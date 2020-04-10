@@ -1,17 +1,90 @@
 <template>
 <div class="data-list">
-  <div style="overflow: hidden">
-    <table class="table table-header" ref="headerWrapper">
-      <thead>
+  <div class="datatable-wrapper">
+    <table class="datatable">
+      <thead class="datatable-head">
         <tr>
-          <th class="name">{{ $t('task_types.fields.name') }}</th>
-          <th class="priority">{{ $t('task_types.fields.priority') }}</th>
-          <th class="allow-timelog">
+          <th scope="col" class="name">{{ $t('task_types.fields.name') }}</th>
+          <th scope="col" class="priority">
+            {{ $t('task_types.fields.priority') }}
+          </th>
+          <th scope="col" class="allow-timelog">
             {{ $t('task_types.fields.allow_timelog') }}
           </th>
-          <th class="actions"></th>
+          <th scope="col" class="actions"></th>
         </tr>
       </thead>
+      <draggable
+        class="datatable-body"
+        v-model="assetsItems"
+        draggable=".tasktype-item"
+        tag="tbody"
+        :sort="true"
+        @end="updatePriorityAssets"
+      >
+        <tr class="datatable-type-header" slot="header">
+          <th scope="rowgroup" colspan="4">
+            <span class="datatable-row-header">
+              {{ $t('assets.title') }}
+            </span>
+          </th>
+        </tr>
+        <tr class="datatable-row tasktype-item" v-for="taskType in assetsItems" :key="taskType.id">
+          <task-type-name class="name" :entry="taskType" />
+          <td class="priority">{{ taskType.priority }}</td>
+          <td class="allow-timelog">
+            {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
+          </td>
+          <row-actions
+            :taskType-id="taskType.id"
+            :edit-route="{
+              name: 'edit-task-type',
+              params: {task_type_id: taskType.id}
+            }"
+            :delete-route="{
+              name: 'delete-task-type',
+              params: {task_type_id: taskType.id}
+            }"
+          />
+        </tr>
+      </draggable>
+      <draggable
+        class="datatable-body"
+        v-model="shotsItems"
+        draggable=".tasktype-item"
+        tag="tbody"
+        :sort="true"
+        @end="updatePriorityShots"
+      >
+        <tr class="datatable-type-header" slot="header">
+          <th scope="rowgroup" colspan="4">
+            <span class="datatable-row-header">
+              {{ $t('shots.title') }}
+            </span>
+          </th>
+        </tr>
+        <tr
+          class="datatable-row tasktype-item"
+          v-for="taskType in shotsItems" :key="taskType.id"
+        >
+          <task-type-name class="name" :entry="taskType" />
+          <td class="priority">{{ taskType.priority }}</td>
+          <td class="allow-timelog">
+            {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
+          </td>
+          <row-actions
+            :taskType-id="taskType.id"
+            :edit-route="{
+              name: 'edit-task-type',
+              params: {task_type_id: taskType.id}
+            }"
+            :delete-route="{
+              name: 'delete-task-type',
+              params: {task_type_id: taskType.id}
+            }"
+          />
+        </tr>
+      </draggable>
     </table>
   </div>
 
@@ -19,76 +92,6 @@
     :is-loading="isLoading"
     :is-error="isError"
   />
-
-  <div class="table-body" v-scroll="onBodyScroll">
-    <table class="table splitted-table">
-      <draggable
-        v-model="assetsItems"
-        draggable=".tasktype-item"
-        tag="tbody"
-        :sort="true"
-        @end="updatePriorityAssets"
-      >
-        <tr class="type-header" slot="header">
-          <td colspan="30">
-            {{ $t('assets.title') }}
-          </td>
-        </tr>
-        <tr class="tasktype-item" v-for="taskType in assetsItems" :key="taskType.id">
-          <task-type-name class="name" :entry="taskType" />
-          <td class="priority">{{ taskType.priority }}</td>
-          <td class="allow-timelog">
-            {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
-          </td>
-          <row-actions
-            :taskType-id="taskType.id"
-            :edit-route="{
-              name: 'edit-task-type',
-              params: {task_type_id: taskType.id}
-            }"
-            :delete-route="{
-              name: 'delete-task-type',
-              params: {task_type_id: taskType.id}
-            }"
-          />
-        </tr>
-      </draggable>
-    </table>
-
-    <table class="table splitted-table">
-      <draggable
-        v-model="shotsItems"
-        draggable=".tasktype-item"
-        tag="tbody"
-        :sort="true"
-        @end="updatePriorityShots"
-      >
-        <tr class="type-header" slot="header">
-          <td colspan="30">
-            {{ $t('shots.title') }}
-          </td>
-        </tr>
-        <tr class="tasktype-item" v-for="taskType in shotsItems" :key="taskType.id">
-          <task-type-name class="name" :entry="taskType" />
-          <td class="priority">{{ taskType.priority }}</td>
-          <td class="allow-timelog">
-            {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
-          </td>
-          <row-actions
-            :taskType-id="taskType.id"
-            :edit-route="{
-              name: 'edit-task-type',
-              params: {task_type_id: taskType.id}
-            }"
-            :delete-route="{
-              name: 'delete-task-type',
-              params: {task_type_id: taskType.id}
-            }"
-          />
-        </tr>
-      </draggable>
-    </table>
-  </div>
 
   <p class="has-text-centered nb-task-types">
     {{ entries.length }} {{ $tc('task_types.number', entries.length) }}
@@ -145,10 +148,6 @@ export default {
   methods: {
     ...mapActions([
     ]),
-
-    onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
-    },
 
     updatePriorityAssets () {
       const forms = []
