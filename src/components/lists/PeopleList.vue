@@ -154,11 +154,6 @@ export default {
 
 <style lang="scss" scoped>
 
-.datatable-wrapper {
-  overflow: auto;
-  margin-bottom: 1rem;
-}
-
 .name {
   width: 230px;
   min-width: 230px;

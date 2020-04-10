@@ -555,11 +555,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-.datatable-wrapper {
-  overflow: auto;
-  margin-bottom: 1rem;
-}
 .project {
   min-width: 60px;
   width: 60px;
