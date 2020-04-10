@@ -123,7 +123,7 @@ export default {
 
     defaultForEntity () {
       const isAssetEpisode =
-        this.currentEpisode && ['all', 'main'].includes(this.currentEpisode)
+        this.currentEpisode && ['all', 'main'].includes(this.currentEpisode.id)
       return isAssetEpisode ? 'asset' : 'shot'
     }
   },
