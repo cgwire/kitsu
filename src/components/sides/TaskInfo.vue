@@ -179,6 +179,7 @@
                 @edit-comment="onEditComment"
                 @delete-comment="onDeleteComment"
                 @checklist-updated="saveComment"
+                @ack-comment="onAckComment"
                 v-for="(comment, index) in taskComments"
               />
             </div>
@@ -558,6 +559,7 @@ export default {
       'deleteTaskComment',
       'deleteTaskPreview',
       'editTaskComment',
+      'ackComment',
       'loadPreviewFileFormData',
       'loadTask',
       'loadTaskComments',
@@ -798,6 +800,10 @@ export default {
       } else {
         panel.parentElement.style['min-width'] = '350px'
       }
+    },
+
+    onAckComment (comment) {
+      this.ackComment(comment)
     },
 
     onPinComment (comment) {

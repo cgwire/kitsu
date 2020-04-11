@@ -205,5 +205,11 @@ export default {
         }
       )
     })
+  },
+
+  ackComment (comment) {
+    const path =
+      `/api/data/tasks/${comment.object_id}/comments/${comment.id}/ack`
+    return client.ppost(path, {})
   }
 }

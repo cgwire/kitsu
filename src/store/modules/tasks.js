@@ -33,6 +33,7 @@ import {
   EDIT_COMMENT_END,
   DELETE_COMMENT_END,
   PIN_COMMENT,
+  ACK_COMMENT,
 
   PREVIEW_FILE_SELECTED,
   ADD_PREVIEW_START,
@@ -687,9 +688,15 @@ const actions = {
     })
   },
 
+  ackComment ({ commit, rootGetters }, comment) {
+    const user = rootGetters.user
+    commit(ACK_COMMENT, { comment, user })
+    return tasksApi.ackComment(comment)
+  },
+
   pinComment ({ commit }, comment) {
     commit(PIN_COMMENT, comment)
-    tasksApi.pinComment(comment)
+    return tasksApi.pinComment(comment)
   }
 }
 
@@ -1104,6 +1111,18 @@ const mutations = {
 
   [PIN_COMMENT] (state, comment) {
     comment.pinned = !comment.pinned
+    state.taskComments[comment.object_id] =
+      sortComments(state.taskComments[comment.object_id])
+  },
+
+  [ACK_COMMENT] (state, { comment, user }) {
+    if (comment.acknowledgements.includes(user.id)) {
+      comment.acknowledgements = comment.acknowledgements.filter(
+        personId => personId !== user.id
+      )
+    } else {
+      comment.acknowledgements.push(user.id)
+    }
     state.taskComments[comment.object_id] =
       sortComments(state.taskComments[comment.object_id])
   },

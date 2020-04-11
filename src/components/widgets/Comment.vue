@@ -12,7 +12,10 @@
   <div class="flexrow">
   <figure class="flexrow-item comment-left">
     <people-avatar class="" :person="comment.person" />
-    <div class="comment-like">
+    <div
+      class="comment-like"
+      @click="acknowledgeComment(comment)"
+    >
       <button
         :class="{
           'like-button': true,
@@ -20,11 +23,10 @@
         }"
         type="button"
         :title="isLikedBy"
-        @click="likeComment(comment)"
         disabled="comment.person_id !== user.id"
       >
         <thumbs-up-icon size="1.2x"/>
-        {{comment.like || 0}}
+        <span>{{ comment.acknowledgements.length }}</span>
       </button>
     </div>
     <span
@@ -375,10 +377,11 @@ export default {
       }
     },
 
-    likeComment (comment) {
+    acknowledgeComment (comment) {
       console.log(comment.person)
       console.log('like by', this.user.id)
-      // this.$emit('like-comment', comment.id, this.user.id)
+      console.log('ack')
+      this.$emit('ack-comment', comment)
     },
 
     renderComment
@@ -610,6 +613,10 @@ a.revision:hover {
   &[disabled] {
     pointer-events: none;
   }
+
+  span {
+    margin-left: 0.3em;
+  }
 }
 
 .like-button--empty {
@@ -624,6 +631,10 @@ a.revision:hover {
 .comment-content {
   padding: 0.5em;
   flex: 1;
+}
+
+.comment-like {
+  cursor: pointer;
 }
 
 .infos {
