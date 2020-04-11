@@ -243,12 +243,12 @@ export default {
     currentEpisodeOptions () {
       if (this.assetSections.includes(this.currentProjectSection)) {
         return [
-          { label: this.$t('main.all'), value: 'all' },
+          { label: this.$t('main.all_assets'), value: 'all' },
           { label: 'Main Pack', value: 'main' }
         ].concat(this.episodeOptions)
       } else if (['playlists'].includes(this.currentProjectSection)) {
         return [
-          { label: this.$t('main.all'), value: 'all' },
+          { label: this.$t('main.all_assets'), value: 'all' },
           { label: 'Main Pack', value: 'main' }
         ].concat(this.episodeOptions)
       } else {
