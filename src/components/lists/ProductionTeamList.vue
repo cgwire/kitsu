@@ -89,11 +89,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-.datatable-wrapper {
-  overflow: auto;
-  margin-bottom: 1rem;
-}
 .datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;
@@ -108,7 +103,7 @@ export default {
 }
 .phone {
   width: 200px;
-  min-width: 140px;
+  min-width: 200px;
 }
 .role {
   width: 125px;

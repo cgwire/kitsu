@@ -155,12 +155,12 @@
         </tr>
         <tr
           class="datatable-row"
-          scope="row"
           :key="shot.id"
           :class="{canceled: shot.canceled}"
           v-for="(shot, i) in group"
         >
           <th
+            scope="row"
             :class="{
               'datatable-row-header': true,
               'shot-name': true,
@@ -555,11 +555,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-.datatable-wrapper {
-  overflow: auto;
-  margin-bottom: 1rem;
-}
 .project {
   min-width: 60px;
   width: 60px;

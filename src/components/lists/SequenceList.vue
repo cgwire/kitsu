@@ -348,11 +348,6 @@ export default {
 
 <style lang="scss" scoped>
 
-.datatable-wrapper {
-  overflow: auto;
-  margin-bottom: 1rem;
-}
-
 .datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;

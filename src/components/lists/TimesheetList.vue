@@ -18,41 +18,40 @@
     </div>
   </div>
 
-  <div style="overflow: hidden">
-    <table class="table table-header" ref="headerWrapper">
-      <thead>
+  <div
+    class="datatable-wrapper"
+    ref="body"
+    v-scroll="onBodyScroll"
+  >
+    <table class="datatable">
+      <thead class="datatable-head">
         <tr>
-          <th class="production">
+          <th scope="col" class="datatable-row-header production">
             {{ $t('tasks.fields.production') }}
           </th>
-          <th class="type">
+          <th scope="col" class="type">
             {{ $t('tasks.fields.task_type') }}
           </th>
-          <th class="name">
+          <th scope="col" class="name">
             {{ $t('tasks.fields.entity') }}
           </th>
-          <th class="time-spent">
+          <th scope="col" class="time-spent">
             {{ $t('timesheets.time_spents') }}
           </th>
         </tr>
       </thead>
-    </table>
-  </div>
-
-  <div
-    class="table-body"
-    ref="body"
-    v-scroll="onBodyScroll"
-    v-if="tasks.length > 0 && !isLoading"
-  >
-    <table class="table">
-      <tbody>
-        <tr v-for="(task, i) in displayedTasks" :key="task.id + '-' + i">
-          <production-name-cell
-            class="production"
-            :entry="productionMap[task.project_id]"
-            :only-avatar="true"
-          />
+      <tbody class="datatable-body" v-if="tasks.length > 0 && !isLoading">
+        <tr
+          class="datatable-row"
+          v-for="(task, i) in displayedTasks"
+          :key="task.id + '-' + i"
+        >
+          <th class="production datatable-row-header" scope="row">
+            <production-name-cell
+              :entry="productionMap[task.project_id]"
+              :only-avatar="true"
+            />
+          </th>
           <task-type-name
             class="type"
             :production-id="task.project_id"
@@ -72,22 +71,28 @@
           />
        </tr>
       </tbody>
-    </table>
-
-    <page-subtitle
-      :text="$t('timesheets.done_tasks')"
-      v-if="!hideDone"
-    />
-
-    <table class="table" v-if="!isLoading && !hideDone">
-      <tbody>
-       <tr v-for="(task, i) in doneTasks" :key="task + '-' + i">
-         <production-name-cell
-           class="production"
-           :entry="productionMap[task.project_id]"
-           :only-avatar="true"
-         />
-         <task-type-name
+      <tbody class="datatable-body" v-if="!isLoading && !hideDone">
+        <tr v-if="!hideDone" class="datatable-type-header">
+          <th colspan="4" scope="rowgroup">
+            <div class="datatable-row-header">
+              <page-subtitle
+                :text="$t('timesheets.done_tasks')"
+              />
+            </div>
+          </th>
+        </tr>
+        <tr
+          class="datatable-row"
+          v-for="(task, i) in doneTasks"
+          :key="task + '-' + i"
+        >
+          <th class="production datatable-row-header" scope="row">
+           <production-name-cell
+             :entry="productionMap[task.project_id]"
+             :only-avatar="true"
+           />
+          </th>
+          <task-type-name
            class="type"
            :production-id="task.project_id"
            :entry="{
@@ -95,20 +100,19 @@
              name: task.task_type_name,
              color: task.task_type_color
            }"
-         />
-
-         <td class="name">
+          />
+          <td class="name">
            <router-link :to="task.entity_path">
              {{ task.full_entity_name }}
            </router-link>
-         </td>
-         <time-slider-cell
+          </td>
+          <time-slider-cell
            :duration="timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0"
            class="time-spent"
            :task-id="task.id"
            @change="onSliderChange"
-         />
-       </tr>
+          />
+        </tr>
       </tbody>
     </table>
   </div>
@@ -220,7 +224,6 @@ export default {
     ]),
 
     onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
       if (maxHeight < (position.scrollTop + 100)) {
@@ -269,6 +272,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.datatable-body tr:first-child th,
+.datatable-body tr:first-child td {
+  border-top: 0;
+}
+
 .name {
   width: 230px;
   min-width: 230px;
@@ -332,5 +341,9 @@ td.name {
 .time-spent-total {
   font-size: 1.6em;
   line-height: 1.7em;
+}
+
+.vue-slider {
+  z-index: 0;
 }
 </style>

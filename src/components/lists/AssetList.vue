@@ -519,11 +519,6 @@ export default {
 
 <style lang="scss" scoped>
 
-.datatable-wrapper {
-  overflow: auto;
-  margin-bottom: 1rem;
-}
-
 .dark thead tr a {
   color: $light-grey;
 }

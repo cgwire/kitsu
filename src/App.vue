@@ -1164,6 +1164,11 @@ tbody:last-child .empty-line:last-child {
   vertical-align: middle;
 }
 
+.datatable-wrapper {
+  overflow: auto;
+  margin-bottom: 1rem;
+}
+
 .datatable {
   position: relative;
   overflow-x: auto;
@@ -1198,7 +1203,7 @@ tbody:last-child .empty-line:last-child {
     padding: 0.5rem 0.75rem;
     font-size: .9rem;
     vertical-align: middle;
-    z-index: 1;
+    z-index: 2;
     background-color: var(--background);
     color: var(--text);
     border-bottom: 1px solid var(--border-alt);
@@ -1230,7 +1235,7 @@ tbody:last-child .empty-line:last-child {
   }
 
   .datatable-row-header {
-    z-index: 3
+    z-index: 4;
   }
   .header-icon {
     width: 15px;
@@ -1294,6 +1299,7 @@ tbody:last-child .empty-line:last-child {
 .datatable-row-header {
   position: sticky;
   left: 0;
+  z-index: 1;
   border-right: 1px solid rgba(var(--border-rgb), .5);
 
   &::after {
@@ -1312,6 +1318,13 @@ tbody:last-child .empty-line:last-child {
       rgba(var(--border-rgb),0) 100%
     );
   }
+  .datatable-type-header & {
+    border-right: 0;
+
+    &::after {
+      display: none;
+    }
+  }
 }
 
 .datatable-type-header {
@@ -1320,7 +1333,8 @@ tbody:last-child .empty-line:last-child {
   th {
     padding: 1.5rem 0 .5rem;
 
-    span {
+    span,
+    div {
       display: inline-block;
       text-indent: .3rem;
       font-size: 1.1em;
@@ -1365,7 +1379,7 @@ tbody:last-child .empty-line:last-child {
 }
 
 .flexrow-item {
-  margin-right: 1em;
+  margin-right: 1rem;
 
   &.no-margin {
     margin-right: 0;

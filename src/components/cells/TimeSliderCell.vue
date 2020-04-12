@@ -98,5 +98,6 @@ export default {
 
 .slider {
   cursor: pointer;
+  z-index: 0;
 }
 </style>

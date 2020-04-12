@@ -1,68 +1,64 @@
 <template>
 <div class="data-list task-list">
-  <div style="overflow: hidden">
-    <table class="table table-header" ref="headerWrapper">
-      <thead>
+  <div
+    class="datatable-wrapper"
+    ref="body"
+    v-scroll="onBodyScroll"
+  >
+    <table class="datatable">
+      <thead class="datatable-head">
         <tr>
-          <th class="production">
+          <th scope="col" class="production datatable-row-header">
             {{ $t('tasks.fields.production') }}
           </th>
-          <th class="type" ref="th-type">
+          <th scope="col" class="type" ref="th-type">
             {{ $t('tasks.fields.task_type') }}
           </th>
-          <th class="thumbnail">
+          <th scope="col" class="thumbnail">
           </th>
-          <th class="name" ref="th-name">
+          <th scope="col" class="name" ref="th-name">
             {{ $t('tasks.fields.entity') }}
           </th>
-          <th class="description">
+          <th scope="col" class="description">
             {{ $t('assets.fields.description') }}
           </th>
-          <th class="estimation">
+          <th scope="col" class="estimation">
             {{ $t('tasks.fields.estimation').substring(0, 3) }}.
           </th>
-          <th class="estimation">
+          <th scope="col" class="estimation">
             {{ $t('tasks.fields.duration').substring(0, 3) }}.
           </th>
-          <th class="due-date">
+          <th scope="col" class="due-date">
             {{ $t('tasks.fields.due_date') }}
           </th>
-          <th class="status">
+          <th scope="col" class="status">
             {{ $t('tasks.fields.task_status') }}
           </th>
-          <th class="last-comment" v-if="!done">
+          <th scope="col" class="last-comment" v-if="!done">
             {{ $t('tasks.fields.last_comment') }}
           </th>
-          <th class="end-date" v-else>
+          <th scope="col" class="end-date" v-else>
             {{ $t('tasks.fields.end_date') }}
           </th>
         </tr>
       </thead>
-    </table>
-  </div>
-
-  <div
-    ref="body"
-    class="table-body"
-    v-scroll="onBodyScroll"
-    v-if="tasks.length > 0"
-  >
-    <table class="table">
-      <tbody ref="body-tbody">
+      <tbody class="datatable-body" v-if="tasks.length > 0">
         <tr
           v-for="(entry, i) in displayedTasks"
           :key="entry + '-' + i"
           :class="{
+            'datatable-row': true,
             selected: selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
           }"
           @click="onLineClicked(i, $event)"
         >
-          <production-name-cell
-            class="production"
-            :is-tooltip="true"
-            :entry="productionMap[entry.project_id]"
-            :only-avatar="true"
-          />
+          <th class="production datatable-row-header" scope="row">
+           <production-name-cell
+             :is-tooltip="true"
+              :entry="productionMap[entry.project_id]"
+              :only-avatar="true"
+           />
+          </th>
           <task-type-name
             class="type"
             :production-id="entry.project_id"
@@ -229,7 +225,6 @@ export default {
     },
 
     onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
@@ -417,6 +412,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.datatable-body tr:first-child th,
+.datatable-body tr:first-child td {
+  border-top: 0;
+}
+
 .name {
   width: 230px;
   min-width: 230px;
@@ -471,7 +472,7 @@ td.last-comment {
   min-width: 250px;
 }
 
-.end-date {
+td.end-date {
   width: 100%;
   min-width: 150px;
   color: $grey;

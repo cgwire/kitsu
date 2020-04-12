@@ -1,30 +1,33 @@
 <template>
 <div class="data-list">
-  <div style="overflow: hidden">
-    <table class="table table-header" ref="headerWrapper">
-      <thead class="thead">
+  <div class="datatable-wrapper">
+    <table class="datatable">
+      <thead class="datatable-head">
         <tr>
-          <th class="name">{{ $t('custom_actions.fields.name') }}</th>
-          <th class="url">{{ $t('custom_actions.fields.url') }}</th>
-          <th class="entity-type">{{ $t('custom_actions.fields.entity_type') }}</th>
-          <th class="is-ajax">{{ $t('custom_actions.fields.is_ajax') }}</th>
-          <th class="actions">&nbsp;</th>
+          <th scope="col" class="name">
+            {{ $t('custom_actions.fields.name') }}
+          </th>
+          <th scope="col" class="url">
+            {{ $t('custom_actions.fields.url') }}
+          </th>
+          <th scope="col" class="entity-type">
+            {{ $t('custom_actions.fields.entity_type') }}
+          </th>
+          <th scope="col" class="is-ajax">
+            {{ $t('custom_actions.fields.is_ajax') }}
+          </th>
+          <th scope="col" class="actions">&nbsp;</th>
         </tr>
       </thead>
-    </table>
-  </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  >
-  </table-info>
-
-  <div class="table-body" v-scroll="onBodyScroll">
-    <table class="table">
-      <tbody>
-        <tr v-for="customAction in entries" :key="customAction.id">
-          <td class="name">{{ customAction.name }}</td>
+      <tbody class="datatable-body">
+        <tr
+          class="datatable-row"
+          v-for="customAction in entries"
+          :key="customAction.id"
+        >
+          <th scope="row" class="name datatable-row-header">
+            {{ customAction.name }}
+          </th>
           <td class="url">{{ customAction.url }}</td>
           <td class="entity-type">{{ customAction.entity_type }}</td>
           <td class="is-ajax">
@@ -45,6 +48,12 @@
       </tbody>
     </table>
   </div>
+
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  >
+  </table-info>
 
   <p class="has-text-centered nb-custom-actions">
     {{ entries.length }} {{ $tc('custom_actions.number', entries.length) }}
@@ -88,15 +97,18 @@ export default {
       } else {
         return this.$tc('assets.title')
       }
-    },
-    onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+
+.datatable-body tr:first-child th,
+.datatable-body tr:first-child td {
+  border-top: 0;
+}
+
 .name {
   width: 200px;
   min-width: 200px;
