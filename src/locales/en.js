@@ -701,6 +701,8 @@ export default {
     validation: 'Validation',
     tasks: 'Tasks',
     with_comment: 'With a comment...',
+    comment_image: 'Attach an image to your comment',
+    select_image_file: 'Please select the picture from your hard drive you want to attach to your comment:',
     fields: {
       asset_type: 'Asset type',
       assignees: 'Assignees',

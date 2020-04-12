@@ -320,6 +320,7 @@ export default {
     return {
       addExtraPreviewFormData: null,
       attachedFileName: '',
+      attachedImage: '',
       currentPreviewIndex: 0,
       currentPreviewPath: '',
       currentPreviewDlPath: '',
@@ -599,11 +600,12 @@ export default {
       }
     },
 
-    addComment (comment, taskStatusId) {
+    addComment (comment, attachment, taskStatusId) {
       const params = {
         taskId: this.task.id,
         taskStatusId: taskStatusId,
         commentText: comment,
+        attachment: attachment,
         comment: comment
       }
       let action = 'commentTask'
@@ -613,6 +615,7 @@ export default {
       this.$store.dispatch(action, params)
         .then(() => {
           this.$refs['add-preview-modal'].reset()
+          this.$refs['add-comment-image-modal'].reset()
           this.reset()
           this.attachedFileName = ''
           this.loading.addComment = false

@@ -95,6 +95,9 @@
       <p v-if="taskStatus.is_done && isLast">
         <img src="../../assets/illustrations/validated.png" />
       </p>
+      <p v-if="comment.attachment">
+        <img :src="comment.attachment" />
+      </p>
       <p
         v-if="personMap[comment.person_id].role === 'client'"
       >

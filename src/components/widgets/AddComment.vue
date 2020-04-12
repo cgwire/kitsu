@@ -43,7 +43,7 @@
           :placeholder="$t('comments.add_comment')"
           :disabled="isLoading"
           v-model="text"
-          @keyup.enter.ctrl="runAddComment(text, task_status_id)"
+          @keyup.enter.ctrl="runAddComment(text, attachment, task_status_id)"
           v-focus>
         </textarea>
       </at-ta>
@@ -69,16 +69,22 @@
           </em>
         </span>
       </div>
-      <div class="flexrow mt1">
-        <div class="filler"></div>
-        <div class="flexrow-item status-combo-wrapper">
-          <combobox-status
-            class="status-selector"
-            :task-status-list="taskStatus"
-            v-model="task_status_id"
-          />
-        </div>
-        <div class="flexrow-item post-button-wrapper">
+      <group-button class="mt1">
+        <combobox-status
+          class="status-selector"
+          :narrow="true"
+          :task-status-list="taskStatus"
+          v-model="task_status_id"
+        />
+        <button-simple
+          :class="{
+            'button': true,
+            'active': attachment.length !== 0
+          }"
+          icon="image"
+          @click="onAddCommentAttachmentClicked()"
+        >
+        </button-simple>
         <button
           :class="{
             'button': true,
@@ -88,12 +94,11 @@
           :style="{
             'background-color': taskStatusColor
           }"
-          @click="runAddComment(text, task_status_id)"
+          @click="runAddComment(text, attachment, task_status_id)"
         >
           {{ $t('comments.post_status') }}
         </button>
-        </div>
-      </div>
+      </group-button>
       <div
         class="error pull-right"
         v-if="isError"
@@ -101,28 +106,53 @@
         <em>{{ $t('comments.error') }}</em>
       </div>
     </div>
+    <add-comment-image-modal
+      ref="add-comment-image-modal"
+      :active="modals.addCommentAttachment"
+      :is-loading="loading.addCommentAttachment"
+      :is-error="errors.addCommentAttachment"
+      extensions=".png,.jpg,.jpeg,.gif"
+      @cancel="onCloseCommentAttachment"
+      @confirm="createCommentAttachment"
+    />
   </article>
 </template>
 
 <script>
 import AtTa from 'vue-at/dist/vue-at-textarea'
+import AddCommentImageModal from '../modals/AddCommentImageModal'
 import ComboboxStatus from './ComboboxStatus'
 import PeopleAvatar from './PeopleAvatar'
+import GroupButton from './GroupButton'
+import ButtonSimple from './ButtonSimple'
 
 export default {
   name: 'add-comment',
 
   components: {
     AtTa,
+    AddCommentImageModal,
     ComboboxStatus,
-    PeopleAvatar
+    PeopleAvatar,
+    GroupButton,
+    ButtonSimple
   },
 
   data () {
     return {
       isDragging: false,
       text: '',
-      task_status_id: this.task.task_status_id
+      attachment: [],
+      task_status_id: this.task.task_status_id,
+      errors: {
+        addCommentAttachment: false
+      },
+      loading: {
+        addCommentAttachment: false
+      },
+      modals: {
+        addCommentAttachment: false
+      }
     }
   },
 
@@ -194,9 +224,10 @@ export default {
   },
 
   methods: {
-    runAddComment (text, taskStatusId) {
-      this.$emit('add-comment', text, taskStatusId)
+    runAddComment (text, attachment, taskStatusId) {
+      this.$emit('add-comment', text, attachment, taskStatusId)
       this.text = ''
+      this.attachment = []
     },
 
     updateValue (value) {
@@ -224,6 +255,19 @@ export default {
       }
       this.$emit('file-drop', forms)
       this.isDragging = false
+    },
+
+    onAddCommentAttachmentClicked (comment) {
+      this.modals.addCommentAttachment = true
+    },
+
+    createCommentAttachment (forms) {
+      this.onCloseCommentAttachment()
+      this.attachment = forms
+    },
+
+    onCloseCommentAttachment () {
+      this.modals.addCommentAttachment = false
     }
   },
 
@@ -285,6 +329,10 @@ export default {
 
 .button.is-primary {
   border-radius: 2em;
+}
+
+.button.active {
+  background: rgba($green, .5);
 }
 
 .status-selector {
