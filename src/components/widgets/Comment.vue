@@ -108,7 +108,10 @@
         v-if="comment.text"
       >
       </p>
-      <p class="comment-text empty word-break" v-else>
+      <p
+        class="comment-text empty word-break"
+        v-else-if="comment.attachment_files.length === 0"
+      >
         {{ $t('comments.empty_text') }}
       </p>
       <div
