@@ -14,6 +14,7 @@
     <people-avatar class="" :person="comment.person" />
     <div
       class="comment-like"
+      :title="isLikedBy"
       @click="acknowledgeComment(comment)"
     >
       <button
@@ -22,7 +23,6 @@
           'like-button--empty': comment.like === undefined ? true : false
         }"
         type="button"
-        :title="isLikedBy"
         disabled="comment.person_id !== user.id"
       >
         <thumbs-up-icon size="1.2x"/>
@@ -95,9 +95,6 @@
       <p v-if="taskStatus.is_done && isLast">
         <img src="../../assets/illustrations/validated.png" />
       </p>
-      <p v-if="comment.attachment">
-        <img :src="comment.attachment" />
-      </p>
       <p
         v-if="personMap[comment.person_id].role === 'client'"
       >
@@ -148,6 +145,28 @@
           ></textarea-autosize>
         </div>
       </div>
+      <p v-if="comment.attachment_files">
+        <a
+          :href="`/api/data/attachment-files/${attachment.id}/file`"
+          :key="attachment.id"
+          :title="attachment.name"
+          target="_blank"
+          v-for="attachment in pictureAttachments"
+        >
+          <img
+            :src="`/api/data/attachment-files/${attachment.id}/file`"
+          />
+        </a>
+        <a
+          :href="`/api/data/attachment-files/${attachment.id}/file`"
+          :key="attachment.id"
+          :title="attachment.name"
+          target="_blank"
+          v-for="attachment in fileAttachments"
+        >
+          <paperclip-icon size="1x" />
+        </a>
+      </p>
 
       <p class="pinned-text" v-if="comment.pinned">
         {{ $t('comments.pinned') }}
@@ -174,6 +193,7 @@ import { remove } from '../../lib/models'
 import {
   CheckSquareIcon,
   ChevronDownIcon,
+  PaperclipIcon,
   SquareIcon,
   ThumbsUpIcon
 } from 'vue-feather-icons'
@@ -187,6 +207,7 @@ export default {
     CheckSquareIcon,
     ChevronDownIcon,
     CommentMenu,
+    PaperclipIcon,
     PeopleAvatar,
     PeopleName,
     SquareIcon,
@@ -291,8 +312,21 @@ export default {
       return this.taskStatus.is_retake &&
         this.user.id === this.comment.person_id
     },
+
     isLikedBy () {
       return 'John Doe, etc…'
+    },
+
+    pictureAttachments () {
+      return this.comment.attachment_files.filter(attachment => {
+        return ['png', 'jpg'].includes(attachment.extension)
+      })
+    },
+
+    fileAttachments () {
+      return this.comment.attachment_files.filter(attachment => {
+        return !['png', 'jpg'].includes(attachment.extension)
+      })
     }
   },
 

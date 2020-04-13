@@ -894,12 +894,13 @@ export default {
       return `/api/pictures/previews/preview-files/${previewId}.png`
     },
 
-    addComment (comment, taskStatusId) {
+    addComment (comment, attachment, taskStatusId) {
       const params = {
         taskId: this.currentTask.id,
         taskStatusId: taskStatusId,
         commentText: comment,
-        comment: comment
+        comment: comment,
+        attachment
       }
       let action = 'commentTask'
       if (this.attachedFileName) action = 'commentTaskWithPreview'
