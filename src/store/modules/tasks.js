@@ -253,8 +253,11 @@ const actions = {
       .catch(callback)
   },
 
-  commentTask ({ commit, state }, { taskId, taskStatusId, comment }) {
-    return tasksApi.commentTask({ taskId, taskStatusId, comment })
+  commentTask (
+    { commit, state },
+    { taskId, taskStatusId, comment, attachment }
+  ) {
+    return tasksApi.commentTask({ taskId, taskStatusId, comment, attachment })
       .then((comment) => {
         commit(NEW_TASK_COMMENT_END, { comment, taskId })
       })
@@ -479,9 +482,9 @@ const actions = {
 
   commentTaskWithPreview (
     { commit, getters, state, dispatch },
-    { taskId, commentText, taskStatusId, form }
+    { taskId, commentText, taskStatusId, form, attachment }
   ) {
-    const data = { taskId, taskStatusId, comment: commentText }
+    const data = { taskId, taskStatusId, comment: commentText, attachment }
     commit(ADD_PREVIEW_START)
     let newComment
     return tasksApi.commentTask(data)

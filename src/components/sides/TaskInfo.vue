@@ -603,10 +603,10 @@ export default {
     addComment (comment, attachment, taskStatusId) {
       const params = {
         taskId: this.task.id,
-        taskStatusId: taskStatusId,
+        taskStatusId,
         commentText: comment,
-        attachment: attachment,
-        comment: comment
+        attachment,
+        comment
       }
       let action = 'commentTask'
       if (this.attachedFileName) action = 'commentTaskWithPreview'
@@ -615,7 +615,9 @@ export default {
       this.$store.dispatch(action, params)
         .then(() => {
           this.$refs['add-preview-modal'].reset()
-          this.$refs['add-comment-image-modal'].reset()
+          if (this.$refs['add-comment-image-modal']) {
+            this.$refs['add-comment-image-modal'].reset()
+          }
           this.reset()
           this.attachedFileName = ''
           this.loading.addComment = false
