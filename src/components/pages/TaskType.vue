@@ -578,15 +578,19 @@ export default {
     resetScheduleDates () {
       let mainStartDate = this.schedule.startDate
       let mainEndDate = this.schedule.endDate
+      let change = false
       this.schedule.scheduleItems.forEach((personElement) => {
         if (!mainStartDate || mainStartDate.isAfter(personElement.startDate)) {
           mainStartDate = personElement.startDate.clone()
+          change = true
         }
         if (!mainEndDate || mainEndDate.isBefore(personElement.endDate)) {
           mainEndDate = personElement.endDate.clone()
         }
       })
-      this.schedule.startDate = mainStartDate.add(-1, 'days')
+      if (change) {
+        this.schedule.startDate = mainStartDate.add(-1, 'days')
+      }
       this.schedule.endDate = mainEndDate
     },
 
