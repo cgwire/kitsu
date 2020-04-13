@@ -314,7 +314,9 @@ export default {
     },
 
     isLikedBy () {
-      return 'John Doe, etc…'
+      return this.comment.acknowledgements.map(
+        personId => this.personMap[personId].name
+      ).join(', ')
     },
 
     pictureAttachments () {
