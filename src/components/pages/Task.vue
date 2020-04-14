@@ -1154,6 +1154,7 @@ export default {
       const comment = this.$store.getters.getTaskComment(taskId, commentId)
 
       if (
+        this.currentTask &&
         comment &&
         (
           comment.previews.length === 0 ||

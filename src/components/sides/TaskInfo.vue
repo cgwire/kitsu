@@ -710,24 +710,28 @@ export default {
       const comment = this.$store.getters.getTaskComment(taskId, commentId)
 
       if (
-        comment &&
-        (
-          comment.previews.length === 0 ||
-          comment.previews[0].id !== previewId
-        ) &&
-        taskId === this.task.id
+        this.task
       ) {
-        this.$store.commit('ADD_PREVIEW_END', {
-          preview: {
-            id: previewId,
-            revision,
-            extension: extension
-          },
-          taskId,
-          commentId,
-          comment
-        })
-        this.reset()
+        if (
+          taskId === this.task.id &&
+          comment &&
+          (
+            comment.previews.length === 0 ||
+            comment.previews[0].id !== previewId
+          )
+        ) {
+          this.$store.commit('ADD_PREVIEW_END', {
+            preview: {
+              id: previewId,
+              revision,
+              extension: extension
+            },
+            taskId,
+            commentId,
+            comment
+          })
+          this.reset()
+        }
       }
     },
 
@@ -930,7 +934,7 @@ export default {
         const preview = this.taskPreviews.filter((preview) => {
           return preview.id === eventData.preview_file_id
         })
-        if (preview) {
+        if (preview && this.task) {
           this.refreshPreview({
             taskId: this.task.id,
             previewId: eventData.preview_file_id

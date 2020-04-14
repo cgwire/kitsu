@@ -324,13 +324,13 @@ export default {
 
     pictureAttachments () {
       return this.comment.attachment_files.filter(attachment => {
-        return ['png', 'jpg'].includes(attachment.extension)
+        return ['png', 'jpg', 'gif'].includes(attachment.extension)
       })
     },
 
     fileAttachments () {
       return this.comment.attachment_files.filter(attachment => {
-        return !['png', 'jpg'].includes(attachment.extension)
+        return !['png', 'jpg', 'gif'].includes(attachment.extension)
       })
     }
   },
@@ -420,9 +420,6 @@ export default {
     },
 
     acknowledgeComment (comment) {
-      console.log(comment.person)
-      console.log('like by', this.user.id)
-      console.log('ack')
       this.$emit('ack-comment', comment)
     },
 
