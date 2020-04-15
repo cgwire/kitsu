@@ -707,7 +707,7 @@ export default {
       const previewId = eventData.preview_file_id
       const revision = eventData.revision
       const extension = eventData.extension
-      const comment = this.$store.getters.getTaskComment(taskId, commentId)
+      const comment = this.getTaskComment(taskId, commentId)
 
       if (
         this.task
@@ -913,7 +913,7 @@ export default {
 
     onRemoteAcknowledge (eventData, type) {
       if (this.task) {
-        const comment = this.taskComments.find(c => c.id === eventData.comment_id)
+        const comment = this.getTaskComment(this.task.id, eventData.comment_id)
         const user = this.personMap[eventData.person_id]
         if (comment && user) {
           if (this.user.id === user.id) {
