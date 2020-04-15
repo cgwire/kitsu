@@ -84,6 +84,7 @@
                 :current-user="user"
                 :editable="comment.person && user.id === comment.person.id"
                 :is-last="index === pinnedCount"
+                @ack-comment="ackComment"
                 @pin-comment="onPinComment"
                 @edit-comment="onEditComment"
                 @delete-comment="onDeleteComment"
@@ -689,6 +690,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'ackComment',
       'addCommentPreview',
       'addCommentExtraPreview',
       'commentTask',
@@ -1277,6 +1279,33 @@ export default {
 
     onCancelDeleteComment (comment) {
       this.modals.deleteComment = false
+    },
+
+    onRemoteAcknowledge (eventData, type) {
+      if (this.currentTask) {
+        const comment = this.currentTaskComments.find(
+          c => c.id === eventData.comment_id
+        )
+        const user = this.personMap[eventData.person_id]
+        if (comment && user) {
+          if (this.user.id === user.id) {
+            if (
+              (
+                type === 'ack' &&
+                !comment.acknowledgements.includes(user.id)
+              ) ||
+              (
+                type === 'unack' &&
+                comment.acknowledgements.includes(user.id)
+              )
+            ) {
+              this.$store.commit('ACK_COMMENT', { comment, user })
+            }
+          } else {
+            this.$store.commit('ACK_COMMENT', { comment, user })
+          }
+        }
+      }
     }
   },
 
@@ -1330,6 +1359,14 @@ export default {
             }
           })
         }
+      },
+
+      'comment:acknowledge' (eventData) {
+        this.onRemoteAcknowledge(eventData, 'ack')
+      },
+
+      'comment:unacknowledge' (eventData) {
+        this.onRemoteAcknowledge(eventData, 'unack')
       }
     }
   },
