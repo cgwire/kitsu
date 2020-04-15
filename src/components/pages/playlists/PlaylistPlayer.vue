@@ -52,6 +52,9 @@
       @entity-change="onEntityChange"
       @time-update="onTimeUpdate"
       @max-duration-update="onMaxDurationUpdate"
+      :style="{
+        display: currentEntity && currentEntity.preview_file_extension === 'mp4' ? 'block' : 'none'
+      }"
     />
     <raw-video-player
       class="raw-player"
@@ -61,6 +64,33 @@
       :entities="entityListToCompare"
       v-if="isComparing"
     />
+
+    <p
+      v-if="!['mp4', 'png', 'gif'].includes(
+        currentEntity.preview_file_extension
+      )"
+      :style="{width: '100%'}"
+      class="preview-standard-file has-text-centered"
+    >
+      <a
+        class="button"
+        ref="preview-file"
+        :href="currentEntityDlPath"
+      >
+        <download-icon class="icon" />
+        <span class="text">
+          {{ $t('tasks.download_pdf_file', {extension: currentEntity.preview_file_extension}) }}
+        </span>
+      </a>
+    </p>
+
+    <p
+      class="has-text-centered"
+      v-if="['png', 'gif'].includes(currentEntity.preview_file_extension)"
+    >
+       <img :src="currentEntityOriginalPath" />
+    </p>
+
     <div class="canvas-wrapper" ref="canvas-wrapper">
       <canvas
         id="playlist-annotation-canvas"
@@ -448,7 +478,7 @@
 import moment from 'moment-timezone'
 import { mapActions, mapGetters } from 'vuex'
 import { fabric } from 'fabric'
-import { RepeatIcon } from 'vue-feather-icons'
+import { DownloadIcon, RepeatIcon } from 'vue-feather-icons'
 
 import { roundToFrame } from '../../../lib/video'
 import AnnotationBar from './AnnotationBar'
@@ -474,6 +504,7 @@ export default {
     ButtonSimple,
     ColorPicker,
     Combobox,
+    DownloadIcon,
     DeleteModal,
     PencilPicker,
     PlaylistedEntity,
@@ -595,6 +626,21 @@ export default {
       'shotTaskTypes',
       'user'
     ]),
+
+    currentEntityOriginalPath () {
+      const previewId = this.currentEntity.preview_file_id
+      const extension = this.currentEntity.preview_file_extension
+      return `/api/pictures/originals/preview-files/${previewId}.${extension}`
+    },
+
+    currentEntityDlPath () {
+      const previewId = this.currentEntity.preview_file_id
+      return `/api/pictures/originals/preview-files/${previewId}/download`
+    },
+
+    currentEntity () {
+      return this.entityList[this.playingEntityIndex]
+    },
 
     isFullScreenEnabled () {
       return !!(
@@ -846,9 +892,11 @@ export default {
     },
 
     playEntity (entityIndex) {
+      console.log(entityIndex, 'playEntity')
       const entity = this.entityList[entityIndex]
       this.hideCanvas()
       this.clearCanvas()
+      console.log('play')
       if (entity.preview_file_extension === 'mp4') {
         this.annotations = entity.preview_file_annotations || []
         this.playingEntityIndex = entityIndex
@@ -862,6 +910,7 @@ export default {
           if (this.isComparing) this.$refs['raw-player-comparison'].play()
         }
       } else {
+        this.playingEntityIndex = entityIndex
         this.annotations = []
       }
     },
