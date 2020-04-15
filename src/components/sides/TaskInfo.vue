@@ -554,13 +554,13 @@ export default {
 
   methods: {
     ...mapActions([
+      'ackComment',
       'addCommentExtraPreview',
       'commentTask',
       'commentTaskWithPreview',
       'deleteTaskComment',
       'deleteTaskPreview',
       'editTaskComment',
-      'ackComment',
       'loadPreviewFileFormData',
       'loadTask',
       'loadTaskComments',
@@ -909,6 +909,31 @@ export default {
           this.loading.deleteExtraPreview = false
           this.errors.deleteExtraPreview = true
         })
+    },
+
+    onRemoteAcknowledge (eventData, type) {
+      if (this.task) {
+        const comment = this.taskComments.find(c => c.id === eventData.comment_id)
+        const user = this.personMap[eventData.person_id]
+        if (comment && user) {
+          if (this.user.id === user.id) {
+            if (
+              (
+                type === 'ack' &&
+                !comment.acknowledgements.includes(user.id)
+              ) ||
+              (
+                type === 'unack' &&
+                comment.acknowledgements.includes(user.id)
+              )
+            ) {
+              this.$store.commit('ACK_COMMENT', { comment, user })
+            }
+          } else {
+            this.$store.commit('ACK_COMMENT', { comment, user })
+          }
+        }
+      }
     }
   },
 
@@ -950,6 +975,14 @@ export default {
             }
           })
         }
+      },
+
+      'comment:acknowledge' (eventData) {
+        this.onRemoteAcknowledge(eventData, 'ack')
+      },
+
+      'comment:unacknowledge' (eventData) {
+        this.onRemoteAcknowledge(eventData, 'unack')
       }
     }
   }

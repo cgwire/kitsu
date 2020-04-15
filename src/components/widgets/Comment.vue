@@ -192,6 +192,7 @@ import { mapGetters } from 'vuex'
 import { formatDate } from '../../lib/time'
 import { renderComment } from '../../lib/render'
 import { remove } from '../../lib/models'
+import { sortByName } from '../../lib/sorting'
 
 import {
   CheckSquareIcon,
@@ -317,9 +318,12 @@ export default {
     },
 
     isLikedBy () {
-      return this.comment.acknowledgements.map(
-        personId => this.personMap[personId].name
-      ).join(', ')
+      const personList = this.comment.acknowledgements.map(
+        personId => this.personMap[personId]
+      )
+      return sortByName(personList)
+        .map(p => p.name)
+        .join(', ')
     },
 
     pictureAttachments () {
