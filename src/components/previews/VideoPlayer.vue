@@ -4,7 +4,7 @@
     <div class="loading-background" v-if="isLoading" >
       <spinner class="spinner" />
     </div>
-    <div class="canvas-wrapper">
+    <div class="canvas-wrapper" ref="canvas-wrapper">
       <canvas
         id="annotation-canvas"
         ref="annotation-canvas"
@@ -167,6 +167,33 @@
         <transition name="slide">
           <div
             class="annotation-tools"
+            v-show="isTyping"
+          >
+            <color-picker
+              :isOpen="isShowingPalette"
+              :color="this.textColor"
+              :palette="this.palette"
+              @TogglePalette="onPickColor"
+              @change="onChangeTextColor"
+            />
+          </div>
+        </transition>
+        <button
+          :class="{
+            button: true,
+            'flexrow-item': true,
+            active: isTyping
+          }"
+          :title="$t('playlists.actions.annotation_text')"
+          @click="onTypeClicked"
+          v-if="!readOnly && isFullScreenEnabled"
+        >
+          <type-icon class="icon" />
+        </button>
+
+        <transition name="slide">
+          <div
+            class="annotation-tools"
             v-show="isDrawing"
           >
             <pencil-picker
@@ -233,6 +260,7 @@ import {
   PauseIcon,
   PlayIcon,
   RepeatIcon,
+  TypeIcon,
   XIcon
 } from 'vue-feather-icons'
 
@@ -264,6 +292,7 @@ export default {
     PlayIcon,
     RepeatIcon,
     Spinner,
+    TypeIcon,
     XIcon
   },
 
@@ -300,12 +329,14 @@ export default {
       palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
       pencilPalette: ['big', 'medium', 'small'],
       color: '#ff3860',
+      textColor: '#ff3860',
       pencil: 'big',
       currentTime: '00:00.00',
       currentTimeRaw: 0,
       fabricCanvas: null,
       isComparing: false,
       isDrawing: false,
+      isTyping: false,
       isLoading: false,
       isPlaying: false,
       isRepeating: false,
@@ -360,6 +391,10 @@ export default {
 
     currentFrame () {
       return `${Math.ceil(this.currentTimeRaw * this.fps)}`.padStart(3, '0')
+    },
+
+    canvasWrapper () {
+      return this.$refs['canvas-wrapper']
     },
 
     canvas () {
@@ -769,8 +804,23 @@ export default {
         this.fabricCanvas.isDrawingMode = false
         this.isDrawing = false
       } else {
+        this.isTyping = false
         this.fabricCanvas.isDrawingMode = true
         this.isDrawing = true
+      }
+    },
+
+    onTypeClicked () {
+      const clickarea =
+        this.canvasWrapper.getElementsByClassName('upper-canvas')[0]
+      if (this.isTyping) {
+        this.isTyping = false
+        clickarea.removeEventListener('dblclick', this.addText)
+      } else {
+        this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
+        this.isTyping = true
+        clickarea.addEventListener('dblclick', this.addText)
       }
     },
 
@@ -896,6 +946,19 @@ export default {
             mtr: false
           })
           this.fabricCanvas.add(path)
+        } else if ((obj.type === 'i-text') || (obj.type === 'text')) {
+          const text = new fabric.Text(
+            obj.text,
+            {
+              ...base,
+              fill: obj.fill,
+              left: obj.left,
+              top: obj.top,
+              fontFamily: obj.fontFamily,
+              fontSize: obj.fontSize
+            }
+          )
+          this.fabricCanvas.add(text)
         }
       })
     },

@@ -308,6 +308,7 @@ export default {
     actions: {
       comments: 'Montrer/Cacher les commentaires',
       annotation: 'Annotation',
+      annotation_text: 'Double clic sur la preview pour ajouter du texte',
       annotation_delete: 'Supprimer l\'annotation',
       annotation_redo: 'Refaire annotation',
       annotation_undo: 'Annuler annotation',
