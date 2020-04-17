@@ -747,7 +747,8 @@ a:hover {
   font-size: 1.4em;
 }
 
-.canceled td:not(.actions) {
+.canceled td:not(.actions),
+.canceled th {
   text-decoration: line-through;
 }
 
