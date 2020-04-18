@@ -515,7 +515,6 @@ export default {
     return {
       annotations: [],
       color: '#ff3860',
-      textColor: '#ff3860',
       currentTime: '00:00.00',
       currentTimeRaw: 0,
       fabricCanvas: null,
@@ -540,6 +539,7 @@ export default {
       task: null,
       taskTypeOptions: [],
       taskTypeToCompare: null,
+      textColor: '#ff3860',
       modals: {
         edit: false,
         delete: false,
@@ -1391,7 +1391,6 @@ export default {
       if (!this.annotations) return
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)
-      console.log('annotations', annotations)
       const entity = this.entityList[this.playingEntityIndex]
       const preview = {
         id: entity.preview_file_id,
