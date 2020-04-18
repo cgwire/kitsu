@@ -49,11 +49,11 @@
       :entities="entityList"
       :is-repeating="isRepeating"
       @metadata-loaded="onMetadataLoaded"
-      @entity-change="onEntityChange"
+      @entity-change="onPlayerEntityChange"
       @time-update="onTimeUpdate"
       @max-duration-update="onMaxDurationUpdate"
       :style="{
-        display: currentEntity && currentEntity.preview_file_extension === 'mp4' ? 'block' : 'none'
+        display: isCurrentEntityMovie ? 'block' : 'none'
       }"
     />
     <raw-video-player
@@ -66,9 +66,7 @@
     />
 
     <p
-      v-if="!['mp4', 'png', 'gif'].includes(
-        currentEntity.preview_file_extension
-      )"
+      v-if="isCurrentEntityFile && currentEntity.preview_file_extension"
       :style="{width: '100%'}"
       class="preview-standard-file has-text-centered"
     >
@@ -84,12 +82,19 @@
       </a>
     </p>
 
-    <p
-      class="has-text-centered"
-      v-if="['png', 'gif'].includes(currentEntity.preview_file_extension)"
+    <div
+      class="picture-preview-wrapper"
+      ref="picture-player-wrapper"
+      :style="{
+        display: isCurrentEntityPicture ? 'flex' : 'none'
+      }"
     >
-       <img :src="currentEntityOriginalPath" />
-    </p>
+       <img
+         ref="picture-player"
+         class="picture-preview"
+         :src="currentEntityPicturePath"
+       />
+    </div>
 
     <div class="canvas-wrapper" ref="canvas-wrapper">
       <canvas
@@ -115,6 +120,9 @@
     class="playlist-progress"
     ref="playlist-progress"
     v-if="!isAddingEntity"
+    :style="{
+      display: isCurrentEntityMovie ? 'flex' : 'none'
+    }"
   >
     <div class="video-progress">
       <progress
@@ -137,6 +145,9 @@
     :annotations="annotations"
     :max-duration-raw="maxDurationRaw"
     @select-annotation="loadAnnotation"
+    :style="{
+      display: isCurrentEntityMovie ? 'flex' : 'none'
+    }"
     v-if="playlist.id && !isAddingEntity"
   />
 
@@ -145,68 +156,6 @@
     ref="button-bar"
     v-if="playlist.id && !isAddingEntity"
   >
-    <button-simple
-      class="button playlist-button flexrow-item"
-      @click="onPlayClicked"
-      :title="$t('playlists.actions.play')"
-      icon="play"
-      v-if="!isPlaying"
-    />
-    <button-simple
-      class="button playlist-button flexrow-item"
-      @click="onPlayClicked"
-      :title="$t('playlists.actions.pause')"
-      icon="pause"
-      v-else
-    />
-
-    <button
-      :class="{
-        button: true,
-        'flexrow-item': true,
-        'playlist-button': true,
-        active: isRepeating
-      }"
-      @click="onRepeatClicked"
-    >
-      <repeat-icon class="icon is-small" style="margin-top: 1px"/>
-    </button>
-
-    <span class="flexrow-item time-indicator">
-      {{ currentTime }}
-    </span>
-    <span class="flexrow-item time-indicator">
-    /
-
-    </span>
-    <span class="flexrow-item time-indicator">
-      {{ maxDuration }}
-    </span>
-    <span class="flexrow-item time-indicator mr1">
-      ({{ currentFrame }})
-    </span>
-    <button-simple
-      class="button playlist-button flexrow-item"
-      @click="onPreviousFrameClicked"
-      :title="$t('playlists.actions.previous_frame')"
-      icon="left"
-    />
-    <button-simple
-      class="button playlist-button flexrow-item"
-      @click="onNextFrameClicked"
-      :title="$t('playlists.actions.next_frame')"
-      icon="right"
-    />
-
-    <span class="flexrow-item time-indicator">
-      {{ entityList.length > 0 ? playingEntityIndex + 1 : 0 }}
-    </span>
-    <span class="flexrow-item time-indicator">
-    /
-    </span>
-    <span class="flexrow-item time-indicator mr1">
-      {{ entityList.length }}
-    </span>
     <button-simple
       class="button playlist-button flexrow-item"
       @click="onPlayPreviousEntityClicked"
@@ -219,103 +168,196 @@
       :title="$t('playlists.actions.next_shot')"
       icon="forward"
     />
-    <button-simple
-      :class="{
-        'comparison-button': true,
-        'flexrow-item': true,
-        'playlist-button': true,
-        active: isComparing
-      }"
-      :title="$t('playlists.actions.split_screen')"
-      icon="compare"
-      @click="onCompareClicked"
-      v-if="taskTypeOptions"
-    />
-    <combobox
-      class="playlist-button flexrow-item comparison-list"
-      :options="taskTypeOptions"
-      v-model="taskTypeToCompare"
-      v-if="isComparing"
-    />
+    <span class="flexrow-item time-indicator">
+      {{ entityList.length > 0 ? playingEntityIndex + 1 : 0 }}
+    </span>
+    <span class="flexrow-item time-indicator">
+    /
+    </span>
+    <span class="flexrow-item time-indicator mr1">
+      {{ entityList.length }}
+    </span>
+    <div class="separator"></div>
+
+    <div
+      class="flexrow flexrow-item"
+      v-if="isCurrentEntityPicture"
+    >
+      <button-simple
+        class="button playlist-button flexrow-item"
+        icon="left"
+        @click="onPreviousPictureClicked"
+      />
+      <span
+        class=""
+      >
+        {{ currentEntityPictureIndex + 1 }} / {{ currentPicturePreviewLength }}
+      </span>
+      <button-simple
+        class="button playlist-button flexrow-item"
+        icon="right"
+        @click="onNextPictureClicked"
+      />
+    </div>
+
+    <div
+      class="flexrow flexrow-item"
+      v-if="isCurrentEntityMovie"
+    >
+      <button-simple
+        class="button playlist-button flexrow-item"
+        @click="onPlayClicked"
+        :title="$t('playlists.actions.play')"
+        icon="play"
+        v-if="!isPlaying"
+      />
+      <button-simple
+        class="button playlist-button flexrow-item"
+        @click="onPlayClicked"
+        :title="$t('playlists.actions.pause')"
+        icon="pause"
+        v-else
+      />
+      <button
+        :class="{
+          button: true,
+          'flexrow-item': true,
+          'playlist-button': true,
+          active: isRepeating
+        }"
+        @click="onRepeatClicked"
+      >
+        <repeat-icon class="icon is-small" style="margin-top: 1px"/>
+      </button>
+
+      <span class="flexrow-item time-indicator">
+        {{ currentTime }}
+      </span>
+      <span class="flexrow-item time-indicator">
+      /
+
+      </span>
+      <span class="flexrow-item time-indicator">
+        {{ maxDuration }}
+      </span>
+      <span class="flexrow-item time-indicator mr1">
+        ({{ currentFrame }})
+      </span>
+      <button-simple
+        class="button playlist-button flexrow-item"
+        @click="onPreviousFrameClicked"
+        :title="$t('playlists.actions.previous_frame')"
+        icon="left"
+      />
+      <button-simple
+        class="button playlist-button flexrow-item"
+        @click="onNextFrameClicked"
+        :title="$t('playlists.actions.next_frame')"
+        icon="right"
+      />
+      <button-simple
+        :class="{
+          'comparison-button': true,
+          'flexrow-item': true,
+          'playlist-button': true,
+          active: isComparing
+        }"
+        :title="$t('playlists.actions.split_screen')"
+        icon="compare"
+        @click="onCompareClicked"
+        v-if="taskTypeOptions"
+      />
+      <combobox
+        class="playlist-button flexrow-item comparison-list"
+        :options="taskTypeOptions"
+        v-model="taskTypeToCompare"
+        v-if="isComparing"
+      />
+    </div>
     <span class="filler"></span>
 
-    <button-simple
-      class="playlist-button flexrow-item"
-      icon="undo"
-      :title="$t('playlists.actions.annotation_undo')"
-      @click="undoLastAction"
-    />
+    <div
+      class="flexrow"
+      v-if="isCurrentEntityMovie || isCurrentEntityPicture"
+    >
+      <button-simple
+        class="playlist-button flexrow-item"
+        icon="undo"
+        :title="$t('playlists.actions.annotation_undo')"
+        @click="undoLastAction"
+      />
 
-    <button-simple
-      class="playlist-button flexrow-item"
-      :title="$t('playlists.actions.annotation_redo')"
-      icon="redo"
-      @click="redoLastAction"
-    />
+      <button-simple
+        class="playlist-button flexrow-item"
+        :title="$t('playlists.actions.annotation_redo')"
+        icon="redo"
+        @click="redoLastAction"
+      />
 
-    <transition name="slide">
-      <div
-        class="annotation-tools"
-        v-show="isTyping"
-      >
-        <color-picker
-          :isOpen="isShowingPalette"
-          :color="this.textColor"
-          :palette="this.palette"
-          @TogglePalette="onPickColor"
-          @change="onChangeTextColor"
-        />
-      </div>
-    </transition>
-    <button-simple
-      :class="{
-        'playlist-button': true,
-        'flexrow-item': true,
-        active: isTyping
-      }"
-      :title="$t('playlists.actions.annotation_text')"
-      @click="onTypeClicked"
-      icon="type"
-    />
+      <transition name="slide">
+        <div
+          class="annotation-tools"
+          v-show="isTyping"
+        >
+          <color-picker
+            :isOpen="isShowingPalette"
+            :color="this.textColor"
+            :palette="this.palette"
+            @TogglePalette="onPickColor"
+            @change="onChangeTextColor"
+          />
+        </div>
+      </transition>
+      <button-simple
+        :class="{
+          'playlist-button': true,
+          'flexrow-item': true,
+          active: isTyping
+        }"
+        :title="$t('playlists.actions.annotation_text')"
+        @click="onTypeClicked"
+        icon="type"
+      />
 
-    <transition name="slide">
-      <div
-        class="annotation-tools"
-        v-show="isDrawing"
-      >
-        <pencil-picker
-          :isOpen="isShowingPencilPalette"
-          :pencil="pencil"
-          :sizes="this.pencilPalette"
-          @toggle-palette="onPickPencil"
-          @change="onChangePencil"
-        />
+      <transition name="slide">
+        <div
+          class="annotation-tools"
+          v-show="isDrawing"
+        >
+          <pencil-picker
+            :isOpen="isShowingPencilPalette"
+            :pencil="pencil"
+            :sizes="this.pencilPalette"
+            @toggle-palette="onPickPencil"
+            @change="onChangePencil"
+          />
 
-        <color-picker
-          :isOpen="isShowingPalette"
-          :color="this.color"
-          :palette="this.palette"
-          @TogglePalette="onPickColor"
-          @change="onChangeColor"
-        />
-      </div>
-    </transition>
-    <button-simple
-      :class="{
-        'playlist-button': true,
-        'flexrow-item': true,
-        active: isDrawing
-      }"
-      :title="$t('playlists.actions.annotation')"
-      @click="onAnnotateClicked"
-      icon="pencil"
-    />
-    <button-simple
-      class="playlist-button flexrow-item"
-      icon="remove"
-      :title="$t('playlists.actions.annotation_delete')"
-      @click="onDeleteClicked"
-    />
+          <color-picker
+            :isOpen="isShowingPalette"
+            :color="this.color"
+            :palette="this.palette"
+            @TogglePalette="onPickColor"
+            @change="onChangeColor"
+          />
+        </div>
+      </transition>
+      <button-simple
+        :class="{
+          'playlist-button': true,
+          'flexrow-item': true,
+          active: isDrawing
+        }"
+        :title="$t('playlists.actions.annotation')"
+        @click="onAnnotateClicked"
+        icon="pencil"
+      />
+      <button-simple
+        class="playlist-button flexrow-item"
+        icon="remove"
+        :title="$t('playlists.actions.annotation_delete')"
+        @click="onDeleteClicked"
+      />
+    </div>
     <div class="separator"></div>
     <button-simple
       class="playlist-button flexrow-item"
@@ -546,6 +588,7 @@ export default {
     return {
       annotations: [],
       color: '#ff3860',
+      currentEntityPictureIndex: 0,
       currentTime: '00:00.00',
       currentTimeRaw: 0,
       fabricCanvas: null,
@@ -600,6 +643,7 @@ export default {
       this.entityList = []
     }
     this.updateProgressBar()
+    if (this.picturePlayer) this.picturePlayer.onload = this.resetPictureCanvas
     this.$nextTick(() => {
       window.addEventListener('keydown', this.onKeyDown, false)
       window.addEventListener('resize', this.onWindowResize)
@@ -613,6 +657,7 @@ export default {
     window.removeEventListener('keydown', this.onKeyDown)
     window.removeEventListener('resize', this.onWindowResize)
     this.$el.onmousemove = null
+    if (this.picturePlayer) this.picturePlayer.onload = null
   },
 
   computed: {
@@ -627,6 +672,44 @@ export default {
       'user'
     ]),
 
+    isCurrentEntityMovie () {
+      return (
+        this.currentEntity &&
+        this.currentEntity.preview_file_extension === 'mp4'
+      )
+    },
+
+    isCurrentEntityPicture () {
+      return (
+        this.currentEntity &&
+        ['png', 'gif'].includes(this.currentEntity.preview_file_extension)
+      )
+    },
+
+    isCurrentEntityFile () {
+      return (
+        this.currentEntity &&
+        !this.isCurrentEntityMovie &&
+        !this.isCurrentEntityPicture
+      )
+    },
+
+    currentEntityPicturePath () {
+      if (this.currentEntity) {
+        let previewId = this.currentEntity.preview_file_id
+        let extension = this.currentEntity.preview_file_extension
+        if (this.currentEntityPictureIndex > 0) {
+          const index = this.currentEntityPictureIndex - 1
+          const preview = this.currentEntity.preview_file_previews[index]
+          previewId = preview.id
+          extension = preview.extension
+        }
+        return `/api/pictures/originals/preview-files/${previewId}.${extension}`
+      } else {
+        return ''
+      }
+    },
+
     currentEntityOriginalPath () {
       const previewId = this.currentEntity.preview_file_id
       const extension = this.currentEntity.preview_file_extension
@@ -640,6 +723,22 @@ export default {
 
     currentEntity () {
       return this.entityList[this.playingEntityIndex]
+    },
+
+    previousEntityIndex () {
+      let index = this.playingEntityIndex - 1
+      if (index < 0) index = this.entityList.length - 1
+      return index
+    },
+
+    nextEntityIndex () {
+      let index = this.playingEntityIndex + 1
+      if (index > this.entityList.length - 1) index = 0
+      return index
+    },
+
+    currentPicturePreviewLength () {
+      return this.currentEntity.preview_file_previews.length + 1
     },
 
     isFullScreenEnabled () {
@@ -694,10 +793,6 @@ export default {
       return this.currentProduction.fps || 24
     },
 
-    canvasWrapper () {
-      return this.$refs['canvas-wrapper']
-    },
-
     container () {
       return this.$refs.container
     },
@@ -708,6 +803,14 @@ export default {
 
     rawPlayerComparison () {
       return this.$refs['raw-player-comparison']
+    },
+
+    picturePlayer () {
+      return this.$refs['picture-player']
+    },
+
+    canvas () {
+      return this.$refs['canvas-wrapper']
     },
 
     progress () {
@@ -783,7 +886,10 @@ export default {
         if (this.$refs['button-bar']) {
           this.$refs['button-bar'].style.display = 'flex'
           this.$refs['button-bar'].style.opacity = 1
-          this.$refs['playlist-progress'].style.display = 'flex'
+        }
+        if (this.$refs['playlist-progress']) {
+          this.$refs['playlist-progress'].style.display =
+            this.isCurrentEntityMovie ? 'flex' : 'none'
           this.$refs['playlist-progress'].style.opacity = 1
         }
         this.container.style.cursor = 'default'
@@ -892,26 +998,27 @@ export default {
     },
 
     playEntity (entityIndex) {
-      console.log(entityIndex, 'playEntity')
       const entity = this.entityList[entityIndex]
       this.hideCanvas()
       this.clearCanvas()
-      console.log('play')
       if (entity.preview_file_extension === 'mp4') {
-        this.annotations = entity.preview_file_annotations || []
         this.playingEntityIndex = entityIndex
-        this.scrollToEntity(this.playingEntityIndex)
-        this.rawPlayer.loadEntity(entityIndex)
-        if (this.isComparing) {
-          this.$refs['raw-player-comparison'].loadEntity(entityIndex)
-        }
-        if (this.isPlaying) {
-          this.rawPlayer.play()
-          if (this.isComparing) this.$refs['raw-player-comparison'].play()
-        }
+        this.$nextTick(() => {
+          this.scrollToEntity(this.playingEntityIndex)
+          this.rawPlayer.loadEntity(entityIndex)
+          this.annotations = entity.preview_file_annotations || []
+          if (this.isComparing) {
+            this.$refs['raw-player-comparison'].loadEntity(entityIndex)
+          }
+          if (this.isPlaying) {
+            this.rawPlayer.play()
+            if (this.isComparing) this.$refs['raw-player-comparison'].play()
+          }
+        })
       } else {
         this.playingEntityIndex = entityIndex
-        this.annotations = []
+        const annotation = this.getAnnotation(0)
+        this.loadAnnotation(annotation)
       }
     },
 
@@ -1001,19 +1108,25 @@ export default {
     },
 
     onPlayPreviousEntityClicked () {
-      this.rawPlayer.loadPreviousEntity()
-      if (this.isComparing) {
-        this.$refs['raw-player-comparison'].loadPreviousEntity()
+      this.playEntity(this.previousEntityIndex)
+      if (this.isCurrentEntityMovie) {
+        this.rawPlayer.loadPreviousEntity()
+        if (this.isComparing) {
+          this.$refs['raw-player-comparison'].loadPreviousEntity()
+        }
+        if (this.isPlaying) this.play()
       }
-      if (this.isPlaying) this.play()
     },
 
     onPlayNextEntityClicked () {
-      this.rawPlayer.loadNextEntity()
-      if (this.isComparing) {
-        this.$refs['raw-player-comparison'].loadNextEntity()
+      this.playEntity(this.nextEntityIndex)
+      if (this.isCurrentEntityMovie) {
+        this.rawPlayer.loadNextEntity()
+        if (this.isComparing) {
+          this.$refs['raw-player-comparison'].loadNextEntity()
+        }
+        if (this.isPlaying) this.play()
       }
-      if (this.isPlaying) this.play()
     },
 
     onPlayPauseClicked () {
@@ -1071,7 +1184,9 @@ export default {
         setTimeout(() => {
           this.resetHeight()
           this.resetCanvas()
-          this.reloadAnnotations()
+            .then(() => {
+              this.reloadAnnotations()
+            })
         }, 100)
       }
     },
@@ -1158,25 +1273,29 @@ export default {
       }
     },
 
-    onEntityChange (entityIndex) {
-      this.playingEntityIndex = entityIndex
-      if (this.rawPlayerComparison) {
-        const comparisonIndex = this.rawPlayerComparison.playingIndex
-        if (comparisonIndex < entityIndex) {
-          this.rawPlayerComparison.playNext()
-        } else {
-          this.rawPlayerComparison.setCurrentTime(0)
-          this.rawPlayerComparison.play()
+    onPlayerEntityChange (entityIndex) {
+      if (this.isCurrentEntityMovie) {
+        this.playingEntityIndex = entityIndex
+        if (this.rawPlayerComparison) {
+          const comparisonIndex = this.rawPlayerComparison.playingIndex
+          if (comparisonIndex < entityIndex) {
+            this.rawPlayerComparison.playNext()
+          } else {
+            this.rawPlayerComparison.setCurrentTime(0)
+            this.rawPlayerComparison.play()
+          }
         }
+        if (!this.$options.silent) this.scrollToEntity(this.playingEntityIndex)
       }
-      if (!this.$options.silent) this.scrollToEntity(this.playingEntityIndex)
     },
 
-    onPreviewChanged (entity, previewFileId) {
+    onPreviewChanged (entity, previewFile) {
       this.pause()
-      this.$emit('preview-changed', entity, previewFileId)
+      this.$emit('preview-changed', entity, previewFile.id)
       const localEntity = this.entityList.find(s => s.id === entity.id)
-      localEntity.preview_file_id = previewFileId
+      localEntity.preview_file_id = previewFile.id
+      localEntity.preview_file_extension = previewFile.extension
+      localEntity.preview_file_annotations = previewFile.annotations
       if (this.rawPlayer) this.rawPlayer.reloadCurrentEntity()
     },
 
@@ -1236,34 +1355,73 @@ export default {
     },
 
     resetCanvas () {
-      this.resetCanvasSize()
-      if (this.fabricCanvas) this.fabricCanvas.renderAll()
       this.clearCanvas()
+      return this.resetCanvasSize()
+        .then(() => {
+          if (this.fabricCanvas) this.fabricCanvas.renderAll()
+          return Promise.resolve(this.fabricCanvas)
+        })
     },
 
     resetCanvasSize () {
-      if (this.rawPlayer && this.fabricCanvas) {
-        this.$nextTick(() => {
-          if (this.$refs['canvas-wrapper']) {
-            const ratio = this.rawPlayer.getVideoRatio()
-            const fullWidth = this.rawPlayer.$el.offsetWidth
-            const fullHeight = this.rawPlayer.$el.offsetHeight
-            const width = ratio ? fullHeight * ratio : fullWidth
-            if (fullWidth > width) {
-              const left = Math.round((fullWidth - width) / 2)
-              this.$refs['canvas-wrapper'].style.left = left + 'px'
-              this.$refs['canvas-wrapper'].style.top = '0px'
-              this.fabricCanvas.setDimensions({ width, height: fullHeight })
-            } else {
-              const height = ratio ? Math.round(fullWidth / ratio) : fullHeight
-              const top = Math.round((fullHeight - height) / 2)
-              this.$refs['canvas-wrapper'].style.left = '0px'
-              this.$refs['canvas-wrapper'].style.top = top + 'px'
-              this.fabricCanvas.setDimensions({ width: fullWidth, height })
+      return this.$nextTick()
+        .then(() => {
+          if (this.isCurrentEntityMovie && this.fabricCanvas) {
+            if (this.canvas) {
+              const ratio = this.rawPlayer.getVideoRatio()
+              const fullWidth = this.rawPlayer.$el.offsetWidth
+              const fullHeight = this.rawPlayer.$el.offsetHeight
+              const width = ratio ? fullHeight * ratio : fullWidth
+              if (fullWidth > width) {
+                const left = Math.round((fullWidth - width) / 2)
+                this.canvas.style.left = left + 'px'
+                this.canvas.style.top = '0px'
+                this.fabricCanvas.setDimensions({ width, height: fullHeight })
+              } else {
+                const height = ratio ? Math.round(fullWidth / ratio) : fullHeight
+                const top = Math.round((fullHeight - height) / 2)
+                this.canvas.style.left = '0px'
+                this.canvas.style.top = top + 'px'
+                this.fabricCanvas.setDimensions({ width: fullWidth, height })
+              }
+            }
+          } else if (this.isCurrentEntityPicture && this.fabricCanvas) {
+            if (this.canvas) {
+              const naturalWidth = this.picturePlayer.naturalWidth
+              const naturalHeight = this.picturePlayer.naturalHeight
+              const ratio = naturalWidth / naturalHeight
+              const fullWidth = this.$refs['video-container'].offsetWidth
+              const fullHeight = this.$refs['video-container'].offsetHeight
+
+              let width = ratio ? fullHeight * ratio : fullWidth
+              let height = ratio ? Math.round(fullWidth / ratio) : fullHeight
+              this.canvas.style.top = '0px'
+              this.canvas.style.left = '0px'
+              if (fullWidth > naturalWidth) {
+                const left = Math.round((fullWidth - naturalWidth) / 2)
+                this.canvas.style.left = left + 'px'
+                width = naturalWidth
+              } else if (fullWidth > width) {
+                const left = Math.round((fullWidth - width) / 2)
+                this.canvas.style.left = left + 'px'
+              } else {
+                width = fullWidth
+              }
+              if (fullHeight > naturalHeight) {
+                const top = Math.round((fullHeight - naturalHeight) / 2)
+                this.canvas.style.top = top + 'px'
+                height = naturalHeight
+              } else if (fullHeight > height) {
+                const top = Math.round((fullHeight - height) / 2)
+                this.canvas.style.top = top + 'px'
+              } else {
+                height = fullHeight
+              }
+              this.fabricCanvas.setDimensions({ width, height })
             }
           }
+          return Promise.resolve()
         })
-      }
     },
 
     rebuildComparisonOptions () {
@@ -1347,24 +1505,26 @@ export default {
     },
 
     showCanvas () {
-      if (this.canvasWrapper) this.canvasWrapper.style.display = 'block'
+      if (this.canvas) this.canvas.style.display = 'block'
     },
 
     hideCanvas () {
-      if (this.canvasWrapper) this.canvasWrapper.style.display = 'none'
+      if (this.canvas) this.canvas.style.display = 'none'
     },
 
     loadAnnotation (annotation) {
+      if (!annotation) return
       this.pause()
-      const currentTime = annotation.time || 0
-      if (this.rawPlayer) {
-        this.rawPlayer.setCurrentTime(currentTime)
-        if (this.isComparing) {
-          this.$refs['raw-player-comparison'].setCurrentTime(currentTime)
+      const currentTime = annotation ? annotation.time || 0 : 0
+      if (this.rawPlayer || this.picturePlayer) {
+        if (this.rawPlayer) {
+          this.rawPlayer.setCurrentTime(currentTime)
+          if (this.isComparing) {
+            this.$refs['raw-player-comparison'].setCurrentTime(currentTime)
+          }
+          this.currentTimeRaw = currentTime
+          this.updateProgressBar()
         }
-        this.currentTimeRaw = currentTime
-        this.updateProgressBar()
-
         this.fabricCanvas.isDrawingMode = false
         this.isDrawing = false
         this.clearCanvas()
@@ -1436,15 +1596,25 @@ export default {
     },
 
     saveAnnotations () {
-      const currentTime = roundToFrame(this.currentTimeRaw, this.fps) || 0
+      let currentTime = roundToFrame(this.currentTimeRaw, this.fps) || 0
+      if (this.isCurrentEntityPicture) currentTime = 0
       if (!this.annotations) return
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)
       const entity = this.entityList[this.playingEntityIndex]
-      const preview = {
+      let preview = {
         id: entity.preview_file_id,
         task_id: entity.preview_file_task_id,
         annotations: entity.preview_file_annotations
+      }
+      if (this.isCurrentEntityPicture && this.currentEntityPictureIndex > 0) {
+        const index = this.currentEntityPictureIndex - 1
+        const previewFile = this.currentEntity.preview_file_previews[index]
+        preview = {
+          id: previewFile.id,
+          task_id: entity.preview_file_task_id,
+          annotations: previewFile.annotations
+        }
       }
       this.$emit('annotationchanged', {
         preview: preview,
@@ -1457,11 +1627,22 @@ export default {
     },
 
     getAnnotation (time) {
+      if (!this.annotations) {
+        this.annotations = this.currentEntity.preview_file_annotations
+      }
       time = roundToFrame(time, this.fps)
       if (this.annotations) {
-        return this.annotations.find(
+        let annotation = this.annotations.find(
           (annotation) => annotation.time === time
         )
+        if (!annotation &&
+          this.isCurrentEntityPicture &&
+          this.annotations.length > 0
+        ) {
+          annotation = this.annotations[0]
+          annotation.time = 0
+        }
+        return annotation
       } else {
         return null
       }
@@ -1497,13 +1678,65 @@ export default {
     confirmChangeTaskType (taskTypeId) {
       this.$emit('task-type-changed', taskTypeId)
       this.modals.taskType = false
+    },
+
+    clearPlayer () {
+      if (this.rawPlayer) this.rawPlayer.clear()
+      if (this.isComparing) {
+        this.$refs['raw-player-comparison'].clear()
+      }
+      this.maxDurationRaw = 0
+      this.maxDuration = '00:00.00'
+    },
+
+    onPreviousPictureClicked () {
+      const index = this.currentEntityPictureIndex - 1
+      this.currentEntityPictureIndex =
+        index < 0 ? this.currentPicturePreviewLength - 1 : index
+    },
+
+    onNextPictureClicked () {
+      const index = this.currentEntityPictureIndex + 1
+      this.currentEntityPictureIndex =
+        index > this.currentPicturePreviewLength - 1 ? 0 : index
+    },
+
+    resetPictureCanvas () {
+      if (this.currentEntityPictureIndex > 0) {
+        this.annotations =
+          this.currentEntity.preview_file_previews[
+            this.currentEntityPictureIndex - 1
+          ].annotations || []
+      } else {
+        this.annotations = this.currentEntity.preview_file_annotations || []
+      }
+      this.resetCanvas()
+        .then(() => {
+          if (this.isCurrentEntityPicture) {
+            this.loadAnnotation(this.getAnnotation(0))
+          }
+        })
     }
   },
 
   watch: {
+    currentEntityPictureIndex () {
+      this.resetUndoStacks()
+    },
+
     playingEntityIndex () {
       this.updateTaskPanel()
       this.resetUndoStacks()
+      this.currentEntityPictureIndex = 0
+      if (this.currentEntity) {
+        this.annotations = this.currentEntity.preview_file_annotations || []
+      }
+      this.resetCanvas()
+        .then(() => {
+          if (this.isCurrentEntityPicture) {
+            this.loadAnnotation(this.getAnnotation(0))
+          }
+        })
     },
 
     isComparing () {
@@ -1520,8 +1753,7 @@ export default {
     },
 
     entities () {
-      const playlistEl = this.$refs['playlisted-entities']
-      const scrollLeft = playlistEl ? playlistEl.scrollLeft : 0
+      this.currentEntityPictureIndex = 0
       this.entityList = Object.values(this.entities)
       this.playingEntityIndex = 0
       this.pause()
@@ -1533,26 +1765,16 @@ export default {
       this.clearCanvas()
       this.annotations = []
       if (this.entityList.length === 0) {
-        if (this.rawPlayer) this.rawPlayer.clear()
-        if (this.isComparing) {
-          this.$refs['raw-player-comparison'].clear()
-        }
-        this.maxDurationRaw = 0
-        this.maxDuration = '00:00.00'
-      } else {
-        if (
-          this.entityList[0].preview_file_extension !== 'mp4'
-        ) {
-          this.$nextTick(() => {
-            this.rawPlayer.loadNextEntity()
-          })
-        }
-        this.$nextTick(() => {
-          if (playlistEl) playlistEl.scrollLeft = scrollLeft
-        })
+        this.clearPlayer()
       }
       this.resetHeight()
       this.resetCanvas()
+        .then(() => {
+          if (this.isCurrentEntityPicture) {
+            this.annotations = this.currentEntity.preview_file_annotations
+            this.loadAnnotation(this.getAnnotation(0))
+          }
+        })
     },
 
     playlist () {
@@ -1565,6 +1787,9 @@ export default {
 
     isAddingEntity () {
       this.$nextTick(() => {
+        if (this.picturePlayer && !this.picturePlayer.onload) {
+          this.picturePlayer.onload = this.resetPictureCanvas
+        }
         this.updateProgressBar()
       })
     }
@@ -1918,5 +2143,22 @@ progress {
 
 .playlisted-wrapper {
   margin-right: 0;
+}
+
+.picture-preview-wrapper {
+  display: flex;
+  height: inherit;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.picture-preview {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+.raw-player {
+  margin: auto;
 }
 </style>

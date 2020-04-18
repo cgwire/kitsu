@@ -618,7 +618,10 @@ export default {
             entity.preview_file_task_id,
           preview_file_annotations:
             entityInfo.preview_file_annotations ||
-            entity.preview_file_annotations
+            entity.preview_file_annotations,
+          preview_file_previews:
+            entityInfo.preview_file_previews ||
+            entity.preview_file_previews
         }
         return playlistEntity
       } else {
