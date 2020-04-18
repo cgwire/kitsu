@@ -393,6 +393,7 @@ export default {
       entity_list: 'Show/Hide entity list',
       comments: 'Show/Hide comments',
       annotation: 'Annotation',
+      annotation_text: 'Double click on the preview to add some text',
       annotation_delete: 'Delete annotation',
       annotation_redo: 'Redo annotation',
       annotation_undo: 'Undo annotation',

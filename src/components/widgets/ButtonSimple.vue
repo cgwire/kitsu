@@ -92,6 +92,10 @@
     :class="iconClass"
     v-if="icon === 'layers'"
   />
+  <type-icon
+    :class="iconClass"
+    v-if="icon === 'type'"
+  />
 
   <span
     :class="{
@@ -127,6 +131,7 @@ import {
   SkipBackIcon,
   SkipForwardIcon,
   TrashIcon,
+  TypeIcon,
   UploadIcon,
   XIcon
 } from 'vue-feather-icons'
@@ -154,6 +159,7 @@ export default {
     SkipBackIcon,
     SkipForwardIcon,
     TrashIcon,
+    TypeIcon,
     UploadIcon,
     XIcon
   },

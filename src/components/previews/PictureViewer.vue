@@ -85,6 +85,33 @@
       </button>
 
       <transition name="slide">
+          <div
+            class="annotation-tools"
+            v-show="isTyping"
+          >
+            <color-picker
+              :isOpen="isShowingPalette"
+              :color="this.textColor"
+              :palette="this.palette"
+              @TogglePalette="onPickColor"
+              @change="onChangeTextColor"
+            />
+          </div>
+        </transition>
+        <button
+          :class="{
+            button: true,
+            'flexrow-item': true,
+            active: isTyping
+          }"
+          :title="$t('playlists.actions.annotation_text')"
+          @click="onTypeClicked"
+          v-if="!readOnly && isFullScreenEnabled"
+        >
+          <type-icon class="icon" />
+        </button>
+
+      <transition name="slide">
         <div
           class="annotation-tools"
           v-show="isDrawing"
@@ -149,6 +176,7 @@ import {
   MaximizeIcon,
   PlusIcon,
   TrashIcon,
+  TypeIcon,
   XIcon
 } from 'vue-feather-icons'
 import { fullScreenMixin } from '../mixins/fullscreen'
@@ -173,6 +201,7 @@ export default {
     PlusIcon,
     Spinner,
     TrashIcon,
+    TypeIcon,
     XIcon
   },
   mixins: [annotationMixin, fullScreenMixin],
@@ -198,10 +227,12 @@ export default {
         this.preview.annotations ? [...this.preview.annotations] : [],
       currentIndex: 1,
       color: '#ff3860',
+      textColor: '#ff3860',
       fabricCanvas: null,
       fullScreen: false,
       isLoading: true,
       isDrawing: false,
+      isTyping: false,
       isShowingPalette: false,
       palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
       pencil: 'big',
@@ -236,6 +267,10 @@ export default {
   computed: {
     container () {
       return this.$refs.container
+    },
+
+    canvasWrapper () {
+      return this.$refs['canvas-wrapper']
     },
 
     canvas () {
@@ -422,8 +457,23 @@ export default {
         this.fabricCanvas.isDrawingMode = false
         this.isDrawing = false
       } else {
+        this.isTyping = false
         this.fabricCanvas.isDrawingMode = true
         this.isDrawing = true
+      }
+    },
+
+    onTypeClicked () {
+      const clickarea =
+        this.canvasWrapper.getElementsByClassName('upper-canvas')[0]
+      if (this.isTyping) {
+        this.isTyping = false
+        clickarea.removeEventListener('dblclick', this.addText)
+      } else {
+        this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
+        this.isTyping = true
+        clickarea.addEventListener('dblclick', this.addText)
       }
     },
 
@@ -571,6 +621,19 @@ export default {
             })
             this.fabricCanvas.add(path)
             this.$options.doneActionStack.pop()
+          } else if ((obj.type === 'i-text') || (obj.type === 'text')) {
+            const text = new fabric.Text(
+              obj.text,
+              {
+                ...base,
+                fill: obj.fill,
+                left: obj.left,
+                top: obj.top,
+                fontFamily: obj.fontFamily,
+                fontSize: obj.fontSize
+              }
+            )
+            this.fabricCanvas.add(text)
           }
         })
       }

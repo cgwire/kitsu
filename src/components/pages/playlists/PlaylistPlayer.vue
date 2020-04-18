@@ -226,6 +226,31 @@
     <transition name="slide">
       <div
         class="annotation-tools"
+        v-show="isTyping"
+      >
+        <color-picker
+          :isOpen="isShowingPalette"
+          :color="this.textColor"
+          :palette="this.palette"
+          @TogglePalette="onPickColor"
+          @change="onChangeTextColor"
+        />
+      </div>
+    </transition>
+    <button-simple
+      :class="{
+        'playlist-button': true,
+        'flexrow-item': true,
+        active: isTyping
+      }"
+      :title="$t('playlists.actions.annotation_text')"
+      @click="onTypeClicked"
+      icon="type"
+    />
+
+    <transition name="slide">
+      <div
+        class="annotation-tools"
         v-show="isDrawing"
       >
         <pencil-picker
@@ -490,6 +515,7 @@ export default {
     return {
       annotations: [],
       color: '#ff3860',
+      textColor: '#ff3860',
       currentTime: '00:00.00',
       currentTimeRaw: 0,
       fabricCanvas: null,
@@ -497,6 +523,7 @@ export default {
       isCommentsHidden: true,
       isComparing: false,
       isDrawing: false,
+      isTyping: false,
       isPlaying: false,
       isRepeating: false,
       isShowingPalette: false,
@@ -621,7 +648,7 @@ export default {
       return this.currentProduction.fps || 24
     },
 
-    canvas () {
+    canvasWrapper () {
       return this.$refs['canvas-wrapper']
     },
 
@@ -1250,17 +1277,32 @@ export default {
         this.fabricCanvas.isDrawingMode = false
         this.isDrawing = false
       } else {
+        this.isTyping = false
         this.fabricCanvas.isDrawingMode = true
         this.isDrawing = true
       }
     },
 
+    onTypeClicked () {
+      const clickarea = this.canvas.getElementsByClassName('upper-canvas')[0]
+      this.showCanvas()
+      if (this.isTyping) {
+        this.isTyping = false
+        clickarea.removeEventListener('dblclick', this.addText)
+      } else {
+        this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
+        this.isTyping = true
+        clickarea.addEventListener('dblclick', this.addText)
+      }
+    },
+
     showCanvas () {
-      if (this.canvas) this.canvas.style.display = 'block'
+      if (this.canvasWrapper) this.canvasWrapper.style.display = 'block'
     },
 
     hideCanvas () {
-      if (this.canvas) this.canvas.style.display = 'none'
+      if (this.canvasWrapper) this.canvasWrapper.style.display = 'none'
     },
 
     loadAnnotation (annotation) {
@@ -1326,6 +1368,19 @@ export default {
               mtr: false
             })
             this.fabricCanvas.add(path)
+          } else if ((obj.type === 'i-text') || (obj.type === 'text')) {
+            const text = new fabric.Text(
+              obj.text,
+              {
+                ...base,
+                fill: obj.fill,
+                left: obj.left,
+                top: obj.top,
+                fontFamily: obj.fontFamily,
+                fontSize: obj.fontSize
+              }
+            )
+            this.fabricCanvas.add(text)
           }
         })
       }
@@ -1336,6 +1391,7 @@ export default {
       if (!this.annotations) return
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)
+      console.log('annotations', annotations)
       const entity = this.entityList[this.playingEntityIndex]
       const preview = {
         id: entity.preview_file_id,

@@ -94,6 +94,11 @@ export const annotationMixin = {
       this.isShowingPalette = false
     },
 
+    onChangeTextColor (color) {
+      this.textColor = color
+      this.isShowingPalette = false
+    },
+
     onChangePencil (pencil) {
       this.pencil = pencil
       const converter = {
@@ -166,6 +171,26 @@ export const annotationMixin = {
       }
       this.$options.doneActionStack.push({ type: 'add', obj: activeObject })
       this.saveAnnotations()
+    },
+
+    addText () {
+      const offsetCanvas = this.canvas.getBoundingClientRect()
+      const posX = event.clientX - offsetCanvas.x
+      const posY = event.clientY - offsetCanvas.y
+      const fabricText = new fabric.IText('Type…', {
+        left: posX,
+        top: posY,
+        fontFamily: 'arial',
+        fill: this.textColor,
+        fontSize: 20
+      })
+      this.fabricCanvas.add(fabricText)
+      this.fabricCanvas.setActiveObject(fabricText)
+      fabricText.enterEditing()
+      fabricText.selectAll()
+      fabricText.hiddenTextarea.onblur = () => {
+        this.saveAnnotations()
+      }
     },
 
     clearUndoneStack () {
