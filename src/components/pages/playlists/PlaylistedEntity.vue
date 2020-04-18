@@ -218,7 +218,14 @@ export default {
     },
 
     previewFileId () {
-      this.$emit('preview-changed', this.entity, this.previewFileId)
+      let previewFile = null
+      const previewFiles = this.entity.preview_files[this.taskTypeId]
+      if (previewFiles && previewFiles.length > 0) {
+        previewFile = previewFiles.find(previewFile => {
+          return previewFile.id === this.previewFileId
+        })
+      }
+      this.$emit('preview-changed', this.entity, previewFile)
     }
   }
 }

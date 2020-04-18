@@ -315,9 +315,14 @@ export default {
 <style lang="scss" scoped>
 .video-wrapper {
   height: 100%;
+
+  video {
+    margin: auto;
+  }
 }
 
 .container {
   max-height: 100%;
 }
+
 </style>
