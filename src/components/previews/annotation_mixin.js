@@ -174,7 +174,8 @@ export const annotationMixin = {
     },
 
     addText () {
-      const offsetCanvas = this.canvas.getBoundingClientRect()
+      const canvas = this.canvas || this.canvasWrapper
+      const offsetCanvas = canvas.getBoundingClientRect()
       const posX = event.clientX - offsetCanvas.x
       const posY = event.clientY - offsetCanvas.y
       const fabricText = new fabric.IText('Type…', {

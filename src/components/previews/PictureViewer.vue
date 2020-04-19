@@ -85,31 +85,31 @@
       </button>
 
       <transition name="slide">
-          <div
-            class="annotation-tools"
-            v-show="isTyping"
-          >
-            <color-picker
-              :isOpen="isShowingPalette"
-              :color="this.textColor"
-              :palette="this.palette"
-              @TogglePalette="onPickColor"
-              @change="onChangeTextColor"
-            />
-          </div>
-        </transition>
-        <button
-          :class="{
-            button: true,
-            'flexrow-item': true,
-            active: isTyping
-          }"
-          :title="$t('playlists.actions.annotation_text')"
-          @click="onTypeClicked"
-          v-if="!readOnly && isFullScreenEnabled"
+        <div
+          class="annotation-tools"
+          v-show="isTyping"
         >
-          <type-icon class="icon" />
-        </button>
+          <color-picker
+            :isOpen="isShowingPalette"
+            :color="this.textColor"
+            :palette="this.palette"
+            @TogglePalette="onPickColor"
+            @change="onChangeTextColor"
+          />
+        </div>
+      </transition>
+      <button
+        :class="{
+          button: true,
+          'flexrow-item': true,
+          active: isTyping
+        }"
+        :title="$t('playlists.actions.annotation_text')"
+        @click="onTypeClicked"
+        v-if="false && !readOnly && isFullScreenEnabled"
+      >
+        <type-icon class="icon" />
+      </button>
 
       <transition name="slide">
         <div

@@ -186,7 +186,7 @@
           }"
           :title="$t('playlists.actions.annotation_text')"
           @click="onTypeClicked"
-          v-if="!readOnly && isFullScreenEnabled"
+          v-if="false && !readOnly && isFullScreenEnabled"
         >
           <type-icon class="icon" />
         </button>
@@ -329,7 +329,6 @@ export default {
       palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
       pencilPalette: ['big', 'medium', 'small'],
       color: '#ff3860',
-      textColor: '#ff3860',
       pencil: 'big',
       currentTime: '00:00.00',
       currentTimeRaw: 0,
@@ -344,6 +343,7 @@ export default {
       previewToCompareId: null,
       taskTypeId:
         this.entityPreviewFIles ? Object.keys(this.entityPreviewFiles)[0] : null,
+      textColor: '#ff3860',
       videoDuration: 0
     }
   },
