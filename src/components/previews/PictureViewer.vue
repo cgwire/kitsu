@@ -627,8 +627,8 @@ export default {
               {
                 ...base,
                 fill: obj.fill,
-                left: obj.left,
-                top: obj.top,
+                left: obj.left * scaleMultiplierX,
+                top: obj.top * scaleMultiplierY,
                 fontFamily: obj.fontFamily,
                 fontSize: obj.fontSize
               }
