@@ -58,7 +58,9 @@ export default {
   comments: {
     add_comment: 'Add a comment...',
     add_checklist: 'Add checklist',
+    add_attachment: 'Add attachment',
     add_preview: 'Attach preview',
+    task_placeholder: 'Task name',
     change_preview: 'Change preview',
     comment_from_client: 'Comment from client',
     empty_text: 'This comment is empty',

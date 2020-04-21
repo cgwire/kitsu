@@ -114,40 +114,14 @@
       >
         {{ $t('comments.empty_text') }}
       </p>
-      <div
+      <checklist
+        :checklist="checklist"
+        @remove-task="removeTask"
+        @keyup.native="emitChangeEvent($event)"
+        @emit-change="emitChangeEvent"
+        :disabled="!isChangeChecklistAllowed"
         v-if="checklist.length > 0"
-      >
-        <div
-          :class="{
-            'checklist-entry': true,
-            flexrow: true,
-            checked: entry.checked
-          }"
-          :key="'comment-checklist-' + comment.id + '-' + index"
-          v-for="(entry, index) in checklist"
-        >
-          <span
-            class="flexrow-item"
-            @click="toggleEntryChecked(entry)"
-          >
-            <check-square-icon class="icon" v-if="entry.checked" />
-            <square-icon class="icon" v-else />
-          </span>
-          <textarea-autosize
-            type="text"
-            class="checklist-text flexrow-item"
-            :ref="`checklist-entry-${index}`"
-            rows="1"
-            @keypress.enter.prevent.native="addChecklistEntry(index, $event)"
-            @keyup.backspace.native="removeChecklistEntry(index)"
-            @keyup.up.native="focusPrevious(index)"
-            @keyup.down.native="focusNext(index)"
-            @keyup.native="emitChangeEvent($event)"
-            :disabled="!isChangeChecklistAllowed"
-            v-model="entry.text"
-          ></textarea-autosize>
-        </div>
-      </div>
+      />
       <p v-if="comment.attachment_files">
         <a
           :href="`/api/data/attachment-files/${attachment.id}/file`"
@@ -179,7 +153,7 @@
   </div>
   <div
     class="has-text-centered add-checklist"
-    @click="addChecklistEntry(-1)"
+    @click="addChecklistEntry()"
     v-if="isAddChecklistAllowed"
   >
     {{ $t('comments.add_checklist') }}
@@ -188,33 +162,32 @@
 </template>
 
 <script>
+import { remove } from '../../lib/models'
+
 import { mapGetters } from 'vuex'
 import { formatDate } from '../../lib/time'
 import { renderComment } from '../../lib/render'
-import { remove } from '../../lib/models'
 import { sortByName } from '../../lib/sorting'
 
 import {
-  CheckSquareIcon,
   ChevronDownIcon,
   PaperclipIcon,
-  SquareIcon,
   ThumbsUpIcon
 } from 'vue-feather-icons'
 import CommentMenu from './CommentMenu.vue'
 import PeopleAvatar from './PeopleAvatar.vue'
 import PeopleName from './PeopleName.vue'
+import Checklist from './Checklist'
 
 export default {
   name: 'comment',
   components: {
-    CheckSquareIcon,
+    Checklist,
     ChevronDownIcon,
     CommentMenu,
     PaperclipIcon,
     PeopleAvatar,
     PeopleName,
-    SquareIcon,
     ThumbsUpIcon
   },
 
@@ -363,51 +336,15 @@ export default {
       this.$refs.menu.toggle()
     },
 
-    addChecklistEntry (index, event) {
-      if (event) {
-        this.checklist[index].text = this.checklist[index].text.trim()
-      }
-      if (index === -1 || index === this.checklist.length - 1) {
-        this.checklist.push({
-          text: '',
-          checked: false
-        })
-      }
-
-      this.$nextTick(() => {
-        this.focusNext(index)
+    addChecklistEntry () {
+      this.checklist.push({
+        text: '',
+        checked: false
       })
     },
 
-    removeChecklistEntry (index) {
-      const entry = this.checklist[index]
-      if (entry.text.length === 0) {
-        this.checklist = remove(this.checklist, entry)
-        this.focusPrevious(index)
-      }
-    },
-
-    toggleEntryChecked (entry) {
-      entry.checked = !entry.checked
-      this.emitChangeEvent()
-    },
-
-    focusPrevious (index) {
-      if (this.checklist.length > 0) {
-        if (index === 0) index = this.checklist.length
-        index--
-        const entryRef = `checklist-entry-${index}`
-        this.$refs[entryRef][0].$el.focus()
-      }
-    },
-
-    focusNext (index) {
-      if (this.checklist.length > 0) {
-        if (index === this.checklist.length - 1) index = -1
-        index++
-        const entryRef = `checklist-entry-${index}`
-        this.$refs[entryRef][0].$el.focus()
-      }
+    removeTask (entry) {
+      this.checklist = remove(this.checklist, entry)
     },
 
     emitChangeEvent (event) {
@@ -447,6 +384,10 @@ export default {
   .client-comment {
     background: #C4677B;
     color: white;
+  }
+
+  .add-checklist {
+    background: $dark-grey-lighter;
   }
 }
 
@@ -529,85 +470,6 @@ a.revision:hover {
   cursor: pointer;
   font-size: 0.8em;
   padding: 0.5em;
-}
-
-.dark {
-  .add-checklist {
-    background: $dark-grey-lighter;
-  }
-
-  .checklist-entry {
-
-    .checklist-text {
-      color: $light-grey-light;
-      background: transparent;
-
-      &:active,
-      &:focus,
-      &:hover {
-        background: $dark-grey;
-        border: 1px solid $dark-grey-strong;
-      }
-
-      &:disabled {
-        background: transparent;
-        color: white;
-
-        &:hover {
-          border: 1px solid transparent;
-        }
-      }
-    }
-  }
-}
-
-.checklist-entry {
-  color: $grey;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  margin-bottom: 0.3em;
-
-  .checklist-text {
-    font-size: 0.9em;
-    padding: 0.2em;
-    padding-top: 0em;
-    margin-right: 0.5em;
-    margin-top: 4px;
-    width: 100%;
-    min-height: 20px;
-    border: 1px solid transparent;
-
-    &:focus,
-    &:active,
-    &:hover {
-      border: 1px solid $light-grey;
-    }
-
-    &:disabled {
-      background-color: white;
-      color: #333;
-
-      &:hover {
-        border: 1px solid transparent;
-      }
-    }
-  }
-
-  &.checked .checklist-text {
-    text-decoration: line-through;
-  }
-
-  span {
-    cursor: pointer;
-    padding: 0.2em 0 0 0;
-    margin-right: 0.2em;
-    margin-left: 0;
-
-    .icon {
-      width: 20px;
-    }
-  }
 }
 
 .client-comment {

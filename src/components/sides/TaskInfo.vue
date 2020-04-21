@@ -600,12 +600,13 @@ export default {
       }
     },
 
-    addComment (comment, attachment, taskStatusId) {
+    addComment (comment, attachment, checklist, taskStatusId) {
       const params = {
         taskId: this.task.id,
         taskStatusId,
         commentText: comment,
         attachment,
+        checklist,
         comment
       }
       let action = 'commentTask'
