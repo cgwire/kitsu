@@ -1328,6 +1328,14 @@ tbody:last-child .empty-line:last-child {
   }
 }
 
+.datatable-row-header--nobd {
+  border-right: 0;
+
+  &::after {
+    display: none;
+  }
+}
+
 .datatable-type-header {
   border-bottom: 1px solid var(--background);
 
