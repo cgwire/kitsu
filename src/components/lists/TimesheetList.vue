@@ -26,13 +26,26 @@
     <table class="datatable">
       <thead class="datatable-head">
         <tr>
-          <th scope="col" class="datatable-row-header production">
+          <th
+            scope="col"
+            class="datatable-row-header datatable-row-header--nobd production"
+            ref="th-prod"
+          >
             {{ $t('tasks.fields.production') }}
           </th>
-          <th scope="col" class="type">
+          <th
+            scope="col"
+            class="type datatable-row-header datatable-row-header--nobd"
+            ref="th-type"
+            :style="{left: colTypePosX}"
+          >
             {{ $t('tasks.fields.task_type') }}
           </th>
-          <th scope="col" class="name">
+          <th
+            scope="col"
+            class="name datatable-row-header"
+            :style="{left: colNamePosX}"
+          >
             {{ $t('tasks.fields.entity') }}
           </th>
           <th scope="col" class="time-spent">
@@ -46,23 +59,27 @@
           v-for="(task, i) in displayedTasks"
           :key="task.id + '-' + i"
         >
-          <th class="production datatable-row-header" scope="row">
+          <th
+            class="production datatable-row-header datatable-row-header--nobd"
+            scope="row"
+          >
             <production-name-cell
               :entry="productionMap[task.project_id]"
               :only-avatar="true"
             />
           </th>
           <task-type-name
-            class="type"
+            class="type datatable-row-header datatable-row-header--nobd"
             :production-id="task.project_id"
             :entry="taskTypeMap[task.task_type_id]"
+            :style="{left: colTypePosX}"
           />
 
-          <td class="name">
+          <th class="name datatable-row-header" :style="{left: colNamePosX}">
             <router-link :to="entityPath(task)">
               {{ task.full_entity_name }}
             </router-link>
-          </td>
+          </th>
           <time-slider-cell
             :duration="timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0"
             class="time-spent"
@@ -86,26 +103,30 @@
           v-for="(task, i) in doneTasks"
           :key="task + '-' + i"
         >
-          <th class="production datatable-row-header" scope="row">
+          <th
+            class="production datatable-row-header datatable-row-header--nobd"
+            scope="row"
+          >
            <production-name-cell
              :entry="productionMap[task.project_id]"
              :only-avatar="true"
            />
           </th>
           <task-type-name
-           class="type"
+           class="type datatable-row-header datatable-row-header--nobd"
            :production-id="task.project_id"
            :entry="{
              id: task.task_type_id,
              name: task.task_type_name,
              color: task.task_type_color
            }"
+           :style="{left: colTypePosX}"
           />
-          <td class="name">
+          <th class="name datatable-row-header" :style="{left: colNamePosX}">
            <router-link :to="task.entity_path">
              {{ task.full_entity_name }}
            </router-link>
-          </td>
+          </th>
           <time-slider-cell
            :duration="timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0"
            class="time-spent"
@@ -159,8 +180,18 @@ export default {
         from: moment().toDate() // Disable dates after today.
       },
       page: 1,
-      selectedDate: moment().toDate() // By default current day.
+      selectedDate: moment().toDate(), // By default current day.
+      colTypePosX: '',
+      colNamePosX: ''
     }
+  },
+
+  mounted () {
+    this.colTypePosX = this.$refs['th-prod'].offsetWidth + 'px'
+    this.colNamePosX =
+      this.$refs['th-prod'].offsetWidth +
+      this.$refs['th-type'].offsetWidth +
+      'px'
   },
 
   props: {

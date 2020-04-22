@@ -8,15 +8,27 @@
     <table class="datatable">
       <thead class="datatable-head">
         <tr>
-          <th scope="col" class="production datatable-row-header">
+          <th
+            scope="col"
+            class="production datatable-row-header datatable-row-header--nobd"
+            ref="th-prod"
+          >
             {{ $t('tasks.fields.production') }}
           </th>
-          <th scope="col" class="type" ref="th-type">
+          <th
+            scope="col"
+            class="type datatable-row-header datatable-row-header--nobd"
+            ref="th-type"
+            :style="{left: colTypePosX}"
+          >
             {{ $t('tasks.fields.task_type') }}
           </th>
-          <th scope="col" class="thumbnail">
-          </th>
-          <th scope="col" class="name" ref="th-name">
+          <th
+            scope="col"
+            class="name datatable-row-header"
+            ref="th-name"
+            :style="{left: colNamePosX}"
+          >
             {{ $t('tasks.fields.entity') }}
           </th>
           <th scope="col" class="description">
@@ -48,35 +60,39 @@
           :key="entry + '-' + i"
           :class="{
             'datatable-row': true,
-            selected: selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
+            selected:
+              selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
           }"
           @click="onLineClicked(i, $event)"
         >
-          <th class="production datatable-row-header" scope="row">
-           <production-name-cell
-             :is-tooltip="true"
+          <th
+            class="production datatable-row-header datatable-row-header--nobd"
+            scope="row"
+          >
+            <production-name-cell
+              :is-tooltip="true"
               :entry="productionMap[entry.project_id]"
               :only-avatar="true"
-           />
+            />
           </th>
           <task-type-name
-            class="type"
+            class="type datatable-row-header datatable-row-header--nobd"
             :production-id="entry.project_id"
             :entry="getTaskType(entry)"
+            :style="{left: colTypePosX}"
           />
-          <td class="thumbnail">
-            <entity-thumbnail
-              :empty-width="60"
-              :empty-height="40"
-              :entity="{preview_file_id: entry.entity_preview_file_id}"
-            />
-          </td>
-
-          <td class="name">
-            <router-link :to="entityPath(entry)">
-              {{ entry.full_entity_name }}
-            </router-link>
-          </td>
+          <th class="name datatable-row-header" :style="{left: colNamePosX}">
+            <div class="flexrow">
+              <entity-thumbnail
+                :empty-width="60"
+                :empty-height="40"
+                :entity="{preview_file_id: entry.entity_preview_file_id}"
+              />
+              <router-link :to="entityPath(entry)">
+                {{ entry.full_entity_name }}
+              </router-link>
+            </div>
+          </th>
           <description-cell
             class="description"
             :entry="{description: entry.entity_description}"
@@ -184,7 +200,9 @@ export default {
 
   data () {
     return {
-      page: 1
+      page: 1,
+      colTypePosX: '',
+      colNamePosX: ''
     }
   },
 
@@ -192,6 +210,11 @@ export default {
     this.page = 1
     this.resizeHeaders()
     window.addEventListener('keydown', this.onKeyDown, false)
+    this.colTypePosX = this.$refs['th-prod'].offsetWidth + 'px'
+    this.colNamePosX =
+      this.$refs['th-prod'].offsetWidth +
+      this.$refs['th-type'].offsetWidth +
+      'px'
   },
 
   beforeDestroy () {
