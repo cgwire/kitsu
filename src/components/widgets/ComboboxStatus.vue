@@ -154,7 +154,6 @@ export default {
 <style lang="scss" scoped>
 .dark {
   .select-input,
-  .selected-status-line,
   .status-line,
   .status-combo {
     background: $dark-grey-light;
@@ -189,7 +188,6 @@ export default {
 }
 
 .selected-status-line {
-  background: $white;
   text-transform: uppercase;
   flex: 1;
 }

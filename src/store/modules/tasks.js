@@ -255,9 +255,11 @@ const actions = {
 
   commentTask (
     { commit, state },
-    { taskId, taskStatusId, comment, attachment }
+    { taskId, taskStatusId, comment, attachment, checklist }
   ) {
-    return tasksApi.commentTask({ taskId, taskStatusId, comment, attachment })
+    return tasksApi.commentTask(
+      { taskId, taskStatusId, comment, attachment, checklist }
+    )
       .then((comment) => {
         commit(NEW_TASK_COMMENT_END, { comment, taskId })
       })

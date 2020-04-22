@@ -47,6 +47,11 @@
           v-focus>
         </textarea>
       </at-ta>
+      <checklist
+        :checklist="checklist"
+        @remove-task="removeTask"
+        v-if="checklist.length > 0"
+      />
       <div class="flexrow preview-section">
         <button
           class="button flexrow-item"
@@ -79,9 +84,21 @@
         <button-simple
           :class="{
             'button': true,
+            'active': checklist.length !== 0
+          }"
+          icon="list"
+          :title="$t('comments.add_checklist')"
+          @click="addChecklistEntry(-1)"
+          v-if="isAddChecklistAllowed"
+        >
+        </button-simple>
+        <button-simple
+          :class="{
+            'button': true,
             'active': attachment.length !== 0
           }"
           icon="image"
+          :title="$t('comments.add_attachment')"
           @click="onAddCommentAttachmentClicked()"
         >
         </button-simple>
@@ -119,12 +136,15 @@
 </template>
 
 <script>
+import { remove } from '../../lib/models'
+
 import AtTa from 'vue-at/dist/vue-at-textarea'
 import AddCommentImageModal from '../modals/AddCommentImageModal'
 import ComboboxStatus from './ComboboxStatus'
 import PeopleAvatar from './PeopleAvatar'
 import GroupButton from './GroupButton'
 import ButtonSimple from './ButtonSimple'
+import Checklist from './Checklist'
 
 export default {
   name: 'add-comment',
@@ -135,7 +155,8 @@ export default {
     ComboboxStatus,
     PeopleAvatar,
     GroupButton,
-    ButtonSimple
+    ButtonSimple,
+    Checklist
   },
 
   data () {
@@ -143,6 +164,7 @@ export default {
       isDragging: false,
       text: '',
       attachment: [],
+      checklist: [],
       task_status_id: this.task.task_status_id,
       errors: {
         addCommentAttachment: false
@@ -220,14 +242,22 @@ export default {
         this.taskStatus[0]
       if (status.short_name === 'todo') return '#666'
       return status.color
+    },
+
+    isAddChecklistAllowed () {
+      const status = this.taskStatus.find(t => t.id === this.task_status_id) ||
+        this.taskStatus[0]
+      return status.is_retake &&
+        this.checklist.length === 0
     }
   },
 
   methods: {
-    runAddComment (text, attachment, taskStatusId) {
-      this.$emit('add-comment', text, attachment, taskStatusId)
+    runAddComment (text, attachment, checklist, taskStatusId) {
+      this.$emit('add-comment', text, attachment, checklist, taskStatusId)
       this.text = ''
       this.attachment = []
+      this.checklist = []
     },
 
     updateValue (value) {
@@ -268,6 +298,19 @@ export default {
 
     onCloseCommentAttachment () {
       this.modals.addCommentAttachment = false
+    },
+
+    addChecklistEntry (index) {
+      if (index === -1 || index === this.checklist.length - 1) {
+        this.checklist.push({
+          text: '',
+          checked: false
+        })
+      }
+    },
+
+    removeTask (entry) {
+      this.checklist = remove(this.checklist, entry)
     }
   },
 

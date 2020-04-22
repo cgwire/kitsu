@@ -38,13 +38,13 @@ export default {
     height: auto;
   }
 
-  :first-child,
+  .status-selector:first-child > :first-child,
   .button.is-primary:first-child {
     border-top-left-radius: 2rem;
     border-bottom-left-radius: 2rem;
   }
 
-  :last-child,
+  .status-selector:last-child > :first-child,
   .button.is-primary:last-child {
     border-top-right-radius: 2rem;
     border-bottom-right-radius: 2rem;

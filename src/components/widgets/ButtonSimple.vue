@@ -96,6 +96,10 @@
     :class="iconClass"
     v-if="icon === 'type'"
   />
+  <list-icon
+    :class="iconClass"
+    v-if="icon === 'list'"
+  />
 
   <span
     :class="{
@@ -122,6 +126,7 @@ import {
   FilmIcon,
   ImageIcon,
   LayersIcon,
+  ListIcon,
   MaximizeIcon,
   MessageSquareIcon,
   PauseIcon,
@@ -150,6 +155,7 @@ export default {
     FilmIcon,
     ImageIcon,
     LayersIcon,
+    ListIcon,
     MaximizeIcon,
     MessageSquareIcon,
     PauseIcon,
