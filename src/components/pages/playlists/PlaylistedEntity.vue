@@ -260,6 +260,8 @@ export default {
 
 .entity-title {
   margin-bottom: 0.6em;
+  max-width: 150px;
+  word-wrap: anywhere;
 }
 
 .thumbnail-wrapper {
