@@ -123,6 +123,7 @@ export default {
   padding-left: 0.4em;
   padding-top: 0;
   flex: 0 0 100px;
+  word-break: break-all;
 }
 
 .asset-type-name {
