@@ -43,7 +43,7 @@
           :placeholder="$t('comments.add_comment')"
           :disabled="isLoading"
           v-model="text"
-          @keyup.enter.ctrl="runAddComment(text, attachment, task_status_id)"
+          @keyup.enter.ctrl="runAddComment(text, attachment, checklist, task_status_id)"
           v-focus>
         </textarea>
       </at-ta>
@@ -111,7 +111,7 @@
           :style="{
             'background-color': taskStatusColor
           }"
-          @click="runAddComment(text, attachment, task_status_id)"
+          @click="runAddComment(text, attachment, checklist, task_status_id)"
         >
           {{ $t('comments.post_status') }}
         </button>

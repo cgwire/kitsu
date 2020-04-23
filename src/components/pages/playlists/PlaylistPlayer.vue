@@ -62,13 +62,13 @@
       ref="raw-player-comparison"
       :muted="true"
       :entities="entityListToCompare"
-      v-if="isComparing"
+      v-show="isComparing && isMovieComparison"
     />
 
     <p
-      v-if="isCurrentEntityFile && currentEntity.preview_file_extension"
       :style="{width: '100%'}"
       class="preview-standard-file has-text-centered"
+      v-if="isCurrentEntityFile && currentEntity.preview_file_extension"
     >
       <a
         class="button"
@@ -85,14 +85,24 @@
     <div
       class="picture-preview-wrapper"
       ref="picture-player-wrapper"
-      :style="{
-        display: isCurrentEntityPicture ? 'flex' : 'none'
-      }"
+      v-show="isCurrentEntityPicture"
     >
        <img
          ref="picture-player"
          class="picture-preview"
          :src="currentEntityPicturePath"
+         v-show="isCurrentEntityPicture"
+       />
+    </div>
+    <div
+      class="picture-preview-comparison-wrapper"
+      v-show="isComparing && isPictureComparison"
+    >
+       <img
+         ref="picture-player-comparison"
+         class="picture-preview"
+         :src="currentComparisonEntityPicturePath"
+         v-show="isComparing && isPictureComparison"
        />
     </div>
 
@@ -255,6 +265,12 @@
         :title="$t('playlists.actions.next_frame')"
         icon="right"
       />
+    </div>
+
+    <div
+      class="flexrow flexrow-item"
+      v-if="isCurrentEntityMovie || isCurrentEntityPicture"
+    >
       <button-simple
         :class="{
           'comparison-button': true,
@@ -274,6 +290,7 @@
         v-if="isComparing"
       />
     </div>
+
     <span class="filler"></span>
 
     <div
@@ -695,6 +712,29 @@ export default {
       )
     },
 
+    isMovieComparison () {
+      if (!this.currentPreviewToCompare) return false
+      return this.currentPreviewToCompare.extension === 'mp4'
+    },
+
+    isPictureComparison () {
+      if (!this.currentPreviewToCompare) return false
+      return (
+        ['png', 'gif'].includes(this.currentPreviewToCompare.extension)
+      )
+    },
+
+    currentPreviewToCompare () {
+      if (!this.currentEntity) return null
+      const previewFiles =
+        this.currentEntity.preview_files[this.taskTypeToCompare]
+      if (previewFiles && previewFiles.length > 0) {
+        return previewFiles[0]
+      } else {
+        return null
+      }
+    },
+
     currentEntityPicturePath () {
       if (this.currentEntity) {
         let previewId = this.currentEntity.preview_file_id
@@ -705,6 +745,16 @@ export default {
           previewId = preview.id
           extension = preview.extension
         }
+        return `/api/pictures/originals/preview-files/${previewId}.${extension}`
+      } else {
+        return ''
+      }
+    },
+
+    currentComparisonEntityPicturePath () {
+      if (this.currentPreviewToCompare) {
+        const previewId = this.currentPreviewToCompare.id
+        const extension = this.currentPreviewToCompare.extension
         return `/api/pictures/originals/preview-files/${previewId}.${extension}`
       } else {
         return ''
@@ -1347,6 +1397,9 @@ export default {
         if (this.rawPlayer) this.rawPlayer.resetHeight()
         if (this.isComparing) {
           this.$refs['raw-player-comparison'].resetHeight()
+          if (this.$refs['picture-preview-wrapper']) {
+            this.$refs['picture-preview-wrapper'].style.height = `${height}px`
+          }
         }
         this.$nextTick(() => {
           this.resetCanvas()
@@ -1399,7 +1452,11 @@ export default {
               this.canvas.style.top = '0px'
               this.canvas.style.left = '0px'
               if (fullWidth > naturalWidth) {
-                const left = Math.round((fullWidth - naturalWidth) / 2)
+                let left = Math.round((fullWidth - naturalWidth) / 2)
+                if (this.isComparing) {
+                  left = left - fullWidth / 4
+                  if (left < 0) left = 0
+                }
                 this.canvas.style.left = left + 'px'
                 width = naturalWidth
               } else if (fullWidth > width) {
@@ -1486,7 +1543,9 @@ export default {
         this.isDrawing = false
       } else {
         this.isTyping = false
-        this.fabricCanvas.isDrawingMode = true
+        if (this.fabricCanvas) {
+          this.fabricCanvas.isDrawingMode = true
+        }
         this.isDrawing = true
       }
     },
@@ -1744,7 +1803,11 @@ export default {
       if (this.isComparing) {
         this.resetComparison()
       }
-      this.$nextTick(this.resetCanvas)
+      this.$nextTick()
+        .then(() => {
+          this.resetCanvas()
+          this.reloadAnnotations()
+        })
     },
 
     taskTypeToCompare () {
@@ -2152,6 +2215,16 @@ progress {
   justify-content: center;
   align-items: center;
   width: 100%;
+}
+
+.picture-preview-comparison-wrapper {
+  display: flex;
+  height: inherit;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  min-width: 50%;
+  max-width: 50%;
 }
 
 .picture-preview {

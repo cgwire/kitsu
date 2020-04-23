@@ -60,7 +60,7 @@ export default {
     add_checklist: 'Add checklist',
     add_attachment: 'Add attachment',
     add_preview: 'Attach preview',
-    task_placeholder: 'Task name',
+    task_placeholder: 'New item...',
     change_preview: 'Change preview',
     comment_from_client: 'Comment from client',
     empty_text: 'This comment is empty',
