@@ -792,9 +792,27 @@ export default {
     },
 
     onFullscreenClicked () {
+      /** @lends fabric.IText.prototype */
+      // fix for : IText not editable when canvas is in a fullscreen
+      // element on chrome
+      // https://github.com/fabricjs/fabric.js/issues/5126
+      const originalInitHiddenTextarea =
+        fabric.IText.prototype.initHiddenTextarea
       if (this.isFullScreen()) {
+        fabric.util.object.extend(fabric.IText.prototype, {
+          initHiddenTextarea: function () {
+            originalInitHiddenTextarea.call(this)
+            fabric.document.body.appendChild(this.hiddenTextarea)
+          }
+        })
         this.exitFullScreen()
       } else {
+        fabric.util.object.extend(fabric.IText.prototype, {
+          initHiddenTextarea: function () {
+            originalInitHiddenTextarea.call(this)
+            this.canvas.wrapperEl.appendChild(this.hiddenTextarea)
+          }
+        })
         this.setFullScreen()
       }
     },
