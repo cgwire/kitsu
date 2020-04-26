@@ -291,6 +291,27 @@
       />
     </div>
 
+    <div
+      class="flexrow flexrow-item"
+      v-if="
+        isComparing && currentPreviewToCompare &&
+        currentPreviewToCompare.extension === 'png' &&
+        currentComparisonPicturePreviewLength > 1
+      "
+    >
+      <button-simple
+        class="button playlist-button flexrow-item"
+        icon="left"
+        @click="onPreviousComparisonPictureClicked"
+      />
+      {{ currentComparisonEntityPictureIndex + 1 }} / {{ currentComparisonPicturePreviewLength }}
+      <button-simple
+        class="button playlist-button flexrow-item"
+        icon="right"
+        @click="onNextComparisonPictureClicked"
+      />
+    </div>
+
     <span class="filler"></span>
 
     <div
@@ -606,6 +627,7 @@ export default {
     return {
       annotations: [],
       color: '#ff3860',
+      currentComparisonEntityPictureIndex: 0,
       currentEntityPictureIndex: 0,
       currentTime: '00:00.00',
       currentTimeRaw: 0,
@@ -753,9 +775,19 @@ export default {
 
     currentComparisonEntityPicturePath () {
       if (this.currentPreviewToCompare) {
-        const previewId = this.currentPreviewToCompare.id
         const extension = this.currentPreviewToCompare.extension
-        return `/api/pictures/originals/preview-files/${previewId}.${extension}`
+        let previewId = this.currentPreviewToCompare.id
+        if (extension === 'png') {
+          if (this.currentComparisonEntityPictureIndex > 0) {
+            const index = this.currentComparisonEntityPictureIndex - 1
+            previewId = this.currentPreviewToCompare.previews[index].id
+          }
+          return `/api/pictures/previews/preview-files/${previewId}.${extension}`
+        } else {
+          return (
+            `/api/pictures/originals/preview-files/${previewId}.${extension}`
+          )
+        }
       } else {
         return ''
       }
@@ -790,6 +822,18 @@ export default {
 
     currentPicturePreviewLength () {
       return this.currentEntity.preview_file_previews.length + 1
+    },
+
+    currentComparisonPicturePreviewLength () {
+      if (
+        this.currentPreviewToCompare &&
+        this.currentPreviewToCompare.extension === 'png'
+      ) {
+        const previews = this.currentPreviewToCompare.previews
+        return previews ? previews.length + 1 : 0
+      } else {
+        return 0
+      }
     },
 
     isFullScreenEnabled () {
@@ -1779,6 +1823,18 @@ export default {
         index > this.currentPicturePreviewLength - 1 ? 0 : index
     },
 
+    onPreviousComparisonPictureClicked () {
+      const index = this.currentComparisonEntityPictureIndex - 1
+      this.currentComparisonEntityPictureIndex =
+        index < 0 ? this.currentComparisonPicturePreviewLength - 1 : index
+    },
+
+    onNextComparisonPictureClicked () {
+      const index = this.currentComparisonEntityPictureIndex + 1
+      this.currentComparisonEntityPictureIndex =
+        index > this.currentComparisonPicturePreviewLength - 1 ? 0 : index
+    },
+
     resetPictureCanvas () {
       if (this.currentEntityPictureIndex > 0) {
         this.annotations =
@@ -1806,6 +1862,7 @@ export default {
       this.updateTaskPanel()
       this.resetUndoStacks()
       this.currentEntityPictureIndex = 0
+      this.currentComparisonEntityPictureIndex = 0
       if (this.currentEntity) {
         this.annotations = this.currentEntity.preview_file_annotations || []
       }
@@ -1836,6 +1893,7 @@ export default {
 
     entities () {
       this.currentEntityPictureIndex = 0
+      this.currentComparisonEntityPictureIndex = 0
       this.entityList = Object.values(this.entities)
       this.playingEntityIndex = 0
       this.pause()

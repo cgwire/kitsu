@@ -255,9 +255,11 @@ export default {
         this.currentIndex = nextIndex
         this.$emit('entity-change', this.currentIndex)
 
-        this.currentPlayer.style.display = 'none'
-        this.nextPlayer.style.display = 'block'
-        this.nextPlayer.play()
+        if (this.currentPlayer) this.currentPlayer.style.display = 'none'
+        if (this.nextPlayer) {
+          this.nextPlayer.style.display = 'block'
+          this.nextPlayer.play()
+        }
 
         this.switchPlayers()
         this.updateMaxDuration()
@@ -279,12 +281,16 @@ export default {
       this.tmpPlayer = this.currentPlayer
       this.currentPlayer = this.nextPlayer
       this.nextPlayer = this.tmpPlayer
-      this.nextPlayer.src = this.getMoviePath(nextEntity.preview_file_id)
+      if (nextEntity) {
+        this.nextPlayer.src = this.getMoviePath(nextEntity.preview_file_id)
+      }
       this.resetHeight()
 
-      this.currentPlayer.removeEventListener('timeupdate', this.updateTime)
+      if (this.currentPlayer) {
+        this.currentPlayer.removeEventListener('timeupdate', this.updateTime)
+        this.currentPlayer.addEventListener('timeupdate', this.updateTime)
+      }
       this.nextPlayer.removeEventListener('timeupdate', this.updateTime)
-      this.currentPlayer.addEventListener('timeupdate', this.updateTime)
     },
 
     updateTime (time) {
