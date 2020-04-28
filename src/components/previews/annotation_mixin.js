@@ -178,12 +178,17 @@ export const annotationMixin = {
       const offsetCanvas = canvas.getBoundingClientRect()
       const posX = event.clientX - offsetCanvas.x
       const posY = event.clientY - offsetCanvas.y
+      const baseHeight = 140
+      let fontSize = 9
+      if (this.canvas.height > baseHeight) {
+        fontSize = fontSize * (this.canvas.height / baseHeight)
+      }
       const fabricText = new fabric.IText('Type…', {
         left: posX,
         top: posY,
         fontFamily: 'arial',
         fill: this.textColor,
-        fontSize: 20
+        fontSize: fontSize
       })
       this.fabricCanvas.add(fabricText)
       this.fabricCanvas.setActiveObject(fabricText)

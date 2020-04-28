@@ -973,7 +973,8 @@ export default {
               left: obj.left * scaleMultiplierX,
               top: obj.top * scaleMultiplierY,
               fontFamily: obj.fontFamily,
-              fontSize: obj.fontSize
+              fontSize: obj.fontSize,
+              width: obj.width * scaleMultiplierX
             }
           )
           this.fabricCanvas.add(text)
