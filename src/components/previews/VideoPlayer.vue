@@ -933,7 +933,7 @@ export default {
           fill: 'transparent',
           stroke: obj.stroke,
           strokeWidth: obj.strokeWidth,
-          radius: obj.radius,
+          radius: obj.radius * scaleMultiplierX,
           width: obj.width,
           height: obj.height,
           scaleX: obj.scaleX * scaleMultiplierX,
@@ -942,7 +942,7 @@ export default {
         if (obj.type === 'path') {
           let strokeMultiplier = 1
           if (obj.canvasWidth) {
-            strokeMultiplier = obj.canvasWidth / this.fabricCanvas.width
+            strokeMultiplier = annotation.width / this.fabricCanvas.width
           }
           const path = new fabric.Path(
             obj.path,
