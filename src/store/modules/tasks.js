@@ -484,9 +484,9 @@ const actions = {
 
   commentTaskWithPreview (
     { commit, getters, state, dispatch },
-    { taskId, commentText, taskStatusId, form, attachment, checklist }
+    { taskId, comment, taskStatusId, form, attachment, checklist }
   ) {
-    const data = { taskId, taskStatusId, comment: commentText, attachment, checklist }
+    const data = { taskId, taskStatusId, comment, attachment, checklist }
     commit(ADD_PREVIEW_START)
     let newComment
     return tasksApi.commentTask(data)

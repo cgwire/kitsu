@@ -604,7 +604,6 @@ export default {
       const params = {
         taskId: this.task.id,
         taskStatusId,
-        commentText: comment,
         attachment,
         checklist,
         comment
