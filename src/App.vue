@@ -1271,6 +1271,24 @@ tbody:last-child .empty-line:last-child {
     border-bottom: 1px solid var(--border);
   }
 
+  &.datatable-row--selectable {
+    cursor: pointer;
+
+    &:hover,
+    &:hover .datatable-row-header {
+      background: var(--background-selectable);
+    }
+  }
+
+  &.selected {
+    &,
+    & .datatable-row-header,
+    &:hover,
+    &:hover .datatable-row-header {
+      background-color: var(--background-selected);
+    }
+  }
+
   th, td {
     box-sizing: border-box;
     border-top: 1px solid var(--border);
