@@ -221,7 +221,14 @@ export default {
   },
 
   mounted () {
-    if (this.comment.checklist) this.checklist = [...this.comment.checklist]
+    if (this.comment.checklist) {
+      this.$options.silent = true
+      this.checklist = [...this.comment.checklist]
+      this.$nextTick()
+        .then(() => {
+          this.$options.silent = false
+        })
+    }
   },
 
   computed: {
@@ -369,7 +376,9 @@ export default {
 
   watch: {
     checklist () {
-      this.emitChangeEvent()
+      if (!this.$options.silent) {
+        this.emitChangeEvent()
+      }
     }
   }
 }
