@@ -896,12 +896,12 @@ export default {
       return `/api/pictures/previews/preview-files/${previewId}.png`
     },
 
-    addComment (comment, attachment, taskStatusId) {
+    addComment (comment, attachment, checklist, taskStatusId) {
       const params = {
         taskId: this.currentTask.id,
         taskStatusId: taskStatusId,
-        commentText: comment,
         comment: comment,
+        checklist,
         attachment
       }
       let action = 'commentTask'
