@@ -60,6 +60,7 @@
           :key="entry + '-' + i"
           :class="{
             'datatable-row': true,
+            'datatable-row--selectable': true,
             selected:
               selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
           }"
@@ -441,6 +442,10 @@ export default {
   border-top: 0;
 }
 
+.datatable .datatable-row {
+  cursor: pointer;
+}
+
 .name {
   width: 230px;
   min-width: 230px;
@@ -510,31 +515,5 @@ td.end-date {
 
 .empty-list img {
   max-width: 80vh;
-}
-
-.table-body .table tr.selected,
-.table-body .table tr.selected:hover {
-  background-color: #D1C4E9;
-}
-
-.table-body .table tr {
-  cursor: pointer;
-  user-select: none;
-}
-.table-body .table tr:hover {
-  background: #CCFFCC;
-}
-
-.dark {
-  .table-body .table tr.selected,
-  .table-body .table tr.selected:hover {
-    background: #5E60BA;
-  }
-
-  .table-body .table tr {
-    &:hover {
-      background: #878B97;
-    }
-  }
 }
 </style>
