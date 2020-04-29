@@ -60,7 +60,7 @@ export default {
       commentData = data.attachment[0]
       commentData.set('task_status_id', data.taskStatusId)
       commentData.set('comment', data.comment)
-      commentData.set('checklist', data.checklist)
+      commentData.set('checklist', JSON.stringify(data.checklist || []))
     }
     return client.ppost(
       `/api/actions/tasks/${data.taskId}/comment`,
