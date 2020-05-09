@@ -755,7 +755,7 @@ export default {
     },
 
     currentEntityPicturePath () {
-      if (this.currentEntity) {
+      if (this.currentEntity && this.isCurrentEntityPicture) {
         let previewId = this.currentEntity.preview_file_id
         let extension = this.currentEntity.preview_file_extension
         if (this.currentEntityPictureIndex > 0) {
@@ -771,7 +771,7 @@ export default {
     },
 
     currentComparisonEntityPicturePath () {
-      if (this.currentPreviewToCompare) {
+      if (this.currentPreviewToCompare && this.isPictureComparison) {
         const extension = this.currentPreviewToCompare.extension
         let previewId = this.currentPreviewToCompare.id
         if (extension === 'png') {
