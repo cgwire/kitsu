@@ -1674,7 +1674,7 @@ export default {
           if (obj.type === 'path') {
             let strokeMultiplier = 1
             if (obj.canvasWidth) {
-              strokeMultiplier = obj.canvasWidth / this.fabricCanvas.width
+              strokeMultiplier = annotation.width / this.fabricCanvas.width
             }
             const path = new fabric.Path(
               obj.path,
