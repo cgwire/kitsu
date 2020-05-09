@@ -345,6 +345,7 @@ export default {
             setTimeout(() => {
               this.initialLoading = false
               if (this.$refs['asset-list']) {
+                this.onSearchChange()
                 this.$refs['asset-list'].setScrollPosition(
                   this.assetListScrollPosition
                 )
