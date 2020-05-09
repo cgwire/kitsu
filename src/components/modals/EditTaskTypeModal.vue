@@ -83,15 +83,15 @@ export default {
   },
 
   props: [
-    'onConfirmClicked',
-    'text',
     'active',
+    'onConfirmClicked',
     'cancelRoute',
+    'entries',
+    'errorText',
     'isLoading',
     'isError',
-    'errorText',
     'taskTypeToEdit',
-    'entries'
+    'text'
   ],
 
   watch: {
