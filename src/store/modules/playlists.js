@@ -306,7 +306,9 @@ const mutations = {
 
   [CHANGE_PLAYLIST_PREVIEW] (state, { playlist, entityId, previewFileId }) {
     const entityToChange = playlist.shots.find((entity) => entity.entity_id === entityId)
-    entityToChange.preview_file_id = previewFileId
+    if (entityToChange) {
+      entityToChange.preview_file_id = previewFileId
+    }
   },
 
   [ADD_NEW_JOB] (state, job) {
