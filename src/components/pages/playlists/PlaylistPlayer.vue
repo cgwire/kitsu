@@ -1276,6 +1276,14 @@ export default {
           event.preventDefault()
           event.stopPropagation()
           this.onPlayPauseClicked()
+        } else if (event.keyCode === 74) { //
+          event.preventDefault()
+          event.stopPropagation()
+          this.onPlayPreviousEntityClicked()
+        } else if (event.keyCode === 75) { // k
+          event.preventDefault()
+          event.stopPropagation()
+          this.onPlayNextEntityClicked()
         } else if (event.ctrlKey && event.altKey && event.keyCode === 68) {
           this.onAnnotateClicked()
         } else if (event.ctrlKey && event.keyCode === 90) {
