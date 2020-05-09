@@ -709,9 +709,9 @@ export default {
     fields: {
       asset_type: 'Asset type',
       assignees: 'Assignees',
-      end_date: 'Validation date',
       due_date: 'Due date',
       duration: 'Duration',
+      end_date: 'Validation date',
       entity: 'Entity',
       entity_name: 'Name',
       estimation: 'Estimation',
@@ -724,6 +724,7 @@ export default {
       real_start_date: 'WIP date',
       retake_count: 'Retakes',
       sequence: 'Sequence',
+      start_date: 'Start date',
       task_status: 'Status',
       task_status_short_name: 'Status',
       task_type: 'Type'

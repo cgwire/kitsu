@@ -33,6 +33,9 @@
           <th class="retake-count" ref="th-retake-count">
             {{ $t('tasks.fields.retake_count') }}
           </th>
+          <th class="start-date" ref="th-estimation">
+            {{ $t('tasks.fields.start_date') }}
+          </th>
           <th class="due-date" ref="th-estimation">
             {{ $t('tasks.fields.due_date') }}
           </th>
@@ -136,6 +139,9 @@
             >
               &bull;
             </span>
+          </td>
+          <td class="start-date">
+            {{ formatDate(task.start_date) }}
           </td>
           <td class="due-date">
             {{ formatDate(task.due_date) }}
@@ -524,6 +530,7 @@ export default {
 .last-comment-date,
 .real-start-date,
 .due-date,
+.start-date,
 .real-end-date {
   min-width: 130px;
   width: 130px;
