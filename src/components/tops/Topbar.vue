@@ -536,6 +536,8 @@ export default {
           this.currentEpisodeId =
             this.episodes.length > 0 ? this.episodes[0].id : null
         }
+      } else {
+        this.currentEpisodeId = 'all'
       }
 
       // If no episode is set, select the first one.
