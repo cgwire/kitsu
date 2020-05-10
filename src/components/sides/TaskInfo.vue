@@ -126,10 +126,12 @@
 
               <picture-viewer
                 :preview="currentPreview"
+                :last-preview-files="lastFivePicturePreviews"
                 :light="!isWide"
                 @annotation-changed="onAnnotationChanged"
                 @add-preview="onAddExtraPreview"
                 @remove-extra-preview="onRemoveExtraPreview"
+                @change-current-preview="changeCurrentPreview"
                 ref="preview-picture"
                 v-else-if="isPicturePreview"
               />
@@ -535,6 +537,15 @@ export default {
       if (this.taskPreviews) {
         const isMovie = previewFile => previewFile.extension === 'mp4'
         return this.taskPreviews.filter(isMovie).slice(0, 5)
+      } else {
+        return []
+      }
+    },
+
+    lastFivePicturePreviews () {
+      if (this.taskPreviews) {
+        const isPicture = previewFile => previewFile.extension === 'png'
+        return this.taskPreviews.filter(isPicture).slice(0, 5)
       } else {
         return []
       }

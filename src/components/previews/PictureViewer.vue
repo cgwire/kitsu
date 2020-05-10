@@ -62,6 +62,20 @@
     </div>
 
     <div class="right flexrow">
+      <div class="flexrow flexrow-item" v-if="isFullScreen()">
+        <span
+          :class="{
+            'previous-preview-file': true,
+            'current-preview-file': previewFile.revision === preview.revision
+          }"
+          :key="`last-preview-${previewFile.id}`"
+          @click="changeCurrentPreview(previewFile)"
+          v-for="previewFile in lastPreviewFiles"
+        >
+          {{ previewFile.revision }}
+        </span>
+      </div>
+
       <button-simple
         class="playlist-button flexrow-item"
         icon="undo"
@@ -228,6 +242,10 @@ export default {
     readOnly: {
       type: Boolean,
       default: false
+    },
+    lastPreviewFiles: {
+      type: Array,
+      default: () => []
     }
   },
 
@@ -733,6 +751,10 @@ export default {
           this.fabricCanvas.calcOffset()
         }, 10)
       }
+    },
+
+    changeCurrentPreview (previewFile) {
+      this.$emit('change-current-preview', previewFile)
     }
   },
 
@@ -888,5 +910,13 @@ export default {
 
 .slide-enter, .slide-leave-to {
   transform: translateX(100%);
+}
+
+.previous-preview-file {
+  padding: 1px 8px;
+  margin-right: 0.4em;
+  border: 1px solid $grey;
+  border-radius: 50%;
+  cursor: pointer;
 }
 </style>
