@@ -1,4 +1,6 @@
 import {
+  USER_LOGIN,
+
   TOGGLE_DARK_THEME,
   TOGGLE_SIDEBAR,
   TOGGLE_USER_MENU,
@@ -70,6 +72,12 @@ const mutations = {
 
   [SET_CURRENT_PRODUCTION] (state, productionId) {
     if (productionId) state.lastProductionViewed = productionId
+  },
+
+  [USER_LOGIN] (state, user) {
+    if (user && user.role === 'client') {
+      state.lastProductionScreen = 'playlists'
+    }
   },
 
   [RESET_ALL] (state) {

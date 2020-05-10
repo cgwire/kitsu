@@ -189,7 +189,7 @@ export default {
     return {
       currentProductionId: this.$route.params.production_id,
       currentEpisodeId: this.$route.params.episode_id,
-      currentProjectSection: 'assets',
+      currentProjectSection: this.isCurrentUserClient ? 'playlists' : 'assets',
       kitsuVersion: version,
       silent: false,
 
@@ -317,6 +317,9 @@ export default {
           { label: this.$t('quota.title'), value: 'quota' },
           { label: this.$t('people.team'), value: 'team' }
         ])
+      } else {
+        const playlistSection = options.pop()
+        options = [playlistSection].concat(options)
       }
       if (!this.isTVShow) { // Remove episode Section from the list.
         options.splice(3, 1)
@@ -519,7 +522,7 @@ export default {
         route.name = `episode-${section}`
         route.params.episode_id = episodeId
       } else if (section === 'episodes' && !isTVShow) {
-        route.name = 'assets'
+        route.name = this.isCurrentUserClient ? 'playlists' : 'assets'
       }
       return route
     },
