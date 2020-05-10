@@ -179,7 +179,7 @@ export const annotationMixin = {
       const posX = event.clientX - offsetCanvas.x
       const posY = event.clientY - offsetCanvas.y
       const baseHeight = 140
-      let fontSize = 9
+      let fontSize = 8
       if (this.canvas.height > baseHeight) {
         fontSize = fontSize * (this.canvas.height / baseHeight)
       }
