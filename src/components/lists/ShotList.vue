@@ -109,7 +109,7 @@
               :style="getValidationStyle(columnId)"
             >
               <router-link
-                class="flexrow-item datatable-dropdown"
+                class="flexrow-item datatable-dropdown task-type-name"
                 style="margin-right: 0;"
                 :to="taskTypePath(columnId)"
               >
@@ -668,5 +668,9 @@ span.thumbnail-empty {
 
 .info img {
   max-width: 80vh;
+}
+
+.task-type-name {
+  max-width: 95%;
 }
 </style>

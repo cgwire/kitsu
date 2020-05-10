@@ -435,6 +435,7 @@ export default {
           if (!err) {
             this.handleModalsDisplay()
             setTimeout(() => {
+              this.onSearchChange()
               this.$refs['shot-list'].setScrollPosition(
                 this.shotListScrollPosition
               )

@@ -156,6 +156,14 @@
 
       <a
         class="button flexrow-item"
+        :href="pictureOriginalPath"
+        target="blank"
+        v-if="!readOnly"
+      >
+        <arrow-up-right-icon class="icon" />
+      </a>
+      <a
+        class="button flexrow-item"
         :href="pictureDlPath"
         v-if="!readOnly"
       >
@@ -169,6 +177,7 @@
 <script>
 import { fabric } from 'fabric'
 import {
+  ArrowUpRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   DownloadIcon,
@@ -190,6 +199,7 @@ export default {
   name: 'picture-viewer',
 
   components: {
+    ArrowUpRightIcon,
     ButtonSimple,
     ChevronLeftIcon,
     ChevronRightIcon,
@@ -288,6 +298,11 @@ export default {
     picturePath () {
       const previewId = this.preview.previews[this.currentIndex - 1].id
       return `/api/pictures/previews/preview-files/${previewId}.png`
+    },
+
+    pictureOriginalPath () {
+      const previewId = this.preview.previews[this.currentIndex - 1].id
+      return `/api/pictures/originals/preview-files/${previewId}.png`
     },
 
     pictureDlPath () {

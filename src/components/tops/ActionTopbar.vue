@@ -380,7 +380,7 @@
 
         <div
           class="more-menu-item"
-          v-if="isCurrentViewShot && !isCurrentViewTaskType"
+          v-if="isCurrentViewAsset || isCurrentViewShot || isCurrentViewTaskType"
           @click="selectBar('playlists')"
         >
           {{ $t('menu.generate_playlists') }}

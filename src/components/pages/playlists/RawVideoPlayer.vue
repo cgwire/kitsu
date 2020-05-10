@@ -97,8 +97,13 @@ export default {
       this.$emit('metadata-loaded', event)
     },
 
-    getMoviePath (previewId) {
-      return `/api/movies/originals/preview-files/${previewId}.mp4`
+    getMoviePath (entity) {
+      if (entity.preview_file_extension === 'mp4') {
+        const previewId = entity.preview_file_id
+        return `/api/movies/originals/preview-files/${previewId}.mp4`
+      } else {
+        return ''
+      }
     },
 
     getWidth () {
@@ -214,8 +219,8 @@ export default {
           this.updateMaxDuration
         )
 
-        this.currentPlayer.src = this.getMoviePath(entity.preview_file_id)
-        this.nextPlayer.src = this.getMoviePath(nextEntity.preview_file_id)
+        this.currentPlayer.src = this.getMoviePath(entity)
+        this.nextPlayer.src = this.getMoviePath(nextEntity)
         this.currentPlayer.style.display = 'block'
         this.nextPlayer.style.display = 'none'
         this.resetHeight()
@@ -282,7 +287,7 @@ export default {
       this.currentPlayer = this.nextPlayer
       this.nextPlayer = this.tmpPlayer
       if (nextEntity) {
-        this.nextPlayer.src = this.getMoviePath(nextEntity.preview_file_id)
+        this.nextPlayer.src = this.getMoviePath(nextEntity)
       }
       this.resetHeight()
 
@@ -290,7 +295,9 @@ export default {
         this.currentPlayer.removeEventListener('timeupdate', this.updateTime)
         this.currentPlayer.addEventListener('timeupdate', this.updateTime)
       }
-      this.nextPlayer.removeEventListener('timeupdate', this.updateTime)
+      if (this.nextPlayer) {
+        this.nextPlayer.removeEventListener('timeupdate', this.updateTime)
+      }
     },
 
     updateTime (time) {
@@ -298,7 +305,9 @@ export default {
     },
 
     updateMaxDuration () {
-      this.$emit('max-duration-update', this.currentPlayer.duration)
+      if (this.currentPlayer) {
+        this.$emit('max-duration-update', this.currentPlayer.duration)
+      }
     }
   },
 

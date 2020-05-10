@@ -52,14 +52,12 @@
       @entity-change="onPlayerEntityChange"
       @time-update="onTimeUpdate"
       @max-duration-update="onMaxDurationUpdate"
-      :style="{
-        display: isCurrentEntityMovie ? 'block' : 'none'
-      }"
+      v-show="isCurrentEntityMovie"
     />
     <raw-video-player
+      ref="raw-player-comparison"
       class="raw-player"
       :is-repeating="isRepeating"
-      ref="raw-player-comparison"
       :muted="true"
       :entities="entityListToCompare"
       v-show="isComparing && isMovieComparison"
@@ -355,7 +353,6 @@
         :title="$t('playlists.actions.annotation_text')"
         @click="onTypeClicked"
         icon="type"
-        v-if="false"
       />
 
       <transition name="slide">
@@ -437,10 +434,10 @@
         :class="{
           'dl-button': true,
           'mp4-button': true,
+          'disabled': !isCurrentUserManager,
           hidden: isDlButtonsHidden
         }"
         @click="onBuildClicked"
-        v-if="isCurrentUserManager"
       >
         {{ $t('playlists.build_mp4') }}
       </span>
@@ -758,7 +755,7 @@ export default {
     },
 
     currentEntityPicturePath () {
-      if (this.currentEntity) {
+      if (this.currentEntity && this.isCurrentEntityPicture) {
         let previewId = this.currentEntity.preview_file_id
         let extension = this.currentEntity.preview_file_extension
         if (this.currentEntityPictureIndex > 0) {
@@ -774,7 +771,7 @@ export default {
     },
 
     currentComparisonEntityPicturePath () {
-      if (this.currentPreviewToCompare) {
+      if (this.currentPreviewToCompare && this.isPictureComparison) {
         const extension = this.currentPreviewToCompare.extension
         let previewId = this.currentPreviewToCompare.id
         if (extension === 'png') {
@@ -1279,6 +1276,14 @@ export default {
           event.preventDefault()
           event.stopPropagation()
           this.onPlayPauseClicked()
+        } else if (event.keyCode === 74) { //
+          event.preventDefault()
+          event.stopPropagation()
+          this.onPlayPreviousEntityClicked()
+        } else if (event.keyCode === 75) { // k
+          event.preventDefault()
+          event.stopPropagation()
+          this.onPlayNextEntityClicked()
         } else if (event.ctrlKey && event.altKey && event.keyCode === 68) {
           this.onAnnotateClicked()
         } else if (event.ctrlKey && event.keyCode === 90) {
@@ -1677,7 +1682,7 @@ export default {
           if (obj.type === 'path') {
             let strokeMultiplier = 1
             if (obj.canvasWidth) {
-              strokeMultiplier = obj.canvasWidth / this.fabricCanvas.width
+              strokeMultiplier = annotation.width / this.fabricCanvas.width
             }
             const path = new fabric.Path(
               obj.path,
@@ -1775,7 +1780,9 @@ export default {
     },
 
     onBuildClicked () {
-      this.runPlaylistBuild(this.playlist)
+      if (this.isCurrentUserManager) {
+        this.runPlaylistBuild(this.playlist)
+      }
     },
 
     onRemoveBuildJob (job) {
@@ -2310,5 +2317,9 @@ progress {
 
 .raw-player {
   margin: auto;
+}
+
+.disabled {
+  color: $grey-strong;
 }
 </style>

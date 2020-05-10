@@ -171,10 +171,9 @@ const actions = {
         }
       } else {
         if (Object.keys(rootGetters.assetMap).length < 2 || force) {
-          dispatch('loadAssets', (err) => {
-            if (err) reject(err)
-            else resolve()
-          })
+          dispatch('loadAssets')
+            .then(resolve)
+            .catch(reject)
         } else {
           resolve()
         }
