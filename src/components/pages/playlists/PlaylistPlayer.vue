@@ -462,9 +462,16 @@
             :key="job.id"
             v-for="job in playlist.build_jobs"
           >
+            <span v-if="job.status === 'running'">
+              {{ $t('playlists.building') }}
+            </span>
+            <span v-else-if="job.status === 'failed'">
+              {{ $t('playlists.failed') }}
+            </span>
             <a
               class="flexrow-item"
               :href="getBuildPath(job)"
+              v-else
             >
               {{ formatDate(job.created_at) }}
             </a>
