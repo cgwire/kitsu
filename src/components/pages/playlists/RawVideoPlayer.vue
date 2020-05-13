@@ -255,6 +255,7 @@ export default {
       if (this.isRepeating) {
         this.currentPlayer.currentTime = 0
         this.currentPlayer.play()
+        this.$emit('repeat')
       } else {
         const nextIndex = this.getNextIndex(this.currentIndex)
         this.currentIndex = nextIndex

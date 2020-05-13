@@ -48,6 +48,7 @@
       ref="raw-player"
       :entities="entityList"
       :is-repeating="isRepeating"
+      @repeat="onVideoRepeated"
       @metadata-loaded="onMetadataLoaded"
       @entity-change="onPlayerEntityChange"
       @time-update="onTimeUpdate"
@@ -1237,6 +1238,12 @@ export default {
       }
     },
 
+    onVideoRepeated () {
+      if (this.rawPlayerComparison) {
+        this.rawPlayerComparison.setCurrentTime(0)
+      }
+    },
+
     onRepeatClicked () {
       this.isRepeating = !this.isRepeating
     },
@@ -1406,6 +1413,7 @@ export default {
           const comparisonIndex = this.rawPlayerComparison.playingIndex
           if (comparisonIndex < entityIndex) {
             this.rawPlayerComparison.playNext()
+            this.rawPlayerComparison.setCurrentTime(0)
           } else {
             this.rawPlayerComparison.setCurrentTime(0)
             this.rawPlayerComparison.play()
