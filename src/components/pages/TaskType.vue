@@ -124,6 +124,7 @@
         v-if="isActiveTab('schedule')"
       >
         <schedule
+          ref="schedule-widget"
           :start-date="schedule.startDate"
           :end-date="schedule.endDate"
           :hierarchy="schedule.scheduleItems"
@@ -132,7 +133,6 @@
           :is-loading="loading.entities"
           @item-changed="saveScheduleItem"
           @root-element-expanded="expandPersonElement"
-          ref="schedule-widget"
         />
       </div>
     </div>
@@ -213,7 +213,7 @@ export default {
         entities: false
       },
       schedule: {
-        currentColor: 'neutral',
+        currentColor: 'status',
         endDate: moment().add(3, 'months'),
         scheduleItems: [],
         scheduleHeight: 800,
@@ -560,6 +560,12 @@ export default {
     // Schedule
 
     resetScheduleItems () {
+      const productionStartDate = moment(
+        this.currentProduction.start_date, 'YYYY-MM-DD'
+      )
+      if (this.schedule.startDate.isAfter(productionStartDate)) {
+        this.schedule.startDate = productionStartDate
+      }
       const taskAssignationMap = this.buildAssignationMap()
       let scheduleItems = this.scheduleTeam
         .map(person => this.buildPersonElement(person, taskAssignationMap))
@@ -812,6 +818,9 @@ export default {
       if (this.isActiveTab('schedule')) {
         this.resetScheduleItems()
         this.resetScheduleHeight()
+        this.$nextTick(() => {
+          this.$refs['schedule-widget'].scrollToToday()
+        })
       }
     }
   },
