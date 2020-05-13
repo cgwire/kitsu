@@ -41,7 +41,7 @@
   <div
     class="filler flexrow video-container"
     ref="video-container"
-    v-if="!isAddingEntity"
+    v-show="!isAddingEntity"
   >
     <raw-video-player
       class="raw-player"
@@ -1284,11 +1284,11 @@ export default {
           event.preventDefault()
           event.stopPropagation()
           this.onPlayPauseClicked()
-        } else if (event.keyCode === 74) { //
+        } else if (event.altKey && event.keyCode === 74) { // alt+j
           event.preventDefault()
           event.stopPropagation()
           this.onPlayPreviousEntityClicked()
-        } else if (event.keyCode === 75) { // k
+        } else if (event.altKey && event.keyCode === 75) { // alt+k
           event.preventDefault()
           event.stopPropagation()
           this.onPlayNextEntityClicked()
