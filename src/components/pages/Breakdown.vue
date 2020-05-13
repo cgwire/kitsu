@@ -317,12 +317,21 @@ export default {
       'setCastingEpisode',
       'setCastingSequence',
       'setCastingShot',
+      'setCurrentEpisode',
       'setAssetLinkLabel',
       'setLastProductionScreen',
       'uploadCastingFile'
     ]),
 
     reset () {
+      if (!this.isTVShow) {
+        const route = { ...this.$route }
+        if (route && route.params.episode_id) {
+          route.name = 'breakdown'
+          route.params.episode_id = null
+          this.$router.push(route)
+        }
+      }
       this.isLoading = true
       setTimeout(() => {
         this.reloadShots()

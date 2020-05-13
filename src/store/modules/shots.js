@@ -544,11 +544,16 @@ const actions = {
 
     if (episode && ['all', 'main'].includes(episode.id)) {
       episode = state.episodes.length > 0 ? state.episodes[0] : null
+      if (episode.project_id !== production.id) return
       commit(SET_CURRENT_EPISODE, episode.id)
     }
 
     if (isTVShow && !episode) {
       return callback()
+    }
+
+    if (!isTVShow && episode) {
+      commit(SET_CURRENT_EPISODE, null)
     }
 
     if (state.isShotsLoading) {
@@ -967,7 +972,7 @@ const actions = {
             return dispatch('loadEpisodeStats', productionId)
           })
         } else {
-          dispatch('computEpisodeStats')
+          dispatch('computeEpisodeStats')
           resolve()
         }
       }

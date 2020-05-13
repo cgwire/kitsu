@@ -13,6 +13,7 @@
            @click='toggleSidebar()'
            :class="{'selected': !isSidebarHidden}"
            v-if="!isCurrentUserClient"
+
         >
           ≡
         </a>
@@ -564,6 +565,7 @@ export default {
 
     currentProductionId () {
       this.resetEpisodeForTVShow()
+      if (this.currentProduction.isTVShow) this.loadEpisodes()
       this.updateRoute()
     },
 

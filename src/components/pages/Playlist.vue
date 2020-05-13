@@ -535,7 +535,10 @@ export default {
     // Data loading
 
     loadShotsData (callback) {
-      if (this.displayedShots.length === 0) {
+      if (
+        this.displayedShots.length === 0 ||
+        this.displayedShots[0].project_id !== this.currentProduction.id
+      ) {
         if (this.currentEpisode &&
             (this.currentEpisode.id === 'main' ||
             this.currentEpisode.id === 'all')) {

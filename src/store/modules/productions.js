@@ -39,6 +39,9 @@ import {
   UPDATE_METADATA_DESCRIPTOR_END,
   DELETE_METADATA_DESCRIPTOR_END,
 
+  CLEAR_SHOTS,
+  CLEAR_ASSETS,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -263,6 +266,8 @@ const actions = {
 
   setProduction ({ commit, rootGetters }, productionId) {
     commit(SET_CURRENT_PRODUCTION, productionId)
+    commit(CLEAR_ASSETS)
+    commit(CLEAR_SHOTS)
     if (rootGetters.isTVShow) {
       const episode = rootGetters.currentEpisode
       const episodeId = episode ? episode.id : null

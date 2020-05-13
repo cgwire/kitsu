@@ -416,6 +416,23 @@ export default {
   },
 
   mounted () {
+    const finalize = () => {
+      this.loadShots((err) => {
+        setTimeout(() => {
+          this.initialLoading = false
+        }, 200)
+        if (!err) {
+          this.handleModalsDisplay()
+          setTimeout(() => {
+            this.onSearchChange()
+            this.$refs['shot-list'].setScrollPosition(
+              this.shotListScrollPosition
+            )
+          }, 500)
+        }
+      })
+    }
+
     if (this.shotSearchText.length > 0) {
       this.$refs['shot-search-field'].setValue(this.shotSearchText)
     }
@@ -428,20 +445,15 @@ export default {
       )
     ) {
       setTimeout(() => {
-        this.loadShots((err) => {
-          setTimeout(() => {
-            this.initialLoading = false
-          }, 200)
-          if (!err) {
-            this.handleModalsDisplay()
-            setTimeout(() => {
-              this.onSearchChange()
-              this.$refs['shot-list'].setScrollPosition(
-                this.shotListScrollPosition
-              )
-            }, 500)
-          }
-        })
+        if (
+          this.currentProduction &&
+          this.episodes.length > 0 &&
+          this.episodes[0].project_id !== this.currentProduction.id
+        ) {
+          this.loadEpisodes(finalize)
+        } else {
+          finalize()
+        }
       }, 100)
     } else {
       if (!this.isShotsLoading) this.initialLoading = false
@@ -461,6 +473,7 @@ export default {
       'deleteMetadataDescriptor',
       'getShotsCsvLines',
       'hideAssignations',
+      'loadEpisodes',
       'loadShots',
       'loadComment',
       'removeShotSearch',
@@ -917,7 +930,7 @@ export default {
     },
 
     currentEpisode () {
-      if (this.isTVShow && this.currentEpisode) {
+      const finalize = () => {
         this.initialLoading = true
         this.loadShots((err) => {
           this.setSearchFromUrl()
@@ -927,6 +940,17 @@ export default {
             this.handleModalsDisplay()
           }
         })
+      }
+      if (this.isTVShow && this.currentEpisode) {
+        if (
+          this.currentProduction &&
+          this.episodes.length > 0 &&
+          this.episodes[0].project_id !== this.currentProduction.id
+        ) {
+          this.loadEpisodes(finalize)
+        } else {
+          finalize()
+        }
       }
     }
   },
