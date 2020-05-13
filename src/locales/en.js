@@ -136,6 +136,8 @@ export default {
 
   keyboard: {
     altdown: 'Move task selection down',
+    altj: 'Select previous preview',
+    altk: 'Select next preview',
     altleft: 'Move task selection left',
     altright: 'Move task selection right',
     altup: 'Move task selection up',
@@ -144,6 +146,7 @@ export default {
     navigation: 'Navigation',
     redo: 'Redo',
     undo: 'Undo',
+    playlist_navigation: 'Playlist navigation',
     remove_annotation: 'Remove annotation',
     shortcuts: 'Shortcuts'
   },

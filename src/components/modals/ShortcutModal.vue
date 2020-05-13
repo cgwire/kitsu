@@ -100,6 +100,19 @@ export default {
           ]
         },
         {
+          label: 'keyboard.playlist_navigation',
+          shortcuts: [
+            {
+              keys: ['Alt', 'j'],
+              text: this.$t('keyboard.altj')
+            },
+            {
+              keys: ['Alt', 'k'],
+              text: this.$t('keyboard.altk')
+            }
+          ]
+        },
+        {
           label: 'keyboard.annotations',
           shortcuts: [
             {

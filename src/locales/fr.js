@@ -130,11 +130,14 @@ export default {
 
   keyboard: {
     altdown: 'Déplace la sélection d\'une tâche vers le bas',
+    altj: 'Selectionne le preview précédent',
+    altk: 'Selectionne le preview suivant',
     altleft: 'Déplace la sélection d\'une tâche vers la gauche',
     altright: 'Déplace la sélection d\'une tâche vers la droite',
     altup: 'Déplace la sélection d\'une tâche vers le haut',
     annotations: 'Annotations',
     draw: 'Démarre le mode dessin',
+    playlist_navigation: 'Navigation dans une playlist',
     navigation: 'Navigation',
     redo: 'Redo',
     undo: 'Undo',
