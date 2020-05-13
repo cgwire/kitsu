@@ -353,6 +353,7 @@
         :title="$t('playlists.actions.annotation_text')"
         @click="onTypeClicked"
         icon="type"
+        v-if="false"
       />
 
       <transition name="slide">
