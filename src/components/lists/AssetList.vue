@@ -109,11 +109,22 @@
                 class="flexrow-item datatable-dropdown task-type-name"
                 style="margin-right: 0;"
                 :to="taskTypePath(columnId)"
+                v-if="!isCurrentUserClient"
               >
                 {{ !hiddenColumns[columnId]
                    ? taskTypeMap[columnId].name
                    : '' }}
               </router-link>
+              <span
+                class="flexrow-item datatable-dropdown task-type-name"
+                style="margin-right: 0;"
+                v-else
+              >
+                {{ !hiddenColumns[columnId]
+                  ? taskTypeMap[columnId].name
+                  : '' }}
+              </span>
+
               <chevron-down-icon
                 @click="showHeaderMenu(columnId, $event)"
                 class="header-icon flexrow-item"
