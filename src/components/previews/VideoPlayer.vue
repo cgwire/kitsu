@@ -1241,6 +1241,7 @@ progress {
   border: 1px solid $grey;
   border-radius: 50%;
   cursor: pointer;
+  color: $grey;
 }
 
 .current-preview-file {
@@ -1249,6 +1250,7 @@ progress {
   border: 1px solid $grey;
   border-radius: 50%;
   cursor: pointer;
+  color: white;
   background: $purple-strong;
   transition: 0.3s background ease;
 }

@@ -62,7 +62,7 @@
     </div>
 
     <div class="right flexrow">
-      <div class="flexrow flexrow-item" v-if="isFullScreen()">
+      <div class="flexrow flexrow-item" v-if="fullScreen">
         <span
           :class="{
             'previous-preview-file': true,
@@ -351,6 +351,11 @@ export default {
   methods: {
     exitHandler () {
       if (!this.isFullScreen() && this.fullScreen) this.fullScreen = false
+    },
+
+    isWide () {
+      const dimensions = this.getDimensions()
+      return dimensions.width > 800
     },
 
     mountPicture () {
@@ -918,5 +923,18 @@ export default {
   border: 1px solid $grey;
   border-radius: 50%;
   cursor: pointer;
+  color: $grey;
 }
+
+.current-preview-file {
+  padding: 1px 8px;
+  margin-right: 0.4em;
+  border: 1px solid $grey;
+  border-radius: 50%;
+  cursor: pointer;
+  background: $purple-strong;
+  transition: 0.3s background ease;
+  color: white;
+}
+
 </style>
