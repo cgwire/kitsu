@@ -114,6 +114,8 @@ export default {
       selected_files: 'Selected Files',
       select_task_type: 'Select Task Type',
       title: 'Add Thumbnails',
+      undefined: 'Undefined',
+      undefined_pattern: 'Undefined',
       upload: 'Add Thumbnails'
     }
   },
