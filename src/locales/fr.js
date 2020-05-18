@@ -57,6 +57,7 @@ export default {
   comments: {
     add_checklist: 'Ajout checklist',
     add_comment: 'Ajouter un commentaire...',
+    add_attachment: 'Ajouter une pièce jointe',
     add_preview: 'Attacher un fichier',
     comment_from_client: 'Commentaire du client',
     edit_title: 'Modifier le commentaire',
@@ -159,6 +160,7 @@ export default {
     about: 'À propos',
     add: 'Ajouter',
     all: 'Tous',
+    all_assets: 'Tous les assets',
     admin: 'Admin',
     back_to_list: 'retour à la liste',
     cancel: 'Annuler',
@@ -198,6 +200,7 @@ export default {
     sort_by: 'Trier par',
     sorted_by: 'Trié(e)s par',
     start_date: 'Date de début',
+    tutorials: 'Tutorials',
     white_theme: 'Thème blanc',
     yes: 'oui',
     csv: {
@@ -281,7 +284,7 @@ export default {
     building: 'En cours...',
     client_playlist: 'Playlist Client',
     created_at: 'Créé le :',
-    created_title: 'Créer playlist',
+    create_title: 'Créer playlist',
     delete_text: 'Êtes vous sûr de vouloir supprimer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en supprimant la playlist.',
     download_zip: 'Télécharger en .zip',
@@ -307,6 +310,8 @@ export default {
     updated_at: 'Mis à jour le:',
     fields: {
       name: 'Nom',
+      created_at: 'Date de création',
+      updated_at: 'Date de m.à.j',
       for_client: 'A partager avec',
       for_entity: 'Sélectionne le type d\'entité à afficher'
     },
@@ -383,9 +388,10 @@ export default {
     },
     role: {
       admin: 'Studio Manager',
+      client: 'Client',
       manager: 'Superviseur',
       user: 'Graphiste',
-      client: 'Client'
+      vendor: 'Fournisseur'
     }
   },
 
@@ -628,6 +634,7 @@ export default {
     change_priority: 'Changer le priorité de la tâche à : ',
     change_preview: 'Modifier preview',
     clear_assignations: 'effacer les assignations',
+    comment_image: 'Comment image',
     create_tasks: 'Ajouter des tâches',
     create_tasks_shot: 'Ajouter des tâches pour les plans affichés',
     create_tasks_shot_explaination: 'Vous allez créer une nouvelle tâche pour chaque plan de la liste affichée. Est-ce que vous voulez continuer ?',
@@ -660,6 +667,7 @@ export default {
     next: 'Suivante',
     preview: 'Pré-visualisation',
     previous: 'Précédente',
+    select_image_file: 'Choisissez une image sur votre disque dur:',
     select_preview_file: 'Choisissez une preview sur votre disque dur:',
     set_estimations: 'Donner une estimation pour les tâches sélectionnées :',
     set_preview: 'Utilisez cette previz comme vignette',

@@ -342,7 +342,9 @@ export default {
       admin: 'Studio Manager',
       client: 'Client',
       manager: 'Supervisor',
-      user: 'Artist'
+      user: 'Artist',
+      undefined: '',
+      vendor: 'Vendor'
     }
   },
 
@@ -389,6 +391,8 @@ export default {
     remove: 'remove',
     fields: {
       name: 'Name',
+      created_at: 'Creation date',
+      updated_at: 'Update date',
       for_entity: 'Select entity to display',
       for_client: 'To be shared with'
     },
@@ -663,6 +667,7 @@ export default {
     change_preview: 'Change preview',
     change_priority: 'Change priority to:',
     clear_assignations: 'clear assignations',
+    comment_image: 'Attach an image to your comment',
     create_for_selection: 'Create task for each empty cell:',
     create_tasks: 'Add tasks',
     create_tasks_shot: 'Add tasks for current shots',
@@ -706,11 +711,10 @@ export default {
     show_assignations: 'Show assignations',
     show_infos: 'Show additional information',
     subscribe_notifications: 'Subscribe to notifications',
-    validation: 'Validation',
-    tasks: 'Tasks',
-    with_comment: 'With a comment...',
-    comment_image: 'Attach an image to your comment',
     select_image_file: 'Please select the picture from your hard drive you want to attach to your comment:',
+    tasks: 'Tasks',
+    validation: 'Validation',
+    with_comment: 'With a comment...',
     fields: {
       asset_type: 'Asset type',
       assignees: 'Assignees',
