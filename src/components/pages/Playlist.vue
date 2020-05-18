@@ -2,6 +2,17 @@
   <div class="productions page fixed-page">
     <div class="columns">
       <div class="playlist-list-column column" v-if="playlists.length > 0">
+
+        <div>
+          <combobox
+            :label="$t('main.sorted_by')"
+            :options="sortOptions"
+            :thin="true"
+            locale-key-prefix="playlists.fields."
+            v-model="currentSort"
+          />
+        </div>
+
         <button
           :class="{
             button: true,
@@ -27,7 +38,7 @@
               'for-client': playlist.for_client || false,
               selected: playlist.id === currentPlaylist.id
             }"
-            v-for="playlist in playlists"
+            v-for="playlist in sortedPlaylists"
           >
             <span>
               {{ playlist.name }}
@@ -346,6 +357,7 @@ import {
   removeModelFromList
 } from '../../lib/models'
 
+import Combobox from '../widgets/Combobox'
 import EditPlaylistModal from '../modals/EditPlaylistModal'
 import ErrorText from '../widgets/ErrorText'
 import LightEntityThumbnail from '../widgets/LightEntityThumbnail'
@@ -358,6 +370,7 @@ export default {
   name: 'productions',
 
   components: {
+    Combobox,
     ErrorText,
     EditPlaylistModal,
     LightEntityThumbnail,
@@ -372,8 +385,15 @@ export default {
   data () {
     return {
       currentPlaylist: { name: this.$t('playlists.no_selection') },
+      currentSort: 'updated_at',
+      sortOptions: [
+        'updated_at',
+        'created_at',
+        'name'
+      ].map(name => ({ label: name, value: name })),
       currentEntities: {},
       isAddingEntity: true,
+      sortedPlaylists: [],
       playlistToEdit: {
         name: `${moment().format('YYYY-MM-DD HH:mm:ss')}`,
         for_client: false
@@ -940,6 +960,14 @@ export default {
       }
     },
 
+    resetSorting () {
+      this.sortedPlaylists = [...this.playlists]
+        .sort(
+          firstBy(this.currentSort)
+            .thenBy('name')
+        )
+    },
+
     // Modals
 
     showAddModal () {
@@ -980,6 +1008,7 @@ export default {
 
   mounted () {
     this.reloadAll()
+    this.resetSorting()
   },
 
   watch: {
@@ -1006,6 +1035,14 @@ export default {
       if (this.currentEpisode) {
         this.reloadAll()
       }
+    },
+
+    playlists () {
+      this.resetSorting()
+    },
+
+    currentSort () {
+      this.resetSorting()
     }
   },
 

@@ -364,13 +364,15 @@ export default {
   socket: {
     events: {
       'comment:new' (eventData) {
+        /*
         const commentId = eventData.comment_id
         this.loadComment({
           commentId,
-          callback: () => {
+          callback: (comment) => {
             this.computeSequenceStats()
           }
         })
+        */
       }
     }
   },
