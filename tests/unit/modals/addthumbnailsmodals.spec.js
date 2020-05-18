@@ -39,6 +39,7 @@ describe('AddThumbnailsModal', () => {
       i18n,
       router,
       propsData: {
+        parent: 'assets'
       }
     })
   })

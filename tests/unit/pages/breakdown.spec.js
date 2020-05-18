@@ -24,7 +24,8 @@ describe('Breakdown', () => {
     }
     productionStore = {
       getters: {
-        currentProduction: () => ({ id: 'production-1', name: 'Prod 1' })
+        currentProduction: () => ({ id: 'production-1', name: 'Prod 1' }),
+        isTVShow: () => (true)
       },
       actions: {
       }

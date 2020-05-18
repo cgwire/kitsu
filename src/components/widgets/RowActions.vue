@@ -86,7 +86,9 @@ export default {
     },
     restoreRoute: {
       type: Object,
-      default: null
+      default: () => {
+        return { name: 'home' }
+      }
     },
     hideEdit: {
       type: Boolean,

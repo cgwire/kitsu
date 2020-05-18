@@ -255,7 +255,7 @@ export default {
       if (form.get('file').type.startsWith('image')) {
         return window.URL.createObjectURL(form.get('file'))
       }
-      return undefined
+      return ''
       /*
       const canvas = document.createElement('img')
       const img = document.createElement('img')

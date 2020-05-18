@@ -326,7 +326,7 @@ export default {
     reset () {
       if (!this.isTVShow) {
         const route = { ...this.$route }
-        if (route && route.params.episode_id) {
+        if (route && route.params && route.params.episode_id) {
           route.name = 'breakdown'
           route.params.episode_id = null
           this.$router.push(route)
