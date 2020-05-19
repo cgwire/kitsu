@@ -289,6 +289,7 @@ const helpers = {
     sorting,
     taskStatusMap,
     taskTypeMap,
+    persons,
     taskMap
   }) {
     const taskTypes = Object.values(taskTypeMap)
@@ -301,6 +302,7 @@ const helpers = {
       taskTypes,
       taskStatuses,
       production.descriptors,
+      persons,
       query
     )
     let result = indexSearch(cache.shotIndex, keywords) || cache.shots
@@ -830,9 +832,10 @@ const actions = {
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
     const production = rootGetters.currentProduction
+    const persons = rootGetters.people
     commit(
       SET_SHOT_SEARCH,
-      { shotSearch, taskStatusMap, taskMap, taskTypeMap, production }
+      { shotSearch, persons, taskStatusMap, taskMap, taskTypeMap, production }
     )
   },
 
@@ -1127,10 +1130,11 @@ const actions = {
     const taskStatusMap = rootGetters.taskStatus
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
+    const persons = rootGetters.people
     const production = rootGetters.currentProduction
     const sorting = sortInfo ? [sortInfo] : []
     commit(CHANGE_SHOT_SORT, {
-      taskStatusMap, taskTypeMap, taskMap, production, sorting
+      taskStatusMap, taskTypeMap, taskMap, persons, production, sorting
     })
   }
 }
@@ -1504,6 +1508,7 @@ const mutations = {
       [],
       [],
       production.descriptors.filter(d => d.entity_type === 'Shot'),
+      [],
       sequenceSearch
     )
     state.displayedSequences = result.slice(0, PAGE_SIZE * 2)
@@ -1914,12 +1919,18 @@ const mutations = {
   },
 
   [CHANGE_SHOT_SORT] (state, {
-    taskStatusMap, taskTypeMap, taskMap, production, sorting
+    taskStatusMap, taskTypeMap, taskMap, production, sorting, persons
   }) {
     const shotSearch = state.shotSearchText
     state.shotSorting = sorting
     helpers.buildResult(state, {
-      shotSearch, taskStatusMap, taskTypeMap, taskMap, production, sorting
+      persons,
+      production,
+      sorting,
+      shotSearch,
+      taskStatusMap,
+      taskTypeMap,
+      taskMap
     })
   },
 

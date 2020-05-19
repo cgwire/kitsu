@@ -80,6 +80,12 @@ describe('lib/filtering', () => {
         field_name: 'family'
       }
     ]
+    const persons = [
+      {
+        id: 'person-1',
+        name: 'John Doe'
+      }
+    ]
     const taskStatuses = [
       { id: '1', short_name: 'wip' },
       { id: '2', short_name: 'wfa' },
@@ -92,6 +98,7 @@ describe('lib/filtering', () => {
         taskTypes,
         taskStatuses,
         descriptors,
+        persons,
         'modeling=wip'
       )
       expect(filters.length).toEqual(1)
@@ -108,6 +115,7 @@ describe('lib/filtering', () => {
         taskTypes,
         taskStatuses,
         descriptors,
+        persons,
         'mode=wip'
       )
       expect(filters.length).toEqual(1)
@@ -122,6 +130,7 @@ describe('lib/filtering', () => {
         taskTypes,
         taskStatuses,
         descriptors,
+        persons,
         '[modeling facial]=wip'
       )
       expect(filters.length).toEqual(1)
@@ -136,6 +145,7 @@ describe('lib/filtering', () => {
         taskTypes,
         taskStatuses,
         descriptors,
+        persons,
         'compo=wip'
       )
       expect(filters.length).toEqual(0)
@@ -147,6 +157,7 @@ describe('lib/filtering', () => {
         taskTypes,
         taskStatuses,
         descriptors,
+        persons,
         'toto'
       )
       expect(filters.length).toEqual(0)
@@ -158,6 +169,7 @@ describe('lib/filtering', () => {
         taskTypes,
         taskStatuses,
         descriptors,
+        persons,
         ''
       )
       expect(filters.length).toEqual(0)
@@ -169,6 +181,7 @@ describe('lib/filtering', () => {
         taskTypes,
         taskStatuses,
         descriptors,
+        persons,
         'mode=wip anim=wfa chars'
       )
       expect(filters.length).toEqual(2)
@@ -186,6 +199,7 @@ describe('lib/filtering', () => {
         taskTypes,
         taskStatuses,
         descriptors,
+        persons,
         'mode=assigned'
       )
       expect(filters.length).toEqual(1)
@@ -202,6 +216,7 @@ describe('lib/filtering', () => {
         taskTypes,
         taskStatuses,
         descriptors,
+        persons,
         'mode=unassigned'
       )
       expect(filters.length).toEqual(1)
@@ -218,6 +233,7 @@ describe('lib/filtering', () => {
         taskTypes,
         taskStatuses,
         descriptors,
+        persons,
         '-props'
       )
       expect(filters.length).toEqual(1)
@@ -232,6 +248,7 @@ describe('lib/filtering', () => {
         taskTypes,
         taskStatuses,
         descriptors,
+        persons,
         'family=big'
       )
       expect(filters.length).toEqual(1)
@@ -247,6 +264,7 @@ describe('lib/filtering', () => {
         taskTypes,
         taskStatuses,
         descriptors,
+        persons,
         'withthumbnail'
       )
       expect(filters.length).toEqual(1)
@@ -258,11 +276,27 @@ describe('lib/filtering', () => {
         taskTypes,
         taskStatuses,
         descriptors,
+        persons,
         '-withthumbnail'
       )
       expect(filters.length).toEqual(1)
       expect(filters[0].type).toEqual('thumbnail')
       expect(filters[0].excluding).toEqual(true)
+    })
+
+    it('assignedto=[John Doe] in query case', () => {
+      let filters = getFilters(
+        entryIndex,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        'assignedto=[John Doe]'
+      )
+      expect(filters.length).toEqual(1)
+      expect(filters[0].type).toEqual('assignedto')
+      expect(filters[0].personId).toEqual('person-1')
+      expect(filters[0].excluding).toEqual(false)
     })
   })
 
@@ -286,24 +320,28 @@ describe('lib/filtering', () => {
         name: 'SH01', sequence_name: 'S01', episode_name: 'E01', id: 'shot-1',
         data: {color: 'blue'},
         validations: {'task-type-1': 'task-1'},
+        tasks: ['task-1'],
         preview_file_id: 'preview-file-1'
       },
       {
         name: 'SH02', sequence_name: 'S01', episode_name: 'E01', id: 'shot-2',
         data: {color: 'blue'},
         validations: {'task-type-1': 'task-2'},
+        tasks: ['task-2'],
         preview_file_id: 'preview-file-2'
       },
       {
         name: 'SH01', sequence_name: 'S02', episode_name: 'E01', id: 'shot-3',
         data: {color: 'blue'},
         validations: {'task-type-1': 'task-3'},
+        tasks: ['task-3'],
         preview_file_id: ''
       },
       {
         name: 'SH01', sequence_name: 'S01', episode_name: 'E02', id: 'shot-4',
         data: {color: 'blue'},
-        validations: {'task-type-1': 'task-4'}
+        validations: {'task-type-1': 'task-4'},
+        tasks: ['task-4']
       },
       {
         name: 'SH02', sequence_name: 'S01', episode_name: 'E02', id: 'shot-5',
@@ -311,7 +349,8 @@ describe('lib/filtering', () => {
         validations: {
           'task-type-1': 'task-5',
           'task-type-3': 'task-6'
-        }
+        },
+        tasks: ['task-5', 'task-6']
       }
     ]
     const taskMap = {
@@ -498,6 +537,22 @@ describe('lib/filtering', () => {
         taskMap
       )
       expect(results.length).toEqual(3)
+    })
+
+    it('assignedto=[John Doe]', () => {
+      const filters = [
+        {
+          type: 'assignedto',
+          personId: 'person-1',
+          excluding: false
+        }
+      ]
+      let results = applyFilters(
+        entries,
+        filters,
+        taskMap
+      )
+      expect(results.length).toEqual(2)
     })
   })
 })
