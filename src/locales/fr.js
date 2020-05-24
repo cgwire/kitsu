@@ -100,6 +100,22 @@ export default {
   },
 
   entities: {
+    build_filter: {
+      assignation: 'Assignation',
+      assignation_exists_for: 'Des assignations existent pour',
+      assigned_to: 'Assigné à',
+      descriptor: 'Metadata',
+      equal: 'Égal',
+      no_assignation_for: 'Pas d\'assignation pour',
+      no_filter: 'Pas de filtre',
+      not_equal: 'Pas égal',
+      not_assigned_to: 'Pas assigné à',
+      status: 'Statut de tâche',
+      thumbnail: 'A une vignette',
+      title: 'Filtré sur...',
+      with_thumbnail: 'Avec vignette',
+      without_thumbnail: 'Sans vignette'
+    },
     thumbnails: {
       error: 'Une erreur s\'est produite en téléversant les vignettes',
       explaination: 'L\'ajout d\'une vignette nécessite de publier un nouvel aperçu. Afin de définir plusieurs vignettes en même temps, vous devez d\'abord choisir un type de tâche qui sera utilisé pour publier les nouveaux aperçus. Les vignettes seront définies à partir de ce nouvel aperçu.',

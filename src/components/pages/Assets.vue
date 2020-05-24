@@ -6,13 +6,22 @@
         <div class="level header-title">
           <div class="level-left flexcolumn">
             <div class="filters-area flexcolumn-item">
-              <search-field
-                ref="asset-search-field"
-                :can-save="true"
-                @change="onSearchChange"
-                @save="saveSearchQuery"
-                placeholder="ex: props modeling=wip"
-              />
+              <div class="flexrow">
+                <search-field
+                  ref="asset-search-field"
+                  class="flexrow-item"
+                  :can-save="true"
+                  @change="onSearchChange"
+                  @save="saveSearchQuery"
+                  placeholder="ex: props modeling=wip"
+                />
+                <button-simple
+                  class="flexrow-item"
+                  :title="$t('entities.build_filter.title')"
+                  icon="funnel"
+                  @click="() => modals.isBuildFilterDisplayed = true"
+                />
+              </div>
             </div>
           </div>
 
@@ -206,6 +215,13 @@
     @cancel="hideAddThumbnailsModal"
     @confirm="confirmAddThumbnails"
   />
+
+  <build-filter-modal
+    ref="build-filter-modal"
+    :active="modals.isBuildFilterDisplayed"
+    @cancel="modals.isBuildFilterDisplayed = false"
+    @confirm="confirmBuildFilter"
+  />
 </div>
 </template>
 
@@ -223,6 +239,7 @@ import AssetList from '../lists/AssetList'
 import AddMetadataModal from '../modals/AddMetadataModal'
 import AddThumbnailsModal from '../modals/AddThumbnailsModal'
 import ButtonLink from '../widgets/ButtonLink'
+import BuildFilterModal from '../modals/BuildFilterModal'
 import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../modals/DeleteModal'
@@ -245,6 +262,7 @@ export default {
     AssetList,
     AddMetadataModal,
     AddThumbnailsModal,
+    BuildFilterModal,
     ButtonLink,
     ButtonSimple,
     CreateTasksModal,
@@ -267,6 +285,7 @@ export default {
       modals: {
         isAddMetadataDisplayed: false,
         isAddThumbnailsDisplayed: false,
+        isBuildFilterDisplayed: false,
         isCreateTasksDisplayed: false,
         isDeleteDisplayed: false,
         isDeleteAllTasksDisplayed: false,
@@ -519,6 +538,12 @@ export default {
       })
     },
 
+    confirmBuildFilter (query) {
+      this.isBuildFilterDisplayed = false
+      this.$refs['asset-search-field'].setValue(query)
+      this.onSearchChange()
+    },
+
     confirmCreateTasks (form) {
       this.loading.creatingTasks = true
       this.runTasksCreation(form, () => {
@@ -656,6 +681,7 @@ export default {
         this.modals = {
           isAddMetadataDisplayed: false,
           isAddThumbnailsDisplayed: false,
+          isBuildFilterDisplayed: false,
           isCreateTasksDisplayed: false,
           isDeleteAllTasksDisplayed: false,
           isDeleteDisplayed: false,

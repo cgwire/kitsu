@@ -104,6 +104,22 @@ export default {
   },
 
   entities: {
+    build_filter: {
+      assignation: 'Assignation',
+      assignation_exists_for: 'Assignations exists for',
+      assigned_to: 'Assigned to',
+      descriptor: 'Metadata',
+      equal: 'Equal',
+      no_assignation_for: 'No assignation exists for',
+      no_filter: 'No filter',
+      not_equal: 'Not equal',
+      not_assigned_to: 'Not assigned to',
+      status: 'Task status',
+      thumbnail: 'Thumbnail presence',
+      title: 'Filter on...',
+      with_thumbnail: 'With thumbnail',
+      without_thumbnail: 'Without thumbnail'
+    },
     thumbnails: {
       error: 'An error occured while uploading thumbnails',
       explaination: 'Adding a thumbnail requires to set a new preview. In order to set several thumbnails at the same time, you must chose first a task type that will be used to create the new previews. The thumbnails will be set from this new preview.',
