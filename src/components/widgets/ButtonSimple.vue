@@ -16,6 +16,10 @@
     :class="iconClass"
     v-if="icon === 'plus'"
   />
+  <minus-icon
+    :class="iconClass"
+    v-if="icon === 'minus'"
+  />
   <message-square-icon
     :class="iconClass"
     v-if="icon === 'comment'"
@@ -100,6 +104,10 @@
     :class="iconClass"
     v-if="icon === 'list'"
   />
+  <filter-icon
+    :class="iconClass"
+    v-if="icon === 'funnel'"
+  />
 
   <span
     :class="{
@@ -124,11 +132,13 @@ import {
   EditIcon,
   Edit2Icon,
   FilmIcon,
+  FilterIcon,
   ImageIcon,
   LayersIcon,
   ListIcon,
   MaximizeIcon,
   MessageSquareIcon,
+  MinusIcon,
   PauseIcon,
   PlayIcon,
   PlusIcon,
@@ -153,11 +163,13 @@ export default {
     EditIcon,
     Edit2Icon,
     FilmIcon,
+    FilterIcon,
     ImageIcon,
     LayersIcon,
     ListIcon,
     MaximizeIcon,
     MessageSquareIcon,
+    MinusIcon,
     PauseIcon,
     PlayIcon,
     PlusIcon,
