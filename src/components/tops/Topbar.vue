@@ -621,7 +621,7 @@ export default {
 
   .topbar .nav,
   .user-menu {
-    background-color: $dark-grey-strong;
+    background-color: $black;
     color: $white-grey;
     border-left: 1px solid #2F3136;
     border-bottom: 1px solid #2F3136;
