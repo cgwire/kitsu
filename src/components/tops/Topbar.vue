@@ -223,6 +223,7 @@ export default {
       'episodes',
       'episodeOptions',
       'isCurrentUserClient',
+      'isCurrentUserVendor',
       'isDarkTheme',
       'isSidebarHidden',
       'isUserMenuHidden',
@@ -322,6 +323,19 @@ export default {
         const playlistSection = options.pop()
         options = [playlistSection].concat(options)
       }
+
+      if (this.isCurrentUserVendor) {
+        options = [
+          { label: this.$t('assets.title'), value: 'assets' },
+          { label: this.$t('shots.title'), value: 'shots' },
+          { label: this.$t('sequences.title'), value: 'sequences' },
+          { label: this.$t('episodes.title'), value: 'episodes' },
+          {
+            label: this.$t('asset_types.production_title'), value: 'assetTypes'
+          }
+        ]
+      }
+
       if (!this.isTVShow) { // Remove episode Section from the list.
         options.splice(3, 1)
       }
