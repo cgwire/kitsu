@@ -523,7 +523,7 @@ export default {
         }
       }
       route = this.episodifyRoute(route, section, episodeId, isTVShow)
-      if (route.params.production_id) this.$router.push(route)
+      if (route && route.params.production_id) this.$router.push(route)
     },
 
     episodifyRoute (route, section, episodeId, isTVShow) {

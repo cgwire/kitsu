@@ -557,7 +557,8 @@ export default {
     loadShotsData (callback) {
       if (
         this.displayedShots.length === 0 ||
-        this.displayedShots[0].project_id !== this.currentProduction.id
+        this.displayedShots[0].project_id !== this.currentProduction.id ||
+        this.displayedShots[0].episode_id !== this.currentEpisode.id
       ) {
         if (this.currentEpisode &&
             (this.currentEpisode.id === 'main' ||
