@@ -6,13 +6,21 @@
         <div class="level header-title">
           <div class="level-left flexcolumn">
             <div class="filters-area flexcolumn-item">
-              <search-field
-                ref="shot-search-field"
-                :can-save="true"
-                @change="onSearchChange"
-                @save="saveSearchQuery"
-                placeholder="ex: e01 s01 anim=wip"
-              />
+              <div class="flexrow">
+                <search-field
+                  ref="shot-search-field"
+                  :can-save="true"
+                  @change="onSearchChange"
+                  @save="saveSearchQuery"
+                  placeholder="ex: e01 s01 anim=wip"
+                />
+                <button-simple
+                  class="flexrow-item"
+                  :title="$t('entities.build_filter.title')"
+                  icon="funnel"
+                  @click="() => modals.isBuildFilterDisplayed = true"
+                />
+              </div>
             </div>
           </div>
 
@@ -222,6 +230,14 @@
     :shot="historyShot"
     @cancel="hideShotHistoryModal"
   />
+
+  <build-filter-modal
+    ref="build-filter-modal"
+    :active="modals.isBuildFilterDisplayed"
+    entity-type="shot"
+    @cancel="modals.isBuildFilterDisplayed = false"
+    @confirm="confirmBuildFilter"
+  />
 </div>
 </template>
 
@@ -238,6 +254,7 @@ import { entityListMixin } from '../mixins/entities'
 
 import AddMetadataModal from '../modals/AddMetadataModal'
 import AddThumbnailsModal from '../modals/AddThumbnailsModal'
+import BuildFilterModal from '../modals/BuildFilterModal'
 import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../modals/DeleteModal'
@@ -262,6 +279,7 @@ export default {
   components: {
     AddMetadataModal,
     AddThumbnailsModal,
+    BuildFilterModal,
     ButtonSimple,
     CreateTasksModal,
     DeleteModal,
@@ -293,6 +311,7 @@ export default {
       modals: {
         isAddMetadataDisplayed: false,
         isAddThumbnailsDisplayed: false,
+        isBuildFilterDisplayed: false,
         isCreateTasksDisplayed: false,
         isDeleteDisplayed: false,
         isDeleteMetadataDisplayed: false,
@@ -706,6 +725,7 @@ export default {
 
       Object.assign(this.modals, {
         isAddMetadataDisplayed: false,
+        isBuildFilterDisplayed: false,
         isCreateTasksDisplayed: false,
         isDeleteAllTasksDisplayed: false,
         isDeleteDisplayed: false,
@@ -903,8 +923,13 @@ export default {
 
     onChangeSortClicked (sortInfo) {
       this.changeShotSort(sortInfo)
-    }
+    },
 
+    confirmBuildFilter (query) {
+      this.isBuildFilterDisplayed = false
+      this.$refs['shot-search-field'].setValue(query)
+      this.onSearchChange()
+    }
   },
 
   watch: {

@@ -91,6 +91,10 @@ export default {
 <style lang="scss" scoped>
 input.input {
   font-size: 1.2em;
+
+}
+input.input.thin {
+  height: 2.4em;
 }
 
 .flexrow-item {

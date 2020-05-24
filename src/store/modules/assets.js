@@ -195,6 +195,7 @@ const helpers = {
     sorting,
     taskStatusMap,
     taskTypeMap,
+    persons,
     taskMap
   }) {
     const taskTypes = Object.values(taskTypeMap)
@@ -209,6 +210,7 @@ const helpers = {
       taskTypes,
       taskStatuses,
       production.descriptors || [],
+      persons,
       query
     )
     let result = indexSearch(cache.assetIndex, keywords) || cache.assets
@@ -509,9 +511,17 @@ const actions = {
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
     const production = rootGetters.currentProduction
+    const persons = rootGetters.people
     commit(
       SET_ASSET_SEARCH,
-      { assetSearch, taskMap, taskStatusMap, taskTypeMap, production }
+      {
+        assetSearch,
+        taskMap,
+        taskStatusMap,
+        taskTypeMap,
+        persons,
+        production
+      }
     )
   },
 
@@ -631,9 +641,10 @@ const actions = {
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
     const production = rootGetters.currentProduction
+    const persons = rootGetters.people
     const sorting = sortInfo ? [sortInfo] : []
     commit(CHANGE_ASSET_SORT, {
-      taskStatusMap, taskTypeMap, taskMap, production, sorting
+      taskStatusMap, taskTypeMap, taskMap, production, persons, sorting
     })
   }
 }
@@ -1091,12 +1102,18 @@ const mutations = {
   },
 
   [CHANGE_ASSET_SORT] (state, {
-    taskStatusMap, taskTypeMap, taskMap, production, sorting
+    taskStatusMap, taskTypeMap, taskMap, production, persons, sorting
   }) {
     const assetSearch = state.assetSearchText
     state.assetSorting = sorting
     helpers.buildResult(state, {
-      assetSearch, taskStatusMap, taskTypeMap, taskMap, production, sorting
+      assetSearch,
+      taskStatusMap,
+      taskTypeMap,
+      taskMap,
+      production,
+      persons,
+      sorting
     })
   },
 

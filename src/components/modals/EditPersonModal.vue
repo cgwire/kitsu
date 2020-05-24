@@ -152,7 +152,8 @@ export default {
         { label: 'user', value: 'user' },
         { label: 'manager', value: 'manager' },
         { label: 'admin', value: 'admin' },
-        { label: 'client', value: 'client' }
+        { label: 'client', value: 'client' },
+        { label: 'vendor', value: 'vendor' }
       ],
       activeOptions: [
         { label: this.$t('main.yes'), value: 'true' },

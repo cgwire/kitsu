@@ -3,7 +3,7 @@ import {
   indexSearch
 } from './indexing'
 
-const EQUAL_REGEX = /([^ ]*)=([^ ]*)|\[([^[]*)\]=([^ ]*)/g
+const EQUAL_REGEX = /([^ ]*)=\[([^[]*)\]|([^ ]*)=([^ ]*)|\[([^[]*)\]=([^ ]*)/g
 
 /*
  * Look in the search query for task type filter like anim=wip.
@@ -15,6 +15,7 @@ export const applyFilters = (entries, filters, taskMap) => {
   const isExclusion = { exclusion: true }
   const isDescriptor = { descriptor: true }
   const isAvatar = { thumbnail: true }
+  const isAssignedTo = { assignedto: true }
 
   if (filters && filters.length > 0) {
     return entries.filter((entry) => {
@@ -57,6 +58,15 @@ export const applyFilters = (entries, filters, taskMap) => {
             entry.preview_file_id !== undefined &&
             entry.preview_file_id !== null
           isOk = filter.excluding ? !hasAvatar : hasAvatar
+        } else if (isAssignedTo[filter.type]) {
+          isOk = false
+          if (entry.tasks) {
+            entry.tasks.forEach((taskId) => {
+              task = taskMap[taskId]
+              isOk = isOk || task.assignees.includes(filter.personId)
+            })
+          }
+          if (filter.excluding) isOk = !isOk
         }
       })
       return isOk
@@ -107,13 +117,17 @@ export const getExcludingKeyWords = (queryText) => {
  * * exclusion filters
  */
 export const getFilters = (
-  entryIndex, taskTypes, taskStatuses, descriptors, query
+  entryIndex, taskTypes, taskStatuses, descriptors, persons, query
 ) => {
   let filters = getTaskTypeFilters(taskTypes, taskStatuses, query)
   const descFilters = getDescFilters(descriptors, query)
+  const assignedToFilters = getAssignedToFilters(persons, query)
   const thumbnailFilters = getThumbnailFilters(query) || []
   const excludingKeywords = getExcludingKeyWords(query) || []
-  filters = filters.concat(descFilters).concat(thumbnailFilters)
+  filters = filters
+    .concat(descFilters)
+    .concat(thumbnailFilters)
+    .concat(assignedToFilters)
   excludingKeywords.forEach((keyword) => {
     const excludedMap = {}
     const excludedEntries = indexSearch(entryIndex, [keyword]) || []
@@ -161,13 +175,14 @@ export const getTaskTypeFilters = (
 
   const results = []
   const rgxMatches = queryText.match(EQUAL_REGEX)
-  const taskTypeNameIndex = buildNameIndex(taskTypes, false)
-  const taskStatusShortNameIndex = {}
-  taskStatuses.forEach((taskStatus) => {
-    taskStatusShortNameIndex[taskStatus.short_name.toLowerCase()] = taskStatus
-  })
 
   if (rgxMatches) {
+    const taskTypeNameIndex = buildNameIndex(taskTypes, false)
+    const taskStatusShortNameIndex = {}
+    taskStatuses.forEach((taskStatus) => {
+      const shortName = taskStatus.short_name.toLowerCase()
+      taskStatusShortNameIndex[shortName] = taskStatus
+    })
     rgxMatches.forEach((rgxMatch) => {
       const pattern = rgxMatch.split('=')
       let value = pattern[1]
@@ -214,9 +229,9 @@ export const getDescFilters = (descriptors, queryText) => {
 
   const results = []
   const rgxMatches = queryText.match(EQUAL_REGEX)
-  const descriptorNameIndex = buildNameIndex(descriptors, false)
 
   if (rgxMatches) {
+    const descriptorNameIndex = buildNameIndex(descriptors, false)
     rgxMatches.forEach((rgxMatch) => {
       const pattern = rgxMatch.split('=')
       let value = pattern[1]
@@ -235,6 +250,45 @@ export const getDescFilters = (descriptors, queryText) => {
           type: 'descriptor',
           excluding
         })
+      }
+    })
+  }
+  return results
+}
+
+/*
+ * Extract person filters (like size=big or size=small) from given
+ * query.
+ */
+export const getAssignedToFilters = (persons, queryText) => {
+  if (!queryText) return []
+
+  const results = []
+  const rgxMatches = queryText.match(EQUAL_REGEX)
+  if (rgxMatches) {
+    rgxMatches.forEach((rgxMatch) => {
+      const personIndex = new Map()
+      persons.forEach(person => {
+        const name = person.name.toLowerCase()
+        personIndex.set(name, person)
+      })
+      const pattern = rgxMatch.split('=')
+      if (pattern[0] === 'assignedto') {
+        let value = pattern[1]
+        if (value[0] === '[') {
+          value = value.substring(1, value.length - 1)
+        }
+        const excluding = value.startsWith('-')
+        if (excluding) value = value.substring(1)
+        const person = personIndex.get(value.toLowerCase())
+        if (person) {
+          results.push({
+            personId: person.id,
+            value,
+            type: 'assignedto',
+            excluding
+          })
+        }
       }
     })
   }
