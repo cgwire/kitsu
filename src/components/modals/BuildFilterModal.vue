@@ -94,11 +94,11 @@
         </div>
       </div>
 
-      <h3 class="subtitle">
+      <h3 class="subtitle" v-if="!isCurrentUserVendor">
         {{ $t('entities.build_filter.assignation') }}
       </h3>
 
-      <div class="flexrow">
+      <div class="flexrow" v-if="!isCurrentUserVendor">
         <combobox
           class="flexrow-item"
           :options="assignation.options"
@@ -227,6 +227,7 @@ export default {
       'assetSearchText',
       'assetValidationColumns',
       'currentProduction',
+      'isCurrentUserVendor',
       'people',
       'personMap',
       'shotMetadataDescriptors',
