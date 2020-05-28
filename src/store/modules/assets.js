@@ -991,18 +991,21 @@ const mutations = {
     production
   }) {
     const assets = cache.result
-    state.displayedAssets = assets.slice(
-      0,
-      state.displayedAssets.length + PAGE_SIZE
-    )
-    state.assetFilledColumns = getFilledColumns(state.displayedAssets)
-    const previousX = state.displayedAssets.length - PAGE_SIZE
-    const maxX = state.displayedAssets.length
-    const maxY = state.nbValidationColumns
-    if (previousX >= 0) {
-      state.assetSelectionGrid = appendSelectionGrid(
-        state.assetSelectionGrid, previousX, maxX, maxY
+    const newLength = state.displayedAssets.length + PAGE_SIZE
+    if (newLength < assets.length + PAGE_SIZE) {
+      state.displayedAssets = assets.slice(
+        0,
+        state.displayedAssets.length + PAGE_SIZE
       )
+      state.assetFilledColumns = getFilledColumns(state.displayedAssets)
+      const previousX = state.displayedAssets.length - PAGE_SIZE
+      const maxX = state.displayedAssets.length
+      const maxY = state.nbValidationColumns
+      if (previousX >= 0) {
+        state.assetSelectionGrid = appendSelectionGrid(
+          state.assetSelectionGrid, previousX, maxX, maxY
+        )
+      }
     }
   },
 
