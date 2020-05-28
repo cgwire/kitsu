@@ -186,7 +186,7 @@
           }"
           :title="$t('playlists.actions.annotation_text')"
           @click="onTypeClicked"
-          v-if="false && !readOnly && isFullScreen()"
+          v-if="!readOnly && isFullScreen()"
         >
           <type-icon class="icon" />
         </button>

@@ -93,7 +93,7 @@
       <button
         class="button flexrow-item"
         @click="onDeleteClicked"
-        v-if="isFullScreenEnabled && !readOnly"
+        v-if="fullScreen && !readOnly"
       >
         <x-icon class="icon" />
       </button>
@@ -120,7 +120,7 @@
         }"
         :title="$t('playlists.actions.annotation_text')"
         @click="onTypeClicked"
-        v-if="false && !readOnly && isFullScreenEnabled"
+        v-if="!readOnly && fullScreen"
       >
         <type-icon class="icon" />
       </button>
@@ -155,7 +155,7 @@
           active: isDrawing
         }"
         @click="onPencilAnnotateClicked"
-        v-if="isFullScreenEnabled && !readOnly"
+        v-if="fullScreen && !readOnly"
       >
         <edit-2-icon class="icon" />
       </button>
@@ -385,6 +385,8 @@ export default {
 
         fabricCanvas.off('object:added', this.stackAddAction)
         fabricCanvas.on('object:added', this.stackAddAction)
+        fabricCanvas.off('object:moved', this.saveAnnotations)
+        fabricCanvas.on('object:moved', this.saveAnnotations)
         fabricCanvas.on('mouse:up', () => {
           if (this.isDrawing) {
             this.clearUndoneStack()
@@ -647,9 +649,7 @@ export default {
             width: obj.width,
             height: obj.height,
             scaleX: obj.scaleX * scaleMultiplierX,
-            scaleY: obj.scaleY * scaleMultiplierY,
-            lockMovementX: true,
-            lockMovementY: true
+            scaleY: obj.scaleY * scaleMultiplierY
           }
           if (obj.type === 'path') {
             let strokeMultiplier = 1
@@ -689,6 +689,17 @@ export default {
                 fontSize: obj.fontSize
               }
             )
+            text.setControlsVisibility({
+              mt: false,
+              mb: false,
+              ml: false,
+              mr: false,
+              bl: false,
+              br: false,
+              tl: false,
+              tr: false,
+              mtr: false
+            })
             this.fabricCanvas.add(text)
           }
         })

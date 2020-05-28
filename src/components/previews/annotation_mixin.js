@@ -113,8 +113,13 @@ export const annotationMixin = {
 
     stackAddAction ({ target }) {
       this.$options.doneActionStack.push({ type: 'add', obj: target })
-      target.lockMovementX = true
-      target.lockMovementY = true
+      target.lockScalingX = true
+      target.lockScalingY = true
+      target.rotation = true
+      if (!['text', 'i-text'].includes(target.type)) {
+        target.lockMovementX = true
+        target.lockMovementY = true
+      }
     },
 
     undoLastAction () {
@@ -178,10 +183,10 @@ export const annotationMixin = {
       const offsetCanvas = canvas.getBoundingClientRect()
       const posX = event.clientX - offsetCanvas.x
       const posY = event.clientY - offsetCanvas.y
-      const baseHeight = 140
-      let fontSize = 8
-      if (this.canvas.height > baseHeight) {
-        fontSize = fontSize * (this.canvas.height / baseHeight)
+      const baseHeight = 320
+      let fontSize = 12
+      if (this.fabricCanvas.getHeight() > baseHeight) {
+        fontSize = fontSize * (this.fabricCanvas.getHeight() / baseHeight)
       }
       const fabricText = new fabric.IText('Type…', {
         left: posX,

@@ -354,7 +354,6 @@
         :title="$t('playlists.actions.annotation_text')"
         @click="onTypeClicked"
         icon="type"
-        v-if="false"
       />
 
       <transition name="slide">
@@ -1732,6 +1731,17 @@ export default {
                 fontSize: obj.fontSize
               }
             )
+            text.setControlsVisibility({
+              mt: false,
+              mb: false,
+              ml: false,
+              mr: false,
+              bl: false,
+              br: false,
+              tl: false,
+              tr: false,
+              mtr: false
+            })
             this.fabricCanvas.add(text)
           }
         })
@@ -1745,6 +1755,7 @@ export default {
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)
       const entity = this.entityList[this.playingEntityIndex]
+      if (!entity) return
       let preview = {
         id: entity.preview_file_id,
         task_id: entity.preview_file_task_id,

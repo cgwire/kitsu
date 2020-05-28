@@ -209,6 +209,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetMetadataDescriptors',
       'isTVShow',
       'shotMetadataDescriptors'
     ]),
@@ -221,9 +222,17 @@ export default {
       }
     },
 
+    metadataDescriptors () {
+      if (this.$route.path.indexOf('assets') > 0) {
+        return this.assetMetadataDescriptors
+      } else {
+        return this.shotMetadataDescriptors
+      }
+    },
+
     columnsAllowed () {
       const list = [...this.columns]
-      this.shotMetadataDescriptors.forEach(item => {
+      this.metadataDescriptors.forEach(item => {
         if (!list.includes(item.name)) {
           list.push(item.name)
         }
@@ -290,6 +299,7 @@ export default {
         return true
       }
     },
+
     existingData (index) {
       const csv = this.parsedCsv[index + 1]
       const db = this.database
@@ -360,6 +370,7 @@ export default {
   }
 }
 .render-container {
+  max-height: 500px;
   overflow: auto;
   .render-headers {
     .field {

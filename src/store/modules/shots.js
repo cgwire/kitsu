@@ -1603,19 +1603,22 @@ const mutations = {
     production
   }) {
     const shots = cache.result
-    state.displayedShots = shots.slice(
-      0,
-      state.displayedShots.length + PAGE_SIZE
-    )
-    state.shotFilledColumns = getFilledColumns(state.displayedShots)
-
-    const previousX = state.displayedShots.length - PAGE_SIZE
-    const maxX = state.displayedShots.length
-    const maxY = state.nbValidationColumns
-    if (previousX >= 0) {
-      state.shotSelectionGrid = appendSelectionGrid(
-        state.shotSelectionGrid, previousX, maxX, maxY
+    const newLength = state.displayedShots.length + PAGE_SIZE
+    if (newLength < shots.length + PAGE_SIZE) {
+      state.displayedShots = shots.slice(
+        0,
+        state.displayedShots.length + PAGE_SIZE
       )
+      state.shotFilledColumns = getFilledColumns(state.displayedShots)
+
+      const previousX = state.displayedShots.length - PAGE_SIZE
+      const maxX = state.displayedShots.length
+      const maxY = state.nbValidationColumns
+      if (previousX >= 0) {
+        state.shotSelectionGrid = appendSelectionGrid(
+          state.shotSelectionGrid, previousX, maxX, maxY
+        )
+      }
     }
   },
 
