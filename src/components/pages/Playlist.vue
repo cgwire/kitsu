@@ -558,7 +558,10 @@ export default {
       if (
         this.displayedShots.length === 0 ||
         this.displayedShots[0].project_id !== this.currentProduction.id ||
-        this.displayedShots[0].episode_id !== this.currentEpisode.id
+        (
+          this.currentEpisode &&
+          this.displayedShots[0].episode_id !== this.currentEpisode.id
+        )
       ) {
         if (this.currentEpisode &&
             (this.currentEpisode.id === 'main' ||
@@ -962,9 +965,13 @@ export default {
     },
 
     resetSorting () {
+      let order = 1
+      if (['created_at', 'updated_at'].includes(this.currentSort)) {
+        order = -1
+      }
       this.sortedPlaylists = [...this.playlists]
         .sort(
-          firstBy(this.currentSort)
+          firstBy(this.currentSort, order)
             .thenBy('name')
         )
     },
