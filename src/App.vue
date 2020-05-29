@@ -792,6 +792,10 @@ a:hover {
   margin-bottom: 0;
 }
 
+.mb2 {
+  margin-bottom: 2em;
+}
+
 .filler {
   flex: 1;
 }
