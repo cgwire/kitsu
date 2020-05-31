@@ -18,6 +18,10 @@ export default {
     ActionTopbar,
     Topbar,
     Sidebar
+  },
+
+  mounted () {
+    this.$socket.connect()
   }
 }
 </script>

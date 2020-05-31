@@ -16,11 +16,12 @@ import VueDragDrop from 'vue-drag-drop'
 import VueLazyload from 'vue-lazyload'
 import vuescroll from 'vue-scroll'
 import VueTextareaAutosize from 'vue-textarea-autosize'
-import VueWebsocket from 'vue-websocket'
 import VTooltip from 'v-tooltip'
+import VueWebsocket from 'vue-websocket'
 
 import 'v-autocomplete/dist/v-autocomplete.css'
 
+Vue.use(VueWebsocket, '/events')
 Vue.config.productionTip = false
 Vue.use(Autocomplete)
 Vue.use(Meta)
@@ -32,7 +33,6 @@ Vue.use(VueLazyload)
 Vue.use(vuescroll)
 Vue.use(VueDragDrop)
 Vue.use(VueTextareaAutosize)
-Vue.use(VueWebsocket, '/events')
 
 // Make the current route part of the main state.
 sync(store, router)
