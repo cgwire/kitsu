@@ -1200,7 +1200,7 @@ export default {
   color: $grey-strong;
 
   &.for-client {
-    background: $purple-light;
+    background: $light-purple;
     border: 1px solid $purple;
   }
 }

@@ -1,119 +1,131 @@
 <template>
-<div class="page asset">
-  <div class="page-header flexrow">
-    <router-link
-      class="flexrow-item has-text-centered back-link"
-      :to="assetsPath"
-    >
-      <chevron-left-icon />
-    </router-link>
-    <entity-thumbnail
-      class="asset-thumbnail flexrow-item"
-      :entity="currentAsset"
-      :with-link="false"
-      v-if="currentAsset"
-    />
-    <div class="flexrow-item">
-      <page-title :text="title" class="entity-title" />
-    </div>
-    <div class="flexrow-item">
-      <button-simple
-        icon="edit"
-        @click="modals.edit = true"
+<div class="columns fixed-page asset">
+  <div class="column main-column">
+    <div class="page-header flexrow">
+      <router-link
+        class="flexrow-item has-text-centered back-link"
+        :to="assetsPath"
+      >
+        <chevron-left-icon />
+      </router-link>
+      <entity-thumbnail
+        class="asset-thumbnail flexrow-item"
+        :entity="currentAsset"
+        :with-link="false"
+        v-if="currentAsset"
       />
-    </div>
-  </div>
-
-  <div class="columns">
-    <div class="column task-column">
-      <page-subtitle :text="$t('assets.tasks')" />
-      <entity-task-list
-        class="task-list"
-        :entries="currentAsset ? currentAsset.tasks : []"
-        :is-loading="!currentAsset"
-        :is-error="false"
-      />
-    </div>
-    <div class="column">
-      <page-subtitle :text="$t('main.info')" />
-      <div class="table-body">
-        <table class="table" v-if="currentAsset">
-          <tbody>
-            <tr>
-              <td class="field-label">{{ $t('assets.fields.description') }}</td>
-              <description-cell
-                :entry="currentAsset"
-                :full="true"
-              />
-            </tr>
-            <tr
-              :key="descriptor.id"
-              v-for="descriptor in assetMetadataDescriptors"
-            >
-              <td class="field-label">{{ descriptor.name }}</td>
-              <td>
-                {{ currentAsset.data ? currentAsset.data[descriptor.field_name] : '' }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="flexrow-item">
+        <page-title :text="title" class="entity-title" />
+      </div>
+      <div class="flexrow-item">
+        <button-simple
+          icon="edit"
+          @click="modals.edit = true"
+        />
       </div>
     </div>
-  </div>
 
-  <div class="asset-casted-in">
-    <page-subtitle :text="$t('assets.cast_in')" />
-    <div v-if="currentAsset">
-      <div
-        v-if="currentAsset.castInShotsBySequence &&
-              currentAsset.castInShotsBySequence[0].length > 0"
-      >
-        <div
-          class="sequence-shots"
-          :key="sequenceShots.length > 0 ? sequenceShots[0].sequence_name : ''"
-          v-for="sequenceShots in currentAsset.castInShotsBySequence"
-        >
-          <div class="shot-sequence">
-            {{ sequenceShots.length > 0 ? sequenceShots[0].sequence_name : '' }}
-          </div>
-          <div class="shot-list">
-            <router-link
-              class="shot-link"
-              :key="shot.shot_id"
-              :to="{
-                name: 'shot',
-                params: {
-                  production_id: currentProduction.id,
-                  shot_id: shot.shot_id
-                }
-              }"
-              v-for="shot in sequenceShots"
-            >
-              <entity-thumbnail
-                :entity="shot"
-                :square="true"
-                :empty-width="100"
-                :empty-height="100"
-                :with-link="false"
-              />
-              <div>
-                <span>{{ shot.shot_name }}</span>
-                <span v-if="shot.nb_occurences > 1">
-                  ({{ shot.nb_occurences }})
-                </span>
-              </div>
-            </router-link>
-          </div>
+    <div class="flexrow infos">
+      <div class="flexrow-item">
+        <page-subtitle :text="$t('assets.tasks')" />
+        <entity-task-list
+          class="task-list"
+          :entries="currentAsset ? currentAsset.tasks : []"
+          :is-loading="!currentAsset"
+          :is-error="false"
+          @task-selected="onTaskSelected"
+        />
+      </div>
+      <div class="flexrow-item">
+        <page-subtitle :text="$t('main.info')" />
+        <div class="table-body">
+          <table class="table" v-if="currentAsset">
+            <tbody>
+              <tr>
+                <td class="field-label">{{ $t('assets.fields.description') }}</td>
+                <description-cell
+                  :entry="currentAsset"
+                  :full="true"
+                />
+              </tr>
+              <tr
+                :key="descriptor.id"
+                v-for="descriptor in assetMetadataDescriptors"
+              >
+                <td class="field-label">{{ descriptor.name }}</td>
+                <td>
+                  {{ currentAsset.data ? currentAsset.data[descriptor.field_name] : '' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-      <div v-else>
-        {{ $t('assets.no_cast_in') }}
-      </div>
     </div>
-    <table-info
-      :is-loading="castIn.isLoadin"
-      :is-error="castIn.isError"
-      v-else
+
+    <div class="asset-casted-in">
+      <page-subtitle :text="$t('assets.cast_in')" />
+      <div v-if="currentAsset">
+        <div
+          v-if="currentAsset.castInShotsBySequence &&
+                currentAsset.castInShotsBySequence[0].length > 0"
+        >
+          <div
+            class="sequence-shots"
+            :key="sequenceShots.length > 0 ? sequenceShots[0].sequence_name : ''"
+            v-for="sequenceShots in currentAsset.castInShotsBySequence"
+          >
+            <div class="shot-sequence">
+              {{ sequenceShots.length > 0 ? sequenceShots[0].sequence_name : '' }}
+            </div>
+            <div class="shot-list">
+              <router-link
+                class="shot-link"
+                :key="shot.shot_id"
+                :to="{
+                  name: 'shot',
+                  params: {
+                    production_id: currentProduction.id,
+                    shot_id: shot.shot_id
+                  }
+                }"
+                v-for="shot in sequenceShots"
+              >
+                <entity-thumbnail
+                  :entity="shot"
+                  :square="true"
+                  :empty-width="100"
+                  :empty-height="100"
+                  :with-link="false"
+                />
+                <div>
+                  <span>{{ shot.shot_name }}</span>
+                  <span v-if="shot.nb_occurences > 1">
+                    ({{ shot.nb_occurences }})
+                  </span>
+                </div>
+              </router-link>
+            </div>
+          </div>
+        </div>
+        <div v-else>
+          {{ $t('assets.no_cast_in') }}
+        </div>
+      </div>
+      <table-info
+        :is-loading="castIn.isLoadin"
+        :is-error="castIn.isError"
+        v-else
+      />
+    </div>
+  </div>
+
+  <div
+    class="column side-column"
+    v-if="currentTask"
+  >
+    <task-info
+      :task="currentTask"
     />
   </div>
 
@@ -141,6 +153,7 @@ import EntityThumbnail from '../widgets/EntityThumbnail'
 import PageTitle from '../widgets/PageTitle'
 import PageSubtitle from '../widgets/PageSubtitle'
 import TableInfo from '../widgets/TableInfo'
+import TaskInfo from '../sides/TaskInfo'
 
 export default {
   name: 'asset',
@@ -153,12 +166,14 @@ export default {
     EntityTaskList,
     PageSubtitle,
     PageTitle,
-    TableInfo
+    TableInfo,
+    TaskInfo
   },
 
   data () {
     return {
       currentAsset: null,
+      currentTask: null,
       castIn: {
         isLoading: false,
         isError: false
@@ -281,6 +296,10 @@ export default {
           }
         }
       })
+    },
+
+    onTaskSelected (task) {
+      this.currentTask = task
     }
   },
 
@@ -297,22 +316,25 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .page {
-  background: $dark-grey-light;
-  padding-bottom: 1em;
-}
+.dark {
+  .page {
+    background: $dark-grey-light;
+    padding-bottom: 1em;
+  }
 
-.dark .page-header,
-.dark .asset-casted-in,
-.dark .column {
-  background: #46494F;
-  border-color: $dark-grey;
-  box-shadow: 0px 0px 6px #333;
-}
+  .page-header,
+  .asset-casted-in,
+  .infos,
+  .column {
+    background: #46494F;
+    border-color: $dark-grey;
+    box-shadow: 0px 0px 6px #333;
+  }
 
-.dark .task-list,
-.dark .table-body {
-  border: 1px solid $dark-grey;
+  .task-list,
+  .table-body {
+    border: 1px solid $dark-grey;
+  }
 }
 
 h2.subtitle {
@@ -337,20 +359,18 @@ h2.subtitle {
   margin-right: 1em;
 }
 
-.columns {
+.infos {
+  padding: 1em 1em 1em 1em;
+  background: white;
+  box-shadow: 0px 0px 6px #E0E0E0;
+  margin-bottom: 1.5em;
   margin-left: 1em;
   margin-right: 1em;
-}
 
-.column {
-  background: white;
-  padding: 1em;
-  box-shadow: 0px 0px 6px #E0E0E0;
-  margin: 0;
-}
-
-.column:first-child {
-  margin-right: 1em;
+  .flexrow-item {
+    align-self: flex-start;
+    flex: 1;
+  }
 }
 
 .asset-casted-in {
@@ -411,11 +431,6 @@ h2.subtitle {
 
 .back-link {
   padding-top: 3px;
-}
-
-.task-list,
-.table-body {
-  border: 1px solid $light-grey;
 }
 
 .task-list {

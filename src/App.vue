@@ -477,49 +477,6 @@ body {
     color: #DDD;
   }
 
-  .table-header tr:hover {
-    background: transparent;
-  }
-
-  .table-header,
-  .table-body .table tr:nth-child(odd) {
-    color: $white-grey;
-    background: #36393F;
-  }
-
-  .table-body .table tr:nth-child(even) {
-    color: $white-grey;
-    background: #46494F;
-  }
-
-  .table-header th {
-    color: $white-grey;
-    border-color: #666666;
-  }
-
-  .table-body td {
-    border-color: #25282E;
-  }
-
-  .table-body .table tr:hover {
-    color: $white-grey;
-    background: #5E6169;
-  }
-
-  .table tr.type-header {
-    border: 1px solid #36393F;
-    font-size: 1.1em;
-  }
-
-  .table tr.type-header:hover {
-    background: #36393F;
-  }
-
-  .table tr.type-header td {
-    font-weight: bold;
-    padding-left: 0.3em;
-  }
-
   .splitted-table {
     border-left: 1px solid #36393F;
 
@@ -1089,12 +1046,8 @@ textarea.input:focus {
   margin-top: 1em;
 }
 
-.table-body .table tr:nth-child(even) {
-  background: #F6F6F6;
-}
-
 .table-body .table tr:hover {
-  background: $light-green-lightest;
+  background: $light-purple;
 }
 
 .table tr.type-header {
@@ -1284,10 +1237,11 @@ tbody:last-child .empty-line:last-child {
     }
   }
 
-  &.selected {
+  &.datatable-row.selected {
     &,
     & .datatable-row-header,
     &:hover,
+    &:hover .datatable-row-header--no-bd,
     &:hover .datatable-row-header {
       background-color: var(--background-selected);
     }
