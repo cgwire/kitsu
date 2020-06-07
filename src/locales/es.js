@@ -24,7 +24,8 @@ export default {
       name: 'Nombre',
       production: 'Prod',
       time_spent: 'Tiempo',
-      type: 'Tipo'
+      type: 'Tipo',
+      hidden_from_client: 'Mostrado al cliente'
     }
   },
 
@@ -44,15 +45,23 @@ export default {
 
   breakdown: {
     all_assets: 'Todos los assets disponibles',
+    edit_label: 'Cambiar la etiqueta de asset',
     empty: 'Fundición en vacío',
-    title: 'Casting'
+    label: 'Etiqueta',
+    title: 'Casting',
+    options: {
+      fixed: 'fijo',
+      animate: 'animado'
+    }
   },
 
   comments: {
-    add_comment: 'Añadir un comentario....',
+    add_attachment: 'Añadir un anexo...',
+    add_comment: 'Añadir un comentario...',
     add_checklist: 'Agregar lista de verificación',
     add_preview: 'Adjuntar vista previa',
     change_preview: 'Cambiar la vista previa',
+    choose: 'Choose',
     comment_from_client: 'Comentario del cliente',
     empty_text: 'Este comentario está vacío',
     edit_title: 'Editar cómo',
@@ -68,6 +77,7 @@ export default {
     validated: 'Validado!',
     validation_required: 'Validación Requerida',
     set_status_to: 'Fijar el status en',
+    task_placeholder: 'Nuevo articulo...',
     fields: {
       text: 'texto'
     }
@@ -94,6 +104,39 @@ export default {
     }
   },
 
+  entities: {
+    build_filter: {
+      assignation: 'Asignación',
+      assignation_exists_for: 'La asignación existe para',
+      assigned_to: 'Asignado a',
+      descriptor: 'Metadatos',
+      equal: 'Igual',
+      no_assignation_for: 'No existe ninguna asignación para',
+      no_filter: 'No hay filtro',
+      not_equal: 'No igual',
+      not_assigned_to: 'No asignado a',
+      status: 'Estado de la tarea',
+      thumbnail: 'Presencia de la miniatura',
+      title: 'Filtro en...',
+      with_thumbnail: 'Con la miniatura',
+      without_thumbnail: 'Sin_imagen_pulgada'
+    },
+    thumbnails: {
+      error: 'Un error ocurrió mientras subía las miniaturas',
+      explaination: 'Añadir una miniatura requiere establecer una nueva vista previa. Para establecer varias miniaturas al mismo tiempo, debe elegir primero un tipo de tarea que se utilizará para crear las nuevas vistas previas. Las miniaturas se establecerán desde esta nueva vista previa',
+      explaination_two: 'Entonces tienes que seleccionar los archivos que quieres subir. Para encontrar las entidades correctas, los nombres de los archivos deben coincidir con el siguiente patrón:',
+      shots_pattern: 'NombreDeSecuencia NombreDeDisparo, por ejemplo SQ01_SH01.',
+      assets_pattern: 'Nombre de asset del tipo de asset, por ejemplo, Environment_Forest.',
+      select_files: 'Seleccion archivos',
+      selected_files: 'Archivos seleccionados',
+      select_task_type: 'Seleccionar tipo de tarea',
+      title: 'Add Thumbnails',
+      undefined: 'indefinido',
+      undefined_pattern: 'Indefinido',
+      upload: 'Agregar miniaturas'
+    }
+  },
+
   episodes: {
     all_episodes: 'Todos los episodios',
     delete_error: 'Se ha producido un error al borrar este episodio. Es probable que haya datos vinculados a él. ¿Estás seguro de que este episodio no tiene una secuencia vinculada a él?',
@@ -112,12 +155,15 @@ export default {
 
   keyboard: {
     altdown: 'Mueve la selección de una tarea hacia abajo',
+    altj: 'Seleccione la vista previa',
+    altk: 'Seleccione el siguiente preview',
     altleft: 'Mueve la selección de una tarea a la izquierda',
     altright: 'Mueve la selección de una tarea a la derecha',
     altup: 'Mueve la selección de una tarea hacia arriba',
     annotations: 'Anotaciones',
     draw: 'Activar el modo de dibujo',
     navigation: 'Navegación',
+    playlist_navigation: 'Navegación de las Paylists',
     redo: 'Redo',
     remove_annotation: 'Eliminar anotación',
     undo: 'Undo',
@@ -125,10 +171,12 @@ export default {
   },
 
   login: {
+    back_to_login: 'Voler al login',
     forgot_password: '¿Olvidó su contraseña?',
     login: 'Iniciar sesión',
     login_failed: 'Error de inicio de sesión, por favor verifique sus credenciales',
     login_page: 'Cancelar',
+    redirecting: 'Redirigiendo en {secondsLeft} segundos',
     reset_change_password: 'Cambiar contraseña',
     reset_change_password_form_failed: 'Hay un problema con la contraseña que dio. Por favor, verifique que tenga al menos 7 caracteres y que ambas contraseñas coincidan.',
     reset_change_password_failed: 'Error al cambiar la contraseña. Por favor, reinicie todo el procedimiento de nuevo.',
@@ -150,6 +198,7 @@ export default {
     about: 'Acerca de',
     add: 'añadir',
     all: 'Todos',
+    all_assets: 'Todos assets',
     admin: 'Admin',
     cancel: 'Cancelar',
     clear_selection: 'Borrar la selección actual',
@@ -166,6 +215,7 @@ export default {
     edit: 'Tratar',
     empty_comment: 'Vaciar comentario',
     end_date: 'Fecha de finalización',
+    files_selected: 'archivos seleccionados',
     for: 'Para',
     go_productions: 'Ir a producciones',
     history: 'trayectoria',
@@ -189,15 +239,39 @@ export default {
     start_date: 'Fecha de inicio',
     studio: 'Estudio',
     user: 'Usuario',
+    tutorials: 'Tutorials',
     white_theme: 'Tema Blanco',
     yes: 'Sí',
     csv: {
-      export_file: 'Exportación',
+      choose: 'Elige',
+      export_file: 'Exportar',
       error_upload: 'Se ha producido un error al cargar el archivo CSV.',
       import_file: 'Importar',
       import_title: 'Importar datos de un archivo CSV',
+      legend: 'Leyenda',
+      legend_ok: 'Datos reconocidos',
+      legend_ignored: 'Datos ignorados',
+      legend_missing: 'Datos perdidos',
+      legend_disabled: 'Datos que no serán actualizados ni creados',
+      legend_overwrite: 'Datos que serán actualizados',
+      paste: 'Pegar',
+      paste_code: 'Por favor, pegue aquí sus datos CSV:',
+      preview: 'See preview',
+      preview_episode_name: 'Nombre del episodio',
+      preview_title: 'Vista previa de sus datos importados',
+      preview_description: 'Sube un archivo .csv para llenar tu pizarra con posts',
+      preview_required: 'NB: Los encabezados deben ser incluidos como primera fila.',
+      preview_reupload: 'Subir de nuevo el archivo .CSV',
       required_fields: 'Su archivo CSV requiere las siguientes columnas',
-      select_file: 'Por favor, seleccione un archivo de una de sus carpetas:'
+      select_file: 'Por favor, seleccione un archivo de una de sus carpetas:',
+      tab_select_file: 'Subir un archivo CSV',
+      tab_paste_code: 'Pegar un dato CSV',
+      upload_file: 'Navegar',
+      unknown: 'Columna desconocida',
+      options: {
+        title: 'Opciones',
+        update: 'Actualizar los datos existentes'
+      }
     }
   },
 
@@ -207,6 +281,7 @@ export default {
     change_status: 'Status de modificación',
     create_tasks: 'Crear tareas',
     delete_tasks: 'Borrar medidas',
+    generate_playlists: 'Generar playlists',
     run_custom_action: 'Ejecutar una acción personalizada',
     set_estimations: 'Fijar estimaciones'
   },
@@ -288,16 +363,20 @@ export default {
       admin: 'Director del estudio',
       client: 'Mandante',
       manager: 'Supervisor',
-      user: 'Artista CG'
+      user: 'Artista CG',
+      undefined: '',
+      vendor: 'Proveedor'
     }
   },
 
   playlists: {
     add_selection: 'Añade la selección',
     add_shots: 'Añadir shots',
+    add_assets: 'Añadir assets',
     add_sequence: 'Añadir secuencia completa',
     add_episode: 'Añadir episodio completa',
     add_movie: 'Añadir film completa',
+    building: 'Edificio',
     apply_task_type_change: 'Esto posicionará la última revisión para el tipo de tarea dada en todos los shots.',
     available_build: 'Construcciones disponibles',
     build_daily: 'Diario pendiente',
@@ -305,11 +384,13 @@ export default {
     build_mp4: 'Construir .mp4',
     client_playlist: 'Playlist clave',
     created_at: 'Creado en:',
-    created_title: 'Crear playlist',
+    create_title: 'Crear playlist',
+    create_for_selection: 'Crear una playlist para la selección',
     delete_text: '¿Está seguro de que desea eliminar {name} de su base de datos?',
     delete_error: 'Se ha producido un error al eliminar esta lista de reproducción.',
     download_zip: 'Descargar.zip',
     edit_title: 'Editar lista de reproducción',
+    failed: 'Fallido',
     for_client: 'El cliente',
     for_studio: 'El estudio',
     last_creation: 'Ultimas creaciones',
@@ -330,8 +411,35 @@ export default {
     updated_at: 'Actualizado en:',
     remove: 'quitar',
     fields: {
+      created_at: 'Creado en',
+      for_client: 'Par compartir con',
+      for_entity: 'Para la entidad',
       name: 'Nombre',
-      for_client: 'Par compartir con'
+      updated_at: 'Actualizado en'
+    },
+    actions: {
+      edit: 'Editar playlist',
+      delete: 'Borrar playlist',
+      fullscreen: 'Fullscreen',
+      download: 'Descargar…',
+      entity_list: 'Mostrar/ocultar lista de entidades',
+      comments: 'Mostrar/ocultar comentarios',
+      annotation: 'Anotación',
+      annotation_text: 'Doble clic en la vista previa para añadir algo de texto',
+      annotation_delete: 'Borrar anotación',
+      annotation_redo: 'Redo anotación',
+      annotation_undo: 'Deshacer anotación',
+      annotation_big: 'Grande',
+      annotation_medium: 'Medium',
+      annotation_small: 'Pequeña',
+      change_task_type: 'Cambiar el tipo de tarea',
+      split_screen: 'Split screen',
+      next_shot: 'Próxima shot',
+      previous_shot: 'Anterior shot',
+      next_frame: 'Próxima frame',
+      previous_frame: 'Anterior frame',
+      play: 'Jugar',
+      pause: 'Pausa'
     }
   },
 
@@ -418,7 +526,7 @@ export default {
     average: 'Promedio',
     count_label: 'Modo de conteo',
     detail_label: 'Nivel de detalle',
-    nombre_detalles: 'Nombre',
+    details_name: 'Nombre',
     details_seconds: 'Segundos',
     details_frames: 'Frames',
     month_label: 'Mes',
@@ -581,6 +689,7 @@ export default {
     change_preview: 'Cambiar la vista previa',
     change_priority: 'Cambiar la prioridad a:',
     clear_assignations: 'asignaciones claras',
+    comment_image: 'Adjunte una imagen a su comentario',
     create_for_selection: 'Crear tarea para cada celda vacía:',
     create_tasks: 'Añadir tareas',
     create_tasks_shot: 'Añadir tareas para las tomas actuales',
@@ -616,6 +725,7 @@ export default {
     preview: 'Previsualizaciones',
     previous: 'tarea previa',
     unsubscribe_notifications: 'Darse de baja de las notificaciones',
+    select_image_file: 'Por favor, selecciona la imagen de tu disco duro que quieres adjuntar a tu comentario:',
     set_estimations: 'Establecer estimaciones para las tareas seleccionadas:',
     set_preview: 'Establecer esta vista previa como miniatura',
     set_preview_error: 'Se ha producido un error al configurar la vista previa como miniatura.',
@@ -624,9 +734,9 @@ export default {
     show_assignations: 'Mostrar asignaciones',
     show_infos: 'Mostrar información adicional',
     subscribe_notifications: 'Suscribirse a las notificaciones',
-    validation: 'Validación',
     tasks: 'Tareas',
-    with_comment: 'Con un comentario....',
+    validation: 'Validación',
+    with_comment: 'Con un comentario...',
     fields: {
       asset_type: 'Tipo de asset',
       assignees: 'Asignados',
@@ -644,6 +754,7 @@ export default {
       real_end_date: 'Fecha de validación',
       real_start_date: 'Fecha WIP',
       retake_count: 'Reasignaciones',
+      start_date: 'Fecha de inicio',
       sequence: 'Secuencia',
       task_status: 'Estado',
       task_status_short_name: 'Estado',

@@ -21,6 +21,7 @@ export default {
     fields: {
       description: 'Beschreibung',
       episode: 'Ep.',
+      hidden_from_client: 'Vor dem Kunden verborgen',
       name: 'Name',
       production: 'Produkt',
       time_spent: 'Zeit',
@@ -44,12 +45,19 @@ export default {
 
   breakdown: {
     all_assets: 'Alle verfügbaren Vermögenswerte',
+    edit_label: 'Etikett bearbeiten',
     empty: 'Leerguss',
-    title: 'Aufschlüsselung'
+    label: 'Etikett',
+    title: 'Aufschlüsselung',
+    options: {
+      fixed: 'festgelegt',
+      animate: 'animierte'
+    }
   },
 
   comments: {
-    add_comment: 'Einen Kommentar hinzufügen.....',
+    add_attachment: 'Anhang hinzufügen',
+    add_comment: 'Einen Kommentar hinzufügen...',
     add_checklist: 'Checkliste hinzufügen',
     add_preview: 'Vorschau anhängen',
     comment_from_client: 'Kommentar von die Kunde',
@@ -63,6 +71,7 @@ export default {
     pin: 'Pin',
     pinned: 'Pinned',
     revision: 'Überarbeitung',
+    task_placeholder: 'Neuer Artikel',
     text: 'Text',
     unpin: 'Unbekannt',
     validated: 'Validiert!',
@@ -94,6 +103,40 @@ export default {
     }
   },
 
+  entities: {
+    build_filter: {
+      assignation: 'Zuweisung',
+      assignation_exists_for: 'Zuordnungen existieren für',
+      assigned_to: 'Zugewiesen an',
+      descriptor: 'Metadaten',
+      equal: 'Gleich',
+      no_assignation_for: 'Keine Zuordnung vorhanden für',
+      no_filter: 'Kein Filter',
+      not_equal: 'Nicht gleich',
+      not_assigned_to: 'Nicht zugeordnet zu',
+      status: 'Aufgabenstatus',
+      thumbnail: 'Anwesenheit von Miniaturbildern',
+      Titel: 'Filter an...',
+      with_thumbnail: 'Mit Vorschaubild',
+      without_thumbnail: 'Ohne Miniaturansicht',
+      title: 'Filter on...'
+    },
+    thumbnails: {
+      error: 'Beim Hochladen von Miniaturbildern ist ein Fehler aufgetreten',
+      explaination: 'Das Hinzufügen einer Miniaturansicht erfordert die Einstellung einer neuen Vorschau. Um mehrere Miniaturansichten gleichzeitig festzulegen, müssen Sie zunächst einen Aufgabentyp auswählen, der für die Erstellung der neuen Vorschauen verwendet wird. Die Miniaturansichten werden von dieser neuen Vorschau aus eingestellt.',
+      explaination_two: 'Dann müssen Sie die Dateien auswählen, die Sie hochladen möchten. Um die richtigen Entitäten zu finden, müssen die Dateinamen dem folgenden Muster entsprechen:',
+      shots_pattern: 'SequenceName ShotName" z.B. SQ01_SH01',
+      assets_pattern: 'AssetType AssetName" z.B. Umgebung_Wald',
+      select_files: 'Dateien auswählen',
+      selected_files: 'Ausgewählte Dateien',
+      select_task_type: 'Aufgabentyp auswählen',
+      title: 'Thumbnails hinzufügen',
+      undefined: 'Unbestimmt',
+      undefined_pattern: 'Undefiniert',
+      upload: 'Thumbnails hinzufügen'
+    }
+  },
+
   episodes: {
     all_episodes: 'Alle Episoden',
     delete_error: 'Beim Löschen dieser Episode ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Bist du sicher, dass diese Episode keine Sequenz hat, die mit ihr verbunden ist?',
@@ -112,12 +155,15 @@ export default {
 
   keyboard: {
     altdown: 'Verschiebt die Auswahl einer Aufgabe nach unten',
+    altj: 'Vorherige vorschau auswählen',
+    altk: 'Nächste vorschau auswählen',
     altleft: 'Verschiebt die Auswahl einer Aufgabe nach links',
     altright: 'Verschiebt die Auswahl einer Aufgabe nach rechts',
     altup: 'Verschiebt die Auswahl einer Aufgabe nach oben',
     annotations: 'Anmerkungen',
     draw: 'Zeichnungsmodus einschalten',
     navigation: 'Navigation',
+    playlist_navigation: 'Playlist navigation',
     redo: 'Redo',
     remove_annotation: 'Annotation entfernen',
     undo: 'Undo',
@@ -125,10 +171,12 @@ export default {
   },
 
   login: {
+    back_to_login: 'Zurück zum Login',
     forgot_password: 'Passwort vergessen?',
     login: 'Einloggen',
     login_failed: 'Die Anmeldung ist fehlgeschlagen, bitte überprüfen Sie Ihre Zugangsdaten.',
     login_page: 'Abbrechen',
+    redirecting: 'Umleitung',
     reset_change_password: 'Passwort ändern',
     reset_change_password_form_failed: 'Es gibt ein Problem mit dem von dir angegebenen Passwort. Bitte überprüfen Sie, ob es mindestens 7 Zeichen lang ist und ob beide Passwörter übereinstimmen.',
     reset_change_password_failed: 'Die Änderung des Passworts ist fehlgeschlagen. Bitte starten Sie den gesamten Vorgang erneut.',
@@ -150,6 +198,7 @@ export default {
     about: 'Über',
     add: 'hinzufügen',
     all: 'Alle',
+    all_assets: 'Alle assets',
     admin: 'Admin',
     cancel: 'Abbrechen',
     clear_selection: 'Aktuelle Auswahl löschen',
@@ -166,6 +215,7 @@ export default {
     edit: 'Bearbeiten',
     empty_comment: 'Leerer Kommentar',
     end_date: 'Enddatum',
+    files_selected: 'Ausgewählte dateien',
     for: 'Für',
     go_productions: 'Zu den Produktionen',
     history: 'Historie',
@@ -188,16 +238,40 @@ export default {
     sort_by: 'Sortierent',
     sorted_by: 'Sortiert nach',
     studio: 'Studio',
+    tutorials: 'Tutorials',
     user: 'Benutzer',
     white_theme: 'Weißes Thema',
     yes: 'Ja',
     csv: {
+      choose: 'Auswählen',
+      unknown: 'Unbekannte Spalte',
+      error_upload: 'Beim Hochladen Ihrer CSV-Datei ist ein Fehler aufgetreten',
       export_file: 'Exportieren',
-      error_upload: 'Beim Hochladen Ihrer CSV-Datei ist ein Fehler aufgetreten.',
       import_file: 'Importieren',
-      import_title: 'Daten aus einer CSV-Datei importieren',
-      required_fields: 'Ihre CSV-Datei benötigt die folgenden Spalten',
-      select_file: 'Bitte wählen Sie eine Datei aus einem Ihrer Ordner aus:'
+      import_title: 'Daten aus einem CSV importieren',
+      legend: 'Legende',
+      legend_ok: 'Erkannte Daten',
+      legend_ignored: 'Ignorierte Daten',
+      legend_missing: 'Fehlende Daten',
+      legend_disabled: 'Daten, die nicht aktualisiert oder erstellt werden',
+      legend_overwrite: 'Daten, die aktualisiert werden',
+      paste: 'Einfügen',
+      paste_code: 'Bitte fügen Sie hier Ihre CSV-Daten ein:',
+      preview: 'Vorschau',
+      preview_episode_name: 'Episodenname',
+      preview_title: 'Vorschau Ihrer importierten Daten',
+      preview_description: 'Laden Sie eine .csv-Datei hoch, um Ihr Forum mit Beiträgen zu füllen',
+      preview_required: 'NB: Kopfzeilen müssen als erste Zeile eingefügt werden',
+      preview_reupload: 'CSV-Datei erneut hochladen',
+      required_fields: 'Ihr CSV erfordert die folgenden Spalten',
+      select_file: 'Bitte wählen Sie eine Datei aus einem Ihrer Ordner:',
+      tab_select_file: 'Laden Sie eine CSV-Datei hoch',
+      tab_paste_code: 'CSV-Daten einfügen',
+      upload_file: 'Durchsuchen',
+      options: {
+        title: 'Optionen',
+        update: 'Bestehende Daten aktualisieren'
+      }
     }
   },
 
@@ -207,6 +281,7 @@ export default {
     change_status: 'Status ändern',
     create_tasks: 'Aufgaben erstellen',
     delete_tasks: 'Aufgaben löschen',
+    generate_playlists: 'Wiedergabelisten generieren',
     run_custom_action: 'Benutzerdefinierte Aktion ausführen',
     set_estimations: 'Schätzungen festlegen'
   },
@@ -288,11 +363,14 @@ export default {
       admin: 'Studio-Manager',
       client: 'Client',
       manager: 'Vorgesetzter',
-      user: 'CG Artist'
+      undefined: '',
+      user: 'CG Artist',
+      vendor: 'Anbieter'
     }
   },
 
   playlists: {
+    add_assets: 'Assets hinzufügen',
     add_selection: 'Auswahl hinzufügen',
     add_shots: 'Shots hinzufügen',
     add_episode: 'Ganze episode hinzufügen',
@@ -300,16 +378,19 @@ export default {
     add_sequence: 'Ganze sequenz hinzufügen',
     apply_task_type_change: 'Dadurch wird die letzte Revision für den gegebenen Aufgabentyp auf allen shots positioniert.',
     available_build: 'Verfügbare Builds',
+    building: 'Gebäude',
     build_daily: 'Täglich ausstehend',
     build_weekly: 'Alle ausstehend',
     build_mp4: 'Build .mp4',
     client_playlist: 'Kunde Playlist',
     created_at: 'Erstellen Sie die:',
+    create_for_selection: 'Zur Auswahl erstellen',
     create_title: 'Playlist erstellen',
     delete_text: 'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
     delete_error: 'Beim Löschen dieser Playlist ist ein Fehler aufgetreten.',
     download_zip: 'Download.zip',
     edit_title: 'Wiedergabeliste bearbeiten',
+    failed: 'Fehlgeschlagen',
     for_client: 'Der Kunde',
     for_studio: 'Das Studio',
     last_creation: 'Neueste kreationen',
@@ -329,9 +410,36 @@ export default {
     title: 'Wiedergabelisten',
     updated_at: 'Geändert am',
     remove: 'entfernen',
+    actions: {
+      edit: 'Playliste bearbeiten',
+      delete: 'Playliste löschen',
+      fullscreen: 'Vollbild',
+      download: 'Herunterladen...',
+      entity_list: 'Entity-Liste anzeigen/verbergen',
+      comments: 'Kommentare anzeigen/verbergen',
+      annotation: 'Anmerkung',
+      annotation_text: 'Doppelklicken Sie auf die Vorschau, um etwas Text hinzuzufügen',
+      annotation_delete: 'Annotation löschen',
+      annotation_redo: 'Annotation wiederholen',
+      annotation_undo: 'Annotation rückgängig machen',
+      annotation_big: 'Groß',
+      annotation_medium: 'Medium',
+      annotation_small: 'Klein',
+      change_task_type: 'Aufgabentyp ändern',
+      split_screen: 'Geteilter Bildschirm',
+      next_shot: 'Nächster shot',
+      previous_shot: 'Vorherige shot',
+      next_frame: 'Nächstes Bild',
+      previous_frame: 'Vorheriges Bild',
+      play: 'Spielen',
+      pause: 'Pause'
+    },
     fields: {
+      created_at: 'Erstellt bei',
+      for_client: 'Zum teilen mit',
+      for_entity: 'Für Entität',
       name: 'Name',
-      for_client: 'Zum teilen mit'
+      updated_at: 'Aktualisiert bei'
     }
   },
 
@@ -580,6 +688,7 @@ export default {
     change_preview: 'Änderungsvorschau',
     change_priority: 'Ändern Sie die Priorität auf:',
     clear_assignations: 'klare Zuordnungen',
+    comment_image: 'Ihrem Kommentar ein Bild anhängen',
     create_for_selection: 'Erstellen Sie eine Aufgabe für jede leere Zelle:',
     create_tasks: 'Aufgaben hinzufügen',
     create_tasks_shot: 'Aufgaben für aktuelle Aufnahmen hinzufügen',
@@ -616,6 +725,7 @@ export default {
     previous: 'vorherige Aufgabe',
     unsubscribe_notifications: 'Abmeldung von Benachrichtigungen',
     set_estimations: 'Setzt Schätzungen für ausgewählte Aufgaben:',
+    select_image_file: 'Bitte wählen Sie das Bild von Ihrer Festplatte aus, das Sie Ihrem Kommentar beifügen möchten',
     set_preview: 'Diese Vorschau als Miniaturansicht festlegen',
     set_preview_error: 'Bei der Einstellung der Vorschau als Miniaturansicht ist ein Fehler aufgetreten.',
     set_preview_done: 'Diese Vorschau wird als Miniaturansicht für das aktuelle Objekt verwendet.',
@@ -644,6 +754,7 @@ export default {
       real_start_date: 'WIP-Datum',
       retake_count: 'Wiederholungen',
       sequence: 'Sequenz',
+      start_date: 'Startdatum',
       task_status: 'Status',
       task_status_short_name: 'Status',
       task_type: 'Typ'

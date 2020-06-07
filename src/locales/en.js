@@ -45,10 +45,10 @@ export default {
 
   breakdown: {
     all_assets: 'All available assets',
-    empty: 'Empty casting',
-    title: 'Breakdown',
     edit_label: 'Change the asset\'s label',
+    empty: 'Empty casting',
     label: 'Label',
+    title: 'Breakdown',
     options: {
       fixed: 'fixed',
       animate: 'animate'
@@ -243,7 +243,6 @@ export default {
     yes: 'Yes',
     csv: {
       choose: 'Choose',
-      unknown: 'Unknown column',
       error_upload: 'An error occured while uploading your CSV.',
       export_file: 'Export',
       import_file: 'Import',
@@ -266,6 +265,7 @@ export default {
       select_file: 'Please select a file from one of your folder:',
       tab_select_file: 'Upload a CSV file',
       tab_paste_code: 'Paste a CSV data',
+      unknown: 'Unknown column',
       upload_file: 'Browse',
       options: {
         title: 'Options',
@@ -321,7 +321,7 @@ export default {
     delete_text: 'Are you sure you want to remove {personName} from your database? Every related comments and previews will be deleted. Pleas confirm by typing the full person name below.',
     edit_title: 'Edit person',
     empty_team: 'There is no one listed in the project team.',
-    invite: 'Send invitation',
+    invite: 'Send an invitation',
     invite_error: 'An error occured while sending the invitation',
     invite_success: 'Invitation was successfully sent',
     new_person: 'Add a new employee',
@@ -402,7 +402,6 @@ export default {
     no_selection: 'Please select a playlist on the left.',
     no_sequence_for_episode: 'There is no sequence for this episode',
     no_shot_for_production: 'There is no shot for this production',
-    no_shot_for_sequence: 'There is no shot for this sequence',
     select_shot: 'Please select a shot in the right column',
     select_playlist: 'Please select a playlist in the left column',
     select_task_type: 'Change task type for all shots',
