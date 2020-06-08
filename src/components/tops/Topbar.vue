@@ -358,6 +358,7 @@ export default {
 
     onLogoutClicked () {
       this.logout((err, success) => {
+        this.$socket.disconnect()
         if (err) console.error(err)
         this.toggleUserMenu()
         if (success) this.$router.push('/login')

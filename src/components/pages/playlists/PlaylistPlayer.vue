@@ -4,7 +4,7 @@
   ref="container"
   :class="{
     dark: true,
-    'full-height': !isAddingEntity,
+    'full-height': !isAddingEntity || isLoading,
     'playlist-player': true
   }"
 >
@@ -53,7 +53,7 @@
       @entity-change="onPlayerEntityChange"
       @time-update="onTimeUpdate"
       @max-duration-update="onMaxDurationUpdate"
-      v-show="isCurrentEntityMovie"
+      v-show="isCurrentEntityMovie && !isLoading"
     />
     <raw-video-player
       ref="raw-player-comparison"
@@ -61,13 +61,13 @@
       :is-repeating="isRepeating"
       :muted="true"
       :entities="entityListToCompare"
-      v-show="isComparing && isMovieComparison"
+      v-show="isComparing && isMovieComparison && !isLoading"
     />
 
     <p
       :style="{width: '100%'}"
       class="preview-standard-file has-text-centered"
-      v-if="isCurrentEntityFile && currentEntity.preview_file_extension"
+      v-if="isCurrentEntityFile && currentEntity.preview_file_extension && !isLoading"
     >
       <a
         class="button"
@@ -84,7 +84,7 @@
     <div
       class="picture-preview-wrapper"
       ref="picture-player-wrapper"
-      v-show="isCurrentEntityPicture"
+      v-show="isCurrentEntityPicture && !isLoading"
     >
        <img
          ref="picture-player"
@@ -95,7 +95,7 @@
     </div>
     <div
       class="picture-preview-comparison-wrapper"
-      v-show="isComparing && isPictureComparison"
+      v-show="isComparing && isPictureComparison && !isLoading"
     >
        <img
          ref="picture-player-comparison"
@@ -103,6 +103,9 @@
          :src="currentComparisonEntityPicturePath"
          v-show="isComparing && isPictureComparison"
        />
+    </div>
+    <div class="loading-wrapper" v-if="isLoading">
+      <spinner />
     </div>
 
     <div class="canvas-wrapper" ref="canvas-wrapper">
@@ -128,7 +131,7 @@
   <div
     class="playlist-progress"
     ref="playlist-progress"
-    v-if="!isAddingEntity"
+    v-show="!isAddingEntity"
     :style="{
       display: isCurrentEntityMovie ? 'flex' : 'none'
     }"
@@ -1126,7 +1129,9 @@ export default {
       this.clearCanvas()
       this.rawPlayer.goPreviousFrame()
       if (this.isComparing) {
-        this.$refs['raw-player-comparison'].goPreviousFrame()
+        this.$refs['raw-player-comparison'].setCurrentTime(
+          this.rawPlayer.getCurrentTime()
+        )
       }
       const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
       if (annotation) this.loadAnnotation(annotation)
@@ -1136,7 +1141,9 @@ export default {
       this.clearCanvas()
       this.rawPlayer.goNextFrame()
       if (this.isComparing) {
-        this.$refs['raw-player-comparison'].goNextFrame()
+        this.$refs['raw-player-comparison'].setCurrentTime(
+          this.rawPlayer.getCurrentTime()
+        )
       }
       const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
       if (annotation) this.loadAnnotation(annotation)
@@ -1408,8 +1415,8 @@ export default {
     onPlayerEntityChange (entityIndex) {
       if (this.isCurrentEntityMovie) {
         this.playingEntityIndex = entityIndex
-        if (this.rawPlayerComparison) {
-          const comparisonIndex = this.rawPlayerComparison.playingIndex
+        if (this.isComparing) {
+          const comparisonIndex = this.rawPlayerComparison.currentIndex
           if (comparisonIndex < entityIndex) {
             this.rawPlayerComparison.playNext()
             this.rawPlayerComparison.setCurrentTime(0)
@@ -2348,5 +2355,9 @@ progress {
 
 .disabled {
   color: $grey-strong;
+}
+
+.loading-wrapper {
+  width: 100%;
 }
 </style>

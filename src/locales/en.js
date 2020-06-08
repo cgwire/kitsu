@@ -45,10 +45,10 @@ export default {
 
   breakdown: {
     all_assets: 'All available assets',
-    empty: 'Empty casting',
-    title: 'Breakdown',
     edit_label: 'Change the asset\'s label',
+    empty: 'Empty casting',
     label: 'Label',
+    title: 'Breakdown',
     options: {
       fixed: 'fixed',
       animate: 'animate'
@@ -170,18 +170,20 @@ export default {
   },
 
   login: {
+    back_to_login: 'Go back to login page',
     forgot_password: 'Forgot password?',
     login: 'Log in',
     login_failed: 'Log in failed, please verify your credentials',
     login_page: 'Cancel',
+    redirecting: 'Redirecting in {secondsLeft} seconds...',
     reset_change_password: 'Change password',
     reset_change_password_form_failed: 'There is a problem with the password you gave. Please, verify that it is at least 7 chars long and that both passwords match.',
     reset_change_password_failed: 'Changing password failed. Please, restart the whole procedure again.',
     reset_change_password_succeed: 'Your password was changed successfully. Please, go back to the login page to use it.',
     reset_change_password_title: 'Enter a new password',
     reset_password: 'Reset Password',
-    reset_password_failed: 'Reset Password failed. Please verify your email.',
-    reset_password_succeed: 'Reset Password succeeded. Please check your inbox.',
+    reset_password_failed: 'Resetting you password failed. Please verify your email.',
+    reset_password_succeed: 'Resetting your password succeeded. Please check your inbox.',
     reset_password_title: 'Enter your email to reset your password',
     title: 'Log in to Kitsu',
     fields: {
@@ -241,7 +243,6 @@ export default {
     yes: 'Yes',
     csv: {
       choose: 'Choose',
-      unknown: 'Unknown column',
       error_upload: 'An error occured while uploading your CSV.',
       export_file: 'Export',
       import_file: 'Import',
@@ -264,6 +265,7 @@ export default {
       select_file: 'Please select a file from one of your folder:',
       tab_select_file: 'Upload a CSV file',
       tab_paste_code: 'Paste a CSV data',
+      unknown: 'Unknown column',
       upload_file: 'Browse',
       options: {
         title: 'Options',
@@ -313,13 +315,14 @@ export default {
 
   people: {
     active: 'Active',
+    active_persons: 'active person | active persons',
     add_member_to_team: 'Add a member to the team: ',
     create_invite: 'Create and send invitation',
     delete_error: 'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?',
     delete_text: 'Are you sure you want to remove {personName} from your database? Every related comments and previews will be deleted. Pleas confirm by typing the full person name below.',
     edit_title: 'Edit person',
     empty_team: 'There is no one listed in the project team.',
-    invite: 'Send invitation',
+    invite: 'Send an invitation',
     invite_error: 'An error occured while sending the invitation',
     invite_success: 'Invitation was successfully sent',
     new_person: 'Add a new employee',
@@ -400,7 +403,6 @@ export default {
     no_selection: 'Please select a playlist on the left.',
     no_sequence_for_episode: 'There is no sequence for this episode',
     no_shot_for_production: 'There is no shot for this production',
-    no_shot_for_sequence: 'There is no shot for this sequence',
     select_shot: 'Please select a shot in the right column',
     select_playlist: 'Please select a playlist in the left column',
     select_task_type: 'Change task type for all shots',
@@ -689,10 +691,10 @@ export default {
     create_for_selection: 'Create task for each empty cell:',
     create_tasks: 'Add tasks',
     create_tasks_shot: 'Add tasks for current shots',
-    create_tasks_shot_explaination: 'You are going to create a new task for each shot of current list for the given task type. Do you want to continue?',
+    create_tasks_shot_explaination: 'You are going to create a new task for each shot of current project for the given task type. Do you want to continue?',
     create_tasks_shot_failed: 'A server error occured while proceeding creations.',
     create_tasks_asset: 'Add tasks for current assets',
-    create_tasks_asset_explaination: 'You are going to create a new task for each asset of current list for the given task type. Do you want to continue?',
+    create_tasks_asset_explaination: 'You are going to create a new task for each asset of current project for the given task type. Do you want to continue?',
     create_tasks_asset_failed: 'A server error occured while proceeding creations.',
     current: 'Task to do',
     current_status: 'Current status :',

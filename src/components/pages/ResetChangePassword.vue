@@ -37,12 +37,14 @@
         </div>
 
         <p class="control">
-          <a v-bind:class="{
+          <a :class="{
             'main-button': true,
             'is-fullwidth': true,
             'is-loading': isLoading
           }"
-            @click="confirmResetChangePassword">
+            @click="confirmResetChangePassword"
+            v-if="!isSuccess"
+          >
               {{ $t("login.reset_change_password") }}
           </a>
         </p>
@@ -55,13 +57,22 @@
         <p class="success" v-show="isSuccess">
           {{ $t("login.reset_change_password_succeed") }}
         </p>
+        <p class="has-text-centered mt2 mb2" v-show="isSuccess">
+          {{ $t("login.redirecting", {secondsLeft}) }}
+        </p>
         <p
           class="has-text-centered"
         >
           <router-link
             :to="{ name: 'login' }"
           >
-            {{ $t("login.login_page")}}
+            <span v-if="isSuccess">
+              {{ $t("login.back_to_login")}}
+            </span>
+            <span v-else>
+              {{ $t("login.login_page")}}
+            </span>
+
           </router-link>
         </p>
       </div>
@@ -89,12 +100,16 @@ export default {
       isLoading: false,
       isError: false,
       isFormError: false,
-      isSuccess: false
+      isSuccess: false,
+      secondsLeft: 5
     }
   },
 
   mounted () {
     this.$store.commit('LOGIN_SUCCESS')
+    this.isLoading = false
+    this.isError = false
+    this.secondsLeft = 5
   },
 
   computed: {
@@ -121,9 +136,13 @@ export default {
           .then(() => {
             this.isLoading = false
             this.isSuccess = true
-            setTimeout(() => {
-              this.$router.push({ name: 'login' })
-            }, 3000)
+            const interval = setInterval(() => {
+              this.secondsLeft--
+              if (this.secondsLeft === 0) {
+                this.$router.push({ name: 'login' })
+                clearInterval(interval)
+              }
+            }, 1000)
           })
           .catch(() => {
             this.isLoading = false

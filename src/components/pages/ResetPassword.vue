@@ -31,7 +31,9 @@
             'is-fullwidth': true,
             'is-loading': isLoading
           }"
-            @click="confirmResetPassword">
+            @click="confirmResetPassword"
+            v-if="!isSuccess"
+          >
               {{ $t("login.reset_password") }}
           </a>
         </p>
@@ -47,7 +49,12 @@
           <router-link
             :to="{name: 'login'}"
           >
-            {{ $t("login.login_page")}}
+            <span v-if="isSuccess">
+              {{ $t("login.back_to_login")}}
+            </span>
+            <span v-else>
+              {{ $t("login.login_page")}}
+            </span>
           </router-link>
         </p>
       </div>
@@ -79,6 +86,11 @@ export default {
   computed: {
     ...mapGetters([
     ])
+  },
+
+  mounted () {
+    this.isLoading = false
+    this.isSuccess = false
   },
 
   methods: {

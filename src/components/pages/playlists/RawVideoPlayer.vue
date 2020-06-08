@@ -150,7 +150,11 @@ export default {
     getNextIndex (index) {
       let i = index + 1 >= this.entities.length ? 0 : index + 1
       // While we don't come back to initial entity and we have video previews
-      while (i !== index && this.entities[i] && this.entities[i].preview_file_extension !== 'mp4') {
+      while (
+        i !== index &&
+        this.entities[i] &&
+        this.entities[i].preview_file_extension !== 'mp4'
+      ) {
         i++
         if (i >= this.entities.length) i = 0
       }
@@ -193,7 +197,8 @@ export default {
     },
 
     loadNextEntity () {
-      this.loadEntity(this.getNextIndex(this.currentIndex))
+      const newIndex = this.getNextIndex(this.currentIndex)
+      this.loadEntity(newIndex)
       this.$emit('entity-change', this.currentIndex)
     },
 

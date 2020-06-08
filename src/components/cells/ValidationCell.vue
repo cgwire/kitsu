@@ -232,7 +232,7 @@ export default {
 
     onMouseOver (event) {
       if (this.selectable && !this.selected) {
-        const background = this.isDarkTheme ? '#878B97' : '#CCFFCC'
+        const background = this.isDarkTheme ? '#878B97' : '#CFD1FF'
         this.changeStyle(background)
       }
     },
@@ -309,7 +309,7 @@ export default {
   watch: {
     selected () {
       if (this.selected) {
-        const background = this.isDarkTheme ? '#5E60BA' : '#D1C4E9'
+        const background = this.isDarkTheme ? '#5E60BA' : '#BFC1FF'
         this.changeStyle(background)
       } else {
         const background = this.getBackground(this.column.color)

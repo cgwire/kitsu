@@ -1,151 +1,175 @@
 <template>
-<div class="page shot">
-
-  <div class="page-header flexrow">
-    <router-link
-      class="flexrow-item has-text-centered back-link"
-      :to="shotsPath"
-    >
-      <chevron-left-icon />
-    </router-link>
-    <entity-thumbnail
-      class="shot-thumbnail flexrow-item"
-      :entity="currentShot"
-      :with-link="false"
-      v-if="currentShot"
-    />
-    <div class="flexrow-item">
-      <page-title :text="title" class="entity-title" />
+<div class="columns fixed-page shot">
+  <div class="column main-column">
+    <div class="page-header flexrow">
+      <router-link
+        class="flexrow-item has-text-centered back-link"
+        :to="shotsPath"
+      >
+        <chevron-left-icon />
+      </router-link>
+      <entity-thumbnail
+        class="shot-thumbnail flexrow-item"
+        :entity="currentShot"
+        :with-link="false"
+        v-if="currentShot"
+      />
+      <div class="flexrow-item">
+        <page-title :text="title" class="entity-title" />
+      </div>
+      <div class="flexrow-item">
+        <button-simple
+          icon="edit"
+          @click="modals.edit = true"
+        />
+      </div>
     </div>
-    <div class="flexrow-item">
-      <button-simple
-        icon="edit"
-        @click="modals.edit = true"
+
+    <div class="flexrow infos">
+      <div class="flexrow-item">
+      <page-subtitle :text="$t('shots.tasks')" />
+      <entity-task-list
+        class="task-list"
+        :entries="currentShot ? currentShot.tasks : []"
+        :is-loading="!currentShot"
+        :is-error="false"
+        @task-selected="onTaskSelected"
+      />
+      </div>
+      <div class="flexrow-item">
+        <page-subtitle :text="$t('main.info')" />
+        <div class="table-body">
+          <table class="datatable" v-if="currentShot">
+            <tbody class="datatable-body">
+              <tr
+                class="datatable-row"
+                v-if="currentShot.data && currentShot.data.fps"
+              >
+                <td class="field-label">{{ $t('shots.fields.fps') }}</td>
+                <td>
+                  {{ currentShot ? currentShot.data.fps : '' }}
+                </td>
+              </tr>
+
+              <tr
+                class="datatable-row"
+                v-if="currentShot.data && currentShot.data.frame_in"
+              >
+                <td class="field-label">{{ $t('shots.fields.frame_in') }}</td>
+                <td>
+                  {{ currentShot ? currentShot.data.frame_in : '' }}
+                </td>
+              </tr>
+
+              <tr
+                class="datatable-row"
+                v-if="currentShot.data && currentShot.data.frame_out"
+              >
+                <td class="field-label">{{ $t('shots.fields.frame_out') }}</td>
+                <td>
+                  {{ currentShot ? currentShot.data.frame_out : '' }}
+                </td>
+              </tr>
+
+              <tr
+                class="datatable-row"
+              >
+                <td class="field-label">{{ $t('shots.fields.description') }}</td>
+                <description-cell
+                  :entry="currentShot"
+                  :full="true"
+                />
+              </tr>
+
+              <tr
+                class="datatable-row"
+              >
+                <td class="field-label">{{ $t('shots.fields.nb_frames') }}</td>
+                <td>
+                  {{ currentShot ? currentShot.nb_frames : '' }}
+                </td>
+              </tr>
+
+              <tr
+                :key="descriptor.id"
+                class="datatable-row"
+                v-for="descriptor in shotMetadataDescriptors"
+              >
+                <td class="field-label">{{ descriptor.name }}</td>
+                <td>
+                  {{ currentShot.data ? currentShot.data[descriptor.field_name] : '' }}
+                </td>
+              </tr>
+
+            </tbody>
+        </table>
+      </div>
+      </div>
+    </div>
+
+    <div class="shot-casting">
+      <page-subtitle :text="$t('shots.casting')" />
+      <div v-if="currentShot">
+        <div
+            v-if="currentShot.castingAssetsByType && currentShot.castingAssetsByType[0].length > 0"
+        >
+          <div
+            class="type-assets"
+            :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
+            v-for="typeAssets in currentShot.castingAssetsByType"
+          >
+            <div class="asset-type">
+              {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
+            </div>
+            <div class="asset-list">
+              <router-link
+                class="asset-link"
+                :key="asset.id"
+                :to="{
+                  name: 'asset',
+                  params: {
+                    production_id: currentProduction.id,
+                    asset_id: asset.asset_id
+                  }
+                }"
+                v-for="asset in typeAssets"
+              >
+                <entity-thumbnail
+                  :entity="asset"
+                  :square="true"
+                  :empty-width="100"
+                  :empty-height="100"
+                  :with-link="false"
+                />
+                <div>
+                  <span>{{ asset.asset_name }}</span>
+                  <span v-if="asset.nb_occurences > 1">
+                    ({{ asset.nb_occurences }})
+                  </span>
+                </div>
+              </router-link>
+            </div>
+          </div>
+        </div>
+        <div v-else>
+          {{ $t('shots.no_casting') }}
+        </div>
+      </div>
+      <table-info
+        :is-loading="casting.isLoadin"
+        :is-error="casting.isError"
+        v-else
       />
     </div>
   </div>
 
-  <div class="columns">
-    <div class="column task-column">
-    <page-subtitle :text="$t('shots.tasks')" />
-    <entity-task-list
-      class="task-list"
-      :entries="currentShot ? currentShot.tasks : []"
-      :is-loading="!currentShot"
-      :is-error="false"
+  <div
+    class="column side-column"
+    v-if="currentTask"
+  >
+    <task-info
+      :task="currentTask"
     />
-    </div>
-    <div class="column">
-      <page-subtitle :text="$t('main.info')" />
-      <div class="table-body">
-        <table class="table" v-if="currentShot">
-          <tbody>
-            <tr v-if="currentShot.data && currentShot.data.fps">
-              <td class="field-label">{{ $t('shots.fields.fps') }}</td>
-              <td>
-                {{ currentShot ? currentShot.data.fps : '' }}
-              </td>
-            </tr>
-
-            <tr v-if="currentShot.data && currentShot.data.frame_in">
-              <td class="field-label">{{ $t('shots.fields.frame_in') }}</td>
-              <td>
-                {{ currentShot ? currentShot.data.frame_in : '' }}
-              </td>
-            </tr>
-
-            <tr v-if="currentShot.data && currentShot.data.frame_out">
-              <td class="field-label">{{ $t('shots.fields.frame_out') }}</td>
-              <td>
-                {{ currentShot ? currentShot.data.frame_out : '' }}
-              </td>
-            </tr>
-
-            <tr>
-              <td class="field-label">{{ $t('shots.fields.description') }}</td>
-              <description-cell
-                :entry="currentShot"
-                :full="true"
-              />
-            </tr>
-
-            <tr>
-              <td class="field-label">{{ $t('shots.fields.nb_frames') }}</td>
-              <td>
-                {{ currentShot ? currentShot.nb_frames : '' }}
-              </td>
-            </tr>
-
-            <tr
-              :key="descriptor.id"
-              v-for="descriptor in shotMetadataDescriptors"
-            >
-              <td class="field-label">{{ descriptor.name }}</td>
-              <td>
-                {{ currentShot.data ? currentShot.data[descriptor.field_name] : '' }}
-              </td>
-            </tr>
-
-          </tbody>
-      </table>
-    </div>
-    </div>
-  </div>
-
-  <div class="shot-casting">
-    <page-subtitle :text="$t('shots.casting')" />
-    <div v-if="currentShot">
-      <div
-          v-if="currentShot.castingAssetsByType && currentShot.castingAssetsByType[0].length > 0"
-      >
-        <div
-          class="type-assets"
-          :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
-          v-for="typeAssets in currentShot.castingAssetsByType"
-        >
-          <div class="asset-type">
-            {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
-          </div>
-          <div class="asset-list">
-            <router-link
-              class="asset-link"
-              :key="asset.id"
-              :to="{
-                name: 'asset',
-                params: {
-                  production_id: currentProduction.id,
-                  asset_id: asset.asset_id
-                }
-              }"
-              v-for="asset in typeAssets"
-            >
-              <entity-thumbnail
-                :entity="asset"
-                :square="true"
-                :empty-width="100"
-                :empty-height="100"
-                :with-link="false"
-              />
-              <div>
-                <span>{{ asset.asset_name }}</span>
-                <span v-if="asset.nb_occurences > 1">
-                  ({{ asset.nb_occurences }})
-                </span>
-              </div>
-            </router-link>
-          </div>
-        </div>
-      </div>
-      <div v-else>
-        {{ $t('shots.no_casting') }}
-      </div>
-    </div>
-    <table-info
-      :is-loading="casting.isLoadin"
-      :is-error="casting.isError"
-      v-else
-    >
-    </table-info>
   </div>
 
   <edit-shot-modal
@@ -172,6 +196,7 @@ import EntityTaskList from '../lists/EntityTaskList'
 import PageTitle from '../widgets/PageTitle'
 import PageSubtitle from '../widgets/PageSubtitle'
 import TableInfo from '../widgets/TableInfo'
+import TaskInfo from '../sides/TaskInfo'
 
 export default {
   name: 'shot',
@@ -184,12 +209,14 @@ export default {
     EntityTaskList,
     PageSubtitle,
     PageTitle,
-    TableInfo
+    TableInfo,
+    TaskInfo
   },
 
   data () {
     return {
       currentShot: null,
+      currentTask: null,
       casting: {
         isLoading: false,
         isError: false
@@ -319,6 +346,10 @@ export default {
           }
         }
       })
+    },
+
+    onTaskSelected (task) {
+      this.currentTask = task
     }
   },
 
@@ -343,15 +374,10 @@ export default {
 
 .dark .page-header,
 .dark .shot-casting,
-.dark .column {
+.dark .infos {
   background: #46494F;
   border-color: $dark-grey;
   box-shadow: 0px 0px 6px #333;
-}
-
-.dark .task-list,
-.dark .table-body {
-  border: 1px solid $dark-grey;
 }
 
 h2.subtitle {
@@ -376,20 +402,18 @@ h2.subtitle {
   margin-right: 1em;
 }
 
-.columns {
+.infos {
+  background: white;
+  padding: 1em 1em 1em 1em;
+  box-shadow: 0px 0px 6px #E0E0E0;
+  margin-bottom: 1em;
   margin-left: 1em;
   margin-right: 1em;
-}
 
-.column {
-  background: white;
-  padding: 1em;
-  box-shadow: 0px 0px 6px #E0E0E0;
-  margin: 0;
-}
-
-.column:first-child {
-  margin-right: 1em;
+  .flexrow-item {
+    align-self: flex-start;
+    flex: 1;
+  }
 }
 
 .shot-casting {
@@ -458,11 +482,6 @@ h2.subtitle {
 
 .back-link {
   padding-top: 3px;
-}
-
-.task-list,
-.table-body {
-  border: 1px solid $light-grey;
 }
 
 .task-list {

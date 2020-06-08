@@ -21,7 +21,8 @@ export default {
     edit_fail: 'La création ou l\'édition a échoué, une erreur est survenue.',
     edit_title: 'Modifier asset',
     edit_success: 'Asset {name} édité avec succès.',
-    empty_list: 'Il n\'y a pas d\'assets dans la production. Voulez vous en créer ?',
+    empty_list: 'Il n\'y a pas d\'asset dans la production. Voulez vous en créer ?',
+    empty_list_client: 'Il n\'y a pas d\'asset dans la production.',
     new_asset: 'Ajouter un asset',
     new_assets: 'Ajouter des assets',
     new_success: 'Asset {name} créé avec succès.',
@@ -59,8 +60,10 @@ export default {
     add_comment: 'Ajouter un commentaire...',
     add_attachment: 'Ajouter une pièce jointe',
     add_preview: 'Attacher un fichier',
+    change_preview: 'Changer previz',
     comment_from_client: 'Commentaire du client',
     edit_title: 'Modifier le commentaire',
+    error: 'Une erreur est survenue en postant le commentaire',
     empty_text: 'Ce commentaire est vide',
     no_file_attached: 'Aucun fichier attaché',
     pin: 'Épingler',
@@ -69,6 +72,7 @@ export default {
     retake: 'Reprise',
     revision: 'révision',
     set_status_to: 'Positionner le statut à',
+    task_placeholder: 'Nouvel élément...',
     unpin: 'Désépingler',
     text: 'Texte',
     validated: 'Validé !',
@@ -125,6 +129,8 @@ export default {
       select_files: 'Sélectionner les fichiers',
       selected_files: 'Fichiers sélectionnés',
       select_task_type: 'Sélectionner un type de tâche',
+      undefined: 'Non défini',
+      undefined_pattern: 'Non défini',
       title: 'Ajouter des vignettes',
       upload: 'Téléverser des vignettes'
     }
@@ -136,6 +142,7 @@ export default {
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ? Tous les plans et préviz liés seront supprimés. Pour confirmer, tapez le nom de l\'épisode en dessous',
     delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
     empty_list: 'Il n\'y a pas d\'épisodes dans la production. Voulez vous en créer ?',
+    empty_list_client: 'Il n\'y a pas d\'épisode pour cette production.',
     new_episode: 'Nouvel épisode',
     number: 'épisode | épisodes',
     title: 'Stats épisodes',
@@ -163,12 +170,26 @@ export default {
   },
 
   login: {
+    back_to_login: 'Revenir à la page de connexion',
+    forgot_password: 'Mot de passe oublié?',
     login: 'Se connecter',
     login_failed: 'La connexion a échoué, vérifiez vos identifiants',
+    login_page: 'Annuler',
+    redirecting: 'Redirection dans {secondsLeft} secondes...',
+    reset_change_password: 'Changer le mot de passe',
+    reset_change_password_form_failed: 'Il y a un problème avec le mot de passe donné. S\'il vous plait, verifiez qu\'il y a au moins 7 caractèrs et que les deux mots de passe correspondent.',
+    reset_change_password_failed: 'Le changement de mot de passe a échoué. Recommencez toute la procédure.',
+    reset_change_password_succeed: 'Le mot de passe a changé. Revenez à la page de connexion pour vous identifier avec.',
+    reset_change_password_title: 'Entrez un nouveau mot de passe',
+    reset_password: 'Réinitialiser le mot de passe',
+    reset_password_failed: 'La réinitialisation du mot de passe a échoué. S\'il vous plait vérifiez votre email.',
+    reset_password_succeed: 'La réinitialisation du mot de passe a réussi. Consultez votre boite mail pour la suite de la procédure.',
+    reset_password_title: 'Entrez votre mail pour réinitialiser le mot de passe',
     title: 'Se connecter à Kitsu',
     fields: {
       email: 'Adresse Mail',
-      password: 'Mot de passe'
+      password: 'Mot de passe',
+      password2: 'Mot de passe à nouveau'
     }
   },
 
@@ -195,6 +216,8 @@ export default {
     delete_text: 'Etes vous sûr de vouloir supprimer {name} de la base de données ?',
     empty_comment: 'Commentaire vide',
     end_date: 'Date de fin',
+    files_selected: 'Fichiers sélectionnés',
+    for: 'Pour',
     go_productions: 'Aller aux productions',
     history: 'Historique',
     info: 'Information',
@@ -204,6 +227,7 @@ export default {
     logout: 'Se déconnecter',
     maximize: 'Maximiser',
     minimize: 'Minimiser',
+    modify: 'Modifier',
     nb_frames: 'frames',
     no: 'non',
     or: 'ou',
@@ -263,6 +287,11 @@ export default {
     set_estimations: 'Définir estimations'
   },
 
+  not_found: {
+    text: 'Le lien que vous avez chargé ne correspond à rien. Retournez sur la page d\'accueil pour reprendre la navigation',
+    title: 'Page non trouvé... Est-ce que vous cherchez quelque chose que vous avez supprimé ?'
+  },
+
   notifications: {
     and_change_status: 'et changé le statut à',
     assigned_you: 'vous a assigné à',
@@ -301,8 +330,9 @@ export default {
     building: 'En cours...',
     client_playlist: 'Playlist Client',
     created_at: 'Créé le :',
-    create_title: 'Créer playlist',
+    create_for_selection: 'Créer une playlist pour la sélection courante',
     delete_text: 'Êtes vous sûr de vouloir supprimer {name} de la base de données ?',
+    create_title: 'Créer playlist',
     delete_error: 'Une erreur est survenue en supprimant la playlist.',
     download_zip: 'Télécharger en .zip',
     failed: 'Echec',
@@ -360,6 +390,7 @@ export default {
 
   people: {
     active: 'Présents',
+    active_persons: 'présent | présents',
     add_member_to_team: 'Ajouter un membre à l\'équipe: ',
     create_invite: 'Créer et envoyer une invitation',
     delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données? Tous les commentaires et préviz liés seront supprimés. Pour confirmer, tapez le nom complet de la personne en dessous',
@@ -368,6 +399,9 @@ export default {
     empty_team: 'Personne n\'a été affecté à cette production.',
     episodes: 'Épisodes',
     history: 'Historique des valeurs de plans',
+    invite: 'Envoyer une invitation',
+    invite_error: 'Une erreur est survenue en envoyant l\'invitation.',
+    invite_success: 'L\'invitation a été envoyé avec succès.',
     no_task_assigned: 'Il n\'y a aucune tâche assignée.',
     new_person: 'Ajouter un employé',
     padding: 'Ecart',
@@ -379,6 +413,7 @@ export default {
     title: 'Employés',
     unactive: 'Absents',
     csv: {
+      error_upload: 'Une erreur est survenue en important votre fichier CSV.',
       export_file: 'Télécharger',
       import_file: 'Importer',
       import_title: 'Import employees from a CSV file',
@@ -407,6 +442,7 @@ export default {
       admin: 'Studio Manager',
       client: 'Client',
       manager: 'Superviseur',
+      undefined: '',
       user: 'Graphiste',
       vendor: 'Fournisseur'
     }
@@ -426,6 +462,7 @@ export default {
       create_new: 'Créer une nouvelle production',
       empty: 'Vous n\'avez pas de production ouverte, voulez vous en créer une nouvelle ?',
       no_task: 'Vous n\'avez pas de tâches assignées. Demandez à votre superviseur ce que vous pouvez faire !',
+      no_prod_for_client: 'Vous n\'avez accès à aucune production. Contactez votre prestataire pour obtenir un accès',
       title: 'Productions en cours',
       welcome: 'Bienvenue sur Kitsu'
     },
@@ -450,6 +487,8 @@ export default {
       title: 'Ajouter une colonne de métadonnées'
     },
     status: {
+      active: 'Ouvert',
+      archived: 'Fermé',
       open: 'Ouvert',
       closed: 'Fermé'
     },
@@ -528,6 +567,7 @@ export default {
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ? Tous les plans et préviz liés seront supprimés. Pour confirmer, tapez le nom de la séquence en dessous',
     delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
     empty_list: 'Il n\'y a pas de séquence dans la production. Voulez vous en créer ?',
+    empty_list_client: 'Il n\'y pas de séquences dans cette production.',
     fields: {
       name: 'Nom',
       description: 'Description'
@@ -569,6 +609,7 @@ export default {
     edit_title: 'Modifier plan',
     edit_success: 'Plan {name} édité avec succès.',
     empty_list: 'Il n\'y a pas de plans dans la production. Voulez vous en créer ?',
+    empty_list_client: 'Il n\'y pas de plans dans cette production.',
     history: 'historique',
     no_casting: 'Le casting du plan est vide.',
     number: 'plan | plans',
@@ -594,7 +635,8 @@ export default {
       fps: 'FPS',
       nb_frames: 'Frames',
       description: 'Description',
-      production: 'Prod'
+      production: 'Prod',
+      time_spent: 'Temps passé'
     }
   },
 
@@ -655,21 +697,23 @@ export default {
     comment_image: 'Comment image',
     create_tasks: 'Ajouter des tâches',
     create_tasks_shot: 'Ajouter des tâches pour les plans affichés',
-    create_tasks_shot_explaination: 'Vous allez créer une nouvelle tâche pour chaque plan de la liste affichée. Est-ce que vous voulez continuer ?',
+    create_tasks_shot_explaination: 'Vous allez créer une nouvelle tâche pour chaque plan du projet. Est-ce que vous voulez continuer ?',
     create_tasks_shot_failed: 'Une erreur serveur est survenue pendant la création des tâches.',
     create_tasks_asset: 'Ajouter des tâches pour les assets affichés',
-    create_tasks_asset_explaination: 'Vous allez créer une nouvelle tâche pour chaque asset de la liste affichée. Est-ce que vous voulez continuer ?',
+    create_tasks_asset_explaination: 'Vous allez créer une nouvelle tâche pour chaque asset du projet. Est-ce que vous voulez continuer ?',
     create_tasks_asset_failed: 'Une erreur serveur est survenue pendant la création des tâches.',
     create_for_selection: 'Créer une tâche pour chaque cellule vide :',
     current: 'Tâches à faire',
     current_status: 'Statut actuel :',
     delete_all_error: 'Supprimer toutes les tâches pour ce type de tâche a échoué',
+    delete_all_text: 'Êtes vous sûr de vouloir supprimmer toutes les tâches pour {name}? S\'il vous plait, confirmez en tapant the nom du type de tâches des tâches que vous souhaitez supprimmer.',
     delete_comment: 'Êtes vous sûr de vouloir supprimer ce commentaire ?',
     delete_comment_error: 'Une erreur est survenue en supprimant le commentaire.',
     delete_error: 'Une erreur est survenue en supprimant la tâche.',
     delete_for_selection: 'Delete selected tasks:',
     delete_preview: 'Êtes vous sûr de vouloir supprimer cette préviz ?',
     delete_preview_error: 'Une erreur est survenue en supprimant la preview.',
+    edit_comment: 'Éditer commentaire',
     done: 'Terminées',
     download_pdf_file: 'Télécharger le fichier .{extension}',
     feedback: 'retours',
