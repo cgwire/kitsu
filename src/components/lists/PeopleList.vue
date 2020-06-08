@@ -93,6 +93,7 @@
 
   <p class="has-text-centered footer-info" v-if="!isLoading">
     {{ entries.length }} {{ $tc('people.persons', entries.length) }}
+    ({{ activePeople.length }} {{ $tc('people.active_persons', activePeople.length) }})
   </p>
 </div>
 </template>

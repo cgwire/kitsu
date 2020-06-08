@@ -315,6 +315,7 @@ export default {
 
   people: {
     active: 'Active',
+    active_persons: 'active person | active persons',
     add_member_to_team: 'Add a member to the team: ',
     create_invite: 'Create and send invitation',
     delete_error: 'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?',

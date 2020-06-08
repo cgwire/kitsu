@@ -390,6 +390,7 @@ export default {
 
   people: {
     active: 'Présents',
+    active_persons: 'présent | présents',
     add_member_to_team: 'Ajouter un membre à l\'équipe: ',
     create_invite: 'Créer et envoyer une invitation',
     delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données? Tous les commentaires et préviz liés seront supprimés. Pour confirmer, tapez le nom complet de la personne en dessous',
