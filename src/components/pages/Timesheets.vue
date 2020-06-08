@@ -1,7 +1,7 @@
 <template>
   <div class="columns fixed-page">
     <div class="column main-column">
-      <div class="timesheets page" v-if="isCurrentUserManager">
+      <div class="timesheets page">
         <div class="page-header flexrow">
           <page-title class="flexrow-item" :text="$t('timesheets.title')"/>
           <combobox

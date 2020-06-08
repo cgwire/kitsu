@@ -37,16 +37,16 @@
            </p>
          </div>
 
-         <div v-if="isCurrentUserAdmin">
+         <div v-if="!isCurrentUserClient && !isCurrentUserVendor">
            <h2>{{ $t('main.studio')}}</h2>
 
-           <p @click="toggleSidebar()">
+           <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
              <router-link :to="{name: 'productions'}">
              {{ $t("productions.title") }}
              </router-link>
            </p>
 
-           <p @click="toggleSidebar()">
+           <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
              <router-link :to="{name: 'people'}">
              {{ $t("people.title") }}
              </router-link>
@@ -58,7 +58,7 @@
              </router-link>
            </p>
 
-           <p @click="toggleSidebar()">
+           <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
              <router-link :to="{name: 'main-schedule'}">
              {{ $t("schedule.title_main") }}
              </router-link>
@@ -124,10 +124,11 @@ export default {
   computed: {
     ...mapGetters([
       'isSidebarHidden',
-      'isCurrentUserClient',
-      'isCurrentUserCGArtist',
-      'isCurrentUserManager',
       'isCurrentUserAdmin',
+      'isCurrentUserCGArtist',
+      'isCurrentUserClient',
+      'isCurrentUserManager',
+      'isCurrentUserVendor',
       'organisation'
     ])
   },
