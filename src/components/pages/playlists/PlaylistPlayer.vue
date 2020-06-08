@@ -104,7 +104,7 @@
          v-show="isComparing && isPictureComparison"
        />
     </div>
-    <div class="filler" v-if="isLoading">
+    <div class="loading-wrapper" v-if="isLoading">
       <spinner />
     </div>
 
@@ -131,7 +131,7 @@
   <div
     class="playlist-progress"
     ref="playlist-progress"
-    v-if="!isAddingEntity"
+    v-show="!isAddingEntity"
     :style="{
       display: isCurrentEntityMovie ? 'flex' : 'none'
     }"
@@ -1129,7 +1129,9 @@ export default {
       this.clearCanvas()
       this.rawPlayer.goPreviousFrame()
       if (this.isComparing) {
-        this.$refs['raw-player-comparison'].goPreviousFrame()
+        this.$refs['raw-player-comparison'].setCurrentTime(
+          this.rawPlayer.getCurrentTime()
+        )
       }
       const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
       if (annotation) this.loadAnnotation(annotation)
@@ -1139,7 +1141,9 @@ export default {
       this.clearCanvas()
       this.rawPlayer.goNextFrame()
       if (this.isComparing) {
-        this.$refs['raw-player-comparison'].goNextFrame()
+        this.$refs['raw-player-comparison'].setCurrentTime(
+          this.rawPlayer.getCurrentTime()
+        )
       }
       const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
       if (annotation) this.loadAnnotation(annotation)
@@ -1411,8 +1415,8 @@ export default {
     onPlayerEntityChange (entityIndex) {
       if (this.isCurrentEntityMovie) {
         this.playingEntityIndex = entityIndex
-        if (this.rawPlayerComparison) {
-          const comparisonIndex = this.rawPlayerComparison.playingIndex
+        if (this.isComparing) {
+          const comparisonIndex = this.rawPlayerComparison.currentIndex
           if (comparisonIndex < entityIndex) {
             this.rawPlayerComparison.playNext()
             this.rawPlayerComparison.setCurrentTime(0)
@@ -2351,5 +2355,9 @@ progress {
 
 .disabled {
   color: $grey-strong;
+}
+
+.loading-wrapper {
+  width: 100%;
 }
 </style>
