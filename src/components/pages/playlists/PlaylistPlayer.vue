@@ -4,7 +4,7 @@
   ref="container"
   :class="{
     dark: true,
-    'full-height': !isAddingEntity,
+    'full-height': !isAddingEntity || isLoading,
     'playlist-player': true
   }"
 >
@@ -53,7 +53,7 @@
       @entity-change="onPlayerEntityChange"
       @time-update="onTimeUpdate"
       @max-duration-update="onMaxDurationUpdate"
-      v-show="isCurrentEntityMovie"
+      v-show="isCurrentEntityMovie && !isLoading"
     />
     <raw-video-player
       ref="raw-player-comparison"
@@ -61,13 +61,13 @@
       :is-repeating="isRepeating"
       :muted="true"
       :entities="entityListToCompare"
-      v-show="isComparing && isMovieComparison"
+      v-show="isComparing && isMovieComparison && !isLoading"
     />
 
     <p
       :style="{width: '100%'}"
       class="preview-standard-file has-text-centered"
-      v-if="isCurrentEntityFile && currentEntity.preview_file_extension"
+      v-if="isCurrentEntityFile && currentEntity.preview_file_extension && !isLoading"
     >
       <a
         class="button"
@@ -84,7 +84,7 @@
     <div
       class="picture-preview-wrapper"
       ref="picture-player-wrapper"
-      v-show="isCurrentEntityPicture"
+      v-show="isCurrentEntityPicture && !isLoading"
     >
        <img
          ref="picture-player"
@@ -95,7 +95,7 @@
     </div>
     <div
       class="picture-preview-comparison-wrapper"
-      v-show="isComparing && isPictureComparison"
+      v-show="isComparing && isPictureComparison && !isLoading"
     >
        <img
          ref="picture-player-comparison"
@@ -103,6 +103,9 @@
          :src="currentComparisonEntityPicturePath"
          v-show="isComparing && isPictureComparison"
        />
+    </div>
+    <div class="filler" v-if="isLoading">
+      <spinner />
     </div>
 
     <div class="canvas-wrapper" ref="canvas-wrapper">
