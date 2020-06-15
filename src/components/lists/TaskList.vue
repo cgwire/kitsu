@@ -167,8 +167,11 @@
     v-if="!isLoading"
   >
     {{ tasks.length }} {{ $tc('tasks.number', tasks.length) }}
-    ({{ formatDuration(timeSpent) }}
-     {{ $tc('main.days_spent', Math.floor((timeSpent ? timeSpent : 0) / 60) / 8) }}<span v-if="!isAssets">, {{ nbFrames }} {{ $tc('main.nb_frames', nbFrames) }}</span>)
+    ({{ formatDuration(timeEstimated) }}
+     {{ $tc('main.days_estimated', isTimeEstimatedPlural) }},
+     {{ formatDuration(timeSpent) }}
+     {{ $tc('main.days_spent', isTimeSpentPlural) }}<span v-if="!isAssets">,
+     {{ nbFrames }} {{ $tc('main.nb_frames', nbFrames) }}</span>)
   </p>
 </div>
 </template>
@@ -246,11 +249,23 @@ export default {
     ]),
 
     timeSpent () {
-      let total = 0
-      this.tasks.forEach(task => {
-        total += task.duration
-      })
-      return total
+      return this.tasks.reduce((acc, task) => acc + task.duration, 0)
+    },
+
+    isTimeSpentPlural () {
+      return Math.floor(
+        (this.timeSpent ? this.timeSpent : 0) / 60 / 8
+      ) <= 1
+    },
+
+    timeEstimated () {
+      return this.tasks.reduce((acc, task) => acc + task.estimation, 0)
+    },
+
+    isTimeEstimatedPlural () {
+      return Math.floor(
+        (this.timeEstimated ? this.timeEstimated : 0) / 60 / 8
+      ) <= 1
     },
 
     nbFrames () {
