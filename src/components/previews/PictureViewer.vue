@@ -947,5 +947,4 @@ export default {
   transition: 0.3s background ease;
   color: white;
 }
-
 </style>

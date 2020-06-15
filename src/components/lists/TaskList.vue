@@ -1,8 +1,8 @@
 <template>
 <div class="data-list">
-  <div class="table-header-wrapper">
-    <table class="table table-header" ref="headerWrapper">
-      <thead ref="thead">
+  <div ref="body" class="datatable-wrapper" v-scroll="onBodyScroll">
+    <table class="datatable">
+      <thead ref="thead" class="datatable-head">
         <tr>
           <th class="thumbnail" ref="th-thumbnail">
           </th>
@@ -53,32 +53,16 @@
           </th>
         </tr>
       </thead>
-    </table>
-  </div>
 
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
-
-  <div
-    ref="body"
-    class="table-body"
-    v-scroll="onBodyScroll"
-    v-if="!isLoading"
-  >
-    <table
-      class="table unselectable"
-    >
       <tbody
-        class="tbody"
-        ref="body-tbody"
+        class="datatable-body"
       >
         <tr
           :ref="'task-' + task.id"
           :key="task.id"
           :class="{
             'task-line': true,
+            'datatable-row': true,
             selected: selectionGrid[task.id]
           }"
           @click="selectTask($event, index, task)"
@@ -161,6 +145,11 @@
       </tbody>
     </table>
   </div>
+
+  <table-info
+    :is-loading="isLoading"
+    :is-error="isError"
+  />
 
   <p
     class="has-text-centered nb-tasks"
@@ -318,7 +307,6 @@ export default {
     },
 
     onBodyScroll (event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
       this.$emit('scroll', position.scrollTop)
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
@@ -417,27 +405,6 @@ export default {
       this.lastSelection = null
     },
 
-    resizeHeaders () {
-      if (
-        this.$refs['body-tbody'] &&
-        this.$refs['body-tbody'].children.length > 0
-      ) {
-        const bodyElement = this.$refs['body-tbody'].children[0]
-        const columnDescriptors = [
-          { index: 1, name: 'type' },
-          { index: 2, name: 'name' },
-          { index: 4, name: 'assignees' }
-        ]
-        columnDescriptors.forEach(desc => {
-          const width = Math.max(
-            bodyElement.children[desc.index].offsetWidth,
-            100
-          )
-          this.$refs['th-' + desc.name].style['min-width'] = `${width}px`
-        })
-      }
-    },
-
     getTableData () {
       const headers = [
         this.isAssets ? this.$t('tasks.fields.asset_type') : this.$t('tasks.fields.sequence'),
@@ -498,14 +465,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.dark .table-body tr.task-line.selected {
-  background: $dark-purple;
-}
-
 .thumbnail {
   min-width: 80px;
-  width: 80px;
   max-width: 80px;
+  width: 80px;
 }
 
 .asset-type {
@@ -584,10 +547,31 @@ td.retake-count {
   }
 }
 
-.table-body {
+.datatable-head {
+  th {
+    padding-left: 0;
+
+    &.retake-count {
+      padding-right: 1em;
+    }
+
+    &.status {
+      padding-left: 1em;
+      padding-right: 1em;
+    }
+  }
+}
+
+.datatable-body {
+  overflow-x: auto;
+
   td,
   tr {
     padding: 0;
+
+    &.thumbnail {
+      padding-left: 0.4em;
+    }
   }
 
   td.retake-count {
@@ -601,11 +585,6 @@ td.retake-count {
 
   tr.task-line {
     cursor: pointer;
-
-    &.selected {
-      border: 0;
-      background: $purple;
-    }
   }
 }
 </style>
