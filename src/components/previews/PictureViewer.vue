@@ -277,7 +277,7 @@ export default {
       } else {
         this.picture.addEventListener('load', () => {
           this.isLoading = false
-          this.mountPicture()
+          this.onWindowResize()
         })
       }
       window.addEventListener('keydown', this.onKeyDown)
@@ -787,6 +787,7 @@ export default {
     currentIndex () {
       this.reset()
       this.resetUndoStacks()
+      this.onWindowResize()
     },
 
     light () {
@@ -947,5 +948,4 @@ export default {
   transition: 0.3s background ease;
   color: white;
 }
-
 </style>

@@ -207,6 +207,7 @@ export default {
     date: 'Date',
     dark_theme: 'Dark Theme',
     days_spent: 'day spent | days spent',
+    days_estimated: 'day estimated | days estimated',
     delete: 'Delete',
     delete_all: 'Delete all',
     delete_text: 'Are you sure you want to remove {name} from your database?',
