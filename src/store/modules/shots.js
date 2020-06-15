@@ -990,6 +990,7 @@ const actions = {
         commit(SET_EPISODE_STATS, { episodeStats, taskTypeMap })
         return Promise.resolve()
       })
+      .catch(console.error)
   },
 
   setEpisodeSearch ({ commit }, searchQuery) {

@@ -64,7 +64,7 @@
               'flexrow-item': true,
               selected: currentPreviewIndex === index
             }"
-            :key="'preview-' + preview.revision"
+            :key="'preview-' + preview.id"
             @click="onPreviewChanged(index)"
             v-for="(preview, index) in lastFivePreviews"
           >
