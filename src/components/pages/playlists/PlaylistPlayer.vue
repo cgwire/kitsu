@@ -210,6 +210,13 @@
         icon="right"
         @click="onNextPictureClicked"
       />
+      <a
+        class="button playlist-button flexrow-item"
+        :href="currentEntityPicturePath"
+        target="blank"
+      >
+        <arrow-up-right-icon class="icon" />
+      </a>
     </div>
 
     <div
@@ -567,7 +574,7 @@
 import moment from 'moment-timezone'
 import { mapActions, mapGetters } from 'vuex'
 import { fabric } from 'fabric'
-import { DownloadIcon, RepeatIcon } from 'vue-feather-icons'
+import { ArrowUpRightIcon, DownloadIcon, RepeatIcon } from 'vue-feather-icons'
 
 import { roundToFrame } from '../../../lib/video'
 import AnnotationBar from './AnnotationBar'
@@ -590,6 +597,7 @@ export default {
 
   components: {
     AnnotationBar,
+    ArrowUpRightIcon,
     ButtonSimple,
     ColorPicker,
     Combobox,
@@ -2359,5 +2367,12 @@ progress {
 
 .loading-wrapper {
   width: 100%;
+}
+
+.playlist-player a.playlist-button {
+  margin-top: 3px;
+  svg {
+    width: 18px;
+  }
 }
 </style>
