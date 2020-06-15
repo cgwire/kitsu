@@ -982,16 +982,14 @@ const actions = {
     })
   },
 
-  loadEpisodeStats ({ commit }, productionId) {
-    return new Promise((resolve, reject) => {
-      commit(SET_EPISODE_STATS, {})
-      shotsApi.getEpisodeStats(productionId)
-        .then((episodeStats) => {
-          commit(SET_EPISODE_STATS, episodeStats)
-          resolve()
-        })
-        .catch(reject)
-    })
+  loadEpisodeStats ({ commit, rootGetters }, productionId) {
+    const taskTypeMap = rootGetters.taskTypeMap
+    commit(SET_EPISODE_STATS, { episodeStats: {}, taskTypeMap })
+    return shotsApi.getEpisodeStats(productionId)
+      .then((episodeStats) => {
+        commit(SET_EPISODE_STATS, { episodeStats, taskTypeMap })
+        return Promise.resolve()
+      })
   },
 
   setEpisodeSearch ({ commit }, searchQuery) {
@@ -1761,7 +1759,7 @@ const mutations = {
     }
   },
 
-  [SET_EPISODE_STATS] (state, episodeStats) {
+  [SET_EPISODE_STATS] (state, { episodeStats, taskTypeMap }) {
     const validationColumnsMap = {}
     if (episodeStats.all) {
       Object.keys(episodeStats.all).forEach((entryId) => {
@@ -1771,7 +1769,10 @@ const mutations = {
       })
     }
     state.episodeStats = episodeStats
-    state.episodeValidationColumns = Object.keys(validationColumnsMap)
+    const validationColumns = Object.keys(validationColumnsMap)
+    state.episodeValidationColumns = sortValidationColumns(
+      validationColumns, taskTypeMap
+    )
   },
 
   [COMPUTE_SEQUENCE_STATS] (state, { taskMap, taskStatusMap }) {
