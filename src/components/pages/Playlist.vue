@@ -384,7 +384,7 @@ export default {
 
   data () {
     return {
-      currentPlaylist: { name: this.$t('playlists.no_selection') },
+      currentPlaylist: { name: '' },
       currentSort: 'updated_at',
       sortOptions: [
         'updated_at',
@@ -392,7 +392,7 @@ export default {
         'name'
       ].map(name => ({ label: name, value: name })),
       currentEntities: {},
-      isAddingEntity: true,
+      isAddingEntity: false,
       sortedPlaylists: [],
       playlistToEdit: {
         name: `${moment().format('YYYY-MM-DD HH:mm:ss')}`,

@@ -41,7 +41,7 @@
   <div
     class="filler flexrow video-container"
     ref="video-container"
-    v-show="!isAddingEntity"
+    v-show="!isAddingEntity || isLoading"
   >
     <raw-video-player
       class="raw-player"
@@ -698,6 +698,7 @@ export default {
     } else {
       this.entityList = []
     }
+    if (!this.playlist.name) this.isLoading = true
     this.updateProgressBar()
     if (this.picturePlayer) this.picturePlayer.onload = this.resetPictureCanvas
     this.$nextTick(() => {
