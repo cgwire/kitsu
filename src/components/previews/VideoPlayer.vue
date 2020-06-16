@@ -82,6 +82,13 @@
           <repeat-icon class="icon smaller" />
         </button>
 
+        <button
+          class="button flexrow-item"
+          @click="onToggleSoundClicked">
+          <volume-x-icon class="icon" v-if="isMuted" />
+          <volume-2-icon class="icon" v-if="!isMuted" />
+        </button>
+
         <span class="flexrow-item time-indicator">
           {{ currentTime }}
         </span>
@@ -260,6 +267,8 @@ import {
   PauseIcon,
   PlayIcon,
   RepeatIcon,
+  Volume2Icon,
+  VolumeXIcon,
   TypeIcon,
   XIcon
 } from 'vue-feather-icons'
@@ -291,6 +300,8 @@ export default {
     PauseIcon,
     PlayIcon,
     RepeatIcon,
+    Volume2Icon,
+    VolumeXIcon,
     Spinner,
     TypeIcon,
     XIcon
@@ -338,6 +349,7 @@ export default {
       isTyping: false,
       isLoading: false,
       isPlaying: false,
+      isMuted: false,
       isRepeating: false,
       maxDuration: '00:00.00',
       previewToCompareId: null,
@@ -589,6 +601,7 @@ export default {
       this.maxDuration = this.formatTime(this.videoDuration)
       this.isLoading = false
       this.isPlaying = false
+      this.isMuted = false
       this.isRepeating = false
 
       if (this.container) {
@@ -655,6 +668,11 @@ export default {
         const comparisonVideo = document.getElementById('comparison-movie')
         if (comparisonVideo) comparisonVideo.pause()
       }
+    },
+
+    toggleMute () {
+      this.video.muted = !this.video.muted
+      this.isMuted = this.video.muted
     },
 
     goPreviousFrame () {
@@ -749,6 +767,10 @@ export default {
       } else {
         this.isRepeating = true
       }
+    },
+
+    onToggleSoundClicked () {
+      this.toggleMute()
     },
 
     onCompareClicked () {
