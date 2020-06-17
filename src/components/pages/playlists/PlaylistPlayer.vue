@@ -61,6 +61,7 @@
       :is-repeating="isRepeating"
       :muted="true"
       :entities="entityListToCompare"
+      name="comparison"
       v-show="isComparing && isMovieComparison && !isLoading"
     />
 
@@ -1492,9 +1493,9 @@ export default {
         if (!this.isCommentsHidden) {
           this.$refs['task-info'].$el.style.height = `${height}px`
         }
-        if (this.rawPlayer) this.rawPlayer.resetHeight()
+        if (this.rawPlayer) this.rawPlayer.resetHeight(height)
         if (this.isComparing) {
-          this.$refs['raw-player-comparison'].resetHeight()
+          this.$refs['raw-player-comparison'].resetHeight(height)
           if (this.$refs['picture-preview-wrapper']) {
             this.$refs['picture-preview-wrapper'].style.height = `${height}px`
           }

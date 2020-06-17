@@ -42,6 +42,10 @@ export default {
     isRepeating: {
       type: Boolean,
       default: false
+    },
+    name: { // Debug purpose
+      type: String,
+      default: 'main'
     }
   },
 
@@ -135,11 +139,11 @@ export default {
       }
     },
 
-    resetHeight () {
+    resetHeight (height) {
       this.$nextTick(() => {
         if (this.currentPlayer) this.currentPlayer.style.height = '0px'
         if (this.nextPlayer) this.nextPlayer.style.height = '0px'
-        const height = this.container.offsetHeight
+        height = height || this.container.offsetHeight
         if (this.currentPlayer) this.currentPlayer.style.height = `${height}px`
         if (this.nextPlayer) this.nextPlayer.style.height = `${height}px`
       })
