@@ -320,7 +320,7 @@ export default {
     add_member_to_team: 'Add a member to the team: ',
     create_invite: 'Create and send invitation',
     delete_error: 'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?',
-    delete_text: 'Are you sure you want to remove {personName} from your database? Every related comments and previews will be deleted. Pleas confirm by typing the full person name below.',
+    delete_text: 'Are you sure you want to remove {personName} from your database? Every related comments and previews will be deleted. Please confirm by typing the full person name below.',
     edit_title: 'Edit person',
     empty_team: 'There is no one listed in the project team.',
     invite: 'Send an invitation',
