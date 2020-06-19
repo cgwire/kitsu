@@ -544,14 +544,14 @@ export default {
     },
 
     resetEpisodeForTVShow () {
-      const isNotAssetSection =
-        !this.assetSections.includes(this.currentProjectSection)
+      const isAssetSection =
+        this.assetSections.includes(this.currentProjectSection)
       const isAssetEpisode =
         ['all', 'main'].includes(this.currentEpisodeId)
 
       // Set current episode to first episode if it's not related to assets.
       if (isAssetEpisode) {
-        if (isNotAssetSection) {
+        if (!isAssetSection) {
           this.currentEpisodeId =
             this.episodes.length > 0 ? this.episodes[0].id : null
         }
@@ -579,9 +579,9 @@ export default {
     },
 
     currentProductionId () {
+      this.updateRoute()
       this.resetEpisodeForTVShow()
       if (this.currentProduction.isTVShow) this.loadEpisodes()
-      this.updateRoute()
     },
 
     currentProjectSection () {

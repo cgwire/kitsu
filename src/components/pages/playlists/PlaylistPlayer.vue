@@ -41,7 +41,7 @@
   <div
     class="filler flexrow video-container"
     ref="video-container"
-    v-show="!isAddingEntity"
+    v-show="!isAddingEntity || isLoading"
   >
     <raw-video-player
       class="raw-player"
@@ -61,6 +61,7 @@
       :is-repeating="isRepeating"
       :muted="true"
       :entities="entityListToCompare"
+      name="comparison"
       v-show="isComparing && isMovieComparison && !isLoading"
     />
 
@@ -698,6 +699,7 @@ export default {
     } else {
       this.entityList = []
     }
+    if (!this.playlist.name) this.isLoading = true
     this.updateProgressBar()
     if (this.picturePlayer) this.picturePlayer.onload = this.resetPictureCanvas
     this.$nextTick(() => {
@@ -1491,9 +1493,9 @@ export default {
         if (!this.isCommentsHidden) {
           this.$refs['task-info'].$el.style.height = `${height}px`
         }
-        if (this.rawPlayer) this.rawPlayer.resetHeight()
+        if (this.rawPlayer) this.rawPlayer.resetHeight(height)
         if (this.isComparing) {
-          this.$refs['raw-player-comparison'].resetHeight()
+          this.$refs['raw-player-comparison'].resetHeight(height)
           if (this.$refs['picture-preview-wrapper']) {
             this.$refs['picture-preview-wrapper'].style.height = `${height}px`
           }

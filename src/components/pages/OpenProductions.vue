@@ -54,7 +54,7 @@
       </div>
       <div
         class="has-text-centered new-production-link"
-        v-if="!isCurrentUserClient"
+        v-if="isCurrentUserAdmin"
       >
         <a
           @click="showNewModal"
@@ -71,7 +71,7 @@
       <h1 class="title has-text-centered">
         {{ $t('productions.home.welcome') }}
       </h1>
-      <div v-if="isCurrentUserManager">
+      <div v-if="isCurrentUserAdmin">
         <p class="has-text-centered info">
           {{ $t('productions.home.empty') }}
         </p>
@@ -89,7 +89,7 @@
           {{ $t('productions.home.no_prod_for_client') }}
         </p>
       </div>
-      <div v-else>
+      <div v-else-if="!isCurrentUserManager">
         <p class="has-text-centered">
           {{ $t('productions.home.no_task') }}
         </p>
@@ -135,6 +135,7 @@ export default {
   computed: {
     ...mapGetters([
       'editProduction',
+      'isCurrentUserAdmin',
       'isCurrentUserManager',
       'isCurrentUserClient',
       'isOpenProductionsLoading',

@@ -13,9 +13,15 @@
       >
       </canvas>
     </div>
-    <img ref="picture" :src="pictureGifPath" v-if="isGif" />
-    <img ref="picture" :src="pictureDlPath" v-else-if="isFullScreen()" />
-    <img ref="picture" :src="picturePath" v-else />
+    <div v-show="!isLoading" ref="picture-subwrapper">
+      <div v-show="isGif">
+        <img ref="picture-gif" :src="pictureGifPath" />
+      </div>
+      <div v-show="!isGif">
+        <img id="picture-big" ref="picture-big" :src="pictureDlPath" v-show="fullScreen" />
+        <img id="picture" ref="picture" :src="picturePath" v-show="!fullScreen" />
+      </div>
+    </div>
     <spinner v-if="isLoading"/>
   </div>
 
@@ -264,32 +270,42 @@ export default {
       isShowingPalette: false,
       palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
       pencil: 'big',
-      pencilPalette: ['big', 'medium', 'small']
+      pencilPalette: ['big', 'medium', 'small'],
+      picturePath: '',
+      pictureDlPath: '',
+      pictureGifPath: ''
     }
   },
 
   mounted () {
     this.container.style.height = this.getDefaultHeight() + 'px'
-    setTimeout(() => {
-      if (this.picture.complete) {
-        this.isLoading = false
-        this.mountPicture()
-      } else {
-        this.picture.addEventListener('load', () => {
-          this.isLoading = false
-          this.onWindowResize()
-        })
-      }
-      window.addEventListener('keydown', this.onKeyDown)
-      window.addEventListener('resize', this.onWindowResize)
-      const events = [
-        'webkitfullscreenchange',
-        'mozfullscreenchange',
-        'fullscreenchange',
-        'msfullscreenchange'
-      ]
-      events.forEach(eventName => window.addEventListener(eventName, this.exitHandler))
-    }, 0)
+    this.isLoading = true
+    if (this.picture.complete) {
+      this.isLoading = false
+      this.onWindowResize()
+    }
+    this.picture.addEventListener('load', () => {
+      this.isLoading = false
+      this.resetPicture()
+    })
+    this.pictureBig.addEventListener('load', () => {
+      this.isLoading = false
+      this.resetPicture()
+    })
+    this.pictureGif.addEventListener('load', () => {
+      this.isLoading = false
+      this.resetPicture()
+    })
+    window.addEventListener('keydown', this.onKeyDown)
+    window.addEventListener('resize', this.onWindowResize)
+    const events = [
+      'webkitfullscreenchange',
+      'mozfullscreenchange',
+      'fullscreenchange',
+      'msfullscreenchange'
+    ]
+    events.forEach(eventName => window.addEventListener(eventName, this.exitHandler))
+    this.setPicturePath()
   },
 
   computed: {
@@ -309,28 +325,25 @@ export default {
       return this.$refs.picture
     },
 
+    pictureBig () {
+      return this.$refs['picture-big']
+    },
+
+    pictureGif () {
+      return this.$refs['picture-gif']
+    },
+
     pictureWrapper () {
       return this.$refs['picture-wrapper']
     },
 
-    picturePath () {
-      const previewId = this.preview.previews[this.currentIndex - 1].id
-      return `/api/pictures/previews/preview-files/${previewId}.png`
+    pictureSubWrapper () {
+      return this.$refs['picture-subwrapper']
     },
 
     pictureOriginalPath () {
       const previewId = this.preview.previews[this.currentIndex - 1].id
       return `/api/pictures/originals/preview-files/${previewId}.png`
-    },
-
-    pictureDlPath () {
-      const previewId = this.preview.previews[this.currentIndex - 1].id
-      return `/api/pictures/originals/preview-files/${previewId}/download`
-    },
-
-    pictureGifPath () {
-      const previewId = this.preview.previews[this.currentIndex - 1].id
-      return `/api/pictures/originals/preview-files/${previewId}.gif`
     },
 
     currentPreview () {
@@ -359,12 +372,16 @@ export default {
     },
 
     mountPicture () {
-      this.container.style.height = this.getDefaultHeight() + 'px'
-      if (!this.fabricCanvas) {
-        this.setupFabricCanvas()
-      }
-      this.loadAnnotation(0)
-      this.$nextTick(this.fixCanvasSize)
+      this.$nextTick(() => {
+        this.container.style.height = this.getDefaultHeight() + 'px'
+        this.pictureWrapper.style.height = this.getDefaultHeight() - 32 + 'px'
+        this.pictureSubWrapper.style['max-height'] = this.getDefaultHeight() - 32 + 'px'
+        if (!this.fabricCanvas) {
+          this.setupFabricCanvas()
+        }
+        this.loadAnnotation(0)
+        this.$nextTick(this.fixCanvasSize)
+      })
     },
 
     setupFabricCanvas () {
@@ -416,17 +433,17 @@ export default {
 
     getDimensions () {
       let ratio = 1
-      if (this.picture.naturalWidth) {
+      if (this.picture.naturalWidth && !this.isGif) {
         ratio = this.picture.naturalHeight / this.picture.naturalWidth
+      } else if (this.pictureGif.naturalWidth && this.isGif) {
+        ratio = this.pictureGif.naturalHeight / this.pictureGif.naturalWidth
       }
       let width = this.container.offsetWidth - 1
       let height = Math.floor(width * ratio)
-      if (height > this.getDefaultHeight()) {
-        height = this.getDefaultHeight()
+      if (height > this.getDefaultHeight() - 32) {
+        height = this.getDefaultHeight() - 32
       }
-      height = height - 32
       width = Math.floor(height / ratio)
-
       return { width, height }
     },
 
@@ -535,17 +552,23 @@ export default {
       }
     },
 
+    resetPicture () {
+      this.mountPicture()
+      this.reloadAnnotations()
+      this.$nextTick(this.fixCanvasSize)
+    },
+
     onWindowResize () {
       const now = (new Date().getTime())
       this.lastCall = this.lastCall || 0
       if (now - this.lastCall > 600) {
         this.lastCall = now
-        setTimeout(() => {
-          this.clearCanvas()
+        this.clearCanvas()
+        this.$nextTick(() => {
           this.mountPicture()
           this.reloadAnnotations()
           this.$nextTick(this.fixCanvasSize)
-        }, 10)
+        })
       }
     },
 
@@ -758,11 +781,17 @@ export default {
       const height = dimensions.height
       this.picture.width = width
       this.picture.height = height
+      this.pictureBig.width = width
+      this.pictureBig.height = height
+      this.pictureGif.width = width
+      this.pictureGif.height = height
       if (this.fabricCanvas) {
         this.fabricCanvas.setDimensions({ width, height })
         const containerWidth = this.container.offsetWidth
         const margin = Math.round((containerWidth - width) / 2)
-        this.$refs['canvas-wrapper'].style.left = margin + 'px'
+        this.canvasWrapper.style.left = margin + 'px'
+        this.canvasWrapper.style.width = width + 'px'
+        this.canvasWrapper.style.height = height + 'px'
         setTimeout(() => {
           this.fabricCanvas.calcOffset()
         }, 10)
@@ -771,27 +800,60 @@ export default {
 
     changeCurrentPreview (previewFile) {
       this.$emit('change-current-preview', previewFile)
+    },
+
+    setPicturePath () {
+      if (this.isGif) {
+        const previewId = this.preview.previews[this.currentIndex - 1].id
+        this.pictureGifPath = `/api/pictures/originals/preview-files/${previewId}.gif`
+      } else {
+        const previewId = this.preview.previews[this.currentIndex - 1].id
+        this.picturePath = `/api/pictures/previews/preview-files/${previewId}.png`
+      }
+    },
+
+    setPictureDlPath () {
+      const previewId = this.preview.previews[this.currentIndex - 1].id
+      this.pictureDlPath = `/api/pictures/originals/preview-files/${previewId}/download`
     }
   },
 
   watch: {
     preview () {
+      this.isLoading = true
       if (this.currentIndex > 1) {
         this.currentIndex = 1
       } else {
         this.reset()
       }
+      this.setPicturePath()
+      this.setPictureDlPath()
       this.resetUndoStacks()
     },
 
     currentIndex () {
+      this.isLoading = true
       this.reset()
       this.resetUndoStacks()
-      this.onWindowResize()
+      if (this.fullScreen) {
+        this.setPictureDlPath()
+      } else {
+        this.setPicturePath()
+      }
     },
 
     light () {
       this.onWindowResize()
+    },
+
+    fullScreen () {
+      if (this.fullScreen) {
+        this.isLoading = true
+        this.setPictureDlPath()
+        if (this.pictureBig.complete) this.isLoading = false
+      } else {
+        this.setPicturePath()
+      }
     }
   }
 }

@@ -20,6 +20,7 @@
       >
         <span class="asset-type-name flexrow-item">
           {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
+          ({{ typeAssets.length }})
         </span>
         <div class="asset-type-items flexrow-item">
           <asset-block
@@ -128,11 +129,11 @@ export default {
 
 .asset-type-name {
   display: flex;
-  flex: 0 0 130px;
+  flex: 0 0 150px;
   align-items: center;
   align-self: flex-start;
   margin-right: 1em;
-  width: 130px;
+  width: 150px;
   height: 40px;
   color: $grey;
   text-transform: uppercase;

@@ -293,10 +293,11 @@ export default {
 
     applyTaskTypeChoice (query) {
       this.taskTypeFilters.values.forEach((taskTypeFilter) => {
-        const operator = taskTypeFilter.operator
+        let operator = '=['
+        if (taskTypeFilter.operator === '=-') operator = '=[-'
         const taskType = this.getTaskType(taskTypeFilter.id)
         const taskStatus = this.taskStatusMap[taskTypeFilter.statusId]
-        query += ` [${taskType.name}]${operator}${taskStatus.short_name}`
+        query += ` [${taskType.name}]${operator}${taskStatus.short_name}]`
       })
       return query
     },

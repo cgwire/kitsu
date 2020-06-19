@@ -384,7 +384,7 @@ export default {
 
   data () {
     return {
-      currentPlaylist: { name: this.$t('playlists.no_selection') },
+      currentPlaylist: { name: '' },
       currentSort: 'updated_at',
       sortOptions: [
         'updated_at',
@@ -392,7 +392,7 @@ export default {
         'name'
       ].map(name => ({ label: name, value: name })),
       currentEntities: {},
-      isAddingEntity: true,
+      isAddingEntity: false,
       sortedPlaylists: [],
       playlistToEdit: {
         name: `${moment().format('YYYY-MM-DD HH:mm:ss')}`,
@@ -1023,6 +1023,9 @@ export default {
 
   mounted () {
     this.reloadAll()
+    if (localStorage.getItem('playlist-sort')) {
+      this.currentSort = localStorage.getItem('playlist-sort')
+    }
     this.resetSorting()
   },
 
@@ -1057,6 +1060,7 @@ export default {
     },
 
     currentSort () {
+      localStorage.setItem('playlist-sort', this.currentSort)
       this.resetSorting()
     }
   },

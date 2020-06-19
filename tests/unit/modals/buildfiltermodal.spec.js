@@ -63,6 +63,7 @@ describe('BuildFilterModal', () => {
     }
     peopleStore = {
       getters: {
+        isCurrentUserVendor: () => false,
         people: () => [
           { id: 'person-1', name: 'John' },
           { id: 'person-2', name: 'James' },
@@ -218,7 +219,7 @@ describe('BuildFilterModal', () => {
           })
           const query = wrapper.vm.applyFilter()
           expect(wrapper.emitted().confirm).toBeTruthy()
-          expect(wrapper.emitted().confirm[0][0]).toBe('[Modeling]=WIP')
+          expect(wrapper.emitted().confirm[0][0]).toBe('[Modeling]=[WIP]')
       })
       describe('Build filter', () => {
         describe('task types', () => {
@@ -235,7 +236,7 @@ describe('BuildFilterModal', () => {
               }
             })
             const query = wrapper.vm.buildFilter()
-            expect(query).toBe('[Modeling]=WIP')
+            expect(query).toBe('[Modeling]=[WIP]')
           })
           it('status is not', () => {
             wrapper.setData({
@@ -250,7 +251,7 @@ describe('BuildFilterModal', () => {
               }
             })
             const query = wrapper.vm.buildFilter()
-            expect(query).toBe('[Modeling]=-WIP')
+            expect(query).toBe('[Modeling]=[-WIP]')
           })
         })
         describe('descriptors', () => {

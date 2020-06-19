@@ -44,6 +44,8 @@
         value="0"
         min="0"
         @click="onProgressClicked"
+        @mousedown="onProgressMouseDown"
+        @mousemove="onProgressMouseMove"
       >
         <span
           id="progress-bar"
@@ -572,10 +574,12 @@ export default {
 
     setCurrentTime (currentTime) {
       currentTime = roundToFrame(currentTime, this.fps)
+      /*
       this.progress.value = currentTime
       this.progressBar.style.width = Math.floor(
         (currentTime / this.video.duration) * 100
       ) + '%'
+      */
       this.clearCanvas()
       this.video.currentTime = currentTime
       if (this.isComparing) {
@@ -1082,6 +1086,44 @@ export default {
 
     changeCurrentPreview (previewFile) {
       this.$emit('change-current-preview', previewFile)
+    },
+
+    pauseEvent (e) {
+      if (e.stopPropagation) e.stopPropagation()
+      if (e.preventDefault) e.preventDefault()
+      e.cancelBubble = true
+      e.returnValue = false
+      return false
+    },
+
+    onProgressMouseDown (e) {
+      if (e.buttons === 1) { // Primary button (left click)
+        this.pauseEvent(e)
+        let left = this.progress.offsetLeft
+        if (left === 0 && !this.isFullScreen()) {
+          left = this.progress.parentElement.offsetParent.offsetLeft - 10
+        }
+        const pos = (e.pageX - left) / this.progress.offsetWidth
+        const currentTime = pos * this.video.duration
+        this.setCurrentTime(currentTime)
+      }
+    },
+
+    onProgressMouseMove (e) {
+      if (e.buttons === 1) { // Primary button (left click)
+        const now = (new Date().getTime())
+        this.lastCall = this.lastCall || 0
+        if (now - this.lastCall > 130) {
+          this.lastCall = now
+          let left = this.progress.offsetLeft
+          if (left === 0 && !this.isFullScreen()) {
+            left = this.progress.parentElement.offsetParent.offsetLeft - 10
+          }
+          const pos = (e.pageX - left) / this.progress.offsetWidth
+          const currentTime = pos * this.video.duration
+          this.setCurrentTime(currentTime)
+        }
+      }
     }
   },
 

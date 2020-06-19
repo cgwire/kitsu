@@ -102,6 +102,5 @@ export default {
 <style lang="scss" scoped>
 .add-people-field {
   font-size: 1.3em;
-  border-bottom: 2px solid $grey;
 }
 </style>
