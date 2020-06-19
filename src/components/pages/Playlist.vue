@@ -1023,6 +1023,9 @@ export default {
 
   mounted () {
     this.reloadAll()
+    if (localStorage.getItem('playlist-sort')) {
+      this.currentSort = localStorage.getItem('playlist-sort')
+    }
     this.resetSorting()
   },
 
@@ -1057,6 +1060,7 @@ export default {
     },
 
     currentSort () {
+      localStorage.setItem('playlist-sort', this.currentSort)
       this.resetSorting()
     }
   },
