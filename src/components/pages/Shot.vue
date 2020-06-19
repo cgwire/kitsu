@@ -120,6 +120,7 @@
           >
             <div class="asset-type">
               {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
+              ({{ typeAssets.length }})
             </div>
             <div class="asset-list">
               <router-link
