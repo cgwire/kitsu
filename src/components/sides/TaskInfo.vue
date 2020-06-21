@@ -168,7 +168,7 @@
 
             <div
               class="comments"
-              v-if="taskComments.length > 0 && !loading.task"
+              v-if="taskComments && taskComments.length > 0 && !loading.task"
             >
               <comment
                 :key="'comment' + comment.id"

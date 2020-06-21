@@ -188,7 +188,7 @@ export const annotationMixin = {
       if (this.fabricCanvas.getHeight() > baseHeight) {
         fontSize = fontSize * (this.fabricCanvas.getHeight() / baseHeight)
       }
-      const fabricText = new fabric.IText('Type…', {
+      const fabricText = new fabric.IText('Type...', {
         left: posX,
         top: posY,
         fontFamily: 'arial',
