@@ -372,16 +372,14 @@ export default {
     },
 
     mountPicture () {
-      this.$nextTick(() => {
-        this.container.style.height = this.getDefaultHeight() + 'px'
-        this.pictureWrapper.style.height = this.getDefaultHeight() - 32 + 'px'
-        this.pictureSubWrapper.style['max-height'] = this.getDefaultHeight() - 32 + 'px'
-        if (!this.fabricCanvas) {
-          this.setupFabricCanvas()
-        }
-        this.loadAnnotation(0)
-        this.$nextTick(this.fixCanvasSize)
-      })
+      this.container.style.height = this.getDefaultHeight() + 'px'
+      this.pictureWrapper.style.height = this.getDefaultHeight() - 32 + 'px'
+      this.pictureSubWrapper.style['max-height'] = this.getDefaultHeight() - 32 + 'px'
+      if (!this.fabricCanvas) {
+        this.setupFabricCanvas()
+      }
+      this.loadAnnotation(0)
+      this.$nextTick(this.fixCanvasSize)
     },
 
     setupFabricCanvas () {
@@ -424,7 +422,7 @@ export default {
     },
 
     getDefaultHeight () {
-      if (this.isFullScreen()) {
+      if (this.fullScreen) {
         return screen.height
       } else {
         return screen.width > 1300 && (!this.light || this.readOnly) ? 500 : 200
@@ -433,8 +431,12 @@ export default {
 
     getDimensions () {
       let ratio = 1
-      if (this.picture.naturalWidth && !this.isGif) {
+      if (!this.fullScreen && this.picture.naturalWidth && !this.isGif) {
         ratio = this.picture.naturalHeight / this.picture.naturalWidth
+      } else if (
+        this.fullScreen && this.pictureBig.naturalWidth && !this.isGif
+      ) {
+        ratio = this.pictureBig.naturalHeight / this.pictureBig.naturalWidth
       } else if (this.pictureGif.naturalWidth && this.isGif) {
         ratio = this.pictureGif.naturalHeight / this.pictureGif.naturalWidth
       }
@@ -555,7 +557,8 @@ export default {
     resetPicture () {
       this.mountPicture()
       this.reloadAnnotations()
-      this.$nextTick(this.fixCanvasSize)
+      this.resetUndoStacks()
+      this.fixCanvasSize()
     },
 
     onWindowResize () {
@@ -591,8 +594,9 @@ export default {
       // annotations are stored in a list.
       let annotation = { ...this.getAnnotation(0) }
 
+      console.log(annotation.drawing)
       this.fabricCanvas.getObjects().forEach((obj) => {
-        if (obj.type === 'path') {
+        if (obj.type === 'path' || obj.type === 'text') {
           if (!obj.canvasWidth) obj.canvasWidth = this.fabricCanvas.width
           obj.setControlsVisibility({
             mt: false,
@@ -621,6 +625,7 @@ export default {
           drawing: this.fabricCanvas.toJSON(['canvasWidth'])
         }
       }
+      annotation.drawing.objects = this.removeDuplicatedTexts(annotation.drawing)
       this.annotations = []
       this.annotations.push(annotation)
 
@@ -630,8 +635,19 @@ export default {
       })
     },
 
-    getAnnotation (time) {
-      return [...this.annotations][time]
+    removeDuplicatedTexts (drawing) {
+      const map = {}
+      return drawing.objects.filter((obj) => {
+        if (['text', 'i-text'].includes(obj.type)) {
+          const key = obj.left + '-' + obj.top + '-' + obj.text
+          if (!map[key]) {
+            map[key] = true
+            return true
+          } else {
+            return false
+          }
+        }
+      })
     },
 
     clearAnnotations () {
@@ -642,6 +658,10 @@ export default {
           }
         })
       }
+    },
+
+    getAnnotation (time) {
+      return [...this.annotations][time]
     },
 
     loadAnnotation (time) {
@@ -757,8 +777,6 @@ export default {
     displayFirst () {
       if (this.currentIndex > 1) {
         this.currentIndex = 1
-      } else {
-        this.reset()
       }
     },
 
@@ -767,10 +785,10 @@ export default {
     },
 
     reset () {
+      this.mountPicture()
       this.clearAnnotations()
       this.annotations = []
       this.reloadAnnotations()
-      this.mountPicture()
       this.isDrawing = false
       if (this.fabricCanvas) this.fabricCanvas.isDrawingMode = false
     },
@@ -779,12 +797,19 @@ export default {
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
+      this.picture.style.width = width + 'px'
+      this.picture.style.height = height + 'px'
+      this.pictureBig.style.width = width + 'px'
+      this.pictureBig.style.height = height + 'px'
+      this.pictureGif.style.width = width + 'px'
+      this.pictureGif.style.height = height + 'px'
       this.picture.width = width
       this.picture.height = height
       this.pictureBig.width = width
       this.pictureBig.height = height
       this.pictureGif.width = width
       this.pictureGif.height = height
+
       if (this.fabricCanvas) {
         this.fabricCanvas.setDimensions({ width, height })
         const containerWidth = this.container.offsetWidth
@@ -821,24 +846,34 @@ export default {
   watch: {
     preview () {
       this.isLoading = true
-      if (this.currentIndex > 1) {
-        this.currentIndex = 1
-      } else {
-        this.reset()
-      }
       this.setPicturePath()
       this.setPictureDlPath()
-      this.resetUndoStacks()
+      if (this.currentIndex > 1) {
+        this.currentIndex = 1
+      }
+      if (this.fullScreen) {
+        if (this.pictureBig.complete) {
+          this.resetPicture()
+        }
+      } else {
+        if (this.picture.complete) {
+          this.resetPicture()
+        }
+      }
     },
 
     currentIndex () {
       this.isLoading = true
-      this.reset()
-      this.resetUndoStacks()
       if (this.fullScreen) {
         this.setPictureDlPath()
+        if (this.pictureBig.complete) {
+          this.resetPicture()
+        }
       } else {
         this.setPicturePath()
+        if (this.picture.complete) {
+          this.resetPicture()
+        }
       }
     },
 
@@ -852,6 +887,8 @@ export default {
         this.setPictureDlPath()
         if (this.pictureBig.complete) this.isLoading = false
       } else {
+        this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
         this.setPicturePath()
       }
     }
