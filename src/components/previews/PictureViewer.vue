@@ -53,7 +53,7 @@
       <button
         class="button flexrow-item"
         @click="onAddPreviewClicked"
-        v-if="preview.extension !== 'gif'"
+        v-if="!readOnly && preview.extension !== 'gif'"
       >
         <plus-icon class="icon" />
       </button>
@@ -854,10 +854,12 @@ export default {
       if (this.fullScreen) {
         if (this.pictureBig.complete) {
           this.resetPicture()
+          this.isLoading = false
         }
       } else {
         if (this.picture.complete) {
           this.resetPicture()
+          this.isLoading = false
         }
       }
     },
