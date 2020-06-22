@@ -26,6 +26,9 @@ const getters = {
       return !notification.read
     })
     return unreadNotifications.length > 0
+  },
+  unreadNotificationsLength: (state) => {
+    return state.notifications.filter(n => !n.read).length
   }
 }
 

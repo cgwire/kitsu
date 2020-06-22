@@ -310,6 +310,7 @@ export default {
     commented_on: 'commented on',
     mention_you_on: 'mentioned you on',
     no_notifications: 'There is currently no notification for you for your current projects.',
+    unread_notifications: 'unread notification | unread notifications',
     title: 'Notifications',
     with_preview: 'with a preview'
   },

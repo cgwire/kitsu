@@ -5,7 +5,17 @@
   <router-link :to="{name: 'notifications'}">
     <bell-icon
       :class="notificationBellClass"
+      v-if="!isNewNotification"
     />
+    <span
+      class="number"
+      :title="unreadNotificationsLength + ' ' +
+              $tc('notifications.unread_notifications',
+                   unreadNotificationsLength)"
+      v-else
+    >
+      {{ unreadNotificationsLength }}
+    </span>
   </router-link>
 </div>
 </template>
@@ -29,7 +39,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'isNewNotification'
+      'isNewNotification',
+      'unreadNotificationsLength'
     ]),
 
     notificationBellClass () {
@@ -51,11 +62,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .has-no-notifications {
-  color: $grey;
+.dark {
+  .has-no-notifications {
+    color: $grey;
 
-  &.white {
-    color: $white-grey;
+    &.white {
+      color: $white-grey;
+    }
+  }
+
+  .number {
+    background: $pink-transparent;
+    border: 2px solid $pink;
+    color: $pink;
+    font-size: 0.9em;
+    margin: 0;
   }
 }
 
@@ -71,5 +92,15 @@ export default {
 .has-notifications {
   margin-top: 5px;
   color: $orange;
+}
+
+.number {
+  background: $orange-light;
+  border: 2px solid $orange;
+  color: $orange;
+  font-size: 0.9em;
+  margin: 0;
+  width: 30px;
+  height: 30px;
 }
 </style>
