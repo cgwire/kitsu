@@ -199,10 +199,23 @@ const csv = {
         encoding: 'ISO-8859-1',
         error: reject,
         complete: (results) => {
-          resolve(results.data)
+          const parsedData = csv.cleanUpCsv(results.data)
+          resolve(parsedData)
         }
       })
     })
+  },
+
+  cleanUpCsv: (data) => {
+    data.forEach(item => {
+      item.forEach((item, index, data) => {
+        data[index] = item.trim()
+      })
+    })
+    data[0].forEach((item, index, data) => {
+      data[index] = (item[0] || '').toUpperCase() + item.slice(1)
+    })
+    return data
   }
 }
 

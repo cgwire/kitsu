@@ -468,18 +468,6 @@ export default {
       this.modals.isImportRenderDisplayed = false
     },
 
-    cleanUpCsv (data) {
-      data.forEach(item => {
-        item.forEach((item, index, data) => {
-          data[index] = item.trim()
-        })
-      })
-      data[0].forEach((item, index, data) => {
-        data[index] = item[0].toUpperCase() + item.slice(1)
-      })
-      return data
-    },
-
     renderImport (data, mode) {
       this.loading.importing = true
       this.errors.importing = false
@@ -488,7 +476,6 @@ export default {
       }
       csv.processCSV(data)
         .then((results) => {
-          this.cleanUpCsv(results)
           this.parsedCSV = results
           this.hideImportModal()
           this.loading.importing = false
