@@ -23,6 +23,7 @@
             background: backgroundColor(currentStatus),
             color: color(currentStatus)
           }"
+          v-if="currentStatus"
         >
           {{ currentStatus.short_name }}
         </span>
@@ -125,9 +126,9 @@ export default {
     },
 
     backgroundColor (taskStatus) {
-      if (taskStatus.short_name === 'todo' && !this.isDarkTheme) {
+      if ((!taskStatus || taskStatus.short_name === 'todo') && !this.isDarkTheme) {
         return '#ECECEC'
-      } else if (taskStatus.short_name === 'todo' && this.isDarkTheme) {
+      } else if ((!taskStatus || taskStatus.short_name === 'todo') && this.isDarkTheme) {
         return '#5F626A'
       } else if (this.isDarkTheme) {
         return colors.darkenColor(taskStatus.color)
@@ -137,7 +138,7 @@ export default {
     },
 
     color (taskStatus) {
-      if (taskStatus.short_name !== 'todo' || this.isDarkTheme) {
+      if ((!taskStatus || taskStatus.short_name !== 'todo') || this.isDarkTheme) {
         return 'white'
       } else {
         return '#333'

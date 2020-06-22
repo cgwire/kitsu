@@ -59,12 +59,8 @@ const actions = {
   },
 
   loadMoreNews ({ commit, state }, params) {
-    return new Promise((resolve, reject) => {
-      newsApi.getLastNews(params)
-        .then((newsList) => commit(ADD_PREVIOUS_NEWS, newsList))
-        .then(resolve)
-        .catch(reject)
-    })
+    return newsApi.getLastNews(params)
+      .then((newsList) => commit(ADD_PREVIOUS_NEWS, newsList))
   },
 
   loadSingleNews ({ commit, state }, { productionId, newsId }) {
@@ -82,10 +78,7 @@ const mutations = {
   },
 
   [ADD_PREVIOUS_NEWS] (state, newsList) {
-    state.newsList = [
-      ...state.newsList,
-      ...sortByDate(newsList)
-    ]
+    state.newsList = state.newsList.concat(sortByDate(newsList))
   },
 
   [ADD_FIRST_NEWS] (state, news) {
