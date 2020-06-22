@@ -14,6 +14,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import Spinner from './components/widgets/Spinner.vue'
+import crisp from './lib/crisp'
 
 export default {
   name: 'app',
@@ -54,6 +55,7 @@ export default {
       document.documentElement.style.background = '#FFF'
       document.body.style.background = '#FFF'
     }
+    crisp.init()
   },
 
   metaInfo: {
