@@ -89,7 +89,6 @@
           icon="list"
           :title="$t('comments.add_checklist')"
           @click="addChecklistEntry(-1)"
-          v-if="isAddChecklistAllowed"
         >
         </button-simple>
         <button-simple
