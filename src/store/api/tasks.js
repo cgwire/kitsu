@@ -57,7 +57,12 @@ export default {
       checklist: data.checklist || []
     }
     if (data.attachment && data.attachment.length > 0) {
-      commentData = data.attachment[0]
+      commentData = new FormData()
+      let i = 0
+      data.attachment.forEach(attachment => {
+        commentData.append('file-' + i, attachment.get('file'))
+        i++
+      })
       commentData.set('task_status_id', data.taskStatusId)
       commentData.set('comment', data.comment)
       commentData.set('checklist', JSON.stringify(data.checklist || []))
