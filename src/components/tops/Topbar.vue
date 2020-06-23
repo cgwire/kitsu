@@ -610,6 +610,7 @@ export default {
         if (this.user.id === eventData.person_id) {
           const notificationId = eventData.notification_id
           this.loadNotification(notificationId)
+            .catch(console.error)
         }
       },
 

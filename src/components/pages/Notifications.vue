@@ -23,6 +23,7 @@
       :key="notification.id"
       @click="onNotificationSelected(notification)"
       v-for="notification in notifications"
+      v-show="!loading.notifications"
     >
 
       <div class="flexrow notification-line">

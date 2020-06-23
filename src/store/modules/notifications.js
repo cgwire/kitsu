@@ -33,43 +33,20 @@ const getters = {
 }
 
 const actions = {
-  loadNotifications ({ commit, state }, callback) {
-    if (callback) {
-      commit(LOAD_NOTIFICATIONS_END, [])
-      notificationsApi.getNotifications((err, notifications) => {
-        if (err) {
-          callback(err)
-        } else {
-          commit(LOAD_NOTIFICATIONS_END, notifications)
-          callback()
-        }
+  loadNotifications ({ commit, state }) {
+    return notificationsApi.getNotifications()
+      .then(notifications => {
+        commit(LOAD_NOTIFICATIONS_END, notifications)
+        Promise.resolve()
       })
-    } else {
-      return new Promise((resolve, reject) => {
-        commit(LOAD_NOTIFICATIONS_END, [])
-        notificationsApi.getNotifications((err, notifications) => {
-          if (err) {
-            reject(err)
-          } else {
-            commit(LOAD_NOTIFICATIONS_END, notifications)
-            resolve()
-          }
-        })
-      })
-    }
   },
 
   loadNotification ({ commit, state }, notificationId) {
-    return new Promise((resolve, reject) => {
-      notificationsApi.getNotification(notificationId, (err, notification) => {
-        if (err) {
-          reject(err)
-        } else {
-          commit(LOAD_NOTIFICATION_END, notification)
-          resolve()
-        }
+    return notificationsApi.getNotifications(notificationId)
+      .then(notification => {
+        commit(LOAD_NOTIFICATION_END, notification)
+        Promise.resolve()
       })
-    })
   },
 
   markAllNotificationsAsRead ({ commit }) {

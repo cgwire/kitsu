@@ -2,10 +2,10 @@ import client from './client'
 
 export default {
   getNotifications (callback) {
-    client.get('/api/data/user/notifications', callback)
+    return client.pget('/api/data/user/notifications')
   },
 
-  getNotification (notificationId, callback) {
-    client.get(`/api/data/user/notifications/${notificationId}`, callback)
+  getNotification (notificationId) {
+    return client.pget(`/api/data/user/notifications/${notificationId}`)
   }
 }
