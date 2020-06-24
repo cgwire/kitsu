@@ -136,6 +136,10 @@ export default {
     }
   },
 
+  estimation: {
+    title: 'Estimation'
+  },
+
   episodes: {
     all_episodes: 'All episodes',
     delete_error: 'An error occured while deleting this episode. There are probably data linked to it. Are you sure this episode has no sequence linked to it?',
@@ -740,11 +744,13 @@ export default {
     fields: {
       asset_type: 'Asset type',
       assignees: 'Assignees',
+      count: 'Count',
       due_date: 'Due date',
       duration: 'Duration',
       end_date: 'Validation date',
       entity: 'Entity',
       entity_name: 'Name',
+      estimated_quota: 'Avg. Quota',
       estimation: 'Estimation',
       frames: 'Fram.',
       last_comment: 'Last comment',

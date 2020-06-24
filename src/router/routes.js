@@ -600,6 +600,11 @@ export const routes = [
             name: 'task-type-schedule',
             path: 'schedule',
             component: TaskType
+          },
+          {
+            name: 'task-type-estimation',
+            path: 'estimation',
+            component: TaskType
           }
         ]
       },
@@ -809,9 +814,14 @@ export const routes = [
         name: 'episode-task-type',
         children: [
           {
+            name: 'episode-task-type-schedule',
             path: 'schedule',
-            component: TaskType,
-            name: 'episode-task-type-schedule'
+            component: TaskType
+          },
+          {
+            name: 'episode-task-type-estimation',
+            path: 'estimation',
+            component: TaskType
           }
         ]
       },

@@ -73,6 +73,8 @@
               :entity="getEntity(task.entity.id)"
               :width="50"
               :height="33"
+              :empty-width="50"
+              :empty-height="33"
             />
           </td>
           <td class="asset-type" v-if="isAssets">
