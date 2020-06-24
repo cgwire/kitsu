@@ -1146,7 +1146,7 @@ tbody:last-child .empty-line:last-child {
     .thumbnail-wrapper,
     .thumbnail-picture,
     .thumbnail-picture.thumbnail-empty {
-      margin: .35rem .35rem .35rem 0;
+      margin: 0 .35rem 0 0;
     }
 
     .thumbnail-wrapper {
