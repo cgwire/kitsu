@@ -283,10 +283,11 @@ import Combobox from '../widgets/Combobox'
 import Spinner from '../widgets/Spinner'
 
 import { annotationMixin } from './annotation_mixin'
+import { domMixin } from '@/components/mixins/dom'
 
 export default {
   name: 'video-player',
-  mixins: [annotationMixin],
+  mixins: [annotationMixin, domMixin],
 
   components: {
     AnnotationBar,
@@ -1086,14 +1087,6 @@ export default {
 
     changeCurrentPreview (previewFile) {
       this.$emit('change-current-preview', previewFile)
-    },
-
-    pauseEvent (e) {
-      if (e.stopPropagation) e.stopPropagation()
-      if (e.preventDefault) e.preventDefault()
-      e.cancelBubble = true
-      e.returnValue = false
-      return false
     },
 
     onProgressMouseDown (e) {
