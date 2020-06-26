@@ -76,3 +76,89 @@ export const getEndDateFromString = (startDate, endDateString) => {
     return startDate.clone().add('days', 1)
   }
 }
+
+export const formatSimpleDate = (date) => {
+  return moment(date).format('YYYY-MM-DD')
+}
+
+export const getDatesFromStartDate = (startDate, dueDate, estimation) => {
+  if (estimation && estimation > 0) {
+    dueDate = addBusinessDays(startDate, Math.ceil(estimation))
+  }
+
+  if (!startDate || !dueDate) {
+    const start = startDate ? formatSimpleDate(startDate) || startDate : null
+    const end = dueDate ? formatSimpleDate(dueDate) || dueDate : null
+    return {
+      start_date: start,
+      due_date: end
+    }
+  } else if (startDate.isAfter(dueDate)) {
+    return {
+      start_date: formatSimpleDate(startDate),
+      due_date: formatSimpleDate(startDate)
+    }
+  } else {
+    return {
+      start_date: formatSimpleDate(startDate),
+      due_date: formatSimpleDate(dueDate)
+    }
+  }
+}
+
+export const getDatesFromEndDate = (startDate, dueDate, estimation) => {
+  if (estimation && estimation > 0) {
+    startDate = removeBusinessDays(dueDate, Math.ceil(estimation))
+  }
+
+  if (!startDate || !dueDate) {
+    const start = startDate ? formatSimpleDate(startDate) || startDate : null
+    const end = dueDate ? formatSimpleDate(dueDate) || dueDate : null
+    return {
+      start_date: start,
+      due_date: end
+    }
+  } else if (startDate.isAfter(dueDate)) {
+    return {
+      start_date: formatSimpleDate(dueDate),
+      due_date: formatSimpleDate(dueDate)
+    }
+  } else {
+    return {
+      start_date: formatSimpleDate(startDate),
+      due_date: formatSimpleDate(dueDate)
+    }
+  }
+}
+
+export const addBusinessDays = (originalDate, numDaysToAdd) => {
+  const Sunday = 0
+  const Saturday = 6
+  let daysRemaining = numDaysToAdd
+  const newDate = originalDate.clone()
+
+  while (daysRemaining > 0) {
+    newDate.add(1, 'days')
+    if (newDate.day() !== Sunday && newDate.day() !== Saturday) {
+      daysRemaining--
+    }
+  }
+
+  return newDate
+}
+
+export const removeBusinessDays = (originalDate, numDaysToRemove) => {
+  const Sunday = 0
+  const Saturday = 6
+  let daysRemaining = numDaysToRemove
+  const newDate = originalDate.clone()
+
+  while (daysRemaining > 0) {
+    newDate.subtract(1, 'days')
+    if (newDate.day() !== Sunday && newDate.day() !== Saturday) {
+      daysRemaining--
+    }
+  }
+
+  return newDate
+}

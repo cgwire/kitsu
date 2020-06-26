@@ -1273,6 +1273,18 @@ tbody:last-child .empty-line:last-child {
     width: 30px;
     padding: .3rem;
   }
+
+  .numeric-cell {
+    min-width: 80px;
+    max-width: 80px;
+    width: 80px;
+  }
+
+  .input.stylehidden {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: none;
+  }
 }
 
 .datatable-row-header {
