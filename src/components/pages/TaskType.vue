@@ -1,5 +1,4 @@
 <template>
-
 <div class="task-type columns fixed-page">
   <div class="column main-column">
     <div class="task-type page" ref="page">
@@ -44,6 +43,11 @@
             <li :class="{'is-active': isActiveTab('schedule')}">
               <router-link :to="schedulePath">
                 {{ $t('schedule.title')}}
+              </router-link>
+            </li>
+            <li :class="{'is-active': isActiveTab('estimation')}">
+              <router-link :to="estimationPath">
+                {{ $t('estimation.title')}}
               </router-link>
             </li>
           </ul>
@@ -135,6 +139,18 @@
           @root-element-expanded="expandPersonElement"
         />
       </div>
+
+      <div
+        class="task-type-estimation flexrow-item"
+        v-if="isActiveTab('estimation')"
+      >
+        <estimation-helper
+          ref="estimation-widget"
+          :is-assets="isAssets"
+          :tasks="tasks"
+        />
+      </div>
+
     </div>
   </div>
 
@@ -173,10 +189,11 @@ import { ChevronLeftIcon } from 'vue-feather-icons'
 import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
 import ComboboxNumber from '../widgets/ComboboxNumber'
-import TaskInfo from '../sides/TaskInfo'
+import EstimationHelper from './tasktype/EstimationHelper'
 import Schedule from './schedule/Schedule'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
+import TaskInfo from '../sides/TaskInfo'
 import TaskList from '../lists/TaskList'
 import TaskTypeName from '../widgets/TaskTypeName'
 
@@ -188,6 +205,7 @@ export default {
     ChevronLeftIcon,
     Combobox,
     ComboboxNumber,
+    EstimationHelper,
     Schedule,
     SearchField,
     SearchQueryList,
@@ -245,9 +263,7 @@ export default {
 
   mounted () {
     this.isAssets = this.$route.path.includes('assets')
-    if (this.$route.path.includes('schedule')) {
-      this.activeTab = 'schedule'
-    }
+    this.updateActiveTab()
     setTimeout(() => {
       this.initData(false)
     }, 100)
@@ -312,6 +328,10 @@ export default {
 
     schedulePath () {
       return this.getRoute('task-type-schedule')
+    },
+
+    estimationPath () {
+      return this.getRoute('task-type-estimation')
     },
 
     // Helpers
@@ -402,6 +422,8 @@ export default {
     updateActiveTab () {
       if (this.$route.path.indexOf('schedule') > 0) {
         this.activeTab = 'schedule'
+      } else if (this.$route.path.indexOf('estimation') > 0) {
+        this.activeTab = 'estimation'
       } else {
         this.activeTab = 'tasks'
       }
@@ -883,6 +905,7 @@ export default {
 .task-type {
   display: flex;
   flex-direction: column;
+  max-height: 100%;
 }
 
 .columns {
@@ -910,6 +933,7 @@ export default {
 
 .query-list {
   margin-bottom: 0;
+  margin-top: 0.2em;
   margin-left: 1em;
   min-height: 25px;
 }
@@ -925,5 +949,10 @@ export default {
 
 .zoom-level {
   margin-top: -8px;
+}
+
+.task-type-estimation {
+  display: flex;
+  max-height: calc(100% - 200px);
 }
 </style>

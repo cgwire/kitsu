@@ -394,12 +394,11 @@ const actions = {
       const taskType = rootGetters.taskTypeMap[task.task_type_id]
 
       if (task && task.priority !== priority) {
-        tasksApi.updateTask(taskId, { priority }, (err, task) => {
-          if (!err) {
+        tasksApi.updateTask(taskId, { priority })
+          .then(task => {
             commit(EDIT_TASK_END, { task, taskType })
-          }
-          next(err)
-        })
+          })
+          .catch(next)
       } else {
         next()
       }
@@ -409,9 +408,11 @@ const actions = {
   },
 
   updateTask ({ commit }, { taskId, data }) {
-    return tasksApi.updateTask(taskId, data, () => {
-      commit(EDIT_TASK_DATES, { taskId, data })
-    })
+    commit(EDIT_TASK_DATES, { taskId, data })
+    return tasksApi.updateTask(taskId, data)
+      .then((task) => {
+        commit(EDIT_TASK_DATES, { taskId, data })
+      })
   },
 
   changeSelectedEstimations ({ commit, state, rootGetters }, estimation) {
@@ -420,10 +421,11 @@ const actions = {
         const task = state.taskMap[taskId]
         const taskType = rootGetters.taskTypeMap[task.task_type_id]
         if (task && task.estimation !== estimation) {
-          tasksApi.updateTask(taskId, { estimation }, (err, task) => {
-            if (!err) commit(EDIT_TASK_END, { task, taskType })
-            next(err)
-          })
+          tasksApi.updateTask(taskId, { estimation })
+            .then(task => {
+              commit(EDIT_TASK_END, { task, taskType })
+            })
+            .catch(next)
         } else {
           next()
         }
