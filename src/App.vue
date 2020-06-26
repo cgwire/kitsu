@@ -1146,7 +1146,7 @@ tbody:last-child .empty-line:last-child {
     .thumbnail-wrapper,
     .thumbnail-picture,
     .thumbnail-picture.thumbnail-empty {
-      margin: .35rem .35rem .35rem 0;
+      margin: 0 .35rem 0 0;
     }
 
     .thumbnail-wrapper {
@@ -1272,6 +1272,18 @@ tbody:last-child .empty-line:last-child {
     max-width: 30px;
     width: 30px;
     padding: .3rem;
+  }
+
+  .numeric-cell {
+    min-width: 80px;
+    max-width: 80px;
+    width: 80px;
+  }
+
+  .input.stylehidden {
+    border-color: transparent;
+    background-color: transparent;
+    box-shadow: none;
   }
 }
 

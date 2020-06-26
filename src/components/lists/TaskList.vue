@@ -73,6 +73,8 @@
               :entity="getEntity(task.entity.id)"
               :width="50"
               :height="33"
+              :empty-width="50"
+              :empty-height="33"
             />
           </td>
           <td class="asset-type" v-if="isAssets">
@@ -108,7 +110,17 @@
             {{ getEntity(task.entity.id).nb_frames }}
           </td>
           <td class="estimation">
-            {{ formatEstimation(task.estimation) }}
+            <input
+              v-if="selectionGrid[task.id]"
+              :ref="task.id + '-estimation'"
+              class="input"
+              type="number"
+              @change="updateEstimation($event.target.value)"
+              :value="formatEstimation(task.estimation)"
+            />
+            <span v-else>
+              {{ formatEstimation(task.estimation) }}
+            </span>
           </td>
           <td :class="{
             duration: true,
@@ -125,10 +137,35 @@
             </span>
           </td>
           <td class="start-date">
-            {{ formatDate(task.start_date) }}
+            <datepicker
+              v-if="selectionGrid[task.id]"
+              wrapper-class="datepicker"
+              input-class="date-field input"
+              :language="locale"
+              :monday-first="true"
+              :value="getDate(task.start_date)"
+              format="yyyy-MM-dd"
+              @input="updateStartDate"
+            />
+            <span v-else>
+              {{ formatDate(task.start_date) }}
+            </span>
           </td>
           <td class="due-date">
-            {{ formatDate(task.due_date) }}
+            <datepicker
+              v-if="selectionGrid[task.id]"
+              wrapper-class="datepicker"
+              input-class="date-field input"
+              :language="locale"
+              :monday-first="true"
+              :value="getDate(task.due_date)"
+              format="yyyy-MM-dd"
+              @input="updateDueDate"
+            />
+            <span v-else>
+              {{ formatDate(task.due_date) }}
+            </span>
+
           </td>
           <td class="real-start-date">
             {{ formatDate(task.real_start_date) }}
@@ -169,9 +206,14 @@
 import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
-import { range } from '../../lib/time'
+import {
+  getDatesFromStartDate, getDatesFromEndDate, range
+} from '../../lib/time'
 import { formatListMixin } from './format_mixin'
+import { domMixin } from '@/components/mixins/dom'
 
+import Datepicker from 'vuejs-datepicker'
+import { en, fr } from 'vuejs-datepicker/dist/locale'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import TableInfo from '../widgets/TableInfo'
 import PeopleAvatar from '../widgets/PeopleAvatar'
@@ -179,9 +221,10 @@ import ValidationCell from '../cells/ValidationCell'
 
 export default {
   name: 'task-list',
-  mixins: [formatListMixin],
+  mixins: [domMixin, formatListMixin],
 
   components: {
+    Datepicker,
     EntityThumbnail,
     PeopleAvatar,
     TableInfo,
@@ -192,7 +235,8 @@ export default {
     return {
       lastSelection: null,
       page: 1,
-      selectionGrid: {}
+      selectionGrid: {},
+      selectedDate: moment().toDate() // By default current day.
     }
   },
 
@@ -233,8 +277,10 @@ export default {
       'assetMap',
       'nbSelectedTasks',
       'personMap',
+      'user',
       'selectedTasks',
-      'shotMap'
+      'shotMap',
+      'taskMap'
     ]),
 
     timeSpent () {
@@ -272,6 +318,14 @@ export default {
       } else {
         return []
       }
+    },
+
+    locale () {
+      if (this.user.locale === 'fr_FR') {
+        return fr
+      } else {
+        return en
+      }
     }
   },
 
@@ -280,8 +334,13 @@ export default {
       'addSelectedTask',
       'addSelectedTasks',
       'clearSelectedTasks',
+      'updateTask',
       'removeSelectedTask'
     ]),
+
+    getDate (date) {
+      return date ? moment(date, 'YYYY-MM-DD').toDate() : null
+    },
 
     formatEstimation (estimation) {
       if (estimation) {
@@ -293,6 +352,40 @@ export default {
       } else {
         return 0
       }
+    },
+
+    updateEstimation (estimation) {
+      this.updateTaskField({ estimation })
+    },
+
+    updateStartDate (date) {
+      Object.keys(this.selectionGrid).forEach(taskId => {
+        const task = this.taskMap[taskId]
+        const startDate = moment(date)
+        const dueDate = task.due_date ? moment(task.due_date) : null
+        const data = getDatesFromStartDate(
+          startDate,
+          dueDate,
+          task.estimation
+        )
+        this.updateTask({ taskId, data })
+          .catch(console.error)
+      })
+    },
+
+    updateDueDate (date) {
+      Object.keys(this.selectionGrid).forEach(taskId => {
+        const task = this.taskMap[taskId]
+        const startDate = task.start_date ? moment(task.start_date) : null
+        const dueDate = moment(date)
+        const data = getDatesFromEndDate(
+          startDate,
+          dueDate,
+          task.estimation
+        )
+        this.updateTask({ taskId, data })
+          .catch(console.error)
+      })
     },
 
     formatDate (date) {
@@ -337,6 +430,12 @@ export default {
     },
 
     selectTask (event, index, task) {
+      if (event && event.target && (
+        // Dirty hack needed to make date picker and inputs work properly
+        ['INPUT'].includes(event.target.nodeName) ||
+        ['HEADER'].includes(event.target.parentNode.nodeName) ||
+        ['cell day selected'].includes(event.target.className)
+      )) return
       const isSelected = this.selectionGrid[task.id]
       const isManySelection = Object.keys(this.selectionGrid).length > 1
       if (!event.ctrlKey && !event.shiftKey) {
@@ -447,6 +546,13 @@ export default {
         taskLines.push(line)
       })
       return taskLines
+    },
+
+    updateTaskField (data) {
+      Object.keys(this.selectionGrid).forEach(taskId => {
+        this.updateTask({ taskId, data })
+          .catch(console.error)
+      })
     }
   },
 
@@ -493,8 +599,8 @@ export default {
 }
 
 .assignees {
-  min-width: 130px;
-  width: 130px;
+  min-width: 100px;
+  width: 100px;
 }
 
 .frames,
@@ -510,8 +616,9 @@ export default {
 .due-date,
 .start-date,
 .real-end-date {
-  min-width: 130px;
-  width: 130px;
+  min-width: 110px;
+  max-width: 110px;
+  width: 110px;
 }
 
 .retake-count {
@@ -560,6 +667,10 @@ td.retake-count {
       padding-right: 1em;
     }
   }
+}
+
+.input {
+  padding: 0.5em
 }
 
 .datatable-body {

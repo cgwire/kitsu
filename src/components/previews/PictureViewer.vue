@@ -835,6 +835,7 @@ export default {
         const previewId = this.preview.previews[this.currentIndex - 1].id
         this.picturePath = `/api/pictures/previews/preview-files/${previewId}.png`
       }
+      this.setPictureDlPath()
     },
 
     setPictureDlPath () {

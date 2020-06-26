@@ -143,11 +143,11 @@ span.thumbnail-empty {
 }
 
 table .thumbnail-picture.thumbnail-empty {
-  margin: 5px;
+  margin: 0px;
 }
 
 table .thumbnail-picture {
-  margin: 7px 5px 0 5px;
+  margin: 0px;
 }
 
 </style>

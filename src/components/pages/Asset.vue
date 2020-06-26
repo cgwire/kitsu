@@ -39,9 +39,11 @@
       <div class="flexrow-item">
         <page-subtitle :text="$t('main.info')" />
         <div class="table-body">
-          <table class="table" v-if="currentAsset">
-            <tbody>
-              <tr>
+          <table class="datatable" v-if="currentAsset">
+            <tbody class="table-body">
+              <tr
+                class="datatable-row"
+              >
                 <td class="field-label">{{ $t('assets.fields.description') }}</td>
                 <description-cell
                   :entry="currentAsset"
@@ -50,6 +52,7 @@
               </tr>
               <tr
                 :key="descriptor.id"
+                class="datatable-row"
                 v-for="descriptor in assetMetadataDescriptors"
               >
                 <td class="field-label">{{ descriptor.name }}</td>
