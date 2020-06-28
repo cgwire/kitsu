@@ -114,7 +114,6 @@
               v-if="selectionGrid[task.id]"
               :ref="task.id + '-estimation'"
               class="input"
-              type="number"
               @change="updateEstimation($event.target.value)"
               :value="formatEstimation(task.estimation)"
             />
@@ -207,7 +206,11 @@ import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import {
-  getDatesFromStartDate, getDatesFromEndDate, range
+  daysToMinutes,
+  getDatesFromStartDate,
+  getDatesFromEndDate,
+  minutesToDays,
+  range
 } from '../../lib/time'
 import { formatListMixin } from './format_mixin'
 import { domMixin } from '@/components/mixins/dom'
@@ -343,18 +346,11 @@ export default {
     },
 
     formatEstimation (estimation) {
-      if (estimation) {
-        if (estimation < 10) {
-          return estimation
-        } else {
-          return this.formatDuration(estimation)
-        }
-      } else {
-        return 0
-      }
+      return estimation ? this.formatDuration(estimation) : 0
     },
 
-    updateEstimation (estimation) {
+    updateEstimation (days) {
+      const estimation = daysToMinutes(this.organisation, days)
       this.updateTaskField({ estimation })
     },
 
@@ -366,7 +362,7 @@ export default {
         const data = getDatesFromStartDate(
           startDate,
           dueDate,
-          task.estimation
+          minutesToDays(this.organisation, task.estimation)
         )
         this.updateTask({ taskId, data })
           .catch(console.error)
@@ -381,7 +377,7 @@ export default {
         const data = getDatesFromEndDate(
           startDate,
           dueDate,
-          task.estimation
+          minutesToDays(this.organisation, task.estimation)
         )
         this.updateTask({ taskId, data })
           .catch(console.error)

@@ -162,3 +162,12 @@ export const removeBusinessDays = (originalDate, numDaysToRemove) => {
 
   return newDate
 }
+
+export const daysToMinutes = (organisation, days) => {
+  const nbHoursByDay = organisation.hours_by_day
+  return Math.floor(days * nbHoursByDay * 60)
+}
+
+export const minutesToDays = (organisation, minutes) => {
+  return minutes / 60 / organisation.hours_by_day
+}

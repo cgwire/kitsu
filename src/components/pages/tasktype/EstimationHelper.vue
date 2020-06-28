@@ -5,29 +5,32 @@
   >
     <div ref="body" class="task-list column datatable-wrapper">
       <table class="datatable">
-        <thead ref="thead" class="datatable-head">
+        <thead class="datatable-head">
           <tr>
-            <th class="assignees" ref="th-assignees">
+            <th class="assignees">
               {{ $t('tasks.fields.assignees') }}
             </th>
-            <th class="thumbnail" ref="th-thumbnail">
+            <th class="thumbnail">
             </th>
-            <th class="asset-type" ref="th-type" v-if="isAssets">
+            <th class="asset-type" v-if="isAssets">
               {{ $t('tasks.fields.asset_type') }}
             </th>
-            <th class="sequence" ref="th-type" v-else>
+            <th class="sequence" v-else>
               {{ $t('tasks.fields.sequence') }}
             </th>
-            <th class="name" ref="th-name">
+            <th class="name">
               {{ $t('tasks.fields.entity_name') }}
             </th>
-            <th class="frames numeric-cell" ref="th-frames" v-if="!isAssets">
+            <th class="frames numeric-cell" v-if="!isAssets">
               {{ $t('tasks.fields.frames') }}
             </th>
-            <th class="estimation numeric-cell" ref="th-estimation">
+            <th class="seconds numeric-cell" v-if="!isAssets">
+              {{ $t('tasks.fields.seconds').substring(0, 3) }}.
+            </th>
+            <th class="estimation numeric-cell">
               {{ $t('tasks.fields.estimation').substring(0, 3) }}.
             </th>
-            <th class="empty" ref="">
+            <th class="empty">
               &nbsp;
             </th>
           </tr>
@@ -95,6 +98,9 @@
             <td class="frames numeric-cell" v-if="!isAssets">
               {{ getEntity(task.entity.id).nb_frames }}
             </td>
+            <td class="frames numeric-cell" v-if="!isAssets">
+              {{ getSeconds(task) }}
+            </td>
             <td
               @click="selectTask($event, task, index)"
               class="estimation numeric-cell"
@@ -126,6 +132,12 @@
             </th>
             <th class="count numeric-cell">
               {{ $t('tasks.fields.count') }}
+            </th>
+            <th class="frames numeric-cell">
+              {{ $t('tasks.fields.frames') }}
+            </th>
+            <th class="seconds numeric-cell">
+              {{ $t('tasks.fields.seconds').substring(0, 3) }}.
             </th>
             <th class="estimation numeric-cell">
               {{ $t('tasks.fields.estimation').substring(0, 3) }}.
@@ -166,6 +178,12 @@
             <td class="count numeric-cell">
               {{ person.count }}
             </td>
+            <td class="frames numeric-cell">
+              {{ person.frames }}
+            </td>
+            <td class="seconds numeric-cell">
+              {{ person.seconds }}
+            </td>
             <td class="estimation numeric-cell">
               {{ person.estimation }}
             </td>
@@ -191,14 +209,15 @@ import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import PeopleName from '@/components/widgets/PeopleName'
 
 import { domMixin } from '@/components/mixins/dom'
-import { range } from '@/lib/time'
+import { formatListMixin } from '@/components/lists/format_mixin'
+import { daysToMinutes, minutesToDays, range } from '@/lib/time'
 import { frameToSeconds } from '@/lib/video'
 import firstBy from 'thenby'
 
 export default {
   name: 'estimation-helper',
 
-  mixins: [domMixin],
+  mixins: [domMixin, formatListMixin],
 
   components: {
     EntityThumbnail,
@@ -233,6 +252,7 @@ export default {
     ...mapGetters([
       'assetMap',
       'currentProduction',
+      'organisation',
       'personMap',
       'shotMap'
     ]),
@@ -241,6 +261,7 @@ export default {
       const assigneeSet = new Set()
       const countMap = new Map()
       const secondMap = new Map()
+      const frameMap = new Map()
       const estimationMap = new Map()
       const assignees = []
       this.tasks.forEach(task => {
@@ -253,12 +274,14 @@ export default {
             (estimationMap.get(personId) || 0) + task.estimation
           )
           if (!this.isAssets) {
+            const frames = entity.nb_frames || 0
             const seconds = frameToSeconds(
-              entity.nb_frames,
+              frames,
               this.currentProduction,
               entity
             )
             secondMap.set(personId, (secondMap.get(personId) || 0) + seconds)
+            frameMap.set(personId, (frameMap.get(personId) || 0) + frames)
           }
         })
       })
@@ -269,12 +292,17 @@ export default {
         .sort(firstBy('name'))
         .map(person => {
           const estimation = estimationMap.get(person.id) || 0
-          const nbSeconds = secondMap.get(person.id) || 0
+          const seconds = secondMap.get(person.id) || 0
+          const frames = frameMap.get(person.id) || 0
+          const estimationDays = minutesToDays(this.organisation, estimation)
+          const quota = estimation > 0 ? (seconds / estimationDays) : 0
           return {
             ...person,
             count: countMap.get(person.id) || 0,
-            estimation,
-            quota: nbSeconds > 0 ? (estimation / nbSeconds).toFixed(2) : 0
+            estimation: this.formatEstimation(estimation),
+            frames,
+            quota: quota.toFixed(2),
+            seconds
           }
         })
     },
@@ -288,6 +316,8 @@ export default {
     ...mapActions([
       'updateTask'
     ]),
+
+    frameToSeconds,
 
     getEntity (entityId) {
       if (this.isAssets) {
@@ -312,11 +342,16 @@ export default {
     },
 
     formatEstimation (estimation) {
-      if (estimation) {
-        return estimation
-      } else {
-        return 0
-      }
+      return estimation ? this.formatDuration(estimation) : 0
+    },
+
+    getSeconds (task) {
+      const shot = this.getEntity(task.entity_id)
+      return frameToSeconds(
+        shot.nb_frames,
+        this.currentProduction,
+        shot
+      )
     },
 
     estimationUpdated (event, task) {
@@ -327,8 +362,9 @@ export default {
       }
     },
 
-    saveEstimations (estimation, task) {
+    saveEstimations (days, task) {
       const selection = Object.keys(this.selectionGrid)
+      const estimation = daysToMinutes(this.organisation, days)
       if (selection.length > 1) {
         selection.forEach(taskId => {
           this.updateTask({ taskId, data: { estimation } })
@@ -436,7 +472,6 @@ td {
 .assignees {
   min-width: 160px;
   max-width: 220px;
-  width: 220px;
 
   span {
     margin-top: 0.2em;
@@ -483,7 +518,7 @@ td {
 }
 
 .task-list {
-  flex: 2;
+  flex: 1.5;
 }
 
 .person-list {

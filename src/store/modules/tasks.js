@@ -415,27 +415,6 @@ const actions = {
       })
   },
 
-  changeSelectedEstimations ({ commit, state, rootGetters }, estimation) {
-    return new Promise((resolve, reject) => {
-      async.eachSeries(Object.keys(state.selectedTasks), (taskId, next) => {
-        const task = state.taskMap[taskId]
-        const taskType = rootGetters.taskTypeMap[task.task_type_id]
-        if (task && task.estimation !== estimation) {
-          tasksApi.updateTask(taskId, { estimation })
-            .then(task => {
-              commit(EDIT_TASK_END, { task, taskType })
-            })
-            .catch(next)
-        } else {
-          next()
-        }
-      }, (err) => {
-        if (err) reject(err)
-        else resolve()
-      })
-    })
-  },
-
   getTask ({ commit, rootGetters }, { taskId, callback }) {
     tasksApi.getTask(taskId, (err, task) => {
       if (!err) {

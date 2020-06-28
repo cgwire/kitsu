@@ -760,6 +760,7 @@ export default {
       real_end_date: 'Validation date',
       real_start_date: 'WIP date',
       retake_count: 'Retakes',
+      seconds: 'Seconds',
       sequence: 'Sequence',
       start_date: 'Start date',
       task_status: 'Status',

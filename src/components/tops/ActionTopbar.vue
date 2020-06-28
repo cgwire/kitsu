@@ -131,37 +131,6 @@
 
         <div
           class="flexrow-item"
-          v-if="selectedBar === 'estimations'"
-        >
-          <div class="flexrow">
-            <div class="flexrow-item strong bigger hide-small-screen">
-              {{ $t('tasks.set_estimations') }}
-            </div>
-            <div class="flexrow-item combobox-item">
-            <input
-              class="input estimation-input"
-              type="number"
-              min="0"
-              v-model="estimation"
-            />
-            </div>
-            <div class="flexrow-item" v-if="!isChangeEstimationLoading">
-              <button
-                class="button is-success confirm-button"
-                @click="confirmEstimationChange"
-              >
-                {{ $t('main.confirmation') }}
-              </button>
-
-            </div>
-            <div class="flexrow-item" v-if="isChangeEstimationLoading">
-              <spinner :is-white="true" />
-            </div>
-          </div>
-        </div>
-
-        <div
-          class="flexrow-item"
           v-if="selectedBar === 'tasks'"
         >
           <div class="flexrow">
@@ -364,14 +333,6 @@
 
         <div
           class="more-menu-item"
-          v-if="(isCurrentViewTaskType || isCurrentViewPerson) && isCurrentUserManager"
-          @click="selectBar('estimations')"
-        >
-          {{ $t('menu.set_estimations') }}
-        </div>
-
-        <div
-          class="more-menu-item"
           v-if="((isCurrentViewAsset || isCurrentViewShot) && !isCurrentViewTaskType) && isCurrentUserManager"
           @click="selectBar('tasks')"
         >
@@ -455,9 +416,7 @@ export default {
       currentTeam: [],
       customAction: {},
       customActions: [],
-      estimation: 0,
       isAssignationLoading: false,
-      isChangeEstimationLoading: false,
       isChangePriorityLoading: false,
       isChangeStatusLoading: false,
       isCreationLoading: false,
@@ -589,7 +548,6 @@ export default {
     currentMenuLabel () {
       const labels = {
         assignation: 'menu.assign_tasks',
-        estimations: 'menu.set_estimations',
         'change-status': 'menu.change_status',
         priorities: 'menu.change_priority',
         playlists: 'menu.generate_playlists',
@@ -613,7 +571,6 @@ export default {
   methods: {
     ...mapActions([
       'assignSelectedTasks',
-      'changeSelectedEstimations',
       'createSelectedTasks',
       'deleteSelectedTasks',
       'unassignSelectedTasks',
@@ -659,21 +616,6 @@ export default {
           this.isChangePriorityLoading = false
         }
       })
-    },
-
-    confirmEstimationChange () {
-      this.isChangeEstimationLoading = true
-      const nbHoursByDay = this.organisation.hours_by_day
-      const estimation = Math.floor(this.estimation * nbHoursByDay * 60)
-      this.changeSelectedEstimations(estimation)
-        .then(() => {
-          this.isChangeEstimationLoading = false
-        })
-        .catch((err) => {
-          this.isChangeEstimationLoading = false
-          this.isChangeEstimationError = true
-          console.error(err)
-        })
     },
 
     confirmTaskCreation () {
@@ -964,10 +906,6 @@ div.combobox-item {
 
 .clear-selection .flexrow-item:first-child {
   margin-left: auto;
-}
-
-.estimation-input {
-  width: 90px;
 }
 
 .comment-text {
