@@ -9,7 +9,11 @@ export const range = (start, end) => {
 
 export const formatDate = (date) => {
   const utcDate = moment.tz(date, 'UTC')
-  return utcDate.format('YYYY-MM-DD HH:mm')
+  if (moment().diff(utcDate, 'days') > 1) {
+    return utcDate.format('YYYY-MM-DD HH:mm')
+  } else {
+    return utcDate.fromNow()
+  }
 }
 
 export const monthToString = (month) => {
