@@ -6,15 +6,7 @@
         <div class="flexcolumn-item flexrow">
           <router-link
             class="back-link flexrow-item"
-            :to="shotsPath"
-            v-if="currentTaskType.for_shots"
-          >
-            <chevron-left-icon />
-          </router-link>
-          <router-link
-            class="back-link flexrow-item"
-            :to="assetsPath"
-            v-else
+            :to="backPath"
           >
             <chevron-left-icon />
           </router-link>
@@ -321,6 +313,23 @@ export default {
     },
 
     // Paths
+
+    backPath () {
+      if (this.isActiveTab('schedule')) {
+        return {
+          name: 'schedule',
+          params: {
+            production_id: this.currentProduction.id
+          }
+        }
+      } else {
+        if (this.currentTaskType.for_shots) {
+          return this.shotsPath
+        } else {
+          return this.assetsPath
+        }
+      }
+    },
 
     tasksPath () {
       return this.getRoute('task-type')
