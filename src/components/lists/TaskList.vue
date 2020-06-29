@@ -351,7 +351,7 @@ export default {
 
     updateEstimation (days) {
       const estimation = daysToMinutes(this.organisation, days)
-      this.updateTaskField({ estimation })
+      this.updateTasksEstimation({ estimation })
     },
 
     updateStartDate (date) {
@@ -544,8 +544,20 @@ export default {
       return taskLines
     },
 
-    updateTaskField (data) {
+    updateTasksEstimation ({ estimation }) {
       Object.keys(this.selectionGrid).forEach(taskId => {
+        const task = this.taskMap[taskId]
+        let data = { estimation }
+        if (task.start_date) {
+          const startDate = moment(task.start_date)
+          const dueDate = task.due_date ? moment(task.due_date) : null
+          data = getDatesFromStartDate(
+            startDate,
+            dueDate,
+            minutesToDays(this.organisation, estimation)
+          )
+          data.estimation = estimation
+        }
         this.updateTask({ taskId, data })
           .catch(console.error)
       })

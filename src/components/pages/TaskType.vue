@@ -129,6 +129,7 @@
           :is-loading="loading.entities"
           @item-changed="saveScheduleItem"
           @root-element-expanded="expandPersonElement"
+          @estimation-changed="updateEstimation"
         />
       </div>
 
@@ -164,9 +165,14 @@ import moment from 'moment'
 import { searchMixin } from '../mixins/search'
 
 import csv from '../../lib/csv'
-import { sortPeople } from '../../lib/sorting'
 import { buildSupervisorTaskIndex, indexSearch } from '../../lib/indexing'
+import { sortPeople } from '../../lib/sorting'
 import { slugify } from '../../lib/string'
+import {
+  daysToMinutes,
+  getDatesFromStartDate,
+  minutesToDays
+} from '../../lib/time'
 import {
   applyFilters,
   getDescFilters,
@@ -276,6 +282,7 @@ export default {
       'isCurrentUserManager',
       'isTVShow',
       'nbSelectedTasks',
+      'organisation',
       'personMap',
       'selectedTasks',
       'sequenceSubscriptions',
@@ -588,6 +595,24 @@ export default {
       csv.buildCsvFile(name, taskLines)
     },
 
+    updateEstimation ({ taskId, days }) {
+      const estimation = daysToMinutes(this.organisation, parseInt(days))
+      const task = this.taskMap[taskId]
+      let data = { estimation }
+      if (task.start_date) {
+        const startDate = moment(task.start_date)
+        const dueDate = task.due_date ? moment(task.due_date) : null
+        data = getDatesFromStartDate(
+          startDate,
+          dueDate,
+          minutesToDays(this.organisation, estimation)
+        )
+        data.estimation = estimation
+      }
+      this.updateTask({ taskId, data })
+        .catch(console.error)
+    },
+
     // Schedule
 
     resetScheduleItems () {
@@ -738,6 +763,7 @@ export default {
           loading: false,
           man_days: estimation,
           editable: this.isCurrentUserManager,
+          unresizable: estimation > 0,
           parentElement: personElement,
           color: this.getTaskElementColor(task, endDate),
           children: []

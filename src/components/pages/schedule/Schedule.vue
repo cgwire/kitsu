@@ -121,9 +121,20 @@
               <span class="filler flexrow-item">
                 {{ childElement.name }}
               </span>
+              <span class="flexrow-item"
+                v-if="childElement.editable"
+              >
+                <input
+                  class="man-days-unit flexrow-item"
+                  placeholder="0"
+                  @input="onChildEstimationChanged($event, childElement)"
+                  v-model="childElement.man_days"
+                />
+                {{ $t('schedule.md') }}
+              </span>
               <span
                 class="man-days-unit flexrow-item"
-                v-if="childElement.man_days"
+                v-else
               >
                 {{ childElement.man_days }}
                 {{ $t('schedule.md') }}
@@ -301,7 +312,7 @@
                 >
                   <div
                     :class="{
-                      'timebar-left-hand': childElement.editable
+                      'timebar-left-hand': childElement.editable && !childElement.unresizable
                     }"
                     @mousedown="moveTimebarLeftSide(childElement, $event)"
                   >
@@ -313,7 +324,7 @@
                   </div>
                   <div
                     :class="{
-                      'timebar-right-hand': childElement.editable
+                      'timebar-right-hand': childElement.editabl && !childElement.unresizablee
                     }"
                     @mousedown="moveTimebarRightSide(childElement, $event)"
                   >
@@ -599,6 +610,13 @@ export default {
       }
 
       this.updatePositionBarPosition(event)
+    },
+
+    onChildEstimationChanged (event, childElement) {
+      this.$emit('estimation-changed', {
+        taskId: childElement.id,
+        days: event.target.value
+      })
     },
 
     updatePositionBarPosition (event) {
@@ -1110,6 +1128,12 @@ export default {
     color: white;
   }
 
+  .entity-name {
+    .man-days-unit {
+      color: $white;
+    }
+  }
+
   .child-name .entity-name span {
     color: $white;
   }
@@ -1399,6 +1423,7 @@ export default {
   }
 
   .man-days-unit {
+    color: $dark-grey;
     font-size: 0.7em;
   }
 
