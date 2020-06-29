@@ -302,7 +302,7 @@ export default {
             estimation: this.formatEstimation(estimation),
             frames,
             quota: quota.toFixed(2),
-            seconds
+            seconds: seconds.toFixed(2)
           }
         })
     },
@@ -470,8 +470,9 @@ td {
 }
 
 .assignees {
-  min-width: 160px;
-  max-width: 220px;
+  min-width: 260px;
+  max-width: 260px;
+  width: 260px;
 
   span {
     margin-top: 0.2em;
@@ -499,6 +500,11 @@ td {
   min-width: 120px;
   width: 120px;
   font-weight: bold;
+}
+
+.number {
+  min-width: 80px;
+  width: 80px;
 }
 
 .estimation-helper {
