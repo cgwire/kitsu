@@ -3,7 +3,8 @@
   'modal': true,
   'is-active': active
 }">
-  <div class="modal-background"></div>
+  <div class="modal-background" @click="$emit('cancel')" ></div>
+
   <div class="modal-content">
     <div class="box content">
 
