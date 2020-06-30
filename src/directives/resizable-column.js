@@ -28,6 +28,7 @@ export default {
                 const diffX = e.pageX - pageX
                 const newWidth = (curColWidth + diffX) + 'px'
                 curCol.style.minWidth = newWidth
+                curCol.style.width = newWidth
                 localStorage.setItem(`${el.id}-${item.textContent}`, newWidth)
               }
             })
@@ -48,9 +49,10 @@ export default {
             item.appendChild(div)
             setListeners(item, div)
           }
-          if (localStorage.getItem(`${el.id}-${item.textContent}`)) {
-            item.style.minWidth =
-              localStorage.getItem(`${el.id}-${item.textContent}`)
+          const width = localStorage.getItem(`${el.id}-${item.textContent}`)
+          if (width) {
+            item.style.minWidth = width
+            item.style.width = width
           }
         })
       }

@@ -666,7 +666,7 @@ span.thumbnail-empty {
   background: #F3F3F3;
 }
 
-.metadata-descriptor {
+th.metadata-descriptor {
   min-width: 120px;
   max-width: 120px;
   width: 120px;

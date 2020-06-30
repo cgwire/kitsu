@@ -565,7 +565,7 @@ td.time-spent {
   width: 200px;
 }
 
-.metadata-descriptor {
+th.metadata-descriptor {
   min-width: 120px;
   max-width: 120px;
   width: 120px;
