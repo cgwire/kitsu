@@ -1,64 +1,47 @@
 <template>
-<article
-  :class="{
-    comment: true,
-    pinned: comment.pinned,
-    highlighted: highlighted
-  }"
-  :style="{
-    'border-left': '6px solid ' + comment.task_status.color
-  }"
->
-  <div class="flexrow">
-  <figure class="flexrow-item comment-left">
-    <people-avatar class="" :person="comment.person" />
-    <div
-      class="comment-like"
-      :title="isLikedBy"
-      @click="acknowledgeComment(comment)"
-    >
-      <button
-        :class="{
-          'like-button': true,
-          'like-button--empty': comment.like === undefined ? true : false
-        }"
-        type="button"
-        disabled="comment.person_id !== user.id"
-      >
-        <thumbs-up-icon size="1.2x"/>
-        <span>{{ comment.acknowledgements.length }}</span>
-      </button>
-    </div>
-    <span
-      class="task-status-name"
-      :style="{
-        color: comment.task_status.color
-      }"
-      v-if="comment.task_status.short_name !== 'todo'"
-    >
-      {{ comment.task_status.short_name }}
-    </span>
-  </figure>
-
-  <div class="flexrow-item comment-content">
-    <div class="content">
-      <div class="comment-person flexrow">
-        <div class="flexrow-item infos">
-          <strong class="">
-            <people-name class="" :person="comment.person" />
-          </strong>
-          <span class="comment-date">
-            {{ formatDate(comment.created_at) }}
-          </span>
-          <router-link
-            :to="previewRoute"
-            class="revision"
-            v-if="!light && comment.previews.length > 0"
-          >
-            {{ $t('comments.revision') }} {{ comment.previews[0].revision }}
-          </router-link>
-        </div>
+<div>
+  <article
+    :class="{
+      comment: true,
+      pinned: comment.pinned,
+      highlighted: highlighted
+    }"
+    :style="{
+      'box-shadow': boxShadowStyle,
+    }"
+    v-if="!isEmpty"
+  >
+    <div class="content-wrapper full">
+      <div class="flexrow">
+        <span
+          class="round-task-status-name"
+          :style="{
+            'background-color': comment.task_status.color,
+            color: 'white'
+          }"
+          v-if="comment.task_status.short_name !== 'todo'"
+        >
+          {{ comment.task_status.short_name }}
+        </span>
+        <people-avatar
+          class="flexrow-item"
+          :size="25"
+          :font-size="12"
+          :person="comment.person"
+        />
+        <strong class="flexrow-item">
+          <people-name
+            class=""
+            :person="comment.person"
+          />
+        </strong>
         <div class="filler"></div>
+        <span
+          class="flexrow-item date"
+          :title="fullDate"
+        >
+          {{ shortDate }}
+        </span>
         <div class="flexrow-item menu-wrapper">
           <chevron-down-icon
             class="menu-icon"
@@ -74,100 +57,150 @@
           />
         </div>
       </div>
-      <div>
-        <router-link
-          :to="previewRoute"
-          class="revision"
-          v-if="light && comment.previews.length > 0"
-        >
-          {{ $t('comments.revision') }} {{ comment.previews[0].revision }}
-        </router-link>
-      </div>
-
-      <p
-        class="comment-text"
-        v-if="comment.task_status.name === 'Done'"
-      >
-        <span :style="{'color': comment.task_status.color}">
-          {{ $t('comments.validated') }}
-        </span>
-      </p>
-      <p v-if="taskStatus.is_done && isLast">
-        <img src="../../assets/illustrations/validated.png" />
-      </p>
-      <p
-        v-if="personMap[comment.person_id].role === 'client'"
-      >
-        <span class="client-comment">
-          {{ $t('comments.comment_from_client') }}
-        </span>
-      </p>
-      <p
-        v-html="renderComment(comment.text, comment.mentions, personMap)"
-        class="comment-text"
-        v-if="comment.text"
-      >
-      </p>
-      <p
-        class="comment-text empty word-break"
-        v-else-if="comment.attachment_files.length === 0"
-      >
-        {{ $t('comments.empty_text') }}
-      </p>
-      <checklist
-        :checklist="checklist"
-        @remove-task="removeTask"
-        @keyup.native="emitChangeEvent($event)"
-        @emit-change="emitChangeEvent"
-        :disabled="!isChangeChecklistAllowed"
-        v-if="checklist.length > 0"
-      />
-      <p v-if="comment.attachment_files">
-        <a
-          :href="`/api/data/attachment-files/${attachment.id}/file`"
-          :key="attachment.id"
-          :title="attachment.name"
-          target="_blank"
-          v-for="attachment in pictureAttachments"
-        >
-          <img
-            :src="`/api/data/attachment-files/${attachment.id}/file`"
+      <div class="flexrow-item comment-content">
+        <div class="content">
+          <p
+            v-if="personMap[comment.person_id].role === 'client'"
+          >
+            <span class="client-comment">
+              {{ $t('comments.comment_from_client') }}
+            </span>
+          </p>
+          <p
+            v-html="renderComment(comment.text, comment.mentions, personMap)"
+            class="comment-text"
+            v-if="comment.text"
+          >
+          </p>
+          <checklist
+            class="checklist"
+            :checklist="checklist"
+            @remove-task="removeTask"
+            @keyup.native="emitChangeEvent($event)"
+            @emit-change="emitChangeEvent"
+            :disabled="!isChangeChecklistAllowed"
+            v-if="checklist.length > 0"
           />
-        </a>
-        <a
-          :href="`/api/data/attachment-files/${attachment.id}/file`"
-          :key="attachment.id"
-          :title="attachment.name"
-          target="_blank"
-          v-for="attachment in fileAttachments"
-        >
-          <paperclip-icon size="1x" />
-        </a>
-      </p>
+          <p v-if="taskStatus.is_done && isLast">
+            <img src="../../assets/illustrations/validated.png" />
+          </p>
+          <p v-if="comment.attachment_files.length > 0">
+            <a
+              :href="getAttachmentPath(attachment)"
+              :key="attachment.id"
+              :title="attachment.name"
+              target="_blank"
+              v-for="attachment in pictureAttachments"
+            >
+              <img
+                :src="getAttachmentPath(attachment)"
+              />
+            </a>
+            <a
+              :href="getAttachmentPath(attachment)"
+              :key="attachment.id"
+              :title="attachment.name"
+              target="_blank"
+              v-for="attachment in fileAttachments"
+            >
+              <paperclip-icon size="1x" />
+            </a>
+          </p>
+          <div
+            class="comment-like"
+            :title="isLikedBy"
+            @click="acknowledgeComment(comment)"
+            v-if="comment.text.length > 0"
+          >
+            <button
+              :class="{
+                'like-button': true,
+                'like-button--empty': comment.like === undefined ? true : false
+              }"
+              type="button"
+              disabled="comment.person_id !== user.id"
+            >
+              <thumbs-up-icon size="1x"/>
+              <span>{{ comment.acknowledgements.length }}</span>
+            </button>
+          </div>
+          <p class="pinned-text" v-if="comment.pinned">
+            {{ $t('comments.pinned') }}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div
+      class="flexrow content-wrapper preview-info"
+      v-if="comment.previews.length > 0"
+    >
+      <router-link
+        class="flexrow-item round-task-status-name revision"
+        :to="previewRoute"
+      >
+        Revision {{ comment.previews[0].revision }}
+      </router-link>
+    </div>
 
-      <p class="pinned-text" v-if="comment.pinned">
-        {{ $t('comments.pinned') }}
-      </p>
+    <div
+      class="has-text-centered add-checklist"
+      @click="addChecklistEntry()"
+      v-if="isAddChecklistAllowed"
+    >
+      {{ $t('comments.add_checklist') }}
+    </div>
+  </article>
+  <div class="empty-comment" v-else>
+    <div class="flexrow content-wrapper">
+      <span
+        class="round-task-status-name flexrow-item"
+        :style="{
+          'border': '1px solid' + comment.task_status.color,
+          color: comment.task_status.color
+        }"
+        v-if="comment.task_status.short_name !== 'todo'"
+      >
+        {{ comment.task_status.short_name }}
+      </span>
+      <people-avatar
+        class="flexrow-item"
+        :person="comment.person"
+        :size="25"
+        :font-size="12"
+      />
+      <people-name class="flexrow-item" :person="comment.person" />
+      <span class="filler">
+      </span>
+      <span class="flexrow-item date" :title="fullDate">
+        {{ shortDate }}
+      </span>
+      <div class="flexrow-item menu-wrapper">
+        <chevron-down-icon
+          class="menu-icon"
+          @click="toggleCommentMenu"
+        />
+        <comment-menu
+          :is-editable="editable"
+          :is-empty="true"
+          @pin-clicked="$emit('pin-comment', comment)"
+          @edit-clicked="$emit('edit-comment', comment); toggleCommentMenu()"
+          @delete-clicked="$emit('delete-comment', comment); toggleCommentMenu()"
+          ref="menu"
+        />
+      </div>
     </div>
   </div>
-  </div>
-  <div
-    class="has-text-centered add-checklist"
-    @click="addChecklistEntry()"
-    v-if="isAddChecklistAllowed"
-  >
-    {{ $t('comments.add_checklist') }}
-  </div>
-</article>
+</div>
 </template>
 
 <script>
-import { remove } from '../../lib/models'
 
+import moment from 'moment'
 import { mapGetters } from 'vuex'
-import { formatDate } from '../../lib/time'
+import { remove } from '../../lib/models'
 import { renderComment } from '../../lib/render'
 import { sortByName } from '../../lib/sorting'
+import { formatDate, parseDate } from '../../lib/time'
 
 import {
   ChevronDownIcon,
@@ -214,6 +247,10 @@ export default {
       type: Boolean,
       default: false
     },
+    isFirst: {
+      type: Boolean,
+      default: false
+    },
     isLast: {
       type: Boolean,
       default: false
@@ -240,6 +277,17 @@ export default {
       'taskTypeMap',
       'taskStatusMap'
     ]),
+
+    isEmpty () {
+      return (
+        this.comment.text.length === 0 && (
+          !this.comment.checklist ||
+          this.comment.checklist.length === 0
+        ) &&
+        this.comment.previews.length === 0 &&
+        !this.isFirst
+      )
+    },
 
     previewRoute () {
       let route = {
@@ -316,6 +364,26 @@ export default {
       return this.comment.attachment_files.filter(attachment => {
         return !['png', 'jpg', 'gif'].includes(attachment.extension)
       })
+    },
+
+    commentDate () {
+      return parseDate(this.comment.created_at)
+    },
+
+    fullDate () {
+      return this.commentDate.format('YYYY-MM-DD HH:mm:ss')
+    },
+
+    shortDate () {
+      if (moment().diff(this.commentDate, 'days') > 1) {
+        return this.commentDate.format('MM/DD')
+      } else {
+        return this.commentDate.tz(this.user.timezone).format('HH:mm')
+      }
+    },
+
+    boxShadowStyle () {
+      return `0 0 3px 2px ${this.comment.task_status.color}1F`
     }
   },
 
@@ -337,6 +405,10 @@ export default {
         route.params.episode_id = this.$route.params.episode_id
       }
       return route
+    },
+
+    getAttachmentPath (attachment) {
+      return `/api/data/attachment-files/${attachment.id}/file`
     },
 
     toggleCommentMenu () {
@@ -398,13 +470,21 @@ export default {
   .add-checklist {
     background: $dark-grey-lighter;
   }
+
+  .comment {
+    background: $dark-grey-lightmore;
+  }
+
+  .like-button {
+    color: white;
+  }
 }
 
-.comment {
+article.comment {
   background: white;
-  border-left: 6px solid $light-grey;
-  border-radius: 0 5px 5px 0;
+  border-radius: 5px;
   padding: 0;
+  margin: 1em 0;
   word-wrap: anywhere;
   hyphens: auto;
 }
@@ -428,27 +508,19 @@ export default {
   flex: 1;
 }
 
-a.revision {
-  color: $grey;
-  font-size: 0.8em;
-  font-style: italic;
-  margin: 0 1em 0 0;
+.content {
+  .comment-text {
+    margin-top: .5rem;
+    margin-bottom: 0rem;
+    padding: 0.2em 0.1em;
+    word-break: break-word;
+    hyphens: auto;
+    hyphenate-limit-chars: 8 6 2;
+  }
 }
 
-a.revision:hover {
-  text-decoration: underline;
-}
-
-.comment-text {
-  margin-top: .5rem;
-  word-break: break-word;
-  hyphens: auto;
-  hyphenate-limit-chars: 8 6 2;
-}
-
-.comment-text.empty {
-  font-style: italic;
-  color: #AAA;
+.checklist {
+  margin-top: 0.5em;
 }
 
 .menu-icon {
@@ -462,7 +534,7 @@ a.revision:hover {
 }
 
 .pinned {
-  transform: scale(1.03)
+  transform: scale(1.02)
 }
 
 .pinned-text {
@@ -496,8 +568,26 @@ a.revision:hover {
   text-transform: uppercase;
 }
 
+.round-task-status-name {
+  border-radius: 1em;
+  font-size: 0.8em;
+  margin: 0;
+  margin-right: 0.5em;
+  min-width: 55px;
+  padding: 0.4em;
+  text-transform: uppercase;
+  text-align: center;
+
+  &.revision {
+    width: 100%;
+    font-weight: bold;
+    border: 1px solid $purple-strong;
+    color: $purple-strong;
+  }
+}
+
 .flexrow {
-  align-items: stretch;
+  align-items: center;
 }
 
 .comment-left {
@@ -507,17 +597,16 @@ a.revision:hover {
 }
 
 .like-button {
-  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  border-radius: .5rem;
-  border: 0;
-  margin: .5rem 0;
-  width: 100%;
-  padding: .3rem .5rem;
   background-color: transparent;
+  border: 0;
+  border-radius: .5rem;
   color: inherit;
   cursor: pointer;
+  display: inline-flex;
+  margin: 0;
+  padding: .3rem 0;
+  width: 100%;
 
   &:hover,
   &:focus {
@@ -543,8 +632,7 @@ a.revision:hover {
 }
 
 .comment-content {
-  padding: 0.5em;
-  flex: 1;
+  padding: 0em;
 }
 
 .comment-like {
@@ -554,6 +642,32 @@ a.revision:hover {
 .infos {
   display: flex;
   align-items: center;
+}
+
+.content-wrapper {
+  padding: 0.5em;
+
+  &.full {
+    border-left: 1px solid transparent;
+  }
+}
+
+.date {
+  font-size: 0.8em;
+  margin-right: 0.5em;
+}
+
+.preview-info {
+  margin-top: 0;
+  padding-top: 0;
+
+  .date {
+    margin-right: 26px;
+  }
+}
+
+p {
+  margin: 0;
 }
 
 @media screen and (max-width: 768px) {

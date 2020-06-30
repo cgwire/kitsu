@@ -83,6 +83,7 @@
                 :key="comment.id"
                 :current-user="user"
                 :editable="comment.person && user.id === comment.person.id"
+                :is-first="index === 0"
                 :is-last="index === pinnedCount"
                 @ack-comment="ackComment"
                 @pin-comment="onPinComment"

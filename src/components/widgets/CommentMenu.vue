@@ -2,6 +2,7 @@
   <div class="comment-menu hidden" ref="main">
     <div
       @click="onPinClicked"
+      v-show="!isEmpty"
     >
       <span v-if="isPinned">
         {{ $t('comments.unpin') }}
@@ -42,6 +43,10 @@ export default {
     isEditable: {
       type: Boolean,
       default: true
+    },
+    isEmpty: {
+      type: Boolean,
+      default: false
     }
   },
 

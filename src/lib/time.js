@@ -7,6 +7,10 @@ export const range = (start, end) => {
     .map(i => i + start)
 }
 
+export const parseDate = (date) => {
+  return moment.tz(date, 'YYYY-MM-DDTHH:mm:ss', 'UTC')
+}
+
 export const formatDate = (date) => {
   const utcDate = moment.tz(date, 'UTC')
   if (moment().diff(utcDate, 'days') > 1) {

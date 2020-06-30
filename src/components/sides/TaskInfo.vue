@@ -175,6 +175,7 @@
                 :comment="comment"
                 :light="true"
                 :add-preview="onAddPreviewClicked"
+                :is-first="index === 0"
                 :is-last="index === pinnedCount"
                 :editable="comment.person && user.id === comment.person.id"
                 @pin-comment="onPinComment"
@@ -1037,7 +1038,7 @@ export default {
 
 .side {
   background: #F8F8F8;
-  height: 100%;
+  min-height: 100%;
 }
 
 .add-comment {
