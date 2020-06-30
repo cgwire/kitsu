@@ -61,6 +61,7 @@
           <combobox
             class="flexrow-item"
             :options="descriptorOptions"
+            @input="onDescriptorChanged(descriptorFilter)"
             v-model="descriptorFilter.id"
           />
           <combobox
@@ -317,8 +318,7 @@ export default {
           let value = this.assignation.person.name
           if (this.assignation.value === '-assignedto') value = `-${value}`
           query += ` assignedto=[${value}]`
-        }
-        if (this.assignation.taskTypeId) {
+        } else if (this.assignation.taskTypeId) {
           const taskType = this.taskTypeMap[this.assignation.taskTypeId]
           const value =
             this.assignation.value === 'assigned' ? 'assigned' : 'unassigned'
@@ -357,6 +357,17 @@ export default {
     },
 
     // Descriptors
+
+    onDescriptorChanged (descriptorFilter) {
+      const descriptor = this.getDescriptor(descriptorFilter.id)
+      console.log(descriptor.choices)
+      if (descriptor.choices.length > 0) {
+        descriptorFilter.text = descriptor.choices[0]
+      } else {
+        descriptorFilter.text = ''
+      }
+      console.log(descriptorFilter.text)
+    },
 
     addDescriptorFilter () {
       const desc = this.getDescriptor(this.descriptorOptions[0].value)
