@@ -33,6 +33,9 @@ To modify a production go into the **Edit production** page.
 You can add some specific information as the **FPS** (Frames per second), 
 the **Ratio** and the **Resolution** of the picture.
 
+If nothing is filled, the **FPS** is set to **24 FPS** per default. 
+The **FPS** will be applied to the applied to re-encode the video, and also to calculate the quota.
+
 NB: The default avatar for a production is the first letter displayed on a
 colored background. You can change it with a picture if you want.
 
@@ -141,6 +144,15 @@ Now, you have all your assets imported into Kitsu.
 
 ![Import data copy paste data](../img/getting-started/import_result_asset.png)
 
+
+## Update assets with the CSV import
+
+You can use the CSV import to update quickly your data.
+
+You need to switch on the option ** Update existing data**. Then the lines that will be updated
+will be highlighted in blue.
+
+![Import data copy paste data](../img/getting-started/import_update_asset.png)
 
 
 ## Create tasks for the assets
@@ -338,14 +350,15 @@ The new page is the **Supervisor view**. You have more detailed information spec
 
 ![Supervisor page](../img/getting-started/supervisor_page.png)
 
-To add an estimation to a task, click on the line, and choose **Set estimations** on the **Action Menu**.
+To add an estimation to a task, click on the line, and type the number or days you estimate. You can select multiple assets or shots at the same time.
 
-![Drop Down menu](../img/getting-started/set_estimation_menu.png)
+You can also define a **Start date** by clicking on it.
+A calendar will open and let you choose your start date.
 
-You can now enter the number of days you estimate. As for any action with the **Action Menu**, you can select
-multiple assets or shots at the same time.
+The **Due date** is automatically calculated with the **Estimation**.
+
  
-![Drop Down menu](../img/getting-started/set_estimation.png)
+![start date](../img/getting-started/set_estimation.png)
  
  
 To go further in detail with the Supervisor view :  
@@ -357,11 +370,12 @@ To go further in detail with the Supervisor view :
 
 - (4) Kitsu calculate the sum of the timesheet fed by the artists
 - (5) The number of back and forth with the retake status
-- (6) The Due date is linked to the task type schedule
-- (7)(8) the wip and validation dates are automatically filled
-- (9) the Last comment section help you to keep an eye on the last activity of this task type.
+- (6) You can add a start date for the task (with the calendar)
+- (7) The Due date is linked to the Start date and Estimation
+- (8)(9) the wip and validation dates are automatically filled
+- (10) the Last comment section help you to keep an eye on the last activity of this task type.
 
-(4) to (9) is automatically filled.
+(8) to (10) is automatically filled.
  
 
 ## Create (episodes) sequences and shots
