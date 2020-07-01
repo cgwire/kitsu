@@ -103,6 +103,7 @@
                           class="flexrow-item"
                           :person="personMap[news.author_id]"
                           :size="30"
+                          :font-size="14"
                           :no-link="true"
                           v-if="personMap[news.author_id]"
                         />
