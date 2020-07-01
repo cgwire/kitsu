@@ -364,18 +364,18 @@ The **Due date** is automatically calculated with the **Estimation**.
 To go further in detail with the Supervisor view :  
 - (1) You can see and change the status of a task
 - (2) You can assign people to tasks
+
+(1) and (2) is filled with the action menu.
+
 - (3) You can add an estimation for the task (in day unit)
-
-(1) to (3) is filled with the action menu.
-
 - (4) Kitsu calculate the sum of the timesheet fed by the artists
 - (5) The number of back and forth with the retake status
 - (6) You can add a start date for the task (with the calendar)
-- (7) The Due date is linked to the Start date and Estimation
-- (8)(9) the wip and validation dates are automatically filled
+- (7)Kitsu calculate the due date with the Start date and the estimation
+- (8)(9) the Wip and Validation dates are automatically filled
 - (10) the Last comment section help you to keep an eye on the last activity of this task type.
 
-(8) to (10) is automatically filled.
+(7) to (10) is automatically filled.
  
 
 ## Create (episodes) sequences and shots
@@ -491,6 +491,40 @@ You can check and adjust the name of the columns with the preview of your data.
 NB: the **Episode** column is only mandatory for a **TV Show** production.
  
 ![Import data copy paste data](../img/getting-started/import_preview_data_shot.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have all your shots imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/import_result_shot.png)
+
+
+## Update Shots information with CSV Import
+
+You can use the **CSV Import** to update your data as the **NB Frames**, **Frame IN**, **Frame Out** or any **Custom Column**
+
+Open you spreadsheet, select your data and copy them.
+
+![Import copy data](../img/getting-started/import_copypas_shot.png)
+
+Then, go back to the shot page on Kitsu, and click on the **Import** icon 
+![Import Icon](../img/getting-started/import.png).
+
+A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
+
+![Import data copy paste tab](../img/getting-started/import_pastcsvdata_shot.png)
+ 
+There you can paste your previously selected data, and see the result with the **Preview** button.
+ 
+![Import data copy paste data](../img/getting-started/import_pastcsvdata2_shot.png)
+  
+You need to switch on the **Option : Update existing data**.
+the updated shots will be in blue
+
+ 
+NB: the **Episode** column is only mandatory for a **TV Show** production.
+ 
+![Import data copy paste data](../img/getting-started/update_preview_data_shot.png)
 
 Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
 
