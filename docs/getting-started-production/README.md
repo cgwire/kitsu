@@ -740,6 +740,7 @@ Nearby the name of your custom column, click on the arrow ![Custom Column detail
 
 You can also use the **CSV Import** to fill quickly your custom column.
 You need to first create your **Custom Column** into kitsu, then add it in your spreadhseet, then copy paste your data into the **CSV Import**.
+[Update Shots information with CSV Import](#update-shots-information-with-csv-import)
 
 Select in the menu if you want to 
 edit the name of the custom column and its information, or you want to remove it.
@@ -794,6 +795,14 @@ The **Add preview** pop-up opens and asks you to choose a file.
 You can navigate through the pictures uploaded.
 
 ![attach preview drag drop](../img/getting-started/upload_second_pictures.png)
+
+To delete an additional preview, you need to enlarge the comment panel.
+
+![enlarge comment section](../img/getting-started/enlarge_comment.png)
+
+And then click on the ![delete button](../img/getting-started/delete_button.png)
+
+![enlarge comment section delete](../img/getting-started/enlarge_comment_delete.png)
 
 
 ## Validation per batch
@@ -884,11 +893,11 @@ performs some changes.
 
 You can add a **checklist** to your comments.
 
-You need first to post your retake comments. Then the **ADD CHECKLIST** appears.
+You need to click on the **Add checklist** button, and the first item of the checklist appears. 
 
 ![add checklist](../img/getting-started/add_checklist.png)
 
-Type your comments, and hit **Enter** key to add another line on your checklist.
+Type your comments, and hit **Enter** key to add another line on your checklist or click again on **Add Checklist** button.
 
 ![checklist](../img/getting-started/checklist_detailed.png)
 
@@ -898,6 +907,7 @@ You can also **tag** someone of the team in the comments. Type the `@`and it ope
 
 Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png), to notify the CG artist
 that his work is validated.
+
 
 ## Add a thumbnail
 
@@ -920,7 +930,9 @@ You can use the **Add Thumbnails** button ![Add thumbnails button](../img/gettin
 
 A new pop-up opens and asks you to choose which task types the thumbnails are linked.
 
-**Thumbnails batch import only accept images files**
+**Thumbnails batch import accept images files and video files**.
+
+For the video files, only the first frame is used as the thumbnail.
 
 You have to name your thumbnails as sequence_shot.
 
