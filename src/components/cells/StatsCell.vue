@@ -94,4 +94,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.stats-name {
+  text-transform: uppercase;
+}
 </style>
