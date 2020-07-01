@@ -376,9 +376,30 @@ To go further in detail with the Supervisor view :
 - (10) the Last comment section help you to keep an eye on the last activity of this task type.
 
 (7) to (10) is automatically filled.
+
+To help you to set a correct estimation, you can use the **Estimation** Tab.
+
+![Estimation tab](../img/getting-started/tasktype_estimation_tab.png) 
+
+On the left part of the screen is the list of the shots with the assignation and the number of frames (1).
+Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2). 
+( [Create your first production](#create-your-first-production) ) 
+
+ On the right part of the screen you can see the full team of the departement (depending on the assignations you made), the number of shots they have to do, the number of frame, seconds, and the average quota. 
+ 
+ 
+ And the last column is the **Estimation**, to modify the estimation, hoover the line with your mouse and click and the editing zone.
+ 
+ You can also select multiple shot at the same time to edit them all the once.
+ 
+ ![Estimation tab edit](../img/getting-started/tasktype_estimation_tab_edit.png) 
+ 
+ Everytime you change the **Estimation** in day on the right part, you can see in real time that the **Average Quota** is updated as well.
+ 
+
  
  For more information about the **Schedule** tab, go to the 
- ![Task Type Schedule](#task-type-schedule) 
+ [Task Type Schedule](#task-type-schedule) 
 
 
 
@@ -1066,7 +1087,15 @@ If you need more details than in the production schedule, you can go to the **Ta
 
 You can notice there are two tabs on the page, Tasks and **Schedule**. Click on the ![Task type schedule tab](../img/getting-started/task_type_tab_schedule.png) 
 
-On this page, you can do the schedule per CG Artist and per asset (or shot, depending on the task type).
+There is two ways to set the artist schedule.
+
+The first way is with the **Tasks** tab, by setting the estimation time and the **Start date**. The Grantt diagram is filled automatically.
+
+Then you are only allowed on the **Schedule** Tab to slide the bar, to change the **Start date** and **Due date**.
+
+**Once the estimation is set from the Tasks tab, you can't change is on the schedule tab**.
+
+The second way is to set directly the lenght (**Estimation**), **Start date** and the **Due Date** from the Gantt diagram. 
 
 ![Task type page schedule default](../img/getting-started/task_type_schedule_emplty.png)
 
@@ -1082,7 +1111,7 @@ You can also reduce or expand each CG Artist (2) section, to ease the reading of
 
 And you can change the color of the bar in the Gantt diagram (3). Per default, the **coloring** is set in Neutral.
 
-But you can the color of the bar, depending on what you need.
+Per dfault the color of the bar is set on **Status color**, but you can change it.
 
 ![Task type page schedule coloring](../img/getting-started/task_type_schedule_coloring.png)
 
@@ -1099,7 +1128,7 @@ In a glimpse, you can see the state of your elements and team.
 
 The Gantt diagram has an impact on the other pages on Kistu.
 
-The **due date** is displayed on the **Tasks** tab of the task type page.
+The **Start date** and the **Due date** is displayed on the **Tasks** tab of the task type page.
 
 ![Task type page schedule due date](../img/getting-started/task_type_schedule_due_date.png)
 
