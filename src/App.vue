@@ -1484,6 +1484,12 @@ tbody:last-child .empty-line:last-child {
   font-size: 1.5em;
 }
 
+th.validation-cell {
+  &:hover {
+    text-decoration: underline $light-grey;
+  }
+}
+
 .tooltip {
   display: block !important;
   z-index: 10000;
