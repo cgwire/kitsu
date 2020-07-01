@@ -376,7 +376,7 @@ const actions = {
           comment: comment || ''
         })
           .then(next)
-          .catch((err) => next(err))
+          .catch(next)
       } else {
         next()
       }
@@ -397,6 +397,7 @@ const actions = {
         tasksApi.updateTask(taskId, { priority })
           .then(task => {
             commit(EDIT_TASK_END, { task, taskType })
+            next()
           })
           .catch(next)
       } else {
