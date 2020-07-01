@@ -688,8 +688,8 @@ On the new window, you can enter the **In** and **Out** of the shot. Save with t
 
 Now the frame range appears on the general spreadsheet of the shot page.
 
-You can also use the **CSV Import** to update quickly your frame range. [Update Shots information with CSV Import](#Update-Shots-information-with-CSV-Import)
-).
+You can also use the **CSV Import** to update quickly your frame range. [Update Shots information with CSV Import](#update-shots-information-with-csv-import)
+.
 
 ![Shot framerange detail](../img/getting-started/shot_framerange_detail.png)
 
