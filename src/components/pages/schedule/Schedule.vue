@@ -127,7 +127,7 @@
                 <input
                   class="man-days-unit flexrow-item"
                   placeholder="0"
-                  @input="onChildEstimationChanged($event, childElement)"
+                  @input="onChildEstimationChanged($event, childElement, rootElement)"
                   v-model="childElement.man_days"
                 />
                 {{ $t('schedule.md') }}
@@ -360,6 +360,7 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 
 import colors from '../../../lib/colors'
+import { addBusinessDays } from '../../../lib/time'
 
 import { ChevronRightIcon, ChevronDownIcon, Edit2Icon } from 'vue-feather-icons'
 import EditMilestoneModal from '../../modals/EditMilestoneModal'
@@ -612,10 +613,27 @@ export default {
       this.updatePositionBarPosition(event)
     },
 
-    onChildEstimationChanged (event, childElement) {
+    onChildEstimationChanged (event, childElement, rootElement) {
+      const estimation = parseInt(event.target.value)
+      childElement.man_days = estimation
+      rootElement.man_days = rootElement.children.reduce((acc, child) => {
+        let value = acc
+        let manDays = child.man_days
+        if (child.man_days) {
+          if (typeof manDays === 'string') manDays = parseInt(manDays)
+          value = acc + manDays
+        }
+        return value
+      }, 0)
+
+      if (estimation > 0) {
+        childElement.endDate = addBusinessDays(
+          childElement.startDate, estimation
+        )
+      }
       this.$emit('estimation-changed', {
         taskId: childElement.id,
-        days: event.target.value
+        days: estimation
       })
     },
 
