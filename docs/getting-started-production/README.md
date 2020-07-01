@@ -34,7 +34,7 @@ You can add some specific information as the **FPS** (Frames per second),
 the **Ratio** and the **Resolution** of the picture.
 
 If nothing is filled, the **FPS** is set to **24 FPS** per default. 
-The **FPS** will be applied to the applied to re-encode the video, and also to calculate the quota.
+The **FPS** will be applied to re-encode the video, and also to calculate the quota.
 
 NB: The default avatar for a production is the first letter displayed on a
 colored background. You can change it with a picture if you want.
@@ -665,6 +665,8 @@ of assets that appear on this shot (**Shot casting**).
  
 ![Shot detail page](../img/getting-started/shot_detail_page.png)
  
+You can click on the status of each task to open the comment panel and see the history of the comments and the different versions.
+
 
 
 ## Add the Frameranges
@@ -686,11 +688,14 @@ On the new window, you can enter the **In** and **Out** of the shot. Save with t
 
 Now the frame range appears on the general spreadsheet of the shot page.
 
+You can also use the **CSV Import** to update quickly your frame range.
+
 ![Shot framerange detail](../img/getting-started/shot_framerange_detail.png)
 
 You can have access to the shot values history too.
 
 ![Shot Values History](../img/getting-started/shot_values_history.png)
+
 
 ## Add Custom columns
 
@@ -731,6 +736,9 @@ Don't forget to press the **Confirm** button when you are done.
 
 If you need to **edit** or **delete** the custom column, go back to the general spreadsheet page.
 Nearby the name of your custom column, click on the arrow ![Custom Column detail](../img/getting-started/arrow.png). 
+
+You can also use the **CSV Import** to fill quickly your custom column.
+You need to first create your **Custom Column** into kitsu, then add it in your spreadhseet, then copy paste your data into the **CSV Import**.
 
 Select in the menu if you want to 
 edit the name of the custom column and its information, or you want to remove it.
@@ -784,8 +792,7 @@ The **Add preview** pop-up opens and asks you to choose a file.
 
 You can navigate through the pictures uploaded.
 
-![attach preview drag drop](../img/getting-started/
-upload_second_pictures.png)
+![attach preview drag drop](../img/getting-started/upload_second_pictures.png)
 
 
 ## Validation per batch
