@@ -377,6 +377,10 @@ To go further in detail with the Supervisor view :
 
 (7) to (10) is automatically filled.
  
+ For more information about the **Schedule** tab, go to the 
+ ![Task Type Schedule](#task-type-schedule) 
+
+
 
 ## Create (episodes) sequences and shots
 
@@ -805,22 +809,6 @@ And then click on the ![delete button](../img/getting-started/delete_button.png)
 ![enlarge comment section delete](../img/getting-started/enlarge_comment_delete.png)
 
 
-## Validation per batch
-
-Alternatively, you can do it per **batch**. 
-
-You can select multiple shots or assets, by pressing the **crtl** or
-**shift** key.
-
-Then go to the **Change status** section on the action menu.
-
-![action menu status](../img/getting-started/blue_menu_status.png)
-
-Choose the new status for your selected tasks (1). You can also add a comment for all the selected tasks (2)
-You validate the new status with the **Confirm** button.
-
-![Change status per batch](../img/getting-started/change_status_batch.png)
-
 ## Change priorities
 
 At some point on the production you may want to prioritize some tasks, and
@@ -908,6 +896,23 @@ You can also **tag** someone of the team in the comments. Type the `@`and it ope
 Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png), to notify the CG artist
 that his work is validated.
 
+
+
+## Validation per batch
+
+Alternatively, you can do it per **batch**. 
+
+You can select multiple shots or assets, by pressing the **crtl** or
+**shift** key.
+
+Then go to the **Change status** section on the action menu.
+
+![action menu status](../img/getting-started/blue_menu_status.png)
+
+Choose the new status for your selected tasks (1). You can also add a comment for all the selected tasks (2)
+You validate the new status with the **Confirm** button.
+
+![Change status per batch](../img/getting-started/change_status_batch.png)
 
 ## Add a thumbnail
 
