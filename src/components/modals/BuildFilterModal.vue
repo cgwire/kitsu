@@ -360,13 +360,11 @@ export default {
 
     onDescriptorChanged (descriptorFilter) {
       const descriptor = this.getDescriptor(descriptorFilter.id)
-      console.log(descriptor.choices)
       if (descriptor.choices.length > 0) {
         descriptorFilter.text = descriptor.choices[0]
       } else {
         descriptorFilter.text = ''
       }
-      console.log(descriptorFilter.text)
     },
 
     addDescriptorFilter () {
