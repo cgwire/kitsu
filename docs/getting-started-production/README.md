@@ -16,7 +16,7 @@ To navigate through Kitsu sections, you need to use the sidebar. you can
 access it through the three lines button on top of the screen 
 ![Main button](../img/getting-started/main_button.png).  It opens a menu on
 the left part of the screen. We want to see the production list. 
-So in below **Studio** section, click on the **PRODUCTIONS** button. 
+So below **Studio** section, click on the **PRODUCTIONS** button. 
 
 ![Main menu](../img/getting-started/main_menu_production.png)
 
@@ -64,8 +64,12 @@ FX, Props, ...
 Let's start with an environment. You select the **Episode** (2), or the main pack (**All**).
 We give it a **Name** (3) and enter a description that helps the designer to know what to do, and later to
 identify the asset quickly.
-If you have multiple assets to create, click on **Confirm and stay**. You
-can change the asset type, and keep adding assets. 
+If you have multiple assets to create, click on **Confirm and stay**. 
+
+You can change the asset type, and keep adding assets. 
+
+You can also customized the asset type list 
+[How to customaize the workflow](.../faq/#how-to-customize-the-workflow)
 
 ![Create an asset](../img/getting-started/add_asset_popup.png)
 
@@ -149,7 +153,7 @@ Now, you have all your assets imported into Kitsu.
 
 You can use the CSV import to update quickly your data.
 
-You need to switch on the option ** Update existing data**. Then the lines that will be updated
+You need to switch on the option **Update existing data**. Then the lines that will be updated
 will be highlighted in blue.
 
 ![Import data copy paste data](../img/getting-started/import_update_asset.png)
@@ -196,7 +200,7 @@ Then, click on the **+ Add a new employee** button.
 A creation window opens. You can enter the first (1) and last name (2), the email
 (which is **mandatory** to create the account) (3), the phone number (4) and
 define the role of the employee: **CG artist**, **Supervisor**,
-**Administrator** or **Client** (5).  If the artist is working right now, keep
+**Studio Manager**, **Vendor** or **Client** (5).  If the artist is working right now, keep
 him as active, otherwise select no. Validate by clicking **Confirm** button.
 
 ![Create a new employee](../img/getting-started/create_employee.png)
@@ -285,7 +289,7 @@ on the top of the page.
 
 ![Team page](../img/getting-started/team_page.png)
 
-You can also add someone to a production without assigning him to a task, you
+You can also add someone to a production without assigning him to a task if you have less than 10 people, you
 can select his name on the search box (or type his name), and validate with
 **add**.
 
@@ -321,7 +325,7 @@ button.
 ![Assigned multiple people](../img/getting-started/assigned_multiple.png)
 
 In the same way, you can click on **Clear assignations** to remove all 
-assignations.
+assignations, or press the "Escape" key.
 
 When you finish all the assignations, quit this mode using the **Clear
 current selection** button ![Clear current selection](../img/getting-started/clear_current_selection.png).
@@ -334,7 +338,7 @@ To unclutter the list, you can hide this information with the **Hide
 assignations** button on the top of the spreadsheet ![Hide assignations](../img/getting-started/hide_assignation.png).
 
 Once you assigned someone, he is part of the production team. Depending
-on his position (CG Artist, Supervisor), he only sees the production where
+on his position (CG Artist, Supervisor, Vendor), he only sees the production where
 he's assigned. 
 
 Now, everybody knows what to do and who is doing what!
@@ -346,21 +350,10 @@ Click on the name of a task type.
 
 ![Task type](../img/getting-started/supervisor_tasktype.png)
 
-The new page is the **Supervisor view**. You have more detailed information specific to this task type.
+The new page is the **Supervisor view**. You have more detailed information specific to this specific **task type**.
 
 ![Supervisor page](../img/getting-started/supervisor_page.png)
 
-To add an estimation to a task, click on the line, and type the number or days you estimate. You can select multiple assets or shots at the same time.
-
-You can also define a **Start date** by clicking on it.
-A calendar will open and let you choose your start date.
-
-The **Due date** is automatically calculated with the **Estimation**.
-
- 
-![start date](../img/getting-started/set_estimation.png)
- 
- 
 To go further in detail with the Supervisor view :  
 - (1) You can see and change the status of a task
 - (2) You can assign people to tasks
@@ -376,6 +369,19 @@ To go further in detail with the Supervisor view :
 - (10) the Last comment section help you to keep an eye on the last activity of this task type.
 
 (7) to (10) is automatically filled.
+
+To add an estimation to a task, click on the line, and type the number or days you estimate. You can select multiple assets or shots at the same time.
+
+You can also define a **Start date** by clicking on it.
+A calendar will open and let you choose your start date.
+
+The **Due date** is automatically calculated with the **Estimation**.
+
+ 
+![start date](../img/getting-started/set_estimation.png)
+ 
+ 
+
 
 To help you to set a correct estimation, you can use the **Estimation** Tab.
 
