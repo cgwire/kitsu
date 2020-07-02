@@ -33,6 +33,24 @@ Each time you add a new revision, the previous versions are still available.
 ![Preview v2](../img/getting-started/previewv2.png)
 
  -----------------------------------------    
+ 
+ ## How to add batch of previews)
+
+You can use the **Add Thumbnails** button ![Add thumbnails button](../img/getting-started/add_thumbnails.png) on the global page to massively import previews (still frame or video).
+
+
+![History](../img/getting-started/add_thumbnails_menu.png)
+
+A new pop-up opens and asks you to choose which task types the thumbnails are linked.
+
+**Thumbnails batch import accept images files and video files**.
+
+For the video files, only the first frame is used as the thumbnail.
+
+You have to name your thumbnails as sequence_shot or asettype_asset.
+ 
+  -----------------------------------------    
+
 
 ## How to change your password?
 
@@ -159,6 +177,25 @@ bar](../img/faq/filter_save_button.png). in the following pages:
 * Todo-lists
 
 NB: The **search bar** is available too in people episodes list.
+
+### How to use the Filter Builder?
+
+Next to the search bar you have the icon of the **Filter Builder**
+
+![Filter Builder](../img/faq/filter_builder.png)
+
+When you click on it a pop up opened, and gives you several choices for your filtering; 
+
+![Filter Builder option](../img/faq/filter_builder_option.png)
+
+You can filter per **Status** on a **Task Type**, you can also filter through the custom column 
+[Filter Builder option](..//getting-started-production/#add-custom-columns)
+
+You can also filter the global page through the assignation, per artist or per the lack of assignation.
+
+And finally you can filter per the Thumbnails presence.
+
+You can add several filters. Once you are done, validate your choice with the **Confirm"" button.
 
 
 ### How to use the search bar?
