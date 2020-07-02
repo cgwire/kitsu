@@ -34,7 +34,7 @@ You can add some specific information as the **FPS** (Frames per second),
 the **Ratio** and the **Resolution** of the picture.
 
 If nothing is filled, the **FPS** is set to **24 FPS** per default. 
-The **FPS** will be applied to re-encode the video, and also to calculate the quota.
+The **FPS** will be applied to re-encode the video, and also to calculate the quotas.
 
 NB: The default avatar for a production is the first letter displayed on a
 colored background. You can change it with a picture if you want.
@@ -830,6 +830,33 @@ And then click on the ![delete button](../img/getting-started/delete_button.png)
 ![enlarge comment section delete](../img/getting-started/enlarge_comment_delete.png)
 
 
+## Add a thumbnail
+
+You can use the preview as a **thumbnail** on the asset or shot spreadsheet. It
+helps to recognize the assets/shots on the main pages. 
+On the list page, click on the status you want, then on the right panel, click on **Preview** button (1).
+
+![History](../img/getting-started/pannel_history.png)
+
+Once you have clicked on the button, you see the thumbnail appears, and the button turns gray.
+
+
+## Add batch of thumbnails (and previews)
+
+You can use the **Add Thumbnails** button ![Add thumbnails button](../img/getting-started/add_thumbnails.png) on the global page to massively import thumbnails.
+
+
+![History](../img/getting-started/add_thumbnails_menu.png)
+
+A new pop-up opens and asks you to choose which task types the thumbnails are linked.
+
+**Thumbnails batch import accept images files and video files**.
+
+For the video files, only the first frame is used as the thumbnail.
+
+You have to name your thumbnails as sequence_shot.
+
+
 ## Change priorities
 
 At some point on the production you may want to prioritize some tasks, and
@@ -935,32 +962,7 @@ You validate the new status with the **Confirm** button.
 
 ![Change status per batch](../img/getting-started/change_status_batch.png)
 
-## Add a thumbnail
 
-
-You can use the preview as a **thumbnail** on the asset or shot spreadsheet. It
-helps to recognize the assets/shots on the main pages. 
-On the list page, click on the status you want, then on the right panel, click on **Preview** button (1).
-
-![History](../img/getting-started/pannel_history.png)
-
-
-Once you have clicked on the button, you see the thumbnail appears, and the button turns gray.
-
-## Add batch of thumbnails 
-
-You can use the **Add Thumbnails** button ![Add thumbnails button](../img/getting-started/add_thumbnails.png) on the global page to massively import thumbnails.
-
-
-![History](../img/getting-started/add_thumbnails_menu.png)
-
-A new pop-up opens and asks you to choose which task types the thumbnails are linked.
-
-**Thumbnails batch import accept images files and video files**.
-
-For the video files, only the first frame is used as the thumbnail.
-
-You have to name your thumbnails as sequence_shot.
 
 
 ## Simplify the global page
