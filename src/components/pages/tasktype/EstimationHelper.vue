@@ -245,7 +245,6 @@ export default {
   },
 
   mounted () {
-    // this.clearSelection()
   },
 
   computed: {
