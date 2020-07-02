@@ -89,6 +89,9 @@ the line.
 On the main asset page, to extend the description, click on the first words
 (2), and a pop-up opens with the full description.
 
+To delete an asset see the FAQ : [How to delete an asset](../faq/#how-to-delete-an-asset)
+
+
 
 ## Create assets from a csv spreadsheet file
 
@@ -376,20 +379,16 @@ You can also define a **Start date** by clicking on it.
 A calendar will open and let you choose your start date.
 
 The **Due date** is automatically calculated with the **Estimation**.
-
  
 ![start date](../img/getting-started/set_estimation.png)
- 
- 
-
-
+  
 To help you to set a correct estimation, you can use the **Estimation** Tab.
 
 ![Estimation tab](../img/getting-started/tasktype_estimation_tab.png) 
 
 On the left part of the screen is the list of the shots with the assignation and the number of frames (1).
 Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2). 
-( [Create your first production](#create-your-first-production) ) 
+(See how to set your production fps [Create your first production](#create-your-first-production) ) 
 
  On the right part of the screen you can see the full team of the departement (depending on the assignations you made), the number of shots they have to do, the number of frame, seconds, and the average quota. 
  
@@ -469,6 +468,10 @@ shots are linked to the tasks.
 
 Now we can do the breakdown of the storyboard, meaning associate the assets to
 each shot. 
+
+To delete a shot see the FAQ : [How to delete a shot](../faq/#how-to-delete-a-shot)
+
+To delete a sequence see the FAQ : [How to delete a shot](../faq/#how-to-delete-a-sequence)
 
 
 ## Create shots from a csv spreadsheet file
