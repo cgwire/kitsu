@@ -681,8 +681,13 @@ td.retake-count {
   padding: 0.5em
 }
 
+.datatable-wrapper {
+  min-height: calc(100% - 50px);
+}
+
 .datatable-body {
   overflow-x: auto;
+  min-height: 100%;
 
   td,
   tr {
