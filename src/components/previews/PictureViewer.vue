@@ -383,34 +383,32 @@ export default {
     },
 
     setupFabricCanvas () {
-      if (!this.readOnly) {
-        const dimensions = this.getDimensions()
-        const width = dimensions.width
-        const height = dimensions.height
-        const fabricCanvas = new fabric.Canvas('annotation-canvas')
+      const dimensions = this.getDimensions()
+      const width = dimensions.width
+      const height = dimensions.height
+      const fabricCanvas = new fabric.Canvas('annotation-canvas')
 
-        this.container.style.height = this.getDefaultHeight() + 'px'
-        fabricCanvas.setDimensions({
-          width: width,
-          height: height
-        })
+      this.container.style.height = this.getDefaultHeight() + 'px'
+      fabricCanvas.setDimensions({
+        width: width,
+        height: height
+      })
 
-        fabricCanvas.freeDrawingBrush.color = this.color
-        fabricCanvas.freeDrawingBrush.width = 4
+      fabricCanvas.freeDrawingBrush.color = this.color
+      fabricCanvas.freeDrawingBrush.width = 4
 
-        fabricCanvas.off('object:added', this.stackAddAction)
-        fabricCanvas.on('object:added', this.stackAddAction)
-        fabricCanvas.off('object:moved', this.saveAnnotations)
-        fabricCanvas.on('object:moved', this.saveAnnotations)
-        fabricCanvas.on('mouse:up', () => {
-          if (this.isDrawing) {
-            this.clearUndoneStack()
-            this.saveAnnotations()
-          }
-        })
+      fabricCanvas.off('object:added', this.stackAddAction)
+      fabricCanvas.on('object:added', this.stackAddAction)
+      fabricCanvas.off('object:moved', this.saveAnnotations)
+      fabricCanvas.on('object:moved', this.saveAnnotations)
+      fabricCanvas.on('mouse:up', () => {
+        if (this.isDrawing) {
+          this.clearUndoneStack()
+          this.saveAnnotations()
+        }
+      })
 
-        this.fabricCanvas = fabricCanvas
-      }
+      this.fabricCanvas = fabricCanvas
     },
 
     clearCanvas () {
@@ -425,7 +423,7 @@ export default {
       if (this.fullScreen) {
         return screen.height
       } else {
-        return screen.width > 1300 && (!this.light || this.readOnly) ? 500 : 200
+        return screen.width > 1300 && (!this.light) ? 500 : 200
       }
     },
 

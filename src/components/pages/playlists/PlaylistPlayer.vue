@@ -324,9 +324,10 @@
 
     <span class="filler"></span>
 
+    {{ isCurrentUserCGArtist }}
     <div
       class="flexrow"
-      v-if="isCurrentEntityMovie || isCurrentEntityPicture"
+      v-if="!isCurrentUserCGArtist && (isCurrentEntityMovie || isCurrentEntityPicture)"
     >
       <button-simple
         class="playlist-button flexrow-item"
@@ -722,6 +723,7 @@ export default {
     ...mapGetters([
       'assetTaskTypes',
       'currentProduction',
+      'isCurrentUserCGArtist',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'taskMap',

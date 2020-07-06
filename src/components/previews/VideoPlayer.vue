@@ -9,7 +9,6 @@
         id="annotation-canvas"
         ref="annotation-canvas"
         class="canvas"
-        v-if="!readOnly"
       >
       </canvas>
     </div>
@@ -59,7 +58,6 @@
       :maxDurationRaw="videoDuration"
       @select-annotation="loadAnnotation"
       ref="annotation-bar"
-      v-if="!readOnly"
     />
 
     <div class="buttons flexrow pull-bottom">
@@ -544,7 +542,7 @@ export default {
       if (this.isFullScreen()) {
         return screen.height
       } else {
-        return screen.width > 1300 && (!this.light || this.readOnly) ? 500 : 200
+        return screen.width > 1300 && (!this.light) ? 500 : 200
       }
     },
 
@@ -634,7 +632,7 @@ export default {
             this.videoWrapper.style.height = height + 'px'
           }
         }
-        if (!this.readOnly) this.resetCanvas()
+        this.resetCanvas()
       }
     },
 
@@ -655,10 +653,8 @@ export default {
     play () {
       this.clearCanvas()
       this.isPlaying = true
-      if (!this.readOnly) {
-        this.fabricCanvas.isDrawingMode = false
-        this.isDrawing = false
-      }
+      this.fabricCanvas.isDrawingMode = false
+      this.isDrawing = false
       this.video.play()
       if (this.isComparing) {
         const comparisonVideo = document.getElementById('comparison-movie')
@@ -1010,7 +1006,6 @@ export default {
     },
 
     reloadAnnotations () {
-      if (this.readOnly) return
       this.annotations = []
       if (this.preview.annotations) {
         const annotations = []
