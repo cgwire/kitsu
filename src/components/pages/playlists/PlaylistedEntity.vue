@@ -245,7 +245,7 @@ export default {
 .playlisted-entity {
   border-top: 3px solid transparent;
   border-radius: 5px;
-  border: 1px solid dark;
+  border: 3px solid transparent;
   box-shadow: 2px 2px 2px $dark-grey-strong;
   background: $dark-grey-lighter;
   display: flex;
@@ -254,7 +254,7 @@ export default {
   padding: 4px 4px;
 
   &.playing {
-    border-top: 3px solid $green;
+    border: 3px solid $green;
   }
 }
 
