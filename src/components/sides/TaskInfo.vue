@@ -178,6 +178,7 @@
                 :is-first="index === 0"
                 :is-last="index === pinnedCount"
                 :editable="comment.person && user.id === comment.person.id"
+                @duplicate-comment="onDuplicateComment"
                 @pin-comment="onPinComment"
                 @edit-comment="onEditComment"
                 @delete-comment="onDeleteComment"
@@ -825,6 +826,10 @@ export default {
 
     onAckComment (comment) {
       this.ackComment(comment)
+    },
+
+    onDuplicateComment (comment) {
+      this.$refs['add-comment'].setValue(comment)
     },
 
     onPinComment (comment) {

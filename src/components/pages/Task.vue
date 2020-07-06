@@ -64,6 +64,7 @@
         <div v-if="currentTask">
           <div>
             <add-comment
+              ref="add-comment"
               :is-loading="loading.addComment"
               :is-error="errors.addComment"
               :user="user"
@@ -73,6 +74,7 @@
               :attached-file-name="attachedFileName"
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
+              @duplicate-comment="onDuplicateComment"
               @file-drop="selectFile"
               v-if="isCommentingAllowed"
             />
@@ -1258,6 +1260,10 @@ export default {
 
     closeAddPreviewModal () {
       this.modals.addPreview = false
+    },
+
+    onDuplicateComment (comment) {
+      this.$refs['add-comment'].setValue(comment)
     },
 
     onPinComment (comment) {
