@@ -94,6 +94,7 @@
                   :last-preview-files="lastFiveMoviePreviews"
                   :task-type-map="taskTypeMap"
                   :light="!isWide"
+                  :read-only="isCurrentUserCGArtist"
                   @annotationchanged="onAnnotationChanged"
                   @change-current-preview="changeCurrentPreview"
                   ref="preview-movie"
@@ -128,6 +129,7 @@
                 :preview="currentPreview"
                 :last-preview-files="lastFivePicturePreviews"
                 :light="!isWide"
+                :read-only="isCurrentUserCGArtist"
                 @annotation-changed="onAnnotationChanged"
                 @add-preview="onAddExtraPreview"
                 @remove-extra-preview="onRemoveExtraPreview"
@@ -178,6 +180,7 @@
                 :is-first="index === 0"
                 :is-last="index === pinnedCount"
                 :editable="comment.person && user.id === comment.person.id"
+                @duplicate-comment="onDuplicateComment"
                 @pin-comment="onPinComment"
                 @edit-comment="onEditComment"
                 @delete-comment="onDeleteComment"
@@ -382,6 +385,7 @@ export default {
       'getTaskComment',
       'getTaskComments',
       'getTaskPreviews',
+      'isCurrentUserCGArtist',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isSingleEpisode',
@@ -825,6 +829,10 @@ export default {
 
     onAckComment (comment) {
       this.ackComment(comment)
+    },
+
+    onDuplicateComment (comment) {
+      this.$refs['add-comment'].setValue(comment)
     },
 
     onPinComment (comment) {

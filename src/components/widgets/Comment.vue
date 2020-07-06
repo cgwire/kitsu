@@ -60,10 +60,16 @@
       <div class="flexrow-item comment-content">
         <div class="content">
           <p
+            class="client-comment"
             v-if="personMap[comment.person_id].role === 'client'"
           >
-            <span class="client-comment">
+            <span>
               {{ $t('comments.comment_from_client') }}
+              <copy-icon
+                class="copy-icon"
+                size="1.1x"
+                @click="$emit('duplicate-comment', comment)"
+              />
             </span>
           </p>
           <p
@@ -93,6 +99,7 @@
               v-for="attachment in pictureAttachments"
             >
               <img
+                class="attachment"
                 :src="getAttachmentPath(attachment)"
               />
             </a>
@@ -100,10 +107,14 @@
               :href="getAttachmentPath(attachment)"
               :key="attachment.id"
               :title="attachment.name"
+              class="flexrow"
               target="_blank"
               v-for="attachment in fileAttachments"
             >
-              <paperclip-icon size="1x" />
+              <paperclip-icon size="1x" class="flexrow-item attachment-icon"/>
+              <span class="flexrow-item">
+              {{ attachment.name }}
+              </span>
             </a>
           </p>
           <div
@@ -204,6 +215,7 @@ import { formatDate, parseDate } from '../../lib/time'
 
 import {
   ChevronDownIcon,
+  CopyIcon,
   PaperclipIcon,
   ThumbsUpIcon
 } from 'vue-feather-icons'
@@ -217,6 +229,7 @@ export default {
   components: {
     Checklist,
     ChevronDownIcon,
+    CopyIcon,
     CommentMenu,
     PaperclipIcon,
     PeopleAvatar,
@@ -284,8 +297,9 @@ export default {
           !this.comment.checklist ||
           this.comment.checklist.length === 0
         ) &&
-        this.comment.previews.length === 0 &&
-        !this.isFirst
+        this.comment.previews.length === 0 && !(
+          this.isFirst && this.taskStatus.is_done
+        )
       )
     },
 
@@ -553,12 +567,15 @@ article.comment {
   padding: 0.5em;
 }
 
-.client-comment {
+.content .client-comment {
   border-radius: 4px;
   background: $red + 190%;
   color: desaturate($red - 30%, 20%);
   font-size: 0.8em;
-  padding: 0.3em 0.6em;
+  margin-top: 0.4em;
+  margin-bottom: 0;
+  padding: 0.5em 0.2em;
+  text-align: center;
   text-transform: uppercase;
 }
 
@@ -668,6 +685,21 @@ article.comment {
 
 p {
   margin: 0;
+}
+
+.attachment {
+  display: block;
+  text-align: center;
+  margin: 0.4em auto;
+}
+
+.attachment-icon {
+  margin: 0.6em;
+}
+
+.copy-icon {
+  cursor: pointer;
+  margin-left: .5em;
 }
 
 @media screen and (max-width: 768px) {

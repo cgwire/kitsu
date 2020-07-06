@@ -64,6 +64,7 @@
         <div v-if="currentTask">
           <div>
             <add-comment
+              ref="add-comment"
               :is-loading="loading.addComment"
               :is-error="errors.addComment"
               :user="user"
@@ -73,6 +74,7 @@
               :attached-file-name="attachedFileName"
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
+              @duplicate-comment="onDuplicateComment"
               @file-drop="selectFile"
               v-if="isCommentingAllowed"
             />
@@ -168,6 +170,7 @@
                 :preview="currentPreview"
                 :task-type-map="taskTypeMap"
                 :entity-preview-files="taskEntityPreviews"
+                :read-only="isCurrentUserCGArtist"
                 @annotationchanged="onAnnotationChanged"
                 ref="preview-movie"
               />
@@ -193,6 +196,7 @@
 
             <picture-viewer
               :preview="currentPreview"
+              :read-only="isCurrentUserCGArtist"
               @annotation-changed="onAnnotationChanged"
               @add-preview="onAddExtraPreview"
               @remove-extra-preview="showRemoveExtraPreviewModal"
@@ -381,6 +385,7 @@ export default {
       'getTaskPreviews',
       'getTaskComment',
       'isCurrentUserManager',
+      'isCurrentUserCGArtist',
       'isSingleEpisode',
       'isTVShow',
       'personMap',
@@ -1258,6 +1263,10 @@ export default {
 
     closeAddPreviewModal () {
       this.modals.addPreview = false
+    },
+
+    onDuplicateComment (comment) {
+      this.$refs['add-comment'].setValue(comment)
     },
 
     onPinComment (comment) {

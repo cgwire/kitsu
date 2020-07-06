@@ -209,7 +209,6 @@ export const annotationMixin = {
     },
 
     setupFabricCanvas () {
-      if (this.readOnly) return
       if (!this.annotationCanvas) return
 
       const canvasId = this.annotationCanvas.id

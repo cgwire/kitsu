@@ -564,7 +564,8 @@ export default {
           this.displayedShots[0].episode_id !== this.currentEpisode.id
         )
       ) {
-        if (this.currentEpisode &&
+        if (this.isTVShow &&
+            this.currentEpisode &&
             (this.currentEpisode.id === 'main' ||
             this.currentEpisode.id === 'all')) {
           callback()
@@ -1022,11 +1023,14 @@ export default {
   },
 
   mounted () {
-    this.reloadAll()
-    if (localStorage.getItem('playlist-sort')) {
-      this.currentSort = localStorage.getItem('playlist-sort')
-    }
-    this.resetSorting()
+    // Next tick needed to ensure that current production is properly set.
+    this.$nextTick(() => {
+      this.reloadAll()
+      if (localStorage.getItem('playlist-sort')) {
+        this.currentSort = localStorage.getItem('playlist-sort')
+      }
+      this.resetSorting()
+    })
   },
 
   watch: {
