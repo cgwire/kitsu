@@ -94,6 +94,7 @@
                   :last-preview-files="lastFiveMoviePreviews"
                   :task-type-map="taskTypeMap"
                   :light="!isWide"
+                  :read-only="isCurrentUserCGArtist"
                   @annotationchanged="onAnnotationChanged"
                   @change-current-preview="changeCurrentPreview"
                   ref="preview-movie"
@@ -128,6 +129,7 @@
                 :preview="currentPreview"
                 :last-preview-files="lastFivePicturePreviews"
                 :light="!isWide"
+                :read-only="isCurrentUserCGArtist"
                 @annotation-changed="onAnnotationChanged"
                 @add-preview="onAddExtraPreview"
                 @remove-extra-preview="onRemoveExtraPreview"
@@ -383,6 +385,7 @@ export default {
       'getTaskComment',
       'getTaskComments',
       'getTaskPreviews',
+      'isCurrentUserCGArtist',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isSingleEpisode',
