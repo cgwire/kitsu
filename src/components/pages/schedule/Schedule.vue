@@ -324,7 +324,7 @@
                   </div>
                   <div
                     :class="{
-                      'timebar-right-hand': childElement.editabl && !childElement.unresizablee
+                      'timebar-right-hand': childElement.editable && !childElement.unresizablee
                     }"
                     @mousedown="moveTimebarRightSide(childElement, $event)"
                   >
