@@ -347,6 +347,7 @@ export default {
     ...mapActions([
       'clearEpisodes',
       'loadEpisodes',
+      'loadMilestones',
       'loadNotification',
       'logout',
       'setProduction',
@@ -601,6 +602,12 @@ export default {
       } else if (this.currentEpisodeId !== this.currentEpisode.id) {
         this.currentEpisodeId = this.currentEpisode.id
       }
+    },
+
+    currentProduction () {
+      this.$nextTick(() => {
+        this.loadMilestones()
+      })
     }
   },
 
