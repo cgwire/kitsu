@@ -871,5 +871,6 @@ export default {
 
 .person-label {
   margin-top: 5px;
+  margin-bottom: 4px;
 }
 </style>

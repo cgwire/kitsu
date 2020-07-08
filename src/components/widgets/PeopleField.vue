@@ -167,7 +167,7 @@ export default {
 .v-autocomplete .v-autocomplete-input-group .v-autocomplete-input {
   width: 300px;
   margin-bottom: 1px;
-  border: 1px solid $light-grey;
+  border: 1px solid $light-grey-light;
   border-radius: 5px;
   padding: 0.5em;
 
