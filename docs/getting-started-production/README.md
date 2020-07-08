@@ -781,10 +781,7 @@ Depending on the **FPS** you have set for the production, the number of **Second
 
 
 
-
-
-
-## Comment and validation
+## Change status and add a Preview
 
 To write a comment and to change the status of a task, you can click on the
 status of the task (1). 
@@ -797,8 +794,6 @@ It makes appear a panel on the right, and here you can write a comment (1) and c
 Validate the post and the new status with **Post status**
 
 ![Changing status](../img/getting-started/changing_status_shot.png)
-
-## Add preview
 
 You can add a preview to any comments. It can be a picture (`.png`, `.jpg`, `.jpeg`), or a video (`.mp4`, `.mov`, `.wmv`), 
 or an `.obj` file. All can be reviewed from the browser.
@@ -957,7 +952,7 @@ that his work is validated.
 
 
 
-## Validation per batch
+## Cahnge status per batch
 
 Alternatively, you can do it per **batch**. 
 
@@ -973,7 +968,71 @@ You validate the new status with the **Confirm** button.
 
 ![Change status per batch](../img/getting-started/change_status_batch.png)
 
+## Create a playlist
 
+
+You can find the **Playlists** page on the drop-down menu. 
+
+![Playlist main menu](../img/faq/drop_down_menu_playlist.png)
+
+The **playlist** page is separated into 2 parts: 
+
+* (1) The playlist list where you can **create** a playlist, or load an existing one.
+* (2) The last created playlists and the last modified playlists
+
+![Playlist page](../img/faq/playlist_page.png)
+
+Start by creating a **Playlist** 
+![Playlist add button](../img/faq/playlist_add_button.png), You default name
+is the date and the hour. You can change it immediately. You can  choose if the playlist
+will be shared with the **studio** or the **client** and if it's a **shot** or **asset** playlist.
+
+![Playlist add page](../img/faq/playlist_add_page.png)
+
+Once the playlist created, via the search/filter bar, you can select which shots to add
+to your playlist. You can also choose to add the whole movie.
+
+You can use the same filter than on the global shot/asset page. For example you can select all the 
+WFA short for the animation stage.
+You have to type **animation=wfa** in the search bar. Valid your selection with the **Add selection** button.
+
+The shots appear on the top part of the screen. Every change are 
+automatically saved.
+
+![Playlist page](../img/faq/playlist_example.png)
+
+
+## Validate with a playlist
+
+For each playlisted shot/asset you can choose the **task** and the
+**version** you want to see.
+
+![Playlist task selection](../img/faq/playlist_task_selection.png)
+![Playlist version selection](../img/faq/playlist_version_selection.png)
+
+You can also play side by side two tasks of a shot.
+
+Click on the **Compare** button ![Compare button](../img/faq/compare_button.png) and choose the second task type.
+
+![Playlist side by side](../img/faq/playlist_side_by_side.png)
+
+
+
+The primary purpose of the playlist is to help you with the review of the shots adn assets.
+
+You can comment the shots directly from the preview.
+
+Click on the **comment** button.
+
+![Playlist comment](../img/faq/playlist_comment_button.png)
+
+You now have access to the right panel, with all the history of the comments and status.
+
+You can see the drawing comment on the video (the red dot below the timeline).
+
+![Playlist comment](../img/faq/playlist_comment.png)
+
+You can draw on the video (same than for the shot review), with the **draw** button ![draw button](../img/faq/draw.png)
 
 
 ## Simplify the global page
