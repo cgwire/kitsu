@@ -1,4 +1,5 @@
 import {
+  buildTaskTypeIndex,
   buildNameIndex,
   indexSearch
 } from './indexing'
@@ -185,7 +186,7 @@ export const getTaskTypeFilters = (
   const rgxMatches = queryText.match(EQUAL_REGEX)
 
   if (rgxMatches) {
-    const taskTypeNameIndex = buildNameIndex(taskTypes, false)
+    const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
     const taskStatusShortNameIndex = {}
     taskStatuses.forEach((taskStatus) => {
       const shortName = taskStatus.short_name.toLowerCase()
