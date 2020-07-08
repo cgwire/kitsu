@@ -38,11 +38,13 @@ $blue: #7289DA;
 
 :root {
   --background: #FFFFFF;
-  --background-rgb: 255, 255, 255;
   --background-alt: #F6F6F6;
+  --background-rgb: 255, 255, 255;
   --background-alt-rgb: 246, 246, 246;
   --background-hover: #E1E4FF;
   --background-hover-rgb: 240, 255, 240;
+  --background-tag:  #EEE;
+  --background-tag-button: #F9F9F9; 
   --background-selectable: #E1E4FF;
   --background-selected: #CFD1FF;
   --border: #DBDBDB;
@@ -57,7 +59,10 @@ $blue: #7289DA;
   --background-alt: #46494F;
   --background-alt-rgb: 70, 73, 79;
   --background-hover: #5E6169;
+  --background-tag-button: #4E5159; 
   --background-hover-rgb: 94, 97, 105;
+  --background-tag:  #36393F; 
+  --background-selectable: #E1E4FF;
   --background-selectable: #878B97;
   --background-selected: #5E60BA;
   --border: #25282E;
