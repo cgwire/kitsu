@@ -23,6 +23,16 @@ export const buildNameIndex = (entries, split = true) => {
 }
 
 /*
+ * Generate an index to find task type easily.
+ */
+export const buildTaskTypeIndex = (taskTypes) => {
+  const sortedTaskTypes = [...taskTypes].sort(
+    (a, b) => a.name.localeCompare(b.name)
+  )
+  return buildNameIndex(sortedTaskTypes, false)
+}
+
+/*
  * Generate an index to find task easily. Search will be based on the task
  * entity name and words appearing into it.
  * The result is an array of tasks.
@@ -79,7 +89,9 @@ export const buildAssetIndex = (entries) => {
   entries.forEach((asset) => {
     const stringToIndex = asset.name.replace(/_/g, ' ').replace(/-/g, ' ')
     const assetTypeWords = asset.asset_type_name.split(' ')
-    const words = stringToIndex.split(' ').concat(assetTypeWords)
+    const words = stringToIndex.split(' ')
+      .concat(assetTypeWords)
+      .concat([asset.name])
     indexWords(index, assetIndex, asset, words)
   })
   return index

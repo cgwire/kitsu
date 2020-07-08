@@ -336,8 +336,11 @@ export default {
         ]
       }
 
-      if (!this.isTVShow) { // Remove episode Section from the list.
+      // Remove episode Section from the list.
+      if (!this.isTVShow && !this.isCurrentUserClient) {
         options.splice(3, 1)
+      } else if (!this.isTVShow) {
+        options.splice(4, 1)
       }
       return options
     }

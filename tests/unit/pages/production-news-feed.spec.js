@@ -76,7 +76,9 @@ describe('ProductionNewsFeed', () => {
     },
     productionStore = {
       getters: {
-        currentProduction: () => ({ id: 'production-1', name: 'Prod 1' })
+        currentProduction: () => ({
+          id: 'production-1', name: 'Prod 1', team: []
+        })
       },
       actions: {
       }
@@ -123,7 +125,8 @@ describe('ProductionNewsFeed', () => {
         page_size: 50,
         productionId: "production-1",
         task_status_id: undefined,
-        task_type_id: undefined
+        task_type_id: undefined,
+        person_id: undefined
       })
       wrapper.vm.previewMode = 'previews'
       wrapper.vm.taskStatusId = 'task-status-1'

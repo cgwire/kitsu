@@ -25,10 +25,19 @@
           <span class="filler"></span>
           <button-simple
             class="flexrow-item"
+            :title="$t('breakdown.text_mode')"
+            icon="type"
+            :is-on="isTextMode"
+            :is-responsive="true"
+            @click="toggleTextMode"
+          />
+          <button-simple
+            class="flexrow-item"
             :title="$t('main.csv.import_file')"
             icon="upload"
             :is-responsive="true"
             @click="showImportModal"
+            v-if="isCurrentUserManager"
           />
           <button-href-link
             class="flexrow-item"
@@ -36,6 +45,7 @@
             icon="download"
             :is-responsive="true"
             :path="exportUrlPath"
+            v-if="isCurrentUserManager"
           />
         </div>
         <spinner class="mt1" v-if="isLoading" />
@@ -47,6 +57,7 @@
             :name="entity.name"
             :assets="castingByType[entity.id] || []"
             :read-only="!isCurrentUserManager"
+            :text-mode="isTextMode"
             @edit-label="onEditLabelClicked"
             @remove-one="removeOneAsset"
             @remove-ten="removeTenAssets"
@@ -88,6 +99,7 @@
               :key="asset.id"
               :asset="asset"
               :active="Object.keys(selection).length > 0"
+              :text-mode="isTextMode"
               @add-one="addOneAsset"
               @add-ten="addTenAssets"
               v-for="asset in typeAssets"
@@ -202,6 +214,7 @@ export default {
       episodeId: '',
       importCsvFormData: {},
       isLoading: false,
+      isTextMode: false,
       selection: {},
       sequenceId: '',
       errors: {
@@ -226,6 +239,7 @@ export default {
       this.reset()
     }
     this.setLastProductionScreen('breakdown')
+    this.isTextMode = localStorage.getItem('breakdown:text-mode') === 'true'
   },
 
   computed: {
@@ -375,6 +389,8 @@ export default {
 
     onSearchChange (searchQuery) {
       this.setAssetSearch(searchQuery)
+      this.displayMoreAssets()
+      this.displayMoreAssets()
     },
 
     selectEntity (entityId, event) {
@@ -579,6 +595,11 @@ export default {
           this.errors.editLabel = true
           this.loading.editLabel = false
         })
+    },
+
+    toggleTextMode () {
+      this.isTextMode = !this.isTextMode
+      localStorage.setItem('breakdown:text-mode', this.isTextMode)
     }
   },
 

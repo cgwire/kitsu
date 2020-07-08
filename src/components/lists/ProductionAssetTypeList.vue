@@ -27,10 +27,18 @@
               :style="getValidationStyle(columnId)"
             >
               <router-link
+                class="flexrow-item"
                 :to="taskTypePath(columnId)"
+                v-if="!isCurrentUserClient"
               >
                 {{ taskTypeMap[columnId].name }}
               </router-link>
+              <span
+                class="flexrow-item"
+                v-else
+              >
+                {{ taskTypeMap[columnId].name }}
+              </span>
             </div>
           </th>
           <th scope="col" class="actions"></th>

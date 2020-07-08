@@ -48,6 +48,7 @@ export default {
     edit_label: 'Change the asset\'s label',
     empty: 'Empty casting',
     label: 'Label',
+    text_mode: 'Switch to text mode',
     title: 'Breakdown',
     options: {
       fixed: 'fixed',
@@ -234,6 +235,7 @@ export default {
     minimize: 'Minimize',
     maximize: 'Maximize',
     nb_frames: 'frame | frames',
+    person: 'Person',
     profile: 'Profile',
     production: 'Production',
     remove: 'Remove',

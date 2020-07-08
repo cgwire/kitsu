@@ -27,11 +27,11 @@
         <task-type-name :task-type="taskTypeMap[taskTypeId]" />
 
         <div class="table-body">
-          <table class="table">
-            <tbody>
+          <table class="datatable">
+            <tbody class="datatable-body">
               <tr
                 :key="task.id"
-                class="by-task-type-id"
+                class="by-task-type-id datatable-row"
                 v-for="task in projects[projectId][taskTypeId]"
               >
                 <td class="name">{{ task.name }}</td>

@@ -31,6 +31,16 @@
             :task-type-list="taskTypeList"
             v-model="taskTypeId"
           />
+          <div class="field flexrow-item selector">
+            <label class="label person-label">
+              {{ $t('main.person') }}
+            </label>
+            <people-field
+              :people="team"
+              :big="true"
+              v-model="person"
+            />
+          </div>
           <span class="filler"></span>
         </div>
 
@@ -213,6 +223,7 @@
                       :task-type-map="taskTypeMap"
                       :read-only="true"
                       :light="true"
+                      :big="true"
                     />
                   </div>
 
@@ -229,6 +240,7 @@
                     :preview="{previews: [{id: news.preview_file_id}]}"
                     :light="true"
                     :read-only="true"
+                    :big="true"
                     ref="preview-picture"
                     v-else-if="news.preview_file_extension == 'png'"
                   />
@@ -287,6 +299,7 @@ import { sortByName } from '../../lib/sorting'
 import Combobox from '../widgets/Combobox'
 import ComboboxStatus from '../widgets/ComboboxStatus'
 import ComboboxTaskType from '../widgets/ComboboxTaskType'
+import PeopleField from '../widgets/PeopleField'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import ModelViewer from '../previews/ModelViewer'
 import PeopleAvatar from '../widgets/PeopleAvatar'
@@ -307,6 +320,7 @@ export default {
     EntityThumbnail,
     ModelViewer,
     PeopleAvatar,
+    PeopleField,
     PictureViewer,
     TaskTypeName,
     ValidationTag,
@@ -328,6 +342,7 @@ export default {
         news: false,
         currentTask: true
       },
+      person: {},
       previewMode: 'comments',
       previewOptions: [
         {
@@ -394,6 +409,7 @@ export default {
         task_type_id: this.taskTypeId !== '' ? this.taskTypeId : undefined,
         task_status_id:
           this.taskStatusId !== '' ? this.taskStatusId : undefined,
+        person_id: this.person ? this.person.id : undefined,
         page: this.currentPage
       }
       return params
@@ -413,6 +429,10 @@ export default {
         color: '#999',
         name: this.$t('news.all')
       }].concat(sortByName([...this.taskTypes]))
+    },
+
+    team () {
+      return this.currentProduction.team.map(pId => this.personMap[pId])
     },
 
     timezone () {
@@ -487,17 +507,24 @@ export default {
 
     onNewsSelected (news) {
       this.loading.currentTask = true
-      this.lastSelection = this.newsList.findIndex(n => n.id === news.id)
-      this.loadTask({
-        taskId: news.task_id,
-        callback: (err, task) => {
-          if (err) console.error(err)
-          this.loading.currentTask = false
-          this.currentTask = task
-          this.currentNewsId = news.id
-        }
-      })
-      this.scrollToLine(news)
+      const index = this.newsList.findIndex(n => n.id === news.id)
+      if (this.lastSelection !== index) {
+        this.lastSelection = index
+        this.loadTask({
+          taskId: news.task_id,
+          callback: (err, task) => {
+            if (err) console.error(err)
+            this.loading.currentTask = false
+            this.currentTask = task
+            this.currentNewsId = news.id
+          }
+        })
+        this.scrollToLine(news)
+      } else {
+        this.lastSelection = -1
+        this.currentTask = null
+        this.currentNewsId = ''
+      }
     },
 
     scrollToLine (news) {
@@ -634,6 +661,10 @@ export default {
     taskStatusId () {
       localStorage.setItem('news:task-status-id', this.taskStatusId)
       this.init()
+    },
+
+    person () {
+      this.init()
     }
   },
 
@@ -655,17 +686,6 @@ export default {
 .dark {
   .page {
     background: $dark-grey-light;
-  }
-
-  .news-line {
-    &:hover {
-      border-left: 6px solid $green;
-    }
-
-    &.selected {
-      border-left: 6px solid $dark-purple;
-      background: $purple-strong;
-    }
   }
 
   .icon,
@@ -691,6 +711,10 @@ export default {
     .big-dot {
       background: $blue;
     }
+
+    .selected .date {
+      color: $light-grey;
+    }
   }
 }
 
@@ -706,14 +730,15 @@ export default {
 
 .main-column {
   flex: 1 1 auto;
-  padding-top: 70px;
+  padding-top: 60px;
   background: $white-grey-light;
   height: 100%;
+  overflow: hidden;
 }
 
 .news {
   background: $white-grey-light;
-  width: calc(100% - 9px);
+  width: 100%;
   padding: 0;
   overflow-y: auto;
   height: 100%;
@@ -755,7 +780,7 @@ export default {
     .dot {
       position: absolute;
       display: block;
-      left: -37px;
+      left: -31px;
       background: $blue-light;
       width: 8px;
       height: 8px;
@@ -781,6 +806,10 @@ export default {
 
   .date {
     min-width: 30px;
+  }
+
+  .selected .date {
+    color: $dark-grey;
   }
 
   .explaination,
@@ -810,20 +839,19 @@ export default {
 }
 
 .news-line {
-  border-left: 6px solid transparent;
   padding-left: 1em;
   align-items: middle;
   cursor: pointer;
   padding-top: 0.5em;
   padding-bottom: 0.5em;
+  border-radius: 0.5em;
 
   &:hover {
-    border-left: 6px solid $light-green-light;
+  background: var(--background-hover);
   }
 
   &.selected {
-    border-left: 6px solid $purple;
-    background: $light-purple;
+    background: var(--background-selected);
   }
 }
 
@@ -841,5 +869,10 @@ export default {
 .selector {
   margin-bottom: 0;
   margin-right: 1em;
+}
+
+.person-label {
+  margin-top: 5px;
+  margin-bottom: 4px;
 }
 </style>

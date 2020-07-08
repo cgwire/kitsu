@@ -476,7 +476,7 @@ export default {
     color: $white-grey;
   }
 
-  .client-comment {
+  .content .client-comment {
     background: #C4677B;
     color: white;
   }
