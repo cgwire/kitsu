@@ -505,17 +505,24 @@ export default {
 
     onNewsSelected (news) {
       this.loading.currentTask = true
-      this.lastSelection = this.newsList.findIndex(n => n.id === news.id)
-      this.loadTask({
-        taskId: news.task_id,
-        callback: (err, task) => {
-          if (err) console.error(err)
-          this.loading.currentTask = false
-          this.currentTask = task
-          this.currentNewsId = news.id
-        }
-      })
-      this.scrollToLine(news)
+      const index = this.newsList.findIndex(n => n.id === news.id)
+      if (this.lastSelection !== index) {
+        this.lastSelection = index
+        this.loadTask({
+          taskId: news.task_id,
+          callback: (err, task) => {
+            if (err) console.error(err)
+            this.loading.currentTask = false
+            this.currentTask = task
+            this.currentNewsId = news.id
+          }
+        })
+        this.scrollToLine(news)
+      } else {
+        this.lastSelection = -1
+        this.currentTask = null
+        this.currentNewsId = ''
+      }
     },
 
     scrollToLine (news) {
@@ -702,6 +709,10 @@ export default {
     .big-dot {
       background: $blue;
     }
+
+    .selected .date {
+      color: $light-grey;
+    }
   }
 }
 
@@ -793,6 +804,10 @@ export default {
 
   .date {
     min-width: 30px;
+  }
+
+  .selected .date {
+    color: $dark-grey;
   }
 
   .explaination,
