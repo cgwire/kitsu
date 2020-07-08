@@ -717,14 +717,15 @@ export default {
 
 .main-column {
   flex: 1 1 auto;
-  padding-top: 70px;
+  padding-top: 60px;
   background: $white-grey-light;
   height: 100%;
+  overflow: hidden;
 }
 
 .news {
   background: $white-grey-light;
-  width: calc(100% - 9px);
+  width: 100%;
   padding: 0;
   overflow-y: auto;
   height: 100%;

@@ -373,6 +373,7 @@ body {
   min-height: 100%;
   width: 100%;
   background: #EEE;
+  overflow: auto;
 }
 
 * {
@@ -383,6 +384,7 @@ body {
 }
 
 .dark {
+
   .hero {
     background-color: $dark-grey;
   }
@@ -1458,6 +1460,11 @@ tbody:last-child .empty-line:last-child {
   display: flex;
   flex-direction: row;
   padding: 0;
+  margin: 0;
+}
+
+.columns:last-child {
+  margin: 0;
 }
 
 .column {
