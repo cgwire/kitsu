@@ -6,7 +6,8 @@
     :min-len="1"
     :auto-select-one-item="false"
     :input-attrs="{
-      placeholder: this.$t('people.select_person')
+      placeholder: this.$t('people.select_person'),
+      class: big ? 'big v-autocomplete-input' : 'v-autocomplete-input'
     }"
     ref="autocomplete"
     @update-items="update"
@@ -62,6 +63,10 @@ export default {
     people: {
       type: Array,
       default: () => []
+    },
+    big: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -175,6 +180,10 @@ export default {
 
   &:hover {
     border: 1px solid $green;
+  }
+
+  &.big {
+    padding: 0.85em;
   }
 }
 </style>
