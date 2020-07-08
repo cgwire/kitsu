@@ -8,6 +8,7 @@
     labelled: true
   }"
   :title="`${asset.name} (${nbOccurences})`"
+  v-if="!textMode"
 >
   <div class="asset-wrapper">
     <div
@@ -45,6 +46,18 @@
     {{ asset.label || $t('breakdown.options.animate') }}
   </div>
 </div>
+<div class="asset-text flexrow-item flexrow" v-else>
+  <span class="asset-text-name flexrow-item">
+    {{ asset.name }} ({{ nbOccurences }})
+  </span>
+  <span
+    class="modify-asset flexrow-item"
+    @click="removeOneAsset"
+    v-if="!readOnly"
+  >
+  - 1
+  </span>
+</div>
 </template>
 
 <script>
@@ -79,6 +92,10 @@ export default {
       type: Boolean
     },
     readOnly: {
+      default: false,
+      type: Boolean
+    },
+    textMode: {
       default: false,
       type: Boolean
     }

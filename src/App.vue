@@ -731,6 +731,10 @@ a:hover {
   margin-right: 1em;
 }
 
+.mt05 {
+  margin-top: 0.5em;
+}
+
 .mt1 {
   margin-top: 1em;
 }
@@ -749,6 +753,14 @@ a:hover {
 
 .mb0 {
   margin-bottom: 0;
+}
+
+.mb05 {
+  margin-bottom: 0.5em;
+}
+
+.mb1 {
+  margin-bottom: 1em;
 }
 
 .mb2 {
@@ -1712,6 +1724,30 @@ th.validation-cell {
   display: inline-block;
   background: $white-grey;
   border-radius: 50%;
+}
+
+.asset-text {
+  background: var(--background-tag);
+  color: var(--text);
+  border-radius: 0.9em;
+  cursor: default;
+  font-size: 0.8em;
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+  padding: 0.2em 0.6em;
+
+  .asset-text-name {
+    margin-right: 0;
+  }
+
+  .modify-asset {
+    background: var(--background-tag-button);
+    border-radius: 0.9em;
+    cursor: pointer;
+    font-size: 0.7em;
+    padding: 0.3em 0.5em;
+    margin-left: 0.5em;
+  }
 }
 
 @media screen and (max-width: 1000px) {

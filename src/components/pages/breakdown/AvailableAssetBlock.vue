@@ -6,6 +6,7 @@
     active: active
   }"
   :title="asset.name"
+  v-if="!textMode"
 >
   <div
     class="asset-add"
@@ -31,6 +32,18 @@
     </span>
   </div>
 </div>
+<div class="asset-text flexrow-item flexrow" v-else>
+  <span class="asset-text-name flexrow-item">
+    {{ asset.name }}
+  </span>
+  <span
+    class="modify-asset flexrow-item"
+    @click="addOneAsset"
+  >
+  + 1
+  </span>
+</div>
+
 </template>
 
 <script>
@@ -45,6 +58,10 @@ export default {
       type: Object
     },
     active: {
+      default: false,
+      type: Boolean
+    },
+    textMode: {
       default: false,
       type: Boolean
     }
@@ -162,5 +179,10 @@ export default {
 
 .active {
   cursor: pointer;
+}
+
+.asset-text {
+  font-size: 0.9em;
+  margin-bottom: 0.5em;
 }
 </style>

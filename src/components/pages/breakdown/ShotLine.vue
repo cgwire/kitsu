@@ -20,7 +20,7 @@
       >
         <span class="asset-type-name flexrow-item">
           {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
-          ({{ typeAssets.length }})
+          ({{ typeAssets.reduce((acc, a) => acc + a.nb_occurences, 0) }})
         </span>
         <div class="asset-type-items flexrow-item">
           <asset-block
@@ -29,6 +29,7 @@
             :asset="asset"
             :nb-occurences="asset.nb_occurences"
             :read-only="readOnly"
+            :text-mode="textMode"
             @edit-label="onEditLabelClicked"
             @remove-one="removeOneAsset"
             @remove-ten="removeTenAssets"
@@ -37,7 +38,7 @@
         </div>
       </div>
       <div
-        class="asset-type-line flexrow empty"
+        class="asset-type-line flexrow empty mt05 mb05"
         v-if="assets.length === 0"
       >
         {{ $t('breakdown.empty') }}
@@ -70,6 +71,10 @@ export default {
       type: Array
     },
     readOnly: {
+      default: false,
+      type: Boolean
+    },
+    textMode: {
       default: false,
       type: Boolean
     }
