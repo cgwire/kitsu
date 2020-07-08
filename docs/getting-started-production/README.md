@@ -162,88 +162,6 @@ will be highlighted in blue.
 ![Import data copy paste data](../img/getting-started/import_update_asset.png)
 
 
-## Create tasks for the assets
-
-And now we can create tasks for the assets (3), like **Concept**, **Modeling**,
-**Texture**, **Setup**, and other if needed (see 
-[How to customize the workflow](.../faq/#how-to-customize-the-workflow)
-).
-
-
-Click on the **+ Add tasks** (3) on top of the spreadsheet. A new window will
-open and on the list under **Type** you can choose the task you need to add,
-validate it by **Confirm** button.
-
-![Add task to an asset](../img/getting-started/add_task.png)
-
-You added tasks to all the assets.
-
-
-If you want to delete a task, If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
-then select the **delete tasks** (2) on the left top
-of the page.
-![Delete button](../img/getting-started/delete_task.png) 
-
-Now that we have created all the assets and related tasks, we can now add the
-artists to the team and assign tasks to them.
-
-
-## Add a new employee
-
-Each artist required an account. Go to the drop-down menu ![Main
-menu](../img/getting-started/main_button.png), and under the **Studio**
-section, choose **PEOPLE** page.
-
-![People Menu](../img/getting-started/main_menu_people.png)
-
-Then, click on the **+ Add a new employee** button. 
-
-![Add a new employee](../img/getting-started/add_employee.png)
-
-A creation window opens. You can enter the first (1) and last name (2), the email
-(which is **mandatory** to create the account) (3), the phone number (4) and
-define the role of the employee: **CG artist**, **Supervisor**,
-**Studio Manager**, **Vendor** or **Client** (5).  If the artist is working right now, keep
-him as active, otherwise select no. Validate by clicking **Confirm** button.
-
-![Create a new employee](../img/getting-started/create_employee.png)
-
-See the [permissions](../permissions/README.md) section for more information. 
-To make it short, CG artists, supervisors and clients only see the
-productions they are assigned.
-
-All the people are now part of your studio. They are added to a specific
-production when you assign them to a task on a production. Otherwise, they
-won't have access to anything.
-
-
-## Add employees from a csv spreadsheet file
-
-You may have already your employee list ready in a spreadsheet file.
-With Kitsu you have 2 ways to import them, the first is to import a `.csv` file directly, the second is to copy paste your data directly into Kitsu.
-
-First save your spreadsheet as a `.csv` file.
-
-Then, go back to the people page on Kitsu, and click on the **Import** icon.
-![Import Icon](../img/getting-started/import.png)
-
-A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
-
-![Import csv file](../img/getting-started/import_csv_people.png)
-
-To see the result, click on the **Preview** button.
-  
-You can check and adjust the name of the columns with the preview of your data.
-
-NB: the **Role** column is not mandatory.
- 
-![Import data copy paste data](../img/getting-started/import_preview_data_people.png)
-
-Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
-
-Now, you have all your people imported into Kitsu.
-
-![Import data copy paste data](../img/getting-started/import_result_people.png)
 
 
 ## Create assets with copy/paste a spreadsheet file
@@ -647,6 +565,90 @@ Select in the menu if you want to
 edit the name of the custom column and its information, or you want to remove it.
 
 ![Custom Column detail](../img/getting-started//custom_column_edit.png)
+
+
+## Create tasks for the assets
+
+And now we can create tasks for the assets (3), like **Concept**, **Modeling**,
+**Texture**, **Setup**, and other if needed (see 
+[How to customize the workflow](.../faq/#how-to-customize-the-workflow)
+).
+
+
+Click on the **+ Add tasks** (3) on top of the spreadsheet. A new window will
+open and on the list under **Type** you can choose the task you need to add,
+validate it by **Confirm** button.
+
+![Add task to an asset](../img/getting-started/add_task.png)
+
+You added tasks to all the assets.
+
+
+If you want to delete a task, If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
+then select the **delete tasks** (2) on the left top
+of the page.
+![Delete button](../img/getting-started/delete_task.png) 
+
+Now that we have created all the assets and related tasks, we can now add the
+artists to the team and assign tasks to them.
+
+
+## Add a new employee
+
+Each artist required an account. Go to the drop-down menu ![Main
+menu](../img/getting-started/main_button.png), and under the **Studio**
+section, choose **PEOPLE** page.
+
+![People Menu](../img/getting-started/main_menu_people.png)
+
+Then, click on the **+ Add a new employee** button. 
+
+![Add a new employee](../img/getting-started/add_employee.png)
+
+A creation window opens. You can enter the first (1) and last name (2), the email
+(which is **mandatory** to create the account) (3), the phone number (4) and
+define the role of the employee: **CG artist**, **Supervisor**,
+**Studio Manager**, **Vendor** or **Client** (5).  If the artist is working right now, keep
+him as active, otherwise select no. Validate by clicking **Confirm** button.
+
+![Create a new employee](../img/getting-started/create_employee.png)
+
+See the [permissions](../permissions/README.md) section for more information. 
+To make it short, CG artists, supervisors and clients only see the
+productions they are assigned.
+
+All the people are now part of your studio. They are added to a specific
+production when you assign them to a task on a production. Otherwise, they
+won't have access to anything.
+
+
+## Add employees from a csv spreadsheet file
+
+You may have already your employee list ready in a spreadsheet file.
+With Kitsu you have 2 ways to import them, the first is to import a `.csv` file directly, the second is to copy paste your data directly into Kitsu.
+
+First save your spreadsheet as a `.csv` file.
+
+Then, go back to the people page on Kitsu, and click on the **Import** icon.
+![Import Icon](../img/getting-started/import.png)
+
+A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
+
+![Import csv file](../img/getting-started/import_csv_people.png)
+
+To see the result, click on the **Preview** button.
+  
+You can check and adjust the name of the columns with the preview of your data.
+
+NB: the **Role** column is not mandatory.
+ 
+![Import data copy paste data](../img/getting-started/import_preview_data_people.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have all your people imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/import_result_people.png)
 
 
 ## Add a CG Artist to the team
