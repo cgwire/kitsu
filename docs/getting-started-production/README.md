@@ -275,139 +275,6 @@ Now, you have all your assets imported into Kitsu.
 
 ![Import data copy paste data](../img/getting-started/import_result_people.png)
 
-
-
-
-## Add a CG Artist to the team
-
-You need to add someone to a production to assign him a task.
-
-On the drop-down menu on the top of the page, select the **TEAM** page.
-
-![Drop down menu team](../img/getting-started/drop_down_menu_team.png) 
-
-On the **Team** page, you can see all the assignations for a specific project.
-If you want to check another project team, you need to switch the project
-on the top of the page.
-
-![Team page](../img/getting-started/team_page.png)
-
-You can also add someone to a production without assigning him to a task if you have less than 10 people, you
-can select his name on the search box (or type his name), and validate with
-**add**.
-
-
-## Assign tasks to a CG artist
-
-We can now get back to the **ASSETS** page via the drop-down menu.
-
-![Drop down menu asset](../img/getting-started/drop_down_menu_asset.png).
-
-Now its time to do your first assignment! 
-
-Click on the status (1) you want to assign.
-
-![Assigned a task](../img/getting-started/task_assigned.png)
-
-The **Action Menu** on top of the screen appears. 
-
-![Blue menu](../img/getting-started/blue_menu.png)
-
-You can now do the assignation. Click on the text input, and you see
-the list of available people. Click on a person's name to perform to select
-him. Then click on the confirmation button to complete the assignation.
-
-![Selected people](../img/getting-started/select_people.png)
-
-You can assign several tasks to the same person in one step (1). Once you have
-the blue menu visible, keep **ctrl** on your keyboard pressed and select
-multiple tasks. You can even use the **shift** key to choose a range of tasks
-(2). When you have chosen everything you need, apply with the **Confirm**
-button.  
-
-![Assigned multiple people](../img/getting-started/assigned_multiple.png)
-
-In the same way, you can click on **Clear assignations** to remove all 
-assignations, or press the "Escape" key.
-
-When you finish all the assignations, quit this mode using the **Clear
-current selection** button ![Clear current selection](../img/getting-started/clear_current_selection.png).
-
-Now you can see next to each status the avatar of the CG artist.
-
-![Assigned people](../img/getting-started/assignation.png)
-
-To unclutter the list, you can hide this information with the **Hide
-assignations** button on the top of the spreadsheet ![Hide assignations](../img/getting-started/hide_assignation.png).
-
-Once you assigned someone, he is part of the production team. Depending
-on his position (CG Artist, Supervisor, Vendor), he only sees the production where
-he's assigned. 
-
-Now, everybody knows what to do and who is doing what!
-
-
-## Add an estimation for a task
-
-Click on the name of a task type.
-
-![Task type](../img/getting-started/supervisor_tasktype.png)
-
-The new page is the **Supervisor view**. You have more detailed information specific to this specific **task type**.
-
-![Supervisor page](../img/getting-started/supervisor_page.png)
-
-To go further in detail with the Supervisor view :  
-- (1) You can see and change the status of a task
-- (2) You can assign people to tasks
-
-(1) and (2) is filled with the action menu.
-
-- (3) You can add an estimation for the task (in day unit)
-- (4) Kitsu calculate the sum of the timesheet fed by the artists
-- (5) The number of back and forth with the retake status
-- (6) You can add a start date for the task (with the calendar)
-- (7)Kitsu calculate the due date with the Start date and the estimation
-- (8)(9) the Wip and Validation dates are automatically filled
-- (10) the Last comment section help you to keep an eye on the last activity of this task type.
-
-(7) to (10) is automatically filled.
-
-To add an estimation to a task, click on the line, and type the number or days you estimate. You can select multiple assets or shots at the same time.
-
-You can also define a **Start date** by clicking on it.
-A calendar will open and let you choose your start date.
-
-The **Due date** is automatically calculated with the **Estimation**.
- 
-![start date](../img/getting-started/set_estimation.png)
-  
-To help you to set a correct estimation, you can use the **Estimation** Tab.
-
-![Estimation tab](../img/getting-started/tasktype_estimation_tab.png) 
-
-On the left part of the screen is the list of the shots with the assignation and the number of frames (1).
-Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2). 
-(See how to set your production fps [Create your first production](#create-your-first-production) ) 
-
- On the right part of the screen you can see the full team of the departement (depending on the assignations you made), the number of shots they have to do, the number of frame, seconds, and the average quota. 
- 
- 
- And the last column is the **Estimation**, to modify the estimation, hoover the line with your mouse and click and the editing zone.
- 
- You can also select multiple shot at the same time to edit them all the once.
- 
- ![Estimation tab edit](../img/getting-started/tasktype_estimation_tab_edit.png) 
- 
- Everytime you change the **Estimation** in day on the right part, you can see in real time that the **Average Quota** is updated as well.
- 
-
- 
- For more information about the **Schedule** tab, go to the 
- [Task Type Schedule](#task-type-schedule) 
-
-
-
 ## Create (episodes) sequences and shots
 
 It's time to do the breakdown of the storyboard. Meaning you can create
@@ -780,6 +647,139 @@ Select in the menu if you want to
 edit the name of the custom column and its information, or you want to remove it.
 
 ![Custom Column detail](../img/getting-started//custom_column_edit.png)
+
+
+## Add a CG Artist to the team
+
+You need to add someone to a production to assign him a task.
+
+On the drop-down menu on the top of the page, select the **TEAM** page.
+
+![Drop down menu team](../img/getting-started/drop_down_menu_team.png) 
+
+On the **Team** page, you can see all the assignations for a specific project.
+If you want to check another project team, you need to switch the project
+on the top of the page.
+
+![Team page](../img/getting-started/team_page.png)
+
+You can also add someone to a production without assigning him to a task if you have less than 10 people, you
+can select his name on the search box (or type his name), and validate with
+**add**.
+
+
+## Assign tasks to a CG artist
+
+We can now get back to the **ASSETS** page via the drop-down menu.
+
+![Drop down menu asset](../img/getting-started/drop_down_menu_asset.png).
+
+Now its time to do your first assignment! 
+
+Click on the status (1) you want to assign.
+
+![Assigned a task](../img/getting-started/task_assigned.png)
+
+The **Action Menu** on top of the screen appears. 
+
+![Blue menu](../img/getting-started/blue_menu.png)
+
+You can now do the assignation. Click on the text input, and you see
+the list of available people. Click on a person's name to perform to select
+him. Then click on the confirmation button to complete the assignation.
+
+![Selected people](../img/getting-started/select_people.png)
+
+You can assign several tasks to the same person in one step (1). Once you have
+the blue menu visible, keep **ctrl** on your keyboard pressed and select
+multiple tasks. You can even use the **shift** key to choose a range of tasks
+(2). When you have chosen everything you need, apply with the **Confirm**
+button.  
+
+![Assigned multiple people](../img/getting-started/assigned_multiple.png)
+
+In the same way, you can click on **Clear assignations** to remove all 
+assignations, or press the "Escape" key.
+
+When you finish all the assignations, quit this mode using the **Clear
+current selection** button ![Clear current selection](../img/getting-started/clear_current_selection.png).
+
+Now you can see next to each status the avatar of the CG artist.
+
+![Assigned people](../img/getting-started/assignation.png)
+
+To unclutter the list, you can hide this information with the **Hide
+assignations** button on the top of the spreadsheet ![Hide assignations](../img/getting-started/hide_assignation.png).
+
+Once you assigned someone, he is part of the production team. Depending
+on his position (CG Artist, Supervisor, Vendor), he only sees the production where
+he's assigned. 
+
+Now, everybody knows what to do and who is doing what!
+
+
+## Add an estimation for a task
+
+Click on the name of a task type.
+
+![Task type](../img/getting-started/supervisor_tasktype.png)
+
+The new page is the **Supervisor view**. You have more detailed information specific to this specific **task type**.
+
+![Supervisor page](../img/getting-started/supervisor_page.png)
+
+To go further in detail with the Supervisor view :  
+- (1) You can see and change the status of a task
+- (2) You can assign people to tasks
+
+(1) and (2) is filled with the action menu.
+
+- (3) You can add an estimation for the task (in day unit)
+- (4) Kitsu calculate the sum of the timesheet fed by the artists
+- (5) The number of back and forth with the retake status
+- (6) You can add a start date for the task (with the calendar)
+- (7)Kitsu calculate the due date with the Start date and the estimation
+- (8)(9) the Wip and Validation dates are automatically filled
+- (10) the Last comment section help you to keep an eye on the last activity of this task type.
+
+(7) to (10) is automatically filled.
+
+To add an estimation to a task, click on the line, and type the number or days you estimate. You can select multiple assets or shots at the same time.
+
+You can also define a **Start date** by clicking on it.
+A calendar will open and let you choose your start date.
+
+The **Due date** is automatically calculated with the **Estimation**.
+ 
+![start date](../img/getting-started/set_estimation.png)
+  
+To help you to set a correct estimation, you can use the **Estimation** Tab.
+
+![Estimation tab](../img/getting-started/tasktype_estimation_tab.png) 
+
+On the left part of the screen is the list of the shots with the assignation and the number of frames (1).
+Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2). 
+(See how to set your production fps [Create your first production](#create-your-first-production) ) 
+
+ On the right part of the screen you can see the full team of the departement (depending on the assignations you made), the number of shots they have to do, the number of frame, seconds, and the average quota. 
+ 
+ 
+ And the last column is the **Estimation**, to modify the estimation, hoover the line with your mouse and click and the editing zone.
+ 
+ You can also select multiple shot at the same time to edit them all the once.
+ 
+ ![Estimation tab edit](../img/getting-started/tasktype_estimation_tab_edit.png) 
+ 
+ Everytime you change the **Estimation** in day on the right part, you can see in real time that the **Average Quota** is updated as well.
+ 
+
+ 
+ For more information about the **Schedule** tab, go to the 
+ [Task Type Schedule](#task-type-schedule) 
+
+
+
+
 
 
 ## Comment and validation
