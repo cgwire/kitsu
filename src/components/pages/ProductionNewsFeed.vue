@@ -223,6 +223,7 @@
                       :task-type-map="taskTypeMap"
                       :read-only="true"
                       :light="true"
+                      :big="true"
                     />
                   </div>
 
@@ -239,6 +240,7 @@
                     :preview="{previews: [{id: news.preview_file_id}]}"
                     :light="true"
                     :read-only="true"
+                    :big="true"
                     ref="preview-picture"
                     v-else-if="news.preview_file_extension == 'png'"
                   />

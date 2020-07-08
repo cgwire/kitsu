@@ -30,14 +30,12 @@
       <button
         class="button flexrow-item"
         @click="onPreviousClicked"
-        v-if="!readOnly"
       >
         <chevron-left-icon class="icon" />
       </button>
 
       <span
         class="flexrow-item bar-element"
-        v-if="!readOnly"
       >
         {{ currentIndex }} / {{ preview.previews.length }}
       </span>
@@ -45,7 +43,6 @@
       <button
         class="button flexrow-item"
         @click="onNextClicked"
-        v-if="!readOnly"
       >
         <chevron-right-icon class="icon" />
       </button>
@@ -252,6 +249,10 @@ export default {
     lastPreviewFiles: {
       type: Array,
       default: () => []
+    },
+    big: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -423,7 +424,7 @@ export default {
       if (this.fullScreen) {
         return screen.height
       } else {
-        return screen.width > 1300 && (!this.light) ? 500 : 200
+        return screen.width > 1300 && (!this.light || this.big) ? 500 : 200
       }
     },
 
@@ -592,9 +593,8 @@ export default {
       // annotations are stored in a list.
       let annotation = { ...this.getAnnotation(0) }
 
-      console.log(annotation.drawing)
       this.fabricCanvas.getObjects().forEach((obj) => {
-        if (obj.type === 'path' || obj.type === 'text') {
+        if (obj.type === 'path' || obj.type === 'text' || obj.type === 'i-text') {
           if (!obj.canvasWidth) obj.canvasWidth = this.fabricCanvas.width
           obj.setControlsVisibility({
             mt: false,
@@ -680,7 +680,9 @@ export default {
         if (annotation.height) {
           scaleMultiplierY = dimensions.height / annotation.height
         }
-
+        if (!annotation.drawing.objects) {
+          annotation.drawing.objects = []
+        }
         annotation.drawing.objects.forEach((obj) => {
           const base = {
             left: obj.left * scaleMultiplierX,

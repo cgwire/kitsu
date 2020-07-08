@@ -332,6 +332,10 @@ export default {
     lastPreviewFiles: {
       type: Array,
       default: () => []
+    },
+    big: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -542,7 +546,7 @@ export default {
       if (this.isFullScreen()) {
         return screen.height
       } else {
-        return screen.width > 1300 && (!this.light) ? 500 : 200
+        return screen.width > 1000 && (!this.light || this.big) ? 500 : 200
       }
     },
 
