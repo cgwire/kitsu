@@ -1,6 +1,9 @@
 <template>
 <button
-  class="button"
+  :class="{
+    button: true,
+    'is-on': isOn
+  }"
   :title="title"
   @click="$emit('click')"
 >
@@ -186,6 +189,10 @@ export default {
     icon: {
       default: '',
       type: String
+    },
+    isOn: {
+      default: false,
+      type: Boolean
     },
     isResponsive: {
       default: false,
