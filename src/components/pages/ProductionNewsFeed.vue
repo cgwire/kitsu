@@ -31,6 +31,16 @@
             :task-type-list="taskTypeList"
             v-model="taskTypeId"
           />
+          <div class="field flexrow-item selector">
+            <label class="label person-label">
+              {{ $t('main.person') }}
+            </label>
+            <people-field
+              :people="team"
+              :big="true"
+              v-model="person"
+            />
+          </div>
           <span class="filler"></span>
         </div>
 
@@ -287,6 +297,7 @@ import { sortByName } from '../../lib/sorting'
 import Combobox from '../widgets/Combobox'
 import ComboboxStatus from '../widgets/ComboboxStatus'
 import ComboboxTaskType from '../widgets/ComboboxTaskType'
+import PeopleField from '../widgets/PeopleField'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import ModelViewer from '../previews/ModelViewer'
 import PeopleAvatar from '../widgets/PeopleAvatar'
@@ -307,6 +318,7 @@ export default {
     EntityThumbnail,
     ModelViewer,
     PeopleAvatar,
+    PeopleField,
     PictureViewer,
     TaskTypeName,
     ValidationTag,
@@ -328,6 +340,7 @@ export default {
         news: false,
         currentTask: true
       },
+      person: {},
       previewMode: 'comments',
       previewOptions: [
         {
@@ -394,6 +407,7 @@ export default {
         task_type_id: this.taskTypeId !== '' ? this.taskTypeId : undefined,
         task_status_id:
           this.taskStatusId !== '' ? this.taskStatusId : undefined,
+        person_id: this.person ? this.person.id : undefined,
         page: this.currentPage
       }
       return params
@@ -413,6 +427,10 @@ export default {
         color: '#999',
         name: this.$t('news.all')
       }].concat(sortByName([...this.taskTypes]))
+    },
+
+    team () {
+      return this.currentProduction.team.map(pId => this.personMap[pId])
     },
 
     timezone () {
@@ -634,6 +652,10 @@ export default {
     taskStatusId () {
       localStorage.setItem('news:task-status-id', this.taskStatusId)
       this.init()
+    },
+
+    person () {
+      this.init()
     }
   },
 
@@ -655,17 +677,6 @@ export default {
 .dark {
   .page {
     background: $dark-grey-light;
-  }
-
-  .news-line {
-    &:hover {
-      border-left: 6px solid $green;
-    }
-
-    &.selected {
-      border-left: 6px solid $dark-purple;
-      background: $purple-strong;
-    }
   }
 
   .icon,
@@ -755,7 +766,7 @@ export default {
     .dot {
       position: absolute;
       display: block;
-      left: -37px;
+      left: -31px;
       background: $blue-light;
       width: 8px;
       height: 8px;
@@ -810,20 +821,19 @@ export default {
 }
 
 .news-line {
-  border-left: 6px solid transparent;
   padding-left: 1em;
   align-items: middle;
   cursor: pointer;
   padding-top: 0.5em;
   padding-bottom: 0.5em;
+  border-radius: 0.5em;
 
   &:hover {
-    border-left: 6px solid $light-green-light;
+  background: var(--background-hover);
   }
 
   &.selected {
-    border-left: 6px solid $purple;
-    background: $light-purple;
+    background: var(--background-selected);
   }
 }
 
@@ -841,5 +851,9 @@ export default {
 .selector {
   margin-bottom: 0;
   margin-right: 1em;
+}
+
+.person-label {
+  margin-top: 5px;
 }
 </style>
