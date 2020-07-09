@@ -560,30 +560,37 @@ body {
     background-color: #5E6169;
   }
 
-  .project-dates .vdp-datepicker__calendar,
-  .current-date .datepicker .vdp-datepicker__calendar {
+  .vdp-datepicker__calendar {
     background-color: #36393F;
     border-color: #25282E;
-    z-index: 150;
-  }
-  .project-dates .datepicker .vdp-datepicker__calendar .prev,
-  .project-dates .datepicker .vdp-datepicker__calendar .next,
-  .project-dates .datepicker .vdp-datepicker__calendar .day__month_btn,
-  .current-date .datepicker .vdp-datepicker__calendar header span:hover {
-    background: #36393F;
-  }
-  .project-dates .datepicker .vdp-datepicker__calendar header .prev::after,
-  .current-date .datepicker .vdp-datepicker__calendar header .prev::after {
-    border-right-color: #EEE;
-  }
-  .project-dates .datepicker .vdp-datepicker__calendar header .next::after,
-  .current-date .datepicker .vdp-datepicker__calendar header .next::after {
-    border-left-color: #EEE;
-  }
 
-  .projects-dates .datepicker .vdp-datepicker__calendar header .next.disabled::after,
-  .current-date .datepicker .vdp-datepicker__calendar header .next.disabled::after {
-    border-left-color: #666;
+    .prev,
+    .next,
+    .day__month_btn,
+    header span:hover {
+      background: #36393F;
+    }
+
+    header .prev::after,
+    header .prev::after {
+      border-right-color: #EEE;
+    }
+
+    header .next::after,
+    header .next::after {
+      border-left-color: #EEE;
+    }
+
+    header .next.disabled::after,
+    header .next.disabled::after {
+      border-left-color: #666;
+    }
+
+    .cell.year.disabled,
+    .cell.month.disabled,
+    .cell.day.disabled {
+      color: $grey;
+    }
   }
 
   .hero .control .icon {
@@ -1684,17 +1691,38 @@ th.validation-cell {
   }
 }
 
-.project-dates .vdp-datepicker__calendar .cell.day.selected,
-.current-date .datepicker .vdp-datepicker__calendar .cell.day.selected {
-  background: $purple;
-}
-.project-dates .vdp-datepicker__calendar .cell.day:not(.blank):not(.disabled):hover,
-.current-date .datepicker .vdp-datepicker__calendar .cell.day:not(.blank):not(.disabled):hover {
-  border: 1px solid $light-green;
-}
-.project-dates .vdp-datepicker__calendar .cell.day.disabled:hover,
-.current-date .datepicker .vdp-datepicker__calendar .cell.day.disabled:hover {
-  border: 1px solid transparent;
+.theme .datepicker .vdp-datepicker__calendar {
+  z-index: 200;
+
+  .cell.year:not(.blank):not(.disabled):hover,
+  .cell.month:not(.blank):not(.disabled):hover,
+  .cell.day:not(.blank):not(.disabled):hover {
+    background: var(--background-selectable);
+    border: 1px solid transparent;
+  }
+
+  .cell.year.disabled:hover,
+  .cell.month.disabled:hover,
+  .cell.day.disabled:hover {
+    border: 1px solid transparent;
+  }
+
+  .cell.year.selected,
+  .cell.month.selected,
+  .cell.day.selected {
+    background: var(--background-selected);
+  }
+
+  .cell.year.selected:not(.blank):not(.disabled):hover,
+  .cell.month.selected:not(.blank):not(.disabled):hover,
+  .cell.day.selected:not(.blank):not(.disabled):hover {
+    border: 1px solid transparent;
+    background: var(--background-selected);
+  }
+
+  header span:not(.disabled):hover {
+    background: var(--background-selectable);
+  }
 }
 
 .c-mask {
