@@ -1,6 +1,6 @@
 [![Kitsu](https://www.cg-wire.com/en/images/kitsu.png)](https://kitsu.cg-wire.com)
 
-# Kitsu, CG Production Manager
+# Kitsu, Production Tracker For Indie Studios
 
 Kitsu is a web application to track the progress of your productions. It improves the communication between all stakeholders of the production. Which leads to better pictures and faster deliveries. 
 
