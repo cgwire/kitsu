@@ -342,7 +342,7 @@ export default {
         news: false,
         currentTask: true
       },
-      person: {},
+      person: null,
       previewMode: 'comments',
       previewOptions: [
         {

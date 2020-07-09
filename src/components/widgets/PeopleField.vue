@@ -153,7 +153,7 @@ export default {
   max-height: 300px;
   overflow-y: auto;
   box-shadow: 2px 2px 2px 0px $light-grey;
-  z-index: 100;
+  z-index: 3000;
 }
 
 .v-autocomplete .v-autocomplete-list-item {
