@@ -210,7 +210,7 @@ import PeopleName from '@/components/widgets/PeopleName'
 
 import { domMixin } from '@/components/mixins/dom'
 import { formatListMixin } from '@/components/lists/format_mixin'
-import { daysToMinutes, minutesToDays, range } from '@/lib/time'
+import { minutesToDays, range } from '@/lib/time'
 import { frameToSeconds } from '@/lib/video'
 import firstBy from 'thenby'
 
@@ -363,15 +363,12 @@ export default {
 
     saveEstimations (days, task) {
       const selection = Object.keys(this.selectionGrid)
-      const estimation = daysToMinutes(this.organisation, days)
       if (selection.length > 1) {
         selection.forEach(taskId => {
-          this.updateTask({ taskId, data: { estimation } })
-            .catch(console.error)
+          this.$emit('estimation-changed', { taskId, days })
         })
       } else {
-        this.updateTask({ taskId: task.id, data: { estimation } })
-          .catch(console.error)
+        this.$emit('estimation-changed', { taskId: task.id, days })
       }
     },
 
