@@ -232,7 +232,7 @@ export default {
 
     onMouseOver (event) {
       if (this.selectable && !this.selected) {
-        const background = this.isDarkTheme ? '#878B97' : '#CFD1FF'
+        const background = this.isDarkTheme ? '#6E70CA' : '#CFD1FF'
         this.changeStyle(background)
       }
     },

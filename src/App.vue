@@ -1497,12 +1497,10 @@ tbody:last-child .empty-line:last-child {
 }
 
 .side-column {
-  width: 400px;
-  max-width: 400px;
-  margin-top: 70px;
   background: white;
-  margin-right: 10px;
-  margin-bottom: 10px;
+  margin-top: 60px;
+  max-width: 400px;
+  width: 400px;
 }
 
 .empty-list {

@@ -324,7 +324,6 @@
 
     <span class="filler"></span>
 
-    {{ isCurrentUserCGArtist }}
     <div
       class="flexrow"
       v-if="!isCurrentUserCGArtist && (isCurrentEntityMovie || isCurrentEntityPicture)"

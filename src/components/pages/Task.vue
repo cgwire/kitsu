@@ -1416,6 +1416,7 @@ h2.subtitle {
 
 .page {
   background: #F9F9F9;
+  margin-top: 60px;
   padding: 0;
 }
 
@@ -1424,7 +1425,7 @@ h2.subtitle {
   margin-top: 1em;
   background: white;
   box-shadow: 0px 0px 6px #E0E0E0;
-  margin: 80px 1em 1em 1em;
+  margin: 2em 1em 0 1em;
 }
 
 .navigation-buttons {

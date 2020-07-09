@@ -480,6 +480,6 @@ a:hover {
 }
 
 .duration:hover {
-  background: #BBEEBB;
+  background: var(--background-selectable-selectable);
 }
 </style>

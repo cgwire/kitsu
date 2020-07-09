@@ -569,8 +569,8 @@ article.comment {
 
 .content .client-comment {
   border-radius: 4px;
-  background: $red + 190%;
-  color: desaturate($red - 30%, 20%);
+  background: lighten($red, 80%);
+  color: desaturate(darken($red, 30%), 20%);
   font-size: 0.8em;
   margin-top: 0.4em;
   margin-bottom: 0;
