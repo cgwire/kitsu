@@ -46,10 +46,12 @@ $blue: #7289DA;
   --background-tag:  #EEE;
   --background-tag-button: #F9F9F9; 
   --background-selectable: #E1E4FF;
+  --background-selectable-selectable: #CFD1FF;
   --background-selected: #CFD1FF;
   --border: #DBDBDB;
   --border-rgb: 219, 219, 219;
   --border-alt: #DBDBDB;
+  --box-shadow: #DDD;
   --text: #7A7A7A;
 }
 
@@ -59,14 +61,15 @@ $blue: #7289DA;
   --background-alt: #46494F;
   --background-alt-rgb: 70, 73, 79;
   --background-hover: #5E6169;
-  --background-tag-button: #4E5159; 
   --background-hover-rgb: 94, 97, 105;
   --background-tag:  #36393F; 
-  --background-selectable: #E1E4FF;
-  --background-selectable: #878B97;
+  --background-tag-button: #4E5159; 
+  --background-selectable: #6E70CA;
+  --background-selectable-selectable: #878B97;
   --background-selected: #5E60BA;
   --border: #25282E;
   --border-rgb: 37, 40, 46;
   --border-alt: #666666;
+  --box-shadow: #2226;
   --text: #EEEEEE;
 }
