@@ -551,21 +551,16 @@ const actions = {
   updatePreviewAnnotation ({ commit, state }, {
     taskId, preview, annotations
   }) {
-    return new Promise((resolve, reject) => {
-      tasksApi.updatePreviewAnnotation(preview, annotations)
-        .then((updatedPreview) => {
-          commit(UPDATE_PREVIEW_ANNOTATION, {
-            taskId,
-            preview,
-            annotations
-          })
-          resolve()
+    return tasksApi.updatePreviewAnnotation(preview, annotations)
+      .then((updatedPreview) => {
+        commit(UPDATE_PREVIEW_ANNOTATION, {
+          taskId,
+          preview,
+          annotations
         })
-        .catch((err) => {
-          console.error(err)
-          reject(err)
-        })
-    })
+        Promise.resolve()
+      })
+      .catch(console.error)
   },
 
   refreshPreview ({ commit, state }, { taskId, previewId }) {

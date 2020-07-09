@@ -648,12 +648,6 @@ export default {
       }
     },
 
-    clearCanvas () {
-      if (this.fabricCanvas) {
-        this.fabricCanvas.clear()
-      }
-    },
-
     play () {
       this.clearCanvas()
       this.isPlaying = true

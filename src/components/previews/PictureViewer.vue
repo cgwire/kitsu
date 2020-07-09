@@ -412,14 +412,6 @@ export default {
       this.fabricCanvas = fabricCanvas
     },
 
-    clearCanvas () {
-      if (this.fabricCanvas) {
-        this.fabricCanvas.getObjects().forEach((obj) => {
-          this.fabricCanvas.remove(obj)
-        })
-      }
-    },
-
     getDefaultHeight () {
       if (this.fullScreen) {
         return screen.height
@@ -623,41 +615,19 @@ export default {
           drawing: this.fabricCanvas.toJSON(['canvasWidth'])
         }
       }
-      annotation.drawing.objects = this.removeDuplicatedTexts(annotation.drawing)
       this.annotations = []
-      this.annotations.push(annotation)
+      this.annotations = [annotation]
 
-      this.$emit('annotation-changed', {
-        preview: this.currentPreview,
-        annotations: [...this.annotations]
-      })
-    },
-
-    removeDuplicatedTexts (drawing) {
-      const map = {}
-      return drawing.objects.filter((obj) => {
-        if (['text', 'i-text'].includes(obj.type)) {
-          const key = obj.left + '-' + obj.top + '-' + obj.text
-          if (!map[key]) {
-            map[key] = true
-            return true
-          } else {
-            return false
-          }
-        } else {
-          return true
-        }
-      })
-    },
-
-    clearAnnotations () {
-      if (this.fabricCanvas) {
-        this.fabricCanvas.getObjects().forEach((obj) => {
-          if (['rect', 'circle', 'path'].includes(obj.type)) {
-            this.fabricCanvas.remove(obj)
-          }
-        })
+      const annotations = [{ ...annotation }]
+      const preview = {
+        id: this.currentPreview.id,
+        task_id: this.currentPreview.task_id,
+        annotations: annotations
       }
+      this.$emit('annotation-changed', {
+        preview: preview,
+        annotations: annotations
+      })
     },
 
     getAnnotation (time) {
@@ -666,7 +636,7 @@ export default {
 
     loadAnnotation (time) {
       const annotation = this.getAnnotation(time)
-      this.clearAnnotations()
+      this.clearCanvas()
 
       if (annotation) {
         const dimensions = this.getDimensions()
@@ -731,7 +701,9 @@ export default {
                 left: obj.left * scaleMultiplierX,
                 top: obj.top * scaleMultiplierY,
                 fontFamily: obj.fontFamily,
-                fontSize: obj.fontSize
+                fontSize: obj.fontSize,
+                backgroundColor: 'white',
+                padding: 50
               }
             )
             text.setControlsVisibility({
@@ -749,15 +721,6 @@ export default {
           }
         })
       }
-    },
-
-    reloadAnnotations () {
-      if (this.currentPreview.annotations) {
-        this.annotations = this.currentPreview.annotations
-      } else {
-        this.annotations = []
-      }
-      return this.annotations
     },
 
     onPreviousClicked () {
@@ -788,7 +751,7 @@ export default {
 
     reset () {
       this.mountPicture()
-      this.clearAnnotations()
+      this.clearCanvas()
       this.annotations = []
       this.reloadAnnotations()
       this.isDrawing = false

@@ -990,7 +990,7 @@ export default {
               }
             } else if (this.$refs['preview-picture']) {
               if (!this.$refs['preview-picture'].isDrawing) {
-                this.$refs['preview-picture'].reset()
+                this.$refs['preview-picture'].reloadAnnotations()
               }
             }
           })
