@@ -3,11 +3,25 @@
     <div class="has-text-centered" v-if="isOpenProductionsLoading">
       <spinner />
     </div>
-    <div class="open-productions-box" v-else-if="openProductions.length > 0">
-      <img src="">
-      <h1 class="title has-text-centered">
+    <div class="flexrow open-productions-header" v-if="!isOpenProductionsLoading && openProductions.length > 0">
+      <h1 class="title has-text-centered flexrow-item">
+      <img src="../../assets/kitsu.png" width="23"/>
         {{ $t('productions.home.title') }}
       </h1>
+      <div class="filler"></div>
+      <div
+        class="button flexrow-item"
+        v-if="isCurrentUserAdmin"
+      >
+        <a
+          @click="showNewModal"
+        >
+          {{ $t('productions.home.create_new') }}
+        </a>
+      </div>
+    </div>
+    <div class="open-productions-box" v-if="!isOpenProductionsLoading && openProductions.length > 0">
+      <img src="">
       <div
         :class="{
           'open-productions-list': true,
@@ -37,30 +51,7 @@
               {{ production.name }}
             </div>
           </router-link>
-          <router-link
-            class="secondary"
-            :to="assetsPath(production)"
-          >
-            {{ $t('assets.title') }}
-          </router-link>
-          -
-          <router-link
-            class="secondary"
-            :to="shotsPath(production)"
-          >
-            {{ $t('shots.title') }}
-          </router-link>
         </div>
-      </div>
-      <div
-        class="has-text-centered new-production-link"
-        v-if="isCurrentUserAdmin"
-      >
-        <a
-          @click="showNewModal"
-        >
-          {{ $t('productions.home.create_new') }}
-        </a>
       </div>
     </div>
 
@@ -95,7 +86,6 @@
         </p>
       </div>
     </div>
-
     <edit-production-modal
       :active="modals.isNewDisplayed"
       :is-loading="editProduction.isLoading"
@@ -244,7 +234,7 @@ export default {
 h1.title {
   margin-bottom: 0;
   text-transform: uppercase;
-  color: #999;
+  color: $grey;
 }
 
 .is-grid {
@@ -252,14 +242,13 @@ h1.title {
   grid-template-columns: repeat(auto-fill,minmax(200px, 1fr));
 
   .open-production {
-    margin: 1em auto 0 auto;
+    margin: 2em auto 0 auto;
   }
 }
 
-.open-productions-list {
+.open-productions .open-productions-list {
   max-width: 1000px;
   margin: auto;
-  margin-top: 4em;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -271,13 +260,13 @@ h1.title {
     margin: auto;
     font-size: 64px;
     font-weight: bold;
-    border-radius: 1em;
+    border-radius: 25px;
   }
 
   .avatar img {
-    border-radius: 1em;
     width: 100%;
     height: 100%;
+    border-radius: 25px;
   }
 
   .open-production {
@@ -288,10 +277,20 @@ h1.title {
     flex: 1;
   }
 
-  .open-production:hover .avatar{
+  .open-production:hover {
+    transition: all .4s ease-in-out;
     transform: scale(1.1);
-    transition: all .2s ease-in-out;
-    box-shadow: 0 0 4px 2px #DDD;
+  }
+
+  .open-production:hover .avatar {
+    transition: all .4s ease-in-out;
+    box-shadow: 0 0 4px 2px var(--box-shadow);
+  }
+
+  .open-production:hover .production-name {
+    transition: all .4s ease-in-out;
+    transform: scale(1.15);
+    text-shadow: 0px 0px 3px var(--box-shadow);
   }
 }
 
@@ -339,12 +338,19 @@ a.secondary:hover {
 .open-productions-box {
   background: white;
   box-shadow: 0 0 3px 3px #EEE;
-  border-radius: 2em;
+  border-radius: 3em;
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
-  padding: 3em 2em 2em 2em;
-  margin-top: 2em;
+  padding: 3em 3em 4em 3em;
+}
+
+.open-productions-header {
+  margin-top: 4em;
+  margin-bottom: 1em;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .open-productions.page {
