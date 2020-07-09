@@ -381,7 +381,7 @@ export default {
 }
 
 .button.active {
-  background: rgba($green, .5);
+  background: var(--background-selected);
 }
 
 .status-selector {

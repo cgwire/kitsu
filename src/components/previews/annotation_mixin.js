@@ -116,10 +116,6 @@ export const annotationMixin = {
       target.lockScalingX = true
       target.lockScalingY = true
       target.rotation = true
-      if (!['text', 'i-text'].includes(target.type)) {
-        target.lockMovementX = true
-        target.lockMovementY = true
-      }
     },
 
     undoLastAction () {
@@ -208,13 +204,26 @@ export const annotationMixin = {
       this.$options.undoneActionStack = []
     },
 
+    reloadAnnotations () {
+      this.annotations = []
+      if (this.preview.annotations) {
+        const annotations = []
+        this.preview.annotations.forEach(a => annotations.push({ ...a }))
+        this.annotations = annotations.sort((a, b) => {
+          return a.time < b.time
+        }) || []
+      } else {
+        this.annotations = []
+      }
+      return this.annotations
+    },
+
     setupFabricCanvas () {
       if (!this.annotationCanvas) return
 
       const canvasId = this.annotationCanvas.id
       this.fabricCanvas = new fabric.Canvas(canvasId)
       this.fabricCanvas.on('object:moved', this.saveAnnotations)
-      this.fabricCanvas.on('object:scaled', this.saveAnnotations)
       this.fabricCanvas.on('object:added', this.stackAddAction)
       this.fabricCanvas.on('mouse:up', () => {
         if (this.isDrawing) {
@@ -229,6 +238,12 @@ export const annotationMixin = {
       this.fabricCanvas.freeDrawingBrush.color = this.color
       this.fabricCanvas.freeDrawingBrush.width = 4
       return this.fabricCanvas
+    },
+
+    clearCanvas () {
+      if (this.fabricCanvas) {
+        this.fabricCanvas.clear()
+      }
     }
   }
 }

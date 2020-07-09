@@ -990,7 +990,7 @@ export default {
               }
             } else if (this.$refs['preview-picture']) {
               if (!this.$refs['preview-picture'].isDrawing) {
-                this.$refs['preview-picture'].reset()
+                this.$refs['preview-picture'].reloadAnnotations()
               }
             }
           })
@@ -1034,13 +1034,6 @@ export default {
 
   .task-info {
     color: white;
-  }
-
-  .preview-list span {
-    &:hover,
-    &.selected {
-      color: $dark-grey;
-    }
   }
 }
 
@@ -1148,11 +1141,11 @@ export default {
     border-radius: 3px;
 
     &:hover {
-      background: $light-green-light;
+      background: var(--background-selectable);
     }
 
     &.selected {
-      background: $purple;
+      background: var(--background-selected);
     }
   }
 }
