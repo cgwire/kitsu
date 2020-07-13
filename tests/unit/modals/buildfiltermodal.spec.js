@@ -150,10 +150,10 @@ describe('BuildFilterModal', () => {
           done()
         })
       })
-      it('descriptors', () => {
+      it('descriptors', (done) => {
         expect(wrapper.contains('.descriptor-filter')).toBeFalsy()
         wrapper.setData({
-          taskTypeFilters: {
+          metadataDescriptorFilters: {
             values: [
               {
                 id: 'descriptor-1' ,
