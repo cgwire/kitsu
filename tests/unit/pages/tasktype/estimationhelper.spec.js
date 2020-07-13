@@ -15,6 +15,24 @@ describe('EstimationHelper', () => {
   let store, assetStore, peopleStore, productionStore, shotStore, taskStore
   let wrapper
   let getters
+  const tasks = [
+    {
+      id: 'task-1',
+      assignees: ['person-1'],
+      entity_id: 'shot-1',
+      entity: {
+        id: 'shot-1'
+      }
+    },
+    {
+      id: 'task-2',
+      assignees: ['person-3'],
+      entity_id: 'shot-2',
+      entity: {
+        id: 'shot-2'
+      }
+    }
+  ]
 
   beforeEach(() => {
     assetStore = {
@@ -53,8 +71,8 @@ describe('EstimationHelper', () => {
         shotSearchText: () => '',
         shotValidationColumns: () => ['task-type-3', 'task-type-4'],
         shotMap: () => ({
-          'shot-1': { id: 'shot-1', name: 'SH01'},
-          'shot-2': { id: 'shot-2', name: 'SH02'}
+          'shot-1': { id: 'shot-1', name: 'SH01', nb_frames: 58 },
+          'shot-2': { id: 'shot-2', name: 'SH02', nb_frames: 34 }
         })
       },
       actions: {}
@@ -72,6 +90,10 @@ describe('EstimationHelper', () => {
     peopleStore = {
       getters: {
         isCurrentUserVendor: () => false,
+        organisation: () => ({
+          id: 'organisation-1',
+          name: 'Org.'
+        }),
         people: () => [
           { id: 'person-1', name: 'John' },
           { id: 'person-2', name: 'James' },
@@ -142,8 +164,55 @@ describe('EstimationHelper', () => {
 
   describe('Helpers', () => {
     describe('computed', () => {
-      it('tasksByPerson', () => {
-        expect(wrapper.vm.tasksByPerson).toStrictEqual([])
+      it('tasksByPerson', (done) => {
+        wrapper.setProps({
+          isAssets: false,
+          tasks
+        })
+        wrapper.vm.$nextTick(() => {
+          expect(wrapper.vm.tasksByPerson).toStrictEqual([
+            {
+              'assignees':  ['person-3'],
+              'entity':  { 'id': 'shot-2' },
+              'entity_id': 'shot-2',
+              'id': 'task-2',
+            },
+            {
+              'assignees':  ['person-1'],
+              'entity':  { 'id': 'shot-1' },
+              'entity_id': 'shot-1',
+              'id': 'task-1'
+            }
+          ])
+          done()
+        })
+      })
+      it('assignees', () => {
+      })
+    })
+
+    describe('methods', () => {
+      it('getEntity', () => {
+        expect(wrapper.vm.getEntity('asset-1').name).toBe('Lama')
+        wrapper.setProps({ isAssets: false })
+        expect(wrapper.vm.getEntity('asset-1')).toBe(undefined)
+        expect(wrapper.vm.getEntity('shot-1').name).toBe('SH01')
+      })
+      it.skip('compareFirstAssignees', () => {
+      })
+      it.skip('formatEstimation', () => {
+      })
+      it.skip('getSeconds', () => {
+      })
+      it.skip('estimationUpdated', () => {
+      })
+      it.skip('saveEstimations', () => {
+      })
+      it.skip('onKeyDown', () => {
+      })
+      it.skip('clearSelection', () => {
+      })
+      it.skip('addToSelection', () => {
       })
       it.skip('assignees', () => {
       })

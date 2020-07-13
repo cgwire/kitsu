@@ -176,11 +176,13 @@ export default {
     },
 
     goPreviousFrame () {
-      const newTime = this.currentPlayer.currentTime - 1 / this.fps
-      if (newTime < 0) {
-        this.setCurrentTime(0)
-      } else {
-        this.setCurrentTime(newTime)
+      if (this.currentPlayer) {
+        const newTime = this.currentPlayer.currentTime - 1 / this.fps
+        if (newTime < 0) {
+          this.setCurrentTime(0)
+        } else {
+          this.setCurrentTime(newTime)
+        }
       }
     },
 
@@ -282,7 +284,11 @@ export default {
     },
 
     getCurrentTime () {
-      return this.currentPlayer.currentTime
+      if (this.currentPlayer) {
+        return this.currentPlayer.currentTime
+      } else {
+        return 0
+      }
     },
 
     setCurrentTime (currentTime) {
