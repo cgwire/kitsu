@@ -273,7 +273,7 @@ import {
   XIcon
 } from 'vue-feather-icons'
 
-import { roundToFrame } from '../../lib/video'
+import { formatFrame, formatTime, roundToFrame } from '../../lib/video'
 import AnnotationBar from '../pages/playlists/AnnotationBar'
 import ColorPicker from '../widgets/ColorPicker'
 import PencilPicker from '../widgets/PencilPicker'
@@ -346,7 +346,7 @@ export default {
       pencilPalette: ['big', 'medium', 'small'],
       color: '#ff3860',
       pencil: 'big',
-      currentTime: '00:00.00',
+      currentTime: '00:00.000',
       currentTimeRaw: 0,
       fabricCanvas: null,
       isComparing: false,
@@ -356,7 +356,7 @@ export default {
       isPlaying: false,
       isMuted: false,
       isRepeating: false,
-      maxDuration: '00:00.00',
+      maxDuration: '00:00.000',
       previewToCompareId: null,
       taskTypeId:
         this.entityPreviewFIles ? Object.keys(this.entityPreviewFiles)[0] : null,
@@ -407,7 +407,7 @@ export default {
     ]),
 
     currentFrame () {
-      return `${Math.ceil(this.currentTimeRaw * this.fps)}`.padStart(3, '0')
+      return formatFrame(this.currentTimeRaw, this.fps)
     },
 
     canvasWrapper () {
@@ -532,6 +532,10 @@ export default {
   },
 
   methods: {
+    formatFrame,
+
+    formatTime,
+
     isFullScreen () {
       return !!(
         document.fullScreen ||
@@ -577,12 +581,6 @@ export default {
 
     setCurrentTime (currentTime) {
       currentTime = roundToFrame(currentTime, this.fps)
-      /*
-      this.progress.value = currentTime
-      this.progressBar.style.width = Math.floor(
-        (currentTime / this.video.duration) * 100
-      ) + '%'
-      */
       this.clearCanvas()
       this.video.currentTime = currentTime
       if (this.isComparing) {
@@ -694,19 +692,6 @@ export default {
       }
       const annotation = this.getAnnotation(this.video.currentTime)
       if (annotation) this.loadAnnotation(annotation)
-    },
-
-    formatTime (seconds) {
-      let milliseconds = `.${Math.round((seconds % 1) * 100)}`
-      if (milliseconds.length === 2) milliseconds += '0'
-      try {
-        return new Date(1000 * seconds)
-          .toISOString()
-          .substr(14, 5) + milliseconds
-      } catch (err) {
-        console.error(err)
-        return '00:00.00'
-      }
     },
 
     exitFullScreen () {
@@ -1115,7 +1100,7 @@ export default {
 
   watch: {
     preview () {
-      this.maxDuration = '00:00.00'
+      this.maxDuration = '00:00.000'
       if (this.fabricCanvas) this.fabricCanvas.isDrawingMode = false
       this.isDrawing = false
       this.reloadAnnotations()

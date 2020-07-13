@@ -577,7 +577,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { fabric } from 'fabric'
 import { ArrowUpRightIcon, DownloadIcon, RepeatIcon } from 'vue-feather-icons'
 
-import { roundToFrame } from '../../../lib/video'
+import { formatFrame, formatTime, roundToFrame } from '../../../lib/video'
 import AnnotationBar from './AnnotationBar'
 import ButtonSimple from '../../widgets/ButtonSimple'
 import ColorPicker from '../../widgets/ColorPicker'
@@ -646,7 +646,7 @@ export default {
       color: '#ff3860',
       currentComparisonEntityPictureIndex: 0,
       currentEntityPictureIndex: 0,
-      currentTime: '00:00.00',
+      currentTime: '00:00.000',
       currentTimeRaw: 0,
       fabricCanvas: null,
       isDlButtonsHidden: true,
@@ -659,7 +659,7 @@ export default {
       isShowingPalette: false,
       isShowingPencilPalette: false,
       isEntitiesHidden: false,
-      maxDuration: '00:00.00',
+      maxDuration: '00:00.000',
       maxDurationRaw: 0,
       palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
       pencil: 'big',
@@ -872,7 +872,7 @@ export default {
     },
 
     currentFrame () {
-      return `${Math.floor(this.currentTimeRaw * this.fps)}`.padStart(3, '0')
+      return formatFrame(this.currentTimeRaw, this.fps)
     },
 
     deleteText () {
@@ -962,18 +962,9 @@ export default {
       return date.format('YYYY-MM-DD HH:mm')
     },
 
-    formatTime (seconds) {
-      let milliseconds = `.${Math.round((seconds % 1) * 100)}`
-      if (milliseconds.length === 2) milliseconds += '0'
-      try {
-        return new Date(1000 * seconds)
-          .toISOString()
-          .substr(14, 5) + milliseconds
-      } catch (err) {
-        console.error(err)
-        return '00:00.00'
-      }
-    },
+    formatFrame,
+
+    formatTime,
 
     getTimelinePosition (time, index) {
       if (this.$refs.movie && this.progress) {
@@ -1860,7 +1851,7 @@ export default {
         this.$refs['raw-player-comparison'].clear()
       }
       this.maxDurationRaw = 0
-      this.maxDuration = '00:00.00'
+      this.maxDuration = '00:00.000'
     },
 
     onPreviousPictureClicked () {
