@@ -674,7 +674,7 @@ export default {
         })
       } else {
         this.currentPlaylist = {
-          name: this.$t('playlists.no_selection')
+          name: ''
         }
         this.currentShots = {}
       }

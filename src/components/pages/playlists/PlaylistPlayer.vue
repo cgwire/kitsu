@@ -1328,11 +1328,12 @@ export default {
             .then(() => {
               this.reloadAnnotations()
             })
-        }, 100)
+        }, 200)
       }
     },
 
     reloadAnnotations () {
+      if (!this.annotations) return
       const annotations = this.annotations.map(a => ({ ...a }))
       this.annotations = []
       setTimeout(() => {
@@ -1345,6 +1346,7 @@ export default {
       this.isEntitiesHidden = !this.isEntitiesHidden
       this.$nextTick(() => {
         this.resetHeight()
+        this.reloadAnnotations()
         this.scrollToEntity(this.playingEntityIndex)
       })
     },
@@ -1363,7 +1365,7 @@ export default {
       this.$nextTick(() => {
         this.$refs['task-info'].focusCommentTextarea()
         this.resetHeight()
-        setTimeout(this.reloadCurrentAnnotation, 300)
+        this.reloadAnnotations()
       })
     },
 
@@ -1535,7 +1537,10 @@ export default {
               const naturalWidth = this.picturePlayer.naturalWidth
               const naturalHeight = this.picturePlayer.naturalHeight
               const ratio = naturalWidth / naturalHeight
-              const fullWidth = this.$refs['video-container'].offsetWidth
+              let fullWidth = this.$refs['video-container'].offsetWidth
+              if (!this.isCommentsHidden) {
+                fullWidth -= 450 // task info widget width
+              }
               const fullHeight = this.$refs['video-container'].offsetHeight
 
               let width = ratio ? fullHeight * ratio : fullWidth
@@ -1798,6 +1803,12 @@ export default {
         let annotation = this.annotations.find(
           (annotation) => annotation.time === time
         )
+        if (!annotation) {
+          annotation = this.annotations.find(
+            (annotation) => annotation.time > time - 0.2 && annotation.time <
+            time + 0.2
+          )
+        }
         if (!annotation &&
           this.isCurrentEntityPicture &&
           this.annotations.length > 0
