@@ -71,6 +71,10 @@ describe('lib/filtering', () => {
       {
         name: 'Modeling facial',
         id: 'task-type-3'
+      },
+      {
+        name: 'Anim',
+        id: 'task-type-4'
       }
     ]
     const descriptors = [
@@ -175,6 +179,21 @@ describe('lib/filtering', () => {
       expect(filters.length).toEqual(0)
     })
 
+    it('task type with same base name (shorter first)', () => {
+      const filters = getFilters(
+        entryIndex,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        'anim=wfa'
+      )
+      expect(filters.length).toEqual(1)
+      const filter = filters[0]
+      expect(filter.taskType).toEqual(taskTypes[3])
+      expect(filter.taskStatus.short_name).toEqual('wfa')
+    })
+
     it('multiple task type query case', () => {
       const filters = getFilters(
         entryIndex,
@@ -182,7 +201,7 @@ describe('lib/filtering', () => {
         taskStatuses,
         descriptors,
         persons,
-        'mode=wip anim=wfa chars'
+        'mode=wip animation=wfa chars'
       )
       expect(filters.length).toEqual(2)
       let filter = filters[0]
