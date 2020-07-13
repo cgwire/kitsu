@@ -280,7 +280,7 @@ import PencilPicker from '../widgets/PencilPicker'
 import Combobox from '../widgets/Combobox'
 import Spinner from '../widgets/Spinner'
 
-import { annotationMixin } from './annotation_mixin'
+import { annotationMixin } from '@/components/mixins/annotation_mixin'
 import { domMixin } from '@/components/mixins/dom'
 
 export default {

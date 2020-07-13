@@ -205,8 +205,8 @@ import {
   TypeIcon,
   XIcon
 } from 'vue-feather-icons'
-import { fullScreenMixin } from '../mixins/fullscreen'
-import { annotationMixin } from '../previews/annotation_mixin'
+import { fullScreenMixin } from '@/components/mixins/fullscreen'
+import { annotationMixin } from '@/components/mixins/annotation_mixin'
 import ButtonSimple from '../widgets/ButtonSimple'
 import ColorPicker from '../widgets/ColorPicker'
 import PencilPicker from '../widgets/PencilPicker'

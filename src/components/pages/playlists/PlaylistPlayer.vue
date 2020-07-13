@@ -590,7 +590,7 @@ import SelectTaskTypeModal from '../../modals/SelectTaskTypeModal'
 import Spinner from '../../widgets/Spinner'
 import TaskInfo from '../../sides/TaskInfo'
 
-import { annotationMixin } from '../../previews/annotation_mixin'
+import { annotationMixin } from '@/components/mixins/annotation_mixin'
 
 export default {
   name: 'playlist-player',
