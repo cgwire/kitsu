@@ -16,7 +16,7 @@
         <span
           class="round-task-status-name"
           :style="{
-            'background-color': comment.task_status.color,
+            'background-color': statusColor,
             color: 'white'
           }"
           v-if="comment.task_status.short_name !== 'todo'"
@@ -166,8 +166,8 @@
       <span
         class="round-task-status-name flexrow-item"
         :style="{
-          'border': '1px solid' + comment.task_status.color,
-          color: comment.task_status.color
+          'border': '1px solid' + statusColor,
+          color: statusColor
         }"
         v-if="comment.task_status.short_name !== 'todo'"
       >
@@ -212,6 +212,7 @@ import { remove } from '../../lib/models'
 import { renderComment } from '../../lib/render'
 import { sortByName } from '../../lib/sorting'
 import { formatDate, parseDate } from '../../lib/time'
+import colors from '@/lib/colors'
 
 import {
   ChevronDownIcon,
@@ -284,6 +285,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'isDarkTheme',
       'user',
       'personMap',
       'taskMap',
@@ -398,6 +400,15 @@ export default {
 
     boxShadowStyle () {
       return `0 0 3px 2px ${this.comment.task_status.color}1F`
+    },
+
+    statusColor () {
+      const color = this.comment.task_status.color
+      if (this.isDarkTheme && !this.isEmpty) {
+        return colors.darkenColor(color)
+      } else {
+        return color
+      }
     }
   },
 
