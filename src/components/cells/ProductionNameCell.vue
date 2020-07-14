@@ -161,4 +161,11 @@ export default {
 .production-name a {
   color: inherit;
 }
+
+.avatar {
+  border-radius: 12px;
+  img {
+    border-radius: 12px;
+  }
+}
 </style>
