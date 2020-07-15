@@ -21,6 +21,7 @@
         <button-simple
           icon="edit"
           @click="modals.edit = true"
+          v-if="isCurrentUserManager"
         />
       </div>
     </div>
@@ -239,6 +240,7 @@ export default {
       'assetMetadataDescriptors',
       'assetsPath',
       'currentProduction',
+      'isCurrentUserManager',
       'route'
     ]),
 
