@@ -117,6 +117,24 @@ const helpers = {
     return peopleStore.state.personMap[personId]
   },
 
+  setListStats (state, assets) {
+    let timeSpent = 0
+    if (assets) {
+      assets.forEach((asset) => {
+        timeSpent += asset.timeSpent
+      })
+      Object.assign(state, {
+        displayedAssetsLength: assets.length,
+        displayedAssetsTimeSpent: timeSpent
+      })
+    } else {
+      Object.assign(state, {
+        displayedAssetsLength: 0,
+        displayedAssetsTimeSpent: 0
+      })
+    }
+  },
+
   populateTask (task, asset, production) {
     task.name = helpers.getTaskType(task.task_type_id).priority.toString()
     task.task_status_short_name =
@@ -230,7 +248,7 @@ const helpers = {
 
     state.displayedAssets = displayedAssets
     state.assetFilledColumns = getFilledColumns(displayedAssets)
-    state.displayedAssetsLength = result ? result.length : 0
+    helpers.setListStats(state, result)
     state.assetSearchText = query
     state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
   }
@@ -250,6 +268,7 @@ const initialState = {
   filteredAssets: [],
   displayedAssets: [],
   displayedAssetsLength: 0,
+  displayedAssetsTimeSpent: 0,
   assetFilledColumns: {},
   assetSearchText: '',
   assetSelectionGrid: {},
@@ -306,6 +325,7 @@ const getters = {
 
   displayedAssets: state => state.displayedAssets,
   displayedAssetsLength: state => state.displayedAssetsLength,
+  displayedAssetsTimeSpent: state => state.displayedAssetsTimeSpent,
   assetFilledColumns: state => state.assetFilledColumns,
 
   displayedAssetTypes: state => state.displayedAssetTypes,
@@ -608,7 +628,7 @@ const actions = {
       let assetLine = []
       if (rootGetters.isTVShow) {
         assetLine.push(
-          asset.episode_id ? episodeMap[asset.episode_id].name : 'All'
+          asset.episode_id ? episodeMap[asset.episode_id].name : 'MP'
         )
       }
       assetLine = assetLine.concat([
@@ -659,7 +679,7 @@ const mutations = {
     cache.assetIndex = {}
     state.displayedAssets = []
     state.assetFilledColumns = {}
-    state.displayedAssetsLength = 0
+    helpers.setListStats(state, [])
     state.assetSearchQueries = []
   },
 
@@ -674,7 +694,7 @@ const mutations = {
     cache.assetIndex = {}
     state.displayedAssets = []
     state.assetFilledColumns = {}
-    state.displayedAssetsLength = 0
+    helpers.setListStats(state, [])
     state.assetSearchQueries = []
   },
 
@@ -733,7 +753,8 @@ const mutations = {
     state.nbValidationColumns = state.assetValidationColumns.length
 
     state.displayedAssets = displayedAssets
-    state.displayedAssetsLength = cache.assets ? cache.assets.length : 0
+    helpers.setListStats(state, cache.assets)
+
     state.assetFilledColumns = filledColumns
 
     state.assetTypes = assetTypes
@@ -777,7 +798,7 @@ const mutations = {
 
     state.displayedAssets.push(asset)
     state.displayedAssets = sortAssets(state.displayedAssets)
-    state.displayedAssetsLength = cache.assets.length
+    helpers.setListStats(state, cache.assets)
     state.assetFilledColumns = getFilledColumns(state.displayedAssets)
 
     const maxX = state.displayedAssets.length
@@ -803,10 +824,7 @@ const mutations = {
         state.displayedAssetsTimeSpent -= assetToDelete.timeSpent
       }
       state.assetFilledColumns = getFilledColumns(state.displayedAssets)
-      state.displayedAssetsLength = Math.max(
-        state.displayedAssetsLength - 1,
-        0
-      )
+      helpers.setListStats(state, cache.assets)
       cache.assetIndex = buildAssetIndex(cache.assets)
     }
   },
