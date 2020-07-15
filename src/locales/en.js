@@ -233,6 +233,7 @@ export default {
     logout: 'Logout',
     modify: 'Modify',
     minimize: 'Minimize',
+    main_pack: 'Main Pack',
     maximize: 'Maximize',
     nb_frames: 'frame | frames',
     person: 'Person',

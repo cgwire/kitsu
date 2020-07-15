@@ -175,7 +175,7 @@ export default {
         }
       })
       options.unshift({
-        label: this.$t('main.all'),
+        label: this.$t('main.main_pack'),
         value: 'null'
       })
       return options
