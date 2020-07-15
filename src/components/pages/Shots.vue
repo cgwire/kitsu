@@ -782,6 +782,7 @@ export default {
       this.uploadShotFile(toUpdate)
         .then(() => {
           this.loading.importing = false
+          this.loadEpisodes()
           this.hideImportRenderModal()
           this.loadShots()
         })
