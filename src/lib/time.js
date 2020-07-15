@@ -91,7 +91,7 @@ export const formatSimpleDate = (date) => {
 
 export const getDatesFromStartDate = (startDate, dueDate, estimation) => {
   if (estimation && estimation > 0) {
-    dueDate = addBusinessDays(startDate, Math.ceil(estimation))
+    dueDate = addBusinessDays(startDate, Math.ceil(estimation) - 1)
   }
 
   if (!startDate || !dueDate) {
@@ -116,7 +116,7 @@ export const getDatesFromStartDate = (startDate, dueDate, estimation) => {
 
 export const getDatesFromEndDate = (startDate, dueDate, estimation) => {
   if (estimation && estimation > 0) {
-    startDate = removeBusinessDays(dueDate, Math.ceil(estimation))
+    startDate = removeBusinessDays(dueDate, Math.ceil(estimation) - 1)
   }
 
   if (!startDate || !dueDate) {
