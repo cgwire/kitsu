@@ -126,6 +126,8 @@
               >
                 <input
                   class="man-days-unit flexrow-item"
+                  type="number"
+                  min="0"
                   placeholder="0"
                   @input="onChildEstimationChanged($event, childElement, rootElement)"
                   v-model="childElement.man_days"
@@ -154,7 +156,7 @@
       >
         <div
           class="day"
-          :key="'header-' + day.text"
+          :key="'header-' + day.text + '-' + index"
           :style="dayStyle(day)"
           v-for="(day, index) in daysAvailable"
         >
@@ -264,7 +266,7 @@
               >
                 <div
                   :class="{
-                    'timebar-left-hand': rootElement.editable
+                    'timebar-left-hand': rootElement.editable && isCurrentUserManager
                   }"
                   @mousedown="moveTimebarLeftSide(rootElement, $event)"
                 >
@@ -276,7 +278,7 @@
                 </div>
                 <div
                   :class="{
-                    'timebar-right-hand': rootElement.editable
+                    'timebar-right-hand': rootElement.editable && isCurrentUserManager
                   }"
                   @mousedown="moveTimebarRightSide(rootElement, $event)"
                 >
@@ -308,7 +310,7 @@
                 >
                   <div
                     :class="{
-                      'timebar-left-hand': childElement.editable && !childElement.unresizable
+                      'timebar-left-hand': childElement.editable && !childElement.unresizable && isCurrentUserManager
                     }"
                     @mousedown="moveTimebarLeftSide(childElement, $event)"
                   >
@@ -320,7 +322,7 @@
                   </div>
                   <div
                     :class="{
-                      'timebar-right-hand': childElement.editable && !childElement.unresizable
+                      'timebar-right-hand': childElement.editable && !childElement.unresizable && isCurrentUserManager
                     }"
                     @mousedown="moveTimebarRightSide(childElement, $event)"
                   >
@@ -422,6 +424,10 @@ export default {
       type: Object,
       required: true
     },
+    isEstimationLinked: {
+      type: Boolean,
+      default: false
+    },
     zoomLevel: {
       type: Number,
       default: 2
@@ -444,6 +450,8 @@ export default {
 
   computed: {
     ...mapGetters([
+      'isCurrentUserManager',
+      'organisation',
       'milestones'
     ]),
 
@@ -460,7 +468,12 @@ export default {
       )
       const day = startDate.clone().add(-1, 'days')
       let dayDate = day.toDate()
-      const endDayDate = this.endDate.toDate()
+      const endDate = moment.tz(
+        this.endDate.format('YYYY-MM-DD'),
+        'YYYY-MM-DD',
+        'UTC'
+      )
+      const endDayDate = endDate.toDate()
       dayDate.isoweekday = day.isoWeekday()
       dayDate.monthday = day.month()
 
@@ -480,7 +493,7 @@ export default {
         }
         if ([6, 7].includes(nextDay.isoweekday)) nextDay.weekend = true
 
-        const momentDay = moment.tz(nextDay, 'YYYY-MM-DD', 'UTC')
+        const momentDay = moment.tz(moment(nextDay).format('YYYY-MM-DD'), 'YYYY-MM-DD', 'UTC')
         momentDay.newWeek = nextDay.newWeek
         momentDay.newMonth = nextDay.newMonth
         momentDay.weekend = nextDay.weekend
@@ -628,25 +641,28 @@ export default {
 
     onChildEstimationChanged (event, childElement, rootElement) {
       const estimation = parseInt(event.target.value)
-      childElement.man_days = estimation
-      rootElement.man_days = rootElement.children.reduce((acc, child) => {
-        let value = acc
-        let manDays = child.man_days
-        if (child.man_days) {
-          if (typeof manDays === 'string') manDays = parseInt(manDays)
-          value = acc + manDays
-        }
-        return value
-      }, 0)
+      if (this.isEstimationLinked) {
+        childElement.man_days = estimation
+        rootElement.man_days = rootElement.children.reduce((acc, child) => {
+          let value = acc
+          let manDays = child.man_days
+          if (child.man_days) {
+            if (typeof manDays === 'string') manDays = parseInt(manDays)
+            value = acc + manDays
+          }
+          return value
+        }, 0)
 
-      if (estimation > 0) {
-        childElement.endDate = addBusinessDays(
-          childElement.startDate, estimation
-        )
+        if (estimation > 0) {
+          childElement.endDate = addBusinessDays(
+            childElement.startDate, estimation
+          )
+        }
       }
       this.$emit('estimation-changed', {
         taskId: childElement.id,
-        days: estimation
+        days: estimation,
+        item: childElement
       })
     },
 
@@ -701,7 +717,10 @@ export default {
       currentIndex += dayChange
       if (currentIndex < 0) currentIndex = 0
 
-      const newStartDate = this.displayedDays[currentIndex]
+      let newStartDate = this.displayedDays[currentIndex]
+      if (!newStartDate) newStartDate = this.displayedDays[currentIndex - 1]
+      if (!newStartDate) newStartDate = this.displayedDays[currentIndex - 2]
+
       if (newStartDate) {
         const newEndDate = this.displayedDays[currentIndex + length]
         if (this.isValidItemDates(newStartDate, newEndDate)) {
@@ -770,7 +789,8 @@ export default {
       if (
         !this.isChangeStartDate &&
         !this.isChangeEndDate &&
-        timeElement.editable
+        timeElement.editable &&
+        this.isCurrentUserManager
       ) {
         this.isChangeDates = true
         this.isChangeStartDate = false
@@ -787,7 +807,8 @@ export default {
       if (
         !this.isChangeDates &&
         !this.isChangeEndDate &&
-        timeElement.editable
+        timeElement.editable &&
+        this.isCurrentUserManager
       ) {
         this.isChangeDates = false
         this.isChangeStartDate = true
@@ -807,7 +828,8 @@ export default {
       if (
         !this.isChangeDates &&
         !this.isChangeStartDate &&
-        timeElement.editable
+        timeElement.editable &&
+        this.isCurrentUserManager
       ) {
         this.isChangeDates = false
         this.isChangeStartDate = false
@@ -967,16 +989,21 @@ export default {
     },
 
     getTimebarWidth (timeElement) {
-      const startDate =
-        timeElement.startDate || this.startDate
-      const endDate =
+      const startDate = timeElement.startDate || this.startDate
+      let endDate =
         timeElement.endDate ||
         (
           timeElement.startDate &&
           timeElement.startDate.clone().add(1, 'days')
         ) ||
         this.startDate.clone().add(1, 'days')
+
+      if (timeElement.man_days > 0 && !timeElement.end_date && !timeElement.endDate) {
+        const days = Math.ceil(timeElement.man_days)
+        endDate = addBusinessDays(startDate, days - 1)
+      }
       const lengthDiff = this.businessDiff(startDate, endDate)
+
       if (lengthDiff > 0) {
         return (lengthDiff + 1) * this.cellWidth - 10
       } else {
@@ -1605,5 +1632,15 @@ export default {
       display: none;
     }
   }
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
 }
 </style>

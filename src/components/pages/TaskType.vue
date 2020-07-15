@@ -127,6 +127,7 @@
           :zoom-level=schedule.zoomLevel
           :height="schedule.scheduleHeight"
           :is-loading="loading.entities"
+          :is-estimation-linked="true"
           @item-changed="saveScheduleItem"
           @root-element-expanded="expandPersonElement"
           @estimation-changed="updateEstimation"
@@ -265,6 +266,7 @@ export default {
     this.updateActiveTab()
     setTimeout(() => {
       this.initData(false)
+      this.$refs['schedule-widget'].scrollToToday()
     }, 100)
     window.addEventListener('resize', this.resetScheduleHeight)
   },
@@ -295,6 +297,10 @@ export default {
       'taskMap',
       'user'
     ]),
+
+    scheduleWidget () {
+      return this.$refs['schedule-widget']
+    },
 
     // Meta
 
@@ -418,7 +424,10 @@ export default {
             setTimeout(() => {
               this.setSearchFromUrl()
             }, 200)
-            if (this.isActiveTab('schedule')) this.resetScheduleItems()
+            if (this.isActiveTab('schedule')) {
+              this.resetScheduleItems()
+              this.$refs['schedule-widget'].scrollToToday()
+            }
           })
           .catch((err) => {
             console.error(err)
@@ -426,7 +435,10 @@ export default {
             this.errors.entities = true
           })
       } else {
-        if (this.isActiveTab('schedule')) this.resetScheduleItems()
+        if (this.isActiveTab('schedule')) {
+          this.resetScheduleItems()
+          this.$refs['schedule-widget'].scrollToToday()
+        }
       }
     },
 
@@ -596,20 +608,30 @@ export default {
       csv.buildCsvFile(name, taskLines)
     },
 
-    updateEstimation ({ taskId, days }) {
+    updateEstimation ({ taskId, days, item }) {
       const estimation = daysToMinutes(this.organisation, parseInt(days))
       const task = this.taskMap[taskId]
       let data = { estimation }
-      if (task.start_date) {
-        const startDate = moment(task.start_date)
-        const dueDate = task.due_date ? moment(task.due_date) : null
-        data = getDatesFromStartDate(
-          startDate,
-          dueDate,
-          minutesToDays(this.organisation, estimation)
-        )
-        data.estimation = estimation
+      if (!task.start_date) task.start_date = moment().format('YYYY-MM-DD')
+      const startDate = moment(task.start_date)
+      const dueDate = task.due_date ? moment(task.due_date) : null
+      data = getDatesFromStartDate(
+        startDate,
+        dueDate,
+        minutesToDays(this.organisation, estimation)
+      )
+      data.estimation = estimation
+      if (item && !item.startDate) {
+        item.startDate = moment.tz(data.end_date, 'YYYY-MM-DD', 'UTC')
       }
+      if (item && !item.endDate) {
+        item.endDate = moment.tz(data.end_date, 'YYYY-MM-DD', 'UTC')
+      }
+      if (item && item.startDate && item.endDate) {
+        item.parentElement.startDate = this.getMinDate(item.parentElement)
+        item.parentElement.endDate = this.getMaxDate(item.parentElement)
+      }
+
       this.updateTask({ taskId, data })
         .catch(console.error)
     },

@@ -58,6 +58,7 @@
       :is-loading="loading.schedule"
       :is-error="errors.schedule"
       @item-changed="scheduleItemChanged"
+      @estimation-changed="estimationChanged"
       @change-zoom="changeZoom"
       @root-element-expanded="expandTaskTypeElement"
     />
@@ -288,6 +289,10 @@ export default {
             taskTypeElement.children = []
           })
       }
+    },
+
+    estimationChanged ({ item }) {
+      this.saveScheduleItem(item)
     },
 
     scheduleItemChanged (item) {
