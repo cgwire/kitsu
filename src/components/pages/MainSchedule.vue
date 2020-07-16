@@ -16,7 +16,7 @@
           :language="locale"
           :disabled-dates="{ days: [6, 0] }"
           :monday-first="true"
-          format="d MMMM yyyy"
+          format="yyyy-MM-dd"
           v-model="selectedStartDate"
         />
       </div>
@@ -30,7 +30,7 @@
           :language="locale"
           :disabled-dates="{ days: [6, 0] }"
           :monday-first="true"
-          format="d MMMM yyyy"
+          format="yyyy-MM-dd"
           v-model="selectedEndDate"
         />
       </div>

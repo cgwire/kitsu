@@ -71,6 +71,42 @@
               v-model="currentSort"
             />
           </div>
+
+          <div
+            class="flexrow-item field"
+            v-if="isActiveTab('schedule') && isCurrentUserManager"
+          >
+            <label class="label">
+              {{ $t('main.start_date') }}
+            </label>
+            <datepicker
+              wrapper-class="datepicker"
+              input-class="date-input input"
+              :language="locale"
+              :disabled-dates="startDisabledDates"
+              :monday-first="true"
+              format="yyyy-MM-dd"
+              v-model="schedule.selectedStartDate"
+            />
+          </div>
+          <div
+            class="flexrow-item field"
+            v-if="isActiveTab('schedule') && isCurrentUserManager"
+          >
+            <label class="label">
+              {{ $t('main.end_date') }}
+            </label>
+            <datepicker
+              wrapper-class="datepicker"
+              input-class="date-input input"
+              :language="locale"
+              :disabled-dates="endDisabledDates"
+              :monday-first="true"
+              format="yyyy-MM-dd"
+              v-model="schedule.selectedEndDate"
+            />
+          </div>
+
           <div
             class="flexrow-item color-option"
             v-if="isActiveTab('schedule')"
@@ -128,7 +164,7 @@
           :height="schedule.scheduleHeight"
           :is-loading="loading.entities"
           :is-estimation-linked="true"
-          @item-changed="saveScheduleItem"
+          @item-changed="saveTaskScheduleItem"
           @root-element-expanded="expandPersonElement"
           @estimation-changed="updateEstimation"
         />
@@ -162,6 +198,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { en, fr } from 'vuejs-datepicker/dist/locale'
 import firstBy from 'thenby'
 import moment from 'moment'
 import { searchMixin } from '../mixins/search'
@@ -172,8 +209,10 @@ import { sortPeople } from '../../lib/sorting'
 import { slugify } from '../../lib/string'
 import {
   daysToMinutes,
+  formatSimpleDate,
   getDatesFromStartDate,
-  minutesToDays
+  minutesToDays,
+  parseDate
 } from '../../lib/time'
 import {
   applyFilters,
@@ -187,6 +226,7 @@ import { formatListMixin } from '../lists/format_mixin.js'
 
 import { ChevronLeftIcon } from 'vue-feather-icons'
 import ButtonSimple from '../widgets/ButtonSimple'
+import Datepicker from 'vuejs-datepicker'
 import Combobox from '../widgets/Combobox'
 import ComboboxNumber from '../widgets/ComboboxNumber'
 import EstimationHelper from './tasktype/EstimationHelper'
@@ -205,6 +245,7 @@ export default {
     ChevronLeftIcon,
     Combobox,
     ComboboxNumber,
+    Datepicker,
     EstimationHelper,
     Schedule,
     SearchField,
@@ -220,6 +261,7 @@ export default {
     return {
       activeTab: 'tasks',
       currentSort: 'entity_name',
+      currentScheduleItem: null,
       currentTask: null,
       isAssets: true,
       tasks: [],
@@ -235,6 +277,8 @@ export default {
         endDate: moment().add(3, 'months'),
         scheduleItems: [],
         scheduleHeight: 800,
+        selectedEndDate: moment().add(3, 'months').toDate(),
+        selectedStartDate: moment().add(-1, 'months').toDate(),
         startDate: moment().add(-1, 'months'),
         zoomLevel: 1,
         zoomOptions: [
@@ -298,8 +342,28 @@ export default {
       'user'
     ]),
 
-    scheduleWidget () {
-      return this.$refs['schedule-widget']
+    locale () {
+      if (this.user.locale === 'fr_FR') {
+        return fr
+      } else {
+        return en
+      }
+    },
+
+    startDisabledDates () {
+      return {
+        to: parseDate(this.currentProduction.start_date).toDate(),
+        from: this.schedule.endDate.toDate(),
+        days: [6, 0]
+      }
+    },
+
+    endDisabledDates () {
+      return {
+        to: this.schedule.startDate.toDate(),
+        from: parseDate(this.currentProduction.end_date).toDate(),
+        days: [6, 0]
+      }
     },
 
     // Meta
@@ -389,6 +453,10 @@ export default {
       return sortPeople(scheduleTeam)
     },
 
+    scheduleWidget () {
+      return this.$refs['schedule-widget']
+    },
+
     searchField () {
       return this.$refs['task-search-field']
     }
@@ -398,7 +466,10 @@ export default {
     ...mapActions([
       'clearSelectedTasks',
       'initTaskType',
+      'loadEpisodeScheduleItems',
+      'loadScheduleItems',
       'removeTaskSearch',
+      'saveScheduleItem',
       'saveTaskSearch',
       'setProduction',
       'subscribeToSequence',
@@ -414,6 +485,7 @@ export default {
         this.loading.entities = true
         this.errors.entities = false
         this.initTaskType(force)
+          .then(this.setCurrentScheduleItem)
           .then(() => {
             this.loading.entities = false
             this.resetTasks()
@@ -435,10 +507,49 @@ export default {
             this.errors.entities = true
           })
       } else {
-        if (this.isActiveTab('schedule')) {
-          this.resetScheduleItems()
-          this.$refs['schedule-widget'].scrollToToday()
-        }
+        this.loading.entities = true
+        this.setCurrentScheduleItem()
+          .then(() => {
+            this.loading.entities = false
+            if (this.isActiveTab('schedule')) {
+              this.resetScheduleItems()
+              this.$refs['schedule-widget'].scrollToToday()
+            }
+          })
+      }
+    },
+
+    setCurrentScheduleItem () {
+      if (this.isTVShow) {
+        return this.loadEpisodeScheduleItems({
+          production: this.currentProduction,
+          taskType: this.currentTaskType
+        })
+          .then((items) => {
+            if (!items) {
+              Promise.resolve([])
+            } else {
+              this.currentScheduleItem = items.find((item) => {
+                return (
+                  item.task_type_id === this.currentTaskType.id &&
+                  item.object_id === this.currentEpisode.id
+                )
+              })
+              Promise.resolve(this.currentScheduleItem)
+            }
+          })
+      } else {
+        return this.loadScheduleItems(this.currentProduction)
+          .then((items) => {
+            if (!items) {
+              Promise.resolve([])
+            } else {
+              this.currentScheduleItem = items.find((item) => {
+                return item.task_type_id === this.currentTaskType.id
+              })
+              Promise.resolve(this.currentScheduleItem)
+            }
+          })
       }
     },
 
@@ -639,12 +750,6 @@ export default {
     // Schedule
 
     resetScheduleItems () {
-      const productionStartDate = moment(
-        this.currentProduction.start_date, 'YYYY-MM-DD'
-      )
-      if (this.schedule.startDate.isAfter(productionStartDate)) {
-        this.schedule.startDate = productionStartDate
-      }
       const taskAssignationMap = this.buildAssignationMap()
       let scheduleItems = this.scheduleTeam
         .map(person => this.buildPersonElement(person, taskAssignationMap))
@@ -657,26 +762,6 @@ export default {
         ])
       }
       this.schedule.scheduleItems = scheduleItems
-      this.resetScheduleDates()
-    },
-
-    resetScheduleDates () {
-      let mainStartDate = this.schedule.startDate
-      let mainEndDate = this.schedule.endDate
-      let change = false
-      this.schedule.scheduleItems.forEach((personElement) => {
-        if (!mainStartDate || mainStartDate.isAfter(personElement.startDate)) {
-          mainStartDate = personElement.startDate.clone()
-          change = true
-        }
-        if (!mainEndDate || mainEndDate.isBefore(personElement.endDate)) {
-          mainEndDate = personElement.endDate.clone()
-        }
-      })
-      if (change) {
-        this.schedule.startDate = mainStartDate.add(-1, 'days')
-      }
-      this.schedule.endDate = mainEndDate
     },
 
     buildAssignationMap () {
@@ -817,7 +902,7 @@ export default {
       }
     },
 
-    saveScheduleItem (item) {
+    saveTaskScheduleItem (item) {
       if (!this.$options.savingBuffer) this.$options.savingBuffer = {}
       if (!this.$options.savingBuffer[item.id]) {
         this.$options.savingBuffer[item.id] = item
@@ -901,8 +986,40 @@ export default {
         this.resetScheduleItems()
         this.resetScheduleHeight()
         this.$nextTick(() => {
-          this.$refs['schedule-widget'].scrollToToday()
+          if (this.$refs['schedule-widget']) {
+            this.$refs['schedule-widget'].scrollToToday()
+          }
         })
+      }
+    },
+
+    currentScheduleItem () {
+      if (this.currentScheduleItem) {
+        this.schedule.startDate =
+          parseDate(this.currentScheduleItem.start_date)
+        this.schedule.endDate = parseDate(this.currentScheduleItem.end_date)
+        this.schedule.selectedStartDate = this.schedule.startDate.toDate()
+        this.schedule.selectedEndDate = this.schedule.endDate.toDate()
+      }
+    },
+
+    'schedule.selectedStartDate' () {
+      const newDate = formatSimpleDate(this.schedule.selectedStartDate)
+      if (newDate !== this.currentScheduleItem.start_date) {
+        this.schedule.startDate = parseDate(newDate)
+        this.currentScheduleItem.startDate = this.schedule.startDate
+        this.currentScheduleItem.endDate = this.schedule.endDate
+        this.saveScheduleItem(this.currentScheduleItem)
+      }
+    },
+
+    'schedule.selectedEndDate' () {
+      const newDate = formatSimpleDate(this.schedule.selectedEndDate)
+      if (newDate !== this.currentScheduleItem.end_date) {
+        this.schedule.endDate = parseDate(newDate)
+        this.currentScheduleItem.startDate = this.schedule.startDate
+        this.currentScheduleItem.endDate = this.schedule.endDate
+        this.saveScheduleItem(this.currentScheduleItem)
       }
     }
   },

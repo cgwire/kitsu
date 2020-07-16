@@ -76,7 +76,7 @@
             {{ rootElement.name }}
           </router-link>
           <input
-            class="flexrow-item"
+            class="flexrow-item mr1"
             type="number"
             placeholder="0"
             @input="$emit('item-changed', rootElement)"
@@ -118,7 +118,14 @@
               class="entity-line entity-name child-line flexrow"
               :style="childNameStyle(rootElement, j)"
             >
-              <span class="filler flexrow-item">
+              <router-link
+                :to="childElement.route"
+                class="filler flexrow-item root-element-name"
+                v-if="childElement.route"
+              >
+                {{ childElement.name }}
+              </router-link>
+              <span class="filler flexrow-item" v-else>
                 {{ childElement.name }}
               </span>
               <span class="flexrow-item"
@@ -263,6 +270,7 @@
               <div
                 class="timebar"
                 :style="timebarStyle(rootElement)"
+                v-show="isVisible(rootElement)"
               >
                 <div
                   :class="{
@@ -307,6 +315,7 @@
                   class="timebar"
                   :title="childElement.name + ' (' + childElement.startDate.format('DD-MM') + ' - ' + childElement.endDate.format('DD-MM') + ')'"
                   :style="timebarChildStyle(childElement, rootElement, true)"
+                  v-show="isVisible(childElement)"
                 >
                   <div
                     :class="{
@@ -358,7 +367,10 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 
 import colors from '../../../lib/colors'
-import { addBusinessDays } from '../../../lib/time'
+import {
+  addBusinessDays,
+  parseDate
+} from '../../../lib/time'
 
 import { ChevronRightIcon, ChevronDownIcon } from 'vue-feather-icons'
 import EditMilestoneModal from '../../modals/EditMilestoneModal'
@@ -461,18 +473,10 @@ export default {
 
     daysAvailable () {
       const days = []
-      const startDate = moment.tz(
-        this.startDate.format('YYYY-MM-DD'),
-        'YYYY-MM-DD',
-        'UTC'
-      )
+      const startDate = parseDate(this.startDate.format('YYYY-MM-DD'))
       const day = startDate.clone().add(-1, 'days')
       let dayDate = day.toDate()
-      const endDate = moment.tz(
-        this.endDate.format('YYYY-MM-DD'),
-        'YYYY-MM-DD',
-        'UTC'
-      )
+      const endDate = parseDate(this.endDate.format('YYYY-MM-DD'))
       const endDayDate = endDate.toDate()
       dayDate.isoweekday = day.isoWeekday()
       dayDate.monthday = day.month()
@@ -493,7 +497,7 @@ export default {
         }
         if ([6, 7].includes(nextDay.isoweekday)) nextDay.weekend = true
 
-        const momentDay = moment.tz(moment(nextDay).format('YYYY-MM-DD'), 'YYYY-MM-DD', 'UTC')
+        const momentDay = parseDate(moment(nextDay).format('YYYY-MM-DD'))
         momentDay.newWeek = nextDay.newWeek
         momentDay.newMonth = nextDay.newMonth
         momentDay.weekend = nextDay.weekend
@@ -594,9 +598,12 @@ export default {
 
     timelineTodayPositionStyle () {
       const today = moment()
+      const isVisible =
+        today.isAfter(this.startDate) && today.isBefore(this.endDate)
       return {
         width: `${this.cellWidth}px`,
-        left: `${this.getTimebarLeft({ startDate: today }) - 5}px`
+        left: `${this.getTimebarLeft({ startDate: today }) - 5}px`,
+        display: isVisible ? 'block' : 'none'
       }
     },
 
@@ -611,6 +618,12 @@ export default {
       'deleteMilestone',
       'saveMilestone'
     ]),
+
+    isVisible (timeElement) {
+      const isStartDateOk = timeElement.startDate.isAfter(this.startDate)
+      const isEndDateOk = timeElement.endDate.isBefore(this.endDate)
+      return isStartDateOk && isEndDateOk
+    },
 
     resetScheduleSize () {
       if (this.height) this.schedule.style.height = `${this.height}px`
@@ -1039,7 +1052,7 @@ export default {
     showEditMilestoneModal (day, milestone) {
       this.modals.edit = true
       if (milestone) {
-        milestone.date = moment(milestone.date, 'YYYY-MM-DD', 'en')
+        milestone.date = parseDate(milestone.date)
         this.milestoneToEdit = milestone
       } else {
         this.milestoneToEdit = { date: day }
@@ -1079,12 +1092,8 @@ export default {
     },
 
     milestoneLineStyle (milestone) {
-      const startDate = moment(
-        this.startDate.format('YYYY-MM-DD'),
-        'YYYY-MM-DD',
-        'UTC'
-      )
-      const endDate = moment(milestone.date, 'YYYY-MM-DD', 'UTC')
+      const startDate = parseDate(this.startDate.format('YYYY-MM-DD'))
+      const endDate = parseDate(milestone.date)
       const lengthDiff = this.businessDiff(startDate, endDate)
       return {
         left: (lengthDiff + 0.5) * this.cellWidth + 'px'
@@ -1260,6 +1269,10 @@ export default {
 
   .flexrow-item {
     margin: 0;
+
+    &.mr1 {
+      margin-right: 0.5em;
+    }
   }
 
   .expand {

@@ -4,9 +4,10 @@ import vuescroll from 'vue-scroll'
 import Vuex from 'vuex'
 import moment from 'moment'
 
-import i18n from '../../../src/lib/i18n'
+import i18n from '@/lib/i18n'
 
-import ProductionSchedule from '../../../src/components/pages/ProductionSchedule'
+import ProductionSchedule from '@/components/pages/ProductionSchedule'
+import productionStoreFixture from '../fixtures/production-store.js'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
@@ -19,7 +20,6 @@ localVue.directive('focus', {
 
 describe('ProductionSchedule', () => {
   let store
-  let productionStore
   let taskStore
   let taskStatusStore
   let taskTypeStore
@@ -71,13 +71,6 @@ describe('ProductionSchedule', () => {
       actions: {
       }
     }
-    productionStore = {
-      getters: {
-        currentProduction: () => ({ id: 'production-1', name: 'Prod 1' })
-      },
-      actions: {
-      }
-    }
     userStore = {
       getters: {
         user: () => ({ id: 'user-1', timezone: 'Europe/Paris' }),
@@ -113,7 +106,7 @@ describe('ProductionSchedule', () => {
       strict: true,
       modules: {
         tasks: taskStore,
-        productions: productionStore,
+        productions: { ...productionStoreFixture },
         taskStatus: taskStatusStore,
         taskTypes: taskTypeStore,
         user: userStore,
@@ -149,17 +142,16 @@ describe('ProductionSchedule', () => {
         end_date: '2019-09-01'
       }])
       Vue.nextTick(() => {
-        expect(item[0]).toEqual({
-          editable: true,
-          name: 'Characters',
-          start_date: '2019-08-15',
-          end_date: '2019-09-01',
-          startDate: moment('2019-08-15', 'YYYY-MM-DD', 'en'),
-          endDate: moment('2019-09-01', 'YYYY-MM-DD', 'en'),
-          expanded: false,
-          loading: false,
-          children: []
-        })
+        const newItem = item[0]
+        expect(newItem.editable).toEqual(true)
+        expect(newItem.name).toEqual('Characters')
+        expect(newItem.start_date).toEqual('2019-08-15')
+        expect(newItem.end_date).toEqual('2019-09-01')
+        expect(newItem.startDate.format('YYYY-MM-DD')).toEqual('2019-08-15')
+        expect(newItem.endDate.format('YYYY-MM-DD')).toEqual('2019-09-01')
+        expect(newItem.expanded).toEqual(false)
+        expect(newItem.loading).toEqual(false)
+        expect(newItem.children).toEqual([])
         done()
       })
     })

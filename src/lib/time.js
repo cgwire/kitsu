@@ -11,6 +11,10 @@ export const parseDate = (date) => {
   return moment.tz(date, 'YYYY-MM-DDTHH:mm:ss', 'UTC')
 }
 
+export const formatSimpleDate = (date) => {
+  return moment(date).format('YYYY-MM-DD')
+}
+
 export const formatDate = (date) => {
   const utcDate = moment.tz(date, 'UTC')
   if (moment().diff(utcDate, 'days') > 1) {
@@ -83,10 +87,6 @@ export const getEndDateFromString = (startDate, endDateString) => {
   } else {
     return startDate.clone().add('days', 1)
   }
-}
-
-export const formatSimpleDate = (date) => {
-  return moment(date).format('YYYY-MM-DD')
 }
 
 export const getDatesFromStartDate = (startDate, dueDate, estimation) => {

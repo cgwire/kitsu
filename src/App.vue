@@ -1622,10 +1622,6 @@ th.validation-cell {
   transition: opacity .15s;
 }
 
-.datepicker .date-field {
-  width: 250px;
-}
-
 .project-dates .date-input {
   width: 150px;
 }
@@ -1687,6 +1683,10 @@ th.validation-cell {
     padding: 0.1em;
     padding-left: 0.2em;
   }
+}
+
+.theme .datepicker input {
+  width: 150px;
 }
 
 .theme .datepicker .vdp-datepicker__calendar {

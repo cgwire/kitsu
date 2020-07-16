@@ -8,7 +8,7 @@
         :language="locale"
         :disabled-dates="disabledDates"
         :monday-first="true"
-        format="d MMMM yyyy"
+        format="yyyy-MM-dd"
         v-model="selectedDate"
       />
     </div>

@@ -16,7 +16,7 @@
           :language="locale"
           :disabled-dates="{ days: [6, 0] }"
           :monday-first="true"
-          format="d MMMM yyyy"
+          format="yyyy-MM-dd"
           v-model="selectedStartDate"
         />
       </div>
@@ -30,7 +30,7 @@
           :language="locale"
           :disabled-dates="{ days: [6, 0] }"
           :monday-first="true"
-          format="d MMMM yyyy"
+          format="yyyy-MM-dd"
           v-model="selectedEndDate"
         />
       </div>
@@ -89,6 +89,7 @@ import Datepicker from 'vuejs-datepicker'
 
 import { sortScheduleItems } from '../../lib/sorting'
 import { getTaskTypeSchedulePath } from '../../lib/path'
+import { parseDate } from '../../lib/time'
 
 import ComboboxNumber from '../widgets/ComboboxNumber'
 import TaskInfo from '../sides/TaskInfo'
@@ -174,12 +175,12 @@ export default {
             const taskType = this.taskTypeMap[item.task_type_id]
             let startDate, endDate
             if (item.start_date) {
-              startDate = moment(item.start_date, 'YYYY-MM-DD', 'en')
+              startDate = parseDate(item.start_date)
             } else {
               startDate = moment()
             }
             if (item.end_date) {
-              endDate = moment(item.end_date, 'YYYY-MM-DD', 'en')
+              endDate = parseDate(item.end_date)
             } else {
               endDate = startDate.clone().add(1, 'days')
             }
@@ -223,10 +224,10 @@ export default {
     reset () {
       if (this.currentProduction.start_date) {
         this.startDate =
-          moment.utc(this.currentProduction.start_date, 'YYYY-MM-DD', 'en')
+          parseDate(this.currentProduction.start_date)
       }
       if (this.currentProduction.end_date) {
-        this.endDate = moment(this.currentProduction.end_date)
+        this.endDate = parseDate(this.currentProduction.end_date)
       }
       this.overallManDays = this.currentProduction.man_days
       this.selectedStartDate = this.startDate.toDate()
@@ -238,16 +239,16 @@ export default {
       return scheduleItems.map((item) => {
         let startDate, endDate
         if (item.start_date) {
-          startDate = moment(item.start_date, 'YYYY-MM-DD', 'en')
+          startDate = parseDate(item.start_date)
         } else {
           startDate = moment()
         }
         if (item.end_date) {
-          endDate = moment(item.end_date, 'YYYY-MM-DD', 'en')
+          endDate = parseDate(item.end_date)
         } else {
           endDate = startDate.clone().add(1, 'days')
         }
-        return {
+        const scheduleItem = {
           ...item,
           startDate: startDate,
           endDate: endDate,
@@ -257,6 +258,15 @@ export default {
           children: [],
           parentElement: taskTypeElement
         }
+        if (this.isTVShow) {
+          scheduleItem.route = getTaskTypeSchedulePath(
+            item.task_type_id,
+            this.currentProduction.id,
+            item.object_id,
+            taskTypeElement.for_shots ? 'shots' : 'assets'
+          )
+        }
+        return scheduleItem
       })
     },
 
@@ -337,7 +347,7 @@ export default {
 
   watch: {
     selectedStartDate () {
-      this.startDate = moment.utc(this.selectedStartDate, 'YYYY-MM-DD', 'en')
+      this.startDate = parseDate(this.selectedStartDate)
       this.editProduction({
         data: {
           ...this.currentProduction,
@@ -347,7 +357,7 @@ export default {
     },
 
     selectedEndDate () {
-      this.endDate = moment(this.selectedEndDate)
+      this.endDate = parseDate(this.selectedEndDate)
       this.editProduction({
         data: {
           ...this.currentProduction,
