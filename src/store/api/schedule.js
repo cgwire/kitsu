@@ -3,11 +3,15 @@ import client from './client'
 export default {
   getMilestones (production) {
     return new Promise((resolve, reject) => {
-      const path = `/api/data/projects/${production.id}/milestones`
-      client.get(path, (err, milestones) => {
-        if (err) reject(err)
-        else resolve(milestones)
-      })
+      if (production) {
+        const path = `/api/data/projects/${production.id}/milestones`
+        client.get(path, (err, milestones) => {
+          if (err) reject(err)
+          else resolve(milestones)
+        })
+      } else {
+        resolve([])
+      }
     })
   },
 

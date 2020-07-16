@@ -3,10 +3,11 @@ import vuescroll from 'vue-scroll'
 import Vuex from 'vuex'
 import moment from 'moment'
 
-import i18n from '../../../src/lib/i18n'
-import { range } from '../../../src/lib/time'
+import i18n from '@/lib/i18n'
+import { range } from '@/lib/time'
 
-import Schedule from '../../../src/components/pages/schedule/Schedule'
+import Schedule from '@/components/pages/schedule/Schedule'
+import productionStoreFixture from '../fixtures/production-store.js'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
@@ -17,7 +18,6 @@ describe('Schedule', () => {
   let store
 
   let newsStore
-  let productionStore
   let scheduleStore
   let taskStore
   let taskStatusStore
@@ -69,17 +69,11 @@ describe('Schedule', () => {
       actions: {
       }
     },
-    productionStore = {
-      getters: {
-        currentProduction: () => ({ id: 'production-1', name: 'Prod 1' })
-      },
-      actions: {
-      }
-    }
     userStore = {
       getters: {
         user: () => ({ id: 'user-1', timezone: 'Europe/Paris' }),
-        isCurrentUserAdmin: () => true
+        isCurrentUserAdmin: () => true,
+        isCurrentUserManager: () => true
       },
       actions: {}
     }
@@ -95,7 +89,7 @@ describe('Schedule', () => {
       strict: true,
       modules: {
         tasks: taskStore,
-        productions: productionStore,
+        productions: {... productionStoreFixture },
         taskStatus: taskStatusStore,
         taskTypes: taskTypeStore,
         user: userStore,
@@ -464,7 +458,7 @@ describe('Schedule', () => {
           'width': 14 * 60 - 10 + 'px'
         })
       })
-      
+
       test.skip('timebarStyle', () => {
       })
 

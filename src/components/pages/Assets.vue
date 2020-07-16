@@ -365,6 +365,7 @@ export default {
               this.initialLoading = false
               if (this.$refs['asset-list']) {
                 this.onSearchChange()
+                this.resetCsvColumns()
                 this.$refs['asset-list'].setScrollPosition(
                   this.assetListScrollPosition
                 )
@@ -375,6 +376,7 @@ export default {
     } else {
       if (!this.isAssetsLoading) this.initialLoading = false
       this.onSearchChange()
+      this.resetCsvColumns()
       this.$refs['asset-list'].setScrollPosition(
         this.assetListScrollPosition
       )
@@ -465,6 +467,7 @@ export default {
       'getAssetsCsvLines',
       'loadAssets',
       'loadComment',
+      'loadEpisodes',
       'removeAssetSearch',
       'saveAssetSearch',
       'setLastProductionScreen',
@@ -726,6 +729,7 @@ export default {
         .then(() => {
           this.hideImportRenderModal()
           this.loading.importing = false
+          this.loadEpisodes()
           this.loadAssets()
         })
         .catch((err) => {
@@ -892,7 +896,7 @@ export default {
         })
     },
 
-    resetCsVColumns () {
+    resetCsvColumns () {
       const columns = this.isTVShow ? ['Episode'] : []
       this.columns = columns.concat([
         'Type',
@@ -925,7 +929,7 @@ export default {
     currentProduction () {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
-      this.resetCsVColumns()
+      this.resetCsvColumns()
 
       if (!this.isTVShow) this.reset()
     },
@@ -934,6 +938,7 @@ export default {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       if (this.isTVShow && this.currentEpisode) this.reset()
+      this.resetCsvColumns()
     },
 
     displayedAssets () {

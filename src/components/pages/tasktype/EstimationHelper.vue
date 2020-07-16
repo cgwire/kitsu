@@ -114,7 +114,11 @@
                 @mouseout="onInputMouseOut"
                 @mouseover="onInputMouseOver"
                 :value="formatEstimation(task.estimation)"
+                v-if="isCurrentUserManager"
               />
+              <span v-else>
+                {{ formatEstimation(task.estimation) }}
+              </span>
             </td>
             <td>
             </td>
@@ -251,6 +255,7 @@ export default {
     ...mapGetters([
       'assetMap',
       'currentProduction',
+      'isCurrentUserManager',
       'organisation',
       'personMap',
       'shotMap'
@@ -405,9 +410,11 @@ export default {
         if (!event.ctrlKey) this.clearSelection()
         this.selectSingleTask(index)
       }
-      this.focusInput(
-        this.$refs[this.tasksByPerson[index].id + '-estimation'][0]
-      )
+      if (this.isCurrentUserManager) {
+        this.focusInput(
+          this.$refs[this.tasksByPerson[index].id + '-estimation'][0]
+        )
+      }
     },
 
     selectPrevious (shiftKey) {

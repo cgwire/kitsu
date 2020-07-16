@@ -12,7 +12,12 @@
     />
     <button class="button flexrow-item" @click="setValue(1)">1</button>
     <button class="button flexrow-item" @click="setValue(4)">4</button>
-    <button class="button flexrow-item" @click="setValue(8)">8</button>
+    <button
+      class="button flexrow-item"
+      @click="setValue(organisation.hours_by_day || 8)"
+    >
+    {{ organisation.hours_by_day || 8}}
+    </button>
   </div>
 </td>
 </template>
@@ -67,6 +72,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'organisation'
     ])
   },
 

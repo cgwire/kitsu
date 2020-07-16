@@ -4,6 +4,7 @@ import VueRouter from 'vue-router'
 
 import i18n from '@/lib/i18n'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper'
+import productionStoreFixture from '../../fixtures/production-store.js'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
@@ -77,19 +78,11 @@ describe('EstimationHelper', () => {
       },
       actions: {}
     }
-    productionStore = {
-      getters: {
-        currentProduction: () => ({
-          id: 'production-1',
-          name: 'Caminandes',
-          team: ['person-2', 'person-3']
-        })
-      },
-      actions: {}
-    }
+    productionStore = { ...productionStoreFixture }
     peopleStore = {
       getters: {
         isCurrentUserVendor: () => false,
+        isCurrentUserManager: () => false,
         organisation: () => ({
           id: 'organisation-1',
           name: 'Org.'

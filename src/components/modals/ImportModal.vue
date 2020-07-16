@@ -121,12 +121,15 @@ export default {
   methods: {
     ...mapActions([
     ]),
+
     onTabUpdate (tabs) {
       this.tabs = tabs
     },
+
     onFileSelected (formData) {
       this.formData = formData
     },
+
     onConfirmClicked () {
       let mode = ''
       let data = null
@@ -139,8 +142,10 @@ export default {
       }
       this.$emit('confirm', data, mode)
     },
+
     reset () {
       this.$refs.inputFile.reset()
+      this.pastedCode = ''
     }
   },
 

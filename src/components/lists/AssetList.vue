@@ -279,6 +279,8 @@
     v-if="!isEmptyList && !isLoading"
   >
     {{ displayedAssetsLength }} {{ $tc('assets.number', displayedAssetsLength) }}
+    ({{ formatDuration(displayedAssetsTimeSpent) }}
+     {{ $tc('main.days_spent', displayedAssetsTimeSpent) }})
   </p>
 
 </div>
@@ -358,6 +360,7 @@ export default {
       'currentEpisode',
       'currentProduction',
       'displayedAssetsLength',
+      'displayedAssetsTimeSpent',
       'nbSelectedTasks',
       'isAssetDescription',
       'isCurrentUserAdmin',

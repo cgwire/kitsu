@@ -21,6 +21,7 @@
         <button-simple
           icon="edit"
           @click="modals.edit = true"
+          v-if="isCurrentUserManager"
         />
       </div>
     </div>
@@ -278,6 +279,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'isCurrentUserManager',
       'route',
       'shotMap',
       'shotMetadataDescriptors',
