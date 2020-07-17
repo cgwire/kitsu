@@ -30,6 +30,16 @@ describe('BuildFilterModal', () => {
         ],
         assetSearchText: (state) => state.assetSearchText,
         assetValidationColumns: () => ['task-type-1', 'task-type-2'],
+        assetTypeMap: () => ({
+          'asset-type-1': { id: 'asset-type-1', name: 'chars' },
+          'asset-type-2': { id: 'asset-type-2', name: 'sets' },
+          'asset-type-3': { id: 'asset-type-3', name: 'props' }
+        }),
+        assetTypes: () => [
+          { id: 'asset-type-1', name: 'chars' },
+          { id: 'asset-type-2', name: 'sets' },
+          { id: 'asset-type-3', name: 'props' }
+        ],
       },
       mutations: {
         'CHANGE_SEARCH': (state, query) => state.assetSearchText = query
@@ -222,6 +232,28 @@ describe('BuildFilterModal', () => {
           expect(wrapper.emitted().confirm[0][0]).toBe('[Modeling]=[WIP]')
       })
       describe('Build filter', () => {
+        describe('asset types', () => {
+          it('type is', () => {
+            wrapper.setData({
+              assetTypeFilters: {
+                operator: '=' ,
+                value: 'asset-type-1'
+              }
+            })
+            const query = wrapper.vm.buildFilter()
+            expect(query).toBe('type=[chars]')
+          })
+          it('type is not', () => {
+            wrapper.setData({
+              assetTypeFilters: {
+                operator: '=' ,
+                value: 'asset-type-1'
+              }
+            })
+            const query = wrapper.vm.buildFilter()
+            expect(query).toBe('type=[chars]')
+          })
+        })
         describe('task types', () => {
           it('status is', () => {
             wrapper.setData({

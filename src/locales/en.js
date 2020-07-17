@@ -106,6 +106,8 @@ export default {
 
   entities: {
     build_filter: {
+      asset_type: 'Asset type',
+      all_types: 'All asset types',
       assignation: 'Assignation',
       assignation_exists_for: 'Assignations exists for',
       assigned_to: 'Assigned to',

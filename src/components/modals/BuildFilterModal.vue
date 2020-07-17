@@ -12,6 +12,27 @@
       </h1>
 
       <h3 class="subtitle">
+        {{ $t('entities.build_filter.asset_type') }}
+      </h3>
+
+      <div
+        class="flexrow asset-type-filter"
+        v-if="isAssets"
+      >
+        <combobox
+          class="flexrow-item"
+          :options="general.operatorOptions"
+          locale-key-prefix="entities.build_filter."
+          v-model="assetTypeFilters.operator"
+        />
+        <combobox
+          class="flexrow-item"
+          :options="assetTypeOptions"
+          v-model="assetTypeFilters.value"
+        />
+      </div>
+
+      <h3 class="subtitle">
         {{ $t('entities.build_filter.status') }}
       </h3>
 
@@ -213,6 +234,10 @@ export default {
       },
       taskTypeFilters: {
         values: []
+      },
+      assetTypeFilters: {
+        operator: '=',
+        value: ''
       }
     }
   },
@@ -225,6 +250,8 @@ export default {
   computed: {
     ...mapGetters([
       'assetMetadataDescriptors',
+      'assetTypeMap',
+      'assetTypes',
       'assetSearchText',
       'assetValidationColumns',
       'currentProduction',
@@ -242,6 +269,18 @@ export default {
 
     isAssets () {
       return this.entityType === 'asset'
+    },
+
+    assetTypeOptions () {
+      return [
+        { label: this.$t('entities.build_filter.all_types'), value: '-' },
+        ...this.assetTypes.map((assetType) => {
+          return {
+            label: assetType.name,
+            value: assetType.id
+          }
+        })
+      ]
     },
 
     taskTypeList () {
@@ -285,11 +324,23 @@ export default {
 
     buildFilter () {
       let query = ''
+      query = this.applyAssetTypeChoice(query)
       query = this.applyTaskTypeChoice(query)
       query = this.applyDescriptorChoice(query)
       query = this.applyAssignationChoice(query)
       query = this.applyThumbnailChoice(query)
       return query.trim()
+    },
+
+    applyAssetTypeChoice (query) {
+      const value = this.assetTypeFilters.value
+      if (value && value !== '-') {
+        let operator = '=['
+        if (this.assetTypeFilters.operator === '=-') operator = '=[-'
+        const assetType = this.assetTypeMap[value]
+        query += ` type${operator}${assetType.name}]`
+      }
+      return query
     },
 
     applyTaskTypeChoice (query) {
@@ -401,20 +452,23 @@ export default {
       const searchQuery =
         this.isAssets ? this.assetSearchText : this.shotSearchText
       if (searchQuery) {
-        const filters = getFilters(
-          [], // entry list is not needed,
-          this.taskTypes,
-          this.taskStatus,
-          this.metadataDescriptors,
-          this.people,
-          searchQuery
-        )
+        const filters = getFilters({
+          entryIndex: [], // entry list is not needed,
+          assetTypes: this.assetTypes,
+          taskTypes: this.taskTypes,
+          taskStatuses: this.taskStatus,
+          descriptors: this.metadataDescriptors,
+          persons: this.people,
+          query: searchQuery
+        })
         filters.forEach((filter) => {
-          if (filter.type === 'status') {
+          if (filter.type === 'assettype') {
+            this.setFiltersFromAssetTypeQuery(filter)
+          } else if (filter.type === 'status') {
             this.setFiltersFromStatusQuery(filter)
-          } if (filter.type === 'descriptor') {
+          } else if (filter.type === 'descriptor') {
             this.setFiltersFromDescriptorQuery(filter)
-          } if (filter.type === 'assignation') {
+          } else if (filter.type === 'assignation') {
             this.setFiltersFromAssignationQuery(filter)
           } else if (filter.type === 'assignedto') {
             this.setFiltersFromAssignedToQuery(filter)
@@ -423,6 +477,11 @@ export default {
           }
         })
       }
+    },
+
+    setFiltersFromAssetTypeQuery (filter) {
+      this.assetTypeFilters.operator = filter.excluding ? '=-' : '='
+      this.assetTypeFilters.value = filter.assetType.id
     },
 
     setFiltersFromStatusQuery (filter) {
@@ -472,6 +531,8 @@ export default {
       this.hasThumbnail.value = 'nofilter'
       this.metadataDescriptorFilters.values = []
       this.taskTypeFilters.values = []
+      this.assetTypeFilters.operator = '='
+      this.assetTypeFilters.value = '-'
     }
   },
 

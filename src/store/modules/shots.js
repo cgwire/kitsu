@@ -297,14 +297,15 @@ const helpers = {
 
     const query = shotSearch
     const keywords = getKeyWords(query) || []
-    const filters = getFilters(
-      cache.shotIndex,
+    const filters = getFilters({
+      entryIndex: cache.shotIndex,
+      assetTypes: [],
       taskTypes,
       taskStatuses,
-      production.descriptors,
+      descriptors: production.descriptors,
       persons,
       query
-    )
+    })
     let result = indexSearch(cache.shotIndex, keywords) || cache.shots
     result = applyFilters(result, filters, taskMap)
     result = sortShotResult(
@@ -1502,14 +1503,16 @@ const mutations = {
     const result =
       indexSearch(state.sequenceIndex, keywords) || state.sequences
 
-    state.searchSequenceFilters = getFilters(
-      cache.shotIndex,
-      [],
-      [],
-      production.descriptors.filter(d => d.entity_type === 'Shot'),
-      [],
-      sequenceSearch
-    )
+    state.searchSequenceFilters = getFilters({
+      entryIndex: cache.shotIndex,
+      assetTypes: [],
+      taskTypes: [],
+      taskStatuses: [],
+      descriptors:
+        production.descriptors.filter(d => d.entity_type === 'Shot'),
+      persons: [],
+      query: sequenceSearch
+    })
     state.displayedSequences = result.slice(0, PAGE_SIZE * 2)
     state.displayedSequencesLength = result.length
     state.sequenceSearchText = sequenceSearch

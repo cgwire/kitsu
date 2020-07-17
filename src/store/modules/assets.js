@@ -223,14 +223,15 @@ const helpers = {
 
     const query = assetSearch
     const keywords = getKeyWords(query) || []
-    const filters = getFilters(
-      cache.assetIndex,
+    const filters = getFilters({
+      entryIndex: cache.assetIndex,
+      assetTypes: state.assetTypes,
       taskTypes,
       taskStatuses,
-      production.descriptors || [],
+      descriptors: production.descriptors || [],
       persons,
       query
-    )
+    })
     let result = indexSearch(cache.assetIndex, keywords) || cache.assets
     result = applyFilters(result, filters, taskMap)
     result = sortAssetResult(

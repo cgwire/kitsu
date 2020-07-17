@@ -95,16 +95,22 @@ describe('lib/filtering', () => {
       { id: '2', short_name: 'wfa' },
       { id: '3', short_name: 'done' }
     ]
+    const assetTypes = [
+      { id: 'asset-type-1', name: 'chars' },
+      { id: 'asset-type-2', name: 'sets' },
+      { id: 'asset-type-3', name: 'props' }
+    ]
 
     it('simple case', () => {
-      const filters = getFilters(
+      const filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        'modeling=wip'
-      )
+        query: 'modeling=wip'
+      })
       expect(filters.length).toEqual(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
@@ -114,14 +120,15 @@ describe('lib/filtering', () => {
     })
 
     it('shortcut case', () => {
-      const filters = getFilters(
+      const filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        'mode=wip'
-      )
+        query: 'mode=wip'
+      })
       expect(filters.length).toEqual(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
@@ -129,14 +136,15 @@ describe('lib/filtering', () => {
     })
 
     it('task type with space case', () => {
-      const filters = getFilters(
+      const filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        '[modeling facial]=wip'
-      )
+        query: '[modeling facial]=wip'
+      })
       expect(filters.length).toEqual(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[2])
@@ -144,50 +152,54 @@ describe('lib/filtering', () => {
     })
 
     it('non existing task type case', () => {
-      const filters = getFilters(
+      const filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        'compo=wip'
-      )
+        query: 'compo=wip'
+      })
       expect(filters.length).toEqual(0)
     })
 
     it('no task type in query case', () => {
-      const filters = getFilters(
+      const filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        'toto'
-      )
+        query: 'toto'
+      })
       expect(filters.length).toEqual(0)
     })
 
     it('empty query case', () => {
-      const filters = getFilters(
+      const filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        ''
-      )
+        query: ''
+      })
       expect(filters.length).toEqual(0)
     })
 
     it('task type with same base name (shorter first)', () => {
-      const filters = getFilters(
+      const filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        'anim=wfa'
-      )
+        query: 'anim=wfa'
+      })
       expect(filters.length).toEqual(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[3])
@@ -195,14 +207,15 @@ describe('lib/filtering', () => {
     })
 
     it('multiple task type query case', () => {
-      const filters = getFilters(
+      const filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        'mode=wip animation=wfa chars'
-      )
+        query: 'mode=wip animation=wfa chars'
+      })
       expect(filters.length).toEqual(2)
       let filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
@@ -213,14 +226,15 @@ describe('lib/filtering', () => {
     })
 
     it('assigned query case', () => {
-      const filters = getFilters(
+      const filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        'mode=assigned'
-      )
+        query: 'mode=assigned'
+      })
       expect(filters.length).toEqual(1)
       let filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
@@ -230,14 +244,15 @@ describe('lib/filtering', () => {
     })
 
     it('unassigned query case', () => {
-      const filters = getFilters(
+      const filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        'mode=unassigned'
-      )
+        query: 'mode=unassigned'
+      })
       expect(filters.length).toEqual(1)
       let filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
@@ -247,14 +262,15 @@ describe('lib/filtering', () => {
     })
 
     it('exclusion query case', () => {
-      const filters = getFilters(
+      const filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        '-props'
-      )
+        query: '-props'
+      })
       expect(filters.length).toEqual(1)
       let filter = filters[0]
       expect(filter.type).toEqual('exclusion')
@@ -262,14 +278,15 @@ describe('lib/filtering', () => {
     })
 
     it('descriptor query case', () => {
-      const filters = getFilters(
+      const filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        'family=big'
-      )
+        query: 'family=big'
+      })
       expect(filters.length).toEqual(1)
       let filter = filters[0]
       expect(filter.type).toEqual('descriptor')
@@ -278,43 +295,62 @@ describe('lib/filtering', () => {
     })
 
     it('withthumbnail in query case', () => {
-      let filters = getFilters(
+      let filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        'withthumbnail'
-      )
+        query: 'withthumbnail'
+      })
       expect(filters.length).toEqual(1)
       expect(filters[0].type).toEqual('thumbnail')
       expect(filters[0].excluding).toEqual(false)
 
-      filters = getFilters(
+      filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        '-withthumbnail'
-      )
+        query: '-withthumbnail'
+      })
       expect(filters.length).toEqual(1)
       expect(filters[0].type).toEqual('thumbnail')
       expect(filters[0].excluding).toEqual(true)
     })
 
     it('assignedto=[John Doe] in query case', () => {
-      let filters = getFilters(
+      let filters = getFilters({
         entryIndex,
+        assetTypes,
         taskTypes,
         taskStatuses,
         descriptors,
         persons,
-        'assignedto=[John Doe]'
-      )
+        query: 'assignedto=[John Doe]'
+      })
       expect(filters.length).toEqual(1)
       expect(filters[0].type).toEqual('assignedto')
       expect(filters[0].personId).toEqual('person-1')
+      expect(filters[0].excluding).toEqual(false)
+    })
+
+    it('type=[chars] in query case', () => {
+      let filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        query: 'type=[chars]'
+      })
+      expect(filters.length).toEqual(1)
+      expect(filters[0].type).toEqual('assettype')
+      expect(filters[0].assetType.id).toEqual('asset-type-1')
       expect(filters[0].excluding).toEqual(false)
     })
   })

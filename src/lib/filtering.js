@@ -5,6 +5,7 @@ import {
 } from './indexing'
 
 const EQUAL_REGEX = /([^ ]*)=\[([^[]*)\]|([^ ]*)=([^ ]*)|\[([^[]*)\]=([^ ]*)/g
+const EQUAL_ASSET_TYPE_REGEX = /type=\[([^[]*)\]|type=([^ ]*)|type=([^ ]*)/g
 
 /*
  * Look in the search query for task type filter like anim=wip.
@@ -17,6 +18,7 @@ export const applyFilters = (entries, filters, taskMap) => {
   const isDescriptor = { descriptor: true }
   const isAvatar = { thumbnail: true }
   const isAssignedTo = { assignedto: true }
+  const isAssetType = { assettype: true }
 
   if (filters && filters.length > 0) {
     return entries.filter((entry) => {
@@ -28,7 +30,10 @@ export const applyFilters = (entries, filters, taskMap) => {
         if (filter.taskType && entry.validations[filter.taskType.id]) {
           task = taskMap[entry.validations[filter.taskType.id]]
         }
-        if (isStatus[filter.type]) {
+        if (isAssetType[filter.type]) {
+          isOk = filter.assetType && entry.asset_type_id === filter.assetType.id
+          if (filter.excluding) isOk = !isOk
+        } else if (isStatus[filter.type]) {
           isOk = task && task.task_status_id === filter.taskStatus.id
           if (filter.excluding) isOk = !isOk
         } else if (isAssignation[filter.type]) {
@@ -118,17 +123,33 @@ export const getExcludingKeyWords = (queryText) => {
  * * exclusion filters
  */
 export const getFilters = (
-  entryIndex, taskTypes, taskStatuses, descriptors, persons, query
+  {
+    entryIndex,
+    assetTypes,
+    taskTypes,
+    taskStatuses,
+    descriptors,
+    persons,
+    query
+  }
 ) => {
-  let filters = getTaskTypeFilters(taskTypes, taskStatuses, query)
-  const descFilters = getDescFilters(descriptors, query)
-  const assignedToFilters = getAssignedToFilters(persons, query)
-  const thumbnailFilters = getThumbnailFilters(query) || []
+  const filters = [
+    ...getAssetTypeFilters(assetTypes, query),
+    ...getTaskTypeFilters(taskTypes, taskStatuses, query),
+    ...getDescFilters(descriptors, query),
+    ...getAssignedToFilters(persons, query),
+    ...getThumbnailFilters(query) || [],
+    ...getExcludingFilters(entryIndex, query)
+  ]
+  return filters
+}
+
+/*
+ *  Extract filters excluding entities based on their name.
+ */
+const getExcludingFilters = (entryIndex, query) => {
+  const filters = []
   const excludingKeywords = getExcludingKeyWords(query) || []
-  filters = filters
-    .concat(descFilters)
-    .concat(thumbnailFilters)
-    .concat(assignedToFilters)
   excludingKeywords.forEach((keyword) => {
     const excludedMap = {}
     const excludedEntries = indexSearch(entryIndex, [keyword]) || []
@@ -171,6 +192,34 @@ const cleanParenthesis = (value) => {
   }
 }
 
+/*
+ * Extract asset type filters (like type=characters from given query.
+ */
+export const getAssetTypeFilters = (
+  assetTypes,
+  queryText
+) => {
+  if (!queryText) return []
+
+  const results = []
+  const rgxMatches = queryText.match(EQUAL_ASSET_TYPE_REGEX)
+
+  if (rgxMatches) {
+    rgxMatches.forEach((rgxMatch) => {
+      const pattern = rgxMatch.split('=')
+      let value = cleanParenthesis(pattern[1])
+      const excluding = value.startsWith('-')
+      if (excluding) value = value.substring(1)
+      const assetType = assetTypes.find(t => t.name === value)
+      results.push({
+        assetType,
+        excluding,
+        type: 'assettype'
+      })
+    })
+  }
+  return results
+}
 /*
  * Extract task type filters (like anim=wip or [mode facial]=wip) from given
  * query.
