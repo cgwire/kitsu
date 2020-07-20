@@ -33,6 +33,18 @@ export const buildTaskTypeIndex = (taskTypes) => {
 }
 
 /*
+ * Generate an index to find task status easily.
+ */
+export const buildTaskStatusIndex = (taskStatuses) => {
+  const taskStatusShortNameIndex = {}
+  taskStatuses.forEach((taskStatus) => {
+    const shortName = taskStatus.short_name.toLowerCase()
+    taskStatusShortNameIndex[shortName] = taskStatus
+  })
+  return taskStatusShortNameIndex
+}
+
+/*
  * Generate an index to find task easily. Search will be based on the task
  * entity name and words appearing into it.
  * The result is an array of tasks.

@@ -1,5 +1,6 @@
 import {
   buildTaskTypeIndex,
+  buildTaskStatusIndex,
   buildNameIndex,
   indexSearch
 } from './indexing'
@@ -34,7 +35,7 @@ export const applyFilters = (entries, filters, taskMap) => {
           isOk = filter.assetType && entry.asset_type_id === filter.assetType.id
           if (filter.excluding) isOk = !isOk
         } else if (isStatus[filter.type]) {
-          isOk = task && task.task_status_id === filter.taskStatus.id
+          isOk = task && filter.taskStatuses.includes(task.task_status_id)
           if (filter.excluding) isOk = !isOk
         } else if (isAssignation[filter.type]) {
           if (filter.assigned) {
@@ -236,11 +237,7 @@ export const getTaskTypeFilters = (
 
   if (rgxMatches) {
     const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
-    const taskStatusShortNameIndex = {}
-    taskStatuses.forEach((taskStatus) => {
-      const shortName = taskStatus.short_name.toLowerCase()
-      taskStatusShortNameIndex[shortName] = taskStatus
-    })
+    const taskStatusShortNameIndex = buildTaskStatusIndex(taskStatuses)
     rgxMatches.forEach((rgxMatch) => {
       const pattern = rgxMatch.split('=')
       let value = cleanParenthesis(pattern[1])
@@ -261,13 +258,19 @@ export const getTaskTypeFilters = (
             assigned: true,
             type: 'assignation'
           })
-        } else if (value && taskStatusShortNameIndex[value.toLowerCase()]) {
-          results.push({
-            taskType: taskTypes[0],
-            taskStatus: taskStatusShortNameIndex[value.toLowerCase()],
-            type: 'status',
-            excluding
-          })
+        } else if (value) {
+          const values = value.split(',')
+            .map(shortName => shortName.toLowerCase())
+            .filter(shortName => taskStatusShortNameIndex[shortName])
+            .map(shortName => taskStatusShortNameIndex[shortName].id)
+          if (values.length > 0) {
+            results.push({
+              taskType: taskTypes[0],
+              taskStatuses: values,
+              type: 'status',
+              excluding
+            })
+          }
         }
       }
     })

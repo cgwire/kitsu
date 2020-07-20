@@ -48,16 +48,28 @@
         />
         <combobox
           class="flexrow-item"
-          :options="general.operatorOptions"
+          :options="general.taskTypeOperatorOptions"
+          @input="onTaskTypeOperatorChanged(taskTypeFilter)"
           locale-key-prefix="entities.build_filter."
           v-model="taskTypeFilter.operator"
         />
-        <combobox-status
-          class="flexrow-item"
-          :task-status-list="taskStatus"
-          v-model="taskTypeFilter.statusId"
-        />
+        <div class="flexrow-item flexrow value-column">
+          <combobox-status
+            class="flexrow-item"
+            :key="'task-type-value-' + index"
+            :task-status-list="taskStatus"
+            v-model="taskTypeFilter.values[index]"
+            v-for="(statusId, index) in taskTypeFilter.values"
+          />
+          <button-simple
+            class="mt05"
+            icon="plus"
+            @click="addInTaskTypeFilter(taskTypeFilter)"
+            v-if="taskTypeFilter.operator === 'in'"
+          />
+        </div>
         <button-simple
+          class="mt05"
           icon="minus"
           @click="removeTaskTypeFilter(taskTypeFilter)"
         />
@@ -219,6 +231,11 @@ export default {
         operatorOptions: [
           { label: 'equal', value: '=' },
           { label: 'not_equal', value: '=-' }
+        ],
+        taskTypeOperatorOptions: [
+          { label: 'equal', value: '=' },
+          { label: 'not_equal', value: '=-' },
+          { label: 'in', value: 'in' }
         ]
       },
       hasThumbnail: {
@@ -348,8 +365,10 @@ export default {
         let operator = '=['
         if (taskTypeFilter.operator === '=-') operator = '=[-'
         const taskType = this.getTaskType(taskTypeFilter.id)
-        const taskStatus = this.taskStatusMap[taskTypeFilter.statusId]
-        query += ` [${taskType.name}]${operator}${taskStatus.short_name}]`
+        const value = taskTypeFilter.values.map(statusId => {
+          return this.taskStatusMap[statusId].short_name
+        }).join(',')
+        query += ` [${taskType.name}]${operator}${value}]`
       })
       return query
     },
@@ -392,10 +411,14 @@ export default {
       const filter = {
         id: this.taskTypeList[0].id,
         operator: '=',
-        statusId: this.taskStatus[0].id
+        values: [this.taskStatus[0].id]
       }
       this.taskTypeFilters.values.push(filter)
       return filter
+    },
+
+    addInTaskTypeFilter (taskTypeFilter) {
+      taskTypeFilter.values.push(this.taskStatus[0].id)
     },
 
     removeTaskTypeFilter (taskTypeFilter) {
@@ -485,10 +508,16 @@ export default {
     },
 
     setFiltersFromStatusQuery (filter) {
+      let operator = '='
+      if (filter.taskStatuses.length > 1) {
+        operator = 'in'
+      } else if (filter.excluding) {
+        operator = '='
+      }
       this.taskTypeFilters.values.push({
         id: filter.taskType.id,
-        operator: filter.excluding ? '=-' : '=',
-        statusId: filter.taskStatus.id
+        operator,
+        values: filter.taskStatuses
       })
     },
 
@@ -523,6 +552,13 @@ export default {
     },
 
     // General
+
+    onTaskTypeOperatorChanged (taskTypeFilter) {
+      console.log('otot')
+      if (taskTypeFilter.operator !== 'in') {
+        taskTypeFilter.values = [taskTypeFilter.values[0]]
+      }
+    },
 
     reset () {
       this.assignation.value = 'nofilter'
@@ -579,5 +615,14 @@ export default {
   .descriptor-text-value {
     padding: 0;
   }
+}
+
+.task-type-filter {
+  align-items: flex-start;
+}
+
+.value-column {
+  flex-direction: column;
+  align-items: flex-start;
 }
 </style>

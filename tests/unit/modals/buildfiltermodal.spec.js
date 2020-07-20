@@ -150,7 +150,7 @@ describe('BuildFilterModal', () => {
               {
                 id: 'task-type-1' ,
                 operator: '=' ,
-                statusId: 'task-status-2'
+                values: ['task-status-2']
               }
             ]
           }
@@ -222,7 +222,7 @@ describe('BuildFilterModal', () => {
                 {
                   id: 'task-type-1' ,
                   operator: '=' ,
-                  statusId: 'task-status-2'
+                  values: ['task-status-2']
                 }
               ]
             }
@@ -262,7 +262,7 @@ describe('BuildFilterModal', () => {
                   {
                     id: 'task-type-1' ,
                     operator: '=' ,
-                    statusId: 'task-status-2'
+                    values: ['task-status-2']
                   }
                 ]
               }
@@ -277,7 +277,7 @@ describe('BuildFilterModal', () => {
                   {
                     id: 'task-type-1' ,
                     operator: '=-' ,
-                    statusId: 'task-status-2'
+                    values: ['task-status-2']
                   }
                 ]
               }
@@ -398,7 +398,7 @@ describe('BuildFilterModal', () => {
               {
                 id: 'task-type-1' ,
                 operator: '=' ,
-                statusId: 'task-status-2'
+                values: ['task-status-2']
               }
             ])
           })
@@ -409,7 +409,18 @@ describe('BuildFilterModal', () => {
               {
                 id: 'task-type-1' ,
                 operator: '=' ,
-                statusId: 'task-status-2'
+                values: ['task-status-2']
+              }
+            ])
+          })
+          it('status in', () => {
+            changeSearch('Modeling=WIP,WFA')
+            wrapper.vm.setFiltersFromCurrentQuery()
+            expect(wrapper.vm.taskTypeFilters.values).toStrictEqual([
+              {
+                id: 'task-type-1' ,
+                operator: 'in',
+                values: ['task-status-2', 'task-status-1']
               }
             ])
           })
@@ -485,7 +496,7 @@ describe('BuildFilterModal', () => {
           expect(wrapper.vm.taskTypeFilters.values).toStrictEqual([{
             id: 'task-type-1',
             operator: '=',
-            statusId: 'task-status-1',
+            values: ['task-status-1'],
           }])
           wrapper.vm.addTaskTypeFilter()
           expect(wrapper.vm.taskTypeFilters.values.length).toBe(2)

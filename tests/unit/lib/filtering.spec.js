@@ -91,9 +91,9 @@ describe('lib/filtering', () => {
       }
     ]
     const taskStatuses = [
-      { id: '1', short_name: 'wip' },
-      { id: '2', short_name: 'wfa' },
-      { id: '3', short_name: 'done' }
+      { id: 'task-status-1', short_name: 'wip' },
+      { id: 'task-status-2', short_name: 'wfa' },
+      { id: 'task-status-3', short_name: 'done' }
     ]
     const assetTypes = [
       { id: 'asset-type-1', name: 'chars' },
@@ -114,7 +114,7 @@ describe('lib/filtering', () => {
       expect(filters.length).toEqual(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
-      expect(filter.taskStatus.short_name).toEqual('wip')
+      expect(filter.taskStatuses[0]).toEqual('task-status-1')
       expect(filter.assigned).toBeUndefined()
       expect(filter.type).toEqual('status')
     })
@@ -132,7 +132,24 @@ describe('lib/filtering', () => {
       expect(filters.length).toEqual(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
-      expect(filter.taskStatus.short_name).toEqual('wip')
+      expect(filter.taskStatuses[0]).toEqual('task-status-1')
+    })
+
+    it('several task types', () => {
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        query: '[modeling]=[wip,wfa]'
+      })
+      expect(filters.length).toEqual(1)
+      const filter = filters[0]
+      expect(filter.taskType).toEqual(taskTypes[1])
+      expect(filter.taskStatuses[0]).toEqual('task-status-1')
+      expect(filter.taskStatuses[1]).toEqual('task-status-2')
     })
 
     it('task type with space case', () => {
@@ -148,7 +165,7 @@ describe('lib/filtering', () => {
       expect(filters.length).toEqual(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[2])
-      expect(filter.taskStatus.short_name).toEqual('wip')
+      expect(filter.taskStatuses[0]).toEqual('task-status-1')
     })
 
     it('non existing task type case', () => {
@@ -203,7 +220,7 @@ describe('lib/filtering', () => {
       expect(filters.length).toEqual(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[3])
-      expect(filter.taskStatus.short_name).toEqual('wfa')
+      expect(filter.taskStatuses[0]).toEqual('task-status-2')
     })
 
     it('multiple task type query case', () => {
@@ -219,10 +236,10 @@ describe('lib/filtering', () => {
       expect(filters.length).toEqual(2)
       let filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
-      expect(filter.taskStatus.short_name).toEqual('wip')
+      expect(filter.taskStatuses[0]).toEqual('task-status-1')
       filter = filters[1]
       expect(filter.taskType).toEqual(taskTypes[0])
-      expect(filter.taskStatus.short_name).toEqual('wfa')
+      expect(filter.taskStatuses[0]).toEqual('task-status-2')
     })
 
     it('assigned query case', () => {
@@ -456,7 +473,7 @@ describe('lib/filtering', () => {
       const filters = [
         {
           taskType: taskTypes[0],
-          taskStatus: taskStatusMap['task-status-1'],
+          taskStatuses: ['task-status-1'],
           type: 'status'
         }
       ]
@@ -482,12 +499,12 @@ describe('lib/filtering', () => {
       const filters = [
         {
           taskType: taskTypes[0],
-          taskStatus: taskStatusMap['task-status-2'],
+          taskStatuses: ['task-status-2'],
           type: 'status'
         },
         {
           taskType: taskTypes[2],
-          taskStatus: taskStatusMap['task-status-1'],
+          taskStatuses: ['task-status-1'],
           type: 'status'
         }
       ]
@@ -497,6 +514,22 @@ describe('lib/filtering', () => {
         taskMap
       )
       expect(results.length).toEqual(1)
+    })
+
+    it('in filter', () => {
+      const filters = [
+        {
+          taskType: taskTypes[0],
+          taskStatuses: ['task-status-1', 'task-status-2'],
+          type: 'status'
+        }
+      ]
+      let results = applyFilters(
+        entries,
+        filters,
+        taskMap
+      )
+      expect(results.length).toEqual(5)
     })
 
     it('animation=unassigned', () => {

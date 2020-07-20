@@ -113,6 +113,7 @@ export default {
       assigned_to: 'Assigned to',
       descriptor: 'Metadata',
       equal: 'Equal',
+      in: 'In',
       no_assignation_for: 'No assignation exists for',
       no_filter: 'No filter',
       not_equal: 'Not equal',
