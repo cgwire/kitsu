@@ -81,7 +81,7 @@
            >
             {{ $t('shots.fields.time_spent') }}
           </th>
-          <th scope="col" class="frames" v-if="isShowInfos">
+          <th scope="col" class="frames" v-if="isFrames && isShowInfos">
             {{ $t('shots.fields.nb_frames') }}
           </th>
           <th scope="col" class="framein" v-if="isFrameIn && isShowInfos">
@@ -209,7 +209,7 @@
             {{ formatDuration(shot.timeSpent) }}
           </td>
           <td class="frames"
-            v-if="isShowInfos"
+            v-if="isFrames && isShowInfos"
           >
             {{ shot.nb_frames }}
           </td>
@@ -370,6 +370,7 @@ export default {
       'isCurrentUserManager',
       'isCurrentUserClient',
       'isFps',
+      'isFrames',
       'isFrameIn',
       'isFrameOut',
       'isSingleEpisode',
