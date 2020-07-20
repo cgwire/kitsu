@@ -11,7 +11,10 @@
         {{ $t('entities.build_filter.title') }}
       </h1>
 
-      <h3 class="subtitle">
+      <h3
+        class="subtitle"
+        v-if="isAssets"
+      >
         {{ $t('entities.build_filter.asset_type') }}
       </h3>
 
@@ -554,7 +557,6 @@ export default {
     // General
 
     onTaskTypeOperatorChanged (taskTypeFilter) {
-      console.log('otot')
       if (taskTypeFilter.operator !== 'in') {
         taskTypeFilter.values = [taskTypeFilter.values[0]]
       }
