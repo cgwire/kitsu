@@ -21,7 +21,7 @@ export const formatListMixin = {
     formatDuration (duration) {
       if (duration) {
         return (duration / 60 / this.organisation.hours_by_day).toLocaleString(
-          'fullwide', { maximumFractionDigits: 1 }
+          'fullwide', { maximumFractionDigits: 2 }
         )
       } else {
         return 0
@@ -30,18 +30,6 @@ export const formatListMixin = {
 
     formatBoolean (booleanValue) {
       return booleanValue ? this.$t('main.yes') : this.$t('main.no')
-    },
-
-    formatEstimation (estimation) {
-      if (estimation) {
-        if (estimation < 10) {
-          return estimation
-        } else {
-          return this.formatDuration(estimation)
-        }
-      } else {
-        return 0
-      }
     }
   }
 }

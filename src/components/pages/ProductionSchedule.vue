@@ -89,7 +89,7 @@ import Datepicker from 'vuejs-datepicker'
 
 import { sortScheduleItems } from '../../lib/sorting'
 import { getTaskTypeSchedulePath } from '../../lib/path'
-import { parseDate } from '../../lib/time'
+import { daysToMinutes, parseDate } from '../../lib/time'
 
 import ComboboxNumber from '../widgets/ComboboxNumber'
 import TaskInfo from '../sides/TaskInfo'
@@ -142,6 +142,7 @@ export default {
       'isCurrentUserAdmin',
       'isCurrentUserManager',
       'isTVShow',
+      'organisation',
       'taskTypeMap',
       'timezone',
       'user'
@@ -301,7 +302,8 @@ export default {
       }
     },
 
-    estimationChanged ({ item }) {
+    estimationChanged ({ item, days }) {
+      item.man_days = daysToMinutes(this.organisation, days)
       this.saveScheduleItem(item)
     },
 

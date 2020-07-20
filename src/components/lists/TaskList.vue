@@ -115,10 +115,10 @@
               :ref="task.id + '-estimation'"
               class="input"
               @change="updateEstimation($event.target.value)"
-              :value="formatEstimation(task.estimation)"
+              :value="formatDuration(task.estimation)"
             />
             <span v-else>
-              {{ formatEstimation(task.estimation) }}
+              {{ formatDuration(task.estimation) }}
             </span>
           </td>
           <td :class="{
@@ -343,10 +343,6 @@ export default {
 
     getDate (date) {
       return date ? moment(date, 'YYYY-MM-DD').toDate() : null
-    },
-
-    formatEstimation (estimation) {
-      return estimation ? this.formatDuration(estimation) : 0
     },
 
     updateEstimation (days) {

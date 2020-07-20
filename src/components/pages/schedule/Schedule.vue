@@ -16,7 +16,7 @@
         class="has-text-right total-man-days mr0"
       >
         <span class="total-value">
-          {{ totalManDays }} {{ $t('schedule.md') }}
+          {{ formatDuration(totalManDays) }} {{ $t('schedule.md') }}
         </span>
       </div>
 
@@ -78,10 +78,14 @@
           <input
             class="flexrow-item mr1"
             type="number"
+            step="any"
             placeholder="0"
-            @input="$emit('item-changed', rootElement)"
+            @input="$emit('estimation-changed', {
+              days: $event.target.value,
+              item: rootElement
+            })"
             v-if="!rootElement.avatar && rootElement.editable"
-            v-model="rootElement.man_days"
+            :value="formatDuration(rootElement.man_days)"
           />
           <span
             class="man-days-unit flexrow-item"
@@ -93,7 +97,7 @@
             class="man-days-unit flexrow-item"
             v-if="rootElement.avatar || !rootElement.editable"
           >
-            {{ rootElement.man_days }}
+            {{ formatDuration(rootElement.man_days) }}
             {{ $t('schedule.md') }}
           </span>
 
@@ -136,8 +140,9 @@
                   type="number"
                   min="0"
                   placeholder="0"
+                  step="any"
                   @input="onChildEstimationChanged($event, childElement, rootElement)"
-                  v-model="childElement.man_days"
+                  :value="formatDuration(childElement.man_days)"
                 />
                 {{ $t('schedule.md') }}
               </span>
@@ -366,9 +371,11 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 
+import { formatListMixin } from '../../lists/format_mixin'
 import colors from '../../../lib/colors'
 import {
   addBusinessDays,
+  daysToMinutes,
   parseDate
 } from '../../../lib/time'
 
@@ -380,6 +387,7 @@ import Spinner from '../../widgets/Spinner'
 
 export default {
   name: 'schedule',
+  mixins: [formatListMixin],
   components: {
     ChevronDownIcon,
     ChevronRightIcon,
@@ -663,14 +671,16 @@ export default {
     },
 
     onChildEstimationChanged (event, childElement, rootElement) {
-      const estimation = parseInt(event.target.value)
+      const estimation = event.target.value
       if (this.isEstimationLinked) {
-        childElement.man_days = estimation
+        childElement.man_days = daysToMinutes(
+          this.organisation,
+          estimation
+        )
         rootElement.man_days = rootElement.children.reduce((acc, child) => {
           let value = acc
-          let manDays = child.man_days
+          const manDays = child.man_days
           if (child.man_days) {
-            if (typeof manDays === 'string') manDays = parseInt(manDays)
             value = acc + manDays
           }
           return value
@@ -1104,9 +1114,15 @@ export default {
     milestoneLineStyle (milestone) {
       const startDate = parseDate(this.startDate.format('YYYY-MM-DD'))
       const endDate = parseDate(milestone.date)
-      const lengthDiff = this.businessDiff(startDate, endDate)
-      return {
-        left: (lengthDiff + 0.5) * this.cellWidth + 'px'
+      if (startDate.isSameOrBefore(endDate)) {
+        const lengthDiff = this.businessDiff(startDate, endDate)
+        return {
+          left: (lengthDiff + 0.5) * this.cellWidth + 'px'
+        }
+      } else {
+        return {
+          display: 'none'
+        }
       }
     },
 

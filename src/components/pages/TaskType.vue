@@ -722,7 +722,7 @@ export default {
     },
 
     updateEstimation ({ taskId, days, item }) {
-      const estimation = daysToMinutes(this.organisation, parseInt(days))
+      const estimation = daysToMinutes(this.organisation, days)
       const task = this.taskMap[taskId]
       let data = { estimation }
       if (!task.start_date) task.start_date = formatSimpleDate(moment())
@@ -828,7 +828,7 @@ export default {
       }
 
       const children = personTasks.map((task) => {
-        const estimation = this.formatEstimation(task.estimation)
+        const estimation = task.estimation
         let endDate
 
         let startDate = moment()
@@ -856,7 +856,7 @@ export default {
           endDate = startDate.clone().add(nbDays, 'days')
         }
 
-        if (estimation) manDays += parseInt(estimation)
+        if (estimation) manDays += estimation
         if (!minStartDate || minStartDate.isAfter(startDate)) {
           minStartDate = startDate.clone()
         }
