@@ -196,7 +196,7 @@ const csv = {
     return new Promise((resolve, reject) => {
       Papa.parse(data, {
         config: config,
-        encoding: 'ISO-8859-1',
+        encoding: 'UTF-8',
         error: reject,
         complete: (results) => {
           const parsedData = csv.cleanUpCsv(results.data)
