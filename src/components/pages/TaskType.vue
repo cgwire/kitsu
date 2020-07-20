@@ -310,7 +310,9 @@ export default {
     this.updateActiveTab()
     setTimeout(() => {
       this.initData(false)
-      this.$refs['schedule-widget'].scrollToToday()
+      if (this.$refs['schedule-widget']) {
+        this.$refs['schedule-widget'].scrollToToday()
+      }
     }, 100)
     window.addEventListener('resize', this.resetScheduleHeight)
   },
@@ -707,7 +709,7 @@ export default {
     onExportClick () {
       const taskLines = this.$refs['task-list'].getTableData()
       const nameData = [
-        moment().format('YYYY-MM-DD'),
+        formatSimpleDate(moment()),
         this.currentProduction.name,
         this.currentTaskType.name,
         'tasks'
@@ -723,9 +725,9 @@ export default {
       const estimation = daysToMinutes(this.organisation, parseInt(days))
       const task = this.taskMap[taskId]
       let data = { estimation }
-      if (!task.start_date) task.start_date = moment().format('YYYY-MM-DD')
-      const startDate = moment(task.start_date)
-      const dueDate = task.due_date ? moment(task.due_date) : null
+      if (!task.start_date) task.start_date = formatSimpleDate(moment())
+      const startDate = parseDate(task.start_date)
+      const dueDate = task.due_date ? parseDate(task.due_date) : null
       data = getDatesFromStartDate(
         startDate,
         dueDate,
@@ -733,10 +735,10 @@ export default {
       )
       data.estimation = estimation
       if (item && !item.startDate) {
-        item.startDate = moment.tz(data.end_date, 'YYYY-MM-DD', 'UTC')
+        item.startDate = parseDate(data.end_date)
       }
       if (item && !item.endDate) {
-        item.endDate = moment.tz(data.end_date, 'YYYY-MM-DD', 'UTC')
+        item.endDate = parseDate(data.end_date)
       }
       if (item && item.startDate && item.endDate) {
         item.parentElement.startDate = this.getMinDate(item.parentElement)
@@ -831,25 +833,25 @@ export default {
 
         let startDate = moment()
         if (task.start_date) {
-          startDate = moment(task.start_date, 'YYYY-MM-DD')
+          startDate = parseDate(task.start_date)
         } else if (task.real_start_date) {
-          startDate = moment(task.real_start_date, 'YYYY-MM-DD')
+          startDate = parseDate(task.real_start_date)
         }
 
         if (task.due_date) {
-          endDate = moment(task.due_date, 'YYYY-MM-DD')
+          endDate = parseDate(task.due_date)
         } else if (task.end_date) {
-          endDate = moment(task.end_date, 'YYYY-MM-DD')
+          endDate = parseDate(task.end_date)
         } else if (task.estimation) {
           endDate = startDate.add(estimation, 'days')
         }
-        if (!endDate || endDate.isBefore(startDate)) {
+
+        if (!endDate || endDate.isSameOrBefore(startDate)) {
           const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
           endDate = startDate.add(nbDays, 'days')
         }
-
         if (!startDate) startDate = moment()
-        if (!endDate.isAfter(startDate)) {
+        if (!endDate.isSameOrAfter(startDate)) {
           const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
           endDate = startDate.clone().add(nbDays, 'days')
         }
