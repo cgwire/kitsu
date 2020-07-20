@@ -348,6 +348,7 @@ const initialState = {
   episodeValidationColumns: [],
 
   isFps: false,
+  isFrames: false,
   isFrameIn: false,
   isFrameOut: false,
   isTime: false,
@@ -418,6 +419,7 @@ const getters = {
   shotSorting: state => state.shotSorting,
 
   isFps: state => state.isFps,
+  isFrames: state => state.isFrames,
   isFrameIn: state => state.isFrameIn,
   isFrameOut: state => state.isFrameOut,
   isTime: state => state.isTime,
@@ -1031,6 +1033,7 @@ const actions = {
           shotLine.push(shot.data[descriptor.field_name])
         })
       shotLine.push(shot.nb_frames)
+      if (state.isFrames) shotLine.push(shot.data.frames)
       if (state.isFrameIn) shotLine.push(shot.data.frame_in)
       if (state.isFrameOut) shotLine.push(shot.data.frame_out)
       if (state.isFps) shotLine.push(shot.data.fps)
@@ -1193,6 +1196,7 @@ const mutations = {
   ) {
     const validationColumns = {}
     let isFps = false
+    let isFrames = false
     let isFrameIn = false
     let isFrameOut = false
     let isDescription = false
@@ -1233,6 +1237,7 @@ const mutations = {
       shot.timeSpent = timeSpent
 
       if (!isFps && shot.data.fps) isFps = true
+      if (!isFrames && shot.nb_frames) isFrames = true
       if (!isFrameIn && shot.data.frame_in) isFrameIn = true
       if (!isFrameOut && shot.data.frame_out) isFrameOut = true
       if (!isTime && shot.timeSpent > 0) isTime = true
@@ -1249,6 +1254,7 @@ const mutations = {
 
     state.nbValidationColumns = state.shotValidationColumns.length
     state.isFps = isFps
+    state.isFrames = isFrames
     state.isFrameIn = isFrameIn
     state.isFrameOut = isFrameOut
     state.isTime = isTime
@@ -1415,6 +1421,7 @@ const mutations = {
     }
 
     if (newShot.data.fps) state.isFps = true
+    if (newShot.nb_frames) state.isFrames = true
     if (newShot.data.frame_in) state.isFrameIn = true
     if (newShot.data.frame_out) state.isFrameOut = true
     if (shot.description && !state.isShotDescription) {
@@ -1557,6 +1564,7 @@ const mutations = {
     state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
 
     if (shot.data.fps) state.isFps = true
+    if (shot.nb_frames) state.isFrames = true
     if (shot.data.frame_in) state.isFrameIn = true
     if (shot.data.frame_out) state.isFrameOut = true
   },

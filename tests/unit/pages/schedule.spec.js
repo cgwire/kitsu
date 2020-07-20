@@ -176,6 +176,7 @@ describe('Schedule', () => {
       const left = wrapper.vm.businessDiff(wrapper.vm.startDate, moment()) * 60
       wrapper.setProps({ zoomLevel: 3 })
       expect(wrapper.vm.timelineTodayPositionStyle).toEqual({
+        display: 'none',
         width: '60px',
         left: `${left}px`
       })

@@ -610,6 +610,14 @@ export default {
     milestoneTooltipStyle () {
       // arbitrary calculus
       return { left: (-40 - 10 * (3 - this.zoomLevel)) + 'px' }
+    },
+
+    dayBeforeStartDate () {
+      return this.startDate.clone().add(-1, 'days')
+    },
+
+    dayAfterEndDate () {
+      return this.endDate.clone().add(1, 'days')
     }
   },
 
@@ -620,8 +628,10 @@ export default {
     ]),
 
     isVisible (timeElement) {
-      const isStartDateOk = timeElement.startDate.isAfter(this.startDate)
-      const isEndDateOk = timeElement.endDate.isBefore(this.endDate)
+      const isStartDateOk =
+        timeElement.startDate.isSameOrAfter(this.startDate)
+      const isEndDateOk =
+        timeElement.endDate.isSameOrBefore(this.dayAfterEndDate)
       return isStartDateOk && isEndDateOk
     },
 
@@ -691,7 +701,7 @@ export default {
         startDate &&
         endDate &&
         startDate.isSameOrAfter(this.startDate.clone().add(-1, 'hour')) &&
-        endDate.isSameOrBefore(this.endDate) &&
+        endDate.isSameOrBefore(this.endDate.clone().add(1, 'day')) &&
         startDate.isSameOrBefore(endDate) &&
         endDate.isSameOrAfter(startDate)
       )
@@ -926,6 +936,7 @@ export default {
     // Helpers
 
     businessDiff (startDate, endDate) {
+      if (startDate.isSame(endDate)) return 0
       const first = startDate.clone().endOf('isoweek')
       const last = endDate.clone().startOf('isoweek')
       const diff = last.diff(first, 'days')
@@ -1016,7 +1027,6 @@ export default {
         endDate = addBusinessDays(startDate, days - 1)
       }
       const lengthDiff = this.businessDiff(startDate, endDate)
-
       if (lengthDiff > 0) {
         return (lengthDiff + 1) * this.cellWidth - 10
       } else {
