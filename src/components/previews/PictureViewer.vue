@@ -343,12 +343,17 @@ export default {
     },
 
     pictureOriginalPath () {
-      const previewId = this.preview.previews[this.currentIndex - 1].id
+      const previewId = this.currentPreview.id
       return `/api/pictures/originals/preview-files/${previewId}.png`
     },
 
     currentPreview () {
-      return this.preview.previews[this.currentIndex - 1]
+      if (this.preview.previews.length > 0 &&
+          this.currentIndex - 1 < this.preview.previews.length) {
+        return this.preview.previews[this.currentIndex - 1]
+      } else {
+        return this.preview
+      }
     },
 
     isGif () {
@@ -375,7 +380,8 @@ export default {
     mountPicture () {
       this.container.style.height = this.getDefaultHeight() + 'px'
       this.pictureWrapper.style.height = this.getDefaultHeight() - 32 + 'px'
-      this.pictureSubWrapper.style['max-height'] = this.getDefaultHeight() - 32 + 'px'
+      this.pictureSubWrapper.style['max-height'] =
+        this.getDefaultHeight() - 32 + 'px'
       if (!this.fabricCanvas) {
         this.setupFabricCanvas()
       }
@@ -794,18 +800,32 @@ export default {
 
     setPicturePath () {
       if (this.isGif) {
-        const previewId = this.preview.previews[this.currentIndex - 1].id
+        const previewId = this.currentPreview.id
         this.pictureGifPath = `/api/pictures/originals/preview-files/${previewId}.gif`
       } else {
-        const previewId = this.preview.previews[this.currentIndex - 1].id
+        const previewId = this.currentPreview.id
         this.picturePath = `/api/pictures/previews/preview-files/${previewId}.png`
       }
       this.setPictureDlPath()
     },
 
     setPictureDlPath () {
-      const previewId = this.preview.previews[this.currentIndex - 1].id
+      const previewId = this.currentPreview.id
       this.pictureDlPath = `/api/pictures/originals/preview-files/${previewId}/download`
+    },
+
+    reloadAnnotations () {
+      this.annotations = []
+      if (this.currentPreview.annotations) {
+        const annotations = []
+        this.currentPreview.annotations.forEach(a => annotations.push({ ...a }))
+        this.annotations = annotations.sort((a, b) => {
+          return a.time < b.time
+        }) || []
+      } else {
+        this.annotations = []
+      }
+      return this.annotations
     }
   },
 
