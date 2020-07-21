@@ -37,7 +37,7 @@ export default {
     new_asset_type: 'اضافه کردن نوع منبع',
     number: 'نوع منبع | انواع منبع',
     title: 'انواع منبع',
-    production_title: 'Asset Types Stats',
+    production_title: 'آمار تمام منابع',
     fields: {
       name: 'نام'
     }
@@ -45,118 +45,118 @@ export default {
 
   breakdown: {
     all_assets: 'همه منابع موجود',
-    edit_label: 'Change the asset\'s label',
-    empty: 'Empty casting',
-    label: 'Label',
-    text_mode: 'Switch to text mode',
-    title: 'Breakdown',
+    edit_label: 'تغییر برچسب منبع',
+    empty: 'خالی کردن عوامل',
+    label: 'برچسپ',
+    text_mode: 'تغییر به حالت متن',
+    title: 'مراحل انجام',
     options: {
-      fixed: 'fixed',
-      animate: 'animate'
+      fixed: 'ثابت',
+      animate: 'متحرک'
     }
   },
 
   comments: {
-    add_comment: 'Add a comment...',
-    add_checklist: 'Add checklist',
-    add_attachment: 'Add attachment',
-    add_preview: 'Attach preview',
-    task_placeholder: 'New item...',
-    change_preview: 'Change preview',
-    comment_from_client: 'Comment from client',
-    empty_text: 'This comment is empty',
-    edit_title: 'Edit comment',
-    error: 'An error occured while posting comment',
-    no_file_attached: 'No file attached',
-    post_status: 'Post comment',
-    retake: 'Retake',
-    pin: 'Pin',
-    pinned: 'Pinned',
-    revision: 'revision',
-    unpin: 'Unpin',
-    validated: 'Validated!',
-    validation_required: 'Validation Required',
-    text: 'Text',
-    set_status_to: 'Set status to',
+    add_comment: 'اضافه کردن نظر...',
+    add_checklist: 'اضافه کردن چک لیست',
+    add_attachment: 'اضافه کردن پیوست',
+    add_preview: 'پیوست پیش نمایش',
+    task_placeholder: 'آیتم جدید...',
+    change_preview: 'تغییر پیش نمایش',
+    comment_from_client: 'نظر مشتری',
+    empty_text: 'فاقد نظر',
+    edit_title: 'اصلاح نظر',
+    error: 'هنگام ارسال نظر مشکلی رخ داده.',
+    no_file_attached: 'هیچ فایلی پیوست نشده',
+    post_status: 'ارسال نظر',
+    retake: 'برداشت مجدد',
+    pin: 'سنجاق کردن',
+    pinned: 'سنجاق شده',
+    revision: 'بازنگری',
+    unpin: 'خروج از سنجاق کردن',
+    validated: 'تایید شده!',
+    validation_required: 'نیازمند تایید شدن',
+    text: 'متن',
+    set_status_to: 'تغییر وضعیت به',
     fields: {
-      text: 'text'
+      text: 'متن'
     }
   },
 
   custom_actions: {
-    delete_text: 'Are you sure you want to remove custom action {name} from your database?',
-    delete_error: 'An error occured while deleting this custom custom action.',
-    edit_title: 'Edit a custom action',
-    new_custom_action: 'Add a custom action',
-    number: 'custom action | custom actions',
-    run_for_selection: 'Run custom action for selected tasks:',
-    title: 'Custom Actions',
+    delete_text: 'آیا مطمئن هستید که میخوا هید عمل سفارشی {name} را حذف کنید؟',
+    delete_error: 'هنگام حذف این کار سفارشی خطایی رخ داده.',
+    edit_title: 'اصلاح یک کار سفارشی',
+    new_custom_action: 'اضافه کردن یک کار سفارشی',
+    number: 'کار سفارشی | کارهای سفارشی',
+    run_for_selection: 'اجرای کار سفارشی برای وظیفه انتخاب شده:',
+    title: 'کارهای سفارشی',
     fields: {
-      name: 'Name',
-      url: 'URL',
-      entity_type: 'Entity Type',
-      is_ajax: 'Use AJAX'
+      name: 'نام',
+      url: 'لینک',
+      entity_type: 'متعلق',
+      is_ajax: 'استفاده از AJAX'
     },
     entity_types: {
-      all: 'All',
-      shot: 'Shot',
-      asset: 'Asset'
+      all: 'همه',
+      shot: 'شات',
+      asset: 'منبع'
     }
   },
 
   entities: {
     build_filter: {
-      asset_type: 'Asset type',
-      all_types: 'All asset types',
-      assignation: 'Assignation',
-      assignation_exists_for: 'Assignations exists for',
-      assigned_to: 'Assigned to',
+      asset_type: 'نوع منبع',
+      all_types: 'تمام انواع منابع',
+      assignation: 'واگذاری',
+      assignation_exists_for: 'واگذاری وجود دارد برای',
+      assigned_to: 'واگذارشده به',
       descriptor: 'Metadata',
-      equal: 'Equal',
-      in: 'In',
-      no_assignation_for: 'No assignation exists for',
-      no_filter: 'No filter',
-      not_equal: 'Not equal',
-      not_assigned_to: 'Not assigned to',
-      status: 'Task status',
-      thumbnail: 'Thumbnail presence',
-      title: 'Filter on...',
-      with_thumbnail: 'With thumbnail',
-      without_thumbnail: 'Without thumbnail'
+      equal: 'برابر',
+      in: 'در',
+      no_assignation_for: 'واگذاری وجود ندارد برای',
+      no_filter: 'بدون فیلتر',
+      not_equal: 'برابر نیست',
+      not_assigned_to: 'واگذار نشده به',
+      status: 'وضعیت وظیفه',
+      thumbnail: 'بندانگشتی دارد',
+      title: 'فیلتر روشن ...',
+      with_thumbnail: 'با بندانگشتی',
+      without_thumbnail: 'بدون بند انگشتی'
     },
     thumbnails: {
-      error: 'An error occured while uploading thumbnails',
-      explaination: 'Adding a thumbnail requires to set a new preview. In order to set several thumbnails at the same time, you must chose first a task type that will be used to create the new previews. The thumbnails will be set from this new preview.',
-      explaination_two: 'Then you have to select the files you want to upload. To find the right entities, the file names must match the following pattern:',
-      shots_pattern: '"SequenceName ShotName" eg. SQ01_SH01.',
-      assets_pattern: '"AssetType AssetName" eg. Environment_Forest.',
-      select_files: 'Select Files',
-      selected_files: 'Selected Files',
-      select_task_type: 'Select Task Type',
-      title: 'Add Thumbnails',
-      undefined: 'Undefined',
-      undefined_pattern: 'Undefined',
-      upload: 'Add Thumbnails'
+      error: 'در هنگام بارگذاری بندانگشتی خطایی رخ داده.',
+      explaination: 'اضافه کردن بندانگشتی نیازمند یک پیش نمایش است. در صورتی که مایلید چندین بندانگشتی تعیین کنید باید ابتدا یک نوع وظیفه ای را که برای ایجاد پیش نمایش جدید استفاده خواهد شد انتخاب کنید.',
+      explaination_two: 'سپس می بایست فایلی که میخواهید بارگذاری کنید را انتخاب کنید. برای پیدا کرد متعلقات درست ، فایل باید با الگوی تعریف شده مطابقت کند :',
+      shots_pattern: '"نام سکانس  نام شات" eg. SQ01_SH01.',
+      assets_pattern: '"نوع منبع  نام منبع" eg. Environment_Forest.',
+      select_files: 'انتخاب فایل ها',
+      selected_files: 'فایل های انتخاب شده',
+      select_task_type: 'انتخاب نوع وظیفه',
+      title: 'اضافه کردن بندانگشتی ها',
+      undefined: 'تعریف نشده',
+      undefined_pattern: 'تعریف نشده',
+      upload: 'اضافه کردن بندانگشتی ها'
     }
   },
 
   estimation: {
-    title: 'Estimation'
+    title: 'برآورد'
   },
 
   episodes: {
-    all_episodes: 'All episodes',
-    delete_error: 'An error occured while deleting this episode. There are probably data linked to it. Are you sure this episode has no sequence linked to it?',
-    delete_text: 'Are you sure you want to remove {name} from your database? Every related shots and previews will be deleted. Pleas confirm by typing the episode name below.',
-    edit_title: 'Edit episode',
-    empty_list: 'There is no episode in the production. What about creating some?',
-    empty_list_client: 'There is no episode in this production.',
-    new_episode: 'New episode',
-    number: 'episode | episodes',
-    title: 'Episode Stats',
+    all_episodes: 'تمام قسمت ها',
+    delete_error: 'به هنگام حذف کردن این قسمت خطایی رخ داد. احتمالا داده ای به ان متصل است. آیا مطمئنید  این قسمت به هیچ سکانسی لینک نشده؟',
+    delete_text: 'آیا میخواهید {name} را از پایگاه داده حذف کنید؟ هر شات یا پیش نمایشی وابسته حذف خواهد شد. لطفا با تایپ نام قسمت در زیر این عمل را تایید کنید?',
+    edit_title: 'اصلاح قسمت',
+    empty_list: 'در این پروژه قسمتی تعرف نشده. آیا میخواهید یک قسمت ایجاد کنید؟',
+    empty_list_client: 'در این پروژه هیچ قسمتی وجود ندارد.',
+    new_episode: 'قسمت جدید',
+    number: 'قسمت | قسمت ها',
+    title: 'قسمت ها ',
     fields: {
-      name: 'name',
-      description: 'description'
+      name: 'نام',
+      description: 'توضیحات'
     }
   },
 
@@ -204,7 +204,7 @@ export default {
   main: {
     about: 'About',
     add: 'add',
-    all: 'All',
+    all: 'همه',
     all_assets: 'All assets',
     admin: 'Admin',
     cancel: 'Cancel',
@@ -297,7 +297,7 @@ export default {
   },
 
   news: {
-    all: 'All',
+    all: 'همه',
     commented_on: 'commented on',
     infos: 'Infos',
     no_news: 'There is no news for this production or for this filter.',
@@ -365,7 +365,7 @@ export default {
       active: 'Active'
     },
     list: {
-      name: 'Name',
+      name: 'نام',
       email: 'Email',
       phone: 'Phone',
       role: 'Role',
@@ -422,7 +422,7 @@ export default {
     updated_at: 'Updated at:',
     remove: 'remove',
     fields: {
-      name: 'Name',
+      name: 'نام',
       created_at: 'Creation date',
       updated_at: 'Update date',
       for_entity: 'Select entity to display',
@@ -474,7 +474,7 @@ export default {
     },
     fields: {
       fps: 'FPS',
-      name: 'Name',
+      name: 'نام',
       ratio: 'Ratio',
       resolution: 'Resolution',
       status: 'Status',
@@ -566,7 +566,7 @@ export default {
       is_done: 'Is done',
       is_reviewable: 'Is reviewable',
       is_retake: 'Has retake value',
-      name: 'Name',
+      name: 'نام',
       short_name: 'Short name'
     }
   },
@@ -581,7 +581,7 @@ export default {
     fields: {
       dedicated_to: 'For',
       color: 'Color',
-      name: 'Name',
+      name: 'نام',
       allow_timelog: 'Timelog',
       priority: 'Priority'
     }
@@ -598,8 +598,8 @@ export default {
     number: 'sequence | sequences',
     title: 'Sequence Stats',
     fields: {
-      name: 'name',
-      description: 'description'
+      name: 'نام',
+      description: 'توضیحات'
     }
   },
 
@@ -612,7 +612,7 @@ export default {
     milestone: {
       add_milestone: 'Add milestone for',
       edit_milestone: 'Edit milestone for',
-      name: 'Name',
+      name: 'نام',
       error: 'An error occured while adding or editing the milestone. Please try again.'
     }
   },
@@ -621,12 +621,12 @@ export default {
     average: 'Average',
     count_label: 'Count mode',
     detail_label: 'Detail level',
-    details_name: 'Name',
+    details_name: 'نام',
     details_seconds: 'Seconds',
     details_frames: 'Frames',
     month_label: 'Month',
     no_quota: 'There is no quota for this task type.',
-    name: 'Name',
+    name: 'نام',
     quota_day: 'Quota per day',
     quota_week: 'Quota per week',
     quota_month: 'Quota per month',
@@ -662,13 +662,13 @@ export default {
     tasks: 'Shot Tasks',
     title: 'Shots',
     fields: {
-      description: 'Description',
+      description: 'توضیحات',
       nb_frames: 'Frames',
       episode: 'Episode',
       frame_in: 'In',
       frame_out: 'Out',
       fps: 'FPS',
-      name: 'Name',
+      name: 'نام',
       production: 'Prod',
       sequence: 'Sequence',
       time_spent: 'Time'
@@ -755,7 +755,7 @@ export default {
       duration: 'Duration',
       end_date: 'Validation date',
       entity: 'Entity',
-      entity_name: 'Name',
+      entity_name: 'نام',
       estimated_quota: 'Avg. Quota',
       estimation: 'Estimation',
       frames: 'Fram.',
