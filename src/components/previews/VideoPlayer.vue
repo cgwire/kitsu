@@ -120,6 +120,7 @@
           class="comparison-combobox"
           :options="taskTypeOptions"
           :is-dark="true"
+          :thin="true"
           v-model="taskTypeId"
           v-if="!readOnly && isComparing && (!light || isFullScreen())"
         />
@@ -127,6 +128,7 @@
           class="comparison-combobox"
           :options="previewFileOptions"
           :is-dark="true"
+          :thin="true"
           v-model="previewToCompareId"
           v-if="!readOnly && isComparing && (!light || isFullScreen())"
         />

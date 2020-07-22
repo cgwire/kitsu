@@ -16,6 +16,9 @@
           'select-input': true,
           error: this.error
         }"
+        :style="{
+          width: width ? width + 'px' : undefined
+        }"
         ref="select"
         :disabled="disabled"
         @keyup.enter="emitEnter()"
@@ -71,6 +74,9 @@ export default {
     thin: {
       default: false,
       type: Boolean
+    },
+    width: {
+      type: Number
     }
   },
 
@@ -121,7 +127,6 @@ export default {
 
   &.thin {
     height: 2.1em;
-    width: 150px;
   }
 }
 
