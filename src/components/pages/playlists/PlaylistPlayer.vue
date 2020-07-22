@@ -44,8 +44,8 @@
     v-show="!isAddingEntity || isLoading"
   >
     <raw-video-player
-      class="raw-player"
       ref="raw-player"
+      class="raw-player"
       :entities="entityList"
       :is-repeating="isRepeating"
       @repeat="onVideoRepeated"
@@ -58,9 +58,9 @@
     <raw-video-player
       ref="raw-player-comparison"
       class="raw-player"
+      :entities="entityListToCompare"
       :is-repeating="isRepeating"
       :muted="true"
-      :entities="entityListToCompare"
       name="comparison"
       v-show="isComparing && isMovieComparison && !isLoading"
     />
@@ -238,6 +238,28 @@
         icon="pause"
         v-else
       />
+      <button-simple
+        class="button playlist-button flexrow-item"
+        @click="onSpeedClicked"
+        :title="$t('playlists.actions.speed')"
+        text="x1.00"
+        v-if="speed === 3"
+      />
+      <button-simple
+        class="button playlist-button flexrow-item"
+        @click="onSpeedClicked"
+        :title="$t('playlists.actions.speed')"
+        text="x0.50"
+        v-else-if="speed === 2"
+      />
+      <button-simple
+        class="button playlist-button flexrow-item"
+        @click="onSpeedClicked"
+        :title="$t('playlists.actions.speed')"
+        text="x0.25"
+        v-else
+      />
+
       <button
         :class="{
           button: true,
@@ -648,6 +670,8 @@ export default {
       currentEntityPictureIndex: 0,
       currentTime: '00:00.000',
       currentTimeRaw: 0,
+      entityList: [],
+      entityListToCompare: [],
       fabricCanvas: null,
       isDlButtonsHidden: true,
       isCommentsHidden: true,
@@ -665,8 +689,7 @@ export default {
       pencil: 'big',
       pencilPalette: ['big', 'medium', 'small'],
       playingEntityIndex: 0,
-      entityList: [],
-      entityListToCompare: [],
+      speed: 3,
       task: null,
       taskTypeOptions: [],
       taskTypeToCompare: null,
@@ -708,6 +731,7 @@ export default {
       if (!this.$el.nomousemove) this.$el.onmousemove = this.onMouseMove
       this.setupFabricCanvas()
       this.resetCanvas()
+      this.setPlayerSpeed(1)
     })
   },
 
@@ -1379,6 +1403,19 @@ export default {
       } else {
         this.play()
       }
+    },
+
+    onSpeedClicked () {
+      this.speed = this.speed + 1 > 3 ? 1 : this.speed + 1
+      let rate = 1
+      if (this.speed === 2) rate = 0.5
+      if (this.speed === 1) rate = 0.25
+      this.setPlayerSpeed(rate)
+    },
+
+    setPlayerSpeed (rate) {
+      this.rawPlayer.setSpeed(rate)
+      this.rawPlayerComparison.setSpeed(rate)
     },
 
     onTimeUpdate () {

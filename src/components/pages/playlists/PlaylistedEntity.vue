@@ -34,12 +34,14 @@
         <combobox
           ref="task-type-combobox"
           :thin="true"
+          :width="150"
           :options="taskTypeOptions"
           v-model="taskTypeId"
         />
         <combobox
           class="version-combo"
           :thin="true"
+          :width="150"
           :options="previewFileOptions"
           v-model="previewFileId"
         />

@@ -229,6 +229,7 @@ export default {
           'loadedmetadata',
           this.updateMaxDuration
         )
+        const rate = this.$options.rate || 1
 
         this.currentPlayer.src = this.getMoviePath(entity)
         this.nextPlayer.src = this.getMoviePath(nextEntity)
@@ -239,6 +240,7 @@ export default {
         this.currentPlayer.removeEventListener('timeupdate', this.updateTime)
         this.currentPlayer.addEventListener('timeupdate', this.updateTime)
 
+        this.setSpeed(rate)
         this.$emit('entity-change', this.currentIndex)
       }
     },
@@ -314,6 +316,8 @@ export default {
       if (this.nextPlayer) {
         this.nextPlayer.removeEventListener('timeupdate', this.updateTime)
       }
+      const rate = this.$options.rate || 1
+      this.setSpeed(rate)
     },
 
     updateTime (time) {
@@ -324,6 +328,12 @@ export default {
       if (this.currentPlayer) {
         this.$emit('max-duration-update', this.currentPlayer.duration)
       }
+    },
+
+    setSpeed (rate) {
+      this.$options.rate = rate
+      if (this.currentPlayer) this.currentPlayer.playbackRate = rate
+      if (this.nextPlayer) this.nextPlayer.playbackRate = rate
     }
   },
 
