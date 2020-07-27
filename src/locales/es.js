@@ -48,6 +48,7 @@ export default {
     edit_label: 'Cambiar la etiqueta de asset',
     empty: 'Fundición en vacío',
     label: 'Etiqueta',
+    text_mode: 'Mode de texto',
     title: 'Casting',
     options: {
       fixed: 'fijo',
@@ -106,11 +107,14 @@ export default {
 
   entities: {
     build_filter: {
+      asset_type: 'Tipo de asset',
+      all_types: 'Todo tipos de asset',
       assignation: 'Asignación',
       assignation_exists_for: 'La asignación existe para',
       assigned_to: 'Asignado a',
       descriptor: 'Metadatos',
       equal: 'Igual',
+      in: 'En',
       no_assignation_for: 'No existe ninguna asignación para',
       no_filter: 'No hay filtro',
       not_equal: 'No igual',
@@ -151,6 +155,10 @@ export default {
       name: 'denominar',
       description: 'descripción'
     }
+  },
+
+  estimation: {
+    title: 'Estimación'
   },
 
   keyboard: {
@@ -202,6 +210,7 @@ export default {
     admin: 'Admin',
     cancel: 'Cancelar',
     clear_selection: 'Borrar la selección actual',
+    days_estimated: 'día estimado | días estimados',
     documentation: 'Documentación',
     close: 'Cerrar',
     confirmation: 'Confirmar',
@@ -220,6 +229,7 @@ export default {
     go_productions: 'Ir a producciones',
     history: 'trayectoria',
     info: 'Información',
+    main_pack: 'Main Pack',
     or: 'o',
     no: 'No',
     loading: 'Carga...',
@@ -230,6 +240,7 @@ export default {
     minimize: 'Minimizar',
     maximize: 'Maximizar',
     nb_frames: 'marcos | marcos',
+    person: 'person',
     profile: 'Perfil',
     production: 'Producción',
     remove: 'Quitar',
@@ -311,11 +322,13 @@ export default {
     mention_you_on: 'te mencioné en',
     no_notifications: 'Actualmente no hay ninguna notificación para usted para sus proyectos actuales.',
     title: 'Notificaciones',
+    unread_notifications: 'notificación no leída | notificaciones no leídas',
     with_preview: 'con una vista previa'
   },
 
   people: {
-    active: 'Asset',
+    active: 'Activada',
+    active_persons: 'Persona activada | Personas activadas',
     add_member_to_team: 'Añada un miembro al equipo:',
     create_invite: 'Crear y enviar invitación',
     delete_error: 'Se ha producido un error al borrar a esta persona. Es probable que haya datos vinculados a él. ¿Está seguro de que esta persona no tiene ninguna cita o escribió ningún comentario?',
@@ -418,12 +431,6 @@ export default {
       updated_at: 'Actualizado en'
     },
     actions: {
-      edit: 'Editar playlist',
-      delete: 'Borrar playlist',
-      fullscreen: 'Fullscreen',
-      download: 'Descargar…',
-      entity_list: 'Mostrar/ocultar lista de entidades',
-      comments: 'Mostrar/ocultar comentarios',
       annotation: 'Anotación',
       annotation_text: 'Doble clic en la vista previa para añadir algo de texto',
       annotation_delete: 'Borrar anotación',
@@ -433,13 +440,20 @@ export default {
       annotation_medium: 'Medium',
       annotation_small: 'Pequeña',
       change_task_type: 'Cambiar el tipo de tarea',
-      split_screen: 'Split screen',
-      next_shot: 'Próxima shot',
-      previous_shot: 'Anterior shot',
+      comments: 'Mostrar/ocultar comentarios',
+      delete: 'Borrar playlist',
+      download: 'Descargar…',
+      edit: 'Editar playlist',
+      entity_list: 'Mostrar/ocultar lista de entidades',
+      fullscreen: 'Fullscreen',
       next_frame: 'Próxima frame',
-      previous_frame: 'Anterior frame',
+      next_shot: 'Próxima shot',
+      pause: 'Pausa',
       play: 'Jugar',
-      pause: 'Pausa'
+      previous_frame: 'Anterior frame',
+      previous_shot: 'Anterior shot',
+      split_screen: 'Split screen',
+      speed: 'Cambiar velocidad'
     }
   },
 
@@ -740,6 +754,7 @@ export default {
     fields: {
       asset_type: 'Tipo de asset',
       assignees: 'Asignados',
+      count: 'Cuenta',
       end_date: 'Fecha de finalización',
       due_date: 'Dos fechas',
       duration: 'Duración',

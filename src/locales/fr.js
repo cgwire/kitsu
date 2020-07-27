@@ -106,11 +106,14 @@ export default {
 
   entities: {
     build_filter: {
+      asset_type: 'Type d\'asset',
+      all_types: 'Tous les types d\'assets',
       assignation: 'Assignation',
       assignation_exists_for: 'Des assignations existent pour',
       assigned_to: 'Assigné à',
       descriptor: 'Metadata',
       equal: 'Égal',
+      in: 'Dans',
       no_assignation_for: 'Pas d\'assignation pour',
       no_filter: 'Pas de filtre',
       not_equal: 'Pas égal',
@@ -151,6 +154,10 @@ export default {
       name: 'Nom',
       description: 'Description'
     }
+  },
+
+  estimation: {
+    title: 'Estimation'
   },
 
   keyboard: {
@@ -227,6 +234,8 @@ export default {
     loading_data: 'Chargement des données',
     loading_error: 'Une erreur est survenue en chargeant les données.',
     logout: 'Se déconnecter',
+    person: 'Personne',
+    main_pack: 'Main Pack',
     maximize: 'Maximiser',
     minimize: 'Minimiser',
     modify: 'Modifier',
@@ -301,6 +310,7 @@ export default {
     mention_you_on: 'vous a mentionné sur',
     no_notifications: 'Il n\'y a pas encore de notifications pour vous pour les projets en cours',
     title: 'Notifications',
+    unread_notifications: 'notification non lue | notifications non lues',
     with_preview: 'avec une version'
   },
 
@@ -365,7 +375,6 @@ export default {
       for_entity: 'Sélectionne le type d\'entité à afficher'
     },
     actions: {
-      comments: 'Montrer/Cacher les commentaires',
       annotation: 'Annotation',
       annotation_text: 'Double clic sur la preview pour ajouter du texte',
       annotation_delete: 'Supprimer l\'annotation',
@@ -374,19 +383,21 @@ export default {
       annotation_big: 'Gros',
       annotation_medium: 'Moyen',
       annotation_small: 'Petit',
+      comments: 'Montrer/Cacher les commentaires',
       change_task_type: 'Changer le task type',
       delete: 'Supprimer la playlist',
       download: 'Télécharger…',
       edit: 'Modifier la playlist',
       entity_list: 'Montrer/Cacher la liste d\'entités',
       fullscreen: 'Plein écran',
-      split_screen: 'Partager l\'écran',
       next_shot: 'Prochain shot',
-      previous_shot: 'Shot précédent',
       next_frame: 'Prochaine frame',
       previous_frame: 'Frame précédente',
+      previous_shot: 'Shot précédent',
+      pause: 'Pause',
       play: 'Lecture',
-      pause: 'Pause'
+      speed: 'Changer la vitesse',
+      split_screen: 'Partager l\'écran'
     }
   },
 
@@ -747,9 +758,11 @@ export default {
     fields: {
       asset_type: 'Type d\'asset',
       assignees: 'Assignés',
+      count: 'Nombre',
       duration: 'Duration',
       due_date: 'Pour le',
       end_date: 'Date de fin',
+      estimated_quota: 'Quota Moy.',
       estimation: 'Estimation',
       entity: 'Entité',
       entity_name: 'Nom',
@@ -761,6 +774,7 @@ export default {
       real_start_date: 'Date de WIP',
       start_date: 'Date de début',
       retake_count: 'Retakes',
+      seconds: 'Secondes',
       sequence: 'Séquence',
       task_status: 'Statut',
       last_comment: 'Dernier commentaire',

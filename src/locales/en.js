@@ -429,12 +429,6 @@ export default {
       for_client: 'To be shared with'
     },
     actions: {
-      edit: 'Edit playlist',
-      delete: 'Delete playlist',
-      fullscreen: 'Fullscreen',
-      download: 'Download…',
-      entity_list: 'Show/Hide entity list',
-      comments: 'Show/Hide comments',
       annotation: 'Annotation',
       annotation_text: 'Double click on the preview to add some text',
       annotation_delete: 'Delete annotation',
@@ -444,13 +438,20 @@ export default {
       annotation_medium: 'Medium',
       annotation_small: 'Small',
       change_task_type: 'Change task type',
-      split_screen: 'Split screen',
-      next_shot: 'Next shot',
-      previous_shot: 'Previous shot',
+      comments: 'Show/Hide comments',
+      delete: 'Delete playlist',
+      download: 'Download…',
+      edit: 'Edit playlist',
+      entity_list: 'Show/Hide entity list',
+      fullscreen: 'Fullscreen',
       next_frame: 'Next frame',
-      previous_frame: 'Previous frame',
+      next_shot: 'Next shot',
+      pause: 'Pause',
       play: 'Play',
-      pause: 'Pause'
+      previous_frame: 'Previous frame',
+      previous_shot: 'Previous shot',
+      speed: 'Change speed',
+      split_screen: 'Split screen'
     }
   },
 
