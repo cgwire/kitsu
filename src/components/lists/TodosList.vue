@@ -66,7 +66,7 @@
           }"
           @click="onLineClicked(i, $event)"
         >
-          <th
+          <td
             class="production datatable-row-header datatable-row-header--nobd"
             scope="row"
           >
@@ -75,14 +75,14 @@
               :entry="productionMap[entry.project_id]"
               :only-avatar="true"
             />
-          </th>
-          <task-type-name
+          </td>
+          <task-type-cell
             class="type datatable-row-header datatable-row-header--nobd"
             :production-id="entry.project_id"
-            :entry="getTaskType(entry)"
+            :task-type="getTaskType(entry)"
             :style="{left: colTypePosX}"
           />
-          <th class="name datatable-row-header" :style="{left: colNamePosX}">
+          <td class="name datatable-row-header" :style="{left: colNamePosX}">
             <div class="flexrow">
               <entity-thumbnail
                 :empty-width="60"
@@ -93,7 +93,7 @@
                 {{ entry.full_entity_name }}
               </router-link>
             </div>
-          </th>
+          </td>
           <description-cell
             class="description"
             :entry="{description: entry.entity_description}"
@@ -166,7 +166,7 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 
 import EntityThumbnail from '../widgets/EntityThumbnail'
-import TaskTypeName from '../cells/TaskTypeName'
+import TaskTypeCell from '../cells/TaskTypeName'
 import TableInfo from '../widgets/TableInfo'
 
 import DescriptionCell from '../cells/DescriptionCell'
@@ -187,7 +187,7 @@ export default {
     LastCommentCell,
     ProductionNameCell,
     TableInfo,
-    TaskTypeName,
+    TaskTypeCell,
     ValidationCell
   },
 

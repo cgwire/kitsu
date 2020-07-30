@@ -1,10 +1,9 @@
 <template>
 <td class="name">
   <task-type-name
-    :task-type="entry"
+    :task-type="taskType"
     :production-id="productionId"
-  >
-  </task-type-name>
+  />
 </td>
 </template>
 
@@ -18,10 +17,18 @@ export default {
   components: {
     TaskTypeName
   },
-  props: [
-    'entry',
-    'productionId'
-  ],
+
+  props: {
+    taskType: {
+      type: Object,
+      default: null
+    },
+    productionId: {
+      type: String,
+      default: null
+    }
+  },
+
   computed: {
     ...mapGetters([
     ]),
