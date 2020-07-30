@@ -4,6 +4,7 @@ import VueRouter from 'vue-router'
 
 import i18n from '../../../src/lib/i18n'
 import BuildFilterModal from '../../../src/components/modals/BuildFilterModal'
+import productionStoreFixture from '../fixtures/production-store.js'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
@@ -61,16 +62,6 @@ describe('BuildFilterModal', () => {
       },
       actions: {}
     }
-    productionStore = {
-      getters: {
-        currentProduction: () => ({
-          id: 'production-1',
-          name: 'Caminandes',
-          team: ['person-2', 'person-3']
-        })
-      },
-      actions: {}
-    }
     peopleStore = {
       getters: {
         isCurrentUserVendor: () => false,
@@ -96,7 +87,7 @@ describe('BuildFilterModal', () => {
           { id: 'task-type-4', name: 'Animation' }
         ],
         taskStatus: () => [
-          { id: 'task-status-1', short_name: 'WFA' },
+          { id: 'task-status-1', short_name: 'Done' },
           { id: 'task-status-2', short_name: 'WIP' },
           { id: 'task-status-3', short_name: 'Retake' }
         ],
@@ -118,7 +109,7 @@ describe('BuildFilterModal', () => {
       strict: true,
       modules: {
         assets: assetStore,
-        productions: productionStore,
+        productions: { ...productionStoreFixture },
         people: peopleStore,
         shots: shotStore,
         tasks: taskStore
@@ -414,7 +405,8 @@ describe('BuildFilterModal', () => {
             ])
           })
           it('status in', () => {
-            changeSearch('Modeling=WIP,WFA')
+            changeSearch('Modeling=WIP,Done')
+            console.log(store.assetSearchText)
             wrapper.vm.setFiltersFromCurrentQuery()
             expect(wrapper.vm.taskTypeFilters.values).toStrictEqual([
               {

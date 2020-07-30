@@ -1070,7 +1070,6 @@ const mutations = {
         const person = helpers.getPerson(task.last_comment.person_id)
         task.last_comment.person = person
       }
-
       state.taskMap[task.id] = task
     })
   },

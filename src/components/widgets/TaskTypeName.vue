@@ -26,10 +26,18 @@ export default {
   name: 'task-type-name',
   components: {
   },
-  props: [
-    'taskType',
-    'productionId'
-  ],
+
+  props: {
+    taskType: {
+      type: Object,
+      default: null
+    },
+    productionId: {
+      type: String,
+      default: null
+    }
+  },
+
   computed: {
     ...mapGetters([
     ]),

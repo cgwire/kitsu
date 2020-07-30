@@ -157,7 +157,7 @@
               :user="user"
               :team="currentTeam"
               :task="task"
-              :task-status="taskStatusForCurrentUser"
+              :task-status="getTaskStatusForCurrentUser(task.project_id)"
               :light="true"
               :is-loading="loading.addComment"
               :attached-file-name="attachedFileName"
@@ -396,7 +396,7 @@ export default {
       'previewFormData',
       'productionMap',
       'taskEntityPreviews',
-      'taskStatusForCurrentUser',
+      'getTaskStatusForCurrentUser',
       'taskTypeMap',
       'user'
     ]),

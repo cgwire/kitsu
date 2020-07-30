@@ -9,26 +9,22 @@ import userStore from '../store/modules/user'
 import taskTypeStore from '../store/modules/tasktypes'
 import store from '../store/'
 
-import Asset from '../components/pages/Asset'
 import Assets from '../components/pages/Assets'
 import Login from '../components/pages/Login'
 import Main from '../components/Main'
 import Notifications from '../components/pages/Notifications'
 import OpenProductions from '../components/pages/OpenProductions'
 import ProductionNewsFeed from '../components/pages/ProductionNewsFeed'
-import Sequences from '../components/pages/Sequences'
-import Shot from '../components/pages/Shot'
 import Shots from '../components/pages/Shots'
-import Team from '../components/pages/Team'
 import TaskType from '../components/pages/TaskType'
-import Timesheets from '../components/pages/Timesheets'
-import MainSchedule from '../components/pages/MainSchedule'
 import Todos from '../components/pages/Todos'
 
 const AssetTypes = () => import('../components/pages/AssetTypes')
+const Asset = () => import('../components/pages/Asset')
 const Breakdown = () => import('../components/pages/Breakdown')
 const CustomActions = () => import('../components/pages/CustomActions')
 const Episodes = () => import('../components/pages/Episodes')
+const MainSchedule = () => import('../components/pages/MainSchedule')
 const NotFound = () => import('../components/pages/NotFound')
 const Person = () => import('../components/pages/Person')
 const People = () => import('../components/pages/People')
@@ -37,12 +33,17 @@ const Productions = () => import('../components/pages/Productions')
 const ProductionAssetTypes = () => import('../components/pages/ProductionAssetTypes')
 const ProductionSchedule = () => import('../components/pages/ProductionSchedule')
 const ProductionQuota = () => import('../components/pages/ProductionQuota')
+const ProductionSettings = () => import('../components/pages/ProductionSettings')
 const Profile = () => import('../components/pages/Profile')
 const ResetPassword = () => import('../components/pages/ResetPassword')
 const ResetChangePassword = () => import('../components/pages/ResetChangePassword')
 const ServerDown = () => import('../components/pages/ServerDown')
 const Settings = () => import('../components/pages/Settings')
+const Sequences = () => import('../components/pages/Sequences')
+const Shot = () => import('../components/pages/Shot')
 const Task = () => import('../components/pages/Task')
+const Team = () => import('../components/pages/Team')
+const Timesheets = () => import('../components/pages/Timesheets')
 const TaskStatus = () => import('../components/pages/TaskStatus')
 const TaskTypes = () => import('../components/pages/TaskTypes')
 const WrongBrowser = () => import('../components/pages/WrongBrowser')
@@ -374,6 +375,12 @@ export const routes = [
         path: 'productions/:production_id/schedule',
         component: ProductionSchedule,
         name: 'schedule'
+      },
+
+      {
+        path: 'productions/:production_id/production-settings',
+        component: ProductionSettings,
+        name: 'production-settings'
       },
 
       {

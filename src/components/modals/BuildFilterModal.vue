@@ -60,7 +60,7 @@
           <combobox-status
             class="flexrow-item"
             :key="'task-type-value-' + index"
-            :task-status-list="taskStatus"
+            :task-status-list="productionTaskStatuses"
             v-model="taskTypeFilter.values[index]"
             v-for="(statusId, index) in taskTypeFilter.values"
           />
@@ -271,19 +271,19 @@ export default {
     ...mapGetters([
       'assetMetadataDescriptors',
       'assetTypeMap',
-      'assetTypes',
       'assetSearchText',
       'assetValidationColumns',
       'currentProduction',
       'isCurrentUserVendor',
       'people',
       'personMap',
+      'productionAssetTypes',
+      'productionTaskStatuses',
+      'productionTaskTypes',
       'shotMetadataDescriptors',
       'shotSearchText',
       'shotValidationColumns',
-      'taskTypes',
       'taskTypeMap',
-      'taskStatus',
       'taskStatusMap'
     ]),
 
@@ -294,7 +294,7 @@ export default {
     assetTypeOptions () {
       return [
         { label: this.$t('entities.build_filter.all_types'), value: '-' },
-        ...this.assetTypes.map((assetType) => {
+        ...this.productionAssetTypes.map((assetType) => {
           return {
             label: assetType.name,
             value: assetType.id
@@ -414,14 +414,14 @@ export default {
       const filter = {
         id: this.taskTypeList[0].id,
         operator: '=',
-        values: [this.taskStatus[0].id]
+        values: [this.productionTaskStatuses[0].id]
       }
       this.taskTypeFilters.values.push(filter)
       return filter
     },
 
     addInTaskTypeFilter (taskTypeFilter) {
-      taskTypeFilter.values.push(this.taskStatus[0].id)
+      taskTypeFilter.values.push(this.productionTaskStatuses[0].id)
     },
 
     removeTaskTypeFilter (taskTypeFilter) {
@@ -480,9 +480,9 @@ export default {
       if (searchQuery) {
         const filters = getFilters({
           entryIndex: [], // entry list is not needed,
-          assetTypes: this.assetTypes,
-          taskTypes: this.taskTypes,
-          taskStatuses: this.taskStatus,
+          assetTypes: this.productionAsseTypes,
+          taskTypes: this.productionTaskTypes,
+          taskStatuses: this.productionTaskStatuses,
           descriptors: this.metadataDescriptors,
           persons: this.people,
           query: searchQuery

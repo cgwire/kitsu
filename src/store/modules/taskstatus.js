@@ -31,18 +31,36 @@ const getters = {
   deleteTaskStatus: state => state.deleteTaskStatus,
 
   taskStatusForCurrentUser: (state, getters, rootState, rootGetters) => {
+    const statuses = rootGetters.productionTaskStatuses
     if (rootGetters.isCurrentUserManager) {
-      return state.taskStatus
+      return statuses
     } else if (rootGetters.isCurrentUserClient) {
-      return state.taskStatus.filter(taskStatus => {
+      return statuses.filter(taskStatus => {
         return taskStatus.is_client_allowed
       })
     } else {
-      return state.taskStatus.filter(taskStatus => {
+      return statuses.filter(taskStatus => {
         return taskStatus.is_artist_allowed
       })
     }
-  }
+  },
+
+  getTaskStatusForCurrentUser:
+    (state, getters, rootState, rootGetters) => (projectId) => {
+      const statuses = rootGetters.getProductionTaskStatuses(projectId)
+      if (rootGetters.isCurrentUserManager) {
+        return statuses
+      } else if (rootGetters.isCurrentUserClient) {
+        return statuses.filter(taskStatus => {
+          return taskStatus.is_client_allowed
+        })
+      } else {
+        return statuses.filter(taskStatus => {
+          return taskStatus.is_artist_allowed
+        })
+      }
+    }
+
 }
 
 const actions = {

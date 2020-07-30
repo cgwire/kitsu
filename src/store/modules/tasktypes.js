@@ -53,24 +53,26 @@ const getters = {
     return state.taskTypeMap[rootState.route.params.task_type_id] || {}
   },
 
-  assetTaskTypes: state => state.taskTypes
-    .filter((taskType) => !taskType.for_shots),
+  assetTaskTypes: (state, getters, rootState, rootGetters) => {
+    return rootGetters.productionTaskTypes
+      .filter((taskType) => !taskType.for_shots)
+  },
 
-  shotTaskTypes: state => state.taskTypes
-    .filter((taskType) => taskType.for_shots),
+  shotTaskTypes: (state, getters, rootState, rootGetters) => {
+    return rootGetters.productionTaskTypes
+      .filter((taskType) => taskType.for_shots)
+  },
 
   getTaskTypeOptions: state => state.taskTypes.map(
     (type) => { return { label: type.name, value: type.id } }
   ),
 
-  getAssetTaskTypeOptions: state => state.taskTypes
-    .filter((taskType) => !taskType.for_shots)
+  getAssetTaskTypeOptions: (state, getters) => getters.assetTaskTypes
     .map(
       (type) => { return { label: type.name, value: type.id } }
     ),
 
-  getShotTaskTypeOptions: state => state.taskTypes
-    .filter((taskType) => taskType.for_shots)
+  getShotTaskTypeOptions: (state, getters) => getters.shotTaskTypes
     .map(
       (type) => { return { label: type.name, value: type.id } }
     ),
