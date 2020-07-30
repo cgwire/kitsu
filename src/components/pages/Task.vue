@@ -81,6 +81,7 @@
             <div class="comments" v-if="currentTaskComments && currentTaskComments.length > 0">
               <comment
                 :comment="comment"
+                :task="currentTask"
                 :highlighted="isHighlighted(comment)"
                 :key="comment.id"
                 :current-user="user"

@@ -175,6 +175,7 @@
               <comment
                 :key="'comment' + comment.id"
                 :comment="comment"
+                :task="task"
                 :light="true"
                 :add-preview="onAddPreviewClicked"
                 :is-first="index === 0"

@@ -249,6 +249,10 @@ export default {
       type: Object,
       default: () => {}
     },
+    task: {
+      type: Object,
+      default: null
+    },
     highlighted: {
       type: Boolean,
       default: false
@@ -323,12 +327,14 @@ export default {
           }
         }
       }
-      if (this.$route.params.episode_id) {
+      if (this.task.episode_id) {
         route.name = `episode-${route.name}`
-        route.params.episode_id = this.$route.params.episode_id
+        route.params.episode_id = this.task.episode_id
+      } else if (this.task.entity && this.task.entity.episode_id) {
+        route.name = `episode-${route.name}`
+        route.params.episode_id = this.task.entity.episode_id
       }
-      const task = this.taskMap[this.comment.object_id]
-      const taskType = this.taskTypeMap[task.task_type_id]
+      const taskType = this.taskTypeMap[this.task.task_type_id]
       route.params.type = taskType.for_shots ? 'shots' : 'assets'
       return route
     },
