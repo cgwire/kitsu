@@ -1289,10 +1289,6 @@ span.thumbnail-picture {
   flex: 1;
 }
 
-.playlist-column:last-child {
-  padding-right: 0.7em;
-}
-
 .playlisted-shot-name {
   padding-right: 20px;
 }
