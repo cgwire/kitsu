@@ -81,11 +81,11 @@ export default {
     ...mapGetters([
       'deleteProduction',
       'editProduction',
-      'getProduction',
       'isProductionsLoading',
       'isProductionsLoadingError',
       'productionAvatarFormData',
-      'productions'
+      'productions',
+      'productionMap'
     ]),
 
     currentLockText () {
@@ -163,11 +163,12 @@ export default {
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('edit') > 0) {
         const productionId = this.$store.state.route.params.production_edit_id
-        this.productionToEdit = this.getProduction(productionId)
+        this.productionToEdit = this.productionMap[productionId]
         this.modals.isNewDisplayed = true
       } else if (path.indexOf('delete') > 0) {
-        const productionId = this.$store.state.route.params.production_delete_id
-        this.productionToDelete = this.getProduction(productionId)
+        const productionId =
+          this.$store.state.route.params.production_delete_id
+        this.productionToDelete = this.productionMap[productionId]
         this.modals.isDeleteDisplayed = true
       } else {
         this.modals.isNewDisplayed = false

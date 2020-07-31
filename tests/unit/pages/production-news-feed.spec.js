@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 import i18n from '../../../src/lib/i18n'
 import ProductionNewsFeed from '../../../src/components/pages/ProductionNewsFeed'
 import { range } from '../../../src/lib/time'
+import productionStoreFixture from '../fixtures/production-store.js'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
@@ -13,7 +14,7 @@ localVue.use(vuescroll)
 describe('ProductionNewsFeed', () => {
   let store
   let newsStore
-  let productionStore
+  let personStore
   let taskStore
   let taskStatusStore
   let taskTypeStore
@@ -74,28 +75,36 @@ describe('ProductionNewsFeed', () => {
       actions: {
       }
     },
-    productionStore = {
-      getters: {
-        currentProduction: () => ({
-          id: 'production-1', name: 'Prod 1', team: []
-        })
-      },
-      actions: {
-      }
-    }
     userStore = {
       getters: {
         user: () => ({ id: 'user-1', timezone: 'Europe/Paris' })
       },
       actions: {}
     }
+    personStore = {
+      getters: {
+        personMap: () => ({
+          'person-1': {
+            id: 'person-1',
+            name: 'Jhon Doe'
+          },
+          'person-2': {
+            id: 'person-1',
+            name: 'Emma Doe'
+          }
+        })
+      },
+      actions: {}
+    }
+
 
     store = new Vuex.Store({
       strict: true,
       modules: {
         tasks: taskStore,
         news: newsStore,
-        productions: productionStore,
+        persons: personStore,
+        productions: { ...productionStoreFixture },
         taskStatus: taskStatusStore,
         taskTypes: taskTypeStore,
         user: userStore

@@ -68,10 +68,10 @@
               :only-avatar="true"
             />
           </th>
-          <task-type-name
+          <task-type-cell
             class="type datatable-row-header datatable-row-header--nobd"
             :production-id="task.project_id"
-            :entry="taskTypeMap[task.task_type_id]"
+            :task-type="taskTypeMap[task.task_type_id]"
             :style="{left: colTypePosX}"
           />
 
@@ -158,7 +158,7 @@ import { en, fr } from 'vuejs-datepicker/dist/locale'
 import { PAGE_SIZE } from '../../lib/pagination'
 import PageSubtitle from '../widgets/PageSubtitle'
 import ProductionNameCell from '../cells/ProductionNameCell'
-import TaskTypeName from '../cells/TaskTypeName'
+import TaskTypeCell from '../cells/TaskTypeName'
 import TimeSliderCell from '../cells/TimeSliderCell'
 import TableInfo from '../widgets/TableInfo'
 
@@ -170,7 +170,7 @@ export default {
     ProductionNameCell,
     PageSubtitle,
     TableInfo,
-    TaskTypeName,
+    TaskTypeCell,
     TimeSliderCell
   },
 

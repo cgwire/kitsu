@@ -104,13 +104,17 @@ const actions = {
     })
   },
 
-  editPlaylist ({ commit }, { data, callback }) {
-    commit(EDIT_PLAYLIST_START)
-    playlistsApi.updatePlaylist(data, (err, playlist) => {
-      if (err) commit(EDIT_PLAYLIST_ERROR)
-      else commit(EDIT_PLAYLIST_END, playlist)
-      if (callback) callback(err, playlist)
-    })
+  editPlaylist ({ commit, rootGetters }, { data, callback }) {
+    if (!rootGetters.isCurrentUserClient) {
+      commit(EDIT_PLAYLIST_START)
+      playlistsApi.updatePlaylist(data, (err, playlist) => {
+        if (err) commit(EDIT_PLAYLIST_ERROR)
+        else commit(EDIT_PLAYLIST_END, playlist)
+        if (callback) callback(err, playlist)
+      })
+    } else {
+      callback()
+    }
   },
 
   deletePlaylist ({ commit }, { playlist, callback }) {

@@ -178,7 +178,7 @@ export default {
   border: 1px solid $light-grey-light;
   z-index: 300;
   margin-left: -1px;
-  max-height: 120px;
+  max-height: 200px;
   overflow-y: auto;
 }
 

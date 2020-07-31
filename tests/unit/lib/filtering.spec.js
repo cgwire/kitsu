@@ -75,7 +75,12 @@ describe('lib/filtering', () => {
       {
         name: 'Anim',
         id: 'task-type-4'
+      },
+      {
+        name: 'BG',
+        id: 'task-type-5'
       }
+
     ]
     const descriptors = [
       {
@@ -220,6 +225,22 @@ describe('lib/filtering', () => {
       expect(filters.length).toEqual(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[3])
+      expect(filter.taskStatuses[0]).toEqual('task-status-2')
+    })
+
+    it('task type with short name', () => {
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        query: 'bg=wfa'
+      })
+      expect(filters.length).toEqual(1)
+      const filter = filters[0]
+      expect(filter.taskType).toEqual(taskTypes[4])
       expect(filter.taskStatuses[0]).toEqual('task-status-2')
     })
 
@@ -385,6 +406,10 @@ describe('lib/filtering', () => {
         {
           name: 'Compositing',
           id: 'task-type-3'
+        },
+        {
+          name: 'BG',
+          id: 'task-type-4'
         }
     ]
     const entries = [
@@ -420,7 +445,8 @@ describe('lib/filtering', () => {
         data: {color: 'red'},
         validations: {
           'task-type-1': 'task-5',
-          'task-type-3': 'task-6'
+          'task-type-3': 'task-6',
+          'task-type-4': 'task-7',
         },
         tasks: ['task-5', 'task-6']
       }
@@ -455,6 +481,11 @@ describe('lib/filtering', () => {
         id: 'task-6',
         assignees: [],
         task_status_id: 'task-status-1'
+      },
+      'task-7': {
+        id: 'task-7',
+        assignees: [],
+        task_status_id: 'task-status-2'
       }
     }
     const taskStatusMap = {
@@ -483,6 +514,22 @@ describe('lib/filtering', () => {
         taskMap
       )
       expect(results.length).toEqual(3)
+    })
+
+    it('bg=done', () => {
+      const filters = [
+        {
+          taskType: taskTypes[3],
+          taskStatuses: ['task-status-2'],
+          type: 'status'
+        }
+      ]
+      let results = applyFilters(
+        entries,
+        filters,
+        taskMap
+      )
+      expect(results.length).toEqual(1)
     })
 
     it('empty filter', () => {

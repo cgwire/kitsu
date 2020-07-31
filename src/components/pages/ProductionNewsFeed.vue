@@ -95,6 +95,7 @@
                       class="task-type-name"
                       :task-type="buildTaskTypeFromNews(news)"
                       :production-id="currentProduction.id"
+                      :is-static="true"
                     />
                   </div>
 
@@ -102,6 +103,7 @@
                     <validation-tag
                       class="validation-tag"
                       :task="buildTaskFromNews(news)"
+                      :is-static="true"
                       v-if="news.change"
                     />
                   </div>
@@ -114,7 +116,7 @@
                           :person="personMap[news.author_id]"
                           :size="30"
                           :font-size="14"
-                          :no-link="true"
+                          :is-link="false"
                           v-if="personMap[news.author_id]"
                         />
                         <span
@@ -394,6 +396,8 @@ export default {
       'newsList',
       'newsListByDay',
       'personMap',
+      'productionTaskStatuses',
+      'productionTaskTypes',
       'taskStatusMap',
       'taskTypeMap',
       'taskStatus',
@@ -420,7 +424,7 @@ export default {
         id: '',
         color: '#999',
         short_name: this.$t('news.all')
-      }].concat(sortByName([...this.taskStatus]))
+      }].concat(sortByName([...this.productionTaskStatuses]))
     },
 
     taskTypeList () {
@@ -428,7 +432,7 @@ export default {
         id: '',
         color: '#999',
         name: this.$t('news.all')
-      }].concat(sortByName([...this.taskTypes]))
+      }].concat(sortByName([...this.productionTaskTypes]))
     },
 
     team () {

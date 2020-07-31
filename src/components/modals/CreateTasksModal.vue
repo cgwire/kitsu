@@ -13,9 +13,8 @@
       <p>{{ text }}</p>
 
       <form v-on:submit.prevent>
-        <combobox
-          :label="$t('tasks.fields.task_type')"
-          :options="isAssetTasks ? getAssetTaskTypeOptions : getShotTaskTypeOptions"
+        <combobox-task-type
+          :task-type-list="isAssetTasks ? assetTaskTypes : shotTaskTypes"
           v-model="form.task_type_id"
         />
       </form>
@@ -59,9 +58,9 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
-import Combobox from '../widgets/Combobox'
-import PageTitle from '../widgets/PageTitle'
+import { modalMixin } from '@/components/modals/base_modal'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
+import PageTitle from '@/components/widgets/PageTitle'
 
 export default {
   name: 'create-task-modal',
@@ -69,7 +68,7 @@ export default {
 
   components: {
     PageTitle,
-    Combobox
+    ComboboxTaskType
   },
 
   props: {
@@ -118,8 +117,8 @@ export default {
   computed: {
     ...mapGetters([
       'taskTypes',
-      'getAssetTaskTypeOptions',
-      'getShotTaskTypeOptions'
+      'assetTaskTypes',
+      'shotTaskTypes'
     ]),
     isAssetTasks () {
       return this.$route.path.indexOf('assets') >= 0
@@ -141,12 +140,12 @@ export default {
 
   mounted () {
     if (this.isAssetTasks) {
-      if (this.getAssetTaskTypeOptions.length > 0) {
-        this.form.task_type_id = this.getAssetTaskTypeOptions[0].value
+      if (this.assetTaskTypes.length > 0) {
+        this.form.task_type_id = this.assetTaskTypes[0].id
       }
     } else {
-      if (this.getShotTaskTypeOptions.length > 0) {
-        this.form.task_type_id = this.getShotTaskTypeOptions[0].value
+      if (this.shotTaskTypes.length > 0) {
+        this.form.task_type_id = this.shotTaskTypes[0].id
       }
     }
   }

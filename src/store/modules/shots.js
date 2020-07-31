@@ -33,6 +33,9 @@ import {
   frameToSeconds
 } from '../../lib/video'
 import {
+  minutesToDays
+} from '../../lib/time'
+import {
   buildShotIndex,
   buildSequenceIndex,
   buildEpisodeIndex,
@@ -190,7 +193,7 @@ const helpers = {
     return date.toString().padStart(2, '0')
   },
 
-  populateTask (task, shot, production) {
+  populateTask (task, shot) {
     task.name = helpers.getTaskType(task.task_type_id).priority.toString()
     task.task_status_short_name =
       helpers.getTaskStatus(task.task_status_id).short_name
@@ -1017,6 +1020,7 @@ const actions = {
 
   getShotsCsvLines ({ state, rootGetters }) {
     const production = rootGetters.currentProduction
+    const organisation = rootGetters.organisation
     let shots = cache.shots
     if (cache.result && cache.result.length > 0) {
       shots = cache.result
@@ -1032,12 +1036,13 @@ const actions = {
         .forEach((descriptor) => {
           shotLine.push(shot.data[descriptor.field_name])
         })
-      shotLine.push(shot.nb_frames)
-      if (state.isFrames) shotLine.push(shot.data.frames)
+      if (state.isTime) {
+        shotLine.push(minutesToDays(organisation, shot.timeSpent).toFixed(2))
+      }
+      if (state.isFrames) shotLine.push(shot.nb_frames)
       if (state.isFrameIn) shotLine.push(shot.data.frame_in)
       if (state.isFrameOut) shotLine.push(shot.data.frame_out)
       if (state.isFps) shotLine.push(shot.data.fps)
-      if (state.isTime) shotLine.push(shot.timeSpent)
       state.shotValidationColumns
         .forEach((validationColumn) => {
           const task = rootGetters.taskMap[shot.validations[validationColumn]]
@@ -1597,10 +1602,12 @@ const mutations = {
       if (task) {
         const shot = state.shotMap[task.entity_id]
         if (shot) {
+          helpers.populateTask(task, shot)
           const validations = { ...shot.validations }
           Vue.set(validations, task.task_type_id, task.id)
           delete shot.validations
           Vue.set(shot, 'validations', validations)
+          shot.tasks.push(task.id)
         }
       }
     })
@@ -1733,20 +1740,6 @@ const mutations = {
       )
       shot.tasks.splice(taskIndex, 1)
     }
-  },
-
-  [CREATE_TASKS_END] (state, tasks) {
-    tasks.forEach((task) => {
-      if (task) {
-        const shot = state.shotMap[task.entity_id]
-        if (shot) {
-          const validations = { ...shot.validations }
-          Vue.set(validations, task.task_type_id, task.id)
-          delete shot.validations
-          Vue.set(shot, 'validations', validations)
-        }
-      }
-    })
   },
 
   [ADD_SELECTED_TASKS] (state, selection) {

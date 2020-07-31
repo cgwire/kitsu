@@ -109,7 +109,11 @@
       <spinner />
     </div>
 
-    <div class="canvas-wrapper" ref="canvas-wrapper">
+    <div
+      class="canvas-wrapper"
+      ref="canvas-wrapper"
+      v-show="!isCurrentEntityFile"
+    >
       <canvas
         id="playlist-annotation-canvas"
         ref="annotation-canvas"
@@ -132,10 +136,7 @@
   <div
     class="playlist-progress"
     ref="playlist-progress"
-    v-show="!isAddingEntity"
-    :style="{
-      display: isCurrentEntityMovie ? 'flex' : 'none'
-    }"
+    v-show="isCurrentEntityMovie && !isAddingEntity"
   >
     <div class="video-progress">
       <progress
@@ -158,10 +159,7 @@
     :annotations="annotations"
     :max-duration-raw="maxDurationRaw"
     @select-annotation="loadAnnotation"
-    :style="{
-      display: isCurrentEntityMovie ? 'flex' : 'none'
-    }"
-    v-if="playlist.id && !isAddingEntity"
+    v-show="isCurrentEntityMovie && playlist.id && !isAddingEntity"
   />
 
   <div
@@ -1009,17 +1007,16 @@ export default {
     displayBars () {
       if (this.$refs['button-bar']) {
         if (this.$refs.header) {
-          this.$refs.header.style.display = 'flex'
           this.$refs.header.style.opacity = 1
         }
         if (this.$refs['button-bar']) {
-          this.$refs['button-bar'].style.display = 'flex'
           this.$refs['button-bar'].style.opacity = 1
         }
         if (this.$refs['playlist-progress']) {
-          this.$refs['playlist-progress'].style.display =
-            this.isCurrentEntityMovie ? 'flex' : 'none'
           this.$refs['playlist-progress'].style.opacity = 1
+        }
+        if (this.$refs['playlist-annotation']) {
+          this.$refs['playlist-annotation'].$el.style.opacity = 1
         }
         this.container.style.cursor = 'default'
       }
@@ -1029,12 +1026,7 @@ export default {
       this.$refs.header.style.opacity = 0
       this.$refs['button-bar'].style.opacity = 0
       this.$refs['playlist-progress'].style.opacity = 0
-      setTimeout(() => {
-        this.$refs.header.style.display = 'none'
-        this.$refs['button-bar'].style.display = 'none'
-        this.$refs['playlist-progress'].style.display = 'none'
-        this.container.style.cursor = 'none'
-      }, 500)
+      this.$refs['playlist-annotation'].$el.style.opacity = 0
     },
 
     showDeleteModal () {

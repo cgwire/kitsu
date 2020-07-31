@@ -461,7 +461,7 @@ const mutations = {
   },
 
   [ADD_SELECTED_TASK] (state, validationInfo) {
-    if (state.todoSelectionGrid && state.todoSelectionGrid[0]) {
+    if (state.todoSelectionGrid && state.todoSelectionGrid[validationInfo.x]) {
       state.todoSelectionGrid[validationInfo.x][validationInfo.y] = true
     }
   },

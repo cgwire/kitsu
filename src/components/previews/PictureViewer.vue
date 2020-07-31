@@ -379,9 +379,13 @@ export default {
 
     mountPicture () {
       this.container.style.height = this.getDefaultHeight() + 'px'
-      this.pictureWrapper.style.height = this.getDefaultHeight() - 32 + 'px'
-      this.pictureSubWrapper.style['max-height'] =
-        this.getDefaultHeight() - 32 + 'px'
+      if (this.pictureWrapper) {
+        this.pictureWrapper.style.height = this.getDefaultHeight() - 32 + 'px'
+      }
+      if (this.pictureSubWrapper) {
+        this.pictureSubWrapper.style['max-height'] =
+          this.getDefaultHeight() - 32 + 'px'
+      }
       if (!this.fabricCanvas) {
         this.setupFabricCanvas()
       }

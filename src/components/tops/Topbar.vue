@@ -222,6 +222,7 @@ export default {
       'currentProduction',
       'episodes',
       'episodeOptions',
+      'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserVendor',
       'isDarkTheme',
@@ -319,6 +320,12 @@ export default {
           { label: this.$t('quota.title'), value: 'quota' },
           { label: this.$t('people.team'), value: 'team' }
         ])
+
+        if (this.isCurrentUserAdmin) {
+          options = options.concat([
+            { label: this.$t('settings.title'), value: 'production-settings' }
+          ])
+        }
       } else {
         const playlistSection = options.pop()
         options = [playlistSection].concat(options)
@@ -537,6 +544,7 @@ export default {
         section !== 'team' &&
         section !== 'news-feed' &&
         section !== 'schedule' &&
+        section !== 'production-settings' &&
         section !== 'episodes'
       if (isEpisodeContext) {
         route.name = `episode-${section}`

@@ -1,7 +1,12 @@
 import Vue from 'vue'
 import productionsApi from '../api/productions'
 import { sortProductions, sortByName } from '../../lib/sorting'
-import { updateModelFromList, removeModelFromList } from '../../lib/models'
+import {
+  addToIdList,
+  removeFromIdList,
+  removeModelFromList,
+  updateModelFromList
+} from '../../lib/models'
 import {
   LOAD_PRODUCTIONS_START,
   LOAD_PRODUCTIONS_ERROR,
@@ -34,6 +39,12 @@ import {
 
   TEAM_ADD_PERSON,
   TEAM_REMOVE_PERSON,
+  PRODUCTION_ADD_ASSET_TYPE,
+  PRODUCTION_REMOVE_ASSET_TYPE,
+  PRODUCTION_ADD_TASK_TYPE,
+  PRODUCTION_REMOVE_TASK_TYPE,
+  PRODUCTION_ADD_TASK_STATUS,
+  PRODUCTION_REMOVE_TASK_STATUS,
   ASSIGN_TASKS,
 
   ADD_METADATA_DESCRIPTOR_END,
@@ -101,12 +112,21 @@ const helpers = {
     } else {
       return { name: 'open-productions' }
     }
+  },
+
+  isEmptyArray (production, field) {
+    return (
+      !production ||
+      !production[field] ||
+      production[field].length === 0
+    )
   }
 }
 
 const getters = {
   productions: state => state.productions,
   productionMap: state => state.productionMap,
+  productionStatusMap: state => state.productionStatusMap,
   openProductions: state => state.openProductions,
   productionStatus: state => state.productionStatus,
 
@@ -127,6 +147,55 @@ const getters = {
   breakdownPath: state => state.breakdownPath,
   playlistsPath: state => state.playlistsPath,
   teamPath: state => state.teamPath,
+
+  productionAssetTypes: (state, getters, rootState) => {
+    if (helpers.isEmptyArray(state.currentProduction, 'asset_types')) {
+      return rootState.assetTypes.assetTypes
+    } else {
+      return sortByName(
+        state.currentProduction
+          .asset_types
+          .map(id => rootState.assetTypes.assetTypeMap[id])
+      )
+    }
+  },
+
+  productionTaskStatuses: (state, getters, rootState) => {
+    if (helpers.isEmptyArray(state.currentProduction, 'task_statuses')) {
+      return rootState.taskStatus.taskStatus
+    } else {
+      return sortByName(
+        state.currentProduction
+          .task_statuses
+          .map(id => rootState.taskStatus.taskStatusMap[id])
+      )
+    }
+  },
+
+  getProductionTaskStatuses: (state, getters, rootState) => (id) => {
+    const production = state.productionMap[id]
+    if (helpers.isEmptyArray(production, 'task_statuses')) {
+      return rootState.taskStatus.taskStatus
+    } else {
+      return sortByName(
+        production
+          .task_statuses
+          .map(id => rootState.taskStatus.taskStatusMap[id])
+      )
+    }
+  },
+
+  productionTaskTypes: (state, getters, rootState) => {
+    if (helpers.isEmptyArray(state.currentProduction, 'task_types')) {
+      return rootState.taskTypes.taskTypes
+    } else {
+      return sortByName(
+        state.currentProduction
+          .task_types
+          .map(id => rootState.taskTypes.taskTypeMap[id])
+      )
+    }
+  },
 
   currentProduction: (state) => {
     if (state.currentProduction) {
@@ -170,18 +239,7 @@ const getters = {
   ),
   openProductionOptions: state => state.openProductions.map(
     (production) => { return { label: production.name, value: production.id } }
-  ),
-
-  getProduction: (state, getters) => (id) => {
-    return state.productions.find(
-      (production) => production.id === id
-    )
-  },
-  getProductionStatus: (state, getters) => (id) => {
-    return state.productionStatus.find(
-      (productionStatus) => productionStatus.id === id
-    )
-  }
+  )
 }
 
 const actions = {
@@ -301,27 +359,67 @@ const actions = {
   },
 
   addPersonToTeam ({ commit, state }, person) {
-    return new Promise((resolve, reject) => {
-      commit(TEAM_ADD_PERSON, person.id)
-      return productionsApi.addPersonToTeam(
-        state.currentProduction.id,
-        person.id
-      )
-        .then(resolve)
-        .catch(reject)
-    })
+    commit(TEAM_ADD_PERSON, person.id)
+    return productionsApi.addPersonToTeam(
+      state.currentProduction.id,
+      person.id
+    )
   },
 
   removePersonFromTeam ({ commit, state }, person) {
-    return new Promise((resolve, reject) => {
-      commit(TEAM_REMOVE_PERSON, person.id)
-      return productionsApi.removePersonFromTeam(
-        state.currentProduction.id,
-        person.id
-      )
-        .then(resolve)
-        .catch(reject)
-    })
+    commit(TEAM_REMOVE_PERSON, person.id)
+    return productionsApi.removePersonFromTeam(
+      state.currentProduction.id,
+      person.id
+    )
+  },
+
+  addAssetTypeToProduction ({ commit, state }, assetTypeId) {
+    commit(PRODUCTION_ADD_ASSET_TYPE, assetTypeId)
+    return productionsApi.addAssetTypeToProduction(
+      state.currentProduction.id,
+      assetTypeId
+    )
+  },
+
+  removeAssetTypeFromProduction ({ commit, state }, assetTypeId) {
+    commit(PRODUCTION_REMOVE_ASSET_TYPE, assetTypeId)
+    return productionsApi.removeAssetTypeFromProduction(
+      state.currentProduction.id,
+      assetTypeId
+    )
+  },
+
+  addTaskTypeToProduction ({ commit, state }, taskTypeId) {
+    commit(PRODUCTION_ADD_TASK_TYPE, taskTypeId)
+    return productionsApi.addTaskTypeToProduction(
+      state.currentProduction.id,
+      taskTypeId
+    )
+  },
+
+  removeTaskTypeFromProduction ({ commit, state }, taskTypeId) {
+    commit(PRODUCTION_REMOVE_TASK_TYPE, taskTypeId)
+    return productionsApi.removeTaskTypeFromProduction(
+      state.currentProduction.id,
+      taskTypeId
+    )
+  },
+
+  addTaskStatusToProduction ({ commit, state }, taskStatusId) {
+    commit(PRODUCTION_ADD_TASK_STATUS, taskStatusId)
+    return productionsApi.addTaskStatusToProduction(
+      state.currentProduction.id,
+      taskStatusId
+    )
+  },
+
+  removeTaskStatusFromProduction ({ commit, state }, taskStatusId) {
+    commit(PRODUCTION_REMOVE_TASK_STATUS, taskStatusId)
+    return productionsApi.removeTaskStatusFromProduction(
+      state.currentProduction.id,
+      taskStatusId
+    )
   },
 
   addMetadataDescriptor ({ commit, state }, descriptor) {
@@ -473,9 +571,8 @@ const mutations = {
   },
 
   [EDIT_PRODUCTION_END] (state, newProduction) {
-    const productionStatus = getters.getProductionStatus(state)(
-      newProduction.project_status_id
-    )
+    const productionStatus =
+      state.productionStatusMap[newProduction.project_status_id]
     const production = state.productions.find(
       (production) => production.id === newProduction.id
     )
@@ -625,18 +722,35 @@ const mutations = {
   },
 
   [TEAM_ADD_PERSON] (state, personId) {
-    if (!state.currentProduction.team.find((pId) => pId === personId)) {
-      state.currentProduction.team.push(personId)
-    }
+    addToIdList(state.currentProduction, 'team', personId)
   },
 
   [TEAM_REMOVE_PERSON] (state, personId) {
-    const personIndex = state.currentProduction.team.findIndex(
-      (pId) => pId === personId
-    )
-    if (personIndex !== null) {
-      state.currentProduction.team.splice(personIndex, 1)
-    }
+    removeFromIdList(state.currentProduction, 'team', personId)
+  },
+
+  [PRODUCTION_ADD_ASSET_TYPE] (state, assetTypeId) {
+    addToIdList(state.currentProduction, 'asset_types', assetTypeId)
+  },
+
+  [PRODUCTION_REMOVE_ASSET_TYPE] (state, assetTypeId) {
+    removeFromIdList(state.currentProduction, 'asset_types', assetTypeId)
+  },
+
+  [PRODUCTION_ADD_TASK_STATUS] (state, taskStatusId) {
+    addToIdList(state.currentProduction, 'task_statuses', taskStatusId)
+  },
+
+  [PRODUCTION_REMOVE_TASK_STATUS] (state, taskStatusId) {
+    removeFromIdList(state.currentProduction, 'task_statuses', taskStatusId)
+  },
+
+  [PRODUCTION_ADD_TASK_TYPE] (state, taskTypeId) {
+    addToIdList(state.currentProduction, 'task_types', taskTypeId)
+  },
+
+  [PRODUCTION_REMOVE_TASK_TYPE] (state, taskTypeId) {
+    removeFromIdList(state.currentProduction, 'task_types', taskTypeId)
   },
 
   [ADD_METADATA_DESCRIPTOR_END] (state, { production, descriptor }) {

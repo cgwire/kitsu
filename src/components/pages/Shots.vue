@@ -888,6 +888,9 @@ export default {
             .forEach((descriptor) => {
               headers.push(descriptor.name)
             })
+          if (this.isTime) {
+            headers.push('Time spent')
+          }
           headers.push('Nb Frames')
           if (this.isFrameIn) {
             headers.push('Frame In')
@@ -897,9 +900,6 @@ export default {
           }
           if (this.isFps) {
             headers.push('FPS')
-          }
-          if (this.isTime) {
-            headers.push('Time spent')
           }
           this.shotValidationColumns
             .forEach((taskTypeId) => {

@@ -58,29 +58,6 @@
 import { mapGetters } from 'vuex'
 import colors from '../../lib/colors'
 
-/*
-    isDarkTheme: {
-      default: false,
-      type: Boolean
-    },
-    isCurrentUserClient: {
-      default: false,
-      type: Boolean
-    },
-    personMap: {
-      default: () => {},
-      type: Object
-    },
-    taskMap: {
-      default: () => {},
-      type: Object
-    },
-    taskStatusMap: {
-      default: () => {},
-      type: Object
-    }
-    */
-
 export default {
   name: 'validation-tag',
   props: {
