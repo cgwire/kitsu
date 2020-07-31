@@ -372,6 +372,9 @@ export default {
     this.container.style.height = this.getDefaultHeight() + 'px'
     this.isLoading = true
     this.setupFabricCanvas()
+    this.isPlaying = false
+    this.isMuted = false
+    this.isRepeating = false
     setTimeout(() => {
       if (this.video) {
         this.video.addEventListener('loadedmetadata', () => {
@@ -607,9 +610,6 @@ export default {
       this.progress.setAttribute('max', this.videoDuration)
       this.maxDuration = this.formatTime(this.videoDuration)
       this.isLoading = false
-      this.isPlaying = false
-      this.isMuted = false
-      this.isRepeating = false
 
       if (this.container) {
         const dimensions = this.getDimensions()
