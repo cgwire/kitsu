@@ -318,10 +318,14 @@ const actions = {
       const selectedTaskIds = Object.keys(state.selectedTasks)
       async.eachSeries(selectedTaskIds, (taskId, next) => {
         const task = state.taskMap[taskId]
-        tasksApi.deleteTask(task, (err) => {
-          if (!err) commit(DELETE_TASK_END, task)
-          next(err)
-        })
+        if (task) {
+          tasksApi.deleteTask(task, (err) => {
+            if (!err) commit(DELETE_TASK_END, task)
+            next(err)
+          })
+        } else {
+          next()
+        }
       }, (err) => {
         if (err) reject(err)
         else {
@@ -790,6 +794,12 @@ const mutations = {
     state.taskComments[task.id] = undefined
     state.taskPreviews[task.id] = undefined
     state.taskMap[task.id] = undefined
+    const validationKey = `${task.entity_id}-${task.task_type_id}`
+    state.selectedValidations[validationKey] = {
+      entity: { id: task.entity_id },
+      column: { id: task.task_type_id }
+    }
+    delete state.selectedTasks[task.id]
   },
 
   [DELETE_COMMENT_END] (state, {
