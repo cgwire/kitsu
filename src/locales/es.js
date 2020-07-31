@@ -567,6 +567,9 @@ export default {
       slack_token: 'Slack token (opcional)',
       use_original_name: 'Usar el nombre del archivo original para las descargas'
     },
+    production: {
+      empty_list: 'La lista está actualmente vacía. Significa que todos los datos de los ajustes principales están disponibles para los usuarios. Añada algunas entradas para limitar las opciones de esta producción.'
+    },
     save: {
       button: 'Grabar parametrizaciones',
       error: 'Se ha producido un error del servidor al guardar la configuración'

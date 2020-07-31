@@ -18,7 +18,7 @@
       <form v-on:submit.prevent>
         <combobox
           :label="$t('assets.fields.type')"
-          :options="getAssetTypeOptions"
+          :options="productionAssetTypeOptions"
           v-model="form.entity_type_id"
         />
         <combobox
@@ -161,7 +161,7 @@ export default {
       'currentProduction',
       'currentEpisode',
       'episodes',
-      'getAssetTypeOptions',
+      'productionAssetTypeOptions',
       'getOpenProductionOptions',
       'isTVShow',
       'openProductions'

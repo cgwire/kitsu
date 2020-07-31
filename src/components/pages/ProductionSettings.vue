@@ -35,7 +35,13 @@
           {{ $t('main.add') }}
         </button>
       </div>
-      <table class="datatable list">
+      <div
+        class="box"
+        v-if="isEmpty(currentProduction.asset_types)"
+      >
+        {{ $t('settings.production.empty_list') }}
+      </div>
+      <table class="datatable list" v-else>
         <tbody class="datatable-body">
           <tr
             class="datatable-row"
@@ -70,7 +76,13 @@
           {{ $t('main.add') }}
         </button>
       </div>
-      <table class="datatable list">
+      <div
+        class="box"
+        v-if="isEmpty(currentProduction.task_types)"
+      >
+        {{ $t('settings.production.empty_list') }}
+      </div>
+      <table class="datatable list" v-else>
         <tbody class="datatable-body">
           <tr
             class="datatable-row"
@@ -107,7 +119,13 @@
           {{ $t('main.add') }}
         </button>
       </div>
-      <table class="datatable list">
+      <div
+        class="box"
+        v-if="isEmpty(currentProduction.task_statuses)"
+      >
+        {{ $t('settings.production.empty_list') }}
+      </div>
+      <table class="datatable list" v-else>
         <tbody class="datatable-body">
           <tr
             class="datatable-row"
@@ -138,6 +156,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
 import { sortByName } from '@/lib/sorting'
 
 import Combobox from '@/components/widgets/Combobox'
@@ -183,6 +202,7 @@ export default {
       'currentProduction',
       'assetTypes',
       'productionAssetTypes',
+      'productionTaskTypes',
       'productionTaskStatuses',
       'taskStatus',
       'taskStatusMap',
@@ -201,17 +221,11 @@ export default {
         .filter(s => !this.currentProduction.task_statuses.includes(s.id))
     },
 
-    productionTaskTypes () {
-      return sortByName(
-        this.currentProduction
-          .task_types
-          .map(id => this.taskTypeMap[id])
-      )
-    },
-
     remainingTaskTypes () {
-      return this.taskTypes
-        .filter(t => !this.currentProduction.task_types.includes(t.id))
+      return sortByName(
+        this.taskTypes
+          .filter(t => !this.currentProduction.task_types.includes(t.id))
+      )
     }
   },
 
@@ -224,6 +238,10 @@ export default {
       'removeTaskStatusFromProduction',
       'removeTaskTypeFromProduction'
     ]),
+
+    isEmpty (list) {
+      return !list || list.length === 0
+    },
 
     isActiveTab (tab) {
       return this.activeTab === tab
@@ -308,5 +326,9 @@ h2.subtitle {
   .name {
     width: 100%;
   }
+}
+
+.box {
+  max-width: 400px;
 }
 </style>

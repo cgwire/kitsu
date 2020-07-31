@@ -234,11 +234,16 @@ const getters = {
     }
   },
 
+  productionAssetTypeOptions: (state, getters) => {
+    return getters.productionAssetTypes.map(
+      assetType => ({ label: assetType.name, value: assetType.id })
+    )
+  },
   productionStatusOptions: state => state.productionStatus.map(
-    (status) => { return { label: status.name, value: status.id } }
+    status => ({ label: status.name, value: status.id })
   ),
   openProductionOptions: state => state.openProductions.map(
-    (production) => { return { label: production.name, value: production.id } }
+    production => ({ label: production.name, value: production.id })
   )
 }
 

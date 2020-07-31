@@ -553,6 +553,9 @@ export default {
       slack_token: 'Slack Token (Optional)',
       use_original_name: 'Original-Dateinamen für Downloads verwenden'
     },
+    production: {
+      empty_list: 'Die Liste ist derzeit leer. Das bedeutet, dass den Benutzern alle Daten aus den Haupteinstellungen zur Verfügung stehen. Fügen Sie einige Einträge hinzu, um die Auswahl für diese Produktion einzuschränken.'
+    },
     save: {
       button: 'Einstellungen speichern',
       error: 'Beim Speichern von Einstellungen ist ein Serverfehler aufgetreten.'

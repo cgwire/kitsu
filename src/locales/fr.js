@@ -600,6 +600,9 @@ export default {
       hours_by_day: 'Heures par jour',
       use_original_name: 'Utiliser les noms de fichiers originaux pour le téléchargement'
     },
+    production: {
+      empty_list: 'La liste est vide. Cela signifie que tous les entrées sont disponibles aux utilisateurs. Ajouter des éléments à cette liste si vous voulez limiter les choix disponibles aux utilisateurs.'
+    },
     save: {
       button: 'Sauvegarder les paramètres',
       error: 'Une erreur serveur est survenue en sauvegardant les paramètres'
