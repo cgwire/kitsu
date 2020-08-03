@@ -102,14 +102,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 .dark {
-  .shot:hover {
-    background-color: $mid-grey;
-  }
-
-  .shot.selected {
-    background-color: $dark-purple;
-  }
-
   .asset-type-name {
     color: $light-grey-light;
   }
@@ -140,7 +132,7 @@ export default {
   margin-right: 1em;
   width: 150px;
   height: 40px;
-  color: $grey;
+  color: $grey-strong;
   text-transform: uppercase;
 }
 
@@ -158,11 +150,11 @@ export default {
 }
 
 .shot:hover {
-  background: #ecfaec;
+  background: var(--background-selectable);
 }
 
 .shot.selected {
-  background: $light-purple;
+  background: var(--background-selected);
 }
 
 .empty {
