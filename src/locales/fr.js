@@ -49,6 +49,7 @@ export default {
     title: 'Casting',
     edit_label: 'Changer le label de l\'asset',
     label: 'Label',
+    picture_mode: 'Passer en mode image',
     text_mode: 'Passer en mode texte',
     options: {
       fixed: 'fixe',

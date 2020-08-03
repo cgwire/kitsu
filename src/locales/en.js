@@ -48,6 +48,7 @@ export default {
     edit_label: 'Change the asset\'s label',
     empty: 'Empty casting',
     label: 'Label',
+    picture_mode: 'Switch to picture mode',
     text_mode: 'Switch to text mode',
     title: 'Breakdown',
     options: {

@@ -25,7 +25,7 @@
           <span class="filler"></span>
           <button-simple
             class="flexrow-item"
-            :title="$t('breakdown.text_mode')"
+            :title="isTextMode ? $t('breakdown.picture_mode') : $t('breakdown.text_mode')"
             icon="type"
             :is-on="isTextMode"
             :is-responsive="true"
