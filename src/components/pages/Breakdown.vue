@@ -534,7 +534,7 @@ export default {
         .then(() => {
           this.loading.importing = false
           this.hideImportRenderModal()
-          this.reloadShots()
+          this.setCastingSequence(this.sequenceId)
         })
         .catch(() => {
           this.loading.importing = false
