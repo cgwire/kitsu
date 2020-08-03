@@ -397,6 +397,7 @@ export default {
     },
 
     selectEntity (entityId, event) {
+      const previousSelection = { ...this.selection }
       if (!event.ctrlKey && !event.shitKey) {
         this.clearSelection()
       }
@@ -405,8 +406,24 @@ export default {
         this.selectRange(this.previousEntityId, entityId)
       }
 
-      if (!this.previousEntityId || !event.shiftKey) this.previousEntityId = entityId
-      this.selection[entityId] = true
+      if (!this.previousEntityId || !event.shiftKey) {
+        this.previousEntityId = entityId
+      }
+
+      const nbElementsSelected = Object.keys(previousSelection)
+        .filter(k => previousSelection[k])
+        .length
+      if (
+        !previousSelection[entityId] ||
+        (nbElementsSelected > 1 && !event.ctrlKey)
+      ) {
+        this.selection[entityId] = true
+      } else if (
+        previousSelection[entityId] &&
+        event.ctrlKey
+      ) {
+        this.selection[entityId] = false
+      }
     },
 
     clearSelection () {
