@@ -50,6 +50,8 @@ import {
 import {
   CLEAR_SHOTS,
 
+  LOAD_ASSET_CASTING_END,
+
   LOAD_SHOTS_START,
   LOAD_SHOTS_ERROR,
   LOAD_SHOTS_END,
@@ -640,6 +642,14 @@ const actions = {
       .catch((err) => console.error(err))
   },
 
+  loadAssetCasting ({ commit, rootGetters }, asset) {
+    const assetMap = rootGetters.assetMap
+    return breakdownApi.getAssetCasting(asset)
+      .then((casting) => {
+        commit(LOAD_ASSET_CASTING_END, { asset, casting, assetMap })
+      })
+  },
+
   loadShotCasting ({ commit, rootGetters }, shot) {
     const assetMap = rootGetters.assetMap
     return breakdownApi.getShotCasting(shot)
@@ -929,17 +939,12 @@ const actions = {
     return new Promise((resolve, reject) => {
       const productionId = rootState.route.params.production_id
       dispatch('setLastProductionScreen', 'sequences')
-
       if (state.sequences.length === 0 ||
           state.sequences[0].production_id !== productionId) {
-        dispatch('loadShots', (err) => {
-          if (err) {
-            reject(err)
-          } else {
-            dispatch('computeSequenceStats')
-            resolve()
-          }
-        })
+        dispatch('computeSequenceStats')
+        resolve()
+      } else {
+        resolve()
       }
     })
   },

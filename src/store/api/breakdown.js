@@ -33,5 +33,12 @@ export default {
       `/api/data/projects/${shot.project_id}/entities/` +
       `${shot.id}/casting`
     return client.pget(path)
+  },
+
+  getAssetCasting (asset) {
+    const path =
+      `/api/data/projects/${asset.project_id}/entities/` +
+      `${asset.id}/casting`
+    return client.pget(path)
   }
 }

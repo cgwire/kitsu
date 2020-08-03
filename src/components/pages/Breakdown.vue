@@ -321,8 +321,8 @@ export default {
     ...mapActions([
       'addAssetToCasting',
       'displayMoreAssets',
-      'loadShots',
-      'loadAssets',
+      'loadAssetCasting',
+      'loadShotCasting',
       'removeAssetFromCasting',
       'saveCasting',
       'setAssetSearch',
@@ -685,6 +685,24 @@ export default {
 
     sequences () {
       this.$store.commit('CASTING_SET_SEQUENCES', this.sequences)
+    }
+  },
+
+  socket: {
+    events: {
+      'shot:casting-update' (eventData) {
+        const shot = this.shotMap[eventData.shot_id]
+        if (shot.sequence_id === this.sequenceId) {
+          this.loadShotCasting(shot)
+        }
+      },
+
+      'asset:casting-update' (eventData) {
+        const asset = this.assetMap[eventData.asset_id]
+        if (asset.asset_type_id === this.assetTypeId) {
+          this.loadAssetCasting(asset)
+        }
+      }
     }
   },
 
