@@ -279,9 +279,12 @@ export default {
     },
 
     exportUrlPath () {
-      return (
+      let path =
         `/api/export/csv/projects/${this.currentProduction.id}/casting.csv`
-      )
+      if (this.currentEpisode) {
+        path += `?episode_id=${this.currentEpisode.id}`
+      }
+      return path
     },
 
     isAssetCasting () {
