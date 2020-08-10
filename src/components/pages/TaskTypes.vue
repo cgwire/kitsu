@@ -1,45 +1,38 @@
 <template>
   <div class="task-types page fixed-page">
-    <div class="level page-header">
-      <div class="level-left">
-        <page-title :text="$t('task_types.title')" />
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <button-link
-            class="level-item"
-            icon="plus"
-            :text="$t('task_types.new_task_type')"
-            path="/task-types/new"
-          />
-        </div>
-      </div>
-    </div>
+
+    <list-page-header
+      :title="$t('task_types.title')"
+      :new-entry-label="$t('task_types.new_task_type')"
+      @new-clicked="onNewClicked"
+    />
 
     <task-type-list
       :entries="taskTypes"
       :is-loading="loading.taskTypes"
       :is-error="errors.taskTypes"
       @update-priorities="updatePriorities"
+      @edit-clicked="onEditClicked"
+      @delete-clicked="onDeleteClicked"
     />
 
     <edit-task-type-modal
-      :active="modals.isNewDisplayed"
-      :is-loading="editTaskType.isLoading"
-      :is-error="editTaskType.isError"
+      :active="modals.edit"
+      :is-loading="loading.edit"
+      :is-error="errors.edit"
       :entries="taskTypes"
-      :cancel-route="'/task-types'"
       :task-type-to-edit="taskTypeToEdit"
+      @cancel="modals.edit = false"
       @confirm="confirmEditTaskType"
     />
 
     <delete-modal
-      :active="modals.isDeleteDisplayed"
-      :is-loading="deleteTaskType.isLoading"
-      :is-error="deleteTaskType.isError"
-      :cancel-route="'/task-types'"
+      :active="modals.del"
+      :is-loading="loading.del"
+      :is-error="errors.del"
       :text="deleteText()"
       :error-text="$t('task_types.delete_error')"
+      @cancel="modals.del = false"
       @confirm="confirmDeleteTaskType"
     />
 
@@ -49,36 +42,38 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import func from '../../lib/func'
-import ButtonLink from '../widgets/ButtonLink'
 import DeleteModal from '../modals/DeleteModal'
 import EditTaskTypeModal from '../modals/EditTaskTypeModal'
-import PageTitle from '../widgets/PageTitle'
+import ListPageHeader from '../widgets/ListPageHeader'
 import TaskTypeList from '../lists/TaskTypeList'
 
 export default {
   name: 'task-types',
 
   components: {
-    ButtonLink,
     DeleteModal,
     EditTaskTypeModal,
-    PageTitle,
+    ListPageHeader,
     TaskTypeList
   },
 
   data () {
     return {
       errors: {
-        taskTypes: false
+        taskTypes: false,
+        edit: false,
+        del: false
       },
       loading: {
-        taskTypes: false
+        taskTypes: false,
+        edit: false,
+        del: false
       },
       modals: {
-        isNewDisplayed: false,
-        isDeleteDisplayed: false
+        del: false,
+        edit: false
       },
-      taskTypeToDelete: null,
+      taskTypeToDelete: { color: '#999999' },
       taskTypeToEdit: null
     }
   },
@@ -95,7 +90,6 @@ export default {
     this.errors.taskTypes = false
     this.loadTaskTypes()
       .then(() => {
-        this.handleModalsDisplay()
         this.loading.taskTypes = false
       })
       .catch((err) => {
@@ -118,10 +112,17 @@ export default {
         action = 'editTaskType'
         form.id = this.taskTypeToEdit.id
       }
+      this.loading.edit = true
+      this.errors.edit = false
       this.$store.dispatch(action, form)
         .then(() => {
-          this.modals.isNewDisplayed = false
-          this.$router.push({ name: 'task-types' })
+          this.loading.edit = false
+          this.modals.edit = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.edit = false
+          this.errors.edit = true
         })
     },
 
@@ -149,10 +150,17 @@ export default {
     },
 
     confirmDeleteTaskType () {
+      this.loading.del = true
+      this.errors.del = false
       this.deleteTaskType(this.taskTypeToDelete)
         .then(() => {
-          this.modals.isDeleteDisplayed = false
-          this.$router.push({ name: 'task-types' })
+          this.loading.del = false
+          this.modals.del = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.del = false
+          this.errors.del = true
         })
     },
 
@@ -165,27 +173,23 @@ export default {
       }
     },
 
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
-      const taskTypeId = this.$store.state.route.params.task_type_id
-      if (path.indexOf('new') > 0) {
-        this.taskTypeToEdit = { color: '#999999' }
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('edit') > 0) {
-        this.taskTypeToEdit = this.getTaskType(taskTypeId)
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('delete') > 0) {
-        this.taskTypeToDelete = this.getTaskType(taskTypeId)
-        this.modals.isDeleteDisplayed = true
-      } else {
-        this.modals.isNewDisplayed = false
-        this.modals.isDeleteDisplayed = false
-      }
+    onDeleteClicked (taskType) {
+      this.taskTypeToDelete = taskType
+      this.modals.del = true
+    },
+
+    onEditClicked (taskType) {
+      this.taskTypeToEdit = taskType
+      this.modals.edit = true
+    },
+
+    onNewClicked () {
+      this.taskTypeToEdit = { color: '#999999' }
+      this.modals.edit = true
     }
   },
 
   watch: {
-    $route () { this.handleModalsDisplay() }
   },
 
   metaInfo () {

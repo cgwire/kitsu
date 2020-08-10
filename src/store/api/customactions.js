@@ -6,26 +6,26 @@ export default {
     client.get('/api/data/custom-actions', callback)
   },
 
-  newCustomAction (customAction, callback) {
+  newCustomAction (customAction) {
     const data = {
       name: customAction.name,
       url: customAction.url
     }
-    client.post('/api/data/custom-actions/', data, callback)
+    return client.ppost('/api/data/custom-actions/', data)
   },
 
-  updateCustomAction (customAction, callback) {
+  updateCustomAction (customAction) {
     const data = {
       name: customAction.name,
       url: customAction.url,
       entity_type: customAction.entityType,
       is_ajax: customAction.isAjax === 'true'
     }
-    client.put(`/api/data/custom-actions/${customAction.id}`, data, callback)
+    return client.pput(`/api/data/custom-actions/${customAction.id}`, data)
   },
 
-  deleteCustomAction (customAction, callback) {
-    client.del(`/api/data/custom-actions/${customAction.id}`, callback)
+  deleteCustomAction (customAction) {
+    return client.pdel(`/api/data/custom-actions/${customAction.id}`)
   },
 
   postCustomAction (url, data) {

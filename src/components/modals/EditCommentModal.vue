@@ -53,27 +53,13 @@
         </div>
       </form>
 
-      <p class="has-text-right">
-        <a
-          :class="{
-            button: true,
-            'is-primary': true,
-            'is-loading': isLoading
-          }"
-          @click="runConfirmation">
-          {{ $t("main.confirmation") }}
-        </a>
-        <button
-          class="button is-link"
-          @click="$emit('cancel')"
-        >
-          {{ $t("main.cancel") }}
-        </button>
-      </p>
-
-      <p class="error has-text-right info-message" v-if="isError">
-        {{ $t("assets.edit_fail") }}
-      </p>
+      <modal-footer
+        :error-text="$t('comments.edit_error')"
+        :is-error="isError"
+        :is-loading="isLoading"
+        @confirm="runConfirmation"
+        @cancel="$emit('cancel')"
+      />
     </div>
   </div>
 </div>
@@ -81,16 +67,20 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { modalMixin } from './base_modal'
 
 import AtTa from 'vue-at/dist/vue-at-textarea'
 import ComboBoxStatus from '../widgets/ComboboxStatus.vue'
+import ModalFooter from './ModalFooter'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 
 export default {
   name: 'edit-comment-modal',
+  mixins: [modalMixin],
   components: {
     AtTa,
     ComboBoxStatus,
+    ModalFooter,
     PeopleAvatar
   },
 

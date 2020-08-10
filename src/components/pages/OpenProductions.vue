@@ -88,8 +88,8 @@
     </div>
     <edit-production-modal
       :active="modals.isNewDisplayed"
-      :is-loading="editProduction.isLoading"
-      :is-error="editProduction.isError"
+      :is-loading="loading.edit"
+      :is-error="errors.edit"
       @confirm="confirmEditProduction"
       @cancel="hideNewModal"
     />
@@ -116,6 +116,12 @@ export default {
 
   data () {
     return {
+      errors: {
+        edit: false
+      },
+      loading: {
+        edit: false
+      },
       modals: {
         isNewDisplayed: false
       }
@@ -124,7 +130,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'editProduction',
       'isCurrentUserAdmin',
       'isCurrentUserManager',
       'isCurrentUserClient',
@@ -152,18 +157,6 @@ export default {
       return this.sectionPath(production, this.lastProductionScreen)
     },
 
-    assetsPath (production) {
-      return this.sectionPath(production, 'assets')
-    },
-
-    shotsPath (production) {
-      return this.sectionPath(production, 'shots')
-    },
-
-    sequencesPath (production) {
-      return this.sectionPath(production, 'sequences')
-    },
-
     sectionPath (production, section) {
       const route = {
         name: section,
@@ -183,14 +176,18 @@ export default {
     },
 
     confirmEditProduction (form) {
-      this.newProduction({
-        data: form,
-        callback: (err, production) => {
-          if (!err) {
-            this.modals.isNewDisplayed = false
-          }
-        }
-      })
+      this.errors.edit = false
+      this.loading.edit = true
+      this.newProduction(form)
+        .then(() => {
+          this.modals.isNewDisplayed = false
+          this.loading.edit = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.edit = false
+          this.errors.edit = true
+        })
     },
 
     showNewModal () {
@@ -200,7 +197,6 @@ export default {
     hideNewModal () {
       this.modals.isNewDisplayed = false
     }
-
   },
 
   watch: {},

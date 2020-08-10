@@ -3,56 +3,37 @@ import client from './client'
 export default {
 
   getOrganisation () {
-    return new Promise((resolve, reject) => {
-      client.get('/api/data/organisations', (err, organisations) => {
-        if (err) reject(err)
-        else {
-          let organisation = {
-            name: 'Kitsu',
-            hours_by_day: 8,
-            has_avatar: false,
-            use_original_file_name: false,
-            chat_token_slack: ''
-          }
-          if (organisations.length > 0) organisation = organisations[0]
-          organisation.use_original_file_name =
-            organisation.use_original_file_name ? 'true' : 'false'
-          resolve(organisation)
+    return client.pget('/api/data/organisations')
+      .then((organisations) => {
+        let organisation = {
+          name: 'Kitsu',
+          hours_by_day: 8,
+          has_avatar: false,
+          use_original_file_name: false,
+          chat_token_slack: ''
         }
+        if (organisations.length > 0) organisation = organisations[0]
+        organisation.use_original_file_name =
+          organisation.use_original_file_name ? 'true' : 'false'
+        Promise.resolve(organisation)
       })
-    })
   },
 
   updateOrganisation (organisation) {
-    return new Promise((resolve, reject) => {
-      const data = {
-        name: organisation.name,
-        hours_by_day: organisation.hours_by_day,
-        use_original_file_name: organisation.use_original_file_name === 'true',
-        chat_token_slack: organisation.chat_token_slack
-      }
-      client.put(
-        `/api/data/organisations/${organisation.id}`,
-        data,
-        (err, organisation) => {
-          if (err) reject(err)
-          else resolve(organisation)
-        }
-      )
-    })
+    const data = {
+      name: organisation.name,
+      hours_by_day: organisation.hours_by_day,
+      use_original_file_name: organisation.use_original_file_name === 'true',
+      chat_token_slack: organisation.chat_token_slack
+    }
+    return client.pput(`/api/data/organisations/${organisation.id}`, data)
   },
 
   postOrganisationLogo (organisationId, formData) {
-    return new Promise((resolve, reject) => {
-      client.post(
-        `/api/pictures/thumbnails/organisations/${organisationId}`,
-        formData,
-        (err, organisation) => {
-          if (err) reject(err)
-          else resolve(organisation)
-        }
-      )
-    })
+    return client.ppost(
+      `/api/pictures/thumbnails/organisations/${organisationId}`,
+      formData
+    )
   },
 
   getPeople (callback) {
@@ -63,56 +44,41 @@ export default {
     client.get(`/api/data/persons/${personId}`, callback)
   },
 
-  newPerson (person) {
-    return new Promise((resolve, reject) => {
-      const data = {
-        first_name: person.first_name,
-        last_name: person.last_name,
-        email: person.email.trim(),
-        phone: person.phone,
-        role: person.role,
-        active: person.active
-      }
-      client.post('/api/data/persons/new', data, (err, person) => {
-        if (err) reject(err)
-        else resolve(person)
-      })
-    })
+  createPerson (person) {
+    const data = {
+      first_name: person.first_name,
+      last_name: person.last_name,
+      email: person.email.trim(),
+      phone: person.phone,
+      role: person.role,
+      active: person.active
+    }
+    return client.ppost('/api/data/persons/new', data)
   },
 
   invitePerson (person) {
-    return new Promise((resolve, reject) => {
-      client.get(`/api/actions/persons/${person.id}/invite`, (err) => {
-        if (err) reject(err)
-        else resolve(person)
-      })
-    })
+    return client.pget(`/api/actions/persons/${person.id}/invite`)
   },
 
   updatePerson (person) {
-    return new Promise((resolve, reject) => {
-      const data = {
-        first_name: person.first_name,
-        last_name: person.last_name,
-        email: person.email.trim(),
-        phone: person.phone,
-        timezone: person.timezone,
-        locale: person.locale,
-        role: person.role,
-        active: person.active,
-        notifications_enabled: person.notifications_enabled === 'true',
-        notifications_slack_enabled: person.notifications_slack_enabled === 'true',
-        notifications_slack_userid: person.notifications_slack_userid
-      }
-      client.put(`/api/data/persons/${person.id}`, data, (err, person) => {
-        if (err) reject(err)
-        else resolve(person)
-      })
-    })
+    const data = {
+      first_name: person.first_name,
+      last_name: person.last_name,
+      email: person.email.trim(),
+      phone: person.phone,
+      timezone: person.timezone,
+      locale: person.locale,
+      role: person.role,
+      active: person.active,
+      notifications_enabled: person.notifications_enabled === 'true',
+      notifications_slack_enabled: person.notifications_slack_enabled === 'true',
+      notifications_slack_userid: person.notifications_slack_userid
+    }
+    return client.pput(`/api/data/persons/${person.id}`, data)
   },
 
-  deletePerson (personId, callback) {
-    client.del(`/api/data/persons/${personId}?force=true`, callback)
+  deletePerson (person, callback) {
+    return client.pdel(`/api/data/persons/${person.id}?force=true`)
   },
 
   postCsv (formData, toUpdate) {
@@ -195,39 +161,15 @@ export default {
   },
 
   getDayTable (year, month) {
-    return new Promise((resolve, reject) => {
-      client.get(
-        `/api/data/persons/time-spents/day-table/${year}/${month}`,
-        (err, table) => {
-          if (err) reject(err)
-          else resolve(table)
-        }
-      )
-    })
+    return client.pget(`/api/data/persons/time-spents/day-table/${year}/${month}`)
   },
 
   getWeekTable (year) {
-    return new Promise((resolve, reject) => {
-      client.get(
-        `/api/data/persons/time-spents/week-table/${year}`,
-        (err, table) => {
-          if (err) reject(err)
-          else resolve(table)
-        }
-      )
-    })
+    return client.pget(`/api/data/persons/time-spents/week-table/${year}`)
   },
 
   getMonthTable (year) {
-    return new Promise((resolve, reject) => {
-      client.get(
-        `/api/data/persons/time-spents/month-table/${year}`,
-        (err, table) => {
-          if (err) reject(err)
-          else resolve(table)
-        }
-      )
-    })
+    return client.pget(`/api/data/persons/time-spents/month-table/${year}`)
   },
 
   getYearTable (year) {
@@ -242,24 +184,19 @@ export default {
     week,
     day
   ) {
-    return new Promise((resolve, reject) => {
-      let path = `/api/data/persons/${personId}/time-spents/`
+    let path = `/api/data/persons/${personId}/time-spents/`
 
-      if (detailLevel === 'year') {
-        path += `year/${year}`
-      } else if (detailLevel === 'month') {
-        path += `month/${year}/${month}`
-      } else if (detailLevel === 'week') {
-        path += `week/${year}/${week}`
-      } else {
-        path += `day/${year}/${month}/${day}`
-      }
+    if (detailLevel === 'year') {
+      path += `year/${year}`
+    } else if (detailLevel === 'month') {
+      path += `month/${year}/${month}`
+    } else if (detailLevel === 'week') {
+      path += `week/${year}/${week}`
+    } else {
+      path += `day/${year}/${month}/${day}`
+    }
 
-      client.get(path, (err, tasks) => {
-        if (err) reject(err)
-        else resolve(tasks)
-      })
-    })
+    return client.pget(path)
   },
 
   getContext () {

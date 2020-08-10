@@ -26,25 +26,14 @@ import {
   IMPORT_PEOPLE_ERROR,
   IMPORT_PEOPLE_END,
 
-  EDIT_PEOPLE_START,
-  EDIT_PEOPLE_ERROR,
-  EDIT_PEOPLE_END,
-  SHOW_EDIT_PEOPLE_MODAL,
-  HIDE_EDIT_PEOPLE_MODAL,
-
-  NEW_PEOPLE_END,
-
-  DELETE_PEOPLE_START,
-  DELETE_PEOPLE_ERROR,
-  DELETE_PEOPLE_END,
-  SHOW_DELETE_PEOPLE_MODAL,
-  HIDE_DELETE_PEOPLE_MODAL,
-
   UPLOAD_AVATAR_END,
   USER_SAVE_PROFILE_SUCCESS,
 
   LOAD_PERSON_TASKS_END,
   LOAD_PERSON_DONE_TASKS_END,
+
+  EDIT_PEOPLE_END,
+  DELETE_PEOPLE_END,
 
   SET_PERSON_TASKS_SEARCH,
   SAVE_PERSON_TASKS_SEARCH_END,
@@ -114,6 +103,7 @@ const initialState = {
 
   people: [],
   displayedPeople: [],
+  peopleSearchText: '',
   peopleIndex: {},
   personMap: {},
   isPeopleLoading: false,
@@ -126,14 +116,10 @@ const initialState = {
   isEditModalShown: false,
   isEditLoading: false,
   isEditLoadingError: false,
-  personToEdit: {
-    role: 'user'
-  },
 
   isDeleteModalShown: false,
   isDeleteLoading: false,
   isDeleteLoadingError: false,
-  personToDelete: undefined,
 
   personCsvFormData: undefined,
 
@@ -173,12 +159,10 @@ const getters = {
   isDeleteModalShown: state => state.isDeleteModalShown,
   isDeleteLoading: state => state.isDeleteLoading,
   isDeleteLoadingError: state => state.isDeleteLoadingError,
-  personToDelete: state => state.personToDelete,
 
   isEditModalShown: state => state.isEditModalShown,
   isEditLoading: state => state.isEditLoading,
   isEditLoadingError: state => state.isEditLoadingError,
-  personToEdit: state => state.personToEdit,
 
   personCsvFormData: state => state.personCsvFormData,
 
@@ -214,15 +198,12 @@ const actions = {
   },
 
   saveOrganisation ({ commit }, form) {
-    return new Promise((resolve, reject) => {
-      form.id = state.organisation.id
-      peopleApi.updateOrganisation(form)
-        .then((organisation) => {
-          commit(SET_ORGANISATION, organisation)
-          resolve()
-        })
-        .catch(reject)
-    })
+    form.id = state.organisation.id
+    return peopleApi.updateOrganisation(form)
+      .then((organisation) => {
+        commit(SET_ORGANISATION, organisation)
+        Promise.resolve(organisation)
+      })
   },
 
   uploadOrganisationLogo ({ commit, state }, formData) {
@@ -255,75 +236,44 @@ const actions = {
   loadPerson ({ commit, state }, personId) {
     peopleApi.getPerson(personId, (err, person) => {
       if (err) console.error(err)
-      else if (person.email) {
-        commit(EDIT_PEOPLE_START, person)
-        commit(EDIT_PEOPLE_END, person)
-      }
     })
   },
 
   newPerson ({ commit, state }, data) {
-    return new Promise((resolve, reject) => {
-      commit(EDIT_PEOPLE_START, data)
-      peopleApi.newPerson(state.personToEdit)
-        .then((person) => {
-          commit(HIDE_EDIT_PEOPLE_MODAL)
-          resolve(person)
-        })
-        .catch((err) => {
-          commit(EDIT_PEOPLE_ERROR)
-          reject(err)
-        })
-    })
+    return peopleApi.createPerson(data)
+      .then((person) => {
+        commit(EDIT_PEOPLE_END, person)
+        Promise.resolve()
+      })
   },
 
   newPersonAndInvite ({ commit, state }, data) {
-    return new Promise((resolve, reject) => {
-      commit(EDIT_PEOPLE_START, data)
-      peopleApi.newPerson(state.personToEdit)
-        .then(peopleApi.invitePerson)
-        .then(() => {
-          commit(HIDE_EDIT_PEOPLE_MODAL)
-          resolve()
-        })
-        .catch((err) => {
-          commit(EDIT_PEOPLE_ERROR)
-          reject(err)
-        })
-    })
+    return peopleApi.createPerson(data)
+      .then(peopleApi.invitePerson)
+      .then((person) => {
+        commit(EDIT_PEOPLE_END, person)
+        Promise.resolve()
+      })
   },
 
-  invitePerson ({ commit, state }) {
-    return peopleApi.invitePerson(state.personToEdit)
+  invitePerson ({ commit, state }, person) {
+    return peopleApi.invitePerson(person)
   },
 
   editPerson ({ commit, state }, data) {
-    return new Promise((resolve, reject) => {
-      commit(EDIT_PEOPLE_START, data)
-      peopleApi.updatePerson(state.personToEdit)
-        .then((person) => {
-          commit(EDIT_PEOPLE_END, state.personToEdit)
-          commit(HIDE_EDIT_PEOPLE_MODAL)
-          resolve(person)
-        })
-        .catch((err) => {
-          commit(EDIT_PEOPLE_ERROR)
-          reject(err)
-        })
-    })
+    return peopleApi.updatePerson(data)
+      .then((person) => {
+        commit(EDIT_PEOPLE_END, person)
+        Promise.resolve()
+      })
   },
 
-  deletePeople ({ commit, state }, callback) {
-    commit(DELETE_PEOPLE_START)
-    peopleApi.deletePerson(state.personToDelete.id, (err, people) => {
-      if (err) {
-        commit(DELETE_PEOPLE_ERROR)
-      } else {
-        commit(DELETE_PEOPLE_END, state.personToDelete)
-        commit(HIDE_DELETE_PEOPLE_MODAL)
-      }
-      if (callback) callback(err)
-    })
+  deletePeople ({ commit, state }, person) {
+    return peopleApi.deletePerson(person)
+      .then(() => {
+        commit(DELETE_PEOPLE_END)
+        Promise.resolve()
+      })
   },
 
   uploadPersonFile ({ commit, state }, toUpdate) {
@@ -396,22 +346,6 @@ const actions = {
 
   hidePersonImportModal ({ commit, state }, personId) {
     commit(HIDE_IMPORT_PEOPLE_MODAL)
-  },
-
-  showPersonEditModal ({ commit, state }, personId) {
-    commit(SHOW_EDIT_PEOPLE_MODAL, personId)
-  },
-
-  hidePersonEditModal ({ commit, state }, personId) {
-    commit(HIDE_EDIT_PEOPLE_MODAL, personId)
-  },
-
-  showPersonDeleteModal ({ commit, state }, personId) {
-    commit(SHOW_DELETE_PEOPLE_MODAL, personId)
-  },
-
-  hidePersonDeleteModal ({ commit, state }, personId) {
-    commit(HIDE_DELETE_PEOPLE_MODAL, personId)
   },
 
   setPersonTasksSearch ({ commit, state }, searchText) {
@@ -533,14 +467,7 @@ const mutations = {
     state.peopleIndex = buildNameIndex(state.people)
   },
 
-  [DELETE_PEOPLE_START] (state) {
-    state.isDeleteLoading = true
-    state.isDeleteLoadingError = false
-  },
-
   [DELETE_PEOPLE_END] (state, person) {
-    state.isDeleteLoading = false
-    state.personToDelete = undefined
     if (person) {
       const personToDeleteIndex = state.people.findIndex(
         (p) => p.id === person.id
@@ -550,40 +477,16 @@ const mutations = {
       }
       delete state.personMap[person.id]
     }
-  },
-
-  [DELETE_PEOPLE_ERROR] (state) {
-    state.isDeleteLoading = false
-    state.isDeleteLoadingError = true
-  },
-
-  [SHOW_DELETE_PEOPLE_MODAL] (state, personId) {
-    state.isDeleteModalShown = true
-    state.isDeleteLoadingError = false
-    state.isDeleteLoading = false
-    state.personToDelete = state.people.find(
-      (person) => person.id === personId
-    )
-  },
-
-  [HIDE_DELETE_PEOPLE_MODAL] (state, personId) {
-    state.isDeleteModalShown = false
-    state.personToDelete = undefined
-  },
-
-  [EDIT_PEOPLE_START] (state, data) {
-    state.isEditLoading = true
-    state.isEditLoadingError = false
-    state.personToEdit = Object.assign(state.personToEdit, data)
-  },
-
-  [NEW_PEOPLE_END] (state) {
+    state.peopleIndex = buildNameIndex(state.people)
+    if (state.peopleSearchText) {
+      const keywords = getKeyWords(state.peopleSearchText)
+      state.displayedPeople = indexSearch(state.peopleIndex, keywords)
+    } else {
+      state.displayedPeople = state.people
+    }
   },
 
   [EDIT_PEOPLE_END] (state, form) {
-    state.isEditLoading = false
-    state.isEditLoadingError = false
-
     let personToAdd = { ...form }
     personToAdd = helpers.addAdditionalInformation(personToAdd)
 
@@ -592,25 +495,22 @@ const mutations = {
     )
     if (personToAdd.name) {
       if (personToEditIndex >= 0) {
-        state.personMap[state.personToEdit.id] = personToAdd
+        state.personMap[personToAdd.id] = personToAdd
         delete state.people[personToEditIndex]
-        state.people[personToEditIndex] = state.personMap[state.personToEdit.id]
+        state.people[personToEditIndex] = state.personMap[personToAdd.id]
       } else if (!state.personMap[personToAdd.id]) {
         state.people.push(personToAdd)
         state.personMap[personToAdd.id] = personToAdd
       }
       state.people = sortPeople(state.people)
-      state.displayedPeople = state.people
       state.peopleIndex = buildNameIndex(state.people)
-      state.personToEdit = {
-        role: 'user'
+      if (state.peopleSearchText) {
+        const keywords = getKeyWords(state.peopleSearchText)
+        state.displayedPeople = indexSearch(state.peopleIndex, keywords)
+      } else {
+        state.displayedPeople = state.people
       }
     }
-  },
-
-  [EDIT_PEOPLE_ERROR] (state) {
-    state.isEditLoading = false
-    state.isEditLoadingError = true
   },
 
   [IMPORT_PEOPLE_START] (state, data) {
@@ -626,30 +526,6 @@ const mutations = {
   [IMPORT_PEOPLE_ERROR] (state) {
     state.isImportPeopleLoading = false
     state.isImportPeopleLoadingError = true
-  },
-
-  [SHOW_EDIT_PEOPLE_MODAL] (state, personId) {
-    state.isEditModalShown = true
-    state.isEditLoadingError = false
-    state.isEditLoading = false
-    if (personId !== undefined) {
-      state.personToEdit = state.people.find(
-        (person) => person.id === personId
-      )
-    } else {
-      state.personToEdit = {
-        first_name: '',
-        last_name: '',
-        phone: '',
-        email: '',
-        role: 'user'
-      }
-    }
-  },
-
-  [HIDE_EDIT_PEOPLE_MODAL] (state) {
-    state.isEditModalShown = false
-    state.personToEdit = {}
   },
 
   [SHOW_IMPORT_PEOPLE_MODAL] (state) {
@@ -802,8 +678,10 @@ const mutations = {
     if (text) {
       const keywords = getKeyWords(text)
       state.displayedPeople = indexSearch(state.peopleIndex, keywords)
+      state.peopleSearchText = text
     } else {
       state.displayedPeople = state.people
+      state.peopleSearchText = ''
     }
   },
 

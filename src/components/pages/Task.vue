@@ -214,8 +214,8 @@
       :active="modals.addPreview"
       :is-loading="loading.addPreview"
       :is-error="errors.addPreview"
-      :cancel-route="taskPath()"
       :form-data="addPreviewFormData"
+      @cancel="modals.addPreview = false"
       @fileselected="selectFile"
       @confirm="closeAddPreviewModal"
     />

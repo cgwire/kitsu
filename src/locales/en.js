@@ -4,7 +4,7 @@ export default {
     cast_in: 'Cast in',
     delete_error: 'An error occured while deleting this asset. There are probably data linked to it. Are you sure this asset type has no task linked to it?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
-    edit_fail: 'Creation or edition failed, a server error occured.',
+    edit_fail: 'Saving failed, it may be due to the fact that an asset with a similar name already exists.',
     edit_success: 'Asset {name} successfully edited.',
     edit_title: 'Edit asset',
     empty_list: 'There is no asset in the production. What about creating some?',
@@ -31,6 +31,7 @@ export default {
 
   asset_types: {
     all_asset_types: 'All asset types',
+    create_error: 'An error occured while saving this asset type. Are you sure there is no asset type with similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this asset type. There are probably data linked to it. Are you sure this asset type has no asset linked to it?',
     edit_title: 'Edit asset type',
@@ -85,6 +86,7 @@ export default {
   },
 
   custom_actions: {
+    create_error: 'An error occured while saving this custom custom action. Are you sure that there is no other action with the same name?',
     delete_text: 'Are you sure you want to remove custom action {name} from your database?',
     delete_error: 'An error occured while deleting this custom custom action.',
     edit_title: 'Edit a custom action',
@@ -147,6 +149,7 @@ export default {
 
   episodes: {
     all_episodes: 'All episodes',
+    edit_error: 'An error occured while saving this episode. Are you sure there is no episode with similar name?',
     delete_error: 'An error occured while deleting this episode. There are probably data linked to it. Are you sure this episode has no sequence linked to it?',
     delete_text: 'Are you sure you want to remove {name} from your database? Every related shots and previews will be deleted. Pleas confirm by typing the episode name below.',
     edit_title: 'Edit episode',
@@ -331,6 +334,7 @@ export default {
     active_persons: 'active person | active persons',
     add_member_to_team: 'Add a member to the team: ',
     create_invite: 'Create and send invitation',
+    create_error: 'An  error occured while creating this person. Please contact our support team for more information.',
     delete_error: 'An error occured while deleting this person. There are probably data linked to it. Are you sure this person has no assignation or wrote no comment?',
     delete_text: 'Are you sure you want to remove {personName} from your database? Every related comments and previews will be deleted. Please confirm by typing the full person name below.',
     edit_title: 'Edit person',
@@ -558,6 +562,7 @@ export default {
   },
 
   task_status: {
+    create_error: 'An error occured while saving this task status. Are you sure there is no task status with similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this task status. There are probably data linked to it. Are you sure this task status has no task linked to it?',
     edit_title: 'Edit task status',
@@ -565,9 +570,9 @@ export default {
     new_task_status: 'Add a task status',
     title: 'Task Status',
     fields: {
+      color: 'Color',
       is_artist_allowed: 'Is artist allowed',
       is_client_allowed: 'Is client allowed',
-      color: 'Color',
       is_done: 'Is done',
       is_reviewable: 'Is reviewable',
       is_retake: 'Has retake value',
@@ -580,6 +585,7 @@ export default {
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this task type. There are probably data linked to it. Are you sure this task type has no task linked to it?',
     edit_title: 'Edit task type',
+    create_error: 'An error occured while creating the task type. Please, check that there is no task type with similar name.',
     new_task_type: 'Add a task type',
     number: 'task type | task types',
     title: 'Task Types',
@@ -594,6 +600,7 @@ export default {
 
   sequences: {
     all_sequences: 'All sequences',
+    edit_error: 'An error occured while saving this sequence. Are you sure there is no sequence with similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database? Every related shots and previews will be deleted. Please confirm by typing the sequence name below.',
     delete_error: 'An error occured while deleting this sequence. There are probably data linked to it. Are you sure this sequence has no shot linked to it?',
     edit_title: 'Edit sequence',

@@ -85,8 +85,11 @@
         @change-sort="onChangeSortClicked"
         @create-tasks="showCreateTasksModal"
         @delete-all-tasks="onDeleteAllTasksClicked"
+        @delete-clicked="onDeleteClicked"
         @delete-metadata="onDeleteMetadataClicked"
+        @edit-clicked="onEditClicked"
         @edit-metadata="onEditMetadataClicked"
+        @restore-clicked="onRestoreClicked"
         @scroll="saveScrollPosition"
         @shot-history="showShotHistoryModal"
       />
@@ -107,40 +110,37 @@
     :is-loading="loading.manage"
     :is-error="false"
     :is-success="false"
-    :cancel-route="shotsPath"
     @cancel="hideManageShots"
   />
 
   <edit-shot-modal
     :active="modals.isNewDisplayed"
     :is-loading="loading.edit"
-    :is-loading-stay="loading.stay"
-    :is-error="editShot.isCreateError"
-    :is-success="editShot.isSuccess"
-    :cancel-route="shotsPath"
+    :is-error="errors.edit"
     :shot-to-edit="shotToEdit"
+    @cancel="modals.isNewDisplayed = false"
     @confirm="confirmEditShot"
   />
 
   <delete-modal
     ref="delete-shot-modal"
     :active="modals.isDeleteDisplayed"
-    :is-loading="deleteShot.isLoading"
-    :is-error="deleteShot.isError"
-    :cancel-route="shotsPath"
+    :is-loading="loading.del"
+    :is-error="errors.del"
     :text="deleteText()"
     :error-text="$t('shots.delete_error')"
+    @cancel="modals.isDeleteDisplayed = false"
     @confirm="confirmDeleteShot"
   />
 
   <delete-modal
     ref="restore-shot-modal"
     :active="modals.isRestoreDisplayed"
-    :is-loading="restoreShot.isLoading"
-    :is-error="restoreShot.isError"
-    :cancel-route="shotsPath"
+    :is-loading="loading.restore"
+    :is-error="errors.restore"
     :text="restoreText()"
     :error-text="$t('shots.restore_error')"
+    @cancel="modals.isDeleteDisplayed = false"
     @confirm="confirmRestoreShot"
   />
 
@@ -160,10 +160,10 @@
     :active="modals.isDeleteAllTasksDisplayed"
     :is-loading="loading.deleteAllTasks"
     :is-error="errors.deleteAllTasks"
-    :cancel-route="shotsPath"
     :text="deleteAllTasksText()"
     :error-text="$t('tasks.delete_all_error')"
     :lock-text="deleteAllTasksLockText"
+    @cancel="modals.isDeleteAllTasksDisplayed = false"
     @confirm="confirmDeleteAllTasks"
   />
 
@@ -303,11 +303,12 @@ export default {
       initialLoading: true,
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
+      formData: null,
       historyShot: {},
+      parsedCSV: [],
       shotToDelete: null,
       shotToEdit: null,
-      formData: null,
-      parsedCSV: [],
+      taskTypeForTaskDeletion: null,
       modals: {
         isAddMetadataDisplayed: false,
         isAddThumbnailsDisplayed: false,
@@ -331,7 +332,9 @@ export default {
         deleteAllTasks: false,
         deleteMetadata: false,
         edit: false,
+        del: false,
         importing: false,
+        restore: false,
         stay: false
       },
       errors: {
@@ -348,9 +351,7 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
-      'deleteShot',
       'displayedShotsBySequence',
-      'editShot',
       'episodeMap',
       'episodes',
       'isCurrentUserClient',
@@ -365,7 +366,6 @@ export default {
       'isTVShow',
       'nbSelectedTasks',
       'openProductions',
-      'restoreShot',
       'sequences',
       'selectedTasks',
       'shotMap',
@@ -441,7 +441,6 @@ export default {
           this.initialLoading = false
         }, 200)
         if (!err) {
-          this.handleModalsDisplay()
           setTimeout(() => {
             this.onSearchChange()
             this.$refs['shot-list'].setScrollPosition(
@@ -489,13 +488,16 @@ export default {
       'changeShotSort',
       'commentTaskWithPreview',
       'deleteAllTasks',
+      'deleteShot',
       'deleteMetadataDescriptor',
+      'editShot',
       'getShotsCsvLines',
       'hideAssignations',
       'loadEpisodes',
       'loadShots',
       'loadComment',
       'removeShotSearch',
+      'restoreShot',
       'saveShotSearch',
       'setLastProductionScreen',
       'setPreview',
@@ -548,6 +550,21 @@ export default {
       this.modals.isDeleteMetadataDisplayed = true
     },
 
+    onDeleteClicked (shot) {
+      this.shotToDelete = shot
+      this.modals.isDeleteDisplayed = true
+    },
+
+    onEditClicked (shot) {
+      this.shotToEdit = shot
+      this.modals.isNewDisplayed = true
+    },
+
+    onRestoreClicked (shot) {
+      this.shotToRestore = shot
+      this.modals.isRestoreDisplayed = true
+    },
+
     onEditMetadataClicked (descriptorId) {
       this.descriptorToEdit = this.currentProduction.descriptors.find(
         d => d.id === descriptorId
@@ -556,39 +573,31 @@ export default {
     },
 
     confirmEditShot (form) {
-      let action = 'newShot'
+      form.id = this.shotToEdit.id
       this.loading.edit = true
-      this.editShot.isCreateError = false
-      if (this.shotToEdit && this.shotToEdit.id) {
-        action = 'editShot'
-        form.id = this.shotToEdit.id
-      }
-
-      this.$store.dispatch(action, {
-        data: form,
-        callback: (err) => {
-          if (!err) {
-            this.loading.edit = false
-            this.modals.isNewDisplayed = false
-            this.$router.push(this.shotsPath)
-          } else {
-            this.loading.edit = false
-            this.editShot.isCreateError = true
-          }
-        }
-      })
+      this.errors.edit = false
+      this.editShot(form)
+        .then(() => {
+          this.loading.edit = false
+          this.modals.isNewDisplayed = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.edit = false
+          this.errors.edit = true
+        })
     },
 
     confirmDeleteAllTasks () {
-      const taskTypeId = this.$route.params.task_type_id
+      const taskTypeId = this.taskTypeForTaskDeletion.id
       const projectId = this.currentProduction.id
       this.errors.deleteAllTasks = false
       this.loading.deleteAllTasks = true
       this.deleteAllTasks({ projectId, taskTypeId })
         .then(() => {
           this.loading.deleteAllTasks = false
+          this.modals.isDeleteAllTasksDisplayed = false
           this.loadShots()
-          this.$router.push(this.shotsPath)
         }).catch((err) => {
           console.error(err)
           this.loading.deleteAllTasks = false
@@ -597,25 +606,33 @@ export default {
     },
 
     confirmDeleteShot () {
-      this.$store.dispatch('deleteShot', {
-        shot: this.shotToDelete,
-        callback: (err) => {
-          if (!err) {
-            this.$router.push(this.shotsPath)
-          }
-        }
-      })
+      this.loading.del = true
+      this.errors.del = false
+      this.deleteShot(this.shotToDelete)
+        .then(() => {
+          this.loading.del = false
+          this.modals.isDeleteDisplayed = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.del = false
+          this.errors.del = true
+        })
     },
 
     confirmRestoreShot () {
-      this.$store.dispatch('restoreShot', {
-        shot: this.shotToRestore,
-        callback: (err) => {
-          if (!err) {
-            this.$router.push(this.shotsPath)
-          }
-        }
-      })
+      this.loading.restore = true
+      this.errors.restore = false
+      this.restoreShot(this.shotToRestore)
+        .then(() => {
+          this.loading.restore = false
+          this.modals.isRestoreDisplayed = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.restore = false
+          this.errors.restore = true
+        })
     },
 
     confirmAddThumbnails (forms) {
@@ -700,7 +717,7 @@ export default {
     },
 
     deleteAllTasksText () {
-      const taskType = this.taskTypeMap[this.$route.params.task_type_id]
+      const taskType = this.taskTypeForTaskDeletion
       if (taskType) {
         return this.$t('tasks.delete_all_text', { name: taskType.name })
       } else {
@@ -714,40 +731,6 @@ export default {
         return this.$t('shots.restore_text', { name: shot.name })
       } else {
         return ''
-      }
-    },
-
-    handleModalsDisplay () {
-      const path = this.$route.path
-      const shotId = this.$route.params.shot_id
-      this.editShot.isSuccess = false
-      this.editShot.isError = false
-
-      Object.assign(this.modals, {
-        isAddMetadataDisplayed: false,
-        isBuildFilterDisplayed: false,
-        isCreateTasksDisplayed: false,
-        isDeleteAllTasksDisplayed: false,
-        isDeleteDisplayed: false,
-        isDeleteMetadataDisplayed: false,
-        isNewDisplayed: false,
-        isRestoreDisplayed: false
-      })
-
-      if (path.indexOf('new') > 0) {
-        this.resetEditModal()
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('edit') > 0) {
-        this.shotToEdit = this.shotMap[shotId]
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('delete-all-tasks') > 0) {
-        this.modals.isDeleteAllTasksDisplayed = true
-      } else if (path.indexOf('delete') > 0) {
-        this.shotToDelete = this.shotMap[shotId]
-        this.modals.isDeleteDisplayed = true
-      } else if (path.indexOf('restore') > 0) {
-        this.shotToRestore = this.shotMap[shotId]
-        this.modals.isRestoreDisplayed = true
       }
     },
 
@@ -802,11 +785,10 @@ export default {
     },
 
     onDeleteAllTasksClicked (taskTypeId) {
-      const route = this.getPath('delete-all-shot-tasks')
       const taskType = this.taskTypeMap[taskTypeId]
-      route.params.task_type_id = taskTypeId
+      this.taskTypeForTaskDeletion = taskType
       this.deleteAllTasksLockText = taskType.name
-      this.$router.push(route)
+      this.modals.isDeleteAllTasksDisplayed = true
     },
 
     onSearchChange (event) {
@@ -921,23 +903,16 @@ export default {
   },
 
   watch: {
-    $route () {
-      this.handleModalsDisplay()
-    },
-
     currentProduction () {
       this.$refs['shot-search-field'].setValue('')
       this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
 
       this.initialLoading = true
       if (!this.isTVShow) {
-        this.loadShots((err) => {
+        this.loadShots(() => {
           this.initialLoading = false
           this.setSearchFromUrl()
           this.onSearchChange()
-          if (!err) {
-            this.handleModalsDisplay()
-          }
         })
       }
     },
@@ -945,13 +920,10 @@ export default {
     currentEpisode () {
       const finalize = () => {
         this.initialLoading = true
-        this.loadShots((err) => {
+        this.loadShots(() => {
           this.setSearchFromUrl()
           this.onSearchChange()
           this.initialLoading = false
-          if (!err) {
-            this.handleModalsDisplay()
-          }
         })
       }
       if (this.isTVShow && this.currentEpisode) {

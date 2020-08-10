@@ -56,24 +56,13 @@
         />
       </form>
 
-      <p class="has-text-right">
-        <a
-          :class="{
-            button: true,
-            'confirm-edit-task-status': true,
-            'is-primary': true,
-            'is-loading': isLoading
-          }"
-          @click="confirmClicked"
-        >
-          {{ $t("main.confirmation") }}
-        </a>
-        <router-link
-          :to="cancelRoute"
-          class="button is-link">
-          {{ $t("main.cancel") }}
-        </router-link>
-      </p>
+      <modal-footer
+        :error-text="$t('task_status.create_error')"
+        :is-error="isError"
+        :is-loading="isLoading"
+        @confirm="confirmClicked"
+        @cancel="$emit('cancel')"
+      />
     </div>
 
   </div>
@@ -82,16 +71,20 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import TextField from '../widgets/TextField'
+import { modalMixin } from './base_modal'
 import ComboboxBoolean from '../widgets/ComboboxBoolean'
 import ColorField from '../widgets/ColorField'
+import ModalFooter from '../modals/ModalFooter'
+import TextField from '../widgets/TextField'
 
 export default {
   name: 'edit-task-status-modal',
+  mixins: [modalMixin],
   components: {
+    ColorField,
     ComboboxBoolean,
-    TextField,
-    ColorField
+    ModalFooter,
+    TextField
   },
 
   props: [
@@ -101,7 +94,6 @@ export default {
     'cancelRoute',
     'isLoading',
     'isError',
-    'errorText',
     'taskStatusToEdit'
   ],
 

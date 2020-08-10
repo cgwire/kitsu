@@ -320,15 +320,13 @@ export default {
             name: this.names.episode,
             project_id: this.currentProduction.id
           }
-          this.newEpisode({
-            episode,
-            callback: (err, episode) => {
-              if (err) console.error(err)
+          this.newEpisode(episode)
+            .then((episode) => {
               this.loading.addEpisode = false
               this.selectEpisode(episode.id)
               this.names.episode = stringHelpers.generateNextName(episode.name)
-            }
-          })
+            })
+            .catch(console.error)
         }
       }
     },
@@ -346,18 +344,16 @@ export default {
             episode_id: this.selectedEpisodeId,
             project_id: this.currentProduction.id
           }
-          this.newSequence({
-            sequence,
-            callback: (err, sequence) => {
-              if (err) console.error(err)
+          this.newSequence(sequence)
+            .then((sequence) => {
               this.loading.addSequence = false
               this.selectEpisode(this.selectedEpisodeId)
               this.selectSequence(sequence.id)
               this.names.sequence = stringHelpers.generateNextName(
                 sequence.name
               )
-            }
-          })
+            })
+            .catch(console.error)
         }
       }
     },
@@ -373,18 +369,16 @@ export default {
             project_id: this.currentProduction.id
           }
           this.loading.addShot = false
-          this.newShot({
-            shot,
-            callback: (err) => {
-              if (err) console.error(err)
+          this.newShot(shot)
+            .then((shot) => {
               this.loading.addShot = false
               this.selectSequence(this.selectedSequenceId)
               this.names.shot = stringHelpers.generateNextName(
                 shot.name,
                 parseInt(this.shotPadding)
               )
-            }
-          })
+            })
+            .catch(console.error)
         }
       }
     }
@@ -394,14 +388,6 @@ export default {
 
 <style lang="scss" scoped>
 .dark {
-  .entity-line.selected {
-    background: $purple-strong;
-  }
-
-  .entity-line:hover {
-    background: $green;
-  }
-
   .shot-column .list {
     border: 1px solid $dark-grey;
   }
@@ -447,11 +433,11 @@ export default {
 }
 
 .entity-line:hover {
-  background: $light-green;
+  background: var(--background-selectable);
 }
 
 .entity-line.selected {
-  background: $purple;
+  background: var(--background-selected);
   border: 0;
 }
 

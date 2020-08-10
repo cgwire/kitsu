@@ -41,13 +41,9 @@
           <row-actions
             v-if="isCurrentUserAdmin"
             :entry-id="entry.id"
-            :edit-route="{
-              name: 'edit-person',
-              params: {person_id: entry.id}
-            }"
             :hide-delete="true"
-          >
-          </row-actions>
+            @edit-clicked="$emit('edit-clicked', entry)"
+          />
           <td class="actions" v-else>
           </td>
         </tr>
@@ -70,14 +66,8 @@
           <row-actions
             v-if="isCurrentUserAdmin"
             :entry-id="entry.id"
-            :edit-route="{
-              name: 'edit-person',
-              params: {person_id: entry.id}
-            }"
-            :delete-route="{
-              name: 'delete-person',
-              params: {person_id: entry.id}
-            }"
+            @edit-clicked="$emit('edit-clicked', entry)"
+            @delete-clicked="$emit('delete-clicked', entry)"
           />
           <td class="actions" v-else>
           </td>

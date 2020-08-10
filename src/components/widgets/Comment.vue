@@ -301,6 +301,7 @@ export default {
           !this.comment.checklist ||
           this.comment.checklist.length === 0
         ) &&
+        this.comment.attachment_files.length === 0 &&
         this.comment.previews.length === 0 && !(
           this.isFirst && this.taskStatus.is_done
         )

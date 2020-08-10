@@ -4,12 +4,7 @@ import {
   LOAD_ASSET_TYPES_ERROR,
   LOAD_ASSET_TYPES_END,
 
-  EDIT_ASSET_TYPE_START,
-  EDIT_ASSET_TYPE_ERROR,
   EDIT_ASSET_TYPE_END,
-
-  DELETE_ASSET_TYPE_START,
-  DELETE_ASSET_TYPE_ERROR,
   DELETE_ASSET_TYPE_END,
 
   RESET_ALL
@@ -18,19 +13,7 @@ import { sortByName } from '../../lib/sorting'
 
 const initialState = {
   assetTypes: [],
-  assetTypeMap: {},
-  isAssetTypesLoading: false,
-  isAssetTypesLoadingError: false,
-
-  editAssetType: {
-    isLoading: false,
-    isError: false
-  },
-
-  deleteAssetType: {
-    isLoading: false,
-    isError: false
-  }
+  assetTypeMap: {}
 }
 
 const state = { ...initialState }
@@ -38,12 +21,6 @@ const state = { ...initialState }
 const getters = {
   assetTypes: state => state.assetTypes,
   assetTypeMap: state => state.assetTypeMap,
-
-  isAssetTypesLoading: state => state.isAssetTypesLoading,
-  isAssetTypesLoadingError: state => state.isAssetTypesLoadingError,
-
-  editAssetType: state => state.editAssetType,
-  deleteAssetType: state => state.deleteAssetType,
 
   getAssetType: (state, getters) => (id) => {
     return state.assetTypes.find(
@@ -74,41 +51,28 @@ const actions = {
     })
   },
 
-  newAssetType ({ commit, state }, payload) {
-    commit(EDIT_ASSET_TYPE_START, payload.data)
-    assetTypesApi.newAssetType(payload.data, (err, assetType) => {
-      if (err) {
-        commit(EDIT_ASSET_TYPE_ERROR)
-      } else {
+  newAssetType ({ commit, state }, data) {
+    return assetTypesApi.newAssetType(data)
+      .then((assetType) => {
         commit(EDIT_ASSET_TYPE_END, assetType)
-      }
-      if (payload.callback) payload.callback(err)
-    })
+        Promise.resolve(assetType)
+      })
   },
 
-  editAssetType ({ commit, state }, payload) {
-    commit(EDIT_ASSET_TYPE_START)
-    assetTypesApi.updateAssetType(payload.data, (err, assetType) => {
-      if (err) {
-        commit(EDIT_ASSET_TYPE_ERROR)
-      } else {
+  editAssetType ({ commit, state }, data) {
+    return assetTypesApi.updateAssetType(data)
+      .then((assetType) => {
         commit(EDIT_ASSET_TYPE_END, assetType)
-      }
-      if (payload.callback) payload.callback(err)
-    })
+        Promise.resolve(assetType)
+      })
   },
 
-  deleteAssetType ({ commit, state }, payload) {
-    commit(DELETE_ASSET_TYPE_START)
-    const assetType = payload.assetType
-    assetTypesApi.deleteAssetType(assetType, (err) => {
-      if (err) {
-        commit(DELETE_ASSET_TYPE_ERROR)
-      } else {
+  deleteAssetType ({ commit, state }, assetType) {
+    return assetTypesApi.deleteAssetType(assetType)
+      .then(() => {
         commit(DELETE_ASSET_TYPE_END, assetType)
-      }
-      if (payload.callback) payload.callback(err)
-    })
+        Promise.resolve(assetType)
+      })
   }
 }
 
@@ -134,16 +98,6 @@ const mutations = {
     })
   },
 
-  [EDIT_ASSET_TYPE_START] (state, data) {
-    state.editAssetType.isLoading = true
-    state.editAssetType.isError = false
-  },
-
-  [EDIT_ASSET_TYPE_ERROR] (state) {
-    state.editAssetType.isLoading = false
-    state.editAssetType.isError = true
-  },
-
   [EDIT_ASSET_TYPE_END] (state, newAssetType) {
     const assetType = getters.getAssetType(state)(newAssetType.id)
 
@@ -153,25 +107,9 @@ const mutations = {
       state.assetTypes.push(newAssetType)
       state.assetTypeMap[newAssetType.id] = newAssetType
     }
-    state.editAssetType = {
-      isLoading: false,
-      isError: false
-    }
     state.assetTypes = sortByName(state.assetTypes)
   },
 
-  [DELETE_ASSET_TYPE_START] (state) {
-    state.deleteAssetType = {
-      isLoading: true,
-      isError: false
-    }
-  },
-  [DELETE_ASSET_TYPE_ERROR] (state) {
-    state.deleteAssetType = {
-      isLoading: false,
-      isError: true
-    }
-  },
   [DELETE_ASSET_TYPE_END] (state, assetTypeToDelete) {
     const assetTypeToDeleteIndex = state.assetTypes.findIndex(
       (assetType) => assetType.id === assetTypeToDelete.id
@@ -180,11 +118,6 @@ const mutations = {
       state.assetTypes.splice(assetTypeToDeleteIndex, 1)
     }
     delete state.assetTypeMap[assetTypeToDelete.id]
-
-    state.deleteAssetType = {
-      isLoading: false,
-      isError: false
-    }
   },
 
   [RESET_ALL] (state) {

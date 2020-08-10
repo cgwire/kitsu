@@ -6,11 +6,11 @@
       </div>
       <div class="level-right">
         <div class="level-item">
-          <button-link
+          <button-simple
             class="level-item"
             :text="$t('productions.new_production')"
             icon="plus"
-            path="/productions/new"
+            @click="onNewClicked"
           />
         </div>
       </div>
@@ -20,26 +20,28 @@
       :entries="productions"
       :is-loading="isProductionsLoading"
       :is-error="isProductionsLoadingError"
+      @delete-clicked="onDeleteClicked"
+      @edit-clicked="onEditClicked"
     />
 
     <edit-production-modal
       :active="modals.isNewDisplayed"
-      :is-loading="editProduction.isLoading"
-      :is-error="editProduction.isError"
-      :cancel-route="'/productions'"
+      :is-loading="loading.edit"
+      :is-error="errors.edit"
       :production-to-edit="productionToEdit"
+      @cancel="modals.isNewDisplayed = false"
       @fileselected="onProductionPictureSelected"
       @confirm="confirmEditProduction"
     />
 
     <hard-delete-modal
       :active="modals.isDeleteDisplayed"
-      :is-loading="deleteProduction.isLoading"
-      :is-error="deleteProduction.isError"
-      :cancel-route="{name: 'productions'}"
+      :is-loading="loading.del"
+      :is-error="errors.del"
       :text="deleteText()"
       :error-text="$t('productions.delete_error')"
       :lock-text="currentLockText"
+      @cancel="modals.isDeletDisplayed = false"
       @confirm="confirmDeleteProduction"
     />
 
@@ -51,14 +53,14 @@ import { mapGetters, mapActions } from 'vuex'
 import ProductionList from '../lists/ProductionList'
 import EditProductionModal from '../modals/EditProductionModal'
 import HardDeleteModal from '../modals/HardDeleteModal'
-import ButtonLink from '../widgets/ButtonLink'
+import ButtonSimple from '../widgets/ButtonSimple'
 import PageTitle from '../widgets/PageTitle'
 
 export default {
   name: 'productions',
 
   components: {
-    ButtonLink,
+    ButtonSimple,
     HardDeleteModal,
     EditProductionModal,
     PageTitle,
@@ -67,6 +69,14 @@ export default {
 
   data () {
     return {
+      errors: {
+        del: false,
+        edit: false
+      },
+      loading: {
+        del: false,
+        edit: false
+      },
       modals: {
         isNewDisplayed: false,
         isDeleteDisplayed: false
@@ -79,8 +89,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'deleteProduction',
-      'editProduction',
       'isProductionsLoading',
       'isProductionsLoadingError',
       'productionAvatarFormData',
@@ -98,52 +106,60 @@ export default {
   },
 
   created () {
-    this.loadProductions((err) => {
-      if (!err) this.handleModalsDisplay()
-    })
+    this.loadProductions()
   },
 
   methods: {
     ...mapActions([
+      'deleteProduction',
       'loadProductions',
       'storeProductionPicture',
       'uploadProductionAvatar'
     ]),
 
+    // Actions
+
     confirmEditProduction (form) {
       let action = 'newProduction'
       const isEditing = this.productionToEdit && this.productionToEdit.id
-      if (this.productionToEdit && this.productionToEdit.id) {
+      if (isEditing) {
         action = 'editProduction'
         form.id = this.productionToEdit.id
       }
 
-      this.$store.dispatch(action, {
-        data: form,
-        callback: (err) => {
-          if (!err) {
-            if (isEditing && this.productionAvatarFormData) {
-              this.uploadProductionAvatar(form.id)
-                .then(() => {
-                  this.modals.isNewDisplayed = false
-                  this.$router.push('/productions')
-                })
-            } else {
-              this.modals.isNewDisplayed = false
-              this.$router.push('/productions')
-            }
+      this.loading.edit = true
+      this.errors.edit = false
+      this.$store.dispatch(action, form)
+        .then(() => {
+          if (isEditing && this.productionAvatarFormData) {
+            return this.uploadProductionAvatar(form.id)
+          } else {
+            return Promise.resolve()
           }
-        }
-      })
+        }).then(() => {
+          this.modals.isNewDisplayed = false
+          this.loading.edit = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.edit = false
+          this.errors.edit = true
+        })
     },
 
     confirmDeleteProduction () {
-      this.$store.dispatch('deleteProduction', {
-        production: this.productionToDelete,
-        callback: (err) => {
-          if (!err) this.modals.isDeleteDisplayed = false
-        }
-      })
+      this.loading.del = true
+      this.errors.del = false
+      this.deleteProduction(this.productionToDelete)
+        .then(() => {
+          this.modals.isDeleteDisplayed = false
+          this.loading.del = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.errors.del = true
+          this.loading.del = false
+        })
     },
 
     deleteText () {
@@ -155,25 +171,21 @@ export default {
       }
     },
 
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
+    // Events
 
-      if (path.indexOf('new') > 0) {
-        this.productionToEdit = {}
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('edit') > 0) {
-        const productionId = this.$store.state.route.params.production_edit_id
-        this.productionToEdit = this.productionMap[productionId]
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('delete') > 0) {
-        const productionId =
-          this.$store.state.route.params.production_delete_id
-        this.productionToDelete = this.productionMap[productionId]
-        this.modals.isDeleteDisplayed = true
-      } else {
-        this.modals.isNewDisplayed = false
-        this.modals.isDeleteDisplayed = false
-      }
+    onEditClicked (production) {
+      this.productionToEdit = production
+      this.modals.isNewDisplayed = true
+    },
+
+    onDeleteClicked (production) {
+      this.productionToDelete = production
+      this.modals.isDeleteDisplayed = true
+    },
+
+    onNewClicked (production) {
+      this.productionToEdit = {}
+      this.modals.isNewDisplayed = true
     },
 
     onProductionPictureSelected (formData) {
@@ -182,7 +194,6 @@ export default {
   },
 
   watch: {
-    $route () { this.handleModalsDisplay() }
   },
 
   metaInfo () {

@@ -15,14 +15,8 @@
           </td>
           <row-actions
             :entry-id="entry.id"
-            :edit-route="{
-              name: 'edit-asset-type',
-              params: {asset_type_id: entry.id}
-            }"
-            :delete-route="{
-              name: 'delete-asset-type',
-              params: {asset_type_id: entry.id}
-            }"
+            @edit-clicked="$emit('edit-clicked', entry)"
+            @delete-clicked="$emit('delete-clicked', entry)"
           />
         </tr>
       </tbody>

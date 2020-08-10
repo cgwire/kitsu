@@ -19,7 +19,7 @@
                   class="flexrow-item"
                   :title="$t('entities.build_filter.title')"
                   icon="funnel"
-                  @click="() => modals.isBuildFilterDisplayed = true"
+                  @click="modals.isBuildFilterDisplayed = true"
                 />
               </div>
             </div>
@@ -50,11 +50,11 @@
               :title="$t('main.csv.export_file')"
               @click="onExportClick"
             />
-            <button-link
+            <button-simple
               class="flexrow-item"
               :text="$t('assets.new_asset')"
               icon="plus"
-              :path="newAssetPath"
+              @click="showNewModal"
             />
             </div>
           </div>
@@ -80,12 +80,15 @@
         :is-loading="isAssetsLoading || initialLoading"
         :is-error="isAssetsLoadingError"
         :validation-columns="assetValidationColumns"
-        @add-metadata="onAddMetadataClicked"
         @change-sort="onChangeSortClicked"
         @create-tasks="showCreateTasksModal"
         @delete-all-tasks="onDeleteAllTasksClicked"
-        @delete-metadata="onDeleteMetadataClicked"
+        @edit-clicked="onEditClicked"
+        @delete-clicked="onDeleteClicked"
+        @restore-clicked="onRestoreClicked"
+        @add-metadata="onAddMetadataClicked"
         @edit-metadata="onEditMetadataClicked"
+        @delete-metadata="onDeleteMetadataClicked"
         @scroll="saveScrollPosition"
       />
     </div>
@@ -105,34 +108,34 @@
     :active="modals.isNewDisplayed"
     :is-loading="loading.edit"
     :is-loading-stay="loading.stay"
-    :is-error="editAsset.isCreateError"
-    :is-success="editAsset.isSuccess"
-    :cancel-route="assetsPath"
+    :is-error="errors.edit"
+    :is-success="success.edit"
     :asset-to-edit="assetToEdit"
     @confirm="confirmEditAsset"
     @confirmAndStay="confirmNewAssetStay"
+    @cancel="modals.isNewDisplayed = false"
   />
 
   <delete-modal
     ref="delete-asset-modal"
     :active="modals.isDeleteDisplayed"
-    :is-loading="deleteAsset.isLoading"
-    :is-error="deleteAsset.isError"
-    :cancel-route="assetsPath"
+    :is-loading="loading.delete"
+    :is-error="errors.delete"
     :text="deleteText()"
     :error-text="$t('assets.delete_error')"
     @confirm="confirmDeleteAsset"
+    @cancel="modals.isDeleteDisplayed = false"
   />
 
   <delete-modal
     ref="restore-asset-modal"
     :active="modals.isRestoreDisplayed"
-    :is-loading="restoreAsset.isLoading"
-    :is-error="restoreAsset.isDeleteError"
-    :cancel-route="assetsPath"
+    :is-loading="loading.restore"
+    :is-error="loading.delete"
     :text="restoreText()"
     :error-text="$t('assets.restore_error')"
     @confirm="confirmRestoreAsset"
+    @cancel="modals.isRestoreDisplayed = false"
   />
 
   <hard-delete-modal
@@ -140,11 +143,11 @@
     :active="modals.isDeleteAllTasksDisplayed"
     :is-loading="loading.deleteAllTasks"
     :is-error="errors.deleteAllTasks"
-    :cancel-route="assetsPath"
     :text="deleteAllTasksText()"
     :error-text="$t('tasks.delete_all_error')"
     :lock-text="deleteAllTasksLockText"
     @confirm="confirmDeleteAllTasks"
+    @cancel="modals.isDeleteAllTasksDisplayed = false"
   />
 
   <delete-modal
@@ -152,10 +155,10 @@
     :active="modals.isDeleteMetadataDisplayed"
     :is-loading="loading.deleteMetadata"
     :is-error="errors.deleteMetadata"
-    @cancel="modals.isDeleteMetadataDisplayed = false"
     :text="$t('productions.metadata.delete_text')"
     :error-text="$t('productions.metadata.delete_error')"
     @confirm="confirmDeleteMetadata"
+    @cancel="modals.isDeleteMetadataDisplayed = false"
   />
 
   <import-render-modal
@@ -168,8 +171,8 @@
     :dataMatchers="dataMatchers"
     :database="filteredAssets"
     @reupload="resetImport"
-    @cancel="hideImportRenderModal"
     @confirm="uploadImportFile"
+    @cancel="hideImportRenderModal"
   />
 
   <import-modal
@@ -191,9 +194,9 @@
     :title="$t('tasks.create_tasks_asset')"
     :text="$t('tasks.create_tasks_asset_explaination')"
     :error-text="$t('tasks.create_tasks_asset_failed')"
-    @cancel="hideCreateTasksModal"
     @confirm="confirmCreateTasks"
     @confirm-and-stay="confirmCreateTasksAndStay"
+    @cancel="hideCreateTasksModal"
   />
 
   <add-metadata-modal
@@ -202,8 +205,8 @@
     :is-loading-stay="loading.addMetadata"
     :is-error="errors.addMetadata"
     :descriptor-to-edit="descriptorToEdit"
-    @cancel="modals.isAddMetadataDisplayed = false"
     @confirm="confirmAddMetadata"
+    @cancel="modals.isAddMetadataDisplayed = false"
   />
 
   <add-thumbnails-modal
@@ -212,15 +215,15 @@
     :active="modals.isAddThumbnailsDisplayed"
     :is-loading="loading.addThumbnails"
     :is-error="errors.addThumbnails"
-    @cancel="hideAddThumbnailsModal"
     @confirm="confirmAddThumbnails"
+    @cancel="hideAddThumbnailsModal"
   />
 
   <build-filter-modal
     ref="build-filter-modal"
     :active="modals.isBuildFilterDisplayed"
-    @cancel="modals.isBuildFilterDisplayed = false"
     @confirm="confirmBuildFilter"
+    @cancel="modals.isBuildFilterDisplayed = false"
   />
 </div>
 </template>
@@ -238,7 +241,6 @@ import { entityListMixin } from '../mixins/entities'
 import AssetList from '../lists/AssetList'
 import AddMetadataModal from '../modals/AddMetadataModal'
 import AddThumbnailsModal from '../modals/AddThumbnailsModal'
-import ButtonLink from '../widgets/ButtonLink'
 import BuildFilterModal from '../modals/BuildFilterModal'
 import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
@@ -263,7 +265,6 @@ export default {
     AddMetadataModal,
     AddThumbnailsModal,
     BuildFilterModal,
-    ButtonLink,
     ButtonSimple,
     CreateTasksModal,
     DeleteModal,
@@ -281,7 +282,53 @@ export default {
 
   data () {
     return {
+      assetToDelete: {},
+      assetToRestore: {},
+      assetToEdit: {},
+      assetFilters: [{
+        type: 'Type',
+        value: {
+          name: 'open'
+        }
+      }],
+      assetFilterTypes: [
+        'Type'
+      ],
+      columns: [
+        'Type',
+        'Name',
+        'Description'
+      ],
+      dataMatchers: [
+        'Type',
+        'Name'
+      ],
+      deleteAllTasksLockText: null,
+      descriptorToEdit: {},
+      errors: {
+        addMetadata: false,
+        addThumbnails: false,
+        creatingTasks: false,
+        delete: false,
+        deleteMetadata: false,
+        edit: false,
+        restore: false,
+        importing: false
+      },
       initialLoading: true,
+      loading: {
+        addMetadata: false,
+        addThumbnails: false,
+        creatingTasks: false,
+        deleteAllTasks: false,
+        deleteMetadata: false,
+        delete: false,
+        edit: false,
+        importing: false,
+        restore: false,
+        stay: false,
+        taskStay: false
+      },
       modals: {
         isAddMetadataDisplayed: false,
         isAddThumbnailsDisplayed: false,
@@ -294,48 +341,10 @@ export default {
         isImportRenderDisplayed: false,
         isNewDisplayed: false
       },
-      loading: {
-        addMetadata: false,
-        addThumbnails: false,
-        creatingTasks: false,
-        deleteAllTasks: false,
-        deleteMetadata: false,
-        edit: false,
-        importing: false,
-        stay: false,
-        taskStay: false
-      },
-      errors: {
-        addMetadata: false,
-        addThumbnails: false,
-        deleteMetadata: false,
-        creatingTasks: false,
-        importing: false
-      },
-      assetToDelete: null,
-      assetToRestore: null,
-      assetToEdit: null,
-      assetFilters: [{
-        type: 'Type',
-        value: {
-          name: 'open'
-        }
-      }],
-      assetFilterTypes: [
-        'Type'
-      ],
-      descriptorToEdit: {},
-      columns: [
-        'Type',
-        'Name',
-        'Description'
-      ],
-      dataMatchers: [
-        'Type',
-        'Name'
-      ],
-      deleteAllTasksLockText: null,
-      parsedCSV: []
+      parsedCSV: [],
+      success: {
+        edit: false
+      }
     }
   },
 
@@ -360,7 +369,6 @@ export default {
       setTimeout(() => {
         this.loadAssets()
           .then(() => {
-            this.handleModalsDisplay()
             setTimeout(() => {
               this.initialLoading = false
               if (this.$refs['asset-list']) {
@@ -395,8 +403,6 @@ export default {
       'assetValidationColumns',
       'currentEpisode',
       'currentProduction',
-      'editAsset',
-      'deleteAsset',
       'displayedAssetsByType',
       'openProductions',
       'isAssetsLoading',
@@ -406,10 +412,10 @@ export default {
       'isAssetTime',
       'isTVShow',
       'nbSelectedTasks',
-      'restoreAsset',
       'selectedTasks',
       'assetSorting',
-      'taskTypeMap'
+      'taskTypeMap',
+      'taskTypes'
     ]),
 
     newAssetPath () {
@@ -463,12 +469,16 @@ export default {
       'changeAssetSort',
       'commentTaskWithPreview',
       'deleteAllTasks',
+      'deleteAsset',
       'deleteMetadataDescriptor',
+      'editAsset',
       'getAssetsCsvLines',
       'loadAssets',
       'loadComment',
       'loadEpisodes',
+      'newAsset',
       'removeAssetSearch',
+      'restoreAsset',
       'saveAssetSearch',
       'setLastProductionScreen',
       'setAssetSearch',
@@ -476,69 +486,94 @@ export default {
       'uploadAssetFile'
     ]),
 
-    confirmNewAssetStay (form) {
-      const action = 'newAsset'
-      this.loading.stay = true
-      this.editAsset.isSuccess = false
-      this.editAsset.isError = false
+    showNewModal () {
+      this.assetToEdit = {}
+      this.modals.isNewDisplayed = true
+    },
 
-      this.$store.dispatch(action, {
-        data: form,
-        callback: (err) => {
+    onEditClicked (asset) {
+      this.assetToEdit = asset
+      this.modals.isNewDisplayed = true
+    },
+
+    onDeleteClicked (asset) {
+      this.assetToDelete = asset
+      this.modals.isDeleteDisplayed = true
+    },
+
+    onRestoreClicked (asset) {
+      this.assetToRestore = asset
+      this.modals.isRestoreDisplayed = true
+    },
+
+    confirmNewAssetStay (form) {
+      this.loading.stay = true
+      this.success.edit = false
+      this.newAsset(form)
+        .then(() => {
           this.loading.stay = false
-          if (!err) {
-            this.resetLightEditModal()
-            this.$refs['edit-asset-modal'].focusName()
-            this.editAsset.isSuccess = true
-          } else {
-            this.loading.edit = false
-          }
-        }
-      })
+          this.loading.edit = false
+          this.resetLightEditModal()
+          this.$refs['edit-asset-modal'].focusName()
+          this.success.edit = true
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.stay = false
+          this.loading.edit = false
+          this.success.edit = false
+          this.errors.edit = true
+        })
     },
 
     confirmEditAsset (form) {
       let action = 'newAsset'
       this.loading.edit = true
-      this.editAsset.isCreateError = false
+      this.errors.edit = false
       if (this.assetToEdit && this.assetToEdit.id) {
         action = 'editAsset'
         form.id = this.assetToEdit.id
       }
-
-      this.$store.dispatch(action, {
-        data: form,
-        callback: (err) => {
-          if (!err) {
-            this.loading.edit = false
-            this.modals.isNewDisplayed = false
-            this.$router.push(this.assetsPath)
-          } else {
-            this.loading.edit = false
-            this.editAsset.isCreateError = true
-          }
-        }
-      })
+      this[action](form)
+        .then((form) => {
+          this.loading.edit = false
+          this.modals.isNewDisplayed = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.edit = false
+          this.errors.edit = true
+        })
     },
 
     confirmDeleteAsset () {
-      this.$store.dispatch('deleteAsset', {
-        asset: this.assetToDelete,
-        callback: (err) => {
-          if (!err) {
-            this.$router.push(this.assetsPath)
-          }
-        }
-      })
+      this.loading.delete = true
+      this.errors.delete = false
+      this.deleteAsset(this.assetToDelete)
+        .then((form) => {
+          this.loading.delete = false
+          this.modals.isDeleteDisplayed = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.delete = false
+          this.errors.delete = true
+        })
     },
 
     confirmRestoreAsset () {
-      this.$store.dispatch('restoreAsset', {
-        asset: this.assetToRestore,
-        callback: (err) => {
-          if (!err) this.modals.isRestoreDisplayed = false
-        }
-      })
+      this.loading.restore = true
+      this.errors.restore = false
+      this.restoreAsset(this.assetToRestore)
+        .then((form) => {
+          this.loading.restore = false
+          this.modals.isRestoreDisplayed = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.restore = false
+          this.errors.restore = true
+        })
     },
 
     confirmBuildFilter (query) {
@@ -564,7 +599,7 @@ export default {
 
     runTasksCreation (form, callback) {
       this.errors.creatingTasks = false
-      this.$store.dispatch('createTasks', {
+      this.createTasks({
         task_type_id: form.task_type_id,
         type: 'assets',
         project_id: this.currentProduction.id,
@@ -580,7 +615,9 @@ export default {
     },
 
     confirmDeleteAllTasks () {
-      const taskTypeId = this.$route.params.task_type_id
+      const taskTypeId = this.taskTypes.find(
+        t => t.name === this.deleteAllTasksLockText
+      ).id
       const projectId = this.currentProduction.id
       this.errors.deleteAllTasks = false
       this.loading.deleteAllTasks = true
@@ -588,7 +625,7 @@ export default {
         .then(() => {
           this.loading.deleteAllTasks = false
           this.loadAssets()
-          this.$router.push(this.assetsPath)
+          this.modals.isDeleteAllTasksDisplayed = false
         }).catch((err) => {
           console.error(err)
           this.loading.deleteAllTasks = false
@@ -639,12 +676,9 @@ export default {
     },
 
     deleteAllTasksText () {
-      const taskType = this.taskTypeMap[this.$route.params.task_type_id]
-      if (taskType) {
-        return this.$t('tasks.delete_all_text', { name: taskType.name })
-      } else {
-        return ''
-      }
+      return this.$t('tasks.delete_all_text', {
+        name: this.deleteAllTasksLockText
+      })
     },
 
     restoreText () {
@@ -653,47 +687,6 @@ export default {
         return this.$t('assets.restore_text', { name: asset.name })
       } else {
         return ''
-      }
-    },
-
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
-      const assetId = this.$store.state.route.params.asset_id
-      this.editAsset.isSuccess = false
-      this.editAsset.isError = false
-
-      if (path.indexOf('new') > 0) {
-        this.resetEditModal()
-        this.editAsset.isSuccess = false
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('edit') > 0) {
-        this.editAsset.isSuccess = false
-        this.assetToEdit = this.assetMap[assetId]
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('delete-all-tasks') > 0) {
-        const taskType = this.taskTypeMap[this.$route.params.task_type_id]
-        this.deleteAllTasksLockText = taskType.name
-        this.modals.isDeleteAllTasksDisplayed = true
-      } else if (path.indexOf('delete') > 0) {
-        this.assetToDelete = this.assetMap[assetId]
-        this.modals.isDeleteDisplayed = true
-      } else if (path.indexOf('restore') > 0) {
-        this.assetToRestore = this.assetMap[assetId]
-        this.modals.isRestoreDisplayed = true
-      } else {
-        this.modals = {
-          isAddMetadataDisplayed: false,
-          isAddThumbnailsDisplayed: false,
-          isBuildFilterDisplayed: false,
-          isCreateTasksDisplayed: false,
-          isDeleteAllTasksDisplayed: false,
-          isDeleteDisplayed: false,
-          isDeleteMetadataDisplayed: false,
-          isImportDisplayed: false,
-          isImportRenderDisplayed: false,
-          isNewDisplayed: false,
-          isRestoreDisplayed: false
-        }
       }
     },
 
@@ -792,11 +785,9 @@ export default {
     },
 
     onDeleteAllTasksClicked (taskTypeId) {
-      const route = this.getPath('delete-all-asset-tasks')
       const taskType = this.taskTypeMap[taskTypeId]
-      route.params.task_type_id = taskTypeId
       this.deleteAllTasksLockText = taskType.name
-      this.$router.push(route)
+      this.modals.isDeleteAllTasksDisplayed = true
     },
 
     confirmAddMetadata (form) {
@@ -913,7 +904,6 @@ export default {
       this.initialLoading = true
       this.loadAssets()
         .then(() => {
-          this.handleModalsDisplay()
           this.initialLoading = false
           this.setSearchFromUrl()
           this.onSearchChange()
@@ -922,10 +912,6 @@ export default {
   },
 
   watch: {
-    $route () {
-      this.handleModalsDisplay()
-    },
-
     currentProduction () {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)

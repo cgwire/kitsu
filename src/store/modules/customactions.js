@@ -6,12 +6,7 @@ import {
   LOAD_CUSTOM_ACTIONS_ERROR,
   LOAD_CUSTOM_ACTIONS_END,
 
-  EDIT_CUSTOM_ACTION_START,
-  EDIT_CUSTOM_ACTION_ERROR,
   EDIT_CUSTOM_ACTION_END,
-
-  DELETE_CUSTOM_ACTION_START,
-  DELETE_CUSTOM_ACTION_ERROR,
   DELETE_CUSTOM_ACTION_END,
 
   RESET_ALL
@@ -80,40 +75,28 @@ const actions = {
     })
   },
 
-  newCustomAction ({ commit, state }, { data, callback }) {
-    commit(EDIT_CUSTOM_ACTION_START, data)
-    customActionsApi.newCustomAction(data, (err, customAction) => {
-      if (err) {
-        commit(EDIT_CUSTOM_ACTION_ERROR)
-      } else {
+  newCustomAction ({ commit, state }, data) {
+    return customActionsApi.newCustomAction(data)
+      .then((customAction) => {
         commit(EDIT_CUSTOM_ACTION_END, customAction)
-      }
-      if (callback) callback(err)
-    })
+        Promise.resolve(customAction)
+      })
   },
 
-  editCustomAction ({ commit, state }, { data, callback }) {
-    commit(EDIT_CUSTOM_ACTION_START)
-    customActionsApi.updateCustomAction(data, (err, customAction) => {
-      if (err) {
-        commit(EDIT_CUSTOM_ACTION_ERROR)
-      } else {
+  editCustomAction ({ commit, state }, data) {
+    return customActionsApi.updateCustomAction(data)
+      .then((customAction) => {
         commit(EDIT_CUSTOM_ACTION_END, customAction)
-      }
-      if (callback) callback(err)
-    })
+        Promise.resolve(customAction)
+      })
   },
 
-  deleteCustomAction ({ commit, state }, { customAction, callback }) {
-    commit(DELETE_CUSTOM_ACTION_START)
-    customActionsApi.deleteCustomAction(customAction, (err) => {
-      if (err) {
-        commit(DELETE_CUSTOM_ACTION_ERROR)
-      } else {
+  deleteCustomAction ({ commit, state }, customAction) {
+    return customActionsApi.deleteCustomAction(customAction)
+      .then(() => {
         commit(DELETE_CUSTOM_ACTION_END, customAction)
-      }
-      if (callback) callback(err)
-    })
+        Promise.resolve(customAction)
+      })
   },
 
   postCustomAction ({ commit }, { data, url }) {
@@ -123,30 +106,12 @@ const actions = {
 
 const mutations = {
   [LOAD_CUSTOM_ACTIONS_START] (state) {
-    state.isCustomActionsLoading = true
-    state.isCustomActionsLoadingError = false
-  },
-
-  [LOAD_CUSTOM_ACTIONS_ERROR] (state) {
-    state.isCustomActionsLoading = false
-    state.isCustomActionsLoadingError = true
+    state.customActions = []
   },
 
   [LOAD_CUSTOM_ACTIONS_END] (state, customActions) {
-    state.isCustomActionsLoading = false
-    state.isCustomActionsLoadingError = false
     state.customActions = customActions
     state.customActions = sortByName(state.customActions)
-  },
-
-  [EDIT_CUSTOM_ACTION_START] (state, data) {
-    state.editCustomAction.isLoading = true
-    state.editCustomAction.isError = false
-  },
-
-  [EDIT_CUSTOM_ACTION_ERROR] (state) {
-    state.editCustomAction.isLoading = false
-    state.editCustomAction.isError = true
   },
 
   [EDIT_CUSTOM_ACTION_END] (state, newCustomAction) {
@@ -158,34 +123,13 @@ const mutations = {
       state.customActions.push(newCustomAction)
       state.customActions = sortByName(state.customActions)
     }
-    state.editCustomAction = {
-      isLoading: false,
-      isError: false
-    }
   },
 
-  [DELETE_CUSTOM_ACTION_START] (state) {
-    state.deleteCustomAction = {
-      isLoading: true,
-      isError: false
-    }
-  },
-  [DELETE_CUSTOM_ACTION_ERROR] (state) {
-    state.deleteCustomAction = {
-      isLoading: false,
-      isError: true
-    }
-  },
   [DELETE_CUSTOM_ACTION_END] (state, customActionToDelete) {
     const customActionToDeleteIndex = state.customActions.findIndex(
       (customAction) => customAction.id === customActionToDelete.id
     )
     state.customActions.splice(customActionToDeleteIndex, 1)
-
-    state.deleteCustomAction = {
-      isLoading: false,
-      isError: false
-    }
   },
 
   [RESET_ALL] (state) {

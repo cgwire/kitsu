@@ -123,20 +123,8 @@
 
           <row-actions v-if="isCurrentUserManager"
             :entry="entry"
-            :edit-route="{
-              name: 'edit-episode',
-              params: {
-                episode_id: entry.id,
-                production_id: currentProduction.id
-              }
-            }"
-            :delete-route="{
-              name: 'delete-episode',
-              params: {
-                episode_id: entry.id,
-                production_id: currentProduction.id
-              }
-            }"
+            @delete-clicked="$emit('delete-clicked', entry)"
+            @edit-clicked="$emit('edit-clicked', entry)"
           />
           <td class="actions" v-else></td>
         </tr>

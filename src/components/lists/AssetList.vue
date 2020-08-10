@@ -235,9 +235,9 @@
           />
           <row-actions v-if="isCurrentUserManager"
             :entry="asset"
-            :edit-route="editPath(asset.id)"
-            :delete-route="deletePath(asset.id)"
-            :restore-route="restorePath(asset.id)"
+            @edit-clicked="$emit('edit-clicked', asset)"
+            @delete-clicked="$emit('delete-clicked', asset)"
+            @restore-clicked="$emit('restore-clicked', asset)"
           />
           <td class="actions" v-else></td>
         </tr>
@@ -464,18 +464,6 @@ export default {
 
     assetPath (assetId) {
       return this.getPath('asset', assetId)
-    },
-
-    editPath (assetId) {
-      return this.getPath('edit-asset', assetId)
-    },
-
-    deletePath (assetId) {
-      return this.getPath('delete-asset', assetId)
-    },
-
-    restorePath (assetId) {
-      return this.getPath('restore-asset', assetId)
     },
 
     taskTypePath (taskTypeId) {

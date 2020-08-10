@@ -9,41 +9,41 @@
     <clock-icon class="icon is-small only-icon" />
   </button>
 
-  <router-link
+  <button
     class="button"
     data-test="button-edit"
-    :to="editRoute"
+    @click="$emit('edit-clicked')"
     v-if="!hideEdit && !entry.canceled"
   >
     <edit-icon class="icon is-small only-icon" />
-  </router-link>
+  </button>
 
-  <router-link
+  <button
     class="button"
     data-test="button-restore"
-    :to="restoreRoute"
+    @click="$emit('restore-clicked')"
     v-if="entry.canceled"
   >
     <rotate-ccw-icon class="icon is-small only-icon" />
-  </router-link>
+  </button>
 
-  <router-link
+  <button
     class="button"
     data-test="button-delete-admin"
-    :to="deleteRoute"
+    @click="$emit('delete-clicked')"
     v-if="!hideDelete && !entry.canceled && isCurrentUserAdmin"
   >
     <trash-icon class="icon is-small only-icon" />
-  </router-link>
+  </button>
 
-  <router-link
+  <button
     class="button"
     data-test="button-delete"
-    :to="deleteRoute"
+    @click="$emit('delete-clicked')"
     v-else-if="!hideDelete"
   >
     <trash-icon class="icon is-small only-icon" />
-  </router-link>
+  </button>
 </td>
 </template>
 
@@ -70,24 +70,6 @@ export default {
       type: Object,
       default: () => {
         return {}
-      }
-    },
-    editRoute: {
-      type: Object,
-      default: () => {
-        return { name: 'home' }
-      }
-    },
-    deleteRoute: {
-      type: Object,
-      default: () => {
-        return { name: 'home' }
-      }
-    },
-    restoreRoute: {
-      type: Object,
-      default: () => {
-        return { name: 'home' }
       }
     },
     hideEdit: {

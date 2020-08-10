@@ -45,16 +45,10 @@
           </td>
           <row-actions
             :entry-id="entry.id"
-            :edit-route="{
-              name: 'edit-task-status',
-              params: {task_status_id: entry.id}
-            }"
-            :delete-route="{
-              name: 'delete-task-status',
-              params: {task_status_id: entry.id}
-            }"
             :hide-edit="entry.short_name === 'todo'"
             :hide-delete="entry.short_name === 'todo'"
+            @edit-clicked="$emit('edit-clicked', entry)"
+            @delete-clicked="$emit('delete-clicked', entry)"
           />
         </tr>
       </tbody>

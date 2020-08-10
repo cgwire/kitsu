@@ -244,11 +244,11 @@
           />
           <row-actions
             :entry="shot"
-            :edit-route="editPath(shot.id)"
-            :restore-route="restorePath(shot.id)"
-            :delete-route="deletePath(shot.id)"
             :hide-history="false"
+            @delete-clicked="$emit('delete-clicked', shot)"
+            @edit-clicked="$emit('edit-clicked', shot)"
             @history-clicked="$emit('shot-history', shot)"
+            @restore-clicked="$emit('restore-clicked', shot)"
             v-if="isCurrentUserManager"
           />
           <td class="actions" v-else></td>

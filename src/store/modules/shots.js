@@ -62,60 +62,26 @@ import {
   LOAD_SHOT_CASTING_END,
 
   SHOT_CSV_FILE_SELECTED,
-  IMPORT_SHOTS_START,
   IMPORT_SHOTS_END,
 
   LOAD_OPEN_PRODUCTIONS_END,
 
-  NEW_SHOT_START,
-  NEW_SHOT_ERROR,
   NEW_SHOT_END,
-
-  NEW_SEQUENCE_START,
-  NEW_SEQUENCE_ERROR,
   NEW_SEQUENCE_END,
-
-  NEW_EPISODE_START,
-  NEW_EPISODE_ERROR,
   NEW_EPISODE_END,
-
-  EDIT_SHOT_START,
-  EDIT_SHOT_ERROR,
   EDIT_SHOT_END,
-
-  EDIT_SEQUENCE_START,
-  EDIT_SEQUENCE_ERROR,
   EDIT_SEQUENCE_END,
-
-  EDIT_EPISODE_START,
-  EDIT_EPISODE_ERROR,
   EDIT_EPISODE_END,
-
-  DELETE_SHOT_START,
-  DELETE_SHOT_ERROR,
-  DELETE_SHOT_END,
-
-  DELETE_SEQUENCE_START,
-  DELETE_SEQUENCE_ERROR,
-
-  DELETE_EPISODE_START,
-  DELETE_EPISODE_ERROR,
-
   ADD_EPISODE,
   UPDATE_EPISODE,
   REMOVE_EPISODE,
-
   ADD_SEQUENCE,
   UPDATE_SEQUENCE,
   REMOVE_SEQUENCE,
-
   ADD_SHOT,
   UPDATE_SHOT,
   REMOVE_SHOT,
   CANCEL_SHOT,
-
-  RESTORE_SHOT_START,
-  RESTORE_SHOT_ERROR,
   RESTORE_SHOT_END,
 
   NEW_TASK_COMMENT_END,
@@ -380,21 +346,6 @@ const initialState = {
   isShotsLoadingError: false,
   shotsCsvFormData: null,
 
-  editShot: {
-    isLoading: false,
-    isError: false
-  },
-
-  deleteShot: {
-    isLoading: false,
-    isError: false
-  },
-
-  restoreShot: {
-    isLoading: false,
-    isError: false
-  },
-
   shotListScrollPosition: 0,
   sequenceListScrollPosition: 0,
   episodeListScrollPosition: 0,
@@ -452,10 +403,6 @@ const getters = {
 
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,
-
-  editShot: state => state.editShot,
-  deleteShot: state => state.deleteShot,
-  restoreShot: state => state.restoreShot,
   shotCreated: state => state.shotCreated,
 
   shotsCsvFormData: state => state.shotsCsvFormData,
@@ -605,7 +552,7 @@ const actions = {
           commit(ADD_EPISODE, episode)
         }
       })
-      .catch((err) => console.error(err))
+      .catch(console.error)
   },
 
   loadSequence ({ commit, state }, sequenceId) {
@@ -617,7 +564,7 @@ const actions = {
           commit(ADD_SEQUENCE, sequence)
         }
       })
-      .catch((err) => console.error(err))
+      .catch(console.error)
   },
 
   loadShot ({ commit, state, rootGetters }, shotId) {
@@ -658,13 +605,9 @@ const actions = {
       })
   },
 
-  newShot ({ commit, dispatch, rootGetters }, { shot, callback }) {
-    commit(NEW_SHOT_START)
-    shotsApi.newShot(shot, (err, shot) => {
-      if (err) {
-        commit(NEW_SHOT_ERROR)
-        if (callback) callback(err)
-      } else {
+  newShot ({ commit, dispatch, rootGetters }, shot) {
+    return shotsApi.newShot(shot)
+      .then((shot) => {
         commit(NEW_SHOT_END, shot)
         const taskTypeIds = state.shotValidationColumns
         const createTaskPromises = taskTypeIds.map(
@@ -675,88 +618,57 @@ const actions = {
             type: 'shots'
           })
         )
-
-        Promise.all(createTaskPromises).then(() => {
-          if (callback) callback(null, shot)
-        }).catch((err) => {
-          console.error(err)
-        })
-      }
-    })
-  },
-
-  newSequence ({ commit, state }, { sequence, callback }) {
-    commit(NEW_SEQUENCE_START)
-    shotsApi.newSequence(sequence, (err, sequence) => {
-      if (err) {
-        commit(NEW_SEQUENCE_ERROR)
-      } else {
-        commit(NEW_SEQUENCE_END, sequence)
-      }
-      if (callback) callback(err, sequence)
-    })
-  },
-
-  newEpisode ({ commit, state }, payload) {
-    commit(NEW_EPISODE_START)
-    shotsApi.newEpisode(payload.episode, (err, episode) => {
-      if (err) {
-        commit(NEW_EPISODE_ERROR)
-      } else {
-        commit(NEW_EPISODE_END, episode)
-      }
-      if (payload.callback) payload.callback(err, episode)
-    })
-  },
-
-  editShot ({ commit, state }, payload) {
-    commit(EDIT_SHOT_START)
-    shotsApi.updateShot(payload.data, (err, shot) => {
-      if (err) {
-        commit(EDIT_SHOT_ERROR)
-      } else {
-        commit(EDIT_SHOT_END, shot)
-      }
-      if (payload.callback) payload.callback(err)
-    })
-  },
-
-  editEpisode ({ commit, state }, episode) {
-    return new Promise((resolve, reject) => {
-      commit(EDIT_EPISODE_START)
-      shotsApi.updateEpisode(episode, (err, episode) => {
-        if (err) {
-          commit(EDIT_EPISODE_ERROR)
-          reject(err)
-        } else {
-          commit(EDIT_EPISODE_END, episode)
-          resolve(episode)
-        }
+        return Promise.all(createTaskPromises)
+          .then(() => {
+            return Promise.resolve(shot)
+          })
+          .catch(console.error)
       })
-    })
+  },
+
+  newSequence ({ commit, state }, sequence) {
+    return shotsApi.newSequence(sequence)
+      .then((sequence) => {
+        commit(NEW_SEQUENCE_END, sequence)
+        return Promise.resolve(sequence)
+      })
+  },
+
+  newEpisode ({ commit, state }, episode) {
+    return shotsApi.newEpisode(episode)
+      .then((episode) => {
+        commit(NEW_EPISODE_END, episode)
+        return Promise.resolve(episode)
+      })
+  },
+
+  editShot ({ commit, state }, data) {
+    return shotsApi.updateShot(data)
+      .then((shot) => {
+        commit(EDIT_SHOT_END, shot)
+        return Promise.resolve(shot)
+      })
+  },
+
+  editEpisode ({ commit, state }, data) {
+    return shotsApi.updateEpisode(data)
+      .then((episode) => {
+        commit(EDIT_EPISODE_END, episode)
+        return Promise.resolve(episode)
+      })
   },
 
   editSequence ({ commit, state }, data) {
-    return new Promise((resolve, reject) => {
-      commit(EDIT_SEQUENCE_START)
-      shotsApi.updateSequence(data, (err, sequence) => {
-        if (err) {
-          commit(EDIT_SEQUENCE_ERROR)
-          reject(err)
-        } else {
-          commit(EDIT_SEQUENCE_END, sequence)
-          resolve(sequence)
-        }
+    return shotsApi.updateSequence(data)
+      .then((sequence) => {
+        commit(EDIT_SEQUENCE_END, sequence)
+        return Promise.resolve(sequence)
       })
-    })
   },
 
-  deleteShot ({ commit, state }, { shot, callback }) {
-    commit(DELETE_SHOT_START)
-    shotsApi.deleteShot(shot, (err) => {
-      if (err) {
-        commit(DELETE_SHOT_ERROR)
-      } else {
+  deleteShot ({ commit, state }, shot) {
+    return shotsApi.deleteShot(shot)
+      .then(() => {
         const previousShot = state.shotMap[shot.id]
         if (
           previousShot &&
@@ -767,62 +679,40 @@ const actions = {
         } else {
           commit(REMOVE_SHOT, shot)
         }
-        commit(DELETE_SHOT_END, shot)
-      }
-      if (callback) callback(err)
-    })
+        return Promise.resolve()
+      })
   },
 
   deleteEpisode ({ commit, state }, episode) {
-    return new Promise((resolve, reject) => {
-      commit(DELETE_EPISODE_START)
-      shotsApi.deleteEpisode(episode, (err) => {
-        if (err) {
-          commit(DELETE_EPISODE_ERROR)
-          reject(err)
-        } else {
-          commit(REMOVE_EPISODE, episode)
-          resolve(episode)
-        }
+    return shotsApi.deleteEpisode(episode)
+      .then(() => {
+        commit(REMOVE_EPISODE, episode)
+        return Promise.resolve(episode)
       })
-    })
   },
 
   deleteSequence ({ commit, state }, sequence) {
-    return new Promise((resolve, reject) => {
-      commit(DELETE_SEQUENCE_START)
-      shotsApi.deleteSequence(sequence, (err) => {
-        if (err) {
-          commit(DELETE_SEQUENCE_ERROR)
-        } else {
-          commit(REMOVE_SEQUENCE, sequence)
-        }
-        if (err) reject(err)
-        else resolve(sequence)
+    return shotsApi.deleteSequence(sequence)
+      .then(() => {
+        commit(REMOVE_SEQUENCE, sequence)
+        return Promise.resolve(sequence)
       })
-    })
   },
 
-  restoreShot ({ commit, state }, payload) {
-    commit(RESTORE_SHOT_START)
-    const shot = payload.shot
-    shotsApi.restoreShot(shot, (err) => {
-      if (err) {
-        commit(RESTORE_SHOT_ERROR)
-      } else {
+  restoreShot ({ commit, state }, shot) {
+    return shotsApi.restoreShot(shot)
+      .then((shot) => {
         commit(RESTORE_SHOT_END, shot)
-      }
-      if (payload.callback) payload.callback(err)
-    })
+        return Promise.resolve(shot)
+      })
   },
 
   uploadShotFile ({ commit, state, rootGetters }, toUpdate) {
-    commit(IMPORT_SHOTS_START)
     const production = rootGetters.currentProduction
     return shotsApi.postCsv(production, state.shotsCsvFormData, toUpdate)
       .then(() => {
         commit(IMPORT_SHOTS_END)
-        Promise.resolve()
+        return Promise.resolve()
       })
   },
 
@@ -1380,23 +1270,12 @@ const mutations = {
   [SHOT_CSV_FILE_SELECTED] (state, formData) {
     state.shotsCsvFormData = formData
   },
-  [IMPORT_SHOTS_START] (state) {},
   [IMPORT_SHOTS_END] (state) {
     state.shotsCsvFormData = null
   },
 
   [LOAD_OPEN_PRODUCTIONS_END] (state, projects) {
     state.openProductions = projects
-  },
-
-  [EDIT_SHOT_START] (state, data) {
-    state.editShot.isLoading = true
-    state.editShot.isError = false
-  },
-
-  [EDIT_SHOT_ERROR] (state) {
-    state.editShot.isLoading = false
-    state.editShot.isError = true
   },
 
   [EDIT_SHOT_END] (state, newShot) {
@@ -1439,8 +1318,6 @@ const mutations = {
     }
   },
 
-  [EDIT_SEQUENCE_START] (state, data) {},
-  [EDIT_SEQUENCE_ERROR] (state) {},
   [EDIT_SEQUENCE_END] (state, newSequence) {
     const sequence = state.sequenceMap[newSequence.id]
     if (sequence) {
@@ -1449,8 +1326,6 @@ const mutations = {
     state.sequenceIndex = buildSequenceIndex(state.sequences)
   },
 
-  [EDIT_EPISODE_START] (state, data) {},
-  [EDIT_EPISODE_ERROR] (state) {},
   [EDIT_EPISODE_END] (state, newEpisode) {
     const episode = state.episodeMap[newEpisode.id]
     if (episode) {
@@ -1459,51 +1334,9 @@ const mutations = {
     state.episodeIndex = buildEpisodeIndex(state.episodes)
   },
 
-  [DELETE_SHOT_START] (state) {
-    state.deleteShot = {
-      isLoading: true,
-      isError: false
-    }
-  },
-  [DELETE_SHOT_ERROR] (state) {
-    state.deleteShot = {
-      isLoading: false,
-      isError: true
-    }
-  },
-
-  [DELETE_SHOT_END] (state, shotToDelete) {
-    state.deleteShot = {
-      isLoading: false,
-      isError: false
-    }
-  },
-
-  [DELETE_SEQUENCE_START] (state) {},
-  [DELETE_SEQUENCE_ERROR] (state) {},
-
-  [DELETE_EPISODE_START] (state) {},
-  [DELETE_EPISODE_ERROR] (state) {},
-
-  [RESTORE_SHOT_START] (state) {
-    state.restoreShot = {
-      isLoading: true,
-      isError: false
-    }
-  },
-  [RESTORE_SHOT_ERROR] (state) {
-    state.restoreShot = {
-      isLoading: false,
-      isError: true
-    }
-  },
   [RESTORE_SHOT_END] (state, shotToRestore) {
     const shot = state.shotMap[shotToRestore.id]
     shot.canceled = false
-    state.restoreShot = {
-      isLoading: false,
-      isError: false
-    }
     cache.shotIndex = buildShotIndex(cache.shots)
   },
 
@@ -1545,8 +1378,6 @@ const mutations = {
     state.episodeSearchText = episodeSearch
   },
 
-  [NEW_SHOT_START] (state) {},
-  [NEW_SHOT_ERROR] (state) {},
   [NEW_SHOT_END] (state, shot) {
     const sequence = state.sequenceMap[shot.parent_id]
     const episode = state.episodeMap[sequence.parent_id]
@@ -1579,8 +1410,6 @@ const mutations = {
     if (shot.data.frame_out) state.isFrameOut = true
   },
 
-  [NEW_SEQUENCE_START] (state) {},
-  [NEW_SEQUENCE_ERROR] (state) {},
   [NEW_SEQUENCE_END] (state, sequence) {
     if (sequence.parent_id) {
       const episode = state.episodeMap[sequence.parent_id]
@@ -1593,8 +1422,6 @@ const mutations = {
     state.sequenceIndex = buildSequenceIndex(state.sequences)
   },
 
-  [NEW_EPISODE_START] (state) {},
-  [NEW_EPISODE_ERROR] (state) {},
   [NEW_EPISODE_END] (state, episode) {
     state.episodes.push(episode)
     state.episodes = sortByName(state.episodes)

@@ -26,40 +26,27 @@
         />
       </form>
 
-      <p class="error has-text-right info-message" v-if="isError">
-        {{ $t("assets.edit_fail") }}
-      </p>
-
-      <div class="has-text-right mt1">
-        <a
-          :class="{
-            button: true,
-            'is-primary': true,
-            'is-loading': isLoading
-          }"
-          @click="runConfirmation"
-        >
-          {{ $t("main.confirmation") }}
-        </a>
-        <router-link
-          :to="cancelRoute"
-          class="button is-link">
-          {{ $t("main.cancel") }}
-        </router-link>
-      </div>
+      <modal-footer
+        :error-text="$t('asset_types.create_error')"
+        :is-error="isError"
+        :is-loading="isLoading"
+        @confirm="runConfirmation"
+        @cancel="$emit('cancel')"
+      />
     </div>
-
   </div>
 </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import ModalFooter from './ModalFooter'
 import TextField from '../widgets/TextField'
 
 export default {
   name: 'edit-asset-type-modal',
   components: {
+    ModalFooter,
     TextField
   },
 
