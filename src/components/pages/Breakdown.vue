@@ -79,8 +79,15 @@
 
         <div class="filters-area flexrow">
           <search-field
+            ref="search-field"
             class="flexrow-item"
             @change="onSearchChange"
+          />
+          <button-simple
+            class="flexrow-item"
+            :title="$t('entities.build_filter.title')"
+            icon="funnel"
+            @click="modals.isBuildFilterDisplayed = true"
           />
         </div>
 
@@ -145,29 +152,39 @@
       @cancel="modals.isEditLabelDisplayed = false"
       @confirm="confirmEditLabel"
     />
+
+    <build-filter-modal
+      ref="build-filter-modal"
+      :active="modals.isBuildFilterDisplayed"
+      @confirm="confirmBuildFilter"
+      @cancel="modals.isBuildFilterDisplayed = false"
+    />
+
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { range } from '../../lib/time'
-import csv from '../../lib/csv'
-import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
-import ButtonHrefLink from '../widgets/ButtonHrefLink.vue'
-import ButtonSimple from '../widgets/ButtonSimple'
-import ComboboxStyled from '../widgets/ComboboxStyled'
-import EditLabelModal from '../modals/EditLabelModal'
-import ImportRenderModal from '../modals/ImportRenderModal'
-import ImportModal from '../modals/ImportModal'
-import SearchField from '../widgets/SearchField.vue'
+import { range } from '@/lib/time'
+import csv from '@/lib/csv'
+import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock'
+import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
+import ButtonHrefLink from '@/components/widgets/ButtonHrefLink.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
+import EditLabelModal from '@/components/modals/EditLabelModal'
+import ImportRenderModal from '@/components/modals/ImportRenderModal'
+import ImportModal from '@/components/modals/ImportModal'
+import SearchField from '@/components/widgets/SearchField.vue'
 import ShotLine from './breakdown/ShotLine'
-import Spinner from '../widgets/Spinner'
+import Spinner from '@/components/widgets/Spinner'
 
 export default {
   name: 'breakdown',
 
   components: {
     AvailableAssetBlock,
+    BuildFilterModal,
     ButtonHrefLink,
     ButtonSimple,
     ComboboxStyled,
@@ -226,6 +243,7 @@ export default {
         importing: false
       },
       modals: {
+        isBuildFilterDisplayed: false,
         isEditLabelDisplayed: false,
         isImportRenderDisplayed: false,
         importing: false
@@ -390,6 +408,12 @@ export default {
         })
       }
       this.selection = selection
+    },
+
+    confirmBuildFilter (query) {
+      this.modals.isBuildFilterDisplayed = false
+      this.$refs['search-field'].setValue(query)
+      this.onSearchChange(query)
     },
 
     onSearchChange (searchQuery) {
@@ -818,5 +842,9 @@ export default {
 
 .filters-area {
   margin-bottom: 2em;
+
+  .search-field-wrapper {
+    margin-right: 0.5em;
+  }
 }
 </style>
