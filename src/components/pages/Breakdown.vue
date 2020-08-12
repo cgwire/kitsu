@@ -73,8 +73,16 @@
         class="breakdown-column assets-column"
         v-if="isCurrentUserManager"
       >
-        <h2 class="subtitle">
-          {{ $t('breakdown.all_assets') }}
+        <h2 class="subtitle flexrow">
+          <span class="flexrow-item">
+            {{ $t('breakdown.all_assets') }}
+          </span>
+          <button-simple
+            class="flexrow-item"
+            :title="$t('assets.add_assets')"
+            icon="plus"
+            @click="modals.isNewDisplayed = true"
+          />
         </h2>
 
         <div class="filters-area flexrow">
@@ -160,6 +168,19 @@
       @cancel="modals.isBuildFilterDisplayed = false"
     />
 
+    <edit-asset-modal
+      ref="edit-asset-modal"
+      :active="modals.isNewDisplayed"
+      :is-loading="loading.edit"
+      :is-loading-stay="loading.stay"
+      :is-error="errors.edit"
+      :is-success="success.edit"
+      :asset-to-edit="{}"
+      @confirm="confirmNewAsset"
+      @confirmAndStay="confirmNewAssetStay"
+      @cancel="modals.isNewDisplayed = false"
+    />
+
   </div>
 </template>
 
@@ -168,14 +189,15 @@ import { mapGetters, mapActions } from 'vuex'
 import { range } from '@/lib/time'
 import csv from '@/lib/csv'
 import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock'
-import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
-import ButtonHrefLink from '@/components/widgets/ButtonHrefLink.vue'
+import BuildFilterModal from '@/components/modals/BuildFilterModal'
+import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
+import EditAssetModal from '@/components/modals/EditAssetModal'
 import EditLabelModal from '@/components/modals/EditLabelModal'
 import ImportRenderModal from '@/components/modals/ImportRenderModal'
 import ImportModal from '@/components/modals/ImportModal'
-import SearchField from '@/components/widgets/SearchField.vue'
+import SearchField from '@/components/widgets/SearchField'
 import ShotLine from './breakdown/ShotLine'
 import Spinner from '@/components/widgets/Spinner'
 
@@ -188,6 +210,7 @@ export default {
     ButtonHrefLink,
     ButtonSimple,
     ComboboxStyled,
+    EditAssetModal,
     EditLabelModal,
     ImportModal,
     ImportRenderModal,
@@ -235,18 +258,26 @@ export default {
       selection: {},
       sequenceId: '',
       errors: {
+        edit: false,
+        stay: false,
         editLabel: false,
         importing: false
       },
       loading: {
+        edit: false,
+        stay: false,
         editLabel: false,
         importing: false
       },
       modals: {
         isBuildFilterDisplayed: false,
         isEditLabelDisplayed: false,
+        isNewDisplayed: false,
         isImportRenderDisplayed: false,
         importing: false
+      },
+      success: {
+        edit: false
       },
       parsedCSV: []
     }
@@ -346,6 +377,7 @@ export default {
       'loadAssets',
       'loadShotCasting',
       'loadShots',
+      'newAsset',
       'removeAssetFromCasting',
       'saveCasting',
       'setAssetSearch',
@@ -646,6 +678,50 @@ export default {
     toggleTextMode () {
       this.isTextMode = !this.isTextMode
       localStorage.setItem('breakdown:text-mode', this.isTextMode)
+    },
+
+    confirmNewAssetStay (form) {
+      this.loading.stay = true
+      this.success.edit = false
+      this.newAsset(form)
+        .then((asset) => {
+          this.loading.stay = false
+          this.loading.edit = false
+          this.resetLightEditModal(asset)
+          this.$refs['edit-asset-modal'].focusName()
+          this.success.edit = true
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.stay = false
+          this.loading.edit = false
+          this.success.edit = false
+          this.errors.edit = true
+        })
+    },
+
+    confirmNewAsset (form) {
+      this.loading.edit = true
+      this.errors.edit = false
+      this.newAsset(form)
+        .then((form) => {
+          this.loading.edit = false
+          this.modals.isNewDisplayed = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.edit = false
+          this.errors.edit = true
+        })
+    },
+
+    resetLightEditModal (asset) {
+      const form = {
+        name: '',
+        entity_type_id: asset.entit_type_id,
+        production_id: this.currentProduction.id
+      }
+      this.assetToEdit = form
     }
   },
 
@@ -838,6 +914,10 @@ export default {
 
 .shots-title {
   font-weight: bold;
+}
+
+.subtitle {
+  font-size: 1.5em;
 }
 
 .filters-area {
