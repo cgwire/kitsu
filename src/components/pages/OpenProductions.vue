@@ -4,8 +4,8 @@
       <spinner />
     </div>
     <div class="flexrow open-productions-header" v-if="!isOpenProductionsLoading && openProductions.length > 0">
-      <h1 class="title has-text-centered flexrow-item">
-      <img src="../../assets/kitsu.png" width="23"/>
+      <h1 class="title flexrow-item">
+        <img src="../../assets/kitsu.png" width="23"/>
         {{ $t('productions.home.title') }}
       </h1>
       <div class="filler"></div>
@@ -362,6 +362,29 @@ a.secondary:hover {
 
   .production-name {
     font-size: 1.1em;
+  }
+
+  .page {
+    padding-top: 3em;
+  }
+
+  .open-productions-header {
+    margin-bottom: 2em;
+    h1 {
+      font-size: 1.6em;
+      font-weight: bold;
+      margin-bottom: 1em;
+      margin-top: 0;
+      padding-top: 0;
+    }
+  }
+
+  .open-productions-box {
+    padding: 0;
+  }
+
+  .flexrow {
+    flex-direction: column;
   }
 }
 </style>
