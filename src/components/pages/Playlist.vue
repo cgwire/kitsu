@@ -272,7 +272,7 @@
                     }"
                     :key="asset.id"
                     @click.prevent="addEntityToPlaylist(asset)"
-                    v-for="asset in typeAssets"
+                    v-for="asset in typeAssets.filter(a => !a.canceled)"
                   >
                       <light-entity-thumbnail
                         :preview-file-id="asset.preview_file_id"
@@ -313,7 +313,7 @@
                     }"
                     :key="shot.id"
                     @click.prevent="addEntityToPlaylist(shot)"
-                    v-for="shot in sequenceShots"
+                    v-for="shot in sequenceShots.filter(s => !s.canceled)"
                   >
                       <light-entity-thumbnail
                         :preview-file-id="shot.preview_file_id"

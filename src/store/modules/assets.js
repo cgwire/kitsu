@@ -319,10 +319,9 @@ const getters = {
   },
 
   assetsByType: state => {
-    return groupEntitiesByParents(
-      Object.values(state.displayedAssets),
-      'asset_type_name'
-    )
+    const activeAssets = state.displayedAssets
+      .filter(a => !a.canceled)
+    return groupEntitiesByParents(activeAssets, 'asset_type_name')
   },
 
   assetCreated: state => state.assetCreated,
