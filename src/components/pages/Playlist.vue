@@ -179,6 +179,12 @@
                 @change="onSearchChange"
                 :placeholder="isAssetPlaylist ? 'chars mode=wfa' : 'ex: seq01 anim=wfa'"
               />
+              <button-simple
+                class="flexrow-item"
+                :title="$t('entities.build_filter.title')"
+                icon="funnel"
+                @click="modals.isBuildFilterDisplayed = true"
+              />
               <button
                 :class="{
                   button: true,
@@ -236,7 +242,6 @@
           class="addition-section"
           v-if="isCurrentUserManager && isAddingEntity"
           v-scroll="onBodyScroll"
-          ref="List"
         >
           <spinner
             class="mt2"
@@ -257,14 +262,6 @@
                   v-if="typeAssets.length > 0"
                 >
                   {{ typeAssets[0].asset_type_name }}
-                  <!--button
-                    class="button"
-                    @click="addAsset(sequenceShots)"
-                    :key="'add-sequence-button-' + sequenceShots[0].sequence_id"
-                    v-if="isCurrentUserManager"
-                  >
-                    {{ $t('playlists.add_sequence') }}
-                  </button-->
                 </h2>
                 <div
                  class="addition-entities"
@@ -343,6 +340,13 @@
       @confirm="confirmEditPlaylist"
     />
 
+    <build-filter-modal
+      ref="build-filter-modal"
+      :active="modals.isBuildFilterDisplayed"
+      :entity-type="isAssetPlaylist ? 'asset' : 'shot'"
+      @confirm="confirmBuildFilter"
+      @cancel="modals.isBuildFilterDisplayed = false"
+    />
   </div>
 </template>
 <script>
@@ -350,26 +354,30 @@ import firstBy from 'thenby'
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 import { PlusIcon, XIcon } from 'vue-feather-icons'
-import { formatDate } from '../../lib/time'
-import { getPlaylistPath } from '../../lib/path'
+import { formatDate } from '@/lib/time'
+import { getPlaylistPath } from '@/lib/path'
 import {
   updateModelFromList,
   removeModelFromList
-} from '../../lib/models'
+} from '@/lib/models'
 
-import Combobox from '../widgets/Combobox'
-import EditPlaylistModal from '../modals/EditPlaylistModal'
-import ErrorText from '../widgets/ErrorText'
-import LightEntityThumbnail from '../widgets/LightEntityThumbnail'
-import PageSubtitle from '../widgets/PageSubtitle'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import BuildFilterModal from '@/components/modals/BuildFilterModal'
+import Combobox from '@/components/widgets/Combobox'
+import EditPlaylistModal from '@/components/modals/EditPlaylistModal'
+import ErrorText from '@/components/widgets/ErrorText'
+import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail'
+import PageSubtitle from '@/components/widgets/PageSubtitle'
 import PlaylistPlayer from './playlists/PlaylistPlayer'
-import SearchField from '../widgets/SearchField'
-import Spinner from '../widgets/Spinner'
+import SearchField from '@/components/widgets/SearchField'
+import Spinner from '@/components/widgets/Spinner'
 
 export default {
   name: 'productions',
 
   components: {
+    BuildFilterModal,
+    ButtonSimple,
     Combobox,
     ErrorText,
     EditPlaylistModal,
@@ -399,6 +407,7 @@ export default {
         for_client: false
       },
       modals: {
+        isBuildFilterDisplayed: false,
         isDeleteDisplayed: false,
         isEditDisplayed: false
       },
@@ -837,6 +846,12 @@ export default {
     },
 
     // Search
+
+    confirmBuildFilter (query) {
+      this.modals.isBuildFilterDisplayed = false
+      this.$refs['search-field'].setValue(query)
+      this.onSearchChange(query)
+    },
 
     onSearchChange (searchQuery) {
       if (searchQuery.length > 1) {
