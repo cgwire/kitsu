@@ -468,6 +468,7 @@ export default {
       'addMetadataDescriptor',
       'changeAssetSort',
       'commentTaskWithPreview',
+      'createTasks',
       'deleteAllTasks',
       'deleteAsset',
       'deleteMetadataDescriptor',

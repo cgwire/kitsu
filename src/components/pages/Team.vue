@@ -79,10 +79,12 @@ export default {
     ]),
 
     addPerson () {
-      this.addPersonToTeam(this.person)
-      setTimeout(() => {
-        this.$refs['people-field'].clear()
-      }, 1)
+      if (this.person) {
+        this.addPersonToTeam(this.person)
+        setTimeout(() => {
+          this.$refs['people-field'].clear()
+        }, 1)
+      }
     },
 
     removePerson (person) {

@@ -79,7 +79,7 @@
           </span>
           <button-simple
             class="flexrow-item"
-            :title="$t('assets.add_assets')"
+            :title="$t('assets.new_asset')"
             icon="plus"
             @click="modals.isNewDisplayed = true"
           />
@@ -900,6 +900,11 @@ export default {
   border-bottom: 1px solid $light-grey;
   font-size: 1.2em;
   margin-bottom: 1em;
+}
+
+.asset-type {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
 }
 
 .asset-list {
