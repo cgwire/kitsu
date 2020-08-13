@@ -153,7 +153,7 @@ const mutations = {
   },
 
   [CASTING_SET_SHOTS] (state, shots) {
-    const casting = []
+    const casting = {}
     const castingByType = []
     state.castingSequenceShots = shots
     shots.forEach((shot) => {
@@ -165,7 +165,7 @@ const mutations = {
   },
 
   [CASTING_SET_ASSETS] (state, assets) {
-    const casting = []
+    const casting = {}
     const castingByType = []
     state.castingAssetTypeAssets = assets
     assets.forEach((asset) => {
@@ -300,7 +300,7 @@ const mutations = {
   },
 
   [LOAD_SHOT_CASTING_END] (state, { shot, casting }) {
-    casting.forEach(a => { a.name = a.asset_name })
+    casting.forEach(a => { a.name = a.asset_name || a.name })
     const castingByType = groupEntitiesByParents(casting, 'asset_type_name')
     shot.casting = casting
     Vue.set(state.casting, shot.id, casting)

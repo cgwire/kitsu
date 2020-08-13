@@ -406,7 +406,6 @@ describe('BuildFilterModal', () => {
           })
           it('status in', () => {
             changeSearch('Modeling=WIP,Done')
-            console.log(store.assetSearchText)
             wrapper.vm.setFiltersFromCurrentQuery()
             expect(wrapper.vm.taskTypeFilters.values).toStrictEqual([
               {
