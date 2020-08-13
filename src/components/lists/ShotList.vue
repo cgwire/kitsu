@@ -178,7 +178,7 @@
               bold: !shot.canceled}"
             >
             <div class="flexrow">
-              <entity-thumbnail :entity="shot" />
+              <entity-thumbnail :entity="shot" :empty-height="32" />
               <router-link :to="shotPath(shot.id)">
                 {{ shot.name }}
               </router-link>
@@ -683,5 +683,13 @@ th.metadata-descriptor {
 
 .task-type-name {
   max-width: 95%;
+}
+
+.datatable-row th.name {
+  font-size: 1.1em;
+  padding: 6px;
+
+  .flexrow {
+  }
 }
 </style>

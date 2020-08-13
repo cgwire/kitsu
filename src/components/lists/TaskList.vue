@@ -68,8 +68,9 @@
           @click="selectTask($event, index, task)"
           v-for="(task, index) in displayedTasks"
         >
-          <td class="thumbnail">
+          <td class="thumbnail flexrow">
             <entity-thumbnail
+              class="flexrow-item"
               :entity="getEntity(task.entity.id)"
               :width="50"
               :height="33"
@@ -694,7 +695,7 @@ td.retake-count {
     padding: 0;
 
     &.thumbnail {
-      padding-left: 0.4em;
+      padding: 6px;
     }
   }
 

@@ -178,7 +178,7 @@
               bold: !asset.canceled
             }">
             <div class="flexrow">
-              <entity-thumbnail :entity="asset" />
+              <entity-thumbnail :entity="asset" :empty-height="32" />
               <router-link
                 class="asset-link"
                 :to="assetPath(asset.id)"
@@ -578,8 +578,12 @@ th.metadata-descriptor {
   padding: 4px;
 }
 
-td.name {
-  font-size: 1.2em;
+.datatable-row th.name {
+  font-size: 1.1em;
+  padding: 6px;
+
+  .flexrow {
+  }
 }
 
 .asset-link {
