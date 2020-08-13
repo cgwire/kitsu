@@ -77,6 +77,7 @@
           <div
             class="sequence-shots"
             :key="sequenceShots.length > 0 ? sequenceShots[0].sequence_name : ''"
+            v-if="sequenceShots[0].sequence_name"
             v-for="sequenceShots in currentAsset.castInShotsBySequence"
           >
             <div class="shot-sequence">
@@ -98,8 +99,8 @@
                 <entity-thumbnail
                   :entity="shot"
                   :square="true"
-                  :empty-width="100"
-                  :empty-height="100"
+                  :empty-width="103"
+                  :empty-height="103"
                   :with-link="false"
                 />
                 <div>
@@ -121,6 +122,53 @@
         :is-error="castIn.isError"
         v-else
       />
+
+      <div v-if="currentAsset && currentAsset.castingAssetsByType &&
+          currentAsset.castingAssetsByType[0].length > 0">
+        <page-subtitle text="Linked" />
+        <div
+            v-if="currentAsset.castingAssetsByType && currentAsset.castingAssetsByType[0].length > 0"
+        >
+          <div
+            class="type-assets"
+            :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
+            v-for="typeAssets in currentAsset.castingAssetsByType"
+          >
+            <div class="asset-type">
+              {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
+              ({{ typeAssets.length }})
+            </div>
+            <div class="asset-list">
+              <router-link
+                class="asset-link"
+                :key="asset.id"
+                :to="{
+                  name: 'asset',
+                  params: {
+                    production_id: currentProduction.id,
+                    asset_id: asset.asset_id
+                  }
+                }"
+                v-for="asset in typeAssets"
+              >
+                <entity-thumbnail
+                  :entity="asset"
+                  :square="true"
+                  :empty-width="103"
+                  :empty-height="103"
+                  :with-link="false"
+                />
+                <div>
+                  <span>{{ asset.asset_name }}</span>
+                  <span v-if="asset.nb_occurences > 1">
+                    ({{ asset.nb_occurences }})
+                  </span>
+                </div>
+              </router-link>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -194,27 +242,15 @@ export default {
     }
   },
 
-  created () {
-    if (!this.currentProduction) {
-      this.setProduction(this.$route.params.production_id)
-    } else {
-      const options = { productionId: this.currentProduction.id }
-      if (this.currentEpisode) options.episodeId = this.currentEpisode.id
-      this.$store.commit('RESET_PRODUCTION_PATH', options)
-    }
-
+  mounted () {
     this.clearSelectedTasks()
     this.currentAsset = this.getCurrentAsset()
 
     this.castIn.isLoading = true
     this.castIn.isError = false
-
-    if (!this.currentAsset) {
-      this.loadAsset(this.route.params.asset_id)
-        .then(() => {
-          this.currentAsset = this.getCurrentAsset()
-          return this.loadAssetCastIn(this.currentAsset)
-        })
+    if (this.currentAsset) {
+      this.loadAssetCastIn(this.currentAsset)
+        .then(() => this.loadAssetCasting(this.currentAsset))
         .then(() => {
           this.castIn.isLoading = false
         })
@@ -223,14 +259,7 @@ export default {
           console.error(err)
         })
     } else {
-      this.loadAssetCastIn(this.currentAsset)
-        .then(() => {
-          this.castIn.isLoading = false
-        })
-        .catch((err) => {
-          this.castIn.isError = true
-          console.error(err)
-        })
+      this.resetData()
     }
   },
 
@@ -239,7 +268,9 @@ export default {
       'assetMap',
       'assetMetadataDescriptors',
       'assetsPath',
+      'currentEpisode',
       'currentProduction',
+      'isTVShow',
       'isCurrentUserManager',
       'route'
     ]),
@@ -268,8 +299,9 @@ export default {
   methods: {
     ...mapActions([
       'editAsset',
-      'loadAsset',
+      'loadAssets',
       'loadAssetCastIn',
+      'loadAssetCasting',
       'clearSelectedTasks'
     ]),
 
@@ -305,11 +337,33 @@ export default {
 
     onTaskSelected (task) {
       this.currentTask = task
+    },
+
+    resetData () {
+      this.loadAssets()
+        .then(() => {
+          this.currentAsset = this.getCurrentAsset()
+          return this.loadAssetCastIn(this.currentAsset)
+        })
+        .then(() => this.loadAssetCasting(this.currentAsset))
+        .then(() => {
+          this.castIn.isLoading = false
+        })
+        .catch((err) => {
+          this.castIn.isError = true
+          console.error(err)
+        })
     }
   },
 
   watch: {
-    $route () { this.handleModalsDisplay() }
+    currentProduction () {
+      if (!this.isTVShow) this.resetData()
+    },
+
+    currentEpisode () {
+      if (this.isTVShow) this.resetData()
+    }
   },
 
   metaInfo () {
@@ -378,6 +432,7 @@ h2.subtitle {
   }
 }
 
+.asset-casting,
 .asset-casted-in {
   margin-left: 1em;
   margin-right: 1em;
@@ -390,6 +445,11 @@ h2.subtitle {
   margin-bottom: 0.5em;
 }
 
+.sequence-shots {
+  margin-bottom: 3em;
+}
+
+.asset-type,
 .shot-sequence {
   text-transform: uppercase;
   font-size: 1.2em;
@@ -398,11 +458,13 @@ h2.subtitle {
   margin-bottom: 0.4em;
 }
 
+.asset-list,
 .shot-list {
   display: flex;
   flex-wrap: wrap;
 }
 
+.asset-link,
 .shot-link {
   color: inherit;
   margin-right: 1em;
@@ -412,10 +474,12 @@ h2.subtitle {
   font-size: 0.8em;
 }
 
+.asset-link div,
 .shot-link div {
   max-width: 100px;
 }
 
+.asset-link span,
 .shot-link span {
   word-wrap: break-word;
 }
@@ -440,6 +504,10 @@ h2.subtitle {
 
 .task-list {
   max-width: 100%;
+}
+
+.datatable-row {
+  user-select: text;
 }
 
 @media screen and (max-width: 768px) {

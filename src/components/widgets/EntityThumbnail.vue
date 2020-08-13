@@ -150,4 +150,7 @@ table .thumbnail-picture {
   margin: 0px;
 }
 
+.thumbnail-wrapper {
+  display: inline-block;
+}
 </style>

@@ -141,7 +141,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
-// import TextField from '../widgets/TextField'
 import Combobox from '../widgets/Combobox'
 import Checkbox from '../widgets/Checkbox'
 import ButtonSimple from '../widgets/ButtonSimple'
@@ -154,7 +153,6 @@ export default {
     ButtonSimple,
     Combobox,
     Checkbox,
-    // TextField,
     ModalFooter
   },
 

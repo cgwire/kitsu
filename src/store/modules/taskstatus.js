@@ -6,12 +6,7 @@ import {
   LOAD_TASK_STATUSES_ERROR,
   LOAD_TASK_STATUSES_END,
 
-  EDIT_TASK_STATUS_START,
-  EDIT_TASK_STATUS_ERROR,
   EDIT_TASK_STATUS_END,
-
-  DELETE_TASK_STATUS_START,
-  DELETE_TASK_STATUS_ERROR,
   DELETE_TASK_STATUS_END,
 
   RESET_ALL
@@ -81,40 +76,28 @@ const actions = {
     })
   },
 
-  newTaskStatus ({ commit, state }, { form, callback }) {
-    commit(EDIT_TASK_STATUS_START, form)
-    taskStatusApi.newTaskStatus(form, (err, taskStatus) => {
-      if (err) {
-        commit(EDIT_TASK_STATUS_ERROR)
-      } else {
+  newTaskStatus ({ commit, state }, form) {
+    return taskStatusApi.newTaskStatus(form)
+      .then((taskStatus) => {
         commit(EDIT_TASK_STATUS_END, taskStatus)
-      }
-      if (callback) callback(err, taskStatus)
-    })
+        Promise.resolve(taskStatus)
+      })
   },
 
-  saveTaskStatus ({ commit, state }, { form, callback }) {
-    commit(EDIT_TASK_STATUS_START)
-    taskStatusApi.updateTaskStatus(form, (err, taskStatus) => {
-      if (err) {
-        commit(EDIT_TASK_STATUS_ERROR)
-      } else {
+  saveTaskStatus ({ commit, state }, form) {
+    return taskStatusApi.updateTaskStatus(form)
+      .then((taskStatus) => {
         commit(EDIT_TASK_STATUS_END, taskStatus)
-      }
-      if (callback) callback(err)
-    })
+        Promise.resolve(taskStatus)
+      })
   },
 
-  deleteTaskStatus ({ commit, state }, { taskStatus, callback }) {
-    commit(DELETE_TASK_STATUS_START)
-    taskStatusApi.deleteTaskStatus(taskStatus, (err) => {
-      if (err) {
-        commit(DELETE_TASK_STATUS_ERROR)
-      } else {
+  deleteTaskStatus ({ commit, state }, taskStatus) {
+    taskStatusApi.deleteTaskStatus(taskStatus)
+      .then(() => {
         commit(DELETE_TASK_STATUS_END, taskStatus)
-      }
-      if (callback) callback(err)
-    })
+        Promise.resolve(taskStatus)
+      })
   }
 }
 
@@ -143,10 +126,6 @@ const mutations = {
     })
   },
 
-  [EDIT_TASK_STATUS_START] (state, form) {
-  },
-  [EDIT_TASK_STATUS_ERROR] (state) {
-  },
   [EDIT_TASK_STATUS_END] (state, newTaskStatus) {
     const taskStatus = state.taskStatusMap[newTaskStatus.id]
 
@@ -159,10 +138,6 @@ const mutations = {
     state.taskStatusMap[newTaskStatus.id] = newTaskStatus
   },
 
-  [DELETE_TASK_STATUS_START] (state) {
-  },
-  [DELETE_TASK_STATUS_ERROR] (state) {
-  },
   [DELETE_TASK_STATUS_END] (state, taskStatusToDelete) {
     const taskStatusToDeleteIndex = state.taskStatus.findIndex(
       (taskStatus) => taskStatus.id === taskStatusToDelete.id

@@ -29,6 +29,7 @@
 
       <modal-footer
         :error-text="$t('schedule.milestone.error')"
+        :is-error="isError"
         :is-loading="isLoading"
         :is-disabled="!isFormFilled"
         @confirm="confirm"

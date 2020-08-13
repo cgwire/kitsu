@@ -70,16 +70,6 @@ const initialState = {
   isProductionsLoadingError: false,
   isOpenProductionsLoading: false,
 
-  editProduction: {
-    isLoading: false,
-    isError: false
-  },
-
-  deleteProduction: {
-    isLoading: false,
-    isError: false
-  },
-
   assetsPath: { name: 'open-productions' },
   assetTypesPath: { name: 'open-productions' },
   shotsPath: { name: 'open-productions' },
@@ -135,9 +125,6 @@ const getters = {
   isProductionsLoading: state => state.isProductionsLoading,
   isProductionsLoadingError: state => state.isProductionsLoadingError,
   isOpenProductionsLoading: state => state.isOpenProductionsLoading,
-
-  editProduction: state => state.editProduction,
-  deleteProduction: state => state.deleteProduction,
 
   assetsPath: state => state.assetsPath,
   assetTypesPath: state => state.assetTypesPath,
@@ -290,42 +277,29 @@ const actions = {
       .catch((err) => console.error(err))
   },
 
-  newProduction ({ commit, state }, { data, callback }) {
+  newProduction ({ commit, state }, data) {
     commit(EDIT_PRODUCTION_START, data)
-    productionsApi.newProduction(data, (err, production) => {
-      if (err) {
-        commit(EDIT_PRODUCTION_ERROR)
-      } else {
+    return productionsApi.newProduction(data)
+      .then((production) => {
         commit(EDIT_PRODUCTION_END, production)
-      }
-      if (callback) callback(err, production)
-    })
+      })
   },
 
-  editProduction ({ commit, state }, payload) {
+  editProduction ({ commit, state }, data) {
     commit(EDIT_PRODUCTION_START)
-    productionsApi.updateProduction(payload.data, (err, production) => {
-      if (err) {
-        commit(EDIT_PRODUCTION_ERROR)
-      } else {
+    return productionsApi.updateProduction(data)
+      .then((production) => {
         commit(EDIT_PRODUCTION_END, production)
-      }
-      if (payload.callback) payload.callback(err)
-    })
+      })
   },
 
-  deleteProduction ({ commit, state }, payload) {
+  deleteProduction ({ commit, state }, production) {
     commit(DELETE_PRODUCTION_START)
-    const production = payload.production
-    productionsApi.deleteProduction(production, (err) => {
-      if (err) {
-        commit(DELETE_PRODUCTION_ERROR)
-      } else {
+    return productionsApi.deleteProduction(production)
+      .then(() => {
         commit(REMOVE_PRODUCTION, production)
         commit(DELETE_PRODUCTION_END)
-      }
-      if (payload.callback) payload.callback(err)
-    })
+      })
   },
 
   setProduction ({ commit, rootGetters }, productionId) {
@@ -567,12 +541,8 @@ const mutations = {
   },
 
   [EDIT_PRODUCTION_START] (state, data) {
-    state.editProduction.isLoading = true
-    state.editProduction.isError = false
   },
   [EDIT_PRODUCTION_ERROR] (state) {
-    state.editProduction.isLoading = false
-    state.editProduction.isError = true
   },
 
   [EDIT_PRODUCTION_END] (state, newProduction) {
@@ -624,10 +594,6 @@ const mutations = {
       }
       state.productions = sortProductions(state.productions)
     }
-    state.editProduction = {
-      isLoading: false,
-      isError: false
-    }
   },
 
   [ADD_PRODUCTION] (state, production) {
@@ -665,17 +631,9 @@ const mutations = {
   },
 
   [DELETE_PRODUCTION_START] (state) {
-    state.deleteProduction = {
-      isLoading: true,
-      isError: false
-    }
   },
 
   [DELETE_PRODUCTION_ERROR] (state) {
-    state.deleteProduction = {
-      isLoading: false,
-      isError: true
-    }
   },
 
   [REMOVE_PRODUCTION] (state, productionToDelete) {
@@ -687,10 +645,6 @@ const mutations = {
   },
 
   [DELETE_PRODUCTION_END] (state, productionToDelete) {
-    state.deleteProduction = {
-      isLoading: false,
-      isError: false
-    }
   },
 
   [PRODUCTION_PICTURE_FILE_SELECTED] (state, formData) {

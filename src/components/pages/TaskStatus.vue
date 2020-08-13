@@ -1,44 +1,36 @@
 <template>
   <div class="task-status page fixed-page">
-    <div class="level page-header">
-      <div class="level-left">
-        <page-title :text="$t('task_status.title')"></page-title>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <button-link
-            class="level-item task-status-new"
-            icon="plus"
-            :text="$t('task_status.new_task_status')"
-            path="/task-status/new"
-          >
-          </button-link>
-        </div>
-      </div>
-    </div>
+
+    <list-page-header
+      :title="$t('task_status.title')"
+      :new-entry-label="$t('task_status.new_task_status')"
+      @new-clicked="onNewClicked"
+    />
 
     <task-status-list
       :entries="taskStatus"
-      :is-loading="taskStatusList.isLoading"
-      :is-error="taskStatusList.isError"
+      :is-loading="loading.list"
+      :is-error="errors.list"
+      @edit-clicked="onEditClicked"
+      @delete-clicked="onDeleteClicked"
     />
 
     <edit-task-status-modal
-      :active="modals.isNewDisplayed"
-      :is-loading="editStatus.isLoading"
-      :is-error="editStatus.isError"
-      :cancel-route="'/task-status'"
+      :active="modals.edit"
+      :is-loading="loading.edit"
+      :is-error="errors.edit"
       :task-status-to-edit="taskStatusToEdit"
+      @cancel="modals.edit = false"
       @confirm="confirmEditTaskStatus"
     />
 
     <delete-modal
-      :active="modals.isDeleteDisplayed"
-      :is-loading="deleteStatus.isLoading"
-      :is-error="deleteStatus.isError"
-      :cancel-route="'/task-status'"
+      :active="modals.del"
+      :is-loading="loading.del"
+      :is-error="errors.del"
       :text="deleteText()"
       :error-text="$t('task_status.delete_error')"
+      @cancel="modals.del = false"
       @confirm="confirmDeleteTaskStatus"
     />
 
@@ -47,42 +39,38 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import TaskStatusList from '../lists/TaskStatusList'
-import EditTaskStatusModal from '../modals/EditTaskStatusModal'
-import PageTitle from '../widgets/PageTitle'
 import DeleteModal from '../modals/DeleteModal'
-import ButtonLink from '../widgets/ButtonLink'
+import EditTaskStatusModal from '../modals/EditTaskStatusModal'
+import ListPageHeader from '../widgets/ListPageHeader'
+import TaskStatusList from '../lists/TaskStatusList'
 
 export default {
   name: 'task-status',
 
   components: {
-    ButtonLink,
     DeleteModal,
     EditTaskStatusModal,
-    PageTitle,
+    ListPageHeader,
     TaskStatusList
   },
 
   data () {
     return {
       taskStatusToDelete: null,
-      taskStatusToEdit: null,
+      taskStatusToEdit: { color: '#000000' },
       modals: {
-        isNewDisplayed: false,
-        isDeleteDisplayed: false
+        edit: false,
+        del: false
       },
-      taskStatusList: {
-        isLoading: false,
-        isError: false
+      loading: {
+        edit: false,
+        del: false,
+        list: false
       },
-      editStatus: {
-        isLoading: false,
-        isError: false
-      },
-      deleteStatus: {
-        isLoading: false,
-        isError: false
+      errors: {
+        edit: false,
+        del: false,
+        list: false
       }
     }
   },
@@ -95,7 +83,6 @@ export default {
   },
 
   created () {
-    this.handleModalsDisplay()
   },
 
   methods: {
@@ -111,35 +98,33 @@ export default {
         form.id = this.taskStatusToEdit.id
       }
 
-      this.editStatus.isLoading = true
-      this.editStatus.isError = false
-      this.$store.dispatch(action, {
-        form: form,
-        callback: (err) => {
-          this.editStatus.isLoading = false
-          if (err) {
-            this.editStatus.isError = true
-          } else {
-            this.$router.push({ name: 'task-status' }) // Close modal
-          }
-        }
-      })
+      this.loading.edit = true
+      this.loading.del = false
+      this.$store.dispatch(action, form)
+        .then(() => {
+          this.loading.edit = false
+          this.modals.edit = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.edit = false
+          this.errors.edit = true
+        })
     },
 
     confirmDeleteTaskStatus () {
-      this.deleteStatus.isLoading = true
-      this.deleteStatus.isError = false
-      this.deleteTaskStatus({
-        taskStatus: this.taskStatusToDelete,
-        callback: (err) => {
-          this.deleteStatus.isLoading = false
-          if (err) {
-            this.deleteStatus.isError = true
-          } else {
-            this.$router.push({ name: 'task-status' }) // Close modal
-          }
-        }
-      })
+      this.loading.del = true
+      this.errors.del = false
+      this.deleteTaskStatus(this.taskStatusToDelete)
+        .then(() => {
+          this.loading.del = false
+          this.modals.del = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.del = false
+          this.errors.del = true
+        })
     },
 
     deleteText () {
@@ -151,28 +136,23 @@ export default {
       }
     },
 
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
-      const taskStatusId = this.$store.state.route.params.task_status_id
+    onNewClicked () {
+      this.taskStatusToEdit = { color: '#000000' }
+      this.modals.edit = true
+    },
 
-      if (path.indexOf('new') > 0) {
-        this.taskStatusToEdit = { color: '#000000' }
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('edit') > 0) {
-        this.taskStatusToEdit = this.taskStatusMap[taskStatusId]
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('delete') > 0) {
-        this.taskStatusToDelete = this.taskStatusMap[taskStatusId]
-        this.modals.isDeleteDisplayed = true
-      } else {
-        this.modals.isNewDisplayed = false
-        this.modals.isDeleteDisplayed = false
-      }
+    onEditClicked (taskStatus) {
+      this.taskStatusToEdit = taskStatus
+      this.modals.edit = true
+    },
+
+    onDeleteClicked (taskStatus) {
+      this.taskStatusToDelete = taskStatus
+      this.modals.del = true
     }
   },
 
   watch: {
-    $route () { this.handleModalsDisplay() }
   },
 
   metaInfo () {

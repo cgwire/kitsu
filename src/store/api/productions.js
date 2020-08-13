@@ -17,16 +17,16 @@ export default {
     client.get('/api/data/project-status', callback)
   },
 
-  newProduction (production, callback) {
+  newProduction (production) {
     const data = {
       name: production.name,
       project_status_id: production.project_status_id,
       production_type: production.production_type
     }
-    client.post('/api/data/projects/', data, callback)
+    return client.ppost('/api/data/projects/', data)
   },
 
-  updateProduction (production, callback) {
+  updateProduction (production) {
     const data = {
       name: production.name,
       project_status_id: production.project_status_id,
@@ -38,7 +38,7 @@ export default {
       end_date: production.end_date,
       man_days: production.man_days
     }
-    client.put(`/api/data/projects/${production.id}`, data, callback)
+    return client.pput(`/api/data/projects/${production.id}`, data)
   },
 
   postAvatar (productionId, formData, callback) {
@@ -49,8 +49,8 @@ export default {
     )
   },
 
-  deleteProduction (production, callback) {
-    client.del(`/api/data/projects/${production.id}?force=true`, callback)
+  deleteProduction (production) {
+    return client.pdel(`/api/data/projects/${production.id}?force=true`)
   },
 
   addPersonToTeam (productionId, personId) {

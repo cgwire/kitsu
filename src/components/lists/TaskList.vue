@@ -68,8 +68,9 @@
           @click="selectTask($event, index, task)"
           v-for="(task, index) in displayedTasks"
         >
-          <td class="thumbnail">
+          <td class="thumbnail flexrow">
             <entity-thumbnail
+              class="flexrow-item"
               :entity="getEntity(task.entity.id)"
               :width="50"
               :height="33"
@@ -505,6 +506,8 @@ export default {
         this.$t('tasks.fields.estimation'),
         this.$t('tasks.fields.duration'),
         this.$t('tasks.fields.retake_count'),
+        this.$t('tasks.fields.start_date'),
+        this.$t('tasks.fields.due_date'),
         this.$t('tasks.fields.real_start_date'),
         this.$t('tasks.fields.real_end_date'),
         this.$t('tasks.fields.last_comment_date')
@@ -527,6 +530,8 @@ export default {
           this.formatDuration(task.estimation),
           this.formatDuration(task.duration),
           task.retake_count,
+          this.formatDate(task.start_date),
+          this.formatDate(task.due_date),
           this.formatDate(task.real_start_date),
           this.formatDate(task.end_date),
           this.formatDate(task.last_comment_date)
@@ -690,7 +695,7 @@ td.retake-count {
     padding: 0;
 
     &.thumbnail {
-      padding-left: 0.4em;
+      padding: 6px;
     }
   }
 

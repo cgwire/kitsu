@@ -13,17 +13,17 @@ export default {
     const data = {
       name: assetType.name
     }
-    client.post('/api/data/entity-types', data, callback)
+    return client.ppost('/api/data/entity-types', data)
   },
 
   updateAssetType (assetType, callback) {
     const data = {
       name: assetType.name
     }
-    client.put(`/api/data/entity-types/${assetType.id}`, data, callback)
+    return client.pput(`/api/data/entity-types/${assetType.id}`, data)
   },
 
   deleteAssetType (assetType, callback) {
-    client.del(`/api/data/entity-types/${assetType.id}`, callback)
+    return client.pdel(`/api/data/entity-types/${assetType.id}`)
   }
 }

@@ -223,10 +223,12 @@ export default {
       'drag', 'dragstart', 'dragend', 'dragover',
       'dragenter', 'dragleave', 'drop'
     ].forEach((evt) => {
-      this.$refs.wrapper.addEventListener(evt, (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-      })
+      if (this.$refs.wrapper) {
+        this.$refs.wrapper.addEventListener(evt, (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        })
+      }
     })
   },
 

@@ -35,26 +35,14 @@
         />
       </form>
 
-      <p class="has-text-right">
-        <a
-          :class="{
-            button: true,
-            'is-primary': true,
-            'is-loading': isLoading
-          }"
-          @click="runConfirmation">
-          {{ $t("main.confirmation") }}
-        </a>
-        <button
-          @click="$emit('cancel')"
-          class="button is-link">
-          {{ $t("main.cancel") }}
-        </button>
-      </p>
+      <modal-footer
+        :error-text="$t('playlists.edit_error')"
+        :is-error="isError"
+        :is-loading="isLoading"
+        @confirm="runConfirmation"
+        @cancel="$emit('cancel')"
+      />
 
-      <p class="error has-text-right info-message" v-if="isError">
-        {{ $t("assets.edit_fail") }}
-      </p>
     </div>
   </div>
 </div>
@@ -62,6 +50,7 @@
 
 <script>
 import Combobox from '../widgets/Combobox'
+import ModalFooter from './ModalFooter'
 import TextField from '../widgets/TextField'
 
 import { mapGetters } from 'vuex'
@@ -72,6 +61,7 @@ export default {
   mixins: [modalMixin],
   components: {
     Combobox,
+    ModalFooter,
     TextField
   },
 

@@ -20,17 +20,9 @@
             @click="$emit('confirm')">
             {{ $t("main.confirmation") }}
           </a>
-          <router-link
-            :to="cancelRoute"
-            class="button is-text"
-            v-if="cancelRoute"
-          >
-            {{ $t("main.cancel") }}
-          </router-link>
           <button
-            class="button is-text"
+            class="button is-link"
             @click="$emit('cancel')"
-            v-else
           >
             {{ $t("main.cancel") }}
           </button>
@@ -42,13 +34,14 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { modalMixin } from './base_modal'
 
 export default {
   name: 'delete-modal',
+  mixins: [modalMixin],
   props: [
     'text',
     'active',
-    'cancelRoute',
     'isLoading',
     'isError',
     'errorText'

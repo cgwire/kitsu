@@ -69,34 +69,14 @@
         </div>
       </form>
 
-      <p class="has-text-right">
-        <a
-          :class="{
-            button: true,
-            'is-primary': true,
-            'is-loading': isLoading
-          }"
-          @click="runConfirmation">
-          {{ $t("main.confirmation") }}
-        </a>
-        <router-link
-          :to="cancelRoute"
-          class="button is-link"
-          v-if="cancelRoute"
-        >
-          {{ $t("main.cancel") }}
-        </router-link>
-        <button
-          @click="$emit('cancel')"
-          class="button is-link"
-          v-else
-        >
-          {{ $t("main.cancel") }}
-        </button>
-      </p>
-      <p class="error has-text-right info-message" v-if="isError">
-        {{ $t("assets.edit_fail") }}
-      </p>
+      <modal-footer
+        :error-text="$t('productions.edit_error')"
+        :is-error="isError"
+        :is-loading="isLoading"
+        @confirm="runConfirmation"
+        @cancel="$emit('cancel')"
+      />
+
     </div>
   </div>
 </div>
@@ -107,6 +87,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
 
 import Combobox from '../widgets/Combobox'
+import ModalFooter from '@/components/modals/ModalFooter'
 import FileUpload from '../widgets/FileUpload'
 import TextField from '../widgets/TextField'
 
@@ -116,13 +97,13 @@ export default {
   components: {
     Combobox,
     FileUpload,
+    ModalFooter,
     TextField
   },
 
   props: [
     'text',
     'active',
-    'cancelRoute',
     'isLoading',
     'isError',
     'errorText',

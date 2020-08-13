@@ -178,7 +178,7 @@
               bold: !shot.canceled}"
             >
             <div class="flexrow">
-              <entity-thumbnail :entity="shot" />
+              <entity-thumbnail :entity="shot" :empty-height="32" />
               <router-link :to="shotPath(shot.id)">
                 {{ shot.name }}
               </router-link>
@@ -244,11 +244,11 @@
           />
           <row-actions
             :entry="shot"
-            :edit-route="editPath(shot.id)"
-            :restore-route="restorePath(shot.id)"
-            :delete-route="deletePath(shot.id)"
             :hide-history="false"
+            @delete-clicked="$emit('delete-clicked', shot)"
+            @edit-clicked="$emit('edit-clicked', shot)"
             @history-clicked="$emit('shot-history', shot)"
+            @restore-clicked="$emit('restore-clicked', shot)"
             v-if="isCurrentUserManager"
           />
           <td class="actions" v-else></td>
@@ -683,5 +683,13 @@ th.metadata-descriptor {
 
 .task-type-name {
   max-width: 95%;
+}
+
+.datatable-row th.name {
+  font-size: 1.1em;
+  padding: 6px;
+
+  .flexrow {
+  }
 }
 </style>

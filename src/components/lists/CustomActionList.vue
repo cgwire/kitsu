@@ -35,14 +35,8 @@
           </td>
           <row-actions
             :entry-id="customAction.id"
-            :edit-route="{
-              name: 'edit-custom-action',
-              params: {custom_action_id: customAction.id}
-            }"
-            :delete-route="{
-              name: 'delete-custom-action',
-              params: {custom_action_id: customAction.id}
-            }"
+            @edit-clicked="$emit('edit-clicked', customAction)"
+            @delete-clicked="$emit('delete-clicked', customAction)"
           />
         </tr>
       </tbody>
@@ -52,8 +46,7 @@
   <table-info
     :is-loading="isLoading"
     :is-error="isError"
-  >
-  </table-info>
+  />
 
   <p class="has-text-centered nb-custom-actions">
     {{ entries.length }} {{ $tc('custom_actions.number', entries.length) }}

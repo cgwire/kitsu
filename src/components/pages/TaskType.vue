@@ -344,6 +344,10 @@ export default {
       'user'
     ]),
 
+    entityMap () {
+      return this.isAssets ? this.assetMap : this.shotMap
+    },
+
     locale () {
       if (this.user.locale === 'fr_FR') {
         return fr
@@ -481,7 +485,6 @@ export default {
 
     initData (force) {
       this.resetTasks()
-      this.resetTaskIndex()
       this.focusSearchField()
       if (this.tasks.length === 0) {
         this.loading.entities = true
@@ -491,9 +494,9 @@ export default {
           .then(() => {
             this.loading.entities = false
             this.resetTasks()
-            this.resetTaskIndex()
             this.focusSearchField()
-            const searchQuery = this.searchField.getValue()
+            const searchQuery =
+              this.searchField ? this.searchField.getValue() : ''
             if (searchQuery) this.onSearchChange(searchQuery)
             setTimeout(() => {
               this.setSearchFromUrl()
@@ -654,24 +657,22 @@ export default {
     },
 
     resetTasks () {
-      if (this.isAssets) {
-        this.tasks = this.assetTasks
-      } else {
+      let tasks = this.assetTasks
+      if (!this.isAssets) {
         this.tasks = this.shotTasks
       }
-      this.tasks = this.sortTasks()
+      tasks = tasks.filter((task) => {
+        const entity = this.entityMap[task.entity_id]
+        return !entity.canceled
+      })
+      this.tasks = this.sortTasks(tasks)
+      this.resetTaskIndex()
     },
 
     resetTaskIndex () {
-      if (this.isAssets) {
-        this.$options.taskIndex = buildSupervisorTaskIndex(
-          this.assetTasks, this.personMap
-        )
-      } else {
-        this.$options.taskIndex = buildSupervisorTaskIndex(
-          this.shotTasks, this.personMap
-        )
-      }
+      this.$options.taskIndex = buildSupervisorTaskIndex(
+        this.tasks, this.personMap
+      )
       this.$options.taskIndex.me =
         indexSearch(this.$options.taskIndex, this.user.full_name.split(' '))
     },

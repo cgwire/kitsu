@@ -81,7 +81,6 @@
         >
           {{ $t('people.invite') }}
         </button>
-
         <a
           :class="{
             button: true,
@@ -92,11 +91,12 @@
           @click="confirmClicked">
           {{ $t('main.confirmation') }}
         </a>
-        <router-link
-          :to="cancelRoute"
-          class="button is-link">
-          {{ $t('main.cancel') }}
-        </router-link>
+         <button
+            @click="$emit('cancel')"
+            class="button is-link"
+          >
+            {{ $t("main.cancel") }}
+          </button>
       </p>
 
       <div
@@ -111,6 +111,12 @@
       >
         {{ $t('people.invite_error') }}
       </div>
+      <div
+        class="error has-text-right mt1"
+        v-if="isError"
+      >
+        {{ $t('people.create_error') }}
+      </div>
     </div>
   </div>
 </div>
@@ -118,23 +124,27 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { modalMixin } from './base_modal'
+
 import TextField from '../widgets/TextField'
 import Combobox from '../widgets/Combobox'
 
 export default {
   name: 'edit-modal',
+  mixins: [modalMixin],
   props: [
-    'onConfirmClicked',
-    'text',
     'active',
     'cancelRoute',
+    'errorText',
     'isLoading',
     'isCreateInviteLoading',
     'isInvitationSuccess',
     'isInvitationError',
     'isInviteLoading',
     'isError',
-    'errorText'
+    'onConfirmClicked',
+    'personToEdit',
+    'text'
   ],
 
   data () {
@@ -172,7 +182,6 @@ export default {
     ...mapGetters([
       'isLdap',
       'isCurrentUserAdmin',
-      'personToEdit',
       'people'
     ]),
 
@@ -201,10 +210,11 @@ export default {
     },
 
     confirmClicked () {
-      this.form.active =
+      const form = { ...this.form }
+      form.active =
         this.form.active === 'true' || this.form.active === true
       if (this.form.email) {
-        this.$emit('confirm', this.form)
+        this.$emit('confirm', form)
       }
     },
 
@@ -217,6 +227,15 @@ export default {
           email: this.personToEdit.email,
           role: this.personToEdit.role,
           active: !this.personToEdit.id || this.personToEdit.active ? 'true' : 'false'
+        }
+      } else {
+        this.form = {
+          first_name: '',
+          last_name: '',
+          email: '',
+          phone: '',
+          role: 'user',
+          active: 'true'
         }
       }
       this.checkEmailValidity()

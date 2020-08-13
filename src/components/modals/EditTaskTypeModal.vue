@@ -43,52 +43,43 @@
         />
       </form>
 
-      <p class="has-text-right">
-        <a
-          :class="{
-            button: true,
-            'is-primary': true,
-            'is-loading': isLoading
-          }"
-          @click="confirmClicked"
-        >
-          {{ $t("main.confirmation") }}
-        </a>
-        <router-link
-          :to="cancelRoute"
-          class="button is-link"
-        >
-          {{ $t("main.cancel") }}
-        </router-link>
-      </p>
+      <modal-footer
+        :error-text="$t('task_types.create_error')"
+        :is-loading="isLoading"
+        :is-error="isError"
+        @confirm="confirmClicked"
+        @cancel="$emit('cancel')"
+      />
     </div>
-
   </div>
 </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import TextField from '../widgets/TextField'
+import { modalMixin } from './base_modal'
+
 import Combobox from '../widgets/Combobox.vue'
 import ComboboxBoolean from '../widgets/ComboboxBoolean.vue'
 import ColorField from '../widgets/ColorField'
+import ModalFooter from '@/components/modals/ModalFooter'
+import TextField from '../widgets/TextField'
 
 export default {
   name: 'edit-task-type-modal',
+  mixins: [modalMixin],
   components: {
     Combobox,
     ComboboxBoolean,
-    TextField,
-    ColorField
+    ColorField,
+    ModalFooter,
+    TextField
   },
 
   props: [
     'active',
     'onConfirmClicked',
-    'cancelRoute',
     'entries',
-    'errorText',
     'isLoading',
     'isError',
     'taskTypeToEdit',

@@ -1,73 +1,72 @@
 <template>
   <div class="custom-actions page fixed-page">
-    <div class="level page-header">
-      <div class="level-left">
-        <page-title :text="$t('custom_actions.title')" />
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <button-link
-            class="level-item"
-            icon="plus"
-            :text="$t('custom_actions.new_custom_action')"
-            path="/custom-actions/new"
-          />
-        </div>
-      </div>
-    </div>
+    <list-page-header
+      :title="$t('custom_actions.title')"
+      :new-entry-label="$t('custom_actions.new_custom_action')"
+      @new-clicked="onNewClicked"
+    />
 
     <custom-action-list
       :entries="customActions"
-      :is-loading="isCustomActionsLoading"
-      :is-error="isCustomActionsLoadingError"
+      :is-loading="loading.list"
+      :is-error="errors.list"
+      @edit-clicked="onEditClicked"
+      @delete-clicked="onDeleteClicked"
     />
 
     <edit-custom-action-modal
-      :active="modals.isNewDisplayed"
-      :is-loading="editCustomAction.isLoading"
-      :is-error="editCustomAction.isError"
-      :cancel-route="'/custom-actions'"
+      :active="modals.edit"
+      :is-loading="loading.edit"
+      :is-error="errors.edit"
       :custom-action-to-edit="customActionToEdit"
+      @cancel="modals.edit = false"
       @confirm="confirmEditCustomAction"
     />
 
     <delete-modal
-      :active="modals.isDeleteDisplayed"
-      :is-loading="deleteCustomAction.isLoading"
-      :is-error="deleteCustomAction.isError"
-      :cancel-route="'/custom-actions'"
-      :text="deleteText()"
+      :active="modals.del"
+      :is-loading="loading.del"
+      :is-error="errors.del"
+      :text="deleteText"
       :error-text="$t('custom_actions.delete_error')"
+      @cancel="modals.delete = false"
       @confirm="confirmDeleteCustomAction"
     />
-
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import CustomActionList from '../lists/CustomActionList'
-import EditCustomActionModal from '../modals/EditCustomActionModal'
 import DeleteModal from '../modals/DeleteModal'
-import PageTitle from '../widgets/PageTitle'
-import ButtonLink from '../widgets/ButtonLink'
+import EditCustomActionModal from '../modals/EditCustomActionModal'
+import ListPageHeader from '@/components/widgets/ListPageHeader'
 
 export default {
   name: 'custom-actions',
 
   components: {
-    ButtonLink,
+    CustomActionList,
     DeleteModal,
     EditCustomActionModal,
-    PageTitle,
-    CustomActionList
+    ListPageHeader
   },
 
   data () {
     return {
       modals: {
-        isNewDisplayed: false,
-        isDeleteDisplayed: false
+        edit: false,
+        del: false
+      },
+      loading: {
+        edit: false,
+        del: false,
+        list: false
+      },
+      errors: {
+        edit: false,
+        del: false,
+        list: false
       },
       customActionToDelete: null,
       customActionToEdit: null
@@ -76,24 +75,37 @@ export default {
 
   computed: {
     ...mapGetters([
-      'customActions',
-      'isCustomActionsLoading',
-      'isCustomActionsLoadingError',
-      'editCustomAction',
-      'deleteCustomAction',
-      'customAction'
-    ])
+      'customActions'
+    ]),
+
+    deleteText () {
+      const customAction = this.customActionToDelete
+      if (customAction) {
+        return this.$t(
+          'custom_actions.delete_text', { name: customAction.name })
+      } else {
+        return ''
+      }
+    }
   },
 
   created () {
+    this.loading.list = true
+    this.errors.list = false
     this.loadCustomActions((err) => {
-      if (!err) this.handleModalsDisplay()
+      this.loading.list = false
+      if (err) {
+        this.errors.list = true
+      }
     })
   },
 
   methods: {
     ...mapActions([
-      'loadCustomActions'
+      'deleteCustomAction',
+      'editCustomAction',
+      'loadCustomActions',
+      'newCustomAction'
     ]),
 
     confirmEditCustomAction (form) {
@@ -103,52 +115,51 @@ export default {
         form.id = this.customActionToEdit.id
       }
 
-      this.$store.dispatch(action, {
-        data: form,
-        callback: (err) => {
-          if (!err) {
-            this.modals.isNewDisplayed = false
-            this.$router.push('/custom-actions')
-          }
-        }
-      })
+      this.loading.edit = true
+      this.errors.edit = false
+      this[action](form)
+        .then(() => {
+          this.loading.edit = false
+          this.modals.edit = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.errors.edit = true
+          this.modals.isNewDisplayed = false
+        })
     },
 
     confirmDeleteCustomAction () {
-      this.$store.dispatch('deleteCustomAction', {
-        customAction: this.customActionToDelete,
-        callback: (err) => {
-          if (!err) this.$router.push('/custom-actions')
-        }
-      })
+      this.loading.del = true
+      this.errors.del = false
+      this.deleteCustomAction(this.customActionToDelete)
+        .then(() => {
+          this.loading.del = false
+          this.modals.del = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.errors.del = true
+          this.loading.del = false
+        })
     },
 
-    deleteText () {
-      const customAction = this.customActionToDelete
-      if (customAction) {
-        return this.$t('custom_actions.delete_text', { name: customAction.name })
-      } else {
-        return ''
-      }
+    onNewClicked () {
+      this.customActionToEdit = {}
+      this.errors.edit = false
+      this.modals.edit = true
     },
 
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
-      const customActionId = this.$store.state.route.params.custom_action_id
+    onEditClicked (customAction) {
+      this.customActionToEdit = customAction
+      this.errors.edit = false
+      this.modals.edit = true
+    },
 
-      if (path.indexOf('new') > 0) {
-        this.customActionToEdit = { color: '#FFFFFF' }
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('edit') > 0) {
-        this.customActionToEdit = this.customAction(customActionId)
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('delete') > 0) {
-        this.customActionToDelete = this.customAction(customActionId)
-        this.modals.isDeleteDisplayed = true
-      } else {
-        this.modals.isNewDisplayed = false
-        this.modals.isDeleteDisplayed = false
-      }
+    onDeleteClicked (customAction) {
+      this.customActionToDelete = customAction
+      this.errors.del = false
+      this.modals.del = true
     }
   },
 
@@ -161,7 +172,6 @@ export default {
       title: `${this.$t('custom_actions.title')} - Kitsu`
     }
   }
-
 }
 </script>
 

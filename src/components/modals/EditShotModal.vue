@@ -81,38 +81,13 @@
         </div>
       </form>
 
-      <div class="has-text-right">
-        <a
-          :class="{
-            button: true,
-            'is-primary': true,
-            'is-loading': isLoading
-          }"
-          @click="confirmClicked"
-        >
-          {{ $t("main.confirmation") }}
-        </a>
-        <router-link
-          :to="cancelRoute"
-          class="button is-link"
-          v-if="cancelRoute"
-        >
-          {{ $t("main.close") }}
-        </router-link>
-        <button
-          class="button is-link"
-          @click="$emit('cancel')"
-          v-else
-        >
-          {{ $t("main.close") }}
-        </button>
-        <p class="error has-text-right info-message" v-if="isError">
-          {{ $t("shots.edit_fail") }}
-        </p>
-        <p class="success has-text-right info-message">
-          {{ shotSuccessText }}
-        </p>
-      </div>
+      <modal-footer
+        :error-text="$t('shots.edit_fail')"
+        :is-loading="isLoading"
+        :is-error="isError"
+        @confirm="confirmClicked"
+        @cancel="$emit('cancel')"
+      />
     </div>
   </div>
 </div>
@@ -121,9 +96,10 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
+import Combobox from '../widgets/Combobox'
+import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '../widgets/TextField'
 import TextareaField from '../widgets/TextareaField'
-import Combobox from '../widgets/Combobox'
 
 export default {
   name: 'edit-shot-modal',
@@ -131,6 +107,7 @@ export default {
 
   components: {
     Combobox,
+    ModalFooter,
     TextField,
     TextareaField
   },

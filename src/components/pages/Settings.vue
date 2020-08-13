@@ -189,7 +189,13 @@ export default {
 
   watch: {
     organisation () {
-      this.form = Object.assign(this.form, this.organisation)
+      this.form = {
+        name: this.organisation.name,
+        hours_by_day: this.organisation.hours_by_day,
+        use_original_file_name:
+          this.organisation.use_original_file_name ? 'true' : 'false',
+        chat_token_slack: this.organisation.chat_token_slack
+      }
     }
   },
 

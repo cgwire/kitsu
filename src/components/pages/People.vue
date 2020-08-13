@@ -17,12 +17,12 @@
         icon="download"
         path="/api/export/csv/persons.csv"
       />
-      <button-link
+      <button-simple
         class="flexrow-item"
         :text="$t('people.new_person')"
         :is-responsive="true"
         icon="plus"
-        path="/people/new"
+        @click="onNewClicked"
         v-if="isCurrentUserAdmin"
       />
     </div>
@@ -41,6 +41,8 @@
       :entries="displayedPeople"
       :is-loading="isPeopleLoading"
       :is-error="isPeopleLoadingError"
+      @edit-clicked="onEditClicked"
+      @delete-clicked="onDeleteClicked"
     />
 
     <import-render-modal
@@ -69,27 +71,28 @@
     />
 
     <edit-person-modal
-      :active="isEditModalShown"
+      :active="modals.edit"
       :is-loading="loading.edit"
       :is-invite-loading="loading.invite"
       :is-create-invite-loading="loading.createAndInvite"
-      :is-error="isEditLoadingError"
+      :is-error="errors.edit"
       :is-invitation-success="success.invite"
       :is-invitation-error="errors.invite"
-      :cancel-route="{ name: 'people'}"
+      :person-to-edit="personToEdit"
+      @cancel="modals.edit = false"
       @confirm="confirmEditPeople"
       @confirm-invite="confirmCreateAndInvite"
       @invite="confirmInvite"
     />
 
     <hard-delete-modal
-      :active="isDeleteModalShown"
-      :is-loading="isDeleteLoading"
-      :is-error="isDeleteLoadingError"
-      :cancel-route="{ name: 'people'}"
-      :text="deleteText"
+      :active="modals.del"
       :error-text="$t('people.delete_error')"
+      :is-loading="loading.del"
+      :is-error="errors.del"
       :lock-text="personToDelete ? personToDelete.full_name : ''"
+      :text="deleteText"
+      @cancel="modals.del = false"
       @confirm="confirmDeletePeople"
     />
 
@@ -101,7 +104,6 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import csv from '../../lib/csv'
-import ButtonLink from '../widgets/ButtonLink'
 import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import ButtonSimple from '../widgets/ButtonSimple'
 import EditPersonModal from '../modals/EditPersonModal'
@@ -115,7 +117,6 @@ import SearchField from '../widgets/SearchField'
 export default {
   name: 'people',
   components: {
-    ButtonLink,
     ButtonHrefLink,
     ButtonSimple,
     EditPersonModal,
@@ -129,22 +130,6 @@ export default {
 
   data () {
     return {
-      errors: {
-        invite: false
-      },
-      loading: {
-        createAndInvite: false,
-        edit: false,
-        invite: false
-      },
-      modals: {
-        importModal: false,
-        isImportRenderDisplayed: false
-      },
-      parsedCSV: [],
-      success: {
-        invite: false
-      },
       csvColumns: [
         'First Name',
         'Last Name',
@@ -154,25 +139,45 @@ export default {
       ],
       dataMatchers: [
         'Email'
-      ]
+      ],
+      errors: {
+        del: false,
+        edit: false,
+        invite: false
+      },
+      loading: {
+        createAndInvite: false,
+        edit: false,
+        del: false,
+        invite: false
+      },
+      modals: {
+        edit: false,
+        del: false,
+        importModal: false,
+        isImportRenderDisplayed: false
+      },
+      parsedCSV: [],
+      personToDelete: {},
+      personToEdit: { role: 'user' },
+      success: {
+        invite: false
+      }
     }
   },
 
   created () {
-    this.loadPeople(() => {
-      this.handleModalsDisplay()
-    })
+    this.loadPeople()
   },
 
   watch: {
-    '$route' (to, from) {
-      this.handleModalsDisplay()
-    }
   },
 
   computed: {
     ...mapGetters([
       'displayedPeople',
+      'isCurrentUserAdmin',
+
       'isPeopleLoading',
       'isPeopleLoadingError',
 
@@ -180,23 +185,11 @@ export default {
       'isImportPeopleLoading',
       'isImportPeopleLoadingError',
 
-      'isEditModalShown',
-      'isEditLoading',
-      'isEditLoadingError',
-
-      'isDeleteModalShown',
-      'isDeleteLoading',
-      'isDeleteLoadingError',
-
       'isImportModalShown',
       'isImportLoading',
       'isImportLoadingError',
 
-      'personToDelete',
-      'personCsvFormData',
-      'personToEdit',
-
-      'isCurrentUserAdmin'
+      'personCsvFormData'
     ]),
 
     deleteText () {
@@ -221,11 +214,12 @@ export default {
 
   methods: {
     ...mapActions([
-      'invitePerson',
       'editPerson',
+      'deletePeople',
+      'invitePerson',
+      'loadPeople',
       'newPerson',
       'newPersonAndInvite',
-      'loadPeople',
       'peopleSearchChange',
       'uploadPersonFile'
     ]),
@@ -277,47 +271,50 @@ export default {
       this.showImportModal()
     },
 
-    addPersonFilter (newFilter) {
-    },
-
-    removePersonFilter (newFilter) {
-    },
-
     confirmEditPeople (form) {
       let action = 'editPerson'
       if (this.personToEdit.id === undefined) action = 'newPerson'
+      else form.id = this.personToEdit.id
       this.loading.edit = true
+      this.errors.edit = false
       this[action](form)
         .then(() => {
-          this.$router.push('/people')
           this.loading.edit = false
+          this.modals.edit = false
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(err)
+          this.errors.edit = true
           this.loading.edit = false
         })
     },
 
     confirmCreateAndInvite (form) {
       this.loading.createAndInvite = true
+      this.errors.edit = false
       this.newPersonAndInvite(form)
         .then(() => {
           this.loading.createAndInvite = false
-          this.$router.push('/people')
+          this.modals.edit = false
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(err)
+          this.errors.edit = true
           this.loading.createAndInvite = false
         })
     },
 
     confirmInvite (form) {
+      form.id = this.personToEdit.id
       this.loading.invite = true
+      this.errors.invite = false
       this.invitePerson(form)
         .then(() => {
           this.loading.invite = false
           this.success.invite = true
-          this.errors.invite = false
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error(err)
           this.loading.invite = false
           this.success.invite = false
           this.errors.invite = true
@@ -325,42 +322,41 @@ export default {
     },
 
     confirmDeletePeople () {
-      this.$store.dispatch('deletePeople', (err) => {
-        if (!err) {
-          this.$router.push('/people')
-        }
-      })
-    },
-
-    showDeleteModalIfNeeded (path, personId) {
-      if (path.indexOf('delete') > 0) {
-        this.$store.dispatch('showPersonDeleteModal', personId)
-      } else {
-        this.$store.dispatch('hidePersonDeleteModal', personId)
-      }
-    },
-
-    showEditModalIfNeeded (path, personId) {
-      this.errors.invite = false
-      this.success.invite = false
-      if (path.indexOf('new') > 0) {
-        this.$store.dispatch('showPersonEditModal')
-      } else if (path.indexOf('edit') > 0) {
-        this.$store.dispatch('showPersonEditModal', personId)
-      } else {
-        this.$store.dispatch('hidePersonEditModal', personId)
-      }
-    },
-
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
-      const personId = this.$store.state.route.params.person_id
-      this.showDeleteModalIfNeeded(path, personId)
-      this.showEditModalIfNeeded(path, personId)
+      this.loading.del = true
+      this.errors.del = false
+      this.deletePeople(this.personToDelete)
+        .then(() => {
+          this.loading.del = false
+          this.modals.del = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.del = false
+          this.errors.del = true
+        })
     },
 
     onSearchChange () {
       this.peopleSearchChange(this.$refs['people-search-field'].getValue())
+    },
+
+    onDeleteClicked (person) {
+      this.personToDelete = person
+      this.modals.del = true
+    },
+
+    onEditClicked (person) {
+      this.errors.invite = false
+      this.success.invite = false
+      this.personToEdit = person
+      this.modals.edit = true
+    },
+
+    onNewClicked () {
+      this.errors.invite = false
+      this.success.invite = false
+      this.personToEdit = { role: 'user' }
+      this.modals.edit = true
     },
 
     showImportModal () {

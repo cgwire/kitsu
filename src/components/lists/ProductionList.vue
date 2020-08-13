@@ -52,10 +52,7 @@
           </td>
           <row-actions
             :entry-id="entry.id"
-            :edit-route="{
-              name: 'edit-production',
-              params: {production_edit_id: entry.id}
-            }"
+            @edit-clicked="$emit('edit-clicked', entry)"
             :hide-delete="true"
           />
         </tr>
@@ -94,14 +91,8 @@
           </td>
           <row-actions
             :entry-id="entry.id"
-            :edit-route="{
-              name: 'edit-production',
-              params: {production_edit_id: entry.id}
-            }"
-            :delete-route="{
-              name: 'delete-production',
-              params: {production_delete_id: entry.id}
-            }"
+            @edit-clicked="$emit('edit-clicked', entry)"
+            @delete-clicked="$emit('delete-clicked', entry)"
           />
         </tr>
       </tbody>

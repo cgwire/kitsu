@@ -155,6 +155,7 @@ export default {
         'entity_name',
         'priority',
         'task_status_short_name',
+        'due_date',
         'estimation',
         'last_comment_date'
       ].map((name) => ({ label: name, value: name }))

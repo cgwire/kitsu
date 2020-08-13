@@ -1459,6 +1459,10 @@ tbody:last-child .empty-line:last-child {
   margin-bottom: 2em;
 }
 
+.selectable {
+  user-select: text;
+}
+
 .unselectable {
   user-select: none;
 }

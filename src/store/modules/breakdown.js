@@ -18,6 +18,7 @@ import {
 
   LOAD_SHOTS_START,
   LOAD_SHOT_CASTING_END,
+  LOAD_ASSET_CASTING_END,
   LOAD_ASSET_CAST_IN_END,
 
   CASTING_SET_LINK_LABEL,
@@ -152,7 +153,7 @@ const mutations = {
   },
 
   [CASTING_SET_SHOTS] (state, shots) {
-    const casting = []
+    const casting = {}
     const castingByType = []
     state.castingSequenceShots = shots
     shots.forEach((shot) => {
@@ -164,7 +165,7 @@ const mutations = {
   },
 
   [CASTING_SET_ASSETS] (state, assets) {
-    const casting = []
+    const casting = {}
     const castingByType = []
     state.castingAssetTypeAssets = assets
     assets.forEach((asset) => {
@@ -285,16 +286,33 @@ const mutations = {
     }
   },
 
-  [LOAD_SHOT_CASTING_END] ({ state, rootState }, { shot, casting }) {
-    shot.casting = casting
+  [LOAD_ASSET_CASTING_END] (state, { asset, casting }) {
+    casting.forEach(a => { a.name = a.asset_name })
+    const castingByType = groupEntitiesByParents(casting, 'asset_type_name')
+    asset.casting = casting
+    Vue.set(state.casting, asset.id, casting)
+    Vue.set(state.castingByType, asset.id, castingByType)
     Vue.set(
-      shot,
+      asset,
       'castingAssetsByType',
-      groupEntitiesByParents(casting, 'asset_type_name')
+      castingByType
     )
   },
 
-  [LOAD_ASSET_CAST_IN_END] ({ state, rootState }, { asset, castIn }) {
+  [LOAD_SHOT_CASTING_END] (state, { shot, casting }) {
+    casting.forEach(a => { a.name = a.asset_name || a.name })
+    const castingByType = groupEntitiesByParents(casting, 'asset_type_name')
+    shot.casting = casting
+    Vue.set(state.casting, shot.id, casting)
+    Vue.set(state.castingByType, shot.id, castingByType)
+    Vue.set(
+      shot,
+      'castingAssetsByType',
+      castingByType
+    )
+  },
+
+  [LOAD_ASSET_CAST_IN_END] (state, { asset, castIn }) {
     castIn.forEach((shot) => {
       if (shot.episode_name) {
         shot.sequence_name = `${shot.episode_name} / ${shot.sequence_name}`

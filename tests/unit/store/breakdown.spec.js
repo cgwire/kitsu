@@ -18,7 +18,10 @@ describe('Breakdown store', () => {
   let sequences, expectedSequenceOptions, rootState, rootGetters
 
   beforeEach(() => {
-    state = {}
+    state = {
+      casting: {},
+      castingByType: {}
+    }
     shots = [
       {
         id: 'shot-1',

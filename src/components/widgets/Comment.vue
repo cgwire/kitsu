@@ -17,9 +17,8 @@
           class="round-task-status-name"
           :style="{
             'background-color': statusColor,
-            color: 'white'
+            color: comment.task_status.short_name === 'todo' ? 'grey' : 'white'
           }"
-          v-if="comment.task_status.short_name !== 'todo'"
         >
           {{ comment.task_status.short_name }}
         </span>
@@ -166,10 +165,9 @@
       <span
         class="round-task-status-name flexrow-item"
         :style="{
-          'border': '1px solid' + statusColor,
-          color: statusColor
+          'border': '1px solid ' + (comment.task_status.short_name === 'todo' ? 'grey' : statusColor),
+          color: comment.task_status.short_name === 'todo' ? 'grey' : statusColor
         }"
-        v-if="comment.task_status.short_name !== 'todo'"
       >
         {{ comment.task_status.short_name }}
       </span>
@@ -303,6 +301,7 @@ export default {
           !this.comment.checklist ||
           this.comment.checklist.length === 0
         ) &&
+        this.comment.attachment_files.length === 0 &&
         this.comment.previews.length === 0 && !(
           this.isFirst && this.taskStatus.is_done
         )

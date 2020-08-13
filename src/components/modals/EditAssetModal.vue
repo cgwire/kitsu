@@ -83,24 +83,16 @@
         >
           {{ $t("main.confirmation") }}
         </a>
-        <router-link
-          :to="cancelRoute"
-          class="button is-link"
-          v-if="cancelRoute"
-        >
-          {{ $t("main.close") }}
-        </router-link>
         <button
           class="button is-link"
           @click="$emit('cancel')"
-          v-else
         >
           {{ $t("main.close") }}
         </button>
         <p class="error has-text-right info-message" v-if="isError">
           {{ $t("assets.edit_fail") }}
         </p>
-        <p class="success has-text-right info-message">
+        <p class="success has-text-right info-message" v-if="isSuccess">
           {{ assetSuccessText }}
         </p>
       </div>
@@ -127,18 +119,40 @@ export default {
     Combobox
   },
 
-  props: [
-    'onConfirmClicked',
-    'text',
-    'active',
-    'cancelRoute',
-    'isError',
-    'isLoading',
-    'isLoadingStay',
-    'isSuccess',
-    'assetToEdit',
-    'errorText'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    text: {
+      type: String,
+      default: ''
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    isLoadingStay: {
+      type: Boolean,
+      default: false
+    },
+    isSuccess: {
+      type: Boolean,
+      default: false
+    },
+    assetToEdit: {
+      type: Object,
+      default: () => {}
+    },
+    errorText: {
+      type: String,
+      default: ''
+    }
+  },
 
   data () {
     return {
@@ -162,7 +176,6 @@ export default {
       'currentEpisode',
       'episodes',
       'productionAssetTypeOptions',
-      'getOpenProductionOptions',
       'isTVShow',
       'openProductions'
     ]),

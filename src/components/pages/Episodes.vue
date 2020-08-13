@@ -21,8 +21,7 @@
         :options="countModeOptions"
         v-model="countMode"
       />
-      <span class="filler">
-      </span>
+      <span class="filler"></span>
       <button-simple
         class="flexrow-item"
         icon="download"
@@ -41,14 +40,16 @@
       :display-mode="displayMode"
       :show-all="episodeSearchText.length === 0"
       @scroll="saveScrollPosition"
+      @delete-clicked="onDeleteClicked"
+      @edit-clicked="onEditClicked"
     />
 
     <edit-episode-modal
       :active="modals.isNewDisplayed"
       :is-loading="loading.edit"
       :is-error="errors.edit"
-      :cancel-route="episodesPath"
       :episode-to-edit="episodeToEdit"
+      @cancel="modals.isNewDisplayed = false"
       @confirm="confirmEditEpisode"
     />
 
@@ -59,7 +60,7 @@
       :text="deleteText()"
       :error-text="$t('episodes.delete_error')"
       :lock-text="episodeToDelete ? episodeToDelete.name : ''"
-      :cancel-route="episodesPath"
+      @cancel="modals.isDeleteDisplayed = false"
       @confirm="confirmDeleteEpisode"
     />
   </div>
@@ -144,7 +145,6 @@ export default {
     this.setDefaultListScrollPosition()
     this.resizeHeaders()
     this.initEpisodes()
-      .then(this.handleModalsDisplay)
   },
 
   methods: {
@@ -178,6 +178,16 @@ export default {
       this.$router.push(this.episodesPath)
     },
 
+    onEditClicked (episode) {
+      this.episodeToEdit = episode
+      this.modals.isNewDisplayed = true
+    },
+
+    onDeleteClicked (episode) {
+      this.episodeToDelete = episode
+      this.modals.isDeleteDisplayed = true
+    },
+
     confirmEditEpisode (form) {
       this.loading.edit = true
       this.errors.edit = false
@@ -186,7 +196,6 @@ export default {
         .then(() => {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
-          this.navigateToList()
         })
         .catch(() => {
           this.loading.edit = false
@@ -195,15 +204,15 @@ export default {
     },
 
     confirmDeleteEpisode () {
-      this.loading.delete = true
+      this.loading.del = true
       this.errors.edit = false
 
       this.deleteEpisode(this.episodeToDelete)
         .then(() => {
-          this.loading.delete = false
-          this.navigateToList()
+          this.loading.del = false
+          this.modals.isDeleteDisplayed = false
         }).catch(() => {
-          this.loading.delete = false
+          this.loading.del = false
           this.errors.delete = true
         })
     },
@@ -225,28 +234,6 @@ export default {
         return this.$t('episodes.delete_text', { name: episode.name })
       } else {
         return ''
-      }
-    },
-
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
-      const episodeId = this.$store.state.route.params.episode_id
-      this.errors = {
-        edit: false,
-        delete: false
-      }
-
-      this.modals = {
-        isNewDisplayed: false,
-        isDeleteDisplayed: false
-      }
-
-      if (path.indexOf('edit') > 0) {
-        this.episodeToEdit = this.episodeMap[episodeId]
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('delete') > 0) {
-        this.episodeToDelete = this.episodeMap[episodeId]
-        this.modals.isDeleteDisplayed = true
       }
     },
 
@@ -288,8 +275,6 @@ export default {
   },
 
   watch: {
-    $route () { this.handleModalsDisplay() },
-
     displayedEpisodes () {
       this.resizeHeaders()
     },

@@ -54,10 +54,12 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { modalMixin } from './base_modal'
 import FileUpload from '../widgets/FileUpload.vue'
 
 export default {
   name: 'add-preview-modal',
+  mixins: [modalMixin],
 
   components: {
     FileUpload

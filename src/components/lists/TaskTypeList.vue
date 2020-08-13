@@ -37,14 +37,8 @@
           </td>
           <row-actions
             :taskType-id="taskType.id"
-            :edit-route="{
-              name: 'edit-task-type',
-              params: {task_type_id: taskType.id}
-            }"
-            :delete-route="{
-              name: 'delete-task-type',
-              params: {task_type_id: taskType.id}
-            }"
+            @delete-clicked="$emit('delete-clicked', taskType)"
+            @edit-clicked="$emit('edit-clicked', taskType)"
           />
         </tr>
       </draggable>

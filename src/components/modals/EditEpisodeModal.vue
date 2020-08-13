@@ -31,29 +31,13 @@
         />
       </form>
 
-      <div class="has-text-right">
-        <a
-          :class="{
-            button: true,
-            'is-primary': true,
-            'is-loading': isLoading
-          }"
-          @click="confirmClicked"
-        >
-          {{ $t("main.confirmation") }}
-        </a>
-        <router-link
-          :to="cancelRoute"
-          class="button is-link">
-          {{ $t("main.cancel") }}
-        </router-link>
-        <p class="error has-text-right info-message" v-if="isError">
-          {{ $t("episodes.edit_fail") }}
-        </p>
-        <p class="success has-text-right info-message">
-          {{ episodeSuccessText }}
-        </p>
-      </div>
+      <modal-footer
+        :error-text="$t('episodes.edit_error')"
+        :is-loading="isLoading"
+        :is-error="isError"
+        @confirm="confirmClicked"
+        @cancel="$emit('cancel')"
+      />
     </div>
   </div>
 </div>
@@ -61,12 +45,16 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { modalMixin } from './base_modal'
+import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '../widgets/TextField'
 import TextareaField from '../widgets/TextareaField'
 
 export default {
   name: 'edit-episode-modal',
+  mixins: [modalMixin],
   components: {
+    ModalFooter,
     TextField,
     TextareaField
   },

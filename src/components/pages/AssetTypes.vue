@@ -1,44 +1,37 @@
 <template>
   <div class="asset-types page fixed-page">
-    <div class="level page-header">
-      <div class="level-left">
-        <page-title :text="$t('asset_types.title')" />
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <button-link
-            class="level-item"
-            icon="plus"
-            :text="$t('asset_types.new_asset_type')"
-            path="/asset-types/new"
-          />
-        </div>
-      </div>
-    </div>
+
+    <list-page-header
+      :title="$t('asset_types.title')"
+      :new-entry-label="$t('asset_types.new_asset_type')"
+      @new-clicked="onNewClicked"
+    />
 
     <asset-type-list
       class="mt2"
       :entries="assetTypes"
-      :is-loading="isAssetTypesLoading"
-      :is-error="isAssetTypesLoadingError"
+      :is-loading="loading.list"
+      :is-error="errors.list"
+      @edit-clicked="onEditClicked"
+      @delete-clicked="onDeleteClicked"
     />
 
     <edit-asset-type-modal
-      :active="modals.isNewDisplayed"
-      :is-loading="editAssetType.isLoading"
-      :is-error="editAssetType.isError"
-      :cancel-route="'/asset-types'"
+      :active="modals.edit"
+      :is-loading="loading.edit"
+      :is-error="errors.edit"
       :asset-type-to-edit="assetTypeToEdit"
+      @cancel="modals.edit = false"
       @confirm="confirmEditAssetType"
     />
 
     <delete-modal
-      :active="modals.isDeleteDisplayed"
-      :is-loading="deleteAssetType.isLoading"
-      :is-error="deleteAssetType.isError"
-      :cancel-route="'/asset-types'"
-      :text="deleteText()"
+      :active="modals.del"
+      :is-loading="loading.del"
+      :is-error="errors.del"
+      :text="deleteText"
       :error-text="$t('asset_types.delete_error')"
+      @cancel="modals.del = false"
       @confirm="confirmDeleteAssetType"
     />
   </div>
@@ -47,53 +40,63 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import AssetTypeList from '../lists/AssetTypeList'
-import EditAssetTypeModal from '../modals/EditAssetTypeModal'
 import DeleteModal from '../modals/DeleteModal'
-import ButtonLink from '../widgets/ButtonLink'
-import PageTitle from '../widgets/PageTitle'
+import EditAssetTypeModal from '../modals/EditAssetTypeModal'
+import ListPageHeader from '../widgets/ListPageHeader'
 
 export default {
   name: 'asset-types',
 
   components: {
     AssetTypeList,
-    ButtonLink,
     DeleteModal,
     EditAssetTypeModal,
-    PageTitle
+    ListPageHeader
   },
 
   data () {
     return {
-      modals: {
-        isNewDisplayed: false,
-        isDeleteDisplayed: false
-      },
       assetTypeToDelete: null,
-      assetTypeToEdit: null,
-      choices: []
+      assetTypeToEdit: {},
+      choices: [],
+      errors: {
+        del: false,
+        edit: false,
+        list: false
+      },
+      modals: {
+        del: false,
+        edit: false
+      },
+      loading: {
+        del: false,
+        edit: false,
+        list: false
+      }
     }
   },
 
   computed: {
     ...mapGetters([
       'assetTypes',
-      'isAssetTypesLoading',
-      'isAssetTypesLoadingError',
-      'editAssetType',
-      'deleteAssetType',
       'getAssetType'
-    ])
-  },
+    ]),
 
-  created () {
-    this.loadAssetTypes((err) => {
-      if (!err) this.handleModalsDisplay()
-    })
+    deleteText () {
+      const assetType = this.assetTypeToDelete
+      if (assetType) {
+        return this.$t('asset_types.delete_text', { name: assetType.name })
+      } else {
+        return ''
+      }
+    }
   },
 
   methods: {
     ...mapActions([
+      'deleteAssetType',
+      'editAssetType',
+      'newAssetType',
       'loadAssetTypes'
     ]),
 
@@ -104,57 +107,55 @@ export default {
         form.id = this.assetTypeToEdit.id
       }
 
-      this.$store.dispatch(action, {
-        data: form,
-        callback: (err) => {
-          if (!err) {
-            this.modals.isNewDisplayed = false
-            this.$router.push('/asset-types')
-          }
-        }
-      })
+      this.loading.edit = true
+      this.errors.edit = false
+      this[action](form)
+        .then(() => {
+          this.loading.edit = false
+          this.modals.edit = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.errors.edit = true
+          this.modals.isNewDisplayed = false
+        })
     },
 
     confirmDeleteAssetType () {
-      this.$store.dispatch('deleteAssetType', {
-        assetType: this.assetTypeToDelete,
-        callback: (err) => {
-          if (!err) this.modals.isDeleteDisplayed = false
-        }
-      })
+      this.loading.del = true
+      this.errors.del = false
+      this.deleteAssetType(this.assetTypeToDelete)
+        .then(() => {
+          this.loading.del = false
+          this.modals.del = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.errors.del = true
+          this.loading.del = false
+        })
     },
 
-    deleteText () {
-      const assetType = this.assetTypeToDelete
-      if (assetType) {
-        return this.$t('asset_types.delete_text', { name: assetType.name })
-      } else {
-        return ''
-      }
+    onNewClicked () {
+      this.assetTypeToEdit = {}
+      this.errors.edit = false
+      this.modals.edit = true
     },
 
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
-      const assetTypeId = this.$store.state.route.params.asset_type_id
+    onEditClicked (assetType) {
+      this.assetTypeToEdit = assetType
+      this.errors.edit = false
+      this.modals.edit = true
+    },
 
-      if (path.indexOf('new') > 0) {
-        this.assetTypeToEdit = { ccolor: '#FFFFFF' }
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('edit') > 0) {
-        this.assetTypeToEdit = this.getAssetType(assetTypeId)
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('delete') > 0) {
-        this.assetTypeToDelete = this.getAssetType(assetTypeId)
-        this.modals.isDeleteDisplayed = true
-      } else {
-        this.modals.isNewDisplayed = false
-        this.modals.isDeleteDisplayed = false
-      }
+    onDeleteClicked (assetType) {
+      this.assetTypeToDelete = assetType
+      this.errors.del = false
+      this.modals.del = true
     }
   },
 
   watch: {
-    $route () { this.handleModalsDisplay() }
   },
 
   metaInfo () {

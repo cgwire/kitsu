@@ -22,17 +22,17 @@ export default {
     client.get(`/api/data/task-status/${taskStatusId}`, callback)
   },
 
-  newTaskStatus (taskStatus, callback) {
+  newTaskStatus (taskStatus) {
     const data = sanitizeTaskStatus(taskStatus)
-    client.post('/api/data/task-status/', data, callback)
+    return client.ppost('/api/data/task-status/', data)
   },
 
-  updateTaskStatus (taskStatus, callback) {
+  updateTaskStatus (taskStatus) {
     const data = sanitizeTaskStatus(taskStatus)
-    client.put(`/api/data/task-status/${taskStatus.id}`, data, callback)
+    return client.pput(`/api/data/task-status/${taskStatus.id}`, data)
   },
 
-  deleteTaskStatus (taskStatus, callback) {
-    client.del(`/api/data/task-status/${taskStatus.id}`, callback)
+  deleteTaskStatus (taskStatus) {
+    return client.pdel(`/api/data/task-status/${taskStatus.id}`)
   }
 }

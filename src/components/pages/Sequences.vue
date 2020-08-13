@@ -50,6 +50,8 @@
       :validation-columns="shotValidationColumns"
       :sequence-stats="sequenceStats"
       :show-all="sequenceSearchText.length === 0"
+      @delete-clicked="onDeleteClicked"
+      @edit-clicked="onEditClicked"
       @scroll="saveScrollPosition"
     />
 
@@ -57,8 +59,8 @@
       :active="modals.isNewDisplayed"
       :is-loading="loading.edit"
       :is-error="errors.edit"
-      :cancel-route="sequencesPath"
       :sequence-to-edit="sequenceToEdit"
+      @cancel="modals.isNewDisplayed = false"
       @confirm="confirmEditSequence"
     />
 
@@ -68,8 +70,8 @@
       :is-error="errors.del"
       :text="deleteText()"
       :error-text="$t('sequences.delete_error')"
-      :cancel-route="sequencesPath"
       :lock-text="sequenceToDelete ? sequenceToDelete.name : ''"
+      @cancel="modals.isDeleteDisplayed = false"
       @confirm="confirmDeleteSequence"
     />
 
@@ -159,7 +161,6 @@ export default {
   mounted () {
     setTimeout(() => {
       this.initSequences()
-        .then(this.handleModalsDisplay)
         .then(this.resizeHeaders)
         .then(() => {
           this.initialLoading = false
@@ -177,6 +178,7 @@ export default {
       'hideAssignations',
       'initSequences',
       'loadComment',
+      'loadShots',
       'removeSequenceSearch',
       'saveSequenceSearch',
       'setLastProductionScreen',
@@ -210,8 +212,7 @@ export default {
       this.editSequence(form)
         .then(() => {
           this.loading.edit = false
-          this.resizeHeaders()
-          this.navigateToList()
+          this.modals.isNewDisplayed = false
         }).catch(() => {
           this.loading.edit = false
           this.errors.edit = true
@@ -223,8 +224,7 @@ export default {
       this.deleteSequence(this.sequenceToDelete)
         .then(() => {
           this.loading.del = false
-          this.resizeHeaders()
-          this.navigateToList()
+          this.modals.isDeleteDisplayed = false
         }).catch(() => {
           this.loading.del = false
           this.errors.del = true
@@ -232,9 +232,7 @@ export default {
     },
 
     resetEditModal () {
-      const form = {
-        name: ''
-      }
+      const form = { name: '' }
       if (this.sequences.length > 0) {
         form.sequence_id = this.sequences[0].id
       }
@@ -253,26 +251,15 @@ export default {
       }
     },
 
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
-      const sequenceId = this.$store.state.route.params.sequence_id
-      this.errors = {
-        edit: false,
-        delete: false
-      }
+    onEditClicked (sequence) {
+      this.sequenceToEdit = sequence
+      this.modals.isNewDisplayed = true
+    },
 
-      this.modals = {
-        isNewDisplayed: false,
-        isDeleteDisplayed: false
-      }
-
-      if (path.indexOf('edit') > 0) {
-        this.sequenceToEdit = this.sequenceMap[sequenceId]
-        this.modals.isNewDisplayed = true
-      } else if (path.indexOf('delete') > 0) {
-        this.sequenceToDelete = this.sequenceMap[sequenceId]
-        this.modals.isDeleteDisplayed = true
-      }
+    onDeleteClicked (sequence) {
+      this.sequenceToDelete = sequence
+      console.log('otot')
+      this.modals.isDeleteDisplayed = true
     },
 
     onSearchChange (event) {
@@ -332,8 +319,6 @@ export default {
   },
 
   watch: {
-    $route () { this.handleModalsDisplay() },
-
     currentProduction () {
       this.$refs['sequence-search-field'].setValue('')
       this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
@@ -347,12 +332,14 @@ export default {
 
     currentEpisode () {
       if (this.isTVShow && this.currentEpisode) {
-        this.initSequences()
-          .then(this.handleModalsDisplay)
-          .then(this.resizeHeaders)
-          .then(() => {
-            this.initialLoading = false
-          })
+        this.loadShots(() => {
+          this.initSequences()
+            .then(this.handleModalsDisplay)
+            .then(this.resizeHeaders)
+            .then(() => {
+              this.initialLoading = false
+            })
+        })
       }
     },
 

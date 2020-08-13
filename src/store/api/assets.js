@@ -16,7 +16,7 @@ export default {
     return client.getModel('assets', assetId)
   },
 
-  newAsset (asset, callback) {
+  newAsset (asset) {
     const data = {
       name: asset.name,
       description: asset.description,
@@ -28,10 +28,10 @@ export default {
 
     const path = `/api/data/projects/${asset.project_id}/asset-types/` +
                  `${asset.entity_type_id}/assets/new`
-    client.post(path, data, callback)
+    return client.ppost(path, data)
   },
 
-  updateAsset (asset, callback) {
+  updateAsset (asset) {
     const data = {
       name: asset.name,
       description: asset.description,
@@ -42,20 +42,20 @@ export default {
     if (asset.source_id === 'null' || asset.source_id) {
       data.source_id = asset.source_id
     }
-    client.put(`/api/data/entities/${asset.id}`, data, callback)
+    return client.pput(`/api/data/entities/${asset.id}`, data)
   },
 
-  deleteAsset (asset, callback) {
+  deleteAsset (asset) {
     if (asset.canceled) {
-      client.del(`/api/data/assets/${asset.id}?force=true`, callback)
+      return client.pdel(`/api/data/assets/${asset.id}?force=true`)
     } else {
-      client.del(`/api/data/assets/${asset.id}`, callback)
+      return client.pdel(`/api/data/assets/${asset.id}`)
     }
   },
 
   restoreAsset (asset, callback) {
     const data = { canceled: false }
-    client.put(`/api/data/entities/${asset.id}`, data, callback)
+    return client.pput(`/api/data/entities/${asset.id}`, data)
   },
 
   postCsv (production, formData, toUpdate) {

@@ -46,40 +46,32 @@
         />
       </form>
 
-      <p class="has-text-right">
-        <a
-          :class="{
-            button: true,
-            'is-primary': true,
-            'is-loading': isLoading
-          }"
-          @click="confirmClicked"
-        >
-          {{ $t("main.confirmation") }}
-        </a>
-        <router-link
-          :to="cancelRoute"
-          class="button is-link">
-          {{ $t("main.cancel") }}
-        </router-link>
-      </p>
+      <modal-footer
+        :error-text="$t('custom_actions.create_error')"
+        :is-error="isError"
+        @confirm="confirmClicked"
+        @cancel="$emit('cancel')"
+      />
     </div>
-
   </div>
 </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { modalMixin } from './base_modal'
 import Combobox from '../widgets/Combobox'
 import ComboboxBoolean from '../widgets/ComboboxBoolean'
+import ModalFooter from './ModalFooter'
 import TextField from '../widgets/TextField'
 
 export default {
   name: 'edit-custom-action-modal',
+  mixins: [modalMixin],
   components: {
     Combobox,
     ComboboxBoolean,
+    ModalFooter,
     TextField
   },
 
@@ -87,7 +79,6 @@ export default {
     'onConfirmClicked',
     'text',
     'active',
-    'cancelRoute',
     'isLoading',
     'isError',
     'errorText',

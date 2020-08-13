@@ -111,40 +111,28 @@ const actions = {
 
   newTaskType ({ commit, state }, data) {
     commit(EDIT_TASK_TYPE_START, data)
-    taskTypesApi.newTaskType(data)
+    return taskTypesApi.newTaskType(data)
       .then((taskType) => {
         commit(EDIT_TASK_TYPE_END, taskType)
         Promise.resolve(taskType)
-      })
-      .catch((err) => {
-        console.error(err)
-        commit(EDIT_TASK_TYPE_ERROR)
       })
   },
 
   editTaskType ({ commit, state }, data) {
     commit(EDIT_TASK_TYPE_START)
-    taskTypesApi.updateTaskType(data)
+    return taskTypesApi.updateTaskType(data)
       .then((taskType) => {
         commit(EDIT_TASK_TYPE_END, taskType)
         Promise.resolve(taskType)
-      })
-      .catch((err) => {
-        console.error(err)
-        commit(EDIT_TASK_TYPE_ERROR)
       })
   },
 
   deleteTaskType ({ commit, state }, taskType) {
     commit(DELETE_TASK_TYPE_START)
-    taskTypesApi.deleteTaskType(taskType)
+    return taskTypesApi.deleteTaskType(taskType)
       .then(() => {
         commit(DELETE_TASK_TYPE_END, taskType)
-        Promise.resolve()
-      })
-      .catch((err) => {
-        console.error(err)
-        commit(DELETE_TASK_TYPE_ERROR)
+        Promise.resolve(taskType)
       })
   },
 

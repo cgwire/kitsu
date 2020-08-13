@@ -22,6 +22,7 @@
         />
 
         <modal-footer
+          :is-error="isError"
           :is-loading="isLoading"
           @confirm="confirm"
           @cancel="$emit('cancel')"

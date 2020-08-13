@@ -127,8 +127,8 @@
 
           <row-actions v-if="isCurrentUserManager"
             :entry="entry"
-            :edit-route="editPath(entry.id)"
-            :delete-route="deletePath(entry.id)"
+            @edit-clicked="$emit('edit-clicked', entry)"
+            @delete-clicked="$emit('delete-clicked', entry)"
           />
           <td class="actions" v-else></td>
         </tr>

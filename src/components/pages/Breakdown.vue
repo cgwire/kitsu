@@ -25,7 +25,7 @@
           <span class="filler"></span>
           <button-simple
             class="flexrow-item"
-            :title="$t('breakdown.text_mode')"
+            :title="isTextMode ? $t('breakdown.picture_mode') : $t('breakdown.text_mode')"
             icon="type"
             :is-on="isTextMode"
             :is-responsive="true"
@@ -73,14 +73,29 @@
         class="breakdown-column assets-column"
         v-if="isCurrentUserManager"
       >
-        <h2 class="subtitle">
-          {{ $t('breakdown.all_assets') }}
+        <h2 class="subtitle flexrow">
+          <span class="flexrow-item">
+            {{ $t('breakdown.all_assets') }}
+          </span>
+          <button-simple
+            class="flexrow-item"
+            :title="$t('assets.new_asset')"
+            icon="plus"
+            @click="modals.isNewDisplayed = true"
+          />
         </h2>
 
         <div class="filters-area flexrow">
           <search-field
+            ref="search-field"
             class="flexrow-item"
             @change="onSearchChange"
+          />
+          <button-simple
+            class="flexrow-item"
+            :title="$t('entities.build_filter.title')"
+            icon="funnel"
+            @click="modals.isBuildFilterDisplayed = true"
           />
         </div>
 
@@ -145,32 +160,57 @@
       @cancel="modals.isEditLabelDisplayed = false"
       @confirm="confirmEditLabel"
     />
+
+    <build-filter-modal
+      ref="build-filter-modal"
+      :active="modals.isBuildFilterDisplayed"
+      @confirm="confirmBuildFilter"
+      @cancel="modals.isBuildFilterDisplayed = false"
+    />
+
+    <edit-asset-modal
+      ref="edit-asset-modal"
+      :active="modals.isNewDisplayed"
+      :is-loading="loading.edit"
+      :is-loading-stay="loading.stay"
+      :is-error="errors.edit"
+      :is-success="success.edit"
+      :asset-to-edit="{}"
+      @confirm="confirmNewAsset"
+      @confirmAndStay="confirmNewAssetStay"
+      @cancel="modals.isNewDisplayed = false"
+    />
+
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { range } from '../../lib/time'
-import csv from '../../lib/csv'
-import AvailableAssetBlock from './breakdown/AvailableAssetBlock'
-import ButtonHrefLink from '../widgets/ButtonHrefLink.vue'
-import ButtonSimple from '../widgets/ButtonSimple'
-import ComboboxStyled from '../widgets/ComboboxStyled'
-import EditLabelModal from '../modals/EditLabelModal'
-import ImportRenderModal from '../modals/ImportRenderModal'
-import ImportModal from '../modals/ImportModal'
-import SearchField from '../widgets/SearchField.vue'
+import { range } from '@/lib/time'
+import csv from '@/lib/csv'
+import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock'
+import BuildFilterModal from '@/components/modals/BuildFilterModal'
+import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
+import EditAssetModal from '@/components/modals/EditAssetModal'
+import EditLabelModal from '@/components/modals/EditLabelModal'
+import ImportRenderModal from '@/components/modals/ImportRenderModal'
+import ImportModal from '@/components/modals/ImportModal'
+import SearchField from '@/components/widgets/SearchField'
 import ShotLine from './breakdown/ShotLine'
-import Spinner from '../widgets/Spinner'
+import Spinner from '@/components/widgets/Spinner'
 
 export default {
   name: 'breakdown',
 
   components: {
     AvailableAssetBlock,
+    BuildFilterModal,
     ButtonHrefLink,
     ButtonSimple,
     ComboboxStyled,
+    EditAssetModal,
     EditLabelModal,
     ImportModal,
     ImportRenderModal,
@@ -218,17 +258,26 @@ export default {
       selection: {},
       sequenceId: '',
       errors: {
+        edit: false,
+        stay: false,
         editLabel: false,
         importing: false
       },
       loading: {
+        edit: false,
+        stay: false,
         editLabel: false,
         importing: false
       },
       modals: {
+        isBuildFilterDisplayed: false,
         isEditLabelDisplayed: false,
+        isNewDisplayed: false,
         isImportRenderDisplayed: false,
         importing: false
+      },
+      success: {
+        edit: false
       },
       parsedCSV: []
     }
@@ -279,9 +328,12 @@ export default {
     },
 
     exportUrlPath () {
-      return (
+      let path =
         `/api/export/csv/projects/${this.currentProduction.id}/casting.csv`
-      )
+      if (this.currentEpisode) {
+        path += `?episode_id=${this.currentEpisode.id}`
+      }
+      return path
     },
 
     isAssetCasting () {
@@ -321,8 +373,11 @@ export default {
     ...mapActions([
       'addAssetToCasting',
       'displayMoreAssets',
-      'loadShots',
+      'loadAssetCasting',
       'loadAssets',
+      'loadShotCasting',
+      'loadShots',
+      'newAsset',
       'removeAssetFromCasting',
       'saveCasting',
       'setAssetSearch',
@@ -387,6 +442,12 @@ export default {
       this.selection = selection
     },
 
+    confirmBuildFilter (query) {
+      this.modals.isBuildFilterDisplayed = false
+      this.$refs['search-field'].setValue(query)
+      this.onSearchChange(query)
+    },
+
     onSearchChange (searchQuery) {
       this.setAssetSearch(searchQuery)
       this.displayMoreAssets()
@@ -394,6 +455,7 @@ export default {
     },
 
     selectEntity (entityId, event) {
+      const previousSelection = { ...this.selection }
       if (!event.ctrlKey && !event.shitKey) {
         this.clearSelection()
       }
@@ -402,8 +464,24 @@ export default {
         this.selectRange(this.previousEntityId, entityId)
       }
 
-      if (!this.previousEntityId || !event.shiftKey) this.previousEntityId = entityId
-      this.selection[entityId] = true
+      if (!this.previousEntityId || !event.shiftKey) {
+        this.previousEntityId = entityId
+      }
+
+      const nbElementsSelected = Object.keys(previousSelection)
+        .filter(k => previousSelection[k])
+        .length
+      if (
+        !previousSelection[entityId] ||
+        (nbElementsSelected > 1 && !event.ctrlKey)
+      ) {
+        this.selection[entityId] = true
+      } else if (
+        previousSelection[entityId] &&
+        event.ctrlKey
+      ) {
+        this.selection[entityId] = false
+      }
     },
 
     clearSelection () {
@@ -514,7 +592,7 @@ export default {
         .then(() => {
           this.loading.importing = false
           this.hideImportRenderModal()
-          this.reloadShots()
+          this.setCastingSequence(this.sequenceId)
         })
         .catch(() => {
           this.loading.importing = false
@@ -600,6 +678,50 @@ export default {
     toggleTextMode () {
       this.isTextMode = !this.isTextMode
       localStorage.setItem('breakdown:text-mode', this.isTextMode)
+    },
+
+    confirmNewAssetStay (form) {
+      this.loading.stay = true
+      this.success.edit = false
+      this.newAsset(form)
+        .then((asset) => {
+          this.loading.stay = false
+          this.loading.edit = false
+          this.resetLightEditModal(asset)
+          this.$refs['edit-asset-modal'].focusName()
+          this.success.edit = true
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.stay = false
+          this.loading.edit = false
+          this.success.edit = false
+          this.errors.edit = true
+        })
+    },
+
+    confirmNewAsset (form) {
+      this.loading.edit = true
+      this.errors.edit = false
+      this.newAsset(form)
+        .then((form) => {
+          this.loading.edit = false
+          this.modals.isNewDisplayed = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.edit = false
+          this.errors.edit = true
+        })
+    },
+
+    resetLightEditModal (asset) {
+      const form = {
+        name: '',
+        entity_type_id: asset.entit_type_id,
+        production_id: this.currentProduction.id
+      }
+      this.assetToEdit = form
     }
   },
 
@@ -688,6 +810,24 @@ export default {
     }
   },
 
+  socket: {
+    events: {
+      'shot:casting-update' (eventData) {
+        const shot = this.shotMap[eventData.shot_id]
+        if (shot.sequence_id === this.sequenceId) {
+          this.loadShotCasting(shot)
+        }
+      },
+
+      'asset:casting-update' (eventData) {
+        const asset = this.assetMap[eventData.asset_id]
+        if (asset.asset_type_id === this.assetTypeId) {
+          this.loadAssetCasting(asset)
+        }
+      }
+    }
+  },
+
   metaInfo () {
     const pageTitle = this.$t('breakdown.title')
     return {
@@ -762,6 +902,11 @@ export default {
   margin-bottom: 1em;
 }
 
+.asset-type {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
 .asset-list {
   display: flex;
   flex-direction: row;
@@ -776,7 +921,15 @@ export default {
   font-weight: bold;
 }
 
+.subtitle {
+  font-size: 1.5em;
+}
+
 .filters-area {
   margin-bottom: 2em;
+
+  .search-field-wrapper {
+    margin-right: 0.5em;
+  }
 }
 </style>

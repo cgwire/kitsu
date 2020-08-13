@@ -35,39 +35,33 @@ export default {
     client.get('/api/data/shot-type', callback)
   },
 
-  newShot (shot, callback) {
+  newShot (shot) {
     const data = {
       name: shot.name,
       description: shot.description,
       sequence_id: shot.sequence_id
     }
-    client.post(`/api/data/projects/${shot.project_id}/shots`, data, callback)
+    return client.ppost(`/api/data/projects/${shot.project_id}/shots`, data)
   },
 
-  newSequence (sequence, callback) {
+  newSequence (sequence) {
     const data = {
       name: sequence.name,
       episode_id: sequence.episode_id
     }
-    client.post(
-      `/api/data/projects/${sequence.project_id}/sequences`,
-      data,
-      callback
-    )
+    const path = `/api/data/projects/${sequence.project_id}/sequences`
+    return client.ppost(path, data)
   },
 
-  newEpisode (episode, callback) {
+  newEpisode (episode) {
     const data = {
       name: episode.name
     }
-    client.post(
-      `/api/data/projects/${episode.project_id}/episodes`,
-      data,
-      callback
-    )
+    const path = `/api/data/projects/${episode.project_id}/episodes`
+    return client.ppost(path, data)
   },
 
-  updateShot (shot, callback) {
+  updateShot (shot) {
     const data = {
       name: shot.name,
       parent_id: shot.sequence_id,
@@ -86,44 +80,44 @@ export default {
         fps: shot.fps
       })
     }
-    client.put(`/api/data/entities/${shot.id}`, data, callback)
+    return client.pput(`/api/data/entities/${shot.id}`, data)
   },
 
-  updateSequence (sequence, callback) {
+  updateSequence (sequence) {
     const data = {
       name: sequence.name,
       description: sequence.description
     }
-    client.put(`/api/data/entities/${sequence.id}`, data, callback)
+    return client.pput(`/api/data/entities/${sequence.id}`, data)
   },
 
-  updateEpisode (episode, callback) {
+  updateEpisode (episode) {
     const data = {
       name: episode.name,
       description: episode.description
     }
-    client.put(`/api/data/entities/${episode.id}`, data, callback)
+    return client.pput(`/api/data/entities/${episode.id}`, data)
   },
 
-  deleteShot (shot, callback) {
+  deleteShot (shot) {
     if (shot.canceled) {
-      client.del(`/api/data/shots/${shot.id}?force=true`, callback)
+      return client.pdel(`/api/data/shots/${shot.id}?force=true`)
     } else {
-      client.del(`/api/data/shots/${shot.id}`, callback)
+      return client.pdel(`/api/data/shots/${shot.id}`)
     }
   },
 
-  deleteSequence (sequence, callback) {
-    client.del(`/api/data/sequences/${sequence.id}?force=true`, callback)
+  deleteSequence (sequence) {
+    return client.pdel(`/api/data/sequences/${sequence.id}?force=true`)
   },
 
-  deleteEpisode (episode, callback) {
-    client.del(`/api/data/episodes/${episode.id}?force=true`, callback)
+  deleteEpisode (episode) {
+    return client.pdel(`/api/data/episodes/${episode.id}?force=true`)
   },
 
   restoreShot (shot, callback) {
     const data = { canceled: false }
-    client.put(`/api/data/entities/${shot.id}`, data, callback)
+    return client.pput(`/api/data/entities/${shot.id}`, data)
   },
 
   postCsv (production, formData, toUpdate) {
@@ -139,5 +133,4 @@ export default {
   loadShotHistory (shotId) {
     return client.pget(`/api/data/shots/${shotId}/versions`)
   }
-
 }

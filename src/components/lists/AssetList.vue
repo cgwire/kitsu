@@ -178,7 +178,7 @@
               bold: !asset.canceled
             }">
             <div class="flexrow">
-              <entity-thumbnail :entity="asset" />
+              <entity-thumbnail :entity="asset" :empty-height="32" />
               <router-link
                 class="asset-link"
                 :to="assetPath(asset.id)"
@@ -235,9 +235,9 @@
           />
           <row-actions v-if="isCurrentUserManager"
             :entry="asset"
-            :edit-route="editPath(asset.id)"
-            :delete-route="deletePath(asset.id)"
-            :restore-route="restorePath(asset.id)"
+            @edit-clicked="$emit('edit-clicked', asset)"
+            @delete-clicked="$emit('delete-clicked', asset)"
+            @restore-clicked="$emit('restore-clicked', asset)"
           />
           <td class="actions" v-else></td>
         </tr>
@@ -466,18 +466,6 @@ export default {
       return this.getPath('asset', assetId)
     },
 
-    editPath (assetId) {
-      return this.getPath('edit-asset', assetId)
-    },
-
-    deletePath (assetId) {
-      return this.getPath('delete-asset', assetId)
-    },
-
-    restorePath (assetId) {
-      return this.getPath('restore-asset', assetId)
-    },
-
     taskTypePath (taskTypeId) {
       const route = {
         name: 'task-type',
@@ -590,8 +578,12 @@ th.metadata-descriptor {
   padding: 4px;
 }
 
-td.name {
-  font-size: 1.2em;
+.datatable-row th.name {
+  font-size: 1.1em;
+  padding: 6px;
+
+  .flexrow {
+  }
 }
 
 .asset-link {
