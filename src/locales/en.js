@@ -9,7 +9,7 @@ export default {
     edit_title: 'Edit asset',
     empty_list: 'There is no asset in the production. What about creating some?',
     empty_list_client: 'There is no asset in this production.',
-    new_asset: 'Add an asset',
+    new_asset: 'Create an asset',
     new_assets: 'Add assets',
     new_success: 'Asset {name} successfully created.',
     no_cast_in: 'This asset is not cast in any shot.',
@@ -127,6 +127,7 @@ export default {
       with_thumbnail: 'With thumbnail',
       without_thumbnail: 'Without thumbnail'
     },
+
     thumbnails: {
       error: 'An error occured while uploading thumbnails',
       explaination: 'Adding a thumbnail requires to set a new preview. In order to set several thumbnails at the same time, you must chose first a task type that will be used to create the new previews. The thumbnails will be set from this new preview.',

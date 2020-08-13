@@ -399,6 +399,7 @@ const actions = {
     return breakdownApi.getAssetCastIn(asset)
       .then((castIn) => {
         commit(LOAD_ASSET_CAST_IN_END, { asset, castIn, shotMap })
+        return Promise.resolve(castIn)
       })
   },
 
@@ -830,7 +831,6 @@ const mutations = {
 
   [RESTORE_ASSET_END] (state, assetToRestore) {
     const asset = state.assetMap[assetToRestore.id]
-    console.log(asset, assetToRestore.id)
     asset.canceled = false
     cache.assetIndex = buildAssetIndex(cache.assets)
   },

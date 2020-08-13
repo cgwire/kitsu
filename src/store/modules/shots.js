@@ -505,8 +505,13 @@ const actions = {
       commit(SET_CURRENT_EPISODE, episode.id)
     }
 
-    if (isTVShow && !episode) {
+    if (isTVShow && !episode && state.episodes.length === 0) {
       return callback()
+    }
+
+    if (isTVShow && !episode) {
+      episode = state.episodes.length > 0 ? state.episodes[0] : null
+      commit(SET_CURRENT_EPISODE, episode.id)
     }
 
     if (!isTVShow && episode) {
@@ -590,10 +595,12 @@ const actions = {
   },
 
   loadAssetCasting ({ commit, rootGetters }, asset) {
+    if (!asset) return Promise.resolve(asset)
     const assetMap = rootGetters.assetMap
     return breakdownApi.getAssetCasting(asset)
       .then((casting) => {
         commit(LOAD_ASSET_CASTING_END, { asset, casting, assetMap })
+        return Promise.resolve(casting)
       })
   },
 
@@ -602,6 +609,7 @@ const actions = {
     return breakdownApi.getShotCasting(shot)
       .then((casting) => {
         commit(LOAD_SHOT_CASTING_END, { shot, casting, assetMap })
+        return Promise.resolve(casting)
       })
   },
 
