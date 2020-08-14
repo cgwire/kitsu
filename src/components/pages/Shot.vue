@@ -251,6 +251,8 @@ export default {
           this.casting.isError = true
           console.error(err)
         })
+    } else {
+      this.resetData()
     }
   },
 
@@ -300,10 +302,11 @@ export default {
 
   methods: {
     ...mapActions([
+      'clearSelectedTasks',
       'editShot',
+      'loadAssets',
       'loadShots',
-      'loadShotCasting',
-      'clearSelectedTasks'
+      'loadShotCasting'
     ]),
 
     changeTab (tab) {
@@ -342,16 +345,17 @@ export default {
 
     resetData () {
       this.loadShots(() => {
-        this.currentShot = this.getCurrentShot()
-        console.log(this.shotMap)
-        console.log(this.currentShot)
-        return this.loadShotCasting(this.currentShot)
+        this.loadAssets()
           .then(() => {
-            this.casting.isLoading = false
-          })
-          .catch((err) => {
-            this.casting.isError = true
-            console.error(err)
+            this.currentShot = this.getCurrentShot()
+            return this.loadShotCasting(this.currentShot)
+              .then(() => {
+                this.casting.isLoading = false
+              })
+              .catch((err) => {
+                console.error(err)
+                this.casting.isError = true
+              })
           })
       })
     }

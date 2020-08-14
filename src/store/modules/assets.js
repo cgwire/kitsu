@@ -1,7 +1,6 @@
 import Vue from 'vue'
 
 import assetsApi from '../api/assets'
-import breakdownApi from '../api/breakdown'
 import peopleApi from '../api/people'
 import tasksStore from './tasks'
 import taskTypesStore from './tasktypes'
@@ -46,7 +45,6 @@ import {
   LOAD_ASSETS_START,
   LOAD_ASSETS_ERROR,
   LOAD_ASSETS_END,
-  LOAD_ASSET_CAST_IN_END,
 
   EDIT_ASSET_END,
 
@@ -392,15 +390,6 @@ const actions = {
         }
       })
       .catch((err) => console.error(err))
-  },
-
-  loadAssetCastIn ({ commit, state, rootState }, asset) {
-    const shotMap = rootState.shots.shotMap
-    return breakdownApi.getAssetCastIn(asset)
-      .then((castIn) => {
-        commit(LOAD_ASSET_CAST_IN_END, { asset, castIn, shotMap })
-        return Promise.resolve(castIn)
-      })
   },
 
   newAsset ({ commit, dispatch, state, rootGetters }, data) {

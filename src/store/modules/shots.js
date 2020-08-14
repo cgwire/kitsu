@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import moment from 'moment'
-import breakdownApi from '../api/breakdown'
 import peopleApi from '../api/people'
 import shotsApi from '../api/shots'
 import tasksStore from './tasks'
@@ -50,8 +49,6 @@ import {
 import {
   CLEAR_SHOTS,
 
-  LOAD_ASSET_CASTING_END,
-
   LOAD_SHOTS_START,
   LOAD_SHOTS_ERROR,
   LOAD_SHOTS_END,
@@ -59,7 +56,6 @@ import {
   LOAD_SEQUENCES_END,
 
   LOAD_SHOT_END,
-  LOAD_SHOT_CASTING_END,
 
   SHOT_CSV_FILE_SELECTED,
   IMPORT_SHOTS_END,
@@ -592,25 +588,6 @@ const actions = {
         }
       })
       .catch((err) => console.error(err))
-  },
-
-  loadAssetCasting ({ commit, rootGetters }, asset) {
-    if (!asset) return Promise.resolve(asset)
-    const assetMap = rootGetters.assetMap
-    return breakdownApi.getAssetCasting(asset)
-      .then((casting) => {
-        commit(LOAD_ASSET_CASTING_END, { asset, casting, assetMap })
-        return Promise.resolve(casting)
-      })
-  },
-
-  loadShotCasting ({ commit, rootGetters }, shot) {
-    const assetMap = rootGetters.assetMap
-    return breakdownApi.getShotCasting(shot)
-      .then((casting) => {
-        commit(LOAD_SHOT_CASTING_END, { shot, casting, assetMap })
-        return Promise.resolve(casting)
-      })
   },
 
   newShot ({ commit, dispatch, rootGetters }, shot) {
