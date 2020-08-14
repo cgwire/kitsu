@@ -87,7 +87,7 @@
               <router-link
                 class="shot-link"
                 :key="shot.shot_id"
-                :to="shotPath(shot.shot_id)"
+                :to="shotPath(shot)"
                 v-for="shot in sequenceShots"
               >
                 <entity-thumbnail
@@ -267,7 +267,6 @@ export default {
       'isTVShow',
       'isCurrentUserManager',
       'route',
-      'shotMap',
       'shotId'
     ]),
 
@@ -337,31 +336,28 @@ export default {
     },
 
     resetData () {
-      this.loadShots(() => {
-        this.loadAssets()
-          .then(() => {
-            this.currentAsset = this.getCurrentAsset()
-            return this.loadAssetCastIn(this.currentAsset)
-          })
-          .then(() => this.loadAssetCasting(this.currentAsset))
-          .then(() => {
-            this.castIn.isLoading = false
-          })
-          .catch((err) => {
-            this.castIn.isError = true
-            console.error(err)
-          })
-      })
+      this.loadAssets()
+        .then(() => {
+          this.currentAsset = this.getCurrentAsset()
+          return this.loadAssetCastIn(this.currentAsset)
+        })
+        .then(() => this.loadAssetCasting(this.currentAsset))
+        .then(() => {
+          this.castIn.isLoading = false
+        })
+        .catch((err) => {
+          this.castIn.isError = true
+          console.error(err)
+        })
     },
 
-    shotPath (shotId) {
-      const shot = this.shotMap[shotId]
+    shotPath (shot) {
       return {
-        name: shot && shot.episode_id ? 'episode-shot' : 'shot',
+        name: shot.episode_id ? 'episode-shot' : 'shot',
         params: {
           production_id: this.currentProduction.id,
-          shot_id: shotId,
-          episode_id: shot && shot.episode_id ? shot.episode_id : undefined
+          shot_id: shot.shot_id,
+          episode_id: shot.episode_id ? shot.episode_id : undefined
         }
       }
     }
