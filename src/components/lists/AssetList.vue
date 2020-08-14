@@ -258,10 +258,10 @@
       <img src="../../assets/illustrations/empty_asset.png" />
     </p>
     <p class="info">{{ $t('assets.empty_list') }}</p>
-    <button-link
+    <button-simple
       class="level-item big-button"
       :text="$t('assets.new_assets')"
-      :path="newAssetPath()"
+      @click="$emit('new-clicked')"
     />
   </div>
   <div
@@ -296,7 +296,6 @@ import { formatListMixin } from './format_mixin'
 import { selectionListMixin } from './selection'
 
 import DescriptionCell from '../cells/DescriptionCell'
-import ButtonLink from '../widgets/ButtonLink'
 import ButtonSimple from '../widgets/ButtonSimple'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import RowActions from '../widgets/RowActions'
@@ -308,6 +307,18 @@ import ValidationCell from '../cells/ValidationCell'
 export default {
   name: 'asset-list',
   mixins: [entityListMixin, formatListMixin, selectionListMixin],
+
+  components: {
+    ButtonSimple,
+    DescriptionCell,
+    EntityThumbnail,
+    ChevronDownIcon,
+    RowActions,
+    TableInfo,
+    TableHeaderMenu,
+    TableMetadataHeaderMenu,
+    ValidationCell
+  },
 
   props: {
     displayedAssets: {
@@ -334,19 +345,6 @@ export default {
       hiddenColumns: {},
       lastHeaderMenuDisplayed: null
     }
-  },
-
-  components: {
-    ButtonLink,
-    ButtonSimple,
-    DescriptionCell,
-    EntityThumbnail,
-    ChevronDownIcon,
-    RowActions,
-    TableInfo,
-    TableHeaderMenu,
-    TableMetadataHeaderMenu,
-    ValidationCell
   },
 
   computed: {
