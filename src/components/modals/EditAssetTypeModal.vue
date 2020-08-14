@@ -40,11 +40,14 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { modalMixin } from './base_modal'
+
 import ModalFooter from './ModalFooter'
 import TextField from '../widgets/TextField'
 
 export default {
   name: 'edit-asset-type-modal',
+  mixins: [modalMixin],
   components: {
     ModalFooter,
     TextField

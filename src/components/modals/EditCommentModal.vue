@@ -119,7 +119,7 @@ export default {
 
   methods: {
     runConfirmation (event) {
-      if (event.keyCode === 13 || !event.keyCode) {
+      if (!event || event.keyCode === 13 || !event.keyCode) {
         this.$emit('confirm', {
           id: this.commentToEdit.id,
           ...this.form
