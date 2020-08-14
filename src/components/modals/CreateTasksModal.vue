@@ -12,7 +12,7 @@
 
       <p>{{ text }}</p>
 
-      <form v-on:submit.prevent>
+      <form v-on:submit.prevent class="widden">
         <combobox-task-type
           :task-type-list="isAssetTasks ? assetTaskTypes : shotTaskTypes"
           v-model="form.task_type_id"
@@ -155,5 +155,9 @@ export default {
 <style lang="scss" scoped>
 .info-message {
   margin-top: 1em;
+}
+
+.widden {
+  margin-bottom: 12em;
 }
 </style>
