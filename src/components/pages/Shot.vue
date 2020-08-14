@@ -445,12 +445,13 @@ h2.subtitle {
 .asset-type {
   text-transform: uppercase;
   font-size: 1.2em;
-  color: $grey;
+  color: var(--text);
   margin-top: 2em;
   margin-bottom: 0.4em;
 }
 
 .asset-list {
+  color: var(--text);
   display: flex;
   flex-wrap: wrap;
 }
