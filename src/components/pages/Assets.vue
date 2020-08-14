@@ -83,6 +83,7 @@
         @change-sort="onChangeSortClicked"
         @create-tasks="showCreateTasksModal"
         @delete-all-tasks="onDeleteAllTasksClicked"
+        @new-clicked="showNewModal"
         @edit-clicked="onEditClicked"
         @delete-clicked="onDeleteClicked"
         @restore-clicked="onRestoreClicked"
@@ -578,7 +579,7 @@ export default {
     },
 
     confirmBuildFilter (query) {
-      this.isBuildFilterDisplayed = false
+      this.modals.isBuildFilterDisplayed = false
       this.$refs['asset-search-field'].setValue(query)
       this.onSearchChange()
     },

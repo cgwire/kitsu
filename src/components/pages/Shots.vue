@@ -896,7 +896,7 @@ export default {
     },
 
     confirmBuildFilter (query) {
-      this.isBuildFilterDisplayed = false
+      this.modals.isBuildFilterDisplayed = false
       this.$refs['shot-search-field'].setValue(query)
       this.onSearchChange()
     }

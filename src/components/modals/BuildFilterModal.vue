@@ -578,7 +578,8 @@ export default {
     active () {
       if (this.active) {
         this.reset()
-        this.assignation.taskTypeId = this.taskTypeList[0].id
+        this.assignation.taskTypeId =
+          this.taskTypeList.length > 0 ? this.taskTypeList[0].id : ''
         this.setFiltersFromCurrentQuery()
       }
     }
