@@ -189,7 +189,7 @@ export default {
       this.assetTypeId = this.remainingAssetTypes[0].value
     }
     if (this.remainingTaskStatuses.length > 0) {
-      this.taskStatusId = this.remainingTaskStatuses[0].value
+      this.taskStatusId = this.remainingTaskStatuses[0].id
     }
     if (this.remainingTaskTypes.length > 0) {
       this.taskTypeId = this.remainingTaskTypes[0].id
@@ -249,6 +249,9 @@ export default {
 
     addAssetType () {
       this.addAssetTypeToProduction(this.assetTypeId)
+      if (this.remainingAssetTypes.length > 0) {
+        this.assetTypeId = this.remainingAssetTypes[0].value
+      }
     },
 
     removeAssetType (assetTypeId) {
@@ -258,7 +261,7 @@ export default {
     addTaskStatus () {
       this.addTaskStatusToProduction(this.taskStatusId)
       if (this.remainingTaskStatuses.length > 0) {
-        this.taskStatusId = this.remainingTaskStatuses[0].value
+        this.taskStatusId = this.remainingTaskStatuses[0].id
       }
     },
 
