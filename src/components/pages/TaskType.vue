@@ -659,7 +659,7 @@ export default {
     resetTasks () {
       let tasks = this.assetTasks
       if (!this.isAssets) {
-        this.tasks = this.shotTasks
+        tasks = this.shotTasks
       }
       tasks = tasks.filter((task) => {
         const entity = this.entityMap[task.entity_id]
