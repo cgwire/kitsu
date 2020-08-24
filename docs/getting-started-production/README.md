@@ -571,7 +571,7 @@ edit the name of the custom column and its information, or you want to remove it
 
 And now we can create tasks for the assets (3), like **Concept**, **Modeling**,
 **Texture**, **Setup**, and other if needed (see 
-[How to customize the workflow](.../faq/#how-to-customize-the-workflow)
+[How to customize the workflow](/faq/#how-to-customize-the-workflow)
 ).
 
 
@@ -952,7 +952,7 @@ that his work is validated.
 
 
 
-## Cahnge status per batch
+## Change status per batch
 
 Alternatively, you can do it per **batch**. 
 
