@@ -571,7 +571,7 @@ edit the name of the custom column and its information, or you want to remove it
 
 And now we can create tasks for the assets (3), like **Concept**, **Modeling**,
 **Texture**, **Setup**, and other if needed (see 
-[How to customize the workflow](../faq/#how-to-customize-the-workflow)
+[How to customize the workflow](../faq/README.md/#how-to-customize-the-workflow)
 ).
 
 
