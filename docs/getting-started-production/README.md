@@ -947,8 +947,7 @@ You can also **tag** someone of the team in the comments. Type the `@`and it ope
 
 ![Tag someone](../img/getting-started/tag_team.png)
 
-Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png), to notify the CG artist
-that his work is validated.
+Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png), to notify the CG artist that his work is validated.
 
 
 
@@ -973,21 +972,21 @@ You validate the new status with the **Confirm** button.
 
 You can find the **Playlists** page on the drop-down menu. 
 
-![Playlist main menu](../img/faq/drop_down_menu_playlist.png)
+![Playlist main menu](../img/getting-started/drop_down_menu_playlist.png)
 
 The **playlist** page is separated into 2 parts: 
 
 * (1) The playlist list where you can **create** a playlist, or load an existing one.
 * (2) The last created playlists and the last modified playlists
 
-![Playlist page](../img/faq/playlist_page.png)
+![Playlist page](../img/getting-started/playlist_page.png)
 
 Start by creating a **Playlist** 
-![Playlist add button](../img/faq/playlist_add_button.png), You default name
+![Playlist add button](../img/getting-started/playlist_add_button.png), You default name
 is the date and the hour. You can change it immediately. You can  choose if the playlist
 will be shared with the **studio** or the **client** and if it's a **shot** or **asset** playlist.
 
-![Playlist add page](../img/faq/playlist_add_page.png)
+![Playlist add page](../img/getting-started/playlist_add_page.png)
 
 Once the playlist created, via the search/filter bar, you can select which shots to add
 to your playlist. You can also choose to add the whole movie.
@@ -999,7 +998,7 @@ You have to type **animation=wfa** in the search bar. Valid your selection with 
 The shots appear on the top part of the screen. Every change are 
 automatically saved.
 
-![Playlist page](../img/faq/playlist_example.png)
+![Playlist page](../img/getting-started/playlist_example.png)
 
 
 ## Validate with a playlist
@@ -1007,14 +1006,14 @@ automatically saved.
 For each playlisted shot/asset you can choose the **task** and the
 **version** you want to see.
 
-![Playlist task selection](../img/faq/playlist_task_selection.png)
-![Playlist version selection](../img/faq/playlist_version_selection.png)
+![Playlist task selection](../img/getting-started/playlist_task_selection.png)
+![Playlist version selection](../img/getting-started/playlist_version_selection.png)
 
 You can also play side by side two tasks of a shot.
 
-Click on the **Compare** button ![Compare button](../img/faq/compare_button.png) and choose the second task type.
+Click on the **Compare** button ![Compare button](../img/getting-started/compare_button.png) and choose the second task type.
 
-![Playlist side by side](../img/faq/playlist_side_by_side.png)
+![Playlist side by side](../img/getting-started/playlist_side_by_side.png)
 
 
 
@@ -1024,15 +1023,15 @@ You can comment the shots directly from the preview.
 
 Click on the **comment** button.
 
-![Playlist comment](../img/faq/playlist_comment_button.png)
+![Playlist comment](../img/getting-started/playlist_comment_button.png)
 
 You now have access to the right panel, with all the history of the comments and status.
 
 You can see the drawing comment on the video (the red dot below the timeline).
 
-![Playlist comment](../img/faq/playlist_comment.png)
+![Playlist comment](../img/getting-started/playlist_comment.png)
 
-You can draw on the video (same than for the shot review), with the **draw** button ![draw button](../img/faq/draw.png)
+You can draw on the video (same than for the shot review), with the **draw** button ![draw button](../img/getting-started/draw.png)
 
 
 ## Simplify the global page
