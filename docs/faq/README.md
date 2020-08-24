@@ -446,7 +446,7 @@ will be shared with the studio or the client.
 Once the playlist created, via the search/filter bar, you can select which shots to add
 to your playlist. You can also choose to add the whole movie.
 
-You can use the same filter than on the global shot/asset page. For example you can select all the 
+You can use the same filter, or the filter builder than on the global shot/asset page. For example you can select all the 
 WFA short for the animation stage.
 You have to type **animation=wfa** in the search bar. Valid your selection with the **Add selection** button.
 
@@ -518,11 +518,12 @@ On the main page, you can edit all the tasks already created
 ![Task Type global page](../img/faq/task_type_global.png)
 
 You can change : 
+
+the order of the tasks by drag and move them to the wanted position.
+
 - (1) The name of the task type
-- (2) The priority, meaning the order of the task types
-- (3) For which entity it is used
-- (4) If the artists need to time log their work on this task type
-- (5) The color 
+- (2) If the artists need to time log their work on this task type
+- (3) The color 
 
 ![Edit task](../img/faq/edit_task.png)
 
@@ -570,8 +571,9 @@ You can change :
 - (2) His short name, useful for the filters
 - (3) If it's the end of the task
 - (4) If it will count as a retake (for the supervisor page)
-- (5) If the CG artist can use this status
-- (6) The color 
+- (5) If the CG artist / Vendor can use this status
+- (6) If the Client can use this status
+- (7) The color 
 
 ![Edit status](../img/faq/edit_status.png)
 
