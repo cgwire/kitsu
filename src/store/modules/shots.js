@@ -1601,6 +1601,7 @@ const mutations = {
     let shots = cache.shots
     if (state.searchSequenceFilters.length > 0) {
       shots = applyFilters(cache.shots, state.searchSequenceFilters, {})
+      shots = shots.filter(shot => !shot.canceled)
     }
     state.sequenceStats = computeStats(
       shots,
