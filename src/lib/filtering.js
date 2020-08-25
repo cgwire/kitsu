@@ -5,6 +5,7 @@ import {
   indexSearch
 } from './indexing'
 
+const UNION_REGEX = /\+\(.*\)/
 const EQUAL_REGEX = /\[([^[]*)\]=\[([^[]*)\]|([^ ]*)=\[([^[]*)\]|([^ ]*)=([^ ]*)|\[([^[]*)\]=([^ ]*)/g
 const EQUAL_ASSET_TYPE_REGEX = /type=\[([^[]*)\]|type=([^ ]*)|type=([^ ]*)/g
 
@@ -13,73 +14,86 @@ const EQUAL_ASSET_TYPE_REGEX = /type=\[([^[]*)\]|type=([^ ]*)|type=([^ ]*)/g
  * Then apply filters found on result list.
  */
 export const applyFilters = (entries, filters, taskMap) => {
-  const isStatus = { status: true }
-  const isAssignation = { assignation: true }
-  const isExclusion = { exclusion: true }
-  const isDescriptor = { descriptor: true }
-  const isAvatar = { thumbnail: true }
-  const isAssignedTo = { assignedto: true }
-  const isAssetType = { assettype: true }
-
   if (filters && filters.length > 0) {
     return entries.filter((entry) => {
-      let isOk = true
+      let isOk = null
       filters.forEach((filter) => {
-        let task = null
-        if (!isOk) return false
-
-        if (filter.taskType && entry.validations[filter.taskType.id]) {
-          task = taskMap[entry.validations[filter.taskType.id]]
-        }
-        if (isAssetType[filter.type]) {
-          isOk = filter.assetType && entry.asset_type_id === filter.assetType.id
-          if (filter.excluding) isOk = !isOk
-        } else if (isStatus[filter.type]) {
-          isOk = task && filter.taskStatuses.includes(task.task_status_id)
-          if (filter.excluding) isOk = !isOk
-        } else if (isAssignation[filter.type]) {
-          if (filter.assigned) {
-            isOk = task && task.assignees && task.assignees.length > 0
-          } else {
-            isOk = !task ||
-              (task && task.assignees && task.assignees.length === 0)
-          }
-        } else if (isExclusion[filter.type]) {
-          isOk = !filter.excludedIds[entry.id]
-        } else if (isDescriptor[filter.type]) {
-          if (
-            entry.data &&
-            entry.data[filter.descriptor.field_name] &&
-            filter.value
-          ) {
-            let dataValue = entry.data[filter.descriptor.field_name]
-            dataValue = dataValue.toLowerCase()
-            isOk = dataValue.indexOf(filter.value.toLowerCase()) >= 0
-          } else {
-            isOk = false
-          }
-          if (filter.excluding) isOk = !isOk
-        } else if (isAvatar[filter.type]) {
-          const hasAvatar =
-            entry.preview_file_id !== '' &&
-            entry.preview_file_id !== undefined &&
-            entry.preview_file_id !== null
-          isOk = filter.excluding ? !hasAvatar : hasAvatar
-        } else if (isAssignedTo[filter.type]) {
-          isOk = false
-          if (entry.tasks) {
-            entry.tasks.forEach((taskId) => {
-              task = taskMap[taskId]
-              isOk = isOk || task.assignees.includes(filter.personId)
-            })
-          }
-          if (filter.excluding) isOk = !isOk
-        }
+        if (isOk === false && !filters.union) return false
+        if (isOk === true && filters.union) return true
+        isOk = applyFiltersFunctions[filter.type](entry, filter, taskMap)
       })
       return isOk
     })
   } else {
     return entries
+  }
+}
+
+const applyFiltersFunctions = {
+  assettype (entry, filter, taskMap) {
+    let isOk = true
+    isOk = filter.assetType && entry.asset_type_id === filter.assetType.id
+    if (filter.excluding) isOk = !isOk
+    return isOk
+  },
+
+  assignation (entry, filter, taskMap) {
+    const task = taskMap[entry.validations[filter.taskType.id]]
+    if (filter.assigned) {
+      return task && task.assignees && task.assignees.length > 0
+    } else {
+      return !task ||
+        (task && task.assignees && task.assignees.length === 0)
+    }
+  },
+
+  assignedto (entry, filter, taskMap) {
+    let isOk = false
+    if (entry.tasks) {
+      entry.tasks.forEach((taskId) => {
+        const task = taskMap[taskId]
+        isOk = isOk || task.assignees.includes(filter.personId)
+      })
+    }
+    if (filter.excluding) isOk = !isOk
+    return isOk
+  },
+
+  descriptor (entry, filter, taskMap) {
+    let isOk = true
+    if (
+      entry.data &&
+      entry.data[filter.descriptor.field_name] &&
+      filter.value
+    ) {
+      let dataValue = entry.data[filter.descriptor.field_name]
+      dataValue = dataValue.toLowerCase()
+      isOk = dataValue.indexOf(filter.value.toLowerCase()) >= 0
+    } else {
+      isOk = false
+    }
+    if (filter.excluding) isOk = !isOk
+    return isOk
+  },
+
+  exclusion (entry, filter, taskMap) {
+    return !filter.excludedIds[entry.id]
+  },
+
+  status (entry, filter, taskMap) {
+    const task = taskMap[entry.validations[filter.taskType.id]]
+    let isOk = true
+    isOk = task && filter.taskStatuses.includes(task.task_status_id)
+    if (filter.excluding) isOk = !isOk
+    return isOk
+  },
+
+  thumbnail (entry, filter, taskMap) {
+    const hasAvatar =
+      entry.preview_file_id !== '' &&
+      entry.preview_file_id !== undefined &&
+      entry.preview_file_id !== null
+    return filter.excluding ? !hasAvatar : hasAvatar
   }
 }
 
@@ -92,6 +106,7 @@ export const getKeyWords = (queryText) => {
     return []
   } else {
     return queryText
+      .replace(UNION_REGEX, '')
       .replace(EQUAL_REGEX, '')
       .split(' ')
       .filter((query) => {
@@ -106,6 +121,7 @@ export const getKeyWords = (queryText) => {
  */
 export const getExcludingKeyWords = (queryText) => {
   return queryText
+    .replace(UNION_REGEX, '')
     .replace(EQUAL_REGEX, '')
     .split(' ')
     .filter((keyword) => {
@@ -134,6 +150,8 @@ export const getFilters = (
     query
   }
 ) => {
+  const unionExtraction = getUnion(query)
+  query = unionExtraction.query
   const filters = [
     ...getAssetTypeFilters(assetTypes, query),
     ...getTaskTypeFilters(taskTypes, taskStatuses, query),
@@ -142,7 +160,21 @@ export const getFilters = (
     ...getThumbnailFilters(query) || [],
     ...getExcludingFilters(entryIndex, query)
   ]
+  filters.union = unionExtraction.union
   return filters
+}
+
+const getUnion = (query) => {
+  const rgxMatches = query.match(UNION_REGEX)
+  let union = false
+  if (rgxMatches) {
+    union = true
+    query = rgxMatches[0].substring(2, rgxMatches[0].length - 1)
+  }
+  return {
+    query,
+    union
+  }
 }
 
 /*

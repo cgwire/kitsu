@@ -11,6 +11,13 @@
         {{ $t('entities.build_filter.title') }}
       </h1>
 
+      <combobox
+        class="flexrow-item"
+        :options="general.unionOptions"
+        locale-key-prefix="entities.build_filter."
+        v-model="union"
+      />
+
       <h3
         class="subtitle"
         v-if="isAssets"
@@ -218,6 +225,10 @@ export default {
 
   data () {
     return {
+      assetTypeFilters: {
+        operator: '=',
+        value: ''
+      },
       assignation: {
         person: null,
         taskTypeId: '',
@@ -239,6 +250,10 @@ export default {
           { label: 'equal', value: '=' },
           { label: 'not_equal', value: '=-' },
           { label: 'in', value: 'in' }
+        ],
+        unionOptions: [
+          { label: 'union_and', value: 'and' },
+          { label: 'union_or', value: 'or' }
         ]
       },
       hasThumbnail: {
@@ -255,10 +270,7 @@ export default {
       taskTypeFilters: {
         values: []
       },
-      assetTypeFilters: {
-        operator: '=',
-        value: ''
-      }
+      union: 'and'
     }
   },
 
@@ -349,6 +361,7 @@ export default {
       query = this.applyDescriptorChoice(query)
       query = this.applyAssignationChoice(query)
       query = this.applyThumbnailChoice(query)
+      query = this.applyUnionChoice(query)
       return query.trim()
     },
 
@@ -404,6 +417,13 @@ export default {
     applyThumbnailChoice (query) {
       if (this.hasThumbnail.value !== 'nofilter') {
         query += ` ${this.hasThumbnail.value}`
+      }
+      return query
+    },
+
+    applyUnionChoice (query) {
+      if (this.union === 'or') {
+        query = ` +(${query.trim()})`
       }
       return query
     },
@@ -502,6 +522,9 @@ export default {
             this.setFiltersFromThumbnailQuery(filter)
           }
         })
+        if (filters.union) {
+          this.setUnion()
+        }
       }
     },
 
@@ -552,6 +575,10 @@ export default {
       } else {
         this.hasThumbnail.value = 'withthumbnail'
       }
+    },
+
+    setUnion () {
+      this.union = 'or'
     },
 
     // General

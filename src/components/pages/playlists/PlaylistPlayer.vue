@@ -349,13 +349,16 @@
       class="playlist-button flexrow-item"
       :title="$t('playlists.actions.save_playlist')"
       icon="save"
-      v-if="isCurrentUserManager"
+      v-if="isCurrentUserManager && tempMode"
     />
     <div
       class="flexrow"
       v-if="!isCurrentUserCGArtist && (isCurrentEntityMovie || isCurrentEntityPicture)"
     >
-      <div class="separator"></div>
+      <div
+        class="separator"
+        v-if="isCurrentUserManager && tempMode"
+      ></div>
       <button-simple
         class="playlist-button flexrow-item"
         icon="undo"

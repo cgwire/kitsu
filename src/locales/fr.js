@@ -2,6 +2,7 @@ export default {
 
   asset_types: {
     all_asset_types: 'Tous les types d\'assets',
+    create_error: 'Une erreur est survenue en créant l\'asset. Êtes vous sûr qu\'il n\'y a pas un asset avec un nom similaire ?',
     delete_error: 'Une erreur est survenue en supprimant un type d\'asset. Êtes vous sûr qu\'aucun asset est lié à ce type d\'asset?',
     delete_text: 'Êtes vous sur de vouloir enlever {name} de la base de données ?',
     edit_title: 'Modifier le type d\'asset',
@@ -65,6 +66,7 @@ export default {
     change_preview: 'Changer previz',
     comment_from_client: 'Commentaire du client',
     edit_title: 'Modifier le commentaire',
+    edit_error: 'Une erreur est survenue en éditant le commentaire',
     error: 'Une erreur est survenue en postant le commentaire',
     empty_text: 'Ce commentaire est vide',
     no_file_attached: 'Aucun fichier attaché',
@@ -87,6 +89,7 @@ export default {
   custom_actions: {
     delete_text: 'Êtes-vous sûr de supprimer l\'action personnalisée {name} de la base de données?',
     delete_error: 'Une erreur est survenue en supprimant l\'action personnalisée.',
+    create_error: 'Une erreur est survenue durant la création. Êtes vous sûr qu\'aucune action a un nom similaire ?',
     edit_title: 'Modifier une action personnalisée',
     new_custom_action: 'Ajouter une action personnalisée',
     number: 'action pesonnalisée | actions personnalisées',
@@ -122,6 +125,8 @@ export default {
       status: 'Statut de tâche',
       thumbnail: 'A une vignette',
       title: 'Filtré sur...',
+      union_and: 'Valide tous les filtres suivants',
+      union_or: 'Valide un des filtres suivants',
       with_thumbnail: 'Avec vignette',
       without_thumbnail: 'Sans vignette'
     },
@@ -146,6 +151,7 @@ export default {
     edit_title: 'Éditer épisode',
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ? Tous les plans et préviz liés seront supprimés. Pour confirmer, tapez le nom de l\'épisode en dessous',
     delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
+    edit_error: 'Une erreur est survenue en sauvegardant l\'épisode. Êtes vous sûr qu\'aucun épisode existe avec un nom similaire ?',
     empty_list: 'Il n\'y a pas d\'épisodes dans la production. Voulez vous en créer ?',
     empty_list_client: 'Il n\'y a pas d\'épisode pour cette production.',
     new_episode: 'Nouvel épisode',
@@ -344,9 +350,10 @@ export default {
     client_playlist: 'Playlist Client',
     created_at: 'Créé le :',
     create_for_selection: 'Créer une playlist pour la sélection courante',
-    delete_text: 'Êtes vous sûr de vouloir supprimer {name} de la base de données ?',
     create_title: 'Créer playlist',
+    delete_text: 'Êtes vous sûr de vouloir supprimer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue en supprimant la playlist.',
+    edit_error: 'Une erreur est survenue en sauvegardant la playlist. Êtes vous sûr qu\'aucune playlist n\'existe avec un nom similaire ?',
     download_zip: 'Télécharger en .zip',
     failed: 'Echec',
     for_client: 'Pour le client',
@@ -397,6 +404,7 @@ export default {
       previous_shot: 'Shot précédent',
       pause: 'Pause',
       play: 'Lecture',
+      save_playlist: 'Sauvegarde la playlist',
       speed: 'Changer la vitesse',
       split_screen: 'Partager l\'écran'
     }
@@ -407,6 +415,7 @@ export default {
     active_persons: 'présent | présents',
     add_member_to_team: 'Ajouter un membre à l\'équipe: ',
     create_invite: 'Créer et envoyer une invitation',
+    create_error: 'Une erreur est survenue en créant l\'utilisateur. Êtes vous sûr qu\'il n\'y a pas un utilisateur avec un nom ou un email similaire ?',
     delete_text: 'Êtes vous sûr de vouloir retirer {personName} de la base de données? Tous les commentaires et préviz liés seront supprimés. Pour confirmer, tapez le nom complet de la personne en dessous',
     delete_error: 'Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n\'a aucune tâche assignée et n\'a fait aucun commentaire ?',
     edit_title: 'Modifier les informations de',
@@ -574,14 +583,15 @@ export default {
 
   sequences: {
     all_sequences: 'Toutes les séquences',
-    title: 'Stats séquences',
-    number: 'séquence | séquences',
-    new_sequence: 'Nouvelle séquence',
-    edit_title: 'Éditer séquence',
     delete_text: 'Etes vous sûr de vouloir retirer {name} de la base de données ? Tous les plans et préviz liés seront supprimés. Pour confirmer, tapez le nom de la séquence en dessous',
     delete_error: 'Une erreur est survenue en créant le plan, êtes vous sûr que la séquence n\'a plus aucun lien ?',
+    edit_error: 'Une erreur est survenue en sauvegardant la séquence. Êtes vous sûr qu\'aucune séquence n\'existe avec un nom similaire ?',
+    edit_title: 'Éditer séquence',
     empty_list: 'Il n\'y a pas de séquence dans la production. Voulez vous en créer ?',
     empty_list_client: 'Il n\'y pas de séquences dans cette production.',
+    number: 'séquence | séquences',
+    new_sequence: 'Nouvelle séquence',
+    title: 'Stats séquences',
     fields: {
       name: 'Nom',
       description: 'Description'
@@ -667,6 +677,7 @@ export default {
   },
 
   task_status: {
+    create_error: 'Une erreur est survenue en créant le statut. Êtes vous sûr qu\'il n\'y a pas un statut avec un nom similaire ?',
     delete_text: 'Êtes vous sur de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue lors de la suppression du statut de tâche. Êtes vous sûr qu\'aucune tâche n\'est lié à ce statut de tâche ?',
     edit_title: 'Modifier statut',
@@ -686,6 +697,7 @@ export default {
   },
 
   task_types: {
+    create_error: 'Une erreur est survenue en créant le type de tâche. Êtes vous sûr qu\'il n\'y a pas un type avec un nom similaire ?',
     delete_text: 'Êtes vous sur de vouloir retirer {name} de la base de données ?',
     delete_error: 'Une erreur est survenue lors de la suppression du type de tâche. Êtes vous sûr qu\'aucune tâche n\'est lié à ce type de tâche ?',
     edit_title: 'Modifier le type de tâches',

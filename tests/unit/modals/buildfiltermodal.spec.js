@@ -371,6 +371,19 @@ describe('BuildFilterModal', () => {
             expect(query).toBe('-withthumbnail')
           })
         })
+        describe('union', () => {
+          it('or', () => {
+            wrapper.setData({
+              assignation: {
+                value: 'assignedto',
+                person: {id: 'person-1', name: 'John'}
+              },
+              union: 'or'
+            })
+            const query = wrapper.vm.buildFilter()
+            expect(query).toBe('+(assignedto=[John])')
+          })
+        })
       })
 
       describe('Set values from query', () => {
@@ -476,6 +489,18 @@ describe('BuildFilterModal', () => {
             changeSearch('-withthumbnail')
             wrapper.vm.setFiltersFromCurrentQuery()
             expect(wrapper.vm.hasThumbnail.value).toBe('-withthumbnail')
+          })
+        })
+        describe('union', () => {
+          it('and', () => {
+            changeSearch('[Modeling]=assigned assignedto=[John]')
+            wrapper.vm.setFiltersFromCurrentQuery()
+            expect(wrapper.vm.union).toBe('and')
+          })
+          it('or', () => {
+            changeSearch('+([Modeling]=assigned assignedto=[John])')
+            wrapper.vm.setFiltersFromCurrentQuery()
+            expect(wrapper.vm.union).toBe('or')
           })
         })
       })

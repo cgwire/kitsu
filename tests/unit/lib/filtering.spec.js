@@ -244,7 +244,7 @@ describe('lib/filtering', () => {
       expect(filter.taskStatuses[0]).toEqual('task-status-2')
     })
 
-    it('multiple task type query case', () => {
+    it('multiple task type AND query case', () => {
       const filters = getFilters({
         entryIndex,
         assetTypes,
@@ -252,7 +252,7 @@ describe('lib/filtering', () => {
         taskStatuses,
         descriptors,
         persons,
-        query: 'mode=wip animation=wfa chars'
+        query: 'mode=[wip] animation=[wfa] chars'
       })
       expect(filters.length).toEqual(2)
       let filter = filters[0]
@@ -261,6 +261,27 @@ describe('lib/filtering', () => {
       filter = filters[1]
       expect(filter.taskType).toEqual(taskTypes[0])
       expect(filter.taskStatuses[0]).toEqual('task-status-2')
+      expect(filters.union).toBeFalsy()
+    })
+
+    it('multiple task type OR query case', () => {
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        query: '+(mode=[wip] animation=[wfa]) chars'
+      })
+      expect(filters.length).toEqual(2)
+      let filter = filters[0]
+      expect(filter.taskType).toEqual(taskTypes[1])
+      expect(filter.taskStatuses[0]).toEqual('task-status-1')
+      filter = filters[1]
+      expect(filter.taskType).toEqual(taskTypes[0])
+      expect(filter.taskStatuses[0]).toEqual('task-status-2')
+      expect(filters.union).toBeTruthy()
     })
 
     it('assigned query case', () => {
@@ -562,6 +583,30 @@ describe('lib/filtering', () => {
       )
       expect(results.length).toEqual(1)
     })
+
+    it('multiple or filters', () => {
+      const filters = [
+        {
+          taskType: taskTypes[0],
+          taskStatuses: ['task-status-2'],
+          type: 'status'
+        },
+        {
+          taskType: taskTypes[2],
+          taskStatuses: ['task-status-1'],
+          type: 'status'
+        }
+      ]
+      filters.union = true
+      let results = applyFilters(
+        entries,
+        filters,
+        taskMap,
+        true
+      )
+      expect(results.length).toEqual(2)
+    })
+
 
     it('in filter', () => {
       const filters = [
