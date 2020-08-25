@@ -125,6 +125,8 @@ export default {
       status: 'Task status',
       thumbnail: 'Thumbnail presence',
       title: 'Filter on...',
+      union_and: 'Match all the following filters',
+      union_or: 'Match one of the following filters',
       with_thumbnail: 'With thumbnail',
       without_thumbnail: 'Without thumbnail'
     },
