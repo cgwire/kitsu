@@ -30,6 +30,7 @@
         <combobox
           :label="$t('playlists.fields.for_entity')"
           :options="forEntityOptions"
+          :disabled="typeDisabled"
           v-model="form.for_entity"
           v-if="!isEditing"
         />
@@ -65,13 +66,28 @@ export default {
     TextField
   },
 
-  props: [
-    'active',
-    'cancelRoute',
-    'isLoading',
-    'isError',
-    'playlistToEdit'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      value: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    playlistToEdit: {
+      type: Object,
+      default: () => {}
+    },
+    typeDisabled: {
+      type: Boolean,
+      default: false
+    }
+  },
 
   data () {
     return {
@@ -133,7 +149,7 @@ export default {
       } else {
         this.form = {
           name: this.playlistToEdit.name,
-          for_entity: this.defaultForEntity,
+          for_entity: this.playlistToEdit.for_entity || this.defaultForEntity,
           for_client: 'false',
           is_for_all: this.currentEpisode && this.currentEpisode.id === 'all'
         }

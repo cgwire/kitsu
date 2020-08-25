@@ -895,15 +895,16 @@ export default {
       }
       this.loading.editPlaylist = true
       this.errors.editPlaylist = false
-      this.newPlaylist({
-        data: newPlaylist,
-        callback: (err, playlist) => {
-          if (err) this.errors.editPlaylist = true
+      this.newPlaylist(newPlaylist)
+        .then((playlist) => {
           this.$router.push(this.getPlaylistPath(playlist.id))
           this.loading.editPlaylist = false
           this.modals.isEditDisplayed = false
-        }
-      })
+        })
+        .catch((err) => {
+          console.error(err)
+          this.errors.editPlaylist = true
+        })
     },
 
     confirmEditPlaylist (form) {

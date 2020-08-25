@@ -344,10 +344,18 @@
 
     <span class="filler"></span>
 
+    <button-simple
+      @click="$emit('save-clicked')"
+      class="playlist-button flexrow-item"
+      :title="$t('playlists.actions.save_playlist')"
+      icon="save"
+      v-if="isCurrentUserManager"
+    />
     <div
       class="flexrow"
       v-if="!isCurrentUserCGArtist && (isCurrentEntityMovie || isCurrentEntityPicture)"
     >
+      <div class="separator"></div>
       <button-simple
         class="playlist-button flexrow-item"
         icon="undo"
@@ -675,17 +683,18 @@ export default {
       isCommentsHidden: true,
       isComparing: false,
       isDrawing: false,
-      isTyping: false,
+      isEntitiesHidden: false,
       isPlaying: false,
       isRepeating: false,
       isShowingPalette: false,
       isShowingPencilPalette: false,
-      isEntitiesHidden: false,
+      isTyping: false,
       maxDuration: '00:00.000',
       maxDurationRaw: 0,
       palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
       pencil: 'big',
       pencilPalette: ['big', 'medium', 'small'],
+      playlistToEdit: {},
       playingEntityIndex: 0,
       speed: 3,
       task: null,
@@ -693,18 +702,14 @@ export default {
       taskTypeToCompare: null,
       textColor: '#ff3860',
       modals: {
-        edit: false,
         delete: false,
         taskType: false
       },
       loading: {
-        playlists: false,
-        editPlaylist: false,
         deletePlaylist: false
       },
       errors: {
         playlists: false,
-        editPlaylist: false,
         deletePlaylist: false
       },
       forClientOptions: [
@@ -743,10 +748,12 @@ export default {
   computed: {
     ...mapGetters([
       'assetTaskTypes',
+      'currentEpisode',
       'currentProduction',
       'isCurrentUserCGArtist',
       'isCurrentUserClient',
       'isCurrentUserManager',
+      'isTVShow',
       'taskMap',
       'taskTypeMap',
       'shotTaskTypes',
@@ -970,7 +977,6 @@ export default {
     ...mapActions([
       'changePlaylistType',
       'deletePlaylist',
-      'editPlaylist',
       'removeBuildJob',
       'runPlaylistBuild'
     ]),
