@@ -15,6 +15,10 @@
     :class="iconClass"
     v-if="icon === 'redo'"
   />
+  <save-icon
+    :class="iconClass"
+    v-if="icon === 'save'"
+  />
   <plus-icon
     :class="iconClass"
     v-if="icon === 'plus'"
@@ -146,6 +150,7 @@ import {
   PlayIcon,
   PlusIcon,
   RotateCcwIcon,
+  SaveIcon,
   SkipBackIcon,
   SkipForwardIcon,
   TrashIcon,
@@ -177,6 +182,7 @@ export default {
     PlayIcon,
     PlusIcon,
     RotateCcwIcon,
+    SaveIcon,
     SkipBackIcon,
     SkipForwardIcon,
     TrashIcon,

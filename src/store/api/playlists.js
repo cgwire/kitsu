@@ -21,7 +21,7 @@ export default {
     return client.pget(path)
   },
 
-  newPlaylist (playlist, callback) {
+  newPlaylist (playlist) {
     const data = {
       name: playlist.name,
       project_id: playlist.production_id,
@@ -30,7 +30,7 @@ export default {
       for_entity: playlist.for_entity,
       is_for_all: playlist.is_for_all
     }
-    client.post('/api/data/playlists/', data, callback)
+    return client.ppost('/api/data/playlists/', data)
   },
 
   updatePlaylist (playlist, callback) {

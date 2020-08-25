@@ -407,6 +407,7 @@ export default {
     created_at: 'Created at:',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this playlist.',
+    edit_error: 'An error occured while saving this playlist.',
     download_zip: 'Download .zip',
     failed: 'Failed',
     for_client: 'The client',
@@ -457,6 +458,7 @@ export default {
       play: 'Play',
       previous_frame: 'Previous frame',
       previous_shot: 'Previous shot',
+      save_playlist: 'Save playlist',
       speed: 'Change speed',
       split_screen: 'Split screen'
     }
