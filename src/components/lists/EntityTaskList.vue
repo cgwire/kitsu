@@ -52,7 +52,10 @@
             />
           </td>
           <td class="assignees">
-            <div class="flexrow">
+            <div
+              class="flexrow"
+              v-if="!isCurrentUserClient && !isCurrentUserVendor"
+            >
               <div
                 class="avatar-wrapper"
                 :key="personId"
@@ -119,6 +122,8 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'isCurrentUserClient',
+      'isCurrentUserVendor',
       'personMap',
       'taskMap',
       'taskTypeMap'
