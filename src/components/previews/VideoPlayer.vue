@@ -238,7 +238,6 @@
         <a
           :href="movieDlPath"
           class="button flexrow-item"
-          v-if="!readOnly"
         >
           <download-icon class="icon" />
         </a>

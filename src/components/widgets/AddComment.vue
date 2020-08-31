@@ -122,12 +122,12 @@
         <em>{{ $t('comments.error') }}</em>
       </div>
     </div>
+
     <add-comment-image-modal
       ref="add-comment-image-modal"
       :active="modals.addCommentAttachment"
       :is-loading="loading.addCommentAttachment"
       :is-error="errors.addCommentAttachment"
-      extensions=".png,.jpg,.jpeg,.gif"
       @cancel="onCloseCommentAttachment"
       @confirm="createCommentAttachment"
     />

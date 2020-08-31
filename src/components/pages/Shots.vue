@@ -247,7 +247,7 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '../../lib/csv'
 import func from '../../lib/func'
 import { sortByName } from '../../lib/sorting'
-import { slugify } from '../../lib/string'
+import stringHelpers from '../../lib/string'
 
 import { searchMixin } from '../mixins/search'
 import { entityListMixin } from '../mixins/entities'
@@ -859,7 +859,7 @@ export default {
           if (this.currentEpisode) {
             nameData.splice(3, 0, this.currentEpisode.name)
           }
-          const name = slugify(nameData.join('_'))
+          const name = stringHelpers.slugify(nameData.join('_'))
           const headers = [
             'Sequence',
             'Name',

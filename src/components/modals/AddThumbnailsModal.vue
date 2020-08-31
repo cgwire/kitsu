@@ -86,7 +86,7 @@ import { modalMixin } from './base_modal'
 
 import { CheckIcon } from 'vue-feather-icons'
 
-import { slugify } from '../../lib/string'
+import stringHelpers from '../../lib/string'
 import assetStore from '../../store/modules/assets'
 import shotStore from '../../store/modules/shots'
 
@@ -191,9 +191,11 @@ export default {
     addEntityToEntityMap (entity) {
       let fullName = ''
       if (this.isAssets) {
-        fullName = slugify(`${entity.asset_type_name}_${entity.name}`)
+        fullName =
+          stringHelpers.slugify(`${entity.asset_type_name}_${entity.name}`)
       } else {
-        fullName = slugify(`${entity.sequence_name}_${entity.name}`)
+        fullName =
+          stringHelpers.slugify(`${entity.sequence_name}_${entity.name}`)
       }
       this.entityMap[fullName] = entity
       return this.entityMap
@@ -248,7 +250,7 @@ export default {
 
     slugifyFilename (form) {
       const filename = form.get('file').name
-      return slugify(filename.substring(0, filename.length - 3))
+      return stringHelpers.slugify(filename.substring(0, filename.length - 3))
     },
 
     prepareImagePreview (form) {

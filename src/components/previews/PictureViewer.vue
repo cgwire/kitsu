@@ -1,7 +1,15 @@
 <template>
 <div ref="container" class="picture-player">
-  <div ref="picture-wrapper" class="picture-wrapper">
+  <div ref="picture-wrapper" class="picture-wrapper" oncontextmenu="return false;">
     <div ref="canvas-wrapper" class="canvas-wrapper">
+      <div
+        ref="loupe"
+        class="loupe"
+        :style="{
+          background: 'url(' + pictureDlPath + ')'
+        }"
+      >
+      </div>
       <canvas
         :style="{
           display: 'block'
@@ -182,7 +190,6 @@
       <a
         class="button flexrow-item"
         :href="pictureDlPath"
-        v-if="!readOnly"
       >
         <download-icon class="icon" />
       </a>
@@ -207,6 +214,7 @@ import {
 } from 'vue-feather-icons'
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { annotationMixin } from '@/components/mixins/annotation_mixin'
+import { domMixin } from '@/components/mixins/dom'
 import ButtonSimple from '../widgets/ButtonSimple'
 import ColorPicker from '../widgets/ColorPicker'
 import PencilPicker from '../widgets/PencilPicker'
@@ -231,7 +239,7 @@ export default {
     TypeIcon,
     XIcon
   },
-  mixins: [annotationMixin, fullScreenMixin],
+  mixins: [annotationMixin, domMixin, fullScreenMixin],
 
   props: {
     preview: {
@@ -397,7 +405,9 @@ export default {
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
-      const fabricCanvas = new fabric.Canvas('annotation-canvas')
+      const fabricCanvas = new fabric.Canvas('annotation-canvas', {
+        fireRightClick: true
+      })
 
       this.container.style.height = this.getDefaultHeight() + 'px'
       fabricCanvas.setDimensions({
@@ -413,11 +423,15 @@ export default {
       fabricCanvas.off('object:moved', this.saveAnnotations)
       fabricCanvas.on('object:moved', this.saveAnnotations)
       fabricCanvas.on('mouse:up', () => {
+        this.$refs.loupe.style.display = 'none'
+        this.$options.loupe = false
         if (this.isDrawing) {
           this.clearUndoneStack()
           this.saveAnnotations()
         }
       })
+      fabricCanvas.on('mouse:move', this.onCanvasMouseMoved)
+      fabricCanvas.on('mouse:down', this.onCanvasClicked)
 
       this.fabricCanvas = fabricCanvas
     },
@@ -427,6 +441,23 @@ export default {
         return screen.height
       } else {
         return screen.width > 1300 && (!this.light || this.big) ? 500 : 200
+      }
+    },
+
+    getNaturalDimensions () {
+      let picture = { naturalWidth: 0, naturalHeight: 0 }
+      if (!this.fullScreen && this.picture.naturalWidth && !this.isGif) {
+        picture = this.picture
+      } else if (
+        this.fullScreen && this.pictureBig.naturalWidth && !this.isGif
+      ) {
+        picture = this.pictureBig
+      } else if (this.pictureGif.naturalWidth && this.isGif) {
+        picture = this.pictureGif
+      }
+      return {
+        height: picture.naturalHeight,
+        width: picture.naturalWidth
       }
     },
 
@@ -830,6 +861,44 @@ export default {
         this.annotations = []
       }
       return this.annotations
+    },
+
+    onCanvasMouseMoved (event) {
+      if (this.$options.loupe) {
+        this.updateLoupePosition(event)
+      }
+    },
+
+    onCanvasClicked (event) {
+      if (event.button > 1 && this.fullScreen) {
+        this.$options.loupe = true
+        this.$refs.loupe.style.display = 'block'
+        this.updateLoupePosition(event)
+        return false
+      }
+    },
+
+    updateLoupePosition (event) {
+      const w = this.canvasWrapper.style.width
+      const maxWidth = parseInt(w.substring(0, w.length - 2))
+      const h = this.canvasWrapper.style.height
+      const maxHeight = parseInt(h.substring(0, h.length - 2))
+      let x = Math.max(event.pointer.x - 150, 0)
+      let y = Math.max(event.pointer.y - 150, 0)
+      x = Math.min(x, maxWidth - 300)
+      y = Math.min(y, maxHeight - 300)
+      this.$refs.loupe.style.left = x + 'px'
+      this.$refs.loupe.style.top = y + 'px'
+
+      let zx = Math.max(event.pointer.x, 0)
+      let zy = Math.max(event.pointer.y, 0)
+      zx = Math.min(zx, maxWidth)
+      zy = Math.min(zy, maxHeight)
+      const naturalDimensions = this.getNaturalDimensions()
+      const ratioW = naturalDimensions.width / maxWidth
+      const bgX = Math.min((ratioW * zx) - 150, naturalDimensions.width - 300)
+      const bgY = Math.min((ratioW * zy) - 150, naturalDimensions.height - 300)
+      this.$refs.loupe.style['background-position'] = `-${bgX}px -${bgY}px`
     }
   },
 
@@ -1038,5 +1107,23 @@ export default {
   background: $purple-strong;
   transition: 0.3s background ease;
   color: white;
+}
+
+.loupe {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 300px;
+  width: 300px;
+  background: white;
+  z-index: 3000;
+  border-radius: 5px;
+  box-shadow: 0 0 8px 4px rgba(0, 0, 0, 0.2);
+
+  img {
+    position: relative;
+    width: 800px;
+  }
 }
 </style>
