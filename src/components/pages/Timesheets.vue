@@ -77,7 +77,7 @@ import PeopleTimesheetInfo from '../sides/PeopleTimesheetInfo'
 import PageTitle from '../widgets/PageTitle'
 import csv from '../../lib/csv'
 import { monthToString, range } from '../../lib/time'
-import { slugify } from '../../lib/string'
+import stringHelpers from '../../lib/string'
 
 export default {
   name: 'people',
@@ -314,7 +314,7 @@ export default {
         this.currentYear
       ]
       if (this.detailLevel === 'day') nameData.push(this.currentMonth)
-      const name = slugify(nameData.join('_'))
+      const name = stringHelpers.slugify(nameData.join('_'))
       csv.generateTimesheet(
         name,
         this.timesheet,

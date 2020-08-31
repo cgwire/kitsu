@@ -40,7 +40,7 @@
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 import csv from '../../lib/csv'
-import { slugify } from '../../lib/string'
+import stringHelpers from '../../lib/string'
 import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
 import ProductionAssetTypeList from '../lists/ProductionAssetTypeList.vue'
@@ -145,7 +145,7 @@ export default {
       if (this.currentEpisode) {
         nameData.splice(2, 0, this.currentEpisode.name)
       }
-      const name = slugify(nameData.join('_'))
+      const name = stringHelpers.slugify(nameData.join('_'))
       csv.generateStatReports(
         name,
         this.assetTypeStats,

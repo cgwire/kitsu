@@ -206,7 +206,7 @@ import { searchMixin } from '../mixins/search'
 import csv from '../../lib/csv'
 import { buildSupervisorTaskIndex, indexSearch } from '../../lib/indexing'
 import { sortPeople } from '../../lib/sorting'
-import { slugify } from '../../lib/string'
+import stringHelpers from '../../lib/string'
 import {
   daysToMinutes,
   formatSimpleDate,
@@ -718,7 +718,7 @@ export default {
       if (this.currentEpisode) {
         nameData.splice(1, 0, this.currentEpisode.name)
       }
-      const name = slugify(nameData.join('_'))
+      const name = stringHelpers.slugify(nameData.join('_'))
       csv.buildCsvFile(name, taskLines)
     },
 

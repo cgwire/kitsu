@@ -37,4 +37,25 @@ describe('colors', () => {
       }
     )
   })
+
+  test('lightenColor', () => {
+    expect(colors.lightenColor('#FFFFFF')).toEqual(
+      { color: [255, 255, 255], model: 'rgb', valpha: 0.7 }
+    )
+    expect(colors.lightenColor('#000000')).toEqual(
+      { color: [0, 0, 0], model: 'rgb', valpha: 0.7 }
+    )
+    expect(colors.lightenColor('#123456')).toEqual(
+      {
+        color: [18, 52, 86],
+        model: 'rgb',
+        valpha: 0.7
+      }
+    )
+  })
+
+  test('fromString', () => {
+    expect(colors.fromString('123456')).toEqual('#c975f0')
+    expect(colors.fromString('Jhon Doe')).toEqual('#75f0c9')
+  })
 })

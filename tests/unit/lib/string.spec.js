@@ -18,4 +18,14 @@ describe('lib/string', () => {
     expect(stringHelpers.generateNextName('SH010', 10)).toEqual('SH020')
     expect(stringHelpers.generateNextName('SH001', 2)).toEqual('SH003')
   })
+
+  it('shortenText', () => {
+    expect(stringHelpers.shortenText('long text', 0)).toEqual('...')
+    expect(stringHelpers.shortenText('short text', 10)).toEqual('short text')
+    expect(stringHelpers.shortenText('long text', 4)).toEqual('long...')
+  })
+
+  it('slugify', () => {
+    expect(stringHelpers.slugify('text spécial', 0)).toEqual('text_special')
+  })
 })

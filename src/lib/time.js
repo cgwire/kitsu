@@ -11,6 +11,10 @@ export const parseDate = (date) => {
   return moment.tz(date, 'YYYY-MM-DDTHH:mm:ss', 'UTC')
 }
 
+export const parseSimpleDate = (date) => {
+  return moment.tz(date, 'YYYY-MM-DD', 'UTC')
+}
+
 export const formatSimpleDate = (date) => {
   return moment(date).format('YYYY-MM-DD')
 }
@@ -75,17 +79,21 @@ export const getLastEndDate = (items) => {
 
 export const getStartDateFromString = (startDateString) => {
   if (startDateString) {
-    return moment(startDateString, 'YYYY-MM-DD', 'en')
+    return parseSimpleDate(startDateString)
   } else {
-    return moment()
+    return parseSimpleDate(formatSimpleDate(moment()))
   }
 }
 
 export const getEndDateFromString = (startDate, endDateString) => {
   if (endDateString) {
-    return moment(endDateString, 'YYYY-MM-DD', 'en')
+    if (parseSimpleDate(endDateString).isAfter(startDate)) {
+      return parseSimpleDate(endDateString)
+    } else {
+      return startDate.clone()
+    }
   } else {
-    return startDate.clone().add('days', 1)
+    return startDate.clone()
   }
 }
 

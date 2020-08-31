@@ -38,6 +38,7 @@ export const domMixin = {
       if (e.preventDefault) e.preventDefault()
       e.cancelBubble = true
       e.returnValue = false
+      console.log(e)
       return false
     }
   }
