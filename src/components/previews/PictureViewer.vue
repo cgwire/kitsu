@@ -182,7 +182,6 @@
       <a
         class="button flexrow-item"
         :href="pictureDlPath"
-        v-if="!readOnly"
       >
         <download-icon class="icon" />
       </a>
