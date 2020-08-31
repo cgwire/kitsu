@@ -61,7 +61,7 @@ npm run build
 Run tests with the following command:
 
 ```
-npm run test:store
+npm run test:unit
 ```
 
 # Architecture
