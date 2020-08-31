@@ -23,6 +23,6 @@
   },
   "homepage": "https://github.com/cgwire/kitsu#readme",
   "devDependencies": {
-    "vuepress": "1.5.4"
+    "vuepress": "1.5.3"
   }
 }
