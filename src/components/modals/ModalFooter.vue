@@ -1,8 +1,5 @@
 <template>
 <div>
-  <p class="error" v-if="isError">
-    {{ errorText }}
-  </p>
 
   <p class="has-text-right">
     <a
@@ -22,6 +19,10 @@
     >
       {{ cancelLabel || $t('main.cancel') }}
     </button>
+
+  </p>
+  <p class="error mt1 has-text-right" v-if="isError">
+    {{ errorText }}
   </p>
 </div>
 </template>
