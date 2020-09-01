@@ -600,22 +600,23 @@ On the new pop up you can define your personalized task :
 
 Click on **Confirm** to save your changes.
 
+
 ---------------------
 
 ## How to set your production?
 
-### How to select speticific Task Status for a production
+### How to select speticific Task Status for a production?
 
 
 On the **Action Menu**, choose on the drop down menu the "Setting" 
 
-![Setting Status](../img/faq/drop_down_menu_setting.png)
+![Drop Down menu Setting](../img/faq/drop_down_menu_setting.png)
 
 Per default, Kitsu will load all the Task Status of your status library into your production.
 
 But you can choose to use only specific status.
 
-![Setting Status](../img/faq/setting_status_new.png)
+![Setting status new](../img/faq/setting_status_new.png)
 
 On the "Task Status" tab, you can choose which status you want to use on this production, 
 validate your choice with the "add" button.
@@ -624,11 +625,11 @@ validate your choice with the "add" button.
 ![Setting Add Status](../img/faq/setting_status_add.png)
 
 
-### How to select speticific Task Types for a production
+### How to select speticific Task Types for a production?
 
 On the **Action Menu**, choose on the drop down menu the "Setting" 
 
-![Setting Status](../img/faq/drop_down_menu_setting.png)
+![Drop Down menu Setting](../img/faq/drop_down_menu_setting.png)
 
 Per default, Kitsu will load all the Task Types of your status library into your production.
 
@@ -638,20 +639,20 @@ For example you can create a 2D and A CGI workflow on your library, and add the 
 
 On the **Action Menu**, choose on the drop down menu the "Setting" 
 
-![Setting Status](../img/faq/setting_task_new.png)
+![Setting Task Type new](../img/faq/setting_task_new.png)
 
 On the "Task Status" tab, you can choose which status you want to use on this production, 
 validate your choice with the "add" button.
 
 
-![Setting Add Status](../img/faq/setting_task_add.png)
+![Setting Add Task Type](../img/faq/setting_task_add.png)
 
 
-### How to select speticific Asset Types for a production
+### How to select speticific Asset Types for a production?
 
 On the **Action Menu**, choose on the drop down menu the "Setting" 
 
-![Setting Status](../img/faq/drop_down_menu_setting.png)
+![Drop Down menu Setting](../img/faq/drop_down_menu_setting.png)
 
 Per default, Kitsu will load all the Asset Types of your status library into your production.
 
@@ -660,13 +661,13 @@ But you can choose to use only specific Asset Types, depending of the type of yo
 
 On the **Action Menu**, choose on the drop down menu the "Setting" 
 
-![Setting Status](../img/faq/setting_asset_new.png)
+![Setting Asset type new](../img/faq/setting_asset_new.png)
 
 On the "Task Status" tab, you can choose which status you want to use on this production, 
 validate your choice with the "add" button.
 
 
-![Setting Add Status](../img/faq/ssetting_asset_add.png)
+![Setting Add Asset](../img/faq/setting_asset_add.png)
 
 
 ---------------------
