@@ -89,7 +89,7 @@ export default {
           entity: this.entity,
           column: this.taskType,
           task: this.task,
-          isCtrlKey: event ? event.ctrlKey : false,
+          isCtrlKey: event ? (event.ctrlKey || event.metaKey) ): false,
           isShiftKey: event ? event.shiftKey : false,
           isUserClick: isUserClick
         }

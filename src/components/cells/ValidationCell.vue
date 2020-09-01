@@ -268,7 +268,7 @@ export default {
             task: this.task,
             x: this.rowX,
             y: this.columnY,
-            isCtrlKey: event.ctrlKey,
+            isCtrlKey: event.ctrlKey || event.metaKey,
             isShiftKey: event.shiftKey,
             isUserClick: isUserClick
           })
@@ -279,7 +279,7 @@ export default {
             task: this.task,
             x: this.rowX,
             y: this.columnY,
-            isCtrlKey: event.ctrlKey,
+            isCtrlKey: event.ctrlKey || event.metaKey,
             isShiftKey: event.shiftKey,
             isUserClick: isUserClick
           })

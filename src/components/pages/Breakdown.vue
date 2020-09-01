@@ -456,7 +456,7 @@ export default {
 
     selectEntity (entityId, event) {
       const previousSelection = { ...this.selection }
-      if (!event.ctrlKey && !event.shitKey) {
+      if (!(event.ctrlKey || event.metaKey) && !event.shitKey) {
         this.clearSelection()
       }
 
@@ -473,12 +473,12 @@ export default {
         .length
       if (
         !previousSelection[entityId] ||
-        (nbElementsSelected > 1 && !event.ctrlKey)
+        (nbElementsSelected > 1 && !(event.ctrlKey || event.metaKey))
       ) {
         this.selection[entityId] = true
       } else if (
         previousSelection[entityId] &&
-        event.ctrlKey
+        (event.ctrlKey || event.metaKey)
       ) {
         this.selection[entityId] = false
       }

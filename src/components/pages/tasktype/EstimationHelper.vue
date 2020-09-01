@@ -401,10 +401,10 @@ export default {
 
     selectTask (event, task, index) {
       if (event.shiftKey) {
-        if (!event.ctrlKey) this.clearSelection()
+        if (!(event.ctrlKey || event.metaKey)) this.clearSelection()
         this.selectTaskRange(index)
       } else {
-        if (!event.ctrlKey) this.clearSelection()
+        if (!(event.ctrlKey || event.metaKey)) this.clearSelection()
         this.selectSingleTask(index)
       }
       if (this.isCurrentUserManager) {

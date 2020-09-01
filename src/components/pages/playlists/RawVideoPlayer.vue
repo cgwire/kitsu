@@ -143,9 +143,11 @@ export default {
       this.$nextTick(() => {
         if (this.currentPlayer) this.currentPlayer.style.height = '0px'
         if (this.nextPlayer) this.nextPlayer.style.height = '0px'
-        height = height || this.container.offsetHeight
-        if (this.currentPlayer) this.currentPlayer.style.height = `${height}px`
-        if (this.nextPlayer) this.nextPlayer.style.height = `${height}px`
+        if (this.container) {
+          height = height || this.container.offsetHeight
+          if (this.currentPlayer) this.currentPlayer.style.height = `${height}px`
+          if (this.nextPlayer) this.nextPlayer.style.height = `${height}px`
+        }
       })
     },
 

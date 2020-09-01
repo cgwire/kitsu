@@ -46,6 +46,7 @@
               ref="textField"
               v-model="form.text"
               @keyup.ctrl="runConfirmation"
+              @keyup.meta="runConfirmation"
               v-focus
             >
             </textarea>

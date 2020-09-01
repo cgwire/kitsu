@@ -28,6 +28,7 @@
           :label="$t('sequences.fields.description')"
           v-model="form.description"
           @keyup.ctrl.enter="runConfirmation"
+          @keyup.meta.enter="runConfirmation"
         />
       </form>
 

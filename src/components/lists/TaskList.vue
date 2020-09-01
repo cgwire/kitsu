@@ -431,7 +431,7 @@ export default {
       )) return
       const isSelected = this.selectionGrid[task.id]
       const isManySelection = Object.keys(this.selectionGrid).length > 1
-      if (!event.ctrlKey && !event.shiftKey) {
+      if (!(event.ctrlKey || event.metaKey) && !event.shiftKey) {
         this.clearSelectedTasks({ task })
         this.resetSelection()
       }

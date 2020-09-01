@@ -33,6 +33,7 @@
           :label="$t('shots.fields.description')"
           v-model="form.description"
           @keyup.ctrl.enter="runConfirmation"
+          @keyup.meta.enter="runConfirmation"
         />
         <text-field
           ref="nbFramesField"

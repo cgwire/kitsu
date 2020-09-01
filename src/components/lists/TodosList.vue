@@ -356,7 +356,7 @@ export default {
       const i = lastSelection.x
       const j = lastSelection.y
       let validationCell = null
-      if (event.ctrlKey) {
+      if (event.ctrlKey || event.metaKey) {
         if (event.keyCode === 37) {
           validationCell = this.select(i, j - 1)
         } else if (event.keyCode === 38) {

@@ -44,6 +44,7 @@
           :disabled="isLoading"
           v-model="text"
           @keyup.enter.ctrl="runAddComment(text, attachment, checklist, task_status_id)"
+          @keyup.enter.meta="runAddComment(text, attachment, checklist, task_status_id)"
           v-focus>
         </textarea>
       </at-ta>
