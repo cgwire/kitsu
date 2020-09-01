@@ -48,7 +48,7 @@ On the left part, you can sort the playlist per **date** or per **name** (1), th
 
 ### Detail of the playlist
 
-On the left part you keep acess to the different playlist, On the center part you see the different elements of the selected playlist, it can be assets or shots.
+On the left part you keep access to the different playlist, On the center part you see the different elements of the selected playlist, it can be assets or shots.
 
 ![Client playlist global page](../img/getting-started/client_playlist_detaill.png)
 
@@ -56,27 +56,27 @@ On top of the elements (assets or shots) you have access to different options:
 
 ![Client playlist option](../img/getting-started/client_playlist_option.png)
 
-(1) Previous shot / asset
-(2) Next shot / asset
-(3) the position of the element
-(4) the play and pause button
-(5) You can change the speed : x1..0, x0.50 or x0.25
-(6) loop the selected shot
-(7) Actual time code / global time code of the shot
-(8) Actual frame
-(9) Previous frame
-(10) Next frame
-(11) Split screen :You can compare two task type side by side
-(12) Undo annotation
-(13) Redo annotation
-(14) Write a comment on the picture, and change the color of the text
-(15) Draw a comment on the picture, and change the color and the size of the line
-(16) Select the drawing and click on the cross to delete it
-(17) Change the task type of all the element in the playlist
-(18) Open the pannel section to post a comment and change the status
-(19) hide the list of the elements
-(20) Download the playlist
-(21) fullscreen
+* (1) Previous shot / asset
+*(2) Next shot / asset
+* (3) the position of the element
+* (4) the play and pause button
+* (5) You can change the speed : x1..0, x0.50 or x0.25
+* (6) loop the selected shot
+* (7) Actual time code / global time code of the shot
+* (8) Actual frame
+* (9) Previous frame
+* (10) Next frame
+* (11) Split screen :You can compare two task type side by side
+* (12) Undo annotation
+* (13) Redo annotation
+* (14) Write a comment on the picture, and change the color of the text
+* (15) Draw a comment on the picture, and change the color and the size of the line
+* (16) Select the drawing and click on the cross to delete it
+* (17) Change the task type of all the element in the playlist
+* (18) Open the pannel section to post a comment and change the status
+* (19) hide the list of the elements
+* (20) Download the playlist
+* (21) fullscreen
 
 
  
@@ -92,7 +92,7 @@ You can add a **checklist** to your comments.
 
 You need to click on the **Add checklist** button, and the first item of the checklist appears. 
 
-![add checklist](../img/getting-started/add_checklist.png)
+![client add checklist](../img/getting-started/client_checklist_retake.png)
 
 Type your comments, and hit **Enter** key to add another line on your checklist or click again on **Add Checklist** button.
 
