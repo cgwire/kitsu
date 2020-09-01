@@ -615,13 +615,13 @@ Per default, Kitsu will load all the Task Status of your status library into you
 
 But you can choose to use only specific status.
 
-![Setting Status](../img/faq/setting_task_new.png)
+![Setting Status](../img/faq/setting_status_new.png)
 
 On the "Task Status" tab, you can choose which status you want to use on this production, 
 validate your choice with the "add" button.
 
 
-![Setting Add Status](../img/faq/setting_task_add.png)
+![Setting Add Status](../img/faq/setting_status_add.png)
 
 
 ### How to select speticific Task Types for a production
