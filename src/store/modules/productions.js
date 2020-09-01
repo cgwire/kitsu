@@ -586,6 +586,9 @@ const mutations = {
       if (openProduction) Object.assign(openProduction, newProduction)
     } else {
       newProduction.team = []
+      newProduction.task_statuses = []
+      newProduction.asset_types = []
+      newProduction.task_types = []
       state.productions.push(newProduction)
       state.productionMap[newProduction.id] = newProduction
       if (!openProduction) {
