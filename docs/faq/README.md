@@ -625,7 +625,7 @@ validate your choice with the "add" button.
 ![Setting Add Status](../img/faq/setting_status_add.png)
 
 
-### How to select speticific Task Types for a production?
+### How to select specific Task Types for a production?
 
 On the **Action Menu**, choose on the drop down menu the "Setting" 
 
@@ -633,22 +633,21 @@ On the **Action Menu**, choose on the drop down menu the "Setting"
 
 Per default, Kitsu will load all the Task Types of your status library into your production.
 
-But you can choose to use only specific Task Types, depending of the type of your production.
-
-For example you can create a 2D and A CGI workflow on your library, and add the needed task type into this production.
-
-On the **Action Menu**, choose on the drop down menu the "Setting" 
-
 ![Setting Task Type new](../img/faq/setting_task_new.png)
 
-On the "Task Status" tab, you can choose which status you want to use on this production, 
+But you can choose to use only specific Task Types, depending of the type of your production.
+
+For example you can create a 2D and A CGI workflow on your library, and add the needed task types into this production.
+
+
+On the "Task Types" tab, you can choose which status you want to use on this production, 
 validate your choice with the "add" button.
 
 
 ![Setting Add Task Type](../img/faq/setting_task_add.png)
 
 
-### How to select speticific Asset Types for a production?
+### How to select specific Asset Types for a production?
 
 On the **Action Menu**, choose on the drop down menu the "Setting" 
 
@@ -658,14 +657,10 @@ Per default, Kitsu will load all the Asset Types of your status library into you
 
 But you can choose to use only specific Asset Types, depending of the type of your production.
 
-
-On the **Action Menu**, choose on the drop down menu the "Setting" 
-
 ![Setting Asset type new](../img/faq/setting_asset_new.png)
 
-On the "Task Status" tab, you can choose which status you want to use on this production, 
+On the "Asset Types" tab, you can choose which Asset Types you want to use on this production, 
 validate your choice with the "add" button.
-
 
 ![Setting Add Asset](../img/faq/setting_asset_add.png)
 
