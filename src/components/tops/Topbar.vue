@@ -527,7 +527,8 @@ export default {
 
     pushContextRoute (section) {
       const episodeId = this.currentEpisodeId
-      const isTVShow = !!this.currentEpisodeId
+      const production = this.productionMap[this.currentProductionId]
+      const isTVShow = production.production_type === 'tvshow'
       let route = {
         name: section,
         params: {
