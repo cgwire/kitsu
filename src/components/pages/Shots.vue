@@ -356,6 +356,7 @@ export default {
       'episodes',
       'isCurrentUserClient',
       'isCurrentUserManager',
+      'isFrames',
       'isFrameIn',
       'isFrameOut',
       'isFps',
@@ -873,7 +874,9 @@ export default {
           if (this.isTime) {
             headers.push('Time spent')
           }
-          headers.push('Nb Frames')
+          if (this.isFrames) {
+            headers.push('Nb Frames')
+          }
           if (this.isFrameIn) {
             headers.push('Frame In')
           }
