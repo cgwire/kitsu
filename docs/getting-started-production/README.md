@@ -69,7 +69,7 @@ If you have multiple assets to create, click on **Confirm and stay**.
 You can change the asset type, and keep adding assets. 
 
 You can also customized the asset type list 
-[How to customaize the workflow](.../faq/#how-to-customize-the-workflow)
+[How to customaize the workflow](./faq/#how-to-customize-the-workflow)
 
 ![Create an asset](../img/getting-started/add_asset_popup.png)
 
