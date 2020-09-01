@@ -2,19 +2,27 @@
 
 # Kitsu Documentation
 
-Kitsu is a validation tracking app for CG productions. By
-offering a clean UI and a shared database, it allows you to communicate
-efficiently with all the shareholders of the production: CG Artists,
-Production managers, TDs, Supervisors and Clients.
+Kitsu is a validation tracking app for animation productions. Through
+its clean UI and shared database, it allows you to communicate
+efficiently with all the shareholders of the production: Artists,
+Production managers, TDs, Supervisors, Vendors and Clients.
 
 ## Getting Started
 
-Depending of your role in the studio we propose you two tutorials:
+Depending on your role in the studio we propose you two tutorials:
 
 * [Getting Started as a Production Manager](getting-started-production/README.md#as-a-production-manager): you will learn how to set up a full
   production and dispatch tasks to your team.
-* [Getting Started as a CG artist](getting-started-artist/README.md#as-an-artist): you will find all the information required to access
+* [Getting Started as an artist](getting-started-artist/README.md): you will find all the information required to access
   to your task list, share your progress and upload your results.
+
+## Tutorials
+
+Video tutorials are available on Youtube. They cover the essential parts of
+Kitsu. You will find them via the link below:
+
+[Kitsu tutorials channel](https://www.youtube.com/playlist?list=PLp_1gB5ZBHXqnQgZ4TCrAt7smxesaDo29)
+
 
 ## Frequently Asked Questions
 

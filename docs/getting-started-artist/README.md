@@ -1,4 +1,4 @@
-# How to get started with Kitsu as CG artist
+# How to get started with Kitsu as an artist
 
 
 ## First Connection
