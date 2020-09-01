@@ -470,6 +470,7 @@ export default {
     current: 'Selected production',
     delete_text: 'Are you sure you want to remove {name} from your database? Please, confirm by typing the name of the project you want to delete in the text field.',
     delete_error: 'An error occured while deleting this production. There are probably data linked to it. Are you sure this production has no task, shot or asset linked to it? Kitsu doesn\'t allow production deletion. If you don\'t want to see the production anymore, you can close it instead.',
+    edit_error: 'An error occured while editing production. Please contact our support team.',
     edit_title: 'Edit production',
     new_production: 'Add a production',
     number: 'production | productions',
