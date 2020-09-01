@@ -14,7 +14,8 @@ module.exports = {
        '/getting-started-artist/',
        ['/faq/', 'FAQ'],
        '/permissions/',
-       '/slack/'
+       '/slack/',
+       '/custom-actions/'
      ]
    },
    {
