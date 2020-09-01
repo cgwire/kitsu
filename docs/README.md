@@ -15,6 +15,9 @@ Depending on your role in the studio we propose you two tutorials:
   production and dispatch tasks to your team.
 * [Getting Started as an artist](getting-started-artist/README.md): you will find all the information required to access
   to your task list, share your progress and upload your results.
+ * [Getting Started as a client](getting-started-client/README.md): you will find all the information required to access
+  to your playlists, share your comments and validations. 
+  
 
 ## Tutorials
 

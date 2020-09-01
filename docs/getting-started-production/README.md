@@ -69,7 +69,7 @@ If you have multiple assets to create, click on **Confirm and stay**.
 You can change the asset type, and keep adding assets. 
 
 You can also customized the asset type list 
-[How to customize the workflow](../faq/README.md/#how-to-customize-the-workflow)
+[How to customize the workflow](../faq/README.md#how-to-customize-the-workflow)
 
 ![Create an asset](../img/getting-started/add_asset_popup.png)
 
@@ -89,7 +89,7 @@ the line.
 On the main asset page, to extend the description, click on the first words
 (2), and a pop-up opens with the full description.
 
-To delete an asset see the FAQ : [How to delete an asset](../faq/#how-to-delete-an-asset)
+To delete an asset see the FAQ : [How to delete an asset](../faq/README.md#how-to-delete-an-asset)
 
 
 
@@ -254,9 +254,9 @@ shots are linked to the tasks.
 Now we can do the breakdown of the storyboard, meaning associate the assets to
 each shot. 
 
-To delete a shot see the FAQ : [How to delete a shot](../faq/#how-to-delete-a-shot)
+To delete a shot see the FAQ : [How to delete a shot](../faq/README.md#how-to-delete-a-shot)
 
-To delete a sequence see the FAQ : [How to delete a shot](../faq/#how-to-delete-a-sequence)
+To delete a sequence see the FAQ : [How to delete a shot](../faq/README.md#how-to-delete-a-sequence)
 
 
 ## Create shots from a csv spreadsheet file
@@ -571,7 +571,7 @@ edit the name of the custom column and its information, or you want to remove it
 
 And now we can create tasks for the assets (3), like **Concept**, **Modeling**,
 **Texture**, **Setup**, and other if needed (see 
-[How to customize the workflow](.../faq/#how-to-customize-the-workflow)
+[How to customize the workflow](../faq/README.md#how-to-customize-the-workflow)
 ).
 
 
