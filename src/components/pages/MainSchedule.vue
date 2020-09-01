@@ -208,11 +208,9 @@ export default {
         this.saveScheduleItem(item)
       } else {
         this.editProduction({
-          data: {
-            id: item.id,
-            start_date: item.startDate.format('YYYY-MM-DD'),
-            end_date: item.endDate.format('YYYY-MM-DD')
-          }
+          id: item.id,
+          start_date: item.startDate.format('YYYY-MM-DD'),
+          end_date: item.endDate.format('YYYY-MM-DD')
         })
       }
     }

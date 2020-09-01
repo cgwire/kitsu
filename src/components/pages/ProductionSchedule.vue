@@ -351,30 +351,24 @@ export default {
     selectedStartDate () {
       this.startDate = parseDate(this.selectedStartDate)
       this.editProduction({
-        data: {
-          ...this.currentProduction,
-          start_date: this.startDate.format('YYYY-MM-DD')
-        }
+        ...this.currentProduction,
+        start_date: this.startDate.format('YYYY-MM-DD')
       })
     },
 
     selectedEndDate () {
       this.endDate = parseDate(this.selectedEndDate)
       this.editProduction({
-        data: {
-          ...this.currentProduction,
-          end_date: this.endDate.format('YYYY-MM-DD')
-        }
+        ...this.currentProduction,
+        end_date: this.endDate.format('YYYY-MM-DD')
       })
     },
 
     overallManDays () {
       if (this.overallManDays !== this.currentProduction.man_days) {
         this.editProduction({
-          data: {
-            ...this.currentProduction,
-            man_days: this.overallManDays
-          }
+          ...this.currentProduction,
+          man_days: this.overallManDays
         })
       }
     },
