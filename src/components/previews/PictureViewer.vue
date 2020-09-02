@@ -820,12 +820,14 @@ export default {
         this.fabricCanvas.setDimensions({ width, height })
         const containerWidth = this.container.offsetWidth
         const margin = Math.round((containerWidth - width) / 2)
-        this.canvasWrapper.style.left = margin + 'px'
-        this.canvasWrapper.style.width = width + 'px'
-        this.canvasWrapper.style.height = height + 'px'
-        setTimeout(() => {
-          this.fabricCanvas.calcOffset()
-        }, 10)
+        if (this.canvasWrapper) {
+          this.canvasWrapper.style.left = margin + 'px'
+          this.canvasWrapper.style.width = width + 'px'
+          this.canvasWrapper.style.height = height + 'px'
+          setTimeout(() => {
+            this.fabricCanvas.calcOffset()
+          }, 10)
+        }
       }
     },
 
