@@ -98,4 +98,44 @@ Type your comments, and hit **Enter** key to add another line on your checklist 
 
 ![checklist](../img/getting-started/checklist_detailed.png)
 
+## Global view of the assets
+
+As a client you can go to the global page of the assets with the drop-down menu on top of the screen.
+
+![Client dropdown menu Asset](../img/getting-started/client_dropdown_asset.png)
+
+On the global page, you will be able to see all the status of the different step of the assets
+
+![Client global page Asset](../img/getting-started/client_global_asset.png)
+
+
+## Global view of the shots
+
+As a client you can go to the global page of the shots with the drop-down menu on top of the screen.
+
+![Client dropdown menu Shot](../img/getting-started/client_dropdown_shot.png)
+
+On the global page, you will be able to see all the status of the different step of the shots
+
+![Client global page Shot](../img/getting-started/client_global_shot.png)
+
+## Production report
+
+To ease the communication with the studio, you have a direct access to the production report, separated in two parts : the **Sequence Stats** and the **Asset Types Stats**
+
+![Client dropdown menu sequence stat](../img/getting-started/client_dropdown_sequence.png)
+
+The **Sequence Stats** page is updated in real time. Everytime you look at this page, you are sure to have updated information.
+
+![Client sequence stat](../img/getting-started/client_sequence_stat.png)
+
+You can choose to display the stats per number of shots, or number of frame.
+
+You can also chance the **Display Mode**, you can switch from the **Pie charts** view 
+to the **Counts** view.
+
+![Client sequence stat count](../img/getting-started/
+client_sequence_stat_count.png.png)
+
+It's this presentation that you can download to keep track of the production progress
 
