@@ -117,6 +117,7 @@ export default {
   methods: {
     ...mapActions([
       'editPlaylist',
+      'loadPlaylists',
       'loadTempPlaylist',
       'newPlaylist',
       'updatePreviewAnnotation'
@@ -179,6 +180,7 @@ export default {
                 this.modals.edit = false
               }
               this.loading.edit = false
+              this.loadPlaylists()
             }
           })
         })
