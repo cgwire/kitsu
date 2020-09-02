@@ -43,12 +43,13 @@
     </div>
 
     <schedule
-      :start-date="startDate"
       :end-date="endDate"
       :hierarchy="scheduleItems"
-      :zoom-level="zoomLevel"
       :is-loading="loading.schedule"
       :is-error="errors.schedule"
+      :start-date="startDate"
+      :with-milestones="false"
+      :zoom-level="zoomLevel"
       @item-changed="onScheduleItemChanged"
       @change-zoom="changeZoom"
       @root-element-expanded="expandProductionElement"

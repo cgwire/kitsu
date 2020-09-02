@@ -198,7 +198,10 @@
             </div>
           </div>
 
-          <div class="date-widget">
+          <div :class="{
+            'with-milestones': withMilestones,
+            'date-widget': true
+          }">
             <div
               class="add-milestone"
               :title="addMilestoneTitle(day)"
@@ -447,6 +450,10 @@ export default {
     isEstimationLinked: {
       type: Boolean,
       default: false
+    },
+    withMilestones: {
+      type: Boolean,
+      default: true
     },
     zoomLevel: {
       type: Number,
@@ -1660,7 +1667,7 @@ export default {
     }
   }
 
-  &:hover {
+  &:hover.with-milestones {
     background: $light-green-light;
     height: 100%;
     .add-milestone {
