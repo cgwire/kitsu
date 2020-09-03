@@ -16,6 +16,25 @@ For further information about features and installation, please refer to the
 
 ## Contributing
 
+As any open source project, we enjoy any contribution! You will find below 
+how you can help the Kitsu project to get better.
+
+### Bug reports 
+
+All bugs must be submitted directly in 
+[the issue page](https://github.com/cgwire/kitsu/issues) of this repository.
+
+### Feature requests
+
+Feature requests must be posted on our [Canny page](https://cgwire.canny.io/).
+
+### Translations
+
+If you want to contribute to translations, you can connect directly to the 
+[POEditor platform](https://poeditor.com/join/project?hash=fpUejpWDVo).
+
+### Code
+
 All contributions are welcomed as long as they respect the [C4
 contract](https://rfc.zeromq.org/spec:42/C4).
 
@@ -25,14 +44,14 @@ the [Vuex](https://vuex.vuejs.org) plugin.
 
 To install the development environment, follow [the dedicated guide](https://kitsu.cg-wire.com/development-environment/).
 
-
 ## Sponsors
 
-[![Les Fées Spéciales](https://www.cg-wire.com/images/logo-les-fees-speciales.png)](http://les-fees-speciales.coop/)
-[![Cube](https://www.cg-wire.com/images/logo-cube.png)](https://www.cube-creative.com)
-[![TNZPV](https://www.cg-wire.com/images/logo-tnzpv.png)](https://nousvoir.com/en/home/)
-[![Karlab](https://www.cg-wire.com/images/logo-karlab.png)](https://www.karlab.fr)
-[![Lee Film](https://www.cg-wire.com/images/logo-lee.png)](https://leefilm.se/)
+[![Les Fées Spéciales](https://www.cg-wire.com/images/logo-les-fees-speciales.png | width=100)](http://les-fees-speciales.coop)
+[![Cube](https://www.cg-wire.com/images/logo-cube.png | width=100)](https://www.cube-creative.com)
+[![TNZPV](https://www.cg-wire.com/images/logo-tnzpv.png | width=100)](https://nousvoir.com/en/home/)
+[![Karlab](https://www.cg-wire.com/images/logo-karlab.png | width=100)](https://www.karlab.fr)
+[![Lee Film](https://www.cg-wire.com/images/logo-lee.png | width=100)](https://leefilm.se)
+[![Miyu](https://www.cg-wire.com/images/logo-miyu.png | width=100)](https://miyu.fr)
 
 ## About authors
 
