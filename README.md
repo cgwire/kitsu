@@ -46,12 +46,21 @@ To install the development environment, follow [the dedicated guide](https://kit
 
 ## Sponsors
 
-[![Les Fées Spéciales](https://www.cg-wire.com/images/logo-les-fees-speciales.png | width=100)](http://les-fees-speciales.coop)
-[![Cube](https://www.cg-wire.com/images/logo-cube.png | width=100)](https://www.cube-creative.com)
-[![TNZPV](https://www.cg-wire.com/images/logo-tnzpv.png | width=100)](https://nousvoir.com/en/home/)
-[![Karlab](https://www.cg-wire.com/images/logo-karlab.png | width=100)](https://www.karlab.fr)
-[![Lee Film](https://www.cg-wire.com/images/logo-lee.png | width=100)](https://leefilm.se)
-[![Miyu](https://www.cg-wire.com/images/logo-miyu.png | width=100)](https://miyu.fr)
+<a href="http://www.les-fees-speciales.coop">
+<img alt="Les Fées Spéciales" src="https://www.cg-wire.com/images/logo-les-fees-speciales.png" width=100 />
+</a>
+<a href="https://www.cube-creative.com">
+<img alt="Cube Creative" src="https://www.cg-wire.com/images/logo-cube.png" width=100 />
+</a>
+<a href="http://nousvoir.com/en/home">
+<img alt="TNZPV" src="https://www.cg-wire.com/images/logo-tnzpv.png" width=100 />
+</a>
+<a href="http://leefilm.se">
+<img alt="Lee Film" src="https://www.cg-wire.com/images/logo-lee.png" width=100 />
+</a>
+<a href="http://miyu.fr">
+<img alt="Miyu" src="https://www.cg-wire.com/images/logo-miyu" width=100 />
+</a>
 
 ## About authors
 
