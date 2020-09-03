@@ -59,7 +59,7 @@ To install the development environment, follow [the dedicated guide](https://kit
 <img alt="Lee Film" src="https://www.cg-wire.com/images/logo-lee.png" width=100 />
 </a>
 <a href="http://miyu.fr">
-<img alt="Miyu" src="https://www.cg-wire.com/images/logo-miyu" width=100 />
+<img alt="Miyu" src="https://www.cg-wire.com/images/logo-miyu.png" width=100 />
 </a>
 
 ## About authors
