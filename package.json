@@ -29,7 +29,7 @@
     "marked": "0.8.0",
     "moment": "2.24.0",
     "moment-timezone": "0.5.27",
-    "papaparse": "5.1.1",
+    "papaparse": "5.2.0",
     "pify": "4.0.1",
     "superagent": "5.2.1",
     "textarea-caret": "3.1.0",
