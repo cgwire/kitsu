@@ -86,7 +86,7 @@ export default {
       type: String,
       default:
         '.png,.jpg,.mp4,.mov,.obj,.pdf,.ma,.mb,.zip,.rar,.jpeg,' +
-        '.blend,.wmv,.m4v,.ai,.comp,.exr,.psd,.hip,.gif,.ae,.fla,.flv,.swf'
+        '.blend,.wmv,.m4v,.ai,.comp,.exr,.psd,.hip,.gif,.ae,.fla,.flv,.swf,.avi'
     }
   },
 
