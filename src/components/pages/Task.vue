@@ -171,7 +171,7 @@
                 :preview="currentPreview"
                 :task-type-map="taskTypeMap"
                 :entity-preview-files="taskEntityPreviews"
-                :read-only="isCurrentUserCGArtist"
+                :read-only="isCurrentUserArtist"
                 @annotationchanged="onAnnotationChanged"
                 ref="preview-movie"
               />
@@ -197,7 +197,7 @@
 
             <picture-viewer
               :preview="currentPreview"
-              :read-only="isCurrentUserCGArtist"
+              :read-only="isCurrentUserArtist"
               @annotation-changed="onAnnotationChanged"
               @add-preview="onAddExtraPreview"
               @remove-extra-preview="showRemoveExtraPreviewModal"
@@ -386,7 +386,7 @@ export default {
       'getTaskPreviews',
       'getTaskComment',
       'isCurrentUserManager',
-      'isCurrentUserCGArtist',
+      'isCurrentUserArtist',
       'isSingleEpisode',
       'isTVShow',
       'personMap',

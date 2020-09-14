@@ -116,7 +116,7 @@ const getters = {
     return state.user && ['admin', 'manager'].includes(state.user.role)
   },
   isCurrentUserAdmin: state => state.user && state.user.role === 'admin',
-  isCurrentUserCGArtist: state => {
+  isCurrentUserArtist: state => {
     return state.user && ['user', 'vendor'].includes(state.user.role)
   },
   isCurrentUserClient: state => state.user && state.user.role === 'client',

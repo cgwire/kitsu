@@ -68,6 +68,28 @@
       </div>
 
       <div class="nav-right">
+        <router-link
+          class="nav-item"
+          :to="{
+            name: 'todos-tab',
+            params: { tab: 'todos' }
+          }"
+          v-if="isCurrentUserArtist"
+        >
+          {{ $t('tasks.my_tasks') }}
+        </router-link>
+
+        <router-link
+          class="nav-item"
+          :to="{
+            name: 'todos-tab',
+            params: { tab: 'timesheets' }
+          }"
+          v-if="isCurrentUserArtist"
+        >
+          {{ $t('timesheets.title') }}
+        </router-link>
+
         <notification-bell />
         <div
           :class="{
@@ -222,6 +244,7 @@ export default {
       'currentProduction',
       'episodes',
       'episodeOptions',
+      'isCurrentUserArtist',
       'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserVendor',

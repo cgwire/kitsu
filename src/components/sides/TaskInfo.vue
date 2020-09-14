@@ -386,7 +386,6 @@ export default {
       'getTaskComment',
       'getTaskComments',
       'getTaskPreviews',
-      'isCurrentUserCGArtist',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isSingleEpisode',

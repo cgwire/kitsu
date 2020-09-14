@@ -76,7 +76,7 @@ export const routes = [
               if (err) {
                 next({ name: 'server-down' })
               } else {
-                if (!userStore.getters.isCurrentUserCGArtist(userStore.state)) {
+                if (!userStore.getters.isCurrentUserArtist(userStore.state)) {
                   next({ name: 'open-productions' })
                 } else {
                   next({ name: 'todos' })
@@ -84,7 +84,7 @@ export const routes = [
               }
             })
           } else {
-            if (!userStore.getters.isCurrentUserCGArtist(userStore.state)) {
+            if (!userStore.getters.isCurrentUserArtist(userStore.state)) {
               store.commit('DATA_LOADING_END')
               next({ name: 'open-productions' })
             } else {
