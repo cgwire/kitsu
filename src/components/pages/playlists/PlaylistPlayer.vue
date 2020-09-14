@@ -353,7 +353,7 @@
     />
     <div
       class="flexrow"
-      v-if="!isCurrentUserCGArtist && (isCurrentEntityMovie || isCurrentEntityPicture)"
+      v-if="!isCurrentUserArtist && (isCurrentEntityMovie || isCurrentEntityPicture)"
     >
       <div
         class="separator"
@@ -753,7 +753,7 @@ export default {
       'assetTaskTypes',
       'currentEpisode',
       'currentProduction',
-      'isCurrentUserCGArtist',
+      'isCurrentUserArtist',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isTVShow',

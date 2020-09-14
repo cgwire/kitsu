@@ -125,7 +125,6 @@ export default {
     ...mapGetters([
       'isSidebarHidden',
       'isCurrentUserAdmin',
-      'isCurrentUserCGArtist',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isCurrentUserVendor',
