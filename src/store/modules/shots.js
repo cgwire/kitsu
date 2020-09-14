@@ -1729,10 +1729,12 @@ const mutations = {
   },
 
   [REMOVE_SHOT] (state, shotToDelete) {
+    delete state.shotMap[shotToDelete.id]
     cache.shots = removeModelFromList(cache.shots, shotToDelete)
+    cache.result = removeModelFromList(cache.result, shotToDelete)
+    cache.shotIndex = buildShotIndex(cache.shots)
     state.displayedShots =
       removeModelFromList(state.displayedShots, shotToDelete)
-    delete state.shotMap[shotToDelete.id]
     if (shotToDelete.timeSpent) {
       state.displayedShotsTimeSpent -= shotToDelete.timeSpent
     }
