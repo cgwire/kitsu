@@ -412,7 +412,7 @@ export default {
     edit_error: 'An error occured while saving this playlist.',
     download_zip: 'Download .zip',
     failed: 'Failed',
-    for_client: 'The client',
+    for_client: 'The Client',
     for_studio: 'The Studio',
     edit_title: 'Edit playlist',
     last_creation: 'Last creations',
