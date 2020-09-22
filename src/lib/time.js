@@ -19,6 +19,11 @@ export const formatSimpleDate = (date) => {
   return moment(date).format('YYYY-MM-DD')
 }
 
+export const formatFullDate = (date) => {
+  const utcDate = moment.tz(date, 'UTC')
+  return utcDate.format('YYYY-MM-DD HH:mm:ss')
+}
+
 export const formatDate = (date) => {
   const utcDate = moment.tz(date, 'UTC')
   if (moment().diff(utcDate, 'days') > 1) {
