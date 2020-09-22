@@ -209,6 +209,12 @@ export default {
     }
   },
 
+  logs: {
+    current_date_label: 'Show logs for',
+    empty_list: 'There is no logs for the selected date.',
+    title: 'Logs'
+  },
+
   main: {
     about: 'About',
     add: 'add',
