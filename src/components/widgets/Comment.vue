@@ -392,7 +392,9 @@ export default {
     },
 
     fullDate () {
-      return this.commentDate.format('YYYY-MM-DD HH:mm:ss')
+      return this.commentDate
+        .tz(this.user.timezone)
+        .format('YYYY-MM-DD HH:mm:ss')
     },
 
     shortDate () {
