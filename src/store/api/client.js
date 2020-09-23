@@ -100,13 +100,14 @@ const client = {
   },
 
   getModel (modelName, modelId) {
-    return new Promise((resolve, reject) => {
-      const path = `/api/data/${modelName}/${modelId}`
-      client.get(path, (err, model) => {
-        if (err) reject(err)
-        else resolve(model)
-      })
-    })
+    const path = `/api/data/${modelName}/${modelId}`
+    return client.pget(path)
+  },
+
+  getEvents (after, before) {
+    const path =
+      `/api/data/events/last?after=${after}&before=${before}&page_size=100000`
+    return client.pget(path)
   }
 }
 

@@ -1,3 +1,4 @@
+import client from '@/store/api/client'
 import {
   USER_LOGIN,
 
@@ -10,7 +11,7 @@ import {
   SET_CURRENT_PRODUCTION,
 
   RESET_ALL
-} from '../mutation-types'
+} from '@/store/mutation-types'
 
 const initialState = {
   currentProductionScreen: 'assets',
@@ -50,6 +51,10 @@ const actions = {
 
   setLastProductionScreen ({ commit, state }, lastProductionScreen) {
     commit(SET_LAST_PRODUCTION_SCREEN, lastProductionScreen)
+  },
+
+  loadEvents ({ commit, state }, { after, before }) {
+    return client.getEvents(after, before)
   }
 }
 

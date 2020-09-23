@@ -27,6 +27,7 @@ export default {
     ...mapGetters([
       'assetMap',
       'assetTypeMap',
+      'currentEpisode',
       'currentProduction',
       'episodeMap',
       'isCurrentUserAdmin',
@@ -34,6 +35,7 @@ export default {
       'isDarkTheme',
       'isLoginLoading',
       'isSavingCommentPreview',
+      'isTVShow',
       'route',
       'personMap',
       'productionMap',
@@ -191,7 +193,11 @@ export default {
         if (
           !this.shotMap[eventData.shot_id] &&
           this.currentProduction &&
-          this.currentProduction.id === eventData.project_id
+          this.currentProduction.id === eventData.project_id &&
+          (
+            !this.isTVShow ||
+            this.currentEpisode.id === eventData.episode_id
+          )
         ) {
           setTimeout(() => {
             this.loadShot(eventData.shot_id)

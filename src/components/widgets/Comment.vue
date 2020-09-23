@@ -392,12 +392,14 @@ export default {
     },
 
     fullDate () {
-      return this.commentDate.format('YYYY-MM-DD HH:mm:ss')
+      return this.commentDate
+        .tz(this.user.timezone)
+        .format('YYYY-MM-DD HH:mm:ss')
     },
 
     shortDate () {
       if (moment().diff(this.commentDate, 'days') > 1) {
-        return this.commentDate.format('MM/DD')
+        return this.commentDate.tz(this.user.timezone).format('MM/DD')
       } else {
         return this.commentDate.tz(this.user.timezone).format('HH:mm')
       }

@@ -145,9 +145,9 @@
               >
                 {{ $t('main.confirmation') }}
               </button>
-              <div class="" v-if="isCreationLoading">
-                <spinner :is-white="true" />
-              </div>
+            </div>
+            <div class="flexrow-item" v-else>
+              <spinner :is-white="true" />
             </div>
           </div>
         </div>

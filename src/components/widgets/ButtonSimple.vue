@@ -115,6 +115,10 @@
     :class="iconClass"
     v-if="icon === 'funnel'"
   />
+  <refresh-cw-icon
+    :class="iconClass"
+    v-if="icon === 'refresh'"
+  />
 
   <span
     :class="{
@@ -149,6 +153,7 @@ import {
   PauseIcon,
   PlayIcon,
   PlusIcon,
+  RefreshCwIcon,
   RotateCcwIcon,
   SaveIcon,
   SkipBackIcon,
@@ -181,6 +186,7 @@ export default {
     PauseIcon,
     PlayIcon,
     PlusIcon,
+    RefreshCwIcon,
     RotateCcwIcon,
     SaveIcon,
     SkipBackIcon,

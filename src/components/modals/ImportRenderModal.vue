@@ -369,7 +369,7 @@ export default {
   }
 }
 .render-container {
-  max-height: 500px;
+  max-height: 300px;
   overflow: auto;
   .render-headers {
     .field {

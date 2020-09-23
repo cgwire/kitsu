@@ -209,6 +209,12 @@ export default {
     }
   },
 
+  logs: {
+    current_date_label: 'Show logs for',
+    empty_list: 'There is no logs for the selected date.',
+    title: 'Logs'
+  },
+
   main: {
     about: 'About',
     add: 'add',
@@ -412,7 +418,7 @@ export default {
     edit_error: 'An error occured while saving this playlist.',
     download_zip: 'Download .zip',
     failed: 'Failed',
-    for_client: 'The client',
+    for_client: 'The Client',
     for_studio: 'The Studio',
     edit_title: 'Edit playlist',
     last_creation: 'Last creations',

@@ -340,7 +340,7 @@ export default {
           { label: this.$t('news.title'), value: 'newsFeed' },
           { label: this.$t('breakdown.title'), value: 'breakdown' },
           { label: this.$t('schedule.title'), value: 'schedule' },
-          { label: this.$t('quota.title'), value: 'quota' },
+          // { label: this.$t('quota.title'), value: 'quota' },
           { label: this.$t('people.team'), value: 'team' }
         ])
 
@@ -549,9 +549,19 @@ export default {
     },
 
     pushContextRoute (section) {
-      const episodeId = this.currentEpisodeId
+      const isAssetSection = this.assetSections.includes(section)
       const production = this.productionMap[this.currentProductionId]
       const isTVShow = production.production_type === 'tvshow'
+      let episodeId = this.currentEpisodeId
+      if (!episodeId && isTVShow) {
+        if (isAssetSection) {
+          episodeId = 'all'
+        } else if (this.episodes.length > 0) {
+          episodeId = this.episodes[0].id
+        } else {
+          episodeId = production.first_episode_id
+        }
+      }
       let route = {
         name: section,
         params: {
@@ -576,34 +586,56 @@ export default {
       } else if (section === 'episodes' && !isTVShow) {
         route.name = this.isCurrentUserClient ? 'playlists' : 'assets'
       }
+      console.log('episodify', route)
       return route
     },
 
-    resetEpisodeForTVShow () {
-      const isAssetSection =
-        this.assetSections.includes(this.currentProjectSection)
+    resetEpisodeForTVShow (soft = false) {
+      const section =
+        this.currentProjectSection || this.getCurrentSectionFromRoute()
+      const isAssetSection = this.assetSections.includes(section)
       const isAssetEpisode =
         ['all', 'main'].includes(this.currentEpisodeId)
+      const production = this.productionMap[this.currentProductionId]
+      if (!production) return
+      const isTVShow = production.production_type === 'tvshow'
 
-      // Set current episode to first episode if it's not related to assets.
       if (isAssetEpisode) {
+        // It's an asset episode. We have to switch if we are in a shot
+        // section.
         if (!isAssetSection) {
+          // Set current episode to first episode if it's a shot section.
           this.currentEpisodeId =
             this.episodes.length > 0 ? this.episodes[0].id : null
         }
-      } else {
-        this.currentEpisodeId = 'all'
       }
 
-      // If no episode is set, select the first one.
-      if (!this.currentEpisode && this.isTVShow) {
-        if (!this.currentEpisodeId) {
-          this.currentEpisodeId =
-            this.episodes.length > 0 ? this.episodes[0].id : null
+      // If no episode is set and we are in a tv show, select the first one.
+      if (isTVShow) {
+        console.log('set episode for TV show', isAssetSection, section,
+          this.currentEpisodeId)
+        // It's an asset section, and episode is not set, we chose all
+        if (isAssetSection && !this.currentEpisodeId) {
+          console.log('set all')
+          this.currentEpisodeId = 'all'
+          this.setCurrentEpisode(this.currentEpisodeId)
+        // It's a shot section, and episode is not set, we chose the first one
+        } else if (!this.currentEpisode) {
+          if (!this.currentEpisodeId) {
+            if (this.episodes.length > 0) {
+              this.currentEpisodeId = this.episodes[0].id
+            } else {
+              this.currentEpisodeId = production.first_episode_id
+            }
+          }
+          this.setCurrentEpisode(this.currentEpisodeId)
+        } else if (!this.currentEpisodeId && this.currentEpisode) {
+          this.currentEpisodeId = this.currentEpisode.id
         }
-        this.setCurrentEpisode(this.currentEpisodeId)
-      } else if (!this.currentEpisodeId && this.isTVShow) {
-        this.currentEpisodeId = this.currentEpisode.id
+        console.log(this.currentEpisode)
+      } else {
+        console.log('clear tv show')
+        this.currentEpisodeId = null
       }
     }
   },
