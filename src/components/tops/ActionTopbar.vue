@@ -598,15 +598,18 @@ export default {
       if (!this.taskStatusId) {
         this.taskStatusId = this.taskStatusForCurrentUser[0].id
       }
-
       this.changeSelectedTaskStatus({
         taskStatusId: this.taskStatusId,
-        comment: this.statusComment,
-        callback: () => {
-          this.isChangeStatusLoading = false
-          this.statusComment = ''
-        }
+        comment: this.statusComment
       })
+        .then(() => {
+          this.statusComment = ''
+          this.isChangeStatusLoading = false
+        })
+        .catch(err => {
+          console.error(err)
+          this.isChangeStatusLoading = false
+        })
     },
 
     confirmPriorityChange () {

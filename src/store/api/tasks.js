@@ -73,6 +73,13 @@ export default {
     )
   },
 
+  commentTasks (projectId, comments) {
+    return client.ppost(
+      `/api/actions/project/${projectId}/tasks/comment-many`,
+      comments
+    )
+  },
+
   getTaskComment (data, callback) {
     client.get(`/api/data/comments/${data.id}`, callback)
   },
