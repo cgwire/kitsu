@@ -366,27 +366,37 @@ const actions = {
     })
   },
 
-  changeSelectedTaskStatus ({ commit, state }, {
+  changeSelectedTaskStatus ({ commit, state, rootGetters }, {
     taskStatusId,
-    comment,
-    callback
+    comment
   }) {
-    async.eachSeries(Object.keys(state.selectedTasks), (taskId, next) => {
+    const tasksToChange = []
+    const production = rootGetters.currentProduction
+    Object.keys(state.selectedTasks).forEach((taskId) => {
       const task = state.taskMap[taskId]
-      if (task && task.task_status_id !== taskStatusId) {
-        actions.commentTask({ commit, state }, {
-          taskId: taskId,
-          taskStatusId: taskStatusId,
-          comment: comment || ''
+      const isChanged = task && (
+        task.task_status_id !== taskStatusId ||
+        (comment && comment.length > 0)
+      )
+      if (isChanged) {
+        tasksToChange.push({
+          object_id: taskId,
+          task_status_id: taskStatusId,
+          comment: comment || '',
+          checklist: []
         })
-          .then(next)
-          .catch(next)
-      } else {
-        next()
       }
-    }, (err) => {
-      callback(err)
     })
+    return tasksApi.commentTasks(production.id, tasksToChange)
+      .then((comments) => {
+        comments.forEach(comment => {
+          commit(
+            NEW_TASK_COMMENT_END,
+            { comment, taskId: comment.object_id }
+          )
+        })
+        return Promise.resolve()
+      })
   },
 
   changeSelectedPriorities (
