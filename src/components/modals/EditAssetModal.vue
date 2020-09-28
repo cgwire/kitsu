@@ -175,6 +175,7 @@ export default {
       'currentProduction',
       'currentEpisode',
       'episodes',
+      'productionAssetTypes',
       'productionAssetTypeOptions',
       'isTVShow',
       'openProductions'
@@ -237,8 +238,9 @@ export default {
 
     resetForm () {
       if (!this.isEditing()) {
-        if (!this.form.entity_type_id && this.assetTypes.length > 0) {
-          this.form.entity_type_id = this.assetTypes[0].id
+        if (!this.form.entity_type_id &&
+            this.productionAssetTypes.length > 0) {
+          this.form.entity_type_id = this.productionAssetTypes[0].id
         }
         if (this.openProductions.length > 0) {
           this.form.project_id =
