@@ -206,6 +206,10 @@ export default {
     }
   },
 
+  created () {
+    this.clearNotifications()
+  },
+
   mounted () {
     this.loading.notifications = true
     this.errors.notifications = false
@@ -226,20 +230,23 @@ export default {
       'personMap',
       'taskTypeMap',
       'taskStatusMap',
-      'personMap'
+      'personMap',
+      'user'
     ])
   },
 
   methods: {
     ...mapActions([
+      'clearNotifications',
+      'loadNotification',
       'loadNotifications',
       'loadTask',
       'markAllNotificationsAsRead'
     ]),
 
     entityPath (notification) {
-      const type =
-        this.getTaskType(notification).for_shots ? 'shot' : 'asset'
+      const taskType = this.taskTypeMap[notification.task_type_id]
+      const type = taskType.for_shots ? 'shot' : 'asset'
 
       const route = {
         name: 'task',
@@ -255,10 +262,6 @@ export default {
         route.params.episode_id = notification.episode_id
       }
       return route
-    },
-
-    getTaskType (notification) {
-      return this.taskTypeMap[notification.task_type_id]
     },
 
     formatDate (date) {
@@ -318,6 +321,14 @@ export default {
 
   socket: {
     events: {
+      'notification:new' (eventData) {
+        if (this.user.id === eventData.person_id) {
+          const notificationId = eventData.notification_id
+          this.loadNotification(notificationId)
+            .catch(console.error)
+        }
+      },
+
       'preview-file:add-file' (eventData) {
         const commentId = eventData.comment_id
         const previewId = eventData.preview_file_id

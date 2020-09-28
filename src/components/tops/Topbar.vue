@@ -381,7 +381,7 @@ export default {
       'clearEpisodes',
       'loadEpisodes',
       'loadMilestones',
-      'loadNotification',
+      'incrementNotificationCounter',
       'logout',
       'setProduction',
       'setCurrentEpisode',
@@ -586,7 +586,6 @@ export default {
       } else if (section === 'episodes' && !isTVShow) {
         route.name = this.isCurrentUserClient ? 'playlists' : 'assets'
       }
-      console.log('episodify', route)
       return route
     },
 
@@ -612,11 +611,8 @@ export default {
 
       // If no episode is set and we are in a tv show, select the first one.
       if (isTVShow) {
-        console.log('set episode for TV show', isAssetSection, section,
-          this.currentEpisodeId)
         // It's an asset section, and episode is not set, we chose all
         if (isAssetSection && !this.currentEpisodeId) {
-          console.log('set all')
           this.currentEpisodeId = 'all'
           this.setCurrentEpisode(this.currentEpisodeId)
         // It's a shot section, and episode is not set, we chose the first one
@@ -632,9 +628,7 @@ export default {
         } else if (!this.currentEpisodeId && this.currentEpisode) {
           this.currentEpisodeId = this.currentEpisode.id
         }
-        console.log(this.currentEpisode)
       } else {
-        console.log('clear tv show')
         this.currentEpisodeId = null
       }
     }
@@ -681,10 +675,9 @@ export default {
   socket: {
     events: {
       'notification:new' (eventData) {
-        if (this.user.id === eventData.person_id) {
-          const notificationId = eventData.notification_id
-          this.loadNotification(notificationId)
-            .catch(console.error)
+        if (this.user.id === eventData.person_id &&
+            this.$route.name !== 'notifications') {
+          this.incrementNotificationCounter()
         }
       },
 
