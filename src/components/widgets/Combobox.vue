@@ -1,5 +1,5 @@
 <template>
-<div class="field">
+<div :class="{ field: withMargin }">
   <label class="label" v-if="label.length > 0">
     {{ label }}
   </label>
@@ -77,6 +77,10 @@ export default {
     },
     width: {
       type: Number
+    },
+    withMargin: {
+      default: true,
+      type: Boolean
     }
   },
 
