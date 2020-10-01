@@ -748,6 +748,8 @@ export default {
     download_pdf_file: 'Download .{extension} file',
     feedback: 'feedback',
     full_screen: 'Display in full screen',
+    for_selection: 'For selection',
+    for_project: 'For project',
     hide_assignations: 'Hide assignations',
     hide_infos: 'Hide additional information',
     my_tasks: 'My tasks',

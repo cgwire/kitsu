@@ -241,6 +241,13 @@ export default {
         }
       },
 
+      'task:delete' (eventData) {
+        const task = this.taskMap[eventData.task_id]
+        if (task) {
+          this.$store.commit('DELETE_TASK_END', task)
+        }
+      },
+
       'task-type:new' (eventData) {
         if (!this.taskTypeMap[eventData.task_type_id]) {
           this.loadTaskType(eventData.task_type_id)

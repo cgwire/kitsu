@@ -80,7 +80,8 @@ export default {
         fps: shot.fps
       })
     }
-    return client.pput(`/api/data/entities/${shot.id}`, data)
+    const path = `/api/data/entities/${shot.id}`
+    return client.pput(path, data)
   },
 
   updateSequence (sequence) {

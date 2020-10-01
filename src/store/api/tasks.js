@@ -124,11 +124,17 @@ export default {
     client.del(`/api/data/tasks/${task.id}?force=true`, callback)
   },
 
-  deleteAllTasks (projectId, taskTypeId, callback) {
-    client.del(
-      `/api/data/projects/${projectId}/task-types/${taskTypeId}/tasks`,
-      callback
-    )
+  deleteAllTasks (projectId, taskTypeId, taskIds) {
+    if (taskIds.length > 0) {
+      return client.ppost(
+        `/api/actions/projects/${projectId}/delete-tasks`,
+        taskIds
+      )
+    } else {
+      return client.pdel(
+        `/api/actions/projects/${projectId}/task-types/${taskTypeId}/delete-tasks`
+      )
+    }
   },
 
   addPreview (data) {

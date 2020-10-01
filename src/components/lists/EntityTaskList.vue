@@ -29,7 +29,7 @@
     <table class="datatable">
       <tbody class="datatable-body">
         <tr
-          :key="taskId"
+          :key="typeof (taskId) === 'string' ? taskId : taskId.id"
           :class="{
             selected: currentTask && currentTask.id === taskId,
             'datatable-row': true,
