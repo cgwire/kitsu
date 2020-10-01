@@ -75,7 +75,7 @@ export default {
 
   commentTasks (projectId, comments) {
     return client.ppost(
-      `/api/actions/project/${projectId}/tasks/comment-many`,
+      `/api/actions/projects/${projectId}/tasks/comment-many`,
       comments
     )
   },
