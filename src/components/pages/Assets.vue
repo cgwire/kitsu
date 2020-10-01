@@ -147,6 +147,7 @@
     :text="deleteAllTasksText()"
     :error-text="$t('tasks.delete_all_error')"
     :lock-text="deleteAllTasksLockText"
+    :selection-option="true"
     @confirm="confirmDeleteAllTasks"
     @cancel="modals.isDeleteAllTasksDisplayed = false"
   />
@@ -470,7 +471,7 @@ export default {
       'changeAssetSort',
       'commentTaskWithPreview',
       'createTasks',
-      'deleteAllTasks',
+      'deleteAllAssetTasks',
       'deleteAsset',
       'deleteMetadataDescriptor',
       'editAsset',
@@ -616,17 +617,17 @@ export default {
       })
     },
 
-    confirmDeleteAllTasks () {
+    confirmDeleteAllTasks (selectionOnly) {
       const taskTypeId = this.taskTypes.find(
         t => t.name === this.deleteAllTasksLockText
       ).id
       const projectId = this.currentProduction.id
       this.errors.deleteAllTasks = false
       this.loading.deleteAllTasks = true
-      this.deleteAllTasks({ projectId, taskTypeId })
+      this.deleteAllAssetTasks({ projectId, taskTypeId, selectionOnly })
         .then(() => {
           this.loading.deleteAllTasks = false
-          this.loadAssets()
+          if (!selectionOnly) this.loadAssets()
           this.modals.isDeleteAllTasksDisplayed = false
         }).catch((err) => {
           console.error(err)

@@ -163,6 +163,7 @@
     :text="deleteAllTasksText()"
     :error-text="$t('tasks.delete_all_error')"
     :lock-text="deleteAllTasksLockText"
+    :selection-option="true"
     @cancel="modals.isDeleteAllTasksDisplayed = false"
     @confirm="confirmDeleteAllTasks"
   />
@@ -488,7 +489,7 @@ export default {
       'addMetadataDescriptor',
       'changeShotSort',
       'commentTaskWithPreview',
-      'deleteAllTasks',
+      'deleteAllShotTasks',
       'deleteShot',
       'deleteMetadataDescriptor',
       'editShot',
@@ -589,16 +590,15 @@ export default {
         })
     },
 
-    confirmDeleteAllTasks () {
+    confirmDeleteAllTasks (selectionOnly) {
       const taskTypeId = this.taskTypeForTaskDeletion.id
       const projectId = this.currentProduction.id
       this.errors.deleteAllTasks = false
       this.loading.deleteAllTasks = true
-      this.deleteAllTasks({ projectId, taskTypeId })
+      this.deleteAllShotTasks({ projectId, taskTypeId, selectionOnly })
         .then(() => {
           this.loading.deleteAllTasks = false
           this.modals.isDeleteAllTasksDisplayed = false
-          this.loadShots()
         }).catch((err) => {
           console.error(err)
           this.loading.deleteAllTasks = false

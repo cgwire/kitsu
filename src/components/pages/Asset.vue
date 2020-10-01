@@ -317,18 +317,16 @@ export default {
       form.id = this.currentAsset.id
       this.loading.edit = true
       this.errors.edit = false
-      this.editAsset({
-        data: form,
-        callback: (err) => {
-          if (err) {
-            this.loading.edit = false
-            this.errors.edit = true
-          } else {
-            this.loading.edit = false
-            this.modals.edit = false
-          }
-        }
-      })
+      this.editAsset(form)
+        .then(() => {
+          this.loading.edit = false
+          this.modals.edit = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.edit = false
+          this.errors.edit = true
+        })
     },
 
     onTaskSelected (task) {

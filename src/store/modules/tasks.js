@@ -335,13 +335,8 @@ const actions = {
     })
   },
 
-  deleteAllTasks ({ commit, state }, { projectId, taskTypeId }) {
-    return new Promise((resolve, reject) => {
-      tasksApi.deleteAllTasks(projectId, taskTypeId, (err) => {
-        if (err) reject(err)
-        else resolve()
-      })
-    })
+  deleteAllTasks ({ commit, state }, { projectId, taskTypeId, taskIds }) {
+    return tasksApi.deleteAllTasks(projectId, taskTypeId, taskIds)
   },
 
   createTask (

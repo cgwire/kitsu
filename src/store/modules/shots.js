@@ -1024,6 +1024,18 @@ const actions = {
     commit(CHANGE_SHOT_SORT, {
       taskStatusMap, taskTypeMap, taskMap, persons, production, sorting
     })
+  },
+
+  deleteAllShotTasks (
+    { commit, dispatch, state }, { projectId, taskTypeId, selectionOnly }
+  ) {
+    let taskIds = []
+    if (selectionOnly) {
+      taskIds = cache.result
+        .filter(a => a.validations[taskTypeId])
+        .map(a => a.validations[taskTypeId])
+    }
+    return dispatch('deleteAllTasks', { projectId, taskTypeId, taskIds })
   }
 }
 

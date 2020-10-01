@@ -18,7 +18,15 @@
         />
       </p>
       <p class="is-danger" v-if="isError">{{ errorText }}</p>
-      <p class="has-text-right">
+      <div class="has-text-right flexrow">
+        <div class="filler"></div>
+        <combobox
+          class="flexrow-item"
+          :options="selectionOptions"
+          :with-margin="false"
+          v-model="selectionOnly"
+          v-if="selectionOption"
+        />
         <a
           :class="{
             button: true,
@@ -26,7 +34,7 @@
             'is-loading': isLoading
           }"
           :disabled="isLocked"
-          @click="$emit('confirm')">
+          @click="$emit('confirm', selectionOnly === 'true')">
           {{ $t("main.confirmation") }}
         </a>
         <button
@@ -35,7 +43,7 @@
         >
           {{ $t('main.cancel') }}
         </button>
-      </p>
+      </div>
     </div>
   </div>
 </div>
@@ -43,15 +51,26 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
+
+import Combobox from '@/components/widgets/Combobox'
 
 export default {
   name: 'hard-delete-modal',
   mixins: [modalMixin],
 
+  components: {
+    Combobox
+  },
+
   data () {
     return {
-      userLockText: ''
+      userLockText: '',
+      selectionOnly: 'true',
+      selectionOptions: [
+        { label: this.$t('tasks.for_selection'), value: 'true' },
+        { label: this.$t('tasks.for_project'), value: 'false' }
+      ]
     }
   },
 
@@ -79,6 +98,10 @@ export default {
     lockText: {
       type: String,
       default: 'locked'
+    },
+    selectionOption: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -115,6 +138,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.flexrow {
+  align-items: center;
+  justify-content: center;
+}
+
 .input {
   margin-bottom: 1em;
 }
