@@ -76,6 +76,7 @@
               <option value="de_DE">German</option>
               <option value="fa_IR">Persian</option>
               <option value="es_ES">Spanish</option>
+              <option value="ru_RU">Russian</option>
               <option value="zh_Hans_CN">Chinese</option>
             </select>
           </span>
