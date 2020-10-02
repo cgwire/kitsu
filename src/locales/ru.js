@@ -132,7 +132,7 @@ export default {
     },
 
     thumbnails: {
-      error: 'An error occured while uploading thumbnails',
+      error: 'Ошибка при загрузке ярлыков',
       explaination: 'Для добавления ярлыка нужно новое превью. Чтобы сделать сразу несколько ярлыков, необходимо сначала выбрать тип задачи для создания новых превью. Ярлыки будут сделаны на основании этого нового превью.',
       explaination_two: 'Далее выберите файлы для загрузки. Чтобы найти правильные объекты, имена файлов должны соответсвовать маске:',
       shots_pattern: '"SequenceName_ShotName" пр. SQ01_SH01.',
@@ -569,128 +569,128 @@ export default {
   },
 
   task_status: {
-    create_error: 'An error occured while saving this task status. Are you sure there is no task status with similar name?',
-    delete_text: 'Are you sure you want to remove {name} from your database?',
-    delete_error: 'An error occured while deleting this task status. There are probably data linked to it. Are you sure this task status has no task linked to it?',
-    edit_title: 'Edit task status',
-    number: 'task status | task status',
-    new_task_status: 'Add a task status',
-    title: 'Статусы задач',
+    create_error: 'Ошибка при сохранении этого статуса задачи. Вы уверены, что нет статуса задачи с таким же названием?', // An error occured while saving this task status. Are you sure there is no task status with similar name?
+    delete_text: 'Уверены, что хотите удалить {name} из своей базы данных?', // Are you sure you want to remove {name} from your database?
+    delete_error: 'Ошибка при удалении статуса задачи. Вероятнее всего к нему привязаны какие-то данные. Вы уверены, что этот статус задачи не связан с какой-либо задачей?', // An error occured while deleting this task status. There are probably data linked to it. Are you sure this task status has no task linked to it?
+    edit_title: 'Редактировать статус задачи', // Edit task status
+    number: 'статус задачи | статус задачи', // task status | task status
+    new_task_status: 'Добавить статус задаци', // Add a task status
+    title: 'Статус Задачи', // Task Status
     fields: {
-      color: 'Color',
+      color: 'Цвет', // Color
       is_artist_allowed: 'Is artist allowed',
       is_client_allowed: 'Is client allowed',
-      is_done: 'Is done',
+      is_done: 'Завершена', // Is done
       is_reviewable: 'Is reviewable',
       is_retake: 'Has retake value',
-      name: 'Name',
-      short_name: 'Short name'
+      name: 'Назв.', // Name
+      short_name: 'Сокр. назв.' // Short name
     }
   },
 
   task_types: {
-    delete_text: 'Are you sure you want to remove {name} from your database?',
-    delete_error: 'An error occured while deleting this task type. There are probably data linked to it. Are you sure this task type has no task linked to it?',
-    edit_title: 'Edit task type',
+    delete_text: 'Уверены, что хотите удалить {name} из своей базы данных?', // Are you sure you want to remove {name} from your database?
+    delete_error: 'Ошибка при удалении этого типа задачи. Вероятнее всего к нему привязаны какие-то данные. Вы уверены, что этот статус задачи не связан с какой-либо задачей?', // An error occured while deleting this task type. There are probably data linked to it. Are you sure this task type has no task linked to it?
+    edit_title: 'Редактировать тип задачи', // Edit task type
     create_error: 'An error occured while creating the task type. Please, check that there is no task type with similar name.',
-    new_task_type: 'Add a task type',
-    number: 'task type | task types',
-    title: 'Task Types',
+    new_task_type: 'Добавить тип задачи', // Add a task type
+    number: 'тпип задачи | типы задач', // task type | task types
+    title: 'типы Задач', // Task Types
     fields: {
-      dedicated_to: 'For',
-      color: 'Color',
-      name: 'Name',
+      dedicated_to: 'Для', // For
+      color: 'Цвет', // Color
+      name: 'Назв.', // Name
       allow_timelog: 'Timelog',
-      priority: 'Priority'
+      priority: 'Приоритет' // Priority
     }
   },
 
   sequences: {
-    all_sequences: 'All sequences',
-    edit_error: 'An error occured while saving this sequence. Are you sure there is no sequence with similar name?',
-    delete_text: 'Are you sure you want to remove {name} from your database? Every related shots and previews will be deleted. Please confirm by typing the sequence name below.',
-    delete_error: 'An error occured while deleting this sequence. There are probably data linked to it. Are you sure this sequence has no shot linked to it?',
-    edit_title: 'Edit sequence',
-    empty_list: 'There is no sequence in the production. What about creating some?',
-    empty_list_client: 'There is no sequence in this production.',
-    new_sequence: 'New sequence',
-    number: 'sequence | sequences',
-    title: 'Sequence Stats',
+    all_sequences: 'Все секвенции', // All sequences
+    edit_error: 'Ошибка при сохранении этой секвенции. Вы уверены, что нет секвенции с таким же названием?', // An error occured while saving this sequence. Are you sure there is no sequence with similar name?
+    delete_text: 'Уверены, что хотите удалить {name} из своей базы данных? Все связанные шоты и превью будут удалены. Для подтверждения введите название секвенции внизу.', // Are you sure you want to remove {name} from your database? Every related shots and previews will be deleted. Please confirm by typing the sequence name below.
+    delete_error: 'Ошибка при удалении секвенции. Вероятнее всего к нему привязаны какие-то данные. Вы уверены, что этот тип ассетов не связан с каким-либо шотом?', // An error occured while deleting this sequence. There are probably data linked to it. Are you sure this sequence has no shot linked to it?
+    edit_title: 'Редактировать секвенцию', // Edit sequence
+    empty_list: 'В проекте нет ни одной секвенции. Не хотите ли создать?', // There is no sequence in the production. What about creating some?
+    empty_list_client: 'В этом проекте нет ни одной секвенции.', // There is no sequence in this production.
+    new_sequence: 'Новая секвенция', // New sequence
+    number: 'секвенция | секвенции', // sequence | sequences
+    title: 'Статистика Севенции', // Sequence Stats
     fields: {
-      name: 'name',
-      description: 'description'
+      name: 'назв.', // name
+      description: 'описание' // description
     }
   },
 
   schedule: {
-    title: 'Schedule',
-    title_main: 'Main Schedule',
+    title: 'График', // Schedule
+    title_main: 'Основной график', // Main Schedule
     overall_man_days: 'Man-days',
     md: 'md',
     zoom_level: 'Zoom level',
     milestone: {
-      add_milestone: 'Add milestone for',
-      edit_milestone: 'Edit milestone for',
-      name: 'Name',
-      error: 'An error occured while adding or editing the milestone. Please try again.'
+      add_milestone: 'Добавить этапы для', // Add milestone for
+      edit_milestone: 'Редактировать этапы для', // Edit milestone for
+      name: 'Назв', // Name
+      error: 'Ошибка при добавлении или редактировании этапа. Повторите попытку.' // An error occured while adding or editing the milestone. Please try again.
     }
   },
 
   quota: {
-    average: 'Average',
+    average: 'Средний', // Average
     count_label: 'Count mode',
     detail_label: 'Detail level',
-    details_name: 'Name',
-    details_seconds: 'Seconds',
-    details_frames: 'Frames',
-    month_label: 'Month',
-    no_quota: 'There is no quota for this task type.',
-    name: 'Name',
-    quota_day: 'Quota per day',
-    quota_week: 'Quota per week',
-    quota_month: 'Quota per month',
-    year_label: 'Year',
-    title: 'Quota',
-    type_label: 'Type'
+    details_name: 'Назв.', // Name
+    details_seconds: 'Секунды', // Seconds
+    details_frames: 'Кадры', // Frames
+    month_label: 'Месяц', // Month
+    no_quota: 'Нет квоты для этого типа задачи', // There is no quota for this task type.
+    name: 'Назв.', // Name
+    quota_day: 'Ежедневная квота', // Quota per day
+    quota_week: 'Еженедельная квота', // Quota per week
+    quota_month: 'Ежемесечная квота', // Quota per month
+    year_label: 'Год', // Year
+    title: 'Квота', // Quota
+    type_label: 'Тип' // Type
   },
 
   shots: {
-    casting: 'Shot casting',
+    casting: 'Задействование шота', // Shot casting
     creation_explaination: 'To add shots you need first to create an episode and a sequence. Type an episode name in the bottom of the left column then click on add to create a new episode. Select this episode and repeat the same operation for sequence. Finally select a sequence and type a shot name in the field in the bottom of the right column. Click on the add button below. Your first shot was created. You can now add many more! If it\'s not a TV Show, you have to directly create a sequence.',
-    delete_text: 'Are you sure you want to remove {name} from your database?',
-    delete_error: 'An error occured while deleting this shot. There are probably data linked to it. Are you sure this shot has no task linked to it?',
-    edit_success: 'Shot {name} successfully edited.',
+    delete_text: 'Уверены, что хотите удалить {name} из своей базы данных?', // Are you sure you want to remove {name} from your database?
+    delete_error: 'Ошибка при удалении шота. Вероятнее всего к нему привязаны какие-то данные. Вы уверены, что этот тип ассетов не связан с какой-либо задачей?', // An error occured while deleting this shot. There are probably data linked to it. Are you sure this shot has no task linked to it?
+    edit_success: 'Шот {name} успешно изменён.', // Shot {name} successfully edited.
     edit_fail: 'Creation or edition failed, an error occured. Make sure that you are not renaming the shot with a name already listed for given sequence.',
-    edit_title: 'Edit shot',
+    edit_title: 'Редактировать шот', // Edit shot
     empty_list: 'There is no shot in the production. What about creating some?',
     empty_list_client: 'There is no shot in this production.',
-    episodes: 'Episodes',
-    history: 'Shot values history',
-    new_shot: 'Add a shot',
-    new_shots: 'Add shots',
-    new_sequences: 'Add sequences',
-    new_episodes: 'Add episodes',
-    no_casting: 'The shot casting is empty.',
-    number: 'shot | shots',
-    manage: 'Create shots',
+    episodes: 'Эпизоды', // Episodes
+    history: 'История значений шота', // Shot values history
+    new_shot: 'Добавить шот', // Add a shot
+    new_shots: 'Добавить шоты', // Add shots
+    new_sequences: 'добавить секвенции', // Add sequences
+    new_episodes: 'Добавить эпизоды', // Add episodes
+    no_casting: 'Пустое задействование шота', // The shot casting is empty.
+    number: 'шот | шоты', // shot | shots
+    manage: 'Создать шоты', // Create shots
     new_success: 'Shot {name} successfully created.',
     padding: 'Shot Padding',
-    restore_text: 'Are you sure you want to restore {name} into your database?',
-    restore_error: 'An error occured while restoring this shot.',
-    sequences: 'Sequences',
-    tasks: 'Shot Tasks',
-    title: 'Shots',
+    restore_text: 'Вы уверены, что хотите восстановить {name} в вашей базе данных?', // Are you sure you want to restore {name} into your database?
+    restore_error: 'Ошибка при восстановлении шота', // An error occured while restoring this shot.
+    sequences: 'Секвенции', // Sequences
+    tasks: 'Задачи Шотов', // Shot Tasks
+    title: 'Шоты', // Shots
     fields: {
-      description: 'Description',
-      nb_frames: 'Frames',
-      episode: 'Episode',
+      description: 'Описание', // Description
+      nb_frames: 'Кадры', // Frames
+      episode: 'Эпизод', // Episode
       frame_in: 'In',
       frame_out: 'Out',
       fps: 'FPS',
-      name: 'Name',
-      production: 'Prod',
-      sequence: 'Sequence',
-      time_spent: 'Time'
+      name: 'Назв.', // Name
+      production: 'Проект', // Prod
+      sequence: 'Секвенция', // Sequence
+      time_spent: 'Время' // Time
     }
   },
 
@@ -703,122 +703,122 @@ export default {
     count: 'Counts',
     count_mode: 'Count mode',
     display_mode: 'Display mode',
-    frames: 'Frames',
-    pie: 'Pie charts',
-    shots: 'Shots'
+    frames: 'Кадры', // Frames
+    pie: 'Круговые диаграммы', // Pie charts
+    shots: 'Шоты' // Shots
   },
 
   tasks: {
-    add_preview: 'Add preview',
+    add_preview: 'Добавить превью', // Add preview
     add_preview_error: 'An error occured while adding preview.',
     assign: 'Assign one task to: | Assign {nbSelectedTasks} tasks to:',
-    back_to_list: 'back to list',
-    bigger: 'Widen task panel',
-    change_status_to: 'Change task status to:',
-    change_preview: 'Change preview',
-    change_priority: 'Change priority to:',
-    clear_assignations: 'clear assignations',
-    comment_image: 'Attach an image to your comment',
+    back_to_list: 'назад к списку', // back to list
+    bigger: 'расширить панель задач', // Widen task panel
+    change_status_to: 'Изменить статус задачи на:', // Change task status to:
+    change_preview: 'Изменить превью', // Change preview
+    change_priority: 'Изменить приоритет на:', // Change priority to:
+    clear_assignations: 'очистить назначения', // clear assignations
+    comment_image: 'Прикрепить изображение к комментарию', // Attach an image to your comment
     create_for_selection: 'Create task for each empty cell:',
-    create_tasks: 'Add tasks',
-    create_tasks_shot: 'Add tasks for current shots',
+    create_tasks: 'Добавить задачи', // Add tasks
+    create_tasks_shot: 'Добавть задачи для текущих шотов', // Add tasks for current shots
     create_tasks_shot_explaination: 'You are going to create a new task for each shot of current project for the given task type. Do you want to continue?',
     create_tasks_shot_failed: 'A server error occured while proceeding creations.',
-    create_tasks_asset: 'Add tasks for current assets',
+    create_tasks_asset: 'Добавить задачи для текущих ассетов', // Add tasks for current assets
     create_tasks_asset_explaination: 'You are going to create a new task for each asset of current project for the given task type. Do you want to continue?',
     create_tasks_asset_failed: 'A server error occured while proceeding creations.',
-    current: 'Task to do',
-    current_status: 'Current status :',
+    current: 'Задача на выполнение', // Task to do
+    current_status: 'Текущий статус:', // Current status :
     delete_all_text: 'Are you sure you want to delete all tasks for given {name}? Please, confirm by typing the task type name of the tasks you want to delete in the text field.',
     delete_all_error: 'Deleting all tasks for given task type failed.',
-    delete_error: 'An error occured while deleting task.',
-    delete_comment: 'Are you sure you want to delete last comment?',
-    delete_comment_error: 'An error occured while deleting comment.',
-    delete_for_selection: 'Delete selected tasks:',
-    delete_preview: 'Are you sure you want to delete this preview?',
-    delete_preview_error: 'An error occured while deleting preview.',
-    edit_comment: 'Edit comment',
-    done: 'Done',
-    download_pdf_file: 'Download .{extension} file',
-    feedback: 'feedback',
-    full_screen: 'Display in full screen',
-    hide_assignations: 'Hide assignations',
-    hide_infos: 'Hide additional information',
-    my_tasks: 'My tasks',
-    next: 'next task',
+    delete_error: 'Ошибка при удалении задачи', // An error occured while deleting task.
+    delete_comment: 'Уверены, что хотите удалить последний комментарий?', // Are you sure you want to delete last comment?
+    delete_comment_error: 'Ошибка при удалении комментария.', // An error occured while deleting comment.
+    delete_for_selection: 'Удалить выбранные задачи:', // Delete selected tasks:
+    delete_preview: 'Уверены, что хотите удалить этот превью? ', // Are you sure you want to delete this preview?
+    delete_preview_error: 'ошибка при удвлении превью.', // An error occured while deleting preview.
+    edit_comment: 'Редактировать комментарий', // Edit comment
+    done: 'Завершено', // Done
+    download_pdf_file: 'Скачать .{extension} файл', // Download .{extension} file
+    feedback: 'обратная связь', // feedback
+    full_screen: 'Открыть на полный экран', // Display in full screen
+    hide_assignations: 'Скрыть назначения', // Hide assignations
+    hide_infos: 'Скрыть дополнительную информацию', // Hide additional information
+    my_tasks: 'Мои задачи', // My tasks
+    next: 'следующая задача', // next task
     no_assignation_right: 'You are not allowed to manage assignations',
-    no_comment: 'There is currently no comment for this task.',
-    no_preview: 'There is currently no preview for this task.',
-    no_task_selected: 'No task selected',
-    number: 'task | tasks',
-    preview: 'Previews',
-    previous: 'previous task',
-    unsubscribe_notifications: 'Unsubscribe from notifications',
-    set_estimations: 'Set estimations for selected tasks:',
-    set_preview: 'Set this preview as thumbnail',
-    set_preview_error: 'An error occured while setting preview as thumbnail',
-    set_preview_done: 'This preview is used as thumbnail for the current entity.',
-    select_preview_file: 'Please select a picture from your hard drive to be used as a preview for the current task:',
-    show_assignations: 'Show assignations',
-    show_infos: 'Show additional information',
-    subscribe_notifications: 'Subscribe to notifications',
-    select_image_file: 'Please select the picture from your hard drive you want to attach to your comment:',
-    tasks: 'Tasks',
-    validation: 'Validation',
-    with_comment: 'With a comment...',
+    no_comment: 'В настоящий момент у этогй задачи нет комментариев.', // There is currently no comment for this task.
+    no_preview: 'В настоящий момент у этогй задачи нет превью.', // There is currently no preview for this task.
+    no_task_selected: 'Задачи не выбраны', // No task selected
+    number: 'задача | задачи', // task | tasks
+    preview: 'Превью', // Previews
+    previous: 'предыдущая задача', // previous task
+    unsubscribe_notifications: 'Отписаться от уведомлений', // Unsubscribe from notifications
+    set_estimations: 'Выставить ожидания для выбранных задач:', // Set estimations for selected tasks:
+    set_preview: 'Установить это превью как ярлык', // Set this preview as thumbnail
+    set_preview_error: 'Ошибка при установлении превью как ярлыка', // An error occured while setting preview as thumbnail
+    set_preview_done: 'Это превью используется как ярлык для текущего объекта', // This preview is used as thumbnail for the current entity.
+    select_preview_file: 'Выберите изображение с диска для использования в качестве превью для текущей задачи', // Please select a picture from your hard drive to be used as a preview for the current task:
+    show_assignations: 'Показать назначения', // Show assignations
+    show_infos: 'Показать дополнитеьную информацию', // Show additional information
+    subscribe_notifications: 'Подписаться на уведомления', // Subscribe to notifications
+    select_image_file: 'Выберите изображение с диска, которе вы хотите прикрепить к комментарию.', // Please select the picture from your hard drive you want to attach to your comment:
+    tasks: 'Задачи', // Tasks
+    validation: 'Валидация', // Validation
+    with_comment: 'С комменарием...', // With a comment...
     fields: {
-      asset_type: 'Asset type',
-      assignees: 'Assignees',
+      asset_type: 'Тип ассетов', // Asset type
+      assignees: 'Назначенные', // Assignees
       count: 'Count',
-      due_date: 'Due date',
-      duration: 'Duration',
-      end_date: 'Validation date',
-      entity: 'Entity',
-      entity_name: 'Name',
-      estimated_quota: 'Avg. Quota',
-      estimation: 'Estimation',
-      frames: 'Fram.',
-      last_comment: 'Last comment',
-      last_comment_date: 'Last comment',
-      priority: 'Priority',
-      production: 'Prod',
-      real_end_date: 'Validation date',
-      real_start_date: 'WIP date',
-      retake_count: 'Retakes',
-      seconds: 'Seconds',
-      sequence: 'Sequence',
-      start_date: 'Start date',
-      task_status: 'Status',
-      task_status_short_name: 'Status',
-      task_type: 'Type'
+      due_date: 'До даты', // Due date
+      duration: 'Длительность', // Duration
+      end_date: 'Дата валидации', // Validation date
+      entity: 'Объект', // Entity
+      entity_name: 'Назв', // Name
+      estimated_quota: 'Средн. Квота', // Avg. Quota
+      estimation: 'Вычисление', // Estimation
+      frames: 'Кадр.', // Fram.
+      last_comment: 'Последний комментарий', // Last comment
+      last_comment_date: 'Последний комментарий', // Last comment
+      priority: 'Приоритет', // Priority
+      production: 'Проект', // Prod
+      real_end_date: 'Дата валидации', // Validation date
+      real_start_date: 'WIP дата', // WIP date
+      retake_count: 'Повторы', // Retakes
+      seconds: 'Секунды', // Seconds
+      sequence: 'Секвенция', // Sequence
+      start_date: 'Дата начала', // Start date
+      task_status: 'Статус', // Status
+      task_status_short_name: 'Статус', // Status
+      task_type: 'Тип' // Type
     },
     colors: {
-      title: 'Coloring',
-      neutral: 'Neutral',
-      status: 'Status color',
+      title: 'Окрас', // Coloring
+      neutral: 'Нейтральный', // Neutral
+      status: 'Цвет стауса', // Status color
       late: 'Late in red'
     },
     priority: {
-      emergency: 'Emergency',
-      normal: 'Normal',
-      high: 'High',
-      very_high: 'Very High'
+      emergency: 'Черезвычайная ситуация', // Emergency
+      normal: 'Нормальный', // Normal
+      high: 'высокий', // High
+      very_high: 'Очень высокий' // Very High
     }
   },
 
   timesheets: {
     detail_level: 'Detail level',
-    done_tasks: 'Done tasks',
+    done_tasks: 'Выполненные задачи', // Done tasks
     export_timesheet: 'Export Timesheet',
-    hours: 'hours',
-    month: 'Month',
-    time_spents: 'Time Spent (hours)',
+    hours: 'часы', // hours
+    month: 'Месяц', // Month
+    time_spents: 'Затраченное время (часы)', // Time Spent (hours)
     title: 'Timesheets',
-    year: 'Year'
+    year: 'Год' // Year
   },
 
   wrong_browser: {
-    title: 'Your browser is not supported by Kitsu',
-    text: 'Kitsu can only be used with Firefox and Chrome browsers.'
+    title: 'Kitsu не поддерживает ваш браузер', // Your browser is not supported by Kitsu
+    text: 'Kitsu поддерживает только Firefox и Chrome' // Kitsu can only be used with Firefox and Chrome browsers.
   }
 }
