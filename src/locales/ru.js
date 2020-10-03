@@ -494,16 +494,16 @@ export default {
       type: 'Тип'
     },
     metadata: {
-      add_explaination: 'Add specific data required by this project.',
-      add_failed: 'An error occured while adding metadata to your project.',
-      add_new_values: 'There is currently no available values.',
-      available_values: 'Available values',
-      choices: 'List of values',
-      delete_text: 'Are you sure you want to delete this column and related data for all assets of this production?',
-      delete_error: 'An error occured while deleting this metadata column.',
-      error: 'An error occured while adding the metadata column. Make sure there is no column with similar name and that all fields are filled. If the problem is persists, please contact the support team.',
-      free: 'Free value',
-      title: 'Add metadata column'
+      add_explaination: 'Добавить данные спецификации этого проекта.', // Add specific data required by this project.
+      add_failed: 'Ошибка при добавлении метаданных в ваш проект.', // An error occured while adding metadata to your project.
+      add_new_values: 'В настоящий момент нет доступных значений.', // There is currently no available values.
+      available_values: 'Доступные значения', // Available values
+      choices: 'Доступные значения', // List of values
+      delete_text: 'Уверены, что хотите удалить этот столбец и связанные данные для всех ассетов этого проекта?', // Are you sure you want to delete this column and related data for all assets of this production?
+      delete_error: 'Ошибка при удалении этого столбца метаданных.', // An error occured while deleting this metadata column.
+      error: 'Ошибка при добавлении столбца метаданных. Убедитесь, нет ли уже столбца с таким названием и что все строки заполнены. Если проблема осталась, обратитесь в поддержку.', // An error occured while adding the metadata column. Make sure there is no column with similar name and that all fields are filled. If the problem is persists, please contact the support team.
+      free: 'Свободные значения', // Free value
+      title: 'Добавить столбец метаданных' // Add metadata column
     },
 
     status: {
@@ -560,7 +560,7 @@ export default {
       use_original_name: 'Использовать оригинальное название файла при скачивании'
     },
     production: {
-      empty_list: 'The list is currently empty. It means that all data from the main settings are available to users. Add some entries to limit choices for this production.'
+      empty_list: 'Список пуст. Это значит, что все данные основных настроек доступны пользователям. Внесите изменения, чтобы ограничить доступ к этому проекту.' // The list is currently empty. It means that all data from the main settings are available to users. Add some entries to limit choices for this production.
     },
     save: {
       button: 'Сохранить настройки',
@@ -592,7 +592,7 @@ export default {
     delete_text: 'Уверены, что хотите удалить {name} из базы данных?',
     delete_error: 'Ошибка при удалении этого типа задач. Вероятнее всего к нему привязаны какие-то данные. Вы уверены, что этот статус не связан с какой-либо задачей?',
     edit_title: 'Редактировать тип задачи',
-    create_error: 'An error occured while creating the task type. Please, check that there is no task type with similar name.', // 'An error occured while creating the task type. Please, check that there is no task type with similar name.'
+    create_error: 'Ошибка при создании типа задач. Убедитесь, нет ли уже типа задач с таким названием.', // 'An error occured while creating the task type. Please, check that there is no task type with similar name.'
     new_task_type: 'Добавить тип задачи',
     number: 'тпип задачи | типы задач',
     title: 'типы Задач',
@@ -627,7 +627,7 @@ export default {
     title_main: 'Основной график',
     overall_man_days: 'Человеко-дни',
     md: 'ч/д',
-    zoom_level: 'Zoom',
+    zoom_level: 'Зум', // Zoom
     milestone: {
       add_milestone: 'Добавить этапы для',
       edit_milestone: 'Редактировать этапы для',
@@ -656,14 +656,14 @@ export default {
 
   shots: {
     casting: 'Использование шота',
-    creation_explaination: 'To add shots you need first to create an episode and a sequence. Type an episode name in the bottom of the left column then click on add to create a new episode. Select this episode and repeat the same operation for sequence. Finally select a sequence and type a shot name in the field in the bottom of the right column. Click on the add button below. Your first shot was created. You can now add many more! If it\'s not a TV Show, you have to directly create a sequence.', // 'To add shots you need first to create an episode and a sequence. Type an episode name in the bottom of the left column then click on add to create a new episode. Select this episode and repeat the same operation for sequence. Finally select a sequence and type a shot name in the field in the bottom of the right column. Click on the add button below. Your first shot was created. You can now add many more! If it\'s not a TV Show, you have to directly create a sequence.'
+    creation_explaination: 'Чтобы добавить шоты вам необходиме сначала создать эпизод и секвенции. Впишите имя эпизода внизу левого столбца и нажмите "добавить", чтобы создать новый эпизод. Выберите этот эпизод и повторите то же самое для секвенции. В конце выдерите секвенцию и в поле внизу правого столбца впишите имя шота. Нажмите "добавить" внизу. Вы создали ваш первый шот. Вы можете создать ещё! Если это не ТВ шоу, вам необходимо создать дополнительную секвенцию.', // 'To add shots you need first to create an episode and a sequence. Type an episode name in the bottom of the left column then click on add to create a new episode. Select this episode and repeat the same operation for sequence. Finally select a sequence and type a shot name in the field in the bottom of the right column. Click on the add button below. Your first shot was created. You can now add many more! If it's not a TV Show, you have to directly create a sequence.'
     delete_text: 'Уверены, что хотите удалить {name} из базы данных?',
     delete_error: 'Ошибка при удалении шота. Вероятнее всего к нему привязаны какие-то данные. Вы уверены, что этот шот не связан с какой-либо задачей?',
     edit_success: 'Шот {name} отредактирован.',
-    edit_fail: 'Creation or edition failed, an error occured. Make sure that you are not renaming the shot with a name already listed for given sequence.', // 'Creation or edition failed, an error occured. Make sure that you are not renaming the shot with a name already listed for given sequence.'
+    edit_fail: 'Ошибка: не удалось создать или редактировать. Убедитесь, что вы не переименовываете шот именем, которое уже в списке данной секвенции.', // 'Creation or edition failed, an error occured. Make sure that you are not renaming the shot with a name already listed for given sequence.'
     edit_title: 'Редактировать шот',
-    empty_list: 'There is no shot in the production. What about creating some?', // 'There is no shot in the production. What about creating some?'
-    empty_list_client: 'There is no shot in this production.', // 'There is no shot in this production.'
+    empty_list: 'В проекте нет ни одного шота. Создать?', // 'There is no shot in the production. What about creating some?'
+    empty_list_client: 'В этом проекте нет ни одного шота.', // 'There is no shot in this production.'
     episodes: 'Эпизоды',
     history: 'История шота',
     new_shot: 'Добавить шот',
@@ -673,7 +673,7 @@ export default {
     no_casting: 'Шот нигде не используется',
     number: 'шот | шоты',
     manage: 'Создать шоты',
-    new_success: 'Shot {name} successfully created.', // 'Shot {name} successfully created.'
+    new_success: 'Шот {name} успешно изменён.', // 'Shot {name} successfully created.'
     padding: 'Shot Padding', // 'Shot Padding'
     restore_text: 'Вы уверены, что хотите восстановить {name} в базе данных?',
     restore_error: 'Ошибка при восстановлении шота',
@@ -684,8 +684,8 @@ export default {
       description: 'Описание',
       nb_frames: 'Кадры',
       episode: 'Эпизод',
-      frame_in: 'In',
-      frame_out: 'Out',
+      frame_in: 'In', // НЕ ЗНАЮ
+      frame_out: 'Out', // КАКОЙ ТАМ КОНТЕКСТ
       fps: 'FPS',
       name: 'Название',
       production: 'Проект',
@@ -695,8 +695,8 @@ export default {
   },
 
   server_down: {
-    text: 'Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.', // 'Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.',
-    title: 'Kitsu encountered an error while reaching its data API.' // 'Kitsu encountered an error while reaching its data API.'
+    text: 'Обратитесь к вашему вендору, системному администратору или отделу ИТ, чтобы определить причину проблем.', // 'Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.',
+    title: 'Ошибка получения API данных в Kitsu.' // 'Kitsu encountered an error while reaching its data API.'
   },
 
   statistics: {
@@ -710,8 +710,8 @@ export default {
 
   tasks: {
     add_preview: 'Добавить превью',
-    add_preview_error: 'An error occured while adding preview.', // 'An error occured while adding preview.'
-    assign: 'Assign one task to: | Assign {nbSelectedTasks} tasks to:', // 'Assign one task to: | Assign {nbSelectedTasks} tasks to:'
+    add_preview_error: 'Ошибка при добавлении превью.', // 'An error occured while adding preview.'
+    assign: 'Назначить задачу: | Назначить {nbSelectedTasks} задач:', // 'Assign one task to: | Assign {nbSelectedTasks} tasks to:'
     back_to_list: 'Назад к списку',
     bigger: 'Расширить панель задач',
     change_status_to: 'Изменить статус задачи на:',
@@ -722,15 +722,15 @@ export default {
     create_for_selection: 'Create task for each empty cell:', // 'Create task for each empty cell:'
     create_tasks: 'Добавить задачи',
     create_tasks_shot: 'Добавть задачи для текущих шотов',
-    create_tasks_shot_explaination: 'You are going to create a new task for each shot of current project for the given task type. Do you want to continue?', // 'You are going to create a new task for each shot of current project for the given task type. Do you want to continue?'
-    create_tasks_shot_failed: 'A server error occured while proceeding creations.', // 'A server error occured while proceeding creations.'
+    create_tasks_shot_explaination: 'Вы хотите создать новые задачи данного типа для каждого шота текущего проекта. Продолжить?', // 'You are going to create a new task for each shot of current project for the given task type. Do you want to continue?'
+    create_tasks_shot_failed: 'Ошибка сервера при обработке созданных объектов.', // 'A server error occured while proceeding creations.'
     create_tasks_asset: 'Добавить задачи для текущих ассетов',
-    create_tasks_asset_explaination: 'You are going to create a new task for each asset of current project for the given task type. Do you want to continue?', // 'You are going to create a new task for each asset of current project for the given task type. Do you want to continue?'
-    create_tasks_asset_failed: 'A server error occured while proceeding creations.', // 'A server error occured while proceeding creations.'
+    create_tasks_asset_explaination: 'Вы хотите создать новые задачи данного типа для каждого ассета текущего проекта. Продолжить?', // 'You are going to create a new task for each asset of current project for the given task type. Do you want to continue?'
+    create_tasks_asset_failed: 'Ошибка сервера при обработке созданных объектов.', // 'A server error occured while proceeding creations.'
     current: 'Задача на выполнение',
     current_status: 'Текущий статус:',
-    delete_all_text: 'Are you sure you want to delete all tasks for given {name}? Please, confirm by typing the task type name of the tasks you want to delete in the text field.', // 'Are you sure you want to delete all tasks for given {name}? Please, confirm by typing the task type name of the tasks you want to delete in the text field.'
-    delete_all_error: 'Deleting all tasks for given task type failed.', // 'Deleting all tasks for given task type failed.'
+    delete_all_text: 'Уверены, что хотите удалить все задачи типа {name}? Для подтверждения введите названия типа задач, которые хотите удалить, в окне ниже', // 'Are you sure you want to delete all tasks for given {name}? Please, confirm by typing the task type name of the tasks you want to delete in the text field.'
+    delete_all_error: 'Не удалось удалить все задачи данного типа.', // 'Deleting all tasks for given task type failed.'
     delete_error: 'Ошибка при удалении задачи',
     delete_comment: 'Уверены, что хотите удалить последний комментарий?',
     delete_comment_error: 'Ошибка при удалении комментария.',
