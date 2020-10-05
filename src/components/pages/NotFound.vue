@@ -1,7 +1,7 @@
 <template>
   <div class="not-found page">
-    <h1 class="title">{{ $t('not_found.title') }}</h1>
-    <p>
+    <h1 class="title has-text-centered">{{ $t('not_found.title') }}</h1>
+    <p class="has-text-centered">
       {{ $t('not_found.text') }}
     </p>
   </div>
