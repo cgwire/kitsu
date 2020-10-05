@@ -211,6 +211,7 @@ export default {
 
   logs: {
     current_date_label: 'Show logs for',
+    events: 'events listed for the current day',
     empty_list: 'There is no logs for the selected date.',
     title: 'Logs'
   },
@@ -738,7 +739,7 @@ export default {
     delete_all_text: 'Are you sure you want to delete all tasks for given {name}? Please, confirm by typing the task type name of the tasks you want to delete in the text field.',
     delete_all_error: 'Deleting all tasks for given task type failed.',
     delete_error: 'An error occured while deleting task.',
-    delete_comment: 'Are you sure you want to delete last comment?',
+    delete_comment: 'Are you sure you want to delete comment?',
     delete_comment_error: 'An error occured while deleting comment.',
     delete_for_selection: 'Delete selected tasks:',
     delete_preview: 'Are you sure you want to delete this preview?',
@@ -748,7 +749,7 @@ export default {
     download_pdf_file: 'Download .{extension} file',
     feedback: 'feedback',
     full_screen: 'Display in full screen',
-    for_selection: 'For selection',
+    for_selection: 'For current list and filters',
     for_project: 'For project',
     hide_assignations: 'Hide assignations',
     hide_infos: 'Hide additional information',
