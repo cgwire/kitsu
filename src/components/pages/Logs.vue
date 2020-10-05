@@ -1,7 +1,7 @@
 <template>
-  <div class="logs page">
+  <div class="logs fixed-page">
     <div>
-      <page-title class="flexrow-item mt1 mb1" :text="$t('logs.title')" />
+      <page-title class="flexrow-item mb1" :text="$t('logs.title')" />
     </div>
 
     <div class="flexrow">
@@ -16,6 +16,9 @@
         icon="refresh"
         @click="loadDayEvents"
       />
+      <span class="flexrow-item">
+        {{ events.length }} {{ $t('logs.events') }}
+      </span>
     </div>
 
     <div class="mt2" v-if="!isLoading && events.length === 0">
@@ -24,7 +27,7 @@
     <div class="has-text-centered" v-if="isLoading" >
       <spinner />
     </div>
-    <div class="log-list mt2" v-else>
+    <div class="log-list" v-else>
       <div
         class="mt05 event-line"
         :key="event.id"
@@ -195,6 +198,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.fixed-page {
+  margin-top: 60px;
+  padding: 2em;
+  overflow: scroll;
+}
+
 .log-list {
   margin-bottom: 2em;
 }
