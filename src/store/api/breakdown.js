@@ -36,9 +36,9 @@ export default {
   },
 
   getAssetCasting (asset) {
+    const projectId = asset.project_id || asset.production_id
     const path =
-      `/api/data/projects/${asset.project_id}/entities/` +
-      `${asset.id}/casting`
+      `/api/data/projects/${projectId}/entities/${asset.id}/casting`
     return client.pget(path)
   }
 }
