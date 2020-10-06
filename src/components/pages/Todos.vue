@@ -231,12 +231,41 @@ export default {
 
     sortedTasks () {
       const isName = this.currentSort === 'entity_name'
+      const isPriority = this.currentSort === 'priority'
+      const isDueDate = this.currentSort === 'due_date'
       const tasks = [...this.displayedTodos]
       if (isName) {
         return tasks.sort(
           firstBy('project_name')
             .thenBy('task_type_name')
             .thenBy('full_entity_name')
+        )
+      } else if (isPriority) {
+        return tasks.sort(
+          firstBy('priority', -1)
+            .thenBy(
+              (a, b) => {
+                if (!a.due_date) return 1
+                else if (!b.due_date) return -1
+                else return a.due_date.localeCompare(b.due_date)
+              }
+            )
+            .thenBy('project_name')
+            .thenBy('task_type_name')
+            .thenBy('entity_name')
+        )
+      } else if (isDueDate) {
+        return tasks.sort(
+          firstBy(
+            (a, b) => {
+              if (!a.due_date) return 1
+              else if (!b.due_date) return -1
+              else return a.due_date.localeCompare(b.due_date)
+            }
+          )
+            .thenBy('project_name')
+            .thenBy('task_type_name')
+            .thenBy('entity_name')
         )
       } else {
         return tasks.sort(

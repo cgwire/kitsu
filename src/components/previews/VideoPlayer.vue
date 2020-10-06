@@ -899,10 +899,12 @@ export default {
       const currentTime = roundToFrame(this.video.currentTime, this.fps) || 0
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)
-      this.$emit('annotationchanged', {
-        preview: this.preview,
-        annotations: annotations
-      })
+      if (!this.readOnly) {
+        this.$emit('annotationchanged', {
+          preview: this.preview,
+          annotations: annotations
+        })
+      }
     },
 
     loadAnnotation (annotation) {

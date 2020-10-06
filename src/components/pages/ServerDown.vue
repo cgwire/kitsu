@@ -1,7 +1,7 @@
 <template>
   <div class="server-down page">
-    <h1 class="title">{{ $t('server_down.title') }}</h1>
-    <p>
+    <h1 class="title has-text-centered">{{ $t('server_down.title') }}</h1>
+    <p class="has-text-centered">
       {{ $t('server_down.text') }}
     </p>
   </div>

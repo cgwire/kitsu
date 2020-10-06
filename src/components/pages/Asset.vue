@@ -298,7 +298,8 @@ export default {
       'loadAssets',
       'loadAssetCastIn',
       'loadAssetCasting',
-      'loadShots'
+      'loadShots',
+      'setCurrentEpisode'
     ]),
 
     changeTab (tab) {
@@ -334,6 +335,9 @@ export default {
     },
 
     resetData () {
+      if (this.$route.params.episode_id === 'main') {
+        this.setCurrentEpisode('main')
+      }
       this.loadAssets()
         .then(() => {
           this.currentAsset = this.getCurrentAsset()
@@ -367,7 +371,7 @@ export default {
     },
 
     currentEpisode () {
-      if (this.isTVShow) this.resetData()
+      if (this.isTVShow && this.currentEpisode.id !== 'main') this.resetData()
     }
   },
 

@@ -118,6 +118,7 @@ import {
   SET_EPISODE_STATS,
 
   CHANGE_SHOT_SORT,
+  UPDATE_METADATA_DESCRIPTOR_END,
 
   RESET_ALL
 } from '../mutation-types'
@@ -1773,6 +1774,18 @@ const mutations = {
       taskTypeMap,
       taskMap
     })
+  },
+
+  [UPDATE_METADATA_DESCRIPTOR_END] (
+    state, { descriptor, previousDescriptorFieldName }
+  ) {
+    if (descriptor.entity_type === 'Shot' && previousDescriptorFieldName) {
+      cache.shots.forEach((shot) => {
+        shot.data[descriptor.field_name] =
+          shot.data[previousDescriptorFieldName]
+        delete shot.data[previousDescriptorFieldName]
+      })
+    }
   },
 
   [RESET_ALL] (state) {

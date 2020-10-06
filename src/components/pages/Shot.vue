@@ -127,13 +127,7 @@
               <router-link
                 class="asset-link"
                 :key="asset.id"
-                :to="{
-                  name: 'asset',
-                  params: {
-                    production_id: currentProduction.id,
-                    asset_id: asset.asset_id
-                  }
-                }"
+                :to="buildAssetRoute(asset)"
                 v-for="asset in typeAssets"
               >
                 <entity-thumbnail
@@ -190,15 +184,17 @@
 import { mapGetters, mapActions } from 'vuex'
 import { ChevronLeftIcon } from 'vue-feather-icons'
 
-import ButtonSimple from '../widgets/ButtonSimple'
-import DescriptionCell from '../cells/DescriptionCell'
-import EditShotModal from '../modals/EditShotModal'
-import EntityThumbnail from '../widgets/EntityThumbnail'
-import EntityTaskList from '../lists/EntityTaskList'
-import PageTitle from '../widgets/PageTitle'
-import PageSubtitle from '../widgets/PageSubtitle'
-import TableInfo from '../widgets/TableInfo'
-import TaskInfo from '../sides/TaskInfo'
+import { episodifyRoute } from '@/lib/path'
+
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import DescriptionCell from '@/components/cells/DescriptionCell'
+import EditShotModal from '@/components/modals/EditShotModal'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import EntityTaskList from '@/components/lists/EntityTaskList'
+import PageTitle from '@/components/widgets/PageTitle'
+import PageSubtitle from '@/components/widgets/PageSubtitle'
+import TableInfo from '@/components/widgets/TableInfo'
+import TaskInfo from '@/components/sides/TaskInfo'
 
 export default {
   name: 'shot',
@@ -341,6 +337,19 @@ export default {
       this.currentTask = task
     },
 
+    buildAssetRoute (asset) {
+      let episodeId = asset.episode_id
+      if (this.isTVShow && !episodeId) episodeId = 'main'
+      const route = {
+        name: 'asset',
+        params: {
+          production_id: this.currentProduction.id,
+          asset_id: asset.asset_id
+        }
+      }
+      return episodifyRoute(route, episodeId)
+    },
+
     resetData () {
       this.loadShots(() => {
         this.loadAssets()
@@ -365,7 +374,9 @@ export default {
     },
 
     currentEpisode () {
-      if (this.isTVShow) this.resetData()
+      if (this.isTVShow && Object.keys(this.shotMap).length === 0) {
+        this.resetData()
+      }
     }
   },
 

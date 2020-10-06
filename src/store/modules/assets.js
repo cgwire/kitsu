@@ -84,6 +84,7 @@ import {
 
   SET_ASSET_TYPE_SEARCH,
   COMPUTE_ASSET_TYPE_STATS,
+  UPDATE_METADATA_DESCRIPTOR_END,
 
   CHANGE_ASSET_SORT,
 
@@ -1013,6 +1014,18 @@ const mutations = {
       persons,
       sorting
     })
+  },
+
+  [UPDATE_METADATA_DESCRIPTOR_END] (
+    state, { descriptor, previousDescriptorFieldName }
+  ) {
+    if (descriptor.entity_type === 'Asset' && previousDescriptorFieldName) {
+      cache.assets.forEach((asset) => {
+        asset.data[descriptor.field_name] =
+          asset.data[previousDescriptorFieldName]
+        delete asset.data[previousDescriptorFieldName]
+      })
+    }
   },
 
   [RESET_ALL] (state) {
