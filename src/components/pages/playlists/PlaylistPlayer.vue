@@ -1822,10 +1822,12 @@ export default {
           annotations: previewFile.annotations
         }
       }
-      this.$emit('annotationchanged', {
-        preview: preview,
-        annotations: annotations
-      })
+      if (!this.isCurrentUserArtist) {
+        this.$emit('annotationchanged', {
+          preview: preview,
+          annotations: annotations
+        })
+      }
     },
 
     onDeleteClicked () {

@@ -17,7 +17,6 @@
         id="annotation-canvas"
         ref="annotation-canvas"
         class="canvas"
-        v-if="!readOnly"
       >
       </canvas>
     </div>
@@ -665,10 +664,12 @@ export default {
         task_id: this.currentPreview.task_id,
         annotations: annotations
       }
-      this.$emit('annotation-changed', {
-        preview: preview,
-        annotations: annotations
-      })
+      if (!this.readOnly) {
+        this.$emit('annotation-changed', {
+          preview: preview,
+          annotations: annotations
+        })
+      }
     },
 
     getAnnotation (time) {
