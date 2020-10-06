@@ -4,6 +4,7 @@ import de from './de'
 import fa from './fa'
 import fr from './fr'
 import zh from './zh'
+import ru from './ru'
 
 export default {
   de: de,
@@ -11,5 +12,6 @@ export default {
   es: es,
   fa: fa,
   fr: fr,
-  zh: zh
+  zh: zh,
+  ru: ru
 }
