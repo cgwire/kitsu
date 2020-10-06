@@ -402,31 +402,28 @@ const actions = {
   },
 
   addMetadataDescriptor ({ commit, state }, descriptor) {
-    return new Promise((resolve, reject) => {
-      if (descriptor.id) {
-        return productionsApi.updateMetadataDescriptor(
-          state.currentProduction.id,
-          descriptor
-        )
-          .then((descriptor) => {
-            commit(UPDATE_METADATA_DESCRIPTOR_END, {
-              production: state.currentProduction,
-              descriptor
-            })
-            resolve()
+    if (descriptor.id) {
+      const previousDescriptorFieldName =
+        state.currentProduction.descriptors.find(
+          d => d.id === descriptor.id
+        ).field_name
+      return productionsApi.updateMetadataDescriptor(
+        state.currentProduction.id,
+        descriptor
+      )
+        .then((descriptor) => {
+          commit(UPDATE_METADATA_DESCRIPTOR_END, {
+            production: state.currentProduction,
+            previousDescriptorFieldName,
+            descriptor
           })
-          .catch(reject)
-      } else {
-        return productionsApi.addMetadataDescriptor(
-          state.currentProduction.id,
-          descriptor
-        )
-          .then((descriptor) => {
-            resolve()
-          })
-          .catch(reject)
-      }
-    })
+        })
+    } else {
+      return productionsApi.addMetadataDescriptor(
+        state.currentProduction.id,
+        descriptor
+      )
+    }
   },
 
   deleteMetadataDescriptor ({ commit, state }, descriptorId) {
