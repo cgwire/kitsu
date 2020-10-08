@@ -487,6 +487,7 @@ export default {
   methods: {
     ...mapActions([
       'addMetadataDescriptor',
+      'createTasks',
       'changeShotSort',
       'commentTaskWithPreview',
       'deleteAllShotTasks',
@@ -665,35 +666,48 @@ export default {
         })
     },
 
-    confirmCreateTasks (form) {
+    confirmCreateTasks ({ form, selectionOnly }) {
       this.loading.creatingTasks = true
-      this.runTasksCreation(form, () => {
-        this.hideCreateTasksModal()
-        this.loading.creatingTasks = false
-      })
+      this.runTasksCreation(form, selectionOnly)
+        .then(() => {
+          this.reset()
+          this.hideCreateTasksModal()
+          this.loading.creatingTasks = false
+        })
+        .catch(err => {
+          this.errors.creatingTasks = true
+          console.errror(err)
+        })
     },
 
-    confirmCreateTasksAndStay (form) {
+    confirmCreateTasksAndStay ({ form, selectionOnly }) {
       this.loading.creatingTasksStay = true
-      this.runTasksCreation(form, () => {
-        this.loading.creatingTasksStay = false
-      })
+      this.runTasksCreation(form, selectionOnly)
+        .then(() => {
+          this.reset()
+          this.loading.creatingTasksStay = false
+        })
+        .catch(err => {
+          this.errors.creatingTasks = true
+          console.errror(err)
+        })
     },
 
-    runTasksCreation (form, callback) {
+    runTasksCreation (form, selectionOnly) {
       this.errors.creatingTasks = false
-      this.$store.dispatch('createTasks', {
+      return this.createTasks({
         task_type_id: form.task_type_id,
         project_id: this.currentProduction.id,
         type: 'shots',
-        callback: (err) => {
-          if (err) {
-            this.errors.creatingTasks = true
-          } else {
-            this.loadShots()
-          }
-          callback(err)
-        }
+        selectionOnly
+      })
+    },
+
+    reset () {
+      this.initialLoading = true
+      this.loadShots((err) => {
+        if (err) console.error(err)
+        this.initialLoading = false
       })
     },
 

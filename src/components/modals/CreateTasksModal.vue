@@ -1,4 +1,4 @@
-<template>
+c<template>
 <div :class="{
   'modal': true,
   'is-active': active
@@ -19,10 +19,18 @@
         />
       </form>
 
-      <div class="has-text-right">
+      <div class="flexrow">
+        <div class="filler"></div>
+        <combobox
+          class="flexrow-item"
+          :options="selectionOptions"
+          :with-margin="false"
+          v-model="selectionOnly"
+        />
         <a
           :class="{
             button: true,
+            'flexrow-item': true,
             'is-primary': true,
             'is-loading': isLoadingStay
           }"
@@ -33,6 +41,7 @@
         <a
           :class="{
             button: true,
+            'flexrow-item': true,
             'is-primary': true,
             'is-loading': isLoading
           }"
@@ -46,10 +55,10 @@
         >
           {{ $t("main.cancel") }}
         </button>
-        <p class="error has-text-right info-message" v-if="isError">
-          {{ errorText }}
-        </p>
       </div>
+      <p class="error has-text-right info-message" v-if="isError">
+        {{ errorText }}
+      </p>
 
     </div>
   </div>
@@ -59,6 +68,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
+import Combobox from '@/components/widgets/Combobox'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import PageTitle from '@/components/widgets/PageTitle'
 
@@ -67,8 +77,9 @@ export default {
   mixins: [modalMixin],
 
   components: {
-    PageTitle,
-    ComboboxTaskType
+    Combobox,
+    ComboboxTaskType,
+    PageTitle
   },
 
   props: {
@@ -110,7 +121,12 @@ export default {
     return {
       form: {
         task_type_id: ''
-      }
+      },
+      selectionOnly: 'false',
+      selectionOptions: [
+        { label: this.$t('tasks.for_selection'), value: 'true' },
+        { label: this.$t('tasks.for_project'), value: 'false' }
+      ]
     }
   },
 
@@ -130,11 +146,17 @@ export default {
     ]),
 
     confirmClicked () {
-      this.$emit('confirm', this.form)
+      this.$emit('confirm', {
+        form: this.form,
+        selectionOnly: this.selectionOnly === 'true'
+      })
     },
 
     confirmAndStayClicked () {
-      this.$emit('confirm-and-stay', this.form)
+      this.$emit('confirm-and-stay', {
+        form: this.form,
+        selectionOnly: this.selectionOnly === 'true'
+      })
     }
   },
 
@@ -159,5 +181,9 @@ export default {
 
 .widden {
   margin-bottom: 12em;
+}
+
+.flexrow-item {
+  margin-right: 0;
 }
 </style>
