@@ -500,7 +500,7 @@ export default {
       if (searchQuery) {
         const filters = getFilters({
           entryIndex: [], // entry list is not needed,
-          assetTypes: this.productionAsseTypes,
+          assetTypes: this.productionAssetTypes,
           taskTypes: this.productionTaskTypes,
           taskStatuses: this.productionTaskStatuses,
           descriptors: this.metadataDescriptors,
