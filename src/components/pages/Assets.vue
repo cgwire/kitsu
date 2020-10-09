@@ -585,36 +585,37 @@ export default {
       this.onSearchChange()
     },
 
-    confirmCreateTasks (form) {
+    confirmCreateTasks ({ form, selectionOnly }) {
       this.loading.creatingTasks = true
-      this.runTasksCreation(form, () => {
-        this.hideCreateTasksModal()
-        this.loading.creatingTasks = false
-      })
+      this.runTasksCreation(form, selectionOnly)
+        .then(() => {
+          this.reset()
+          this.hideCreateTasksModal()
+          this.loading.creatingTasks = false
+        })
     },
 
-    confirmCreateTasksAndStay (form) {
+    confirmCreateTasksAndStay ({ form, selectionOnly }) {
       this.loading.taskStay = true
-      this.runTasksCreation(form, () => {
-        this.loading.taskStay = false
-      })
+      this.runTasksCreation(form, selectionOnly)
+        .then(() => {
+          this.reset()
+          this.loading.taskStay = false
+        })
     },
 
-    runTasksCreation (form, callback) {
+    runTasksCreation (form, selectionOnly) {
       this.errors.creatingTasks = false
-      this.createTasks({
-        task_type_id: form.task_type_id,
+      return this.createTasks({
         type: 'assets',
+        task_type_id: form.task_type_id,
         project_id: this.currentProduction.id,
-        callback: (err) => {
-          if (err) {
-            this.errors.creatingTasks = true
-          } else {
-            this.loadAssets()
-          }
-          callback(err)
-        }
+        selectionOnly
       })
+        .catch(err => {
+          this.errors.creatingTasks = true
+          console.error(err)
+        })
     },
 
     confirmDeleteAllTasks (selectionOnly) {

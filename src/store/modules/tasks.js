@@ -9,6 +9,8 @@ import {
 } from '../../lib/sorting'
 import personStore from './people'
 import taskTypeStore from './tasktypes'
+import assetStore from './assets'
+import shotStore from './shots'
 
 import {
   LOAD_ASSETS_END,
@@ -274,18 +276,24 @@ const actions = {
     })
   },
 
-  createTasks (
-    { commit, state },
+  createTasks ({ commit, state },
     payload
   ) {
+    let entityIds = []
+    if (payload.selectionOnly) {
+      if (payload.type === 'shots') {
+        entityIds = shotStore.cache.result.map(shot => shot.id)
+      } else {
+        entityIds = assetStore.cache.result.map(asset => asset.id)
+      }
+    }
     const data = {
       task_type_id: payload.task_type_id,
       type: payload.type,
-      project_id: payload.project_id
+      project_id: payload.project_id,
+      entityIds
     }
-    tasksApi.createTasks(data, (err, tasks) => {
-      if (payload.callback) payload.callback(err, tasks)
-    })
+    return tasksApi.createTasks(data)
   },
 
   createSelectedTasks (

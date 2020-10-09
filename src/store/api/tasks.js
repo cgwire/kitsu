@@ -97,14 +97,15 @@ export default {
     client.del(`/api/data/tasks/${taskId}/comments/${commentId}`, callback)
   },
 
-  createTasks (data, callback) {
+  createTasks (data) {
     const taskTypeId = data.task_type_id
     const type = data.type
     const projectId = data.project_id
-    client.post(
-      `/api/actions/task-types/${taskTypeId}/${type}/create-tasks?project_id=${projectId}`,
-      {},
-      callback
+    const entityIds = data.entityIds
+    return client.ppost(
+      `/api/actions/projects/${projectId}/task-types/${taskTypeId}/${type}/` +
+      'create-tasks',
+      entityIds
     )
   },
 
@@ -114,7 +115,8 @@ export default {
     const type = data.type
     const projectId = data.project_id
     client.post(
-      `/api/actions/task-types/${taskTypeId}/${type}/create-tasks?project_id=${projectId}&id=${entityId}`,
+      `/api/actions/projects/${projectId}/task-types/${taskTypeId}/${type}/` +
+      `create-tasks?id=${entityId}`,
       {},
       callback
     )
