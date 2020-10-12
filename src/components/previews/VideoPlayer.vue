@@ -111,7 +111,7 @@
             'comparison-button': true
           }"
           @click="onCompareClicked"
-          v-if="!readOnly && taskTypeOptions.length > 0 && (!light || isFullScreen())"
+          v-if="taskTypeOptions.length > 0 && (!light || isFullScreen())"
         >
           <copy-icon class="icon smaller" />
         </button>
@@ -122,7 +122,7 @@
           :is-dark="true"
           :thin="true"
           v-model="taskTypeId"
-          v-if="!readOnly && isComparing && (!light || isFullScreen())"
+          v-if="isComparing && (!light || isFullScreen())"
         />
         <combobox
           class="comparison-combobox"
@@ -130,7 +130,7 @@
           :is-dark="true"
           :thin="true"
           v-model="previewToCompareId"
-          v-if="!readOnly && isComparing && (!light || isFullScreen())"
+          v-if="isComparing && (!light || isFullScreen())"
         />
       </div>
 
@@ -1015,7 +1015,6 @@ export default {
     },
 
     setDefaultComparisonTaskType () {
-      if (this.readOnly) return
       const taskTypeIds = Object.keys(this.entityPreviewFiles)
       if (taskTypeIds && taskTypeIds.length > 0) {
         const taskTypeOption = this.taskTypeOptions.find((option) => {
