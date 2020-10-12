@@ -377,13 +377,13 @@ export default {
 
     pictureAttachments () {
       return this.comment.attachment_files.filter(attachment => {
-        return ['png', 'jpg', 'gif'].includes(attachment.extension)
+        return ['png', 'jpg', 'jpeg', 'gif'].includes(attachment.extension)
       })
     },
 
     fileAttachments () {
       return this.comment.attachment_files.filter(attachment => {
-        return !['png', 'jpg', 'gif'].includes(attachment.extension)
+        return !['png', 'jpg', 'jpeg', 'gif'].includes(attachment.extension)
       })
     },
 

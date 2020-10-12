@@ -170,7 +170,7 @@
     :parsed-csv="parsedCSV"
     :form-data="assetsCsvFormData"
     :columns="columns"
-    :dataMatchers="dataMatchers"
+    :data-matchers="dataMatchers"
     :database="filteredAssets"
     @reupload="resetImport"
     @confirm="uploadImportFile"
@@ -301,10 +301,6 @@ export default {
         'Name',
         'Description'
       ],
-      dataMatchers: [
-        'Type',
-        'Name'
-      ],
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
       errors: {
@@ -406,6 +402,7 @@ export default {
       'currentEpisode',
       'currentProduction',
       'displayedAssetsByType',
+      'episodeMap',
       'openProductions',
       'isAssetsLoading',
       'isAssetsLoadingError',
@@ -436,7 +433,11 @@ export default {
       const assets = {}
       this.displayedAssetsByType.forEach(type => {
         type.forEach(item => {
-          const assetKey = `${item.asset_type_name}${item.name}`
+          let assetKey = ''
+          if (this.isTVShow && item.episode_id) {
+            assetKey += this.episodeMap[item.episode_id].name
+          }
+          assetKey += `${item.asset_type_name}${item.name}`
           assets[assetKey] = true
         })
       })
@@ -462,6 +463,17 @@ export default {
       const productionName =
         this.currentProduction ? this.currentProduction.name : ''
       return `${productionName} ${this.$t('assets.title')} - Kitsu`
+    },
+
+    dataMatchers () {
+      return this.isTVShow ? [
+        'Episode',
+        'Type',
+        'Name'
+      ] : [
+        'Type',
+        'Name'
+      ]
     }
   },
 

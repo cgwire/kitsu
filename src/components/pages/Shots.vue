@@ -880,6 +880,9 @@ export default {
             'Name',
             'Description'
           ]
+          if (this.currentEpisode) {
+            headers.splice(0, 0, 'Episode')
+          }
           sortByName([...this.currentProduction.descriptors])
             .filter(d => d.entity_type === 'Shot')
             .forEach((descriptor) => {

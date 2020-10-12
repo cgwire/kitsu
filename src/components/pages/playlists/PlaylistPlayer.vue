@@ -179,13 +179,19 @@
       :title="$t('playlists.actions.next_shot')"
       icon="forward"
     />
-    <span class="flexrow-item time-indicator">
+    <span
+      class="flexrow-item time-indicator"
+      :title="$t('playlists.actions.entity_index')"
+    >
       {{ entityList.length > 0 ? playingEntityIndex + 1 : 0 }}
     </span>
     <span class="flexrow-item time-indicator">
     /
     </span>
-    <span class="flexrow-item time-indicator mr1">
+    <span
+      class="flexrow-item time-indicator"
+      :title="$t('playlists.actions.entities_number')"
+    >
       {{ entityList.length }}
     </span>
     <div class="separator"></div>
@@ -197,21 +203,25 @@
       <button-simple
         class="button playlist-button flexrow-item"
         icon="left"
+        :title="$t('playlists.actions.files_previous')"
         @click="onPreviousPictureClicked"
       />
       <span
         class=""
+        :title="$t('playlists.actions.files_position')"
       >
         {{ currentEntityPictureIndex + 1 }} / {{ currentPicturePreviewLength }}
       </span>
       <button-simple
         class="button playlist-button flexrow-item"
         icon="right"
+        :title="$t('playlists.actions.files_next')"
         @click="onNextPictureClicked"
       />
       <a
         class="button playlist-button flexrow-item"
         :href="currentEntityPicturePath"
+        :title="$t('playlists.actions.see_original_file')"
         target="blank"
       >
         <arrow-up-right-icon class="icon" />
@@ -258,29 +268,33 @@
         v-else
       />
 
-      <button
-        :class="{
-          button: true,
-          'flexrow-item': true,
-          'playlist-button': true,
-          active: isRepeating
-        }"
+      <button-simple
+        :active="isRepeating"
+        :title="$t('playlists.actions.looping')"
+        icon="repeat"
         @click="onRepeatClicked"
-      >
-        <repeat-icon class="icon is-small" style="margin-top: 1px"/>
-      </button>
+        v-if="isFullScreen()"
+      />
 
-      <span class="flexrow-item time-indicator">
+      <span
+        class="flexrow-item time-indicator"
+        :title="$t('playlists.actions.current_time')"
+      >
         {{ currentTime }}
       </span>
       <span class="flexrow-item time-indicator">
       /
-
       </span>
-      <span class="flexrow-item time-indicator">
+      <span
+        class="flexrow-item time-indicator"
+        :title="$t('playlists.actions.max_duration')"
+      >
         {{ maxDuration }}
       </span>
-      <span class="flexrow-item time-indicator mr1">
+      <span
+        class="flexrow-item time-indicator mr1"
+        :title="$t('playlists.actions.frame_number')"
+      >
         ({{ currentFrame }})
       </span>
       <button-simple
@@ -606,7 +620,7 @@
 import moment from 'moment-timezone'
 import { mapActions, mapGetters } from 'vuex'
 import { fabric } from 'fabric'
-import { ArrowUpRightIcon, DownloadIcon, RepeatIcon } from 'vue-feather-icons'
+import { ArrowUpRightIcon, DownloadIcon } from 'vue-feather-icons'
 
 import { formatFrame, formatTime, roundToFrame } from '../../../lib/video'
 import AnnotationBar from './AnnotationBar'
@@ -640,8 +654,7 @@ export default {
     RawVideoPlayer,
     SelectTaskTypeModal,
     Spinner,
-    TaskInfo,
-    RepeatIcon
+    TaskInfo
   },
 
   props: {
@@ -1473,12 +1486,14 @@ export default {
 
     onPreviewChanged (entity, previewFile) {
       this.pause()
-      this.$emit('preview-changed', entity, previewFile.id)
       const localEntity = this.entityList.find(s => s.id === entity.id)
       localEntity.preview_file_id = previewFile.id
+      localEntity.preview_file_task_id = previewFile.task_id
       localEntity.preview_file_extension = previewFile.extension
       localEntity.preview_file_annotations = previewFile.annotations
       if (this.rawPlayer) this.rawPlayer.reloadCurrentEntity()
+      this.$emit('preview-changed', entity, previewFile.id)
+      this.updateTaskPanel()
     },
 
     onEntityDropped (info) {
@@ -1599,15 +1614,22 @@ export default {
               } else {
                 width = fullWidth
               }
+              let top = 0
               if (fullHeight > naturalHeight) {
-                const top = Math.round((fullHeight - naturalHeight) / 2)
+                top = Math.round((fullHeight - naturalHeight) / 2)
                 this.canvas.style.top = top + 'px'
                 height = naturalHeight
               } else if (fullHeight > height) {
-                const top = Math.round((fullHeight - height) / 2)
+                top = Math.round((fullHeight - height) / 2)
                 this.canvas.style.top = top + 'px'
               } else {
                 height = fullHeight
+              }
+              if (this.isComparing) {
+                width = width / 2
+                height = height / 2
+                top = Math.round((fullHeight - height) / 2)
+                this.canvas.style.top = top + 'px'
               }
               this.fabricCanvas.setDimensions({ width, height })
             }
@@ -2384,7 +2406,7 @@ progress {
   height: inherit;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  flex: 1;
 }
 
 .picture-preview-comparison-wrapper {
@@ -2392,9 +2414,7 @@ progress {
   height: inherit;
   justify-content: center;
   align-items: center;
-  width: 50%;
-  min-width: 50%;
-  max-width: 50%;
+  flex: 1;
 }
 
 .picture-preview {

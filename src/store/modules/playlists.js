@@ -309,7 +309,10 @@ const mutations = {
   },
 
   [CHANGE_PLAYLIST_PREVIEW] (state, { playlist, entityId, previewFileId }) {
-    const entityToChange = playlist.shots.find((entity) => entity.entity_id === entityId)
+    let entityToChange = playlist.shots.find(e => e.entity_id === entityId)
+    if (!entityToChange) {
+      entityToChange = playlist.shots.find(e => e.id === entityId)
+    }
     if (entityToChange) {
       entityToChange.preview_file_id = previewFileId
     }

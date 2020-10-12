@@ -901,17 +901,20 @@ const actions = {
 
   getShotsCsvLines ({ state, rootGetters }) {
     const production = rootGetters.currentProduction
+    const isTVShow = rootGetters.isTVShow
     const organisation = rootGetters.organisation
     let shots = cache.shots
     if (cache.result && cache.result.length > 0) {
       shots = cache.result
     }
     const lines = shots.map((shot) => {
-      const shotLine = [
+      let shotLine = []
+      if (isTVShow) shotLine.push(shot.episode_name)
+      shotLine = shotLine.concat([
         shot.sequence_name,
         shot.name,
         shot.description
-      ]
+      ])
       sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Shot')
         .forEach((descriptor) => {

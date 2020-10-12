@@ -62,59 +62,78 @@
 
     <div class="buttons flexrow pull-bottom">
       <div class="left flexrow">
-        <button
-          class="button flexrow-item"
+        <button-simple
+          class="flexrow-item"
+          :title="$t('playlists.actions.play')"
+          icon="play"
           @click="onPlayPauseClicked"
-        >
-          <pause-icon class="icon" v-if="isPlaying" />
-          <play-icon class="icon" v-if="!isPlaying" />
-        </button>
+          v-if="!isPlaying"
+        />
+        <button-simple
+          class="flexrow-item"
+          :title="$t('playlists.actions.pause')"
+          icon="pause"
+          @click="onPlayPauseClicked"
+          v-else
+        />
 
-        <button
-          :class="{
-            button: true,
-            'flexrow-item': true,
-            active: isRepeating
-          }"
+        <button-simple
+          :active="isRepeating"
+          :title="$t('playlists.actions.looping')"
+          icon="repeat"
           @click="onRepeatClicked"
           v-if="isFullScreen()"
+        />
+
+        <button-simple
+          class="flexrow-item"
+          :title="$t('playlists.actions.unmute')"
+          icon="soundoff"
+          @click="onToggleSoundClicked"
+          v-if="isMuted"
+        />
+        <button-simple
+          class="flexrow-item"
+          :title="$t('playlists.actions.mute')"
+          icon="soundon"
+          @click="onToggleSoundClicked"
+          v-else
+        />
+
+        <span
+          class="flexrow-item time-indicator"
+          :title="$t('playlists.actions.current_time')"
         >
-          <repeat-icon class="icon smaller" />
-        </button>
-
-        <button
-          class="button flexrow-item"
-          @click="onToggleSoundClicked">
-          <volume-x-icon class="icon" v-if="isMuted" />
-          <volume-2-icon class="icon" v-if="!isMuted" />
-        </button>
-
-        <span class="flexrow-item time-indicator">
           {{ currentTime }}
         </span>
-        <span class="flexrow-item time-indicator" v-if="!light || readOnly|| isFullScreen()">
+        <span
+          class="flexrow-item time-indicator"
+          v-if="!light || readOnly|| isFullScreen()"
+        >
         /
         </span>
-        <span class="flexrow-item time-indicator" v-if="!light || readOnly || isFullScreen()">
+        <span
+          class="flexrow-item time-indicator"
+          :title="$t('playlists.actions.max_duration')"
+          v-if="!light || readOnly || isFullScreen()"
+        >
          {{ maxDuration }}
         </span>
 
-        <span class="flexrow-item time-indicator mr1">
+        <span
+          class="flexrow-item time-indicator mr1"
+          :title="$t('playlists.actions.frame_number')"
+        >
           ({{ currentFrame }})
         </span>
 
-        <button
-          :class="{
-            button: true,
-            'flexrow-item': true,
-            active: isComparing,
-            'comparison-button': true
-          }"
+        <button-simple
+          :active="isComparing"
+          icon="compare"
+          :title="$t('playlists.actions.split_screen')"
           @click="onCompareClicked"
-          v-if="!readOnly && taskTypeOptions.length > 0 && (!light || isFullScreen())"
-        >
-          <copy-icon class="icon smaller" />
-        </button>
+          v-if="taskTypeOptions.length > 0 && (!light || isFullScreen())"
+        />
 
         <combobox
           class="comparison-combobox"
@@ -122,7 +141,7 @@
           :is-dark="true"
           :thin="true"
           v-model="taskTypeId"
-          v-if="!readOnly && isComparing && (!light || isFullScreen())"
+          v-if="isComparing && (!light || isFullScreen())"
         />
         <combobox
           class="comparison-combobox"
@@ -130,7 +149,7 @@
           :is-dark="true"
           :thin="true"
           v-model="previewToCompareId"
-          v-if="!readOnly && isComparing && (!light || isFullScreen())"
+          v-if="isComparing && (!light || isFullScreen())"
         />
       </div>
 
@@ -148,30 +167,29 @@
             {{ previewFile.revision }}
           </span>
         </div>
-
-        <button
-          class="button flexrow-item"
+        <button-simple
+          class="flexrow-item"
+          icon="undo"
+          :title="$t('playlists.actions.annotation_undo')"
+          v-if="!readOnly && isFullScreen()"
           @click="undoLastAction"
-          v-if="!readOnly && isFullScreen()"
-        >
-          <corner-left-down-icon class="icon" />
-        </button>
+        />
 
-        <button
-          class="button flexrow-item"
+        <button-simple
+          class="flexrow-item"
+          :title="$t('playlists.actions.annotation_redo')"
+          icon="redo"
+          v-if="!readOnly && isFullScreen()"
           @click="redoLastAction"
-          v-if="!readOnly && isFullScreen()"
-        >
-          <corner-right-down-icon class="icon" />
-        </button>
+        />
 
-        <button
-          class="button flexrow-item"
+        <button-simple
+          class="flexrow-item"
+          icon="remove"
+          :title="$t('playlists.actions.annotation_delete')"
           @click="onDeleteClicked"
-          v-if="!readOnly && isFullScreenEnabled"
-        >
-          <x-icon class="icon" />
-        </button>
+          v-if="!readOnly && isFullScreen()"
+        />
 
         <transition name="slide">
           <div
@@ -187,18 +205,15 @@
             />
           </div>
         </transition>
-        <button
-          :class="{
-            button: true,
-            'flexrow-item': true,
-            active: isTyping
-          }"
+
+        <button-simple
+          class="flexrow-item"
+          icon="type"
+          :active="isTyping"
           :title="$t('playlists.actions.annotation_text')"
           @click="onTypeClicked"
           v-if="!readOnly && isFullScreen()"
-        >
-          <type-icon class="icon" />
-        </button>
+        />
 
         <transition name="slide">
           <div
@@ -223,32 +238,30 @@
           </div>
         </transition>
 
-        <button
-          :class="{
-            button: true,
-            'flexrow-item': true,
-            active: isDrawing
-          }"
+        <button-simple
+          class="flexrow-item"
+          icon="pencil"
+          :active="isDrawing"
+          :title="$t('playlists.actions.annotation_text')"
           @click="onPencilAnnotateClicked"
-          v-if="!readOnly && isFullScreenEnabled"
-        >
-          <edit-2-icon class="icon" />
-        </button>
+          v-if="!readOnly && isFullScreen()"
+        />
 
         <a
-          :href="movieDlPath"
           class="button flexrow-item"
+          :href="movieDlPath"
+          :title="$t('playlists.actions.download_file')"
         >
-          <download-icon class="icon" />
+          <download-icon class="icon is-small" />
         </a>
 
-        <button
-          class="button flexrow-item"
-          @click="onFullscreenClicked"
+        <button-simple
+          class="flexrow-item"
+          :title="$t('playlists.actions.fullscreen')"
+          icon="maximize"
           v-if="isFullScreenEnabled"
-        >
-          <maximize-icon class="icon" />
-        </button>
+          @click="onFullscreenClicked"
+        />
       </div>
     </div>
   </div>
@@ -259,23 +272,12 @@
 import { mapGetters } from 'vuex'
 import { fabric } from 'fabric'
 import {
-  CopyIcon,
-  CornerLeftDownIcon,
-  CornerRightDownIcon,
-  DownloadIcon,
-  Edit2Icon,
-  MaximizeIcon,
-  PauseIcon,
-  PlayIcon,
-  RepeatIcon,
-  Volume2Icon,
-  VolumeXIcon,
-  TypeIcon,
-  XIcon
+  DownloadIcon
 } from 'vue-feather-icons'
 
 import { formatFrame, formatTime, roundToFrame } from '../../lib/video'
 import AnnotationBar from '../pages/playlists/AnnotationBar'
+import ButtonSimple from '../widgets/ButtonSimple'
 import ColorPicker from '../widgets/ColorPicker'
 import PencilPicker from '../widgets/PencilPicker'
 import Combobox from '../widgets/Combobox'
@@ -290,23 +292,12 @@ export default {
 
   components: {
     AnnotationBar,
+    ButtonSimple,
     ColorPicker,
-    CornerLeftDownIcon,
-    CornerRightDownIcon,
     PencilPicker,
-    CopyIcon,
     Combobox,
     DownloadIcon,
-    Edit2Icon,
-    MaximizeIcon,
-    PauseIcon,
-    PlayIcon,
-    RepeatIcon,
-    Volume2Icon,
-    VolumeXIcon,
-    Spinner,
-    TypeIcon,
-    XIcon
+    Spinner
   },
 
   props: {
@@ -367,6 +358,7 @@ export default {
   },
 
   mounted () {
+    if (!this.container) return
     this.reloadAnnotations()
     this.container.style.height = this.getDefaultHeight() + 'px'
     this.isLoading = true
@@ -1015,7 +1007,6 @@ export default {
     },
 
     setDefaultComparisonTaskType () {
-      if (this.readOnly) return
       const taskTypeIds = Object.keys(this.entityPreviewFiles)
       if (taskTypeIds && taskTypeIds.length > 0) {
         const taskTypeOption = this.taskTypeOptions.find((option) => {
