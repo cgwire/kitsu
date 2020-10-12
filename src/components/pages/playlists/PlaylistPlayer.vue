@@ -1473,12 +1473,14 @@ export default {
 
     onPreviewChanged (entity, previewFile) {
       this.pause()
-      this.$emit('preview-changed', entity, previewFile.id)
       const localEntity = this.entityList.find(s => s.id === entity.id)
       localEntity.preview_file_id = previewFile.id
+      localEntity.preview_file_task_id = previewFile.task_id
       localEntity.preview_file_extension = previewFile.extension
       localEntity.preview_file_annotations = previewFile.annotations
       if (this.rawPlayer) this.rawPlayer.reloadCurrentEntity()
+      this.$emit('preview-changed', entity, previewFile.id)
+      this.updateTaskPanel()
     },
 
     onEntityDropped (info) {
@@ -1599,15 +1601,22 @@ export default {
               } else {
                 width = fullWidth
               }
+              let top = 0
               if (fullHeight > naturalHeight) {
-                const top = Math.round((fullHeight - naturalHeight) / 2)
+                top = Math.round((fullHeight - naturalHeight) / 2)
                 this.canvas.style.top = top + 'px'
                 height = naturalHeight
               } else if (fullHeight > height) {
-                const top = Math.round((fullHeight - height) / 2)
+                top = Math.round((fullHeight - height) / 2)
                 this.canvas.style.top = top + 'px'
               } else {
                 height = fullHeight
+              }
+              if (this.isComparing) {
+                width = width / 2
+                height = height / 2
+                top = Math.round((fullHeight - height) / 2)
+                this.canvas.style.top = top + 'px'
               }
               this.fabricCanvas.setDimensions({ width, height })
             }
@@ -2384,7 +2393,7 @@ progress {
   height: inherit;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  flex: 1;
 }
 
 .picture-preview-comparison-wrapper {
@@ -2392,9 +2401,7 @@ progress {
   height: inherit;
   justify-content: center;
   align-items: center;
-  width: 50%;
-  min-width: 50%;
-  max-width: 50%;
+  flex: 1;
 }
 
 .picture-preview {
