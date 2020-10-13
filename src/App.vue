@@ -961,6 +961,12 @@ textarea.input:focus {
   margin-right: 0em;
 }
 
+.button .icon.is-small {
+  height: 1.1rem;
+  line-height: 1.1rem;
+  width: 1.1rem;
+}
+
 .button.highlighted {
   background: #00B242;
   color: white;

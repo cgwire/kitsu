@@ -34,41 +34,42 @@
 
   <div class="buttons flexrow pull-bottom" ref="button-bar">
     <div class="left flexrow">
-      <button
-        class="button flexrow-item"
+      <button-simple
+        class="flexrow-item"
+        :title="$t('playlists.actions.files_previous')"
+        icon="left"
         @click="onPreviousClicked"
-      >
-        <chevron-left-icon class="icon" />
-      </button>
+      />
 
       <span
         class="flexrow-item bar-element"
+        :title="$t('playlists.actions.files_position')"
       >
         {{ currentIndex }} / {{ preview.previews.length }}
       </span>
 
-      <button
+      <button-simple
         class="button flexrow-item"
+        icon="right"
+        :title="$t('playlists.actions.files_next')"
         @click="onNextClicked"
-      >
-        <chevron-right-icon class="icon" />
-      </button>
+      />
 
-      <button
-        class="button flexrow-item"
+      <button-simple
+        class="flexrow-item"
         @click="onAddPreviewClicked"
+        :title="$t('playlists.actions.files_add')"
+        icon="plus"
         v-if="!readOnly && preview.extension !== 'gif'"
-      >
-        <plus-icon class="icon" />
-      </button>
+      />
 
-      <button
-        class="button flexrow-item"
+      <button-simple
+        class="flexrow-item"
+        :title="$t('playlists.actions.files_delete')"
+        icon="delete"
         @click="onRemovePreviewClicked"
-        v-if="currentIndex > 1 && !light && !readOnly"
-      >
-        <trash-icon class="icon" />
-      </button>
+        v-if="currentIndex > 1 && (!light || fullScreen) && !readOnly"
+      />
     </div>
 
     <div class="right flexrow">
@@ -89,6 +90,7 @@
       <button-simple
         class="playlist-button flexrow-item"
         icon="undo"
+        :title="$t('playlists.actions.annotation_undo')"
         @click="undoLastAction"
         v-if="fullScreen && !readOnly"
       />
@@ -96,17 +98,18 @@
       <button-simple
         class="playlist-button flexrow-item"
         icon="redo"
+        :title="$t('playlists.actions.annotation_redo')"
         @click="redoLastAction"
         v-if="fullScreen && !readOnly"
       />
 
-      <button
-        class="button flexrow-item"
+      <button-simple
+        class="flexrow-item"
+        icon="remove"
+        :title="$t('playlists.actions.annotation_delete')"
         @click="onDeleteClicked"
         v-if="fullScreen && !readOnly"
-      >
-        <x-icon class="icon" />
-      </button>
+      />
 
       <transition name="slide">
         <div
@@ -122,18 +125,15 @@
           />
         </div>
       </transition>
-      <button
-        :class="{
-          button: true,
-          'flexrow-item': true,
-          active: isTyping
-        }"
+
+      <button-simple
+        class="flexrow-item"
+        icon="type"
+        :active="isTyping"
         :title="$t('playlists.actions.annotation_text')"
         @click="onTypeClicked"
         v-if="!readOnly && fullScreen"
-      >
-        <type-icon class="icon" />
-      </button>
+      />
 
       <transition name="slide">
         <div
@@ -158,40 +158,38 @@
         </div>
       </transition>
 
-      <button
-        :class="{
-          button: true,
-          'flexrow-item': true,
-          active: isDrawing
-        }"
+      <button-simple
+        class="flexrow-item"
+        icon="pencil"
+        :active="isDrawing"
+        :title="$t('playlists.actions.annotation_draw')"
         @click="onPencilAnnotateClicked"
         v-if="fullScreen && !readOnly"
-      >
-        <edit-2-icon class="icon" />
-      </button>
-
-      <button
-        class="button flexrow-item"
-        @click="onFullscreenClicked"
-        v-if="isFullScreenEnabled"
-      >
-        <maximize-icon class="icon" />
-      </button>
+      />
 
       <a
         class="button flexrow-item"
         :href="pictureOriginalPath"
+        :title="$t('playlists.actions.see_original_file')"
         target="blank"
         v-if="!readOnly"
       >
-        <arrow-up-right-icon class="icon" />
+        <arrow-up-right-icon class="icon is-small" />
       </a>
       <a
         class="button flexrow-item"
+        :title="$t('playlists.actions.download_file')"
         :href="pictureDlPath"
       >
-        <download-icon class="icon" />
+        <download-icon class="icon is-small" />
       </a>
+
+      <button-simple
+        class="flexrow-item"
+        :title="$t('playlists.actions.fullscreen')"
+        icon="maximize"
+        @click="onFullscreenClicked"
+      />
     </div>
   </div>
 </div>
@@ -201,15 +199,7 @@
 import { fabric } from 'fabric'
 import {
   ArrowUpRightIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  DownloadIcon,
-  Edit2Icon,
-  MaximizeIcon,
-  PlusIcon,
-  TrashIcon,
-  TypeIcon,
-  XIcon
+  DownloadIcon
 } from 'vue-feather-icons'
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { annotationMixin } from '@/components/mixins/annotation_mixin'
@@ -225,18 +215,10 @@ export default {
   components: {
     ArrowUpRightIcon,
     ButtonSimple,
-    ChevronLeftIcon,
-    ChevronRightIcon,
     ColorPicker,
     DownloadIcon,
-    Edit2Icon,
-    MaximizeIcon,
     PencilPicker,
-    PlusIcon,
-    Spinner,
-    TrashIcon,
-    TypeIcon,
-    XIcon
+    Spinner
   },
   mixins: [annotationMixin, domMixin, fullScreenMixin],
 
@@ -1128,5 +1110,9 @@ export default {
     position: relative;
     width: 800px;
   }
+}
+
+a {
+  padding-top: 3px;
 }
 </style>

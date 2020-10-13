@@ -210,7 +210,7 @@
         @click="onPreviousPictureClicked"
       />
       <span
-        class=""
+        class="ml05 mr05"
         :title="$t('playlists.actions.files_position')"
       >
         {{ currentEntityPictureIndex + 1 }} / {{ currentPicturePreviewLength }}
@@ -227,7 +227,7 @@
         :title="$t('playlists.actions.see_original_file')"
         target="blank"
       >
-        <arrow-up-right-icon class="icon" />
+        <arrow-up-right-icon class="icon is-small" />
       </a>
     </div>
 
@@ -328,7 +328,7 @@
         :title="$t('playlists.actions.split_screen')"
         icon="compare"
         @click="onCompareClicked"
-        v-if="taskTypeOptions"
+        v-if="taskTypeOptions && taskTypeOptions.length > 0"
       />
       <combobox
         class="playlist-button flexrow-item comparison-list"
@@ -443,7 +443,7 @@
           'flexrow-item': true,
           active: isDrawing
         }"
-        :title="$t('playlists.actions.annotation')"
+        :title="$t('playlists.actions.annotation_draw')"
         @click="onAnnotateClicked"
         icon="pencil"
       />
@@ -1667,13 +1667,15 @@ export default {
 
     rebuildEntityListToCompare () {
       if (this.taskTypeToCompare) {
-        this.entityListToCompare = this.entityList.map((entity) => {
-          const preview = entity.preview_files[this.taskTypeToCompare][0]
-          return ({
-            preview_file_id: preview.id,
-            preview_file_extension: 'mp4'
+        this.entityListToCompare = this.entityList
+          .filter(entity => entity.preview_files[this.taskTypeToCompare])
+          .map((entity) => {
+            const preview = entity.preview_files[this.taskTypeToCompare][0]
+            return ({
+              preview_file_id: preview.id,
+              preview_file_extension: 'mp4'
+            })
           })
-        })
       } else {
         this.buildEntityListToCompare = []
       }
@@ -2438,7 +2440,7 @@ progress {
 }
 
 .playlist-player a.playlist-button {
-  margin-top: 3px;
+  padding-top: 3px;
   svg {
     width: 18px;
   }
