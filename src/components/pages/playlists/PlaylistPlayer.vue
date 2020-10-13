@@ -9,7 +9,10 @@
   }"
 >
   <div class="playlist-header flexrow" ref="header" v-if="!tempMode">
-    <div class="flexrow-item for-client" v-if="playlist && playlist.for_client">
+    <div
+      class="flexrow-item for-client"
+      v-if="playlist && playlist.for_client"
+    >
       {{ $t('playlists.client_playlist') }}
     </div>
     <span class="flexrow-item playlist-name">
@@ -269,11 +272,11 @@
       />
 
       <button-simple
+        class="button playlist-button flexrow-item"
         :active="isRepeating"
         :title="$t('playlists.actions.looping')"
         icon="repeat"
         @click="onRepeatClicked"
-        v-if="isFullScreen()"
       />
 
       <span
