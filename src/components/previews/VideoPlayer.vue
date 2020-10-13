@@ -478,6 +478,7 @@ export default {
     },
 
     taskTypeOptions () {
+      if (!this.entityPreviewFiles) return []
       const taskTypeIds = Object.keys(this.entityPreviewFiles)
       return taskTypeIds
         .filter((taskTypeId) => {
