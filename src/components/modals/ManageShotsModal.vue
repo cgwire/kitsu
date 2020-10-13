@@ -133,7 +133,7 @@
                 'is-success': true,
                 'is-loading': loading.addShot
               }"
-              :disabled="!isAddShotAllowed"
+              :disabled="!isAddShotAllowed || loading.addShot"
               @click="addShot"
             >
               {{ $t('main.add')}}
@@ -359,7 +359,7 @@ export default {
     },
 
     addShot () {
-      if (this.isAddShotAllowed) {
+      if (this.isAddShotAllowed && !this.loading.addShot) {
         const shotName = this.names.shot
         this.loading.addShot = true
         if (shotName.length > 0 && this.selectedSequenceId) {
@@ -368,7 +368,6 @@ export default {
             sequence_id: this.selectedSequenceId,
             project_id: this.currentProduction.id
           }
-          this.loading.addShot = false
           this.newShot(shot)
             .then((shot) => {
               this.loading.addShot = false
