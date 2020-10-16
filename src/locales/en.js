@@ -788,7 +788,7 @@ export default {
     set_preview: 'Set this preview as thumbnail',
     set_preview_error: 'An error occured while setting preview as thumbnail',
     set_preview_done: 'This preview is used as thumbnail for the current entity.',
-    select_preview_file: 'Please select a picture from your hard drive to be used as a preview for the current task:',
+    select_preview_file: 'Please select a file (picture, movie or others) from your hard drive to be used as a preview for the current task:',
     show_assignations: 'Show assignations',
     show_infos: 'Show additional information',
     subscribe_notifications: 'Subscribe to notifications',

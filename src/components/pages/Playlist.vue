@@ -904,6 +904,7 @@ export default {
         .catch((err) => {
           console.error(err)
           this.errors.editPlaylist = true
+          this.loading.editPlaylist = false
         })
     },
 

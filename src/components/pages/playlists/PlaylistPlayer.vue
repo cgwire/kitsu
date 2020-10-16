@@ -2363,15 +2363,6 @@ progress {
   }
 }
 
-.separator {
-  margin: .5rem;
-  &:before {
-    content: '';
-    border-left: 1px solid $dark-grey-lightest;
-    height: .5rem;
-  }
-}
-
 .annotation-tools {
   display: flex;
   align-items: stretch;
