@@ -24,6 +24,12 @@
       <span class="filler"></span>
       <button-simple
         class="flexrow-item"
+        icon="refresh"
+        :title="$t('main.reload')"
+        @click="reset"
+      />
+      <button-simple
+        class="flexrow-item"
         icon="download"
         @click="exportStatisticsToCsv"
       />
@@ -155,6 +161,7 @@ export default {
       'hideAssignations',
       'initEpisodes',
       'loadComment',
+      'loadEpisodeStats',
       'loadShots',
       'setLastProductionScreen',
       'setEpisodeSearch',
@@ -271,6 +278,10 @@ export default {
         this.episodeMap,
         this.countMode
       )
+    },
+
+    reset () {
+      this.loadEpisodeStats(this.currentProduction.id)
     }
   },
 
@@ -292,27 +303,9 @@ export default {
         this.loadShots(() => {
           this.resizeHeaders()
           if (this.isTVShow) {
-            this.loadEpisodeStats()
+            this.loadEpisodeStats(this.currentProduction.id)
           } else {
             this.computeEpisodeStats()
-          }
-        })
-      }
-    }
-  },
-
-  socket: {
-    events: {
-      'comment:new' (eventData) {
-        const commentId = eventData.comment_id
-        this.loadComment({
-          commentId,
-          callback: () => {
-            if (this.isTVShow) {
-              this.loadEpisodeStats()
-            } else {
-              this.computeEpisodeStats()
-            }
           }
         })
       }
