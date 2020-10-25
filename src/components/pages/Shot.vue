@@ -152,7 +152,7 @@
         </div>
       </div>
       <table-info
-        :is-loading="casting.isLoadin"
+        :is-loading="casting.isLoading"
         :is-error="casting.isError"
         v-else
       />

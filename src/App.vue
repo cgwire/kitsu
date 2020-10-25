@@ -992,7 +992,6 @@ textarea.input:focus {
 }
 
 .query-list .tag .delete {
-  margin-left: 0.5em;
   transform: rotate(45deg) scale(0.7)
 }
 

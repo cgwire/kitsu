@@ -135,8 +135,8 @@
       <div class="query-list">
         <search-query-list
           :queries="searchQueries"
-          @changesearch="changeSearch"
-          @removesearch="removeSearchQuery"
+          @change-search="changeSearch"
+          @remove-search="removeSearchQuery"
           v-if="!loading.entities"
         />
       </div>

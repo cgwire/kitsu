@@ -275,7 +275,6 @@ export default {
 
     onDeleteClicked (sequence) {
       this.sequenceToDelete = sequence
-      console.log('otot')
       this.modals.isDeleteDisplayed = true
     },
 

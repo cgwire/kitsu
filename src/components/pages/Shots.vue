@@ -62,8 +62,8 @@
         <div class="query-list">
           <search-query-list
             :queries="shotSearchQueries"
-            @changesearch="changeSearch"
-            @removesearch="removeSearchQuery"
+            @change-search="changeSearch"
+            @remove-search="removeSearchQuery"
             v-if="!isShotsLoading && !initialLoading"
           />
         </div>
@@ -92,6 +92,7 @@
         @restore-clicked="onRestoreClicked"
         @scroll="saveScrollPosition"
         @shot-history="showShotHistoryModal"
+        @sequence-clicked="onSequenceClicked"
       />
     </div>
   </div>
@@ -806,7 +807,12 @@ export default {
       this.modals.isDeleteAllTasksDisplayed = true
     },
 
-    onSearchChange (event) {
+    onSequenceClicked (sequenceName) {
+      this.searchField.setValue(`${this.shotSearchText} ${sequenceName}`)
+      this.onSearchChange()
+    },
+
+    onSearchChange () {
       const searchQuery = this.searchField.getValue()
       if (searchQuery.length !== 1) {
         this.setShotSearch(searchQuery)

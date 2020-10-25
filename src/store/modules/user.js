@@ -35,6 +35,7 @@ import {
   SET_TODOS_SEARCH,
   LOAD_USER_FILTERS_END,
   LOAD_USER_FILTERS_ERROR,
+  UPDATE_USER_FILTER,
   SAVE_TODO_SEARCH_END,
   REMOVE_TODO_SEARCH_END,
 
@@ -224,6 +225,11 @@ const actions = {
 
   setTodosSearch ({ commit, state }, searchText) {
     commit(SET_TODOS_SEARCH, searchText)
+  },
+
+  updateSearchFilter ({ commit }, searchFilter) {
+    commit(UPDATE_USER_FILTER, searchFilter)
+    return peopleApi.updateFilter(searchFilter)
   },
 
   loadUserSearchFilters ({ commit }, callback) {
@@ -487,6 +493,17 @@ const mutations = {
   },
   [LOAD_USER_FILTERS_END] (state, userFilters) {
     state.userFilters = userFilters
+  },
+  [UPDATE_USER_FILTER] (state, userFilter) {
+    Object.keys(state.userFilters).forEach(typeName => {
+      Object.keys(state.userFilters[typeName]).forEach(projectId => {
+        const projectFilters = state.userFilters[typeName][projectId]
+        const filter = projectFilters.find(f => f.id === userFilter.id)
+        if (filter) {
+          Object.assign(filter, userFilter)
+        }
+      })
+    })
   },
 
   [SET_TIME_SPENT] (state, timeSpent) {

@@ -128,6 +128,14 @@ export default {
     client.get('/api/data/user/filters', callback)
   },
 
+  updateFilter (searchFilter) {
+    const data = {
+      name: searchFilter.name,
+      search_query: searchFilter.search_query
+    }
+    return client.pput(`/api/data/user/filters/${searchFilter.id}`, data)
+  },
+
   createFilter (listType, name, query, productionId, entityType, callback) {
     const data = {
       list_type: listType,
@@ -139,8 +147,8 @@ export default {
     client.post('/api/data/user/filters', data, callback)
   },
 
-  removeFilter (searchQuery, callback) {
-    client.del(`/api/data/user/filters/${searchQuery.id}`, callback)
+  removeFilter (searchFilter, callback) {
+    client.del(`/api/data/user/filters/${searchFilter.id}`, callback)
   },
 
   getTimeSpents (personId, date, callback) {
