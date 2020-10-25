@@ -182,6 +182,7 @@
               <router-link
                 class="asset-link"
                 :to="assetPath(asset.id)"
+                :title="asset.full_name"
               >
                 {{ asset.name }}
               </router-link>

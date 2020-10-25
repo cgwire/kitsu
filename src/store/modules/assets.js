@@ -168,6 +168,7 @@ const helpers = {
 
     const taskIds = []
     asset.tasks.forEach((task) => {
+      asset.full_name = `${asset.asset_type_name} / ${asset.name}`
       helpers.populateTask(task, asset)
 
       if (task.assignees.length > 1) {

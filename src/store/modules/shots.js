@@ -1114,6 +1114,7 @@ const mutations = {
       let timeSpent = 0
       shot.project_name = production.name
       shot.production_id = production.id
+      shot.full_name = helpers.getShotName(shot)
       shot.tasks.forEach((task) => {
         helpers.populateTask(task, shot, production)
         timeSpent += task.duration
