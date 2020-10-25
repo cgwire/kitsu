@@ -147,7 +147,7 @@
           @show-add-entities="toggleAddEntities"
           @preview-changed="onPreviewChanged"
           @task-type-changed="onTaskTypeChanged"
-          @playlist-deleted="goFirstPlaylist"
+          @playlist-deleted="$router.push(playlistsPath)"
           @remove-entity="removeEntity"
           @order-change="onOrderChange"
           @annotationchanged="onAnnotationChanged"
