@@ -324,6 +324,7 @@
                 'current-preview-file': previewFile.revision === currentPreview.revision
               }"
               :key="`last-preview-${previewFile.id}`"
+              :title="$t('playlists.actions.display_revision') + ' ' + previewFile.revision"
               @click="changeCurrentPreview(previewFile)"
               v-for="previewFile in lastPreviewFiles"
             >

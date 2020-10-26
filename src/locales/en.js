@@ -463,6 +463,7 @@ export default {
       current_time: 'Position in the video',
       comments: 'Show/Hide comments',
       delete: 'Delete playlist',
+      display_revision: 'Display revision',
       download: 'Download playlist',
       download_file: 'Download file',
       edit: 'Edit playlist',
