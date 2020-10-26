@@ -912,6 +912,7 @@ export default {
           this.shotValidationColumns
             .forEach((taskTypeId) => {
               headers.push(this.taskTypeMap[taskTypeId].name)
+              headers.push('Assignations')
             })
           csv.buildCsvFile(name, [headers].concat(shotLines))
         })

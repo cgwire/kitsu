@@ -903,6 +903,7 @@ const actions = {
     const production = rootGetters.currentProduction
     const isTVShow = rootGetters.isTVShow
     const organisation = rootGetters.organisation
+    const personMap = rootGetters.personMap
     let shots = cache.shots
     if (cache.result && cache.result.length > 0) {
       shots = cache.result
@@ -928,12 +929,16 @@ const actions = {
       if (state.isFrameOut) shotLine.push(shot.data.frame_out)
       if (state.isFps) shotLine.push(shot.data.fps)
       state.shotValidationColumns
-        .forEach((validationColumn) => {
+        .forEach(validationColumn => {
           const task = rootGetters.taskMap[shot.validations[validationColumn]]
           if (task) {
             shotLine.push(task.task_status_short_name)
+            shotLine.push(
+              task.assignees.map(id => personMap[id].full_name).join(',')
+            )
           } else {
-            shotLine.push('')
+            shotLine.push('') // Status
+            shotLine.push('') // Assignations
           }
         })
       return shotLine
