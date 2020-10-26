@@ -213,6 +213,7 @@ export default {
   data () {
     return {
       disabledDates: {
+        to: this.isCurrentUserArtist ? moment().startOf('isoWeek').toDate() : null,
         from: moment().toDate() // Disable dates after today.
       },
       page: 1,
@@ -228,14 +229,11 @@ export default {
       this.$refs['th-prod'].offsetWidth +
       this.$refs['th-type'].offsetWidth +
       'px'
-
-    if (this.isCurrentUserArtist) {
-      this.disabledDates.to = moment().substract('day', 7).toDate()
-    }
   },
 
   computed: {
     ...mapGetters([
+      'isCurrentUserArtist',
       'nbSelectedTasks',
       'productionMap',
       'taskTypeMap',
