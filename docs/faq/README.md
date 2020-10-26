@@ -51,7 +51,6 @@ You have to name your thumbnails as sequence_shot or asettype_asset.
  
   -----------------------------------------    
 
-
 ## How to change your password?
 
 Click on your name on the top right of the screen (1) then on **Profile** (2).
@@ -89,6 +88,130 @@ You can also filter the information. As you already are in a task, you need to t
 `wip`, `wfa`, `-done`, etc.
 
 You can also search per sequence or type of asset (`character`, or `seq01`)
+
+-----------------------
+
+## How to delete an asset
+
+Go on the main page of the assets.
+
+![Delete asset](../img/faq/delete_asset_global.png)
+
+On the right part of the asset line, click on the 
+![Delete button](../img/faq/delete_button.png) button.
+
+A confirmation pop up appears, validate with **Confirm**.
+
+![Delete asset popup](../img/faq/validation_popup_delete_asset.png)
+
+Once deleted, the asset appears as crossed, it can be still restored with ![Restore asset](../img/faq/restore_button.png) .
+
+![Delete asset](../img/faq/delete_asset1.png)
+
+To definitively delete an asset, you have to click on 
+![Delete button](../img/faq/delete_button.png) button a second time.
+
+The asset is removed from the database and won't appear anymore on Kitsu.
+
+---------------------
+
+## How to delete a shot
+
+Go on the main page of the shots.
+
+![Delete shot](../img/faq/delete_shot_global.png)
+
+On the right part of the shot line, click on the 
+![Delete button](../img/faq/delete_button.png) button.
+
+A confirmation pop-up appears, validate with **Confirm**.
+
+![Delete shot popup](../img/faq/validation_popup_delete_shot.png)
+
+Once deleted, the shot appears as crossed, it can be still restored 
+with ![Restore asset](../img/faq/restore_button.png) .
+
+![Delete shot](../img/faq/delete_shot1.png)
+
+To definitively delete a shot, you have to click on 
+![Delete button](../img/faq/delete_button.png) button a second time.
+
+The shot is removed from the database and won't appear anymore on Kitsu.
+
+-----------------------
+
+## How to delete a sequence
+
+To delete a sequence, use the drop-down menu to
+go to the sequence page.
+ 
+![Drop down menu sequence](../img/faq/drop_down_menu_breakdown.png)
+ 
+Then you can delete the sequence, with the 
+![Delete button](../img/faq/delete_button.png) button.
+
+![Delete sequence](../img/faq/delete_sequence.png)
+
+-----------------------
+
+## How to delete a task type
+
+To delete a task type (shot or asset), go to the global spreadsheet page, 
+and click on the arrow next to the name of the task type ![Delete sequence](../img/faq/arrow.png). 
+
+A sub-menu appears with the option **Delete all** the tasks.
+Once you have click on it, a message appears and ask you to type the name of the task. You need to type it as it shows, it's case sensitive.
+
+![Delete sequence](../img/faq/delete_tasktype.png). 
+
+-----------------------
+
+## How to delete a task
+
+To delete a task (shot or asset), go to the global spreadsheet page, 
+and click on the status of the task that you want to delete.
+
+![Delete tssk selection](../img/faq/delete_task_selection.png). 
+
+The action menu will appear. Select **Delete tasks** and validate with the **Confirm** button.
+
+![Delete tssk menu](../img/faq/delete_task_menu_delete.png). 
+
+Once the tasks deleted, the column will be empty, and won't count on the stats.
+
+![Delete tssk empty](../img/faq/delete_task_empty.png)
+
+The second benefit will be to hide automatically this empty column once your will filter your view.
+
+![Delete tssk filter](../img/faq/delete_task_filter.png.png)
+
+-----------------------
+
+## How to delete tasks for a specific asset type (or sequence)
+
+To delete tasks (shot or asset) of a specific asset type or sequence , go to the global spreadsheet page, filter the view to display the element you want to delete.
+
+![Delete tssk type selection](../img/faq/delete_task_assettype_filter.png). 
+
+Then click on the arrow on the right of the task that you want to delete and select **Delete all**.
+
+![Delete tssk selection asset type](../img/faq/delete_task_assettype.png). 
+
+On the pop-up window, type the name of the task type, 
+and select **For current list and filters** on the drop down menu.
+
+
+![Delete all tssk filtered](../img/faq/delete_task_assettype_all.png). 
+
+Once the tasks deleted, the column will be empty, and won't count on the stats.
+
+![Delete tssk empty](../img/faq/delete_task_empty.png)
+
+The second benefit will be to hide automatically this empty column once your will filter your view.
+
+![Delete tssk filter](../img/faq/delete_task_filter.png.png)
+
+-----------------------
 
 ## How to have an overview of the production?
 ### Sequence overview page
@@ -667,83 +790,3 @@ validate your choice with the "add" button.
 
 ---------------------
 
-## How to delete an asset
-
-Go on the main page of the assets.
-
-![Delete asset](../img/faq/delete_asset_global.png)
-
-On the right part of the asset line, click on the 
-![Delete button](../img/faq/delete_button.png) button.
-
-A confirmation pop up appears, validate with **Confirm**.
-
-![Delete asset popup](../img/faq/validation_popup_delete_asset.png)
-
-Once deleted, the asset appears as crossed, it can be still restored with ![Restore asset](../img/faq/restore_button.png) .
-
-![Delete asset](../img/faq/delete_asset1.png)
-
-To definitively delete an asset, you have to click on 
-![Delete button](../img/faq/delete_button.png) button a second time.
-
-The asset is removed from the database and won't appear anymore on Kitsu.
-
----------------------
-
-## How to delete a shot
-
-Go on the main page of the shots.
-
-![Delete shot](../img/faq/delete_shot_global.png)
-
-On the right part of the shot line, click on the 
-![Delete button](../img/faq/delete_button.png) button.
-
-A confirmation pop-up appears, validate with **Confirm**.
-
-![Delete shot popup](../img/faq/validation_popup_delete_shot.png)
-
-Once deleted, the shot appears as crossed, it can be still restored 
-with ![Restore asset](../img/faq/restore_button.png) .
-
-![Delete shot](../img/faq/delete_shot1.png)
-
-To definitively delete a shot, you have to click on 
-![Delete button](../img/faq/delete_button.png) button a second time.
-
-The shot is removed from the database and won't appear anymore on Kitsu.
-
------------------------
-
-## How to delete a sequence
-
-To delete a sequence, you must first delete all the shots on this sequence.
-It's a safeguard.
-
-If you don't delete all the shots of a sequence before deleting it, you will
-see an error message after confirming the deletion.
-
-![Delete sequence error](../img/faq/delete_sequence_error.png)
-
-Once you have deleted all the shots of the sequence, use the drop-down menu to
-go to the sequence page.
- 
-![Drop down menu sequence](../img/faq/drop_down_menu_breakdown.png)
- 
-Then you can delete the sequence, with the 
-![Delete button](../img/faq/delete_button.png) button.
-
-![Delete sequence](../img/faq/delete_sequence.png)
-
------------------------
-
-## How to delete a task type
-
-To delete a task type (shot or asset), go to the global spreadsheet page, 
-and click on the arrow next to the name of the task type ![Delete sequence](../img/faq/arrow.png). 
-
-A sub-menu appears with the option **Delete all** the tasks.
-Once you have click on it, a message appears and ask you to type the name of the task. You need to type it as it shows, it's case sensitive.
-
-![Delete sequence](../img/faq/delete_tasktype.png). 

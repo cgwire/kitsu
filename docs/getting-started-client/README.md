@@ -39,8 +39,7 @@ You can access it by clicking on the production avatar.
 
 Once you have click on the production avatar you will go to the **Playlist** page.
 
-this is the central part for you, on Kitsu. The playlists will gather all the assets and 
-shots you have to comment.
+The playlists will gather all the assets and shots you have to comment.
 
 ![Client playlist global page](../img/getting-started/client_playlist_global.png)
 

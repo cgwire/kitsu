@@ -164,7 +164,7 @@ will be highlighted in blue.
 
 
 
-## Create assets with copy/paste a spreadsheet file
+## Update assets with copy/paste a spreadsheet file
 
 Open you spreadsheet, select your data and copy them.
 
