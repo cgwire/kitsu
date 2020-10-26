@@ -209,7 +209,7 @@ Once the tasks deleted, the column will be empty, and won't count on the stats.
 
 The second benefit will be to hide automatically this empty column once your will filter your view.
 
-![Delete task filter display](../img/faq/delete_task_filter.png.png)
+![Delete task filter display](../img/faq/delete_task_filter.png)
 
 -----------------------
 
