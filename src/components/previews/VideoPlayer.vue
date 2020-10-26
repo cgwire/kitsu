@@ -242,7 +242,7 @@
           class="flexrow-item"
           icon="pencil"
           :active="isDrawing"
-          :title="$t('playlists.actions.annotation_text')"
+          :title="$t('playlists.actions.annotation_draw')"
           @click="onPencilAnnotateClicked"
           v-if="!readOnly && isFullScreen()"
         />

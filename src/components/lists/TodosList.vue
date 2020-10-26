@@ -339,7 +339,11 @@ export default {
       const production = this.productionMap[entity.project_id]
       let episodeId = entity.episode_id
       if (production && production.production_type === 'tvshow' && !episodeId) {
-        episodeId = production.first_episode_id
+        if (entityType === 'shot') {
+          episodeId = production.first_episode_id
+        } else {
+          episodeId = 'main'
+        }
       }
 
       if (episodeId) {

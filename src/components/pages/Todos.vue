@@ -68,8 +68,8 @@
       >
         <search-query-list
           :queries="todoSearchQueries"
-          @changesearch="changeSearch"
-          @removesearch="removeSearchQuery"
+          @change-search="changeSearch"
+          @remove-search="removeSearchQuery"
         />
       </div>
 
@@ -167,18 +167,20 @@ export default {
     if (this.todosSearchText.length > 0) {
       this.$refs['todos-search-field'].setValue(this.todosSearchText)
     }
-    this.loadTodos({
-      date: this.selectedDate,
-      callback: () => {
-        if (this.todoList) {
-          this.$nextTick(() => {
-            this.todoList.setScrollPosition(
-              this.todoListScrollPosition
-            )
-          })
+    this.$nextTick(() => {
+      this.loadTodos({
+        date: this.selectedDate,
+        callback: () => {
+          if (this.todoList) {
+            this.$nextTick(() => {
+              this.todoList.setScrollPosition(
+                this.todoListScrollPosition
+              )
+            })
+          }
+          this.resizeHeaders()
         }
-        this.resizeHeaders()
-      }
+      })
     })
   },
 
@@ -197,6 +199,7 @@ export default {
       'isTodosLoadingError',
       'nbSelectedTasks',
       'selectedTasks',
+      'taskMap',
       'taskTypeMap',
       'todosSearchText',
       'timeSpentMap',
@@ -208,7 +211,7 @@ export default {
     ]),
 
     loggableTodos () {
-      return this.displayedTodos
+      return this.sortedTasks
         .filter((task) => {
           return this.taskTypeMap[task.task_type_id].allow_timelog
         })

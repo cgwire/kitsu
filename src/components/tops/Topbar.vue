@@ -637,7 +637,9 @@ export default {
   watch: {
     $route () {
       const productionId = this.$route.params.production_id
-      this.updateContext(productionId)
+      if (productionId) {
+        this.updateContext(productionId)
+      }
     },
 
     currentProductionId () {

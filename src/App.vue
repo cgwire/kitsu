@@ -961,6 +961,12 @@ textarea.input:focus {
   margin-right: 0em;
 }
 
+.button .icon.is-small {
+  height: 1.1rem;
+  line-height: 1.1rem;
+  width: 1.1rem;
+}
+
 .button.highlighted {
   background: #00B242;
   color: white;
@@ -986,7 +992,6 @@ textarea.input:focus {
 }
 
 .query-list .tag .delete {
-  margin-left: 0.5em;
   transform: rotate(45deg) scale(0.7)
 }
 

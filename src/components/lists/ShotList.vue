@@ -158,7 +158,10 @@
             scope="rowgroup"
             :colspan="visibleColumns"
           >
-            <span class="datatable-row-header">
+            <span
+              class="datatable-row-header"
+              @click="$emit('sequence-clicked', group[0].sequence_name)"
+            >
               {{ group[0] ? group[0].sequence_name : '' }}
             </span>
           </th>
@@ -179,7 +182,7 @@
             >
             <div class="flexrow">
               <entity-thumbnail :entity="shot" :empty-height="32" />
-              <router-link :to="shotPath(shot.id)">
+              <router-link :to="shotPath(shot.id)" :title="shot.full_name">
                 {{ shot.name }}
               </router-link>
             </div>
@@ -691,5 +694,9 @@ th.metadata-descriptor {
 
   .flexrow {
   }
+}
+
+.datatable-row-header {
+  cursor: pointer;
 }
 </style>

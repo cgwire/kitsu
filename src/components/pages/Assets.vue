@@ -62,8 +62,8 @@
         <div class="query-list">
           <search-query-list
             :queries="assetSearchQueries"
-            @changesearch="changeSearch"
-            @removesearch="removeSearchQuery"
+            @change-search="changeSearch"
+            @remove-search="removeSearchQuery"
             v-if="!isAssetsLoading && !initialLoading"
           />
         </div>

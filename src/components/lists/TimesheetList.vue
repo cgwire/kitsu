@@ -112,16 +112,17 @@
              :only-avatar="true"
            />
           </th>
-          <task-type-name
-           class="type datatable-row-header datatable-row-header--nobd"
-           :production-id="task.project_id"
-           :entry="{
-             id: task.task_type_id,
-             name: task.task_type_name,
-             color: task.task_type_color
-           }"
-           :style="{left: colTypePosX}"
+          <task-type-cell
+            class="type datatable-row-header datatable-row-header--nobd"
+            :production-id="task.project_id"
+            :task-type="{
+              id: task.task_type_id,
+              name: task.task_type_name,
+              color: task.task_type_color
+            }"
+            :style="{left: colTypePosX}"
           />
+
           <th class="name datatable-row-header" :style="{left: colNamePosX}">
            <router-link :to="task.entity_path">
              {{ task.full_entity_name }}
@@ -174,26 +175,6 @@ export default {
     TimeSliderCell
   },
 
-  data () {
-    return {
-      disabledDates: {
-        from: moment().toDate() // Disable dates after today.
-      },
-      page: 1,
-      selectedDate: moment().toDate(), // By default current day.
-      colTypePosX: '',
-      colNamePosX: ''
-    }
-  },
-
-  mounted () {
-    this.colTypePosX = this.$refs['th-prod'].offsetWidth + 'px'
-    this.colNamePosX =
-      this.$refs['th-prod'].offsetWidth +
-      this.$refs['th-type'].offsetWidth +
-      'px'
-  },
-
   props: {
     tasks: {
       default: () => [],
@@ -229,8 +210,30 @@ export default {
     }
   },
 
+  data () {
+    return {
+      disabledDates: {
+        to: this.isCurrentUserArtist ? moment().startOf('isoWeek').toDate() : null,
+        from: moment().toDate() // Disable dates after today.
+      },
+      page: 1,
+      selectedDate: moment().toDate(), // By default current day.
+      colTypePosX: '',
+      colNamePosX: ''
+    }
+  },
+
+  mounted () {
+    this.colTypePosX = this.$refs['th-prod'].offsetWidth + 'px'
+    this.colNamePosX =
+      this.$refs['th-prod'].offsetWidth +
+      this.$refs['th-type'].offsetWidth +
+      'px'
+  },
+
   computed: {
     ...mapGetters([
+      'isCurrentUserArtist',
       'nbSelectedTasks',
       'productionMap',
       'taskTypeMap',

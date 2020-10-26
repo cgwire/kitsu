@@ -91,8 +91,8 @@
       >
         <search-query-list
           :queries="personTaskSearchQueries"
-          @changesearch="changeSearch"
-          @removesearch="removeSearchQuery"
+          @change-search="changeSearch"
+          @remove-search="removeSearchQuery"
         />
       </div>
 

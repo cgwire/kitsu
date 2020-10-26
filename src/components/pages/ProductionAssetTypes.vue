@@ -17,6 +17,12 @@
       <span class="filler"></span>
       <button-simple
         class="flexrow-item"
+        icon="refresh"
+        :title="$t('main.reload')"
+        @click="reset"
+      />
+      <button-simple
+        class="flexrow-item"
         icon="download"
         @click="exportStatisticsToCsv"
       />
@@ -176,20 +182,6 @@ export default {
 
     currentEpisode () {
       if (this.isTVShow) this.reset()
-    }
-  },
-
-  socket: {
-    events: {
-      'comment:new' (eventData) {
-        const commentId = eventData.comment_id
-        this.loadComment({
-          commentId,
-          callback: () => {
-            this.computeAssetTypeStats()
-          }
-        })
-      }
     }
   },
 
