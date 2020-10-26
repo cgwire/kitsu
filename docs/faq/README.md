@@ -171,19 +171,19 @@ Once you have click on it, a message appears and ask you to type the name of the
 To delete a task (shot or asset), go to the global spreadsheet page, 
 and click on the status of the task that you want to delete.
 
-![Delete tssk selection](../img/faq/delete_task_selection.png). 
+![Delete task selection](../img/faq/delete_task_selection.png). 
 
 The action menu will appear. Select **Delete tasks** and validate with the **Confirm** button.
 
-![Delete tssk menu](../img/faq/delete_task_menu_delete.png). 
+![Delete task menu](../img/faq/delete_task_menu_delete.png). 
 
 Once the tasks deleted, the column will be empty, and won't count on the stats.
 
-![Delete tssk empty](../img/faq/delete_task_empty.png)
+![Delete task empty](../img/faq/delete_task_empty.png)
 
 The second benefit will be to hide automatically this empty column once your will filter your view.
 
-![Delete tssk filter](../img/faq/delete_task_filter.png.png)
+![Delete task filter](../img/faq/delete_task_filter.png)
 
 -----------------------
 
@@ -191,25 +191,25 @@ The second benefit will be to hide automatically this empty column once your wil
 
 To delete tasks (shot or asset) of a specific asset type or sequence , go to the global spreadsheet page, filter the view to display the element you want to delete.
 
-![Delete tssk type selection](../img/faq/delete_task_assettype_filter.png). 
+![Delete task type selection](../img/faq/delete_task_assettype_filter.png). 
 
 Then click on the arrow on the right of the task that you want to delete and select **Delete all**.
 
-![Delete tssk selection asset type](../img/faq/delete_task_assettype.png). 
+![Delete task selection asset type](../img/faq/delete_task_assettype.png). 
 
 On the pop-up window, type the name of the task type, 
 and select **For current list and filters** on the drop down menu.
 
 
-![Delete all tssk filtered](../img/faq/delete_task_assettype_all.png). 
+![Delete all task filtered](../img/faq/delete_task_assettype_all.png). 
 
 Once the tasks deleted, the column will be empty, and won't count on the stats.
 
-![Delete tssk empty](../img/faq/delete_task_empty.png)
+![Delete task asset type empty](../img/faq/delete_task_empty.png)
 
 The second benefit will be to hide automatically this empty column once your will filter your view.
 
-![Delete tssk filter](../img/faq/delete_task_filter.png.png)
+![Delete task filter display](../img/faq/delete_task_filter.png.png)
 
 -----------------------
 
