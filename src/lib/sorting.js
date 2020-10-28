@@ -73,6 +73,13 @@ export const sortComments = (comments) => {
   )
 }
 
+export const sortRevisionPreviewFiles = (previewFiles) => {
+  return previewFiles.sort(
+    firstBy('position')
+      .thenBy('created_at')
+  )
+}
+
 export const sortTaskTypes = (taskTypes) => {
   return taskTypes.sort(
     firstBy('for_shots')

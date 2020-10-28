@@ -9,8 +9,9 @@
   />
 
   <span
-    class="flexrow-item bar-element"
+    class="flexrow-item bar-element current-index"
     :title="$t('playlists.actions.files_position')"
+    @click="$emit('current-index-clicked')"
     v-if="(!light || fullScreen) && previews.length > 1"
   >
     {{ currentIndex }} / {{ previews.length }}
@@ -121,5 +122,9 @@ export default {
 .bar-element {
   color: $light-grey;
   padding-left: 1em;
+}
+
+.current-index {
+  cursor: pointer;
 }
 </style>

@@ -197,11 +197,13 @@
     >
       {{ entityList.length }}
     </span>
+
     <div class="separator"></div>
 
+    {{ currentPicturePreviewLength}}
     <div
       class="flexrow flexrow-item"
-      v-if="isCurrentEntityPicture"
+      v-if="currentPicturePreviewLength > 1"
     >
       <button-simple
         class="button playlist-button flexrow-item"
@@ -888,6 +890,7 @@ export default {
     },
 
     currentPicturePreviewLength () {
+      if (!this.currentEntity) return 0
       return this.currentEntity.preview_file_previews.length + 1
     },
 

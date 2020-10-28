@@ -2,7 +2,11 @@
 <div ref="container" class="preview-player dark">
 
   <div class="preview">
-    <div class="canvas-wrapper" ref="canvas-wrapper" oncontextmenu="return false;">
+    <div
+      class="canvas-wrapper"
+      ref="canvas-wrapper"
+      oncontextmenu="return false;"
+    >
       <canvas
         id="annotation-canvas"
         ref="annotation-canvas"
@@ -173,7 +177,7 @@
           icon="compare"
           :title="$t('playlists.actions.split_screen')"
           @click="onCompareClicked"
-          v-if="taskTypeOptions.length > 0 && fullScreen"
+          v-if="taskTypeOptions.length > 0 && (!light || fullScreen)"
         />
 
         <combobox
@@ -313,6 +317,7 @@
           @next-clicked="onNextClicked"
           @previous-clicked="onPreviousClicked"
           @remove-preview-clicked="onRemovePreviewClicked"
+          @current-index-clicked="isOrdering = !isOrdering"
           v-if="currentPreview"
         />
 
@@ -321,10 +326,10 @@
             <span
               :class="{
                 'previous-preview-file': true,
-                'current-preview-file': previewFile.revision === currentPreview.revision
+                'current-preview-file': isCurrentRevision(previewFile)
               }"
               :key="`last-preview-${previewFile.id}`"
-              :title="$t('playlists.actions.display_revision') + ' ' + previewFile.revision"
+              :title="getRevisionTitle(previewFile)"
               @click="changeCurrentPreview(previewFile)"
               v-for="previewFile in lastPreviewFiles"
             >
@@ -357,13 +362,33 @@
       </div>
     </div>
   </div>
+
+  <div
+    class="flexrow revision-previews"
+    ref="revision-previews"
+    v-if="(!light || fullScreen) && isOrdering"
+  >
+    <div
+      class="flexrow-item revision-preview"
+      :key="preview.id"
+      v-for="(preview, index) in previews"
+    >
+      <revision-preview
+        :preview-file="preview"
+        :index="index"
+        :is-selected="currentPreview.id === preview.id"
+        @selected="onRevisionPreviewSelected(index + 1)"
+        @preview-dropped="onRevisionPreviewDropped"
+      />
+    </div>
+  </div>
 </div>
 </template>
 
 <script>
 // import pdf from 'vue-pdf'
 import { fabric } from 'fabric'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import { formatFrame, formatTime, roundToFrame } from '@/lib/video'
 
 import { annotationMixin } from '@/components/mixins/annotation_mixin'
@@ -380,6 +405,7 @@ import ColorPicker from '@/components/widgets/ColorPicker'
 import Combobox from '@/components/widgets/Combobox'
 // import ModelViewer from '@/components/previews/ModelViewer'
 import PencilPicker from '@/components/widgets/PencilPicker'
+import RevisionPreview from '@/components/previews/RevisionPreview'
 import PictureViewer from '@/components/previews/PictureViewer'
 import VideoPlayer from '@/components/previews/VideoPlayer'
 
@@ -399,6 +425,7 @@ export default {
     // pdf,
     PencilPicker,
     PictureViewer,
+    RevisionPreview,
     VideoPlayer
   },
 
@@ -443,6 +470,7 @@ export default {
       currentTimeRaw: 0,
       isComparing: false,
       isDrawing: false,
+      isOrdering: false,
       isTyping: false,
       isLoading: false,
       isPlaying: false,
@@ -475,7 +503,6 @@ export default {
       console.log('remove key listener')
       window.removeEventListener('keydown', this.onKeyDown)
     }
-    window.removeEventListener('resize', this.onWindowResize)
     document.removeEventListener(
       'fullscreenchange', this.onExitFullScreen)
     document.removeEventListener(
@@ -584,28 +611,20 @@ export default {
       const taskTypeIds = Object.keys(this.entityPreviewFiles)
       return taskTypeIds
         .filter((taskTypeId) => {
-          if (this.entityPreviewFiles[taskTypeId].length > 1) {
+          const previewFiles = this.entityPreviewFiles[taskTypeId]
+            .filter(p => ['mp4', 'png'].includes(p.extension))
+          if (previewFiles.length > 0) {
             return true
-          } else if (this.entityPreviewFiles[taskTypeId].length === 1) {
-            return (
-              this.entityPreviewFiles[taskTypeId][0].id !== this.currentPreview.id
-            )
           } else {
             return false
           }
         })
-        .map((taskTypeId) => {
+        .filter(taskTypeId => this.taskTypeMap[taskTypeId])
+        .map(taskTypeId => {
           const taskType = this.taskTypeMap[taskTypeId]
-          if (taskType) {
-            return {
-              label: taskType.name,
-              value: taskType.id
-            }
-          } else {
-            return {
-              label: '',
-              value: ''
-            }
+          return {
+            label: taskType.name,
+            value: taskType.id
           }
         })
     },
@@ -613,8 +632,9 @@ export default {
     previewFileOptions () {
       let previewFiles = this.entityPreviewFiles[this.taskTypeId]
       if (previewFiles) {
-        previewFiles = previewFiles.filter(p => p.id !== this.currentPreview.id)
-        if (previewFiles && previewFiles.length > 0) {
+        previewFiles = previewFiles
+          .filter(p => ['mp4', 'png'].includes(p.extension))
+        if (previewFiles.length > 0) {
           return previewFiles.map((previewFile) => {
             return {
               label: `v${previewFile.revision}`,
@@ -630,6 +650,7 @@ export default {
     },
 
     currentPreview () {
+      console.log('currentPreview getter', this.currentIndex)
       if (this.previews &&
           this.previews.length > 0 &&
           this.currentIndex - 1 < this.previews.length) {
@@ -642,9 +663,9 @@ export default {
     defaultHeight () {
       if (this.fullScreen) {
         if (this.isMovie) {
-          return screen.height - 90
+          return screen.height - 90 - 140
         } else {
-          return screen.height - 30
+          return screen.height - 30 - 140
         }
       } else {
         let bigHeight = screen.height > 800 ? 470 : 300
@@ -658,9 +679,20 @@ export default {
   },
 
   methods: {
+    ...mapActions([
+      'updateRevisionPreviewPosition'
+    ]),
     formatFrame,
     formatTime,
 
+    isCurrentRevision (previewFile) {
+      return previewFile.revision === this.currentPreview.revision
+    },
+
+    getRevisionTitle (previewFile) {
+      return `${this.$t('playlists.actions.display_revision')}` +
+             ` ${previewFile.revision}`
+    },
     updateTime (time) {
       this.updateProgressBar(time)
       this.currentTimeRaw = time
@@ -776,6 +808,12 @@ export default {
         this.isComparing = false
       } else {
         this.isComparing = true
+        if (!this.taskTypeId) {
+          this.taskTypeId = this.taskTypeOptions[0].value
+          this.$nextTick(() => {
+            this.previewToCompareId = this.previewFileOptions[0].value
+          })
+        }
         this.isDrawing = false
       }
     },
@@ -929,18 +967,6 @@ export default {
       return this.annotations
     },
 
-    /*
-    onWindowResize () {
-      const now = (new Date().getTime())
-      this.lastCall = this.lastCall || 0
-      if (now - this.lastCall > 600) {
-        this.lastCall = now
-        // this.fixCanvasSize(this.getDimensions())
-        this.width = this.getDimensions().width
-      }
-    },
-    */
-
     onKeyDown (event) {
       console.log(event.keyCode)
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
@@ -1060,9 +1086,7 @@ export default {
     },
 
     configureEvents () {
-      console.log('add key listener')
       window.addEventListener('keydown', this.onKeyDown, false)
-      window.addEventListener('resize', this.onWindowResize)
       document.addEventListener(
         'fullscreenchange', this.onExitFullScreen, false)
       document.addEventListener(
@@ -1152,7 +1176,6 @@ export default {
     },
 
     onCanvasReleased (event) {
-      console.log('mouse up')
       if (this.isPicture && this.$options.loupe) {
         this.picturePlayer.hideLoupe()
         this.$options.loupe = false
@@ -1259,6 +1282,26 @@ export default {
         this.progress.setAttribute('max', this.videoDuration)
       }
       this.progress.value = currentTime * 1
+    },
+
+    onRevisionPreviewSelected (index) {
+      this.currentIndex = index
+    },
+
+    onRevisionPreviewDropped ({ previousIndex, newIndex }) {
+      const preview = this.previews[previousIndex]
+      console.log(preview.original_name)
+      this.updateRevisionPreviewPosition({
+        previousIndex,
+        newIndex,
+        revision: this.currentPreview.revision,
+        taskId: this.currentPreview.task_id,
+        previewId: preview.id
+      })
+        .catch(console.error)
+      this.$nextTick(() => {
+        this.currentIndex = newIndex + 1
+      })
     }
   },
 
@@ -1291,10 +1334,6 @@ export default {
 
     taskTypeId () {
       this.setDefaultComparisonPreview()
-    },
-
-    light () {
-      this.onWindowResize()
     },
 
     isDrawing () {
@@ -1333,25 +1372,6 @@ export default {
 
 .spinner {
   margin: auto;
-}
-
-.video-player {
-  display: flex;
-  flex-direction: column;
-  align-content: flex-end;
-  height: 100%;
-}
-
-.video-wrapper {
-  flex: 1;
-  display: flex;
-  background: black;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  margin: auto;
-  width: 100%;
-  position: relative;
 }
 
 .annotation-movie {
@@ -1542,5 +1562,18 @@ progress::-o-progress-value,
 progress::-moz-progress-value,
 progress::-webkit-progress-value {
   transition: all 0.25s linear;
+}
+
+.revision-previews {
+  overflow-x: auto;
+  height: 140px;
+  padding-left: 10px;
+  padding-top: 10px;
+  box-shadow: inset 0px 0px 10px 1px #0008;
+  align-items: flex-start;
+
+  .flexrow-item.revision-preview {
+    margin-right: 0px;
+  }
 }
 </style>

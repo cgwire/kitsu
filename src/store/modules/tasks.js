@@ -5,8 +5,13 @@ import peopleApi from '../api/people'
 import playlistsApi from '../api/playlists'
 import {
   sortComments,
+  sortRevisionPreviewFiles,
   sortByName
 } from '../../lib/sorting'
+import {
+  arrayMove
+} from '../../lib/models'
+
 import personStore from './people'
 import taskTypeStore from './tasktypes'
 import assetStore from './assets'
@@ -64,6 +69,7 @@ import {
   SET_LAST_COMMENT_DRAFT,
 
   REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD,
+  UPDATE_REVISION_PREVIEW_POSITION,
 
   RESET_ALL
 } from '../mutation-types'
@@ -474,7 +480,6 @@ const actions = {
         .then(preview => tasksApi.uploadPreview(preview.id, form))
         .then((preview) => {
           const comment = getters.getTaskComment(taskId, commentId)
-          preview.extension = 'png'
           commit(ADD_PREVIEW_END, {
             preview,
             taskId,
@@ -635,6 +640,15 @@ const actions = {
   pinComment ({ commit }, comment) {
     commit(PIN_COMMENT, comment)
     return tasksApi.pinComment(comment)
+  },
+
+  updateRevisionPreviewPosition ({ commit }, payload) {
+    if (payload.newIndex < payload.previousIndex) payload.newIndex++
+    commit(UPDATE_REVISION_PREVIEW_POSITION, payload)
+    return tasksApi.updateRevisionPreviewPosition(
+      payload.previewId,
+      payload.newIndex
+    )
   }
 }
 
@@ -687,14 +701,19 @@ const mutations = {
     state.taskPreviews[taskId] = comments.reduce((previews, comment) => {
       if (comment.previews && comment.previews.length > 0) {
         const preview = comment.previews[0]
-        preview.previews = comment.previews.map((p) => {
-          return {
-            id: p.id,
-            annotations: p.annotations,
-            extension: p.extension,
-            revision: p.revision
-          }
-        })
+        preview.previews = sortRevisionPreviewFiles(comment.previews
+          .map((p) => {
+            return {
+              id: p.id,
+              annotations: p.annotations,
+              extension: p.extension,
+              task_id: p.task_id,
+              revision: p.revision,
+              position: p.position,
+              original_name: p.original_name
+            }
+          })
+        )
         previews.push(preview)
         return previews
       } else {
@@ -822,6 +841,8 @@ const mutations = {
       id: preview.id,
       feedback: false,
       revision: preview.revision,
+      position: preview.position,
+      original_name: preview.original_name,
       extension: preview.extension
     }
 
@@ -883,6 +904,8 @@ const mutations = {
       id: preview.id,
       feedback: false,
       revision: preview.revision,
+      position: preview.position,
+      original_name: preview.original_name,
       extension: preview.extension
     }
     state.taskPreviews[taskId].shift()
@@ -1085,6 +1108,24 @@ const mutations = {
 
   [SET_LAST_COMMENT_DRAFT] (state, lastCommentDraft) {
     state.lastCommentDraft = lastCommentDraft
+  },
+
+  [UPDATE_REVISION_PREVIEW_POSITION] (state, {
+    previousIndex,
+    newIndex,
+    revision,
+    taskId
+  }) {
+    const preview = state.taskPreviews[taskId].find(
+      p => p.revision === revision
+    )
+    preview.previews = arrayMove(preview.previews, previousIndex, newIndex)
+    let i = 1
+    preview.previews.forEach(preview => {
+      preview.position = i
+      i++
+    })
+    console.log('after', preview.previews.map(p => p.position))
   },
 
   [REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD] (state) {

@@ -198,5 +198,12 @@ export default {
     const path =
       `/api/data/tasks/${comment.object_id}/comments/${comment.id}/ack`
     return client.ppost(path, {})
+  },
+
+  updateRevisionPreviewPosition (previewId, position) {
+    const path =
+      `/api/actions/preview-files/${previewId}/update-position`
+    console.log('request', position + 1)
+    return client.pput(path, { position: position + 1 })
   }
 }
