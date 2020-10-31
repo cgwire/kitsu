@@ -1,40 +1,26 @@
 <template>
-<div ref="container">
+<div
+  id="model-container"
+  :style="{
+    height: defaultHeight + 'px',
+    width: '100%'
+  }"
+  :class="{
+    light: light && !readOnly
+  }"
+>
   <div
-    ref="model-viewer"
     id="model-viewer"
-    :class="{
-      light: light && !readOnly
-    }"
   >
-  </div>
-  <div class="viewer-actions flexrow">
-    <span v-if="isLoading">{{ $t('main.loading') }}</span>
-    <span class="filler"></span>
-    <a
-      :href="previewDlPath"
-      class="button flexrow-item"
-      v-if="!readOnly"
-    >
-      <download-icon class="icon" />
-    </a>
-    <button
-      class="button flexrow-item"
-      @click="goFullScreen">
-      <maximize-icon class="icon" />
-    </button>
   </div>
 </div>
 </template>
 
 <script>
 import {
-  DownloadIcon,
-  MaximizeIcon
 } from 'vue-feather-icons'
 import {
   clearScene,
-  goFullScreen,
   loadObject,
   prepareScene
 } from '../../../node_modules/js-3d-model-viewer/src/index'
@@ -43,8 +29,6 @@ export default {
   name: 'model-viewer',
 
   components: {
-    DownloadIcon,
-    MaximizeIcon
   },
 
   data () {
@@ -69,25 +53,45 @@ export default {
     readOnly: {
       default: false,
       type: Boolean
+    },
+    empty: {
+      default: false,
+      type: Boolean
+    },
+    defaultHeight: {
+      type: Number,
+      default: 470
+    },
+    fullScreen: {
+      default: false,
+      type: Boolean
     }
   },
 
-  computed: {
-    element () {
-      return this.$refs['model-viewer']
-    },
+  mounted () {
+    this.element = document.getElementById('model-viewer')
+    setTimeout(() => {
+      if (!this.empty) {
+        this.loadObject()
+      }
+    }, 100)
+  },
 
+  computed: {
     container () {
       return this.$refs.container
     }
   },
 
   methods: {
-    goFullScreen () {
-      goFullScreen(this.element)
-    },
-
     loadObject () {
+      this.element.remove()
+      const container = document.getElementById('model-container')
+      const el = document.createElement('div')
+      el.id = 'model-viewer'
+      container.appendChild(el)
+      this.element = document.getElementById('model-viewer')
+      if (!this.scene) this.scene = prepareScene(this.element)
       this.isLoading = true
       loadObject(this.scene, this.previewUrl, null, () => {
         this.isLoading = false
@@ -95,25 +99,28 @@ export default {
     }
   },
 
-  mounted () {
-    setTimeout(() => {
-      this.scene = prepareScene(this.element)
-      this.loadObject()
-    }, 100)
-  },
-
   watch: {
-    previewUrl () {
+    defaultHeight () {
       clearScene(this.scene)
-      this.loadObject()
+      setTimeout(() => {
+        this.loadObject()
+      }, 1000)
+    },
+
+    previewUrl () {
+      if (!this.empty) {
+        if (this.scene) clearScene(this.scene)
+        this.loadObject()
+      }
     },
 
     light () {
       clearScene(this.scene)
       this.element.innerHTML = ''
       setTimeout(() => {
-        this.scene = prepareScene(this.element)
-        loadObject(this.scene, this.previewUrl)
+        if (!this.empty) {
+          loadObject(this.scene, this.previewUrl)
+        }
       }, 100)
     }
   }
@@ -121,16 +128,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-#model-viewer {
-  height: 500px;
-}
-
 #model-viewer.light {
   height: 200px;
-}
-
-.viewer-actions {
-  padding: 0.2em 0;
-  text-align: left;
 }
 </style>
