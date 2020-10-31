@@ -16,16 +16,6 @@
       :poster="posterPath"
     >
     </video>
-    <video
-      id="comparison-movie"
-      ref="comparison-movie"
-      class="annotation-movie"
-      preload="auto"
-      :src="comparisonMoviePath"
-      :poster="comparisonPosterPath"
-      v-if="isComparing && previewToCompareId"
-    >
-    </video>
   </div>
 </div>
 </template>
@@ -39,7 +29,7 @@ import Spinner from '../widgets/Spinner'
 import { domMixin } from '@/components/mixins/dom'
 
 export default {
-  name: 'video-player',
+  name: 'video-viewer',
   mixins: [domMixin],
 
   components: {
@@ -47,41 +37,41 @@ export default {
   },
 
   props: {
+    name: {
+      type: String,
+      default: ''
+    },
     big: {
       type: Boolean,
-      default: () => {}
+      default: false
     },
     isComparing: {
       type: Boolean,
-      default: () => {}
+      default: false
     },
     isDrawing: {
       type: Boolean,
-      default: () => {}
+      default: false
     },
     isTyping: {
       type: Boolean,
-      default: () => {}
+      default: false
     },
     isMuted: {
       type: Boolean,
-      default: () => {}
+      default: false
     },
     isRepeating: {
       type: Boolean,
-      default: () => {}
+      default: false
     },
     light: {
       type: Boolean,
-      default: () => {}
+      default: false
     },
     preview: {
       type: Object,
       default: () => {}
-    },
-    previewToCompareId: {
-      type: String,
-      default: ''
     },
     defaultHeight: {
       type: Number,
@@ -159,7 +149,7 @@ export default {
     },
 
     moviePath () {
-      if (this.preview.extension === 'mp4') {
+      if (this.extension === 'mp4') {
         return `/api/movies/originals/preview-files/${this.preview.id}.mp4`
       } else {
         return null
@@ -167,39 +157,35 @@ export default {
     },
 
     movieDlPath () {
-      return `/api/movies/originals/preview-files/${this.preview.id}/download`
+      if (this.preview) {
+        return `/api/movies/originals/preview-files/${this.preview.id}/download`
+      } else {
+        return ''
+      }
     },
 
     posterPath () {
-      if (this.preview.extension === 'mp4') {
+      if (this.extension === 'mp4') {
         return `/api/pictures/previews/preview-files/${this.preview.id}.png`
       } else {
         return null
       }
     },
 
-    comparisonMoviePath () {
-      return `/api/movies/originals/preview-files/${this.previewToCompareId}.mp4`
-    },
-
-    comparisonPosterPath () {
-      return `/api/pictures/originals/preview-files/${this.previewToCompareId}.png`
-    },
-
     video () {
       return this.$refs.movie
-    },
-
-    comparisonVideo () {
-      return this.$refs['comparison-movie']
     },
 
     videoWrapper () {
       return this.$refs['video-wrapper']
     },
 
+    extension () {
+      return this.preview ? this.preview.extension : ''
+    },
+
     isMovie () {
-      return this.preview.extension === 'mp4'
+      return this.extension === 'mp4'
     }
   },
 
@@ -219,6 +205,9 @@ export default {
       const dimensions = this.getNaturalDimensions()
       const ratio = dimensions.height / dimensions.width
       let width = Math.min(dimensions.width, this.container.offsetWidth)
+      if (this.isComparing) {
+        width = Math.min(dimensions.width / 2, this.container.offsetWidth)
+      }
       let height = Math.floor(width * ratio)
       height = Math.min(height, this.defaultHeight)
       width = Math.floor(height / ratio)
@@ -228,10 +217,6 @@ export default {
     setCurrentTime (currentTime) {
       currentTime = roundToFrame(currentTime, this.fps)
       this.video.currentTime = currentTime
-      if (this.isComparing) {
-        const comparisonVideo = document.getElementById('comparison-movie')
-        if (comparisonVideo) comparisonVideo.currentTime = currentTime
-      }
     },
 
     configureVideo () {
@@ -247,27 +232,16 @@ export default {
       this.video.mute = true
       this.videoDuration = this.video.duration
       this.isLoading = false
-      // this.progress.setAttribute('max', this.videoDuration)
       this.$emit('duration-changed', this.videoDuration)
 
       if (this.container) {
         const dimensions = this.getDimensions()
-        let width = dimensions.width
-        let height = dimensions.height
-
+        const width = dimensions.width
+        const height = dimensions.height
         if (height > 0) {
           this.container.style.height = this.defaultHeight + 'px'
           this.videoWrapper.style.width = width + 'px'
           this.videoWrapper.style.height = height + 'px'
-          if (this.isComparing) {
-            width = Math.round(width / 2)
-            height = Math.round(height / 2)
-            const comparisonVideo = document.getElementById('comparison-movie')
-            if (comparisonVideo) {
-              comparisonVideo.style.width = width + 'px'
-              comparisonVideo.style.height = height + 'px'
-            }
-          }
           this.video.style.width = width + 'px'
           this.video.style.height = height + 'px'
           this.$emit('size-changed', { width, height })
@@ -286,18 +260,10 @@ export default {
 
     play () {
       this.video.play()
-      if (this.isComparing) {
-        const comparisonVideo = document.getElementById('comparison-movie')
-        if (comparisonVideo) comparisonVideo.play()
-      }
     },
 
     pause () {
       this.video.pause()
-      if (this.isComparing) {
-        const comparisonVideo = document.getElementById('comparison-movie')
-        if (comparisonVideo) comparisonVideo.pause()
-      }
     },
 
     toggleMute () {
@@ -327,10 +293,6 @@ export default {
       this.isPlaying = false
       if (this.isRepeating) {
         this.video.currentTime = 0
-        if (this.isComparing) {
-          const comparisonVideo = document.getElementById('comparison-movie')
-          if (comparisonVideo) comparisonVideo.currentTime = 0
-        }
         this.play()
       } else {
         this.$emit('play-ended')
@@ -347,44 +309,12 @@ export default {
           if (callback && typeof callback === 'function') callback()
         })
       }
-    },
-
-    setDefaultComparisonPreview () {
-      let previewFiles = this.entityPreviewFiles[this.taskTypeId]
-      if (previewFiles) {
-        previewFiles = previewFiles.filter(p => p.id !== this.preview.id)
-        if (previewFiles.length > 0) {
-          this.previewToCompareId = previewFiles[0].id
-        } else {
-          this.previewToCompareId = null
-        }
-      } else {
-        this.previewToCompareId = null
-      }
     }
   },
 
   watch: {
     preview () {
       this.maxDuration = '00:00.000'
-      if (this.isComparing) {
-        this.mountVideo()
-      }
-    },
-
-    previewToCompareId () {
-      if (this.isComparing) {
-        this.pause()
-        const currentTime = this.video.currentTime
-        this.$nextTick(() => {
-          const comparisonVideo = document.getElementById('comparison-movie')
-          if (comparisonVideo) comparisonVideo.currentTime = currentTime
-        })
-      }
-    },
-
-    taskTypeId () {
-      this.setDefaultComparisonPreview()
     },
 
     light () {
@@ -392,22 +322,12 @@ export default {
     },
 
     isComparing () {
-      if (this.isComparing) {
-        this.mountVideo()
-      } else {
-        this.$nextTick(() => {
-          this.mountVideo()
-        })
-      }
+      this.mountVideo()
     },
 
     isMuted () {
       this.video.muted = !this.video.muted
       this.isMuted = this.video.muted
-    },
-
-    fullScreen () {
-      this.mountVideo()
     }
   }
 }

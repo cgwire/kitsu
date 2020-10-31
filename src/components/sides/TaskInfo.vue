@@ -84,31 +84,29 @@
       <div class="task-column preview-column" v-if="isPreview">
         <div class="preview-column-content">
           <div class="preview">
-            <div class="preview-picture">
-              <div
-                v-if="taskPreviews && taskPreviews.length > 0"
-              >
-                <preview-player
-                  :entity-preview-files="taskEntityPreviews"
-                  :last-preview-files="lastFivePreviews"
-                  :previews="currentPreview.previews"
-                  :task-type-map="taskTypeMap"
-                  :light="!isWide"
-                  :read-only="!isCurrentUserManager"
-                  @annotation-changed="onAnnotationChanged"
-                  @change-current-preview="changeCurrentPreview"
-                  @add-extra-preview="onAddExtraPreview"
-                  @remove-extra-preview="onRemoveExtraPreview"
-                  ref="preview-player"
-                />
-              </div>
+            <div
+              v-if="taskPreviews && taskPreviews.length > 0"
+            >
+              <preview-player
+                :entity-preview-files="taskEntityPreviews"
+                :last-preview-files="lastFivePreviews"
+                :previews="currentPreview.previews"
+                :task-type-map="taskTypeMap"
+                :light="!isWide"
+                :read-only="!isCurrentUserManager"
+                @annotation-changed="onAnnotationChanged"
+                @change-current-preview="changeCurrentPreview"
+                @add-extra-preview="onAddExtraPreview"
+                @remove-extra-preview="onRemoveExtraPreview"
+                ref="preview-player"
+              />
+            </div>
 
-              <div
-                class="no-preview"
-                v-if="!taskPreviews || taskPreviews.length === 0"
-              >
-                <em>{{ $t('tasks.no_preview') }}</em>
-              </div>
+            <div
+              class="no-preview"
+              v-if="!taskPreviews || taskPreviews.length === 0"
+            >
+              <em>{{ $t('tasks.no_preview') }}</em>
             </div>
           </div>
         </div>
@@ -639,7 +637,7 @@ export default {
           this.$refs['add-extra-preview-modal'].reset()
           this.reset()
           setTimeout(() => {
-            this.$refs['preview-picture'].displayLast()
+            this.$refs['preview-player'].displayLast()
           }, 0)
           this.modals.addExtraPreview = false
         })
@@ -946,10 +944,6 @@ export default {
 
   .no-preview {
     padding: 0.5em;
-  }
-
-  .preview-picture {
-    border: 1px solid $dark-grey;
   }
 
   .side {

@@ -17,7 +17,7 @@
           class="round-task-status-name"
           :style="{
             'background-color': statusColor,
-            color: comment.task_status.short_name === 'todo' ? 'grey' : 'white'
+            color: comment.task_status.short_name === 'todo' ? '#333' : 'white'
           }"
         >
           {{ comment.task_status.short_name }}

@@ -13,7 +13,7 @@
         width="150px"
         height="103px"
         :preview-file-id="previewFile.id"
-        v-if="['mp4', 'png'].includes(previewFile.extension)"
+        v-if="hasThumbnail"
       />
       <span :title="originalName" v-else>
         .{{ previewFile.extension }}
@@ -75,6 +75,10 @@ export default {
       return this.$refs['drop-area']
     },
 
+    hasThumbnail () {
+      return ['mp4', 'png'].includes(this.previewFile.extension)
+    },
+
     originalName () {
       return `${this.previewFile.original_name}.${this.previewFile.extension}`
     }
@@ -82,7 +86,6 @@ export default {
 
   methods: {
     onSelected () {
-      console.log('this.index', this.index)
       this.$emit('selected', this.index)
     },
 

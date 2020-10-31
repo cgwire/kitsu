@@ -5,14 +5,14 @@
     icon="left"
     :title="$t('playlists.actions.files_previous')"
     @click="$emit('previous-clicked')"
-    v-if="(!light || fullScreen) && previews.length > 1"
+    v-if="isBigDisplay"
   />
 
   <span
     class="flexrow-item bar-element current-index"
     :title="$t('playlists.actions.files_position')"
     @click="$emit('current-index-clicked')"
-    v-if="(!light || fullScreen) && previews.length > 1"
+    v-if="isBigDisplay"
   >
     {{ currentIndex }} / {{ previews.length }}
   </span>
@@ -22,7 +22,7 @@
     icon="right"
     :title="$t('playlists.actions.files_next')"
     @click="$emit('next-clicked')"
-    v-if="(!light || fullScreen) && previews.length > 1"
+    v-if="isBigDisplay"
   />
 
   <button-simple
@@ -55,21 +55,21 @@ export default {
   },
 
   props: {
-    previews: {
-      type: Array,
-      default: () => []
-    },
     currentIndex: {
       type: Number,
       default: 0
+    },
+    fullScreen: {
+      type: Boolean,
+      default: false
     },
     light: {
       type: Boolean,
       default: false
     },
-    fullScreen: {
-      type: Boolean,
-      default: false
+    previews: {
+      type: Array,
+      default: () => []
     },
     readOnly: {
       type: Boolean,
@@ -79,7 +79,11 @@ export default {
 
   computed: {
     ...mapGetters([
-    ])
+    ]),
+
+    isBigDisplay () {
+      return (!this.light || this.fullScreen) && this.previews.length > 1
+    }
   },
 
   methods: {

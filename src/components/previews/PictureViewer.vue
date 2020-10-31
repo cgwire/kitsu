@@ -48,29 +48,29 @@ export default {
   mixins: [domMixin, fullScreenMixin],
 
   props: {
-    preview: {
-      type: Object,
-      default: () => {}
+    big: {
+      type: Boolean,
+      default: false
     },
     defaultHeight: {
       type: Number,
       default: 0
     },
+    fullScreen: {
+      type: Boolean,
+      default: false
+    },
+    isComparing: {
+      type: Boolean,
+      default: false
+    },
     light: {
       type: Boolean,
       default: false
     },
-    lastPreviewFiles: {
-      type: Array,
-      default: () => []
-    },
-    big: {
-      type: Boolean,
-      default: false
-    },
-    fullScreen: {
-      type: Boolean,
-      default: false
+    preview: {
+      type: Object,
+      default: () => {}
     }
   },
 
@@ -102,6 +102,9 @@ export default {
   },
 
   computed: {
+
+    // Elements
+
     container () {
       return this.$refs.container
     },
@@ -126,37 +129,32 @@ export default {
       return this.$refs['picture-subwrapper']
     },
 
-    pictureOriginalPath () {
-      const previewId = this.preview.id
-      return `/api/pictures/originals/preview-files/${previewId}.png`
+    // Utils
+
+    extension () {
+      return this.preview ? this.preview.extension : ''
     },
 
     isGif () {
-      return this.preview.extension === 'gif'
+      return this.extension === 'gif'
     },
 
     isMovie () {
-      return this.preview.extension === 'mp4'
+      return this.extension === 'mp4'
+    },
+
+    pictureOriginalPath () {
+      if (this.preview) {
+        const previewId = this.preview.id
+        return `/api/pictures/originals/preview-files/${previewId}.png`
+      } else {
+        return ''
+      }
     }
   },
 
   methods: {
-    onWindowResize () {
-      const now = (new Date().getTime())
-      this.lastCall = this.lastCall || 0
-      if (now - this.lastCall > 600) {
-        this.lastCall = now
-        this.$nextTick(() => {
-          this.resetPicture()
-        })
-      }
-    },
-
-    endLoading () {
-      console.log('end picture loading')
-      this.isLoading = false
-      this.$nextTick(this.resetPicture)
-    },
+    // Sizing
 
     getNaturalDimensions () {
       let picture = { naturalWidth: 0, naturalHeight: 0 }
@@ -191,12 +189,22 @@ export default {
       return { width, height }
     },
 
-    showLoupe () {
-      this.$refs.loupe.style.display = 'block'
+    onWindowResize () {
+      const now = (new Date().getTime())
+      this.lastCall = this.lastCall || 0
+      if (now - this.lastCall > 600) {
+        this.lastCall = now
+        this.$nextTick(() => {
+          this.resetPicture()
+        })
+      }
     },
 
-    hideLoupe () {
-      this.$refs.loupe.style.display = 'none'
+    // Configuration
+
+    endLoading () {
+      this.isLoading = false
+      this.$nextTick(this.resetPicture)
     },
 
     resetPicture () {
@@ -230,7 +238,7 @@ export default {
         const previewId = this.preview.id
         this.pictureGifPath =
           `/api/pictures/originals/preview-files/${previewId}.gif`
-      } else {
+      } else if (this.preview) {
         const previewId = this.preview.id
         this.picturePath =
           `/api/pictures/previews/preview-files/${previewId}.png`
@@ -239,9 +247,23 @@ export default {
     },
 
     setPictureDlPath () {
-      const previewId = this.preview.id
-      this.pictureDlPath =
-        `/api/pictures/originals/preview-files/${previewId}/download`
+      if (this.preview) {
+        const previewId = this.preview.id
+        this.pictureDlPath =
+          `/api/pictures/originals/preview-files/${previewId}/download`
+      } else {
+        this.pictureDlPath = ''
+      }
+    },
+
+    // Loupe
+
+    showLoupe () {
+      this.$refs.loupe.style.display = 'block'
+    },
+
+    hideLoupe () {
+      this.$refs.loupe.style.display = 'none'
     },
 
     updateLoupePosition (event, canvasDimensions) {
@@ -269,6 +291,32 @@ export default {
   },
 
   watch: {
+    fullScreen () {
+      if (this.fullScreen) {
+        this.isLoading = true
+        this.setPictureDlPath()
+        if (this.pictureBig.complete) this.isLoading = false
+      } else {
+        this.setPicturePath()
+      }
+    },
+
+    isLoading () {
+      if (!this.isLoading) {
+        setTimeout(this.resetPicture, 100)
+      }
+    },
+
+    light () {
+      this.onWindowResize()
+    },
+
+    isComparing () {
+      setTimeout(() => {
+        this.resetPicture()
+      }, 20)
+    },
+
     preview () {
       this.isLoading = true
       this.setPicturePath()
@@ -286,26 +334,6 @@ export default {
           this.isLoading = false
         }
         this.$nextTick(this.resetPicture)
-      }
-    },
-
-    isLoading () {
-      if (!this.isLoading) {
-        setTimeout(this.resetPicture, 100)
-      }
-    },
-
-    light () {
-      this.onWindowResize()
-    },
-
-    fullScreen () {
-      if (this.fullScreen) {
-        this.isLoading = true
-        this.setPictureDlPath()
-        if (this.pictureBig.complete) this.isLoading = false
-      } else {
-        this.setPicturePath()
       }
     }
   }

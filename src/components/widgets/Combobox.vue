@@ -49,7 +49,7 @@ export default {
     },
     value: {
       default: '',
-      type: String
+      type: [Object, String]
     },
     options: {
       default: () => [],
