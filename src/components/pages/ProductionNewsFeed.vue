@@ -217,51 +217,15 @@
                   class="has-text-centered"
                   v-if="previewMode == 'previews'"
                 >
-                  <div
-                    v-if="news.preview_file_extension == 'mp4'"
-                  >
-                    <video-player
-                      :preview="{id: news.preview_file_id}"
-                      :task-type-map="taskTypeMap"
-                      :read-only="true"
-                      :light="true"
-                      :big="true"
-                    />
-                  </div>
-
-                  <model-viewer
-                    class="model-viewer"
-                    :preview-url="getPreviewPath(news)"
-                    :preview-dl-path="getPreviewDlPath(news)"
-                    :light="true"
+                  <preview-player
+                    :previews="[{
+                      id: news.preview_file_id,
+                      extension: news.preview_file_extension
+                    }]"
                     :read-only="true"
-                    v-else-if="news.preview_file_extension == 'obj'"
-                  />
-
-                  <picture-viewer
-                    :preview="{previews: [{id: news.preview_file_id}]}"
                     :light="true"
-                    :read-only="true"
                     :big="true"
-                    ref="preview-picture"
-                    v-else-if="news.preview_file_extension == 'png'"
                   />
-
-                  <div
-                    class="preview-standard-file"
-                    v-else
-                  >
-                    <a
-                      class="button"
-                      ref="preview-file"
-                      :href="getPreviewDlPath(news)"
-                    >
-                      <download-icon class="icon" />
-                      <span class="text">
-                        {{ $t('tasks.download_pdf_file', {extension: news.preview_file_extension}) }}
-                      </span>
-                    </a>
-                  </div>
                 </div>
               </div>
             </div>
@@ -292,9 +256,6 @@
  * infinite scrolling.
  */
 import { mapGetters, mapActions } from 'vuex'
-import {
-  DownloadIcon
-} from 'vue-feather-icons'
 import moment from 'moment-timezone'
 import { sortByName } from '../../lib/sorting'
 
@@ -303,14 +264,12 @@ import ComboboxStatus from '../widgets/ComboboxStatus'
 import ComboboxTaskType from '../widgets/ComboboxTaskType'
 import PeopleField from '../widgets/PeopleField'
 import EntityThumbnail from '../widgets/EntityThumbnail'
-import ModelViewer from '../previews/ModelViewer'
 import PeopleAvatar from '../widgets/PeopleAvatar'
-import PictureViewer from '../previews/PictureViewer'
 import TaskInfo from '../sides/TaskInfo'
 import TaskTypeName from '../widgets/TaskTypeName'
 import Spinner from '../widgets/Spinner'
 import ValidationTag from '../widgets/ValidationTag'
-import VideoPlayer from '../previews/VideoPlayer'
+import PreviewPlayer from '../previews/PreviewPlayer'
 
 export default {
   name: 'news-page',
@@ -318,17 +277,14 @@ export default {
     Combobox,
     ComboboxStatus,
     ComboboxTaskType,
-    DownloadIcon,
     EntityThumbnail,
-    ModelViewer,
     PeopleAvatar,
     PeopleField,
-    PictureViewer,
     TaskTypeName,
     ValidationTag,
     Spinner,
     TaskInfo,
-    VideoPlayer
+    PreviewPlayer
   },
 
   data () {

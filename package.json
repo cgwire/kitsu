@@ -47,6 +47,7 @@
     "vue-infinite-scroll": "2.0.2",
     "vue-lazyload": "1.3.3",
     "vue-meta": "2.4.0",
+    "vue-pdf": "^4.2.0",
     "vue-router": "3.4.3",
     "vue-scroll": "2.1.13",
     "vue-slider-component": "3.2.5",

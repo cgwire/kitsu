@@ -78,7 +78,10 @@
               @file-drop="selectFile"
               v-if="isCommentingAllowed"
             />
-            <div class="comments" v-if="currentTaskComments && currentTaskComments.length > 0">
+            <div
+              class="comments"
+              v-if="currentTaskComments && currentTaskComments.length > 0"
+            >
               <comment
                 :comment="comment"
                 :task="currentTask"
@@ -126,7 +129,7 @@
                   'is-loading': loading.setPreview
                 }"
                 @click="setPreview"
-                v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isCurrentUserManager"
+                v-if="isPreviews && isCurrentUserManager"
               >
                 <image-icon class="icon" />
                 <span class="text">
@@ -163,47 +166,24 @@
             </em>
           </div>
 
-          <div class="preview-picture">
+          <div class="preview-area">
             <div
-              v-if="currentTaskPreviews && currentTaskPreviews.length > 0 && isMovie"
+              v-if="isPreviews"
             >
-              <video-player
-                :preview="currentPreview"
+              <preview-player
+                :previews="currentPreview.previews"
                 :task-type-map="taskTypeMap"
                 :entity-preview-files="taskEntityPreviews"
                 :read-only="isCurrentUserArtist"
-                @annotationchanged="onAnnotationChanged"
-                ref="preview-movie"
+                :last-preview-files="lastFivePreviews"
+                @annotation-changed="onAnnotationChanged"
+                @add-extra-preview="onAddExtraPreviewClicked"
+                @remove-extra-preview="onRemoveExtraPreviewClicked"
+                @change-current-preview="changeCurrentPreview"
+                ref="preview-player"
+                v-if="currentPreview"
               />
             </div>
-
-            <a
-              class="button mt2"
-              ref="preview-file"
-              :href="currentPreviewDlPath"
-              v-else-if="isDlPreviewFile"
-            >
-              <download-icon class="icon" />
-              <span class="text">
-                {{ $t('tasks.download_pdf_file', {extension}) }}
-              </span>
-            </a>
-
-            <model-viewer
-              :preview-url="currentPreviewPath"
-              :preview-dl-path="currentPreviewDlPath"
-              v-else-if="currentTaskPreviews && currentTaskPreviews.length > 0 && extension === 'obj'"
-            />
-
-            <picture-viewer
-              :preview="currentPreview"
-              :read-only="isCurrentUserArtist"
-              @annotation-changed="onAnnotationChanged"
-              @add-preview="onAddExtraPreview"
-              @remove-extra-preview="showRemoveExtraPreviewModal"
-              ref="preview-picture"
-              v-else-if="currentTaskPreviews && currentTaskPreviews.length > 0 && ['png', 'gif'].includes(this.extension)"
-            />
           </div>
         </div>
       </div>
@@ -226,7 +206,6 @@
       :is-loading="loading.addExtraPreview"
       :is-error="errors.addExtraPreview"
       :form-data="addExtraPreviewFormData"
-      extensions=".png,.jpg,.jpeg"
       @cancel="hideExtraPreviewModal"
       @fileselected="selectFile"
       @confirm="createExtraPreview"
@@ -269,7 +248,6 @@
 import { mapGetters, mapActions } from 'vuex'
 import {
   ChevronLeftIcon,
-  DownloadIcon,
   ImageIcon
 } from 'vue-feather-icons'
 
@@ -278,15 +256,13 @@ import AddPreviewModal from '../modals/AddPreviewModal'
 import Comment from '../widgets/Comment'
 import DeleteModal from '../modals/DeleteModal'
 import EditCommentModal from '../modals/EditCommentModal'
-import ModelViewer from '../previews/ModelViewer'
 import PeopleAvatar from '../widgets/PeopleAvatar'
-import PictureViewer from '../previews/PictureViewer'
 import PreviewRow from '../widgets/PreviewRow'
 import Spinner from '../widgets/Spinner'
 import SubscribeButton from '../widgets/SubscribeButton'
 import TaskTypeName from '../widgets/TaskTypeName'
 import ValidationTag from '../widgets/ValidationTag'
-import VideoPlayer from '../previews/VideoPlayer'
+import PreviewPlayer from '../previews/PreviewPlayer'
 
 export default {
   name: 'task',
@@ -296,25 +272,20 @@ export default {
     Comment,
     ChevronLeftIcon,
     DeleteModal,
-    DownloadIcon,
     EditCommentModal,
     ImageIcon,
-    ModelViewer,
     PeopleAvatar,
     PreviewRow,
-    PictureViewer,
+    PreviewPlayer,
     Spinner,
     SubscribeButton,
     TaskTypeName,
-    ValidationTag,
-    VideoPlayer
+    ValidationTag
   },
 
   data () {
     return {
       attachedFileName: '',
-      currentPreviewId: null,
-      currentExtraPreviewId: null,
       entityPage: this.getEntityPage(),
       selectedTab: 'validation',
       taskLoading: {
@@ -351,12 +322,9 @@ export default {
       currentTaskComments: [],
       currentTaskPreviews: [],
       commentToEdit: null,
-      otherPreviews: [],
       addPreviewFormData: null,
       addExtraPreviewFormData: null,
-      isSubscribed: false,
-      currentPreviewPath: '',
-      currentPreviewDlPath: ''
+      isSubscribed: false
     }
   },
 
@@ -366,7 +334,6 @@ export default {
   },
 
   mounted () {
-    this.handleModalsDisplay()
     this.reset()
     this.$nextTick(() => {
       if (this.$refs['task-columns']) {
@@ -399,6 +366,38 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
+    isPreviewButtonVisible () {
+      return (
+        this.currentTask &&
+        this.currentTask.entity &&
+        this.currentTask.entity.preview_file_id !== this.currentPreviewId &&
+        ['png', 'mp4'].includes(this.extension)
+      )
+    },
+
+    extension () {
+      return this.currentPreview ? this.currentPreview.extension : ''
+    },
+
+    currentPreviewId () {
+      return this.currentPreview ? this.currentPreview.id : ''
+    },
+
+    currentPreview () {
+      if (this.isPreviews) {
+        let currentPreview = this.currentTaskPreviews[0]
+        const previewId = this.route.params.preview_id
+        if (previewId) {
+          currentPreview = this.currentTaskPreviews.find((preview) => {
+            return preview.id === previewId
+          })
+        }
+        return currentPreview
+      } else {
+        return null
+      }
+    },
 
     isCommentingAllowed () {
       return this.isCurrentUserManager || this.currentTask.assignees.find(
@@ -455,6 +454,14 @@ export default {
         return {
           name: 'open-productions'
         }
+      }
+    },
+
+    lastFivePreviews () {
+      if (this.currentTaskPreviews) {
+        return this.currentTaskPreviews.slice(0, 5)
+      } else {
+        return []
       }
     },
 
@@ -568,6 +575,10 @@ export default {
       }
     },
 
+    previewPlayer () {
+      return this.$refs['preview-player']
+    },
+
     title () {
       if (this.currentTask) {
         const type = this.currentTask.entity_type_name
@@ -605,44 +616,6 @@ export default {
       }
     },
 
-    isMovie () {
-      if (this.currentTaskPreviews) {
-        const previewId = this.route.params.preview_id
-        let currentPreview = this.currentTaskPreviews[0]
-        if (previewId) {
-          currentPreview = this.currentTaskPreviews.find((preview) => {
-            return preview.id === previewId
-          })
-        }
-        return currentPreview && currentPreview.extension === 'mp4'
-      } else {
-        return false
-      }
-    },
-
-    extension () {
-      if (this.currentTaskPreviews) {
-        const previewId = this.route.params.preview_id
-        let currentPreview = this.currentTaskPreviews[0]
-        if (previewId) {
-          currentPreview = this.currentTaskPreviews.find((preview) => {
-            return preview.id === previewId
-          })
-        }
-        return currentPreview ? currentPreview.extension : ''
-      } else {
-        return ''
-      }
-    },
-
-    moviePath () {
-      let previewId = this.route.params.preview_id
-      if (!previewId && this.currentTaskPreviews) {
-        previewId = this.currentTaskPreviews[0].id
-      }
-      return `/api/movies/originals/preview-files/${previewId}.mp4`
-    },
-
     isAssigned () {
       if (this.currentTask) {
         return this.currentTask.assignees.some((assigneeId) => {
@@ -653,37 +626,12 @@ export default {
       }
     },
 
-    isPreviewButtonVisible () {
-      return (
-        this.currentTask &&
-        this.currentTask.entity &&
-        this.currentTask.entity.preview_file_id !== this.currentPreviewId &&
-        ['png', 'mp4'].includes(this.extension)
-      )
-    },
-
-    isDlPreviewFile () {
-      return this.currentTaskPreviews &&
-        ['pdf', 'ma', 'mb', 'rar', 'zip'].includes(this.extension)
-    },
-
     currentTaskType () {
       if (this.currentTask) {
         return this.taskTypeMap[this.currentTask.task_type_id]
       } else {
         return null
       }
-    },
-
-    currentPreview () {
-      let currentPreview = this.currentTaskPreviews[0]
-      const previewId = this.route.params.preview_id
-      if (previewId) {
-        currentPreview = this.currentTaskPreviews.find((preview) => {
-          return preview.id === previewId
-        })
-      }
-      return currentPreview
     },
 
     currentTeam () {
@@ -752,16 +700,9 @@ export default {
     loadTaskData () {
       const task = this.getCurrentTask()
       if (!task) {
-        this.taskLoading = {
-          isLoading: true,
-          isError: false
-        }
-
-        this.loadTask({
-          taskId: this.route.params.task_id,
-          callback: (err, task) => {
-            if (err) console.error(err)
-
+        this.taskLoading = { isLoading: true, isError: false }
+        this.loadTask({ taskId: this.route.params.task_id })
+          .then(task => {
             let loadingFunction = (callback) => {
               this.loadAssets()
                 .then(callback)
@@ -781,63 +722,36 @@ export default {
               this.currentTask = task
               this.loadTaskComments({
                 taskId: task.id,
-                entityId: task.entity_id,
-                callback: (err) => {
-                  if (err) {
-                    this.taskLoading = {
-                      isLoading: false,
-                      isError: true
-                    }
-                  } else {
-                    this.reset()
-                    this.entityPage = this.getEntityPage()
-                    this.taskLoading = {
-                      isLoading: false,
-                      isError: false
-                    }
-                    this.loadTaskSubscribed({
-                      taskId: this.route.params.task_id,
-                      callback: (err, subscribed) => {
-                        if (err) console.error(err)
-                        this.isSubscribed = subscribed
-                      }
-                    })
-                  }
-                }
+                entityId: task.entity_id
               })
-            })
-          }
-        })
-      } else {
-        this.currentTask = task
-        this.loadTaskComments({
-          taskId: this.route.params.task_id,
-          entityId: task.entity_id,
-          callback: (err) => {
-            if (err) {
-            } else {
-              this.currentTaskComments = this.getCurrentTaskComments()
-              this.currentTaskPreviews = this.getCurrentTaskPreviews()
-              this.setOtherPreviews()
-              this.currentPreviewPath = this.getOriginalPath()
-              this.currentPreviewDlPath = this.getOriginalDlPath()
-              this.entityPage = this.getEntityPage()
-              this.setOtherPreviews()
-              this.loadTaskSubscribed({
-                taskId: this.route.params.task_id,
-                callback: (err, subscribed) => {
-                  if (err) console.error(err)
+                .then(() => this.loadTaskSubscribed({ taskId: task.id }))
+                .then((subscribed) => {
                   this.isSubscribed = subscribed
-                }
-              })
-            }
-          }
-        })
+                  this.reset()
+                  this.entityPage = this.getEntityPage()
+                  this.taskLoading = { isLoading: false, isError: false }
+                }).catch((err) => {
+                  console.error(err)
+                  this.taskLoading = { isLoading: false, isError: true }
+                })
+            })
+          })
+      } else {
+        const taskId = this.route.params.task_id
+        this.currentTask = task
+        this.loadTaskComments({ taskId, entityId: task.entity_id })
+          .then(() => this.loadTaskSubscribed({ taskId }))
+          .then(subscribed => {
+            this.isSubscribed = subscribed
+            this.currentTaskComments = this.getCurrentTaskComments()
+            this.currentTaskPreviews = this.getCurrentTaskPreviews()
+            this.entityPage = this.getEntityPage()
+          })
+          .catch(err => {
+            console.error(err)
+            this.taskLoading.isError = true
+          })
       }
-    },
-
-    isHighlighted (comment) {
-      return comment.preview && comment.preview.id === this.currentPreviewId
     },
 
     getCurrentTask () {
@@ -859,48 +773,6 @@ export default {
 
     getCurrentTaskPreviews () {
       return this.getTaskPreviews(this.route.params.task_id)
-    },
-
-    getCurrentTaskPath () {
-      if (this.currentTask) {
-        return `/tasks/${this.currentTask.id}`
-      } else {
-        return ''
-      }
-    },
-
-    getOriginalPath () {
-      let previewId = this.route.params.preview_id
-      if (!previewId &&
-          this.currentTaskPreviews &&
-          this.currentTaskPreviews.length > 0
-      ) {
-        previewId = this.currentTaskPreviews[0].id
-      }
-      const extension = this.extension ? this.extension : 'png'
-      return `/api/pictures/originals/preview-files/${previewId}.${extension}`
-    },
-
-    getOriginalDlPath () {
-      let previewId = this.route.params.preview_id
-      if (!previewId &&
-          this.currentTaskPreviews &&
-          this.currentTaskPreviews.length > 0
-      ) {
-        previewId = this.currentTaskPreviews[0].id
-      }
-      return `/api/pictures/originals/preview-files/${previewId}/download`
-    },
-
-    getPreviewPath () {
-      let previewId = this.route.params.preview_id
-      if (!previewId &&
-          this.currentTaskPreviews &&
-          this.currentTaskPreviews.length > 0
-      ) {
-        previewId = this.currentTaskPreviews[0].id
-      }
-      return `/api/pictures/previews/preview-files/${previewId}.png`
     },
 
     addComment (comment, attachment, checklist, taskStatusId) {
@@ -932,35 +804,7 @@ export default {
     reset () {
       this.currentTaskComments = this.getCurrentTaskComments()
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
-      this.setOtherPreviews()
-      this.currentPreviewPath = this.getOriginalPath()
-      this.currentPreviewDlPath = this.getOriginalDlPath()
       this.currentTask = this.getCurrentTask()
-      let previewId = this.route.params.preview_id
-      if (!previewId &&
-          this.currentTaskPreviews &&
-          this.currentTaskPreviews.length > 0) {
-        previewId = this.currentTaskPreviews[0].id
-      }
-      this.currentPreviewId = previewId
-    },
-
-    handleModalsDisplay () {
-      const path = this.$store.state.route.path
-
-      this.modals = {
-        addPreview: false,
-        addExtraPreview: false,
-        deleteExtraPreview: false,
-        deleteTask: false,
-        deleteComment: false,
-        editComment: false
-      }
-      if (
-        path.indexOf('delete') > 0 && path.indexOf('comments') < 0
-      ) {
-        this.modals.deleteTask = true
-      }
     },
 
     selectFile (forms) {
@@ -975,25 +819,31 @@ export default {
       this.loading.addPreview = true
       this.addCommentPreview({
         taskId: this.route.params.task_id,
-        commentId: this.route.params.comment_id,
-        callback: (err, preview) => {
-          this.loading.addPreview = false
-          if (err) {
-            this.errors.addPreview = true
-          } else {
-            this.$refs['add-preview-modal'].reset()
-            this.resetPreview(preview)
-          }
-        }
+        commentId: this.route.params.comment_id
       })
+        .then(preview => {
+          this.loading.addPreview = false
+          this.$refs['add-preview-modal'].reset()
+          this.resetPreview()
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.addPreview = false
+          this.errors.addPreview = true
+        })
+    },
+
+    isHighlighted (comment) {
+      return comment.preview && comment.preview.id === this.currentPreviewId
     },
 
     createExtraPreview () {
+      const previews = this.currentTaskPreviews
+      const preview = previews.length > 0 ? previews[0] : null
       this.errors.addExtraPreview = false
       this.loading.addExtraPreview = true
-      const previewId = this.currentPreviewId
       const comment = this.getCurrentTaskComments().find((comment) => {
-        return comment.previews.findIndex((p) => p.id === previewId) >= 0
+        return comment.previews.findIndex((p) => p.id === preview.id) >= 0
       })
       this.addCommentExtraPreview({
         taskId: this.currentTask.id,
@@ -1002,17 +852,11 @@ export default {
       })
         .then(() => {
           this.loading.addExtraPreview = false
-          if (this.currentPreview) {
-            this.resetPreview(this.currentPreview)
-          } else {
-            this.resetPreview({
-              id: previewId
-            })
-          }
+          this.resetPreview(false)
           this.modals.addExtraPreview = false
           this.$refs['add-extra-preview-modal'].reset()
           setTimeout(() => {
-            this.$refs['preview-picture'].displayLast()
+            this.previewPlayer.displayLast()
           }, 0)
         })
         .catch((err) => {
@@ -1022,13 +866,14 @@ export default {
         })
     },
 
-    resetPreview (preview) {
+    resetPreview (changeRoute = true) {
+      const previews = this.currentTaskPreviews
+      const preview = previews.length > 0 ? previews[0] : null
       this.currentTaskComments = this.getCurrentTaskComments()
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
-      this.setOtherPreviews()
-      this.currentPreviewPath = this.getOriginalPath()
-      this.currentPreviewDlPath = this.getOriginalDlPath()
-      if (preview) this.$router.push(this.previewPath(preview.id))
+      if (preview && changeRoute) {
+        this.$router.push(this.previewPath(preview.id))
+      }
     },
 
     setPreview () {
@@ -1048,52 +893,21 @@ export default {
         })
     },
 
-    setOtherPreviews () {
-      if (this.currentTaskPreviews) {
-        this.otherPreviews = this.currentTaskPreviews.filter((p) => {
-          return (
-            p.id !== this.currentPreviewId &&
-            p.extension === 'mp4'
-          )
-        })
-      } else {
-        this.otherPreviews = []
-      }
-      return this.otherPreviews
-    },
-
-    confirmDeleteTask () {
-      this.loading.deleteTask = true
-      this.errors.deleteTask = false
-
-      this.deleteTask({
-        task: this.currentTask,
-        callback: (err) => {
-          this.loading.deleteTask = false
-          if (err) {
-            this.errors.deleteTask = true
-          } else {
-            this.$router.push(this.entityPage)
-          }
-        }
-      })
-    },
-
     confirmEditTaskComment (comment) {
       this.loading.editComment = true
       this.errors.editComment = false
       this.editTaskComment({
         taskId: this.currentTask.id,
-        comment,
-        callback: (err) => {
-          this.loading.editComment = false
-          if (err) {
-            this.errors.editComment = true
-          } else {
-            this.modals.editComment = false
-          }
-        }
+        comment
       })
+        .then(() => {
+          this.loading.editComment = false
+          this.modals.editComment = false
+        })
+        .catch(err => {
+          console.error(err)
+          this.errors.editComment = true
+        })
     },
 
     saveComment (comment, checklist) {
@@ -1111,21 +925,19 @@ export default {
 
       this.deleteTaskComment({
         taskId: this.currentTask.id,
-        commentId,
-        callback: (err) => {
-          this.loading.deleteComment = false
-          if (err) {
-            this.errors.deleteComment = true
-          } else {
-            this.reset()
-            if (this.currentTaskPreviews &&
-                this.currentTaskPreviews.length > 0) {
-              this.resetPreview(this.currentTaskPreviews[0])
-            }
-            this.modals.deleteComment = false
-          }
-        }
+        commentId
       })
+        .then(() => {
+          this.loading.deleteComment = false
+          this.reset()
+          if (this.isPreviews) this.resetPreview()
+          this.modals.deleteComment = false
+        })
+        .catch(err => {
+          console.error(err)
+          this.loading.deleteComment = false
+          this.errors.deleteComment = true
+        })
     },
 
     confirmDeleteTaskPreview () {
@@ -1136,7 +948,7 @@ export default {
         return comment.previews.findIndex((p) => p.id === previewId) >= 0
       })
 
-      this.$refs['preview-picture'].displayFirst()
+      this.previewPlayer.displayFirst()
       this.deleteTaskPreview({
         taskId: this.currentTask.id,
         commentId: comment.id,
@@ -1144,7 +956,7 @@ export default {
       })
         .then(() => {
           this.loading.deleteExtraPreview = false
-          this.resetPreview(this.currentPreview)
+          this.resetPreview()
           this.hideRemoveExtraPreviewModal()
         })
         .catch((err) => {
@@ -1181,11 +993,7 @@ export default {
           commentId,
           comment
         })
-        if (this.currentPreviewId) {
-          this.resetPreview({ id: this.currentPreviewId })
-        } else {
-          this.resetPreview({ id: previewId })
-        }
+        this.resetPreview()
       }
     },
 
@@ -1241,8 +1049,12 @@ export default {
       this.updatePreviewAnnotation({ taskId, preview, annotations })
     },
 
-    onAddExtraPreview () {
+    onAddExtraPreviewClicked () {
       this.modals.addExtraPreview = true
+    },
+
+    onRemoveExtraPreviewClicked (preview) {
+      this.showRemoveExtraPreviewModal(preview)
     },
 
     hideExtraPreviewModal () {
@@ -1292,6 +1104,10 @@ export default {
       this.modals.deleteComment = false
     },
 
+    changeCurrentPreview (preview) {
+      this.$router.push(this.previewPath(preview.id))
+    },
+
     onRemoteAcknowledge (eventData, type) {
       if (this.currentTask) {
         const comment = this.currentTaskComments.find(
@@ -1321,26 +1137,10 @@ export default {
   },
 
   watch: {
-    currentPreviewId () {
-      this.setOtherPreviews()
-    },
-
     $route () {
-      this.handleModalsDisplay()
       if (this.$route.params.task_id !== this.currentTask.id) {
         this.loadTaskData()
       }
-      let previewId = this.route.params.preview_id
-      if (
-        !previewId &&
-        this.currentTaskPreviews &&
-        this.currentTaskPreviews.length > 0
-      ) {
-        previewId = this.currentTaskPreviews[0].id
-      }
-      this.currentPreviewId = previewId
-      this.currentPreviewPath = this.getOriginalPath()
-      this.currentPreviewDlPath = this.getOriginalDlPath()
     }
   },
 
@@ -1359,15 +1159,7 @@ export default {
             taskId: this.currentTask.id,
             previewId: eventData.preview_file_id
           }).then(() => {
-            if (this.$refs['preview-movie']) {
-              if (!this.$refs['preview-movie'].isDrawing) {
-                this.$refs['preview-movie'].reloadAnnotations()
-              }
-            } else if (this.$refs['preview-picture']) {
-              if (!this.$refs['preview-picture'].isDrawing) {
-                this.$refs['preview-picture'].reset()
-              }
-            }
+            this.$refs['preview-movie'].refreshAnnotations()
           })
         }
       },
@@ -1525,14 +1317,6 @@ video {
 
 .assignees span {
   margin-right: 0.2em;
-}
-
-.preview-picture {
-  text-align: center;
-}
-
-.preview-picture img {
-  max-height: 700px;
 }
 
 .avatar-wrapper {

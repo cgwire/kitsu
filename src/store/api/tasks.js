@@ -2,7 +2,7 @@ import client from './client'
 
 export default {
   getTask (taskId, callback) {
-    client.get(`/api/data/tasks/${taskId}/full`, callback)
+    return client.pget(`/api/data/tasks/${taskId}/full`)
   },
 
   updateTask (taskId, data, callback) {
@@ -14,40 +14,23 @@ export default {
   },
 
   getTaskSubscribed (taskId, callback) {
-    client.get(`/api/data/user/tasks/${taskId}/subscribed`, callback)
+    return client.pget(`/api/data/user/tasks/${taskId}/subscribed`)
   },
 
   subscribeToTask (taskId, callback) {
-    client.post(`/api/actions/user/tasks/${taskId}/subscribe`, {}, callback)
+    return client.ppost(`/api/actions/user/tasks/${taskId}/subscribe`, {})
   },
 
   unsubscribeFromTask (taskId, callback) {
-    client.del(`/api/actions/user/tasks/${taskId}/unsubscribe`, callback)
-  },
-
-  subscribeToSequence (sequenceId, taskTypeId, callback) {
-    client.post(
-      `/api/actions/user/sequences/${sequenceId}/task-types/` +
-      `${taskTypeId}/subscribe`,
-      {},
-      callback
-    )
-  },
-
-  unsubscribeFromSequence (sequenceId, taskTypeId, callback) {
-    client.del(
-      `/api/actions/user/sequences/${sequenceId}/task-types/` +
-      `${taskTypeId}/unsubscribe`,
-      callback
-    )
+    return client.pdel(`/api/actions/user/tasks/${taskId}/unsubscribe`)
   },
 
   getTaskComments (taskId, callback) {
-    client.get(`/api/data/tasks/${taskId}/comments`, callback)
+    return client.pget(`/api/data/tasks/${taskId}/comments`)
   },
 
   getTaskPreviews (taskId, callback) {
-    client.get(`/api/data/tasks/${taskId}/previews`, callback)
+    return client.pget(`/api/data/tasks/${taskId}/previews`)
   },
 
   commentTask (data) {
@@ -81,7 +64,7 @@ export default {
   },
 
   getTaskComment (data, callback) {
-    client.get(`/api/data/comments/${data.id}`, callback)
+    return client.pget(`/api/data/comments/${data.id}`)
   },
 
   editTaskComment (comment, callback) {
@@ -90,11 +73,11 @@ export default {
       task_status_id: comment.task_status_id,
       checklist: comment.checklist
     }
-    client.put(`/api/data/comments/${comment.id}`, commentData, callback)
+    return client.pput(`/api/data/comments/${comment.id}`, commentData)
   },
 
   deleteTaskComment (taskId, commentId, callback) {
-    client.del(`/api/data/tasks/${taskId}/comments/${commentId}`, callback)
+    return client.pdel(`/api/data/tasks/${taskId}/comments/${commentId}`)
   },
 
   createTasks (data) {
@@ -178,28 +161,14 @@ export default {
   },
 
   updatePreviewAnnotation (preview, annotations) {
-    return new Promise((resolve, reject) => {
-      client.put(
-        `/api/data/preview-files/${preview.id}`,
-        { annotations },
-        (err, preview) => {
-          if (err) reject(err)
-          else resolve(preview)
-        }
-      )
-    })
+    return client.pput(
+      `/api/data/preview-files/${preview.id}`,
+      { annotations }
+    )
   },
 
   getPreviewFile (previewId) {
-    return new Promise((resolve, reject) => {
-      client.get(
-        `/api/data/preview-files/${previewId}`,
-        (err, preview) => {
-          if (err) reject(err)
-          else resolve(preview)
-        }
-      )
-    })
+    return client.pget(`/api/data/preview-files/${previewId}`)
   },
 
   assignTasks (personId, selectedTaskIds, callback) {
@@ -219,24 +188,22 @@ export default {
   },
 
   pinComment (comment) {
-    return new Promise((resolve, reject) => {
-      const data = {
-        pinned: comment.pinned
-      }
-      client.put(
-        `/api/data/comments/${comment.id}`,
-        data,
-        (err, comment) => {
-          if (err) reject(err)
-          else resolve(comment)
-        }
-      )
-    })
+    const data = {
+      pinned: comment.pinned
+    }
+    return client.pput(`/api/data/comments/${comment.id}`, data)
   },
 
   ackComment (comment) {
     const path =
       `/api/data/tasks/${comment.object_id}/comments/${comment.id}/ack`
     return client.ppost(path, {})
+  },
+
+  updateRevisionPreviewPosition (previewId, position) {
+    const path =
+      `/api/actions/preview-files/${previewId}/update-position`
+    console.log('request', position + 1)
+    return client.pput(path, { position: position + 1 })
   }
 }

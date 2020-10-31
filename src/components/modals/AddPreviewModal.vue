@@ -86,7 +86,7 @@ export default {
       type: String,
       default:
         '.png,.jpg,.mp4,.mov,.obj,.pdf,.ma,.mb,.zip,.rar,.jpeg,' +
-        '.blend,.wmv,.m4v,.ai,.comp,.exr,.psd,.hip,.gif,.ae,.fla,.flv,.swf,.avi'
+        '.blend,.wmv,.m4v,.mkv,.ai,.comp,.exr,.psd,.hip,.gif,.ae,.fla,.flv,.swf,.avi'
     }
   },
 
@@ -111,17 +111,7 @@ export default {
 
     onFileSelected (forms) {
       this.forms = forms
-      const isMultipleSelection = forms.length > 1
-      const allPictureFiles = forms.reduce((acc, form) => {
-        const filename = form.get('file').name
-        const extension = filename.substring(filename.length - 3)
-        return acc && ['png', 'jpg'].includes(extension)
-      }, true)
-      if (isMultipleSelection && !allPictureFiles) {
-        this.reset()
-      } else {
-        this.$emit('fileselected', forms)
-      }
+      this.$emit('fileselected', forms)
     },
 
     reset () {

@@ -1805,6 +1805,21 @@ th.validation-cell {
   }
 }
 
+.separator {
+  margin: .5rem;
+  &:before {
+    content: '';
+    border-left: 1px solid $dark-grey-lightest;
+    height: .5rem;
+  }
+}
+
+#model-viewer {
+  width: 100%;
+  height: 100%;
+  background: black;
+}
+
 @media screen and (max-width: 1000px) {
   .button .icon.is-small {
     margin-right: 0;

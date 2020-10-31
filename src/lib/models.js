@@ -93,3 +93,11 @@ export const removeFromIdList = (production, field, id) => {
   const index = production[field].findIndex((mid) => mid === id)
   if (index !== null) production[field].splice(index, 1)
 }
+
+export const arrayMove = (array, fromIndex, toIndex) => {
+  const arr = [...array]
+  const element = arr[fromIndex]
+  arr.splice(fromIndex, 1)
+  arr.splice(toIndex, 0, element)
+  return arr
+}
