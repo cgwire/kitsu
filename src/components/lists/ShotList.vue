@@ -575,7 +575,7 @@ export default {
 }
 
 .actions {
-  min-width: 140px;
+  min-width: 160px;
 }
 
 th.actions {

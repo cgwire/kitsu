@@ -525,7 +525,7 @@ export default {
 }
 
 .actions {
-  min-width: 150px;
+  min-width: 160px;
   padding: 0.4em;
 }
 

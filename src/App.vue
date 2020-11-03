@@ -650,7 +650,7 @@ body {
 }
 
 th.actions {
-  min-width: 120px;
+  min-width: 160px;
 }
 
 td.actions {
