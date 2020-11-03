@@ -1248,6 +1248,7 @@ export default {
         this.container.msRequestFullscreen()
       }
       this.container.setAttribute('data-fullscreen', !!true)
+      document.activeElement.blur()
     },
 
     exitFullScreen () {
@@ -1261,6 +1262,7 @@ export default {
         document.msExitFullscreen()
       }
       this.container.setAttribute('data-fullscreen', !!false)
+      document.activeElement.blur()
     },
 
     isFullScreen () {
@@ -1646,7 +1648,6 @@ export default {
 
               // Init canvas values
               let width = ratio ? fullHeight * ratio : fullWidth
-              // let height = fullHeight
               let height = ratio ? Math.round(fullWidth / ratio) : fullHeight
               let top = 0
               let left = 0
@@ -1684,7 +1685,12 @@ export default {
                 top = Math.round((fullHeight - height) / 2)
                 this.canvas.style.top = top + 'px'
               } else {
+                // Height is bigger than the container. So we put it
+                // inside the container and adapt width parameters accordingly.
                 height = fullHeight
+                width = Math.round(height * ratio)
+                const left = Math.round((fullWidth - width) / 2)
+                this.canvas.style.left = left + 'px'
               }
               this.fabricCanvas.setDimensions({ width, height })
             }

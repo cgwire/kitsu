@@ -71,7 +71,7 @@
       v-show="isMovie"
     />
 
-    <div class="buttons flexrow pull-bottom">
+    <div class="buttons flexrow pull-bottom" ref="buttons">
       <div class="left flexrow" v-if="isMovie">
         <button-simple
           class="flexrow-item"
@@ -360,6 +360,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { formatFrame, formatTime, roundToFrame } from '@/lib/video'
 
 import { annotationMixin } from '@/components/mixins/annotation_mixin'
+import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { domMixin } from '@/components/mixins/dom'
 
 import {
@@ -377,7 +378,7 @@ import PreviewViewer from '@/components/previews/PreviewViewer'
 
 export default {
   name: 'preview-player',
-  mixins: [annotationMixin, domMixin],
+  mixins: [annotationMixin, domMixin, fullScreenMixin],
 
   components: {
     ArrowUpRightIcon,
@@ -723,26 +724,6 @@ export default {
       this.isMuted = !this.isMuted
     },
 
-    exitFullScreen () {
-      if (document.exitFullscreen) {
-        document.exitFullscreen()
-      } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen()
-      } else if (document.webkitCancelFullScreen) {
-        document.webkitCancelFullScreen()
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen()
-      }
-      this.container.setAttribute('data-fullscreen', !!false)
-      this.isComparing = false
-      this.fullScreen = false
-      this.fixCanvasSize(this.getCurrentPreviewDimensions())
-      this.$nextTick(() => {
-        this.reloadAnnotations()
-        this.loadAnnotation()
-      })
-    },
-
     // Sizing
 
     getDimensions () {
@@ -755,7 +736,8 @@ export default {
     },
 
     getCurrentPreviewDimensions () {
-      return this.previewViewer.getPreviewDimensions()
+      const dim = this.previewViewer.getPreviewDimensions()
+      return dim
     },
 
     setupFabricCanvas () {
@@ -823,23 +805,30 @@ export default {
     // Screen
 
     setFullScreen () {
-      if (this.container.requestFullscreen) {
-        this.container.requestFullscreen()
-      } else if (this.container.mozRequestFullScreen) {
-        this.container.mozRequestFullScreen()
-      } else if (this.container.webkitRequestFullScreen) {
-        this.container.webkitRequestFullScreen()
-      } else if (this.container.msRequestFullscreen) {
-        this.container.msRequestFullscreen()
-      }
+      this.documentSetFullScreen(this.container)
       this.container.setAttribute('data-fullscreen', !!true)
       this.fullScreen = true
       this.fixCanvasSize(this.getCurrentPreviewDimensions())
       this.$nextTick(() => {
+        // Needed to avoid fullsceen button to be called with space bar.
+        document.activeElement.blur()
         this.reloadAnnotations()
         this.loadAnnotation()
       })
-      this.$refs['button-bar'].focus()
+    },
+
+    exitFullScreen () {
+      this.documentExitFullScreen()
+      this.container.setAttribute('data-fullscreen', !!false)
+      this.isComparing = false
+      this.fullScreen = false
+      this.fixCanvasSize(this.getCurrentPreviewDimensions())
+      this.$nextTick(() => {
+        // Needed to avoid fullsceen button to be called with space bar.
+        document.activeElement.blur()
+        this.reloadAnnotations()
+        this.loadAnnotation()
+      })
     },
 
     onFullscreenClicked () {
@@ -852,30 +841,33 @@ export default {
       }
     },
 
-    onExitFullScreen () {
+    onFullScreenChange () {
       if (
-        !document.webkitIsFullScreen &&
-        !document.mozFullScreen &&
-        !document.msFullscreenElement
+        this.fullScreen &&
+        !this.isFullScreen()
       ) {
+        this.isComparing = false
         this.fullScreen = false
+        this.$nextTick(() => {
+          this.previewViewer.resetVideo()
+          this.fixCanvasSize(this.getCurrentPreviewDimensions())
+          this.reloadAnnotations()
+          this.loadAnnotation()
+        })
       }
     },
 
     // Comparison
 
     onCompareClicked () {
-      console.log(this.isComparing)
       if (this.isComparing) {
         this.isComparing = false
       } else {
         this.isComparing = true
         this.taskTypeId = this.taskTypeOptions[0].value
-        console.log(this.taskTypeId)
         this.previewToCompareId = ''
         this.$nextTick(() => {
           this.previewToCompareId = this.previewFileOptions[0].value
-          console.log(this.previewToCompareId, this.previewFileOptions)
         })
         this.isDrawing = false
       }
@@ -1128,6 +1120,8 @@ export default {
           this.goNextFrame()
         } else if (event.keyCode === 32) { // space
           this.onPlayPauseClicked()
+          this.pauseEvent(event)
+          return false
         } else if (event.keyCode === 68) { // d
           this.container.focus()
           this.pauseEvent(event)
@@ -1154,28 +1148,18 @@ export default {
 
     configureEvents () {
       window.addEventListener('keydown', this.onKeyDown, false)
-      document.addEventListener(
-        'fullscreenchange', this.onExitFullScreen, false)
-      document.addEventListener(
-        'mozfullscreenchange', this.onExitFullScreen, false)
-      document.addEventListener(
-        'MSFullscreenChange', this.onExitFullScreen, false)
-      document.addEventListener(
-        'webkitfullscreenchange', this.onExitFullScreen, false)
+      this.container.addEventListener(
+        'fullscreenchange', this.onFullScreenChange, false)
+      this.container.addEventListener(
+        'mozfullscreenchange', this.onFullScreenChange, false)
+      this.container.addEventListener(
+        'MSFullscreenChange', this.onFullScreenChange, false)
+      this.container.addEventListener(
+        'webkitfullscreenchange', this.onFullScreenChange, false)
     },
 
     removeEvents () {
-      if (this.container) {
-        window.removeEventListener('keydown', this.onKeyDown)
-      }
-      document.removeEventListener(
-        'fullscreenchange', this.onExitFullScreen)
-      document.removeEventListener(
-        'mozfullscreenchange', this.onExitFullScreen)
-      document.removeEventListener(
-        'MSFullscreenChange', this.onExitFullScreen)
-      document.removeEventListener(
-        'webkitfullscreenchange', this.onExitFullScreen)
+      window.removeEventListener('keydown', this.onKeyDown)
     },
 
     // Browsing
