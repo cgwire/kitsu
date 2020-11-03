@@ -865,16 +865,18 @@ export default {
     // Comparison
 
     onCompareClicked () {
+      console.log(this.isComparing)
       if (this.isComparing) {
         this.isComparing = false
       } else {
         this.isComparing = true
-        if (!this.taskTypeId) {
-          this.taskTypeId = this.taskTypeOptions[0].value
-          this.$nextTick(() => {
-            this.previewToCompareId = this.previewFileOptions[0].value
-          })
-        }
+        this.taskTypeId = this.taskTypeOptions[0].value
+        console.log(this.taskTypeId)
+        this.previewToCompareId = ''
+        this.$nextTick(() => {
+          this.previewToCompareId = this.previewFileOptions[0].value
+          console.log(this.previewToCompareId, this.previewFileOptions)
+        })
         this.isDrawing = false
       }
     },
@@ -1346,6 +1348,10 @@ export default {
     },
 
     isComparing () {
+      if (!this.isComparing) {
+        this.taskTypeId = ''
+        this.previewToCompareId = ''
+      }
       this.$nextTick(() => {
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
       })

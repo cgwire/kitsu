@@ -1606,16 +1606,22 @@ export default {
         .then(() => {
           if (this.isCurrentPreviewMovie && this.fabricCanvas) {
             if (this.canvas) {
+              // Video Ratio
               const ratio = this.rawPlayer.getVideoRatio()
+
+              // Container size
               const fullWidth = this.rawPlayer.$el.offsetWidth
               const fullHeight = this.rawPlayer.$el.offsetHeight
               const width = ratio ? fullHeight * ratio : fullWidth
+
               if (fullWidth > width) {
+                // Case where canvas is less big than the container
                 const left = Math.round((fullWidth - width) / 2)
                 this.canvas.style.left = left + 'px'
                 this.canvas.style.top = '0px'
                 this.fabricCanvas.setDimensions({ width, height: fullHeight })
               } else {
+                // Case where canvas is bigger than the container
                 const height = ratio ? Math.round(fullWidth / ratio) : fullHeight
                 const top = Math.round((fullHeight - height) / 2)
                 this.canvas.style.left = '0px'
@@ -1625,49 +1631,60 @@ export default {
             }
           } else if (this.isCurrentPreviewPicture && this.fabricCanvas) {
             if (this.canvas) {
+              // Picture ratio
               const naturalWidth = this.picturePlayer.naturalWidth
               const naturalHeight = this.picturePlayer.naturalHeight
               const ratio = naturalWidth / naturalHeight
+
+              // Container size
               let fullWidth = this.$refs['video-container'].offsetWidth
               if (!this.isCommentsHidden) {
                 fullWidth -= 450 // task info widget width
               }
               const fullHeight = this.$refs['video-container'].offsetHeight
+              if (this.isComparing) fullWidth = Math.round(fullWidth / 2)
 
+              // Init canvas values
               let width = ratio ? fullHeight * ratio : fullWidth
+              // let height = fullHeight
               let height = ratio ? Math.round(fullWidth / ratio) : fullHeight
+              let top = 0
+              let left = 0
               this.canvas.style.top = '0px'
               this.canvas.style.left = '0px'
+
+              // Set Canvas width and left position
               if (fullWidth > naturalWidth) {
-                let left = Math.round((fullWidth - naturalWidth) / 2)
-                if (this.isComparing) {
-                  left = left - fullWidth / 4
-                  if (left < 0) left = 0
-                }
+                // Case where picture is less wide than the container
+                // We adapt left position, because there will be margins
+                left = Math.round((fullWidth - naturalWidth) / 2)
                 this.canvas.style.left = left + 'px'
                 width = naturalWidth
               } else if (fullWidth > width) {
+                // Case where canvas is less wide than the container
+                // We adapt left position
                 const left = Math.round((fullWidth - width) / 2)
                 this.canvas.style.left = left + 'px'
               } else {
+                // Case where canvas is wider than the container
+                // We set the width to the container size
                 width = fullWidth
               }
-              let top = 0
+
+              // Set Canvas height and top position
               if (fullHeight > naturalHeight) {
+                // Case where picture is less high than the container
+                // We adapt top position, because there will be margins
                 top = Math.round((fullHeight - naturalHeight) / 2)
                 this.canvas.style.top = top + 'px'
                 height = naturalHeight
               } else if (fullHeight > height) {
+                // Case where canvas is less high than the container
+                // We adapt top position
                 top = Math.round((fullHeight - height) / 2)
                 this.canvas.style.top = top + 'px'
               } else {
                 height = fullHeight
-              }
-              if (this.isComparing) {
-                width = width / 2
-                height = height / 2
-                top = Math.round((fullHeight - height) / 2)
-                this.canvas.style.top = top + 'px'
               }
               this.fabricCanvas.setDimensions({ width, height })
             }
