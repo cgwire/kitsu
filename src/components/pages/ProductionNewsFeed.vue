@@ -481,7 +481,6 @@ export default {
           .catch(console.error)
         this.scrollToLine(news)
       } else {
-        console.log('task not loaded', this.lastSelection, index)
         this.lastSelection = -1
         this.currentTask = null
         this.currentNewsId = ''

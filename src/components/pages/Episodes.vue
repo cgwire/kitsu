@@ -160,7 +160,6 @@ export default {
       'editEpisode',
       'hideAssignations',
       'initEpisodes',
-      'loadComment',
       'loadEpisodeStats',
       'loadShots',
       'setLastProductionScreen',

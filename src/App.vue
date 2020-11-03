@@ -85,7 +85,6 @@ export default {
       'loadShot',
       'loadTaskStatus',
       'loadTaskType',
-      'refreshPreview',
       'refreshMetadataDescriptor',
       'removeAsset'
     ]),
@@ -339,12 +338,17 @@ export default {
 
       'comment:new' (eventData) {
         const commentId = eventData.comment_id
-        if (!this.isSavingCommentPreview) this.loadComment({ commentId })
+        if (!this.isSavingCommentPreview) {
+          this.loadComment({ commentId })
+            .catch(console.error)
+        }
       },
 
       'task:update' (eventData) {
         if (this.taskMap[eventData.task_id]) {
-          this.loadTask({ taskId: eventData.task_id })
+          this.$nextTick(() => {
+            this.loadTask({ taskId: eventData.task_id })
+          })
         }
       },
 

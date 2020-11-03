@@ -108,7 +108,6 @@ export default {
       'computeAssetTypeStats',
       'initAssetTypes',
       'loadAssets',
-      'loadComment',
       'setAssetTypeSearch',
       'setAssetTypeListScrollPosition',
       'setLastProductionScreen'

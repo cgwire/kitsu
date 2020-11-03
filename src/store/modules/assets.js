@@ -689,6 +689,7 @@ const mutations = {
       if (!isTime && asset.timeSpent > 0) isTime = true
       if (!isDescription && asset.description) isDescription = true
     })
+
     const assetTypes = Object.values(assetTypeMap)
     cache.assetTypeIndex = buildNameIndex(assetTypes)
     const displayedAssets = cache.assets.slice(0, PAGE_SIZE)

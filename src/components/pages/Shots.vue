@@ -499,7 +499,6 @@ export default {
       'hideAssignations',
       'loadEpisodes',
       'loadShots',
-      'loadComment',
       'removeShotSearch',
       'restoreShot',
       'saveShotSearch',

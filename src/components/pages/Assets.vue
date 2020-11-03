@@ -489,7 +489,6 @@ export default {
       'editAsset',
       'getAssetsCsvLines',
       'loadAssets',
-      'loadComment',
       'loadEpisodes',
       'newAsset',
       'removeAssetSearch',

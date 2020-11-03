@@ -159,7 +159,9 @@ const actions = {
   loadTask ({ commit, state }, { taskId }) {
     return tasksApi.getTask(taskId)
       .then(task => {
-        commit(LOAD_TASK_END, task)
+        setTimeout(() => {
+          commit(LOAD_TASK_END, task)
+        }, 1000)
         return Promise.resolve(task)
       })
   },
@@ -221,12 +223,11 @@ const actions = {
   },
 
   loadComment ({ commit, state }, { commentId, callback }) {
-    tasksApi.getTaskComment({ id: commentId }, (err, comment) => {
-      if (!err) {
+    return tasksApi.getTaskComment({ id: commentId })
+      .then(comment => {
         commit(NEW_TASK_COMMENT_END, { comment, taskId: comment.object_id })
-      }
-      if (callback) callback(err, comment)
-    })
+        return Promise.resolve(comment)
+      })
   },
 
   createTasks ({ commit, state },
@@ -1125,7 +1126,6 @@ const mutations = {
       preview.position = i
       i++
     })
-    console.log('after', preview.previews.map(p => p.position))
   },
 
   [REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD] (state) {

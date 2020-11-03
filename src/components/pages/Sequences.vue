@@ -184,7 +184,6 @@ export default {
       'editSequence',
       'hideAssignations',
       'initSequences',
-      'loadComment',
       'loadShots',
       'removeSequenceSearch',
       'saveSequenceSearch',
