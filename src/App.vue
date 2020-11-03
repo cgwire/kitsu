@@ -72,7 +72,7 @@ export default {
   methods: {
     ...mapActions([
       'getOrganisation',
-      'getTask',
+      'loadTask',
       'loadAsset',
       'loadAssetType',
       'loadComment',
@@ -344,7 +344,7 @@ export default {
 
       'task:update' (eventData) {
         if (this.taskMap[eventData.task_id]) {
-          this.getTask({ taskId: eventData.task_id })
+          this.loadTask({ taskId: eventData.task_id })
         }
       },
 

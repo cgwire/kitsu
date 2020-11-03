@@ -156,7 +156,7 @@ const getters = {
 }
 
 const actions = {
-  loadTask ({ commit, state }, { taskId, callback }) {
+  loadTask ({ commit, state }, { taskId }) {
     return tasksApi.getTask(taskId)
       .then(task => {
         commit(LOAD_TASK_END, task)

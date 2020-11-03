@@ -298,14 +298,14 @@ export default {
     onNotificationSelected (notification) {
       this.loading.currentTask = true
       this.loadTask({
-        taskId: notification.task_id,
-        callback: (err, task) => {
-          if (err) console.error(err)
+        taskId: notification.task_id
+      })
+        .then((task) => {
           this.loading.currentTask = false
           this.currentTask = task
           this.currentNotificationId = notification.id
-        }
-      })
+        })
+        .catch(console.error)
     },
 
     renderComment,

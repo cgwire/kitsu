@@ -471,16 +471,17 @@ export default {
       if (this.lastSelection !== index) {
         this.lastSelection = index
         this.loadTask({
-          taskId: news.task_id,
-          callback: (err, task) => {
-            if (err) console.error(err)
+          taskId: news.task_id
+        })
+          .then((task) => {
             this.loading.currentTask = false
             this.currentTask = task
             this.currentNewsId = news.id
-          }
-        })
+          })
+          .catch(console.error)
         this.scrollToLine(news)
       } else {
+        console.log('task not loaded', this.lastSelection, index)
         this.lastSelection = -1
         this.currentTask = null
         this.currentNewsId = ''
