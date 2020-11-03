@@ -317,6 +317,7 @@
           class="button flexrow-item"
           :href="originalDlPath"
           :title="$t('playlists.actions.download_file')"
+          v-if="big || fullScreen"
         >
           <download-icon class="icon is-small" />
         </a>
@@ -850,6 +851,7 @@ export default {
         this.fullScreen = false
         this.$nextTick(() => {
           this.previewViewer.resetVideo()
+          this.previewViewer.resetPicture()
           this.fixCanvasSize(this.getCurrentPreviewDimensions())
           this.reloadAnnotations()
           this.loadAnnotation()
@@ -1349,6 +1351,7 @@ export default {
       this.$nextTick(() => {
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
         this.previewViewer.resetVideo()
+        this.previewViewer.resetPicture()
       })
     },
 

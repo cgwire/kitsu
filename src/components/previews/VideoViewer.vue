@@ -206,7 +206,12 @@ export default {
       const ratio = dimensions.height / dimensions.width
       let width = Math.min(dimensions.width, this.container.offsetWidth)
       if (this.isComparing) {
-        width = Math.min(dimensions.width / 2, this.container.offsetWidth)
+        // parent is used because sometimes the container width is not
+        // properly computed.
+        width = Math.min(
+          dimensions.width,
+          this.container.parentElement.parentElement.offsetWidth / 2
+        )
       }
       let height = Math.floor(width * ratio)
       height = Math.min(height, this.defaultHeight)
@@ -245,6 +250,7 @@ export default {
           this.video.style.width = width + 'px'
           this.video.style.height = height + 'px'
           this.$emit('size-changed', { width, height })
+          this.onWindowResize()
         }
       }
     },

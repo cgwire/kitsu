@@ -502,6 +502,10 @@ export default {
     pinnedCount () {
       if (!this.taskComments) return 0
       return this.taskComments.filter(c => c.pinned).length
+    },
+
+    previewPlayer () {
+      return this.$refs['preview-player']
     }
   },
 
@@ -806,6 +810,7 @@ export default {
       })
         .then(() => {
           this.reset()
+          this.loading.deleteComment = false
           this.modals.deleteComment = false
         })
         .catch((err) => {
