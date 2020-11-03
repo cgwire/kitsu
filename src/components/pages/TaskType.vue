@@ -895,11 +895,12 @@ export default {
         if (color === '#f5f5f5') color = '#999'
         return color
       } else if (this.schedule.currentColor === 'late') {
+        console.log(endDate, moment())
         const isLate = (
           !this.taskStatusMap[task.task_status_id].is_done &&
           endDate.isBefore(moment())
         )
-        return isLate ? '#FF3860' : null
+        return isLate ? '#FF3860' : '#999'
       } else {
         return null
       }
