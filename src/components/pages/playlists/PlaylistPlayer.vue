@@ -1636,8 +1636,6 @@ export default {
               const naturalHeight = this.picturePlayer.naturalHeight
               const ratio = naturalWidth / naturalHeight
 
-              console.log('natural value', naturalWidth, naturalHeight)
-
               // Container size
               let fullWidth = this.$refs['video-container'].offsetWidth
               if (!this.isCommentsHidden) {
@@ -1645,8 +1643,6 @@ export default {
               }
               const fullHeight = this.$refs['video-container'].offsetHeight
               if (this.isComparing) fullWidth = Math.round(fullWidth / 2)
-
-              console.log('container value', fullWidth, fullHeight)
 
               // Init canvas values
               let width = ratio ? fullHeight * ratio : fullWidth
@@ -1656,8 +1652,6 @@ export default {
               let left = 0
               this.canvas.style.top = '0px'
               this.canvas.style.left = '0px'
-
-              console.log('init value', width, height)
 
               // Set Canvas width and left position
               if (fullWidth > naturalWidth) {
@@ -1676,8 +1670,6 @@ export default {
                 // We set the width to the container size
                 width = fullWidth
               }
-
-              console.log('width adaptation value', width, height)
 
               // Set Canvas height and top position
               if (fullHeight > naturalHeight) {
