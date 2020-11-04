@@ -1,40 +1,71 @@
 // Get all data displayed in statistics (needed by the stat cell widget).
 // Data follow this format: [[task-status-1-name, value], ...]
 // Set count data or frames data depending on data type.
-export const getChartData = (mainStats, entryId, columnId, dataType = 'count') => {
-  if (!mainStats[entryId] || !mainStats[entryId][columnId]) return []
-  const statusData = mainStats[entryId][columnId]
-  const valueField = dataType === 'count' ? 'count' : 'frames'
-  return Object.keys(statusData)
-    .map((taskStatusId) => {
-      const data = statusData[taskStatusId]
-      const color = data.name === 'todo' ? '#6F727A' : data.color
-      return [data.name, data[valueField], color]
-    })
-    .sort((a, b) => {
-      if (a[0] && b[0]) {
-        return a[0].localeCompare(b[0])
-      } else if (!a[0] && b[0]) {
-        return -1
-      } else if (a[0] && !b[0]) {
-        return 1
-      } else {
-        return 1
-      }
-    })
+export const getChartData =
+  (mainStats, entryId, columnId, dataType = 'count') => {
+    if (!mainStats[entryId] || !mainStats[entryId][columnId]) return []
+    const statusData = mainStats[entryId][columnId]
+    const valueField = dataType === 'count' ? 'count' : 'frames'
+    return Object.keys(statusData)
+      .map((taskStatusId) => {
+        const data = statusData[taskStatusId]
+        const color = data.name === 'todo' ? '#6F727A' : data.color
+        return [data.name, data[valueField], color]
+      })
+      .sort(_sortData)
+  }
+
+const _sortData = (a, b) => {
+  if (a[0] && b[0]) {
+    return a[0].localeCompare(b[0])
+  } else if (!a[0] && b[0]) {
+    return -1
+  } else if (a[0] && !b[0]) {
+    return 1
+  } else {
+    return 1
+  }
 }
+
+export const getRetakeChartData =
+  (mainStats, entryId, columnId, dataType = 'count') => {
+    const colorMap = {
+      done: '#22d160',
+      retake: '#ff3860',
+      other: '#6f727a'
+    }
+    if (!mainStats[entryId] || !mainStats[entryId][columnId]) return []
+    const statusData = { ...mainStats[entryId][columnId] }
+    delete statusData.evolution
+    delete statusData.max_retake_count
+    const valueField = dataType === 'count' ? 'count' : 'frames'
+    return Object.keys(statusData)
+      .map(dataName => {
+        const data = statusData[dataName]
+        const color = colorMap[dataName]
+        return [dataName, data[valueField], color]
+      })
+  }
 
 // Get all colors displayed in statistics (needed by the stat cell widget).
 export const getChartColors = (mainStats, entry, column) => {
   return getChartData(mainStats, entry, column).map(entry => entry[2])
 }
 
+// Extract max retake count info from retake statistics.
+export const getChartRetakeCount = (mainStats, entryId, columnId) => {
+  if (!mainStats[entryId] || !mainStats[entryId][columnId]) return -1
+  return mainStats[entryId][columnId].max_retake_count
+}
+
 // Build a map containing all stats of a production or episode:
 //
 // {
 //    all: {
-//      task-status-id-1: { count: 0, frames: 0 }
-//      ...
+//      all {
+//        task-status-id-1: { count: 0, frames: 0 }
+//         ...
+//      },
 //      task-type-id-1: {
 //        task-status-id-1: { count: 0, frames: 0 }
 //        ...
@@ -42,7 +73,10 @@ export const getChartColors = (mainStats, entry, column) => {
 //      ...
 //    },
 //    entity-id-1: {
-//      task-status-id-1: { count: 0, frames: 0 }
+//      all {
+//        task-status-id-1: { count: 0, frames: 0 }
+//         ...
+//      },
 //      ...
 //      task-type-id-1: {
 //        task-status-id-1: { count: 0, frames: 0 }

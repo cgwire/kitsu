@@ -738,6 +738,7 @@ export default {
           this.hideImportRenderModal()
           this.loading.importing = false
           this.loadEpisodes()
+            .catch(console.error)
           this.loadAssets()
         })
         .catch((err) => {

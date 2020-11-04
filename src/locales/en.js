@@ -730,10 +730,13 @@ export default {
 
   statistics: {
     count: 'Counts',
-    count_mode: 'Count mode',
-    display_mode: 'Display mode',
+    count_mode: 'Count',
+    data_mode: 'Data',
+    display_mode: 'Display',
     frames: 'Frames',
     pie: 'Pie charts',
+    retakes: 'Retakes',
+    status: 'Status',
     shots: 'Shots'
   },
 

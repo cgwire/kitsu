@@ -1,13 +1,21 @@
 <template>
 <td class="validation">
-  <div v-if="displayMode === 'pie'">
+  <div class="flexrow" v-if="displayMode === 'pie'">
     <pie-chart
+      class="flexrow-item"
       width="70px"
       height="50px"
       :legend="false"
       :colors="colors"
       :data="selectedData"
     />
+    <span
+      class="tag flexrow-item"
+      :style="{ 'background-color': labelColor }"
+      v-if="label"
+    >
+      {{ label }}
+    </span>
   </div>
   <div v-else>
     <div
@@ -24,6 +32,13 @@
         {{ data[1] }} ({{ percent(data[1]) }}%)
       </span>
     </div>
+    <span
+      class="tag flexrow-item"
+      :style="{ 'background-color': labelColor }"
+      v-if="label"
+    >
+      {{ label }}
+    </span>
   </div>
 </td>
 </template>
@@ -33,6 +48,8 @@
  * Components to display statistics as a pie or as text depending on the
  * selected display mode. Stats are based on count data (nb of shots or assets)
  * or on frames data (sum of shot frames) depending on the selected count mode.
+ * Data format:
+ * [['name', count, 'color'], ...  ]
  */
 export default {
   name: 'stats-cell',
@@ -58,6 +75,14 @@ export default {
     framesData: {
       type: Array,
       default: () => []
+    },
+    label: {
+      type: String,
+      default: ''
+    },
+    labelColor: {
+      type: String,
+      default: '#e67e22'
     }
   },
 
@@ -95,6 +120,14 @@ export default {
 
 <style lang="scss" scoped>
 .stats-name {
+  text-transform: uppercase;
+}
+
+.tag {
+  background: $orange-carrot;
+  color: white;
+  cursor: default;
+  font-weight: bold;
   text-transform: uppercase;
 }
 </style>

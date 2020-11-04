@@ -71,13 +71,17 @@
             :to="getPlaylistPath(playlist.id)"
             v-for="playlist in lastPlaylistsCreated"
           >
-            <light-entity-thumbnail
-              :preview-file-id="playlist.first_preview_file_id"
-              type="previews"
-              width="300px"
-              height="auto"
-              empty-height="150px"
-            />
+            <div class="has-text-centered">
+              <light-entity-thumbnail
+                :preview-file-id="playlist.first_preview_file_id"
+                type="previews"
+                width="auto"
+                height="auto"
+                max-width="300px"
+                max-height="150px"
+                empty-height="150px"
+              />
+            </div>
             <h3>{{ playlist.name }}</h3>
             <span>
               {{ $t('playlists.created_at') }}
@@ -95,13 +99,17 @@
             :to="getPlaylistPath(playlist.id)"
             v-for="playlist in lastPlaylistsUpdated"
           >
-            <light-entity-thumbnail
-              :preview-file-id="playlist.first_preview_file_id"
-              type="previews"
-              width="300px"
-              height="auto"
-              empty-height="150px"
-            />
+            <div class="has-text-centered">
+              <light-entity-thumbnail
+                :preview-file-id="playlist.first_preview_file_id"
+                type="previews"
+                width="auto"
+                height="auot"
+                max-width="300px"
+                max-height="150px"
+                empty-height="150px"
+              />
+            </div>
             <h3>{{ playlist.name }}</h3>
             <span>
               {{ $t('playlists.updated_at') }}
@@ -1358,6 +1366,7 @@ h2 {
 
   .recent-playlist {
     width: 333px;
+    height: 250px;
     background: white;
     border: 2px solid $light-grey-light;
     box-shadow: 0px 0px 6px #DDD;

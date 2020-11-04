@@ -124,7 +124,7 @@ const csv = {
 
   getStatReportsHeaders (mainStats, taskTypeMap, taskStatusMap) {
     const taskTypeIds = getStatsTaskTypeIds(mainStats, taskTypeMap)
-    const initialHeaders = ['name', '', 'All', '']
+    const initialHeaders = ['Name', '', 'All', '']
     return taskTypeIds.reduce((acc, taskTypeId) => {
       if (taskTypeId !== 'all') {
         const taskTypeName = taskTypeMap[taskTypeId].name
@@ -142,7 +142,7 @@ const csv = {
     const taskTypeIds = getStatsTaskTypeIds(mainStats, taskTypeMap)
     const entryIds = getStatsEntryIds(mainStats, entryMap)
 
-    entryIds.forEach((entryId) => {
+    entryIds.forEach(entryId => {
       const taskStatusIds = getStatsTaskStatusIdsForEntry(mainStats, entryId)
       const total = getStatsTotalCount(mainStats, taskStatusIds, countMode, entryId)
       const lineMap = buildTotalLines(
@@ -192,6 +192,102 @@ const csv = {
     return entries
   },
 
+  generateRetakeStatReports (
+    name,
+    mainStats,
+    taskTyeMap,
+    taskStatusMap,
+    entryMap,
+    countMode
+  ) {
+    const headers =
+      csv.getStatReportsHeaders(mainStats, taskTyeMap, taskStatusMap)
+    const entries = csv.getRetakeStatReportsEntries(
+      mainStats,
+      taskTyeMap,
+      taskStatusMap,
+      entryMap,
+      countMode
+    )
+    const lines = [headers, ...entries]
+    return csv.buildCsvFile(name, lines)
+  },
+
+  getRetakeStatReportsEntries (
+    mainStats, taskTypeMap, taskStatusMap, entryMap, countMode = 'count'
+  ) {
+    let entries = []
+    const taskTypeIds = getStatsTaskTypeIds(mainStats, taskTypeMap)
+    const entryIds = getStatsEntryIds(mainStats, entryMap)
+
+    entryIds.forEach(entryId => {
+      const taskStatusIds = getStatsTaskStatusIdsForEntry(mainStats, entryId)
+        .filter(s => !['max_retake_count', 'evolution'].includes(s))
+      const total = getStatsTotalCount(
+        mainStats, taskStatusIds, countMode, entryId
+      )
+      const lineMap = buildTotalLines(
+        entryMap,
+        taskStatusMap,
+        countMode,
+        mainStats,
+        taskStatusIds,
+        entryId,
+        total
+      )
+
+      taskTypeIds.forEach((taskTypeId) => {
+        if (taskTypeId === 'all') {
+          Object.keys(mainStats[entryId].all).forEach(taskStatusId => {
+            if (!['max_retake_count', 'evolution'].includes(taskStatusId)) {
+              lineMap[taskStatusId] = lineMap[taskStatusId].concat(['', ''])
+            }
+          })
+        } else {
+          const taskTypeStats = mainStats[entryId][taskTypeId]
+          if (taskTypeStats) {
+            const total = getStatsTotalEntryCount(
+              mainStats,
+              taskTypeStats,
+              countMode,
+              entryId,
+              taskTypeId
+            )
+            addEntryStatusStats(
+              mainStats,
+              countMode,
+              entryId,
+              taskTypeId,
+              taskStatusIds,
+              total,
+              lineMap
+            )
+          }
+        }
+      })
+
+      /*
+      const takeLines = []
+      if (entryId !== 'all') {
+        taskTypeIds.forEach(taskTypeId => {
+          if (taskTypeId !== 'all') {
+            const takeNumbers = Object.keys(
+              mainStats[entryId][taskTypeId].evolution)
+            takeNumbers.forEach(takeNumber => {
+              console.log(takeNumber)
+            })
+          }
+        })
+      }
+      */
+
+      entries = entries.concat(Object.values(lineMap))
+      // entries = entries.concat(takeLines)
+      entries.push([''])
+    })
+    return entries
+  },
+
   processCSV: (data, config) => {
     return new Promise((resolve, reject) => {
       Papa.parse(data, {
@@ -221,6 +317,7 @@ const csv = {
 
 const getStatsTaskTypeIds = (mainStats, taskTypeMap) => {
   return Object.keys(mainStats.all)
+    .filter(taskTypeId => taskTypeId !== 'evolution')
     .sort((a, b) => {
       if (a === 'all') return 1
       if (b === 'all') return -1
@@ -259,9 +356,11 @@ const getStatsTotalEntryCount = (
 ) => {
   let total = 0
   Object.keys(taskTypeStats).forEach((taskStatusId) => {
-    const taskStatusStats =
-      mainStats[entryId][taskTypeId][taskStatusId]
-    total += taskStatusStats[countMode]
+    if (!['max_retake_count', 'evolution'].includes(taskStatusId)) {
+      const taskStatusStats =
+        mainStats[entryId][taskTypeId][taskStatusId]
+      total += taskStatusStats[countMode]
+    }
   })
   return total
 }
@@ -278,13 +377,14 @@ const buildTotalLines = (
   const lineMap = {}
   taskStatusIds.forEach((taskStatusId) => {
     const taskStatus = taskStatusMap[taskStatusId]
+    const taskStatusName = taskStatus ? taskStatus.name : taskStatusId
     const entry = entryMap[entryId]
     const name = entry ? entry.name : 'All'
     const taskStatusStats = mainStats[entryId].all[taskStatusId]
     const count = taskStatusStats[countMode]
     const percentage = getPercentage(count, total)
     lineMap[taskStatusId] =
-      [name, taskStatus.name, count, percentage + '%']
+      [name, taskStatusName, count || '0', percentage + '%']
   })
   return lineMap
 }
@@ -298,15 +398,16 @@ const addEntryStatusStats = (
   total,
   lineMap
 ) => {
-  taskStatusIds.forEach((taskStatusId) => {
-    const taskStatusStats =
-      mainStats[entryId][taskTypeId][taskStatusId]
-    let count = 0
-    if (taskStatusStats) count = taskStatusStats[countMode]
-    const percentage = getPercentage(count, total)
-    lineMap[taskStatusId] =
-      lineMap[taskStatusId].concat([count, percentage + '%'])
-  })
+  taskStatusIds
+    .forEach((taskStatusId) => {
+      const taskStatusStats =
+        mainStats[entryId][taskTypeId][taskStatusId]
+      let count = 0
+      if (taskStatusStats) count = taskStatusStats[countMode]
+      const percentage = getPercentage(count, total)
+      lineMap[taskStatusId] =
+        lineMap[taskStatusId].concat([count || '0', percentage + '%'])
+    })
 }
 
 export default csv

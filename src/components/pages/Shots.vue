@@ -471,7 +471,9 @@ export default {
           this.episodes.length > 0 &&
           this.episodes[0].project_id !== this.currentProduction.id
         ) {
-          this.loadEpisodes(finalize)
+          this.loadEpisodes()
+            .then(() => finalize())
+            .catch(console.error)
         } else {
           finalize()
         }
@@ -781,6 +783,7 @@ export default {
         .then(() => {
           this.loading.importing = false
           this.loadEpisodes()
+            .catch(console.error)
           this.hideImportRenderModal()
           this.loadShots()
         })
@@ -958,7 +961,9 @@ export default {
           this.episodes.length > 0 &&
           this.episodes[0].project_id !== this.currentProduction.id
         ) {
-          this.loadEpisodes(finalize)
+          this.loadEpisodes()
+            .then(() => finalize())
+            .catch(console.error)
         } else {
           finalize()
         }

@@ -10,6 +10,13 @@
       <combobox
         class="mb0 flexrow-item"
         locale-key-prefix="statistics."
+        :label="$t('statistics.data_mode')"
+        :options="dataModeOptions"
+        v-model="dataMode"
+      />
+      <combobox
+        class="mb0 flexrow-item"
+        locale-key-prefix="statistics."
         :label="$t('statistics.display_mode')"
         :options="displayModeOptions"
         v-model="displayMode"
@@ -38,10 +45,12 @@
     <episode-list
       ref="episode-list"
       :entries="displayedEpisodes"
-      :is-loading="isShotsLoading"
-      :is-error="isShotsLoadingError"
+      :is-loading="isLoading"
+      :is-error="isLoadingError"
       :validation-columns="episodeValidationColumns"
       :episode-stats="episodeStats"
+      :episode-retakes-stats="episodeRetakeStats"
+      :data-mode="dataMode"
       :count-mode="countMode"
       :display-mode="displayMode"
       :show-all="episodeSearchText.length === 0"
@@ -100,12 +109,19 @@ export default {
   data () {
     return {
       countMode: 'count',
+      dataMode: 'retakes',
       displayMode: 'pie',
       episodeToDelete: null,
       episodeToEdit: null,
+      isLoading: true,
+      isLoadingError: false,
       countModeOptions: [
         { label: 'shots', value: 'count' },
         { label: 'frames', value: 'frames' }
+      ],
+      dataModeOptions: [
+        { label: 'retakes', value: 'retakes' },
+        { label: 'status', value: 'status' }
       ],
       displayModeOptions: [
         { label: 'pie', value: 'pie' },
@@ -126,31 +142,42 @@ export default {
     }
   },
 
+  mounted () {
+    this.setDefaultSearchText()
+    this.setDefaultListScrollPosition()
+    this.resizeHeaders()
+    this.isLoading = true
+    this.isLoadingError = false
+    this.initEpisodes()
+      .then(() => {
+        this.isLoading = false
+      })
+      .catch(err => {
+        this.isLoading = false
+        this.isLoadingError = true
+        console.error(err)
+      })
+  },
+
   computed: {
     ...mapGetters([
       'currentProduction',
       'displayedEpisodes',
       'episodesPath',
       'isCurrentUserManager',
-      'isShotsLoading',
-      'isShotsLoadingError',
       'episodes',
       'episodeMap',
       'episodePath',
       'episodeStats',
+      'episodeRetakeStats',
       'episodeSearchText',
       'episodeListScrollPosition',
       'episodeValidationColumns',
       'taskStatusMap',
       'taskTypeMap'
-    ])
-  },
+    ]),
 
-  mounted () {
-    this.setDefaultSearchText()
-    this.setDefaultListScrollPosition()
-    this.resizeHeaders()
-    this.initEpisodes()
+    isRetakeDataMode () { return this.dataMode === 'retakes' }
   },
 
   methods: {
@@ -161,6 +188,7 @@ export default {
       'hideAssignations',
       'initEpisodes',
       'loadEpisodeStats',
+      'loadEpisodeRetakeStats',
       'loadShots',
       'setLastProductionScreen',
       'setEpisodeSearch',
@@ -268,19 +296,44 @@ export default {
         'episodes',
         'statistics'
       ]
+      if (this.isRetakeDataMode) nameData.splice(3, 0, 'retake')
       const name = stringHelpers.slugify(nameData.join('_'))
-      csv.generateStatReports(
-        name,
-        this.episodeStats,
-        this.taskTypeMap,
-        this.taskStatusMap,
-        this.episodeMap,
-        this.countMode
-      )
+      if (this.isRetakeDataMode) {
+        csv.generateRetakeStatReports(
+          name,
+          this.episodeRetakeStats,
+          this.taskTypeMap,
+          this.taskStatusMap,
+          this.episodeMap,
+          this.countMode
+        )
+      } else {
+        csv.generateStatReports(
+          name,
+          this.episodeStats,
+          this.taskTypeMap,
+          this.taskStatusMap,
+          this.episodeMap,
+          this.countMode
+        )
+      }
     },
 
     reset () {
+      this.isLoading = true
+      this.isLoadingError = false
       this.loadEpisodeStats(this.currentProduction.id)
+        .then(() => {
+          return this.loadEpisodeRetakeStats(this.currentProduction.id)
+        })
+        .then(() => {
+          this.isLoading = false
+        })
+        .catch(err => {
+          this.isLoading = false
+          this.isLoadingError = true
+          console.error(err)
+        })
     }
   },
 
@@ -303,6 +356,7 @@ export default {
           this.resizeHeaders()
           if (this.isTVShow) {
             this.loadEpisodeStats(this.currentProduction.id)
+            this.loadEpisodeRetakeStats(this.currentProduction.id)
           } else {
             this.computeEpisodeStats()
           }

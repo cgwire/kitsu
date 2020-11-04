@@ -710,12 +710,14 @@ export default {
 
             if (task.entity_type_name === 'Shot') {
               loadingFunction = (callback) => {
-                this.loadEpisodes(() => {
-                  if (this.isTVShow) {
-                    this.setCurrentEpisode(task.episode.id)
-                  }
-                  this.loadShots(callback)
-                })
+                this.loadEpisodes()
+                  .then(() => {
+                    if (this.isTVShow) {
+                      this.setCurrentEpisode(task.episode.id)
+                    }
+                    this.loadShots(callback)
+                  })
+                  .catch(callback)
               }
             }
             loadingFunction(() => {

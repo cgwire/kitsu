@@ -3,7 +3,9 @@
   class="thumbnail-picture"
   :style="{
     width: props.width,
-    height: props.height
+    height: props.height,
+    'max-width': props.maxWidth,
+    'max-height': props.maxHeight
   }"
   v-lazy="'/api/pictures/' + props.type + '/preview-files/' + props.previewFileId + '.png'"
   :key="props.previewFileId"
@@ -40,6 +42,14 @@ export default {
     },
     height: {
       default: '50px',
+      type: String
+    },
+    maxHeight: {
+      default: 'auto',
+      type: String
+    },
+    maxWidth: {
+      default: 'auto',
       type: String
     },
     emptyHeight: {

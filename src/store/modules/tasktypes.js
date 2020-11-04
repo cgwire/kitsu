@@ -141,15 +141,14 @@ const actions = {
       if (rootGetters.currentTaskType.for_shots) {
         if (Object.keys(rootGetters.shotMap).length < 2 || force) {
           if (rootGetters.episodes.length === 0 && rootGetters.isTVShow) {
-            dispatch('loadEpisodes', (err) => {
-              if (err) reject(err)
-              else {
-                dispatch('loadShots', (err) => {
+            dispatch('loadEpisodes')
+              .then(() => {
+                return dispatch('loadShots', (err) => {
                   if (err) reject(err)
                   else resolve()
                 })
-              }
-            })
+              })
+              .catch(reject)
           } else {
             dispatch('loadShots', (err) => {
               if (err) reject(err)

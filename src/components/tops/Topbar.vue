@@ -234,6 +234,7 @@ export default {
       }
     }
 
+    this.currentProjectSection = this.getCurrentSectionFromRoute()
     this.setProductionFromRoute()
   },
 
@@ -448,9 +449,11 @@ export default {
     configureProduction (routeProductionId) {
       this.setProduction(routeProductionId)
       if (this.isTVShow) {
-        this.loadEpisodes(() => {
-          this.updateCombosFromRoute()
-        })
+        this.loadEpisodes()
+          .then((episodes) => {
+            this.updateCombosFromRoute()
+          })
+          .catch(console.error)
       } else {
         this.clearEpisodes()
         this.updateCombosFromRoute()
@@ -459,10 +462,12 @@ export default {
 
     configureEpisode (routeEpisodeId) {
       if (this.episodes.length < 2) {
-        this.loadEpisodes(() => {
-          this.setEpisodeFromRoute()
-          this.updateCombosFromRoute()
-        })
+        this.loadEpisodes()
+          .then(episodes => {
+            this.setEpisodeFromRoute()
+            this.updateCombosFromRoute()
+          })
+          .catch(console.error)
       } else {
         this.setEpisodeFromRoute()
         this.updateCombosFromRoute()
@@ -645,7 +650,10 @@ export default {
     currentProductionId () {
       this.updateRoute()
       this.resetEpisodeForTVShow()
-      if (this.currentProduction.isTVShow) this.loadEpisodes()
+      if (this.currentProduction.isTVShow) {
+        this.loadEpisodes()
+          .catch(console.error)
+      }
     },
 
     currentProjectSection () {

@@ -60,8 +60,12 @@ export default {
       default: null,
       type: Number
     },
-    emptyWidth: {
-      default: 50,
+    maxWidth: {
+      default: null,
+      type: Number
+    },
+    maxHeight: {
+      default: null,
       type: Number
     },
     emptyHeight: {
@@ -91,11 +95,14 @@ export default {
 
     imgStyle () {
       const style = {}
-      if (this.width) {
+      if (this.maxWidth) {
+        style['max-width'] = this.maxWidth + 'px'
+      } else if (this.width) {
         style.width = this.width + 'px'
       }
-
-      if (this.height) {
+      if (this.maxHeight) {
+        style['max-height'] = this.maxHeight + 'px'
+      } else if (this.height) {
         style.height = this.height + 'px'
       }
       return style
