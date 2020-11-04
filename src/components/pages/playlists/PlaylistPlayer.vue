@@ -925,7 +925,9 @@ export default {
     },
 
     currentEntityPreviewLength () {
-      if (!this.currentEntity) return 0
+      if (!this.currentEntity || !this.currentEntity.preview_file_previews) {
+        return 0
+      }
       return this.currentEntity.preview_file_previews.length + 1
     },
 
