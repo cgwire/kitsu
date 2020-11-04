@@ -332,8 +332,7 @@ export default {
     },
 
     isMuted () {
-      this.video.muted = !this.video.muted
-      this.isMuted = this.video.muted
+      this.video.muted = this.isMuted
     }
   }
 }

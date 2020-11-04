@@ -42,7 +42,7 @@
       :default-height="defaultHeight"
       :full-screen="fullScreen"
       :is-comparing="isComparing"
-      :is-muted="isMuted"
+      :is-muted="true"
       :is-repeating="isRepeating"
       :light="light"
       :preview="previewToCompare"
@@ -1327,6 +1327,7 @@ export default {
 
     previewToCompareId () {
       this.$nextTick(() => {
+        if (this.comparisonViewer) this.comparisonViewer.pause()
         this.previewToCompare = this.previewFileMap[this.previewToCompareId]
         this.setCurrentTime(0)
         if (this.isComparing) {
@@ -1342,6 +1343,7 @@ export default {
 
     isComparing () {
       if (!this.isComparing) {
+        if (this.comparisonViewer) this.comparisonViewer.pause()
         this.taskTypeId = ''
         this.previewToCompareId = ''
       }
