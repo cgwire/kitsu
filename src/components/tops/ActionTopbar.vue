@@ -627,11 +627,15 @@ export default {
       this.isCreationLoading = true
       this.createSelectedTasks({
         type: type,
-        projectId: this.currentProduction.id,
-        callback: () => {
-          this.isCreationLoading = false
-        }
+        projectId: this.currentProduction.id
       })
+        .then(() => {
+          this.isCreationLoading = false
+        })
+        .catch((err) => {
+          this.isCreationLoading = false
+          console.error(err)
+        })
     },
 
     confirmTaskDeletion () {
