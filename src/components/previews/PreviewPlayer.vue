@@ -706,6 +706,7 @@ export default {
     },
 
     onPlayPauseClicked () {
+      this.clearFocus()
       if (!this.isPlaying) {
         this.play()
       } else {
@@ -714,6 +715,7 @@ export default {
     },
 
     onRepeatClicked () {
+      this.clearFocus()
       if (this.isRepeating) {
         this.isRepeating = false
       } else {
@@ -722,6 +724,7 @@ export default {
     },
 
     onToggleSoundClicked () {
+      this.clearFocus()
       this.isMuted = !this.isMuted
     },
 
@@ -812,7 +815,7 @@ export default {
       this.fixCanvasSize(this.getCurrentPreviewDimensions())
       this.$nextTick(() => {
         // Needed to avoid fullsceen button to be called with space bar.
-        document.activeElement.blur()
+        this.clearFocus()
         this.reloadAnnotations()
         this.loadAnnotation()
       })
@@ -826,7 +829,7 @@ export default {
       this.fixCanvasSize(this.getCurrentPreviewDimensions())
       this.$nextTick(() => {
         // Needed to avoid fullsceen button to be called with space bar.
-        document.activeElement.blur()
+        this.clearFocus()
         this.reloadAnnotations()
         this.loadAnnotation()
       })
@@ -862,6 +865,7 @@ export default {
     // Comparison
 
     onCompareClicked () {
+      this.clearFocus()
       if (this.isComparing) {
         this.isComparing = false
       } else {
@@ -926,6 +930,7 @@ export default {
     // Annotations
 
     onDeleteClicked () {
+      this.clearFocus()
       this.deleteSelection()
     },
 
@@ -936,6 +941,7 @@ export default {
     },
 
     onPencilAnnotateClicked () {
+      this.clearFocus()
       if (this.isDrawing) {
         this.isDrawing = false
       } else {
@@ -945,6 +951,7 @@ export default {
     },
 
     onTypeClicked () {
+      this.clearFocus()
       if (this.isTyping) {
         this.isTyping = false
       } else {

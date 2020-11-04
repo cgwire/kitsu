@@ -13,6 +13,10 @@ export const domMixin = {
   },
 
   methods: {
+    clearFocus () {
+      document.activeElement.blur()
+    },
+
     focusInput (inputEl) {
       inputEl.focus()
       inputEl.setSelectionRange(0, inputEl.value.length)
