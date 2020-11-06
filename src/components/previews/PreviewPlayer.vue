@@ -665,9 +665,11 @@ export default {
       if (duration) {
         this.maxDuration = this.formatTime(duration)
         this.videoDuration = duration
+        this.progress.setAttribute('max', this.videoDuration)
       } else {
         this.maxDuration = '00:00.000'
         this.videoDuration = 0
+        this.progress.setAttribute('max', 0)
       }
     },
 

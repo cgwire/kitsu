@@ -140,8 +140,6 @@ export default {
   },
 
   mounted () {
-    if (!this.container) return
-    if (this.isMovie) this.configureVideo()
   },
 
   beforeDestroy () {
@@ -294,22 +292,6 @@ export default {
       }
     },
 
-    onToggleSoundClicked () {
-      this.isMuted = !this.isMuted
-    },
-
-    configureVideo () {
-      this.isPlaying = false
-      this.isMuted = false
-      this.isRepeating = false
-      /*
-      this.container.addEventListener('keydown', (event) => {
-        this.pauseEvent(event)
-        return false
-      })
-      */
-    },
-
     // Sizing
 
     getDimensions () {
@@ -357,7 +339,6 @@ export default {
   watch: {
     preview () {
       if (this.isMovie) {
-        this.configureVideo()
         this.pause()
         this.maxDuration = '00:00.000'
       } else if (this.isPicture) {
