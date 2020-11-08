@@ -72,6 +72,10 @@ export default {
       default: 30,
       type: Number
     },
+    emptyWidth: {
+      default: 50,
+      type: Number
+    },
     previewFileId: {
       default: null,
       type: String
