@@ -159,9 +159,7 @@ const actions = {
   loadTask ({ commit, state }, { taskId }) {
     return tasksApi.getTask(taskId)
       .then(task => {
-        setTimeout(() => {
-          commit(LOAD_TASK_END, task)
-        }, 1000)
+        commit(LOAD_TASK_END, task)
         return Promise.resolve(task)
       })
   },
