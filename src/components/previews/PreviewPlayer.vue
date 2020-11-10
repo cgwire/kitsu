@@ -1415,7 +1415,7 @@ export default {
 }
 
 .buttons {
-  background: #36393F;
+  background: $dark-grey-2;
   height: 32px;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
@@ -1429,7 +1429,7 @@ export default {
 }
 
 .buttons .button {
-  background: transparent;
+  background: $dark-grey-2;
   border-radius: 0;
   color: #BBB;
   border: 0;
@@ -1601,5 +1601,9 @@ progress::-webkit-progress-value {
 .comparision-preview-viewer,
 .preview-viewer {
   flex: 1 1 0;
+}
+
+.separator {
+  background: $dark-grey-2;
 }
 </style>
