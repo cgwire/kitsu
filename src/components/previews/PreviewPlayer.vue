@@ -645,6 +645,7 @@ export default {
       this.updateProgressBar(time)
       this.currentTimeRaw = time
       this.currentTime = this.formatTime(this.currentTimeRaw)
+      if (!this.isPlaying) this.loadAnnotation()
     },
 
     // Video
@@ -653,12 +654,6 @@ export default {
       this.isPlaying = false
       this.isMuted = false
       this.isRepeating = false
-      /*
-      this.container.addEventListener('keydown', (event) => {
-        this.pauseEvent(event)
-        return false
-      })
-      */
     },
 
     changeMaxDuration (duration) {
@@ -692,11 +687,13 @@ export default {
     goPreviousFrame () {
       this.previewViewer.goPreviousFrame()
       if (this.comparisonViewer) this.comparisonViewer.goPreviousFrame()
+      this.clearCanvas()
     },
 
     goNextFrame () {
       this.previewViewer.goNextFrame()
       if (this.comparisonViewer) this.comparisonViewer.goNextFrame()
+      this.clearCanvas()
     },
 
     onVideoEnd () {
