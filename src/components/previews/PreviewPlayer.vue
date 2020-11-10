@@ -1261,10 +1261,10 @@ export default {
     onProgressClicked (e) {
       let left = this.progress.offsetLeft
       if (left === 0 && !this.fullScreen) {
-        left = this.progress.parentElement.offsetParent.offsetLeft - 10
+        left = this.progress.parentElement.offsetParent.offsetLeft
       }
       const pos = (e.pageX - left) / this.progress.offsetWidth
-      const currentTime = pos * this.videoDuration
+      const currentTime = roundToFrame(pos * this.videoDuration, this.fps)
       this.setCurrentTime(currentTime)
     },
 
@@ -1277,7 +1277,7 @@ export default {
       if (!this.progress.getAttribute('max')) {
         this.progress.setAttribute('max', this.videoDuration)
       }
-      this.progress.value = currentTime * 1
+      this.progress.value = currentTime
     },
 
     // Revision previews
