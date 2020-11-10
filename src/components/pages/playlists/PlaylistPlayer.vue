@@ -1203,6 +1203,7 @@ export default {
         const annotation = this.getAnnotation(0)
         this.loadAnnotation(annotation)
       }
+      this.scrollToEntity(this.playingEntityIndex)
     },
 
     goPreviousFrame () {
@@ -1522,8 +1523,8 @@ export default {
             this.rawPlayerComparison.play()
           }
         }
-        if (!this.$options.silent) this.scrollToEntity(this.playingEntityIndex)
       }
+      if (!this.$options.silent) this.scrollToEntity(this.playingEntityIndex)
     },
 
     onPreviewChanged (entity, previewFile) {
