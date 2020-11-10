@@ -198,7 +198,7 @@
           <transition name="slide">
             <div
               class="annotation-tools"
-              v-show="isTyping && fullScreen"
+              v-show="isTyping && (!light || fullScreen)"
             >
               <color-picker
                 :isOpen="isShowingPalette"
@@ -216,13 +216,13 @@
             :active="isTyping"
             :title="$t('playlists.actions.annotation_text')"
             @click="onTypeClicked"
-            v-if="!readOnly && fullScreen"
+            v-if="!readOnly && (!light || fullScreen)"
           />
 
           <transition name="slide">
             <div
               class="annotation-tools"
-              v-show="isDrawing && fullScreen"
+              v-show="isDrawing && (!light || fullScreen)"
             >
               <pencil-picker
                 :isOpen="isShowingPencilPalette"
@@ -248,7 +248,7 @@
             :active="isDrawing"
             :title="$t('playlists.actions.annotation_draw')"
             @click="onPencilAnnotateClicked"
-            v-if="!readOnly && fullScreen"
+            v-if="!readOnly && (!light || fullScreen)"
           />
         </div>
 
