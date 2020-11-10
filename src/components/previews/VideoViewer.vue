@@ -203,18 +203,21 @@ export default {
     getDimensions () {
       const dimensions = this.getNaturalDimensions()
       const ratio = dimensions.height / dimensions.width
-      let width = Math.min(dimensions.width, this.container.offsetWidth)
+      const parent = this.container.parentElement.parentElement
+      let width = Math.min(dimensions.width, parent.offsetWidth)
       if (this.isComparing) {
         // parent is used because sometimes the container width is not
         // properly computed.
         width = Math.min(
           dimensions.width,
-          this.container.parentElement.parentElement.offsetWidth / 2
+          parent.offsetWidth / 2
         )
       }
       let height = Math.floor(width * ratio)
       height = Math.min(height, this.defaultHeight)
       width = Math.floor(height / ratio)
+      height = Math.floor(width * ratio)
+      height = Math.min(height, this.defaultHeight)
       return { width, height }
     },
 
@@ -249,7 +252,6 @@ export default {
           this.video.style.width = width + 'px'
           this.video.style.height = height + 'px'
           this.$emit('size-changed', { width, height })
-          this.onWindowResize()
         }
       }
     },
