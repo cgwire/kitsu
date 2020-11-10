@@ -94,7 +94,6 @@ export default {
     if (!this.container) return
     this.container.style.height = this.defaultHeight + 'px'
     this.isLoading = true
-    this.isMuted = false
     this.isRepeating = false
     setTimeout(() => {
       if (this.video) {
@@ -274,7 +273,6 @@ export default {
 
     toggleMute () {
       this.video.muted = !this.video.muted
-      this.isMuted = this.video.muted
     },
 
     goPreviousFrame () {
