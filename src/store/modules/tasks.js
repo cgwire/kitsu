@@ -683,7 +683,11 @@ const mutations = {
     } else {
       task.entity_name = `${task.entity_type.name} / ${task.entity.name}`
     }
-    state.taskMap[task.id] = task
+    if (!state.taskMap[task.id]) {
+      state.taskMap[task.id] = task
+    } else {
+      Object.assign(state.taskMap[task.id], task)
+    }
   },
 
   [LOAD_TASK_ENTITY_PREVIEW_FILES_END] (state, previewFiles) {
