@@ -13,14 +13,30 @@
       <div class="timeline-wrapper">
         <div
           class="has-text-right filler filter-button"
-          @click="toggleFilters"
         >
-          <template v-if="isFiltersDisplayed">
-            {{ $t('main.less_filters') }}
-          </template>
-          <template v-else>
-            {{ $t('main.more_filters') }}
-          </template>
+          <span
+            @click="toggleFilters"
+          >
+            <template v-if="isFiltersDisplayed">
+              {{ $t('main.less_filters') }}
+            </template>
+            <template v-else>
+              {{ $t('main.more_filters') }}
+            </template>
+          </span>
+          &bull;
+
+          <span
+            @click="toggleStats"
+          >
+            <template v-if="isStatsDisplayed">
+              {{ $t('news.hide_stats') }}
+            </template>
+            <template v-else>
+              {{ $t('news.show_stats') }}
+            </template>
+          </span>
+
         </div>
 
         <div class="filters flexrow">
@@ -70,9 +86,10 @@
           />
         </div>
 
-        <div class="total mt1">
-          {{ newsTotal }} {{ $t('news.news') }}
+        <div class="stats mt1" v-if="isStatsDisplayed">
+          {{ newsTotal }} {{ $t('news.news') }} ({{ renderedStats }})
         </div>
+
         <div class="timeline">
           <div
             class="empty-list has-text-centered"
@@ -327,6 +344,7 @@ export default {
       currentPage: 1,
       currentTask: null,
       isFiltersDisplayed: false,
+      isStatsDisplayed: false,
       errors: {
         news: false
       },
@@ -386,12 +404,14 @@ export default {
       'currentProduction',
       'newsList',
       'newsTotal',
+      'newsStats',
       'newsListByDay',
       'personMap',
       'productionTaskStatuses',
       'productionTaskTypes',
       'taskStatusMap',
       'taskTypeMap',
+      'taskStatusMap',
       'taskStatus',
       'taskTypes',
       'user'
@@ -441,6 +461,22 @@ export default {
 
     today () {
       return moment().toDate()
+    },
+
+    renderedStats () {
+      if (this.newsStats) {
+        return Object
+          .keys(this.newsStats)
+          .map(taskStatusId => {
+            const name =
+              this.taskStatusMap[taskStatusId].short_name.toUpperCase()
+            return name + ': ' + this.newsStats[taskStatusId]
+          })
+          .sort((a, b) => a.localeCompare(b))
+          .join(', ')
+      } else {
+        return ''
+      }
     }
   },
 
@@ -619,6 +655,10 @@ export default {
 
     toggleFilters () {
       this.isFiltersDisplayed = !this.isFiltersDisplayed
+    },
+
+    toggleStats () {
+      this.isStatsDisplayed = !this.isStatsDisplayed
     }
   },
 
@@ -901,8 +941,9 @@ export default {
   text-transform: lowercase;
 }
 
-.total {
-  text-align: right;
+.stats {
+  text-align: left;
+  margin-top: 2em;
   font-style: italic;
 }
 </style>

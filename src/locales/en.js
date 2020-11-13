@@ -326,8 +326,10 @@ export default {
     no_news: 'There is no news for this production or for this filter.',
     only_comments: 'Only comments',
     only_previews: 'Only previews',
+    hide_stats: 'Hide stats',
     news: 'news',
     set_preview_on: 'set preview on',
+    show_stats: 'Show stats',
     task_status: 'Task status',
     task_type: 'Task type',
     title: 'News Feed'
