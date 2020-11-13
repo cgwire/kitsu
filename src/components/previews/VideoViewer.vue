@@ -122,6 +122,7 @@ export default {
   },
 
   beforeDestroy () {
+    this.pause()
     window.removeEventListener('keydown', this.onKeyDown)
     window.removeEventListener('resize', this.onWindowResize)
   },
@@ -321,6 +322,7 @@ export default {
   watch: {
     preview () {
       this.maxDuration = '00:00.000'
+      this.pause()
     },
 
     light () {
