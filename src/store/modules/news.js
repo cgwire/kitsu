@@ -7,12 +7,14 @@ import {
   ADD_PREVIOUS_NEWS,
   ADD_FIRST_NEWS,
   NEWS_ADD_PREVIEW,
+  NEWS_SET_TOTAL,
 
   RESET_ALL
 } from '../mutation-types'
 
 const initialState = {
-  newsList: []
+  newsList: [],
+  newsTotal: 0
 }
 
 const state = {
@@ -21,6 +23,7 @@ const state = {
 
 const getters = {
   newsList: state => state.newsList,
+  newsTotal: state => state.newsTotal,
 
   newsListByDay (state) {
     if (state.newsList.length === 0) return []
@@ -49,24 +52,24 @@ const getters = {
 
 const actions = {
   loadNews ({ commit, state }, params) {
-    return new Promise((resolve, reject) => {
-      commit(CLEAR_NEWS)
-      newsApi.getLastNews(params)
-        .then((newsList) => commit(ADD_PREVIOUS_NEWS, newsList))
-        .then(resolve)
-        .catch(reject)
-    })
+    commit(CLEAR_NEWS)
+    return newsApi.getLastNews(params)
+      .then(newsList => {
+        commit(ADD_PREVIOUS_NEWS, newsList.data)
+        commit(NEWS_SET_TOTAL, newsList.total)
+        return Promise.resolve()
+      })
   },
 
   loadMoreNews ({ commit, state }, params) {
     return newsApi.getLastNews(params)
-      .then((newsList) => commit(ADD_PREVIOUS_NEWS, newsList))
+      .then(newsList => commit(ADD_PREVIOUS_NEWS, newsList.data))
   },
 
   loadSingleNews ({ commit, state }, { productionId, newsId }) {
     return new Promise((resolve, reject) => {
       newsApi.getNews(productionId, newsId)
-        .then((news) => commit(ADD_FIRST_NEWS, news))
+        .then(news => commit(ADD_FIRST_NEWS, news))
         .catch(reject)
     })
   }
@@ -75,6 +78,7 @@ const actions = {
 const mutations = {
   [CLEAR_NEWS] (state) {
     state.newsList = []
+    state.newsTotal = 0
   },
 
   [ADD_PREVIOUS_NEWS] (state, newsList) {
@@ -95,6 +99,10 @@ const mutations = {
         news.preview_file_extension = extension
       }
     }
+  },
+
+  [NEWS_SET_TOTAL] (state, count) {
+    state.newsTotal = count
   },
 
   [RESET_ALL] (state) {

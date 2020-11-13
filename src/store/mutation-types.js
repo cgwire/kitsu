@@ -454,6 +454,7 @@ export const CLEAR_NEWS = 'CLEAR_NEWS'
 export const ADD_PREVIOUS_NEWS = 'ADD_PREVIOUS_NEWS'
 export const ADD_FIRST_NEWS = 'ADD_FIRST_NEWS'
 export const NEWS_ADD_PREVIEW = 'NEWS_ADD_PREVIEW'
+export const NEWS_SET_TOTAL = 'NEWS_SET_TOTAL'
 
 // Misc
 

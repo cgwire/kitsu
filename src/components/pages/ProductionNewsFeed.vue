@@ -11,14 +11,19 @@
       v-scroll="onBodyScroll"
     >
       <div class="timeline-wrapper">
+        <div
+          class="has-text-right filler filter-button"
+          @click="toggleFilters"
+        >
+          <template v-if="isFiltersDisplayed">
+            {{ $t('main.less_filters') }}
+          </template>
+          <template v-else>
+            {{ $t('main.more_filters') }}
+          </template>
+        </div>
+
         <div class="filters flexrow">
-          <span class="filler"></span>
-          <combobox
-            class="flexrow-item selector"
-            :label="$t('news.infos')"
-            :options="previewOptions"
-            v-model="previewMode"
-          />
           <combobox-status
             class="flexrow-item selector"
             :label="$t('news.task_status')"
@@ -41,9 +46,33 @@
               v-model="person"
             />
           </div>
-          <span class="filler"></span>
+        </div>
+        <div class="filters flexrow mt1" v-show="isFiltersDisplayed">
+          <date-field
+            class="flexrow-item"
+            :label="$t('main.before')"
+            :disabled-dates="{from: today}"
+            :with-margin="false"
+            v-model="before"
+          />
+          <date-field
+            class="flexrow-item"
+            :disabled-dates="{from: today}"
+            :label="$t('main.after')"
+            :with-margin="false"
+            v-model="after"
+          />
+          <combobox
+            class="flexrow-item selector"
+            :label="$t('news.infos')"
+            :options="previewOptions"
+            v-model="previewMode"
+          />
         </div>
 
+        <div class="total mt1">
+          {{ newsTotal }} {{ $t('news.news') }}
+        </div>
         <div class="timeline">
           <div
             class="empty-list has-text-centered"
@@ -258,10 +287,12 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import { sortByName } from '../../lib/sorting'
+import { formatSimpleDate } from '../../lib/time'
 
 import Combobox from '../widgets/Combobox'
 import ComboboxStatus from '../widgets/ComboboxStatus'
 import ComboboxTaskType from '../widgets/ComboboxTaskType'
+import DateField from '../widgets/DateField'
 import PeopleField from '../widgets/PeopleField'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import PeopleAvatar from '../widgets/PeopleAvatar'
@@ -277,6 +308,7 @@ export default {
     Combobox,
     ComboboxStatus,
     ComboboxTaskType,
+    DateField,
     EntityThumbnail,
     PeopleAvatar,
     PeopleField,
@@ -289,9 +321,12 @@ export default {
 
   data () {
     return {
+      after: null,
+      before: null,
       currentNewsId: null,
       currentPage: 1,
       currentTask: null,
+      isFiltersDisplayed: false,
       errors: {
         news: false
       },
@@ -350,6 +385,7 @@ export default {
     ...mapGetters([
       'currentProduction',
       'newsList',
+      'newsTotal',
       'newsListByDay',
       'personMap',
       'productionTaskStatuses',
@@ -370,7 +406,9 @@ export default {
         task_status_id:
           this.taskStatusId !== '' ? this.taskStatusId : undefined,
         person_id: this.person ? this.person.id : undefined,
-        page: this.currentPage
+        page: this.currentPage,
+        before: formatSimpleDate(this.before),
+        after: formatSimpleDate(this.after)
       }
       return params
     },
@@ -392,11 +430,17 @@ export default {
     },
 
     team () {
-      return this.currentProduction.team.map(pId => this.personMap[pId])
+      return this.currentProduction.team
+        .map(pId => this.personMap[pId])
+        .sort((a, b) => a.full_name.localeCompare(b.full_name))
     },
 
     timezone () {
       return this.user.timezone || moment.tz.guess()
+    },
+
+    today () {
+      return moment().toDate()
     }
   },
 
@@ -517,19 +561,21 @@ export default {
     },
 
     init () {
-      this.currentPage = 1
-      this.loading.news = true
-      this.errors.news = false
-      this.currentTask = null
-      this.loadNews(this.params)
-        .then(() => {
-          this.loading.news = false
-        })
-        .catch((err) => {
-          console.error(err)
-          this.loading.news = false
-          this.errors.news = true
-        })
+      if (!this.$options.silent) {
+        this.currentPage = 1
+        this.loading.news = true
+        this.errors.news = false
+        this.currentTask = null
+        this.loadNews(this.params)
+          .then(() => {
+            this.loading.news = false
+          })
+          .catch((err) => {
+            console.error(err)
+            this.loading.news = false
+            this.errors.news = true
+          })
+      }
     },
 
     onBodyScroll (event, position) {
@@ -569,6 +615,10 @@ export default {
     hasDoneValue (news) {
       const taskStatus = this.taskStatusMap[news.task_status_id]
       return taskStatus ? news.change && taskStatus.is_done : false
+    },
+
+    toggleFilters () {
+      this.isFiltersDisplayed = !this.isFiltersDisplayed
     }
   },
 
@@ -605,17 +655,17 @@ export default {
 
   watch: {
     currentProduction () {
-      if (!this.$options.silent) if (!this.loading.news) this.init()
+      if (!this.loading.news) this.init()
     },
 
     previewMode () {
       localStorage.setItem('news:preview-mode', this.previewMode)
-      if (!this.$options.silent) this.init()
+      this.init()
     },
 
     taskTypeId () {
       localStorage.setItem('news:task-type-id', this.taskTypeId)
-      if (!this.$options.silent) this.init()
+      this.init()
     },
 
     taskStatusId () {
@@ -624,6 +674,14 @@ export default {
     },
 
     person () {
+      this.init()
+    },
+
+    before () {
+      this.init()
+    },
+
+    after () {
       this.init()
     }
   },
@@ -834,5 +892,17 @@ export default {
 .person-label {
   margin-top: 5px;
   margin-bottom: 4px;
+}
+
+.filter-button {
+  color: $grey;
+  cursor: pointer;
+  float: right;
+  text-transform: lowercase;
+}
+
+.total {
+  text-align: right;
+  font-style: italic;
 }
 </style>
