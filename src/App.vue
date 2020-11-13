@@ -1713,6 +1713,10 @@ th.validation-cell {
 
 .theme .datepicker input {
   width: 150px;
+
+  &.short {
+    width: 105px;
+  }
 }
 
 .theme .datepicker .vdp-datepicker__calendar {
