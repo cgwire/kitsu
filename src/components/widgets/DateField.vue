@@ -1,10 +1,14 @@
 <template>
-<div class="field">
+<div :class="{ field: withMargin }">
   <label class="label" v-if="label">{{ label }}</label>
   <p class="control flexrow">
     <datepicker
       wrapper-class="datepicker"
-      input-class="date-input input"
+      :input-class="{
+        'date-input': true,
+        input: true,
+        short: shortDate
+      }"
       :language="locale"
       :disabled-dates="disabledDates"
       :monday-first="true"
@@ -34,9 +38,17 @@ export default {
       default: '',
       type: String
     },
+    shortDate: {
+      default: true,
+      type: Boolean
+    },
     value: {
       default: new Date(),
       type: Date
+    },
+    withMargin: {
+      default: true,
+      type: Boolean
     }
   },
 

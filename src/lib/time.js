@@ -16,7 +16,8 @@ export const parseSimpleDate = (date) => {
 }
 
 export const formatSimpleDate = (date) => {
-  return moment(date).format('YYYY-MM-DD')
+  if (date) return moment(date).format('YYYY-MM-DD')
+  else return ''
 }
 
 export const formatFullDate = (date) => {

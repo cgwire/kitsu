@@ -129,8 +129,8 @@ export default {
 
 .task-type-combo {
   background: $white;
-  min-width: 170px;
-  width: 170px;
+  min-width: 200px;
+  width: 200px;
   border: 1px solid $light-grey-light;
   user-select: none;
   cursor: pointer;
@@ -173,7 +173,7 @@ export default {
 
 .select-input {
   background: $white;
-  width: 170px;
+  width: 200px;
   position: absolute;
   border: 1px solid $light-grey-light;
   z-index: 300;

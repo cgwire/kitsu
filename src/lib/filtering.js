@@ -358,10 +358,12 @@ export const getAssignedToFilters = (persons, queryText) => {
   if (rgxMatches) {
     rgxMatches.forEach((rgxMatch) => {
       const personIndex = new Map()
-      persons.forEach(person => {
-        const name = person.name.toLowerCase()
-        personIndex.set(name, person)
-      })
+      persons
+        .filter(person => person.active)
+        .forEach(person => {
+          const name = person.name.toLowerCase()
+          personIndex.set(name, person)
+        })
       const pattern = rgxMatch.split('=')
       if (pattern[0] === 'assignedto') {
         let value = pattern[1]
