@@ -471,6 +471,12 @@ export default {
   watch: {
     entries () {
       this.entries.forEach(e => { Vue.set(this.expanded, e.id, false) })
+    },
+
+    isRetakes () {
+      if (!this.isRetakes) {
+        this.entries.forEach(e => { Vue.set(this.expanded, e.id, false) })
+      }
     }
   }
 }
