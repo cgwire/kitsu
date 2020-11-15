@@ -39,12 +39,11 @@ export const getRetakeChartData =
     delete statusData.evolution
     delete statusData.max_retake_count
     const valueField = dataType === 'count' ? 'count' : 'frames'
-    return Object.keys(statusData)
-      .map(dataName => {
-        const data = statusData[dataName]
-        const color = colorMap[dataName]
-        return [dataName, data[valueField], color]
-      })
+    return [
+      ['done', statusData.done[valueField] || 0, colorMap.done],
+      ['retake', statusData.retake[valueField] || 0, colorMap.retake],
+      ['other', statusData.other[valueField] || 0, colorMap.other]
+    ]
   }
 
 // Get all colors displayed in statistics (needed by the stat cell widget).
