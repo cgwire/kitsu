@@ -87,7 +87,22 @@
         </div>
 
         <div class="stats mt1" v-if="isStatsDisplayed">
-          {{ newsTotal }} {{ $t('news.news') }} ({{ renderedStats }})
+          {{ newsTotal }} {{ $t('news.news') }} -
+          <template
+            v-for="stat in renderedStats"
+          >
+            <span
+              :key="'stat-value-' + stat.name.toLowerCase()"
+              class="tag stat-tag"
+              :style="{
+                background: stat.color,
+                color: stat.name === 'TODO' ? '#666' : 'white'
+              }"
+            >
+             {{ stat.name }}
+            </span>
+            : {{ stat.value }}
+          </template>
         </div>
 
         <div class="timeline">
@@ -470,10 +485,15 @@ export default {
           .map(taskStatusId => {
             const name =
               this.taskStatusMap[taskStatusId].short_name.toUpperCase()
-            return name + ': ' + this.newsStats[taskStatusId]
+            const color =
+              this.taskStatusMap[taskStatusId].color
+            return {
+              name,
+              color,
+              value: this.newsStats[taskStatusId]
+            }
           })
-          .sort((a, b) => a.localeCompare(b))
-          .join(', ')
+          .sort((a, b) => a.name.localeCompare(b.name))
       } else {
         return ''
       }
@@ -944,6 +964,10 @@ export default {
 .stats {
   text-align: left;
   margin-top: 2em;
-  font-style: italic;
+
+  .stat-tag {
+    margin-left: 1em;
+    margin-top: 0;
+  }
 }
 </style>
