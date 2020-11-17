@@ -66,17 +66,17 @@
         <div class="filters flexrow mt1" v-show="isFiltersDisplayed">
           <date-field
             class="flexrow-item"
-            :label="$t('main.before')"
             :disabled-dates="{from: today}"
+            :label="$t('main.from')"
             :with-margin="false"
-            v-model="before"
+            v-model="after"
           />
           <date-field
             class="flexrow-item"
+            :label="$t('main.to')"
             :disabled-dates="{from: today}"
-            :label="$t('main.after')"
             :with-margin="false"
-            v-model="after"
+            v-model="before"
           />
           <combobox
             class="flexrow-item selector"
