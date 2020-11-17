@@ -339,7 +339,7 @@ export default {
 
     chartColors (entryId, columnId) {
       if (this.isRetakes) {
-        return ['#22d160', '#ff3860', '#6f727a']
+        return ['#ff3860', '#6f727a', '#22d160']
       } else {
         return getChartColors(this.episodeStats, entryId, columnId)
       }
@@ -359,11 +359,12 @@ export default {
       const nowData = getRetakeChartData(
         this.episodeRetakeStats, entryId, columnId, dataType
       )
-      const nbActiveShots = nowData[0][1] + nowData[1][1]
+      // Count how many shots there is for this cell.
+      const nbActiveShots = nowData[0][1] + nowData[1][1] + nowData[2][1]
       const nbRetakes =
         this.episodeRetakeStats[entryId][columnId].evolution[takeNumber][dataType]
       const nbDones = nbActiveShots - nbRetakes
-      return [['done', nbDones, '#22d160'], ['retake', nbRetakes, '#ff3860']]
+      return [['retake', nbRetakes, '#ff3860'], ['other', 0, '#6f727a'], ['done', nbDones, '#22d160']]
     },
 
     chartLabel (entryId, columnId) {
