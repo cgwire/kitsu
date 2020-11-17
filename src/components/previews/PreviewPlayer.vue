@@ -309,7 +309,7 @@
 
         <div
           class="separator"
-          v-if="lastPreviewFiles.length > 1"
+          v-if="lastPreviewFiles.length > 1 && fullScreen"
         >
         </div>
 
@@ -317,7 +317,6 @@
           class="button flexrow-item"
           :href="originalDlPath"
           :title="$t('playlists.actions.download_file')"
-          v-if="big || fullScreen"
         >
           <download-icon class="icon is-small" />
         </a>
@@ -674,7 +673,9 @@ export default {
       if (this.previewViewer) {
         this.clearCanvas()
         this.previewViewer.play()
-        if (this.comparisonViewer) this.comparisonViewer.play()
+        if (this.comparisonViewer && this.isComparing) {
+          this.comparisonViewer.play()
+        }
       }
     },
 
