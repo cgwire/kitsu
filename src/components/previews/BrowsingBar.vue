@@ -39,8 +39,11 @@
     icon="delete"
     :title="$t('playlists.actions.files_delete')"
     @click="$emit('remove-preview-clicked')"
-    v-if="!readOnly && !fullScreen"
+    v-if="!readOnly && !fullScreen && !light"
   />
+
+  <div class="separator" v-if="isBigDisplay">
+  </div>
 </div>
 </template>
 
