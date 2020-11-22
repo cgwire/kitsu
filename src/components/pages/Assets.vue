@@ -357,36 +357,22 @@ export default {
     this.$refs['asset-list'].setScrollPosition(
       this.assetListScrollPosition
     )
-    if (
-      Object.keys(this.assetMap).length < 2 ||
-      (
-        this.assetValidationColumns.length > 0 &&
-        !Object.keys(this.assetMap)[0].validations
-      )
-    ) {
-      setTimeout(() => {
-        this.loadAssets()
-          .then(() => {
-            setTimeout(() => {
-              this.initialLoading = false
-              if (this.$refs['asset-list']) {
-                this.onSearchChange()
-                this.resetCsvColumns()
-                this.$refs['asset-list'].setScrollPosition(
-                  this.assetListScrollPosition
-                )
-              }
-            }, 500)
-          })
-      }, 0)
-    } else {
-      if (!this.isAssetsLoading) this.initialLoading = false
-      this.onSearchChange()
-      this.resetCsvColumns()
-      this.$refs['asset-list'].setScrollPosition(
-        this.assetListScrollPosition
-      )
-    }
+    this.onSearchChange()
+    this.resetCsvColumns()
+    this.$refs['asset-list'].setScrollPosition(
+      this.assetListScrollPosition
+    )
+    setTimeout(() => {
+      this.initialLoading = false
+      if (this.$refs['asset-list']) {
+        this.onSearchChange()
+        this.resetCsvColumns()
+        if (!this.isAssetsLoading) this.initialLoading = false
+        this.$refs['asset-list'].setScrollPosition(
+          this.assetListScrollPosition
+        )
+      }
+    }, 500)
   },
 
   computed: {
@@ -932,6 +918,7 @@ export default {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       this.resetCsvColumns()
+      this.initialLoading = true
 
       if (!this.isTVShow) this.reset()
     },

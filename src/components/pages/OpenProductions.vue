@@ -166,7 +166,11 @@ export default {
       }
       if (production.production_type === 'tvshow') {
         route.name = `episode-${section}`
-        route.params.episode_id = production.first_episode_id
+        if (section !== 'assets') {
+          route.params.episode_id = production.first_episode_id
+        } else {
+          route.params.episode_id = 'all'
+        }
       }
       return route
     },
