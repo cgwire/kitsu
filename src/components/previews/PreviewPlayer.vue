@@ -1025,7 +1025,6 @@ export default {
           return
         }
       }
-      this.isDrawing = false
 
       if (!this.fabricCanvas) this.setupFabricCanvas()
       if (this.isMovie) {
@@ -1577,13 +1576,6 @@ progress {
   background: $grey;
   height: 8px;
   display: block;
-}
-
-progress::progress-value,
-progress::-o-progress-value,
-progress::-moz-progress-value,
-progress::-webkit-progress-value {
-  transition: all 0.25s linear;
 }
 
 .revision-previews {
