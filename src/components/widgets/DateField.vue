@@ -15,6 +15,12 @@
       format="yyyy-MM-dd"
       v-model="localValue"
     />
+    <span
+      class="clear-button"
+      @click="clearValue"
+      v-show="localValue">
+      +
+    </span>
   </p>
 </div>
 </template>
@@ -78,7 +84,11 @@ export default {
 
   methods: {
     ...mapActions([
-    ])
+    ]),
+
+    clearValue () {
+      this.localValue = null
+    }
   },
 
   watch: {
@@ -89,4 +99,15 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.control {
+  position: relative;
+}
+
+.clear-button {
+  cursor: pointer;
+  position: absolute;
+  right: 5px;
+  top: 0px;
+  transform: rotate(45deg);
+}
 </style>
