@@ -181,8 +181,9 @@
                   :frames-data="chartData(entry.id, columnId, 'frames')"
                   :countMode="countMode"
                   :displayMode="displayMode"
-                  v-else-if="isStats(entry.id, columnId) &&
-                        chartRetakeMaxCount(entry.id, columnId) + 1 === takeNumber"
+                  v-else-if="
+                    isStats(entry.id, columnId) &&
+                    chartRetakeMaxCount(entry.id, columnId) + 1 === takeNumber"
                 />
                 <td
                   :key="takeNumber + entry.id + columnId"
@@ -356,15 +357,17 @@ export default {
     },
 
     chartTakeData (entryId, columnId, takeNumber, dataType = 'count') {
-      const nowData = getRetakeChartData(
-        this.episodeRetakeStats, entryId, columnId, dataType
-      )
-      // Count how many shots there is for this cell.
-      const nbActiveShots = nowData[0][1] + nowData[1][1] + nowData[2][1]
-      const nbRetakes =
-        this.episodeRetakeStats[entryId][columnId].evolution[takeNumber][dataType]
-      const nbDones = nbActiveShots - nbRetakes
-      return [['retake', nbRetakes, '#ff3860'], ['other', 0, '#6f727a'], ['done', nbDones, '#22d160']]
+      const evolutionStats =
+        this.episodeRetakeStats[entryId][columnId].evolution
+      const nbRetakes = evolutionStats.[takeNumber].retake[dataType]
+      const nbDones = evolutionStats.[takeNumber].done[dataType]
+      const nbOthers = evolutionStats.[takeNumber].other[dataType]
+      // Order here is important
+      return [
+        ['retake', nbRetakes, '#ff3860'],
+        ['other', nbOthers, '#6f727a'],
+        ['done', nbDones, '#22d160']
+      ]
     },
 
     chartLabel (entryId, columnId) {
