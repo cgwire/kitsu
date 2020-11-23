@@ -362,17 +362,36 @@ export default {
     this.$refs['asset-list'].setScrollPosition(
       this.assetListScrollPosition
     )
-    setTimeout(() => {
-      this.initialLoading = false
+    const finalize = () => {
       if (this.$refs['asset-list']) {
         this.onSearchChange()
         this.resetCsvColumns()
-        if (!this.isAssetsLoading) this.initialLoading = false
         this.$refs['asset-list'].setScrollPosition(
           this.assetListScrollPosition
         )
       }
-    }, 500)
+    }
+
+    if (
+      Object.keys(this.assetMap).length < 2 ||
+      (
+        this.assetValidationColumns.length > 0 &&
+        !Object.keys(this.assetMap)[0].validations
+      )
+    ) {
+      setTimeout(() => {
+        this.loadAssets()
+          .then(() => {
+            setTimeout(() => {
+              this.initialLoading = false
+              finalize()
+            }, 500)
+          })
+      }, 0)
+    } else {
+      if (!this.isAssetsLoading) this.initialLoading = false
+      finalize()
+    }
   },
 
   computed: {
@@ -919,7 +938,6 @@ export default {
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       this.resetCsvColumns()
       this.initialLoading = true
-
       if (!this.isTVShow) this.reset()
     },
 
