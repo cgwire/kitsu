@@ -20,9 +20,9 @@ export default {
   getNews (projectId, newsId) {
     return new Promise((resolve, reject) => {
       const path = `/api/data/projects/${projectId}/news/${newsId}`
-      client.get(path, (err, news) => {
+      client.get(path, (err, singleNews) => {
         if (err) reject(err)
-        else resolve(news[0])
+        else resolve(singleNews)
       })
     })
   }
