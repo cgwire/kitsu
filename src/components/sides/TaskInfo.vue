@@ -41,7 +41,6 @@
         <button-simple
           class="flexrow-item set-thumbnail-button"
           icon="image"
-          :disabled="!isSetThumbnailAllowed"
           :title="$t('tasks.set_preview')"
           @click="setCurrentPreviewAsEntityThumbnail"
           v-if="isCurrentUserManager && isPreview && extension !== 'gif'"
@@ -732,10 +731,11 @@ export default {
     },
 
     setCurrentPreviewAsEntityThumbnail () {
+      console.log(this.currentPreview.previews)
       this.setPreview({
         taskId: this.task.id,
         entityId: this.task.entity.id,
-        previewId: this.currentPreviewId
+        previewId: this.currentPreview.previews[0].id
       })
     },
 
