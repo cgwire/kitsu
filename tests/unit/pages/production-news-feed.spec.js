@@ -129,10 +129,13 @@ describe('ProductionNewsFeed', () => {
   describe('Getters', () => {
     test('params', () => {
       expect(wrapper.vm.params).toEqual({
+        after: '',
+        before: '',
         only_preview: false,
         page: 1,
         page_size: 50,
         productionId: "production-1",
+        person_id: undefined,
         task_status_id: undefined,
         task_type_id: undefined,
         person_id: undefined
@@ -140,11 +143,15 @@ describe('ProductionNewsFeed', () => {
       wrapper.vm.previewMode = 'previews'
       wrapper.vm.taskStatusId = 'task-status-1'
       wrapper.vm.taskTypeId = 'task-type-1'
+      wrapper.vm.person = {id: 'person-1'}
       wrapper.vm.currentPage = 2
       expect(wrapper.vm.params).toEqual({
+        after: '',
+        before: '',
         only_preview: true,
         page: 2,
         page_size: 6,
+        person_id: 'person-1',
         productionId: "production-1",
         task_status_id: 'task-status-1',
         task_type_id: 'task-type-1'

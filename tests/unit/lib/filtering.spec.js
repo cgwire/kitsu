@@ -92,7 +92,8 @@ describe('lib/filtering', () => {
     const persons = [
       {
         id: 'person-1',
-        name: 'John Doe'
+        name: 'John Doe',
+        active: true
       }
     ]
     const taskStatuses = [
