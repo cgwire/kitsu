@@ -203,7 +203,6 @@ export default {
   updateRevisionPreviewPosition (previewId, position) {
     const path =
       `/api/actions/preview-files/${previewId}/update-position`
-    console.log('request', position + 1)
     return client.pput(path, { position: position + 1 })
   }
 }
