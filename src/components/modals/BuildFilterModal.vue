@@ -393,7 +393,7 @@ export default {
       this.metadataDescriptorFilters.values.forEach((descriptorFilter) => {
         const operator = descriptorFilter.operator
         const desc = this.getDescriptor(descriptorFilter.id)
-        query += ` [${desc.name}]${operator}${descriptorFilter.text}`
+        query += ` [${desc.name}]${operator}[${descriptorFilter.text}]`
       })
       return query
     },

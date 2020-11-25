@@ -15,7 +15,7 @@ const EQUAL_ASSET_TYPE_REGEX = /type=\[([^[]*)\]|type=([^ ]*)|type=([^ ]*)/g
  */
 export const applyFilters = (entries, filters, taskMap) => {
   if (filters && filters.length > 0) {
-    return entries.filter((entry) => {
+    const result = entries.filter((entry) => {
       let isOk = null
       filters.forEach((filter) => {
         if (isOk === false && !filters.union) return false
@@ -24,6 +24,7 @@ export const applyFilters = (entries, filters, taskMap) => {
       })
       return isOk
     })
+    return result
   } else {
     return entries
   }
@@ -183,10 +184,10 @@ const getUnion = (query) => {
 const getExcludingFilters = (entryIndex, query) => {
   const filters = []
   const excludingKeywords = getExcludingKeyWords(query) || []
-  excludingKeywords.forEach((keyword) => {
+  excludingKeywords.forEach(keyword => {
     const excludedMap = {}
     const excludedEntries = indexSearch(entryIndex, [keyword]) || []
-    excludedEntries.forEach((entry) => {
+    excludedEntries.forEach(entry => {
       excludedMap[entry.id] = true
     })
     filters.push({
@@ -203,7 +204,7 @@ const getExcludingFilters = (entryIndex, query) => {
 export const getTaskFilters = (entryIndex, query) => {
   const filters = []
   const excludingKeywords = getExcludingKeyWords(query) || []
-  excludingKeywords.forEach((keyword) => {
+  excludingKeywords.forEach(keyword => {
     const excludedMap = {}
     const excludedEntries = indexSearch(entryIndex, [keyword]) || []
     excludedEntries.forEach((entry) => {
@@ -238,7 +239,7 @@ export const getAssetTypeFilters = (
   const rgxMatches = queryText.match(EQUAL_ASSET_TYPE_REGEX)
 
   if (rgxMatches) {
-    rgxMatches.forEach((rgxMatch) => {
+    rgxMatches.forEach(rgxMatch => {
       const pattern = rgxMatch.split('=')
       let value = cleanParenthesis(pattern[1])
       const excluding = value.startsWith('-')
@@ -270,7 +271,7 @@ export const getTaskTypeFilters = (
   if (rgxMatches) {
     const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
     const taskStatusShortNameIndex = buildTaskStatusIndex(taskStatuses)
-    rgxMatches.forEach((rgxMatch) => {
+    rgxMatches.forEach(rgxMatch => {
       const pattern = rgxMatch.split('=')
       let value = cleanParenthesis(pattern[1])
       const excluding = value.startsWith('-')
@@ -322,15 +323,13 @@ export const getDescFilters = (descriptors, queryText) => {
 
   if (rgxMatches) {
     const descriptorNameIndex = buildNameIndex(descriptors, false)
-    rgxMatches.forEach((rgxMatch) => {
+    rgxMatches.forEach(rgxMatch => {
       const pattern = rgxMatch.split('=')
-      let value = pattern[1]
-      let descriptorName = pattern[0]
-      if (descriptorName[0] === '[') {
-        descriptorName = descriptorName.substring(1, descriptorName.length - 1)
-      }
+      const descriptorName = cleanParenthesis(pattern[0])
+      if (descriptorName === 'type') return
       const matchedDescriptors =
         descriptorNameIndex[descriptorName.toLowerCase()]
+      let value = cleanParenthesis(pattern[1])
       const excluding = value.startsWith('-')
       if (excluding) value = value.substring(1)
       if (matchedDescriptors) {
@@ -367,9 +366,7 @@ export const getAssignedToFilters = (persons, queryText) => {
       const pattern = rgxMatch.split('=')
       if (pattern[0] === 'assignedto') {
         let value = pattern[1]
-        if (value[0] === '[') {
-          value = value.substring(1, value.length - 1)
-        }
+        value = cleanParenthesis(value)
         const excluding = value.startsWith('-')
         if (excluding) value = value.substring(1)
         const person = personIndex.get(value.toLowerCase())

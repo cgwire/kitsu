@@ -458,7 +458,7 @@ describe('lib/filtering', () => {
       },
       {
         name: 'SH01', sequence_name: 'S01', episode_name: 'E02', id: 'shot-4',
-        data: {color: 'blue'},
+        data: {color: 'the space'},
         validations: {'task-type-1': 'task-4'},
         tasks: ['task-4']
       },
@@ -687,7 +687,23 @@ describe('lib/filtering', () => {
         filters,
         taskMap
       )
-      expect(results.length).toEqual(4)
+      expect(results.length).toEqual(3)
+    })
+
+    it('color=[blue space]', () => {
+      const filters = [
+        {
+          descriptor: descriptors[0],
+          value: 'the space',
+          type: 'descriptor'
+        }
+      ]
+      let results = applyFilters(
+        entries,
+        filters,
+        taskMap
+      )
+      expect(results.length).toEqual(1)
     })
 
     it('withthumbnail', () => {
