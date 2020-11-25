@@ -212,14 +212,11 @@ export default {
 
   data () {
     return {
-      disabledDates: {
-        to: this.isCurrentUserArtist ? moment().startOf('isoWeek').toDate() : null,
-        from: moment().toDate() // Disable dates after today.
-      },
-      page: 1,
-      selectedDate: moment().toDate(), // By default current day.
+      colNamePosX: '',
       colTypePosX: '',
-      colNamePosX: ''
+      disabledDates: {},
+      page: 1,
+      selectedDate: moment().toDate() // By default current day.
     }
   },
 
@@ -229,6 +226,11 @@ export default {
       this.$refs['th-prod'].offsetWidth +
       this.$refs['th-type'].offsetWidth +
       'px'
+    const beginningOfTheWeek = moment().startOf('isoWeek').toDate()
+    this.disabledDates = {
+      to: this.isCurrentUserArtist ? beginningOfTheWeek : null,
+      from: moment().toDate() // Disable dates after today.
+    }
   },
 
   computed: {
