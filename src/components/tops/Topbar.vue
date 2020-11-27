@@ -650,7 +650,7 @@ export default {
     currentProductionId () {
       this.updateRoute()
       this.resetEpisodeForTVShow()
-      if (this.currentProduction.isTVShow) {
+      if (this.isTVShow) {
         this.loadEpisodes()
           .catch(console.error)
       }
