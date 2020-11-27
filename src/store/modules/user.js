@@ -63,7 +63,7 @@ import {
   LOAD_PEOPLE_END,
   LOAD_CUSTOM_ACTIONS_END,
   LOAD_ASSET_TYPES_END,
-  LOAD_NOTIFICATIONS_END,
+  SET_NOTIFICATION_COUNT,
   LOAD_OPEN_PRODUCTIONS_END,
 
   RESET_ALL
@@ -292,7 +292,7 @@ const actions = {
         commit(LOAD_PEOPLE_END, context.persons)
         commit(LOAD_CUSTOM_ACTIONS_END, context.custom_actions)
         commit(LOAD_ASSET_TYPES_END, context.asset_types)
-        commit(LOAD_NOTIFICATIONS_END, context.notifications)
+        commit(SET_NOTIFICATION_COUNT, context.notification_count)
         commit(LOAD_OPEN_PRODUCTIONS_END, context.projects)
       })
   }
