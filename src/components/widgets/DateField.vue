@@ -16,7 +16,7 @@
       v-model="localValue"
     />
     <span
-      class="clear-button"
+      class="clear-button unselectable"
       @click="clearValue"
       v-show="localValue">
       +
@@ -108,6 +108,7 @@ export default {
   position: absolute;
   right: 5px;
   top: 0px;
+  color: $light-grey;
   transform: rotate(45deg);
 }
 </style>

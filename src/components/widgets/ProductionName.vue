@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import colors from '../../lib/colors.js'
+import colors from '@/lib/colors.js'
 import { mapGetters, mapActions } from 'vuex'
 
 export default {

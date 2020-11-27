@@ -64,8 +64,8 @@
 import { mapGetters } from 'vuex'
 import { ChevronDownIcon } from 'vue-feather-icons'
 
-import colors from '../../lib/colors'
-import ComboboxMask from './ComboboxMask'
+import colors from '@/lib/colors'
+import ComboboxMask from '@/components/widgets/ComboboxMask'
 
 export default {
   name: 'combobox-status',

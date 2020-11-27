@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import ButtonLink from './ButtonLink.vue'
+import ButtonLink from '@/components/widgets/ButtonLink.vue'
 
 export default {
   name: 'preview-row',

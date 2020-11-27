@@ -49,8 +49,8 @@
 import { mapGetters } from 'vuex'
 import { ChevronDownIcon } from 'vue-feather-icons'
 
-import ComboboxMask from './ComboboxMask'
-import TaskTypeName from './TaskTypeName'
+import ComboboxMask from '@/components/widgets/ComboboxMask'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
   name: 'combobox-task-type',

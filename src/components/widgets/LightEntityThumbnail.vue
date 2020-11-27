@@ -9,8 +9,8 @@
   }"
   v-lazy="'/api/pictures/' + props.type + '/preview-files/' + props.previewFileId + '.png'"
   :key="props.previewFileId"
-  v-bind="data.attrs"
   v-if="props.previewFileId"
+  v-bind="data.attrs"
 />
 <span
   :class="{

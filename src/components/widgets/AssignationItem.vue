@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import PeopleAvatar from './PeopleAvatar'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 
 export default {
   name: 'assignation-item',

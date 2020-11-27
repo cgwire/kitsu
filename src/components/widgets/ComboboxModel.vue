@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import Combobox from '../widgets/Combobox'
+import Combobox from '@/components/widgets/Combobox'
 
 export default {
   name: 'combobox-model',
