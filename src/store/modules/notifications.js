@@ -4,16 +4,19 @@ import { sortByDate } from '../../lib/sorting'
 import {
   CLEAR_NOTIFICATIONS,
   INCREMENT_NOTIFICATION_COUNTER,
+  LOAD_MORE_NOTIFICATIONS_END,
   LOAD_NOTIFICATION_END,
   LOAD_NOTIFICATIONS_END,
   MARK_ALL_NOTIFICATIONS_AS_READ,
 
   NOTIFICATION_ADD_PREVIEW,
+  SET_NOTIFICATION_COUNT,
 
   RESET_ALL
 } from '../mutation-types'
 
 const initialState = {
+  notificationCount: 0,
   notifications: []
 }
 
@@ -22,16 +25,9 @@ const state = {
 }
 
 const getters = {
+  notificationCount: state => state.notificationCount,
   notifications: state => state.notifications,
-  isNewNotification: (state) => {
-    const unreadNotifications = state.notifications.filter((notification) => {
-      return !notification.read
-    })
-    return unreadNotifications.length > 0
-  },
-  unreadNotificationsLength: (state) => {
-    return state.notifications.filter(n => !n.read).length
-  }
+  isNewNotification: (state) => state.notificationCount > 0
 }
 
 const actions = {
@@ -40,11 +36,27 @@ const actions = {
   },
 
   loadNotifications ({ commit, state }) {
+    commit(LOAD_NOTIFICATIONS_END, [])
     return notificationsApi.getNotifications()
       .then(notifications => {
         commit(LOAD_NOTIFICATIONS_END, notifications)
         return Promise.resolve()
       })
+  },
+
+  loadMoreNotifications ({ commit, state }) {
+    if (state.notifications.length > 0 &&
+        state.notifications.length % 100 === 0) {
+      const lastNotification = state.notifications.length - 1
+      const before = state.notifications[lastNotification].created_at
+      return notificationsApi.getNotifications(before)
+        .then(notifications => {
+          commit(LOAD_MORE_NOTIFICATIONS_END, notifications)
+          return Promise.resolve(notifications)
+        })
+    } else {
+      return Promise.resolve([])
+    }
   },
 
   loadNotification ({ commit, state }, notificationId) {
@@ -73,12 +85,21 @@ const mutations = {
     state.notifications = sortByDate(notifications)
   },
 
+  [LOAD_MORE_NOTIFICATIONS_END] (state, notifications) {
+    state.notifications = sortByDate(state.notifications.concat(notifications))
+  },
+
   [LOAD_NOTIFICATION_END] (state, notification) {
     state.notifications.push(notification)
     state.notifications = sortByDate(state.notifications)
   },
 
+  [SET_NOTIFICATION_COUNT] (state, count) {
+    state.notificationCount = count
+  },
+
   [MARK_ALL_NOTIFICATIONS_AS_READ] (state) {
+    state.notificationCount = 0
     state.notifications.forEach((notification) => {
       notification.read = true
     })
@@ -95,8 +116,7 @@ const mutations = {
   },
 
   [INCREMENT_NOTIFICATION_COUNTER] (state) {
-    // Dirty hack to increment counter without reloading notifications.
-    state.notifications.push({ read: false })
+    state.notificationCount = state.notificationCount + 1
   },
 
   [RESET_ALL] (state) {

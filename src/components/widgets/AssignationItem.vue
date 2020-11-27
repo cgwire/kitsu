@@ -1,6 +1,7 @@
 <template>
   <div class="flexrow">
     <people-avatar
+      :is-link="false"
       :no-cache="true"
       :person="item"
       :size="30"
@@ -13,7 +14,7 @@
 </template>
 
 <script>
-import PeopleAvatar from './PeopleAvatar'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 
 export default {
   name: 'assignation-item',

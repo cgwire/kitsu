@@ -137,16 +137,16 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { remove } from '../../lib/models'
+import { remove } from '@/lib/models'
 import colors from '@/lib/colors'
 
 import AtTa from 'vue-at/dist/vue-at-textarea'
-import AddCommentImageModal from '../modals/AddCommentImageModal'
-import ComboboxStatus from './ComboboxStatus'
-import PeopleAvatar from './PeopleAvatar'
-import GroupButton from './GroupButton'
-import ButtonSimple from './ButtonSimple'
-import Checklist from './Checklist'
+import AddCommentImageModal from '@/components/modals/AddCommentImageModal'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import GroupButton from '@/components/widgets/GroupButton'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import Checklist from '@/components/widgets/Checklist'
 
 export default {
   name: 'add-comment',

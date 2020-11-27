@@ -124,7 +124,7 @@
             >
               <router-link
                 :to="childElement.route"
-                class="filler flexrow-item root-element-name"
+                class="filler flexrow-item child-element-name"
                 v-if="childElement.route"
               >
                 {{ childElement.name }}
@@ -1186,6 +1186,10 @@ export default {
     }
   }
 
+  .child-element-name {
+    color: white;
+  }
+
   .timeline {
     .timeline-header {
       background: #36393F;
@@ -1646,6 +1650,11 @@ export default {
 .root-element-name {
   padding-left: 10px;
   color: white;
+}
+
+.child-element-name {
+  padding-left: 10px;
+  color: $grey-strong;
 }
 
 .date-widget {

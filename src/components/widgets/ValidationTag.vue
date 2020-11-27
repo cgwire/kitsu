@@ -56,7 +56,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import colors from '../../lib/colors'
+import colors from '@/lib/colors'
 
 export default {
   name: 'validation-tag',

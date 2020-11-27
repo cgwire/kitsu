@@ -343,25 +343,9 @@ export default {
     },
 
     currentProduction () {
-      const productionId = this.$route.params.production_id
-      if (this.currentProduction.id !== productionId) {
-        const newPath = {
-          name: 'episodes',
-          params: { production_id: this.currentProduction.id }
-        }
-        this.$refs['episode-search-field'].setValue('')
-        this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
-        this.$router.push(newPath)
-        this.loadShots(() => {
-          this.resizeHeaders()
-          if (this.isTVShow) {
-            this.loadEpisodeStats(this.currentProduction.id)
-            this.loadEpisodeRetakeStats(this.currentProduction.id)
-          } else {
-            this.computeEpisodeStats()
-          }
-        })
-      }
+      this.$refs['episode-search-field'].setValue('')
+      this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
+      this.reset()
     }
   },
 

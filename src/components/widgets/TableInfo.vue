@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import Spinner from './Spinner'
+import Spinner from '@/components/widgets/Spinner'
 
 export default {
   name: 'table-info',

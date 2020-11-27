@@ -206,10 +206,10 @@
 
 import moment from 'moment'
 import { mapGetters } from 'vuex'
-import { remove } from '../../lib/models'
-import { renderComment } from '../../lib/render'
-import { sortByName } from '../../lib/sorting'
-import { formatDate, parseDate } from '../../lib/time'
+import { remove } from '@/lib/models'
+import { renderComment } from '@/lib/render'
+import { sortByName } from '@/lib/sorting'
+import { formatDate, parseDate } from '@/lib/time'
 import colors from '@/lib/colors'
 
 import {

@@ -1,7 +1,11 @@
 <template>
 <div class="columns fixed-page">
   <div class="column main-column">
-    <div class="notifications page">
+    <div
+      class="notifications page"
+      v-scroll="onBodyScroll"
+      ref="body"
+    >
     <div
       class="empty-list has-text-centered"
       v-if="!loading.notifications && (!notifications || notifications.length === 0)"
@@ -195,6 +199,7 @@ export default {
   data () {
     return {
       loading: {
+        more: false,
         notifications: false,
         currentTask: true
       },
@@ -238,11 +243,31 @@ export default {
   methods: {
     ...mapActions([
       'clearNotifications',
+      'loadMoreNotifications',
       'loadNotification',
       'loadNotifications',
       'loadTask',
       'markAllNotificationsAsRead'
     ]),
+
+    onBodyScroll (event, position) {
+      const maxHeight =
+        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
+      if (maxHeight < (position.scrollTop + 100)) {
+        this.loadFollowingNotifications()
+      }
+    },
+
+    loadFollowingNotifications () {
+      console.log('yeah')
+      if (!this.loading.more && !this.loading.notifications) {
+        this.loading.more = true
+        this.loadMoreNotifications()
+          .then(() => {
+            this.loading.more = false
+          })
+      }
+    },
 
     entityPath (notification) {
       const taskType = this.taskTypeMap[notification.task_type_id]

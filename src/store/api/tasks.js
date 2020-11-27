@@ -148,7 +148,7 @@ export default {
 
   setPreview (entityId, previewId, callback) {
     return client.pput(
-      `/api/actions/entities/${entityId}/set-main-preview/${previewId}`,
+      `/api/actions/preview-files/${previewId}/set-main-preview`,
       {}
     )
   },

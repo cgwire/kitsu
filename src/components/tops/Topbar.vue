@@ -89,7 +89,11 @@
         >
           {{ $t('timesheets.title') }}
         </router-link>
-
+        <div class="nav-item">
+          <button  data-canny-changelog class="changelog-button" >
+            <zap-icon />
+          </button>
+        </div>
         <notification-bell />
         <div
           :class="{
@@ -134,6 +138,7 @@
             {{ $t("main.white_theme")}}
           </span>
         </li>
+        <hr />
         <li>
           <a href="https://kitsu.cg-wire.com" target="_blank">
             {{ $t("main.documentation")}}
@@ -154,26 +159,30 @@
             {{ $t('keyboard.shortcuts') }}
           </a>
         </li>
+        <hr />
         <li>
           <a href="https://slack.cg-wire.com" target="_blank">
-            Slack
+            Discord
           </a>
         </li>
         <li>
           <a href="https://cgwire.canny.io" target="_blank">
-            Roadmap
+            Roadmap / Feedback
           </a>
         </li>
+        <hr />
         <li>
           <a href="https://cg-wire.com/en/about.html" target="_blank">
             {{ $t("main.about")}}
           </a>
         </li>
-        <li @click="onLogoutClicked">
-          {{ $t("main.logout") }}
-        </li>
         <li class="version">
           Kitsu {{ kitsuVersion }}
+        </li>
+        <hr />
+        <li class="flexrow" @click="onLogoutClicked">
+          <log-out-icon class="flexrow-item" size="1x" />
+          <span class="flexrow-item">{{ $t("main.logout") }}</span>
         </li>
       </ul>
     </nav>
@@ -188,7 +197,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { ChevronLeftIcon } from 'vue-feather-icons'
+import { ChevronLeftIcon, LogOutIcon, ZapIcon } from 'vue-feather-icons'
 
 import Combobox from '../widgets/Combobox'
 import NotificationBell from '../widgets/NotificationBell'
@@ -202,10 +211,12 @@ export default {
   components: {
     Combobox,
     ChevronLeftIcon,
+    LogOutIcon,
     NotificationBell,
     PeopleName,
     PeopleAvatar,
-    ShortcutModal
+    ShortcutModal,
+    ZapIcon
   },
 
   data () {
@@ -223,6 +234,11 @@ export default {
   },
 
   mounted () {
+    Canny('initChangelog', { // eslint-disable-line
+      appID: '5db968118d1a9c132c168d54',
+      position: 'bottom',
+      align: 'right'
+    })
     const userMenu = this.$refs['user-menu']
     const userName = this.$refs['user-name']
     if (userName) {
@@ -650,7 +666,7 @@ export default {
     currentProductionId () {
       this.updateRoute()
       this.resetEpisodeForTVShow()
-      if (this.currentProduction.isTVShow) {
+      if (this.isTVShow) {
         this.loadEpisodes()
           .catch(console.error)
       }
@@ -742,7 +758,7 @@ export default {
 
 .user-nav {
   cursor: pointer;
-  min-width: 150px;
+  min-width: 180px;
 }
 
 .user-nav.active {
@@ -751,8 +767,8 @@ export default {
 .user-menu {
   position: fixed;
   top: 60px;
-  width: 200px;
-  min-width: 150px;
+  width: 180px;
+  min-width: 180px;
   right: 0;
   background-color: white;
   padding: 1em 1em 1em 1em;
@@ -824,8 +840,14 @@ strong {
 }
 
 .user-name {
-  min-width: 130px;
+  min-width: 180px;
   text-align: left;
+}
+
+.changelog-button {
+  background: transparent;
+  color: $light-grey;
+  cursor: pointer;
 }
 
 @media screen and (max-width: 768px) {

@@ -1,20 +1,19 @@
 <template>
 <div
-  class="nav-item"
+  class="notification-bell nav-item"
 >
   <router-link :to="{name: 'notifications'}">
     <bell-icon
       :class="notificationBellClass"
-      v-if="!isNewNotification"
     />
     <span
       class="number"
-      :title="unreadNotificationsLength + ' ' +
+      :title="notificationCount + ' ' +
               $tc('notifications.unread_notifications',
-                   unreadNotificationsLength)"
-      v-else
+                   notificationCount)"
+      v-if="isNewNotification"
     >
-      {{ unreadNotificationsLength }}
+      {{ notificationCount }}
     </span>
   </router-link>
 </div>
@@ -40,7 +39,7 @@ export default {
   computed: {
     ...mapGetters([
       'isNewNotification',
-      'unreadNotificationsLength'
+      'notificationCount'
     ]),
 
     notificationBellClass () {
@@ -89,18 +88,26 @@ export default {
   }
 }
 
+.notification-bell {
+  position: relative;
+}
+
 .has-notifications {
   margin-top: 5px;
   color: $orange;
 }
 
 .number {
+  position: absolute;
+  left: 20px;
   background: $orange-light;
   border: 2px solid $orange;
   color: $orange;
-  font-size: 0.9em;
+  font-size: 0.8em;
   margin: 0;
-  width: 30px;
-  height: 30px;
+  width: auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 2px;
 }
 </style>

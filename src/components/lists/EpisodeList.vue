@@ -206,13 +206,19 @@
     :is-error="isError"
   />
 
-  <div class="has-text-centered" v-if="isEmptyList && !isCurrentUserClient">
+  <div
+    class="has-text-centered"
+    v-if="!isLoading && isEmptyList && !isCurrentUserClient"
+  >
     <p class="info">
       <img src="../../assets/illustrations/empty_shot.png" />
     </p>
     <p class="info">{{ $t('episodes.empty_list') }}</p>
   </div>
-  <div class="has-text-centered" v-if="isEmptyList && isCurrentUserClient">
+  <div
+    class="has-text-centered"
+    v-if="!isLoading && isEmptyList && isCurrentUserClient"
+  >
     <p class="info">
       <img src="../../assets/illustrations/empty_shot.png" />
     </p>
@@ -474,7 +480,10 @@ export default {
 
   watch: {
     entries () {
-      this.entries.forEach(e => { Vue.set(this.expanded, e.id, false) })
+      this.entries.forEach(e => {
+        const value = this.expanded[e.id] || false
+        Vue.set(this.expanded, e.id, value)
+      })
     },
 
     isRetakes () {

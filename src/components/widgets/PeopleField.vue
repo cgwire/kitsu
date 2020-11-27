@@ -17,9 +17,9 @@
 </template>
 
 <script>
-import AssignationItem from './AssignationItem'
+import AssignationItem from '@/components/widgets/AssignationItem'
 import { mapGetters } from 'vuex'
-import { buildNameIndex, indexSearch } from '../../lib/indexing'
+import { buildNameIndex, indexSearch } from '@/lib/indexing'
 
 export default {
   name: 'people-field',

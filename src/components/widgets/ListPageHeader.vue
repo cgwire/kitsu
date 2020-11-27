@@ -17,8 +17,8 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import ButtonSimple from '../widgets/ButtonSimple'
-import PageTitle from '../widgets/PageTitle'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import PageTitle from '@/components/widgets/PageTitle'
 
 export default {
   name: 'list-page-header',

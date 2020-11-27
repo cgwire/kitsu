@@ -59,16 +59,16 @@ describe('ShotHistoryModal', () => {
 
   describe('Mount', () => {
     it('empty', () => {
-      const modal = wrapper.find(ShotHistoryModal)
-      const tableInfo = wrapper.find(TableInfo)
+      const modal = wrapper.findComponent(ShotHistoryModal)
+      const tableInfo = wrapper.findComponent(TableInfo)
       expect(tableInfo.props().isLoading).toBe(false)
       expect(modal.findAll('.shot-version')).toHaveLength(0)
     })
     it('spinner on loading', done => {
       wrapper.setData({ isLoading: true })
       Vue.nextTick(() => {
-        const modal = wrapper.find(ShotHistoryModal)
-        const tableInfo = wrapper.find(TableInfo)
+        const modal = wrapper.findComponent(ShotHistoryModal)
+        const tableInfo = wrapper.findComponent(TableInfo)
         expect(tableInfo.props().isLoading).toBe(true)
         expect(modal.findAll('.shot-version')).toHaveLength(0)
         done()
@@ -76,8 +76,8 @@ describe('ShotHistoryModal', () => {
     })
     it('data loaded', async () => {
       await wrapper.vm.loadData()
-      const modal = wrapper.find(ShotHistoryModal)
-      const tableInfo = wrapper.find(TableInfo)
+      const modal = wrapper.findComponent(ShotHistoryModal)
+      const tableInfo = wrapper.findComponent(TableInfo)
       expect(tableInfo.props().isLoading).toBe(false)
       expect(modal.findAll('.shot-version')).toHaveLength(2)
     })
