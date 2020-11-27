@@ -181,7 +181,15 @@
               bold: !shot.canceled}"
             >
             <div class="flexrow">
-              <entity-thumbnail :entity="shot" :empty-height="32" />
+              <light-entity-thumbnail
+                :preview-file-id="shot.preview_file_id"
+                empty-height="32px"
+                empty-width="48px"
+                height="32px"
+                width="48px"
+                max-height="32px"
+                max-width="48px"
+              />
               <router-link :to="shotPath(shot.id)" :title="shot.full_name">
                 {{ shot.name }}
               </router-link>
@@ -312,7 +320,7 @@ import { formatListMixin } from './format_mixin'
 
 import ButtonSimple from '../widgets/ButtonSimple'
 import DescriptionCell from '../cells/DescriptionCell'
-import EntityThumbnail from '../widgets/EntityThumbnail'
+import LightEntityThumbnail from '../widgets/LightEntityThumbnail'
 import TableMetadataHeaderMenu from '../widgets/TableMetadataHeaderMenu'
 import RowActions from '../widgets/RowActions'
 import TableHeaderMenu from '../widgets/TableHeaderMenu'
@@ -354,7 +362,7 @@ export default {
     ButtonSimple,
     ChevronDownIcon,
     DescriptionCell,
-    EntityThumbnail,
+    LightEntityThumbnail,
     RowActions,
     TableHeaderMenu,
     TableMetadataHeaderMenu,
