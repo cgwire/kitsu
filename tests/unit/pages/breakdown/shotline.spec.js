@@ -42,10 +42,5 @@ describe('ShotLine', () => {
       const empty = wrapper.findAll('.asset-type-line.empty')
       expect(empty.at(0).text()).toMatch('Empty casting')
     })
-    it('should have been clicked one time', () => {
-      wrapper.setMethods({ onClicked: jest.fn() })
-      wrapper.findAll('.shot').trigger('click')
-      expect(wrapper.vm.onClicked).toHaveBeenCalledTimes(1)
-    })
   })
 })

@@ -21,7 +21,7 @@ describe('PreviewRow', () => {
     router
   })
 
-  const link = wrapper.find(ButtonLink)
+  const link = wrapper.findComponent(ButtonLink)
 
   describe('Mount', () => {
     it('should be default', () => {

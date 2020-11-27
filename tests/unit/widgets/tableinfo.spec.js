@@ -47,7 +47,7 @@ describe('TableInfo', () => {
     })
 
     it('should display a spinner', () => {
-      expect(wrapperLoading.contains(Spinner)).toBe(true)
+      expect(wrapperLoading.findComponent(Spinner).exists()).toBe(true)
     })
 
     it('should display an error', () => {

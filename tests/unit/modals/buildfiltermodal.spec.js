@@ -130,11 +130,11 @@ describe('BuildFilterModal', () => {
 
   describe('UI', () => {
     it('mount succeeds', () => {
-      const modal = wrapper.find(BuildFilterModal)
+      const modal = wrapper.findComponent(BuildFilterModal)
     })
     describe('mount with query', () => {
       it('task types', done => {
-        expect(wrapper.contains('.task-type-filter')).toBeFalsy()
+        expect(wrapper.find('.task-type-filter').exists()).toBeFalsy()
         wrapper.setData({
           taskTypeFilters: {
             values: [
@@ -147,12 +147,12 @@ describe('BuildFilterModal', () => {
           }
         })
         wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.contains('.task-type-filter')).toBeTruthy()
+          expect(wrapper.find('.task-type-filter').exists()).toBeTruthy()
           done()
         })
       })
       it('descriptors', (done) => {
-        expect(wrapper.contains('.descriptor-filter')).toBeFalsy()
+        expect(wrapper.find('.descriptor-filter').exists()).toBeFalsy()
         wrapper.setData({
           metadataDescriptorFilters: {
             values: [
@@ -165,7 +165,7 @@ describe('BuildFilterModal', () => {
           }
         })
         wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.contains('.descriptor-filter')).toBeTruthy()
+          expect(wrapper.find('.descriptor-filter').exists()).toBeTruthy()
           done()
         })
       })

@@ -151,7 +151,7 @@ describe('EstimationHelper', () => {
 
   describe('UI', () => {
     it('mount succeeds', () => {
-      const panel = wrapper.find(EstimationHelper)
+      const panel = wrapper.findComponent(EstimationHelper)
     })
   })
 

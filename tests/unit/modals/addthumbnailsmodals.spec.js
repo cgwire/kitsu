@@ -46,7 +46,7 @@ describe('AddThumbnailsModal', () => {
 
   describe('Mount', () => {
     it('empty', () => {
-      const modal = wrapper.find(AddThumbnailsModal)
+      const modal = wrapper.findComponent(AddThumbnailsModal)
     })
   })
 })
