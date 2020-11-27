@@ -35,8 +35,12 @@ const actions = {
   },
 
   loadEpisodeScheduleItems ({ commit }, { production, taskType }) {
-    return scheduleApi.getEpisodeScheduleItems(production, taskType)
-      .catch(console.error)
+    if (!taskType.id) {
+      return Promise.reject(new Error('Wrong task type for loading schedule'))
+    } else {
+      return scheduleApi.getEpisodeScheduleItems(production, taskType)
+        .catch(console.error)
+    }
   },
 
   saveScheduleItem ({ commit }, scheduleItem) {
