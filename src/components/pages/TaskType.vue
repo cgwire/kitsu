@@ -76,16 +76,11 @@
             class="flexrow-item field"
             v-if="isActiveTab('schedule') && isCurrentUserManager"
           >
-            <label class="label">
-              {{ $t('main.start_date') }}
-            </label>
-            <datepicker
-              wrapper-class="datepicker"
-              input-class="date-input input"
-              :language="locale"
+            <date-field
+              class="flexrow-item"
               :disabled-dates="startDisabledDates"
-              :monday-first="true"
-              format="yyyy-MM-dd"
+              :with-margin="false"
+              :label="$t('main.start_date')"
               v-model="schedule.selectedStartDate"
             />
           </div>
@@ -93,16 +88,11 @@
             class="flexrow-item field"
             v-if="isActiveTab('schedule') && isCurrentUserManager"
           >
-            <label class="label">
-              {{ $t('main.end_date') }}
-            </label>
-            <datepicker
-              wrapper-class="datepicker"
-              input-class="date-input input"
-              :language="locale"
+            <date-field
+              class="flexrow-item"
               :disabled-dates="endDisabledDates"
-              :monday-first="true"
-              format="yyyy-MM-dd"
+              :with-margin="false"
+              :label="$t('main.end_date')"
               v-model="schedule.selectedEndDate"
             />
           </div>
@@ -201,12 +191,12 @@ import { mapGetters, mapActions } from 'vuex'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 import firstBy from 'thenby'
 import moment from 'moment'
-import { searchMixin } from '../mixins/search'
+import { searchMixin } from '@/components/mixins/search'
 
-import csv from '../../lib/csv'
-import { buildSupervisorTaskIndex, indexSearch } from '../../lib/indexing'
-import { sortPeople } from '../../lib/sorting'
-import stringHelpers from '../../lib/string'
+import csv from '@/lib/csv'
+import { buildSupervisorTaskIndex, indexSearch } from '@/lib/indexing'
+import { sortPeople } from '@/lib/sorting'
+import stringHelpers from '@/lib/string'
 import {
   daysToMinutes,
   formatSimpleDate,
@@ -226,7 +216,7 @@ import { formatListMixin } from '../lists/format_mixin.js'
 
 import { ChevronLeftIcon } from 'vue-feather-icons'
 import ButtonSimple from '../widgets/ButtonSimple'
-import Datepicker from 'vuejs-datepicker'
+import DateField from '@/components/widgets/DateField'
 import Combobox from '../widgets/Combobox'
 import ComboboxNumber from '../widgets/ComboboxNumber'
 import EstimationHelper from './tasktype/EstimationHelper'
@@ -245,7 +235,7 @@ export default {
     ChevronLeftIcon,
     Combobox,
     ComboboxNumber,
-    Datepicker,
+    DateField,
     EstimationHelper,
     Schedule,
     SearchField,
@@ -503,7 +493,9 @@ export default {
             }, 200)
             if (this.isActiveTab('schedule')) {
               this.resetScheduleItems()
-              this.$refs['schedule-widget'].scrollToToday()
+              if (this.$refs['schedule-widget']) {
+                this.$refs['schedule-widget'].scrollToToday()
+              }
             }
           })
           .catch((err) => {
@@ -518,7 +510,9 @@ export default {
             this.loading.entities = false
             if (this.isActiveTab('schedule')) {
               this.resetScheduleItems()
-              this.$refs['schedule-widget'].scrollToToday()
+              if (this.$refs['schedule-widget']) {
+                this.$refs['schedule-widget'].scrollToToday()
+              }
             }
           })
       }

@@ -137,30 +137,24 @@
             </span>
           </td>
           <td class="start-date">
-            <datepicker
-              v-if="selectionGrid[task.id]"
-              wrapper-class="datepicker"
-              input-class="date-field input"
-              :language="locale"
-              :monday-first="true"
+            <date-field
+              class="flexrow-item"
+              :with-margin="false"
               :value="getDate(task.start_date)"
-              format="yyyy-MM-dd"
               @input="updateStartDate"
+              v-if="selectionGrid[task.id]"
             />
             <span v-else>
               {{ formatDate(task.start_date) }}
             </span>
           </td>
           <td class="due-date">
-            <datepicker
-              v-if="selectionGrid[task.id]"
-              wrapper-class="datepicker"
-              input-class="date-field input"
-              :language="locale"
-              :monday-first="true"
+            <date-field
+              class="flexrow-item"
+              :with-margin="false"
               :value="getDate(task.due_date)"
-              format="yyyy-MM-dd"
               @input="updateDueDate"
+              v-if="selectionGrid[task.id]"
             />
             <span v-else>
               {{ formatDate(task.due_date) }}
@@ -181,13 +175,11 @@
         </tr>
       </tbody>
     </table>
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+    />
   </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
-
   <p
     class="has-text-centered nb-tasks"
     v-if="!isLoading"
@@ -212,23 +204,22 @@ import {
   getDatesFromEndDate,
   minutesToDays,
   range
-} from '../../lib/time'
+} from '@/lib/time'
 import { formatListMixin } from './format_mixin'
 import { domMixin } from '@/components/mixins/dom'
 
-import Datepicker from 'vuejs-datepicker'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
-import EntityThumbnail from '../widgets/EntityThumbnail'
-import TableInfo from '../widgets/TableInfo'
-import PeopleAvatar from '../widgets/PeopleAvatar'
-import ValidationCell from '../cells/ValidationCell'
+import DateField from '@/components/widgets/DateField'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import TableInfo from '@/components/widgets/TableInfo'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import ValidationCell from '@/components/cells/ValidationCell'
 
 export default {
   name: 'task-list',
   mixins: [domMixin, formatListMixin],
 
   components: {
-    Datepicker,
+    DateField,
     EntityThumbnail,
     PeopleAvatar,
     TableInfo,
@@ -322,14 +313,6 @@ export default {
       } else {
         return []
       }
-    },
-
-    locale () {
-      if (this.user.locale === 'fr_FR') {
-        return fr
-      } else {
-        return en
-      }
     }
   },
 
@@ -356,11 +339,17 @@ export default {
         const task = this.taskMap[taskId]
         const startDate = moment(date)
         const dueDate = task.due_date ? moment(task.due_date) : null
-        const data = getDatesFromStartDate(
-          startDate,
-          dueDate,
-          minutesToDays(this.organisation, task.estimation)
-        )
+        let data = {
+          start_date: null,
+          due_date: null
+        }
+        if (date) {
+          data = getDatesFromStartDate(
+            startDate,
+            dueDate,
+            minutesToDays(this.organisation, task.estimation)
+          )
+        }
         this.updateTask({ taskId, data })
           .catch(console.error)
       })
@@ -371,11 +360,17 @@ export default {
         const task = this.taskMap[taskId]
         const startDate = task.start_date ? moment(task.start_date) : null
         const dueDate = moment(date)
-        const data = getDatesFromEndDate(
-          startDate,
-          dueDate,
-          minutesToDays(this.organisation, task.estimation)
-        )
+        let data = {
+          start_date: null,
+          due_date: null
+        }
+        if (date) {
+          data = getDatesFromEndDate(
+            startDate,
+            dueDate,
+            minutesToDays(this.organisation, task.estimation)
+          )
+        }
         this.updateTask({ taskId, data })
           .catch(console.error)
       })
@@ -622,12 +617,24 @@ export default {
 
 .last-comment-date,
 .real-start-date,
-.due-date,
-.start-date,
 .real-end-date {
   min-width: 110px;
   max-width: 110px;
   width: 110px;
+}
+
+th.start-date,
+th.due-date {
+  min-width: 105px;
+  max-width: 105px;
+  width: 105px;
+}
+
+td.start-date,
+td.due-date {
+  text-align: center;
+  margin: 0;
+  padding: 0;
 }
 
 .retake-count {
