@@ -60,7 +60,8 @@ export const routes = [
       const isValidBrowser = browser.satisfies({
         chrome: '>20.1.1432',
         firefox: '>31',
-        vivaldi: '>2.8'
+        vivaldi: '>2.8',
+        opera: '>22'
       })
       if (!isValidBrowser) {
         return next({ name: 'wrong-browser' })
