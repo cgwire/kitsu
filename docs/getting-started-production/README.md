@@ -341,6 +341,141 @@ Now, you have all your shots imported into Kitsu.
 ![Import data copy paste data](../img/getting-started/import_result_shot.png)
 
 
+
+## Add the Frameranges
+
+At this stage of the production, the animatic should be done. Meaning you have
+the length (**frame range In** and **frame range Out**) for each shot. You can
+add this information to the spreadsheet.  This way, you are sure that all
+the frames a calculated, and none are missing, or over computed.
+
+You may also be able to add a camera as an asset!
+
+You need to edit the shots to fill the frame range information. Click on the
+edit button ![Edit button](../img/getting-started/edit_button.png) on the right
+side of the shot line.
+
+On the new window, you can enter the **In** and **Out** of the shot. Save with the **Confirm** button. 
+
+![Shot edit page](../img/getting-started/shot_edit.png)
+
+Now the frame range appears on the general spreadsheet of the shot page.
+
+You can also use the **CSV Import** to update quickly your frame range. [Update Shots information with CSV Import](#update-shots-information-with-csv-import)
+.
+
+![Shot framerange detail](../img/getting-started/shot_framerange_detail.png)
+
+You can have access to the shot values history too.
+
+![Shot Values History](../img/getting-started/shot_values_history.png)
+
+
+## Add Custom columns
+
+To add more information on the general spreadsheet pages, you have to create a 
+**Custom column**.
+
+
+Click on the **+** near the Name column.
+
+![Custom Column](../img/getting-started/add_column_custom.png)
+
+You may have extra information to add on your pages as the **level of difficulties**,
+the **name of the studios**, when a production is split, etc.
+
+In the custom column, you can store all kinds of information: a **list of value** or a **free value**.
+
+The **free value** is different for each entity.
+
+The **list of value** gives you the same choice for each entity. Moreover, it has to be filled now. 
+
+![Custom Column list](../img/getting-started/custom_column_list.png)
+
+Type the elements of the list below **Available values**, and confirm them by clicking on **Add value**.
+
+Validate the creation of the custom column with the **Confirm** button.
+
+![Custom Column detail](../img/getting-started/custom_column_detail.png)
+
+Back on the global spreadsheets page, you can fill this information with the edit 
+button ![Edit button](../img/getting-started/edit_button.png).
+
+You now see a new line on the edit pop-up. You can select the information from the list, 
+alternatively, enter the free values, depending on your previous choice.
+
+Don't forget to press the **Confirm** button when you are done.
+
+![Custom Column detail](../img/getting-started/edit_asset_custom.png)
+
+If you need to **edit** or **delete** the custom column, go back to the general spreadsheet page.
+Nearby the name of your custom column, click on the arrow ![Custom Column detail](../img/getting-started/arrow.png). 
+
+You can also use the **CSV Import** to fill quickly your custom column.
+You need to first create your **Custom Column** into kitsu, then add it in your spreadhseet, then copy paste your data into the **CSV Import**.
+[Update Shots information with CSV Import](#update-shots-information-with-csv-import)
+
+Select in the menu if you want to 
+edit the name of the custom column and its information, or you want to remove it.
+
+![Custom Column detail](../img/getting-started//custom_column_edit.png)
+
+
+## Create tasks for the assets
+
+And now we can create tasks for the assets, like **Concept**, **Modeling**,
+**Shading**, **Rigging**, and other if needed (see 
+[How to customize the workflow](../faq/README.md#how-to-customize-the-workflow)
+).
+
+Click on the **+ Add tasks** on top of the spreadsheet. 
+
+![Add tasks button](../img/getting-started/add_tasks_asset.png)
+
+A new window will
+open and on the list under **Type** you can choose the task you need to add.
+You can also choose if you want to create tasks for **the project**, validate it by **Confirm** button.
+
+![Add task to an asset](../img/getting-started/add_task.png)
+
+You can choose to create tasks only for filtered elements. For exemple you want to create 
+**Rigg** tasks only for the characters.
+
+You need to type **Characters** on the search bar on the asset global page.
+
+![Characters filtered](../img/getting-started/chara_filtered.png)
+
+Then click on **+ Add tasks**. Select the task type, here **Rigging**, and switch to **For current list and filters**.
+
+Valid with **Confirm**.
+
+![Tasks filtered](../img/getting-started/task_filtered.png)
+
+If you remove the filter characters, you will see the tasks only created for the selected elements.
+
+![Tasks filtered Created](../img/getting-started/add_task_filtered.png)
+
+
+If you want to delete a task, If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
+then select the **delete tasks** (2) on the left top
+of the page.
+![Delete button](../img/getting-started/delete_task.png) 
+
+Now that we have created all the assets and related tasks, we can now add the
+artists to the team and assign tasks to them.
+
+## Create tasks for the shots
+
+We can now associate tasks with the shots. Same way than for the assets, click on
+the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png)
+on the top of the spreadsheet. 
+
+A new pop-up opens and lets you choose what task you want to add. All the
+shots are linked to the tasks if you select **For project** option.
+
+![List of tasks for the shots](../img/getting-started/task_shots.png)
+
+
 ## Create a breakdown list
 
 Fill the breakdown, help you with the assembly of the shots. With the
@@ -488,141 +623,6 @@ of assets that appear on this shot (**Shot casting**).
 ![Shot detail page](../img/getting-started/shot_detail_page.png)
  
 You can click on the status of each task to open the comment panel and see the history of the comments and the different versions.
-
-
-
-## Add the Frameranges
-
-At this stage of the production, the animatic should be done. Meaning you have
-the length (**frame range In** and **frame range Out**) for each shot. You can
-add this information to the spreadsheet.  This way, you are sure that all
-the frames a calculated, and none are missing, or over computed.
-
-You may also be able to add a camera as an asset!
-
-You need to edit the shots to fill the frame range information. Click on the
-edit button ![Edit button](../img/getting-started/edit_button.png) on the right
-side of the shot line.
-
-On the new window, you can enter the **In** and **Out** of the shot. Save with the **Confirm** button. 
-
-![Shot edit page](../img/getting-started/shot_edit.png)
-
-Now the frame range appears on the general spreadsheet of the shot page.
-
-You can also use the **CSV Import** to update quickly your frame range. [Update Shots information with CSV Import](#update-shots-information-with-csv-import)
-.
-
-![Shot framerange detail](../img/getting-started/shot_framerange_detail.png)
-
-You can have access to the shot values history too.
-
-![Shot Values History](../img/getting-started/shot_values_history.png)
-
-
-## Add Custom columns
-
-To add more information on the general spreadsheet pages, you have to create a 
-**Custom column**.
-
-
-Click on the **+** near the Name column.
-
-![Custom Column](../img/getting-started/add_column_custom.png)
-
-You may have extra information to add on your pages as the **level of difficulties**,
-the **name of the studios**, when a production is split, etc.
-
-In the custom column, you can store all kinds of information: a **list of value** or a **free value**.
-
-The **free value** is different for each entity.
-
-The **list of value** gives you the same choice for each entity. Moreover, it has to be filled now. 
-
-![Custom Column list](../img/getting-started/custom_column_list.png)
-
-Type the elements of the list below **Available values**, and confirm them by clicking on **Add value**.
-
-Validate the creation of the custom column with the **Confirm** button.
-
-![Custom Column detail](../img/getting-started/custom_column_detail.png)
-
-Back on the global spreadsheets page, you can fill this information with the edit 
-button ![Edit button](../img/getting-started/edit_button.png).
-
-You now see a new line on the edit pop-up. You can select the information from the list, 
-alternatively, enter the free values, depending on your previous choice.
-
-Don't forget to press the **Confirm** button when you are done.
-
-![Custom Column detail](../img/getting-started/edit_asset_custom.png)
-
-If you need to **edit** or **delete** the custom column, go back to the general spreadsheet page.
-Nearby the name of your custom column, click on the arrow ![Custom Column detail](../img/getting-started/arrow.png). 
-
-You can also use the **CSV Import** to fill quickly your custom column.
-You need to first create your **Custom Column** into kitsu, then add it in your spreadhseet, then copy paste your data into the **CSV Import**.
-[Update Shots information with CSV Import](#update-shots-information-with-csv-import)
-
-Select in the menu if you want to 
-edit the name of the custom column and its information, or you want to remove it.
-
-![Custom Column detail](../img/getting-started//custom_column_edit.png)
-
-
-## Create tasks for the assets
-
-And now we can create tasks for the assets, like **Concept**, **Modeling**,
-**Shading**, **Rigging**, and other if needed (see 
-[How to customize the workflow](../faq/README.md#how-to-customize-the-workflow)
-).
-
-Click on the **+ Add tasks** on top of the spreadsheet. 
-
-![Add tasks button](../img/getting-started/add_tasks_asset.png)
-
-A new window will
-open and on the list under **Type** you can choose the task you need to add.
-You can also choose if you want to create tasks for **the project**, validate it by **Confirm** button.
-
-![Add task to an asset](../img/getting-started/add_task.png)
-
-You can choose to create tasks only for filtered elements. For exemple you want to create 
-**Rigg** tasks only for the characters.
-
-You need to type **Characters** on the search bar on the asset global page.
-
-![Characters filtered](../img/getting-started/chara_filtered.png)
-
-Then click on **+ Add tasks**. Select the task type, here **Rigging**, and switch to **For current list and filters**.
-
-Valid with **Confirm**.
-
-![Tasks filtered](../img/getting-started/task_filtered.png)
-
-If you remove the filter characters, you will see the tasks only created for the selected elements.
-
-![Tasks filtered Created](../img/getting-started/add_task_filtered.png)
-
-
-If you want to delete a task, If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
-then select the **delete tasks** (2) on the left top
-of the page.
-![Delete button](../img/getting-started/delete_task.png) 
-
-Now that we have created all the assets and related tasks, we can now add the
-artists to the team and assign tasks to them.
-
-## Create tasks for the shots
-
-We can now associate tasks with the shots. Same way than for the assets, click on
-the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png)
-on the top of the spreadsheet. 
-
-A new pop-up opens and lets you choose what task you want to add. All the
-shots are linked to the tasks if you select **For project** option.
-
-![List of tasks for the shots](../img/getting-started/task_shots.png)
 
 
 
@@ -985,6 +985,11 @@ You need to click on the **Add checklist** button, and the first item of the che
 Type your comments, and hit **Enter** key to add another line on your checklist or click again on **Add Checklist** button.
 
 ![checklist](../img/getting-started/checklist_detailed.png)
+
+In addition of your comment, you can also attached a preview. Click on the "**Add attachment" button.
+
+![attachment](../img/getting-started/attachment_retake.png)
+
 
 You can also **tag** someone of the team in the comments. Type the `@`and it opens a sub-menu with the list of the team. 
 
