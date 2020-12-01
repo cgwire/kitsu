@@ -353,12 +353,26 @@ On the drop-down menu, choose **BREAKDOWN**.
 
 On the left part of the breakdown page is the episode/sequence/shot menu (1),
 you can choose between the ones you have created. They are the right part of
-the screen; all the assets available created for this production (3). Moreover, in
+the screen; all the assets available created for this production (main pack and episodes) (3). Moreover, in
 the middle section, it is your selection for the shot (2).
 
 ![Breakdown page](../img/getting-started/breakdown_general_empty.png)
 
-So now you have to select the shot you want to cast. You can also choose multiple shots at the same time. Click on the first shot, hold the **shift** key and click on the last shot of your selection.
+So now you have to select the shot you want to cast.
+
+If you don't have thumbnails yet, you can choose to display the assets as text.
+
+
+![Breakdown page text display](../img/getting-started/breakdown_text_display.png)
+
+You may also realize during your breakdown that an asset is missing on the list.
+
+You can create a new asset directly from the breakdown page. Click on the **+** on the right of the **All available assets**.
+
+![Breakdown page create asset](../img/getting-started/breakdown_create_asset.png)
+
+
+You can also choose multiple shots at the same time. Click on the first shot, hold the **shift** key and click on the last shot of your selection.
 
 ![Breakdown page global bulk select](../img/getting-started/breakdown_general_bulk_select.png)
 
@@ -1041,6 +1055,27 @@ automatically saved.
 
 ## Validate with a playlist
 
+Once you have created a playlist; you have several options:
+
+
+![Playlist Global](../img/getting-started/playlist_global.png)
+
+1/ Navigate from element to element
+2/ you can see the position of the selected element compare to the total number of elements
+3/ Play or Pause
+4/ You can change the speed, full speed (x1), half of the speed (x0.50) or quarter of the speed (x0.25)
+5/ Loop on one element
+6/ TC of the element compare to the TC of the whole playlist
+7/ Number of frame
+8/ Navigate frame per frame on the preview. You can also do it with the arrow on the Keyboard
+9/ Compare tool
+10/ Undo and Redo option for the drawing comment
+11/ Text and drawing option, and delete selection
+12/ Change the task type of all the element of the playlist
+13/ Display the comment section
+14/ Hide the elements of the playlist
+15/ Download the playlist, as a **Zip** files with all the separated elements, or **Build .mp4** to create the whole movie (only for shots)
+16/ Fullscreen
 
 
 
@@ -1072,9 +1107,9 @@ You can see the drawing comment on the video (the red dot below the timeline).
 
 ![Playlist comment](../img/getting-started/playlist_comment.png)
 
-You can draw or type on the video (same than for the shot review), with the **draw** button ![draw button](../img/getting-started/draw.png)
+You can draw or type on the video (same than [Perform a review](./#perform-a-review)), with the **draw** button ![draw button](../img/getting-started/draw.png)
 
-[Perform a review](./getting-started-production/#perform-a-review)
+[Perform a review](./#perform-a-review)
 
 
 ## Simplify the global page
