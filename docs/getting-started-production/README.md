@@ -811,8 +811,8 @@ Validate the post and the new status with **Post status**
 
 ![Changing status](../img/getting-started/changing_status_shot.png)
 
-You can add a preview to any comments. It can be a picture (`.png`, `.jpg`, `.jpeg`), or a video (`.mp4`, `.mov`, `.wmv`), 
-or an `.obj` file. All can be reviewed from the browser.
+You can add one or several preview to any comments. It can be a picture (`.png`, `.jpg`, `.jpeg`), or a video (`.mp4`, `.mov`, `.wmv`), 
+or an `.obj` file. All can be reviewed from the browser. or a mix of everything.
 
 Other files like `.pdf`, `.zip`, `.rar`, `.ma` or `.mb` however, they need to be
 downloaded to be reviewed.
@@ -821,7 +821,7 @@ If you have defined a **FPS** for the production, Kitsu conforms to the uploaded
 
 Otherwise, the video is compressed to 1080P, and 30mbits/sec. 
 
-Click on the "Attach preview" button, the explorer opens and lets you choose your file.
+Click on the "Attach preview" button, the explorer opens and lets you choose your file, or several files.
 
 ![attach preview](../img/getting-started/attach_preview.png)
 
@@ -839,9 +839,18 @@ You can add multiple images at the same time, or, once you have uploaded an imag
 
 The **Add preview** pop-up opens and asks you to choose a file.
 
-You can navigate through the pictures uploaded.
+You can navigate through the pictures uploaded. You need to enlarge the comment section. 
+
+![enlarge comment section](../img/getting-started/enlarge_comment.png)
+
+And then click on the number of the picture to see them all.
 
 ![attach preview drag drop](../img/getting-started/upload_second_pictures.png)
+
+You can change the order of the preview by drag and drop them.
+
+![preview drag drop](../img/getting-started/multiple_preview.png)
+
 
 To delete an additional preview, you need to enlarge the comment panel.
 
