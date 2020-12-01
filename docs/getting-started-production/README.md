@@ -185,9 +185,10 @@ You can check and adjust the name of the columns with the preview of your data.
 
 NB: the **Episode** column is only mandatory for a **TV Show** production. 
  
-![Import data copy paste data](../img/getting-started/import_preview_data.png)
+You need to switch on the option **Update existing data**. Then the lines that will be updated
+will be highlighted in blue.
 
-Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+![Import data copy paste data](../img/getting-started/import_update_asset.png)
 
 Now, you have all your assets imported into Kitsu.
 
@@ -241,18 +242,6 @@ If at some point you need to delete a shot, click on the **trash can**
 icon on the right of the line ![Delete button](../img/getting-started/delete_button.png). 
 If you need to import back this shot, click on the restore button 
 ![Restore button](../img/getting-started/restore_button.png).
-
-We can now associate tasks with the shots. Same way than for the assets, click on
-the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png)
-on the top of the spreadsheet. 
-
-A new pop-up opens and lets you choose what task you want to add. All the
-shots are linked to the tasks.
-
-![List of tasks for the shots](../img/getting-started/task_shots.png)
-
-Now we can do the breakdown of the storyboard, meaning associate the assets to
-each shot. 
 
 To delete a shot see the FAQ : [How to delete a shot](../faq/README.md#how-to-delete-a-shot)
 
@@ -576,12 +565,27 @@ And now we can create tasks for the assets (3), like **Concept**, **Modeling**,
 
 
 Click on the **+ Add tasks** (3) on top of the spreadsheet. A new window will
-open and on the list under **Type** you can choose the task you need to add,
-validate it by **Confirm** button.
+open and on the list under **Type** you can choose the task you need to add.
+You can also choose if you want to create tasks for **the project**, validate it by **Confirm** button.
 
 ![Add task to an asset](../img/getting-started/add_task.png)
 
-You added tasks to all the assets.
+You can choose to create tasks only for filtered elements. For exemple you want to create 
+**Rigg** tasks only for the characters.
+
+You need to type **Characters** on the search bar on the asset global page.
+
+![Characters filtered](../img/getting-started/chara_filtered.png)
+
+Then click on **+ Add tasks**. Select the task type, here **Rigging**, and switch to **For current list and filters**.
+
+Valid with **Confirm**.
+
+![Tasks filtered](../img/getting-started/task_filtered.png)
+
+If you remove the filter characters, you will see the tasks only created for the selected elements.
+
+![Tasks filtered Created](../img/getting-started/add_task_filtered.png)
 
 
 If you want to delete a task, If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
@@ -591,6 +595,18 @@ of the page.
 
 Now that we have created all the assets and related tasks, we can now add the
 artists to the team and assign tasks to them.
+
+## Create tasks for the shots
+
+We can now associate tasks with the shots. Same way than for the assets, click on
+the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png)
+on the top of the spreadsheet. 
+
+A new pop-up opens and lets you choose what task you want to add. All the
+shots are linked to the tasks if you select **For project** option.
+
+![List of tasks for the shots](../img/getting-started/task_shots.png)
+
 
 
 ## Add a new employee
