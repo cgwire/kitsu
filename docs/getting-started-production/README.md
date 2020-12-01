@@ -168,30 +168,30 @@ will be highlighted in blue.
 
 Open you spreadsheet, select your data and copy them.
 
-![Import copy data](../img/getting-started/import_copypas_people.png)
+![Import copy data](../img/getting-started/import_copypas_asset.png)
 
-Then, go back to the people page on Kitsu, and click on the **Import** icon 
+Then, go back to the asset page on Kitsu, and click on the **Import** icon 
 ![Import Icon](../img/getting-started/import.png).
 
 A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
 
-![Import data copy paste tab](../img/getting-started/import_pastcsvdata_people.png)
+![Import data copy paste tab](../img/getting-started/import_pastcsvdata_asset.png)
  
 There you can paste your previously selected data, and see the result with the **Preview** button.
  
-![Import data copy paste data](../img/getting-started/import_pastcsvdata2_people.png)
+![Import data copy paste data](../img/getting-started/import_pastcsvdata2_asset.png)
   
 You can check and adjust the name of the columns with the preview of your data.
+
+NB: the **Episode** column is only mandatory for a **TV Show** production. 
  
-NB: the **Role** column is not mandatory.
- 
-![Import data copy paste data](../img/getting-started/import_preview_data_people.png)
+![Import data copy paste data](../img/getting-started/import_preview_data.png)
 
 Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
 
 Now, you have all your assets imported into Kitsu.
 
-![Import data copy paste data](../img/getting-started/import_result_people.png)
+![Import data copy paste data](../img/getting-started/import_result_asset.png)
 
 ## Create (episodes) sequences and shots
 
