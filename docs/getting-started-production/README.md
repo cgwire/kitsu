@@ -93,107 +93,6 @@ To delete an asset see the FAQ : [How to delete an asset](../faq/README.md#how-t
 
 
 
-## Create assets from a csv spreadsheet file
-
-You may have already your asset list ready in a spreadsheet file.
-With Kitsu you have 2 ways to import them, the first is to import a `.csv` file directly, the second is to copy paste your data directly into Kitsu.
-
-First save your spreadsheet as a `.csv` file.
-
-Then, go back to the asset page on Kitsu, and click on the **Import** icon.
-![Import Icon](../img/getting-started/import.png)
-
-A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
-
-![Import csv file](../img/getting-started/import_csv_asset.png)
-
-To see the result, click on the **Preview** button.
-  
-You can check and adjust the name of the columns with the preview of your data.
- 
-NB: the **Episode** column is only mandatory for a **TV Show** production.
- 
-![Import data copy paste data](../img/getting-started/import_preview_data.png)
-
-Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
-
-Now, you have all your assets imported into Kitsu.
-
-![Import data copy paste data](../img/getting-started/import_result_asset.png)
-
-
-## Create assets with copy/paste a spreadsheet file
-
-Open you spreadsheet, select your data and copy them.
-
-![Import copy data](../img/getting-started/import_copypas_asset.png)
-
-Then, go back to the asset page on Kitsu, and click on the **Import** icon 
-![Import Icon](../img/getting-started/import.png).
-
-A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
-
-![Import data copy paste tab](../img/getting-started/import_pastcsvdata_asset.png)
- 
-There you can paste your previously selected data, and see the result with the **Preview** button.
- 
-![Import data copy paste data](../img/getting-started/import_pastcsvdata2_asset.png)
-  
-You can check and adjust the name of the columns with the preview of your data.
- 
-NB: the **Episode** column is only mandatory for a **TV Show** production.
- 
-![Import data copy paste data](../img/getting-started/import_preview_data.png)
-
-Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
-
-Now, you have all your assets imported into Kitsu.
-
-![Import data copy paste data](../img/getting-started/import_result_asset.png)
-
-
-## Update assets with the CSV import
-
-You can use the CSV import to update quickly your data.
-
-You need to switch on the option **Update existing data**. Then the lines that will be updated
-will be highlighted in blue.
-
-![Import data copy paste data](../img/getting-started/import_update_asset.png)
-
-
-
-
-## Update assets with copy/paste a spreadsheet file
-
-Open you spreadsheet, select your data and copy them.
-
-![Import copy data](../img/getting-started/import_copypas_asset.png)
-
-Then, go back to the asset page on Kitsu, and click on the **Import** icon 
-![Import Icon](../img/getting-started/import.png).
-
-A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
-
-![Import data copy paste tab](../img/getting-started/import_pastcsvdata_asset.png)
- 
-There you can paste your previously selected data, and see the result with the **Preview** button.
- 
-![Import data copy paste data](../img/getting-started/import_pastcsvdata2_asset.png)
-  
-You can check and adjust the name of the columns with the preview of your data.
-
-NB: the **Episode** column is only mandatory for a **TV Show** production. 
- 
-You need to switch on the option **Update existing data**. Then the lines that will be updated
-will be highlighted in blue.
-
-![Import data copy paste data](../img/getting-started/import_update_asset.png)
-
-Now, you have all your assets imported into Kitsu.
-
-![Import data copy paste data](../img/getting-started/import_result_asset.png)
-
 ## Create (episodes) sequences and shots
 
 It's time to do the breakdown of the storyboard. Meaning you can create
@@ -248,99 +147,6 @@ To delete a shot see the FAQ : [How to delete a shot](../faq/README.md#how-to-de
 To delete a sequence see the FAQ : [How to delete a shot](../faq/README.md#how-to-delete-a-sequence)
 
 
-## Create shots from a csv spreadsheet file
-
-You may have already your shots list ready in a spreadsheet file.
-With Kitsu you have 2 ways to import them, the first is to import a `.csv` file directly, the second is to copy paste your data directly into Kitsu.
-
-First save your spreadsheet as a `.csv` file.
-
-Then, go back to the shot page on Kitsu, and click on the **Import** icon.
-![Import Icon](../img/getting-started/import.png)
-
-A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
-
-![Import csv file](../img/getting-started/import_csv_shot.png)
-
-To see the result, click on the **Preview** button.
-  
-You can check and adjust the name of the columns with the preview of your data.
- 
-NB: the **Episode** column is only mandatory for a **TV Show** production.
- 
-![Import data copy paste data](../img/getting-started/import_preview_data_shot.png)
-
-Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
-
-Now, you have all your shots imported into Kitsu.
-
-![Import data copy paste data](../img/getting-started/import_result_shot.png)
-
-
-## Create shots with copy/paste a spreadsheet file
-
-Open you spreadsheet, select your data and copy them.
-
-![Import copy data](../img/getting-started/import_copypas_shot.png)
-
-Then, go back to the shot page on Kitsu, and click on the **Import** icon 
-![Import Icon](../img/getting-started/import.png).
-
-A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
-
-![Import data copy paste tab](../img/getting-started/import_pastcsvdata_shot.png)
- 
-There you can paste your previously selected data, and see the result with the **Preview** button.
- 
-![Import data copy paste data](../img/getting-started/import_pastcsvdata2_shot.png)
-  
-You can check and adjust the name of the columns with the preview of your data.
- 
-NB: the **Episode** column is only mandatory for a **TV Show** production.
- 
-![Import data copy paste data](../img/getting-started/import_preview_data_shot.png)
-
-Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
-
-Now, you have all your shots imported into Kitsu.
-
-![Import data copy paste data](../img/getting-started/import_result_shot.png)
-
-
-## Update Shots information with CSV Import
-
-You can use the **CSV Import** to update your data as the **NB Frames**, **Frame IN**, **Frame Out** or any **Custom Column**
-
-Open you spreadsheet, select your data and copy them.
-
-![Import copy data](../img/getting-started/import_copypas_shot.png)
-
-Then, go back to the shot page on Kitsu, and click on the **Import** icon 
-![Import Icon](../img/getting-started/import.png).
-
-A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
-
-![Import data copy paste tab](../img/getting-started/import_pastcsvdata_shot.png)
- 
-There you can paste your previously selected data, and see the result with the **Preview** button.
- 
-![Import data copy paste data](../img/getting-started/import_pastcsvdata2_shot.png)
-  
-You need to switch on the **Option : Update existing data**.
-the updated shots will be in blue
-
- 
-NB: the **Episode** column is only mandatory for a **TV Show** production.
- 
-![Import data copy paste data](../img/getting-started/update_preview_data_shot.png)
-
-Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
-
-Now, you have all your shots imported into Kitsu.
-
-![Import data copy paste data](../img/getting-started/import_result_shot.png)
-
-
 
 ## Add the Frameranges
 
@@ -371,98 +177,7 @@ You can have access to the shot values history too.
 ![Shot Values History](../img/getting-started/shot_values_history.png)
 
 
-## Add Custom columns
 
-To add more information on the general spreadsheet pages, you have to create a 
-**Custom column**.
-
-
-Click on the **+** near the Name column.
-
-![Custom Column](../img/getting-started/add_column_custom.png)
-
-You may have extra information to add on your pages as the **level of difficulties**,
-the **name of the studios**, when a production is split, etc.
-
-In the custom column, you can store all kinds of information: a **list of value** or a **free value**.
-
-The **free value** is different for each entity.
-
-The **list of value** gives you the same choice for each entity. Moreover, it has to be filled now. 
-
-![Custom Column list](../img/getting-started/custom_column_list.png)
-
-Type the elements of the list below **Available values**, and confirm them by clicking on **Add value**.
-
-Validate the creation of the custom column with the **Confirm** button.
-
-![Custom Column detail](../img/getting-started/custom_column_detail.png)
-
-Back on the global spreadsheets page, you can fill this information with the edit 
-button ![Edit button](../img/getting-started/edit_button.png).
-
-You now see a new line on the edit pop-up. You can select the information from the list, 
-alternatively, enter the free values, depending on your previous choice.
-
-Don't forget to press the **Confirm** button when you are done.
-
-![Custom Column detail](../img/getting-started/edit_asset_custom.png)
-
-If you need to **edit** or **delete** the custom column, go back to the general spreadsheet page.
-Nearby the name of your custom column, click on the arrow ![Custom Column detail](../img/getting-started/arrow.png). 
-
-You can also use the **CSV Import** to fill quickly your custom column.
-You need to first create your **Custom Column** into kitsu, then add it in your spreadhseet, then copy paste your data into the **CSV Import**.
-[Update Shots information with CSV Import](#update-shots-information-with-csv-import)
-
-Select in the menu if you want to 
-edit the name of the custom column and its information, or you want to remove it.
-
-![Custom Column detail](../img/getting-started//custom_column_edit.png)
-
-
-## Create tasks for the assets
-
-And now we can create tasks for the assets, like **Concept**, **Modeling**,
-**Shading**, **Rigging**, and other if needed (see 
-[How to customize the workflow](../faq/README.md#how-to-customize-the-workflow)
-).
-
-Click on the **+ Add tasks** on top of the spreadsheet. 
-
-![Add tasks button](../img/getting-started/add_tasks_asset.png)
-
-A new window will
-open and on the list under **Type** you can choose the task you need to add.
-You can also choose if you want to create tasks for **the project**, validate it by **Confirm** button.
-
-![Add task to an asset](../img/getting-started/add_task.png)
-
-You can choose to create tasks only for filtered elements. For exemple you want to create 
-**Rigg** tasks only for the characters.
-
-You need to type **Characters** on the search bar on the asset global page.
-
-![Characters filtered](../img/getting-started/chara_filtered.png)
-
-Then click on **+ Add tasks**. Select the task type, here **Rigging**, and switch to **For current list and filters**.
-
-Valid with **Confirm**.
-
-![Tasks filtered](../img/getting-started/task_filtered.png)
-
-If you remove the filter characters, you will see the tasks only created for the selected elements.
-
-![Tasks filtered Created](../img/getting-started/add_task_filtered.png)
-
-
-If you want to delete a task, If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
-then select the **delete tasks** (2) on the left top
-of the page.
-![Delete button](../img/getting-started/delete_task.png) 
-
-Now that we have created all the assets and related tasks, we can now add the
-artists to the team and assign tasks to them.
 
 ## Create tasks for the shots
 
@@ -474,6 +189,9 @@ A new pop-up opens and lets you choose what task you want to add. All the
 shots are linked to the tasks if you select **For project** option.
 
 ![List of tasks for the shots](../img/getting-started/task_shots.png)
+
+
+
 
 
 ## Create a breakdown list
@@ -554,62 +272,6 @@ You now have access to a second drop-down menu, where you can choose your asset 
 
 You can fill the asset breakdown page, the same way than the shots. Select one or more assets on the left part, then add the elements from the right part.
 
-## Create a breakdown list from a CSV file
-
-You may have already your breakdown list ready in a spreadsheet file. With Kitsu you have 2 ways to import it, the first is to import a .`csv` file directly, the second is to copy paste your data directly into Kitsu.
-
-First save your spreadsheet as a `.csv` file following Kitsu's recommandation.
-
-Click on the **import** button ![Import button](../img/getting-started/import.png)
-
-A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
-
-![Breakdown import csv file](../img/getting-started/import_breakdown_csv_file.png)
-
-To see the result, click on the **Preview** button.
-
-You can check and adjust the name of the columns with the preview of your data.
-
-NB: the **Episode** column is only mandatory for a **TV Show** production.
-
-![Breakdown import Preview](../img/getting-started/import_breakdown_preview.png)
-
-Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
-
-Now, you have your breakdown imported into Kitsu.
-
-![Breakdown import Preview](../img/getting-started/breakdown_general_bulk_select_full.png)
-
-
-## Create a breakdown list with copy/paste a spreadsheet file
-
-Open you spreadsheet, select your data and copy them.
-
-![Import copy data](../img/getting-started/import_copypas_breakdown.png)
-
-Then, go back to the breakdown page on Kitsu, and click on the **Import** icon 
-![Import Icon](../img/getting-started/import.png).
-
-A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
-
-![Import data copy paste tab](../img/getting-started//import_breakdown_csv_file.png)
- 
-There you can paste your previously selected data, and see the result with the **Preview** button.
- 
-![Import data copy paste data](../img/getting-started/import_breakdown_preview.png)
-  
-You can check and adjust the name of the columns with the preview of your data.
- 
-NB: the **Episode** column is only mandatory for a **TV Show** production.
- 
-![Import data copy paste data](../img/getting-started/import_breakdown_preview.png)
-
-Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
-
-Now, you have all your assets imported into Kitsu.
-
-![Import data copy paste data](../img/getting-started/breakdown_general_bulk_select_full.png)
-
 
 ## See detail of a shot
 
@@ -654,34 +316,6 @@ All the people are now part of your studio. They are added to a specific
 production when you assign them to a task on a production. Otherwise, they
 won't have access to anything.
 
-
-## Add employees from a csv spreadsheet file
-
-You may have already your employee list ready in a spreadsheet file.
-With Kitsu you have 2 ways to import them, the first is to import a `.csv` file directly, the second is to copy paste your data directly into Kitsu.
-
-First save your spreadsheet as a `.csv` file.
-
-Then, go back to the people page on Kitsu, and click on the **Import** icon.
-![Import Icon](../img/getting-started/import.png)
-
-A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
-
-![Import csv file](../img/getting-started/import_csv_people.png)
-
-To see the result, click on the **Preview** button.
-  
-You can check and adjust the name of the columns with the preview of your data.
-
-NB: the **Role** column is not mandatory.
- 
-![Import data copy paste data](../img/getting-started/import_preview_data_people.png)
-
-Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
-
-Now, you have all your people imported into Kitsu.
-
-![Import data copy paste data](../img/getting-started/import_result_people.png)
 
 
 ## Add a CG Artist to the team
@@ -751,66 +385,6 @@ on his position (CG Artist, Supervisor, Vendor), he only sees the production whe
 he's assigned. 
 
 Now, everybody knows what to do and who is doing what!
-
-
-## Add an estimation for a task
-
-Click on the name of a task type.
-
-![Task type](../img/getting-started/supervisor_tasktype.png)
-
-The new page is the **Supervisor view**. You have more detailed information specific to this specific **task type**.
-
-![Supervisor page](../img/getting-started/supervisor_page.png)
-
-To go further in detail with the Supervisor view :  
-- (1) You can see and change the status of a task
-- (2) You can assign people to tasks
-
-(1) and (2) is filled with the action menu.
-
-- (3) You can add an estimation for the task (in day unit)
-- (4) Kitsu calculate the sum of the timesheet fed by the artists
-- (5) The number of back and forth with the retake status
-- (6) You can add a start date for the task (with the calendar)
-- (7)Kitsu calculate the due date with the Start date and the estimation
-- (8)(9) the Wip and Validation dates are automatically filled
-- (10) the Last comment section help you to keep an eye on the last activity of this task type.
-
-(7) to (10) is automatically filled.
-
-To add an estimation to a task, click on the line, and type the number or days you estimate. You can select multiple assets or shots at the same time.
-
-You can also define a **Start date** by clicking on it.
-A calendar will open and let you choose your start date.
-
-The **Due date** is automatically calculated with the **Estimation**.
- 
-![start date](../img/getting-started/set_estimation.png)
-  
-To help you to set a correct estimation, you can use the **Estimation** Tab.
-
-![Estimation tab](../img/getting-started/tasktype_estimation_tab.png) 
-
-On the left part of the screen is the list of the shots with the assignation and the number of frames (1).
-Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2). 
-(See how to set your production fps [Create your first production](#create-your-first-production) ) 
-
- On the right part of the screen you can see the full team of the departement (depending on the assignations you made), the number of shots they have to do, the number of frame, seconds, and the average quota. 
- 
- 
- And the last column is the **Estimation**, to modify the estimation, hoover the line with your mouse and click and the editing zone.
- 
- You can also select multiple shot at the same time to edit them all the once.
- 
- ![Estimation tab edit](../img/getting-started/tasktype_estimation_tab_edit.png) 
- 
- Everytime you change the **Estimation** in day on the right part, you can see in real time that the **Average Quota** is updated as well.
- 
-
- 
- For more information about the **Schedule** tab, go to the 
- [Task Type Schedule](#task-type-schedule) 
 
 
 
@@ -889,21 +463,6 @@ On the list page, click on the status you want, then on the right panel, click o
 Once you have clicked on the button, you see the thumbnail appears, and the button turns gray.
 
 
-## Add batch of thumbnails (and previews)
-
-You can use the **Add Thumbnails** button ![Add thumbnails button](../img/getting-started/add_thumbnails.png) on the global page to massively import thumbnails.
-
-
-![History](../img/getting-started/add_thumbnails_menu.png)
-
-A new pop-up opens and asks you to choose which task types the thumbnails are linked.
-
-**Thumbnails batch import accept images files and video files**.
-
-For the video files, only the first frame is used as the thumbnail.
-
-You have to name your thumbnails as sequence_shot.
-
 
 ## Change priorities
 
@@ -942,6 +501,7 @@ more there are, the more urgent the task is.
 * (4) is for **Emergency**.
     
 ![Priority level](../img/getting-started/priority_level.png)
+
 
 ## Perform a review
 
@@ -999,21 +559,6 @@ Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png
 
 
 
-## Change status per batch
-
-Alternatively, you can do it per **batch**. 
-
-You can select multiple shots or assets, by pressing the **crtl** or
-**shift** key.
-
-Then go to the **Change status** section on the action menu.
-
-![action menu status](../img/getting-started/blue_menu_status.png)
-
-Choose the new status for your selected tasks (1). You can also add a comment for all the selected tasks (2)
-You validate the new status with the **Confirm** button.
-
-![Change status per batch](../img/getting-started/change_status_batch.png)
 
 ## Create a playlist
 
@@ -1115,33 +660,6 @@ You can see the drawing comment on the video (the red dot below the timeline).
 You can draw or type on the video (same than [Perform a review](./#perform-a-review)), with the **draw** button ![draw button](../img/getting-started/draw.png)
 
 [Perform a review](./#perform-a-review)
-
-
-## Simplify the global page
-
-You may need to reduce a task type column in a global page. For example, you may be 
-only interested in layout and animation but not so much about the shipment for the client.
-
-Close to each task type name, you can click on the arrow 
-![Arrow](../img/getting-started/arrow.png) to unfold a submenu. 
-
-You can choose to **Minimize** or **Delete** the task type.
-
-![Tasktype submenu](../img/getting-started/tasktype_minimize.png)
-
-Once the column is minimized, only colored dots show the status.
-
-![Tasktype submenu](../img/getting-started/tasktype_small.png)
-
-
-You can also hide all the non-essential column, like **Description**, **Custom column**, 
-even the minimize columns.
-
-Just click on the **Hide additional information** 
-![minimize button](../img/getting-started/minimize.png) button on the top right of the page.
-
-To make the information reappear, click on the same button,
-![maximize button](../img/getting-started/maximize.png) it won't have the grey highlight.
 
 
 ## The timesheets
@@ -1316,6 +834,515 @@ The color is the same as the column on the global pages.
 **An important thing to keep in mind**: you can't modify your production schedule from this page. You have to go back to the production schedule page you want to adjust to doing it.
 
 Only the **Studio Manager** has access to this page.
+
+
+
+
+# Getting started as a Production Manager - Advanced Users
+
+
+## Create assets from a csv spreadsheet file
+
+You may have already your asset list ready in a spreadsheet file.
+With Kitsu you have 2 ways to import them, the first is to import a `.csv` file directly, the second is to copy paste your data directly into Kitsu.
+
+First save your spreadsheet as a `.csv` file.
+
+Then, go back to the asset page on Kitsu, and click on the **Import** icon.
+![Import Icon](../img/getting-started/import.png)
+
+A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
+
+![Import csv file](../img/getting-started/import_csv_asset.png)
+
+To see the result, click on the **Preview** button.
+  
+You can check and adjust the name of the columns with the preview of your data.
+ 
+NB: the **Episode** column is only mandatory for a **TV Show** production.
+ 
+![Import data copy paste data](../img/getting-started/import_preview_data.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have all your assets imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/import_result_asset.png)
+
+
+## Create assets with copy/paste a spreadsheet file
+
+Open you spreadsheet, select your data and copy them.
+
+![Import copy data](../img/getting-started/import_copypas_asset.png)
+
+Then, go back to the asset page on Kitsu, and click on the **Import** icon 
+![Import Icon](../img/getting-started/import.png).
+
+A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
+
+![Import data copy paste tab](../img/getting-started/import_pastcsvdata_asset.png)
+ 
+There you can paste your previously selected data, and see the result with the **Preview** button.
+ 
+![Import data copy paste data](../img/getting-started/import_pastcsvdata2_asset.png)
+  
+You can check and adjust the name of the columns with the preview of your data.
+ 
+NB: the **Episode** column is only mandatory for a **TV Show** production.
+ 
+![Import data copy paste data](../img/getting-started/import_preview_data.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have all your assets imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/import_result_asset.png)
+
+
+## Update assets with the CSV import
+
+You can use the CSV import to update quickly your data.
+
+You need to switch on the option **Update existing data**. Then the lines that will be updated
+will be highlighted in blue.
+
+![Import data copy paste data](../img/getting-started/import_update_asset.png)
+
+
+
+## Create tasks for the assets
+
+And now we can create tasks for the assets, like **Concept**, **Modeling**,
+**Shading**, **Rigging**, and other if needed (see 
+[How to customize the workflow](../faq/README.md#how-to-customize-the-workflow)
+).
+
+Click on the **+ Add tasks** on top of the spreadsheet. 
+
+![Add tasks button](../img/getting-started/add_tasks_asset.png)
+
+A new window will
+open and on the list under **Type** you can choose the task you need to add.
+You can also choose if you want to create tasks for **the project**, validate it by **Confirm** button.
+
+![Add task to an asset](../img/getting-started/add_task.png)
+
+You can choose to create tasks only for filtered elements. For exemple you want to create 
+**Rigg** tasks only for the characters.
+
+You need to type **Characters** on the search bar on the asset global page.
+
+![Characters filtered](../img/getting-started/chara_filtered.png)
+
+Then click on **+ Add tasks**. Select the task type, here **Rigging**, and switch to **For current list and filters**.
+
+Valid with **Confirm**.
+
+![Tasks filtered](../img/getting-started/task_filtered.png)
+
+If you remove the filter characters, you will see the tasks only created for the selected elements.
+
+![Tasks filtered Created](../img/getting-started/add_task_filtered.png)
+
+
+If you want to delete a task, If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
+then select the **delete tasks** (2) on the left top
+of the page.
+![Delete button](../img/getting-started/delete_task.png) 
+
+Now that we have created all the assets and related tasks, we can now add the
+artists to the team and assign tasks to them.
+
+
+## Update assets with copy/paste a spreadsheet file
+
+Open you spreadsheet, select your data and copy them.
+
+![Import copy data](../img/getting-started/import_copypas_asset.png)
+
+Then, go back to the asset page on Kitsu, and click on the **Import** icon 
+![Import Icon](../img/getting-started/import.png).
+
+A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
+
+![Import data copy paste tab](../img/getting-started/import_pastcsvdata_asset.png)
+ 
+There you can paste your previously selected data, and see the result with the **Preview** button.
+ 
+![Import data copy paste data](../img/getting-started/import_pastcsvdata2_asset.png)
+  
+You can check and adjust the name of the columns with the preview of your data.
+
+NB: the **Episode** column is only mandatory for a **TV Show** production. 
+ 
+You need to switch on the option **Update existing data**. Then the lines that will be updated
+will be highlighted in blue.
+
+![Import data copy paste data](../img/getting-started/import_update_asset.png)
+
+Now, you have all your assets imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/import_result_asset.png)
+
+
+
+## Create shots from a csv spreadsheet file
+
+You may have already your shots list ready in a spreadsheet file.
+With Kitsu you have 2 ways to import them, the first is to import a `.csv` file directly, the second is to copy paste your data directly into Kitsu.
+
+First save your spreadsheet as a `.csv` file.
+
+Then, go back to the shot page on Kitsu, and click on the **Import** icon.
+![Import Icon](../img/getting-started/import.png)
+
+A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
+
+![Import csv file](../img/getting-started/import_csv_shot.png)
+
+To see the result, click on the **Preview** button.
+  
+You can check and adjust the name of the columns with the preview of your data.
+ 
+NB: the **Episode** column is only mandatory for a **TV Show** production.
+ 
+![Import data copy paste data](../img/getting-started/import_preview_data_shot.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have all your shots imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/import_result_shot.png)
+
+
+## Create shots with copy/paste a spreadsheet file
+
+Open you spreadsheet, select your data and copy them.
+
+![Import copy data](../img/getting-started/import_copypas_shot.png)
+
+Then, go back to the shot page on Kitsu, and click on the **Import** icon 
+![Import Icon](../img/getting-started/import.png).
+
+A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
+
+![Import data copy paste tab](../img/getting-started/import_pastcsvdata_shot.png)
+ 
+There you can paste your previously selected data, and see the result with the **Preview** button.
+ 
+![Import data copy paste data](../img/getting-started/import_pastcsvdata2_shot.png)
+  
+You can check and adjust the name of the columns with the preview of your data.
+ 
+NB: the **Episode** column is only mandatory for a **TV Show** production.
+ 
+![Import data copy paste data](../img/getting-started/import_preview_data_shot.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have all your shots imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/import_result_shot.png)
+
+
+## Update Shots information with CSV Import
+
+You can use the **CSV Import** to update your data as the **NB Frames**, **Frame IN**, **Frame Out** or any **Custom Column**
+
+Open you spreadsheet, select your data and copy them.
+
+![Import copy data](../img/getting-started/import_copypas_shot.png)
+
+Then, go back to the shot page on Kitsu, and click on the **Import** icon 
+![Import Icon](../img/getting-started/import.png).
+
+A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
+
+![Import data copy paste tab](../img/getting-started/import_pastcsvdata_shot.png)
+ 
+There you can paste your previously selected data, and see the result with the **Preview** button.
+ 
+![Import data copy paste data](../img/getting-started/import_pastcsvdata2_shot.png)
+  
+You need to switch on the **Option : Update existing data**.
+the updated shots will be in blue
+
+ 
+NB: the **Episode** column is only mandatory for a **TV Show** production.
+ 
+![Import data copy paste data](../img/getting-started/update_preview_data_shot.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have all your shots imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/import_result_shot.png)
+
+
+
+## Add Custom columns
+
+To add more information on the general spreadsheet pages, you have to create a 
+**Custom column**.
+
+
+Click on the **+** near the Name column.
+
+![Custom Column](../img/getting-started/add_column_custom.png)
+
+You may have extra information to add on your pages as the **level of difficulties**,
+the **name of the studios**, when a production is split, the shot order, etc.
+
+In the custom column, you can store all kinds of text information: a **list of value** or a **free value**.
+
+The **free value** is different for each entity.
+
+The **list of value** gives you the same choice for each entity. Moreover, it has to be filled now. 
+
+![Custom Column list](../img/getting-started/custom_column_list.png)
+
+Type the elements of the list below **Available values**, and confirm them by clicking on **Add value**.
+
+Validate the creation of the custom column with the **Confirm** button.
+
+![Custom Column detail](../img/getting-started/custom_column_detail.png)
+
+Back on the global spreadsheets page, you can fill this information with the edit 
+button ![Edit button](../img/getting-started/edit_button.png).
+
+You now see a new line on the edit pop-up. You can select the information from the list, 
+alternatively, enter the free values, depending on your previous choice.
+
+Don't forget to press the **Confirm** button when you are done.
+
+![Custom Column detail](../img/getting-started/edit_asset_custom.png)
+
+If you need to **edit** or **delete** the custom column, go back to the general spreadsheet page.
+Nearby the name of your custom column, click on the arrow ![Custom Column detail](../img/getting-started/arrow.png). 
+
+You can now **sort** your global page with this new column. For example let's create a **Sort Order** custom column.
+
+
+![Custom Column exemple](../img/getting-started/custom_column_exemple.png)
+
+
+
+You can also use the **CSV Import** to fill quickly your custom column.
+You need to first create your **Custom Column** into kitsu, then add it in your spreadhseet, then copy paste your data into the **CSV Import**.
+[Update Shots information with CSV Import](#update-shots-information-with-csv-import)
+
+Select in the menu if you want to 
+edit the name of the custom column and its information, or you want to remove it.
+
+![Custom Column detail](../img/getting-started//custom_column_edit.png)
+
+
+## Create a breakdown list from a CSV file
+
+You may have already your breakdown list ready in a spreadsheet file. With Kitsu you have 2 ways to import it, the first is to import a .`csv` file directly, the second is to copy paste your data directly into Kitsu.
+
+First save your spreadsheet as a `.csv` file following Kitsu's recommandation.
+
+Click on the **import** button ![Import button](../img/getting-started/import.png)
+
+A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
+
+![Breakdown import csv file](../img/getting-started/import_breakdown_csv_file.png)
+
+To see the result, click on the **Preview** button.
+
+You can check and adjust the name of the columns with the preview of your data.
+
+NB: the **Episode** column is only mandatory for a **TV Show** production.
+
+![Breakdown import Preview](../img/getting-started/import_breakdown_preview.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have your breakdown imported into Kitsu.
+
+![Breakdown import Preview](../img/getting-started/breakdown_general_bulk_select_full.png)
+
+
+## Create a breakdown list with copy/paste a spreadsheet file
+
+Open you spreadsheet, select your data and copy them.
+
+![Import copy data](../img/getting-started/import_copypas_breakdown.png)
+
+Then, go back to the breakdown page on Kitsu, and click on the **Import** icon 
+![Import Icon](../img/getting-started/import.png).
+
+A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
+
+![Import data copy paste tab](../img/getting-started//import_breakdown_csv_file.png)
+ 
+There you can paste your previously selected data, and see the result with the **Preview** button.
+ 
+![Import data copy paste data](../img/getting-started/import_breakdown_preview.png)
+  
+You can check and adjust the name of the columns with the preview of your data.
+ 
+NB: the **Episode** column is only mandatory for a **TV Show** production.
+ 
+![Import data copy paste data](../img/getting-started/import_breakdown_preview.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have all your assets imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/breakdown_general_bulk_select_full.png)
+
+
+## Add employees from a csv spreadsheet file
+
+You may have already your employee list ready in a spreadsheet file.
+With Kitsu you have 2 ways to import them, the first is to import a `.csv` file directly, the second is to copy paste your data directly into Kitsu.
+
+First save your spreadsheet as a `.csv` file.
+
+Then, go back to the people page on Kitsu, and click on the **Import** icon.
+![Import Icon](../img/getting-started/import.png)
+
+A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
+
+![Import csv file](../img/getting-started/import_csv_people.png)
+
+To see the result, click on the **Preview** button.
+  
+You can check and adjust the name of the columns with the preview of your data.
+
+NB: the **Role** column is not mandatory.
+ 
+![Import data copy paste data](../img/getting-started/import_preview_data_people.png)
+
+Once everything is good, click on the **Confirm** button, to import your data into Kitsu.
+
+Now, you have all your people imported into Kitsu.
+
+![Import data copy paste data](../img/getting-started/import_result_people.png)
+
+
+## Add an estimation for a task
+
+Click on the name of a task type.
+
+![Task type](../img/getting-started/supervisor_tasktype.png)
+
+The new page is the **Supervisor view**. You have more detailed information specific to this specific **task type**.
+
+![Supervisor page](../img/getting-started/supervisor_page.png)
+
+To go further in detail with the Supervisor view :  
+- (1) You can see and change the status of a task
+- (2) You can assign people to tasks
+
+(1) and (2) is filled with the action menu.
+
+- (3) You can add an estimation for the task (in day unit)
+- (4) Kitsu calculate the sum of the timesheet fed by the artists
+- (5) The number of back and forth with the retake status
+- (6) You can add a start date for the task (with the calendar)
+- (7)Kitsu calculate the due date with the Start date and the estimation
+- (8)(9) the Wip and Validation dates are automatically filled
+- (10) the Last comment section help you to keep an eye on the last activity of this task type.
+
+(7) to (10) is automatically filled.
+
+To add an estimation to a task, click on the line, and type the number or days you estimate. You can select multiple assets or shots at the same time.
+
+You can also define a **Start date** by clicking on it.
+A calendar will open and let you choose your start date.
+
+The **Due date** is automatically calculated with the **Estimation**.
+ 
+![start date](../img/getting-started/set_estimation.png)
+  
+To help you to set a correct estimation, you can use the **Estimation** Tab.
+
+![Estimation tab](../img/getting-started/tasktype_estimation_tab.png) 
+
+On the left part of the screen is the list of the shots with the assignation and the number of frames (1).
+Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2). 
+(See how to set your production fps [Create your first production](#create-your-first-production) ) 
+
+ On the right part of the screen you can see the full team of the departement (depending on the assignations you made), the number of shots they have to do, the number of frame, seconds, and the average quota. 
+ 
+ 
+ And the last column is the **Estimation**, to modify the estimation, hoover the line with your mouse and click and the editing zone.
+ 
+ You can also select multiple shot at the same time to edit them all the once.
+ 
+ ![Estimation tab edit](../img/getting-started/tasktype_estimation_tab_edit.png) 
+ 
+ Everytime you change the **Estimation** in day on the right part, you can see in real time that the **Average Quota** is updated as well.
+ 
+
+ 
+ For more information about the **Schedule** tab, go to the 
+ [Task Type Schedule](#task-type-schedule) 
+
+
+## Add batch of thumbnails (and previews)
+
+You can use the **Add Thumbnails** button ![Add thumbnails button](../img/getting-started/add_thumbnails.png) on the global page to massively import thumbnails.
+
+
+![History](../img/getting-started/add_thumbnails_menu.png)
+
+A new pop-up opens and asks you to choose which task types the thumbnails are linked.
+
+**Thumbnails batch import accept images files and video files**.
+
+For the video files, only the first frame is used as the thumbnail.
+
+You have to name your thumbnails as sequence_shot.
+
+
+## Change status per batch
+
+Alternatively, you can do it per **batch**. 
+
+You can select multiple shots or assets, by pressing the **crtl** or
+**shift** key.
+
+Then go to the **Change status** section on the action menu.
+
+![action menu status](../img/getting-started/blue_menu_status.png)
+
+Choose the new status for your selected tasks (1). You can also add a comment for all the selected tasks (2)
+You validate the new status with the **Confirm** button.
+
+![Change status per batch](../img/getting-started/change_status_batch.png)
+
+
+## Simplify the global page
+
+You may need to reduce a task type column in a global page. For example, you may be 
+only interested in layout and animation but not so much about the shipment for the client.
+
+Close to each task type name, you can click on the arrow 
+![Arrow](../img/getting-started/arrow.png) to unfold a submenu. 
+
+You can choose to **Minimize** or **Delete** the task type.
+
+![Tasktype submenu](../img/getting-started/tasktype_minimize.png)
+
+Once the column is minimized, only colored dots show the status.
+
+![Tasktype submenu](../img/getting-started/tasktype_small.png)
+
+
+You can also hide all the non-essential column, like **Description**, **Custom column**, 
+even the minimize columns.
+
+Just click on the **Hide additional information** 
+![minimize button](../img/getting-started/minimize.png) button on the top right of the page.
+
+To make the information reappear, click on the same button,
+![maximize button](../img/getting-started/maximize.png) it won't have the grey highlight.
+
 
 
 ## Quotas stat
