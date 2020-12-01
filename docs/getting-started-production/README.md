@@ -815,7 +815,7 @@ Validate the post and the new status with **Post status**
 ![Changing status](../img/getting-started/changing_status_shot.png)
 
 You can add one or several preview to any comments. It can be a picture (`.png`, `.jpg`, `.jpeg`), or a video (`.mp4`, `.mov`, `.wmv`), 
-or an `.obj` file. All can be reviewed from the browser. or a mix of everything.
+or an `.obj` file. All can be reviewed from the browser or a mix of everything.
 
 Other files like `.pdf`, `.zip`, `.rar`, `.ma` or `.mb` however, they need to be
 downloaded to be reviewed.
@@ -935,21 +935,17 @@ When a CG artist needs a review, he changes the status of his task to ![wfa](../
 
 Click on the status (1) to open the right panel and start the review. 
 
-![review on global page](../img/getting-started/review_global.png)
-
 You can watch the version from the right panel, or enlarge it (2), or even go fullscreen   ![Fullscreen](../img/getting-started/fullscreen.png) (3).
 
-![review](../img/getting-started/review.png)
-
-You can compare two task type or version side by side when you click on the **Compare** button 
-![compare button](../img/getting-started/compare_button.png).
-
-![compare button](../img/getting-started/compare_version.png)
+![review on global page](../img/getting-started/review_global.png)
 
 You can draw directly on the preview with the **pencil** tool and select a color ![Pencil](../img/getting-started/draw.png). 
 
 ![review drawing](../img/getting-started/review_comment.png)
 
+You can also add **text** on the frame.
+
+![review drawing text](../img/getting-started/review_comment_text.png)
 
 If you need to delete your line, click again on the **pencil** icon, the cursor changes to a multi-directional cross ![Pencil](../img/getting-started/direction_arrow.png), and then you can select your line and move it around.
 
@@ -957,6 +953,13 @@ If you need to delete your line, click again on the **pencil** icon, the cursor 
 
 Select the line with the directional cross, and then press the **delete** icon ![Delete line](../img/getting-started/delete_line.png)
 
+
+![review](../img/getting-started/review.png)
+
+If you go into **Full Screen** you can compare two task type or version side by side when you click on the **Compare** button 
+![compare button](../img/getting-started/compare_button.png).
+
+![compare button](../img/getting-started/compare_version.png)
 
 From there, you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the CG artist
 performs some changes. 
