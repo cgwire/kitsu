@@ -954,8 +954,6 @@ If you need to delete your line, click again on the **pencil** icon, the cursor 
 Select the line with the directional cross, and then press the **delete** icon ![Delete line](../img/getting-started/delete_line.png)
 
 
-![review](../img/getting-started/review.png)
-
 If you go into **Full Screen** you can compare two task type or version side by side when you click on the **Compare** button 
 ![compare button](../img/getting-started/compare_button.png).
 
@@ -1020,19 +1018,31 @@ will be shared with the **studio** or the **client** and if it's a **shot** or *
 ![Playlist add page](../img/getting-started/playlist_add_page.png)
 
 Once the playlist created, via the search/filter bar, you can select which shots to add
-to your playlist. You can also choose to add the whole movie.
+to your playlist. 
 
-You can use the same filter than on the global shot/asset page. For example you can select all the 
+You can also choose to **add whole movie**, it will add all the shots of the movie.
+
+You can select **Daily pending**, this will add all the **WFA** tasks of the day.
+
+Otherwise you can **Add whole sequence**, if you want to focus only on a particular sequence.
+
+You can use the same **filter** than on the global shot/asset page. For example you can select all the 
 WFA short for the animation stage.
-You have to type **animation=wfa** in the search bar. Valid your selection with the **Add selection** button.
+You have to type **animation=wfa** in the search bar. Valid your selection with the **Add selection** button. 
+Kitsu will select the shots that have the **WFA** status at the **Animation** stage, but Kitsu will automatically load **the lastest uploaded version**.
 
 The shots appear on the top part of the screen. Every change are 
 automatically saved.
+
+
 
 ![Playlist page](../img/getting-started/playlist_example.png)
 
 
 ## Validate with a playlist
+
+
+
 
 For each playlisted shot/asset you can choose the **task** and the
 **version** you want to see.
@@ -1062,7 +1072,9 @@ You can see the drawing comment on the video (the red dot below the timeline).
 
 ![Playlist comment](../img/getting-started/playlist_comment.png)
 
-You can draw on the video (same than for the shot review), with the **draw** button ![draw button](../img/getting-started/draw.png)
+You can draw or type on the video (same than for the shot review), with the **draw** button ![draw button](../img/getting-started/draw.png)
+
+[Perform a review](./getting-started-production/#perform-a-review)
 
 
 ## Simplify the global page
