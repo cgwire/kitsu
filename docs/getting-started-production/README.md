@@ -490,45 +490,6 @@ You can fill the asset breakdown page, the same way than the shots. Select one o
 
 
 
-## Change priorities
-
-At some point on the production you may want to prioritize some tasks, and
-pinpoint these urgent tasks to your team.
-
-For this, we use the same technique as before. Click on the space
-near a status task (1). 
-
-![Task assigned](../img/getting-started/task_assigned.png)
-
-The action menu appears on the top of the screen. 
-
-![Blue menu](../img/getting-started/blue_menu.png)
-
-Click on the name on the left on the action menu, and choose 
-**Change priority**.
-
-![Change priority](../img/getting-started/change_priority.png)
-
-There are four levels of priority: **Normal**, that is the fundamental level of all the
-tasks, **High**, **Very High**, or **Emergency**. Save the changes with the
-**Confirm** button.
-
-As we have done for the assignation or the status, select the shots (1), select
-the level of priority (2), and apply with **Confirm** (3).
-
-![Priority selection](../img/getting-started/priority.png)
-
-You can now see next to the status of the task some **exclamation marks**. The
-more there are, the more urgent the task is.  
-
-* (1) is **Normal**, 
-* (2) is **High**,
-* (3) is **Very High**
-* (4) is for **Emergency**.
-    
-![Priority level](../img/getting-started/priority_level.png)
-
-
 ## Perform a review
 
 When a CG artist needs a review, he changes the status of his task to ![wfa](../img/getting-started/wfa_icon.png).
@@ -1221,6 +1182,48 @@ of assets that appear on this shot (**Shot casting**).
 ![Shot detail page](../img/getting-started/shot_detail_page.png)
  
 You can click on the status of each task to open the comment panel and see the history of the comments and the different versions.
+
+
+## Change priorities
+
+At some point on the production you may want to prioritize some tasks, and
+pinpoint these urgent tasks to your team.
+
+For this, we use the same technique as before. Click on the space
+near a status task (1). 
+
+![Task assigned](../img/getting-started/task_assigned.png)
+
+The action menu appears on the top of the screen. 
+
+![Blue menu](../img/getting-started/blue_menu.png)
+
+Click on the name on the left on the action menu, and choose 
+**Change priority**.
+
+![Change priority](../img/getting-started/change_priority.png)
+
+There are four levels of priority: **Normal**, that is the fundamental level of all the
+tasks, **High**, **Very High**, or **Emergency**. Save the changes with the
+**Confirm** button.
+
+As we have done for the assignation or the status, select the shots (1), select
+the level of priority (2), and apply with **Confirm** (3).
+
+![Priority selection](../img/getting-started/priority.png)
+
+You can now see next to the status of the task some **exclamation marks**. The
+more there are, the more urgent the task is.  
+
+* (1) is **Normal**, 
+* (2) is **High**,
+* (3) is **Very High**
+* (4) is for **Emergency**.
+    
+![Priority level](../img/getting-started/priority_level.png)
+
+
+
 
 ## Add an estimation for a task
 
