@@ -558,13 +558,16 @@ edit the name of the custom column and its information, or you want to remove it
 
 ## Create tasks for the assets
 
-And now we can create tasks for the assets (3), like **Concept**, **Modeling**,
-**Texture**, **Setup**, and other if needed (see 
+And now we can create tasks for the assets, like **Concept**, **Modeling**,
+**Shading**, **Rigging**, and other if needed (see 
 [How to customize the workflow](../faq/README.md#how-to-customize-the-workflow)
 ).
 
+Click on the **+ Add tasks** on top of the spreadsheet. 
 
-Click on the **+ Add tasks** (3) on top of the spreadsheet. A new window will
+![Add tasks button](../img/getting-started/add_tasks_asset.png)
+
+A new window will
 open and on the list under **Type** you can choose the task you need to add.
 You can also choose if you want to create tasks for **the project**, validate it by **Confirm** button.
 
