@@ -88,7 +88,10 @@
                 :highlighted="isHighlighted(comment)"
                 :key="comment.id"
                 :current-user="user"
-                :editable="comment.person && user.id === comment.person.id"
+                :editable="(
+                  comment.person && user.id === comment.person.id ||
+                  isCurrentUserAdmin
+                )"
                 :is-first="index === 0"
                 :is-last="index === pinnedCount"
                 @ack-comment="ackComment"
@@ -352,8 +355,9 @@ export default {
       'getTaskComments',
       'getTaskPreviews',
       'getTaskComment',
-      'isCurrentUserManager',
+      'isCurrentUserAdmin',
       'isCurrentUserArtist',
+      'isCurrentUserManager',
       'isSingleEpisode',
       'isTVShow',
       'personMap',

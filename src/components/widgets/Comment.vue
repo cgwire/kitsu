@@ -83,7 +83,7 @@
             @remove-task="removeTask"
             @keyup.native="emitChangeEvent($event)"
             @emit-change="emitChangeEvent"
-            :disabled="!isChangeChecklistAllowed"
+            :disabled="true"
             v-if="checklist.length > 0"
           />
           <p v-if="taskStatus.is_done && isLast">
@@ -479,6 +479,10 @@ export default {
   },
 
   watch: {
+    'comment.checklist' () {
+      this.checklist = [...this.comment.checklist]
+    },
+
     checklist () {
       if (!this.$options.silent) {
         this.emitChangeEvent()

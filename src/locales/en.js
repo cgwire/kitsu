@@ -63,6 +63,7 @@ export default {
     add_checklist: 'Add checklist',
     add_comment: 'Add a comment...',
     add_preview: 'Attach preview',
+    checklist: 'Checklist',
     change_preview: 'Change preview',
     comment_from_client: 'Comment from client',
     edit_title: 'Edit comment',

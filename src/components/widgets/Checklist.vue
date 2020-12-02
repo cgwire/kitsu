@@ -26,6 +26,7 @@
       @keyup.backspace.native="removeChecklistEntry(index)"
       @keyup.up.native="focusPrevious(index)"
       @keyup.down.native="focusNext(index)"
+      :disabled="disabled"
       v-model="entry.text"
     ></textarea-autosize>
   </div>
@@ -48,6 +49,10 @@ export default {
     checklist: {
       default: () => [],
       type: Array
+    },
+    disabled: {
+      default: false,
+      type: Boolean
     }
   },
 
