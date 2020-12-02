@@ -5,10 +5,10 @@
 
 On your first connection, we encourage you to fill your contact information
 into your profile.
-Click on your name on the top right of the screen (1) then on **Profile** (2).
+Click on your name on the top right of the screen (1) then on **Profile** (2). You can also change the color of the **Theme** (3).
 
-NB: A link to this **Documentation** is available (4), 
-and you can switch to the **Dark Theme**  in this menu too (3). You can also jump on our slack (5), or look at our roadmap (6).
+NB: A link to this **Documentation** and YouYbe **Tutorials** are available (4 & 5).
+You can also jump on our Discord (7), or look at our roadmap (8).
  
 ![User profile](../img/getting-started/user_profil.png)
  
@@ -50,7 +50,7 @@ You can also filter your tasks.
 ![My tasks page](../img/getting-started/mytask_filter.png)
 
 
-You can also find it on the main menu ![Main menu](../img/getting-started/main_button.png),
+In addition of the shortcut **My Tasks** on top of the screen,; you can also find it on the main menu ![Main menu](../img/getting-started/main_button.png),
 under the **User** section of **MY TASKS**. The Kistu logo is a shortcut too,
 to your task list.
 
@@ -137,7 +137,7 @@ on the **Done** tab.
 ## Fill your timesheet
 
 Every day, you can declare how much time you spent on each task. On your **My
-Tasks** page, go to the **Timesheets** tab.
+Tasks** page, go to the **Timesheets** tab. Or click on the shortcut on top of the screen.
 
 ![Timesheets](../img/getting-started/timesheets.png)
 
