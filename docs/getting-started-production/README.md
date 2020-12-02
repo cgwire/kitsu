@@ -334,7 +334,7 @@ Now, everybody knows what to do and who is doing what!
 
 
 
-## Change status and add a Preview
+## Change status
 
 To write a comment and to change the status of a task, you can click on the
 status of the task (1). 
@@ -347,6 +347,8 @@ It makes appear a panel on the right, and here you can write a comment (1) and c
 Validate the post and the new status with **Post status**
 
 ![Changing status](../img/getting-started/changing_status_shot.png)
+
+## Add a Preview
 
 You can add one or several preview to any comments. It can be a picture (`.png`, `.jpg`, `.jpeg`), or a video (`.mp4`, `.mov`, `.wmv`), 
 or an `.obj` file. All can be reviewed from the browser or a mix of everything.
@@ -369,33 +371,6 @@ Once your file is selected, you see its name near the "Attach preview" button.
 You can also **drag & drop** the file in the comment section.
 
 ![attach preview drag drop](../img/getting-started/drag_drop_preview.png)
-
-You can add multiple images at the same time, or, once you have uploaded an image, you can add another one.
-
-![attach preview drag drop](../img/getting-started/upload_several_pictures.png)
-
-The **Add preview** pop-up opens and asks you to choose a file.
-
-You can navigate through the pictures uploaded. You need to enlarge the comment section. 
-
-![enlarge comment section](../img/getting-started/enlarge_comment.png)
-
-And then click on the number of the picture to see them all.
-
-![attach preview drag drop](../img/getting-started/upload_second_pictures.png)
-
-You can change the order of the preview by drag and drop them.
-
-![preview drag drop](../img/getting-started/multiple_preview.png)
-
-
-To delete an additional preview, you need to enlarge the comment panel.
-
-![enlarge comment section](../img/getting-started/enlarge_comment.png)
-
-And then click on the ![delete button](../img/getting-started/delete_button.png)
-
-![enlarge comment section delete](../img/getting-started/enlarge_comment_delete.png)
 
 
 ## Add a thumbnail
@@ -1042,7 +1017,34 @@ You can also use the **CSV Import** to fill quickly your custom column.
 You need to first create your **Custom Column** into kitsu, then add it in your spreadhseet, then copy paste your data into the **CSV Import**.
 [Update Shots information with CSV Import](#update-shots-information-with-csv-import)
 
+## Add multiple Preview
 
+You can add multiple images at the same time, or, once you have uploaded an image, you can add another one.
+
+![attach preview drag drop](../img/getting-started/upload_several_pictures.png)
+
+The **Add preview** pop-up opens and asks you to choose a file.
+
+You can navigate through the pictures uploaded. You need to enlarge the comment section. 
+
+![enlarge comment section](../img/getting-started/enlarge_comment.png)
+
+And then click on the number of the picture to see them all.
+
+![attach preview drag drop](../img/getting-started/upload_second_pictures.png)
+
+You can change the order of the preview by drag and drop them.
+
+![preview drag drop](../img/getting-started/multiple_preview.png)
+
+
+To delete an additional preview, you need to enlarge the comment panel.
+
+![enlarge comment section](../img/getting-started/enlarge_comment.png)
+
+And then click on the ![delete button](../img/getting-started/delete_button.png)
+
+![enlarge comment section delete](../img/getting-started/enlarge_comment_delete.png)
 
 ## Create a breakdown list from a CSV file
 
