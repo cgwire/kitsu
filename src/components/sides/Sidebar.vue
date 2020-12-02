@@ -27,11 +27,13 @@
 
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'todos'}">
+               <check-icon size="0.9x" />
                {{ $t("tasks.my_tasks") }}
              </router-link>
            </p>
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'open-productions'}">
+               <film-icon size="0.9x" />
                {{ $t("productions.open_productions") }}
              </router-link>
            </p>
@@ -42,25 +44,29 @@
 
            <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
              <router-link :to="{name: 'productions'}">
-             {{ $t("productions.title") }}
+               <film-icon size="0.9x" />
+               {{ $t("productions.title") }}
              </router-link>
            </p>
 
            <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
              <router-link :to="{name: 'people'}">
-             {{ $t("people.title") }}
+               <users-icon size="0.9x" />
+               {{ $t("people.title") }}
              </router-link>
            </p>
 
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'timesheets'}">
-             {{ $t("timesheets.title") }}
+               <clock-icon size="0.9x" />
+               {{ $t("timesheets.title") }}
              </router-link>
-           </p>
+         </p>
 
            <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
              <router-link :to="{name: 'main-schedule'}">
-             {{ $t("schedule.title_main") }}
+               <calendar-icon size="0.9x" />
+               {{ $t("schedule.title_main") }}
              </router-link>
            </p>
          </div>
@@ -69,31 +75,37 @@
            <h2>{{ $t('main.admin')}}</h2>
            <p @click="toggleSidebar()">
              <router-link to="/task-types">
-             {{ $t("task_types.title") }}
+               <copy-icon size="0.9x" />
+               {{ $t("task_types.title") }}
              </router-link>
            </p>
            <p @click="toggleSidebar()">
              <router-link to="/task-status" class="task-status-link">
-             {{ $t("task_status.title") }}
+               <award-icon size="0.9x" />
+               {{ $t("task_status.title") }}
              </router-link>
            </p>
            <p @click="toggleSidebar()">
              <router-link to="/asset-types">
-             {{ $t("asset_types.title") }}
+               <box-icon size="0.9x" />
+               {{ $t("asset_types.title") }}
              </router-link>
            </p>
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'custom-actions'}">
-             {{ $t("custom_actions.title") }}
+               <git-pull-request-icon size="0.9x" />
+               {{ $t("custom_actions.title") }}
              </router-link>
            </p>
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'settings'}">
+               <settings-icon size="0.9x" />
                {{ $t("settings.title") }}
              </router-link>
            </p>
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'logs'}">
+               <list-icon size="0.9x" />
                {{ $t("logs.title") }}
              </router-link>
            </p>
@@ -111,9 +123,35 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import {
+  AwardIcon,
+  BoxIcon,
+  CopyIcon,
+  CalendarIcon,
+  CheckIcon,
+  ClockIcon,
+  FilmIcon,
+  GitPullRequestIcon,
+  ListIcon,
+  SettingsIcon,
+  UsersIcon
+} from 'vue-feather-icons'
 
 export default {
   name: 'sidebar',
+  components: {
+    AwardIcon,
+    BoxIcon,
+    CopyIcon,
+    CalendarIcon,
+    CheckIcon,
+    ClockIcon,
+    FilmIcon,
+    GitPullRequestIcon,
+    ListIcon,
+    SettingsIcon,
+    UsersIcon
+  },
 
   data () {
     return {
@@ -172,7 +210,7 @@ aside {
   top: 0;
   bottom: 0;
   left: 0;
-  width: 180px;
+  width: 230px;
   background-color: white;
   padding: 15px;
   overflow-y: auto;
@@ -187,14 +225,20 @@ aside {
 }
 
 aside.hidden-bar {
-  left: -200px;
+  left: -230px;
   transition: all 0.3s ease;
 }
 
 aside p a {
   font-size: 1.4em;
   color: $grey-strong;
+  display: flex;
+  align-items: center;
   font-weight: 300;
+
+  svg {
+    margin-right: 0.5em;
+  }
 }
 
 aside section {
@@ -209,8 +253,7 @@ aside section {
 }
 
 .company-logo {
-  width: 150px;
-  margin: auto;
+  width: 200px;
   img {
     border-radius: 5px;
   }
