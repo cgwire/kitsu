@@ -1,6 +1,6 @@
 <template>
   <div class="navbar">
-    <aside :class="{'hidden': isSidebarHidden}">
+    <aside :class="{'hidden-bar': isSidebarHidden}">
       <div>
         <router-link
            class="home-link"
@@ -23,7 +23,7 @@
 
         <section>
          <div v-if="!isCurrentUserClient">
-           <h2>{{ $t('main.user')}}</h2>
+           <h2></h2>
 
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'todos'}">
@@ -161,6 +161,10 @@ export default {
 .dark aside {
   background-color: #2F3136;
   color: $white-grey;
+
+  a {
+    color: $white-grey;
+  }
 }
 
 aside {
@@ -168,25 +172,29 @@ aside {
   top: 0;
   bottom: 0;
   left: 0;
-  width: 200px;
+  width: 180px;
   background-color: white;
-  padding: 20px 1em 1em 1em;
+  padding: 15px;
   overflow-y: auto;
   z-index: 205;
   box-shadow: 1px 0px 6px rgba(0,0,0,0.2);
-  transition-property: all;
-  transition-duration: .5s;
-  transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+  transition: all 0.3s ease;
+
+  h2 {
+    text-transform: uppercase;
+    color: $grey;
+  }
 }
 
-aside.hidden {
+aside.hidden-bar {
   left: -200px;
+  transition: all 0.3s ease;
 }
 
 aside p a {
-  font-size: 1.2em;
-  text-transform: uppercase;
-  color: $grey;
+  font-size: 1.4em;
+  color: $grey-strong;
+  font-weight: 300;
 }
 
 aside section {
@@ -203,6 +211,9 @@ aside section {
 .company-logo {
   width: 150px;
   margin: auto;
+  img {
+    border-radius: 5px;
+  }
 }
 
 #c-mask {
