@@ -119,14 +119,14 @@
         </span>
         <span
           class="flexrow-item time-indicator"
-          v-if="!light || readOnly || fullScreen"
+          v-if="!light || fullScreen"
         >
         /
         </span>
         <span
           class="flexrow-item time-indicator"
           :title="$t('playlists.actions.max_duration')"
-          v-if="!light || readOnly || fullScreen"
+          v-if="!light || fullScreen"
         >
          {{ maxDuration }}
         </span>
@@ -282,6 +282,7 @@
           :read-only="readOnly"
           :light="light"
           :full-screen="fullScreen"
+          :is-assigned="isAssigned"
           @add-preview-clicked="$emit('add-extra-preview')"
           @next-clicked="onNextClicked"
           @previous-clicked="onPreviousClicked"
@@ -394,17 +395,21 @@ export default {
   },
 
   props: {
-    previews: {
-      type: Array,
-      default: () => []
+    big: {
+      type: Boolean,
+      default: false
     },
     entityPreviewFiles: {
       type: Object,
       default: () => {}
     },
-    taskTypeMap: {
-      type: Object,
-      default: () => {}
+    isAssigned: {
+      type: Boolean,
+      default: false
+    },
+    lastPreviewFiles: {
+      type: Array,
+      default: () => []
     },
     light: {
       type: Boolean,
@@ -414,13 +419,13 @@ export default {
       type: Boolean,
       default: false
     },
-    lastPreviewFiles: {
+    previews: {
       type: Array,
       default: () => []
     },
-    big: {
-      type: Boolean,
-      default: false
+    taskTypeMap: {
+      type: Object,
+      default: () => {}
     }
   },
 

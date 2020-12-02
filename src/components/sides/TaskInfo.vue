@@ -93,6 +93,7 @@
                 :task-type-map="taskTypeMap"
                 :light="!isWide"
                 :read-only="!isCurrentUserManager"
+                :is-assigned="isAssigned"
                 @annotation-changed="onAnnotationChanged"
                 @change-current-preview="changeCurrentPreview"
                 @add-extra-preview="onAddExtraPreview"
@@ -375,7 +376,7 @@ export default {
 
     isAssigned () {
       if (this.task) {
-        return this.task.assignees.some((assigneeId) => {
+        return this.task.assignees.some(assigneeId => {
           return assigneeId === this.user.id
         })
       } else {
