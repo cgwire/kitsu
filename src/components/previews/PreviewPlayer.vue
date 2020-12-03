@@ -1267,6 +1267,7 @@ export default {
       }
       const pos = (e.pageX - left) / this.progress.offsetWidth
       const currentTime = roundToFrame(pos * this.videoDuration, this.fps)
+      this.clearCanvas()
       this.setCurrentTime(currentTime)
     },
 

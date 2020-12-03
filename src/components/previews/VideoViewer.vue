@@ -291,7 +291,8 @@ export default {
     },
 
     goNextFrame () {
-      const newTime = this.video.currentTime + 1 / this.fps
+      const frameFactor = Math.round((1 / this.fps) * 10000) / 10000
+      const newTime = roundToFrame(this.currentTimeRaw, this.fps) + frameFactor
       if (newTime > this.video.duration) {
         this.setCurrentTime(this.video.duration)
       } else {

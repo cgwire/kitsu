@@ -2,10 +2,11 @@
  * Make sure that given time matches a frame in the video
  */
 export const roundToFrame = (time, fps) => {
-  const frameFactor = Math.round((1 / fps) * 1000) / 1000
+  const frameFactor = Math.round((1 / fps) * 10000) / 10000
   const frameNumber = Math.round(time / frameFactor)
   let roundedTime = frameNumber * frameFactor
-  roundedTime = Math.round((roundedTime) * 1000) / 1000
+  roundedTime = Math.round((roundedTime) * 10000) / 10000
+  console.log('round to frame', time, frameNumber, frameFactor, roundedTime)
   return roundedTime
 }
 
