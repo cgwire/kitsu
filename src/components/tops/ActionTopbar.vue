@@ -55,6 +55,9 @@
                 {{ $t('tasks.clear_assignations') }}
               </button>
             </div>
+            <div class="flexrow-item" v-if="!isShowAssignations">
+              {{ $t('tasks.assignation_warning') }}
+            </div>
           </div>
           <div style="padding-left: 1em;" v-else>
             {{ $t('tasks.no_assignation_right') }}
@@ -464,6 +467,7 @@ export default {
       'currentProduction',
       'getPersonOptions',
       'isCurrentUserManager',
+      'isShowAssignations',
       'nbSelectedTasks',
       'nbSelectedValidations',
       'organisation',

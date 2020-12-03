@@ -754,6 +754,7 @@ export default {
     add_preview: 'Add preview',
     add_preview_error: 'An error occured while adding preview.',
     assign: 'Assign one task to: | Assign {nbSelectedTasks} tasks to:',
+    assignation_warning: 'Warning: you won\'t see the result because you are hiding assignations',
     back_to_list: 'back to list',
     bigger: 'Widen task panel',
     change_status_to: 'Change task status to:',
