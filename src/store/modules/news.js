@@ -35,7 +35,7 @@ const getters = {
     let runningList = []
     let currentDay = state.newsList[0].created_at.substring(0, 10)
 
-    state.newsList.forEach((news) => {
+    state.newsList.forEach(news => {
       const newsDay = news.created_at.substring(0, 10)
       if (newsDay !== currentDay) {
         listsByDay.push(runningList)

@@ -93,6 +93,7 @@
                 :task-type-map="taskTypeMap"
                 :light="!isWide"
                 :read-only="!isCurrentUserManager"
+                :is-assigned="isAssigned"
                 @annotation-changed="onAnnotationChanged"
                 @change-current-preview="changeCurrentPreview"
                 @add-extra-preview="onAddExtraPreview"
@@ -142,7 +143,10 @@
                 :add-preview="onAddPreviewClicked"
                 :is-first="index === 0"
                 :is-last="index === pinnedCount"
-                :editable="comment.person && user.id === comment.person.id"
+                :editable="(
+                  comment.person && user.id === comment.person.id ||
+                  isCurrentUserAdmin
+                )"
                 @duplicate-comment="onDuplicateComment"
                 @pin-comment="onPinComment"
                 @edit-comment="onEditComment"
@@ -340,6 +344,7 @@ export default {
       'getTaskComment',
       'getTaskComments',
       'getTaskPreviews',
+      'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isSingleEpisode',
@@ -371,7 +376,7 @@ export default {
 
     isAssigned () {
       if (this.task) {
-        return this.task.assignees.some((assigneeId) => {
+        return this.task.assignees.some(assigneeId => {
           return assigneeId === this.user.id
         })
       } else {

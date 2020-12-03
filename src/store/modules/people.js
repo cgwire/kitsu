@@ -391,19 +391,14 @@ const actions = {
   },
 
   setTimeSpent ({ commit }, { personId, taskId, date, duration }) {
-    return new Promise((resolve, reject) => {
-      peopleApi.setTimeSpent(
-        taskId,
-        personId,
-        date,
-        duration,
-        (err, timeSpent) => {
-          if (err) reject(err)
-          else {
-            commit(SET_TIME_SPENT, timeSpent)
-            resolve()
-          }
-        })
+    return peopleApi.setTimeSpent(
+      taskId,
+      personId,
+      date,
+      duration
+    ).then(timeSpent => {
+      commit(SET_TIME_SPENT, timeSpent)
+      Promise.resolve(timeSpent)
     })
   },
 

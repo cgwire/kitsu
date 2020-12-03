@@ -1,6 +1,6 @@
 <template>
   <div class="navbar">
-    <aside :class="{'hidden': isSidebarHidden}">
+    <aside :class="{'hidden-bar': isSidebarHidden}">
       <div>
         <router-link
            class="home-link"
@@ -23,15 +23,17 @@
 
         <section>
          <div v-if="!isCurrentUserClient">
-           <h2>{{ $t('main.user')}}</h2>
+           <h2></h2>
 
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'todos'}">
+               <check-icon size="0.9x" />
                {{ $t("tasks.my_tasks") }}
              </router-link>
            </p>
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'open-productions'}">
+               <film-icon size="0.9x" />
                {{ $t("productions.open_productions") }}
              </router-link>
            </p>
@@ -42,25 +44,29 @@
 
            <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
              <router-link :to="{name: 'productions'}">
-             {{ $t("productions.title") }}
+               <film-icon size="0.9x" />
+               {{ $t("productions.title") }}
              </router-link>
            </p>
 
            <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
              <router-link :to="{name: 'people'}">
-             {{ $t("people.title") }}
+               <users-icon size="0.9x" />
+               {{ $t("people.title") }}
              </router-link>
            </p>
 
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'timesheets'}">
-             {{ $t("timesheets.title") }}
+               <clock-icon size="0.9x" />
+               {{ $t("timesheets.title") }}
              </router-link>
-           </p>
+         </p>
 
            <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
              <router-link :to="{name: 'main-schedule'}">
-             {{ $t("schedule.title_main") }}
+               <calendar-icon size="0.9x" />
+               {{ $t("schedule.title_main") }}
              </router-link>
            </p>
          </div>
@@ -69,31 +75,37 @@
            <h2>{{ $t('main.admin')}}</h2>
            <p @click="toggleSidebar()">
              <router-link to="/task-types">
-             {{ $t("task_types.title") }}
+               <copy-icon size="0.9x" />
+               {{ $t("task_types.title") }}
              </router-link>
            </p>
            <p @click="toggleSidebar()">
              <router-link to="/task-status" class="task-status-link">
-             {{ $t("task_status.title") }}
+               <award-icon size="0.9x" />
+               {{ $t("task_status.title") }}
              </router-link>
            </p>
            <p @click="toggleSidebar()">
              <router-link to="/asset-types">
-             {{ $t("asset_types.title") }}
+               <box-icon size="0.9x" />
+               {{ $t("asset_types.title") }}
              </router-link>
            </p>
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'custom-actions'}">
-             {{ $t("custom_actions.title") }}
+               <git-pull-request-icon size="0.9x" />
+               {{ $t("custom_actions.title") }}
              </router-link>
            </p>
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'settings'}">
+               <settings-icon size="0.9x" />
                {{ $t("settings.title") }}
              </router-link>
            </p>
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'logs'}">
+               <list-icon size="0.9x" />
                {{ $t("logs.title") }}
              </router-link>
            </p>
@@ -111,9 +123,35 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import {
+  AwardIcon,
+  BoxIcon,
+  CopyIcon,
+  CalendarIcon,
+  CheckIcon,
+  ClockIcon,
+  FilmIcon,
+  GitPullRequestIcon,
+  ListIcon,
+  SettingsIcon,
+  UsersIcon
+} from 'vue-feather-icons'
 
 export default {
   name: 'sidebar',
+  components: {
+    AwardIcon,
+    BoxIcon,
+    CopyIcon,
+    CalendarIcon,
+    CheckIcon,
+    ClockIcon,
+    FilmIcon,
+    GitPullRequestIcon,
+    ListIcon,
+    SettingsIcon,
+    UsersIcon
+  },
 
   data () {
     return {
@@ -161,6 +199,10 @@ export default {
 .dark aside {
   background-color: #2F3136;
   color: $white-grey;
+
+  a {
+    color: $white-grey;
+  }
 }
 
 aside {
@@ -168,25 +210,35 @@ aside {
   top: 0;
   bottom: 0;
   left: 0;
-  width: 200px;
+  width: 230px;
   background-color: white;
-  padding: 20px 1em 1em 1em;
+  padding: 15px;
   overflow-y: auto;
   z-index: 205;
   box-shadow: 1px 0px 6px rgba(0,0,0,0.2);
-  transition-property: all;
-  transition-duration: .5s;
-  transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+  transition: all 0.3s ease;
+
+  h2 {
+    text-transform: uppercase;
+    color: $grey;
+  }
 }
 
-aside.hidden {
-  left: -200px;
+aside.hidden-bar {
+  left: -230px;
+  transition: all 0.3s ease;
 }
 
 aside p a {
-  font-size: 1.2em;
-  text-transform: uppercase;
-  color: $grey;
+  font-size: 1.4em;
+  color: $grey-strong;
+  display: flex;
+  align-items: center;
+  font-weight: 300;
+
+  svg {
+    margin-right: 0.5em;
+  }
 }
 
 aside section {
@@ -201,8 +253,10 @@ aside section {
 }
 
 .company-logo {
-  width: 150px;
-  margin: auto;
+  width: 200px;
+  img {
+    border-radius: 5px;
+  }
 }
 
 #c-mask {

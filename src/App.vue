@@ -1720,7 +1720,7 @@ th.validation-cell {
 }
 
 .theme .datepicker .vdp-datepicker__calendar {
-  z-index: 200;
+  z-index: 2000;
 
   .cell.year:not(.blank):not(.disabled):hover,
   .cell.month:not(.blank):not(.disabled):hover,
@@ -1751,6 +1751,16 @@ th.validation-cell {
   header span:not(.disabled):hover {
     background: var(--background-selectable);
   }
+}
+
+.theme .vue-slider-dot-tooltip-inner {
+  background: $purple-strong;
+  border-color: $purple-strong;
+}
+
+.dark .vue-slider-dot-tooltip-inner {
+  background: $dark-purple;
+  border-color: $dark-purple;
 }
 
 .c-mask {

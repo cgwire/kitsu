@@ -31,7 +31,7 @@
     icon="plus"
     :title="$t('playlists.actions.files_add')"
     @click="$emit('add-preview-clicked')"
-    v-if="!readOnly && !fullScreen"
+    v-if="(isAssigned || !readOnly) && !fullScreen"
   />
 
   <button-simple
@@ -64,6 +64,10 @@ export default {
       default: 0
     },
     fullScreen: {
+      type: Boolean,
+      default: false
+    },
+    isAssigned: {
       type: Boolean,
       default: false
     },

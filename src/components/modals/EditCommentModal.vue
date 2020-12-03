@@ -52,6 +52,13 @@
             </textarea>
           </at-ta>
         </div>
+        <label class="label">
+          {{ $t('comments.checklist') }}
+        </label>
+        <checklist
+          :checklist="form.checklist"
+          @remove-task="removeTask"
+        />
       </form>
 
       <modal-footer
@@ -69,8 +76,10 @@
 <script>
 import { mapGetters } from 'vuex'
 import { modalMixin } from './base_modal'
+import { remove } from '@/lib/models'
 
 import AtTa from 'vue-at/dist/vue-at-textarea'
+import Checklist from '../widgets/Checklist'
 import ComboBoxStatus from '../widgets/ComboboxStatus.vue'
 import ModalFooter from './ModalFooter'
 import PeopleAvatar from '../widgets/PeopleAvatar'
@@ -80,6 +89,7 @@ export default {
   mixins: [modalMixin],
   components: {
     AtTa,
+    Checklist,
     ComboBoxStatus,
     ModalFooter,
     PeopleAvatar
@@ -95,19 +105,11 @@ export default {
   ],
 
   data () {
-    if (this.commentToEdit && this.commentToEdit.id) {
-      return {
-        form: {
-          text: this.commentToEdit.text,
-          task_status_id: this.commentToEdit.task_status_id
-        }
-      }
-    } else {
-      return {
-        form: {
-          text: '',
-          task_status_id: null
-        }
+    return {
+      form: {
+        text: '',
+        task_status_id: null,
+        checklist: [{ checked: false, text: '' }]
       }
     }
   },
@@ -126,25 +128,38 @@ export default {
           ...this.form
         })
       }
+    },
+
+    removeTask (entry) {
+      this.form.checklist = remove(this.form.checklist, entry)
+    },
+
+    reset () {
+      if (this.commentToEdit && this.commentToEdit.id) {
+        this.form = {
+          text: this.commentToEdit.text,
+          task_status_id: this.commentToEdit.task_status_id,
+          checklist: this.commentToEdit.checklist
+        }
+      } else {
+        this.form = {
+          text: '',
+          task_status_id: null,
+          checklist: [{ checked: false, text: '' }]
+        }
+      }
     }
   },
 
   watch: {
     commentToEdit () {
-      if (this.commentToEdit && this.commentToEdit.id) {
-        this.form.text = this.commentToEdit.text
-        this.form.task_status_id = this.commentToEdit.task_status_id
-      } else {
-        this.form = {
-          text: '',
-          task_status_id: null
-        }
-      }
+      this.reset()
     },
 
     active () {
       if (this.active) {
         setTimeout(() => {
+          this.reset()
           this.$refs.textField.focus()
         }, 100)
       }

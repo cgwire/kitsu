@@ -404,13 +404,11 @@ const actions = {
     })
   },
 
-  editTaskComment ({ commit }, { taskId, comment, checklist, callback }) {
-    if (checklist) {
-      commit(UPDATE_COMMENT_CHECKLIST, { comment, checklist })
-    }
+  editTaskComment ({ commit }, { taskId, comment, checklist }) {
+    checklist = checklist || comment.checklist
     return tasksApi.editTaskComment(comment)
       .then(comment => {
-        commit(EDIT_COMMENT_END, { taskId, comment })
+        commit(EDIT_COMMENT_END, { taskId, comment, checklist })
         return Promise.resolve(comment)
       })
   },
@@ -819,14 +817,15 @@ const mutations = {
     }
   },
 
-  [EDIT_COMMENT_END] (state, { taskId, comment }) {
+  [EDIT_COMMENT_END] (state, { taskId, comment, checklist }) {
     const oldComment = state.taskComments[taskId].find(
       c => c.id === comment.id
     )
     Object.assign(oldComment, {
       text: comment.text,
       task_status_id: comment.task_status_id,
-      task_status: state.taskStatusMap[comment.task_status_id]
+      task_status: state.taskStatusMap[comment.task_status_id],
+      checklist: checklist || []
     })
   },
 
@@ -1098,7 +1097,8 @@ const mutations = {
   },
 
   [UPDATE_COMMENT_CHECKLIST] (state, { comment, checklist }) {
-    comment.checklist = checklist
+    comment.checklist = [...checklist]
+    state.taskComments[comment.object_id].checklist = [...checklist]
   },
 
   [CLEAR_ASSETS] (state) {

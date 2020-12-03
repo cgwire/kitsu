@@ -20,6 +20,12 @@
 </template>
 
 <script>
+/*
+ * Widget use to show if there is notification. The count is extracted directly
+ * from the Vuex store.
+ * If there is no value, it doesn't show a counter. If there are some, it adds
+ * a badge giving the number of unread notifications.
+ */
 import { mapGetters } from 'vuex'
 import { BellIcon } from 'vue-feather-icons'
 
@@ -70,8 +76,12 @@ export default {
     }
   }
 
+  .has-notifications {
+    color: $pink;
+  }
+
   .number {
-    background: $pink-transparent;
+    background: $pink-light;
     border: 2px solid $pink;
     color: $pink;
     font-size: 0.9em;
