@@ -1720,7 +1720,7 @@ th.validation-cell {
 }
 
 .theme .datepicker .vdp-datepicker__calendar {
-  z-index: 200;
+  z-index: 2000;
 
   .cell.year:not(.blank):not(.disabled):hover,
   .cell.month:not(.blank):not(.disabled):hover,
