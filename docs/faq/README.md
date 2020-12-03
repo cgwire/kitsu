@@ -171,7 +171,7 @@ Once you have click on it, a message appears and ask you to type the name of the
 To delete a task (shot or asset), go to the global spreadsheet page, 
 and click on the status of the task that you want to delete.
 
-![Delete task selection](../img/getting-started/delete_task_selection.png). 
+![Delete task selection](../img/getting-started/delete_task_selection.png)
 
 The action menu will appear. Select **Delete tasks** and validate with the **Confirm** button.
 
