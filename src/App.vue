@@ -1753,6 +1753,16 @@ th.validation-cell {
   }
 }
 
+.theme .vue-slider-dot-tooltip-inner {
+  background: $purple-strong;
+  border-color: $purple-strong;
+}
+
+.dark .vue-slider-dot-tooltip-inner {
+  background: $dark-purple;
+  border-color: $dark-purple;
+}
+
 .c-mask {
   position: fixed;
   z-index: 204;
