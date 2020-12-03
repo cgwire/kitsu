@@ -161,10 +161,9 @@ export default {
     const data = {
       duration: hours * 60
     }
-    client.post(
+    return client.ppost(
       `/api/actions/tasks/${taskId}/time-spents/${date}/persons/${personId}`,
-      data,
-      callback
+      data
     )
   },
 
