@@ -6,7 +6,6 @@ export const roundToFrame = (time, fps) => {
   const frameNumber = Math.round(time / frameFactor)
   let roundedTime = frameNumber * frameFactor
   roundedTime = Math.round((roundedTime) * 10000) / 10000
-  console.log('round to frame', time, frameNumber, frameFactor, roundedTime)
   return roundedTime
 }
 
