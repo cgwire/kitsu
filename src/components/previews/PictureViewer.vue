@@ -194,9 +194,10 @@ export default {
       this.lastCall = this.lastCall || 0
       if (now - this.lastCall > 600) {
         this.lastCall = now
-        this.$nextTick(() => {
+        this.$nextTick(this.resetPicture)
+        setTimeout(() => {
           this.resetPicture()
-        })
+        }, 400)
       }
     },
 

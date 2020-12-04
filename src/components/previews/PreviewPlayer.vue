@@ -817,8 +817,8 @@ export default {
       this.documentSetFullScreen(this.container)
       this.container.setAttribute('data-fullscreen', !!true)
       this.fullScreen = true
-      this.fixCanvasSize(this.getCurrentPreviewDimensions())
       this.$nextTick(() => {
+        this.fixCanvasSize(this.getCurrentPreviewDimensions())
         // Needed to avoid fullsceen button to be called with space bar.
         this.clearFocus()
         this.reloadAnnotations()

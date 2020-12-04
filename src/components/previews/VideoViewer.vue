@@ -310,15 +310,15 @@ export default {
       }
     },
 
-    onWindowResize (callback) {
+    onWindowResize () {
       const now = (new Date().getTime())
       this.lastCall = this.lastCall || 0
       if (now - this.lastCall > 600) {
         this.lastCall = now
-        this.$nextTick(() => {
+        this.$nextTick(this.mountVideo)
+        setTimeout(() => {
           this.mountVideo()
-          if (callback && typeof callback === 'function') callback()
-        })
+        }, 400)
       }
     }
   },
