@@ -161,7 +161,7 @@
         </li>
         <hr />
         <li>
-          <a href="https://slack.cg-wire.com" target="_blank">
+          <a href="https://discord.gg/VbCxtKN" target="_blank">
             Discord
           </a>
         </li>
