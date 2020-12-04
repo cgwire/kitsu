@@ -9,10 +9,10 @@ describe('video', () => {
 
   describe('Mount', () => {
     it('roundToFrame', () => {
-      expect(roundToFrame(1, 24)).toBe(1.008)
-      expect(roundToFrame(0.95, 24)).toBe(0.966)
-      expect(roundToFrame(2, 24)).toBe(2.016)
-      expect(roundToFrame(60, 24)).toBe(60.018)
+      expect(roundToFrame(1, 24)).toBe(1.0008)
+      expect(roundToFrame(0.95, 24)).toBe(0.9591)
+      expect(roundToFrame(2, 24)).toBe(2.0016)
+      expect(roundToFrame(60, 24)).toBe(60.0063)
       expect(roundToFrame(60, 25)).toBe(60)
       expect(roundToFrame(50, 25)).toBe(50)
       expect(roundToFrame(49.1, 25)).toBe(49.12)
