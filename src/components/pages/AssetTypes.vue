@@ -116,8 +116,8 @@ export default {
         })
         .catch((err) => {
           console.error(err)
+          this.loading.edit = false
           this.errors.edit = true
-          this.modals.isNewDisplayed = false
         })
     },
 
