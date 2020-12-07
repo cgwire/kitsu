@@ -471,14 +471,9 @@ export default {
     },
 
     dataMatchers () {
-      return this.isTVShow ? [
-        'Episode',
-        'Type',
-        'Name'
-      ] : [
-        'Type',
-        'Name'
-      ]
+      return this.isTVShow ?
+        [ 'Episode', 'Type', 'Name'] :
+        [ 'Type', 'Name' ]
     }
   },
 

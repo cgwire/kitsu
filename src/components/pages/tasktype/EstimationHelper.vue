@@ -416,14 +416,13 @@ export default {
 
     selectPrevious (shiftKey) {
       let index = this.lastSelection
-      index = (index - 1) < 0 ? index =
-        this.tasksByPerson.length - 1 : index - 1
+      index = (index - 1) < 0 ? this.tasksByPerson.length - 1 : index - 1
       this.selectTask({ shiftKey }, this.tasksByPerson[index], index)
     },
 
     selectNext (shiftKey) {
       let index = this.lastSelection
-      index = (index + 1) >= this.tasksByPerson.length ? index = 0 : index + 1
+      index = (index + 1) >= this.tasksByPerson.length ? 0 : index + 1
       this.selectTask({ shiftKey }, this.tasksByPerson[index], index)
     },
 

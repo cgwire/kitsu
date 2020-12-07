@@ -759,7 +759,6 @@ export default {
     } else {
       this.entityList = []
     }
-    if (!this.playlist.name) this.isLoading = true
     this.updateProgressBar()
     if (this.picturePlayer) {
       this.picturePlayer.addEventListener('load', () => {
