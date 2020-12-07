@@ -3,6 +3,7 @@
   <button
     class="button"
     data-test="button-history"
+    tabindex="-1"
     @click="$emit('history-clicked')"
     v-if="!hideHistory"
   >
@@ -12,6 +13,7 @@
   <button
     class="button"
     data-test="button-edit"
+    tabindex="-1"
     @click="$emit('edit-clicked')"
     v-if="!hideEdit && !entry.canceled"
   >
@@ -21,6 +23,7 @@
   <button
     class="button"
     data-test="button-restore"
+    tabindex="-1"
     @click="$emit('restore-clicked')"
     v-if="entry.canceled"
   >
@@ -30,6 +33,7 @@
   <button
     class="button"
     data-test="button-delete-admin"
+    tabindex="-1"
     @click="$emit('delete-clicked')"
     v-if="!hideDelete && !entry.canceled && isCurrentUserAdmin"
   >
@@ -39,6 +43,7 @@
   <button
     class="button"
     data-test="button-delete"
+    tabindex="-1"
     @click="$emit('delete-clicked')"
     v-else-if="!hideDelete"
   >

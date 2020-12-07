@@ -1279,7 +1279,7 @@ export default {
 
     onProgressBarClicked (e) {
       this.clearCanvas()
-      var pos =
+      const pos =
         (e.pageX - this.progress.offsetLeft) / this.progress.offsetWidth
       const currentTime = pos * this.maxDurationRaw
       this.rawPlayer.setCurrentTime(currentTime)

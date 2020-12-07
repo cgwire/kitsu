@@ -90,6 +90,8 @@
         @add-metadata="onAddMetadataClicked"
         @edit-metadata="onEditMetadataClicked"
         @delete-metadata="onDeleteMetadataClicked"
+        @metadata-changed="onMetadataChanged"
+        @field-changed="onFieldChanged"
         @scroll="saveScrollPosition"
       />
     </div>
@@ -471,9 +473,9 @@ export default {
     },
 
     dataMatchers () {
-      return this.isTVShow ?
-        [ 'Episode', 'Type', 'Name'] :
-        [ 'Type', 'Name' ]
+      return this.isTVShow
+        ? ['Episode', 'Type', 'Name']
+        : ['Type', 'Name']
     }
   },
 
@@ -914,6 +916,22 @@ export default {
 
     onChangeSortClicked (sortInfo) {
       this.changeAssetSort(sortInfo)
+    },
+
+    onFieldChanged ({ asset, fieldName, value }) {
+      const data = { id: asset.id }
+      data[fieldName] = value
+      this.editAsset(data)
+    },
+
+    onMetadataChanged ({ asset, descriptor, value }) {
+      const metadata = { ...asset.data }
+      metadata[descriptor.field_name] = value
+      const data = {
+        id: asset.id,
+        data: metadata
+      }
+      this.editAsset(data)
     },
 
     reset () {

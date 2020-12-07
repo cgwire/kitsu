@@ -419,15 +419,17 @@ const actions = {
   },
 
   editAsset ({ commit, state, rootState }, data) {
-    const existingAsset = data.name && cache.assets.find((asset) => {
+    /*
+    const existingAsset = data.name && cache.assets.find(asset => {
       return asset.name === data.name && data.id !== asset.id
     })
     if (existingAsset) {
       return Promise.reject(new Error('Asset already exsists'))
     }
+    */
     const assetTypeMap = rootState.assetTypes.assetTypeMap
     return assetsApi.updateAsset(data)
-      .then((asset) => {
+      .then(asset => {
         commit(EDIT_ASSET_END, { newAsset: asset, assetTypeMap })
         return Promise.resolve(asset)
       })

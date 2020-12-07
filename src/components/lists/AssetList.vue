@@ -178,22 +178,36 @@
               bold: !asset.canceled
             }">
             <div class="flexrow">
-              <light-entity-thumbnail
-                :preview-file-id="asset.preview_file_id"
-                empty-height="32px"
-                empty-width="48px"
-                height="32px"
-                width="48px"
-                max-height="32px"
-                max-width="48px"
-              />
               <router-link
+                tabindex="-1"
                 class="asset-link"
                 :to="assetPath(asset.id)"
                 :title="asset.full_name"
               >
-                {{ asset.name }}
+                <light-entity-thumbnail
+                  :preview-file-id="asset.preview_file_id"
+                  empty-height="32px"
+                  empty-width="48px"
+                  height="32px"
+                  width="48px"
+                  max-height="32px"
+                  max-width="48px"
+                />
               </router-link>
+              <input
+                class="input-editor asset-name"
+                @input="event => $emit('field-changed', {
+                  asset, fieldName: 'name', value: event.target.value
+                })"
+                :value="asset.name"
+                v-if="isCurrentUserManager"
+              />
+              <span
+                class="asset-name"
+                v-else
+              >
+                {{ asset.name }}
+              </span>
             </div>
           </th>
           <description-cell
@@ -204,15 +218,41 @@
           <td
             class="metadata-descriptor"
             :key="asset.id + '-' + descriptor.id"
+            :title="asset.data ? asset.data[descriptor.field_name] : ''"
             v-for="descriptor in assetMetadataDescriptors"
             v-if="isShowInfos"
           >
-            <div
-              class="ellipsis"
-              :title="asset.data ? asset.data[descriptor.field_name] : ''"
+            <input
+              class="input-editor"
+              @input="event => $emit('metadata-changed', {
+                asset, descriptor, value: event.target.value
+              })"
+              :value="getMetadataFieldValue(descriptor, asset)"
+              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+            />
+            <span
+              class="select"
+              v-else-if="isCurrentUserManager"
             >
-              {{ asset.data ? asset.data[descriptor.field_name] : '' }}
-            </div>
+              <select
+                class="select-input"
+                @change="event => $emit('metadata-changed', {
+                  asset, descriptor, value: event.target.value
+                })"
+              >
+                <option
+                  v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
+                  :key="`${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+                  :value="option.value"
+                  :selected="getMetadataFieldValue(descriptor, asset) == option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </select>
+            </span>
+            <span v-else>
+              {{ getMetadataFieldValue(descriptor, asset) }}
+            </span>
           </td>
           <td
             class="time-spent"
@@ -300,22 +340,30 @@ import { mapGetters, mapActions } from 'vuex'
 import {
   ChevronDownIcon
 } from 'vue-feather-icons'
-import { entityListMixin } from './base'
-import { formatListMixin } from './format_mixin'
-import { selectionListMixin } from './selection'
 
-import DescriptionCell from '../cells/DescriptionCell'
-import ButtonSimple from '../widgets/ButtonSimple'
-import LightEntityThumbnail from '../widgets/LightEntityThumbnail'
-import RowActions from '../widgets/RowActions'
-import TableHeaderMenu from '../widgets/TableHeaderMenu'
-import TableInfo from '../widgets/TableInfo'
-import TableMetadataHeaderMenu from '../widgets/TableMetadataHeaderMenu'
-import ValidationCell from '../cells/ValidationCell'
+import { entityListMixin } from '@/components/lists/base'
+import { formatListMixin } from '@/components/lists/format_mixin'
+import { selectionListMixin } from '@/components/lists/selection'
+import { descriptorMixin } from '@/components/mixins/descriptors'
+
+import DescriptionCell from '@/components/cells/DescriptionCell'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail'
+import RowActions from '@/components/widgets/RowActions'
+import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
+import TableInfo from '@/components/widgets/TableInfo'
+import TableMetadataHeaderMenu from
+  '@/components/widgets/TableMetadataHeaderMenu'
+import ValidationCell from '@/components/cells/ValidationCell'
 
 export default {
   name: 'asset-list',
-  mixins: [entityListMixin, formatListMixin, selectionListMixin],
+  mixins: [
+    entityListMixin,
+    descriptorMixin,
+    formatListMixin,
+    selectionListMixin
+  ],
 
   components: {
     ButtonSimple,
@@ -593,8 +641,9 @@ th.metadata-descriptor {
   }
 }
 
-.asset-link {
+.asset-name {
   color: inherit
+  font-siwe
 }
 
 .info img {
@@ -603,5 +652,76 @@ th.metadata-descriptor {
 
 .task-type-name {
   max-width: 95%;
+}
+
+td.metadata-descriptor {
+  height: 3.1rem;
+  padding: 0;
+}
+
+th .input-editor,
+td .input-editor {
+  color: $grey-strong;
+  height: 100%;
+  padding: 0.5rem;
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  z-index: 100;
+
+  &:active,
+  &:focus,
+  &:hover {
+    background: transparent;
+    background: white;
+  }
+
+  &:active,
+  &:focus {
+    border: 1px solid $green;
+  }
+
+  &:hover {
+    border: 1px solid $light-green;
+  }
+}
+
+td .select {
+  color: $grey-strong;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  border: 1px solid transparent;
+
+  &::after {
+    border-color: transparent;
+  }
+
+  &:active,
+  &:hover {
+    &::after {
+      border-color: $green;
+    }
+  }
+
+  select {
+    color: $grey-strong;
+    height: 100%;
+    width: 100%;
+    background: transparent;
+    border-radius: 0;
+    border: 1px solid transparent;
+
+    &:focus {
+      border: 1px solid $green;
+      background: white;
+    }
+
+    &:hover {
+      background: transparent;
+      background: white;
+      border: 1px solid $light-green;
+    }
+  }
 }
 </style>

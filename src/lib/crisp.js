@@ -20,8 +20,8 @@ export default {
     window.$crisp = []
     window.CRISP_WEBSITE_ID = token
     function run () {
-      var d = document
-      var s = d.createElement('script')
+      const d = document
+      const s = d.createElement('script')
 
       s.src = 'https://client.crisp.chat/l.js'
       s.async = 1

@@ -1648,6 +1648,21 @@ th.validation-cell {
   transition: opacity .15s;
 }
 
+.description-cell .tooltip {
+  h1 {
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 1em;
+    text-transform: uppercase;
+  }
+  strong {
+    font-size: inherit;
+  }
+  p, ul {
+    margin-bottom: 1em;
+  }
+}
+
 .project-dates .date-input {
   width: 150px;
 }

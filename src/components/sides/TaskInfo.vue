@@ -431,8 +431,8 @@ export default {
       const index = this.currentPreviewIndex
       return this.taskPreviews &&
         this.taskPreviews.length > 0
-          ? this.taskPreviews[index].extension
-          : ''
+        ? this.taskPreviews[index].extension
+        : ''
     },
 
     isStandardPreview () {
