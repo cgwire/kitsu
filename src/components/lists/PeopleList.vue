@@ -38,7 +38,7 @@
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
-          <row-actions
+          <row-actions-cell
             v-if="isCurrentUserAdmin"
             :entry-id="entry.id"
             :hide-delete="true"
@@ -91,14 +91,14 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import PeopleNameCell from '../cells/PeopleNameCell'
-import RowActions from '../widgets/RowActions'
+import RowActionsCell from '../cells/RowActionsCell'
 import TableInfo from '../widgets/TableInfo'
 
 export default {
   name: 'people-list',
   components: {
     PeopleNameCell,
-    RowActions,
+    RowActionsCell,
     TableInfo
   },
 

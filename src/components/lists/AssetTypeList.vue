@@ -13,7 +13,7 @@
           <td class="name">
              {{ entry.name }}
           </td>
-          <row-actions
+          <row-actions-cell
             :entry-id="entry.id"
             @edit-clicked="$emit('edit-clicked', entry)"
             @delete-clicked="$emit('delete-clicked', entry)"
@@ -38,7 +38,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import RowActions from '../widgets/RowActions'
+import RowActionsCell from '../cells/RowActionsCell'
 import TableInfo from '../widgets/TableInfo'
 
 export default {
@@ -52,7 +52,7 @@ export default {
     return {}
   },
   components: {
-    RowActions,
+    RowActionsCell,
     TableInfo
   },
   computed: {

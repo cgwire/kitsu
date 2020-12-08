@@ -136,7 +136,7 @@
             >
             </td>
 
-            <row-actions
+            <row-actions-cell
               :entry="entry"
               @delete-clicked="$emit('delete-clicked', entry)"
               @edit-clicked="$emit('edit-clicked', entry)"
@@ -248,7 +248,7 @@ import {
   getChartRetakeCount,
   getRetakeChartData
 } from '@/lib/stats'
-import RowActions from '@/components/widgets/RowActions'
+import RowActionsCell from '@/components/cells/RowActionsCell'
 import StatsCell from '@/components/cells/StatsCell'
 import TableInfo from '@/components/widgets/TableInfo'
 
@@ -259,7 +259,7 @@ export default {
   components: {
     ChevronDownIcon,
     ChevronRightIcon,
-    RowActions,
+    RowActionsCell,
     StatsCell,
     TableInfo
   },

@@ -253,7 +253,7 @@
             v-for="(columnId, j) in displayedValidationColumns"
             v-if="!isLoading"
           />
-          <row-actions
+          <row-actions-cell
             :entry="shot"
             :hide-history="false"
             @delete-clicked="$emit('delete-clicked', shot)"
@@ -322,7 +322,7 @@ import ButtonSimple from '../widgets/ButtonSimple'
 import DescriptionCell from '../cells/DescriptionCell'
 import LightEntityThumbnail from '../widgets/LightEntityThumbnail'
 import TableMetadataHeaderMenu from '../widgets/TableMetadataHeaderMenu'
-import RowActions from '../widgets/RowActions'
+import RowActionsCell from '../cells/RowActionsCell'
 import TableHeaderMenu from '../widgets/TableHeaderMenu'
 import TableInfo from '../widgets/TableInfo'
 import ValidationCell from '../cells/ValidationCell'
@@ -363,7 +363,7 @@ export default {
     ChevronDownIcon,
     DescriptionCell,
     LightEntityThumbnail,
-    RowActions,
+    RowActionsCell,
     TableHeaderMenu,
     TableMetadataHeaderMenu,
     TableInfo,

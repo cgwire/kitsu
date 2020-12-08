@@ -125,10 +125,11 @@
           >
           </td>
 
-          <row-actions v-if="isCurrentUserManager"
+          <row-actions-cell
             :entry="entry"
             @edit-clicked="$emit('edit-clicked', entry)"
             @delete-clicked="$emit('delete-clicked', entry)"
+            v-if="isCurrentUserManager"
           />
           <td class="actions" v-else></td>
         </tr>
@@ -174,7 +175,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { getChartColors, getChartData } from '../../lib/stats'
 import { entityListMixin } from './base'
-import RowActions from '../widgets/RowActions'
+import RowActionsCell from '../cells/RowActionsCell'
 import TableInfo from '../widgets/TableInfo'
 import StatsCell from '../cells/StatsCell'
 
@@ -183,7 +184,7 @@ export default {
   mixins: [entityListMixin],
 
   components: {
-    RowActions,
+    RowActionsCell,
     StatsCell,
     TableInfo
   },

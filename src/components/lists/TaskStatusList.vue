@@ -43,7 +43,7 @@
           <td class="is-client-allowed">
             {{ formatBoolean(entry.is_client_allowed) }}
           </td>
-          <row-actions
+          <row-actions-cell
             :entry-id="entry.id"
             :hide-edit="entry.short_name === 'todo'"
             :hide-delete="entry.short_name === 'todo'"
@@ -70,7 +70,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { formatListMixin } from './format_mixin'
-import RowActions from '../widgets/RowActions'
+import RowActionsCell from '../cells/RowActionsCell'
 import TableInfo from '../widgets/TableInfo'
 import TaskStatusName from '../cells/TaskStatusName'
 
@@ -86,7 +86,7 @@ export default {
     return {}
   },
   components: {
-    RowActions,
+    RowActionsCell,
     TableInfo,
     TaskStatusName
   },

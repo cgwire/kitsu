@@ -62,7 +62,7 @@ import {
 } from 'vue-feather-icons'
 
 export default {
-  name: 'row-actions',
+  name: 'row-actions-cell',
   components: {
     ClockIcon,
     EditIcon,

@@ -282,11 +282,12 @@
             v-for="(columnId, j) in displayedValidationColumns"
             v-if="!isLoading"
           />
-          <row-actions v-if="isCurrentUserManager"
+          <row-actions-cell
             :entry="asset"
             @edit-clicked="$emit('edit-clicked', asset)"
             @delete-clicked="$emit('delete-clicked', asset)"
             @restore-clicked="$emit('restore-clicked', asset)"
+            v-if="isCurrentUserManager"
           />
           <td class="actions" v-else></td>
         </tr>
@@ -349,7 +350,7 @@ import { descriptorMixin } from '@/components/mixins/descriptors'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail'
-import RowActions from '@/components/widgets/RowActions'
+import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
 import TableInfo from '@/components/widgets/TableInfo'
 import TableMetadataHeaderMenu from
@@ -370,7 +371,7 @@ export default {
     DescriptionCell,
     LightEntityThumbnail,
     ChevronDownIcon,
-    RowActions,
+    RowActionsCell,
     TableInfo,
     TableHeaderMenu,
     TableMetadataHeaderMenu,
