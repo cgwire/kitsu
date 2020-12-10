@@ -1,5 +1,6 @@
-import colors from '../../lib/colors'
 import Vue from 'vue'
+
+import colors from '../../lib/colors'
 
 export const entityListMixin = {
 
@@ -8,7 +9,7 @@ export const entityListMixin = {
   },
 
   mounted () {
-    this.resizeHeaders()
+    if (this.resizeHeaders) this.resizeHeaders()
     window.addEventListener('keydown', this.onKeyDown, false)
   },
 
@@ -248,6 +249,37 @@ export const entityListMixin = {
     getGroupKey (group, i, fieldName) {
       const key = group[0] ? group[0][fieldName] + group[0].canceled : ''
       return `${i}-${key}`
+    },
+
+    getEntityLineNumber (entities, i, k) {
+      this.$options.lineIndex = {}
+      const key = `${i}-${k}`
+      const cached = this.$options.lineIndex[key]
+      if (!cached) {
+        let j = 0
+        let index = 0
+        while (j < k) {
+          index += entities[j].length
+          j++
+        }
+        const val = i + index
+        this.$options.lineIndex[key] = val
+        return val
+      } else {
+        return cached
+      }
+    },
+
+    onMetadataFieldChanged (asset, descriptor, event) {
+      this.$emit('metadata-changed', {
+        asset, descriptor, value: event.target.value
+      })
+    },
+
+    onDescriptionChanged (entry, value) {
+      this.$emit('field-changed', {
+        entry, fieldName: 'description', value
+      })
     }
   }
 }

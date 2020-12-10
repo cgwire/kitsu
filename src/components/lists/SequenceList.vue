@@ -91,9 +91,12 @@
             {{ entry.name }}
           </th>
 
-          <td class="description">
-            {{ entry.description }}
-          </td>
+          <description-cell
+            class="description"
+            :editable="isCurrentUserManager"
+            :entry="entry"
+            @description-changed="value => onDescriptionChanged(entry, value)"
+          />
 
           <stats-cell
             :colors="chartColors(entry.id, 'all')"
@@ -175,6 +178,8 @@
 import { mapGetters, mapActions } from 'vuex'
 import { getChartColors, getChartData } from '../../lib/stats'
 import { entityListMixin } from './base'
+
+import DescriptionCell from '../cells/DescriptionCell'
 import RowActionsCell from '../cells/RowActionsCell'
 import TableInfo from '../widgets/TableInfo'
 import StatsCell from '../cells/StatsCell'
@@ -184,6 +189,7 @@ export default {
   mixins: [entityListMixin],
 
   components: {
+    DescriptionCell,
     RowActionsCell,
     StatsCell,
     TableInfo
@@ -406,5 +412,6 @@ th.actions {
 
 .actions {
   width: 100%;
+  min-width: 150px;
 }
 </style>

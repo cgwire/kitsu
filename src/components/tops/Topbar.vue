@@ -173,7 +173,7 @@
         <hr />
         <li>
           <a href="https://cg-wire.com/en/about.html" target="_blank">
-            {{ $t("main.about")}}
+            {{ $t("main.about") }}
           </a>
         </li>
         <li class="version">

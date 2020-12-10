@@ -100,9 +100,12 @@
               {{ entry.name }}
             </td>
 
-            <td class="description">
-              {{ entry.description }}
-            </td>
+            <description-cell
+              class="description"
+              :editable="isCurrentUserManager"
+              :entry="entry"
+              @description-changed="value => onDescriptionChanged(entry, value)"
+            />
 
             <stats-cell
               :colors="chartColors(entry.id, 'all')"
@@ -248,6 +251,7 @@ import {
   getChartRetakeCount,
   getRetakeChartData
 } from '@/lib/stats'
+import DescriptionCell from '@/components/cells/DescriptionCell'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import StatsCell from '@/components/cells/StatsCell'
 import TableInfo from '@/components/widgets/TableInfo'
@@ -257,6 +261,7 @@ export default {
   mixins: [entityListMixin],
 
   components: {
+    DescriptionCell,
     ChevronDownIcon,
     ChevronRightIcon,
     RowActionsCell,

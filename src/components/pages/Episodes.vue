@@ -54,9 +54,10 @@
       :count-mode="countMode"
       :display-mode="displayMode"
       :show-all="episodeSearchText.length === 0"
-      @scroll="saveScrollPosition"
       @delete-clicked="onDeleteClicked"
       @edit-clicked="onEditClicked"
+      @field-changed="onFieldChanged"
+      @scroll="saveScrollPosition"
     />
 
     <edit-episode-modal
@@ -317,6 +318,12 @@ export default {
           this.countMode
         )
       }
+    },
+
+    onFieldChanged ({ entry, fieldName, value }) {
+      const data = { id: entry.id }
+      data[fieldName] = value
+      this.editEpisode(data)
     },
 
     reset () {

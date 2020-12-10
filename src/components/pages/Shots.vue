@@ -89,6 +89,7 @@
         @delete-metadata="onDeleteMetadataClicked"
         @edit-clicked="onEditClicked"
         @edit-metadata="onEditMetadataClicked"
+        @field-changed="onFieldChanged"
         @restore-clicked="onRestoreClicked"
         @scroll="saveScrollPosition"
         @shot-history="showShotHistoryModal"
@@ -928,6 +929,16 @@ export default {
       this.modals.isBuildFilterDisplayed = false
       this.$refs['shot-search-field'].setValue(query)
       this.onSearchChange()
+    },
+
+    onFieldChanged ({ entry, fieldName, value }) {
+      const data = {
+        id: entry.id,
+        nb_frames: entry.nb_frames,
+        description: entry.description
+      }
+      data[fieldName] = value
+      this.editShot(data)
     }
   },
 

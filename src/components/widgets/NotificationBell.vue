@@ -82,8 +82,8 @@ export default {
 
   .number {
     background: $pink-light;
-    border: 2px solid $pink;
-    color: $pink;
+    border: 2px solid $pink-strong;
+    color: $pink-strong;
     font-size: 0.9em;
     margin: 0;
   }

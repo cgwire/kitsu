@@ -918,8 +918,8 @@ export default {
       this.changeAssetSort(sortInfo)
     },
 
-    onFieldChanged ({ asset, fieldName, value }) {
-      const data = { id: asset.id }
+    onFieldChanged ({ entry, fieldName, value }) {
+      const data = { id: entry.id }
       data[fieldName] = value
       this.editAsset(data)
     },

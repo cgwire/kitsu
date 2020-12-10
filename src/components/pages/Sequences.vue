@@ -59,6 +59,7 @@
       :show-all="sequenceSearchText.length === 0"
       @delete-clicked="onDeleteClicked"
       @edit-clicked="onEditClicked"
+      @field-changed="onFieldChanged"
       @scroll="saveScrollPosition"
     />
 
@@ -321,6 +322,12 @@ export default {
         this.sequenceMap,
         this.countMode
       )
+    },
+
+    onFieldChanged ({ entry, fieldName, value }) {
+      const data = { id: entry.id }
+      data[fieldName] = value
+      this.editSequence(data)
     }
   },
 

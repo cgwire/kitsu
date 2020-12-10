@@ -73,14 +73,6 @@
             </div>
           </th>
 
-          <th
-            scope="col"
-            ref="th-spent"
-            class="time-spent"
-            v-if="!isCurrentUserClient && isShowInfos && isTime"
-           >
-            {{ $t('shots.fields.time_spent') }}
-          </th>
           <th scope="col" class="frames" v-if="isFrames && isShowInfos">
             {{ $t('shots.fields.nb_frames') }}
           </th>
@@ -92,6 +84,15 @@
           </th>
           <th scope="col" class="fps" v-if="isFps && isShowInfos">
             {{ $t('shots.fields.fps') }}
+          </th>
+
+          <th
+            scope="col"
+            ref="th-spent"
+            class="time-spent"
+            v-if="!isCurrentUserClient && isShowInfos && isTime"
+           >
+            {{ $t('shots.fields.time_spent') }}
           </th>
 
           <th
@@ -198,26 +199,46 @@
           <description-cell
             class="description"
             :entry="shot"
+            :editable="isCurrentUserManager"
+            @description-changed="value => onDescriptionChanged(shot, value)"
             v-if="!isCurrentUserClient && isShowInfos && isShotDescription"
           />
           <td
             class="metadata-descriptor"
             :key="shot.id + '-' + descriptor.id"
-            v-for="descriptor in shotMetadataDescriptors"
+            v-for="(descriptor, j) in shotMetadataDescriptors"
             v-if="isShowInfos"
           >
-            <div
-              class="ellipsis"
-              :title="shot.data ? shot.data[descriptor.field_name] : ''"
+            <input
+              :ref="`editor-${getIndex(i, k)}-${j + 1}`"
+              class="input-editor"
+              @input="
+                event => onMetadataFieldChanged(shot, descriptor, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j + 1)"
+              :value="getMetadataFieldValue(descriptor, shot)"
+              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+            />
+            <span
+              class="select"
+              v-else-if="isCurrentUserManager"
             >
-              {{ shot.data ? shot.data[descriptor.field_name] : '' }}
-            </div>
-          </td>
-          <td
-            class="time-spent"
-            v-if="!isCurrentUserClient && isShowInfos && isTime"
-          >
-            {{ formatDuration(shot.timeSpent) }}
+              <select
+                class="select-input"
+                @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j + 1)"
+                :ref="`editor-${getIndex(i, k)}-${j + 1}`"
+                @change="
+                  event => onMetadataFieldChanged(shot, descriptor, event)"
+              >
+                <option
+                  v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
+                  :key="`${shot.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+                  :value="option.value"
+                  :selected="getMetadataFieldValue(descriptor, shot) == option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </select>
+            </span>
           </td>
           <td class="frames"
             v-if="isFrames && isShowInfos"
@@ -225,13 +246,30 @@
             {{ shot.nb_frames }}
           </td>
           <td class="framein" v-if="isFrameIn && isShowInfos">
-            {{ shot.data && shot.data.frame_in ? shot.data.frame_in : ''}}
+            <input
+              :ref="`editor-${getIndex(i, k)}-${j + 1}`"
+              class="input-editor"
+              @input="
+                event => onMetadataFieldChanged(shot, descriptor, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j + 1)"
+              :value="getMetadataFieldValue(field_name: 'frame_in'}, shot)"
+              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+            />
+            <span v-else>
+              {{ getMetadataFieldValue({field_name: 'frame_in'}, shot) }}
+            </span>
           </td>
           <td class="frameout" v-if="isFrameOut && isShowInfos">
             {{ shot.data && shot.data.frame_out ? shot.data.frame_out : ''}}
           </td>
           <td class="fps" v-if="isFps && isShowInfos">
             {{ shot.data && shot.data.fps ? shot.data.fps : ''}}
+          </td>
+          <td
+            class="time-spent"
+            v-if="!isCurrentUserClient && isShowInfos && isTime"
+          >
+            {{ formatDuration(shot.timeSpent) }}
           </td>
           <validation-cell
             :class="{
@@ -314,22 +352,28 @@ import { mapGetters, mapActions } from 'vuex'
 import {
   ChevronDownIcon
 } from 'vue-feather-icons'
-import { entityListMixin } from './base'
-import { selectionListMixin } from './selection'
-import { formatListMixin } from './format_mixin'
+import { entityListMixin } from '@/components/lists/base'
+import { selectionListMixin } from '@/components/lists/selection'
+import { formatListMixin } from '@/components/lists/format_mixin'
+import { descriptorMixin } from '@/components/mixins/descriptors'
 
-import ButtonSimple from '../widgets/ButtonSimple'
-import DescriptionCell from '../cells/DescriptionCell'
-import LightEntityThumbnail from '../widgets/LightEntityThumbnail'
-import TableMetadataHeaderMenu from '../widgets/TableMetadataHeaderMenu'
-import RowActionsCell from '../cells/RowActionsCell'
-import TableHeaderMenu from '../widgets/TableHeaderMenu'
-import TableInfo from '../widgets/TableInfo'
-import ValidationCell from '../cells/ValidationCell'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import DescriptionCell from '@/components/cells/DescriptionCell'
+import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail'
+import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu'
+import RowActionsCell from '@/components/cells/RowActionsCell'
+import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
+import TableInfo from '@/components/widgets/TableInfo'
+import ValidationCell from '@/components/cells/ValidationCell'
 
 export default {
   name: 'shot-list',
-  mixins: [entityListMixin, selectionListMixin, formatListMixin],
+  mixins: [
+    descriptorMixin,
+    formatListMixin,
+    entityListMixin,
+    selectionListMixin
+  ],
 
   props: {
     displayedShots: {
@@ -557,18 +601,22 @@ export default {
       return route
     },
 
+    onInputKeyUp (event, i, j) {
+      const listWidth = this.shotMetadataDescriptors.length
+      const listHeight = this.displayedShotsLength
+      this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
+    },
+
     getIndex (i, k) {
-      let j = 0
-      let index = 0
-      while (j < k) {
-        index += this.displayedShots[j].length
-        j++
-      }
-      return i + index
+      return this.getEntityLineNumber(this.displayedShots, i, k)
     }
   },
 
   watch: {
+    displayedShots () {
+      this.$options.lineIndex = {}
+    },
+
     validationColumns () {
       this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
     }
@@ -707,4 +755,95 @@ th.metadata-descriptor {
 .datatable-row-header {
   cursor: pointer;
 }
+
+td.metadata-descriptor {
+  height: 3.1rem;
+  padding: 0;
+}
+
+.dark {
+  th .input-editor,
+  td .select select,
+  td .input-editor {
+    color: $white;
+
+    option {
+      background: $dark-grey-light;
+      color: $white;
+    }
+
+    &:focus,
+    &:active,
+    &:hover {
+      background: $dark-grey-light;
+    }
+  }
+}
+
+th .input-editor,
+td .input-editor {
+  color: $grey-strong;
+  height: 100%;
+  padding: 0.5rem;
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  z-index: 100;
+
+  &:active,
+  &:focus,
+  &:hover {
+    background: transparent;
+    background: white;
+  }
+
+  &:active,
+  &:focus {
+    border: 1px solid $green;
+  }
+
+  &:hover {
+    border: 1px solid $light-green;
+  }
+}
+
+td .select {
+  color: $grey-strong;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  border: 1px solid transparent;
+
+  &::after {
+    border-color: transparent;
+  }
+
+  &:active,
+  &:hover {
+    &::after {
+      border-color: $green;
+    }
+  }
+
+  select {
+    color: $grey-strong;
+    height: 100%;
+    width: 100%;
+    background: transparent;
+    border-radius: 0;
+    border: 1px solid transparent;
+
+    &:focus {
+      border: 1px solid $green;
+      background: white;
+    }
+
+    &:hover {
+      background: transparent;
+      background: white;
+      border: 1px solid $light-green;
+    }
+  }
+}
+
 </style>

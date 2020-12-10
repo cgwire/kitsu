@@ -178,40 +178,29 @@
               bold: !asset.canceled
             }">
             <div class="flexrow">
+              <light-entity-thumbnail
+                :preview-file-id="asset.preview_file_id"
+                empty-height="32px"
+                empty-width="48px"
+                height="32px"
+                width="48px"
+                max-height="32px"
+                max-width="48px"
+              />
               <router-link
                 tabindex="-1"
-                class="asset-link"
+                class="asset-link asset-name"
                 :to="assetPath(asset.id)"
                 :title="asset.full_name"
               >
-                <light-entity-thumbnail
-                  :preview-file-id="asset.preview_file_id"
-                  empty-height="32px"
-                  empty-width="48px"
-                  height="32px"
-                  width="48px"
-                  max-height="32px"
-                  max-width="48px"
-                />
-              </router-link>
-              <input
-                class="input-editor asset-name"
-                @input="event => $emit('field-changed', {
-                  asset, fieldName: 'name', value: event.target.value
-                })"
-                :value="asset.name"
-                v-if="isCurrentUserManager"
-              />
-              <span
-                class="asset-name"
-                v-else
-              >
                 {{ asset.name }}
-              </span>
+              </router-link>
             </div>
           </th>
           <description-cell
             class="description"
+            @description-changed="value => onDescriptionChanged(asset, value)"
+            :editable="isCurrentUserManager"
             v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
             :entry="asset"
           />
@@ -219,14 +208,15 @@
             class="metadata-descriptor"
             :key="asset.id + '-' + descriptor.id"
             :title="asset.data ? asset.data[descriptor.field_name] : ''"
-            v-for="descriptor in assetMetadataDescriptors"
+            v-for="(descriptor, j) in assetMetadataDescriptors"
             v-if="isShowInfos"
           >
             <input
+              :ref="`editor-${getIndex(i, k)}-${j}`"
               class="input-editor"
-              @input="event => $emit('metadata-changed', {
-                asset, descriptor, value: event.target.value
-              })"
+              @input="
+                event => onMetadataFieldChanged(asset, descriptor, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
               :value="getMetadataFieldValue(descriptor, asset)"
               v-if="descriptor.choices.length === 0 && isCurrentUserManager"
             />
@@ -236,9 +226,10 @@
             >
               <select
                 class="select-input"
-                @change="event => $emit('metadata-changed', {
-                  asset, descriptor, value: event.target.value
-                })"
+                @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+                :ref="`editor-${getIndex(i, k)}-${j}`"
+                @change="
+                  event => onMetadataFieldChanged(asset, descriptor, event)"
               >
                 <option
                   v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
@@ -254,6 +245,7 @@
               {{ getMetadataFieldValue(descriptor, asset) }}
             </span>
           </td>
+
           <td
             class="time-spent"
             v-if="!isCurrentUserClient && isShowInfos && isAssetTime"
@@ -505,13 +497,7 @@ export default {
     },
 
     getIndex (i, k) {
-      let j = 0
-      let index = 0
-      while (j < k) {
-        index += this.displayedAssets[j].length
-        j++
-      }
-      return i + index
+      return this.getEntityLineNumber(this.displayedAssets, i, k)
     },
 
     newAssetPath () {
@@ -560,14 +546,18 @@ export default {
       return route
     },
 
-    // Remaining function for retrocompatibility
-    resizeHeaders () {
-      return true
+    onInputKeyUp (event, i, j) {
+      const listWidth = this.assetMetadataDescriptors.length
+      const listHeight = this.displayedAssetsLength
+      this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
     }
-    //
   },
 
   watch: {
+    displayedAssets () {
+      this.$options.lineIndex = {}
+    },
+
     validationColumns () {
       this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
     }
@@ -582,7 +572,7 @@ export default {
 }
 
 .actions {
-    min-width: 160px;
+  min-width: 160px;
   padding: 0.4em;
 }
 
@@ -658,6 +648,25 @@ th.metadata-descriptor {
 td.metadata-descriptor {
   height: 3.1rem;
   padding: 0;
+}
+
+.dark {
+  th .input-editor,
+  td .select select,
+  td .input-editor {
+    color: $white;
+
+    option {
+      background: $dark-grey-light;
+      color: $white;
+    }
+
+    &:focus,
+    &:active,
+    &:hover {
+      background: $dark-grey-light;
+    }
+  }
 }
 
 th .input-editor,
