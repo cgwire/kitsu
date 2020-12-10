@@ -90,9 +90,9 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import PeopleNameCell from '../cells/PeopleNameCell'
-import RowActionsCell from '../cells/RowActionsCell'
-import TableInfo from '../widgets/TableInfo'
+import PeopleNameCell from '@/components/cells/PeopleNameCell'
+import RowActionsCell from '@/components/cells/RowActionsCell'
+import TableInfo from '@/components/widgets/TableInfo'
 
 export default {
   name: 'people-list',

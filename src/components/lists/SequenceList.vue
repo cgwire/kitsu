@@ -176,13 +176,13 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { getChartColors, getChartData } from '../../lib/stats'
-import { entityListMixin } from './base'
+import { getChartColors, getChartData } from '@/lib/stats'
+import { entityListMixin } from '@/components/mixins/entity_list'
 
-import DescriptionCell from '../cells/DescriptionCell'
-import RowActionsCell from '../cells/RowActionsCell'
-import TableInfo from '../widgets/TableInfo'
-import StatsCell from '../cells/StatsCell'
+import DescriptionCell from '@/components/cells/DescriptionCell'
+import RowActionsCell from '@/components/cells/RowActionsCell'
+import TableInfo from '@/components/widgets/TableInfo'
+import StatsCell from '@/components/cells/StatsCell'
 
 export default {
   name: 'sequence-list',

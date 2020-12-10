@@ -243,7 +243,7 @@ import {
   ChevronRightIcon
 } from 'vue-feather-icons'
 
-import { entityListMixin } from './base'
+import { entityListMixin } from '@/components/mixins/entity_list'
 import { range } from '@/lib/time'
 import {
   getChartColors,

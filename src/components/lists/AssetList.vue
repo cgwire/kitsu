@@ -334,10 +334,10 @@ import {
   ChevronDownIcon
 } from 'vue-feather-icons'
 
-import { entityListMixin } from '@/components/lists/base'
-import { formatListMixin } from '@/components/lists/format_mixin'
-import { selectionListMixin } from '@/components/lists/selection'
 import { descriptorMixin } from '@/components/mixins/descriptors'
+import { entityListMixin } from '@/components/mixins/entity_list'
+import { formatListMixin } from '@/components/mixins/format'
+import { selectionListMixin } from '@/components/mixins/selection'
 
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import ButtonSimple from '@/components/widgets/ButtonSimple'

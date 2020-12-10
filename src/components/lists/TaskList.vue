@@ -206,13 +206,13 @@ import {
   minutesToDays,
   range
 } from '@/lib/time'
-import { formatListMixin } from './format_mixin'
+import { formatListMixin } from '@/components/mixins/format'
 import { domMixin } from '@/components/mixins/dom'
 
 import DateField from '@/components/widgets/DateField'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import TableInfo from '@/components/widgets/TableInfo'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import TableInfo from '@/components/widgets/TableInfo'
 import ValidationCell from '@/components/cells/ValidationCell'
 
 export default {

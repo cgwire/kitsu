@@ -57,9 +57,10 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { formatListMixin } from './format_mixin'
-import RowActionsCell from '../cells/RowActionsCell'
-import TableInfo from '../widgets/TableInfo'
+import { formatListMixin } from '@/components/mixins/format'
+
+import RowActionsCell from '@/components/cells/RowActionsCell'
+import TableInfo from '@/components/widgets/TableInfo'
 
 export default {
   name: 'custom-action-list',

@@ -213,7 +213,7 @@ import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import PeopleName from '@/components/widgets/PeopleName'
 
 import { domMixin } from '@/components/mixins/dom'
-import { formatListMixin } from '@/components/lists/format_mixin'
+import { formatListMixin } from '@/components/mixins/format'
 import { minutesToDays, range } from '@/lib/time'
 import { frameToSeconds } from '@/lib/video'
 import firstBy from 'thenby'

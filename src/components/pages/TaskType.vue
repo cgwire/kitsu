@@ -203,29 +203,29 @@ import {
   getDatesFromStartDate,
   minutesToDays,
   parseDate
-} from '../../lib/time'
+} from '@/lib/time'
 import {
   applyFilters,
   getDescFilters,
   getExcludingKeyWords,
   getKeyWords,
   getTaskFilters
-} from '../../lib/filtering'
+} from '@/lib/filtering'
 
-import { formatListMixin } from '../lists/format_mixin.js'
+import { formatListMixin } from '@/components/mixins/format'
 
 import { ChevronLeftIcon } from 'vue-feather-icons'
-import ButtonSimple from '../widgets/ButtonSimple'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DateField from '@/components/widgets/DateField'
-import Combobox from '../widgets/Combobox'
-import ComboboxNumber from '../widgets/ComboboxNumber'
-import EstimationHelper from './tasktype/EstimationHelper'
-import Schedule from './schedule/Schedule'
-import SearchField from '../widgets/SearchField'
-import SearchQueryList from '../widgets/SearchQueryList'
-import TaskInfo from '../sides/TaskInfo'
-import TaskList from '../lists/TaskList'
-import TaskTypeName from '../widgets/TaskTypeName'
+import Combobox from '@/components/widgets/Combobox'
+import ComboboxNumber from '@/components/widgets/ComboboxNumber'
+import EstimationHelper from '@/components/pages/tasktype/EstimationHelper'
+import Schedule from '@/components/pages/schedule/Schedule'
+import SearchField from '@/components/widgets/SearchField'
+import SearchQueryList from '@/components/widgets/SearchQueryList'
+import TaskInfo from '@/components/sides/TaskInfo'
+import TaskList from '@/components/lists/TaskList'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
   name: 'task-type-page',

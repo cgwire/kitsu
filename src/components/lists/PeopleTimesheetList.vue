@@ -215,8 +215,8 @@ import {
   getDayRange,
   range
 } from '../../lib/time'
-import PeopleNameCell from '../cells/PeopleNameCell'
-import TableInfo from '../widgets/TableInfo'
+import PeopleNameCell from '@/components/cells/PeopleNameCell'
+import TableInfo from '@/components/widgets/TableInfo'
 
 export default {
   name: 'people-timesheet-list',

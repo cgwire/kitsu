@@ -54,7 +54,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import PeopleNameCell from '../cells/PeopleNameCell'
+import PeopleNameCell from '@/components/cells/PeopleNameCell'
 
 export default {
   name: 'production-team-list',

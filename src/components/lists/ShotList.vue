@@ -252,7 +252,7 @@
               @input="
                 event => onMetadataFieldChanged(shot, descriptor, event)"
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j + 1)"
-              :value="getMetadataFieldValue(field_name: 'frame_in'}, shot)"
+              :value="getMetadataFieldValue({field_name: 'frame_in'}, shot)"
               v-if="descriptor.choices.length === 0 && isCurrentUserManager"
             />
             <span v-else>
@@ -352,10 +352,10 @@ import { mapGetters, mapActions } from 'vuex'
 import {
   ChevronDownIcon
 } from 'vue-feather-icons'
-import { entityListMixin } from '@/components/lists/base'
-import { selectionListMixin } from '@/components/lists/selection'
-import { formatListMixin } from '@/components/lists/format_mixin'
 import { descriptorMixin } from '@/components/mixins/descriptors'
+import { entityListMixin } from '@/components/mixins/entity_list'
+import { formatListMixin } from '@/components/mixins/format'
+import { selectionListMixin } from '@/components/mixins/selection'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DescriptionCell from '@/components/cells/DescriptionCell'

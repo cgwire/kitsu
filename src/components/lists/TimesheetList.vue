@@ -156,12 +156,12 @@ import moment from 'moment-timezone'
 import Datepicker from 'vuejs-datepicker'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 
-import { PAGE_SIZE } from '../../lib/pagination'
-import PageSubtitle from '../widgets/PageSubtitle'
-import ProductionNameCell from '../cells/ProductionNameCell'
-import TaskTypeCell from '../cells/TaskTypeName'
-import TimeSliderCell from '../cells/TimeSliderCell'
-import TableInfo from '../widgets/TableInfo'
+import { PAGE_SIZE } from '@/lib/pagination'
+import PageSubtitle from '@/components/widgets/PageSubtitle'
+import ProductionNameCell from '@/components/cells/ProductionNameCell'
+import TableInfo from '@/components/widgets/TableInfo'
+import TaskTypeCell from '@/components/cells/TaskTypeName'
+import TimeSliderCell from '@/components/cells/TimeSliderCell'
 
 export default {
   name: 'timesheet-list',

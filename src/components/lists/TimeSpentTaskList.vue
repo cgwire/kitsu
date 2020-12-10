@@ -49,10 +49,10 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import TableInfo from '../widgets/TableInfo'
-import ProductionName from '../widgets/ProductionName'
-import TaskTypeName from '../widgets/TaskTypeName'
-import { sortByName } from '../../lib/sorting'
+import TableInfo from '@/components/widgets/TableInfo'
+import ProductionName from '@/components/widgets/ProductionName'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
+import { sortByName } from '@/lib/sorting'
 
 export default {
   name: 'timespent-task-list',

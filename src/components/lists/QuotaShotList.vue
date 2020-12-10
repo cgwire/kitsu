@@ -34,8 +34,8 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import { frameToSeconds } from '../../lib/video'
-import TableInfo from '../widgets/TableInfo'
+import { frameToSeconds } from '@/lib/video'
+import TableInfo from '@/components/widgets/TableInfo'
 
 export default {
   name: 'quota-shot-list',

@@ -69,10 +69,10 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { formatListMixin } from './format_mixin'
-import RowActionsCell from '../cells/RowActionsCell'
-import TableInfo from '../widgets/TableInfo'
-import TaskStatusName from '../cells/TaskStatusName'
+import { formatListMixin } from '@/components/mixins/format'
+import RowActionsCell from '@/components/cells/RowActionsCell'
+import TableInfo from '@/components/widgets/TableInfo'
+import TaskStatusName from '@/components/cells/TaskStatusName'
 
 export default {
   name: 'task-status-list',

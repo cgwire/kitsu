@@ -164,18 +164,18 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import EntityThumbnail from '../widgets/EntityThumbnail'
-import TaskTypeCell from '../cells/TaskTypeName'
-import TableInfo from '../widgets/TableInfo'
-
-import DescriptionCell from '../cells/DescriptionCell'
-import LastCommentCell from '../cells/LastCommentCell'
-import ProductionNameCell from '../cells/ProductionNameCell'
-import ValidationCell from '../cells/ValidationCell'
-import { selectionListMixin } from './selection'
-import { formatListMixin } from './format_mixin'
-import { PAGE_SIZE } from '../../lib/pagination'
+import { selectionListMixin } from '@/components/mixins/selection'
+import { formatListMixin } from '@/components/mixins/format'
+import { PAGE_SIZE } from '@/lib/pagination'
 import { formatSimpleDate } from '@/lib/time'
+
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import DescriptionCell from '@/components/cells/DescriptionCell'
+import LastCommentCell from '@/components/cells/LastCommentCell'
+import ProductionNameCell from '@/components/cells/ProductionNameCell'
+import TaskTypeCell from '@/components/cells/TaskTypeName'
+import TableInfo from '@/components/widgets/TableInfo'
+import ValidationCell from '@/components/cells/ValidationCell'
 
 export default {
   name: 'todos-list',

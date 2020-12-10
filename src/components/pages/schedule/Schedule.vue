@@ -374,19 +374,19 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 
-import { formatListMixin } from '../../lists/format_mixin'
-import colors from '../../../lib/colors'
+import { formatListMixin } from '@/components/mixins/format'
+import colors from '@/lib/colors'
 import {
   addBusinessDays,
   daysToMinutes,
   parseDate
-} from '../../../lib/time'
+} from '@/lib/time'
 
 import { ChevronRightIcon, ChevronDownIcon } from 'vue-feather-icons'
-import EditMilestoneModal from '../../modals/EditMilestoneModal'
-import PeopleAvatar from '../../widgets/PeopleAvatar'
-import ProductionName from '../../widgets/ProductionName'
-import Spinner from '../../widgets/Spinner'
+import EditMilestoneModal from '@/components/modals/EditMilestoneModal'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import ProductionName from '@/components/widgets/ProductionName'
+import Spinner from '@/components/widgets/Spinner'
 
 export default {
   name: 'schedule',

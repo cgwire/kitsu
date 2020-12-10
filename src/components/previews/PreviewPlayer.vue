@@ -360,7 +360,7 @@ import { fabric } from 'fabric'
 import { mapGetters, mapActions } from 'vuex'
 import { formatFrame, formatTime, roundToFrame } from '@/lib/video'
 
-import { annotationMixin } from '@/components/mixins/annotation_mixin'
+import { annotationMixin } from '@/components/mixins/annotation'
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { domMixin } from '@/components/mixins/dom'
 
@@ -451,8 +451,10 @@ export default {
       pencilPalette: ['big', 'medium', 'small'],
       previewToCompare: null,
       previewToCompareId: null,
-      taskTypeId: this.entityPreviewFIles
-        ? Object.keys(this.entityPreviewFiles)[0] : null,
+      taskTypeId:
+        this.entityPreviewFIles
+          ? Object.keys(this.entityPreviewFiles)[0]
+          : null,
       textColor: '#ff3860',
       videoDuration: 0,
       width: 0
@@ -529,9 +531,9 @@ export default {
       } else {
         let bigHeight = screen.height > 800 ? 470 : 300
         if (this.isMovie) bigHeight = screen.height > 800 ? 442 : 272
-        return screen.width > 1300 && (
-          !this.light || this.big
-        ) ? bigHeight : 200
+        return screen.width > 1300 && (!this.light || this.big)
+          ? bigHeight
+          : 200
       }
     },
 

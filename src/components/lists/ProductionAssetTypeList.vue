@@ -157,11 +157,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { entityListMixin } from './base'
-import { getChartColors, getChartData } from '../../lib/stats'
-import ButtonLink from '../widgets/ButtonLink'
-import StatsCell from '../cells/StatsCell'
-import TableInfo from '../widgets/TableInfo'
+import { entityListMixin } from '@/components/mixins/entity_list'
+import { getChartColors, getChartData } from '@/lib/stats'
+import ButtonLink from '@/components/widgets/ButtonLink'
+import StatsCell from '@/components/cells/StatsCell'
+import TableInfo from '@/components/widgets/TableInfo'
 
 export default {
   name: 'production-asset-type-list',
