@@ -146,7 +146,6 @@ export default {
   mounted () {
     this.setDefaultSearchText()
     this.setDefaultListScrollPosition()
-    this.resizeHeaders()
     this.isLoading = true
     this.isLoadingError = false
     this.initEpisodes()
@@ -275,19 +274,10 @@ export default {
     onSearchChange (event) {
       const searchQuery = this.$refs['episode-search-field'].getValue()
       this.setEpisodeSearch(searchQuery)
-      this.resizeHeaders()
     },
 
     saveScrollPosition (scrollPosition) {
       this.setEpisodeListScrollPosition(scrollPosition)
-    },
-
-    resizeHeaders () {
-      setTimeout(() => {
-        if (this.$refs['episode-list']) {
-          this.$refs['episode-list'].resizeHeaders()
-        }
-      }, 0)
     },
 
     exportStatisticsToCsv () {
@@ -346,7 +336,6 @@ export default {
 
   watch: {
     displayedEpisodes () {
-      this.resizeHeaders()
     },
 
     currentProduction () {
