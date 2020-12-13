@@ -1,3 +1,6 @@
+/*
+ * Helpers to access dom through vanilla javascript.
+ */
 export const domMixin = {
 
   created () {

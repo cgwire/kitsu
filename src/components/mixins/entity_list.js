@@ -166,24 +166,6 @@ export const entityListMixin = {
       this.lastHeaderMenuDisplayed = columnId
     },
 
-    showMetadataHeaderMenu (columnId, event) {
-      const headerMenuEl = this.$refs.headerMetadataMenu.$el
-      if (headerMenuEl.className === 'header-menu') {
-        headerMenuEl.className = 'header-menu hidden'
-      } else {
-        headerMenuEl.className = 'header-menu'
-        const headerElement = event.srcElement.parentNode.parentNode
-        const headerBox = headerElement.getBoundingClientRect()
-        const left = headerBox.left
-        const top = headerBox.bottom
-        const width = Math.max(100, headerBox.width - 1)
-        headerMenuEl.style.left = left + 'px'
-        headerMenuEl.style.top = top + 'px'
-        headerMenuEl.style.width = width + 'px'
-      }
-      this.lastMetadaDataHeaderMenuDisplayed = columnId
-    },
-
     onMinimizeColumnToggled () {
       this.hideColumn(this.lastHeaderMenuDisplayed)
       this.showHeaderMenu()
@@ -194,36 +176,6 @@ export const entityListMixin = {
       this.showHeaderMenu()
     },
 
-    onAddMetadataClicked () {
-      this.$emit('add-metadata')
-    },
-
-    onEditMetadataClicked () {
-      this.$emit('edit-metadata', this.lastMetadaDataHeaderMenuDisplayed)
-      this.showMetadataHeaderMenu()
-    },
-
-    onDeleteMetadataClicked () {
-      this.$emit('delete-metadata', this.lastMetadaDataHeaderMenuDisplayed)
-      this.showMetadataHeaderMenu()
-    },
-
-    resizeSplittedTableHeaders (columnDescriptors) {
-      if (
-        this.$refs['body-tbody'] &&
-        this.$refs['body-tbody'].length > 0 &&
-        this.$refs['body-tbody'][0].children.length > 1
-      ) {
-        const bodyElement = this.$refs['body-tbody'][0].children[1]
-        columnDescriptors.forEach(desc => {
-          const width = bodyElement.children[desc.index].offsetWidth
-          if (this.$refs['th-' + desc.name]) {
-            this.$refs['th-' + desc.name].style['min-width'] = `${width}px`
-          }
-        })
-      }
-    },
-
     onSortByTaskTypeClicked () {
       const taskTypeId = this.lastHeaderMenuDisplayed
       this.$emit('change-sort', {
@@ -232,23 +184,6 @@ export const entityListMixin = {
         name: this.taskTypeMap[taskTypeId].name
       })
       this.showHeaderMenu()
-    },
-
-    onSortByMetadataClicked () {
-      const columnId = this.lastMetadaDataHeaderMenuDisplayed
-      const column =
-        this.currentProduction.descriptors.find(d => d.id === columnId)
-      this.$emit('change-sort', {
-        type: 'metadata',
-        column: column.field_name,
-        name: column.name
-      })
-      this.showMetadataHeaderMenu()
-    },
-
-    getGroupKey (group, i, fieldName) {
-      const key = group[0] ? group[0][fieldName] + group[0].canceled : ''
-      return `${i}-${key}`
     },
 
     getEntityLineNumber (entities, i, k) {
@@ -270,16 +205,21 @@ export const entityListMixin = {
       }
     },
 
-    onMetadataFieldChanged (asset, descriptor, event) {
-      this.$emit('metadata-changed', {
-        asset, descriptor, value: event.target.value
-      })
+    getGroupKey (group, i, fieldName) {
+      const key = group[0] ? group[0][fieldName] + group[0].canceled : ''
+      return `${i}-${key}`
     },
 
     onDescriptionChanged (entry, value) {
       this.$emit('field-changed', {
         entry, fieldName: 'description', value
       })
+    },
+
+    onNumberFieldKeyDown (event) {
+      if (['ArrowDown', 'ArrowUp'].includes(event.key)) {
+        this.pauseEvent(event) // Requires dom mixin
+      }
     }
   }
 }

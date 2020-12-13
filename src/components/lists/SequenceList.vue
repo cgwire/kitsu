@@ -307,12 +307,6 @@ export default {
       }
     },
 
-    // Remaining function for retrocompatibility
-    resizeHeaders () {
-      return true
-    },
-    //
-
     editPath (sequenceId) {
       return this.getPath('edit-sequence', sequenceId)
     },

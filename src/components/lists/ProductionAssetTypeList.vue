@@ -294,9 +294,6 @@ export default {
       }
 
       return route
-    },
-
-    resizeHeaders () {
     }
   }
 }

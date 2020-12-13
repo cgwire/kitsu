@@ -1,3 +1,6 @@
+/*
+ * Utilities to deal with full screen state.
+ */
 export const fullScreenMixin = {
 
   created () {

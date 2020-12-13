@@ -261,7 +261,6 @@ export default {
 
   mounted () {
     window.addEventListener('keydown', this.onKeyDown, false)
-    this.$nextTick(this.resizeHeaders)
   },
 
   beforeDestroy () {
@@ -566,7 +565,6 @@ export default {
     tasks () {
       this.page = 1
       this.resetSelection()
-      this.$nextTick(this.resizeHeaders)
     },
 
     nbSelectedTasks () {

@@ -1,3 +1,6 @@
+/*
+ * Set of functions to make data more readable.
+ */
 import { mapGetters } from 'vuex'
 
 export const formatListMixin = {
@@ -18,6 +21,10 @@ export const formatListMixin = {
   },
 
   methods: {
+    formatBoolean (booleanValue) {
+      return booleanValue ? this.$t('main.yes') : this.$t('main.no')
+    },
+
     formatDuration (duration) {
       if (duration) {
         return (duration / 60 / this.organisation.hours_by_day).toLocaleString(
@@ -26,10 +33,6 @@ export const formatListMixin = {
       } else {
         return 0
       }
-    },
-
-    formatBoolean (booleanValue) {
-      return booleanValue ? this.$t('main.yes') : this.$t('main.no')
     }
   }
 }

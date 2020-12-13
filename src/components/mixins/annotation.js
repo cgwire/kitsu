@@ -1,3 +1,7 @@
+/*
+ * Set of helpers to deal with annotation canvas. It's aimed at preview
+ * widgets.
+ */
 import { mapGetters } from 'vuex'
 import { fabric } from 'fabric'
 
@@ -30,17 +34,90 @@ export const annotationMixin = {
   },
 
   methods: {
-    resetUndoStacks () {
-      this.$options.doneActionStack = []
-      this.$options.undoneActionStack = []
+    // Objects
+
+    addObject (activeObject) {
+      if (activeObject._objects) {
+        activeObject._objects.forEach((obj) => {
+          this.fabricCanvas.add(obj)
+          this.$options.doneActionStack.pop()
+        })
+      } else {
+        this.fabricCanvas.add(activeObject)
+      }
+      this.$options.doneActionStack.push({ type: 'add', obj: activeObject })
+      this.saveAnnotations()
     },
 
-    isEmptyCanvas () {
-      if (this.fabricCanvas) {
-        return this.fabricCanvas.getObjects().length > 0
-      } else {
-        return true
+    addText () {
+      const canvas = this.canvas || this.canvasWrapper
+      const offsetCanvas = canvas.getBoundingClientRect()
+      const posX = event.clientX - offsetCanvas.x
+      const posY = event.clientY - offsetCanvas.y
+      const baseHeight = 320
+      let fontSize = 12
+      if (this.fabricCanvas.getHeight() > baseHeight) {
+        fontSize = fontSize * (this.fabricCanvas.getHeight() / baseHeight)
       }
+      const fabricText = new fabric.IText('Type...', {
+        left: posX,
+        top: posY,
+        fontFamily: 'arial',
+        fill: this.textColor,
+        fontSize: fontSize
+      })
+      this.fabricCanvas.add(fabricText)
+      this.fabricCanvas.setActiveObject(fabricText)
+      fabricText.enterEditing()
+      fabricText.selectAll()
+      fabricText.hiddenTextarea.onblur = () => {
+        this.saveAnnotations()
+      }
+    },
+
+    addTypeArea () {
+      /** @lends fabric.IText.prototype */
+      // fix for : IText not editable when canvas is in a fullscreen
+      // element on chrome
+      // https://github.com/fabricjs/fabric.js/issues/5126
+      const originalInitHiddenTextarea =
+        fabric.IText.prototype.initHiddenTextarea
+      fabric.util.object.extend(fabric.IText.prototype, {
+        initHiddenTextarea: function () {
+          originalInitHiddenTextarea.call(this)
+          this.canvas.wrapperEl.appendChild(this.hiddenTextarea)
+        }
+      })
+    },
+
+    removeTypeArea () {
+      const originalInitHiddenTextarea =
+        fabric.IText.prototype.initHiddenTextarea
+      fabric.util.object.extend(fabric.IText.prototype, {
+        initHiddenTextarea: function () {
+          originalInitHiddenTextarea.call(this)
+          fabric.document.body.appendChild(this.hiddenTextarea)
+        }
+      })
+    },
+
+    deleteSelection () {
+      const activeObject = this.fabricCanvas.getActiveObject()
+      this.deleteObject(activeObject)
+    },
+
+    deleteObject (activeObject) {
+      if (activeObject && activeObject._objects) {
+        activeObject._objects.forEach((obj) => {
+          this.fabricCanvas.remove(obj)
+        })
+      } else {
+        this.fabricCanvas.remove(activeObject)
+      }
+      this.$options.doneActionStack.push({
+        type: 'remove', obj: activeObject
+      })
+      this.saveAnnotations()
     },
 
     getNewAnnotations (currentTime, annotation) {
@@ -88,6 +165,8 @@ export const annotationMixin = {
       return annotations
     },
 
+    // Events
+
     onPickPencil () {
       this.isShowingPencilPalette = !this.isShowingPencilPalette
     },
@@ -117,6 +196,13 @@ export const annotationMixin = {
       const strokeWidth = converter[pencil]
       this.fabricCanvas.freeDrawingBrush.width = strokeWidth
       this.isShowingPalette = false
+    },
+
+    // Undo / Redo
+
+    resetUndoStacks () {
+      this.$options.doneActionStack = []
+      this.$options.undoneActionStack = []
     },
 
     stackAddAction ({ target }) {
@@ -150,67 +236,11 @@ export const annotationMixin = {
       }
     },
 
-    deleteSelection () {
-      const activeObject = this.fabricCanvas.getActiveObject()
-      this.deleteObject(activeObject)
-    },
-
-    deleteObject (activeObject) {
-      if (activeObject && activeObject._objects) {
-        activeObject._objects.forEach((obj) => {
-          this.fabricCanvas.remove(obj)
-        })
-      } else {
-        this.fabricCanvas.remove(activeObject)
-      }
-      this.$options.doneActionStack.push({
-        type: 'remove', obj: activeObject
-      })
-      this.saveAnnotations()
-    },
-
-    addObject (activeObject) {
-      if (activeObject._objects) {
-        activeObject._objects.forEach((obj) => {
-          this.fabricCanvas.add(obj)
-          this.$options.doneActionStack.pop()
-        })
-      } else {
-        this.fabricCanvas.add(activeObject)
-      }
-      this.$options.doneActionStack.push({ type: 'add', obj: activeObject })
-      this.saveAnnotations()
-    },
-
-    addText () {
-      const canvas = this.canvas || this.canvasWrapper
-      const offsetCanvas = canvas.getBoundingClientRect()
-      const posX = event.clientX - offsetCanvas.x
-      const posY = event.clientY - offsetCanvas.y
-      const baseHeight = 320
-      let fontSize = 12
-      if (this.fabricCanvas.getHeight() > baseHeight) {
-        fontSize = fontSize * (this.fabricCanvas.getHeight() / baseHeight)
-      }
-      const fabricText = new fabric.IText('Type...', {
-        left: posX,
-        top: posY,
-        fontFamily: 'arial',
-        fill: this.textColor,
-        fontSize: fontSize
-      })
-      this.fabricCanvas.add(fabricText)
-      this.fabricCanvas.setActiveObject(fabricText)
-      fabricText.enterEditing()
-      fabricText.selectAll()
-      fabricText.hiddenTextarea.onblur = () => {
-        this.saveAnnotations()
-      }
-    },
-
     clearUndoneStack () {
       this.$options.undoneActionStack = []
     },
+
+    // Canvas
 
     reloadAnnotations () {
       this.annotations = []
@@ -248,46 +278,18 @@ export const annotationMixin = {
       return this.fabricCanvas
     },
 
+    isEmptyCanvas () {
+      if (this.fabricCanvas) {
+        return this.fabricCanvas.getObjects().length > 0
+      } else {
+        return true
+      }
+    },
+
     clearCanvas () {
       if (this.fabricCanvas) {
         this.fabricCanvas.clear()
       }
-    },
-
-    addTypeArea () {
-      /** @lends fabric.IText.prototype */
-      // fix for : IText not editable when canvas is in a fullscreen
-      // element on chrome
-      // https://github.com/fabricjs/fabric.js/issues/5126
-      const originalInitHiddenTextarea =
-        fabric.IText.prototype.initHiddenTextarea
-      fabric.util.object.extend(fabric.IText.prototype, {
-        initHiddenTextarea: function () {
-          originalInitHiddenTextarea.call(this)
-          this.canvas.wrapperEl.appendChild(this.hiddenTextarea)
-        }
-      })
-    },
-
-    isFullScreen () {
-      return !!(
-        document.fullScreen ||
-        document.webkitIsFullScreen ||
-        document.mozFullScreen ||
-        document.msFullscreenElement ||
-        document.fullscreenElement
-      )
-    },
-
-    removeTypeArea () {
-      const originalInitHiddenTextarea =
-        fabric.IText.prototype.initHiddenTextarea
-      fabric.util.object.extend(fabric.IText.prototype, {
-        initHiddenTextarea: function () {
-          originalInitHiddenTextarea.call(this)
-          fabric.document.body.appendChild(this.hiddenTextarea)
-        }
-      })
     }
   }
 }

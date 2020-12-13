@@ -1,3 +1,7 @@
+/*
+ * Set of functions to facilitate usage of a search field in order to filter
+ * list.
+ */
 export const searchMixin = {
 
   created () {
@@ -14,6 +18,18 @@ export const searchMixin = {
   },
 
   methods: {
+    changeSearch (searchQuery) {
+      this.searchField.setValue(searchQuery.search_query)
+      this.searchField.$emit('change', searchQuery.search_query)
+      if (this.resizeHeaders) this.resizeHeaders()
+    },
+
+    focusSearchField () {
+      if (this.searchField) {
+        this.searchField.focus()
+      }
+    },
+
     setSearchFromUrl () {
       const searchQuery = this.searchField.getValue()
       const searchFromUrl = this.$route.query.search
@@ -30,18 +46,6 @@ export const searchMixin = {
             search: searchQuery
           }
         })
-      }
-    },
-
-    changeSearch (searchQuery) {
-      this.searchField.setValue(searchQuery.search_query)
-      this.searchField.$emit('change', searchQuery.search_query)
-      if (this.resizeHeaders) this.resizeHeaders()
-    },
-
-    focusSearchField () {
-      if (this.searchField) {
-        this.searchField.focus()
       }
     }
   }

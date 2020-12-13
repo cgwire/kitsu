@@ -434,12 +434,6 @@ export default {
       this.$refs.body.scrollTop = scrollPosition
     },
 
-    // Remaining function for retrocompatibility
-    resizeHeaders () {
-      return true
-    },
-    //
-
     editPath (episodeId) {
       return this.getPath('edit-episode', episodeId)
     },
