@@ -116,8 +116,8 @@
                 v-if="!isCurrentUserClient"
               >
                 {{ !hiddenColumns[columnId]
-                  ? taskTypeMap[columnId].name
-                  : '' }}
+                   ? taskTypeMap[columnId].name
+                   : '' }}
               </router-link>
               <span
                 class="flexrow-item datatable-dropdown task-type-name"
@@ -191,7 +191,11 @@
                 max-height="32px"
                 max-width="48px"
               />
-              <router-link :to="shotPath(shot.id)" :title="shot.full_name">
+              <router-link
+                tabindex="-1"
+                :title="shot.full_name"
+                :to="shotPath(shot.id)"
+              >
                 {{ shot.name }}
               </router-link>
             </div>
@@ -210,12 +214,12 @@
             v-if="isShowInfos"
           >
             <input
-              :ref="`editor-${getIndex(i, k)}-${j + 1}`"
+              :ref="`editor-${getIndex(i, k)}-${j}`"
               class="input-editor"
+              :value="getMetadataFieldValue(descriptor, shot)"
               @input="
                 event => onMetadataFieldChanged(shot, descriptor, event)"
-              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j + 1)"
-              :value="getMetadataFieldValue(descriptor, shot)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
               v-if="descriptor.choices.length === 0 && isCurrentUserManager"
             />
             <span
@@ -224,8 +228,8 @@
             >
               <select
                 class="select-input"
-                @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j + 1)"
-                :ref="`editor-${getIndex(i, k)}-${j + 1}`"
+                :ref="`editor-${getIndex(i, k)}-${j}`"
+                @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
                 @change="
                   event => onMetadataFieldChanged(shot, descriptor, event)"
               >
@@ -239,31 +243,78 @@
                 </option>
               </select>
             </span>
+            <span v-else>
+              {{ getMetadataFieldValue(descriptor, shot) }}
+            </span>
           </td>
           <td class="frames"
             v-if="isFrames && isShowInfos"
           >
-            {{ shot.nb_frames }}
+            <input
+              :ref="`editor-${getIndex(i, k)}-${descriptorLength}`"
+              class="input-editor"
+              step="1"
+              :value="shot.nb_frames"
+              type="number"
+              min="0"
+              @input="event => onNbFramesChanged(shot, event.target.value)"
+              @keydown="onNumberFieldKeyDown"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength)"
+              v-if="isCurrentUserManager"
+            />
+            <span v-else>
+              {{ shot.nb_frames }}
+            </span>
           </td>
           <td class="framein" v-if="isFrameIn && isShowInfos">
             <input
-              :ref="`editor-${getIndex(i, k)}-${j + 1}`"
+              :ref="`editor-${getIndex(i, k)}-${descriptorLength + 1}`"
               class="input-editor"
-              @input="
-                event => onMetadataFieldChanged(shot, descriptor, event)"
-              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j + 1)"
+              step="1"
+              type="number"
+              min="0"
               :value="getMetadataFieldValue({field_name: 'frame_in'}, shot)"
-              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+              @input="event => onMetadataFieldChanged(shot, {field_name: 'frame_in'}, event)"
+              @keydown="onNumberFieldKeyDown"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 1)"
+              v-if="isCurrentUserManager"
             />
             <span v-else>
               {{ getMetadataFieldValue({field_name: 'frame_in'}, shot) }}
             </span>
           </td>
           <td class="frameout" v-if="isFrameOut && isShowInfos">
-            {{ shot.data && shot.data.frame_out ? shot.data.frame_out : ''}}
+            <input
+              :ref="`editor-${getIndex(i, k)}-${descriptorLength + 2}`"
+              class="input-editor"
+              step="1"
+              type="number"
+              min="0"
+              :value="getMetadataFieldValue({field_name: 'frame_out'}, shot)"
+              @keydown="onNumberFieldKeyDown"
+              @input="event => onMetadataFieldChanged(shot, {field_name: 'frame_out'}, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 2)"
+              v-if="isCurrentUserManager"
+            />
+            <span v-else>
+              {{ getMetadataFieldValue({field_name: 'frame_in'}, shot) }}
+            </span>
           </td>
           <td class="fps" v-if="isFps && isShowInfos">
-            {{ shot.data && shot.data.fps ? shot.data.fps : ''}}
+            <input
+              :ref="`editor-${getIndex(i, k)}-${descriptorLength + 3}`"
+              class="input-editor"
+              step="1"
+              type="number"
+              :value="getMetadataFieldValue({field_name: 'fps'}, shot)"
+              @keydown="onNumberFieldKeyDown"
+              @input="event => onMetadataFieldChanged(shot, {field_name: 'fps'}, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)"
+              v-if="isCurrentUserManager"
+            />
+            <span v-else>
+              {{ getMetadataFieldValue({field_name: 'frame_out'}, shot) }}
+            </span>
           </td>
           <td
             class="time-spent"
@@ -353,6 +404,7 @@ import {
   ChevronDownIcon
 } from 'vue-feather-icons'
 import { descriptorMixin } from '@/components/mixins/descriptors'
+import { domMixin } from '@/components/mixins/dom'
 import { entityListMixin } from '@/components/mixins/entity_list'
 import { formatListMixin } from '@/components/mixins/format'
 import { selectionListMixin } from '@/components/mixins/selection'
@@ -370,6 +422,7 @@ export default {
   name: 'shot-list',
   mixins: [
     descriptorMixin,
+    domMixin,
     formatListMixin,
     entityListMixin,
     selectionListMixin
@@ -452,26 +505,6 @@ export default {
              (!this.shotSearchText || this.shotSearchText.length === 0)
     },
 
-    createTasksPath () {
-      return this.getPath('create-shot-tasks')
-    },
-
-    manageShotsPath () {
-      const route = {
-        name: 'manage-shots',
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = 'episode-manage-shots'
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      return route
-    },
-
     isEmptyTask () {
       return !this.isEmptyList &&
       !this.isLoading &&
@@ -536,12 +569,6 @@ export default {
       this.displayMoreShots()
     },
 
-    // Remaining function for retrocompatibility
-    resizeHeaders () {
-      return true
-    },
-    //
-
     taskTypePath (taskTypeId) {
       if (this.isTVShow && this.currentEpisode) {
         return {
@@ -569,18 +596,6 @@ export default {
       return this.getPath('shot', shotId)
     },
 
-    editPath (shotId) {
-      return this.getPath('edit-shot', shotId)
-    },
-
-    deletePath (shotId) {
-      return this.getPath('delete-shot', shotId)
-    },
-
-    restorePath (shotId) {
-      return this.getPath('restore-shot', shotId)
-    },
-
     getPath (section, shotId) {
       const route = {
         name: section,
@@ -602,9 +617,16 @@ export default {
     },
 
     onInputKeyUp (event, i, j) {
-      const listWidth = this.shotMetadataDescriptors.length
+      const listWidth = this.shotMetadataDescriptors.length + 4
       const listHeight = this.displayedShotsLength
       this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
+      return this.pauseEvent(event)
+    },
+
+    onNbFramesChanged (entry, value) {
+      this.$emit('field-changed', {
+        entry, fieldName: 'nb_frames', value
+      })
     },
 
     getIndex (i, k) {
@@ -780,6 +802,14 @@ td.metadata-descriptor {
   }
 }
 
+td.frames,
+td.framein,
+td.frameout,
+td.fps {
+  height: 3.1rem;
+  padding: 0;
+}
+
 th .input-editor,
 td .input-editor {
   color: $grey-strong;
@@ -846,4 +876,13 @@ td .select {
   }
 }
 
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
 </style>

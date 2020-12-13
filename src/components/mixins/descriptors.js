@@ -88,7 +88,6 @@ export const descriptorMixin = {
      * not an arrow nothing is done.
      */
     keyMetadataNavigation (listWidth, listHeight, i, j, key) {
-      console.log(listWidth, listHeight, i, j, key)
       if (key === 'ArrowDown') {
         i = i + 1
         if (i >= listHeight) i = 0
@@ -105,7 +104,6 @@ export const descriptorMixin = {
         return
       }
       const ref = `editor-${i}-${j}`
-      console.log(ref)
       const input = this.$refs[ref][0]
       input.focus()
     }

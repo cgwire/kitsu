@@ -569,6 +569,10 @@ export default {
 
 .dark thead tr a {
   color: $light-grey;
+
+  .asset-name {
+    color: $white;
+  }
 }
 
 .actions {
@@ -634,7 +638,6 @@ th.metadata-descriptor {
 
 .asset-name {
   color: inherit
-  font-siwe
 }
 
 .info img {

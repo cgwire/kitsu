@@ -90,6 +90,7 @@
         @edit-clicked="onEditClicked"
         @edit-metadata="onEditMetadataClicked"
         @field-changed="onFieldChanged"
+        @metadata-changed="onMetadataChanged"
         @restore-clicked="onRestoreClicked"
         @scroll="saveScrollPosition"
         @shot-history="showShotHistoryModal"
@@ -938,6 +939,18 @@ export default {
         description: entry.description
       }
       data[fieldName] = value
+      this.editShot(data)
+    },
+
+    onMetadataChanged ({ entry, descriptor, value }) {
+      const metadata = { ...entry.data }
+      metadata[descriptor.field_name] = value
+      const data = {
+        id: entry.id,
+        nb_frames: entry.nb_frames,
+        description: entry.description,
+        data: metadata
+      }
       this.editShot(data)
     }
   },
