@@ -35,7 +35,6 @@
         class="tooltip-editor"
         ref="text"
         :value="entry.description"
-        @input="event => $emit('description-changed', event.target.value)"
         @keyup.esc="onClick"
         @keyup.ctrl.enter="onDoubleClick"
         v-else
@@ -109,6 +108,10 @@ export default {
 
     onDoubleClick () {
       if (this.editable) {
+        if (this.isEditing) {
+          const val = this.$refs.text.value
+          this.$emit('description-changed', val)
+        }
         this.isEditing = !this.isEditing
         if (this.isEditing) {
           this.$nextTick(() => {

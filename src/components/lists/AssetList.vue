@@ -573,6 +573,16 @@ export default {
   .asset-name {
     color: $white;
   }
+
+  td .select {
+    &:active,
+    &:focus,
+    &:hover {
+      &::after {
+        border-color: $green;
+      }
+    }
+  }
 }
 
 .actions {
@@ -711,6 +721,7 @@ td .select {
   }
 
   &:active,
+  &:focus,
   &:hover {
     &::after {
       border-color: $green;

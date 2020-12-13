@@ -372,6 +372,9 @@ export const DATA_LOADING_END = 'DATA_LOADING_END'
 
 export const CHANGE_SHOT_SORT = 'CHANGE_SHOT_SORT'
 
+export const LOCK_SHOT = 'LOCK_SHOT'
+export const UNLOCK_SHOT = 'UNLOCK_SHOT'
+
 // Profile and auth
 
 export const CHANGE_EMAIL = 'CHANGE_EMAIL'

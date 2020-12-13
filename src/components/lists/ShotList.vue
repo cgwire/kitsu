@@ -229,6 +229,7 @@
               <select
                 class="select-input"
                 :ref="`editor-${getIndex(i, k)}-${j}`"
+                @keydown.ctrl="pauseEvent"
                 @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
                 @change="
                   event => onMetadataFieldChanged(shot, descriptor, event)"

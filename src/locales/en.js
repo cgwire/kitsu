@@ -727,6 +727,7 @@ export default {
       frame_out: 'Out',
       fps: 'FPS',
       name: 'Name',
+      person: 'Modifier',
       production: 'Prod',
       sequence: 'Sequence',
       time_spent: 'Time'
