@@ -57,6 +57,7 @@
         </label>
         <checklist
           :checklist="form.checklist"
+          @add-item="onAddChecklistItem"
           @remove-task="removeTask"
         />
       </form>
@@ -131,7 +132,7 @@ export default {
     },
 
     removeTask (entry) {
-      this.form.checklist = remove(this.form.checklist, entry)
+      this.form.checklist = [...remove(this.form.checklist, entry)]
     },
 
     reset () {
@@ -139,7 +140,7 @@ export default {
         this.form = {
           text: this.commentToEdit.text,
           task_status_id: this.commentToEdit.task_status_id,
-          checklist: this.commentToEdit.checklist
+          checklist: [...this.commentToEdit.checklist]
         }
       } else {
         this.form = {
@@ -148,6 +149,13 @@ export default {
           checklist: [{ checked: false, text: '' }]
         }
       }
+    },
+
+    onAddChecklistItem (item) {
+      this.form.checklist[item.index].text =
+        this.form.checklist[item.index].text.trim()
+      delete item.index
+      this.form.checklist.push(item)
     }
   },
 

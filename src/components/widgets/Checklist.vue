@@ -58,11 +58,9 @@ export default {
 
   methods: {
     addChecklistEntry (index, event) {
-      if (event) {
-        this.checklist[index].text = this.checklist[index].text.trim()
-      }
       if (index === -1 || index === this.checklist.length - 1) {
-        this.checklist.push({
+        this.$emit('add-item', {
+          index,
           text: '',
           checked: false
         })

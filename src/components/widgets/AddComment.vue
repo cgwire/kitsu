@@ -50,6 +50,7 @@
       </at-ta>
       <checklist
         :checklist="checklist"
+        @add-item="onAddChecklistItem"
         @remove-task="removeTask"
         v-if="checklist.length > 0"
       />
@@ -331,6 +332,12 @@ export default {
       this.$nextTick(() => {
         this.$refs['comment-textarea'].value = comment.text
       })
+    },
+
+    onAddChecklistItem (item) {
+      this.checklist[item.index].text = this.checklist[item.index].text.trim()
+      delete item.index
+      this.checklist.push(item)
     }
   },
 
