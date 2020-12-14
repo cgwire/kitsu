@@ -269,6 +269,8 @@ export const REMOVE_ASSET = 'REMOVE_ASSET'
 export const CANCEL_ASSET = 'CANCEL_ASSET'
 
 export const CHANGE_ASSET_SORT = 'CHANGE_ASSET_SORT'
+export const LOCK_ASSET = 'LOCK_ASSET'
+export const UNLOCK_ASSET = 'UNLOCK_ASSET'
 
 // Shots
 //

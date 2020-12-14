@@ -87,6 +87,8 @@ import {
   UPDATE_METADATA_DESCRIPTOR_END,
 
   CHANGE_ASSET_SORT,
+  LOCK_ASSET,
+  UNLOCK_ASSET,
 
   RESET_ALL
 } from '../mutation-types'
@@ -372,7 +374,14 @@ const actions = {
       })
   },
 
+  /*
+   * Function used mainly to reload asset information when a remote change
+   * occurs.
+   */
   loadAsset ({ commit, state, rootGetters }, assetId) {
+    const asset = state.assetMap[assetId]
+    if (asset && asset.lock) return
+
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
     const taskMap = rootGetters.taskMap
@@ -419,18 +428,20 @@ const actions = {
   },
 
   editAsset ({ commit, state, rootState }, data) {
-    /*
     const existingAsset = data.name && cache.assets.find(asset => {
       return asset.name === data.name && data.id !== asset.id
     })
     if (existingAsset) {
       return Promise.reject(new Error('Asset already exsists'))
     }
-    */
     const assetTypeMap = rootState.assetTypes.assetTypeMap
+    commit(LOCK_ASSET, data)
+    commit(EDIT_ASSET_END, { newAsset: data, assetTypeMap })
     return assetsApi.updateAsset(data)
       .then(asset => {
-        commit(EDIT_ASSET_END, { newAsset: asset, assetTypeMap })
+        setTimeout(() => {
+          commit(UNLOCK_ASSET, data)
+        }, 2000)
         return Promise.resolve(asset)
       })
   },
@@ -796,7 +807,6 @@ const mutations = {
 
   [EDIT_ASSET_END] (state, { newAsset, assetTypeMap }) {
     state.assetCreated = newAsset.name
-
     const asset = state.assetMap[newAsset.id]
     const assetType = assetTypeMap[newAsset.entity_type_id]
     if (assetType) {
@@ -1030,6 +1040,16 @@ const mutations = {
         delete asset.data[previousDescriptorFieldName]
       })
     }
+  },
+
+  [LOCK_ASSET] (state, asset) {
+    asset = state.assetMap[asset.id]
+    asset.lock = true
+  },
+
+  [UNLOCK_ASSET] (state, asset) {
+    asset = state.assetMap[asset.id]
+    asset.lock = false
   },
 
   [RESET_ALL] (state) {

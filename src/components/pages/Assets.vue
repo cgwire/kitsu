@@ -924,11 +924,11 @@ export default {
       this.editAsset(data)
     },
 
-    onMetadataChanged ({ asset, descriptor, value }) {
-      const metadata = { ...asset.data }
+    onMetadataChanged ({ entry, descriptor, value }) {
+      const metadata = { ...entry.data }
       metadata[descriptor.field_name] = value
       const data = {
-        id: asset.id,
+        id: entry.id,
         data: metadata
       }
       this.editAsset(data)
