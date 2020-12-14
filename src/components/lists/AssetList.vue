@@ -178,15 +178,7 @@
               bold: !asset.canceled
             }">
             <div class="flexrow">
-              <light-entity-thumbnail
-                :preview-file-id="asset.preview_file_id"
-                empty-height="32px"
-                empty-width="48px"
-                height="32px"
-                width="48px"
-                max-height="32px"
-                max-width="48px"
-              />
+              <entity-thumbnail :entity="asset" :empty-height="32" />
               <router-link
                 tabindex="-1"
                 class="asset-link asset-name"
@@ -341,7 +333,7 @@ import { selectionListMixin } from '@/components/mixins/selection'
 
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
-import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
 import TableInfo from '@/components/widgets/TableInfo'
@@ -361,7 +353,7 @@ export default {
   components: {
     ButtonSimple,
     DescriptionCell,
-    LightEntityThumbnail,
+    EntityThumbnail,
     ChevronDownIcon,
     RowActionsCell,
     TableInfo,
