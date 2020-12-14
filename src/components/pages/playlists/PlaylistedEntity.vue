@@ -117,16 +117,18 @@ export default {
     },
 
     taskTypeOptions () {
-      return this.entity.preview_files ? Object
-        .keys(this.entity.preview_files)
-        .map(id => this.taskTypeMap[id])
-        .sort(firstBy('priority', 1).thenBy('name'))
-        .map((taskType) => {
-          return {
-            label: taskType.name,
-            value: taskType.id
-          }
-        }) : []
+      return this.entity.preview_files
+        ? Object
+            .keys(this.entity.preview_files)
+            .map(id => this.taskTypeMap[id])
+            .sort(firstBy('priority', 1).thenBy('name'))
+            .map((taskType) => {
+              return {
+                label: taskType.name,
+                value: taskType.id
+              }
+            })
+        : []
     },
 
     previewFileOptions () {

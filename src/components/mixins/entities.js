@@ -1,3 +1,6 @@
+/*
+ * Common functions to shots and assets pages.
+ */
 export const entityListMixin = {
 
   created () {

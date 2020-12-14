@@ -269,6 +269,8 @@ export const REMOVE_ASSET = 'REMOVE_ASSET'
 export const CANCEL_ASSET = 'CANCEL_ASSET'
 
 export const CHANGE_ASSET_SORT = 'CHANGE_ASSET_SORT'
+export const LOCK_ASSET = 'LOCK_ASSET'
+export const UNLOCK_ASSET = 'UNLOCK_ASSET'
 
 // Shots
 //
@@ -371,6 +373,9 @@ export const DATA_LOADING_START = 'DATA_LOADING_START'
 export const DATA_LOADING_END = 'DATA_LOADING_END'
 
 export const CHANGE_SHOT_SORT = 'CHANGE_SHOT_SORT'
+
+export const LOCK_SHOT = 'LOCK_SHOT'
+export const UNLOCK_SHOT = 'UNLOCK_SHOT'
 
 // Profile and auth
 

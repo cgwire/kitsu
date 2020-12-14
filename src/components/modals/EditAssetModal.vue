@@ -103,15 +103,16 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
+import { descriptorMixin } from '@/components/mixins/descriptors'
 
-import TextField from '../widgets/TextField'
-import TextareaField from '../widgets/TextareaField'
-import Combobox from '../widgets/Combobox'
+import TextField from '@/components/widgets/TextField'
+import TextareaField from '@/components/widgets/TextareaField'
+import Combobox from '@/components/widgets/Combobox'
 
 export default {
   name: 'edit-asset-modal',
-  mixins: [modalMixin],
+  mixins: [descriptorMixin, modalMixin],
 
   components: {
     TextField,
@@ -229,11 +230,6 @@ export default {
 
     isEditing () {
       return this.assetToEdit && this.assetToEdit.id
-    },
-
-    getDescriptorChoicesOptions (descriptor) {
-      const values = descriptor.choices.map(c => ({ label: c, value: c }))
-      return [{ label: '', value: '' }, ...values]
     },
 
     resetForm () {

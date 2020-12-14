@@ -33,7 +33,7 @@
           <td class="is-ajax">
             {{ formatBoolean(customAction.is_ajax) }}
           </td>
-          <row-actions
+          <row-actions-cell
             :entry-id="customAction.id"
             @edit-clicked="$emit('edit-clicked', customAction)"
             @delete-clicked="$emit('delete-clicked', customAction)"
@@ -57,9 +57,10 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { formatListMixin } from './format_mixin'
-import RowActions from '../widgets/RowActions'
-import TableInfo from '../widgets/TableInfo'
+import { formatListMixin } from '@/components/mixins/format'
+
+import RowActionsCell from '@/components/cells/RowActionsCell'
+import TableInfo from '@/components/widgets/TableInfo'
 
 export default {
   name: 'custom-action-list',
@@ -74,7 +75,7 @@ export default {
     return {}
   },
   components: {
-    RowActions,
+    RowActionsCell,
     TableInfo
   },
   computed: {

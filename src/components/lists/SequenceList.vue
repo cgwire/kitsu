@@ -91,9 +91,12 @@
             {{ entry.name }}
           </th>
 
-          <td class="description">
-            {{ entry.description }}
-          </td>
+          <description-cell
+            class="description"
+            :editable="isCurrentUserManager"
+            :entry="entry"
+            @description-changed="value => onDescriptionChanged(entry, value)"
+          />
 
           <stats-cell
             :colors="chartColors(entry.id, 'all')"
@@ -125,10 +128,11 @@
           >
           </td>
 
-          <row-actions v-if="isCurrentUserManager"
+          <row-actions-cell
             :entry="entry"
             @edit-clicked="$emit('edit-clicked', entry)"
             @delete-clicked="$emit('delete-clicked', entry)"
+            v-if="isCurrentUserManager"
           />
           <td class="actions" v-else></td>
         </tr>
@@ -172,18 +176,21 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { getChartColors, getChartData } from '../../lib/stats'
-import { entityListMixin } from './base'
-import RowActions from '../widgets/RowActions'
-import TableInfo from '../widgets/TableInfo'
-import StatsCell from '../cells/StatsCell'
+import { getChartColors, getChartData } from '@/lib/stats'
+import { entityListMixin } from '@/components/mixins/entity_list'
+
+import DescriptionCell from '@/components/cells/DescriptionCell'
+import RowActionsCell from '@/components/cells/RowActionsCell'
+import TableInfo from '@/components/widgets/TableInfo'
+import StatsCell from '@/components/cells/StatsCell'
 
 export default {
   name: 'sequence-list',
   mixins: [entityListMixin],
 
   components: {
-    RowActions,
+    DescriptionCell,
+    RowActionsCell,
     StatsCell,
     TableInfo
   },
@@ -300,12 +307,6 @@ export default {
       }
     },
 
-    // Remaining function for retrocompatibility
-    resizeHeaders () {
-      return true
-    },
-    //
-
     editPath (sequenceId) {
       return this.getPath('edit-sequence', sequenceId)
     },
@@ -405,5 +406,6 @@ th.actions {
 
 .actions {
   width: 100%;
+  min-width: 150px;
 }
 </style>

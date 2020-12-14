@@ -199,7 +199,7 @@ export default {
     },
     task: {
       type: Object,
-      default: () => []
+      default: () => {}
     },
     taskStatus: {
       type: Array,

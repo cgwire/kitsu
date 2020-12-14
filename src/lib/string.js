@@ -5,7 +5,7 @@ export default {
    * must be written.
    */
   generateNextName (name, padding = 1) {
-    var matches = name.match(/\d+$/)
+    const matches = name.match(/\d+$/)
     if (matches) {
       const number = matches[0]
       const rootName = name.substring(0, name.length - number.length)

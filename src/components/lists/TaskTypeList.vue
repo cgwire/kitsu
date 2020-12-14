@@ -35,7 +35,7 @@
           <td class="allow-timelog">
             {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
           </td>
-          <row-actions
+          <row-actions-cell
             :taskType-id="taskType.id"
             @delete-clicked="$emit('delete-clicked', taskType)"
             @edit-clicked="$emit('edit-clicked', taskType)"
@@ -66,7 +66,7 @@
           <td class="allow-timelog">
             {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
           </td>
-          <row-actions
+          <row-actions-cell
             :taskType-id="taskType.id"
             @delete-clicked="$emit('delete-clicked', taskType)"
             @edit-clicked="$emit('edit-clicked', taskType)"
@@ -91,7 +91,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import draggable from 'vuedraggable'
-import RowActions from '../widgets/RowActions'
+import RowActionsCell from '../cells/RowActionsCell'
 import TableInfo from '../widgets/TableInfo'
 import TaskTypeCell from '../cells/TaskTypeName'
 
@@ -113,7 +113,7 @@ export default {
 
   components: {
     draggable,
-    RowActions,
+    RowActionsCell,
     TableInfo,
     TaskTypeCell
   },

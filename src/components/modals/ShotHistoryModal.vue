@@ -18,7 +18,7 @@
             <th class="name">{{ $t('shots.fields.name') }}</th>
             <th class="frame-in">{{ $t('shots.fields.frame_in') }}</th>
             <th class="frame-out">{{ $t('shots.fields.frame_out') }}</th>
-            <th class="table-filler">&nbsp;</th>
+            <th class="person table-filler">{{ $t('shots.fields.person') }}</th>
           </tr>
         </thead>
       </table>
@@ -46,7 +46,9 @@
               <td class="frame-out">
                 {{ version.data.frame_out }}
               </td>
-              <td class="table-filler"></td>
+              <td class="person table-filler">
+                {{ getPersonFullName(version.person_id) }}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -110,6 +112,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'personMap'
     ])
   },
 
@@ -118,29 +121,34 @@ export default {
       'loadShotHistory'
     ]),
 
-    reset () {
-      this.versions = []
-      this.isError = false
-      this.isLoading = false
+    formatDate (dateString) {
+      return formatDate(dateString)
+    },
+
+    getPersonFullName (personId) {
+      const person = this.personMap[personId]
+      return person ? person.full_name : ''
     },
 
     loadData () {
       this.isError = false
       this.isLoading = true
       return this.loadShotHistory(this.shot.id)
-        .then((versions) => {
+        .then(versions => {
           this.versions = versions
           this.isLoading = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.isLoading = false
           this.isError = true
         })
     },
 
-    formatDate (dateString) {
-      return formatDate(dateString)
+    reset () {
+      this.versions = []
+      this.isError = false
+      this.isLoading = false
     }
   },
 
@@ -157,6 +165,12 @@ export default {
 
 <style lang="scss" scoped>
 .dark {
+  .table {
+    th {
+      color: $white;
+    }
+  }
+
   .table tr:nth-child(odd) {
     color: $white-grey;
     background: #36393F;
@@ -191,6 +205,11 @@ export default {
 .frame-in {
   min-width: 80px;
   width: 80px;
+}
+
+td.person {
+  font-size: 0.8em;
+  padding-top: 0.9em;
 }
 
 .table-filler {

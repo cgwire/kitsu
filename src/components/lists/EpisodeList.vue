@@ -100,9 +100,12 @@
               {{ entry.name }}
             </td>
 
-            <td class="description">
-              {{ entry.description }}
-            </td>
+            <description-cell
+              class="description"
+              :editable="isCurrentUserManager"
+              :entry="entry"
+              @description-changed="value => onDescriptionChanged(entry, value)"
+            />
 
             <stats-cell
               :colors="chartColors(entry.id, 'all')"
@@ -136,7 +139,7 @@
             >
             </td>
 
-            <row-actions
+            <row-actions-cell
               :entry="entry"
               @delete-clicked="$emit('delete-clicked', entry)"
               @edit-clicked="$emit('edit-clicked', entry)"
@@ -240,7 +243,7 @@ import {
   ChevronRightIcon
 } from 'vue-feather-icons'
 
-import { entityListMixin } from './base'
+import { entityListMixin } from '@/components/mixins/entity_list'
 import { range } from '@/lib/time'
 import {
   getChartColors,
@@ -248,7 +251,8 @@ import {
   getChartRetakeCount,
   getRetakeChartData
 } from '@/lib/stats'
-import RowActions from '@/components/widgets/RowActions'
+import DescriptionCell from '@/components/cells/DescriptionCell'
+import RowActionsCell from '@/components/cells/RowActionsCell'
 import StatsCell from '@/components/cells/StatsCell'
 import TableInfo from '@/components/widgets/TableInfo'
 
@@ -257,9 +261,10 @@ export default {
   mixins: [entityListMixin],
 
   components: {
+    DescriptionCell,
     ChevronDownIcon,
     ChevronRightIcon,
-    RowActions,
+    RowActionsCell,
     StatsCell,
     TableInfo
   },
@@ -428,12 +433,6 @@ export default {
     setScrollPosition (scrollPosition) {
       this.$refs.body.scrollTop = scrollPosition
     },
-
-    // Remaining function for retrocompatibility
-    resizeHeaders () {
-      return true
-    },
-    //
 
     editPath (episodeId) {
       return this.getPath('edit-episode', episodeId)

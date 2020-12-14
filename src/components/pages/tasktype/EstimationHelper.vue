@@ -213,7 +213,7 @@ import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import PeopleName from '@/components/widgets/PeopleName'
 
 import { domMixin } from '@/components/mixins/dom'
-import { formatListMixin } from '@/components/lists/format_mixin'
+import { formatListMixin } from '@/components/mixins/format'
 import { minutesToDays, range } from '@/lib/time'
 import { frameToSeconds } from '@/lib/video'
 import firstBy from 'thenby'
@@ -416,14 +416,13 @@ export default {
 
     selectPrevious (shiftKey) {
       let index = this.lastSelection
-      index = (index - 1) < 0 ? index =
-        this.tasksByPerson.length - 1 : index - 1
+      index = (index - 1) < 0 ? this.tasksByPerson.length - 1 : index - 1
       this.selectTask({ shiftKey }, this.tasksByPerson[index], index)
     },
 
     selectNext (shiftKey) {
       let index = this.lastSelection
-      index = (index + 1) >= this.tasksByPerson.length ? index = 0 : index + 1
+      index = (index + 1) >= this.tasksByPerson.length ? 0 : index + 1
       this.selectTask({ shiftKey }, this.tasksByPerson[index], index)
     },
 

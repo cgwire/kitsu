@@ -54,9 +54,10 @@
       :count-mode="countMode"
       :display-mode="displayMode"
       :show-all="episodeSearchText.length === 0"
-      @scroll="saveScrollPosition"
       @delete-clicked="onDeleteClicked"
       @edit-clicked="onEditClicked"
+      @field-changed="onFieldChanged"
+      @scroll="saveScrollPosition"
     />
 
     <edit-episode-modal
@@ -145,7 +146,6 @@ export default {
   mounted () {
     this.setDefaultSearchText()
     this.setDefaultListScrollPosition()
-    this.resizeHeaders()
     this.isLoading = true
     this.isLoadingError = false
     this.initEpisodes()
@@ -274,19 +274,10 @@ export default {
     onSearchChange (event) {
       const searchQuery = this.$refs['episode-search-field'].getValue()
       this.setEpisodeSearch(searchQuery)
-      this.resizeHeaders()
     },
 
     saveScrollPosition (scrollPosition) {
       this.setEpisodeListScrollPosition(scrollPosition)
-    },
-
-    resizeHeaders () {
-      setTimeout(() => {
-        if (this.$refs['episode-list']) {
-          this.$refs['episode-list'].resizeHeaders()
-        }
-      }, 0)
     },
 
     exportStatisticsToCsv () {
@@ -319,6 +310,12 @@ export default {
       }
     },
 
+    onFieldChanged ({ entry, fieldName, value }) {
+      const data = { id: entry.id }
+      data[fieldName] = value
+      this.editEpisode(data)
+    },
+
     reset () {
       this.isLoading = true
       this.isLoadingError = false
@@ -339,7 +336,6 @@ export default {
 
   watch: {
     displayedEpisodes () {
-      this.resizeHeaders()
     },
 
     currentProduction () {

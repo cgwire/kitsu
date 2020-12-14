@@ -169,7 +169,8 @@ export default {
     fileTitle () {
       return (
         this.preview
-          ? this.preview.original_name + '.' + this.preview.extension : ''
+          ? this.preview.original_name + '.' + this.preview.extension
+          : ''
       )
     },
 
@@ -281,14 +282,6 @@ export default {
         this.play()
       } else {
         this.pause()
-      }
-    },
-
-    onRepeatClicked () {
-      if (this.isRepeating) {
-        this.isRepeating = false
-      } else {
-        this.isRepeating = true
       }
     },
 

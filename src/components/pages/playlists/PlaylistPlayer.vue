@@ -640,20 +640,20 @@ import { mapActions, mapGetters } from 'vuex'
 import { fabric } from 'fabric'
 import { ArrowUpRightIcon, DownloadIcon } from 'vue-feather-icons'
 
-import { formatFrame, formatTime, roundToFrame } from '../../../lib/video'
-import AnnotationBar from './AnnotationBar'
-import ButtonSimple from '../../widgets/ButtonSimple'
-import ColorPicker from '../../widgets/ColorPicker'
-import Combobox from '../../widgets/Combobox'
-import DeleteModal from '../../modals/DeleteModal'
-import PencilPicker from '../../widgets/PencilPicker'
-import PlaylistedEntity from './PlaylistedEntity'
-import RawVideoPlayer from './RawVideoPlayer'
-import SelectTaskTypeModal from '../../modals/SelectTaskTypeModal'
-import Spinner from '../../widgets/Spinner'
-import TaskInfo from '../../sides/TaskInfo'
+import { formatFrame, formatTime, roundToFrame } from '@/lib/video'
+import AnnotationBar from '@/components/pages/playlists/AnnotationBar'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import ColorPicker from '@/components/widgets/ColorPicker'
+import Combobox from '@/components/widgets/Combobox'
+import DeleteModal from '@/components/modals/DeleteModal'
+import PencilPicker from '@/components/widgets/PencilPicker'
+import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity'
+import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer'
+import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal'
+import Spinner from '@/components/widgets/Spinner'
+import TaskInfo from '@/components/sides/TaskInfo'
 
-import { annotationMixin } from '@/components/mixins/annotation_mixin'
+import { annotationMixin } from '@/components/mixins/annotation'
 
 export default {
   name: 'playlist-player',
@@ -759,7 +759,6 @@ export default {
     } else {
       this.entityList = []
     }
-    if (!this.playlist.name) this.isLoading = true
     this.updateProgressBar()
     if (this.picturePlayer) {
       this.picturePlayer.addEventListener('load', () => {
@@ -1280,7 +1279,7 @@ export default {
 
     onProgressBarClicked (e) {
       this.clearCanvas()
-      var pos =
+      const pos =
         (e.pageX - this.progress.offsetLeft) / this.progress.offsetWidth
       const currentTime = pos * this.maxDurationRaw
       this.rawPlayer.setCurrentTime(currentTime)

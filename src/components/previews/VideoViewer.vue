@@ -94,7 +94,6 @@ export default {
     if (!this.container) return
     this.container.style.height = this.defaultHeight + 'px'
     this.isLoading = true
-    this.isRepeating = false
     if (this.isMuted) {
       this.video.muted = this.isMuted
     }

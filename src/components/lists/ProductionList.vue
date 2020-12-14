@@ -50,7 +50,7 @@
           <td class="resolution">
             {{ entry.resolution }}
           </td>
-          <row-actions
+          <row-actions-cell
             :entry-id="entry.id"
             @edit-clicked="$emit('edit-clicked', entry)"
             :hide-delete="true"
@@ -114,9 +114,9 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import ProductionNameCell from '../cells/ProductionNameCell'
-import RowActions from '../widgets/RowActions'
-import TableInfo from '../widgets/TableInfo'
+import ProductionNameCell from '@/components/cells/ProductionNameCell'
+import RowActionsCell from '@/components/cells/RowActionsCell'
+import TableInfo from '@/components/widgets/TableInfo'
 
 export default {
   name: 'production-list',
@@ -132,7 +132,7 @@ export default {
 
   components: {
     ProductionNameCell,
-    RowActions,
+    RowActionsCell,
     TableInfo
   },
 

@@ -121,6 +121,9 @@ import {
   CHANGE_SHOT_SORT,
   UPDATE_METADATA_DESCRIPTOR_END,
 
+  LOCK_SHOT,
+  UNLOCK_SHOT,
+
   RESET_ALL
 } from '../mutation-types'
 
@@ -585,7 +588,14 @@ const actions = {
       .catch(console.error)
   },
 
+  /*
+   * Function useds mainly to reload shot data after an update or creation
+   * event. If the shot was updated a few times ago, it is not reloaded.
+   */
   loadShot ({ commit, state, rootGetters }, shotId) {
+    const shot = this.shotMap[shotId]
+    if (shot && shot.lock) return
+
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
     const taskMap = rootGetters.taskMap
@@ -645,9 +655,13 @@ const actions = {
   },
 
   editShot ({ commit, state }, data) {
+    commit(LOCK_SHOT, data)
+    commit(EDIT_SHOT_END, data)
     return shotsApi.updateShot(data)
-      .then((shot) => {
-        commit(EDIT_SHOT_END, shot)
+      .then(shot => {
+        setTimeout(() => {
+          commit(UNLOCK_SHOT, shot)
+        }, 2000)
         return Promise.resolve(shot)
       })
   },
@@ -1317,7 +1331,7 @@ const mutations = {
     const sequence = state.sequences.find(
       (sequence) => sequence.id === newShot.parent_id
     )
-    newShot.sequence_name = sequence.name
+    if (sequence) newShot.sequence_name = sequence.name
 
     if (shot) {
       Object.assign(shot, newShot)
@@ -1343,6 +1357,7 @@ const mutations = {
       helpers.setListStats(state, cache.shots)
     }
 
+    if (!newShot.data) newShot.data = {}
     if (newShot.data.fps) state.isFps = true
     if (newShot.nb_frames) state.isFrames = true
     if (newShot.data.frame_in) state.isFrameIn = true
@@ -1818,6 +1833,16 @@ const mutations = {
         delete shot.data[previousDescriptorFieldName]
       })
     }
+  },
+
+  [LOCK_SHOT] (state, shot) {
+    shot = state.shotMap[shot.id]
+    if (shot) shot.lock = true
+  },
+
+  [UNLOCK_SHOT] (state, shot) {
+    shot = state.shotMap[shot.id]
+    if (shot) shot.lock = false
   },
 
   [RESET_ALL] (state) {

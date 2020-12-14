@@ -178,17 +178,10 @@
               bold: !asset.canceled
             }">
             <div class="flexrow">
-              <light-entity-thumbnail
-                :preview-file-id="asset.preview_file_id"
-                empty-height="32px"
-                empty-width="48px"
-                height="32px"
-                width="48px"
-                max-height="32px"
-                max-width="48px"
-              />
+              <entity-thumbnail :entity="asset" :empty-height="32" />
               <router-link
-                class="asset-link"
+                tabindex="-1"
+                class="asset-link asset-name"
                 :to="assetPath(asset.id)"
                 :title="asset.full_name"
               >
@@ -198,22 +191,53 @@
           </th>
           <description-cell
             class="description"
+            @description-changed="value => onDescriptionChanged(asset, value)"
+            :editable="isCurrentUserManager"
             v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
             :entry="asset"
           />
           <td
             class="metadata-descriptor"
             :key="asset.id + '-' + descriptor.id"
-            v-for="descriptor in assetMetadataDescriptors"
+            :title="asset.data ? asset.data[descriptor.field_name] : ''"
+            v-for="(descriptor, j) in assetMetadataDescriptors"
             v-if="isShowInfos"
           >
-            <div
-              class="ellipsis"
-              :title="asset.data ? asset.data[descriptor.field_name] : ''"
+            <input
+              :ref="`editor-${getIndex(i, k)}-${j}`"
+              class="input-editor"
+              @input="
+                event => onMetadataFieldChanged(asset, descriptor, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+              :value="getMetadataFieldValue(descriptor, asset)"
+              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+            />
+            <span
+              class="select"
+              v-else-if="isCurrentUserManager"
             >
-              {{ asset.data ? asset.data[descriptor.field_name] : '' }}
-            </div>
+              <select
+                class="select-input"
+                @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+                :ref="`editor-${getIndex(i, k)}-${j}`"
+                @change="
+                  event => onMetadataFieldChanged(asset, descriptor, event)"
+              >
+                <option
+                  v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
+                  :key="`${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+                  :value="option.value"
+                  :selected="getMetadataFieldValue(descriptor, asset) == option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </select>
+            </span>
+            <span v-else>
+              {{ getMetadataFieldValue(descriptor, asset) }}
+            </span>
           </td>
+
           <td
             class="time-spent"
             v-if="!isCurrentUserClient && isShowInfos && isAssetTime"
@@ -242,11 +266,12 @@
             v-for="(columnId, j) in displayedValidationColumns"
             v-if="!isLoading"
           />
-          <row-actions v-if="isCurrentUserManager"
+          <row-actions-cell
             :entry="asset"
             @edit-clicked="$emit('edit-clicked', asset)"
             @delete-clicked="$emit('delete-clicked', asset)"
             @restore-clicked="$emit('restore-clicked', asset)"
+            v-if="isCurrentUserManager"
           />
           <td class="actions" v-else></td>
         </tr>
@@ -300,29 +325,37 @@ import { mapGetters, mapActions } from 'vuex'
 import {
   ChevronDownIcon
 } from 'vue-feather-icons'
-import { entityListMixin } from './base'
-import { formatListMixin } from './format_mixin'
-import { selectionListMixin } from './selection'
 
-import DescriptionCell from '../cells/DescriptionCell'
-import ButtonSimple from '../widgets/ButtonSimple'
-import LightEntityThumbnail from '../widgets/LightEntityThumbnail'
-import RowActions from '../widgets/RowActions'
-import TableHeaderMenu from '../widgets/TableHeaderMenu'
-import TableInfo from '../widgets/TableInfo'
-import TableMetadataHeaderMenu from '../widgets/TableMetadataHeaderMenu'
-import ValidationCell from '../cells/ValidationCell'
+import { descriptorMixin } from '@/components/mixins/descriptors'
+import { entityListMixin } from '@/components/mixins/entity_list'
+import { formatListMixin } from '@/components/mixins/format'
+import { selectionListMixin } from '@/components/mixins/selection'
+
+import DescriptionCell from '@/components/cells/DescriptionCell'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import RowActionsCell from '@/components/cells/RowActionsCell'
+import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
+import TableInfo from '@/components/widgets/TableInfo'
+import TableMetadataHeaderMenu from
+  '@/components/widgets/TableMetadataHeaderMenu'
+import ValidationCell from '@/components/cells/ValidationCell'
 
 export default {
   name: 'asset-list',
-  mixins: [entityListMixin, formatListMixin, selectionListMixin],
+  mixins: [
+    entityListMixin,
+    descriptorMixin,
+    formatListMixin,
+    selectionListMixin
+  ],
 
   components: {
     ButtonSimple,
     DescriptionCell,
-    LightEntityThumbnail,
+    EntityThumbnail,
     ChevronDownIcon,
-    RowActions,
+    RowActionsCell,
     TableInfo,
     TableHeaderMenu,
     TableMetadataHeaderMenu,
@@ -456,13 +489,7 @@ export default {
     },
 
     getIndex (i, k) {
-      let j = 0
-      let index = 0
-      while (j < k) {
-        index += this.displayedAssets[j].length
-        j++
-      }
-      return i + index
+      return this.getEntityLineNumber(this.displayedAssets, i, k)
     },
 
     newAssetPath () {
@@ -511,14 +538,18 @@ export default {
       return route
     },
 
-    // Remaining function for retrocompatibility
-    resizeHeaders () {
-      return true
+    onInputKeyUp (event, i, j) {
+      const listWidth = this.assetMetadataDescriptors.length
+      const listHeight = this.displayedAssetsLength
+      this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
     }
-    //
   },
 
   watch: {
+    displayedAssets () {
+      this.$options.lineIndex = {}
+    },
+
     validationColumns () {
       this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
     }
@@ -530,10 +561,24 @@ export default {
 
 .dark thead tr a {
   color: $light-grey;
+
+  .asset-name {
+    color: $white;
+  }
+
+  td .select {
+    &:active,
+    &:focus,
+    &:hover {
+      &::after {
+        border-color: $green;
+      }
+    }
+  }
 }
 
 .actions {
-    min-width: 160px;
+  min-width: 160px;
   padding: 0.4em;
 }
 
@@ -593,7 +638,7 @@ th.metadata-descriptor {
   }
 }
 
-.asset-link {
+.asset-name {
   color: inherit
 }
 
@@ -603,5 +648,96 @@ th.metadata-descriptor {
 
 .task-type-name {
   max-width: 95%;
+}
+
+td.metadata-descriptor {
+  height: 3.1rem;
+  padding: 0;
+}
+
+.dark {
+  th .input-editor,
+  td .select select,
+  td .input-editor {
+    color: $white;
+
+    option {
+      background: $dark-grey-light;
+      color: $white;
+    }
+
+    &:focus,
+    &:active,
+    &:hover {
+      background: $dark-grey-light;
+    }
+  }
+}
+
+th .input-editor,
+td .input-editor {
+  color: $grey-strong;
+  height: 100%;
+  padding: 0.5rem;
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  z-index: 100;
+
+  &:active,
+  &:focus,
+  &:hover {
+    background: transparent;
+    background: white;
+  }
+
+  &:active,
+  &:focus {
+    border: 1px solid $green;
+  }
+
+  &:hover {
+    border: 1px solid $light-green;
+  }
+}
+
+td .select {
+  color: $grey-strong;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  border: 1px solid transparent;
+
+  &::after {
+    border-color: transparent;
+  }
+
+  &:active,
+  &:focus,
+  &:hover {
+    &::after {
+      border-color: $green;
+    }
+  }
+
+  select {
+    color: $grey-strong;
+    height: 100%;
+    width: 100%;
+    background: transparent;
+    border-radius: 0;
+    border: 1px solid transparent;
+
+    &:focus {
+      border: 1px solid $green;
+      background: white;
+    }
+
+    &:hover {
+      background: transparent;
+      background: white;
+      border: 1px solid $light-green;
+    }
+  }
 }
 </style>

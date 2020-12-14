@@ -409,7 +409,9 @@ export default {
     currentPreview () {
       const index = this.currentPreviewIndex
       return this.taskPreviews &&
-        this.taskPreviews.length > 0 ? this.taskPreviews[index] : null
+        this.taskPreviews.length > 0
+        ? this.taskPreviews[index]
+        : null
     },
 
     currentPreviewId () {
@@ -428,7 +430,9 @@ export default {
     extension () {
       const index = this.currentPreviewIndex
       return this.taskPreviews &&
-        this.taskPreviews.length > 0 ? this.taskPreviews[index].extension : ''
+        this.taskPreviews.length > 0
+        ? this.taskPreviews[index].extension
+        : ''
     },
 
     isStandardPreview () {
@@ -903,10 +907,6 @@ export default {
       this.attachedFileName = ''
       this.currentPreviewIndex = 0
       this.loadTaskData()
-    },
-
-    isLoading () {
-      this.task.loading = this.isLoading
     }
   },
 

@@ -1,9 +1,10 @@
 <template functional>
-<div class="field">
+<div>
   <label class="label" v-if="props.label.length > 0">
     {{ props.label }}
   </label>
   <p class="control">
+    {{ value }}
     <span
       :class="{
         select: true,
@@ -22,7 +23,7 @@
           :value="option.value || option.label"
           :selected="value === option.value"
         >
-          {{ option.label }}
+          {{ option.label }} {{ option.value }} {{ value }}
         </option>
       </select>
     </span>
@@ -32,7 +33,7 @@
 
 <script>
 export default {
-  name: 'combobox',
+  name: 'light-combobox',
 
   props: {
     label: {
@@ -40,7 +41,7 @@ export default {
       type: String
     },
     value: {
-      default: '',
+      required: true,
       type: String
     },
     options: {

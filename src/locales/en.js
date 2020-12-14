@@ -153,7 +153,7 @@ export default {
   },
 
   episodes: {
-    all_episodes: 'All episodes',
+    all_episodes: 'All',
     edit_error: 'An error occured while saving this episode. Are you sure there is no episode with similar name?',
     delete_error: 'An error occured while deleting this episode. There are probably data linked to it. Are you sure this episode has no sequence linked to it?',
     delete_text: 'Are you sure you want to remove {name} from your database? Every related shots and previews will be deleted. Pleas confirm by typing the episode name below.',
@@ -727,6 +727,7 @@ export default {
       frame_out: 'Out',
       fps: 'FPS',
       name: 'Name',
+      person: 'Modifier',
       production: 'Prod',
       sequence: 'Sequence',
       time_spent: 'Time'

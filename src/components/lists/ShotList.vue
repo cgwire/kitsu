@@ -73,14 +73,6 @@
             </div>
           </th>
 
-          <th
-            scope="col"
-            ref="th-spent"
-            class="time-spent"
-            v-if="!isCurrentUserClient && isShowInfos && isTime"
-           >
-            {{ $t('shots.fields.time_spent') }}
-          </th>
           <th scope="col" class="frames" v-if="isFrames && isShowInfos">
             {{ $t('shots.fields.nb_frames') }}
           </th>
@@ -92,6 +84,15 @@
           </th>
           <th scope="col" class="fps" v-if="isFps && isShowInfos">
             {{ $t('shots.fields.fps') }}
+          </th>
+
+          <th
+            scope="col"
+            ref="th-spent"
+            class="time-spent"
+            v-if="!isCurrentUserClient && isShowInfos && isTime"
+           >
+            {{ $t('shots.fields.time_spent') }}
           </th>
 
           <th
@@ -115,8 +116,8 @@
                 v-if="!isCurrentUserClient"
               >
                 {{ !hiddenColumns[columnId]
-                  ? taskTypeMap[columnId].name
-                  : '' }}
+                   ? taskTypeMap[columnId].name
+                   : '' }}
               </router-link>
               <span
                 class="flexrow-item datatable-dropdown task-type-name"
@@ -181,16 +182,12 @@
               bold: !shot.canceled}"
             >
             <div class="flexrow">
-              <light-entity-thumbnail
-                :preview-file-id="shot.preview_file_id"
-                empty-height="32px"
-                empty-width="48px"
-                height="32px"
-                width="48px"
-                max-height="32px"
-                max-width="48px"
-              />
-              <router-link :to="shotPath(shot.id)" :title="shot.full_name">
+              <entity-thumbnail :entity="shot" :empty-height="32" />
+              <router-link
+                tabindex="-1"
+                :title="shot.full_name"
+                :to="shotPath(shot.id)"
+              >
                 {{ shot.name }}
               </router-link>
             </div>
@@ -198,40 +195,125 @@
           <description-cell
             class="description"
             :entry="shot"
+            :editable="isCurrentUserManager"
+            @description-changed="value => onDescriptionChanged(shot, value)"
             v-if="!isCurrentUserClient && isShowInfos && isShotDescription"
           />
           <td
             class="metadata-descriptor"
             :key="shot.id + '-' + descriptor.id"
-            v-for="descriptor in shotMetadataDescriptors"
+            v-for="(descriptor, j) in shotMetadataDescriptors"
             v-if="isShowInfos"
           >
-            <div
-              class="ellipsis"
-              :title="shot.data ? shot.data[descriptor.field_name] : ''"
+            <input
+              :ref="`editor-${getIndex(i, k)}-${j}`"
+              class="input-editor"
+              :value="getMetadataFieldValue(descriptor, shot)"
+              @input="
+                event => onMetadataFieldChanged(shot, descriptor, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+            />
+            <span
+              class="select"
+              v-else-if="isCurrentUserManager"
             >
-              {{ shot.data ? shot.data[descriptor.field_name] : '' }}
-            </div>
+              <select
+                class="select-input"
+                :ref="`editor-${getIndex(i, k)}-${j}`"
+                @keydown.ctrl="pauseEvent"
+                @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+                @change="
+                  event => onMetadataFieldChanged(shot, descriptor, event)"
+              >
+                <option
+                  v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
+                  :key="`${shot.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+                  :value="option.value"
+                  :selected="getMetadataFieldValue(descriptor, shot) == option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </select>
+            </span>
+            <span v-else>
+              {{ getMetadataFieldValue(descriptor, shot) }}
+            </span>
+          </td>
+          <td class="frames"
+            v-if="isFrames && isShowInfos"
+          >
+            <input
+              :ref="`editor-${getIndex(i, k)}-${descriptorLength}`"
+              class="input-editor"
+              step="1"
+              :value="shot.nb_frames"
+              type="number"
+              min="0"
+              @input="event => onNbFramesChanged(shot, event.target.value)"
+              @keydown="onNumberFieldKeyDown"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength)"
+              v-if="isCurrentUserManager"
+            />
+            <span v-else>
+              {{ shot.nb_frames }}
+            </span>
+          </td>
+          <td class="framein" v-if="isFrameIn && isShowInfos">
+            <input
+              :ref="`editor-${getIndex(i, k)}-${descriptorLength + 1}`"
+              class="input-editor"
+              step="1"
+              type="number"
+              min="0"
+              :value="getMetadataFieldValue({field_name: 'frame_in'}, shot)"
+              @input="event => onMetadataFieldChanged(shot, {field_name: 'frame_in'}, event)"
+              @keydown="onNumberFieldKeyDown"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 1)"
+              v-if="isCurrentUserManager"
+            />
+            <span v-else>
+              {{ getMetadataFieldValue({field_name: 'frame_in'}, shot) }}
+            </span>
+          </td>
+          <td class="frameout" v-if="isFrameOut && isShowInfos">
+            <input
+              :ref="`editor-${getIndex(i, k)}-${descriptorLength + 2}`"
+              class="input-editor"
+              step="1"
+              type="number"
+              min="0"
+              :value="getMetadataFieldValue({field_name: 'frame_out'}, shot)"
+              @keydown="onNumberFieldKeyDown"
+              @input="event => onMetadataFieldChanged(shot, {field_name: 'frame_out'}, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 2)"
+              v-if="isCurrentUserManager"
+            />
+            <span v-else>
+              {{ getMetadataFieldValue({field_name: 'frame_in'}, shot) }}
+            </span>
+          </td>
+          <td class="fps" v-if="isFps && isShowInfos">
+            <input
+              :ref="`editor-${getIndex(i, k)}-${descriptorLength + 3}`"
+              class="input-editor"
+              step="1"
+              type="number"
+              :value="getMetadataFieldValue({field_name: 'fps'}, shot)"
+              @keydown="onNumberFieldKeyDown"
+              @input="event => onMetadataFieldChanged(shot, {field_name: 'fps'}, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)"
+              v-if="isCurrentUserManager"
+            />
+            <span v-else>
+              {{ getMetadataFieldValue({field_name: 'frame_out'}, shot) }}
+            </span>
           </td>
           <td
             class="time-spent"
             v-if="!isCurrentUserClient && isShowInfos && isTime"
           >
             {{ formatDuration(shot.timeSpent) }}
-          </td>
-          <td class="frames"
-            v-if="isFrames && isShowInfos"
-          >
-            {{ shot.nb_frames }}
-          </td>
-          <td class="framein" v-if="isFrameIn && isShowInfos">
-            {{ shot.data && shot.data.frame_in ? shot.data.frame_in : ''}}
-          </td>
-          <td class="frameout" v-if="isFrameOut && isShowInfos">
-            {{ shot.data && shot.data.frame_out ? shot.data.frame_out : ''}}
-          </td>
-          <td class="fps" v-if="isFps && isShowInfos">
-            {{ shot.data && shot.data.fps ? shot.data.fps : ''}}
           </td>
           <validation-cell
             :class="{
@@ -253,7 +335,7 @@
             v-for="(columnId, j) in displayedValidationColumns"
             v-if="!isLoading"
           />
-          <row-actions
+          <row-actions-cell
             :entry="shot"
             :hide-history="false"
             @delete-clicked="$emit('delete-clicked', shot)"
@@ -314,22 +396,30 @@ import { mapGetters, mapActions } from 'vuex'
 import {
   ChevronDownIcon
 } from 'vue-feather-icons'
-import { entityListMixin } from './base'
-import { selectionListMixin } from './selection'
-import { formatListMixin } from './format_mixin'
+import { descriptorMixin } from '@/components/mixins/descriptors'
+import { domMixin } from '@/components/mixins/dom'
+import { entityListMixin } from '@/components/mixins/entity_list'
+import { formatListMixin } from '@/components/mixins/format'
+import { selectionListMixin } from '@/components/mixins/selection'
 
-import ButtonSimple from '../widgets/ButtonSimple'
-import DescriptionCell from '../cells/DescriptionCell'
-import LightEntityThumbnail from '../widgets/LightEntityThumbnail'
-import TableMetadataHeaderMenu from '../widgets/TableMetadataHeaderMenu'
-import RowActions from '../widgets/RowActions'
-import TableHeaderMenu from '../widgets/TableHeaderMenu'
-import TableInfo from '../widgets/TableInfo'
-import ValidationCell from '../cells/ValidationCell'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import DescriptionCell from '@/components/cells/DescriptionCell'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu'
+import RowActionsCell from '@/components/cells/RowActionsCell'
+import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
+import TableInfo from '@/components/widgets/TableInfo'
+import ValidationCell from '@/components/cells/ValidationCell'
 
 export default {
   name: 'shot-list',
-  mixins: [entityListMixin, selectionListMixin, formatListMixin],
+  mixins: [
+    descriptorMixin,
+    domMixin,
+    formatListMixin,
+    entityListMixin,
+    selectionListMixin
+  ],
 
   props: {
     displayedShots: {
@@ -362,8 +452,8 @@ export default {
     ButtonSimple,
     ChevronDownIcon,
     DescriptionCell,
-    LightEntityThumbnail,
-    RowActions,
+    EntityThumbnail,
+    RowActionsCell,
     TableHeaderMenu,
     TableMetadataHeaderMenu,
     TableInfo,
@@ -406,26 +496,6 @@ export default {
              !this.isLoading &&
              !this.isError &&
              (!this.shotSearchText || this.shotSearchText.length === 0)
-    },
-
-    createTasksPath () {
-      return this.getPath('create-shot-tasks')
-    },
-
-    manageShotsPath () {
-      const route = {
-        name: 'manage-shots',
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = 'episode-manage-shots'
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      return route
     },
 
     isEmptyTask () {
@@ -492,12 +562,6 @@ export default {
       this.displayMoreShots()
     },
 
-    // Remaining function for retrocompatibility
-    resizeHeaders () {
-      return true
-    },
-    //
-
     taskTypePath (taskTypeId) {
       if (this.isTVShow && this.currentEpisode) {
         return {
@@ -525,18 +589,6 @@ export default {
       return this.getPath('shot', shotId)
     },
 
-    editPath (shotId) {
-      return this.getPath('edit-shot', shotId)
-    },
-
-    deletePath (shotId) {
-      return this.getPath('delete-shot', shotId)
-    },
-
-    restorePath (shotId) {
-      return this.getPath('restore-shot', shotId)
-    },
-
     getPath (section, shotId) {
       const route = {
         name: section,
@@ -557,18 +609,29 @@ export default {
       return route
     },
 
+    onInputKeyUp (event, i, j) {
+      const listWidth = this.shotMetadataDescriptors.length + 4
+      const listHeight = this.displayedShotsLength
+      this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
+      return this.pauseEvent(event)
+    },
+
+    onNbFramesChanged (entry, value) {
+      this.$emit('field-changed', {
+        entry, fieldName: 'nb_frames', value
+      })
+    },
+
     getIndex (i, k) {
-      let j = 0
-      let index = 0
-      while (j < k) {
-        index += this.displayedShots[j].length
-        j++
-      }
-      return i + index
+      return this.getEntityLineNumber(this.displayedShots, i, k)
     }
   },
 
   watch: {
+    displayedShots () {
+      this.$options.lineIndex = {}
+    },
+
     validationColumns () {
       this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
     }
@@ -706,5 +769,113 @@ th.metadata-descriptor {
 
 .datatable-row-header {
   cursor: pointer;
+}
+
+td.metadata-descriptor {
+  height: 3.1rem;
+  padding: 0;
+}
+
+.dark {
+  th .input-editor,
+  td .select select,
+  td .input-editor {
+    color: $white;
+
+    option {
+      background: $dark-grey-light;
+      color: $white;
+    }
+
+    &:focus,
+    &:active,
+    &:hover {
+      background: $dark-grey-light;
+    }
+  }
+}
+
+td.frames,
+td.framein,
+td.frameout,
+td.fps {
+  height: 3.1rem;
+  padding: 0;
+}
+
+th .input-editor,
+td .input-editor {
+  color: $grey-strong;
+  height: 100%;
+  padding: 0.5rem;
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  z-index: 100;
+
+  &:active,
+  &:focus,
+  &:hover {
+    background: transparent;
+    background: white;
+  }
+
+  &:active,
+  &:focus {
+    border: 1px solid $green;
+  }
+
+  &:hover {
+    border: 1px solid $light-green;
+  }
+}
+
+td .select {
+  color: $grey-strong;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  border: 1px solid transparent;
+
+  &::after {
+    border-color: transparent;
+  }
+
+  &:active,
+  &:hover {
+    &::after {
+      border-color: $green;
+    }
+  }
+
+  select {
+    color: $grey-strong;
+    height: 100%;
+    width: 100%;
+    background: transparent;
+    border-radius: 0;
+    border: 1px solid transparent;
+
+    &:focus {
+      border: 1px solid $green;
+      background: white;
+    }
+
+    &:hover {
+      background: transparent;
+      background: white;
+      border: 1px solid $light-green;
+    }
+  }
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
 }
 </style>
