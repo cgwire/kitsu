@@ -99,10 +99,10 @@ const mutations = {
   },
 
   [MARK_ALL_NOTIFICATIONS_AS_READ] (state) {
-    state.notificationCount = 0
-    state.notifications.forEach((notification) => {
-      notification.read = true
-    })
+    let notificationCount =
+      state.notificationCount - state.notifications.length
+    if (notificationCount < 0) notificationCount = 0
+    state.notificationCount = notificationCount
   },
 
   [NOTIFICATION_ADD_PREVIEW] (state, { commentId, previewId }) {
