@@ -618,7 +618,7 @@ export default {
 
     onNbFramesChanged (entry, value) {
       this.$emit('field-changed', {
-        entry, fieldName: 'nb_frames', value
+        entry, fieldName: 'nb_frames', value: this.sanitizeInteger(value)
       })
     },
 
