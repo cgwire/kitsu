@@ -96,6 +96,22 @@ export default {
             {
               keys: ['Alt', '↓'],
               text: this.$t('keyboard.altdown')
+            },
+            {
+              keys: ['Ctrl', '←'],
+              text: this.$t('keyboard.ctrlleft')
+            },
+            {
+              keys: ['Ctrl', '↑'],
+              text: this.$t('keyboard.ctrlup')
+            },
+            {
+              keys: ['Ctrl', '→'],
+              text: this.$t('keyboard.ctrlright')
+            },
+            {
+              keys: ['Ctrl', '↓'],
+              text: this.$t('keyboard.ctrldown')
             }
           ]
         },
@@ -163,6 +179,9 @@ export default {
 
 <style lang="scss" scoped>
 .dark {
+  h3 {
+    color: $white;
+  }
   .shortcut-key {
     border: 2px solid $white;
   }
