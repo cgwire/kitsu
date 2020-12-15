@@ -739,6 +739,10 @@ export default {
   .changelog-button {
     color: $grey;
   }
+
+  hr {
+    background-color: $grey-strong;
+  }
 }
 
 .nav {
