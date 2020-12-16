@@ -236,7 +236,7 @@
                 </option>
               </select>
             </span>
-            <span v-else>
+            <span class="metadata-value" v-else>
               {{ getMetadataFieldValue(descriptor, shot) }}
             </span>
           </td>
@@ -255,7 +255,7 @@
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength)"
               v-if="isCurrentUserManager"
             />
-            <span v-else>
+            <span class="metadata-value" v-else>
               {{ shot.nb_frames }}
             </span>
           </td>
@@ -272,7 +272,7 @@
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 1)"
               v-if="isCurrentUserManager"
             />
-            <span v-else>
+            <span class="metadata-value" v-else>
               {{ getMetadataFieldValue({field_name: 'frame_in'}, shot) }}
             </span>
           </td>
@@ -289,7 +289,7 @@
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 2)"
               v-if="isCurrentUserManager"
             />
-            <span v-else>
+            <span class="metadata-value" v-else>
               {{ getMetadataFieldValue({field_name: 'frame_in'}, shot) }}
             </span>
           </td>
@@ -305,7 +305,7 @@
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)"
               v-if="isCurrentUserManager"
             />
-            <span v-else>
+            <span class="metadata-value" v-else>
               {{ getMetadataFieldValue({field_name: 'frame_out'}, shot) }}
             </span>
           </td>
@@ -877,5 +877,9 @@ input[type="number"]::-webkit-inner-spin-button {
 
 input[type="number"] {
     -moz-appearance: textfield;
+}
+
+.metadata-value {
+  padding: 0.8rem;
 }
 </style>

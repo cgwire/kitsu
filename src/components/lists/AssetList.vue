@@ -233,7 +233,7 @@
                 </option>
               </select>
             </span>
-            <span v-else>
+            <span class="metadata-value" v-else>
               {{ getMetadataFieldValue(descriptor, asset) }}
             </span>
           </td>
@@ -739,5 +739,9 @@ td .select {
       border: 1px solid $light-green;
     }
   }
+}
+
+.metadata-value {
+  padding: 0.8rem;
 }
 </style>
