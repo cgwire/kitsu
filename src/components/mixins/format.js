@@ -43,6 +43,5 @@ export const formatListMixin = {
       }
       return val
     }
-
   }
 }
