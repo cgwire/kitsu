@@ -441,6 +441,7 @@ a {
 
 .notification-info {
   vertical-align: middle;
+  margin-bottom: 1em;
 }
 
 .notification-info span,
