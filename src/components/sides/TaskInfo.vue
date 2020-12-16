@@ -740,7 +740,6 @@ export default {
     },
 
     setCurrentPreviewAsEntityThumbnail () {
-      console.log(this.currentPreview.previews)
       this.setPreview({
         taskId: this.task.id,
         entityId: this.task.entity.id,

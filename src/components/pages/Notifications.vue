@@ -259,7 +259,6 @@ export default {
     },
 
     loadFollowingNotifications () {
-      console.log('yeah')
       if (!this.loading.more && !this.loading.notifications) {
         this.loading.more = true
         this.loadMoreNotifications()

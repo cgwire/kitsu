@@ -927,7 +927,6 @@ export default {
     onMetadataChanged ({ entry, descriptor, value }) {
       const metadata = { ...entry.data }
       metadata[descriptor.field_name] = value
-      console.log(entry)
       const data = {
         id: entry.id,
         source_id: entry.episode_id,
