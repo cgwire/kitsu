@@ -48,3 +48,6 @@ const locales = [fr, es, de]
   })
   console.log('Missing main keys for', locale.name, ':', difference)
 })
+
+const fs = require('fs')
+fs.writeFileSync('en.json', JSON.stringify(en, null, 2))
