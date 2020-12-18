@@ -175,6 +175,7 @@
     :active="modals.isImportRenderDisplayed"
     :is-loading="loading.importing"
     :is-error="errors.importing"
+    :import-error="errors.importingError"
     :parsed-csv="parsedCSV"
     :form-data="shotsCsvFormData"
     :columns="columns"
@@ -346,7 +347,8 @@ export default {
         deleteMetadata: false,
         creatingTasks: false,
         deleteAllTasks: false,
-        importing: false
+        importing: false,
+        importingError: {}
       }
     }
   },
@@ -789,9 +791,10 @@ export default {
           this.hideImportRenderModal()
           this.loadShots()
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.importing = false
+          this.loading.importingError = err
           this.errors.importing = true
         })
     },
