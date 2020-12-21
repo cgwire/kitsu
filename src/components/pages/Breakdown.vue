@@ -128,6 +128,7 @@
       :active="modals.isImportRenderDisplayed"
       :is-loading="loading.importing"
       :is-error="errors.importing"
+      :import-error="errors.importingError"
       :parsed-csv="parsedCSV"
       :form-data="importCsvFormData"
       :columns="csvColumns"
@@ -261,7 +262,8 @@ export default {
         edit: false,
         stay: false,
         editLabel: false,
-        importing: false
+        importing: false,
+        importingError: null
       },
       loading: {
         edit: false,
@@ -586,6 +588,7 @@ export default {
 
       this.loading.importing = true
       this.errors.importing = false
+      this.errors.importingError = null
       this.importCsvFormData = formData
 
       this.uploadCastingFile(this.importCsvFormData)
@@ -594,14 +597,16 @@ export default {
           this.hideImportRenderModal()
           this.setCastingSequence(this.sequenceId)
         })
-        .catch(() => {
+        .catch(err => {
           this.loading.importing = false
+          this.errors.importingError = err
           this.errors.importing = true
         })
     },
 
     resetImport () {
       this.errors.importing = false
+      this.errors.importingError = null
       this.hideImportRenderModal()
       this.importCsvFormData = undefined
       this.$refs['import-modal'].reset()

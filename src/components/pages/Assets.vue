@@ -169,6 +169,7 @@
     :active="modals.isImportRenderDisplayed"
     :is-loading="loading.importing"
     :is-error="errors.importing"
+    :import-error="errors.importingError"
     :parsed-csv="parsedCSV"
     :form-data="assetsCsvFormData"
     :columns="columns"
@@ -313,7 +314,8 @@ export default {
         deleteMetadata: false,
         edit: false,
         restore: false,
-        importing: false
+        importing: false,
+        importingError: null
       },
       initialLoading: true,
       loading: {
@@ -743,10 +745,10 @@ export default {
             .catch(console.error)
           this.loadAssets()
         })
-        .catch((err) => {
-          console.error(err)
+        .catch(err => {
           this.loading.importing = false
           this.errors.importing = true
+          this.errors.importingError = err
         })
     },
 

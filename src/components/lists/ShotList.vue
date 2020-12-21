@@ -290,7 +290,7 @@
               v-if="isCurrentUserManager"
             />
             <span class="metadata-value" v-else>
-              {{ getMetadataFieldValue({field_name: 'frame_in'}, shot) }}
+              {{ getMetadataFieldValue({field_name: 'frame_out'}, shot) }}
             </span>
           </td>
           <td class="fps" v-if="isFps && isShowInfos">
@@ -306,7 +306,7 @@
               v-if="isCurrentUserManager"
             />
             <span class="metadata-value" v-else>
-              {{ getMetadataFieldValue({field_name: 'frame_out'}, shot) }}
+              {{ getMetadataFieldValue({field_name: 'fps'}, shot) }}
             </span>
           </td>
           <td

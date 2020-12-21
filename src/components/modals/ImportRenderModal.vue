@@ -125,7 +125,7 @@
           @click="onReupload"
         />
         <modal-footer
-          :error-text="$t('main.csv.error_upload')"
+          :error-text="errorText"
           :is-loading="isLoading"
           :is-disabled="formData === undefined"
           :is-error="isError"
@@ -199,6 +199,10 @@ export default {
     isError: {
       type: Boolean,
       default: false
+    },
+    importError: {
+      type: Error,
+      default: null
     }
   },
 
@@ -260,6 +264,15 @@ export default {
         indexes.push(this.parsedCsv[0].indexOf(item))
       })
       return indexes
+    },
+
+    errorText () {
+      let text = this.$t('main.csv.error_upload')
+      if (this.importError && this.importError.status === 400) {
+        const res = this.importError.response
+        text += ` (line: ${res.body.line_number}) ${res.body.message}`
+      }
+      return text
     }
   },
 
