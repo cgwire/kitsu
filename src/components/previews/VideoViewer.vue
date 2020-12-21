@@ -105,6 +105,8 @@ export default {
         this.video.addEventListener('loadedmetadata', () => {
           this.configureVideo()
           this.onWindowResize()
+          this.video.removeEventListener('timeupdate', this.onTimeUpdate)
+          this.video.addEventListener('timeupdate', this.onTimeUpdate)
           this.isLoading = false
         })
 
@@ -117,14 +119,16 @@ export default {
           this.isLoading = false
         })
 
-        window.addEventListener('resize', this.onWindowResize)
+        this.video.removeEventListener('timeupdate', this.onTimeUpdate)
         this.video.addEventListener('timeupdate', this.onTimeUpdate)
+        window.addEventListener('resize', this.onWindowResize)
       }
     }, 0)
   },
 
   beforeDestroy () {
     this.pause()
+    this.video.removeEventListener('timeupdate', this.onTimeUpdate)
     window.removeEventListener('keydown', this.onKeyDown)
     window.removeEventListener('resize', this.onWindowResize)
   },
@@ -226,7 +230,9 @@ export default {
 
     setCurrentTime (currentTime) {
       currentTime = roundToFrame(currentTime, this.fps)
-      this.video.currentTime = currentTime
+      if (this.video.currentTime !== currentTime) {
+        this.video.currentTime = currentTime
+      }
     },
 
     configureVideo () {
