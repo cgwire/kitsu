@@ -348,7 +348,7 @@ export default {
         creatingTasks: false,
         deleteAllTasks: false,
         importing: false,
-        importingError: {}
+        importingError: null
       }
     }
   },
