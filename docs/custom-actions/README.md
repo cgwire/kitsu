@@ -7,6 +7,33 @@ current Kitsu selection to a custom endpoint. In other terms, when your user
 is in its Kitsu UI, he can send a request to an another sever containing the 
 IDs of the selected elements.
 
+### Goal
+
+The aim is, probably until there is a plugin system, to be able to create an 
+action outside of Kitsu (so we don't have to touch Kitsu/Zou core code). 
+Basically it's a web request, usually a POST (but can be a GET) to a 
+page/service you handle yourself. You catch the request and then do something.
+
+Examples:
+
+- Debug page (for a given objects display all the information I can access, including field names etc)
+- Launch render in CGRU or Flamenco
+- Get some statistics pages for the APM
+- Create some special playlists
+- Launch a custom protocol (with a service waiting for it) start a video player, any DCC, etc
+- Plug it with an asset manager like Kabaret to open it at the right spot (or launching some actions)
+
+It can be anything as long as you can catch the request (using for 
+example a python webserver such as flask or tornado.web, is very easy). It's 
+made to extend kitsu to somewhere you control.
+In any case, useful information is provided to whatever catches the request, 
+such as what is selected (and what is probably the things you are going to 
+apply the action on), the page you were, the user who launched the action, 
+etc. So you can adapt the answer to the provided information.
+Note that you can also run the custom action in the background (ajax request 
+instead of opening a new page), if you don't need feedback to the user.
+
+
 ## How to setup a custom action
 
 ### Creation 
