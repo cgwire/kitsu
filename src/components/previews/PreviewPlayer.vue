@@ -93,7 +93,7 @@
           :title="$t('playlists.actions.looping')"
           icon="repeat"
           @click="onRepeatClicked"
-          v-if="fullScreen"
+          v-if="!light"
         />
 
         <button-simple
@@ -359,6 +359,7 @@
 import { fabric } from 'fabric'
 import { mapGetters, mapActions } from 'vuex'
 import { formatFrame, formatTime, roundToFrame } from '@/lib/video'
+import localPreferences from '@/lib/preferences'
 
 import { annotationMixin } from '@/components/mixins/annotation'
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
@@ -468,6 +469,7 @@ export default {
     this.reloadAnnotations()
     if (this.isPicture) this.loadAnnotation(this.getAnnotation(0))
     this.resetPreviewFileMap()
+    this.initPreferences()
   },
 
   beforeDestroy () {
@@ -654,6 +656,12 @@ export default {
       if (!this.isPlaying) this.loadAnnotation()
     },
 
+    initPreferences () {
+      const isRepeating =
+        localPreferences.getBoolPreference('player:repeating')
+      this.isRepeating = isRepeating
+    },
+
     // Video
 
     configureVideo () {
@@ -728,6 +736,7 @@ export default {
       } else {
         this.isRepeating = true
       }
+      localPreferences.setPreference('player:repeating', this.isRepeating)
     },
 
     onToggleSoundClicked () {
