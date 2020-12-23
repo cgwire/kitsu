@@ -1,17 +1,22 @@
 import en from './en'
-import es from './es'
-import de from './de'
-import fa from './fa'
-import fr from './fr'
-import zh from './zh'
-import ru from './ru'
+import de from '@/locales/de.js'
+import nl from '@/locales/nl.json'
+import es from '@/locales/es.json'
+import fa from '@/locales/fa.js'
+import fr from '@/locales/fr.json'
+import pt from '@/locales/pt.json'
+import ru from '@/locales/ru.js'
+import zh from '@/locales/zh.js'
 
+console.log(fr)
 export default {
   de: de,
+  nl: nl.default,
   en: en,
-  es: es,
+  es: es.default,
   fa: fa,
-  fr: fr,
+  fr: fr.default,
+  pt: pt.default,
   zh: zh,
   ru: ru
 }
