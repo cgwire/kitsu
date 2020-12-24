@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 import i18n from '../../../src/lib/i18n'
 import ShotHistoryModal from '../../../src/components/modals/ShotHistoryModal'
 import TableInfo from '../../../src/components/widgets/TableInfo'
+import peopleStoreFixture from '../fixtures/person-store.js'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
@@ -41,7 +42,8 @@ describe('ShotHistoryModal', () => {
     store = new Vuex.Store({
       strict: true,
       modules: {
-        shots: shotStore
+        shots: shotStore,
+        people: { ...peopleStoreFixture }
       }
     })
 

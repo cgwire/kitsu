@@ -2,7 +2,7 @@ import Vue from 'vue'
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
-import RowActions from '../../../src/components/widgets/RowActions'
+import RowActions from '@/components/cells/RowActionsCell'
 
 const localVue = createLocalVue()
 
