@@ -8,7 +8,6 @@ import pt from '@/locales/pt.json'
 import ru from '@/locales/ru.js'
 import zh from '@/locales/zh.js'
 
-console.log(fr)
 export default {
   de: de,
   nl: nl.default,
