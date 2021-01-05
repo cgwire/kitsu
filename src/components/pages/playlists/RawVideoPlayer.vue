@@ -211,10 +211,10 @@ export default {
     },
 
     reloadCurrentEntity () {
-      this.loadEntity(this.currentIndex)
+      this.loadEntity(this.currentIndex, this.currentPlayer.currentTime)
     },
 
-    loadEntity (index = 0) {
+    loadEntity (index = 0, currentTime = 0) {
       if (index < this.entities.length) {
         const nextIndex = this.getNextIndex(index)
         const entity = this.entities[index]
@@ -243,6 +243,7 @@ export default {
         this.currentPlayer.addEventListener('timeupdate', this.updateTime)
 
         this.setSpeed(rate)
+        this.setCurrentTime(currentTime)
         this.$emit('entity-change', this.currentIndex)
       }
     },
