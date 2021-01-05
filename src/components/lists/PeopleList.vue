@@ -158,8 +158,8 @@ export default {
   min-width: 200px;
 }
 .role {
-  width: 125px;
-  min-width: 125px;
+  width: 150px;
+  min-width: 150px;
 }
 .actions {
   min-width: 100px;
