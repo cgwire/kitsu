@@ -352,6 +352,12 @@
         v-model="taskTypeToCompare"
         v-if="isComparing"
       />
+      <combobox
+        class="playlist-button flexrow-item comparison-list"
+        :options="revisionOptions"
+        v-model="revisionToCompare"
+        v-if="isComparing"
+      />
     </div>
 
     <div
@@ -734,6 +740,7 @@ export default {
       task: null,
       taskTypeOptions: [],
       taskTypeToCompare: null,
+      revisionToCompare: null,
       textColor: '#ff3860',
       modals: {
         delete: false,
@@ -836,7 +843,10 @@ export default {
       const previewFiles =
         this.currentEntity.preview_files[this.taskTypeToCompare]
       if (previewFiles && previewFiles.length > 0) {
-        return previewFiles[0]
+        const preview =
+          previewFiles.find(p => `${p.revision}` === this.revisionToCompare)
+        if (preview) return preview
+        else return previewFiles[0]
       } else {
         return null
       }
@@ -1533,6 +1543,7 @@ export default {
       localEntity.preview_file_task_id = previewFile.task_id
       localEntity.preview_file_extension = previewFile.extension
       localEntity.preview_file_annotations = previewFile.annotations
+      localEntity.preview_file_previews = previewFile.previews
       if (this.rawPlayer) this.rawPlayer.reloadCurrentEntity()
       this.$emit('preview-changed', entity, previewFile.id)
       this.updateTaskPanel()
@@ -1706,9 +1717,8 @@ export default {
       if (entities.length > 0) {
         let taskTypeIds = Object.keys(entities[0].preview_files)
         entities.forEach((entity) => {
-          const entityTaskTypeIds = Object.keys(entity.preview_files)
           taskTypeIds = taskTypeIds.filter(
-            value => entityTaskTypeIds.includes(value)
+            taskTypeId => entity.preview_files[taskTypeId]
           )
         })
         this.taskTypeOptions = taskTypeIds.map((taskTypeId) => {
@@ -1716,12 +1726,41 @@ export default {
             label: this.taskTypeMap[taskTypeId].name,
             value: this.taskTypeMap[taskTypeId].id
           }
-        })
+        }).sort((a, b) => a.label.localeCompare(b.label))
         if (this.taskTypeOptions.length > 0) {
           this.taskTypeToCompare = this.taskTypeOptions[0].value
         }
+        this.rebuildRevisionOptions()
       } else {
         this.taskTypeOptions = []
+        this.revisionOptions = []
+      }
+    },
+
+    rebuildRevisionOptions () {
+      if (this.currentEntity &&
+          this.currentEntity.preview_files[this.taskTypeToCompare]) {
+        const revisions = this.currentEntity
+          .preview_files[this.taskTypeToCompare]
+          .map(p => p.revision)
+        this.revisionOptions = [{
+          label: 'Last',
+          value: null
+        }].concat(
+          revisions
+            .sort((a, b) => b - a)
+            .map(revision => {
+              return {
+                label: `v${revision}`,
+                value: `${revision}`
+              }
+            })
+        )
+        if (this.revisionOptions.length > 0) {
+          this.revisionToCompare = this.revisionOptions[0].value
+        }
+      } else {
+        this.revisionOptions = []
       }
     },
 
@@ -1729,8 +1768,13 @@ export default {
       if (this.taskTypeToCompare) {
         this.entityListToCompare = this.entityList
           .filter(entity => entity.preview_files[this.taskTypeToCompare])
-          .map((entity) => {
-            const preview = entity.preview_files[this.taskTypeToCompare][0]
+          .map(entity => {
+            let preview = entity.preview_files[this.taskTypeToCompare].find(
+              p => `${p.revision}` === this.revisionToCompare
+            )
+            if (!preview) {
+              preview = entity.preview_files[this.taskTypeToCompare][0]
+            }
             return ({
               preview_file_id: preview.id,
               preview_file_extension: 'mp4'
@@ -1742,6 +1786,7 @@ export default {
     },
 
     resetComparison () {
+      this.rebuildRevisionOptions()
       this.rebuildEntityListToCompare()
       this.$nextTick(() => {
         this.pause()
@@ -1932,8 +1977,8 @@ export default {
         )
         if (!annotation) {
           annotation = this.annotations.find(
-            (annotation) => annotation.time > time - 0.2 && annotation.time <
-            time + 0.2
+            (annotation) => annotation.time > time - 0.02 && annotation.time <
+            time + 0.02
           )
         }
         if (!annotation &&
@@ -2048,6 +2093,7 @@ export default {
         this.annotations = this.currentEntity.preview_file_annotations || []
       }
       this.$nextTick(() => {
+        if (this.isComparing) this.rebuildRevisionOptions()
         this.resetCanvas()
           .then(() => {
             if (!this.isCurrentPreviewPicture) {
@@ -2072,6 +2118,18 @@ export default {
     taskTypeToCompare () {
       if (this.isComparing) {
         this.resetComparison()
+      }
+    },
+
+    revisionToCompare () {
+      if (this.isComparing) {
+        this.rebuildEntityListToCompare()
+        this.$nextTick(() => {
+          this.pause()
+          const player = this.$refs['raw-player-comparison']
+          player.loadEntity(this.playingEntityIndex)
+          player.setCurrentTime(this.currentTimeRaw)
+        })
       }
     },
 
