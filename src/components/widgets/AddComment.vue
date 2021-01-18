@@ -30,6 +30,7 @@
               class="flexrow-item"
               :person="team.item"
               :size="20"
+              :font-size="11"
               :no-cache="true"
             />
             <span class="flexrow-item">

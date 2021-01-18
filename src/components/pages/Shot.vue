@@ -351,24 +351,26 @@ export default {
     },
 
     resetData () {
-      this.loadShots(() => {
-        this.loadAssets()
-          .then(() => {
-            this.currentShot = this.getCurrentShot()
-            return this.loadShotCasting(this.currentShot)
-              .then(() => {
-                this.casting.isLoading = false
-              })
-              .catch((err) => {
-                console.error(err)
-                this.casting.isError = true
-              })
-          })
+      this.$nextTick(() => {
+        this.loadShots(() => {
+          this.loadAssets()
+            .then(() => {
+              this.currentShot = this.getCurrentShot()
+              return this.loadShotCasting(this.currentShot)
+                .then(() => {
+                  this.casting.isLoading = false
+                })
+                .catch((err) => {
+                  console.error(err)
+                  this.casting.isError = true
+                })
+            })
+        })
       })
     }
   },
 
-  watch: {
+  watch: { // Needed when reloading the page with F5
     currentProduction () {
       if (!this.isTVShow) this.resetData()
     },

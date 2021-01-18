@@ -335,22 +335,27 @@ export default {
     },
 
     resetData () {
+      this.castIn.isLoading = true
       if (this.$route.params.episode_id === 'main') {
         this.setCurrentEpisode('main')
       }
-      this.loadAssets()
-        .then(() => {
-          this.currentAsset = this.getCurrentAsset()
-          return this.loadAssetCastIn(this.currentAsset)
-        })
-        .then(() => this.loadAssetCasting(this.currentAsset))
-        .then(() => {
-          this.castIn.isLoading = false
-        })
-        .catch((err) => {
-          this.castIn.isError = true
-          console.error(err)
-        })
+      // Next tick is needed to wait for the episode change.
+      this.$nextTick(() => {
+        this.loadAssets()
+          .then(() => {
+            this.currentAsset = this.getCurrentAsset()
+            return this.loadAssetCastIn(this.currentAsset)
+          })
+          .then(() => this.loadAssetCasting(this.currentAsset))
+          .then(() => {
+            this.castIn.isLoading = false
+          })
+          .catch((err) => {
+            this.castIn.isError = true
+            this.castIn.isLoading = false
+            console.error(err)
+          })
+      })
     },
 
     shotPath (shot) {
@@ -365,7 +370,7 @@ export default {
     }
   },
 
-  watch: {
+  watch: { // Needed when reloading the page with F5
     currentProduction () {
       if (!this.isTVShow) this.resetData()
     },
