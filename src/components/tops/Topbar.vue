@@ -122,7 +122,9 @@
     <nav
       class="user-menu"
       ref="user-menu"
-      v-show="!isUserMenuHidden"
+      :style="{
+        top: isUserMenuHidden ? '-460px' : '60px'
+      }"
     >
       <ul>
         <li>
@@ -774,7 +776,6 @@ export default {
 
 .user-menu {
   position: fixed;
-  top: 60px;
   width: 180px;
   min-width: 180px;
   right: 0;
@@ -782,11 +783,9 @@ export default {
   padding: 1em 1em 1em 1em;
   z-index: 203;
   box-shadow: 2px 3px 3px rgba(0,0,0,0.2);
-  transition-property: all;
-  transition-duration: .5s;
-  transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
   border-left: 1px solid $white-grey;
   border-bottom: 1px solid $white-grey;
+  transition: top .5s ease;
 }
 
 .user-menu ul {
@@ -794,10 +793,17 @@ export default {
 }
 
 .user-menu li {
-  cursor: pointer;
+  cursor: default;
   padding: 0.2em;
+  padding-left: 0.4em;
   font-size: 1.1em;
   list-style-type: none;
+
+  &:not(.version):hover {
+    cursor: pointer;
+    background: $white-grey;
+    border-radius: 5px;
+  }
 }
 
 .user-menu li a {

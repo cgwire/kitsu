@@ -23,7 +23,7 @@
 
         <section>
          <div v-if="!isCurrentUserClient">
-           <h2></h2>
+           <h2>{{ $t('main.workspace')}}</h2>
 
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'todos'}">
@@ -278,6 +278,17 @@ aside section {
 
 h2 {
   margin-top: 2em;
+  margin-bottom: 0.3em;
+}
+
+p {
+  padding-left: 0.3em;
+}
+
+p:hover {
+  cursor: pointer;
+  background: $white-grey;
+  border-radius: 5px;
 }
 
 @media screen and (max-width: 768px) {
