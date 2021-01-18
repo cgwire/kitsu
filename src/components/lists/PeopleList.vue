@@ -148,14 +148,17 @@ export default {
 .name {
   width: 230px;
   min-width: 230px;
+  user-select: text;
 }
 .email {
   width: 300px;
   min-width: 300px;
+  user-select: text;
 }
 .phone {
   width: 200px;
   min-width: 200px;
+  user-select: text;
 }
 .role {
   width: 150px;
