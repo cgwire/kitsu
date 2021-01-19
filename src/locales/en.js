@@ -870,5 +870,14 @@ export default {
   wrong_browser: {
     title: 'Your browser is not supported by Kitsu',
     text: 'Kitsu can only be used with Firefox and Chrome browsers.'
+  },
+
+  brief: {
+    title: 'Brief',
+    empty: 'There is not brief yiet. What about creating some?',
+    create: 'Create a brief',
+    save: {
+      button: 'Save brief'
+    }
   }
 }

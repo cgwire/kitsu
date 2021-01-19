@@ -3,6 +3,11 @@
     <div class="wrapper">
     <div class="tabs">
       <ul>
+        <li :class="{'is-active': isActiveTab('brief')}">
+          <a @click="activeTab = 'brief'">
+            {{ $t('brief.title')}}
+          </a>
+        </li>
         <li :class="{'is-active': isActiveTab('taskStatus')}">
           <a @click="activeTab = 'taskStatus'">
             {{ $t('task_status.title')}}
@@ -19,6 +24,10 @@
           </a>
         </li>
       </ul>
+    </div>
+
+    <div class="tab" v-show="isActiveTab('brief')">
+      <ProductionBrief />
     </div>
 
     <div class="tab" v-show="isActiveTab('assetTypes')">
@@ -162,12 +171,14 @@ import { sortByName } from '@/lib/sorting'
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
+import ProductionBrief from '@/components/pages/production/ProductionBrief'
 import TaskTypeCell from '@/components/cells/TaskTypeName'
 import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
   name: 'production-settings',
   components: {
+    ProductionBrief,
     Combobox,
     ComboboxStatus,
     ComboboxTaskType,
@@ -177,7 +188,7 @@ export default {
 
   data () {
     return {
-      activeTab: 'taskStatus',
+      activeTab: 'brief',
       assetTypeId: '',
       taskStatusId: '',
       taskTypeId: ''
