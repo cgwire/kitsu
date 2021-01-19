@@ -3,6 +3,7 @@
   :class="{
     button: true,
     active: active,
+    'is-loading': isLoading,
     'is-on': isOn
   }"
   :title="title"
@@ -226,6 +227,10 @@ export default {
       type: String
     },
     isOn: {
+      default: false,
+      type: Boolean
+    },
+    isLoading: {
       default: false,
       type: Boolean
     },
