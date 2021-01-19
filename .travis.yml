@@ -10,6 +10,8 @@ script:
 branches:
     only:
         - master
+    except:
+        - build
 addons:
     apt:
         packages:
