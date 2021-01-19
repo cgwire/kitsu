@@ -8,5 +8,7 @@ script:
     - npm install
     - npm run build
 branches:
+    only: 
+        - master
     except:
         - build
