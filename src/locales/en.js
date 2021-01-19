@@ -550,6 +550,11 @@ export default {
       title: 'Add metadata column'
     },
 
+    brief: {
+      title: 'Brief',
+      empty: 'There is not brief yet. What about creating one?'
+    },
+
     status: {
       closed: 'Closed',
       open: 'Open',
@@ -871,14 +876,5 @@ export default {
   wrong_browser: {
     title: 'Your browser is not supported by Kitsu',
     text: 'Kitsu can only be used with Firefox and Chrome browsers.'
-  },
-
-  brief: {
-    title: 'Brief',
-    empty: 'There is not brief yiet. What about creating some?',
-    create: 'Create a brief',
-    save: {
-      button: 'Save brief'
-    }
   }
 }

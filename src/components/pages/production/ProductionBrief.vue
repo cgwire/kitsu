@@ -1,32 +1,36 @@
 <template>
-    <div>
+    <div class="brief">
       <div v-if="!isEditing" class="box" @dblclick="openEditing">
         <div v-if="isEmpty(currentProduction.description)">
-          <p>{{$t('brief.empty')}}</p>
+          <p>{{$t('productions.brief.empty')}}</p>
         </div>
-        <div class="content" v-else v-html="compileMarkdown(currentProduction.description)">
+        <div
+          class="content"
+          v-html="compileMarkdown(currentProduction.description)"
+          v-else
+        >
         </div>
       </div>
       <div v-else class="box has-text-right">
-        <TextareaField
+        <textarea-field
+          class="editor"
+          ref="textarea"
+          input-class="textarea"
+          @keyup.ctrl.enter="editBrief"
           v-model="brief"
-          inputClass="textarea"
-          editable
         />
-
         <p v-if="errors.editBrief" class="error mt1 has-text-right">
-          {{ $t('brief.edit.errorText') }}
+          {{ $t('productions.brief.edit.errorText') }}
         </p>
-        <ButtonSimple
-          class="is-primary"
-          icon="save"
-          :class="{'is-loading': isLoading}"
-          :disabled="isLoading"
-          :text="$t('brief.save.button')"
-          @click="editBrief"
-        >
-        </ButtonSimple>
-
+        <p>
+          <button-simple
+            class="is-primary button"
+            :is-loading="isLoading"
+            :disabled="isLoading"
+            :text="$t('main.save')"
+            @click="editBrief"
+          />
+        </p>
       </div>
     </div>
 </template>
@@ -57,7 +61,9 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction'
-    ])
+    ]),
+
+    textarea () { return this.$refs.textarea }
   },
   mounted () {
     if (this.currentProduction) {
@@ -76,6 +82,9 @@ export default {
 
     openEditing () {
       this.isEditing = true
+      this.$nextTick(() => { // Needed because of the v-if
+        this.textarea.focus()
+      })
     },
 
     async editBrief () {
@@ -83,8 +92,8 @@ export default {
       try {
         await this.editProduction(
           {
-            ...this.currentProduction,
-            ...{ description: this.brief }
+            id: this.currentProduction.id,
+            description: this.brief
           }
         )
       } catch {
@@ -92,12 +101,6 @@ export default {
         this.isLoading = false
         return
       }
-      /*
-        editProduction action doesn't refresh properly the currentProduction
-        if the edited production is the currentProduction we set again the
-        production, this can be automaticly in action / mutation
-      */
-      await this.setProduction(this.currentProduction.id)
       this.isEditing = false
       this.isLoading = false
     },
@@ -110,7 +113,29 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.brief {
+  flex: 1;
+}
+
 .box {
-  max-width: 400px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  height: calc(100% - 20px);
+  max-width: 800px;
+  overflow: auto;
+  margin-bottom: 0.5em;
+}
+
+.content {
+  padding-bottom: 1em;
+}
+
+.editor {
+  height: 100%;
+}
+
+.textarea {
+  color: red;
 }
 </style>

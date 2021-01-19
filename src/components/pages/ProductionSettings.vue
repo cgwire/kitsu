@@ -5,7 +5,7 @@
       <ul>
         <li :class="{'is-active': isActiveTab('brief')}">
           <a @click="activeTab = 'brief'">
-            {{ $t('brief.title')}}
+            {{ $t('productions.brief.title')}}
           </a>
         </li>
         <li :class="{'is-active': isActiveTab('taskStatus')}">
@@ -310,6 +310,12 @@ export default {
   overflow-y: scroll;
   padding: 2em;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tabs {
+  min-height: 2em;
 }
 
 .tabs ul {
@@ -318,6 +324,11 @@ export default {
 
 .tab {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-left: 2px;
+  padding-top: 0.5em;
 }
 
 h2.subtitle {
