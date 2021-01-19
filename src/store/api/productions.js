@@ -29,6 +29,7 @@ export default {
   updateProduction (production) {
     const data = {
       name: production.name,
+      description: production.description,
       project_status_id: production.project_status_id,
       production_type: production.production_type,
       fps: production.fps,
