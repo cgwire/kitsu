@@ -37,7 +37,9 @@ export default {
       resolution: production.resolution,
       start_date: production.start_date,
       end_date: production.end_date,
-      man_days: production.man_days
+      man_days: production.man_days,
+      nb_episodes: production.nb_episodes,
+      episode_span: production.episode_span
     }
     return client.pput(`/api/data/projects/${production.id}`, data)
   },
