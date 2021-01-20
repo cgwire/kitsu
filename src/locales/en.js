@@ -535,7 +535,11 @@ export default {
       ratio: 'Ratio',
       resolution: 'Resolution',
       status: 'Status',
-      type: 'Type'
+      type: 'Type',
+      start_date: 'Start date',
+      end_date: 'End date',
+      nb_episodes: 'Number of episodes',
+      episode_span: 'Span beetwen episodes'
     },
     metadata: {
       add_explaination: 'Add specific data required by this project.',
@@ -553,6 +557,13 @@ export default {
     brief: {
       title: 'Brief',
       empty: 'There is not brief yet. What about creating one?'
+    },
+
+    parameters: {
+      title: 'Parameters',
+      save: {
+        button: 'Confirm'
+      }
     },
 
     status: {

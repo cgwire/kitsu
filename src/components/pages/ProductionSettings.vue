@@ -8,6 +8,11 @@
             {{ $t('productions.brief.title')}}
           </a>
         </li>
+        <li :class="{'is-active': isActiveTab('parameters')}">
+          <a @click="activeTab = 'parameters'">
+            {{ $t('productions.parameters.title')}}
+          </a>
+        </li>
         <li :class="{'is-active': isActiveTab('taskStatus')}">
           <a @click="activeTab = 'taskStatus'">
             {{ $t('task_status.title')}}
@@ -28,6 +33,10 @@
 
     <div class="tab" v-show="isActiveTab('brief')">
       <ProductionBrief />
+    </div>
+
+    <div class="tab" v-show="isActiveTab('parameters')">
+      <production-parameters />
     </div>
 
     <div class="tab" v-show="isActiveTab('assetTypes')">
@@ -172,6 +181,7 @@ import Combobox from '@/components/widgets/Combobox'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import ProductionBrief from '@/components/pages/production/ProductionBrief'
+import ProductionParameters from '@/components/pages/production/ProductionParameters'
 import TaskTypeCell from '@/components/cells/TaskTypeName'
 import ValidationTag from '@/components/widgets/ValidationTag'
 
@@ -179,6 +189,7 @@ export default {
   name: 'production-settings',
   components: {
     ProductionBrief,
+    ProductionParameters,
     Combobox,
     ComboboxStatus,
     ComboboxTaskType,
