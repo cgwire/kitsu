@@ -444,10 +444,10 @@ const actions = {
           commentId: newComment.id
         }
         return tasksApi.addPreview(previewData)
-      }).then((preview) => {
+      }).then(preview => {
         if (!form) form = state.previewForms[0]
         return tasksApi.uploadPreview(preview.id, form)
-      }).then((preview) => {
+      }).then(preview => {
         commit(NEW_TASK_COMMENT_END, { comment: newComment, taskId })
         commit(ADD_PREVIEW_END, {
           preview,
@@ -709,6 +709,7 @@ const mutations = {
               annotations: p.annotations,
               extension: p.extension,
               task_id: p.task_id,
+              status: p.status,
               revision: p.revision,
               position: p.position,
               original_name: p.original_name
@@ -843,6 +844,7 @@ const mutations = {
       id: preview.id,
       feedback: false,
       revision: preview.revision,
+      status: preview.status,
       position: preview.position,
       original_name: preview.original_name,
       extension: preview.extension

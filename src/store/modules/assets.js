@@ -929,7 +929,7 @@ const mutations = {
       asset.preview_file_id = previewId
       asset.tasks.forEach((taskId) => {
         const task = taskMap[taskId]
-        task.entity.preview_file_id = previewId
+        if (task) task.entity.preview_file_id = previewId
       })
     }
   },
