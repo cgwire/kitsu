@@ -633,6 +633,7 @@ export default {
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occured while deleting this task status. There are probably data linked to it. Are you sure this task status has no task linked to it?',
     edit_title: 'Edit task status',
+    name: 'task status',
     number: 'task status | task status',
     new_task_status: 'Add a task status',
     title: 'Task Status',

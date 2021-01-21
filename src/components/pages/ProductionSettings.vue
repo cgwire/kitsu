@@ -124,7 +124,7 @@
     </div>
 
     <div class="tab" v-show="isActiveTab('taskStatus')">
-      <div class="flexrow mt1 mb1 add-task-status">
+      <div class="flexrow mt1 mb1 add-task-status" v-if="!isEmpty(remainingTaskStatuses)">
         <combobox-status
           class="flexrow-item selector"
           :task-status-list="remainingTaskStatuses"
@@ -143,30 +143,52 @@
       >
         {{ $t('settings.production.empty_list') }}
       </div>
-      <table class="datatable list" v-else>
-        <tbody class="datatable-body">
-          <tr
-            class="datatable-row"
-            :key="taskStatus.id"
-            v-for="taskStatus in productionTaskStatuses"
-          >
-            <td class="name">
-              <validation-tag
-                :is-static="true"
-                :task="{ task_status_id: taskStatus.id }"
-              />
-            </td>
-            <td>
-              <button
-                class="button"
-                @click="removeTaskStatus(taskStatus.id)"
-              >
-                {{ $t('main.remove') }}
-              </button>
-            </td>
+      <table class="datatable" v-else>
+        <thead>
+          <tr>
+            <th>{{$t('task_status.fields.name')}}</th>
+            <th>{{$t('task_status.fields.short_name')}}</th>
+            <th>{{$t('task_status.fields.is_done')}}</th>
+            <th>{{$t('task_status.fields.is_retake')}}</th>
+            <th>{{$t('task_status.fields.is_artist_allowed')}}</th>
+            <th>{{$t('task_status.fields.is_client_allowed')}}</th>
           </tr>
+        </thead>
+        <tbody class="datatable-body">
+          <template v-for="taskStatus in productionTaskStatuses">
+            <tr
+              class="datatable-row"
+              :key="taskStatus.id"
+              v-if="taskStatus"
+            >
+              <td>
+                {{taskStatus.name}}
+              </td>
+              <td class="name">
+                <validation-tag
+                  :is-static="true"
+                  :task="{ task_status_id: taskStatus.id }"
+                />
+              </td>
+              <td>{{getBooleanTranslation(taskStatus.is_done)}}</td>
+              <td>{{getBooleanTranslation(taskStatus.is_retake)}}</td>
+              <td>{{getBooleanTranslation(taskStatus.is_artist_allowed)}}</td>
+              <td>{{getBooleanTranslation(taskStatus.is_client_allowed)}}</td>
+              <td>
+                <button
+                  class="button"
+                  @click="removeTaskStatus(taskStatus.id)"
+                >
+                  {{ $t('main.remove') }}
+                </button>
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
+      <p class="has-text-centered">
+        {{productionTaskStatuses.length}} {{$t('task_status.name')}}
+      </p>
     </div>
   </div>
   </div>
@@ -284,11 +306,19 @@ export default {
       this.addTaskStatusToProduction(this.taskStatusId)
       if (this.remainingTaskStatuses.length > 0) {
         this.taskStatusId = this.remainingTaskStatuses[0].id
+      } else {
+        // Clean data to avoid duplicated data in combobox
+        this.taskStatusId = ''
       }
     },
 
-    removeTaskStatus (taskStatusId) {
-      this.removeTaskStatusFromProduction(taskStatusId)
+    async removeTaskStatus (taskStatusId) {
+      await this.removeTaskStatusFromProduction(taskStatusId)
+      await this.$nextTick()
+      // Reselect the remainingTaskStatuses to avoid empty taskStatusId
+      if (this.remainingTaskStatuses.length > 0) {
+        this.taskStatusId = this.remainingTaskStatuses[0].id
+      }
     },
 
     addTaskType () {
@@ -300,6 +330,9 @@ export default {
 
     removeTaskType (taskTypeId) {
       this.removeTaskTypeFromProduction(taskTypeId)
+    },
+    getBooleanTranslation (bool) {
+      return bool ? this.$t('main.yes') : this.$t('main.no')
     }
   },
 
@@ -312,6 +345,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.datatable th {
+  color: var(--text);
+}
+p {
+  color: var(--text);
+}
 .fixed-page {
   display: flex;
 }
