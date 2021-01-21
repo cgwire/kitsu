@@ -85,7 +85,7 @@
               <comment
                 :comment="comment"
                 :task="currentTask"
-                :highlighted="isHighlighted(comment)"
+                :highlighted="false"
                 :key="comment.id"
                 :current-user="user"
                 :editable="(
@@ -795,6 +795,8 @@ export default {
       this.errors.addComment = false
       this.$store.dispatch(action, params)
         .then(() => {
+          this.currentTaskPreviews = this.getCurrentTaskPreviews()
+          this.resetPreview()
           this.$refs['add-preview-modal'].reset()
           this.reset()
           this.attachedFileName = ''
@@ -820,25 +822,6 @@ export default {
         .join(', ')
     },
 
-    createPreview () {
-      this.errors.addPreview = false
-      this.loading.addPreview = true
-      this.addCommentPreview({
-        taskId: this.route.params.task_id,
-        commentId: this.route.params.comment_id
-      })
-        .then(preview => {
-          this.loading.addPreview = false
-          this.$refs['add-preview-modal'].reset()
-          this.resetPreview()
-        })
-        .catch((err) => {
-          console.error(err)
-          this.loading.addPreview = false
-          this.errors.addPreview = true
-        })
-    },
-
     isHighlighted (comment) {
       return comment.preview && comment.preview.id === this.currentPreviewId
     },
@@ -858,7 +841,6 @@ export default {
       })
         .then(() => {
           this.loading.addExtraPreview = false
-          this.resetPreview(false)
           this.modals.addExtraPreview = false
           this.$refs['add-extra-preview-modal'].reset()
           setTimeout(() => {
@@ -1156,7 +1138,7 @@ export default {
         this.onPreviewAdded(eventData)
       },
 
-      'preview_file:update' (eventData) {
+      'preview-file:update' (eventData) {
         const preview = this.currentTaskPreviews.filter((preview) => {
           return preview.id === eventData.preview_file_id
         })
@@ -1165,7 +1147,7 @@ export default {
             taskId: this.currentTask.id,
             previewId: eventData.preview_file_id
           }).then(() => {
-            this.$refs['preview-movie'].refreshAnnotations()
+            this.taskPreviews = this.getCurrentTaskPreviews()
           })
         }
       },

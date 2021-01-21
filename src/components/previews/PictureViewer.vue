@@ -129,6 +129,16 @@ export default {
       return this.$refs['picture-subwrapper']
     },
 
+    status () {
+      return this.preview && this.preview.status
+        ? this.preview.status
+        : 'ready'
+    },
+
+    isAvailable () {
+      return !['broken', 'processing'].includes(this.status)
+    },
+
     // Utils
 
     extension () {
@@ -144,18 +154,18 @@ export default {
     },
 
     pictureOriginalPath () {
-      if (this.preview) {
+      if (this.preview && this.isAvailable && !this.isMovie) {
         const previewId = this.preview.id
         return `/api/pictures/originals/preview-files/${previewId}.png`
       } else {
-        return ''
+        return null
       }
     }
   },
 
   methods: {
-    // Sizing
 
+    // Sizing
     getNaturalDimensions () {
       let picture = { naturalWidth: 0, naturalHeight: 0 }
       if (!this.fullScreen && this.picture.naturalWidth && !this.isGif) {
@@ -235,11 +245,11 @@ export default {
     },
 
     setPicturePath () {
-      if (this.isGif) {
+      if (this.isGif && this.isAvailable && !this.isMovie) {
         const previewId = this.preview.id
         this.pictureGifPath =
           `/api/pictures/originals/preview-files/${previewId}.gif`
-      } else if (this.preview) {
+      } else if (this.preview && this.isAvailable && !this.isMovie) {
         const previewId = this.preview.id
         this.picturePath =
           `/api/pictures/previews/preview-files/${previewId}.png`
@@ -248,12 +258,12 @@ export default {
     },
 
     setPictureDlPath () {
-      if (this.preview) {
+      if (this.preview && this.isAvailable && !this.isMovie) {
         const previewId = this.preview.id
         this.pictureDlPath =
           `/api/pictures/originals/preview-files/${previewId}/download`
       } else {
-        this.pictureDlPath = ''
+        this.pictureDlPath = null
       }
     },
 
