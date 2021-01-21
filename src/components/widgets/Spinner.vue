@@ -15,6 +15,7 @@ import {
   SquareGrid,
   Origami
 } from 'vue-loading-spinner'
+
 export default {
   name: 'spinner',
   components: {
