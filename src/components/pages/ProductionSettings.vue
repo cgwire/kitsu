@@ -186,9 +186,6 @@
           </template>
         </tbody>
       </table>
-      <p class="has-text-centered">
-        {{productionTaskStatuses.length}} {{$t('task_status.name')}}
-      </p>
     </div>
   </div>
   </div>
