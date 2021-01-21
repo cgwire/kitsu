@@ -1,104 +1,104 @@
 <template>
   <div class="columns">
-    <div class="column is-one-third">
+    <div class="column is-one-third box">
       <!-- Form -->
       <form class="form" v-on:submit.prevent>
         <text-field
-          v-model="form.name"
-          v-focus
           ref="nameField"
           :label="$t('productions.fields.name')"
           @enter="runConfirmation"
+          v-focus
+          v-model="form.name"
         />
         <div class="columns">
-          <div class="column is-half">
+          <div class="mr1">
             <date-field
-              v-model="form.start_date"
-              :label="$t('productions.fields.start_date')"
               ref="startDateField"
+              :label="$t('productions.fields.start_date')"
+              :short-date="true"
+              v-model="form.start_date"
             />
           </div>
-          <div class="column is-half">
+          <div>
             <date-field
-              v-model="form.end_date"
-              :label="$t('productions.fields.end_date')"
               ref="endDateField"
+              :label="$t('productions.fields.end_date')"
+              :short-date="true"
+              v-model="form.end_date"
              />
           </div>
         </div>
-        <!-- Add v-model -->
         <combobox
-          v-model="form.production_type"
+          ref="productionTypeField"
           localeKeyPrefix="productions.type."
           :label="$t('productions.fields.type')"
           :options="productionTypeOptions"
           @enter="runConfirmation"
-          ref="productionTypeField"
+          v-model="form.production_type"
         />
 
         <text-field
-          v-model="form.nb_episodes"
-          v-focus
+          ref="nbEpisodesField"
           :label="$t('productions.fields.nb_episodes')"
           @enter="runConfirmation"
-          ref="nbEpisodesField"
+          v-focus
+          v-model="form.nb_episodes"
           v-if="currentProduction && currentProduction.id && isLocalTVShow"
         />
         <text-field
-          v-model="form.episode_span"
-          v-focus
+          ref="episodesSpanField"
           :label="$t('productions.fields.episode_span')"
           @enter="runConfirmation"
-          ref="episodesSpanField"
+          v-focus
+          v-model="form.episode_span"
           v-if="currentProduction && currentProduction.id && isLocalTVShow"
         />
 
         <text-field
-          v-model="form.fps"
-          v-focus
+          ref="fpsField"
           :label="$t('productions.fields.fps')"
           @enter="runConfirmation"
-          ref="fpsField"
+          v-focus
+          v-model="form.fps"
           v-if="currentProduction && currentProduction.id"
         />
         <text-field
-          v-model="form.ratio"
-          v-focus
+          ref="ratioField"
           :label="$t('productions.fields.ratio')"
           @enter="runConfirmation"
-          ref="ratioField"
+          v-focus
+          v-model="form.ratio"
           v-if="currentProduction && currentProduction.id"
         />
         <text-field
-          v-model="form.resolution"
-          v-focus
-          :label="$t('productions.fields.resolution')"
           ref="resolutionField"
+          :label="$t('productions.fields.resolution')"
           @enter="runConfirmation"
+          v-focus
+          v-model="form.resolution"
           v-if="currentProduction && currentProduction.id"
         />
         <div v-if="currentProduction && currentProduction.id">
-          <span class="label">{{ $t("productions.picture") }}</span>
+          <label class="label">{{ $t("productions.picture") }}</label>
           <file-upload
+            ref="fileField"
+            :is-primary="false"
             :label="$t('main.csv.upload_file')"
             @fileselected="onFileSelected"
             accept=".png,.jpg,.jpeg"
-            ref="fileField"
           />
         </div>
         <p v-if="isError" class="error mt1">
           {{ $t('productions.edit_error') }}
         </p>
-        <div class="has-text-right">
-          <div>
-            <button-simple
-              class="is-primary is-rounded"
-              :class="{'is-loading': isLoading}"
-              :disabled="isLoading"
-              :text="$t('productions.parameters.save.button')"
-              @click="editParameters"
-            />
-          </div>
+        <div class="has-text-right mt2">
+          <button-simple
+            :is-primary="true"
+            :class="{'is-loading': isLoading}"
+            :disabled="isLoading"
+            :text="$t('main.save')"
+            @click="editParameters"
+          />
         </div>
       </form>
     </div>
@@ -108,7 +108,7 @@
 <script>
 
 import { mapGetters, mapActions } from 'vuex'
-import { formatSimpleDate } from '@/lib/time'
+import { formatSimpleDate, parseSimpleDate } from '@/lib/time'
 
 import Combobox from '@/components/widgets/Combobox'
 import DateField from '@/components/widgets/DateField'
@@ -152,7 +152,6 @@ export default {
         end_date: new Date(),
         nb_episodes: 0,
         episode_span: 0,
-        project_status_id: this.productionStatus ? this.productionStatus[0].id : null,
         fps: '',
         ratio: '',
         resolution: '',
@@ -216,20 +215,16 @@ export default {
       if (this.currentProduction) {
         this.form = {
           name: this.currentProduction.name,
-          start_date: new Date(this.currentProduction.start_date),
-          end_date: new Date(this.currentProduction.end_date),
+          start_date:
+            parseSimpleDate(this.currentProduction.start_date).toDate(),
+          end_date: parseSimpleDate(this.currentProduction.end_date).toDate(),
           production_type: this.currentProduction.production_type || 'short',
           nb_episodes: this.currentProduction.nb_episodes,
           episode_span: this.currentProduction.episode_span,
-          project_status_id: this.currentProduction.project_status_id,
           fps: this.currentProduction.fps,
           ratio: this.currentProduction.ratio,
           resolution: this.currentProduction.resolution
         }
-        this.form.project_status_id = null
-        this.$nextTick(() => {
-          this.form.project_status_id = this.currentProduction.project_status_id
-        })
       } else {
         this.form = {
           name: '',
@@ -238,7 +233,6 @@ export default {
           production_type: 'short',
           nb_episodes: 0,
           episode_span: 0,
-          project_status_id: this.productionStatusOptions[0].value,
           fps: '',
           ratio: '',
           resolution: ''
@@ -275,5 +269,9 @@ export default {
 .column {
   overflow-y: initial;
   padding: initial;
+}
+
+.box {
+  padding: 1em;
 }
 </style>

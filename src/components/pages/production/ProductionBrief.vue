@@ -24,7 +24,7 @@
         </p>
         <p>
           <button-simple
-            class="is-primary button"
+            :is-primary="true"
             :is-loading="isLoading"
             :disabled="isLoading"
             :text="$t('main.save')"
@@ -113,6 +113,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dark {
+  .content {
+    color: $white;
+  }
+}
+
 .brief {
   flex: 1;
 }
