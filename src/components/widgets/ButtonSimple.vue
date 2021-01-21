@@ -3,6 +3,7 @@
   :class="{
     button: true,
     active: active,
+    'is-primary': isPrimary,
     'is-loading': isLoading,
     'is-on': isOn
   }"
@@ -231,6 +232,10 @@ export default {
       type: Boolean
     },
     isLoading: {
+      default: false,
+      type: Boolean
+    },
+    isPrimary: {
       default: false,
       type: Boolean
     },
