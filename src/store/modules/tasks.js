@@ -884,8 +884,8 @@ const mutations = {
 
   [UPDATE_PREVIEW_ANNOTATION] (state, { taskId, preview, annotations }) {
     let oldPreview = null
-    state.taskPreviews[taskId].forEach((p) => {
-      p.previews.forEach((subPreview) => {
+    state.taskPreviews[taskId].forEach(p => {
+      p.previews.forEach(subPreview => {
         if (subPreview.id === preview.id) {
           oldPreview = subPreview
         }
@@ -893,11 +893,13 @@ const mutations = {
 
       if (p.id === preview.id) {
         p.annotations = annotations
+        p.status = preview.status
       }
     })
 
     if (oldPreview) {
       oldPreview.annotations = annotations
+      oldPreview.status = preview.status
     }
   },
 

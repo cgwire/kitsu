@@ -150,12 +150,22 @@ export default {
       return this.currentProduction.fps || 24
     },
 
+    status () {
+      return this.preview && this.preview.status
+        ? this.preview.status
+        : 'ready'
+    },
+
+    isAvailable () {
+      return !['broken', 'processing'].includes(this.status)
+    },
+
     isVideo () {
       return this.$refs.movie && this.videoDuration && this.videoDuration > 0
     },
 
     moviePath () {
-      if (this.extension === 'mp4') {
+      if (this.extension === 'mp4' && this.isAvailable) {
         return `/api/movies/originals/preview-files/${this.preview.id}.mp4`
       } else {
         return null
@@ -163,7 +173,7 @@ export default {
     },
 
     movieDlPath () {
-      if (this.preview) {
+      if (this.preview && this.isAvailable) {
         return `/api/movies/originals/preview-files/${this.preview.id}/download`
       } else {
         return ''
@@ -171,7 +181,7 @@ export default {
     },
 
     posterPath () {
-      if (this.extension === 'mp4') {
+      if (this.extension === 'mp4' && this.isAvailable) {
         return `/api/pictures/previews/preview-files/${this.preview.id}.png`
       } else {
         return null

@@ -119,14 +119,14 @@
         </span>
         <span
           class="flexrow-item time-indicator"
-          v-if="!light || fullScreen"
+          v-if="fullScreen"
         >
         /
         </span>
         <span
           class="flexrow-item time-indicator"
           :title="$t('playlists.actions.max_duration')"
-          v-if="!light || fullScreen"
+          v-if="fullScreen"
         >
          {{ maxDuration }}
         </span>

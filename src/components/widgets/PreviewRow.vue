@@ -7,8 +7,7 @@
   <button-link
     :text="label"
     :path="previewPath"
-  >
-  </button-link>
+  />
 </div>
 </template>
 

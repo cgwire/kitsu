@@ -251,6 +251,7 @@ export default {
     go_productions: 'Go to productions',
     history: 'history',
     info: 'Information',
+    home: 'return to home page',
     or: 'or',
     no: 'No',
     less_filters: 'Less filters',

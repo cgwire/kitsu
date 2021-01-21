@@ -916,7 +916,7 @@ export default {
       },
 
       'preview-file:update' (eventData) {
-        const preview = this.taskPreviews.filter((preview) => {
+        const preview = this.taskPreviews.filter(preview => {
           return preview.id === eventData.preview_file_id
         })
         if (preview && this.task) {
@@ -924,6 +924,7 @@ export default {
             taskId: this.task.id,
             previewId: eventData.preview_file_id
           }).then(() => {
+            this.taskPreviews = this.getTaskPreviews(this.task.id)
           })
         }
       },

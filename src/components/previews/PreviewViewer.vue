@@ -1,23 +1,21 @@
 <template>
 <div ref="container" class="preview-viewer dark">
 
-    <div style="color: white;"> toto {{ status }} {{ preview && preview.status ? preview.status : 'non'}}</div>
     <div
       class="center status-message"
       :style="{ height: defaultHeight + 'px' }"
       v-show="isBroken"
     >
       <p>This preview is broken.</p>
-      <spinner />
     </div>
 
     <div
       class="center status-message"
       :style="{ height: defaultHeight + 'px' }"
+      title="Video processing in progress..."
       v-show="isProcessing"
     >
-      <p>We are processing the video...</p>
-      <p><spinner /></p>
+      <spinner :is-processing="true" />
     </div>
 
     <video-viewer
@@ -48,6 +46,7 @@
       :preview="preview"
       @size-changed="dimensions => $emit('size-changed', dimensions)"
       v-show="isPicture"
+
     />
 
     <!--model-viewer
@@ -160,7 +159,6 @@ export default {
   },
 
   mounted () {
-    console.log(this.preview)
   },
 
   beforeDestroy () {
@@ -372,7 +370,6 @@ export default {
 
   watch: {
     preview () {
-      console.log(this.preview)
       if (this.isMovie) {
         this.pause()
         this.maxDuration = '00:00.000'
