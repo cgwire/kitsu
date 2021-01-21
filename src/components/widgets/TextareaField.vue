@@ -67,6 +67,15 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.control {
+  flex: 1;
+}
+
 textarea {
   height: 100%;
   min-height: 8em;
