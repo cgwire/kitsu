@@ -146,12 +146,12 @@
       <table class="datatable" v-else>
         <thead>
           <tr>
-            <th>{{$t('task_status.fields.name')}}</th>
-            <th>{{$t('task_status.fields.short_name')}}</th>
-            <th>{{$t('task_status.fields.is_done')}}</th>
-            <th>{{$t('task_status.fields.is_retake')}}</th>
-            <th>{{$t('task_status.fields.is_artist_allowed')}}</th>
-            <th>{{$t('task_status.fields.is_client_allowed')}}</th>
+            <th class="th-name">{{$t('task_status.fields.name')}}</th>
+            <th class="th-short-name">{{$t('task_status.fields.short_name')}}</th>
+            <th class="th-bool">{{$t('task_status.fields.is_done')}}</th>
+            <th class="th-bool">{{$t('task_status.fields.is_retake')}}</th>
+            <th class="th-bool">{{$t('task_status.fields.is_artist_allowed')}}</th>
+            <th class="th-bool">{{$t('task_status.fields.is_client_allowed')}}</th>
           </tr>
         </thead>
         <tbody class="datatable-body">
@@ -401,6 +401,23 @@ h2.subtitle {
   .name {
     width: 100%;
   }
+}
+
+.th-name {
+  width: 200px;
+}
+
+.th-short-name {
+  width: 120px;
+}
+
+.th-bool {
+  width: 140px;
+}
+
+th {
+  padding-left: 10px;
+  padding-bottom: 5px;
 }
 
 .box {
