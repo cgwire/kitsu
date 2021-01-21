@@ -745,6 +745,12 @@ export default {
   hr {
     background-color: $grey-strong;
   }
+
+  .user-menu li {
+    &:not(.version):hover {
+      background: $dark-grey-light;
+    }
+  }
 }
 
 .nav {

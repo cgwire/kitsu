@@ -203,6 +203,10 @@ export default {
   a {
     color: $white-grey;
   }
+
+  p:hover {
+    background: $dark-grey-light;
+  }
 }
 
 aside {
