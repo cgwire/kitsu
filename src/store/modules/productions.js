@@ -581,6 +581,9 @@ const mutations = {
 
       Object.assign(production, newProduction)
       if (openProduction) Object.assign(openProduction, newProduction)
+      if (state.currentProduction.id === newProduction.id) {
+        Object.assign(state.currentProduction, newProduction)
+      }
     } else {
       newProduction.team = []
       newProduction.task_statuses = []
