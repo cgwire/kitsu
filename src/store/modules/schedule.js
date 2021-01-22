@@ -15,12 +15,24 @@ const initialState = {
 const state = { ...initialState }
 
 const getters = {
-  milestones: (state) => state.milestones
+  milestones: (state) => state.milestones,
+  currentScheduleItems: (state) => state.currentScheduleItems
 }
 
 const actions = {
   loadScheduleItems ({ commit }, production) {
     return scheduleApi.getScheduleItems(production)
+      .then((scheduleItems) => {
+        commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
+      })
+      .catch(console.error)
+  },
+
+  loadAllScheduleItems ({ commit }, production) {
+    return scheduleApi.getAllScheduleItems(production)
+      .then((scheduleItems) => {
+        commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
+      })
       .catch(console.error)
   },
 
@@ -43,8 +55,39 @@ const actions = {
     }
   },
 
-  saveScheduleItem ({ commit }, scheduleItem) {
+  createScheduleItem ({ commit, state }, scheduleItem) {
+    return scheduleApi.createScheduleItem(scheduleItem)
+      .then((newScheduleItem) => {
+        const scheduleItems = state.currentScheduleItems.slice()
+        scheduleItems.push(newScheduleItem)
+        commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
+      })
+      .catch(console.error)
+  },
+
+  deleteScheduleItem ({ commit, state }, scheduleItem) {
+    return scheduleApi.deleteScheduleItem(scheduleItem)
+      .then((deletedItem) => {
+        const scheduleItems = state.currentScheduleItems.slice()
+        const indexToRemove = scheduleItems.findIndex(item => item.id === deletedItem.id)
+        if (indexToRemove !== -1) {
+          scheduleItems.splice(indexToRemove, 1)
+          commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
+        }
+      })
+      .catch(console.error)
+  },
+
+  saveScheduleItem ({ commit, state }, scheduleItem) {
     return scheduleApi.updateScheduleItem(scheduleItem)
+      .then((updatedItem) => {
+        const scheduleItems = state.currentScheduleItems.slice()
+        const indexUpdate = scheduleItems.findIndex(item => item.id === updatedItem.id)
+        if (indexUpdate !== -1) {
+          scheduleItems[indexUpdate] = updatedItem
+          commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
+        }
+      })
       .catch(console.error)
   },
 
@@ -99,7 +142,7 @@ const mutations = {
   },
 
   [SET_CURRENT_SCHEDULE_ITEMS] (state, items) {
-    this.currentScheduleItems = items
+    state.currentScheduleItems = items
   },
 
   [RESET_ALL] (state) {

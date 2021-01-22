@@ -96,7 +96,9 @@ export default {
       this.localValue = this.value
     },
     localValue () {
-      this.$emit('input', this.localValue)
+      if (this.localValue !== this.value) {
+        this.$emit('input', this.localValue)
+      }
     }
   }
 }

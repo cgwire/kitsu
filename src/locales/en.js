@@ -539,7 +539,7 @@ export default {
       start_date: 'Start date',
       end_date: 'End date',
       nb_episodes: 'Number of episodes',
-      episode_span: 'Span beetwen episodes'
+      episode_span: 'Episode spacing'
     },
     metadata: {
       add_explaination: 'Add specific data required by this project.',

@@ -171,9 +171,12 @@ export default {
     this.resetForm()
   },
   watch: {
-    currentProduction () {
-      this.resetForm()
-      this.updateTvShowRelatedDatas(this.isTVShow)
+    currentProduction: {
+      handler () {
+        this.resetForm()
+        this.updateTvShowRelatedDatas(this.isTVShow)
+      },
+      deep: true
     },
     'form.production_type' (newProductionType) {
       this.updateTvShowRelatedDatas(newProductionType === 'tvshow')
