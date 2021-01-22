@@ -248,6 +248,13 @@ export default {
 
     hideSideInfo () {
       this.showInfo = false
+    },
+
+    episodifyRoute (route) {
+      if (this.currentEpisode) {
+        episodifyRoute(route, this.currentEpisode.id)
+      }
+      return route
     }
   },
 
@@ -266,7 +273,7 @@ export default {
         if (this.detailLevelString === 'day') {
           route.params.month = this.currentMonth
         }
-        this.$router.push(episodifyRoute(route, this.currentEpisode.id))
+        this.$router.push(this.episodifyRoute(route))
       }
     },
 
@@ -286,7 +293,7 @@ export default {
         if (this.detailLevelString === 'day') {
           route.params.month = `${Math.min(Number(this.monthString), currentMonth)}`
         }
-        this.$router.push(episodifyRoute(route, this.currentEpisode.id))
+        this.$router.push(this.episodifyRoute(route))
       }
     },
 
@@ -302,17 +309,19 @@ export default {
             countMode: this.countMode
           }
         }
-        this.$router.push(episodifyRoute(route, this.currentEpisode.id))
+        this.$router.push(this.episodifyRoute(route))
       }
     },
 
     countMode () {
       if (this.currentMode !== this.countMode) {
-        this.$router.push({
-          query: {
-            countMode: this.countMode
-          }
-        })
+        if (this.$route.query.countMode !== this.countMode) {
+          this.$router.push({
+            query: {
+              countMode: this.countMode
+            }
+          })
+        }
         this.currentMode = this.countMode
       }
     },
@@ -320,11 +329,13 @@ export default {
     taskTypeId () {
       const key = `quota:${this.currentProduction.id}:task-type-id`
       localStorage.setItem(key, this.taskTypeId)
-      this.$router.push({
-        query: {
-          taskTypeId: this.taskTypeId
-        }
-      })
+      if (this.$route.query.taskTypeId !== this.taskTypeId) {
+        this.$router.push({
+          query: {
+            taskTypeId: this.taskTypeId
+          }
+        })
+      }
     },
 
     currentProduction () {

@@ -473,6 +473,9 @@ export default {
    .quota-button:hover {
       color: #333;
     }
+    .info {
+      color: $white;
+    }
   }
 
   .data-list {
