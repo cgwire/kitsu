@@ -1,7 +1,8 @@
 <template>
-  <div class="server-down page">
-    <h1 class="title has-text-centered">{{ $t('server_down.title') }}</h1>
-    <p class="has-text-centered">
+  <div class="server-down page has-text-centered">
+    <img src="@/assets/500.gif">
+    <h1 class="title">{{ $t('server_down.title') }}</h1>
+    <p>
       {{ $t('server_down.text') }}
     </p>
   </div>
@@ -9,7 +10,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import auth from '../../lib/auth'
+import auth from '@/lib/auth'
 
 export default {
   name: 'server-down',
@@ -35,4 +36,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+img {
+  max-width: 1000px;
+}
+
+p {
+  font-size: 1.3em;
+  padding-bottom: 1em;
+
+  a {
+    text-decoration: underline;
+  }
+}
 </style>
