@@ -451,8 +451,8 @@ export default {
 }
 
 .name {
-  width: 230px;
-  min-width: 230px;
+  width: 280px;
+  min-width: 280px;
 }
 
 .description {
@@ -481,8 +481,8 @@ export default {
 }
 
 .status {
-  width: 90px;
-  min-width: 90px;
+  width: 100px;
+  min-width: 100px;
 }
 
 .estimation {
