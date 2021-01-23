@@ -186,7 +186,7 @@ const actions = {
   },
 
   runPlaylistBuild ({ commit }, playlist) {
-    playlistsApi.runPlaylistBuild(playlist)
+    return playlistsApi.runPlaylistBuild(playlist)
   },
 
   changePlaylistType (
