@@ -325,6 +325,16 @@ export default {
       'removeSelectedTask'
     ]),
 
+    isTaskChanged (task, data) {
+      const taskStart = task.start_date ? task.start_date.substring(0, 10) : ''
+      const taskDue = task.due_date ? task.due_date.substring(0, 10) : ''
+      return (
+        (data.start_date && taskStart !== data.start_date) ||
+        (data.due_date && taskDue !== data.due_date) ||
+        (data.estimation && task.estimation !== data.estimation)
+      )
+    },
+
     getDate (date) {
       return date ? moment(date, 'YYYY-MM-DD').toDate() : null
     },
@@ -351,8 +361,10 @@ export default {
             minutesToDays(this.organisation, task.estimation)
           )
         }
-        this.updateTask({ taskId, data })
-          .catch(console.error)
+        if (this.isTaskChanged(task, data)) {
+          this.updateTask({ taskId, data })
+            .catch(console.error)
+        }
       })
     },
 
@@ -372,8 +384,10 @@ export default {
             minutesToDays(this.organisation, task.estimation)
           )
         }
-        this.updateTask({ taskId, data })
-          .catch(console.error)
+        if (this.isTaskChanged(task, data)) {
+          this.updateTask({ taskId, data })
+            .catch(console.error)
+        }
       })
     },
 
@@ -555,8 +569,10 @@ export default {
           )
           data.estimation = estimation
         }
-        this.updateTask({ taskId, data })
-          .catch(console.error)
+        if (this.isTaskChanged(task, data)) {
+          this.updateTask({ taskId, data })
+            .catch(console.error)
+        }
       })
     }
   },
