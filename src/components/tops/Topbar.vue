@@ -111,10 +111,6 @@
             :person="user"
             :is-link="false"
           />
-          <people-name
-            class="user-name"
-            :person="user"
-          />
         </div>
       </div>
     </nav>
@@ -204,7 +200,6 @@ import { ChevronLeftIcon, LogOutIcon, ZapIcon } from 'vue-feather-icons'
 import Combobox from '../widgets/Combobox'
 import NotificationBell from '../widgets/NotificationBell'
 import PeopleAvatar from '../widgets/PeopleAvatar'
-import PeopleName from '../widgets/PeopleName'
 import ShortcutModal from '../modals/ShortcutModal'
 import { version } from '../../../package.json'
 
@@ -215,7 +210,6 @@ export default {
     ChevronLeftIcon,
     LogOutIcon,
     NotificationBell,
-    PeopleName,
     PeopleAvatar,
     ShortcutModal,
     ZapIcon
@@ -241,16 +235,6 @@ export default {
       position: 'bottom',
       align: 'right'
     })
-    const userMenu = this.$refs['user-menu']
-    const userName = this.$refs['user-name']
-    if (userName) {
-      const userNameWidth = userName.clientWidth
-
-      if (userNameWidth > 100) {
-        userMenu.style.width = `${userNameWidth}px`
-        userName.style.width = `${userNameWidth}px`
-      }
-    }
 
     this.currentProjectSection = this.getCurrentSectionFromRoute()
     this.setProductionFromRoute()
@@ -774,7 +758,6 @@ export default {
 
 .user-nav {
   cursor: pointer;
-  min-width: 180px;
 }
 
 .user-nav.active {
@@ -782,8 +765,8 @@ export default {
 
 .user-menu {
   position: fixed;
-  width: 180px;
-  min-width: 180px;
+  width: 220px;
+  min-width: 220px;
   right: 0;
   background-color: white;
   padding: 1em 1em 1em 1em;
@@ -857,11 +840,6 @@ strong {
 
 .version {
   color: $grey;
-}
-
-.user-name {
-  min-width: 180px;
-  text-align: left;
 }
 
 .changelog-button {
