@@ -273,4 +273,8 @@ export default {
 .icon.is-small.only-icon {
   margin-right: 0;
 }
+
+.is-primary {
+  border-radius: 2em;
+}
 </style>
