@@ -29,7 +29,11 @@
             </span>
           </th>
         </tr>
-        <tr class="datatable-row tasktype-item" v-for="taskType in assetsItems" :key="taskType.id">
+        <tr
+          class="datatable-row tasktype-item"
+          :key="taskType.id"
+          v-for="taskType in assetsItems"
+        >
           <task-type-cell class="name" :task-type="taskType" />
           <td class="priority">{{ taskType.priority }}</td>
           <td class="allow-timelog">
