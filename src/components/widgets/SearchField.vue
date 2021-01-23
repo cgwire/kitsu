@@ -78,7 +78,11 @@ export default {
     },
 
     getValue (value) {
-      return this.$refs.input.value
+      if (this.$refs.input) {
+        return this.$refs.input.value
+      } else {
+        return ''
+      }
     },
 
     setValue (value) {
