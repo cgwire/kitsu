@@ -1628,7 +1628,7 @@ th.validation-cell {
   width: 150px;
 
   &.short {
-    width: 105px;
+    width: 106px;
   }
 }
 
