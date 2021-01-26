@@ -347,7 +347,7 @@ export default {
     updateStartDate (date) {
       Object.keys(this.selectionGrid).forEach(taskId => {
         const task = this.taskMap[taskId]
-        if (task.start_date.substring(0, 10) === formatSimpleDate(date)) return
+        if (task.start_date && task.start_date.substring(0, 10) === formatSimpleDate(date)) return
         const startDate = moment(date)
         const dueDate = task.due_date ? moment(task.due_date) : null
         let data = {
@@ -641,9 +641,9 @@ export default {
 
 th.start-date,
 th.due-date {
-  min-width: 105px;
-  max-width: 105px;
-  width: 105px;
+  min-width: 106px;
+  max-width: 106px;
+  width: 106px;
 }
 
 td.start-date,

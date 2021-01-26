@@ -676,10 +676,12 @@ export default {
       entities.forEach((entity) => {
         entity.tasks.forEach((taskId) => {
           const task = this.taskMap[taskId]
-          // Hack to allow filtering on linked entity metadata.
-          task.data = entity.data
-          if (task && task.task_type_id === this.currentTaskType.id) {
-            tasks.push(task)
+          if (task) {
+            // Hack to allow filtering on linked entity metadata.
+            task.data = entity.data
+            if (task.task_type_id === this.currentTaskType.id) {
+              tasks.push(task)
+            }
           }
         })
       })
