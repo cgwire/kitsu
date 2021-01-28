@@ -67,6 +67,52 @@ export default {
     })
   },
 
+  getAllScheduleItems (production) {
+    return new Promise((resolve, reject) => {
+      client.get(
+        `/api/data/projects/${production.id}/schedule-items/`,
+        (err, scheduleItems) => {
+          if (err) reject(err)
+          else resolve(scheduleItems)
+        }
+      )
+    })
+  },
+
+  createScheduleItem (scheduleItem) {
+    return new Promise((resolve, reject) => {
+      if (!scheduleItem.endDate) {
+        scheduleItem.endDate = scheduleItem.startDate.add('days', 1).clone()
+      }
+      const manDays = scheduleItem.man_days
+      const data = {
+        start_date: scheduleItem.startDate.format('YYYY-MM-DD'),
+        end_date: scheduleItem.endDate.format('YYYY-MM-DD'),
+        project_id: scheduleItem.project_id,
+        task_type_id: scheduleItem.task_type_id
+      }
+      if (manDays) data.man_days = parseInt(manDays)
+      client.post(
+        '/api/data/schedule-items/',
+        data,
+        (err, scheduleItem) => {
+          if (err) reject(err)
+          else resolve(scheduleItem)
+        }
+      )
+    })
+  },
+
+  deleteScheduleItem (scheduleItem) {
+    return new Promise((resolve, reject) => {
+      const path = `/api/data/schedule-items/${scheduleItem.id}`
+      client.del(path, (err) => {
+        if (err) reject(err)
+        else resolve(scheduleItem)
+      })
+    })
+  },
+
   getAssetTypeScheduleItems (production, taskType) {
     return this.getEntitycheduleItems(production, taskType, 'asset-types')
   },

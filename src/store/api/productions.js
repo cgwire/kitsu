@@ -86,7 +86,7 @@ export default {
   removeTaskTypeFromProduction (productionId, taskTypeId) {
     const path =
       `/api/data/projects/${productionId}/settings/task-types/${taskTypeId}`
-    return client.pdel(path)
+    return client.pdel(path).catch(console.error)
   },
 
   addTaskStatusToProduction (productionId, taskStatusId) {

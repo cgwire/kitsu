@@ -81,46 +81,7 @@
     </div>
 
     <div class="tab" v-show="isActiveTab('taskTypes')">
-      <div class="flexrow mt1 mb1 add-task-type">
-        <combobox-task-type
-          class="flexrow-item selector"
-          :task-type-list="remainingTaskTypes"
-          v-model="taskTypeId"
-        />
-        <button
-          class="button flexrow-item"
-          @click="addTaskType"
-        >
-          {{ $t('main.add') }}
-        </button>
-      </div>
-      <div
-        class="box"
-        v-if="isEmpty(currentProduction.task_types)"
-      >
-        {{ $t('settings.production.empty_list') }}
-      </div>
-      <table class="datatable list" v-else>
-        <tbody class="datatable-body">
-          <tr
-            class="datatable-row"
-            :key="taskType.id"
-            v-for="taskType in productionTaskTypes"
-          >
-            <task-type-cell
-              :task-type="taskType"
-            />
-            <td>
-              <button
-                class="button"
-                @click="removeTaskType(taskType.id)"
-              >
-                {{ $t('main.remove') }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <production-task-types />
     </div>
 
     <div class="tab" v-show="isActiveTab('taskStatus')">
@@ -194,14 +155,11 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import { sortByName } from '@/lib/sorting'
-
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import ProductionBrief from '@/components/pages/production/ProductionBrief'
 import ProductionParameters from '@/components/pages/production/ProductionParameters'
-import TaskTypeCell from '@/components/cells/TaskTypeName'
+import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes'
 import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
@@ -209,10 +167,9 @@ export default {
   components: {
     ProductionBrief,
     ProductionParameters,
+    ProductionTaskTypes,
     Combobox,
     ComboboxStatus,
-    ComboboxTaskType,
-    TaskTypeCell,
     ValidationTag
   },
 
@@ -220,8 +177,7 @@ export default {
     return {
       activeTab: 'brief',
       assetTypeId: '',
-      taskStatusId: '',
-      taskTypeId: ''
+      taskStatusId: ''
     }
   },
 
@@ -231,9 +187,6 @@ export default {
     }
     if (this.remainingTaskStatuses.length > 0) {
       this.taskStatusId = this.remainingTaskStatuses[0].id
-    }
-    if (this.remainingTaskTypes.length > 0) {
-      this.taskTypeId = this.remainingTaskTypes[0].id
     }
   },
 
@@ -248,7 +201,8 @@ export default {
       'taskStatus',
       'taskStatusMap',
       'taskTypeMap',
-      'taskTypes'
+      'taskTypes',
+      'isTVShow'
     ]),
 
     remainingAssetTypes () {
@@ -260,13 +214,6 @@ export default {
     remainingTaskStatuses () {
       return this.taskStatus
         .filter(s => !this.currentProduction.task_statuses.includes(s.id))
-    },
-
-    remainingTaskTypes () {
-      return sortByName(
-        this.taskTypes
-          .filter(t => !this.currentProduction.task_types.includes(t.id))
-      )
     }
   },
 
@@ -274,10 +221,8 @@ export default {
     ...mapActions([
       'addAssetTypeToProduction',
       'addTaskStatusToProduction',
-      'addTaskTypeToProduction',
       'removeAssetTypeFromProduction',
-      'removeTaskStatusFromProduction',
-      'removeTaskTypeFromProduction'
+      'removeTaskStatusFromProduction'
     ]),
 
     isEmpty (list) {
@@ -318,16 +263,6 @@ export default {
       }
     },
 
-    addTaskType () {
-      this.addTaskTypeToProduction(this.taskTypeId)
-      if (this.remainingTaskTypes.length > 0) {
-        this.taskTypeId = this.remainingTaskTypes[0].id
-      }
-    },
-
-    removeTaskType (taskTypeId) {
-      this.removeTaskTypeFromProduction(taskTypeId)
-    },
     getBooleanTranslation (bool) {
       return bool ? this.$t('main.yes') : this.$t('main.no')
     }

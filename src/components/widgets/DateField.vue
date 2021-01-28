@@ -95,6 +95,8 @@ export default {
   watch: {
     value () {
       this.localValue = this.value
+    },
+    localValue () {
     }
   }
 }
