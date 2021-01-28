@@ -13,6 +13,7 @@
       :disabled-dates="disabledDates"
       :monday-first="true"
       format="yyyy-MM-dd"
+      @input="$emit('input', localValue)"
       v-model="localValue"
     />
     <span
@@ -94,9 +95,6 @@ export default {
   watch: {
     value () {
       this.localValue = this.value
-    },
-    localValue () {
-      this.$emit('input', this.localValue)
     }
   }
 }
