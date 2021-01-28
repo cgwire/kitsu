@@ -1943,7 +1943,7 @@ export default {
       let preview = {
         id: entity.preview_file_id,
         task_id: entity.preview_file_task_id,
-        annotations: entity.preview_file_annotations
+        annotations: entity.preview_file_annotations || []
       }
       if (this.isCurrentPreviewPicture && this.currentPreviewIndex > 0) {
         const index = this.currentPreviewIndex - 1
@@ -1951,7 +1951,7 @@ export default {
         preview = {
           id: previewFile.id,
           task_id: entity.preview_file_task_id,
-          annotations: previewFile.annotations
+          annotations: previewFile.annotations || []
         }
       }
       if (!this.isCurrentUserArtist) {
@@ -1959,6 +1959,7 @@ export default {
           preview: preview,
           annotations: annotations
         })
+        entity.preview_file_annotations = annotations
       }
     },
 

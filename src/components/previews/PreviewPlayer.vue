@@ -1034,8 +1034,8 @@ export default {
         annotation = this.getAnnotation(currentTime)
         if (!annotation) {
           if (!this.isMovie) {
-            console.error(
-              'Annotations are malformed and cannot be loaded.', currentTime
+            console.warn(
+              'Annotations are malformed or empty.'
             )
           }
           return
