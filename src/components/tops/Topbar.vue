@@ -221,8 +221,7 @@ export default {
       currentEpisodeId: this.$route.params.episode_id,
       currentProjectSection: this.isCurrentUserClient ? 'playlists' : 'assets',
       kitsuVersion: version,
-      silent: false,
-
+      silent: true,
       display: {
         shortcutModal: false
       }
