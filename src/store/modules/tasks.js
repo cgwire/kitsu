@@ -515,13 +515,13 @@ const actions = {
     taskId, preview, annotations
   }) {
     return tasksApi.updatePreviewAnnotation(preview, annotations)
-      .then((updatedPreview) => {
+      .then(updatedPreview => {
         commit(UPDATE_PREVIEW_ANNOTATION, {
           taskId,
           preview,
           annotations
         })
-        return Promise.resolve()
+        return Promise.resolve(updatedPreview)
       })
       .catch(console.error)
   },
@@ -847,7 +847,8 @@ const mutations = {
       status: preview.status,
       position: preview.position,
       original_name: preview.original_name,
-      extension: preview.extension
+      extension: preview.extension,
+      task_id: taskId
     }
 
     if (state.taskPreviews[taskId]) {
@@ -883,6 +884,7 @@ const mutations = {
   },
 
   [UPDATE_PREVIEW_ANNOTATION] (state, { taskId, preview, annotations }) {
+    preview.annotations = annotations
     state.taskPreviews[taskId].forEach(p => {
       p.previews.forEach(subPreview => {
         if (subPreview.id === preview.id) {
