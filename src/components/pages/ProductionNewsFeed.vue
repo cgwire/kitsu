@@ -87,21 +87,24 @@
         </div>
 
         <div class="stats mt1" v-if="isStatsDisplayed">
-          {{ newsTotal }} {{ $t('news.news') }} -
+          <span class="news-number">
+           {{ newsTotal }} {{ $t('news.news') }}
+           </span>
           <template
             v-for="stat in renderedStats"
           >
             <span
               :key="'stat-value-' + stat.name.toLowerCase()"
               class="tag stat-tag"
+              :title="stat.name + ': ' + stat.value"
               :style="{
                 background: stat.color,
                 color: stat.name === 'TODO' ? '#666' : 'white'
               }"
             >
              {{ stat.name }}
-            </span>
             : {{ stat.value }}
+            </span>
           </template>
         </div>
 
@@ -775,6 +778,13 @@ export default {
     color: $light-grey-light;
   }
 
+  .stats {
+    .news-number {
+      border: 2px solid $light-grey;
+      color: $light-grey;
+    }
+  }
+
   .timeline-wrapper {
     background: $dark-grey;
   }
@@ -965,9 +975,18 @@ export default {
   text-align: left;
   margin-top: 2em;
 
+  .news-number {
+    font-weight: bold;
+    border: 2px solid $grey-strong;
+    border-radius: 1em;
+    padding: 0.3em;
+    margin-right: 0.8em;
+  }
+
   .stat-tag {
-    margin-left: 1em;
+    margin-right: 1em;
     margin-top: 0;
+    margin-bottom: 1em;
   }
 }
 </style>
