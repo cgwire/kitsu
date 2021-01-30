@@ -309,14 +309,12 @@ export default {
       'currentProduction',
       'displayedShots',
       'getEpisodeOptions',
-      'isCastingSaveActive',
       'isCurrentUserManager',
       'isAssetsLoading',
       'isShotsLoading',
       'isTVShow',
       'sequences',
       'sequenceMap',
-      'shots',
       'shotMap'
     ]),
 
