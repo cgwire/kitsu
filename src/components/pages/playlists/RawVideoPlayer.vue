@@ -258,7 +258,7 @@ export default {
     play () {
       let entity = this.entities[this.currentIndex]
       if (entity) {
-        if (!entity.preview_file_id) this.loadNextEntitn()
+        if (!entity.preview_file_id) this.loadNextEntity()
         entity = this.entities[this.currentIndex]
         if (entity.preview_file_id) {
           if (this.currentPlayer) this.currentPlayer.play()
