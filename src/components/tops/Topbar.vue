@@ -196,12 +196,15 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { ChevronLeftIcon, LogOutIcon, ZapIcon } from 'vue-feather-icons'
+import VueRouter from 'vue-router'
 
 import Combobox from '../widgets/Combobox'
 import NotificationBell from '../widgets/NotificationBell'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 import ShortcutModal from '../modals/ShortcutModal'
 import { version } from '../../../package.json'
+
+const { isNavigationFailure, NavigationFailureType } = VueRouter
 
 export default {
   name: 'topbar',
@@ -575,7 +578,13 @@ export default {
         }
       }
       route = this.episodifyRoute(route, section, episodeId, isTVShow)
-      if (route && route.params.production_id) this.$router.push(route)
+      if (route && route.params.production_id) {
+        this.$router.push(route).catch(error => {
+          if (isNavigationFailure(error, NavigationFailureType.redirected)) {
+            console.error(error)
+          }
+        })
+      }
     },
 
     episodifyRoute (route, section, episodeId, isTVShow) {
