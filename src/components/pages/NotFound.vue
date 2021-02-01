@@ -1,6 +1,6 @@
 <template>
   <div class="not-found page has-text-centered">
-    <img src="@/assets/404.png">
+    <img src="@/assets/illustrations/404.png">
     <h1 class="title">{{ $t('not_found.title') }}</h1>
     <p>
       {{ $t('not_found.text') }}

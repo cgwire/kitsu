@@ -57,22 +57,19 @@
 
     <div class="has-text-centered welcome" v-else>
       <p class="kitsu-logo info">
-        <img src="../../assets/illustrations/studio_collaboration.png" />
+        <img src="../../assets/illustrations/empty_production.png" />
       </p>
-      <h1 class="title has-text-centered">
-        {{ $t('productions.home.welcome') }}
-      </h1>
       <div v-if="isCurrentUserAdmin">
         <p class="has-text-centered info">
           {{ $t('productions.home.empty') }}
         </p>
-        <p class="has-text-centered">
-          <button-simple
-            class="level-item big-button"
-            :text="$t('productions.home.create_new')"
-            :is-responsive="false"
+        <p class="has-text-centered mt1">
+          <button
+            class="button big-button"
             @click="showNewModal"
-          />
+          >
+          {{ $t('productions.home.create_new') }}
+          </button>
         </p>
       </div>
       <div v-else-if="isCurrentUserClient">
@@ -101,7 +98,6 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import colors from '../../lib/colors.js'
-import ButtonSimple from '../widgets/ButtonSimple'
 import EditProductionModal from '../modals/EditProductionModal'
 import Spinner from '../widgets/Spinner'
 
@@ -109,7 +105,6 @@ export default {
   name: 'open-productions',
 
   components: {
-    ButtonSimple,
     EditProductionModal,
     Spinner
   },
@@ -228,6 +223,11 @@ export default {
     .open-production:hover .avatar{
       box-shadow: 0 0 4px 2px #444;
     }
+  }
+
+  .big-button {
+    background: $dark-grey-2;
+    box-shadow: 0 0 4px 0 #393;
   }
 }
 
@@ -357,6 +357,24 @@ a.secondary:hover {
   height: auto;
   min-height: 100vh;
   padding-bottom: 3em;
+}
+
+.big-button {
+  background: $white;
+  border: 1px solid $green;
+  box-shadow: 0 0 4px 0 #9C9;
+  color: $green;
+  margin-top: 1em;
+  transition: all .2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.1);
+    width: auto;
+  }
+
+  &:active {
+    box-shadow: none;
+  }
 }
 
 @media screen and (max-width: 768px) {

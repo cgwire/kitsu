@@ -1,6 +1,6 @@
 <template>
   <div class="server-down page has-text-centered">
-    <img src="@/assets/500.gif">
+    <img src="@/assets/illustrations/500.png">
     <h1 class="title">{{ $t('server_down.title') }}</h1>
     <p>
       {{ $t('server_down.text') }}
