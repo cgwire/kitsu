@@ -42,25 +42,21 @@
   </div>
 
   <div
-    class="filler flexrow video-container"
+    :class="{
+       filler: true,
+       flexrow: true,
+       'video-container': true,
+       'flexrow-reverse': !isComparisonOverlay
+    }"
     ref="video-container"
     v-show="!isAddingEntity || isLoading"
   >
     <raw-video-player
-      ref="raw-player"
-      class="raw-player"
-      :entities="entityList"
-      :is-repeating="isRepeating"
-      @repeat="onVideoRepeated"
-      @metadata-loaded="onMetadataLoaded"
-      @entity-change="onPlayerEntityChange"
-      @time-update="onTimeUpdate"
-      @max-duration-update="onMaxDurationUpdate"
-      v-show="isCurrentPreviewMovie && !isLoading"
-    />
-    <raw-video-player
       ref="raw-player-comparison"
       class="raw-player"
+      :style="{
+        position: isComparisonOverlay ? 'absolute': 'static'
+      }"
       :entities="entityListToCompare"
       :is-repeating="isRepeating"
       :muted="true"
@@ -68,38 +64,13 @@
       v-show="isComparing && isCurrentPreviewMovie && isMovieComparison && !isLoading"
     />
 
-    <p
-      :style="{width: '100%'}"
-      class="preview-standard-file has-text-centered"
-      v-show="isCurrentPreviewFile && !isLoading"
-    >
-      <a
-        class="button"
-        ref="preview-file"
-        :href="currentPreviewDlPath"
-      >
-        <download-icon class="icon" />
-        <span class="text">
-          {{ $t('tasks.download_pdf_file', {extension: extension}) }}
-        </span>
-      </a>
-    </p>
-
-    <div
-      class="picture-preview-wrapper"
-      ref="picture-player-wrapper"
-      v-show="isCurrentPreviewPicture && !isLoading"
-    >
-       <img
-         ref="picture-player"
-         id="picture-player"
-         class="picture-preview"
-         :src="currentPreviewPath"
-         v-show="isCurrentPreviewPicture"
-       />
-    </div>
     <div
       class="picture-preview-comparison-wrapper"
+      :style="{
+        position: isComparisonOverlay ? 'absolute': 'static',
+        left: 0,
+        right: 0
+      }"
       v-show="
         isComparing &&
         !isLoading &&
@@ -122,6 +93,60 @@
        >
          It's not a picture preview
        </span>
+    </div>
+
+    <raw-video-player
+      ref="raw-player"
+      class="raw-player"
+      :style="{
+        position: isComparisonOverlay ? 'absolute': 'static',
+        opacity: overlayOpacity
+      }"
+      :entities="entityList"
+      :is-repeating="isRepeating"
+      @repeat="onVideoRepeated"
+      @metadata-loaded="onMetadataLoaded"
+      @entity-change="onPlayerEntityChange"
+      @time-update="onTimeUpdate"
+      @max-duration-update="onMaxDurationUpdate"
+      v-show="isCurrentPreviewMovie && !isLoading"
+    />
+
+    <p
+      :style="{width: '100%'}"
+      class="preview-standard-file has-text-centered"
+      v-show="isCurrentPreviewFile && !isLoading"
+    >
+      <a
+        class="button"
+        ref="preview-file"
+        :href="currentPreviewDlPath"
+      >
+        <download-icon class="icon" />
+        <span class="text">
+          {{ $t('tasks.download_pdf_file', {extension: extension}) }}
+        </span>
+      </a>
+    </p>
+
+    <div
+      class="picture-preview-wrapper flexrow"
+      ref="picture-player-wrapper"
+      :style="{
+        position: isComparisonOverlay ? 'absolute': 'static',
+        opacity: overlayOpacity,
+        left: 0,
+        right: 0
+      }"
+      v-show="isCurrentPreviewPicture && !isLoading"
+    >
+       <img
+         ref="picture-player"
+         id="picture-player"
+         class="picture-preview"
+         :src="isCurrentPreviewPicture ? currentPreviewPath : null"
+         v-show="isCurrentPreviewPicture"
+       />
     </div>
     <div class="loading-wrapper" v-if="isLoading">
       <spinner />
@@ -331,7 +356,7 @@
     </div>
 
     <div
-      class="flexrow flexrow-item"
+      class="flexrow flexrow-item comparison-buttons"
       v-if="isCurrentPreviewMovie || isCurrentPreviewPicture"
     >
       <button-simple
@@ -346,18 +371,28 @@
         @click="onCompareClicked"
         v-if="taskTypeOptions && taskTypeOptions.length > 0"
       />
-      <combobox
-        class="playlist-button flexrow-item comparison-list"
-        :options="taskTypeOptions"
-        v-model="taskTypeToCompare"
-        v-if="isComparing"
-      />
-      <combobox
-        class="playlist-button flexrow-item comparison-list"
-        :options="revisionOptions"
-        v-model="revisionToCompare"
-        v-if="isComparing"
-      />
+      <div
+        class="flexrow comparison-combos"
+      >
+        <combobox
+          class="playlist-button flexrow-item comparison-list"
+          :options="taskTypeOptions"
+          v-model="taskTypeToCompare"
+          v-if="isComparing"
+        />
+        <combobox
+          class="playlist-button flexrow-item comparison-list"
+          :options="revisionOptions"
+          v-model="revisionToCompare"
+          v-if="isComparing"
+        />
+        <combobox
+          class="playlist-button flexrow-item comparison-list"
+          :options="comparisonModeOptions"
+          v-model="comparisonMode"
+          v-if="isComparing"
+        />
+      </div>
     </div>
 
     <div
@@ -712,6 +747,7 @@ export default {
     return {
       annotations: [],
       color: '#ff3860',
+      comparisonMode: 'sidebyside',
       currentComparisonPreviewIndex: 0,
       currentPreviewIndex: 0,
       currentTime: '00:00.000',
@@ -736,6 +772,7 @@ export default {
       pencilPalette: ['big', 'medium', 'small'],
       playlistToEdit: {},
       playingEntityIndex: 0,
+      revisionOptions: [],
       speed: 3,
       task: null,
       taskTypeOptions: [],
@@ -779,6 +816,7 @@ export default {
       this.setupFabricCanvas()
       this.resetCanvas()
       this.setPlayerSpeed(1)
+      this.rebuildComparisonOptions()
     })
   },
 
@@ -838,6 +876,48 @@ export default {
       )
     },
 
+    isComparisonOverlay () {
+      return this.comparisonMode !== 'sidebyside'
+    },
+
+    overlayOpacity () {
+      if (this.isComparing && this.isComparisonOverlay) {
+        switch (this.comparisonMode) {
+          case 'overlay25':
+            return 0.25
+          case 'overlay50':
+            return 0.5
+          case 'overlay75':
+            return 0.75
+          default:
+            return 1
+        }
+      } else {
+        return 1
+      }
+    },
+
+    comparisonModeOptions () {
+      return [
+        {
+          label: this.$t('playlists.actions.side_by_side'),
+          value: 'sidebyside'
+        },
+        {
+          label: `${this.$t('playlists.actions.overlay')} 25%`,
+          value: 'overlay25'
+        },
+        {
+          label: `${this.$t('playlists.actions.overlay')} 50%`,
+          value: 'overlay50'
+        },
+        {
+          label: `${this.$t('playlists.actions.overlay')} 75%`,
+          value: 'overlay75'
+        }
+      ]
+    },
+
     currentRevisionToCompare () {
       if (!this.currentEntity) return null
       const previewFiles =
@@ -882,7 +962,7 @@ export default {
       if (this.currentPreviewToCompare && this.isPictureComparison) {
         const extension = this.currentPreviewToCompare.extension
         const previewId = this.currentPreviewToCompare.id
-        return `/api/pictures/previews/preview-files/${previewId}.${extension}`
+        return `/api/pictures/originals/preview-files/${previewId}.${extension}`
       } else {
         return ''
       }
@@ -1524,7 +1604,7 @@ export default {
         this.playingEntityIndex = entityIndex
         if (this.isComparing) {
           const comparisonIndex = this.rawPlayerComparison.currentIndex
-          if (comparisonIndex < entityIndex) {
+          if (comparisonIndex !== entityIndex) {
             this.rawPlayerComparison.playNext()
             this.rawPlayerComparison.setCurrentTime(0)
           } else {
@@ -1657,7 +1737,9 @@ export default {
                 fullWidth -= 450 // task info widget width
               }
               const fullHeight = this.$refs['video-container'].offsetHeight
-              if (this.isComparing) fullWidth = Math.round(fullWidth / 2)
+              if (this.isComparing && !this.isComparisonOverlay) {
+                fullWidth = Math.round(fullWidth / 2)
+              }
 
               // Init canvas values
               let width = ratio ? fullHeight * ratio : fullWidth
@@ -2095,12 +2177,9 @@ export default {
       }
       this.$nextTick(() => {
         if (this.isComparing) this.rebuildRevisionOptions()
-        this.resetCanvas()
-          .then(() => {
-            if (!this.isCurrentPreviewPicture) {
-              this.loadAnnotation(this.getAnnotation(0))
-            }
-          })
+        this.$nextTick(() => {
+          this.resetCanvas()
+        })
       })
     },
 
@@ -2172,6 +2251,13 @@ export default {
       this.$nextTick(() => {
         this.updateProgressBar()
       })
+    },
+
+    isComparisonOverlay () {
+      this.$nextTick(() => {
+        this.resetCanvas()
+          .then(this.reloadCurrentAnnotation)
+      })
     }
   }
 }
@@ -2180,6 +2266,24 @@ export default {
 <style lang="scss" scoped>
 .full-height {
   height: 100%;
+}
+
+.playlist-header {
+  color: $white-grey;
+  background: $dark-grey-light;
+
+  .playlist-name {
+    flex: 1;
+    font-size: 1.5em;
+    padding: 10px;
+    padding-left: 1em;
+  }
+
+  .edit-button,
+  .delete-button {
+    height: 50px;
+    width: 50px;
+  }
 }
 
 .playlist-player {
@@ -2210,24 +2314,6 @@ export default {
   }
 }
 
-.playlist-header {
-  color: $white-grey;
-  background: $dark-grey-light;
-
-  .playlist-name {
-    flex: 1;
-    font-size: 1.5em;
-    padding: 10px;
-    padding-left: 1em;
-  }
-
-  .edit-button,
-  .delete-button {
-    height: 50px;
-    width: 50px;
-  }
-}
-
 .playlisted-entities,
 .playlist-progress,
 .playlist-footer {
@@ -2245,12 +2331,6 @@ export default {
   min-height: 240px;
 }
 
-.task-info-column {
-  min-width: 450px;
-  max-width: 450px;
-  overflow-y: auto;
-}
-
 .loading-background {
   width: 100%;
   height: 100%;
@@ -2263,6 +2343,12 @@ export default {
 
 .spinner {
   margin: auto;
+}
+
+.task-info-column {
+  min-width: 450px;
+  max-width: 450px;
+  overflow-y: auto;
 }
 
 .icon {
@@ -2535,6 +2621,7 @@ progress {
 .picture-preview {
   max-height: 100%;
   max-width: 100%;
+  color: var(--text);
 }
 
 .raw-player {
@@ -2554,5 +2641,15 @@ progress {
   svg {
     width: 18px;
   }
+}
+
+.comparison-buttons {
+  position: relative;
+}
+
+.comparison-combos {
+  position: absolute;
+  top: 33px;
+  z-index: 50;
 }
 </style>

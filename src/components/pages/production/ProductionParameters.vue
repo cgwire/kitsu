@@ -45,14 +45,14 @@
           v-model="form.nb_episodes"
           v-if="currentProduction && currentProduction.id && isLocalTVShow"
         />
-        <text-field
+        <!--text-field
           ref="episodesSpanField"
           :label="$t('productions.fields.episode_span')"
           @enter="runConfirmation"
           v-focus
           v-model="form.episode_span"
           v-if="currentProduction && currentProduction.id && isLocalTVShow"
-        />
+        /-->
 
         <text-field
           ref="fpsField"
@@ -171,9 +171,12 @@ export default {
     this.resetForm()
   },
   watch: {
-    currentProduction () {
-      this.resetForm()
-      this.updateTvShowRelatedDatas(this.isTVShow)
+    currentProduction: {
+      handler () {
+        this.resetForm()
+        this.updateTvShowRelatedDatas(this.isTVShow)
+      },
+      deep: true
     },
     'form.production_type' (newProductionType) {
       this.updateTvShowRelatedDatas(newProductionType === 'tvshow')

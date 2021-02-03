@@ -12,7 +12,7 @@
       </h1>
 
       <p>
-        {{ $t("tasks.select_image_file") }}
+        {{ $t("tasks.select_file") }}
       </p>
 
       <file-upload
@@ -51,8 +51,9 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
-import FileUpload from '../widgets/FileUpload.vue'
+import { modalMixin } from '@/components/modals/base_modal'
+import files from '@/lib/files'
+import FileUpload from '@/components/widgets/FileUpload.vue'
 
 export default {
   name: 'add-preview-modal',
@@ -81,9 +82,7 @@ export default {
     },
     extensions: {
       type: String,
-      default:
-        '.png,.jpg,.mp4,.mov,.obj,.pdf,.ma,.mb,.zip,.rar,.jpeg,' +
-        '.blend,.wmv,.m4v,.ai,.comp,.exr,.psd,.hip,.gif,.ae,.fla,.flv,.swf'
+      default: files.ALL_EXTENSIONS_STRING
     }
   },
 

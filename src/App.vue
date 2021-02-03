@@ -1420,6 +1420,10 @@ tbody:last-child .empty-line:last-child {
   align-items: center;
 }
 
+.flexrow-reverse {
+  flex-direction: row-reverse;
+}
+
 .flexrow-item {
   margin-right: 1rem;
 

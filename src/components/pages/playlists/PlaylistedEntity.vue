@@ -295,7 +295,7 @@ export default {
   text-align: center;
   background: rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  z-index: 100;
+  z-index: 10;
 
   &:hover {
     background: rgba(0, 0, 0, 0.2);

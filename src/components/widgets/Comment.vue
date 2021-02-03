@@ -211,6 +211,7 @@ import { renderComment } from '@/lib/render'
 import { sortByName } from '@/lib/sorting'
 import { formatDate, parseDate } from '@/lib/time'
 import colors from '@/lib/colors'
+import files from '@/lib/files'
 
 import {
   ChevronDownIcon,
@@ -377,13 +378,17 @@ export default {
 
     pictureAttachments () {
       return this.comment.attachment_files.filter(attachment => {
-        return ['png', 'jpg', 'jpeg', 'gif'].includes(attachment.extension)
+        return files.IMG_EXTENSIONS.includes(
+          attachment.extension
+        )
       })
     },
 
     fileAttachments () {
       return this.comment.attachment_files.filter(attachment => {
-        return !['png', 'jpg', 'jpeg', 'gif'].includes(attachment.extension)
+        return files.IMG_EXTENSIONS.includes(
+          attachment.extension
+        )
       })
     },
 
@@ -440,7 +445,8 @@ export default {
     },
 
     getAttachmentPath (attachment) {
-      return `/api/data/attachment-files/${attachment.id}/file`
+      return `/api/data/attachment-files/${attachment.id}/` +
+        `file/${attachment.name}`
     },
 
     toggleCommentMenu () {
