@@ -1139,6 +1139,7 @@ export default {
       },
 
       'preview-file:update' (eventData) {
+        if (!this.currentTaskPreviews) return
         const preview = this.currentTaskPreviews.filter((preview) => {
           return preview.id === eventData.preview_file_id
         })
