@@ -495,6 +495,7 @@ export default {
       fullscreen: 'See file in full screen',
       looping: 'Loop on current video',
       mute: 'Mute',
+      overlay: 'Overlay',
       unmute: 'Unmute',
       next_frame: 'Next frame',
       next_shot: 'Next entity',
@@ -506,6 +507,7 @@ export default {
       previous_shot: 'Previous entity',
       save_playlist: 'Save playlist',
       see_original_file: 'Open original file in a new tab',
+      side_by_side: 'Side by side',
       speed: 'Change speed',
       split_screen: 'Compare with other task types'
     }
@@ -524,7 +526,7 @@ export default {
     title: 'Productions',
     home: {
       create_new: 'Create a new production',
-      empty: 'You don\'t have any production open. What about creating a new one?',
+      empty: 'You don\'t have open productions. What about creating a new one?',
       no_task: 'You have no task assigned. See your supervisor to see what you can do!',
       no_prod_for_client: 'You don\'t have access to any production. Contact your contractor to obtain an access.',
       title: 'Running Productions',
@@ -785,7 +787,7 @@ export default {
     change_preview: 'Change preview',
     change_priority: 'Change priority to:',
     clear_assignations: 'clear assignations',
-    comment_image: 'Attach an image to your comment',
+    comment_image: 'Attach a file to your comment',
     create_for_selection: 'Create task for each empty cell:',
     create_tasks: 'Add tasks',
     create_tasks_shot: 'Add tasks for current shots',
@@ -831,7 +833,7 @@ export default {
     show_assignations: 'Show assignations',
     show_infos: 'Show additional information',
     subscribe_notifications: 'Subscribe to notifications',
-    select_image_file: 'Please select the picture from your hard drive you want to attach to your comment:',
+    select_file: 'Please select the file from your hard drive you want to attach to your comment:',
     tasks: 'Tasks',
     validation: 'Validation',
     with_comment: 'With a comment...',
