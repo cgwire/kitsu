@@ -1,15 +1,32 @@
 <template>
   <div class="productions page fixed-page">
-    <div class="columns">
-      <div class="playlist-list-column column" v-if="playlists.length > 0">
+    <div class="columns dark">
+      <div
+        :class="{
+          'playlist-list-column': true,
+          column: true,
+          toggled: isListToggled
+        }"
+        v-if="playlists.length > 0"
+      >
 
-        <div>
-          <combobox
-            :label="$t('main.sorted_by')"
-            :options="sortOptions"
-            :thin="true"
-            locale-key-prefix="playlists.fields."
-            v-model="currentSort"
+        <div class="flexrow">
+          <template v-if="!isListToggled">
+            <combobox
+              class="flexrow-item"
+              :label="$t('main.sorted_by')"
+              :options="sortOptions"
+              :thin="true"
+              locale-key-prefix="playlists.fields."
+              v-model="currentSort"
+            />
+            <span class="flexrow-item filler"></span>
+          </template>
+          <button-simple
+            class="flexrow-item"
+            style="flex: 0;"
+            @click="isListToggled = !isListToggled"
+            :icon="isListToggled ? 'right' : 'left'"
           />
         </div>
 
@@ -20,7 +37,7 @@
           }"
           @click="showAddModal"
           key="new-playlist-button"
-          v-if="isCurrentUserManager"
+          v-if="isCurrentUserManager && !isListToggled"
         >
           <plus-icon class="icon is-small" />
           {{ $t('playlists.new_playlist') }}
@@ -40,6 +57,7 @@
             }"
             v-for="playlist in sortedPlaylists"
           >
+            <div v-if="!isListToggled">
             <span>
               {{ playlist.name }}
             </span>
@@ -47,6 +65,19 @@
               {{ $t('playlists.updated_at') }}
               {{ formatDate(playlist.updated_at) }}
             </span>
+            </div>
+            <div class="has-text-centered" v-else>
+              <light-entity-thumbnail
+                :preview-file-id="playlist.first_preview_file_id"
+                type="previews"
+                width="auto"
+                height="auto"
+                max-width="40px"
+                max-height="30px"
+                empty-height="30px"
+                :title="playlist.name"
+              />
+            </div>
           </router-link>
         </div>
         <spinner
@@ -104,7 +135,7 @@
                 :preview-file-id="playlist.first_preview_file_id"
                 type="previews"
                 width="auto"
-                height="auot"
+                height="auto"
                 max-width="300px"
                 max-height="150px"
                 empty-height="150px"
@@ -409,6 +440,7 @@ export default {
       ].map(name => ({ label: name, value: name })),
       currentEntities: {},
       isAddingEntity: false,
+      isListToggled: false,
       sortedPlaylists: [],
       playlistToEdit: {
         name: `${moment().format('YYYY-MM-DD HH:mm:ss')}`,
@@ -1351,6 +1383,21 @@ h2 {
   font-weight: bold;
   text-transform: uppercase;
   color: $grey;
+}
+
+.toggled {
+  padding: 1em 0.1em;
+  max-width: 50px;
+
+  .flexrow {
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1em;
+  }
+
+  .playlist-item {
+    padding: 0;
+  }
 }
 
 .playlist-column.no-selection {
