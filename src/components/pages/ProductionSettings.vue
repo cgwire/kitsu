@@ -188,6 +188,9 @@ export default {
     if (this.remainingTaskStatuses.length > 0) {
       this.taskStatusId = this.remainingTaskStatuses[0].id
     }
+    if (this.$route.query.tab) {
+      this.activeTab = this.$route.query.tab
+    }
   },
 
   computed: {
@@ -265,6 +268,18 @@ export default {
 
     getBooleanTranslation (bool) {
       return bool ? this.$t('main.yes') : this.$t('main.no')
+    }
+  },
+
+  watch: {
+    activeTab () {
+      if (this.$route.query.tab !== this.activeTab) {
+        this.$router.push({
+          query: {
+            tab: this.activeTab
+          }
+        })
+      }
     }
   },
 
