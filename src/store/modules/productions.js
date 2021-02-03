@@ -581,7 +581,8 @@ const mutations = {
 
       Object.assign(production, newProduction)
       if (openProduction) Object.assign(openProduction, newProduction)
-      if (state.currentProduction.id === newProduction.id) {
+      if (state.currentProduction &&
+          state.currentProduction.id === newProduction.id) {
         Object.assign(state.currentProduction, newProduction)
       }
     } else {

@@ -22,15 +22,16 @@ const getters = {
 const actions = {
   loadScheduleItems ({ commit }, production) {
     return scheduleApi.getScheduleItems(production)
-      .then((scheduleItems) => {
+      .then(scheduleItems => {
         commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
+        return Promise.resolve(scheduleItems)
       })
       .catch(console.error)
   },
 
   loadAllScheduleItems ({ commit }, production) {
     return scheduleApi.getAllScheduleItems(production)
-      .then((scheduleItems) => {
+      .then(scheduleItems => {
         commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
       })
       .catch(console.error)
@@ -56,20 +57,30 @@ const actions = {
   },
 
   createScheduleItem ({ commit, state }, scheduleItem) {
+    if (!scheduleItem.object_id) {
+      const previousItem = state.currentScheduleItems.find(
+        item => item.task_type_id === scheduleItem.taskTypeId &&
+                item.project_id === scheduleItem.project_id
+      )
+      if (previousItem) return Promise.resolve(scheduleItem)
+    }
     return scheduleApi.createScheduleItem(scheduleItem)
-      .then((newScheduleItem) => {
+      .then(newScheduleItem => {
         const scheduleItems = state.currentScheduleItems.slice()
         scheduleItems.push(newScheduleItem)
         commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
+        return Promise.resolve(newScheduleItem)
       })
       .catch(console.error)
   },
 
   deleteScheduleItem ({ commit, state }, scheduleItem) {
     return scheduleApi.deleteScheduleItem(scheduleItem)
-      .then((deletedItem) => {
+      .then(() => {
         const scheduleItems = state.currentScheduleItems.slice()
-        const indexToRemove = scheduleItems.findIndex(item => item.id === deletedItem.id)
+        const indexToRemove = scheduleItems.findIndex(
+          item => item.id === scheduleItem.id
+        )
         if (indexToRemove !== -1) {
           scheduleItems.splice(indexToRemove, 1)
           commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
@@ -80,9 +91,11 @@ const actions = {
 
   saveScheduleItem ({ commit, state }, scheduleItem) {
     return scheduleApi.updateScheduleItem(scheduleItem)
-      .then((updatedItem) => {
+      .then(updatedItem => {
         const scheduleItems = state.currentScheduleItems.slice()
-        const indexUpdate = scheduleItems.findIndex(item => item.id === updatedItem.id)
+        const indexUpdate = scheduleItems.findIndex(
+          item => item.id === updatedItem.id
+        )
         if (indexUpdate !== -1) {
           scheduleItems[indexUpdate] = updatedItem
           commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
