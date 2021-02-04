@@ -386,7 +386,7 @@ export default {
 
     fileAttachments () {
       return this.comment.attachment_files.filter(attachment => {
-        return files.IMG_EXTENSIONS.includes(
+        return !files.IMG_EXTENSIONS.includes(
           attachment.extension
         )
       })
