@@ -2,7 +2,7 @@ export default {
 
   assets: {
     cast_in: 'Cast in',
-    delete_error: 'An error occured while deleting this asset. There are probably data linked to it. Are you sure this asset type has no task linked to it?',
+    delete_error: 'An error occurred while deleting this asset. There are probably data linked to it. Are you sure this asset type has no task linked to it?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     edit_fail: 'Saving failed, it may be due to the fact that an asset with a similar name already exists.',
     edit_success: 'Asset {name} successfully edited.',
@@ -15,7 +15,7 @@ export default {
     no_cast_in: 'This asset is not cast in any shot.',
     number: 'asset | assets',
     restore_text: 'Are you sure you want to restore {name} into your database?',
-    restore_error: 'An error occured while restoring this asset.',
+    restore_error: 'An error occurred while restoring this asset.',
     tasks: 'Asset tasks',
     title: 'Assets',
     fields: {
@@ -31,9 +31,9 @@ export default {
 
   asset_types: {
     all_asset_types: 'All asset types',
-    create_error: 'An error occured while saving this asset type. Are you sure there is no asset type with similar name?',
+    create_error: 'An error occurred while saving this asset type. Are you sure there is no asset type with similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
-    delete_error: 'An error occured while deleting this asset type. There are probably data linked to it. Are you sure this asset type has no asset linked to it?',
+    delete_error: 'An error occurred while deleting this asset type. There are probably data linked to it. Are you sure this asset type has no asset linked to it?',
     edit_title: 'Edit asset type',
     new_asset_type: 'Add an asset type',
     number: 'asset type | asset types',
@@ -68,8 +68,8 @@ export default {
     comment_from_client: 'Comment from client',
     edit_title: 'Edit comment',
     empty_text: 'This comment is empty',
-    edit_error: 'An error occured while editing comment. Please contact our support team.',
-    error: 'An error occured while posting comment',
+    edit_error: 'An error occurred while editing comment. Please contact our support team.',
+    error: 'An error occurred while posting comment',
     no_file_attached: 'No file attached',
     pin: 'Pin',
     pinned: 'Pinned',
@@ -88,9 +88,9 @@ export default {
   },
 
   custom_actions: {
-    create_error: 'An error occured while saving this custom custom action. Are you sure that there is no other action with the same name?',
+    create_error: 'An error occurred while saving this custom custom action. Are you sure that there is no other action with the same name?',
     delete_text: 'Are you sure you want to remove custom action {name} from your database?',
-    delete_error: 'An error occured while deleting this custom custom action.',
+    delete_error: 'An error occurred while deleting this custom custom action.',
     edit_title: 'Edit a custom action',
     new_custom_action: 'Add a custom action',
     number: 'custom action | custom actions',
@@ -133,7 +133,7 @@ export default {
     },
 
     thumbnails: {
-      error: 'An error occured while uploading thumbnails',
+      error: 'An error occurred while uploading thumbnails',
       explaination: 'Adding a thumbnail requires to set a new preview. In order to set several thumbnails at the same time, you must chose first a task type that will be used to create the new previews. The thumbnails will be set from this new preview.',
       explaination_two: 'Then you have to select the files you want to upload. To find the right entities, the file names must match the following pattern:',
       shots_pattern: '"SequenceName ShotName" eg. SQ01_SH01.',
@@ -154,8 +154,8 @@ export default {
 
   episodes: {
     all_episodes: 'All',
-    edit_error: 'An error occured while saving this episode. Are you sure there is no episode with similar name?',
-    delete_error: 'An error occured while deleting this episode. There are probably data linked to it. Are you sure this episode has no sequence linked to it?',
+    edit_error: 'An error occurred while saving this episode. Are you sure there is no episode with similar name?',
+    delete_error: 'An error occurred while deleting this episode. There are probably data linked to it. Are you sure this episode has no sequence linked to it?',
     delete_text: 'Are you sure you want to remove {name} from your database? Every related shots and previews will be deleted. Pleas confirm by typing the episode name below.',
     edit_title: 'Edit episode',
     empty_list: 'There is no episode in the production. What about creating some?',
@@ -257,7 +257,7 @@ export default {
     less_filters: 'Less filters',
     loading: 'Loading...',
     loading_data: 'Loading data',
-    loading_error: 'An error occured while loading data.',
+    loading_error: 'An error occurred while loading data.',
     logout: 'Logout',
     modify: 'Modify',
     minimize: 'Minimize',
@@ -273,7 +273,7 @@ export default {
     save: 'Save',
     search_query: 'Search query',
     search_query_edit: 'Edit search filter',
-    search_query_edit_error: 'An error occured while updating this search filter.',
+    search_query_edit_error: 'An error occurred while updating this search filter.',
     sorted_by: 'Sorted by',
     sort_by: 'Sort by',
     start_date: 'Start date',
@@ -286,7 +286,7 @@ export default {
     yes: 'Yes',
     csv: {
       choose: 'Choose',
-      error_upload: 'An error occured while uploading your CSV.',
+      error_upload: 'An error occurred while uploading your CSV.',
       export_file: 'Export',
       import_file: 'Import',
       import_title: 'Import data from a CSV',
@@ -365,13 +365,13 @@ export default {
     active_persons: 'active user | active users',
     add_member_to_team: 'Add a member to the team: ',
     create_invite: 'Create and send invitation',
-    create_error: 'An  error occured while creating or update this user. You may have reach your user limit. Please contact our support team for more information.',
-    delete_error: 'An error occured while deleting this user. There are probably data linked to it. Are you sure this user has no assignation or wrote no comment?',
+    create_error: 'An  error occurred while creating or update this user. You may have reach your user limit. Please contact our support team for more information.',
+    delete_error: 'An error occurred while deleting this user. There are probably data linked to it. Are you sure this user has no assignation or wrote no comment?',
     delete_text: 'Are you sure you want to remove {personName} from your database? Every related comments and previews will be deleted. Please confirm by typing the full user name below.',
     edit_title: 'Edit user',
     empty_team: 'There is no one listed in the project team.',
     invite: 'Send an invitation',
-    invite_error: 'An error occured while sending the invitation',
+    invite_error: 'An error occurred while sending the invitation',
     invite_success: 'Invitation was successfully sent',
     new_person: 'Add a new user',
     no_task_assigned: 'There are no running tasks assigned to you',
@@ -387,7 +387,7 @@ export default {
       import_title: 'Import data from a CSV file',
       required_fields: 'Your CSV file requires the following columns',
       select_file: 'Please select a file from one of your folder:',
-      error_upload: 'An error occured while uploading your CSV file.'
+      error_upload: 'An error occurred while uploading your CSV file.'
     },
     fields: {
       first_name: 'First name',
@@ -435,8 +435,9 @@ export default {
     create_title: 'Create playlist',
     created_at: 'Created at:',
     delete_text: 'Are you sure you want to remove {name} from your database?',
-    delete_error: 'An error occured while deleting this playlist.',
-    edit_error: 'An error occured while saving this playlist.',
+    delete_error: 'An error occurred while deleting this playlist.',
+    edit_error: 'An error occurred while saving this playlist.',
+    download_csv: 'Download .csv',
     download_zip: 'Download .zip',
     failed: 'Failed',
     for_client: 'The Client',
@@ -444,7 +445,7 @@ export default {
     edit_title: 'Edit playlist',
     last_creation: 'Last creations',
     last_modification: 'Last modifications',
-    loading_error: 'A server error occured. Playlists cannot be loaded.',
+    loading_error: 'A server error occurred. Playlists cannot be loaded.',
     new_playlist: 'Add a playlist',
     no_build: 'No build',
     no_playlist: 'There is currently no playlist for this project or episode.',
@@ -516,8 +517,8 @@ export default {
   productions: {
     current: 'Selected production',
     delete_text: 'Are you sure you want to remove {name} from your database? Please, confirm by typing the name of the project you want to delete in the text field.',
-    delete_error: 'An error occured while deleting this production. There are probably data linked to it. Are you sure this production has no task, shot or asset linked to it? Kitsu doesn\'t allow production deletion. If you don\'t want to see the production anymore, you can close it instead.',
-    edit_error: 'An error occured while editing production. Please contact our support team.',
+    delete_error: 'An error occurred while deleting this production. There are probably data linked to it. Are you sure this production has no task, shot or asset linked to it? Kitsu doesn\'t allow production deletion. If you don\'t want to see the production anymore, you can close it instead.',
+    edit_error: 'An error occurred while editing production. Please contact our support team.',
     edit_title: 'Edit production',
     new_production: 'Add a production',
     number: 'production | productions',
@@ -546,13 +547,13 @@ export default {
     },
     metadata: {
       add_explaination: 'Add specific data required by this project.',
-      add_failed: 'An error occured while adding metadata to your project.',
+      add_failed: 'An error occurred while adding metadata to your project.',
       add_new_values: 'There is currently no available values.',
       available_values: 'Available values',
       choices: 'List of values',
       delete_text: 'Are you sure you want to delete this column and related data for all assets of this production?',
-      delete_error: 'An error occured while deleting this metadata column.',
-      error: 'An error occured while adding the metadata column. Make sure there is no column with similar name and that all fields are filled. If the problem is persists, please contact the support team.',
+      delete_error: 'An error occurred while deleting this metadata column.',
+      error: 'An error occurred while adding the metadata column. Make sure there is no column with similar name and that all fields are filled. If the problem is persists, please contact the support team.',
       free: 'Free value',
       title: 'Add metadata column'
     },
@@ -599,13 +600,13 @@ export default {
     },
     change_password: {
       button: 'Change password',
-      error: 'An error occured while changing password. Please verify your current password.',
+      error: 'An error occurred while changing password. Please verify your current password.',
       success: 'Your password was successfully changed!',
       unvalid: 'Your new password confirmation doesn\'t match or your password is too short (7 chars, at least, is expected).'
     },
     save: {
       button: 'Save changes',
-      error: 'An error occured while saving changes'
+      error: 'An error occurred while saving changes'
     }
   },
 
@@ -627,14 +628,14 @@ export default {
     },
     save: {
       button: 'Save settings',
-      error: 'A server error occured while saving settings'
+      error: 'A server error occurred while saving settings'
     }
   },
 
   task_status: {
-    create_error: 'An error occured while saving this task status. Are you sure there is no task status with similar name?',
+    create_error: 'An error occurred while saving this task status. Are you sure there is no task status with similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
-    delete_error: 'An error occured while deleting this task status. There are probably data linked to it. Are you sure this task status has no task linked to it?',
+    delete_error: 'An error occurred while deleting this task status. There are probably data linked to it. Are you sure this task status has no task linked to it?',
     edit_title: 'Edit task status',
     name: 'task status',
     number: 'task status | task status',
@@ -654,9 +655,9 @@ export default {
 
   task_types: {
     delete_text: 'Are you sure you want to remove {name} from your database?',
-    delete_error: 'An error occured while deleting this task type. There are probably data linked to it. Are you sure this task type has no task linked to it?',
+    delete_error: 'An error occurred while deleting this task type. There are probably data linked to it. Are you sure this task type has no task linked to it?',
     edit_title: 'Edit task type',
-    create_error: 'An error occured while creating the task type. Please, check that there is no task type with similar name.',
+    create_error: 'An error occurred while creating the task type. Please, check that there is no task type with similar name.',
     new_task_type: 'Add a task type',
     number: 'task type | task types',
     title: 'Task Types',
@@ -671,9 +672,9 @@ export default {
 
   sequences: {
     all_sequences: 'All sequences',
-    edit_error: 'An error occured while saving this sequence. Are you sure there is no sequence with similar name?',
+    edit_error: 'An error occurred while saving this sequence. Are you sure there is no sequence with similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database? Every related shots and previews will be deleted. Please confirm by typing the sequence name below.',
-    delete_error: 'An error occured while deleting this sequence. There are probably data linked to it. Are you sure this sequence has no shot linked to it?',
+    delete_error: 'An error occurred while deleting this sequence. There are probably data linked to it. Are you sure this sequence has no shot linked to it?',
     edit_title: 'Edit sequence',
     empty_list: 'There is no sequence in the production. What about creating some?',
     empty_list_client: 'There is no sequence in this production.',
@@ -696,7 +697,7 @@ export default {
       add_milestone: 'Add milestone for',
       edit_milestone: 'Edit milestone for',
       name: 'Name',
-      error: 'An error occured while adding or editing the milestone. Please try again.'
+      error: 'An error occurred while adding or editing the milestone. Please try again.'
     }
   },
 
@@ -722,9 +723,9 @@ export default {
     casting: 'Shot casting',
     creation_explaination: 'To add shots you need first to create an episode and a sequence. Type an episode name in the bottom of the left column then click on add to create a new episode. Select this episode and repeat the same operation for sequence. Finally select a sequence and type a shot name in the field in the bottom of the right column. Click on the add button below. Your first shot was created. You can now add many more! If it\'s not a TV Show, you have to directly create a sequence.',
     delete_text: 'Are you sure you want to remove {name} from your database?',
-    delete_error: 'An error occured while deleting this shot. There are probably data linked to it. Are you sure this shot has no task linked to it?',
+    delete_error: 'An error occurred while deleting this shot. There are probably data linked to it. Are you sure this shot has no task linked to it?',
     edit_success: 'Shot {name} successfully edited.',
-    edit_fail: 'Creation or edition failed, an error occured. Make sure that you are not renaming the shot with a name already listed for given sequence.',
+    edit_fail: 'Creation or edition failed, an error occurred. Make sure that you are not renaming the shot with a name already listed for given sequence.',
     edit_title: 'Edit shot',
     empty_list: 'There is no shot in the production. What about creating some?',
     empty_list_client: 'There is no shot in this production.',
@@ -740,7 +741,7 @@ export default {
     new_success: 'Shot {name} successfully created.',
     padding: 'Shot Padding',
     restore_text: 'Are you sure you want to restore {name} into your database?',
-    restore_error: 'An error occured while restoring this shot.',
+    restore_error: 'An error occurred while restoring this shot.',
     sequences: 'Sequences',
     tasks: 'Shot Tasks',
     title: 'Shots',
@@ -778,7 +779,7 @@ export default {
 
   tasks: {
     add_preview: 'Add preview',
-    add_preview_error: 'An error occured while adding preview.',
+    add_preview_error: 'An error occurred while adding preview.',
     assign: 'Assign one task to: | Assign {nbSelectedTasks} tasks to:',
     assignation_warning: 'Warning: you won\'t see the result because you are hiding assignations',
     back_to_list: 'back to list',
@@ -792,20 +793,20 @@ export default {
     create_tasks: 'Add tasks',
     create_tasks_shot: 'Add tasks for current shots',
     create_tasks_shot_explaination: 'You are going to create a new task for each shot of current project for the given task type. Do you want to continue?',
-    create_tasks_shot_failed: 'A server error occured while proceeding creations.',
+    create_tasks_shot_failed: 'A server error occurred while proceeding creations.',
     create_tasks_asset: 'Add tasks for current assets',
     create_tasks_asset_explaination: 'You are going to create a new task for each asset of current project for the given task type. Do you want to continue?',
-    create_tasks_asset_failed: 'A server error occured while proceeding creations.',
+    create_tasks_asset_failed: 'A server error occurred while proceeding creations.',
     current: 'Task to do',
     current_status: 'Current status :',
     delete_all_text: 'Are you sure you want to delete all tasks for given {name}? Please, confirm by typing the task type name of the tasks you want to delete in the text field.',
     delete_all_error: 'Deleting all tasks for given task type failed.',
-    delete_error: 'An error occured while deleting task.',
+    delete_error: 'An error occurred while deleting task.',
     delete_comment: 'Are you sure you want to delete comment?',
-    delete_comment_error: 'An error occured while deleting comment.',
+    delete_comment_error: 'An error occurred while deleting comment.',
     delete_for_selection: 'Delete selected tasks:',
     delete_preview: 'Are you sure you want to delete this preview?',
-    delete_preview_error: 'An error occured while deleting preview.',
+    delete_preview_error: 'An error occurred while deleting preview.',
     edit_comment: 'Edit comment',
     done: 'Done',
     download_pdf_file: 'Download .{extension} file',
@@ -827,7 +828,7 @@ export default {
     unsubscribe_notifications: 'Unsubscribe from notifications',
     set_estimations: 'Set estimations for selected tasks:',
     set_preview: 'Set this preview as thumbnail',
-    set_preview_error: 'An error occured while setting preview as thumbnail',
+    set_preview_error: 'An error occurred while setting preview as thumbnail',
     set_preview_done: 'This preview is used as thumbnail for the current entity.',
     select_preview_file: 'Please select a file (picture, movie or others) from your hard drive to be used as a preview for the current task:',
     show_assignations: 'Show assignations',
