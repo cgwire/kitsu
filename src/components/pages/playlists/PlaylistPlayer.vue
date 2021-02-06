@@ -42,128 +42,135 @@
   </div>
 
   <div
-    :class="{
-       filler: true,
-       flexrow: true,
-       'video-container': true,
-       'flexrow-reverse': !isComparisonOverlay
-    }"
-    ref="video-container"
+    class="flexrow filler"
     v-show="!isAddingEntity || isLoading"
   >
-    <raw-video-player
-      ref="raw-player-comparison"
-      class="raw-player"
-      :style="{
-        position: isComparisonOverlay ? 'absolute': 'static'
-      }"
-      :entities="entityListToCompare"
-      :is-repeating="isRepeating"
-      :muted="true"
-      name="comparison"
-      v-show="isComparing && isCurrentPreviewMovie && isMovieComparison && !isLoading"
-    />
-
     <div
-      class="picture-preview-comparison-wrapper"
-      :style="{
-        position: isComparisonOverlay ? 'absolute': 'static',
-        left: 0,
-        right: 0
+      :class="{
+         filler: true,
+         flexrow: true,
+         'video-container': true,
+         'flexrow-reverse': !isComparisonOverlay
       }"
-      v-show="
-        isComparing &&
-        !isLoading &&
-        !isCurrentPreviewFile &&
-        (
-          (isCurrentPreviewMovie && !isMovieComparison) ||
-          !isCurrentPreviewMovie
-        )
-      "
+      ref="video-container"
     >
-       <img
-         ref="picture-player-comparison"
-         class="picture-preview"
-         :src="currentComparisonPreviewPath"
-         v-show="isComparing && isPictureComparison"
-       />
-       <span
-         class="picture-preview"
-         v-show="isComparing && !isPictureComparison"
-       >
-         It's not a picture preview
-       </span>
-    </div>
 
-    <raw-video-player
-      ref="raw-player"
-      class="raw-player"
-      :style="{
-        position: isComparisonOverlay ? 'absolute': 'static',
-        opacity: overlayOpacity
-      }"
-      :entities="entityList"
-      :is-repeating="isRepeating"
-      @repeat="onVideoRepeated"
-      @metadata-loaded="onMetadataLoaded"
-      @entity-change="onPlayerEntityChange"
-      @time-update="onTimeUpdate"
-      @max-duration-update="onMaxDurationUpdate"
-      v-show="isCurrentPreviewMovie && !isLoading"
-    />
+      <raw-video-player
+        ref="raw-player-comparison"
+        class="raw-player"
+        :style="{
+          position: isComparisonOverlay ? 'absolute': 'static'
+        }"
+        :entities="entityListToCompare"
+        :is-repeating="isRepeating"
+        :muted="true"
+        name="comparison"
+        v-show="isComparing && isCurrentPreviewMovie && isMovieComparison && !isLoading"
+      />
 
-    <p
-      :style="{width: '100%'}"
-      class="preview-standard-file has-text-centered"
-      v-show="isCurrentPreviewFile && !isLoading"
-    >
-      <a
-        class="button"
-        ref="preview-file"
-        :href="currentPreviewDlPath"
+      <div
+        class="picture-preview-comparison-wrapper"
+        :style="{
+          position: isComparisonOverlay ? 'absolute': 'static',
+          left: 0,
+          right: 0
+        }"
+        v-show="
+          isComparing &&
+          !isLoading &&
+          !isCurrentPreviewFile &&
+          (
+            (isCurrentPreviewMovie && !isMovieComparison) ||
+            !isCurrentPreviewMovie
+          )
+        "
       >
-        <download-icon class="icon" />
-        <span class="text">
-          {{ $t('tasks.download_pdf_file', {extension: extension}) }}
-        </span>
-      </a>
-    </p>
+         <img
+           ref="picture-player-comparison"
+           class="picture-preview"
+           :src="currentComparisonPreviewPath"
+           v-show="isComparing && isPictureComparison"
+         />
+         <span
+           class="picture-preview"
+           v-show="isComparing && !isPictureComparison"
+         >
+           It's not a picture preview
+         </span>
+      </div>
 
-    <div
-      class="picture-preview-wrapper flexrow"
-      ref="picture-player-wrapper"
-      :style="{
-        position: isComparisonOverlay ? 'absolute': 'static',
-        opacity: overlayOpacity,
-        left: 0,
-        right: 0
-      }"
-      v-show="isCurrentPreviewPicture && !isLoading"
-    >
-       <img
-         ref="picture-player"
-         id="picture-player"
-         class="picture-preview"
-         :src="isCurrentPreviewPicture ? currentPreviewPath : null"
-         v-show="isCurrentPreviewPicture"
-       />
-    </div>
-    <div class="loading-wrapper" v-if="isLoading">
-      <spinner />
-    </div>
+      <raw-video-player
+        ref="raw-player"
+        class="raw-player"
+        :style="{
+          position: isComparisonOverlay ? 'absolute': 'static',
+          opacity: overlayOpacity
+        }"
+        :entities="entityList"
+        :is-repeating="isRepeating"
+        :muted="isMuted"
+        @repeat="onVideoRepeated"
+        @metadata-loaded="onMetadataLoaded"
+        @entity-change="onPlayerEntityChange"
+        @time-update="onTimeUpdate"
+        @max-duration-update="onMaxDurationUpdate"
+        v-show="isCurrentPreviewMovie && !isLoading"
+      />
 
-    <div
-      class="canvas-wrapper"
-      ref="canvas-wrapper"
-      v-show="!isCurrentPreviewFile"
-    >
-      <canvas
-        id="playlist-annotation-canvas"
-        ref="annotation-canvas"
-        class="canvas"
+      <p
+        :style="{width: '100%'}"
+        class="preview-standard-file has-text-centered"
+        v-show="isCurrentPreviewFile && !isLoading"
       >
-      </canvas>
+        <a
+          class="button"
+          ref="preview-file"
+          :href="currentPreviewDlPath"
+        >
+          <download-icon class="icon" />
+          <span class="text">
+            {{ $t('tasks.download_pdf_file', {extension: extension}) }}
+          </span>
+        </a>
+      </p>
+
+      <div
+        class="picture-preview-wrapper flexrow"
+        ref="picture-player-wrapper"
+        :style="{
+          position: isComparisonOverlay ? 'absolute': 'static',
+          opacity: overlayOpacity,
+          left: 0,
+          right: 0
+        }"
+        v-show="isCurrentPreviewPicture && !isLoading"
+      >
+         <img
+           ref="picture-player"
+           id="picture-player"
+           class="picture-preview"
+           :src="isCurrentPreviewPicture ? currentPreviewPath : null"
+           v-show="isCurrentPreviewPicture"
+         />
+      </div>
+      <div class="loading-wrapper" v-if="isLoading">
+        <spinner />
+      </div>
+
+      <div
+        class="canvas-wrapper"
+        ref="canvas-wrapper"
+        v-show="!isCurrentPreviewFile"
+      >
+        <canvas
+          id="playlist-annotation-canvas"
+          ref="annotation-canvas"
+          class="canvas"
+        >
+        </canvas>
+      </div>
     </div>
+
     <task-info
       ref="task-info"
       :class="{
@@ -309,6 +316,21 @@
         @click="onSpeedClicked"
         :title="$t('playlists.actions.speed')"
         text="x0.25"
+        v-else
+      />
+
+      <button-simple
+        class="flexrow-item playlist-button"
+        :title="$t('playlists.actions.unmute')"
+        icon="soundoff"
+        @click="onToggleSoundClicked"
+        v-if="isMuted"
+      />
+      <button-simple
+        class="flexrow-item playlist-button"
+        :title="$t('playlists.actions.mute')"
+        icon="soundon"
+        @click="onToggleSoundClicked"
         v-else
       />
 
@@ -546,6 +568,16 @@
       >
         {{ $t('playlists.download_zip') }}
       </a>
+      <a
+        :class="{
+          'dl-button': true,
+          'csv-button': true,
+          hidden: isDlButtonsHidden
+        }"
+        :href="csvDlPath"
+      >
+        {{ $t('playlists.download_csv') }}
+      </a>
       <span
         :class="{
           'dl-button': true,
@@ -695,10 +727,11 @@ import Spinner from '@/components/widgets/Spinner'
 import TaskInfo from '@/components/sides/TaskInfo'
 
 import { annotationMixin } from '@/components/mixins/annotation'
+import { domMixin } from '@/components/mixins/dom'
 
 export default {
   name: 'playlist-player',
-  mixins: [annotationMixin],
+  mixins: [annotationMixin, domMixin],
 
   components: {
     AnnotationBar,
@@ -760,6 +793,7 @@ export default {
       isComparing: false,
       isDrawing: false,
       isEntitiesHidden: false,
+      isMuted: false,
       isPlaying: false,
       isRepeating: false,
       isShowingPalette: false,
@@ -1041,6 +1075,10 @@ export default {
       )
     },
 
+    csvDlPath () {
+      return `/api/export/csv/playlists/${this.playlist.id}`
+    },
+
     zipDlPath () {
       return `/api/data/playlists/${this.playlist.id}/download/zip`
     },
@@ -1078,7 +1116,9 @@ export default {
     },
 
     fps () {
-      return this.currentProduction.fps || 24
+      return this.currentProduction
+        ? this.currentProduction.fps || 24
+        : 24
     },
 
     container () {
@@ -1379,14 +1419,17 @@ export default {
     },
 
     onPreviousFrameClicked () {
+      this.clearFocus()
       this.goPreviousFrame()
     },
 
     onNextFrameClicked () {
+      this.clearFocus()
       this.goNextFrame()
     },
 
     onPlayPreviousEntityClicked () {
+      this.clearFocus()
       this.playEntity(this.previousEntityIndex)
       if (this.isCurrentPreviewMovie) {
         this.rawPlayer.loadPreviousEntity()
@@ -1398,6 +1441,7 @@ export default {
     },
 
     onPlayNextEntityClicked () {
+      this.clearFocus()
       this.playEntity(this.nextEntityIndex)
       if (this.isCurrentPreviewMovie) {
         this.rawPlayer.loadNextEntity()
@@ -1409,6 +1453,7 @@ export default {
     },
 
     onPlayPauseClicked () {
+      this.clearFocus()
       if (!this.isPlaying) {
         this.play()
       } else {
@@ -1417,13 +1462,20 @@ export default {
     },
 
     onVideoRepeated () {
+      this.clearFocus()
       if (this.rawPlayerComparison) {
         this.rawPlayerComparison.setCurrentTime(0)
       }
     },
 
     onRepeatClicked () {
+      this.clearFocus()
       this.isRepeating = !this.isRepeating
+    },
+
+    onToggleSoundClicked () {
+      this.clearFocus()
+      this.isMuted = !this.isMuted
     },
 
     onFullscreenClicked () {
@@ -2499,9 +2551,14 @@ progress {
     background: $dark-grey-light;
   }
 
-  &.zip-button {
+  &.csv-button {
     left: -110px;
     top: -200px;
+  }
+
+  &.zip-button {
+    left: -110px;
+    top: -240px;
   }
 
   &.mp4-button {
@@ -2651,5 +2708,12 @@ progress {
   position: absolute;
   top: 33px;
   z-index: 50;
+}
+
+@media only screen and (min-width: 1600px) {
+  .comparison-combos {
+    top: -1px;
+    left: 33px;
+  }
 }
 </style>

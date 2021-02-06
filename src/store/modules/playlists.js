@@ -107,13 +107,13 @@ const actions = {
   editPlaylist ({ commit, rootGetters }, { data, callback }) {
     if (!rootGetters.isCurrentUserClient) {
       commit(EDIT_PLAYLIST_START)
-      playlistsApi.updatePlaylist(data, (err, playlist) => {
+      return playlistsApi.updatePlaylist(data, (err, playlist) => {
         if (err) commit(EDIT_PLAYLIST_ERROR)
         else commit(EDIT_PLAYLIST_END, playlist)
         if (callback) callback(err, playlist)
       })
     } else {
-      callback()
+      if (callback) callback()
     }
   },
 
