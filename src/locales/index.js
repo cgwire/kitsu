@@ -6,7 +6,7 @@ import fa from '@/locales/fa.js'
 import fr from '@/locales/fr.json'
 import pt from '@/locales/pt.json'
 import ru from '@/locales/ru.js'
-import zh from '@/locales/zh.js'
+import zh from '@/locales/zh.json'
 
 export default {
   de: de,

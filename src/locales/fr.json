@@ -80,7 +80,8 @@
             "validation_required": "Validation requise",
             "fields": {
                 "text": "Texte"
-            }
+            },
+            "checklist": "Checklist"
         },
         "custom_actions": {
             "create_error": "Une erreur est survenue durant la création. Êtes vous sûr qu'aucune action a un nom similaire ?",
@@ -173,7 +174,11 @@
             "undo": "Undo",
             "playlist_navigation": "Navigation dans une playlist",
             "remove_annotation": "Supprimme l'annotation sélectionnée",
-            "shortcuts": "Raccourcis claviers"
+            "shortcuts": "Raccourcis claviers",
+            "ctrldown": "Déplacer la seléction de la colonne de métadonnées vers le bas",
+            "ctrlleft": "Déplacer la seléction de la colonne de métadonnées vers la gauche",
+            "ctrlright": "Déplacer la seléction de la colonne de métadonnées vers la droite",
+            "ctrlup": "Déplacer la seléction de la colonne de métadonnées vers le haut"
         },
         "login": {
             "back_to_login": "Revenir à la page de connexion",
@@ -279,7 +284,19 @@
                     "title": "Options",
                     "update": "Mettre à jour les données"
                 }
-            }
+            },
+            "after": "Après",
+            "before": "avant",
+            "from": "Depuis",
+            "home": "Revenir à la page d'acceuil",
+            "less_filters": "Moins de filtres",
+            "more_filters": "Plus de filtres",
+            "reload": "Recharger",
+            "search_query": "Recherche",
+            "search_query_edit": "Éditer le filtre",
+            "search_query_edit_error": "Une erreur est survenue en mettant à jour le filtre",
+            "to": "Jusqu'à",
+            "workspace": "Espace de travail"
         },
         "menu": {
             "assign_tasks": "Assigner des tâches",
@@ -301,7 +318,10 @@
             "set_preview_on": "a mis un preview sur",
             "task_status": "Statut de tâche",
             "task_type": "Type de tâche",
-            "title": "Flux de nouveautés "
+            "title": "Flux de nouveautés ",
+            "hide_stats": "Cacher les statistiques",
+            "news": "nouvelles",
+            "show_stats": "Montrer les statistiques"
         },
         "not_found": {
             "text": "Le lien que vous avez chargé ne correspond à rien. Retournez sur la page d'accueil pour reprendre la navigation",
@@ -323,8 +343,8 @@
             "add_member_to_team": "Ajouter un membre à l'équipe: ",
             "create_invite": "Créer et envoyer une invitation",
             "create_error": "Une erreur est survenue en créant l'utilisateur. Êtes vous sûr qu'il n'y a pas un utilisateur avec un nom ou un email similaire ?",
-            "delete_error": "Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cette personne n'a aucune tâche assignée et n'a fait aucun commentaire ?",
-            "delete_text": "Êtes vous sûr de vouloir retirer {personName} de la base de données? Tous les commentaires et préviz liés seront supprimés. Pour confirmer, tapez le nom complet de la personne en dessous",
+            "delete_error": "Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Etes vous sur que cet utilisateur n'a aucune tâche assignée et n'a fait aucun commentaire ?",
+            "delete_text": "Êtes vous sûr de vouloir retirer {personName} de la base de données? Tous les commentaires et préviz liés seront supprimés. Pour confirmer, tapez le nom complet de l'utilisateur en dessous",
             "edit_title": "Modifier les informations de",
             "empty_team": "Personne n'a été affecté à cette production.",
             "invite": "Envoyer une invitation",
@@ -332,9 +352,9 @@
             "invite_success": "L'invitation a été envoyé avec succès.",
             "new_person": "Ajouter un employé",
             "no_task_assigned": "Il n'y a aucune tâche assignée.",
-            "persons": "Personnes",
+            "persons": "utilisateurs",
             "running_tasks": "Tâches en cours",
-            "select_person": "Sélectionner une personne...",
+            "select_person": "Sélectionner un utilisateur...",
             "team": "Équipe",
             "title": "Employés",
             "unactive": "Absents",
@@ -445,7 +465,25 @@
                 "previous_shot": "Entité précédente",
                 "save_playlist": "Sauvegarde la playlist",
                 "speed": "Changer la vitesse",
-                "split_screen": "Comparer avec d'autres types de tâches"
+                "split_screen": "Comparer avec d'autres types de tâches",
+                "annotation_draw": "Dessiner des annotations",
+                "current_time": "Position dans la vidéo",
+                "display_revision": "Afficher révision",
+                "download_file": "Télécharger fichier",
+                "entity_index": "Index de l'entité courante dans la playlist",
+                "entities_number": "Nombre d'entités dans la playlist",
+                "frame_number": "Numéro de frame",
+                "files_add": "Ajouter un fichier à la révision",
+                "files_delete": "Supprimmer le fichier de la révision",
+                "files_next": "Prochain fichier pour la révision",
+                "files_position": "Index du fichier pour cette révision",
+                "files_previous": "Fichier précédent pour cette révision",
+                "looping": "Boucler sur la vidéo courante",
+                "mute": "Couper le son",
+                "unmute": "Rétablir le son",
+                "number_of_files": "Nombre de fichier pour cette révision",
+                "max_duration": "Durée de la vidéo",
+                "see_original_file": "Ouvrir le fichier original dans un nouvel onglet"
             }
         },
         "productions": {
@@ -472,7 +510,11 @@
                 "ratio": "Ratio",
                 "resolution": "Resolution",
                 "status": "Status",
-                "type": "Type"
+                "type": "Type",
+                "start_date": "Date de début",
+                "end_date": "Date de fin",
+                "nb_episodes": "Nombre d'épisodes",
+                "episode_span": "Espace entre les épisodes"
             },
             "metadata": {
                 "add_explaination": "Ajouter des données spécifiques au projet.",
@@ -496,6 +538,17 @@
                 "short": "Format court",
                 "featurefilm": "Long Métrage",
                 "tvshow": "Série télé"
+            },
+            "edit_error": "Une erreur s'est produite en éditant la production. Contactez notre équipe support pour obtenir de l'aide",
+            "brief": {
+                "title": "Brief",
+                "empty": "Il n'y a pas de brief. Voulez-vous en créer un ?"
+            },
+            "parameters": {
+                "title": "Paramètres",
+                "save": {
+                    "button": "Confirmez"
+                }
             }
         },
         "profile": {
@@ -561,7 +614,8 @@
                 "is_retake": "A valeur de retake",
                 "name": "Nom",
                 "short_name": "Nom court"
-            }
+            },
+            "name": "Statut de tâche"
         },
         "task_types": {
             "delete_text": "Êtes vous sur de vouloir retirer {name} de la base de données ?",
@@ -661,7 +715,8 @@
                 "name": "Plan",
                 "production": "Prod",
                 "sequence": "Séquence",
-                "time_spent": "Temps passé"
+                "time_spent": "Temps passé",
+                "person": "Modifier"
             }
         },
         "server_down": {
@@ -674,7 +729,10 @@
             "display_mode": "Mode d'affichage",
             "frames": "Frames",
             "pie": "Graphiques",
-            "shots": "Plans"
+            "shots": "Plans",
+            "data_mode": "Données",
+            "retakes": "Retakes",
+            "status": "Statut"
         },
         "tasks": {
             "add_preview": "Attacher une préviz",
@@ -771,7 +829,10 @@
                 "normal": "Normale",
                 "high": "Haute",
                 "very_high": "Très haute"
-            }
+            },
+            "assignation_warning": "Attention: vous ne verrez pas le résultat car vous masquez les assignations dans la liste.",
+            "for_selection": "Pour la liste et les filtres courants",
+            "for_project": "Pour le projet"
         },
         "timesheets": {
             "detail_level": "Niveau de détail",
@@ -786,6 +847,12 @@
         "wrong_browser": {
             "title": "Votre navigateur n'est pas pris en charges par Kitsu",
             "text": "Kitsu ne peut être utilisé qu'avec les navigateurs Firefox et Chrome."
+        },
+        "logs": {
+            "current_date_label": "Montrer les journaux pour",
+            "events": "Événements listés pour le jour courant",
+            "empty_list": "Il n'y a pas de journaux pour cette date",
+            "title": "Journaux"
         }
     }
 }
