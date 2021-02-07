@@ -83,6 +83,13 @@
             icon="plus"
             @click="modals.isNewDisplayed = true"
           />
+          <button-simple
+            class="flexrow-item"
+            :text="$t('assets.only_current_episode')"
+            :is-on="isOnlyCurrentEpisode"
+            @click="isOnlyCurrentEpisode = !isOnlyCurrentEpisode"
+            v-if="isTVShow"
+          />
         </h2>
 
         <div class="filters-area flexrow">
@@ -255,6 +262,7 @@ export default {
       episodeId: '',
       importCsvFormData: {},
       isLoading: false,
+      isOnlyCurrentEpisode: false,
       isTextMode: false,
       selection: {},
       sequenceId: '',
@@ -321,7 +329,12 @@ export default {
     availableAssetsByType () {
       const result = []
       this.assetsByType.forEach((typeGroup) => {
-        const newGroup = typeGroup.filter((asset) => !asset.canceled)
+        let newGroup = typeGroup.filter(asset => !asset.canceled)
+        if (this.isTVShow && this.isOnlyCurrentEpisode) {
+          newGroup = typeGroup.filter(
+            asset => asset.episode_id === this.currentEpisode.id
+          )
+        }
         if (newGroup.length > 0) result.push(newGroup)
       })
       return result

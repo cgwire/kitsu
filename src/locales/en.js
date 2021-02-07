@@ -9,6 +9,7 @@ export default {
     edit_title: 'Edit asset',
     empty_list: 'There is no asset in the production. What about creating some?',
     empty_list_client: 'There is no asset in this production.',
+    only_current_episode: 'Only current episode',
     new_asset: 'Create an asset',
     new_assets: 'Add assets',
     new_success: 'Asset {name} successfully created.',
