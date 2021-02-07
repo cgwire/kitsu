@@ -159,7 +159,7 @@ describe('BuildFilterModal', () => {
               {
                 id: 'descriptor-1' ,
                 operator: '=' ,
-                text: 'easy'
+                values: ['easy']
               }
             ]
           }
@@ -285,7 +285,7 @@ describe('BuildFilterModal', () => {
                   {
                     id: 'descriptor-1' ,
                     operator: '=' ,
-                    text: 'easy'
+                    values: ['easy']
                   }
                 ]
               }
@@ -300,13 +300,28 @@ describe('BuildFilterModal', () => {
                   {
                     id: 'descriptor-1' ,
                     operator: '=-' ,
-                    text: 'easy'
+                    values: ['easy']
                   }
                 ]
               }
             })
             const query = wrapper.vm.buildFilter()
-            expect(query).toBe('[Difficulty]=-[easy]')
+            expect(query).toBe('[Difficulty]=[-easy]')
+          })
+          it('descriptor in', () => {
+            wrapper.setData({
+              metadataDescriptorFilters: {
+                values: [
+                  {
+                    id: 'descriptor-1' ,
+                    operator: 'in' ,
+                    values: ['easy', 'hard']
+                  }
+                ]
+              }
+            })
+            const query = wrapper.vm.buildFilter()
+            expect(query).toBe('[Difficulty]=[easy,hard]')
           })
         })
         describe('assignation', () => {
@@ -437,7 +452,7 @@ describe('BuildFilterModal', () => {
               {
                 id: 'descriptor-1' ,
                 operator: '=' ,
-                text: 'easy'
+                values: ['easy']
               }
             ])
           })
@@ -448,7 +463,18 @@ describe('BuildFilterModal', () => {
               {
                 id: 'descriptor-1' ,
                 operator: '=-' ,
-                text: 'easy'
+                values: ['easy']
+              }
+            ])
+          })
+          it('descriptor in', () => {
+            changeSearch('Difficulty=[easy,hard]')
+            wrapper.vm.setFiltersFromCurrentQuery()
+            expect(wrapper.vm.metadataDescriptorFilters.values).toStrictEqual([
+              {
+                id: 'descriptor-1' ,
+                operator: 'in' ,
+                values: ['easy', 'hard']
               }
             ])
           })
@@ -533,7 +559,7 @@ describe('BuildFilterModal', () => {
           expect(wrapper.vm.metadataDescriptorFilters.values).toStrictEqual([{
             id: 'descriptor-1',
             operator: '=',
-            text: 'easy',
+            values: ['easy'],
           }])
           wrapper.vm.addDescriptorFilter()
           expect(wrapper.vm.metadataDescriptorFilters.values.length).toBe(2)

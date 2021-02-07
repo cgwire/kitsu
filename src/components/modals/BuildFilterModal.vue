@@ -113,19 +113,35 @@
             locale-key-prefix="entities.build_filter."
             v-model="descriptorFilter.operator"
           />
-          <text-field
-            class="flexrow-item"
-            input-class=" thin"
-            v-model="descriptorFilter.text"
-            v-if="getDescriptor(descriptorFilter.id).choices.length === 0"
-          />
-          <combobox
-            class="flexrow-item"
-            :options="getDescriptorChoiceOptions(descriptorFilter.id)"
-            v-model="descriptorFilter.text"
-            v-else
-          />
+
+          <div class="flexrow-item flexrow value-column">
+            <template
+              v-for="(value, index) in descriptorFilter.values"
+            >
+              <text-field
+                :key="'descriptor-value-' + index"
+                class="flexrow-item"
+                input-class=" thin"
+                v-model="descriptorFilter.values[index]"
+                v-if="getDescriptor(descriptorFilter.id).choices.length === 0"
+              />
+              <combobox
+                class="flexrow-item"
+                :key="'descriptor-value-' + index"
+                :options="getDescriptorChoiceOptions(descriptorFilter.id)"
+                v-model="descriptorFilter.values[index]"
+                v-else
+              />
+            </template>
+            <button-simple
+              class="mt05"
+              icon="plus"
+              @click="addInDescriptorFilter(descriptorFilter)"
+              v-if="descriptorFilter.operator === 'in'"
+            />
+          </div>
           <button-simple
+            class="mt05"
             icon="minus"
             @click="removeDescriptorFilter(descriptorFilter)"
           />
@@ -244,7 +260,8 @@ export default {
       general: {
         operatorOptions: [
           { label: 'equal', value: '=' },
-          { label: 'not_equal', value: '=-' }
+          { label: 'not_equal', value: '=-' },
+          { label: 'in', value: 'in' }
         ],
         taskTypeOperatorOptions: [
           { label: 'equal', value: '=' },
@@ -390,10 +407,12 @@ export default {
     },
 
     applyDescriptorChoice (query) {
-      this.metadataDescriptorFilters.values.forEach((descriptorFilter) => {
-        const operator = descriptorFilter.operator
+      this.metadataDescriptorFilters.values.forEach(descriptorFilter => {
+        let operator = '=['
+        if (descriptorFilter.operator === '=-') operator = '=[-'
         const desc = this.getDescriptor(descriptorFilter.id)
-        query += ` [${desc.name}]${operator}[${descriptorFilter.text}]`
+        const value = descriptorFilter.values.join(',')
+        query += ` [${desc.name}]${operator}${value}]`
       })
       return query
     },
@@ -449,6 +468,10 @@ export default {
         this.taskTypeFilters.values.filter(f => f !== taskTypeFilter)
     },
 
+    addInDescriptorFilter (descriptorFilter) {
+      descriptorFilter.values.push('')
+    },
+
     getTaskType (taskTypeId) {
       return this.taskTypeMap[taskTypeId]
     },
@@ -458,9 +481,9 @@ export default {
     onDescriptorChanged (descriptorFilter) {
       const descriptor = this.getDescriptor(descriptorFilter.id)
       if (descriptor.choices.length > 0) {
-        descriptorFilter.text = descriptor.choices[0]
+        descriptorFilter.values = [descriptor.choices[0]]
       } else {
-        descriptorFilter.text = ''
+        descriptorFilter.values = ['']
       }
     },
 
@@ -469,7 +492,7 @@ export default {
       const filter = {
         id: this.descriptorOptions[0].value,
         operator: '=',
-        text: desc.choices.length > 0 ? desc.choices[0] : ''
+        values: [desc.choices.length > 0 ? desc.choices[0] : '']
       }
       this.metadataDescriptorFilters.values.push(filter)
       return filter
@@ -538,7 +561,7 @@ export default {
       if (filter.taskStatuses.length > 1) {
         operator = 'in'
       } else if (filter.excluding) {
-        operator = '='
+        operator = '=-'
       }
       this.taskTypeFilters.values.push({
         id: filter.taskType.id,
@@ -548,10 +571,16 @@ export default {
     },
 
     setFiltersFromDescriptorQuery (filter) {
+      let operator = '='
+      if (filter.values.length > 1) {
+        operator = 'in'
+      } else if (filter.excluding) {
+        operator = '=-'
+      }
       this.metadataDescriptorFilters.values.push({
         id: filter.descriptor.id,
-        operator: filter.excluding ? '=-' : '=',
-        text: filter.value
+        operator,
+        values: filter.values
       })
     },
 
@@ -641,14 +670,11 @@ export default {
 .task-type-filter,
 .descriptor-filter {
   margin-bottom: 0.3em;
+  align-items: flex-start;
 
   .descriptor-text-value {
     padding: 0;
   }
-}
-
-.task-type-filter {
-  align-items: flex-start;
 }
 
 .value-column {

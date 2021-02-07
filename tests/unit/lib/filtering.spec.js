@@ -195,7 +195,7 @@ describe('lib/filtering', () => {
         taskStatuses,
         descriptors,
         persons,
-        query: 'toto'
+        query: 'empty'
       })
       expect(filters.length).toEqual(0)
     })
@@ -350,7 +350,7 @@ describe('lib/filtering', () => {
       expect(filters.length).toEqual(1)
       let filter = filters[0]
       expect(filter.type).toEqual('descriptor')
-      expect(filter.value).toEqual('big')
+      expect(filter.values).toEqual(['big'])
       expect(filter.descriptor.id).toEqual('descriptor-1')
     })
 
@@ -413,6 +413,23 @@ describe('lib/filtering', () => {
       expect(filters[0].assetType.id).toEqual('asset-type-1')
       expect(filters[0].excluding).toEqual(false)
     })
+
+    it('color=[blue,red] in query case', () => {
+      let filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        query: 'family=[blue,red]'
+      })
+      expect(filters.length).toEqual(1)
+      expect(filters[0].type).toEqual('descriptor')
+      expect(filters[0].values).toEqual(['blue', 'red'])
+      expect(filters[0].excluding).toEqual(false)
+    })
+
   })
 
   describe('applyFilters', () => {
@@ -678,7 +695,7 @@ describe('lib/filtering', () => {
       const filters = [
         {
           descriptor: descriptors[0],
-          value: 'blue',
+          values: ['blue'],
           type: 'descriptor'
         }
       ]
@@ -690,11 +707,11 @@ describe('lib/filtering', () => {
       expect(results.length).toEqual(3)
     })
 
-    it('color=[blue space]', () => {
+    it('color=[the space]', () => {
       const filters = [
         {
           descriptor: descriptors[0],
-          value: 'the space',
+          values: ['the space'],
           type: 'descriptor'
         }
       ]
@@ -705,6 +722,23 @@ describe('lib/filtering', () => {
       )
       expect(results.length).toEqual(1)
     })
+
+    it('color=[blue,the space]', () => {
+      const filters = [
+        {
+          descriptor: descriptors[0],
+          values: ['blue', 'the space'],
+          type: 'descriptor'
+        }
+      ]
+      let results = applyFilters(
+        entries,
+        filters,
+        taskMap
+      )
+      expect(results.length).toEqual(4)
+    })
+
 
     it('withthumbnail', () => {
       const filters = [

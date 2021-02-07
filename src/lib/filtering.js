@@ -61,15 +61,17 @@ const applyFiltersFunctions = {
   },
 
   descriptor (entry, filter, taskMap) {
-    let isOk = true
+    let isOk = false
     if (
       entry.data &&
       entry.data[filter.descriptor.field_name] &&
-      filter.value
+      filter.values
     ) {
       let dataValue = entry.data[filter.descriptor.field_name]
       dataValue = dataValue.toLowerCase()
-      isOk = dataValue.indexOf(filter.value.toLowerCase()) >= 0
+      filter.values.forEach(value => {
+        isOk = isOk || dataValue.indexOf(value.toLowerCase()) >= 0
+      })
     } else {
       isOk = false
     }
@@ -332,10 +334,11 @@ export const getDescFilters = (descriptors, queryText) => {
       let value = cleanParenthesis(pattern[1])
       const excluding = value.startsWith('-')
       if (excluding) value = value.substring(1)
+      const values = value.split(',')
       if (matchedDescriptors) {
         results.push({
           descriptor: matchedDescriptors[0],
-          value,
+          values,
           type: 'descriptor',
           excluding
         })

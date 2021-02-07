@@ -52,7 +52,7 @@ describe('TableInfo', () => {
 
     it('should display an error', () => {
       const name = wrapperError.findAll('.table-info')
-      expect(name.at(0).text()).toEqual('An error occured while loading data.')
+      expect(name.at(0).text()).toEqual('An error occurred while loading data.')
     })
   })
 })
