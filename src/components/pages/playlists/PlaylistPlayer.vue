@@ -1678,6 +1678,7 @@ export default {
       localEntity.preview_file_previews = previewFile.previews
       if (this.rawPlayer) this.rawPlayer.reloadCurrentEntity()
       this.$emit('preview-changed', entity, previewFile.id)
+      this.clearCanvas()
       this.updateTaskPanel()
     },
 
@@ -2070,15 +2071,22 @@ export default {
       let currentTime = roundToFrame(this.currentTimeRaw, this.fps) || 0
       if (this.isCurrentPreviewPicture) currentTime = 0
       if (!this.annotations) return
+
+      // Get annotations currently stored
       const annotation = this.getAnnotation(currentTime)
+      // Get annotation set on the canvas
       const annotations = this.getNewAnnotations(currentTime, annotation)
+      // Retrieved current entity.
       const entity = this.entityList[this.playingEntityIndex]
       if (!entity) return
+
+      // Build a preview object to handle update
       let preview = {
         id: entity.preview_file_id,
         task_id: entity.preview_file_task_id,
         annotations: entity.preview_file_annotations || []
       }
+      // If we are working on a subpreview build the preview object from it.
       if (this.isCurrentPreviewPicture && this.currentPreviewIndex > 0) {
         const index = this.currentPreviewIndex - 1
         const previewFile = this.currentEntity.preview_file_previews[index]
@@ -2088,12 +2096,26 @@ export default {
           annotations: previewFile.annotations || []
         }
       }
-      if (!this.isCurrentUserArtist) {
+      if (!this.isCurrentUserArtist) { // Artists are not allowed to draw
+        // Emit an event for remote and store update
         this.$emit('annotationchanged', {
           preview: preview,
           annotations: annotations
         })
+        // Update information locally
         entity.preview_file_annotations = annotations
+        Object.keys(entity.preview_files).forEach(taskTypeId => {
+          let revPreview = null
+          entity.preview_files[taskTypeId].forEach(p => {
+            if (p.id === preview.id) revPreview = p
+            if (!revPreview && p.previews) {
+              p.previews.forEach(subPreview => {
+                if (subPreview.id === preview.id) revPreview = p
+              })
+            }
+          })
+          if (revPreview) revPreview.annotations = annotations
+        })
       }
     },
 
