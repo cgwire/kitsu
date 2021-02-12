@@ -90,9 +90,18 @@
             scope="col"
             ref="th-spent"
             class="time-spent"
-            v-if="!isCurrentUserClient && isShowInfos && isTime"
+            v-if="!isCurrentUserClient && isShowInfos && isShotTime"
            >
             {{ $t('shots.fields.time_spent') }}
+          </th>
+
+          <th
+            scope="col"
+            class="estimation"
+            ref="th-spent"
+            v-if="!isCurrentUserClient && isShowInfos && isShotEstimation"
+          >
+            {{ $t('main.estimation_short') }}
           </th>
 
           <th
@@ -309,12 +318,21 @@
               {{ getMetadataFieldValue({field_name: 'fps'}, shot) }}
             </span>
           </td>
+
           <td
             class="time-spent"
-            v-if="!isCurrentUserClient && isShowInfos && isTime"
+            v-if="!isCurrentUserClient && isShowInfos && isShotTime"
           >
             {{ formatDuration(shot.timeSpent) }}
           </td>
+
+          <td
+            class="estimation"
+            v-if="!isCurrentUserClient && isShowInfos && isShotEstimation"
+          >
+            {{ formatDuration(shot.estimation) }}
+          </td>
+
           <validation-cell
             :class="{
               'validation-cell': !hiddenColumns[columnId],
@@ -384,7 +402,10 @@
   >
     {{ displayedShotsLength }} {{ $tc('shots.number', displayedShotsLength) }}
     ({{ formatDuration(displayedShotsTimeSpent) }}
-     {{ $tc('main.days_spent', displayedShotsTimeSpent) }}, {{ displayedShotsFrames }} {{ $tc('main.nb_frames', displayedShotsFrames) }})
+     {{ $tc('main.days_spent', displayedShotsTimeSpent) }},
+     {{ formatDuration(displayedShotsEstimation) }}
+     {{ $tc('main.man_days', displayedShotsEstimation) }},
+     {{ displayedShotsFrames }} {{ $tc('main.nb_frames', displayedShotsFrames) }})
 
   </p>
 
@@ -464,6 +485,7 @@ export default {
     ...mapGetters([
       'currentProduction',
       'currentEpisode',
+      'displayedShotsEstimation',
       'displayedShotsLength',
       'displayedShotsTimeSpent',
       'displayedShotsFrames',
@@ -476,9 +498,10 @@ export default {
       'isFrameOut',
       'isSingleEpisode',
       'isShotDescription',
+      'isShotEstimation',
+      'isShotTime',
       'isShowAssignations',
       'isShowInfos',
-      'isTime',
       'isTVShow',
       'nbSelectedTasks',
       'shotFilledColumns',
@@ -525,7 +548,12 @@ export default {
       count += this.shotMetadataDescriptors.length
       count += !this.isCurrentUserClient &&
         this.isShowInfos &&
-        this.isTime
+        this.isShotTime
+        ? 1
+        : 0
+      count += !this.isCurrentUserClient &&
+        this.isShowInfos &&
+        this.isShotEstimation
         ? 1
         : 0
       count += this.isShowInfos ? 1 : 0
@@ -716,10 +744,11 @@ th.actions {
   width: 80px;
 }
 
+.estimation,
 .time-spent {
-  min-width: 80px;
-  max-width: 80px;
-  width: 80px;
+  min-width: 70px;
+  max-width: 70px;
+  width: 70px;
 }
 
 td.name {
