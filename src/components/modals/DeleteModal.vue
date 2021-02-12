@@ -39,13 +39,28 @@ import { modalMixin } from './base_modal'
 export default {
   name: 'delete-modal',
   mixins: [modalMixin],
-  props: [
-    'text',
-    'active',
-    'isLoading',
-    'isError',
-    'errorText'
-  ],
+  props: {
+    text: {
+      required: true,
+      type: String
+    },
+    active: {
+      default: false,
+      type: Boolean
+    },
+    isLoading: {
+      default: false,
+      type: Boolean
+    },
+    isError: {
+      default: false,
+      type: Boolean
+    },
+    errorText: {
+      default: '',
+      type: String
+    }
+  },
   computed: {
     ...mapGetters([
     ])

@@ -77,13 +77,7 @@
           >
             <router-link
               class="duration"
-              :to="{
-                name: 'timesheets-year-person',
-                params: {
-                  person_id: person.id,
-                  year: year
-                }
-              }"
+              :to="getYearDetailRoute(person, year)"
               v-if="yearDuration(year, person.id) > 0"
             >
               {{ yearDuration(year, person.id) }}
@@ -105,14 +99,7 @@
           >
             <router-link
               class="duration"
-              :to="{
-                name: 'timesheets-month-person',
-                params: {
-                  person_id: person.id,
-                  year: year,
-                  month: month
-                }
-              }"
+              :to="getMonthDetailRoute(person, year, month)"
               v-if="monthDuration(month, person.id) > 0"
             >
               {{ monthDuration(month, person.id) }}
@@ -136,14 +123,7 @@
                 duration: true,
                 'warning': weekDuration(week, person.id) > 5 * organisation.hours_by_day
               }"
-              :to="{
-                name: 'timesheets-week-person',
-                params: {
-                  person_id: person.id,
-                  year: year,
-                  week: week
-                }
-              }"
+              :to="getWeekDetailRoute(person, year, week)"
               v-if="weekDuration(week, person.id) > 0"
             >
               {{ weekDuration(week, person.id) }}
@@ -166,15 +146,7 @@
           >
             <router-link
               class="duration"
-              :to="{
-                name: 'timesheets-day-person',
-                params: {
-                  person_id: person.id,
-                  year: year,
-                  month: month,
-                  day: day
-                }
-              }"
+              :to="getDayDetailRoute(person, year, month, day)"
               v-if="dayDuration(day, person.id) > 0"
             >
               {{ dayDuration(day, person.id) }}
@@ -183,7 +155,6 @@
             -
             </span>
           </td>
-
           <td class="actions"></td>
          </tr>
       </tbody>
@@ -380,6 +351,62 @@ export default {
       const beginning = moment(this.currentYear + '-' + week, 'YYYY-W')
       const end = beginning.clone().add(6, 'days')
       return beginning.format('YYYY-MM-DD') + ' - ' + end.format('YYYY-MM-DD')
+    },
+
+    getYearDetailRoute (person, year) {
+      return {
+        name: 'timesheets-year-person',
+        params: {
+          person_id: person.id,
+          year: year
+        },
+        query: {
+          productionId: this.$route.query.productionId
+        }
+      }
+    },
+
+    getMonthDetailRoute (person, year, month) {
+      return {
+        name: 'timesheets-month-person',
+        params: {
+          person_id: person.id,
+          year: year,
+          month: month
+        },
+        query: {
+          productionId: this.$route.query.productionId
+        }
+      }
+    },
+
+    getWeekDetailRoute (person, year, week) {
+      return {
+        name: 'timesheets-week-person',
+        params: {
+          person_id: person.id,
+          year: year,
+          week: week
+        },
+        query: {
+          productionId: this.$route.query.productionId
+        }
+      }
+    },
+
+    getDayDetailRoute (person, year, month, day) {
+      return {
+        name: 'timesheets-day-person',
+        params: {
+          person_id: person.id,
+          year: year,
+          month: month,
+          day: day
+        },
+        query: {
+          productionId: this.$route.query.productionId
+        }
+      }
     }
   },
 

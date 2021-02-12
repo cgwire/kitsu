@@ -12,7 +12,7 @@
       v-for="projectId in Object.keys(projects)"
     >
       <production-name
-        :project="{
+        :production="{
           id: projectId,
           name: projectNames[projectId]
         }"
@@ -173,5 +173,9 @@ export default {
 .by-task-type-id {
   margin-top: 1em;
   padding-left: 1em;
+}
+
+.by-project {
+  margin-bottom: 2em;
 }
 </style>

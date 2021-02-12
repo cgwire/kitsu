@@ -12,10 +12,16 @@
         v-model="selectedDate"
       />
     </div>
-    <div class="flexrow time-spent-total">
+    <div class="flexrow-item flexrow time-spent-total">
     -&nbsp;&nbsp;
     {{ timeSpentTotal }} {{ $t('timesheets.hours') }}
     </div>
+    <div class="filler"></div>
+    <button-simple
+      class="flexrow-item"
+      text="Day off"
+      @click="modals.dayOff = true"
+    />
   </div>
 
   <div
@@ -77,7 +83,16 @@
 
           <th class="name datatable-row-header" :style="{left: colNamePosX}">
             <router-link :to="entityPath(task)">
-              {{ task.full_entity_name }}
+              <div class="flexrow">
+                <entity-thumbnail
+                  :empty-width="60"
+                  :empty-height="40"
+                  :entity="{preview_file_id: task.entity_preview_file_id}"
+                />
+                <span>
+                 {{ task.full_entity_name }}
+                </span>
+              </div>
             </router-link>
           </th>
           <time-slider-cell
@@ -147,6 +162,13 @@
   <p class="has-text-centered footer-info" v-if="!isLoading">
     {{ tasks.length }} {{ $tc('tasks.tasks', tasks.length) }}
   </p>
+
+  <delete-modal
+    text="Setting this day as a day off will erase all time filled for the
+    current day. Are you sure you want to continue?"
+    @cancel="modals.dayOff = false"
+    :active="modals.dayOff"
+  />
 </div>
 </template>
 
@@ -157,6 +179,9 @@ import Datepicker from 'vuejs-datepicker'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 
 import { PAGE_SIZE } from '@/lib/pagination'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import DeleteModal from '@/components/modals/DeleteModal'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PageSubtitle from '@/components/widgets/PageSubtitle'
 import ProductionNameCell from '@/components/cells/ProductionNameCell'
 import TableInfo from '@/components/widgets/TableInfo'
@@ -167,7 +192,10 @@ export default {
   name: 'timesheet-list',
 
   components: {
+    ButtonSimple,
     Datepicker,
+    DeleteModal,
+    EntityThumbnail,
     ProductionNameCell,
     PageSubtitle,
     TableInfo,
@@ -216,7 +244,10 @@ export default {
       colTypePosX: '',
       disabledDates: {},
       page: 1,
-      selectedDate: moment().toDate() // By default current day.
+      selectedDate: moment().toDate(), // By default current day.
+      modals: {
+        dayOff: false
+      }
     }
   },
 

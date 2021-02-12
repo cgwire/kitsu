@@ -324,20 +324,18 @@ const actions = {
       year,
       month,
       week,
-      day
+      day,
+      productionId
     }) {
-    return new Promise((resolve, reject) => {
-      peopleApi.getAggregatedPersonTimeSpents(
-        personId,
-        detailLevel,
-        year,
-        month,
-        week,
-        day
-      ).then((tasks) => {
-        resolve(tasks)
-      }).catch((err) => reject(err))
-    })
+    return peopleApi.getAggregatedPersonTimeSpents(
+      personId,
+      detailLevel,
+      year,
+      month,
+      week,
+      day,
+      productionId
+    )
   },
 
   showPersonImportModal ({ commit, state }, personId) {
@@ -409,28 +407,26 @@ const actions = {
   loadTimesheets ({ commit }, {
     detailLevel,
     year,
-    month
+    month,
+    productionId
   }) {
-    return new Promise((resolve, reject) => {
-      const monthString =
-        month.length === 1 ? `0${parseInt(month) + 1}` : `${month}`
-      let mainFunc = peopleApi.getMonthTable
-      if (detailLevel === 'day') {
-        mainFunc = peopleApi.getDayTable
-      }
-      if (detailLevel === 'week') {
-        mainFunc = peopleApi.getWeekTable
-      }
-      if (detailLevel === 'year') {
-        mainFunc = peopleApi.getYearTable
-      }
-      mainFunc(year, monthString)
-        .then((table) => {
-          commit(PEOPLE_TIMESHEET_LOADED, table)
-          resolve()
-        })
-        .catch(reject)
-    })
+    const monthString =
+      month.length === 1 ? `0${parseInt(month) + 1}` : `${month}`
+    let mainFunc = peopleApi.getMonthTable
+    if (detailLevel === 'day') {
+      mainFunc = peopleApi.getDayTable
+    }
+    if (detailLevel === 'week') {
+      mainFunc = peopleApi.getWeekTable
+    }
+    if (detailLevel === 'year') {
+      mainFunc = peopleApi.getYearTable
+    }
+    return mainFunc(year, monthString, productionId)
+      .then(table => {
+        commit(PEOPLE_TIMESHEET_LOADED, table)
+        Promise.resolve(table)
+      })
   },
 
   peopleSearchChange ({ commit }, text) {

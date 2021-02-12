@@ -167,20 +167,28 @@ export default {
     )
   },
 
-  getDayTable (year, month) {
-    return client.pget(`/api/data/persons/time-spents/day-table/${year}/${month}`)
+  getDayTable (year, month, productionId) {
+    let path = `/api/data/persons/time-spents/day-table/${year}/${month}`
+    if (productionId) path += `?project_id=${productionId}`
+    return client.pget(path)
   },
 
-  getWeekTable (year) {
-    return client.pget(`/api/data/persons/time-spents/week-table/${year}`)
+  getWeekTable (year, month, productionId) {
+    let path = `/api/data/persons/time-spents/week-table/${year}`
+    if (productionId) path += `?project_id=${productionId}`
+    return client.pget(path)
   },
 
-  getMonthTable (year) {
-    return client.pget(`/api/data/persons/time-spents/month-table/${year}`)
+  getMonthTable (year, month, productionId) {
+    let path = `/api/data/persons/time-spents/month-table/${year}`
+    if (productionId) path += `?project_id=${productionId}`
+    return client.pget(path)
   },
 
-  getYearTable (year) {
-    return client.pget('/api/data/persons/time-spents/year-table')
+  getYearTable (year, month, productionId) {
+    let path = '/api/data/persons/time-spents/year-table'
+    if (productionId) path += `?project_id=${productionId}`
+    return client.pget(path)
   },
 
   getAggregatedPersonTimeSpents (
@@ -189,7 +197,8 @@ export default {
     year,
     month,
     week,
-    day
+    day,
+    productionId
   ) {
     let path = `/api/data/persons/${personId}/time-spents/`
 
@@ -201,6 +210,10 @@ export default {
       path += `week/${year}/${week}`
     } else {
       path += `day/${year}/${month}/${day}`
+    }
+
+    if (productionId) {
+      path += `?project_id=${productionId}`
     }
 
     return client.pget(path)

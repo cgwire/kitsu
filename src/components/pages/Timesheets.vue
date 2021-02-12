@@ -3,7 +3,18 @@
     <div class="column main-column">
       <div class="timesheets page">
         <div class="page-header flexrow">
-          <page-title class="flexrow-item" :text="$t('timesheets.title')"/>
+          <page-title
+            class="flexrow-item title"
+            :text="$t('timesheets.title')"
+          />
+
+          <combobox-production
+            class="flexrow-item"
+            :label="$t('main.production')"
+            :production-list="productionList"
+            v-model="productionIdString"
+          />
+
           <combobox
             class="flexrow-item"
             :label="$t('timesheets.detail_level')"
@@ -60,6 +71,7 @@
     >
       <people-timesheet-info
         :person="currentPerson"
+        :production="productionId"
         :year="currentYear"
         :month="currentMonth"
         :week="currentWeek"
@@ -77,8 +89,10 @@
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
+import ButtonHrefLink from '../widgets/ButtonHrefLink'
 import ButtonSimple from '../widgets/ButtonSimple'
 import Combobox from '../widgets/Combobox'
+import ComboboxProduction from '../widgets/ComboboxProduction'
 import PeopleTimesheetList from '../lists/PeopleTimesheetList'
 import PeopleTimesheetInfo from '../sides/PeopleTimesheetInfo'
 import PageTitle from '../widgets/PageTitle'
@@ -90,7 +104,9 @@ export default {
   name: 'people',
   components: {
     ButtonSimple,
+    ButtonHrefLink,
     Combobox,
+    ComboboxProduction,
     PageTitle,
     PeopleTimesheetList,
     PeopleTimesheetInfo
@@ -119,6 +135,8 @@ export default {
 
       detailLevelString: 'day',
       detailLevel: 'day',
+      productionIdString: '',
+      productionId: '',
 
       yearString: `${moment().year()}`,
       monthString: `${moment().month() + 1}`,
@@ -132,9 +150,10 @@ export default {
       isLoading: false,
       isLoadingError: false,
 
-      showInfo: true,
       isInfoLoading: false,
       isInfoLoadingError: false,
+
+      showInfo: true,
       tasks: []
     }
   },
@@ -150,13 +169,35 @@ export default {
     }
   },
 
+  mounted () {
+    const productionId = this.$route.query.productionId
+    if (productionId) {
+      this.silent = true
+      this.productionId = productionId
+      this.productionIdString = productionId
+      this.reloadTimesheet()
+        .then(() => {
+          this.silent = false
+        })
+    }
+  },
+
   computed: {
     ...mapGetters([
+      'isCurrentUserAdmin',
       'isCurrentUserManager',
+      'openProductions',
       'people',
       'personMap',
       'timesheet'
     ]),
+
+    productionList () {
+      return [{
+        id: '',
+        name: this.$t('main.all')
+      }].concat([...this.openProductions])
+    },
 
     filteredPeople () {
       return this.people.filter((person) => {
@@ -209,17 +250,21 @@ export default {
 
     reloadTimesheet () {
       this.isLoading = true
-      this.loadTimesheets({
+      this.isLoadingError = false
+      return this.loadTimesheets({
         detailLevel: this.detailLevel,
         year: this.currentYear,
-        month: this.currentMonth
+        month: this.currentMonth,
+        productionId: this.productionId
       })
         .then((table) => {
           this.isLoading = false
+          return Promise.resolve()
         })
         .catch(() => {
           this.isLoading = false
           this.isLoadingError = true
+          return Promise.resolve()
         })
     },
 
@@ -232,8 +277,10 @@ export default {
     },
 
     loadRoute () {
+      this.$options.silent = true
       const { month, year, week, day } = this.$route.params
 
+      const previousProduction = `${this.productionId}`
       const previousDetailLevel = `${this.detailLevel}`
       const previousMonth = `${this.currentMonth}`
       const previousYear = `${this.currentYear}`
@@ -259,29 +306,34 @@ export default {
       if (day) {
         this.currentDay = Number(day)
       }
+      this.productionId = this.$route.query.productionId || ''
 
       const detailLevelHasChanged = previousDetailLevel !== this.detailLevel
       const monthHasChanged =
         previousMonth.localeCompare(`${this.currentMonth}`) !== 0
       const yearHasChanged =
         previousYear.localeCompare(`${this.currentYear}`) !== 0
+      const productionHasChanged =
+        previousProduction.localeCompare(`${this.productionId}`) !== 0
+      this.$nextTick(() => {
+        this.$options.silent = false
+      })
 
       if (this.$route.path.indexOf('person') > 0) {
         this.showSideInfo()
         this.loadAggregate()
-        if (this.isLoading) {
-          this.reloadTimesheet()
-        }
       } else {
         this.hideSideInfo()
-        if (
-          this.isLoading ||
-          monthHasChanged ||
-          yearHasChanged ||
-          detailLevelHasChanged
-        ) {
-          this.reloadTimesheet()
-        }
+      }
+
+      if (
+        this.isLoading ||
+        monthHasChanged ||
+        yearHasChanged ||
+        detailLevelHasChanged ||
+        productionHasChanged
+      ) {
+        this.reloadTimesheet()
       }
     },
 
@@ -295,9 +347,11 @@ export default {
         year: this.$route.params.year,
         month: this.$route.params.month,
         week: this.$route.params.week,
-        day: this.$route.params.day
+        day: this.$route.params.day,
+        productionId: this.productionId
       }).then((tasks) => {
         this.isInfoLoading = false
+        console.log(tasks.length)
         this.tasks = tasks.filter((task) => task.duration > 0)
       }).catch((err) => {
         console.error(err)
@@ -338,20 +392,24 @@ export default {
 
   watch: {
     detailLevelString () {
+      if (this.silent) return
+      console.log('detail change')
       if (this.detailLevel !== this.detailLevelString) {
         if (this.detailLevelString === 'month') {
           this.$router.push({
             name: 'timesheets-month',
             params: {
               year: this.currentYear
-            }
+            },
+            query: this.$route.query
           })
         } else if (this.detailLevelString === 'week') {
           this.$router.push({
             name: 'timesheets-week',
             params: {
               year: this.currentYear
-            }
+            },
+            query: this.$route.query
           })
         } else if (this.detailLevelString === 'day') {
           this.$router.push({
@@ -359,32 +417,38 @@ export default {
             params: {
               year: this.currentYear,
               month: this.currentMonth
-            }
+            },
+            query: this.$route.query
           })
         } else if (this.detailLevelString === 'year') {
           this.$router.push({
             name: 'timesheets-year',
             params: {
               year: this.currentYear
-            }
+            },
+            query: this.$route.query
           })
         }
       }
     },
 
     yearString () {
+      if (this.silent) return
       const year = Number(this.yearString)
       const currentMonth = moment().month()
+      console.log('year change')
       if (this.currentYear !== year) {
         if (this.detailLevel === 'month') {
           this.$router.push({
             name: 'timesheets-month',
-            params: { year }
+            params: { year },
+            query: this.$route.query
           })
         } else if (this.detailLevel === 'week') {
           this.$router.push({
             name: 'timesheets-week',
-            params: { year }
+            params: { year },
+            query: this.$route.query
           })
         } else {
           this.$router.push({
@@ -392,22 +456,35 @@ export default {
             params: {
               year: year,
               month: Math.min(Number(this.monthString), currentMonth)
-            }
+            },
+            query: this.$route.query
           })
         }
       }
     },
 
     monthString () {
+      if (this.silent) return
+      console.log('month change')
       if (this.currentMonth !== Number(this.monthString)) {
         this.$router.push({
           name: 'timesheets-day',
           params: {
             year: this.currentYear,
             month: Number(this.monthString)
-          }
+          },
+          query: this.$route.query
         })
       }
+    },
+
+    productionIdString () {
+      if (this.silent) return
+      this.$router.push({
+        query: {
+          productionId: this.productionIdString
+        }
+      })
     },
 
     $route () {
@@ -453,5 +530,9 @@ export default {
 .main-column {
   border-right: 3px solid $light-grey;
   margin: 0;
+}
+
+.title {
+  margin-right: 1em;
 }
 </style>
