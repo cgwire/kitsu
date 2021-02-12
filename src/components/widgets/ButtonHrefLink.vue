@@ -8,20 +8,27 @@
   <plus-icon class="icon is-small" v-if="icon === 'plus'" />
   <download-icon class="icon is-small" v-if="icon === 'download'" />
   <upload-icon class="icon is-small" v-if="icon === 'upload'" />
-  <span class="text is-hidden-touch">
+  <list-icon class="icon is-small" v-if="icon === 'list'" />
+  <span class="text is-hidden-touch" v-if="text">
     {{ text }}
   </span>
 </a>
 </template>
 
 <script>
-import { PlusIcon, DownloadIcon, UploadIcon } from 'vue-feather-icons'
+import {
+  DownloadIcon,
+  ListIcon,
+  PlusIcon,
+  UploadIcon
+} from 'vue-feather-icons'
 
 export default {
   name: 'button-href-link',
   components: {
-    PlusIcon,
     DownloadIcon,
+    ListIcon,
+    PlusIcon,
     UploadIcon
   },
   props: {

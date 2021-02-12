@@ -33,6 +33,13 @@
             icon="download"
             @click="exportTimesheet"
           />
+          <button-href-link
+            class="flexrow-item"
+            :title="$t('timesheets.export_timespents')"
+            path="/api/export/csv/time-spents.csv"
+            icon="list"
+            v-if="isCurrentUserAdmin"
+          />
         </div>
 
         <people-timesheet-list
