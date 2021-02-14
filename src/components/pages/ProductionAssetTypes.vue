@@ -76,7 +76,6 @@ export default {
   computed: {
     ...mapGetters([
       'assetTypeMap',
-      'assetTypePath',
       'assetTypeStats',
       'assetTypeSearchText',
       'assetTypeListScrollPosition',

@@ -144,7 +144,6 @@ export default {
       'isTVShow',
       'organisation',
       'taskTypeMap',
-      'timezone',
       'user'
     ]),
 

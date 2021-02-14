@@ -52,10 +52,12 @@
               class="flexrow-item"
               :size="20"
               :person="personMap[event.user_id]"
+              v-if="event.user_id"
             />
             <people-name
               class="flexrow-item"
               :person="personMap[event.user_id]"
+              v-if="event.user_id"
             />
           </li>
           <li

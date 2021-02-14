@@ -185,10 +185,6 @@ export default {
       'isImportPeopleLoading',
       'isImportPeopleLoadingError',
 
-      'isImportModalShown',
-      'isImportLoading',
-      'isImportLoadingError',
-
       'personCsvFormData'
     ]),
 

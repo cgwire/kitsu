@@ -4,7 +4,7 @@
     <div class="page-header flexrow">
       <router-link
         class="flexrow-item has-text-centered back-link"
-        :to="shotsPath"
+        :to="getShotsRoute"
       >
         <chevron-left-icon />
       </router-link>
@@ -293,6 +293,16 @@ export default {
       return this.currentShot &&
         this.currentShot.preview_file_id &&
         this.currentShot.preview_file_id.length > 0
+    },
+
+    getShotsRoute () {
+      const route = {
+        name: 'shots',
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+      return route
     }
   },
 
