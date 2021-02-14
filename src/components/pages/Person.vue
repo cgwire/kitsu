@@ -126,6 +126,8 @@
         :hide-done="personTasksSearchText.length > 0"
         @date-changed="onDateChanged"
         @time-spent-change="onTimeSpentChange"
+        @set-day-off="onSetDayOff"
+        @unset-day-off="onUnsetDayOff"
         v-if="isActiveTab('timesheets')"
       />
     </div>
@@ -273,8 +275,10 @@ export default {
       'setPersonTasksSearch',
       'savePersonTasksSearch',
       'removePersonTasksSearch',
+      'setDayOff',
       'setPersonTasksScrollPosition',
-      'setTimeSpent'
+      'setTimeSpent',
+      'unsetDayOff'
     ]),
 
     isActiveTab (tab) {
@@ -378,6 +382,22 @@ export default {
     onDateChanged (date) {
       this.selectedDate = moment(date).format('YYYY-MM-DD')
       this.loadPerson(this.person.id)
+    },
+
+    onSetDayOff () {
+      const dayOff = {
+        personId: this.person.id,
+        date: this.selectedDate
+      }
+      this.setDayOff(dayOff)
+    },
+
+    onUnsetDayOff () {
+      const dayOff = {
+        personId: this.person.id,
+        date: this.selectedDate
+      }
+      this.unsetDayOff(dayOff)
     }
   },
 

@@ -106,6 +106,8 @@
         :hide-done="todosSearchText.length > 0 || loggableDoneTasks.length === 0"
         @date-changed="onDateChanged"
         @time-spent-change="onTimeSpentChange"
+        @set-day-off="onSetDayOff"
+        @unset-day-off="onUnsetDayOff"
         v-if="isTabActive('timesheets')"
       />
     </div>
@@ -287,9 +289,11 @@ export default {
       'loadOpenProductions',
       'removeTodoSearch',
       'saveTodoSearch',
+      'setDayOff',
       'setTodoListScrollPosition',
       'setTodosSearch',
-      'setTimeSpent'
+      'setTimeSpent',
+      'unsetDayOff'
     ]),
 
     isTabActive (tab) {
@@ -354,6 +358,22 @@ export default {
         date: this.selectedDate,
         forced: true
       })
+    },
+
+    onSetDayOff () {
+      const dayOff = {
+        personId: this.user.id,
+        date: this.selectedDate
+      }
+      this.setDayOff(dayOff)
+    },
+
+    onUnsetDayOff () {
+      const dayOff = {
+        personId: this.user.id,
+        date: this.selectedDate
+      }
+      this.unsetDayOff(dayOff)
     },
 
     onTimeSpentChange (timeSpentInfo) {

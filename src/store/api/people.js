@@ -112,8 +112,8 @@ export default {
     client.get('/api/data/user/done-tasks', callback)
   },
 
-  loadTimeSpents (date, callback) {
-    client.get(`/api/data/user/time-spents/${date}`, callback)
+  loadTimeSpents (date) {
+    return client.pget(`/api/data/user/time-spents/${date}`)
   },
 
   getPersonTasks (personId, callback) {
@@ -151,12 +151,12 @@ export default {
     client.del(`/api/data/user/filters/${searchFilter.id}`, callback)
   },
 
-  getTimeSpents (personId, date, callback) {
+  getTimeSpents (personId, date) {
     // Date is a string with following format: YYYYY-MM-DD.
-    client.get(`/api/data/persons/${personId}/time-spents/${date}`, callback)
+    return client.pget(`/api/data/persons/${personId}/time-spents/${date}`)
   },
 
-  setTimeSpent (taskId, personId, date, hours, callback) {
+  setTimeSpent (taskId, personId, date, hours) {
     // Date is a string with following format: YYYYY-MM-DD.
     const data = {
       duration: hours * 60
@@ -165,6 +165,21 @@ export default {
       `/api/actions/tasks/${taskId}/time-spents/${date}/persons/${personId}`,
       data
     )
+  },
+
+  getDayOff (personId, date) {
+    // Date is a string with following format: YYYYY-MM-DD.
+    return client.pget(`/api/data/persons/${personId}/day-offs/${date}`)
+  },
+
+  setDayOff (personId, date) {
+    // Date is a string with following format: YYYYY-MM-DD.
+    return client.ppost('/api/data/day-offs', { person_id: personId, date })
+  },
+
+  unsetDayOff (dayOff) {
+    // Date is a string with following format: YYYYY-MM-DD.
+    return client.pdel(`/api/data/day-offs/${dayOff.id}`)
   },
 
   getDayTable (year, month, productionId) {

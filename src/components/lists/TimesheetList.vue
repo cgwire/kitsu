@@ -20,7 +20,8 @@
     <button-simple
       class="flexrow-item"
       text="Day off"
-      @click="modals.dayOff = true"
+      :active="personIsDayOff"
+      @click="toggleDayOff"
     />
   </div>
 
@@ -59,7 +60,10 @@
           </th>
         </tr>
       </thead>
-      <tbody class="datatable-body" v-if="tasks.length > 0 && !isLoading">
+      <tbody
+        class="datatable-body"
+        v-if="tasks.length > 0 && !isLoading"
+      >
         <tr
           class="datatable-row"
           v-for="(task, i) in displayedTasks"
@@ -100,7 +104,9 @@
             class="time-spent"
             :task-id="task.id"
             @change="onSliderChange"
+            v-if="!personIsDayOff"
           />
+          <td v-else></td>
        </tr>
       </tbody>
       <tbody class="datatable-body" v-if="!isLoading && !hideDone">
@@ -144,10 +150,11 @@
            </router-link>
           </th>
           <time-slider-cell
-           :duration="timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0"
-           class="time-spent"
-           :task-id="task.id"
-           @change="onSliderChange"
+            :duration="timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0"
+            class="time-spent"
+            :task-id="task.id"
+            @change="onSliderChange"
+            v-if="!personIsDayOff"
           />
         </tr>
       </tbody>
@@ -166,6 +173,7 @@
   <delete-modal
     text="Setting this day as a day off will erase all time filled for the
     current day. Are you sure you want to continue?"
+    @confirm="$emit('set-day-off')"
     @cancel="modals.dayOff = false"
     :active="modals.dayOff"
   />
@@ -268,6 +276,7 @@ export default {
     ...mapGetters([
       'isCurrentUserArtist',
       'nbSelectedTasks',
+      'personIsDayOff',
       'productionMap',
       'taskTypeMap',
       'user'
@@ -327,6 +336,14 @@ export default {
       }
 
       return route
+    },
+
+    toggleDayOff () {
+      if (this.personIsDayOff) {
+        this.$emit('unset-day-off')
+      } else {
+        this.$emit('set-day-off')
+      }
     }
   },
 
