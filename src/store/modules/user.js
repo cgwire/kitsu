@@ -31,6 +31,7 @@ import {
   USER_LOAD_TODOS_ERROR,
   USER_LOAD_DONE_TASKS_END,
   USER_LOAD_TIME_SPENTS_END,
+  PERSON_SET_DAY_OFF,
 
   SET_TODOS_SEARCH,
   LOAD_USER_FILTERS_END,
@@ -196,18 +197,23 @@ const actions = {
               commit(USER_LOAD_DONE_TASKS_END, doneTasks)
             }
 
-            peopleApi.loadTimeSpents(date, (err, timeSpents) => {
-              if (err) {
-                commit(USER_LOAD_TODOS_ERROR)
-              } else {
+            return peopleApi.loadTimeSpents(date)
+              .then(timeSpents => {
                 commit(USER_LOAD_TIME_SPENTS_END, timeSpents)
                 commit(
                   USER_LOAD_TODOS_END,
                   { tasks, userFilters, taskTypeMap }
                 )
-              }
-              if (callback) callback(err)
-            })
+                return peopleApi.getDayOff(state.user.id, date)
+              })
+              .then(dayOff => {
+                commit(PERSON_SET_DAY_OFF, dayOff)
+                if (callback) callback()
+              })
+              .catch(err => {
+                console.error(err)
+                commit(USER_LOAD_TODOS_ERROR)
+              })
           })
         }
       })

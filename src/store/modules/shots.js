@@ -184,14 +184,17 @@ const helpers = {
 
   setListStats (state, shots) {
     let timeSpent = 0
+    let estimation = 0
     let nbFrames = 0
-    shots.forEach((shot) => {
+    shots.forEach(shot => {
       timeSpent += shot.timeSpent
+      estimation += shot.estimation
       nbFrames += shot.nb_frames
     })
     Object.assign(state, {
       displayedShotsLength: shots.length,
       displayedShotsTimeSpent: timeSpent,
+      displayedShotsEstimation: estimation,
       displayedShotsFrames: nbFrames
     })
   },
@@ -337,12 +340,14 @@ const initialState = {
   isFrames: false,
   isFrameIn: false,
   isFrameOut: false,
-  isTime: false,
   isShotDescription: false,
+  isShotEstimation: false,
+  isShotTime: false,
 
   displayedShots: [],
   displayedShotsLength: 0,
   displayedShotsTimeSpent: 0,
+  displayedShotsEstimation: 0,
   displayedShotsFrames: 0,
   displayedSequences: [],
   displayedSequencesLength: 0,
@@ -394,8 +399,9 @@ const getters = {
   isFrames: state => state.isFrames,
   isFrameIn: state => state.isFrameIn,
   isFrameOut: state => state.isFrameOut,
-  isTime: state => state.isTime,
   isShotDescription: state => state.isShotDescription,
+  isShotEstimation: state => state.isShotEstimation,
+  isShotTime: state => state.isShotTime,
 
   shotSearchText: state => state.shotSearchText,
   sequenceSearchText: state => state.sequenceSearchText,
@@ -406,6 +412,7 @@ const getters = {
   displayedShots: state => state.displayedShots,
   displayedShotsLength: state => state.displayedShotsLength,
   displayedShotsTimeSpent: state => state.displayedShotsTimeSpent,
+  displayedShotsEstimation: state => state.displayedShotsEstimation,
   displayedShotsFrames: state => state.displayedShotsFrames,
   displayedSequences: state => state.displayedSequences,
   displayedSequencesLength: state => state.displayedSequencesLength,
@@ -962,8 +969,11 @@ const actions = {
         .forEach((descriptor) => {
           shotLine.push(shot.data[descriptor.field_name])
         })
-      if (state.isTime) {
+      if (state.isShotTime) {
         shotLine.push(minutesToDays(organisation, shot.timeSpent).toFixed(2))
+      }
+      if (state.isShotEstimation) {
+        shotLine.push(minutesToDays(organisation, shot.estimation).toFixed(2))
       }
       if (state.isFrames) shotLine.push(shot.nb_frames)
       if (state.isFrameIn) shotLine.push(shot.data.frame_in)
@@ -1101,6 +1111,7 @@ const mutations = {
     state.displayedShots = []
     state.displayedShotsLength = 0
     state.displayedTimeSpent = 0
+    state.displayedEstimation = 0
     state.displayedFrames = 0
     state.shotSearchQueries = []
     state.displayedSequences = []
@@ -1123,7 +1134,7 @@ const mutations = {
     state.sequenceIndex = {}
     state.displayedShots = []
     state.displayedShotsLength = 0
-    state.displayedTimeSpent = 0
+    state.displayedEstimation = 0
     state.displayedFrames = 0
     state.shotSearchQueries = []
     state.displayedSequences = []
@@ -1148,6 +1159,7 @@ const mutations = {
     let isFrameOut = false
     let isDescription = false
     let isTime = false
+    let isEstimation = false
     shots = sortShots(shots)
     cache.shots = shots
     cache.result = shots
@@ -1158,12 +1170,14 @@ const mutations = {
       const taskIds = []
       const validations = {}
       let timeSpent = 0
+      let estimation = 0
       shot.project_name = production.name
       shot.production_id = production.id
       shot.full_name = helpers.getShotName(shot)
       shot.tasks.forEach((task) => {
         helpers.populateTask(task, shot, production)
         timeSpent += task.duration
+        estimation += task.estimation
         task.episode_id = shot.episode_id
 
         taskMap[task.id] = task
@@ -1183,12 +1197,14 @@ const mutations = {
       shot.tasks = taskIds
       shot.validations = validations
       shot.timeSpent = timeSpent
+      shot.estimation = estimation
 
       if (!isFps && shot.data.fps) isFps = true
       if (!isFrames && shot.nb_frames) isFrames = true
       if (!isFrameIn && shot.data.frame_in) isFrameIn = true
       if (!isFrameOut && shot.data.frame_out) isFrameOut = true
       if (!isTime && shot.timeSpent > 0) isTime = true
+      if (!isEstimation && shot.estimation > 0) isEstimation = true
       if (!isDescription && shot.description) isDescription = true
 
       state.shotMap[shot.id] = shot
@@ -1205,7 +1221,8 @@ const mutations = {
     state.isFrames = isFrames
     state.isFrameIn = isFrameIn
     state.isFrameOut = isFrameOut
-    state.isTime = isTime
+    state.isShotTime = isTime
+    state.isShotEstimation = isEstimation
     state.isShotDescription = isDescription
 
     state.isShotsLoading = false
@@ -1747,11 +1764,13 @@ const mutations = {
     const taskIds = []
     const validations = {}
     let timeSpent = 0
+    let estimation = 0
     shot.project_name = production.name
     shot.production_id = production.id
     shot.tasks.forEach((task) => {
       helpers.populateTask(task, shot, production)
       timeSpent += task.duration
+      estimation += task.estimation
       task.episode_id = shot.episode_id
 
       taskMap[task.id] = task
@@ -1767,6 +1786,7 @@ const mutations = {
     shot.tasks = taskIds
     shot.validations = validations
     shot.timeSpent = timeSpent
+    shot.estimation = estimation
 
     cache.shots.push(shot)
     cache.shots = sortShots(cache.shots)
@@ -1797,6 +1817,9 @@ const mutations = {
       removeModelFromList(state.displayedShots, shotToDelete)
     if (shotToDelete.timeSpent) {
       state.displayedShotsTimeSpent -= shotToDelete.timeSpent
+    }
+    if (shotToDelete.estimation) {
+      state.displayedShotsEstimation -= shotToDelete.estimation
     }
     if (shotToDelete.nb_frames) {
       state.displayedShotsFrames -= shotToDelete.nb_frames

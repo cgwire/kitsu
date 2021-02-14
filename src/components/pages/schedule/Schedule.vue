@@ -49,7 +49,7 @@
             v-if="rootElement.avatar"
           >
             <production-name
-              :project="rootElement"
+              :production="rootElement"
               :only-avatar="true"
               :size="30"
               v-if="rootElement.type === 'Project'"

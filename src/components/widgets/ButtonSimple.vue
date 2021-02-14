@@ -277,4 +277,8 @@ export default {
 .is-primary {
   border-radius: 2em;
 }
+
+.active {
+  box-shadow: inset 0 0 2px 2px var(--box-shadow)
+}
 </style>

@@ -93,6 +93,14 @@
           </th>
           <th
             scope="col"
+            class="estimation"
+            ref="th-spent"
+            v-if="!isCurrentUserClient && isShowInfos && isAssetEstimation"
+          >
+            {{ $t('main.estimation_short') }}
+          </th>
+          <th
+            scope="col"
             :class="{
               'validation-cell': !hiddenColumns[columnId],
               'hidden-validation-cell': hiddenColumns[columnId]
@@ -245,6 +253,13 @@
             {{ formatDuration(asset.timeSpent) }}
           </td>
 
+          <td
+            class="estimation"
+            v-if="!isCurrentUserClient && isShowInfos && isAssetEstimation"
+          >
+            {{ formatDuration(asset.estimation) }}
+          </td>
+
           <validation-cell
             :class="{
               'validation-cell': !hiddenColumns[columnId],
@@ -314,7 +329,9 @@
   >
     {{ displayedAssetsLength }} {{ $tc('assets.number', displayedAssetsLength) }}
     ({{ formatDuration(displayedAssetsTimeSpent) }}
-     {{ $tc('main.days_spent', displayedAssetsTimeSpent) }})
+     {{ $tc('main.days_spent', displayedAssetsTimeSpent) }},
+     {{ formatDuration(displayedAssetsEstimation) }}
+     {{ $tc('main.man_days', displayedAssetsEstimation) }})
   </p>
 
 </div>
@@ -401,6 +418,7 @@ export default {
       'currentProduction',
       'displayedAssetsLength',
       'displayedAssetsTimeSpent',
+      'displayedAssetsEstimation',
       'nbSelectedTasks',
       'isAssetDescription',
       'isCurrentUserAdmin',
@@ -408,6 +426,7 @@ export default {
       'isCurrentUserManager',
       'isShowAssignations',
       'isShowInfos',
+      'isAssetEstimation',
       'isAssetTime',
       'isTVShow',
       'selectedTasks',
@@ -455,6 +474,11 @@ export default {
       count += !this.isCurrentUserClient &&
         this.isShowInfos &&
         this.isAssetTime
+        ? 1
+        : 0
+      count += !this.isCurrentUserClient &&
+        this.isShowInfos &&
+        this.isAssetEstimation
         ? 1
         : 0
       count += this.displayedValidationColumns.length
@@ -588,9 +612,11 @@ export default {
 }
 
 th.time-spent,
-td.time-spent {
-  min-width: 80px;
-  width: 80px;
+td.time-spent,
+th.estimation,
+td.estimation {
+  min-width: 70px;
+  width: 70px;
 }
 
 .episode {

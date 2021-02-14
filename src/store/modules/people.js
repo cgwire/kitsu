@@ -46,6 +46,7 @@ import {
 
   SET_TIME_SPENT,
   PEOPLE_TIMESHEET_LOADED,
+  PERSON_SET_DAY_OFF,
   PERSON_LOAD_TIME_SPENTS_END,
 
   SET_ORGANISATION,
@@ -135,7 +136,8 @@ const initialState = {
 
   timesheet: {},
   personTimeSpentMap: {},
-  personTimeSpentTotal: 0
+  personTimeSpentTotal: 0,
+  personIsDayOff: false
 }
 
 const state = {
@@ -185,7 +187,8 @@ const getters = {
 
   timesheet: state => state.timesheet,
   personTimeSpentMap: state => state.personTimeSpentMap,
-  personTimeSpentTotal: state => state.personTimeSpentTotal
+  personTimeSpentTotal: state => state.personTimeSpentTotal,
+  personIsDayOff: state => state.personIsDayOff
 }
 
 const actions = {
@@ -283,7 +286,7 @@ const actions = {
         commit(IMPORT_PEOPLE_END)
         Promise.resolve()
       })
-      .catch((err) => {
+      .catch(err => {
         commit(IMPORT_PEOPLE_ERROR)
         Promise.reject(err)
       })
@@ -304,15 +307,19 @@ const actions = {
       peopleApi.getPersonDoneTasks(personId, (err, doneTasks) => {
         if (err) doneTasks = []
         commit(LOAD_PERSON_DONE_TASKS_END, doneTasks)
-        peopleApi.getTimeSpents(personId, date, (err, timeSpents) => {
-          if (err) timeSpents = []
-          commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
-          commit(
-            LOAD_PERSON_TASKS_END,
-            { personId, tasks, userFilters, taskTypeMap }
-          )
-          if (callback) callback(err)
-        })
+        peopleApi.getTimeSpents(personId, date)
+          .then(timeSpents => {
+            commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
+            return peopleApi.getDayOff(personId, date)
+          })
+          .then(dayOff => {
+            commit(PERSON_SET_DAY_OFF, dayOff)
+            commit(
+              LOAD_PERSON_TASKS_END,
+              { personId, tasks, userFilters, taskTypeMap }
+            )
+            if (callback) callback(err)
+          })
       })
     })
   },
@@ -324,20 +331,18 @@ const actions = {
       year,
       month,
       week,
-      day
+      day,
+      productionId
     }) {
-    return new Promise((resolve, reject) => {
-      peopleApi.getAggregatedPersonTimeSpents(
-        personId,
-        detailLevel,
-        year,
-        month,
-        week,
-        day
-      ).then((tasks) => {
-        resolve(tasks)
-      }).catch((err) => reject(err))
-    })
+    return peopleApi.getAggregatedPersonTimeSpents(
+      personId,
+      detailLevel,
+      year,
+      month,
+      week,
+      day,
+      productionId
+    )
   },
 
   showPersonImportModal ({ commit, state }, personId) {
@@ -402,6 +407,24 @@ const actions = {
     })
   },
 
+  setDayOff ({ commit }, { personId, date }) {
+    return peopleApi.setDayOff(
+      personId,
+      date
+    ).then(dayOff => {
+      commit(PERSON_SET_DAY_OFF, dayOff)
+      Promise.resolve(dayOff)
+    })
+  },
+
+  unsetDayOff ({ commit, state }, dayOff) {
+    return peopleApi.unsetDayOff(state.personDayOff)
+      .then(dayOff => {
+        commit(PERSON_SET_DAY_OFF, {})
+        Promise.resolve()
+      })
+  },
+
   setPersonTasksScrollPosition ({ commit }, scrollPosition) {
     commit(SET_PERSON_TASKS_SCROLL_POSITION, scrollPosition)
   },
@@ -409,28 +432,26 @@ const actions = {
   loadTimesheets ({ commit }, {
     detailLevel,
     year,
-    month
+    month,
+    productionId
   }) {
-    return new Promise((resolve, reject) => {
-      const monthString =
-        month.length === 1 ? `0${parseInt(month) + 1}` : `${month}`
-      let mainFunc = peopleApi.getMonthTable
-      if (detailLevel === 'day') {
-        mainFunc = peopleApi.getDayTable
-      }
-      if (detailLevel === 'week') {
-        mainFunc = peopleApi.getWeekTable
-      }
-      if (detailLevel === 'year') {
-        mainFunc = peopleApi.getYearTable
-      }
-      mainFunc(year, monthString)
-        .then((table) => {
-          commit(PEOPLE_TIMESHEET_LOADED, table)
-          resolve()
-        })
-        .catch(reject)
-    })
+    const monthString =
+      month.length === 1 ? `0${parseInt(month) + 1}` : `${month}`
+    let mainFunc = peopleApi.getMonthTable
+    if (detailLevel === 'day') {
+      mainFunc = peopleApi.getDayTable
+    }
+    if (detailLevel === 'week') {
+      mainFunc = peopleApi.getWeekTable
+    }
+    if (detailLevel === 'year') {
+      mainFunc = peopleApi.getYearTable
+    }
+    return mainFunc(year, monthString, productionId)
+      .then(table => {
+        commit(PEOPLE_TIMESHEET_LOADED, table)
+        Promise.resolve(table)
+      })
   },
 
   peopleSearchChange ({ commit }, text) {
@@ -691,6 +712,11 @@ const mutations = {
   [SET_ORGANISATION] (state, organisation) {
     Object.assign(state.organisation, organisation)
     state.organisation = { ...state.organisation }
+  },
+
+  [PERSON_SET_DAY_OFF] (state, dayOff) {
+    state.personDayOff = dayOff
+    state.personIsDayOff = dayOff === null || dayOff.id !== undefined
   },
 
   [RESET_ALL] (state, people) {

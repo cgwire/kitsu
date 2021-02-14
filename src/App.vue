@@ -1545,7 +1545,16 @@ th.validation-cell {
 }
 
 .tooltip {
+  background: var(--background);
+  border-radius: 1em;
+  box-shadow: 0 0 2px 2px var(--box-shadow);
+  color: var(--text);
+  padding: 1em;
   z-index: 2;
+
+  .popover-arrow {
+    border-color: var(--background);
+  }
 }
 
 .asset .description-cell,

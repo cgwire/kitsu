@@ -1,37 +1,31 @@
 <template>
-  <div class="production-name">
-    <router-link
-      class="flexrow"
-      :title="productionInfo"
-      :to="productionRoute"
-    >
-      <div
-         class="flexrow-item avatar has-text-centered"
-         v-if="withAvatar"
-         :style="{
-           background: getAvatarColor(project),
-           width: size + 'px',
-           height: size + 'px',
-           'font-size': (size - 15) + 'px',
-           'line-height': size + 'px'
-         }"
-       >
-        <span v-if="!project.has_avatar">
-          {{ generateAvatar(project) }}
-        </span>
-        <img
-          :src="getThumbnailPath(project)"
-          :style="{
-            width: size + 'px',
-            height: size + 'px'
-          }"
-          v-else
-        />
-      </div>
-      <span class="flexrow-item avatar-name" v-if="!onlyAvatar">
-        {{ project.name }}
+  <div class="production-name flexrow">
+    <div
+       class="flexrow-item avatar has-text-centered"
+       v-if="withAvatar"
+       :style="{
+         background: getAvatarColor(production),
+         width: size + 'px',
+         height: size + 'px',
+         'font-size': (size - 15) + 'px',
+         'line-height': size + 'px'
+       }"
+     >
+      <span v-if="!production.has_avatar">
+        {{ generateAvatar(production) }}
       </span>
-    </router-link>
+      <img
+        :src="getThumbnailPath(production)"
+        :style="{
+          width: size + 'px',
+          height: size + 'px'
+        }"
+        v-else
+      />
+    </div>
+    <span class="flexrow-item avatar-name" v-if="!onlyAvatar">
+      {{ production.name }}
+    </span>
   </div>
 </template>
 
@@ -43,7 +37,7 @@ export default {
   name: 'production-name',
 
   props: {
-    project: {
+    production: {
       default: () => {},
       type: Object
     },
@@ -69,24 +63,10 @@ export default {
     ...mapGetters([
     ]),
 
-    productionRoute () {
-      const route = {
-        name: this.lastProductionScreen,
-        params: {
-          production_id: this.project.id
-        }
-      }
-      if (this.project.first_episode_id) {
-        route.name = `episode-${this.lastProductionScreen}`
-        route.params.episode_id = this.project.first_episode_id
-      }
-      return route
-    },
-
     productionInfo () {
-      const fps = this.project.fps
-      const ratio = this.project.ratio
-      const resolution = this.project.resolution
+      const fps = this.production.fps
+      const ratio = this.production.ratio
+      const resolution = this.production.resolution
       if (fps || ratio || resolution) {
         return `fps: ${fps}\nratio: ${ratio}\nresolution: ${resolution}`
       } else {
@@ -99,27 +79,23 @@ export default {
     ...mapActions([
     ]),
 
-    generateAvatar (project) {
-      const firstLetter = project.name.length > 0 ? project.name[0] : 'P'
+    generateAvatar (production) {
+      const firstLetter = production.name.length > 0 ? production.name[0] : 'P'
       return firstLetter.toUpperCase()
     },
 
-    getAvatarColor (project) {
-      return colors.fromString(project.name)
+    getAvatarColor (production) {
+      return colors.fromString(production.name)
     },
 
     getThumbnailPath (production) {
-      return `/api/pictures/thumbnails/projects/${production.id}.png`
+      return `/api/pictures/thumbnails/productions/${production.id}.png`
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.production-name a {
-  color: inherit;
-}
-
 .flexrow-item {
   margin: 0;
 }
