@@ -414,29 +414,29 @@
           v-model="comparisonMode"
           v-if="isComparing"
         />
+          <div
+            class="flexrow flexrow-item comparison-list"
+            v-if="
+              isComparing && currentRevisionToCompare &&
+              currentComparisonPreviewLength > 1
+            "
+          >
+          <button-simple
+            class="button playlist-button flexrow-item"
+            icon="left"
+            @click="onPreviousComparisonPictureClicked"
+          />
+          <span class="flexrow-item comparison-index">
+          {{ currentComparisonPreviewIndex + 1 }} / {{ currentComparisonPreviewLength }}
+          </span>
+          <button-simple
+            class="button playlist-button flexrow-item"
+            icon="right"
+            @click="onNextComparisonPictureClicked"
+          />
+        </div>
       </div>
     </div>
-
-    <div
-      class="flexrow flexrow-item"
-      v-if="
-        isComparing && currentRevisionToCompare &&
-        currentComparisonPreviewLength > 1
-      "
-    >
-      <button-simple
-        class="button playlist-button flexrow-item"
-        icon="left"
-        @click="onPreviousComparisonPictureClicked"
-      />
-      {{ currentComparisonPreviewIndex + 1 }} / {{ currentComparisonPreviewLength }}
-      <button-simple
-        class="button playlist-button flexrow-item"
-        icon="right"
-        @click="onNextComparisonPictureClicked"
-      />
-    </div>
-
     <span class="filler"></span>
 
     <button-simple
@@ -2730,6 +2730,11 @@ progress {
   position: absolute;
   top: 33px;
   z-index: 50;
+}
+
+.comparison-index {
+  min-width: 30px;
+  margin: 0;
 }
 
 @media only screen and (min-width: 1600px) {
