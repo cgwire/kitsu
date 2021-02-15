@@ -366,7 +366,9 @@ export default {
       'isFrameIn',
       'isFrameOut',
       'isFps',
-      'isTime',
+      'isShotDescription',
+      'isShotEstimation',
+      'isShotTime',
       'isShotsLoading',
       'isShotsLoadingError',
       'isShowAssignations',
@@ -889,9 +891,9 @@ export default {
           }
           const name = stringHelpers.slugify(nameData.join('_'))
           const headers = [
-            'Sequence',
-            'Name',
-            'Description'
+            this.$t('shots.fields.sequence'),
+            this.$t('shots.fields.name'),
+            this.$t('shots.fields.description')
           ]
           if (this.currentEpisode) {
             headers.splice(0, 0, 'Episode')
@@ -901,8 +903,11 @@ export default {
             .forEach((descriptor) => {
               headers.push(descriptor.name)
             })
-          if (this.isTime) {
-            headers.push('Time spent')
+          if (this.isShotTime) {
+            headers.push(this.$t('shots.fields.time_spent'))
+          }
+          if (this.isShotEstimation) {
+            headers.push(this.$t('main.estimation_short'))
           }
           if (this.isFrames) {
             headers.push('Nb Frames')

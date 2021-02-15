@@ -417,6 +417,7 @@ export default {
       'isAssetsLoadingError',
       'isCurrentUserClient',
       'isCurrentUserManager',
+      'isAssetEstimation',
       'isAssetTime',
       'isTVShow',
       'nbSelectedTasks',
@@ -897,7 +898,10 @@ export default {
               headers.push(descriptor.name)
             })
           if (this.isAssetTime) {
-            headers.push(this.$t('shots.fields.time_spent'))
+            headers.push(this.$t('assets.fields.time_spent'))
+          }
+          if (this.isAssetEstimation) {
+            headers.push(this.$t('main.estimation_short'))
           }
           this.assetValidationColumns
             .forEach((taskTypeId) => {
