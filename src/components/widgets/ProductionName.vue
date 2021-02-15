@@ -89,7 +89,7 @@ export default {
     },
 
     getThumbnailPath (production) {
-      return `/api/pictures/thumbnails/productions/${production.id}.png`
+      return `/api/pictures/thumbnails/projects/${production.id}.png`
     }
   }
 }
