@@ -1,6 +1,6 @@
 <template>
-  <div class="productions page fixed-page">
-    <div class="columns dark">
+  <div class="playlists page fixed-page dark">
+    <div class="columns">
       <div
         :class="{
           'playlist-list-column': true,
@@ -1371,10 +1371,12 @@ span.thumbnail-picture {
 }
 
 .addition-header {
+  background: var(--background);
   height: 110px;
 }
 
 .addition-section {
+  background: var(--background);
   overflow-y: auto;
   height: calc(100% - 420px);
 }
