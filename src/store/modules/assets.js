@@ -6,6 +6,9 @@ import tasksStore from './tasks'
 import taskTypesStore from './tasktypes'
 import productionsStore from './productions'
 import peopleStore from './people'
+import {
+  minutesToDays
+} from '../../lib/time'
 
 import { PAGE_SIZE } from '../../lib/pagination'
 import {
@@ -585,11 +588,12 @@ const actions = {
   getAssetsCsvLines ({ state, rootGetters }) {
     const production = rootGetters.currentProduction
     const episodeMap = rootGetters.episodeMap
+    const organisation = rootGetters.organisation
     let assets = cache.assets
     if (cache.result && cache.result.length > 0) {
       assets = cache.result
     }
-    const lines = assets.map((asset) => {
+    const lines = assets.map(asset => {
       let assetLine = []
       if (rootGetters.isTVShow) {
         assetLine.push(
@@ -603,13 +607,17 @@ const actions = {
       ])
       sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Asset')
-        .forEach((descriptor) => {
+        .forEach(descriptor => {
           assetLine.push(asset.data[descriptor.field_name])
         })
-      if (state.isAssetTime) assetLine.push(asset.timeSpent)
-      if (state.isAssetEstimation) assetLine.push(asset.estimation)
+      if (state.isAssetTime) {
+        assetLine.push(minutesToDays(organisation, asset.timeSpent).toFixed(2))
+      }
+      if (state.isAssetEstimation) {
+        assetLine.push(minutesToDays(organisation, asset.estimation).toFixed(2))
+      }
       state.assetValidationColumns
-        .forEach((validationColumn) => {
+        .forEach(validationColumn => {
           const task = rootGetters.taskMap[asset.validations[validationColumn]]
           if (task) {
             assetLine.push(task.task_status_short_name)
