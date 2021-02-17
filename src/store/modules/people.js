@@ -53,6 +53,7 @@ import {
 
   SET_PERSON_TASKS_SCROLL_POSITION,
 
+  PEOPLE_SET_DAY_OFFS,
   PEOPLE_SEARCH_CHANGE,
 
   RESET_ALL
@@ -137,7 +138,8 @@ const initialState = {
   timesheet: {},
   personTimeSpentMap: {},
   personTimeSpentTotal: 0,
-  personIsDayOff: false
+  personIsDayOff: false,
+  dayOffMap: {}
 }
 
 const state = {
@@ -188,7 +190,8 @@ const getters = {
   timesheet: state => state.timesheet,
   personTimeSpentMap: state => state.personTimeSpentMap,
   personTimeSpentTotal: state => state.personTimeSpentTotal,
-  personIsDayOff: state => state.personIsDayOff
+  personIsDayOff: state => state.personIsDayOff,
+  dayOffMap: state => state.dayOffMap
 }
 
 const actions = {
@@ -345,6 +348,27 @@ const actions = {
     )
   },
 
+  loadAggregatedPersonDaysOff (
+    { commit, state, rootGetters }, {
+      personId,
+      detailLevel,
+      year,
+      month,
+      week
+    }) {
+    if (detailLevel === 'day') {
+      return Promise.resolve([])
+    } else {
+      return peopleApi.getAggregatedPersonDaysOff(
+        personId,
+        detailLevel,
+        year,
+        month,
+        week
+      )
+    }
+  },
+
   showPersonImportModal ({ commit, state }, personId) {
     commit(SHOW_IMPORT_PEOPLE_MODAL)
   },
@@ -449,8 +473,18 @@ const actions = {
     }
     return mainFunc(year, monthString, productionId)
       .then(table => {
-        commit(PEOPLE_TIMESHEET_LOADED, table)
-        Promise.resolve(table)
+        if (detailLevel === 'day') {
+          console.log('get day offs')
+          peopleApi.getDayOffs(year, monthString)
+            .then(dayOffs => {
+              commit(PEOPLE_SET_DAY_OFFS, dayOffs)
+              commit(PEOPLE_TIMESHEET_LOADED, table)
+              Promise.resolve(table)
+            })
+        } else {
+          commit(PEOPLE_TIMESHEET_LOADED, table)
+          Promise.resolve(table)
+        }
       })
   },
 
@@ -717,6 +751,17 @@ const mutations = {
   [PERSON_SET_DAY_OFF] (state, dayOff) {
     state.personDayOff = dayOff
     state.personIsDayOff = dayOff === null || dayOff.id !== undefined
+  },
+
+  [PEOPLE_SET_DAY_OFFS] (state, dayOffs) {
+    const dayOffMap = {}
+    // Build a map that tells if a day is off. It uses two keys: the person id
+    // and the day number.
+    dayOffs.forEach(dayOff => {
+      if (!dayOffMap[dayOff.person_id]) dayOffMap[dayOff.person_id] = {}
+      dayOffMap[dayOff.person_id][dayOff.date.substring(8, 10)] = true
+    })
+    state.dayOffMap = dayOffMap
   },
 
   [RESET_ALL] (state, people) {

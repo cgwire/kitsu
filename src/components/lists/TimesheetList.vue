@@ -173,7 +173,7 @@
   <delete-modal
     text="Setting this day as a day off will erase all time filled for the
     current day. Are you sure you want to continue?"
-    @confirm="$emit('set-day-off')"
+    @confirm="modals.dayOff = false ; $emit('set-day-off')"
     @cancel="modals.dayOff = false"
     :active="modals.dayOff"
   />
@@ -342,7 +342,7 @@ export default {
       if (this.personIsDayOff) {
         this.$emit('unset-day-off')
       } else {
-        this.$emit('set-day-off')
+        this.modals.dayOff = true
       }
     }
   },

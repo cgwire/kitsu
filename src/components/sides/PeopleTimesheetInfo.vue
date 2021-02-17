@@ -10,6 +10,14 @@
     <people-avatar class="flexrow-item" :person="person" :no-cache=true />
     <page-title class="flexrow-item" :text="person.full_name" />
   </div>
+
+  <div
+    class="info-date"
+    v-if="isYearInfo"
+  >
+    {{ year }}
+  </div>
+
   <div
     class="info-date"
     v-if="isMonthInfo"
@@ -22,6 +30,13 @@
     v-else-if="isWeekInfo"
   >
     week {{ week }}, {{ startDay }} - {{ endDay }} {{ weekMonth }} {{ year }}
+  </div>
+
+  <div
+    class="info-day-off"
+    v-if="!isDayInfo"
+  >
+    {{ dayOffCount }} days off
   </div>
 
   <div
@@ -92,6 +107,10 @@ export default {
     tasks: {
       type: Array,
       default: () => []
+    },
+    dayOffCount: {
+      type: Number,
+      default: 0
     }
   },
 
@@ -126,6 +145,10 @@ export default {
 
     monthString () {
       return monthToString(this.month)
+    },
+
+    isYearInfo () {
+      return !this.isMonthInfo && !this.isWeekInfo && !this.isDayInfo
     },
 
     isMonthInfo () {
@@ -193,6 +216,9 @@ export default {
   font-size: 1.5em;
   margin-top: 1em;
   text-transform: capitalize;
+}
+
+.info-day-off {
 }
 
 .close {

@@ -79,6 +79,7 @@
         :is-loading="isInfoLoading"
         :is-loading-error="isInfoLoadingError"
         :tasks="tasks"
+        :day-off-count="dayOffCount"
         @close="hideSideInfo"
       />
     </div>
@@ -114,6 +115,7 @@ export default {
 
   data () {
     return {
+      dayOffCount: 0,
       detailOptions: [
         {
           label: 'Day',
@@ -244,6 +246,7 @@ export default {
   methods: {
     ...mapActions([
       'loadPeople',
+      'loadAggregatedPersonDaysOff',
       'loadAggregatedPersonTimeSpents',
       'loadTimesheets'
     ]),
@@ -261,7 +264,8 @@ export default {
           this.isLoading = false
           return Promise.resolve()
         })
-        .catch(() => {
+        .catch(err => {
+          console.error(err)
           this.isLoading = false
           this.isLoadingError = true
           return Promise.resolve()
@@ -349,11 +353,19 @@ export default {
         week: this.$route.params.week,
         day: this.$route.params.day,
         productionId: this.productionId
-      }).then((tasks) => {
+      }).then(tasks => {
+        this.tasks = tasks.filter(task => task.duration > 0)
+        return this.loadAggregatedPersonDaysOff({
+          personId: this.$route.params.person_id,
+          detailLevel: this.detailLevel,
+          year: this.$route.params.year,
+          month: this.$route.params.month,
+          week: this.$route.params.week
+        })
+      }).then(dayOffs => {
+        this.dayOffCount = dayOffs.length
         this.isInfoLoading = false
-        console.log(tasks.length)
-        this.tasks = tasks.filter((task) => task.duration > 0)
-      }).catch((err) => {
+      }).catch(err => {
         console.error(err)
         this.isInfoLoadingError = true
       })

@@ -374,6 +374,10 @@ export default {
         date: this.selectedDate
       }
       this.unsetDayOff(dayOff)
+      this.loadTodos({
+        forced: true,
+        date: this.selectedDate
+      })
     },
 
     onTimeSpentChange (timeSpentInfo) {

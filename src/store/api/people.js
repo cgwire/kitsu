@@ -177,9 +177,33 @@ export default {
     return client.ppost('/api/data/day-offs', { person_id: personId, date })
   },
 
+  getDayOffs (year, month) {
+    const path = `/api/data/persons/day-offs/${year}/${month}`
+    return client.pget(path)
+  },
+
   unsetDayOff (dayOff) {
     // Date is a string with following format: YYYYY-MM-DD.
     return client.pdel(`/api/data/day-offs/${dayOff.id}`)
+  },
+
+  getAggregatedPersonDaysOff (
+    personId,
+    detailLevel,
+    year,
+    month,
+    week
+  ) {
+    let path = `/api/data/persons/${personId}/day-offs/`
+
+    if (detailLevel === 'year') {
+      path += `year/${year}`
+    } else if (detailLevel === 'month') {
+      path += `month/${year}/${month}`
+    } else if (detailLevel === 'week') {
+      path += `week/${year}/${week}`
+    }
+    return client.pget(path)
   },
 
   getDayTable (year, month, productionId) {

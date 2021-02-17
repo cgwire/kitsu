@@ -151,8 +151,12 @@
             >
               {{ dayDuration(day, person.id) }}
             </router-link>
+            <span v-else-if="dayOffMap[person.id] &&
+                             dayOffMap[person.id][`${day}`]">
+              OFF
+            </span>
             <span v-else>
-            -
+              -
             </span>
           </td>
           <td class="actions"></td>
@@ -244,6 +248,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'dayOffMap',
       'isCurrentUserManager',
       'organisation',
       'route'
@@ -292,7 +297,12 @@ export default {
     },
 
     dayDuration (day, personId) {
-      return this.getDuration(day, personId)
+      if (this.dayOffMap[personId] &&
+          this.dayOffMap[personId][`${day}`] === true) {
+        return 'OFF'
+      } else {
+        return this.getDuration(day, personId)
+      }
     },
 
     getDuration (index, personId) {
