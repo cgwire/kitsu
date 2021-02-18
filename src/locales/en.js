@@ -882,6 +882,8 @@ export default {
   },
 
   timesheets: {
+    confirm_day_off: 'Setting this day as a day off will erase all time filled for the current day. Are you sure you want to continue?',
+    day_off: 'Day Off',
     detail_level: 'Detail level',
     done_tasks: 'Done tasks',
     export_timesheet: 'Export Timesheet',

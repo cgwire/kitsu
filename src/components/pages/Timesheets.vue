@@ -90,16 +90,17 @@
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
-import ButtonHrefLink from '../widgets/ButtonHrefLink'
-import ButtonSimple from '../widgets/ButtonSimple'
-import Combobox from '../widgets/Combobox'
-import ComboboxProduction from '../widgets/ComboboxProduction'
-import PeopleTimesheetList from '../lists/PeopleTimesheetList'
-import PeopleTimesheetInfo from '../sides/PeopleTimesheetInfo'
-import PageTitle from '../widgets/PageTitle'
-import csv from '../../lib/csv'
-import { monthToString, range } from '../../lib/time'
-import stringHelpers from '../../lib/string'
+import csv from '@/lib/csv'
+import { monthToString, range } from '@/lib/time'
+import stringHelpers from '@/lib/string'
+
+import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import Combobox from '@/components/widgets/Combobox'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction'
+import PeopleTimesheetList from '@/components/lists/PeopleTimesheetList'
+import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo'
+import PageTitle from '@/components/widgets/PageTitle'
 
 export default {
   name: 'people',
@@ -115,7 +116,6 @@ export default {
 
   data () {
     return {
-      dayOffCount: 0,
       detailOptions: [
         {
           label: 'Day',
@@ -134,12 +134,10 @@ export default {
           value: 'year'
         }
       ],
-
       detailLevelString: 'day',
       detailLevel: 'day',
       productionIdString: '',
       productionId: '',
-
       yearString: `${moment().year()}`,
       monthString: `${moment().month() + 1}`,
 
@@ -152,9 +150,9 @@ export default {
       isLoading: false,
       isLoadingError: false,
 
+      dayOffCount: 0,
       isInfoLoading: false,
       isInfoLoadingError: false,
-
       showInfo: true,
       tasks: []
     }
@@ -202,7 +200,7 @@ export default {
     },
 
     filteredPeople () {
-      return this.people.filter((person) => {
+      return this.people.filter(person => {
         const keys = Object.keys(this.timesheet)
         let isThere = false
         let i = 0
@@ -281,20 +279,23 @@ export default {
     },
 
     loadRoute () {
+      // The main idea is to build the context from the route and compare it
+      // to the current context. If there are changes, it applies it.
+      // It handles too the display or not of the side column.
       this.$options.silent = true
       const { month, year, week, day } = this.$route.params
-
       const previousProduction = `${this.productionId}`
       const previousDetailLevel = `${this.detailLevel}`
       const previousMonth = `${this.currentMonth}`
       const previousYear = `${this.currentYear}`
+
       if (this.$route.path.indexOf('week') > 0) this.detailLevel = 'week'
       if (this.$route.path.indexOf('month') > 0) this.detailLevel = 'month'
       if (this.$route.path.indexOf('day') > 0) this.detailLevel = 'day'
       if (this.$route.path.indexOf('year') > 0) this.detailLevel = 'year'
-
       this.currentPerson = this.getCurrentPerson()
       this.detailLevelString = this.detailLevel
+
       if (month) {
         this.currentMonth = Number(month)
         this.monthString = `${month}`
@@ -405,7 +406,6 @@ export default {
   watch: {
     detailLevelString () {
       if (this.silent) return
-      console.log('detail change')
       if (this.detailLevel !== this.detailLevelString) {
         if (this.detailLevelString === 'month') {
           this.$router.push({
@@ -448,7 +448,6 @@ export default {
       if (this.silent) return
       const year = Number(this.yearString)
       const currentMonth = moment().month()
-      console.log('year change')
       if (this.currentYear !== year) {
         if (this.detailLevel === 'month') {
           this.$router.push({
@@ -477,7 +476,6 @@ export default {
 
     monthString () {
       if (this.silent) return
-      console.log('month change')
       if (this.currentMonth !== Number(this.monthString)) {
         this.$router.push({
           name: 'timesheets-day',
@@ -526,17 +524,6 @@ export default {
   flex-direction: column;
   height: 100%;
   padding-bottom: 1em;
-}
-
-.columns {
-  display: flex;
-  flex-direction: row;
-  padding: 0;
-}
-
-.column {
-  overflow-y: auto;
-  padding: 0;
 }
 
 .main-column {

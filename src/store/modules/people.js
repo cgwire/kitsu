@@ -410,13 +410,11 @@ const actions = {
   },
 
   removePersonTasksSearch ({ commit, rootGetters }, searchQuery) {
-    return new Promise((resolve, reject) => {
-      peopleApi.removeFilter(searchQuery, (err) => {
+    return peopleApi.removeFilter(searchQuery)
+      .then(() => {
         commit(REMOVE_PERSON_TASKS_SEARCH_END, { searchQuery })
-        if (err) reject(err)
-        else resolve()
+        return Promise.resolve()
       })
-    })
   },
 
   setTimeSpent ({ commit }, { personId, taskId, date, duration }) {
@@ -720,6 +718,22 @@ const mutations = {
       .reduce((acc, timeSpent) => timeSpent.duration + acc, 0) / 60
   },
 
+  [PERSON_SET_DAY_OFF] (state, dayOff) {
+    state.personDayOff = dayOff
+    state.personIsDayOff = dayOff !== null && dayOff.id !== undefined
+  },
+
+  [PEOPLE_SET_DAY_OFFS] (state, dayOffs) {
+    const dayOffMap = {}
+    // Build a map that tells if a day is off. It uses two keys: the person id
+    // and the day number.
+    dayOffs.forEach(dayOff => {
+      if (!dayOffMap[dayOff.person_id]) dayOffMap[dayOff.person_id] = {}
+      dayOffMap[dayOff.person_id][dayOff.date.substring(8, 10)] = true
+    })
+    state.dayOffMap = dayOffMap
+  },
+
   [SET_PERSON_TASKS_SCROLL_POSITION] (state, scrollPosition) {
     state.personTasksScrollPosition = scrollPosition
   },
@@ -736,6 +750,7 @@ const mutations = {
   },
 
   [USER_SAVE_PROFILE_SUCCESS] (state, form) {
+    // On profile change we need to update the main list.
     const person = state.personMap[form.id]
     if (person) {
       Object.assign(person, form)
@@ -746,22 +761,6 @@ const mutations = {
   [SET_ORGANISATION] (state, organisation) {
     Object.assign(state.organisation, organisation)
     state.organisation = { ...state.organisation }
-  },
-
-  [PERSON_SET_DAY_OFF] (state, dayOff) {
-    state.personDayOff = dayOff
-    state.personIsDayOff = dayOff === null || dayOff.id !== undefined
-  },
-
-  [PEOPLE_SET_DAY_OFFS] (state, dayOffs) {
-    const dayOffMap = {}
-    // Build a map that tells if a day is off. It uses two keys: the person id
-    // and the day number.
-    dayOffs.forEach(dayOff => {
-      if (!dayOffMap[dayOff.person_id]) dayOffMap[dayOff.person_id] = {}
-      dayOffMap[dayOff.person_id][dayOff.date.substring(8, 10)] = true
-    })
-    state.dayOffMap = dayOffMap
   },
 
   [RESET_ALL] (state, people) {

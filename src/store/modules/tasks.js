@@ -621,7 +621,7 @@ const actions = {
 
   removeTaskSearch ({ commit, rootGetters }, searchQuery) {
     const production = rootGetters.currentProduction
-    peopleApi.removeFilter(searchQuery)
+    return peopleApi.removeFilter(searchQuery)
       .then(() => {
         commit(REMOVE_TASK_SEARCH_END, { searchQuery, production })
         return Promise.resolve(searchQuery)

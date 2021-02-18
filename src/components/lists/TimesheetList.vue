@@ -19,7 +19,7 @@
     <div class="filler"></div>
     <button-simple
       class="flexrow-item"
-      text="Day off"
+      :text="$t('timesheets.day_off')"
       :active="personIsDayOff"
       @click="toggleDayOff"
     />
@@ -171,8 +171,7 @@
   </p>
 
   <delete-modal
-    text="Setting this day as a day off will erase all time filled for the
-    current day. Are you sure you want to continue?"
+    :text="$t('timesheets.confirm_day_off')"
     @confirm="modals.dayOff = false ; $emit('set-day-off')"
     @cancel="modals.dayOff = false"
     :active="modals.dayOff"

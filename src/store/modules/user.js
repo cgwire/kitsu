@@ -275,13 +275,11 @@ const actions = {
   },
 
   removeTodoSearch ({ commit, rootGetters }, searchQuery) {
-    return new Promise((resolve, reject) => {
-      peopleApi.removeFilter(searchQuery, (err) => {
+    return peopleApi.removeFilter(searchQuery)
+      .then(() => {
         commit(REMOVE_TODO_SEARCH_END, { searchQuery })
-        if (err) reject(err)
-        else resolve()
+        return Promise.resolve(searchQuery)
       })
-    })
   },
 
   setTodoListScrollPosition ({ commit, rootGetters }, scrollPosition) {
@@ -523,7 +521,7 @@ const mutations = {
 
   [USER_LOAD_TIME_SPENTS_END] (state, timeSpents) {
     const timeSpentMap = {}
-    timeSpents.forEach((timeSpent) => {
+    timeSpents.forEach(timeSpent => {
       timeSpentMap[timeSpent.task_id] = timeSpent
     })
     state.timeSpentMap = timeSpentMap
@@ -548,6 +546,9 @@ const mutations = {
   },
 
   [SAVE_SHOT_SEARCH_END] (state, { searchQuery, production }) {
+    if (!state.userFilters.shot) {
+      state.userFilters.shot = {}
+    }
     if (!state.userFilters.shot[production.id]) {
       state.userFilters.shot[production.id] = []
     }

@@ -798,14 +798,12 @@ const actions = {
   },
 
   removeShotSearch ({ commit, rootGetters }, searchQuery) {
-    return new Promise((resolve, reject) => {
-      const production = rootGetters.currentProduction
-      peopleApi.removeFilter(searchQuery, (err) => {
+    const production = rootGetters.currentProduction
+    return peopleApi.removeFilter(searchQuery)
+      .then(() => {
         commit(REMOVE_SHOT_SEARCH_END, { searchQuery, production })
-        if (err) reject(err)
-        else resolve()
+        return Promise.resolve()
       })
-    })
   },
 
   saveSequenceSearch ({ commit, rootGetters }, searchQuery) {
@@ -838,14 +836,12 @@ const actions = {
   },
 
   removeSequenceSearch ({ commit, rootGetters }, searchQuery) {
-    return new Promise((resolve, reject) => {
-      const production = rootGetters.currentProduction
-      peopleApi.removeFilter(searchQuery, (err) => {
+    const production = rootGetters.currentProduction
+    return peopleApi.removeFilter(searchQuery)
+      .then(() => {
         commit(REMOVE_SEQUENCE_SEARCH_END, { searchQuery, production })
-        if (err) reject(err)
-        else resolve()
+        return Promise.resolve()
       })
-    })
   },
 
   initSequences ({ commit, dispatch, state, rootState, rootGetters }) {

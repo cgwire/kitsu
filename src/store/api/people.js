@@ -4,7 +4,7 @@ export default {
 
   getOrganisation () {
     return client.pget('/api/data/organisations')
-      .then((organisations) => {
+      .then(organisations => {
         let organisation = {
           name: 'Kitsu',
           hours_by_day: 8,
@@ -148,7 +148,7 @@ export default {
   },
 
   removeFilter (searchFilter, callback) {
-    client.del(`/api/data/user/filters/${searchFilter.id}`, callback)
+    return client.pdel(`/api/data/user/filters/${searchFilter.id}`)
   },
 
   getTimeSpents (personId, date) {
@@ -183,7 +183,6 @@ export default {
   },
 
   unsetDayOff (dayOff) {
-    // Date is a string with following format: YYYYY-MM-DD.
     return client.pdel(`/api/data/day-offs/${dayOff.id}`)
   },
 

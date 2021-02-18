@@ -441,11 +441,7 @@ export default {
 }
 
 .dark .duration:hover {
-  color: #333;
-}
-
-.selected .duration {
-  color: #333;
+  color: $white;
 }
 
 .name {
@@ -502,8 +498,19 @@ a:hover {
   background-color: $white-grey;
 }
 
+.duration:hover {
+  background: var(--background-selectable-selectable);
+}
+
 .selected .duration {
-  background: $purple;
+  background: var(--background-selected);
+  color: var(--text);
+
+  &:hover {
+    background: var(--background-selected);
+    color: var(--text);
+    cursor: default;
+  }
 }
 
 .duration {
@@ -512,11 +519,7 @@ a:hover {
 }
 
 .selected .duration.warning {
-  background: #ff9890;
+  background: $red;
   color: black;
-}
-
-.duration:hover {
-  background: var(--background-selectable-selectable);
 }
 </style>
