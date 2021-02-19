@@ -1275,7 +1275,7 @@ export default {
   right: 0;
   left: 0;
   bottom: 0;
-  height: 100vh;
+  height: 97vh;
   overflow: hidden;
   display: flex;
   flex-direction: row;
