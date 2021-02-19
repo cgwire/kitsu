@@ -1460,6 +1460,8 @@ export default {
         this.play()
       } else {
         this.pause()
+        const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
+        if (annotation) this.loadAnnotation(annotation)
       }
     },
 
