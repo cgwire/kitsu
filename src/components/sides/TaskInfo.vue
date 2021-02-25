@@ -143,6 +143,7 @@
                 :add-preview="onAddPreviewClicked"
                 :is-first="index === 0"
                 :is-last="index === pinnedCount"
+                :is-change="isStatusChange(index)"
                 :editable="(
                   comment.person && user.id === comment.person.id ||
                   isCurrentUserAdmin
@@ -898,6 +899,14 @@ export default {
           }
         }
       }
+    },
+
+    isStatusChange (index) {
+      const comment = this.taskComments[index]
+      return (
+        index === this.taskComments.length - 1 ||
+        comment.task_status_id !== this.taskComments[index + 1].task_status_id
+      )
     }
   },
 
