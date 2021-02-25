@@ -389,19 +389,25 @@ export default {
     // Paths
 
     backPath () {
+      let route = {}
       if (this.isActiveTab('schedule')) {
-        return {
+        route = {
           name: 'schedule',
           params: {
             production_id: this.currentProduction.id
-          }
+          },
+          query: { search: '' }
         }
       } else {
         if (this.currentTaskType.for_shots) {
-          return this.shotsPath
+          route = this.shotsPath
         } else {
-          return this.assetsPath
+          route = this.assetsPath
         }
+      }
+      return {
+        ...route,
+        query: { search: '' }
       }
     },
 

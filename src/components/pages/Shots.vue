@@ -444,6 +444,12 @@ export default {
   },
 
   mounted () {
+    let searchQuery = ''
+    if (this.$route.query.search.length > 0) {
+      searchQuery = '' + this.$route.query.search
+    }
+    this.$refs['shot-search-field'].setValue(searchQuery)
+
     const finalize = () => {
       this.loadShots((err) => {
         setTimeout(() => {
@@ -458,10 +464,6 @@ export default {
           }, 500)
         }
       })
-    }
-
-    if (this.shotSearchText.length > 0) {
-      this.$refs['shot-search-field'].setValue(this.shotSearchText)
     }
 
     if (
@@ -822,6 +824,7 @@ export default {
     },
 
     onSearchChange () {
+      if (!this.searchField) return
       const searchQuery = this.searchField.getValue()
       if (searchQuery.length !== 1) {
         this.setShotSearch(searchQuery)
@@ -964,6 +967,16 @@ export default {
   },
 
   watch: {
+    $route () {
+      if (!this.$route.query) return
+      const search = this.$route.query.search
+      const actualSearch = this.$refs['shot-search-field'].getValue()
+      if (search !== actualSearch) {
+        this.searchField.setValue(search)
+        this.onSearchChange()
+      }
+    },
+
     currentProduction () {
       this.$refs['shot-search-field'].setValue('')
       this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)

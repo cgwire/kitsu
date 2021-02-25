@@ -157,7 +157,8 @@ export default {
         name: section,
         params: {
           production_id: production.id
-        }
+        },
+        query: {}
       }
       if (production.production_type === 'tvshow') {
         route.name = `episode-${section}`
@@ -166,6 +167,9 @@ export default {
         } else {
           route.params.episode_id = 'all'
         }
+      }
+      if (['assets', 'shots'].includes(section)) {
+        route.query.search = ''
       }
       return route
     },

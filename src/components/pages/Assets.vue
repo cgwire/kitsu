@@ -355,8 +355,12 @@ export default {
   },
 
   mounted () {
+    let searchQuery = ''
     if (this.assetSearchText.length > 0) {
       this.searchField.setValue(this.assetSearchText)
+    }
+    if (this.$route.query.search && this.$route.query.search.length > 0) {
+      searchQuery = '' + this.$route.query.search
     }
     this.$refs['asset-list'].setScrollPosition(
       this.assetListScrollPosition
@@ -368,6 +372,7 @@ export default {
     )
     const finalize = () => {
       if (this.$refs['asset-list']) {
+        this.$refs['asset-search-field'].setValue(searchQuery)
         this.onSearchChange()
         this.resetCsvColumns()
         this.$refs['asset-list'].setScrollPosition(
@@ -954,6 +959,16 @@ export default {
   },
 
   watch: {
+    $route () {
+      if (!this.$route.query) return
+      const search = this.$route.query.search
+      const actualSearch = this.$refs['asset-search-field'].getValue()
+      if (search !== actualSearch) {
+        this.searchField.setValue(search)
+        this.onSearchChange()
+      }
+    },
+
     currentProduction () {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)

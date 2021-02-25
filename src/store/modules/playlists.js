@@ -51,12 +51,16 @@ const actions = {
 
   loadPlaylists ({ commit, rootGetters }, callback) {
     const production = rootGetters.currentProduction
-    const episode = rootGetters.currentEpisode
+    let episode = rootGetters.currentEpisode
     const isTVShow = rootGetters.isTVShow
 
     if (isTVShow && !episode) {
       if (callback) return callback()
       else return null
+    }
+
+    if (!isTVShow) {
+      episode = null
     }
 
     commit(LOAD_PLAYLISTS_START)
