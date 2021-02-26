@@ -109,6 +109,12 @@
                {{ $t("logs.title") }}
              </router-link>
            </p>
+           <p @click="toggleSidebar()">
+             <router-link :to="{name: 'departments'}">
+               <list-icon size="0.9x" />
+               {{ $t("departments.title") }}
+             </router-link>
+           </p>
          </div>
 
         </section>

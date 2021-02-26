@@ -47,6 +47,7 @@ const Team = () => import('../components/pages/Team')
 const Timesheets = () => import('../components/pages/Timesheets')
 const TaskStatus = () => import('../components/pages/TaskStatus')
 const TaskTypes = () => import('../components/pages/TaskTypes')
+const Departements = () => import('../components/pages/departments/Departments')
 const WrongBrowser = () => import('../components/pages/WrongBrowser')
 
 export const routes = [
@@ -145,6 +146,12 @@ export const routes = [
             component: AssetTypes
           }
         ]
+      },
+
+      {
+        path: 'departments',
+        component: Departements,
+        name: 'departments'
       },
 
       {

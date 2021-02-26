@@ -110,6 +110,21 @@ export default {
     }
   },
 
+  departments: {
+    all_asset_types: 'All departments',
+    create_error: 'An error occurred while saving this department. Are you sure there is no department with similar name?',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occurred while deleting this department.',
+    edit_title: 'Edit department',
+    new_departments: 'Add an department',
+    number: 'department | departments',
+    title: 'Departments',
+    fields: {
+      name: 'Name',
+      color: 'Color'
+    }
+  },
+
   entities: {
     build_filter: {
       asset_type: 'Asset type',
