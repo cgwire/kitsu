@@ -35,7 +35,7 @@
             root: true,
             expanded: rootElement.expanded
           }"
-          :style="entityLineStyle(rootElement)"
+          :style="entityLineStyle(rootElement, true, true)"
         >
           <span
             class="expand flexrow-item mr1"
@@ -272,12 +272,15 @@
           >
 
             <div
-              class="entity-line"
-              :style="entityLineStyle(rootElement)"
+              class="entity-line root-element"
+              :style="entityLineStyle(rootElement, true)"
             >
               <div
+                class="timebar-wrapper"
+                :style="timebarStyle(rootElement, true)"
+              >
+              <div
                 class="timebar"
-                :style="timebarStyle(rootElement)"
                 v-show="isVisible(rootElement)"
               >
                 <div
@@ -299,6 +302,7 @@
                   @mousedown="moveTimebarRightSide(rootElement, $event)"
                 >
                 </div>
+              </div>
               </div>
             </div>
 
@@ -996,9 +1000,15 @@ export default {
       }
     },
 
-    entityLineStyle (timeElement) {
-      const style = {
-        'background-color': timeElement.color
+    entityLineStyle (timeElement, root = false, header = false) {
+      const style = {}
+      if (root) {
+        style['border-left'] = '1px solid ' + timeElement.color
+        style['border-top'] = '1px solid ' + timeElement.color
+        style['border-bottom'] = '1px solid ' + timeElement.color
+        if (header) {
+          style.background = timeElement.color
+        }
       }
       if (timeElement.expanded) {
         style['margin-bottom'] = '0'
@@ -1006,12 +1016,16 @@ export default {
       return style
     },
 
-    timebarStyle (timeElement) {
-      return {
+    timebarStyle (timeElement, root = false) {
+      const style = {
         left: this.getTimebarLeft(timeElement) + 'px',
         width: this.getTimebarWidth(timeElement) + 'px',
         cursor: timeElement.editable ? 'ew-resize' : 'default'
       }
+      if (root) {
+        style['background-color'] = timeElement.color
+      }
+      return style
     },
 
     timebarChildStyle (timeElement, rootElement) {
@@ -1298,7 +1312,6 @@ export default {
 }
 
 .entity-line {
-  color: white;
   font-size: 1.2em;
   height: 40px;
   margin-bottom: 20px;
@@ -1518,21 +1531,12 @@ export default {
     border-bottom-left-radius: 0em;
   }
 
-  span {
-    color: white;
-  }
-
   input {
     width: 50px;
     text-align: right;
     background: transparent;
-    color: white;
     margin-right: 0.2em;
     font-size: 1.1em;
-
-    &::placeholder {
-      color: white;
-    }
   }
 
   .man-days-unit {
@@ -1649,7 +1653,7 @@ export default {
 
 .root-element-name {
   padding-left: 10px;
-  color: white;
+  color: $white;
 }
 
 .child-element-name {
@@ -1686,6 +1690,18 @@ export default {
     .date-name {
       display: none;
     }
+  }
+}
+
+.timebar-wrapper {
+  position: absolute;
+  height: 40px;
+  top: 0px;
+  padding: 0 0.4em;
+  border-radius: 10px;
+
+  .timebar {
+    width: calc(100% - 0.8em);
   }
 }
 
