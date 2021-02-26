@@ -14,7 +14,8 @@ describe('lib/indexing', () => {
       {name: 'Agent327', id: 1},
       {name: 'Arnold', id: 2},
       {name: 'Bunny', id: 3},
-      {name: 'Test', id: 4}
+      {name: 'Test', id: 4},
+      {name: 'constructor', id: 5}
     ]
     const index = buildNameIndex(entries)
     expect(index['A']).toBeUndefined()
@@ -30,7 +31,8 @@ describe('lib/indexing', () => {
       {name: 'Arnold', asset_type_name: 'Characters', id: 2},
       {name: 'Bunny', asset_type_name: 'Characters', id: 3},
       {name: 'Test', asset_type_name: 'Props', id: 4},
-      {name: 'New object', asset_type_name: 'Props', id: 5}
+      {name: 'New object', asset_type_name: 'Props', id: 5},
+      {name: 'constructor', asset_type_name: 'Props', id: 6}
     ]
     const index = buildAssetIndex(entries)
     expect(index['A']).toBeUndefined()
@@ -48,7 +50,8 @@ describe('lib/indexing', () => {
       {name: 'SH02', sequence_name: 'S01', episode_name: 'E01', id: 2},
       {name: 'SH01', sequence_name: 'S02', episode_name: 'E01', id: 3},
       {name: 'SH01', sequence_name: 'S01', episode_name: 'E02', id: 4},
-      {name: 'SH02', sequence_name: 'S01', episode_name: 'E02', id: 5}
+      {name: 'SH02', sequence_name: 'S01', episode_name: 'E02', id: 5},
+      {name: 'constructor', sequence_name: 'SEQ01', episode_name: 'EP02', id: 6}
     ]
     const index = buildShotIndex(entries)
     expect(index['e01'].length).toEqual(3)
@@ -88,10 +91,17 @@ describe('lib/indexing', () => {
       },
       {
         full_entity_name: 'Props / Tree',
-        task_status_short_name: 'wip',
+        task_status_short_name: 'todo',
         task_type_name: 'Modeling',
         project_name: 'Caminandes',
         id: 5
+      },
+      {
+        full_entity_name: 'constructor',
+        task_status_short_name: 'wip',
+        task_type_name: 'Modeling',
+        project_name: 'security',
+        id: 6
       }
     ]
     const index = buildTaskIndex(entries)
@@ -106,7 +116,8 @@ describe('lib/indexing', () => {
       {name: 'Agent327', id: 1},
       {name: 'Arnold', id: 2},
       {name: 'Bunny', id: 3},
-      {name: 'Test', id: 4}
+      {name: 'Test', id: 4},
+      {name: 'constructor', id: 5}
     ]
     const index = buildNameIndex(entries)
     expect(indexSearch(index, ['A']).length).toEqual(2)

@@ -2,8 +2,8 @@
  * Build a simple index based on entry names.
  */
 export const buildNameIndex = (entries, split = true) => {
-  const index = {}
-  const entryIndex = {}
+  const index = Object.create(null)
+  const entryIndex = Object.create(null)
   entries.forEach((entry) => {
     if (entry) {
       let words
@@ -50,8 +50,8 @@ export const buildTaskStatusIndex = (taskStatuses) => {
  * The result is an array of tasks.
  */
 export const buildTaskIndex = (tasks) => {
-  const index = {}
-  const taskIndex = {}
+  const index = Object.create(null)
+  const taskIndex = Object.create(null)
   tasks.forEach((task) => {
     const stringToIndex =
       task.full_entity_name.replace(/_/g, ' ').replace(/-/g, ' ')
@@ -71,8 +71,8 @@ export const buildTaskIndex = (tasks) => {
  * The result is an array of tasks.
  */
 export const buildSupervisorTaskIndex = (tasks, personMap, taskStatusMap) => {
-  const index = {}
-  const taskIndex = {}
+  const index = Object.create(null)
+  const taskIndex = Object.create(null)
   tasks.forEach(task => {
     const stringToIndex = task
       .entity_name
@@ -97,8 +97,8 @@ export const buildSupervisorTaskIndex = (tasks, personMap, taskStatusMap) => {
  * Results are arrays of assets.
  */
 export const buildAssetIndex = (entries) => {
-  const index = {}
-  const assetIndex = {}
+  const index = Object.create(null)
+  const assetIndex = Object.create(null)
   entries.forEach((asset) => {
     const stringToIndex = asset.name.replace(/_/g, ' ').replace(/-/g, ' ')
     const assetTypeWords = asset.asset_type_name.split(' ')
@@ -116,8 +116,8 @@ export const buildAssetIndex = (entries) => {
  * Results are arrays of shots.
  */
 export const buildShotIndex = (shots) => {
-  const index = {}
-  const shotIndex = {}
+  const index = Object.create(null)
+  const shotIndex = Object.create(null)
   shots.forEach((shot) => {
     const words = [shot.name, shot.sequence_name, shot.episode_name]
     indexWords(index, shotIndex, shot, words)
@@ -131,8 +131,8 @@ export const buildShotIndex = (shots) => {
  * Results are arrays of sequences.
  */
 export const buildSequenceIndex = (sequences) => {
-  const index = {}
-  const sequenceIndex = {}
+  const index = Object.create(null)
+  const sequenceIndex = Object.create(null)
   sequences.forEach((sequence) => {
     const words = [sequence.name, sequence.episode_name]
     indexWords(index, sequenceIndex, sequence, words)
@@ -146,8 +146,8 @@ export const buildSequenceIndex = (sequences) => {
  * Results are arrays of episodes.
  */
 export const buildEpisodeIndex = (episodes) => {
-  const index = {}
-  const episodeIndex = {}
+  const index = Object.create(null)
+  const episodeIndex = Object.create(null)
   episodes.forEach((episode) => {
     const words = [episode.name]
     indexWords(index, episodeIndex, episode, words)
@@ -210,7 +210,7 @@ const indexWords = (index, entryIndex, entry, words) => {
         currentString += character.toLowerCase()
         if (index[currentString] === undefined) {
           index[currentString] = []
-          entryIndex[currentString] = {}
+          entryIndex[currentString] = Object.create(null)
         }
 
         if (!entryIndex[currentString][entry.id]) {
