@@ -1786,9 +1786,6 @@ export default {
 
               // Container size
               let fullWidth = this.$refs['video-container'].offsetWidth
-              if (!this.isCommentsHidden) {
-                fullWidth -= 450 // task info widget width
-              }
               const fullHeight = this.$refs['video-container'].offsetHeight
               if (this.isComparing && !this.isComparisonOverlay) {
                 fullWidth = Math.round(fullWidth / 2)
