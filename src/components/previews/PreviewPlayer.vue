@@ -1235,6 +1235,14 @@ export default {
         const width = this.canvasWrapper.style.width
         const height = this.canvasWrapper.style.height
         this.previewViewer.updateLoupePosition(event, { width, height })
+      } else if (this.isMovie && this.$options.scrubbing) {
+        const x = event.e.clientX
+        if (x - this.$options.scrubStartX < 0) {
+          this.goPreviousFrame()
+        } else {
+          this.goNextFrame()
+        }
+        this.$options.scrubStartX = x
       }
     },
 
@@ -1246,6 +1254,10 @@ export default {
         const height = this.canvasWrapper.style.height
         this.previewViewer.updateLoupePosition(event, { width, height })
         return false
+      } else if (event.button > 1 && this.isMovie) {
+        this.$options.scrubbing = true
+        this.$options.scrubStartX = event.e.clientX
+        this.$options.scrubStartTime = Number(this.currentTimeRaw)
       }
     },
 
@@ -1253,8 +1265,10 @@ export default {
       if (this.isPicture && this.$options.loupe) {
         this.previewViewer.hideLoupe()
         this.$options.loupe = false
-        return false
+      } else if (this.isMovie && this.$options.scrubbing) {
+        this.$options.scrubbing = false
       }
+      return false
     },
 
     // Video progress
