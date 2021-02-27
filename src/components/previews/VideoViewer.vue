@@ -14,6 +14,7 @@
       }"
       :src="moviePath"
       :poster="posterPath"
+      type="video/mp4"
     >
     </video>
   </div>
@@ -76,6 +77,10 @@ export default {
     defaultHeight: {
       type: Number,
       default: 0
+    },
+    fullScreen: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -92,6 +97,8 @@ export default {
 
   mounted () {
     if (!this.container) return
+    this.$options.currentTimeCalls = []
+
     this.container.style.height = this.defaultHeight + 'px'
     this.isLoading = true
     if (this.isMuted) {
@@ -165,7 +172,9 @@ export default {
     },
 
     moviePath () {
-      if (this.extension === 'mp4' && this.isAvailable) {
+      if (this.extension === 'mp4' && this.isAvailable && !this.fullScreen) {
+        return `/api/movies/low/preview-files/${this.preview.id}.mp4`
+      } else if (this.extension === 'mp4' && this.isAvailable) {
         return `/api/movies/originals/preview-files/${this.preview.id}.mp4`
       } else {
         return null
