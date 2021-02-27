@@ -431,9 +431,13 @@ describe('Schedule', () => {
       })
 
       test('entityLineStyle', () => {
-        let entityLineStyle = wrapper.vm.entityLineStyle({ color: 'red' })
+        let entityLineStyle = wrapper.vm.entityLineStyle(
+          { color: 'red' }, true
+        )
         expect(entityLineStyle).toEqual({
-          'background-color': 'red'
+          'border-bottom': '1px solid red',
+          'border-left': '1px solid red',
+          'border-top': '1px solid red',
         })
       })
 
