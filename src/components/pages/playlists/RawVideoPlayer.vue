@@ -68,6 +68,7 @@ export default {
     this.resetHeight()
     this.player1.addEventListener('loadedmetadata', this.emitLoadedEvent)
     window.addEventListener('resize', this.resetHeight)
+    this.$options.currentTimeCalls = []
   },
 
   beforeDestroy () {
@@ -189,7 +190,8 @@ export default {
 
     goPreviousFrame () {
       if (this.currentPlayer) {
-        const newTime = this.currentPlayer.currentTime - 1 / this.fps
+        const time = this.getLastPushedCurrentTime()
+        const newTime = roundToFrame(time, this.fps) - this.frameFactor
         if (newTime < 0) {
           this.setCurrentTime(0)
         } else {
@@ -200,9 +202,10 @@ export default {
 
     goNextFrame () {
       if (this.currentPlayer) {
-        const newTime = this.currentPlayer.currentTime + 1 / this.fps
+        const time = this.getLastPushedCurrentTime()
+        const newTime = roundToFrame(time, this.fps) + this.frameFactor
         if (newTime > this.currentPlayer.duration) {
-          this.setCurrentTime(this.video.duration)
+          this.setCurrentTime(this.currentPlayer.duration)
         } else {
           this.setCurrentTime(newTime)
         }
@@ -300,15 +303,45 @@ export default {
 
     getCurrentTime () {
       if (this.currentPlayer) {
-        return this.currentPlayer.currentTime
+        return this.currentPlayer.currentTime - this.frameFactor
       } else {
         return 0
       }
     },
 
+    getLastPushedCurrentTime () {
+      const length = this.$options.currentTimeCalls.length
+      if (length > 0) {
+        return this.$options.currentTimeCalls[length - 1]
+      } else {
+        return this.getCurrentTime()
+      }
+    },
+
     setCurrentTime (currentTime) {
-      currentTime = roundToFrame(currentTime, this.fps)
-      if (this.currentPlayer) this.currentPlayer.currentTime = currentTime
+      if (!this.$options.currentTimeCalls) {
+        this.$options.currentTimeCalls = []
+      }
+      this.$options.currentTimeCalls.push(currentTime)
+      if (!this.$options.running) this.runSetCurrentTime()
+    },
+
+    runSetCurrentTime () {
+      if (this.$options.currentTimeCalls.length === 0) {
+        this.$options.running = false
+      } else {
+        this.$options.running = true
+        const currentTime = this.$options.currentTimeCalls.shift()
+        if (this.currentPlayer &&
+            this.currentPlayer.currentTime !== currentTime + this.frameFactor) {
+          if (this.currentPlayer) {
+            this.currentPlayer.currentTime = currentTime + this.frameFactor
+          }
+        }
+        setTimeout(() => {
+          this.runSetCurrentTime()
+        }, 10)
+      }
     },
 
     switchPlayers () {

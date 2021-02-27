@@ -163,6 +163,7 @@
       <div
         class="canvas-wrapper"
         ref="canvas-wrapper"
+        oncontextmenu="return false;"
         v-show="!isCurrentPreviewFile"
       >
         <canvas
@@ -836,6 +837,7 @@ export default {
   },
 
   mounted () {
+    this.$options.scrubbing = false
     if (this.entities) {
       this.entityList = Object.values(this.entities)
     } else {
@@ -2262,6 +2264,36 @@ export default {
             this.loadAnnotation(this.getAnnotation(0))
           }
         })
+    },
+
+    // Scrubbing
+
+    onCanvasMouseMoved (event) {
+      if (this.isCurrentPreviewMovie && this.$options.scrubbing) {
+        const x = event.e.clientX
+        if (x - this.$options.scrubStartX < 0) {
+          this.goPreviousFrame()
+        } else {
+          this.goNextFrame()
+        }
+        this.$options.scrubStartX = x
+      }
+    },
+
+    onCanvasClicked (event) {
+      if (event.button > 1 && this.isCurrentPreviewMovie) {
+        this.$options.scrubbing = true
+        this.$options.scrubStartX = event.e.clientX
+        this.$options.scrubStartTime = Number(this.currentTimeRaw)
+      }
+      return false
+    },
+
+    onCanvasReleased (event) {
+      if (this.isCurrentPreviewMovie && this.$options.scrubbing) {
+        this.$options.scrubbing = false
+      }
+      return false
     }
   },
 
