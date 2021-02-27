@@ -64,8 +64,10 @@
         :entities="entityListToCompare"
         :is-repeating="isRepeating"
         :muted="true"
+        :full-screen="fullScreen"
         name="comparison"
-        v-show="isComparing && isCurrentPreviewMovie && isMovieComparison && !isLoading"
+        v-show="isComparing && isCurrentPreviewMovie &&
+                isMovieComparison && !isLoading"
       />
 
       <div
@@ -109,6 +111,7 @@
         :entities="entityList"
         :is-repeating="isRepeating"
         :muted="isMuted"
+        :full-screen="fullScreen"
         @repeat="onVideoRepeated"
         @metadata-loaded="onMetadataLoaded"
         @entity-change="onPlayerEntityChange"
@@ -788,6 +791,7 @@ export default {
       entityList: [],
       entityListToCompare: [],
       fabricCanvas: null,
+      fullScreen: false,
       isDlButtonsHidden: true,
       isCommentsHidden: true,
       isComparing: false,
@@ -844,9 +848,7 @@ export default {
       })
     }
     this.$nextTick(() => {
-      window.addEventListener('keydown', this.onKeyDown, false)
-      window.addEventListener('resize', this.onWindowResize)
-      if (!this.$el.nomousemove) this.$el.onmousemove = this.onMouseMove
+      this.configureEvents()
       this.setupFabricCanvas()
       this.resetCanvas()
       this.setPlayerSpeed(1)
@@ -855,9 +857,7 @@ export default {
   },
 
   beforeDestroy () {
-    window.removeEventListener('keydown', this.onKeyDown)
-    window.removeEventListener('resize', this.onWindowResize)
-    this.$el.onmousemove = null
+    this.removeEvents()
   },
 
   computed: {
@@ -1166,6 +1166,34 @@ export default {
       'runPlaylistBuild'
     ]),
 
+    configureEvents () {
+      window.addEventListener('keydown', this.onKeyDown, false)
+      window.addEventListener('resize', this.onWindowResize)
+      if (!this.$el.nomousemove) this.$el.onmousemove = this.onMouseMove
+      this.container.addEventListener(
+        'fullscreenchange', this.onFullScreenChange, false)
+      this.container.addEventListener(
+        'mozfullscreenchange', this.onFullScreenChange, false)
+      this.container.addEventListener(
+        'MSFullscreenChange', this.onFullScreenChange, false)
+      this.container.addEventListener(
+        'webkitfullscreenchange', this.onFullScreenChange, false)
+    },
+
+    removeEvents () {
+      window.removeEventListener('keydown', this.onKeyDown)
+      window.removeEventListener('resize', this.onWindowResize)
+      this.$el.onmousemove = null
+      this.container.removeEventListener(
+        'fullscreenchange', this.onFullScreenChange, false)
+      this.container.removeEventListener(
+        'mozfullscreenchange', this.onFullScreenChange, false)
+      this.container.removeEventListener(
+        'MSFullscreenChange', this.onFullScreenChange, false)
+      this.container.removeEventListener(
+        'webkitfullscreenchange', this.onFullScreenChange, false)
+    },
+
     getBuildPath (job) {
       return `/api/data/playlists/${this.playlist.id}/jobs/${job.id}/build/mp4`
     },
@@ -1381,6 +1409,7 @@ export default {
       }
       this.container.setAttribute('data-fullscreen', !!true)
       document.activeElement.blur()
+      this.fullScreen = true
     },
 
     exitFullScreen () {
@@ -1395,6 +1424,7 @@ export default {
       }
       this.container.setAttribute('data-fullscreen', !!false)
       document.activeElement.blur()
+      this.fullScreen = false
     },
 
     isFullScreen () {
@@ -1476,6 +1506,15 @@ export default {
     onToggleSoundClicked () {
       this.clearFocus()
       this.isMuted = !this.isMuted
+    },
+
+    onFullScreenChange () {
+      if (
+        this.fullScreen &&
+        !this.isFullScreen()
+      ) {
+        this.fullScreen = false
+      }
     },
 
     onFullscreenClicked () {

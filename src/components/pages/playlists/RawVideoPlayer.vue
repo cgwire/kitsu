@@ -43,6 +43,10 @@ export default {
       type: Boolean,
       default: false
     },
+    fullScreen: {
+      type: Boolean,
+      default: false
+    },
     name: { // Debug purpose
       type: String,
       default: 'main'
@@ -104,7 +108,11 @@ export default {
     getMoviePath (entity) {
       if (entity.preview_file_extension === 'mp4') {
         const previewId = entity.preview_file_id
-        return `/api/movies/originals/preview-files/${previewId}.mp4`
+        if (this.fullScreen) {
+          return `/api/movies/originals/preview-files/${previewId}.mp4`
+        } else {
+          return `/api/movies/low/preview-files/${previewId}.mp4`
+        }
       } else {
         return ''
       }
@@ -170,7 +178,9 @@ export default {
     getPreviousIndex (index) {
       let i = index - 1 >= 0 ? index - 1 : this.entities.length - 1
       // While we don't come back to initial entity and we have video previews
-      while (i !== index && this.entities[i] && this.entities[i].preview_file_extension !== 'mp4') {
+      while (i !== index &&
+             this.entities[i] &&
+             this.entities[i].preview_file_extension !== 'mp4') {
         i--
         if (i < 0) i = this.entities.length
       }
@@ -341,6 +351,13 @@ export default {
   },
 
   watch: {
+    fullScreen () {
+      if (this.currentPlayer) {
+        this.loadEntity(this.currentIndex, this.currentPlayer.currentTime)
+        if (this.isPlaying) this.play()
+      }
+    },
+
     entities () {
       if (this.entities.length > 0) {
         this.loadEntity(0)
