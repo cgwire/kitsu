@@ -234,7 +234,6 @@ export default {
       position: 'bottom',
       align: 'right'
     })
-
     this.currentProjectSection = this.getCurrentSectionFromRoute()
     this.setProductionFromRoute()
   },
@@ -515,14 +514,19 @@ export default {
       this.silent = true
       this.currentProductionId = productionId
       this.currentProjectSection = section
-      this.currentProjectSection = null
+
       this.$nextTick(() => {
-        this.currentProjectSection = section
-        this.currentEpisodeId = null
+        this.currentProjectSection = null
         this.$nextTick(() => {
-          this.currentEpisodeId = episodeId
+          this.currentProjectSection = section
           this.$nextTick(() => {
-            this.silent = false
+            this.currentEpisodeId = null
+            this.$nextTick(() => {
+              this.currentEpisodeId = episodeId
+              this.$nextTick(() => {
+                this.silent = false
+              })
+            })
           })
         })
       })
