@@ -778,17 +778,14 @@ export default {
       fabricCanvas.freeDrawingBrush.color = this.color
       fabricCanvas.freeDrawingBrush.width = 4
       fabricCanvas.off('object:added', this.stackAddAction)
-      fabricCanvas.on('object:added', this.stackAddAction)
       fabricCanvas.off('object:moved', this.saveAnnotations)
+      fabricCanvas.off('mouse:move', this.onCanvasMouseMoved)
+      fabricCanvas.off('mouse:down', this.onCanvasClicked)
+      fabricCanvas.off('mouse:up', this.onCanvasReleased)
+      fabricCanvas.off('mouse:up', this.endDrawing)
+      fabricCanvas.on('object:added', this.stackAddAction)
       fabricCanvas.on('object:moved', this.saveAnnotations)
-      fabricCanvas.on('mouse:up', () => {
-        // this.$refs.loupe.style.display = 'none'
-        // this.$options.loupe = false
-        if (this.isDrawing) {
-          this.clearUndoneStack()
-          this.saveAnnotations()
-        }
-      })
+      fabricCanvas.on('mouse:up', this.endDrawing)
       fabricCanvas.on('mouse:move', this.onCanvasMouseMoved)
       fabricCanvas.on('mouse:down', this.onCanvasClicked)
       fabricCanvas.on('mouse:up', this.onCanvasReleased)
@@ -1188,6 +1185,14 @@ export default {
 
     removeEvents () {
       window.removeEventListener('keydown', this.onKeyDown)
+      this.container.removeEventListener(
+        'fullscreenchange', this.onFullScreenChange, false)
+      this.container.removeEventListener(
+        'mozfullscreenchange', this.onFullScreenChange, false)
+      this.container.removeEventListener(
+        'MSFullscreenChange', this.onFullScreenChange, false)
+      this.container.removeEventListener(
+        'webkitfullscreenchange', this.onFullScreenChange, false)
     },
 
     // Browsing
@@ -1253,12 +1258,12 @@ export default {
         const width = this.canvasWrapper.style.width
         const height = this.canvasWrapper.style.height
         this.previewViewer.updateLoupePosition(event, { width, height })
-        return false
       } else if (event.button > 1 && this.isMovie) {
         this.$options.scrubbing = true
         this.$options.scrubStartX = event.e.clientX
         this.$options.scrubStartTime = Number(this.currentTimeRaw)
       }
+      return false
     },
 
     onCanvasReleased (event) {
