@@ -42,11 +42,15 @@ describe('video', () => {
     it('formatFrame', () => {
       expect(formatFrame(1, 24)).toBe('024')
       expect(formatFrame(1, 25)).toBe('025')
-      expect(formatFrame(0, 24)).toBe('001')
-      expect(formatFrame(0.68, 24)).toBe('017')
-      expect(formatFrame(4.83, 24)).toBe('116')
-      expect(formatFrame(4.83, 25)).toBe('121')
+      expect(formatFrame(0, 24)).toBe('000')
+      expect(formatFrame(0.68, 24)).toBe('016')
+      expect(formatFrame(4.83, 24)).toBe('115')
+      expect(formatFrame(4.83, 25)).toBe('120')
       expect(formatFrame(5, 25)).toBe('125')
+      expect(formatFrame(0.240, 25)).toBe('006')
+      expect(formatFrame(0.2400000000002, 25)).toBe('006')
+      expect(formatFrame(0.28000, 25)).toBe('007')
+      expect(formatFrame(0.48000, 25)).toBe('012')
     })
 
     it('formatTime', () => {

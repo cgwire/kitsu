@@ -43,6 +43,10 @@ export default {
       type: Boolean,
       default: false
     },
+    fullScreen: {
+      type: Boolean,
+      default: false
+    },
     name: { // Debug purpose
       type: String,
       default: 'main'
@@ -64,6 +68,7 @@ export default {
     this.resetHeight()
     this.player1.addEventListener('loadedmetadata', this.emitLoadedEvent)
     window.addEventListener('resize', this.resetHeight)
+    this.$options.currentTimeCalls = []
   },
 
   beforeDestroy () {
@@ -90,6 +95,10 @@ export default {
 
     player2 () {
       return this.$refs.player2
+    },
+
+    frameFactor () {
+      return Math.round((1 / this.fps) * 10000) / 10000
     }
   },
 
@@ -104,7 +113,11 @@ export default {
     getMoviePath (entity) {
       if (entity.preview_file_extension === 'mp4') {
         const previewId = entity.preview_file_id
-        return `/api/movies/originals/preview-files/${previewId}.mp4`
+        if (this.fullScreen) {
+          return `/api/movies/originals/preview-files/${previewId}.mp4`
+        } else {
+          return `/api/movies/low/preview-files/${previewId}.mp4`
+        }
       } else {
         return ''
       }
@@ -170,7 +183,9 @@ export default {
     getPreviousIndex (index) {
       let i = index - 1 >= 0 ? index - 1 : this.entities.length - 1
       // While we don't come back to initial entity and we have video previews
-      while (i !== index && this.entities[i] && this.entities[i].preview_file_extension !== 'mp4') {
+      while (i !== index &&
+             this.entities[i] &&
+             this.entities[i].preview_file_extension !== 'mp4') {
         i--
         if (i < 0) i = this.entities.length
       }
@@ -179,7 +194,8 @@ export default {
 
     goPreviousFrame () {
       if (this.currentPlayer) {
-        const newTime = this.currentPlayer.currentTime - 1 / this.fps
+        const time = this.getLastPushedCurrentTime()
+        const newTime = roundToFrame(time, this.fps) - this.frameFactor
         if (newTime < 0) {
           this.setCurrentTime(0)
         } else {
@@ -190,9 +206,10 @@ export default {
 
     goNextFrame () {
       if (this.currentPlayer) {
-        const newTime = this.currentPlayer.currentTime + 1 / this.fps
+        const time = this.getLastPushedCurrentTime()
+        const newTime = roundToFrame(time, this.fps) + this.frameFactor
         if (newTime > this.currentPlayer.duration) {
-          this.setCurrentTime(this.video.duration)
+          this.setCurrentTime(this.currentPlayer.duration)
         } else {
           this.setCurrentTime(newTime)
         }
@@ -268,6 +285,7 @@ export default {
     },
 
     playNext () {
+      if (!this.isPlaying) return
       if (this.isRepeating) {
         this.currentPlayer.currentTime = 0
         this.currentPlayer.play()
@@ -290,15 +308,45 @@ export default {
 
     getCurrentTime () {
       if (this.currentPlayer) {
-        return this.currentPlayer.currentTime
+        return this.currentPlayer.currentTime - this.frameFactor
       } else {
         return 0
       }
     },
 
+    getLastPushedCurrentTime () {
+      const length = this.$options.currentTimeCalls.length
+      if (length > 0) {
+        return this.$options.currentTimeCalls[length - 1]
+      } else {
+        return this.getCurrentTime()
+      }
+    },
+
     setCurrentTime (currentTime) {
-      currentTime = roundToFrame(currentTime, this.fps)
-      if (this.currentPlayer) this.currentPlayer.currentTime = currentTime
+      if (!this.$options.currentTimeCalls) {
+        this.$options.currentTimeCalls = []
+      }
+      this.$options.currentTimeCalls.push(currentTime)
+      if (!this.$options.running) this.runSetCurrentTime()
+    },
+
+    runSetCurrentTime () {
+      if (this.$options.currentTimeCalls.length === 0) {
+        this.$options.running = false
+      } else {
+        this.$options.running = true
+        const currentTime = this.$options.currentTimeCalls.shift()
+        if (this.currentPlayer &&
+            this.currentPlayer.currentTime !== currentTime + this.frameFactor) {
+          if (this.currentPlayer) {
+            this.currentPlayer.currentTime = currentTime + this.frameFactor
+          }
+        }
+        setTimeout(() => {
+          this.runSetCurrentTime()
+        }, 10)
+      }
     },
 
     switchPlayers () {
@@ -341,6 +389,13 @@ export default {
   },
 
   watch: {
+    fullScreen () {
+      if (this.currentPlayer) {
+        this.loadEntity(this.currentIndex, this.currentPlayer.currentTime)
+        if (this.isPlaying) this.play()
+      }
+    },
+
     entities () {
       if (this.entities.length > 0) {
         this.loadEntity(0)

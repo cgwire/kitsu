@@ -1344,6 +1344,7 @@ span.thumbnail-picture {
   padding: 0;
   overflow: hidden;
   flex: 1;
+  background: $dark-grey-2;
 }
 
 .playlisted-shot-name {
@@ -1433,6 +1434,7 @@ h2 {
   }
 
   .empty-explaination {
+    color: $white;
     margin-top: 4em;
     font-size: 1.5em;
   }

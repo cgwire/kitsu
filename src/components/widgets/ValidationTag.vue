@@ -5,20 +5,13 @@
       :to="taskPath(task)"
       class="tag dynamic"
       v-if="!isStatic && !isCurrentUserClient"
-      :style="{
-        background: backgroundColor,
-        color: color
-    }">
+      :style="tagStyle">
       {{ taskStatus.short_name }}
     </router-link>
 
     <span
       class="tag"
-      :style="{
-        background: backgroundColor,
-        color: color,
-        cursor: cursor
-      }"
+      :style="tagStyle"
       v-else
     >
       {{ taskStatus.short_name }}
@@ -31,21 +24,15 @@
     <router-link
       :to="taskPath(task)"
       class="tag dynamic"
+      :style="tagStyle"
       v-if="!isStatic && !isCurrentUserClient"
-      :style="{
-        background: backgroundColor,
-        color: color
-    }">
+    >
        &nbsp;
     </router-link>
 
     <span
       class="tag"
-      :style="{
-        background: backgroundColor,
-        color: color,
-        cursor: cursor
-      }"
+      :style="cursor"
       v-else
     >
       &nbsp;
@@ -78,6 +65,10 @@ export default {
       type: Boolean
     },
     pointer: {
+      default: false,
+      type: Boolean
+    },
+    thin: {
       default: false,
       type: Boolean
     }
@@ -144,6 +135,25 @@ export default {
         }
       } else {
         return ''
+      }
+    },
+
+    tagStyle () {
+      const isStatic = !this.isStatic && !this.isCurrentUserClient
+      const isTodo = this.taskStatus.short_name.toLowerCase() === 'todo'
+      if (this.thin && !isTodo) {
+        return {
+          background: 'transparent',
+          border: '1px solid ' + (isTodo ? 'grey' : this.backgroundColor),
+          color: this.backgroundColor,
+          cursor: isStatic ? 'pointer' : this.cursor
+        }
+      } else {
+        return {
+          background: this.backgroundColor,
+          color: this.color,
+          cursor: isStatic ? 'pointer' : this.cursor
+        }
       }
     }
   },

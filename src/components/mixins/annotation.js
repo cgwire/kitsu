@@ -260,15 +260,21 @@ export const annotationMixin = {
       if (!this.annotationCanvas) return
 
       const canvasId = this.annotationCanvas.id
-      this.fabricCanvas = new fabric.Canvas(canvasId)
+      this.fabricCanvas = new fabric.Canvas(canvasId, {
+        fireRightClick: true
+      })
+      this.fabricCanvas.off('object:moved', this.saveAnnotations)
+      this.fabricCanvas.off('object:added', this.stackAddAction)
+      this.fabricCanvas.off('mouse:up', this.endDrawing)
+      this.fabricCanvas.off('mouse:up', this.onCanvasReleased)
+      this.fabricCanvas.off('mouse:move', this.onCanvasMouseMoved)
+      this.fabricCanvas.off('mouse:down', this.onCanvasClicked)
       this.fabricCanvas.on('object:moved', this.saveAnnotations)
       this.fabricCanvas.on('object:added', this.stackAddAction)
-      this.fabricCanvas.on('mouse:up', () => {
-        if (this.isDrawing) {
-          this.clearUndoneStack()
-          this.saveAnnotations()
-        }
-      })
+      this.fabricCanvas.on('mouse:up', this.endDrawing)
+      this.fabricCanvas.on('mouse:move', this.onCanvasMouseMoved)
+      this.fabricCanvas.on('mouse:down', this.onCanvasClicked)
+      this.fabricCanvas.on('mouse:up', this.onCanvasReleased)
       this.fabricCanvas.setDimensions({
         width: 100,
         height: 100
@@ -276,6 +282,13 @@ export const annotationMixin = {
       this.fabricCanvas.freeDrawingBrush.color = this.color
       this.fabricCanvas.freeDrawingBrush.width = 4
       return this.fabricCanvas
+    },
+
+    endDrawing () {
+      if (this.isDrawing) {
+        this.clearUndoneStack()
+        this.saveAnnotations()
+      }
     },
 
     isEmptyCanvas () {

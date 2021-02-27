@@ -29,6 +29,7 @@
       :is-repeating="isRepeating"
       :light="light"
       :preview="preview"
+      :full-screen="fullScreen"
       @size-changed="dimensions => $emit('size-changed', dimensions)"
       @duration-changed="duration => $emit('duration-changed', duration)"
       @time-update="time => $emit('time-update', time)"

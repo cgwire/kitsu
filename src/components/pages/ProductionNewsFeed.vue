@@ -102,8 +102,7 @@
                 color: stat.name === 'TODO' ? '#666' : 'white'
               }"
             >
-             {{ stat.name }}
-            : {{ stat.value }}
+             {{ stat.name }} : {{ stat.value }}
             </span>
           </template>
         </div>
@@ -168,7 +167,7 @@
                       class="validation-tag"
                       :task="buildTaskFromNews(news)"
                       :is-static="true"
-                      v-if="news.change"
+                      :thin="!news.change"
                     />
                   </div>
 

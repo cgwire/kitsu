@@ -543,6 +543,10 @@ export default {
       return this.currentProduction.fps || 24
     },
 
+    frameFactor () {
+      return Math.round((1 / this.fps) * 10000) / 10000
+    },
+
     extension () {
       return this.currentPreview ? this.currentPreview.extension : ''
     },
@@ -673,7 +677,7 @@ export default {
     changeMaxDuration (duration) {
       if (duration) {
         this.maxDuration = this.formatTime(duration)
-        this.videoDuration = duration
+        this.videoDuration = duration - this.frameFactor
         this.progress.setAttribute('max', this.videoDuration)
       } else {
         this.maxDuration = '00:00.000'
@@ -774,17 +778,14 @@ export default {
       fabricCanvas.freeDrawingBrush.color = this.color
       fabricCanvas.freeDrawingBrush.width = 4
       fabricCanvas.off('object:added', this.stackAddAction)
-      fabricCanvas.on('object:added', this.stackAddAction)
       fabricCanvas.off('object:moved', this.saveAnnotations)
+      fabricCanvas.off('mouse:move', this.onCanvasMouseMoved)
+      fabricCanvas.off('mouse:down', this.onCanvasClicked)
+      fabricCanvas.off('mouse:up', this.onCanvasReleased)
+      fabricCanvas.off('mouse:up', this.endDrawing)
+      fabricCanvas.on('object:added', this.stackAddAction)
       fabricCanvas.on('object:moved', this.saveAnnotations)
-      fabricCanvas.on('mouse:up', () => {
-        // this.$refs.loupe.style.display = 'none'
-        // this.$options.loupe = false
-        if (this.isDrawing) {
-          this.clearUndoneStack()
-          this.saveAnnotations()
-        }
-      })
+      fabricCanvas.on('mouse:up', this.endDrawing)
       fabricCanvas.on('mouse:move', this.onCanvasMouseMoved)
       fabricCanvas.on('mouse:down', this.onCanvasClicked)
       fabricCanvas.on('mouse:up', this.onCanvasReleased)
@@ -1184,6 +1185,14 @@ export default {
 
     removeEvents () {
       window.removeEventListener('keydown', this.onKeyDown)
+      this.container.removeEventListener(
+        'fullscreenchange', this.onFullScreenChange, false)
+      this.container.removeEventListener(
+        'mozfullscreenchange', this.onFullScreenChange, false)
+      this.container.removeEventListener(
+        'MSFullscreenChange', this.onFullScreenChange, false)
+      this.container.removeEventListener(
+        'webkitfullscreenchange', this.onFullScreenChange, false)
     },
 
     // Browsing
@@ -1231,6 +1240,14 @@ export default {
         const width = this.canvasWrapper.style.width
         const height = this.canvasWrapper.style.height
         this.previewViewer.updateLoupePosition(event, { width, height })
+      } else if (this.isMovie && this.$options.scrubbing) {
+        const x = event.e.clientX
+        if (x - this.$options.scrubStartX < 0) {
+          this.goPreviousFrame()
+        } else {
+          this.goNextFrame()
+        }
+        this.$options.scrubStartX = x
       }
     },
 
@@ -1241,16 +1258,22 @@ export default {
         const width = this.canvasWrapper.style.width
         const height = this.canvasWrapper.style.height
         this.previewViewer.updateLoupePosition(event, { width, height })
-        return false
+      } else if (event.button > 1 && this.isMovie) {
+        this.$options.scrubbing = true
+        this.$options.scrubStartX = event.e.clientX
+        this.$options.scrubStartTime = Number(this.currentTimeRaw)
       }
+      return false
     },
 
     onCanvasReleased (event) {
       if (this.isPicture && this.$options.loupe) {
         this.previewViewer.hideLoupe()
         this.$options.loupe = false
-        return false
+      } else if (this.isMovie && this.$options.scrubbing) {
+        this.$options.scrubbing = false
       }
+      return false
     },
 
     // Video progress
@@ -1289,7 +1312,9 @@ export default {
 
     updateProgressBar (currentTime) {
       if (!this.progress.getAttribute('max')) {
-        this.progress.setAttribute('max', this.videoDuration)
+        this.progress.setAttribute(
+          'max', this.videoDuration - this.frameFactor
+        )
       }
       this.progress.value = currentTime
     },

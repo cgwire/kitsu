@@ -13,15 +13,12 @@
   >
     <div class="content-wrapper full">
       <div class="flexrow">
-        <span
-          class="round-task-status-name"
-          :style="{
-            'background-color': statusColor,
-            color: comment.task_status.short_name === 'todo' ? '#333' : 'white'
-          }"
-        >
-          {{ comment.task_status.short_name }}
-        </span>
+        <validation-tag
+          class="flexrow-item"
+          :task="{ task_status_id: comment.task_status.id}"
+          :is-static="true"
+          :thin="!isChange"
+        />
         <people-avatar
           class="flexrow-item"
           :size="25"
@@ -145,7 +142,7 @@
       v-if="comment.previews.length > 0"
     >
       <router-link
-        class="flexrow-item round-task-status-name revision"
+        class="flexrow-item round-name revision"
         :to="previewRoute"
       >
         Revision {{ comment.previews[0].revision }}
@@ -162,15 +159,12 @@
   </article>
   <div class="empty-comment" v-else>
     <div class="flexrow content-wrapper">
-      <span
-        class="round-task-status-name flexrow-item"
-        :style="{
-          'border': '1px solid ' + (comment.task_status.short_name === 'todo' ? 'grey' : statusColor),
-          color: comment.task_status.short_name === 'todo' ? 'grey' : statusColor
-        }"
-      >
-        {{ comment.task_status.short_name }}
-      </span>
+      <validation-tag
+        class="flexrow-item"
+        :task="{ task_status_id: comment.task_status.id}"
+        :is-static="true"
+        :thin="!isChange"
+      />
       <people-avatar
         class="flexrow-item"
         :person="comment.person"
@@ -223,6 +217,7 @@ import CommentMenu from './CommentMenu.vue'
 import PeopleAvatar from './PeopleAvatar.vue'
 import PeopleName from './PeopleName.vue'
 import Checklist from './Checklist'
+import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
   name: 'comment',
@@ -234,7 +229,8 @@ export default {
     PaperclipIcon,
     PeopleAvatar,
     PeopleName,
-    ThumbsUpIcon
+    ThumbsUpIcon,
+    ValidationTag
   },
 
   data () {
@@ -269,6 +265,10 @@ export default {
       default: false
     },
     isLast: {
+      type: Boolean,
+      default: false
+    },
+    isChange: {
       type: Boolean,
       default: false
     }
@@ -607,13 +607,7 @@ article.comment {
   text-transform: uppercase;
 }
 
-.task-status-name {
-  margin-top: auto;
-  font-size: 0.8em;
-  text-transform: uppercase;
-}
-
-.round-task-status-name {
+.round-name {
   border-radius: 1em;
   font-size: 0.8em;
   margin: 0;

@@ -14,6 +14,7 @@
       }"
       :src="moviePath"
       :poster="posterPath"
+      type="video/mp4"
     >
     </video>
   </div>
@@ -76,6 +77,10 @@ export default {
     defaultHeight: {
       type: Number,
       default: 0
+    },
+    fullScreen: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -92,6 +97,8 @@ export default {
 
   mounted () {
     if (!this.container) return
+    this.$options.currentTimeCalls = []
+
     this.container.style.height = this.defaultHeight + 'px'
     this.isLoading = true
     if (this.isMuted) {
@@ -165,7 +172,9 @@ export default {
     },
 
     moviePath () {
-      if (this.extension === 'mp4' && this.isAvailable) {
+      if (this.extension === 'mp4' && this.isAvailable && !this.fullScreen) {
+        return `/api/movies/low/preview-files/${this.preview.id}.mp4`
+      } else if (this.extension === 'mp4' && this.isAvailable) {
         return `/api/movies/originals/preview-files/${this.preview.id}.mp4`
       } else {
         return null
@@ -202,6 +211,10 @@ export default {
 
     isMovie () {
       return this.extension === 'mp4'
+    },
+
+    frameFactor () {
+      return Math.round((1 / this.fps) * 10000) / 10000
     }
   },
 
@@ -238,10 +251,36 @@ export default {
       return { width, height }
     },
 
+    getLastPushedCurrentTime () {
+      const length = this.$options.currentTimeCalls.length
+      if (length > 0) {
+        return this.$options.currentTimeCalls[length - 1]
+      } else {
+        return this.currentTimeRaw
+      }
+    },
+
     setCurrentTime (currentTime) {
-      currentTime = roundToFrame(currentTime, this.fps)
-      if (this.video.currentTime !== currentTime) {
-        this.video.currentTime = currentTime
+      if (!this.$options.currentTimeCalls) {
+        this.$options.currentTimeCalls = []
+      }
+      this.$options.currentTimeCalls.push(currentTime)
+      if (!this.$options.running) this.runSetCurrentTime()
+    },
+
+    runSetCurrentTime () {
+      if (this.$options.currentTimeCalls.length === 0) {
+        this.$options.running = false
+      } else {
+        this.$options.running = true
+        const currentTime = this.$options.currentTimeCalls.shift()
+        // currentTime = roundToFrame(currentTime, this.fps)
+        if (this.video.currentTime !== currentTime + this.frameFactor) {
+          this.video.currentTime = currentTime + this.frameFactor
+        }
+        setTimeout(() => {
+          this.runSetCurrentTime()
+        }, 10)
       }
     },
 
@@ -277,9 +316,9 @@ export default {
 
     onTimeUpdate (time) {
       if (this.video) {
-        this.currentTimeRaw = this.video.currentTime
+        this.currentTimeRaw = this.video.currentTime - this.frameFactor
       } else {
-        this.currentTimeRaw = 0
+        this.currentTimeRaw = 0 + this.frameFactor
       }
       this.$emit('time-update', this.currentTimeRaw)
     },
@@ -297,7 +336,8 @@ export default {
     },
 
     goPreviousFrame () {
-      const newTime = this.video.currentTime - 1 / this.fps
+      const time = this.getLastPushedCurrentTime()
+      const newTime = roundToFrame(time, this.fps) - this.frameFactor
       if (newTime < 0) {
         this.setCurrentTime(0)
       } else {
@@ -306,8 +346,8 @@ export default {
     },
 
     goNextFrame () {
-      const frameFactor = Math.round((1 / this.fps) * 10000) / 10000
-      const newTime = roundToFrame(this.currentTimeRaw, this.fps) + frameFactor
+      const time = this.getLastPushedCurrentTime()
+      const newTime = roundToFrame(time, this.fps) + this.frameFactor
       if (newTime > this.video.duration) {
         this.setCurrentTime(this.video.duration)
       } else {

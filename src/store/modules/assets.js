@@ -606,6 +606,7 @@ const actions = {
       sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Asset')
         .forEach(descriptor => {
+          asset.data = asset.data || {}
           assetLine.push(asset.data[descriptor.field_name])
         })
       if (state.isAssetTime) {

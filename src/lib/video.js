@@ -39,7 +39,7 @@ export const formatTime = (seconds) => {
  * Convert time to a frame string.
  */
 export const formatFrame = (rawTime, fps) => {
-  let frame = Math.ceil(rawTime * fps)
-  if (frame === 0) frame = 1
+  let frame = Math.floor(rawTime.toFixed(5) * fps)
+  if (frame < 0) frame = 0
   return `${frame}`.padStart(3, '0')
 }

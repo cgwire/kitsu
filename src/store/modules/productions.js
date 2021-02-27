@@ -84,8 +84,9 @@ const state = { ...initialState }
 
 const helpers = {
   getProductionComponentPath (routeName, productionId, episodeId) {
+    let route = { name: 'open-productions' }
     if (episodeId) {
-      return {
+      route = {
         name: 'episode-' + routeName,
         params: {
           episode_id: episodeId,
@@ -99,9 +100,11 @@ const helpers = {
           production_id: productionId
         }
       }
-    } else {
-      return { name: 'open-productions' }
     }
+    if (['assets', 'shots'].includes(routeName)) {
+      route.query = { search: '' }
+    }
+    return route
   },
 
   isEmptyArray (production, field) {

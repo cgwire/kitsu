@@ -94,6 +94,7 @@
                 )"
                 :is-first="index === 0"
                 :is-last="index === pinnedCount"
+                :is-change="isStatusChange(index)"
                 @ack-comment="ackComment"
                 @pin-comment="onPinComment"
                 @edit-comment="onEditComment"
@@ -1121,6 +1122,15 @@ export default {
           }
         }
       }
+    },
+
+    isStatusChange (index) {
+      const comments = this.currentTaskComments
+      const comment = comments[index]
+      return (
+        index === comments.length - 1 ||
+        comment.task_status_id !== comments[index + 1].task_status_id
+      )
     }
   },
 

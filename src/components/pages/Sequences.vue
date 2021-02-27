@@ -337,9 +337,11 @@ export default {
       this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
 
       if (!this.isTVShow) {
-        this.initSequences()
-          .then(this.handleModalsDisplay)
-          .catch(err => console.error(err))
+        this.loadShots(() => {
+          this.initSequences()
+            .then(this.handleModalsDisplay)
+            .catch(err => console.error(err))
+        })
       }
     },
 

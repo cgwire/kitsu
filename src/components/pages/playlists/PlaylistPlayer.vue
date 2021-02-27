@@ -64,8 +64,10 @@
         :entities="entityListToCompare"
         :is-repeating="isRepeating"
         :muted="true"
+        :full-screen="fullScreen"
         name="comparison"
-        v-show="isComparing && isCurrentPreviewMovie && isMovieComparison && !isLoading"
+        v-show="isComparing && isCurrentPreviewMovie &&
+                isMovieComparison && !isLoading"
       />
 
       <div
@@ -109,6 +111,7 @@
         :entities="entityList"
         :is-repeating="isRepeating"
         :muted="isMuted"
+        :full-screen="fullScreen"
         @repeat="onVideoRepeated"
         @metadata-loaded="onMetadataLoaded"
         @entity-change="onPlayerEntityChange"
@@ -160,6 +163,7 @@
       <div
         class="canvas-wrapper"
         ref="canvas-wrapper"
+        oncontextmenu="return false;"
         v-show="!isCurrentPreviewFile"
       >
         <canvas
@@ -788,6 +792,7 @@ export default {
       entityList: [],
       entityListToCompare: [],
       fabricCanvas: null,
+      fullScreen: false,
       isDlButtonsHidden: true,
       isCommentsHidden: true,
       isComparing: false,
@@ -832,6 +837,7 @@ export default {
   },
 
   mounted () {
+    this.$options.scrubbing = false
     if (this.entities) {
       this.entityList = Object.values(this.entities)
     } else {
@@ -844,9 +850,7 @@ export default {
       })
     }
     this.$nextTick(() => {
-      window.addEventListener('keydown', this.onKeyDown, false)
-      window.addEventListener('resize', this.onWindowResize)
-      if (!this.$el.nomousemove) this.$el.onmousemove = this.onMouseMove
+      this.configureEvents()
       this.setupFabricCanvas()
       this.resetCanvas()
       this.setPlayerSpeed(1)
@@ -855,9 +859,7 @@ export default {
   },
 
   beforeDestroy () {
-    window.removeEventListener('keydown', this.onKeyDown)
-    window.removeEventListener('resize', this.onWindowResize)
-    this.$el.onmousemove = null
+    this.removeEvents()
   },
 
   computed: {
@@ -1115,6 +1117,10 @@ export default {
       }
     },
 
+    frameFactor () {
+      return Math.round((1 / this.fps) * 10000) / 10000
+    },
+
     fps () {
       return this.currentProduction
         ? this.currentProduction.fps || 24
@@ -1165,6 +1171,34 @@ export default {
       'removeBuildJob',
       'runPlaylistBuild'
     ]),
+
+    configureEvents () {
+      window.addEventListener('keydown', this.onKeyDown, false)
+      window.addEventListener('resize', this.onWindowResize)
+      if (!this.$el.nomousemove) this.$el.onmousemove = this.onMouseMove
+      this.container.addEventListener(
+        'fullscreenchange', this.onFullScreenChange, false)
+      this.container.addEventListener(
+        'mozfullscreenchange', this.onFullScreenChange, false)
+      this.container.addEventListener(
+        'MSFullscreenChange', this.onFullScreenChange, false)
+      this.container.addEventListener(
+        'webkitfullscreenchange', this.onFullScreenChange, false)
+    },
+
+    removeEvents () {
+      window.removeEventListener('keydown', this.onKeyDown)
+      window.removeEventListener('resize', this.onWindowResize)
+      this.$el.onmousemove = null
+      this.container.removeEventListener(
+        'fullscreenchange', this.onFullScreenChange, false)
+      this.container.removeEventListener(
+        'mozfullscreenchange', this.onFullScreenChange, false)
+      this.container.removeEventListener(
+        'MSFullscreenChange', this.onFullScreenChange, false)
+      this.container.removeEventListener(
+        'webkitfullscreenchange', this.onFullScreenChange, false)
+    },
 
     getBuildPath (job) {
       return `/api/data/playlists/${this.playlist.id}/jobs/${job.id}/build/mp4`
@@ -1381,6 +1415,7 @@ export default {
       }
       this.container.setAttribute('data-fullscreen', !!true)
       document.activeElement.blur()
+      this.fullScreen = true
     },
 
     exitFullScreen () {
@@ -1395,6 +1430,7 @@ export default {
       }
       this.container.setAttribute('data-fullscreen', !!false)
       document.activeElement.blur()
+      this.fullScreen = false
     },
 
     isFullScreen () {
@@ -1480,6 +1516,15 @@ export default {
     onToggleSoundClicked () {
       this.clearFocus()
       this.isMuted = !this.isMuted
+    },
+
+    onFullScreenChange () {
+      if (
+        this.fullScreen &&
+        !this.isFullScreen()
+      ) {
+        this.fullScreen = false
+      }
     },
 
     onFullscreenClicked () {
@@ -1622,16 +1667,17 @@ export default {
 
     onTimeUpdate () {
       if (this.rawPlayer && this.rawPlayer.currentPlayer) {
-        this.currentTimeRaw = this.rawPlayer.currentPlayer.currentTime
+        this.currentTimeRaw =
+          this.rawPlayer.currentPlayer.currentTime - this.frameFactor
       } else {
-        this.currentTimeRaw = 0
+        this.currentTimeRaw = 0 + this.frameFactor
       }
       this.currentTime = this.formatTime(this.currentTimeRaw)
       this.updateProgressBar()
     },
 
     onMaxDurationUpdate (duration) {
-      this.maxDurationRaw = duration
+      this.maxDurationRaw = duration - this.frameFactor
       this.maxDuration = this.formatTime(duration)
       if (this.progress) {
         this.progress.setAttribute('max', this.maxDurationRaw)
@@ -1790,9 +1836,6 @@ export default {
 
               // Container size
               let fullWidth = this.$refs['video-container'].offsetWidth
-              if (!this.isCommentsHidden) {
-                fullWidth -= 450 // task info widget width
-              }
               const fullHeight = this.$refs['video-container'].offsetHeight
               if (this.isComparing && !this.isComparisonOverlay) {
                 fullWidth = Math.round(fullWidth / 2)
@@ -2230,6 +2273,36 @@ export default {
             this.loadAnnotation(this.getAnnotation(0))
           }
         })
+    },
+
+    // Scrubbing
+
+    onCanvasMouseMoved (event) {
+      if (this.isCurrentPreviewMovie && this.$options.scrubbing) {
+        const x = event.e.clientX
+        if (x - this.$options.scrubStartX < 0) {
+          this.goPreviousFrame()
+        } else {
+          this.goNextFrame()
+        }
+        this.$options.scrubStartX = x
+      }
+    },
+
+    onCanvasClicked (event) {
+      if (event.button > 1 && this.isCurrentPreviewMovie) {
+        this.$options.scrubbing = true
+        this.$options.scrubStartX = event.e.clientX
+        this.$options.scrubStartTime = Number(this.currentTimeRaw)
+      }
+      return false
+    },
+
+    onCanvasReleased (event) {
+      if (this.isCurrentPreviewMovie && this.$options.scrubbing) {
+        this.$options.scrubbing = false
+      }
+      return false
     }
   },
 

@@ -28,8 +28,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-img {
+.illustration {
   max-width: 1000px;
+  margin: auto;
 }
 
 p {

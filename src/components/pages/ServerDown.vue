@@ -1,6 +1,8 @@
 <template>
   <div class="server-down page has-text-centered">
-    <img src="@/assets/illustrations/500.png">
+    <div class="illustration">
+      <img src="@/assets/illustrations/500.png">
+    </div>
     <h1 class="title">{{ $t('server_down.title') }}</h1>
     <p>
       {{ $t('server_down.text') }}
@@ -36,8 +38,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-img {
+.illustration {
   max-width: 1000px;
+  margin: auto;
 }
 
 p {
