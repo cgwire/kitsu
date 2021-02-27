@@ -202,6 +202,10 @@ export default {
 
     isMovie () {
       return this.extension === 'mp4'
+    },
+
+    frameFactor () {
+      return Math.round((1 / this.fps) * 10000) / 10000
     }
   },
 
@@ -238,10 +242,36 @@ export default {
       return { width, height }
     },
 
+    getLastPushedCurrentTime () {
+      const length = this.$options.currentTimeCalls.length
+      if (length > 0) {
+        return this.$options.currentTimeCalls[length - 1]
+      } else {
+        return this.currentTimeRaw
+      }
+    },
+
     setCurrentTime (currentTime) {
-      currentTime = roundToFrame(currentTime, this.fps)
-      if (this.video.currentTime !== currentTime) {
-        this.video.currentTime = currentTime
+      if (!this.$options.currentTimeCalls) {
+        this.$options.currentTimeCalls = []
+      }
+      this.$options.currentTimeCalls.push(currentTime)
+      if (!this.$options.running) this.runSetCurrentTime()
+    },
+
+    runSetCurrentTime () {
+      if (this.$options.currentTimeCalls.length === 0) {
+        this.$options.running = false
+      } else {
+        this.$options.running = true
+        const currentTime = this.$options.currentTimeCalls.shift()
+        // currentTime = roundToFrame(currentTime, this.fps)
+        if (this.video.currentTime !== currentTime + this.frameFactor) {
+          this.video.currentTime = currentTime + this.frameFactor
+        }
+        setTimeout(() => {
+          this.runSetCurrentTime()
+        }, 10)
       }
     },
 
@@ -277,9 +307,9 @@ export default {
 
     onTimeUpdate (time) {
       if (this.video) {
-        this.currentTimeRaw = this.video.currentTime
+        this.currentTimeRaw = this.video.currentTime - this.frameFactor
       } else {
-        this.currentTimeRaw = 0
+        this.currentTimeRaw = 0 + this.frameFactor
       }
       this.$emit('time-update', this.currentTimeRaw)
     },
@@ -297,7 +327,8 @@ export default {
     },
 
     goPreviousFrame () {
-      const newTime = this.video.currentTime - 1 / this.fps
+      const time = this.getLastPushedCurrentTime()
+      const newTime = roundToFrame(time, this.fps) - this.frameFactor
       if (newTime < 0) {
         this.setCurrentTime(0)
       } else {
@@ -306,8 +337,8 @@ export default {
     },
 
     goNextFrame () {
-      const frameFactor = Math.round((1 / this.fps) * 10000) / 10000
-      const newTime = roundToFrame(this.currentTimeRaw, this.fps) + frameFactor
+      const time = this.getLastPushedCurrentTime()
+      const newTime = roundToFrame(time, this.fps) + this.frameFactor
       if (newTime > this.video.duration) {
         this.setCurrentTime(this.video.duration)
       } else {

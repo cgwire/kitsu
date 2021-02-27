@@ -543,6 +543,10 @@ export default {
       return this.currentProduction.fps || 24
     },
 
+    frameFactor () {
+      return Math.round((1 / this.fps) * 10000) / 10000
+    },
+
     extension () {
       return this.currentPreview ? this.currentPreview.extension : ''
     },
@@ -673,7 +677,7 @@ export default {
     changeMaxDuration (duration) {
       if (duration) {
         this.maxDuration = this.formatTime(duration)
-        this.videoDuration = duration
+        this.videoDuration = duration - this.frameFactor
         this.progress.setAttribute('max', this.videoDuration)
       } else {
         this.maxDuration = '00:00.000'
@@ -1289,7 +1293,9 @@ export default {
 
     updateProgressBar (currentTime) {
       if (!this.progress.getAttribute('max')) {
-        this.progress.setAttribute('max', this.videoDuration)
+        this.progress.setAttribute(
+          'max', this.videoDuration - this.frameFactor
+        )
       }
       this.progress.value = currentTime
     },
