@@ -95,6 +95,10 @@ export default {
 
     player2 () {
       return this.$refs.player2
+    },
+
+    frameFactor () {
+      return Math.round((1 / this.fps) * 10000) / 10000
     }
   },
 
@@ -281,6 +285,7 @@ export default {
     },
 
     playNext () {
+      if (!this.isPlaying) return
       if (this.isRepeating) {
         this.currentPlayer.currentTime = 0
         this.currentPlayer.play()

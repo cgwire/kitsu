@@ -1117,6 +1117,10 @@ export default {
       }
     },
 
+    frameFactor () {
+      return Math.round((1 / this.fps) * 10000) / 10000
+    },
+
     fps () {
       return this.currentProduction
         ? this.currentProduction.fps || 24
@@ -1659,16 +1663,17 @@ export default {
 
     onTimeUpdate () {
       if (this.rawPlayer && this.rawPlayer.currentPlayer) {
-        this.currentTimeRaw = this.rawPlayer.currentPlayer.currentTime
+        this.currentTimeRaw =
+          this.rawPlayer.currentPlayer.currentTime - this.frameFactor
       } else {
-        this.currentTimeRaw = 0
+        this.currentTimeRaw = 0 + this.frameFactor
       }
       this.currentTime = this.formatTime(this.currentTimeRaw)
       this.updateProgressBar()
     },
 
     onMaxDurationUpdate (duration) {
-      this.maxDurationRaw = duration
+      this.maxDurationRaw = duration - this.frameFactor
       this.maxDuration = this.formatTime(duration)
       if (this.progress) {
         this.progress.setAttribute('max', this.maxDurationRaw)
