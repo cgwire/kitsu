@@ -586,7 +586,7 @@
         :class="{
           'dl-button': true,
           'mp4-button': true,
-          'disabled': !isCurrentUserManager,
+          'disabled': !isCurrentUserManager || isJobRunning,
           hidden: isDlButtonsHidden
         }"
         @click="onBuildClicked"
@@ -634,7 +634,6 @@
             <button
               class="delete-job-button"
               @click="onRemoveBuildJob(job)"
-              v-else
             >
               x
             </button>
@@ -1161,6 +1160,12 @@ export default {
 
     video () {
       return this.$refs.movie
+    },
+
+    isJobRunning () {
+      return this.playlist.build_jobs
+        .filter(job => job.status === 'running')
+        .length !== 0
     }
   },
 
@@ -2203,7 +2208,7 @@ export default {
     },
 
     onBuildClicked () {
-      if (this.isCurrentUserManager) {
+      if (this.isCurrentUserManager && !this.isJobRunning) {
         this.runPlaylistBuild(this.playlist)
       }
     },
@@ -2812,6 +2817,10 @@ progress {
 .comparison-index {
   min-width: 30px;
   margin: 0;
+}
+
+.disabled {
+  color: $grey;
 }
 
 @media only screen and (min-width: 1600px) {
