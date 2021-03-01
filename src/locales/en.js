@@ -681,6 +681,7 @@ export default {
     title: 'Task Types',
     fields: {
       dedicated_to: 'For',
+      department: 'Department',
       color: 'Color',
       name: 'Name',
       allow_timelog: 'Timelog',

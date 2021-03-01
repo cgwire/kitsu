@@ -9,8 +9,8 @@
 
     <task-type-list
       :entries="taskTypes"
-      :is-loading="loading.taskTypes"
-      :is-error="errors.taskTypes"
+      :is-loading="loading.taskTypes || loading.departments"
+      :is-error="errors.taskTypes || errors.departments"
       @update-priorities="updatePriorities"
       @edit-clicked="onEditClicked"
       @delete-clicked="onDeleteClicked"
@@ -61,11 +61,13 @@ export default {
     return {
       errors: {
         taskTypes: false,
+        departments: false,
         edit: false,
         del: false
       },
       loading: {
         taskTypes: false,
+        departments: false,
         edit: false,
         del: false
       },
@@ -88,6 +90,17 @@ export default {
   mounted () {
     this.loading.taskTypes = true
     this.errors.taskTypes = false
+    this.loading.departments = true
+    this.errors.departments = false
+    this.loadDepartments()
+      .then(() => {
+        this.loading.departments = false
+      })
+      .catch((err) => {
+        console.error(err)
+        this.loading.departments = false
+        this.errors.departments = true
+      })
     this.loadTaskTypes()
       .then(() => {
         this.loading.taskTypes = false
@@ -103,7 +116,8 @@ export default {
     ...mapActions([
       'editTaskType',
       'deleteTaskType',
-      'loadTaskTypes'
+      'loadTaskTypes',
+      'loadDepartments'
     ]),
 
     confirmEditTaskType (form) {

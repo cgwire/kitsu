@@ -11,7 +11,8 @@ export default {
       color: taskType.color,
       priority: Number(taskType.priority),
       for_shots: Boolean(taskType.for_shots === 'true'),
-      allow_timelog: Boolean(taskType.allow_timelog === 'true')
+      allow_timelog: Boolean(taskType.allow_timelog === 'true'),
+      department_id: taskType.department_id
     }
     return client.ppost('/api/data/task-types/', data)
   },
@@ -19,7 +20,8 @@ export default {
   updateTaskType (taskType) {
     const data = {
       name: taskType.name,
-      color: taskType.color
+      color: taskType.color,
+      department_id: taskType.department_id
     }
     if (taskType.priority && taskType.priority > 0) {
       data.priority = Number(taskType.priority)

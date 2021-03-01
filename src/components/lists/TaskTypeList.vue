@@ -11,6 +11,9 @@
           <th scope="col" class="allow-timelog">
             {{ $t('task_types.fields.allow_timelog') }}
           </th>
+          <th scope="col">
+            {{ $t('task_types.fields.department') }}
+          </th>
           <th scope="col" class="actions"></th>
         </tr>
       </thead>
@@ -38,6 +41,12 @@
           <td class="priority">{{ taskType.priority }}</td>
           <td class="allow-timelog">
             {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
+          </td>
+          <td>
+            <department-name
+              :department="getDepartments(taskType.department_id)"
+              v-if="!isEmpty(taskType.department_id)"
+            />
           </td>
           <row-actions-cell
             :taskType-id="taskType.id"
@@ -70,6 +79,12 @@
           <td class="allow-timelog">
             {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
           </td>
+          <td>
+            <department-name
+              :department="getDepartments(taskType.department_id)"
+              v-if="!isEmpty(taskType.department_id)"
+            />
+          </td>
           <row-actions-cell
             :taskType-id="taskType.id"
             @delete-clicked="$emit('delete-clicked', taskType)"
@@ -98,6 +113,7 @@ import draggable from 'vuedraggable'
 import RowActionsCell from '../cells/RowActionsCell'
 import TableInfo from '../widgets/TableInfo'
 import TaskTypeCell from '../cells/TaskTypeName'
+import DepartmentName from '../widgets/DepartmentName.vue'
 
 export default {
   name: 'task-type-list',
@@ -117,6 +133,7 @@ export default {
 
   components: {
     draggable,
+    DepartmentName,
     RowActionsCell,
     TableInfo,
     TaskTypeCell
@@ -126,6 +143,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'getDepartments'
     ]),
 
     assetTaskTypes () {
@@ -169,6 +187,9 @@ export default {
         forms.push(form)
       })
       this.$emit('update-priorities', forms)
+    },
+    isEmpty (value) {
+      return value === undefined || value === null || value === ''
     }
   },
 
