@@ -408,22 +408,24 @@ export default {
       error_upload: 'An error occurred while uploading your CSV file.'
     },
     fields: {
+      active: 'Active',
+      departments: 'Departments',
+      email: 'Email',
       first_name: 'First name',
       last_name: 'Last name',
-      email: 'Email',
-      phone: 'Phone',
-      role: 'Role',
       old_password: 'Current password',
       password: 'New password',
       password_2: 'New password (repeat)',
-      active: 'Active'
+      phone: 'Phone',
+      role: 'Role'
     },
     list: {
-      name: 'Name',
+      active: 'Active',
+      departments: 'Departments',
       email: 'Email',
+      name: 'Name',
       phone: 'Phone',
-      role: 'Role',
-      active: 'Active'
+      role: 'Role'
     },
     role: {
       admin: 'Studio Manager',

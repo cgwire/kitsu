@@ -33,9 +33,6 @@
         <department-name
           :department="department"
         />
-        <!-- <task&#45;type&#45;name -->
-        <!--   :task&#45;type="taskType" -->
-        <!-- /> -->
       </div>
     </div>
   </div>
@@ -76,6 +73,10 @@ export default {
     value: {
       default: '',
       type: String
+    },
+    selectableDepartments: {
+      type: Array,
+      required: false
     }
   },
 
@@ -87,8 +88,13 @@ export default {
       'departments'
     ]),
 
+    departmentsToTakeAccount () {
+      if (this.selectableDepartments) return this.selectableDepartments
+      return this.departments
+    },
+
     departmentList () {
-      return [{ name: '---', id: null, color: '#000000' }, ...this.departments]
+      return [{ name: '---', id: null, color: '#000000' }, ...this.departmentsToTakeAccount]
     },
 
     departmentMap () {
