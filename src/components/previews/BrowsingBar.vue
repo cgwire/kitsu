@@ -5,17 +5,17 @@
     icon="left"
     :title="$t('playlists.actions.files_previous')"
     @click="$emit('previous-clicked')"
-    v-if="isBigDisplay"
+    v-if="isBigDisplay || !isMovie"
   />
 
   <div
     class="flexrow-item bar-element current-index"
     :title="$t('playlists.actions.files_position')"
     @click="$emit('current-index-clicked')"
-    v-if="isBigDisplay"
+    v-if="isBigDisplay || !isMovie"
   >
     <span>{{ currentIndex }}</span>
-    <span v-if="fullScreen"> / {{ previews.length }}</span>
+    <span v-if="fullScreen || !isMovie"> / {{ previews.length }}</span>
   </div>
 
   <button-simple
@@ -23,7 +23,7 @@
     icon="right"
     :title="$t('playlists.actions.files_next')"
     @click="$emit('next-clicked')"
-    v-if="isBigDisplay"
+    v-if="isBigDisplay || !isMovie"
   />
 
   <button-simple
@@ -91,6 +91,14 @@ export default {
 
     isBigDisplay () {
       return (!this.light || this.fullScreen) && this.previews.length > 1
+    },
+
+    isMovie () {
+      if (this.previews.length < this.currentIndex) {
+        return false
+      } else {
+        return this.previews[this.currentIndex - 1].extension === 'mp4'
+      }
     }
   },
 
