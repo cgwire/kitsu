@@ -31,6 +31,10 @@ describe('time', () => {
     expect(date.toString()).toEqual(
       moment.tz('2019-09-01', 'UTC').toString()
     )
+    date = parseSimpleDate(null)
+    expect(formatSimpleDate(date)).toEqual(
+      formatSimpleDate(new Date())
+    )
   })
 
   test('formatSimpleDate', () => {
@@ -118,4 +122,5 @@ describe('time', () => {
   })
   test.skip('minutesToDays', () => {
   })
+
 })

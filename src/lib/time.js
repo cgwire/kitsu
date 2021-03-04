@@ -12,7 +12,11 @@ export const parseDate = (date) => {
 }
 
 export const parseSimpleDate = (date) => {
-  return moment.tz(date, 'YYYY-MM-DD', 'UTC')
+  if (date) {
+    return moment.tz(date, 'YYYY-MM-DD', 'UTC')
+  } else {
+    return moment.tz(new Date(), 'YYYY-MM-DD', 'UTC')
+  }
 }
 
 export const formatSimpleDate = (date) => {
