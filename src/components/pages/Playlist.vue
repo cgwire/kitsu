@@ -2,11 +2,13 @@
   <div class="playlists page fixed-page dark">
     <div class="columns">
       <div
+        ref="playlistList"
         :class="{
           'playlist-list-column': true,
           column: true,
           toggled: isListToggled
         }"
+        v-scroll="onPlaylistListScroll"
         v-if="playlists.length > 0"
       >
 
@@ -55,7 +57,7 @@
               'for-client': playlist.for_client || false,
               selected: playlist.id === currentPlaylist.id
             }"
-            v-for="playlist in sortedPlaylists"
+            v-for="playlist in playlists"
           >
             <div v-if="!isListToggled">
             <span>
@@ -441,6 +443,7 @@ export default {
       currentEntities: {},
       isAddingEntity: false,
       isListToggled: false,
+      page: 1,
       sortedPlaylists: [],
       playlistToEdit: {
         name: `${moment().format('YYYY-MM-DD HH:mm:ss')}`,
@@ -571,6 +574,7 @@ export default {
       'displayMoreShots',
       'editPlaylist',
       'getPending',
+      'loadMorePlaylists',
       'loadPlaylist',
       'loadPlaylists',
       'loadEntityPreviewFiles',
@@ -626,7 +630,7 @@ export default {
       }
     },
 
-    loadAssetsData (callback) {
+    loadAssetsData () {
       if (this.isTVShow || this.displayedAssets.length === 0) {
         return this.loadAssets()
       } else {
@@ -634,23 +638,55 @@ export default {
       }
     },
 
-    loadPlaylistsData (callback) {
+    loadPlaylistsData (force = false) {
       const setFirstPlaylist = () => {
         this.setCurrentPlaylist(() => {
           if (!this.currentPlaylist || !this.currentPlaylist.id) {
             this.goFirstPlaylist()
           }
+          return Promise.resolve()
         })
       }
-      if (this.playlists.length === 0) {
-        this.loadPlaylists((err) => {
-          if (err) this.errors.loadPlaylists = true
-          if (!err) setFirstPlaylist()
-          if (callback) callback()
+      if (this.playlists.length === 0 || force) {
+        return this.loadPlaylists({
+          sortBy: this.currentSort,
+          page: this.page
         })
+          .then(() => {
+            return setFirstPlaylist()
+          })
+          .catch(err => {
+            console.error(err)
+            this.errors.loadPlaylists = true
+            return Promise.reject(err)
+          })
       } else {
-        setFirstPlaylist()
-        if (callback) callback()
+        return setFirstPlaylist()
+      }
+    },
+
+    onPlaylistListScroll (event, position) {
+      if (this.$options.silentMore) return
+      const listEl = this.$refs.playlistList
+      const maxHeight = listEl.scrollHeight - listEl.offsetHeight
+      if (maxHeight < (position.scrollTop + 20)) {
+        this.$options.silentMore = true
+        this.page++
+        this.loadMorePlaylists({
+          sortBy: this.currentSort,
+          page: this.page
+        })
+          .then(playlists => {
+            if (playlists.length !== 0) {
+              this.$options.silentMore = false
+            }
+          })
+          .catch(err => {
+            console.error(err)
+            this.$options.silentMore = false
+            this.errors.loadPlaylists = true
+            return Promise.reject(err)
+          })
       }
     },
 
@@ -1066,13 +1102,15 @@ export default {
         this.loadShotsData(() => {
           this.loadAssetsData()
             .then(() => {
-              this.loadPlaylistsData(() => {
-                this.loading.playlists = false
-                this.resetPlaylist()
-                setTimeout(() => {
-                  this.loading.playlistsInit = false
-                }, 300)
-              })
+              this.page = 1
+              return this.loadPlaylistsData()
+            })
+            .then(() => {
+              this.loading.playlists = false
+              this.resetPlaylist()
+              setTimeout(() => {
+                this.loading.playlistsInit = false
+              }, 300)
             })
         })
       }
@@ -1097,6 +1135,7 @@ export default {
 
     currentPlaylist () {
       if (this.currentPlaylist.shots) {
+        this.$options.silentMore = false
         this.isAddingEntity =
           Object.keys(this.currentPlaylist.shots).length === 0
       } else {
@@ -1117,12 +1156,16 @@ export default {
     },
 
     playlists () {
-      this.resetSorting()
     },
 
     currentSort () {
       localStorage.setItem('playlist-sort', this.currentSort)
-      this.resetSorting()
+      this.loading.playlists = true
+      this.page = 1
+      this.loadPlaylistsData(true)
+        .then(() => {
+          this.loading.playlists = false
+        })
     }
   },
 

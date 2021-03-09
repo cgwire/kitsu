@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import playlistsApi from '../api/playlists'
-import { sortPlaylists, sortByDate } from '../../lib/sorting'
+import { sortByDate } from '../../lib/sorting'
 import { removeModelFromList, updateModelFromList } from '../../lib/models'
 
 import {
-  LOAD_PLAYLISTS_START,
-  LOAD_PLAYLISTS_ERROR,
+  ADD_PLAYLISTS,
+
   LOAD_PLAYLISTS_END,
 
   LOAD_PLAYLIST_START,
@@ -49,26 +49,39 @@ const getters = {
 
 const actions = {
 
-  loadPlaylists ({ commit, rootGetters }, callback) {
+  loadPlaylists (
+    { commit, rootGetters }, { sortBy = 'updated_at', page = 1 }
+  ) {
     const production = rootGetters.currentProduction
     let episode = rootGetters.currentEpisode
     const isTVShow = rootGetters.isTVShow
 
-    if (isTVShow && !episode) {
-      if (callback) return callback()
-      else return null
-    }
+    if (isTVShow && !episode) return Promise.resolve([])
+    if (!isTVShow) episode = null
 
-    if (!isTVShow) {
-      episode = null
-    }
+    commit(LOAD_PLAYLISTS_END, [])
+    return playlistsApi.getPlaylists(production, episode, sortBy, page)
+      .then(playlists => {
+        commit(LOAD_PLAYLISTS_END, playlists)
+        return Promise.resolve(playlists)
+      })
+  },
 
-    commit(LOAD_PLAYLISTS_START)
-    playlistsApi.getPlaylists(production, episode, (err, playlists) => {
-      if (err) commit(LOAD_PLAYLISTS_ERROR)
-      else commit(LOAD_PLAYLISTS_END, playlists)
-      if (callback) callback(err)
-    })
+  loadMorePlaylists (
+    { commit, rootGetters }, { sortBy = 'updated_at', page = 1 }
+  ) {
+    const production = rootGetters.currentProduction
+    let episode = rootGetters.currentEpisode
+    const isTVShow = rootGetters.isTVShow
+
+    if (state.playlists.length === 0) return Promise.resolve([])
+    if (isTVShow && !episode) return Promise.resolve([])
+    if (!isTVShow) episode = null
+    return playlistsApi.getPlaylists(production, episode, sortBy, page)
+      .then(playlists => {
+        commit(ADD_PLAYLISTS, playlists)
+        return Promise.resolve(playlists)
+      })
   },
 
   loadPlaylist ({ commit, rootGetters }, { playlist, callback }) {
@@ -207,17 +220,10 @@ const actions = {
 }
 
 const mutations = {
-  [LOAD_PLAYLISTS_START] (state) {
-  },
-
-  [LOAD_PLAYLISTS_ERROR] (state) {
-  },
-
   [LOAD_PLAYLISTS_END] (state, playlists) {
     state.playlists = playlists
-    state.playlists = sortPlaylists(state.playlists)
     state.playlistMap = {}
-    playlists.forEach((playlist) => {
+    playlists.forEach(playlist => {
       if (!playlist.entities) playlist.entities = []
       state.playlistMap[playlist.id] = playlist
     })
@@ -343,12 +349,14 @@ const mutations = {
 
   [REMOVE_BUILD_JOB] (state, job) {
     const playlist = state.playlistMap[job.playlist_id]
-    Vue.set(playlist, 'build_jobs', removeModelFromList(playlist.build_jobs, job))
+    Vue.set(
+      playlist, 'build_jobs', removeModelFromList(playlist.build_jobs, job)
+    )
   },
 
   [CHANGE_PLAYLIST_TYPE] (state, { playlist, taskTypeId }) {
     if (playlist) {
-      playlist.shots.forEach((entity) => {
+      playlist.shots.forEach(entity => {
         if (entity.preview_files[taskTypeId]) {
           const previewFile = entity.preview_files[taskTypeId][0]
           entity.preview_file_id = previewFile.id
@@ -359,6 +367,10 @@ const mutations = {
         }
       })
     }
+  },
+
+  [ADD_PLAYLISTS] (state, playlists) {
+    state.playlists = state.playlists.concat(playlists)
   },
 
   [RESET_ALL] (state) {
