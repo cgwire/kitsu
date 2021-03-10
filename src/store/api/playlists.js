@@ -1,14 +1,14 @@
 import client from './client'
 
 export default {
-  getPlaylists (production, episode, callback) {
+  getPlaylists (production, episode, sortBy, page) {
     let path = `/api/data/projects/${production.id}`
     if (episode) {
       path += `/episodes/${episode.id}/playlists`
     } else {
-      path += '/playlists'
+      path += `/playlists?sort_by=${sortBy}&page=${page}`
     }
-    client.get(path, callback)
+    return client.pget(path)
   },
 
   getPlaylist (production, playlist, callback) {
@@ -45,27 +45,17 @@ export default {
   },
 
   deletePlaylist (playlist, callback) {
-    client.del(`/api/data/playlists/${playlist.id}`, callback)
+    return client.del(`/api/data/playlists/${playlist.id}`, callback)
   },
 
   deleteBuildJob (job, callback) {
-    return new Promise((resolve, reject) => {
-      const path = `/api/data/playlists/${job.playlist_id}/jobs/${job.id}`
-      client.del(path, (err) => {
-        if (err) reject(err)
-        else resolve()
-      })
-    })
+    const path = `/api/data/playlists/${job.playlist_id}/jobs/${job.id}`
+    return client.pdel(path)
   },
 
   runPlaylistBuild (playlist) {
-    return new Promise((resolve, reject) => {
-      const path = `/api/data/playlists/${playlist.id}/build/mp4`
-      client.get(path, (err) => {
-        if (err) reject(err)
-        else resolve()
-      })
-    })
+    const path = `/api/data/playlists/${playlist.id}/build/mp4`
+    return client.pget(path)
   },
 
   loadTempPlaylist (production, taskIds) {

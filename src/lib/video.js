@@ -23,6 +23,7 @@ export const frameToSeconds = (nbFrames, production, shot) => {
  * Display time at this format.
  */
 export const formatTime = (seconds) => {
+  if (seconds < 0) seconds = 0
   let milliseconds = `${Math.round((seconds % 1) * 1000)}`.padStart(3, '0')
   milliseconds = '.' + milliseconds
   try {

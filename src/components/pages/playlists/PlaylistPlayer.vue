@@ -1350,6 +1350,7 @@ export default {
 
     playEntity (entityIndex) {
       const entity = this.entityList[entityIndex]
+      const wasDrawing = this.isDrawing === true
       this.hideCanvas()
       this.clearCanvas()
       if (entity.preview_file_extension === 'mp4') {
@@ -1364,12 +1365,20 @@ export default {
           if (this.isPlaying) {
             this.rawPlayer.play()
             if (this.isComparing) this.$refs['raw-player-comparison'].play()
+          } else {
+            this.showCanvas()
           }
         })
       } else {
         this.playingEntityIndex = entityIndex
         const annotation = this.getAnnotation(0)
         this.loadAnnotation(annotation)
+        if (wasDrawing) {
+          setTimeout(() => {
+            this.isDrawing = true
+            this.fabricCanvas.isDrawingMode = true
+          }, 100)
+        }
       }
       this.scrollToEntity(this.playingEntityIndex)
     },
@@ -2038,8 +2047,6 @@ export default {
           this.currentTimeRaw = currentTime
           this.updateProgressBar()
         }
-        this.fabricCanvas.isDrawingMode = false
-        this.isDrawing = false
         this.clearCanvas()
 
         let scaleMultiplierX = 1

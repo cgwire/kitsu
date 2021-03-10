@@ -443,6 +443,8 @@ export const ADD_NEW_JOB = 'ADD_NEW_JOB'
 export const MARK_JOB_AS_DONE = 'MARK_JOB_AS_DONE'
 export const REMOVE_BUILD_JOB = 'REMOVE_BUILD_JOB'
 
+export const ADD_PLAYLISTS = 'ADD_PLAYLISTS'
+
 // Notifications
 
 export const CLEAR_NOTIFICATIONS = 'CLEAR_NOTIFICATIONS'
