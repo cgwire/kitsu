@@ -1359,6 +1359,11 @@ export default {
           setTimeout(this.comparisonViewer.resetPicture, 20)
         }
       }
+      this.$nextTick(() => {
+        if (this.previewViewer && this.previewViewer.isBroken) {
+          this.clearCanvas()
+        }
+      })
       this.setDefaultComparisonTaskType()
     },
 
