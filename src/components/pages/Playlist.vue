@@ -1166,6 +1166,10 @@ export default {
         .then(() => {
           this.loading.playlists = false
         })
+    },
+
+    isListToggled () {
+      this.playlistPlayer.onWindowResize()
     }
   },
 
