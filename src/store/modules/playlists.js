@@ -360,6 +360,7 @@ const mutations = {
         if (entity.preview_files[taskTypeId]) {
           const previewFile = entity.preview_files[taskTypeId][0]
           entity.preview_file_id = previewFile.id
+          entity.preview_file_task_id = previewFile.task_id
           entity.preview_file_extension = previewFile.extension
           entity.preview_file_annotations = previewFile.annotations
           entity.extension = previewFile.extension
