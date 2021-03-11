@@ -1725,7 +1725,7 @@ export default {
             this.rawPlayerComparison.setCurrentTime(0)
           } else {
             this.rawPlayerComparison.setCurrentTime(0)
-            this.rawPlayerComparison.play()
+            if (this.isPlaying) this.rawPlayerComparison.play()
           }
         }
       }
@@ -2059,7 +2059,7 @@ export default {
           scaleMultiplierY = this.fabricCanvas.height / annotation.height
         }
 
-        annotation.drawing.objects.forEach((obj) => {
+        annotation.drawing.objects.forEach(obj => {
           const base = {
             left: obj.left * scaleMultiplierX,
             top: obj.top * scaleMultiplierY,
