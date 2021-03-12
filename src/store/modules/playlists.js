@@ -372,6 +372,10 @@ const mutations = {
 
   [ADD_PLAYLISTS] (state, playlists) {
     state.playlists = state.playlists.concat(playlists)
+    playlists.forEach(playlist => {
+      if (!playlist.entities) playlist.entities = []
+      state.playlistMap[playlist.id] = playlist
+    })
   },
 
   [RESET_ALL] (state) {
