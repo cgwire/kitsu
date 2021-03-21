@@ -79,7 +79,7 @@
               @keyup.tab="focusAddShot"
               @click="selectSequence(sequence.id)"
               v-for="sequence in displayedSequences">
-              {{ sequence.name }}
+              {{ sequence.name }} toto
             </div>
           </div>
           <div class="field">

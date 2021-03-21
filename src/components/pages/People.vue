@@ -168,6 +168,7 @@ export default {
 
   created () {
     this.loadPeople()
+    this.loadDepartments()
   },
 
   watch: {
@@ -214,6 +215,7 @@ export default {
       'deletePeople',
       'invitePerson',
       'loadPeople',
+      'loadDepartments',
       'newPerson',
       'newPersonAndInvite',
       'peopleSearchChange',

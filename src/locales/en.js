@@ -110,6 +110,21 @@ export default {
     }
   },
 
+  departments: {
+    all_asset_types: 'All departments',
+    create_error: 'An error occurred while saving this department. Are you sure there is no department with similar name?',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occurred while deleting this department.',
+    edit_title: 'Edit department',
+    new_departments: 'Add an department',
+    number: 'department | departments',
+    title: 'Departments',
+    fields: {
+      name: 'Name',
+      color: 'Color'
+    }
+  },
+
   entities: {
     build_filter: {
       asset_type: 'Asset type',
@@ -393,22 +408,24 @@ export default {
       error_upload: 'An error occurred while uploading your CSV file.'
     },
     fields: {
+      active: 'Active',
+      departments: 'Departments',
+      email: 'Email',
       first_name: 'First name',
       last_name: 'Last name',
-      email: 'Email',
-      phone: 'Phone',
-      role: 'Role',
       old_password: 'Current password',
       password: 'New password',
       password_2: 'New password (repeat)',
-      active: 'Active'
+      phone: 'Phone',
+      role: 'Role'
     },
     list: {
-      name: 'Name',
+      active: 'Active',
+      departments: 'Departments',
       email: 'Email',
+      name: 'Name',
       phone: 'Phone',
-      role: 'Role',
-      active: 'Active'
+      role: 'Role'
     },
     role: {
       admin: 'Studio Manager',
@@ -666,6 +683,7 @@ export default {
     title: 'Task Types',
     fields: {
       dedicated_to: 'For',
+      department: 'Department',
       color: 'Color',
       name: 'Name',
       allow_timelog: 'Timelog',

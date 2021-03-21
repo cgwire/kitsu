@@ -54,6 +54,35 @@
           @enter="confirmClicked()"
           v-model="form.active"
         />
+
+        <div class="departments">
+          <h2 class="subtitle">{{ $t('people.fields.departments') }}</h2>
+          <div class="department-element" :key="departmentId"
+            v-for="departmentId in form.departments" @click="removeDepartment(departmentId)">
+            <department-name
+              :department="departmentMap[departmentId]"
+            />
+          </div>
+          <div class="field">
+            <combobox-department
+              :label="$t('task_types.fields.department')"
+              :selectableDepartments="selectableDepartments"
+              @enter="confirmClicked"
+              v-model="selectedDepartment"
+              v-if="selectableDepartments.length > 0"
+            />
+            <button
+              class="button is-success"
+              :class="{
+                'is-disabled': selectedDepartment === null
+              }"
+              @click="addDepartment"
+              v-if="selectableDepartments.length > 0"
+            >
+              {{ $t('main.add')}}
+            </button>
+          </div>
+        </div>
       </form>
 
       <p class="has-text-right">
@@ -128,6 +157,8 @@ import { modalMixin } from './base_modal'
 
 import TextField from '../widgets/TextField'
 import Combobox from '../widgets/Combobox'
+import ComboboxDepartment from '../widgets/ComboboxDepartment'
+import DepartmentName from '../widgets/DepartmentName'
 
 export default {
   name: 'edit-modal',
@@ -156,7 +187,8 @@ export default {
         email: '',
         phone: '',
         role: 'user',
-        active: 'true'
+        active: 'true',
+        departments: []
       },
 
       roleOptions: [
@@ -169,21 +201,31 @@ export default {
       activeOptions: [
         { label: this.$t('main.yes'), value: 'true' },
         { label: this.$t('main.no'), value: 'false' }
-      ]
+      ],
+      selectedDepartment: null
     }
   },
 
   components: {
     TextField,
-    Combobox
+    Combobox,
+    ComboboxDepartment,
+    DepartmentName
   },
 
   computed: {
     ...mapGetters([
+      'departments',
       'isLdap',
       'isCurrentUserAdmin',
       'people'
     ]),
+
+    selectableDepartments () {
+      return this.departments.filter(departement => {
+        return this.form.departments.findIndex(selectedDepartment => selectedDepartment === departement.id) === -1
+      })
+    },
 
     isCreating () {
       return this.personToEdit.id === undefined
@@ -195,6 +237,14 @@ export default {
       } else {
         return ''
       }
+    },
+
+    departmentMap () {
+      const departmentMap = {}
+      this.departments.forEach(department => {
+        departmentMap[department.id] = department
+      })
+      return departmentMap
     }
   },
 
@@ -218,6 +268,18 @@ export default {
       }
     },
 
+    addDepartment () {
+      this.form.departments.push(this.selectedDepartment)
+      this.selectedDepartment = null
+    },
+
+    removeDepartment (idToRemove) {
+      const departmentIndex = this.form.departments.indexOf(idToRemove)
+      if (departmentIndex >= 0) {
+        this.form.departments.splice(departmentIndex, 1)
+      }
+    },
+
     resetForm () {
       if (this.personToEdit) {
         this.form = {
@@ -226,7 +288,8 @@ export default {
           phone: this.personToEdit.phone,
           email: this.personToEdit.email,
           role: this.personToEdit.role,
-          active: !this.personToEdit.id || this.personToEdit.active ? 'true' : 'false'
+          active: !this.personToEdit.id || this.personToEdit.active ? 'true' : 'false',
+          departments: (this.personToEdit.departments) ? this.personToEdit.departments : []
         }
       } else {
         this.form = {
@@ -235,7 +298,8 @@ export default {
           email: '',
           phone: '',
           role: 'user',
-          active: 'true'
+          active: 'true',
+          departments: []
         }
       }
       this.checkEmailValidity()
@@ -277,6 +341,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.department-element {
+  display: inline-block;
+  margin: 0.1em;
+}
+
 .modal-content .box p.text {
   margin-bottom: 1em;
 }

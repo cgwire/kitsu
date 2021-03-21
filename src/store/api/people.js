@@ -51,7 +51,8 @@ export default {
       email: person.email.trim(),
       phone: person.phone,
       role: person.role,
-      active: person.active
+      active: person.active,
+      departments: person.departments
     }
     return client.ppost('/api/data/persons/new', data)
   },
@@ -72,7 +73,8 @@ export default {
       active: person.active,
       notifications_enabled: person.notifications_enabled === 'true',
       notifications_slack_enabled: person.notifications_slack_enabled === 'true',
-      notifications_slack_userid: person.notifications_slack_userid
+      notifications_slack_userid: person.notifications_slack_userid,
+      departments: person.departments
     }
     return client.pput(`/api/data/persons/${person.id}`, data)
   },

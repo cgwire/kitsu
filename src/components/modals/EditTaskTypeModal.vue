@@ -41,6 +41,11 @@
           :label="$t('task_types.fields.color')"
           v-model="form.color"
         />
+        <combobox-department
+          :label="$t('task_types.fields.department')"
+          @enter="confirmClicked"
+          v-model="form.department_id"
+        />
       </form>
 
       <modal-footer
@@ -61,6 +66,7 @@ import { modalMixin } from './base_modal'
 
 import Combobox from '../widgets/Combobox.vue'
 import ComboboxBoolean from '../widgets/ComboboxBoolean.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ColorField from '../widgets/ColorField'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '../widgets/TextField'
@@ -71,6 +77,7 @@ export default {
   components: {
     Combobox,
     ComboboxBoolean,
+    ComboboxDepartment,
     ColorField,
     ModalFooter,
     TextField
@@ -93,7 +100,8 @@ export default {
           name: this.taskTypeToEdit.name,
           color: this.taskTypeToEdit.color,
           for_shots: String(this.taskTypeToEdit.for_shots === true),
-          allow_timelog: String(this.taskTypeToEdit.allow_timelog === true)
+          allow_timelog: String(this.taskTypeToEdit.allow_timelog === true),
+          department_id: this.taskTypeToEdit.department_id
         }
       }
     }
@@ -105,7 +113,8 @@ export default {
         name: '',
         color: '$grey',
         for_shots: 'false',
-        allow_timelog: 'false'
+        allow_timelog: 'false',
+        department_id: null
       },
       dedicatedToOptions: [
         { label: this.$t('assets.title'), value: 'false' },
@@ -117,7 +126,8 @@ export default {
   computed: {
     ...mapGetters([
       'taskTypes',
-      'taskTypeStatusOptions'
+      'taskTypeStatusOptions',
+      'departments'
     ]),
     isEditing () {
       return this.taskTypeToEdit && this.taskTypeToEdit.id

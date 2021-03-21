@@ -20,6 +20,9 @@
           <th scope="col" class="role">
             {{ $t("people.list.role") }}
           </th>
+          <th scope="col" class="departments">
+            {{ $t("people.list.departments") }}
+          </th>
           <th scope="col" class="actions"></th>
         </tr>
       </thead>
@@ -38,6 +41,13 @@
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
+          <td class="departments">
+            <span class="departments-element" v-for="departmentId in entry.departments" :key="departmentId">
+              <department-name
+                :department="departmentMap[departmentId]"
+              />
+            </span>
+          </td>
           <row-actions-cell
             v-if="isCurrentUserAdmin"
             :entry-id="entry.id"
@@ -63,6 +73,13 @@
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
+          <td class="departments">
+            <span class="departments-element" v-for="departmentId in entry.departments" :key="departmentId">
+              <department-name
+                :department="departmentMap[departmentId]"
+              />
+            </span>
+          </td>
           <row-actions-cell
             v-if="isCurrentUserAdmin"
             :entry-id="entry.id"
@@ -93,13 +110,15 @@ import { mapGetters, mapActions } from 'vuex'
 import PeopleNameCell from '@/components/cells/PeopleNameCell'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
+import DepartmentName from '../widgets/DepartmentName.vue'
 
 export default {
   name: 'people-list',
   components: {
     PeopleNameCell,
     RowActionsCell,
-    TableInfo
+    TableInfo,
+    DepartmentName
   },
 
   props: [
@@ -112,11 +131,20 @@ export default {
 
   computed: {
     ...mapGetters([
+      'departments',
       'isCurrentUserAdmin'
     ]),
 
     activePeople () {
       return this.entries.filter(person => person.active)
+    },
+
+    departmentMap () {
+      const departmentMap = {}
+      this.departments.forEach(department => {
+        departmentMap[department.id] = department
+      })
+      return departmentMap
     },
 
     unactivePeople () {
@@ -144,7 +172,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .name {
   width: 230px;
   min-width: 230px;
@@ -170,5 +197,9 @@ export default {
 
 .data-list {
   margin-top: 2em;
+}
+
+.departments-element {
+  padding: 5px;
 }
 </style>
