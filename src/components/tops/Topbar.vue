@@ -18,39 +18,38 @@
           ≡
         </a>
 
-        <div :class="{
-          'nav-item': true,
-        }" v-if="isProductionContext">
-          <div class="level">
-            <div class="level-item">
-              <combobox
-                class="context-selector"
-                :options="openProductionOptions"
-                :is-top="true"
-                v-model="currentProductionId"
-              />
-              <strong>
-              >
-              </strong>
-              <combobox
-                class="context-selector"
-                :options="sectionOptions"
-                :is-top="true"
-                v-model="currentProjectSection"
-              />
-              <strong
-                v-if="isEpisodeContext"
-              >
-              >
-              </strong>
-              <combobox
-                class="context-selector"
-                :options="currentEpisodeOptions"
-                :is-top="true"
-                v-model="currentEpisodeId"
-                v-if="isEpisodeContext"
-              />
-            </div>
+        <div
+          class="flexrow topbar-menu"
+          v-if="isProductionContext"
+        >
+          <div class="flexrow-item subitem">
+            <topbar-production-list
+              :episode-id="currentEpisodeId"
+              :production-list="openProductions"
+              :production="currentProduction"
+              :section="currentSectionOption"
+            />
+          </div>
+          <div class="flexrow-item">
+            <chevron-right-icon class="mt05" size="1.4x" />
+          </div>
+          <div class="flexrow-item subitem">
+            <topbar-section-list
+              :episode-id="currentEpisodeId"
+              :section-list="sectionOptions"
+              :section="currentSectionOption"
+            />
+          </div>
+          <div class="flexrow-item" v-if="isEpisodeContext">
+            <chevron-right-icon class="mt05" size="1.4x" />
+          </div>
+          <div class="flexrow-item subitem">
+            <topbar-episode-list
+              :episode-list="currentEpisodeOptions"
+              :episode-id="currentEpisodeId"
+              :section="currentSectionOption"
+              v-if="isEpisodeContext"
+            />
           </div>
         </div>
         <div
@@ -195,22 +194,33 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { ChevronLeftIcon, LogOutIcon, ZapIcon } from 'vue-feather-icons'
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  LogOutIcon,
+  ZapIcon
+} from 'vue-feather-icons'
 
-import Combobox from '../widgets/Combobox'
-import NotificationBell from '../widgets/NotificationBell'
-import PeopleAvatar from '../widgets/PeopleAvatar'
-import ShortcutModal from '../modals/ShortcutModal'
+import TopbarEpisodeList from '@/components/tops/TopbarEpisodeList'
+import TopbarProductionList from '@/components/tops/TopbarProductionList'
+import TopbarSectionList from '@/components/tops/TopbarSectionList'
+import NotificationBell from '@/components/widgets/NotificationBell'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import ShortcutModal from '@/components/modals/ShortcutModal'
+
 import { version } from '../../../package.json'
 
 export default {
   name: 'topbar',
   components: {
-    Combobox,
     ChevronLeftIcon,
+    ChevronRightIcon,
     LogOutIcon,
     NotificationBell,
     PeopleAvatar,
+    TopbarEpisodeList,
+    TopbarProductionList,
+    TopbarSectionList,
     ShortcutModal,
     ZapIcon
   },
@@ -374,6 +384,13 @@ export default {
         options.splice(4, 1)
       }
       return options
+    },
+
+    currentSectionOption () {
+      return (
+        this.sectionOptions.find(
+          o => o.value === this.currentProjectSection) || {}
+      ).value
     }
   },
 
@@ -509,54 +526,18 @@ export default {
 
     updateCombosFromRoute () {
       const productionId = this.$route.params.production_id
-      const episodeId = this.$route.params.episode_id
       const section = this.getCurrentSectionFromRoute()
+      let episodeId = this.$route.params.episode_id
       this.silent = true
       this.currentProductionId = productionId
       this.currentProjectSection = section
-
-      this.$nextTick(() => {
-        this.currentProjectSection = null
-        this.$nextTick(() => {
-          this.currentProjectSection = section
-          this.$nextTick(() => {
-            this.currentEpisodeId = null
-            this.$nextTick(() => {
-              this.currentEpisodeId = episodeId
-              this.$nextTick(() => {
-                this.silent = false
-              })
-            })
-          })
-        })
-      })
-    },
-
-    updateRoute () {
-      if (this.silent) return
-
-      const productionId = this.$route.params.production_id
-      const episodeId = this.$route.params.episode_id
-      const sectionFromRoute = this.getCurrentSectionFromRoute()
-      let section = this.currentProjectSection
-
-      const isProperContext =
-        section &&
-        this.$route.path.indexOf('manage') < 0
-
-      const isContextChanged =
-        section !== sectionFromRoute ||
-        productionId !== this.currentProductionId ||
-        (
-          this.currentEpisodeId &&
-          episodeId &&
-          episodeId !== this.currentEpisodeId
-        )
-
-      if (isProperContext && isContextChanged) {
-        if (section === 'newsFeed') section = 'news-feed'
-        if (section === 'assetTypes') section = 'production-asset-types'
+      const isAssetSection = this.assetSections.includes(section)
+      if (!isAssetSection && ['all', 'main'].includes(episodeId)) {
+        episodeId = this.episodes[0].id
+        this.currentEpisodeId = episodeId
         this.pushContextRoute(section)
+      } else {
+        this.currentEpisodeId = episodeId
       }
     },
 
@@ -581,7 +562,6 @@ export default {
         }
       }
       route = this.episodifyRoute(route, section, episodeId, isTVShow)
-
       if (['assets', 'shots'].includes(section)) {
         route.query = { search: '' }
       }
@@ -662,24 +642,10 @@ export default {
       }
     },
 
-    currentProductionId () {
-      this.updateRoute()
-      this.resetEpisodeForTVShow()
-      if (this.isTVShow) {
-        this.loadEpisodes()
-          .catch(console.error)
-      }
-    },
-
-    currentProjectSection () {
-      if (this.silent) return
-      this.resetEpisodeForTVShow()
-      this.updateRoute()
-    },
-
-    currentEpisodeId () {
-      if (this.silent) return
-      this.updateRoute()
+    currentProduction () {
+      this.$nextTick(() => {
+        this.loadMilestones()
+      })
     },
 
     currentEpisode () {
@@ -691,12 +657,6 @@ export default {
       }
       this.$nextTick(() => {
         this.silent = false
-      })
-    },
-
-    currentProduction () {
-      this.$nextTick(() => {
-        this.loadMilestones()
       })
     }
   },
@@ -863,6 +823,10 @@ strong {
   background: transparent;
   color: $light-grey;
   cursor: pointer;
+}
+
+.topbar-menu {
+  padding: 10px;
 }
 
 @media screen and (max-width: 768px) {

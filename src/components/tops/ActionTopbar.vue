@@ -455,16 +455,16 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { sortPeople } from '../../lib/sorting'
+import { sortPeople } from '@/lib/sorting'
 
 import { ChevronDownIcon, XIcon } from 'vue-feather-icons'
-import Combobox from '../widgets/Combobox'
-import ComboboxModel from '../widgets/ComboboxModel'
-import ComboboxStatus from '../widgets/ComboboxStatus'
-import ViewPlaylistModal from '../modals/ViewPlaylistModal'
-import NotificationBell from '../widgets/NotificationBell'
-import PeopleField from '../widgets/PeopleField'
-import Spinner from '../widgets/Spinner'
+import Combobox from '@/components/widgets/Combobox'
+import ComboboxModel from '@/components/widgets/ComboboxModel'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus'
+import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal'
+import NotificationBell from '@/components/widgets/NotificationBell'
+import PeopleField from '@/components/widgets/PeopleField'
+import Spinner from '@/components/widgets/Spinner'
 
 export default {
   name: 'action-topbar',
