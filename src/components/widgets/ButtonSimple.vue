@@ -82,6 +82,10 @@
     :class="iconClass"
     v-if="icon === 'forward'"
   />
+  <chevron-down-icon
+    :class="iconClass"
+    v-if="icon === 'down'"
+  />
   <chevron-left-icon
     :class="iconClass"
     v-if="icon === 'left'"
@@ -149,6 +153,7 @@
 
 <script>
 import {
+  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   CornerLeftDownIcon,
@@ -185,6 +190,7 @@ import {
 export default {
   name: 'button-simple',
   components: {
+    ChevronDownIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
     CornerLeftDownIcon,

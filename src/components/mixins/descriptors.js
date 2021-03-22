@@ -72,6 +72,23 @@ export const descriptorMixin = {
       this.lastMetadaDataHeaderMenuDisplayed = columnId
     },
 
+    showMetadataSelectorMenu () {
+      const headerMenuEl = this.$refs.headerMetadataSelectorMenu.$el
+      if (headerMenuEl.className === 'header-menu') {
+        headerMenuEl.className = 'header-menu hidden'
+      } else {
+        headerMenuEl.className = 'header-menu'
+        const headerElement = this.$refs.actionsSection
+        const headerBox = headerElement.getBoundingClientRect()
+        const left = headerBox.left
+        const top = headerBox.bottom
+        const width = Math.max(100, headerBox.width - 1)
+        headerMenuEl.style.left = left + 'px'
+        headerMenuEl.style.top = top + 'px'
+        headerMenuEl.style.width = width + 'px'
+      }
+    },
+
     getDescriptorChoicesOptions (descriptor) {
       const values = descriptor.choices.map(c => ({ label: c, value: c }))
       return [{ label: '', value: '' }, ...values]
