@@ -23,6 +23,13 @@
       @sort-by-clicked="onSortByMetadataClicked()"
     />
 
+    <table-metadata-selector-menu
+      ref="headerMetadataSelectorMenu"
+      :metadataDisplayHeaders.sync="metadataDisplayHeaders"
+      :descriptors="assetMetadataDescriptors"
+      namespace="assets"
+    />
+
     <table class="datatable">
       <thead
         class="datatable-head"
@@ -70,7 +77,7 @@
             scope="col"
             class="metadata-descriptor"
             :key="descriptor.id"
-            v-for="descriptor in assetMetadataDescriptors"
+            v-for="descriptor in visibleMetadataDescriptors"
             v-if="isShowInfos"
           >
             <div class="flexrow">
@@ -139,7 +146,7 @@
               />
             </div>
           </th>
-          <th scope="col" class="actions">
+          <th scope="col" class="actions" ref="actionsSection">
             <button-simple
               :class="{
                 'is-small': true,
@@ -149,6 +156,12 @@
               :text="$t('tasks.create_tasks')"
               @click="$emit('create-tasks')"
               v-if="isCurrentUserManager && displayedAssets.length > 0 && !isLoading"
+            />
+            <button-simple
+              class="is-small is-pulled-right"
+              icon="down"
+              @click="showMetadataSelectorMenu"
+              v-if="assetMetadataDescriptors.length > 0"
             />
           </th>
         </tr>
@@ -208,7 +221,7 @@
             class="metadata-descriptor"
             :key="asset.id + '-' + descriptor.id"
             :title="asset.data ? asset.data[descriptor.field_name] : ''"
-            v-for="(descriptor, j) in assetMetadataDescriptors"
+            v-for="(descriptor, j) in visibleMetadataDescriptors"
             v-if="isShowInfos"
           >
             <input
@@ -356,6 +369,7 @@ import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
 import TableInfo from '@/components/widgets/TableInfo'
 import TableMetadataHeaderMenu from
   '@/components/widgets/TableMetadataHeaderMenu'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu'
 import ValidationCell from '@/components/cells/ValidationCell'
 
 export default {
@@ -376,6 +390,7 @@ export default {
     TableInfo,
     TableHeaderMenu,
     TableMetadataHeaderMenu,
+    TableMetadataSelectorMenu,
     ValidationCell
   },
 
@@ -402,7 +417,8 @@ export default {
     return {
       lastSelection: null,
       hiddenColumns: {},
-      lastHeaderMenuDisplayed: null
+      lastHeaderMenuDisplayed: null,
+      metadataDisplayHeaders: {}
     }
   },
 
@@ -462,6 +478,12 @@ export default {
       )
     },
 
+    visibleMetadataDescriptors () {
+      return this.assetMetadataDescriptors.filter(
+        descriptor => this.metadataDisplayHeaders[descriptor.field_name] === undefined || this.metadataDisplayHeaders[descriptor.field_name]
+      )
+    },
+
     visibleColumns () {
       let count = 1
       count += this.isTVShow ? 1 : 0
@@ -470,7 +492,7 @@ export default {
         this.isAssetDescription
         ? 1
         : 0
-      count += this.assetMetadataDescriptors.length
+      count += this.visibleMetadataDescriptors.length
       count += !this.isCurrentUserClient &&
         this.isShowInfos &&
         this.isAssetTime
@@ -563,7 +585,7 @@ export default {
     },
 
     onInputKeyUp (event, i, j) {
-      const listWidth = this.assetMetadataDescriptors.length
+      const listWidth = this.visibleMetadataDescriptors.length
       const listHeight = this.displayedAssetsLength
       this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
     }
