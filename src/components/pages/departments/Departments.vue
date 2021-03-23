@@ -145,18 +145,17 @@ export default {
       this.modals.del = true
     },
 
-    confirmDeleteDepartment () {
+    async confirmDeleteDepartment () {
       this.loading.del = true
       this.errors.del = false
-      this.deleteDepartment(this.departmentToDelete)
-        .then(() => {
-          this.loading.del = false
-          this.modals.del = false
-        })
-        .catch(() => {
-          this.loading.del = false
-          this.errors.del = true
-        })
+      try {
+        await this.deleteDepartment(this.departmentToDelete)
+        this.loading.del = false
+        this.modals.del = false
+      } catch (e) {
+        this.loading.del = false
+        this.errors.del = true
+      }
     }
   }
 }
