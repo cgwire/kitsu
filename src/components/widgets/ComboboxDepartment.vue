@@ -4,14 +4,14 @@
     {{ label }}
   </label>
   <div
-    class="task-type-combo"
+    class="department-combo"
   >
     <div
       class="flexrow"
       @click="toggleDepartmentList"
     >
       <div
-        class="selected-task-type-line flexrow-item" v-if="currentDepartment"
+        class="selected-department-line flexrow-item" v-if="currentDepartment"
       >
         <department-name
           :department="currentDepartment"
@@ -130,19 +130,22 @@ export default {
 <style lang="scss" scoped>
 .dark {
   .select-input,
-  .selected-task-type-line,
-  .task-type-line,
-  .task-type-combo {
+  .selected-department-line,
+  .department-line,
+  .department-combo {
     background: $dark-grey-light;
     border-color: $dark-grey;
   }
 
-  .task-type-line:hover {
+  .department-line:hover {
     background: $dark-purple;
   }
 }
 
-.task-type-combo {
+.department-line {
+}
+
+.department-combo {
   background: $white;
   min-width: 200px;
   width: 200px;
@@ -155,23 +158,21 @@ export default {
   position: relative;
 }
 
-.task-type-combo:hover {
+.department-combo:hover {
   border: 1px solid $green;
 }
 
-.selected-task-type-line {
+.selected-department-line {
   background: $white;
   padding: 0.4em;
-  text-transform: uppercase;
   flex: 1;
 }
 
-.task-type-line {
+.department-line {
   background: $white;
   cursor: pointer;
   padding: 0.4em;
   margin: 0;
-  text-transform: uppercase;
 
   &:hover {
     background: $purple;

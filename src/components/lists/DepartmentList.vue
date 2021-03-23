@@ -4,7 +4,9 @@
       <table class="datatable">
         <thead class="datatable-head">
           <tr>
-            <th scope="col" class="name">{{ $t('departments.fields.name') }}</th>
+            <th scope="col" class="name">
+              {{ $t('departments.fields.name') }}
+            </th>
             <th scope="col">{{ $t('departments.fields.color') }}</th>
             <th scope="col" class="actions"></th>
           </tr>
@@ -15,11 +17,7 @@
                {{ entry.name }}
             </td>
             <td class="color">
-              <div
-                :class="{
-                  color: true,
-                }"
-              >
+              <div>
                 <span
                   :style="{ background: entry.color }"
                 >
@@ -79,12 +77,14 @@ export default {
 .color {
   width: 20px;
   height: 20px;
+  text-align: center;
 }
 
 .color span {
   display: inline-block;
   width: 20px;
   height: 20px;
+  border-radius: 10px;
 }
 
 .datatable-body tr:first-child th,

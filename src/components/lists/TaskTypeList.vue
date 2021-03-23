@@ -4,15 +4,15 @@
     <table class="datatable">
       <thead class="datatable-head">
         <tr>
+          <th scope="col" class="department">
+            {{ $t('task_types.fields.department') }}
+          </th>
           <th scope="col" class="name">{{ $t('task_types.fields.name') }}</th>
           <th scope="col" class="priority">
             {{ $t('task_types.fields.priority') }}
           </th>
           <th scope="col" class="allow-timelog">
             {{ $t('task_types.fields.allow_timelog') }}
-          </th>
-          <th scope="col">
-            {{ $t('task_types.fields.department') }}
           </th>
           <th scope="col" class="actions"></th>
         </tr>
@@ -37,16 +37,16 @@
           :key="taskType.id"
           v-for="taskType in assetsItems"
         >
-          <task-type-cell class="name" :task-type="taskType" />
-          <td class="priority">{{ taskType.priority }}</td>
-          <td class="allow-timelog">
-            {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
-          </td>
-          <td>
+          <td class="department">
             <department-name
               :department="getDepartments(taskType.department_id)"
               v-if="!isEmpty(taskType.department_id)"
             />
+          </td>
+          <task-type-cell class="name" :task-type="taskType" />
+          <td class="priority">{{ taskType.priority }}</td>
+          <td class="allow-timelog">
+            {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
           </td>
           <row-actions-cell
             :taskType-id="taskType.id"
@@ -74,16 +74,16 @@
           class="datatable-row tasktype-item"
           v-for="taskType in shotsItems" :key="taskType.id"
         >
-          <task-type-cell class="name" :task-type="taskType" />
-          <td class="priority">{{ taskType.priority }}</td>
-          <td class="allow-timelog">
-            {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
-          </td>
-          <td>
+          <td class="department">
             <department-name
               :department="getDepartments(taskType.department_id)"
               v-if="!isEmpty(taskType.department_id)"
             />
+          </td>
+          <task-type-cell class="name" :task-type="taskType" />
+          <td class="priority">{{ taskType.priority }}</td>
+          <td class="allow-timelog">
+            {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
           </td>
           <row-actions-cell
             :taskType-id="taskType.id"
@@ -208,6 +208,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.department {
+  width: 200px;
+  min-width: 200px;
+}
+
 .name {
   width: 300px;
   min-width: 300px;

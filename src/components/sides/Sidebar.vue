@@ -74,6 +74,12 @@
          <div v-if="isCurrentUserAdmin">
            <h2>{{ $t('main.admin')}}</h2>
            <p @click="toggleSidebar()">
+             <router-link :to="{name: 'departments'}">
+               <hexagon-icon size="0.9x" />
+               {{ $t("departments.title") }}
+             </router-link>
+           </p>
+           <p @click="toggleSidebar()">
              <router-link to="/task-types">
                <copy-icon size="0.9x" />
                {{ $t("task_types.title") }}
@@ -109,12 +115,6 @@
                {{ $t("logs.title") }}
              </router-link>
            </p>
-           <p @click="toggleSidebar()">
-             <router-link :to="{name: 'departments'}">
-               <list-icon size="0.9x" />
-               {{ $t("departments.title") }}
-             </router-link>
-           </p>
          </div>
 
         </section>
@@ -138,6 +138,7 @@ import {
   ClockIcon,
   FilmIcon,
   GitPullRequestIcon,
+  HexagonIcon,
   ListIcon,
   SettingsIcon,
   UsersIcon
@@ -154,6 +155,7 @@ export default {
     ClockIcon,
     FilmIcon,
     GitPullRequestIcon,
+    HexagonIcon,
     ListIcon,
     SettingsIcon,
     UsersIcon

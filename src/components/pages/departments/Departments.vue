@@ -80,7 +80,9 @@ export default {
     ]),
     deleteText () {
       if (this.departmentToDelete) {
-        return this.$t('departments.delete_text', { name: this.departmentToDelete.name })
+        return this.$t(
+          'departments.delete_text', { name: this.departmentToDelete.name }
+        )
       } else {
         return ''
       }
@@ -103,16 +105,16 @@ export default {
 
   methods: {
     ...mapActions([
+      'deleteDepartment',
       'loadDepartments',
-      'newDepartement',
-      'deleteDepartment'
+      'newDepartement'
     ]),
 
-    // Creation
     onNewClicked () {
       this.departmentToEdit = { name: '', color: '#999999' }
       this.modals.edit = true
     },
+
     onEditClicked (department) {
       this.departmentToEdit = department
       this.modals.edit = true

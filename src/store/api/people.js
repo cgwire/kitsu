@@ -37,7 +37,7 @@ export default {
   },
 
   getPeople (callback) {
-    client.get('/api/data/persons', callback)
+    client.get('/api/data/persons?relations=true', callback)
   },
 
   getPerson (personId, callback) {

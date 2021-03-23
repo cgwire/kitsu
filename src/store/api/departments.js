@@ -10,7 +10,9 @@ export default {
   },
 
   editDepartement (editedDepartement) {
-    return client.pput(`/api/data/departments/${editedDepartement.id}`, editedDepartement)
+    return client.pput(
+      `/api/data/departments/${editedDepartement.id}`, editedDepartement
+    )
   },
 
   deleteDepartment (departementToDelete) {

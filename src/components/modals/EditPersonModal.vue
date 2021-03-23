@@ -41,6 +41,44 @@
           @enter="confirmClicked()"
           v-model="form.phone"
         />
+
+        <div
+          class="departments"
+          v-if="personToEdit.id !== undefined"
+        >
+          <label class="label">{{ $t('people.fields.departments') }}</label>
+          <div
+            class="department-element mb1"
+            :key="departmentId"
+            @click="removeDepartment(departmentId)"
+            v-for="departmentId in form.departments"
+          >
+            <department-name
+              :department="departmentMap[departmentId]"
+              v-if="departmentId"
+            />
+          </div>
+          <div class="flexrow">
+            <combobox-department
+              class="flexrow-item"
+              :selectableDepartments="selectableDepartments"
+              @enter="confirmClicked"
+              v-model="selectedDepartment"
+              v-if="selectableDepartments.length > 0"
+            />
+            <button
+              class="button is-success flexrow-item mb2"
+              :class="{
+                'is-disabled': selectedDepartment === null
+              }"
+              @click="addDepartment"
+              v-if="selectableDepartments.length > 0"
+            >
+              {{ $t('main.add')}}
+            </button>
+          </div>
+        </div>
+
         <combobox
           :label="$t('people.fields.role')"
           :options="roleOptions"
@@ -54,35 +92,6 @@
           @enter="confirmClicked()"
           v-model="form.active"
         />
-
-        <div class="departments">
-          <h2 class="subtitle">{{ $t('people.fields.departments') }}</h2>
-          <div class="department-element" :key="departmentId"
-            v-for="departmentId in form.departments" @click="removeDepartment(departmentId)">
-            <department-name
-              :department="departmentMap[departmentId]"
-            />
-          </div>
-          <div class="field">
-            <combobox-department
-              :label="$t('task_types.fields.department')"
-              :selectableDepartments="selectableDepartments"
-              @enter="confirmClicked"
-              v-model="selectedDepartment"
-              v-if="selectableDepartments.length > 0"
-            />
-            <button
-              class="button is-success"
-              :class="{
-                'is-disabled': selectedDepartment === null
-              }"
-              @click="addDepartment"
-              v-if="selectableDepartments.length > 0"
-            >
-              {{ $t('main.add')}}
-            </button>
-          </div>
-        </div>
       </form>
 
       <p class="has-text-right">
@@ -343,7 +352,8 @@ export default {
 <style lang="scss" scoped>
 .department-element {
   display: inline-block;
-  margin: 0.1em;
+  margin-right: 0.2em;
+  cursor: pointer;
 }
 
 .modal-content .box p.text {

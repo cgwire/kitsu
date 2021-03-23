@@ -1,15 +1,21 @@
 <template>
-  <div
-    class="tag"
-    :style="{ 'border-left': '4px solid ' + color }"
-    v-if="department"
+<div
+  :style="{ 'border': '2px solid ' + color }"
+>
+  <span
+    class="dot"
+    :style="{ 'border': '5px solid ' + color, color }"
   >
+  </span>
+  <span>
     {{ department.name }}
-  </div>
+  </span>
+</div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+// import colors from '@/lib/colors'
 
 export default {
   name: 'department-name',
@@ -28,8 +34,9 @@ export default {
     ]),
 
     color () {
-      if (this.department.color.toUpperCase() === '#000000') return '$grey-strong'
-      else return this.department.color
+      if (this.department.color.toUpperCase() === '#000000') {
+        return '$grey-strong'
+      } else return this.department.color
     }
   },
 
@@ -41,18 +48,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.tag {
-  margin: 0;
-  padding: 0 0.7em;
-  font-size: 0.9em;
-  line-height: 0.8em;
-  color: $grey-strong;
-  border-radius: 0;
-  font-weight: bold;
+div {
+  display: inline-block;
+  padding: 0.4em 0.6em;
+  border-radius: 5px;
 }
 
-.dark .tag {
-  color: $white-grey;
-  background: $dark-grey-lightest;
+span.dot {
+  display: inline-block;
+  height: 8px;
+  width: 8px;
+  border-radius: 20px;
+  font-weight: 500;
+  padding: 0em;
+  margin-right: 0.6em;
+}
+
+span {
+  color: var(--text);
 }
 </style>
