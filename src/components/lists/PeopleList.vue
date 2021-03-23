@@ -45,6 +45,7 @@
             <span class="departments-element" v-for="departmentId in entry.departments" :key="departmentId">
               <department-name
                 :department="departmentMap[departmentId]"
+                v-if="departmentMap[departmentId]"
               />
             </span>
           </td>
@@ -77,6 +78,7 @@
             <span class="departments-element" v-for="departmentId in entry.departments" :key="departmentId">
               <department-name
                 :department="departmentMap[departmentId]"
+                v-if="departmentMap[departmentId]"
               />
             </span>
           </td>
