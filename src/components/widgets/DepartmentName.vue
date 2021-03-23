@@ -1,6 +1,5 @@
 <template>
 <div
-  :style="{ 'border': '2px solid ' + color }"
 >
   <span
     class="dot"
@@ -15,7 +14,6 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-// import colors from '@/lib/colors'
 
 export default {
   name: 'department-name',
@@ -49,19 +47,19 @@ export default {
 
 <style lang="scss" scoped>
 div {
+  border-radius: 5px;
   display: inline-block;
   padding: 0.4em 0.6em;
-  border-radius: 5px;
 }
 
 span.dot {
-  display: inline-block;
-  height: 8px;
-  width: 8px;
   border-radius: 20px;
   font-weight: 500;
+  display: inline-block;
+  height: 8px;
+  margin-right: 0.3em;
   padding: 0em;
-  margin-right: 0.6em;
+  width: 8px;
 }
 
 span {

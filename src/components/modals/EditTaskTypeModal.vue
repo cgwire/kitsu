@@ -36,15 +36,15 @@
           @enter="confirmClicked"
           v-model="form.allow_timelog"
         />
-        <color-field
-          ref="colorField"
-          :label="$t('task_types.fields.color')"
-          v-model="form.color"
-        />
         <combobox-department
           :label="$t('task_types.fields.department')"
           @enter="confirmClicked"
           v-model="form.department_id"
+        />
+        <color-field
+          ref="colorField"
+          :label="$t('task_types.fields.color')"
+          v-model="form.color"
         />
       </form>
 

@@ -44,7 +44,6 @@
 
         <div
           class="departments"
-          v-if="personToEdit.id !== undefined"
         >
           <label class="label">{{ $t('people.fields.departments') }}</label>
           <div
@@ -61,7 +60,7 @@
           <div class="flexrow">
             <combobox-department
               class="flexrow-item"
-              :selectableDepartments="selectableDepartments"
+              :selectable-departments="selectableDepartments"
               @enter="confirmClicked"
               v-model="selectedDepartment"
               v-if="selectableDepartments.length > 0"
@@ -232,7 +231,9 @@ export default {
 
     selectableDepartments () {
       return this.departments.filter(departement => {
-        return this.form.departments.findIndex(selectedDepartment => selectedDepartment === departement.id) === -1
+        return this.form.departments.findIndex(
+          selectedDepartment => selectedDepartment === departement.id
+        ) === -1
       })
     },
 
@@ -297,8 +298,10 @@ export default {
           phone: this.personToEdit.phone,
           email: this.personToEdit.email,
           role: this.personToEdit.role,
-          active: !this.personToEdit.id || this.personToEdit.active ? 'true' : 'false',
-          departments: (this.personToEdit.departments) ? this.personToEdit.departments : []
+          active: !this.personToEdit.id || this.personToEdit.active
+            ? 'true'
+            : 'false',
+          departments: this.personToEdit.departments || []
         }
       } else {
         this.form = {
