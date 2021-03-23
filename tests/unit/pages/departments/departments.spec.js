@@ -11,32 +11,32 @@ localVue.use(Vuex)
 localVue.use(vuescroll)
 
 function initialiseStore (actions) {
-    return new Vuex.Store({
-      strict: true,
-      modules: {
-        departments: {
-          state:departmentsStoreModule.state,
-          getters: departmentsStoreModule.getters,
-          actions: {
-              loadDepartments () {
-                return new Promise((resolve) => {
-                  resolve()
-                })
-              },
-            ...actions
+  return new Vuex.Store({
+    strict: true,
+    modules: {
+      departments: {
+        state: departmentsStoreModule.state,
+        getters: departmentsStoreModule.getters,
+        actions: {
+          loadDepartments () {
+            return new Promise((resolve) => {
+              resolve()
+            })
           },
-          mutations: departmentsStoreModule.mutations,
-        }
+          ...actions
+        },
+        mutations: departmentsStoreModule.mutations
       }
-    })
+    }
+  })
 }
 
-function initialiseWrapper(store, localVue, i18n) {
-    return shallowMount(Departments, {
-      store,
-      localVue,
-      i18n
-    })
+function initialiseWrapper (store, localVue, i18n) {
+  return shallowMount(Departments, {
+    store,
+    localVue,
+    i18n
+  })
 }
 
 describe('Departements', () => {
@@ -44,23 +44,23 @@ describe('Departements', () => {
   })
 
   describe('Mounted', () => {
-    test('mount Departements page', async() => {
+    test('mount Departements page', async () => {
       const loadFunction = jest.fn()
       const store = initialiseStore(
         {
-          loadDepartments({state}) {
+          loadDepartments ({ state }) {
             loadFunction()
             return state
           }
-        },
+        }
       )
       initialiseWrapper(store, localVue, i18n)
-      expect(loadFunction).toHaveBeenCalled();
+      expect(loadFunction).toHaveBeenCalled()
     })
-  }),
+  })
 
   describe('Methods', () => {
-    test('onNewClicked', async() => {
+    test('onNewClicked', async () => {
       const store = initialiseStore()
       const wrapper = initialiseWrapper(store, localVue, i18n)
       expect(wrapper.vm.departmentToEdit).toBe(null)
@@ -68,9 +68,9 @@ describe('Departements', () => {
       wrapper.vm.onNewClicked()
       expect(wrapper.vm.departmentToEdit).toStrictEqual({ name: '', color: '#999999' })
       expect(wrapper.vm.modals.edit).toBe(true)
-    }),
+    })
 
-    test('onEditClicked', async() => {
+    test('onEditClicked', async () => {
       const store = initialiseStore()
       const wrapper = initialiseWrapper(store, localVue, i18n)
       const departmentToEdit = {
@@ -83,9 +83,9 @@ describe('Departements', () => {
       wrapper.vm.onEditClicked(departmentToEdit)
       expect(wrapper.vm.departmentToEdit).toStrictEqual(departmentToEdit)
       expect(wrapper.vm.modals.edit).toBe(true)
-    }),
+    })
 
-    test('onDeleteClicked', async() => {
+    test('onDeleteClicked', async () => {
       const store = initialiseStore()
       const wrapper = initialiseWrapper(store, localVue, i18n)
       const departmentToDelete = {
@@ -98,14 +98,13 @@ describe('Departements', () => {
       wrapper.vm.onDeleteClicked(departmentToDelete)
       expect(wrapper.vm.departmentToDelete).toStrictEqual(departmentToDelete)
       expect(wrapper.vm.modals.del).toBe(true)
-    }),
+    })
 
-
-    test('confirmDeleteDepartment', async() => {
+    test('confirmDeleteDepartment', async () => {
       const deleteFunction = jest.fn()
       const store = initialiseStore(
         {
-          deleteDepartment() {
+          deleteDepartment () {
             deleteFunction()
           }
         }
@@ -117,21 +116,20 @@ describe('Departements', () => {
         color: '#ffffff'
       }
       wrapper.vm.onDeleteClicked(departmentToDelete)
-      wrapper.vm.confirmDeleteDepartment()
+      await wrapper.vm.confirmDeleteDepartment()
       expect(deleteFunction).toHaveBeenCalled()
-      await Vue.nextTick()
+      // await Vue.nextTick()
       expect(wrapper.vm.modals.del).toBe(false)
       expect(wrapper.vm.loading.del).toBe(false)
       expect(wrapper.vm.errors.del).toBe(false)
-    }),
+    })
 
-    test('[ERROR] confirmDeleteDepartment', async() => {
+    test('[ERROR] confirmDeleteDepartment', async () => {
       // const deleteFunction = jest.fn()
       const store = initialiseStore(
         {
-          deleteDepartment() {
-            return Promise.reject()
-            // deleteFunction()
+          deleteDepartment () {
+            return Promise.reject(new Error('some error'))
           }
         }
       )
@@ -142,18 +140,17 @@ describe('Departements', () => {
         color: '#ffffff'
       }
       wrapper.vm.onDeleteClicked(departmentToDelete)
-      wrapper.vm.confirmDeleteDepartment()
-      await Vue.nextTick()
+      await wrapper.vm.confirmDeleteDepartment()
       expect(wrapper.vm.modals.del).toBe(true)
       expect(wrapper.vm.errors.del).toBe(true)
       expect(wrapper.vm.loading.del).toBe(false)
-    }),
+    })
 
-    test('[NEW] confirmEditDepartment', async() => {
+    test('[NEW] confirmEditDepartment', async () => {
       const newFunction = jest.fn()
       const store = initialiseStore(
         {
-          newDepartement({state}) {
+          newDepartement ({ state }) {
             newFunction()
             return state
           }
@@ -179,11 +176,11 @@ describe('Departements', () => {
       expect(wrapper.vm.errors.edit).toBe(false)
     })
 
-    test('[EDIT] confirmEditDepartment', async() => {
+    test('[EDIT] confirmEditDepartment', async () => {
       const editFunction = jest.fn()
       const store = initialiseStore(
         {
-          editDepartement() {
+          editDepartement () {
             editFunction()
           }
         }
@@ -207,11 +204,11 @@ describe('Departements', () => {
       expect(wrapper.vm.errors.edit).toBe(false)
     })
 
-    test('[ERROR] confirmEditDepartment', async() => {
+    test('[ERROR] confirmEditDepartment', async () => {
       const store = initialiseStore(
         {
-          newDepartement() {
-            return Promise.reject()
+          newDepartement () {
+            return Promise.reject(new Error('some error'))
           }
         }
       )
