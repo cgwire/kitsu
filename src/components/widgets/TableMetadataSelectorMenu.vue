@@ -3,10 +3,10 @@ z<template>
     <h2>{{ $t('main.column_visibility') }}</h2>
     <div
       class="field is-marginless"
-      v-for="metadataDescriptor in descriptors"
+      v-for="metadataDescriptor in metadataDescriptors"
       :key="metadataDescriptor.field_name"
     >
-      <span
+      <label
         class="checkbox"
         :for="metadataDescriptor.field_name"
       >
@@ -19,7 +19,7 @@ z<template>
           )"
         >
         {{ metadataDescriptor.name }}
-      </span>
+      </label>
     </div>
   </div>
 </template>
@@ -47,6 +47,14 @@ export default {
 
   data () {
     return {
+      fieldToName: {
+        fps: this.$t('main.fps'),
+        frameIn: this.$t('main.frameIn'),
+        frameOut: this.$t('main.frameOut'),
+        frames: this.$t('main.frames'),
+        estimation: this.$t('main.estimation'),
+        timeSpent: this.$t('main.timeSpent')
+      }
     }
   },
 
@@ -55,22 +63,26 @@ export default {
     ]),
     localStorageKey () {
       return `metadataDisplayHeaders:${this.namespace}`
+    },
+    metadataDescriptors () {
+      const descriptors = [...this.descriptors]
+      for (const headerName in this.metadataDisplayHeaders) {
+        if (this.fieldToName[headerName]) {
+          descriptors.push({
+            field_name: headerName,
+            name: this.fieldToName[headerName]
+          })
+        }
+      }
+      return descriptors
     }
   },
 
   methods: {
     ...mapActions([
     ]),
-    shallowCopy (object) {
-      const newObject = {}
-      for (const key in object) {
-        newObject[key] = object[key]
-      }
-      return newObject
-    },
     setMetadataDisplayValue (metadataName, isSelected) {
-      const localMetadataDisplayHeaders =
-        this.shallowCopy(this.metadataDisplayHeaders)
+      const localMetadataDisplayHeaders = { ...this.metadataDisplayHeaders }
       localMetadataDisplayHeaders[metadataName] = isSelected
       localStorage.setItem(
         this.localStorageKey, JSON.stringify(localMetadataDisplayHeaders)
@@ -81,9 +93,9 @@ export default {
 
   created () {
     const metadataDisplayHeadersString = localStorage.getItem(this.localStorageKey)
-    let localMetadataDisplayHeaders = {}
+    let localMetadataDisplayHeaders = { ...this.metadataDisplayHeaders }
     if (metadataDisplayHeadersString) {
-      localMetadataDisplayHeaders = JSON.parse(metadataDisplayHeadersString)
+      localMetadataDisplayHeaders = { ...localMetadataDisplayHeaders, ...JSON.parse(metadataDisplayHeadersString) }
     }
     for (const descriptor of this.descriptors) {
       if (localMetadataDisplayHeaders[descriptor.field_name] === undefined) {
