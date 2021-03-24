@@ -4,19 +4,19 @@
       @click="$emit('edit-clicked')"
       v-if="isCurrentUserAdmin"
     >
-      {{ $t('main.edit')}}
+      {{ $t('main.edit') }}
     </div>
     <div
       @click="$emit('sort-by-clicked')"
     >
-      {{ $t('main.sort_by')}}
+      {{ $t('main.sort_by') }}
     </div>
     <div
       class="error"
       @click="$emit('delete-clicked')"
       v-if="isCurrentUserAdmin"
     >
-      {{ $t('main.delete')}}
+      {{ $t('main.delete') }}
     </div>
   </div>
 </template>

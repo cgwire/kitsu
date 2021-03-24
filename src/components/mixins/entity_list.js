@@ -17,6 +17,12 @@ export const entityListMixin = {
     window.removeEventListener('keydown', this.onKeyDown)
   },
 
+  data () {
+    return {
+      columnSelectorDisplayed: false
+    }
+  },
+
   computed: {
   },
 
@@ -220,6 +226,10 @@ export const entityListMixin = {
       if (['ArrowDown', 'ArrowUp'].includes(event.key)) {
         this.pauseEvent(event) // Requires dom mixin
       }
+    },
+
+    toggleColumnSelector () {
+      this.columnSelectorDisplayed = !this.columnSelectorDisplayed
     }
   }
 }

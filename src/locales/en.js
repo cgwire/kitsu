@@ -248,6 +248,7 @@ export default {
     cancel: 'Cancel',
     clear_selection: 'Clear current selection',
     close: 'Close',
+    column_visibility: 'Visible columns',
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
     date: 'Date',

@@ -23,13 +23,6 @@
       @sort-by-clicked="onSortByMetadataClicked()"
     />
 
-    <table-metadata-selector-menu
-      ref="headerMetadataSelectorMenu"
-      :metadataDisplayHeaders.sync="metadataDisplayHeaders"
-      :descriptors="shotMetadataDescriptors"
-      namespace="shots"
-    />
-
     <table class="datatable">
       <thead
         class="datatable-head"
@@ -161,11 +154,20 @@
               @click="$emit('create-tasks')"
               v-if="isCurrentUserManager"
             />
+
+            <table-metadata-selector-menu
+              ref="headerMetadataSelectorMenu"
+              :metadataDisplayHeaders.sync="metadataDisplayHeaders"
+              :descriptors="shotMetadataDescriptors"
+              namespace="shots"
+              v-show="columnSelectorDisplayed && isShowInfos"
+            />
+
             <button-simple
               class="is-small is-pulled-right"
               icon="down"
-              @click="showMetadataSelectorMenu"
-              v-if="shotMetadataDescriptors.length > 0"
+              @click="toggleColumnSelector"
+              v-if="shotMetadataDescriptors.length > 0 && isShowInfos"
             />
           </th>
         </tr>
@@ -439,8 +441,10 @@ import { selectionListMixin } from '@/components/mixins/selection'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu'
-import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu'
+import TableMetadataHeaderMenu from
+  '@/components/widgets/TableMetadataHeaderMenu'
+import TableMetadataSelectorMenu from
+  '@/components/widgets/TableMetadataSelectorMenu'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
 import TableInfo from '@/components/widgets/TableInfo'
@@ -697,6 +701,7 @@ export default {
 
 .actions {
   min-width: 160px;
+  position: relative;
 }
 
 th.actions {

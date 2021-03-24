@@ -1,11 +1,12 @@
-<template>
-  <div class="header-menu hidden">
+z<template>
+  <div class="column-menu">
+    <h2>{{ $t('main.column_visibility') }}</h2>
     <div
       class="field is-marginless"
       v-for="metadataDescriptor in descriptors"
       :key="metadataDescriptor.field_name"
     >
-      <label
+      <span
         class="checkbox"
         :for="metadataDescriptor.field_name"
       >
@@ -13,10 +14,12 @@
           type="checkbox"
           :id="metadataDescriptor.field_name"
           :checked="metadataDisplayHeaders[metadataDescriptor.field_name]"
-          @change="setMetadataDisplayValue(metadataDescriptor.field_name, $event.target.checked)"
+          @change="setMetadataDisplayValue(
+            metadataDescriptor.field_name, $event.target.checked
+          )"
         >
         {{ metadataDescriptor.name }}
-      </label>
+      </span>
     </div>
   </div>
 </template>
@@ -51,7 +54,7 @@ export default {
     ...mapGetters([
     ]),
     localStorageKey () {
-      return `metadataDisplayHeaders.${this.namespace}`
+      return `metadataDisplayHeaders:${this.namespace}`
     }
   },
 
@@ -66,9 +69,12 @@ export default {
       return newObject
     },
     setMetadataDisplayValue (metadataName, isSelected) {
-      const localMetadataDisplayHeaders = this.shallowCopy(this.metadataDisplayHeaders)
+      const localMetadataDisplayHeaders =
+        this.shallowCopy(this.metadataDisplayHeaders)
       localMetadataDisplayHeaders[metadataName] = isSelected
-      localStorage.setItem(this.localStorageKey, JSON.stringify(localMetadataDisplayHeaders))
+      localStorage.setItem(
+        this.localStorageKey, JSON.stringify(localMetadataDisplayHeaders)
+      )
       this.$emit('update:metadataDisplayHeaders', localMetadataDisplayHeaders)
     }
   },
@@ -90,25 +96,35 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .header-menu {
+.dark .column-menu {
   background-color: $dark-grey-light;
   box-shadow: 0 2px 6px $dark-grey-light;
 }
 
-.header-menu {
+.column-menu {
   position: absolute;
   background: white;
-  width: 118px;
+  width: 200px;
   box-shadow: 0 2px 6px $light-grey;
-  top: 90px;
+  top: 40px;
+  right: 0;
   z-index: 100;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  overflow: auto;
+
+  h2 {
+    color: $grey;
+    padding: 0.8em;
+    text-transform: uppercase;
+  }
+
+  div {
+    padding: 0.8em;
+  }
 }
 
-.header-menu div {
-  padding: 0.5em;
-}
-
-label.checkbox {
+span.checkbox {
   width: 100%;
 }
 </style>

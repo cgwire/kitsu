@@ -23,13 +23,6 @@
       @sort-by-clicked="onSortByMetadataClicked()"
     />
 
-    <table-metadata-selector-menu
-      ref="headerMetadataSelectorMenu"
-      :metadataDisplayHeaders.sync="metadataDisplayHeaders"
-      :descriptors="assetMetadataDescriptors"
-      namespace="assets"
-    />
-
     <table class="datatable">
       <thead
         class="datatable-head"
@@ -157,11 +150,20 @@
               @click="$emit('create-tasks')"
               v-if="isCurrentUserManager && displayedAssets.length > 0 && !isLoading"
             />
+
+            <table-metadata-selector-menu
+              ref="headerMetadataSelectorMenu"
+              :metadataDisplayHeaders.sync="metadataDisplayHeaders"
+              :descriptors="assetMetadataDescriptors"
+              namespace="assets"
+              v-show="columnSelectorDisplayed && isShowInfos"
+            />
+
             <button-simple
               class="is-small is-pulled-right"
               icon="down"
-              @click="showMetadataSelectorMenu"
-              v-if="assetMetadataDescriptors.length > 0"
+              @click="toggleColumnSelector"
+              v-if="assetMetadataDescriptors.length > 0 && isShowInfos"
             />
           </th>
         </tr>
@@ -369,7 +371,8 @@ import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
 import TableInfo from '@/components/widgets/TableInfo'
 import TableMetadataHeaderMenu from
   '@/components/widgets/TableMetadataHeaderMenu'
-import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu'
+import TableMetadataSelectorMenu from
+  '@/components/widgets/TableMetadataSelectorMenu'
 import ValidationCell from '@/components/cells/ValidationCell'
 
 export default {
@@ -418,6 +421,7 @@ export default {
       lastSelection: null,
       hiddenColumns: {},
       lastHeaderMenuDisplayed: null,
+      columnSelectorDisplayed: false,
       metadataDisplayHeaders: {}
     }
   },
@@ -626,6 +630,7 @@ export default {
 .actions {
   min-width: 160px;
   padding: 0.4em;
+  position: relative;
 }
 
 .name {
