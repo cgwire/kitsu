@@ -293,6 +293,7 @@ export default {
     search_query: 'Search query',
     search_query_edit: 'Edit search filter',
     search_query_edit_error: 'An error occurred while updating this search filter.',
+    select_column: 'Select column',
     sorted_by: 'Sorted by',
     sort_by: 'Sort by',
     start_date: 'Start date',

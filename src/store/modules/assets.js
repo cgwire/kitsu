@@ -932,7 +932,7 @@ const mutations = {
         state.displayedAssets.length + PAGE_SIZE
       )
       state.assetFilledColumns = getFilledColumns(state.displayedAssets)
-      const previousX = state.displayedAssets.length - PAGE_SIZE
+      const previousX = Object.keys(state.assetSelectionGrid).length
       const maxX = state.displayedAssets.length
       const maxY = state.nbValidationColumns
       if (previousX >= 0) {
@@ -981,11 +981,17 @@ const mutations = {
   },
 
   [ADD_SELECTED_TASKS] (state, selection) {
-    const tmpGrid = JSON.parse(JSON.stringify(state.assetSelectionGrid))
+    let tmpGrid = JSON.parse(JSON.stringify(state.assetSelectionGrid))
     selection.forEach((validationInfo) => {
-      if (tmpGrid[0] && tmpGrid[validationInfo.x]) {
-        tmpGrid[validationInfo.x][validationInfo.y] = true
+      if (!tmpGrid[validationInfo.x]) {
+        tmpGrid = appendSelectionGrid(
+          tmpGrid,
+          Object.keys(tmpGrid).length,
+          validationInfo.x + 1,
+          state.nbValidationColumns
+        )
       }
+      tmpGrid[validationInfo.x][validationInfo.y] = true
     })
     state.assetSelectionGrid = tmpGrid
   },
