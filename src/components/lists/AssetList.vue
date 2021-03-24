@@ -427,7 +427,8 @@ export default {
       metadataDisplayHeaders: {
         estimation: true,
         timeSpent: true
-      }
+      },
+      lastHeaderMenuDisplayedIndexInGrid: null
     }
   },
 
