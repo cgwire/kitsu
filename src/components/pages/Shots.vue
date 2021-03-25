@@ -143,7 +143,7 @@
     :is-error="errors.restore"
     :text="restoreText()"
     :error-text="$t('shots.restore_error')"
-    @cancel="modals.isDeleteDisplayed = false"
+    @cancel="modals.isRestoreDisplayed = false"
     @confirm="confirmRestoreShot"
   />
 
