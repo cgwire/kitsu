@@ -17,7 +17,7 @@ localVue.prototype.$locale = {
 describe('TableMetadataSelectorMenu', () => {
   describe('Mount', () => {
     it('emits the preferences saved in localStorage', () => {
-      localStorage.setItem('metadataDisplayHeaders.shots', JSON.stringify({ key: true }))
+      localStorage.setItem('metadataDisplayHeaders:shots', JSON.stringify({ key: true }))
       const component = mount(TableMetadataSelectorMenu, {
         propsData: {
           metadataDisplayHeaders: {},
@@ -32,7 +32,7 @@ describe('TableMetadataSelectorMenu', () => {
       expect(emitted[0]).toEqual([{ key: true }])
     })
     it('emits changes the preferences in localStorage', () => {
-      localStorage.setItem('metadataDisplayHeaders.shots', JSON.stringify({ key: true }))
+      localStorage.setItem('metadataDisplayHeaders:shots', JSON.stringify({ key: true }))
       const component = mount(TableMetadataSelectorMenu, {
         propsData: {
           metadataDisplayHeaders: { key: true },
@@ -46,7 +46,7 @@ describe('TableMetadataSelectorMenu', () => {
       const emitted = component.emitted()['update:metadataDisplayHeaders']
       expect(emitted).toHaveLength(2)
       expect(emitted[1]).toEqual([{ key: true, newKey: true }])
-      const stored = JSON.parse(localStorage.getItem('metadataDisplayHeaders.shots'))
+      const stored = JSON.parse(localStorage.getItem('metadataDisplayHeaders:shots'))
       expect(stored).toEqual({ key: true, newKey: true })
     })
   })
