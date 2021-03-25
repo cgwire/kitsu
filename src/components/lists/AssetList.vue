@@ -88,7 +88,7 @@
             scope="col"
             class="time-spent"
             ref="th-spent"
-            v-if="!isCurrentUserClient && isShowInfos && isAssetTime"
+            v-if="!isCurrentUserClient && isShowInfos && isAssetTime && metadataDisplayHeaders.timeSpent"
           >
             {{ $t('assets.fields.time_spent') }}
           </th>
@@ -96,7 +96,7 @@
             scope="col"
             class="estimation"
             ref="th-spent"
-            v-if="!isCurrentUserClient && isShowInfos && isAssetEstimation"
+            v-if="!isCurrentUserClient && isShowInfos && isAssetEstimation && metadataDisplayHeaders.estimation"
           >
             {{ $t('main.estimation_short') }}
           </th>
@@ -423,8 +423,11 @@ export default {
       hiddenColumns: {},
       lastHeaderMenuDisplayed: null,
       columnSelectorDisplayed: false,
-      metadataDisplayHeaders: {},
-      lastHeaderMenuDisplayedIndexInGrid: null
+      lastHeaderMenuDisplayedIndexInGrid: null,
+      metadataDisplayHeaders: {
+        estimation: true,
+        timeSpent: true
+      }
     }
   },
 
@@ -502,12 +505,12 @@ export default {
       count += this.visibleMetadataDescriptors.length
       count += !this.isCurrentUserClient &&
         this.isShowInfos &&
-        this.isAssetTime
+        this.isAssetTime && this.metadataDisplayHeaders.timeSpent
         ? 1
         : 0
       count += !this.isCurrentUserClient &&
         this.isShowInfos &&
-        this.isAssetEstimation
+        this.isAssetEstimation && this.metadataDisplayHeaders.estimation
         ? 1
         : 0
       count += this.displayedValidationColumns.length

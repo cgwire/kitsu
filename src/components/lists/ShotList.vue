@@ -74,16 +74,16 @@
             </div>
           </th>
 
-          <th scope="col" class="frames" v-if="isFrames && isShowInfos">
+          <th scope="col" class="frames" v-if="isFrames && isShowInfos && metadataDisplayHeaders.frames">
             {{ $t('shots.fields.nb_frames') }}
           </th>
-          <th scope="col" class="framein" v-if="isFrameIn && isShowInfos">
+          <th scope="col" class="framein" v-if="isFrameIn && isShowInfos && metadataDisplayHeaders.frameIn">
             {{ $t('shots.fields.frame_in') }}
           </th>
-          <th scope="col" class="frameout" v-if="isFrameOut && isShowInfos">
+          <th scope="col" class="frameout" v-if="isFrameOut && isShowInfos && metadataDisplayHeaders.frameOut">
             {{ $t('shots.fields.frame_out') }}
           </th>
-          <th scope="col" class="fps" v-if="isFps && isShowInfos">
+          <th scope="col" class="fps" v-if="isFps && isShowInfos && metadataDisplayHeaders.fps">
             {{ $t('shots.fields.fps') }}
           </th>
 
@@ -91,7 +91,7 @@
             scope="col"
             ref="th-spent"
             class="time-spent"
-            v-if="!isCurrentUserClient && isShowInfos && isShotTime"
+            v-if="!isCurrentUserClient && isShowInfos && isShotTime && metadataDisplayHeaders.timeSpent"
            >
             {{ $t('shots.fields.time_spent') }}
           </th>
@@ -100,7 +100,7 @@
             scope="col"
             class="estimation"
             ref="th-spent"
-            v-if="!isCurrentUserClient && isShowInfos && isShotEstimation"
+            v-if="!isCurrentUserClient && isShowInfos && isShotEstimation && metadataDisplayHeaders.estimation"
           >
             {{ $t('main.estimation_short') }}
           </th>
@@ -266,7 +266,7 @@
             </span>
           </td>
           <td class="frames"
-            v-if="isFrames && isShowInfos"
+            v-if="isFrames && isShowInfos && metadataDisplayHeaders.frames"
           >
             <input
               :ref="`editor-${getIndex(i, k)}-${descriptorLength}`"
@@ -284,7 +284,7 @@
               {{ shot.nb_frames }}
             </span>
           </td>
-          <td class="framein" v-if="isFrameIn && isShowInfos">
+          <td class="framein" v-if="isFrameIn && isShowInfos && metadataDisplayHeaders.frameIn">
             <input
               :ref="`editor-${getIndex(i, k)}-${descriptorLength + 1}`"
               class="input-editor"
@@ -301,7 +301,7 @@
               {{ getMetadataFieldValue({field_name: 'frame_in'}, shot) }}
             </span>
           </td>
-          <td class="frameout" v-if="isFrameOut && isShowInfos">
+          <td class="frameout" v-if="isFrameOut && isShowInfos && metadataDisplayHeaders.frameOut">
             <input
               :ref="`editor-${getIndex(i, k)}-${descriptorLength + 2}`"
               class="input-editor"
@@ -318,7 +318,7 @@
               {{ getMetadataFieldValue({field_name: 'frame_out'}, shot) }}
             </span>
           </td>
-          <td class="fps" v-if="isFps && isShowInfos">
+          <td class="fps" v-if="isFps && isShowInfos && metadataDisplayHeaders.fps">
             <input
               :ref="`editor-${getIndex(i, k)}-${descriptorLength + 3}`"
               class="input-editor"
@@ -337,14 +337,14 @@
 
           <td
             class="time-spent"
-            v-if="!isCurrentUserClient && isShowInfos && isShotTime"
+            v-if="!isCurrentUserClient && isShowInfos && isShotTime && metadataDisplayHeaders.timeSpent"
           >
             {{ formatDuration(shot.timeSpent) }}
           </td>
 
           <td
             class="estimation"
-            v-if="!isCurrentUserClient && isShowInfos && isShotEstimation"
+            v-if="!isCurrentUserClient && isShowInfos && isShotEstimation && metadataDisplayHeaders.estimation"
           >
             {{ formatDuration(shot.estimation) }}
           </td>
@@ -485,8 +485,15 @@ export default {
       lastSelection: null,
       hiddenColumns: {},
       lastHeaderMenuDisplayed: null,
-      metadataDisplayHeaders: {},
-      lastHeaderMenuDisplayedIndexInGrid: null
+      lastHeaderMenuDisplayedIndexInGrid: null,
+      metadataDisplayHeaders: {
+        fps: true,
+        frameIn: true,
+        frameOut: true,
+        frames: true,
+        estimation: true,
+        timeSpent: true
+      }
     }
   },
 
@@ -576,18 +583,18 @@ export default {
       count += this.visibleMetadataDescriptors.length
       count += !this.isCurrentUserClient &&
         this.isShowInfos &&
-        this.isShotTime
+        this.isShotTime && this.metadataDisplayHeaders.timeSpent
         ? 1
         : 0
       count += !this.isCurrentUserClient &&
         this.isShowInfos &&
-        this.isShotEstimation
+        this.isShotEstimation && this.metadataDisplayHeaders.estimation
         ? 1
         : 0
-      count += this.isShowInfos ? 1 : 0
-      count += this.isShowInfos && this.isFrameIn ? 1 : 0
-      count += this.isShowInfos && this.isFrameOut ? 1 : 0
-      count += this.isShowInfos && this.isFps ? 1 : 0
+      count += this.isShowInfos && this.metadataDisplayHeaders.frames ? 1 : 0
+      count += this.isShowInfos && this.isFrameIn && this.metadataDisplayHeaders.frameIn ? 1 : 0
+      count += this.isShowInfos && this.isFrameOut && this.metadataDisplayHeaders.frameOut ? 1 : 0
+      count += this.isShowInfos && this.isFps && this.metadataDisplayHeaders.fps ? 1 : 0
       count += this.displayedValidationColumns.length
       return count
     },
