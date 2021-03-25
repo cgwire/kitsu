@@ -11,7 +11,7 @@ follow this process:
 6. replace dist directory with the new one.
 7. Tag the commit and push the changes to Github
 
-You can un the following script to perform these commands at once:
+You can run the following script to perform these commands at once:
 
 ```bash
 release_number=0.11.32
