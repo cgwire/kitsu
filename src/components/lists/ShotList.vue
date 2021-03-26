@@ -13,6 +13,7 @@
       @minimize-clicked="onMinimizeColumnToggled()"
       @delete-all-clicked="onDeleteAllTasksClicked()"
       @sort-by-clicked="onSortByTaskTypeClicked()"
+      @select-column="onSelectColumn"
     />
 
     <table-metadata-header-menu
@@ -111,7 +112,7 @@
               'hidden-validation-cell': hiddenColumns[columnId]
             }"
             :key="columnId"
-            v-for="columnId in displayedValidationColumns"
+            v-for="(columnId, columnIndexInGrid) in displayedValidationColumns"
             v-if="!isLoading"
           >
             <div
@@ -138,7 +139,7 @@
                   : '' }}
               </span>
               <chevron-down-icon
-                @click="showHeaderMenu(columnId, $event)"
+                @click="showHeaderMenu(columnId, columnIndexInGrid, $event)"
                 class="header-icon flexrow-item"
               />
             </div>
@@ -484,6 +485,7 @@ export default {
       lastSelection: null,
       hiddenColumns: {},
       lastHeaderMenuDisplayed: null,
+      lastHeaderMenuDisplayedIndexInGrid: null,
       metadataDisplayHeaders: {
         fps: true,
         frameIn: true,

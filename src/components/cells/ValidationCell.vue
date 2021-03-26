@@ -149,6 +149,7 @@ export default {
     } else if (this.entity) {
       this.task = this.taskMap[this.entity.validations[this.column.id]]
     }
+    this.changeStyleBasedOnSelected()
   },
 
   computed: {
@@ -303,11 +304,9 @@ export default {
       } else {
         return ''
       }
-    }
-  },
+    },
 
-  watch: {
-    selected () {
+    changeStyleBasedOnSelected () {
       if (this.selected) {
         const background = this.isDarkTheme ? '#5E60BA' : '#BFC1FF'
         this.changeStyle(background)
@@ -315,6 +314,12 @@ export default {
         const background = this.getBackground(this.column.color)
         this.changeStyle(background)
       }
+    }
+  },
+
+  watch: {
+    selected () {
+      this.changeStyleBasedOnSelected()
     },
 
     taskTest () {

@@ -13,6 +13,7 @@
       @minimize-clicked="onMinimizeColumnToggled()"
       @delete-all-clicked="onDeleteAllTasksClicked()"
       @sort-by-clicked="onSortByTaskTypeClicked()"
+      @select-column="onSelectColumn"
     />
 
     <table-metadata-header-menu
@@ -106,7 +107,7 @@
               'hidden-validation-cell': hiddenColumns[columnId]
             }"
             :key="columnId"
-            v-for="columnId in displayedValidationColumns"
+            v-for="(columnId, columnIndexInGrid) in displayedValidationColumns"
             v-if="!isLoading"
           >
             <div
@@ -134,7 +135,7 @@
               </span>
 
               <chevron-down-icon
-                @click="showHeaderMenu(columnId, $event)"
+                @click="showHeaderMenu(columnId, columnIndexInGrid, $event)"
                 class="header-icon flexrow-item"
               />
             </div>
@@ -422,6 +423,7 @@ export default {
       hiddenColumns: {},
       lastHeaderMenuDisplayed: null,
       columnSelectorDisplayed: false,
+      lastHeaderMenuDisplayedIndexInGrid: null,
       metadataDisplayHeaders: {
         estimation: true,
         timeSpent: true
@@ -433,6 +435,7 @@ export default {
     ...mapGetters([
       'assets',
       'assetFilledColumns',
+      'assetMap',
       'assetMetadataDescriptors',
       'assetSearchText',
       'assetSelectionGrid',

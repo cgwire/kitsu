@@ -14,6 +14,11 @@
       {{ $t('main.sort_by')}}
     </div>
     <div
+      @click="$emit('select-column')"
+    >
+      {{ $t('main.select_column')}}
+    </div>
+    <div
       class="error"
       @click="$emit('delete-all-clicked')"
       v-if="isCurrentUserAdmin"

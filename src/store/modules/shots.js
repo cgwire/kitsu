@@ -1521,8 +1521,7 @@ const mutations = {
         state.displayedShots.length + PAGE_SIZE
       )
       state.shotFilledColumns = getFilledColumns(state.displayedShots)
-
-      const previousX = state.displayedShots.length - PAGE_SIZE
+      const previousX = Object.keys(state.shotSelectionGrid).length
       const maxX = state.displayedShots.length
       const maxY = state.nbValidationColumns
       if (previousX >= 0) {
@@ -1637,11 +1636,17 @@ const mutations = {
   },
 
   [ADD_SELECTED_TASKS] (state, selection) {
-    const tmpGrid = JSON.parse(JSON.stringify(state.shotSelectionGrid))
+    let tmpGrid = JSON.parse(JSON.stringify(state.shotSelectionGrid))
     selection.forEach((validationInfo) => {
-      if (tmpGrid[0] && tmpGrid[validationInfo.x]) {
-        tmpGrid[validationInfo.x][validationInfo.y] = true
+      if (!tmpGrid[validationInfo.x]) {
+        tmpGrid = appendSelectionGrid(
+          tmpGrid,
+          Object.keys(tmpGrid).length,
+          validationInfo.x + 1,
+          state.nbValidationColumns
+        )
       }
+      tmpGrid[validationInfo.x][validationInfo.y] = true
     })
     state.shotSelectionGrid = tmpGrid
   },

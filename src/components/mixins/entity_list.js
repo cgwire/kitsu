@@ -151,7 +151,7 @@ export const entityListMixin = {
       }
     },
 
-    showHeaderMenu (columnId, event) {
+    showHeaderMenu (columnId, columnIndexInGrid, event) {
       const headerMenuEl = this.$refs.headerMenu.$el
       if (headerMenuEl.className === 'header-menu') {
         headerMenuEl.className = 'header-menu hidden'
@@ -170,6 +170,7 @@ export const entityListMixin = {
         headerMenuEl.style.width = width + 'px'
       }
       this.lastHeaderMenuDisplayed = columnId
+      this.lastHeaderMenuDisplayedIndexInGrid = columnIndexInGrid
     },
 
     onMinimizeColumnToggled () {
@@ -189,6 +190,27 @@ export const entityListMixin = {
         column: taskTypeId,
         name: this.taskTypeMap[taskTypeId].name
       })
+      this.showHeaderMenu()
+    },
+
+    onSelectColumn () {
+      const mapOfElements = this.assetMap ? this.assetMap : this.shotMap
+      const listOfElements = Object.values(mapOfElements)
+      const selection = []
+      for (let i = 0; i < Object.keys(mapOfElements).length; i++) {
+        // this might not be the shot/asset on row `i` but we don't really care as we will select them all anyway
+        const entity = listOfElements[i]
+
+        selection.push({
+          entity: entity,
+          column: this.taskTypeMap[this.lastHeaderMenuDisplayed],
+          task: this.taskMap[entity.validations[this.lastHeaderMenuDisplayed]],
+          x: i,
+          y: this.lastHeaderMenuDisplayedIndexInGrid
+        })
+      }
+
+      this.$store.commit('ADD_SELECTED_TASKS', selection)
       this.showHeaderMenu()
     },
 
