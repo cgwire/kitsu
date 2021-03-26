@@ -10,6 +10,8 @@ import {
   buildNameIndex
 } from '../../lib/indexing'
 import {
+  applyFilters,
+  getFilters,
   getKeyWords
 } from '../../lib/filtering'
 
@@ -56,7 +58,10 @@ import {
   PEOPLE_SET_DAY_OFFS,
   PEOPLE_SEARCH_CHANGE,
 
-  RESET_ALL
+  RESET_ALL,
+
+  REMOVE_PEOPLE_SEARCH_END,
+  SAVE_PEOPLE_SEARCH_END
 } from '../mutation-types'
 
 const helpers = {
@@ -92,6 +97,29 @@ const helpers = {
 
   getTaskStatus (taskStatusId) {
     return taskStatusStore.state.taskStatusMap[taskStatusId]
+  },
+
+  buildResult (state, {
+    peopleSearch,
+    departments,
+    persons
+  }) {
+    const query = peopleSearch
+    const keywords = getKeyWords(query) || []
+
+    const peopleIndex = buildNameIndex(state.people)
+    const filters = getFilters({
+      entryIndex: peopleIndex,
+      departments,
+      persons,
+      query
+    })
+    let result = indexSearch(peopleIndex, keywords) || state.people
+    result = applyFilters(result, filters, {})
+    result = sortPeople(result)
+
+    state.displayedPeople = result
+    state.peopleSearchText = peopleSearch
   }
 }
 
@@ -106,6 +134,7 @@ const initialState = {
   people: [],
   displayedPeople: [],
   peopleSearchText: '',
+  peopleSearchQueries: [],
   peopleIndex: {},
   personMap: {},
   isPeopleLoading: false,
@@ -155,6 +184,7 @@ const getters = {
   personMap: state => state.personMap,
   isPeopleLoading: state => state.isPeopleLoading,
   isPeopleLoadingError: state => state.isPeopleLoadingError,
+  peopleSearchQueries: state => state.peopleSearchQueries,
 
   isImportPeopleModalShown: state => state.isImportPeopleModalShown,
   isImportPeopleLoading: state => state.isImportPeopleLoading,
@@ -224,16 +254,20 @@ const actions = {
     })
   },
 
-  loadPeople ({ commit, state }, callback) {
+  loadPeople ({ commit, state, rootGetters }, callback) {
     commit(LOAD_PEOPLE_START)
     peopleApi.getPeople((err, people) => {
       if (err) {
         commit(LOAD_PEOPLE_ERROR)
       } else {
-        commit(LOAD_PEOPLE_END, people.map((person) => {
+        const peopleList = people.map((person) => {
           person.departments = person.departments || ''
           return person
-        }))
+        })
+        commit(LOAD_PEOPLE_END, {
+          people: peopleList,
+          userFilters: rootGetters.userFilters
+        })
       }
       if (callback) callback(err)
     })
@@ -486,8 +520,47 @@ const actions = {
       })
   },
 
-  peopleSearchChange ({ commit }, text) {
-    commit(PEOPLE_SEARCH_CHANGE, text)
+  setPeopleSearch ({ commit, rootGetters }, peopleSearch) {
+    commit(
+      PEOPLE_SEARCH_CHANGE,
+      { peopleSearch, persons: rootGetters.people, departments: rootGetters.departments }
+    )
+  },
+
+  savePeopleSearch ({ commit, rootGetters }, searchQuery) {
+    return new Promise((resolve, reject) => {
+      const query = state.peopleSearchQueries.find(
+        (query) => query.name === searchQuery
+      )
+
+      if (!query) {
+        peopleApi.createFilter(
+          'people',
+          searchQuery,
+          searchQuery,
+          null,
+          null,
+          (err, searchQuery) => {
+            commit(SAVE_PEOPLE_SEARCH_END, { searchQuery })
+            if (err) {
+              reject(err)
+            } else {
+              resolve(searchQuery)
+            }
+          }
+        )
+      } else {
+        resolve()
+      }
+    })
+  },
+
+  removePeopleSearch ({ commit, rootGetters }, searchQuery) {
+    return peopleApi.removeFilter(searchQuery)
+      .then(() => {
+        commit(REMOVE_PEOPLE_SEARCH_END, { searchQuery })
+        return Promise.resolve()
+      })
   }
 }
 
@@ -503,7 +576,7 @@ const mutations = {
     state.isPeopleLoadingError = true
   },
 
-  [LOAD_PEOPLE_END] (state, people) {
+  [LOAD_PEOPLE_END] (state, { people, userFilters }) {
     state.isPeopleLoading = false
     state.isPeopleLoadingError = false
     state.people = sortPeople(people)
@@ -513,6 +586,12 @@ const mutations = {
       state.personMap[person.id] = person
     })
     state.peopleIndex = buildNameIndex(state.people)
+
+    if (userFilters.people && userFilters.people.all) {
+      state.peopleSearchQueries = userFilters.people.all
+    } else {
+      state.shotSearchQueries = []
+    }
   },
 
   [DELETE_PEOPLE_END] (state, person) {
@@ -738,15 +817,8 @@ const mutations = {
     state.personTasksScrollPosition = scrollPosition
   },
 
-  [PEOPLE_SEARCH_CHANGE] (state, text) {
-    if (text) {
-      const keywords = getKeyWords(text)
-      state.displayedPeople = indexSearch(state.peopleIndex, keywords)
-      state.peopleSearchText = text
-    } else {
-      state.displayedPeople = state.people
-      state.peopleSearchText = ''
-    }
+  [PEOPLE_SEARCH_CHANGE] (state, payload) {
+    helpers.buildResult(state, payload)
   },
 
   [USER_SAVE_PROFILE_SUCCESS] (state, form) {
@@ -765,6 +837,20 @@ const mutations = {
 
   [RESET_ALL] (state, people) {
     Object.assign(state, { ...initialState })
+  },
+
+  [SAVE_PEOPLE_SEARCH_END] (state, { searchQuery }) {
+    state.peopleSearchQueries.push(searchQuery)
+    state.peopleSearchQueries = sortByName(state.peopleSearchQueries)
+  },
+
+  [REMOVE_PEOPLE_SEARCH_END] (state, { searchQuery }) {
+    const queryIndex = state.peopleSearchQueries.findIndex(
+      (query) => query.name === searchQuery.name
+    )
+    if (queryIndex >= 0) {
+      state.peopleSearchQueries.splice(queryIndex, 1)
+    }
   }
 }
 

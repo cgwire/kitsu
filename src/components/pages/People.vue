@@ -31,9 +31,19 @@
       <search-field
         class="search flexrow-item"
         ref="people-search-field"
-        :can-save="false"
+        :can-save="true"
         @change="onSearchChange"
+        @save="saveSearchQuery"
         placeholder="ex: John Doe"
+      />
+    </div>
+
+    <div class="query-list">
+      <search-query-list
+        :queries="peopleSearchQueries"
+        @change-search="changeSearch"
+        @remove-search="removeSearchQuery"
+        v-if="!isPeopleLoading"
       />
     </div>
 
@@ -113,9 +123,12 @@ import ImportRenderModal from '../modals/ImportRenderModal'
 import PeopleList from '../lists/PeopleList'
 import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
+import SearchQueryList from '../widgets/SearchQueryList'
+import { searchMixin } from '@/components/mixins/search'
 
 export default {
   name: 'people',
+  mixins: [searchMixin],
   components: {
     ButtonHrefLink,
     ButtonSimple,
@@ -125,7 +138,8 @@ export default {
     PageTitle,
     PeopleList,
     ImportRenderModal,
-    SearchField
+    SearchField,
+    SearchQueryList
   },
 
   data () {
@@ -186,6 +200,7 @@ export default {
       'isImportPeopleLoading',
       'isImportPeopleLoadingError',
 
+      'peopleSearchQueries',
       'personCsvFormData'
     ]),
 
@@ -206,6 +221,10 @@ export default {
         persons[personKey] = true
       })
       return persons
+    },
+
+    searchField () {
+      return this.$refs['people-search-field']
     }
   },
 
@@ -218,7 +237,9 @@ export default {
       'loadDepartments',
       'newPerson',
       'newPersonAndInvite',
-      'peopleSearchChange',
+      'removePeopleSearch',
+      'savePeopleSearch',
+      'setPeopleSearch',
       'uploadPersonFile'
     ]),
 
@@ -335,7 +356,12 @@ export default {
     },
 
     onSearchChange () {
-      this.peopleSearchChange(this.$refs['people-search-field'].getValue())
+      if (!this.searchField) return
+      const searchQuery = this.searchField.getValue()
+      if (searchQuery.length !== 1) {
+        this.setPeopleSearch(searchQuery)
+        this.setSearchInUrl()
+      }
     },
 
     onDeleteClicked (person) {
@@ -371,6 +397,16 @@ export default {
 
     hideImportRenderModal () {
       this.modals.isImportRenderDisplayed = false
+    },
+
+    saveSearchQuery (searchQuery) {
+      this.savePeopleSearch(searchQuery)
+        .catch(console.error)
+    },
+
+    removeSearchQuery (searchQuery) {
+      this.removePeopleSearch(searchQuery)
+        .catch(console.error)
     }
   },
 
@@ -385,5 +421,8 @@ export default {
 <style lang="scss" scoped>
 .search {
   margin-top: 2em;
+}
+.query-list {
+  margin-top: 1.5rem;
 }
 </style>

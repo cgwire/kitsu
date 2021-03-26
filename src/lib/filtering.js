@@ -8,6 +8,7 @@ import {
 const UNION_REGEX = /\+\(.*\)/
 const EQUAL_REGEX = /\[([^[]*)\]=\[([^[]*)\]|([^ ]*)=\[([^[]*)\]|([^ ]*)=([^ ]*)|\[([^[]*)\]=([^ ]*)/g
 const EQUAL_ASSET_TYPE_REGEX = /type=\[([^[]*)\]|type=([^ ]*)|type=([^ ]*)/g
+const EQUAL_PEOPLE_DEPARTMENT_REGEX = /department=\[([^[]*)\]|department=([^ ]*)|department=([^ ]*)/g
 
 /*
  * Look in the search query for task type filter like anim=wip.
@@ -97,6 +98,11 @@ const applyFiltersFunctions = {
       entry.preview_file_id !== undefined &&
       entry.preview_file_id !== null
     return filter.excluding ? !hasAvatar : hasAvatar
+  },
+
+  department (entry, filter, taskMap) {
+    if (!entry.departments) return false
+    return entry.departments.indexOf(filter.department.id) !== -1
   }
 }
 
@@ -145,10 +151,11 @@ export const getExcludingKeyWords = (queryText) => {
 export const getFilters = (
   {
     entryIndex,
-    assetTypes,
-    taskTypes,
-    taskStatuses,
-    descriptors,
+    assetTypes = [],
+    taskTypes = [],
+    taskStatuses = [],
+    descriptors = [],
+    departments = [],
     persons,
     query
   }
@@ -160,6 +167,7 @@ export const getFilters = (
     ...getTaskTypeFilters(taskTypes, taskStatuses, query),
     ...getDescFilters(descriptors, query),
     ...getAssignedToFilters(persons, query),
+    ...getDepartmentFilters(departments, query),
     ...getThumbnailFilters(query) || [],
     ...getExcludingFilters(entryIndex, query)
   ]
@@ -328,7 +336,7 @@ export const getDescFilters = (descriptors, queryText) => {
     rgxMatches.forEach(rgxMatch => {
       const pattern = rgxMatch.split('=')
       const descriptorName = cleanParenthesis(pattern[0])
-      if (descriptorName === 'type') return
+      if (descriptorName === 'type' || descriptorName === 'department') return
       const matchedDescriptors =
         descriptorNameIndex[descriptorName.toLowerCase()]
       let value = cleanParenthesis(pattern[1])
@@ -340,6 +348,39 @@ export const getDescFilters = (descriptors, queryText) => {
           descriptor: matchedDescriptors[0],
           values,
           type: 'descriptor',
+          excluding
+        })
+      }
+    })
+  }
+  return results
+}
+
+/*
+ * Extract department filters (like department=Modeling) from given
+ * query.
+ */
+export const getDepartmentFilters = (departments, queryText) => {
+  if (!queryText) return []
+
+  const results = []
+  const rgxMatches = queryText.match(EQUAL_PEOPLE_DEPARTMENT_REGEX)
+
+  if (rgxMatches) {
+    const departmentNameIndex = buildNameIndex(departments, false)
+    rgxMatches.forEach(rgxMatch => {
+      const pattern = rgxMatch.split('=')
+      let departmentName = cleanParenthesis(pattern[1])
+      const matchedDepartments =
+        departmentNameIndex[departmentName.toLowerCase()]
+      const excluding = departmentName.startsWith('-')
+      if (excluding) departmentName = departmentName.substring(1)
+      const departmentNames = departmentName.split(',')
+      if (matchedDepartments) {
+        results.push({
+          department: matchedDepartments[0],
+          departmentNames,
+          type: 'department',
           excluding
         })
       }

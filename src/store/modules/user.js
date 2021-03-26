@@ -286,14 +286,18 @@ const actions = {
     commit(SET_TODO_LIST_SCROLL_POSITION, scrollPosition)
   },
 
-  loadContext ({ commit }, callback) {
+  loadContext ({ commit, rootGetters }, callback) {
     return peopleApi.getContext()
       .then((context) => {
         commit(LOAD_USER_FILTERS_END, context.search_filters)
         commit(LOAD_PRODUCTION_STATUS_END, context.project_status)
         commit(LOAD_TASK_STATUSES_END, context.task_status)
         commit(LOAD_TASK_TYPES_END, context.task_types)
-        commit(LOAD_PEOPLE_END, context.persons)
+        commit(LOAD_PEOPLE_END, {
+          people: context.persons,
+          production: rootGetters.currentProduction,
+          userFilters: rootGetters.userFilters
+        })
         commit(LOAD_CUSTOM_ACTIONS_END, context.custom_actions)
         commit(LOAD_ASSET_TYPES_END, context.asset_types)
         commit(SET_NOTIFICATION_COUNT, context.notification_count)
