@@ -197,10 +197,7 @@ export const entityListMixin = {
       const mapOfElements = this.assetMap ? this.assetMap : this.shotMap
       const listOfElements = Object.values(mapOfElements)
       const selection = []
-      for (let i = 0; i < Object.keys(mapOfElements).length; i++) {
-        // this might not be the shot/asset on row `i` but we don't really care as we will select them all anyway
-        const entity = listOfElements[i]
-
+      listOfElements.forEach((entity, i) => {
         selection.push({
           entity: entity,
           column: this.taskTypeMap[this.lastHeaderMenuDisplayed],
@@ -208,7 +205,7 @@ export const entityListMixin = {
           x: i,
           y: this.lastHeaderMenuDisplayedIndexInGrid
         })
-      }
+      })
 
       this.$store.commit('ADD_SELECTED_TASKS', selection)
       this.showHeaderMenu()
