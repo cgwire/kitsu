@@ -493,8 +493,7 @@ export default {
         frames: true,
         estimation: true,
         timeSpent: true
-      },
-      lastHeaderMenuDisplayedIndexInGrid: null
+      }
     }
   },
 
