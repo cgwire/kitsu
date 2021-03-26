@@ -101,6 +101,7 @@ const helpers = {
 
   buildResult (state, {
     peopleSearch,
+    departments,
     persons
   }) {
     const query = peopleSearch
@@ -109,10 +110,7 @@ const helpers = {
     const peopleIndex = buildNameIndex(state.people)
     const filters = getFilters({
       entryIndex: peopleIndex,
-      assetTypes: [],
-      taskTypes: [],
-      taskStatuses: [],
-      descriptors: [],
+      departments,
       persons,
       query
     })
@@ -523,10 +521,9 @@ const actions = {
   },
 
   setPeopleSearch ({ commit, rootGetters }, peopleSearch) {
-    const persons = rootGetters.people
     commit(
       PEOPLE_SEARCH_CHANGE,
-      { peopleSearch, persons }
+      { peopleSearch, persons: rootGetters.people, departments: rootGetters.departments }
     )
   },
 
