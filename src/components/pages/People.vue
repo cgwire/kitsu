@@ -36,6 +36,12 @@
         @save="saveSearchQuery"
         placeholder="ex: John Doe"
       />
+      <button-simple
+        class="flexrow-item"
+        :title="$t('entities.build_filter.title')"
+        icon="funnel"
+        @click="() => modals.isBuildFilterDisplayed = true"
+      />
     </div>
 
     <div class="query-list">
@@ -106,6 +112,12 @@
       @confirm="confirmDeletePeople"
     />
 
+    <build-people-filter-modal
+      ref="build-filter-modal"
+      :active="modals.isBuildFilterDisplayed"
+      @cancel="modals.isBuildFilterDisplayed = false"
+      @confirm="confirmBuildFilter"
+    />
   </div>
 </template>
 
@@ -125,11 +137,13 @@ import PageTitle from '../widgets/PageTitle'
 import SearchField from '../widgets/SearchField'
 import SearchQueryList from '../widgets/SearchQueryList'
 import { searchMixin } from '@/components/mixins/search'
+import BuildPeopleFilterModal from '@/components/modals/BuildPeopleFilterModal'
 
 export default {
   name: 'people',
   mixins: [searchMixin],
   components: {
+    BuildPeopleFilterModal,
     ButtonHrefLink,
     ButtonSimple,
     EditPersonModal,
@@ -169,7 +183,8 @@ export default {
         edit: false,
         del: false,
         importModal: false,
-        isImportRenderDisplayed: false
+        isImportRenderDisplayed: false,
+        isBuildFilterDisplayed: false
       },
       parsedCSV: [],
       personToDelete: {},
@@ -407,6 +422,12 @@ export default {
     removeSearchQuery (searchQuery) {
       this.removePeopleSearch(searchQuery)
         .catch(console.error)
+    },
+
+    confirmBuildFilter (query) {
+      this.modals.isBuildFilterDisplayed = false
+      this.searchField.setValue(query)
+      this.onSearchChange()
     }
   },
 
