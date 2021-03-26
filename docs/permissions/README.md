@@ -2,8 +2,7 @@
 
 Kitsu proposes a simple permission scheme to manage your productions. To set
 permissions for a user, go to the employee page and grant him with one of the 
-following role (the lowest to the higher permission level, each new level of 
-permission inherit the permission of the previous):
+following role:
 
 
 ## Artist
