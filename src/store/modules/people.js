@@ -185,6 +185,7 @@ const getters = {
   isPeopleLoading: state => state.isPeopleLoading,
   isPeopleLoadingError: state => state.isPeopleLoadingError,
   peopleSearchQueries: state => state.peopleSearchQueries,
+  peopleSearchText: state => state.peopleSearchText,
 
   isImportPeopleModalShown: state => state.isImportPeopleModalShown,
   isImportPeopleLoading: state => state.isImportPeopleLoading,
