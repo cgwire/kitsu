@@ -80,7 +80,7 @@ They have full access to all productions:
 
 The client can only display the production of which they are part of.
 
-They see :
+They see:
 
 * the global page of the assets/shots. 
 * the stats pages.
@@ -89,8 +89,8 @@ They see :
 
 They don't see:
 
-* assignation 
-* comments that he didn't write
+* assignations
+* comments that they didn't write
 
 
 ## Vendor
