@@ -694,6 +694,7 @@ export default {
           route.params.episode_id =
             this.currentEpisode ? this.currentEpisode.id : this.$route.params.episode_id
         }
+        route.query = { search: '' }
         return route
       } else {
         return {

@@ -27,17 +27,17 @@
       />
     </div>
 
-    <div class="flexrow">
+    <div class="flexrow search-options">
       <search-field
-        class="search flexrow-item"
         ref="people-search-field"
+        class="search flexrow-item"
         :can-save="true"
         @change="onSearchChange"
         @save="saveSearchQuery"
         placeholder="ex: John Doe"
       />
       <button-simple
-        class="flexrow-item"
+        class="flexrow-item filter-button"
         :title="$t('entities.build_filter.title')"
         icon="funnel"
         @click="() => modals.isBuildFilterDisplayed = true"
@@ -195,9 +195,11 @@ export default {
     }
   },
 
-  created () {
-    this.loadPeople()
-    this.loadDepartments()
+  mounted () {
+    this.loadPeople(() => {
+      this.setSearchFromUrl()
+      this.onSearchChange()
+    }) // Needed to show department informations
   },
 
   watch: {
@@ -445,5 +447,11 @@ export default {
 }
 .query-list {
   margin-top: 1.5rem;
+}
+.search-options {
+  align-items: flex-start;
+}
+.filter-button {
+  margin-top: 0.3em;
 }
 </style>

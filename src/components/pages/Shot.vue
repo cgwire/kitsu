@@ -300,6 +300,9 @@ export default {
         name: 'shots',
         params: {
           production_id: this.currentProduction.id
+        },
+        query: {
+          search: ''
         }
       }
       return route

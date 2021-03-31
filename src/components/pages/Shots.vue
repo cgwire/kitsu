@@ -445,7 +445,8 @@ export default {
 
   mounted () {
     let searchQuery = ''
-    if (this.$route.query.search.length > 0) {
+    if (this.$route.query.search &&
+        this.$route.query.search.length > 0) {
       searchQuery = '' + this.$route.query.search
     }
     this.$refs['shot-search-field'].setValue(searchQuery)
@@ -458,9 +459,11 @@ export default {
         if (!err) {
           setTimeout(() => {
             this.onSearchChange()
-            this.$refs['shot-list'].setScrollPosition(
-              this.shotListScrollPosition
-            )
+            if (this.$refs['shot-list']) {
+              this.$refs['shot-list'].setScrollPosition(
+                this.shotListScrollPosition
+              )
+            }
           }, 500)
         }
       })
@@ -470,7 +473,7 @@ export default {
       Object.keys(this.shotMap).length < 2 ||
       (
         this.shotValidationColumns.length > 0 &&
-        !Object.keys(this.shotMap)[0].validations
+        !this.shotMap[Object.keys(this.shotMap)[0]].validations
       )
     ) {
       setTimeout(() => {

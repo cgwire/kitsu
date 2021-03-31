@@ -385,7 +385,7 @@ export default {
       Object.keys(this.assetMap).length < 2 ||
       (
         this.assetValidationColumns.length > 0 &&
-        !Object.keys(this.assetMap)[0].validations
+        !this.assetMap[Object.keys(this.assetMap)[0]].validations
       )
     ) {
       setTimeout(() => {
