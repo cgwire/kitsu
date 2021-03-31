@@ -1,6 +1,9 @@
 import Vue from 'vue'
 
-import colors from '../../lib/colors'
+import colors from '@/lib/colors'
+
+import assetStore from '@/store/modules/assets'
+import shotStore from '@/store/modules/shots'
 
 export const entityListMixin = {
 
@@ -194,10 +197,11 @@ export const entityListMixin = {
     },
 
     onSelectColumn () {
-      const mapOfElements = this.assetMap ? this.assetMap : this.shotMap
-      const listOfElements = Object.values(mapOfElements)
       const selection = []
-      listOfElements.forEach((entity, i) => {
+      const entities = this.assetMap
+        ? assetStore.cache.result
+        : shotStore.cache.result
+      entities.forEach((entity, i) => {
         selection.push({
           entity: entity,
           column: this.taskTypeMap[this.lastHeaderMenuDisplayed],
@@ -207,8 +211,11 @@ export const entityListMixin = {
         })
       })
 
-      this.$store.commit('ADD_SELECTED_TASKS', selection)
-      this.showHeaderMenu()
+      this.$store.commit('CLEAR_SELECTED_TASKS')
+      this.$nextTick(() => {
+        this.$store.commit('ADD_SELECTED_TASKS', selection)
+        this.showHeaderMenu()
+      })
     },
 
     getEntityLineNumber (entities, i, k) {
