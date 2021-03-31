@@ -507,7 +507,6 @@ const actions = {
     return mainFunc(year, monthString, productionId)
       .then(table => {
         if (detailLevel === 'day') {
-          console.log('get day offs')
           peopleApi.getDayOffs(year, monthString)
             .then(dayOffs => {
               commit(PEOPLE_SET_DAY_OFFS, dayOffs)
