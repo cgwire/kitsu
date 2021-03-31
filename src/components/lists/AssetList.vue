@@ -88,7 +88,10 @@
             scope="col"
             class="time-spent"
             ref="th-spent"
-            v-if="!isCurrentUserClient && isShowInfos && isAssetTime && metadataDisplayHeaders.timeSpent"
+            v-if="!isCurrentUserClient &&
+                  isShowInfos &&
+                  isAssetTime &&
+                  metadataDisplayHeaders.timeSpent"
           >
             {{ $t('assets.fields.time_spent') }}
           </th>
@@ -96,7 +99,10 @@
             scope="col"
             class="estimation"
             ref="th-spent"
-            v-if="!isCurrentUserClient && isShowInfos && isAssetEstimation && metadataDisplayHeaders.estimation"
+            v-if="!isCurrentUserClient &&
+                  isShowInfos &&
+                  isAssetEstimation &&
+                  metadataDisplayHeaders.estimation"
           >
             {{ $t('main.estimation_short') }}
           </th>
@@ -149,13 +155,19 @@
               icon="plus"
               :text="$t('tasks.create_tasks')"
               @click="$emit('create-tasks')"
-              v-if="isCurrentUserManager && displayedAssets.length > 0 && !isLoading"
+              v-if="isCurrentUserManager &&
+                    displayedAssets.length > 0 &&
+                    !isLoading"
             />
 
             <table-metadata-selector-menu
               ref="headerMetadataSelectorMenu"
               :metadataDisplayHeaders.sync="metadataDisplayHeaders"
               :descriptors="assetMetadataDescriptors"
+              :exclude="{
+                timeSpent: !isAssetTime,
+                estimation: !isAssetEstimation
+              }"
               namespace="assets"
               v-show="columnSelectorDisplayed && isShowInfos"
             />
@@ -264,14 +276,20 @@
 
           <td
             class="time-spent"
-            v-if="!isCurrentUserClient && isShowInfos && isAssetTime"
+            v-if="!isCurrentUserClient &&
+                  isShowInfos &&
+                  isAssetTime &&
+                  metadataDisplayHeaders.timeSpent"
           >
             {{ formatDuration(asset.timeSpent) }}
           </td>
 
           <td
             class="estimation"
-            v-if="!isCurrentUserClient && isShowInfos && isAssetEstimation"
+            v-if="!isCurrentUserClient &&
+                  isShowInfos &&
+                  isAssetEstimation &&
+                  metadataDisplayHeaders.estimation"
           >
             {{ formatDuration(asset.estimation) }}
           </td>

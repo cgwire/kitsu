@@ -161,6 +161,14 @@
               :metadataDisplayHeaders.sync="metadataDisplayHeaders"
               :descriptors="shotMetadataDescriptors"
               namespace="shots"
+              :exclude="{
+                frames: !isFrames,
+                frameIn: !isFrameIn,
+                frameOut: !isFrameOut,
+                fps: !isFps,
+                estimation: !isShotEstimation,
+                timeSpent: !isShotTime
+              }"
               v-show="columnSelectorDisplayed && isShowInfos"
             />
 
