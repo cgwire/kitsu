@@ -59,6 +59,7 @@ import {
   REMOVE_ASSET_SEARCH_END,
 
   LOAD_PRODUCTION_STATUS_END,
+  LOAD_DEPARTMENTS_END,
   LOAD_TASK_STATUSES_END,
   LOAD_TASK_TYPES_END,
   LOAD_PEOPLE_END,
@@ -288,9 +289,10 @@ const actions = {
 
   loadContext ({ commit, rootGetters }, callback) {
     return peopleApi.getContext()
-      .then((context) => {
+      .then(context => {
         commit(LOAD_USER_FILTERS_END, context.search_filters)
         commit(LOAD_PRODUCTION_STATUS_END, context.project_status)
+        commit(LOAD_DEPARTMENTS_END, context.departments)
         commit(LOAD_TASK_STATUSES_END, context.task_status)
         commit(LOAD_TASK_TYPES_END, context.task_types)
         commit(LOAD_PEOPLE_END, {

@@ -11,12 +11,12 @@
         {{ $t('entities.build_filter.title') }}
       </h1>
 
-      <combobox
+      <!--combobox
         class="flexrow-item"
         :options="general.unionOptions"
         locale-key-prefix="entities.build_filter."
         v-model="union"
-      />
+      /-->
 
       <h3 class="subtitle">
         {{ $t('entities.build_filter.department') }}
@@ -35,13 +35,16 @@
           v-model="departmentFilter.operator"
         />
         <div class="flexrow-item flexrow value-column">
-          <combobox
-            class="flexrow-item"
-            :options="departmentsOptions"
+          <div
             :key="`department-${index}`"
-            v-model="departmentFilter.values[index]"
             v-for="(_, index) in departmentFilter.values"
-          />
+          >
+            <combobox
+              class="flexrow-item"
+              :options="departmentsOptions"
+              v-model="departmentFilter.values[index]"
+            />
+          </div>
           <button-simple
             class="mt05"
             icon="plus"
@@ -49,17 +52,6 @@
             v-if="departmentFilter.operator === 'in'"
           />
         </div>
-        <button-simple
-          class="mt05"
-          icon="minus"
-          @click="removeDepartmentFilter(departmentFilter)"
-        />
-      </div>
-      <div class="add-button">
-        <button-simple
-          icon="plus"
-          @click="addDepartmentFilter"
-        />
       </div>
 
       <modal-footer
@@ -82,7 +74,7 @@ import Combobox from '../widgets/Combobox'
 import ModalFooter from './ModalFooter'
 
 export default {
-  name: 'build-filter-modal',
+  name: 'build-people-filter-modal',
   mixins: [modalMixin],
 
   components: {
@@ -126,6 +118,8 @@ export default {
   computed: {
     ...mapGetters([
       'peopleSearchText',
+      'peopleSearchText',
+      'departmentMap',
       'departments'
     ]),
 
@@ -133,7 +127,7 @@ export default {
       return this.departments.map(department => {
         return {
           label: department.name,
-          value: department.name
+          value: department.id
         }
       })
     }
@@ -160,7 +154,7 @@ export default {
     addDepartmentFilter () {
       const filter = {
         operator: '=',
-        values: [this.departments[0].name]
+        values: [this.departments[0].id]
       }
       this.departmentFilters.values.push(filter)
       return filter
@@ -176,10 +170,17 @@ export default {
     },
 
     applyDepartmentChoice (query) {
-      this.departmentFilters.values.forEach((departmentFilter) => {
+      this.departmentFilters.values.forEach(departmentFilter => {
         let operator = '=['
         if (departmentFilter.operator === '=-') operator = '=[-'
-        const value = departmentFilter.values.join(',')
+        const value = departmentFilter
+          .values
+          .map(dId => {
+            return this.departmentMap.get(dId)
+              ? this.departmentMap.get(dId).name
+              : this.departments[0].name
+          })
+          .join(',')
         query += ` department${operator}${value}]`
       })
       return query
@@ -198,6 +199,7 @@ export default {
       if (!this.peopleSearchText) {
         return
       }
+      this.departmentFilters.values = []
 
       const filters = getFilters({
         entryIndex: [],
@@ -222,7 +224,7 @@ export default {
       }
       this.departmentFilters.values.push({
         operator,
-        values: filter.values
+        values: filter.values.map(d => d.id)
       })
     },
 
@@ -239,7 +241,12 @@ export default {
     },
 
     reset () {
-      this.departmentFilters.values = []
+      this.departmentFilters.values = [{
+        operator: '=',
+        values: this.departments.length > 0
+          ? [this.departments[0].id]
+          : []
+      }]
     }
   },
 

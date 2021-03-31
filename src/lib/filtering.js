@@ -102,7 +102,11 @@ const applyFiltersFunctions = {
 
   department (entry, filter, taskMap) {
     if (!entry.departments) return false
-    const hasDepartment = entry.departments.indexOf(filter.department.id) !== -1
+    let hasDepartment = false
+    filter.values.forEach(value => {
+      hasDepartment = hasDepartment ||
+                      entry.departments.indexOf(value.id) !== -1
+    })
     return filter.excluding ? !hasDepartment : hasDepartment
   }
 }
@@ -369,6 +373,7 @@ export const getDepartmentFilters = (departments, queryText) => {
 
   if (rgxMatches) {
     const departmentNameIndex = buildNameIndex(departments, false)
+
     rgxMatches.forEach(rgxMatch => {
       const pattern = rgxMatch.split('=')
       let departmentName = cleanParenthesis(pattern[1])
@@ -376,17 +381,17 @@ export const getDepartmentFilters = (departments, queryText) => {
       if (excluding) departmentName = departmentName.substring(1)
       const departmentNames = departmentName.split(',')
 
-      let departments = []
-      departmentNames.forEach(departmentName => {
-        const matchedDepartments = departmentNameIndex[departmentName.toLowerCase()]
-        if (matchedDepartments) {
-          departments = [...departments, ...matchedDepartments]
-        }
-      })
+      const departments = departmentNames
+        .map(departmentName => {
+          const department = departmentNameIndex[departmentName.toLowerCase()]
+          if (department) return department[0]
+          else return null
+        })
+        .filter(department => department !== null)
+
       if (departments.length > 0) {
         results.push({
-          department: departments[0],
-          values: departmentNames,
+          values: departments,
           type: 'department',
           excluding
         })

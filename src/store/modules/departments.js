@@ -15,13 +15,15 @@ import {
 } from '../mutation-types'
 
 const initialState = {
-  departments: []
+  departments: [],
+  departmentMap: new Map()
 }
 
 const state = { ...initialState }
 
 const getters = {
   departments: state => state.departments,
+  departmentMap: state => state.departmentMap,
 
   getDepartments: (state) => (id) => {
     return state.departments.find(
@@ -46,9 +48,6 @@ const actions = {
       .then((department) => {
         commit(EDIT_DEPARTMENTS_END, department)
         return Promise.resolve(department)
-      }).catch((err) => {
-        commit(EDIT_DEPARTMENTS_ERROR)
-        return Promise.reject(err)
       })
   },
 
@@ -58,9 +57,6 @@ const actions = {
       .then((department) => {
         commit(EDIT_DEPARTMENTS_END, department)
         return Promise.resolve(department)
-      }).catch((err) => {
-        commit(EDIT_DEPARTMENTS_ERROR)
-        return Promise.reject(err)
       })
   },
 
@@ -69,9 +65,6 @@ const actions = {
     return departmentsApi.deleteDepartment(department).then(() => {
       commit(DELETE_DEPARTMENTS_END, department)
       return Promise.resolve(department)
-    }).catch((err) => {
-      commit(DELETE_DEPARTMENTS_ERROR)
-      return Promise.reject(err)
     })
   }
 }
@@ -83,19 +76,23 @@ const mutations = {
 
   [LOAD_DEPARTMENTS_END] (state, departments) {
     state.departments = departments
+    departments.forEach(department => {
+      state.departmentMap.set(department.id, department)
+    })
   },
 
   [EDIT_DEPARTMENTS_START] () {},
 
   [EDIT_DEPARTMENTS_ERROR] () {},
 
-  [EDIT_DEPARTMENTS_END] (state, newDepartement) {
-    const department = getters.getDepartments(state)(newDepartement.id)
-    if (department && newDepartement.id) {
-      Object.assign(department, newDepartement)
+  [EDIT_DEPARTMENTS_END] (state, newDepartment) {
+    const department = getters.getDepartments(state)(newDepartment.id)
+    if (department && newDepartment.id) {
+      Object.assign(department, newDepartment)
     } else {
-      state.departments.push(newDepartement)
+      state.departments.push(newDepartment)
     }
+    state.departmentMap.set(newDepartment.id, newDepartment)
   },
 
   [DELETE_DEPARTMENTS_START] () {},
@@ -108,6 +105,7 @@ const mutations = {
     if (departmentToDeleteIndex >= 0) {
       state.departments.splice(departmentToDeleteIndex, 1)
     }
+    state.departmentMap.delete(departmentToDelete.id)
   },
 
   [RESET_ALL] (state) {
