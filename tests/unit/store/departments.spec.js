@@ -13,12 +13,18 @@ const departments = [
   }
 ]
 
+const departmentMap = new Map()
+departments.forEach(department => {
+  departmentMap.set(department.id, department)
+})
+
 describe('Productions store', () => {
   describe('Getters', () => {
     let rootState
     beforeEach(() => {
       rootState = {
         departments: [...departments],
+        departmentMap
       }
     })
 
@@ -26,7 +32,9 @@ describe('Productions store', () => {
       expect(store.getters.departments(rootState)).toStrictEqual(departments)
     }),
     test('getDepartments', () => {
-        expect(store.getters.getDepartments(rootState)(departments[0].id)).toStrictEqual(departments[0])
+        expect(
+          store.getters.getDepartments(rootState)(departments[0].id))
+          .toStrictEqual(departments[0])
     })
   })
 
@@ -37,7 +45,8 @@ describe('Productions store', () => {
     let rootState
     beforeEach(() => {
       rootState = {
-        departments
+        departments,
+        departmentMap
       }
     })
 
@@ -59,15 +68,15 @@ describe('Productions store', () => {
     }),
 
     test('DELETE_DEPARTMENTS_END', () => {
-      const state = {
-        departments: [{
-          name: 'test',
-          id: 'test',
-          color: 'test'
-        }],
-      }
-      store.mutations.DELETE_DEPARTMENTS_END(state, state.departments[0])
-      expect(state.departments).toEqual([])
+      store.mutations.DELETE_DEPARTMENTS_END(
+        rootState, rootState.departments[0])
+      store.mutations.DELETE_DEPARTMENTS_END(
+        rootState, rootState.departments[0])
+      store.mutations.DELETE_DEPARTMENTS_END(
+        rootState, rootState.departments[0])
+      store.mutations.DELETE_DEPARTMENTS_END(
+        rootState, rootState.departments[0])
+      expect(rootState.departments).toEqual([])
     })
   })
 })
