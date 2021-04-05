@@ -655,9 +655,11 @@ export default {
 
     updateTime (time) {
       this.updateProgressBar(time)
-      this.currentTimeRaw = time
-      this.currentTime = this.formatTime(this.currentTimeRaw)
-      if (!this.isPlaying) this.loadAnnotation()
+      if (this.currentTimeRaw !== time) {
+        this.currentTimeRaw = time
+        this.currentTime = this.formatTime(this.currentTimeRaw)
+        if (!this.isPlaying) this.loadAnnotation()
+      }
     },
 
     initPreferences () {
@@ -702,6 +704,9 @@ export default {
       this.isPlaying = false
       if (this.previewViewer) this.previewViewer.pause()
       if (this.comparisonViewer) this.comparisonViewer.pause()
+      const currentTimeRaw = this.previewViewer.getCurrentTimeRaw()
+      const currentTime = roundToFrame(currentTimeRaw, this.fps) || 0
+      this.setCurrentTime(currentTime)
     },
 
     goPreviousFrame () {
