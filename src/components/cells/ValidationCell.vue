@@ -146,7 +146,7 @@ export default {
   mounted () {
     if (this.taskTest) {
       this.task = this.taskTest
-    } else if (this.entity) {
+    } else if (this.entity && this.column) {
       this.task = this.taskMap[this.entity.validations[this.column.id]]
     }
     this.changeStyleBasedOnSelected()
@@ -311,7 +311,9 @@ export default {
         const background = this.isDarkTheme ? '#5E60BA' : '#BFC1FF'
         this.changeStyle(background)
       } else {
-        const background = this.getBackground(this.column.color)
+        const background = this.getBackground(
+          this.column ? this.column.color : 'transparent'
+        )
         this.changeStyle(background)
       }
     }
