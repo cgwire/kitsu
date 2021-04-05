@@ -20,6 +20,7 @@
           ref="nameField"
           input-class="task-status-name"
           :label="$t('task_status.fields.name')"
+          @enter="confirmClicked"
           v-model="form.name"
           v-focus
         />
@@ -28,23 +29,28 @@
           input-class="task-status-short-name"
           :label="$t('task_status.fields.short_name')"
           :maxlength="8"
+          @enter="confirmClicked"
           v-model="form.short_name"
           v-focus
         />
         <combobox-boolean
           :label="$t('task_status.fields.is_done')"
+          @enter="confirmClicked"
           v-model="form.is_done"
         />
         <combobox-boolean
           :label="$t('task_status.fields.is_retake')"
+          @enter="confirmClicked"
           v-model="form.is_retake"
         />
         <combobox-boolean
           :label="$t('task_status.fields.is_artist_allowed')"
+          @enter="confirmClicked"
           v-model="form.is_artist_allowed"
         />
         <combobox-boolean
           :label="$t('task_status.fields.is_client_allowed')"
+          @enter="confirmClicked"
           v-model="form.is_client_allowed"
         />
 
