@@ -846,12 +846,12 @@ export default {
         } else if (task.end_date) {
           endDate = parseDate(task.end_date)
         } else if (task.estimation) {
-          endDate = startDate.add(estimation, 'days')
+          endDate = startDate.clone().add(estimation, 'days')
         }
 
-        if (!endDate || endDate.isSameOrBefore(startDate)) {
+        if (!endDate || endDate.isBefore(startDate)) {
           const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
-          endDate = startDate.add(nbDays, 'days')
+          endDate = startDate.clone().add(nbDays, 'days')
         }
         if (!startDate) startDate = moment()
         if (!endDate.isSameOrAfter(startDate)) {
