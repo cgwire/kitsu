@@ -306,7 +306,7 @@ export default {
 
     selectSequence (sequenceId) {
       this.selectedSequenceId = sequenceId
-      this.displayedShots = Object.values(this.shotMap).filter((shot) => {
+      this.displayedShots = Array.from(this.shotMap.values()).filter((shot) => {
         return shot.sequence_id === sequenceId
       })
     },

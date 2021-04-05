@@ -782,7 +782,7 @@ export default {
         const sequenceId = this.$route.params.sequence_id
         if (
           sequenceId &&
-          this.sequenceMap[sequenceId]
+          this.sequenceMap.get(sequenceId)
         ) {
           this.sequenceId = sequenceId
         } else if (this.castingSequenceOptions.length > 0) {
@@ -829,14 +829,14 @@ export default {
   socket: {
     events: {
       'shot:casting-update' (eventData) {
-        const shot = this.shotMap[eventData.shot_id]
+        const shot = this.shotMap.get(eventData.shot_id)
         if (shot.sequence_id === this.sequenceId) {
           this.loadShotCasting(shot)
         }
       },
 
       'asset:casting-update' (eventData) {
-        const asset = this.assetMap[eventData.asset_id]
+        const asset = this.assetMap.get(eventData.asset_id)
         if (asset.asset_type_id === this.assetTypeId) {
           this.loadAssetCasting(asset)
         }

@@ -101,16 +101,16 @@ const helpers = {
     return productionsStore.getters.currentProduction(productionsStore.state)
   },
   getTaskStatus (taskStatusId) {
-    return tasksStore.state.taskStatusMap[taskStatusId]
+    return tasksStore.state.taskStatusMap.get(taskStatusId)
   },
   getTaskType (taskTypeId) {
-    return taskTypesStore.state.taskTypeMap[taskTypeId]
+    return taskTypesStore.state.taskTypeMap.get(taskTypeId)
   },
   getTask (taskId) {
-    return tasksStore.state.taskMap[taskId]
+    return tasksStore.state.taskMap.get(taskId)
   },
   getPerson (personId) {
-    return peopleStore.state.personMap[personId]
+    return peopleStore.state.personMap.get(personId)
   },
 
   setListStats (state, assets) {
@@ -165,11 +165,11 @@ const helpers = {
     const validations = {}
     let timeSpent = 0
     let estimation = 0
-    if (!assetTypeMap[asset.asset_type]) {
-      assetTypeMap[asset.asset_type_id] = {
+    if (!assetTypeMap.get(asset.asset_type)) {
+      assetTypeMap.set(asset.asset_type_id, {
         id: asset.asset_type_id,
         name: asset.asset_type_name
-      }
+      })
     }
     asset.production_id = production.id
     asset.project_name = production.name
@@ -182,11 +182,11 @@ const helpers = {
 
       if (task.assignees.length > 1) {
         task.assignees = task.assignees.sort((a, b) => {
-          return personMap[a].name.localeCompare(personMap[b].name)
+          return personMap.get(a).name.localeCompare(personMap.get(b).name)
         })
       }
 
-      const taskType = taskTypeMap[task.task_type_id]
+      const taskType = taskTypeMap.get(task.task_type_id)
       if (!validationColumns[taskType.name]) {
         validationColumns[taskType.name] = task.task_type_id
       }
@@ -195,7 +195,7 @@ const helpers = {
       estimation += task.estimation
       taskIds.push(task.id)
       validations[task.task_type_id] = task.id
-      taskMap[task.id] = task
+      taskMap.set(task.id, task)
     })
 
     asset.tasks = taskIds
@@ -219,11 +219,8 @@ const helpers = {
     persons,
     taskMap
   }) {
-    const taskTypes = Object.values(taskTypeMap)
-    const taskStatuses = Object.keys(taskStatusMap).map((id) => {
-      return taskStatusMap[id]
-    })
-
+    const taskTypes = Array.from(taskTypeMap.values())
+    const taskStatuses = Array.from(taskStatusMap.values())
     const query = assetSearch
     const keywords = getKeyWords(query) || []
     const filters = getFilters({
@@ -265,7 +262,7 @@ const cache = {
 }
 
 const initialState = {
-  assetMap: {},
+  assetMap: new Map(),
   assetValidationColumns: [],
   nbValidationColumns: 0,
 
@@ -392,7 +389,7 @@ const actions = {
    * occurs.
    */
   loadAsset ({ commit, state, rootGetters }, assetId) {
-    const asset = state.assetMap[assetId]
+    const asset = state.assetMap.get(assetId)
     if (asset && asset.lock) return
 
     const personMap = rootGetters.personMap
@@ -401,7 +398,7 @@ const actions = {
     const taskTypeMap = rootGetters.taskTypeMap
     return assetsApi.getAsset(assetId)
       .then((asset) => {
-        if (state.assetMap[asset.id]) {
+        if (state.assetMap.get(asset.id)) {
           commit(UPDATE_ASSET, asset)
         } else {
           commit(ADD_ASSET, {
@@ -462,7 +459,7 @@ const actions = {
   deleteAsset ({ commit, state }, asset) {
     return assetsApi.deleteAsset(asset)
       .then(() => {
-        const previousAsset = state.assetMap[asset.id]
+        const previousAsset = state.assetMap.get(asset.id)
         if (
           previousAsset &&
           previousAsset.tasks.length > 0 &&
@@ -595,7 +592,7 @@ const actions = {
       let assetLine = []
       if (rootGetters.isTVShow) {
         assetLine.push(
-          asset.episode_id ? episodeMap[asset.episode_id].name : 'MP'
+          asset.episode_id ? episodeMap.get(asset.episode_id).name : 'MP'
         )
       }
       assetLine = assetLine.concat([
@@ -617,7 +614,8 @@ const actions = {
       }
       state.assetValidationColumns
         .forEach(validationColumn => {
-          const task = rootGetters.taskMap[asset.validations[validationColumn]]
+          const task =
+            rootGetters.taskMap.get(asset.validations[validationColumn])
           if (task) {
             assetLine.push(task.task_status_short_name)
           } else {
@@ -657,7 +655,7 @@ const actions = {
 const mutations = {
   [CLEAR_ASSETS] (state) {
     cache.assets = []
-    state.assetMap = {}
+    state.assetMap = new Map()
     cache.result = []
     state.assetValidationColumns = []
 
@@ -671,7 +669,7 @@ const mutations = {
   [LOAD_ASSETS_START] (state) {
     cache.assets = []
     cache.result = []
-    state.assetMap = {}
+    state.assetMap = new Map()
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
     state.assetValidationColumns = []
@@ -697,7 +695,7 @@ const mutations = {
     taskTypeMap
   }) {
     const validationColumns = {}
-    const assetTypeMap = {}
+    const assetTypeMap = new Map()
     let isTime = false
     let isEstimation = false
     let isDescription = false
@@ -705,7 +703,7 @@ const mutations = {
     cache.assets = assets
     cache.result = assets
     cache.assetIndex = buildAssetIndex(assets)
-    state.assetMap = {}
+    state.assetMap = new Map()
 
     assets.forEach(asset => {
       helpers.populateAndRegisterAsset(
@@ -717,13 +715,13 @@ const mutations = {
         validationColumns,
         asset
       )
-      state.assetMap[asset.id] = asset
+      state.assetMap.set(asset.id, asset)
       if (!isTime && asset.timeSpent > 0) isTime = true
       if (!isEstimation && asset.estimation > 0) isEstimation = true
       if (!isDescription && asset.description) isDescription = true
     })
 
-    const assetTypes = Object.values(assetTypeMap)
+    const assetTypes = Array.from(assetTypeMap.values())
     cache.assetTypeIndex = buildNameIndex(assetTypes)
     const displayedAssets = cache.assets.slice(0, PAGE_SIZE)
     const filledColumns = getFilledColumns(displayedAssets)
@@ -783,7 +781,7 @@ const mutations = {
     )
     cache.assets.push(asset)
     cache.assets = sortAssets(cache.assets)
-    state.assetMap[asset.id] = asset
+    state.assetMap.set(asset.id, asset)
 
     state.displayedAssets.push(asset)
     state.displayedAssets = sortAssets(state.displayedAssets)
@@ -793,19 +791,19 @@ const mutations = {
     const maxX = state.displayedAssets.length
     const maxY = state.nbValidationColumns
     state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
-    state.assetMap[asset.id] = asset
+    state.assetMap.set(asset.id, asset)
 
     cache.assetIndex = buildAssetIndex(cache.assets)
   },
 
   [UPDATE_ASSET] (state, asset) {
-    Object.assign(state.assetMap[asset.id], asset)
+    Object.assign(state.assetMap.get(asset.id), asset)
     cache.assetIndex = buildAssetIndex(cache.assets)
   },
 
   [REMOVE_ASSET] (state, assetToDelete) {
-    if (state.assetMap[assetToDelete.id]) {
-      delete state.assetMap[assetToDelete.id]
+    if (state.assetMap.get(assetToDelete.id)) {
+      delete state.assetMap.get(assetToDelete.id)
       cache.assets = removeModelFromList(cache.assets, assetToDelete)
       state.displayedAssets =
         removeModelFromList(state.displayedAssets, assetToDelete)
@@ -831,8 +829,8 @@ const mutations = {
 
   [EDIT_ASSET_END] (state, { newAsset, assetTypeMap }) {
     state.assetCreated = newAsset.name
-    const asset = state.assetMap[newAsset.id]
-    const assetType = assetTypeMap[newAsset.entity_type_id]
+    const asset = state.assetMap.get(newAsset.id)
+    const assetType = assetTypeMap.get(newAsset.entity_type_id)
     if (assetType) {
       newAsset.asset_type_name = assetType.name
       newAsset.asset_type_id = assetType.id
@@ -857,7 +855,7 @@ const mutations = {
       const maxX = state.displayedAssets.length
       const maxY = state.nbValidationColumns
       state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
-      state.assetMap[newAsset.id] = newAsset
+      state.assetMap.set(newAsset.id, newAsset)
     }
     if (newAsset.description && !state.isAssetDescription) {
       state.isAssetDescription = true
@@ -870,7 +868,7 @@ const mutations = {
   },
 
   [RESTORE_ASSET_END] (state, assetToRestore) {
-    const asset = state.assetMap[assetToRestore.id]
+    const asset = state.assetMap.get(assetToRestore.id)
     asset.canceled = false
     cache.assetIndex = buildAssetIndex(cache.assets)
   },
@@ -948,11 +946,11 @@ const mutations = {
   },
 
   [SET_PREVIEW] (state, { entityId, taskId, previewId, taskMap }) {
-    const asset = state.assetMap[entityId]
+    const asset = state.assetMap.get(entityId)
     if (asset) {
       asset.preview_file_id = previewId
-      asset.tasks.forEach((taskId) => {
-        const task = taskMap[taskId]
+      asset.tasks.forEach(taskId => {
+        const task = taskMap.get(taskId)
         if (task) task.entity.preview_file_id = previewId
       })
     }
@@ -1002,7 +1000,7 @@ const mutations = {
   },
 
   [NEW_TASK_END] (state, task) {
-    const asset = state.assetMap[task.entity_id]
+    const asset = state.assetMap.get(task.entity_id)
     if (asset && task) {
       task = helpers.populateTask(task, asset)
       asset.tasks.push(task.id)
@@ -1014,7 +1012,7 @@ const mutations = {
   [CREATE_TASKS_END] (state, tasks) {
     tasks.forEach((task) => {
       if (task) {
-        const asset = state.assetMap[task.entity_id]
+        const asset = state.assetMap.get(task.entity_id)
         if (asset) {
           const validations = { ...asset.validations }
           Vue.set(validations, task.task_type_id, task.id)
@@ -1072,12 +1070,12 @@ const mutations = {
   },
 
   [LOCK_ASSET] (state, asset) {
-    asset = state.assetMap[asset.id]
+    asset = state.assetMap.get(asset.id)
     asset.lock = true
   },
 
   [UNLOCK_ASSET] (state, asset) {
-    asset = state.assetMap[asset.id]
+    asset = state.assetMap.get(asset.id)
     asset.lock = false
   },
 

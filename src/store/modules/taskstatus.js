@@ -14,7 +14,7 @@ import {
 
 const initialState = {
   taskStatus: [],
-  taskStatusMap: {}
+  taskStatusMap: new Map()
 }
 
 const state = initialState
@@ -104,17 +104,17 @@ const actions = {
 const mutations = {
   [LOAD_TASK_STATUSES_START] (state) {
     state.taskStatus = []
-    state.taskStatusMap = {}
+    state.taskStatusMap = new Map()
   },
 
   [LOAD_TASK_STATUSES_ERROR] (state) {
     state.taskStatus = []
-    state.taskStatusMap = {}
+    state.taskStatusMap = new Map()
   },
 
   [LOAD_TASK_STATUSES_END] (state, taskStatus) {
     state.taskStatus = sortByName(taskStatus)
-    state.taskStatusMap = {}
+    state.taskStatusMap = new Map()
     taskStatus.forEach((taskStatus) => {
       if (taskStatus.is_artist_allowed === null) {
         taskStatus.is_artist_allowed = true
@@ -122,12 +122,12 @@ const mutations = {
       if (taskStatus.is_client_allowed === null) {
         taskStatus.is_client_allowed = false
       }
-      state.taskStatusMap[taskStatus.id] = taskStatus
+      state.taskStatusMap.set(taskStatus.id, taskStatus)
     })
   },
 
   [EDIT_TASK_STATUS_END] (state, newTaskStatus) {
-    const taskStatus = state.taskStatusMap[newTaskStatus.id]
+    const taskStatus = state.taskStatusMap.get(newTaskStatus.id)
 
     if (taskStatus && taskStatus.id) {
       Object.assign(taskStatus, newTaskStatus)
@@ -135,7 +135,7 @@ const mutations = {
       state.taskStatus.push(newTaskStatus)
       state.taskStatus = sortByName(state.taskStatus)
     }
-    state.taskStatusMap[newTaskStatus.id] = newTaskStatus
+    state.taskStatusMap.set(newTaskStatus.id, newTaskStatus)
   },
 
   [DELETE_TASK_STATUS_END] (state, taskStatusToDelete) {
@@ -145,7 +145,7 @@ const mutations = {
     if (taskStatusToDeleteIndex >= 0) {
       state.taskStatus.splice(taskStatusToDeleteIndex, 1)
     }
-    delete state.taskStatusMap[taskStatusToDelete.id]
+    delete state.taskStatusMap.get(taskStatusToDelete.id)
   },
 
   [RESET_ALL] (state) {

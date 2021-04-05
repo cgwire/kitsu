@@ -92,7 +92,7 @@ export default {
 
     currentTaskType () {
       if (this.value) {
-        return this.taskTypeMap[this.value]
+        return this.taskTypeMap.get(this.value)
       } else {
         return this.taskTypeList[0]
       }

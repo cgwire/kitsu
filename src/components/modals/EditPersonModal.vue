@@ -53,7 +53,7 @@
             v-for="departmentId in form.departments"
           >
             <department-name
-              :department="departmentMap[departmentId]"
+              :department="departmentMap.get(departmentId)"
               v-if="departmentId"
             />
           </div>
@@ -224,15 +224,16 @@ export default {
   computed: {
     ...mapGetters([
       'departments',
+      'departmentMap',
       'isLdap',
       'isCurrentUserAdmin',
       'people'
     ]),
 
     selectableDepartments () {
-      return this.departments.filter(departement => {
+      return this.departments.filter(department => {
         return this.form.departments.findIndex(
-          selectedDepartment => selectedDepartment === departement.id
+          selectedDepartment => selectedDepartment === department.id
         ) === -1
       })
     },
@@ -247,14 +248,6 @@ export default {
       } else {
         return ''
       }
-    },
-
-    departmentMap () {
-      const departmentMap = {}
-      this.departments.forEach(department => {
-        departmentMap[department.id] = department
-      })
-      return departmentMap
     }
   },
 

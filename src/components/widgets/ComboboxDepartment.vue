@@ -85,6 +85,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'departmentMap',
       'departments'
     ]),
 
@@ -97,17 +98,9 @@ export default {
       return [{ name: '---', id: null, color: '#000000' }, ...this.departmentsToTakeAccount]
     },
 
-    departmentMap () {
-      const departmentMap = {}
-      this.departmentList.forEach(department => {
-        departmentMap[department.id] = department
-      })
-      return departmentMap
-    },
-
     currentDepartment () {
       if (this.value) {
-        return this.departmentMap[this.value]
+        return this.departmentMap.get(this.value)
       } else {
         return this.departmentList[0]
       }

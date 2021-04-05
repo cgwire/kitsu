@@ -125,13 +125,13 @@ export default {
   socket: {
     events: {
       'project:new' (eventData) {
-        if (!this.productionMap[eventData.project_id]) {
+        if (!this.productionMap.get(eventData.project_id)) {
           this.loadProduction(eventData.project_id)
         }
       },
 
       'project:update' (eventData) {
-        if (this.productionMap[eventData.project_id]) {
+        if (this.productionMap.get(eventData.project_id)) {
           this.loadProduction(eventData.project_id)
         } else {
           this.loadOpenProductions()
@@ -139,14 +139,14 @@ export default {
       },
 
       'project:delete' (eventData) {
-        if (this.productionMap[eventData.project_id]) {
+        if (this.productionMap.get(eventData.project_id)) {
           this.$store.commit('REMOVE_PRODUCTION', { id: eventData.project_id })
         }
       },
 
       'sequence:new' (eventData) {
         if (
-          !this.sequenceMap[eventData.sequence_id] &&
+          !this.sequenceMap.get(eventData.sequence_id) &&
           this.currentProduction &&
           this.currentProduction.id === eventData.project_id
         ) {
@@ -155,20 +155,20 @@ export default {
       },
 
       'sequence:update' (eventData) {
-        if (this.sequenceMap[eventData.sequence_id]) {
+        if (this.sequenceMap.get(eventData.sequence_id)) {
           this.loadSequence(eventData.sequence_id)
         }
       },
 
       'sequence:delete' (eventData) {
-        if (this.sequenceMap[eventData.sequence_id]) {
+        if (this.sequenceMap.get(eventData.sequence_id)) {
           this.$store.commit('REMOVE_SEQUENCE', { id: eventData.sequence_id })
         }
       },
 
       'episode:new' (eventData) {
         if (
-          !this.episodeMap[eventData.episode_id] &&
+          !this.episodeMap.get(eventData.episode_id) &&
           this.currentProduction &&
           this.currentProduction.id === eventData.project_id
         ) {
@@ -177,20 +177,20 @@ export default {
       },
 
       'episode:update' (eventData) {
-        if (this.episodeMap[eventData.episode_id]) {
+        if (this.episodeMap.get(eventData.episode_id)) {
           this.loadEpisode(eventData.episode_id)
         }
       },
 
       'episode:delete' (eventData) {
-        if (this.episodeMap[eventData.episode_id]) {
+        if (this.episodeMap.get(eventData.episode_id)) {
           this.$store.commit('REMOVE_EPISODE', { id: eventData.episode_id })
         }
       },
 
       'shot:new' (eventData) {
         if (
-          !this.shotMap[eventData.shot_id] &&
+          !this.shotMap.get(eventData.shot_id) &&
           this.currentProduction &&
           this.currentProduction.id === eventData.project_id &&
           (
@@ -205,20 +205,20 @@ export default {
       },
 
       'shot:update' (eventData) {
-        if (this.shotMap[eventData.shot_id]) {
+        if (this.shotMap.get(eventData.shot_id)) {
           this.loadShot(eventData.shot_id)
         }
       },
 
       'shot:delete' (eventData) {
-        if (this.shotMap[eventData.shot_id]) {
+        if (this.shotMap.get(eventData.shot_id)) {
           this.$store.commit('REMOVE_SHOT', { id: eventData.shot_id })
         }
       },
 
       'asset:new' (eventData) {
         if (
-          !this.assetMap[eventData.asset_id] &&
+          !this.assetMap.get(eventData.asset_id) &&
           this.currentProduction &&
           this.currentProduction.id === eventData.project_id
         ) {
@@ -229,26 +229,26 @@ export default {
       },
 
       'asset:update' (eventData) {
-        if (this.assetMap[eventData.asset_id]) {
+        if (this.assetMap.get(eventData.asset_id)) {
           this.loadAsset(eventData.asset_id)
         }
       },
 
       'asset:delete' (eventData) {
-        if (this.assetMap[eventData.asset_id]) {
+        if (this.assetMap.get(eventData.asset_id)) {
           this.$store.commit('REMOVE_ASSET', { id: eventData.asset_id })
         }
       },
 
       'task:delete' (eventData) {
-        const task = this.taskMap[eventData.task_id]
+        const task = this.taskMap.get(eventData.task_id)
         if (task) {
           this.$store.commit('DELETE_TASK_END', task)
         }
       },
 
       'task-type:new' (eventData) {
-        if (!this.taskTypeMap[eventData.task_type_id]) {
+        if (!this.taskTypeMap.get(eventData.task_type_id)) {
           this.loadTaskType(eventData.task_type_id)
         }
       },
@@ -258,7 +258,7 @@ export default {
       },
 
       'task-type:delete' (eventData) {
-        if (this.taskTypeMap[eventData.task_type_id]) {
+        if (this.taskTypeMap.get(eventData.task_type_id)) {
           this.$store.commit(
             'DELETE_TASK_TYPE_END',
             { id: eventData.task_type_id }
@@ -267,19 +267,19 @@ export default {
       },
 
       'task-status:new' (eventData) {
-        if (!this.taskStatusMap[eventData.task_status_id]) {
+        if (!this.taskStatusMap.get(eventData.task_status_id)) {
           this.loadTaskStatus(eventData.task_status_id)
         }
       },
 
       'task-status:update' (eventData) {
-        if (this.taskStatusMap[eventData.task_status_id]) {
+        if (this.taskStatusMap.get(eventData.task_status_id)) {
           this.loadTaskStatus(eventData.task_status_id)
         }
       },
 
       'task-status:delete' (eventData) {
-        if (this.taskStatusMap[eventData.task_status_id]) {
+        if (this.taskStatusMap.get(eventData.task_status_id)) {
           this.$store.commit(
             'DELETE_TASK_STATUS_END',
             { id: eventData.task_status_id }
@@ -288,19 +288,19 @@ export default {
       },
 
       'asset-type:new' (eventData) {
-        if (!this.assetTypeMap[eventData.asset_type_id]) {
+        if (!this.assetTypeMap.get(eventData.asset_type_id)) {
           this.loadAssetType(eventData.asset_type_id)
         }
       },
 
       'asset-type:update' (eventData) {
-        if (this.assetTypeMap[eventData.asset_type_id]) {
+        if (this.assetTypeMap.get(eventData.asset_type_id)) {
           this.loadAssetType(eventData.asset_type_id)
         }
       },
 
       'asset-type:delete' (eventData) {
-        if (this.assetTypeMap[eventData.asset_type_id]) {
+        if (this.assetTypeMap.get(eventData.asset_type_id)) {
           this.$store.commit(
             'DELETE_ASSET_TYPE_END',
             { id: eventData.asset_type_id }
@@ -309,19 +309,19 @@ export default {
       },
 
       'person:new' (eventData) {
-        if (!this.personMap[eventData.person_id]) {
+        if (!this.personMap.get(eventData.person_id)) {
           this.loadPerson(eventData.person_id)
         }
       },
 
       'person:update' (eventData) {
-        if (this.personMap[eventData.person_id]) {
+        if (this.personMap.get(eventData.person_id)) {
           this.loadPerson(eventData.person_id)
         }
       },
 
       'person:delete' (eventData) {
-        const person = this.personMap[eventData.person_id]
+        const person = this.personMap.get(eventData.person_id)
         if (person) {
           this.$store.commit('DELETE_PEOPLE_START', person)
           this.$store.commit('DELETE_PEOPLE_END', person)
@@ -337,15 +337,17 @@ export default {
       },
 
       'comment:new' (eventData) {
+        console.log(eventData)
         const commentId = eventData.comment_id
-        if (!this.isSavingCommentPreview) {
+        if (!this.isSavingCommentPreview &&
+            this.taskMap.get(eventData.task_id)) {
           this.loadComment({ commentId })
             .catch(console.error)
         }
       },
 
       'task:update' (eventData) {
-        if (this.taskMap[eventData.task_id]) {
+        if (this.taskMap.get(eventData.task_id)) {
           this.$nextTick(() => {
             this.loadTask({ taskId: eventData.task_id })
           })

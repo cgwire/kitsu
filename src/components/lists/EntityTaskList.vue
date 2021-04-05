@@ -64,7 +64,7 @@
                 <people-avatar
                   class="person-avatar flexrow-item"
                   :key="taskId + '-' + personId"
-                  :person="personMap[personId]"
+                  :person="personMap.get(personId)"
                   :size="30"
                   :font-size="15"
                 />
@@ -133,8 +133,10 @@ export default {
       return [...this.entries].sort((taskIdA, taskIdB) => {
         const taskA = this.getTask(taskIdA)
         const taskB = this.getTask(taskIdB)
-        const taskTypeA = this.getTask(this.taskTypeMap[taskA.task_type_id])
-        const taskTypeB = this.getTask(this.taskTypeMap[taskB.task_type_id])
+        const taskTypeA =
+          this.getTask(this.taskTypeMap.get(taskA.task_type_id))
+        const taskTypeB =
+          this.getTask(this.taskTypeMap.get(taskB.task_type_id))
         if (taskTypeA.priority === taskTypeB.priority) {
           return this.taskTypeA.localeCompare(this.taskTypeB.name)
         } else {
@@ -154,7 +156,7 @@ export default {
 
     getTask (task) {
       if (typeof (task) === 'string') {
-        return this.taskMap[task]
+        return this.taskMap.get(task)
       } else {
         return task
       }
@@ -162,7 +164,7 @@ export default {
 
     getTaskType (entry) {
       const task = this.getTask(entry)
-      return task ? this.taskTypeMap[task.task_type_id] : null
+      return task ? this.taskTypeMap.get(task.task_type_id) : null
     },
 
     getAssignees (entry) {

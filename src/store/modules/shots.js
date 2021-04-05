@@ -138,16 +138,16 @@ const cache = {
 
 const helpers = {
   getTask (taskId) {
-    return tasksStore.state.taskMap[taskId]
+    return tasksStore.state.taskMap.get(taskId)
   },
   getTaskStatus (taskStatusId) {
-    return tasksStore.state.taskStatusMap[taskStatusId]
+    return tasksStore.state.taskStatusMap.get(taskStatusId)
   },
   getTaskType (taskTypeId) {
-    return taskTypesStore.state.taskTypeMap[taskTypeId]
+    return taskTypesStore.state.taskTypeMap.get(taskTypeId)
   },
   getPerson (personId) {
-    return peopleStore.state.personMap[personId]
+    return peopleStore.state.personMap.get(personId)
   },
 
   getShotName (shot) {
@@ -320,7 +320,7 @@ const helpers = {
 }
 
 const initialState = {
-  shotMap: {},
+  shotMap: new Map(),
   sequences: [],
   episodes: [],
   shotSearchText: '',
@@ -356,8 +356,8 @@ const initialState = {
   sequenceIndex: {},
   shotFilledColumns: {},
 
-  sequenceMap: {},
-  episodeMap: {},
+  sequenceMap: new Map(),
+  episodeMap: new Map(),
   shotCreated: '',
   shotSelectionGrid: {},
   sequenceSelectionGrid: {},
@@ -428,7 +428,7 @@ const getters = {
   isShotsLoadingError: state => state.isShotsLoadingError,
   shotCreated: state => state.shotCreated,
 
-  isLongShotList: state => Object.keys(state.shotMap).length > 500,
+  isLongShotList: state => state.shotMap.size > 500,
   shotsCsvFormData: state => state.shotsCsvFormData,
   shotListScrollPosition: state => state.shotListScrollPosition,
   sequenceListScrollPosition: state => state.sequenceListScrollPosition,
@@ -441,7 +441,7 @@ const getters = {
     let sequenceShots = []
     let previousShot = null
 
-    for (const shot of Object.values(state.shotMap)) {
+    for (const shot of state.shotMap.values()) {
       if (previousShot && shot.sequence_name !== previousShot.sequence_name) {
         shotsBySequence.push(sequenceShots.slice(0))
         sequenceShots = []
@@ -479,7 +479,7 @@ const actions = {
       cache.shots.forEach((shot) => {
         let isPending = false
         shot.tasks.forEach((taskId) => {
-          const task = tasksStore.state.taskMap[taskId]
+          const task = tasksStore.state.taskMap.get(taskId)
           if (!isPending) {
             if (daily) {
               if (task.last_comment_date) {
@@ -575,7 +575,7 @@ const actions = {
   loadEpisode ({ commit, state }, episodeId) {
     return shotsApi.getEpisode(episodeId)
       .then((episode) => {
-        if (state.episodeMap[episode.id]) {
+        if (state.episodeMap.get(episode.id)) {
           commit(UPDATE_EPISODE, episode)
         } else {
           commit(ADD_EPISODE, episode)
@@ -587,7 +587,7 @@ const actions = {
   loadSequence ({ commit, state }, sequenceId) {
     return shotsApi.getSequence(sequenceId)
       .then((sequence) => {
-        if (state.sequenceMap[sequence.id]) {
+        if (state.sequenceMap.get(sequence.id)) {
           commit(UPDATE_SEQUENCE, sequence)
         } else {
           commit(ADD_SEQUENCE, sequence)
@@ -601,7 +601,7 @@ const actions = {
    * event. If the shot was updated a few times ago, it is not reloaded.
    */
   loadShot ({ commit, state, rootGetters }, shotId) {
-    const shot = rootGetters.shotMap[shotId]
+    const shot = rootGetters.shotMap.get(shotId)
     if (shot && shot.lock) return
 
     const personMap = rootGetters.personMap
@@ -610,7 +610,7 @@ const actions = {
     const taskTypeMap = rootGetters.taskTypeMap
     return shotsApi.getShot(shotId)
       .then((shot) => {
-        if (state.shotMap[shot.id]) {
+        if (state.shotMap.get(shot.id)) {
           commit(UPDATE_SHOT, shot)
         } else {
           commit(ADD_SHOT, {
@@ -693,7 +693,7 @@ const actions = {
   deleteShot ({ commit, state }, shot) {
     return shotsApi.deleteShot(shot)
       .then(() => {
-        const previousShot = state.shotMap[shot.id]
+        const previousShot = state.shotMap.get(shot.id)
         if (
           previousShot &&
           previousShot.tasks.length > 0 &&
@@ -978,11 +978,13 @@ const actions = {
       if (state.isFps) shotLine.push(shot.data.fps)
       state.shotValidationColumns
         .forEach(validationColumn => {
-          const task = rootGetters.taskMap[shot.validations[validationColumn]]
+          const task = rootGetters.taskMap.get(
+            shot.validations[validationColumn]
+          )
           if (task) {
             shotLine.push(task.task_status_short_name)
             shotLine.push(
-              task.assignees.map(id => personMap[id].full_name).join(',')
+              task.assignees.map(id => personMap.get(id).full_name).join(',')
             )
           } else {
             shotLine.push('') // Status
@@ -1007,8 +1009,9 @@ const actions = {
     const quotas = {}
 
     cache.shots.forEach((shot) => {
-      const task = taskMap[shot.validations[taskTypeId]]
-      const isTaskFinished = task && taskStatusMap[task.task_status_id].is_done
+      const task = taskMap.get(shot.validations[taskTypeId])
+      const isTaskFinished =
+        task && taskStatusMap.get(task.task_status_id).is_done
       if (isTaskFinished) {
         const period = helpers.getPeriod(task, detailLevel)
         const endDateString = helpers.getTaskEndDate(task, detailLevel)
@@ -1050,9 +1053,9 @@ const actions = {
     })
 
     const shots = cache.shots.filter((shot) => {
-      const task = rootGetters.taskMap[shot.validations[taskTypeId]]
+      const task = rootGetters.taskMap.get(shot.validations[taskTypeId])
       if (task) {
-        const taskStatus = taskStatusMap[task.task_status_id]
+        const taskStatus = taskStatusMap.get(task.task_status_id)
         const endDateString = helpers.getTaskEndDate(task, detailLevel)
         return (
           task &&
@@ -1101,7 +1104,7 @@ const mutations = {
     cache.shots = []
     cache.result = []
     cache.shotIndex = {}
-    state.shotMap = {}
+    state.shotMap = new Map()
 
     state.sequences = []
     state.sequenceIndex = {}
@@ -1121,7 +1124,7 @@ const mutations = {
     cache.shots = []
     cache.result = []
     cache.shotIndex = {}
-    state.shotMap = {}
+    state.shotMap = new Map()
     state.shotValidationColumns = []
 
     state.sequences = []
@@ -1162,7 +1165,7 @@ const mutations = {
     cache.result = shots
     cache.shotIndex = buildShotIndex(shots)
 
-    state.shotMap = {}
+    state.shotMap = new Map()
     shots.forEach((shot) => {
       const taskIds = []
       const validations = {}
@@ -1177,17 +1180,17 @@ const mutations = {
         estimation += task.estimation
         task.episode_id = shot.episode_id
 
-        taskMap[task.id] = task
+        taskMap.set(task.id, task)
         validations[task.task_type_id] = task.id
         taskIds.push(task.id)
 
-        const taskType = taskTypeMap[task.task_type_id]
+        const taskType = taskTypeMap.get(task.task_type_id)
         if (!validationColumns[taskType.name]) {
           validationColumns[taskType.name] = taskType.id
         }
         if (task.assignees.length > 1) {
           task.assignees = task.assignees.sort((a, b) => {
-            return personMap[a].name.localeCompare(personMap[b])
+            return personMap.get(a).name.localeCompare(personMap.get(b))
           })
         }
       })
@@ -1204,8 +1207,9 @@ const mutations = {
       if (!isEstimation && shot.estimation > 0) isEstimation = true
       if (!isDescription && shot.description) isDescription = true
 
-      state.shotMap[shot.id] = shot
+      state.shotMap.set(shot.id, shot)
     })
+    console.log('ok shots', state.shotMap)
     const displayedShots = shots.slice(0, PAGE_SIZE)
     const filledColumns = getFilledColumns(displayedShots)
 
@@ -1272,11 +1276,11 @@ const mutations = {
   },
 
   [LOAD_SEQUENCES_END] (state, sequences) {
-    const sequenceMap = {}
-    sequences.forEach((sequence) => {
-      sequenceMap[sequence.id] = sequence
+    const sequenceMap = new Map()
+    sequences.forEach(sequence => {
+      sequenceMap.set(sequence.id, sequence)
       if (sequence.parent_id) {
-        const episode = state.episodeMap[sequence.parent_id]
+        const episode = state.episodeMap.get(sequence.parent_id)
         if (episode) {
           Object.assign(sequence, {
             episode_id: episode.id,
@@ -1294,10 +1298,10 @@ const mutations = {
   },
 
   [LOAD_EPISODES_END] (state, { episodes, routeEpisodeId }) {
-    const episodeMap = {}
+    const episodeMap = new Map()
     if (!episodes) episodes = []
-    episodes.forEach((episode) => {
-      episodeMap[episode.id] = episode
+    episodes.forEach(episode => {
+      episodeMap.set(episode.id, episode)
     })
     state.episodeMap = episodeMap
     state.episodes = sortByName(episodes)
@@ -1312,7 +1316,7 @@ const mutations = {
       } else if (routeEpisodeId === 'main') {
         state.currentEpisode = { id: 'main' }
       } else if (routeEpisodeId) {
-        state.currentEpisode = state.episodeMap[routeEpisodeId]
+        state.currentEpisode = state.episodeMap.get(routeEpisodeId)
       } else {
         state.currentEpisode = state.episodes[0]
       }
@@ -1326,7 +1330,7 @@ const mutations = {
       helpers.populateTask(task, shot)
     })
     shot.tasks = sortTasks(shot.tasks, taskTypeMap)
-    state.shotMap[shot.id] = shot
+    state.shotMap.set(shot.id, shot)
   },
 
   [SHOT_CSV_FILE_SELECTED] (state, formData) {
@@ -1341,7 +1345,7 @@ const mutations = {
   },
 
   [EDIT_SHOT_END] (state, newShot) {
-    const shot = state.shotMap[newShot.id]
+    const shot = state.shotMap.get(newShot.id)
     const sequence = state.sequences.find(
       (sequence) => sequence.id === newShot.parent_id
     )
@@ -1352,7 +1356,7 @@ const mutations = {
     } else {
       cache.shots.push(newShot)
       cache.shots = sortShots(cache.shots)
-      state.shotMap[newShot.id] = newShot
+      state.shotMap.set(newShot.id, newShot)
 
       const maxX = state.displayedShots.length
       const maxY = state.nbValidationColumns
@@ -1382,7 +1386,7 @@ const mutations = {
   },
 
   [EDIT_SEQUENCE_END] (state, newSequence) {
-    const sequence = state.sequenceMap[newSequence.id]
+    const sequence = state.sequenceMap.get(newSequence.id)
     if (sequence) {
       Object.assign(sequence, newSequence)
     }
@@ -1390,7 +1394,7 @@ const mutations = {
   },
 
   [EDIT_EPISODE_END] (state, newEpisode) {
-    const episode = state.episodeMap[newEpisode.id]
+    const episode = state.episodeMap.get(newEpisode.id)
     if (episode) {
       Object.assign(episode, newEpisode)
     }
@@ -1398,7 +1402,7 @@ const mutations = {
   },
 
   [RESTORE_SHOT_END] (state, shotToRestore) {
-    const shot = state.shotMap[shotToRestore.id]
+    const shot = state.shotMap.get(shotToRestore.id)
     shot.canceled = false
     cache.shotIndex = buildShotIndex(cache.shots)
   },
@@ -1442,8 +1446,8 @@ const mutations = {
   },
 
   [NEW_SHOT_END] (state, shot) {
-    const sequence = state.sequenceMap[shot.parent_id]
-    const episode = state.episodeMap[sequence.parent_id]
+    const sequence = state.sequenceMap.get(shot.parent_id)
+    const episode = state.episodeMap.get(sequence.parent_id)
     shot.production_id = shot.project_id
     shot.sequence_name = sequence.name
     shot.sequence_id = sequence.id
@@ -1460,7 +1464,7 @@ const mutations = {
     state.displayedShots = cache.shots.slice(0, PAGE_SIZE)
     helpers.setListStats(state, cache.shots)
     state.shotFilledColumns = getFilledColumns(state.displayedShots)
-    state.shotMap[shot.id] = shot
+    state.shotMap.set(shot.id, shot)
     cache.shotIndex = buildShotIndex(cache.shots)
 
     const maxX = state.displayedShots.length
@@ -1475,13 +1479,13 @@ const mutations = {
 
   [NEW_SEQUENCE_END] (state, sequence) {
     if (sequence.parent_id) {
-      const episode = state.episodeMap[sequence.parent_id]
+      const episode = state.episodeMap.get(sequence.parent_id)
       sequence.episode_id = episode.id
       sequence.episode_name = episode.name
     }
     state.sequences.push(sequence)
     state.sequences = sortSequences(state.sequences)
-    state.sequenceMap[sequence.id] = sequence
+    state.sequenceMap.set(sequence.id, sequence)
     state.sequenceIndex = buildSequenceIndex(state.sequences)
   },
 
@@ -1489,13 +1493,13 @@ const mutations = {
     state.episodes.push(episode)
     state.episodes = sortByName(state.episodes)
     state.displayedEpisodes = state.episodes
-    state.episodeMap[episode.id] = episode
+    state.episodeMap.set(episode.id, episode)
   },
 
   [CREATE_TASKS_END] (state, tasks) {
     tasks.forEach((task) => {
       if (task) {
-        const shot = state.shotMap[task.entity_id]
+        const shot = state.shotMap.get(task.entity_id)
         if (shot) {
           helpers.populateTask(task, shot)
           const validations = { ...shot.validations }
@@ -1568,11 +1572,11 @@ const mutations = {
   },
 
   [SET_PREVIEW] (state, { entityId, taskId, previewId, taskMap }) {
-    const shot = state.shotMap[entityId]
+    const shot = state.shotMap.get(entityId)
     if (shot) {
       shot.preview_file_id = previewId
       shot.tasks.forEach((taskId) => {
-        const task = taskMap[taskId]
+        const task = taskMap.get(taskId)
         if (task) task.entity.preview_file_id = previewId
       })
     }
@@ -1610,7 +1614,7 @@ const mutations = {
   },
 
   [NEW_TASK_END] (state, task) {
-    const shot = state.shotMap[task.entity_id]
+    const shot = state.shotMap.get(task.entity_id)
     if (shot && task) {
       task = helpers.populateTask(task, shot)
 
@@ -1659,7 +1663,7 @@ const mutations = {
       } else if (episodeId === 'all') {
         state.currentEpisode = { id: 'all' }
       } else {
-        state.currentEpisode = state.episodeMap[episodeId]
+        state.currentEpisode = state.episodeMap.get(episodeId)
       }
     }
   },
@@ -1702,7 +1706,7 @@ const mutations = {
   [ADD_EPISODE] (state, episode) {
     state.episodes.push(episode)
     const sortedEpisodes = sortByName(state.episodes)
-    state.episodeMap[episode.id] = episode
+    state.episodeMap.set(episode.id, episode)
     state.episodes = sortedEpisodes
     state.displayedEpisodes.push(episode)
     state.displayedEpisodes = sortByName(state.displayedEpisodes)
@@ -1711,12 +1715,12 @@ const mutations = {
   },
 
   [UPDATE_EPISODE] (state, episode) {
-    Object.assign(state.episodeMap[episode.id], episode)
+    Object.assign(state.episodeMap.get(episode.id), episode)
     state.episodeIndex = buildSequenceIndex(state.episodes)
   },
 
   [REMOVE_EPISODE] (state, episode) {
-    delete state.episodeMap[episode.id]
+    delete state.episodeMap.get(episode.id)
     state.episodes = removeModelFromList(state.episodes, episode)
     state.displayedEpisodes =
       removeModelFromList(state.displayedEpisodes, episode)
@@ -1726,9 +1730,9 @@ const mutations = {
   [ADD_SEQUENCE] (state, sequence) {
     state.sequences.push(sequence)
     const sortedSequences = sortSequences(state.sequences)
-    state.sequenceMap[sequence.id] = sequence
+    state.sequenceMap.set(sequence.id, sequence)
     if (sequence.parent_id) {
-      const episode = state.episodeMap[sequence.parent_id]
+      const episode = state.episodeMap.get(sequence.parent_id)
       if (episode) {
         Object.assign(sequence, {
           episode_id: episode.id,
@@ -1744,12 +1748,12 @@ const mutations = {
   },
 
   [UPDATE_SEQUENCE] (state, sequence) {
-    Object.assign(state.sequenceMap[sequence.id], sequence)
+    Object.assign(state.sequenceMap.get(sequence.id), sequence)
     state.sequenceIndex = buildSequenceIndex(state.sequences)
   },
 
   [REMOVE_SEQUENCE] (state, sequence) {
-    delete state.sequenceMap[sequence.id]
+    delete state.sequenceMap.get(sequence.id)
     state.sequences = removeModelFromList(state.sequences, sequence)
     state.displayedSequences =
       removeModelFromList(state.displayedSequences, sequence)
@@ -1775,13 +1779,13 @@ const mutations = {
       estimation += task.estimation
       task.episode_id = shot.episode_id
 
-      taskMap[task.id] = task
+      taskMap.set(task.id, task)
       validations[task.task_type_id] = task.id
       taskIds.push(task.id)
 
       if (task.assignees.length > 1) {
         task.assignees = task.assignees.sort((a, b) => {
-          return personMap[a].name.localeCompare(personMap[b])
+          return personMap.get(a).name.localeCompare(personMap.get(b))
         })
       }
     })
@@ -1792,7 +1796,7 @@ const mutations = {
 
     cache.shots.push(shot)
     cache.shots = sortShots(cache.shots)
-    state.shotMap[shot.id] = shot
+    state.shotMap.set(shot.id, shot)
 
     state.displayedShots.push(shot)
     state.displayedShots = sortShots(state.displayedShots)
@@ -1802,16 +1806,16 @@ const mutations = {
     const maxX = state.displayedShots.length
     const maxY = state.nbValidationColumns
     state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
-    state.shotMap[shot.id] = shot
+    state.shotMap.set(shot.id, shot)
   },
 
   [UPDATE_SHOT] (state, shot) {
-    Object.assign(state.shotMap[shot.id], shot)
+    Object.assign(state.shotMap.get(shot.id), shot)
     cache.shotIndex = buildShotIndex(cache.shots)
   },
 
   [REMOVE_SHOT] (state, shotToDelete) {
-    delete state.shotMap[shotToDelete.id]
+    state.shotMap.delete(shotToDelete.id)
     cache.shots = removeModelFromList(cache.shots, shotToDelete)
     cache.result = removeModelFromList(cache.result, shotToDelete)
     cache.shotIndex = buildShotIndex(cache.shots)
@@ -1861,12 +1865,12 @@ const mutations = {
   },
 
   [LOCK_SHOT] (state, shot) {
-    shot = state.shotMap[shot.id]
+    shot = state.shotMap.get(shot.id)
     if (shot) shot.lock = true
   },
 
   [UNLOCK_SHOT] (state, shot) {
-    shot = state.shotMap[shot.id]
+    shot = state.shotMap.get(shot.id)
     if (shot) shot.lock = false
   },
 

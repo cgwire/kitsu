@@ -51,7 +51,7 @@
           <people-avatar
             class="flexrow-item"
             :key="personId"
-            :person="personMap[personId]"
+            :person="personMap.get(personId)"
             :size="30"
             :font-size="16"
           />
@@ -499,7 +499,7 @@ export default {
           if (this.entityList[previousEntityIndex]) {
             const entity = this.entityList[previousEntityIndex]
             taskId = entity.tasks.find((ctaskId) => {
-              const task = this.taskMap[ctaskId]
+              const task = this.taskMap.get(taskId)
               if (task) {
                 return task.task_type_id === taskTypeId
               } else {
@@ -548,7 +548,7 @@ export default {
           if (this.entityList[nextEntityIndex]) {
             const entity = this.entityList[nextEntityIndex]
             taskId = entity.tasks.find((ctaskId) => {
-              const task = this.taskMap[ctaskId]
+              const task = this.taskMap.get(taskId)
               if (task) {
                 return task.task_type_id === taskTypeId
               } else {
@@ -612,7 +612,7 @@ export default {
 
     deleteText () {
       if (this.currentTask) {
-        const taskType = this.taskTypeMap[this.currentTask.task_type_id]
+        const taskType = this.taskTypeMap.get(this.currentTask.task_type_id)
         return this.$t('main.delete_text', {
           name: `${this.currentTask.entity_name} / ${taskType.name}`
         })
@@ -633,14 +633,14 @@ export default {
 
     currentTaskType () {
       if (this.currentTask) {
-        return this.taskTypeMap[this.currentTask.task_type_id]
+        return this.taskTypeMap.get(this.currentTask.task_type_id)
       } else {
         return null
       }
     },
 
     currentTeam () {
-      return this.currentProduction.team.map(id => this.personMap[id])
+      return this.currentProduction.team.map(id => this.personMap.get(id))
     },
 
     pinnedCount () {
@@ -763,7 +763,7 @@ export default {
     },
 
     getCurrentTask () {
-      return this.taskMap[this.route.params.task_id]
+      return this.taskMap.get(this.route.params.task_id)
     },
 
     getCurrentComment () {
@@ -1103,7 +1103,7 @@ export default {
         const comment = this.currentTaskComments.find(
           c => c.id === eventData.comment_id
         )
-        const user = this.personMap[eventData.person_id]
+        const user = this.personMap.get(eventData.person_id)
         if (comment && user) {
           if (this.user.id === user.id) {
             if (
@@ -1177,7 +1177,8 @@ export default {
   metaInfo () {
     let title = 'Loading task... - Kitsu'
     if (this.currentTask) {
-      const taskTypeName = this.taskTypeMap[this.currentTask.task_type_id].name
+      const taskTypeName =
+        this.taskTypeMap.get(this.currentTask.task_type_id).name
       title = `${this.title} / ${taskTypeName} - Kitsu`
     }
     return { title }

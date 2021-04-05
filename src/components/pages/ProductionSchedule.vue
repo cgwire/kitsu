@@ -172,7 +172,7 @@ export default {
       this.loadScheduleItems(this.currentProduction)
         .then(scheduleItems => {
           scheduleItems = scheduleItems.map((item) => {
-            const taskType = this.taskTypeMap[item.task_type_id]
+            const taskType = this.taskTypeMap.get(item.task_type_id)
             let startDate, endDate
             if (item.start_date) {
               startDate = parseDate(item.start_date)
@@ -273,7 +273,7 @@ export default {
     expandTaskTypeElement (taskTypeElement) {
       const parameters = {
         production: this.currentProduction,
-        taskType: this.taskTypeMap[taskTypeElement.task_type_id]
+        taskType: this.taskTypeMap.get(taskTypeElement.task_type_id)
       }
 
       taskTypeElement.expanded = !taskTypeElement.expanded

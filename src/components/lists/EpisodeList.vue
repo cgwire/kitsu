@@ -20,7 +20,7 @@
           <th
             scope="col"
             class="validation validation-cell"
-            :key="taskTypeMap[columnId].id"
+            :key="taskTypeMap.get(columnId).id"
             v-for="columnId in validationColumns">
             <div
               class="flexrow validation-content"
@@ -31,13 +31,13 @@
                 :to="taskTypePath(columnId)"
                 v-if="!isCurrentUserClient"
               >
-                {{ taskTypeMap[columnId].name }}
+                {{ taskTypeMap.get(columnId).name }}
               </router-link>
               <span
                 class="flexrow-item"
                 v-else
               >
-                {{ taskTypeMap[columnId].name }}
+                {{ taskTypeMap.get(columnId).name }}
               </span>
             </div>
           </th>

@@ -36,9 +36,9 @@
     </span>
     <span
       class="avatar has-text-centered"
-      :title="personMap[personId].full_name"
+      :title="personMap.get(personId).full_name"
       :style="{
-        background: personMap[personId].color,
+        background: personMap.get(personId).color,
         width: '20px',
         height: '20px',
         'font-size': '10px'
@@ -52,10 +52,10 @@
         :key="avatarKey(personId)"
         width="20"
         height="20"
-        v-if="personMap[personId].has_avatar"
+        v-if="personMap.get(personId).has_avatar"
       />
       <span v-else>
-        {{ personMap[personId].initials }}
+        {{ personMap.get(personId).initials }}
       </span>
     </span>
   </div>
@@ -147,7 +147,7 @@ export default {
     if (this.taskTest) {
       this.task = this.taskTest
     } else if (this.entity && this.column) {
-      this.task = this.taskMap[this.entity.validations[this.column.id]]
+      this.task = this.taskMap.get(this.entity.validations[this.column.id])
     }
     this.changeStyleBasedOnSelected()
   },
@@ -211,7 +211,7 @@ export default {
     taskStatus () {
       if (this.task) {
         const taskStatusId = this.task.task_status_id
-        return this.taskStatusMap ? this.taskStatusMap[taskStatusId] : {}
+        return this.taskStatusMap ? this.taskStatusMap.get(taskStatusId) : {}
       } else {
         return {}
       }
@@ -289,7 +289,7 @@ export default {
     },
 
     avatarPath (personId) {
-      const person = this.personMap[personId]
+      const person = this.personMap.get(personId)
       if (person) {
         return person.avatarPath + '?unique=' + person.uniqueHash
       } else {
@@ -298,7 +298,7 @@ export default {
     },
 
     avatarKey (personId) {
-      const person = this.personMap[personId]
+      const person = this.personMap.get(personId)
       if (person) {
         return person.id + '-' + person.uniqueHash
       } else {
@@ -328,7 +328,7 @@ export default {
       if (this.taskTest) {
         this.task = this.taskTest
       } else if (this.entity) {
-        this.task = this.taskMap[this.entity.validations[this.column.id]]
+        this.task = this.taskMap.get(this.entity.validations[this.column.id])
       }
     }
   }

@@ -59,10 +59,10 @@ import {
 
 const initialState = {
   productions: [],
-  productionMap: {},
+  productionMap: new Map(),
   openProductions: [],
   productionStatus: [],
-  productionStatusMap: {},
+  productionStatusMap: new Map(),
   currentProduction: null,
   productionAvatarFormData: null,
 
@@ -145,7 +145,7 @@ const getters = {
       return sortByName(
         state.currentProduction
           .asset_types
-          .map(id => rootState.assetTypes.assetTypeMap[id])
+          .map(id => rootState.assetTypes.assetTypeMap.get(id))
       )
     }
   },
@@ -157,20 +157,20 @@ const getters = {
       return sortByName(
         state.currentProduction
           .task_statuses
-          .map(id => rootState.taskStatus.taskStatusMap[id])
+          .map(id => rootState.taskStatus.taskStatusMap.get(id))
       )
     }
   },
 
   getProductionTaskStatuses: (state, getters, rootState) => (id) => {
-    const production = state.productionMap[id]
+    const production = state.productionMap.get(id)
     if (helpers.isEmptyArray(production, 'task_statuses')) {
       return rootState.taskStatus.taskStatus
     } else {
       return sortByName(
         production
           .task_statuses
-          .map(id => rootState.taskStatus.taskStatusMap[id])
+          .map(id => rootState.taskStatus.taskStatusMap.get(id))
       )
     }
   },
@@ -182,7 +182,7 @@ const getters = {
       return sortByName(
         state.currentProduction
           .task_types
-          .map(id => rootState.taskTypes.taskTypeMap[id])
+          .map(id => rootState.taskTypes.taskTypeMap.get(id))
       )
     }
   },
@@ -271,7 +271,7 @@ const actions = {
   loadProduction ({ commit, state }, productionId) {
     return productionsApi.getProduction(productionId)
       .then((production) => {
-        if (state.productionMap[production.id]) {
+        if (state.productionMap.get(production.id)) {
           commit(UPDATE_PRODUCTION, production)
         } else {
           commit(ADD_PRODUCTION, production)
@@ -454,17 +454,17 @@ const actions = {
           state.openProductions.forEach((production) => {
             if (!production.descriptors) Vue.set(production, 'descriptors', [])
             production.descriptors.forEach((desc) => {
-              descriptorMap[desc.id] = desc
+              descriptorMap.set(desc.id, desc)
             })
           })
-          if (!descriptorMap[descriptor.id]) {
+          if (!descriptorMap.get(descriptor.id)) {
             commit(ADD_METADATA_DESCRIPTOR_END, {
-              production: state.productionMap[descriptor.project_id],
+              production: state.productionMap.get(descriptor.project_id),
               descriptor
             })
           } else {
             commit(UPDATE_METADATA_DESCRIPTOR_END, {
-              production: state.productionMap[descriptor.project_id],
+              production: state.productionMap.get(descriptor.project_id),
               descriptor
             })
           }
@@ -493,10 +493,10 @@ const mutations = {
     state.isProductionsLoadingError = false
     state.productions = sortProductions(productions)
 
-    const productionMap = {}
+    const productionMap = new Map()
     const addProductionToMap = (production) => {
-      if (!productionMap[production.id]) {
-        productionMap[production.id] = production
+      if (!productionMap.get(production.id)) {
+        productionMap.set(production.id, production)
       }
     }
     state.openProductions.forEach(addProductionToMap)
@@ -515,9 +515,9 @@ const mutations = {
     state.isOpenProductionsLoading = false
     state.openProductions = sortByName(productions)
 
-    const productionMap = {}
-    productions.forEach((production) => {
-      productionMap[production.id] = production
+    const productionMap = new Map()
+    productions.forEach(production => {
+      productionMap.set(production.id, production)
     })
     state.productionMap = productionMap
 
@@ -532,9 +532,9 @@ const mutations = {
   [LOAD_PRODUCTION_STATUS_ERROR] (state) {
   },
   [LOAD_PRODUCTION_STATUS_END] (state, productionStatus) {
-    const productionStatusMap = {}
-    productionStatus.forEach((status) => {
-      productionStatusMap[status.id] = status
+    const productionStatusMap = new Map()
+    productionStatus.forEach(status => {
+      productionStatusMap.set(status.id, status)
     })
     state.productionStatus = productionStatus
     state.productionStatusMap = productionStatusMap
@@ -547,7 +547,7 @@ const mutations = {
 
   [EDIT_PRODUCTION_END] (state, newProduction) {
     const productionStatus =
-      state.productionStatusMap[newProduction.project_status_id]
+      state.productionStatusMap.get(newProduction.project_status_id)
     const production = state.productions.find(
       (production) => production.id === newProduction.id
     )
@@ -594,7 +594,7 @@ const mutations = {
       newProduction.asset_types = []
       newProduction.task_types = []
       state.productions.push(newProduction)
-      state.productionMap[newProduction.id] = newProduction
+      state.productionMap.set(newProduction.id, newProduction)
       if (!openProduction) {
         state.openProductions.push(newProduction)
         state.openProductions = sortByName(state.openProductions)
@@ -608,13 +608,13 @@ const mutations = {
     state.openProductions.push(production)
     state.productions = sortProductions(state.productions)
     state.openProductions = sortByName(state.openProductions)
-    state.productionMap[production.id] = production
+    state.productionMap.set(production.id, production)
   },
 
   [UPDATE_PRODUCTION] (state, production) {
-    const previousProduction = state.productionMap[production.id]
+    const previousProduction = state.productionMap.get(production.id)
     const productionStatus =
-      state.productionStatusMap[production.project_status_id]
+      state.productionStatusMap.get(production.project_status_id)
     const openProduction =
       state.openProductions.find(p => p.id === production.id)
     const isStatusChanged =
@@ -648,7 +648,7 @@ const mutations = {
       removeModelFromList(state.productions, productionToDelete)
     state.openProductions =
       removeModelFromList(state.openProductions, productionToDelete)
-    delete state.productionMap[productionToDelete.id]
+    state.productionMap.delete(productionToDelete.id)
   },
 
   [DELETE_PRODUCTION_END] (state, productionToDelete) {
@@ -659,12 +659,12 @@ const mutations = {
   },
 
   [PRODUCTION_AVATAR_UPLOADED] (state, productionId) {
-    const production = state.productionMap[productionId]
+    const production = state.productionMap.get(productionId)
     if (production) production.has_avatar = true
   },
 
   [SET_CURRENT_PRODUCTION] (state, productionId) {
-    const production = state.productionMap[productionId]
+    const production = state.productionMap.get(productionId)
     state.currentProduction = production
   },
 

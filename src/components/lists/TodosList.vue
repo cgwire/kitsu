@@ -72,7 +72,7 @@
           >
             <production-name-cell
               :is-tooltip="true"
-              :entry="productionMap[entry.project_id]"
+              :entry="productionMap.get(entry.project_id)"
               :only-avatar="true"
             />
           </td>
@@ -312,8 +312,8 @@ export default {
     },
 
     getTaskType (entry) {
-      const taskType = this.taskTypeMap[entry.task_type_id]
-      const production = this.productionMap[entry.project_id]
+      const taskType = this.taskTypeMap.get(entry.task_type_id)
+      const production = this.productionMap.get(entry.project_id)
       taskType.episode_id = entry.episode_id
       if (production && production.production_type === 'tvshow' && !entry.episode_id) {
         taskType.episode_id = production.first_episode_id
@@ -336,7 +336,7 @@ export default {
         route.params.shot_id = entity.entity_id
       }
 
-      const production = this.productionMap[entity.project_id]
+      const production = this.productionMap.get(entity.project_id)
       let episodeId = entity.episode_id
       if (production && production.production_type === 'tvshow' && !episodeId) {
         if (entityType === 'shot') {

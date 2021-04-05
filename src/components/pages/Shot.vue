@@ -259,7 +259,6 @@ export default {
       'isCurrentUserManager',
       'isTVShow',
       'route',
-      'taskMap',
       'shotMap',
       'shotMetadataDescriptors',
       'shotsPath'
@@ -305,6 +304,10 @@ export default {
           search: ''
         }
       }
+      if (this.currentEpisode) {
+        route.name = 'episode-shots'
+        route.params.episode_id = this.currentEpisode.id
+      }
       return route
     }
   },
@@ -323,7 +326,7 @@ export default {
     },
 
     getCurrentShot () {
-      return this.shotMap[this.route.params.shot_id] || null
+      return this.shotMap.get(this.route.params.shot_id) || null
     },
 
     onEditClicked () {
@@ -389,7 +392,7 @@ export default {
     },
 
     currentEpisode () {
-      if (this.isTVShow && Object.keys(this.shotMap).length === 0) {
+      if (this.isTVShow && this.shotMap.size === 0) {
         this.resetData()
       }
     }

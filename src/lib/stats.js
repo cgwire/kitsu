@@ -95,7 +95,7 @@ export const computeStats = (entities, idField, taskStatusMap, taskMap) => {
       }
 
       entity.tasks.forEach((taskId) => {
-        const task = taskMap[taskId]
+        const task = taskMap.get(taskId)
         computeTaskResult(
           taskStatusMap,
           results,

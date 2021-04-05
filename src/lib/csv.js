@@ -127,7 +127,7 @@ const csv = {
     const initialHeaders = ['Name', '', 'All', '']
     return taskTypeIds.reduce((acc, taskTypeId) => {
       if (taskTypeId !== 'all') {
-        const taskTypeName = taskTypeMap[taskTypeId].name
+        const taskTypeName = taskTypeMap.get(taskTypeId).name
         return acc.concat([taskTypeName, ''])
       } else {
         return acc
@@ -321,7 +321,7 @@ const getStatsTaskTypeIds = (mainStats, taskTypeMap) => {
     .sort((a, b) => {
       if (a === 'all') return 1
       if (b === 'all') return -1
-      return taskTypeMap[a].priority - taskTypeMap[b].priority
+      return taskTypeMap.get(a).priority - taskTypeMap.get(b).priority
     })
 }
 
@@ -330,7 +330,7 @@ const getStatsEntryIds = (mainStats, entryMap) => {
     .sort((a, b) => {
       if (a === 'all') return -1
       if (b === 'all') return 1
-      return entryMap[a].name.localeCompare(entryMap[b].name)
+      return entryMap.get(a).name.localeCompare(entryMap.get(b).name)
     })
 }
 
@@ -375,10 +375,10 @@ const buildTotalLines = (
   total
 ) => {
   const lineMap = {}
-  taskStatusIds.forEach((taskStatusId) => {
-    const taskStatus = taskStatusMap[taskStatusId]
+  taskStatusIds.forEach(taskStatusId => {
+    const taskStatus = taskStatusMap.get(taskStatusId)
     const taskStatusName = taskStatus ? taskStatus.name : taskStatusId
-    const entry = entryMap[entryId]
+    const entry = entryMap.get(entryId)
     const name = entry ? entry.name : 'All'
     const taskStatusStats = mainStats[entryId].all[taskStatusId]
     const count = taskStatusStats[countMode]

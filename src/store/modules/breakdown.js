@@ -63,8 +63,8 @@ const actions = {
     const production = rootState.productions.currentProduction
     const assetMap = rootState.assets.assetMap
     const shots =
-      Object.values(rootState.shots.shotMap)
-        .filter((shot) => shot.sequence_id === sequenceId)
+     Array.from(rootState.shots.shotMap.values())
+       .filter((shot) => shot.sequence_id === sequenceId)
     commit(CASTING_SET_SEQUENCE, sequenceId)
     commit(CASTING_SET_SHOTS, shots)
     return breakdownApi.getSequenceCasting(production.id, sequenceId)
@@ -80,7 +80,7 @@ const actions = {
     const production = rootState.productions.currentProduction
     const assetMap = rootState.assets.assetMap
     const assets =
-      Object.values(rootState.assets.assetMap)
+      Array.from(rootState.assets.assetMap.values())
         .filter((asset) => asset.asset_type_id === assetTypeId)
     commit(CASTING_SET_ASSET_TYPE, assetTypeId)
     commit(CASTING_SET_ASSETS, assets)
@@ -105,7 +105,7 @@ const actions = {
     { commit, rootState },
     { entityId, assetId, nbOccurences }
   ) {
-    const asset = rootState.assets.assetMap[assetId]
+    const asset = rootState.assets.assetMap.get(assetId)
     commit(CASTING_ADD_TO_CASTING, { entityId, asset, nbOccurences })
   },
 
@@ -113,7 +113,7 @@ const actions = {
     { commit, rootState },
     { entityId, assetId, nbOccurences }
   ) {
-    const asset = rootState.assets.assetMap[assetId]
+    const asset = rootState.assets.assetMap.get(assetId)
     commit(CASTING_REMOVE_FROM_CASTING, { entityId, asset, nbOccurences })
   },
 
@@ -264,7 +264,7 @@ const mutations = {
   [CASTING_SET_CASTING] (state, { casting, assetMap }) {
     const entityCastingByType = {}
     const entityCastingKeys = Object.keys(casting)
-    entityCastingKeys.forEach((entityId) => {
+    entityCastingKeys.forEach(entityId => {
       const entityCasting = casting[entityId]
       entityCastingByType[entityId] =
         groupEntitiesByParents(entityCasting, 'asset_type_name')

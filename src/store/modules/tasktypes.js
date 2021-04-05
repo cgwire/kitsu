@@ -23,7 +23,7 @@ import {
 
 const initialState = {
   taskTypes: [],
-  taskTypeMap: {},
+  taskTypeMap: new Map(),
   sequenceSubscriptions: {},
 
   editTaskType: {
@@ -50,7 +50,7 @@ const getters = {
   deleteTaskType: state => state.deleteTaskType,
 
   currentTaskType: (state, getters, rootState) => {
-    return state.taskTypeMap[rootState.route.params.task_type_id] || {}
+    return state.taskTypeMap.get(rootState.route.params.task_type_id) || {}
   },
 
   assetTaskTypes: (state, getters, rootState, rootGetters) => {
@@ -78,7 +78,7 @@ const getters = {
     ),
 
   getTaskType: (state, getters) => (id) => {
-    return state.taskTypeMap[id]
+    return state.taskTypeMap.get(id)
   }
 }
 
@@ -139,7 +139,7 @@ const actions = {
   initTaskType ({ commit, dispatch, state, rootState, rootGetters }, force) {
     return new Promise((resolve, reject) => {
       if (rootGetters.currentTaskType.for_shots) {
-        if (Object.keys(rootGetters.shotMap).length < 2 || force) {
+        if (rootGetters.shotMap.size < 2 || force) {
           if (rootGetters.episodes.length === 0 && rootGetters.isTVShow) {
             dispatch('loadEpisodes')
               .then(() => {
@@ -159,7 +159,7 @@ const actions = {
           resolve()
         }
       } else {
-        if (Object.keys(rootGetters.assetMap).length < 2 || force) {
+        if (rootGetters.assetMap.size < 2 || force) {
           dispatch('loadAssets')
             .then(resolve)
             .catch(reject)
@@ -177,14 +177,14 @@ const mutations = {
 
   [LOAD_TASK_TYPES_ERROR] (state) {
     state.taskTypes = []
-    state.taskTypeMap = {}
+    state.taskTypeMap = new Map()
   },
 
   [LOAD_TASK_TYPES_END] (state, taskTypes) {
     state.taskTypes = sortTaskTypes(taskTypes)
-    state.taskTypeMap = {}
-    taskTypes.forEach((taskType) => {
-      state.taskTypeMap[taskType.id] = taskType
+    state.taskTypeMap = new Map()
+    taskTypes.forEach(taskType => {
+      state.taskTypeMap.set(taskType.id, taskType)
     })
   },
 
@@ -199,13 +199,13 @@ const mutations = {
   },
 
   [EDIT_TASK_TYPE_END] (state, newTaskType) {
-    const taskType = state.taskTypeMap[newTaskType.id]
+    const taskType = state.taskTypeMap.get(newTaskType.id)
 
     if (taskType && taskType.id) {
       Object.assign(taskType, newTaskType)
     } else {
       state.taskTypes.push(newTaskType)
-      state.taskTypeMap[newTaskType.id] = newTaskType
+      state.taskTypeMap.set(newTaskType.id, newTaskType)
     }
     state.taskTypes = sortTaskTypes(state.taskTypes)
     state.editTaskType = {
@@ -233,7 +233,7 @@ const mutations = {
     if (taskTypeToDeleteIndex >= 0) {
       state.taskTypes.splice(taskTypeToDeleteIndex, 1)
     }
-    delete state.taskTypeMap[taskTypeToDelete.id]
+    state.taskTypeMap.delete(taskTypeToDelete.id)
 
     state.deleteTaskType = {
       isLoading: false,

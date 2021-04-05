@@ -40,7 +40,7 @@ const applyFiltersFunctions = {
   },
 
   assignation (entry, filter, taskMap) {
-    const task = taskMap[entry.validations[filter.taskType.id]]
+    const task = taskMap.get(entry.validations[filter.taskType.id])
     if (filter.assigned) {
       return task && task.assignees && task.assignees.length > 0
     } else {
@@ -52,8 +52,8 @@ const applyFiltersFunctions = {
   assignedto (entry, filter, taskMap) {
     let isOk = false
     if (entry.tasks) {
-      entry.tasks.forEach((taskId) => {
-        const task = taskMap[taskId]
+      entry.tasks.forEach(taskId => {
+        const task = taskMap.get(taskId)
         isOk = isOk || task.assignees.includes(filter.personId)
       })
     }
@@ -85,7 +85,7 @@ const applyFiltersFunctions = {
   },
 
   status (entry, filter, taskMap) {
-    const task = taskMap[entry.validations[filter.taskType.id]]
+    const task = taskMap.get(entry.validations[filter.taskType.id])
     let isOk = true
     isOk = task && filter.taskStatuses.includes(task.task_status_id)
     if (filter.excluding) isOk = !isOk

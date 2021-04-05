@@ -52,7 +52,7 @@
             <td class="assignees flexrow">
               <people-avatar
                 class="flexrow-item"
-                :person="personMap[personId]"
+                :person="personMap.get(personId)"
                 :size="30"
                 :font-size="17"
                 v-for="personId in task.assignees"
@@ -67,13 +67,13 @@
               >
                 <people-avatar
                   class="flexrow-item"
-                  :person="personMap[personId]"
+                  :person="personMap.get(personId)"
                   :size="30"
                   :font-size="17"
                 />
                 <people-name
                   class="flexrow-item"
-                  :person="personMap[personId]"
+                  :person="personMap.get(personId)"
                 />
               </span>
             </td>
@@ -290,7 +290,7 @@ export default {
         })
       })
       assigneeSet.forEach(
-        (val, personId) => assignees.push(this.personMap[personId])
+        (val, personId) => assignees.push(this.personMap.get(personId))
       )
       return assignees
         .sort(firstBy('name'))
@@ -326,16 +326,16 @@ export default {
 
     getEntity (entityId) {
       if (this.isAssets) {
-        return this.assetMap[entityId]
+        return this.assetMap.get(entityId)
       } else {
-        return this.shotMap[entityId]
+        return this.shotMap.get(entityId)
       }
     },
 
     compareFirstAssignees (a, b) {
       if (a.assignees.length > 0 && b.assignees.length > 0) {
-        const personA = this.personMap[a.assignees[0]]
-        const personB = this.personMap[b.assignees[0]]
+        const personA = this.personMap.get(a.assignees[0])
+        const personB = this.personMap.get(b.assignees[0])
         return personA.name.localeCompare(personB.name)
       } else if (a.assignees.length > 0) {
         return -1

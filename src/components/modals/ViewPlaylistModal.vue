@@ -90,7 +90,6 @@ export default {
       'currentProduction',
       'isTVShow',
       'selectedTasks',
-      'shotMap',
       'taskMap'
     ]),
 
@@ -99,7 +98,7 @@ export default {
     },
 
     taskIds () {
-      return Object.keys(this.selectedTasks)
+      return Array.from(this.selectedTasks.keys())
     },
 
     playlistPlayer () {

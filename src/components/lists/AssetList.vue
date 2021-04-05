@@ -127,7 +127,7 @@
                 v-if="!isCurrentUserClient"
               >
                 {{ !hiddenColumns[columnId]
-                   ? taskTypeMap[columnId].name
+                   ? taskTypeMap.get(columnId).name
                    : '' }}
               </router-link>
               <span
@@ -136,7 +136,7 @@
                 v-else
               >
                 {{ !hiddenColumns[columnId]
-                  ? taskTypeMap[columnId].name
+                  ? taskTypeMap.get(columnId).name
                   : '' }}
               </span>
 
@@ -205,7 +205,11 @@
           v-for="(asset, i) in group"
         >
           <td class="episode" v-if="isTVShow">
-            {{ episodeMap[asset.episode_id] ? episodeMap[asset.episode_id].name : 'MP' }}
+            {{
+              episodeMap.get(asset.episode_id)
+              ? episodeMap.get(asset.episode_id).name
+              : 'MP'
+            }}
           </td>
           <th
             :class="{
@@ -301,9 +305,9 @@
             }"
             :key="columnId + '-' + asset.id"
             :ref="'validation-' + getIndex(i, k) + '-' + j"
-            :column="taskTypeMap[columnId]"
+            :column="taskTypeMap.get(columnId)"
             :entity="asset"
-            :task-test="taskMap[asset.validations[columnId]]"
+            :task-test="taskMap.get(asset.validations[columnId])"
             :selected="assetSelectionGrid[getIndex(i, k)][j]"
             :rowX="getIndex(i, k)"
             :columnY="j"

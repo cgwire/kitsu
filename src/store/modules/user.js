@@ -73,7 +73,7 @@ import {
 
 const helpers = {
   getTaskStatus (taskStatusId) {
-    return taskStatusStore.state.taskStatusMap[taskStatusId]
+    return taskStatusStore.state.taskStatusMap.get(taskStatusId)
   }
 }
 

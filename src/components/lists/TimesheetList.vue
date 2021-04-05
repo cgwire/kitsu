@@ -74,14 +74,14 @@
             scope="row"
           >
             <production-name-cell
-              :entry="productionMap[task.project_id]"
+              :entry="productionMap.get(task.project_id)"
               :only-avatar="true"
             />
           </th>
           <task-type-cell
             class="type datatable-row-header datatable-row-header--nobd"
             :production-id="task.project_id"
-            :task-type="taskTypeMap[task.task_type_id]"
+            :task-type="taskTypeMap.get(task.task_type_id)"
             :style="{left: colTypePosX}"
           />
 
@@ -129,7 +129,7 @@
             scope="row"
           >
            <production-name-cell
-             :entry="productionMap[task.project_id]"
+             :entry="productionMap.get(task.project_id)"
              :only-avatar="true"
            />
           </th>
@@ -150,7 +150,7 @@
            </router-link>
           </th>
           <time-slider-cell
-            :duration="timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0"
+            :duration="timeSpentMap.get(task.id) ? timeSpentMap.get(task.id).duration / 60 : 0"
             class="time-spent"
             :task-id="task.id"
             @change="onSliderChange"
