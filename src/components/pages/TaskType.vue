@@ -81,6 +81,7 @@
               :disabled-dates="startDisabledDates"
               :with-margin="false"
               :label="$t('main.start_date')"
+              :can-delete="false"
               v-model="schedule.selectedStartDate"
             />
           </div>
@@ -93,6 +94,7 @@
               :disabled-dates="endDisabledDates"
               :with-margin="false"
               :label="$t('main.end_date')"
+              :can-delete="false"
               v-model="schedule.selectedEndDate"
             />
           </div>

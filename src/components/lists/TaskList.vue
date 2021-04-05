@@ -346,23 +346,31 @@ export default {
 
     updateStartDate (date) {
       Object.keys(this.selectionGrid).forEach(taskId => {
-        const task = this.taskMap[taskId]
-        const startDate = moment(date)
-        if (
-          task.start_date &&
-          task.start_date.substring(0, 10) === formatSimpleDate(startDate)
-        ) return
-        const dueDate = task.due_date ? moment(task.due_date) : null
         let data = {
           start_date: null,
           due_date: null
         }
+        const task = this.taskMap[taskId]
         if (date) {
-          data = getDatesFromStartDate(
-            startDate,
-            dueDate,
-            minutesToDays(this.organisation, task.estimation)
-          )
+          const startDate = moment(date)
+          if (
+            task.start_date &&
+            task.start_date.substring(0, 10) === formatSimpleDate(startDate)
+          ) return
+          const dueDate = task.due_date ? moment(task.due_date) : null
+          if (date) {
+            data = getDatesFromStartDate(
+              startDate,
+              dueDate,
+              minutesToDays(this.organisation, task.estimation)
+            )
+          }
+        } else {
+          const dueDate = task.due_date ? moment(task.due_date) : null
+          data = {
+            start_date: null,
+            due_date: dueDate
+          }
         }
         if (this.isTaskChanged(task, data)) {
           this.updateTask({ taskId, data })

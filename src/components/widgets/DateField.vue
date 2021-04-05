@@ -18,8 +18,9 @@
     />
     <span
       class="clear-button unselectable"
-      @click="clearValue"
-      v-show="localValue">
+      @click="event => clearValue(event)"
+      v-show="localValue && canDelete"
+    >
       +
     </span>
   </p>
@@ -31,11 +32,17 @@ import { mapGetters, mapActions } from 'vuex'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
 
+import { domMixin } from '@/components/mixins/dom'
+
 export default {
   name: 'text-field',
+
   components: {
     Datepicker
   },
+
+  mixins: [domMixin],
+
   props: {
     disabledDates: {
       default: () => {},
@@ -52,6 +59,10 @@ export default {
     value: {
       default: new Date(),
       type: Date
+    },
+    canDelete: {
+      default: true,
+      type: Boolean
     },
     withMargin: {
       default: true,
@@ -87,8 +98,10 @@ export default {
     ...mapActions([
     ]),
 
-    clearValue () {
+    clearValue (event) {
+      this.pauseEvent(event)
       this.localValue = null
+      this.$emit('input', null)
     }
   },
 
