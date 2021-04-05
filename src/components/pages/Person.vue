@@ -183,6 +183,7 @@ export default {
         'priority',
         'task_status_short_name',
         'estimation',
+        'due_date',
         'last_comment_date'
       ].map((name) => ({ label: name, value: name }))
     }
