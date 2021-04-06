@@ -1008,8 +1008,7 @@ then click on the arrox on the right of the column name to open his menu.Then cl
 
 Now the shots are not sorted by name but by the custom column information.
 
-![Custom Column Sort By result](../img/getting-started/custom_column_sortby_result
-.png)
+![Custom Column Sort By result](../img/getting-started/custom_column_sortby_result.png)
 
 You can also select in the menu if you want to edit the name of the custom column and its information, or if you want to delete it.
 
