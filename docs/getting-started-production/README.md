@@ -728,7 +728,65 @@ From there on can rename the milestone or delete it.
 
 Everybody has access to this page, but only the **Studio Manager** can modify it.
 
+ 
+## Task Type Schedule
 
+If you need more details than in the production schedule, you can go to the **Task Type** page.
+
+![Task type page](../img/getting-started/global_view_asset_task_export.png)
+
+You can notice there are tabs on the page, Tasks, **Schedule** and Estimation. Click on the ![Task type schedule tab](../img/getting-started/task_type_tab_schedule.png) 
+
+There is two ways to set the artist schedule.
+
+The first way is with the **Tasks** tab, by setting the estimation time and the **Start date**. The Grantt diagram is filled automatically.
+
+Then you are only allowed on the **Schedule** Tab to slide the bar, to change the **Start date** and **Due date**.
+
+**Once the estimation is set from the Tasks tab, you can change it by editing the MD column on the schedule tab**.
+
+The second way is to set directly the lenght (**Estimation**), **Start date** and the **Due Date** from the Gantt diagram. 
+
+![Task type page schedule default](../img/getting-started/task_type_schedule_emplty.png)
+
+
+Put your cursor on the start date, and the cursor changes as a double arrow. Then drag and slide the start date.
+Do the same for the end date. 
+
+You can use the search bar (1) as on the other pages: you can search **status** 
+(no need to add the name of the task type as you already are on a specific task type page), 
+per **asset type** (or sequence), per **asset name** (or shot name), and per **CG Artist name**.
+
+You can also reduce or expand each CG Artist (2) section, to ease the reading of the schedule.
+
+And you can change the color of the bar in the Gantt diagram (3). Per default, the **coloring** is set in Neutral.
+
+Per default the color of the bar is set on **Status color**, but you can change it.
+
+![Task type page schedule coloring](../img/getting-started/task_type_schedule_coloring.png)
+
+**Status color** changes the color of the bar based on their status. For example Blue is for WIP, red is for RETAKE, 
+purple for Waiting For Approval, green is for Done.
+
+![Task type page schedule coloring status](../img/getting-started/task_type_schedule_coloring_status.png)
+
+In a glimpse, you can see the state of your elements and team.
+
+**Late in red** display the bar that is not validated yet, but they are behind schedule.
+
+![Task type page schedule coloring late in red](../img/getting-started/task_type_schedule_coloring_late.png)
+
+The Gantt diagram has an impact on the other pages on Kistu.
+
+The **Start date** and the **Due date** is displayed on the **Tasks** tab of the task type page.
+
+![Task type page schedule due date](../img/getting-started/task_type_schedule_due_date.png)
+
+But you can also see the **Due date** on the **Todo Page** of a CG Artist.
+
+![Task type page schedule CG artist due date](../img/getting-started/task_type_schedule_due_date_todo.png)
+
+Everybody has access to this page, but only the **Studio Manager** can modify it.
 
 ## Studio Schedule
 
