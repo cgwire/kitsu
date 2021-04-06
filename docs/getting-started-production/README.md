@@ -670,7 +670,11 @@ Go back to the main menu, and select **Settings**.
 
 ## Production Schedule
 
-As production, you can set the global schedule for your production. 
+As production, you can set the global schedule as a reference for your production. 
+
+The main purpose of this schedule is to keep track of the milestones link to your contract.
+
+It's your **Reference schedule**.
 
 On the drop-down menu choose **SCHEDULE**
 
@@ -679,6 +683,18 @@ On the drop-down menu choose **SCHEDULE**
 On top of the schedule, you can define the start date (1), and the end date (2). 
 Click on the box to open the calendar and pick a date.
 You can add your global man-days as on your quote.
+
+The **man-days** is the reference for your production. This way, you always have the information, 
+without searching into your quote / contract.
+
+Next to each task type, there is a **md** (man days) that you can fill. 
+
+**It's also for reference only.**
+
+The number of **md** will **not determine** the lenght of the task type.
+For example you may have 50 days of budget for a task, 5 artists on the team, so the duration will be 10 days for the task. The lenght of the task should be 10 days and not 50.
+
+It's a reminder of your contract/quote. You can also fill the **md** for each 
 
 ![Production Schedule](../img/getting-started/production_schedule.png)
 
@@ -689,6 +705,7 @@ Put your cursor on the start date; the cursor changes as a double arrow. Then dr
 Do the same for the end date. 
 
 ![Production Schedule gantt](../img/getting-started/schedule_production_task_type.png)
+
 
 Once you have defined all the start and end dates of the task types, your schedule should look like the example.
 
@@ -728,6 +745,10 @@ From there on can rename the milestone or delete it.
 
 Everybody has access to this page, but only the **Studio Manager** can modify it.
 
+
+Now to go to further detail, and to keep track of the tasks, you can click on the name of the task type.
+
+It will leads you to the **Schedule** tab of the task type page.
  
 ## Task Type Schedule
 
