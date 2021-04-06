@@ -705,7 +705,7 @@ You can change :
 - (2) His short name, useful for the filters
 - (3) If it's the end of the task
 - (4) If it will count as a retake (for the supervisor page)
-- (5) If the CG artist / Vendor can use this status
+- (5) If the artist / Vendor can use this status
 - (6) If the Client can use this status
 - (7) The color 
 

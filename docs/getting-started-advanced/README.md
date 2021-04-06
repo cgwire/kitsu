@@ -552,7 +552,7 @@ To make the information reappear, click on the same button,
 
 ## Quotas stat
 
-Kitsu grabs the number of frames (or seconds) validated per day/week/month per CG Artist.
+Kitsu grabs the number of frames (or seconds) validated per day/week/month per Artist.
 
 ![Quotat stat page](../img/getting-started/quotas_week.png)
 

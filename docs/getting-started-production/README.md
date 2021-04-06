@@ -46,7 +46,7 @@ colored background. You can change it with a picture if you want.
 
 So, now you have the first script for your production. It's time to do the
 breakdown and the creation of the assets. It allows you to list your assets, 
-dispatch the work to the CG artists, and follow each related
+dispatch the work to the artists, and follow each related
 task's progress.
 
 Let's begin with the asset page. You can access it via the drop-down menu on top of the page. 
@@ -245,14 +245,14 @@ Then, click on the **+ Add a new employee** button.
 
 A creation window opens. You can enter the first (1) and last name (2), the email
 (which is **mandatory** to create the account) (3), the phone number (4) and
-define the role of the employee: **CG artist**, **Supervisor**,
+define the role of the employee: **Artist**, **Supervisor**,
 **Studio Manager**, **Vendor** or **Client** (5).  If the artist is working right now, keep
 him active, otherwise select no. Validate by clicking the **Confirm** button.
 
 ![Create a new employee](../img/getting-started/create_employee.png)
 
 See the [permissions](../permissions/README.md) section for more information. 
-To make it short, CG artists, supervisors, and clients only see the
+To make it short, artists, supervisors, and clients only see the
 productions they are assigned.
 
 All the people are now part of your studio. They are added to a specific
@@ -261,7 +261,7 @@ won't have access to anything.
 
 
 
-## Add a CG Artist to the team
+## Add an Artist to the team
 
 You need to add someone to a production to assign him a task.
 
@@ -280,7 +280,7 @@ can select his name on the search box (or type his name) and validate with
 **add**.
 
 
-## Assign tasks to a CG artist
+## Assign tasks to an Artist
 
 We can now get back to the **ASSETS** page via the drop-down menu.
 
@@ -316,7 +316,7 @@ assignations, or press the "Escape" key.
 When you finish all the assignations, quit this mode using the **Clear
 current selection** button ![Clear current selection](../img/getting-started/clear_current_selection.png).
 
-Now you can see next to each status the avatar of the CG artist.
+Now you can see next to each status the avatar of the artist.
 
 ![Assigned people](../img/getting-started/assignation.png)
 
@@ -324,7 +324,7 @@ To unclutter the list, you can hide this information with the **Hide
 assignations** button on the top of the spreadsheet ![Hide assignations](../img/getting-started/hide_assignation.png).
 
 Once you assigned someone, he is part of the production team. Depending
-on his position (CG Artist, Supervisor, Vendor), he only sees the production where
+on his position (Artist, Supervisor, Vendor), he only sees the production where
 he's assigned. 
 
 Now, everybody knows what to do and who is doing what!
@@ -463,7 +463,7 @@ You can fill the asset breakdown page the same way as the shots. Select one or m
 
 ## Perform a review
 
-When a CG artist needs a review, he changes the status of his task to ![wfa](../img/getting-started/wfa_icon.png).
+When an artist needs a review, he changes the status of his task to ![wfa](../img/getting-started/wfa_icon.png).
 
 Click on the status (1) to open the right panel and start the review. 
 
@@ -491,7 +491,7 @@ If you go into **Full-Screen**, you can compare two task type or version side by
 
 ![compare button](../img/getting-started/compare_version.png)
 
-From there, you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the CG artist
+From there, you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the artist
 performs some changes. 
 
 You can add a **checklist** to your comments.
@@ -513,7 +513,7 @@ You can also **tag** someone on the team in the comments. Type the `@`and it ope
 
 ![Tag someone](../img/getting-started/tag_team.png)
 
-Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the CG artist that his work is validated.
+Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the artist that his work is validated.
 
 
 
@@ -651,7 +651,7 @@ You can choose which **month** or **year** you want to display.
 
 You can also choose the detail level: **day**, **week**, **month**.
 
-Per week, Kitsu highlights the overdue time per CG Artist.
+Per week, Kitsu highlights the overdue time per Artist.
 
 ![main button](../img/getting-started/timesheet_week.png)
 
@@ -752,13 +752,18 @@ If you need more details than in the production schedule, you can go to the **Ta
 
 ![Task type page](../img/getting-started/global_view_asset_task_export.png)
 
-You can notice there are tabs on the page, Tasks, **Schedule**, and estimation. Click on the ![Task type schedule tab](../img/getting-started/task_type_tab_schedule.png) 
+You can notice there are tabs on the page, Tasks, **Schedule**, and estimation. Click on the 
+**Tasks** or **Schedule** tab.
+
+![Task type schedule tab](../img/getting-started/task_type_tab_schedule.png) 
 
 There are two ways to set the artist's schedule.
 
-The first way is with the **Tasks** tab, by setting the estimation time and the **Start date**. The Gantt diagram is filled automatically.
+The first way is with the **Tasks** tab, by setting the estimation time and the **Start date**. 
+The **Due date** is filled automatically. Now if you navigate to the **Schedule** tab, you will see
+the Gantt diagram is filled automatically.
 
-You are then only allowed on the **Schedule** Tab to slide the bar and change the **Start date** and **Due date**.
+You are then only allowed on the **Schedule** Tab to slide the bar and change the **Start date** (or **Due date**). The lenght of the task is set by the **MD**.
 
 **Once the estimation is set from the Tasks tab, you can change it by editing the MD column on the schedule tab**.
 
@@ -768,17 +773,15 @@ The second way is to set the length directly (**Estimation**), **Start date**, a
 
 
 Put your cursor on the start date, and the cursor changes as a double arrow. Then drag and slide the start date.
-Do the same for the end date. 
+Define your **Due date** by filling the **MD**.
 
 You can use the search bar (1) as on the other pages: you can search **status** 
 (no need to add the name of the task type as you already are on a specific task type page), 
-per **asset type** (or sequence), per **asset name** (or shot name), and per **CG Artist name**.
+per **asset type** (or sequence), per **asset name** (or shot name), and per **Artist name**.
 
-You can also reduce or expand each CG Artist (2) section to ease reading the schedule.
+You can also reduce or expand each Artist (2) section to ease reading of the schedule.
 
-And you can change the color of the bar in the Gantt diagram (3). Per default, the **coloring** is set in Neutral.
-
-By default, the color of the bar is set on **Status color**, but you can change it.
+You can change the color of the bar in the Gantt diagram (3). Per default, the **coloring** is set in Status Color.
 
 ![Task type page schedule coloring](../img/getting-started/task_type_schedule_coloring.png)
 
@@ -789,7 +792,7 @@ purple for Waiting For Approval, green is for Done.
 
 In a glimpse, you can see the state of your elements and team.
 
-**Late in red** display the bar that is not validated yet, but they are behind schedule.
+**Late in red** display the task that is not validated yet, but they are behind schedule, Due Date is past.
 
 ![Task type page schedule coloring late in red](../img/getting-started/task_type_schedule_coloring_late.png)
 
@@ -799,9 +802,9 @@ The **Start date** and the **Due date** are displayed on the **Tasks** tab of th
 
 ![Task type page schedule due date](../img/getting-started/task_type_schedule_due_date.png)
 
-But you can also see the **Due date** on the **Todo Page** of a CG Artist.
+But you can also see the **Due date** and **Estimation** days on the **Todo Page** of an Artist.
 
-![Task type page schedule CG artist due date](../img/getting-started/task_type_schedule_due_date_todo.png)
+![Task type page schedule artist due date](../img/getting-started/task_type_schedule_due_date_todo.png)
 
 Everybody has access to this page, but only the **Studio Manager** can modify it.
 
