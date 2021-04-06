@@ -27,7 +27,7 @@ module.exports = {
        '/Schedules/',
        '/batch-action/',
      ]
-   }
+   },
     {
      title: 'Open Source Setup',
      collapsable: false,
@@ -36,9 +36,6 @@ module.exports = {
        '/development-environment/'
      ]
    }
-   
-   
-   
    ]
   }
 }
