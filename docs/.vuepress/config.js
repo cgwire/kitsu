@@ -14,6 +14,7 @@ module.exports = {
 	   '/getting-started-advanced/',
        '/getting-started-artist/',
 	   '/getting-started-client/',
+	   '/Schedules/',
        ['/faq/', 'FAQ'],
        '/permissions/',
        '/slack/',

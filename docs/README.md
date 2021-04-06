@@ -33,6 +33,12 @@ Depending on your role in the studio we propose you two tutorials:
  * [Getting Started as a client](getting-started-client/README.md): you will find all the information required to access
   to your playlists, share your comments and validations. 
   
+## Modules
+
+On this section we will detailled all the Kitsu's different module
+
+* [Schedules](Schedules/README.md)  
+  
 
 ## Tutorials
 
