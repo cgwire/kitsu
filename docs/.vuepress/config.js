@@ -14,7 +14,6 @@ module.exports = {
 	   '/getting-started-advanced/',
        '/getting-started-artist/',
 	   '/getting-started-client/',
-	   '/Schedules/',
 	   '/batch-action/',
        ['/faq/', 'FAQ'],
        '/permissions/',
@@ -22,6 +21,12 @@ module.exports = {
        '/custom-actions/'
      ]
    },
+   {
+     title: 'Kitsu Module',
+     collapsable: false,
+     children: [
+       '/Schedules/',
+            ]
    {
      title: 'Open Source Setup',
      collapsable: false,
