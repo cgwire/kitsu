@@ -21,20 +21,24 @@ module.exports = {
      ]
    },
    {
-     title: 'Kitsu Module',
+     title: 'Modules',
      collapsable: false,
      children: [
-       '/Schedules/',	
-	   '/batch-action/',	   
+       '/Schedules/',
+       '/batch-action/',
      ]
-   } 
-   {
+   }
+    {
      title: 'Open Source Setup',
      collapsable: false,
      children: [
        '/installation/',
        '/development-environment/'
      ]
-   }]
+   }
+   
+   
+   
+   ]
   }
 }
