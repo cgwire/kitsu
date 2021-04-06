@@ -13,8 +13,7 @@ module.exports = {
        '/getting-started-production/',
 	   '/getting-started-advanced/',
        '/getting-started-artist/',
-	   '/getting-started-client/',
-	   '/batch-action/',
+	   '/getting-started-client/',	   
        ['/faq/', 'FAQ'],
        '/permissions/',
        '/slack/',
@@ -25,8 +24,10 @@ module.exports = {
      title: 'Kitsu Module',
      collapsable: false,
      children: [
-       '/Schedules/',
-            ]
+       '/Schedules/',	
+	   '/batch-action/',	   
+     ]
+   } 
    {
      title: 'Open Source Setup',
      collapsable: false,
