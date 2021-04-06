@@ -104,7 +104,9 @@ A confirmation pop up appears, validate with **Confirm**.
 
 ![Delete asset popup](../img/getting-started/validation_popup_delete_asset.png)
 
-Once deleted, the asset appears as crossed, it can be still restored with ![Restore asset](../img/getting-started/restore_button.png) .
+If the asset has no task, it will be deleted immediately.
+
+If the asset has a task, once deleted, the asset appears as crossed, it can be still restored with ![Restore asset](../img/getting-started/restore_button.png) .
 
 ![Delete asset](../img/getting-started/delete_asset1.png)
 
@@ -128,7 +130,10 @@ A confirmation pop-up appears, validate with **Confirm**.
 
 ![Delete shot popup](../img/getting-started/validation_popup_delete_shot.png)
 
-Once deleted, the shot appears as crossed, it can be still restored 
+
+If the shot has no task, it will be deleted immediately.
+
+If the shot has a task, once deleted, the shot appears as crossed, it can be still restored 
 with ![Restore asset](../img/getting-started/restore_button.png) .
 
 ![Delete shot](../img/getting-started/delete_shot1.png)
