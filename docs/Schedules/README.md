@@ -3,7 +3,7 @@
 
 ## Production Schedule
 
-As production, you can set the global schedule as a reference for your production. 
+As Studio Manager, you can set the global schedule as a reference for your production. 
 
 The main purpose of this schedule is to keep track of the milestones link to your contract.
 

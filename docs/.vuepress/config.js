@@ -15,6 +15,7 @@ module.exports = {
        '/getting-started-artist/',
 	   '/getting-started-client/',
 	   '/Schedules/',
+	   '/batch-action/',
        ['/faq/', 'FAQ'],
        '/permissions/',
        '/slack/',
