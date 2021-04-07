@@ -33,6 +33,7 @@
         class="search flexrow-item"
         :can-save="true"
         @change="onSearchChange"
+        @enter="saveSearchQuery"
         @save="saveSearchQuery"
         placeholder="ex: John Doe"
       />

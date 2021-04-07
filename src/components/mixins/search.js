@@ -22,6 +22,7 @@ export const searchMixin = {
       this.searchField.setValue(searchQuery.search_query)
       this.searchField.$emit('change', searchQuery.search_query)
       if (this.resizeHeaders) this.resizeHeaders()
+      if (this.applySearch) this.applySearch(searchQuery.search_query)
     },
 
     focusSearchField () {

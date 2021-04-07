@@ -55,6 +55,7 @@
               ref="task-search-field"
               :can-save="true"
               @change="onSearchChange"
+              @enter="saveSearchQuery"
               @save="saveSearchQuery"
               placeholder="ex: retake chara"
             />

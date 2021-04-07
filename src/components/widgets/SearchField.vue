@@ -7,11 +7,14 @@
   <div class="flexrow-item search-field">
     <input
       ref="input"
+      :style="{
+        color: active ? 'inherit' : '#999'
+      }"
       class="search-input"
       type="text"
       :placeholder="placeholder"
       @input="onSearchChange"
-      @keyup.enter="onSaveClicked"
+      @keyup.enter="onEnterPressed"
       @focus="setFocusedStyle"
       @blur="unsetFocusedStyle"
       v-focus
@@ -54,6 +57,10 @@ export default {
     canSave: {
       type: Boolean,
       default: false
+    },
+    active: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -68,6 +75,10 @@ export default {
   methods: {
     onSearchChange () {
       this.$emit('change', this.$refs.input.value)
+    },
+
+    onEnterPressed () {
+      this.$emit('enter', this.$refs.input.value)
     },
 
     onSaveClicked () {

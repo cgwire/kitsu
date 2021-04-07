@@ -10,7 +10,11 @@
                 <search-field
                   ref="shot-search-field"
                   :can-save="true"
+                  :active="isSearchActive"
                   @change="onSearchChange"
+                  @enter="(query) => isLongShotList
+                    ? applySearch(query)
+                    : saveShotSearch(query)"
                   @save="saveSearchQuery"
                   placeholder="ex: e01 s01 anim=wip"
                 />
@@ -309,6 +313,7 @@ export default {
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
       formData: null,
+      isSearchActive: false,
       historyShot: {},
       parsedCSV: [],
       shotToDelete: null,
@@ -377,6 +382,7 @@ export default {
       'openProductions',
       'sequences',
       'selectedTasks',
+      'isLongShotList',
       'shotMap',
       'shotFilledColumns',
       'shotsCsvFormData',
@@ -445,28 +451,15 @@ export default {
 
   mounted () {
     let searchQuery = ''
-    if (this.$route.query.search &&
-        this.$route.query.search.length > 0) {
+    if (
+      this.$route.query.search &&
+      this.$route.query.search.length > 0
+    ) {
       searchQuery = '' + this.$route.query.search
     }
     this.$refs['shot-search-field'].setValue(searchQuery)
-
     const finalize = () => {
-      this.loadShots((err) => {
-        setTimeout(() => {
-          this.initialLoading = false
-        }, 200)
-        if (!err) {
-          setTimeout(() => {
-            this.onSearchChange()
-            if (this.$refs['shot-list']) {
-              this.$refs['shot-list'].setScrollPosition(
-                this.shotListScrollPosition
-              )
-            }
-          }, 500)
-        }
-      })
+      this.loadShots(() => {})
     }
 
     if (
@@ -828,10 +821,10 @@ export default {
 
     onSearchChange () {
       if (!this.searchField) return
+      this.isSearchActive = false
       const searchQuery = this.searchField.getValue()
-      if (searchQuery.length !== 1) {
-        this.setShotSearch(searchQuery)
-        this.setSearchInUrl()
+      if (searchQuery.length !== 1 && !this.isLongShotList) {
+        this.applySearch(searchQuery)
       }
     },
 
@@ -840,6 +833,12 @@ export default {
         'SET_SHOT_LIST_SCROLL_POSITION',
         scrollPosition
       )
+    },
+
+    applySearch (searchQuery) {
+      this.setShotSearch(searchQuery)
+      this.setSearchInUrl()
+      this.isSearchActive = true
     },
 
     saveSearchQuery (searchQuery) {
@@ -943,7 +942,7 @@ export default {
     confirmBuildFilter (query) {
       this.modals.isBuildFilterDisplayed = false
       this.$refs['shot-search-field'].setValue(query)
-      this.onSearchChange()
+      this.applySearch(query)
     },
 
     onFieldChanged ({ entry, fieldName, value }) {
@@ -976,7 +975,7 @@ export default {
       const actualSearch = this.$refs['shot-search-field'].getValue()
       if (search !== actualSearch) {
         this.searchField.setValue(search)
-        this.onSearchChange()
+        this.applySearch(search)
       }
     },
 
@@ -1014,6 +1013,28 @@ export default {
             .catch(console.error)
         } else {
           finalize()
+        }
+      }
+    },
+
+    isShotsLoading () {
+      if (!this.isShotsLoading) {
+        let searchQuery = ''
+        if (
+          this.$route.query.search &&
+          this.$route.query.search.length > 0
+        ) {
+          searchQuery = '' + this.$route.query.search
+        }
+        this.initialLoading = false
+        this.$refs['shot-search-field'].setValue(searchQuery)
+        this.$nextTick(() => {
+          this.applySearch(searchQuery)
+        })
+        if (this.$refs['shot-list']) {
+          this.$refs['shot-list'].setScrollPosition(
+            this.shotListScrollPosition
+          )
         }
       }
     }

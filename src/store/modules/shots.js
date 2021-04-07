@@ -428,6 +428,7 @@ const getters = {
   isShotsLoadingError: state => state.isShotsLoadingError,
   shotCreated: state => state.shotCreated,
 
+  isLongShotList: state => Object.keys(state.shotMap).length > 500,
   shotsCsvFormData: state => state.shotsCsvFormData,
   shotListScrollPosition: state => state.shotListScrollPosition,
   sequenceListScrollPosition: state => state.sequenceListScrollPosition,
@@ -565,7 +566,6 @@ const actions = {
               }
             )
           }
-          if (callback) callback(err)
         })
       }
     })
