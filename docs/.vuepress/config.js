@@ -20,14 +20,6 @@ module.exports = {
        '/custom-actions/'
      ]
    },
-   {
-     title: 'Modules',
-     collapsable: false,
-     children: [
-       '/Schedules/',
-       '/batch-action/',
-     ]
-   },
     {
      title: 'Open Source Setup',
      collapsable: false,
@@ -35,7 +27,14 @@ module.exports = {
        '/installation/',
        '/development-environment/'
      ]
-   }
-   ]
+   },
+      {
+     title: 'Modules',
+     collapsable: false,
+     children: [
+       '/Schedules/',
+       '/batch-action/',
+     ]
+   }]
   }
 }
