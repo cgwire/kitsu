@@ -37,8 +37,9 @@ Depending on your role in the studio we propose you two tutorials:
 
 On this section we will detailled all the Kitsu's different module
 
-* [Schedules](Schedules/README.md)  
-* [batch-action](batch-action/README.md)
+* [Schedules](Schedules/README.md): Everything you need to know to set your schedules  
+* [batch-action](batch-action/README.md): Let Kitsu do all the heavy lifting for you
+* [playlist](playlist/README.md): Stay focus during the review and gain more time with the playlist 
   
 
 ## Tutorials
