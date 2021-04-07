@@ -1,4 +1,4 @@
-# Filters
+# How to filter...
 
 ## Introduction to filters
 

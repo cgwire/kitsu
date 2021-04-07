@@ -1,4 +1,4 @@
-# Notification
+# How to get notify...
 
 
 ## How notifications work?

@@ -56,7 +56,10 @@ It's the place to find common questions asked by the studios and their answers.
 Tutorials don't cover everything... Fortunately, this FAQ is here to add the
 missing part!
 
-[Frequently Asked Questions](faq/#faq-for-kitsu)
+[How to delete...](faq-deletion)
+[How to filter...](faq-filter)
+[How to get notified...](faq-notification)
+[How to report...](faq-production-report)
 
 
 ## About authors

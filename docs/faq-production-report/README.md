@@ -1,8 +1,6 @@
-# Production report and statistics
+# How to report...
 
-## How to have an overview of the production?
-
-### Sequence overview page
+## How to have an overview of the Sequence?
 
 The other way is to go to the **Sequence Stats** page. You can go there with the drop-down menu on top of a page.
 
@@ -34,7 +32,7 @@ You can also click on the **tasks name** to have the detailed shots about this
 task (page supervisor).
 
 
-### Asset overview page
+## How to have an overview of the Assets?
 
 
 The other way is to go to the **Asset Types Stats** page. You can go there with the drop-down menu on top of a page.
