@@ -639,17 +639,7 @@ export default {
     onBodyScroll (event, position) {
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
-      if (maxHeight < (position.scrollTop + 100) &&
-         (
-           (
-             this.newsList.length % 50 === 0 &&
-             this.previewMode === 'comments') ||
-           (
-             this.newsList.length % 6 === 0 &&
-             this.previewMode === 'previews'
-           )
-         )
-      ) {
+      if (maxHeight < (position.scrollTop + 200)) {
         this.loadFollowingNews()
       }
     },
