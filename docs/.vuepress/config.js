@@ -33,7 +33,7 @@ module.exports = {
      collapsable: false,
      children: [
        '/faq/'
-       ]
+     ]
 	}, 
     {
      title: 'Open Source Setup',
