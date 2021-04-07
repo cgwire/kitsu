@@ -21,20 +21,21 @@ module.exports = {
      ]
    },
     {
+     title: 'Modules',
+     collapsable: false,
+     children: [
+       '/Schedules/',
+       '/batch-action/',
+	   '/playlist/'
+     ]
+	}, 
+    {
      title: 'Open Source Setup',
      collapsable: false,
      children: [
        '/installation/',
        '/development-environment/'
      ]
-   },
-      {
-     title: 'Modules',
-     collapsable: false,
-     children: [
-       '/Schedules/',
-       '/batch-action/',
-     ]
-   }]
+    }]
   }
 }
