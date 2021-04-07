@@ -25,14 +25,18 @@ module.exports = {
      children: [
        '/Schedules/',
        '/batch-action/',
-	   '/playlist/'
+	   '/playlist/',
+	   '/customization/'
      ]
 	}, 
 	{
      title: 'FAQ',
      collapsable: false,
      children: [
-       '/faq/'
+       '/faq-deletion/',
+	   '/faq-filter/',
+	   '/faq-notification/',
+	   '/faq-production-report/'
      ]
 	}, 
     {
