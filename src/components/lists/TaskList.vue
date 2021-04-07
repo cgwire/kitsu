@@ -329,9 +329,9 @@ export default {
       const taskStart = task.start_date ? task.start_date.substring(0, 10) : ''
       const taskDue = task.due_date ? task.due_date.substring(0, 10) : ''
       return (
-        (data.start_date && taskStart !== data.start_date) ||
-        (data.due_date && taskDue !== data.due_date) ||
-        (data.estimation && task.estimation !== data.estimation)
+        (data.start_date !== undefined && taskStart !== data.start_date) ||
+        (data.due_date !== undefined && taskDue !== data.due_date) ||
+        (data.estimation !== undefined && task.estimation !== data.estimation)
       )
     },
 
@@ -351,22 +351,19 @@ export default {
           due_date: null
         }
         const task = this.taskMap[taskId]
+        const dueDate = task.due_date ? moment(task.due_date) : null
         if (date) {
           const startDate = moment(date)
           if (
             task.start_date &&
             task.start_date.substring(0, 10) === formatSimpleDate(startDate)
           ) return
-          const dueDate = task.due_date ? moment(task.due_date) : null
-          if (date) {
-            data = getDatesFromStartDate(
-              startDate,
-              dueDate,
-              minutesToDays(this.organisation, task.estimation)
-            )
-          }
+          data = getDatesFromStartDate(
+            startDate,
+            dueDate,
+            minutesToDays(this.organisation, task.estimation)
+          )
         } else {
-          const dueDate = task.due_date ? moment(task.due_date) : null
           data = {
             start_date: null,
             due_date: dueDate
@@ -381,23 +378,28 @@ export default {
 
     updateDueDate (date) {
       Object.keys(this.selectionGrid).forEach(taskId => {
-        const task = this.taskMap[taskId]
-        const startDate = task.start_date ? moment(task.start_date) : null
-        const dueDate = moment(date)
-        if (
-          task.due_date &&
-          task.due_date.substring(0, 10) === formatSimpleDate(dueDate)
-        ) return
         let data = {
           start_date: null,
           due_date: null
         }
+        const task = this.taskMap[taskId]
+        const startDate = task.start_date ? moment(task.start_date) : null
         if (date) {
+          const dueDate = moment(date)
+          if (
+            task.due_date &&
+            task.due_date.substring(0, 10) === formatSimpleDate(dueDate)
+          ) return
           data = getDatesFromEndDate(
             startDate,
             dueDate,
             minutesToDays(this.organisation, task.estimation)
           )
+        } else {
+          data = {
+            start_date: startDate,
+            due_date: null
+          }
         }
         if (this.isTaskChanged(task, data)) {
           this.updateTask({ taskId, data })
