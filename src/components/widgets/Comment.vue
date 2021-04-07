@@ -83,8 +83,11 @@
             :disabled="true"
             v-if="checklist.length > 0"
           />
-          <p v-if="taskStatus.is_done && isLast">
-            <img src="../../assets/illustrations/validated.png" />
+          <p class="has-text-centered" v-if="taskStatus.is_done && isLast">
+            <img
+              class="congrats-picture"
+              src="../../assets/illustrations/validated.png"
+            />
           </p>
           <p v-if="comment.attachment_files.length > 0">
             <a
@@ -377,11 +380,13 @@ export default {
     },
 
     pictureAttachments () {
-      return this.comment.attachment_files.filter(attachment => {
-        return files.IMG_EXTENSIONS.includes(
-          attachment.extension
-        )
-      })
+      return [...this.comment.attachment_files]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .filter(attachment => {
+          return files.IMG_EXTENSIONS.includes(
+            attachment.extension
+          )
+        })
     },
 
     fileAttachments () {
@@ -722,6 +727,10 @@ p {
 .copy-icon {
   cursor: pointer;
   margin-left: .5em;
+}
+
+.congrats-picture {
+  max-width: 300px;
 }
 
 @media screen and (max-width: 768px) {
