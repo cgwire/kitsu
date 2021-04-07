@@ -14,7 +14,6 @@ module.exports = {
 	   '/getting-started-advanced/',
        '/getting-started-artist/',
 	   '/getting-started-client/',	   
-       ['/faq/', 'FAQ'],
        '/permissions/',
        '/slack/',
        '/custom-actions/'
@@ -28,6 +27,13 @@ module.exports = {
        '/batch-action/',
 	   '/playlist/'
      ]
+	}, 
+	{
+     title: 'FAQ',
+     collapsable: false,
+     children: [
+       '/faq/'
+       ]
 	}, 
     {
      title: 'Open Source Setup',
