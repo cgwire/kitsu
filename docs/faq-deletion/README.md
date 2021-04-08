@@ -56,9 +56,9 @@ The shot is removed from the database and won't appear anymore on Kitsu.
 ## How to delete a sequence
 
 To delete a sequence, use the drop-down menu to
-go to the sequence page.
+go to the **Sequence Stats** page.
  
-![Drop down menu sequence](../img/getting-started/drop_down_menu_breakdown.png)
+![Drop down menu sequence](../img/getting-started/drop_down_menu_sequence.png)
  
 Then you can delete the sequence, with the 
 ![Delete button](../img/getting-started/delete_button.png) button.
@@ -66,8 +66,20 @@ Then you can delete the sequence, with the
 ![Delete sequence](../img/getting-started/delete_sequence.png)
 
 
+## How to delete an episode
 
-## How to delete a task type
+To delete an episode, use the drop-down menu to
+go to the **Episode Stats** page.
+ 
+![Drop down menu episode](../img/getting-started/drop_down_menu_ep_seq.png)
+ 
+Then you can delete the sequence, with the 
+![Delete button](../img/getting-started/delete_button.png) button.
+
+![Delete sequence](../img/getting-started/delete_episode.png)
+
+
+## How to delete a task type column 
 
 To delete a task type (shot or asset), go to the global spreadsheet page, 
 and click on the arrow next to the name of the task type ![Delete sequence](../img/getting-started/arrow.png). 
@@ -77,7 +89,15 @@ Once you have click on it, a message appears and ask you to type the name of the
 
 ![Delete sequence](../img/getting-started/delete_tasktype.png). 
 
+## How to delete a task type column for a specfic group
 
+To delete a task type (shot or asset), go to the global spreadsheet page, 
+and click on the arrow next to the name of the task type ![Delete sequence](../img/getting-started/arrow.png). 
+
+A sub-menu appears with the option **Delete all** the tasks.
+Once you have click on it, a message appears and ask you to type the name of the task. You need to type it as it shows, it's case sensitive.
+
+![Delete sequence](../img/getting-started/delete_tasktype.png). 
 
 ## How to delete a task
 
@@ -123,4 +143,45 @@ Once the tasks deleted, the column will be empty, and won't count on the stats.
 The second benefit will be to hide automatically this empty column once your will filter your view.
 
 ![Delete task filter display](../img/getting-started/delete_task_filter.png)
+
+## How to delete a production
+
+To delete a production, you need to close it first.
+
+As **Studio Manager** open the main menu, and choose **Productions** under the **STUDIO** section.
+
+![Productions in Main Menu](../img/getting-started/main_menu_production.png)
+
+Then on the **Prodcutions** page, click on the edit button on the far right of the screen, on the selected production.
+
+![Productions edit button](../img/getting-started/production_edit.png)
+
+On the pop-up window, under the **Status** option, choose **Closed**.
+
+![Productions edit closed](../img/getting-started/edit_production.png)
+
+Now your production appears as **Closed**. No one will have acces to it, but it's saved.
+It also means that you won't be able to delete any **task status**, **task type**, **asset type**.
+
+## How to remove access to someone?
+
+At some point you may need to remove acces to Kitsu to an artsit, supervisor etc.
+
+As **Studio Manager** open the main menu, and choose **People** under the **STUDIO** section.
+
+![People in Main Menu](../img/getting-started/main_menu_people.png)
+
+Then on the **People** page, click on the edit button on the far right of the screen, on the selected people.
+
+![People edit](../img/getting-started/people_edit.png)
+
+On the pop-up window, under the **Active** option, choose **No**.
+
+![People edit closed](../img/getting-started/people_edit_closed.png)
+
+As soon as someone is not **active** anymore, they won't have access to Kitsu. But you still can see their comment and version.
+
+If you really want to delete someone, it means you will also delete all their comment and version they have uploaded.
+
+If you still want to delete someone, then go to the **Unactive** part of the **People** page, and click on the trask button on the right part of the line of the people.
 
