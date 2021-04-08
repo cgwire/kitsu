@@ -39,7 +39,7 @@ And finally you can filter per the Thumbnails presence.
 You can add several filters. Once you are done, validate your choice with the **Confirm"" button.
 
 
-## How to filter two status of a same task
+## How to filter two status of a same task?
 
 You may need to filter for example all the tasks that are in **WIP** and **Done** status
 
@@ -121,8 +121,27 @@ Now under the **search bar** you can see your saved queries as buttons.
 
 ![Search saved](../img/getting-started/filter_saved.png)
 
-Every time you get back to this page, the buttons are there. It helps
-you to run common queries faster.
+Every time you get back to this page, the buttons are there. It helps you to run common queries faster.
+
+## How to rename a saved filter
+
+Once a have created your filter, and saved it, it will appear as a button under the search bar.
+The search can be complexe and not easy to read.
+
+You can renamme the filter with a more explicite choice of words.
+
+For example you want to filter the task that are in RETAKE and WFA in modeling, with the difficulty easy, and assigned to Ann.
+
+![Search saved example](../img/getting-started/filter_rename_example.png)
+
+The saved filter is quite long, and hard to read. Hover your mouse on the saved filered. You will see two icons, one to edit, the other to delete.
+
+![Search saved example edit](../img/getting-started/filter_edit.png)
+
+On the pop-up window, you can now change the displayed name on the **Name** section.
+
+![Edit filtered name](../img/getting-started/filter_edit_name.png)
+
 
 ## What filters can I create?
 
