@@ -133,8 +133,7 @@ You can choose to display the stats per number of shots, or number of frame.
 You can also chance the **Display Mode**, you can switch from the **Pie charts** view 
 to the **Counts** view.
 
-![Client sequence stat count](../img/getting-started/
-client_sequence_stat_count.png.png)
+![Client sequence stat count](../img/getting-started/client_sequence_stat_count.png)
 
 It's this presentation that you can download to keep track of the production progress
 
