@@ -65,11 +65,11 @@ system.
 You can change : 
 - (1) The name of the status
 - (2) His short name, useful for the filters
-- (3) If it's the end of the task
-- (4) If it will count as a retake (for the supervisor page)
-- (5) If the artist / Vendor can use this status
-- (6) If the Client can use this status
-- (7) The color 
+- (3) If this status is used to validate a task (useful for the quota, to clean tthe todo list, and episode stat page)
+- (4) If this status is used to give comment a task (useful to keep track of the back and forth in the task type page, and for the episode stats page)
+- (5) Can the artist use this status. If **No** the artist won't see this status on his list. But he can post on top of it.
+- (6) Can the client use this status. If **No** the client won't see this status on his list
+- (7) Choose a color you like
 
 ![Edit status](../img/getting-started/edit_status.png)
 
@@ -88,9 +88,11 @@ On the new pop up you can define your personalized task :
 
 - (1) The name of the status
 - (2) His short name, useful for the filters
-- (3) If you can upload a preview with this task
-- (4) If it's the end of the task
-- (5) The color 
+- (3) If this status is used to validate a task (useful for the quota, to clean tthe todo list, and episode stat page)
+- (4) If this status is used to give comment a task (useful to keep track of the back and forth in the task type page, and for the episode stats page)
+- (5) Can the artist use this status. If **No** the artist won't see this status on his list. But he can post on top of it.
+- (6) Can the client use this status. If **No** the client won't see this status on his list
+- (7) Choose a color you like
 
 ![Add Status](../img/getting-started/add_status.png)
 
