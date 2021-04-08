@@ -682,8 +682,8 @@ export default {
 
     getTasks (entities) {
       const tasks = []
-      entities.forEach((entity) => {
-        entity.tasks.forEach((taskId) => {
+      entities.forEach(entity => {
+        entity.tasks.forEach(taskId => {
           const task = this.taskMap[taskId]
           if (task) {
             // Hack to allow filtering on linked entity metadata.

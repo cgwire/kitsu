@@ -565,6 +565,7 @@ const actions = {
                 personMap
               }
             )
+            if (callback) callback(err)
           }
         })
       }

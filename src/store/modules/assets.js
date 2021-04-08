@@ -1005,8 +1005,7 @@ const mutations = {
     const asset = state.assetMap[task.entity_id]
     if (asset && task) {
       task = helpers.populateTask(task, asset)
-
-      asset.tasks.push(task)
+      asset.tasks.push(task.id)
       if (!asset.validations) asset.validations = {}
       Vue.set(asset.validations, task.task_type_id, task.id)
     }
