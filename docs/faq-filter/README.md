@@ -37,6 +37,41 @@ And finally you can filter per the Thumbnails presence.
 
 You can add several filters. Once you are done, validate your choice with the **Confirm"" button.
 
+## How to filter two status of a same task
+
+You may need to filter for example all the tasks that are in **WIP** and **Done** status
+
+When you click on it a pop up opened, and gives you several choices for your filtering; 
+
+![Filter Builder option](../img/getting-started/filter_builder_option.png)
+
+Under the **Task Status**, choose the name of the task type you want to filter. Then instead of **Equal**, choose **IN**.
+You can now add more status on this filtered task type.
+
+For example we want to see the tasks in modeling that are in WFA **AND** in RETAKE.
+
+![Filter Builder example 01](../img/getting-started/filter_builder_example01.png)
+
+Click on the filter builder and choose the task type Modeling, IN retake and WFA
+
+![Filter Builder example 02](../img/getting-started/filter_builder_example02.png)
+
+Then validate with **Confirm**
+
+You can now see the result
+
+![Filter Builder example 03](../img/getting-started/filter_builder_example03.png)
+
+You can save your filter with the ![Save button](../img/getting-started/filter_save_button.png) save button.
+
+
+
+
+
+
+
+filter_builder_example02.png
+
 
 ## How to use the search bar?
 
