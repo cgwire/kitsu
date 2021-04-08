@@ -18,6 +18,7 @@ bar](../img/getting-started/filter_save_button.png). in the following pages:
 
 NB: The **search bar** is available too in people episodes list.
 
+
 ## How to use the Filter Builder?
 
 Next to the search bar you have the icon of the **Filter Builder**
@@ -36,6 +37,7 @@ You can also filter the global page through the assignation, per artist or per t
 And finally you can filter per the Thumbnails presence.
 
 You can add several filters. Once you are done, validate your choice with the **Confirm"" button.
+
 
 ## How to filter two status of a same task
 
@@ -63,14 +65,6 @@ You can now see the result
 ![Filter Builder example 03](../img/getting-started/filter_builder_example03.png)
 
 You can save your filter with the ![Save button](../img/getting-started/filter_save_button.png) save button.
-
-
-
-
-
-
-
-filter_builder_example02.png
 
 
 ## How to use the search bar?
