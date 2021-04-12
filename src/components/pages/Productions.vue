@@ -41,7 +41,7 @@
       :text="deleteText()"
       :error-text="$t('productions.delete_error')"
       :lock-text="currentLockText"
-      @cancel="modals.isDeletDisplayed = false"
+      @cancel="modals.isDeleteDisplayed = false"
       @confirm="confirmDeleteProduction"
     />
 
