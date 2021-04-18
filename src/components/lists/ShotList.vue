@@ -718,7 +718,7 @@ export default {
 
 .actions {
   min-width: 160px;
-  position: relative;
+  position: sticky;
 }
 
 th.actions {

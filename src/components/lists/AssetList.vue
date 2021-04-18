@@ -654,7 +654,7 @@ export default {
 .actions {
   min-width: 160px;
   padding: 0.4em;
-  position: relative;
+  position: sticky;
 }
 
 .name {
