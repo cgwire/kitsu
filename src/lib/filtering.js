@@ -176,7 +176,6 @@ export const getFilters = (
     ...getThumbnailFilters(query) || [],
     ...getExcludingFilters(entryIndex, query)
   ]
-  console.log(filters)
   filters.union = unionExtraction.union
   return filters
 }
@@ -411,7 +410,6 @@ export const getAssignedToFilters = (persons, queryText) => {
 
   const results = []
   const rgxMatches = queryText.match(EQUAL_REGEX)
-  console.log(rgxMatches)
   if (rgxMatches) {
     rgxMatches.forEach((rgxMatch) => {
       const personIndex = new Map()
@@ -427,7 +425,6 @@ export const getAssignedToFilters = (persons, queryText) => {
         const excluding = value.startsWith('-')
         if (excluding) value = value.substring(1)
         const person = personIndex.get(value.toLowerCase())
-        console.log(person, value, personIndex)
         if (person) {
           results.push({
             personId: person.id,
