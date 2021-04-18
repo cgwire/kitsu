@@ -80,6 +80,7 @@ const helpers = {
         person.name = person.email
         person.initials = person.email[0]
       } else {
+        person.name = ''
         person.initials = 'NN'
       }
 
