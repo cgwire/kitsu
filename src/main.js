@@ -21,7 +21,7 @@ import VueWebsocket from 'vue-websocket'
 
 import 'v-autocomplete/dist/v-autocomplete.css'
 
-Vue.use(VueWebsocket, '/events')
+Vue.use(VueWebsocket, '/events', { transports: ['websocket', 'polling'] })
 Vue.config.productionTip = false
 Vue.use(Autocomplete)
 Vue.use(Meta)
