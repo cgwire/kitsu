@@ -87,7 +87,6 @@ export default {
   data () {
     return {
       annotations: [],
-      currentTime: '00:00.000',
       currentTimeRaw: 0,
       isLoading: false,
       maxDuration: '00:00.000',
@@ -324,6 +323,9 @@ export default {
     },
 
     play () {
+      if (!this.isPlaying && this.videoDuration === this.video.currentTime) {
+        this.setCurrentTime(0)
+      }
       this.video.play()
     },
 
