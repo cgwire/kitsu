@@ -1321,8 +1321,11 @@ export default {
     },
 
     setCurrentTime (time) {
-      this.previewViewer.setCurrentTime(time)
-      if (this.comparisonViewer) this.comparisonViewer.setCurrentTime(time)
+      const currentTime = roundToFrame(this.currentTimeRaw, this.fps)
+      if (time !== currentTime) {
+        this.previewViewer.setCurrentTime(time)
+        if (this.comparisonViewer) this.comparisonViewer.setCurrentTime(time)
+      }
     },
 
     updateProgressBar (currentTime) {
