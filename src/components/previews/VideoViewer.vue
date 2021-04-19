@@ -50,6 +50,10 @@ export default {
       type: Boolean,
       default: false
     },
+    isHd: {
+      type: Boolean,
+      default: false
+    },
     isDrawing: {
       type: Boolean,
       default: false
@@ -171,7 +175,7 @@ export default {
     },
 
     moviePath () {
-      if (this.extension === 'mp4' && this.isAvailable && !this.fullScreen) {
+      if (this.extension === 'mp4' && this.isAvailable && !this.isHd) {
         return `/api/movies/low/preview-files/${this.preview.id}.mp4`
       } else if (this.extension === 'mp4' && this.isAvailable) {
         return `/api/movies/originals/preview-files/${this.preview.id}.mp4`
