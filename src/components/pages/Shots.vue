@@ -730,8 +730,13 @@ export default {
 
     deleteText () {
       const shot = this.shotToDelete
-      if (shot) {
+      if (
+        shot &&
+        (shot.canceled || !shot.tasks || shot.tasks.length === 0)
+      ) {
         return this.$t('shots.delete_text', { name: shot.name })
+      } else if (shot) {
+        return this.$t('shots.cancel_text', { name: shot.name })
       } else {
         return ''
       }

@@ -2,6 +2,7 @@ export default {
 
   assets: {
     cast_in: 'Cast in',
+    cancel_text: 'Are you sure you want to archive {name}?',
     delete_error: 'An error occurred while deleting this asset. There are probably data linked to it. Are you sure this asset type has no task linked to it?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     edit_fail: 'Saving failed, it may be due to the fact that an asset with a similar name already exists.',
@@ -15,7 +16,7 @@ export default {
     new_success: 'Asset {name} successfully created.',
     no_cast_in: 'This asset is not cast in any shot.',
     number: 'asset | assets',
-    restore_text: 'Are you sure you want to restore {name} into your database?',
+    restore_text: 'Are you sure you want to restore {name} from your archive?',
     restore_error: 'An error occurred while restoring this asset.',
     tasks: 'Asset tasks',
     title: 'Assets',
@@ -751,6 +752,7 @@ export default {
 
   shots: {
     casting: 'Shot casting',
+    cancel_text: 'Are you sure you want to archive {name}?',
     creation_explaination: 'To add shots you need first to create an episode and a sequence. Type an episode name in the bottom of the left column then click on add to create a new episode. Select this episode and repeat the same operation for sequence. Finally select a sequence and type a shot name in the field in the bottom of the right column. Click on the add button below. Your first shot was created. You can now add many more! If it\'s not a TV Show, you have to directly create a sequence.',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this shot. There are probably data linked to it. Are you sure this shot has no task linked to it?',
@@ -770,7 +772,7 @@ export default {
     manage: 'Create shots',
     new_success: 'Shot {name} successfully created.',
     padding: 'Shot Padding',
-    restore_text: 'Are you sure you want to restore {name} into your database?',
+    restore_text: 'Are you sure you want to restore {name} from your archive?',
     restore_error: 'An error occurred while restoring this shot.',
     sequences: 'Sequences',
     tasks: 'Shot Tasks',
