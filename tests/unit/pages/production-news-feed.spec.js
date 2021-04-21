@@ -298,7 +298,7 @@ describe('ProductionNewsFeed', () => {
 
     test('onBodyScroll', () => {
       wrapper.vm.loading.more = false
-      wrapper.vm.onBodyScroll(null, { scrollTop: -100 })
+        wrapper.vm.onBodyScroll(null, { scrollTop: -800 })
       expect(newsStore.actions.loadMoreNews).not.toHaveBeenCalled()
       wrapper.vm.onBodyScroll(null, { scrollTop: 500 })
       expect(newsStore.actions.loadMoreNews).toHaveBeenCalled()
