@@ -62,9 +62,10 @@
           position: isComparisonOverlay ? 'absolute': 'static'
         }"
         :entities="entityListToCompare"
+        :full-screen="fullScreen"
+        :is-hd="isHd"
         :is-repeating="isRepeating"
         :muted="true"
-        :full-screen="fullScreen"
         name="comparison"
         v-show="isComparing && isCurrentPreviewMovie &&
                 isMovieComparison && !isLoading"
@@ -109,9 +110,10 @@
           opacity: overlayOpacity
         }"
         :entities="entityList"
+        :full-screen="fullScreen"
+        :is-hd="isHd"
         :is-repeating="isRepeating"
         :muted="isMuted"
-        :full-screen="fullScreen"
         @repeat="onVideoRepeated"
         @metadata-loaded="onMetadataLoaded"
         @entity-change="onPlayerEntityChange"
@@ -556,6 +558,13 @@
       @click="onFilmClicked"
       icon="film"
     />
+    <button-simple
+      class="playlist-button flexrow-item"
+      :title="$t('playlists.actions.switch_hd')"
+      :text="isHd ? 'HD' : 'LD'"
+      @click="isHd = !isHd"
+      v-if="isCurrentPreviewMovie"
+    />
 
     <div
       class="flexrow-item playlist-button"
@@ -792,11 +801,12 @@ export default {
       entityListToCompare: [],
       fabricCanvas: null,
       fullScreen: false,
-      isDlButtonsHidden: true,
       isCommentsHidden: true,
       isComparing: false,
+      isDlButtonsHidden: true,
       isDrawing: false,
       isEntitiesHidden: false,
+      isHd: false,
       isMuted: false,
       isPlaying: false,
       isRepeating: false,
@@ -1516,7 +1526,9 @@ export default {
     },
 
     onVideoRepeated () {
-      this.clearFocus()
+      if (!this.isCommentsHidden || this.isFocusTextarea()) {
+        this.clearFocus()
+      }
       if (this.rawPlayerComparison) {
         this.rawPlayerComparison.setCurrentTime(0)
       }

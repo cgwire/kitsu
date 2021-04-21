@@ -22,9 +22,10 @@
       :big="big"
       :default-height="defaultHeight"
       :full-screen="fullScreen"
-      :is-ordering="isOrdering"
+      :is-hd="isHd"
       :is-comparing="isComparing"
       :is-muted="isMuted"
+      :is-ordering="isOrdering"
       :is-repeating="isRepeating"
       :light="light"
       :preview="currentPreview"
@@ -314,6 +315,14 @@
         >
         </div>
 
+        <button-simple
+          class="flexrow-item"
+          :title="$t('playlists.actions.switch_hd')"
+          :text="isHd ? 'HD' : 'LD'"
+          @click="isHd = !isHd"
+          v-if="fullScreen && isMovie"
+        />
+
         <a
           class="button flexrow-item"
           :href="originalDlPath"
@@ -440,6 +449,7 @@ export default {
       currentTimeRaw: 0,
       isComparing: false,
       isDrawing: false,
+      isHd: false,
       isLoading: false,
       isMuted: false,
       isPlaying: false,
@@ -1311,8 +1321,11 @@ export default {
     },
 
     setCurrentTime (time) {
-      this.previewViewer.setCurrentTime(time)
-      if (this.comparisonViewer) this.comparisonViewer.setCurrentTime(time)
+      const currentTime = roundToFrame(this.currentTimeRaw, this.fps)
+      if (time !== currentTime) {
+        this.previewViewer.setCurrentTime(time)
+        if (this.comparisonViewer) this.comparisonViewer.setCurrentTime(time)
+      }
     },
 
     updateProgressBar (currentTime) {

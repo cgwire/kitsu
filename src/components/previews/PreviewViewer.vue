@@ -25,6 +25,7 @@
       :big="big"
       :default-height="defaultHeight"
       :is-comparing="isComparing"
+      :is-hd="isHd"
       :is-muted="isMuted"
       :is-repeating="isRepeating"
       :light="light"
@@ -130,6 +131,10 @@ export default {
       default: 0
     },
     isComparing: {
+      type: Boolean,
+      default: false
+    },
+    isHd: {
       type: Boolean,
       default: false
     },

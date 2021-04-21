@@ -39,6 +39,10 @@ export default {
       type: Boolean,
       default: false
     },
+    isHd: {
+      type: Boolean,
+      default: false
+    },
     isRepeating: {
       type: Boolean,
       default: false
@@ -113,7 +117,7 @@ export default {
     getMoviePath (entity) {
       if (entity.preview_file_extension === 'mp4') {
         const previewId = entity.preview_file_id
-        if (this.fullScreen) {
+        if (this.isHd) {
           return `/api/movies/originals/preview-files/${previewId}.mp4`
         } else {
           return `/api/movies/low/preview-files/${previewId}.mp4`
@@ -389,9 +393,9 @@ export default {
   },
 
   watch: {
-    fullScreen () {
+    isHd () {
       if (this.currentPlayer) {
-        this.loadEntity(this.currentIndex, this.currentPlayer.currentTime)
+        this.reloadCurrentEntity()
         if (this.isPlaying) this.play()
       }
     },

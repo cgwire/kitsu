@@ -694,8 +694,13 @@ export default {
 
     deleteText () {
       const asset = this.assetToDelete
-      if (asset) {
+      if (
+        asset &&
+        (asset.canceled || !asset.tasks || asset.tasks.length === 0)
+      ) {
         return this.$t('assets.delete_text', { name: asset.name })
+      } else if (asset) {
+        return this.$t('assets.cancel_text', { name: asset.name })
       } else {
         return ''
       }
