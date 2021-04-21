@@ -16,6 +16,10 @@ export const domMixin = {
   },
 
   methods: {
+    isFocusTextArea () {
+      return document.activeElement.nodeName === 'TEXTAREA'
+    },
+
     clearFocus () {
       document.activeElement.blur()
     },

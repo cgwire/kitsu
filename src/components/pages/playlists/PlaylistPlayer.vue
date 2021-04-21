@@ -1526,7 +1526,9 @@ export default {
     },
 
     onVideoRepeated () {
-      this.clearFocus()
+      if (!this.isCommentsHidden || this.isFocusTextarea()) {
+        this.clearFocus()
+      }
       if (this.rawPlayerComparison) {
         this.rawPlayerComparison.setCurrentTime(0)
       }
