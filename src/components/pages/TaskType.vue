@@ -183,7 +183,7 @@
     v-if="nbSelectedTasks === 1"
   >
     <task-info
-      :task="Object.values(selectedTasks)[0]"
+      :task="selectedTasks.values().next().value"
     />
   </div>
 </div>
@@ -368,11 +368,11 @@ export default {
     // Meta
 
     assetTasks () {
-      return this.getTasks(Object.values(this.assetMap))
+      return this.getTasks(Array.from(this.assetMap.values()))
     },
 
     shotTasks () {
-      return this.getTasks(Object.values(this.shotMap))
+      return this.getTasks(Array.from(this.shotMap.values()))
     },
 
     title () {
@@ -453,7 +453,7 @@ export default {
 
     scheduleTeam () {
       const scheduleTeam = this.currentProduction.team.map((personId) => {
-        return this.personMap[personId]
+        return this.personMap.get(personId)
       })
       return sortPeople(scheduleTeam)
     },
@@ -485,7 +485,9 @@ export default {
     initData (force) {
       this.resetTasks()
       this.focusSearchField()
+      console.log('init')
       if (this.tasks.length === 0) {
+        console.log('no tasks')
         this.loading.entities = true
         this.errors.entities = false
         this.initTaskType(force)
@@ -665,7 +667,7 @@ export default {
         tasks = this.shotTasks
       }
       tasks = tasks.filter((task) => {
-        const entity = this.entityMap[task.entity_id]
+        const entity = this.entityMap.get(task.entity_id)
         return !entity.canceled
       })
       this.tasks = this.sortTasks(tasks)
@@ -684,7 +686,7 @@ export default {
       const tasks = []
       entities.forEach(entity => {
         entity.tasks.forEach(taskId => {
-          const task = this.taskMap[taskId]
+          const task = this.taskMap.get(taskId)
           if (task) {
             // Hack to allow filtering on linked entity metadata.
             task.data = entity.data
@@ -729,7 +731,7 @@ export default {
 
     updateEstimation ({ taskId, days, item }) {
       const estimation = daysToMinutes(this.organisation, days)
-      const task = this.taskMap[taskId]
+      const task = this.taskMap.get(taskId)
       let data = { estimation }
       if (!task.start_date) task.start_date = formatSimpleDate(moment())
       const startDate = parseDate(task.start_date)
@@ -896,12 +898,12 @@ export default {
 
     getTaskElementColor (task, endDate) {
       if (this.schedule.currentColor === 'status') {
-        let color = this.taskStatusMap[task.task_status_id].color
+        let color = this.taskStatusMap.get(task.task_status_id).color
         if (color === '#f5f5f5') color = '#999'
         return color
       } else if (this.schedule.currentColor === 'late') {
         const isLate = (
-          !this.taskStatusMap[task.task_status_id].is_done &&
+          !this.taskStatusMap.get(task.task_status_id).is_done &&
           endDate.isBefore(moment())
         )
         return isLate ? '#FF3860' : '#999'
@@ -1035,7 +1037,7 @@ export default {
   socket: {
     events: {
       'task:update' (eventData) {
-        if (this.taskMap[eventData.task_id]) {
+        if (this.taskMap.get(eventData.task_id)) {
           setTimeout(this.resetTaskIndex, 1000)
         }
       }

@@ -14,11 +14,11 @@ import {
 } from '../../../src/lib/sorting'
 
 
-const taskTypeMap = {
+const taskTypeMap = new Map(Object.entries({
   'task-type-1': {id: 'task-type-1', priority: 1, name: 'Modeling'},
   'task-type-2': {id: 'task-type-2', priority: 1, name: 'Setup'},
   'task-type-3': {id: 'task-type-3', priority: 2, name: 'Texture'}
-}
+}))
 
 describe('lib/sorting', () => {
 

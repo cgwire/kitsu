@@ -34,12 +34,12 @@ describe('ProductionNewsFeed', () => {
     }
     taskStore = {
       getters: {
-        taskTypeMap: () => ({
+        taskTypeMap: () => new Map(Object.entries({
           'task-type-1': {
             name: 'Modeling'
           }
-        }),
-        taskStatusMap: () => ({
+        })),
+        taskStatusMap: () => new Map(Object.entries({
           'task-status-1': {
             name: 'WIP',
             is_retake: false,
@@ -55,7 +55,7 @@ describe('ProductionNewsFeed', () => {
             is_retake: false,
             is_done: true
           }
-        })
+        }))
       },
       actions: {
         loadTask: jest.fn()
@@ -83,7 +83,7 @@ describe('ProductionNewsFeed', () => {
     }
     personStore = {
       getters: {
-        personMap: () => ({
+        personMap: () => new Map(Object.entries({
           'person-1': {
             id: 'person-1',
             name: 'Jhon Doe'
@@ -92,7 +92,7 @@ describe('ProductionNewsFeed', () => {
             id: 'person-1',
             name: 'Emma Doe'
           }
-        })
+        }))
       },
       actions: {}
     }

@@ -31,11 +31,11 @@ describe('BuildFilterModal', () => {
         ],
         assetSearchText: (state) => state.assetSearchText,
         assetValidationColumns: () => ['task-type-1', 'task-type-2'],
-        assetTypeMap: () => ({
+        assetTypeMap: () => new Map(Object.entries({
           'asset-type-1': { id: 'asset-type-1', name: 'chars' },
           'asset-type-2': { id: 'asset-type-2', name: 'sets' },
           'asset-type-3': { id: 'asset-type-3', name: 'props' }
-        }),
+        })),
         assetTypes: () => [
           { id: 'asset-type-1', name: 'chars' },
           { id: 'asset-type-2', name: 'sets' },
@@ -70,11 +70,11 @@ describe('BuildFilterModal', () => {
           { id: 'person-2', name: 'James', active: true },
           { id: 'person-3', name: 'Ema', active: true }
         ],
-        personMap: () => ({
+        personMap: () => new Map(Object.entries({
           'person-1': { id: 'person-1', name: 'John', active: true },
           'person-2': { id: 'person-2', name: 'James', active: true },
           'person-3': { id: 'person-3', name: 'Ema', active: true }
-        })
+        }))
       },
       actions: {}
     }
@@ -91,17 +91,17 @@ describe('BuildFilterModal', () => {
           { id: 'task-status-2', short_name: 'WIP' },
           { id: 'task-status-3', short_name: 'Retake' }
         ],
-        taskTypeMap: () => ({
+        taskTypeMap: () => new Map(Object.entries({
           'task-type-1': { id: 'task-type-1', name: 'Modeling' },
           'task-type-2': { id: 'task-type-2', name: 'Rigging' },
           'task-type-3': { id: 'task-type-3', name: 'Layout' },
           'task-type-4': { id: 'task-type-4', name: 'Animation' }
-        }),
-        taskStatusMap: () => ({
+        })),
+        taskStatusMap: () => new Map(Object.entries({
           'task-status-1': { id: 'task-status-1', short_name: 'WFA' },
           'task-status-2': { id: 'task-status-2', short_name: 'WIP' },
           'task-status-3': { id: 'task-status-3', short_name: 'Retake' },
-        })
+        }))
       },
       actions: {}
     }

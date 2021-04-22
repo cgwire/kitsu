@@ -56,7 +56,7 @@ describe('Breakdown store', () => {
         nb_occurences: 2
       }
     ]
-    assetMap = {
+    assetMap = new Map(Object.entries({
       'asset-1': assetCasting[0],
       'asset-2': assetCasting[1],
       'asset-3': {
@@ -67,7 +67,7 @@ describe('Breakdown store', () => {
         nb_occurences: 1,
         preview_file_id: undefined
       }
-    }
+    }))
     casting = {
       'shot-1': assetCasting,
       'shot-2': []
@@ -79,7 +79,7 @@ describe('Breakdown store', () => {
     const entityMapReducer = (acc, entity) => {
       acc[entity.id] = entity ; return acc
     }
-    shotMap = shots.reduce(entityMapReducer, {})
+    shotMap = new Map(Object.entries(shots.reduce(entityMapReducer, {})))
     expectedSequenceOptions = [{
       label: 'SE01',
       value: 'sequence-1',
@@ -249,7 +249,7 @@ describe('Breakdown store', () => {
         .toEqual(newAsset.id)
 
       store.mutations.CASTING_ADD_TO_CASTING(state,
-        { entityId: 'shot-1', asset: assetMap['asset-2'], nbOccurences: 3 }
+        { entityId: 'shot-1', asset: assetMap.get('asset-2'), nbOccurences: 3 }
       )
       expect(state.casting['shot-1'][1]['nb_occurences'])
         .toEqual(5)
@@ -261,14 +261,14 @@ describe('Breakdown store', () => {
       store.mutations.CASTING_SET_SHOTS(state, shots)
       store.mutations.CASTING_SET_CASTING(state, { casting, assetMap })
       store.mutations.CASTING_REMOVE_FROM_CASTING(state,
-        { entityId: 'shot-1', asset: assetMap['asset-2'], nbOccurences: 1 }
+        { entityId: 'shot-1', asset: assetMap.get('asset-2'), nbOccurences: 1 }
       )
       expect(state.casting['shot-1'][1]['nb_occurences'])
         .toEqual(1)
       expect(state.castingByType['shot-1'][1][0]['nb_occurences'])
         .toEqual(1)
       store.mutations.CASTING_REMOVE_FROM_CASTING(state,
-        { entityId: 'shot-1', asset: assetMap['asset-2'], nbOccurences: 1 }
+        { entityId: 'shot-1', asset: assetMap.get('asset-2'), nbOccurences: 1 }
       )
       expect(state.casting['shot-1'].length).toEqual(1)
       expect(state.castingByType['shot-1'].length).toEqual(1)

@@ -126,7 +126,7 @@ export default {
     },
 
     getPersonFullName (personId) {
-      const person = this.personMap[personId]
+      const person = this.personMap.get(personId)
       return person ? person.full_name : ''
     },
 

@@ -691,7 +691,7 @@ export default {
       if (this.people.length > 10 && this.currentProduction) {
         this.currentTeam = sortPeople(
           this.currentProduction.team.map((personId) => {
-            return this.personMap[personId]
+            return this.personMap.get(personId)
           })
         )
       } else {
@@ -750,21 +750,20 @@ export default {
     },
 
     nbSelectedTasks () {
-      this.selectedTaskIds = Object.keys(this.selectedTasks)
+      this.selectedTaskIds = Array.from(this.selectedTasks.keys())
 
       if (this.nbSelectedTasks > 0) {
         let isShotSelected = false
         let isAssetSelected = false
 
-        for (const taskId of Object.keys(this.selectedTasks)) {
-          const task = this.selectedTasks[taskId]
+        this.selectedTaskIds.forEach(taskId => {
+          const task = this.selectedTasks.get(taskId)
           if (task.sequence_name) {
             isShotSelected = true
           } else {
             isAssetSelected = true
           }
-        }
-
+        })
         if (isShotSelected && isAssetSelected) {
           this.customActions = this.allCustomActions
         } else if (isShotSelected) {
@@ -808,7 +807,7 @@ export default {
     },
 
     $route () {
-      this.selectedTaskIds = Object.keys(this.selectedTasks)
+      this.selectedTaskIds = Array.from(this.selectedTasks.keys())
       if (this.nbSelectedTasks > 0) {
         this.clearSelectedTasks()
       }

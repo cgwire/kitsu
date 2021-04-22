@@ -131,6 +131,7 @@
           class="button"
           ref="preview-file"
           :href="currentPreviewDlPath"
+          v-if="extension && extension.length > 0"
         >
           <download-icon class="icon" />
           <span class="text">
@@ -1302,7 +1303,7 @@ export default {
     updateTaskPanel () {
       if (this.entityList.length > 0) {
         const entity = this.entityList[this.playingEntityIndex]
-        if (entity) this.task = this.taskMap[entity.preview_file_task_id]
+        if (entity) this.task = this.taskMap.get(entity.preview_file_task_id)
         else this.task = null
       } else {
         this.task = null
@@ -1924,15 +1925,15 @@ export default {
       const entities = Object.values(this.entities)
       if (entities.length > 0) {
         let taskTypeIds = Object.keys(entities[0].preview_files)
-        entities.forEach((entity) => {
+        entities.forEach(entity => {
           taskTypeIds = taskTypeIds.filter(
             taskTypeId => entity.preview_files[taskTypeId]
           )
         })
         this.taskTypeOptions = taskTypeIds.map((taskTypeId) => {
           return {
-            label: this.taskTypeMap[taskTypeId].name,
-            value: this.taskTypeMap[taskTypeId].id
+            label: this.taskTypeMap.get(taskTypeId).name,
+            value: this.taskTypeMap.get(taskTypeId).id
           }
         }).sort((a, b) => a.label.localeCompare(b.label))
         if (this.taskTypeOptions.length > 0) {

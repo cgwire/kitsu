@@ -335,15 +335,15 @@ export default {
     taskTypeList () {
       if (this.isAssets) {
         return this.assetValidationColumns
-          .map((taskTypeId) => this.taskTypeMap[taskTypeId])
+          .map((taskTypeId) => this.taskTypeMap.get(taskTypeId))
       } else {
         return this.shotValidationColumns
-          .map((taskTypeId) => this.taskTypeMap[taskTypeId])
+          .map((taskTypeId) => this.taskTypeMap.get(taskTypeId))
       }
     },
 
     team () {
-      return this.currentProduction.team.map(pId => this.personMap[pId])
+      return this.currentProduction.team.map(pId => this.personMap.get(pId))
     },
 
     descriptorOptions () {
@@ -387,7 +387,7 @@ export default {
       if (value && value !== '-') {
         let operator = '=['
         if (this.assetTypeFilters.operator === '=-') operator = '=[-'
-        const assetType = this.assetTypeMap[value]
+        const assetType = this.assetTypeMap.get(value)
         query += ` type${operator}${assetType.name}]`
       }
       return query
@@ -399,7 +399,7 @@ export default {
         if (taskTypeFilter.operator === '=-') operator = '=[-'
         const taskType = this.getTaskType(taskTypeFilter.id)
         const value = taskTypeFilter.values.map(statusId => {
-          return this.taskStatusMap[statusId].short_name
+          return this.taskStatusMap.get(statusId).short_name
         }).join(',')
         query += ` [${taskType.name}]${operator}${value}]`
       })
@@ -424,7 +424,7 @@ export default {
           if (this.assignation.value === '-assignedto') value = `-${value}`
           query += ` assignedto=[${value}]`
         } else if (this.assignation.taskTypeId) {
-          const taskType = this.taskTypeMap[this.assignation.taskTypeId]
+          const taskType = this.taskTypeMap.get(this.assignation.taskTypeId)
           const value =
             this.assignation.value === 'assigned' ? 'assigned' : 'unassigned'
           query += ` [${taskType.name}]=${value}`
@@ -473,7 +473,7 @@ export default {
     },
 
     getTaskType (taskTypeId) {
-      return this.taskTypeMap[taskTypeId]
+      return this.taskTypeMap.get(taskTypeId)
     },
 
     // Descriptors

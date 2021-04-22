@@ -126,7 +126,7 @@
                 v-if="!isCurrentUserClient"
               >
                 {{ !hiddenColumns[columnId]
-                   ? taskTypeMap[columnId].name
+                   ? taskTypeMap.get(columnId).name
                    : '' }}
               </router-link>
               <span
@@ -135,7 +135,7 @@
                 v-else
               >
                 {{ !hiddenColumns[columnId]
-                  ? taskTypeMap[columnId].name
+                  ? taskTypeMap.get(columnId).name
                   : '' }}
               </span>
               <chevron-down-icon
@@ -364,9 +364,12 @@
             }"
             :key="`${columnId}-${shot.id}`"
             :ref="`validation-${getIndex(i, k)}-${j}`"
-            :column="taskTypeMap[columnId]"
+            :column="taskTypeMap.get(columnId)"
             :entity="shot"
-            :task-test="taskMap[shot.validations[columnId]]"
+            :task-test="taskMap.get(shot.validations
+                        ? shot.validations.get(columnId)
+                        : null
+            )"
             :minimized="hiddenColumns[columnId]"
             :selected="shotSelectionGrid[getIndex(i, k)][j]"
             :rowX="getIndex(i, k)"

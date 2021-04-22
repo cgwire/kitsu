@@ -59,8 +59,8 @@
         >
           <th scope="row" class="name datatable-row-header">
             <div class="flexrow">
-              <people-avatar :size="30" :person="personMap[key]"/>
-              {{ personMap[key].full_name }}
+              <people-avatar :size="30" :person="personMap.get(key)"/>
+              {{ personMap.get(key).full_name }}
             </div>
           </th>
           <td
@@ -255,7 +255,7 @@ export default {
   },
 
   mounted () {
-    if (Object.keys(this.shotMap).length < 2) {
+    if (this.shotMap.size < 2) {
       setTimeout(() => {
         this.loadShots((err) => {
           setTimeout(() => {
@@ -300,8 +300,8 @@ export default {
     personIds () {
       const personIds = Object.keys(this.quotaMap)
       return personIds.sort((a, b) => {
-        const personAName = this.personMap[a].full_name
-        const personBName = this.personMap[b].full_name
+        const personAName = this.personMap.get(a).full_name
+        const personBName = this.personMap.get(b).full_name
         return personAName.localeCompare(personBName)
       })
     }
@@ -445,10 +445,6 @@ export default {
     },
 
     countMode () {
-      this.loadData()
-    },
-
-    shotMap () {
       this.loadData()
     },
 

@@ -43,15 +43,15 @@ describe('lib/helpers', () => {
     const assets = [
       {
         id: 'asset-1',
-        validations: {
+        validations: new Map(Object.entries({
           'task-type-1': 'task-1'
-        }
+        }))
       },
       {
         id: 'asset-2',
-        validations: {
+        validations: new Map(Object.entries({
           'task-type-2': 'task-2'
-        }
+        }))
       },
       {
         id: 'asset-3',

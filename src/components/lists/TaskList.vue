@@ -100,7 +100,7 @@
               <people-avatar
                 class="flexrow-item"
                 :key="task.id + '-' + personId"
-                :person="personMap[personId]"
+                :person="personMap.get(personId)"
                 :size="30"
                 :font-size="17"
                 v-for="personId in task.assignees"
@@ -301,7 +301,7 @@ export default {
     nbFrames () {
       let total = 0
       this.tasks.forEach(task => {
-        const entity = this.shotMap[task.entity.id]
+        const entity = this.shotMap.get(task.entity.id)
         if (entity && entity.nb_frames) total += entity.nb_frames
       })
       return total
@@ -350,7 +350,7 @@ export default {
           start_date: null,
           due_date: null
         }
-        const task = this.taskMap[taskId]
+        const task = this.taskMap.get(taskId)
         const dueDate = task.due_date ? moment(task.due_date) : null
         if (date) {
           const startDate = moment(date)
@@ -382,7 +382,7 @@ export default {
           start_date: null,
           due_date: null
         }
-        const task = this.taskMap[taskId]
+        const task = this.taskMap.get(taskId)
         const startDate = task.start_date ? moment(task.start_date) : null
         if (date) {
           const dueDate = moment(date)
@@ -410,7 +410,7 @@ export default {
 
     updateTasksEstimation ({ estimation }) {
       Object.keys(this.selectionGrid).forEach(taskId => {
-        const task = this.taskMap[taskId]
+        const task = this.taskMap.get(taskId)
         let data = { estimation }
         if (task.start_date) {
           const startDate = moment(task.start_date)
@@ -451,9 +451,9 @@ export default {
 
     getEntity (entityId) {
       if (this.isAssets) {
-        return this.assetMap[entityId]
+        return this.assetMap.get(entityId)
       } else {
-        return this.shotMap[entityId]
+        return this.shotMap.get(entityId)
       }
     },
 
@@ -569,7 +569,7 @@ export default {
       const taskLines = [headers]
       this.tasks.forEach((task) => {
         const assignees = task.assignees.map(personId => {
-          const person = this.personMap[personId]
+          const person = this.personMap.get(personId)
           if (person) return person.name
           else return ''
         }).join(', ')

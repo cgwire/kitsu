@@ -28,12 +28,12 @@ describe('Schedule', () => {
   beforeEach(() => {
     taskStore = {
       getters: {
-        taskTypeMap: () => ({
+        taskTypeMap: () => new Map(Object.entries({
           'task-type-1': {
             name: 'Modeling'
           }
-        }),
-        taskStatusMap: () => ({
+        })),
+        taskStatusMap: () => new Map(Object.entries({
           'task-status-1': {
             name: 'WIP',
             is_retake: false,
@@ -49,7 +49,7 @@ describe('Schedule', () => {
             is_retake: false,
             is_done: true
           }
-        })
+        }))
       },
       actions: {
         loadTask: jest.fn()

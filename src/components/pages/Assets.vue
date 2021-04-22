@@ -103,7 +103,7 @@
     v-if="nbSelectedTasks === 1"
   >
     <task-info
-      :task="Object.values(selectedTasks)[0]"
+      :task="selectedTasks.values().next().value"
     />
   </div>
 
@@ -386,7 +386,7 @@ export default {
       Object.keys(this.assetMap).length < 2 ||
       (
         this.assetValidationColumns.length > 0 &&
-        !this.assetMap[Object.keys(this.assetMap)[0]].validations
+        !this.assetMap.get(this.assetMap.keys()[0]).validations
       )
     ) {
       setTimeout(() => {
@@ -451,7 +451,7 @@ export default {
         type.forEach(item => {
           let assetKey = ''
           if (this.isTVShow && item.episode_id) {
-            assetKey += this.episodeMap[item.episode_id].name
+            assetKey += this.episodeMap.get(item.episode_id).name
           }
           assetKey += `${item.asset_type_name}${item.name}`
           assets[assetKey] = true
@@ -817,7 +817,7 @@ export default {
     },
 
     onDeleteAllTasksClicked (taskTypeId) {
-      const taskType = this.taskTypeMap[taskTypeId]
+      const taskType = this.taskTypeMap.get(taskTypeId)
       this.deleteAllTasksLockText = taskType.name
       this.modals.isDeleteAllTasksDisplayed = true
     },
@@ -916,7 +916,7 @@ export default {
           }
           this.assetValidationColumns
             .forEach((taskTypeId) => {
-              headers.push(this.taskTypeMap[taskTypeId].name)
+              headers.push(this.taskTypeMap.get(taskTypeId).name)
             })
           csv.buildCsvFile(name, [headers].concat(assetLines))
         })

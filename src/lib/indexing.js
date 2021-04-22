@@ -82,7 +82,7 @@ export const buildSupervisorTaskIndex = (tasks, personMap) => {
       task.task_status_short_name
     ])
     task.assignees.forEach((personId) => {
-      const person = personMap[personId]
+      const person = personMap.get(personId)
       if (person) words.push(person.first_name, person.last_name)
     })
     indexWords(index, taskIndex, task, words)

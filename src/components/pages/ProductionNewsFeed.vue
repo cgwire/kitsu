@@ -176,11 +176,11 @@
                       <div class="news-info flexrow">
                         <people-avatar
                           class="flexrow-item"
-                          :person="personMap[news.author_id]"
+                          :person="personMap.get(news.author_id)"
                           :size="30"
                           :font-size="14"
                           :is-link="false"
-                          v-if="personMap[news.author_id]"
+                          v-if="personMap.get(news.author_id)"
                         />
                         <span
                           class="explaination flexrow-item"
@@ -245,10 +245,10 @@
                       <div class="news-info flexrow">
                         <people-avatar
                           class="flexrow-item"
-                          :person="personMap[news.author_id]"
+                          :person="personMap.get(news.author_id)"
                           :size="30"
                           :no-link="true"
-                          v-if="personMap[news.author_id]"
+                          v-if="personMap.get(news.author_id)"
                         />
                         <span
                           class="explaination flexrow-item"
@@ -468,7 +468,7 @@ export default {
 
     team () {
       return this.currentProduction.team
-        .map(pId => this.personMap[pId])
+        .map(pId => this.personMap.get(pId))
         .sort((a, b) => a.full_name.localeCompare(b.full_name))
     },
 
@@ -486,9 +486,9 @@ export default {
           .keys(this.newsStats)
           .map(taskStatusId => {
             const name =
-              this.taskStatusMap[taskStatusId].short_name.toUpperCase()
+              this.taskStatusMap.get(taskStatusId).short_name.toUpperCase()
             const color =
-              this.taskStatusMap[taskStatusId].color
+              this.taskStatusMap.get(taskStatusId).color
             return {
               name,
               color,
@@ -547,7 +547,7 @@ export default {
     },
 
     personName (news) {
-      const person = this.personMap[news.author_id]
+      const person = this.personMap.get(news.author_id)
       return person ? person.full_name : ''
     },
 
@@ -562,7 +562,7 @@ export default {
 
     buildTaskTypeFromNews (news) {
       return {
-        ...this.taskTypeMap[news.task_type_id],
+        ...this.taskTypeMap.get(news.task_type_id),
         episode_id: news.episode_id
       }
     },
@@ -656,12 +656,12 @@ export default {
     },
 
     hasRetakeValue (news) {
-      const taskStatus = this.taskStatusMap[news.task_status_id]
+      const taskStatus = this.taskStatusMap.get(news.task_status_id)
       return taskStatus ? news.change && taskStatus.is_retake : false
     },
 
     hasDoneValue (news) {
-      const taskStatus = this.taskStatusMap[news.task_status_id]
+      const taskStatus = this.taskStatusMap.get(news.task_status_id)
       return taskStatus ? news.change && taskStatus.is_done : false
     },
 

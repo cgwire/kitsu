@@ -108,7 +108,7 @@
     v-if="nbSelectedTasks === 1"
   >
     <task-info
-      :task="Object.values(selectedTasks)[0]"
+      :task="selectedTasks.values().next().value"
     />
   </div>
 
@@ -463,10 +463,13 @@ export default {
     }
 
     if (
-      Object.keys(this.shotMap).length < 2 ||
+      this.shotMap.size < 2 ||
       (
         this.shotValidationColumns.length > 0 &&
-        !this.shotMap[Object.keys(this.shotMap)[0]].validations
+        (
+          !this.shotMap.get(this.shotMap.keys()[0]) ||
+          !this.shotMap.get(this.shotMap.keys()[0]).validations
+        )
       )
     ) {
       setTimeout(() => {
@@ -813,7 +816,7 @@ export default {
     },
 
     onDeleteAllTasksClicked (taskTypeId) {
-      const taskType = this.taskTypeMap[taskTypeId]
+      const taskType = this.taskTypeMap.get(taskTypeId)
       this.taskTypeForTaskDeletion = taskType
       this.deleteAllTasksLockText = taskType.name
       this.modals.isDeleteAllTasksDisplayed = true
@@ -933,7 +936,7 @@ export default {
           }
           this.shotValidationColumns
             .forEach((taskTypeId) => {
-              headers.push(this.taskTypeMap[taskTypeId].name)
+              headers.push(this.taskTypeMap.get(taskTypeId).name)
               headers.push('Assignations')
             })
           csv.buildCsvFile(name, [headers].concat(shotLines))

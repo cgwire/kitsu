@@ -300,7 +300,7 @@ export default {
     },
 
     lastProduction () {
-      let production = this.productionMap[this.lastProductionViewed]
+      let production = this.productionMap.get(this.lastProductionViewed)
       if (!production) {
         production = this.currentProduction
       }
@@ -562,7 +562,7 @@ export default {
 
     pushContextRoute (section) {
       const isAssetSection = this.assetSections.includes(section)
-      const production = this.productionMap[this.currentProductionId]
+      const production = this.productionMap.get(this.currentProductionId)
       const isTVShow = production.production_type === 'tvshow'
       let episodeId = this.currentEpisodeId
       if (!episodeId && isTVShow) {
@@ -615,7 +615,7 @@ export default {
       const isAssetSection = this.assetSections.includes(section)
       const isAssetEpisode =
         ['all', 'main'].includes(this.currentEpisodeId)
-      const production = this.productionMap[this.currentProductionId]
+      const production = this.productionMap.get(this.currentProductionId)
       if (!production) return
       const isTVShow = production.production_type === 'tvshow'
 

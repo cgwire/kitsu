@@ -19,7 +19,7 @@
           <div class="department-element" :key="departmentId"
             v-for="departmentId in form.departments" @click="removeDepartment(departmentId)">
             <department-name
-              :department="departmentMap[departmentId]"
+              :department="departmentMap.get(departmentId)"
             />
           </div>
           <div class="field">
@@ -108,12 +108,15 @@ export default {
 
   computed: {
     ...mapGetters([
-      'departments',
+      'departmentMap',
+      'departments'
     ]),
 
     selectableDepartments () {
       return this.departments.filter(departement => {
-        return this.form.departments.findIndex(selectedDepartment => selectedDepartment === departement.id) === -1
+        return this.form.departments.findIndex(
+          selectedDepartment => selectedDepartment === departement.id
+        ) === -1
       })
     },
 
@@ -123,14 +126,6 @@ export default {
       } else {
         return ''
       }
-    },
-
-    departmentMap () {
-      const departmentMap = {}
-      this.departments.forEach(department => {
-        departmentMap[department.id] = department
-      })
-      return departmentMap
     }
   },
 
@@ -156,7 +151,9 @@ export default {
     resetForm () {
       if (this.personToEdit) {
         this.form = {
-          departments: (this.personToEdit.departments) ? this.personToEdit.departments : []
+          departments: (this.personToEdit.departments)
+            ? this.personToEdit.departments
+            : []
         }
       } else {
         this.form = {

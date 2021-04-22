@@ -120,7 +120,7 @@ export default {
       return this.entity.preview_files
         ? Object
             .keys(this.entity.preview_files)
-            .map(id => this.taskTypeMap[id])
+            .map(id => this.taskTypeMap.get(id))
             .sort(firstBy('priority', 1).thenBy('name'))
             .map((taskType) => {
               return {

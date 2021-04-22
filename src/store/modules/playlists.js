@@ -37,7 +37,7 @@ import {
 
 const initialState = {
   playlists: [],
-  playlistMap: {}
+  playlistMap: new Map()
 }
 
 const state = { ...initialState }
@@ -222,10 +222,10 @@ const actions = {
 const mutations = {
   [LOAD_PLAYLISTS_END] (state, playlists) {
     state.playlists = playlists
-    state.playlistMap = {}
+    state.playlistMap = new Map()
     playlists.forEach(playlist => {
       if (!playlist.entities) playlist.entities = []
-      state.playlistMap[playlist.id] = playlist
+      state.playlistMap.set(playlist.id, playlist)
     })
   },
 
@@ -236,7 +236,7 @@ const mutations = {
   },
 
   [LOAD_PLAYLIST_END] (state, playlist) {
-    state.playlistMap[playlist.id].build_jobs = playlist.build_jobs
+    state.playlistMap.get(playlist.id).build_jobs = playlist.build_jobs
   },
 
   [EDIT_PLAYLIST_START] (state, data) {
@@ -246,12 +246,12 @@ const mutations = {
   },
 
   [EDIT_PLAYLIST_END] (state, newPlaylist) {
-    const playlist = state.playlistMap[newPlaylist.id]
+    const playlist = state.playlistMap.get(newPlaylist.id)
     if (playlist && playlist.id) {
       Object.assign(playlist, newPlaylist)
     } else {
       state.playlists = [newPlaylist].concat(state.playlists)
-      state.playlistMap[newPlaylist.id] = newPlaylist
+      state.playlistMap.set(newPlaylist.id, newPlaylist)
     }
   },
 
@@ -261,7 +261,7 @@ const mutations = {
   },
   [DELETE_PLAYLIST_END] (state, playlistToDelete) {
     state.playlists = removeModelFromList(state.playlists, playlistToDelete)
-    delete state.playlistMap[playlistToDelete.id]
+    state.playlistMap.delete(playlistToDelete.id)
   },
 
   [LOAD_ENTITY_PREVIEW_FILES_END] (state, { playlist, entity, previewFiles }) {
@@ -330,7 +330,7 @@ const mutations = {
   },
 
   [ADD_NEW_JOB] (state, job) {
-    const playlist = state.playlistMap[job.playlist_id]
+    const playlist = state.playlistMap.get(job.playlist_id)
     playlist.build_jobs = [{
       id: job.build_job_id,
       created_at: job.created_at,
@@ -340,7 +340,7 @@ const mutations = {
   },
 
   [MARK_JOB_AS_DONE] (state, job) {
-    const playlist = state.playlistMap[job.playlist_id]
+    const playlist = state.playlistMap.get(job.playlist_id)
     updateModelFromList(playlist.build_jobs, {
       id: job.build_job_id,
       status: 'succeeded'
@@ -348,7 +348,7 @@ const mutations = {
   },
 
   [REMOVE_BUILD_JOB] (state, job) {
-    const playlist = state.playlistMap[job.playlist_id]
+    const playlist = state.playlistMap.get(job.playlist_id)
     Vue.set(
       playlist, 'build_jobs', removeModelFromList(playlist.build_jobs, job)
     )
@@ -374,7 +374,7 @@ const mutations = {
     state.playlists = state.playlists.concat(playlists)
     playlists.forEach(playlist => {
       if (!playlist.entities) playlist.entities = []
-      state.playlistMap[playlist.id] = playlist
+      state.playlistMap.set(playlist.id, playlist)
     })
   },
 

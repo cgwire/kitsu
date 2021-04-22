@@ -18,7 +18,7 @@ export const getTaskPath = (
     route.name = 'episode-task'
     route.params.episode_id = task.episode_id || episode.id
   }
-  const taskType = taskTypeMap[task.task_type_id]
+  const taskType = taskTypeMap.get(task.task_type_id)
   route.params.type = taskType.for_shots ? 'shots' : 'assets'
   return route
 }

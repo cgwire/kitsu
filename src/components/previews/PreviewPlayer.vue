@@ -434,7 +434,7 @@ export default {
       default: () => []
     },
     taskTypeMap: {
-      type: Object,
+      type: Map,
       default: () => {}
     }
   },
@@ -620,10 +620,10 @@ export default {
         .filter((taskTypeId) => {
           const previewFiles = this.entityPreviewFiles[taskTypeId]
             .filter(p => ['mp4', 'png'].includes(p.extension))
-          return previewFiles.length > 0 && this.taskTypeMap[taskTypeId]
+          return previewFiles.length > 0 && this.taskTypeMap.get(taskTypeId)
         })
         .map(taskTypeId => {
-          const taskType = this.taskTypeMap[taskTypeId]
+          const taskType = this.taskTypeMap.get(taskTypeId)
           return {
             label: taskType.name,
             value: taskType.id

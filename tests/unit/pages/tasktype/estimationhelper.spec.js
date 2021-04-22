@@ -49,10 +49,10 @@ describe('EstimationHelper', () => {
         ],
         assetSearchText: (state) => state.assetSearchText,
         assetValidationColumns: () => ['task-type-1', 'task-type-2'],
-        assetMap: () => ({
+        assetMap: () => new Map(Object.entries({
           'asset-1': { id: 'asset-1', name: 'Lama'},
           'asset-2': { id: 'asset-2', name: 'Pingu'}
-        })
+        }))
       },
       mutations: {
         'CHANGE_SEARCH': (state, query) => state.assetSearchText = query
@@ -71,10 +71,10 @@ describe('EstimationHelper', () => {
         ],
         shotSearchText: () => '',
         shotValidationColumns: () => ['task-type-3', 'task-type-4'],
-        shotMap: () => ({
+        shotMap: () => new Map(Object.entries({
           'shot-1': { id: 'shot-1', name: 'SH01', nb_frames: 58 },
           'shot-2': { id: 'shot-2', name: 'SH02', nb_frames: 34 }
-        })
+        }))
       },
       actions: {}
     }
@@ -92,11 +92,11 @@ describe('EstimationHelper', () => {
           { id: 'person-2', name: 'James' },
           { id: 'person-3', name: 'Ema' }
         ],
-        personMap: () => ({
+        personMap: () => new Map(Object.entries({
           'person-1': { id: 'person-1', name: 'John' },
           'person-2': { id: 'person-2', name: 'James' },
           'person-3': { id: 'person-3', name: 'Ema' }
-        })
+        }))
       },
       actions: {}
     }
@@ -113,17 +113,17 @@ describe('EstimationHelper', () => {
           { id: 'task-status-2', short_name: 'WIP' },
           { id: 'task-status-3', short_name: 'Retake' }
         ],
-        taskTypeMap: () => ({
+        taskTypeMap: () => new Map(Object.entries({
           'task-type-1': { id: 'task-type-1', name: 'Modeling' },
           'task-type-2': { id: 'task-type-2', name: 'Rigging' },
           'task-type-3': { id: 'task-type-3', name: 'Layout' },
           'task-type-4': { id: 'task-type-4', name: 'Animation' }
-        }),
-        taskStatusMap: () => ({
+        })),
+        taskStatusMap: () => new Map(Object.entries({
           'task-status-1': { id: 'task-status-1', short_name: 'WFA' },
           'task-status-2': { id: 'task-status-2', short_name: 'WIP' },
           'task-status-3': { id: 'task-status-3', short_name: 'Retake' },
-        })
+        }))
       },
       actions: {}
     }

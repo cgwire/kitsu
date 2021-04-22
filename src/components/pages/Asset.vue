@@ -261,7 +261,6 @@ export default {
     ...mapGetters([
       'assetMap',
       'assetMetadataDescriptors',
-      'assetsPath',
       'currentEpisode',
       'currentProduction',
       'isTVShow',
@@ -288,6 +287,23 @@ export default {
       return this.currentAsset &&
         this.currentAsset.preview_file_id &&
         this.currentAsset.preview_file_id.length > 0
+    },
+
+    assetsPath () {
+      const route = {
+        name: 'assets',
+        params: {
+          production_id: this.currentProduction.id
+        },
+        query: {
+          search: ''
+        }
+      }
+      if (this.currentEpisode) {
+        route.name = 'episode-assets'
+        route.params.episode_id = this.currentEpisode.id
+      }
+      return route
     }
   },
 
@@ -307,7 +323,7 @@ export default {
     },
 
     getCurrentAsset () {
-      return this.assetMap[this.route.params.asset_id] || null
+      return this.assetMap.get(this.route.params.asset_id) || null
     },
 
     onEditClicked () {
