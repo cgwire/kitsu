@@ -14,7 +14,7 @@ describe('ComboboxTaskType', () => {
   beforeEach(() => {
     taskTypeStore = {
       getters: {
-        taskTypeMap: () => ({
+        taskTypeMap: () => new Map(Object.entries({
           'task-type-1': {
             id: 'task-type-1',
             name: 'Modeling',
@@ -25,7 +25,7 @@ describe('ComboboxTaskType', () => {
             name: 'Compositing',
             color: 'red'
           }
-        })
+        }))
       },
       actions: {
       }

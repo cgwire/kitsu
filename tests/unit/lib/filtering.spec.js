@@ -490,7 +490,7 @@ describe('lib/filtering', () => {
         tasks: ['task-5', 'task-6']
       }
     ]
-    const taskMap = {
+    const taskMap = new Map(Object.entries({
       'task-1': {
         id: 'task-1',
         assignees: [],
@@ -526,11 +526,11 @@ describe('lib/filtering', () => {
         assignees: [],
         task_status_id: 'task-status-2'
       }
-    }
-    const taskStatusMap = {
+    }))
+    const taskStatusMap = new Map(Object.entries({
       'task-status-1': { id: 'task-status-1', short_name: 'wip' },
       'task-status-2': { id: 'task-status-2', short_name: 'done' }
-    }
+    }))
     const descriptors = [
       {
         id: 'descriptor-1',

@@ -5,7 +5,7 @@ import {
 } from '../../../src/lib/stats'
 
 
-const taskMap = {
+const taskMap = new Map(Object.entries({
   'task-1': {
     id: 'task-1',
     entity_id: 'shot-1',
@@ -42,8 +42,8 @@ const taskMap = {
     task_status_id: 'task-status-2',
     task_type_id: 'task-type-2'
   }
-}
-const taskTypeMap = {
+}))
+const taskTypeMap = new Map(Object.entries({
   'task-type-1': {
     id: 'task-type-1',
     name: 'Layout'
@@ -52,8 +52,8 @@ const taskTypeMap = {
     id: 'task-type-2',
     name: 'Animation'
   }
-}
-const taskStatusMap = {
+}))
+const taskStatusMap = new Map(Object.entries({
   'task-status-1': {
     id: 'task-status-1',
     name: 'WIP',
@@ -78,7 +78,7 @@ const taskStatusMap = {
     is_retake: false,
     is_done: true
   }
-}
+}))
 const expectedStatResult = {
   all: {
     all: {
@@ -157,7 +157,7 @@ describe('lib/stats', () => {
 
   it('getChartData', () => {
     const sequence = { id: 'sequence-1' }
-    const taskType = taskTypeMap['task-type-1']
+    const taskType = taskTypeMap.get('task-type-1')
     let data = getChartData(expectedStatResult, sequence.id, taskType.id)
     expect(data).toEqual([ [ 'retake', 1, 'red' ], [ 'wip', 1, 'blue' ] ])
     data = getChartData(expectedStatResult, 'all', 'all')
@@ -166,7 +166,7 @@ describe('lib/stats', () => {
 
   it('getChartColors', () => {
     const sequence = { id: 'sequence-1' }
-    const taskType = taskTypeMap['task-type-1']
+    const taskType = taskTypeMap.get('task-type-1')
     let data = getChartColors(expectedStatResult, sequence.id, taskType.id)
     expect(data).toEqual([ 'red' , 'blue' ])
     data = getChartColors(expectedStatResult, 'all', 'all')

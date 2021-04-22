@@ -13,11 +13,11 @@ describe('Productions store', () => {
             { id: 'asset-type-2', name: 'Asset type 2' },
             { id: 'asset-type-3', name: 'Asset type 3' }
           ],
-          assetTypeMap: {
+          assetTypeMap: new Map(Object.entries({
             'asset-type-1': { id: 'asset-type-1', name: 'Asset type 1' },
             'asset-type-2': { id: 'asset-type-2', name: 'Asset type 2' },
             'asset-type-3': { id: 'asset-type-3', name: 'Asset type 3' }
-          }
+          }))
         },
         taskStatus: {
           taskStatus: [
@@ -25,11 +25,11 @@ describe('Productions store', () => {
             { id: 'task-status-2', name: 'Task status 2' },
             { id: 'task-status-3', name: 'Task status 3' }
           ],
-          taskStatusMap: {
+          taskStatusMap: new Map(Object.entries({
             'task-status-1': { id: 'task-status-1', name: 'Task status 1' },
             'task-status-2': { id: 'task-status-2', name: 'Task status 2' },
             'task-status-3': { id: 'task-status-3', name: 'Task status 3' }
-          }
+          }))
         },
         taskTypes: {
           taskTypes: [
@@ -37,11 +37,11 @@ describe('Productions store', () => {
             { id: 'task-type-2', name: 'Task type 2' },
             { id: 'task-type-3', name: 'Task type 3' }
           ],
-          taskTypeMap: {
+          taskTypeMap: new Map(Object.entries({
             'task-type-1': { id: 'task-type-1', name: 'Task type 1' },
             'task-type-2': { id: 'task-type-2', name: 'Task type 2' },
             'task-type-3': { id: 'task-type-3', name: 'Task type 3' }
-          }
+          }))
         },
         productions: {
           currentProduction: {
@@ -49,13 +49,13 @@ describe('Productions store', () => {
             name: 'Caminandes',
             task_types: []
           },
-          productionMap: {
+          productionMap: new Map(Object.entries({
             'production-1': {
               id: 'production-1',
               name: 'Caminandes',
               task_statuses: ['task-status-3', 'task-status-1']
             }
-          }
+          }))
         }
       }
     })

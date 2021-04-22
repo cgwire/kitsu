@@ -18,10 +18,10 @@ describe('Quota', () => {
       getters: {
         currentEpisode: () => ({}),
         isShotsLoading: () => false,
-        shotMap: () => ({
+        shotMap: () => new Map(Object.entries({
           '24ec56f9-0c00-43e5-9233-3dec2ee06a98': {},
           '32c5b3a2-eaa7-49b6-8f86-03f2b1c4b7bd': {}
-        })
+        }))
       },
       actions: {
         loadShots: jest.fn(),
@@ -43,11 +43,11 @@ describe('Quota', () => {
     }
     peopleStore = {
       getters: {
-        personMap: () => ({
+        personMap: () => new Map(Object.entries({
           'cd5f95f0-8293-4cf2-8220-6928b594ede7': {
             full_name: 'Alicia Cooper'
           }
-        })
+        }))
       },
       actions: {
       }
