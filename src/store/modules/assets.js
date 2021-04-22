@@ -162,7 +162,7 @@ const helpers = {
     validationColumns,
     asset
   ) {
-    const validations = {}
+    const validations = new Map()
     let timeSpent = 0
     let estimation = 0
     if (!assetTypeMap.get(asset.asset_type)) {
@@ -194,7 +194,7 @@ const helpers = {
       timeSpent += task.duration
       estimation += task.estimation
       taskIds.push(task.id)
-      validations[task.task_type_id] = task.id
+      validations.set(task.task_type_id, task.id)
       taskMap.set(task.id, task)
     })
 
@@ -615,7 +615,7 @@ const actions = {
       state.assetValidationColumns
         .forEach(validationColumn => {
           const task =
-            rootGetters.taskMap.get(asset.validations[validationColumn])
+            rootGetters.taskMap.get(asset.validations.get(validationColumn))
           if (task) {
             assetLine.push(task.task_status_short_name)
           } else {
@@ -645,8 +645,8 @@ const actions = {
     let taskIds = []
     if (selectionOnly) {
       taskIds = cache.result
-        .filter(a => a.validations[taskTypeId])
-        .map(a => a.validations[taskTypeId])
+        .filter(a => a.validations.get(taskTypeId))
+        .map(a => a.validations.get(taskTypeId))
     }
     return dispatch('deleteAllTasks', { projectId, taskTypeId, taskIds })
   }
@@ -767,7 +767,7 @@ const mutations = {
     asset
   }) {
     asset.tasks = sortTasks(asset.tasks, taskTypeMap)
-    asset.validations = {}
+    asset.validations = new Map()
     asset.production_id = asset.project_id
     asset.episode_id = asset.source_id
     helpers.populateAndRegisterAsset(
@@ -842,7 +842,7 @@ const mutations = {
       Object.assign(asset, newAsset)
       state.displayedAssets = sortAssets(state.displayedAssets)
     } else {
-      newAsset.validations = {}
+      newAsset.validations = new Map()
       newAsset.production_id = newAsset.project_id
       newAsset.episode_id = newAsset.source_id
       cache.assets.push(newAsset)
@@ -878,7 +878,7 @@ const mutations = {
       (asset) => asset.id === task.entity_id
     )
     if (asset) {
-      const validations = JSON.parse(JSON.stringify(asset.validations))
+      const validations = new Map(asset.validations)
       delete asset.validations
       Vue.set(asset, 'validations', validations)
 
@@ -1004,8 +1004,9 @@ const mutations = {
     if (asset && task) {
       task = helpers.populateTask(task, asset)
       asset.tasks.push(task.id)
-      if (!asset.validations) asset.validations = {}
-      Vue.set(asset.validations, task.task_type_id, task.id)
+      if (!asset.validations) asset.validations = new Map()
+      asset.validations.set(task.task_type_id, task.id)
+      Vue.set(asset, 'validations', new Map(asset.validations))
     }
   },
 
@@ -1014,10 +1015,7 @@ const mutations = {
       if (task) {
         const asset = state.assetMap.get(task.entity_id)
         if (asset) {
-          const validations = { ...asset.validations }
-          Vue.set(validations, task.task_type_id, task.id)
-          delete asset.validations
-          Vue.set(asset, 'validations', validations)
+          asset.validations.set(task.task_type_id, task.id)
         }
       }
     })

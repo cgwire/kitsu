@@ -147,7 +147,7 @@ export default {
     if (this.taskTest) {
       this.task = this.taskTest
     } else if (this.entity && this.column) {
-      this.task = this.taskMap.get(this.entity.validations[this.column.id])
+      this.task = this.taskMap.get(this.entity.validations.get(this.column.id))
     }
     this.changeStyleBasedOnSelected()
   },
@@ -328,7 +328,8 @@ export default {
       if (this.taskTest) {
         this.task = this.taskTest
       } else if (this.entity) {
-        this.task = this.taskMap.get(this.entity.validations[this.column.id])
+        this.task =
+          this.taskMap.get(this.entity.validations.get(this.column.id))
       }
     }
   }

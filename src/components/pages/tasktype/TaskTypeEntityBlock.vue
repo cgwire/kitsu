@@ -73,8 +73,8 @@ export default {
     ]),
 
     task () {
-      if (this.entity.validations[this.taskType.id]) {
-        return this.taskMap.get(this.entity.validations[this.taskType.id])
+      if (this.entity.validations.get(this.taskType.id)) {
+        return this.taskMap.get(this.entity.validations.get(this.taskType.id))
       } else {
         return null
       }

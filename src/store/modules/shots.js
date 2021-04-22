@@ -979,7 +979,7 @@ const actions = {
       state.shotValidationColumns
         .forEach(validationColumn => {
           const task = rootGetters.taskMap.get(
-            shot.validations[validationColumn]
+            shot.validations.get(validationColumn)
           )
           if (task) {
             shotLine.push(task.task_status_short_name)
@@ -1009,7 +1009,7 @@ const actions = {
     const quotas = {}
 
     cache.shots.forEach((shot) => {
-      const task = taskMap.get(shot.validations[taskTypeId])
+      const task = taskMap.get(shot.validations.get(taskTypeId))
       const isTaskFinished =
         task && taskStatusMap.get(task.task_status_id).is_done
       if (isTaskFinished) {
@@ -1053,7 +1053,7 @@ const actions = {
     })
 
     const shots = cache.shots.filter((shot) => {
-      const task = rootGetters.taskMap.get(shot.validations[taskTypeId])
+      const task = rootGetters.taskMap.get(shot.validations.get(taskTypeId))
       if (task) {
         const taskStatus = taskStatusMap.get(task.task_status_id)
         const endDateString = helpers.getTaskEndDate(task, detailLevel)
@@ -1092,8 +1092,8 @@ const actions = {
     let taskIds = []
     if (selectionOnly) {
       taskIds = cache.result
-        .filter(a => a.validations[taskTypeId])
-        .map(a => a.validations[taskTypeId])
+        .filter(a => a.validations.get(taskTypeId))
+        .map(a => a.validations.get(taskTypeId))
     }
     return dispatch('deleteAllTasks', { projectId, taskTypeId, taskIds })
   }
@@ -1160,28 +1160,27 @@ const mutations = {
     let isDescription = false
     let isTime = false
     let isEstimation = false
-    shots = sortShots(shots)
-    cache.shots = shots
-    cache.result = shots
-    cache.shotIndex = buildShotIndex(shots)
-
     state.shotMap = new Map()
-    shots.forEach((shot) => {
+    shots.forEach(shot => {
       const taskIds = []
-      const validations = {}
+      const validations = new Map()
       let timeSpent = 0
       let estimation = 0
+      const sequence = state.sequenceMap.get(shot.sequence_id)
+      const episode = state.episodeMap.get(sequence.parent_id)
+      shot.sequence_name = sequence.name
+      shot.episode_name = episode ? episode.name : ''
       shot.project_name = production.name
       shot.production_id = production.id
       shot.full_name = helpers.getShotName(shot)
-      shot.tasks.forEach((task) => {
+      shot.tasks.forEach(task => {
         helpers.populateTask(task, shot, production)
         timeSpent += task.duration
         estimation += task.estimation
         task.episode_id = shot.episode_id
 
         taskMap.set(task.id, task)
-        validations[task.task_type_id] = task.id
+        validations.set(task.task_type_id, task.id)
         taskIds.push(task.id)
 
         const taskType = taskTypeMap.get(task.task_type_id)
@@ -1209,7 +1208,11 @@ const mutations = {
 
       state.shotMap.set(shot.id, shot)
     })
-    console.log('ok shots', state.shotMap)
+    shots = sortShots(shots)
+    cache.shots = shots
+    cache.result = shots
+    cache.shotIndex = buildShotIndex(shots)
+
     const displayedShots = shots.slice(0, PAGE_SIZE)
     const filledColumns = getFilledColumns(displayedShots)
 
@@ -1456,7 +1459,7 @@ const mutations = {
     shot.preview_file_id = ''
 
     shot.tasks = []
-    shot.validations = {}
+    shot.validations = new Map()
     shot.data = {}
 
     cache.shots.push(shot)
@@ -1502,10 +1505,7 @@ const mutations = {
         const shot = state.shotMap.get(task.entity_id)
         if (shot) {
           helpers.populateTask(task, shot)
-          const validations = { ...shot.validations }
-          Vue.set(validations, task.task_type_id, task.id)
-          delete shot.validations
-          Vue.set(shot, 'validations', validations)
+          shot.validations.set(task.task_type_id, task.id)
           shot.tasks.push(task.id)
         }
       }
@@ -1628,8 +1628,8 @@ const mutations = {
       (shot) => shot.id === task.entity_id
     )
     if (shot) {
-      const validations = JSON.parse(JSON.stringify(shot.validations))
-      delete validations[task.task_type_id]
+      const validations = new Map(shot.validations)
+      validations.remove(task.task_type_id)
       delete shot.validations
       Vue.set(shot, 'validations', validations)
 
@@ -1768,7 +1768,7 @@ const mutations = {
     shot
   }) {
     const taskIds = []
-    const validations = {}
+    const validations = new Map()
     let timeSpent = 0
     let estimation = 0
     shot.project_name = production.name
@@ -1780,7 +1780,7 @@ const mutations = {
       task.episode_id = shot.episode_id
 
       taskMap.set(task.id, task)
-      validations[task.task_type_id] = task.id
+      validations.set(task.task_type_id, task.id)
       taskIds.push(task.id)
 
       if (task.assignees.length > 1) {

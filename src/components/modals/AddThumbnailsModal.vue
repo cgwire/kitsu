@@ -204,7 +204,7 @@ export default {
     addTaskInformation (form) {
       const filename = this.slugifyFilename(form)
       const entity = this.entityMap[filename]
-      const task = this.taskMap.get(entity.validations[this.taskTypeId])
+      const task = this.taskMap.get(entity.validations.get(this.taskTypeId))
       form.task = task
       return form
     },
@@ -226,7 +226,7 @@ export default {
         .filter((form) => {
           const filename = this.slugifyFilename(form)
           const asset = this.entityMap[filename]
-          return asset && asset.validations[this.taskTypeId]
+          return asset && asset.validations.get(this.taskTypeId)
         })
     },
 

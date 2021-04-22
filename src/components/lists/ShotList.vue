@@ -366,7 +366,10 @@
             :ref="`validation-${getIndex(i, k)}-${j}`"
             :column="taskTypeMap.get(columnId)"
             :entity="shot"
-            :task-test="taskMap.get(shot.validations[columnId])"
+            :task-test="taskMap.get(shot.validations
+                        ? shot.validations.get(columnId)
+                        : null
+            )"
             :minimized="hiddenColumns[columnId]"
             :selected="shotSelectionGrid[getIndex(i, k)][j]"
             :rowX="getIndex(i, k)"

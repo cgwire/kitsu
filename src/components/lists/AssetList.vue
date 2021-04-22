@@ -307,7 +307,7 @@
             :ref="'validation-' + getIndex(i, k) + '-' + j"
             :column="taskTypeMap.get(columnId)"
             :entity="asset"
-            :task-test="taskMap.get(asset.validations[columnId])"
+            :task-test="taskMap.get(asset.validations.get(columnId))"
             :selected="assetSelectionGrid[getIndex(i, k)][j]"
             :rowX="getIndex(i, k)"
             :columnY="j"
