@@ -75,15 +75,15 @@ import {
 } from '../mutation-types'
 
 const initialState = {
-  taskMap: {},
-  taskStatusMap: {},
+  taskMap: new Map(),
+  taskStatusMap: new Map(),
 
   taskStatuses: [],
   taskComments: {},
   taskPreviews: {},
   taskEntityPreviews: {},
-  selectedTasks: {},
-  selectedValidations: {},
+  selectedTasks: new Map(),
+  selectedValidations: new Map(),
   taskSearchQueries: [],
 
   nbSelectedTasks: 0,
@@ -109,7 +109,7 @@ const helpers = {
   },
 
   getTaskType (taskTypeId) {
-    return taskTypeStore.state.taskTypeMap[taskTypeId]
+    return taskTypeStore.state.taskTypeMap.get(taskTypeId)
   }
 }
 
@@ -252,8 +252,9 @@ const actions = {
     { commit, state },
     { type, projectId, callback }
   ) {
-    async.eachSeries(Object.keys(state.selectedValidations), (key, next) => {
-      const validationInfo = state.selectedValidations[key]
+    const selectedTaskIds = Array.from(state.selectedValidations.keys())
+    async.eachSeries(selectedTaskIds, (key, next) => {
+      const validationInfo = state.selectedValidations.get(key)
       const data = {
         entity_id: validationInfo.entity.id,
         task_type_id: validationInfo.column.id,
@@ -275,9 +276,9 @@ const actions = {
 
   deleteSelectedTasks ({ commit, state }) {
     return new Promise((resolve, reject) => {
-      const selectedTaskIds = Object.keys(state.selectedTasks)
+      const selectedTaskIds = Array.from(state.selectedTasks.keys())
       async.eachSeries(selectedTaskIds, (taskId, next) => {
-        const task = state.taskMap[taskId]
+        const task = state.taskMap.get(taskId)
         if (task) {
           tasksApi.deleteTask(task, (err) => {
             if (!err) commit(DELETE_TASK_END, task)
@@ -327,8 +328,8 @@ const actions = {
   }) {
     const tasksToChange = []
     const production = rootGetters.currentProduction
-    Object.keys(state.selectedTasks).forEach((taskId) => {
-      const task = state.taskMap[taskId]
+    Array.from(state.selectedTasks.keys()).forEach(taskId => {
+      const task = state.taskMap.get(taskId)
       const isChanged = task && (
         task.task_status_id !== taskStatusId ||
         (comment && comment.length > 0)
@@ -358,9 +359,10 @@ const actions = {
     { commit, state, rootGetters },
     { priority, callback }
   ) {
-    async.eachSeries(Object.keys(state.selectedTasks), (taskId, next) => {
-      const task = state.taskMap[taskId]
-      const taskType = rootGetters.taskTypeMap[task.task_type_id]
+    const selectedTaskIds = Array.from(state.selectedTasks.keys())
+    async.eachSeries(selectedTaskIds, (taskId, next) => {
+      const task = state.taskMap.get(taskId)
+      const taskType = rootGetters.taskTypeMap.get(task.task_type_id)
 
       if (task && task.priority !== priority) {
         tasksApi.updateTask(taskId, { priority })
@@ -388,7 +390,7 @@ const actions = {
   getTask ({ commit, rootGetters }, { taskId, callback }) {
     tasksApi.getTask(taskId, (err, task) => {
       if (!err) {
-        const taskType = rootGetters.taskTypeMap[task.task_type_id]
+        const taskType = rootGetters.taskTypeMap.get(task.task_type_id)
         commit(EDIT_TASK_END, { task, taskType })
       }
       if (callback) callback(err)
@@ -539,7 +541,7 @@ const actions = {
   },
 
   assignSelectedTasks ({ commit, state }, { personId, callback }) {
-    const selectedTaskIds = Object.keys(state.selectedTasks)
+    const selectedTaskIds = Array.from(state.selectedTasks.keys())
     tasksApi.assignTasks(personId, selectedTaskIds, (err) => {
       if (!err) commit(ASSIGN_TASKS, { selectedTaskIds, personId })
       if (callback) callback(err)
@@ -547,7 +549,7 @@ const actions = {
   },
 
   unassignSelectedTasks ({ commit, state }, { personId, callback }) {
-    const selectedTaskIds = Object.keys(state.selectedTasks)
+    const selectedTaskIds = Array.from(state.selectedTasks.keys())
     tasksApi.unassignTasks(selectedTaskIds, (err) => {
       if (!err) commit(UNASSIGN_TASKS, selectedTaskIds)
       if (callback) callback(err)
@@ -681,10 +683,10 @@ const mutations = {
     } else {
       task.entity_name = `${task.entity_type.name} / ${task.entity.name}`
     }
-    if (!state.taskMap[task.id]) {
-      state.taskMap[task.id] = task
+    if (!state.taskMap.get(task.id)) {
+      state.taskMap.set(task.id, task)
     } else {
-      Object.assign(state.taskMap[task.id], task)
+      Object.assign(state.taskMap.get(task.id), task)
     }
   },
 
@@ -727,14 +729,14 @@ const mutations = {
   [LOAD_TASK_STATUSES_END] (state, taskStatuses) {
     state.taskStatuses = sortByName(taskStatuses)
     state.taskStatuses.forEach((taskStatus) => {
-      state.taskStatusMap[taskStatus.id] = taskStatus
+      state.taskStatusMap.set(taskStatus.id, taskStatus)
     })
   },
 
   [LOAD_TASK_SUBSCRIBE_END] (state, { taskId, subscribed }) {},
 
   [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {
-    const task = state.taskMap[taskId]
+    const task = state.taskMap.get(taskId)
     if (comment.task_status === undefined) {
       const getTaskStatus = getters.getTaskStatus(state, getters)
       comment.task_status = getTaskStatus(comment.task_status_id)
@@ -767,13 +769,13 @@ const mutations = {
   [DELETE_TASK_END] (state, task) {
     state.taskComments[task.id] = undefined
     state.taskPreviews[task.id] = undefined
-    state.taskMap[task.id] = undefined
+    state.taskMap.delete(task.id)
     const validationKey = `${task.entity_id}-${task.task_type_id}`
-    state.selectedValidations[validationKey] = {
+    state.selectedValidations.set(validationKey, {
       entity: { id: task.entity_id },
       column: { id: task.task_type_id }
-    }
-    delete state.selectedTasks[task.id]
+    })
+    state.selectedTasks.delete(task.id)
   },
 
   [DELETE_COMMENT_END] (state, {
@@ -782,7 +784,7 @@ const mutations = {
     taskStatusMap,
     todoStatus
   }) {
-    const task = state.taskMap[taskId]
+    const task = state.taskMap.get(taskId)
     let comments = state.taskComments[taskId]
     const oldCommentIndex = comments.findIndex(c => c.id === commentId)
     const oldComment = comments.find(c => c.id === commentId)
@@ -806,7 +808,7 @@ const mutations = {
         if (pinnedCount < comments.length) {
           newStatusId = comments[pinnedCount].task_status_id
         }
-        newStatus = taskStatusMap[newStatusId]
+        newStatus = taskStatusMap.get(newStatusId)
       }
 
       if (task) {
@@ -825,7 +827,7 @@ const mutations = {
     Object.assign(oldComment, {
       text: comment.text,
       task_status_id: comment.task_status_id,
-      task_status: state.taskStatusMap[comment.task_status_id],
+      task_status: state.taskStatusMap.get(comment.task_status_id),
       checklist: checklist || []
     })
   },
@@ -918,80 +920,77 @@ const mutations = {
 
   [ADD_SELECTED_TASK] (state, validationInfo) {
     if (validationInfo.task) {
-      state.selectedTasks[validationInfo.task.id] = validationInfo.task
-      state.nbSelectedTasks = Object.keys(state.selectedTasks).length
+      state.selectedTasks.set(validationInfo.task.id, validationInfo.task)
+      state.nbSelectedTasks = state.selectedTasks.size
     } else {
       const taskTypeId = validationInfo.column.id
       const entityId = validationInfo.entity.id
       const validationKey = `${entityId}-${taskTypeId}`
-      state.selectedValidations[validationKey] = validationInfo
-      state.nbSelectedValidations =
-        Object.keys(state.selectedValidations).length
+      state.selectedValidations.set(validationKey, validationInfo)
+      state.nbSelectedValidations = state.selectedValidations.size
     }
   },
 
   [ADD_SELECTED_TASKS] (state, selection) {
-    const tmpSelectedTasks = JSON.parse(JSON.stringify(state.selectedTasks))
-    const tmpSelectedValidations =
-      JSON.parse(JSON.stringify(state.selectedValidations))
+    const tmpSelectedTasks = new Map(state.selectedTasks)
+    const tmpSelectedValidations = new Map(state.selectedValidations)
     let isValidationChanged = false
-    selection.forEach((validationInfo) => {
+    selection.forEach(validationInfo => {
       if (validationInfo.task) {
-        tmpSelectedTasks[validationInfo.task.id] = validationInfo.task
+        tmpSelectedTasks.set(validationInfo.task.id, validationInfo.task)
       } else {
         const taskTypeId = validationInfo.column.id
         const entityId = validationInfo.entity.id
         const validationKey = `${entityId}-${taskTypeId}`
-        tmpSelectedValidations[validationKey] = validationInfo
+        tmpSelectedValidations.set(validationKey, validationInfo)
         isValidationChanged = true
       }
     })
     state.selectedTasks = tmpSelectedTasks
-    state.nbSelectedTasks = Object.keys(state.selectedTasks).length
+    state.nbSelectedTasks = state.selectedTasks.size
     if (isValidationChanged) {
       state.selectedValidations = tmpSelectedValidations
-      state.nbSelectedValidations =
-        Object.keys(state.selectedValidations).length
+      state.nbSelectedValidations = state.selectedValidations.size
     }
   },
 
   [REMOVE_SELECTED_TASK] (state, validationInfo) {
     if (validationInfo.task) {
-      delete state.selectedTasks[validationInfo.task.id]
-      state.nbSelectedTasks = Object.keys(state.selectedTasks).length
+      state.selectedTasks.delete(validationInfo.task.id)
+      state.nbSelectedTasks = state.selectedTasks.size
     } else {
       const taskTypeId = validationInfo.column.id
       const entityId = validationInfo.entity.id
       const validationKey = `${entityId}-${taskTypeId}`
-      delete state.selectedValidations[validationKey]
-      state.nbSelectedValidations = Object.keys(state.selectedValidations).length
+      state.selectedValidations.delete(validationKey)
+      state.nbSelectedValidations = state.selectedValidations.size
     }
   },
 
   [CLEAR_SELECTED_TASKS] (state) {
-    state.selectedTasks = {}
+    state.selectedTasks = new Map()
     state.nbSelectedTasks = 0
-    state.selectedValidations = {}
+    state.selectedValidations = new Map()
     state.nbSelectedValidations = 0
   },
 
   [CREATE_TASKS_END] (state, tasks) {
     tasks.forEach((task) => {
-      state.taskMap[task.id] = task
+      state.taskMap.set(task.id, task)
     })
   },
 
   [NEW_TASK_END] (state, task) {
-    state.taskMap[task.id] = task
+    state.taskMap.set(task.id, task)
   },
 
   [EDIT_TASK_END] (state, { task }) {
-    const currentTask = state.taskMap[task.id]
+    const currentTask = state.taskMap.get(task.id)
     if (currentTask) {
-      Object.assign(state.taskMap[task.id], {
+      Object.assign(state.taskMap.get(task.id), {
         task_status_id: task.task_status_id,
         task_status_short_name:
-          state.taskStatusMap[task.task_status_id].short_name,
+          state.taskStatusMap.get(task.task_status_id).short_name,
         priority: task.priority,
         estimation: task.estimation,
         duration: task.duration,
@@ -1006,13 +1005,13 @@ const mutations = {
   },
 
   [EDIT_TASK_DATES] (state, { taskId, data }) {
-    const task = state.taskMap[taskId]
+    const task = state.taskMap.get(taskId)
     Object.assign(task, data)
   },
 
   [ASSIGN_TASKS] (state, { selectedTaskIds, personId }) {
     selectedTaskIds.forEach((taskId) => {
-      const task = state.taskMap[taskId]
+      const task = state.taskMap.get(taskId)
       if (task &&
           !task.assignees.find((assigneeId) => assigneeId === personId)) {
         task.assignees.push(personId)
@@ -1023,15 +1022,15 @@ const mutations = {
 
   [UNASSIGN_TASKS] (state, selectedTaskIds) {
     selectedTaskIds.forEach((taskId) => {
-      const task = state.taskMap[taskId]
+      const task = state.taskMap.get(taskId)
       task.assignees = []
       task.assigneesInfo = []
     })
   },
 
   [SET_PREVIEW] (state, { taskId, previewId }) {
-    if (state.taskMap[taskId]) {
-      state.taskMap[taskId].entity.preview_file_id = previewId
+    if (state.taskMap.get(taskId)) {
+      state.taskMap.get(taskId).entity.preview_file_id = previewId
     }
   },
 
@@ -1049,7 +1048,7 @@ const mutations = {
         const person = helpers.getPerson(task.last_comment.person_id)
         task.last_comment.person = person
       }
-      state.taskMap[task.id] = task
+      state.taskMap.set(task.id, task)
     })
   },
 
@@ -1059,7 +1058,7 @@ const mutations = {
         const person = helpers.getPerson(task.last_comment.person_id)
         task.last_comment.person = person
       }
-      state.taskMap[task.id] = task
+      state.taskMap.set(task.id, task)
     })
   },
 
@@ -1103,11 +1102,11 @@ const mutations = {
   },
 
   [CLEAR_ASSETS] (state) {
-    state.taskMap = {}
+    state.taskMap = new Map()
   },
 
   [CLEAR_SHOTS] (state) {
-    state.taskMap = {}
+    state.taskMap = new Map()
   },
 
   [SET_LAST_COMMENT_DRAFT] (state, lastCommentDraft) {

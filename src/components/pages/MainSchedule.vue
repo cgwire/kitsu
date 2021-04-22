@@ -173,7 +173,7 @@ export default {
       return scheduleItems.map((item) => {
         const startDate = getStartDateFromString(item.start_date)
         const endDate = getEndDateFromString(startDate, item.end_date)
-        const taskType = this.taskTypeMap[item.task_type_id]
+        const taskType = this.taskTypeMap.get(item.task_type_id)
 
         return {
           ...item,

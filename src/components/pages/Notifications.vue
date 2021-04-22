@@ -67,9 +67,9 @@
         <div class="notification-info flexrow">
         <people-avatar
           class="flexrow-item"
-          :person="personMap[notification.author_id]"
+          :person="personMap.get(notification.author_id)"
           :size="30"
-          v-if="personMap[notification.author_id]"
+          v-if="personMap.get(notification.author_id)"
         />
 
           <router-link
@@ -269,7 +269,7 @@ export default {
     },
 
     entityPath (notification) {
-      const taskType = this.taskTypeMap[notification.task_type_id]
+      const taskType = this.taskTypeMap.get(notification.task_type_id)
       const type = taskType.for_shots ? 'shot' : 'asset'
 
       const route = {
@@ -299,7 +299,7 @@ export default {
     },
 
     personName (notification) {
-      const person = this.personMap[notification.author_id]
+      const person = this.personMap.get(notification.author_id)
       return person ? person.full_name : ''
     },
 
@@ -314,7 +314,7 @@ export default {
 
     buildTaskTypeFromNotification (notification) {
       return {
-        ...this.taskTypeMap[notification.task_type_id],
+        ...this.taskTypeMap.get(notification.task_type_id),
         episode_id: notification.episode_id
       }
     },

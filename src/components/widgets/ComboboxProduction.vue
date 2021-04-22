@@ -97,7 +97,7 @@ export default {
 
     currentProduction () {
       if (this.value) {
-        return this.productionMap[this.value]
+        return this.productionMap.get(this.value)
       } else {
         return this.productionList[0]
       }

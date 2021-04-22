@@ -29,13 +29,13 @@
                 :to="taskTypePath(columnId)"
                 v-if="!isCurrentUserClient"
               >
-                {{ taskTypeMap[columnId].name }}
+                {{ taskTypeMap.get(columnId).name }}
               </router-link>
               <span
                 class="flexrow-item"
                 v-else
               >
-                {{ taskTypeMap[columnId].name }}
+                {{ taskTypeMap.get(columnId).name }}
               </span>
             </div>
           </th>

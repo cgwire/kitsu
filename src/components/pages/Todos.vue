@@ -119,7 +119,7 @@
     v-if="nbSelectedTasks === 1"
   >
     <task-info
-      :task="Object.values(selectedTasks)[0]"
+      :task="selectedTasks.values().next().value"
     />
   </div>
 </div>
@@ -202,7 +202,6 @@ export default {
       'isTodosLoadingError',
       'nbSelectedTasks',
       'selectedTasks',
-      'taskMap',
       'taskTypeMap',
       'todosSearchText',
       'timeSpentMap',
@@ -216,14 +215,14 @@ export default {
     loggableTodos () {
       return this.sortedTasks
         .filter((task) => {
-          return this.taskTypeMap[task.task_type_id].allow_timelog
+          return this.taskTypeMap.get(task.task_type_id).allow_timelog
         })
     },
 
     loggableDoneTasks () {
       return this.displayedDoneTasks
         .filter((task) => {
-          return this.taskTypeMap[task.task_type_id].allow_timelog
+          return this.taskTypeMap.get(task.task_type_id).allow_timelog
         })
     },
 

@@ -112,7 +112,7 @@ export default {
 
     currentStatus () {
       if (this.value) {
-        return this.taskStatusMap[this.value]
+        return this.taskStatusMap.get(this.value)
       } else {
         return this.taskStatusList[0]
       }

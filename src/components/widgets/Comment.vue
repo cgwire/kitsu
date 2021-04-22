@@ -57,7 +57,7 @@
         <div class="content">
           <p
             class="client-comment"
-            v-if="personMap[comment.person_id].role === 'client'"
+            v-if="personMap.get(comment.person_id).role === 'client'"
           >
             <span>
               {{ $t('comments.comment_from_client') }}
@@ -294,7 +294,6 @@ export default {
       'isDarkTheme',
       'user',
       'personMap',
-      'taskMap',
       'taskTypeMap',
       'taskStatusMap'
     ]),
@@ -337,7 +336,7 @@ export default {
         route.name = `episode-${route.name}`
         route.params.episode_id = this.task.entity.episode_id
       }
-      const taskType = this.taskTypeMap[this.task.task_type_id]
+      const taskType = this.taskTypeMap.get(this.task.task_type_id)
       route.params.type = taskType.for_shots ? 'shots' : 'assets'
       return route
     },
@@ -355,7 +354,7 @@ export default {
     },
 
     taskStatus () {
-      const status = this.taskStatusMap[this.comment.task_status.id]
+      const status = this.taskStatusMap.get(this.comment.task_status.id)
       return status || this.comment.task_status
     },
 
@@ -372,7 +371,7 @@ export default {
 
     isLikedBy () {
       const personList = this.comment.acknowledgements.map(
-        personId => this.personMap[personId]
+        personId => this.personMap.get(personId)
       )
       return sortByName(personList)
         .map(p => p.name)

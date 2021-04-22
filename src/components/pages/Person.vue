@@ -137,7 +137,7 @@
     v-if="nbSelectedTasks === 1"
   >
     <task-info
-      :task="Object.values(selectedTasks)[0]"
+      :task="selectedTasks.values().next().value"
     />
   </div>
 </div>
@@ -227,14 +227,14 @@ export default {
     loggablePersonTasks () {
       return this.displayedPersonTasks
         .filter((task) => {
-          return this.taskTypeMap[task.task_type_id].allow_timelog
+          return this.taskTypeMap.get(task.task_type_id).allow_timelog
         })
     },
 
     loggableDoneTasks () {
       return this.displayedPersonDoneTasks
         .filter((task) => {
-          return this.taskTypeMap[task.task_type_id].allow_timelog
+          return this.taskTypeMap.get(task.task_type_id).allow_timelog
         })
     },
 
@@ -300,7 +300,7 @@ export default {
     },
 
     loadPerson (personId) {
-      this.person = this.personMap[personId]
+      this.person = this.personMap.get(personId)
       this.isTasksLoading = true
       this.loadPersonTasks({
         personId: this.person.id,

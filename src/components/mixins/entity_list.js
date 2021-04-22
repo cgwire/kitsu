@@ -76,7 +76,7 @@ export const entityListMixin = {
     },
 
     getValidationStyle (columnId) {
-      const taskType = this.taskTypeMap[columnId]
+      const taskType = this.taskTypeMap.get(columnId)
       return {
         'border-left': `1px solid ${taskType.color}`,
         background: this.getBackground(taskType.color)
@@ -191,7 +191,7 @@ export const entityListMixin = {
       this.$emit('change-sort', {
         type: 'status',
         column: taskTypeId,
-        name: this.taskTypeMap[taskTypeId].name
+        name: this.taskTypeMap.get(taskTypeId).name
       })
       this.showHeaderMenu()
     },
@@ -204,8 +204,10 @@ export const entityListMixin = {
       entities.forEach((entity, i) => {
         selection.push({
           entity: entity,
-          column: this.taskTypeMap[this.lastHeaderMenuDisplayed],
-          task: this.taskMap[entity.validations[this.lastHeaderMenuDisplayed]],
+          column: this.taskTypeMap.get(this.lastHeaderMenuDisplayed),
+          task: this.taskMap.get(
+            entity.validations[this.lastHeaderMenuDisplayed]
+          ),
           x: i,
           y: this.lastHeaderMenuDisplayedIndexInGrid
         })

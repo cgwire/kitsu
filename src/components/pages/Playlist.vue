@@ -709,9 +709,9 @@ export default {
     convertEntityToPlaylistFormat (entityInfo) {
       let entity
       if (this.isAssetPlaylist) {
-        entity = this.assetMap[entityInfo.id]
+        entity = this.assetMap.get(entityInfo.id)
       } else {
-        entity = this.shotMap[entityInfo.id]
+        entity = this.shotMap.get(entityInfo.id)
       }
       if (entity) {
         const playlistEntity = {
@@ -744,7 +744,7 @@ export default {
 
     setCurrentPlaylist (callback) {
       const playlistId = this.$route.params.playlist_id
-      const playlist = this.playlistMap[playlistId]
+      const playlist = this.playlistMap.get(playlistId)
       if (playlist) {
         this.loading.playlist = true
         this.loadPlaylist({
@@ -832,7 +832,7 @@ export default {
     addSequence (sequenceShots) {
       if (sequenceShots.length > 0) {
         const sequenceId = sequenceShots[0].sequence_id
-        const shots = Object.values(this.shotMap)
+        const shots = this.shotMap.values()
           .filter(s => s.sequence_id === sequenceId)
           .sort(firstBy('name'))
           .reverse()
@@ -880,7 +880,7 @@ export default {
     addMovie () {
       this.loading.addMovie = true
       this.$options.silent = true
-      const shots = Object.values(this.shotMap)
+      const shots = this.shotMap.values()
       this.addEntities(shots.reverse(), () => {
         this.loading.addMovie = false
         this.$options.silent = false
@@ -1176,7 +1176,7 @@ export default {
   socket: {
     events: {
       'playlist:new' (eventData) {
-        if (!this.playlistMap[eventData.playlist_id]) {
+        if (!this.playlistMap.get(eventData.playlist_id)) {
           this.refreshPlaylist(eventData.playlist_id)
         }
       },

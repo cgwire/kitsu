@@ -52,8 +52,8 @@ export const sortTasks = (tasks, taskTypeMap) => {
         }
       })
       .thenBy((a, b) => {
-        const taskTypeA = taskTypeMap[a.task_type_id]
-        const taskTypeB = taskTypeMap[b.task_type_id]
+        const taskTypeA = taskTypeMap.get(a.task_type_id)
+        const taskTypeB = taskTypeMap.get(b.task_type_id)
         return taskTypeA.name.localeCompare(taskTypeB.name)
       })
       .thenBy((a, b) => {
@@ -113,8 +113,8 @@ export const sortByDate = (entries) => {
 
 export const sortValidationColumns = (columns, taskTypeMap) => {
   return columns.sort((a, b) => {
-    const taskTypeA = taskTypeMap[a]
-    const taskTypeB = taskTypeMap[b]
+    const taskTypeA = taskTypeMap.get(a)
+    const taskTypeB = taskTypeMap.get(b)
     if (taskTypeA.priority === taskTypeB.priority) {
       return taskTypeA.name.localeCompare(taskTypeB.name)
     } else if (taskTypeA.priority > taskTypeB.priority) {
@@ -194,8 +194,8 @@ const sortByTaskType = (taskMap, sortInfo) => (a, b) => {
   const taskB = b.validations[sortInfo.column]
   if (!taskA) return -1
   if (!taskB) return 1
-  const taskStatusA = taskMap[taskA].task_status_short_name
-  const taskStatusB = taskMap[taskB].task_status_short_name
+  const taskStatusA = taskMap.get(taskA).task_status_short_name
+  const taskStatusB = taskMap.get(taskB).task_status_short_name
   return taskStatusA.localeCompare(taskStatusB)
 }
 

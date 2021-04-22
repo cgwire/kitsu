@@ -48,13 +48,16 @@ export const getFilledColumns = (entries) => {
   const filledColumns = {}
   entries.forEach((entry) => {
     if (entry.validations) {
+      Array.from(entry.validations.keys()).forEach(taskTypeId => {
+        filledColumns[taskTypeId] = true
+      })
       Object.assign(
         filledColumns,
         entry.validations
       )
     } else {
       entry.tasks.forEach((task) => {
-        filledColumns[task.task_type_id] = task.id
+        filledColumns[task.task_type_id] = true
       })
     }
   })

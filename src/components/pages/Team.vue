@@ -62,7 +62,7 @@ export default {
 
     teamPersons () {
       return sortPeople(this.currentProduction.team
-        .map((personId) => this.personMap[personId]))
+        .map(personId => this.personMap.get(personId)))
     },
 
     unlistedPeople () {

@@ -24,7 +24,7 @@
         class="by-task-type-id"
         v-for="taskTypeId in Object.keys(projects[projectId])"
       >
-        <task-type-name :task-type="taskTypeMap[taskTypeId]" />
+        <task-type-name :task-type="taskTypeMap.get(taskTypeId)" />
 
         <div class="table-body">
           <table class="datatable">

@@ -361,8 +361,8 @@ export default {
     ]),
 
     currentTeam () {
-      const production = this.productionMap[this.task.project_id]
-      return production.team.map(id => this.personMap[id])
+      const production = this.productionMap.get(this.task.project_id)
+      return production.team.map(id => this.personMap.get(id))
     },
 
     title () {
@@ -404,7 +404,7 @@ export default {
     },
 
     currentTaskType () {
-      return this.task ? this.taskTypeMap[this.task.task_type_id] : null
+      return this.task ? this.taskTypeMap.get(this.task.task_type_id) : null
     },
 
     currentPreview () {
@@ -879,7 +879,7 @@ export default {
     onRemoteAcknowledge (eventData, type) {
       if (this.task) {
         const comment = this.getTaskComment(this.task.id, eventData.comment_id)
-        const user = this.personMap[eventData.person_id]
+        const user = this.personMap.get(eventData.person_id)
         if (comment && user) {
           if (this.user.id === user.id) {
             if (

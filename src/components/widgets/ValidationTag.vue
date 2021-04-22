@@ -80,7 +80,6 @@ export default {
       'currentProduction',
       'isDarkTheme',
       'isTVShow',
-      'taskMap',
       'taskStatusMap',
       'taskTypeMap',
       'isCurrentUserClient'
@@ -93,7 +92,7 @@ export default {
     taskStatus () {
       if (this.task) {
         const taskStatusId = this.task.task_status_id
-        return this.taskStatusMap ? this.taskStatusMap[taskStatusId] : {}
+        return this.taskStatusMap ? this.taskStatusMap.get(taskStatusId) : {}
       } else {
         return {}
       }
@@ -175,7 +174,7 @@ export default {
         route.params.episode_id = task.episode_id || this.currentEpisode.id
       }
 
-      const taskType = this.taskTypeMap[task.task_type_id]
+      const taskType = this.taskTypeMap.get(task.task_type_id)
       route.params.type = taskType.for_shots ? 'shots' : 'assets'
 
       return route

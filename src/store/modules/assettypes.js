@@ -13,7 +13,7 @@ import { sortByName } from '../../lib/sorting'
 
 const initialState = {
   assetTypes: [],
-  assetTypeMap: {}
+  assetTypeMap: new Map()
 }
 
 const state = { ...initialState }
@@ -92,9 +92,9 @@ const mutations = {
     state.isAssetTypesLoadingError = false
     state.assetTypes = assetTypes
     state.assetTypes = sortByName(state.assetTypes)
-    state.assetTypeMap = {}
+    state.assetTypeMap = new Map()
     state.assetTypes.forEach((assetType) => {
-      state.assetTypeMap[assetType.id] = assetType
+      state.assetTypeMap.set(assetType.id, assetType)
     })
   },
 
@@ -105,7 +105,7 @@ const mutations = {
       Object.assign(assetType, newAssetType)
     } else {
       state.assetTypes.push(newAssetType)
-      state.assetTypeMap[newAssetType.id] = newAssetType
+      state.assetTypeMap.set(newAssetType.id, newAssetType)
     }
     state.assetTypes = sortByName(state.assetTypes)
   },
@@ -117,7 +117,7 @@ const mutations = {
     if (assetTypeToDeleteIndex >= 0) {
       state.assetTypes.splice(assetTypeToDeleteIndex, 1)
     }
-    delete state.assetTypeMap[assetTypeToDelete.id]
+    state.assetTypeMap.delete(assetTypeToDelete.id)
   },
 
   [RESET_ALL] (state) {

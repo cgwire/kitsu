@@ -97,7 +97,7 @@ const helpers = {
   },
 
   getTaskStatus (taskStatusId) {
-    return taskStatusStore.state.taskStatusMap[taskStatusId]
+    return taskStatusStore.state.taskStatusMap.get(taskStatusId)
   },
 
   buildResult (state, {
@@ -124,6 +124,10 @@ const helpers = {
   }
 }
 
+const cache = {
+  peopleIndex: {}
+}
+
 const initialState = {
   organisation: {
     name: 'Kitsu',
@@ -136,8 +140,7 @@ const initialState = {
   displayedPeople: [],
   peopleSearchText: '',
   peopleSearchQueries: [],
-  peopleIndex: {},
-  personMap: {},
+  personMap: new Map(),
   isPeopleLoading: false,
   isPeopleLoadingError: true,
 
@@ -209,7 +212,7 @@ const getters = {
   personTaskSelectionGrid: state => state.personTaskSelectionGrid,
   personTasksScrollPosition: state => state.personTasksScrollPosition,
 
-  getPerson: (state, getters) => (id) => state.personMap[id],
+  getPerson: (state, getters) => (id) => state.personMap.get(id),
   getPersonOptions: state => state.people.map(
     (person) => {
       return {
@@ -569,7 +572,7 @@ const mutations = {
   [LOAD_PEOPLE_START] (state) {
     state.isPeopleLoading = true
     state.isPeopleLoadingError = false
-    state.personMap = {}
+    state.personMap = new Map()
   },
 
   [LOAD_PEOPLE_ERROR] (state) {
@@ -584,9 +587,9 @@ const mutations = {
     state.displayedPeople = state.people
     state.people.forEach((person) => {
       person = helpers.addAdditionalInformation(person)
-      state.personMap[person.id] = person
+      state.personMap.set(person.id, person)
     })
-    state.peopleIndex = buildNameIndex(state.people)
+    cache.peopleIndex = buildNameIndex(state.people)
 
     if (userFilters.people && userFilters.people.all) {
       state.peopleSearchQueries = userFilters.people.all
@@ -603,12 +606,12 @@ const mutations = {
       if (personToDeleteIndex >= 0) {
         state.people.splice(personToDeleteIndex, 1)
       }
-      delete state.personMap[person.id]
+      delete state.personMap.get(person.id)
     }
-    state.peopleIndex = buildNameIndex(state.people)
+    cache.peopleIndex = buildNameIndex(state.people)
     if (state.peopleSearchText) {
       const keywords = getKeyWords(state.peopleSearchText)
-      state.displayedPeople = indexSearch(state.peopleIndex, keywords)
+      state.displayedPeople = indexSearch(cache.peopleIndex, keywords)
     } else {
       state.displayedPeople = state.people
     }
@@ -623,18 +626,18 @@ const mutations = {
     )
     if (personToAdd.name) {
       if (personToEditIndex >= 0) {
-        state.personMap[personToAdd.id] = personToAdd
-        delete state.people[personToEditIndex]
-        state.people[personToEditIndex] = state.personMap[personToAdd.id]
-      } else if (!state.personMap[personToAdd.id]) {
+        state.personMap.set(personToAdd.id, personToAdd)
+        state.people.delete(personToEditIndex)
+        state.people[personToEditIndex] = state.personMap.get(personToAdd.id)
+      } else if (!state.personMap.get(personToAdd.id)) {
         state.people.push(personToAdd)
-        state.personMap[personToAdd.id] = personToAdd
+        state.personMap.set(personToAdd.id, personToAdd)
       }
       state.people = sortPeople(state.people)
-      state.peopleIndex = buildNameIndex(state.people)
+      cache.peopleIndex = buildNameIndex(state.people)
       if (state.peopleSearchText) {
         const keywords = getKeyWords(state.peopleSearchText)
-        state.displayedPeople = indexSearch(state.peopleIndex, keywords)
+        state.displayedPeople = indexSearch(cache.peopleIndex, keywords)
       } else {
         state.displayedPeople = state.people
       }
@@ -671,7 +674,7 @@ const mutations = {
   },
 
   [UPLOAD_AVATAR_END] (state, personId) {
-    const person = state.personMap[personId]
+    const person = state.personMap.get(personId)
     if (person) {
       const randomHash = Math.random().toString(36).substring(7)
       person.has_avatar = true
@@ -685,7 +688,7 @@ const mutations = {
     state,
     { personId, tasks, userFilters, taskTypeMap }
   ) {
-    state.person = state.personMap[personId]
+    state.person = state.personMap.get(personId)
 
     tasks.forEach(populateTask)
     tasks.forEach((task) => {
@@ -824,7 +827,7 @@ const mutations = {
 
   [USER_SAVE_PROFILE_SUCCESS] (state, form) {
     // On profile change we need to update the main list.
-    const person = state.personMap[form.id]
+    const person = state.personMap.get(form.id)
     if (person) {
       Object.assign(person, form)
       helpers.addAdditionalInformation(person)
@@ -837,6 +840,7 @@ const mutations = {
   },
 
   [RESET_ALL] (state, people) {
+    cache.peopleIndex = {}
     Object.assign(state, { ...initialState })
   },
 

@@ -44,8 +44,8 @@
           <td class="departments">
             <span class="departments-element" v-for="departmentId in entry.departments" :key="departmentId">
               <department-name
-                :department="departmentMap[departmentId]"
-                v-if="departmentMap[departmentId]"
+                :department="departmentMap.get(departmentId)"
+                v-if="departmentMap.get(departmentId)"
               />
             </span>
           </td>
@@ -77,8 +77,8 @@
           <td class="departments">
             <span class="departments-element" v-for="departmentId in entry.departments" :key="departmentId">
               <department-name
-                :department="departmentMap[departmentId]"
-                v-if="departmentMap[departmentId]"
+                :department="departmentMap.get(departmentId)"
+                v-if="departmentMap.get(departmentId)"
               />
             </span>
           </td>
@@ -133,20 +133,12 @@ export default {
 
   computed: {
     ...mapGetters([
-      'departments',
+      'departmentMap',
       'isCurrentUserAdmin'
     ]),
 
     activePeople () {
       return this.entries.filter(person => person.active)
-    },
-
-    departmentMap () {
-      const departmentMap = {}
-      this.departments.forEach(department => {
-        departmentMap[department.id] = department
-      })
-      return departmentMap
     },
 
     unactivePeople () {

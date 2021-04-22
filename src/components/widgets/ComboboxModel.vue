@@ -59,7 +59,7 @@ export default {
   methods: {
     emitValue (value) {
       this.currentModelId = value
-      const model = this.modelMap[this.currentModelId]
+      const model = this.modelMap.get(this.currentModelId)
       this.$emit('input', model)
     },
 

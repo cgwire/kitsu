@@ -11,8 +11,8 @@ export const getTaskTypeStyle = (task) => {
 export const renderComment = (input, mentions, personMap) => {
   let compiled = marked(input || '')
   if (mentions) {
-    mentions.forEach((personId) => {
-      const person = personMap[personId]
+    mentions.forEach(personId => {
+      const person = personMap.get(personId)
       compiled = compiled.replace(
         `@${person.full_name}`,
         `<a class="mention" href="/people/${person.id}">@${person.full_name}</a>`
