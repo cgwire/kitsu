@@ -125,7 +125,7 @@ export const sortValidationColumns = (columns, taskTypeMap) => {
   })
 }
 
-export const sortScheduleItems = (scheduleItems, taskTypeMap) => {
+export const sortScheduleItems = (scheduleItems) => {
   return scheduleItems.sort(
     firstBy('for_shots')
       .thenBy('priority')
@@ -137,7 +137,6 @@ export const sortScheduleItems = (scheduleItems, taskTypeMap) => {
 export const sortAssetResult = (
   result,
   sorting,
-  taskStatusMap,
   taskTypeMap,
   taskMap
 ) => {
@@ -160,7 +159,6 @@ export const sortAssetResult = (
 export const sortShotResult = (
   result,
   sorting,
-  taskStatusMap,
   taskTypeMap,
   taskMap
 ) => {

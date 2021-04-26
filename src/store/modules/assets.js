@@ -237,7 +237,6 @@ const helpers = {
     result = sortAssetResult(
       result,
       sorting,
-      taskStatusMap,
       taskTypeMap,
       taskMap
     )

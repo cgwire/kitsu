@@ -206,7 +206,7 @@ export default {
             }
           })
           this.scheduleItems =
-            sortScheduleItems(scheduleItems, this.taskTypeMap)
+            sortScheduleItems(scheduleItems)
           this.loading.schedule = false
         })
         .then(this.loadMilestones)
