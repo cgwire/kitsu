@@ -286,7 +286,6 @@ const helpers = {
     result = sortShotResult(
       result,
       sorting,
-      taskStatusMap,
       taskTypeMap,
       taskMap
     )
