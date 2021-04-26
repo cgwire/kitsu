@@ -1,22 +1,28 @@
 import moment from 'moment'
 import {
+  addBusinessDays,
+  daysToMinutes,
   formatDate,
+  formatFullDate,
   formatSimpleDate,
   getDayRange,
+  getDatesFromEndDate,
+  getDatesFromStartDate,
   getEndDateFromString,
   getFirstStartDate,
   getLastEndDate,
   getMonthRange,
   getStartDateFromString,
   getWeekRange,
+  minutesToDays,
   monthToString,
   parseDate,
   parseSimpleDate,
-  range
-} from '../../../src/lib/time'
+  range,
+  removeBusinessDays,
+} from '@/lib/time'
 
 describe('time', () => {
-
   test('range', () => {
     expect(range(1, 10)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     expect(range(1, -1)).toEqual([])
@@ -45,6 +51,11 @@ describe('time', () => {
   test('formatDate', () => {
     const dateString = formatDate(new Date('2019-09-01T08:23:12Z'))
     expect(dateString).toEqual('2019-09-01 08:23')
+  })
+
+  test('formatFullDate', () => {
+    const dateString = formatFullDate(new Date('2019-09-01T08:23:12Z'))
+    expect(dateString).toEqual('2019-09-01 08:23:12')
   })
 
   test('monthToString', () => {
@@ -110,17 +121,84 @@ describe('time', () => {
     ).toEqual('2019-10-01')
   })
 
-  test.skip('getDatesFromStartDate', () => {
+  test('getDatesFromStartDate', () => {
+    const startDate = parseSimpleDate('2019-10-01')
+    const farStartDate = parseSimpleDate('2020-10-01')
+    const dueDate = parseSimpleDate('2020-01-31')
+    expect(getDatesFromStartDate(startDate, dueDate, 0)).toEqual({
+      start_date: '2019-10-01',
+      due_date: '2020-01-31'
+    })
+    expect(getDatesFromStartDate(farStartDate, dueDate, 0)).toEqual({
+      start_date: '2020-10-01',
+      due_date: '2020-10-01'
+    })
+    expect(getDatesFromStartDate(null, dueDate, 0)).toEqual({
+      start_date: null,
+      due_date: '2020-01-31'
+    })
+    expect(getDatesFromStartDate(startDate, null, 0)).toEqual({
+      start_date: '2019-10-01',
+      due_date: null
+    })
+    expect(getDatesFromStartDate(startDate, null, 1)).toEqual({
+      start_date: '2019-10-01',
+      due_date: '2019-10-01'
+    })
+    expect(getDatesFromStartDate(startDate, null, 7)).toEqual({
+      start_date: '2019-10-01', // tuesday
+      due_date: '2019-10-09' // a week later + 2 days (weekend)
+    })
   })
-  test.skip('getDatesFromEndDate', () => {
+  test('getDatesFromEndDate', () => {
+    const startDate = parseSimpleDate('2019-10-01')
+    const farStartDate = parseSimpleDate('2020-10-01')
+    const dueDate = parseSimpleDate('2020-01-31')
+    expect(getDatesFromEndDate(startDate, dueDate, 0)).toEqual({
+      start_date: '2019-10-01',
+      due_date: '2020-01-31'
+    })
+    expect(getDatesFromEndDate(farStartDate, dueDate, 0)).toEqual({
+      start_date: '2020-01-31',
+      due_date: '2020-01-31'
+    })
+    expect(getDatesFromEndDate(null, dueDate, 0)).toEqual({
+      start_date: null,
+      due_date: '2020-01-31'
+    })
+    expect(getDatesFromEndDate(startDate, null, 0)).toEqual({
+      start_date: '2019-10-01',
+      due_date: null
+    })
+    expect(getDatesFromEndDate(null, dueDate, 1)).toEqual({
+      start_date: '2020-01-31',
+      due_date: '2020-01-31'
+    })
+    expect(getDatesFromEndDate(null, dueDate, 7)).toEqual({
+      start_date: '2020-01-23',
+      due_date: '2020-01-31'
+    })
   })
-  test.skip('addBusinessDays', () => {
+  test('addBusinessDays', () => {
+    const startDate = parseSimpleDate('2019-10-01') // tuesday
+    expect(formatSimpleDate(addBusinessDays(startDate, 0))).toEqual('2019-10-01')
+    expect(formatSimpleDate(addBusinessDays(startDate, 1))).toEqual('2019-10-02') // wednesday
+    expect(formatSimpleDate(addBusinessDays(startDate, 2))).toEqual('2019-10-03') // thursday
+    expect(formatSimpleDate(addBusinessDays(startDate, 3))).toEqual('2019-10-04') // friday
+    expect(formatSimpleDate(addBusinessDays(startDate, 4))).toEqual('2019-10-07') // next monday
   })
-  test.skip('removeBusinessDays', () => {
+  test('removeBusinessDays', () => {
+    const startDate = parseSimpleDate('2019-10-07')
+    expect(formatSimpleDate(removeBusinessDays(startDate, 0))).toEqual('2019-10-07')
+    expect(formatSimpleDate(removeBusinessDays(startDate, 1))).toEqual('2019-10-04')
+    expect(formatSimpleDate(removeBusinessDays(startDate, 2))).toEqual('2019-10-03')
+    expect(formatSimpleDate(removeBusinessDays(startDate, 3))).toEqual('2019-10-02')
+    expect(formatSimpleDate(removeBusinessDays(startDate, 4))).toEqual('2019-10-01')
   })
-  test.skip('daysToMinutes', () => {
+  test('daysToMinutes', () => {
+    expect(daysToMinutes({ hours_by_day: 7 }, 8)).toEqual(7 * 8 * 60)
   })
-  test.skip('minutesToDays', () => {
+  test('minutesToDays', () => {
+    expect(minutesToDays({ hours_by_day: 7 }, 7 * 8 * 60)).toEqual(8)
   })
-
 })
