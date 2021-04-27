@@ -467,8 +467,8 @@ export default {
       (
         this.shotValidationColumns.length > 0 &&
         (
-          !this.shotMap.get(this.shotMap.keys()[0]) ||
-          !this.shotMap.get(this.shotMap.keys()[0]).validations
+          !this.shotMap.get(this.shotMap.keys().next().value) ||
+          !this.shotMap.get(this.shotMap.keys().next().value).validations
         )
       )
     ) {

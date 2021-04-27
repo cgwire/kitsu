@@ -383,10 +383,10 @@ export default {
     }
 
     if (
-      Object.keys(this.assetMap).length < 2 ||
+      this.assetMap.size < 2 ||
       (
         this.assetValidationColumns.length > 0 &&
-        !this.assetMap.get(this.assetMap.keys()[0]).validations
+        !this.assetMap.get(this.assetMap.keys().next().value).validations
       )
     ) {
       setTimeout(() => {
