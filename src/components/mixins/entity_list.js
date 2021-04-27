@@ -197,6 +197,7 @@ export const entityListMixin = {
     },
 
     onSelectColumn () {
+      const taskTypeId = this.lastHeaderMenuDisplayed
       const selection = []
       const entities = this.assetMap
         ? assetStore.cache.result
@@ -204,10 +205,8 @@ export const entityListMixin = {
       entities.forEach((entity, i) => {
         selection.push({
           entity: entity,
-          column: this.taskTypeMap.get(this.lastHeaderMenuDisplayed),
-          task: this.taskMap.get(
-            entity.validations[this.lastHeaderMenuDisplayed]
-          ),
+          column: this.taskTypeMap.get(taskTypeId),
+          task: this.taskMap.get(entity.validations.get(taskTypeId)),
           x: i,
           y: this.lastHeaderMenuDisplayedIndexInGrid
         })
