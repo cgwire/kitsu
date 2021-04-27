@@ -267,8 +267,8 @@ const helpers = {
     persons,
     taskMap
   }) {
-    const taskTypes = Object.values(taskTypeMap)
-    const taskStatuses = Object.values(taskStatusMap)
+    const taskTypes = Array.from(taskTypeMap.values())
+    const taskStatuses = Array.from(taskStatusMap.values())
 
     const query = shotSearch
     const keywords = getKeyWords(query) || []
@@ -1378,10 +1378,10 @@ const mutations = {
     }
 
     if (!newShot.data) newShot.data = {}
-    if (newShot.data.fps) state.isFps = true
-    if (newShot.nb_frames) state.isFrames = true
-    if (newShot.data.frame_in) state.isFrameIn = true
-    if (newShot.data.frame_out) state.isFrameOut = true
+    if (newShot.data.fps && !state.isFps) state.isFps = true
+    if (newShot.nb_frames && !state.isFrames) state.isFrames = true
+    if (newShot.data.frame_in && !state.isFrameIn) state.isFrameIn = true
+    if (newShot.data.frame_out && !state.isFrameOut) state.isFrameOut = true
     if (shot.description && !state.isShotDescription) {
       state.isShotDescription = true
     }

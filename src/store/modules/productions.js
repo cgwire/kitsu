@@ -444,34 +444,31 @@ const actions = {
   },
 
   refreshMetadataDescriptor ({ commit, state }, descriptorId) {
-    return new Promise((resolve, reject) => {
-      return productionsApi.getMetadataDescriptor(
-        state.currentProduction.id,
-        descriptorId
-      )
-        .then((descriptor) => {
-          const descriptorMap = {}
-          state.openProductions.forEach((production) => {
-            if (!production.descriptors) Vue.set(production, 'descriptors', [])
-            production.descriptors.forEach((desc) => {
-              descriptorMap.set(desc.id, desc)
-            })
+    return productionsApi.getMetadataDescriptor(
+      state.currentProduction.id,
+      descriptorId
+    )
+      .then(descriptor => {
+        const descriptorMap = new Map()
+        state.openProductions.forEach(production => {
+          if (!production.descriptors) Vue.set(production, 'descriptors', [])
+          production.descriptors.forEach(desc => {
+            descriptorMap.set(desc.id, desc)
           })
-          if (!descriptorMap.get(descriptor.id)) {
-            commit(ADD_METADATA_DESCRIPTOR_END, {
-              production: state.productionMap.get(descriptor.project_id),
-              descriptor
-            })
-          } else {
-            commit(UPDATE_METADATA_DESCRIPTOR_END, {
-              production: state.productionMap.get(descriptor.project_id),
-              descriptor
-            })
-          }
-          resolve()
         })
-        .catch(reject)
-    })
+        if (!descriptorMap.get(descriptor.id)) {
+          commit(ADD_METADATA_DESCRIPTOR_END, {
+            production: state.productionMap.get(descriptor.project_id),
+            descriptor
+          })
+        } else {
+          commit(UPDATE_METADATA_DESCRIPTOR_END, {
+            production: state.productionMap.get(descriptor.project_id),
+            descriptor
+          })
+        }
+        return Promise.resolve()
+      })
   }
 }
 
