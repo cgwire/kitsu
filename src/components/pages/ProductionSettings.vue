@@ -85,7 +85,10 @@
     </div>
 
     <div class="tab" v-show="isActiveTab('taskStatus')">
-      <div class="flexrow mt1 mb1 add-task-status" v-if="!isEmpty(remainingTaskStatuses)">
+      <div
+        class="flexrow mt1 mb1 add-task-status"
+        v-if="!isEmpty(remainingTaskStatuses)"
+      >
         <combobox-status
           class="flexrow-item selector"
           :task-status-list="remainingTaskStatuses"
@@ -107,12 +110,12 @@
       <table class="datatable" v-else>
         <thead>
           <tr>
-            <th class="th-name">{{$t('task_status.fields.name')}}</th>
-            <th class="th-short-name">{{$t('task_status.fields.short_name')}}</th>
-            <th class="th-bool">{{$t('task_status.fields.is_done')}}</th>
-            <th class="th-bool">{{$t('task_status.fields.is_retake')}}</th>
-            <th class="th-bool">{{$t('task_status.fields.is_artist_allowed')}}</th>
-            <th class="th-bool">{{$t('task_status.fields.is_client_allowed')}}</th>
+            <th class="th-name">{{ $t('task_status.fields.name') }}</th>
+            <th class="th-short-name">{{ $t('task_status.fields.short_name') }}</th>
+            <th class="th-bool">{{ $t('task_status.fields.is_done') }}</th>
+            <th class="th-bool">{{ $t('task_status.fields.is_retake') }}</th>
+            <th class="th-bool">{{ $t('task_status.fields.is_artist_allowed') }}</th>
+            <th class="th-bool">{{ $t('task_status.fields.is_client_allowed') }}</th>
           </tr>
         </thead>
         <tbody class="datatable-body">
@@ -131,10 +134,10 @@
                   :task="{ task_status_id: taskStatus.id }"
                 />
               </td>
-              <td>{{getBooleanTranslation(taskStatus.is_done)}}</td>
-              <td>{{getBooleanTranslation(taskStatus.is_retake)}}</td>
-              <td>{{getBooleanTranslation(taskStatus.is_artist_allowed)}}</td>
-              <td>{{getBooleanTranslation(taskStatus.is_client_allowed)}}</td>
+              <td>{{ getBooleanTranslation(taskStatus.is_done) }}</td>
+              <td>{{ getBooleanTranslation(taskStatus.is_retake) }}</td>
+              <td>{{ getBooleanTranslation(taskStatus.is_artist_allowed) }}</td>
+              <td>{{ getBooleanTranslation(taskStatus.is_client_allowed) }}</td>
               <td>
                 <button
                   class="button"

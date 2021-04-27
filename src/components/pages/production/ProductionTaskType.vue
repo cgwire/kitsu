@@ -8,7 +8,8 @@
   />
   <td class="start-date">
    <date-field
-    v-model="startDate"
+      :disabled-dates="productionTimeRange"
+      v-model="startDate"
    />
   </td>
   <td class="end-date">
@@ -65,7 +66,16 @@ export default {
 
   computed: {
     ...mapGetters([
-    ])
+      'currentProduction'
+    ]),
+
+    productionTimeRange () {
+      const dates = {
+        to: parseDate(this.currentProduction.start_date).toDate(),
+        from: parseDate(this.currentProduction.end_date).toDate()
+      }
+      return dates
+    }
   },
 
   mounted () {

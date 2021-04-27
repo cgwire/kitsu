@@ -34,36 +34,42 @@
         v-for="(taskListObject, index) in [assetTaskTypes, shotTaskTypes]"
         v-else
       >
-        <table
-          class="datatable list"
-          v-if="taskListObject.list.length > 0"
+        <div
           :key="index"
         >
-          <thead>
-            <tr>
-              <th>
-                {{ taskListObject.title }}
-              </th>
-              <th class="start-date">
-                {{ $t('productions.fields.start_date') }}
-              </th>
-              <th class="end-date">
-                {{ $t('productions.fields.end_date') }}
-              </th>
-              <th class="remove"></th>
-            </tr>
-          </thead>
-          <tbody class="datatable-body">
-            <production-task-type
-              :key="taskTypeData.taskType.id"
-              :task-type="taskTypeData.taskType"
-              :schedule-item="taskTypeData.scheduleItem"
-              @date-changed="onDateChanged"
-              @remove="removeTaskType"
-              v-for="taskTypeData in taskListObject.list"
-            />
-          </tbody>
-        </table>
+          <h2 class="section-title">
+            {{ taskListObject.title }}
+          </h2>
+          <table
+            class="datatable list"
+            v-if="taskListObject.list.length > 0"
+          >
+            <thead>
+              <tr>
+                <th class="name">
+                  {{ $t('productions.fields.name') }}
+                </th>
+                <th class="start-date">
+                  {{ $t('productions.fields.start_date') }}
+                </th>
+                <th class="end-date">
+                  {{ $t('productions.fields.end_date') }}
+                </th>
+                <th class="remove"></th>
+              </tr>
+            </thead>
+            <tbody class="datatable-body">
+              <production-task-type
+                :key="taskTypeData.taskType.id"
+                :task-type="taskTypeData.taskType"
+                :schedule-item="taskTypeData.scheduleItem"
+                @date-changed="onDateChanged"
+                @remove="removeTaskType"
+                v-for="taskTypeData in taskListObject.list"
+              />
+            </tbody>
+          </table>
+        </div>
       </template>
     </div>
 
@@ -87,7 +93,7 @@
 <script>
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
-import { sortByName } from '@/lib/sorting'
+import { sortByName, sortTaskTypes } from '@/lib/sorting'
 import { formatFullDate } from '@/lib/time'
 
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
@@ -158,7 +164,7 @@ export default {
       }
     */
     assetTaskTypes () {
-      const list = this.productionTaskTypes
+      const list = sortTaskTypes([...this.productionTaskTypes])
         .filter(t => !t.for_shots)
         .map(taskType => {
           return {
@@ -181,7 +187,7 @@ export default {
         linked scheduleItem }
     */
     shotTaskTypes () {
-      const list = this.productionTaskTypes
+      const list = sortTaskTypes([...this.productionTaskTypes])
         .filter(t => t.for_shots)
         .map(taskType => {
           return {
@@ -348,5 +354,13 @@ td /deep/ p.control.flexrow {
 
 .field {
   margin-bottom: 0;
+}
+
+.section-title {
+  color: $grey;
+  font-size: 1.2em;
+  margin-bottom: 1em;
+  margin-top: 2em;
+  text-transform: uppercase;
 }
 </style>
