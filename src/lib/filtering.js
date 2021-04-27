@@ -85,7 +85,7 @@ const applyFiltersFunctions = {
   },
 
   status (entry, filter, taskMap) {
-    const task = taskMap.get(entry.validations[filter.taskType.id])
+    const task = taskMap.get(entry.validations.get(filter.taskType.id))
     let isOk = true
     isOk = task && filter.taskStatuses.includes(task.task_status_id)
     if (filter.excluding) isOk = !isOk

@@ -37,7 +37,7 @@ export const buildTaskTypeIndex = (taskTypes) => {
  */
 export const buildTaskStatusIndex = (taskStatuses) => {
   const taskStatusShortNameIndex = {}
-  taskStatuses.forEach((taskStatus) => {
+  taskStatuses.forEach(taskStatus => {
     const shortName = taskStatus.short_name.toLowerCase()
     taskStatusShortNameIndex[shortName] = taskStatus
   })
