@@ -2,13 +2,10 @@ import {
   applyFilters,
   getKeyWords,
   getExcludingKeyWords,
-  getFilters,
-  buildTaskTypeIndex
-} from '../../../src/lib/filtering'
-
+  getFilters
+} from '@/lib/filtering'
 
 describe('lib/filtering', () => {
-
   describe('getKeyWords', () => {
     it('classic query', () => {
       const keyWords = getKeyWords(
@@ -53,10 +50,10 @@ describe('lib/filtering', () => {
 
   describe('getFilters', () => {
     const entryIndex = {
-      'props': [
-        {id: 'asset-1', data: {family: 'big'}},
-        {id: 'asset-2', data: {family: 'small'}},
-        {id: 'asset-3', data: {family: 'small'}},
+      props: [
+        { id: 'asset-1', data: { family: 'big' } },
+        { id: 'asset-2', data: { family: 'small' } },
+        { id: 'asset-3', data: { family: 'small' } }
       ]
     }
     const taskTypes = [
@@ -117,7 +114,7 @@ describe('lib/filtering', () => {
         persons,
         query: 'modeling=wip'
       })
-      expect(filters.length).toEqual(1)
+      expect(filters).toHaveLength(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
       expect(filter.taskStatuses[0]).toEqual('task-status-1')
@@ -135,7 +132,7 @@ describe('lib/filtering', () => {
         persons,
         query: 'mode=wip'
       })
-      expect(filters.length).toEqual(1)
+      expect(filters).toHaveLength(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
       expect(filter.taskStatuses[0]).toEqual('task-status-1')
@@ -151,7 +148,7 @@ describe('lib/filtering', () => {
         persons,
         query: '[modeling]=[wip,wfa]'
       })
-      expect(filters.length).toEqual(1)
+      expect(filters).toHaveLength(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
       expect(filter.taskStatuses[0]).toEqual('task-status-1')
@@ -168,7 +165,7 @@ describe('lib/filtering', () => {
         persons,
         query: '[modeling facial]=wip'
       })
-      expect(filters.length).toEqual(1)
+      expect(filters).toHaveLength(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[2])
       expect(filter.taskStatuses[0]).toEqual('task-status-1')
@@ -184,7 +181,7 @@ describe('lib/filtering', () => {
         persons,
         query: 'compo=wip'
       })
-      expect(filters.length).toEqual(0)
+      expect(filters).toHaveLength(0)
     })
 
     it('no task type in query case', () => {
@@ -197,7 +194,7 @@ describe('lib/filtering', () => {
         persons,
         query: 'empty'
       })
-      expect(filters.length).toEqual(0)
+      expect(filters).toHaveLength(0)
     })
 
     it('empty query case', () => {
@@ -210,7 +207,7 @@ describe('lib/filtering', () => {
         persons,
         query: ''
       })
-      expect(filters.length).toEqual(0)
+      expect(filters).toHaveLength(0)
     })
 
     it('task type with same base name (shorter first)', () => {
@@ -223,7 +220,7 @@ describe('lib/filtering', () => {
         persons,
         query: 'anim=wfa'
       })
-      expect(filters.length).toEqual(1)
+      expect(filters).toHaveLength(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[3])
       expect(filter.taskStatuses[0]).toEqual('task-status-2')
@@ -239,7 +236,7 @@ describe('lib/filtering', () => {
         persons,
         query: 'bg=wfa'
       })
-      expect(filters.length).toEqual(1)
+      expect(filters).toHaveLength(1)
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[4])
       expect(filter.taskStatuses[0]).toEqual('task-status-2')
@@ -255,7 +252,7 @@ describe('lib/filtering', () => {
         persons,
         query: 'mode=[wip] animation=[wfa] chars'
       })
-      expect(filters.length).toEqual(2)
+      expect(filters).toHaveLength(2)
       let filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
       expect(filter.taskStatuses[0]).toEqual('task-status-1')
@@ -275,7 +272,7 @@ describe('lib/filtering', () => {
         persons,
         query: '+(mode=[wip] animation=[wfa]) chars'
       })
-      expect(filters.length).toEqual(2)
+      expect(filters).toHaveLength(2)
       let filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
       expect(filter.taskStatuses[0]).toEqual('task-status-1')
@@ -295,8 +292,8 @@ describe('lib/filtering', () => {
         persons,
         query: 'mode=assigned'
       })
-      expect(filters.length).toEqual(1)
-      let filter = filters[0]
+      expect(filters).toHaveLength(1)
+      const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
       expect(filter.taskStatus).toBeUndefined()
       expect(filter.assigned).toEqual(true)
@@ -313,8 +310,8 @@ describe('lib/filtering', () => {
         persons,
         query: 'mode=unassigned'
       })
-      expect(filters.length).toEqual(1)
-      let filter = filters[0]
+      expect(filters).toHaveLength(1)
+      const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
       expect(filter.taskStatus).toBeUndefined()
       expect(filter.assigned).toEqual(false)
@@ -331,8 +328,8 @@ describe('lib/filtering', () => {
         persons,
         query: '-props'
       })
-      expect(filters.length).toEqual(1)
-      let filter = filters[0]
+      expect(filters).toHaveLength(1)
+      const filter = filters[0]
       expect(filter.type).toEqual('exclusion')
       expect(filter.excludedIds['asset-1']).toBeTruthy()
     })
@@ -347,8 +344,8 @@ describe('lib/filtering', () => {
         persons,
         query: 'family=big'
       })
-      expect(filters.length).toEqual(1)
-      let filter = filters[0]
+      expect(filters).toHaveLength(1)
+      const filter = filters[0]
       expect(filter.type).toEqual('descriptor')
       expect(filter.values).toEqual(['big'])
       expect(filter.descriptor.id).toEqual('descriptor-1')
@@ -364,7 +361,7 @@ describe('lib/filtering', () => {
         persons,
         query: 'withthumbnail'
       })
-      expect(filters.length).toEqual(1)
+      expect(filters).toHaveLength(1)
       expect(filters[0].type).toEqual('thumbnail')
       expect(filters[0].excluding).toEqual(false)
 
@@ -377,13 +374,13 @@ describe('lib/filtering', () => {
         persons,
         query: '-withthumbnail'
       })
-      expect(filters.length).toEqual(1)
+      expect(filters).toHaveLength(1)
       expect(filters[0].type).toEqual('thumbnail')
       expect(filters[0].excluding).toEqual(true)
     })
 
     it('assignedto=[John Doe] in query case', () => {
-      let filters = getFilters({
+      const filters = getFilters({
         entryIndex,
         assetTypes,
         taskTypes,
@@ -392,14 +389,14 @@ describe('lib/filtering', () => {
         persons,
         query: 'assignedto=[John Doe]'
       })
-      expect(filters.length).toEqual(1)
+      expect(filters).toHaveLength(1)
       expect(filters[0].type).toEqual('assignedto')
       expect(filters[0].personId).toEqual('person-1')
       expect(filters[0].excluding).toEqual(false)
     })
 
     it('type=[chars] in query case', () => {
-      let filters = getFilters({
+      const filters = getFilters({
         entryIndex,
         assetTypes,
         taskTypes,
@@ -408,14 +405,14 @@ describe('lib/filtering', () => {
         persons,
         query: 'type=[chars]'
       })
-      expect(filters.length).toEqual(1)
+      expect(filters).toHaveLength(1)
       expect(filters[0].type).toEqual('assettype')
       expect(filters[0].assetType.id).toEqual('asset-type-1')
       expect(filters[0].excluding).toEqual(false)
     })
 
     it('color=[blue,red] in query case', () => {
-      let filters = getFilters({
+      const filters = getFilters({
         entryIndex,
         assetTypes,
         taskTypes,
@@ -424,69 +421,81 @@ describe('lib/filtering', () => {
         persons,
         query: 'family=[blue,red]'
       })
-      expect(filters.length).toEqual(1)
+      expect(filters).toHaveLength(1)
       expect(filters[0].type).toEqual('descriptor')
       expect(filters[0].values).toEqual(['blue', 'red'])
       expect(filters[0].excluding).toEqual(false)
     })
-
   })
 
   describe('applyFilters', () => {
     const taskTypes = [
-        {
-          name: 'Animation',
-          id: 'task-type-1'
-        },
-        {
-          name: 'Modeling',
-          id: 'task-type-2'
-        },
-        {
-          name: 'Compositing',
-          id: 'task-type-3'
-        },
-        {
-          name: 'BG',
-          id: 'task-type-4'
-        }
+      {
+        name: 'Animation',
+        id: 'task-type-1'
+      },
+      {
+        name: 'Modeling',
+        id: 'task-type-2'
+      },
+      {
+        name: 'Compositing',
+        id: 'task-type-3'
+      },
+      {
+        name: 'BG',
+        id: 'task-type-4'
+      }
     ]
     const entries = [
       {
-        name: 'SH01', sequence_name: 'S01', episode_name: 'E01', id: 'shot-1',
-        data: {color: 'blue'},
-        validations: {'task-type-1': 'task-1'},
+        name: 'SH01',
+        sequence_name: 'S01',
+        episode_name: 'E01',
+        id: 'shot-1',
+        data: { color: 'blue' },
+        validations: new Map([['task-type-1', 'task-1']]),
         tasks: ['task-1'],
         preview_file_id: 'preview-file-1'
       },
       {
-        name: 'SH02', sequence_name: 'S01', episode_name: 'E01', id: 'shot-2',
-        data: {color: 'blue'},
-        validations: {'task-type-1': 'task-2'},
+        name: 'SH02',
+        sequence_name: 'S01',
+        episode_name: 'E01',
+        id: 'shot-2',
+        data: { color: 'blue' },
+        validations: new Map([['task-type-1', 'task-2']]),
         tasks: ['task-2'],
         preview_file_id: 'preview-file-2'
       },
       {
-        name: 'SH01', sequence_name: 'S02', episode_name: 'E01', id: 'shot-3',
-        data: {color: 'blue'},
-        validations: {'task-type-1': 'task-3'},
+        name: 'SH01',
+        sequence_name: 'S02',
+        episode_name: 'E01',
+        id: 'shot-3',
+        data: { color: 'blue' },
+        validations: new Map([['task-type-1', 'task-3']]),
         tasks: ['task-3'],
         preview_file_id: ''
       },
       {
-        name: 'SH01', sequence_name: 'S01', episode_name: 'E02', id: 'shot-4',
-        data: {color: 'the space'},
-        validations: {'task-type-1': 'task-4'},
+        name: 'SH01',
+        sequence_name: 'S01',
+        episode_name: 'E02',
+        id: 'shot-4',
+        data: { color: 'the space' },
+        validations: new Map([['task-type-1', 'task-4']]),
         tasks: ['task-4']
       },
       {
-        name: 'SH02', sequence_name: 'S01', episode_name: 'E02', id: 'shot-5',
-        data: {color: 'red'},
-        validations: {
-          'task-type-1': 'task-5',
-          'task-type-3': 'task-6',
-          'task-type-4': 'task-7',
-        },
+        name: 'SH02',
+        sequence_name: 'S01',
+        episode_name: 'E02',
+        id: 'shot-5',
+        data: { color: 'red' },
+        validations: new Map(
+          [['task-type-1', 'task-5'], ['task-type-3', 'task-6'], ['task-type-4', 'task-7']]
+        ),
         tasks: ['task-5', 'task-6']
       }
     ]
@@ -527,10 +536,6 @@ describe('lib/filtering', () => {
         task_status_id: 'task-status-2'
       }
     }))
-    const taskStatusMap = new Map(Object.entries({
-      'task-status-1': { id: 'task-status-1', short_name: 'wip' },
-      'task-status-2': { id: 'task-status-2', short_name: 'done' }
-    }))
     const descriptors = [
       {
         id: 'descriptor-1',
@@ -547,12 +552,12 @@ describe('lib/filtering', () => {
           type: 'status'
         }
       ]
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap
       )
-      expect(results.length).toEqual(3)
+      expect(results).toHaveLength(3)
     })
 
     it('bg=done', () => {
@@ -563,22 +568,22 @@ describe('lib/filtering', () => {
           type: 'status'
         }
       ]
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap
       )
-      expect(results.length).toEqual(1)
+      expect(results).toHaveLength(1)
     })
 
     it('empty filter', () => {
       const filters = []
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap
       )
-      expect(results.length).toEqual(5)
+      expect(results).toHaveLength(5)
     })
 
     it('multiple filters', () => {
@@ -594,12 +599,12 @@ describe('lib/filtering', () => {
           type: 'status'
         }
       ]
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap
       )
-      expect(results.length).toEqual(1)
+      expect(results).toHaveLength(1)
     })
 
     it('multiple or filters', () => {
@@ -616,15 +621,14 @@ describe('lib/filtering', () => {
         }
       ]
       filters.union = true
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap,
         true
       )
-      expect(results.length).toEqual(2)
+      expect(results).toHaveLength(2)
     })
-
 
     it('in filter', () => {
       const filters = [
@@ -634,12 +638,12 @@ describe('lib/filtering', () => {
           type: 'status'
         }
       ]
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap
       )
-      expect(results.length).toEqual(5)
+      expect(results).toHaveLength(5)
     })
 
     it('animation=unassigned', () => {
@@ -650,12 +654,12 @@ describe('lib/filtering', () => {
           type: 'assignation'
         }
       ]
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap
       )
-      expect(results.length).toEqual(3)
+      expect(results).toHaveLength(3)
     })
 
     it('animation=assigned', () => {
@@ -666,12 +670,12 @@ describe('lib/filtering', () => {
           type: 'assignation'
         }
       ]
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap
       )
-      expect(results.length).toEqual(2)
+      expect(results).toHaveLength(2)
     })
 
     it('exclusion', () => {
@@ -683,12 +687,12 @@ describe('lib/filtering', () => {
           type: 'exclusion'
         }
       ]
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap
       )
-      expect(results.length).toEqual(4)
+      expect(results).toHaveLength(4)
     })
 
     it('color=blue', () => {
@@ -699,12 +703,12 @@ describe('lib/filtering', () => {
           type: 'descriptor'
         }
       ]
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap
       )
-      expect(results.length).toEqual(3)
+      expect(results).toHaveLength(3)
     })
 
     it('color=[the space]', () => {
@@ -715,12 +719,12 @@ describe('lib/filtering', () => {
           type: 'descriptor'
         }
       ]
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap
       )
-      expect(results.length).toEqual(1)
+      expect(results).toHaveLength(1)
     })
 
     it('color=[blue,the space]', () => {
@@ -731,14 +735,13 @@ describe('lib/filtering', () => {
           type: 'descriptor'
         }
       ]
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap
       )
-      expect(results.length).toEqual(4)
+      expect(results).toHaveLength(4)
     })
-
 
     it('withthumbnail', () => {
       const filters = [
@@ -747,12 +750,12 @@ describe('lib/filtering', () => {
           type: 'thumbnail'
         }
       ]
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap
       )
-      expect(results.length).toEqual(2)
+      expect(results).toHaveLength(2)
     })
 
     it('-withthumbnail', () => {
@@ -762,12 +765,12 @@ describe('lib/filtering', () => {
           type: 'thumbnail'
         }
       ]
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap
       )
-      expect(results.length).toEqual(3)
+      expect(results).toHaveLength(3)
     })
 
     it('assignedto=[John Doe]', () => {
@@ -778,12 +781,12 @@ describe('lib/filtering', () => {
           excluding: false
         }
       ]
-      let results = applyFilters(
+      const results = applyFilters(
         entries,
         filters,
         taskMap
       )
-      expect(results.length).toEqual(2)
+      expect(results).toHaveLength(2)
     })
   })
 })
