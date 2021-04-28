@@ -10,18 +10,22 @@
       ref="headerMenu"
       :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"
       :is-current-user-admin="isCurrentUserAdmin"
+      :is-sticked="stickedColumns[lastHeaderMenuDisplayed]"
       @minimize-clicked="onMinimizeColumnToggled()"
       @delete-all-clicked="onDeleteAllTasksClicked()"
       @sort-by-clicked="onSortByTaskTypeClicked()"
       @select-column="onSelectColumn"
+      @toggle-stick="stickColumnClicked()"
     />
 
     <table-metadata-header-menu
       ref="headerMetadataMenu"
       :is-current-user-admin="isCurrentUserAdmin"
+      :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
       @edit-clicked="onEditMetadataClicked()"
       @delete-clicked="onDeleteMetadataClicked()"
       @sort-by-clicked="onSortByMetadataClicked()"
+      @toggle-stick="metadataStickColumnClicked($event)"
     />
 
     <table class="datatable">
@@ -49,6 +53,31 @@
               />
             </div>
           </th>
+          <metadata-header
+            :ref="`editor-${j}`"
+            :key="descriptor.id"
+            :descriptor="descriptor"
+            :left="offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'"
+            is-stick
+            @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
+            v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+            v-if="isShowInfos"
+          />
+          <validation-header
+            :ref="`validation-${columnIndexInGrid}`"
+            :key="columnId"
+            :hidden-columns="hiddenColumns"
+            :column-id="columnId"
+            :task-type-map="taskTypeMap"
+            :validation-style="getValidationStyle(columnId)"
+            :left="offsets['validation-' + columnIndexInGrid] ? `${offsets['validation-' + columnIndexInGrid]}px` : '0'"
+            type="assets"
+            is-stick
+            @show-header-menu="event => showHeaderMenu(columnId, columnIndexInGrid, event)"
+            v-for="(columnId, columnIndexInGrid) in stickedDisplayedValidationColumns"
+            v-if="!isLoading"
+          />
+
           <th
             scope="col"
             class="description"
@@ -56,23 +85,13 @@
           >
             {{ $t('shots.fields.description') }}
           </th>
-          <th
-            scope="col"
-            class="metadata-descriptor"
+          <metadata-header
             :key="descriptor.id"
-            v-for="descriptor in visibleMetadataDescriptors"
+            :descriptor="descriptor"
+            @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
+            v-for="descriptor in nonStickedVisibleMetadataDescriptors"
             v-if="isShowInfos"
-          >
-            <div class="flexrow">
-              <span class="flexrow-item datatable-dropdown">
-                {{ descriptor.name }}
-              </span>
-              <chevron-down-icon
-                @click="showMetadataHeaderMenu(descriptor.id, $event)"
-                class="header-icon flexrow-item"
-              />
-            </div>
-          </th>
+          />
 
           <th scope="col" class="frames" v-if="isFrames && isShowInfos && metadataDisplayHeaders.frames">
             {{ $t('shots.fields.nb_frames') }}
@@ -105,45 +124,17 @@
             {{ $t('main.estimation_short') }}
           </th>
 
-          <th
-            scope="col"
-            :class="{
-              'validation-cell': !hiddenColumns[columnId],
-              'hidden-validation-cell': hiddenColumns[columnId]
-            }"
+          <validation-header
             :key="columnId"
-            v-for="(columnId, columnIndexInGrid) in displayedValidationColumns"
+            :hidden-columns="hiddenColumns"
+            :column-id="columnId"
+            :task-type-map="taskTypeMap"
+            :validation-style="getValidationStyle(columnId)"
+            type="shots"
+            @show-header-menu="event => showHeaderMenu(columnId, columnIndexInGrid, event)"
+            v-for="(columnId, columnIndexInGrid) in nonStickedDisplayedValidationColumns"
             v-if="!isLoading"
-          >
-            <div
-              class="flexrow validation-content"
-              :style="getValidationStyle(columnId)"
-            >
-              <router-link
-                class="flexrow-item datatable-dropdown task-type-name"
-                style="margin-right: 0;"
-                :to="taskTypePath(columnId)"
-                v-if="!isCurrentUserClient"
-              >
-                {{ !hiddenColumns[columnId]
-                   ? taskTypeMap.get(columnId).name
-                   : '' }}
-              </router-link>
-              <span
-                class="flexrow-item datatable-dropdown task-type-name"
-                style="margin-right: 0;"
-                v-else
-              >
-                {{ !hiddenColumns[columnId]
-                  ? taskTypeMap.get(columnId).name
-                  : '' }}
-              </span>
-              <chevron-down-icon
-                @click="showHeaderMenu(columnId, columnIndexInGrid, $event)"
-                class="header-icon flexrow-item"
-              />
-            </div>
-          </th>
+          />
           <th scope="col" class="actions" ref="actionsSection">
             <button-simple
               :class="{
@@ -225,6 +216,72 @@
               </router-link>
             </div>
           </th>
+
+          <!-- Metadata stick -->
+          <td
+            :ref="`editor-${getIndex(i, k)}-${j}`"
+            class="metadata-descriptor datatable-row-header"
+            :title="shot.data ? shot.data[descriptor.field_name] : ''"
+            :style="{'left': offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'}"
+            :key="shot.id + '-' + descriptor.id"
+            v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+            v-if="isShowInfos"
+          >
+            <input
+              class="input-editor"
+              @input="event => onMetadataFieldChanged(shot, descriptor, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+              :value="getMetadataFieldValue(descriptor, shot)"
+              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+            />
+            <span
+              class="select"
+              v-else-if="isCurrentUserManager"
+            >
+            <select
+              class="select-input"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+              @change="event => onMetadataFieldChanged(shot, descriptor, event)"
+            >
+              <option
+                v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
+                :key="`${shot.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+                :value="option.value"
+                :selected="getMetadataFieldValue(descriptor, shot) === option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+            </span>
+              <span class="metadata-value" v-else>
+              {{ getMetadataFieldValue(descriptor, shot) }}
+            </span>
+          </td>
+
+          <validation-cell
+            :ref="`validation-${getIndex(i, k)}-${j}`"
+            :class="{
+              'validation-cell': !hiddenColumns[columnId],
+              'hidden-validation-cell': hiddenColumns[columnId],
+              'datatable-row-header': true
+            }"
+            :key="columnId + '-' + shot.id"
+            :column="taskTypeMap.get(columnId)"
+            :entity="shot"
+            :task-test="taskMap.get(shot.validations.get(columnId))"
+            :selected="shotSelectionGrid[getIndex(i, k)][j]"
+            :rowX="getIndex(i, k)"
+            :columnY="j"
+            :minimized="hiddenColumns[columnId]"
+            :is-static="true"
+            :is-assignees="isShowAssignations"
+            :left="offsets['validation-' + j] ? `${offsets['validation-' + j]}px` : '0'"
+            @select="onTaskSelected"
+            @unselect="onTaskUnselected"
+            v-for="(columnId, j) in stickedDisplayedValidationColumns"
+            v-if="!isLoading"
+          />
+
           <description-cell
             class="description"
             :entry="shot"
@@ -232,44 +289,42 @@
             @description-changed="value => onDescriptionChanged(shot, value)"
             v-if="!isCurrentUserClient && isShowInfos && isShotDescription"
           />
+
+          <!-- other Metadata cells -->
           <td
             class="metadata-descriptor"
+            :title="shot.data ? shot.data[descriptor.field_name] : ''"
             :key="shot.id + '-' + descriptor.id"
-            v-for="(descriptor, j) in visibleMetadataDescriptors"
+            v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
             v-if="isShowInfos"
           >
             <input
-              :ref="`editor-${getIndex(i, k)}-${j}`"
               class="input-editor"
-              :value="getMetadataFieldValue(descriptor, shot)"
-              @input="
-                event => onMetadataFieldChanged(shot, descriptor, event)"
+              @input="event => onMetadataFieldChanged(shot, descriptor, event)"
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+              :value="getMetadataFieldValue(descriptor, shot)"
               v-if="descriptor.choices.length === 0 && isCurrentUserManager"
             />
             <span
               class="select"
               v-else-if="isCurrentUserManager"
             >
-              <select
-                class="select-input"
-                :ref="`editor-${getIndex(i, k)}-${j}`"
-                @keydown.ctrl="pauseEvent"
-                @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-                @change="
-                  event => onMetadataFieldChanged(shot, descriptor, event)"
+            <select
+              class="select-input"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+              @change="event => onMetadataFieldChanged(shot, descriptor, event)"
+            >
+              <option
+                v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
+                :key="`${shot.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+                :value="option.value"
+                :selected="getMetadataFieldValue(descriptor, shot) === option.value"
               >
-                <option
-                  v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
-                  :key="`${shot.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
-                  :value="option.value"
-                  :selected="getMetadataFieldValue(descriptor, shot) == option.value"
-                >
-                  {{ option.label }}
-                </option>
-              </select>
+                {{ option.label }}
+              </option>
+            </select>
             </span>
-            <span class="metadata-value" v-else>
+              <span class="metadata-value" v-else>
               {{ getMetadataFieldValue(descriptor, shot) }}
             </span>
           </td>
@@ -277,7 +332,6 @@
             v-if="isFrames && isShowInfos && metadataDisplayHeaders.frames"
           >
             <input
-              :ref="`editor-${getIndex(i, k)}-${descriptorLength}`"
               class="input-editor"
               step="1"
               :value="shot.nb_frames"
@@ -294,7 +348,6 @@
           </td>
           <td class="framein" v-if="isFrameIn && isShowInfos && metadataDisplayHeaders.frameIn">
             <input
-              :ref="`editor-${getIndex(i, k)}-${descriptorLength + 1}`"
               class="input-editor"
               step="1"
               type="number"
@@ -311,7 +364,6 @@
           </td>
           <td class="frameout" v-if="isFrameOut && isShowInfos && metadataDisplayHeaders.frameOut">
             <input
-              :ref="`editor-${getIndex(i, k)}-${descriptorLength + 2}`"
               class="input-editor"
               step="1"
               type="number"
@@ -328,7 +380,6 @@
           </td>
           <td class="fps" v-if="isFps && isShowInfos && metadataDisplayHeaders.fps">
             <input
-              :ref="`editor-${getIndex(i, k)}-${descriptorLength + 3}`"
               class="input-editor"
               step="1"
               type="number"
@@ -358,12 +409,12 @@
           </td>
 
           <validation-cell
+            :ref="`validation-${getIndex(i, k)}-${j + stickedDisplayedValidationColumns.length}`"
             :class="{
               'validation-cell': !hiddenColumns[columnId],
               'hidden-validation-cell': hiddenColumns[columnId]
             }"
             :key="`${columnId}-${shot.id}`"
-            :ref="`validation-${getIndex(i, k)}-${j}`"
             :column="taskTypeMap.get(columnId)"
             :entity="shot"
             :task-test="taskMap.get(shot.validations
@@ -377,7 +428,7 @@
             :is-assignees="isShowAssignations"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
-            v-for="(columnId, j) in displayedValidationColumns"
+            v-for="(columnId, j) in nonStickedDisplayedValidationColumns"
             v-if="!isLoading"
           />
           <row-actions-cell
@@ -441,9 +492,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import {
-  ChevronDownIcon
-} from 'vue-feather-icons'
+
 import { descriptorMixin } from '@/components/mixins/descriptors'
 import { domMixin } from '@/components/mixins/dom'
 import { entityListMixin } from '@/components/mixins/entity_list'
@@ -453,14 +502,16 @@ import { selectionListMixin } from '@/components/mixins/selection'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import MetadataHeader from '@/components/cells/MetadataHeader'
+import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableMetadataHeaderMenu from
   '@/components/widgets/TableMetadataHeaderMenu'
 import TableMetadataSelectorMenu from
   '@/components/widgets/TableMetadataSelectorMenu'
-import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
 import TableInfo from '@/components/widgets/TableInfo'
 import ValidationCell from '@/components/cells/ValidationCell'
+import ValidationHeader from '@/components/cells/ValidationHeader'
 
 export default {
   name: 'shot-list',
@@ -496,6 +547,7 @@ export default {
       lastSelection: null,
       hiddenColumns: {},
       lastHeaderMenuDisplayed: null,
+      lastMetadaDataHeaderMenuDisplayed: null,
       lastHeaderMenuDisplayedIndexInGrid: null,
       metadataDisplayHeaders: {
         fps: true,
@@ -504,21 +556,24 @@ export default {
         frames: true,
         estimation: true,
         timeSpent: true
-      }
+      },
+      stickedColumns: {},
+      offsets: {}
     }
   },
 
   components: {
     ButtonSimple,
-    ChevronDownIcon,
     DescriptionCell,
     EntityThumbnail,
+    MetadataHeader,
     RowActionsCell,
     TableHeaderMenu,
     TableMetadataHeaderMenu,
     TableMetadataSelectorMenu,
     TableInfo,
-    ValidationCell
+    ValidationCell,
+    ValidationHeader
   },
 
   computed: {
@@ -584,6 +639,18 @@ export default {
       )
     },
 
+    nonStickedVisibleMetadataDescriptors () {
+      return this.visibleMetadataDescriptors.filter(
+        descriptor => !this.stickedColumns[descriptor.id]
+      )
+    },
+
+    stickedVisibleMetadataDescriptors () {
+      return this.visibleMetadataDescriptors.filter(
+        descriptor => this.stickedColumns[descriptor.id]
+      )
+    },
+
     visibleColumns () {
       let count = 2
       count += !this.isCurrentUserClient &&
@@ -615,6 +682,18 @@ export default {
         return this.shotFilledColumns[columnId] &&
           (!this.hiddenColumns[columnId] || this.isShowInfos)
       })
+    },
+
+    nonStickedDisplayedValidationColumns () {
+      return this.displayedValidationColumns.filter(columnId => !this.stickedColumns[columnId])
+    },
+
+    stickedDisplayedValidationColumns () {
+      return this.displayedValidationColumns.filter(columnId => this.stickedColumns[columnId])
+    },
+
+    localStorageStickKey () {
+      return `stick-shots-${this.currentProduction.id}`
     }
   },
 
@@ -634,29 +713,6 @@ export default {
 
     loadMoreShots () {
       this.displayMoreShots()
-    },
-
-    taskTypePath (taskTypeId) {
-      if (this.isTVShow && this.currentEpisode) {
-        return {
-          name: 'episode-task-type',
-          params: {
-            production_id: this.currentProduction.id,
-            episode_id: this.currentEpisode.id,
-            task_type_id: taskTypeId,
-            type: 'shots'
-          }
-        }
-      } else {
-        return {
-          name: 'task-type',
-          params: {
-            production_id: this.currentProduction.id,
-            task_type_id: taskTypeId,
-            type: 'shots'
-          }
-        }
-      }
     },
 
     shotPath (shotId) {
@@ -698,6 +754,46 @@ export default {
 
     getIndex (i, k) {
       return this.getEntityLineNumber(this.displayedShots, i, k)
+    },
+
+    toggleStickedColumns (columnId) {
+      const sticked = !this.stickedColumns[columnId]
+      this.stickedColumns = {
+        ...this.stickedColumns,
+        [columnId]: sticked
+      }
+      localStorage.setItem(this.localStorageStickKey, JSON.stringify(this.stickedColumns))
+    },
+
+    stickColumnClicked () {
+      this.toggleStickedColumns(this.lastHeaderMenuDisplayed)
+      this.showHeaderMenu()
+    },
+
+    metadataStickColumnClicked (event) {
+      this.toggleStickedColumns(this.lastMetadaDataHeaderMenuDisplayed)
+      this.showMetadataHeaderMenu(this.lastMetadaDataHeaderMenuDisplayed, event)
+    },
+
+    updateOffsets () {
+      if (this.isLoading) {
+        return
+      }
+      this.$nextTick(function () {
+        let offset = this.$refs['th-shot'].clientWidth
+        this.offsets = {}
+
+        if (this.isShowInfos) {
+          for (let metadataCol = 0; metadataCol < this.stickedVisibleMetadataDescriptors.length; metadataCol++) {
+            this.offsets[`editor-${metadataCol}`] = offset
+            offset += this.$refs[`editor-${metadataCol}`][0].$el.clientWidth
+          }
+        }
+        for (let validationCol = 0; validationCol < this.stickedDisplayedValidationColumns.length; validationCol++) {
+          this.offsets[`validation-${validationCol}`] = offset
+          offset += this.$refs[`validation-${validationCol}`][0].$el.clientWidth
+        }
+      })
     }
   },
 
@@ -708,7 +804,19 @@ export default {
 
     validationColumns () {
       this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
+    },
+
+    stickedColumns () {
+      this.updateOffsets()
+    },
+
+    isLoading () {
+      this.updateOffsets()
     }
+  },
+
+  mounted () {
+    this.stickedColumns = JSON.parse(localStorage.getItem(this.localStorageStickKey)) || {}
   }
 }
 </script>
@@ -817,22 +925,12 @@ span.thumbnail-empty {
   background: #F3F3F3;
 }
 
-th.metadata-descriptor {
-  min-width: 120px;
-  max-width: 120px;
-  width: 120px;
-}
-
 .info {
   margin-top: 2em;
 }
 
 .info img {
   max-width: 80vh;
-}
-
-.task-type-name {
-  max-width: 95%;
 }
 
 .datatable-row th.name {
@@ -845,11 +943,6 @@ th.metadata-descriptor {
 
 .datatable-row-header {
   cursor: pointer;
-}
-
-td.metadata-descriptor {
-  height: 3.1rem;
-  padding: 0;
 }
 
 .dark {
@@ -906,6 +999,23 @@ td .input-editor {
   }
 }
 
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+// Metadata cell CSS
+
+td.metadata-descriptor {
+  height: 3.1rem;
+  padding: 0;
+}
+
 td .select {
   color: $grey-strong;
   margin: 0;
@@ -918,6 +1028,7 @@ td .select {
   }
 
   &:active,
+  &:focus,
   &:hover {
     &::after {
       border-color: $green;
@@ -943,16 +1054,6 @@ td .select {
       border: 1px solid $light-green;
     }
   }
-}
-
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-input[type="number"] {
-    -moz-appearance: textfield;
 }
 
 .metadata-value {

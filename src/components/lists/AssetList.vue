@@ -10,18 +10,22 @@
       ref="headerMenu"
       :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"
       :is-current-user-admin="isCurrentUserAdmin"
+      :is-sticked="stickedColumns[lastHeaderMenuDisplayed]"
       @minimize-clicked="onMinimizeColumnToggled()"
       @delete-all-clicked="onDeleteAllTasksClicked()"
       @sort-by-clicked="onSortByTaskTypeClicked()"
       @select-column="onSelectColumn"
+      @toggle-stick="stickColumnClicked()"
     />
 
     <table-metadata-header-menu
       ref="headerMetadataMenu"
       :is-current-user-admin="isCurrentUserAdmin"
+      :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
       @edit-clicked="onEditMetadataClicked()"
       @delete-clicked="onDeleteMetadataClicked()"
       @sort-by-clicked="onSortByMetadataClicked()"
+      @toggle-stick="metadataStickColumnClicked($event)"
     />
 
     <table class="datatable">
@@ -57,6 +61,30 @@
               />
             </div>
           </th>
+          <metadata-header
+            :ref="`editor-${j}`"
+            :key="descriptor.id"
+            :descriptor="descriptor"
+            :left="offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'"
+            is-stick
+            @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
+            v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+            v-if="isShowInfos"
+          />
+          <validation-header
+            :ref="`validation-${columnIndexInGrid}`"
+            :key="columnId"
+            :hidden-columns="hiddenColumns"
+            :column-id="columnId"
+            :task-type-map="taskTypeMap"
+            :validation-style="getValidationStyle(columnId)"
+            :left="offsets['validation-' + columnIndexInGrid] ? `${offsets['validation-' + columnIndexInGrid]}px` : '0'"
+            type="assets"
+            is-stick
+            @show-header-menu="event => showHeaderMenu(columnId, columnIndexInGrid, event)"
+            v-for="(columnId, columnIndexInGrid) in stickedDisplayedValidationColumns"
+            v-if="!isLoading"
+          />
 
           <th
             scope="col"
@@ -67,23 +95,13 @@
             {{ $t('assets.fields.description') }}
           </th>
 
-          <th
-            scope="col"
-            class="metadata-descriptor"
+          <metadata-header
             :key="descriptor.id"
-            v-for="descriptor in visibleMetadataDescriptors"
+            :descriptor="descriptor"
+            @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
+            v-for="descriptor in nonStickedVisibleMetadataDescriptors"
             v-if="isShowInfos"
-          >
-            <div class="flexrow">
-              <span class="flexrow-item descriptor-name">
-                {{ descriptor.name }}
-              </span>
-              <chevron-down-icon
-                @click="showMetadataHeaderMenu(descriptor.id, $event)"
-                class="header-icon flexrow-item"
-              />
-            </div>
-          </th>
+          />
           <th
             scope="col"
             class="time-spent"
@@ -106,46 +124,18 @@
           >
             {{ $t('main.estimation_short') }}
           </th>
-          <th
-            scope="col"
-            :class="{
-              'validation-cell': !hiddenColumns[columnId],
-              'hidden-validation-cell': hiddenColumns[columnId]
-            }"
-            :key="columnId"
-            v-for="(columnId, columnIndexInGrid) in displayedValidationColumns"
-            v-if="!isLoading"
-          >
-            <div
-              class="flexrow validation-content"
-              :style="getValidationStyle(columnId)"
-            >
-              <router-link
-                class="flexrow-item datatable-dropdown task-type-name"
-                style="margin-right: 0;"
-                :to="taskTypePath(columnId)"
-                v-if="!isCurrentUserClient"
-              >
-                {{ !hiddenColumns[columnId]
-                   ? taskTypeMap.get(columnId).name
-                   : '' }}
-              </router-link>
-              <span
-                class="flexrow-item datatable-dropdown task-type-name"
-                style="margin-right: 0;"
-                v-else
-              >
-                {{ !hiddenColumns[columnId]
-                  ? taskTypeMap.get(columnId).name
-                  : '' }}
-              </span>
 
-              <chevron-down-icon
-                @click="showHeaderMenu(columnId, columnIndexInGrid, $event)"
-                class="header-icon flexrow-item"
-              />
-            </div>
-          </th>
+          <validation-header
+            :key="columnId"
+            :hidden-columns="hiddenColumns"
+            :column-id="columnId"
+            :task-type-map="taskTypeMap"
+            :validation-style="getValidationStyle(columnId)"
+            type="assets"
+            @show-header-menu="event => showHeaderMenu(columnId, columnIndexInGrid, event)"
+            v-for="(columnId, columnIndexInGrid) in nonStickedDisplayedValidationColumns"
+            v-if="!isLoading"
+          />
           <th scope="col" class="actions" ref="actionsSection">
             <button-simple
               :class="{
@@ -229,25 +219,19 @@
               </router-link>
             </div>
           </th>
-          <description-cell
-            class="description"
-            @description-changed="value => onDescriptionChanged(asset, value)"
-            :editable="isCurrentUserManager"
-            v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
-            :entry="asset"
-          />
+
+          <!-- Metadata stick -->
           <td
-            class="metadata-descriptor"
-            :key="asset.id + '-' + descriptor.id"
+            class="metadata-descriptor datatable-row-header"
             :title="asset.data ? asset.data[descriptor.field_name] : ''"
-            v-for="(descriptor, j) in visibleMetadataDescriptors"
+            :style="{'left': offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'}"
+            :key="asset.id + '-' + descriptor.id"
+            v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
             v-if="isShowInfos"
           >
             <input
-              :ref="`editor-${getIndex(i, k)}-${j}`"
               class="input-editor"
-              @input="
-                event => onMetadataFieldChanged(asset, descriptor, event)"
+              @input="event => onMetadataFieldChanged(asset, descriptor, event)"
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
               :value="getMetadataFieldValue(descriptor, asset)"
               v-if="descriptor.choices.length === 0 && isCurrentUserManager"
@@ -256,24 +240,92 @@
               class="select"
               v-else-if="isCurrentUserManager"
             >
-              <select
-                class="select-input"
-                @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-                :ref="`editor-${getIndex(i, k)}-${j}`"
-                @change="
-                  event => onMetadataFieldChanged(asset, descriptor, event)"
+            <select
+              class="select-input"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+              @change="event => onMetadataFieldChanged(asset, descriptor, event)"
+            >
+              <option
+                v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
+                :key="`${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+                :value="option.value"
+                :selected="getMetadataFieldValue(descriptor, asset) === option.value"
               >
-                <option
-                  v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
-                  :key="`${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
-                  :value="option.value"
-                  :selected="getMetadataFieldValue(descriptor, asset) == option.value"
-                >
-                  {{ option.label }}
-                </option>
-              </select>
+                {{ option.label }}
+              </option>
+            </select>
             </span>
-            <span class="metadata-value" v-else>
+              <span class="metadata-value" v-else>
+              {{ getMetadataFieldValue(descriptor, asset) }}
+            </span>
+          </td>
+
+          <validation-cell
+            :ref="`validation-${getIndex(i, k)}-${j}`"
+            :class="{
+              'validation-cell': !hiddenColumns[columnId],
+              'hidden-validation-cell': hiddenColumns[columnId],
+              'datatable-row-header': true
+            }"
+            :key="columnId + '-' + asset.id"
+            :column="taskTypeMap.get(columnId)"
+            :entity="asset"
+            :task-test="taskMap.get(asset.validations.get(columnId))"
+            :selected="assetSelectionGrid[getIndex(i, k)][j]"
+            :rowX="getIndex(i, k)"
+            :columnY="j"
+            :minimized="hiddenColumns[columnId]"
+            :is-static="true"
+            :is-assignees="isShowAssignations"
+            :left="offsets['validation-' + j] ? `${offsets['validation-' + j]}px` : '0'"
+            @select="onTaskSelected"
+            @unselect="onTaskUnselected"
+            v-for="(columnId, j) in stickedDisplayedValidationColumns"
+            v-if="!isLoading"
+          />
+          <description-cell
+            class="description"
+            @description-changed="value => onDescriptionChanged(asset, value)"
+            :editable="isCurrentUserManager"
+            v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
+            :entry="asset"
+          />
+
+          <!-- other Metadata cells -->
+          <td
+            class="metadata-descriptor"
+            :title="asset.data ? asset.data[descriptor.field_name] : ''"
+            :key="asset.id + '-' + descriptor.id"
+            v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
+            v-if="isShowInfos"
+          >
+            <input
+              class="input-editor"
+              @input="event => onMetadataFieldChanged(asset, descriptor, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+              :value="getMetadataFieldValue(descriptor, asset)"
+              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+            />
+            <span
+              class="select"
+              v-else-if="isCurrentUserManager"
+            >
+            <select
+              class="select-input"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+              @change="event => onMetadataFieldChanged(asset, descriptor, event)"
+            >
+              <option
+                v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
+                :key="`${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+                :value="option.value"
+                :selected="getMetadataFieldValue(descriptor, asset) === option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+            </span>
+              <span class="metadata-value" v-else>
               {{ getMetadataFieldValue(descriptor, asset) }}
             </span>
           </td>
@@ -299,12 +351,12 @@
           </td>
 
           <validation-cell
+            :ref="`validation-${getIndex(i, k)}-${j + stickedDisplayedValidationColumns.length}`"
             :class="{
               'validation-cell': !hiddenColumns[columnId],
               'hidden-validation-cell': hiddenColumns[columnId]
             }"
             :key="columnId + '-' + asset.id"
-            :ref="'validation-' + getIndex(i, k) + '-' + j"
             :column="taskTypeMap.get(columnId)"
             :entity="asset"
             :task-test="taskMap.get(asset.validations.get(columnId))"
@@ -316,7 +368,7 @@
             :is-assignees="isShowAssignations"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
-            v-for="(columnId, j) in displayedValidationColumns"
+            v-for="(columnId, j) in nonStickedDisplayedValidationColumns"
             v-if="!isLoading"
           />
           <row-actions-cell
@@ -377,9 +429,6 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import {
-  ChevronDownIcon
-} from 'vue-feather-icons'
 
 import { descriptorMixin } from '@/components/mixins/descriptors'
 import { entityListMixin } from '@/components/mixins/entity_list'
@@ -389,6 +438,7 @@ import { selectionListMixin } from '@/components/mixins/selection'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import MetadataHeader from '@/components/cells/MetadataHeader'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
 import TableInfo from '@/components/widgets/TableInfo'
@@ -397,6 +447,7 @@ import TableMetadataHeaderMenu from
 import TableMetadataSelectorMenu from
   '@/components/widgets/TableMetadataSelectorMenu'
 import ValidationCell from '@/components/cells/ValidationCell'
+import ValidationHeader from '@/components/cells/ValidationHeader'
 
 export default {
   name: 'asset-list',
@@ -411,13 +462,14 @@ export default {
     ButtonSimple,
     DescriptionCell,
     EntityThumbnail,
-    ChevronDownIcon,
+    MetadataHeader,
     RowActionsCell,
     TableInfo,
     TableHeaderMenu,
     TableMetadataHeaderMenu,
     TableMetadataSelectorMenu,
-    ValidationCell
+    ValidationCell,
+    ValidationHeader
   },
 
   props: {
@@ -444,12 +496,15 @@ export default {
       lastSelection: null,
       hiddenColumns: {},
       lastHeaderMenuDisplayed: null,
+      lastMetadaDataHeaderMenuDisplayed: null,
       columnSelectorDisplayed: false,
       lastHeaderMenuDisplayedIndexInGrid: null,
       metadataDisplayHeaders: {
         estimation: true,
         timeSpent: true
-      }
+      },
+      stickedColumns: {},
+      offsets: {}
     }
   },
 
@@ -516,6 +571,18 @@ export default {
       )
     },
 
+    nonStickedVisibleMetadataDescriptors () {
+      return this.visibleMetadataDescriptors.filter(
+        descriptor => !this.stickedColumns[descriptor.id]
+      )
+    },
+
+    stickedVisibleMetadataDescriptors () {
+      return this.visibleMetadataDescriptors.filter(
+        descriptor => this.stickedColumns[descriptor.id]
+      )
+    },
+
     visibleColumns () {
       let count = 1
       count += this.isTVShow ? 1 : 0
@@ -544,6 +611,18 @@ export default {
         return this.assetFilledColumns[columnId] &&
           (!this.hiddenColumns[columnId] || this.isShowInfos)
       })
+    },
+
+    nonStickedDisplayedValidationColumns () {
+      return this.displayedValidationColumns.filter(columnId => !this.stickedColumns[columnId])
+    },
+
+    stickedDisplayedValidationColumns () {
+      return this.displayedValidationColumns.filter(columnId => this.stickedColumns[columnId])
+    },
+
+    localStorageStickKey () {
+      return `stick-assets-${this.currentProduction.id}`
     }
   },
 
@@ -578,24 +657,6 @@ export default {
       return this.getPath('asset', assetId)
     },
 
-    taskTypePath (taskTypeId) {
-      const route = {
-        name: 'task-type',
-        params: {
-          production_id: this.currentProduction.id,
-          task_type_id: taskTypeId,
-          type: 'assets'
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = 'episode-task-type'
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      return route
-    },
-
     getPath (section, assetId) {
       const route = {
         name: section,
@@ -620,6 +681,46 @@ export default {
       const listWidth = this.visibleMetadataDescriptors.length
       const listHeight = this.displayedAssetsLength
       this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
+    },
+
+    toggleStickedColumns (columnId) {
+      const sticked = !this.stickedColumns[columnId]
+      this.stickedColumns = {
+        ...this.stickedColumns,
+        [columnId]: sticked
+      }
+      localStorage.setItem(this.localStorageStickKey, JSON.stringify(this.stickedColumns))
+    },
+
+    stickColumnClicked () {
+      this.toggleStickedColumns(this.lastHeaderMenuDisplayed)
+      this.showHeaderMenu()
+    },
+
+    metadataStickColumnClicked (event) {
+      this.toggleStickedColumns(this.lastMetadaDataHeaderMenuDisplayed)
+      this.showMetadataHeaderMenu(this.lastMetadaDataHeaderMenuDisplayed, event)
+    },
+
+    updateOffsets () {
+      if (this.isLoading) {
+        return
+      }
+      this.$nextTick(function () {
+        let offset = this.$refs['th-name'].clientWidth
+        this.offsets = {}
+
+        if (this.isShowInfos) {
+          for (let metadataCol = 0; metadataCol < this.stickedVisibleMetadataDescriptors.length; metadataCol++) {
+            this.offsets[`editor-${metadataCol}`] = offset
+            offset += this.$refs[`editor-${metadataCol}`][0].$el.clientWidth
+          }
+        }
+        for (let validationCol = 0; validationCol < this.stickedDisplayedValidationColumns.length; validationCol++) {
+          this.offsets[`validation-${validationCol}`] = offset
+          offset += this.$refs[`validation-${validationCol}`][0].$el.clientWidth
+        }
+      })
     }
   },
 
@@ -630,7 +731,19 @@ export default {
 
     validationColumns () {
       this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
+    },
+
+    stickedColumns () {
+      this.updateOffsets()
+    },
+
+    isLoading () {
+      this.updateOffsets()
     }
+  },
+
+  mounted () {
+    this.stickedColumns = JSON.parse(localStorage.getItem(this.localStorageStickKey)) || {}
   }
 }
 </script>
@@ -689,14 +802,6 @@ td.estimation {
   width: 200px;
 }
 
-th.metadata-descriptor {
-  min-width: 120px;
-  max-width: 120px;
-  width: 120px;
-  overflow-wrap: break-word;
-  hyphens: auto;
-}
-
 .validation-cell {
   min-width: 150px;
   max-width: 150px;
@@ -727,9 +832,7 @@ th.metadata-descriptor {
   max-width: 80vh;
 }
 
-.task-type-name {
-  max-width: 95%;
-}
+// Metadata cell CSS
 
 td.metadata-descriptor {
   height: 3.1rem;

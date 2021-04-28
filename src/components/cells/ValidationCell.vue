@@ -7,7 +7,8 @@
   }"
   :style="{
     'border-left': isBorder ? '1px solid ' + column.color : 'none',
-    'background': isBorder ? getBackground() : 'transparent'
+    'background': isBorder ? getBackground() : 'transparent',
+    'left': left
   }"
   @mouseover="onMouseOver"
   @mouseout="onMouseOut"
@@ -140,6 +141,10 @@ export default {
     columnY: {
       default: 0,
       type: Number
+    },
+    left: {
+      type: String,
+      default: '0px'
     }
   },
 
@@ -255,7 +260,7 @@ export default {
       const border =
         this.isBorder ? '1px solid ' + this.column.color : 'none'
       this.$refs.cell.style =
-        `border-left: ${border}; background: ${background};`
+        `border-left: ${border}; background: ${background}; left: ${this.left}`
     },
 
     select (event) {
