@@ -3,13 +3,17 @@
     <div class="has-text-centered" v-if="isOpenProductionsLoading">
       <spinner />
     </div>
-    <div class="flexrow open-productions-header" v-if="!isOpenProductionsLoading && openProductions.length > 0">
+    <div
+      class="flexrow open-productions-header"
+      v-if="!isOpenProductionsLoading && openProductions.length > 0"
+    >
       <h1 class="title flexrow-item">
         <img src="../../assets/kitsu.png" width="23"/>
         {{ $t('productions.home.title') }}
       </h1>
       <div class="filler"></div>
       <div
+        id="create-production-button"
         class="button flexrow-item"
         v-if="isCurrentUserAdmin"
       >
@@ -20,7 +24,10 @@
         </a>
       </div>
     </div>
-    <div class="open-productions-box" v-if="!isOpenProductionsLoading && openProductions.length > 0">
+    <div
+      class="open-productions-box"
+      v-if="!isOpenProductionsLoading && openProductions.length > 0"
+    >
       <img src="">
       <div
         :class="{
@@ -68,7 +75,7 @@
             class="button big-button"
             @click="showNewModal"
           >
-          {{ $t('productions.home.create_new') }}
+            {{ $t('productions.home.create_new') }}
           </button>
         </p>
       </div>

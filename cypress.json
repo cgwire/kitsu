@@ -1,9 +1,10 @@
 {
-  "integrationFolder": "./test/e2e/integration",
-  "fixturesFolder": "./test/e2e/fixtures",
-  "pluginsFile": "./test/e2e/plugins/index.js",
-  "supportFile": "./test/e2e/support/index.js",
+  "integrationFolder": "./tests/e2e/integration",
+  "fixturesFolder": "./tests/e2e/fixtures",
+  "pluginsFile": "./tests/e2e/plugins/index.js",
+  "supportFile": "./tests/e2e/support/index.js",
   "watchForFileChanges" : false,
   "viewportWidth": 1200,
-  "viewportHeight": 800
+  "viewportHeight": 800,
+  "baseUrl": "http://localhost:8080"
 }
