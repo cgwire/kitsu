@@ -40,7 +40,7 @@ const applyFiltersFunctions = {
   },
 
   assignation (entry, filter, taskMap) {
-    const task = taskMap.get(entry.validations[filter.taskType.id])
+    const task = taskMap.get(entry.validations.get(filter.taskType.id))
     if (filter.assigned) {
       return task && task.assignees && task.assignees.length > 0
     } else {
