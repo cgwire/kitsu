@@ -93,7 +93,7 @@ describe('time', () => {
   test('getLastEndDate', () => {
     const items = [
       { endDate: moment('2019-09-01T08:23:12Z') },
-      { endDate: moment('2021-08-01T08:23:12Z') },
+      { endDate: moment('2025-08-01T08:23:12Z') },
       { endDate: moment('2019-09-08T08:23:12Z') }
     ]
     expect(getLastEndDate(items)).toEqual(items[1].endDate)

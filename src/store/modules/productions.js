@@ -270,20 +270,20 @@ const actions = {
 
   loadProduction ({ commit, state }, productionId) {
     return productionsApi.getProduction(productionId)
-      .then((production) => {
+      .then(production => {
         if (state.productionMap.get(production.id)) {
           commit(UPDATE_PRODUCTION, production)
         } else {
           commit(ADD_PRODUCTION, production)
         }
       })
-      .catch((err) => console.error(err))
+      .catch(console.error)
   },
 
   newProduction ({ commit, state }, data) {
     commit(EDIT_PRODUCTION_START, data)
     return productionsApi.newProduction(data)
-      .then((production) => {
+      .then(production => {
         commit(EDIT_PRODUCTION_END, production)
       })
   },
@@ -291,7 +291,7 @@ const actions = {
   editProduction ({ commit, state }, data) {
     commit(EDIT_PRODUCTION_START)
     return productionsApi.updateProduction(data)
-      .then((production) => {
+      .then(production => {
         commit(EDIT_PRODUCTION_END, production)
       })
   },

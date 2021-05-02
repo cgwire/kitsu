@@ -81,7 +81,7 @@ export const getFirstStartDate = (items) => {
 
 export const getLastEndDate = (items) => {
   let endDate = moment().add(3, 'months')
-  items.forEach((item) => {
+  items.forEach(item => {
     if (item.endDate.isAfter(endDate)) endDate = item.endDate.clone()
   })
   return endDate
