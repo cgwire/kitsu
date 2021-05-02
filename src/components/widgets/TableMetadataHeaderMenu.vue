@@ -12,6 +12,16 @@
       {{ $t('main.sort_by') }}
     </div>
     <div
+      @click="$emit('toggle-stick')"
+    >
+      <template v-if="isSticked">
+        {{ $t('main.unstick') }}
+      </template>
+      <template v-else>
+        {{ $t('main.stick') }}
+      </template>
+    </div>
+    <div
       class="error"
       @click="$emit('delete-clicked')"
       v-if="isCurrentUserAdmin"
@@ -29,6 +39,10 @@ export default {
 
   props: {
     isCurrentUserAdmin: {
+      type: Boolean,
+      default: false
+    },
+    isSticked: {
       type: Boolean,
       default: false
     }

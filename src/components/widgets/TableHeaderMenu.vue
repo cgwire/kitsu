@@ -19,6 +19,16 @@
       {{ $t('main.select_column')}}
     </div>
     <div
+      @click="$emit('toggle-stick')"
+    >
+      <template v-if="isSticked">
+        {{ $t('main.unstick') }}
+      </template>
+      <template v-else>
+        {{ $t('main.stick') }}
+      </template>
+    </div>
+    <div
       class="error"
       @click="$emit('delete-all-clicked')"
       v-if="isCurrentUserAdmin"
@@ -40,6 +50,10 @@ export default {
       default: false
     },
     isCurrentUserAdmin: {
+      type: Boolean,
+      default: false
+    },
+    isSticked: {
       type: Boolean,
       default: false
     }
