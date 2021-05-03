@@ -42,10 +42,14 @@
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
           <td class="departments">
-            <span class="departments-element" v-for="departmentId in entry.departments" :key="departmentId">
+            <span
+              class="departments-element"
+              v-for="department in sortDepartments(entry.departments)"
+              :key="entry.id + '-' + department.id"
+            >
               <department-name
-                :department="departmentMap.get(departmentId)"
-                v-if="departmentMap.get(departmentId)"
+                :department="department"
+                v-if="department"
               />
             </span>
           </td>
@@ -62,7 +66,9 @@
       <tbody class="datatable-body" v-if="unactivePeople.length > 0">
         <tr class="datatable-type-header">
           <th scope="rowgroup" colspan="5">
-            <span class="datatable-row-header">{{ $t('people.unactive') }}</span>
+            <span class="datatable-row-header">
+              {{ $t('people.unactive') }}
+            </span>
           </th>
         </tr>
         <tr
@@ -75,10 +81,14 @@
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
           <td class="departments">
-            <span class="departments-element" v-for="departmentId in entry.departments" :key="departmentId">
+            <span
+              class="departments-element"
+              v-for="department in sortDepartments(entry.departments)"
+              :key="entry.id + '-' + department.id"
+            >
               <department-name
-                :department="departmentMap.get(departmentId)"
-                v-if="departmentMap.get(departmentId)"
+                :department="department"
+                v-if="department"
               />
             </span>
           </td>
@@ -109,6 +119,9 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
+import { sortByName } from '@/lib/sorting'
+
 import PeopleNameCell from '@/components/cells/PeopleNameCell'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
@@ -160,6 +173,11 @@ export default {
 
     onBodyScroll (event, position) {
       this.$refs.body.style.left = `-${position.scrollLeft}px`
+    },
+
+    sortDepartments (departmentIds = []) {
+      return sortByName(departmentIds
+        .map(departmentId => this.departmentMap.get(departmentId)))
     }
   }
 }
