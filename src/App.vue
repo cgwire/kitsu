@@ -337,7 +337,6 @@ export default {
       },
 
       'comment:new' (eventData) {
-        console.log(eventData)
         const commentId = eventData.comment_id
         if (!this.isSavingCommentPreview &&
             this.taskMap.get(eventData.task_id)) {
