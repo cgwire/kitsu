@@ -485,9 +485,7 @@ export default {
     initData (force) {
       this.resetTasks()
       this.focusSearchField()
-      console.log('init')
       if (this.tasks.length === 0) {
-        console.log('no tasks')
         this.loading.entities = true
         this.errors.entities = false
         this.initTaskType(force)
@@ -602,7 +600,7 @@ export default {
     onSearchChange (query) {
       if (query && query.length !== 1) {
         query = query.toLowerCase().trim()
-        const descriptors = this.currentProduction.descriptors
+        const descriptors = (this.currentProduction.descriptors || [])
           .filter(d => d.entityType === this.isAssets ? 'Asset' : 'Shot')
         const keywords = getKeyWords(query) || []
         const excludingKeyWords = getExcludingKeyWords(query) || []
@@ -675,8 +673,9 @@ export default {
     },
 
     resetTaskIndex () {
+      console.log(this.tasks)
       this.$options.taskIndex = buildSupervisorTaskIndex(
-        this.tasks, this.personMap
+        this.tasks, this.personMap, this.taskStatusMap
       )
       this.$options.taskIndex.me =
         indexSearch(this.$options.taskIndex, this.user.full_name.split(' '))
