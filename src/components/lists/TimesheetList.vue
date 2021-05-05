@@ -150,7 +150,7 @@
            </router-link>
           </th>
           <time-slider-cell
-            :duration="timeSpentMap.get(task.id) ? timeSpentMap.get(task.id).duration / 60 : 0"
+            :duration="timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0"
             class="time-spent"
             :task-id="task.id"
             @change="onSliderChange"
