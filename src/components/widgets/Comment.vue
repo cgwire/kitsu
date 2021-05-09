@@ -490,7 +490,12 @@ export default {
 
   watch: {
     'comment.checklist' () {
+      this.$options.silent = true
       this.checklist = [...this.comment.checklist]
+      this.$nextTick()
+        .then(() => {
+          this.$options.silent = false
+        })
     },
 
     checklist () {

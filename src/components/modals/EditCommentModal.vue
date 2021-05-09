@@ -142,6 +142,9 @@ export default {
           task_status_id: this.commentToEdit.task_status_id,
           checklist: [...this.commentToEdit.checklist]
         }
+        if (this.form.checklist.length === 0) {
+          this.form.checklist = [{ checked: false, text: '' }]
+        }
       } else {
         this.form = {
           text: '',
