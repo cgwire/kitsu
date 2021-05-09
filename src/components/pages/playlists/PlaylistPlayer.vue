@@ -561,7 +561,7 @@
     />
     <button-simple
       class="playlist-button flexrow-item"
-      :title="$t('playlists.actions.switch_hd')"
+      :title="$t('playlists.actions.' + (isHd ? 'switch_ld' : 'switch_hd'))"
       :text="isHd ? 'HD' : 'LD'"
       @click="isHd = !isHd"
       v-if="isCurrentPreviewMovie"
