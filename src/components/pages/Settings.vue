@@ -39,6 +39,11 @@
           @enter="saveSettings()"
           v-model="form.use_original_file_name"
         />
+        <combobox-boolean
+          :label="$t('settings.fields.timesheets_locked')"
+          @enter="saveSettings()"
+          v-model="form.timesheets_locked"
+        />
         <h2>
           {{ $t('settings.integrations') }}
         </h2>
@@ -194,6 +199,8 @@ export default {
         hours_by_day: this.organisation.hours_by_day,
         use_original_file_name:
           this.organisation.use_original_file_name ? 'true' : 'false',
+        timesheets_locked:
+          this.organisation.timesheets_locked ? 'true' : 'false',
         chat_token_slack: this.organisation.chat_token_slack
       }
     }

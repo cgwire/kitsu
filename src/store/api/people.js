@@ -10,11 +10,14 @@ export default {
           hours_by_day: 8,
           has_avatar: false,
           use_original_file_name: false,
+          timesheets_locked: false,
           chat_token_slack: ''
         }
         if (organisations.length > 0) organisation = organisations[0]
         organisation.use_original_file_name =
           organisation.use_original_file_name ? 'true' : 'false'
+        organisation.timesheets_locked =
+          organisation.timesheets_locked ? 'true' : 'false'
         Promise.resolve(organisation)
       })
   },
@@ -23,6 +26,7 @@ export default {
     const data = {
       name: organisation.name,
       hours_by_day: organisation.hours_by_day,
+      timesheets_locked: organisation.timesheets_locked === 'true',
       use_original_file_name: organisation.use_original_file_name === 'true',
       chat_token_slack: organisation.chat_token_slack
     }

@@ -133,7 +133,8 @@ const initialState = {
     name: 'Kitsu',
     hours_by_day: 8,
     has_avatar: false,
-    use_original_file_name: 'false'
+    use_original_file_name: 'false',
+    timesheets_locked: 'false'
   },
 
   people: [],
@@ -627,7 +628,6 @@ const mutations = {
     if (personToAdd.name) {
       if (personToEditIndex >= 0) {
         state.personMap.set(personToAdd.id, personToAdd)
-        state.people.delete(personToEditIndex)
         state.people[personToEditIndex] = state.personMap.get(personToAdd.id)
       } else if (!state.personMap.get(personToAdd.id)) {
         state.people.push(personToAdd)

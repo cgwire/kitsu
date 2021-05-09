@@ -91,6 +91,8 @@ const auth = {
           const isLdap = res.body.ldap
           organisation.use_original_file_name =
             organisation.use_original_file_name ? 'true' : 'false'
+          organisation.timesheets_locked =
+            organisation.timesheets_locked ? 'true' : 'false'
           store.commit(SET_ORGANISATION, organisation)
           store.commit(USER_LOGIN, user)
           callback(null, isLdap)

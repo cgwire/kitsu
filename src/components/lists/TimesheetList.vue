@@ -265,8 +265,13 @@ export default {
       this.$refs['th-type'].offsetWidth +
       'px'
     const beginningOfTheWeek = moment().startOf('isoWeek').toDate()
+    console.log(this.organisation.timesheets_locked)
+    console.log(this.organisation.timesheets_locked && this.isCurrentUserArtist)
     this.disabledDates = {
-      to: this.isCurrentUserArtist ? beginningOfTheWeek : null,
+      to: this.isCurrentUserArtist &&
+          this.organisation.timesheets_locked === 'true'
+        ? beginningOfTheWeek
+        : undefined,
       from: moment().toDate() // Disable dates after today.
     }
   },
@@ -275,6 +280,7 @@ export default {
     ...mapGetters([
       'isCurrentUserArtist',
       'nbSelectedTasks',
+      'organisation',
       'personIsDayOff',
       'productionMap',
       'taskTypeMap',
