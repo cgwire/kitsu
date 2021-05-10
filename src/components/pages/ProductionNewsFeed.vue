@@ -123,7 +123,7 @@
 
           <div
             :key="dayList.length > 0 ? dayList[0].created_at : ''"
-            v-for="dayList in newsListByDay"
+            v-for="dayList in newsListByDay(timezone)"
           >
             <div class="has-text-centered subtitle timeline-entry">
               <span class="big-dot"></span>
@@ -321,7 +321,8 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import { sortByName } from '@/lib/sorting'
-import { formatSimpleDate } from '@/lib/time'
+import { formatFullDateWithRevertedTimezone } from '@/lib/time'
+import { timeMixin } from '@/components/mixins/time'
 
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
@@ -338,6 +339,7 @@ import PreviewPlayer from '@/components/previews/PreviewPlayer'
 
 export default {
   name: 'news-page',
+  mixins: [timeMixin],
   components: {
     Combobox,
     ComboboxStatus,
@@ -444,8 +446,8 @@ export default {
           this.taskStatusId !== '' ? this.taskStatusId : undefined,
         person_id: this.person ? this.person.id : undefined,
         page: this.currentPage,
-        before: formatSimpleDate(this.before),
-        after: formatSimpleDate(this.after)
+        before: formatFullDateWithRevertedTimezone(this.before, this.timezone),
+        after: formatFullDateWithRevertedTimezone(this.after, this.timezone)
       }
       return params
     },
@@ -470,14 +472,6 @@ export default {
       return this.currentProduction.team
         .map(pId => this.personMap.get(pId))
         .sort((a, b) => a.full_name.localeCompare(b.full_name))
-    },
-
-    timezone () {
-      return this.user.timezone || moment.tz.guess()
-    },
-
-    today () {
-      return moment().toDate()
     },
 
     renderedStats () {

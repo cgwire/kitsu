@@ -82,7 +82,8 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment'
 import Vue from 'vue'
 
-import { formatSimpleDate } from '@/lib/time'
+import { formatFullDateWithRevertedTimezone } from '@/lib/time'
+import { timeMixin } from '@/components/mixins/time'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DateField from '@/components/widgets/DateField'
@@ -93,6 +94,7 @@ import Spinner from '@/components/widgets/Spinner'
 
 export default {
   name: 'logs',
+  mixins: [timeMixin],
 
   components: {
     ButtonSimple,
@@ -133,13 +135,6 @@ export default {
       'loadEvents'
     ]),
 
-    formatDate (eventDate) {
-      return moment
-        .tz(eventDate, 'UTC')
-        .tz(this.user.timezone)
-        .format('YYYY-MM-DD HH:mm:ss')
-    },
-
     formatType (event) {
       return event.name.split(':')[1].substring(0, 3)
     },
@@ -150,8 +145,8 @@ export default {
       this.selectedEvents = {}
       this.isLoading = true
       this.loadEvents({
-        after: formatSimpleDate(after),
-        before: formatSimpleDate(before)
+        after: formatFullDateWithRevertedTimezone(after, this.timezone),
+        before: formatFullDateWithRevertedTimezone(before, this.timezone)
       })
         .then((events) => {
           this.isLoading = false

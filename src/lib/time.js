@@ -29,6 +29,20 @@ export const formatFullDate = (date) => {
   return utcDate.format('YYYY-MM-DD HH:mm:ss')
 }
 
+export const formatFullDateWithTimezone = (dateString, timezone) => {
+  return moment.tz(dateString, 'UTC')
+    .tz(timezone)
+    .format('YYYY-MM-DD HH:mm:ss')
+}
+
+export const formatFullDateWithRevertedTimezone = (date, timezone) => {
+  if (!date) return ''
+  const dateString = formatSimpleDate(date)
+  return moment.tz(dateString, timezone)
+    .tz('UTC')
+    .format('YYYY-MM-DDTHH:mm:ss')
+}
+
 export const formatDate = (date) => {
   const utcDate = moment.tz(date, 'UTC')
   if (moment().diff(utcDate, 'days') > 1) {

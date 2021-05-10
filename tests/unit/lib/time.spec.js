@@ -4,7 +4,9 @@ import {
   daysToMinutes,
   formatDate,
   formatFullDate,
+  formatFullDateWithTimezone,
   formatSimpleDate,
+  formatSimpleDateWithTimezone,
   getDayRange,
   getDatesFromEndDate,
   getDatesFromStartDate,
@@ -56,6 +58,22 @@ describe('time', () => {
   test('formatFullDate', () => {
     const dateString = formatFullDate(new Date('2019-09-01T08:23:12Z'))
     expect(dateString).toEqual('2019-09-01 08:23:12')
+  })
+
+  test('formatFullDateWithTimezone', () => {
+    const dateString = formatFullDateWithTimezone(
+      new Date('2019-09-01T23:23:12Z'),
+      'Europe/Paris'
+    )
+    expect(dateString).toEqual('2019-09-02 01:23:12')
+  })
+
+  test('formatFullDateWithRevertedTimezone', () => {
+    const dateString = formatFullDateWithRevertedTimezone(
+      new Date('2019-09-02'),
+      'Europe/Paris'
+    )
+    expect(dateString).toEqual('2019-09-01T22:00:00')
   })
 
   test('monthToString', () => {

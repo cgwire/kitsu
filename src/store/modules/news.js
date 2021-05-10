@@ -1,5 +1,6 @@
-import newsApi from '../api/news'
-import { sortByDate } from '../../lib/sorting'
+import newsApi from '@/store/api/news'
+import { sortByDate } from '@/lib/sorting'
+import { formatFullDateWithTimezone } from '@/lib/time'
 
 import {
   CLEAR_NEWS,
@@ -28,15 +29,19 @@ const getters = {
   newsTotal: state => state.newsTotal,
   newsStats: state => state.newsStats,
 
-  newsListByDay (state) {
+  newsListByDay: (state) => (timezone) => {
     if (state.newsList.length === 0) return []
     const listsByDay = []
-
     let runningList = []
-    let currentDay = state.newsList[0].created_at.substring(0, 10)
+    const tzDate = formatFullDateWithTimezone(
+      state.newsList[0].created_at,
+      timezone
+    )
+    let currentDay = tzDate.substring(0, 10)
 
     state.newsList.forEach(news => {
-      const newsDay = news.created_at.substring(0, 10)
+      const newsDay = formatFullDateWithTimezone(news.created_at, timezone)
+        .substring(0, 10)
       if (newsDay !== currentDay) {
         listsByDay.push(runningList)
         currentDay = newsDay
