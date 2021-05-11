@@ -188,8 +188,8 @@ const sortByMetadata = (sortInfo) => (a, b) => {
 }
 
 const sortByTaskType = (taskMap, sortInfo) => (a, b) => {
-  const taskA = a.validations[sortInfo.column]
-  const taskB = b.validations[sortInfo.column]
+  const taskA = a.validations.get(sortInfo.column)
+  const taskB = b.validations.get(sortInfo.column)
   if (!taskA) return -1
   if (!taskB) return 1
   const taskStatusA = taskMap.get(taskA).task_status_short_name
