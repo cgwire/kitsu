@@ -28,7 +28,8 @@ export default {
       episode_id: playlist.episode_id,
       for_client: playlist.for_client,
       for_entity: playlist.for_entity,
-      is_for_all: playlist.is_for_all
+      is_for_all: playlist.is_for_all,
+      task_type_id: playlist.task_type_id
     }
     return client.ppost('/api/data/playlists/', data)
   },
@@ -41,6 +42,7 @@ export default {
     }
     if (playlist.shots) data.shots = playlist.shots
     if (playlist.for_entity) data.for_entity = playlist.for_entity
+    if (playlist.task_type_id) data.task_type_id = playlist.task_type_id
     client.put(`/api/data/playlists/${playlist.id}`, data, callback)
   },
 

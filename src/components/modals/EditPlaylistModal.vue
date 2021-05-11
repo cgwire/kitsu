@@ -34,6 +34,13 @@
           v-model="form.for_entity"
           v-if="!isEditing"
         />
+        <combobox-task-type
+          class="flexrow-item selector"
+          :label="$t('news.task_type')"
+          :task-type-list="taskTypeList"
+          :up="true"
+          v-model="form.task_type_id"
+        />
       </form>
 
       <modal-footer
@@ -50,18 +57,21 @@
 </template>
 
 <script>
-import Combobox from '../widgets/Combobox'
-import ModalFooter from './ModalFooter'
-import TextField from '../widgets/TextField'
+import Combobox from '@/components/widgets/Combobox'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
+import ModalFooter from '@/components/modals/ModalFooter'
+import TextField from '@/components/widgets/TextField'
 
 import { mapGetters } from 'vuex'
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
+import { sortByName } from '@/lib/sorting'
 
 export default {
   name: 'edit-playlist-modal',
   mixins: [modalMixin],
   components: {
     Combobox,
+    ComboboxTaskType,
     ModalFooter,
     TextField
   },
@@ -100,14 +110,16 @@ export default {
         name: this.playlistToEdit.name,
         for_entity: this.playlistToEdit.for_entity || this.defaultForEntity,
         for_client: this.playlistToEdit.for_client,
-        is_for_all: this.currentEpisode && this.currentEpisode.id === 'all'
+        is_for_all: this.currentEpisode && this.currentEpisode.id === 'all',
+        task_type_id: null
       }
     }
   },
 
   computed: {
     ...mapGetters([
-      'currentEpisode'
+      'currentEpisode',
+      'productionTaskTypes'
     ]),
 
     isEditing () {
@@ -132,6 +144,14 @@ export default {
       const isAssetEpisode =
         this.currentEpisode && ['all', 'main'].includes(this.currentEpisode.id)
       return isAssetEpisode ? 'asset' : 'shot'
+    },
+
+    taskTypeList () {
+      return [{
+        id: '',
+        color: '#999',
+        name: this.$t('news.all')
+      }].concat(sortByName([...this.productionTaskTypes]))
     }
   },
 
@@ -145,13 +165,16 @@ export default {
       if (this.isEditing) {
         this.form.name = this.playlistToEdit.name
         this.form.for_entity = this.playlistToEdit.for_entity
-        this.form.is_for_all = this.currentEpisode && this.currentEpisode.id === 'all'
+        this.form.is_for_all =
+          this.currentEpisode && this.currentEpisode.id === 'all'
+        this.form.task_type_id = this.playlistToEdit.task_type_id
       } else {
         this.form = {
           name: this.playlistToEdit.name,
           for_entity: this.playlistToEdit.for_entity || this.defaultForEntity,
           for_client: 'false',
-          is_for_all: this.currentEpisode && this.currentEpisode.id === 'all'
+          is_for_all: this.currentEpisode && this.currentEpisode.id === 'all',
+          task_type_id: null
         }
       }
     }

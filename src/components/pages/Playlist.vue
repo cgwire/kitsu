@@ -57,6 +57,7 @@
               'for-client': playlist.for_client || false,
               selected: playlist.id === currentPlaylist.id
             }"
+            :style="playlistElementStyle(playlist)"
             v-for="playlist in playlists"
           >
             <div v-if="!isListToggled">
@@ -606,6 +607,14 @@ export default {
       )
     },
 
+    playlistElementStyle (playlist) {
+      const taskType = this.taskTypeMap.get(playlist.task_type_id)
+      const color = taskType ? taskType.color : 'transparent'
+      return {
+        'border-left': '2px solid ' + color
+      }
+    },
+
     // Data loading
 
     loadShotsData (callback) {
@@ -964,7 +973,8 @@ export default {
         production_id: this.currentProduction.id,
         for_client: form.for_client,
         for_entity: form.for_entity,
-        is_for_all: form.is_for_all
+        is_for_all: form.is_for_all,
+        task_type_id: form.task_type_id
       }
       if (this.isTVShow && this.currentEpisode) {
         newPlaylist.episode_id = this.currentEpisode.id
@@ -1001,7 +1011,8 @@ export default {
           id: form.id,
           for_client: form.for_client,
           for_entity: form.for_entity,
-          name: form.name
+          name: form.name,
+          task_type_id: form.task_type_id
         },
         callback: (err, playlist) => {
           if (err) this.errors.editPlaylist = true

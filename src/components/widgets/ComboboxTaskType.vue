@@ -21,7 +21,10 @@
       <chevron-down-icon class="down-icon flexrow-item"/>
     </div>
     <div
-      class="select-input"
+      :class="{
+        'select-input': true,
+        'up': up
+      }"
       ref="select"
       v-if="showTaskTypeList"
     >
@@ -79,6 +82,10 @@ export default {
     value: {
       default: '',
       type: String
+    },
+    up: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -180,6 +187,11 @@ export default {
   margin-left: -1px;
   max-height: 200px;
   overflow-y: auto;
+
+  &.up {
+    height: 200px;
+    top: -200px;
+  }
 }
 
 .field .label {
