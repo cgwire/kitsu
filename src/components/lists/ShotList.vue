@@ -265,6 +265,7 @@
               'hidden-validation-cell': hiddenColumns[columnId],
               'datatable-row-header': true
             }"
+            :style="{ background: 'inherit' }"
             :key="columnId + '-' + shot.id"
             :column="taskTypeMap.get(columnId)"
             :entity="shot"
