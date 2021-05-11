@@ -65,6 +65,7 @@ const actions = {
     const shots =
      Array.from(rootState.shots.shotMap.values())
        .filter((shot) => shot.sequence_id === sequenceId)
+       .sort((a, b) => a.name.localeCompare(b))
     commit(CASTING_SET_SEQUENCE, sequenceId)
     commit(CASTING_SET_SHOTS, shots)
     return breakdownApi.getSequenceCasting(production.id, sequenceId)
@@ -82,6 +83,7 @@ const actions = {
     const assets =
       Array.from(rootState.assets.assetMap.values())
         .filter((asset) => asset.asset_type_id === assetTypeId)
+        .sort((a, b) => a.name.localeCompare(b))
     commit(CASTING_SET_ASSET_TYPE, assetTypeId)
     commit(CASTING_SET_ASSETS, assets)
     return breakdownApi.getAssetTypeCasting(production.id, assetTypeId)
