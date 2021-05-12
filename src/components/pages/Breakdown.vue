@@ -830,14 +830,14 @@ export default {
     events: {
       'shot:casting-update' (eventData) {
         const shot = this.shotMap.get(eventData.shot_id)
-        if (shot.sequence_id === this.sequenceId) {
+        if (shot && shot.sequence_id === this.sequenceId) {
           this.loadShotCasting(shot)
         }
       },
 
       'asset:casting-update' (eventData) {
         const asset = this.assetMap.get(eventData.asset_id)
-        if (asset.asset_type_id === this.assetTypeId) {
+        if (asset && asset.asset_type_id === this.assetTypeId) {
           this.loadAssetCasting(asset)
         }
       }

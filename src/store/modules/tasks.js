@@ -1023,8 +1023,10 @@ const mutations = {
   [UNASSIGN_TASKS] (state, selectedTaskIds) {
     selectedTaskIds.forEach((taskId) => {
       const task = state.taskMap.get(taskId)
-      task.assignees = []
-      task.assigneesInfo = []
+      if (task) {
+        task.assignees = []
+        task.assigneesInfo = []
+      }
     })
   },
 
