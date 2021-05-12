@@ -402,6 +402,7 @@ import {
   updateModelFromList,
   removeModelFromList
 } from '@/lib/models'
+import { sortShots } from '@/lib/sorting'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import BuildFilterModal from '@/components/modals/BuildFilterModal'
@@ -841,7 +842,7 @@ export default {
     addSequence (sequenceShots) {
       if (sequenceShots.length > 0) {
         const sequenceId = sequenceShots[0].sequence_id
-        const shots = this.shotMap.values()
+        const shots = Array.from(this.shotMap.values())
           .filter(s => s.sequence_id === sequenceId)
           .sort(firstBy('name'))
           .reverse()
@@ -869,7 +870,7 @@ export default {
       this.$options.silent = true
       this.getPending(true)
         .then((shots) => {
-          this.addEntities(shots.reverse(), () => {
+          this.addEntities(sortShots(shots).reverse(), () => {
             this.loading.addDaily = false
             this.$options.silent = false
           })
@@ -879,7 +880,7 @@ export default {
     addEpisodePending () {
       this.loading.addEpisode = true
       this.$options.silent = true
-      const shots = [].concat(...this.shotsByEpisode).reverse()
+      const shots = [].concat(sortShots(...this.shotsByEpisode)).reverse()
       this.addEntities(shots, () => {
         this.loading.addEpisode = false
         this.$options.silent = false
@@ -889,7 +890,7 @@ export default {
     addMovie () {
       this.loading.addMovie = true
       this.$options.silent = true
-      const shots = this.shotMap.values()
+      const shots = sortShots(Array.from(this.shotMap.values()))
       this.addEntities(shots.reverse(), () => {
         this.loading.addMovie = false
         this.$options.silent = false

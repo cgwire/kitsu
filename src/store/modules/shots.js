@@ -440,15 +440,15 @@ const getters = {
     let sequenceShots = []
     let previousShot = null
 
-    for (const shot of state.shotMap.values()) {
+    Array.from(state.shotMap.values()).forEach(shot => {
       if (previousShot && shot.sequence_name !== previousShot.sequence_name) {
         shotsBySequence.push(sequenceShots.slice(0))
         sequenceShots = []
       }
       sequenceShots.push(shot)
       previousShot = shot
-    }
-    shotsBySequence.push(sequenceShots)
+    })
+    shotsBySequence.push(sortShots(sequenceShots))
 
     return shotsBySequence
   },
