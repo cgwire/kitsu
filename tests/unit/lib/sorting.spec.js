@@ -459,11 +459,45 @@ describe('lib/sorting', () => {
 
   it('sortAssetResult', () => {
     const entries = [
-      { id: 1, canceled: true, name: 'asset 2', asset_type_name: 'asset_type_name 2', data: { metadata1: '2' }, validations: { valid: 'task2' } },
-      { id: 2, canceled: true, name: 'asset 1', asset_type_name: 'asset_type_name 2', data: { metadata1: '2' }, validations: { valid: 'task2' } },
-      { id: 3, canceled: true, name: 'asset 2', asset_type_name: 'asset_type_name 1', data: { metadata1: '2' }, validations: { valid: 'task2' } },
-      { id: 4, canceled: true, name: 'asset 2', asset_type_name: 'asset_type_name 2', data: { metadata1: '1' }, validations: { valid: 'task1' } },
-      { id: 5, canceled: false, name: 'asset 2', asset_type_name: 'asset_type_name 2', data: { metadata1: '2' }, validations: { valid: 'task2' } }
+      {
+        id: 1,
+        canceled: true,
+        name: 'asset 2',
+        asset_type_name: 'asset_type_name 2',
+        data: { metadata1: '2' },
+        validations: new Map([['valid',  'task2']])
+      },
+      { id: 2,
+        canceled: true,
+        name: 'asset 1',
+        asset_type_name: 'asset_type_name 2',
+        data: { metadata1: '2' },
+        validations: new Map([['valid',  'task2']])
+      },
+      {
+        id: 3,
+        canceled: true,
+        name: 'asset 2',
+        asset_type_name: 'asset_type_name 1',
+        data: { metadata1: '2' },
+        validations: new Map([['valid',  'task2']])
+      },
+      {
+        id: 4,
+        canceled: true,
+        name: 'asset 2',
+        asset_type_name: 'asset_type_name 2',
+        data: { metadata1: '1' },
+        validations: new Map([['valid',  'task1']])
+      },
+      {
+        id: 5,
+        canceled: false,
+        name: 'asset 2',
+        asset_type_name: 'asset_type_name 2',
+        data: { metadata1: '2' },
+        validations: new Map([['valid',  'task2']])
+      }
     ]
     const sortingMetadata = [
       { type: 'metadata', column: 'valid' }
@@ -471,9 +505,13 @@ describe('lib/sorting', () => {
     const sortingTaskType = [
       { type: 'task_type', column: 'metadata1' }
     ]
-    const taskMap = new Map([['task1', { task_status_short_name: 'status A' }], ['task2', { task_status_short_name: 'status B' }]])
-    const resultsMetadata = sortAssetResult(entries, sortingMetadata, taskTypeMap, taskMap)
-    const resultsTaskTypes = sortAssetResult(entries, sortingTaskType, taskTypeMap, taskMap)
+    const taskMap = new Map()
+    taskMap.set('task1', { task_status_short_name: 'status A' })
+    taskMap.set('task2', { task_status_short_name: 'status B' })
+    const resultsMetadata =
+      sortAssetResult(entries, sortingMetadata, taskTypeMap, taskMap)
+    const resultsTaskTypes =
+      sortAssetResult(entries, sortingTaskType, taskTypeMap, taskMap)
     expect(resultsMetadata).toHaveLength(5)
     expect(resultsMetadata[0].id).toEqual(5)
     expect(resultsMetadata[1].id).toEqual(4)
@@ -491,12 +529,60 @@ describe('lib/sorting', () => {
 
   it('sortShotResult', () => {
     const entries = [
-      { id: 1, canceled: true, name: 'asset 2', sequence_name: 'sequence_name 2', data: { metadata1: '2' }, validations: { valid: 'task2' }, episode_name: 'episode 2' },
-      { id: 2, canceled: true, name: 'asset 1', sequence_name: 'sequence_name 2', data: { metadata1: '2' }, validations: { valid: 'task2' }, episode_name: 'episode 2' },
-      { id: 3, canceled: true, name: 'asset 2', sequence_name: 'sequence_name 1', data: { metadata1: '3' }, validations: { valid: 'task2' }, episode_name: 'episode 2' },
-      { id: 4, canceled: true, name: 'asset 2', sequence_name: 'sequence_name 1', data: { metadata1: '2' }, validations: { valid: 'task2' }, episode_name: 'episode 1' },
-      { id: 5, canceled: true, name: 'asset 2', sequence_name: 'sequence_name 2', data: { metadata1: '1' }, validations: { valid: 'task1' }, episode_name: 'episode 2' },
-      { id: 6, canceled: false, name: 'asset 2', sequence_name: 'sequence_name 2', data: { metadata1: '2' }, validations: { valid: 'task2' }, episode_name: 'episode 2' }
+      {
+        id: 1,
+        canceled: true,
+        name: 'asset 2',
+        sequence_name: 'sequence_name 2',
+        data: { metadata1: '2' },
+        validations: new Map([['valid',  'task2']]),
+        episode_name: 'episode 2'
+      },
+      {
+        id: 2,
+        canceled: true,
+        name: 'asset 1',
+        sequence_name: 'sequence_name 2',
+        data: { metadata1: '2' },
+        validations: new Map([['valid',  'task2']]),
+        episode_name: 'episode 2'
+      },
+      {
+        id: 3,
+        canceled: true,
+        name: 'asset 2',
+        sequence_name: 'sequence_name 1',
+        data: { metadata1: '3' },
+        validations: new Map([['valid',  'task2']]),
+        episode_name: 'episode 2'
+      },
+      {
+        id: 4,
+        canceled: true,
+        name: 'asset 2',
+        sequence_name: 'sequence_name 1',
+        data: { metadata1: '2' },
+        validations: new Map([['valid',  'task2']]),
+        episode_name: 'episode 1'
+      },
+      {
+        id: 5,
+        canceled: true,
+        name: 'asset 2',
+        sequence_name: 'sequence_name 2',
+        data: { metadata1: '1' },
+        validations: new Map([['valid',  'task1']]),
+        episode_name: 'episode 2'
+      },
+      {
+        id: 6,
+        canceled: false,
+        name: 'asset 2',
+        sequence_name: 'sequence_name 2',
+        data: { metadata1: '2' },
+        validations: new Map([['valid',  'task2']]),
+        episode_name: 'episode 2'
+      }
     ]
     const sortingMetadata = [
       { type: 'metadata', column: 'valid' }
@@ -504,9 +590,14 @@ describe('lib/sorting', () => {
     const sortingTaskType = [
       { type: 'task_type', column: 'metadata1' }
     ]
-    const taskMap = new Map([['task1', { task_status_short_name: 'status A' }], ['task2', { task_status_short_name: 'status B' }]])
-    const resultsMetadata = sortShotResult(entries, sortingMetadata, taskTypeMap, taskMap)
-    const resultsTaskTypes = sortShotResult(entries, sortingTaskType, taskTypeMap, taskMap)
+    const taskMap = new Map([
+      ['task1', { task_status_short_name: 'status A' }],
+      ['task2', { task_status_short_name: 'status B' }]
+    ])
+    const resultsMetadata =
+      sortShotResult(entries, sortingMetadata, taskTypeMap, taskMap)
+    const resultsTaskTypes =
+      sortShotResult(entries, sortingTaskType, taskTypeMap, taskMap)
     expect(resultsMetadata).toHaveLength(6)
     expect(resultsMetadata[0].id).toEqual(6)
     expect(resultsMetadata[1].id).toEqual(5)

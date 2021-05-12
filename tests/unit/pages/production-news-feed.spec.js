@@ -25,7 +25,7 @@ describe('ProductionNewsFeed', () => {
     newsStore = {
       getters: {
         newsList: () => range(1, 50).map(i => ({ id: 'news-' + i })),
-        newsListByDay: () => []
+        newsListByDay: () => (timezone) => []
       },
       actions: {
         loadNews: jest.fn(),

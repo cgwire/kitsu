@@ -1,5 +1,6 @@
 import store from '../../../src/store/modules/news'
 
+const timezone = 'Europe/Paris'
 
 describe('News store', () => {
   describe('Getters', () => {
@@ -7,42 +8,61 @@ describe('News store', () => {
       const state = {
         newsList: []
       }
-      const newsListByDay = store.getters.newsListByDay(state)
+      const newsListByDay = store.getters.newsListByDay(state)(timezone)
       expect(newsListByDay).toEqual([])
     })
 
     test('newsByDay - 1 day', () => {
       const state = {
         newsList: [
+          { id: 'news-2', created_at: '2019-05-04T13:12:23' },
+          { id: 'news-1', created_at: '2019-05-04T11:12:23' },
+        ]
+      }
+      const newsListByDay = store.getters.newsListByDay(state)(timezone)
+      expect(newsListByDay).toEqual([
+        [
+          { id: 'news-2', created_at: '2019-05-04T13:12:23' },
+          { id: 'news-1', created_at: '2019-05-04T11:12:23' }
+        ]
+      ])
+    })
+
+    test('newsByDay - 2 day because of timezone', () => {
+      const state = {
+        newsList: [
           { id: 'news-2', created_at: '2019-05-04T23:12:23' },
           { id: 'news-1', created_at: '2019-05-04T21:12:23' },
         ]
       }
-      const newsListByDay = store.getters.newsListByDay(state)
+      const newsListByDay = store.getters.newsListByDay(state)(timezone)
       expect(newsListByDay).toEqual([
         [
-          { id: 'news-2', created_at: '2019-05-04T23:12:23' },
+          { id: 'news-2', created_at: '2019-05-04T23:12:23' }
+        ],
+        [
           { id: 'news-1', created_at: '2019-05-04T21:12:23' }
         ]
       ])
     })
 
+
     test('newsByDay - 2 days', () => {
       const state = {
         newsList: [
-          { id: 'news-3', created_at: '2019-05-04T23:12:23' },
-          { id: 'news-2', created_at: '2019-05-04T21:12:23' },
-          { id: 'news-1', created_at: '2019-05-03T23:12:23' }
+          { id: 'news-3', created_at: '2019-05-04T13:12:23' },
+          { id: 'news-2', created_at: '2019-05-04T11:12:23' },
+          { id: 'news-1', created_at: '2019-05-03T13:12:23' }
         ]
       }
-      const newsListByDay = store.getters.newsListByDay(state)
+      const newsListByDay = store.getters.newsListByDay(state)(timezone)
       expect(newsListByDay).toEqual([
         [
-          { id: 'news-3', created_at: '2019-05-04T23:12:23' },
-          { id: 'news-2', created_at: '2019-05-04T21:12:23' },
+          { id: 'news-3', created_at: '2019-05-04T13:12:23' },
+          { id: 'news-2', created_at: '2019-05-04T11:12:23' },
         ],
         [
-          { id: 'news-1', created_at: '2019-05-03T23:12:23' }
+          { id: 'news-1', created_at: '2019-05-03T13:12:23' }
         ]
       ])
     })
@@ -50,21 +70,21 @@ describe('News store', () => {
     test('newsByDay - 3 days', () => {
       const state = {
         newsList: [
-          { id: 'news-3', created_at: '2019-05-04T23:12:23' },
-          { id: 'news-2', created_at: '2019-05-03T21:12:23' },
-          { id: 'news-1', created_at: '2019-05-02T23:12:23' }
+          { id: 'news-3', created_at: '2019-05-04T13:12:23' },
+          { id: 'news-2', created_at: '2019-05-03T11:12:23' },
+          { id: 'news-1', created_at: '2019-05-02T13:12:23' }
         ]
       }
-      const newsListByDay = store.getters.newsListByDay(state)
+      const newsListByDay = store.getters.newsListByDay(state)(timezone)
       expect(newsListByDay).toEqual([
         [
-          { id: 'news-3', created_at: '2019-05-04T23:12:23' }
+          { id: 'news-3', created_at: '2019-05-04T13:12:23' }
         ],
         [
-          { id: 'news-2', created_at: '2019-05-03T21:12:23' }
+          { id: 'news-2', created_at: '2019-05-03T11:12:23' }
         ],
         [
-          { id: 'news-1', created_at: '2019-05-02T23:12:23' }
+          { id: 'news-1', created_at: '2019-05-02T13:12:23' }
         ]
       ])
     })
