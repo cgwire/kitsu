@@ -1650,7 +1650,9 @@ const mutations = {
           state.nbValidationColumns
         )
       }
-      tmpGrid[validationInfo.x][validationInfo.y] = true
+      if (tmpGrid[validationInfo.x]) {
+        tmpGrid[validationInfo.x][validationInfo.y] = true
+      }
     })
     state.shotSelectionGrid = tmpGrid
   },

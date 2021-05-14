@@ -564,7 +564,7 @@ export default {
         this.$t('tasks.fields.last_comment_date')
       ]
       if (!this.isAssets) {
-        headers.splice(4, 0, 'otot')
+        headers.splice(4, 0, 'Frames')
       }
       const taskLines = [headers]
       this.tasks.forEach((task) => {
