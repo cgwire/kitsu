@@ -1,12 +1,18 @@
 import client from './client'
 
 export default {
-  getPlaylists (production, episode, sortBy, page) {
+  getPlaylists (production, episode, taskTypeId, sortBy, page) {
     let path = `/api/data/projects/${production.id}`
     if (episode) {
       path += `/episodes/${episode.id}/playlists`
+      if (taskTypeId && taskTypeId.length > 0) {
+        path += `?task_type_id=${taskTypeId}`
+      }
     } else {
       path += `/playlists?sort_by=${sortBy}&page=${page}`
+      if (taskTypeId && taskTypeId.length > 0) {
+        path += `&task_type_id=${taskTypeId}`
+      }
     }
     return client.pget(path)
   },

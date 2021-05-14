@@ -50,7 +50,7 @@ const getters = {
 const actions = {
 
   loadPlaylists (
-    { commit, rootGetters }, { sortBy = 'updated_at', page = 1 }
+    { commit, rootGetters }, { sortBy = 'updated_at', page = 1, taskTypeId }
   ) {
     const production = rootGetters.currentProduction
     let episode = rootGetters.currentEpisode
@@ -60,7 +60,9 @@ const actions = {
     if (!isTVShow) episode = null
 
     commit(LOAD_PLAYLISTS_END, [])
-    return playlistsApi.getPlaylists(production, episode, sortBy, page)
+    return playlistsApi.getPlaylists(
+      production, episode, taskTypeId, sortBy, page
+    )
       .then(playlists => {
         commit(LOAD_PLAYLISTS_END, playlists)
         return Promise.resolve(playlists)
@@ -268,12 +270,23 @@ const mutations = {
     let previewFileList = []
     Object.keys(previewFiles).forEach(taskTypeId => {
       previewFiles[taskTypeId].forEach(previewFile => {
+        previewFile.task_type_id = taskTypeId
         previewFileList.push(previewFile)
       })
     })
     previewFileList = sortByDate(previewFileList)
+
+    // We get the latest preview file uploaded
     if (previewFileList.length > 0) {
-      const preview = previewFileList[0]
+      let preview = previewFileList[0]
+
+      // if the playlist is typed, we use the latest for this type.
+      if (playlist.task_type_id) {
+        previewFileList = previewFileList.filter(
+          p => p.task_type_id === playlist.task_type_id
+        )
+        if (previewFileList.length > 0) preview = previewFileList[0]
+      }
       entity.preview_file_id = preview.id
       entity.preview_file_extension = preview.extension
       entity.preview_file_annotations = preview.annotations
