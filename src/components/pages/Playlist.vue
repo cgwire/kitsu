@@ -904,7 +904,8 @@ export default {
     addEpisodePending () {
       this.loading.addEpisode = true
       this.$options.silent = true
-      const shots = [].concat(sortShots(...this.shotsByEpisode)).reverse()
+      let shots = [].concat(...this.shotsByEpisode)
+      shots = sortShots(shots).reverse()
       this.addEntities(shots, () => {
         this.loading.addEpisode = false
         this.$options.silent = false
