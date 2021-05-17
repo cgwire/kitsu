@@ -16,7 +16,7 @@
         icon="refresh"
         @click="loadDayEvents"
       />
-      <span class="flexrow-item">
+      <span class="flexrow-item nb-events">
         {{ events.length }} {{ $t('logs.events') }}
       </span>
     </div>
@@ -195,6 +195,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dark {
+  .tag {
+    color: $white;
+    background: $dark-grey;
+  }
+
+  .nb-events {
+    color: $white;
+  }
+}
+
 .fixed-page {
   margin-top: 60px;
   padding: 2em;
@@ -247,7 +258,7 @@ export default {
   }
 
   .type[data-status="set"] {
-    background: $light-purple;
+    background: $purple;
   }
 
   ul {

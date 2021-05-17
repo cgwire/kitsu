@@ -201,7 +201,7 @@
           @playlist-deleted="$router.push(playlistsPath)"
           @remove-entity="removeEntity"
           @order-change="onOrderChange"
-          @annotationchanged="onAnnotationChanged"
+          @annotation-changed="onAnnotationChanged"
           @for-client-changed="onForClientChanged"
         />
 

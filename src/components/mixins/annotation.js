@@ -9,6 +9,7 @@ export const annotationMixin = {
 
   data () {
     return {
+      notSave: false,
       isShowingPalette: false,
       isShowingPencilPalette: false
     }
@@ -150,6 +151,7 @@ export const annotationMixin = {
           this.annotations.splice(index, 1)
         }
       } else {
+        if (!this.annotations || !this.annotations.push) this.annotations = []
         this.annotations.push({
           time: currentTime,
           width: this.fabricCanvas.width,
@@ -196,6 +198,14 @@ export const annotationMixin = {
       const strokeWidth = converter[pencil]
       this.fabricCanvas.freeDrawingBrush.width = strokeWidth
       this.isShowingPalette = false
+    },
+
+    onWindowsClosed (event) {
+      if (this.notSaved) {
+        const confirmationMessage = 'Your annotations are not saved yet.'
+        event.returnValue = confirmationMessage
+        return confirmationMessage
+      }
     },
 
     // Undo / Redo
@@ -302,6 +312,25 @@ export const annotationMixin = {
     clearCanvas () {
       if (this.fabricCanvas) {
         this.fabricCanvas.clear()
+      }
+    },
+
+    // Saving
+
+    startAnnotationSaving (preview, annotations) {
+      this.notSaved = true
+      this.$options.changesToSave = { preview, annotations }
+      this.$options.annotationToSave = setTimeout(() => {
+        this.notSaved = false
+        this.$emit('annotation-changed', this.$options.changesToSave)
+      }, 3000)
+    },
+
+    endAnnotationSaving () {
+      if (this.notSaved) {
+        clearTimeout(this.$options.annotationToSave)
+        this.notSaved = false
+        this.$emit('annotation-changed', this.$options.changesToSave)
       }
     }
   }

@@ -483,6 +483,7 @@ export default {
   },
 
   beforeDestroy () {
+    this.endAnnotationSaving()
     this.removeEvents()
   },
 
@@ -841,6 +842,7 @@ export default {
     // Screen
 
     setFullScreen () {
+      this.endAnnotationSaving()
       this.documentSetFullScreen(this.container)
       this.container.setAttribute('data-fullscreen', !!true)
       this.fullScreen = true
@@ -854,6 +856,7 @@ export default {
     },
 
     exitFullScreen () {
+      this.endAnnotationSaving()
       this.documentExitFullScreen()
       this.container.setAttribute('data-fullscreen', !!false)
       this.isComparing = false
@@ -884,6 +887,7 @@ export default {
       ) {
         this.isComparing = false
         this.fullScreen = false
+        this.endAnnotationSaving()
         this.$nextTick(() => {
           this.previewViewer.resetVideo()
           this.previewViewer.resetPicture()
@@ -1036,10 +1040,13 @@ export default {
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)
       if (!this.readOnly) {
-        this.$emit('annotation-changed', {
-          preview: this.currentPreview,
-          annotations: annotations
-        })
+        const preview = this.currentPreview
+        preview.annotations = annotations
+        if (!this.notSaved) {
+          this.startAnnotationSaving(preview, annotations)
+        } else {
+          this.$options.changesToSave = { preview, annotations }
+        }
       }
     },
 
@@ -1188,6 +1195,7 @@ export default {
 
     configureEvents () {
       window.addEventListener('keydown', this.onKeyDown, false)
+      window.addEventListener('beforeunload', this.onWindowsClosed)
       this.container.addEventListener(
         'fullscreenchange', this.onFullScreenChange, false)
       this.container.addEventListener(
@@ -1200,6 +1208,7 @@ export default {
 
     removeEvents () {
       window.removeEventListener('keydown', this.onKeyDown)
+      window.removeEventListener('beforeunload', this.onWindowsClosed)
       this.container.removeEventListener(
         'fullscreenchange', this.onFullScreenChange, false)
       this.container.removeEventListener(
@@ -1361,6 +1370,7 @@ export default {
 
   watch: {
     currentPreview () {
+      this.endAnnotationSaving()
       this.reloadAnnotations()
       if (this.isMovie) {
         this.configureVideo()
@@ -1386,6 +1396,7 @@ export default {
     },
 
     'currentPreview.revision' () {
+      this.endAnnotationSaving()
       this.currentIndex = 1
     },
 
@@ -1406,6 +1417,7 @@ export default {
     },
 
     isComparing () {
+      this.endAnnotationSaving()
       if (!this.isComparing) {
         if (this.comparisonViewer) this.comparisonViewer.pause()
         this.taskTypeId = ''
@@ -1418,6 +1430,7 @@ export default {
 
     isDrawing () {
       if (this.fabricCanvas) this.fabricCanvas.isDrawingMode = this.isDrawing
+      else this.endAnnotationSaving()
     },
 
     isOrdering () {

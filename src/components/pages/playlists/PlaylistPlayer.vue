@@ -869,6 +869,7 @@ export default {
   },
 
   beforeDestroy () {
+    this.endAnnotationSaving()
     this.removeEvents()
   },
 
@@ -1200,11 +1201,13 @@ export default {
         'MSFullscreenChange', this.onFullScreenChange, false)
       this.container.addEventListener(
         'webkitfullscreenchange', this.onFullScreenChange, false)
+      window.addEventListener('beforeunload', this.onWindowsClosed)
     },
 
     removeEvents () {
       window.removeEventListener('keydown', this.onKeyDown)
       window.removeEventListener('resize', this.onWindowResize)
+      window.removeEventListener('beforeunload', this.onWindowsClosed)
       this.$el.onmousemove = null
       this.container.removeEventListener(
         'fullscreenchange', this.onFullScreenChange, false)
@@ -2159,7 +2162,7 @@ export default {
         annotations: entity.preview_file_annotations || []
       }
       // If we are working on a subpreview build the preview object from it.
-      if (this.isCurrentPreviewPicture && this.currentPreviewIndex > 0) {
+      if (this.currentPreviewIndex > 0) {
         const index = this.currentPreviewIndex - 1
         const previewFile = this.currentEntity.preview_file_previews[index]
         preview = {
@@ -2170,10 +2173,12 @@ export default {
       }
       if (!this.isCurrentUserArtist) { // Artists are not allowed to draw
         // Emit an event for remote and store update
-        this.$emit('annotationchanged', {
-          preview: preview,
-          annotations: annotations
-        })
+        if (!this.notSaved) {
+          this.startAnnotationSaving(preview, annotations)
+        } else {
+          this.$options.changesToSave = { preview, annotations }
+        }
+
         // Update information locally
         entity.preview_file_annotations = annotations
         Object.keys(entity.preview_files).forEach(taskTypeId => {
@@ -2200,7 +2205,7 @@ export default {
         this.annotations = this.currentEntity.preview_file_annotations
       }
       time = roundToFrame(time, this.fps)
-      if (this.annotations) {
+      if (this.annotations && this.annotations.find) {
         let annotation = this.annotations.find(
           (annotation) => annotation.time === time
         )
@@ -2219,6 +2224,7 @@ export default {
         }
         return annotation
       } else {
+        this.annotations = []
         return null
       }
     },
@@ -2333,6 +2339,7 @@ export default {
 
   watch: {
     currentPreviewIndex () {
+      this.endAnnotationSaving()
       this.resetUndoStacks()
       this.$nextTick(() => {
         if (this.isCurrentPreviewPicture) {
@@ -2344,6 +2351,7 @@ export default {
     },
 
     playingEntityIndex () {
+      this.endAnnotationSaving()
       this.updateTaskPanel()
       this.resetUndoStacks()
       this.currentPreviewIndex = 0
@@ -2416,6 +2424,7 @@ export default {
     },
 
     playlist () {
+      this.endAnnotationSaving()
       this.forClient = Boolean(this.playlist.for_client).toString()
       this.$nextTick(() => {
         this.updateProgressBar()
