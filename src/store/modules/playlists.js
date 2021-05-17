@@ -70,7 +70,7 @@ const actions = {
   },
 
   loadMorePlaylists (
-    { commit, rootGetters }, { sortBy = 'updated_at', page = 1 }
+    { commit, rootGetters }, { sortBy = 'updated_at', page = 1, taskTypeId }
   ) {
     const production = rootGetters.currentProduction
     let episode = rootGetters.currentEpisode
@@ -79,7 +79,9 @@ const actions = {
     if (state.playlists.length === 0) return Promise.resolve([])
     if (isTVShow && !episode) return Promise.resolve([])
     if (!isTVShow) episode = null
-    return playlistsApi.getPlaylists(production, episode, sortBy, page)
+    return playlistsApi.getPlaylists(
+      production, episode, taskTypeId, sortBy, page
+    )
       .then(playlists => {
         commit(ADD_PLAYLISTS, playlists)
         return Promise.resolve(playlists)

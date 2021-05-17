@@ -708,12 +708,13 @@ export default {
         this.page++
         this.loadMorePlaylists({
           sortBy: this.currentSort,
-          page: this.page
+          page: this.page,
+          taskTypeId: this.taskTypeId
         })
           .then(playlists => {
-            if (playlists.length !== 0) {
+            setTimeout(() => {
               this.$options.silentMore = false
-            }
+            }, 1000)
           })
           .catch(err => {
             console.error(err)
@@ -1171,6 +1172,7 @@ export default {
     },
 
     taskTypeId () {
+      this.page = 1
       this.loadPlaylistsData(true)
     },
 
