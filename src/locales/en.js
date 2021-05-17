@@ -472,6 +472,7 @@ export default {
     download_csv: 'Download .csv',
     download_zip: 'Download .zip',
     failed: 'Failed',
+    filter_task_type: 'Filtered with task type',
     for_client: 'The Client',
     for_studio: 'The Studio',
     edit_title: 'Edit playlist',

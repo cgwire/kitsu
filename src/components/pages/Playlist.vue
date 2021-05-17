@@ -9,27 +9,36 @@
           toggled: isListToggled
         }"
         v-scroll="onPlaylistListScroll"
-        v-if="playlists.length > 0"
       >
+
+        <div class="flexrow">
+          <combobox-task-type
+            class="flexrow-item selector mb1"
+            :task-type-list="taskTypeList"
+            :label="$t('playlists.filter_task_type')"
+            :thin="true"
+            v-model="taskTypeId"
+          />
+        </div>
 
         <div class="flexrow">
           <template v-if="!isListToggled">
             <combobox
-              class="flexrow-item"
+              class="flexrow-item mb2"
               :label="$t('main.sorted_by')"
               :options="sortOptions"
-              :thin="true"
               locale-key-prefix="playlists.fields."
               v-model="currentSort"
             />
             <span class="flexrow-item filler"></span>
           </template>
-          <button-simple
+          <!--button-simple
             class="flexrow-item"
             style="flex: 0;"
             @click="isListToggled = !isListToggled"
             :icon="isListToggled ? 'right' : 'left'"
-          />
+          /-->
+
         </div>
 
         <button
@@ -378,6 +387,7 @@
       :is-loading="loading.editPlaylist"
       :is-error="errors.editPlaylist"
       :playlist-to-edit="playlistToEdit"
+      :task-type-id="taskTypeId"
       @cancel="hideEditModal"
       @confirm="confirmEditPlaylist"
     />
@@ -407,6 +417,7 @@ import { sortShots } from '@/lib/sorting'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import BuildFilterModal from '@/components/modals/BuildFilterModal'
 import Combobox from '@/components/widgets/Combobox'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import EditPlaylistModal from '@/components/modals/EditPlaylistModal'
 import ErrorText from '@/components/widgets/ErrorText'
 import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail'
@@ -422,6 +433,7 @@ export default {
     BuildFilterModal,
     ButtonSimple,
     Combobox,
+    ComboboxTaskType,
     ErrorText,
     EditPlaylistModal,
     LightEntityThumbnail,
@@ -437,16 +449,17 @@ export default {
     return {
       currentPlaylist: { name: '' },
       currentSort: 'updated_at',
+      currentEntities: {},
+      isAddingEntity: false,
+      isListToggled: false,
+      page: 1,
+      taskTypeId: '',
+      sortedPlaylists: [],
       sortOptions: [
         'updated_at',
         'created_at',
         'name'
       ].map(name => ({ label: name, value: name })),
-      currentEntities: {},
-      isAddingEntity: false,
-      isListToggled: false,
-      page: 1,
-      sortedPlaylists: [],
       playlistToEdit: {
         name: `${moment().format('YYYY-MM-DD HH:mm:ss')}`,
         for_client: false
@@ -492,6 +505,7 @@ export default {
       'isCurrentUserManager',
       'isShotsLoading',
       'isTVShow',
+      'productionTaskTypes',
       'playlistMap',
       'playlists',
       'playlistsPath',
@@ -562,7 +576,16 @@ export default {
       const productionName =
         this.currentProduction ? this.currentProduction.name : ''
       return `${productionName} ${this.$t('playlists.title')} - Kitsu`
+    },
+
+    taskTypeList () {
+      return [{
+        id: '',
+        color: '#999',
+        name: this.$t('news.all')
+      }].concat([...this.productionTaskTypes])
     }
+
   },
 
   methods: {
@@ -660,7 +683,8 @@ export default {
       if (this.playlists.length === 0 || force) {
         return this.loadPlaylists({
           sortBy: this.currentSort,
-          page: this.page
+          page: this.page,
+          taskTypeId: this.taskTypeId
         })
           .then(() => {
             return setFirstPlaylist()
@@ -880,7 +904,8 @@ export default {
     addEpisodePending () {
       this.loading.addEpisode = true
       this.$options.silent = true
-      const shots = [].concat(sortShots(...this.shotsByEpisode)).reverse()
+      let shots = [].concat(...this.shotsByEpisode)
+      shots = sortShots(shots).reverse()
       this.addEntities(shots, () => {
         this.loading.addEpisode = false
         this.$options.silent = false
@@ -1143,6 +1168,10 @@ export default {
   watch: {
     $route () {
       this.setCurrentPlaylist()
+    },
+
+    taskTypeId () {
+      this.loadPlaylistsData(true)
     },
 
     currentPlaylist () {

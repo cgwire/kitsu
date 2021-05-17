@@ -673,7 +673,6 @@ export default {
     },
 
     resetTaskIndex () {
-      console.log(this.tasks)
       this.$options.taskIndex = buildSupervisorTaskIndex(
         this.tasks, this.personMap, this.taskStatusMap
       )

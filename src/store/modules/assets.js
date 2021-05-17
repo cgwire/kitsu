@@ -838,6 +838,7 @@ const mutations = {
     newAsset.tasks = []
     if (asset) {
       newAsset.episode_id = newAsset.source_id
+      delete newAsset.tasks
       Object.assign(asset, newAsset)
       state.displayedAssets = sortAssets(state.displayedAssets)
     } else {
@@ -988,7 +989,9 @@ const mutations = {
           state.nbValidationColumns
         )
       }
-      tmpGrid[validationInfo.x][validationInfo.y] = true
+      if (tmpGrid[validationInfo.x]) {
+        [validationInfo.y] = true
+      }
     })
     state.assetSelectionGrid = tmpGrid
   },

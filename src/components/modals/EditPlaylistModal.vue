@@ -96,6 +96,10 @@ export default {
     typeDisabled: {
       type: Boolean,
       default: false
+    },
+    taskTypeId: {
+      type: String,
+      default: ''
     }
   },
 
@@ -111,7 +115,7 @@ export default {
         for_entity: this.playlistToEdit.for_entity || this.defaultForEntity,
         for_client: this.playlistToEdit.for_client,
         is_for_all: this.currentEpisode && this.currentEpisode.id === 'all',
-        task_type_id: null
+        task_type_id: this.taskTypeId
       }
     }
   },
@@ -147,11 +151,14 @@ export default {
     },
 
     taskTypeList () {
+      const forShots = this.form.for_entity !== 'asset'
+      const taskTypes = [...this.productionTaskTypes]
+        .filter(taskType => taskType.for_shots === forShots)
       return [{
         id: '',
         color: '#999',
         name: this.$t('news.all')
-      }].concat(sortByName([...this.productionTaskTypes]))
+      }].concat(sortByName([...taskTypes]))
     }
   },
 
@@ -174,7 +181,7 @@ export default {
           for_entity: this.playlistToEdit.for_entity || this.defaultForEntity,
           for_client: 'false',
           is_for_all: this.currentEpisode && this.currentEpisode.id === 'all',
-          task_type_id: null
+          task_type_id: this.taskTypeId
         }
       }
     }
