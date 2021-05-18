@@ -1527,7 +1527,7 @@ export default {
     },
 
     onVideoRepeated () {
-      if (!this.isCommentsHidden || this.isFocusTextarea()) {
+      if (!this.isCommentsHidden && !this.isFocusTextarea()) {
         this.clearFocus()
       }
       if (this.rawPlayerComparison) {
