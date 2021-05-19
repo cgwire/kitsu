@@ -206,6 +206,12 @@
               bold: !shot.canceled}"
             >
             <div class="flexrow">
+              <input
+                type="checkbox"
+                class="mr1"
+                :checked="selectedShots.has(shot.id)"
+                @input="event => toggleLine(shot, event)"
+              >
               <entity-thumbnail :entity="shot" :empty-height="32" />
               <router-link
                 tabindex="-1"
@@ -600,6 +606,7 @@ export default {
       'isShowInfos',
       'isTVShow',
       'nbSelectedTasks',
+      'selectedShots',
       'shotFilledColumns',
       'shotMap',
       'shotMetadataDescriptors',
@@ -700,8 +707,13 @@ export default {
 
   methods: {
     ...mapActions([
-      'displayMoreShots'
+      'displayMoreShots',
+      'setShotSelection'
     ]),
+
+    toggleLine (shot, event) {
+      this.setShotSelection({ shot, selected: event.target.checked })
+    },
 
     onBodyScroll (event, position) {
       this.$emit('scroll', position.scrollTop)
