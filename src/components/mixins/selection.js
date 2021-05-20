@@ -1,11 +1,20 @@
 export const selectionListMixin = {
+  data () {
+    return {
+      shiftKeyPressed: false
+    }
+  },
 
   computed: {
   },
 
   methods: {
+    onKeyUp (event) {
+      this.shiftKeyPressed = event.shiftKey
+    },
 
     onKeyDown (event) {
+      this.shiftKeyPressed = event.shiftKey
       const lastSelection =
         this.lastSelection ? this.lastSelection : { x: 0, y: 0 }
       const i = lastSelection.x

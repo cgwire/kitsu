@@ -565,7 +565,8 @@ export default {
         timeSpent: true
       },
       stickedColumns: {},
-      offsets: {}
+      offsets: {},
+      lastSelectedShot: null
     }
   },
 
@@ -712,7 +713,31 @@ export default {
     ]),
 
     toggleLine (shot, event) {
-      this.setShotSelection({ shot, selected: event.target.checked })
+      const selected = event.target.checked
+      const shotsToSelect = [shot]
+      if (selected && this.shiftKeyPressed && this.lastSelectedShot) {
+        const shotsFlatten = this.displayedShots.flat()
+        let startShotIndex = shotsFlatten.findIndex(
+          displayedShot => displayedShot.id === this.lastSelectedShot.id
+        )
+        let endShotIndex = shotsFlatten.findIndex(
+          displayedShot => displayedShot.id === shot.id
+        )
+        if (startShotIndex > endShotIndex) {
+          [startShotIndex, endShotIndex] = [endShotIndex, startShotIndex]
+        }
+        if (startShotIndex >= 0 && endShotIndex >= 0) {
+          for (let index = startShotIndex + 1; index < endShotIndex; index++) {
+            shotsToSelect.push(shotsFlatten[index])
+          }
+        }
+      }
+      if (selected) {
+        this.lastSelectedShot = shot
+      }
+      shotsToSelect.forEach(shot => {
+        this.setShotSelection({ shot, selected })
+      })
     },
 
     onBodyScroll (event, position) {
