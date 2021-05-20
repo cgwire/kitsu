@@ -93,8 +93,12 @@ import {
   LOCK_ASSET,
   UNLOCK_ASSET,
 
-  RESET_ALL
+  RESET_ALL,
+
+  CLEAR_SELECTED_ASSETS,
+  SET_ASSET_SELECTION
 } from '../mutation-types'
+import async from 'async'
 
 const helpers = {
   getCurrentProduction () {
@@ -291,7 +295,9 @@ const initialState = {
 
   assetCreated: '',
   personTasks: [],
-  assetListScrollPosition: 0
+  assetListScrollPosition: 0,
+
+  selectedAssets: new Map()
 }
 
 const state = {
@@ -340,7 +346,9 @@ const getters = {
   isAssetTime: state => state.isAssetTime,
   isAssetDescription: state => state.isAssetDescription,
 
-  assetsCsvFormData: state => state.assetsCsvFormData
+  assetsCsvFormData: state => state.assetsCsvFormData,
+
+  selectedAssets: state => state.selectedAssets
 }
 
 const actions = {
@@ -648,6 +656,35 @@ const actions = {
         .map(a => a.validations.get(taskTypeId))
     }
     return dispatch('deleteAllTasks', { projectId, taskTypeId, taskIds })
+  },
+
+  setAssetSelection ({ commit }, { asset, selected }) {
+    commit(SET_ASSET_SELECTION, { asset, selected })
+  },
+
+  clearSelectedAssets ({ commit }) {
+    commit(CLEAR_SELECTED_ASSETS)
+  },
+
+  deleteSelectedAssets ({ state, dispatch }) {
+    return new Promise((resolve, reject) => {
+      let selectedAssetIds = [...state.selectedAssets.values()].filter(asset => !asset.canceled).map(asset => asset.id)
+      if (selectedAssetIds.length === 0) {
+        selectedAssetIds = [...state.selectedAssets.keys()]
+      }
+      async.eachSeries(selectedAssetIds, (assetId, next) => {
+        const asset = state.assetMap.get(assetId)
+        if (asset) {
+          dispatch('deleteAsset', asset)
+        }
+        next()
+      }, (err) => {
+        if (err) reject(err)
+        else {
+          resolve()
+        }
+      })
+    })
   }
 }
 
@@ -663,6 +700,8 @@ const mutations = {
     state.assetFilledColumns = {}
     helpers.setListStats(state, [])
     state.assetSearchQueries = []
+
+    state.selectedAssets = new Map()
   },
 
   [LOAD_ASSETS_START] (state) {
@@ -678,6 +717,8 @@ const mutations = {
     state.assetFilledColumns = {}
     helpers.setListStats(state, [])
     state.assetSearchQueries = []
+
+    state.selectedAssets = new Map()
   },
 
   [LOAD_ASSETS_ERROR] (state) {
@@ -1085,6 +1126,21 @@ const mutations = {
     cache.result = []
 
     Object.assign(state, { ...initialState })
+  },
+
+  [SET_ASSET_SELECTION] (state, { asset, selected }) {
+    if (!selected && state.selectedAssets.has(asset.id)) {
+      state.selectedAssets.delete(asset.id)
+      state.selectedAssets = new Map(state.selectedAssets) // for reactivity
+    }
+    if (selected) {
+      state.selectedAssets.set(asset.id, asset)
+      state.selectedAssets = new Map(state.selectedAssets) // for reactivity
+    }
+  },
+
+  [CLEAR_SELECTED_ASSETS] (state) {
+    state.selectedAssets = new Map()
   }
 }
 

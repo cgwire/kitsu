@@ -124,8 +124,12 @@ import {
   LOCK_SHOT,
   UNLOCK_SHOT,
 
-  RESET_ALL
+  RESET_ALL,
+
+  CLEAR_SELECTED_SHOTS,
+  SET_SHOT_SELECTION
 } from '../mutation-types'
+import async from 'async'
 
 const AVERAGE = 'average'
 const COUNT = 'count'
@@ -370,7 +374,9 @@ const initialState = {
   episodeListScrollPosition: 0,
 
   searchSequenceFilters: [],
-  shotValidationColumns: []
+  shotValidationColumns: [],
+
+  selectedShots: new Map()
 }
 
 const state = {
@@ -467,7 +473,9 @@ const getters = {
 
   episodeOptions: state => state.episodes.map(
     (episode) => { return { label: episode.name, value: episode.id } }
-  )
+  ),
+
+  selectedShots: state => state.selectedShots
 }
 
 const actions = {
@@ -1095,6 +1103,35 @@ const actions = {
         .map(a => a.validations.get(taskTypeId))
     }
     return dispatch('deleteAllTasks', { projectId, taskTypeId, taskIds })
+  },
+
+  setShotSelection ({ commit }, { shot, selected }) {
+    commit(SET_SHOT_SELECTION, { shot, selected })
+  },
+
+  clearSelectedShots ({ commit }) {
+    commit(CLEAR_SELECTED_SHOTS)
+  },
+
+  deleteSelectedShots ({ state, dispatch }) {
+    return new Promise((resolve, reject) => {
+      let selectedShotIds = [...state.selectedShots.values()].filter(shot => !shot.canceled).map(shot => shot.id)
+      if (selectedShotIds.length === 0) {
+        selectedShotIds = [...state.selectedShots.keys()]
+      }
+      async.eachSeries(selectedShotIds, (shotId, next) => {
+        const shot = state.shotMap.get(shotId)
+        if (shot) {
+          dispatch('deleteShot', shot)
+        }
+        next()
+      }, (err) => {
+        if (err) reject(err)
+        else {
+          resolve()
+        }
+      })
+    })
   }
 }
 
@@ -1117,6 +1154,8 @@ const mutations = {
     state.displayedSequencesLength = 0
     state.displayedEpisodes = []
     state.displayedEpisodesLength = 0
+
+    state.selectedShots = new Map()
   },
 
   [LOAD_SHOTS_START] (state) {
@@ -1140,6 +1179,8 @@ const mutations = {
     state.displayedSequencesLength = 0
     state.displayedEpisodes = []
     state.displayedEpisodesLength = 0
+
+    state.selectedShots = new Map()
   },
 
   [LOAD_SHOTS_ERROR] (state) {
@@ -1881,6 +1922,21 @@ const mutations = {
     cache.shots = []
     cache.result = []
     cache.shotIndex = {}
+  },
+
+  [SET_SHOT_SELECTION] (state, { shot, selected }) {
+    if (!selected && state.selectedShots.has(shot.id)) {
+      state.selectedShots.delete(shot.id)
+      state.selectedShots = new Map(state.selectedShots) // for reactivity
+    }
+    if (selected) {
+      state.selectedShots.set(shot.id, shot)
+      state.selectedShots = new Map(state.selectedShots) // for reactivity
+    }
+  },
+
+  [CLEAR_SELECTED_SHOTS] (state) {
+    state.selectedShots = new Map()
   }
 }
 

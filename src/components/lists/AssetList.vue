@@ -195,11 +195,19 @@
           v-for="(asset, i) in group"
         >
           <td class="episode" v-if="isTVShow">
-            {{
-              episodeMap.get(asset.episode_id)
-              ? episodeMap.get(asset.episode_id).name
-              : 'MP'
-            }}
+            <div class="flexrow">
+              <input
+                type="checkbox"
+                class="mr1"
+                :checked="selectedAssets.has(asset.id)"
+                @input="event => toggleLine(asset, event)"
+              >
+              {{
+                episodeMap.get(asset.episode_id)
+                ? episodeMap.get(asset.episode_id).name
+                : 'MP'
+              }}
+            </div>
           </td>
           <th
             :class="{
@@ -208,6 +216,13 @@
               bold: !asset.canceled
             }">
             <div class="flexrow">
+              <input
+                type="checkbox"
+                class="mr1"
+                :checked="selectedAssets.has(asset.id)"
+                @input="event => toggleLine(asset, event)"
+                v-if="!isTVShow"
+              >
               <entity-thumbnail :entity="asset" :empty-height="32" />
               <router-link
                 tabindex="-1"
@@ -533,6 +548,7 @@ export default {
       'isAssetEstimation',
       'isAssetTime',
       'isTVShow',
+      'selectedAssets',
       'selectedTasks',
       'taskMap',
       'taskTypeMap'
@@ -629,8 +645,13 @@ export default {
 
   methods: {
     ...mapActions([
-      'displayMoreAssets'
+      'displayMoreAssets',
+      'setAssetSelection'
     ]),
+
+    toggleLine (asset, event) {
+      this.setAssetSelection({ asset, selected: event.target.checked })
+    },
 
     onBodyScroll (event, position) {
       this.$emit('scroll', position.scrollTop)

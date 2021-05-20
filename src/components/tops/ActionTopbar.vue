@@ -286,13 +286,63 @@
           </div>
         </div>
 
+        <div
+          class="flexrow-item"
+          v-if="selectedBar === 'delete-assets'"
+        >
+          <div class="flexrow">
+            <div class="flexrow-item strong bigger hide-small-screen">
+              {{ $t('assets.delete_for_selection', {nbSelectedAssets}) }}
+            </div>
+            <div class="flexrow-item" v-if="!isAssetDeletionLoading">
+              <button
+                class="button is-danger confirm-button"
+                @click="confirmAssetDeletion"
+              >
+                {{ $t('main.confirmation') }}
+              </button>
+            </div>
+            <div class="flexrow-item" v-else>
+              <spinner :is-white="true" />
+            </div>
+            <div class="flexrow-item error" v-if="errors.deleteAsset">
+              {{ $t('assets.multiple_delete_error') }}
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="flexrow-item"
+          v-if="selectedBar === 'delete-shots'"
+        >
+          <div class="flexrow">
+            <div class="flexrow-item strong bigger hide-small-screen">
+              {{ $t('shots.delete_for_selection', {nbSelectedShots}) }}
+            </div>
+            <div class="flexrow-item" v-if="!isShotDeletionLoading">
+              <button
+                class="button is-danger confirm-button"
+                @click="confirmShotDeletion"
+              >
+                {{ $t('main.confirmation') }}
+              </button>
+            </div>
+            <div class="flexrow-item" v-else>
+              <spinner :is-white="true" />
+            </div>
+            <div class="flexrow-item error" v-if="errors.deleteShot">
+              {{ $t('shots.multiple_delete_error') }}
+            </div>
+          </div>
+        </div>
+
         <div class="flexrow-item clear-selection-container has-text-right">
           <div class="flexrow has-text-right">
             <div style="flex: 1"></div>
             <notification-bell class="flexrow-item" :is-white="true" />
             <div
               class="clear-selection flexrow flexrow-item"
-              @click="clearSelectedTasks"
+              @click="clearSelection"
             >
               <x-icon class="flexrow-item">
               </x-icon>
@@ -366,6 +416,22 @@
         >
           {{ $t('menu.run_custom_action') }}
         </div>
+
+        <div
+          class="more-menu-item"
+          v-if="isCurrentViewAsset && isCurrentUserManager"
+          @click="selectBar('delete-assets')"
+        >
+          {{ $t('menu.delete_assets') }}
+        </div>
+
+        <div
+          class="more-menu-item"
+          v-if="isCurrentViewShot && isCurrentUserManager"
+          @click="selectBar('delete-shots')"
+        >
+          {{ $t('menu.delete_shots') }}
+        </div>
       </div>
     </div>
 
@@ -421,11 +487,13 @@ export default {
       customAction: {},
       customActions: [],
       isAssignationLoading: false,
+      isAssetDeletionLoading: false,
       isChangePriorityLoading: false,
       isChangeStatusLoading: false,
       isCreationLoading: false,
       isDeletionLoading: false,
       isMoreMenuDisplayed: true,
+      isShotDeletionLoading: false,
       person: null,
       priority: '0',
       selectedBar: 'assignation',
@@ -454,7 +522,9 @@ export default {
         }
       ],
       errors: {
-        deleteTask: false
+        deleteAsset: false,
+        deleteTask: false,
+        deleteShot: false
       }
     }
   },
@@ -474,15 +544,27 @@ export default {
       'people',
       'personMap',
       'selectedTasks',
+      'selectedAssets',
+      'selectedShots',
       'shotCustomActions',
       'taskStatusForCurrentUser',
       'user'
     ]),
 
+    nbSelectedAssets () {
+      return this.selectedAssets.size
+    },
+
+    nbSelectedShots () {
+      return this.selectedShots.size
+    },
+
     isHidden () {
       return (
         this.nbSelectedTasks === 0 &&
-        this.nbSelectedValidations === 0
+        this.nbSelectedValidations === 0 &&
+        this.nbSelectedAssets === 0 &&
+        this.nbSelectedShots === 0
       ) ||
       !(
         this.isCurrentViewAsset ||
@@ -558,6 +640,8 @@ export default {
         playlists: 'menu.generate_playlists',
         tasks: 'menu.create_tasks',
         'delete-tasks': 'menu.delete_tasks',
+        'delete-assets': 'menu.delete_assets',
+        'delete-shots': 'menu.delete_shots',
         'custom-actions': 'menu.run_custom_action'
       }
       return this.$t(labels[this.selectedBar])
@@ -576,7 +660,11 @@ export default {
   methods: {
     ...mapActions([
       'assignSelectedTasks',
+      'clearSelectedAssets',
+      'clearSelectedShots',
       'createSelectedTasks',
+      'deleteSelectedAssets',
+      'deleteSelectedShots',
       'deleteSelectedTasks',
       'unassignSelectedTasks',
       'changeSelectedTaskStatus',
@@ -656,6 +744,36 @@ export default {
         })
     },
 
+    confirmAssetDeletion () {
+      this.isAssetDeletionLoading = true
+      this.errors.deleteAsset = false
+      this.deleteSelectedAssets()
+        .then(() => {
+          this.isAssetDeletionLoading = false
+          this.clearSelectedAssets()
+        })
+        .catch((err) => {
+          console.error(err)
+          this.isAssetDeletionLoading = false
+          this.errors.deleteAsset = true
+        })
+    },
+
+    confirmShotDeletion () {
+      this.isShotDeletionLoading = true
+      this.errors.deleteShot = false
+      this.deleteSelectedShots()
+        .then(() => {
+          this.isShotDeletionLoading = false
+          this.clearSelectedShots()
+        })
+        .catch((err) => {
+          console.error(err)
+          this.isShotDeletionLoading = false
+          this.errors.deleteShot = true
+        })
+    },
+
     confirmPlaylistGeneration () {
       this.modals.playlist = true
     },
@@ -721,6 +839,16 @@ export default {
           this.$store.commit('CLEAR_SELECTED_TASKS')
         }
       }
+    },
+
+    clearSelection () {
+      if (this.selectedBar === 'delete-assets') {
+        this.clearSelectedAssets()
+      } else if (this.selectedBar === 'delete-shots') {
+        this.clearSelectedShots()
+      } else {
+        this.clearSelectedTasks()
+      }
     }
   },
 
@@ -733,6 +861,15 @@ export default {
     isHidden () {
       if (!this.isHidden) {
         window.addEventListener('keydown', this.onKeyDown)
+        if (this.isCurrentViewAsset && this.nbSelectedAssets > 0) {
+          this.selectedBar = 'delete-assets'
+          return
+        }
+        if (this.isCurrentViewShot && this.nbSelectedShots > 0) {
+          this.selectedBar = 'delete-shots'
+          return
+        }
+
         const prefix = this.storagePrefix
         const lastSelection = localStorage.getItem(`${prefix}-selected-bar`)
         if (lastSelection) {

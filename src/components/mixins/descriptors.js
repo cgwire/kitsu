@@ -2,6 +2,8 @@
  * Set of function to facilitate the display and edition of metadata in
  * entity lists.
  */
+import { mapGetters } from 'vuex'
+
 export const descriptorMixin = {
 
   created () {
@@ -14,6 +16,10 @@ export const descriptorMixin = {
   },
 
   computed: {
+    ...mapGetters([
+      'selectedAssets',
+      'selectedShots'
+    ]),
     descriptorLength () {
       return this.shotMetadataDescriptors
         ? this.shotMetadataDescriptors.length
@@ -26,10 +32,26 @@ export const descriptorMixin = {
       this.$emit('add-metadata')
     },
 
-    onMetadataFieldChanged (entry, descriptor, event) {
+    emitMetadataChanged (entry, descriptor, value) {
       this.$emit('metadata-changed', {
-        entry, descriptor, value: event.target.value
+        entry, descriptor, value
       })
+    },
+
+    onMetadataFieldChanged (entry, descriptor, event) {
+      if (this.selectedShots.has(entry.id)) {
+        // if the line is selected, also modify the cells of the other selected lines
+        this.selectedShots.forEach((shot, _) => {
+          this.emitMetadataChanged(shot, descriptor, event.target.value)
+        })
+      } else if (this.selectedAssets.has(entry.id)) {
+        // if the line is selected, also modify the cells of the other selected lines
+        this.selectedAssets.forEach((asset, _) => {
+          this.emitMetadataChanged(asset, descriptor, event.target.value)
+        })
+      } else {
+        this.emitMetadataChanged(entry, descriptor, event.target.value)
+      }
     },
 
     onSortByMetadataClicked () {
