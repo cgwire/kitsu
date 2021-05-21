@@ -517,7 +517,7 @@ const actions = {
     )
   },
 
-  saveAssetSearch ({ commit, rootGetters }, searchQuery) {
+  saveAssetSearch ({ commit, state, rootGetters }, searchQuery) {
     return new Promise((resolve, reject) => {
       const query = state.assetSearchQueries.find(
         (query) => query.name === searchQuery
@@ -564,7 +564,7 @@ const actions = {
     })
   },
 
-  initAssetTypes ({ commit, dispatch, state, rootState, rootGetters }) {
+  initAssetTypes ({ dispatch }) {
     dispatch('setLastProductionScreen', 'production-asset-types')
     return dispatch('loadAssets')
       .then(() => {
@@ -647,7 +647,7 @@ const actions = {
   },
 
   deleteAllAssetTasks (
-    { commit, dispatch, state }, { projectId, taskTypeId, selectionOnly }
+    { dispatch }, { projectId, taskTypeId, selectionOnly }
   ) {
     let taskIds = []
     if (selectionOnly) {
@@ -811,7 +811,7 @@ const mutations = {
     asset.production_id = asset.project_id
     asset.episode_id = asset.source_id
     helpers.populateAndRegisterAsset(
-      {},
+      new Map(),
       taskMap,
       taskTypeMap,
       personMap,
@@ -843,7 +843,7 @@ const mutations = {
 
   [REMOVE_ASSET] (state, assetToDelete) {
     if (state.assetMap.get(assetToDelete.id)) {
-      delete state.assetMap.get(assetToDelete.id)
+      state.assetMap.delete(assetToDelete.id)
       cache.assets = removeModelFromList(cache.assets, assetToDelete)
       state.displayedAssets =
         removeModelFromList(state.displayedAssets, assetToDelete)
@@ -936,8 +936,7 @@ const mutations = {
   },
 
   [SET_ASSET_SEARCH] (state, payload) {
-    const sorting = state.assetSorting
-    payload.sorting = sorting
+    payload.sorting = state.assetSorting
     helpers.buildResult(state, payload)
   },
 
