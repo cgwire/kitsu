@@ -520,7 +520,8 @@ export default {
         timeSpent: true
       },
       stickedColumns: {},
-      offsets: {}
+      offsets: {},
+      lastSelectedAsset: null
     }
   },
 
@@ -650,7 +651,31 @@ export default {
     ]),
 
     toggleLine (asset, event) {
-      this.setAssetSelection({ asset, selected: event.target.checked })
+      const selected = event.target.checked
+      const assetsToSelect = [asset]
+      if (selected && this.shiftKeyPressed && this.lastSelectedAsset) {
+        const assetsFlatten = this.displayedAssets.flat()
+        let startAssetIndex = assetsFlatten.findIndex(
+          displayedAsset => displayedAsset.id === this.lastSelectedAsset.id
+        )
+        let endAssetIndex = assetsFlatten.findIndex(
+          displayedAsset => displayedAsset.id === asset.id
+        )
+        if (startAssetIndex > endAssetIndex) {
+          [startAssetIndex, endAssetIndex] = [endAssetIndex, startAssetIndex]
+        }
+        if (startAssetIndex >= 0 && endAssetIndex >= 0) {
+          for (let index = startAssetIndex + 1; index < endAssetIndex; index++) {
+            assetsToSelect.push(assetsFlatten[index])
+          }
+        }
+      }
+      if (selected) {
+        this.lastSelectedAsset = asset
+      }
+      assetsToSelect.forEach(asset => {
+        this.setAssetSelection({ asset, selected })
+      })
     },
 
     onBodyScroll (event, position) {

@@ -1031,7 +1031,7 @@ const mutations = {
         )
       }
       if (tmpGrid[validationInfo.x]) {
-        [validationInfo.y] = true
+        tmpGrid[validationInfo.x][validationInfo.y] = true
       }
     })
     state.assetSelectionGrid = tmpGrid

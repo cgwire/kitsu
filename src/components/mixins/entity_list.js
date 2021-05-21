@@ -14,10 +14,12 @@ export const entityListMixin = {
   mounted () {
     if (this.resizeHeaders) this.resizeHeaders()
     window.addEventListener('keydown', this.onKeyDown, false)
+    window.addEventListener('keyup', this.onKeyUp, false)
   },
 
   beforeDestroy () {
     window.removeEventListener('keydown', this.onKeyDown)
+    window.removeEventListener('keyup', this.onKeyUp)
   },
 
   data () {
