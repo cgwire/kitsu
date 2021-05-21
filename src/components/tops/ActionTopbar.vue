@@ -842,23 +842,12 @@ export default {
     },
 
     clearSelection () {
-      if (this.selectedBar === 'delete-assets') {
-        this.clearSelectedAssets()
-      } else if (this.selectedBar === 'delete-shots') {
-        this.clearSelectedShots()
-      } else {
-        this.clearSelectedTasks()
-      }
-    }
-  },
+      this.clearSelectedAssets()
+      this.clearSelectedShots()
+      this.clearSelectedTasks()
+    },
 
-  mounted () {
-    this.customAction = this.defaultCustomAction
-    this.setCurrentTeam()
-  },
-
-  watch: {
-    isHidden () {
+    autoChooseSelectBar () {
       if (!this.isHidden) {
         window.addEventListener('keydown', this.onKeyDown)
         if (this.isCurrentViewAsset && this.nbSelectedAssets > 0) {
@@ -884,6 +873,25 @@ export default {
       } else {
         window.removeEventListener('keydown', this.onKeyDown)
       }
+    }
+  },
+
+  mounted () {
+    this.customAction = this.defaultCustomAction
+    this.setCurrentTeam()
+  },
+
+  watch: {
+    nbSelectedAssets () {
+      this.autoChooseSelectBar()
+    },
+
+    nbSelectedShots () {
+      this.autoChooseSelectBar()
+    },
+
+    isHidden () {
+      this.autoChooseSelectBar()
     },
 
     nbSelectedTasks () {

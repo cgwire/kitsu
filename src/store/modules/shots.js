@@ -1645,6 +1645,7 @@ const mutations = {
     if (state.shotSelectionGrid[0] &&
         state.shotSelectionGrid[validationInfo.x]) {
       state.shotSelectionGrid[validationInfo.x][validationInfo.y] = true
+      state.selectedShots = new Map() // unselect all previously selected lines
     }
   },
 
@@ -1695,6 +1696,7 @@ const mutations = {
         tmpGrid[validationInfo.x][validationInfo.y] = true
       }
     })
+    state.selectedShots = new Map() // unselect all previously selected lines
     state.shotSelectionGrid = tmpGrid
   },
 
@@ -1932,6 +1934,9 @@ const mutations = {
     if (selected) {
       state.selectedShots.set(shot.id, shot)
       state.selectedShots = new Map(state.selectedShots) // for reactivity
+      const maxX = state.displayedAssets.length
+      const maxY = state.nbValidationColumns
+      state.assetSelectionGrid = buildSelectionGrid(maxX, maxY) // unselect previously selected tasks
     }
   },
 
