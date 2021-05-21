@@ -1872,7 +1872,9 @@ describe('Assets store', () => {
       const state = {
         selectedAssets: new Map(Object.entries({
           'asset-id-1': true
-        }))
+        })),
+        displayedAssets: [],
+        nbValidationColumns: 0
       }
       const asset = {
         id: 'asset-id-1'
