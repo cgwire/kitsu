@@ -177,10 +177,12 @@ describe('Assets store', () => {
       }
       expect(store.getters.displayedAssetsByType(state)).toEqual([
         [
-          { id: 123, asset_type_name: 'test' }, { id: 345, asset_type_name: 'test' }
+          { id: 123, asset_type_name: 'test' },
+          { id: 345, asset_type_name: 'test' }
         ],
         [
-          { id: 234, asset_type_name: 'test2' }, { id: 456, asset_type_name: 'test2' }
+          { id: 234, asset_type_name: 'test2' },
+          { id: 456, asset_type_name: 'test2' }
         ]
       ])
     })
@@ -196,7 +198,8 @@ describe('Assets store', () => {
       }
       expect(store.getters.assetsByType(state)).toEqual([
         [
-          { id: 234, asset_type_name: 'test2' }, { id: 456, asset_type_name: 'test2' }
+          { id: 234, asset_type_name: 'test2' },
+          { id: 456, asset_type_name: 'test2' }
         ],
         [
           { id: 345, asset_type_name: 'test' }
@@ -260,28 +263,37 @@ describe('Assets store', () => {
         taskTypeMap: 5,
         taskMap: 6
       }
-      const res1 = await store.actions.loadAssets({ commit: mockCommit, state, rootGetters })
+      const res1 = await store.actions.loadAssets(
+        { commit: mockCommit, state, rootGetters })
       expect(res1).toEqual([])
       state.episode = {
         id: 123
       }
-      const res2 = await store.actions.loadAssets({ commit: mockCommit, state, rootGetters })
+      const res2 = await store.actions.loadAssets(
+        { commit: mockCommit, state, rootGetters })
       expect(res2).toEqual([])
       state.isAssetsLoading = false
       const assets = [{ id: 456, type: 'asset' }]
       assetsApi.getAssets = jest.fn(() => Promise.resolve(assets))
       mockCommit = jest.fn()
-      const res3 = await store.actions.loadAssets({ commit: mockCommit, state, rootGetters })
+      const res3 = await store.actions.loadAssets(
+        { commit: mockCommit, state, rootGetters })
       expect(mockCommit).toBeCalledTimes(2)
       expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_ASSETS_START)
       expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_ASSETS_END, {
-        production: 1, assets, userFilters: 2, personMap: 3, taskMap: 6, taskTypeMap: 5
+        production: 1,
+        assets,
+        userFilters: 2,
+        personMap: 3,
+        taskMap: 6,
+        taskTypeMap: 5
       })
       expect(res3).toEqual(assets)
 
       mockCommit = jest.fn()
       assetsApi.getAssets = jest.fn(() => Promise.reject(new Error('error')))
-      const res5 = await store.actions.loadAssets({ commit: mockCommit, state, rootGetters }, true)
+      const res5 = await store.actions.loadAssets(
+        { commit: mockCommit, state, rootGetters }, true)
       expect(mockCommit).toBeCalledTimes(2)
       expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_ASSETS_START)
       expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_ASSETS_ERROR)
@@ -300,7 +312,8 @@ describe('Assets store', () => {
       }
       let mockCommit = jest.fn()
       assetsApi.getAsset = jest.fn(() => Promise.resolve({ id: 1 }))
-      await store.actions.loadAsset({ commit: mockCommit, state, rootGetters }, 1)
+      await store.actions.loadAsset(
+        { commit: mockCommit, state, rootGetters }, 1)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, ADD_ASSET, {
         asset: { id: 1 },
@@ -313,13 +326,15 @@ describe('Assets store', () => {
       mockCommit = jest.fn()
       assetsApi.getAsset = jest.fn(() => Promise.resolve({ id: 1 }))
       state.assetMap.set(1, { id: 1 })
-      await store.actions.loadAsset({ commit: mockCommit, state, rootGetters }, 1)
+      await store.actions.loadAsset(
+        { commit: mockCommit, state, rootGetters }, 1)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, UPDATE_ASSET, { id: 1 })
 
       mockCommit = jest.fn()
       state.assetMap.get(1).lock = true
-      await store.actions.loadAsset({ commit: mockCommit, state, rootGetters }, 1)
+      await store.actions.loadAsset(
+        { commit: mockCommit, state, rootGetters }, 1)
       expect(mockCommit).toBeCalledTimes(0)
     })
 
@@ -334,17 +349,19 @@ describe('Assets store', () => {
       const mockDispatch = jest.fn()
       const asset = { id: 1, name: 'assetTest', project_id: 3 }
       assetsApi.newAsset = jest.fn(() => Promise.resolve(asset))
-      const res = await store.actions.newAsset({ commit: mockCommit, state, rootGetters, dispatch: mockDispatch }, 1)
+      const res = await store.actions.newAsset(
+        { commit: mockCommit, state, rootGetters, dispatch: mockDispatch }, 1)
       expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, EDIT_ASSET_END, { newAsset: asset, assetTypeMap: 1 })
-      expect(mockDispatch).toBeCalledTimes(2)
-      expect(mockDispatch).toHaveBeenNthCalledWith(1, 'createTask', {
+      expect(mockCommit).toHaveBeenNthCalledWith(
+        1, EDIT_ASSET_END, { newAsset: asset, assetTypeMap: 1 })
+      expect(mockDispatch).toBeCalledTimes(3)
+      expect(mockDispatch).toHaveBeenNthCalledWith(2, 'createTask', {
         entityId: 1,
         projectId: 3,
         taskTypeId: 1,
         type: 'assets'
       })
-      expect(mockDispatch).toHaveBeenNthCalledWith(2, 'createTask', {
+      expect(mockDispatch).toHaveBeenNthCalledWith(3, 'createTask', {
         entityId: 1,
         projectId: 3,
         taskTypeId: 2,
@@ -362,10 +379,12 @@ describe('Assets store', () => {
       const mockCommit = jest.fn()
       const asset = { id: 1, name: 'assetTest', project_id: 3 }
       assetsApi.updateAsset = jest.fn(() => Promise.resolve(asset))
-      const res = await store.actions.editAsset({ commit: mockCommit, state: {}, rootState }, asset)
+      const res = await store.actions.editAsset(
+        { commit: mockCommit, state: {}, rootState }, asset)
       expect(mockCommit).toBeCalledTimes(2)
       expect(mockCommit).toHaveBeenNthCalledWith(1, LOCK_ASSET, asset)
-      expect(mockCommit).toHaveBeenNthCalledWith(2, EDIT_ASSET_END, { newAsset: asset, assetTypeMap: 1 })
+      expect(mockCommit).toHaveBeenNthCalledWith(
+        2, EDIT_ASSET_END, { newAsset: asset, assetTypeMap: 1 })
       expect(res).toEqual(asset)
     })
 
@@ -374,7 +393,13 @@ describe('Assets store', () => {
         assetMap: new Map()
       }
       let mockCommit = jest.fn()
-      const asset = { id: 1, name: 'assetTest', project_id: 3, tasks: [{ id: 2 }], canceled: false }
+      const asset = {
+        id: 1,
+        name: 'assetTest',
+        project_id: 3,
+        tasks: [{ id: 2 }],
+        canceled: false
+      }
       state.assetMap.set(1, asset)
       assetsApi.deleteAsset = jest.fn(() => Promise.resolve(asset))
       const res1 = await store.actions.deleteAsset({ commit: mockCommit, state }, asset)
@@ -385,7 +410,8 @@ describe('Assets store', () => {
       asset.canceled = true
       mockCommit = jest.fn()
       assetsApi.deleteAsset = jest.fn(() => Promise.resolve(asset))
-      const res2 = await store.actions.deleteAsset({ commit: mockCommit, state }, asset)
+      const res2 = await store.actions.deleteAsset(
+        { commit: mockCommit, state }, asset)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, REMOVE_ASSET, asset)
       expect(res2).toEqual(asset)
@@ -395,7 +421,8 @@ describe('Assets store', () => {
       const mockCommit = jest.fn()
       const asset = { id: 1, name: 'assetTest' }
       assetsApi.restoreAsset = jest.fn(() => Promise.resolve(asset))
-      const res1 = await store.actions.restoreAsset({ commit: mockCommit, state: {} }, asset)
+      const res1 = await store.actions.restoreAsset(
+        { commit: mockCommit, state: {} }, asset)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, RESTORE_ASSET_END, asset)
       expect(res1).toEqual(asset)
@@ -405,7 +432,8 @@ describe('Assets store', () => {
       const mockCommit = jest.fn()
       const asset = { id: 1, name: 'assetTest' }
       assetsApi.postCsv = jest.fn(() => Promise.resolve())
-      await store.actions.uploadAssetFile({ commit: mockCommit, state: {} }, asset)
+      await store.actions.uploadAssetFile(
+        { commit: mockCommit, state: {} }, asset)
       expect(mockCommit).toBeCalledTimes(2)
       expect(mockCommit).toHaveBeenNthCalledWith(1, IMPORT_ASSETS_START)
       expect(mockCommit).toHaveBeenNthCalledWith(2, IMPORT_ASSETS_END)
@@ -421,7 +449,8 @@ describe('Assets store', () => {
       }
 
       const mockCommit = jest.fn()
-      await store.actions.setAssetSearch({ commit: mockCommit, state: {}, rootGetters }, 6)
+      await store.actions.setAssetSearch(
+        { commit: mockCommit, state: {}, rootGetters }, 6)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, SET_ASSET_SEARCH, {
         assetSearch: 6,
@@ -449,7 +478,8 @@ describe('Assets store', () => {
           callback(null, query)
         }
       )
-      await store.actions.saveAssetSearch({ commit: mockCommit, state, rootGetters }, 'name')
+      await store.actions.saveAssetSearch(
+        { commit: mockCommit, state, rootGetters }, 'name')
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, SAVE_ASSET_SEARCH_END, {
         production: 4,
@@ -477,7 +507,8 @@ describe('Assets store', () => {
           return Promise.resolve()
         }
       )
-      await store.actions.removeAssetSearch({ commit: mockCommit, rootGetters }, 'name')
+      await store.actions.removeAssetSearch(
+        { commit: mockCommit, rootGetters }, 'name')
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, REMOVE_ASSET_SEARCH_END, {
         production: 4,
@@ -509,16 +540,20 @@ describe('Assets store', () => {
       const dispatch = jest.fn(() => Promise.resolve())
       await store.actions.initAssetTypes({ dispatch })
       expect(dispatch).toBeCalledTimes(3)
-      expect(dispatch).toHaveBeenNthCalledWith(1, 'setLastProductionScreen', 'production-asset-types')
-      expect(dispatch).toHaveBeenNthCalledWith(2, 'loadAssets')
-      expect(dispatch).toHaveBeenNthCalledWith(3, 'computeAssetTypeStats')
+      expect(dispatch).toHaveBeenNthCalledWith(
+        1, 'setLastProductionScreen', 'production-asset-types')
+      expect(dispatch).toHaveBeenNthCalledWith(
+        2, 'loadAssets')
+      expect(dispatch).toHaveBeenNthCalledWith(
+        3, 'computeAssetTypeStats')
     })
 
     test('setAssetTypeListScrollPosition', () => {
       const mockCommit = jest.fn()
       store.actions.setAssetTypeListScrollPosition({ commit: mockCommit })
       expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION)
+      expect(mockCommit).toHaveBeenNthCalledWith(
+        1, SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION)
     })
 
     test('computeAssetTypeStats', () => {
@@ -539,7 +574,8 @@ describe('Assets store', () => {
       const mockCommit = jest.fn()
       store.actions.setAssetTypeSearch({ commit: mockCommit }, 'searchQuery')
       expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, SET_ASSET_TYPE_SEARCH, 'searchQuery')
+      expect(mockCommit).toHaveBeenNthCalledWith(
+        1, SET_ASSET_TYPE_SEARCH, 'searchQuery')
     })
 
     test('getAssetsCsvLines', () => {
@@ -666,9 +702,11 @@ describe('Assets store', () => {
           2: 5
         }))
       }]
-      store.actions.deleteAllAssetTasks({ dispatch }, { projectId, taskTypeId, selectionOnly })
+      store.actions.deleteAllAssetTasks(
+        { dispatch }, { projectId, taskTypeId, selectionOnly })
       expect(dispatch).toBeCalledTimes(1)
-      expect(dispatch).toHaveBeenNthCalledWith(1, 'deleteAllTasks', { projectId, taskTypeId, taskIds: [5] })
+      expect(dispatch).toHaveBeenNthCalledWith(
+        1, 'deleteAllTasks', { projectId, taskTypeId, taskIds: [5] })
     })
 
     test('deleteSelectedAssets', async () => {
@@ -1435,15 +1473,20 @@ describe('Assets store', () => {
       const state = {
         assetSearchQueries: [{ name: 'test' }]
       }
-      store.mutations.SAVE_ASSET_SEARCH_END(state, { searchQuery: { name: 'search' } })
-      expect(state.assetSearchQueries).toEqual([{ name: 'search' }, { name: 'test' }])
+      store.mutations.SAVE_ASSET_SEARCH_END(
+        state, { searchQuery: { name: 'search' } })
+      expect(state.assetSearchQueries).toEqual(
+        [{ name: 'search' }, { name: 'test' }])
     })
 
     test('REMOVE_ASSET_SEARCH_END', () => {
       const state = {
         assetSearchQueries: [{ name: 'test' }]
       }
-      store.mutations.REMOVE_ASSET_SEARCH_END(state, { searchQuery: { name: 'test' } })
+      store.mutations.REMOVE_ASSET_SEARCH_END(
+        state,
+        { searchQuery: { name: 'test' } }
+      )
       expect(state.assetSearchQueries).toEqual([])
     })
 
@@ -1526,8 +1569,10 @@ describe('Assets store', () => {
         previewId: 'preview-id',
         taskMap
       })
-      expect(taskMap.get('task-id').entity.preview_file_id).toEqual('preview-id')
-      expect(state.assetMap.get('asset-id').preview_file_id).toEqual('preview-id')
+      expect(taskMap.get('task-id').entity.preview_file_id)
+        .toEqual('preview-id')
+      expect(state.assetMap.get('asset-id').preview_file_id)
+        .toEqual('preview-id')
     })
 
     test('SET_ASSET_LIST_SCROLL_POSITION', () => {
@@ -1660,7 +1705,8 @@ describe('Assets store', () => {
         id: 'task-id'
       }]
       store.mutations.CREATE_TASKS_END(state, tasks)
-      expect(state.assetMap.get('asset-id').validations).toEqual(new Map(Object.entries({
+      expect(state.assetMap.get('asset-id').validations).toEqual(
+        new Map(Object.entries({
         task_type_id: 'task-id'
       })))
     })
@@ -1701,7 +1747,8 @@ describe('Assets store', () => {
           task_status_id: 'task_status_id'
         }
       }))
-      store.mutations.COMPUTE_ASSET_TYPE_STATS(state, { taskStatusMap, taskMap })
+      store.mutations.COMPUTE_ASSET_TYPE_STATS(
+        state, { taskStatusMap, taskMap })
       expect(state.assetTypeStats).toEqual({
         all: {
           all: {
@@ -1785,7 +1832,8 @@ describe('Assets store', () => {
           }
         }
       ]
-      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(state, { descriptor, previousDescriptorFieldName })
+      store.mutations.UPDATE_METADATA_DESCRIPTOR_END(
+        state, { descriptor, previousDescriptorFieldName })
       expect(store.cache.assets[0]).toEqual({
         data: {
           'new name': 123
