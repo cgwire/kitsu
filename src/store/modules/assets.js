@@ -1059,7 +1059,9 @@ const mutations = {
       if (task) {
         const asset = state.assetMap.get(task.entity_id)
         if (asset) {
+          if (!asset.validations) asset.validations = new Map()
           asset.validations.set(task.task_type_id, task.id)
+          Vue.set(asset, 'validations', new Map(asset.validations))
         }
       }
     })
