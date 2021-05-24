@@ -1670,7 +1670,7 @@ const mutations = {
     )
     if (shot) {
       const validations = new Map(shot.validations)
-      validations.remove(task.task_type_id)
+      validations.delete(task.task_type_id)
       delete shot.validations
       Vue.set(shot, 'validations', validations)
 
