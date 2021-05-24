@@ -358,6 +358,10 @@ export default {
     }
   },
 
+  beforeDestroy () {
+    this.clearSelectedShots()
+  },
+
   computed: {
     ...mapGetters([
       'currentEpisode',
@@ -499,6 +503,7 @@ export default {
       'addMetadataDescriptor',
       'createTasks',
       'changeShotSort',
+      'clearSelectedShots',
       'commentTaskWithPreview',
       'deleteAllShotTasks',
       'deleteShot',

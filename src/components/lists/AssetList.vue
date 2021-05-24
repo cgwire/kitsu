@@ -632,11 +632,15 @@ export default {
     },
 
     nonStickedDisplayedValidationColumns () {
-      return this.displayedValidationColumns.filter(columnId => !this.stickedColumns[columnId])
+      return this.displayedValidationColumns.filter(
+        columnId => !this.stickedColumns[columnId]
+      )
     },
 
     stickedDisplayedValidationColumns () {
-      return this.displayedValidationColumns.filter(columnId => this.stickedColumns[columnId])
+      return this.displayedValidationColumns.filter(
+        columnId => this.stickedColumns[columnId]
+      )
     },
 
     localStorageStickKey () {
@@ -665,7 +669,11 @@ export default {
           [startAssetIndex, endAssetIndex] = [endAssetIndex, startAssetIndex]
         }
         if (startAssetIndex >= 0 && endAssetIndex >= 0) {
-          for (let index = startAssetIndex + 1; index < endAssetIndex; index++) {
+          for (
+            let index = startAssetIndex + 1;
+            index < endAssetIndex;
+            index++
+          ) {
             assetsToSelect.push(assetsFlatten[index])
           }
         }
@@ -758,14 +766,23 @@ export default {
         this.offsets = {}
 
         if (this.isShowInfos) {
-          for (let metadataCol = 0; metadataCol < this.stickedVisibleMetadataDescriptors.length; metadataCol++) {
+          for (
+            let metadataCol = 0;
+            metadataCol < this.stickedVisibleMetadataDescriptors.length;
+            metadataCol++
+          ) {
             this.offsets[`editor-${metadataCol}`] = offset
             offset += this.$refs[`editor-${metadataCol}`][0].$el.clientWidth
           }
         }
-        for (let validationCol = 0; validationCol < this.stickedDisplayedValidationColumns.length; validationCol++) {
+        for (
+          let validationCol = 0;
+          validationCol < this.stickedDisplayedValidationColumns.length;
+          validationCol++
+        ) {
           this.offsets[`validation-${validationCol}`] = offset
-          offset += this.$refs[`validation-${validationCol}`][0].$el.clientWidth
+          offset +=
+            this.$refs[`validation-${validationCol}`][0].$el.clientWidth
         }
       })
     }
@@ -790,7 +807,9 @@ export default {
   },
 
   mounted () {
-    this.stickedColumns = JSON.parse(localStorage.getItem(this.localStorageStickKey)) || {}
+    this.stickedColumns = JSON.parse(
+      localStorage.getItem(this.localStorageStickKey)
+    ) || {}
   }
 }
 </script>

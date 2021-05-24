@@ -404,6 +404,10 @@ export default {
     }
   },
 
+  beforeDestroy () {
+    this.clearSelectedAssets()
+  },
+
   computed: {
     ...mapGetters([
       'assetMap',
@@ -492,6 +496,7 @@ export default {
     ...mapActions([
       'addMetadataDescriptor',
       'changeAssetSort',
+      'clearSelectedAssets',
       'commentTaskWithPreview',
       'createTasks',
       'deleteAllAssetTasks',
