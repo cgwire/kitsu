@@ -428,6 +428,10 @@ const actions = {
       .then((asset) => {
         const assetTypeMap = rootGetters.assetTypeMap
         commit(EDIT_ASSET_END, { newAsset: asset, assetTypeMap })
+        const sortInfo = state.assetSorting && state.assetSorting.length > 0
+          ? state.assetSorting[0]
+          : []
+        dispatch('changeAssetSort', sortInfo)
         const taskTypeIds = state.assetValidationColumns
         const createTaskPromises = taskTypeIds.map(
           (taskTypeId) => dispatch('createTask', {
@@ -881,7 +885,6 @@ const mutations = {
       newAsset.episode_id = newAsset.source_id
       delete newAsset.tasks
       Object.assign(asset, newAsset)
-      state.displayedAssets = sortAssets(state.displayedAssets)
     } else {
       newAsset.validations = new Map()
       newAsset.production_id = newAsset.project_id
@@ -889,7 +892,6 @@ const mutations = {
       cache.assets.push(newAsset)
       cache.assets = sortAssets(cache.assets)
       state.displayedAssets.push(newAsset)
-      state.displayedAssets = sortAssets(state.displayedAssets)
       state.assetFilledColumns = getFilledColumns(state.displayedAssets)
       state.displayedAssetsLength = cache.assets.length
 
@@ -1055,7 +1057,7 @@ const mutations = {
   },
 
   [CREATE_TASKS_END] (state, tasks) {
-    tasks.forEach((task) => {
+    tasks.forEach(task => {
       if (task) {
         const asset = state.assetMap.get(task.entity_id)
         if (asset) {
