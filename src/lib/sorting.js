@@ -180,8 +180,12 @@ export const sortShotResult = (
 }
 
 const sortByMetadata = (sortInfo) => (a, b) => {
-  const dataA = a.data[sortInfo.column] ? a.data[sortInfo.column] : ''
-  const dataB = b.data[sortInfo.column] ? b.data[sortInfo.column] : ''
+  const dataA = a.data && a.data[sortInfo.column]
+    ? a.data[sortInfo.column]
+    : ''
+  const dataB = b.data && b.data[sortInfo.column]
+    ? b.data[sortInfo.column]
+    : ''
   if (!dataA) return 1
   if (!dataB) return -1
   return dataA.localeCompare(dataB)
