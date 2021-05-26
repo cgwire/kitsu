@@ -16,6 +16,6 @@ export default {
   fa: fa,
   fr: fr.default,
   pt: pt.default,
-  zh: zh,
+  zh: zh.default,
   ru: ru
 }
