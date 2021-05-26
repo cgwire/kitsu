@@ -432,7 +432,7 @@ const actions = {
           ? state.assetSorting[0]
           : []
         dispatch('changeAssetSort', sortInfo)
-        const taskTypeIds = state.assetValidationColumns
+        const taskTypeIds = rootGetters.productionAssetTaskTypeIds
         const createTaskPromises = taskTypeIds.map(
           (taskTypeId) => dispatch('createTask', {
             entityId: asset.id,
@@ -1049,6 +1049,12 @@ const mutations = {
     const asset = state.assetMap.get(task.entity_id)
     if (asset && task) {
       task = helpers.populateTask(task, asset)
+      // Add Column if it is missing
+      if (!state.assetValidationColumns.includes(task.task_type_id)) {
+        state.assetValidationColumns.push(task.task_type_id)
+        state.assetFilledColumns[task.task_type_id] = true
+      }
+      // Push task and readds the whole map to activate the realtime display.
       asset.tasks.push(task.id)
       if (!asset.validations) asset.validations = new Map()
       asset.validations.set(task.task_type_id, task.id)
@@ -1143,7 +1149,8 @@ const mutations = {
       state.selectedAssets = new Map(state.selectedAssets) // for reactivity
       const maxX = state.displayedAssets.length
       const maxY = state.nbValidationColumns
-      state.assetSelectionGrid = buildSelectionGrid(maxX, maxY) // unselect previously selected tasks
+      // unselect previously selected tasks
+      state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
     }
   },
 

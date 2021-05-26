@@ -159,11 +159,12 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
 
-import Combobox from '../widgets/Combobox'
-import PageTitle from '../widgets/PageTitle'
-import stringHelpers from '../../lib/string'
+import Combobox from '@/components/widgets/Combobox'
+import PageTitle from '@/components/widgets/PageTitle'
+import stringHelpers from '@/lib/string'
+import { sortByName } from '@/lib/sorting'
 
 export default {
   name: 'manage-shot-modal',
@@ -212,26 +213,6 @@ export default {
         }
       ],
       shotPadding: '1'
-    }
-  },
-
-  watch: {
-    active () {
-      if (this.active) {
-        this.shotPadding = '1'
-        setTimeout(() => {
-          if (this.isTVShow) {
-            this.$refs.addEpisodeInput.focus()
-          } else {
-            this.$refs.addSequenceInput.focus()
-          }
-        }, 100)
-      }
-    },
-
-    sequences () {
-      this.displayedSequences = this.sequences
-      this.displayedShots = []
     }
   },
 
@@ -306,9 +287,12 @@ export default {
 
     selectSequence (sequenceId) {
       this.selectedSequenceId = sequenceId
-      this.displayedShots = Array.from(this.shotMap.values()).filter((shot) => {
-        return shot.sequence_id === sequenceId
-      })
+      this.displayedShots =
+        sortByName(
+          Array.from(this.shotMap.values()).filter((shot) => {
+            return shot.sequence_id === sequenceId
+          })
+        )
     },
 
     addEpisode () {
@@ -380,6 +364,27 @@ export default {
             .catch(console.error)
         }
       }
+    }
+  },
+
+  watch: {
+    active () {
+      if (this.active) {
+        this.shotPadding = '1'
+        this.displayedSequences = this.sequences
+        setTimeout(() => {
+          if (this.isTVShow) {
+            this.$refs.addEpisodeInput.focus()
+          } else {
+            this.$refs.addSequenceInput.focus()
+          }
+        }, 100)
+      }
+    },
+
+    sequences () {
+      this.displayedSequences = this.sequences
+      this.displayedShots = []
     }
   }
 }

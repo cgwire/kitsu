@@ -187,6 +187,18 @@ const getters = {
     }
   },
 
+  productionAssetTaskTypeIds: (state, getters) => {
+    return getters.productionTaskTypes
+      .filter(taskType => !taskType.for_shots)
+      .map(taskType => taskType.id)
+  },
+
+  productionShotTaskTypeIds: (state, getters) => {
+    return getters.productionTaskTypes
+      .filter(taskType => taskType.for_shots)
+      .map(taskType => taskType.id)
+  },
+
   currentProduction: (state) => {
     if (state.currentProduction) {
       return state.currentProduction
@@ -229,9 +241,11 @@ const getters = {
       assetType => ({ label: assetType.name, value: assetType.id })
     )
   },
+
   productionStatusOptions: state => state.productionStatus.map(
     status => ({ label: status.name, value: status.id })
   ),
+
   openProductionOptions: state => state.openProductions.map(
     production => ({ label: production.name, value: production.id })
   )

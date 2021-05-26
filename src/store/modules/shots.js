@@ -636,7 +636,7 @@ const actions = {
     return shotsApi.newShot(shot)
       .then(shot => {
         commit(NEW_SHOT_END, shot)
-        const taskTypeIds = state.shotValidationColumns
+        const taskTypeIds = rootGetters.productionShotTaskTypeIds
         const createTaskPromises = taskTypeIds.map(
           taskTypeId => dispatch('createTask', {
             entityId: shot.id,
@@ -1656,6 +1656,12 @@ const mutations = {
     const shot = state.shotMap.get(task.entity_id)
     if (shot && task) {
       task = helpers.populateTask(task, shot)
+      // Add Column if it is missing
+      if (!state.shotValidationColumns.includes(task.task_type_id)) {
+        state.shotValidationColumns.push(task.task_type_id)
+        state.shotFilledColumns[task.task_type_id] = true
+      }
+      // Push task and readds the whole map to activate the realtime display.
       shot.tasks.push(task)
       if (!shot.validations) shot.validations = new Map()
       shot.validations.set(task.task_type_id, task.id)

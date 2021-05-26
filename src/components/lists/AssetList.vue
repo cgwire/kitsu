@@ -625,7 +625,7 @@ export default {
     },
 
     displayedValidationColumns () {
-      return this.validationColumns.filter((columnId) => {
+      return this.validationColumns.filter(columnId => {
         return this.assetFilledColumns[columnId] &&
           (!this.hiddenColumns[columnId] || this.isShowInfos)
       })
