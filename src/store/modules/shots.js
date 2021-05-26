@@ -634,11 +634,11 @@ const actions = {
 
   newShot ({ commit, dispatch, rootGetters }, shot) {
     return shotsApi.newShot(shot)
-      .then((shot) => {
+      .then(shot => {
         commit(NEW_SHOT_END, shot)
         const taskTypeIds = state.shotValidationColumns
         const createTaskPromises = taskTypeIds.map(
-          (taskTypeId) => dispatch('createTask', {
+          taskTypeId => dispatch('createTask', {
             entityId: shot.id,
             projectId: shot.project_id,
             taskTypeId: taskTypeId,
@@ -646,9 +646,7 @@ const actions = {
           })
         )
         return Promise.all(createTaskPromises)
-          .then(() => {
-            return Promise.resolve(shot)
-          })
+          .then(() => Promise.resolve(shot))
           .catch(console.error)
       })
   },
@@ -1658,9 +1656,10 @@ const mutations = {
     const shot = state.shotMap.get(task.entity_id)
     if (shot && task) {
       task = helpers.populateTask(task, shot)
-
       shot.tasks.push(task)
-      Vue.set(shot.validations, task.task_type_id, task.id)
+      if (!shot.validations) shot.validations = new Map()
+      shot.validations.set(task.task_type_id, task.id)
+      Vue.set(shot, 'validations', new Map(shot.validations))
     }
   },
 
