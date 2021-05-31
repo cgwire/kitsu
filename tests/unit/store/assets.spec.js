@@ -340,11 +340,12 @@ describe('Assets store', () => {
 
     test('newAsset', async () => {
       const rootGetters = {
-        assetTypeMap: 1
+        assetTypeMap: 1,
+        productionAssetTaskTypeIds: [
+          1, 2
+        ]
       }
-      const state = {
-        assetValidationColumns: [1, 2]
-      }
+      const state = {}
       const mockCommit = jest.fn()
       const mockDispatch = jest.fn()
       const asset = { id: 1, name: 'assetTest', project_id: 3 }
@@ -1648,7 +1649,9 @@ describe('Assets store', () => {
             tasks: ['old-task-id'],
             validations: new Map()
           }
-        }))
+        })),
+        assetValidationColumns: [],
+        assetFilledColumns: []
       }
       taskTypesStore.state.taskTypeMap = new Map(Object.entries({
         task_type_id: {
@@ -1689,6 +1692,7 @@ describe('Assets store', () => {
         task_status_short_name: 'TODO',
         task_type_id: 'task_type_id'
       })
+      expect(state.assetValidationColumns[0]).toEqual('task_type_id')
     })
 
     test('CREATE_TASKS_END', () => {
