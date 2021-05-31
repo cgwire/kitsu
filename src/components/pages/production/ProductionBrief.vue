@@ -36,9 +36,9 @@
 </template>
 
 <script>
-import marked from 'marked'
 import { mapGetters, mapActions } from 'vuex'
 
+import { renderMarkdown } from '@/lib/render'
 import TextareaField from '@/components/widgets/TextareaField'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 
@@ -106,7 +106,7 @@ export default {
     },
 
     compileMarkdown (input) {
-      return marked(input || '')
+      return renderMarkdown(input)
     }
   }
 }

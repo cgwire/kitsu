@@ -1,4 +1,15 @@
 import marked from 'marked'
+import sanitizeHTML from 'sanitize-html'
+
+export const sanitize = (html) => {
+  return sanitizeHTML(html, {
+    allowedTags: sanitizeHTML.defaults.allowedTags.concat(['img']),
+    allowedAttributes: {
+      a: ['class', 'href'],
+      img: ['src']
+    }
+  })
+}
 
 export const getTaskTypeStyle = (task) => {
   let border = 'transparent'
@@ -19,5 +30,10 @@ export const renderComment = (input, mentions, personMap) => {
       )
     })
   }
-  return compiled
+  return sanitize(compiled)
+}
+
+export const renderMarkdown = (input) => {
+  const compiled = marked(input || '')
+  return sanitize(compiled)
 }

@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import marked from 'marked'
+import { renderMarkdown } from '@/lib/render'
 import { mapGetters, mapActions } from 'vuex'
 import PeopleAvatar from './../widgets/PeopleAvatar'
 
@@ -63,7 +63,6 @@ export default {
       if (text !== undefined && text.length > maxLength) {
         result = text.slice(0, maxLength) + '...'
       }
-
       return result
     }
   },
@@ -73,7 +72,7 @@ export default {
     ]),
 
     compileMarkdown (input) {
-      return marked(input || '')
+      return renderMarkdown(input)
     },
 
     onClick () {

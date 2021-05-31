@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import marked from 'marked'
+import { renderMarkdown } from '@/lib/render'
 import { mapGetters, mapActions } from 'vuex'
 import stringHelpers from '../../lib/string'
 
@@ -92,8 +92,9 @@ export default {
     ]),
 
     compileMarkdown (input) {
-      return marked(input || '')
+      return renderMarkdown(input)
     },
+
     shortenText: stringHelpers.shortenText,
 
     onClick (event) {
