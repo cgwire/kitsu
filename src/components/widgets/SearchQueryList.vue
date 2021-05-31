@@ -115,7 +115,14 @@ export default {
   }
 }
 </script>
-<style>
+<style lang="scss">
+.dark {
+  .search-queries .delete,
+  .search-queries .edit {
+    background: $dark-grey-light;
+    color: white;
+  }
+}
 .tag {
   cursor: pointer;
 }
@@ -137,22 +144,20 @@ export default {
   display: inline-block;
 }
 
+.search-queries .delete:hover,
 .search-queries .edit:hover {
-  background: #A4A4A4;
+  background: $dark-grey-lighter;
 }
 
 .search-queries .edit {
-  display: none;
-  background: #C4C4C4;
+  background: $light-grey;
   border-radius: 50%;
   color: white;
   cursor: pointer;
+  display: none;
   height: 14px;
   margin-right: 0;
   width: 14px;
   line-height: 8px;
-  .edit-icon {
-    padding-bottom: 20px;
-  }
 }
 </style>

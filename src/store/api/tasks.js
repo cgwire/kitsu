@@ -162,7 +162,7 @@ export default {
 
   updatePreviewAnnotation (preview, annotations) {
     return client.pput(
-      `/api/data/preview-files/${preview.id}`,
+      `/api/actions/preview-files/${preview.id}/update-annotations`,
       { annotations }
     )
   },

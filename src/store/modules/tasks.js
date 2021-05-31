@@ -523,7 +523,7 @@ const actions = {
           preview,
           annotations
         })
-        return Promise.resolve(updatedPreview)
+        return Promise.resolve(preview)
       })
       .catch(console.error)
   },
