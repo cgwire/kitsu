@@ -50,6 +50,20 @@ const TaskTypes = () => import('../components/pages/TaskTypes')
 const Departements = () => import('../components/pages/departments/Departments')
 const WrongBrowser = () => import('../components/pages/WrongBrowser')
 
+const ADMIN_PAGES = [
+  'asset-types',
+  'custom-actions',
+  'departments',
+  'logs',
+  'main-schedule',
+  'people',
+  'productions',
+  'task-status',
+  'task-types',
+  'main-schedule',
+  'settings'
+]
+
 export const routes = [
 
   {
@@ -111,14 +125,26 @@ export const routes = [
         } else {
           timezone.setTimezone()
           lang.setLocale()
+          const isProhibited =
+            !userStore.getters.isCurrentUserAdmin(userStore.state) &&
+            to &&
+            ADMIN_PAGES.includes(to.name)
           if (taskTypeStore.state.taskTypes.length === 0) {
             init(() => {
               store.commit('DATA_LOADING_END')
-              next()
+              if (isProhibited) {
+                next({ name: 'not-found' })
+              } else {
+                next()
+              }
             })
           } else {
             store.commit('DATA_LOADING_END')
-            next()
+            if (isProhibited) {
+              next({ name: 'server-down' })
+            } else {
+              next()
+            }
           }
         }
       })

@@ -93,7 +93,7 @@ const actions = {
   },
 
   deleteTaskStatus ({ commit, state }, taskStatus) {
-    taskStatusApi.deleteTaskStatus(taskStatus)
+    return taskStatusApi.deleteTaskStatus(taskStatus)
       .then(() => {
         commit(DELETE_TASK_STATUS_END, taskStatus)
         Promise.resolve(taskStatus)

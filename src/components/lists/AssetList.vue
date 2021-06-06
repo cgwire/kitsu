@@ -449,6 +449,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { descriptorMixin } from '@/components/mixins/descriptors'
 import { entityListMixin } from '@/components/mixins/entity_list'
 import { formatListMixin } from '@/components/mixins/format'
+import { range } from '@/lib/time'
 import { selectionListMixin } from '@/components/mixins/selection'
 
 import DescriptionCell from '@/components/cells/DescriptionCell'
@@ -669,13 +670,9 @@ export default {
           [startAssetIndex, endAssetIndex] = [endAssetIndex, startAssetIndex]
         }
         if (startAssetIndex >= 0 && endAssetIndex >= 0) {
-          for (
-            let index = startAssetIndex + 1;
-            index < endAssetIndex;
-            index++
-          ) {
+          range(startAssetIndex, endAssetIndex).forEach(index => {
             assetsToSelect.push(assetsFlatten[index])
-          }
+          })
         }
       }
       if (selected) {
