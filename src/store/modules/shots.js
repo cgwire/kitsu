@@ -1939,9 +1939,10 @@ const mutations = {
     if (selected) {
       state.selectedShots.set(shot.id, shot)
       state.selectedShots = new Map(state.selectedShots) // for reactivity
-      const maxX = state.displayedAssets.length
+      const maxX = state.displayedShots.length
       const maxY = state.nbValidationColumns
-      state.assetSelectionGrid = buildSelectionGrid(maxX, maxY) // unselect previously selected tasks
+      // unselect previously selected tasks
+      state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
     }
   },
 

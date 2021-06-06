@@ -500,6 +500,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+import { range } from '@/lib/time'
 import { descriptorMixin } from '@/components/mixins/descriptors'
 import { domMixin } from '@/components/mixins/dom'
 import { entityListMixin } from '@/components/mixins/entity_list'
@@ -556,6 +557,7 @@ export default {
       lastHeaderMenuDisplayed: null,
       lastMetadaDataHeaderMenuDisplayed: null,
       lastHeaderMenuDisplayedIndexInGrid: null,
+      lastSelectedShot: null,
       metadataDisplayHeaders: {
         fps: true,
         frameIn: true,
@@ -564,9 +566,8 @@ export default {
         estimation: true,
         timeSpent: true
       },
-      stickedColumns: {},
       offsets: {},
-      lastSelectedShot: null
+      stickedColumns: {}
     }
   },
 
@@ -727,9 +728,9 @@ export default {
           [startShotIndex, endShotIndex] = [endShotIndex, startShotIndex]
         }
         if (startShotIndex >= 0 && endShotIndex >= 0) {
-          for (let index = startShotIndex + 1; index < endShotIndex; index++) {
+          range(startShotIndex, endShotIndex).forEach(index => {
             shotsToSelect.push(shotsFlatten[index])
-          }
+          })
         }
       }
       if (selected) {
@@ -800,7 +801,10 @@ export default {
         ...this.stickedColumns,
         [columnId]: sticked
       }
-      localStorage.setItem(this.localStorageStickKey, JSON.stringify(this.stickedColumns))
+      localStorage.setItem(
+        this.localStorageStickKey,
+        JSON.stringify(this.stickedColumns)
+      )
     },
 
     stickColumnClicked () {
@@ -810,7 +814,10 @@ export default {
 
     metadataStickColumnClicked (event) {
       this.toggleStickedColumns(this.lastMetadaDataHeaderMenuDisplayed)
-      this.showMetadataHeaderMenu(this.lastMetadaDataHeaderMenuDisplayed, event)
+      this.showMetadataHeaderMenu(
+        this.lastMetadaDataHeaderMenuDisplayed,
+        event
+      )
     },
 
     updateOffsets () {
@@ -854,7 +861,9 @@ export default {
   },
 
   mounted () {
-    this.stickedColumns = JSON.parse(localStorage.getItem(this.localStorageStickKey)) || {}
+    this.stickedColumns = JSON.parse(
+      localStorage.getItem(this.localStorageStickKey)
+    ) || {}
   }
 }
 </script>
