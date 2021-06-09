@@ -18,7 +18,7 @@
         v-if="isCurrentUserAdmin"
       >
         <a
-          @click="showNewModal"
+          @click="newProductionPage"
         >
           {{ $t('productions.home.create_new') }}
         </a>
@@ -73,7 +73,7 @@
         <p class="has-text-centered mt1">
           <button
             class="button big-button"
-            @click="showNewModal"
+            @click="newProductionPage"
           >
             {{ $t('productions.home.create_new') }}
           </button>
@@ -200,8 +200,10 @@ export default {
         })
     },
 
-    showNewModal () {
-      this.modals.isNewDisplayed = true
+    newProductionPage () {
+      this.$router.push({
+        name: 'new-production'
+      })
     },
 
     hideNewModal () {

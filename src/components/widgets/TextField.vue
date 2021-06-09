@@ -1,7 +1,7 @@
 <template>
-<div class="field">
+<div class="field" :class="{ 'is-inline': isInline }">
   <label class="label" v-if="label">{{ label }}</label>
-  <p class="control flexrow">
+  <p class="control" :class="{ 'is-inline': isInline, flexrow: !isInline }">
     <input
       :class="'input flexrow-item' + inputClass"
       ref="input"
@@ -62,6 +62,10 @@ export default {
     maxlength: {
       default: 524288,
       type: Number
+    },
+    isInline: {
+      default: false,
+      type: Boolean
     }
   },
 

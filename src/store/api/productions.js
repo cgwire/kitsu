@@ -18,12 +18,7 @@ export default {
   },
 
   newProduction (production) {
-    const data = {
-      name: production.name,
-      project_status_id: production.project_status_id,
-      production_type: production.production_type
-    }
-    return client.ppost('/api/data/projects/', data)
+    return client.ppost('/api/data/projects/', production)
   },
 
   updateProduction (production) {

@@ -12,6 +12,7 @@ import store from '../store/'
 import Assets from '../components/pages/Assets'
 import Login from '../components/pages/Login'
 import Main from '../components/Main'
+import NewProduction from '../components/pages/production/NewProduction'
 import Notifications from '../components/pages/Notifications'
 import OpenProductions from '../components/pages/OpenProductions'
 import ProductionNewsFeed from '../components/pages/ProductionNewsFeed'
@@ -213,6 +214,12 @@ export const routes = [
         path: 'open-productions',
         component: OpenProductions,
         name: 'open-productions'
+      },
+
+      {
+        path: 'new-production',
+        component: NewProduction,
+        name: 'new-production'
       },
 
       {
