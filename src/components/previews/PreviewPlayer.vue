@@ -1068,7 +1068,7 @@ export default {
       if (!this.fabricCanvas) this.setupFabricCanvas()
       if (this.isMovie) {
         currentTime = annotation.time || 0
-        this.previewViewer.pause()
+        if (this.previewViewer) this.previewViewer.pause()
         currentTime = roundToFrame(currentTime, this.fps)
         this.setCurrentTime(currentTime)
       }
@@ -1145,7 +1145,11 @@ export default {
       this.annotations = []
       if (this.currentPreview.annotations) {
         const annotations = []
-        this.currentPreview.annotations.forEach(a => annotations.push({ ...a }))
+        if (this.currentPreview.annotations.forEach) {
+          this.currentPreview.annotations.forEach(
+            a => annotations.push({ ...a })
+          )
+        }
         this.annotations = annotations.sort((a, b) => {
           return a.time < b.time
         }) || []
