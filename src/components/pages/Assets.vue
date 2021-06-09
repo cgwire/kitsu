@@ -242,7 +242,7 @@ import func from '../../lib/func'
 import { sortByName } from '../../lib/sorting'
 import stringHelpers from '../../lib/string'
 import { searchMixin } from '../mixins/search'
-import { entityListMixin } from '../mixins/entities'
+import { entitiesMixin } from '../mixins/entities'
 
 import AssetList from '../lists/AssetList'
 import AddMetadataModal from '../modals/AddMetadataModal'
@@ -264,7 +264,7 @@ import TaskInfo from '../sides/TaskInfo.vue'
 
 export default {
   name: 'assets',
-  mixins: [searchMixin, entityListMixin],
+  mixins: [searchMixin, entitiesMixin],
 
   components: {
     AssetList,

@@ -259,7 +259,7 @@ import { sortByName } from '../../lib/sorting'
 import stringHelpers from '../../lib/string'
 
 import { searchMixin } from '../mixins/search'
-import { entityListMixin } from '../mixins/entities'
+import { entitiesMixin } from '../mixins/entities'
 
 import AddMetadataModal from '../modals/AddMetadataModal'
 import AddThumbnailsModal from '../modals/AddThumbnailsModal'
@@ -283,7 +283,7 @@ import TaskInfo from '../sides/TaskInfo.vue'
 
 export default {
   name: 'shots',
-  mixins: [searchMixin, entityListMixin],
+  mixins: [searchMixin, entitiesMixin],
 
   components: {
     AddMetadataModal,
@@ -360,6 +360,55 @@ export default {
 
   beforeDestroy () {
     this.clearSelectedShots()
+  },
+
+  created () {
+    this.setLastProductionScreen('shots')
+  },
+
+  mounted () {
+    let searchQuery = ''
+    if (
+      this.$route.query.search &&
+      this.$route.query.search.length > 0
+    ) {
+      searchQuery = '' + this.$route.query.search
+    }
+    this.$refs['shot-search-field'].setValue(searchQuery)
+    const finalize = () => {
+      this.loadShots(() => {})
+    }
+
+    if (
+      this.shotMap.size < 2 ||
+      (
+        this.shotValidationColumns.length > 0 &&
+        (
+          !this.shotMap.get(this.shotMap.keys().next().value) ||
+          !this.shotMap.get(this.shotMap.keys().next().value).validations
+        )
+      )
+    ) {
+      setTimeout(() => {
+        if (
+          this.currentProduction &&
+          this.episodes.length > 0 &&
+          this.episodes[0].project_id !== this.currentProduction.id
+        ) {
+          this.loadEpisodes()
+            .then(() => finalize())
+            .catch(console.error)
+        } else {
+          finalize()
+        }
+      }, 100)
+    } else {
+      if (!this.isShotsLoading) this.initialLoading = false
+      this.onSearchChange()
+      this.$refs['shot-list'].setScrollPosition(
+        this.shotListScrollPosition
+      )
+    }
   },
 
   computed: {
@@ -446,55 +495,10 @@ export default {
         })
       })
       return shots
-    }
-  },
+    },
 
-  created () {
-    this.setLastProductionScreen('shots')
-  },
-
-  mounted () {
-    let searchQuery = ''
-    if (
-      this.$route.query.search &&
-      this.$route.query.search.length > 0
-    ) {
-      searchQuery = '' + this.$route.query.search
-    }
-    this.$refs['shot-search-field'].setValue(searchQuery)
-    const finalize = () => {
-      this.loadShots(() => {})
-    }
-
-    if (
-      this.shotMap.size < 2 ||
-      (
-        this.shotValidationColumns.length > 0 &&
-        (
-          !this.shotMap.get(this.shotMap.keys().next().value) ||
-          !this.shotMap.get(this.shotMap.keys().next().value).validations
-        )
-      )
-    ) {
-      setTimeout(() => {
-        if (
-          this.currentProduction &&
-          this.episodes.length > 0 &&
-          this.episodes[0].project_id !== this.currentProduction.id
-        ) {
-          this.loadEpisodes()
-            .then(() => finalize())
-            .catch(console.error)
-        } else {
-          finalize()
-        }
-      }, 100)
-    } else {
-      if (!this.isShotsLoading) this.initialLoading = false
-      this.onSearchChange()
-      this.$refs['shot-list'].setScrollPosition(
-        this.shotListScrollPosition
-      )
+    metadataDescriptors () {
+      return this.shotMetadataDescriptors
     }
   },
 
