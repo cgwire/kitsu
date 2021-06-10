@@ -154,7 +154,8 @@ export default {
         production_id: this.currentProduction.id,
         for_client: form.for_client,
         for_entity: form.for_entity,
-        is_for_all: form.is_for_all
+        is_for_all: form.is_for_all,
+        task_type_id: form.task_type_id
       }
       if (this.isTVShow && this.currentEpisode) {
         newPlaylist.episode_id = this.currentEpisode.id

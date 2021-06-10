@@ -29,6 +29,38 @@ export const entityListMixin = {
   },
 
   computed: {
+    visibleMetadataDescriptors () {
+      return this.metadataDescriptors.filter(
+        descriptor => {
+          const header = this.metadataDisplayHeaders[descriptor.field_name]
+          return header === undefined || header
+        }
+      )
+    },
+
+    nonStickedVisibleMetadataDescriptors () {
+      return this.visibleMetadataDescriptors.filter(
+        descriptor => !this.stickedColumns[descriptor.id]
+      )
+    },
+
+    stickedVisibleMetadataDescriptors () {
+      return this.visibleMetadataDescriptors.filter(
+        descriptor => this.stickedColumns[descriptor.id]
+      )
+    },
+
+    nonStickedDisplayedValidationColumns () {
+      return this.displayedValidationColumns.filter(
+        columnId => !this.stickedColumns[columnId]
+      )
+    },
+
+    stickedDisplayedValidationColumns () {
+      return this.displayedValidationColumns.filter(
+        columnId => this.stickedColumns[columnId]
+      )
+    }
   },
 
   methods: {
@@ -85,13 +117,19 @@ export const entityListMixin = {
       }
     },
 
-    onTaskSelected (validationInfo) {
+    onTaskSelected (validationInfo, sticked) {
+      const columnOffset = this.stickedDisplayedValidationColumns.length
       const selection = []
+      if (!sticked) {
+        validationInfo = { ...validationInfo }
+        validationInfo.y += columnOffset
+      }
       if (validationInfo.isShiftKey) {
         if (this.lastSelection) {
           let startX = this.lastSelection.x
           let endX = validationInfo.x
           let startY = this.lastSelection.y
+          if (!sticked) startY += columnOffset
           let endY = validationInfo.y
           let grid = this.assetSelectionGrid
           if (!grid) grid = this.shotSelectionGrid
@@ -103,6 +141,7 @@ export const entityListMixin = {
           if (validationInfo.y < this.lastSelection.y) {
             startY = validationInfo.y
             endY = this.lastSelection.y
+            if (!sticked) endY += columnOffset
           }
 
           for (let i = startX; i <= endX; i++) {
@@ -110,12 +149,14 @@ export const entityListMixin = {
               const ref = 'validation-' + i + '-' + j
               const validationCell = this.$refs[ref][0]
               if (!grid[i][j]) {
+                let y = validationCell.columnY
+                if (!sticked) y += columnOffset
                 selection.push({
                   entity: validationCell.entity,
                   column: validationCell.column,
                   task: validationCell.task,
                   x: validationCell.rowX,
-                  y: validationCell.columnY
+                  y
                 })
               }
             }
@@ -133,7 +174,8 @@ export const entityListMixin = {
 
       if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
         const x = validationInfo.x
-        const y = validationInfo.y
+        let y = validationInfo.y
+        if (!sticked) y -= columnOffset
         this.lastSelection = { x, y }
         const ref = 'validation-' + x + '-' + y
         const validationCell = this.$refs[ref][0]
@@ -143,7 +185,11 @@ export const entityListMixin = {
       }
     },
 
-    onTaskUnselected (validationInfo) {
+    onTaskUnselected (validationInfo, sticked) {
+      if (!sticked) {
+        validationInfo = { ...validationInfo }
+        validationInfo.y += this.stickedDisplayedValidationColumns.length
+      }
       if (!validationInfo.isCtrlKey) {
         if (this.nbSelectedTasks === 1) {
           this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
@@ -221,6 +267,7 @@ export const entityListMixin = {
       })
     },
 
+    // i = line number in entity group and k is the index of the entity group
     getEntityLineNumber (entities, i, k) {
       this.$options.lineIndex = {}
       const key = `${i}-${k}`

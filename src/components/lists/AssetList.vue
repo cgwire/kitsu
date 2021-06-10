@@ -282,20 +282,20 @@
               'hidden-validation-cell': hiddenColumns[columnId],
               'datatable-row-header': true
             }"
-            :style="{ background: 'inherit' }"
             :key="columnId + '-' + asset.id"
             :column="taskTypeMap.get(columnId)"
             :entity="asset"
             :task-test="taskMap.get(asset.validations.get(columnId))"
-            :selected="assetSelectionGrid[getIndex(i, k)][j]"
+            :selected="isSelected(i, k, j)"
             :rowX="getIndex(i, k)"
             :columnY="j"
             :minimized="hiddenColumns[columnId]"
             :is-static="true"
             :is-assignees="isShowAssignations"
             :left="offsets['validation-' + j] ? `${offsets['validation-' + j]}px` : '0'"
-            @select="onTaskSelected"
-            @unselect="onTaskUnselected"
+            :sticked="true"
+            @select="(infos) => onTaskSelected(infos, true)"
+            @unselect="(infos) => onTaskUnselected(infos, true)"
             v-for="(columnId, j) in stickedDisplayedValidationColumns"
             v-if="!isLoading"
           />
@@ -376,7 +376,7 @@
             :column="taskTypeMap.get(columnId)"
             :entity="asset"
             :task-test="taskMap.get(asset.validations.get(columnId))"
-            :selected="assetSelectionGrid[getIndex(i, k)][j]"
+            :selected="isSelected(i, k, j + stickedDisplayedValidationColumns.length)"
             :rowX="getIndex(i, k)"
             :columnY="j"
             :minimized="hiddenColumns[columnId]"
@@ -584,24 +584,6 @@ export default {
       )
     },
 
-    visibleMetadataDescriptors () {
-      return this.assetMetadataDescriptors.filter(
-        descriptor => this.metadataDisplayHeaders[descriptor.field_name] === undefined || this.metadataDisplayHeaders[descriptor.field_name]
-      )
-    },
-
-    nonStickedVisibleMetadataDescriptors () {
-      return this.visibleMetadataDescriptors.filter(
-        descriptor => !this.stickedColumns[descriptor.id]
-      )
-    },
-
-    stickedVisibleMetadataDescriptors () {
-      return this.visibleMetadataDescriptors.filter(
-        descriptor => this.stickedColumns[descriptor.id]
-      )
-    },
-
     visibleColumns () {
       let count = 1
       count += this.isTVShow ? 1 : 0
@@ -632,16 +614,8 @@ export default {
       })
     },
 
-    nonStickedDisplayedValidationColumns () {
-      return this.displayedValidationColumns.filter(
-        columnId => !this.stickedColumns[columnId]
-      )
-    },
-
-    stickedDisplayedValidationColumns () {
-      return this.displayedValidationColumns.filter(
-        columnId => this.stickedColumns[columnId]
-      )
+    metadataDescriptors () {
+      return this.assetMetadataDescriptors
     },
 
     localStorageStickKey () {
@@ -654,6 +628,11 @@ export default {
       'displayMoreAssets',
       'setAssetSelection'
     ]),
+
+    isSelected (indexInGroup, groupIndex, columnIndex) {
+      const lineIndex = this.getIndex(indexInGroup, groupIndex)
+      return this.assetSelectionGrid[lineIndex][columnIndex]
+    },
 
     toggleLine (asset, event) {
       const selected = event.target.checked

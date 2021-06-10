@@ -145,6 +145,10 @@ export default {
     left: {
       type: String,
       default: '0px'
+    },
+    sticked: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -228,11 +232,11 @@ export default {
     ]),
 
     getBackground () {
-      if (this.isBorder) {
+      if (this.isBorder && !this.sticked) {
         const opacity = this.isDarkTheme ? 0.15 : 0.08
         return colors.hexToRGBa(this.column.color, opacity)
       } else {
-        return 'transparent'
+        return 'inherit'
       }
     },
 

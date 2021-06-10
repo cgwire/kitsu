@@ -271,20 +271,20 @@
               'hidden-validation-cell': hiddenColumns[columnId],
               'datatable-row-header': true
             }"
-            :style="{ background: 'inherit' }"
             :key="columnId + '-' + shot.id"
             :column="taskTypeMap.get(columnId)"
             :entity="shot"
             :task-test="taskMap.get(shot.validations.get(columnId))"
-            :selected="shotSelectionGrid[getIndex(i, k)][j]"
+            :selected="isSelected(i, k, j)"
             :rowX="getIndex(i, k)"
             :columnY="j"
             :minimized="hiddenColumns[columnId]"
             :is-static="true"
             :is-assignees="isShowAssignations"
             :left="offsets['validation-' + j] ? `${offsets['validation-' + j]}px` : '0'"
-            @select="onTaskSelected"
-            @unselect="onTaskUnselected"
+            :sticked="true"
+            @select="(infos) => onTaskSelected(infos, true)"
+            @unselect="(infos) => onTaskUnselected(infos, true)"
             v-for="(columnId, j) in stickedDisplayedValidationColumns"
             v-if="!isLoading"
           />
@@ -429,7 +429,7 @@
                         : null
             )"
             :minimized="hiddenColumns[columnId]"
-            :selected="shotSelectionGrid[getIndex(i, k)][j]"
+            :selected="isSelected(i, k, j + stickedDisplayedValidationColumns.length)"
             :rowX="getIndex(i, k)"
             :columnY="j"
             :is-assignees="isShowAssignations"
@@ -643,24 +643,6 @@ export default {
       )
     },
 
-    visibleMetadataDescriptors () {
-      return this.shotMetadataDescriptors.filter(
-        descriptor => this.metadataDisplayHeaders[descriptor.field_name] === undefined || this.metadataDisplayHeaders[descriptor.field_name]
-      )
-    },
-
-    nonStickedVisibleMetadataDescriptors () {
-      return this.visibleMetadataDescriptors.filter(
-        descriptor => !this.stickedColumns[descriptor.id]
-      )
-    },
-
-    stickedVisibleMetadataDescriptors () {
-      return this.visibleMetadataDescriptors.filter(
-        descriptor => this.stickedColumns[descriptor.id]
-      )
-    },
-
     visibleColumns () {
       let count = 2
       count += !this.isCurrentUserClient &&
@@ -694,12 +676,8 @@ export default {
       })
     },
 
-    nonStickedDisplayedValidationColumns () {
-      return this.displayedValidationColumns.filter(columnId => !this.stickedColumns[columnId])
-    },
-
-    stickedDisplayedValidationColumns () {
-      return this.displayedValidationColumns.filter(columnId => this.stickedColumns[columnId])
+    metadataDescriptors () {
+      return this.shotMetadataDescriptors
     },
 
     localStorageStickKey () {
@@ -712,6 +690,11 @@ export default {
       'displayMoreShots',
       'setShotSelection'
     ]),
+
+    isSelected (indexInGroup, groupIndex, columnIndex) {
+      const lineIndex = this.getIndex(indexInGroup, groupIndex)
+      return this.shotSelectionGrid[lineIndex][columnIndex]
+    },
 
     toggleLine (shot, event) {
       const selected = event.target.checked
@@ -829,12 +812,20 @@ export default {
         this.offsets = {}
 
         if (this.isShowInfos) {
-          for (let metadataCol = 0; metadataCol < this.stickedVisibleMetadataDescriptors.length; metadataCol++) {
+          for (
+            let metadataCol = 0;
+            metadataCol < this.stickedVisibleMetadataDescriptors.length;
+            metadataCol++
+          ) {
             this.offsets[`editor-${metadataCol}`] = offset
             offset += this.$refs[`editor-${metadataCol}`][0].$el.clientWidth
           }
         }
-        for (let validationCol = 0; validationCol < this.stickedDisplayedValidationColumns.length; validationCol++) {
+        for (
+          let validationCol = 0;
+          validationCol < this.stickedDisplayedValidationColumns.length;
+          validationCol++
+        ) {
           this.offsets[`validation-${validationCol}`] = offset
           offset += this.$refs[`validation-${validationCol}`][0].$el.clientWidth
         }

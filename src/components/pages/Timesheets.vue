@@ -211,7 +211,7 @@ export default {
           i++
         } while (!isThere && i < keys.length)
 
-        return person.active && isThere
+        return isThere
       })
     },
 
