@@ -4,6 +4,9 @@ node_js:
 env:
     global:
         - NODE_ENV=test
+before_install:
+    - git config --global url."https://github.com/".insteadOf ssh://git@github.com
+    - git config --global url."https://".insteadOf git://
 script:
     - npm install
     - npm run test:unit
