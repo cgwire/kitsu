@@ -110,7 +110,7 @@
           :subtitle="$t('productions.creation.select_asset_task_type_description')"
           :step="3"
           :is-completed="hasValidAssetTaskTypes"
-          v-if="taskTypesLoaded"
+          v-if="!loading.taskTypes"
         >
           <draggable
             v-model="productionToCreate.assetTaskTypes"
@@ -138,7 +138,7 @@
           :subtitle="$t('productions.creation.select_shot_task_type_description')"
           :step="4"
           :is-completed="hasValidShotTaskTypes"
-          v-if="taskTypesLoaded"
+          v-if="!loading.taskTypes"
         >
           <draggable
             v-model="productionToCreate.shotTaskTypes"
@@ -166,8 +166,7 @@
           :subtitle="$t('productions.creation.select_task_status_description')"
           :step="5"
           :is-completed="hasValidTaskStatuses"
-          v-if="taskStatusesLoaded"
-          is-last
+          v-if="!loading.taskStatuses"
         >
           <draggable
             v-model="productionToCreate.taskStatuses"
@@ -190,31 +189,67 @@
             />
           </draggable>
         </timeline-item>
-<!--        <timeline-item-->
-<!--          :title="$t('productions.creation.add_assets')"-->
-<!--          :subtitle="$t('productions.creation.add_assets_description')"-->
-<!--          :step="6"-->
-<!--          is-completed-->
-<!--        />-->
-<!--        <timeline-item-->
-<!--          :title="$t('productions.creation.add_shots')"-->
-<!--          :subtitle="$t('productions.creation.add_shots_description')"-->
-<!--          :step="7"-->
-<!--          is-completed-->
-<!--          is-last-->
-<!--        />-->
+        <timeline-item
+          :title="$t('productions.creation.add_assets')"
+          :subtitle="$t('productions.creation.add_assets_description')"
+          :step="6"
+          is-completed
+        >
+          <div class="import-content">
+            <span class="tag" v-if="nbAssetsToImport > 0">
+              {{ nbAssetsToImport }}
+              {{ $t('productions.creation.assets_to_import') }}
+            </span>
+            <button
+              class="button ml1"
+              @click="toggleModal('isAssetsImportDisplayed')"
+            >
+              + {{ $t('productions.creation.importAssetsButton') }}
+            </button>
+          </div>
+        </timeline-item>
+        <timeline-item
+          :title="$t('productions.creation.add_shots')"
+          :subtitle="$t('productions.creation.add_shots_description')"
+          :step="7"
+          is-completed
+          is-last
+        >
+          <div class="import-content">
+            <span class="tag" v-if="nbShotsToImport > 0">
+              {{ nbShotsToImport }}
+              {{ $t('productions.creation.shots_to_import') }}
+            </span>
+            <button
+              class="button ml1"
+              @click="toggleModal('isShotsImportDisplayed')"
+            >
+              + {{ $t('productions.creation.importShotsButton') }}
+            </button>
+          </div>
+        </timeline-item>
         <section class="has-text-centered mt2">
-          <p v-if="errorCreatingProduction" class="error">
+          <p v-if="errors.importingAssets" class="error">
+            {{ $t('productions.creation.errorImportingAssets') }}
+            <br>
+            {{ errors.importingAssetsError }}
+          </p>
+          <p v-if="errors.importingShots" class="error">
+            {{ $t('productions.creation.errorImportingShots') }}
+            <br>
+            {{ errors.importingShotsError }}
+          </p>
+          <p v-if="errors.creatingProduction" class="error">
             {{ $t('productions.creation.error') }}
-            {{ creationError }}
+            {{ errors.creatingProductionError }}
           </p>
           <button
             class="button big-button"
             v-if="hasAllDataCorrect"
-            :disabled="createProductionLoading"
+            :disabled="loading.createProduction"
             @click="createProduction"
           >
-            <spinner v-if="createProductionLoading" :size="20" class="mr1" />
+            <spinner v-if="loading.createProduction" :size="20" class="mr1" />
             {{ $t('productions.creation.create_button') }}
           </button>
           <button class="button big-button" disabled v-else>
@@ -223,6 +258,61 @@
         </section>
       </div>
     </div>
+
+    <import-render-modal
+      :active="modals.isAssetsImportRenderDisplayed"
+      :is-loading="loading.importingAssets"
+      :is-error="errors.importingAssets"
+      :import-error="errors.importingAssetsError"
+      :parsed-csv="parsedAssetsCSV"
+      :form-data="assetsCsvFormData"
+      :columns="assetsColumns"
+      :data-matchers="assetsDataMatchers"
+      :database="{}"
+      :disable-update="true"
+      @reupload="resetAssetsImport"
+      @confirm="uploadAssetsImportFile"
+      @cancel="toggleModal('isAssetsImportRenderDisplayed')"
+    />
+
+    <import-modal
+      ref="import-assets-modal"
+      :active="modals.isAssetsImportDisplayed"
+      :is-loading="loading.importingAssets"
+      :is-error="errors.importingAssets"
+      :form-data="assetsCsvFormData"
+      :columns="assetsColumns"
+      @confirm="renderAssetsImport"
+      @cancel="toggleModal('isAssetsImportDisplayed')"
+    />
+
+    <import-render-modal
+      :active="modals.isShotsImportRenderDisplayed"
+      :is-loading="loading.importingShots"
+      :is-error="errors.importingShots"
+      :import-error="errors.importingShotsError"
+      :parsed-csv="parsedShotsCSV"
+      :form-data="shotsCsvFormData"
+      :columns="shotsColumns"
+      :data-matchers="shotsDataMatchers"
+      :database="{}"
+      :disable-update="true"
+      @reupload="resetShotsImport"
+      @confirm="uploadShotsImportFile"
+      @cancel="toggleModal('isShotsImportRenderDisplayed')"
+    />
+
+    <import-modal
+      ref="import-shots-modal"
+      :active="modals.isShotsImportDisplayed"
+      :is-loading="loading.importingShots"
+      :is-error="errors.importingShots"
+      :form-data="shotsCsvFormData"
+      :columns="shotsColumns"
+      @confirm="renderShotsImport"
+      @cancel="toggleModal('isShotsImportDisplayed')"
+    />
+
   </div>
 </template>
 
@@ -240,6 +330,9 @@ import TaskTypeName from '../../widgets/TaskTypeName'
 import { removeModelFromList } from '../../../lib/models'
 import ComboboxTaskType from '../../widgets/ComboboxTaskType'
 import Spinner from '../../widgets/Spinner'
+import ImportModal from '../../modals/ImportModal'
+import ImportRenderModal from '../../modals/ImportRenderModal'
+import csv from '../../../lib/csv'
 
 export default {
   name: 'NewProduction',
@@ -249,6 +342,8 @@ export default {
     Combobox,
     ComboboxTaskType,
     Datepicker,
+    ImportModal,
+    ImportRenderModal,
     Spinner,
     TaskTypeName,
     TextField,
@@ -268,21 +363,43 @@ export default {
         },
         assetTaskTypes: [],
         shotTaskTypes: [],
-        taskStatuses: []
+        taskStatuses: [],
+        assetsToAdd: null,
+        shotsToAdd: null
       },
       productionTypeOptions: PRODUCTION_TYPE_OPTIONS,
-      taskTypesLoaded: false,
-      taskStatusesLoaded: true,
-      createProductionLoading: false,
-      errorCreatingProduction: false,
-      creationError: ''
+      loading: {
+        taskTypes: true,
+        taskStatuses: true,
+        createProduction: false,
+        importingAssets: false,
+        importingShots: false
+      },
+      errors: {
+        creatingProduction: false,
+        creatingProductionError: '',
+        importingAssets: false,
+        importingShots: false,
+        importingAssetsError: null,
+        importingShotsError: null
+      },
+      modals: {
+        isAssetsImportDisplayed: false,
+        isAssetsImportRenderDisplayed: false,
+        isShotsImportDisplayed: false,
+        isShotsImportRenderDisplayed: false
+      },
+      parsedAssetsCSV: [],
+      parsedShotsCSV: []
     }
   },
   computed: {
     ...mapGetters([
+      'assetsCsvFormData',
       'assetTaskTypes',
       'productions',
       'productionStatus',
+      'shotsCsvFormData',
       'shotTaskTypes',
       'taskStatus',
       'taskStatusMap',
@@ -290,6 +407,39 @@ export default {
       'user'
     ]),
 
+    isTVShow () {
+      return this.productionToCreate.settings.type === 'tvshow'
+    },
+    assetsDataMatchers () {
+      return this.isTVShow
+        ? ['Episode', 'Type', 'Name']
+        : ['Type', 'Name']
+    },
+    shotsDataMatchers () {
+      return this.isTVShow
+        ? ['Episode', 'Sequence', 'Name']
+        : ['Sequence', 'Name']
+    },
+    assetsColumns () {
+      return this.isTVShow
+        ? ['Episode', 'Type', 'Name', 'Description']
+        : ['Type', 'Name', 'Description']
+    },
+    shotsColumns () {
+      const collection = [
+        'Sequence',
+        'Name',
+        'Description',
+        'Nb Frames',
+        'FPS',
+        'Frame In',
+        'Frame Out'
+      ]
+      if (this.isTVShow) {
+        collection.unshift('Episode')
+      }
+      return collection
+    },
     locale () {
       if (this.user.locale === 'fr_FR') {
         return fr
@@ -385,6 +535,24 @@ export default {
       return this.taskStatus.filter(
         status => this.productionToCreate.taskStatuses.indexOf(status) === -1
       )
+    },
+    nbAssetsToImport () {
+      if (this.productionToCreate.assetsToAdd) {
+        const assetsLines = this.productionToCreate.assetsToAdd.filter(
+          assetLine => assetLine.length > 1
+        )
+        return assetsLines.length - 1
+      }
+      return 0
+    },
+    nbShotsToImport () {
+      if (this.productionToCreate.shotsToAdd) {
+        const shotsLines = this.productionToCreate.shotsToAdd.filter(
+          shotLine => shotLine.length > 1
+        )
+        return shotsLines.length - 1
+      }
+      return 0
     }
   },
   methods: {
@@ -395,7 +563,9 @@ export default {
       'loadTaskStatuses',
       'loadTaskTypes',
       'newProduction',
-      'setProduction'
+      'setProduction',
+      'uploadAssetFile',
+      'uploadShotFile'
     ]),
     removeModelFromList,
     deleteFromList (object, listName) {
@@ -410,9 +580,9 @@ export default {
       return !this.isEmpty(value) && /^\d+$/.test(value)
     },
     async createProduction () {
-      this.createProductionLoading = true
-      this.errorCreatingProduction = false
-      this.creationError = ''
+      this.loading.createProduction = true
+      this.errors.creatingProduction = false
+      this.errors.creatingProductionError = ''
       try {
         await this.newProduction({
           name: this.productionToCreate.name,
@@ -442,30 +612,137 @@ export default {
           )
         ))
 
+        if (this.productionToCreate.assetsToAdd !== null) {
+          this.loading.importingAssets = true
+          this.errors.importingAssets = false
+          await this.uploadAssetFile(false)
+            .then(() => {
+              this.loading.importingAssets = false
+            })
+            .catch(err => {
+              this.loading.importingAssets = false
+              this.errors.importingAssets = true
+              this.errors.importingAssetsError = err
+            })
+        }
+
+        if (this.productionToCreate.shotsToAdd !== null) {
+          this.loading.importingShots = true
+          this.errors.importingShots = false
+          await this.uploadShotFile(false)
+            .then(() => {
+              this.loading.importingShots = false
+            })
+            .catch(err => {
+              this.loading.importingShots = false
+              this.errors.importingShots = true
+              this.errors.importingShotsError = err
+            })
+        }
+
+        const params = {
+          production_id: createdProduction.id
+        }
+        let routeName = 'assets'
+        if (this.isTVShow) {
+          params.episode_id = 'all'
+          routeName = 'episode-assets'
+        }
         await this.$router.push({
-          name: 'assets',
-          params: {
-            production_id: createdProduction.id
-          }
+          name: routeName,
+          params
         })
       } catch (error) {
         console.error(error, error.response)
-        this.errorCreatingProduction = true
-        this.creationError = error.response ? ': ' + error.response.body.message.substring(0, 165) : ''
+        this.errors.creatingProduction = true
+        this.errors.creatingProductionError = error.response
+          ? ': ' + error.response.body.message.substring(0, 165)
+          : ''
       }
-      this.createProductionLoading = false
+      this.loading.createProduction = false
+    },
+    toggleModal (modalName) {
+      this.modals[modalName] = !this.modals[modalName]
+    },
+    renderAssetsImport (data, mode) {
+      this.loading.importingAssets = true
+      this.errors.importingAssets = false
+      if (mode === 'file') {
+        data = data.get('file')
+      }
+      csv.processCSV(data)
+        .then((results) => {
+          this.parsedAssetsCSV = results
+          this.toggleModal('isAssetsImportDisplayed')
+          this.loading.importingAssets = false
+          this.toggleModal('isAssetsImportRenderDisplayed')
+        })
+    },
+    resetAssetsImport () {
+      this.errors.importingAssets = false
+      this.toggleModal('isAssetsImportRenderDisplayed')
+      this.$store.commit('ASSET_CSV_FILE_SELECTED', null)
+      this.productionToCreate.assetsToAdd = null
+      this.$refs['import-assets-modal'].reset()
+      this.toggleModal('isAssetsImportDisplayed')
+    },
+    uploadAssetsImportFile (data, toUpdate) {
+      const formData = new FormData()
+      const filename = 'import.csv'
+      const csvContent = csv.turnEntriesToCsvString(data)
+      const file = new File([csvContent], filename, { type: 'text/csv' })
+
+      formData.append('file', file)
+
+      this.$store.commit('ASSET_CSV_FILE_SELECTED', formData)
+      this.productionToCreate.assetsToAdd = data
+      this.toggleModal('isAssetsImportRenderDisplayed')
+    },
+    renderShotsImport (data, mode) {
+      this.loading.importingShots = true
+      this.errors.importingShots = false
+      if (mode === 'file') {
+        data = data.get('file')
+      }
+      csv.processCSV(data)
+        .then((results) => {
+          this.parsedShotsCSV = results
+          this.toggleModal('isShotsImportDisplayed')
+          this.loading.importingShots = false
+          this.toggleModal('isShotsImportRenderDisplayed')
+        })
+    },
+    resetShotsImport () {
+      this.errors.importingShots = false
+      this.toggleModal('isShotsImportRenderDisplayed')
+      this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
+      this.productionToCreate.shotsToAdd = null
+      this.$refs['import-shots-modal'].reset()
+      this.toggleModal('isShotsImportDisplayed')
+    },
+    uploadShotsImportFile (data, toUpdate) {
+      const formData = new FormData()
+      const filename = 'import.csv'
+      const csvContent = csv.turnEntriesToCsvString(data)
+      const file = new File([csvContent], filename, { type: 'text/csv' })
+
+      formData.append('file', file)
+
+      this.$store.commit('SHOT_CSV_FILE_SELECTED', formData)
+      this.productionToCreate.shotsToAdd = data
+      this.toggleModal('isShotsImportRenderDisplayed')
     }
   },
   async mounted () {
     this.loadTaskStatuses(() => {
       this.productionToCreate.taskStatuses = [...this.taskStatus]
-      this.taskStatusesLoaded = true
+      this.loading.taskStatuses = false
     })
 
     await this.loadTaskTypes()
     this.productionToCreate.assetTaskTypes = [...this.assetTaskTypes]
     this.productionToCreate.shotTaskTypes = [...this.shotTaskTypes]
-    this.taskTypesLoaded = true
+    this.loading.taskTypes = false
 
     await this.loadProductionStatus()
   }
@@ -538,5 +815,10 @@ span.input-separator {
 >>> .selected-task-type-line {
   padding: 0;
   margin-right: 0;
+}
+
+.import-content {
+  display: flex;
+  align-items: center;
 }
 </style>

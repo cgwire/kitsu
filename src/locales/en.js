@@ -569,12 +569,17 @@ export default {
       add_assets_description: 'Add or import the assets for your production.',
       add_shots: 'Add shots',
       add_shots_description: 'Add or import the shots for your production.',
+      assets_to_import: 'assets to import',
       create_production: 'Create production',
       create_button: 'All done let\'s go 🚀',
       create_button_disabled: 'Some data is not valid',
       error: 'An error occurred while creating the production',
+      errorImportingAssets: 'An error occurred while importing your assets. The production has been created though!',
+      errorImportingShots: 'An error occurred while importing your shots. The production has been created though!',
       give_a_name: 'Give your production a name',
       give_a_name_description: 'Start by giving your production a meaningful name.',
+      importAssetsButton: 'Import assets',
+      importShotsButton: 'Import shots',
       placeholder_date_start: 'starts at',
       placeholder_date_end: 'ends at',
       placeholder_name: 'My Awesome Production',
@@ -590,7 +595,8 @@ export default {
       select_shot_task_type: 'Select shot task type',
       select_shot_task_type_description: 'These task types define what you track the process during the shot stage.',
       select_task_status: 'Select task status',
-      select_task_status_description: 'Select the task statuses you will use during the production.'
+      select_task_status_description: 'Select the task statuses you will use during the production.',
+      shots_to_import: 'shots to import'
     },
     home: {
       create_new: 'Create a new production',
