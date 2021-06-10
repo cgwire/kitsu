@@ -157,7 +157,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 
 import { modalMixin } from '@/components/modals/base_modal'
 
@@ -251,13 +251,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-      'newEpisode',
-      'newSequence',
-      'newShot',
-      'setCurrentEpisode'
-    ]),
-
     focusAddSequence () {
       this.$refs.addSequenceInput.focus()
     },
@@ -304,13 +297,11 @@ export default {
             name: this.names.episode,
             project_id: this.currentProduction.id
           }
-          this.newEpisode(episode)
-            .then((episode) => {
-              this.loading.addEpisode = false
-              this.selectEpisode(episode.id)
-              this.names.episode = stringHelpers.generateNextName(episode.name)
-            })
-            .catch(console.error)
+          this.$emit('add-episode', episode, (episode) => {
+            this.loading.addEpisode = false
+            this.selectEpisode(episode.id)
+            this.names.episode = stringHelpers.generateNextName(episode.name)
+          })
         }
       }
     },
@@ -328,16 +319,14 @@ export default {
             episode_id: this.selectedEpisodeId,
             project_id: this.currentProduction.id
           }
-          this.newSequence(sequence)
-            .then((sequence) => {
-              this.loading.addSequence = false
-              this.selectEpisode(this.selectedEpisodeId)
-              this.selectSequence(sequence.id)
-              this.names.sequence = stringHelpers.generateNextName(
-                sequence.name
-              )
-            })
-            .catch(console.error)
+          this.$emit('add-sequence', sequence, (sequence) => {
+            this.loading.addSequence = false
+            this.selectEpisode(this.selectedEpisodeId)
+            this.selectSequence(sequence.id)
+            this.names.sequence = stringHelpers.generateNextName(
+              sequence.name
+            )
+          })
         }
       }
     },
@@ -352,16 +341,14 @@ export default {
             sequence_id: this.selectedSequenceId,
             project_id: this.currentProduction.id
           }
-          this.newShot(shot)
-            .then((shot) => {
-              this.loading.addShot = false
-              this.selectSequence(this.selectedSequenceId)
-              this.names.shot = stringHelpers.generateNextName(
-                shot.name,
-                parseInt(this.shotPadding)
-              )
-            })
-            .catch(console.error)
+          this.$emit('add-shot', shot, (shot) => {
+            this.loading.addShot = false
+            this.selectSequence(this.selectedSequenceId)
+            this.names.shot = stringHelpers.generateNextName(
+              shot.name,
+              parseInt(this.shotPadding)
+            )
+          })
         }
       }
     }

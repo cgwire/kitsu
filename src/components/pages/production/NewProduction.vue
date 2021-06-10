@@ -107,10 +107,11 @@
         </timeline-item>
         <timeline-item
           :title="$t('productions.creation.select_asset_task_type')"
-          :subtitle="$t('productions.creation.select_asset_task_type_description')"
+          :subtitle="$t(
+            'productions.creation.select_asset_task_type_description'
+           )"
           :step="3"
           :is-completed="hasValidAssetTaskTypes"
-          v-if="!loading.taskTypes"
         >
           <draggable
             v-model="productionToCreate.assetTaskTypes"
@@ -128,17 +129,20 @@
               slot="footer"
               class="is-inline"
               :task-type-list="availableAssetTaskTypes"
-              @input="id => productionToCreate.assetTaskTypes.push(taskTypeMap.get(id))"
+              @input="id => productionToCreate.assetTaskTypes.push(
+                taskTypeMap.get(id)
+              )"
               v-if="availableAssetTaskTypes.length > 0"
             />
           </draggable>
         </timeline-item>
         <timeline-item
           :title="$t('productions.creation.select_shot_task_type')"
-          :subtitle="$t('productions.creation.select_shot_task_type_description')"
+          :subtitle="$t(
+            'productions.creation.select_shot_task_type_description'
+          )"
           :step="4"
           :is-completed="hasValidShotTaskTypes"
-          v-if="!loading.taskTypes"
         >
           <draggable
             v-model="productionToCreate.shotTaskTypes"
@@ -156,7 +160,9 @@
               slot="footer"
               class="is-inline"
               :task-type-list="availableShotTaskTypes"
-              @input="id => productionToCreate.shotTaskTypes.push(taskTypeMap.get(id))"
+              @input="id => productionToCreate.shotTaskTypes.push(
+                taskTypeMap.get(id)
+              )"
               v-if="availableShotTaskTypes.length > 0"
             />
           </draggable>
@@ -166,7 +172,6 @@
           :subtitle="$t('productions.creation.select_task_status_description')"
           :step="5"
           :is-completed="hasValidTaskStatuses"
-          v-if="!loading.taskStatuses"
         >
           <draggable
             v-model="productionToCreate.taskStatuses"
@@ -184,7 +189,9 @@
               slot="footer"
               class="is-inline"
               :task-type-list="availableTaskStatuses"
-              @input="id => productionToCreate.taskStatuses.push(taskStatusMap.get(id))"
+              @input="id => productionToCreate.taskStatuses.push(
+                taskStatusMap.get(id)
+              )"
               v-if="availableTaskStatuses.length > 0"
             />
           </draggable>
@@ -193,7 +200,7 @@
           :title="$t('productions.creation.add_assets')"
           :subtitle="$t('productions.creation.add_assets_description')"
           :step="6"
-          is-completed
+          :is-completed="hasValidAssets"
         >
           <div class="import-content">
             <span class="tag" v-if="nbAssetsToImport > 0">
@@ -204,7 +211,7 @@
               class="button ml1"
               @click="toggleModal('isAssetsImportDisplayed')"
             >
-              + {{ $t('productions.creation.importAssetsButton') }}
+              + {{ $t('productions.creation.import_assets_button') }}
             </button>
           </div>
         </timeline-item>
@@ -212,7 +219,7 @@
           :title="$t('productions.creation.add_shots')"
           :subtitle="$t('productions.creation.add_shots_description')"
           :step="7"
-          is-completed
+          :is-completed="hasValidShots"
           is-last
         >
           <div class="import-content">
@@ -224,8 +231,14 @@
               class="button ml1"
               @click="toggleModal('isShotsImportDisplayed')"
             >
-              + {{ $t('productions.creation.importShotsButton') }}
+              + {{ $t('productions.creation.import_shots_button') }}
             </button>
+<!--            <button-->
+<!--              class="button ml1"-->
+<!--              @click="toggleModal('isAddShotsDisplayed')"-->
+<!--            >-->
+<!--              + {{ $t('productions.creation.add_shots_button') }}-->
+<!--            </button>-->
           </div>
         </timeline-item>
         <section class="has-text-centered mt2">
@@ -313,26 +326,37 @@
       @cancel="toggleModal('isShotsImportDisplayed')"
     />
 
+    <manage-shots-modal
+      :active="modals.isAddShotsDisplayed"
+      @add-episode="addEpisode"
+      @add-sequence="addSequence"
+      @add-shot="addShot"
+      @cancel="toggleModal('isAddShotsDisplayed')"
+    />
+
   </div>
 </template>
 
 <script>
 import draggable from 'vuedraggable'
-import TimelineItem from './TimelineItem'
-import { PRODUCTION_TYPE_OPTIONS } from '../../../lib/productions'
-import TextField from '../../widgets/TextField'
-import Combobox from '../../widgets/Combobox'
-import { mapActions, mapGetters } from 'vuex'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
 import { CalendarIcon } from 'vue-feather-icons'
-import TaskTypeName from '../../widgets/TaskTypeName'
-import { removeModelFromList } from '../../../lib/models'
-import ComboboxTaskType from '../../widgets/ComboboxTaskType'
-import Spinner from '../../widgets/Spinner'
-import ImportModal from '../../modals/ImportModal'
-import ImportRenderModal from '../../modals/ImportRenderModal'
-import csv from '../../../lib/csv'
+import { en, fr } from 'vuejs-datepicker/dist/locale'
+import { mapActions, mapGetters } from 'vuex'
+
+import csv from '@/lib/csv'
+import { removeModelFromList } from '@/lib/models'
+import { PRODUCTION_TYPE_OPTIONS } from '@/lib/productions'
+
+import Combobox from '@/components/widgets/Combobox'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
+import ImportModal from '@/components/modals/ImportModal'
+import ImportRenderModal from '@/components/modals/ImportRenderModal'
+import ManageShotsModal from '@/components/modals/ManageShotsModal'
+import Spinner from '@/components/widgets/Spinner'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
+import TextField from '@/components/widgets/TextField'
+import TimelineItem from '@/components/pages/production/TimelineItem'
 
 export default {
   name: 'NewProduction',
@@ -344,6 +368,7 @@ export default {
     Datepicker,
     ImportModal,
     ImportRenderModal,
+    ManageShotsModal,
     Spinner,
     TaskTypeName,
     TextField,
@@ -351,8 +376,35 @@ export default {
   },
   data () {
     return {
+      errors: {
+        creatingProduction: false,
+        creatingProductionError: '',
+        importingAssets: false,
+        importingAssetsError: null,
+        importingShots: false,
+        importingShotsError: null
+      },
+      loading: {
+        createProduction: false,
+        importingAssets: false,
+        importingShots: false
+      },
+      modals: {
+        isAddAssetsDisplayed: false,
+        isAddShotsDisplayed: false,
+        isAssetsImportDisplayed: false,
+        isAssetsImportRenderDisplayed: false,
+        isShotsImportDisplayed: false,
+        isShotsImportRenderDisplayed: false
+      },
+      parsedAssetsCSV: [],
+      parsedShotsCSV: [],
       productionToCreate: {
+        assetsToAdd: null,
+        assetTaskTypes: [],
+        episodesToCreate: [],
         name: null,
+        sequencesToCreate: [],
         settings: {
           type: PRODUCTION_TYPE_OPTIONS[0].value,
           fps: null, // eg: '24'
@@ -361,36 +413,12 @@ export default {
           dateStart: null,
           dateEnd: null
         },
-        assetTaskTypes: [],
+        shotsToAdd: null,
         shotTaskTypes: [],
-        taskStatuses: [],
-        assetsToAdd: null,
-        shotsToAdd: null
+        shotsToCreate: [],
+        taskStatuses: []
       },
-      productionTypeOptions: PRODUCTION_TYPE_OPTIONS,
-      loading: {
-        taskTypes: true,
-        taskStatuses: true,
-        createProduction: false,
-        importingAssets: false,
-        importingShots: false
-      },
-      errors: {
-        creatingProduction: false,
-        creatingProductionError: '',
-        importingAssets: false,
-        importingShots: false,
-        importingAssetsError: null,
-        importingShotsError: null
-      },
-      modals: {
-        isAssetsImportDisplayed: false,
-        isAssetsImportRenderDisplayed: false,
-        isShotsImportDisplayed: false,
-        isShotsImportRenderDisplayed: false
-      },
-      parsedAssetsCSV: [],
-      parsedShotsCSV: []
+      productionTypeOptions: PRODUCTION_TYPE_OPTIONS
     }
   },
   computed: {
@@ -460,6 +488,12 @@ export default {
     },
     hasValidEndDate () {
       return !this.isEmpty(this.productionToCreate.settings.dateEnd)
+    },
+    hasValidAssets () {
+      return this.nbAssetsToImport > 0
+    },
+    hasValidShots () {
+      return this.nbShotsToImport > 0
     },
     hasValidSettings () {
       return (
@@ -546,22 +580,20 @@ export default {
       return 0
     },
     nbShotsToImport () {
+      let nbShots = this.productionToCreate.shotsToCreate.length
       if (this.productionToCreate.shotsToAdd) {
         const shotsLines = this.productionToCreate.shotsToAdd.filter(
           shotLine => shotLine.length > 1
         )
-        return shotsLines.length - 1
+        nbShots += shotsLines.length - 1
       }
-      return 0
+      return nbShots
     }
   },
   methods: {
     ...mapActions([
       'addTaskStatusToProduction',
       'addTaskTypeToProduction',
-      'loadProductionStatus',
-      'loadTaskStatuses',
-      'loadTaskTypes',
       'newProduction',
       'setProduction',
       'uploadAssetFile',
@@ -574,10 +606,77 @@ export default {
       )
     },
     isEmpty (value) {
-      return value === null || value === undefined || value === '' || value === [] || value === {}
+      return (
+        value === null ||
+        value === undefined ||
+        value === '' ||
+        value === [] ||
+        value === {}
+      )
     },
     isInteger (value) {
       return !this.isEmpty(value) && /^\d+$/.test(value)
+    },
+    async createTaskTypesAndStatuses () {
+      await Promise.all(this.productionToCreate.assetTaskTypes.concat(
+        this.productionToCreate.shotTaskTypes
+      ).map(
+        // add task types
+        async (taskType) => {
+          return await this.addTaskTypeToProduction(taskType.id)
+        }
+      ).concat(
+        // add task statuses
+        this.productionToCreate.taskStatuses.map(
+          async (taskStatus) => {
+            return await this.addTaskStatusToProduction(taskStatus.id)
+          }
+        )
+      ))
+    },
+    async createAssets () {
+      if (this.productionToCreate.assetsToAdd !== null) {
+        this.loading.importingAssets = true
+        this.errors.importingAssets = false
+        await this.uploadAssetFile(false)
+          .then(() => {
+            this.loading.importingAssets = false
+          })
+          .catch(err => {
+            this.loading.importingAssets = false
+            this.errors.importingAssets = true
+            this.errors.importingAssetsError = err
+          })
+      }
+    },
+    async createShots () {
+      if (this.productionToCreate.shotsToAdd !== null) {
+        this.loading.importingShots = true
+        this.errors.importingShots = false
+        await this.uploadShotFile(false)
+          .then(() => {
+            this.loading.importingShots = false
+          })
+          .catch(err => {
+            this.loading.importingShots = false
+            this.errors.importingShots = true
+            this.errors.importingShotsError = err
+          })
+      }
+    },
+    createProductionRoute (createdProduction) {
+      const params = {
+        production_id: createdProduction.id
+      }
+      let routeName = 'assets'
+      if (this.isTVShow) {
+        params.episode_id = 'all'
+        routeName = 'episode-assets'
+      }
+      return {
+        name: routeName,
+        params
+      }
     },
     async createProduction () {
       this.loading.createProduction = true
@@ -596,62 +695,10 @@ export default {
         })
         const createdProduction = this.productions[this.productions.length - 1]
         await this.setProduction(createdProduction.id)
-        await Promise.all(this.productionToCreate.assetTaskTypes.concat(
-          this.productionToCreate.shotTaskTypes
-        ).map(
-          // add task types
-          async (taskType) => {
-            return await this.addTaskTypeToProduction(taskType.id)
-          }
-        ).concat(
-          // add task statuses
-          this.productionToCreate.taskStatuses.map(
-            async (taskStatus) => {
-              return await this.addTaskStatusToProduction(taskStatus.id)
-            }
-          )
-        ))
-
-        if (this.productionToCreate.assetsToAdd !== null) {
-          this.loading.importingAssets = true
-          this.errors.importingAssets = false
-          await this.uploadAssetFile(false)
-            .then(() => {
-              this.loading.importingAssets = false
-            })
-            .catch(err => {
-              this.loading.importingAssets = false
-              this.errors.importingAssets = true
-              this.errors.importingAssetsError = err
-            })
-        }
-
-        if (this.productionToCreate.shotsToAdd !== null) {
-          this.loading.importingShots = true
-          this.errors.importingShots = false
-          await this.uploadShotFile(false)
-            .then(() => {
-              this.loading.importingShots = false
-            })
-            .catch(err => {
-              this.loading.importingShots = false
-              this.errors.importingShots = true
-              this.errors.importingShotsError = err
-            })
-        }
-
-        const params = {
-          production_id: createdProduction.id
-        }
-        let routeName = 'assets'
-        if (this.isTVShow) {
-          params.episode_id = 'all'
-          routeName = 'episode-assets'
-        }
-        await this.$router.push({
-          name: routeName,
-          params
-        })
+        await this.createTaskTypesAndStatuses()
+        await this.createAssets()
+        await this.createShots()
+        await this.$router.push(this.createProductionRoute(createdProduction))
       } catch (error) {
         console.error(error, error.response)
         this.errors.creatingProduction = true
@@ -690,7 +737,9 @@ export default {
       const formData = new FormData()
       const filename = 'import.csv'
       const csvContent = csv.turnEntriesToCsvString(data)
-      const file = new File([csvContent], filename, { type: 'text/csv' })
+      const file = new File(
+        [csvContent], filename, { type: 'text/csv' }
+      )
 
       formData.append('file', file)
 
@@ -724,32 +773,41 @@ export default {
       const formData = new FormData()
       const filename = 'import.csv'
       const csvContent = csv.turnEntriesToCsvString(data)
-      const file = new File([csvContent], filename, { type: 'text/csv' })
+      const file = new File(
+        [csvContent], filename, { type: 'text/csv' }
+      )
 
       formData.append('file', file)
 
       this.$store.commit('SHOT_CSV_FILE_SELECTED', formData)
       this.productionToCreate.shotsToAdd = data
       this.toggleModal('isShotsImportRenderDisplayed')
+    },
+    addEpisode (episode, callback) {
+      this.productionToCreate.episodesToCreate.push(episode)
+      episode.id = this.productionToCreate.episodesToCreate.length - 1
+      callback(episode)
+    },
+    addSequence (sequence, callback) {
+      this.productionToCreate.sequencesToCreate.push(sequence)
+      sequence.id = this.productionToCreate.sequencesToCreate.length - 1
+      callback(sequence)
+    },
+    addShot (shot, callback) {
+      this.productionToCreate.shotsToCreate.push(shot)
+      shot.id = this.productionToCreate.shotsToCreate.length - 1
+      callback(shot)
     }
-  },
-  async mounted () {
-    this.loadTaskStatuses(() => {
-      this.productionToCreate.taskStatuses = [...this.taskStatus]
-      this.loading.taskStatuses = false
-    })
-
-    await this.loadTaskTypes()
-    this.productionToCreate.assetTaskTypes = [...this.assetTaskTypes]
-    this.productionToCreate.shotTaskTypes = [...this.shotTaskTypes]
-    this.loading.taskTypes = false
-
-    await this.loadProductionStatus()
   }
 }
 </script>
 
 <style scoped>
+.dark .tag {
+  color: #EEE;
+  background: #5E6169;
+}
+
 .hero {
   background-color: inherit;
 }

@@ -117,6 +117,9 @@
     :is-loading="loading.manage"
     :is-error="false"
     :is-success="false"
+    @add-episode="addEpisode"
+    @add-sequence="addSequence"
+    @add-shot="addShot"
     @cancel="hideManageShots"
   />
 
@@ -517,6 +520,9 @@ export default {
       'hideAssignations',
       'loadEpisodes',
       'loadShots',
+      'newEpisode',
+      'newSequence',
+      'newShot',
       'removeShotSearch',
       'restoreShot',
       'saveShotSearch',
@@ -526,6 +532,24 @@ export default {
       'showAssignations',
       'uploadShotFile'
     ]),
+
+    addEpisode (episode, callback) {
+      this.newEpisode(episode)
+        .then(callback)
+        .catch(console.error)
+    },
+
+    addSequence (sequence, callback) {
+      this.newSequence(sequence)
+        .then(callback)
+        .catch(console.error)
+    },
+
+    addShot (shot, callback) {
+      this.newShot(shot)
+        .then(callback)
+        .catch(console.error)
+    },
 
     confirmAddMetadata (form) {
       this.loading.addMetadata = true

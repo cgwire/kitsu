@@ -5,7 +5,7 @@
       <span class="step" v-else>{{ step }}</span>
       <div v-if="!isLast" class="dots"></div>
     </div>
-    <div class="content">
+    <div class="timeline-content">
       <h3
         class="title"
         :class="{ 'is-completed': isCompleted }"
@@ -45,7 +45,7 @@ export default {
 
 <style lang="scss" scoped>
 .dark {
-  .content {
+  .timeline-content {
     p.subtitle {
       color: $white
     }
@@ -92,9 +92,15 @@ export default {
   display: flex;
   flex: 1;
 }
-.content {
+.timeline-content {
   padding-top: 3px;
   flex: 1;
+
+  h3.title {
+    font-size: 1.5em;
+    font-weight: 400;
+    line-height: 1.125;
+  }
 
   h3.title.is-completed {
     color: $green;
@@ -104,6 +110,7 @@ export default {
     color: $dark-grey;
     font-size: 100%;
     padding-left: 3px;
+    margin-bottom: 1em;
   }
 }
 </style>
