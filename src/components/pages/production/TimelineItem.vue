@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import CheckIcon from 'vue-feather-icons/icons/CheckIcon'
+import { CheckIcon } from 'vue-feather-icons'
 
 export default {
   name: 'TimelineItem',
