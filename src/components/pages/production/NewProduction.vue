@@ -197,9 +197,35 @@
           </draggable>
         </timeline-item>
         <timeline-item
+          :title="$t('productions.creation.add_asset_types')"
+          :subtitle="$t('productions.creation.add_asset_types_description')"
+          :step="6"
+          :is-completed="hasValidAssetTypes"
+        >
+          <div class="mb1">
+            <task-type-name
+              :task-type="{ ...assetType, color: '#000000' }"
+              :key="assetType.id"
+              @delete="deleteFromList(assetType, 'assetTypes')"
+              deletable
+              v-for="assetType in productionToCreate.assetTypes"
+            />
+          </div>
+          <combobox
+            class="is-inline"
+            :options="availableAssetTypes"
+            @input="id => {
+              assetTypeMap.get(id) && productionToCreate.assetTypes.push(
+                assetTypeMap.get(id)
+              )
+            }"
+            v-if="availableAssetTypes.length > 0"
+          />
+        </timeline-item>
+        <timeline-item
           :title="$t('productions.creation.add_assets')"
           :subtitle="$t('productions.creation.add_assets_description')"
-          :step="6"
+          :step="7"
           :is-completed="hasValidAssets"
         >
           <div class="import-content">
@@ -218,7 +244,7 @@
         <timeline-item
           :title="$t('productions.creation.add_shots')"
           :subtitle="$t('productions.creation.add_shots_description')"
-          :step="7"
+          :step="8"
           :is-completed="hasValidShots"
           is-last
         >
@@ -401,6 +427,7 @@ export default {
       parsedShotsCSV: [],
       productionToCreate: {
         assetsToAdd: null,
+        assetTypes: [],
         assetTaskTypes: [],
         episodesToCreate: [],
         name: null,
@@ -425,6 +452,8 @@ export default {
     ...mapGetters([
       'assetsCsvFormData',
       'assetTaskTypes',
+      'assetTypeMap',
+      'assetTypes',
       'productions',
       'productionStatus',
       'shotsCsvFormData',
@@ -492,6 +521,9 @@ export default {
     hasValidAssets () {
       return this.nbAssetsToImport > 0
     },
+    hasValidAssetTypes () {
+      return this.productionToCreate.assetTypes.length > 0
+    },
     hasValidShots () {
       return this.nbShotsToImport > 0
     },
@@ -548,7 +580,8 @@ export default {
         this.hasValidSettings &&
         this.hasValidAssetTaskTypes &&
         this.hasValidShotTaskTypes &&
-        this.hasValidTaskStatuses
+        this.hasValidTaskStatuses &&
+        this.hasValidAssetTypes
       )
     },
     availableAssetTaskTypes () {
@@ -557,6 +590,21 @@ export default {
           assetTaskType
         ) === -1
       )
+    },
+    availableAssetTypes () {
+      return [
+        { label: '-', value: '-' },
+        ...this.assetTypes.filter(
+          assetType => this.productionToCreate.assetTypes.indexOf(
+            assetType
+          ) === -1
+        ).map((assetType) => {
+          return {
+            label: assetType.name,
+            value: assetType.id
+          }
+        })
+      ]
     },
     availableShotTaskTypes () {
       return this.shotTaskTypes.filter(
@@ -592,6 +640,7 @@ export default {
   },
   methods: {
     ...mapActions([
+      'addAssetTypeToProduction',
       'addTaskStatusToProduction',
       'addTaskTypeToProduction',
       'newProduction',
@@ -649,6 +698,13 @@ export default {
           })
       }
     },
+    createAssetTypes () {
+      this.productionToCreate.assetTypes.map(
+        async (assetType) => {
+          return await this.addAssetTypeToProduction(assetType.id)
+        }
+      )
+    },
     async createShots () {
       if (this.productionToCreate.shotsToAdd !== null) {
         this.loading.importingShots = true
@@ -696,6 +752,7 @@ export default {
         const createdProduction = this.productions[this.productions.length - 1]
         await this.setProduction(createdProduction.id)
         await this.createTaskTypesAndStatuses()
+        await this.createAssetTypes()
         await this.createAssets()
         await this.createShots()
         await this.$router.push(this.createProductionRoute(createdProduction))

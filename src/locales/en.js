@@ -566,6 +566,8 @@ export default {
     title: 'Productions',
     creation: {
       add_assets: 'Add assets (optional)',
+      add_asset_types: 'Add asset types',
+      add_asset_types_description: 'Add asset types to your project',
       add_assets_button: 'Add assets',
       add_assets_description: 'Add or import the assets for your production.',
       add_shots: 'Add shots (optional)',
