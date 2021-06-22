@@ -4,6 +4,7 @@ import {
   buildNameIndex,
   indexSearch
 } from './indexing'
+import string from './string'
 
 const UNION_REGEX = /\+\(.*\)/
 const EQUAL_REGEX = /\[([^[]*)\]=\[([^[]*)\]|([^ ]*)=\[([^[]*)\]|([^ ]*)=([^ ]*)|\[([^[]*)\]=([^ ]*)/g
@@ -411,11 +412,11 @@ export const getAssignedToFilters = (persons, queryText) => {
   const results = []
   const rgxMatches = queryText.match(EQUAL_REGEX)
   if (rgxMatches) {
-    rgxMatches.forEach((rgxMatch) => {
+    rgxMatches.forEach(rgxMatch => {
       const personIndex = new Map()
       persons
         .forEach(person => {
-          const name = person.name.toLowerCase()
+          const name = string.slugify(person.name.toLowerCase())
           personIndex.set(name, person)
         })
       const pattern = rgxMatch.split('=')
@@ -424,7 +425,8 @@ export const getAssignedToFilters = (persons, queryText) => {
         value = cleanParenthesis(value)
         const excluding = value.startsWith('-')
         if (excluding) value = value.substring(1)
-        const person = personIndex.get(value.toLowerCase())
+        const simplifiedValue = string.slugify(value.toLowerCase())
+        const person = personIndex.get(simplifiedValue)
         if (person) {
           results.push({
             personId: person.id,
