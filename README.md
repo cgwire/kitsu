@@ -1,8 +1,10 @@
 [![Kitsu](https://www.cg-wire.com/en/images/kitsu.png)](https://kitsu.cg-wire.com)
 
-# Kitsu, Production Tracker For Indie Studios
+# Kitsu, Collaboration Platform for Animation Studios
 
-Kitsu is a web application to track the progress of your productions. It improves the communication between all stakeholders of the production. Which leads to better pictures and faster deliveries. 
+Kitsu is a web application to share the progress of your productions and 
+validate your deliveries. It improves the communication between all stakeholders. 
+Which leads to better pictures, shipped faster. 
 
 [![Build
 badge](https://travis-ci.org/cgwire/kitsu.svg?branch=master)](https://travis-ci.org/cgwire/kitsu)
