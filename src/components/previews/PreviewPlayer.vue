@@ -94,7 +94,7 @@
           :title="$t('playlists.actions.looping')"
           icon="repeat"
           @click="onRepeatClicked"
-          v-if="!light"
+          v-if="!light || fullScreen"
         />
 
         <button-simple

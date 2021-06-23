@@ -11,6 +11,12 @@
           <th class="status">
             {{ $t('tasks.fields.task_status') }}
           </th>
+          <th class="estimation">
+            {{ $t('tasks.fields.estimation').substring(0, 3) }}.
+          </th>
+          <th class="duedate">
+            {{ $t('tasks.fields.due_date') }}
+          </th>
           <th class="assignees">
             {{ $t('tasks.fields.assignees') }}
           </th>
@@ -51,6 +57,12 @@
               v-if="getTask(taskId)"
             />
           </td>
+          <td class="estimation">
+            {{ getTaskEstimation(taskId) }}
+          </td>
+          <td class="duedate">
+            {{ getTaskDueDate(taskId) }}
+          </td>
           <td class="assignees">
             <div
               class="flexrow"
@@ -83,6 +95,8 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+import { formatListMixin } from '@/components/mixins/format'
+
 import TaskTypeCell from '../cells/TaskTypeName'
 import TableInfo from '../widgets/TableInfo'
 import ValidationTag from '../widgets/ValidationTag'
@@ -90,6 +104,7 @@ import PeopleAvatar from '../widgets/PeopleAvatar'
 
 export default {
   name: 'entity-task-list',
+  mixins: [formatListMixin],
 
   components: {
     TableInfo,
@@ -162,6 +177,20 @@ export default {
       }
     },
 
+    getTaskDueDate (taskId) {
+      const task = this.getTask(taskId)
+      return task && task.due_date
+        ? task.due_date.substring(0, 10)
+        : ''
+    },
+
+    getTaskEstimation (taskId) {
+      const task = this.getTask(taskId)
+      return task && task.estimation
+        ? this.formatDuration(task.estimation)
+        : ''
+    },
+
     getTaskType (entry) {
       const task = this.getTask(entry)
       return task ? this.taskTypeMap.get(task.task_type_id) : null
@@ -189,6 +218,16 @@ export default {
 .type {
   max-width: 250px;
   min-width: 250px;
+}
+
+.estimation {
+  max-width: 50px;
+  min-width: 50px;
+}
+
+.duedate {
+  max-width: 100px;
+  min-width: 100px;
 }
 
 .status {
