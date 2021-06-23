@@ -894,9 +894,11 @@ export default {
       this.autoChooseSelectBar()
     },
 
-    nbSelectedTasks () {
+    selectedTasks () {
       this.selectedTaskIds = Array.from(this.selectedTasks.keys())
+    },
 
+    nbSelectedTasks () {
       if (this.nbSelectedTasks > 0) {
         let isShotSelected = false
         let isAssetSelected = false
