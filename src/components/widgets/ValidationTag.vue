@@ -12,6 +12,7 @@
     <span
       class="tag"
       :style="tagStyle"
+      @click="($event) => $emit('click', $event)"
       v-else
     >
       {{ taskStatus.short_name }}

@@ -1,9 +1,9 @@
 <template>
-<div :class="{ field: withMargin }">
+<div :class="{ field: withMargin, 'is-inline': isInline }">
   <label class="label" v-if="label.length > 0">
     {{ label }}
   </label>
-  <p class="control">
+  <p class="control" :class="{ 'is-inline': isInline }">
     <span
       :class="{
         select: true,
@@ -80,6 +80,10 @@ export default {
     },
     withMargin: {
       default: true,
+      type: Boolean
+    },
+    isInline: {
+      default: false,
       type: Boolean
     }
   },

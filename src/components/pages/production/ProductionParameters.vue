@@ -109,6 +109,7 @@
 
 import { mapGetters, mapActions } from 'vuex'
 import { formatSimpleDate, parseSimpleDate } from '@/lib/time'
+import { PRODUCTION_TYPE_OPTIONS } from '@/lib/productions'
 
 import Combobox from '@/components/widgets/Combobox'
 import DateField from '@/components/widgets/DateField'
@@ -132,20 +133,7 @@ export default {
       isLoading: false,
       isError: false,
       isLocalTVShow: false,
-      productionTypeOptions: [
-        {
-          label: 'short',
-          value: 'short'
-        },
-        {
-          label: 'featurefilm',
-          value: 'featurefilm'
-        },
-        {
-          label: 'tvshow',
-          value: 'tvshow'
-        }
-      ],
+      productionTypeOptions: PRODUCTION_TYPE_OPTIONS,
       form: {
         name: '',
         start_date: new Date(),

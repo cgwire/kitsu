@@ -90,6 +90,7 @@ import Combobox from '../widgets/Combobox'
 import ModalFooter from '@/components/modals/ModalFooter'
 import FileUpload from '../widgets/FileUpload'
 import TextField from '../widgets/TextField'
+import { PRODUCTION_TYPE_OPTIONS } from '@/lib/productions'
 
 export default {
   name: 'edit-production-modal',
@@ -155,20 +156,7 @@ export default {
   created () {
     this.resetForm()
 
-    this.productionTypeOptions = [
-      {
-        label: 'short',
-        value: 'short'
-      },
-      {
-        label: 'featurefilm',
-        value: 'featurefilm'
-      },
-      {
-        label: 'tvshow',
-        value: 'tvshow'
-      }
-    ]
+    this.productionTypeOptions = PRODUCTION_TYPE_OPTIONS
   },
 
   mounted () {

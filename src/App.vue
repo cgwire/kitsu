@@ -750,6 +750,10 @@ a:hover {
   margin-left: 1em;
 }
 
+.mr0 {
+  margin-right: 0em;
+}
+
 .mr05 {
   margin-right: 0.5em;
 }
@@ -764,6 +768,10 @@ a:hover {
 
 .mt1 {
   margin-top: 1em;
+}
+
+.mt15 {
+  margin-top: 1.5em;
 }
 
 .mt2 {

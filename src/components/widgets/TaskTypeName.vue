@@ -12,10 +12,14 @@
 </router-link>
 <div
   class="tag task-type-name no-link"
+  :class="{ deletable }"
   :style="{ 'border-left': '4px solid ' + color }"
   v-else
 >
   {{ taskType.name }}
+  <span class="delete-times" v-if="deletable" @click="$emit('delete')">
+    ×
+  </span>
 </div>
 </template>
 
@@ -35,6 +39,10 @@ export default {
     productionId: {
       type: String,
       default: null
+    },
+    deletable: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -85,9 +93,29 @@ export default {
   font-weight: bold;
 }
 
+.tag.deletable {
+  padding-right: 0;
+}
+
 .dark .tag {
   color: $white-grey;
   background: $dark-grey-lightest;
+}
+
+.delete-times:hover {
+  cursor: pointer;
+}
+
+.delete-times {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding-left: 7px;
+  padding-bottom: 2px;
+  padding-right: 0.7rem;
+}
+
+.delete-times:hover {
+  color: black
 }
 
 .no-link {

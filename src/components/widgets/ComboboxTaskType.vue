@@ -86,6 +86,10 @@ export default {
     up: {
       default: false,
       type: Boolean
+    },
+    addPlaceholder: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -100,6 +104,8 @@ export default {
     currentTaskType () {
       if (this.value) {
         return this.taskTypeMap.get(this.value)
+      } else if (this.addPlaceholder) {
+        return { name: '+ Task Type', color: '#E5E5E5' }
       } else {
         return this.taskTypeList[0]
       }
