@@ -4,6 +4,9 @@
       <div class="column is-offset-one-quarter is-half">
         <section class="hero">
           <div class="hero-body">
+            <h2 class="subtitle">
+              {{ $t('productions.creation.new_project') }}
+            </h2>
             <h1 class="title">
               {{ $t('productions.creation.create_production') }}
             </h1>
@@ -16,7 +19,7 @@
           :is-completed="hasValidName"
         >
           <text-field
-            input-class=" is-small is-inline"
+            input-class="w600 is-inline"
             :placeholder="$t('productions.creation.placeholder_name')"
             v-model="productionToCreate.name"
           />
@@ -27,64 +30,84 @@
           :step="2"
           :is-completed="hasValidSettings"
         >
-          <combobox
-            :options="productionTypeOptions"
-            localeKeyPrefix="productions.type."
-            v-model="productionToCreate.settings.type"
-            is-inline
-            thin
-          />
-          <span class="input-separator">&gt;</span>
-          <text-field
-            input-class=" is-small is-inline is-size-3"
-            type="number"
-            :step="1"
-            :placeholder="$t('productions.creation.placeholder_fps')"
-            is-inline
-            v-model="productionToCreate.settings.fps"
-          />
-          <span class="input-separator">fps &gt;</span>
-          <text-field
-            input-class=" is-small is-inline is-size-2"
-            type="number"
-            :step="1"
-            :placeholder="$t('productions.creation.placeholder_ratio1')"
-            is-inline
-            v-model="productionToCreate.settings.ratio[0]"
-          />
-          <span class="input-separator">:</span>
-          <text-field
-            input-class=" is-small is-inline is-size-2"
-            type="number"
-            :step="1"
-            :placeholder="$t('productions.creation.placeholder_ratio2')"
-            is-inline
-            v-model="productionToCreate.settings.ratio[1]"
-          />
-          <span class="input-separator">&gt;</span>
-          <text-field
-            input-class=" is-small is-inline is-size-4"
-            type="number"
-            :step="1"
-            :placeholder="$t('productions.creation.placeholder_resolution1')"
-            is-inline
-            v-model="productionToCreate.settings.resolution[0]"
-          />
-          <span class="input-separator">x</span>
-          <text-field
-            input-class=" is-small is-inline is-size-4"
-            type="number"
-            :step="1"
-            :placeholder="$t('productions.creation.placeholder_resolution2')"
-            is-inline
-            v-model="productionToCreate.settings.resolution[1]"
-          />
-          <div class="date-picker-wrapper">
-            <calendar-icon />
+          <div class="mb1">
+            <combobox
+              :options="productionTypeOptions"
+              :label="$t('productions.fields.type')"
+              localeKeyPrefix="productions.type."
+              v-model="productionToCreate.settings.type"
+              thin
+              is-inline
+            />
+          </div>
+          <div class="flexrow mb1">
+            <text-field
+              class="flexrow-item"
+              input-class=" is-small is-size-3"
+              :label="$t('productions.fields.fps')"
+              type="number"
+              :step="1"
+              :placeholder="$t('productions.creation.placeholder_fps')"
+              v-model="productionToCreate.settings.fps"
+              thin
+            />
+            <span class="input-separator flexrow-item mr1"></span>
+            <text-field
+              class="flexrow-item mr0"
+              input-class=" is-small is-size-2"
+              :label="$t('productions.fields.ratio')"
+              type="number"
+              :step="1"
+              :placeholder="$t('productions.creation.placeholder_ratio1')"
+              v-model="productionToCreate.settings.ratio[0]"
+              thin
+            />
+            <span class="input-separator flexrow-item mt15 mr0">:</span>
+            <text-field
+              class="flexrow-item"
+              input-class=" is-small is-size-2"
+              type="number"
+              :step="1"
+              :placeholder="$t('productions.creation.placeholder_ratio2')"
+              :empty-label="true"
+              v-model="productionToCreate.settings.ratio[1]"
+              thin
+            />
+            <span class="input-separator flexrow-item mr1"></span>
+            <text-field
+              class="flexrow-item mr0 ml2"
+              input-class=" is-small is-size-4"
+              :label="$t('productions.fields.resolution')"
+              type="number"
+              :step="1"
+              :placeholder="$t('productions.creation.placeholder_resolution1')"
+              v-model="productionToCreate.settings.resolution[0]"
+              thin
+            />
+            <span class="input-separator flexrow-item mt15 mr05">x</span>
+            <text-field
+              class="flexrow-item"
+              input-class=" is-small is-size-4"
+              type="number"
+              :placeholder="$t('productions.creation.placeholder_resolution2')"
+              :step="1"
+              :empty-label="true"
+              v-model="productionToCreate.settings.resolution[1]"
+              thin
+            />
+          </div>
+          <div>
+            <label class="label">
+              {{
+                $t('productions.creation.start_and_end_dates')
+              }}
+            </label>
+            <div class="date-picker-wrapper">
             <datepicker
               wrapper-class="datepicker"
-              input-class="is-small date-input input"
-              :placeholder="$t('productions.creation.placeholder_date_start')"
+              input-class=" is-small date-input input"
+              label="Start date"
+              :placeholder="startDatePlaceholder"
               :language="locale"
               :disabled-dates="{ days: [6, 0] }"
               :monday-first="true"
@@ -97,12 +120,13 @@
               input-class="is-small date-input input"
               :language="locale"
               :disabled-dates="{ days: [6, 0] }"
-              :placeholder="$t('productions.creation.placeholder_date_end')"
+              :placeholder="endDatePlaceholder"
               :monday-first="true"
               :disabledDates="{ to: productionToCreate.settings.dateStart }"
               format="yyyy-MM-dd"
               v-model="productionToCreate.settings.dateEnd"
             />
+            </div>
           </div>
         </timeline-item>
         <timeline-item
@@ -121,14 +145,15 @@
               class="task-type"
               :task-type="taskType"
               :key="taskType.id"
-              @delete="deleteFromList(taskType, 'assetTaskTypes')"
               deletable
+              @delete="deleteFromList(taskType, 'assetTaskTypes')"
               v-for="taskType in productionToCreate.assetTaskTypes"
             />
             <combobox-task-type
               slot="footer"
               class="is-inline"
               :task-type-list="availableAssetTaskTypes"
+              add-placeholder
               @input="id => productionToCreate.assetTaskTypes.push(
                 taskTypeMap.get(id)
               )"
@@ -160,6 +185,7 @@
               slot="footer"
               class="is-inline"
               :task-type-list="availableShotTaskTypes"
+              add-placeholder
               @input="id => productionToCreate.shotTaskTypes.push(
                 taskTypeMap.get(id)
               )"
@@ -173,28 +199,28 @@
           :step="5"
           :is-completed="hasValidTaskStatuses"
         >
-          <draggable
-            v-model="productionToCreate.taskStatuses"
-            draggable=".task-type"
-          >
-            <task-type-name
-              class="task-type"
-              :task-type="taskStatus"
+          <div class="flexrow">
+            <validation-tag
+              class="task-status flexrow-item"
+              :task="{ task_status_id: taskStatus.id }"
               :key="taskStatus.id"
-              @delete="deleteFromList(taskStatus, 'taskStatuses')"
-              :deletable="taskStatus.short_name !== 'todo'"
+              pointer
+              is-static
+              @click="deleteFromList(taskStatus, 'taskStatuses')"
               v-for="taskStatus in productionToCreate.taskStatuses"
             />
-            <combobox-task-type
+            <combobox-status
               slot="footer"
-              class="is-inline"
-              :task-type-list="availableTaskStatuses"
+              class="flexrow-item"
+              :task-status-list="availableTaskStatuses"
+              :with-margin="false"
+              add-placeholder
               @input="id => productionToCreate.taskStatuses.push(
                 taskStatusMap.get(id)
               )"
               v-if="availableTaskStatuses.length > 0"
             />
-          </draggable>
+          </div>
         </timeline-item>
         <timeline-item
           :title="$t('productions.creation.add_asset_types')"
@@ -202,42 +228,45 @@
           :step="6"
           :is-completed="hasValidAssetTypes"
         >
-          <div class="mb1">
-            <task-type-name
-              :task-type="{ ...assetType, color: '#000000' }"
+          <div class="flexrow asset-types mb1">
+            <span
               :key="assetType.id"
-              @delete="deleteFromList(assetType, 'assetTypes')"
-              deletable
+              class="asset-type-name flexrow-item"
+              @click="deleteFromList(assetType, 'assetTypes')"
               v-for="assetType in productionToCreate.assetTypes"
+            >
+              {{ assetType.name }}
+            </span>
+            <combobox
+              class="flexrow-item"
+              :options="availableAssetTypes"
+              :with-margin="false"
+              @input="id => {
+                assetTypeMap.get(id) && productionToCreate.assetTypes.push(
+                  assetTypeMap.get(id)
+                )
+              }"
+              v-if="availableAssetTypes.length > 1"
             />
           </div>
-          <combobox
-            class="is-inline"
-            :options="availableAssetTypes"
-            @input="id => {
-              assetTypeMap.get(id) && productionToCreate.assetTypes.push(
-                assetTypeMap.get(id)
-              )
-            }"
-            v-if="availableAssetTypes.length > 0"
-          />
         </timeline-item>
         <timeline-item
           :title="$t('productions.creation.add_assets')"
           :subtitle="$t('productions.creation.add_assets_description')"
           :step="7"
           :is-completed="hasValidAssets"
+          :optional="true"
         >
           <div class="import-content">
-            <span class="tag" v-if="nbAssetsToImport > 0">
+            <span class="tag mr1" v-if="nbAssetsToImport > 0">
               {{ nbAssetsToImport }}
               {{ $t('productions.creation.assets_to_import') }}
             </span>
             <button
-              class="button ml1"
+              class="button import-button"
               @click="toggleModal('isAssetsImportDisplayed')"
             >
-              + {{ $t('productions.creation.import_assets_button') }}
+              {{ $t('productions.creation.import_assets_button') }}
             </button>
           </div>
         </timeline-item>
@@ -246,18 +275,19 @@
           :subtitle="$t('productions.creation.add_shots_description')"
           :step="8"
           :is-completed="hasValidShots"
+          :optional="true"
           is-last
         >
           <div class="import-content">
-            <span class="tag" v-if="nbShotsToImport > 0">
+            <span class="tag mr1" v-if="nbShotsToImport > 0">
               {{ nbShotsToImport }}
               {{ $t('productions.creation.shots_to_import') }}
             </span>
             <button
-              class="button ml1"
+              class="button import-button"
               @click="toggleModal('isShotsImportDisplayed')"
             >
-              + {{ $t('productions.creation.import_shots_button') }}
+              {{ $t('productions.creation.import_shots_button') }}
             </button>
 <!--            <button-->
 <!--              class="button ml1"-->
@@ -285,13 +315,16 @@
           <button
             class="button big-button"
             v-if="hasAllDataCorrect"
-            :disabled="loading.createProduction"
             @click="createProduction"
           >
-            <spinner v-if="loading.createProduction" :size="20" class="mr1" />
+            <spinner
+              v-if="loading.createProduction"
+              :size="20"
+              class="mr1"
+            />
             {{ $t('productions.creation.create_button') }}
           </button>
-          <button class="button big-button" disabled v-else>
+          <button class="button big-button" v-else>
             {{ $t('productions.creation.create_button_disabled') }}
           </button>
         </section>
@@ -366,16 +399,19 @@
 <script>
 import draggable from 'vuedraggable'
 import Datepicker from 'vuejs-datepicker'
-import { CalendarIcon } from 'vue-feather-icons'
+import moment from 'moment'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 import { mapActions, mapGetters } from 'vuex'
 
 import csv from '@/lib/csv'
 import { removeModelFromList } from '@/lib/models'
+import { formatSimpleDate } from '@/lib/time'
+import { sortByName } from '@/lib/sorting'
 import { PRODUCTION_TYPE_OPTIONS } from '@/lib/productions'
 
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ImportModal from '@/components/modals/ImportModal'
 import ImportRenderModal from '@/components/modals/ImportRenderModal'
 import ManageShotsModal from '@/components/modals/ManageShotsModal'
@@ -383,14 +419,15 @@ import Spinner from '@/components/widgets/Spinner'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 import TextField from '@/components/widgets/TextField'
 import TimelineItem from '@/components/pages/production/TimelineItem'
+import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
   name: 'NewProduction',
   components: {
     draggable,
-    CalendarIcon,
     Combobox,
     ComboboxTaskType,
+    ComboboxStatus,
     Datepicker,
     ImportModal,
     ImportRenderModal,
@@ -398,7 +435,8 @@ export default {
     Spinner,
     TaskTypeName,
     TextField,
-    TimelineItem
+    TimelineItem,
+    ValidationTag
   },
   data () {
     return {
@@ -448,6 +486,7 @@ export default {
       productionTypeOptions: PRODUCTION_TYPE_OPTIONS
     }
   },
+
   computed: {
     ...mapGetters([
       'assetsCsvFormData',
@@ -467,21 +506,25 @@ export default {
     isTVShow () {
       return this.productionToCreate.settings.type === 'tvshow'
     },
+
     assetsDataMatchers () {
       return this.isTVShow
         ? ['Episode', 'Type', 'Name']
         : ['Type', 'Name']
     },
+
     shotsDataMatchers () {
       return this.isTVShow
         ? ['Episode', 'Sequence', 'Name']
         : ['Sequence', 'Name']
     },
+
     assetsColumns () {
       return this.isTVShow
         ? ['Episode', 'Type', 'Name', 'Description']
         : ['Type', 'Name', 'Description']
     },
+
     shotsColumns () {
       const collection = [
         'Sequence',
@@ -497,6 +540,7 @@ export default {
       }
       return collection
     },
+
     locale () {
       if (this.user.locale === 'fr_FR') {
         return fr
@@ -504,29 +548,37 @@ export default {
         return en
       }
     },
+
     allowedProductionTypes () {
       return PRODUCTION_TYPE_OPTIONS.map(
         option => option.value
       )
     },
+
     hasValidName () {
       return !this.isEmpty(this.productionToCreate.name)
     },
+
     hasValidStartDate () {
       return !this.isEmpty(this.productionToCreate.settings.dateStart)
     },
+
     hasValidEndDate () {
       return !this.isEmpty(this.productionToCreate.settings.dateEnd)
     },
+
     hasValidAssets () {
       return this.nbAssetsToImport > 0
     },
+
     hasValidAssetTypes () {
       return this.productionToCreate.assetTypes.length > 0
     },
+
     hasValidShots () {
       return this.nbShotsToImport > 0
     },
+
     hasValidSettings () {
       return (
         this.hasValidType &&
@@ -537,9 +589,11 @@ export default {
         this.hasValidEndDate
       )
     },
+
     hasValidFPS () {
       return this.isInteger(this.productionToCreate.settings.fps)
     },
+
     hasValidRatio () {
       if (this.isEmpty(this.productionToCreate.settings.ratio)) {
         return false
@@ -550,6 +604,7 @@ export default {
         this.isInteger(this.productionToCreate.settings.ratio[1])
       )
     },
+
     hasValidResolution () {
       if (this.isEmpty(this.productionToCreate.settings.resolution)) {
         return false
@@ -560,20 +615,25 @@ export default {
         this.isInteger(this.productionToCreate.settings.resolution[1])
       )
     },
+
     hasValidType () {
       return this.allowedProductionTypes.indexOf(
         this.productionToCreate.settings.type
       ) !== -1
     },
+
     hasValidAssetTaskTypes () {
       return this.productionToCreate.assetTaskTypes.length > 0
     },
+
     hasValidShotTaskTypes () {
       return this.productionToCreate.shotTaskTypes.length > 0
     },
+
     hasValidTaskStatuses () {
       return this.productionToCreate.taskStatuses.length > 0
     },
+
     hasAllDataCorrect () {
       return (
         this.hasValidName &&
@@ -584,6 +644,7 @@ export default {
         this.hasValidAssetTypes
       )
     },
+
     availableAssetTaskTypes () {
       return this.assetTaskTypes.filter(
         assetTaskType => this.productionToCreate.assetTaskTypes.indexOf(
@@ -591,21 +652,25 @@ export default {
         ) === -1
       )
     },
+
     availableAssetTypes () {
+      const assetTypes = sortByName(this.assetTypes.filter(assetType => {
+        return this.productionToCreate.assetTypes.indexOf(assetType) === -1
+      }))
       return [
-        { label: '-', value: '-' },
-        ...this.assetTypes.filter(
-          assetType => this.productionToCreate.assetTypes.indexOf(
-            assetType
-          ) === -1
-        ).map((assetType) => {
-          return {
-            label: assetType.name,
-            value: assetType.id
-          }
-        })
-      ]
+        {
+          name: '+ Asset Type',
+          id: '-'
+        },
+        ...assetTypes
+      ].map(assetType => {
+        return {
+          label: assetType.name,
+          value: assetType.id
+        }
+      })
     },
+
     availableShotTaskTypes () {
       return this.shotTaskTypes.filter(
         shotTaskType => this.productionToCreate.shotTaskTypes.indexOf(
@@ -613,11 +678,16 @@ export default {
         ) === -1
       )
     },
+
     availableTaskStatuses () {
       return this.taskStatus.filter(
-        status => this.productionToCreate.taskStatuses.indexOf(status) === -1
+        status => (
+          this.productionToCreate.taskStatuses.indexOf(status) === -1 &&
+          status.short_name !== 'todo'
+        )
       )
     },
+
     nbAssetsToImport () {
       if (this.productionToCreate.assetsToAdd) {
         const assetsLines = this.productionToCreate.assetsToAdd.filter(
@@ -627,6 +697,7 @@ export default {
       }
       return 0
     },
+
     nbShotsToImport () {
       let nbShots = this.productionToCreate.shotsToCreate.length
       if (this.productionToCreate.shotsToAdd) {
@@ -636,8 +707,17 @@ export default {
         nbShots += shotsLines.length - 1
       }
       return nbShots
+    },
+
+    startDatePlaceholder () {
+      return formatSimpleDate(moment())
+    },
+
+    endDatePlaceholder () {
+      return formatSimpleDate(moment().add('month', 3))
     }
   },
+
   methods: {
     ...mapActions([
       'addAssetTypeToProduction',
@@ -649,11 +729,13 @@ export default {
       'uploadShotFile'
     ]),
     removeModelFromList,
+
     deleteFromList (object, listName) {
       this.productionToCreate[listName] = removeModelFromList(
         this.productionToCreate[listName], object
       )
     },
+
     isEmpty (value) {
       return (
         value === null ||
@@ -663,9 +745,11 @@ export default {
         value === {}
       )
     },
+
     isInteger (value) {
       return !this.isEmpty(value) && /^\d+$/.test(value)
     },
+
     async createTaskTypesAndStatuses () {
       await Promise.all(this.productionToCreate.assetTaskTypes.concat(
         this.productionToCreate.shotTaskTypes
@@ -683,6 +767,7 @@ export default {
         )
       ))
     },
+
     async createAssets () {
       if (this.productionToCreate.assetsToAdd !== null) {
         this.loading.importingAssets = true
@@ -698,6 +783,7 @@ export default {
           })
       }
     },
+
     createAssetTypes () {
       this.productionToCreate.assetTypes.map(
         async (assetType) => {
@@ -705,6 +791,7 @@ export default {
         }
       )
     },
+
     async createShots () {
       if (this.productionToCreate.shotsToAdd !== null) {
         this.loading.importingShots = true
@@ -720,6 +807,7 @@ export default {
           })
       }
     },
+
     createProductionRoute (createdProduction) {
       const params = {
         production_id: createdProduction.id
@@ -734,7 +822,9 @@ export default {
         params
       }
     },
+
     async createProduction () {
+      if (this.loading.createProduction) return
       this.loading.createProduction = true
       this.errors.creatingProduction = false
       this.errors.creatingProductionError = ''
@@ -765,9 +855,11 @@ export default {
       }
       this.loading.createProduction = false
     },
+
     toggleModal (modalName) {
       this.modals[modalName] = !this.modals[modalName]
     },
+
     renderAssetsImport (data, mode) {
       this.loading.importingAssets = true
       this.errors.importingAssets = false
@@ -782,6 +874,7 @@ export default {
           this.toggleModal('isAssetsImportRenderDisplayed')
         })
     },
+
     resetAssetsImport () {
       this.errors.importingAssets = false
       this.toggleModal('isAssetsImportRenderDisplayed')
@@ -790,6 +883,7 @@ export default {
       this.$refs['import-assets-modal'].reset()
       this.toggleModal('isAssetsImportDisplayed')
     },
+
     uploadAssetsImportFile (data, toUpdate) {
       const formData = new FormData()
       const filename = 'import.csv'
@@ -804,6 +898,7 @@ export default {
       this.productionToCreate.assetsToAdd = data
       this.toggleModal('isAssetsImportRenderDisplayed')
     },
+
     renderShotsImport (data, mode) {
       this.loading.importingShots = true
       this.errors.importingShots = false
@@ -818,6 +913,7 @@ export default {
           this.toggleModal('isShotsImportRenderDisplayed')
         })
     },
+
     resetShotsImport () {
       this.errors.importingShots = false
       this.toggleModal('isShotsImportRenderDisplayed')
@@ -826,6 +922,7 @@ export default {
       this.$refs['import-shots-modal'].reset()
       this.toggleModal('isShotsImportDisplayed')
     },
+
     uploadShotsImportFile (data, toUpdate) {
       const formData = new FormData()
       const filename = 'import.csv'
@@ -840,16 +937,19 @@ export default {
       this.productionToCreate.shotsToAdd = data
       this.toggleModal('isShotsImportRenderDisplayed')
     },
+
     addEpisode (episode, callback) {
       this.productionToCreate.episodesToCreate.push(episode)
       episode.id = this.productionToCreate.episodesToCreate.length - 1
       callback(episode)
     },
+
     addSequence (sequence, callback) {
       this.productionToCreate.sequencesToCreate.push(sequence)
       sequence.id = this.productionToCreate.sequencesToCreate.length - 1
       callback(sequence)
     },
+
     addShot (shot, callback) {
       this.productionToCreate.shotsToCreate.push(shot)
       shot.id = this.productionToCreate.shotsToCreate.length - 1
@@ -865,12 +965,30 @@ export default {
   background: #5E6169;
 }
 
+.new-production {
+  font-family: Lato;
+}
+
 .hero {
   background-color: inherit;
 }
 
+h2 {
+  color: var(--text);
+  font-size: 20px;
+  letter-spacing: 5px;
+  line-height: 24px;
+  font-weight: 700;
+  padding-bottom: 0.7em;
+  text-transform: uppercase;
+}
+
 h1.title {
-  font-weight: bold;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 56px;
+  text-transform: capitalize;
 }
 
 .new-production > .columns {
@@ -880,6 +998,10 @@ h1.title {
 span.input-separator {
   display: inline-block;
   padding: 3px;
+
+  &.mr0 {
+    margin-right: 0;
+  }
 }
 
 >>> .input.is-small {
@@ -889,15 +1011,15 @@ span.input-separator {
 }
 
 >>> .input.is-size-2 {
-  width: 3.5rem;
+  width: 3rem;
 }
 
 >>> .input.is-size-3 {
-  width: 4rem;
+  width: 3.5rem;
 }
 
 >>> .input.is-size-4 {
-  width: 4.5rem;
+  width: 5rem;
 }
 
 >>> .datepicker {
@@ -934,6 +1056,35 @@ span.input-separator {
 
 .import-content {
   display: flex;
+  align-items: center;
+}
+
+.w600 {
+  max-width: 600px;
+}
+
+.flexrow-item {
+  margin-right: 1em;
+}
+
+.flexrow-item.mr0 {
+  margin-right: 0em;
+}
+
+.flexrow-item.mr05 {
+  margin-right: 0.25em;
+}
+
+.import-button {
+}
+
+.asset-type-name {
+  border: 1px solid var(--text);
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.asset-types {
   align-items: center;
 }
 </style>

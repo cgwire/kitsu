@@ -1,9 +1,10 @@
 <template>
 <div
   :class="{
-    field: true,
+    field: withMargin,
     'field--narrow': narrow
-  }">
+  }"
+>
   <label class="label" v-if="label.length > 0">
     {{ label }}
   </label>
@@ -97,6 +98,14 @@ export default {
     narrow: {
       default: false,
       type: Boolean
+    },
+    withMargin: {
+      default: true,
+      type: Boolean
+    },
+    addPlaceholder: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -111,8 +120,14 @@ export default {
     ]),
 
     currentStatus () {
+      console.log(this.addPlaceholder, this.value)
       if (this.value) {
         return this.taskStatusMap.get(this.value)
+      } else if (this.addPlaceholder) {
+        return {
+          short_name: '+ status',
+          color: '#999'
+        }
       } else {
         return this.taskStatusList[0]
       }
@@ -126,9 +141,15 @@ export default {
     },
 
     backgroundColor (taskStatus) {
-      if ((!taskStatus || taskStatus.short_name === 'todo') && !this.isDarkTheme) {
+      if (
+        (!taskStatus || taskStatus.short_name === 'todo') &&
+        !this.isDarkTheme
+      ) {
         return '#ECECEC'
-      } else if ((!taskStatus || taskStatus.short_name === 'todo') && this.isDarkTheme) {
+      } else if (
+        (!taskStatus || taskStatus.short_name === 'todo') &&
+        this.isDarkTheme
+      ) {
         return '#5F626A'
       } else if (this.isDarkTheme) {
         return colors.darkenColor(taskStatus.color)

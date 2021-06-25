@@ -1,7 +1,11 @@
 <template>
 <div class="field" :class="{ 'is-inline': isInline }">
   <label class="label" v-if="label">{{ label }}</label>
-  <p class="control" :class="{ 'is-inline': isInline, flexrow: !isInline }">
+  <label class="label empty-label" v-if="emptyLabel">A</label>
+  <p class="control" :class="{
+    'is-inline': isInline,
+    flexrow: !isInline
+  }">
     <input
       :class="'input flexrow-item' + inputClass"
       ref="input"
@@ -66,6 +70,10 @@ export default {
     isInline: {
       default: false,
       type: Boolean
+    },
+    emptyLabel: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -107,5 +115,18 @@ input.input.thin {
 
 button {
   font-size: 1.2em;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.empty-label {
+  opacity: 0;
 }
 </style>

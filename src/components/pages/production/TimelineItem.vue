@@ -2,13 +2,21 @@
   <div class="wrapper">
     <div class="timeline">
       <check-icon class="check" size="30" v-if="isCompleted" />
-      <span class="step" v-else>{{ step }}</span>
+      <span
+        :class="{
+          step: true,
+          optional
+        }"
+        v-else
+      >
+        {{ step }}
+      </span>
       <div v-if="!isLast" class="dots"></div>
     </div>
     <div class="timeline-content">
       <h3
         class="title"
-        :class="{ 'is-completed': isCompleted }"
+        :class="{ 'is-completed': isCompleted, optional }"
       >
         {{ title }}
       </h3>
@@ -38,6 +46,10 @@ export default {
     isCompleted: {
       type: Boolean,
       default: false
+    },
+    optional: {
+      type: Boolean,
+      default: false
     }
   }
 }
@@ -61,30 +73,42 @@ export default {
 .wrapper {
   display: flex;
 }
+
 .check {
   color: $white;
   background-color: $green;
   border-radius: 50%;
+  height: 36px;
+  width: 36px;
   polyline {
     transform: scale(0.5) translate(12px, 12px);
     stroke-width: 4;
   }
 }
+
 .step {
-  width: 30px;
-  height: 30px;
-  background-color: #adadad;
-  padding: 0.25rem 0.5rem;
-  text-align: center;
-  border-radius: 15px;
-  color: white;
+  border-radius: 50%;
+  border: 3px solid $green;
+  color: $green;
+  height: 36px;
+  font-size: 16px;
   font-weight: bold;
+  padding-top: 0.2rem;
+  text-align: center;
+  width: 36px;
+
+  &.optional {
+    border: 3px solid var(--text);
+    color: var(--text);
+  }
 }
+
 .timeline {
   margin-right: 2rem;
   display: flex;
   flex-direction: column;
 }
+
 .dots {
   border-right: 2px dotted $light-grey;
   width: 0;
@@ -92,14 +116,22 @@ export default {
   display: flex;
   flex: 1;
 }
+
 .timeline-content {
   padding-top: 3px;
   flex: 1;
 
   h3.title {
-    font-size: 1.5em;
-    font-weight: 400;
+    color: $green;
+    font-size: 22px;
+    font-family: Lato;
+    font-weight: 600;
     line-height: 1.125;
+    padding-top: 0.2em;
+
+    &.optional {
+      color: var(--text);
+    }
   }
 
   h3.title.is-completed {
@@ -108,9 +140,9 @@ export default {
 
   p.subtitle {
     color: $dark-grey;
-    font-size: 100%;
+    font-size: 14px;
+    font-weight: 400;
     padding-left: 3px;
-    margin-bottom: 1em;
   }
 }
 </style>
