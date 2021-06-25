@@ -27,6 +27,10 @@ export default {
     return client.pget(path)
   },
 
+  getPreviewFiles () {
+    return client.pget('/api/data/preview-files')
+  },
+
   newPlaylist (playlist) {
     const data = {
       name: playlist.name,

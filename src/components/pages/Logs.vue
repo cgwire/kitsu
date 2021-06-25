@@ -1,277 +1,85 @@
 <template>
   <div class="logs fixed-page">
-    <div>
-      <page-title class="flexrow-item mb1" :text="$t('logs.title')" />
+
+    <div class="tabs logs-tabs">
+      <ul>
+        <li :class="{'is-active': isActiveTab('events')}">
+          <a @click="activeTab = 'events'">
+            {{ $t('logs.title')}}
+          </a>
+        </li>
+        <li :class="{'is-active': isActiveTab('preview_files')}">
+          <a @click="activeTab = 'preview_files'">
+            {{ $t('logs.preview_files.title')}}
+          </a>
+        </li>
+      </ul>
     </div>
 
-    <div class="flexrow">
-      <date-field
-        class="flexrow-item"
-        :disabled-dates="{from: today}"
-        :label="$t('logs.current_date_label')"
-        v-model="currentDate"
-      />
-      <button-simple
-        class="flexrow-item"
-        icon="refresh"
-        @click="loadDayEvents"
-      />
-      <span class="flexrow-item nb-events">
-        {{ events.length }} {{ $t('logs.events') }}
-      </span>
-    </div>
-
-    <div class="mt2" v-if="!isLoading && events.length === 0">
-      {{ $t('logs.empty_list') }}
-    </div>
-    <div class="has-text-centered" v-if="isLoading" >
-      <spinner />
-    </div>
-    <div class="log-list" v-else>
-      <div
-        class="mt05 event-line"
-        :key="event.id"
-        @click="selectLine(event)"
-        v-for="event in events"
-      >
-        <div>
-          <span class="date tag mr1">{{ formatDate(event.created_at) }} </span>
-          <span
-            class="type tag"
-            :title="event.name.split(':')[1]"
-            :data-status="formatType(event)"
-          >
-            {{ formatType(event) }}
-          </span>
-          <span class="name tag mr1">{{ event.name.split(':')[0] }}</span>
-        </div>
-        <ul v-show="selectedEvents[event.id]">
-          <li class="flexrow">
-            <span class="key">user</span>
-            <people-avatar
-              class="flexrow-item"
-              :size="20"
-              :person="personMap.get(event.user_id)"
-              v-if="event.user_id"
-            />
-            <people-name
-              class="flexrow-item"
-              :person="personMap.get(event.user_id)"
-              v-if="event.user_id"
-            />
-          </li>
-          <li
-            class="variable"
-            :key="event.id + '-' + key"
-            v-for="key in Object.keys(event.data).sort()"
-          >
-            <span class="key">{{ key }}</span>
-            <a :href="getLink(event, key)" v-if="isLink(key)">
-              {{ event.data[key] }}
-            </a>
-            <span v-else>{{ event.data[key] }}</span>
-          </li>
-        </ul>
-      </div>
-    </div>
+    <Events v-if="isActiveTab('events')" />
+    <PreviewFiles v-if="isActiveTab('preview_files')" />
   </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-import moment from 'moment'
-import Vue from 'vue'
-
-import { formatFullDateWithRevertedTimezone } from '@/lib/time'
-import { timeMixin } from '@/components/mixins/time'
-
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import DateField from '@/components/widgets/DateField'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import PeopleName from '@/components/widgets/PeopleName'
-import PageTitle from '@/components/widgets/PageTitle'
-import Spinner from '@/components/widgets/Spinner'
+import Events from './logs/Events'
+import PreviewFiles from './logs/PreviewFiles'
 
 export default {
   name: 'logs',
-  mixins: [timeMixin],
 
   components: {
-    ButtonSimple,
-    DateField,
-    PageTitle,
-    PeopleAvatar,
-    PeopleName,
-    Spinner
+    Events,
+    PreviewFiles
   },
 
   data () {
     return {
-      currentDate: new Date(),
-      events: [],
-      isLoading: true,
-      selectedEvents: {}
+      activeTab: 'events'
     }
   },
 
   mounted () {
-    this.loadDayEvents()
-  },
-
-  computed: {
-    ...mapGetters([
-      'personMap',
-      'productionMap',
-      'user'
-    ]),
-
-    today () {
-      return moment().toDate()
+    if (this.$route.query.tab) {
+      this.activeTab = this.$route.query.tab
     }
   },
 
+  computed: {
+  },
+
   methods: {
-    ...mapActions([
-      'loadEvents'
-    ]),
-
-    formatType (event) {
-      return event.name.split(':')[1].substring(0, 3)
-    },
-
-    loadDayEvents () {
-      const before = moment(this.currentDate).add(1, 'days')
-      const after = moment(this.currentDate)
-      this.selectedEvents = {}
-      this.isLoading = true
-      this.loadEvents({
-        after: formatFullDateWithRevertedTimezone(after, this.timezone),
-        before: formatFullDateWithRevertedTimezone(before, this.timezone)
-      })
-        .then((events) => {
-          this.isLoading = false
-          this.events = events
-        })
-        .catch((err) => {
-          this.isLoading = false
-          console.error(err)
-        })
-    },
-
-    selectLine (event) {
-      Vue.set(this.selectedEvents, event.id, !this.selectedEvents[event.id])
-    },
-
-    isLink (key) {
-      const linkKeys = ['project_id', 'task_id']
-      return linkKeys.includes(key)
-    },
-
-    getLink (event, key) {
-      const productionId = event.data.project_id
-      const entityType = key.substring(0, key.length - 3)
-      if (entityType === 'project') {
-        return `/productions/${productionId}/news-feed`
-      } else {
-        const entityId = event.data[key]
-        return `/productions/${productionId}/${entityType}s/${entityId}`
-      }
+    isActiveTab (tab) {
+      return this.activeTab === tab
     }
   },
 
   watch: {
-    currentDate () {
-      this.loadDayEvents()
-    }
-  },
-
-  metaInfo () {
-    return {
-      title: `${this.$t('logs.title')} - Kitsu`
+    activeTab () {
+      if (this.$route.query.tab !== this.activeTab) {
+        this.$router.push({
+          query: {
+            tab: this.activeTab
+          }
+        })
+      }
     }
   }
-
 }
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .tag {
-    color: $white;
-    background: $dark-grey;
-  }
-
-  .nb-events {
-    color: $white;
-  }
-}
-
 .fixed-page {
   margin-top: 60px;
   padding: 2em;
   overflow: scroll;
 }
 
-.log-list {
-  margin-bottom: 2em;
-}
-
-.event-line {
-  cursor: pointer;
-
-  .tag {
-    border-radius: 4px;
-  }
-
-  .date {
-    font-weight: 500;
-  }
-
-  .type {
-    text-transform: uppercase;
-    min-width: 50px;
-  }
-
-  .type[data-status="new"] {
-    color: white;
-    background: $green;
-  }
-
-  .type[data-status="upd"] {
-    color: white;
-    background: $blue;
-  }
-
-  .type[data-status="add"] {
-    color: white;
-    background: $dark-purple;
-  }
-
-  .type[data-status="del"] {
-    color: white;
-    background: $red;
-  }
-
-  .type[data-status="sta"] {
-    color: white;
-    background: $pink;
-  }
-
-  .type[data-status="set"] {
-    background: $purple;
-  }
-
+.tabs.logs-tabs {
+  overflow: visible;
   ul {
-    border-left: 3px solid $light-grey;
-    list-style-type: none;
-    margin: 1em 1em 2em 0.2em;
-    padding-left: 1em;
-
-    .key {
-      font-weight: 500;
-      width: 170px;
-      display: inline-block;
-    }
+    margin-left: 0;
   }
 }
+
 </style>

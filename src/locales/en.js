@@ -238,7 +238,11 @@ export default {
     current_date_label: 'Show logs for',
     events: 'events listed for the current day',
     empty_list: 'There is no logs for the selected date.',
-    title: 'Logs'
+    title: 'Logs',
+    preview_files: {
+      title: 'Preview files',
+      empty_list: 'There is no broken or ongoing previews.'
+    }
   },
 
   main: {
