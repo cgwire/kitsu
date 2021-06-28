@@ -81,6 +81,7 @@ You can also see the sum up of the parameters of each status.
 
 (To add new Task Status see [Customization of the workflow](../customization/README.md##create-a-new-task-status) )
 
+
 ### Select specific Task Types for a production
 
 
@@ -139,52 +140,66 @@ A pop-up window opens:
  
 It asks you to choose the asset **Type** (1): Camera, Characters, Environment,
 FX, Props, ...  
-Let's start with an environment. First, you select the ** episode** (2), or the main pack (**All**).
+Let's start with an environment. 
+
+Then, you select the ** episode** (2), or the **Main Pack**.
+
 We give it a **Name** (3) and enter a description that helps the designer know what to do and identify the asset quickly.
 If you have multiple assets to create, click on **Confirm and stay**. 
 
 You can change the asset type and keep adding assets. 
 
 You can also customize the asset type list. 
-[How to customize the workflow](../faq/README.md#how-to-customize-the-workflow)
+[Customization of the workflow](../customization/README.md#modify-an-existing-task-type) )
 
 ![Create an asset](../img/getting-started/add_asset_popup.png)
 
-You can see the newly created asset appearing in the background every time you click on **Confirm and stay**. After adding your last asset, click
+You can see the newly created asset appearing in the background every time you click on **Confirm and stay**. 
+
+
+After adding your last asset, click
 on **Confirm**. It saves the asset and closes the window. If you don't have
 more assets to add, click on **Close**, it cancels the window.
 
-For now, the assets are linked with the first episode or with the Main Pack.
+The assets are linked with the first episode **E01** (created per default by Kitsu) or with the **Main Pack**.
+
+![Global asset page](../img/getting-started/asset_edit.png)
+
+You will also see the tasks are created at the same time. Per default all the tasks of your library will be added. If you have set your parameters, only the selected tasks will be added.
+
+If you need to add more **Assets** you can click on the **Add assets** button.
 
 You can edit assets by going to the asset page, hovering the asset you want to modify, and then click on the **edit** button 
 ![Edit button](../img/getting-started/edit_button.png) (1) on the right side of
 the line.  
 
-![Edit an asset](../img/getting-started/asset_edit.png)
+![Edit an asset](../img/getting-started/asset_edit01.png)
 
 On the main asset page, to extend the description, click on the first words (2), and a pop-up opens with the full description.
 
-To delete an asset see the FAQ : [How to delete an asset](../faq/README.md#how-to-delete-an-asset)
+To delete an asset see the FAQ : [How to delete an asset](../faq-deletion/README.md##how-to-delete-an-asset)
 
 
 ## Create tasks for the assets
 
-And now we can create tasks for the assets, like **Concept**, **Modeling**,
-**Shading**, **Rigging**, and other if needed (see 
-[How to customize the workflow](../faq/README.md#how-to-customize-the-workflow)
-).
+If you realize you miss some task type on your pipe line, you need to add the new task type on your library.
 
-Click on the **+ Add tasks** on top of the spreadsheet. 
+(To add new Task Type see [Customization of the workflow](../customization/README.md#create-a-new-task-type) )
+
+Once it's done, you need to add them into your **Setting** page too. 
+
+Then, click on the **+ Add tasks** on top of the spreadsheet. 
 
 ![Add tasks button](../img/getting-started/add_tasks_asset.png)
 
-A new window will
-open, and on the list, under ** type**, you can choose the task you need to add.
-You can also choose to create tasks for **the project** and validate it by the **Confirm** button.
+A new window will open, and on the list you can choose the task you need to add.
+You can also choose to create tasks for **the project**  or **For current list and filters** and validate it by the **Confirm** button.
 
 ![Add task to an asset](../img/getting-started/add_task.png)
 
-You can choose to create tasks only for filtered elements. For example, you want to create 
+## Create tasks for specific assets type
+
+You can choose to create tasks only for **filtered elements**. For example, you want to create 
 **Rigg** tasks only for the characters.
 
 You need to type **Characters** on the search bar on the global asset page.
@@ -201,8 +216,23 @@ If you remove the filter characters, you will see the tasks only created for the
 
 ![Tasks filtered Created](../img/getting-started/add_task_filtered.png)
 
+You can also delete tasks for specific Asset Type. 
+For exemple you want to keep **Rig"" only for the characters.
 
-If you want to delete a task, If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
+You need to type **-Characters** on the search bar on the global asset page. This way the page will filter 
+everything **but** the characters.
+
+![Tasks filtered](../img/getting-started/no_character_filtered.png)
+
+Then select the task type you want to delete for the filtered view. Click on the arrov next to the name 
+of the task type and select **Delete all**.
+
+![Tasks filtered](../img/getting-started/no_character_delete.png)
+
+Once the pop-up opens, type the name of the task type, and double check it's set to **For current list and filters**.
+
+
+You can also delete only a task or selected tasks. If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
 then select the ** delete tasks** (2) on the left top
 of the page.
 ![Delete button](../img/getting-started/delete_task.png) 
