@@ -12,19 +12,12 @@ Then validate by clicking on **Confirm**.
 
 ![Add a production](../img/getting-started/add_production.png)
 
-To navigate through Kitsu sections, you need to use the sidebar. You can 
-access it through the three lines button on top of the screen 
-![Main button](../img/getting-started/main_button.png).  It opens a menu on
-the left part of the screen. We want to see the production list. 
-So below **Studio** section, click on the **PRODUCTIONS** button. 
 
-![Main menu](../img/getting-started/main_menu_production.png)
-
-Now you can see yout production on the main Kitsu's page.
+Now you can see your production on the main Kitsu page.
 
 ![Main page production](../img/getting-started/first_production.png)
 
-You need to click on the avatar of the production to acces to its different pages.
+You need to click on the avatar of the production to access its different pages.
 
 The first step you need to do is to set the **settings** of your production.
 
@@ -37,14 +30,14 @@ Use the navigation menu and go to the **Settings** page.
 On the first tab of the **Settings** page, Kitsu asks you about a brief. It's a good way to keep track of the first 
 brief of the production, and being able to get back to it later.
 
-**/!\ Only Studio manager permission have acess to the Settings page /!\**
+** /!\ Only Studio manager permission have access to the Settings page /!\ **
 
 ![Production settings Brief](../img/getting-started/settings_brief.png)
 
 
 ### Define Production's Parameters
 
-The second tab is the more **important**. You need to define your production's parameter to be sure that everything will go smoothly.
+The second tab is the more **important**. You need to define your production's parameters to be sure that everything will go smoothly.
 
 ![Production settings Parameters](../img/getting-started/settings_parameters.png)
 
@@ -52,24 +45,24 @@ The second tab is the more **important**. You need to define your production's p
 
 - 2/ You can define the start and end date of the production to set the schedule
 
-- 3/ You can change the Type of the production : short, TV Show, Feature Film
+- 3/ You can change the Type of the production: short, TV Show, Feature Film
 
 - 4/ You can add the number of episodes of your TV Show for information
 
 - 5/ You need to set the FPS of the video preview. Kitsu will use this FPS to encode them. **Per default Kitsu will set encode everything at 24 FPS**
 
-- 6/ You can enter the ratio, for information only
+- 6/ You can enter the ratio for information only
 
-- 7/ You need to set the resolution of the video preview. Kitsu will use this resolution to encode them. **Per default Kitsu will set encode everything at 1920*1080**
+- 7/ You need to set the resolution of the video preview. Kitsu will use this resolution to encode them. **Per default, Kitsu will set encode everything at 1920*1080**
 
-- 8/ You can add a picture to better identify your production.
+- 8/ You can add a picture to identify your production better.
 
 Validate everything with the **Save** button.
 
 
 
 
-### Select speticific Task Status for a production
+### Select specific Task Status for a production
 
 
 Per default, Kitsu will load all the Task Status of your status library into your production.
@@ -79,7 +72,7 @@ But you can choose to use only specific status.
 ![Setting status new](../img/getting-started/setting_status_new.png)
 
 On the "Task Status" tab, you can choose which status you want to use on this production, 
-validate your choice with the "add" button.
+validate your choice with the "Add" button.
 
 
 ![Setting Add Status](../img/getting-started/setting_status_add.png)
@@ -93,13 +86,13 @@ Per default, Kitsu will load all the Task Types of your status library into your
 
 ![Setting Task Type new](../img/getting-started/setting_task_new.png)
 
-But you can choose to use only specific Task Types, depending of the type of your production.
+But you can choose to use only specific Task Types, depending on the type of your production.
 
-For example you can create a 2D and A CGI workflow on your library, and add the needed task types into this production.
+For example, you can create a 2D and A CGI workflow on your library and add the needed task types into this production.
 
 
 On the "Task Types" tab, you can choose which status you want to use on this production, 
-validate your choice with the "add" button.
+validate your choice with the "Add" button.
 
 
 ![Setting Add Task Type](../img/getting-started/setting_task_add.png)
@@ -111,24 +104,24 @@ validate your choice with the "add" button.
 
 Per default, Kitsu will load all the Asset Types of your status library into your production.
 
-But you can choose to use only specific Asset Types, depending of the type of your production.
+But you can choose to use only specific Asset Types, depending on the type of your production.
 
 ![Setting Asset type new](../img/getting-started/setting_asset_new.png)
 
 On the "Asset Types" tab, you can choose which Asset Types you want to use on this production, 
-validate your choice with the "add" button.
+validate your choice with the "Add" button.
 
 ![Setting Add Asset](../img/getting-started/setting_asset_add.png)
 
 
 ## Create assets
 
-So, now you have the first script for your production. It's time to do the
-breakdown and the creation of the assets. It allows you to list your assets, 
+So, now you have the first script for your production. Next, it's time to do the
+breakdown and the creation of the assets. Finally, it allows you to list your assets, 
 dispatch the work to the artists, and follow each related
 task's progress.
 
-Let's begin with the asset page. You can access it via the drop-down menu on top of the page. 
+Let's begin with the asset page. You can access it via the drop-down menu on the top of the page. 
 
 ![Drop down menu asset](../img/getting-started/drop_down_menu.png).
 
@@ -140,8 +133,8 @@ A pop-up window opens:
  
 It asks you to choose the asset **Type** (1): Camera, Characters, Environment,
 FX, Props, ...  
-Let's start with an environment. You select the ** episode** (2), or the main pack (**All**).
-We give it a **Name** (3) and enter a description that helps the designer know what to do and later identify the asset quickly.
+Let's start with an environment. First, you select the ** episode** (2), or the main pack (**All**).
+We give it a **Name** (3) and enter a description that helps the designer know what to do and identify the asset quickly.
 If you have multiple assets to create, click on **Confirm and stay**. 
 
 You can change the asset type and keep adding assets. 
@@ -151,11 +144,11 @@ You can also customize the asset type list.
 
 ![Create an asset](../img/getting-started/add_asset_popup.png)
 
-You can see the newly created asset appearing in the background every time you click on **Confirm and stay**. After you added your last asset, click
-on **Confirm**, it saves the asset and closes the window. If you don't have
+You can see the newly created asset appearing in the background every time you click on **Confirm and stay**. After adding your last asset, click
+on **Confirm**. It saves the asset and closes the window. If you don't have
 more assets to add, click on **Close**, it cancels the window.
 
-For now, the assets are linked with the first episode, or with the Main Pack.
+For now, the assets are linked with the first episode or with the Main Pack.
 
 You can edit assets by going to the asset page, hovering the asset you want to modify, and then click on the **edit** button 
 ![Edit button](../img/getting-started/edit_button.png) (1) on the right side of
@@ -192,7 +185,7 @@ You need to type **Characters** on the search bar on the global asset page.
 
 ![Characters filtered](../img/getting-started/chara_filtered.png)
 
-Then click on **+ Add tasks**. Select the task type, here **Rigging**, and switch to **For current list and filters**.
+Then click on **+ Add tasks**. Next, select the task type, here **Rigging**, and switch to **For current list and filters**.
 
 Valid with **Confirm**.
 
@@ -204,7 +197,7 @@ If you remove the filter characters, you will see the tasks only created for the
 
 
 If you want to delete a task, If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
-then select the **delete tasks** (2) on the left top
+then select the ** delete tasks** (2) on the left top
 of the page.
 ![Delete button](../img/getting-started/delete_task.png) 
 
@@ -229,10 +222,10 @@ To start with the shot creation, click on the **Add shots** button.
 ![First add shots](../img/getting-started/new_shot.png)
 
 A new pop-up opens for the creation of the assets.
-You can now create the episodes, the sequences, and shots.
+You can now create the episodes, the sequences, and the shots.
 
 Enter the first episode using your code name, e01, then click
-on the **add** button (1).  Do the same for the sequence, for instance, sq01,
+on the **add** button (1). Then, for instance, do the same for the sequence, for instance, sq01,
 then **add** (2), and now the shots: sh001, then again **add** (3).
 You can also define padding for your shots.
 
@@ -280,7 +273,7 @@ You need to edit the shots to fill the frame range information. Click on the
 edit button ![Edit button](../img/getting-started/edit_button.png) on the right
 side of the shot line.
 
-You can enter the **In** and **Out** of the shot on the new window. Save with the **Confirm** button. 
+You can enter the **In** and **Out** of the shot on the new window. Then, save with the **Confirm** button. 
 
 ![Shot edit page](../img/getting-started/shot_edit.png)
 
@@ -312,7 +305,7 @@ shots are linked to the tasks if you select the **For project** option.
 
 ## Add a new employee
 
-Each artist required an account. Go to the drop-down menu ![Main
+Each Artist required an account. Go to the drop-down menu ![Main
 menu](../img/getting-started/main_button.png), and under the **Studio**
 section, choose **PEOPLE** page.
 
@@ -324,8 +317,8 @@ Then, click on the **+ Add a new employee** button.
 
 A creation window opens. You can enter the first (1) and last name (2), the email
 (which is **mandatory** to create the account) (3), the phone number (4) and
-define the role of the employee: **Artist**, **Supervisor**,
-**Studio Manager**, **Vendor** or **Client** (5).  If the artist is working right now, keep
+define the role of the employee: ** Artist Artist**, **Supervisor**,
+**Studio Manager**, **Vendor** or **Client** (5).  If the ArtistArtist is working right now, keep
 him active, otherwise select no. Validate by clicking the **Confirm** button.
 
 ![Create a new employee](../img/getting-started/create_employee.png)
@@ -350,7 +343,7 @@ On the drop-down menu on the top of the page, select the **TEAM** page.
 
 On the **Team** page, you can see all the assignations for a specific project.
 If you want to check another project team, you need to switch the project
-on the top of the page.
+to the top of the page.
 
 ![Team page](../img/getting-started/team_page.png)
 
@@ -395,7 +388,7 @@ assignations, or press the "Escape" key.
 When you finish all the assignations, quit this mode using the **Clear
 current selection** button ![Clear current selection](../img/getting-started/clear_current_selection.png).
 
-Now you can see next to each status the avatar of the artist.
+Now you can see next to each status the avatar of the ArtistArtist.
 
 ![Assigned people](../img/getting-started/assignation.png)
 
@@ -436,7 +429,7 @@ If you have defined a **FPS** for the production, Kitsu conforms to the uploaded
 
 Otherwise, the video is compressed to 1080P and 30mbits/sec. 
 
-Click on the "Attach preview" button, the explorer opens and lets you choose your file or several files.
+Click on the "Attach preview" button. The explorer opens and lets you choose your file or several files.
 
 ![attach preview](../img/getting-started/attach_preview.png)
 
@@ -472,7 +465,7 @@ On the drop-down menu, choose **BREAKDOWN**.
 ![drop down Menu breakdown](../img/getting-started/drop_down_menu_breakdown.png)
 
 On the left part of the breakdown page is the episode/sequence/shot menu (1); you can choose between those you created. They are the right part of
-the screen; all the assets available ever created for this production (main pack and episodes) (3). Moreover, in
+the screen; all the assets created are available for this production (main pack and episodes) (3). Moreover, in
 the middle section, it is your selection for the shot (2).
 
 ![Breakdown page](../img/getting-started/breakdown_general_empty.png)
@@ -509,8 +502,8 @@ to the name of the asset is the number of times it has been added. In this
 example, we have added two times the character asset Llama.
 
 
-If you add twice an asset by mistake, you have to go on the middle part of
-the screen on your selection of assets for this shot (2). From there, click on
+If you add an asset twice by mistake, you have to go on the middle part of
+the screen to select assets for this shot (2). From there, click on
 **-1**.  When you are done with this shot, go on with the other shots. 
 Your selection is automatically saved.
 
@@ -536,13 +529,13 @@ You now have access to a second drop-down menu, where you can choose your asset 
 
 ![Breakdown asset type](../img/getting-started/breakdown_asset_menu_type.png)
 
-You can fill the asset breakdown page the same way as the shots. Select one or more assets on the left part, then add the elements from the right part.
+You can fill the asset breakdown page the same way as the shots. First, select one or more assets on the left part and then add the right part's elements.
 
 
 
 ## Perform a review
 
-When an artist needs a review, he changes the status of his task to ![wfa](../img/getting-started/wfa_icon.png).
+When an artist needs a review, he changes the status of his task too![wfa](../img/getting-started/wfa_icon.png).
 
 Click on the status (1) to open the right panel and start the review. 
 
@@ -570,7 +563,7 @@ If you go into **Full-Screen**, you can compare two task type or version side by
 
 ![compare button](../img/getting-started/compare_version.png)
 
-From there, you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the artist
+From there, you can change the status too![Retake](../img/getting-started/retake_icon.png) if you want that the ArtistArtist
 performs some changes. 
 
 You can add a **checklist** to your comments.
@@ -592,7 +585,7 @@ You can also **tag** someone on the team in the comments. Type the `@`and it ope
 
 ![Tag someone](../img/getting-started/tag_team.png)
 
-Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the artist that his work is validated.
+Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the ArtistArtist that his work is validated.
 
 
 ## The timesheets
@@ -611,13 +604,13 @@ You can choose which **month** or **year** you want to display.
 
 You can also choose the detail level: **day**, **week**, **month**.
 
-Per week, Kitsu highlights the overdue time per Artist.
+Per week, Kitsu highlights the overdue time per ArtistArtist.
 
 ![main button](../img/getting-started/timesheet_week.png)
 
 If you click on a number, a side panel opens with the details of the time spent per task this week.
 
-You can also set up a number of working hours per day. 
+You can also set up several working hours per day. 
 
 Go back to the main menu and select **Settings**. 
 
