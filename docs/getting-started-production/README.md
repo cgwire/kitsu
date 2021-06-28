@@ -30,7 +30,7 @@ Use the navigation menu and go to the **Settings** page.
 On the first tab of the **Settings** page, Kitsu asks you about a brief. It's a good way to keep track of the first 
 brief of the production, and being able to get back to it later.
 
-** /!\ Only Studio manager permission have access to the Settings page /!\ **
+/!\ **Only Studio manager permission have access to the Settings page** /!\
 
 ![Production settings Brief](../img/getting-started/settings_brief.png)
 
@@ -45,15 +45,15 @@ The second tab is the more **important**. You need to define your production's p
 
 - 2/ You can define the start and end date of the production to set the schedule
 
-- 3/ You can change the Type of the production: short, TV Show, Feature Film
+- 3/ You can change the Type of the production: Short, TV Show, Feature Film
 
 - 4/ You can add the number of episodes of your TV Show for information
 
-- 5/ You need to set the FPS of the video preview. Kitsu will use this FPS to encode them. **Per default Kitsu will set encode everything at 24 FPS**
+- 5/ You need to set the FPS of the video preview. Kitsu will use this FPS to encode them. **Per default Kitsu will encode everything at 24 FPS**
 
 - 6/ You can enter the ratio for information only
 
-- 7/ You need to set the resolution of the video preview. Kitsu will use this resolution to encode them. **Per default, Kitsu will set encode everything at 1920*1080**
+- 7/ You need to set the resolution of the video preview. **Kitsu will use this resolution to encode the videos**. 
 
 - 8/ You can add a picture to identify your production better.
 
@@ -77,30 +77,34 @@ validate your choice with the "Add" button.
 
 ![Setting Add Status](../img/getting-started/setting_status_add.png)
 
+You can also see the sum up of the parameters of each status.
+
+(To add new Task Status see [Customization of the workflow](../customization/README.md##create-a-new-task-status) )
 
 ### Select specific Task Types for a production
 
 
-
-Per default, Kitsu will load all the Task Types of your status library into your production.
+Per default, Kitsu will load all the Task Types of your Task Types library into your production.
 
 ![Setting Task Type new](../img/getting-started/setting_task_new.png)
 
 But you can choose to use only specific Task Types, depending on the type of your production.
-(see [Customization of the workflow](../faq/README.md#how-to-customize-the-workflow) )
+(To add new Task Type see [Customization of the workflow](../customization/README.md#create-a-new-task-type) )
 
 For example, you can create a 2D and A CGI workflow on your library and add the needed task types into this production.
 
 
-On the "Task Types" tab, you can choose which status you want to use on this production, 
+On the "Task Types" tab, you can choose which Task Types you want to use on this production, 
 validate your choice with the "Add" button.
 
+You can also enter start date and due date for each task type.
+
+Once you will add assets and shots on your production; your schedule will be set automatically.
 
 ![Setting Add Task Type](../img/getting-started/setting_task_add.png)
 
 
 ### Select specific Asset Types for a production
-
 
 
 Per default, Kitsu will load all the Asset Types of your status library into your production.
@@ -113,6 +117,7 @@ On the "Asset Types" tab, you can choose which Asset Types you want to use on th
 validate your choice with the "Add" button.
 
 ![Setting Add Asset](../img/getting-started/setting_asset_add.png)
+
 
 
 ## Create assets
