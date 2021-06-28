@@ -87,6 +87,7 @@ Per default, Kitsu will load all the Task Types of your status library into your
 ![Setting Task Type new](../img/getting-started/setting_task_new.png)
 
 But you can choose to use only specific Task Types, depending on the type of your production.
+(see [Customization of the workflow](../faq/README.md#how-to-customize-the-workflow) )
 
 For example, you can create a 2D and A CGI workflow on your library and add the needed task types into this production.
 
