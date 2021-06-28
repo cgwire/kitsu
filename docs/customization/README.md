@@ -160,4 +160,27 @@ validate your choice with the "add" button.
 
 ![Setting Add Asset](../img/getting-started/setting_asset_add.png)
 
+Or you can use the main menu
+
+
+There, you can see all the productions you have created, their type, and their status (open
+for an Active Production, or Closed if not Active). When your cursor is above a
+production line, you can see two news icons on the right part of the line :
+**edit** ![Edit button](../img/getting-started/edit_button.png) and **delete**
+![Delete button](../img/getting-started/delete_button.png).
+
+![Edit a production](../img/getting-started/production_edit.png)
+
+To modify a production, go into the **Edit production** page. 
+
+You can add some specific information as the **FPS** (Frames per second), 
+the **Ratio** and the **Resolution** of the picture.
+
+If nothing is filled, the **FPS** is set to **24 FPS** per default. 
+The **FPS** will be applied to re-encode the video and also to calculate the quotas.
+
+NB: The default avatar for a production is the first letter displayed on a
+colored background. You can change it with a picture if you want.
+
+![Edit the details of a production](../img/getting-started/production_edit_popup.png)
 

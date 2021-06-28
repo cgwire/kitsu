@@ -12,7 +12,7 @@ Then validate by clicking on **Confirm**.
 
 ![Add a production](../img/getting-started/add_production.png)
 
-To navigate through Kitsu sections, you need to use the sidebar. you can 
+To navigate through Kitsu sections, you need to use the sidebar. You can 
 access it through the three lines button on top of the screen 
 ![Main button](../img/getting-started/main_button.png).  It opens a menu on
 the left part of the screen. We want to see the production list. 
@@ -20,26 +20,105 @@ So below **Studio** section, click on the **PRODUCTIONS** button.
 
 ![Main menu](../img/getting-started/main_menu_production.png)
 
-There, you can see all the productions you have created, their type, and their status (open
-for an Active Production, or Closed if not Active). When your cursor is above a
-production line, you can see two news icons on the right part of the line :
-**edit** ![Edit button](../img/getting-started/edit_button.png) and **delete**
-![Delete button](../img/getting-started/delete_button.png).
+Now you can see yout production on the main Kitsu's page.
 
-![Edit a production](../img/getting-started/production_edit.png)
+![Main page production](../img/getting-started/first_production.png)
 
-To modify a production, go into the **Edit production** page. 
+You need to click on the avatar of the production to acces to its different pages.
 
-You can add some specific information as the **FPS** (Frames per second), 
-the **Ratio** and the **Resolution** of the picture.
+The first step you need to do is to set the **settings** of your production.
 
-If nothing is filled, the **FPS** is set to **24 FPS** per default. 
-The **FPS** will be applied to re-encode the video and also to calculate the quotas.
+Use the navigation menu and go to the **Settings** page.
 
-NB: The default avatar for a production is the first letter displayed on a
-colored background. You can change it with a picture if you want.
+![Production settings](../img/getting-started/drop_down_menu_setting.png)
 
-![Edit the details of a production](../img/getting-started/production_edit_popup.png)
+### Add a Brief
+
+On the first tab of the **Settings** page, Kitsu asks you about a brief. It's a good way to keep track of the first 
+brief of the production, and being able to get back to it later.
+
+**/!\ Only Studio manager permission have acess to the Settings page /!\**
+
+![Production settings Brief](../img/getting-started/settings_brief.png)
+
+
+### Define Production's Parameters
+
+The second tab is the more **important**. You need to define your production's parameter to be sure that everything will go smoothly.
+
+![Production settings Parameters](../img/getting-started/settings_parameters.png)
+
+- 1/ You can change the name of the production
+
+- 2/ You can define the start and end date of the production to set the schedule
+
+- 3/ You can change the Type of the production : short, TV Show, Feature Film
+
+- 4/ You can add the number of episodes of your TV Show for information
+
+- 5/ You need to set the FPS of the video preview. Kitsu will use this FPS to encode them. **Per default Kitsu will set encode everything at 24 FPS**
+
+- 6/ You can enter the ratio, for information only
+
+- 7/ You need to set the resolution of the video preview. Kitsu will use this resolution to encode them. **Per default Kitsu will set encode everything at 1920*1080**
+
+- 8/ You can add a picture to better identify your production.
+
+Validate everything with the **Save** button.
+
+
+
+
+### Select speticific Task Status for a production
+
+
+Per default, Kitsu will load all the Task Status of your status library into your production.
+
+But you can choose to use only specific status.
+
+![Setting status new](../img/getting-started/setting_status_new.png)
+
+On the "Task Status" tab, you can choose which status you want to use on this production, 
+validate your choice with the "add" button.
+
+
+![Setting Add Status](../img/getting-started/setting_status_add.png)
+
+
+### Select specific Task Types for a production
+
+
+
+Per default, Kitsu will load all the Task Types of your status library into your production.
+
+![Setting Task Type new](../img/getting-started/setting_task_new.png)
+
+But you can choose to use only specific Task Types, depending of the type of your production.
+
+For example you can create a 2D and A CGI workflow on your library, and add the needed task types into this production.
+
+
+On the "Task Types" tab, you can choose which status you want to use on this production, 
+validate your choice with the "add" button.
+
+
+![Setting Add Task Type](../img/getting-started/setting_task_add.png)
+
+
+### Select specific Asset Types for a production
+
+
+
+Per default, Kitsu will load all the Asset Types of your status library into your production.
+
+But you can choose to use only specific Asset Types, depending of the type of your production.
+
+![Setting Asset type new](../img/getting-started/setting_asset_new.png)
+
+On the "Asset Types" tab, you can choose which Asset Types you want to use on this production, 
+validate your choice with the "add" button.
+
+![Setting Add Asset](../img/getting-started/setting_asset_add.png)
 
 
 ## Create assets
