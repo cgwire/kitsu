@@ -140,19 +140,22 @@ A pop-up window opens:
  
 It asks you to choose the asset **Type** (1): Camera, Characters, Environment,
 FX, Props, ...  
-Let's start with an environment. 
+Let's start with a character. 
 
-Then, you select the ** episode** (2), or the **Main Pack**.
+Then, you select the **Main Pack**, or the **episode** (2)
 
-We give it a **Name** (3) and enter a description that helps the designer know what to do and identify the asset quickly.
+We give it a **Name** (3) and enter a description that helps the Artist knows what to do and identifies the asset quickly.
+
 If you have multiple assets to create, click on **Confirm and stay**. 
+
+
+![Create an asset](../img/getting-started/add_asset_popup.png)
 
 You can change the asset type and keep adding assets. 
 
 You can also customize the asset type list. 
 [Customization of the workflow](../customization/README.md#modify-an-existing-task-type) )
 
-![Create an asset](../img/getting-started/add_asset_popup.png)
 
 You can see the newly created asset appearing in the background every time you click on **Confirm and stay**. 
 
@@ -161,7 +164,7 @@ After adding your last asset, click
 on **Confirm**. It saves the asset and closes the window. If you don't have
 more assets to add, click on **Close**, it cancels the window.
 
-The assets are linked with the first episode **E01** (created per default by Kitsu) or with the **Main Pack**.
+The assets are linked with the  first episode **E01** (created per default by Kitsu) or with the **Main Pack**.
 
 ![Global asset page](../img/getting-started/asset_edit.png)
 
