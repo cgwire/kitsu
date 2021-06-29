@@ -183,7 +183,7 @@ On the main asset page, to extend the description, click on the first words (2),
 To delete an asset see the FAQ : [How to delete an asset](../faq-deletion/README.md##how-to-delete-an-asset)
 
 
-## Create tasks for the assets
+## Create extra tasks for the assets
 
 If you realize you miss some task type on your pipe line, you need to add the new task type on your library.
 
@@ -217,7 +217,7 @@ Valid with **Confirm**.
 
 If you remove the filter characters, you will see the tasks only created for the selected elements.
 
-![Tasks filtered Created](../img/getting-started/add_task_filtered.png)
+![Tasks filtered Created](../img/getting-started/delete_task_done_chara.png)
 
 You can also delete tasks for specific Asset Type. 
 For exemple you want to keep **Rig"" only for the characters.
@@ -230,9 +230,16 @@ everything **but** the characters.
 Then select the task type you want to delete for the filtered view. Click on the arrov next to the name 
 of the task type and select **Delete all**.
 
-![Tasks filtered](../img/getting-started/no_character_delete.png)
+![Tasks filtered no chara](../img/getting-started/no_character_delete.png)
 
 Once the pop-up opens, type the name of the task type, and double check it's set to **For current list and filters**.
+
+![Tasks filtered no chara rigging erased](../img/getting-started/delete_task_done.png)
+
+If you remove the filter **-characters**, you will see the tasks only created for the selected elements.
+
+
+![Tasks filtered no chara rigging erased](../img/getting-started/delete_task_done_chara.png)
 
 
 You can also delete only a task or selected tasks. If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
@@ -286,6 +293,9 @@ If a shot is misplaced on a sequence, you have to edit the shot you want
 ![Edit button](../img/getting-started/edit_button.png), and change the
 sequence. 
 
+![edit shot Change sequence](../img/getting-started/edit_shot.png)
+
+
 ![Change sequence](../img/getting-started/change_seq.png)
 
 If at some point you need to delete a shot, click on the **trash can**
@@ -293,9 +303,9 @@ icon on the right of the line ![Delete button](../img/getting-started/delete_but
 If you need to import back this shot, click on the restore button 
 ![Restore button](../img/getting-started/restore_button.png).
 
-To delete a shot see the FAQ : [How to delete a shot](../faq/README.md#how-to-delete-a-shot)
+To delete a shot see the FAQ : [How to delete a shot](../faq-deletion/README.md#how-to-delete-a-shot)
 
-To delete a sequence see the FAQ : [How to delete a shot](../faq/README.md#how-to-delete-a-sequence)
+To delete a sequence see the FAQ : [How to delete a shot](../faq-deletion/README.md#how-to-delete-a-sequence)
 
 
 
@@ -318,19 +328,27 @@ You can enter the **In** and **Out** of the shot on the new window. Then, save w
 
 Now the frame range appears on the general spreadsheet of the shot page.
 
-You can also use the **CSV Import** to update quickly your frame range. [Update Shots information with CSV Import](#update-shots-information-with-csv-import)
-.
+![Shot edit page](../img/getting-started/shot_framerange_global.png)
 
-![Shot framerange detail](../img/getting-started/shot_framerange_detail.png)
+Now that you have unlock the **Frames**, **In** and **Out** column, you can fill them 
+directly from the global shot page.
+
+Click on the case you want to fill, and you will be able to add the data.
+
+![Shot edit page](../img/getting-started/shot_framerange_global_edit.png)
+
+
+You can also use the **CSV Import** to update quickly your frame range. [Update Shots information with CSV Import]((../batch-action/README.md#update-shots-information-with-csv-import)
 
 You can have access to the shot values history too.
+
+![Shot framerange detail](../img/getting-started/shot_framerange_detail.png)
 
 ![Shot Values History](../img/getting-started/shot_values_history.png)
 
 
 
-
-## Create tasks for the shots
+## Create extra tasks for the shots
 
 We can now associate tasks with the shots. Same way as for the assets, click on
 the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png)
