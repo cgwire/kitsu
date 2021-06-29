@@ -29,8 +29,13 @@ Validate the creation of the custom column with the **Confirm** button.
 
 ![Custom Column detail](../img/getting-started/custom_column_detail.png)
 
-Back on the global spreadsheets page, you can fill this information with the edit 
-button ![Edit button](../img/getting-started/edit_button.png).
+
+Back on the global spreadsheets page, you can fill this information directly on the global page.
+The cases are editable.
+
+![Custom Column detail](../img/getting-started/custom_column_list_edit.png)
+
+You can also modify the information with the edit button ![Edit button](../img/getting-started/edit_button.png).
 
 You now see a new line on the edit pop-up. You can select the information from the list, 
 alternatively, enter the free values, depending on your previous choice.
@@ -46,7 +51,7 @@ You can now **sort** your global page with this new column. For example let's cr
 
 ![Custom Column exemple](../img/getting-started/custom_column_exemple.png)
 
-then click on the arrox on the right of the column name to open his menu.Then click on **Sort By**
+Then click on the arrow on the right of the column name to open his menu. Then click on **Sort By**
 
 ![Custom Column Sort By](../img/getting-started/custom_column_sortby.png)
 
@@ -58,7 +63,8 @@ You can also select in the menu if you want to edit the name of the custom colum
 
 You can also use the **CSV Import** to fill quickly your custom column.
 You need to first create your **Custom Column** into kitsu, then add it in your spreadhseet, then copy paste your data into the **CSV Import**.
-[Update Shots information with CSV Import](#update-shots-information-with-csv-import)
+
+[Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
 
 ## Add multiple Preview
 
@@ -68,15 +74,9 @@ You can add multiple images at the same time, or, once you have uploaded an imag
 
 The **Add preview** pop-up opens and asks you to choose a file.
 
-You can navigate through the pictures uploaded. You need to enlarge the comment section. 
+You can navigate through the pictures uploaded. 
 
-![enlarge comment section](../img/getting-started/enlarge_comment.png)
-
-And then click on the number of the picture to see them all.
-
-![attach preview drag drop](../img/getting-started/upload_second_pictures.png)
-
-You can change the order of the preview by drag and drop them.
+You can change the order of the preview if you click on the number, then by drag and drop them.
 
 ![preview drag drop](../img/getting-started/multiple_preview.png)
 
@@ -104,6 +104,8 @@ of assets that appear on this shot (**Shot casting**).
  
 You can click on the status of each task to open the comment panel and see the history of the comments and the different versions.
 
+
+![Shot detail page](../img/getting-started/shot_detail_page_panel.png)
 
 ## Change priorities
 
@@ -169,14 +171,21 @@ only interested in layout and animation but not so much about the shipment for t
 Close to each task type name, you can click on the arrow 
 ![Arrow](../img/getting-started/arrow.png) to unfold a submenu. 
 
-You can choose to **Minimize** or **Delete** the task type.
+You can choose to **Minimize** **Sort by**, **Select column**, **Stick** or **Delete All** the task type.
 
-![Tasktype submenu](../img/getting-started/tasktype_minimize.png)
+![Tasktype submenu minimize](../img/getting-started/tasktype_minimize.png)
 
 Once the column is minimized, only colored dots show the status.
 
 ![Tasktype submenu](../img/getting-started/tasktype_small.png)
 
+You can also choose which **Custom Column** you want to display.
+
+To hide your custom column, click on the arrow on the right border of the global page.
+
+![Visible column](../img/getting-started/visible_column.png)
+
+Here you can choose which column you want to **hide** or **display**.
 
 You can also hide all the non-essential column, like **Description**, **Custom column**, 
 even the minimize columns.
