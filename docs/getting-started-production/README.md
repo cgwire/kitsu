@@ -664,6 +664,9 @@ On the menu, choose the **Timesheets** page.
 
 ![main button](../img/getting-started/timesheet_menu.png)
 
+Per default, Kitsu will display the timesheet of all the production, but you can choose to see 
+the timesheet for a specific production only.
+
 ![main button](../img/getting-started/timesheet_day.png)
 
 You can choose which **month** or **year** you want to display.
