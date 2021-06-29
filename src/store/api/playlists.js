@@ -27,8 +27,8 @@ export default {
     return client.pget(path)
   },
 
-  getPreviewFiles () {
-    return client.pget('/api/data/preview-files')
+  getRunningPreviewFiles () {
+    return client.pget('/api/data/playlists/preview-files/running')
   },
 
   newPlaylist (playlist) {

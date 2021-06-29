@@ -1,38 +1,22 @@
 <template>
   <div class="mt1">
-    <spinner v-if="previewFilesLoading" :size="20" />
+    <p class="flexrow">
+      <em class="flexrow-item">{{ $t('logs.preview_files.explaination') }}</em>
+      <span class="filler"></span>
+      <button-simple
+        class="flexrow-item"
+        icon="refresh"
+        @click="reload"
+      />
+    </p>
+    <template v-if="previewFiles.length === 0 && !previewFilesLoading">
+      {{ $t('logs.preview_files.empty_list') }}
+    </template>
     <template v-else>
-      <template v-if="previewFiles.length === 0">
-        {{ $t('logs.preview_files.empty_list') }}
-      </template>
-      <template v-else>
-        <ul>
-          <li
-            class="flexrow"
-            v-for="previewFile in previewFiles"
-            :key="previewFile.id"
-          >
-            <people-avatar
-              class="flexrow-item"
-              :size="30"
-              :person="personMap.get(previewFile.person_id)"
-              v-if="previewFile.person_id"
-            />
-            <a @click="redirectToTask(previewFile)">
-              <span class="date tag mr1">
-                {{ formatDate(previewFile.updated_at) }}
-              </span>
-              <span
-                class="status tag"
-                :data-status="previewFile.status"
-              >
-              {{ previewFile.original_name }}.{{ previewFile.extension }}
-              ({{ previewFile.status }})
-              </span>
-            </a>
-          </li>
-        </ul>
-      </template>
+      <preview-file-list
+        :preview-files="previewFiles"
+        :is-loading="previewFilesLoading"
+      />
     </template>
   </div>
 </template>
@@ -40,22 +24,18 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 
-import { getTaskPath } from '@/lib/path'
-
-import playlistsApi from '@/store/api/playlists'
-import tasksApi from '@/store/api/tasks'
-
 import { timeMixin } from '@/components/mixins/time'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import Spinner from '@/components/widgets/Spinner'
+
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import PreviewFileList from '@/components/lists/PreviewFileList'
 
 export default {
   name: 'PreviewFiles',
   mixins: [timeMixin],
 
   components: {
-    PeopleAvatar,
-    Spinner
+    ButtonSimple,
+    PreviewFileList
   },
 
   data () {
@@ -71,6 +51,7 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
     displayedPreviewFiles () {
       return this.previewFiles.filter(
         previewFile => previewFile.status !== 'ready'
@@ -80,23 +61,20 @@ export default {
 
   methods: {
     ...mapActions([
-      'getTask'
+      'getTask',
+      'getRunningPreviewFiles'
     ]),
-    async redirectToTask (previewFile) {
-      const task = await tasksApi.getTask(previewFile.task_id)
-      await this.$router.push(getTaskPath(
-        task,
-        task.project,
-        task.project.production_type === 'tvshow',
-        task.episode,
-        this.taskTypeMap
-      ))
+
+    async reload () {
+      this.previewFiles = []
+      this.previewFilesLoading = true
+      this.previewFiles = await this.getRunningPreviewFiles()
+      this.previewFilesLoading = false
     }
   },
 
-  async mounted () {
-    this.previewFiles = await playlistsApi.getPreviewFiles()
-    this.previewFilesLoading = false
+  mounted () {
+    this.reload()
   }
 }
 </script>

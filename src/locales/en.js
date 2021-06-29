@@ -236,12 +236,21 @@ export default {
 
   logs: {
     current_date_label: 'Show logs for',
-    events: 'events listed for the current day',
     empty_list: 'There is no logs for the selected date.',
+    events: 'events listed for the current day',
     title: 'Logs',
     preview_files: {
-      title: 'Preview files',
-      empty_list: 'There is no broken or ongoing previews.'
+      date: 'Creation date',
+      empty_list: 'There is no broken or ongoing previews.',
+      entity_name: 'Entity name',
+      explaination: 'This page lists all the preview files in an intermediary state: processing or broken. It lets you know how much preview files are processing or which files failed to be normalized and stored on Kitsu.',
+      file_name: 'File name',
+      person: 'User',
+      production: 'Production',
+      revision: 'Revision',
+      status: 'Status',
+      task_type_id: 'Task type',
+      title: 'Preview files'
     }
   },
 

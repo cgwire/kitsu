@@ -3,6 +3,8 @@
  */
 import { mapGetters } from 'vuex'
 
+import { formatDate } from '@/lib/time'
+
 export const formatListMixin = {
 
   created () {
@@ -24,6 +26,8 @@ export const formatListMixin = {
     formatBoolean (booleanValue) {
       return booleanValue ? this.$t('main.yes') : this.$t('main.no')
     },
+
+    formatDate,
 
     formatDuration (duration) {
       if (duration) {

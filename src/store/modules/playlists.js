@@ -220,6 +220,10 @@ const actions = {
   loadTempPlaylist ({ commit, dispatch, rootGetters }, taskIds) {
     const production = rootGetters.currentProduction
     return playlistsApi.loadTempPlaylist(production, taskIds)
+  },
+
+  getRunningPreviewFiles () {
+    return playlistsApi.getRunningPreviewFiles()
   }
 }
 

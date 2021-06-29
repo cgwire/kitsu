@@ -120,7 +120,6 @@ export default {
     ]),
 
     currentStatus () {
-      console.log(this.addPlaceholder, this.value)
       if (this.value) {
         return this.taskStatusMap.get(this.value)
       } else if (this.addPlaceholder) {
