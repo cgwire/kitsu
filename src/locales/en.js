@@ -154,7 +154,7 @@ export default {
 
     thumbnails: {
       error: 'An error occurred while uploading thumbnails',
-      explaination: 'Adding a thumbnail requires to set a new preview. In order to set several thumbnails at the same time, you must chose first a task type that will be used to create the new previews. The thumbnails will be set from this new preview.',
+      explaination: 'Adding a thumbnail requires to set a new preview. In order to set several thumbnails at the same time, you must choose first a task type that will be used to create the new previews. The thumbnails will be set from this new preview.',
       explaination_two: 'Then you have to select the files you want to upload. To find the right entities, the file names must match the following pattern:',
       shots_pattern: '"SequenceName ShotName" eg. SQ01_SH01.',
       assets_pattern: '"AssetType AssetName" eg. Environment_Forest.',
@@ -593,6 +593,9 @@ export default {
       error: 'An error occurred while creating the production',
       errorImportingAssets: 'An error occurred while importing your assets. The production has been created though!',
       errorImportingShots: 'An error occurred while importing your shots. The production has been created though!',
+      explaination_date: 'These dates are needed to setup your schedule.',
+      explaination_type: 'If you choose TV Show, the production will be splitted in episodes.',
+      explaination_video: 'These settings are used to normalize the uploaded videos.',
       give_a_name: 'Give your production a name',
       give_a_name_description: 'Start by giving your production a meaningful name.',
       import_assets_button: 'Import assets',

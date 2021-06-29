@@ -30,7 +30,7 @@
           :step="2"
           :is-completed="hasValidSettings"
         >
-          <div class="mb1">
+          <div>
             <combobox
               :options="productionTypeOptions"
               :label="$t('productions.fields.type')"
@@ -40,7 +40,10 @@
               is-inline
             />
           </div>
-          <div class="flexrow mb1">
+          <div class="mb1 explaination">
+            {{ $t('productions.creation.explaination_type') }}
+          </div>
+          <div class="flexrow">
             <text-field
               class="flexrow-item"
               input-class=" is-small is-size-3"
@@ -96,6 +99,9 @@
               thin
             />
           </div>
+          <div class="mb1 explaination">
+            {{ $t('productions.creation.explaination_video') }}
+          </div>
           <div>
             <label class="label">
               {{
@@ -127,6 +133,9 @@
               v-model="productionToCreate.settings.dateEnd"
             />
             </div>
+          </div>
+          <div class="mb1 explaination">
+            {{ $t('productions.creation.explaination_date') }}
           </div>
         </timeline-item>
         <timeline-item
@@ -961,8 +970,6 @@ export default {
 
 <style scoped>
 .dark .tag {
-  color: #EEE;
-  background: #5E6169;
 }
 
 .new-production {
@@ -1086,5 +1093,10 @@ span.input-separator {
 
 .asset-types {
   align-items: center;
+}
+
+.explaination {
+  font-style: italic;
+  margin-top: 0.2em;
 }
 </style>

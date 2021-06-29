@@ -62,9 +62,6 @@ export default {
       color: $white
     }
   }
-  .step {
-    background-color: $grey-strong;
-  }
   hr {
     background-color: $grey-strong;
   }
