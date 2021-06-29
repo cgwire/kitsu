@@ -220,7 +220,7 @@ If you remove the filter characters, you will see the tasks only created for the
 ![Tasks filtered Created](../img/getting-started/delete_task_done_chara.png)
 
 You can also delete tasks for specific Asset Type. 
-For exemple you want to keep **Rig"" only for the characters.
+For exemple you want to keep **Rig** only for the characters.
 
 You need to type **-Characters** on the search bar on the global asset page. This way the page will filter 
 everything **but** the characters.
@@ -305,14 +305,14 @@ If you need to import back this shot, click on the restore button
 
 To delete a shot see the FAQ : [How to delete a shot](../faq-deletion/README.md#how-to-delete-a-shot)
 
-To delete a sequence see the FAQ : [How to delete a shot](../faq-deletion/README.md#how-to-delete-a-sequence)
+To delete a sequence see the FAQ : [How to delete a Sequence](../faq-deletion/README.md#how-to-delete-a-sequence)
 
 
 
 ## Add the Frameranges
 
 At this stage of the production, the animatic should be done. Meaning you have
-the length (**frame range In** and **frame range Out**) for each shot. You can
+the length (**Number of frames**, **frame range In** and **frame range Out**) for each shot. You can
 add this information to the spreadsheet.  This way, you are sure that all
 the frames a calculated, and none are missing or over computed.
 
@@ -321,6 +321,8 @@ You may also be able to add a camera as an asset!
 You need to edit the shots to fill the frame range information. Click on the
 edit button ![Edit button](../img/getting-started/edit_button.png) on the right
 side of the shot line.
+
+![edit shot Change sequence](../img/getting-started/edit_shot.png)
 
 You can enter the **In** and **Out** of the shot on the new window. Then, save with the **Confirm** button. 
 
@@ -338,7 +340,8 @@ Click on the case you want to fill, and you will be able to add the data.
 ![Shot edit page](../img/getting-started/shot_framerange_global_edit.png)
 
 
-You can also use the **CSV Import** to update quickly your frame range. [Update Shots information with CSV Import]((../batch-action/README.md#update-shots-information-with-csv-import)
+You can also use the **CSV Import** to update quickly your frame range.
+ [Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
 
 You can have access to the shot values history too.
 
@@ -350,7 +353,13 @@ You can have access to the shot values history too.
 
 ## Create extra tasks for the shots
 
-We can now associate tasks with the shots. Same way as for the assets, click on
+If you realize you miss some task type on your pipe line, you need to add the new task type on your library.
+
+(To add new Task Type see [Customization of the workflow](../customization/README.md#create-a-new-task-type) )
+
+Once it's done, you need to add them into your **Setting** page too.
+
+Then,  click on
 the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png)
 on the top of the spreadsheet. 
 
@@ -360,7 +369,7 @@ shots are linked to the tasks if you select the **For project** option.
 ![List of tasks for the shots](../img/getting-started/task_shots.png)
 
 
-## Add a new employee
+## Add a new user
 
 Each Artist required an account. Go to the drop-down menu ![Main
 menu](../img/getting-started/main_button.png), and under the **Studio**
@@ -368,29 +377,33 @@ section, choose **PEOPLE** page.
 
 ![People Menu](../img/getting-started/main_menu_people.png)
 
-Then, click on the **+ Add a new employee** button. 
+Then, click on the **+ Add a new user** button. 
 
-![Add a new employee](../img/getting-started/add_employee.png)
+![Add a new user](../img/getting-started/add_employee.png)
 
 A creation window opens. You can enter the first (1) and last name (2), the email
-(which is **mandatory** to create the account) (3), the phone number (4) and
-define the role of the employee: ** Artist Artist**, **Supervisor**,
-**Studio Manager**, **Vendor** or **Client** (5).  If the ArtistArtist is working right now, keep
+(which is **mandatory** to create the account) (3), the phone number (4).
+
+You can also add the new user to a **Deparment** (or several) (5).
+See **DEPARTEMENT DOCUMENTATION**
+
+Then you need to define the role of the user: **Artist**, **Supervisor**,
+**Studio Manager**, **Vendor** or **Client** (6).  If the Artist is working right now, keep
 him active, otherwise select no. Validate by clicking the **Confirm** button.
 
-![Create a new employee](../img/getting-started/create_employee.png)
+![Create a new user](../img/getting-started/create_employee.png)
 
 See the [permissions](../permissions/README.md) section for more information. 
 To make it short, artists, supervisors, and clients only see the
 productions they are assigned.
 
 All the people are now part of your studio. They are added to a specific
-production when you assign them to a task on a production. Otherwise, they
+production when you add them to a team on a production. Otherwise, they
 won't have access to anything.
 
 
 
-## Add an Artist to the team
+## Add a User to the team
 
 You need to add someone to a production to assign him a task.
 
@@ -403,10 +416,6 @@ If you want to check another project team, you need to switch the project
 to the top of the page.
 
 ![Team page](../img/getting-started/team_page.png)
-
-You can also add someone to a production without assigning him to a task; if you have less than ten people, you
-can select his name on the search box (or type his name) and validate with
-**add**.
 
 
 ## Assign tasks to an Artist
@@ -440,7 +449,7 @@ button.
 ![Assigned multiple people](../img/getting-started/assigned_multiple.png)
 
 In the same way, you can click on **Clear assignations** to remove all 
-assignations, or press the "Escape" key.
+assignations, or press the **Escape** key.
 
 When you finish all the assignations, quit this mode using the **Clear
 current selection** button ![Clear current selection](../img/getting-started/clear_current_selection.png).
@@ -505,11 +514,11 @@ You can use the preview as a **thumbnail** on the asset or shot spreadsheet. It
 helps to recognize the assets/shots on the main pages. 
 On the list page, click on the status you want, then on the right panel, click on the **Preview** button (1).
 
-![History](../img/getting-started/pannel_history.png)
+![Thumbnail Button](../img/getting-started/pannel_history.png)
 
 Once you have clicked on the button, you see the thumbnail appears, and the button turns gray.
 
-
+![thumbnail applied](../img/getting-started/pannel_history_thumbnail.png)
 
 ## Create a breakdown list
 
