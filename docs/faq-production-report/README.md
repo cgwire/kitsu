@@ -58,15 +58,15 @@ distribution.
 
 You can also display the statistic as a percentage.
 
-![Overview sequence detail](../img/getting-started/global_view_episode_perc.png)
+![Overview sequence detail](../img/getting-started/global_view_sequence_detail_count_stat.png)
 
 You can also choose between 2 count modes: per shots or frames.
 
-![Overview sequence detail](../img/getting-started/global_view_sequence_detail_count_stat.png)
-
+![Overview sequence detail](../img/getting-started/global_view_sequence_detail_count.png)
 
 You can also click on the **tasks name** to have the detailed shots about this
 task (page supervisor)
+
 
 ## How to have an overview of the Sequence?
 
