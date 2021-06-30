@@ -79,7 +79,7 @@ validate your choice with the "Add" button.
 
 You can also see the sum up of the parameters of each status.
 
-(To add new Task Status see [Customization of the workflow](../customization/README.md##create-a-new-task-status) )
+(To add new Task Status see [Customization of the workflow](../customization/README.md#create-a-new-task-status) )
 
 
 ### Select specific Task Types for a production
