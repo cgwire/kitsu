@@ -71,12 +71,12 @@ For instance, show them you start working on something.
 Each time you change the status of a task, you can attach a
 text comment to it.
 
-For example, when you start a **new task** you can say that everything is ok.
+For example, when you start a **new task**, you can say that everything is ok.
 If some information is missing, you can either ask all the questions you want.
 
 To change the Status, let's say from ![Todo](../img/getting-started/todo_icon.png) to ![Wip](../img/getting-started/wip_icon.png) as an example, start
-by filling the comment box (1). Then, click on the status box and choose the
-one you want (2), upload a preview (3). 
+by filling the comment box (1). Then, click on the status box, choose the
+one you want (2), and upload a preview (3). 
 
 You can drag and drop your file directly into the comment section, or you can use the **Add a preview to publish** button.
 
@@ -149,8 +149,8 @@ You need to move the cursor (3) next to each task accordingly to the number of
 hours spent. You can also go quicker and click on the **1**, **4**, or **8**
 hours buttons (4).
 
-If one day you miss your declaration, you can click on the today date (2), and
-go back in time and select the day you have missed. If you didn't work, you can tag the day as an **Day Off** (5).
+If you miss your declaration one day, you can click on the today date (2) and
+go back in time and select the day you have missed. If you didn't work, you could tag the day as a **Day Off** (5).
 
 ![Timesheets change the date](../img/getting-started/timesheet_change_date.png)
 
