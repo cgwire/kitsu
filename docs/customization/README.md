@@ -26,6 +26,8 @@ the order of the tasks by drag and move them to the wanted position.
 
 Click on **Confirm** to save your changes.
 
+**SEE Department page**
+
 ## Create a new Task Type
 
 On the main menu ![Main menu](../img/getting-started/main_button.png) select 

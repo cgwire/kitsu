@@ -2,16 +2,13 @@
 
 ## How to delete an asset
 
-Go on the main page of the assets.
+Go on the main page of the assets and click on the box at the laft part of the asset.
 
 ![Delete asset](../img/getting-started/delete_asset_global.png)
 
-On the right part of the asset line, click on the 
-![Delete button](../img/getting-started/delete_button.png) button.
+The action menu ask if you want to delete the asset. You can select more asset to delete if you need.
 
-A confirmation pop up appears, validate with **Confirm**.
-
-![Delete asset popup](../img/getting-started/validation_popup_delete_asset.png)
+Validate with **Confirm**.
 
 If the asset has no task, it will be deleted immediately.
 
@@ -20,23 +17,20 @@ If the asset has a task, once deleted, the asset appears as crossed, it can be s
 ![Delete asset](../img/getting-started/delete_asset1.png)
 
 To definitively delete an asset, you have to click on 
-![Delete button](../img/getting-started/delete_button.png) button a second time.
+the box a second time anc click confirm.
 
 The asset is removed from the database and won't appear anymore on Kitsu.
 
 
 ## How to delete a shot
 
-Go on the main page of the shots.
+Go on the main page of the shots and click on the box at the laft part of the asset.
 
 ![Delete shot](../img/getting-started/delete_shot_global.png)
 
-On the right part of the shot line, click on the 
-![Delete button](../img/getting-started/delete_button.png) button.
+The action menu ask if you want to delete the shot. You can select more shots to delete if you need.
 
-A confirmation pop-up appears, validate with **Confirm**.
-
-![Delete shot popup](../img/getting-started/validation_popup_delete_shot.png)
+Validate with **Confirm**.
 
 
 If the shot has no task, it will be deleted immediately.
@@ -46,8 +40,7 @@ with ![Restore asset](../img/getting-started/restore_button.png) .
 
 ![Delete shot](../img/getting-started/delete_shot1.png)
 
-To definitively delete a shot, you have to click on 
-![Delete button](../img/getting-started/delete_button.png) button a second time.
+To definitively delete a shot, you have to click on the box a second time and confirm.
 
 The shot is removed from the database and won't appear anymore on Kitsu.
 
