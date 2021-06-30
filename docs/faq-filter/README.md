@@ -88,28 +88,39 @@ Another example gets **shots page** of a specific **sequence**.
 Ex: see only the shots of the second sequence of the first episode.
 
 Select the first episode on the drop-down menu, then search `sq002`, the result
- gets all the shots of all the episodes from sequence 2.
+ gets all the shots of all the episodes from sequence SQ002.
 
 ![Search bar sequence episode](../img/getting-started/filter_ep_seq.png)
 
-In the same way, you can search **specific status** link to the task. Type the
-**name of the task** (or between `[` `]` if the task name is more than one word `[modeling low]`),
- then add the sign **equal**
-(`=`) also, the **status** you are looking.
+In the same way, you can search **specific status** link to the task. 
 
-For example, search all the shots which are **Waiting for approval** ![WFA](../img/getting-started/wfa_icon.png)
-at the **Animation** stage. So on the search bar, you type: `animation=wfa`.
+Easiest way will be to use the filter builder 
+
+![Filter build button](../img/getting-started/filter_builder.png)
+
+Under the **Task Status** click on the **+** and select the **Task Type** and the **Status** you want to filter.
+
+![Filter build button](../img/getting-started/filter_builder_example04.png)
+
+Valid with **Confirm**.
 
 ![Search layout wfa](../img/getting-started/filter_lay_wfa.png)
 
-You can be even more specific, let's focus on the shots that are still on retake at the animation stage, and already started at the render stage: on the search
-bar add a **space** after the previous search and type `render=wip`. 
-The research is `animation=wfa render=wip`.
+You can be even more specific, let's focus on the shots that are still on retake at the animation stage, and already started at the render stage.
+
+On the **Filter Builder** search for both task type and status (add more task type with the **+** bellow the first task type) and a custom column.
+
+![Search layout wfa](../img/getting-started/filter_builder_option.png)
+
+Valid with **Confirm**.
 
 ![Search layout wfa seq2](../img/getting-started/filter_lay_wfa_s002.png)
 
 You can also search for an **assigned** or **unassigned** task for a specific type of task.
-For example `Animation = unassigned`, `modeling=assigned`.
+
+
+![Search assignation](../img/getting-started/filter_builder_assignation.png)
+
 
 ## How to save filter queries?
 
