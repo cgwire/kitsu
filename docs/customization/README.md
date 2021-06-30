@@ -19,7 +19,8 @@ the order of the tasks by drag and move them to the wanted position.
 
 - (1) The name of the task type
 - (2) If the artists need to time log their work on this task type
-- (3) The color 
+- (3) To which departement is it linked
+- (4) The color 
 
 ![Edit task](../img/getting-started/edit_task.png)
 
@@ -38,14 +39,21 @@ button.
 On the new pop up you can define your personalized task:
 
 - (1) The name of the task type
-- (2) The priority, meaning the order of the task type columns
-- (3) For which entity it is used
-- (4) If the artists need to time log their work for tasks with this task type
+- (2) For which entity it is used
+- (3) If the artists need to time log their work for tasks with this task type
+- (4) To which departement is it linked
 - (5) The color 
 
-![Edit task](../img/getting-started/edit_task.png)
+![Create task](../img/getting-started/create_task.png)
 
 Click on **Confirm** to save your changes.
+
+Per default the new task type will be at the bottom of the list. To change the order, grab the task type and move it a his right place.
+
+![Create task bottom list](../img/getting-started/created_task_bottom.png)
+
+![Create task bottom list](../img/getting-started/created_task_top.png)
+
 
 ## Modify an existing Task Status
 
@@ -162,6 +170,13 @@ validate your choice with the "add" button.
 
 Or you can use the main menu
 
+To navigate through Kitsu sections, you need to use the sidebar. You can 
+access it through the three lines button on top of the screen 
+![Main button](../img/getting-started/main_button.png).  It opens a menu on
+the left part of the screen. We want to see the production list. 
+So below **Studio** section, click on the **PRODUCTIONS** button. 
+
+![Main menu](../img/getting-started/main_menu_production.png)
 
 There, you can see all the productions you have created, their type, and their status (open
 for an Active Production, or Closed if not Active). When your cursor is above a
