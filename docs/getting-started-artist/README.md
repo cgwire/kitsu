@@ -7,7 +7,7 @@ On your first connection, we encourage you to fill your contact information
 into your profile.
 Click on your name on the top right of the screen (1), then on **Profile** (2). You can also change the color of the **Theme** (3).
 
-NB: A link to this **Documentation** and YouYbe **Tutorials** are available (4 & 5).
+NB: A link to this **Documentation** and YouTube **Tutorials** are available (4 & 5).
 You can also jump on our Discord (7) or look at our roadmap (8).
  
 ![User profile](../img/getting-started/user_profil.png)
@@ -140,17 +140,17 @@ on the **Done** tab.
 
 ## Fill your timesheet
 
-Every day, you can declare how much time you spent on each task. On your **My
-Tasks** page, go to the **Timesheets** tab. Or click on the shortcut on top of the screen.
+Every day, you can declare how much time you spent on each task. On your **My Tasks** 
+page, go to the **Timesheets** tab (1). Or click on the shortcut on top of the screen.
 
 ![Timesheets](../img/getting-started/timesheets.png)
 
-You need to move the cursor (1) next to each task accordingly to the number of
+You need to move the cursor (3) next to each task accordingly to the number of
 hours spent. You can also go quicker and click on the **1**, **4**, or **8**
-hours buttons (2).
+hours buttons (4).
 
-If one day you miss your declaration, you can click on the today date (3), and
-go back in time and select the day you have missed.
+If one day you miss your declaration, you can click on the today date (2), and
+go back in time and select the day you have missed. If you didn't work, you can tag the day as an **Day Off** (5).
 
 ![Timesheets change the date](../img/getting-started/timesheet_change_date.png)
 

@@ -15,7 +15,7 @@ Click on the **+** near the Name column.
 You may have extra information to add on your pages as the **level of difficulties**,
 the **name of the studios**, when a production is split, the shot order, etc.
 
-In the custom column, you can store all kinds of text information: a **list of value** or a **free value**.
+You can store all kinds of text information in the custom column: a **list of value** or a **free value**.
 
 The **free value** is different for each entity.
 
@@ -23,7 +23,7 @@ The **list of value** gives you the same choice for each entity. Moreover, it ha
 
 ![Custom Column list](../img/getting-started/custom_column_list.png)
 
-Type the elements of the list below **Available values**, and confirm them by clicking on **Add value**.
+Type the list elements below **Available values**, and confirm them by clicking on **Add value**.
 
 Validate the creation of the custom column with the **Confirm** button.
 
@@ -47,7 +47,7 @@ Don't forget to press the **Confirm** button when you are done.
 If you need to **edit** or **delete** the custom column, go back to the general spreadsheet page.
 Nearby the name of your custom column, click on the arrow ![Custom Column detail](../img/getting-started/arrow.png). 
 
-You can now **sort** your global page with this new column. For example let's create a **Sort Order** custom column.
+You can now **sort** your global page with this new column. For example, let's create a **Sort Order** custom column.
 
 ![Custom Column exemple](../img/getting-started/custom_column_exemple.png)
 
@@ -59,16 +59,16 @@ Now the shots are not sorted by name but by the custom column information.
 
 ![Custom Column Sort By result](../img/getting-started/custom_column_sortby_result.png)
 
-You can also select in the menu if you want to edit the name of the custom column and its information, or if you want to delete it.
+You can also select in the menu if you want to edit the name of the custom column and its information or if you want to delete it.
 
-You can also use the **CSV Import** to fill quickly your custom column.
-You need to first create your **Custom Column** into kitsu, then add it in your spreadhseet, then copy paste your data into the **CSV Import**.
+You can also use the **CSV Import** to fill your custom column quickly.
+You need first to create your **Custom Column** into kitsu, add it in your spreadsheet, then copy-paste your data into the **CSV Import**.
 
 [Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
 
 ## Add multiple Preview
 
-You can add multiple images at the same time, or, once you have uploaded an image, you can add another one.
+You can add multiple images simultaneously, or once you have uploaded an image, you can add another one.
 
 ![attach preview drag drop](../img/getting-started/upload_several_pictures.png)
 
@@ -76,7 +76,7 @@ The **Add preview** pop-up opens and asks you to choose a file.
 
 You can navigate through the pictures uploaded. 
 
-You can change the order of the preview if you click on the number, then by drag and drop them.
+You can change the preview order if you click on the number, then drag and drop them.
 
 ![preview drag drop](../img/getting-started/multiple_preview.png)
 
@@ -109,7 +109,7 @@ You can click on the status of each task to open the comment panel and see the h
 
 ## Change priorities
 
-At some point on the production you may want to prioritize some tasks, and
+At some point in the production, you may want to prioritize some tasks, and
 pinpoint these urgent tasks to your team.
 
 For this, we use the same technique as before. Click on the space
@@ -126,7 +126,7 @@ Click on the name on the left on the action menu, and choose
 
 ![Change priority](../img/getting-started/change_priority.png)
 
-There are four levels of priority: **Normal**, that is the fundamental level of all the
+There are four levels of priority: **Normal**, which is the fundamental level of all the
 tasks, **High**, **Very High**, or **Emergency**. Save the changes with the
 **Confirm** button.
 
@@ -150,7 +150,7 @@ more there are, the more urgent the task is.
 
 Alternatively, you can do it per **batch**. 
 
-You can select multiple shots or assets, by pressing the **crtl** or
+You can select multiple shots or assets by pressing the **ctrl** or
 **shift** key.
 
 Then go to the **Change status** section on the action menu.
@@ -165,7 +165,7 @@ You validate the new status with the **Confirm** button.
 
 ## Simplify the global page
 
-You may need to reduce a task type column in a global page. For example, you may be 
+You may need to reduce a task type column on a global page. For example, you may be 
 only interested in layout and animation but not so much about the shipment for the client.
 
 Close to each task type name, you can click on the arrow 
@@ -187,7 +187,7 @@ To hide your custom column, click on the arrow on the right border of the global
 
 Here you can choose which column you want to **hide** or **display**.
 
-You can also hide all the non-essential column, like **Description**, **Custom column**, 
+You can also hide all the non-essential columns, like **Description**, **Custom column**, 
 even the minimize columns.
 
 Just click on the **Hide additional information** 
@@ -208,6 +208,6 @@ Kitsu grabs the number of frames (or seconds) validated per day/week/month per A
 
 **2**: Select the level of details, Day, Week or Month
 
-**3**: Select the count mode, per Frames or per Seconds.
+**3**: Select the count mode, per Frame or Seconds.
 
-At any time, you can click on a number and see its detail on the right pannel.
+At any time, you can click on a number and see its detail on the right panel.
