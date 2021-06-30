@@ -39,11 +39,11 @@ Each part is a **link** you can use it to jump on the information you need. If
 you click on the **status**, you jump to the status page of the entity. So
 you can react quickly to this new change.
 
-For example, let's give Alicia a retake.
+For example, let's give Ann a retake.
 
 ![Notification example 01](../img/getting-started/notification_example01.png)
 
-Alicia receives notification immediately, the **bell** button change color
+Ann receives notification immediately, the **bell** button change color
 ![Notification on](../img/getting-started/notification_icon_on.png), and she can read the
 new comment.
 
@@ -130,4 +130,10 @@ You can also select a specific **status** or a specific **task type**.
 Moreover, you can also comment and review any previews from this page.
 
 ![newsfeed preview comment](../img/getting-started/newsfeed_preview_comment.png)
+
+You can also be interested with more specific information. Like what an artist has done on a specific month.
+
+![newsfeed details](../img/getting-started/newsfeed_details.png)
+
+
 
