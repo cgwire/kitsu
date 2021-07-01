@@ -26,6 +26,7 @@ module.exports = {
        '/Schedules/',
        '/batch-action/',
 	   '/playlist/',
+	   '/department/',
 	   '/customization/'
      ]
 	}, 
