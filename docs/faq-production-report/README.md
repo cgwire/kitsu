@@ -29,7 +29,7 @@ You can also display the statistic as a percentage.
 
 ![Overview sequence detail](../img/getting-started/global_view_episode_perc.png)
 
-You can also choose between 2 count modes: per shots or frames.
+You can also choose between two count modes: per shots or frames.
 
 ![Overview sequence detail](../img/getting-started/global_view_sequence_detail_count.png)
 
@@ -60,7 +60,7 @@ You can also display the statistic as a percentage.
 
 ![Overview sequence detail](../img/getting-started/global_view_sequence_detail_count_stat.png)
 
-You can also choose between 2 count modes: per shots or frames.
+You can also choose between two count modes: per shots or frames.
 
 ![Overview sequence detail](../img/getting-started/global_view_sequence_detail_count.png)
 
@@ -91,7 +91,7 @@ You can also display the statistic as a percentage.
 
 ![Overview sequence detail](../img/getting-started/global_view_sequence_detail_perc.png)
 
-You can also choose between 2 count modes: per shots or frames.
+You can also choose between two count modes: per shots or frames.
 
 ![Overview sequence detail](../img/getting-started/global_view_sequence_detail_count.png)
 

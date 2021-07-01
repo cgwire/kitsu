@@ -37,7 +37,7 @@ It's the first landing page when you log in.
 
 
 You can see per **Production** (1) the **Entity** (2) you are assigned to, but also the **Estimation** time (3), and the **Duration** (4) you already spend, the **Due date** (5), the
-** Status** (6) of the tasks you are working on and their **priority** (7). 
+**Status** (6) of the tasks you are working on and their **priority** (7). 
  
 ![My tasks page](../img/getting-started/my_task_page.png)
 

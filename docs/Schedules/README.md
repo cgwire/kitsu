@@ -106,7 +106,7 @@ To go further in detail with the Supervisor view :
 - (4) Kitsu calculate the sum of the timesheet fed by the artists
 - (5) The number of back and forth with the retake status
 - (6) You can add a start date for the task (with the calendar)
-- (7)Kitsu calculate the due date with the Start Date and the estimation
+- (7) Kitsu calculate the due date with the Start Date and the estimation
 - (8)(9) the Wip and Validation dates are automatically filled
 - (10) the Last comment section help you to keep an eye on the last activity of this task type.
 
@@ -127,7 +127,8 @@ To help you to set a correct estimation, you can use the **Estimation** Tab.
 
 On the left part of the screen is the list of the shots with the assignation and the number of frames (1).
 Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2). 
-(See how to set your production fps [Create your first production](#create-your-first-production) ) 
+(See how to set your production fps [Create your first production]((../getting-started-production/README.md#create-your-first-production) ) 
+
 
  On the right part of the screen, you can see the full team of the department (depending on the assignations you made), the number of shots they have to do, the number of frames, seconds, and the average quota. 
  

@@ -154,7 +154,7 @@ If you have multiple assets to create, click on **Confirm and stay**.
 You can change the asset type and keep adding assets. 
 
 You can also customize the asset type list. 
-[Customization of the workflow](../customization/README.md#modify-an-existing-task-type) )
+[Customization of the workflow](../customization/README.md#modify-an-existing-asset-types) )
 
 
 You can see the newly created asset appearing in the background every time you click on **Confirm and stay**. 
@@ -587,7 +587,7 @@ Now your **Breakdown** page should look like this.
 
 You can also make a breakdown list for your assets if you need to assemble them and keep track of the separated parts.
 
-On the top left corner of the screen, choose ** asset** in the drop-down menu, below **FOR**.
+On the top left corner of the screen, choose **asset** in the drop-down menu, below **FOR**.
 
 ![Breakdown asset menu](../img/getting-started/breakdown_asset_menu.png)
 
@@ -642,7 +642,7 @@ Type your comments, and hit the **Enter** key to add another line on your checkl
 
 ![checklist](../img/getting-started/checklist_detailed.png)
 
-Besides your comment, you can also attach a preview. Click on the "**Add attachment" button.
+Besides your comment, you can also attach a preview. Click on the **Add attachment** button.
 
 ![attachment](../img/getting-started/attachment_retake.png)
 
