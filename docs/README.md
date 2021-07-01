@@ -38,6 +38,7 @@ In this section, we will detail all of Kitsu's different modules.
 * [Batch Action](batch-action/README.md): Let Kitsu do all the heavy lifting for you
 * [Playlist](playlist/README.md): Stay focus during the review and gain more time with the Playlist 
 * [Customization of the workflow](customization/READMe.md): Every production are unique, so should be your workflow
+* [Deparment](department/README.md): We all need to stay organized
   
 
 ## Tutorials

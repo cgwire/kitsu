@@ -11,7 +11,7 @@ On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 On the main page, you can edit all the tasks already created 
 ![edit button](../img/getting-started/edit_button.png).
 
-![Task Type global page](../img/getting-started/task_type_global.png)
+![Task Type global page](../img/getting-started/task_type_global_edit.png)
 
 You can change : 
 
