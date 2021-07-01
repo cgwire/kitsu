@@ -54,7 +54,7 @@ Per default the new task type will be at the bottom of the list. To change the o
 
 ![Create task bottom list](../img/getting-started/created_task_bottom.png)
 
-![Create task bottom list](../img/getting-started/created_task_top.png)
+![Create task top list](../img/getting-started/created_task_top.png)
 
 
 ## Modify an existing Task Status
@@ -111,7 +111,7 @@ Click on **Confirm** to save your changes.
 ## Modify an existing Asset Types
 
 On the main menu ![Main menu](../img/getting-started/main_button.png) select the 
-**ASSET Ypes** page under the **Admin** section.
+**ASSET TYPES** page under the **Admin** section.
 
 ![Asset Type](../img/getting-started/menu_asset_type.png)
 
@@ -137,10 +137,9 @@ On the main page, click on the ![Add Asset Types](../img/getting-started/add_ass
 
 On the new pop up you can define your personalized Asset Type : 
 
-![Add asset types](../img/getting-started/add_asset_types_name.png)
+![Add asset types name](../img/getting-started/add_asset_types_name.png)
 
 Click on **Confirm** to save your changes.
-
 
 
 ## Define specific workflow per production
@@ -148,7 +147,7 @@ Click on **Confirm** to save your changes.
 ### Select speticific Task Status for a production
 
 
-On the **Action Menu**, choose on the drop down menu the "Setting" 
+On the **Action Menu**, choose on the drop down menu the **Setting**. 
 
 ![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
 
@@ -158,8 +157,8 @@ But you can choose to use only specific status.
 
 ![Setting status new](../img/getting-started/setting_status_new.png)
 
-On the "Task Status" tab, you can choose which status you want to use on this production, 
-validate your choice with the "add" button.
+On the **Task Status** tab, you can choose which status you want to use on this production, 
+validate your choice with the **add** button.
 
 
 ![Setting Add Status](../img/getting-started/setting_status_add.png)
@@ -167,7 +166,7 @@ validate your choice with the "add" button.
 
 ### Select specific Task Types for a production
 
-On the **Action Menu**, choose on the drop down menu the "Setting" 
+On the **Action Menu**, choose on the drop down menu the **Setting**.
 
 ![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
 
@@ -180,8 +179,8 @@ But you can choose to use only specific Task Types, depending of the type of you
 For example you can create a 2D and A CGI workflow on your library, and add the needed task types into this production.
 
 
-On the "Task Types" tab, you can choose which status you want to use on this production, 
-validate your choice with the "add" button.
+On the **Task Types** tab, you can choose which status you want to use on this production, 
+validate your choice with the **add** button.
 
 
 ![Setting Add Task Type](../img/getting-started/setting_task_add.png)
@@ -189,7 +188,7 @@ validate your choice with the "add" button.
 
 ### Select specific Asset Types for a production
 
-On the **Action Menu**, choose on the drop down menu the "Setting" 
+On the **Action Menu**, choose on the drop down menu the **Setting**.
 
 ![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
 
@@ -199,7 +198,7 @@ But you can choose to use only specific Asset Types, depending of the type of yo
 
 ![Setting Asset type new](../img/getting-started/setting_asset_new.png)
 
-On the "Asset Types" tab, you can choose which Asset Types you want to use on this production, 
+On the **Asset Types** tab, you can choose which Asset Types you want to use on this production, 
 validate your choice with the "add" button.
 
 ![Setting Add Asset](../img/getting-started/setting_asset_add.png)

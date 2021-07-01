@@ -9,13 +9,13 @@ You can find the **Playlists** page on the drop-down menu.
 
 The **playlist** page is separated into two parts: 
 
-* (1) The playlist list where you can **create** a playlist or load an existing one.
-* (2) The last created playlists and the last modified playlists
+- (1) The playlist list where you can **create** a playlist or load an existing one.
+- (2) The last created playlists and the last modified playlists
 
 ![Playlist page](../img/getting-started/playlist_page.png)
 
 Start by creating a **Playlist** 
-![Playlist add button](../img/getting-started/playlist_add_button.png), Your default name
+![Playlist add button](../img/getting-started/playlist_add_button.png). Your default name
 is the date and the hour. You can change it immediately. You can choose if the playlist
 will be shared with the **studio** or the **client** and if it's a **shot** or **asset** playlist.
 You can also add a **Task Type** tag to the playlist.
@@ -79,7 +79,7 @@ Once you have created a playlist; you have several options:
 
 14/ Hide the elements of the playlist
 
-15/ Download the playlist as a **Zip** files with all the separated elements, or **Build .mp4** to create the whole movie (only for shots)
+15/ Download the playlist as a **Zip** files with all the separated elements, a **.csv** text file, or **Build .mp4** to create the whole movie (only for shots)
 
 16/ Fullscreen
 
@@ -113,5 +113,6 @@ You can see the drawing comment on the video (the red dot below the timeline).
 
 ![Playlist comment](../img/getting-started/playlist_comment.png)
 
-You can draw or type on the video (same than [Perform a review](../getting-started-production/README.md#perform-a-review)), with the **draw** button ![draw button](../img/getting-started/draw.png)
+You can draw or type on the video (same than 
+[Perform a review](../getting-started-production/README.md#perform-a-review)), with the **draw** button ![draw button](../img/getting-started/draw.png)
 
