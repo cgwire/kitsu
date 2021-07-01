@@ -108,6 +108,40 @@ On the new pop up you can define your personalized task :
 
 Click on **Confirm** to save your changes.
 
+## Modify an existing Asset Types
+
+On the main menu ![Main menu](../img/getting-started/main_button.png) select the 
+**ASSET Ypes** page under the **Admin** section.
+
+![Task Status](../img/getting-started/menu_asset_type.png)
+
+On the main page, you can edit some Asset Types already created 
+![edit button](../img/getting-started/edit_button.png). 
+
+![Task Status global page](../img/getting-started/asset_types_global.png)
+ 
+You can change the name of the Asset Types.
+
+![Edit status](../img/getting-started/edit_asset_types.png)
+
+Click on **Confirm** to save your changes.
+
+## Create a new Asset Types
+
+On the main menu ![Main menu](../img/getting-started/main_button.png) select the 
+**TASK STATUS** page under the **Admin** section.
+
+![Task Status](../img/getting-started/menu_asset_type.png)
+
+On the main page, click on the ![Add Task Status](../img/getting-started/add_asset_types.png) button.
+
+On the new pop up you can define your personalized Asset Type : 
+
+![Add Status](../img/getting-started/add_asset_types_name.png)
+
+Click on **Confirm** to save your changes.
+
+
 
 ## Define specific workflow per production
 
