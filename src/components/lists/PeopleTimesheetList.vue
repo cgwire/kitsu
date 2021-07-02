@@ -151,8 +151,7 @@
             >
               {{ dayDuration(day, person.id) }}
             </router-link>
-            <span v-else-if="dayOffMap[person.id] &&
-                             dayOffMap[person.id][`${day}`]">
+            <span v-else-if="isDayOff(person.id, day)">
               OFF
             </span>
             <span v-else>
@@ -417,6 +416,11 @@ export default {
           productionId: this.$route.query.productionId
         }
       }
+    },
+
+    isDayOff (personId, day) {
+      const dayString = `${day}`.padStart(2, '0')
+      return this.dayOffMap[personId] && this.dayOffMap[personId][dayString]
     }
   },
 
