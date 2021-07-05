@@ -181,7 +181,7 @@ export const getFilters = (
   return filters
 }
 
-const getUnion = (query) => {
+const getUnion = (query = '') => {
   const rgxMatches = query.match(UNION_REGEX)
   let union = false
   if (rgxMatches) {

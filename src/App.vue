@@ -806,14 +806,11 @@ a:hover {
   flex: 1;
 }
 
- label.label {
+label.label {
   color: $grey;
   text-transform: uppercase;
   font-size: 0.8em;
   margin-left: 2px;
-}
-
-span.select {
 }
 
 texarea,
@@ -1494,7 +1491,7 @@ tbody:last-child .empty-line:last-child {
   margin-bottom: 2em;
 }
 
-.selectable {
+.1electable {
   user-select: text;
 }
 
