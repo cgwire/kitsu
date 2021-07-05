@@ -88,13 +88,13 @@ export default {
 
   computed: {
     originalPath () {
-      return '/api/pictures/originals/preview-files/' +
-             this.entity.preview_file_id + '.png'
+      const previewFileId = this.previewFileId || this.entity.preview_file_id
+      return '/api/pictures/originals/preview-files/' + previewFileId + '.png'
     },
 
     isPreview () {
-      return this.entity.preview_file_id &&
-             this.entity.preview_file_id.length > 0
+      const previewFileId = this.previewFileId || this.entity.preview_file_id
+      return previewFileId && previewFileId.length > 0
     },
 
     imgStyle () {

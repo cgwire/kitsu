@@ -53,6 +53,7 @@
           <shot-line
             :key="entity.id"
             :entity-id="entity.id"
+            :preview-file-id="entity.preview_file_id"
             :selected="selection[entity.id]"
             :name="entity.name"
             :assets="castingByType[entity.id] || []"

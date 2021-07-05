@@ -9,6 +9,15 @@
   @click="onClicked($event)"
 >
   <div class="flexrow">
+    <span class="flexrow flexrow-item">
+      <entity-thumbnail
+        :entity="{}"
+        :height="30"
+        :empty-width="40"
+        :empty-height="30"
+        :preview-file-id="previewFileId"
+      />
+    </span>
     <div class="shot-name flexrow-item">
       {{ name }}
     </div>
@@ -49,12 +58,23 @@
 </template>
 
 <script>
-import AssetBlock from './AssetBlock'
+import AssetBlock from '@/components/pages/breakdown/AssetBlock'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 
 export default {
   name: 'shot-line',
+
+  components: {
+    AssetBlock,
+    EntityThumbnail
+  },
+
   props: {
     entityId: {
+      default: '',
+      type: String
+    },
+    previewFileId: {
       default: '',
       type: String
     },
@@ -78,10 +98,6 @@ export default {
       default: false,
       type: Boolean
     }
-  },
-
-  components: {
-    AssetBlock
   },
 
   methods: {
@@ -118,7 +134,6 @@ export default {
 
 .shot-name {
   width: 100px;
-  padding-left: 0.4em;
   padding-top: 0;
   flex: 0 0 100px;
   word-break: break-all;
@@ -144,7 +159,7 @@ export default {
 
 .shot {
   font-size: 1.1em;
-  padding: .5em .5em 0;
+  padding: 0 .5em 0;
   border-bottom: 1px solid $light-grey;
   cursor: pointer;
 }
