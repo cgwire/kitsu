@@ -80,7 +80,7 @@
 
           <th
             scope="col"
-            class="description"
+            class="description selectable"
             v-if="!isCurrentUserClient && isShowInfos && isShotDescription"
           >
             {{ $t('shots.fields.description') }}
@@ -259,7 +259,7 @@
               </option>
             </select>
             </span>
-              <span class="metadata-value" v-else>
+              <span class="metadata-value selectable" v-else>
               {{ getMetadataFieldValue(descriptor, shot) }}
             </span>
           </td>
@@ -331,7 +331,7 @@
               </option>
             </select>
             </span>
-              <span class="metadata-value" v-else>
+              <span class="metadata-value selectable" v-else>
               {{ getMetadataFieldValue(descriptor, shot) }}
             </span>
           </td>
@@ -349,7 +349,7 @@
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength)"
               v-if="isCurrentUserManager"
             />
-            <span class="metadata-value" v-else>
+            <span class="metadata-value selectable" v-else>
               {{ shot.nb_frames }}
             </span>
           </td>
@@ -365,7 +365,7 @@
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 1)"
               v-if="isCurrentUserManager"
             />
-            <span class="metadata-value" v-else>
+            <span class="metadata-value selectable" v-else>
               {{ getMetadataFieldValue({field_name: 'frame_in'}, shot) }}
             </span>
           </td>
@@ -381,7 +381,7 @@
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 2)"
               v-if="isCurrentUserManager"
             />
-            <span class="metadata-value" v-else>
+            <span class="metadata-value selectable" v-else>
               {{ getMetadataFieldValue({field_name: 'frame_out'}, shot) }}
             </span>
           </td>
@@ -396,20 +396,20 @@
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)"
               v-if="isCurrentUserManager"
             />
-            <span class="metadata-value" v-else>
+            <span class="metadata-value selectable" v-else>
               {{ getMetadataFieldValue({field_name: 'fps'}, shot) }}
             </span>
           </td>
 
           <td
-            class="time-spent"
+            class="time-spent selectable"
             v-if="!isCurrentUserClient && isShowInfos && isShotTime && metadataDisplayHeaders.timeSpent"
           >
             {{ formatDuration(shot.timeSpent) }}
           </td>
 
           <td
-            class="estimation"
+            class="estimation selectable"
             v-if="!isCurrentUserClient && isShowInfos && isShotEstimation && metadataDisplayHeaders.estimation"
           >
             {{ formatDuration(shot.estimation) }}

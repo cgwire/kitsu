@@ -14,7 +14,7 @@
   <template v-else>
     <div class="c-mask" v-if="isOpen"></div>
     <span
-      class="description-shorten-text"
+      class="description-shorten-text selectable"
       v-html="compileMarkdown(shortenText(entry.description || '', 20))"
     >
     </span>

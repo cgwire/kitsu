@@ -270,7 +270,7 @@
               </option>
             </select>
             </span>
-              <span class="metadata-value" v-else>
+              <span class="metadata-value selectable" v-else>
               {{ getMetadataFieldValue(descriptor, asset) }}
             </span>
           </td>
@@ -341,13 +341,13 @@
               </option>
             </select>
             </span>
-              <span class="metadata-value" v-else>
+              <span class="metadata-value selectable" v-else>
               {{ getMetadataFieldValue(descriptor, asset) }}
             </span>
           </td>
 
           <td
-            class="time-spent"
+            class="time-spent selectable"
             v-if="!isCurrentUserClient &&
                   isShowInfos &&
                   isAssetTime &&
@@ -357,7 +357,7 @@
           </td>
 
           <td
-            class="estimation"
+            class="estimation selectable"
             v-if="!isCurrentUserClient &&
                   isShowInfos &&
                   isAssetEstimation &&
