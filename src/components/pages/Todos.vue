@@ -51,10 +51,17 @@
           :can-save="true"
           v-if="!isTabActive('done')"
         />
-        <span class="flexrow-item push-right">
-        </span>
-        <span class="flexrow-item">
-        </span>
+
+        <span class="filler"></span>
+
+        <combobox
+          class="flexrow-item"
+          :label="$t('main.show')"
+          :options="filterOptions"
+          locale-key-prefix="tasks."
+          v-model="currentFilter"
+        />
+
         <combobox
           class="flexrow-item"
           :label="$t('main.sorted_by')"
@@ -130,12 +137,13 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import firstBy from 'thenby'
 
-import Combobox from '../widgets/Combobox'
-import SearchField from '../widgets/SearchField'
-import SearchQueryList from '../widgets/SearchQueryList'
-import TaskInfo from '../sides/TaskInfo'
-import TimesheetList from '../lists/TimesheetList'
-import TodosList from '../lists/TodosList'
+import { parseDate } from '@/lib/time'
+import Combobox from '@/components/widgets/Combobox'
+import SearchField from '@/components/widgets/SearchField'
+import SearchQueryList from '@/components/widgets/SearchQueryList'
+import TaskInfo from '@/components/sides/TaskInfo'
+import TimesheetList from '@/components/lists/TimesheetList'
+import TodosList from '@/components/lists/TodosList'
 
 export default {
   name: 'todos',
@@ -152,7 +160,12 @@ export default {
   data () {
     return {
       activeTab: 'todos',
+      currentFilter: 'all_tasks',
       currentSort: 'priority',
+      filterOptions: [
+        'all_tasks',
+        'due_this_week'
+      ].map((name) => ({ label: name, value: name })),
       selectedDate: moment().format('YYYY-MM-DD'),
       sortOptions: [
         'entity_name',
@@ -238,7 +251,12 @@ export default {
       const isName = this.currentSort === 'entity_name'
       const isPriority = this.currentSort === 'priority'
       const isDueDate = this.currentSort === 'due_date'
-      const tasks = [...this.displayedTodos]
+      const tasks = this.currentFilter === 'all_tasks'
+        ? [...this.displayedTodos]
+        : this.displayedTodos.filter(t => {
+          const dueDate = parseDate(t.due_date)
+          return moment().startOf('week').isSame(dueDate, 'week')
+        })
       if (isName) {
         return tasks.sort(
           firstBy('project_name')

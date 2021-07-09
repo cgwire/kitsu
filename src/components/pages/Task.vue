@@ -180,6 +180,7 @@
                 :entity-preview-files="taskEntityPreviews"
                 :read-only="isCurrentUserArtist"
                 :last-preview-files="lastFivePreviews"
+                :task="currentTask"
                 @annotation-changed="onAnnotationChanged"
                 @add-extra-preview="onAddExtraPreviewClicked"
                 @remove-extra-preview="onRemoveExtraPreviewClicked"

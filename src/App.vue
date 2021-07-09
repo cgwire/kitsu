@@ -1491,7 +1491,7 @@ tbody:last-child .empty-line:last-child {
   margin-bottom: 2em;
 }
 
-.1electable {
+.selectable {
   user-select: text;
 }
 

@@ -14,6 +14,9 @@
           <th class="estimation">
             {{ $t('tasks.fields.estimation').substring(0, 3) }}.
           </th>
+          <th class="estimation">
+            {{ $t('tasks.fields.duration').substring(0, 3) }}.
+          </th>
           <th class="duedate">
             {{ $t('tasks.fields.due_date') }}
           </th>
@@ -59,6 +62,9 @@
           </td>
           <td class="estimation">
             {{ getTaskEstimation(taskId) }}
+          </td>
+          <td class="estimation">
+            {{ getTaskDuration(taskId) }}
           </td>
           <td class="duedate">
             {{ getTaskDueDate(taskId) }}
@@ -188,6 +194,13 @@ export default {
       const task = this.getTask(taskId)
       return task && task.estimation
         ? this.formatDuration(task.estimation)
+        : ''
+    },
+
+    getTaskDuration (taskId) {
+      const task = this.getTask(taskId)
+      return task && task.duration
+        ? this.formatDuration(task.duration)
         : ''
     },
 

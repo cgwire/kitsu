@@ -366,12 +366,23 @@
                     @click.prevent="addEntityToPlaylist(shot)"
                     v-for="shot in sequenceShots.filter(s => !s.canceled)"
                   >
-                      <light-entity-thumbnail
-                        :preview-file-id="shot.preview_file_id"
-                        width="150px"
-                        height="100px"
-                      />
-                    <span class="playlisted-shot-name">{{ shot.name }}</span>
+                    <light-entity-thumbnail
+                      :preview-file-id="shot.preview_file_id"
+                      width="150px"
+                      height="100px"
+                    />
+                    <div>
+                      <span
+                        :title="getTaskStatus(shot).name"
+                        :style="{
+                          color: getTaskStatus(shot).color
+                        }"
+                        v-if="currentPlaylist.task_type_id"
+                      >
+                        &bullet;
+                      </span>
+                      <span class="playlisted-shot-name">{{ shot.name }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -512,6 +523,8 @@ export default {
       'shotsByEpisode',
       'shotSearchText',
       'shotMap',
+      'taskMap',
+      'taskStatusMap',
       'taskTypeMap'
     ]),
 
@@ -636,6 +649,22 @@ export default {
       const color = taskType ? taskType.color : 'transparent'
       return {
         'border-left': '2px solid ' + color
+      }
+    },
+
+    getTaskStatus (entity) {
+      entity = this.shotMap.get(entity.id)
+      if (!entity) entity = this.assetMap.get(entity.id)
+      if (!entity) return {}
+
+      const taskId = entity.validations.get(this.currentPlaylist.task_type_id)
+      if (taskId) {
+        const task = this.taskMap.get(taskId)
+        if (!task) return {}
+        const taskStatus = this.taskStatusMap.get(task.task_status_id)
+        return taskStatus
+      } else {
+        return {}
       }
     },
 
@@ -1171,11 +1200,6 @@ export default {
       this.setCurrentPlaylist()
     },
 
-    taskTypeId () {
-      this.page = 1
-      this.loadPlaylistsData(true)
-    },
-
     currentPlaylist () {
       if (this.currentPlaylist.shots) {
         this.$options.silentMore = false
@@ -1439,6 +1463,7 @@ span.thumbnail-picture {
 
 .playlisted-shot-name {
   padding-right: 20px;
+  color: var(--text);
 }
 
 .playlist-date {

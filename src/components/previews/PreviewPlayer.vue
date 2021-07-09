@@ -169,8 +169,21 @@
       </div>
 
       <div class="filler"></div>
-      <div class="flexrow">
 
+      <div
+        class="entity-name mr1"
+        v-if="fullScreen && task"
+      >
+        {{ task.entity_name }}
+      </div>
+
+      <div
+        class="separator"
+        v-if="fullScreen"
+      >
+      </div>
+
+      <div class="flexrow">
         <div class="flexrow" v-if="isMovie || isPicture">
           <button-simple
             class="flexrow-item"
@@ -433,9 +446,13 @@ export default {
       type: Array,
       default: () => []
     },
+    task: {
+      type: Object,
+      default: () => {}
+    },
     taskTypeMap: {
       type: Map,
-      default: () => {}
+      default: () => new Map()
     }
   },
 
@@ -1680,5 +1697,9 @@ progress {
 
 .separator {
   background: $dark-grey-2;
+}
+
+.entity-name {
+  color: $light-grey;
 }
 </style>
