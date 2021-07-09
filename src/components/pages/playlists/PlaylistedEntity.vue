@@ -24,7 +24,15 @@
       </div>
 
       <div class="entity-title">
-        {{ entity.parent_name }} / {{ entity.name }}
+        <span
+          :style="{
+            color: taskStatus.color
+          }"
+          :title="taskStatus.name"
+        >
+          &bullet;
+        </span>
+        <span>{{ entity.parent_name }} / {{ entity.name }}</span>
       </div>
 
       <div
@@ -108,7 +116,11 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetMap',
+      'shotMap',
+      'taskMap',
       'taskTypeMap',
+      'taskStatusMap',
       'isCurrentUserManager'
     ]),
 
@@ -137,6 +149,22 @@ export default {
         label: `v${previewFile.revision}`,
         value: previewFile.id
       }))
+    },
+
+    taskStatus () {
+      let entity = this.shotMap.get(this.entity.id)
+      if (!entity) entity = this.assetMap.get(this.entity.id)
+      if (!entity) return ''
+
+      const taskId = entity.validations.get(this.taskTypeId)
+      if (taskId) {
+        const task = this.taskMap.get(taskId)
+        if (!task) return ''
+        const taskStatus = this.taskStatusMap.get(task.task_status_id)
+        return taskStatus
+      } else {
+        return ''
+      }
     }
   },
 
