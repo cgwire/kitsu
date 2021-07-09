@@ -905,7 +905,7 @@ export default {
 
         this.selectedTaskIds.forEach(taskId => {
           const task = this.selectedTasks.get(taskId)
-          if (task.sequence_name) {
+          if (task && task.sequence_name) {
             isShotSelected = true
           } else {
             isAssetSelected = true
