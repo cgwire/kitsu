@@ -316,6 +316,7 @@ export default {
     search_query_edit: 'Edit search filter',
     search_query_edit_error: 'An error occurred while updating this search filter.',
     select_column: 'Select column',
+    show: 'Show',
     sorted_by: 'Sorted by',
     sort_by: 'Sort by',
     start_date: 'Start date',
@@ -880,6 +881,7 @@ export default {
   tasks: {
     add_preview: 'Add preview',
     add_preview_error: 'An error occurred while adding preview.',
+    all_tasks: 'All tasks',
     assign: 'Assign one task to: | Assign {nbSelectedTasks} tasks to:',
     assignation_warning: 'Warning: you won\'t see the result because you are hiding assignations',
     back_to_list: 'back to list',
@@ -907,6 +909,7 @@ export default {
     delete_for_selection: 'Delete selected tasks:',
     delete_preview: 'Are you sure you want to delete this preview?',
     delete_preview_error: 'An error occurred while deleting preview.',
+    due_this_week: 'Due this week',
     edit_comment: 'Edit comment',
     done: 'Done',
     download_pdf_file: 'Download .{extension} file',
