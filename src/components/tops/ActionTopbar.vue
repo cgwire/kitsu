@@ -899,6 +899,7 @@ export default {
     },
 
     nbSelectedTasks () {
+      this.selectedTaskIds = Array.from(this.selectedTasks.keys())
       if (this.nbSelectedTasks > 0) {
         let isShotSelected = false
         let isAssetSelected = false
