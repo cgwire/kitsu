@@ -11,13 +11,22 @@
         v-scroll="onPlaylistListScroll"
       >
 
-        <div class="flexrow">
+        <div class="flexrow top-section">
           <combobox-task-type
             class="flexrow-item selector mb1"
             :task-type-list="taskTypeList"
             :label="$t('playlists.filter_task_type')"
             :thin="true"
             v-model="taskTypeId"
+            v-if="!isListToggled"
+          />
+          <span class="filler" v-if="!isListToggled"></span>
+          <button-simple
+            class="flexrow-item"
+            style="flex: 0;"
+            :icon="isListToggled ? 'right' : 'left'"
+            is-small
+            @click="isListToggled = !isListToggled"
           />
         </div>
 
@@ -30,15 +39,7 @@
               locale-key-prefix="playlists.fields."
               v-model="currentSort"
             />
-            <span class="flexrow-item filler"></span>
           </template>
-          <!--button-simple
-            class="flexrow-item"
-            style="flex: 0;"
-            @click="isListToggled = !isListToggled"
-            :icon="isListToggled ? 'right' : 'left'"
-          /-->
-
         </div>
 
         <button
@@ -82,10 +83,11 @@
               <light-entity-thumbnail
                 :preview-file-id="playlist.first_preview_file_id"
                 type="previews"
-                width="auto"
-                height="auto"
-                max-width="40px"
+                width="38px"
+                height="30px"
+                max-width="38px"
                 max-height="30px"
+                empty-width="38px"
                 empty-height="30px"
                 :title="playlist.name"
               />
@@ -1560,5 +1562,9 @@ h2 {
     padding: 0.5em 1em;
     height: auto;
   }
+}
+
+.top-section {
+  align-items: flex-start;
 }
 </style>

@@ -3,6 +3,7 @@
   :class="{
     button: true,
     active: active,
+    small: isSmall,
     'is-primary': isPrimary,
     'is-loading': isLoading,
     'is-on': isOn
@@ -249,6 +250,10 @@ export default {
       default: false,
       type: Boolean
     },
+    isSmall: {
+      default: false,
+      type: Boolean
+    },
     text: {
       default: '',
       type: String
@@ -286,5 +291,10 @@ export default {
 
 .active {
   box-shadow: inset 0 0 2px 2px var(--box-shadow)
+}
+
+.small {
+  font-size: 0.8em;
+  padding: 0.4em;
 }
 </style>
