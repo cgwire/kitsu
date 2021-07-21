@@ -1605,6 +1605,10 @@ export default {
           event.preventDefault()
           event.stopPropagation()
           this.onPlayNextEntityClicked()
+        } else if (event.ctrlKey && event.keyCode === 67) { // ctrl + c
+          this.copyAnnotations()
+        } else if (event.ctrlKey && event.keyCode === 86) { // ctrl + v
+          this.pasteAnnotations()
         } else if (event.ctrlKey && event.altKey && event.keyCode === 68) {
           this.onAnnotateClicked()
         } else if (event.ctrlKey && event.keyCode === 90) {

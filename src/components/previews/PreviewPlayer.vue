@@ -1198,6 +1198,10 @@ export default {
           this.undoLastAction()
         } else if (event.altKey && event.keyCode === 82) { // alt + r
           this.redoLastAction()
+        } else if (event.ctrlKey && event.keyCode === 67) { // ctrl + c
+          this.copyAnnotations()
+        } else if (event.ctrlKey && event.keyCode === 86) { // ctrl + v
+          this.pasteAnnotations()
         } else if (event.keyCode === 27) { // Esc
           if (this.fullScreen) {
             this.isComparing = false

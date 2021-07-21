@@ -315,6 +315,20 @@ export const annotationMixin = {
       }
     },
 
+    copyAnnotations (event) {
+      this.fabricCanvas.getActiveObject().clone((cloned) => {
+        clipboard.copyAnnotations(cloned)
+      })
+    },
+
+    pasteAnnotations (event) {
+      this.fabricCanvas.discardActiveObject()
+      const clonedObj = clipboard.pasteAnnotations()
+      this.addObject(clonedObj)
+      this.fabricCanvas.setActiveObject(clonedObj)
+      this.fabricCanvas.requestRenderAll()
+    },
+
     // Saving
 
     startAnnotationSaving (preview, annotations) {
