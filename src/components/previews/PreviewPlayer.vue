@@ -217,7 +217,6 @@
               <color-picker
                 :isOpen="isShowingPalette"
                 :color="this.textColor"
-                :palette="this.palette"
                 @TogglePalette="onPickColor"
                 @change="onChangeTextColor"
               />
@@ -249,7 +248,6 @@
               <color-picker
                 :isOpen="isShowingPalette"
                 :color="this.color"
-                :palette="this.palette"
                 @TogglePalette="onPickColor"
                 @change="onChangeColor"
               />
@@ -474,7 +472,6 @@ export default {
       isRepeating: false,
       isTyping: false,
       maxDuration: '00:00.000',
-      palette: ['#ff3860', '#008732', '#5E60BA', '#f57f17'],
       pencil: 'big',
       pencilPalette: ['big', 'medium', 'small'],
       previewToCompare: null,
