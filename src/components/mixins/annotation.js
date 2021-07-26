@@ -4,14 +4,23 @@
  */
 import { mapGetters } from 'vuex'
 import { fabric } from 'fabric'
+import { v4 as uuidv4 } from 'uuid'
+import moment from 'moment'
+
+import clipboard from '@/lib/clipboard'
+import { formatFullDate } from '@/lib/time'
 
 export const annotationMixin = {
 
   data () {
     return {
-      notSave: false,
+      lastAnnotationTime: '',
+      additions: [],
+      deletions: [],
+      updates: [],
       isShowingPalette: false,
-      isShowingPencilPalette: false
+      isShowingPencilPalette: false,
+      notSave: false
     }
   },
 
@@ -36,6 +45,14 @@ export const annotationMixin = {
 
   methods: {
     // Objects
+
+    setObjectData (object) {
+      if (!object.id) object.id = uuidv4()
+      object.canvasWidth = this.fabricCanvas.width
+      object.canvasHeight = this.fabricCanvas.height
+      object.serialize = () => object.toJSON(['id', 'canvasWidth', 'canvasHeight'])
+      return object
+    },
 
     addObject (activeObject) {
       if (activeObject._objects) {
@@ -109,11 +126,13 @@ export const annotationMixin = {
 
     deleteObject (activeObject) {
       if (activeObject && activeObject._objects) {
-        activeObject._objects.forEach((obj) => {
+        activeObject._objects.forEach(obj => {
           this.fabricCanvas.remove(obj)
+          this.addToDeletions(obj)
         })
-      } else {
+      } else if (activeObject) {
         this.fabricCanvas.remove(activeObject)
+        this.addToDeletions(activeObject)
       }
       this.$options.doneActionStack.push({
         type: 'remove', obj: activeObject
@@ -121,10 +140,104 @@ export const annotationMixin = {
       this.saveAnnotations()
     },
 
+    addToAdditions (obj) {
+      this.markLastAnnotationTime()
+      const currentTime = this.getCurrentTime()
+      const additions = this.additions.find(a => a.time === currentTime)
+      if (additions) {
+        additions.drawing.objects.push(obj.serialize())
+      } else {
+        this.additions.push({
+          time: currentTime,
+          drawing: { objects: [obj.serialize()] }
+        })
+      }
+      this.printModificationStats('add')
+    },
+
+    removeFromAdditions (obj) {
+      const currentTime = this.getCurrentTime()
+      const additions = this.additions.find(a => a.time === currentTime)
+      if (additions) {
+        additions.drawing.objects = additions.drawing.objects.filter(
+          o => o.id !== obj.id
+        )
+      }
+    },
+
+    addToDeletions (obj) {
+      this.markLastAnnotationTime()
+      const currentTime = this.getCurrentTime()
+      const deletion = this.deletions.find(d => d.time === currentTime)
+      if (deletion) {
+        deletion.objects.push(obj.id)
+      } else {
+        this.deletions.push({
+          time: currentTime,
+          objects: [obj.id]
+        })
+      }
+      this.printModificationStats('delete')
+    },
+
+    removeFromDeletions (obj) {
+      const currentTime = this.getCurrentTime()
+      const deletions = this.deletions.find(a => a.time === currentTime)
+      if (deletions) {
+        deletions.objects = deletions.objects.filter(
+          oId => oId !== obj.id
+        )
+      }
+    },
+
+    addToUpdates (obj) {
+      this.markLastAnnotationTime()
+      this.setObjectData(obj)
+      const currentTime = this.getCurrentTime()
+      const updates = this.updates.find(a => a.time === currentTime)
+      if (updates) {
+        updates.drawing.objects = updates.drawing.objects.filter(
+          o => o.id !== obj.id
+        )
+        updates.drawing.objects.push(obj.serialize())
+      } else {
+        this.updates.push({
+          time: currentTime,
+          drawing: { objects: [obj.serialize()] }
+        })
+      }
+      this.printModificationStats('update')
+    },
+
+    clearModifications () {
+      this.additions = []
+      this.updates = []
+      this.deletions = []
+    },
+
+    printModificationStats (prefix) {
+      console.log(
+        prefix,
+        this.additions.length > 0
+          ? this.additions[0].drawing.objects.length
+          : 0,
+        this.updates.length > 0 ? this.updates[0].drawing.objects.length : 0,
+        this.deletions.length > 0 ? this.deletions[0].objects.length : 0
+      )
+    },
+
+    isWriting (date) {
+      return this.lastAnnotationTime >= date
+    },
+
+    // Annotations
+
     getNewAnnotations (currentTime, annotation) {
-      this.fabricCanvas.getObjects().forEach((obj) => {
+      this.fabricCanvas.getObjects().forEach(obj => {
+        this.setObjectData(obj)
         if (obj.type === 'path') {
           if (!obj.canvasWidth) obj.canvasWidth = this.fabricCanvas.width
+          if (!obj.canvasHeight) obj.canvasHeight = this.fabricCanvas.height
           obj.setControlsVisibility({
             mt: false,
             mb: false,
@@ -140,9 +253,9 @@ export const annotationMixin = {
       })
 
       if (annotation) {
-        annotation.drawing = this.fabricCanvas.toJSON(['canvasWidth'])
-        annotation.width = this.fabricCanvas.width
-        annotation.height = this.fabricCanvas.height
+        annotation.drawing = this.fabricCanvas.toJSON(
+          ['id', 'canvasWidth', 'canvasHeight']
+        )
         annotation.time = currentTime
         if (annotation.drawing && annotation.drawing.objects.length < 1) {
           const index = this.annotations.findIndex(
@@ -154,9 +267,9 @@ export const annotationMixin = {
         if (!this.annotations || !this.annotations.push) this.annotations = []
         this.annotations.push({
           time: currentTime,
-          width: this.fabricCanvas.width,
-          height: this.fabricCanvas.height,
-          drawing: this.fabricCanvas.toJSON(['canvasWidth'])
+          drawing: this.fabricCanvas.toJSON(
+            ['id', 'canvasHeight', 'canvasWidth']
+          )
         })
         this.annotations = this.annotations.sort((a, b) => {
           return a.time < b.time
@@ -165,6 +278,99 @@ export const annotationMixin = {
       const annotations = []
       this.annotations.forEach(a => annotations.push({ ...a }))
       return annotations
+    },
+
+    loadSingleAnnotation (annotation) {
+      let scaleMultiplierX = 1
+      let scaleMultiplierY = 1
+      if (annotation.width) {
+        scaleMultiplierX = this.fabricCanvas.width / annotation.width
+        scaleMultiplierY = this.fabricCanvas.width / annotation.width
+      }
+      if (annotation.height) {
+        scaleMultiplierY = this.fabricCanvas.height / annotation.height
+      }
+
+      annotation.drawing.objects.forEach(obj => {
+        const canvasWidth = obj.canvasWidth || annotation.width
+        const canvasHeight = obj.canvasHeight
+        if (canvasWidth) {
+          scaleMultiplierX = this.fabricCanvas.width / canvasWidth
+          scaleMultiplierY = this.fabricCanvas.width / canvasWidth
+        }
+        if (canvasHeight) {
+          scaleMultiplierY = this.fabricCanvas.height / canvasHeight
+        }
+
+        const base = {
+          id: obj.id,
+          left: obj.left * scaleMultiplierX,
+          top: obj.top * scaleMultiplierY,
+          fill: 'transparent',
+          stroke: obj.stroke,
+          strokeWidth: obj.strokeWidth,
+          radius: obj.radius,
+          width: obj.width,
+          height: obj.height,
+          scaleX: obj.scaleX * scaleMultiplierX,
+          scaleY: obj.scaleY * scaleMultiplierY
+        }
+        if (obj.type === 'path') {
+          let strokeMultiplier = 1
+          if (obj.canvasWidth) {
+            strokeMultiplier = canvasWidth / this.fabricCanvas.width
+          }
+          if (this.fabricCanvas.width < 420) strokeMultiplier /= 2
+          const path = new fabric.Path(
+            obj.path,
+            {
+              ...base,
+              strokeWidth: obj.strokeWidth * strokeMultiplier,
+              canvasWidth: obj.canvasWidth
+            }
+          )
+          path.setControlsVisibility({
+            mt: false,
+            mb: false,
+            ml: false,
+            mr: false,
+            bl: false,
+            br: false,
+            tl: false,
+            tr: false,
+            mtr: false
+          })
+          this.$options.silentAnnnotation = true
+          this.fabricCanvas.add(path)
+          this.$options.silentAnnnotation = false
+        } else if ((obj.type === 'i-text') || (obj.type === 'text')) {
+          const text = new fabric.Text(
+            obj.text,
+            {
+              ...base,
+              fill: obj.fill,
+              left: obj.left * scaleMultiplierX,
+              top: obj.top * scaleMultiplierY,
+              fontFamily: obj.fontFamily,
+              fontSize: obj.fontSize
+            }
+          )
+          text.setControlsVisibility({
+            mt: false,
+            mb: false,
+            ml: false,
+            mr: false,
+            bl: false,
+            br: false,
+            tl: false,
+            tr: false,
+            mtr: false
+          })
+          this.$options.silentAnnnotation = true
+          this.fabricCanvas.add(text)
+          this.$options.silentAnnnotation = false
+        }
+      })
     },
 
     // Events
@@ -208,6 +414,20 @@ export const annotationMixin = {
       }
     },
 
+    onObjectAdded (obj) {
+      if (this.$options.silentAnnnotation) return
+      let o = obj.target
+      o = this.setObjectData(o)
+      if (this.fabricCanvas.width < 420) o.strokeWidth *= 2
+      this.addToAdditions(o)
+      this.stackAddAction(obj)
+    },
+
+    onObjectMoved (obj) {
+      this.addToUpdates(obj.target)
+      this.saveAnnotations()
+    },
+
     // Undo / Redo
 
     resetUndoStacks () {
@@ -227,8 +447,12 @@ export const annotationMixin = {
       if (action && action.obj) {
         if (action.type === 'add') {
           this.deleteObject(action.obj)
+          this.addToDeletions(action.obj)
+          this.removeFromAdditions(action.obj)
         } else if (action.type === 'remove') {
           this.addObject(action.obj)
+          this.addToAdditions(action.obj)
+          this.removeFromDeletions(action.obj)
         }
         this.$options.doneActionStack.pop()
         this.$options.undoneActionStack.push(action)
@@ -273,14 +497,14 @@ export const annotationMixin = {
       this.fabricCanvas = new fabric.Canvas(canvasId, {
         fireRightClick: true
       })
-      this.fabricCanvas.off('object:moved', this.saveAnnotations)
-      this.fabricCanvas.off('object:added', this.stackAddAction)
+      this.fabricCanvas.off('object:moved', this.onObjectMoved)
+      this.fabricCanvas.off('object:added', this.onObjectAdded)
       this.fabricCanvas.off('mouse:up', this.endDrawing)
       this.fabricCanvas.off('mouse:up', this.onCanvasReleased)
       this.fabricCanvas.off('mouse:move', this.onCanvasMouseMoved)
       this.fabricCanvas.off('mouse:down', this.onCanvasClicked)
-      this.fabricCanvas.on('object:moved', this.saveAnnotations)
-      this.fabricCanvas.on('object:added', this.stackAddAction)
+      this.fabricCanvas.on('object:moved', this.onObjectMoved)
+      this.fabricCanvas.on('object:added', this.onObjectAdded)
       this.fabricCanvas.on('mouse:up', this.endDrawing)
       this.fabricCanvas.on('mouse:move', this.onCanvasMouseMoved)
       this.fabricCanvas.on('mouse:down', this.onCanvasClicked)
@@ -331,17 +555,29 @@ export const annotationMixin = {
 
     // Saving
 
+    markLastAnnotationTime () {
+      const time = moment().add(2, 'hour').add(6, 'seconds')
+      this.lastAnnotationTime = formatFullDate(time).replace(' ', 'T')
+    },
+
     startAnnotationSaving (preview, annotations) {
       this.notSaved = true
-      this.$options.changesToSave = { preview, annotations }
-      this.$options.annotationToSave = setTimeout(() => {
-        this.notSaved = false
-        this.$emit('annotation-changed', this.$options.changesToSave)
-      }, 3000)
+      this.printModificationStats('saving')
+      this.$options.annotatedPreview = preview
+      this.$options.annotationToSave =
+        setTimeout(this.endAnnotationSaving, 3000)
     },
 
     endAnnotationSaving () {
       if (this.notSaved) {
+        const preview = this.$options.annotatedPreview
+        this.$options.changesToSave = {
+          preview,
+          additions: [...this.additions],
+          updates: [...this.updates],
+          deletions: [...this.deletions]
+        }
+        this.clearModifications()
         clearTimeout(this.$options.annotationToSave)
         this.notSaved = false
         this.$emit('annotation-changed', this.$options.changesToSave)

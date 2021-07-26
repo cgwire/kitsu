@@ -879,6 +879,7 @@ export default {
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isTVShow',
+      'previewFileMap',
       'taskMap',
       'taskTypeMap',
       'shotTaskTypes',
@@ -1182,6 +1183,7 @@ export default {
     ...mapActions([
       'changePlaylistType',
       'deletePlaylist',
+      'refreshPreview',
       'removeBuildJob',
       'runPlaylistBuild'
     ]),
@@ -1653,8 +1655,14 @@ export default {
       })
     },
 
+    getCurrentTime () {
+      return roundToFrame(this.currentTimeRaw, this.fps) || 0
+    },
+
     reloadCurrentAnnotation () {
-      const annotation = this.getAnnotation(this.currentTimeRaw)
+      let currentTime = roundToFrame(this.currentTimeRaw, this.fps) || 0
+      if (this.isCurrentPreviewPicture) currentTime = 0
+      const annotation = this.getAnnotation(currentTime)
       if (annotation) this.loadAnnotation(annotation)
     },
 
@@ -2065,81 +2073,7 @@ export default {
           this.updateProgressBar()
         }
         this.clearCanvas()
-
-        let scaleMultiplierX = 1
-        let scaleMultiplierY = 1
-        if (annotation.width) {
-          scaleMultiplierX = this.fabricCanvas.width / annotation.width
-          scaleMultiplierY = this.fabricCanvas.width / annotation.width
-        }
-        if (annotation.height) {
-          scaleMultiplierY = this.fabricCanvas.height / annotation.height
-        }
-
-        annotation.drawing.objects.forEach(obj => {
-          const base = {
-            left: obj.left * scaleMultiplierX,
-            top: obj.top * scaleMultiplierY,
-            fill: 'transparent',
-            stroke: obj.stroke,
-            strokeWidth: obj.strokeWidth,
-            radius: obj.radius,
-            width: obj.width,
-            height: obj.height,
-            scaleX: obj.scaleX * scaleMultiplierX,
-            scaleY: obj.scaleY * scaleMultiplierY
-          }
-          if (obj.type === 'path') {
-            let strokeMultiplier = 1
-            if (obj.canvasWidth) {
-              strokeMultiplier = annotation.width / this.fabricCanvas.width
-            }
-            const path = new fabric.Path(
-              obj.path,
-              {
-                ...base,
-                strokeWidth: obj.strokeWidth * strokeMultiplier,
-                canvasWidth: obj.canvasWidth
-              }
-            )
-            path.setControlsVisibility({
-              mt: false,
-              mb: false,
-              ml: false,
-              mr: false,
-              bl: false,
-              br: false,
-              tl: false,
-              tr: false,
-              mtr: false
-            })
-            this.fabricCanvas.add(path)
-          } else if ((obj.type === 'i-text') || (obj.type === 'text')) {
-            const text = new fabric.Text(
-              obj.text,
-              {
-                ...base,
-                fill: obj.fill,
-                left: obj.left * scaleMultiplierX,
-                top: obj.top * scaleMultiplierY,
-                fontFamily: obj.fontFamily,
-                fontSize: obj.fontSize
-              }
-            )
-            text.setControlsVisibility({
-              mt: false,
-              mb: false,
-              ml: false,
-              mr: false,
-              bl: false,
-              br: false,
-              tl: false,
-              tr: false,
-              mtr: false
-            })
-            this.fabricCanvas.add(text)
-          }
-        })
+        this.loadSingleAnnotation(annotation)
       }
     },
 
@@ -2444,6 +2378,34 @@ export default {
         this.resetCanvas()
           .then(this.reloadCurrentAnnotation)
       })
+    }
+  },
+
+  socket: {
+    events: {
+      'preview-file:annotation-update' (eventData) {
+        if (
+          this.previewFileMap.get(eventData.preview_file_id)
+        ) {
+          this.refreshPreview({
+            previewId: eventData.preview_file_id,
+            taskId: this.currentPreview.task_id
+          }).then(preview => {
+            if (
+              !this.notSaved &&
+              this.currentPreview.id === eventData.preview_file_id &&
+              !this.isWriting(eventData.updated_at)
+            ) {
+              const isAnnotationSizeChanged =
+                this.annotations.length !== preview.annotations.length
+              this.annotations = preview.annotations
+              if (isAnnotationSizeChanged) this.reloadAnnotations()
+              this.reloadCurrentAnnotation()
+            }
+            this.$emit('annotations-refreshed', preview)
+          })
+        }
+      }
     }
   }
 }

@@ -205,6 +205,7 @@
           @order-change="onOrderChange"
           @annotation-changed="onAnnotationChanged"
           @for-client-changed="onForClientChanged"
+          @annotations-refreshed="onAnnotationsRefreshed"
         />
 
         <div
@@ -477,6 +478,8 @@ export default {
         name: `${moment().format('YYYY-MM-DD HH:mm:ss')}`,
         for_client: false
       },
+      previewFileMap: new Map(),
+      previewFileEntityMap: new Map(),
       modals: {
         isBuildFilterDisplayed: false,
         isDeleteDisplayed: false,
@@ -761,15 +764,41 @@ export default {
     rebuildCurrentEntities () {
       this.currentEntities = {}
       const tmpEntities = {}
+      this.previewFileMap = new Map()
+      this.previewFileEntityMap = new Map()
       if (this.currentPlaylist && this.currentPlaylist.shots) {
-        this.currentPlaylist.shots.forEach((entity) => {
+        this.currentPlaylist.shots.forEach(entity => {
           const playlistEntity = this.convertEntityToPlaylistFormat(entity)
-          if (playlistEntity) tmpEntities[playlistEntity.id] = playlistEntity
+          if (playlistEntity) {
+            tmpEntities[playlistEntity.id] = playlistEntity
+            this.previewFileEntityMap.set(
+              entity.preview_file_id,
+              playlistEntity
+            )
+            const previewFileGroups =
+              Object.values(playlistEntity.preview_files)
+            previewFileGroups.forEach(previewFiles => {
+              previewFiles.forEach(previewFile => {
+                this.previewFileMap.set(previewFile.id, previewFile)
+              })
+            })
+          }
         })
       }
       this.$nextTick(() => {
         this.currentEntities = tmpEntities
       })
+    },
+
+    onAnnotationsRefreshed (preview) {
+      const entity = this.previewFileEntityMap.get(preview.id)
+      const localPreview = this.previewFileMap.get(preview.id)
+      if (entity) {
+        entity.preview_file_annotations = preview.annotations
+      }
+      if (localPreview) {
+        localPreview.annotations = preview.annotations
+      }
     },
 
     convertEntityToPlaylistFormat (entityInfo) {
@@ -802,6 +831,14 @@ export default {
             entityInfo.preview_file_previews ||
             entity.preview_file_previews
         }
+        this.previewFileEntityMap.set(
+          playlistEntity.preview_file_id,
+          playlistEntity
+        )
+        const previews = playlistEntity.preview_file_previews || []
+        previews.forEach(preview => {
+          this.previewFileMap.set(preview.id, preview)
+        })
         return playlistEntity
       } else {
         return null
@@ -983,9 +1020,11 @@ export default {
       })
     },
 
-    onAnnotationChanged ({ preview, annotations }) {
+    onAnnotationChanged ({ preview, additions, deletions, updates }) {
       const taskId = preview.task_id
-      this.updatePreviewAnnotation({ taskId, preview, annotations })
+      this.updatePreviewAnnotation({
+        taskId, preview, additions, deletions, updates
+      })
     },
 
     // Search

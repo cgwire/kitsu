@@ -503,7 +503,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'currentProduction'
+      'currentProduction',
+      'user'
     ]),
 
     // Elements
@@ -539,9 +540,11 @@ export default {
     },
 
     currentPreview () {
-      if (this.previews &&
-          this.previews.length > 0 &&
-          this.currentIndex - 1 < this.previews.length) {
+      if (
+        this.previews &&
+        this.previews.length > 0 &&
+        this.currentIndex - 1 < this.previews.length
+      ) {
         return this.previews[this.currentIndex - 1]
       } else {
         return {}
@@ -664,6 +667,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'refreshPreview',
       'updateRevisionPreviewPosition'
     ]),
     formatFrame,
@@ -711,6 +715,11 @@ export default {
         this.videoDuration = 0
         this.progress.setAttribute('max', 0)
       }
+    },
+
+    getCurrentTime () {
+      const currentTimeRaw = this.previewViewer.getCurrentTimeRaw()
+      return roundToFrame(currentTimeRaw, this.fps) || 0
     },
 
     play () {
@@ -807,14 +816,14 @@ export default {
       })
       fabricCanvas.freeDrawingBrush.color = this.color
       fabricCanvas.freeDrawingBrush.width = 4
-      fabricCanvas.off('object:added', this.stackAddAction)
-      fabricCanvas.off('object:moved', this.saveAnnotations)
+      fabricCanvas.off('object:moved', this.onObjectMoved)
+      fabricCanvas.off('object:added', this.onObjectAdded)
       fabricCanvas.off('mouse:move', this.onCanvasMouseMoved)
       fabricCanvas.off('mouse:down', this.onCanvasClicked)
       fabricCanvas.off('mouse:up', this.onCanvasReleased)
       fabricCanvas.off('mouse:up', this.endDrawing)
-      fabricCanvas.on('object:added', this.stackAddAction)
-      fabricCanvas.on('object:moved', this.saveAnnotations)
+      fabricCanvas.on('object:moved', this.onObjectMoved)
+      fabricCanvas.on('object:added', this.onObjectAdded)
       fabricCanvas.on('mouse:up', this.endDrawing)
       fabricCanvas.on('mouse:move', this.onCanvasMouseMoved)
       fabricCanvas.on('mouse:down', this.onCanvasClicked)
@@ -1055,11 +1064,8 @@ export default {
       const annotations = this.getNewAnnotations(currentTime, annotation)
       if (!this.readOnly) {
         const preview = this.currentPreview
-        preview.annotations = annotations
         if (!this.notSaved) {
           this.startAnnotationSaving(preview, annotations)
-        } else {
-          this.$options.changesToSave = { preview, annotations }
         }
       }
     },
@@ -1088,71 +1094,7 @@ export default {
       }
 
       this.clearCanvas()
-
-      let scaleMultiplierX = 1
-      let scaleMultiplierY = 1
-      if (annotation.width) {
-        scaleMultiplierX = this.fabricCanvas.width / annotation.width
-        scaleMultiplierY = this.fabricCanvas.width / annotation.width
-      }
-      if (annotation.height) {
-        scaleMultiplierY = this.fabricCanvas.height / annotation.height
-      }
-
-      annotation.drawing.objects.forEach((obj) => {
-        const base = {
-          left: obj.left * scaleMultiplierX,
-          top: obj.top * scaleMultiplierY,
-          fill: 'transparent',
-          stroke: obj.stroke,
-          strokeWidth: obj.strokeWidth,
-          radius: obj.radius * scaleMultiplierX,
-          width: obj.width,
-          height: obj.height,
-          scaleX: obj.scaleX * scaleMultiplierX,
-          scaleY: obj.scaleY * scaleMultiplierY
-        }
-        if (obj.type === 'path') {
-          let strokeMultiplier = 1
-          if (obj.canvasWidth) {
-            strokeMultiplier = annotation.width / this.fabricCanvas.width
-          }
-          const path = new fabric.Path(
-            obj.path,
-            {
-              ...base,
-              strokeWidth: obj.strokeWidth * strokeMultiplier,
-              canvasWidth: obj.canvasWidth
-            }
-          )
-          path.setControlsVisibility({
-            mt: false,
-            mb: false,
-            ml: false,
-            mr: false,
-            bl: false,
-            br: false,
-            tl: false,
-            tr: false,
-            mtr: false
-          })
-          this.fabricCanvas.add(path)
-        } else if ((obj.type === 'i-text') || (obj.type === 'text')) {
-          const text = new fabric.Text(
-            obj.text,
-            {
-              ...base,
-              fill: obj.fill,
-              left: obj.left * scaleMultiplierX,
-              top: obj.top * scaleMultiplierY,
-              fontFamily: obj.fontFamily,
-              fontSize: obj.fontSize,
-              width: obj.width * scaleMultiplierX
-            }
-          )
-          this.fabricCanvas.add(text)
-        }
-      })
+      this.loadSingleAnnotation(annotation)
     },
 
     reloadAnnotations () {
@@ -1470,6 +1412,30 @@ export default {
         clickarea.addEventListener('dblclick', this.addText)
       } else {
         clickarea.removeEventListener('dblclick', this.addText)
+      }
+    }
+  },
+
+  socket: {
+    events: {
+      'preview-file:annotation-update' (eventData) {
+        if (
+          !this.notSaved &&
+          this.currentPreview &&
+          eventData.preview_file_id === this.currentPreview.id &&
+          !this.isWriting(eventData.updated_at)
+        ) {
+          this.refreshPreview({
+            previewId: this.currentPreview.id,
+            taskId: this.currentPreview.task_id
+          }).then(() => {
+            if (!this.notSaved) {
+              this.reloadAnnotations()
+              if (this.isPicture) this.loadAnnotation(this.getAnnotation(0))
+              else this.loadAnnotation()
+            }
+          })
+        }
       }
     }
   }

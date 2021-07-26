@@ -202,7 +202,7 @@ const actions = {
   loadTaskEntityPreviewFiles ({ commit, state }, entityId) {
     const entity = { id: entityId }
     return playlistsApi.getEntityPreviewFiles(entity)
-      .then((previewFiles) => {
+      .then(previewFiles => {
         commit(LOAD_TASK_ENTITY_PREVIEW_FILES_END, previewFiles)
         return Promise.resolve(previewFiles)
       })
@@ -514,29 +514,34 @@ const actions = {
   },
 
   updatePreviewAnnotation ({ commit, state }, {
-    taskId, preview, annotations
+    taskId, preview, additions, deletions, updates
   }) {
-    return tasksApi.updatePreviewAnnotation(preview, annotations)
+    return tasksApi.updatePreviewAnnotation(
+      preview, additions, updates, deletions
+    )
       .then(updatedPreview => {
         commit(UPDATE_PREVIEW_ANNOTATION, {
           taskId,
           preview,
-          annotations
+          annotations: updatedPreview.annotations
         })
         return Promise.resolve(preview)
       })
-      .catch(console.error)
+      .catch(err => {
+        console.error(err)
+        alert('An error occured while saving your annotation, please wait 3s for another try.')
+      })
   },
 
   refreshPreview ({ commit, state }, { taskId, previewId }) {
     return tasksApi.getPreviewFile(previewId)
-      .then((preview) => {
+      .then(preview => {
         commit(UPDATE_PREVIEW_ANNOTATION, {
           taskId,
           preview,
           annotations: preview.annotations
         })
-        return Promise.resolve()
+        return Promise.resolve(preview)
       })
   },
 
@@ -886,6 +891,7 @@ const mutations = {
   },
 
   [UPDATE_PREVIEW_ANNOTATION] (state, { taskId, preview, annotations }) {
+    if (!annotations) return
     preview.annotations = annotations
     state.taskPreviews[taskId].forEach(p => {
       p.previews.forEach(subPreview => {

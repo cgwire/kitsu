@@ -32,19 +32,24 @@ import {
   MARK_JOB_AS_DONE,
   REMOVE_BUILD_JOB,
 
+  UPDATE_PREVIEW_ANNOTATION,
+
   RESET_ALL
 } from '../mutation-types'
 
 const initialState = {
   playlists: [],
-  playlistMap: new Map()
+  playlistMap: new Map(),
+  previewFileMap: new Map(),
+  previewFileEntityMap: new Map()
 }
 
 const state = { ...initialState }
 
 const getters = {
   playlists: state => state.playlists,
-  playlistMap: state => state.playlistMap
+  playlistMap: state => state.playlistMap,
+  previewFileMap: state => state.previewFileMap
 }
 
 const actions = {
@@ -245,6 +250,30 @@ const mutations = {
 
   [LOAD_PLAYLIST_END] (state, playlist) {
     state.playlistMap.get(playlist.id).build_jobs = playlist.build_jobs
+    state.previewFileMap.clear()
+    state.previewFileEntityMap.clear()
+    if (playlist.shots) {
+      playlist.shots.forEach(entity => {
+        state.previewFileEntityMap.set(entity.preview_file_id, entity)
+        const previewFileGroups = Object.values(entity.preview_files)
+        previewFileGroups.forEach(previewFiles => {
+          previewFiles.forEach(previewFile => {
+            state.previewFileMap.set(previewFile.id, previewFile)
+          })
+        })
+      })
+    }
+  },
+
+  [UPDATE_PREVIEW_ANNOTATION] (state, { taskId, preview, annotations }) {
+    const previewFile = state.previewFileMap.get(preview.id)
+    const entity = state.previewFileEntityMap.get(preview.id)
+    if (previewFile) {
+      previewFile.annotations = annotations
+    }
+    if (entity) {
+      entity.preview_file_annotations = annotations
+    }
   },
 
   [EDIT_PLAYLIST_START] (state, data) {

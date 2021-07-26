@@ -1035,9 +1035,11 @@ export default {
       return route
     },
 
-    onAnnotationChanged ({ preview, annotations }) {
+    onAnnotationChanged ({ preview, additions, deletions, updates }) {
       const taskId = this.currentTask.id
-      this.updatePreviewAnnotation({ taskId, preview, annotations })
+      this.updatePreviewAnnotation({
+        taskId, preview, additions, deletions, updates
+      })
     },
 
     onAddExtraPreviewClicked () {
@@ -1148,21 +1150,6 @@ export default {
     events: {
       'preview-file:add-file' (eventData) {
         this.onPreviewAdded(eventData)
-      },
-
-      'preview-file:update' (eventData) {
-        if (!this.currentTaskPreviews) return
-        const preview = this.currentTaskPreviews.filter((preview) => {
-          return preview.id === eventData.preview_file_id
-        })
-        if (preview) {
-          this.refreshPreview({
-            taskId: this.currentTask.id,
-            previewId: eventData.preview_file_id
-          }).then(() => {
-            this.taskPreviews = this.getCurrentTaskPreviews()
-          })
-        }
       },
 
       'comment:acknowledge' (eventData) {
