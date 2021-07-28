@@ -4,9 +4,11 @@ import peopleApi from '../api/people'
 import shotsApi from '../api/shots'
 import tasksStore from './tasks'
 import peopleStore from './people'
+import productionsStore from './productions'
 import taskTypesStore from './tasktypes'
 
 import { PAGE_SIZE } from '../../lib/pagination'
+import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import {
   sortByName,
   sortSequences,
@@ -141,6 +143,9 @@ const cache = {
 }
 
 const helpers = {
+  getCurrentProduction () {
+    return productionsStore.getters.currentProduction(productionsStore.state)
+  },
   getTask (taskId) {
     return tasksStore.state.taskMap.get(taskId)
   },
@@ -167,7 +172,10 @@ const helpers = {
   },
 
   populateTask (task, shot) {
-    task.name = helpers.getTaskType(task.task_type_id).priority.toString()
+    task.name = getTaskTypePriorityOfProd(
+      helpers.getTaskType(task.task_type_id),
+      helpers.getCurrentProduction()
+    ).toString()
     task.task_status_short_name =
       helpers.getTaskStatus(task.task_status_id).short_name
 
@@ -205,7 +213,9 @@ const helpers = {
 
   sortValidationColumns (validationColumns, shotFilledColumns, taskTypeMap) {
     const columns = [...validationColumns]
-    return sortValidationColumns(columns, taskTypeMap)
+    return sortValidationColumns(
+      columns, taskTypeMap, helpers.getCurrentProduction()
+    )
   },
 
   getPeriod (task, detailLevel) {
@@ -318,7 +328,9 @@ const helpers = {
       })
     }
     const validationColumns = Object.keys(validationColumnsMap)
-    return sortValidationColumns(validationColumns, taskTypeMap)
+    return sortValidationColumns(
+      validationColumns, taskTypeMap, helpers.getCurrentProduction()
+    )
   }
 }
 

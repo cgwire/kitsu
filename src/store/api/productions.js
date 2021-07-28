@@ -72,8 +72,8 @@ export default {
     return client.pdel(path)
   },
 
-  addTaskTypeToProduction (productionId, taskTypeId) {
-    const data = { task_type_id: taskTypeId }
+  addTaskTypeToProduction (productionId, taskTypeId, priority) {
+    const data = { task_type_id: taskTypeId, priority }
     const path = `/api/data/projects/${productionId}/settings/task-types`
     return client.ppost(path, data)
   },

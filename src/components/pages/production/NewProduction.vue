@@ -732,6 +732,7 @@ export default {
       'addAssetTypeToProduction',
       'addTaskStatusToProduction',
       'addTaskTypeToProduction',
+      'loadContext',
       'newProduction',
       'setProduction',
       'uploadAssetFile',
@@ -764,8 +765,14 @@ export default {
         this.productionToCreate.shotTaskTypes
       ).map(
         // add task types
-        async (taskType) => {
-          return await this.addTaskTypeToProduction(taskType.id)
+        async (taskType, index) => {
+          const finalIndex = taskType.for_shots
+            ? index - this.productionToCreate.assetTaskTypes.length
+            : index
+          return await this.addTaskTypeToProduction({
+            taskTypeId: taskType.id,
+            priority: finalIndex + 1
+          })
         }
       ).concat(
         // add task statuses
@@ -854,6 +861,7 @@ export default {
         await this.createAssetTypes()
         await this.createAssets()
         await this.createShots()
+        await this.loadContext()
         await this.$router.push(this.createProductionRoute(createdProduction))
       } catch (error) {
         console.error(error, error.response)

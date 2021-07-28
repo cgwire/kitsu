@@ -6,6 +6,7 @@ import tasksStore from './tasks'
 import taskTypesStore from './tasktypes'
 import productionsStore from './productions'
 import peopleStore from './people'
+import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import {
   minutesToDays
 } from '../../lib/time'
@@ -139,7 +140,10 @@ const helpers = {
   },
 
   populateTask (task, asset, production) {
-    task.name = helpers.getTaskType(task.task_type_id).priority.toString()
+    task.name = getTaskTypePriorityOfProd(
+      helpers.getTaskType(task.task_type_id),
+      production || helpers.getCurrentProduction()
+    ).toString()
     task.task_status_short_name =
       helpers.getTaskStatus(task.task_status_id).short_name
 
@@ -211,7 +215,11 @@ const helpers = {
 
   sortValidationColumns (validationColumns, assetFilledColumns, taskTypeMap) {
     const columns = [...validationColumns]
-    return sortValidationColumns(columns, taskTypeMap)
+    return sortValidationColumns(
+      columns,
+      taskTypeMap,
+      helpers.getCurrentProduction()
+    )
   },
 
   buildResult (state, {

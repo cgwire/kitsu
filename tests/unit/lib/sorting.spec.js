@@ -264,19 +264,28 @@ describe('lib/sorting', () => {
 
   it('sortTaskTypes', () => {
     const entries = [
-      { for_shots: false, priority: 1, name: 'Modeling', id: 2 },
-      { for_shots: false, priority: 2, name: 'Setup', id: 5 },
-      { for_shots: false, priority: 1, name: 'Modeling Low', id: 4 },
-      { for_shots: false, priority: 1, name: 'Modeling Hi', id: 3 },
-      { for_shots: true, priority: 1, name: 'Animation', id: 1 }
+      { for_shots: false, priority: 1, name: 'Modeling', id: 'task-type-2' },
+      { for_shots: false, priority: 2, name: 'Setup', id: 'task-type-5' },
+      { for_shots: false, priority: 1, name: 'Modeling Low', id: 'task-type-4' },
+      { for_shots: false, priority: 1, name: 'Modeling Hi', id: 'task-type-3' },
+      { for_shots: true, priority: 1, name: 'Animation', id: 'task-type-1' }
     ]
-    let results = sortTaskTypes(entries)
+    const production = {
+      task_types_priority: {
+        'task-type-5': 5,
+        'task-type-4': 1,
+        'task-type-3': 4,
+        'task-type-2': 3,
+        'task-type-1': 2
+      }
+    }
+    let results = sortTaskTypes(entries, production)
     expect(results).toHaveLength(5)
-    expect(results[0].id).toEqual(2)
-    expect(results[1].id).toEqual(3)
-    expect(results[2].id).toEqual(4)
-    expect(results[3].id).toEqual(5)
-    expect(results[4].id).toEqual(1)
+    expect(results[0].id).toEqual('task-type-4')
+    expect(results[1].id).toEqual('task-type-2')
+    expect(results[2].id).toEqual('task-type-3')
+    expect(results[3].id).toEqual('task-type-5')
+    expect(results[4].id).toEqual('task-type-1')
 
     results = sortProductions([])
     expect(results).toHaveLength(0)
@@ -334,12 +343,22 @@ describe('lib/sorting', () => {
   })
 
   it('sortValidationColumns', () => {
+    const production = {
+      project_status_name: 'open',
+      name: 'Big Buck Bunny',
+      id: 3,
+      task_types_priority: {
+        'task-type-3': 1,
+        'task-type-2': 3,
+        'task-type-1': 2
+      }
+    }
     const entries = ['task-type-3', 'task-type-2', 'task-type-1']
-    let results = sortValidationColumns(entries, taskTypeMap)
+    let results = sortValidationColumns(entries, taskTypeMap, production)
     expect(results).toHaveLength(3)
-    expect(results[0]).toEqual('task-type-1')
-    expect(results[1]).toEqual('task-type-2')
-    expect(results[2]).toEqual('task-type-3')
+    expect(results[0]).toEqual('task-type-3')
+    expect(results[1]).toEqual('task-type-1')
+    expect(results[2]).toEqual('task-type-2')
 
     results = sortValidationColumns([])
     expect(results).toHaveLength(0)
@@ -465,14 +484,15 @@ describe('lib/sorting', () => {
         name: 'asset 2',
         asset_type_name: 'asset_type_name 2',
         data: { metadata1: '2' },
-        validations: new Map([['valid',  'task2']])
+        validations: new Map([['valid', 'task2']])
       },
-      { id: 2,
+      {
+        id: 2,
         canceled: true,
         name: 'asset 1',
         asset_type_name: 'asset_type_name 2',
         data: { metadata1: '2' },
-        validations: new Map([['valid',  'task2']])
+        validations: new Map([['valid', 'task2']])
       },
       {
         id: 3,
@@ -480,7 +500,7 @@ describe('lib/sorting', () => {
         name: 'asset 2',
         asset_type_name: 'asset_type_name 1',
         data: { metadata1: '2' },
-        validations: new Map([['valid',  'task2']])
+        validations: new Map([['valid', 'task2']])
       },
       {
         id: 4,
@@ -488,7 +508,7 @@ describe('lib/sorting', () => {
         name: 'asset 2',
         asset_type_name: 'asset_type_name 2',
         data: { metadata1: '1' },
-        validations: new Map([['valid',  'task1']])
+        validations: new Map([['valid', 'task1']])
       },
       {
         id: 5,
@@ -496,7 +516,7 @@ describe('lib/sorting', () => {
         name: 'asset 2',
         asset_type_name: 'asset_type_name 2',
         data: { metadata1: '2' },
-        validations: new Map([['valid',  'task2']])
+        validations: new Map([['valid', 'task2']])
       }
     ]
     const sortingMetadata = [
@@ -535,7 +555,7 @@ describe('lib/sorting', () => {
         name: 'asset 2',
         sequence_name: 'sequence_name 2',
         data: { metadata1: '2' },
-        validations: new Map([['valid',  'task2']]),
+        validations: new Map([['valid', 'task2']]),
         episode_name: 'episode 2'
       },
       {
@@ -544,7 +564,7 @@ describe('lib/sorting', () => {
         name: 'asset 1',
         sequence_name: 'sequence_name 2',
         data: { metadata1: '2' },
-        validations: new Map([['valid',  'task2']]),
+        validations: new Map([['valid', 'task2']]),
         episode_name: 'episode 2'
       },
       {
@@ -553,7 +573,7 @@ describe('lib/sorting', () => {
         name: 'asset 2',
         sequence_name: 'sequence_name 1',
         data: { metadata1: '3' },
-        validations: new Map([['valid',  'task2']]),
+        validations: new Map([['valid', 'task2']]),
         episode_name: 'episode 2'
       },
       {
@@ -562,7 +582,7 @@ describe('lib/sorting', () => {
         name: 'asset 2',
         sequence_name: 'sequence_name 1',
         data: { metadata1: '2' },
-        validations: new Map([['valid',  'task2']]),
+        validations: new Map([['valid', 'task2']]),
         episode_name: 'episode 1'
       },
       {
@@ -571,7 +591,7 @@ describe('lib/sorting', () => {
         name: 'asset 2',
         sequence_name: 'sequence_name 2',
         data: { metadata1: '1' },
-        validations: new Map([['valid',  'task1']]),
+        validations: new Map([['valid', 'task1']]),
         episode_name: 'episode 2'
       },
       {
@@ -580,7 +600,7 @@ describe('lib/sorting', () => {
         name: 'asset 2',
         sequence_name: 'sequence_name 2',
         data: { metadata1: '2' },
-        validations: new Map([['valid',  'task2']]),
+        validations: new Map([['valid', 'task2']]),
         episode_name: 'episode 2'
       }
     ]

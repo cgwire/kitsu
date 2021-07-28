@@ -1,6 +1,7 @@
 import store from '@/store/modules/assets'
 import taskTypesStore from '@/store/modules/tasktypes'
 import tasksStore from '@/store/modules/tasks'
+import productionsStore from '@/store/modules/productions'
 import {
   ADD_ASSET,
   CANCEL_ASSET,
@@ -1031,6 +1032,11 @@ describe('Assets store', () => {
           name: 'Some person'
         }
       }))
+      productionsStore.state.currentProduction = {
+        task_types_priority: {
+          'task-type-id': 1
+        }
+      }
       const taskMap = new Map()
       const taskTypeMap = new Map(Object.entries({
         'task-type-id': {
@@ -1668,6 +1674,12 @@ describe('Assets store', () => {
         entity_id: 'asset-id',
         task_type_id: 'task_type_id',
         task_status_id: 'todo'
+      }
+      productionsStore.state.currentProduction = {
+        task_types_priority: {
+          'task-id': 1,
+          'old-task-id': 2
+        }
       }
       store.mutations.NEW_TASK_END(state, task)
       expect(state.assetMap.get('asset-id')).toEqual({

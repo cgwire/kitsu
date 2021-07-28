@@ -520,9 +520,14 @@ describe('Productions store', () => {
         currentProduction: { id: '123' }
       }
       productionApi.addTaskTypeToProduction = jest.fn()
-      store.actions.addTaskTypeToProduction({ commit: mockCommit, state }, '456')
+      store.actions.addTaskTypeToProduction(
+        { commit: mockCommit, state },
+        { taskTypeId: '456', priority: 1 }
+      )
       expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, PRODUCTION_ADD_TASK_TYPE, '456')
+      expect(mockCommit).toHaveBeenNthCalledWith(
+        1, PRODUCTION_ADD_TASK_TYPE, '456'
+      )
       expect(productionApi.addTaskTypeToProduction).toBeCalledTimes(1)
     })
 

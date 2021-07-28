@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import taskTypesApi from '../api/tasktypes'
+import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { sortTaskTypes } from '../../lib/sorting'
 
 import {
@@ -20,6 +21,7 @@ import {
 
   RESET_ALL
 } from '../mutation-types'
+import productionsStore from './productions'
 
 const initialState = {
   taskTypes: [],
@@ -39,6 +41,10 @@ const initialState = {
 
 const state = {
   ...initialState
+}
+
+function getCurrentProduction () {
+  return productionsStore.getters.currentProduction(productionsStore.state)
 }
 
 const getters = {
@@ -79,6 +85,14 @@ const getters = {
 
   getTaskType: (state, getters) => (id) => {
     return state.taskTypeMap.get(id)
+  },
+
+  getTaskTypePriority: (state, getters, rootState, rootGetters) => (taskTypeId) => {
+    const taskType = getters.getTaskType(taskTypeId)
+    if (!taskType) {
+      return null
+    }
+    return getTaskTypePriorityOfProd(taskType, rootGetters.currentProduction)
   }
 }
 
@@ -125,6 +139,10 @@ const actions = {
         commit(EDIT_TASK_TYPE_END, taskType)
         Promise.resolve(taskType)
       })
+  },
+
+  async editTaskTypeLink ({ commit, state }, data) {
+    return await taskTypesApi.updateTaskTypeLink(data)
   },
 
   deleteTaskType ({ commit, state }, taskType) {
@@ -181,7 +199,7 @@ const mutations = {
   },
 
   [LOAD_TASK_TYPES_END] (state, taskTypes) {
-    state.taskTypes = sortTaskTypes(taskTypes)
+    state.taskTypes = sortTaskTypes(taskTypes, getCurrentProduction())
     state.taskTypeMap = new Map()
     taskTypes.forEach(taskType => {
       state.taskTypeMap.set(taskType.id, taskType)
@@ -207,7 +225,7 @@ const mutations = {
       state.taskTypes.push(newTaskType)
       state.taskTypeMap.set(newTaskType.id, newTaskType)
     }
-    state.taskTypes = sortTaskTypes(state.taskTypes)
+    state.taskTypes = sortTaskTypes(state.taskTypes, getCurrentProduction())
     state.editTaskType = {
       isLoading: false,
       isError: false

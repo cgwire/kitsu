@@ -49,6 +49,9 @@
                 <th class="name">
                   {{ $t('productions.fields.name') }}
                 </th>
+                <th class="priority">
+                  {{ $t('productions.fields.priority') }}
+                </th>
                 <th class="start-date">
                   {{ $t('productions.fields.start_date') }}
                 </th>
@@ -58,8 +61,15 @@
                 <th class="remove"></th>
               </tr>
             </thead>
-            <tbody class="datatable-body">
+            <draggable
+              v-model="taskListObject.list"
+              draggable=".task-type"
+              class="datatable-body"
+              tag="tbody"
+              @end="updatePriorities(taskListObject.list)"
+            >
               <production-task-type
+                class="task-type"
                 :key="taskTypeData.taskType.id"
                 :task-type="taskTypeData.taskType"
                 :schedule-item="taskTypeData.scheduleItem"
@@ -67,7 +77,7 @@
                 @remove="removeTaskType"
                 v-for="taskTypeData in taskListObject.list"
               />
-            </tbody>
+            </draggable>
           </table>
         </div>
       </template>
@@ -91,6 +101,7 @@
   </div>
 </template>
 <script>
+import draggable from 'vuedraggable'
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 import { sortByName, sortTaskTypes } from '@/lib/sorting'
@@ -98,15 +109,14 @@ import { formatFullDate } from '@/lib/time'
 
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import ProductionTaskType from '@/components/pages/production/ProductionTaskType'
-// import TextField from '@/components/widgets/TextField'
 
 export default {
   name: 'production-task-types',
 
   components: {
     ComboboxTaskType,
+    draggable,
     ProductionTaskType
-    // TextField
   },
 
   data () {
@@ -164,8 +174,9 @@ export default {
       }
     */
     assetTaskTypes () {
-      const list = sortTaskTypes([...this.productionTaskTypes])
-        .filter(t => !t.for_shots)
+      const list = sortTaskTypes(
+        [...this.productionTaskTypes], this.currentProduction
+      ).filter(t => !t.for_shots)
         .map(taskType => {
           return {
             taskType,
@@ -187,8 +198,9 @@ export default {
         linked scheduleItem }
     */
     shotTaskTypes () {
-      const list = sortTaskTypes([...this.productionTaskTypes])
-        .filter(t => t.for_shots)
+      const list = sortTaskTypes(
+        [...this.productionTaskTypes], this.currentProduction
+      ).filter(t => t.for_shots)
         .map(taskType => {
           return {
             taskType,
@@ -208,7 +220,9 @@ export default {
       'createScheduleItem',
       'deleteScheduleItem',
       'editProduction',
+      'editTaskTypeLink',
       'loadAllScheduleItems',
+      'loadContext',
       'removeTaskTypeFromProduction',
       'saveScheduleItem'
     ]),
@@ -228,7 +242,12 @@ export default {
     },
 
     async addTaskType () {
-      await this.addTaskTypeToProduction(this.taskTypeId)
+      await this.addTaskTypeToProduction(
+        {
+          taskTypeId: this.taskTypeId,
+          priority: this.assetTaskTypes.length
+        }
+      )
       await this.createScheduleItem(
         {
           startDate: moment(),
@@ -287,6 +306,41 @@ export default {
         console.error(err)
         this.errors.scheduleTimeUpdate = true
       }
+    },
+
+    async savePriorities (forms) {
+      const now = new Date().getTime()
+      this.lastCall = this.lastCall || 0
+      if (now - this.lastCall > 1000 && !this.isSaving) {
+        this.lastCall = now
+        this.isSaving = true
+        await Promise.all(forms.map(
+          async (form) => {
+            return await this.editTaskTypeLink(form)
+          }
+        ))
+        this.isSaving = false
+        if (this.newSaveCall) {
+          await this.savePriorities(forms)
+        }
+      } else {
+        this.newSaveCall = true
+      }
+    },
+
+    async updatePriorities (taskTypes) {
+      const forms = []
+      taskTypes.forEach((item, index) => {
+        index += 1
+        const form = {
+          projectId: this.currentProduction.id,
+          taskTypeId: item.taskType.id,
+          priority: index
+        }
+        forms.push(form)
+      })
+      await this.savePriorities(forms)
+      await this.loadContext()
     }
   },
 

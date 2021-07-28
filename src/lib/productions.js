@@ -12,3 +12,7 @@ export const PRODUCTION_TYPE_OPTIONS = [
     value: 'featurefilm'
   }
 ]
+
+export function getTaskTypePriorityOfProd (taskType, production) {
+  return production.task_types_priority[taskType.id] || taskType.priority
+}

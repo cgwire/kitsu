@@ -386,11 +386,15 @@ const actions = {
     )
   },
 
-  addTaskTypeToProduction ({ commit, state }, taskTypeId) {
+  addTaskTypeToProduction ({ commit, state }, {
+    taskTypeId,
+    priority = null
+  }) {
     commit(PRODUCTION_ADD_TASK_TYPE, taskTypeId)
     return productionsApi.addTaskTypeToProduction(
       state.currentProduction.id,
-      taskTypeId
+      taskTypeId,
+      priority
     )
   },
 
