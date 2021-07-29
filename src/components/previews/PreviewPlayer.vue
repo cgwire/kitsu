@@ -2,56 +2,71 @@
 <div ref="container" class="preview-player dark">
 
   <div class="preview" :style="{height: defaultHeight + 'px'}">
-    <div
-      class="canvas-wrapper"
-      ref="canvas-wrapper"
-      oncontextmenu="return false;"
-    >
-      <canvas
-        id="annotation-canvas"
-        ref="annotation-canvas"
-        class="canvas"
-      >
-      </canvas>
+    <div class="flexrow filler">
+      <div class="video-container filler" ref="video-container">
+        <div
+          class="canvas-wrapper"
+          ref="canvas-wrapper"
+          oncontextmenu="return false;"
+        >
+          <canvas
+            id="annotation-canvas"
+            ref="annotation-canvas"
+            class="canvas"
+          >
+          </canvas>
+        </div>
+        <preview-viewer
+          ref="preview-viewer"
+          name="player1"
+          class="preview-viewer"
+          :big="big"
+          :default-height="defaultHeight"
+          :full-screen="fullScreen"
+          :is-hd="isHd"
+          :is-comparing="isComparing"
+          :is-muted="isMuted"
+          :is-ordering="isOrdering"
+          :is-repeating="isRepeating"
+          :light="light"
+          :preview="currentPreview"
+          @size-changed="fixCanvasSize"
+          @duration-changed="changeMaxDuration"
+          @time-update="updateTime"
+          @play-ended="pause"
+        />
+
+        <preview-viewer
+          ref="comparison-preview-viewer"
+          name="player2"
+          class="comparison-preview-viewer"
+          :big="big"
+          :default-height="defaultHeight"
+          :full-screen="fullScreen"
+          :is-comparing="isComparing"
+          :is-muted="true"
+          :is-repeating="isRepeating"
+          :light="light"
+          :preview="previewToCompare"
+          v-show="isComparing && previewToCompare"
+        />
+      </div>
+
+      <task-info
+        name="task-info"
+        ref="task-info-player"
+        :class="{
+          'flexrow-item': true,
+          'task-info-column': true,
+          'hidden': isCommentsHidden
+        }"
+        :task="task"
+        :is-preview="false"
+        @comment-added="$emit('comment-added')"
+      />
     </div>
 
-    <preview-viewer
-      ref="preview-viewer"
-      name="player1"
-      class="preview-viewer"
-      :big="big"
-      :default-height="defaultHeight"
-      :full-screen="fullScreen"
-      :is-hd="isHd"
-      :is-comparing="isComparing"
-      :is-muted="isMuted"
-      :is-ordering="isOrdering"
-      :is-repeating="isRepeating"
-      :light="light"
-      :preview="currentPreview"
-      @size-changed="fixCanvasSize"
-      @duration-changed="changeMaxDuration"
-      @time-update="updateTime"
-      @play-ended="pause"
-    />
-
-    <preview-viewer
-      ref="comparison-preview-viewer"
-      name="player2"
-      class="comparison-preview-viewer"
-      :big="big"
-      :default-height="defaultHeight"
-      :full-screen="fullScreen"
-      :is-comparing="isComparing"
-      :is-muted="true"
-      :is-repeating="isRepeating"
-      :light="light"
-      :preview="previewToCompare"
-      v-show="isComparing && previewToCompare"
-    />
-
   </div>
-
   <div class="button-bar" ref="button-bar">
     <div class="video-progress pull-bottom" v-show="isMovie">
       <progress
@@ -96,7 +111,6 @@
           @click="onRepeatClicked"
           v-if="!light || fullScreen"
         />
-
         <button-simple
           class="flexrow-item"
           :title="$t('playlists.actions.unmute')"
@@ -264,6 +278,14 @@
             @click="onPencilAnnotateClicked"
             v-if="!readOnly && (!light || fullScreen)"
           />
+
+          <button-simple
+            class="button playlist-button flexrow-item"
+            :title="$t('playlists.actions.comments')"
+            @click="onCommentClicked"
+            icon="comment"
+            v-if="!readOnly && fullScreen"
+          />
         </div>
 
         <div
@@ -397,8 +419,9 @@ import BrowsingBar from '@/components/previews/BrowsingBar'
 import ColorPicker from '@/components/widgets/ColorPicker'
 import Combobox from '@/components/widgets/Combobox'
 import PencilPicker from '@/components/widgets/PencilPicker'
-import RevisionPreview from '@/components/previews/RevisionPreview'
 import PreviewViewer from '@/components/previews/PreviewViewer'
+import RevisionPreview from '@/components/previews/RevisionPreview'
+const TaskInfo = () => import('@/components/sides/TaskInfo')
 
 export default {
   name: 'preview-player',
@@ -414,7 +437,8 @@ export default {
     DownloadIcon,
     PencilPicker,
     PreviewViewer,
-    RevisionPreview
+    RevisionPreview,
+    TaskInfo
   },
 
   props: {
@@ -464,6 +488,7 @@ export default {
       color: '#ff3860',
       currentTime: '00:00.000',
       currentTimeRaw: 0,
+      isCommentsHidden: true,
       isComparing: false,
       isDrawing: false,
       isHd: false,
@@ -513,6 +538,10 @@ export default {
 
     container () {
       return this.$refs.container
+    },
+
+    videoContainer () {
+      return this.$refs['video-container']
     },
 
     canvasWrapper () {
@@ -832,7 +861,7 @@ export default {
         this.fabricCanvas.setDimensions({ width, height })
         this.fabricCanvas.width = width
         this.fabricCanvas.height = height
-        const containerWidth = this.container.offsetWidth
+        const containerWidth = this.videoContainer.offsetWidth
         const containerHeight = this.container.offsetHeight
         let margin = Math.round((containerWidth - width) / 2)
         if (this.isComparing) {
@@ -878,6 +907,7 @@ export default {
       this.container.setAttribute('data-fullscreen', !!false)
       this.isComparing = false
       this.fullScreen = false
+      this.isCommentsHidden = true
       this.fixCanvasSize(this.getCurrentPreviewDimensions())
       this.$nextTick(() => {
         // Needed to avoid fullsceen button to be called with space bar.
@@ -903,6 +933,7 @@ export default {
         !this.isFullScreen()
       ) {
         this.isComparing = false
+        this.isCommentsHidden = true
         this.fullScreen = false
         this.endAnnotationSaving()
         this.$nextTick(() => {
@@ -1203,15 +1234,29 @@ export default {
           this.redoLastAction()
         } else if (event.keyCode === 27) { // Esc
           if (this.fullScreen) {
-            this.isComparing = false
-            this.fullScreen = false
-            this.$nextTick(() => {
-              this.reloadAnnotations()
-              this.loadAnnotation()
-            })
+            this.onFullScreenChange()
           }
         }
       }
+    },
+
+    onCommentClicked () {
+      const height = this.$refs['video-container'].offsetHeight
+      this.isCommentsHidden = !this.isCommentsHidden
+      this.$nextTick(() => {
+        if (!this.isCommentsHidden) {
+          this.$refs['task-info-player'].$el.style.height = `${height}px`
+        }
+        if (this.$refs['task-info-player']) {
+          this.$refs['task-info-player'].focusCommentTextarea()
+        }
+        // this.resetHeight()
+        this.previewViewer.resetVideo()
+        this.previewViewer.resetPicture()
+        this.fixCanvasSize(this.getCurrentPreviewDimensions())
+        this.reloadAnnotations()
+        this.loadAnnotation()
+      })
     },
 
     configureEvents () {
@@ -1702,4 +1747,16 @@ progress {
 .entity-name {
   color: $light-grey;
 }
+
+.task-info-column {
+  min-width: 450px;
+  max-width: 450px;
+  overflow-y: auto;
+  height: 90vh;
+}
+
+.video-container {
+  position: relative;
+}
+
 </style>

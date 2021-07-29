@@ -99,6 +99,7 @@
                 @change-current-preview="changeCurrentPreview"
                 @add-extra-preview="onAddExtraPreview"
                 @remove-extra-preview="onRemoveExtraPreview"
+                @comment-added="onCommentAdded"
                 ref="preview-player"
               />
             </div>
@@ -582,6 +583,7 @@ export default {
           this.reset()
           this.attachedFileName = ''
           this.loading.addComment = false
+          this.$emit('comment-added')
         })
         .catch((err) => {
           console.error(err)
@@ -712,6 +714,10 @@ export default {
     onRemoveExtraPreview (preview) {
       this.currentExtraPreviewId = preview.id
       this.modals.deleteExtraPreview = true
+    },
+
+    onCommentAdded () {
+      this.taskComments = this.getTaskComments(this.task.id)
     },
 
     onCancelRemoveExtraPreview () {

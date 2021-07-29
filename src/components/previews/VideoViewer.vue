@@ -236,14 +236,18 @@ export default {
     getDimensions () {
       const dimensions = this.getNaturalDimensions()
       const ratio = dimensions.height / dimensions.width
-      const parent = this.container.parentElement.parentElement
-      let width = Math.min(dimensions.width, parent.offsetWidth)
+      let offsetWidth = 0
+      if (this.container.parentElement) {
+        const parent = this.container.parentElement.parentElement
+        offsetWidth = parent.offsetWidth
+      }
+      let width = Math.min(dimensions.width, offsetWidth)
       if (this.isComparing) {
         // parent is used because sometimes the container width is not
         // properly computed.
         width = Math.min(
           dimensions.width,
-          parent.offsetWidth / 2
+          offsetWidth / 2
         )
       }
       let height = Math.floor(width * ratio)
@@ -308,9 +312,11 @@ export default {
         const height = dimensions.height
         if (height > 0) {
           this.container.style.height = this.defaultHeight + 'px'
-          this.videoWrapper.style.width = width + 'px'
+          // Those two lines are commented out because fixing the width was
+          //   breaking the comment section in the preview in full screen
+          // this.videoWrapper.style.width = width + 'px'
+          // this.video.style.width = width + 'px'
           this.videoWrapper.style.height = height + 'px'
-          this.video.style.width = width + 'px'
           this.video.style.height = height + 'px'
           this.$emit('size-changed', { width, height })
         }
