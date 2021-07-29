@@ -92,10 +92,6 @@ export default {
     }
   },
 
-  mounted () {
-    this.forms = null
-  },
-
   computed: {
     ...mapGetters([
     ])
@@ -116,6 +112,10 @@ export default {
     reset () {
       this.$refs['image-field'].reset()
       this.forms = null
+    },
+
+    onPaste (event) {
+      this.$refs['image-field'].filesChange('', event.clipboardData.files)
     }
   },
 
@@ -123,6 +123,15 @@ export default {
     active () {
       this.reset()
     }
+  },
+
+  mounted () {
+    this.forms = null
+    window.addEventListener('paste', this.onPaste, false)
+  },
+
+  beforeDestroy () {
+    window.removeEventListener('paste', this.onPaste)
   }
 }
 </script>
