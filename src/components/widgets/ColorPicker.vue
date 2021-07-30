@@ -40,6 +40,15 @@ export default {
       type: String
     },
     palette: {
+      default: () => [
+        '#000000',
+        '#FFFFFF',
+        '#039BE5',
+        '#ff3860',
+        '#008732',
+        '#5E60BA',
+        '#f57f17'
+      ],
       type: Array
     }
   },

@@ -11,13 +11,22 @@
         v-scroll="onPlaylistListScroll"
       >
 
-        <div class="flexrow">
+        <div class="flexrow top-section">
           <combobox-task-type
             class="flexrow-item selector mb1"
             :task-type-list="taskTypeList"
             :label="$t('playlists.filter_task_type')"
             :thin="true"
             v-model="taskTypeId"
+            v-if="!isListToggled"
+          />
+          <span class="filler" v-if="!isListToggled"></span>
+          <button-simple
+            class="flexrow-item"
+            style="flex: 0;"
+            :icon="isListToggled ? 'right' : 'left'"
+            is-small
+            @click="isListToggled = !isListToggled"
           />
         </div>
 
@@ -30,15 +39,7 @@
               locale-key-prefix="playlists.fields."
               v-model="currentSort"
             />
-            <span class="flexrow-item filler"></span>
           </template>
-          <!--button-simple
-            class="flexrow-item"
-            style="flex: 0;"
-            @click="isListToggled = !isListToggled"
-            :icon="isListToggled ? 'right' : 'left'"
-          /-->
-
         </div>
 
         <button
@@ -82,10 +83,11 @@
               <light-entity-thumbnail
                 :preview-file-id="playlist.first_preview_file_id"
                 type="previews"
-                width="auto"
-                height="auto"
-                max-width="40px"
+                width="38px"
+                height="30px"
+                max-width="38px"
                 max-height="30px"
+                empty-width="38px"
                 empty-height="30px"
                 :title="playlist.name"
               />
@@ -203,6 +205,7 @@
           @order-change="onOrderChange"
           @annotation-changed="onAnnotationChanged"
           @for-client-changed="onForClientChanged"
+          @annotations-refreshed="onAnnotationsRefreshed"
         />
 
         <div
@@ -475,6 +478,8 @@ export default {
         name: `${moment().format('YYYY-MM-DD HH:mm:ss')}`,
         for_client: false
       },
+      previewFileMap: new Map(),
+      previewFileEntityMap: new Map(),
       modals: {
         isBuildFilterDisplayed: false,
         isDeleteDisplayed: false,
@@ -759,15 +764,41 @@ export default {
     rebuildCurrentEntities () {
       this.currentEntities = {}
       const tmpEntities = {}
+      this.previewFileMap = new Map()
+      this.previewFileEntityMap = new Map()
       if (this.currentPlaylist && this.currentPlaylist.shots) {
-        this.currentPlaylist.shots.forEach((entity) => {
+        this.currentPlaylist.shots.forEach(entity => {
           const playlistEntity = this.convertEntityToPlaylistFormat(entity)
-          if (playlistEntity) tmpEntities[playlistEntity.id] = playlistEntity
+          if (playlistEntity) {
+            tmpEntities[playlistEntity.id] = playlistEntity
+            this.previewFileEntityMap.set(
+              entity.preview_file_id,
+              playlistEntity
+            )
+            const previewFileGroups =
+              Object.values(playlistEntity.preview_files)
+            previewFileGroups.forEach(previewFiles => {
+              previewFiles.forEach(previewFile => {
+                this.previewFileMap.set(previewFile.id, previewFile)
+              })
+            })
+          }
         })
       }
       this.$nextTick(() => {
         this.currentEntities = tmpEntities
       })
+    },
+
+    onAnnotationsRefreshed (preview) {
+      const entity = this.previewFileEntityMap.get(preview.id)
+      const localPreview = this.previewFileMap.get(preview.id)
+      if (entity) {
+        entity.preview_file_annotations = preview.annotations
+      }
+      if (localPreview) {
+        localPreview.annotations = preview.annotations
+      }
     },
 
     convertEntityToPlaylistFormat (entityInfo) {
@@ -800,6 +831,14 @@ export default {
             entityInfo.preview_file_previews ||
             entity.preview_file_previews
         }
+        this.previewFileEntityMap.set(
+          playlistEntity.preview_file_id,
+          playlistEntity
+        )
+        const previews = playlistEntity.preview_file_previews || []
+        previews.forEach(preview => {
+          this.previewFileMap.set(preview.id, preview)
+        })
         return playlistEntity
       } else {
         return null
@@ -981,9 +1020,11 @@ export default {
       })
     },
 
-    onAnnotationChanged ({ preview, annotations }) {
+    onAnnotationChanged ({ preview, additions, deletions, updates }) {
       const taskId = preview.task_id
-      this.updatePreviewAnnotation({ taskId, preview, annotations })
+      this.updatePreviewAnnotation({
+        taskId, preview, additions, deletions, updates
+      })
     },
 
     // Search
@@ -1560,5 +1601,9 @@ h2 {
     padding: 0.5em 1em;
     height: auto;
   }
+}
+
+.top-section {
+  align-items: flex-start;
 }
 </style>

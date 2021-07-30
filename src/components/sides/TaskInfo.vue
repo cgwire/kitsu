@@ -347,6 +347,7 @@ export default {
       'getTaskComment',
       'getTaskComments',
       'getTaskPreviews',
+      'getTaskStatusForCurrentUser',
       'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserManager',
@@ -357,7 +358,6 @@ export default {
       'previewFormData',
       'productionMap',
       'taskEntityPreviews',
-      'getTaskStatusForCurrentUser',
       'taskTypeMap',
       'user'
     ]),
@@ -698,9 +698,11 @@ export default {
       }
     },
 
-    onAnnotationChanged ({ preview, annotations }) {
+    onAnnotationChanged ({ preview, additions, deletions, updates }) {
       const taskId = this.task.id
-      this.updatePreviewAnnotation({ taskId, preview, annotations })
+      this.updatePreviewAnnotation({
+        taskId, preview, additions, deletions, updates
+      })
     },
 
     onAddPreviewClicked (comment) {

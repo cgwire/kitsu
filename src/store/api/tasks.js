@@ -160,10 +160,10 @@ export default {
     )
   },
 
-  updatePreviewAnnotation (preview, annotations) {
+  updatePreviewAnnotation (preview, additions, updates, deletions) {
     return client.pput(
       `/api/actions/preview-files/${preview.id}/update-annotations`,
-      { annotations }
+      { additions, updates, deletions }
     )
   },
 
