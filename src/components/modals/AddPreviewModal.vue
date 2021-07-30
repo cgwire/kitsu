@@ -50,6 +50,36 @@
           {{ $t("main.cancel") }}
         </button>
       </p>
+
+      <p v-if="forms">
+        <template v-for="(form, i) in forms">
+          <img
+            class="is-fullwidth"
+            alt="uploaded file"
+            :src="getURL(form)"
+            :key="i"
+            v-if="isImage(form)"
+          >
+          <video
+            preload="auto"
+            class="is-fullwidth"
+            autoplay
+            controls
+            loop
+            muted
+            :src="getURL(form)"
+            :key="i"
+            v-else-if="isVideo(form)"
+          />
+          <iframe
+            class="is-fullwidth"
+            frameborder="0"
+            :src="getURL(form)"
+            :key="i"
+            v-else
+          />
+        </template>
+      </p>
     </div>
   </div>
 </div>
@@ -119,6 +149,18 @@ export default {
 
     onPaste (event) {
       this.$refs['preview-field'].filesChange('', event.clipboardData.files)
+    },
+
+    getURL (form) {
+      return window.URL.createObjectURL(form.get('file'))
+    },
+
+    isImage (form) {
+      return form.get('file').type.startsWith('image')
+    },
+
+    isVideo (form) {
+      return form.get('file').type.startsWith('video')
     }
   },
 
@@ -140,6 +182,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.modal-content {
+  max-height: calc(100vh - 150px);
+}
+
 .modal-content .box p.text {
   margin-bottom: 1em;
 }
@@ -150,5 +196,9 @@ export default {
 
 .description {
   margin-bottom: 1em;
+}
+
+.is-fullwidth {
+  width: 100%;
 }
 </style>
