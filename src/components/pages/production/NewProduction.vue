@@ -981,7 +981,7 @@ export default {
 }
 
 .new-production {
-  font-family: Lato;
+  font-family: 'Lato';
 }
 
 .hero {

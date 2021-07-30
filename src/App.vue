@@ -381,6 +381,13 @@ export default {
 :focus {outline:none;}
 ::-moz-focus-inner {border:0;}
 
+@font-face {
+  font-family: Lato;
+  font-style: normal;
+  font-weight: 400;
+  src: url(./assets/fonts/Lato.woff2) format("woff2");
+}
+
 html {
   height: 100%;
   overflow-y: auto;
