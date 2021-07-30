@@ -419,7 +419,7 @@ import Combobox from '@/components/widgets/Combobox'
 import PencilPicker from '@/components/widgets/PencilPicker'
 import PreviewViewer from '@/components/previews/PreviewViewer'
 import RevisionPreview from '@/components/previews/RevisionPreview'
-const TaskInfo = () => import('@/components/sides/TaskInfo')
+import TaskInfo from '@/components/sides/TaskInfo'
 
 export default {
   name: 'preview-player',
