@@ -35,6 +35,10 @@ export default {
     return client.pput(`/api/data/task-types/${taskType.id}`, data)
   },
 
+  async updateTaskTypeLink (taskTypeLink) {
+    return await client.ppost('/api/data/task-type-links', taskTypeLink)
+  },
+
   deleteTaskType (taskType) {
     return client.pdel(`/api/data/task-types/${taskType.id}`)
   },

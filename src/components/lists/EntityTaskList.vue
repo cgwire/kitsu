@@ -143,6 +143,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'getTaskTypePriority',
       'isCurrentUserClient',
       'isCurrentUserVendor',
       'personMap',
@@ -154,14 +155,12 @@ export default {
       return [...this.entries].sort((taskIdA, taskIdB) => {
         const taskA = this.getTask(taskIdA)
         const taskB = this.getTask(taskIdB)
-        const taskTypeA =
-          this.getTask(this.taskTypeMap.get(taskA.task_type_id))
-        const taskTypeB =
-          this.getTask(this.taskTypeMap.get(taskB.task_type_id))
-        if (taskTypeA.priority === taskTypeB.priority) {
+        const taskTypeAPriority = this.getTaskTypePriority(taskA.task_type_id)
+        const taskTypeBPriority = this.getTaskTypePriority(taskB.task_type_id)
+        if (taskTypeAPriority === taskTypeBPriority) {
           return this.taskTypeA.localeCompare(this.taskTypeB.name)
         } else {
-          return taskTypeA.priority - taskTypeB.priority
+          return taskTypeAPriority - taskTypeBPriority
         }
       })
     }

@@ -6,6 +6,9 @@
   <task-type-cell
     :task-type="taskType"
   />
+  <td class="priority">
+    {{ getTaskTypePriority(taskType.id) }}
+  </td>
   <td class="start-date">
    <date-field
       :disabled-dates="productionTimeRange"
@@ -66,7 +69,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'currentProduction'
+      'currentProduction',
+      'getTaskTypePriority'
     ]),
 
     productionTimeRange () {
@@ -144,5 +148,8 @@ export default {
 .field {
   margin-bottom: 0;
   width: 105px;
+}
+.priority {
+  padding-left: 2rem;
 }
 </style>

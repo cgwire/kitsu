@@ -632,6 +632,7 @@ export default {
     fields: {
       fps: 'FPS',
       name: 'Name',
+      priority: 'Priority',
       ratio: 'Ratio',
       resolution: 'Resolution',
       status: 'Status',

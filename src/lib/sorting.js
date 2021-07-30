@@ -1,4 +1,5 @@
 import firstBy from 'thenby'
+import { getTaskTypePriorityOfProd } from './productions'
 
 export const sortAssets = (assets) => {
   return assets.sort(
@@ -80,10 +81,23 @@ export const sortRevisionPreviewFiles = (previewFiles) => {
   )
 }
 
-export const sortTaskTypes = (taskTypes) => {
+export const sortTaskTypes = (taskTypes, currentProduction) => {
   return taskTypes.sort(
     firstBy('for_shots')
-      .thenBy('priority')
+      .thenBy((taskTypeA, taskTypeB) => {
+        const taskTypeAPriority = getTaskTypePriorityOfProd(
+          taskTypeA, currentProduction
+        )
+        const taskTypeBPriority = getTaskTypePriorityOfProd(
+          taskTypeB, currentProduction
+        )
+        if (taskTypeAPriority > taskTypeBPriority) {
+          return 1
+        } else if (taskTypeAPriority < taskTypeBPriority) {
+          return -1
+        }
+        return 0
+      })
       .thenBy('name')
   )
 }
@@ -111,13 +125,23 @@ export const sortByDate = (entries) => {
   return entries.sort(firstBy('created_at', -1))
 }
 
-export const sortValidationColumns = (columns, taskTypeMap) => {
+export const sortValidationColumns = (
+  columns,
+  taskTypeMap,
+  currentProduction
+) => {
   return columns.sort((a, b) => {
     const taskTypeA = taskTypeMap.get(a)
     const taskTypeB = taskTypeMap.get(b)
-    if (taskTypeA.priority === taskTypeB.priority) {
+    const taskTypeAPriority = getTaskTypePriorityOfProd(
+      taskTypeA, currentProduction
+    )
+    const taskTypeBPriority = getTaskTypePriorityOfProd(
+      taskTypeB, currentProduction
+    )
+    if (taskTypeAPriority === taskTypeBPriority) {
       return taskTypeA.name.localeCompare(taskTypeB.name)
-    } else if (taskTypeA.priority > taskTypeB.priority) {
+    } else if (taskTypeAPriority > taskTypeBPriority) {
       return 1
     } else {
       return -1

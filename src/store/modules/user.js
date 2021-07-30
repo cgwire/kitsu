@@ -68,7 +68,7 @@ import {
   SET_NOTIFICATION_COUNT,
   LOAD_OPEN_PRODUCTIONS_END,
 
-  RESET_ALL
+  RESET_ALL, SET_CURRENT_PRODUCTION
 } from '../mutation-types'
 
 const helpers = {
@@ -294,7 +294,6 @@ const actions = {
         commit(LOAD_PRODUCTION_STATUS_END, context.project_status)
         commit(LOAD_DEPARTMENTS_END, context.departments)
         commit(LOAD_TASK_STATUSES_END, context.task_status)
-        commit(LOAD_TASK_TYPES_END, context.task_types)
         commit(LOAD_PEOPLE_END, {
           people: context.persons,
           production: rootGetters.currentProduction,
@@ -304,6 +303,8 @@ const actions = {
         commit(LOAD_ASSET_TYPES_END, context.asset_types)
         commit(SET_NOTIFICATION_COUNT, context.notification_count)
         commit(LOAD_OPEN_PRODUCTIONS_END, context.projects)
+        commit(SET_CURRENT_PRODUCTION, rootGetters.currentProduction.id)
+        commit(LOAD_TASK_TYPES_END, context.task_types)
       })
   }
 }
