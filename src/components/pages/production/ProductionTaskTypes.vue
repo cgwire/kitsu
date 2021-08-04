@@ -407,7 +407,7 @@ td.name {
   width: 100px;
 }
 
-td /deep/ p.control.flexrow {
+td ::v-deep p.control.flexrow {
   width: 105px;
 }
 
