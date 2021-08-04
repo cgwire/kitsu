@@ -650,6 +650,7 @@ export default {
       choices: 'List of values',
       delete_text: 'Are you sure you want to delete this column and related data for all assets of this production?',
       delete_error: 'An error occurred while deleting this metadata column.',
+      edit_title: 'Edit metadata column',
       error: 'An error occurred while adding the metadata column. Make sure there is no column with similar name and that all fields are filled. If the problem is persists, please contact the support team.',
       free: 'Free value',
       title: 'Add metadata column'
