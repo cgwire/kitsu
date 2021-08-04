@@ -152,7 +152,6 @@ export const annotationMixin = {
           drawing: { objects: [obj.serialize()] }
         })
       }
-      this.printModificationStats('add')
     },
 
     removeFromAdditions (obj) {
@@ -177,7 +176,6 @@ export const annotationMixin = {
           objects: [obj.id]
         })
       }
-      this.printModificationStats('delete')
     },
 
     removeFromDeletions (obj) {
@@ -206,7 +204,6 @@ export const annotationMixin = {
           drawing: { objects: [obj.serialize()] }
         })
       }
-      this.printModificationStats('update')
     },
 
     clearModifications () {
@@ -562,7 +559,6 @@ export const annotationMixin = {
 
     startAnnotationSaving (preview, annotations) {
       this.notSaved = true
-      this.printModificationStats('saving')
       this.$options.annotatedPreview = preview
       this.$options.annotationToSave =
         setTimeout(this.endAnnotationSaving, 3000)
@@ -571,6 +567,11 @@ export const annotationMixin = {
     endAnnotationSaving () {
       if (this.notSaved) {
         const preview = this.$options.annotatedPreview
+        this.$store.commit('UPDATE_PREVIEW_ANNOTATION', {
+          taskId: preview.task_id,
+          preview,
+          annotations: this.getNewAnnotations()
+        })
         this.$options.changesToSave = {
           preview,
           additions: [...this.additions],
