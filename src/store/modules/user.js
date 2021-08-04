@@ -303,7 +303,9 @@ const actions = {
         commit(LOAD_ASSET_TYPES_END, context.asset_types)
         commit(SET_NOTIFICATION_COUNT, context.notification_count)
         commit(LOAD_OPEN_PRODUCTIONS_END, context.projects)
-        commit(SET_CURRENT_PRODUCTION, rootGetters.currentProduction.id)
+        if (rootGetters.currentProduction) {
+          commit(SET_CURRENT_PRODUCTION, rootGetters.currentProduction.id)
+        }
         commit(LOAD_TASK_TYPES_END, context.task_types)
       })
   }
