@@ -1,6 +1,6 @@
 <template>
 <div
-  id="modal"
+  id="add-comment-modal"
   :class="{
     'modal': true,
     'is-active': active
@@ -51,10 +51,10 @@
         </button>
       </p>
 
-      <p v-if="forms">
+      <p class="upload-previews" v-if="forms">
         <template v-for="(form, i) in forms">
+          <hr :key="'separator-' + i"/>
           <img
-            class="is-fullwidth"
             alt="uploaded file"
             :src="getURL(form)"
             :key="i"
@@ -130,7 +130,11 @@ export default {
 
   computed: {
     ...mapGetters([
-    ])
+    ]),
+
+    previewField () {
+      return this.$refs['preview-field']
+    }
   },
 
   methods: {
@@ -143,12 +147,12 @@ export default {
     },
 
     reset () {
-      this.$refs['preview-field'].reset()
+      this.previewField.reset()
       this.forms = null
     },
 
     onPaste (event) {
-      this.$refs['preview-field'].filesChange('', event.clipboardData.files)
+      this.previewField.filesChange('', event.clipboardData.files)
     },
 
     getURL (form) {
@@ -201,4 +205,9 @@ export default {
 .is-fullwidth {
   width: 100%;
 }
+
+.upload-previews {
+  text-align: center;
+}
+
 </style>

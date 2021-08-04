@@ -45,19 +45,18 @@
         </button>
       </p>
 
-      <p v-if="forms">
+      <p class="upload-previews" v-if="forms">
         <template v-for="(form, i) in forms">
+          <hr :key="'separator-' + i"/>
           <img
-            class="is-fullwidth"
             alt="uploaded file"
             :src="getURL(form)"
             :key="i"
             v-if="isImage(form)"
           >
           <video
-            preload="auto"
             class="is-fullwidth"
-            autoplay
+            preload="auto"
             controls
             loop
             muted
@@ -124,7 +123,11 @@ export default {
 
   computed: {
     ...mapGetters([
-    ])
+    ]),
+
+    imageField () {
+      return this.$refs['image-field']
+    }
   },
 
   methods: {
@@ -140,12 +143,12 @@ export default {
     },
 
     reset () {
-      this.$refs['image-field'].reset()
+      this.imageField.reset()
       this.forms = null
     },
 
     onPaste (event) {
-      this.$refs['image-field'].filesChange('', event.clipboardData.files)
+      this.imageField.filesChange('', event.clipboardData.files)
     },
 
     getURL (form) {
@@ -197,5 +200,9 @@ export default {
 
 .is-fullwidth {
   width: 100%;
+}
+
+.upload-previews {
+  text-align: center;
 }
 </style>
