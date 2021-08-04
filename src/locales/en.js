@@ -630,17 +630,16 @@ export default {
       welcome: 'Welcome to Kitsu'
     },
     fields: {
+      end_date: 'End date',
+      episode_span: 'Episode spacing',
       fps: 'FPS',
       name: 'Name',
-      priority: 'Priority',
+      nb_episodes: 'Number of episodes',
       ratio: 'Ratio',
       resolution: 'Resolution',
-      status: 'Status',
-      type: 'Type',
       start_date: 'Start date',
-      end_date: 'End date',
-      nb_episodes: 'Number of episodes',
-      episode_span: 'Episode spacing'
+      status: 'Status',
+      type: 'Type'
     },
     metadata: {
       add_explaination: 'Add specific data required by this project.',
@@ -657,8 +656,8 @@ export default {
     },
 
     brief: {
-      title: 'Brief',
-      empty: 'There is not brief yet. What about creating one?'
+      empty: 'There is not brief yet. What about creating one?',
+      title: 'Brief'
     },
 
     parameters: {

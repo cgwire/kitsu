@@ -49,6 +49,7 @@ import {
   LOAD_ASSETS_START,
   LOAD_ASSETS_ERROR,
   LOAD_ASSETS_END,
+  SORT_VALIDATION_COLUMNS,
 
   EDIT_ASSET_END,
 
@@ -392,7 +393,7 @@ const actions = {
         )
         return Promise.resolve(assets)
       })
-      .catch((err) => {
+      .catch(err => {
         console.error('an error occured while loading assets', err)
         commit(LOAD_ASSETS_ERROR)
         return Promise.resolve([])
@@ -425,7 +426,7 @@ const actions = {
           })
         }
       })
-      .catch((err) => console.error(err))
+      .catch(console.error)
   },
 
   newAsset ({ commit, dispatch, state, rootGetters }, data) {
@@ -1160,6 +1161,14 @@ const mutations = {
       // unselect previously selected tasks
       state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
     }
+  },
+
+  [SORT_VALIDATION_COLUMNS] (taskTypeMap) {
+    state.assetValidationColumns = helpers.sortValidationColumns(
+      state.assetValidationColumns,
+      state.assetFilledColumns,
+      taskTypeMap
+    )
   },
 
   [CLEAR_SELECTED_ASSETS] (state) {
