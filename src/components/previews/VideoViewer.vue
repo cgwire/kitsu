@@ -450,4 +450,8 @@ export default {
   text-align: center;
   background: #36393F;
 }
+
+video {
+  object-fit: inherit;
+}
 </style>
