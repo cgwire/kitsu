@@ -36,7 +36,12 @@ export default {
   },
 
   async updateTaskTypeLink (taskTypeLink) {
-    return await client.ppost('/api/data/task-type-links', taskTypeLink)
+    const data = {
+      project_id: taskTypeLink.projectId,
+      task_type_id: taskTypeLink.taskTypeId,
+      priority: taskTypeLink.priority
+    }
+    return await client.ppost('/api/data/task-type-links', data)
   },
 
   deleteTaskType (taskType) {

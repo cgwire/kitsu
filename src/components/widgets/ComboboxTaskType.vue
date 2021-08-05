@@ -18,7 +18,7 @@
           v-if="currentTaskType"
         />
       </div>
-      <chevron-down-icon class="down-icon flexrow-item"/>
+      <chevron-down-icon class="ml05 down-icon flexrow-item"/>
     </div>
     <div
       :class="{

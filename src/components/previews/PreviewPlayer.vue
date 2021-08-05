@@ -1197,8 +1197,11 @@ export default {
         this.previewViewer.resetVideo()
         this.previewViewer.resetPicture()
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
-        this.reloadAnnotations()
-        this.loadAnnotation()
+        this.endAnnotationSaving()
+        this.$nextTick(() => {
+          this.reloadAnnotations()
+          this.loadAnnotation()
+        })
       })
     },
 

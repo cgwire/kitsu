@@ -56,6 +56,7 @@ import {
   LOAD_SHOTS_END,
   LOAD_EPISODES_END,
   LOAD_SEQUENCES_END,
+  SORT_VALIDATION_COLUMNS,
 
   LOAD_SHOT_END,
 
@@ -1956,6 +1957,16 @@ const mutations = {
       // unselect previously selected tasks
       state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
     }
+  },
+
+  [SORT_VALIDATION_COLUMNS] (state, taskTypeMap) {
+    const columns = [...state.shotValidationColumns]
+    state.shotValidationColumns = []
+    state.shotValidationColumns = helpers.sortValidationColumns(
+      columns,
+      state.shotFilledColumns,
+      taskTypeMap
+    )
   },
 
   [CLEAR_SELECTED_SHOTS] (state) {

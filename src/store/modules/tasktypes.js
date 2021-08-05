@@ -105,7 +105,7 @@ const actions = {
         commit(LOAD_TASK_TYPES_END, taskTypes)
         Promise.resolve(taskTypes)
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(err)
         Promise.reject(err)
       })
@@ -117,7 +117,7 @@ const actions = {
         commit(EDIT_TASK_TYPE_END, taskType)
         Promise.resolve(taskType)
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(err)
         Promise.reject(err)
       })
@@ -135,7 +135,7 @@ const actions = {
   editTaskType ({ commit, state }, data) {
     commit(EDIT_TASK_TYPE_START)
     return taskTypesApi.updateTaskType(data)
-      .then((taskType) => {
+      .then(taskType => {
         commit(EDIT_TASK_TYPE_END, taskType)
         Promise.resolve(taskType)
       })

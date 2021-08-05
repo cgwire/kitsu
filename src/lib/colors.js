@@ -1,5 +1,5 @@
 import ColorHash from 'color-hash'
-import Color from 'color'
+import Color from '@/lib/color2'
 
 const darkenColorIndex = {}
 const lightenColorIndex = {}

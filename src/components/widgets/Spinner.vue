@@ -11,10 +11,8 @@
 </template>
 
 <script>
-import {
-  SquareGrid,
-  Origami
-} from 'vue-loading-spinner'
+import Origami from '@/components/spinners/Origami.vue'
+import SquareGrid from '@/components/spinners/SquareGrid.vue'
 
 export default {
   name: 'spinner',

@@ -7,7 +7,10 @@
 
   <div class="modal-content">
     <div class="box content">
-      <h1 class="title">
+      <h1 class="title" v-if="descriptorToEdit.id">
+        {{ $t('productions.metadata.edit_title') }}
+      </h1>
+      <h1 class="title" v-else>
         {{ $t('productions.metadata.title') }}
       </h1>
 

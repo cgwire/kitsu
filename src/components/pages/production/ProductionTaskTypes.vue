@@ -47,10 +47,7 @@
             <thead>
               <tr>
                 <th class="name">
-                  {{ $t('productions.fields.name') }}
-                </th>
-                <th class="priority">
-                  {{ $t('productions.fields.priority') }}
+                  {{ $t('task_types.fields.name') }}
                 </th>
                 <th class="start-date">
                   {{ $t('productions.fields.start_date') }}
@@ -121,13 +118,15 @@ export default {
 
   data () {
     return {
+      assetTaskTypes: { list: [] },
+      episode_span: 0,
+      shotTaskTypes: { list: [] },
       taskTypeId: '',
       loading: {
         episode_span: false,
         scheduleTimeUpdate: false,
         scheduleTimeDelete: false
       },
-      episode_span: 0,
       errors: {
         episode_span: false,
         scheduleTimeUpdate: false,
@@ -141,9 +140,15 @@ export default {
       this.taskTypeId = this.remainingTaskTypes[0].id
     }
 
+    this.resetAssetTaskTypes()
+    this.resetShotTaskTypes()
     if (this.currentProduction) {
       this.episode_span = this.currentProduction.episode_span
       this.loadAllScheduleItems(this.currentProduction)
+        .then(() => {
+          this.resetAssetTaskTypes()
+          this.resetShotTaskTypes()
+        })
     }
   },
 
@@ -153,6 +158,7 @@ export default {
       'currentScheduleItems',
       'productionTaskTypes',
       'taskStatusMap',
+      'taskTypeMap',
       'taskTypes',
       'isTVShow'
     ]),
@@ -162,55 +168,6 @@ export default {
         this.taskTypes
           .filter(t => !this.currentProduction.task_types.includes(t.id))
       )
-    },
-
-    /*
-      Return an object with the following structure:
-      {
-        title: 'title of the first column of the tab (Assets or short)',
-        list:  [{taskTypes, scheduleItem}]
-        // A list of objects that represents a couple of taskType and their
-        linked scheduleItem.
-      }
-    */
-    assetTaskTypes () {
-      const list = sortTaskTypes(
-        [...this.productionTaskTypes], this.currentProduction
-      ).filter(t => !t.for_shots)
-        .map(taskType => {
-          return {
-            taskType,
-            scheduleItem: this.getScheduleItemForTaskType(taskType)
-          }
-        })
-      return {
-        title: this.$t('assets.title'),
-        list
-      }
-    },
-
-    /*
-      Return an object with the following structure:
-      {
-        title: 'title of the first column of the tab (Assets or short)',
-        list:  [{taskTypes, scheduleItem}]
-        // A list of objects that represents a couple of taskType and their
-        linked scheduleItem }
-    */
-    shotTaskTypes () {
-      const list = sortTaskTypes(
-        [...this.productionTaskTypes], this.currentProduction
-      ).filter(t => t.for_shots)
-        .map(taskType => {
-          return {
-            taskType,
-            scheduleItem: this.getScheduleItemForTaskType(taskType)
-          }
-        })
-      return {
-        title: this.$t('shots.title'),
-        list
-      }
     }
   },
 
@@ -283,6 +240,55 @@ export default {
       }
     },
 
+    /*
+      Return an object with the following structure:
+      {
+        title: 'title of the first column of the tab (Assets or short)',
+        list:  [{taskTypes, scheduleItem}]
+        // A list of objects that represents a couple of taskType and their
+        linked scheduleItem.
+      }
+    */
+    resetAssetTaskTypes () {
+      const list = sortTaskTypes(
+        [...this.productionTaskTypes], this.currentProduction
+      ).filter(t => !t.for_shots)
+        .map(taskType => {
+          return {
+            taskType,
+            scheduleItem: this.getScheduleItemForTaskType(taskType)
+          }
+        })
+      this.assetTaskTypes = {
+        title: this.$t('assets.title'),
+        list
+      }
+    },
+
+    /*
+      Return an object with the following structure:
+      {
+        title: 'title of the first column of the tab (Assets or short)',
+        list:  [{taskTypes, scheduleItem}]
+        // A list of objects that represents a couple of taskType and their
+        linked scheduleItem }
+    */
+    resetShotTaskTypes () {
+      const list = sortTaskTypes(
+        [...this.productionTaskTypes], this.currentProduction
+      ).filter(t => t.for_shots)
+        .map(taskType => {
+          return {
+            taskType,
+            scheduleItem: this.getScheduleItemForTaskType(taskType)
+          }
+        })
+      this.shotTaskTypes = {
+        title: this.$t('shots.title'),
+        list
+      }
+    },
+
     async editEpisodeSpan () {
       this.loading.episode_span = true
       this.errors.episode_span = false
@@ -323,6 +329,9 @@ export default {
         if (this.newSaveCall) {
           await this.savePriorities(forms)
         }
+        setTimeout(() => {
+          this.$store.commit('SORT_VALIDATION_COLUMNS', this.taskTypeMap)
+        }, 100)
       } else {
         this.newSaveCall = true
       }
@@ -398,7 +407,7 @@ td.name {
   width: 100px;
 }
 
-td /deep/ p.control.flexrow {
+td ::v-deep p.control.flexrow {
   width: 105px;
 }
 
