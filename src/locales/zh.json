@@ -26,11 +26,15 @@
                 "time_spent": "时间",
                 "type": "类型",
                 "hidden_from_client": "显示到客户端"
-            }
+            },
+            "cancel_text": "",
+            "delete_for_selection": "",
+            "multiple_delete_error": "",
+            "only_current_episode": ""
         },
         "asset_types": {
             "all_asset_types": "所有资产种类",
-            "create_error": "保存此资产类型时出错。您确定没有相同名称的资产类型吗？",
+            "create_error": "保存此资产类型时出错. 您确定没有相同名称的资产类型吗?",
             "delete_text": "您确定要从您的数据库移除{name}吗?",
             "delete_error": "删除此资源类型时出现错误. 很可能存在有链接至此的数据. 您确定没有资源链接至此资源类型吗?",
             "edit_title": "编辑资源类型",
@@ -64,7 +68,7 @@
             "comment_from_client": "客户留言",
             "edit_title": "编辑注释",
             "empty_text": "此条注释为空",
-            "edit_error": "编辑评论时发生错误。 请联系我们的支持团队。",
+            "edit_error": "编辑评论时发生错误. 请联系我们的支持团队.",
             "error": "发布注释时出现错误",
             "no_file_attached": "未附加文件",
             "pin": "钉",
@@ -73,7 +77,7 @@
             "retake": "重新提交",
             "revision": "校订",
             "set_status_to": "将状态设为",
-            "task_placeholder": "新事项",
+            "task_placeholder": "新事项...",
             "text": "文本",
             "unpin": "取消钉住",
             "validated": "已确认!",
@@ -84,7 +88,7 @@
             "checklist": ""
         },
         "custom_actions": {
-            "create_error": "保存此自定义自定义操作时发生错误。 您确定没有其他同名动作吗？",
+            "create_error": "保存此自定义操作时发生错误. 您确定没有其他同名操作吗?",
             "delete_text": "您确定要从您的数据库移除自定义操作{name}吗?",
             "delete_error": "删除此自定义操作时出现错误.",
             "edit_title": "编辑自定义操作",
@@ -112,19 +116,20 @@
                 "assignation_exists_for": "重新分配至",
                 "assigned_to": "分配至",
                 "descriptor": "元数据",
-                "equal": "",
-                "in": "",
+                "equal": "等于",
+                "in": "属于",
                 "no_assignation_for": "取消分配",
-                "no_filter": "五筛选",
-                "not_equal": "",
+                "no_filter": "无筛选",
+                "not_equal": "不等于",
                 "not_assigned_to": "未分配",
                 "status": "任务状态",
                 "thumbnail": "缩略图",
                 "title": "筛选...",
-                "union_and": "",
-                "union_or": "匹配以下筛选",
+                "union_and": "匹配以下所有过滤器",
+                "union_or": "匹配以下过滤器",
                 "with_thumbnail": "显示缩略图",
-                "without_thumbnail": "关闭缩略图"
+                "without_thumbnail": "关闭缩略图",
+                "department": ""
             },
             "thumbnails": {
                 "error": "上传缩略图时发生错误",
@@ -142,7 +147,7 @@
             }
         },
         "estimation": {
-            "title": "预算\n"
+            "title": "预算"
         },
         "episodes": {
             "all_episodes": "所有",
@@ -186,7 +191,7 @@
             "login": "登录",
             "login_failed": "登录失败, 请核实您的凭据",
             "login_page": "取消",
-            "redirecting": "",
+            "redirecting": "{secondsLeft} 秒内重定向",
             "reset_change_password": "更改密码",
             "reset_change_password_form_failed": "您给出的密码有问题. 请核实密码长度大于6个字符且两次密码一致.",
             "reset_change_password_failed": "更改密码失败. 请再次重启整个步骤.",
@@ -285,18 +290,31 @@
                     "update": "更新数据"
                 }
             },
-            "after": "",
-            "before": "",
-            "from": "",
-            "home": "",
+            "after": "之后",
+            "before": "之前",
+            "from": "从",
+            "home": "返回首页",
             "less_filters": "",
             "more_filters": "",
-            "reload": "",
+            "reload": "重新加载",
             "search_query": "",
             "search_query_edit": "",
             "search_query_edit_error": "",
             "to": "",
-            "workspace": ""
+            "workspace": "",
+            "column_visibility": "",
+            "estimation": "",
+            "estimation_short": "",
+            "fps": "",
+            "frames": "",
+            "frameIn": "",
+            "frameOut": "",
+            "man_days": "",
+            "select_column": "",
+            "show": "",
+            "stick": "",
+            "timeSpent": "",
+            "unstick": ""
         },
         "menu": {
             "assign_tasks": "分配任务",
@@ -306,7 +324,9 @@
             "delete_tasks": "删除任务",
             "generate_playlists": "生成列表",
             "run_custom_action": "执行自定义操作",
-            "set_estimations": "设定预算"
+            "set_estimations": "设定预算",
+            "delete_assets": "",
+            "delete_shots": ""
         },
         "news": {
             "all": "全部",
@@ -334,7 +354,7 @@
             "mention_you_on": "提到你的",
             "no_notifications": "目前没有关于您当前项目的通知.",
             "unread_notifications": "未读通知",
-            "title": "通知\n",
+            "title": "通知",
             "with_preview": "带有预览"
         },
         "people": {
@@ -343,7 +363,7 @@
             "add_member_to_team": "向团队添加成员",
             "create_invite": "创建和发送邀请",
             "create_error": "创建或更新此用户时发生错误。 您可能已达到用户数限制。 请联系我们的支持团队以获取更多信息。",
-            "delete_error": "删除此人员时出现错误. 很可能存在有链接至此的数据. 您确定此人员没有分配任务或是没写注释吗?",
+            "delete_error": "删除此人员时出现错误. 很可能存在有链接至其的数据. 您确定此人员没有分配任务或是没写注释吗?",
             "delete_text": "您确定要从您的数据库移除{personName}吗?",
             "edit_title": "编辑人员",
             "empty_team": "项目团队里没有所列人员.",
@@ -375,14 +395,16 @@
                 "old_password": "当前密码",
                 "password": "新密码",
                 "password_2": "新密码(重复)",
-                "active": "活动"
+                "active": "活动",
+                "departments": ""
             },
             "list": {
                 "name": "名称",
                 "email": "电子邮箱",
                 "phone": "电话",
                 "role": "职责",
-                "active": "活动"
+                "active": "活动",
+                "departments": ""
             },
             "role": {
                 "admin": "工作室经理",
@@ -469,22 +491,28 @@
                 "annotation_draw": "",
                 "current_time": "",
                 "display_revision": "",
-                "download_file": "",
+                "download_file": "下载文件",
                 "entity_index": "",
                 "entities_number": "",
-                "frame_number": "",
+                "frame_number": "帧数",
                 "files_add": "",
                 "files_delete": "",
                 "files_next": "",
                 "files_position": "",
                 "files_previous": "",
-                "looping": "",
-                "mute": "",
-                "unmute": "",
+                "looping": "循环播放当前视频",
+                "mute": "静音",
+                "unmute": "取消静音",
                 "number_of_files": "",
-                "max_duration": "",
-                "see_original_file": ""
-            }
+                "max_duration": "视频时长",
+                "see_original_file": "在新标签页中打开原始文件",
+                "overlay": "",
+                "side_by_side": "",
+                "switch_ld": "",
+                "switch_hd": ""
+            },
+            "download_csv": "",
+            "filter_task_type": ""
         },
         "productions": {
             "current": "所选制作",
@@ -511,9 +539,9 @@
                 "resolution": "分辨率",
                 "status": "状态",
                 "type": "类型",
-                "start_date": "",
-                "end_date": "",
-                "nb_episodes": "",
+                "start_date": "开始日期",
+                "end_date": "结束日期",
+                "nb_episodes": "片段数",
                 "episode_span": ""
             },
             "metadata": {
@@ -526,7 +554,8 @@
                 "delete_error": "删除此元数据列时出现错误.",
                 "error": "添加元数据列时出现错误. 要确保没有相似名称的列, 还要确保填充了所有字段. 如果问题仍然存在, 还请联系我们的支持团队.",
                 "free": "空闲值",
-                "title": "添加元数据列"
+                "title": "添加元数据列",
+                "edit_title": ""
             },
             "status": {
                 "closed": "已关闭",
@@ -541,14 +570,57 @@
             },
             "edit_error": "",
             "brief": {
-                "title": "",
-                "empty": ""
+                "title": "简介",
+                "empty": "还没有简介. 创建一个?"
             },
             "parameters": {
-                "title": "",
+                "title": "参数",
                 "save": {
-                    "button": ""
+                    "button": "确定"
                 }
+            },
+            "creation": {
+                "add_assets": "",
+                "add_asset_types": "",
+                "add_asset_types_description": "",
+                "add_assets_button": "",
+                "add_assets_description": "",
+                "add_shots": "",
+                "add_shots_button": "",
+                "add_shots_description": "",
+                "assets_to_import": "",
+                "create_production": "",
+                "create_button": "",
+                "create_button_disabled": "",
+                "error": "",
+                "errorImportingAssets": "",
+                "errorImportingShots": "",
+                "explaination_date": "",
+                "explaination_type": "",
+                "explaination_video": "",
+                "give_a_name": "",
+                "give_a_name_description": "",
+                "import_assets_button": "",
+                "import_shots_button": "",
+                "new_project": "",
+                "placeholder_date_start": "",
+                "placeholder_date_end": "",
+                "placeholder_name": "",
+                "placeholder_fps": "",
+                "placeholder_ratio1": "",
+                "placeholder_ratio2": "",
+                "placeholder_resolution1": "",
+                "placeholder_resolution2": "",
+                "production_settings": "",
+                "production_settings_description": "",
+                "select_asset_task_type": "",
+                "select_asset_task_type_description": "",
+                "select_shot_task_type": "",
+                "select_shot_task_type_description": "",
+                "select_task_status": "",
+                "select_task_status_description": "",
+                "start_and_end_dates": "",
+                "shots_to_import": ""
             }
         },
         "profile": {
@@ -587,7 +659,8 @@
                 "name": "工作室名字",
                 "hours_by_day": "每天营业时间",
                 "slack_token": "Slack Token （可选）",
-                "use_original_name": "使用原始文件名进行下载"
+                "use_original_name": "使用原始文件名进行下载",
+                "timesheets_locked": ""
             },
             "production": {
                 "empty_list": "该列表当前为空。 这意味着用户可以使用主设置中的所有数据。 添加一些条目以限制此产品的选择。"
@@ -615,7 +688,7 @@
                 "name": "名称",
                 "short_name": "简称"
             },
-            "name": ""
+            "name": "任务状态"
         },
         "task_types": {
             "delete_text": "您确定要从您的数据库移除{name}吗?",
@@ -630,7 +703,8 @@
                 "color": "颜色",
                 "name": "名称",
                 "allow_timelog": "时间日志",
-                "priority": "优先级"
+                "priority": "优先级",
+                "department": ""
             }
         },
         "sequences": {
@@ -653,31 +727,31 @@
             "title": "时间表",
             "title_main": "主时间表",
             "overall_man_days": "月-日",
-            "md": "",
+            "md": "工作天",
             "zoom_level": "缩放等级",
             "milestone": {
-                "add_milestone": "添加重要阶段",
-                "edit_milestone": "",
-                "name": "",
-                "error": ""
+                "add_milestone": "添加里程碑",
+                "edit_milestone": "编辑里程碑",
+                "name": "名称",
+                "error": "添加或编辑里程碑时发生错误。请再试一次。"
             }
         },
         "quota": {
-            "average": "",
+            "average": "平均",
             "count_label": "",
-            "detail_label": "",
-            "details_name": "",
-            "details_seconds": "",
-            "details_frames": "",
-            "month_label": "",
-            "no_quota": "",
-            "name": "",
-            "quota_day": "",
-            "quota_week": "",
-            "quota_month": "",
-            "year_label": "",
-            "title": "",
-            "type_label": ""
+            "detail_label": "细节程度",
+            "details_name": "名称",
+            "details_seconds": "秒",
+            "details_frames": "帧",
+            "month_label": "月",
+            "no_quota": "此任务类型没有配额。",
+            "name": "名称",
+            "quota_day": "每日配额",
+            "quota_week": "每周配额",
+            "quota_month": "每月配额",
+            "year_label": "年",
+            "title": "配额",
+            "type_label": "类型"
         },
         "shots": {
             "casting": "镜头的角色分配",
@@ -689,7 +763,7 @@
             "edit_title": "编辑镜头",
             "empty_list": "制作中没有镜头. 要创建一些吗?",
             "empty_list_client": "此制作中没有镜头.",
-            "episodes": "",
+            "episodes": "片段(多个)",
             "history": "",
             "new_shot": "添加镜头",
             "new_shots": "添加多个镜头",
@@ -702,12 +776,12 @@
             "padding": "",
             "restore_text": "您确定要将{name}恢复进您的数据库吗?",
             "restore_error": "恢复此镜头时出现错误.",
-            "sequences": "",
+            "sequences": "序列(多个)",
             "tasks": "镜头任务(多个)",
             "title": "镜头(多个)",
             "fields": {
                 "description": "说明",
-                "nb_frames": "",
+                "nb_frames": "帧数",
                 "episode": "片段",
                 "frame_in": "入镜",
                 "frame_out": "出镜",
@@ -715,9 +789,12 @@
                 "name": "镜头",
                 "production": "制作",
                 "sequence": "序列",
-                "time_spent": "",
+                "time_spent": "时长",
                 "person": ""
-            }
+            },
+            "cancel_text": "",
+            "delete_for_selection": "",
+            "multiple_delete_error": ""
         },
         "server_down": {
             "text": "请联系您的供应商支持, 您的系统管理员或您的IT部门来搞清楚出什么问题了.",
@@ -727,12 +804,12 @@
             "count": "",
             "count_mode": "",
             "display_mode": "",
-            "frames": "",
-            "pie": "",
-            "shots": "",
-            "data_mode": "",
+            "frames": "帧数",
+            "pie": "饼图",
+            "shots": "镜头",
+            "data_mode": "日期",
             "retakes": "",
-            "status": ""
+            "status": "状态"
         },
         "tasks": {
             "add_preview": "添加预览",
@@ -744,7 +821,7 @@
             "change_preview": "更换预览",
             "change_priority": "将优先级改为:",
             "clear_assignations": "清除多个任务分配",
-            "comment_image": "",
+            "comment_image": "为你的评论添加图片",
             "create_for_selection": "为每个空单元格都创建任务:",
             "create_tasks": "添加多个任务",
             "create_tasks_shot": "为当前的多个镜头添加多个任务",
@@ -769,53 +846,53 @@
             "feedback": "反馈",
             "full_screen": "全屏显示",
             "hide_assignations": "隐藏多个任务分配",
-            "hide_infos": "",
+            "hide_infos": "隐藏其他信息",
             "my_tasks": "我的任务(多个)",
             "next": "下一个任务",
             "no_assignation_right": "不允许您管理多个任务分配",
             "no_comment": "此任务当前没有注释.",
             "no_preview": "此任务当前没有预览.",
-            "no_task_selected": "",
-            "number": "",
+            "no_task_selected": "未选中任务",
+            "number": "任务 | 任务(多个) ",
             "preview": "预览(多个)",
             "previous": "上一个任务",
             "unsubscribe_notifications": "通过通知取消订阅",
-            "set_estimations": "",
+            "set_estimations": "为所选任务设置预估:",
             "set_preview": "将此预览设置为缩略图",
             "set_preview_error": "将预览设置为缩略图时出现错误",
             "set_preview_done": "此预览被用作当前实体的缩略图.",
             "select_preview_file": "请从您的硬盘选择一张要被用作当前任务的预览的图片:",
             "show_assignations": "显示多个任务分配",
-            "show_infos": "",
+            "show_infos": "显示其他信息",
             "subscribe_notifications": "订阅通知",
-            "select_image_file": "",
+            "select_image_file": "请从磁盘中选择您要附加到备注的图片:",
             "tasks": "任务(多个)",
             "validation": "确认",
             "with_comment": "",
             "fields": {
-                "asset_type": "",
+                "asset_type": "资产类别",
                 "assignees": "被分配任务人员(多名)",
                 "count": "",
-                "due_date": "",
-                "duration": "",
+                "due_date": "截止日",
+                "duration": "时长",
                 "end_date": "结束日期",
                 "entity": "实体",
-                "entity_name": "",
+                "entity_name": "名称",
                 "estimated_quota": "",
-                "estimation": "",
+                "estimation": "估计",
                 "frames": "",
                 "last_comment": "最新注释",
-                "last_comment_date": "",
-                "priority": "",
+                "last_comment_date": "最新注释",
+                "priority": "优先级",
                 "production": "制作",
-                "real_end_date": "",
+                "real_end_date": "确认日期",
                 "real_start_date": "",
                 "retake_count": "",
-                "seconds": "",
-                "sequence": "",
-                "start_date": "",
+                "seconds": "秒",
+                "sequence": "序列",
+                "start_date": "开始日期",
                 "task_status": "状态",
-                "task_status_short_name": "",
+                "task_status_short_name": "状态",
                 "task_type": "类型"
             },
             "colors": {
@@ -832,27 +909,60 @@
             },
             "assignation_warning": "",
             "for_selection": "",
-            "for_project": ""
+            "for_project": "项目",
+            "all_tasks": "",
+            "due_this_week": "",
+            "select_file": ""
         },
         "timesheets": {
             "detail_level": "细节层次",
             "done_tasks": "已完成任务",
-            "export_timesheet": "",
+            "export_timesheet": "导出时间表",
             "hours": "小时",
             "month": "月",
             "time_spents": "已用时长(小时)",
             "title": "时间表(多个)",
-            "year": "年"
+            "year": "年",
+            "confirm_day_off": "",
+            "day_off": "",
+            "export_timespents": ""
         },
         "wrong_browser": {
-            "title": "",
+            "title": "Kitsu不支持您的浏览器",
             "text": ""
         },
         "logs": {
             "current_date_label": "",
             "events": "",
-            "empty_list": "",
-            "title": ""
+            "empty_list": "所选日期没有日志。",
+            "title": "日志",
+            "preview_files": {
+                "date": "",
+                "empty_list": "",
+                "entity_name": "",
+                "explaination": "",
+                "file_name": "",
+                "person": "",
+                "production": "",
+                "revision": "",
+                "status": "",
+                "task_type_id": "",
+                "title": ""
+            }
+        },
+        "departments": {
+            "all_asset_types": "",
+            "create_error": "",
+            "delete_text": "",
+            "delete_error": "",
+            "edit_title": "",
+            "new_departments": "",
+            "number": "",
+            "title": "",
+            "fields": {
+                "name": "",
+                "color": ""
+            }
         }
     }
 }
