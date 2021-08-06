@@ -1,7 +1,7 @@
 {
     "default": {
         "assets": {
-            "cast_in": "Diseminado en",
+            "cast_in": "Aparece en",
             "delete_error": "Error al borrar este recurso porque tiene datos vinculados. ¿Está seguro que el recurso no está asociado a ninguna tarea?",
             "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
             "edit_fail": "Error al guardar debido a que hay un recurso con el mismo nombre.",
@@ -12,7 +12,7 @@
             "new_asset": "Añadir un recurso",
             "new_assets": "Añadir recursos",
             "new_success": "{name} de recurso creado con éxito.",
-            "no_cast_in": "Este recurso no está diseminado en ningún plano.",
+            "no_cast_in": "Este recurso no aparece en ningún plano.",
             "number": "recurso | recursos",
             "restore_text": "¿Está seguro de que desea restaurar {name} en su base de datos?",
             "restore_error": "Se ha producido un error al restaurar este recurso.",
@@ -26,7 +26,11 @@
                 "time_spent": "Tiempo",
                 "type": "Tipo",
                 "hidden_from_client": "Mostrado al cliente"
-            }
+            },
+            "cancel_text": "",
+            "delete_for_selection": "",
+            "multiple_delete_error": "",
+            "only_current_episode": ""
         },
         "asset_types": {
             "all_asset_types": "Todos los tipos de assets",
@@ -37,7 +41,7 @@
             "new_asset_type": "Añadir un tipo de recurso",
             "number": "tipo de recurso | tipos de recursos",
             "title": "Tipos de recursos",
-            "production_title": "Estadísticas de tipos de recursos",
+            "production_title": "Estadísticas de Assets",
             "fields": {
                 "name": "Nombre"
             }
@@ -45,7 +49,7 @@
         "breakdown": {
             "all_assets": "Todos los assets disponibles",
             "edit_label": "Cambiar la etiqueta de asset",
-            "empty": "Diseminación vacía",
+            "empty": "Casting vacío",
             "label": "Etiqueta",
             "picture_mode": "Cambiar el a modo de imagen.",
             "text_mode": "Cambiar a modo de texto",
@@ -70,17 +74,18 @@
             "pin": "Anclar",
             "pinned": "Anclado",
             "post_status": "Publicar comentario",
-            "retake": "Repetir",
+            "retake": "Retake",
             "revision": "modificación",
             "set_status_to": "Fijar el estado en",
             "task_placeholder": "Nuevo articulo...",
             "text": "Texto",
             "unpin": "Desanclar",
-            "validated": "Validado!",
+            "validated": "¡Validado!",
             "validation_required": "Validación requerida",
             "fields": {
                 "text": "texto"
-            }
+            },
+            "checklist": "Lista de verificación"
         },
         "custom_actions": {
             "create_error": "Ha ocurrido un error mientras se guardaba esta acción personalizada. ¿Está seguro de que no hay otra acción con el mismo nombre?",
@@ -123,7 +128,8 @@
                 "union_and": "Hacer coincidir todos los filtros.",
                 "union_or": "Hacer coincidir uno de los siguientes filtros.",
                 "with_thumbnail": "Con miniatura",
-                "without_thumbnail": "Sin miniatura"
+                "without_thumbnail": "Sin miniatura",
+                "department": ""
             },
             "thumbnails": {
                 "error": "Ha ocurrido un error mientras se subían las miniaturas",
@@ -134,7 +140,7 @@
                 "select_files": "Seleccion archivos",
                 "selected_files": "Archivos seleccionados",
                 "select_task_type": "Seleccionar tipo de tarea",
-                "title": "Add Thumbnails",
+                "title": "Añadir miniaturas",
                 "undefined": "indefinido",
                 "undefined_pattern": "Indefinido",
                 "upload": "Agregar miniaturas"
@@ -173,7 +179,11 @@
             "undo": "Deshacer",
             "playlist_navigation": "Navegación de las Paylists",
             "remove_annotation": "Eliminar anotación",
-            "shortcuts": "Atajos de teclado"
+            "shortcuts": "Atajos de teclado",
+            "ctrldown": "Mover celda de metadatos abajo",
+            "ctrlleft": "Mover celda de metadatos izquierda",
+            "ctrlright": "Mover celda de metadatos derecha",
+            "ctrlup": "Mover celda de metadatos arriba"
         },
         "login": {
             "back_to_login": "Voler al login",
@@ -218,7 +228,7 @@
             "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
             "documentation": "Documentación",
             "edit": "Tratar",
-            "empty_comment": "Vaciar comentario",
+            "empty_comment": "Sin comentario",
             "end_date": "Fecha de finalización",
             "files_selected": "archivos seleccionados",
             "for": "Para",
@@ -279,7 +289,32 @@
                     "title": "Opciones",
                     "update": "Actualizar los datos existentes"
                 }
-            }
+            },
+            "after": "Después",
+            "before": "Antes",
+            "from": "Desde",
+            "home": "Volver a la página inicio",
+            "less_filters": "Menos filtros",
+            "more_filters": "Más filtros",
+            "reload": "Actualizar",
+            "search_query": "Buscar consulta",
+            "search_query_edit": "Editar filtro de búsqueda",
+            "search_query_edit_error": "Ha ocurrido un error al actualizar este filtro de búsqueda",
+            "to": "Hasta",
+            "workspace": "Espacio de trabajo",
+            "column_visibility": "",
+            "estimation": "",
+            "estimation_short": "",
+            "fps": "",
+            "frames": "",
+            "frameIn": "",
+            "frameOut": "",
+            "man_days": "",
+            "select_column": "",
+            "show": "",
+            "stick": "",
+            "timeSpent": "",
+            "unstick": ""
         },
         "menu": {
             "assign_tasks": "Asignar tareas",
@@ -289,7 +324,9 @@
             "delete_tasks": "Borrar medidas",
             "generate_playlists": "Generar playlists",
             "run_custom_action": "Ejecutar una acción personalizada",
-            "set_estimations": "Fijar estimaciones"
+            "set_estimations": "Fijar estimaciones",
+            "delete_assets": "",
+            "delete_shots": ""
         },
         "news": {
             "all": "Todos",
@@ -301,7 +338,10 @@
             "set_preview_on": "establecer vista previa en",
             "task_status": "Status de la tarea",
             "task_type": "Tipo de tarea",
-            "title": "Últimas noticias"
+            "title": "Últimas noticias",
+            "hide_stats": "Ocultar estadísticas",
+            "news": "novedades",
+            "show_stats": "Mostrar estadísticas"
         },
         "not_found": {
             "text": "Había algo mal en el enlace en el que hiciste clic, te animamos a que vuelvas a la página de inicio.",
@@ -318,23 +358,23 @@
             "with_preview": "con una vista previa"
         },
         "people": {
-            "active": "Activada",
-            "active_persons": "Persona activada | Personas activadas",
+            "active": "Activo",
+            "active_persons": "Usuario activo | Usuarios activos",
             "add_member_to_team": "Añada un miembro al equipo:",
             "create_invite": "Crear y enviar invitación",
-            "create_error": "Seh a producido un error al crear a este usuario. Por favor, contacte con el equipo de soporte técnico para mas información.",
-            "delete_error": "Se ha producido un error al borrar a esta persona. Es probable que haya datos vinculados a él. ¿Está seguro de que esta persona no tiene ninguna cita o escribió ningún comentario?",
+            "create_error": "Se ha producido un error al crear a este usuario. Por favor, contacte con el equipo de soporte técnico para mas información.",
+            "delete_error": "Se ha producido un error al borrar a este usuario. Es probable que haya datos vinculados a él. ¿Está seguro de que este usuario no tiene ninguna tarea asignada o escribió algún comentario?",
             "delete_text": "¿Está seguro de que desea eliminar {personName} de su base de datos?",
             "edit_title": "Editar usuario",
             "empty_team": "No hay nadie en el equipo del proyecto.",
             "invite": "Enviar invitación",
             "invite_error": "Se ha producido un error al enviar la invitación",
             "invite_success": "La invitación fue enviada con éxito",
-            "new_person": "Añadir un nuevo empleado",
+            "new_person": "Añadir un nuevo usuario",
             "no_task_assigned": "No hay tareas de ejecución asignadas a usted",
-            "persons": "persona | personas",
+            "persons": "usuario | usuarios",
             "running_tasks": "Tareas en ejecución",
-            "select_person": "Seleccione una persona....",
+            "select_person": "Seleccione un usuario....",
             "team": "Equipo",
             "title": "Gente",
             "unactive": "Inactivo",
@@ -355,14 +395,16 @@
                 "old_password": "Contraseña actual",
                 "password": "Nueva contraseña",
                 "password_2": "Nueva contraseña (repetir)",
-                "active": "En activo"
+                "active": "Activo",
+                "departments": ""
             },
             "list": {
                 "name": "Nombre",
                 "email": "Correo electrónico",
                 "phone": "llamar",
                 "role": "Papel",
-                "active": "Asset"
+                "active": "Activo",
+                "departments": ""
             },
             "role": {
                 "admin": "Director del estudio",
@@ -445,8 +487,32 @@
                 "previous_shot": "Plano anterior",
                 "save_playlist": "Guardar lista de reproducción.",
                 "speed": "Cambiar velocidad",
-                "split_screen": "Comparar con otro tipo de tareas"
-            }
+                "split_screen": "Comparar con otro tipo de tareas",
+                "annotation_draw": "Dibujar anotaciones",
+                "current_time": "Posición en el vídeo",
+                "display_revision": "Mostrar revisión",
+                "download_file": "Descargar fichero",
+                "entity_index": "Índice de la entidad actual en la lista de reproducción",
+                "entities_number": "Número de entidades en la lista de reproducción",
+                "frame_number": "Número de fotograma",
+                "files_add": "Añadir fichero a la revisión",
+                "files_delete": "Borrar y quitar fichero de la revisión",
+                "files_next": "Próximo fichero para esta revisión",
+                "files_position": "Índice de fichero para esta revisión",
+                "files_previous": "Fichero previo para esta revisión",
+                "looping": "Vídeo actual en bucle",
+                "mute": "Silenciar",
+                "unmute": "Activar sonido",
+                "number_of_files": "Número de ficheros para esta revisión",
+                "max_duration": "Duración del vídeo",
+                "see_original_file": "Abrir fichero original en una nueva pestaña",
+                "overlay": "",
+                "side_by_side": "",
+                "switch_ld": "",
+                "switch_hd": ""
+            },
+            "download_csv": "",
+            "filter_task_type": ""
         },
         "productions": {
             "current": "Producción seleccionada",
@@ -472,7 +538,11 @@
                 "ratio": "Relación de aspecto",
                 "resolution": "Resolución",
                 "status": "Estado",
-                "type": "Tipo"
+                "type": "Tipo",
+                "start_date": "Fecha inicial",
+                "end_date": "Fecha final",
+                "nb_episodes": "Número de episodios",
+                "episode_span": "Espaciado entre episodios"
             },
             "metadata": {
                 "add_explaination": "Añada los datos específicos requeridos por este proyecto.",
@@ -484,7 +554,8 @@
                 "delete_error": "Se ha producido un error al eliminar esta columna de metadatos.",
                 "error": "Se ha producido un error al añadir la columna de metadatos. Asegúrese de que no hay ninguna columna con un nombre similar y que todos los campos están completos. Si el problema persiste, póngase en contacto con el equipo de soporte.",
                 "free": "Valor libre",
-                "title": "Add metadata column"
+                "title": "Añadir columna de metadatos",
+                "edit_title": ""
             },
             "status": {
                 "closed": "Cerrado",
@@ -496,6 +567,60 @@
                 "short": "Corto",
                 "featurefilm": "Largometraje",
                 "tvshow": "programa de televisión"
+            },
+            "edit_error": "Ha ocurrido un error al editar la producción. Por favor, contacte con nuestro equipo de soporte",
+            "brief": {
+                "title": "Brief",
+                "empty": "Todavía no hay un Brief. ¿Quieres crear uno?"
+            },
+            "parameters": {
+                "title": "Parámetros",
+                "save": {
+                    "button": "Confirmar"
+                }
+            },
+            "creation": {
+                "add_assets": "",
+                "add_asset_types": "",
+                "add_asset_types_description": "",
+                "add_assets_button": "",
+                "add_assets_description": "",
+                "add_shots": "",
+                "add_shots_button": "",
+                "add_shots_description": "",
+                "assets_to_import": "",
+                "create_production": "",
+                "create_button": "",
+                "create_button_disabled": "",
+                "error": "",
+                "errorImportingAssets": "",
+                "errorImportingShots": "",
+                "explaination_date": "",
+                "explaination_type": "",
+                "explaination_video": "",
+                "give_a_name": "",
+                "give_a_name_description": "",
+                "import_assets_button": "",
+                "import_shots_button": "",
+                "new_project": "",
+                "placeholder_date_start": "",
+                "placeholder_date_end": "",
+                "placeholder_name": "",
+                "placeholder_fps": "",
+                "placeholder_ratio1": "",
+                "placeholder_ratio2": "",
+                "placeholder_resolution1": "",
+                "placeholder_resolution2": "",
+                "production_settings": "",
+                "production_settings_description": "",
+                "select_asset_task_type": "",
+                "select_asset_task_type_description": "",
+                "select_shot_task_type": "",
+                "select_shot_task_type_description": "",
+                "select_task_status": "",
+                "select_task_status_description": "",
+                "start_and_end_dates": "",
+                "shots_to_import": ""
             }
         },
         "profile": {
@@ -534,7 +659,8 @@
                 "name": "Nombre del estudio",
                 "hours_by_day": "Horas por día",
                 "slack_token": "Slack token (opcional)",
-                "use_original_name": "Usar el nombre del archivo original para las descargas"
+                "use_original_name": "Usar el nombre del archivo original para las descargas",
+                "timesheets_locked": ""
             },
             "production": {
                 "empty_list": "La lista está actualmente vacía. Significa que todos los datos de los ajustes principales están disponibles para los usuarios. Añada algunas entradas para limitar las opciones de esta producción."
@@ -558,10 +684,11 @@
                 "is_client_allowed": "Se permite al cliente",
                 "is_done": "Se hace",
                 "is_reviewable": "Es revisable",
-                "is_retake": "Tiene valor de retomar",
+                "is_retake": "Tiene valor de retake",
                 "name": "Nombre",
                 "short_name": "Denominación breve"
-            }
+            },
+            "name": "Status de la tarea"
         },
         "task_types": {
             "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
@@ -576,7 +703,8 @@
                 "color": "Color",
                 "name": "Nombre",
                 "allow_timelog": "Registro de tiempo",
-                "priority": "Prioridad"
+                "priority": "Prioridad",
+                "department": ""
             }
         },
         "sequences": {
@@ -589,7 +717,7 @@
             "empty_list_client": "No hay secuencia en esta producción.",
             "new_sequence": "Nueva secuencia",
             "number": "secuencia | secuencias",
-            "title": "Estadísticas de secuencia",
+            "title": "Estadísticas de secuencias",
             "fields": {
                 "name": "denominar",
                 "description": "descripción"
@@ -626,7 +754,7 @@
             "type_label": "Tipo"
         },
         "shots": {
-            "casting": "Casting",
+            "casting": "Casting del plano",
             "creation_explaination": "Para añadir tomas, primero tienes que crear un episodio y una secuencia. Escriba el nombre de un episodio en la parte inferior de la columna de la izquierda y luego haga clic en añadir para crear un nuevo episodio. Seleccione este episodio y repita la misma operación para la secuencia. Finalmente seleccione una secuencia y escriba el nombre de una toma en el campo en la parte inferior de la columna derecha. Haga clic en el botón \"Agregar\" que aparece a continuación. Tu primera toma fue creada. Ahora puede añadir muchos más! Si no es un programa de televisión, tienes que crear directamente una secuencia.",
             "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
             "delete_error": "Se ha producido un error al borrar esta imagen. Es probable que haya datos vinculados a él. ¿Estás seguro de que esta toma no tiene ninguna tarea relacionada con ella?",
@@ -641,16 +769,16 @@
             "new_shots": "Añadir tomas",
             "new_sequences": "Añadir secuencias",
             "new_episodes": "Añadir episodios",
-            "no_casting": "El lanzamiento de granadas está vacío.",
+            "no_casting": "El casting del plano está vacío.",
             "number": "Plan | Disparos",
             "manage": "Crear tomas",
             "new_success": "Plan {name} creado con éxito.",
-            "padding": "Acolchado de chupitos",
+            "padding": "Separación entre planos",
             "restore_text": "¿Está seguro de que desea restaurar {name} en su base de datos?",
             "restore_error": "Se ha producido un error al restaurar esta toma.",
             "sequences": "Secuencias",
             "tasks": "Tareas de los chupitos",
-            "title": "Plans",
+            "title": "Planos",
             "fields": {
                 "description": "Descripción",
                 "nb_frames": "Marcos",
@@ -661,8 +789,12 @@
                 "name": "Nombre",
                 "production": "Prod",
                 "sequence": "Secuencia",
-                "time_spent": "Tiempo"
-            }
+                "time_spent": "Tiempo",
+                "person": "Modificador"
+            },
+            "cancel_text": "",
+            "delete_for_selection": "",
+            "multiple_delete_error": ""
         },
         "server_down": {
             "text": "Póngase en contacto con el servicio de asistencia técnica de su proveedor, su administrador de sistemas o su departamento de TI para comprender qué es lo que está fallando.",
@@ -674,7 +806,10 @@
             "display_mode": "Modo de visualización",
             "frames": "Marcos",
             "pie": "Gráficos circulares",
-            "shots": "Plans"
+            "shots": "Planos",
+            "data_mode": "Datos",
+            "retakes": "Retakes",
+            "status": "Status"
         },
         "tasks": {
             "add_preview": "Añadir vista previa",
@@ -700,7 +835,7 @@
             "delete_all_text": "¿Está seguro de que desea eliminar todas las tareas de {name}? Por favor, confirme escribiendo el nombre del tipo de tarea que desea eliminar en el campo de texto.",
             "delete_all_error": "Ha fallado la eliminación de todas las tareas de un determinado tipo de tarea.",
             "delete_error": "Se ha producido un error al eliminar la tarea.",
-            "delete_comment": "¿Seguro de que quiere borrar el último comentario?",
+            "delete_comment": "¿Seguro que quiere borrar el último comentario?",
             "delete_comment_error": "Se ha producido un error al eliminar un comentario.",
             "delete_for_selection": "Eliminar tareas seleccionadas:",
             "delete_preview": "¿Estás seguro de que quieres borrar esta vista previa?",
@@ -738,7 +873,7 @@
                 "asset_type": "Tipo de asset",
                 "assignees": "Asignados",
                 "count": "Cuenta",
-                "due_date": "Dos fechas",
+                "due_date": "Fecha final",
                 "duration": "Duración",
                 "end_date": "Fecha de finalización",
                 "entity": "Entidad",
@@ -752,7 +887,7 @@
                 "production": "Prod",
                 "real_end_date": "Fecha de validación",
                 "real_start_date": "Fecha WIP",
-                "retake_count": "Reasignaciones",
+                "retake_count": "Retakes",
                 "seconds": "Segundos",
                 "sequence": "Secuencia",
                 "start_date": "Fecha de inicio",
@@ -771,7 +906,13 @@
                 "normal": "Normal",
                 "high": "Alto",
                 "very_high": "Muy Alto"
-            }
+            },
+            "assignation_warning": "Aviso: no verá el resultado porque está ocultando asignaciones",
+            "for_selection": "Para lista y filtros actuales",
+            "for_project": "Para proyecto",
+            "all_tasks": "",
+            "due_this_week": "",
+            "select_file": ""
         },
         "timesheets": {
             "detail_level": "Nivel de detalle",
@@ -781,11 +922,47 @@
             "month": "Mes",
             "time_spents": "Tiempo empleado (horas)",
             "title": "Hojas horarias",
-            "year": "Año"
+            "year": "Año",
+            "confirm_day_off": "",
+            "day_off": "",
+            "export_timespents": ""
         },
         "wrong_browser": {
             "title": "Tu navegador no es compatible con Kitsu",
             "text": "Kitsu sólo puede ser usado con navegadores Firefox y Chrome."
+        },
+        "logs": {
+            "current_date_label": "Mostrar registros para",
+            "events": "eventos listados para el día actual",
+            "empty_list": "No hay registros para la fecha seleccionada",
+            "title": "Registros",
+            "preview_files": {
+                "date": "",
+                "empty_list": "",
+                "entity_name": "",
+                "explaination": "",
+                "file_name": "",
+                "person": "",
+                "production": "",
+                "revision": "",
+                "status": "",
+                "task_type_id": "",
+                "title": ""
+            }
+        },
+        "departments": {
+            "all_asset_types": "",
+            "create_error": "",
+            "delete_text": "",
+            "delete_error": "",
+            "edit_title": "",
+            "new_departments": "",
+            "number": "",
+            "title": "",
+            "fields": {
+                "name": "",
+                "color": ""
+            }
         }
     }
 }
