@@ -415,7 +415,7 @@ export const annotationMixin = {
       if (this.$options.silentAnnnotation) return
       let o = obj.target
       o = this.setObjectData(o)
-      if (this.fabricCanvas.width < 420) o.strokeWidth *= 2
+      // if (this.fabricCanvas.width < 420) o.strokeWidth *= 2
       this.addToAdditions(o)
       this.stackAddAction(obj)
     },
@@ -536,13 +536,17 @@ export const annotationMixin = {
       }
     },
 
-    copyAnnotations (event) {
-      this.fabricCanvas.getActiveObject().clone((cloned) => {
-        clipboard.copyAnnotations(cloned)
-      })
+    copyAnnotations () {
+      const activeObject = this.fabricCanvas.getActiveObject()
+      if (activeObject) {
+        activeObject.clone(cloned => {
+          clipboard.copyAnnotations(cloned)
+        })
+      }
+      return activeObject
     },
 
-    pasteAnnotations (event) {
+    pasteAnnotations () {
       this.fabricCanvas.discardActiveObject()
       const clonedObj = clipboard.pasteAnnotations()
       this.addObject(clonedObj)
