@@ -3,7 +3,7 @@
 
   <div class="preview" :style="{height: defaultHeight + 'px'}">
     <div class="flexrow filler">
-      <div class="video-container filler" ref="video-container">
+      <div class="preview-container filler" ref="preview-container">
         <div
           class="canvas-wrapper"
           ref="canvas-wrapper"
@@ -16,40 +16,42 @@
           >
           </canvas>
         </div>
-        <preview-viewer
-          ref="preview-viewer"
-          name="player1"
-          class="preview-viewer"
-          :big="big"
-          :default-height="defaultHeight"
-          :full-screen="fullScreen"
-          :is-hd="isHd"
-          :is-comparing="isComparing"
-          :is-muted="isMuted"
-          :is-ordering="isOrdering"
-          :is-repeating="isRepeating"
-          :light="light"
-          :preview="currentPreview"
-          @size-changed="fixCanvasSize"
-          @duration-changed="changeMaxDuration"
-          @time-update="updateTime"
-          @play-ended="pause"
-        />
+        <div class="viewers">
+          <preview-viewer
+            ref="preview-viewer"
+            name="player1"
+            class="preview-viewer"
+            :big="big"
+            :default-height="defaultHeight"
+            :full-screen="fullScreen"
+            :is-hd="isHd"
+            :is-comparing="isComparing"
+            :is-muted="isMuted"
+            :is-ordering="isOrdering"
+            :is-repeating="isRepeating"
+            :light="light"
+            :preview="currentPreview"
+            @size-changed="fixCanvasSize"
+            @duration-changed="changeMaxDuration"
+            @time-update="updateTime"
+            @play-ended="pause"
+          />
 
-        <preview-viewer
-          ref="comparison-preview-viewer"
-          name="player2"
-          class="comparison-preview-viewer"
-          :big="big"
-          :default-height="defaultHeight"
-          :full-screen="fullScreen"
-          :is-comparing="isComparing"
-          :is-muted="true"
-          :is-repeating="isRepeating"
-          :light="light"
-          :preview="previewToCompare"
-          v-show="isComparing && previewToCompare"
-        />
+          <preview-viewer
+            ref="comparison-preview-viewer"
+            name="player2"
+            class="comparison-preview-viewer"
+            :big="big"
+            :default-height="defaultHeight"
+            :full-screen="fullScreen"
+            :is-comparing="isComparing"
+            :is-muted="true"
+            :is-repeating="isRepeating"
+            :light="light"
+            :preview="previewToCompare"
+            v-show="isComparing && previewToCompare"
+          />
+        </div>
       </div>
 
       <task-info
@@ -538,8 +540,8 @@ export default {
       return this.$refs.container
     },
 
-    videoContainer () {
-      return this.$refs['video-container']
+    previewContainer () {
+      return this.$refs['preview-container']
     },
 
     canvasWrapper () {
@@ -867,7 +869,7 @@ export default {
         this.fabricCanvas.setDimensions({ width, height })
         this.fabricCanvas.width = width
         this.fabricCanvas.height = height
-        const containerWidth = this.videoContainer.offsetWidth
+        const containerWidth = this.previewContainer.offsetWidth
         const containerHeight = this.container.offsetHeight
         let margin = Math.round((containerWidth - width) / 2)
         if (this.isComparing) {
@@ -1184,7 +1186,7 @@ export default {
     },
 
     onCommentClicked () {
-      const height = this.$refs['video-container'].offsetHeight
+      const height = this.previewContainer.offsetHeight
       this.isCommentsHidden = !this.isCommentsHidden
       this.$nextTick(() => {
         if (!this.isCommentsHidden) {
@@ -1461,6 +1463,12 @@ export default {
       } else {
         clickarea.removeEventListener('dblclick', this.addText)
       }
+    },
+
+    isCommentsHidden () {
+      this.$nextTick(() => {
+        this.fixCanvasSize(this.getCurrentPreviewDimensions())
+      })
     }
   },
 
@@ -1725,8 +1733,11 @@ progress {
   height: 90vh;
 }
 
-.video-container {
+.preview-container {
   position: relative;
 }
 
+.viewers {
+  display: flex;
+}
 </style>
