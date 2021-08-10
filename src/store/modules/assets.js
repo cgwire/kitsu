@@ -1163,9 +1163,10 @@ const mutations = {
     }
   },
 
-  [SORT_VALIDATION_COLUMNS] (taskTypeMap) {
+  [SORT_VALIDATION_COLUMNS] (state, taskTypeMap) {
+    const columns = [...state.assetValidationColumns]
     state.assetValidationColumns = helpers.sortValidationColumns(
-      state.assetValidationColumns,
+      columns,
       state.assetFilledColumns,
       taskTypeMap
     )

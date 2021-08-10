@@ -140,14 +140,12 @@ export default {
       this.taskTypeId = this.remainingTaskTypes[0].id
     }
 
-    this.resetAssetTaskTypes()
-    this.resetShotTaskTypes()
+    this.resetDisplayedTaskTypes()
     if (this.currentProduction) {
       this.episode_span = this.currentProduction.episode_span
       this.loadAllScheduleItems(this.currentProduction)
         .then(() => {
-          this.resetAssetTaskTypes()
-          this.resetShotTaskTypes()
+          this.resetDisplayedTaskTypes()
         })
     }
   },
@@ -188,6 +186,11 @@ export default {
       return !list || list.length === 0
     },
 
+    resetDisplayedTaskTypes () {
+      this.resetAssetTaskTypes()
+      this.resetShotTaskTypes()
+    },
+
     getScheduleItemForTaskType (taskType) {
       const item = this.currentScheduleItems.find(
         scheduleItem => scheduleItem.task_type_id === taskType.id
@@ -218,6 +221,7 @@ export default {
       } else {
         this.taskTypeId = ''
       }
+      this.resetDisplayedTaskTypes()
     },
 
     async removeTaskType ({ taskType, scheduleItem }) {
@@ -238,6 +242,7 @@ export default {
       if (this.remainingTaskTypes.length > 0) {
         this.taskTypeId = this.remainingTaskTypes[0].id
       }
+      this.resetDisplayedTaskTypes()
     },
 
     /*
