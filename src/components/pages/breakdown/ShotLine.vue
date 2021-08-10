@@ -4,7 +4,8 @@
   :class="{
     shot: true,
     selected: selected,
-    unselectable: true
+    unselectable: true,
+    'text-mode': textMode
   }"
   @click="onClicked($event)"
 >
@@ -126,6 +127,11 @@ export default {
 .asset-list {
   border-left: 1px solid $light-grey;
   padding-left: 1em;
+  padding-top: 0.5em;
+}
+
+.text-mode .asset-list {
+  padding-top: 0em;
 }
 
 .asset-type-line:not(:first-child) {
