@@ -3,13 +3,14 @@
 We release Kitsu versions through Github. Every time a new version is ready, we
 follow this process:
 
-1. Upgrade the version number through the `npm` CLI. 
-2. Push changes to `master` branch.
-3. Run build
-4. Keep the build somewhere
-5. Switch to `build` branch.
-6. replace dist directory with the new one.
-7. Tag the commit and push the changes to Github
+1. Rebase sources on the master branch.
+2. Up the version number through the `npm` CLI. 
+3. Push changes to `master` branch.
+4. Run the Vue.js build.
+5. Keep the build somewhere.
+6. Switch to the `build` branch.
+7. Replace the `dist` directory with the new one.
+8. Tag the commit and push the changes to Github.
 
 You can run the following script to perform these commands at once:
 
