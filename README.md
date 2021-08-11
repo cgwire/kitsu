@@ -69,13 +69,14 @@ To install the development environment, follow [the dedicated guide](https://kit
 
 ## About authors
 
-Kitsu is written by CG Wire, a company based in France. We help small to
-mid-sized CG studios manage their productions and build pipelines efficiently.
+Kitsu is written by CGWire, a company based in France. We help teams of animation
+studios to collaborate better. We provide tools to more than 50 studios spread
+all around the world.
 
-We apply software craftsmanship principles as much as possible. We love coding
-and consider strong qualities and good developer experience to matter a lot.
-Our extensive experience allows studios to get better at managing production
-and doing software. They can focus more on the artistic work.
+On the technical side, we apply software craftmanship principles as much as
+possible. We love coding and consider that strong quality and good developer
+experience matter a lot.
+
 
 Visit [cg-wire.com](https://cg-wire.com) for more information.
 
