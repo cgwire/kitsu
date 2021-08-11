@@ -7,7 +7,7 @@ validate your deliveries. It improves the communication between all stakeholders
 Which leads to better pictures, shipped faster. 
 
 [![Build
-badge](https://travis-ci.com/cgwire/kitsu.svg?branch=master)](https://travis-ci.org/cgwire/kitsu)
+badge](https://travis-ci.com/cgwire/kitsu.svg?branch=master)](https://travis-ci.com/cgwire/kitsu)
 
 [![Gitter badge](https://badges.gitter.im/cgwire/Lobby.png)](https://gitter.im/cgwire/Lobby)
 
