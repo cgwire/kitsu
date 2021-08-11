@@ -54,6 +54,9 @@ To install the development environment, follow [the dedicated guide](https://kit
 <a href="https://www.cube-creative.com">
 <img alt="Cube Creative" src="https://www.cg-wire.com/images/logo-cube.png" width=100 />
 </a>
+<a href="https://cloud.blender.org">
+<img alt="Blender Studio" src="https://www.cg-wire.com/images/logo-blender.png" width=100 />
+</a>
 <a href="http://nousvoir.com/en/home">
 <img alt="TNZPV" src="https://www.cg-wire.com/images/logo-tnzpv.png" width=100 />
 </a>
