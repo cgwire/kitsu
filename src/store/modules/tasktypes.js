@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import taskTypesApi from '../api/tasktypes'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { sortTaskTypes } from '../../lib/sorting'
@@ -15,9 +14,6 @@ import {
   DELETE_TASK_TYPE_START,
   DELETE_TASK_TYPE_ERROR,
   DELETE_TASK_TYPE_END,
-
-  LOAD_SEQUENCE_SUBSCRIBE_END,
-  LOAD_SEQUENCE_SUBSCRIPTION_END,
 
   RESET_ALL
 } from '../mutation-types'
@@ -81,6 +77,7 @@ const getters = {
   getShotTaskTypeOptions: (state, getters) => getters.shotTaskTypes
     .map(
       (type) => { return { label: type.name, value: type.id } }
+<<<<<<< HEAD
     ),
 
   getTaskType: (state, getters) => (id) => {
@@ -94,6 +91,9 @@ const getters = {
     }
     return getTaskTypePriorityOfProd(taskType, rootGetters.currentProduction)
   }
+=======
+    )
+>>>>>>> [qa] Add some tests around task types
 }
 
 const actions = {
@@ -206,19 +206,10 @@ const mutations = {
     })
   },
 
-  [EDIT_TASK_TYPE_START] (state, data) {
-    state.editTaskType.isLoading = true
-    state.editTaskType.isError = false
-  },
-
-  [EDIT_TASK_TYPE_ERROR] (state) {
-    state.editTaskType.isLoading = false
-    state.editTaskType.isError = true
-  },
-
+  [EDIT_TASK_TYPE_START] (state, data) {},
+  [EDIT_TASK_TYPE_ERROR] (state) {},
   [EDIT_TASK_TYPE_END] (state, newTaskType) {
     const taskType = state.taskTypeMap.get(newTaskType.id)
-
     if (taskType && taskType.id) {
       Object.assign(taskType, newTaskType)
     } else {
@@ -226,48 +217,18 @@ const mutations = {
       state.taskTypeMap.set(newTaskType.id, newTaskType)
     }
     state.taskTypes = sortTaskTypes(state.taskTypes, getCurrentProduction())
-    state.editTaskType = {
-      isLoading: false,
-      isError: false
-    }
   },
 
-  [DELETE_TASK_TYPE_START] (state) {
-    state.deleteTaskType = {
-      isLoading: true,
-      isError: false
-    }
-  },
-  [DELETE_TASK_TYPE_ERROR] (state) {
-    state.deleteTaskType = {
-      isLoading: false,
-      isError: true
-    }
-  },
+  [DELETE_TASK_TYPE_START] (state) {},
+  [DELETE_TASK_TYPE_ERROR] (state) {},
   [DELETE_TASK_TYPE_END] (state, taskTypeToDelete) {
     const taskTypeToDeleteIndex = state.taskTypes.findIndex(
-      (taskType) => taskType.id === taskTypeToDelete.id
+      taskType => taskType.id === taskTypeToDelete.id
     )
     if (taskTypeToDeleteIndex >= 0) {
       state.taskTypes.splice(taskTypeToDeleteIndex, 1)
     }
     state.taskTypeMap.delete(taskTypeToDelete.id)
-
-    state.deleteTaskType = {
-      isLoading: false,
-      isError: false
-    }
-  },
-
-  [LOAD_SEQUENCE_SUBSCRIBE_END] (state, { sequenceId, subscribed }) {
-    Vue.set(state.sequenceSubscriptions, sequenceId, subscribed)
-  },
-
-  [LOAD_SEQUENCE_SUBSCRIPTION_END] (state, sequenceIds) {
-    state.sequenceSubscriptions = {}
-    sequenceIds.forEach((sequenceId) => {
-      state.sequenceSubscriptions[sequenceId] = true
-    })
   },
 
   [RESET_ALL] (state) {

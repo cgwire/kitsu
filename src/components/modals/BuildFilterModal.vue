@@ -397,7 +397,7 @@ export default {
       this.taskTypeFilters.values.forEach((taskTypeFilter) => {
         let operator = '=['
         if (taskTypeFilter.operator === '=-') operator = '=[-'
-        const taskType = this.getTaskType(taskTypeFilter.id)
+        const taskType = this.taskTypeMap.get(taskTypeFilter.id)
         const value = taskTypeFilter.values.map(statusId => {
           return this.taskStatusMap.get(statusId).short_name
         }).join(',')
@@ -470,10 +470,6 @@ export default {
 
     addInDescriptorFilter (descriptorFilter) {
       descriptorFilter.values.push('')
-    },
-
-    getTaskType (taskTypeId) {
-      return this.taskTypeMap.get(taskTypeId)
     },
 
     // Descriptors
