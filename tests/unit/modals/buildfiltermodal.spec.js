@@ -174,33 +174,33 @@ describe('BuildFilterModal', () => {
 
   describe('Helpers', () => {
     describe('computed', () => {
-      it('isAssets', () => {
+      it('isAssets', async () => {
         expect(wrapper.vm.isAssets).toBe(true)
-        wrapper.setProps({ entityType: 'shot' })
+        await wrapper.setProps({ entityType: 'shot' })
         expect(wrapper.vm.isAssets).toBe(false)
       })
-      it('taskTypeList', () => {
+      it('taskTypeList', async () => {
         expect(wrapper.vm.taskTypeList[0].id).toBe('task-type-1')
-        wrapper.setProps({ entityType: 'shot' })
+        await wrapper.setProps({ entityType: 'shot' })
         expect(wrapper.vm.taskTypeList[0].id).toBe('task-type-3')
       })
       it('team', () => {
         expect(wrapper.vm.team[0].id).toBe('person-2')
       })
-      it('descriptorOptions', () => {
+      it('descriptorOptions', async () => {
         expect(wrapper.vm.descriptorOptions[0]).toStrictEqual({
           'label': 'Difficulty',
           'value': 'descriptor-1'
         })
-        wrapper.setProps({ entityType: 'shot' })
+        await wrapper.setProps({ entityType: 'shot' })
         expect(wrapper.vm.descriptorOptions[0]).toStrictEqual({
           'label': 'Style',
           'value': 'descriptor-3'
         })
       })
-      it('metadataDescriptors', () => {
+      it('metadataDescriptors', async () => {
         expect(wrapper.vm.metadataDescriptors[0].id).toBe('descriptor-1')
-        wrapper.setProps({ entityType: 'shot' })
+        await wrapper.setProps({ entityType: 'shot' })
         expect(wrapper.vm.metadataDescriptors[0].id).toBe('descriptor-3')
       })
     })

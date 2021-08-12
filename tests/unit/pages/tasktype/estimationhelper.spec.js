@@ -157,8 +157,8 @@ describe('EstimationHelper', () => {
 
   describe('Helpers', () => {
     describe('computed', () => {
-      it('tasksByPerson', (done) => {
-        wrapper.setProps({
+      it('tasksByPerson', async (done) => {
+        await wrapper.setProps({
           isAssets: false,
           tasks
         })
@@ -185,9 +185,9 @@ describe('EstimationHelper', () => {
     })
 
     describe('methods', () => {
-      it('getEntity', () => {
+      it('getEntity', async () => {
         expect(wrapper.vm.getEntity('asset-1').name).toBe('Lama')
-        wrapper.setProps({ isAssets: false })
+        await wrapper.setProps({ isAssets: false })
         expect(wrapper.vm.getEntity('asset-1')).toBe(undefined)
         expect(wrapper.vm.getEntity('shot-1').name).toBe('SH01')
       })
@@ -208,41 +208,6 @@ describe('EstimationHelper', () => {
       it.skip('addToSelection', () => {
       })
       it.skip('assignees', () => {
-      })
-    })
-
-    describe('methods', () => {
-      it('getEntity', () => {
-        expect(wrapper.vm.getEntity('asset-1').name).toBe('Lama')
-        wrapper.setProps({ isAssets: false })
-        expect(wrapper.vm.getEntity('asset-1')).toBe(undefined)
-        expect(wrapper.vm.getEntity('shot-1').name).toBe('SH01')
-      })
-      it.skip('compareFirstAssignees', () => {
-      })
-      it.skip('formatEstimation', () => {
-      })
-      it.skip('getSeconds', () => {
-      })
-      it.skip('estimationUpdated', () => {
-      })
-      it.skip('saveEstimations', () => {
-      })
-      it.skip('onKeyDown', () => {
-      })
-      it.skip('clearSelection', () => {
-      })
-      it.skip('addToSelection', () => {
-      })
-      it.skip('selectTask', () => {
-      })
-      it.skip('selectPrevious', () => {
-      })
-      it.skip('selectNext', () => {
-      })
-      it.skip('selectSingleTask', () => {
-      })
-      it.skip('selectTaskRange', () => {
       })
     })
   })

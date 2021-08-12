@@ -116,10 +116,10 @@ describe('Schedule', () => {
   })
 
   describe('Getters', () => {
-    test('cellWidth', () => {
+    test('cellWidth', async () => {
       let width = wrapper.vm.cellWidth
       expect(width).toEqual(60)
-      wrapper.setProps({ zoomLevel: 1 })
+      await wrapper.setProps({ zoomLevel: 1 })
       width = wrapper.vm.cellWidth
       expect(width).toEqual(20)
     })

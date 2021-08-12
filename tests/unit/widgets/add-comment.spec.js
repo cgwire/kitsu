@@ -8,10 +8,32 @@ const localVue = createLocalVue()
 localVue.use(Vuex)
 
 describe('AddComment', () => {
-  let wrapper
+  let wrappers, getters
+  let store, mainStore
 
   beforeEach(() => {
-    wrapper = mount(AddComment, {
+
+    mainStore = {
+      state: {},
+      getters: {
+        isDarkTheme: () => false
+      },
+      actions: {
+      }
+    }
+
+    getters = {
+      isDarkTheme: () => false
+    }
+
+    store = new Vuex.Store({
+      strict: true,
+      modules: {
+        main: mainStore
+      }
+    })
+
+    wrapper = shallowMount(AddComment, {
       propsData: {
         addComment: () => {},
         isLoading: false,
@@ -25,20 +47,22 @@ describe('AddComment', () => {
         attachedFileName: '',
         team: []
       },
+      store,
+      getters,
       i18n
     })
   })
 
   describe('Mount', () => {
-    test('Empty props', () => {
+    test.skip('Empty props', () => {
     })
 
-    test('Ensure widget', () => {
+    test.skip('Ensure widget', () => {
     })
   })
 
   describe('Methods', () => {
-    test('iconClass', () => {
+    test.skip('iconClass', () => {
     })
   })
 })

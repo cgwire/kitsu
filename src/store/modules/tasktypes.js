@@ -77,7 +77,6 @@ const getters = {
   getShotTaskTypeOptions: (state, getters) => getters.shotTaskTypes
     .map(
       (type) => { return { label: type.name, value: type.id } }
-<<<<<<< HEAD
     ),
 
   getTaskType: (state, getters) => (id) => {
@@ -91,9 +90,6 @@ const getters = {
     }
     return getTaskTypePriorityOfProd(taskType, rootGetters.currentProduction)
   }
-=======
-    )
->>>>>>> [qa] Add some tests around task types
 }
 
 const actions = {

@@ -225,7 +225,7 @@ export default {
     [
       'drag', 'dragstart', 'dragend', 'dragover',
       'dragenter', 'dragleave', 'drop'
-    ].forEach((evt) => {
+    ].forEach(evt => {
       if (this.$refs.wrapper) {
         this.$refs.wrapper.addEventListener(evt, (e) => {
           e.preventDefault()

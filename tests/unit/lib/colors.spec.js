@@ -1,4 +1,4 @@
-import colors from '../../../src/lib/colors'
+import colors from '@/lib/colors'
 
 describe('colors', () => {
   test('validationTextColor', () => {
@@ -55,7 +55,7 @@ describe('colors', () => {
   })
 
   test('fromString', () => {
-    expect(colors.fromString('123456')).toEqual('#c975f0')
-    expect(colors.fromString('Jhon Doe')).toEqual('#75f0c9')
+    expect(colors.fromString('123456')).toEqual('#f0ee75')
+    expect(colors.fromString('Jhon Doe')).toEqual('#9e75f0')
   })
 })
