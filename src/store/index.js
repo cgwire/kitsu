@@ -47,6 +47,6 @@ const modules = {
 
 export default new Vuex.Store({
   getters,
-  strict: true,
+  strict: process.env.NODE_ENV !== 'production',
   modules: modules
 })
