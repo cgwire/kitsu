@@ -237,9 +237,11 @@ const getters = {
   },
 
   productionAssetTypeOptions: (state, getters) => {
-    return getters.productionAssetTypes.map(
-      assetType => ({ label: assetType.name, value: assetType.id })
-    )
+    return getters.productionAssetTypes
+      .filter(assetType => assetType !== undefined)
+      .map(
+        assetType => ({ label: assetType.name, value: assetType.id })
+      )
   },
 
   productionStatusOptions: state => state.productionStatus.map(

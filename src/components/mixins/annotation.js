@@ -494,22 +494,29 @@ export const annotationMixin = {
       this.fabricCanvas = new fabric.Canvas(canvasId, {
         fireRightClick: true
       })
+      this.fabricCanvas.setDimensions({
+        width: 100,
+        height: 100
+      })
+      this.configureCanvas()
+      return this.fabricCanvas
+    },
+
+    configureCanvas () {
       this.fabricCanvas.off('object:moved', this.onObjectMoved)
+      this.fabricCanvas.off('text:changed', this.onObjectMoved)
       this.fabricCanvas.off('object:added', this.onObjectAdded)
       this.fabricCanvas.off('mouse:up', this.endDrawing)
       this.fabricCanvas.off('mouse:up', this.onCanvasReleased)
       this.fabricCanvas.off('mouse:move', this.onCanvasMouseMoved)
       this.fabricCanvas.off('mouse:down', this.onCanvasClicked)
       this.fabricCanvas.on('object:moved', this.onObjectMoved)
+      this.fabricCanvas.on('text:changed', this.onObjectMoved)
       this.fabricCanvas.on('object:added', this.onObjectAdded)
       this.fabricCanvas.on('mouse:up', this.endDrawing)
       this.fabricCanvas.on('mouse:move', this.onCanvasMouseMoved)
       this.fabricCanvas.on('mouse:down', this.onCanvasClicked)
       this.fabricCanvas.on('mouse:up', this.onCanvasReleased)
-      this.fabricCanvas.setDimensions({
-        width: 100,
-        height: 100
-      })
       this.fabricCanvas.freeDrawingBrush.color = this.color
       this.fabricCanvas.freeDrawingBrush.width = 4
       return this.fabricCanvas
@@ -571,11 +578,6 @@ export const annotationMixin = {
     endAnnotationSaving () {
       if (this.notSaved) {
         const preview = this.$options.annotatedPreview
-        this.$store.commit('UPDATE_PREVIEW_ANNOTATION', {
-          taskId: preview.task_id,
-          preview,
-          annotations: this.getNewAnnotations()
-        })
         this.$options.changesToSave = {
           preview,
           additions: [...this.additions],
