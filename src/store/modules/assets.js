@@ -141,6 +141,7 @@ const helpers = {
   },
 
   populateTask (task, asset, production) {
+    if (!task || typeof task !== 'object') return
     task.name = getTaskTypePriorityOfProd(
       helpers.getTaskType(task.task_type_id),
       production || helpers.getCurrentProduction()
@@ -186,6 +187,10 @@ const helpers = {
 
     const taskIds = []
     asset.tasks.forEach((task) => {
+      if (typeof task === 'string') {
+        task = taskMap.get(task)
+      }
+      if (!task) return
       asset.full_name = `${asset.asset_type_name} / ${asset.name}`
       helpers.populateTask(task, asset)
 
