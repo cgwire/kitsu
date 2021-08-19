@@ -2385,6 +2385,7 @@ export default {
     events: {
       'preview-file:annotation-update' (eventData) {
         if (
+          !this.tempMode &&
           this.previewFileMap.get(eventData.preview_file_id)
         ) {
           this.refreshPreview({

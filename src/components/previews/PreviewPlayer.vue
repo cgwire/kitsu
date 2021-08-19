@@ -1,6 +1,5 @@
 <template>
 <div ref="container" class="preview-player dark">
-
   <div class="preview" :style="{height: defaultHeight + 'px'}">
     <div class="flexrow filler">
       <div class="preview-container filler" ref="preview-container">
@@ -835,31 +834,15 @@ export default {
     },
 
     setupFabricCanvas () {
-      const fabricCanvas = new fabric.Canvas('annotation-canvas', {
-        fireRightClick: true
-      })
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
-      fabricCanvas.setDimensions({
+      this.fabricCanvas = new fabric.Canvas('annotation-canvas', {
+        fireRightClick: true,
         width: width,
         height: height
       })
-      fabricCanvas.freeDrawingBrush.color = this.color
-      fabricCanvas.freeDrawingBrush.width = 4
-      fabricCanvas.off('object:moved', this.onObjectMoved)
-      fabricCanvas.off('object:added', this.onObjectAdded)
-      fabricCanvas.off('mouse:move', this.onCanvasMouseMoved)
-      fabricCanvas.off('mouse:down', this.onCanvasClicked)
-      fabricCanvas.off('mouse:up', this.onCanvasReleased)
-      fabricCanvas.off('mouse:up', this.endDrawing)
-      fabricCanvas.on('object:moved', this.onObjectMoved)
-      fabricCanvas.on('object:added', this.onObjectAdded)
-      fabricCanvas.on('mouse:up', this.endDrawing)
-      fabricCanvas.on('mouse:move', this.onCanvasMouseMoved)
-      fabricCanvas.on('mouse:down', this.onCanvasClicked)
-      fabricCanvas.on('mouse:up', this.onCanvasReleased)
-      this.fabricCanvas = fabricCanvas
+      this.configureCanvas()
     },
 
     fixCanvasSize (dimensions) {
@@ -1484,7 +1467,7 @@ export default {
           this.refreshPreview({
             previewId: this.currentPreview.id,
             taskId: this.currentPreview.task_id
-          }).then(() => {
+          }).then(preview => {
             if (!this.notSaved) {
               this.reloadAnnotations()
               if (this.isPicture) this.loadAnnotation(this.getAnnotation(0))
