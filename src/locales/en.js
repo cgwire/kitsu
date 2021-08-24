@@ -544,6 +544,7 @@ export default {
       files_next: 'Next file for this revision',
       files_position: 'File index for this revision',
       files_previous: 'Previous file for this revision',
+      frames_per_picture: 'Frames per picture',
       fullscreen: 'See file in full screen',
       looping: 'Loop on current video',
       mute: 'Mute',
