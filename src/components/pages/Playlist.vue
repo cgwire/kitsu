@@ -420,6 +420,8 @@ import firstBy from 'thenby'
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 import { PlusIcon, XIcon } from 'vue-feather-icons'
+
+import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 import { formatDate } from '@/lib/time'
 import { getPlaylistPath } from '@/lib/path'
 import {
@@ -829,7 +831,9 @@ export default {
             entity.preview_file_annotations,
           preview_file_previews:
             entityInfo.preview_file_previews ||
-            entity.preview_file_previews
+            entity.preview_file_previews,
+          preview_nb_frames: entityInfo.nb_frames ||
+            entity.nb_frames || DEFAULT_NB_FRAMES_PICTURE
         }
         this.previewFileEntityMap.set(
           playlistEntity.preview_file_id,

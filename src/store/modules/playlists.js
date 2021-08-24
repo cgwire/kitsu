@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 import playlistsApi from '../api/playlists'
 import { sortByDate } from '../../lib/sorting'
 import { removeModelFromList, updateModelFromList } from '../../lib/models'
@@ -338,7 +339,8 @@ const mutations = {
       preview_file_id: entity.preview_file_id,
       preview_file_extension: entity.preview_file_extension,
       preview_file_annotations: entity.preview_file_annotations,
-      preview_files: entity.preview_files
+      preview_files: entity.preview_files,
+      preview_nb_frames: entity.nb_frames || DEFAULT_NB_FRAMES_PICTURE
     })
   },
 

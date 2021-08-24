@@ -244,7 +244,7 @@
         min="0"
         class="frame-per-image-input"
         :title="$t('playlists.actions.frames_per_picture')"
-        v-model="framesPerImage"
+        v-model="framesPerImage[playingEntityIndex]"
       >
     </template>
     <span
@@ -749,6 +749,7 @@ import Spinner from '@/components/widgets/Spinner'
 import TaskInfo from '@/components/sides/TaskInfo'
 
 import { annotationMixin } from '@/components/mixins/annotation'
+import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 import { domMixin } from '@/components/mixins/dom'
 
 export default {
@@ -810,7 +811,7 @@ export default {
       entityList: [],
       entityListToCompare: [],
       fabricCanvas: null,
-      framesPerImage: 48,
+      framesPerImage: [],
       framesSeenOfPicture: 0,
       fullScreen: false,
       isCommentsHidden: true,
@@ -1780,17 +1781,27 @@ export default {
         this.onPlayNextEntityClicked()
         if (this.isCurrentPreviewPicture) {
           this.framesSeenOfPicture = 0
-          setTimeout(this.continuePlayingPlaylist, 100, this.playingEntityIndex, Date.now())
+          setTimeout(
+            this.continuePlayingPlaylist,
+            100,
+            this.playingEntityIndex,
+            Date.now()
+          )
         }
       }
     },
 
     continuePlayingPlaylist (entityIndex, startMs) {
-      const durationToWaitMs = this.framesPerImage * 1000 / this.fps
+      const framesPerImage = this.framesPerImage[entityIndex]
+      const durationToWaitMs = framesPerImage * 1000 / this.fps
       const durationWaited = Date.now() - startMs
       if (durationWaited < durationToWaitMs) {
-        setTimeout(this.continuePlayingPlaylist, 100, entityIndex, startMs)
-        this.framesSeenOfPicture = Math.floor((durationWaited / 1000) * this.fps)
+        setTimeout(
+          this.continuePlayingPlaylist, 100, entityIndex, startMs
+        )
+        this.framesSeenOfPicture = Math.floor(
+          (durationWaited / 1000) * this.fps
+        )
         return
       }
 
@@ -2381,6 +2392,12 @@ export default {
       this.currentPreviewIndex = 0
       this.currentComparisonPreviewuIndex = 0
       this.entityList = Object.values(this.entities)
+      console.log(this.entityList)
+      this.entityList.forEach((entity, i) => {
+        this.framesPerImage[i] = entity.preview_nb_frames ||
+          DEFAULT_NB_FRAMES_PICTURE
+      })
+      console.log({ framesPerImage: this.framesPerImage })
       this.playingEntityIndex = 0
       this.pause()
       if (this.rawPlayer) this.rawPlayer.setCurrentTime(0)
