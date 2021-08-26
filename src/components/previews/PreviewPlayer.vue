@@ -1,5 +1,5 @@
 <template>
-<div ref="container" class="preview-player dark">
+<div ref="container" class="preview-player dark" tabindex="-1">
   <div class="preview" :style="{height: defaultHeight + 'px'}">
     <div class="flexrow filler">
       <div class="preview-container filler" ref="preview-container">
@@ -63,7 +63,10 @@
         }"
         :task="task"
         :is-preview="false"
+        :current-time-raw="currentTimeRaw"
+        :current-parent-preview="currentPreview"
         @comment-added="$emit('comment-added')"
+        @time-code-clicked="timeCodeClicked"
       />
     </div>
 
@@ -725,6 +728,24 @@ export default {
       const isRepeating =
         localPreferences.getBoolPreference('player:repeating')
       this.isRepeating = isRepeating
+    },
+
+    focus () {
+      this.$refs.container.focus()
+    },
+
+    timeCodeClicked (
+      { versionRevision, minutes, seconds, milliseconds, frame }
+    ) {
+      const preview = this.lastPreviewFiles.find(
+        p => p.revision === parseInt(versionRevision)
+      )
+      if (!preview) {
+        return
+      }
+      this.changeCurrentPreview(preview)
+      const time = parseInt(minutes) * 60 + parseInt(seconds) + parseInt(milliseconds) / 1000
+      setTimeout(this.setCurrentTime, 20, time)
     },
 
     // Video

@@ -258,6 +258,12 @@ export default {
         })
       }
       this.$emit('preview-changed', this.entity, previewFile)
+    },
+
+    'entity.preview_file_id': function () {
+      if (this.previewFileId !== this.entity.preview_file_id) {
+        this.previewFileId = this.entity.preview_file_id
+      }
     }
   }
 }

@@ -69,7 +69,7 @@
             </span>
           </p>
           <p
-            v-html="renderComment(comment.text, comment.mentions, personMap)"
+            v-html="renderComment(comment.text, comment.mentions, personMap, uniqueClassName)"
             class="comment-text"
             v-if="comment.text"
           >
@@ -238,7 +238,8 @@ export default {
 
   data () {
     return {
-      checklist: []
+      checklist: [],
+      uniqueClassName: (Math.random() + 1).toString(36).substring(2)
     }
   },
 
@@ -286,6 +287,19 @@ export default {
           this.$options.silent = false
         })
     }
+    Array.from(
+      document.getElementsByClassName(this.uniqueClassName)
+    ).forEach(element => {
+      element.addEventListener('click', this.timeCodeClicked)
+    })
+  },
+
+  destroyed () {
+    Array.from(
+      document.getElementsByClassName(this.uniqueClassName)
+    ).forEach(element => {
+      element.removeEventListener('click', this.timeCodeClicked)
+    })
   },
 
   computed: {
@@ -483,6 +497,10 @@ export default {
 
     acknowledgeComment (comment) {
       this.$emit('ack-comment', comment)
+    },
+
+    timeCodeClicked (event) {
+      this.$emit('time-code-clicked', event.target.dataset)
     },
 
     renderComment

@@ -156,6 +156,7 @@
                 @delete-comment="onDeleteComment"
                 @checklist-updated="saveComment"
                 @ack-comment="onAckComment"
+                @time-code-clicked="timeCodeClicked"
                 v-for="(comment, index) in taskComments"
               />
             </div>
@@ -240,6 +241,7 @@ import {
 import {
   getTaskTypeStyle
 } from '../../lib/render'
+import { replaceTimeWithTimecode } from '@/lib/task'
 
 import AddComment from '../widgets/AddComment'
 import AddPreviewModal from '../modals/AddPreviewModal'
@@ -281,6 +283,14 @@ export default {
     isPreview: {
       type: Boolean,
       default: true
+    },
+    currentTimeRaw: {
+      type: Number,
+      default: 0
+    },
+    currentParentPreview: {
+      type: Object,
+      default: null
     }
   },
 
@@ -563,6 +573,19 @@ export default {
     },
 
     addComment (comment, attachment, checklist, taskStatusId) {
+      let preview = this.currentParentPreview
+        ? this.currentParentPreview : this.currentPreview
+      // find real preview, which contains the `revision`
+      preview = this.taskPreviews.find(p => p.id === preview.id)
+      if (preview) {
+        comment = replaceTimeWithTimecode(
+          comment,
+          preview.revision,
+          this.previewPlayer
+            ? this.previewPlayer.currentTimeRaw : this.currentTimeRaw,
+          this.currentProduction.fps
+        )
+      }
       const params = {
         taskId: this.task.id,
         taskStatusId,
@@ -916,6 +939,26 @@ export default {
         index === this.taskComments.length - 1 ||
         comment.task_status_id !== this.taskComments[index + 1].task_status_id
       )
+    },
+
+    timeCodeClicked (
+      { versionRevision, minutes, seconds, milliseconds, frame }
+    ) {
+      if (!this.isPreview) {
+        this.$emit(
+          'time-code-clicked',
+          { versionRevision, minutes, seconds, milliseconds, frame }
+        )
+        return
+      }
+      this.changeCurrentPreview(this.taskPreviews.find(
+        p => p.revision === parseInt(versionRevision)
+      ))
+      const time = parseInt(minutes) * 60 + parseInt(seconds) + parseInt(milliseconds) / 1000
+      setTimeout(() => {
+        this.previewPlayer.setCurrentTime(time)
+        this.previewPlayer.focus()
+      }, 20)
     }
   },
 

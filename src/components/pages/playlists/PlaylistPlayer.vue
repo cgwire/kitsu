@@ -187,6 +187,9 @@
       }"
       :task="task"
       :is-preview="false"
+      :current-time-raw="currentTimeRaw"
+      :current-parent-preview="currentPreview"
+      @time-code-clicked="timeCodeClicked"
     />
   </div>
 
@@ -2269,6 +2272,23 @@ export default {
         this.$options.scrubbing = false
       }
       return false
+    },
+
+    timeCodeClicked (
+      { versionRevision, minutes, seconds, milliseconds, frame }
+    ) {
+      const previews = this.currentEntity.preview_files[this.task.task_type_id]
+      const previewFile = previews.find(
+        p => p.revision === parseInt(versionRevision)
+      )
+      this.onPreviewChanged(this.currentEntity, previewFile)
+      const time = parseInt(minutes) * 60 + parseInt(seconds) + parseInt(milliseconds) / 1000
+      setTimeout(() => {
+        this.rawPlayer.setCurrentTime(time)
+        if (this.isComparing) {
+          this.$refs['raw-player-comparison'].setCurrentTime(time)
+        }
+      }, 20)
     }
   },
 
