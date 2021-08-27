@@ -937,6 +937,7 @@ export default {
     select_preview_file: 'Please select a file (picture, movie or others) from your hard drive to be used as a preview for the current task:',
     show_assignations: 'Show assignations',
     show_infos: 'Show additional information',
+    smaller: 'Reduce task panel',
     subscribe_notifications: 'Subscribe to notifications',
     select_file: 'Please select the file from your hard drive you want to attach to your comment:',
     tasks: 'Tasks',
