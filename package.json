@@ -85,5 +85,8 @@
     "vue-template-compiler": "2.6.14",
     "webpack": "5.40.0"
   },
-  "babel": {}
+  "babel": {},
+  "engines": {
+    "node": ">=16.0"
+  }
 }
