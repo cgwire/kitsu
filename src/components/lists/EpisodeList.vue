@@ -370,9 +370,9 @@ export default {
     chartTakeData (entryId, columnId, takeNumber, dataType = 'count') {
       const evolutionStats =
         this.episodeRetakeStats[entryId][columnId].evolution
-      const nbRetakes = evolutionStats.[takeNumber].retake[dataType]
-      const nbDones = evolutionStats.[takeNumber].done[dataType]
-      const nbOthers = evolutionStats.[takeNumber].other[dataType]
+      const nbRetakes = evolutionStats[takeNumber].retake[dataType]
+      const nbDones = evolutionStats[takeNumber].done[dataType]
+      const nbOthers = evolutionStats[takeNumber].other[dataType]
       // Order here is important
       return [
         ['retake', nbRetakes, '#ff3860'],
