@@ -867,6 +867,9 @@ export default {
       if (searchQuery.length !== 1 && !this.isLongShotList) {
         this.applySearch(searchQuery)
       }
+      if (searchQuery.length === 0 && this.isLongShotList) {
+        this.applySearch('')
+      }
     },
 
     saveScrollPosition (scrollPosition) {
