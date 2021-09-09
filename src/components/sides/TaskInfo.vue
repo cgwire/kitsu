@@ -1,7 +1,6 @@
 <template>
   <div
     class="side task-info"
-    :style="panelStyle"
     ref="side-panel"
     v-if="task"
   >
@@ -27,16 +26,30 @@
         <button-simple
           class="flexrow-item change-wideness-button"
           icon="right"
+          :title="$t('tasks.smaller')"
+          @click="toggleExtraWidth"
+          v-if="isExtraWide && isPreview"
+        />
+        <button-simple
+          class="flexrow-item change-wideness-button"
+          icon="left"
           :title="$t('tasks.bigger')"
+          @click="toggleExtraWidth"
+          v-else-if="isWide && isPreview"
+        />
+        <button-simple
+          class="flexrow-item change-wideness-button"
+          icon="right"
+          :title="$t('tasks.smaller')"
           @click="toggleWidth"
-          v-if="isWide && isPreview"
+          v-if="isWide && !isExtraWide && isPreview"
         />
         <button-simple
           class="flexrow-item change-wideness-button"
           icon="left"
           :title="$t('tasks.bigger')"
           @click="toggleWidth"
-          v-else-if="isPreview"
+          v-else-if="!isExtraWide && isPreview"
         />
         <button-simple
           class="flexrow-item set-thumbnail-button"
@@ -95,6 +108,7 @@
                 :read-only="!isCurrentUserManager"
                 :is-assigned="isAssigned"
                 :task="task"
+                :force-enable-comparison="isExtraWide"
                 @annotation-changed="onAnnotationChanged"
                 @change-current-preview="changeCurrentPreview"
                 @add-extra-preview="onAddExtraPreview"
@@ -295,6 +309,7 @@ export default {
       commentToEdit: null,
       isSubscribed: false,
       isWide: false,
+      isExtraWide: false,
       otherPreviews: [],
       taskComments: [],
       taskPreviews: [],
@@ -501,12 +516,6 @@ export default {
         return this.taskPreviews.slice(0, 5)
       } else {
         return []
-      }
-    },
-
-    panelStyle () {
-      return {
-        width: this.isWide ? 700 : 350
       }
     },
 
@@ -776,6 +785,16 @@ export default {
         panel.parentElement.style['min-width'] = '700px'
       } else {
         panel.parentElement.style['min-width'] = '350px'
+      }
+    },
+
+    toggleExtraWidth () {
+      this.isExtraWide = !this.isExtraWide
+      const panel = this.$refs['side-panel']
+      if (this.isExtraWide) {
+        panel.parentElement.style['min-width'] = '65vw'
+      } else {
+        panel.parentElement.style['min-width'] = '700px'
       }
     },
 

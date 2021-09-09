@@ -162,7 +162,7 @@
           icon="compare"
           :title="$t('playlists.actions.split_screen')"
           @click="onCompareClicked"
-          v-if="taskTypeOptions.length > 0 && fullScreen"
+          v-if="taskTypeOptions.length > 0 && isComparisonEnabled"
         />
 
         <combobox
@@ -171,7 +171,7 @@
           :is-dark="true"
           :thin="true"
           v-model="taskTypeId"
-          v-if="isComparing && (!light || fullScreen)"
+          v-if="isComparing && (!light || isComparisonEnabled)"
         />
         <combobox
           class="comparison-combobox dark"
@@ -179,7 +179,7 @@
           :is-dark="true"
           :thin="true"
           v-model="previewToCompareId"
-          v-if="isComparing && (!light || fullScreen)"
+          v-if="isComparing && (!light || isComparisonEnabled)"
         />
       </div>
 
@@ -476,6 +476,10 @@ export default {
     taskTypeMap: {
       type: Map,
       default: () => new Map()
+    },
+    forceEnableComparison: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -692,6 +696,10 @@ export default {
       } else {
         return []
       }
+    },
+
+    isComparisonEnabled () {
+      return this.fullScreen || this.forceEnableComparison
     }
   },
 
