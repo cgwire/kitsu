@@ -20,23 +20,28 @@
     </figure>
     <div class="media-content">
       <at-ta
-        :members="team"
+        :members="atOptions"
         name-key="full_name"
         :limit="2"
       >
         <template slot="item" slot-scope="team">
-          <div class="flexrow">
-            <people-avatar
-              class="flexrow-item"
-              :person="team.item"
-              :size="20"
-              :font-size="11"
-              :no-cache="true"
-            />
-            <span class="flexrow-item">
-              {{ team.item.full_name }}
-            </span>
-          </div>
+          <template v-if="team.item.isTime">
+            ⏱️ time
+          </template>
+          <template v-else>
+            <div class="flexrow">
+              <people-avatar
+                class="flexrow-item"
+                :person="team.item"
+                :size="20"
+                :font-size="11"
+                :no-cache="true"
+              />
+              <span class="flexrow-item">
+                {{ team.item.full_name }}
+              </span>
+            </div>
+          </template>
         </template>
         <textarea
           ref="comment-textarea"
@@ -165,6 +170,7 @@ export default {
 
   data () {
     return {
+      atOptions: [],
       isDragging: false,
       text: '',
       attachment: [],
@@ -345,6 +351,18 @@ export default {
   watch: {
     task () {
       this.task_status_id = this.task.task_status_id
+    },
+
+    team: {
+      deep: true,
+      immediate: true,
+      handler () {
+        this.atOptions = this.team
+        this.atOptions.push({
+          isTime: true,
+          full_name: 'time'
+        })
+      }
     }
   }
 }

@@ -100,6 +100,7 @@
                 @edit-comment="onEditComment"
                 @delete-comment="onDeleteComment"
                 @checklist-updated="saveComment"
+                @time-code-clicked="timeCodeClicked"
                 v-for="(comment, index) in currentTaskComments"
               />
             </div>
@@ -255,6 +256,8 @@ import {
   ChevronLeftIcon,
   ImageIcon
 } from 'vue-feather-icons'
+
+import { replaceTimeWithTimecode } from '@/lib/task'
 
 import AddComment from '../widgets/AddComment'
 import AddPreviewModal from '../modals/AddPreviewModal'
@@ -785,6 +788,14 @@ export default {
     },
 
     addComment (comment, attachment, checklist, taskStatusId) {
+      if (this.currentPreview && this.previewPlayer) {
+        comment = replaceTimeWithTimecode(
+          comment,
+          this.currentPreview.revision,
+          this.previewPlayer.currentTimeRaw,
+          this.currentProduction.fps
+        )
+      }
       const params = {
         taskId: this.currentTask.id,
         taskStatusId: taskStatusId,
@@ -1135,6 +1146,19 @@ export default {
         index === comments.length - 1 ||
         comment.task_status_id !== comments[index + 1].task_status_id
       )
+    },
+
+    timeCodeClicked (
+      { versionRevision, minutes, seconds, milliseconds, frame }
+    ) {
+      this.changeCurrentPreview(this.currentTaskPreviews.find(
+        p => p.revision === parseInt(versionRevision)
+      ))
+      const time = parseInt(minutes) * 60 + parseInt(seconds) + parseInt(milliseconds) / 1000
+      setTimeout(() => {
+        this.previewPlayer.setCurrentTime(time)
+        this.previewPlayer.focus()
+      }, 20)
     }
   },
 
