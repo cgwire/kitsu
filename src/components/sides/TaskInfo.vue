@@ -64,11 +64,6 @@
           @click="toggleSubscribe"
           v-if="!isAssigned"
         />
-        <validation-tag
-          class="is-medium flexrow-item"
-          :task="task"
-          :is-static="true"
-        />
         <div class="filler"></div>
         <div class="preview-list flexrow" v-if="isPreview">
           <span
@@ -102,7 +97,7 @@
               <preview-player
                 :entity-preview-files="taskEntityPreviews"
                 :last-preview-files="lastFivePreviews"
-                :previews="currentPreview.previews"
+                :previews="currentPreview ? currentPreview.previews : []"
                 :task-type-map="taskTypeMap"
                 :light="!isWide"
                 :read-only="!isCurrentUserManager"
@@ -114,6 +109,7 @@
                 @add-extra-preview="onAddExtraPreview"
                 @remove-extra-preview="onRemoveExtraPreview"
                 @comment-added="onCommentAdded"
+                @time-updated="onTimeUpdated"
                 ref="preview-player"
               />
             </div>
@@ -141,6 +137,9 @@
               :is-loading="loading.addComment"
               :attached-file-name="attachedFileName"
               :is-error="errors.addComment"
+              :fps="parseInt(currentFps)"
+              :time="isPreview ? currentTime : currentTimeRaw"
+              :revision="currentRevision"
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
               @file-drop="selectFile"
@@ -251,23 +250,21 @@ import { mapGetters, mapActions } from 'vuex'
 import {
   getTaskEntityPath,
   getTaskPath
-} from '../../lib/path'
+} from '@/lib/path'
 import {
   getTaskTypeStyle
-} from '../../lib/render'
-import { replaceTimeWithTimecode } from '@/lib/task'
+} from '@/lib/render'
 
-import AddComment from '../widgets/AddComment'
-import AddPreviewModal from '../modals/AddPreviewModal'
-import ButtonSimple from '../widgets/ButtonSimple'
-import Comment from '../widgets/Comment'
-import DeleteModal from '../modals/DeleteModal'
-import EditCommentModal from '../modals/EditCommentModal'
-import Spinner from '../widgets/Spinner'
-import SubscribeButton from '../widgets/SubscribeButton'
-import TaskTypeName from '../widgets/TaskTypeName'
-import ValidationTag from '../widgets/ValidationTag'
-import PreviewPlayer from '../previews/PreviewPlayer'
+import AddComment from '@/components/widgets/AddComment'
+import AddPreviewModal from '@/components/modals/AddPreviewModal'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import Comment from '@/components/widgets/Comment'
+import DeleteModal from '@/components/modals/DeleteModal'
+import EditCommentModal from '@/components/modals/EditCommentModal'
+import Spinner from '@/components/widgets/Spinner'
+import SubscribeButton from '@/components/widgets/SubscribeButton'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
+import PreviewPlayer from '@/components/previews/PreviewPlayer'
 
 export default {
   name: 'task-info',
@@ -281,8 +278,7 @@ export default {
     PreviewPlayer,
     Spinner,
     SubscribeButton,
-    TaskTypeName,
-    ValidationTag
+    TaskTypeName
   },
 
   props: {
@@ -316,6 +312,7 @@ export default {
       currentPreviewIndex: 0,
       currentPreviewPath: '',
       currentPreviewDlPath: '',
+      currentTime: 0,
       commentToEdit: null,
       isSubscribed: false,
       isWide: false,
@@ -388,6 +385,7 @@ export default {
     ]),
 
     currentTeam () {
+      if (!this.task) return []
       const production = this.productionMap.get(this.task.project_id)
       return production.team.map(id => this.personMap.get(id))
     },
@@ -413,6 +411,7 @@ export default {
     },
 
     isCommentingAllowed () {
+      if (!this.task) return false
       const isManager = this.isCurrentUserManager
       const isAssigned = this.task.assignees.find(
         (personId) => personId === this.user.id
@@ -453,6 +452,16 @@ export default {
       } else {
         return null
       }
+    },
+
+    currentFps () {
+      return this.productionMap.get(this.task.project_id).fps || '25'
+    },
+
+    currentRevision () {
+      return this.currentParentPreview
+        ? this.currentParentPreview.revision
+        : this.currentPreview ? this.currentPreview.revision : 0
     },
 
     extension () {
@@ -586,15 +595,6 @@ export default {
         ? this.currentParentPreview : this.currentPreview
       // find real preview, which contains the `revision`
       preview = this.taskPreviews.find(p => p.id === preview.id)
-      if (preview) {
-        comment = replaceTimeWithTimecode(
-          comment,
-          preview.revision,
-          this.previewPlayer
-            ? this.previewPlayer.currentTimeRaw : this.currentTimeRaw,
-          this.currentProduction.fps
-        )
-      }
       const params = {
         taskId: this.task.id,
         taskStatusId,
@@ -978,6 +978,10 @@ export default {
         this.previewPlayer.setCurrentTime(time)
         this.previewPlayer.focus()
       }, 20)
+    },
+
+    onTimeUpdated (time) {
+      this.currentTime = time
     }
   },
 

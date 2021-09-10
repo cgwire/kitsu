@@ -695,6 +695,19 @@ ul {
   color: $blue;
 }
 
+.timecode {
+  border: 1px solid $blue;
+  border-radius: 5px;
+  color: $blue;
+  font-size: 0.9em;
+  padding: 3px 4px;
+
+  &:hover {
+    border-color: $blue-light;
+    color: $blue-light;
+  }
+}
+
 .th-project {
   width: 30px;
   border-radius: 50%;

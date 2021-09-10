@@ -1,6 +1,8 @@
 import marked from 'marked'
 import sanitizeHTML from 'sanitize-html'
-import { TIME_CODE_REGEX } from './task'
+import { formatFrame, formatTime } from './video'
+
+export const TIME_CODE_REGEX = /v(\d+) (\d+):(\d+)\.(\d+) \((\d+)\)/g
 
 export const sanitize = (html) => {
   return sanitizeHTML(html, {
@@ -37,9 +39,9 @@ export const renderComment = (
 
   return compiled.replaceAll(
     TIME_CODE_REGEX,
-    function (match, p1, p2, p3, p4, p5, offset, string) {
+    (match, p1, p2, p3, p4, p5, offset, string) => {
       return `<a
-        class="mention timecode ${className}"
+        class="timecode ${className}"
         href="#"
         data-version-revision="${p1}"
         data-minutes="${p2}"
@@ -54,4 +56,17 @@ export const renderComment = (
 export const renderMarkdown = (input) => {
   const compiled = marked(input || '')
   return sanitize(compiled)
+}
+
+export const replaceTimeWithTimecode = (
+  comment,
+  currentPreviewRevision,
+  currentTimeRaw,
+  fps
+) => {
+  const frame = formatFrame(currentTimeRaw, fps)
+  const formatedTime = formatTime(currentTimeRaw)
+  return comment.replaceAll(
+    '@frame', `v${currentPreviewRevision} ${formatedTime} (${frame})`
+  )
 }

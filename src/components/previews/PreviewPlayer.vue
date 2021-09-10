@@ -1,6 +1,9 @@
 <template>
 <div ref="container" class="preview-player dark" tabindex="-1">
-  <div class="preview" :style="{height: defaultHeight + 'px'}">
+  <div
+    class="preview"
+    :style="{height: defaultHeight + 'px'}"
+  >
     <div class="flexrow filler">
       <div class="preview-container filler" ref="preview-container">
         <div
@@ -726,6 +729,7 @@ export default {
     updateTime (time) {
       this.updateProgressBar(time)
       if (this.currentTimeRaw !== time) {
+        this.$emit('time-updated', time)
         this.currentTimeRaw = time
         this.currentTime = this.formatTime(this.currentTimeRaw)
         if (!this.isPlaying) this.loadAnnotation()

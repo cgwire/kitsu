@@ -23,10 +23,11 @@
         :members="atOptions"
         name-key="full_name"
         :limit="2"
+        @input="onTextChanged"
       >
         <template slot="item" slot-scope="team">
           <template v-if="team.item.isTime">
-            ⏱️ time
+            ⏱️  frame
           </template>
           <template v-else>
             <div class="flexrow">
@@ -146,6 +147,7 @@
 import { mapGetters } from 'vuex'
 import { remove } from '@/lib/models'
 import colors from '@/lib/colors'
+import { replaceTimeWithTimecode } from '@/lib/render'
 
 import AtTa from 'vue-at/dist/vue-at-textarea'
 import AddCommentImageModal from '@/components/modals/AddCommentImageModal'
@@ -224,6 +226,18 @@ export default {
     team: {
       type: Array,
       default: () => []
+    },
+    fps: {
+      type: Number,
+      default: 25
+    },
+    revision: {
+      type: Number,
+      default: 1
+    },
+    time: {
+      type: Number,
+      default: 0
     }
   },
 
@@ -243,6 +257,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentProduction',
       'isDarkTheme'
     ]),
 
@@ -275,6 +290,12 @@ export default {
 
   methods: {
     runAddComment (text, attachment, checklist, taskStatusId) {
+      text = replaceTimeWithTimecode(
+        text,
+        this.revision,
+        this.time,
+        this.fps
+      )
       this.$emit('add-comment', text, attachment, checklist, taskStatusId)
       this.text = ''
       this.attachment = []
@@ -341,6 +362,20 @@ export default {
       })
     },
 
+    onTextChanged (input) {
+      if (input.indexOf('@frame') >= 0) {
+        this.$nextTick(() => {
+          const text = replaceTimeWithTimecode(
+            this.$refs['comment-textarea'].value,
+            this.revision,
+            this.time,
+            this.fps
+          )
+          this.$refs['comment-textarea'].value = text
+        })
+      }
+    },
+
     onAddChecklistItem (item) {
       this.checklist[item.index].text = this.checklist[item.index].text.trim()
       delete item.index
@@ -357,10 +392,10 @@ export default {
       deep: true,
       immediate: true,
       handler () {
-        this.atOptions = this.team
+        this.atOptions = [...this.team]
         this.atOptions.push({
           isTime: true,
-          full_name: 'time'
+          full_name: 'frame'
         })
       }
     }

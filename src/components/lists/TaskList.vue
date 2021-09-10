@@ -80,6 +80,7 @@
               :height="33"
               :empty-width="50"
               :empty-height="33"
+              v-if="task.entity"
             />
           </td>
           <td class="asset-type" v-if="isAssets">
