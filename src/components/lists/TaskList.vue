@@ -24,7 +24,11 @@
           <th class="frames" ref="th-frames" v-if="!isAssets">
             {{ $t('tasks.fields.frames') }}
           </th>
-          <th class="estimation" ref="th-estimation">
+          <th
+            ref="th-estimation"
+            class="estimation"
+            :title="$t('main.estimation')"
+          >
             {{ $t('tasks.fields.estimation').substring(0, 3) }}.
           </th>
           <th class="duration" ref="th-duration">
