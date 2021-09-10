@@ -4,13 +4,13 @@
     ref="player1"
     preload="auto"
     :muted="muted"
-    @ended="playNext"
+    @ended="$emit('play-next')"
   />
   <video
     ref="player2"
     preload="auto"
     :muted="muted"
-    @ended="playNext"
+    @ended="$emit('play-next')"
   />
 </div>
 </template>

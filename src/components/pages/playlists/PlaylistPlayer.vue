@@ -119,6 +119,7 @@
         @entity-change="onPlayerEntityChange"
         @time-update="onTimeUpdate"
         @max-duration-update="onMaxDurationUpdate"
+        @play-next="onPlayNext"
         v-show="isCurrentPreviewMovie && !isLoading"
       />
 
@@ -239,6 +240,16 @@
       :title="$t('playlists.actions.next_shot')"
       icon="forward"
     />
+    <template v-if="isCurrentPreviewPicture">
+      {{ framesSeenOfPicture }} f /
+      <input
+        type="number"
+        min="0"
+        class="frame-per-image-input"
+        :title="$t('playlists.actions.frames_per_picture')"
+        v-model="framesPerImage[playingEntityIndex]"
+      >
+    </template>
     <span
       class="flexrow-item time-indicator"
       :title="$t('playlists.actions.entity_index')"
@@ -741,6 +752,7 @@ import Spinner from '@/components/widgets/Spinner'
 import TaskInfo from '@/components/sides/TaskInfo'
 
 import { annotationMixin } from '@/components/mixins/annotation'
+import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 import { domMixin } from '@/components/mixins/dom'
 
 export default {
@@ -802,6 +814,8 @@ export default {
       entityList: [],
       entityListToCompare: [],
       fabricCanvas: null,
+      framesPerImage: [],
+      framesSeenOfPicture: 0,
       fullScreen: false,
       isCommentsHidden: true,
       isComparing: false,
@@ -1760,6 +1774,48 @@ export default {
       if (!this.$options.silent) this.scrollToEntity(this.playingEntityIndex)
     },
 
+    onPlayNext () {
+      if (this.entityList[this.nextEntityIndex].preview_file_extension === 'mp4') {
+        this.rawPlayer.playNext()
+        if (this.isComparing) {
+          this.$refs['raw-player-comparison'].playNext()
+        }
+      } else {
+        this.onPlayNextEntityClicked()
+        if (this.isCurrentPreviewPicture) {
+          this.framesSeenOfPicture = 0
+          setTimeout(
+            this.continuePlayingPlaylist,
+            100,
+            this.playingEntityIndex,
+            Date.now()
+          )
+        }
+      }
+    },
+
+    continuePlayingPlaylist (entityIndex, startMs) {
+      const framesPerImage = this.framesPerImage[entityIndex]
+      const durationToWaitMs = framesPerImage * 1000 / this.fps
+      const durationWaited = Date.now() - startMs
+      if (durationWaited < durationToWaitMs) {
+        setTimeout(
+          this.continuePlayingPlaylist, 100, entityIndex, startMs
+        )
+        this.framesSeenOfPicture = Math.floor(
+          (durationWaited / 1000) * this.fps
+        )
+        return
+      }
+
+      // we've seen all the frames the picture should be visible
+      this.framesSeenOfPicture = 0
+      if (this.playingEntityIndex === entityIndex) {
+        this.isPlaying = true
+        this.onPlayNextEntityClicked()
+      }
+    },
+
     onPreviewChanged (entity, previewFile) {
       this.pause()
       const localEntity = this.entityList.find(s => s.id === entity.id)
@@ -2358,6 +2414,12 @@ export default {
       this.currentPreviewIndex = 0
       this.currentComparisonPreviewuIndex = 0
       this.entityList = Object.values(this.entities)
+      console.log(this.entityList)
+      this.entityList.forEach((entity, i) => {
+        this.framesPerImage[i] = entity.preview_nb_frames ||
+          DEFAULT_NB_FRAMES_PICTURE
+      })
+      console.log({ framesPerImage: this.framesPerImage })
       this.playingEntityIndex = 0
       this.pause()
       if (this.rawPlayer) this.rawPlayer.setCurrentTime(0)
@@ -2843,5 +2905,14 @@ progress {
     top: -1px;
     left: 33px;
   }
+}
+
+.frame-per-image-input {
+  padding: 2px;
+  margin-left: 3px;
+  background-color: $dark-grey-2;
+  border: 1px solid $dark-grey-stronger;
+  color: white;
+  width: 3rem;
 }
 </style>
