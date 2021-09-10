@@ -119,6 +119,7 @@
             scope="col"
             class="estimation"
             ref="th-spent"
+            :title="$t('main.estimation')"
             v-if="!isCurrentUserClient && isShowInfos && isShotEstimation && metadataDisplayHeaders.estimation"
           >
             {{ $t('main.estimation_short') }}

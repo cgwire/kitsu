@@ -24,7 +24,11 @@
           <th class="frames" ref="th-frames" v-if="!isAssets">
             {{ $t('tasks.fields.frames') }}
           </th>
-          <th class="estimation" ref="th-estimation">
+          <th
+            ref="th-estimation"
+            class="estimation"
+            :title="$t('main.estimation')"
+          >
             {{ $t('tasks.fields.estimation').substring(0, 3) }}.
           </th>
           <th class="duration" ref="th-duration">
@@ -76,6 +80,7 @@
               :height="33"
               :empty-width="50"
               :empty-height="33"
+              v-if="task.entity"
             />
           </td>
           <td class="asset-type" v-if="isAssets">

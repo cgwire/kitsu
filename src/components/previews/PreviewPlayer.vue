@@ -1,6 +1,9 @@
 <template>
 <div ref="container" class="preview-player dark" tabindex="-1">
-  <div class="preview" :style="{height: defaultHeight + 'px'}">
+  <div
+    class="preview"
+    :style="{height: defaultHeight + 'px'}"
+  >
     <div class="flexrow filler">
       <div class="preview-container filler" ref="preview-container">
         <div
@@ -726,6 +729,7 @@ export default {
     updateTime (time) {
       this.updateProgressBar(time)
       if (this.currentTimeRaw !== time) {
+        this.$emit('time-updated', time)
         this.currentTimeRaw = time
         this.currentTime = this.formatTime(this.currentTimeRaw)
         if (!this.isPlaying) this.loadAnnotation()
@@ -803,22 +807,35 @@ export default {
     },
 
     goPreviousFrame () {
+      this.syncComparisonViewer()
       this.previewViewer.goPreviousFrame()
-      if (this.comparisonViewer) this.comparisonViewer.goPreviousFrame()
+      this.comparisonViewer.goPreviousFrame()
       this.clearCanvas()
     },
 
     goNextFrame () {
+      this.syncComparisonViewer()
       this.previewViewer.goNextFrame()
-      if (this.comparisonViewer) this.comparisonViewer.goNextFrame()
+      this.comparisonViewer.goNextFrame()
       this.clearCanvas()
+    },
+
+    syncComparisonViewer () {
+      if (this.comparisonViewer) {
+        this.comparisonViewer.setCurrentTime(
+          this.previewViewer.getCurrentTimeRaw()
+        )
+      }
     },
 
     onVideoEnd () {
       this.isPlaying = false
       if (this.isRepeating) {
+        this.syncComparisonViewer()
         this.setCurrentTime(0)
-        this.play()
+        this.$nextTick(() => {
+          this.play()
+        })
       }
     },
 
@@ -1358,8 +1375,8 @@ export default {
     setCurrentTime (time) {
       const currentTime = roundToFrame(this.currentTimeRaw, this.fps)
       if (time !== currentTime) {
-        this.previewViewer.setCurrentTime(time)
         if (this.comparisonViewer) this.comparisonViewer.setCurrentTime(time)
+        this.previewViewer.setCurrentTime(time)
       }
     },
 

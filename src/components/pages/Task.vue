@@ -72,6 +72,9 @@
               :task="currentTask"
               :task-status="taskStatusForCurrentUser"
               :attached-file-name="attachedFileName"
+              :fps="parseInt(currentFps)"
+              :time="currentTime"
+              :revision="currentRevision"
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
               @duplicate-comment="onDuplicateComment"
@@ -186,6 +189,7 @@
                 @add-extra-preview="onAddExtraPreviewClicked"
                 @remove-extra-preview="onRemoveExtraPreviewClicked"
                 @change-current-preview="changeCurrentPreview"
+                @time-updated="onTimeUpdated"
                 ref="preview-player"
                 v-if="currentPreview"
               />
@@ -257,8 +261,6 @@ import {
   ImageIcon
 } from 'vue-feather-icons'
 
-import { replaceTimeWithTimecode } from '@/lib/task'
-
 import AddComment from '../widgets/AddComment'
 import AddPreviewModal from '../modals/AddPreviewModal'
 import Comment from '../widgets/Comment'
@@ -294,6 +296,7 @@ export default {
   data () {
     return {
       attachedFileName: '',
+      currentTime: 0,
       entityPage: this.getEntityPage(),
       selectedTab: 'validation',
       taskLoading: {
@@ -406,6 +409,14 @@ export default {
       } else {
         return null
       }
+    },
+
+    currentFps () {
+      return this.productionMap.get(this.currentTask.project_id).fps || '25'
+    },
+
+    currentRevision () {
+      return this.currentPreview ? this.currentPreview.revision : 0
     },
 
     isCommentingAllowed () {
@@ -788,14 +799,6 @@ export default {
     },
 
     addComment (comment, attachment, checklist, taskStatusId) {
-      if (this.currentPreview && this.previewPlayer) {
-        comment = replaceTimeWithTimecode(
-          comment,
-          this.currentPreview.revision,
-          this.previewPlayer.currentTimeRaw,
-          this.currentProduction.fps
-        )
-      }
       const params = {
         taskId: this.currentTask.id,
         taskStatusId: taskStatusId,
@@ -1106,6 +1109,10 @@ export default {
 
     onCancelDeleteComment (comment) {
       this.modals.deleteComment = false
+    },
+
+    onTimeUpdated (time) {
+      this.currentTime = time
     },
 
     changeCurrentPreview (preview) {

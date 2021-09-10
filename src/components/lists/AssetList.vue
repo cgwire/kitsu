@@ -116,6 +116,7 @@
           <th
             scope="col"
             class="estimation"
+            :title="$t('main.estimation')"
             ref="th-spent"
             v-if="!isCurrentUserClient &&
                   isShowInfos &&

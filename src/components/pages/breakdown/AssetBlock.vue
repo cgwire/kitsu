@@ -40,7 +40,9 @@
       </span>
     </div>
   </div>
-  <div class="asset-label"
+  <div
+    class="asset-label"
+    :label="asset.label"
     @click="onEditLabelClicked"
   >
     {{ asset.label || $t('breakdown.options.animate') }}
@@ -227,19 +229,23 @@ export default {
 }
 
 .asset-label {
-  font-size: .7em;
-  text-align: center;
-  transform: rotate(-90deg) translateX(-25%) translateY(calc(-50% - 5px));
-  position: absolute;
-  left: 100%;
-  top: 0;
   background: $dark-green;
-  width: 40px;
-  height: 20px;
-  padding-top: 5px;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   color: $white;
+  font-size: .7em;
+  height: 20px;
+  left: 100%;
+  padding-top: 5px;
+  position: absolute;
+  text-align: center;
+  top: 0;
+  transform: rotate(-90deg) translateX(-25%) translateY(calc(-50% - 5px));
+  width: 40px;
+}
+
+.asset-label[label=fixed] {
+  background: $orange-carrot;
 }
 
 .nb-occurences {

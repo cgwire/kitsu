@@ -34,8 +34,12 @@
           <th scope="col" class="description">
             {{ $t('assets.fields.description') }}
           </th>
-          <th scope="col" class="estimation">
-            {{ $t('tasks.fields.estimation').substring(0, 3) }}.
+          <th
+            scope="col"
+            class="estimation"
+            :title="$t('main.estimation')"
+          >
+            {{ $t('main.estimation_short') }}
           </th>
           <th scope="col" class="estimation">
             {{ $t('tasks.fields.duration').substring(0, 3) }}.
