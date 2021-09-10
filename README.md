@@ -9,7 +9,8 @@ Which leads to better pictures, shipped faster.
 [![Build
 badge](https://travis-ci.com/cgwire/kitsu.svg?branch=master)](https://travis-ci.com/cgwire/kitsu)
 
-[![Gitter badge](https://badges.gitter.im/cgwire/Lobby.png)](https://gitter.im/cgwire/Lobby)
+[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.com/invite/VbCxtKN)
+
 
 ## Documentation 
 
