@@ -57,6 +57,7 @@ import {
   SET_PREVIEW,
   SET_IS_SHOW_ASSIGNATIONS,
   SET_IS_SHOW_INFOS,
+  SET_IS_BIG_THUMBNAILS,
   DELETE_PREVIEW_END,
 
   LOAD_PERSON_TASKS_END,
@@ -88,6 +89,7 @@ const initialState = {
 
   nbSelectedTasks: 0,
   nbSelectedValidations: 0,
+  isBigThumbnails: false,
   isShowAssignations: true,
   isShowInfos: true,
 
@@ -147,6 +149,7 @@ const getters = {
   nbSelectedTasks: state => state.nbSelectedTasks,
   nbSelectedValidations: state => state.nbSelectedValidations,
   taskSearchQueries: state => state.taskSearchQueries,
+  isBigThumbnails: state => state.isBigThumbnails,
   isShowAssignations: state => state.isShowAssignations,
   isShowInfos: state => state.isShowInfos,
   taskEntityPreviews: state => state.taskEntityPreviews,
@@ -575,6 +578,14 @@ const actions = {
 
   hideInfos ({ commit, state }) {
     commit(SET_IS_SHOW_INFOS, false)
+  },
+
+  setBigThumbnails ({ commit, state }) {
+    commit(SET_IS_BIG_THUMBNAILS, true)
+  },
+
+  setSmallThumbnails ({ commit, state }) {
+    commit(SET_IS_BIG_THUMBNAILS, false)
   },
 
   loadPreviewFileFormData ({ commit }, previewForms) {
@@ -1040,6 +1051,10 @@ const mutations = {
     if (state.taskMap.get(taskId)) {
       state.taskMap.get(taskId).entity.preview_file_id = previewId
     }
+  },
+
+  [SET_IS_BIG_THUMBNAILS] (state, isBigThumbnails) {
+    state.isBigThumbnails = isBigThumbnails
   },
 
   [SET_IS_SHOW_ASSIGNATIONS] (state, isShowAssignations) {

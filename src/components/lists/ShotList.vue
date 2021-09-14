@@ -213,7 +213,13 @@
                 :checked="selectedShots.has(shot.id)"
                 @input="event => toggleLine(shot, event)"
               >
-              <entity-thumbnail :entity="shot" :empty-height="32" />
+              <entity-thumbnail
+                :entity="shot"
+                :width="isBigThumbnails ? 150 : 50"
+                :height="isBigThumbnails ? 120 : 30"
+                :empty-width="isBigThumbnails ? 150 : 50"
+                :empty-height="isBigThumbnails ? 120 : 32"
+              />
               <router-link
                 tabindex="-1"
                 :title="shot.full_name"
@@ -594,6 +600,7 @@ export default {
       'displayedShotsLength',
       'displayedShotsTimeSpent',
       'displayedShotsFrames',
+      'isBigThumbnails',
       'isCurrentUserAdmin',
       'isCurrentUserManager',
       'isCurrentUserClient',
