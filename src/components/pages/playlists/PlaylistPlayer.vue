@@ -301,23 +301,28 @@
     </div>
 
     <div
-      class="flexrow flexrow-item"
-      v-if="isCurrentPreviewMovie"
+      class="flexrow flexrow-item mr0"
+      v-if="isCurrentPreviewMovie || isCurrentPreviewPicture"
     >
       <button-simple
         class="button playlist-button flexrow-item"
-        @click="onPlayClicked"
+        @click="play"
         :title="$t('playlists.actions.play')"
         icon="play"
         v-if="!isPlaying"
       />
       <button-simple
         class="button playlist-button flexrow-item"
-        @click="onPlayClicked"
+        @click="pause"
         :title="$t('playlists.actions.pause')"
         icon="pause"
         v-else
       />
+    </div>
+    <div
+      class="flexrow flexrow-item"
+      v-if="isCurrentPreviewMovie"
+    >
       <button-simple
         class="button playlist-button flexrow-item"
         @click="onSpeedClicked"
@@ -869,8 +874,10 @@ export default {
     }
     this.updateProgressBar()
     if (this.picturePlayer) {
-      this.picturePlayer.addEventListener('load', () => {
-        this.resetPictureCanvas()
+      this.picturePlayer.addEventListener('load', async () => {
+        const wasPlaying = this.isPlaying
+        await this.resetPictureCanvas()
+        this.isPlaying = wasPlaying
       })
     }
     this.$nextTick(() => {
@@ -916,7 +923,7 @@ export default {
     },
 
     isCurrentPreviewPicture () {
-      return ['png', 'gif'].includes(this.extension)
+      return this.isPicture(this.extension)
     },
 
     isCurrentPreviewFile () {
@@ -934,7 +941,7 @@ export default {
     isPictureComparison () {
       if (!this.currentPreviewToCompare) return false
       return (
-        ['png', 'gif'].includes(this.currentPreviewToCompare.extension)
+        this.isPicture(this.currentPreviewToCompare.extension)
       )
     },
 
@@ -1205,6 +1212,10 @@ export default {
       'runPlaylistBuild'
     ]),
 
+    isPicture (extension) {
+      return ['png', 'gif'].includes(extension)
+    },
+
     configureEvents () {
       window.addEventListener('keydown', this.onKeyDown, false)
       window.addEventListener('resize', this.onWindowResize)
@@ -1361,20 +1372,26 @@ export default {
     },
 
     play () {
-      this.rawPlayer.play()
-      if (this.isComparing) {
-        this.$refs['raw-player-comparison'].play()
+      if (this.isCurrentPreviewPicture) {
+        this.playPicture()
+      } else {
+        this.rawPlayer.play()
+        if (this.isComparing) {
+          this.$refs['raw-player-comparison'].play()
+        }
+        this.isPlaying = this.$refs['raw-player'].isPlaying
       }
-      this.isPlaying = this.$refs['raw-player'].isPlaying
       this.hideCanvas()
       this.clearCanvas()
     },
 
     pause () {
       this.showCanvas()
-      const comparisonPlayer = this.$refs['raw-player-comparison']
-      if (this.rawPlayer) this.rawPlayer.pause()
-      if (comparisonPlayer) comparisonPlayer.pause()
+      if (this.isCurrentPreviewMovie) {
+        const comparisonPlayer = this.$refs['raw-player-comparison']
+        if (this.rawPlayer) this.rawPlayer.pause()
+        if (comparisonPlayer) comparisonPlayer.pause()
+      }
       this.isPlaying = false
     },
 
@@ -1383,6 +1400,7 @@ export default {
       const wasDrawing = this.isDrawing === true
       this.hideCanvas()
       this.clearCanvas()
+      this.framesSeenOfPicture = 0
       if (entity.preview_file_extension === 'mp4') {
         this.playingEntityIndex = entityIndex
         this.$nextTick(() => {
@@ -1408,6 +1426,9 @@ export default {
             this.isDrawing = true
             this.fabricCanvas.isDrawingMode = true
           }, 100)
+        }
+        if (this.isPlaying && this.isPicture(entity.preview_file_extension)) {
+          this.playPicture()
         }
       }
       this.scrollToEntity(this.playingEntityIndex)
@@ -1700,14 +1721,6 @@ export default {
       this.isComparing = !this.isComparing
     },
 
-    onPlayClicked () {
-      if (this.rawPlayer.isPlaying) {
-        this.pause()
-      } else {
-        this.play()
-      }
-    },
-
     onSpeedClicked () {
       this.speed = this.speed + 1 > 3 ? 1 : this.speed + 1
       let rate = 1
@@ -1784,20 +1797,28 @@ export default {
         this.onPlayNextEntityClicked()
         if (this.isCurrentPreviewPicture) {
           this.framesSeenOfPicture = 0
-          setTimeout(
-            this.continuePlayingPlaylist,
-            100,
-            this.playingEntityIndex,
-            Date.now()
-          )
+          this.playPicture()
         }
       }
+    },
+
+    playPicture () {
+      this.isPlaying = true
+      setTimeout(
+        this.continuePlayingPlaylist,
+        100,
+        this.playingEntityIndex,
+        Date.now() - 1000 * this.framesSeenOfPicture / this.fps
+      )
     },
 
     continuePlayingPlaylist (entityIndex, startMs) {
       const framesPerImage = this.framesPerImage[entityIndex]
       const durationToWaitMs = framesPerImage * 1000 / this.fps
       const durationWaited = Date.now() - startMs
+      if (!this.isPlaying) {
+        return
+      }
       if (durationWaited < durationToWaitMs) {
         setTimeout(
           this.continuePlayingPlaylist, 100, entityIndex, startMs
@@ -2121,6 +2142,7 @@ export default {
 
     loadAnnotation (annotation) {
       if (!annotation) return
+
       this.pause()
       const currentTime = annotation ? annotation.time || 0 : 0
       if (this.rawPlayer || this.picturePlayer) {
@@ -2293,7 +2315,7 @@ export default {
 
     resetPictureCanvas () {
       this.annotations = this.currentPreview.annotations
-      this.resetCanvas()
+      return this.resetCanvas()
         .then(() => {
           if (this.isCurrentPreviewPicture) {
             this.loadAnnotation(this.getAnnotation(0))
@@ -2414,12 +2436,10 @@ export default {
       this.currentPreviewIndex = 0
       this.currentComparisonPreviewuIndex = 0
       this.entityList = Object.values(this.entities)
-      console.log(this.entityList)
       this.entityList.forEach((entity, i) => {
         this.framesPerImage[i] = entity.preview_nb_frames ||
           DEFAULT_NB_FRAMES_PICTURE
       })
-      console.log({ framesPerImage: this.framesPerImage })
       this.playingEntityIndex = 0
       this.pause()
       if (this.rawPlayer) this.rawPlayer.setCurrentTime(0)
@@ -2688,6 +2708,10 @@ progress {
 
 .mr1 {
   margin-right: 1em;
+}
+
+.mr0 {
+  margin-right: 0;
 }
 
 .playlist-progress {
