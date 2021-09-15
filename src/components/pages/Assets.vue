@@ -30,6 +30,7 @@
             <div class="flexrow" v-if="!isCurrentUserClient">
               <show-assignations-button class="flexrow-item" />
               <show-infos-button class="flexrow-item" />
+              <big-thumbnails-button class="flexrow-item" />
               <div class="flexrow-item"></div>
             </div>
             <div class="flexrow" v-if="isCurrentUserManager">
@@ -247,6 +248,7 @@ import { entitiesMixin } from '../mixins/entities'
 import AssetList from '../lists/AssetList'
 import AddMetadataModal from '../modals/AddMetadataModal'
 import AddThumbnailsModal from '../modals/AddThumbnailsModal'
+import BigThumbnailsButton from '../widgets/BigThumbnailsButton'
 import BuildFilterModal from '../modals/BuildFilterModal'
 import ButtonSimple from '../widgets/ButtonSimple'
 import CreateTasksModal from '../modals/CreateTasksModal'
@@ -270,6 +272,7 @@ export default {
     AssetList,
     AddMetadataModal,
     AddThumbnailsModal,
+    BigThumbnailsButton,
     BuildFilterModal,
     ButtonSimple,
     CreateTasksModal,

@@ -64,9 +64,13 @@ export const replaceTimeWithTimecode = (
   currentTimeRaw,
   fps
 ) => {
-  const frame = formatFrame(currentTimeRaw, fps)
-  const formatedTime = formatTime(currentTimeRaw)
-  return comment.replaceAll(
-    '@frame', `v${currentPreviewRevision} ${formatedTime} (${frame})`
-  )
+  if (comment) {
+    const frame = formatFrame(currentTimeRaw, fps)
+    const formatedTime = formatTime(currentTimeRaw)
+    return comment.replaceAll(
+      '@frame', `v${currentPreviewRevision} ${formatedTime} (${frame})`
+    )
+  } else {
+    return ''
+  }
 }

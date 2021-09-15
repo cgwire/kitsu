@@ -224,7 +224,13 @@
                 @input="event => toggleLine(asset, event)"
                 v-if="!isTVShow"
               >
-              <entity-thumbnail :entity="asset" :empty-height="32" />
+              <entity-thumbnail
+                :entity="asset"
+                :width="isBigThumbnails ? 150 : 50"
+                :height="isBigThumbnails ? 120 : 30"
+                :empty-width="isBigThumbnails ? 150 : 50"
+                :empty-height="isBigThumbnails ? 120 : 32"
+               />
               <router-link
                 tabindex="-1"
                 class="asset-link asset-name"
@@ -543,6 +549,7 @@ export default {
       'displayedAssetsEstimation',
       'nbSelectedTasks',
       'isAssetDescription',
+      'isBigThumbnails',
       'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserManager',
