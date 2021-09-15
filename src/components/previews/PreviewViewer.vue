@@ -35,6 +35,7 @@
       @duration-changed="duration => $emit('duration-changed', duration)"
       @time-update="time => $emit('time-update', time)"
       @play-ended="$emit('play-ended')"
+      @video-end="$emit('video-end')"
       v-show="isMovie"
     />
 
@@ -307,19 +308,11 @@ export default {
     },
 
     goPreviousFrame () {
-      this.videoViewer.goPreviousFrame()
+      return this.videoViewer.goPreviousFrame()
     },
 
     goNextFrame () {
-      this.videoViewer.goNextFrame()
-    },
-
-    onVideoEnd () {
-      this.isPlaying = false
-      if (this.isRepeating) {
-        this.videoViewer.currentTime = 0
-        this.play()
-      }
+      return this.videoViewer.goNextFrame()
     },
 
     onPlayPauseClicked () {
@@ -353,6 +346,11 @@ export default {
 
     setCurrentTime (time) {
       this.videoViewer.setCurrentTime(time)
+    },
+
+    // To use when you don't want to handle back pressure and rounding
+    setCurrentTimeRaw (time) {
+      this.videoViewer.setCurrentTimeRaw(time)
     },
 
     getCurrentTimeRaw (time) {

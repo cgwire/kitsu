@@ -33,10 +33,11 @@
             :is-repeating="isRepeating"
             :light="light"
             :preview="currentPreview"
-            @size-changed="fixCanvasSize"
             @duration-changed="changeMaxDuration"
-            @time-update="updateTime"
             @play-ended="pause"
+            @size-changed="fixCanvasSize"
+            @time-update="updateTime"
+            @video-end="onVideoEnd"
           />
 
           <preview-viewer
@@ -807,22 +808,20 @@ export default {
     },
 
     goPreviousFrame () {
-      this.syncComparisonViewer()
-      this.previewViewer.goPreviousFrame()
-      this.comparisonViewer.goPreviousFrame()
+      const time = this.previewViewer.goPreviousFrame()
+      this.comparisonViewer.setCurrentTimeRaw(time)
       this.clearCanvas()
     },
 
     goNextFrame () {
-      this.syncComparisonViewer()
-      this.previewViewer.goNextFrame()
-      this.comparisonViewer.goNextFrame()
+      const time = this.previewViewer.goNextFrame()
+      this.comparisonViewer.setCurrentTimeRaw(time)
       this.clearCanvas()
     },
 
     syncComparisonViewer () {
       if (this.comparisonViewer) {
-        this.comparisonViewer.setCurrentTime(
+        this.comparisonViewer.setCurrentTimeRaw(
           this.previewViewer.getCurrentTimeRaw()
         )
       }
@@ -831,8 +830,8 @@ export default {
     onVideoEnd () {
       this.isPlaying = false
       if (this.isRepeating) {
-        this.syncComparisonViewer()
         this.setCurrentTime(0)
+        this.comparisonViewer.setCurrentTimeRaw(0)
         this.$nextTick(() => {
           this.play()
         })
@@ -1447,7 +1446,7 @@ export default {
       this.$nextTick(() => {
         if (this.comparisonViewer) this.comparisonViewer.pause()
         this.previewToCompare = this.previewFileMap[this.previewToCompareId]
-        this.setCurrentTime(0)
+        this.setCurrentTime(0 + this.frameFactor)
         if (this.isComparing) {
           this.pause()
         }
