@@ -152,7 +152,9 @@ export default {
     },
 
     onPaste (event) {
-      this.previewField.filesChange('', event.clipboardData.files)
+      if (this.active && event.clipboardData.files) {
+        this.previewField.filesChange('', event.clipboardData.files)
+      }
     },
 
     getURL (form) {
