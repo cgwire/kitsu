@@ -50,10 +50,10 @@ export default {
   },
 
   mounted () {
-    if (localStorage.getItem('big-thumbnails') === 'false') {
-      this.setSmallThumbnails()
-    } else {
+    if (localStorage.getItem('big-thumbnails') === 'true') {
       this.setBigThumbnails()
+    } else {
+      this.setSmallThumbnails()
     }
   },
 
