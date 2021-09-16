@@ -239,7 +239,7 @@ export default {
       let offsetWidth = 0
       if (this.container.parentElement) {
         const parent = this.container.parentElement.parentElement
-        offsetWidth = parent.offsetWidth
+        if (parent) offsetWidth = parent.offsetWidth
       }
       let width = Math.min(dimensions.width, offsetWidth)
       if (this.isComparing) {
@@ -265,6 +265,10 @@ export default {
       } else {
         return this.currentTimeRaw
       }
+    },
+
+    setCurrentTimeRaw (currentTime) {
+      this.video.currentTime = currentTime
     },
 
     setCurrentTime (currentTime) {
@@ -355,6 +359,7 @@ export default {
       } else {
         this.setCurrentTime(newTime)
       }
+      return newTime > 0 ? newTime + this.frameFactor : 0
     },
 
     goNextFrame () {
@@ -365,11 +370,13 @@ export default {
       } else {
         this.setCurrentTime(newTime)
       }
+      return newTime > 0 ? newTime + this.frameFactor : 0
     },
 
     onVideoEnd () {
       this.isPlaying = false
       if (this.isRepeating) {
+        this.$emit('video-end')
         this.video.currentTime = 0
         this.play()
       } else {

@@ -148,7 +148,9 @@ export default {
     },
 
     onPaste (event) {
-      this.imageField.filesChange('', event.clipboardData.files)
+      if (this.active && event.clipboardData.files) {
+        this.imageField.filesChange('', event.clipboardData.files)
+      }
     },
 
     getURL (form) {
