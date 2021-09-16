@@ -122,7 +122,7 @@ export default {
       form: {
         task_type_id: ''
       },
-      selectionOnly: 'false',
+      selectionOnly: 'true',
       selectionOptions: [
         { label: this.$t('tasks.for_selection'), value: 'true' },
         { label: this.$t('tasks.for_project'), value: 'false' }
