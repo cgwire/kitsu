@@ -338,6 +338,10 @@ export default {
       if (this.pictureViewer) this.pictureViewer.resetPicture()
     },
 
+    resize () {
+      if (this.videoViewer) this.videoViewer.onWindowResize()
+    },
+
     getPreviewDimensions () {
       if (this.isMovie) return this.videoViewer.getDimensions()
       else if (this.isPicture) return this.pictureViewer.getDimensions()

@@ -103,7 +103,7 @@
                 :read-only="!isCurrentUserManager"
                 :is-assigned="isAssigned"
                 :task="task"
-                :force-enable-comparison="isExtraWide"
+                :extraWide="isExtraWide"
                 @annotation-changed="onAnnotationChanged"
                 @change-current-preview="changeCurrentPreview"
                 @add-extra-preview="onAddExtraPreview"
@@ -1008,7 +1008,7 @@ export default {
           this.refreshPreview({
             taskId: this.task.id,
             previewId: eventData.preview_file_id
-          }).then(() => {
+          }).then(preview => {
             this.taskPreviews = this.getTaskPreviews(this.task.id)
           })
         }

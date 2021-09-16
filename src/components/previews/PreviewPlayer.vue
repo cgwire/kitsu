@@ -484,7 +484,7 @@ export default {
       type: Map,
       default: () => new Map()
     },
-    forceEnableComparison: {
+    extraWide: {
       type: Boolean,
       default: false
     }
@@ -706,7 +706,7 @@ export default {
     },
 
     isComparisonEnabled () {
-      return this.fullScreen || this.forceEnableComparison
+      return this.fullScreen || this.extraWide
     }
   },
 
@@ -1465,6 +1465,14 @@ export default {
         this.taskTypeId = ''
         this.previewToCompareId = ''
       }
+      this.$nextTick(() => {
+        this.fixCanvasSize(this.getCurrentPreviewDimensions())
+      })
+    },
+
+    extraWide () {
+      this.endAnnotationSaving()
+      this.previewViewer.resize()
       this.$nextTick(() => {
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
       })
