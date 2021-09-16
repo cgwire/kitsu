@@ -2030,7 +2030,14 @@ export default {
           }
         }).sort((a, b) => a.label.localeCompare(b.label))
         if (this.taskTypeOptions.length > 0) {
-          this.taskTypeToCompare = this.taskTypeOptions[0].value
+          const currentTaskTypeIndex = this.taskTypeOptions.findIndex(
+            taskTypeOption => taskTypeOption.value === this.taskTypeToCompare
+          )
+          if (currentTaskTypeIndex === -1) {
+            // if we couldn't find the current task type,
+            //   then fallback to the first one in the list
+            this.taskTypeToCompare = this.taskTypeOptions[0].value
+          }
         }
         this.rebuildRevisionOptions()
       } else {
