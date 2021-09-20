@@ -2016,13 +2016,12 @@ export default {
     rebuildComparisonOptions () {
       const entities = Object.values(this.entities)
       if (entities.length > 0) {
-        const taskTypeIds = Object.keys(
-          entities[this.playingEntityIndex].preview_files
-        ).filter(
-          taskTypeId => {
-            return !!entities[this.playingEntityIndex].preview_files[taskTypeId]
-          }
-        )
+        let taskTypeIds = Object.keys(entities[0].preview_files)
+        entities.forEach(entity => {
+          taskTypeIds = taskTypeIds.filter(
+            taskTypeId => entity.preview_files[taskTypeId]
+          )
+        })
         this.taskTypeOptions = taskTypeIds.map((taskTypeId) => {
           return {
             label: this.taskTypeMap.get(taskTypeId).name,
@@ -2394,7 +2393,6 @@ export default {
         this.annotations = this.currentEntity.preview_file_annotations || []
       }
       this.$nextTick(() => {
-        this.rebuildComparisonOptions()
         if (this.isComparing) this.rebuildRevisionOptions()
         this.$nextTick(() => {
           this.resetCanvas()
