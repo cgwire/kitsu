@@ -16,10 +16,11 @@ import vuescroll from 'vue-scroll'
 import VueTextareaAutosize from 'vue-textarea-autosize'
 import VTooltip from 'v-tooltip'
 import VueWebsocket from 'vue-websocket'
+import IO from 'socket.io-client'
 
 import 'v-autocomplete/dist/v-autocomplete.css'
 
-Vue.use(VueWebsocket, '/events')
+Vue.use(VueWebsocket, IO, '/events')
 Vue.config.productionTip = false
 Vue.use(Autocomplete)
 Vue.use(Meta)
