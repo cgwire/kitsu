@@ -327,6 +327,14 @@ export default {
       }
     },
 
+    getCurrentTimeRaw (currentTime) {
+      return this.currentPlayer.currentTime
+    },
+
+    setCurrentTimeRaw (currentTime) {
+      this.currentPlayer.currentTime = currentTime + this.frameFactor
+    },
+
     setCurrentTime (currentTime) {
       if (!this.$options.currentTimeCalls) {
         this.$options.currentTimeCalls = []

@@ -1434,13 +1434,16 @@ export default {
       this.scrollToEntity(this.playingEntityIndex)
     },
 
+    syncComparisonPlayer () {
+      const currentTimeRaw = this.rawPlayer.getCurrentTime()
+      this.rawPlayerComparison.setCurrentTimeRaw(currentTimeRaw)
+    },
+
     goPreviousFrame () {
       this.clearCanvas()
       this.rawPlayer.goPreviousFrame()
       if (this.isComparing) {
-        this.$refs['raw-player-comparison'].setCurrentTime(
-          this.rawPlayer.getCurrentTime()
-        )
+        this.syncComparisonPlayer()
       }
       const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
       if (annotation) this.loadAnnotation(annotation)
@@ -1450,9 +1453,7 @@ export default {
       this.clearCanvas()
       this.rawPlayer.goNextFrame()
       if (this.isComparing) {
-        this.$refs['raw-player-comparison'].setCurrentTime(
-          this.rawPlayer.getCurrentTime()
-        )
+        this.syncComparisonPlayer()
       }
       const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
       if (annotation) this.loadAnnotation(annotation)
@@ -1571,7 +1572,8 @@ export default {
         this.clearFocus()
       }
       if (this.rawPlayerComparison) {
-        this.rawPlayerComparison.setCurrentTime(0)
+        this.syncComparisonPlayer()
+        this.rawPlayerComparison.play()
       }
     },
 
@@ -1790,9 +1792,6 @@ export default {
     onPlayNext () {
       if (this.entityList[this.nextEntityIndex].preview_file_extension === 'mp4') {
         this.rawPlayer.playNext()
-        if (this.isComparing) {
-          this.$refs['raw-player-comparison'].playNext()
-        }
       } else {
         this.onPlayNextEntityClicked()
         if (this.isCurrentPreviewPicture) {
