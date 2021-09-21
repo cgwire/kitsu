@@ -59,7 +59,7 @@
     "vue-slider-component": "3.2.14",
     "vue-textarea-autosize": "1.1.1",
     "vue-upload-component": "2.8.22",
-    "vue-websocket": "git+https://github.com/cgwire/vue-websocket",
+    "vue-websocket": "github:cgwire/vue-websocket",
     "vuedraggable": "2.24.3",
     "vuejs-datepicker": "1.6.2",
     "vuex": "3.6.2",
