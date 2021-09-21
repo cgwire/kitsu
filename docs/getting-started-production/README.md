@@ -26,7 +26,7 @@ Then 7 and 8 are the option parts. If you already have a spreadsheet with your a
 
 See batch Action section for more details 
 
-![Batch Action](../batch-action/README.md#create-assets-from-a-csv-spreadsheet-file)
+[Batch Action](../batch-action/README.md#create-assets-from-a-csv-spreadsheet-file)
 
 Validate everything with the ![All done](../img/getting-started/all_done_go.png) button.
 
