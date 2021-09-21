@@ -15,7 +15,7 @@ import VueLazyload from 'vue-lazyload'
 import vuescroll from 'vue-scroll'
 import VueTextareaAutosize from 'vue-textarea-autosize'
 import VTooltip from 'v-tooltip'
-import VueWebsocket from 'vue-websocket'
+import VueWebsocket from 'vue-websocket-next'
 import IO from 'socket.io-client'
 
 import 'v-autocomplete/dist/v-autocomplete.css'
