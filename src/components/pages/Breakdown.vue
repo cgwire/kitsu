@@ -607,7 +607,9 @@ export default {
         .then(() => {
           this.loading.importing = false
           this.hideImportRenderModal()
-          this.setCastingSequence(this.sequenceId)
+          if (this.sequenceId) {
+            this.setCastingSequence(this.sequenceId)
+          }
         })
         .catch(err => {
           this.loading.importing = false
