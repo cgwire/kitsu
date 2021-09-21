@@ -426,6 +426,7 @@
           class="playlist-button flexrow-item comparison-list"
           :options="taskTypeOptions"
           v-model="taskTypeToCompare"
+          @input="saveUserComparisonChoice"
           v-if="isComparing"
         />
         <combobox
@@ -440,13 +441,13 @@
           v-model="comparisonMode"
           v-if="isComparing"
         />
-          <div
-            class="flexrow flexrow-item comparison-list"
-            v-if="
-              isComparing && currentRevisionToCompare &&
-              currentComparisonPreviewLength > 1
-            "
-          >
+        <div
+          class="flexrow flexrow-item comparison-list"
+          v-if="
+            isComparing && currentRevisionToCompare &&
+            currentComparisonPreviewLength > 1
+          "
+        >
           <button-simple
             class="button playlist-button flexrow-item"
             icon="left"
@@ -460,6 +461,13 @@
             icon="right"
             @click="onNextComparisonPictureClicked"
           />
+        </div>
+        <div
+          class="flexrow flexrow-item comparison-missing"
+          v-if="isComparing && comparisonEntityMissing"
+        >
+          ⚠️ {{ $t('playlists.comparing_missing_plan') }}
+          {{ taskTypeMap.get(savedTaskTypeToCompare).name }}
         </div>
       </div>
     </div>
@@ -822,6 +830,7 @@ export default {
       annotations: [],
       buildLaunched: false,
       color: '#ff3860',
+      comparisonEntityMissing: false,
       comparisonMode: 'sidebyside',
       currentComparisonPreviewIndex: 0,
       currentPreviewIndex: 0,
@@ -853,6 +862,7 @@ export default {
       playlistToEdit: {},
       playingEntityIndex: 0,
       revisionOptions: [],
+      savedTaskTypeToCompare: null,
       speed: 3,
       task: null,
       taskTypeOptions: [],
@@ -2025,22 +2035,33 @@ export default {
     },
 
     rebuildComparisonOptions () {
-      const entities = Object.values(this.entities)
-      if (entities.length > 0) {
-        let taskTypeIds = Object.keys(entities[0].preview_files)
-        entities.forEach(entity => {
-          taskTypeIds = taskTypeIds.filter(
-            taskTypeId => entity.preview_files[taskTypeId]
-          )
-        })
+      this.comparisonEntityMissing = false
+      if (this.entityList.length > 0) {
+        const taskTypeIds = Object.keys(
+          this.currentEntity.preview_files
+        ).filter(
+          taskTypeId => {
+            return !!this.currentEntity.preview_files[taskTypeId]
+          }
+        )
         this.taskTypeOptions = taskTypeIds.map((taskTypeId) => {
           return {
             label: this.taskTypeMap.get(taskTypeId).name,
             value: this.taskTypeMap.get(taskTypeId).id
           }
-        }).sort((a, b) => a.label.localeCompare(b.label))
+        }).sort((a, b) => -a.label.localeCompare(b.label))
         if (this.taskTypeOptions.length > 0) {
-          this.taskTypeToCompare = this.taskTypeOptions[0].value
+          const currentTaskTypeIndex = this.taskTypeOptions.findIndex(
+            taskTypeOption => taskTypeOption.value === this.savedTaskTypeToCompare
+          )
+          if (currentTaskTypeIndex !== -1) {
+            this.taskTypeToCompare = this.savedTaskTypeToCompare
+          } else {
+            // if we couldn't find the current task type,
+            //   then fallback to the first one in the list
+            this.taskTypeToCompare = this.taskTypeOptions[0].value
+            this.comparisonEntityMissing = !!this.savedTaskTypeToCompare
+          }
         }
         this.rebuildRevisionOptions()
       } else {
@@ -2098,6 +2119,7 @@ export default {
     },
 
     resetComparison () {
+      const wasPlaying = this.isPlaying
       this.rebuildRevisionOptions()
       this.rebuildEntityListToCompare()
       this.$nextTick(() => {
@@ -2105,6 +2127,9 @@ export default {
         const player = this.$refs['raw-player-comparison']
         player.loadEntity(this.playingEntityIndex)
         player.setCurrentTime(this.currentTimeRaw)
+        this.$nextTick(() => {
+          if (wasPlaying) this.play()
+        })
       })
     },
 
@@ -2395,6 +2420,10 @@ export default {
           this.$refs['raw-player-comparison'].setCurrentTime(time)
         }
       }, 20)
+    },
+
+    saveUserComparisonChoice () {
+      this.savedTaskTypeToCompare = this.taskTypeToCompare
     }
   },
 
@@ -2421,6 +2450,7 @@ export default {
         this.annotations = this.currentEntity.preview_file_annotations || []
       }
       this.$nextTick(() => {
+        this.rebuildComparisonOptions()
         if (this.isComparing) this.rebuildRevisionOptions()
         this.$nextTick(() => {
           this.resetCanvas()
@@ -2768,6 +2798,14 @@ progress {
 }
 .comparison-list select {
   height: 2.2em;
+}
+.comparison-missing {
+  padding: 6px 10px;
+  border: 1px solid $dark-grey;
+  border-radius: 5px;
+  background-color: $dark-grey-light;
+  font-weight: bold;
+  width: max-content;
 }
 
 .dl-button {
