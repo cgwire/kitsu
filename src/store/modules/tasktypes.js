@@ -17,7 +17,6 @@ import {
 
   RESET_ALL
 } from '../mutation-types'
-import productionsStore from './productions'
 
 const initialState = {
   taskTypes: [],
@@ -39,10 +38,6 @@ const state = {
   ...initialState
 }
 
-function getCurrentProduction () {
-  return productionsStore.getters.currentProduction(productionsStore.state)
-}
-
 const getters = {
   taskTypes: state => state.taskTypes,
   taskTypeMap: state => state.taskTypeMap,
@@ -56,13 +51,13 @@ const getters = {
   },
 
   assetTaskTypes: (state, getters, rootState, rootGetters) => {
-    return rootGetters.productionTaskTypes
-      .filter((taskType) => !taskType.for_shots)
+    return state.taskTypes
+      .filter(taskType => !taskType.for_shots)
   },
 
   shotTaskTypes: (state, getters, rootState, rootGetters) => {
-    return rootGetters.productionTaskTypes
-      .filter((taskType) => taskType.for_shots)
+    return state.taskTypes
+      .filter(taskType => taskType.for_shots)
   },
 
   getTaskTypeOptions: state => state.taskTypes.map(
@@ -195,7 +190,7 @@ const mutations = {
   },
 
   [LOAD_TASK_TYPES_END] (state, taskTypes) {
-    state.taskTypes = sortTaskTypes(taskTypes, getCurrentProduction())
+    state.taskTypes = sortTaskTypes(taskTypes)
     state.taskTypeMap = new Map()
     taskTypes.forEach(taskType => {
       state.taskTypeMap.set(taskType.id, taskType)
@@ -212,7 +207,7 @@ const mutations = {
       state.taskTypes.push(newTaskType)
       state.taskTypeMap.set(newTaskType.id, newTaskType)
     }
-    state.taskTypes = sortTaskTypes(state.taskTypes, getCurrentProduction())
+    state.taskTypes = sortTaskTypes(state.taskTypes)
   },
 
   [DELETE_TASK_TYPE_START] (state) {},

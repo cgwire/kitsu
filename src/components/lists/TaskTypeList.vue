@@ -8,9 +8,6 @@
             {{ $t('task_types.fields.department') }}
           </th>
           <th scope="col" class="name">{{ $t('task_types.fields.name') }}</th>
-          <th scope="col" class="priority">
-            {{ $t('task_types.fields.priority') }}
-          </th>
           <th scope="col" class="allow-timelog">
             {{ $t('task_types.fields.allow_timelog') }}
           </th>
@@ -44,7 +41,6 @@
             />
           </td>
           <task-type-cell class="name" :task-type="taskType" />
-          <td class="priority">{{ taskType.priority }}</td>
           <td class="allow-timelog">
             {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
           </td>
@@ -81,7 +77,6 @@
             />
           </td>
           <task-type-cell class="name" :task-type="taskType" />
-          <td class="priority">{{ taskType.priority }}</td>
           <td class="allow-timelog">
             {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
           </td>

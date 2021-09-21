@@ -199,6 +199,16 @@ const getters = {
       .map(taskType => taskType.id)
   },
 
+  productionAssetTaskTypes: (state, getters) => {
+    return getters.productionTaskTypes
+      .filter(taskType => !taskType.for_shots)
+  },
+
+  productionShotTaskTypes: (state, getters) => {
+    return getters.productionTaskTypes
+      .filter(taskType => taskType.for_shots)
+  },
+
   currentProduction: (state) => {
     if (state.currentProduction) {
       return state.currentProduction

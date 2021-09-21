@@ -14,7 +14,7 @@
 
       <form v-on:submit.prevent class="widden">
         <combobox-task-type
-          :task-type-list="isAssetTasks ? assetTaskTypes : shotTaskTypes"
+          :task-type-list="isAssetTasks ? productionAssetTaskTypes : productionShotTaskTypes"
           v-model="form.task_type_id"
         />
       </form>
@@ -132,9 +132,9 @@ export default {
 
   computed: {
     ...mapGetters([
-      'taskTypes',
-      'assetTaskTypes',
-      'shotTaskTypes'
+      'productionAssetTaskTypes',
+      'productionShotTaskTypes',
+      'taskTypes'
     ]),
     isAssetTasks () {
       return this.$route.path.indexOf('assets') >= 0
@@ -162,12 +162,12 @@ export default {
 
   mounted () {
     if (this.isAssetTasks) {
-      if (this.assetTaskTypes.length > 0) {
-        this.form.task_type_id = this.assetTaskTypes[0].id
+      if (this.productionAssetTaskTypes.length > 0) {
+        this.form.task_type_id = this.productionAssetTaskTypes[0].id
       }
     } else {
-      if (this.shotTaskTypes.length > 0) {
-        this.form.task_type_id = this.shotTaskTypes[0].id
+      if (this.productionShotTaskTypes.length > 0) {
+        this.form.task_type_id = this.productionShotTaskTypes[0].id
       }
     }
   }
