@@ -8,6 +8,7 @@ production** button.
 ![Create a production](../img/getting-started/create_production.png)
 
 Enter your production name, choose **TV Show** if you need more than one episode.
+
 Then you have to fill technical information, as the number of FPS, the Ration, Resolution.
 
 All theses data will be used when Kitsu will reencode the video previews uploaded.
