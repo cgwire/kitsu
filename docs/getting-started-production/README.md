@@ -8,117 +8,26 @@ production** button.
 ![Create a production](../img/getting-started/create_production.png)
 
 Enter your production name, choose **TV Show** if you need more than one episode.
-Then validate by clicking on **Confirm**.
+Then you have to fill technical information, as the number of FPS, the Ration, Resolution.
+
+All theses data will be used when Kitsu will reencode the video previews uploaded.
+
+Then you need to define a start and end dates for your production.
 
 ![Add a production](../img/getting-started/add_production.png)
 
+On the next part 3 to 6, you can define your production pipeline.
+First you need to select your asset task type, shot task type, then the task status and asset types.
 
-Now you can see your production on the main Kitsu page.
+![Add a production Pipeline](../img/getting-started/add_production_pipe.png)
 
-![Main page production](../img/getting-started/first_production.png)
+Then 7 and 8 are the option parts. If you already have a spreadsheet with your asset / shot.
 
-You need to click on the avatar of the production to access its different pages.
+See batch Action section for more details 
 
-The first step you need to do is to set the **settings** of your production.
+[Batch Action](../batch-action/README.md#create-assets-from-a-csv-spreadsheet-file)
 
-Use the navigation menu and go to the **Settings** page.
-
-![Production settings](../img/getting-started/drop_down_menu_setting.png)
-
-### Add a Brief
-
-On the first tab of the **Settings** page, Kitsu asks you about a brief. It's a good way to keep track of the first 
-brief of the production, and being able to get back to it later.
-
-/!\ **Only Studio manager permission have access to the Settings page** /!\
-
-![Production settings Brief](../img/getting-started/settings_brief.png)
-
-
-### Define Production's Parameters
-
-The second tab is the more **important**. You need to define your production's parameters to be sure that everything will go smoothly.
-
-![Production settings Parameters](../img/getting-started/settings_parameters.png)
-
-- 1/ You can change the name of the production
-
-- 2/ You can define the start and end date of the production to set the schedule
-
-- 3/ You can change the Type of the production: Short, TV Show, Feature Film
-
-- 4/ You can add the number of episodes of your TV Show for information
-
-- 5/ You need to set the FPS of the video preview. Kitsu will use this FPS to encode them. **Per default Kitsu will encode everything at 24 FPS**
-
-- 6/ You can enter the ratio for information only
-
-- 7/ You need to set the resolution of the video preview. **Kitsu will use this resolution to encode the videos**. 
-
-- 8/ You can add a picture to identify your production better.
-
-Validate everything with the **Save** button.
-
-
-
-
-### Select specific Task Status for a production
-
-
-Per default, Kitsu will load all the Task Status of your status library into your production.
-
-But you can choose to use only specific status.
-
-![Setting status new](../img/getting-started/setting_status_new.png)
-
-On the "Task Status" tab, you can choose which status you want to use on this production, 
-validate your choice with the "Add" button.
-
-
-![Setting Add Status](../img/getting-started/setting_status_add.png)
-
-You can also see the sum up of the parameters of each status.
-
-(To add new Task Status see [Customization of the workflow](../customization/README.md#create-a-new-task-status) )
-
-
-### Select specific Task Types for a production
-
-
-Per default, Kitsu will load all the Task Types of your Task Types library into your production.
-
-![Setting Task Type new](../img/getting-started/setting_task_new.png)
-
-But you can choose to use only specific Task Types, depending on the type of your production.
-(To add new Task Type see [Customization of the workflow](../customization/README.md#create-a-new-task-type) )
-
-For example, you can create a 2D and A CGI workflow on your library and add the needed task types into this production.
-
-
-On the "Task Types" tab, you can choose which Task Types you want to use on this production, 
-validate your choice with the "Add" button.
-
-You can also enter start date and due date for each task type.
-
-Once you will add assets and shots on your production; your schedule will be set automatically.
-
-![Setting Add Task Type](../img/getting-started/setting_task_add.png)
-
-
-### Select specific Asset Types for a production
-
-
-Per default, Kitsu will load all the Asset Types of your status library into your production.
-
-But you can choose to use only specific Asset Types, depending on the type of your production.
-
-![Setting Asset type new](../img/getting-started/setting_asset_new.png)
-
-On the "Asset Types" tab, you can choose which Asset Types you want to use on this production, 
-validate your choice with the "Add" button.
-
-![Setting Add Asset](../img/getting-started/setting_asset_add.png)
-
+Validate everything with the ![All done](../img/getting-started/all_done_go.png) button.
 
 
 ## Create assets
