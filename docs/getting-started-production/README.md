@@ -40,8 +40,7 @@ Let's take a look around.
 
 On the top part (1), you have the global navigation. This part is always visible through all the pages of the production.
 
-With the main menu button ![Main menu button](../img/getting-started/main_button.png
-) you can go to your productions, your tasks (it's commun to all permissions). And because you are administrator you have access to extra options, like global view of the schedule, timesheets of yoru whole studio and customisation of the worklow.
+With the main menu button ![Main menu button](../img/getting-started/main_button.png) you can go to your productions, your tasks (it's commun to all permissions). And because you are administrator you have access to extra options, like global view of the schedule, timesheets of yoru whole studio and customisation of the worklow.
 
 You can choose between production. The name of the actual production is diplayed now, but thanks for the drop down menu, you can navigate from production to production (if you have several). 
 
@@ -62,7 +61,7 @@ You can then save all the filters, and use them as your personal pages.
 On the right part of the screen, there is some button (from left to right) , hide or display the assignation, hide or display the extra column, enlarge or reduce the thumbnail, 
 ![display and Hide option](../img/getting-started/display_hide_option.png)
 
-batch import thumbnail ![batch import thumbnail](../img/getting-started/add_thumbnails), and finaly export ![export button](../img/getting-started/export.png) or import ![Import button](../img/getting-started/import.png) data.
+batch import thumbnail ![batch import thumbnail](../img/getting-started/add_thumbnails.png), and finaly export ![export button](../img/getting-started/export.png) or import ![Import button](../img/getting-started/import.png) data.
 
 
 Below you have the name of the column. the (+) next to **Name** ![Add custom column](../img/getting-started/add_column_custom.png) is here to create new custom column. Then you have the name of the task type column. 
