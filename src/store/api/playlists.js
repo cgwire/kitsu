@@ -65,8 +65,9 @@ export default {
     return client.pdel(path)
   },
 
-  runPlaylistBuild (playlist) {
-    const path = `/api/data/playlists/${playlist.id}/build/mp4`
+  runPlaylistBuild (playlist, full = false) {
+    let path = `/api/data/playlists/${playlist.id}/build/mp4`
+    if (full) path += '?full=true'
     return client.pget(path)
   },
 

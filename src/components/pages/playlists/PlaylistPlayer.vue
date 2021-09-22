@@ -589,37 +589,47 @@
       style="position: relative"
       v-if="!tempMode"
     >
-      <a
+      <div
         :class="{
-          'dl-button': true,
-          'zip-button': true,
+          'build-options': true,
           hidden: isDlButtonsHidden
         }"
-        :href="zipDlPath"
       >
-        {{ $t('playlists.download_zip') }}
-      </a>
-      <a
-        :class="{
-          'dl-button': true,
-          'csv-button': true,
-          hidden: isDlButtonsHidden
-        }"
-        :href="csvDlPath"
-      >
-        {{ $t('playlists.download_csv') }}
-      </a>
-      <span
-        :class="{
-          'dl-button': true,
-          'mp4-button': true,
-          'disabled': !isCurrentUserManager || isJobRunning,
-          hidden: isDlButtonsHidden
-        }"
-        @click="onBuildClicked"
-      >
-        {{ $t('playlists.build_mp4') }}
-      </span>
+        <a
+          class="dl-button zip-button"
+          :href="zipDlPath"
+        >
+          {{ $t('playlists.download_zip') }}
+        </a>
+        <a
+          class="dl-button zip-button"
+          :href="csvDlPath"
+        >
+          {{ $t('playlists.download_csv') }}
+        </a>
+        <span
+          :class="{
+            'dl-button': true,
+            'mp4-button': true,
+            'disabled': !isCurrentUserManager || isJobRunning,
+            hidden: isDlButtonsHidden
+          }"
+          @click="onBuildClicked"
+        >
+          {{ $t('playlists.build_mp4') }} - concat
+        </span>
+        <span
+          :class="{
+            'dl-button': true,
+            'mp4-2-button': true,
+            'disabled': !isCurrentUserManager || isJobRunning,
+            hidden: isDlButtonsHidden
+          }"
+          @click="onBuildFullClicked"
+        >
+          {{ $t('playlists.build_mp4') }} - full
+        </span>
+      </div>
       <div
         :class="{
           'build-list': true,
@@ -640,6 +650,10 @@
             :key="job.id"
             v-for="job in playlist.build_jobs"
           >
+            <spinner
+              class="build-spinner"
+              v-if="job.status === 'running'"
+            />
             <span v-if="job.status === 'running'">
               {{ $t('playlists.building') }}
             </span>
@@ -654,10 +668,6 @@
               {{ formatDate(job.created_at) }}
             </a>
             <span class="filler"></span>
-            <spinner
-              class="build-spinner"
-              v-if="job.status === 'running'"
-            />
             <button
               class="delete-job-button"
               @click="onRemoveBuildJob(job)"
@@ -810,6 +820,7 @@ export default {
   data () {
     return {
       annotations: [],
+      buildLaunched: false,
       color: '#ff3860',
       comparisonMode: 'sidebyside',
       currentComparisonPreviewIndex: 0,
@@ -822,6 +833,7 @@ export default {
       framesPerImage: [],
       framesSeenOfPicture: 0,
       fullScreen: false,
+      isBuildLaunched: false,
       isCommentsHidden: true,
       isComparing: false,
       isDlButtonsHidden: true,
@@ -2249,8 +2261,25 @@ export default {
     },
 
     onBuildClicked () {
-      if (this.isCurrentUserManager && !this.isJobRunning) {
-        this.runPlaylistBuild(this.playlist)
+      this.runBuild(false)
+    },
+
+    onBuildFullClicked () {
+      this.runBuild(true)
+    },
+
+    runBuild (full = false) {
+      if (
+        this.isCurrentUserManager &&
+        !this.isJobRunning &&
+        !this.isBuildLaunched
+      ) {
+        this.isBuildLaunched = true
+        this.runPlaylistBuild({ playlist: this.playlist, full })
+          .then(() => {
+            this.isBuildLaunched = false
+          })
+          .catch(console.error)
       }
     },
 
@@ -2312,7 +2341,7 @@ export default {
     },
 
     resetPictureCanvas () {
-      this.annotations = this.currentPreview.annotations
+      this.annotations = this.currentPreview.annotations || []
       return this.resetCanvas()
         .then(() => {
           if (this.isCurrentPreviewPicture) {
@@ -2745,38 +2774,36 @@ progress {
   background: $dark-grey;
   border: 1px solid $dark-grey;
   color: $white;
-  position: absolute;
-  width: 180px;
+  display: inline-block;
+  width: 190px;
   padding: 8px;
+  cursor: pointer;
 
   &:hover {
     background: $dark-grey-light;
   }
+}
 
-  &.csv-button {
-    left: -110px;
-    top: -200px;
-  }
-
-  &.zip-button {
-    left: -110px;
-    top: -240px;
-  }
-
-  &.mp4-button {
-    left: -110px;
-    top: -160px;
-    cursor: pointer;
-  }
+.build-options {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  background: $dark-grey;
+  border: 1px solid $dark-grey-light;
+  position: absolute;
+  width: 190px;
+  left: -120px;
+  top: -280px;
+  height: 160px;
+  z-index: 300;
 }
 
 .build-list {
-  background: $dark-grey;
-  border: 1px solid $dark-grey;
+  background: $dark-grey-stronger;
+  border: 1px solid $dark-grey-light;
   position: absolute;
-  width: 180px;
-  left: -110px;
-  top: -120px;
+  width: 190px;
+  left: -120px;
+  top: -121px;
   height: 120px;
   overflow-y: auto;
   padding: 8px;
@@ -2802,6 +2829,8 @@ progress {
 .build-spinner {
   width: 15px;
   max-width: 15px;
+  margin-top: 5px;
+  margin-right: 5px;
 }
 
 .spinner {
