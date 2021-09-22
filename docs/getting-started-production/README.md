@@ -45,7 +45,16 @@ With the main menu button ![Main menu button](../img/getting-started/main_button
 You can choose between production. The name of the actual production is diplayed now, but thanks for the drop down menu, you can navigate from production to production (if you have several). 
 
 The next dropdown menu is here to help you navigate through the differente pages of the production.
-You always start with the asset page, but you can switch to shots, sequence, statistic, team, breakdown. It's also with this dropdown menu that you can change the setting of the production (including the workflow)
+You always start with the asset page, but you can switch to shots, sequence, statistic, team, breakdown. It's also with this dropdown menu that you can change the setting of the production (including the workflow).
+
+If you have define your production as a **TV Show** you will have an episode drop down menu, with the **All assets**, **Main pack** and episode options.
+
+
+On the right part of the top screen you have the news form Kitsu. You can see with an animated gif all the new features ![New features](../img/getting-started/latest_update.png). 
+
+
+Then, the bell is here to show you your notification (assignation, comments, tag), ![Notification](../img/getting-started/notification_icon_on.png), and then your avatar to open your personal menu (setting, documentation, etc) ![Profil enlarged](../img/getting-started/profil_enlarge.png).
+
 
 On the second part of the screen, is common to the asset and shot page. this part always stick to the top of the page, even if you scroll down.
 
