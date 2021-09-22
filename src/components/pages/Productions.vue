@@ -6,11 +6,11 @@
       </div>
       <div class="level-right">
         <div class="level-item">
-          <button-simple
+          <button-link
             class="level-item"
             :text="$t('productions.new_production')"
             icon="plus"
-            @click="onNewClicked"
+            :path="{ name: 'new-production' }"
           />
         </div>
       </div>
@@ -53,14 +53,14 @@ import { mapGetters, mapActions } from 'vuex'
 import ProductionList from '../lists/ProductionList'
 import EditProductionModal from '../modals/EditProductionModal'
 import HardDeleteModal from '../modals/HardDeleteModal'
-import ButtonSimple from '../widgets/ButtonSimple'
+import ButtonLink from '../widgets/ButtonLink'
 import PageTitle from '../widgets/PageTitle'
 
 export default {
   name: 'productions',
 
   components: {
-    ButtonSimple,
+    ButtonLink,
     HardDeleteModal,
     EditProductionModal,
     PageTitle,
