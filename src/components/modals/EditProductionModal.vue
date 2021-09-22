@@ -29,13 +29,6 @@
           @enter="runConfirmation"
           v-model="form.project_status_id"
         />
-        <combobox
-          :label="$t('productions.fields.type')"
-          :options="productionTypeOptions"
-          localeKeyPrefix="productions.type."
-          @enter="runConfirmation"
-          v-model="form.production_type"
-        />
         <text-field v-if="productionToEdit && productionToEdit.id"
           ref="fpsField"
           :label="$t('productions.fields.fps')"
