@@ -30,6 +30,48 @@ See batch Action section for more details
 
 Validate everything with the ![All done](../img/getting-started/all_done_go.png) button.
 
+## Introduction to Kitsu global page
+
+Welcome to the global asset page of Kitsu.
+
+Let's take a look around.
+
+![Presentation of the global page](../img/getting-started/presentation_global.png)
+
+On the top part (1), you have the global navigation. This part is always visible through all the pages of the production.
+
+With the main menu button ![Main menu button](../img/getting-started/main_button.png
+) you can go to your productions, your tasks (it's commun to all permissions). And because you are administrator you have access to extra options, like global view of the schedule, timesheets of yoru whole studio and customisation of the worklow.
+
+You can choose between production. The name of the actual production is diplayed now, but thanks for the drop down menu, you can navigate from production to production (if you have several). 
+
+The next dropdown menu is here to help you navigate through the differente pages of the production.
+You always start with the asset page, but you can switch to shots, sequence, statistic, team, breakdown. It's also with this dropdown menu that you can change the setting of the production (including the workflow)
+
+On the second part of the screen, is common to the asset and shot page. this part always stick to the top of the page, even if you scroll down.
+
+The first element on the left is the filter box, you can type anything you want for simple filtering, sequence, asset type etc.
+
+If you need a more advance filtering, please use the filter builder button. 
+
+![Filter Builder](../img/getting-started/filter_builder.png)
+
+You can then save all the filters, and use them as your personal pages.
+
+
+On the right part of the screen, there is some button (from left to right) , hide or display the assignation, hide or display the extra column, enlarge or reduce the thumbnail, 
+![display and Hide option](../img/getting-started/display_hide_option.png)
+
+batch import thumbnail ![batch import thumbnail](../img/getting-started/add_thumbnails), and finaly export ![export button](../img/getting-started/export.png) or import ![Import button](../img/getting-started/import.png) data.
+
+
+Below you have the name of the column. the (+) next to **Name** ![Add custom column](../img/getting-started/add_column_custom.png) is here to create new custom column. Then you have the name of the task type column. 
+
+On the far right of the screen, next to the scroll bar is the option to hide and display text column
+![Display/hide text column](../img/getting-started/visible_column_detail.png).
+
+On this example we have created a **Studio** and **test** custom column.
+
 
 ## Create assets
 
