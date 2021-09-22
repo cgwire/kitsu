@@ -1532,7 +1532,7 @@ export default {
       this.goNextFrame()
     },
 
-    onPlayPreviousEntityClicked () {
+    onPlayPreviousEntityClicked (forcePlay = false) {
       this.clearFocus()
       this.playEntity(this.previousEntityIndex)
       if (this.isCurrentPreviewMovie) {
@@ -1540,11 +1540,11 @@ export default {
         if (this.isComparing) {
           this.$refs['raw-player-comparison'].loadPreviousEntity()
         }
-        if (this.isPlaying) this.play()
       }
+      if (this.isPlaying || forcePlay) this.play()
     },
 
-    onPlayNextEntityClicked () {
+    onPlayNextEntityClicked (forcePlay = false) {
       this.clearFocus()
       this.playEntity(this.nextEntityIndex)
       if (this.isCurrentPreviewMovie) {
@@ -1552,8 +1552,8 @@ export default {
         if (this.isComparing) {
           this.$refs['raw-player-comparison'].loadNextEntity()
         }
-        if (this.isPlaying) this.play()
       }
+      if (this.isPlaying || forcePlay) this.play()
     },
 
     onPlayPauseClicked () {
@@ -1832,7 +1832,7 @@ export default {
       this.framesSeenOfPicture = 0
       if (this.playingEntityIndex === entityIndex) {
         this.isPlaying = true
-        this.onPlayNextEntityClicked()
+        this.onPlayNextEntityClicked(true)
       }
     },
 
