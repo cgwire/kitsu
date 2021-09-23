@@ -212,8 +212,8 @@ const actions = {
     commit(MARK_JOB_AS_DONE, job)
   },
 
-  runPlaylistBuild ({ commit }, playlist) {
-    return playlistsApi.runPlaylistBuild(playlist)
+  runPlaylistBuild ({ commit }, { playlist, full }) {
+    return playlistsApi.runPlaylistBuild(playlist, full)
   },
 
   changePlaylistType (
