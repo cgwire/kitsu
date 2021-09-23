@@ -590,6 +590,10 @@ You can also add **text** on the frame.
 
 ![review drawing text](../img/getting-started/review_comment_text.png)
 
+You can also tag a freame (whatever version you are in), Type the `@`and it opens a sub-menu with the list of the team and start typing **frame**. 
+
+![Tag a frame](../img/getting-started/tag_frame.png)
+
 If you need to delete your line, click again on the **pencil** icon, the cursor changes to a multi-directional cross ![Pencil](../img/getting-started/direction_arrow.png), and then you can select your line and move it around.
 
 ![review drawing](../img/getting-started/review_edit.png)
@@ -623,6 +627,7 @@ Besides your comment, you can also attach a preview. Click on the **Add attachme
 You can also **tag** someone on the team in the comments. Type the `@`and it opens a sub-menu with the list of the team. 
 
 ![Tag someone](../img/getting-started/tag_team.png)
+
 
 Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the ArtistArtist that his work is validated.
 
