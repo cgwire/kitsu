@@ -465,6 +465,13 @@ Click on the "Attach preview" button. The explorer opens and lets you choose you
 
 ![attach preview](../img/getting-started/attach_preview.png)
 
+You can also copy paste a screenshot for example at this screen.
+
+You will see a preview of the attached files.
+
+![attach preview filled](../img/getting-started/attach_preview_filled.png)
+
+
 Once your file is selected, you see its name near the "Attach preview" button.
 
 ![attach preview confimed](../img/getting-started/attach_preview_confirm.png)
