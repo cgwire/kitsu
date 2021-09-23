@@ -1282,6 +1282,10 @@ export default {
 
     isListToggled () {
       this.playlistPlayer.onWindowResize()
+    },
+
+    taskTypeId () {
+      this.loadPlaylistsData(true)
     }
   },
 
