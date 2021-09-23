@@ -9,22 +9,22 @@ production** button.
 
 Enter your production name, choose **TV Show** if you need more than one episode.
 
-Then you have to fill technical information, as the number of FPS, the Ration, Resolution.
+Then you have to fill in technical information, as the number of FPS, the Ration, Resolution.
 
-All theses data will be used when Kitsu will reencode the video previews uploaded.
+All these data will be used when Kitsu reencodes the video previews uploaded.
 
-Then you need to define a start and end dates for your production.
+Then you need to define start and end dates for your production.
 
 ![Add a production](../img/getting-started/add_production.png)
 
-On the next part 3 to 6, you can define your production pipeline.
-First you need to select your asset task type, shot task type, then the task status and asset types.
+In the next part, 3 to 6, you can define your production pipeline.
+First, you need to select your asset task type, shot task type, and task status and asset types.
 
 ![Add a production Pipeline](../img/getting-started/add_production_pipe.png)
 
-Then 7 and 8 are the option parts. If you already have a spreadsheet with your asset / shot.
+Then 7 and 8 are the option parts. If you already have a spreadsheet with your asset/shot.
 
-See batch Action section for more details 
+See batch Action section for more details. 
 
 [Batch Action](../batch-action/README.md#create-assets-from-a-csv-spreadsheet-file)
 
@@ -40,46 +40,54 @@ Let's take a look around.
 
 On the top part (1), you have the global navigation. This part is always visible through all the pages of the production.
 
-With the main menu button ![Main menu button](../img/getting-started/main_button.png) you can go to your productions, your tasks (it's commun to all permissions). And because you are administrator you have access to extra options, like global view of the schedule, timesheets of yoru whole studio and customisation of the worklow.
+With the main menu button ![Main menu button](../img/getting-started/main_button.png) you can go to your productions, your tasks (it's common to all permissions). And because you are an administrator, you have access to extra options, like the global view of the schedule, timesheets of your whole studio, and workflow customization.
 
-You can choose between production. The name of the actual production is diplayed now, but thanks for the drop down menu, you can navigate from production to production (if you have several). 
+You can choose between production. The name of the actual production is displayed now, but thanks to the drop-down menu, you can navigate from production to production (if you have several). 
 
-The next dropdown menu is here to help you navigate through the differente pages of the production.
-You always start with the asset page, but you can switch to shots, sequence, statistic, team, breakdown. It's also with this dropdown menu that you can change the setting of the production (including the workflow).
+The next drop-down menu is here to help you navigate through the different pages of the production.
+You always start with the asset page, but you can switch to shots, sequence, statistic, team, breakdown. With this drop-down menu, you can also change the setting of the production (including the workflow).
 
-If you have define your production as a **TV Show** you will have an episode drop down menu, with the **All assets**, **Main pack** and episode options.
-
-
-On the right part of the top screen you have the news form Kitsu. You can see with an animated gif all the new features ![New features](../img/getting-started/latest_update.png). 
+If you have defined your production as a **TV Show**, you will have an episode drop-down menu, with the **All assets**, **Main pack**, and episode options.
 
 
-Then, the bell is here to show you your notification (assignation, comments, tag), ![Notification](../img/getting-started/notification_icon_on.png), and then your avatar to open your personal menu (setting, documentation, etc) ![Profil enlarged](../img/getting-started/profil_enlarge.png).
+On the right part of the top screen, you have the news from Kitsu. You can see with an animated gif all the new features.
+
+ ![New features](../img/getting-started/latest_update.png). 
 
 
-On the second part of the screen, is common to the asset and shot page. this part always stick to the top of the page, even if you scroll down.
+Then, the bell shows you your notification (assignation, comments, tag), ![Notification](../img/getting-started/notification_icon_on.png), and then your avatar to open your menu (setting, documentation, etc.) 
 
-The first element on the left is the filter box, you can type anything you want for simple filtering, sequence, asset type etc.
+![Profil enlarged](../img/getting-started/profil_enlarge.png).
 
-If you need a more advance filtering, please use the filter builder button. 
+
+The second part of the screen is common to the asset and shot page. This part always sticks to the top of the page, even if you scroll down.
+
+The first element on the left is the filter box. You can type anything you want for simple filtering, sequence, asset type, etc.
+
+If you need more advanced filtering, please use the filter builder button. 
 
 ![Filter Builder](../img/getting-started/filter_builder.png)
 
-You can then save all the filters, and use them as your personal pages.
+You can then save all the filters and use them as your pages.
 
 
-On the right part of the screen, there is some button (from left to right) , hide or display the assignation, hide or display the extra column, enlarge or reduce the thumbnail, 
+On the right part of the screen, there is some button (from left to right), hide or display the assignation, hide or display the extra column, enlarge or reduce the thumbnail, 
 ![display and Hide option](../img/getting-started/display_hide_option.png)
 
 batch import thumbnail ![batch import thumbnail](../img/getting-started/add_thumbnails.png), and finaly export ![export button](../img/getting-started/export.png) or import ![Import button](../img/getting-started/import.png) data.
 
 
-Below you have the name of the column. the (+) next to **Name** ![Add custom column](../img/getting-started/add_column_custom.png) is here to create new custom column. Then you have the name of the task type column. 
+Below you have the name of the column. the (+) next to **Name** ![Add custom column](../img/getting-started/add_column_custom.png) is here to create a new custom column. Then you have the name of the task type column. 
 
-On the far right of the screen, next to the scroll bar is the option to hide and display text column
+On the far right of the screen, next to the scroll bar, is the option to hide and display text column
 ![Display/hide text column](../img/getting-started/visible_column_detail.png).
 
-On this example we have created a **Studio** and **test** custom column.
+In this example, we have created a **Studio** and **test** custom column.
 
+
+The last part (4), at the bottom of the screen, is the sum-up of your displayed page. It means the sum up will update if you filter the page.
+
+You can see the number of elements (assets or shots), the total number of estimated days, and the total number of already spent days.
 
 ## Create assets
 
@@ -104,7 +112,7 @@ Let's start with a character.
 
 Then, you select the **Main Pack**, or the **episode** (2)
 
-We give it a **Name** (3) and enter a description that helps the Artist knows what to do and identifies the asset quickly.
+We give it a **Name** (3) and enter a description that helps the Artist know what to do and quickly identify the asset.
 
 If you have multiple assets to create, click on **Confirm and stay**. 
 
@@ -124,13 +132,13 @@ After adding your last asset, click
 on **Confirm**. It saves the asset and closes the window. If you don't have
 more assets to add, click on **Close**, it cancels the window.
 
-The assets are linked with the  first episode **E01** (created per default by Kitsu) or with the **Main Pack**.
+The assets are linked with the first episode **E01** (created per default by Kitsu) or with the **Main Pack**.
 
 ![Global asset page](../img/getting-started/asset_edit.png)
 
-You will also see the tasks are created at the same time. Per default all the tasks of your library will be added. If you have set your parameters, only the selected tasks will be added.
+You will also see the tasks are created at the same time. By default, all the tasks of your library will be added. If you have set your parameters, only the selected tasks will be added.
 
-If you need to add more **Assets** you can click on the **Add assets** button.
+If you need to add more **Assets**, click on the **Add assets** button.
 
 You can edit assets by going to the asset page, hovering the asset you want to modify, and then click on the **edit** button 
 ![Edit button](../img/getting-started/edit_button.png) (1) on the right side of
@@ -138,25 +146,25 @@ the line.
 
 ![Edit an asset](../img/getting-started/asset_edit01.png)
 
-On the main asset page, to extend the description, click on the first words (2), and a pop-up opens with the full description.
+To extend the description on the main asset page, click on the first words (2), and a pop-up opens with the full description.
 
 To delete an asset see the FAQ : [How to delete an asset](../faq-deletion/README.md##how-to-delete-an-asset)
 
 
 ## Create extra tasks for the assets
 
-If you realize you miss some task type on your pipe line, you need to add the new task type on your library.
+If you realize you miss some task type on your pipeline, you need to add the new task type to your library.
 
 (To add new Task Type see [Customization of the workflow](../customization/README.md#create-a-new-task-type) )
 
-Once it's done, you need to add them into your **Setting** page too. 
+Once it's done, you need to add them to your **Setting** page too. 
 
 Then, click on the **+ Add tasks** on top of the spreadsheet. 
 
 ![Add tasks button](../img/getting-started/add_tasks_asset.png)
 
-A new window will open, and on the list you can choose the task you need to add.
-You can also choose to create tasks for **the project**  or **For current list and filters** and validate it by the **Confirm** button.
+A new window will open, and on the list, you can choose the task you need to add.
+You can also create tasks for **the project**  or **For current list and filters** and validate it by the **Confirm** button.
 
 ![Add task to an asset](../img/getting-started/add_task.png)
 
@@ -179,20 +187,20 @@ If you remove the filter characters, you will see the tasks only created for the
 
 ![Tasks filtered Created](../img/getting-started/delete_task_done_chara.png)
 
-You can also delete tasks for specific Asset Type. 
-For exemple you want to keep **Rig** only for the characters.
+You can also delete tasks for specific Asset Types. 
+For example, you want to keep **Rig** only for the characters.
 
-You need to type **-Characters** on the search bar on the global asset page. This way the page will filter 
+You need to type **-Characters** on the search bar on the global asset page. This way, the page will filter 
 everything **but** the characters.
 
 ![Tasks filtered](../img/getting-started/no_character_filtered.png)
 
-Then select the task type you want to delete for the filtered view. Click on the arrov next to the name 
+Then select the task type you want to delete for the filtered view. Click on the arrow next to the name 
 of the task type and select **Delete all**.
 
 ![Tasks filtered no chara](../img/getting-started/no_character_delete.png)
 
-Once the pop-up opens, type the name of the task type, and double check it's set to **For current list and filters**.
+Once the pop-up opens, type the name of the task type and double-check it's set to **For current list and filters**.
 
 ![Tasks filtered no chara rigging erased](../img/getting-started/delete_task_done.png)
 
@@ -272,7 +280,7 @@ To delete a sequence see the FAQ : [How to delete a Sequence](../faq-deletion/RE
 ## Add the Frameranges
 
 At this stage of the production, the animatic should be done. Meaning you have
-the length (**Number of frames**, **frame range In** and **frame range Out**) for each shot. You can
+the length (** number of frames**, **frame range In**, and **frame range Out**) for each shot. You can
 add this information to the spreadsheet.  This way, you are sure that all
 the frames a calculated, and none are missing or over computed.
 
@@ -292,7 +300,7 @@ Now the frame range appears on the general spreadsheet of the shot page.
 
 ![Shot edit page](../img/getting-started/shot_framerange_global.png)
 
-Now that you have unlock the **Frames**, **In** and **Out** column, you can fill them 
+Now that you have unlocked the **Frames**, **In**, and **Out** columns, you can fill them 
 directly from the global shot page.
 
 Click on the case you want to fill, and you will be able to add the data.
@@ -300,7 +308,7 @@ Click on the case you want to fill, and you will be able to add the data.
 ![Shot edit page](../img/getting-started/shot_framerange_global_edit.png)
 
 
-You can also use the **CSV Import** to update quickly your frame range.
+You can also use the **CSV Import** to update your frame range quickly.
  [Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
 
 You can have access to the shot values history too.
@@ -313,11 +321,11 @@ You can have access to the shot values history too.
 
 ## Create extra tasks for the shots
 
-If you realize you miss some task type on your pipe line, you need to add the new task type on your library.
+If you realize you miss some task type on your pipeline, you need to add the new task type to your library.
 
 (To add new Task Type see [Customization of the workflow](../customization/README.md#create-a-new-task-type) )
 
-Once it's done, you need to add them into your **Setting** page too.
+Once it's done, you need to add them to your **Setting** page too.
 
 Then,  click on
 the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png)
@@ -344,10 +352,10 @@ Then, click on the **+ Add a new user** button.
 A creation window opens. You can enter the first (1) and last name (2), the email
 (which is **mandatory** to create the account) (3), the phone number (4).
 
-You can also add the new user to a **Deparment** (or several) (5).
+You can also add the new user to a **Department** (or several) (5).
 See **DEPARTEMENT DOCUMENTATION**
 
-Then you need to define the role of the user: **Artist**, **Supervisor**,
+Then you need to define the role of the user: ** Artist**, **Supervisor**,
 **Studio Manager**, **Vendor** or **Client** (6).  If the Artist is working right now, keep
 him active, otherwise select no. Validate by clicking the **Confirm** button.
 
@@ -372,8 +380,7 @@ On the drop-down menu on the top of the page, select the **TEAM** page.
 ![Drop down menu team](../img/getting-started/drop_down_menu_team.png) 
 
 On the **Team** page, you can see all the assignations for a specific project.
-If you want to check another project team, you need to switch the project
-to the top of the page.
+If you want to check another project team, you need to switch to the top of the page.
 
 ![Team page](../img/getting-started/team_page.png)
 
@@ -400,8 +407,7 @@ him. Then click on the confirmation button to complete the assignation.
 
 ![Selected people](../img/getting-started/select_people.png)
 
-You can assign several tasks to the same person in one step (1). Once you have
-the blue menu visible, keep **ctrl** on your Keyboard pressed and select
+You can assign several tasks to the same person in one step (1). Once the blue menu is visible, keep **ctrl** on your Keyboard pressed and select
 multiple tasks. You can even use the **shift** key to choose a range of tasks
 (2). When you have chosen everything you need, apply with the **Confirm**
 button.  
@@ -451,7 +457,7 @@ or an `.obj` file. You can review all the previews from the browser or a mix of 
 Other files like `.pdf`, `.zip`, `.rar`, `.ma` or `.mb` however, they need to be
 downloaded to be reviewed.
 
-If you have defined a **FPS** for the production, Kitsu conforms to the uploaded video to this FPS.
+If you have defined an **FPS** for the production, Kitsu conforms to the uploaded video to this FPS.
 
 Otherwise, the video is compressed to 1080P and 30mbits/sec. 
 
@@ -563,7 +569,7 @@ You can fill the asset breakdown page the same way as the shots. First, select o
 
 When an artist needs a review, he changes the status of his task too![wfa](../img/getting-started/wfa_icon.png).
 
-Click on the status (1) to open the right panel and start the review. 
+Click on status (1) to open the right panel and start the review. 
 
 You can watch the version from the right panel, enlarge it (2), or even go fullscreen ![Fullscreen](../img/getting-started/fullscreen.png) (3).
 
@@ -584,7 +590,7 @@ If you need to delete your line, click again on the **pencil** icon, the cursor 
 Select the line with the directional cross, and then press the **delete** icon ![Delete line](../img/getting-started/delete_line.png)
 
 
-If you go into **Full-Screen**, you can compare two task type or version side by side when you click on the **Compare** button 
+If you go into **Full-Screen**, you can compare two task types or versions side by side when you click on the **Compare** button 
 ![compare button](../img/getting-started/compare_button.png).
 
 ![compare button](../img/getting-started/compare_version.png)
