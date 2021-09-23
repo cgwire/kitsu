@@ -15,7 +15,8 @@ On the drop-down menu, choose **SCHEDULE**
 
 ![Menu Schedule](../img/getting-started/menu_schedule.png)
 
-On top of the Schedule, you can define the start date (1) and the end date (2). 
+On top of the Schedule, you can see the start date (1) and the end date (2) you have define when creating the production. 
+
 Click on the box to open the calendar and pick a date.
 You can add your global man-days as on your quote.
 
@@ -35,6 +36,8 @@ It's a reminder of your contract/quote. You can also fill the **MD** for each ta
 
 You can define, on the Gantt Schedule, the start and end date of each task type. 
 The task types are the ones you have already added to your production.
+
+You can do it two ways, the first one is by moving the bar directly, the second way if entering date on the **setting page** under the **task type** section.
 
 Put your cursor on the start date; the cursor changes as a double arrow. Then drag and slide the start date.
 Do the same for the end date. 
