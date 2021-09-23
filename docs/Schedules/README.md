@@ -15,7 +15,7 @@ On the drop-down menu, choose **SCHEDULE**
 
 ![Menu Schedule](../img/getting-started/menu_schedule.png)
 
-On top of the Schedule, you can see the start date (1) and the end date (2) you have define when creating the production. 
+On top of the Schedule, you can see the start date (1) and the end date (2) you have defined when creating the production. 
 
 Click on the box to open the calendar and pick a date.
 You can add your global man-days as on your quote.
