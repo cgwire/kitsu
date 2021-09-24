@@ -301,6 +301,10 @@ export default {
     currentParentPreview: {
       type: Object,
       default: null
+    },
+    silent: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -989,7 +993,9 @@ export default {
     task () {
       this.attachedFileName = ''
       this.currentPreviewIndex = 0
-      this.loadTaskData()
+      if (!this.silent) {
+        this.loadTaskData()
+      }
     }
   },
 
