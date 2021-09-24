@@ -427,12 +427,13 @@
           class="playlist-button flexrow-item comparison-list"
           :options="taskTypeOptions"
           v-model="taskTypeToCompare"
-          @input="saveUserComparisonChoice"
+          @input="onTaskTypeToCompareChanged"
           v-if="isComparing"
         />
         <combobox
           class="playlist-button flexrow-item comparison-list"
           :options="revisionOptions"
+          @input="onRevisionToCompareChanged"
           v-model="revisionToCompare"
           v-if="isComparing"
         />
@@ -467,8 +468,7 @@
           class="flexrow flexrow-item comparison-missing"
           v-if="isComparing && comparisonEntityMissing"
         >
-          ⚠️ {{ $t('playlists.comparing_missing_plan') }}
-          {{ taskTypeMap.get(savedTaskTypeToCompare).name }}
+          ⚠️  {{ $t('playlists.comparing_missing_plan') }}
         </div>
       </div>
     </div>
@@ -1018,7 +1018,9 @@ export default {
         const preview =
           previewFiles.find(p => `${p.revision}` === this.revisionToCompare)
         if (preview) return preview
-        else return previewFiles[0]
+        else {
+          return previewFiles[0]
+        }
       } else {
         return null
       }
@@ -1026,7 +1028,9 @@ export default {
 
     currentPreviewToCompare () {
       if (!this.currentEntity) return null
-      if (this.currentComparisonPreviewIndex > 0) {
+      if (
+        this.currentComparisonPreviewIndex > 0
+      ) {
         const index = this.currentComparisonPreviewIndex - 1
         return this.currentRevisionToCompare.previews[index]
       } else {
@@ -1400,9 +1404,9 @@ export default {
       } else {
         this.rawPlayer.play()
         if (this.isComparing) {
-          this.$refs['raw-player-comparison'].play()
+          this.rawPlayerComparison.play()
         }
-        this.isPlaying = this.$refs['raw-player'].isPlaying
+        this.isPlaying = this.rawPlayer.isPlaying
       }
       this.hideCanvas()
       this.clearCanvas()
@@ -1744,6 +1748,10 @@ export default {
 
     onCompareClicked () {
       this.isComparing = !this.isComparing
+      this.$nextTick(() => {
+        this.saveUserComparisonChoice()
+        this.comparisonEntityMissing = false
+      })
     },
 
     onSpeedClicked () {
@@ -1795,23 +1803,6 @@ export default {
       }
     },
 
-    onPlayerEntityChange (entityIndex) {
-      if (this.isCurrentPreviewMovie) {
-        this.playingEntityIndex = entityIndex
-        if (this.isComparing) {
-          const comparisonIndex = this.rawPlayerComparison.currentIndex
-          if (comparisonIndex !== entityIndex) {
-            this.rawPlayerComparison.playNext()
-            this.rawPlayerComparison.setCurrentTime(0)
-          } else {
-            this.rawPlayerComparison.setCurrentTime(0)
-            if (this.isPlaying) this.rawPlayerComparison.play()
-          }
-        }
-      }
-      if (!this.$options.silent) this.scrollToEntity(this.playingEntityIndex)
-    },
-
     onPlayNext () {
       if (this.entityList[this.nextEntityIndex].preview_file_extension === 'mp4') {
         this.rawPlayer.playNext()
@@ -1822,6 +1813,19 @@ export default {
           this.playPicture()
         }
       }
+    },
+
+    onPlayerEntityChange (entityIndex) {
+      if (this.isCurrentPreviewMovie) {
+        this.playingEntityIndex = entityIndex
+        if (this.isComparing) {
+          const comparisonIndex = this.rawPlayerComparison.currentIndex
+          if (comparisonIndex !== entityIndex) {
+            this.rawPlayerComparison.playNext()
+          }
+        }
+      }
+      if (!this.$options.silent) this.scrollToEntity(this.playingEntityIndex)
     },
 
     playPicture () {
@@ -2035,33 +2039,43 @@ export default {
         })
     },
 
+    getComparisonTaskTypeOptions () {
+      const taskTypeIds = Object.keys(
+        this.currentEntity.preview_files
+      ).filter(
+        taskTypeId => {
+          return !!this.currentEntity.preview_files[taskTypeId]
+        }
+      )
+      const taskTypeOptions = taskTypeIds.map((taskTypeId) => {
+        return {
+          label: this.taskTypeMap.get(taskTypeId).name,
+          value: this.taskTypeMap.get(taskTypeId).id
+        }
+      }).sort((a, b) => -a.label.localeCompare(b.label))
+      return taskTypeOptions
+    },
+
+    isComparisonTaskTypeAvailable () {
+      return this.taskTypeOptions.findIndex(
+        taskTypeOption => {
+          return taskTypeOption.value === this.savedTaskTypeToCompare
+        }
+      ) !== -1
+    },
+
     rebuildComparisonOptions () {
       this.comparisonEntityMissing = false
       if (this.entityList.length > 0) {
-        const taskTypeIds = Object.keys(
-          this.currentEntity.preview_files
-        ).filter(
-          taskTypeId => {
-            return !!this.currentEntity.preview_files[taskTypeId]
-          }
-        )
-        this.taskTypeOptions = taskTypeIds.map((taskTypeId) => {
-          return {
-            label: this.taskTypeMap.get(taskTypeId).name,
-            value: this.taskTypeMap.get(taskTypeId).id
-          }
-        }).sort((a, b) => -a.label.localeCompare(b.label))
+        this.taskTypeOptions = this.getComparisonTaskTypeOptions()
         if (this.taskTypeOptions.length > 0) {
-          const currentTaskTypeIndex = this.taskTypeOptions.findIndex(
-            taskTypeOption => taskTypeOption.value === this.savedTaskTypeToCompare
-          )
-          if (currentTaskTypeIndex !== -1) {
+          if (this.isComparisonTaskTypeAvailable()) {
             this.taskTypeToCompare = this.savedTaskTypeToCompare
           } else {
-            // if we couldn't find the current task type,
-            //   then fallback to the first one in the list
+            // If we couldn't find the current task type,
+            // then fallback to the first one in the list.
             this.taskTypeToCompare = this.taskTypeOptions[0].value
-            this.comparisonEntityMissing = !!this.savedTaskTypeToCompare
+            this.comparisonEntityMissing = true
           }
         }
         this.rebuildRevisionOptions()
@@ -2101,13 +2115,24 @@ export default {
     rebuildEntityListToCompare () {
       if (this.taskTypeToCompare) {
         this.entityListToCompare = this.entityList
-          .filter(entity => entity.preview_files[this.taskTypeToCompare])
           .map(entity => {
-            let preview = entity.preview_files[this.taskTypeToCompare].find(
+            if (!entity.preview_files || entity.preview_files === {}) {
+              return ({
+                preview_file_id: '',
+                preview_file_extension: 'none'
+              })
+            }
+            let previewFiles = entity.preview_files[this.taskTypeToCompare]
+            let key = this.taskTypeToCompare
+            if (!previewFiles) {
+              key = Object.keys(entity.preview_files)[0]
+              previewFiles = entity.preview_files[key]
+            }
+            let preview = previewFiles.find(
               p => `${p.revision}` === this.revisionToCompare
             )
             if (!preview) {
-              preview = entity.preview_files[this.taskTypeToCompare][0]
+              preview = entity.preview_files[key][0]
             }
             return ({
               preview_file_id: preview.id,
@@ -2120,16 +2145,12 @@ export default {
     },
 
     resetComparison () {
-      const wasPlaying = this.isPlaying
       this.rebuildRevisionOptions()
-      this.rebuildEntityListToCompare()
       this.$nextTick(() => {
-        this.pause()
         const player = this.$refs['raw-player-comparison']
         player.loadEntity(this.playingEntityIndex)
-        player.setCurrentTime(this.currentTimeRaw)
         this.$nextTick(() => {
-          if (wasPlaying) this.play()
+          if (this.isPlaying) this.play()
         })
       })
     },
@@ -2418,9 +2439,25 @@ export default {
       setTimeout(() => {
         this.rawPlayer.setCurrentTime(time)
         if (this.isComparing) {
-          this.$refs['raw-player-comparison'].setCurrentTime(time)
+          this.rawPlayerComparison.setCurrentTime(time)
         }
       }, 20)
+    },
+
+    onTaskTypeToCompareChanged () {
+      this.saveUserComparisonChoice()
+      this.rebuildEntityListToCompare()
+    },
+
+    onRevisionToCompareChanged () {
+      if (this.isComparing) {
+        this.rebuildEntityListToCompare()
+        this.$nextTick(() => {
+          this.pause()
+          this.rawPlayerComparison.loadEntity(this.playingEntityIndex)
+          this.rawPlayerComparison.setCurrentTime(this.currentTimeRaw)
+        })
+      }
     },
 
     saveUserComparisonChoice () {
@@ -2429,6 +2466,10 @@ export default {
   },
 
   watch: {
+    isCommentsHidden () {
+      if (!this.isCommentsHidden) this.$refs['task-info'].loadTaskData()
+    },
+
     currentPreviewIndex () {
       this.endAnnotationSaving()
       this.resetUndoStacks()
@@ -2451,8 +2492,10 @@ export default {
         this.annotations = this.currentEntity.preview_file_annotations || []
       }
       this.$nextTick(() => {
-        this.rebuildComparisonOptions()
-        if (this.isComparing) this.rebuildRevisionOptions()
+        if (this.isComparing) {
+          this.rebuildComparisonOptions()
+          this.rebuildRevisionOptions()
+        }
         this.$nextTick(() => {
           this.resetCanvas()
         })
@@ -2462,6 +2505,7 @@ export default {
     isComparing () {
       if (this.isComparing) {
         this.resetComparison()
+        this.rebuildEntityListToCompare()
       }
       this.$nextTick()
         .then(() => {
@@ -2478,15 +2522,6 @@ export default {
     },
 
     revisionToCompare () {
-      if (this.isComparing) {
-        this.rebuildEntityListToCompare()
-        this.$nextTick(() => {
-          this.pause()
-          const player = this.$refs['raw-player-comparison']
-          player.loadEntity(this.playingEntityIndex)
-          player.setCurrentTime(this.currentTimeRaw)
-        })
-      }
     },
 
     entities () {

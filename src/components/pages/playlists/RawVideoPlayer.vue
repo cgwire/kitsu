@@ -20,6 +20,13 @@
  * To play several videos, to avoid blinking effects, it's required to use
  * two video players. When switching from a entity to another, we hide and show
  * players so the blink does not occur.
+ * Videos are represented with a list of entities. Each entity has a
+ * preview_file_id which is used to build the related movie path. The expected
+ * format of entities is:
+ * [{
+ *    preview_file_id: 'preview-id',
+ *    preview_file_extension: 'mp4'
+ * }, ...]
  */
 import { mapGetters } from 'vuex'
 import { roundToFrame } from '../../../lib/video'
