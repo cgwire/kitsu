@@ -72,6 +72,7 @@
               @change="localeChanged"
             >
               <option value="zh_Hans_CN">Chinese</option>
+              <option value="zh_Hant_TW">Chinese (TW)</option>
               <option value="nl_NL">Dutch</option>
               <option value="en_US">English</option>
               <option value="fr_FR">French</option>
@@ -284,6 +285,8 @@ export default {
       this.$i18n.locale = this.form.locale.substring(0, 2)
       if (this.form.locale === 'zh_Hans_CN') {
         moment.locale('zh_CN')
+      } else if (this.form.locale === 'zh_Hant_TW') {
+        moment.locale('zh_TW')
       } else {
         moment.locale(this.form.locale.substring(0, 2))
       }

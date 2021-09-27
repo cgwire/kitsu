@@ -7,15 +7,17 @@ import fr from '@/locales/fr.json'
 import pt from '@/locales/pt.json'
 import ru from '@/locales/ru.js'
 import zh from '@/locales/zh.json'
+import zhtw from '@/locales/zh_tw.json'
 
 export default {
   de: de,
-  nl: nl.default,
   en: en,
   es: es.default,
   fa: fa,
   fr: fr.default,
+  nl: nl.default,
   pt: pt.default,
+  ru: ru,
   zh: zh.default,
-  ru: ru
+  zw: zhtw.default
 }

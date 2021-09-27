@@ -13,6 +13,8 @@ const lang = {
     i18n.locale = locale.substring(0, 2)
     if (locale === 'zh_Hans_CN') {
       moment.locale('zh_CN')
+    } else if (locale === 'zh_Hant_TW') {
+      moment.locale('zh_TW')
     } else {
       moment.locale(locale.substring(0, 2))
     }
