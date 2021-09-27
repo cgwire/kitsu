@@ -18,9 +18,32 @@
     <span class="flexrow-item playlist-name">
       {{ playlist.name }}
     </span>
+    <div class="flexrow-item playlist-room">
+      <button-simple
+        @click="leaveRoom"
+        class="playlist-button topbar-button"
+        :text="$t('playlists.leave_room')"
+        v-if="joinedRoom"
+      />
+      <button-simple
+        @click="joinRoom"
+        class="playlist-button topbar-button"
+        :text="$t('playlists.join_room')"
+        v-else
+      />
+      <people-avatar
+        class="person-avatar"
+        :key="personId"
+        :person="personMap.get(personId)"
+        :size="30"
+        :font-size="15"
+        v-for="personId in room.people"
+        v-if="personMap.get(personId)"
+      />
+    </div>
     <button-simple
       @click="$emit('show-add-entities')"
-      class="playlist-button add-entities-button flexrow-item"
+      class="playlist-button topbar-button flexrow-item"
       icon="plus"
       :text="addEntitiesText"
       v-if="isCurrentUserManager && !isAddingEntity"
@@ -307,14 +330,14 @@
     >
       <button-simple
         class="button playlist-button flexrow-item"
-        @click="play"
+        @click="playClicked"
         :title="$t('playlists.actions.play')"
         icon="play"
         v-if="!isPlaying"
       />
       <button-simple
         class="button playlist-button flexrow-item"
-        @click="pause"
+        @click="pauseClicked"
         :title="$t('playlists.actions.pause')"
         icon="pause"
         v-else
@@ -441,6 +464,7 @@
           class="playlist-button flexrow-item comparison-list"
           :options="comparisonModeOptions"
           v-model="comparisonMode"
+          @input="updatePlayingStatus"
           v-if="isComparing"
         />
         <div
@@ -724,7 +748,7 @@
         :index="index"
         :entity="entity"
         :is-playing="playingEntityIndex === index"
-        @play-click="playEntity"
+        @play-click="entityListClicked"
         @remove-entity="removeEntity"
         @preview-changed="onPreviewChanged"
         @entity-dropped="onEntityDropped"
@@ -769,6 +793,7 @@ import ColorPicker from '@/components/widgets/ColorPicker'
 import Combobox from '@/components/widgets/Combobox'
 import DeleteModal from '@/components/modals/DeleteModal'
 import PencilPicker from '@/components/widgets/PencilPicker'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity'
 import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer'
 import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal'
@@ -792,6 +817,7 @@ export default {
     DownloadIcon,
     DeleteModal,
     PencilPicker,
+    PeopleAvatar,
     PlaylistedEntity,
     RawVideoPlayer,
     SelectTaskTypeModal,
@@ -858,12 +884,17 @@ export default {
       isTyping: false,
       maxDuration: '00:00.000',
       maxDurationRaw: 0,
+      onNextTimeUpdateActions: [],
       pencil: 'big',
       pencilPalette: ['big', 'medium', 'small'],
       playlistToEdit: {},
       playingEntityIndex: 0,
       revisionOptions: [],
       savedTaskTypeToCompare: null,
+      room: {
+        people: [],
+        newComer: true
+      },
       speed: 3,
       task: null,
       taskTypeOptions: [],
@@ -926,12 +957,17 @@ export default {
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isTVShow',
+      'personMap',
       'previewFileMap',
       'taskMap',
       'taskTypeMap',
       'shotTaskTypes',
       'user'
     ]),
+
+    joinedRoom () {
+      return !!this.room.people.find(peopleId => peopleId === this.user.id)
+    },
 
     extension () {
       if (!this.currentPreview) return ''
@@ -1149,6 +1185,15 @@ export default {
       return formatFrame(this.currentTimeRaw, this.fps)
     },
 
+    currentFrameMovieOrPicture () {
+      if (this.isCurrentPreviewMovie) {
+        return parseInt(this.currentFrame)
+      } else if (this.isCurrentPreviewPicture) {
+        return this.framesSeenOfPicture
+      }
+      return 0
+    },
+
     deleteText () {
       if (this.playlist) {
         return this.$t('playlists.delete_text', { name: this.playlist.name })
@@ -1241,6 +1286,10 @@ export default {
 
     isPicture (extension) {
       return ['png', 'gif'].includes(extension)
+    },
+
+    exists (variable) {
+      return variable !== null && variable !== undefined
     },
 
     configureEvents () {
@@ -1398,6 +1447,16 @@ export default {
       }
     },
 
+    playClicked () {
+      this.play()
+      this.updatePlayingStatus()
+    },
+
+    pauseClicked () {
+      this.pause()
+      this.sendUpdatePlayingStatus()
+    },
+
     play () {
       if (this.isCurrentPreviewPicture) {
         this.playPicture()
@@ -1422,14 +1481,19 @@ export default {
       this.isPlaying = false
     },
 
+    entityListClicked (entityIndex) {
+      this.playEntity(entityIndex)
+      this.updatePlayingStatus()
+    },
+
     playEntity (entityIndex) {
       const entity = this.entityList[entityIndex]
       const wasDrawing = this.isDrawing === true
       this.hideCanvas()
       this.clearCanvas()
       this.framesSeenOfPicture = 0
+      this.playingEntityIndex = entityIndex
       if (entity.preview_file_extension === 'mp4') {
-        this.playingEntityIndex = entityIndex
         this.$nextTick(() => {
           this.scrollToEntity(this.playingEntityIndex)
           this.rawPlayer.loadEntity(entityIndex)
@@ -1445,7 +1509,6 @@ export default {
           }
         })
       } else {
-        this.playingEntityIndex = entityIndex
         const annotation = this.getAnnotation(0)
         this.loadAnnotation(annotation)
         if (wasDrawing) {
@@ -1547,16 +1610,19 @@ export default {
       }
       const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
       if (annotation) this.loadAnnotation(annotation)
+      this.sendUpdatePlayingStatus()
     },
 
     onPreviousFrameClicked () {
       this.clearFocus()
       this.goPreviousFrame()
+      this.sendUpdatePlayingStatus()
     },
 
     onNextFrameClicked () {
       this.clearFocus()
       this.goNextFrame()
+      this.sendUpdatePlayingStatus()
     },
 
     onPlayPreviousEntityClicked (forcePlay = false) {
@@ -1569,9 +1635,10 @@ export default {
         }
       }
       if (this.isPlaying || forcePlay) this.play()
+      this.sendUpdatePlayingStatus()
     },
 
-    onPlayNextEntityClicked (forcePlay = false) {
+    onPlayNextEntity (forcePlay = false) {
       this.clearFocus()
       this.playEntity(this.nextEntityIndex)
       if (this.isCurrentPreviewMovie) {
@@ -1583,12 +1650,17 @@ export default {
       if (this.isPlaying || forcePlay) this.play()
     },
 
+    onPlayNextEntityClicked (forcePlay = false) {
+      this.onPlayNextEntity(forcePlay)
+      this.sendUpdatePlayingStatus()
+    },
+
     onPlayPauseClicked () {
       this.clearFocus()
       if (!this.isPlaying) {
-        this.play()
+        this.playClicked()
       } else {
-        this.pause()
+        this.pauseClicked()
         const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
         if (annotation) this.loadAnnotation(annotation)
       }
@@ -1607,6 +1679,7 @@ export default {
     onRepeatClicked () {
       this.clearFocus()
       this.isRepeating = !this.isRepeating
+      this.updatePlayingStatus()
     },
 
     onToggleSoundClicked () {
@@ -1657,11 +1730,11 @@ export default {
         } else if (event.keyCode === 37) {
           event.preventDefault()
           event.stopPropagation()
-          this.goPreviousFrame()
+          this.onPreviousFrameClicked()
         } else if (event.keyCode === 39) {
           event.preventDefault()
           event.stopPropagation()
-          this.goNextFrame()
+          this.onNextFrameClicked()
         } else if (event.keyCode === 32) {
           event.preventDefault()
           event.stopPropagation()
@@ -1752,6 +1825,7 @@ export default {
         this.saveUserComparisonChoice()
         this.comparisonEntityMissing = false
       })
+      this.updatePlayingStatus()
     },
 
     onSpeedClicked () {
@@ -1776,6 +1850,9 @@ export default {
       }
       this.currentTime = this.formatTime(this.currentTimeRaw)
       this.updateProgressBar()
+      const actions = this.onNextTimeUpdateActions
+      this.onNextTimeUpdateActions = []
+      actions.forEach(action => action())
     },
 
     onMaxDurationUpdate (duration) {
@@ -1859,7 +1936,7 @@ export default {
       this.framesSeenOfPicture = 0
       if (this.playingEntityIndex === entityIndex) {
         this.isPlaying = true
-        this.onPlayNextEntityClicked(true)
+        this.onPlayNextEntity(true)
       }
     },
 
@@ -2367,24 +2444,28 @@ export default {
       const index = this.currentPreviewIndex - 1
       this.currentPreviewIndex =
         index < 0 ? this.currentEntityPreviewLength - 1 : index
+      this.updatePlayingStatus()
     },
 
     onNextPreviewClicked () {
       const index = this.currentPreviewIndex + 1
       this.currentPreviewIndex =
         index > this.currentEntityPreviewLength - 1 ? 0 : index
+      this.updatePlayingStatus()
     },
 
     onPreviousComparisonPictureClicked () {
       const index = this.currentComparisonPreviewIndex - 1
       this.currentComparisonPreviewIndex =
         index < 0 ? this.currentComparisonPreviewLength - 1 : index
+      this.updatePlayingStatus()
     },
 
     onNextComparisonPictureClicked () {
       const index = this.currentComparisonPreviewIndex + 1
       this.currentComparisonPreviewIndex =
         index > this.currentComparisonPreviewLength - 1 ? 0 : index
+      this.updatePlayingStatus()
     },
 
     resetPictureCanvas () {
@@ -2447,11 +2528,13 @@ export default {
     onTaskTypeToCompareChanged () {
       this.saveUserComparisonChoice()
       this.rebuildEntityListToCompare()
+      this.updatePlayingStatus()
     },
 
     onRevisionToCompareChanged () {
       if (this.isComparing) {
         this.rebuildEntityListToCompare()
+        this.updatePlayingStatus()
         this.$nextTick(() => {
           this.pause()
           this.rawPlayerComparison.loadEntity(this.playingEntityIndex)
@@ -2462,6 +2545,61 @@ export default {
 
     saveUserComparisonChoice () {
       this.savedTaskTypeToCompare = this.taskTypeToCompare
+      this.sendUpdatePlayingStatus()
+    },
+
+    joinRoom () {
+      if (!this.playlist.id) {
+        return
+      }
+
+      this.$socket.emit('preview-room:join', {
+        user_id: this.user.id, playlist_id: this.playlist.id
+      })
+    },
+
+    leaveRoom () {
+      if (!this.playlist.id) {
+        return
+      }
+
+      this.$socket.emit('preview-room:leave', {
+        user_id: this.user.id, playlist_id: this.playlist.id
+      })
+    },
+
+    sendUpdatePlayingStatus () {
+      if (this.isCurrentPreviewMovie) {
+        // we need to wait that the video player finished updating before
+        // sending the event on the websocket
+        this.onNextTimeUpdateActions.push(this.updatePlayingStatus)
+      } else {
+        this.updatePlayingStatus()
+      }
+    },
+
+    updatePlayingStatus () {
+      if (!this.playlist.id) {
+        return
+      }
+      if (!this.joinedRoom) {
+        return
+      }
+
+      this.$socket.emit('preview-room:update-playing-status', {
+        playlist_id: this.playlist.id,
+        is_playing: this.isPlaying,
+        current_entity_index: this.playingEntityIndex,
+        current_frame_number: this.currentFrameMovieOrPicture,
+        is_repeating: this.isRepeating,
+        comparing: {
+          enable: this.isComparing,
+          task_type: this.taskTypeToCompare,
+          revision: this.revisionToCompare,
+          mode: this.comparisonMode,
+          comparison_preview_index: this.currentComparisonPreviewIndex
+        }
+      })
     }
   },
 
@@ -2561,6 +2699,11 @@ export default {
         this.updateProgressBar()
         this.clearCanvas()
       })
+      if (this.playlist.id) {
+        this.$socket.emit('preview-room:open-playlist', {
+          playlist_id: this.playlist.id
+        })
+      }
     },
 
     isAddingEntity () {
@@ -2602,7 +2745,101 @@ export default {
             this.$emit('annotations-refreshed', preview)
           })
         }
+      },
+
+      'preview-room:room-people-updated' (eventData) {
+        // someone joined the room
+        this.room.people = eventData.people
+
+        if (!this.joinedRoom) {
+          return
+        }
+        if (this.room.newComer) {
+          this.room.newComer = false
+          return
+        }
+
+        this.$socket.emit('preview-room:sync-newcomer', {
+          playlist_id: this.playlist.id,
+          is_playing: this.isPlaying,
+          current_entity_index: this.playingEntityIndex,
+          current_frame_number: this.currentFrameMovieOrPicture
+        })
+      },
+
+      'preview-room:room-updated' (eventData) {
+        this.room.people = eventData.people
+
+        if (!this.joinedRoom) {
+          return
+        }
+        if (eventData.only_newcomer && !this.room.newComer) {
+          return
+        }
+
+        if (eventData.is_playing !== this.isPlaying && !eventData.is_playing) {
+          // pause if needed to prevent screen flickering
+          this.pause()
+        }
+
+        if (
+          this.exists(eventData.current_entity_index) &&
+          eventData.current_entity_index !== this.playingEntityIndex
+        ) {
+          this.playEntity(eventData.current_entity_index)
+        }
+
+        if (this.exists(eventData.current_frame_number)) {
+          if (
+            this.isCurrentPreviewMovie &&
+            eventData.current_frame_number !== parseInt(this.currentFrame)
+          ) {
+            const time = eventData.current_frame_number / this.fps
+            this.rawPlayer.setCurrentTime(time)
+            if (this.isComparing) {
+              this.$refs['raw-player-comparison'].setCurrentTime(time)
+            }
+          } else if (
+            this.isCurrentPreviewPicture &&
+            eventData.current_frame_number !== this.framesSeenOfPicture
+          ) {
+            this.framesSeenOfPicture = eventData.current_frame_number
+          }
+        }
+
+        if (
+          this.exists(eventData.is_repeating) &&
+          eventData.is_repeating !== this.isRepeating
+        ) {
+          this.isRepeating = eventData.is_repeating
+        }
+
+        if (
+          this.exists(eventData.comparing)
+        ) {
+          this.isComparing = eventData.comparing.enable
+          this.taskTypeToCompare = eventData.comparing.task_type
+          this.revisionToCompare = eventData.comparing.revision
+          this.comparisonMode = eventData.comparing.mode
+          this.currentComparisonPreviewIndex =
+            eventData.comparing.comparison_preview_index
+        }
+
+        if (eventData.is_playing !== this.isPlaying) {
+          if (eventData.is_playing) {
+            this.play()
+          } else {
+            this.pause()
+          }
+        }
       }
+
+      // TODO (?) :
+      // - handle updating the playlist order, adding/removing items
+      // - sync playing speed
+      // - sync number of frames per image
+      // - sync annotations
+      //   (maybe already done, see preview-file:annotation-update)
     }
   }
 }
@@ -2618,10 +2855,14 @@ export default {
   background: $dark-grey-light;
 
   .playlist-name {
+    font-size: 1.5em;
+    padding: 10px 0 10px 1em;
+  }
+
+  .playlist-room {
     flex: 1;
     font-size: 1.5em;
     padding: 10px;
-    padding-left: 1em;
   }
 
   .edit-button,
@@ -2651,7 +2892,7 @@ export default {
       color: $green;
     }
 
-    &.add-entities-button {
+    &.topbar-button {
       border: 1px solid $dark-grey-strong;
       border-radius: 10px;
       margin-right: 0.5em;
@@ -3038,5 +3279,10 @@ progress {
   border: 1px solid $dark-grey-stronger;
   color: white;
   width: 3rem;
+}
+
+.person-avatar {
+  display: inline-flex;
+  margin-right: 4px;
 }
 </style>
