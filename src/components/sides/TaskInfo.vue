@@ -103,7 +103,7 @@
                 :read-only="!isCurrentUserManager"
                 :is-assigned="isAssigned"
                 :task="task"
-                :extraWide="isExtraWide"
+                :extra-wide="isExtraWide"
                 @annotation-changed="onAnnotationChanged"
                 @change-current-preview="changeCurrentPreview"
                 @add-extra-preview="onAddExtraPreview"

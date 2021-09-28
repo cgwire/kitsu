@@ -33,12 +33,12 @@
       />
       <people-avatar
         class="person-avatar"
-        :key="personId"
-        :person="personMap.get(personId)"
+        :key="personEmailMap.get(personEmail).id"
+        :person="personEmailMap.get(personEmail)"
         :size="30"
         :font-size="15"
-        v-for="personId in room.people"
-        v-if="personMap.get(personId)"
+        v-for="personEmail in room.people"
+        v-if="personEmailMap.get(personEmail)"
       />
     </div>
     <button-simple
@@ -946,6 +946,7 @@ export default {
   beforeDestroy () {
     this.endAnnotationSaving()
     this.removeEvents()
+    this.leaveRoom()
   },
 
   computed: {
@@ -957,6 +958,7 @@ export default {
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isTVShow',
+      'personEmailMap',
       'personMap',
       'previewFileMap',
       'taskMap',
@@ -966,7 +968,7 @@ export default {
     ]),
 
     joinedRoom () {
-      return !!this.room.people.find(peopleId => peopleId === this.user.id)
+      return !!this.room.people.find(email => email === this.user.email)
     },
 
     extension () {

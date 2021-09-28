@@ -187,6 +187,15 @@ const getters = {
   displayedPeople: state => state.displayedPeople,
   peopleIndex: state => state.peopleIndex,
   personMap: state => state.personMap,
+  personEmailMap: state => {
+    const emailMap = new Map()
+    Array.from(state.personMap.keys()).forEach(personId => {
+      const person = state.personMap.get(personId)
+      emailMap.set(person.email, person)
+    })
+    console.log(emailMap)
+    return emailMap
+  },
   isPeopleLoading: state => state.isPeopleLoading,
   isPeopleLoadingError: state => state.isPeopleLoadingError,
   peopleSearchQueries: state => state.peopleSearchQueries,
