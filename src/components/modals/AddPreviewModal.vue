@@ -76,7 +76,7 @@
             frameborder="0"
             :src="getURL(form)"
             :key="i"
-            v-else
+            v-else-if="isPdf(form)"
           />
         </template>
       </p>
@@ -167,6 +167,10 @@ export default {
 
     isVideo (form) {
       return form.get('file').type.startsWith('video')
+    },
+
+    isPdf (form) {
+      return form.get('file').type.indexOf('pdf') > 0
     }
   },
 
