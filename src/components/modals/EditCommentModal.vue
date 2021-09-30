@@ -80,10 +80,10 @@ import { modalMixin } from './base_modal'
 import { remove } from '@/lib/models'
 
 import AtTa from 'vue-at/dist/vue-at-textarea'
-import Checklist from '../widgets/Checklist'
-import ComboBoxStatus from '../widgets/ComboboxStatus.vue'
-import ModalFooter from './ModalFooter'
-import PeopleAvatar from '../widgets/PeopleAvatar'
+import Checklist from '@/components/widgets/Checklist'
+import ComboBoxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ModalFooter from '@/components/modals/ModalFooter'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 
 export default {
   name: 'edit-comment-modal',
@@ -124,10 +124,14 @@ export default {
   methods: {
     runConfirmation (event) {
       if (!event || event.keyCode === 13 || !event.keyCode) {
-        this.$emit('confirm', {
+        const result = {
           id: this.commentToEdit.id,
           ...this.form
-        })
+        }
+        const isEmptyChecklist =
+          result.checklist.length === 1 && result.checklist[0].text === ''
+        if (isEmptyChecklist) result.checklist = []
+        this.$emit('confirm', result)
       }
     },
 
