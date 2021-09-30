@@ -76,6 +76,7 @@ export const routes = [
       const isValidBrowser = browser.satisfies({
         chrome: '>20.1.1432',
         firefox: '>31',
+        edge: '>90',
         vivaldi: '>2.8',
         opera: '>22'
       })
