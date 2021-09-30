@@ -38,7 +38,7 @@ export default {
         width: 400,
         min: 0,
         max: 10,
-        interval: 0.5,
+        interval: 0.25,
         lazy: true,
         marks: true,
         hideLabel: true,
