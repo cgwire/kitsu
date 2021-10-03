@@ -16,15 +16,21 @@
         </div>
 
         <div class="flexrow-item" v-if="selectedBar === 'assignation'">
-          <div class="flexrow" v-if="isCurrentUserManager">
+          <div class="flexrow" v-if="isCurrentUserManager || isInDepartment">
             <div class="assignation flexrow-item hide-small-screen">
-              {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
+              <span>
+                {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
+              </span>
+              <span v-show="!isCurrentUserManager">
+                myself
+              </span>
             </div>
             <div class="flexrow-item combobox-item">
               <people-field
                 ref="assignation-field"
                 :people="currentTeam"
                 v-model="person"
+                v-show="isCurrentUserManager"
               />
             </div>
             <div class="" v-if="isAssignationLoading">
@@ -40,13 +46,13 @@
             </div>
             <div
               class="flexrow-item hide-small-screen"
-              v-if="!isAssignationLoading"
+              v-if="!isAssignationLoading && isCurrentUserManager"
             >
               {{ $t('main.or') }}
             </div>
             <div
               class="flexrow-item hide-small-screen"
-              v-if="!isAssignationLoading"
+              v-if="!isAssignationLoading && isCurrentUserManager"
             >
               <button
                 class="button is-link clear-assignation-button hide-small-screen"
@@ -548,6 +554,7 @@ export default {
       'selectedShots',
       'shotCustomActions',
       'taskStatusForCurrentUser',
+      'taskTypeMap',
       'user'
     ]),
 
@@ -632,6 +639,14 @@ export default {
       return this.currentProduction ? this.currentProduction.team : []
     },
 
+    isInDepartment () {
+      const selectedTasks = Array.from(this.selectedTasks.values())
+      if (selectedTasks.length !== 1) return false
+      const taskType = this.taskTypeMap.get(selectedTasks[0].task_type_id)
+      return taskType.department_id &&
+        this.user.departments.includes(taskType.department_id)
+    },
+
     currentMenuLabel () {
       const labels = {
         assignation: 'menu.assign_tasks',
@@ -674,10 +689,13 @@ export default {
     ]),
 
     confirmAssign () {
-      if (this.selectedPersonId) {
+      if (this.selectedPersonId || this.isInDepartment) {
         this.isAssignationLoading = true
+        const personId = this.isCurrentUserManager
+          ? this.selectedPersonId
+          : this.user.id
         this.assignSelectedTasks({
-          personId: this.selectedPersonId,
+          personId,
           callback: () => {
             this.isAssignationLoading = false
           }
