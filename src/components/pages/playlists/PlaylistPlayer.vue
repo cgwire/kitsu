@@ -252,6 +252,27 @@
     ref="button-bar"
     v-if="playlist.id && !isAddingEntity"
   >
+    <div
+      class="flexrow flexrow-item mr0"
+      v-if="isCurrentPreviewMovie || isCurrentPreviewPicture"
+    >
+      <button-simple
+        class="button playlist-button flexrow-item"
+        @click="playClicked"
+        :title="$t('playlists.actions.play')"
+        icon="play"
+        v-if="!isPlaying"
+      />
+      <button-simple
+        class="button playlist-button flexrow-item"
+        @click="pauseClicked"
+        :title="$t('playlists.actions.pause')"
+        icon="pause"
+        v-else
+      />
+    </div>
+    <div class="separator"></div>
+
     <button-simple
       class="button playlist-button flexrow-item"
       @click="onPlayPreviousEntityClicked"
@@ -264,16 +285,7 @@
       :title="$t('playlists.actions.next_shot')"
       icon="forward"
     />
-    <template v-if="isCurrentPreviewPicture">
-      {{ framesSeenOfPicture }} f /
-      <input
-        type="number"
-        min="0"
-        class="frame-per-image-input"
-        :title="$t('playlists.actions.frames_per_picture')"
-        v-model="framesPerImage[playingEntityIndex]"
-      >
-    </template>
+    <div class="separator"></div>
     <span
       class="flexrow-item time-indicator"
       :title="$t('playlists.actions.entity_index')"
@@ -284,13 +296,24 @@
     /
     </span>
     <span
-      class="flexrow-item time-indicator"
+      class="flexrow-item time-indicator mr1"
       :title="$t('playlists.actions.entities_number')"
     >
       {{ entityList.length }}
     </span>
 
-    <div class="separator"></div>
+    <div class="separator ml1"></div>
+    <template v-if="isCurrentPreviewPicture">
+      {{ framesSeenOfPicture }} /
+      <input
+        type="number"
+        min="0"
+        class="frame-per-image-input"
+        :title="$t('playlists.actions.frames_per_picture')"
+        v-model="framesPerImage[playingEntityIndex]"
+      >
+    </template>
+    <div class="separator" v-if="isCurrentPreviewPicture"></div>
 
     <div
       class="flexrow flexrow-item"
@@ -324,25 +347,6 @@
       </a>
     </div>
 
-    <div
-      class="flexrow flexrow-item mr0"
-      v-if="isCurrentPreviewMovie || isCurrentPreviewPicture"
-    >
-      <button-simple
-        class="button playlist-button flexrow-item"
-        @click="playClicked"
-        :title="$t('playlists.actions.play')"
-        icon="play"
-        v-if="!isPlaying"
-      />
-      <button-simple
-        class="button playlist-button flexrow-item"
-        @click="pauseClicked"
-        :title="$t('playlists.actions.pause')"
-        icon="pause"
-        v-else
-      />
-    </div>
     <div
       class="flexrow flexrow-item"
       v-if="isCurrentPreviewMovie"
@@ -1512,7 +1516,7 @@ export default {
         })
       } else {
         const annotation = this.getAnnotation(0)
-        this.loadAnnotation(annotation)
+        if (!this.isPlaying) this.loadAnnotation(annotation)
         if (wasDrawing) {
           setTimeout(() => {
             this.isDrawing = true
@@ -1883,7 +1887,8 @@ export default {
     },
 
     onPlayNext () {
-      if (this.entityList[this.nextEntityIndex].preview_file_extension === 'mp4') {
+      const nextEntity = this.entityList[this.nextEntityIndex]
+      if (nextEntity.preview_file_extension === 'mp4') {
         this.rawPlayer.playNext()
       } else {
         this.onPlayNextEntityClicked()
@@ -1938,7 +1943,16 @@ export default {
       this.framesSeenOfPicture = 0
       if (this.playingEntityIndex === entityIndex) {
         this.isPlaying = true
-        this.onPlayNextEntity(true)
+        const previews = this.currentEntity.preview_file_previews
+        if (previews.length === this.currentPreviewIndex) {
+          this.currentPreviewIndex = 0
+          this.$nextTick(() => {
+            this.onPlayNextEntity(true)
+          })
+        } else {
+          this.currentPreviewIndex++
+          this.playPicture()
+        }
       }
     },
 
@@ -2278,7 +2292,6 @@ export default {
 
     loadAnnotation (annotation) {
       if (!annotation) return
-
       this.pause()
       const currentTime = annotation ? annotation.time || 0 : 0
       if (this.rawPlayer || this.picturePlayer) {
@@ -2475,7 +2488,7 @@ export default {
       return this.resetCanvas()
         .then(() => {
           if (this.isCurrentPreviewPicture) {
-            this.loadAnnotation(this.getAnnotation(0))
+            if (!this.isPlaying) this.loadAnnotation(this.getAnnotation(0))
           }
         })
     },
