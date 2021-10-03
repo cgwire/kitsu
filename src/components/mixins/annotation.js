@@ -10,6 +10,17 @@ import moment from 'moment'
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
 
+fabric.Text.prototype.set({
+  _getNonTransformedDimensions () { // Object dimensions
+    return new fabric.Point(this.width, this.height).scalarAdd(this.padding)
+  },
+  _calculateCurrentDimensions () { // Controls dimensions
+    return fabric.util.transformPoint(
+      this._getTransformedDimensions(), this.getViewportTransform(), true
+    )
+  }
+})
+
 export const annotationMixin = {
 
   data () {
@@ -82,8 +93,11 @@ export const annotationMixin = {
         top: posY,
         fontFamily: 'arial',
         fill: this.textColor,
-        fontSize: fontSize
+        fontSize: fontSize,
+        backgroundColor: 'rgba(255,255,255, 0.8)',
+        padding: 10
       })
+
       this.fabricCanvas.add(fabricText)
       this.fabricCanvas.setActiveObject(fabricText)
       fabricText.enterEditing()
@@ -349,7 +363,9 @@ export const annotationMixin = {
               left: obj.left * scaleMultiplierX,
               top: obj.top * scaleMultiplierY,
               fontFamily: obj.fontFamily,
-              fontSize: obj.fontSize
+              fontSize: obj.fontSize,
+              backgroundColor: 'rgba(255,255,255, 0.8)',
+              padding: 10
             }
           )
           text.setControlsVisibility({
