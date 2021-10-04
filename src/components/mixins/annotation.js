@@ -10,16 +10,19 @@ import moment from 'moment'
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
 
-fabric.Text.prototype.set({
-  _getNonTransformedDimensions () { // Object dimensions
-    return new fabric.Point(this.width, this.height).scalarAdd(this.padding)
-  },
-  _calculateCurrentDimensions () { // Controls dimensions
-    return fabric.util.transformPoint(
-      this._getTransformedDimensions(), this.getViewportTransform(), true
-    )
-  }
-})
+/* Monkey patch needed to have text background including the padding. */
+if (fabric) {
+  fabric.Text.prototype.set({
+    _getNonTransformedDimensions () { // Object dimensions
+      return new fabric.Point(this.width, this.height).scalarAdd(this.padding)
+    },
+    _calculateCurrentDimensions () { // Controls dimensions
+      return fabric.util.transformPoint(
+        this._getTransformedDimensions(), this.getViewportTransform(), true
+      )
+    }
+  })
+}
 
 export const annotationMixin = {
 
