@@ -220,13 +220,12 @@
                 :class="dayClass(day, index)"
               >
                 <span
-                  v-if="!day.weekend && zoomLevel > 2"
+                  v-if="zoomLevel > 2"
                 >
                   {{ day.dayText }} /
                 </span>
                 <span
                   class="day-number"
-                  v-if="!day.weekend"
                 >
                   {{ day.dayNumber }}
                 </span>
@@ -545,7 +544,7 @@ export default {
     },
 
     displayedDays () {
-      return this.daysAvailable.filter(day => !day.weekend)
+      return this.daysAvailable
     },
 
     nbDisplayedDays () {
@@ -729,12 +728,6 @@ export default {
     },
 
     getDisplayedDaysIndex (date) {
-      if (date.isoWeekday() === 6) {
-        date = date.add(-1, 'days')
-      }
-      if (date.isoWeekday() === 7) {
-        date = date.add(-2, 'days')
-      }
       const dateString = date.format('YYYY-MM-DD')
       return this.displayedDaysIndex[dateString]
     },
@@ -761,10 +754,7 @@ export default {
       currentIndex += dayChange
       if (currentIndex < 0) currentIndex = 0
 
-      let newStartDate = this.displayedDays[currentIndex]
-      if (!newStartDate) newStartDate = this.displayedDays[currentIndex - 1]
-      if (!newStartDate) newStartDate = this.displayedDays[currentIndex - 2]
-
+      const newStartDate = this.displayedDays[currentIndex]
       if (newStartDate) {
         const newEndDate = this.displayedDays[currentIndex + length]
         if (this.isValidItemDates(newStartDate, newEndDate)) {
@@ -956,6 +946,14 @@ export default {
 
     // Helpers
 
+    dateDiff (startDate, endDate) {
+      if (startDate.isSame(endDate)) return 0
+      const first = startDate.clone()
+      const last = endDate.clone()
+      const diff = last.diff(first, 'days')
+      return diff
+    },
+
     businessDiff (startDate, endDate) {
       if (startDate.isSame(endDate)) return 0
       const first = startDate.clone().endOf('isoweek')
@@ -989,14 +987,15 @@ export default {
       return {
         'day-name': true,
         'new-week': day.newWeek || false,
-        'new-month': day.newMonth || index === 0 || false
+        'new-month': day.newMonth || index === 0 || false,
+        weekend: day.weekend || false
       }
     },
 
     dayStyle (day) {
       return {
-        'min-width': day.weekend ? '0px' : this.cellWidth + 'px',
-        'max-width': day.weekend ? '0px' : this.cellWidth + 'px'
+        'min-width': this.cellWidth + 'px',
+        'max-width': this.cellWidth + 'px'
       }
     },
 
@@ -1039,7 +1038,7 @@ export default {
 
     getTimebarLeft (timeElement) {
       const startDate = timeElement.startDate || this.startDate
-      const startDiff = this.businessDiff(this.startDate, startDate) || 0
+      const startDiff = this.dateDiff(this.startDate, startDate) || 0
       return ((startDiff) * this.cellWidth) + 5
     },
 
@@ -1057,7 +1056,7 @@ export default {
         const days = Math.ceil(timeElement.man_days)
         endDate = addBusinessDays(startDate, days - 1)
       }
-      const lengthDiff = this.businessDiff(startDate, endDate)
+      const lengthDiff = this.dateDiff(startDate, endDate)
       if (lengthDiff > 0) {
         return (lengthDiff + 1) * this.cellWidth - 10
       } else {
@@ -1136,7 +1135,7 @@ export default {
       const startDate = parseDate(this.startDate.format('YYYY-MM-DD'))
       const endDate = parseDate(milestone.date)
       if (startDate.isSameOrBefore(endDate)) {
-        const lengthDiff = this.businessDiff(startDate, endDate)
+        const lengthDiff = this.dateDiff(startDate, endDate)
         return {
           left: (lengthDiff + 0.5) * this.cellWidth + 'px'
         }
@@ -1703,6 +1702,10 @@ export default {
   .timebar {
     width: calc(100% - 0.8em);
   }
+}
+
+.weekend {
+  background: rgba(200, 200, 200, 0.3)
 }
 
 input::-webkit-outer-spin-button,
