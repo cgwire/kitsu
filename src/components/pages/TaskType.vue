@@ -201,6 +201,7 @@ import { buildSupervisorTaskIndex, indexSearch } from '@/lib/indexing'
 import { sortPeople } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 import {
+  addBusinessDays,
   daysToMinutes,
   formatSimpleDate,
   getDatesFromStartDate,
@@ -837,11 +838,15 @@ export default {
         const estimation = task.estimation
         let endDate
 
-        let startDate = moment()
+        let startDate = this.schedule.startDate.clone()
         if (task.start_date) {
           startDate = parseDate(task.start_date)
         } else if (task.real_start_date) {
           startDate = parseDate(task.real_start_date)
+        }
+
+        if (startDate.isAfter(this.schedule.endDate)) {
+          startDate = this.schedule.endDate.clone().add(-1, 'days')
         }
 
         if (task.due_date) {
@@ -856,7 +861,6 @@ export default {
           const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
           endDate = startDate.clone().add(nbDays, 'days')
         }
-        if (!startDate) startDate = moment()
         if (!endDate.isSameOrAfter(startDate)) {
           const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
           endDate = startDate.clone().add(nbDays, 'days')
@@ -915,6 +919,10 @@ export default {
       if (!this.$options.savingBuffer[item.id]) {
         this.$options.savingBuffer[item.id] = item
         setTimeout(() => {
+          item.endDate = addBusinessDays(
+            item.startDate,
+            Math.ceil(minutesToDays(this.organisation, item.estimation))
+          )
           item = { ...this.$options.savingBuffer[item.id] }
           if (item.startDate && item.endDate) {
             item.parentElement.startDate = this.getMinDate(item.parentElement)
