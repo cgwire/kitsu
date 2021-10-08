@@ -138,19 +138,22 @@ describe('Schedule', () => {
 
     test('displayedDays', () => {
       const days = wrapper.vm.displayedDays
-      expect(days[5].day()).toEqual(1)
+      expect(days[4].day()).toEqual(5)
+      expect(days[5].day()).toEqual(6)
+      expect(days[6].day()).toEqual(0)
+      expect(days[7].day()).toEqual(1)
     })
 
     test('nbDisplayedDays', () => {
       const nbDays = wrapper.vm.nbDisplayedDays
-      expect(nbDays).toEqual(133)
+      expect(nbDays).toEqual(185)
     })
 
     test('displayedDaysIndex', () => {
       const daysIndex = wrapper.vm.displayedDaysIndex
-      expect(daysIndex['2019-08-01']).toEqual(23)
+      expect(daysIndex['2019-08-01']).toEqual(31)
       expect(daysIndex['2019-07-01']).toEqual(0)
-      expect(daysIndex['2019-08-15']).toEqual(33)
+      expect(daysIndex['2019-08-15']).toEqual(45)
     })
 
     test('totalManDays', () => {
@@ -173,7 +176,7 @@ describe('Schedule', () => {
     })
 
     test('timelineTodayPositionStyle', () => {
-      const left = wrapper.vm.businessDiff(wrapper.vm.startDate, moment()) * 60
+      const left = wrapper.vm.dateDiff(wrapper.vm.startDate, moment()) * 60
       wrapper.setProps({ zoomLevel: 3 })
       expect(wrapper.vm.timelineTodayPositionStyle).toEqual({
         display: 'none',
@@ -195,7 +198,7 @@ describe('Schedule', () => {
     describe('Layout', () => {
       test('resetScheduleSize', () => {
         wrapper.vm.resetScheduleSize()
-        expect(wrapper.vm.timelineContent.style.width).toEqual('7980px')
+        expect(wrapper.vm.timelineContent.style.width).toEqual('11100px')
         expect(wrapper.vm.timelineContentWrapper.style.height)
           .toEqual('-250px')
         expect(wrapper.vm.entityList.style.height).toEqual('-169px')
@@ -227,7 +230,7 @@ describe('Schedule', () => {
         expect(wrapper.vm.currentElement.startDate.format('YYYY-MM-DD'))
           .toEqual(moment('2019-08-13').format('YYYY-MM-DD'))
         expect(wrapper.vm.currentElement.endDate.format('YYYY-MM-DD'))
-          .toEqual(moment('2019-08-30').format('YYYY-MM-DD'))
+          .toEqual(moment('2019-09-01').format('YYYY-MM-DD'))
       })
       test('changeStartDate', () => {
         wrapper.vm.moveTimebarLeftSide(timeElement, initialEvent)
@@ -239,7 +242,7 @@ describe('Schedule', () => {
          wrapper.vm.moveTimebarRightSide(timeElement, initialEvent)
          wrapper.vm.changeEndDate(event)
          expect(wrapper.vm.currentElement.endDate.format('YYYY-MM-DD'))
-           .toEqual(moment('2019-08-30').format('YYYY-MM-DD'))
+           .toEqual(moment('2019-09-01').format('YYYY-MM-DD'))
       })
       test('scrollScheduleHeight', () => {
         wrapper.vm.timelineContentWrapper.scrollLeft = 150
@@ -406,13 +409,15 @@ describe('Schedule', () => {
         expect(cssClass).toEqual({
           'day-name': true,
           'new-week': true,
-          'new-month': true
+          'new-month': true,
+          weekend: false
         })
         cssClass = wrapper.vm.dayClass(days[2], 2)
         expect(cssClass).toEqual({
           'day-name': true,
           'new-week': false,
-          'new-month': false
+          'new-month': false,
+          weekend: false
         })
       })
 
@@ -420,8 +425,8 @@ describe('Schedule', () => {
         const days = wrapper.vm.daysAvailable
         let dayStyle = wrapper.vm.dayStyle(days[6])
         expect(dayStyle).toEqual({
-          'min-width': '0px',
-          'max-width': '0px'
+          'min-width': '60px',
+          'max-width': '60px'
         })
         dayStyle = wrapper.vm.dayStyle(days[2])
         expect(dayStyle).toEqual({
@@ -449,8 +454,8 @@ describe('Schedule', () => {
         })
         expect(timebarStyle).toEqual({
           'cursor': 'ew-resize',
-          'left': (33 * 60 + 5) + 'px',
-          'width': 14 * 60 - 10 + 'px'
+          'left': (45 * 60 + 5) + 'px',
+          'width': 18 * 60 - 10 + 'px'
         })
         timebarStyle = wrapper.vm.timebarStyle({
           startDate: moment('2019-08-15', 'YYYY-MM-DD'),
@@ -459,8 +464,8 @@ describe('Schedule', () => {
         })
         expect(timebarStyle).toEqual({
           'cursor': 'default',
-          'left': (33 * 60 + 5) + 'px',
-          'width': 14 * 60 - 10 + 'px'
+          'left': (45 * 60 + 5) + 'px',
+          'width': 18 * 60 - 10 + 'px'
         })
       })
 
@@ -472,7 +477,7 @@ describe('Schedule', () => {
           startDate: moment('2019-08-15', 'YYYY-MM-DD'),
           endDate: moment('2019-09-01', 'YYYY-MM-DD')
         })
-        expect(timebarLeft).toEqual(33 * 60 + 5)
+        expect(timebarLeft).toEqual(45 * 60 + 5)
       })
 
       test('getTimebarWidth', () => {
@@ -480,7 +485,7 @@ describe('Schedule', () => {
           startDate: moment('2019-08-15', 'YYYY-MM-DD'),
           endDate: moment('2019-09-01', 'YYYY-MM-DD')
         })
-        expect(timebarWidth).toEqual(14 * 60 - 10)
+        expect(timebarWidth).toEqual(18 * 60 - 10)
       })
     })
   })
