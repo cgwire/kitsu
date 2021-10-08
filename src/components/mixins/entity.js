@@ -52,7 +52,6 @@ export const entityMixin = {
     },
 
     scheduleItems () {
-      console.log(this.currentTasks)
       let manDays = 0
       const rootElement = {
         avatar: false,
@@ -112,7 +111,6 @@ export const entityMixin = {
       }).filter(c => c !== null)
       const rootStartDate = getFirstStartDate(children)
       const rootEndDate = getLastEndDate(children)
-      console.log(children)
       Object.assign(rootElement, {
         children: children,
         startDate: rootStartDate,
