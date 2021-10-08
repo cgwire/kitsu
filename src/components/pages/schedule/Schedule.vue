@@ -14,14 +14,25 @@
     >
       <div
         class="has-text-right total-man-days mr0"
+        :class="{
+          'has-text-right': true,
+          mr0: true,
+          'total-man-days': true,
+          'without-milestones': !withMilestones
+        }"
       >
-        <span class="total-value">
+        <span
+          class="total-value"
+        >
           {{ formatDuration(totalManDays) }} {{ $t('schedule.md') }}
         </span>
       </div>
 
       <div
-        class="entity-name-list"
+        :class="{
+          'entity-name-list': true,
+          'without-milestones': !withMilestones
+        }"
       >
       <div
         :key="'entity-' + rootElement.id"
@@ -36,6 +47,7 @@
             expanded: rootElement.expanded
           }"
           :style="entityLineStyle(rootElement, true, true)"
+          v-show="!hideRoot"
         >
           <span
             class="expand flexrow-item mr1"
@@ -174,15 +186,15 @@
         >
           <div
             class="milestone"
-            @click="showEditMilestoneModal(day, milestones[day.text])"
-            v-if="milestones[day.text]"
+            @click="showEditMilestoneModal(day, currentMilestones[day.text])"
+            v-if="currentMilestones[day.text] && withMilestones"
           >
             <div
               class="milestone-tooltip"
               :style="milestoneTooltipStyle"
             >
               <span>
-                {{ milestones[day.text].name }}
+                {{ currentMilestones[day.text].name }}
               </span>
             </div>
             <div>
@@ -191,7 +203,7 @@
           </div>
           <div
             class="milestone"
-            v-else
+            v-else-if="withMilestones"
           >
             <div>
               <span class="bull">&nbsp;</span>
@@ -205,7 +217,7 @@
             <div
               class="add-milestone"
               :title="addMilestoneTitle(day)"
-              @click="showEditMilestoneModal(day, milestones[day.text])"
+              @click="showEditMilestoneModal(day, currentMilestones[day.text])"
             >
               <span>+</span>
             </div>
@@ -220,13 +232,12 @@
                 :class="dayClass(day, index)"
               >
                 <span
-                  v-if="!day.weekend && zoomLevel > 2"
+                  v-if="zoomLevel > 2"
                 >
                   {{ day.dayText }} /
                 </span>
                 <span
                   class="day-number"
-                  v-if="!day.weekend"
                 >
                   {{ day.dayNumber }}
                 </span>
@@ -263,7 +274,7 @@
             class="milestone-vertical-line"
             :style="milestoneLineStyle(milestone)"
             :key="'milestone-' + milestone.date"
-            v-for="milestone in Object.values(milestones)"
+            v-for="milestone in Object.values(currentMilestones)"
           >
           </div>
           <div
@@ -274,6 +285,7 @@
             <div
               class="entity-line root-element"
               :style="entityLineStyle(rootElement, true)"
+              v-show="!hideRoot"
             >
               <div
                 class="timebar-wrapper"
@@ -406,7 +418,6 @@ export default {
 
   data () {
     return {
-      currentMilestoneDate: null,
       isBrowsingX: false,
       isBrowsingY: false,
       isChangeSize: false,
@@ -459,6 +470,10 @@ export default {
       type: Boolean,
       default: true
     },
+    hideRoot: {
+      type: Boolean,
+      default: false
+    },
     zoomLevel: {
       type: Number,
       default: 2
@@ -485,6 +500,16 @@ export default {
       'organisation',
       'milestones'
     ]),
+
+    currentMilestones () {
+      const localMilestones = {}
+      Object.keys(this.milestones).forEach(key => {
+        if (this.displayedDaysIndex[key]) {
+          localMilestones[key] = this.milestones[key]
+        }
+      })
+      return localMilestones
+    },
 
     cellWidth () {
       return this.zoomLevel * 20
@@ -545,7 +570,7 @@ export default {
     },
 
     displayedDays () {
-      return this.daysAvailable.filter(day => !day.weekend)
+      return this.daysAvailable
     },
 
     nbDisplayedDays () {
@@ -659,8 +684,9 @@ export default {
       if (this.timelineContent) {
         this.timelineContent.style.width =
           this.nbDisplayedDays * this.cellWidth + 'px'
-        this.timelineContentWrapper.style.height =
-          this.schedule.offsetHeight - 250 + 'px'
+        let contentHeight = this.schedule.offsetHeight - 250
+        if (!this.withMilestones) contentHeight += 40
+        this.timelineContentWrapper.style.height = contentHeight + 'px'
         this.entityList.style.height =
           this.schedule.offsetHeight - 169 + 'px'
       }
@@ -714,7 +740,9 @@ export default {
       let position = this.timelineContentWrapper.scrollLeft + event.clientX
       position -= 320
       position = Math.floor(position / this.cellWidth) * this.cellWidth
-      this.timelinePosition.style.left = position + 'px'
+      if (position < this.timelineContentWrapper.offsetWidth) {
+        this.timelinePosition.style.left = position + 'px'
+      }
     },
 
     isValidItemDates (startDate, endDate) {
@@ -729,12 +757,6 @@ export default {
     },
 
     getDisplayedDaysIndex (date) {
-      if (date.isoWeekday() === 6) {
-        date = date.add(-1, 'days')
-      }
-      if (date.isoWeekday() === 7) {
-        date = date.add(-2, 'days')
-      }
       const dateString = date.format('YYYY-MM-DD')
       return this.displayedDaysIndex[dateString]
     },
@@ -761,10 +783,7 @@ export default {
       currentIndex += dayChange
       if (currentIndex < 0) currentIndex = 0
 
-      let newStartDate = this.displayedDays[currentIndex]
-      if (!newStartDate) newStartDate = this.displayedDays[currentIndex - 1]
-      if (!newStartDate) newStartDate = this.displayedDays[currentIndex - 2]
-
+      const newStartDate = this.displayedDays[currentIndex]
       if (newStartDate) {
         const newEndDate = this.displayedDays[currentIndex + length]
         if (this.isValidItemDates(newStartDate, newEndDate)) {
@@ -956,6 +975,14 @@ export default {
 
     // Helpers
 
+    dateDiff (startDate, endDate) {
+      if (startDate.isSame(endDate)) return 0
+      const first = startDate.clone()
+      const last = endDate.clone()
+      const diff = last.diff(first, 'days')
+      return diff
+    },
+
     businessDiff (startDate, endDate) {
       if (startDate.isSame(endDate)) return 0
       const first = startDate.clone().endOf('isoweek')
@@ -989,14 +1016,15 @@ export default {
       return {
         'day-name': true,
         'new-week': day.newWeek || false,
-        'new-month': day.newMonth || index === 0 || false
+        'new-month': day.newMonth || index === 0 || false,
+        weekend: day.weekend || false
       }
     },
 
     dayStyle (day) {
       return {
-        'min-width': day.weekend ? '0px' : this.cellWidth + 'px',
-        'max-width': day.weekend ? '0px' : this.cellWidth + 'px'
+        'min-width': this.cellWidth + 'px',
+        'max-width': this.cellWidth + 'px'
       }
     },
 
@@ -1039,7 +1067,7 @@ export default {
 
     getTimebarLeft (timeElement) {
       const startDate = timeElement.startDate || this.startDate
-      const startDiff = this.businessDiff(this.startDate, startDate) || 0
+      const startDiff = this.dateDiff(this.startDate, startDate) || 0
       return ((startDiff) * this.cellWidth) + 5
     },
 
@@ -1057,7 +1085,7 @@ export default {
         const days = Math.ceil(timeElement.man_days)
         endDate = addBusinessDays(startDate, days - 1)
       }
-      const lengthDiff = this.businessDiff(startDate, endDate)
+      const lengthDiff = this.dateDiff(startDate, endDate)
       if (lengthDiff > 0) {
         return (lengthDiff + 1) * this.cellWidth - 10
       } else {
@@ -1136,7 +1164,7 @@ export default {
       const startDate = parseDate(this.startDate.format('YYYY-MM-DD'))
       const endDate = parseDate(milestone.date)
       if (startDate.isSameOrBefore(endDate)) {
-        const lengthDiff = this.businessDiff(startDate, endDate)
+        const lengthDiff = this.dateDiff(startDate, endDate)
         return {
           left: (lengthDiff + 0.5) * this.cellWidth + 'px'
         }
@@ -1179,7 +1207,7 @@ export default {
 <style lang="scss" scoped>
 .dark {
   .entities {
-    background: #36393F;
+    background: inherit;
   }
 
   .schedule.zoom-level-1 {
@@ -1206,7 +1234,7 @@ export default {
 
   .timeline {
     .timeline-header {
-      background: #36393F;
+      background: transparent;
       color: white;
 
       .day {
@@ -1247,7 +1275,7 @@ export default {
   }
 
   .total-man-days {
-    background: #36393F;
+    background: $dark-grey-2;
     color: white;
   }
 
@@ -1309,6 +1337,10 @@ export default {
 
 .entity-name-list {
   padding-top: 85px;
+
+  &.without-milestones {
+    padding-top: 55px;
+  }
 }
 
 .entity-line {
@@ -1392,7 +1424,7 @@ export default {
         position: absolute;
         padding-bottom: 12px;
         padding-left: 1em;
-        top: 15px;
+        top: 10px;
         bottom: 0;
         text-transform: uppercase;
         color: black;
@@ -1568,16 +1600,23 @@ export default {
 .total-man-days {
   position: fixed;
   background: white;
+  border-top-left-radius: 10px;
+  height: 85px;
   margin-right: 0.5em;
-  padding-top: 55px;
-  padding-right: 5px;
-  padding-bottom: 10px;
+  margin-bottom: 0px;
   min-width: 300px;
-  height: 77px;
+  padding-bottom: 0px;
+  padding-right: 5px;
+  padding-top: 55px;
   z-index: 2;
 
   .total-value {
     font-size: 20px;
+  }
+
+  &.without-milestones {
+    padding-top: 20px;
+    height: 54px;
   }
 }
 
@@ -1703,6 +1742,10 @@ export default {
   .timebar {
     width: calc(100% - 0.8em);
   }
+}
+
+.weekend {
+  background: rgba(200, 200, 200, 0.3)
 }
 
 input::-webkit-outer-spin-button,

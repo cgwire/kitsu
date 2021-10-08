@@ -524,7 +524,12 @@ export default {
       Object.keys(this.selection)
         .filter(key => this.selection[key])
         .forEach((entityId) => {
-          this.addAssetToCasting({ entityId, assetId, nbOccurences: 1 })
+          this.addAssetToCasting({
+            entityId,
+            assetId,
+            nbOccurences: 1,
+            label: this.castingType === 'shot' ? 'animate' : 'fixed'
+          })
           this.saveCasting(entityId)
             .catch(console.error)
         })
