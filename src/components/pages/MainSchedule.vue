@@ -18,6 +18,7 @@
           :monday-first="true"
           format="yyyy-MM-dd"
           v-model="selectedStartDate"
+          disabled
         />
       </div>
       <div class="flexrow-item field">
@@ -32,6 +33,7 @@
           :monday-first="true"
           format="yyyy-MM-dd"
           v-model="selectedEndDate"
+          disabled
         />
       </div>
       <combobox-number

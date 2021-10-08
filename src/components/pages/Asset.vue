@@ -67,6 +67,24 @@
       </div>
     </div>
 
+    <div class="infos schedule" v-if="scheduleItems.length > 0">
+      <page-subtitle class="schedule-title" text="Schedule" />
+      <div class="wrapper">
+        <schedule
+          ref="schedule-widget"
+          :start-date="tasksStartDate"
+          :end-date="tasksEndDate"
+          :hierarchy="scheduleItems"
+          :zoom-level="2"
+          :height="400"
+          :is-loading="false"
+          :is-estimation-linked="true"
+          :hide-root="true"
+          :with-milestones="false"
+        />
+      </div>
+    </div>
+
     <div class="asset-casted-in">
       <page-subtitle :text="$t('assets.cast_in')" />
       <div v-if="currentAsset">
@@ -189,6 +207,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { entityMixin } from '@/components/mixins/entity'
+import { formatListMixin } from '@/components/mixins/format'
 
 import { ChevronLeftIcon } from 'vue-feather-icons'
 import ButtonSimple from '../widgets/ButtonSimple'
@@ -198,11 +218,13 @@ import EntityTaskList from '../lists/EntityTaskList'
 import EntityThumbnail from '../widgets/EntityThumbnail'
 import PageTitle from '../widgets/PageTitle'
 import PageSubtitle from '../widgets/PageSubtitle'
+import Schedule from '../pages/schedule/Schedule'
 import TableInfo from '../widgets/TableInfo'
 import TaskInfo from '../sides/TaskInfo'
 
 export default {
   name: 'asset',
+  mixins: [entityMixin, formatListMixin],
   components: {
     ButtonSimple,
     ChevronLeftIcon,
@@ -212,6 +234,7 @@ export default {
     EntityTaskList,
     PageSubtitle,
     PageTitle,
+    Schedule,
     TableInfo,
     TaskInfo
   },
@@ -266,6 +289,8 @@ export default {
       'isTVShow',
       'isCurrentUserManager',
       'route',
+      'taskMap',
+      'taskTypeMap',
       'shotId'
     ]),
 
@@ -539,6 +564,22 @@ h2.subtitle {
 
 .datatable-row {
   user-select: text;
+}
+
+.schedule {
+  position: relative;
+  height: 280px;
+  padding: 10px;
+
+  .schedule-title {
+    margin-bottom: 5px;
+  }
+
+  .wrapper {
+    background: $dark-grey-2;
+    height: 230px;
+    border-radius: 10px;
+  }
 }
 
 @media screen and (max-width: 768px) {

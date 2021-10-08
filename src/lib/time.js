@@ -85,8 +85,26 @@ export const getWeekRange = (year, currentYear) => {
   }
 }
 
-export const getFirstStartDate = (items) => {
+export const getFirstStartDateByField = (items) => {
   let startDate = moment()
+  items.forEach(item => {
+    const sDate = parseDate(item.start_date)
+    if (sDate.isBefore(startDate)) startDate = sDate
+  })
+  return startDate
+}
+
+export const getLastEndDateByField = (items) => {
+  let endDate = moment()
+  items.forEach(item => {
+    const eDate = parseDate(item.end_date)
+    if (eDate.isAfter(endDate)) endDate = eDate
+  })
+  return endDate
+}
+
+export const getFirstStartDate = (items) => {
+  let startDate = items[0].startDate
   items.forEach((item) => {
     if (item.startDate.isBefore(startDate)) startDate = item.startDate.clone()
   })
@@ -94,7 +112,7 @@ export const getFirstStartDate = (items) => {
 }
 
 export const getLastEndDate = (items) => {
-  let endDate = moment().add(3, 'months')
+  let endDate = items[0].endDate
   items.forEach(item => {
     if (item.endDate.isAfter(endDate)) endDate = item.endDate.clone()
   })

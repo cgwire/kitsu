@@ -31,7 +31,7 @@
       <page-subtitle :text="$t('shots.tasks')" />
       <entity-task-list
         class="task-list"
-        :entries="currentTasks"
+        :entries="currentTasks.map(t => t.id)"
         :is-loading="!currentShot"
         :is-error="false"
         @task-selected="onTaskSelected"
@@ -105,6 +105,25 @@
             </tbody>
         </table>
       </div>
+      </div>
+    </div>
+
+    <div class="infos schedule" v-if="scheduleItems.length > 0">
+      <page-subtitle class="schedule-title" text="Schedule" />
+      <div class="wrapper">
+        <schedule
+          ref="schedule-widget"
+          class="schedule-widget"
+          :start-date="tasksStartDate"
+          :end-date="tasksEndDate"
+          :hierarchy="scheduleItems"
+          :zoom-level="2"
+          :height="385"
+          :is-loading="false"
+          :is-estimation-linked="true"
+          :hide-root="true"
+          :with-milestones="false"
+        />
       </div>
     </div>
 
@@ -185,6 +204,8 @@ import { mapGetters, mapActions } from 'vuex'
 import { ChevronLeftIcon } from 'vue-feather-icons'
 
 import { episodifyRoute } from '@/lib/path'
+import { entityMixin } from '@/components/mixins/entity'
+import { formatListMixin } from '@/components/mixins/format'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DescriptionCell from '@/components/cells/DescriptionCell'
@@ -193,11 +214,13 @@ import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import EntityTaskList from '@/components/lists/EntityTaskList'
 import PageTitle from '@/components/widgets/PageTitle'
 import PageSubtitle from '@/components/widgets/PageSubtitle'
+import Schedule from '../pages/schedule/Schedule'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskInfo from '@/components/sides/TaskInfo'
 
 export default {
   name: 'shot',
+  mixins: [entityMixin, formatListMixin],
   components: {
     ButtonSimple,
     ChevronLeftIcon,
@@ -207,6 +230,7 @@ export default {
     EntityTaskList,
     PageSubtitle,
     PageTitle,
+    Schedule,
     TableInfo,
     TaskInfo
   },
@@ -261,12 +285,10 @@ export default {
       'route',
       'shotMap',
       'shotMetadataDescriptors',
-      'shotsPath'
+      'shotsPath',
+      'taskMap',
+      'taskTypeMap'
     ]),
-
-    currentTasks () {
-      return this.currentShot ? this.currentShot.tasks : []
-    },
 
     title () {
       if (this.currentShot) {
@@ -532,6 +554,22 @@ h2.subtitle {
 
 .datatable-row {
   user-select: text;
+}
+
+.schedule {
+  position: relative;
+  height: 280px;
+  padding: 10px;
+
+  .schedule-title {
+    margin-bottom: 5px;
+  }
+
+  .wrapper {
+    background: $dark-grey-2;
+    height: 230px;
+    border-radius: 10px;
+  }
 }
 
 @media screen and (max-width: 768px) {
