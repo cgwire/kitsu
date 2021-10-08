@@ -193,7 +193,6 @@ const getters = {
       const person = state.personMap.get(personId)
       emailMap.set(person.email, person)
     })
-    console.log(emailMap)
     return emailMap
   },
   isPeopleLoading: state => state.isPeopleLoading,
