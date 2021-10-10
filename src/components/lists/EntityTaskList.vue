@@ -155,10 +155,12 @@ export default {
       return [...this.entries].sort((taskIdA, taskIdB) => {
         const taskA = this.getTask(taskIdA)
         const taskB = this.getTask(taskIdB)
+        const taskTypeA = this.taskTypeMap.get(taskA.task_type_id)
+        const taskTypeB = this.taskTypeMap.get(taskB.task_type_id)
         const taskTypeAPriority = this.getTaskTypePriority(taskA.task_type_id)
         const taskTypeBPriority = this.getTaskTypePriority(taskB.task_type_id)
         if (taskTypeAPriority === taskTypeBPriority) {
-          return this.taskTypeA.localeCompare(this.taskTypeB.name)
+          return taskTypeA.name.localeCompare(taskTypeB.name)
         } else {
           return taskTypeAPriority - taskTypeBPriority
         }

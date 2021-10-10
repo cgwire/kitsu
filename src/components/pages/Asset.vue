@@ -286,6 +286,7 @@ export default {
       'assetMetadataDescriptors',
       'currentEpisode',
       'currentProduction',
+      'getTaskTypePriority',
       'isTVShow',
       'isCurrentUserManager',
       'route',
@@ -449,6 +450,10 @@ export default {
   .table-body {
     border: 1px solid $dark-grey;
   }
+
+  .wrapper {
+    background: $dark-grey-2;
+  }
 }
 
 h2.subtitle {
@@ -576,7 +581,6 @@ h2.subtitle {
   }
 
   .wrapper {
-    background: $dark-grey-2;
     height: 230px;
     border-radius: 10px;
   }

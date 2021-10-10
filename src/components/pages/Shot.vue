@@ -280,6 +280,7 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
+      'getTaskTypePriority',
       'isCurrentUserManager',
       'isTVShow',
       'route',
@@ -443,6 +444,10 @@ export default {
   box-shadow: 0px 0px 6px #333;
 }
 
+.dark .wrapper {
+  background: $dark-grey-2;
+}
+
 h2.subtitle {
   margin-top: 0;
   margin-bottom: 0.5em;
@@ -566,7 +571,6 @@ h2.subtitle {
   }
 
   .wrapper {
-    background: $dark-grey-2;
     height: 230px;
     border-radius: 10px;
   }

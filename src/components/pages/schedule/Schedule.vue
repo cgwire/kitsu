@@ -88,7 +88,7 @@
             {{ rootElement.name }}
           </router-link>
           <input
-            class="flexrow-item mr1"
+            class="flexrow-item mr1 man-day-input"
             type="number"
             step="any"
             placeholder="0"
@@ -1272,6 +1272,11 @@ export default {
         }
       }
     }
+  }
+
+  .expand,
+  .man-day-input {
+    color: white;
   }
 
   .total-man-days {

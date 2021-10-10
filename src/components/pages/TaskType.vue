@@ -848,6 +848,9 @@ export default {
         if (startDate.isAfter(this.schedule.endDate)) {
           startDate = this.schedule.endDate.clone().add(-1, 'days')
         }
+        if (startDate.isBefore(this.schedule.startDate)) {
+          startDate = this.schedule.startDate.clone()
+        }
 
         if (task.due_date) {
           endDate = parseDate(task.due_date)
@@ -864,6 +867,13 @@ export default {
         if (!endDate.isSameOrAfter(startDate)) {
           const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
           endDate = startDate.clone().add(nbDays, 'days')
+        }
+
+        if (endDate.isAfter(this.schedule.endDate)) {
+          endDate = this.schedule.endDate.clone().add(-1, 'days')
+          if (startDate.isAfter(endDate)) {
+            startDate = endDate.clone().add(-1, 'days')
+          }
         }
 
         if (estimation) manDays += estimation
@@ -919,10 +929,12 @@ export default {
       if (!this.$options.savingBuffer[item.id]) {
         this.$options.savingBuffer[item.id] = item
         setTimeout(() => {
-          item.endDate = addBusinessDays(
-            item.startDate,
-            Math.ceil(minutesToDays(this.organisation, item.estimation))
-          )
+          if (item.estimation) {
+            item.endDate = addBusinessDays(
+              item.startDate,
+              Math.ceil(minutesToDays(this.organisation, item.estimation))
+            )
+          }
           item = { ...this.$options.savingBuffer[item.id] }
           if (item.startDate && item.endDate) {
             item.parentElement.startDate = this.getMinDate(item.parentElement)
