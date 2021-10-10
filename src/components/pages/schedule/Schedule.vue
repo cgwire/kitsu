@@ -1603,7 +1603,7 @@ export default {
 }
 
 .total-man-days {
-  position: fixed;
+  position: absolute;
   background: white;
   border-top-left-radius: 10px;
   height: 85px;
