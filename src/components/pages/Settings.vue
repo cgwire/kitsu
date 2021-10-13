@@ -40,6 +40,11 @@
           v-model="form.use_original_file_name"
         />
         <combobox-boolean
+          :label="$t('settings.fields.show_hd_preview')"
+          @enter="saveSettings()"
+          v-model="form.hd_by_default"
+        />
+        <combobox-boolean
           :label="$t('settings.fields.timesheets_locked')"
           @enter="saveSettings()"
           v-model="form.timesheets_locked"
@@ -112,6 +117,7 @@ export default {
         name: '',
         hours_by_day: 0,
         original_file_name: 'false',
+        hd_by_default: 'false',
         chat_token_slack: ''
       },
       errors: {
@@ -201,6 +207,8 @@ export default {
           this.organisation.use_original_file_name ? 'true' : 'false',
         timesheets_locked:
           this.organisation.timesheets_locked ? 'true' : 'false',
+        hd_by_default:
+          this.organisation.hd_by_default ? 'true' : 'false',
         chat_token_slack: this.organisation.chat_token_slack
       }
     }
