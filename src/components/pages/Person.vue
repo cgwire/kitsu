@@ -353,7 +353,7 @@ export default {
         }
         const rootElement = rootMap.get(task.project_id)
         const taskItem = this.buildTaskScheduleItem(rootElement, task)
-        rootElement.children.push(taskItem)
+        if (taskItem) rootElement.children.push(taskItem)
       })
 
       const rootElements = Array.from(rootMap.values())
@@ -399,13 +399,6 @@ export default {
           const tabsHeight = this.$refs.tabs.offsetHeight
           const searchHeight = this.$refs.search.offsetHeight
           const queryHeight = this.$refs.query.offsetHeight
-          console.log(
-            pageHeight,
-            headerHeight,
-            tabsHeight,
-            searchHeight,
-            queryHeight
-          )
           this.scheduleHeight =
             pageHeight - headerHeight - tabsHeight - searchHeight - queryHeight
           if (this.$refs['schedule-widget']) {
