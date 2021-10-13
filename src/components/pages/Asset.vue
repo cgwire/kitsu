@@ -67,7 +67,7 @@
       </div>
     </div>
 
-    <div class="infos schedule" v-if="scheduleItems.length > 0">
+    <div class="infos schedule" v-if="scheduleItems[0].children.length > 0">
       <page-subtitle class="schedule-title" text="Schedule" />
       <div class="wrapper">
         <schedule
