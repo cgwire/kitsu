@@ -717,6 +717,7 @@ export default {
     logo: 'Studio logo',
     no_logo: 'There is no logo set.',
     set_logo: 'Set studio logo',
+    show_hd_default: 'Show picture with HD quality by default',
     title: 'Settings',
     fields: {
       name: 'Studio name',

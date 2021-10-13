@@ -925,6 +925,9 @@ export default {
 
   mounted () {
     this.$options.scrubbing = false
+    this.isHd = this.organisation
+      ? this.organisation.hd_by_default === 'true'
+      : false
     if (this.entities) {
       this.entityList = Object.values(this.entities)
     } else {
@@ -962,6 +965,7 @@ export default {
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isTVShow',
+      'organisation',
       'personEmailMap',
       'personMap',
       'previewFileMap',

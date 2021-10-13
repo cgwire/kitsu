@@ -541,6 +541,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'organisation',
       'user'
     ]),
 
@@ -741,6 +742,9 @@ export default {
       const isRepeating =
         localPreferences.getBoolPreference('player:repeating')
       this.isRepeating = isRepeating
+      this.isHd = this.organisation
+        ? this.organisation.hd_by_default === 'true'
+        : false
     },
 
     focus () {
