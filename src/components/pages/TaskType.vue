@@ -984,7 +984,9 @@ export default {
           const pageHeight = this.$refs.page.offsetHeight
           const headerHeight = this.$refs.header.offsetHeight
           this.schedule.scheduleHeight = pageHeight - headerHeight + 20
-          this.$refs['schedule-widget'].resetScheduleSize()
+          if (this.$refs['schedule-widget']) {
+            this.$refs['schedule-widget'].resetScheduleSize()
+          }
         }
       })
     }
