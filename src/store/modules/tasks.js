@@ -905,20 +905,22 @@ const mutations = {
     if (annotations) {
       preview.annotations = annotations
     }
-    state.taskPreviews[taskId].forEach(p => {
-      p.previews.forEach(subPreview => {
-        if (subPreview.id === preview.id) {
-          if (annotations) {
-            subPreview.annotations = annotations
+    if (state.taskPreviews[taskId]) {
+      state.taskPreviews[taskId].forEach(p => {
+        p.previews.forEach(subPreview => {
+          if (subPreview.id === preview.id) {
+            if (annotations) {
+              subPreview.annotations = annotations
+            }
+            subPreview.status = preview.status
           }
-          subPreview.status = preview.status
+        })
+        if (p.id === preview.id) {
+          p.annotations = annotations
+          p.status = preview.status
         }
       })
-      if (p.id === preview.id) {
-        p.annotations = annotations
-        p.status = preview.status
-      }
-    })
+    }
   },
 
   [CHANGE_PREVIEW_END] (state, { preview, comment }) {
