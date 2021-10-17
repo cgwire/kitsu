@@ -1294,6 +1294,10 @@ export default {
       'runPlaylistBuild'
     ]),
 
+    isMovie (extension) {
+      return extension === 'mp4'
+    },
+
     isPicture (extension) {
       return ['png', 'gif'].includes(extension)
     },
@@ -1503,7 +1507,7 @@ export default {
       this.clearCanvas()
       this.framesSeenOfPicture = 0
       this.playingEntityIndex = entityIndex
-      if (entity.preview_file_extension === 'mp4') {
+      if (this.isMovie(entity.preview_file_extension)) {
         this.$nextTick(() => {
           this.scrollToEntity(this.playingEntityIndex)
           this.rawPlayer.loadEntity(entityIndex)
@@ -1638,26 +1642,13 @@ export default {
     onPlayPreviousEntityClicked (forcePlay = false) {
       this.clearFocus()
       this.playEntity(this.previousEntityIndex)
-      if (this.isCurrentPreviewMovie) {
-        this.rawPlayer.loadPreviousEntity()
-        if (this.isComparing) {
-          this.$refs['raw-player-comparison'].loadPreviousEntity()
-        }
-      }
-      if (this.isPlaying || forcePlay) this.play()
       this.sendUpdatePlayingStatus()
     },
 
     onPlayNextEntity (forcePlay = false) {
       this.clearFocus()
       this.playEntity(this.nextEntityIndex)
-      if (this.isCurrentPreviewMovie) {
-        this.rawPlayer.loadNextEntity()
-        if (this.isComparing) {
-          this.$refs['raw-player-comparison'].loadNextEntity()
-        }
-      }
-      if (this.isPlaying || forcePlay) this.play()
+      this.sendUpdatePlayingStatus()
     },
 
     onPlayNextEntityClicked (forcePlay = false) {
@@ -1917,8 +1908,9 @@ export default {
     },
 
     playPicture () {
+      if (this.isPlaying) clearTimeout(this.playingPictureTimeout)
       this.isPlaying = true
-      setTimeout(
+      this.playingPictureTimeout = setTimeout(
         this.continuePlayingPlaylist,
         100,
         this.playingEntityIndex,
@@ -1930,33 +1922,34 @@ export default {
       const framesPerImage = this.framesPerImage[entityIndex]
       const durationToWaitMs = framesPerImage * 1000 / this.fps
       const durationWaited = Date.now() - startMs
-      if (!this.isPlaying) {
-        return
-      }
-      if (durationWaited < durationToWaitMs) {
-        setTimeout(
-          this.continuePlayingPlaylist, 100, entityIndex, startMs
-        )
+      if (!this.isPlaying) return
+      else if (durationWaited < durationToWaitMs) {
         this.framesSeenOfPicture = Math.floor(
           (durationWaited / 1000) * this.fps
+        )
+        this.playingPictureTimeout = setTimeout(
+          this.continuePlayingPlaylist, 100, entityIndex, startMs
         )
         return
       }
 
       // we've seen all the frames the picture should be visible
       this.framesSeenOfPicture = 0
-      if (this.playingEntityIndex === entityIndex) {
-        this.isPlaying = true
-        const previews = this.currentEntity.preview_file_previews
-        if (previews.length === this.currentPreviewIndex) {
-          this.currentPreviewIndex = 0
-          this.$nextTick(() => {
-            this.onPlayNextEntity(true)
-          })
-        } else {
-          this.currentPreviewIndex++
-          this.playPicture()
-        }
+      const previews = this.currentEntity.preview_file_previews
+      if (previews.length === this.currentPreviewIndex) {
+        this.$nextTick(() => {
+          this.onPlayNextEntity(true)
+        })
+      } else {
+        this.currentPreviewIndex++
+        this.$nextTick(() => {
+          this.playingPictureTimeout = setTimeout(
+            this.continuePlayingPlaylist,
+            100,
+            this.playingEntityIndex,
+            Date.now()
+          )
+        })
       }
     },
 
