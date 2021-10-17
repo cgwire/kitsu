@@ -177,7 +177,7 @@ export default {
       text: '',
       attachment: [],
       checklist: [],
-      task_status_id: this.task.task_status_id,
+      task_status_id: null,
       errors: {
         addCommentAttachment: false
       },
@@ -253,12 +253,16 @@ export default {
         })
       }
     })
+    this.resetStatus()
   },
 
   computed: {
     ...mapGetters([
       'currentProduction',
-      'isDarkTheme'
+      'isDarkTheme',
+      'isCurrentUserArtist',
+      'taskStatusForCurrentUser',
+      'taskStatusMap'
     ]),
 
     isFileAttached () {
@@ -300,10 +304,6 @@ export default {
       this.text = ''
       this.attachment = []
       this.checklist = []
-    },
-
-    updateValue (value) {
-      this.task_status_id = this.$refs.statusSelect.value
     },
 
     focus () {
@@ -380,12 +380,21 @@ export default {
       this.checklist[item.index].text = this.checklist[item.index].text.trim()
       delete item.index
       this.checklist.push(item)
+    },
+
+    resetStatus () {
+      const taskStatus = this.taskStatusMap.get(this.task.task_status_id)
+      if (!this.isCurrentUserArtist || taskStatus.is_artist_allowed) {
+        this.task_status_id = this.task.task_status_id
+      } else {
+        this.task_status_id = this.taskStatusForCurrentUser[0].id
+      }
     }
   },
 
   watch: {
     task () {
-      this.task_status_id = this.task.task_status_id
+      this.resetStatus()
     },
 
     team: {
