@@ -999,6 +999,7 @@ export default {
     month: 'Month',
     time_spents: 'Time Spent (hours)',
     title: 'Timesheets',
+    unit: 'Unit',
     year: 'Year'
   },
 
