@@ -187,6 +187,7 @@ import {
   getMonthRange,
   getWeekRange,
   getDayRange,
+  hoursToDays,
   range
 } from '../../lib/time'
 import PeopleNameCell from '@/components/cells/PeopleNameCell'
@@ -234,6 +235,11 @@ export default {
       default: 0
     },
 
+    unit: {
+      type: String,
+      default: 'hour'
+    },
+
     isLoading: {
       type: Boolean,
       default: false
@@ -272,6 +278,10 @@ export default {
 
     weekRange () {
       return getWeekRange(this.year, this.currentYear, this.currentWeek)
+    },
+
+    isHours () {
+      return this.unit === 'hour'
     }
   },
 
@@ -283,16 +293,25 @@ export default {
 
     yearDuration (year, personId) {
       const yearString = `${year}`
-      return this.getDuration(yearString, personId)
+      const duration = this.getDuration(yearString, personId)
+      return this.isHours
+        ? duration
+        : hoursToDays(this.organisation, duration).toFixed(2)
     },
 
     monthDuration (month, personId) {
       const monthString = `${month}`
-      return this.getDuration(monthString, personId)
+      const duration = this.getDuration(monthString, personId)
+      return this.isHours
+        ? duration
+        : hoursToDays(this.organisation, duration).toFixed(2)
     },
 
     weekDuration (week, personId) {
-      return this.getDuration(week, personId)
+      const duration = this.getDuration(week, personId)
+      return this.isHours
+        ? duration
+        : hoursToDays(this.organisation, duration).toFixed(2)
     },
 
     dayDuration (day, personId) {
@@ -300,7 +319,10 @@ export default {
           this.dayOffMap[personId][`${day}`] === true) {
         return 'OFF'
       } else {
-        return this.getDuration(day, personId)
+        const duration = this.getDuration(day, personId)
+        return this.isHours
+          ? duration
+          : hoursToDays(this.organisation, duration).toFixed(2)
       }
     },
 

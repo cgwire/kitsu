@@ -229,3 +229,7 @@ export const daysToMinutes = (organisation, days) => {
 export const minutesToDays = (organisation, minutes) => {
   return minutes / 60 / organisation.hours_by_day
 }
+
+export const hoursToDays = (organisation, hours) => {
+  return hours / organisation.hours_by_day
+}

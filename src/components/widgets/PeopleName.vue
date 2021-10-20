@@ -28,7 +28,7 @@ export default {
     },
     withLink: {
       type: Boolean,
-      required: true
+      default: false
     }
   },
   computed: {

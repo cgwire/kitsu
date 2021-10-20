@@ -77,6 +77,7 @@
               <option value="en_US">English</option>
               <option value="fr_FR">French</option>
               <option value="de_DE">German</option>
+              <option value="hu_HU">Hungarian</option>
               <option value="pt_BR">Portuguese (Brasilian)</option>
               <option value="fa_IR">Persian</option>
               <option value="es_ES">Spanish</option>

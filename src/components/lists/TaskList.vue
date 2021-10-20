@@ -573,13 +573,17 @@ export default {
       }
       const taskLines = [headers]
       this.tasks.forEach((task) => {
+        if (!task) return
         const assignees = task.assignees.map(personId => {
           const person = this.personMap.get(personId)
           if (person) return person.name
           else return ''
         }).join(', ')
+
         const line = [
-          this.isAssets ? this.getEntity(task.entity.id).asset_type_name : this.getEntity(task.entity.id).sequence_name,
+          this.isAssets
+            ? this.getEntity(task.entity.id).asset_type_name
+            : this.getEntity(task.entity.id).sequence_name,
           this.getEntity(task.entity.id).name,
           task.task_status_short_name,
           assignees,

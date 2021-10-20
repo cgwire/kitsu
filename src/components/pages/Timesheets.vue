@@ -37,6 +37,14 @@
             v-model="monthString"
             v-if="detailLevelString === 'day'"
           />
+
+          <combobox
+            class="flexrow-item"
+            :label="$t('timesheets.unit')"
+            :options="unitOptions"
+            v-model="unit"
+          />
+
           <div class="filler"></div>
           <button-simple
             class="flexrow-item"
@@ -60,6 +68,7 @@
           :detail-level="detailLevel"
           :month="currentMonth"
           :year="currentYear"
+          :unit="unit"
           :is-loading="isLoading"
           :is-error="isLoadingError"
         />
@@ -76,6 +85,7 @@
         :month="currentMonth"
         :week="currentWeek"
         :day="currentDay"
+        :unit="unit"
         :is-loading="isInfoLoading"
         :is-loading-error="isInfoLoadingError"
         :tasks="tasks"
@@ -134,12 +144,24 @@ export default {
           value: 'year'
         }
       ],
+      unitOptions: [
+        {
+          label: 'Hour',
+          value: 'hour'
+        },
+        {
+          label: 'Day',
+          value: 'day'
+        }
+      ],
+
       detailLevelString: 'day',
       detailLevel: 'day',
       productionIdString: '',
       productionId: '',
       yearString: `${moment().year()}`,
       monthString: `${moment().month() + 1}`,
+      unit: 'hour',
 
       currentYear: moment().year(),
       currentMonth: moment().month() + 1,
