@@ -125,7 +125,6 @@ export const entityMixin = {
       })
       return [rootElement]
     }
-
   },
 
   methods: {
