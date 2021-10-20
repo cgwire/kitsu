@@ -15,7 +15,7 @@
         :temp-mode="true"
         :is-asset-playlist="isAssetPlaylist"
         @save-clicked="onSaveClicked"
-        @annotationchanged="onAnnotationChanged"
+        @annotation-changed="onAnnotationChanged"
         v-if="!isPlaylistPage"
       />
     </div>
@@ -122,9 +122,11 @@ export default {
       'updatePreviewAnnotation'
     ]),
 
-    onAnnotationChanged ({ preview, annotations }) {
+    onAnnotationChanged ({ preview, additions, deletions, updates }) {
       const taskId = preview.task_id
-      this.updatePreviewAnnotation({ taskId, preview, annotations })
+      this.updatePreviewAnnotation({
+        taskId, preview, additions, deletions, updates
+      })
     },
 
     setupEntities (entities) {

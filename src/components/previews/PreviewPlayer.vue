@@ -936,8 +936,7 @@ export default {
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
         // Needed to avoid fullsceen button to be called with space bar.
         this.clearFocus()
-        this.reloadAnnotations()
-        this.loadAnnotation()
+        this.previewViewer.resize()
       })
     },
 
@@ -952,8 +951,7 @@ export default {
       this.$nextTick(() => {
         // Needed to avoid fullsceen button to be called with space bar.
         this.clearFocus()
-        this.reloadAnnotations()
-        this.loadAnnotation()
+        this.previewViewer.resize()
       })
     },
 
