@@ -16,6 +16,7 @@
         :is-asset-playlist="isAssetPlaylist"
         @save-clicked="onSaveClicked"
         @annotation-changed="onAnnotationChanged"
+        @annotations-refreshed="onAnnotationsRefreshed"
         v-if="!isPlaylistPage"
       />
     </div>
@@ -63,6 +64,8 @@ export default {
 
   data () {
     return {
+      previewFileMap: new Map(),
+      previewFileEntityMap: new Map(),
       currentEntities: {},
       currentPlaylist: {
         id: 'temp',
@@ -129,9 +132,27 @@ export default {
       })
     },
 
+    onAnnotationsRefreshed (preview) {
+      const entity = this.previewFileEntityMap.get(preview.id)
+      const localPreview = this.previewFileMap.get(preview.id)
+      if (entity) {
+        entity.preview_file_annotations = preview.annotations
+      }
+      if (localPreview) {
+        localPreview.annotations = preview.annotations
+      }
+    },
+
     setupEntities (entities) {
       const entityMap = {}
-      entities.forEach((entity) => {
+      entities.forEach(entity => {
+        this.previewFileEntityMap.set(entity.preview_file_id, entity)
+        const previewFileGroups = Object.values(entity.preview_files)
+        previewFileGroups.forEach(previewFiles => {
+          previewFiles.forEach(previewFile => {
+            this.previewFileMap.set(previewFile.id, previewFile)
+          })
+        })
         entityMap[entity.id] = entity
       })
       this.currentPlaylist.shots = Object.values(entityMap)
@@ -140,6 +161,9 @@ export default {
 
     initPlaylistPlayer () {
       this.playlistPlayer.setupFabricCanvas()
+      this.playlistPlayer.resetCanvas()
+      this.playlistPlayer.setPlayerSpeed(1)
+      this.playlistPlayer.rebuildComparisonOptions()
     },
 
     onSaveClicked () {
@@ -197,6 +221,8 @@ export default {
     active () {
       if (this.active) {
         this.currentEntities = {}
+        this.previewFileMap = new Map()
+        this.previewFileEntityMap = new Map()
         this.initPlaylistPlayer()
         this.isLoading = true
         this.loadTempPlaylist(this.taskIds)
@@ -212,6 +238,7 @@ export default {
           .catch(console.error)
       } else {
         this.playlistPlayer.pause()
+        this.playlistPlayer.clearCanvas()
         this.currentEntities = {}
       }
     }
