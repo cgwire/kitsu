@@ -6,6 +6,7 @@
       background: color,
       color: textColor
     }"
+    :title="entry.name"
   >
     {{ entry.short_name }}
   </div>
@@ -19,9 +20,12 @@ export default {
   name: 'task-status-name',
   components: {
   },
-  props: [
-    'entry'
-  ],
+  props: {
+    entry: {
+      type: Object,
+      default: () => {}
+    }
+  },
   computed: {
     ...mapGetters([
       'isDarkTheme'
