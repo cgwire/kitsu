@@ -369,7 +369,10 @@
       >
         <div
           class="more-menu-item"
-          v-if="(isCurrentViewAsset || isCurrentViewShot) && isCurrentUserManager"
+          v-if="
+            (isCurrentViewAsset || isCurrentViewShot) &&
+            isCurrentUserManager &&
+            !isEntitySelection"
           @click="selectBar('assignation')"
         >
           {{ $t('menu.assign_tasks') }}
@@ -378,14 +381,17 @@
         <div
           class="more-menu-item"
           @click="selectBar('change-status')"
-          v-if="isCurrentUserManager"
+          v-if="isCurrentUserManager && !isEntitySelection"
         >
           {{ $t('menu.change_status') }}
         </div>
 
         <div
           class="more-menu-item"
-          v-if="(isCurrentViewAsset || isCurrentViewShot || isCurrentViewPerson) && isCurrentUserManager"
+          v-if="
+            (isCurrentViewAsset || isCurrentViewShot || isCurrentViewPerson) &&
+            isCurrentUserManager &&
+            !isEntitySelection"
           @click="selectBar('priorities')"
         >
           {{ $t('menu.change_priority') }}
@@ -393,7 +399,10 @@
 
         <div
           class="more-menu-item"
-          v-if="((isCurrentViewAsset || isCurrentViewShot) && !isCurrentViewTaskType) && isCurrentUserManager"
+          v-if="
+            ((isCurrentViewAsset || isCurrentViewShot) && !isCurrentViewTaskType) &&
+            isCurrentUserManager &&
+            !isEntitySelection"
           @click="selectBar('tasks')"
         >
           {{ $t('menu.create_tasks') }}
@@ -401,7 +410,9 @@
 
         <div
           class="more-menu-item"
-          v-if="isCurrentViewAsset || isCurrentViewShot || isCurrentViewTaskType"
+          v-if="
+            (isCurrentViewAsset || isCurrentViewShot || isCurrentViewTaskType) &&
+            !isEntitySelection"
           @click="selectBar('playlists')"
         >
           {{ $t('menu.generate_playlists') }}
@@ -409,7 +420,10 @@
 
         <div
           class="more-menu-item"
-          v-if="(isCurrentViewAsset || isCurrentViewShot) && isCurrentUserManager"
+          v-if="
+            (isCurrentViewAsset || isCurrentViewShot) &&
+            isCurrentUserManager &&
+            !isEntitySelection"
           @click="selectBar('delete-tasks')"
         >
           {{ $t('menu.delete_tasks') }}
@@ -417,7 +431,10 @@
 
         <div
           class="more-menu-item"
-          v-if="!isCurrentViewTaskType && isCurrentUserManager"
+          v-if="
+            !isCurrentViewTaskType &&
+            isCurrentUserManager &&
+            !isEntitySelection"
           @click="selectBar('custom-actions')"
         >
           {{ $t('menu.run_custom_action') }}
@@ -425,7 +442,10 @@
 
         <div
           class="more-menu-item"
-          v-if="isCurrentViewAsset && isCurrentUserManager"
+          v-if="
+            isCurrentViewAsset &&
+            isCurrentUserManager &&
+            !isTaskSelection"
           @click="selectBar('delete-assets')"
         >
           {{ $t('menu.delete_assets') }}
@@ -433,7 +453,10 @@
 
         <div
           class="more-menu-item"
-          v-if="isCurrentViewShot && isCurrentUserManager"
+          v-if="
+            isCurrentViewShot &&
+            isCurrentUserManager &&
+            !isTaskSelection"
           @click="selectBar('delete-shots')"
         >
           {{ $t('menu.delete_shots') }}
@@ -557,6 +580,14 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
+    isTaskSelection () {
+      return this.nbSelectedTasks > 0
+    },
+
+    isEntitySelection () {
+      return this.selectedAssets.size > 0 || this.selectedShots.size > 0
+    },
 
     nbSelectedAssets () {
       return this.selectedAssets.size
@@ -902,10 +933,12 @@ export default {
   watch: {
     nbSelectedAssets () {
       this.autoChooseSelectBar()
+      if (this.nbSelectedAssets > 0) this.clearSelectedTasks()
     },
 
     nbSelectedShots () {
       this.autoChooseSelectBar()
+      if (this.nbSelectedShots > 0) this.clearSelectedTasks()
     },
 
     isHidden () {
