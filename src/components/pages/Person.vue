@@ -450,7 +450,7 @@ export default {
       const taskType = this.taskTypeMap.get(task.task_type_id)
       return {
         ...task,
-        name: task.full_entity_name,
+        name: task.full_entity_name + ' / ' + taskType.name,
         startDate: startDate,
         endDate: endDate,
         expanded: false,
