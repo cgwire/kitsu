@@ -158,14 +158,6 @@ export default {
       this.currentEntities = entityMap
     },
 
-    initPlaylistPlayer () {
-      this.playlistPlayer.fabricCanvas = null
-      this.playlistPlayer.setupFabricCanvas()
-      this.playlistPlayer.resetCurrentCanvas()
-      this.playlistPlayer.setPlayerSpeed(1)
-      this.playlistPlayer.rebuildComparisonOptions()
-    },
-
     onSaveClicked () {
       this.errors.editPlaylist = false
       this.playlistToEdit = {
@@ -233,9 +225,6 @@ export default {
             } else {
               this.currentPlaylist.for_entity = 'shot'
             }
-            this.$nextTick(() => {
-              this.initPlaylistPlayer()
-            })
           })
           .catch(console.error)
       } else {
