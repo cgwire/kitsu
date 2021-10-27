@@ -8,7 +8,11 @@
     'playlist-player': true
   }"
 >
-  <div class="playlist-header flexrow" ref="header" v-if="!tempMode">
+  <div
+    ref="header"
+    class="playlist-header flexrow"
+    v-if="!tempMode"
+  >
     <div
       class="flexrow-item for-client"
       v-if="playlist && playlist.for_client"
@@ -137,12 +141,12 @@
         :is-hd="isHd"
         :is-repeating="isRepeating"
         :muted="isMuted"
-        @repeat="onVideoRepeated"
-        @metadata-loaded="onMetadataLoaded"
         @entity-change="onPlayerEntityChange"
-        @time-update="onTimeUpdate"
         @max-duration-update="onMaxDurationUpdate"
+        @metadata-loaded="onMetadataLoaded"
         @play-next="onPlayNext"
+        @repeat="onVideoRepeated"
+        @time-update="onTimeUpdate"
         v-show="isCurrentPreviewMovie && !isLoading"
       />
 
@@ -183,6 +187,7 @@
            v-show="isCurrentPreviewPicture"
          />
       </div>
+
       <div class="loading-wrapper" v-if="isLoading">
         <spinner />
       </div>
@@ -1885,6 +1890,8 @@ export default {
       const nextEntity = this.entityList[this.nextEntityIndex]
       if (nextEntity.preview_file_extension === 'mp4') {
         this.rawPlayer.playNext()
+      } else if (this.isRepeating && this.isCurrentPreviewMovie) {
+        this.rawPlayer.playNext()
       } else {
         this.onPlayNextEntityClicked()
         if (this.isCurrentPreviewPicture) {
@@ -2068,6 +2075,8 @@ export default {
               const naturalWidth = this.picturePlayer.naturalWidth
               const naturalHeight = this.picturePlayer.naturalHeight
               const ratio = naturalWidth / naturalHeight
+
+              if (!this.$refs['video-container']) return Promise.resolve()
 
               // Container size
               let fullWidth = this.$refs['video-container'].offsetWidth
@@ -2484,6 +2493,7 @@ export default {
       this.annotations = this.currentPreview.annotations || []
       return this.resetCanvas()
         .then(() => {
+          this.showCanvas()
           if (this.isCurrentPreviewPicture) {
             if (!this.isPlaying) this.loadAnnotation(this.getAnnotation(0))
           }
@@ -2647,7 +2657,11 @@ export default {
           this.rebuildRevisionOptions()
         }
         this.$nextTick(() => {
-          this.resetCanvas()
+          if (this.isCurrentPreviewPicture) {
+            this.resetPictureCanvas()
+          } else {
+            this.resetCanvas()
+          }
         })
       })
     },
