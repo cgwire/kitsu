@@ -2032,6 +2032,15 @@ export default {
       })
     },
 
+    resetCurrentCanvas () {
+      this.$refs['playlists.annotation-canvas'].html = ''
+      if (this.isCurrentPreviewPicture) {
+        this.resetPictureCanvas()
+      } else {
+        this.resetCanvas()
+      }
+    },
+
     resetCanvas () {
       this.clearCanvas()
       return this.resetCanvasSize()

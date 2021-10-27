@@ -31,7 +31,6 @@
     @confirm="savePlaylist"
     @cancel="modals.edit = false"
   />
-
 </div>
 </template>
 
@@ -160,8 +159,9 @@ export default {
     },
 
     initPlaylistPlayer () {
+      this.playlistPlayer.fabricCanvas = null
       this.playlistPlayer.setupFabricCanvas()
-      this.playlistPlayer.resetCanvas()
+      this.playlistPlayer.resetCurrentCanvas()
       this.playlistPlayer.setPlayerSpeed(1)
       this.playlistPlayer.rebuildComparisonOptions()
     },
@@ -223,10 +223,9 @@ export default {
         this.currentEntities = {}
         this.previewFileMap = new Map()
         this.previewFileEntityMap = new Map()
-        this.initPlaylistPlayer()
         this.isLoading = true
-        this.loadTempPlaylist(this.taskIds)
-          .then((entities) => {
+        this.loadTempPlaylist(Array.from(this.selectedTasks.keys()))
+          .then(entities => {
             this.setupEntities(entities)
             this.isLoading = false
             if (this.isAssetPlaylist) {
@@ -234,6 +233,9 @@ export default {
             } else {
               this.currentPlaylist.for_entity = 'shot'
             }
+            this.$nextTick(() => {
+              this.initPlaylistPlayer()
+            })
           })
           .catch(console.error)
       } else {
