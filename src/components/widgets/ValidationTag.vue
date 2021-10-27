@@ -2,22 +2,28 @@
 <span>
   <span v-if="!minimized">
     <router-link
-      :to="taskPath(task)"
       class="tag dynamic"
+      :to="taskPath(task)"
+      :style="tagStyle"
+      :title="taskStatus.name"
       v-if="!isStatic && !isCurrentUserClient"
-      :style="tagStyle">
+    >
       {{ taskStatus.short_name }}
     </router-link>
 
     <span
       class="tag"
       :style="tagStyle"
+      :title="taskStatus.name"
       @click="($event) => $emit('click', $event)"
       v-else
     >
       {{ taskStatus.short_name }}
     </span>
-    <span class="priority" v-if="isPriority && !isCurrentUserClient">
+    <span
+      class="priority"
+      v-if="isPriority && !isCurrentUserClient"
+    >
       {{ priority }}
     </span>
   </span>
@@ -26,11 +32,11 @@
       :to="taskPath(task)"
       class="tag dynamic"
       :style="tagStyle"
+      :title="taskStatus.name"
       v-if="!isStatic && !isCurrentUserClient"
     >
        &nbsp;
     </router-link>
-
     <span
       class="tag"
       :style="cursor"

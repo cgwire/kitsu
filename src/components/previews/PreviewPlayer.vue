@@ -1203,6 +1203,10 @@ export default {
           this.undoLastAction()
         } else if (event.altKey && event.keyCode === 82) { // alt + r
           this.redoLastAction()
+        } else if (event.altKey && event.keyCode === 74) { // alt+j
+          this.onPreviousClicked()
+        } else if (event.altKey && event.keyCode === 75) { // alt+k
+          this.onNextClicked()
         } else if (event.ctrlKey && event.keyCode === 67) { // ctrl + c
           this.copyAnnotations()
         } else if (event.ctrlKey && event.keyCode === 86) { // ctrl + v

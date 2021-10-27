@@ -339,7 +339,9 @@ export default {
     },
 
     setCurrentTimeRaw (currentTime) {
-      this.currentPlayer.currentTime = currentTime + this.frameFactor
+      if (this.currentPlayer) {
+        this.currentPlayer.currentTime = currentTime + this.frameFactor
+      }
     },
 
     setCurrentTime (currentTime) {
