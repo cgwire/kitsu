@@ -1,6 +1,6 @@
 <template>
-  <div class="page fixed-page">
-  <div style="overflow-y: auto;">
+  <div class="fixed-page columns">
+  <div class="page column main-column">
     <div class="page-header">
       <div
         class="flexrow header-title"
@@ -196,6 +196,37 @@
             </div>
           </div>
         </div>
+        <div class="flexrow-item task-information">
+          <page-subtitle :text="$t('main.info')" />
+          <div class="table-body">
+            <table class="datatable" v-if="currentTask">
+              <tbody class="table-body">
+                <tr class="datatable-row">
+                  <td class="field-label">{{ $t('tasks.fields.estimation') }}</td>
+                  <td>{{ currentTask.estimation }}</td>
+                </tr>
+                <tr class="datatable-row">
+                  <td class="field-label">{{ $t('tasks.fields.duration') }}</td>
+                  <td>{{ formatDuration(currentTask.duration) }}</td>
+                </tr>
+                <tr class="datatable-row">
+                  <td class="field-label">{{ $t('tasks.fields.retake_count') }}</td>
+                  <td>{{ currentTask.retake_count }}</td>
+                </tr>
+                <tr class="datatable-row">
+                  <td class="field-label">{{ $t('tasks.fields.start_date') }}</td>
+                  <td>{{ formatSimpleDate(currentTask.start_date) }}</td>
+                </tr>
+                <tr class="datatable-row">
+                  <td class="field-label">{{ $t('tasks.fields.end_date') }}</td>
+                  <td>{{ formatSimpleDate(currentTask.end_date) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="pa2">
+        </div>
       </div>
     </div>
 
@@ -261,11 +292,14 @@ import {
   ImageIcon
 } from 'vue-feather-icons'
 
+import { formatListMixin } from '@/components/mixins/format'
+
 import AddComment from '../widgets/AddComment'
 import AddPreviewModal from '../modals/AddPreviewModal'
 import Comment from '../widgets/Comment'
 import DeleteModal from '../modals/DeleteModal'
 import EditCommentModal from '../modals/EditCommentModal'
+import PageSubtitle from '../widgets/PageSubtitle'
 import PeopleAvatar from '../widgets/PeopleAvatar'
 import PreviewRow from '../widgets/PreviewRow'
 import Spinner from '../widgets/Spinner'
@@ -276,6 +310,7 @@ import PreviewPlayer from '../previews/PreviewPlayer'
 
 export default {
   name: 'task',
+  mixins: [formatListMixin],
   components: {
     AddComment,
     AddPreviewModal,
@@ -284,6 +319,7 @@ export default {
     DeleteModal,
     EditCommentModal,
     ImageIcon,
+    PageSubtitle,
     PeopleAvatar,
     PreviewRow,
     PreviewPlayer,
@@ -1212,6 +1248,7 @@ export default {
 }
 
 .dark .page-header,
+.dark .task-information,
 .dark .add-comment,
 .dark .comment,
 .dark .no-comment,
@@ -1231,6 +1268,13 @@ h2.subtitle {
   background: #F9F9F9;
   margin-top: 60px;
   padding: 0;
+}
+
+.task-information {
+  padding: 1em;
+  margin-top: 1em;
+  background: white;
+  box-shadow: 0px 0px 6px #E0E0E0;
 }
 
 .page-header {
@@ -1304,12 +1348,17 @@ video {
 
 .task-columns {
   display: flex;
+  flex: 1;
   flex-direction: row;
 }
 
 .task-column {
   width: 50%;
   padding: 1em;
+}
+
+.preview-column {
+  overflow: auto;
 }
 
 .preview-column-content {
@@ -1367,6 +1416,22 @@ video {
 
 .back-link {
   padding-top: 6px;
+}
+
+.main-column {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100% - 60px);
+}
+
+.task-columns {
+  display: flex;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.task-column {
+  overflow-y: auto;
 }
 
 @media screen and (max-width: 768px) {
