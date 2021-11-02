@@ -23,6 +23,7 @@
       >
         <span
           class="total-value"
+          v-show="!hideManDays"
         >
           {{ formatDuration(totalManDays) }} {{ $t('schedule.md') }}
         </span>
@@ -96,18 +97,18 @@
               days: $event.target.value,
               item: rootElement
             })"
-            v-if="!rootElement.avatar && rootElement.editable"
+            v-if="!rootElement.avatar && rootElement.editable && !hideManDays"
             :value="formatDuration(rootElement.man_days)"
           />
           <span
             class="man-days-unit flexrow-item"
-            v-if="!rootElement.avatar && rootElement.editable"
+            v-if="!rootElement.avatar && rootElement.editable && !hideManDays"
           >
             {{ $t('schedule.md') }}
           </span>
           <span
             class="man-days-unit flexrow-item"
-            v-if="rootElement.avatar || !rootElement.editable"
+            v-if="(rootElement.avatar || !rootElement.editable) && !hideManDays"
           >
             {{ formatDuration(rootElement.man_days) }}
             {{ $t('schedule.md') }}
@@ -144,8 +145,10 @@
               <span class="filler flexrow-item" v-else>
                 {{ childElement.name }}
               </span>
-              <span class="flexrow-item"
+              <span
+                class="flexrow-item"
                 v-if="childElement.editable"
+                v-show="!hideManDays"
               >
                 <input
                   class="man-days-unit flexrow-item"
@@ -173,10 +176,12 @@
     </div>
 
     <div class="timeline">
+
       <div
         ref="timeline-header"
         class="timeline-header"
         @mousedown="startBrowsingX"
+        v-if="zoomLevel > 0"
       >
         <div
           class="day"
@@ -248,6 +253,51 @@
       </div>
 
       <div
+        ref="timeline-header"
+        class="timeline-header"
+        @mousedown="startBrowsingX"
+        v-else
+      >
+        <div
+          class="day"
+          :key="'header-' + week.weekText + '-' + index"
+          :title="week.label"
+          :style="dayStyle(week)"
+          v-for="(week, index) in weeksAvailable"
+        >
+          <div
+            class="milestone"
+          >
+            <div>
+              <span class="bull">&nbsp;</span>
+            </div>
+          </div>
+          <div :class="{
+            'with-milestones': false,
+            'date-widget': true
+          }">
+            <div class="date-name">
+              <span
+                class="month-name"
+                v-if="week.newMonth"
+              >
+                {{ week.monthText }}
+              </span>
+              <div
+                :class="dayClass(week, index)"
+              >
+                <span
+                  class="day-number"
+                >
+                  {{ week.weekNumber }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
         ref="timeline-content-wrapper"
         class="timeline-content-wrapper"
         v-scroll="onTimelineScroll"
@@ -255,6 +305,7 @@
         <div
           ref="timeline-content"
           class="timeline-content"
+          :style="timelineStyle"
           @mousedown="startBrowsing"
           @mousewheel="$emit('change-zoom', $event)"
         >
@@ -275,6 +326,7 @@
             :style="milestoneLineStyle(milestone)"
             :key="'milestone-' + milestone.date"
             v-for="milestone in Object.values(currentMilestones)"
+            v-if="!isWeekMode"
           >
           </div>
           <div
@@ -289,32 +341,35 @@
             >
               <div
                 class="timebar-wrapper"
+                :title="rootElement.name +
+                ' (' + rootElement.startDate.format('DD-MM')
+                + ' - ' + rootElement.endDate.format('DD-MM') + ')'"
                 :style="timebarStyle(rootElement, true)"
               >
-              <div
-                class="timebar"
-                v-show="isVisible(rootElement)"
-              >
                 <div
-                  :class="{
-                    'timebar-left-hand': rootElement.editable && isCurrentUserManager
-                  }"
-                  @mousedown="moveTimebarLeftSide(rootElement, $event)"
+                  class="timebar"
+                  v-show="isVisible(rootElement)"
                 >
+                  <div
+                    :class="{
+                      'timebar-left-hand': rootElement.editable && isCurrentUserManager
+                    }"
+                    @mousedown="moveTimebarLeftSide(rootElement, $event)"
+                  >
+                  </div>
+                  <div
+                    class="filler"
+                    @mousedown="moveTimebar(rootElement, $event)"
+                  >
+                  </div>
+                  <div
+                    :class="{
+                      'timebar-right-hand': rootElement.editable && isCurrentUserManager
+                    }"
+                    @mousedown="moveTimebarRightSide(rootElement, $event)"
+                  >
+                  </div>
                 </div>
-                <div
-                  class="filler"
-                  @mousedown="moveTimebar(rootElement, $event)"
-                >
-                </div>
-                <div
-                  :class="{
-                    'timebar-right-hand': rootElement.editable && isCurrentUserManager
-                  }"
-                  @mousedown="moveTimebarRightSide(rootElement, $event)"
-                >
-                </div>
-              </div>
               </div>
             </div>
 
@@ -454,6 +509,10 @@ export default {
       type: Number,
       default: 0
     },
+    hideManDays: {
+      type: Boolean,
+      default: false
+    },
     hierarchy: {
       default: () => [],
       type: Array
@@ -512,7 +571,7 @@ export default {
     },
 
     cellWidth () {
-      return this.zoomLevel * 20
+      return Math.max(this.zoomLevel, 1) * 20
     },
 
     daysAvailable () {
@@ -569,6 +628,48 @@ export default {
       return days
     },
 
+    weeksAvailable () {
+      const weeks = []
+      if (this.daysAvailable.length < 1) return []
+      const startDate = this.daysAvailable[0]
+      const endDate = this.daysAvailable[this.daysAvailable.length - 1]
+      const day = startDate.clone().add(-1, 'days')
+      let dayDate = day.toDate()
+      const endDayDate = endDate.clone().add(7, 'days').toDate()
+      dayDate.weekday = day.isoWeekday()
+      dayDate.monthday = day.month()
+      dayDate.week = day.week()
+
+      while (dayDate < endDayDate) {
+        const nextDay = new Date(Number(dayDate))
+        nextDay.setDate(dayDate.getDate() + 1) // Add 1 day
+        if (nextDay.isoweekday > 7) {
+          nextDay.isoweekday = 1
+          nextDay.newWeek = true
+        }
+        nextDay.monthday = dayDate.monthday + 1
+        if (nextDay.getMonth() !== dayDate.getMonth()) {
+          nextDay.newMonth = true
+          nextDay.monthday = 1
+        }
+        const momentDay = parseDate(moment(nextDay).format('YYYY-MM-DD'))
+        if (momentDay.isoWeekday() === 1) {
+          momentDay.weekText = momentDay.format('YYYY-MM-DD')
+          momentDay.label =
+            momentDay.weekText + ' to ' +
+            momentDay.clone().add(6, 'days').format('YYYY-MM-DD')
+          momentDay.weekNumber = momentDay.week()
+          momentDay.newMonth =
+            weeks.length === 0 ||
+            momentDay.month() !== weeks[weeks.length - 1].month()
+          momentDay.monthText = momentDay.format('MMMM')
+          weeks.push(momentDay)
+        }
+        dayDate = nextDay
+      }
+      return weeks
+    },
+
     displayedDays () {
       return this.daysAvailable
     },
@@ -585,6 +686,16 @@ export default {
         index++
       })
       return dayIndex
+    },
+
+    displayedWeeksIndex () {
+      let index = 0
+      const weekIndex = {}
+      this.weeksAvailable.forEach(w => {
+        weekIndex[w.weekText] = index
+        index++
+      })
+      return weekIndex
     },
 
     totalManDays () {
@@ -636,6 +747,14 @@ export default {
       return className
     },
 
+    timelineStyle () {
+      const firstDay = this.daysAvailable[0]
+      const multiplier = -1 * (firstDay.isoWeekday() - 1)
+      return {
+        'background-position-x': `${multiplier * this.cellWidth}px`
+      }
+    },
+
     timelinePositionStyle () {
       return { width: `${this.cellWidth}px` }
     },
@@ -646,7 +765,7 @@ export default {
         today.isAfter(this.startDate) && today.isBefore(this.endDate)
       return {
         width: `${this.cellWidth}px`,
-        left: `${this.getTimebarLeft({ startDate: today }) - 5}px`,
+        left: `${this.getTimebarLeft({ startDate: today }) - 3}px`,
         display: isVisible ? 'block' : 'none'
       }
     },
@@ -662,6 +781,10 @@ export default {
 
     dayAfterEndDate () {
       return this.endDate.clone().add(1, 'days')
+    },
+
+    isWeekMode () {
+      return this.zoomLevel === 0
     }
   },
 
@@ -682,8 +805,13 @@ export default {
     resetScheduleSize () {
       if (this.height) this.schedule.style.height = `${this.height}px`
       if (this.timelineContent) {
-        this.timelineContent.style.width =
-          this.nbDisplayedDays * this.cellWidth + 'px'
+        if (this.zoomLevel > 0) {
+          this.timelineContent.style.width =
+            this.nbDisplayedDays * this.cellWidth + 'px'
+        } else {
+          this.timelineContent.style.width =
+            this.weeksAvailable.length * this.cellWidth + 'px'
+        }
         let contentHeight = this.schedule.offsetHeight - 250
         if (!this.withMilestones) contentHeight += 40
         this.timelineContentWrapper.style.height = contentHeight + 'px'
@@ -738,9 +866,9 @@ export default {
 
     updatePositionBarPosition (event) {
       let position = this.timelineContentWrapper.scrollLeft + event.clientX
-      position -= 320
+      position -= 332
       position = Math.floor(position / this.cellWidth) * this.cellWidth
-      if (position < this.timelineContentWrapper.offsetWidth) {
+      if (event.clientX - 320 < this.timelineContentWrapper.offsetWidth) {
         this.timelinePosition.style.left = position + 'px'
       }
     },
@@ -761,6 +889,11 @@ export default {
       return this.displayedDaysIndex[dateString]
     },
 
+    getDisplayedWeeksIndex (date) {
+      const dateString = date.startOf('isoweek').format('YYYY-MM-DD')
+      return this.displayedWeeksIndex[dateString]
+    },
+
     changeDates (event) {
       const change = event.clientX - this.initialClientX - this.cellWidth / 2
       const dayChange = Math.ceil(change / this.cellWidth)
@@ -775,21 +908,39 @@ export default {
 
       const startDate = this.lastStartDate
       const endDate = this.lastEndDate
-      const startDateIndex = this.getDisplayedDaysIndex(startDate)
-      const endDateIndex = this.getDisplayedDaysIndex(endDate)
-      const length = endDateIndex - startDateIndex
-      let currentIndex = this.getDisplayedDaysIndex(startDate)
+      if (!this.isWeekMode) {
+        const startDateIndex = this.getDisplayedDaysIndex(startDate)
+        const endDateIndex = this.getDisplayedDaysIndex(endDate)
+        const length = endDateIndex - startDateIndex
+        let currentIndex = this.getDisplayedDaysIndex(startDate)
 
-      currentIndex += dayChange
-      if (currentIndex < 0) currentIndex = 0
+        currentIndex += dayChange
+        if (currentIndex < 0) currentIndex = 0
 
-      const newStartDate = this.displayedDays[currentIndex]
-      if (newStartDate) {
-        const newEndDate = this.displayedDays[currentIndex + length]
-        if (this.isValidItemDates(newStartDate, newEndDate)) {
-          this.currentElement.startDate = newStartDate
-          this.currentElement.endDate = newEndDate
-          this.$emit('item-changed', this.currentElement)
+        const newStartDate = this.displayedDays[currentIndex]
+        if (newStartDate) {
+          const newEndDate = this.displayedDays[currentIndex + length]
+          if (this.isValidItemDates(newStartDate, newEndDate)) {
+            this.currentElement.startDate = newStartDate
+            this.currentElement.endDate = newEndDate
+            this.$emit('item-changed', this.currentElement)
+          }
+        }
+      } else {
+        const startDateIndex = this.getDisplayedWeeksIndex(startDate)
+        const endDateIndex = this.getDisplayedWeeksIndex(endDate)
+        const length = endDateIndex - startDateIndex
+        let currentIndex = this.getDisplayedWeeksIndex(startDate)
+        currentIndex += dayChange
+        if (currentIndex < 0) currentIndex = 0
+        const newStartDate = this.weeksAvailable[currentIndex]
+        if (newStartDate) {
+          const newEndDate = this.weeksAvailable[currentIndex + length]
+          if (this.isValidItemDates(newStartDate, newEndDate)) {
+            this.currentElement.startDate = newStartDate
+            this.currentElement.endDate = newEndDate
+            this.$emit('item-changed', this.currentElement)
+          }
         }
       }
     },
@@ -800,14 +951,21 @@ export default {
 
       const startDate = this.lastStartDate
       const endDate = this.currentElement.endDate
-      let currentIndex = this.getDisplayedDaysIndex(startDate)
-      const endDateIndex = this.getDisplayedDaysIndex(endDate)
-
+      let currentIndex, endDateIndex
+      if (this.isWeekMode) {
+        currentIndex = this.getDisplayedWeeksIndex(startDate)
+        endDateIndex = this.getDisplayedWeeksIndex(endDate)
+      } else {
+        currentIndex = this.getDisplayedDaysIndex(startDate)
+        endDateIndex = this.getDisplayedDaysIndex(endDate)
+      }
       currentIndex += dayChange
       if (currentIndex > endDateIndex) currentIndex = endDateIndex
       if (currentIndex < 0) currentIndex = 0
 
-      const newStartDate = this.displayedDays[currentIndex]
+      const newStartDate = this.isWeekMode
+        ? this.weeksAvailable[currentIndex]
+        : this.displayedDays[currentIndex]
       if (this.isValidItemDates(newStartDate, this.currentElement.endDate)) {
         this.currentElement.startDate = newStartDate
         this.$emit('item-changed', this.currentElement)
@@ -832,16 +990,30 @@ export default {
 
       const startDate = this.currentElement.startDate
       const endDate = this.lastEndDate
-      const startDateIndex = this.getDisplayedDaysIndex(startDate)
-      let currentIndex = this.getDisplayedDaysIndex(endDate)
+      let startDateIndex, currentIndex
+      if (this.isWeekMode) {
+        startDateIndex = this.getDisplayedWeeksIndex(startDate)
+        currentIndex = this.getDisplayedWeeksIndex(endDate)
+      } else {
+        startDateIndex = this.getDisplayedDaysIndex(startDate)
+        currentIndex = this.getDisplayedDaysIndex(endDate)
+      }
 
       currentIndex += dayChange - 1
       if (currentIndex < startDateIndex) currentIndex = startDateIndex
-      if (currentIndex > this.displayedDaysIndex.length) {
-        currentIndex = this.displayedDaysIndex.length - 1
+      if (this.isWeekMode) {
+        if (currentIndex > this.displayedWeeksIndex.length) {
+          currentIndex = this.displayedWeeksIndex.length - 1
+        }
+      } else {
+        if (currentIndex > this.displayedDaysIndex.length) {
+          currentIndex = this.displayedDaysIndex.length - 1
+        }
       }
 
-      const newEndDate = this.displayedDays[currentIndex]
+      const newEndDate = this.isWeekMode
+        ? this.weeksAvailable[currentIndex]
+        : this.displayedDays[currentIndex]
       if (this.isValidItemDates(this.currentElement.startDate, newEndDate)) {
         this.currentElement.endDate = newEndDate
         this.$emit('item-changed', this.currentElement)
@@ -1067,8 +1239,9 @@ export default {
 
     getTimebarLeft (timeElement) {
       const startDate = timeElement.startDate || this.startDate
-      const startDiff = this.dateDiff(this.startDate, startDate) || 0
-      return ((startDiff) * this.cellWidth) + 5
+      let startDiff = this.dateDiff(this.startDate, startDate) || 0
+      if (this.zoomLevel === 0) startDiff = Math.round((startDiff / 7) - 1)
+      return ((startDiff) * this.cellWidth) + 3
     },
 
     getTimebarWidth (timeElement) {
@@ -1085,11 +1258,13 @@ export default {
         const days = Math.ceil(timeElement.man_days)
         endDate = addBusinessDays(startDate, days - 1)
       }
-      const lengthDiff = this.dateDiff(startDate, endDate)
+
+      let lengthDiff = this.dateDiff(startDate, endDate)
+      if (this.zoomLevel === 0) lengthDiff = Math.round((lengthDiff / 7))
       if (lengthDiff > 0) {
-        return (lengthDiff + 1) * this.cellWidth - 10
+        return (lengthDiff + 1) * this.cellWidth - 6
       } else {
-        return this.cellWidth - 10
+        return this.cellWidth - 4
       }
     },
 
@@ -1162,9 +1337,10 @@ export default {
 
     milestoneLineStyle (milestone) {
       const startDate = parseDate(this.startDate.format('YYYY-MM-DD'))
-      const endDate = parseDate(milestone.date)
-      if (startDate.isSameOrBefore(endDate)) {
-        const lengthDiff = this.dateDiff(startDate, endDate)
+      const milestoneDate = parseDate(milestone.date)
+      if (startDate.isSameOrBefore(milestoneDate)) {
+        let lengthDiff = this.dateDiff(startDate, milestoneDate)
+        if (this.zoomLevel === 0) lengthDiff = lengthDiff / 7 - 1
         return {
           left: (lengthDiff + 0.5) * this.cellWidth + 'px'
         }
@@ -1193,6 +1369,7 @@ export default {
     },
     zoomLevel () {
       this.resetScheduleSize()
+      this.onTimelineScroll(null, { scrollTop: 0, scrollLeft: 0 })
     },
     isLoading () {
       this.$nextTick(this.resetScheduleSize)
@@ -1210,21 +1387,27 @@ export default {
     background: inherit;
   }
 
-  .schedule.zoom-level-1 {
+  .schedule.zoom-level-0 {
     .timeline-content {
       background-image: url('../../../assets/background/schedule-dark-1.png');
     }
   }
 
+  .schedule.zoom-level-1 {
+    .timeline-content {
+      background-image: url('../../../assets/background/schedule-dark-1-weekend.png');
+    }
+  }
+
   .schedule.zoom-level-2 {
     .timeline-content {
-      background-image: url('../../../assets/background/schedule-dark-2.png');
+      background-image: url('../../../assets/background/schedule-dark-2-weekend.png');
     }
   }
 
   .schedule.zoom-level-3 {
     .timeline-content {
-      background-image: url('../../../assets/background/schedule-dark-3.png');
+      background-image: url('../../../assets/background/schedule-dark-3-weekend.png');
     }
   }
 
@@ -1262,7 +1445,6 @@ export default {
       .timeline-content {
         .entity-line.child-line {
           .timebar {
-            background: rgba(200, 200, 250, 0.8);
             color: $dark-grey;
           }
         }
@@ -1392,10 +1574,9 @@ export default {
     white-space: nowrap;
     position: relative;
     margin-left: 1px;
-    background: white;
-    padding-bottom: 4px;
+    padding-bottom: 0px;
     overflow: hidden;
-    padding-top: 20px;
+    padding-top: 24px;
 
     .day {
       display: inline-block;
@@ -1408,7 +1589,8 @@ export default {
         color: $grey;
         padding-bottom: 0em;
         margin-bottom: 0em;
-        padding-left: 10px;
+        padding-left: 0px;
+        text-align: center;
         padding-top: 0em;
         text-transform: uppercase;
 
@@ -1433,6 +1615,7 @@ export default {
         bottom: 0;
         text-transform: uppercase;
         color: black;
+        z-index: -300;
       }
     }
   }
@@ -1478,10 +1661,9 @@ export default {
 
         .timebar {
           position: absolute;
-          top: 13px;
+          top: 0px;
           height: 14px;
-          background: rgba(255, 255, 255, 0.4);
-          border-radius: 1em;
+          border-radius: 0.2em;
           display: flex;
           z-index: 101;
 
@@ -1496,6 +1678,11 @@ export default {
           }
         }
 
+        .timebar-wrapper {
+          .timebar {
+            height: 30px;
+          }
+        }
         &.child-line {
           padding: 0;
 
@@ -1516,9 +1703,15 @@ export default {
   }
 }
 
-.zoom-level-1 {
+.zoom-level-0 {
   .timeline-content {
     background-image: url('../../../assets/background/schedule-white-1.png');
+  }
+}
+
+.zoom-level-1 {
+  .timeline-content {
+    background-image: url('../../../assets/background/schedule-white-1-weekend.png');
   }
 
   .timeline {
@@ -1528,7 +1721,7 @@ export default {
         padding-left: 0px;
 
         .day-name {
-          padding-left: 0px;
+          padding-left: 2px;
           &.new-week {
             border-left: solid 2px transparent;
           }
@@ -1544,13 +1737,13 @@ export default {
 
 .schedule.zoom-level-2 {
   .timeline-content {
-    background-image: url('../../../assets/background/schedule-white-2.png');
+    background-image: url('../../../assets/background/schedule-white-2-weekend.png');
   }
 }
 
 .schedule.zoom-level-3 {
   .timeline-content {
-    background-image: url('../../../assets/background/schedule-white-3.png');
+    background-image: url('../../../assets/background/schedule-white-3-weekend.png');
   }
 }
 
@@ -1739,13 +1932,13 @@ export default {
 
 .timebar-wrapper {
   position: absolute;
-  height: 40px;
-  top: 0px;
-  padding: 0 0.4em;
-  border-radius: 10px;
+  height: 30px;
+  top: 4px;
+  padding: 0;
+  border-radius: 4px;
 
   .timebar {
-    width: calc(100% - 0.8em);
+    width: calc(100% - 0.2em);
   }
 }
 

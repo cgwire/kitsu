@@ -149,6 +149,20 @@ describe('Schedule', () => {
       expect(nbDays).toEqual(185)
     })
 
+    test('displayedWeeks', () => {
+      const weeks = wrapper.vm.weeksAvailable
+      expect(weeks[4].day()).toEqual(1)
+      expect(weeks[5].day()).toEqual(1)
+      expect(weeks[6].day()).toEqual(1)
+      expect(weeks[7].day()).toEqual(1)
+      expect(weeks[7].format('YYYY-MM-DD')).toEqual('2019-08-19')
+    })
+
+    test('displayedWeekIndex', () => {
+      const index = wrapper.vm.displayedWeeksIndex
+      expect(index['2019-08-19']).toEqual(7)
+    })
+
     test('displayedDaysIndex', () => {
       const daysIndex = wrapper.vm.displayedDaysIndex
       expect(daysIndex['2019-08-01']).toEqual(31)
@@ -166,6 +180,16 @@ describe('Schedule', () => {
         unselectable: true,
         'zoom-level-3': true
       })
+    })
+
+    test.skip('timelineStyle', () => {
+    })
+
+    test('isWeekMode', async () => {
+      await wrapper.setProps({ zoomLevel: 3 })
+      expect(wrapper.vm.isWeekMode).toEqual(false)
+      await wrapper.setProps({ zoomLevel: 0 })
+      expect(wrapper.vm.isWeekMode).toEqual(true)
     })
 
     test('timelinePositionStyle', () => {
@@ -224,25 +248,46 @@ describe('Schedule', () => {
         }
       })
 
-      test('changeDates', () => {
+      test('changeDates', async () => {
         wrapper.vm.moveTimebar(timeElement, initialEvent)
         wrapper.vm.changeDates(event)
         expect(wrapper.vm.currentElement.startDate.format('YYYY-MM-DD'))
           .toEqual(moment('2019-08-13').format('YYYY-MM-DD'))
         expect(wrapper.vm.currentElement.endDate.format('YYYY-MM-DD'))
           .toEqual(moment('2019-09-01').format('YYYY-MM-DD'))
+
+        await wrapper.setProps({ zoomLevel: 0 })
+        wrapper.vm.moveTimebar(timeElement, initialEvent)
+        wrapper.vm.changeDates(event)
+        expect(wrapper.vm.currentElement.startDate.format('YYYY-MM-DD'))
+          .toEqual(moment('2019-07-08').format('YYYY-MM-DD'))
+        expect(wrapper.vm.currentElement.endDate.format('YYYY-MM-DD'))
+          .toEqual(moment('2019-07-22').format('YYYY-MM-DD'))
       })
-      test('changeStartDate', () => {
+
+      test('changeStartDate', async () => {
         wrapper.vm.moveTimebarLeftSide(timeElement, initialEvent)
         wrapper.vm.changeStartDate(event)
         expect(wrapper.vm.currentElement.startDate.format('YYYY-MM-DD'))
           .toEqual(moment('2019-08-13').format('YYYY-MM-DD'))
+
+        await wrapper.setProps({ zoomLevel: 0 })
+        wrapper.vm.moveTimebarLeftSide(timeElement, initialEvent)
+        wrapper.vm.changeStartDate(event)
+        expect(wrapper.vm.currentElement.startDate.format('YYYY-MM-DD'))
+          .toEqual(moment('2019-07-08').format('YYYY-MM-DD'))
       })
-      test('changeEndDate', () => {
+      test('changeEndDate', async () => {
          wrapper.vm.moveTimebarRightSide(timeElement, initialEvent)
          wrapper.vm.changeEndDate(event)
          expect(wrapper.vm.currentElement.endDate.format('YYYY-MM-DD'))
            .toEqual(moment('2019-09-01').format('YYYY-MM-DD'))
+
+        await wrapper.setProps({ zoomLevel: 0 })
+         wrapper.vm.moveTimebarRightSide(timeElement, initialEvent)
+         wrapper.vm.changeEndDate(event)
+         expect(wrapper.vm.currentElement.endDate.format('YYYY-MM-DD'))
+           .toEqual(moment('2019-08-12').format('YYYY-MM-DD'))
       })
       test('scrollScheduleHeight', () => {
         wrapper.vm.timelineContentWrapper.scrollLeft = 150
@@ -454,8 +499,8 @@ describe('Schedule', () => {
         })
         expect(timebarStyle).toEqual({
           'cursor': 'ew-resize',
-          'left': (45 * 60 + 5) + 'px',
-          'width': 18 * 60 - 10 + 'px'
+          'left': (45 * 60 + 3) + 'px',
+          'width': 18 * 60 - 6 + 'px'
         })
         timebarStyle = wrapper.vm.timebarStyle({
           startDate: moment('2019-08-15', 'YYYY-MM-DD'),
@@ -464,8 +509,8 @@ describe('Schedule', () => {
         })
         expect(timebarStyle).toEqual({
           'cursor': 'default',
-          'left': (45 * 60 + 5) + 'px',
-          'width': 18 * 60 - 10 + 'px'
+          'left': (45 * 60 + 3) + 'px',
+          'width': 18 * 60 - 6 + 'px'
         })
       })
 
@@ -477,7 +522,7 @@ describe('Schedule', () => {
           startDate: moment('2019-08-15', 'YYYY-MM-DD'),
           endDate: moment('2019-09-01', 'YYYY-MM-DD')
         })
-        expect(timebarLeft).toEqual(45 * 60 + 5)
+        expect(timebarLeft).toEqual(45 * 60 + 3)
       })
 
       test('getTimebarWidth', () => {
@@ -485,7 +530,16 @@ describe('Schedule', () => {
           startDate: moment('2019-08-15', 'YYYY-MM-DD'),
           endDate: moment('2019-09-01', 'YYYY-MM-DD')
         })
-        expect(timebarWidth).toEqual(18 * 60 - 10)
+        expect(timebarWidth).toEqual(18 * 60 - 6)
+      })
+
+      test('getTimebarWidth', async () => {
+        await wrapper.setProps({ zoomLevel: 0 })
+        let timebarWidth = wrapper.vm.getTimebarWidth({
+          startDate: moment('2019-08-15', 'YYYY-MM-DD'),
+          endDate: moment('2019-09-01', 'YYYY-MM-DD')
+        })
+        expect(timebarWidth).toEqual(2 * 30 - 6)
       })
     })
   })
