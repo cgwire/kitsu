@@ -576,6 +576,11 @@ h2.subtitle {
   }
 }
 
+.column.main-column {
+  background: var(--background-page);
+  padding-bottom: 1em;
+}
+
 @media screen and (max-width: 768px) {
   .task-column {
     margin-bottom: 1em;
