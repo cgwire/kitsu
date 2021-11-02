@@ -1242,11 +1242,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .page.column {
-  background: $dark-grey-2;
-  padding-bottom: 1em;
-}
-
 .dark .page-header,
 .dark .task-information,
 .dark .add-comment,
@@ -1268,6 +1263,11 @@ h2.subtitle {
   background: #F9F9F9;
   margin-top: 60px;
   padding: 0;
+}
+
+.page.column {
+  background: var(--background-page);
+  padding-bottom: 1em;
 }
 
 .task-information {

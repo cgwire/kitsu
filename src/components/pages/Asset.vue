@@ -433,7 +433,6 @@ export default {
 <style lang="scss" scoped>
 .dark {
   .page {
-    background: $dark-grey-light;
     padding-bottom: 1em;
   }
 
@@ -463,9 +462,9 @@ h2.subtitle {
   font-size: 1.5em;
 }
 
-.page {
-  background: #F9F9F9;
-  padding: 0em;
+.column.main-column {
+  background: var(--background-page);
+  padding-bottom: 1em;
 }
 
 .page-header {
