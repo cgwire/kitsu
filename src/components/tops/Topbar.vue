@@ -683,7 +683,7 @@ export default {
 <style lang="scss" scoped>
 .dark {
   a,
-  .user-menu a {
+  .user-menu ul a {
     color: $white-grey;
   }
 
@@ -772,7 +772,7 @@ export default {
   }
 }
 
-.user-menu li a {
+.user-menu ul a {
   color: #333;
 }
 
