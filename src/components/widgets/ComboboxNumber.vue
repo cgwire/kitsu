@@ -19,7 +19,9 @@
         <option
           v-for="(option, i) in options"
           :key="i + '-' + option.label + '-' + option.value"
-          :value="option.value || option.label"
+          :value="option.value !== null && option.value !== undefined
+            ? option.value
+            : option.label"
           :selected="value === option.value"
         >
           {{ getOptionLabel(option) }}
