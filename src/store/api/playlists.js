@@ -31,6 +31,13 @@ export default {
     return client.pget('/api/data/playlists/preview-files/running')
   },
 
+  markPreviewFileAsBroken (previewFileId) {
+    return client.pput(
+      `/api/data/preview-files/${previewFileId}`,
+      { status: 'broken' }
+    )
+  },
+
   newPlaylist (playlist) {
     const data = {
       name: playlist.name,

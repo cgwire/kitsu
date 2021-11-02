@@ -16,6 +16,7 @@
       <preview-file-list
         :preview-files="previewFiles"
         :is-loading="previewFilesLoading"
+        @mark-broken-clicked="markBrokenClicked"
       />
     </template>
   </div>
@@ -62,7 +63,8 @@ export default {
   methods: {
     ...mapActions([
       'getTask',
-      'getRunningPreviewFiles'
+      'getRunningPreviewFiles',
+      'markPreviewFileAsBroken'
     ]),
 
     async reload () {
@@ -70,6 +72,12 @@ export default {
       this.previewFilesLoading = true
       this.previewFiles = await this.getRunningPreviewFiles()
       this.previewFilesLoading = false
+    },
+
+    async markBrokenClicked (previewFileId) {
+      const previewFile = this.previewFiles.find(p => p.id === previewFileId)
+      previewFile.status = 'broken'
+      await this.markPreviewFileAsBroken(previewFileId)
     }
   },
 

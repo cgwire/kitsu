@@ -230,6 +230,10 @@ const actions = {
 
   getRunningPreviewFiles () {
     return playlistsApi.getRunningPreviewFiles()
+  },
+
+  markPreviewFileAsBroken (utils, previewFileId) {
+    return playlistsApi.markPreviewFileAsBroken(previewFileId)
   }
 }
 

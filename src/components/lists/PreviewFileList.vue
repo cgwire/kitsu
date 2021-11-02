@@ -39,7 +39,7 @@
         <tr
           :key="previewFile.id"
           class="datatable-row"
-          @click="redirectToTask(previewFile)"
+          @click="event => redirectToTask(event, previewFile)"
           v-for="previewFile in previewFiles"
         >
           <td class="date">
@@ -65,12 +65,18 @@
           <td class="status" :data-status="previewFile.status">
             {{ previewFile.status }}
           </td>
-          <td class="end-cell"></td>
+          <td class="end-cell has-text-right">
+            <button-simple
+              class="mark-broken-button"
+              text="Mark as broken"
+              @click="$emit('mark-broken-clicked', previewFile.id)"
+              v-if="previewFile.status === 'processing'"
+            />
+          </td>
        </tr>
       </tbody>
     </table>
   </div>
-
 </div>
 </template>
 
@@ -80,6 +86,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { formatListMixin } from '@/components/mixins/format'
 import { getTaskPath } from '@/lib/path'
 
+import ButtonSimple from '../widgets/ButtonSimple'
 import TableInfo from '../widgets/TableInfo'
 import ProductionNameCell from '../cells/ProductionNameCell'
 import TaskTypeName from '../cells/TaskTypeName'
@@ -89,6 +96,7 @@ export default {
   mixins: [formatListMixin],
 
   components: {
+    ButtonSimple,
     ProductionNameCell,
     TableInfo,
     TaskTypeName
@@ -125,14 +133,19 @@ export default {
 
   methods: {
     ...mapActions([
-      'loadTask'
+      'loadTask',
+      'markBroken'
     ]),
 
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     },
 
-    async redirectToTask (previewFile) {
+    async redirectToTask (event, previewFile) {
+      if (
+        event.target.parentNode.className === 'mark-broken-button button' ||
+        event.target.className === 'mark-broken-button button'
+      ) return
       const task = await this.loadTask({ taskId: previewFile.task_id })
       return this.$router.push(getTaskPath(
         task,
