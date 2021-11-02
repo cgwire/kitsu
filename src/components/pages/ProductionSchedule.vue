@@ -40,7 +40,7 @@
         v-model="overallManDays"
         :label="$t('schedule.overall_man_days')"
         :disabled="!isCurrentUserAdmin"
-        v-focus
+        v-show="false"
       />
       <combobox-number
         class="flexrow-item zoom-level"
@@ -57,6 +57,7 @@
       :zoom-level="zoomLevel"
       :is-loading="loading.schedule"
       :is-error="errors.schedule"
+      :hide-man-days="true"
       @item-changed="scheduleItemChanged"
       @estimation-changed="estimationChanged"
       @change-zoom="changeZoom"
@@ -115,8 +116,9 @@ export default {
       startDate: moment().startOf('day'),
       selectedStartDate: null,
       selectedEndDate: null,
-      zoomLevel: 2,
+      zoomLevel: 1,
       zoomOptions: [
+        { label: 'Week', value: 0 },
         { label: '1', value: 1 },
         { label: '2', value: 2 },
         { label: '3', value: 3 }
@@ -171,6 +173,7 @@ export default {
       this.loading.schedule = true
       this.loadScheduleItems(this.currentProduction)
         .then(scheduleItems => {
+          const scheduleEndDate = parseDate(this.selectedEndDate)
           scheduleItems = scheduleItems.map((item) => {
             const taskType = this.taskTypeMap.get(item.task_type_id)
             let startDate, endDate
@@ -179,10 +182,17 @@ export default {
             } else {
               startDate = moment()
             }
+            if (startDate.isSameOrAfter(scheduleEndDate)) {
+              startDate = scheduleEndDate.clone().add(-1, 'days')
+            }
+
             if (item.end_date) {
               endDate = parseDate(item.end_date)
             } else {
               endDate = startDate.clone().add(1, 'days')
+            }
+            if (endDate.isSameOrAfter(scheduleEndDate)) {
+              endDate = scheduleEndDate.clone()
             }
 
             return {
