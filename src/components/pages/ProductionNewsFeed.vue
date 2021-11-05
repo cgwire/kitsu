@@ -322,7 +322,6 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import { sortByName } from '@/lib/sorting'
 import { formatFullDateWithRevertedTimezone } from '@/lib/time'
-// import { queryMixin } from '@/components/mixins/query'
 import { timeMixin } from '@/components/mixins/time'
 
 import Combobox from '@/components/widgets/Combobox'
@@ -394,12 +393,14 @@ export default {
     this.$options.silent = true
     this.previewMode =
       localStorage.getItem('news:preview-mode') || 'comments'
-    this.taskTypeId =
-      this.$route.query.task_type_id ||
-      localStorage.getItem('news:task-type-id') || ''
-    this.taskStatusId =
-      this.$route.query.task_status_id ||
-      localStorage.getItem('news:task-status-id') || ''
+    this.taskTypeId = localStorage.getItem('news:task-type-id') || ''
+    if (this.$route && this.$route.query && this.$route.query.task_type_id) {
+      this.taskTypeId = this.$route.query.task_type_id
+    }
+    this.taskStatusId = localStorage.getItem('news:task-status-id') || ''
+    if (this.$route && this.$route.query && this.$route.query.task_status_id) {
+      this.taskStatusId = this.$route.query.task_status_id
+    }
     this.before = null
     this.after = null
     this.$options.silent = false
@@ -627,7 +628,7 @@ export default {
           task_status_id: this.params.task_status_id,
           task_type_id: this.params.task_type_id
         }
-        this.$router.push({ query })
+        if (this.$router) this.$router.push({ query })
         this.loadNews(this.params)
           .then(() => {
             this.loading.news = false
