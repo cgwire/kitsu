@@ -4,12 +4,16 @@ import { buildQueryString } from '../../lib/query'
 export default {
   getLastNews (params) {
     const productionId = params.productionId
-    delete params.productionId
-    const path = buildQueryString(
-      `/api/data/projects/${productionId}/news`,
-      params
-    )
-    return client.pget(path)
+    if (productionId) {
+      delete params.productionId
+      const path = buildQueryString(
+        `/api/data/projects/${productionId}/news`,
+        params
+      )
+      return client.pget(path)
+    } else {
+      return Promise.resolve({ data: [], total: 0, stats: [] })
+    }
   },
 
   getNews (projectId, newsId) {
