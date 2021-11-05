@@ -311,6 +311,7 @@ export default {
     production: 'Production',
     remove: 'Remove',
     reload: 'Reload',
+    reply: 'Reply',
     save: 'Save',
     search_query: 'Search query',
     search_query_edit: 'Edit search filter',

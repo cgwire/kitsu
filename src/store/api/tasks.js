@@ -200,6 +200,19 @@ export default {
     return client.ppost(path, {})
   },
 
+  replyToComment (comment, text) {
+    const path =
+      `/api/data/tasks/${comment.object_id}/comments/${comment.id}/reply`
+    return client.ppost(path, { text })
+  },
+
+  deleteReply (comment, reply) {
+    const path =
+      `/api/data/tasks/${comment.object_id}` +
+      `/comments/${comment.id}/reply/${reply.id}`
+    return client.pdel(path)
+  },
+
   updateRevisionPreviewPosition (previewId, position) {
     const path =
       `/api/actions/preview-files/${previewId}/update-position`

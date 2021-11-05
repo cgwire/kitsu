@@ -40,6 +40,8 @@ import {
   DELETE_COMMENT_END,
   PIN_COMMENT,
   ACK_COMMENT,
+  ADD_REPLY_TO_COMMENT,
+  REMOVE_REPLY_FROM_COMMENT,
 
   PREVIEW_FILE_SELECTED,
   ADD_PREVIEW_START,
@@ -652,6 +654,22 @@ const actions = {
     return tasksApi.ackComment(comment)
   },
 
+  replyToComment ({ commit, state }, { comment, text }) {
+    return tasksApi.replyToComment(comment, text)
+      .then(reply => {
+        commit(ADD_REPLY_TO_COMMENT, { comment, reply })
+        return Promise.resolve(reply)
+      })
+  },
+
+  deleteReply ({ commit, state }, { comment, reply }) {
+    commit(REMOVE_REPLY_FROM_COMMENT, { comment, reply })
+    return tasksApi.deleteReply(comment, reply)
+      .then(() => {
+        return Promise.resolve(reply)
+      })
+  },
+
   pinComment ({ commit }, comment) {
     commit(PIN_COMMENT, comment)
     return tasksApi.pinComment(comment)
@@ -1121,6 +1139,16 @@ const mutations = {
     }
     state.taskComments[comment.object_id] =
       sortComments(state.taskComments[comment.object_id])
+  },
+
+  [ADD_REPLY_TO_COMMENT] (state, { comment, reply }) {
+    if (!comment.replies) comment.replies = []
+    comment.replies.push(reply)
+  },
+
+  [REMOVE_REPLY_FROM_COMMENT] (state, { comment, reply }) {
+    if (!comment.replies) comment.replies = []
+    comment.replies = comment.replies.filter(r => r.id !== reply.id)
   },
 
   [UPDATE_COMMENT_CHECKLIST] (state, { comment, checklist }) {
