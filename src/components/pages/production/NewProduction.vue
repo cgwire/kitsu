@@ -327,9 +327,10 @@
             @click="createProduction"
           >
             <spinner
-              v-if="loading.createProduction"
+              class="mr05 mt05"
               :size="20"
-              class="mr1"
+              is-white
+              v-if="loading.createProduction"
             />
             {{ $t('productions.creation.create_button') }}
           </button>
@@ -976,7 +977,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .tag {
 }
 
@@ -1106,5 +1107,14 @@ span.input-separator {
 .explaination {
   font-style: italic;
   margin-top: 0.2em;
+}
+
+.big-button {
+  max-width: 100%;
+
+  &:active,
+  &:focus {
+    text-color: white;
+  }
 }
 </style>
