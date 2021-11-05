@@ -563,7 +563,7 @@ h2.subtitle {
 
 .schedule {
   position: relative;
-  height: 280px;
+  height: 300px;
   padding: 10px;
 
   .schedule-title {

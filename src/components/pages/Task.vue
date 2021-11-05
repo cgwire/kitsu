@@ -198,7 +198,7 @@
         </div>
         <div class="flexrow-item task-information">
           <page-subtitle :text="$t('main.info')" />
-          <div class="table-body">
+          <div class="table-body mt1">
             <table class="datatable" v-if="currentTask">
               <tbody class="table-body">
                 <tr class="datatable-row">
@@ -218,8 +218,8 @@
                   <td>{{ formatSimpleDate(currentTask.start_date) }}</td>
                 </tr>
                 <tr class="datatable-row">
-                  <td class="field-label">{{ $t('tasks.fields.end_date') }}</td>
-                  <td>{{ formatSimpleDate(currentTask.end_date) }}</td>
+                  <td class="field-label">{{ $t('tasks.fields.due_date') }}</td>
+                  <td>{{ formatSimpleDate(currentTask.due_date) }}</td>
                 </tr>
               </tbody>
             </table>

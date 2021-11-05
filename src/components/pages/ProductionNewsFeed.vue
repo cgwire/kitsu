@@ -322,6 +322,7 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import { sortByName } from '@/lib/sorting'
 import { formatFullDateWithRevertedTimezone } from '@/lib/time'
+// import { queryMixin } from '@/components/mixins/query'
 import { timeMixin } from '@/components/mixins/time'
 
 import Combobox from '@/components/widgets/Combobox'
@@ -394,9 +395,13 @@ export default {
     this.previewMode =
       localStorage.getItem('news:preview-mode') || 'comments'
     this.taskTypeId =
+      this.$route.query.task_type_id ||
       localStorage.getItem('news:task-type-id') || ''
     this.taskStatusId =
+      this.$route.query.task_status_id ||
       localStorage.getItem('news:task-status-id') || ''
+    this.before = null
+    this.after = null
     this.$options.silent = false
     window.addEventListener('keydown', this.onKeyDown, false)
 
@@ -618,6 +623,11 @@ export default {
         this.loading.news = true
         this.errors.news = false
         this.currentTask = null
+        const query = {
+          task_status_id: this.params.task_status_id,
+          task_type_id: this.params.task_type_id
+        }
+        this.$router.push({ query })
         this.loadNews(this.params)
           .then(() => {
             this.loading.news = false

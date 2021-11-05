@@ -75,7 +75,7 @@
           :start-date="tasksStartDate"
           :end-date="tasksEndDate"
           :hierarchy="scheduleItems"
-          :zoom-level="2"
+          :zoom-level="1"
           :height="400"
           :is-loading="false"
           :is-estimation-linked="true"
@@ -572,7 +572,7 @@ h2.subtitle {
 
 .schedule {
   position: relative;
-  height: 280px;
+  height: 300px;
   padding: 10px;
 
   .schedule-title {

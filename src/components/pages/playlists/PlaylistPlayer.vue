@@ -140,6 +140,7 @@
         :full-screen="fullScreen"
         :is-hd="isHd"
         :is-repeating="isRepeating"
+        :current-preview-index="currentPreviewIndex"
         :muted="isMuted"
         @entity-change="onPlayerEntityChange"
         @max-duration-update="onMaxDurationUpdate"
@@ -328,6 +329,7 @@
         class="button playlist-button flexrow-item"
         icon="left"
         :title="$t('playlists.actions.files_previous')"
+        :disabled="isPlaying"
         @click="onPreviousPreviewClicked"
       />
       <span
@@ -340,6 +342,7 @@
         class="button playlist-button flexrow-item"
         icon="right"
         :title="$t('playlists.actions.files_next')"
+        :disabled="isPlaying"
         @click="onNextPreviewClicked"
       />
       <a
