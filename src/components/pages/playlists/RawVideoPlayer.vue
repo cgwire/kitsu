@@ -58,6 +58,10 @@ export default {
       type: Boolean,
       default: false
     },
+    currentPreviewIndex: {
+      type: Number,
+      default: 0
+    },
     name: { // Debug purpose
       type: String,
       default: 'main'
@@ -123,7 +127,15 @@ export default {
 
     getMoviePath (entity) {
       if (entity.preview_file_extension === 'mp4') {
-        const previewId = entity.preview_file_id
+        let previewId
+        if (this.currentPreviewIndex === 0 ||
+            this.currentPreviewIndex > (entity.preview_file_previews.length)
+        ) {
+          previewId = entity.preview_file_id
+        } else {
+          previewId =
+            entity.preview_file_previews[this.currentPreviewIndex - 1].id
+        }
         if (this.isHd) {
           return `/api/movies/originals/preview-files/${previewId}.mp4`
         } else {
@@ -427,6 +439,13 @@ export default {
         if (entity && !entity.preview_file_id) this.loadNextEntity()
       }
       setTimeout(this.resetHeight, 300)
+    },
+
+    currentPreviewIndex () {
+      if (!this.isPlaying) {
+        this.setCurrentTimeRaw(0)
+        this.reloadCurrentEntity()
+      }
     }
   }
 }
