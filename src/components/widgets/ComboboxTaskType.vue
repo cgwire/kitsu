@@ -105,7 +105,7 @@ export default {
       if (this.value) {
         return this.taskTypeMap.get(this.value)
       } else if (this.addPlaceholder) {
-        return { name: '+ Task Type', color: '#E5E5E5' }
+        return { name: '+ Task Type', color: '#E5E5E5', id: '' }
       } else {
         return this.taskTypeList[0]
       }

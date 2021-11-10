@@ -1026,6 +1026,13 @@ export default {
 
       'comment:unacknowledge' (eventData) {
         this.onRemoteAcknowledge(eventData, 'unack')
+      },
+
+      'comment:reply' (eventData) {
+        this.refreshComment({
+          taskId: this.task.id,
+          commentId: eventData.comment_id
+        })
       }
     }
   }

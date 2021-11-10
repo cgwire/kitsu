@@ -27,6 +27,7 @@ export default {
       episode: 'Ep.',
       name: 'Name',
       production: 'Prod',
+      ready_for: 'Ready for',
       time_spent: 'Time',
       type: 'Type',
       hidden_from_client: 'Displayed to client'

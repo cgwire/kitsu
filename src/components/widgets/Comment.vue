@@ -220,6 +220,14 @@
       >
         Revision {{ comment.previews[0].revision }}
       </router-link>
+      <span
+        class="flexrow-item preview-status"
+        :title="comment.previews[0].validation_status"
+        :style="getPreviewValidationStyle(comment.previews[0])"
+        @click="changePreviewValidationStatus(comment.previews[0])"
+      >
+        &nbsp;
+      </span>
     </div>
 
     <div
@@ -379,6 +387,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'isCurrentUserManager',
       'isDarkTheme',
       'user',
       'personMap',
@@ -515,7 +524,8 @@ export default {
   methods: {
     ...mapActions([
       'deleteReply',
-      'replyToComment'
+      'replyToComment',
+      'updatePreviewFileValidationStatus'
     ]),
 
     formatDate (date) {
@@ -591,6 +601,29 @@ export default {
 
     timeCodeClicked (event) {
       this.$emit('time-code-clicked', event.target.dataset)
+    },
+
+    getPreviewValidationStyle (previewFile) {
+      let color = '#AAA'
+      if (previewFile.validation_status === 'validated') {
+        color = '#67BE48' // green
+      } else if (previewFile.validation_status === 'rejected') {
+        color = '#FF3860' // red
+      }
+      return { background: color }
+    },
+
+    changePreviewValidationStatus (previewFile) {
+      if (!this.isCurrentUserManager) return
+      let status = previewFile.status
+      if (previewFile.validation_status === 'validated') {
+        status = 'rejected'
+      } else if (previewFile.validation_status === 'rejected') {
+        status = 'neutral'
+      } else {
+        status = 'validated'
+      }
+      this.updatePreviewFileValidationStatus({ previewFile, status })
     },
 
     renderComment,
@@ -923,6 +956,15 @@ textarea.reply {
   margin-top: -2px;
   margin-right: 0px;
   opacity: 0;
+}
+
+.preview-status {
+  border-radius: 50%;
+  border: 2px solid $grey;
+  cursor: pointer;
+  height: 20px;
+  transition: background 0.3s ease;
+  width: 20px;
 }
 
 @media screen and (max-width: 768px) {
