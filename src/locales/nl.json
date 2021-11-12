@@ -630,6 +630,8 @@
             "notifications_enabled": "E-mail notificaties ingeschakeld",
             "notifications_slack_enabled": "Slack notificaties ingeschakeld",
             "notifications_slack_user": "Slack gebruikersnaam",
+            "notifications_mattermost_enabled": "Mattermost notificaties ingeschakeld",
+            "notifications_mattermost_user": "Mattermost gebruikersnaam",
             "password_title": "Wachtwoord aanpassen",
             "timezone": "Tijdzone",
             "title": "Jouw profiel",

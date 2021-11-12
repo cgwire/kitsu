@@ -630,6 +630,8 @@
             "notifications_enabled": "E-mail értesítések bekapcsolba",
             "notifications_slack_enabled": "Slack értesítések bekapcsolva",
             "notifications_slack_user": "Slack felhasználónév",
+            "notifications_mattermost_enabled": "Mattermost értesítések bekapcsolva",
+            "notifications_mattermost_user": "Mattermost felhasználónév",
             "password_title": "Jelszó megváltoztatása",
             "timezone": "Időzóna",
             "title": "Profilod",

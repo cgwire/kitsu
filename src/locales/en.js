@@ -692,6 +692,8 @@ export default {
     notifications_enabled: 'Email notifications enabled',
     notifications_slack_enabled: 'Slack notifications enabled',
     notifications_slack_user: 'Slack username',
+    notifications_mattermost_enabled: 'Mattermost notifications enabled',
+    notifications_mattermost_user: 'Mattermost username',
     password_title: 'Change password',
     timezone: 'Timezone',
     title: 'Your Profile',

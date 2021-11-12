@@ -527,6 +527,8 @@ export default {
     notifications_enabled: 'Отправлять уведомления на почту?',
     notifications_slack_enabled: 'Отправлять уведомления в Slack?',
     notifications_slack_user: 'Имя пользователя в Slack',
+    notifications_mattermost_enabled: 'Отправлять уведомления в Mattermost?',
+    notifications_mattermost_user: 'Имя пользователя в Mattermost',
     password_title: 'Изменить пароль',
     timezone: 'Часовой пояс',
     title: 'Профиль',

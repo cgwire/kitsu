@@ -630,6 +630,8 @@
             "notifications_enabled": "電子郵件通知已啟用",
             "notifications_slack_enabled": "Slack通知已啟用",
             "notifications_slack_user": "Slack 用戶名",
+            "notifications_mattermost_enabled": "Mattermost通知已啟用",
+            "notifications_mattermost_user": "Mattermost 用戶名",
             "password_title": "更改密碼",
             "timezone": "時區",
             "title": "您的簡介",

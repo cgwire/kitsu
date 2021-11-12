@@ -79,6 +79,8 @@ export default {
       notifications_enabled: person.notifications_enabled === 'true',
       notifications_slack_enabled: person.notifications_slack_enabled === 'true',
       notifications_slack_userid: person.notifications_slack_userid,
+      notifications_mattermost_enabled: person.notifications_mattermost_enabled === 'true',
+      notifications_mattermost_userid: person.notifications_mattermost_userid,
       departments: person.departments
     }
     return client.pput(`/api/data/persons/${person.id}`, data)

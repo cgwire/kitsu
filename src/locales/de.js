@@ -503,6 +503,8 @@ export default {
     notifications_enabled: 'E-Mail-Benachrichtigungen aktiviert',
     notifications_slack_enabled: 'Slack-Benachrichtigungen aktiviert',
     notifications_slack_user: 'Slack-Benutzername',
+    notifications_mattermost_enabled: 'Mattermost-Benachrichtigungen aktiviert',
+    notifications_mattermost_user: 'Mattermost-Benutzername',
     password_title: 'Passwort ändern',
     timezone: 'Zeitzone',
     title: 'Dein Profil',

@@ -505,6 +505,8 @@
             "notifications_enabled": "Notificações de email habilitadas",
             "notifications_slack_enabled": "Notificações do Slack habilitadas",
             "notifications_slack_user": "Nome de usuário do Slack",
+            "notifications_mattermost_enabled": "Notificações do Mattermost habilitadas",
+            "notifications_mattermost_user": "Nome de usuário do Mattermost",
             "password_title": "Alterar senha",
             "timezone": "Timezone",
             "title": "Seu Perfil",

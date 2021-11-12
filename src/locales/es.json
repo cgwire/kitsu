@@ -630,6 +630,8 @@
             "notifications_enabled": "Notificaciones de correo electrónico habilitadas",
             "notifications_slack_enabled": "Notificaciones de Slack activadas",
             "notifications_slack_user": "Slack ID",
+            "notifications_mattermost_enabled": "Notificationes de Mattermost activadas",
+            "notifications_mattermost_user": "Mattermost ID",
             "password_title": "Cambiar contraseña",
             "timezone": "Zona horaria",
             "title": "Su perfil",
