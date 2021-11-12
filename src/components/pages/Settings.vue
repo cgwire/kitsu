@@ -58,6 +58,15 @@
           v-model="form.chat_token_slack"
         />
 
+        <h2>
+          {{ $t('settings.integrations') }}
+        </h2>
+        <text-field
+          :label="$t('settings.fields.mattermost_webhook')"
+          @enter="saveSettings()"
+          v-model="form.chat_webhook_mattermost"
+        />
+
         <button
           :class="{
             button: true,
@@ -118,7 +127,8 @@ export default {
         hours_by_day: 0,
         original_file_name: 'false',
         hd_by_default: 'false',
-        chat_token_slack: ''
+        chat_token_slack: '',
+        chat_webhook_mattermost: ''
       },
       errors: {
         save: false,
@@ -209,7 +219,8 @@ export default {
           this.organisation.timesheets_locked ? 'true' : 'false',
         hd_by_default:
           this.organisation.hd_by_default ? 'true' : 'false',
-        chat_token_slack: this.organisation.chat_token_slack
+        chat_token_slack: this.organisation.chat_token_slack,
+        chat_webhook_mattermost: this.organisation.chat_webhook_mattermost
       }
     }
   },

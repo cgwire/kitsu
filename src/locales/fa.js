@@ -544,6 +544,7 @@ export default {
       name: 'نام استودیو',
       hours_by_day: 'ساعت در روز',
       slack_token: 'Slack Token (Optional)',
+      mattermost_webhook: 'Mattermost Webhook (Optional)',
       use_original_name: 'استفاده از اسم اصلی فایل برای دانلود.'
     },
     save: {

@@ -661,6 +661,7 @@
                 "name": "工作室名字",
                 "hours_by_day": "每天营业时间",
                 "slack_token": "Slack Token （可选）",
+                "mattermost_webhook": "Mattermost Webhook （可选）",
                 "use_original_name": "使用原始文件名进行下载",
                 "timesheets_locked": ""
             },

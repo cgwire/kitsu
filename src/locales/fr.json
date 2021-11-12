@@ -661,6 +661,7 @@
                 "name": "Nom du studio",
                 "hours_by_day": "Heures par jour",
                 "slack_token": "Token Slack (optionnel)",
+                "mattermost_webhook": "Webhook Mattermost (optionnel)",
                 "use_original_name": "Utiliser les noms de fichiers originaux pour le téléchargement",
                 "timesheets_locked": "Bloquer les feuilles de temps des artistes de plus d'une semaine"
             },

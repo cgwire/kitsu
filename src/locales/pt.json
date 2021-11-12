@@ -536,6 +536,7 @@
                 "name": "Nome do estúdio",
                 "hours_by_day": "Horas por dia",
                 "slack_token": "Slack Token (Opcional)",
+                "mattermost_webhook": "Mattermost Webhook (Opcionnal)",
                 "use_original_name": "Usar nome original dos arquivos para download"
             },
             "production": {

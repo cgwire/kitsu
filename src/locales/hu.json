@@ -661,6 +661,7 @@
                 "name": "Stúdió név",
                 "hours_by_day": "Napi munkaórák",
                 "slack_token": "Slack Token (nem kötelező)",
+                "mattermost_webhook": "Mattermost Webhook (nem kötelező)",
                 "use_original_name": "Eredeti file-nevek használata letöltéskor",
                 "timesheets_locked": "Egy hétnél régebbi művész munkaidő-táblák lezárása"
             },

@@ -725,6 +725,7 @@ export default {
       name: 'Studio name',
       hours_by_day: 'Hours by day',
       slack_token: 'Slack Token (Optional)',
+      mattermost_webhook: 'Mattermost Webhook (Optional)',
       timesheets_locked: 'Lock artist timesheets older than 1 week',
       use_original_name: 'Use original file name for downloads'
     },

@@ -661,6 +661,7 @@
                 "name": "Nombre del estudio",
                 "hours_by_day": "Horas por día",
                 "slack_token": "Slack token (opcional)",
+                "mattermost_webhook": "Mattermost Webhook (Optional)",
                 "use_original_name": "Usar el nombre del archivo original para las descargas",
                 "timesheets_locked": ""
             },

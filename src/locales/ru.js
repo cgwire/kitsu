@@ -559,6 +559,7 @@ export default {
       name: 'Название студии',
       hours_by_day: 'Часов в день',
       slack_token: 'Токен Slack (Опционально)',
+      mattermost_webhook: 'Webhook Mattermost (Опционально)',
       use_original_name: 'Использовать оригинальное название файла при скачивании'
     },
     production: {
