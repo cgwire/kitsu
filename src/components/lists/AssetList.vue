@@ -492,10 +492,8 @@ import MetadataHeader from '@/components/cells/MetadataHeader'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
 import TableInfo from '@/components/widgets/TableInfo'
-import TableMetadataHeaderMenu from
-  '@/components/widgets/TableMetadataHeaderMenu'
-import TableMetadataSelectorMenu from
-  '@/components/widgets/TableMetadataSelectorMenu'
+import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu'
 import ValidationCell from '@/components/cells/ValidationCell'
 import ValidationHeader from '@/components/cells/ValidationHeader'
 
