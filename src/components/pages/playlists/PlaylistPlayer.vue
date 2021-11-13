@@ -151,6 +151,18 @@
         v-show="isCurrentPreviewMovie && !isLoading"
       />
 
+      <object-viewer
+        ref="object-player"
+        class="object-player"
+        :preview-url="currentPreviewDlPath"
+        :style="{
+          position: isComparisonOverlay ? 'absolute': 'static',
+          opacity: overlayOpacity
+        }"
+        :full-screen="fullScreen"
+        v-show="isCurrentPreviewModel && !isLoading"
+      />
+
       <p
         :style="{width: '100%'}"
         class="preview-standard-file has-text-centered"
@@ -160,6 +172,42 @@
           class="button"
           ref="preview-file"
           :href="currentPreviewDlPath"
+          v-if="extension && extension.length > 0"
+        >
+          <download-icon class="icon" />
+          <span class="text">
+            {{ $t('tasks.download_pdf_file', {extension: extension}) }}
+          </span>
+        </a>
+      </p>
+
+      <p
+        :style="{width: '100%'}"
+        class="preview-standard-file has-text-centered"
+        v-show="isCurrentPreviewFile && !isLoading"
+      >
+        <a
+          class="button"
+          ref="preview-file"
+          :href="currentPreviewDlPath"
+          v-if="extension && extension.length > 0"
+        >
+          <download-icon class="icon" />
+          <span class="text">
+            {{ $t('tasks.download_pdf_file', {extension: extension}) }}
+          </span>
+        </a>
+      </p>
+
+      <p
+        :style="{width: '100%'}"
+        class="preview-standard-file has-text-centered"
+        v-show="isCurrentPreviewFile && !isLoading"
+      >
+        <a
+          class="button"
+          ref="preview-file"
+          :href="currentPreviewOriginalPath"
           v-if="extension && extension.length > 0"
         >
           <download-icon class="icon" />
@@ -804,6 +852,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ColorPicker from '@/components/widgets/ColorPicker'
 import Combobox from '@/components/widgets/Combobox'
 import DeleteModal from '@/components/modals/DeleteModal'
+import ObjectViewer from '@/components/previews/ObjectViewer'
 import PencilPicker from '@/components/widgets/PencilPicker'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity'
@@ -828,6 +877,7 @@ export default {
     Combobox,
     DownloadIcon,
     DeleteModal,
+    ObjectViewer,
     PencilPicker,
     PeopleAvatar,
     PlaylistedEntity,
@@ -1003,10 +1053,15 @@ export default {
       return this.isPicture(this.extension)
     },
 
+    isCurrentPreviewModel () {
+      return this.isModel(this.extension)
+    },
+
     isCurrentPreviewFile () {
       return (
         !this.isCurrentPreviewMovie &&
-        !this.isCurrentPreviewPicture
+        !this.isCurrentPreviewPicture &&
+        !this.isCurrentPreviewModel
       )
     },
 
@@ -1308,6 +1363,10 @@ export default {
 
     isPicture (extension) {
       return ['png', 'gif'].includes(extension)
+    },
+
+    isModel (extension) {
+      return ['glb', 'gltf'].includes(extension)
     },
 
     exists (variable) {

@@ -52,7 +52,7 @@
 
     />
 
-    <!--model-viewer
+    <object-viewer
       class="model-viewer"
       :default-height="defaultHeight"
       :preview-url="originalPath"
@@ -62,7 +62,7 @@
       v-show="is3DModel"
     />
 
-    <pdf
+    <!--pdf
       class="pdf-viewer"
       :height="defaultHeight"
       :src="originalPath"
@@ -100,7 +100,7 @@ import { domMixin } from '@/components/mixins/dom'
 import {
   DownloadIcon
 } from 'vue-feather-icons'
-// import ModelViewer from '@/components/previews/ModelViewer'
+import ObjectViewer from '@/components/previews/ObjectViewer'
 import PictureViewer from '@/components/previews/PictureViewer'
 import Spinner from '@/components/widgets/Spinner'
 import VideoViewer from '@/components/previews/VideoViewer'
@@ -110,7 +110,7 @@ export default {
   mixins: [domMixin],
 
   components: {
-    // ModelViewer,
+    ObjectViewer,
     // pdf,
     DownloadIcon,
     PictureViewer,
@@ -236,12 +236,11 @@ export default {
     },
 
     is3DModel () {
-      return this.isReady && this.extension === 'obj'
+      return this.isReady && ['glb', 'gltf'].includes(this.extension)
     },
 
     isFile () {
-      return this.isReady && !this.isPicture && !this.isMovie
-      // && !this.is3DModel && !this.isPdf
+      return this.isReady && !this.isPicture && !this.isMovie && !this.is3DModel // && !this.isPdf
     },
 
     originalPath () {
