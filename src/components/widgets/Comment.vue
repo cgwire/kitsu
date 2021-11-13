@@ -133,7 +133,7 @@
                   <strong class="flexrow-item">
                     <people-name
                       class=""
-                      :person="comment.person"
+                      :person="personMap.get(replyComment.person_id)"
                     />
                   </strong>
                   <span

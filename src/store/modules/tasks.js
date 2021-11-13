@@ -120,6 +120,7 @@ const helpers = {
 
 const getters = {
   taskMap: (state) => state.taskMap,
+  taskComments: state => state.taskComments,
   getTaskComments: (state, getters) => (id) => state.taskComments[id],
   getTaskPreviews: (state, getters) => (id) => state.taskPreviews[id],
 
@@ -677,7 +678,7 @@ const actions = {
   },
 
   refreshComment ({ commit, state }, { taskId, commentId }) {
-    return tasksApi.getComment(commentId)
+    return tasksApi.getTaskComment({ id: commentId })
       .then(comment => {
         commit(UPDATE_COMMENT_REPLIES, comment)
         return Promise.resolve(comment)
