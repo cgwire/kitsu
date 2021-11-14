@@ -163,23 +163,14 @@
         v-show="isCurrentPreviewModel && !isLoading"
       />
 
-      <p
-        :style="{width: '100%'}"
-        class="preview-standard-file has-text-centered"
-        v-show="isCurrentPreviewFile && !isLoading"
-      >
-        <a
-          class="button"
-          ref="preview-file"
-          :href="currentPreviewDlPath"
-          v-if="extension && extension.length > 0"
-        >
-          <download-icon class="icon" />
-          <span class="text">
-            {{ $t('tasks.download_pdf_file', {extension: extension}) }}
-          </span>
-        </a>
-      </p>
+      <sound-viewer
+        ref="sound-player"
+        class="sound-player"
+        :preview-url="currentPreviewDlPath"
+        :full-screen="fullScreen"
+        @play-ended="pause"
+        v-show="isCurrentPreviewSound && !isLoading"
+      />
 
       <p
         :style="{width: '100%'}"
@@ -190,24 +181,6 @@
           class="button"
           ref="preview-file"
           :href="currentPreviewDlPath"
-          v-if="extension && extension.length > 0"
-        >
-          <download-icon class="icon" />
-          <span class="text">
-            {{ $t('tasks.download_pdf_file', {extension: extension}) }}
-          </span>
-        </a>
-      </p>
-
-      <p
-        :style="{width: '100%'}"
-        class="preview-standard-file has-text-centered"
-        v-show="isCurrentPreviewFile && !isLoading"
-      >
-        <a
-          class="button"
-          ref="preview-file"
-          :href="currentPreviewOriginalPath"
           v-if="extension && extension.length > 0"
         >
           <download-icon class="icon" />
@@ -308,7 +281,10 @@
   >
     <div
       class="flexrow flexrow-item mr0"
-      v-if="isCurrentPreviewMovie || isCurrentPreviewPicture"
+      v-if="
+        isCurrentPreviewMovie ||
+        isCurrentPreviewPicture ||
+        isCurrentPreviewSound"
     >
       <button-simple
         class="button playlist-button flexrow-item"
@@ -858,6 +834,7 @@ import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity'
 import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer'
 import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal'
+import SoundViewer from '@/components/previews/SoundViewer'
 import Spinner from '@/components/widgets/Spinner'
 import TaskInfo from '@/components/sides/TaskInfo'
 
@@ -883,6 +860,7 @@ export default {
     PlaylistedEntity,
     RawVideoPlayer,
     SelectTaskTypeModal,
+    SoundViewer,
     Spinner,
     TaskInfo
   },
@@ -1057,10 +1035,15 @@ export default {
       return this.isModel(this.extension)
     },
 
+    isCurrentPreviewSound () {
+      return this.isSound(this.extension)
+    },
+
     isCurrentPreviewFile () {
       return (
         !this.isCurrentPreviewMovie &&
         !this.isCurrentPreviewPicture &&
+        !this.isCurrentPreviewSound &&
         !this.isCurrentPreviewModel
       )
     },
@@ -1321,6 +1304,10 @@ export default {
       return this.$refs['picture-player']
     },
 
+    soundPlayer () {
+      return this.$refs['sound-player']
+    },
+
     canvas () {
       return this.$refs['canvas-wrapper']
     },
@@ -1367,6 +1354,10 @@ export default {
 
     isModel (extension) {
       return ['glb', 'gltf'].includes(extension)
+    },
+
+    isSound (extension) {
+      return ['mp3', 'wav'].includes(extension)
     },
 
     exists (variable) {
@@ -1541,6 +1532,8 @@ export default {
     play () {
       if (this.isCurrentPreviewPicture) {
         this.playPicture()
+      } else if (this.isCurrentPreviewSound) {
+        this.playSound()
       } else {
         this.rawPlayer.play()
         if (this.isComparing) {
@@ -1558,6 +1551,8 @@ export default {
         const comparisonPlayer = this.$refs['raw-player-comparison']
         if (this.rawPlayer) this.rawPlayer.pause()
         if (comparisonPlayer) comparisonPlayer.pause()
+      } else if (this.isCurrentPreviewSound) {
+        this.soundPlayer.pause()
       }
       this.isPlaying = false
     },
@@ -1985,6 +1980,11 @@ export default {
         this.playingEntityIndex,
         Date.now() - 1000 * this.framesSeenOfPicture / this.fps
       )
+    },
+
+    playSound () {
+      this.isPlaying = true
+      this.soundPlayer.play()
     },
 
     continuePlayingPlaylist (entityIndex, startMs) {
@@ -2690,6 +2690,9 @@ export default {
   watch: {
     isCommentsHidden () {
       if (!this.isCommentsHidden) this.$refs['task-info'].loadTaskData()
+      if (this.isSound) {
+        this.soundPlayer.redraw()
+      }
     },
 
     currentPreviewIndex () {

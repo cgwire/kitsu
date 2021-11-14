@@ -96,7 +96,7 @@
     />
 
     <div class="buttons flexrow pull-bottom" ref="buttons">
-      <div class="left flexrow" v-if="isMovie">
+      <div class="left flexrow" v-if="isMovie || isSound">
         <button-simple
           class="flexrow-item"
           :title="$t('playlists.actions.play')"
@@ -111,7 +111,9 @@
           @click="onPlayPauseClicked"
           v-else
         />
+      </div>
 
+      <div class="left flexrow" v-if="isMovie">
         <button-simple
           :active="isRepeating"
           :title="$t('playlists.actions.looping')"
@@ -630,7 +632,11 @@ export default {
     },
 
     is3DModel () {
-      return this.extension === 'obj'
+      return ['glb', 'gltf'].includes(this.extension)
+    },
+
+    isSound () {
+      return ['mp3', 'wav'].includes(this.extension)
     },
 
     isPdf () {
@@ -1471,6 +1477,14 @@ export default {
         this.taskTypeId = ''
         this.previewToCompareId = ''
       }
+      this.$nextTick(() => {
+        this.fixCanvasSize(this.getCurrentPreviewDimensions())
+      })
+    },
+
+    light () {
+      this.endAnnotationSaving()
+      this.previewViewer.resize()
       this.$nextTick(() => {
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
       })
