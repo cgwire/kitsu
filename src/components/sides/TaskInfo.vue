@@ -1067,6 +1067,21 @@ export default {
             }
           }
         }
+      },
+
+      'comment:delete-reply' (eventData) {
+        if (this.task) {
+          const comment = this.taskComments.find(
+            c => c.id === eventData.comment_id
+          )
+          if (comment) {
+            if (!comment.replies) comment.replies = []
+            this.$store.commit('REMOVE_REPLY_FROM_COMMENT', {
+              comment,
+              reply: { id: eventData.reply_id }
+            })
+          }
+        }
       }
     }
   }

@@ -719,6 +719,7 @@ export default {
       'loadPreviewFileFormData',
       'loadTaskComments',
       'loadTaskSubscribed',
+      'refreshComment',
       'refreshPreview',
       'pinComment',
       'subscribeToTask',
@@ -1277,6 +1278,21 @@ export default {
                 })
                 .catch(console.error)
             }
+          }
+        }
+      },
+
+      'comment:delete-reply' (eventData) {
+        if (this.currentTask) {
+          const comment = this.currentTaskComments.find(
+            c => c.id === eventData.comment_id
+          )
+          if (comment) {
+            if (!comment.replies) comment.replies = []
+            this.$store.commit('REMOVE_REPLY_FROM_COMMENT', {
+              comment,
+              reply: { id: eventData.reply_id }
+            })
           }
         }
       }
