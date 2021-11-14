@@ -403,6 +403,7 @@ export default {
     and_change_status: 'and changed status to',
     assigned_you: 'assigned you to',
     commented_on: 'commented on',
+    replied_on: 'replied to a comment on',
     mention_you_on: 'mentioned you on',
     no_notifications: 'There is currently no notification for you for your current projects.',
     unread_notifications: 'unread notification | unread notifications',
