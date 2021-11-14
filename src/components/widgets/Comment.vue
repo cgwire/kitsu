@@ -904,7 +904,7 @@ p {
 textarea.reply {
   border: 1px solid var(--border);
   border-radius: 5px;
-  color: var(--text);
+  color: var(--text-strong);
   font-size: 0.9em;
   margin-top: 0.5em;
   margin-left: 0.5em;
