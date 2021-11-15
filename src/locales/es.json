@@ -657,6 +657,7 @@
             "no_logo": "No hay conjunto de logotipos.",
             "set_logo": "Logotipo de estudio",
             "title": "Ajustes",
+            "webhook_error": "An error occurred while posting webhook",
             "fields": {
                 "name": "Nombre del estudio",
                 "hours_by_day": "Horas por día",

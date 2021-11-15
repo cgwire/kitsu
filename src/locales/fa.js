@@ -540,6 +540,7 @@ export default {
     no_logo: 'هیچ لوگوی تعیین نشده.',
     set_logo: 'تعیین لوگوی استودیو',
     title: 'تنظیمات',
+    webhook_error: 'An error occurred while posting webhook',
     fields: {
       name: 'نام استودیو',
       hours_by_day: 'ساعت در روز',

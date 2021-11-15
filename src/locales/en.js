@@ -694,6 +694,7 @@ export default {
     notifications_slack_user: 'Slack username',
     notifications_mattermost_enabled: 'Mattermost notifications enabled',
     notifications_mattermost_user: 'Mattermost username',
+    webhook_error: 'the webhook mattermost does not correspond to a hook',
     password_title: 'Change password',
     timezone: 'Timezone',
     title: 'Your Profile',
@@ -721,6 +722,7 @@ export default {
     set_logo: 'Set studio logo',
     show_hd_default: 'Show picture with HD quality by default',
     title: 'Settings',
+    webhook_error: 'An error occurred while posting webhook',
     fields: {
       name: 'Studio name',
       hours_by_day: 'Hours by day',

@@ -532,6 +532,7 @@
             "no_logo": "Sem logo definida.",
             "set_logo": "Escolher logo do estúdio",
             "title": "Configurações",
+            "webhook_error": "Une erreur est survenue en postant le webhook",
             "fields": {
                 "name": "Nome do estúdio",
                 "hours_by_day": "Horas por dia",

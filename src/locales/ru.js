@@ -555,6 +555,7 @@ export default {
     no_logo: 'Нет логотипа',
     set_logo: 'Добавить логотип студии',
     title: 'Настройки',
+    webhook_error: 'Une erreur est survenue en postant le webhook',
     fields: {
       name: 'Название студии',
       hours_by_day: 'Часов в день',

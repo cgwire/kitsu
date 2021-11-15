@@ -657,6 +657,7 @@
             "no_logo": "没有设置Logo",
             "set_logo": "设置工作室Logo",
             "title": "设置",
+            "webhook_error": "Une erreur est survenue en postant le webhook",
             "fields": {
                 "name": "工作室名字",
                 "hours_by_day": "每天营业时间",

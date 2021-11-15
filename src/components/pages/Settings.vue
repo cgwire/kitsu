@@ -58,14 +58,19 @@
           v-model="form.chat_token_slack"
         />
 
-        <h2>
-          {{ $t('settings.integrations') }}
-        </h2>
-        <text-field
+        <div id="mattermost_integrations">
+          <text-field
           :label="$t('settings.fields.mattermost_webhook')"
           @enter="saveSettings()"
           v-model="form.chat_webhook_mattermost"
-        />
+          />
+          <div
+            class="error pull-right"
+            v-if="this.errors.webhook_error === true"
+          >
+          <em>{{ $t('settings.webhook_error') }}</em>
+      </div>
+        </div>
 
         <button
           :class="{
@@ -132,7 +137,8 @@ export default {
       },
       errors: {
         save: false,
-        saveAvatar: false
+        saveAvatar: false,
+        webhook_error: false
       },
       loading: {
         save: false,
@@ -164,14 +170,30 @@ export default {
       'saveOrganisation'
     ]),
 
+    checkWebhook () {
+      console.log(this.errors.webhook_error)
+      if (this.form.chat_webhook_mattermost === '') {
+        this.errors.webhook_error = false
+        return true
+      } else if (!this.form.chat_webhook_mattermost.match('https://(.)+.[a-z]{3}/hooks/[a-zA-Z0-9]+')) {
+        this.errors.webhook_error = true
+        return false
+      } else {
+        this.errors.webhook_error = false
+        return true
+      }
+    },
+
     hideAvatarModal () {
       this.modals.avatar = false
     },
 
     saveSettings () {
-      this.loading.save = true
-      this.errors.save = false
-      this.saveOrganisation(this.form)
+      console.log(this.errors.webhook_error)
+      if (this.checkWebhook()) {
+        this.loading.save = true
+        this.errors.save = false
+        this.saveOrganisation(this.form)
         .then(() => {
           this.loading.save = false
           this.errors.save = false
@@ -181,6 +203,7 @@ export default {
           this.loading.save = false
           this.errors.save = true
         })
+      }
     },
 
     uploadAvatarFile (formData) {
@@ -249,6 +272,14 @@ export default {
     background-color: $grey;
     color: $dark-grey
   }
+}
+
+#mattermost_integrations{
+  margin-bottom: 4em;
+}
+
+#mattermost_integrations .field{
+  margin-bottom: 0em;
 }
 
 strong {

@@ -657,6 +657,7 @@
             "no_logo": "Aucun logo n' a été positionné.",
             "set_logo": "Changer le logo",
             "title": "Paramètres",
+            "webhook_error": "Une erreur est survenue en postant le webhook",
             "fields": {
                 "name": "Nom du studio",
                 "hours_by_day": "Heures par jour",

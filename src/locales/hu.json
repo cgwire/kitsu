@@ -657,6 +657,7 @@
             "no_logo": "Nincs logó beállítva",
             "set_logo": "Stúdió logó beállítása",
             "title": "Beállítások",
+            "webhook_error": "Une erreur est survenue en postant le webhook",
             "fields": {
                 "name": "Stúdió név",
                 "hours_by_day": "Napi munkaórák",

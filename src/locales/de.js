@@ -549,6 +549,7 @@ export default {
     no_logo: 'Es gibt kein Logo-Set.',
     set_logo: 'Logo Studio-Set',
     title: 'Einstellungen',
+    webhook_error: 'An error occurred while posting webhook',
     fields: {
       name: 'Studio-Name',
       hours_by_day: 'Stunden am Tag',

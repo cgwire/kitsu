@@ -657,6 +657,7 @@
             "no_logo": "沒有設置Logo",
             "set_logo": "設置公司Logo",
             "title": "設置",
+            "webhook_error": "Une erreur est survenue en postant le webhook",
             "fields": {
                 "name": "公司名稱",
                 "hours_by_day": "每天工作時間",

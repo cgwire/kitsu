@@ -657,6 +657,7 @@
             "no_logo": "Er is geen logo ingesteld",
             "set_logo": "Studio logo instellen",
             "title": "Instellingen",
+            "webhook_error": "Une erreur est survenue en postant le webhook",
             "fields": {
                 "name": "Studio naam",
                 "hours_by_day": "Uren per dag",
