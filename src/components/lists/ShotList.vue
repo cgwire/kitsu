@@ -519,10 +519,8 @@ import DescriptionCell from '@/components/cells/DescriptionCell'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import MetadataHeader from '@/components/cells/MetadataHeader'
 import RowActionsCell from '@/components/cells/RowActionsCell'
-import TableMetadataHeaderMenu from
-  '@/components/widgets/TableMetadataHeaderMenu'
-import TableMetadataSelectorMenu from
-  '@/components/widgets/TableMetadataSelectorMenu'
+import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu'
 import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
 import TableInfo from '@/components/widgets/TableInfo'
 import ValidationCell from '@/components/cells/ValidationCell'

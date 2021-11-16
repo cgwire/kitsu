@@ -61,6 +61,7 @@
               />
             </div>
           </th>
+
           <metadata-header
             :ref="`editor-${j}`"
             :key="descriptor.id"
@@ -126,6 +127,15 @@
             {{ $t('main.estimation_short') }}
           </th>
 
+          <!--th
+            scope="col"
+            class="ready-for"
+            :title="$t('assets.fields.ready_for')"
+            ref="th-ready-for"
+          >
+            {{ $t('assets.fields.ready_for') }}
+          </th-->
+
           <validation-header
             :key="columnId"
             :hidden-columns="hiddenColumns"
@@ -133,7 +143,9 @@
             :task-type-map="taskTypeMap"
             :validation-style="getValidationStyle(columnId)"
             type="assets"
-            @show-header-menu="event => showHeaderMenu(columnId, columnIndexInGrid, event)"
+            @show-header-menu="event => {
+              showHeaderMenu(columnId, columnIndexInGrid, event)
+            }"
             v-for="(columnId, columnIndexInGrid) in nonStickedDisplayedValidationColumns"
             v-if="!isLoading"
           />
@@ -172,6 +184,7 @@
           </th>
         </tr>
       </thead>
+
       <tbody
         class="datatable-body"
         :key="getGroupKey(group, k, 'asset_type_id')"
@@ -373,6 +386,19 @@
             {{ formatDuration(asset.estimation) }}
           </td>
 
+          <!--td
+            class="task-type-name ready-for"
+          >
+            <combobox-task-type
+              class="mb0"
+              :value="asset.ready_for"
+              production-id="this.currentProduction.id"
+              :task-type-list="productionShotTaskTypes"
+              :shy="true"
+              @input="(taskTypeId) => onReadyForChanged(asset, taskTypeId)"
+            />
+          </td-->
+
           <validation-cell
             :ref="`validation-${getIndex(i, k)}-${j + stickedDisplayedValidationColumns.length}`"
             :class="{
@@ -459,17 +485,16 @@ import { formatListMixin } from '@/components/mixins/format'
 import { range } from '@/lib/time'
 import { selectionListMixin } from '@/components/mixins/selection'
 
-import DescriptionCell from '@/components/cells/DescriptionCell'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
+// import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
+import DescriptionCell from '@/components/cells/DescriptionCell'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import MetadataHeader from '@/components/cells/MetadataHeader'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
 import TableInfo from '@/components/widgets/TableInfo'
-import TableMetadataHeaderMenu from
-  '@/components/widgets/TableMetadataHeaderMenu'
-import TableMetadataSelectorMenu from
-  '@/components/widgets/TableMetadataSelectorMenu'
+import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu'
 import ValidationCell from '@/components/cells/ValidationCell'
 import ValidationHeader from '@/components/cells/ValidationHeader'
 
@@ -484,6 +509,7 @@ export default {
 
   components: {
     ButtonSimple,
+    // ComboboxTaskType,
     DescriptionCell,
     EntityThumbnail,
     MetadataHeader,
@@ -558,6 +584,7 @@ export default {
       'isAssetEstimation',
       'isAssetTime',
       'isTVShow',
+      'productionShotTaskTypes',
       'selectedAssets',
       'selectedTasks',
       'taskMap',
@@ -634,6 +661,7 @@ export default {
   methods: {
     ...mapActions([
       'displayMoreAssets',
+      'editAsset',
       'setAssetSelection'
     ]),
 
@@ -677,6 +705,18 @@ export default {
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
       if (maxHeight < (position.scrollTop + 100)) {
         this.loadMoreAssets()
+      }
+    },
+
+    onReadyForChanged (asset, taskTypeId) {
+      if (this.selectedAssets.has(asset.id)) {
+        this.selectedAssets.forEach((asset, _) => {
+          const data = { id: asset.id, ready_for: taskTypeId }
+          this.$emit('asset-changed', data)
+        })
+      } else {
+        const data = { id: asset.id, ready_for: taskTypeId }
+        this.$emit('asset-changed', data)
       }
     },
 
@@ -835,6 +875,13 @@ th.estimation,
 td.estimation {
   min-width: 70px;
   width: 70px;
+}
+
+th.ready-for,
+td.ready-for {
+  max-width: 180px;
+  width: 180px;
+  padding: 1px 5px;
 }
 
 .episode {

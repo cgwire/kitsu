@@ -1126,7 +1126,11 @@ const mutations = {
   [UPDATE_METADATA_DESCRIPTOR_END] (
     state, { descriptor, previousDescriptorFieldName }
   ) {
-    if (descriptor.entity_type === 'Asset' && previousDescriptorFieldName) {
+    if (
+      descriptor.entity_type === 'Asset' &&
+      previousDescriptorFieldName &&
+      previousDescriptorFieldName !== descriptor.field_name
+    ) {
       cache.assets.forEach((asset) => {
         asset.data[descriptor.field_name] =
           asset.data[previousDescriptorFieldName]

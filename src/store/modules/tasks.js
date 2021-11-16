@@ -69,6 +69,7 @@ import {
   REMOVE_TASK_SEARCH_END,
 
   UPDATE_COMMENT_CHECKLIST,
+  UPDATE_COMMENT_REPLIES,
   SET_LAST_COMMENT_DRAFT,
 
   REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD,
@@ -119,6 +120,7 @@ const helpers = {
 
 const getters = {
   taskMap: (state) => state.taskMap,
+  taskComments: state => state.taskComments,
   getTaskComments: (state, getters) => (id) => state.taskComments[id],
   getTaskPreviews: (state, getters) => (id) => state.taskPreviews[id],
 
@@ -675,6 +677,14 @@ const actions = {
     return tasksApi.pinComment(comment)
   },
 
+  refreshComment ({ commit, state }, { taskId, commentId }) {
+    return tasksApi.getTaskComment({ id: commentId })
+      .then(comment => {
+        commit(UPDATE_COMMENT_REPLIES, comment)
+        return Promise.resolve(comment)
+      })
+  },
+
   updateRevisionPreviewPosition ({ commit }, payload) {
     if (payload.newIndex < payload.previousIndex) payload.newIndex++
     commit(UPDATE_REVISION_PREVIEW_POSITION, payload)
@@ -1152,8 +1162,21 @@ const mutations = {
   },
 
   [UPDATE_COMMENT_CHECKLIST] (state, { comment, checklist }) {
-    comment.checklist = [...checklist]
-    state.taskComments[comment.object_id].checklist = [...checklist]
+    if (state.taskComments[comment.object_id]) {
+      const localComment = state.taskComments[comment.object_id].find(
+        c => c.id === comment.id
+      )
+      localComment.checklist = [...checklist]
+    }
+  },
+
+  [UPDATE_COMMENT_REPLIES] (state, comment) {
+    if (state.taskComments[comment.object_id]) {
+      const localComment = state.taskComments[comment.object_id].find(
+        c => c.id === comment.id
+      )
+      localComment.replies = comment.replies
+    }
   },
 
   [CLEAR_ASSETS] (state) {

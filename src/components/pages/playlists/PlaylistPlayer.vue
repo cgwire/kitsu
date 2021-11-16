@@ -151,6 +151,27 @@
         v-show="isCurrentPreviewMovie && !isLoading"
       />
 
+      <object-viewer
+        ref="object-player"
+        class="object-player"
+        :preview-url="currentPreviewDlPath"
+        :style="{
+          position: isComparisonOverlay ? 'absolute': 'static',
+          opacity: overlayOpacity
+        }"
+        :full-screen="fullScreen"
+        v-show="isCurrentPreviewModel && !isLoading"
+      />
+
+      <sound-viewer
+        ref="sound-player"
+        class="sound-player"
+        :preview-url="currentPreviewDlPath"
+        :full-screen="fullScreen"
+        @play-ended="pause"
+        v-show="isCurrentPreviewSound && !isLoading"
+      />
+
       <p
         :style="{width: '100%'}"
         class="preview-standard-file has-text-centered"
@@ -260,7 +281,10 @@
   >
     <div
       class="flexrow flexrow-item mr0"
-      v-if="isCurrentPreviewMovie || isCurrentPreviewPicture"
+      v-if="
+        isCurrentPreviewMovie ||
+        isCurrentPreviewPicture ||
+        isCurrentPreviewSound"
     >
       <button-simple
         class="button playlist-button flexrow-item"
@@ -804,11 +828,13 @@ import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ColorPicker from '@/components/widgets/ColorPicker'
 import Combobox from '@/components/widgets/Combobox'
 import DeleteModal from '@/components/modals/DeleteModal'
+import ObjectViewer from '@/components/previews/ObjectViewer'
 import PencilPicker from '@/components/widgets/PencilPicker'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity'
 import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer'
 import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal'
+import SoundViewer from '@/components/previews/SoundViewer'
 import Spinner from '@/components/widgets/Spinner'
 import TaskInfo from '@/components/sides/TaskInfo'
 
@@ -828,11 +854,13 @@ export default {
     Combobox,
     DownloadIcon,
     DeleteModal,
+    ObjectViewer,
     PencilPicker,
     PeopleAvatar,
     PlaylistedEntity,
     RawVideoPlayer,
     SelectTaskTypeModal,
+    SoundViewer,
     Spinner,
     TaskInfo
   },
@@ -1003,10 +1031,20 @@ export default {
       return this.isPicture(this.extension)
     },
 
+    isCurrentPreviewModel () {
+      return this.isModel(this.extension)
+    },
+
+    isCurrentPreviewSound () {
+      return this.isSound(this.extension)
+    },
+
     isCurrentPreviewFile () {
       return (
         !this.isCurrentPreviewMovie &&
-        !this.isCurrentPreviewPicture
+        !this.isCurrentPreviewPicture &&
+        !this.isCurrentPreviewSound &&
+        !this.isCurrentPreviewModel
       )
     },
 
@@ -1266,6 +1304,10 @@ export default {
       return this.$refs['picture-player']
     },
 
+    soundPlayer () {
+      return this.$refs['sound-player']
+    },
+
     canvas () {
       return this.$refs['canvas-wrapper']
     },
@@ -1308,6 +1350,14 @@ export default {
 
     isPicture (extension) {
       return ['png', 'gif'].includes(extension)
+    },
+
+    isModel (extension) {
+      return ['glb', 'gltf'].includes(extension)
+    },
+
+    isSound (extension) {
+      return ['mp3', 'wav'].includes(extension)
     },
 
     exists (variable) {
@@ -1482,6 +1532,8 @@ export default {
     play () {
       if (this.isCurrentPreviewPicture) {
         this.playPicture()
+      } else if (this.isCurrentPreviewSound) {
+        this.playSound()
       } else {
         this.rawPlayer.play()
         if (this.isComparing) {
@@ -1499,6 +1551,8 @@ export default {
         const comparisonPlayer = this.$refs['raw-player-comparison']
         if (this.rawPlayer) this.rawPlayer.pause()
         if (comparisonPlayer) comparisonPlayer.pause()
+      } else if (this.isCurrentPreviewSound) {
+        this.soundPlayer.pause()
       }
       this.isPlaying = false
     },
@@ -1926,6 +1980,11 @@ export default {
         this.playingEntityIndex,
         Date.now() - 1000 * this.framesSeenOfPicture / this.fps
       )
+    },
+
+    playSound () {
+      this.isPlaying = true
+      this.soundPlayer.play()
     },
 
     continuePlayingPlaylist (entityIndex, startMs) {
@@ -2631,6 +2690,9 @@ export default {
   watch: {
     isCommentsHidden () {
       if (!this.isCommentsHidden) this.$refs['task-info'].loadTaskData()
+      if (this.isSound) {
+        this.soundPlayer.redraw()
+      }
     },
 
     currentPreviewIndex () {

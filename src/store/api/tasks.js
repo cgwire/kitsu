@@ -63,7 +63,7 @@ export default {
     )
   },
 
-  getTaskComment (data, callback) {
+  getTaskComment (data) {
     return client.pget(`/api/data/comments/${data.id}`)
   },
 

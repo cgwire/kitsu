@@ -37,6 +37,7 @@ export default {
       description: asset.description,
       entity_type_id: asset.entity_type_id,
       project_id: asset.project_id,
+      ready_for: asset.ready_for,
       data: asset.data
     }
     if (asset.source_id === 'null' || asset.source_id) {

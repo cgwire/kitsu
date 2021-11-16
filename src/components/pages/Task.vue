@@ -719,6 +719,7 @@ export default {
       'loadPreviewFileFormData',
       'loadTaskComments',
       'loadTaskSubscribed',
+      'refreshComment',
       'refreshPreview',
       'pinComment',
       'subscribeToTask',
@@ -1225,6 +1226,75 @@ export default {
 
       'comment:unacknowledge' (eventData) {
         this.onRemoteAcknowledge(eventData, 'unack')
+      },
+
+      'preview-file:update' (eventData) {
+        const comment = this.currentTaskComments.find(
+          c => (
+            c.previews &&
+            c.previews.length > 0 &&
+            c.previews[0].id === eventData.preview_file_id
+          )
+        )
+        if (comment && this.currentTask) {
+          this.refreshPreview({
+            taskId: this.currentTask.id,
+            previewId: eventData.preview_file_id
+          }).then(preview => {
+            comment.previews[0].validation_status = preview.validation_status
+          })
+        }
+      },
+
+      'comment:new' (eventData) {
+        setTimeout(() => {
+          if (
+            this.getCurrentTaskComments().length !==
+            this.currentTaskComments.length
+          ) {
+            this.currentTaskComments = this.getCurrentTaskComments()
+            this.currentTaskPreviews = this.getCurrentTaskPreviews()
+          }
+        }, 1000)
+      },
+
+      'comment:reply' (eventData) {
+        if (this.currentTask) {
+          const comment = this.currentTaskComments.find(
+            c => c.id === eventData.comment_id
+          )
+          if (comment) {
+            if (!comment.replies) comment.replies = []
+            const reply = comment.replies.find(
+              r => r.id === eventData.reply_id
+            )
+            if (!reply) {
+              this.refreshComment({
+                taskId: this.currentTask.id,
+                commentId: eventData.comment_id
+              })
+                .then(remoteComment => {
+                  comment.replies = remoteComment.replies
+                })
+                .catch(console.error)
+            }
+          }
+        }
+      },
+
+      'comment:delete-reply' (eventData) {
+        if (this.currentTask) {
+          const comment = this.currentTaskComments.find(
+            c => c.id === eventData.comment_id
+          )
+          if (comment) {
+            if (!comment.replies) comment.replies = []
+            this.$store.commit('REMOVE_REPLY_FROM_COMMENT', {
+              comment,
+              reply: { id: eventData.reply_id }
+            })
+          }
+        }
       }
     }
   },

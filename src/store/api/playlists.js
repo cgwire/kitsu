@@ -38,6 +38,13 @@ export default {
     )
   },
 
+  updatePreviewFileValidationStatus (previewFile, status) {
+    return client.pput(
+      `/api/data/preview-files/${previewFile.id}`,
+      { validation_status: status }
+    )
+  },
+
   newPlaylist (playlist) {
     const data = {
       name: playlist.name,
