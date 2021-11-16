@@ -21,6 +21,7 @@ const csv = {
     currentWeek
   ) {
     const headers = csv.getTimesheetHeaders(
+      timesheet,
       detailLevel,
       year,
       month,
@@ -28,11 +29,17 @@ const csv = {
       currentMonth,
       currentWeek
     )
-    const entries = csv.getTimesheetEntries(headers, people, timesheet)
+    const entries = csv.getTimesheetEntries(
+      detailLevel,
+      headers,
+      people,
+      timesheet
+    )
     csv.buildCsvFile(name, entries)
   },
 
   getTimesheetHeaders (
+    timesheet,
     detailLevel,
     year,
     month,
@@ -42,7 +49,11 @@ const csv = {
   ) {
     const headers = ['Person']
     let range = []
-    if (detailLevel === 'month') {
+    if (detailLevel === 'year') {
+      Object.keys(timesheet).forEach(yearLabel => {
+        headers.push(yearLabel)
+      })
+    } else if (detailLevel === 'month') {
       range = getMonthRange(year, currentYear, currentMonth)
     } else if (detailLevel === 'week') {
       range = getWeekRange(year, currentYear, currentWeek)
@@ -53,24 +64,36 @@ const csv = {
     return headers
   },
 
-  getTimesheetEntries (headers, people, timesheet) {
+  getTimesheetEntries (detailLevel, headers, people, timesheet) {
     const entries = [headers]
-    people.forEach((person) => {
+    people.forEach(person => {
       const line = [person.full_name]
-      headers.forEach((h, index) => {
-        if (index > 0) {
-          index--
-          if (
-            timesheet &&
-            timesheet[index] &&
-            timesheet[index][person.id]
-          ) {
-            line.push(timesheet[index][person.id] / 60)
-          } else {
-            line.push('-')
+      if (detailLevel === 'year') {
+        headers.forEach((h, index) => {
+          if (index > 0) {
+            if (timesheet[h]) {
+              line.push(timesheet[h][person.id] / 60)
+            } else {
+              line.push('-')
+            }
           }
-        }
-      })
+        })
+      } else {
+        headers.forEach((h, index) => {
+          if (index > 0) {
+            index--
+            if (
+              timesheet &&
+              timesheet[index] &&
+              timesheet[index][person.id]
+            ) {
+              line.push(timesheet[index][person.id] / 60)
+            } else {
+              line.push('-')
+            }
+          }
+        })
+      }
       entries.push(line)
     })
     return entries
