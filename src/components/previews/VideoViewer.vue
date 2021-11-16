@@ -236,25 +236,14 @@ export default {
     getDimensions () {
       const dimensions = this.getNaturalDimensions()
       const ratio = dimensions.height / dimensions.width
-      let offsetWidth = 0
-      if (this.container.parentElement) {
-        const parent = this.container.parentElement.parentElement
-        if (parent) offsetWidth = parent.offsetWidth
-      }
-      let width = Math.min(dimensions.width, offsetWidth)
-      if (this.isComparing) {
-        // parent is used because sometimes the container width is not
-        // properly computed.
-        width = Math.min(
-          dimensions.width,
-          offsetWidth / 2
-        )
-      }
+      const fullWidth = this.container.offsetWidth
+      const fullHeight = this.container.offsetHeight
+      let width = fullWidth
       let height = Math.floor(width * ratio)
-      height = Math.min(height, this.defaultHeight)
-      width = Math.floor(height / ratio)
-      height = Math.floor(width * ratio)
-      height = Math.min(height, this.defaultHeight)
+      if (height > fullHeight) {
+        height = fullHeight
+        width = height / ratio
+      }
       return { width, height }
     },
 
