@@ -127,14 +127,14 @@
             {{ $t('main.estimation_short') }}
           </th>
 
-          <th
+          <!--th
             scope="col"
             class="ready-for"
             :title="$t('assets.fields.ready_for')"
             ref="th-ready-for"
           >
             {{ $t('assets.fields.ready_for') }}
-          </th>
+          </th-->
 
           <validation-header
             :key="columnId"
@@ -386,7 +386,7 @@
             {{ formatDuration(asset.estimation) }}
           </td>
 
-          <td
+          <!--td
             class="task-type-name ready-for"
           >
             <combobox-task-type
@@ -397,7 +397,7 @@
               :shy="true"
               @input="(taskTypeId) => onReadyForChanged(asset, taskTypeId)"
             />
-          </td>
+          </td-->
 
           <validation-cell
             :ref="`validation-${getIndex(i, k)}-${j + stickedDisplayedValidationColumns.length}`"
@@ -486,7 +486,7 @@ import { range } from '@/lib/time'
 import { selectionListMixin } from '@/components/mixins/selection'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
+// import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import MetadataHeader from '@/components/cells/MetadataHeader'
@@ -509,7 +509,7 @@ export default {
 
   components: {
     ButtonSimple,
-    ComboboxTaskType,
+    // ComboboxTaskType,
     DescriptionCell,
     EntityThumbnail,
     MetadataHeader,
