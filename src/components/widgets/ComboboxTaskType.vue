@@ -4,10 +4,13 @@
     {{ label }}
   </label>
   <div
-    class="task-type-combo"
+    :class="{
+      'task-type-combo': true,
+      shy: shy
+    }"
   >
     <div
-      class="flexrow"
+      class="flexrow selector"
       @click="toggleTaskTypeList"
     >
       <div
@@ -22,8 +25,7 @@
     </div>
     <div
       :class="{
-        'select-input': true,
-        'up': up
+        'select-input': true
       }"
       ref="select"
       v-if="showTaskTypeList"
@@ -83,7 +85,7 @@ export default {
       default: '',
       type: String
     },
-    up: {
+    shy: {
       default: false,
       type: Boolean
     },
@@ -127,24 +129,16 @@ export default {
 
 <style lang="scss" scoped>
 .dark {
-  .select-input,
-  .selected-task-type-line,
-  .task-type-line,
-  .task-type-combo {
-    background: $dark-grey-light;
-    border-color: $dark-grey;
-  }
-
   .task-type-line:hover {
     background: $dark-purple;
   }
 }
 
 .task-type-combo {
-  background: $white;
+  background: var(--background);
   min-width: 200px;
   width: 200px;
-  border: 1px solid $light-grey-light;
+  border: 1px solid var(--border);
   user-select: none;
   cursor: pointer;
   border-radius: 3px;
@@ -158,14 +152,14 @@ export default {
 }
 
 .selected-task-type-line {
-  background: $white;
+  background: var(--background);
   padding: 0.4em;
   text-transform: uppercase;
   flex: 1;
 }
 
 .task-type-line {
-  background: $white;
+  background: var(--background);
   cursor: pointer;
   padding: 0.4em;
   margin: 0;
@@ -188,15 +182,35 @@ export default {
   background: $white;
   width: 200px;
   position: absolute;
-  border: 1px solid $light-grey-light;
+  border: 1px solid var(--border);
   z-index: 300;
   margin-left: -1px;
   max-height: 200px;
   overflow-y: auto;
+}
 
-  &.up {
-    height: 200px;
-    top: -200px;
+.task-type-combo.shy {
+  background: transparent;
+  min-width: 100%;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 5px;
+
+  .down-icon {
+    opacity: 0;
+  }
+
+  .selected-task-type-line,
+  .selected-task-type {
+    background: transparent;
+  }
+
+  &:hover {
+    background: var(--background);
+    border: 1px solid var(--border-alt);
+    .down-icon {
+      opacity: 1;
+    }
   }
 }
 

@@ -394,6 +394,7 @@
               :value="asset.ready_for"
               production-id="this.currentProduction.id"
               :task-type-list="productionShotTaskTypes"
+              :shy="true"
               @input="(taskTypeId) => onReadyForChanged(asset, taskTypeId)"
             />
           </td>
@@ -708,8 +709,15 @@ export default {
     },
 
     onReadyForChanged (asset, taskTypeId) {
-      const data = { ...asset, ready_for: taskTypeId }
-      this.editAsset(data)
+      if (this.selectedAssets.has(asset.id)) {
+        this.selectedAssets.forEach((asset, _) => {
+          const data = { id: asset.id, ready_for: taskTypeId }
+          this.$emit('asset-changed', data)
+        })
+      } else {
+        const data = { id: asset.id, ready_for: taskTypeId }
+        this.$emit('asset-changed', data)
+      }
     },
 
     loadMoreAssets () {
@@ -871,8 +879,8 @@ td.estimation {
 
 th.ready-for,
 td.ready-for {
-  max-width: 250px;
-  width: 250px;
+  max-width: 180px;
+  width: 180px;
   padding: 1px 5px;
 }
 
