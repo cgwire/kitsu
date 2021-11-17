@@ -533,6 +533,9 @@ export default {
     if (this.isPicture) this.loadAnnotation(this.getAnnotation(0))
     this.resetPreviewFileMap()
     this.initPreferences()
+    if (this.isSound) {
+      this.fixCanvasSize({ width: 0, height: 0 })
+    }
   },
 
   beforeDestroy () {
@@ -1440,6 +1443,8 @@ export default {
         if (this.comparisonViewer) {
           setTimeout(this.comparisonViewer.resetPicture, 20)
         }
+      } else if (this.isSound) {
+        this.fixCanvasSize({ width: 0, height: 0 })
       }
       this.$nextTick(() => {
         if (this.previewViewer && this.previewViewer.isBroken) {

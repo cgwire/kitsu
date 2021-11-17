@@ -99,10 +99,6 @@ export default {
     },
 
     redraw () {
-      if (this.previewUrl && this.previewUrl.length > 0) {
-        this.isLoading = true
-        this.wavesurfer.load(this.previewUrl)
-      }
     }
   },
 
@@ -120,6 +116,7 @@ export default {
     light () {
     }
   }
+
 }
 </script>
 
@@ -131,8 +128,8 @@ export default {
 
 .file-name {
   position: absolute;
-  left: 0;
-  bottom: 0;
+  left: 4px;
+  bottom: 4px;
   color: $white;
 }
 

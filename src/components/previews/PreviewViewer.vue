@@ -66,7 +66,7 @@
       ref="sound-viewer"
       class="sound-viewer"
       :preview-url="originalPath"
-      :file-name="preview.original_name"
+      :file-name="fileTitle"
       @play-ended="$emit('play-ended')"
       v-show="isSound"
     />
@@ -372,9 +372,14 @@ export default {
     },
 
     getPreviewDimensions () {
-      if (this.isMovie) return this.videoViewer.getDimensions()
-      else if (this.isPicture) return this.pictureViewer.getDimensions()
-      else return { width: 0, height: 0 }
+      const dimensions = { width: 0, height: 0 }
+      if (this.isMovie) {
+        return this.videoViewer.getDimensions()
+      } else if (this.isPicture) {
+        return this.pictureViewer.getDimensions()
+      }
+      console.log(dimensions)
+      return dimensions
     },
 
     setCurrentTime (time) {
