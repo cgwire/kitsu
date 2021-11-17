@@ -15,10 +15,10 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    "js-3d-model-viewer": "<rootDir>/tests/substituted-model-viewer.js",
-    "vue-slider-component": "<rootDir>/tests/substituted-model-viewer.js",
-    "fabric": "<rootDir>/tests/fabric.js",
-    "vue-loading-spinner": "<rootDir>/tests/spinner.js"
+    'js-3d-model-viewer': '<rootDir>/tests/substituted-model-viewer.js',
+    'vue-slider-component': '<rootDir>/tests/substituted-model-viewer.js',
+    fabric: '<rootDir>/tests/fabric.js',
+    'vue-loading-spinner': '<rootDir>/tests/spinner.js'
   },
   setupFiles: ['<rootDir>/tests/setup.js'],
   snapshotSerializers: [
@@ -31,5 +31,5 @@ module.exports = {
   watchPlugins: [
     'jest-watch-typeahead/filename',
     'jest-watch-typeahead/testname'
-  ],
+  ]
 }

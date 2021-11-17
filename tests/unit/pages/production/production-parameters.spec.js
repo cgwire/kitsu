@@ -24,7 +24,7 @@ function initialiseStore (actions, state) {
       user: () => ({ id: 'user-1', timezone: 'Europe/Paris' }),
       isCurrentUserAdmin: () => true,
       isCurrentUserManager: () => true
-    },
+    }
   }
 
   return new Vuex.Store({
@@ -45,12 +45,12 @@ function initialiseStore (actions, state) {
           ...state
         },
         mutations: {
-          setCurrentProduction(state, production) {
+          setCurrentProduction (state, production) {
             state.currentProduction = production
           },
-          setProductionAvatarFormData(state, avatar) {
+          setProductionAvatarFormData (state, avatar) {
             state.productionAvatarFormData = avatar
-          },
+          }
         },
         actions: {
           setProduction () {
@@ -66,12 +66,12 @@ function initialiseStore (actions, state) {
           productionAvatarFormData: (state) => state.productionAvatarFormData
         }
       },
-      user: userStore,
+      user: userStore
     }
   })
 }
 
-function initialiseWrapper(store, localVue, i18n) {
+function initialiseWrapper (store, localVue, i18n) {
   return shallowMount(ProductionParameters, {
     store,
     localVue,
@@ -96,10 +96,10 @@ const currentProduction = {
 
 describe('ProductionParameters', () => {
   describe('mounted', () => {
-    test('mount ProductionParameters', async() => {
+    test('mount ProductionParameters', async () => {
       const store = initialiseStore(
         {
-          editProduction({commit}, production) {
+          editProduction ({ commit }, production) {
             return new Promise((resolve) => {
               commit('setCurrentProduction', production)
               resolve(production)
@@ -107,7 +107,7 @@ describe('ProductionParameters', () => {
           }
         },
         {
-          currentProduction,
+          currentProduction
         }
       )
       const wrapper = initialiseWrapper(store, localVue, i18n)
@@ -125,16 +125,16 @@ describe('ProductionParameters', () => {
 
   describe('Methods', () => {
     const upload = jest.fn()
-    test('editParameters', async() => {
+    test('editParameters', async () => {
       const store = initialiseStore(
         {
-          editProduction({commit}, production) {
+          editProduction ({ commit }, production) {
             return new Promise((resolve) => {
               commit('setCurrentProduction', production)
               resolve(production)
             })
           },
-          uploadProductionAvatar({commit}, production) {
+          uploadProductionAvatar ({ commit }, production) {
             return new Promise((resolve) => {
               upload()
               resolve(production)
@@ -179,11 +179,11 @@ describe('ProductionParameters', () => {
       expect(upload).toHaveBeenCalled()
     })
 
-    test('editParameters edit production error', async() => {
+    test('editParameters edit production error', async () => {
       const store = initialiseStore({
         editProduction () {
           return Promise.reject()
-        },
+        }
       })
       const formData = {
         name: 'newName',
@@ -210,16 +210,16 @@ describe('ProductionParameters', () => {
       expect(wrapper.vm.isError).toBe(true)
     })
 
-    test('editParameters edit avatar error', async() => {
+    test('editParameters edit avatar error', async () => {
       const store = initialiseStore(
         {
-          editProduction({commit}, production) {
+          editProduction ({ commit }, production) {
             return new Promise((resolve) => {
               commit('setCurrentProduction', production)
               resolve(production)
             })
           },
-          uploadProductionAvatar() {
+          uploadProductionAvatar () {
             return Promise.reject()
           }
         },
@@ -252,21 +252,21 @@ describe('ProductionParameters', () => {
       expect(wrapper.vm.isError).toBe(true)
     })
 
-    test('updateTvShowRelatedDatas not tvshow', async() => {
+    test('updateTvShowRelatedDatas not tvshow', async () => {
       const store = initialiseStore(
         {
-          editProduction({commit}, production) {
+          editProduction ({ commit }, production) {
             return new Promise((resolve) => {
               commit('setCurrentProduction', production)
               resolve(production)
             })
           },
-          uploadProductionAvatar() {
+          uploadProductionAvatar () {
             return Promise.reject()
           }
         },
         {
-          currentProduction,
+          currentProduction
         }
       )
       const wrapper = initialiseWrapper(store, localVue, i18n)
@@ -276,21 +276,21 @@ describe('ProductionParameters', () => {
       expect(wrapper.vm.form.episode_span).toBe(0)
     })
 
-    test('updateTvShowRelatedDatas tvshow', async() => {
+    test('updateTvShowRelatedDatas tvshow', async () => {
       const store = initialiseStore(
         {
-          editProduction({commit}, production) {
+          editProduction ({ commit }, production) {
             return new Promise((resolve) => {
               commit('setCurrentProduction', production)
               resolve(production)
             })
           },
-          uploadProductionAvatar() {
+          uploadProductionAvatar () {
             return Promise.reject()
           }
         },
         {
-          currentProduction,
+          currentProduction
         }
       )
       const wrapper = initialiseWrapper(store, localVue, i18n)

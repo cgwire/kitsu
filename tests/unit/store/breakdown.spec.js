@@ -12,7 +12,6 @@ localVue.use(Vuex)
 const vuexStore = new Vuex.Store(store)
 const commit = vuexStore.commit
 
-
 describe('Breakdown store', () => {
   let state, shots, assetCasting, casting, assetMap, production, shotMap
   let sequences, expectedSequenceOptions, rootState, rootGetters
@@ -45,14 +44,14 @@ describe('Breakdown store', () => {
         id: 'asset-1',
         asset_id: 'asset-1',
         name: 'Asset 1',
-        asset_type_name: 'Characters' ,
+        asset_type_name: 'Characters',
         nb_occurences: 1
       },
       {
         id: 'asset-2',
         asset_id: 'asset-2',
         name: 'Asset 2',
-        asset_type_name: 'Props' ,
+        asset_type_name: 'Props',
         nb_occurences: 2
       }
     ]
@@ -77,7 +76,7 @@ describe('Breakdown store', () => {
       name: 'Caminandes'
     }
     const entityMapReducer = (acc, entity) => {
-      acc[entity.id] = entity ; return acc
+      acc[entity.id] = entity; return acc
     }
     shotMap = new Map(Object.entries(shots.reduce(entityMapReducer, {})))
     expectedSequenceOptions = [{
@@ -142,20 +141,20 @@ describe('Breakdown store', () => {
         assetId: 'asset-3',
         nbOccurences: 3
       })
-      expect(vuexStore.state.casting['shot-1'][2]['asset_id'])
-				.toEqual('asset-3')
-      expect(vuexStore.state.castingByType['shot-1'][1][1]['asset_id'])
+      expect(vuexStore.state.casting['shot-1'][2].asset_id)
+        .toEqual('asset-3')
+      expect(vuexStore.state.castingByType['shot-1'][1][1].asset_id)
         .toEqual('asset-3')
     })
     test('removeAssetFromCasting', async () => {
       await store.actions.removeAssetFromCasting({ commit, rootState }, {
         entityId: 'shot-1',
-				assetId: 'asset-2',
+        assetId: 'asset-2',
         nbOccurences: 1
       })
-      expect(vuexStore.state.casting['shot-1'][1]['nb_occurences'])
+      expect(vuexStore.state.casting['shot-1'][1].nb_occurences)
         .toEqual(1)
-      expect(vuexStore.state.castingByType['shot-1'][1][0]['nb_occurences'])
+      expect(vuexStore.state.castingByType['shot-1'][1][0].nb_occurences)
         .toEqual(1)
     })
     test('saveCasting', async () => {
@@ -164,16 +163,16 @@ describe('Breakdown store', () => {
         'production-1',
         'shot-1',
         [{
-          'asset_id': 'asset-1',
-          'nb_occurences': 1
+          asset_id: 'asset-1',
+          nb_occurences: 1
         },
         {
-          'asset_id': 'asset-2',
-          'nb_occurences': 1
+          asset_id: 'asset-2',
+          nb_occurences: 1
         },
         {
-          'asset_id': 'asset-3',
-          'nb_occurences': 3
+          asset_id: 'asset-3',
+          nb_occurences: 3
         }]
       )
     })
@@ -244,16 +243,16 @@ describe('Breakdown store', () => {
       store.mutations.CASTING_ADD_TO_CASTING(state,
         { entityId: 'shot-1', asset: newAsset, nbOccurences: 1 }
       )
-      expect(state.casting['shot-1'][2]['asset_id']).toEqual(newAsset.id)
-      expect(state.castingByType['shot-1'][1][1]['asset_id'])
+      expect(state.casting['shot-1'][2].asset_id).toEqual(newAsset.id)
+      expect(state.castingByType['shot-1'][1][1].asset_id)
         .toEqual(newAsset.id)
 
       store.mutations.CASTING_ADD_TO_CASTING(state,
         { entityId: 'shot-1', asset: assetMap.get('asset-2'), nbOccurences: 3 }
       )
-      expect(state.casting['shot-1'][1]['nb_occurences'])
+      expect(state.casting['shot-1'][1].nb_occurences)
         .toEqual(5)
-      expect(state.castingByType['shot-1'][1][0]['nb_occurences'])
+      expect(state.castingByType['shot-1'][1][0].nb_occurences)
         .toEqual(5)
     })
 
@@ -263,15 +262,15 @@ describe('Breakdown store', () => {
       store.mutations.CASTING_REMOVE_FROM_CASTING(state,
         { entityId: 'shot-1', asset: assetMap.get('asset-2'), nbOccurences: 1 }
       )
-      expect(state.casting['shot-1'][1]['nb_occurences'])
+      expect(state.casting['shot-1'][1].nb_occurences)
         .toEqual(1)
-      expect(state.castingByType['shot-1'][1][0]['nb_occurences'])
+      expect(state.castingByType['shot-1'][1][0].nb_occurences)
         .toEqual(1)
       store.mutations.CASTING_REMOVE_FROM_CASTING(state,
         { entityId: 'shot-1', asset: assetMap.get('asset-2'), nbOccurences: 1 }
       )
-      expect(state.casting['shot-1'].length).toEqual(1)
-      expect(state.castingByType['shot-1'].length).toEqual(1)
+      expect(state.casting['shot-1']).toHaveLength(1)
+      expect(state.castingByType['shot-1']).toHaveLength(1)
     })
 
     test('LOAD_SHOT_CASTING_END', () => {
