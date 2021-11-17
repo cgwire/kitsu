@@ -11,7 +11,6 @@ localVue.use(Vuex)
 localVue.use(VueRouter)
 const router = new VueRouter()
 
-
 describe('EstimationHelper', () => {
   let store, assetStore, peopleStore, productionStore, shotStore, taskStore
   let wrapper
@@ -45,17 +44,17 @@ describe('EstimationHelper', () => {
           {
             id: 'descriptor-1', name: 'Difficulty', choices: ['easy', 'hard']
           },
-          { id: 'descriptor-2', name: 'Size' },
+          { id: 'descriptor-2', name: 'Size' }
         ],
         assetSearchText: (state) => state.assetSearchText,
         assetValidationColumns: () => ['task-type-1', 'task-type-2'],
         assetMap: () => new Map(Object.entries({
-          'asset-1': { id: 'asset-1', name: 'Lama'},
-          'asset-2': { id: 'asset-2', name: 'Pingu'}
+          'asset-1': { id: 'asset-1', name: 'Lama' },
+          'asset-2': { id: 'asset-2', name: 'Pingu' }
         }))
       },
       mutations: {
-        'CHANGE_SEARCH': (state, query) => state.assetSearchText = query
+        CHANGE_SEARCH: (state, query) => state.assetSearchText = query
       },
       actions: {
         changeSearch ({ commit, state }, query) {
@@ -67,7 +66,7 @@ describe('EstimationHelper', () => {
       getters: {
         shotMetadataDescriptors: () => [
           { id: 'descriptor-3', name: 'Style' },
-          { id: 'descriptor-4', name: 'Length' },
+          { id: 'descriptor-4', name: 'Length' }
         ],
         shotSearchText: () => '',
         shotValidationColumns: () => ['task-type-3', 'task-type-4'],
@@ -122,7 +121,7 @@ describe('EstimationHelper', () => {
         taskStatusMap: () => new Map(Object.entries({
           'task-status-1': { id: 'task-status-1', short_name: 'WFA' },
           'task-status-2': { id: 'task-status-2', short_name: 'WIP' },
-          'task-status-3': { id: 'task-status-3', short_name: 'Retake' },
+          'task-status-3': { id: 'task-status-3', short_name: 'Retake' }
         }))
       },
       actions: {}
@@ -165,16 +164,16 @@ describe('EstimationHelper', () => {
         wrapper.vm.$nextTick(() => {
           expect(wrapper.vm.tasksByPerson).toStrictEqual([
             {
-              'assignees':  ['person-3'],
-              'entity':  { 'id': 'shot-2' },
-              'entity_id': 'shot-2',
-              'id': 'task-2',
+              assignees: ['person-3'],
+              entity: { id: 'shot-2' },
+              entity_id: 'shot-2',
+              id: 'task-2'
             },
             {
-              'assignees':  ['person-1'],
-              'entity':  { 'id': 'shot-1' },
-              'entity_id': 'shot-1',
-              'id': 'task-1'
+              assignees: ['person-1'],
+              entity: { id: 'shot-1' },
+              entity_id: 'shot-1',
+              id: 'task-1'
             }
           ])
           done()

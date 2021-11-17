@@ -3,7 +3,6 @@ import Vuex from 'vuex'
 import i18n from '@/lib/i18n'
 import AddComment from '@/components/widgets/AddComment'
 
-
 const localVue = createLocalVue()
 localVue.use(Vuex)
 
@@ -12,7 +11,6 @@ describe('AddComment', () => {
   let store, mainStore
 
   beforeEach(() => {
-
     mainStore = {
       state: {},
       getters: {

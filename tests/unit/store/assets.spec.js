@@ -1725,8 +1725,8 @@ describe('Assets store', () => {
       store.mutations.CREATE_TASKS_END(state, tasks)
       expect(state.assetMap.get('asset-id').validations).toEqual(
         new Map(Object.entries({
-        task_type_id: 'task-id'
-      })))
+          task_type_id: 'task-id'
+        })))
     })
 
     test('SET_ASSET_TYPE_SEARCH', () => {

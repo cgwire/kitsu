@@ -22,7 +22,7 @@ import {
   parseDate,
   parseSimpleDate,
   range,
-  removeBusinessDays,
+  removeBusinessDays
 } from '@/lib/time'
 
 describe('time', () => {
