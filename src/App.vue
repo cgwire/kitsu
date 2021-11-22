@@ -353,6 +353,26 @@ export default {
         }
       },
 
+      'task:update-casting-stats' (eventData) {
+        const task = this.taskMap.get(eventData.task_id)
+        if (task) {
+          this.$store.commit('UPDATE_TASK', {
+            task,
+            nbAssetsReady: eventData.nb_assets_ready
+          })
+        }
+      },
+
+      'shot:casting-update' (eventData) {
+        const shot = this.shotMap.get(eventData.shot_id)
+        if (shot) {
+          this.$store.commit('UPDATE_SHOT', {
+            id: shot.id,
+            nb_entity_out: eventData.nb_entity_out
+          })
+        }
+      },
+
       'metadata-descriptor:new' (eventData) {
         this.refreshMetadataDescriptor(eventData.metadata_descriptor_id)
       },

@@ -363,6 +363,7 @@ export default {
       handler () {
         this.episode_span = this.currentProduction.episode_span
         this.loadAllScheduleItems(this.currentProduction)
+        this.resetDisplayedTaskTypes()
       },
       deep: true
     }

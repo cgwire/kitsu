@@ -533,7 +533,7 @@ export default {
     if (this.isPicture) this.loadAnnotation(this.getAnnotation(0))
     this.resetPreviewFileMap()
     this.initPreferences()
-    if (this.isSound) {
+    if (this.isSound || this.is3DModel) {
       this.fixCanvasSize({ width: 0, height: 0 })
     }
   },

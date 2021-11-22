@@ -34,6 +34,15 @@
       <span class="priority" v-if="!isCurrentUserClient">
         {{ priority }}
       </span>
+      <span
+        class="casting-status"
+        :title="castingTitle"
+        v-if="!isCurrentUserClient && isCastingReady"
+      >
+        <img src="@/assets/icons/casting-ready.png" width=20>
+      </span>
+    </span>
+    <span>
     </span>
     <span
       class="avatar has-text-centered"
@@ -105,6 +114,14 @@ export default {
     taskTest: {
       default: null,
       type: Object
+    },
+    isCastingReady: {
+      default: false,
+      type: Boolean
+    },
+    castingTitle: {
+      default: '',
+      type: String
     },
     isBorder: {
       default: true,
@@ -352,6 +369,7 @@ export default {
 }
 
 .validation {
+  position: relative;
   cursor: pointer;
   margin-bottom: 3px;
 }
@@ -400,5 +418,15 @@ span.person-avatar:nth-child(2) {
 .priority {
   color: red;
   margin-right: 3px;
+}
+
+.casting-status {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+
+  img {
+    width: 12px;
+  }
 }
 </style>

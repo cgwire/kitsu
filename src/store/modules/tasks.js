@@ -33,6 +33,7 @@ import {
   NEW_TASK_END,
   EDIT_TASK_END,
   EDIT_TASK_DATES,
+  UPDATE_TASK,
 
   CREATE_TASKS_END,
   DELETE_TASK_END,
@@ -1051,6 +1052,10 @@ const mutations = {
         retake_count: task.retake_count
       })
     }
+  },
+
+  [UPDATE_TASK] (state, { task, nbAssetsReady }) {
+    task.nb_assets_ready = nbAssetsReady
   },
 
   [EDIT_TASK_DATES] (state, { taskId, data }) {

@@ -482,9 +482,9 @@ export default {
         sequencesToCreate: [],
         settings: {
           type: PRODUCTION_TYPE_OPTIONS[0].value,
-          fps: null, // eg: '24'
-          ratio: [], // eg: [4, 3]
-          resolution: [], // eg: [1440, 1080]
+          fps: 25, // eg: '24'
+          ratio: [16, 9], // eg: [4, 3]
+          resolution: [1920, 1080], // eg: [1440, 1080]
           dateStart: null,
           dateEnd: null
         },
@@ -1020,54 +1020,26 @@ span.input-separator {
   }
 }
 
->>> .input.is-small {
-  height: 2rem;
-  font-size: 1rem;
-  padding: 0 0.5rem;
-}
-
->>> .input.is-size-2 {
-  width: 3rem;
-}
-
->>> .input.is-size-3 {
-  width: 3.5rem;
-}
-
->>> .input.is-size-4 {
-  width: 5rem;
-}
-
->>> .datepicker {
-  display: inline-flex;
-}
-
 .date-picker-wrapper {
   margin-top: .5rem;
   display: flex;
   align-items: center;
 }
 
->>> .datepicker input.date-input {
-  width: 6.5rem;
-}
-
->>> .task-type.task-type-name:hover {
+.task-type.task-type-name:hover {
   cursor: grab;
 }
->>> .task-type.task-type-name {
+
+.task-type.task-type-name {
   margin-right: 5px;
   margin-bottom: 5px;
   height: 2.3rem;
 }
->>> .task-type-combo {
+
+.task-type-combo-2 {
   display: inline-flex;
   width: auto;
   min-width: auto;
-}
->>> .selected-task-type-line {
-  padding: 0;
-  margin-right: 0;
 }
 
 .import-content {
