@@ -290,6 +290,7 @@
             :is-assignees="isShowAssignations"
             :left="offsets['validation-' + j] ? `${offsets['validation-' + j]}px` : '0'"
             :sticked="true"
+            :is-casting-ready="isCastingReady(shot, columnId)"
             @select="(infos) => onTaskSelected(infos, true)"
             @unselect="(infos) => onTaskUnselected(infos, true)"
             v-for="(columnId, j) in stickedDisplayedValidationColumns"
@@ -440,6 +441,8 @@
             :rowX="getIndex(i, k)"
             :columnY="j"
             :is-assignees="isShowAssignations"
+            :is-casting-ready="isCastingReady(shot, columnId)"
+            :casting-title="castingTitle(shot, columnId)"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             v-for="(columnId, j) in nonStickedDisplayedValidationColumns"
@@ -700,6 +703,21 @@ export default {
     isSelected (indexInGroup, groupIndex, columnIndex) {
       const lineIndex = this.getIndex(indexInGroup, groupIndex)
       return this.shotSelectionGrid[lineIndex][columnIndex]
+    },
+
+    isCastingReady (shot, columnId) {
+      const task = this.taskMap.get(shot.validations.get(columnId))
+      return (
+        task.nb_assets_ready !== 0 &&
+        shot.nb_entity_out === task.nb_assets_ready
+      )
+    },
+
+    castingTitle (shot, columnId) {
+      const task = this.taskMap.get(shot.validations.get(columnId))
+      return (
+        task.nb_assets_ready + ' / ' + shot.nb_entity_out + ' assets ready'
+      )
     },
 
     toggleLine (shot, event) {
