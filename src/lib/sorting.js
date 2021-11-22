@@ -102,6 +102,32 @@ export const sortTaskTypes = (taskTypes, currentProduction) => {
   )
 }
 
+export const sortTaskTypeScheduleItems = (
+  items,
+  currentProduction,
+  taskTypeMap
+) => {
+  const sortFunc = firstBy('for_shots')
+    .thenBy((itemA, itemB) => {
+      const taskTypeA = taskTypeMap.get(itemA.task_type_id)
+      const taskTypeB = taskTypeMap.get(itemB.task_type_id)
+      const taskTypeAPriority = getTaskTypePriorityOfProd(
+        taskTypeA, currentProduction
+      )
+      const taskTypeBPriority = getTaskTypePriorityOfProd(
+        taskTypeB, currentProduction
+      )
+      if (taskTypeAPriority > taskTypeBPriority) {
+        return 1
+      } else if (taskTypeAPriority < taskTypeBPriority) {
+        return -1
+      }
+      return 0
+    })
+    .thenBy('name')
+  return items.sort(sortFunc)
+}
+
 export const sortPlaylists = (playlists) => {
   return playlists.sort(
     firstBy('created_at', -1)
@@ -147,15 +173,6 @@ export const sortValidationColumns = (
       return -1
     }
   })
-}
-
-export const sortScheduleItems = (scheduleItems) => {
-  return scheduleItems.sort(
-    firstBy('for_shots')
-      .thenBy('priority')
-      .thenBy('name')
-      .thenBy('start_date')
-  )
 }
 
 export const sortAssetResult = (
