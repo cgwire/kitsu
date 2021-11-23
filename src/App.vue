@@ -872,6 +872,13 @@ input.input:focus {
   border-radius: 2em;
 }
 
+.datepicker .input.is-small {
+  font-size: 1em;
+  padding: 0.5em;
+  height: 2.3em;
+  width: 100px;
+}
+
 .button:focus {
   box-shadow: none;
 }

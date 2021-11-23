@@ -160,7 +160,7 @@
             />
             <combobox-task-type
               slot="footer"
-              class="is-inline"
+              class="is-inline inline-task-type-combo"
               :task-type-list="availableAssetTaskTypes"
               add-placeholder
               @input="id => productionToCreate.assetTaskTypes.push(
@@ -192,7 +192,7 @@
             />
             <combobox-task-type
               slot="footer"
-              class="is-inline"
+              class="is-inline inline-task-type-combo"
               :task-type-list="availableShotTaskTypes"
               add-placeholder
               @input="id => productionToCreate.shotTaskTypes.push(
@@ -1026,6 +1026,10 @@ span.input-separator {
   align-items: center;
 }
 
+.task-type {
+  margin-top: 4px;
+}
+
 .task-type.task-type-name:hover {
   cursor: grab;
 }
@@ -1036,10 +1040,11 @@ span.input-separator {
   height: 2.3rem;
 }
 
-.task-type-combo-2 {
+.inline-task-type-combo {
   display: inline-flex;
   width: auto;
   min-width: auto;
+  border: 0;
 }
 
 .import-content {
@@ -1086,7 +1091,7 @@ span.input-separator {
 
   &:active,
   &:focus {
-    text-color: white;
+    color: white;
   }
 }
 </style>
