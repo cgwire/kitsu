@@ -368,7 +368,7 @@ export default {
         if (shot) {
           this.$store.commit('UPDATE_SHOT', {
             id: shot.id,
-            nb_entity_out: eventData.nb_entity_out
+            nb_entities_out: eventData.nb_entities_out
           })
         }
       },

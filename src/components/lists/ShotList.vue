@@ -708,15 +708,15 @@ export default {
     isCastingReady (shot, columnId) {
       const task = this.taskMap.get(shot.validations.get(columnId))
       return (
-        task.nb_assets_ready !== 0 &&
-        shot.nb_entity_out === task.nb_assets_ready
+        task.nb_assets_ready > 0 &&
+        shot.nb_entities_out === task.nb_assets_ready
       )
     },
 
     castingTitle (shot, columnId) {
       const task = this.taskMap.get(shot.validations.get(columnId))
       return (
-        task.nb_assets_ready + ' / ' + shot.nb_entity_out + ' assets ready'
+        task.nb_assets_ready + ' / ' + shot.nb_entities_out + ' assets ready'
       )
     },
 
