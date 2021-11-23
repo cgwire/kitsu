@@ -75,6 +75,7 @@
         :label="$t('main.sorted_by')"
         :sorting="assetSorting"
         @clear-sorting="onChangeSortClicked(null)"
+        v-if="assetSorting && assetSorting.length > 0"
       />
       <asset-list
         ref="asset-list"
