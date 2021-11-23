@@ -1601,8 +1601,8 @@ export default {
     },
 
     syncComparisonPlayer () {
-      const currentTimeRaw = this.rawPlayer.getCurrentTime()
-      this.rawPlayerComparison.setCurrentTimeRaw(currentTimeRaw)
+      const currentTimeRaw = this.rawPlayer.getCurrentTimeRaw()
+      this.rawPlayerComparison.currentPlayer.currentTime = currentTimeRaw
     },
 
     goPreviousFrame () {
@@ -1680,9 +1680,9 @@ export default {
       const pos =
         (e.pageX - this.progress.offsetLeft) / this.progress.offsetWidth
       const currentTime = pos * this.maxDurationRaw
-      this.rawPlayer.setCurrentTime(currentTime)
+      this.rawPlayer.setCurrentTimeRaw(currentTime)
       if (this.isComparing) {
-        this.$refs['raw-player-comparison'].setCurrentTime(currentTime)
+        this.rawPlayerComparison.setCurrentTimeRaw(currentTime)
       }
       const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
       if (annotation) this.loadAnnotation(annotation)
@@ -2308,9 +2308,11 @@ export default {
     resetComparison () {
       this.rebuildRevisionOptions()
       this.$nextTick(() => {
-        const player = this.$refs['raw-player-comparison']
-        player.loadEntity(this.playingEntityIndex)
+        this.rawPlayerComparison.loadEntity(this.playingEntityIndex)
         this.$nextTick(() => {
+          setTimeout(() => {
+            this.syncComparisonPlayer()
+          }, 100)
           if (this.isPlaying) this.play()
         })
       })
@@ -2733,6 +2735,7 @@ export default {
 
     isComparing () {
       if (this.isComparing) {
+        this.pause()
         this.resetComparison()
         this.rebuildEntityListToCompare()
       }
