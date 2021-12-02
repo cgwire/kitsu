@@ -609,6 +609,7 @@ const actions = {
     const production = rootGetters.currentProduction
     const episodeMap = rootGetters.episodeMap
     const organisation = rootGetters.organisation
+    const personMap = rootGetters.personMap
     let assets = cache.assets
     if (cache.result && cache.result.length > 0) {
       assets = cache.result
@@ -643,8 +644,12 @@ const actions = {
             rootGetters.taskMap.get(asset.validations.get(validationColumn))
           if (task) {
             assetLine.push(task.task_status_short_name)
+            assetLine.push(
+              task.assignees.map(id => personMap.get(id).full_name).join(',')
+            )
           } else {
-            assetLine.push('')
+            assetLine.push('') // Status
+            assetLine.push('') // Assignation
           }
         })
       return assetLine

@@ -927,6 +927,7 @@ export default {
           this.assetValidationColumns
             .forEach((taskTypeId) => {
               headers.push(this.taskTypeMap.get(taskTypeId).name)
+              headers.push('Assignations')
             })
           csv.buildCsvFile(name, [headers].concat(assetLines))
         })
