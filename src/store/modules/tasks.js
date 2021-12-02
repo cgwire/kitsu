@@ -1158,7 +1158,9 @@ const mutations = {
 
   [ADD_REPLY_TO_COMMENT] (state, { comment, reply }) {
     if (!comment.replies) comment.replies = []
-    comment.replies.push(reply)
+    if (!comment.replies.find(r => r.id === reply.id)) {
+      comment.replies.push(reply)
+    }
   },
 
   [REMOVE_REPLY_FROM_COMMENT] (state, { comment, reply }) {
