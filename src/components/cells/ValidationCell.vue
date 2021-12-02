@@ -41,6 +41,16 @@
       >
         <img src="@/assets/icons/casting-ready.png" width=20>
       </span>
+      <span
+        class="casting-status"
+        :title="castingTitle"
+        v-else-if="!isCurrentUserClient"
+      >
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+      </span>
     </span>
     <span>
     </span>
