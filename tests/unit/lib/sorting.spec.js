@@ -5,7 +5,7 @@ import {
   sortPeople,
   sortPlaylists,
   sortProductions,
-  sortScheduleItems,
+  sortTaskTypeScheduleItems,
   sortSequences,
   sortShots,
   sortTaskTypes,
@@ -393,10 +393,11 @@ describe('lib/sorting', () => {
     expect(results[3].id).toEqual(2)
   })
 
-  it('sortScheduleTime', () => {
+  it('sortTaskTypeScheduleTime', () => {
     const scheduleItems = [
       {
         id: 1,
+        task_type_id: 'task-type-1',
         for_shots: false,
         priority: 2,
         name: 'Modeling',
@@ -404,6 +405,7 @@ describe('lib/sorting', () => {
       },
       {
         id: 2,
+        task_type_id: 'task-type-2',
         for_shots: true,
         priority: 2,
         name: 'Animation',
@@ -411,6 +413,7 @@ describe('lib/sorting', () => {
       },
       {
         id: 3,
+        task_type_id: 'task-type-3',
         for_shots: false,
         priority: 1,
         name: 'Concept',
@@ -418,6 +421,7 @@ describe('lib/sorting', () => {
       },
       {
         id: 4,
+        task_type_id: 'task-type-4',
         for_shots: true,
         priority: 1,
         name: 'Layout',
@@ -425,7 +429,24 @@ describe('lib/sorting', () => {
       }
     ]
 
-    const results = sortScheduleItems(scheduleItems)
+    const taskTypeMap = new Map()
+    taskTypeMap.set('task-type-1', { priority: 2, for_shots: false })
+    taskTypeMap.set('task-type-2', { priority: 2, for_shots: true })
+    taskTypeMap.set('task-type-3', { priority: 1, for_shots: false })
+    taskTypeMap.set('task-type-4', { priority: 1, for_shots: true })
+
+    const production = {
+      id: 'production-1',
+      task_types_priority: {
+        'task-type-1': 1,
+        'task-type-2': 2,
+        'task-type-3': 2,
+        'task-type-4': 1
+      }
+    }
+    const results = sortTaskTypeScheduleItems(
+      scheduleItems, production, taskTypeMap
+    )
     expect(results).toHaveLength(4)
     expect(results[0].id).toEqual(3)
     expect(results[1].id).toEqual(1)
