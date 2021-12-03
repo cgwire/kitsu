@@ -694,7 +694,7 @@ export default {
     language: 'Language',
     notifications_enabled: 'Email notifications enabled',
     notifications_slack_enabled: 'Slack notifications enabled',
-    notifications_slack_user: 'Slack username',
+    notifications_slack_user: 'Slack member ID',
     password_title: 'Change password',
     timezone: 'Timezone',
     title: 'Your Profile',
