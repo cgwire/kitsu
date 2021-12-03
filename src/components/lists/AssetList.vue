@@ -215,6 +215,7 @@
                 class="mr1"
                 :checked="selectedAssets.has(asset.id)"
                 @input="event => toggleLine(asset, event)"
+                v-show="!isCurrentUserClient"
               >
               {{
                 episodeMap.get(asset.episode_id)

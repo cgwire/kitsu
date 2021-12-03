@@ -148,6 +148,7 @@
                     class="flexrow-item reply-delete"
                     :title="$t('main.delete')"
                     @click="onDeleteReplyClicked(replyComment)"
+                    v-if="isCurrentUserAdmin || replyComment.person_id === user.id"
                   >
                     x
                   </span>
@@ -387,6 +388,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'isCurrentUserAdmin',
       'isCurrentUserManager',
       'isDarkTheme',
       'user',

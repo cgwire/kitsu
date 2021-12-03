@@ -56,6 +56,7 @@
           {{ $t('comments.checklist') }}
         </label>
         <checklist
+          class="comment-checklist"
           :checklist="form.checklist"
           @add-item="onAddChecklistItem"
           @remove-task="removeTask"
@@ -196,5 +197,10 @@ textarea {
 
 .modal-content {
   overflow: initial;
+}
+
+.comment-checklist {
+  overflow-y: auto;
+  max-height: 200px;
 }
 </style>
