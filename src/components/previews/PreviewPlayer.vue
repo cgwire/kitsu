@@ -27,7 +27,7 @@
             :default-height="defaultHeight"
             :full-screen="fullScreen"
             :is-hd="isHd"
-            :is-comparing="isComparing"
+            :is-comparing="isComparing && isComparisonEnabled"
             :is-muted="isMuted"
             :is-ordering="isOrdering"
             :is-repeating="isRepeating"
@@ -47,7 +47,7 @@
             :big="big"
             :default-height="defaultHeight"
             :full-screen="fullScreen"
-            :is-comparing="isComparing"
+            :is-comparing="isComparing && isComparisonEnabled"
             :is-muted="true"
             :is-repeating="isRepeating"
             :light="light"
@@ -533,7 +533,7 @@ export default {
     if (this.isPicture) this.loadAnnotation(this.getAnnotation(0))
     this.resetPreviewFileMap()
     this.initPreferences()
-    if (this.isSound || this.is3DModel) {
+    if (this.isSound || this.is3DModel || this.isFile) {
       this.fixCanvasSize({ width: 0, height: 0 })
     }
   },
@@ -1443,7 +1443,7 @@ export default {
         if (this.comparisonViewer) {
           setTimeout(this.comparisonViewer.resetPicture, 20)
         }
-      } else if (this.isSound) {
+      } else if (this.isSound || this.isFile || this.is3DModel) {
         this.fixCanvasSize({ width: 0, height: 0 })
       }
       this.$nextTick(() => {

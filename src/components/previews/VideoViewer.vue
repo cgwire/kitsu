@@ -5,7 +5,6 @@
       <spinner class="spinner" />
     </div>
     <video
-      id="annotation-movie"
       ref="movie"
       class="annotation-movie"
       preload="auto"
@@ -103,6 +102,7 @@ export default {
     this.$options.currentTimeCalls = []
 
     this.container.style.height = this.defaultHeight + 'px'
+    console.log('mount')
     this.isLoading = true
     if (this.isMuted) {
       this.video.muted = this.isMuted
@@ -125,6 +125,7 @@ export default {
         })
 
         this.video.addEventListener('error', () => {
+          console.log('error')
           this.$refs.movie.style.height = this.defaultHeight + 'px'
           this.isLoading = false
         })
@@ -244,6 +245,7 @@ export default {
         height = fullHeight
         width = height / ratio
       }
+      console.log('getDimensions', width, height)
       return { width, height }
     },
 
@@ -294,25 +296,34 @@ export default {
 
     mountVideo () {
       if (!this.isMovie) return
-      this.video.mute = true
+      this.video.mute = this.isMuted
       this.videoDuration = this.video.duration
       this.isLoading = false
       this.$emit('duration-changed', this.videoDuration)
 
       if (this.container) {
-        const dimensions = this.getDimensions()
-        const width = dimensions.width
-        const height = dimensions.height
-        if (height > 0) {
-          this.container.style.height = this.defaultHeight + 'px'
-          // Those two lines are commented out because fixing the width was
-          //   breaking the comment section in the preview in full screen
-          // this.videoWrapper.style.width = width + 'px'
-          // this.video.style.width = width + 'px'
-          this.videoWrapper.style.height = height + 'px'
-          this.video.style.height = height + 'px'
-          this.$emit('size-changed', { width, height })
-        }
+        this.resetSize()
+        setTimeout(this.resetSize)
+      }
+    },
+
+    resetSize () {
+      console.log('reset size')
+      const dimensions = this.getDimensions()
+      const width = dimensions.width
+      const height = dimensions.height
+      console.log('reset size', width, height)
+      if (height > 0) {
+        this.container.style.height = this.defaultHeight + 'px'
+        // Those two lines are commented out because fixing the width was
+        //   breaking the comment section in the preview in full screen
+        // this.videoWrapper.style.width = width + 'px'
+        // this.video.style.width = width + 'px'
+        this.videoWrapper.style.height = height + 'px'
+        this.video.style.height = height + 'px'
+        console.log('ok reset size', width, height)
+        console.log(this.video.style.height)
+        this.$emit('size-changed', { width, height })
       }
     },
 
@@ -393,7 +404,7 @@ export default {
     },
 
     light () {
-      this.onWindowResize()
+      this.mountVideo()
     },
 
     isComparing () {
