@@ -1569,7 +1569,7 @@ export default {
       this.clearCanvas()
       this.framesSeenOfPicture = 0
       this.playingEntityIndex = entityIndex
-      if (this.isMovie(entity.preview_file_extension)) {
+      if (entity && this.isMovie(entity.preview_file_extension)) {
         this.$nextTick(() => {
           this.scrollToEntity(this.playingEntityIndex)
           this.rawPlayer.loadEntity(entityIndex)
