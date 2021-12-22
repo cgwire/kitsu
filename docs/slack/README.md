@@ -75,6 +75,7 @@ your Slack notifications on. It requires a last parameter: the Member ID you use
 on your Slack. 
 
 You can find it in your Slack profile by clicking on More:
+
 ![Application token](../img/slack/slack_display_name1.png)
 
 ![Application token](../img/slack/slack_display_name2.png)
