@@ -71,10 +71,10 @@ page. There you can give the token to your Kitsu instance.
 ### Enable Slack notifications in your profile
 
 The final step requires to go in your profile section. From there you can put
-your Slack notifications on. It requires a last parameter: the nickname you use
+your Slack notifications on. It requires a last parameter: the Member ID you use
 on your Slack. 
 
-You can find it in your Slack profile:
+You can find it in your Slack profile nearby the nickname:
 ![Application token](../img/slack/slack_display_name.png)
 
 Then In your Kitsu proflie, set the Slack notifications on and the Slack
