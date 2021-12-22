@@ -58,8 +58,8 @@
             :key="descriptor.id"
             :descriptor="descriptor"
             :left="offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'"
-            is-stick
             @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
+            is-stick
             v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
             v-if="isShowInfos"
           />
@@ -72,8 +72,8 @@
             :validation-style="getValidationStyle(columnId)"
             :left="offsets['validation-' + columnIndexInGrid] ? `${offsets['validation-' + columnIndexInGrid]}px` : '0'"
             type="assets"
-            is-stick
             @show-header-menu="event => showHeaderMenu(columnId, columnIndexInGrid, event)"
+            is-stick
             v-for="(columnId, columnIndexInGrid) in stickedDisplayedValidationColumns"
             v-if="!isLoading"
           />
@@ -93,13 +93,25 @@
             v-if="isShowInfos"
           />
 
-          <th scope="col" class="frames" v-if="isFrames && isShowInfos && metadataDisplayHeaders.frames">
+          <th
+            class="frames"
+            scope="col"
+            v-if="isFrames && isShowInfos && metadataDisplayHeaders.frames"
+          >
             {{ $t('shots.fields.nb_frames') }}
           </th>
-          <th scope="col" class="framein" v-if="isFrameIn && isShowInfos && metadataDisplayHeaders.frameIn">
+          <th
+            scope="col"
+            class="framein"
+            v-if="isFrameIn && isShowInfos && metadataDisplayHeaders.frameIn"
+          >
             {{ $t('shots.fields.frame_in') }}
           </th>
-          <th scope="col" class="frameout" v-if="isFrameOut && isShowInfos && metadataDisplayHeaders.frameOut">
+          <th
+            scope="col"
+            class="frameout"
+            v-if="isFrameOut && isShowInfos && metadataDisplayHeaders.frameOut"
+          >
             {{ $t('shots.fields.frame_out') }}
           </th>
           <th scope="col" class="fps" v-if="isFps && isShowInfos && metadataDisplayHeaders.fps">
@@ -217,9 +229,9 @@
               <entity-thumbnail
                 :entity="shot"
                 :width="isBigThumbnails ? 150 : 50"
-                :height="isBigThumbnails ? 120 : 30"
+                :height="isBigThumbnails ? 100 : 33"
                 :empty-width="isBigThumbnails ? 150 : 50"
-                :empty-height="isBigThumbnails ? 120 : 32"
+                :empty-height="isBigThumbnails ? 100 : 34"
               />
               <router-link
                 tabindex="-1"
@@ -274,24 +286,24 @@
 
           <validation-cell
             :ref="`validation-${getIndex(i, k)}-${j}`"
+            :key="columnId + '-' + shot.id"
             :class="{
               'validation-cell': !hiddenColumns[columnId],
               'hidden-validation-cell': hiddenColumns[columnId],
               'datatable-row-header': true
             }"
-            :key="columnId + '-' + shot.id"
             :column="taskTypeMap.get(columnId)"
-            :entity="shot"
-            :task-test="taskMap.get(shot.validations.get(columnId))"
-            :selected="isSelected(i, k, j)"
-            :rowX="getIndex(i, k)"
             :columnY="j"
-            :minimized="hiddenColumns[columnId]"
-            :is-static="true"
+            :entity="shot"
             :is-assignees="isShowAssignations"
-            :left="offsets['validation-' + j] ? `${offsets['validation-' + j]}px` : '0'"
-            :sticked="true"
             :is-casting-ready="isCastingReady(shot, columnId)"
+            :is-static="true"
+            :left="offsets['validation-' + j] ? `${offsets['validation-' + j]}px` : '0'"
+            :minimized="hiddenColumns[columnId]"
+            :rowX="getIndex(i, k)"
+            :selected="isSelected(i, k, j)"
+            :sticked="true"
+            :task-test="taskMap.get(shot.validations.get(columnId))"
             @select="(infos) => onTaskSelected(infos, true)"
             @unselect="(infos) => onTaskUnselected(infos, true)"
             v-for="(columnId, j) in stickedDisplayedValidationColumns"
@@ -833,7 +845,7 @@ export default {
       if (this.isLoading) {
         return
       }
-      this.$nextTick(function () {
+      this.$nextTick(() => {
         let offset = this.$refs['th-shot'].clientWidth
         this.offsets = {}
 
