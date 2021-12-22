@@ -241,9 +241,9 @@
               <entity-thumbnail
                 :entity="asset"
                 :width="isBigThumbnails ? 150 : 50"
-                :height="isBigThumbnails ? 120 : 30"
+                :height="isBigThumbnails ? 100 : 30"
                 :empty-width="isBigThumbnails ? 150 : 50"
-                :empty-height="isBigThumbnails ? 120 : 32"
+                :empty-height="isBigThumbnails ? 100 : 32"
                />
               <router-link
                 tabindex="-1"

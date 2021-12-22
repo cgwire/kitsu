@@ -379,12 +379,12 @@ export default {
 }
 
 .validation {
-  position: relative;
   cursor: pointer;
   margin-bottom: 3px;
 }
 
 .wrapper {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
 }
@@ -432,8 +432,8 @@ span.person-avatar:nth-child(2) {
 
 .casting-status {
   position: absolute;
-  right: 10px;
-  top: 5px;
+  right: -5px;
+  top: -8px;
 
   img {
     width: 12px;

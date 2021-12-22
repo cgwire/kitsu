@@ -463,7 +463,7 @@ export default {
     },
 
     currentRevision () {
-      return this.currentParentPreview
+      return this.currentParentPreview && this.currentParentPreview.revision
         ? this.currentParentPreview.revision
         : this.currentPreview ? this.currentPreview.revision : 0
     },
