@@ -69,7 +69,7 @@
             frameborder="0"
             :src="getURL(form)"
             :key="i"
-            v-else
+            v-else-if="isPdf(form)"
           />
         </template>
       </p>
