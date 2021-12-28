@@ -79,6 +79,9 @@
     <div class="video-progress pull-bottom" v-show="isMovie">
       <progress
         ref="progress"
+        :style="{
+          'background-size': progressBackgroundSize
+        }"
         value="0"
         min="0"
         @click="onProgressClicked"
@@ -88,6 +91,7 @@
 
     <annotation-bar
       :annotations="annotations"
+      :nb-frames="nbFrames"
       :maxDurationRaw="videoDuration"
       :width="width"
       @select-annotation="onAnnotationClicked"
@@ -657,6 +661,7 @@ export default {
         document.msFullscreenEnabled ||
         document.webkitSupportsFullscreen ||
         document.webkitFullscreenEnabled ||
+
         document.createElement('video').webkitRequestFullScreen
       )
     },
@@ -717,6 +722,18 @@ export default {
 
     isComparisonEnabled () {
       return this.fullScreen || this.extraWide
+    },
+
+    nbFrames () {
+      return this.videoDuration * this.fps
+    },
+
+    progressBackgroundSize () {
+      if (this.videoDuration) {
+        return (200 / this.nbFrames) + '% 100%'
+      } else {
+        return '100%'
+      }
     }
   },
 
@@ -1744,10 +1761,11 @@ export default {
 
 progress::-moz-progress-bar {
   background-color: #43B581;
+  opacity: 0.6;
 }
 
 progress::-webkit-progress-value {
-  background-color: #43B581;
+  opacity: 0.6;
 }
 
 progress {
@@ -1759,6 +1777,10 @@ progress {
   background: $grey;
   height: 8px;
   display: block;
+  border-top: 1px solid $dark-grey-light;
+  border-bottom: 1px solid $dark-grey-light;
+  background-image: url('../../assets/background/player-timeslider.png');
+  background-repeat: repeat-x;
 }
 
 .revision-previews {

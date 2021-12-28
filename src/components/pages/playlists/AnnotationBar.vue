@@ -25,6 +25,10 @@ export default {
       default: 0,
       type: Number
     },
+    nbFrames: {
+      default: 0,
+      type: Number
+    },
     width: {
       default: 0,
       type: Number
@@ -34,15 +38,17 @@ export default {
   methods: {
     getAnnotationPosition (annotation) {
       const factor = annotation.time / this.maxDurationRaw
+      const frameSize = this.width / this.nbFrames
       let width = this.width
       const progressBar = this.$parent.progress
       if (width === 0 && progressBar) {
         const progressCoordinates = progressBar.getBoundingClientRect()
         width = progressCoordinates.width
       }
-      let left = width * factor - 3
+      const dotWidth = 6
+      let left = (width * factor) - (frameSize - dotWidth / 2)
       if (left >= width) {
-        left -= this.isFullScreen() ? 9 : 6
+        left -= this.isFullScreen() ? 1.5 * dotWidth : dotWidth
       }
       return left
     },

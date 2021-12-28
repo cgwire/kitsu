@@ -282,7 +282,7 @@
       @confirm="confirmDeleteTaskPreview"
     />
   </div>
-  </div>
+</div>
 </template>
 
 <script>
