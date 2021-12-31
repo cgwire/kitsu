@@ -139,6 +139,7 @@
       :is-error="errors.addCommentAttachment"
       @cancel="onCloseCommentAttachment"
       @confirm="createCommentAttachment"
+      @add-snapshots="$emit('add-snapshots')"
     />
   </article>
 </template>
@@ -294,10 +295,11 @@ export default {
 
   methods: {
     runAddComment (text, attachment, checklist, taskStatusId) {
+      const frameDuration = Math.round((1 / this.fps) * 10000) / 10000
       text = replaceTimeWithTimecode(
         text,
         this.revision,
-        this.time,
+        this.time + frameDuration,
         this.fps
       )
       this.$emit('add-comment', text, attachment, checklist, taskStatusId)
@@ -365,10 +367,11 @@ export default {
     onTextChanged (input) {
       if (input.indexOf('@frame') >= 0) {
         this.$nextTick(() => {
+          const frameDuration = Math.round((1 / this.fps) * 10000) / 10000
           const text = replaceTimeWithTimecode(
             this.$refs['comment-textarea'].value,
             this.revision,
-            this.time,
+            this.time + frameDuration,
             this.fps
           )
           this.$refs['comment-textarea'].value = text

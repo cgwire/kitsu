@@ -978,9 +978,8 @@ export default {
       this.changeCurrentPreview(this.taskPreviews.find(
         p => p.revision === parseInt(versionRevision)
       ))
-      const time = parseInt(minutes) * 60 + parseInt(seconds) + parseInt(milliseconds) / 1000
       setTimeout(() => {
-        this.previewPlayer.setCurrentTime(time)
+        this.previewPlayer.setCurrentFrame(frame - 1)
         this.previewPlayer.focus()
       }, 20)
     },

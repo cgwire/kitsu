@@ -29,7 +29,7 @@
  * }, ...]
  */
 import { mapGetters } from 'vuex'
-import { roundToFrame } from '../../../lib/video'
+import { floorToFrame, roundToFrame } from '../../../lib/video'
 
 export default {
   name: 'raw-video-player',
@@ -112,7 +112,7 @@ export default {
       return this.$refs.player2
     },
 
-    frameFactor () {
+    frameDuration () {
       return Math.round((1 / this.fps) * 10000) / 10000
     }
   },
@@ -218,24 +218,20 @@ export default {
     goPreviousFrame () {
       if (this.currentPlayer) {
         const time = this.getLastPushedCurrentTime()
-        const newTime = roundToFrame(time, this.fps) - this.frameFactor
-        if (newTime < 0) {
-          this.setCurrentTime(0)
-        } else {
-          this.setCurrentTime(newTime)
-        }
+        let newTime = time - this.frameDuration
+        newTime = this._setCurrentTime(newTime)
+        const frameNumber = newTime / this.frameDuration
+        this.$emit('frame-update', frameNumber)
       }
     },
 
     goNextFrame () {
       if (this.currentPlayer) {
         const time = this.getLastPushedCurrentTime()
-        const newTime = roundToFrame(time, this.fps) + this.frameFactor
-        if (newTime > this.currentPlayer.duration) {
-          this.setCurrentTime(this.currentPlayer.duration)
-        } else {
-          this.setCurrentTime(newTime)
-        }
+        let newTime = time + this.frameDuration
+        newTime = this._setCurrentTime(newTime)
+        const frameNumber = newTime / this.frameDuration
+        this.$emit('frame-update', frameNumber)
       }
     },
 
@@ -279,11 +275,8 @@ export default {
         this.nextPlayer.style.display = 'none'
         this.resetHeight()
 
-        this.currentPlayer.removeEventListener('timeupdate', this.updateTime)
-        this.currentPlayer.addEventListener('timeupdate', this.updateTime)
-
         this.setSpeed(rate)
-        this.setCurrentTime(currentTime)
+        this._setCurrentTime(currentTime)
         this.$emit('entity-change', this.currentIndex)
       }
     },
@@ -291,7 +284,13 @@ export default {
     // Playing
 
     pause () {
-      if (this.currentPlayer) this.currentPlayer.pause()
+      if (this.currentPlayer) {
+        this.currentPlayer.pause()
+        this.currentPlayer.curentTime = roundToFrame(
+          this.currentPlayer.currentTime, this.fps
+        )
+        clearInterval(this.$options.playLoop)
+      }
       this.isPlaying = false
     },
 
@@ -301,16 +300,26 @@ export default {
         if (!entity.preview_file_id) this.loadNextEntity()
         entity = this.entities[this.currentIndex]
         if (entity.preview_file_id) {
-          if (this.currentPlayer) this.currentPlayer.play()
+          if (this.currentPlayer) {
+            this.runEmitTimeUpdateLoop()
+            this.currentPlayer.play()
+          }
           this.isPlaying = true
         }
       }
     },
 
+    runEmitTimeUpdateLoop () {
+      clearInterval(this.$options.playLoop)
+      this.$options.playLoop = setInterval(() => {
+        this.updateTime(this.currentPlayer.currentTime)
+      }, 1000 / this.fps)
+    },
+
     playNext () {
       if (!this.isPlaying) return
       if (this.isRepeating) {
-        this.currentPlayer.currentTime = 0
+        this.currentPlayer.currentTime = this.frameDuration
         this.currentPlayer.play()
         this.$emit('repeat')
       } else {
@@ -331,7 +340,7 @@ export default {
 
     getCurrentTime () {
       if (this.currentPlayer) {
-        return this.currentPlayer.currentTime - this.frameFactor
+        return this.currentPlayer.currentTime
       } else {
         return 0
       }
@@ -352,16 +361,31 @@ export default {
 
     setCurrentTimeRaw (currentTime) {
       if (this.currentPlayer) {
-        this.currentPlayer.currentTime = currentTime + this.frameFactor
+        this.currentPlayer.currentTime = currentTime
       }
     },
 
-    setCurrentTime (currentTime) {
+    setCurrentFrame (frameNumber) {
+      this._setCurrentTime(frameNumber * this.frameDuration)
+    },
+
+    _setCurrentTime (newTime) {
       if (!this.$options.currentTimeCalls) {
         this.$options.currentTimeCalls = []
       }
-      this.$options.currentTimeCalls.push(currentTime)
+      if (!this.currentPlayer) {
+        newTime = 0
+      } else if (newTime < 0) {
+        newTime = 0
+      } else {
+        const duration = floorToFrame(this.currentPlayer.duration, this.fps)
+        if (newTime > duration) {
+          newTime = duration
+        }
+      }
+      this.$options.currentTimeCalls.push(newTime)
       if (!this.$options.running) this.runSetCurrentTime()
+      return newTime
     },
 
     runSetCurrentTime () {
@@ -371,9 +395,9 @@ export default {
         this.$options.running = true
         const currentTime = this.$options.currentTimeCalls.shift()
         if (this.currentPlayer &&
-            this.currentPlayer.currentTime !== currentTime + this.frameFactor) {
+            this.currentPlayer.currentTime !== currentTime) {
           if (this.currentPlayer) {
-            this.currentPlayer.currentTime = currentTime + this.frameFactor
+            this.currentPlayer.currentTime = currentTime.toFixed(3)
           }
         }
         setTimeout(() => {
@@ -392,20 +416,13 @@ export default {
         this.nextPlayer.src = this.getMoviePath(nextEntity)
       }
       this.resetHeight()
-
-      if (this.currentPlayer) {
-        this.currentPlayer.removeEventListener('timeupdate', this.updateTime)
-        this.currentPlayer.addEventListener('timeupdate', this.updateTime)
-      }
-      if (this.nextPlayer) {
-        this.nextPlayer.removeEventListener('timeupdate', this.updateTime)
-      }
       const rate = this.$options.rate || 1
       this.setSpeed(rate)
     },
 
     updateTime (time) {
-      this.$emit('time-update', time)
+      const frameNumber = Math.round(time / this.frameDuration)
+      this.$emit('frame-update', frameNumber)
     },
 
     updateMaxDuration () {
@@ -433,7 +450,7 @@ export default {
       if (this.entities.length > 0) {
         this.loadEntity(0)
         this.pause()
-        this.setCurrentTime(0)
+        this._setCurrentTime(0)
 
         const entity = this.entities[this.currentIndex]
         if (entity && !entity.preview_file_id) this.loadNextEntity()

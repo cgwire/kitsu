@@ -27,6 +27,15 @@
         {{ $t("tasks.add_preview_error") }}
       </p>
 
+      <p>
+        <button
+          @click="$emit('add-snapshots')"
+          class="button is-link"
+        >
+          Take snapshots of annotations
+        </button>
+      </p>
+
       <p class="has-text-right">
         <a
           :class="{

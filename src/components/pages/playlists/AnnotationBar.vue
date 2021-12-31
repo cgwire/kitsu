@@ -38,7 +38,6 @@ export default {
   methods: {
     getAnnotationPosition (annotation) {
       const factor = annotation.time / this.maxDurationRaw
-      const frameSize = this.width / this.nbFrames
       let width = this.width
       const progressBar = this.$parent.progress
       if (width === 0 && progressBar) {
@@ -46,7 +45,8 @@ export default {
         width = progressCoordinates.width
       }
       const dotWidth = 6
-      let left = (width * factor) - (frameSize - dotWidth / 2)
+      const frameSize = this.width / this.nbFrames
+      let left = (width * factor) - (frameSize / 2) - 3
       if (left >= width) {
         left -= this.isFullScreen() ? 1.5 * dotWidth : dotWidth
       }
@@ -69,7 +69,7 @@ export default {
 <style lang="scss" scoped>
 .annotation-bar {
   width: 100%;
-  height: 20px;
+  height: 10px;
   position: relative;
   background: $dark-grey;
   overflow: hidden;
@@ -81,7 +81,7 @@ export default {
   width: 8px;
   height: 8px;
   display: inline-block;
-  top: 6px;
+  top: 1px;
   position: absolute;
   border-radius: 50%;
   cursor: pointer;
