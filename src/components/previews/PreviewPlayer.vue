@@ -398,6 +398,11 @@
       />
     </div>
   </div>
+
+  <!-- used only for picture saving purpose, it is not displayed -->
+  <canvas id="annotation-snapshot" ref="annotation-snapshot">
+  </canvas>
+  <!-- end -->
 </div>
 </template>
 
@@ -1190,6 +1195,62 @@ export default {
       return this.annotations
     },
 
+    getFileFromCanvas (canvas, filename) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => {
+          const file = new File(
+            [blob],
+            filename,
+            { type: 'image/png', lastModified: new Date().getTime() }
+          )
+          return resolve(file)
+        })
+      })
+    },
+
+    extractVideoFrame (canvas, frameNumber) {
+      return new Promise(resolve => {
+        this.setCurrentFrame(frameNumber)
+        setTimeout(() => {
+          this.previewViewer.extractFrame(canvas, frameNumber)
+          resolve()
+        }, 100)
+      })
+    },
+
+    copyAnnotationCanvas (canvas, annotation) {
+      return new Promise(resolve => {
+        this.clearCanvas()
+        this.loadSingleAnnotation(annotation)
+        setTimeout(() => {
+          const context = canvas.getContext('2d')
+          const source = document.getElementById('annotation-canvas')
+          context.drawImage(source, 0, 0, canvas.width, canvas.height)
+          return resolve()
+        }, 100)
+      })
+    },
+
+    async extractAnnotationSnapshots () {
+      const currentFrame = this.currentFrame
+      const annotations = this.annotations.sort((a, b) => b.time < a.time)
+      const files = []
+      let index = 1
+      for (const annotation of annotations) {
+        const canvas = document.getElementById('annotation-snapshot')
+        const filename = `annotation ${index}.png`
+        const frameNumber =
+          roundToFrame(annotation.time, this.fps) / this.frameDuration
+        await this.extractVideoFrame(canvas, frameNumber)
+        await this.copyAnnotationCanvas(canvas, annotation)
+        const file = await this.getFileFromCanvas(canvas, filename)
+        files.push(file)
+        index++
+      }
+      this.previewViewer.setCurrentFrame(currentFrame)
+      return files
+    },
+
     // Events
 
     onKeyDown (event) {
@@ -1733,5 +1794,9 @@ export default {
 
 .viewers {
   display: flex;
+}
+
+#annotation-snapshot {
+  display: none;
 }
 </style>

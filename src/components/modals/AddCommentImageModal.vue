@@ -17,22 +17,25 @@
 
       <file-upload
         ref="image-field"
-        :label="$t('main.csv.upload_file')"
+        :label="$t('main.select_file')"
         :accept="extensions"
-        @fileselected="onFileSelected"
         :multiple="true"
+        @fileselected="onFileSelected"
       />
-
       <p class="error" v-if="isError">
-        {{ $t("tasks.add_preview_error") }}
+        $t('main.add')
       </p>
 
-      <p>
+      <p class="mt1" v-if="isMovie">
+        Or:
+      </p>
+
+      <p v-if="isMovie">
         <button
           @click="$emit('add-snapshots')"
-          class="button is-link"
+          class="button"
         >
-          Take snapshots of annotations
+          {{ $t('main.attach_snapshots') }}
         </button>
       </p>
 
@@ -118,6 +121,10 @@ export default {
       type: Boolean,
       default: false
     },
+    isMovie: {
+      type: Boolean,
+      default: false
+    },
     extensions: {
       type: String,
       default: files.ALL_EXTENSIONS_STRING
@@ -158,8 +165,9 @@ export default {
 
     onPaste (event) {
       if (this.active && event.clipboardData.files) {
-        this.imageField.filesChange('', event.clipboardData.files)
+        this.addFiles(event.clipboardData.files)
       }
+      event.preventDefault()
     },
 
     getURL (form) {
@@ -172,6 +180,10 @@ export default {
 
     isVideo (form) {
       return form.get('file').type.startsWith('video')
+    },
+
+    addFiles (files) {
+      this.imageField.filesChange('', files)
     }
   },
 

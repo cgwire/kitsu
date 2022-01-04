@@ -140,9 +140,11 @@
               :fps="parseInt(currentFps)"
               :time="isPreview ? currentTime : currentTimeRaw"
               :revision="currentRevision"
+              :is-movie="isMoviePreview"
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
               @file-drop="selectFile"
+              @annotation-snapshots-requested="extractAnnotationSnapshots"
               v-if="isCommentingAllowed"
             />
 
@@ -986,6 +988,12 @@ export default {
 
     onTimeUpdated (time) {
       this.currentTime = time
+    },
+
+    async extractAnnotationSnapshots () {
+      const files = await this.previewPlayer.extractAnnotationSnapshots()
+      this.$refs['add-comment'].setAnnotationSnapshots(files)
+      return files
     }
   },
 

@@ -407,6 +407,17 @@ export default {
 
     updateLoupePosition (event, canvasDimensions) {
       this.pictureViewer.updateLoupePosition(event, canvasDimensions)
+    },
+
+    extractFrame (canvas, frame) {
+      this.videoViewer.setCurrentFrame(frame)
+      const video = this.videoViewer.video
+      const context = canvas.getContext('2d')
+      const dimensions = this.videoViewer.getNaturalDimensions()
+      canvas.width = dimensions.width
+      canvas.height = dimensions.height
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.drawImage(video, 0, 0, canvas.width, canvas.height)
     }
   },
 

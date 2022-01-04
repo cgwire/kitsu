@@ -65,8 +65,9 @@
           <div>
             <add-comment
               ref="add-comment"
-              :is-loading="loading.addComment"
               :is-error="errors.addComment"
+              :is-loading="loading.addComment"
+              :is-movie="isMovie"
               :user="user"
               :team="currentTeam"
               :task="currentTask"
@@ -79,6 +80,7 @@
               @add-preview="onAddPreviewClicked"
               @duplicate-comment="onDuplicateComment"
               @file-drop="selectFile"
+              @annotation-snapshots-requested="extractAnnotationSnapshots"
               v-if="isCommentingAllowed"
             />
             <div
@@ -422,6 +424,10 @@ export default {
         this.currentTask.entity.preview_file_id !== this.currentPreviewId &&
         ['png', 'mp4'].includes(this.extension)
       )
+    },
+
+    isMovie () {
+      return this.extension === 'mp4'
     },
 
     extension () {
@@ -1202,6 +1208,12 @@ export default {
         this.previewPlayer.setCurrentFrame(frame - 1)
         this.previewPlayer.focus()
       }, 20)
+    },
+
+    async extractAnnotationSnapshots () {
+      const files = await this.previewPlayer.extractAnnotationSnapshots()
+      this.$refs['add-comment'].setAnnotationSnapshots(files)
+      return files
     }
   },
 
