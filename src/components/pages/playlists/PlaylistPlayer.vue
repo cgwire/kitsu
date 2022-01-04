@@ -1576,16 +1576,18 @@ export default {
       this.clearCanvas()
       this.rawPlayer.goPreviousFrame()
       if (this.isComparing) this.syncComparisonPlayer()
-      const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
-      if (annotation) this.loadAnnotation(annotation)
+      const annotation = this.getAnnotation(
+        this.rawPlayer.getCurrentTime() - this.frameDuration)
+      if (annotation) this.loadSingleAnnotation(annotation)
     },
 
     goNextFrame () {
       this.clearCanvas()
       this.rawPlayer.goNextFrame()
       if (this.isComparing) this.syncComparisonPlayer()
-      const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
-      if (annotation) this.loadAnnotation(annotation)
+      const annotation = this.getAnnotation(
+        this.rawPlayer.getCurrentTime() - this.frameDuration)
+      if (annotation) this.loadSingleAnnotation(annotation)
     },
 
     removeEntity (entity) {
@@ -2335,6 +2337,7 @@ export default {
 
     saveAnnotations () {
       let currentTime = roundToFrame(this.currentTimeRaw, this.fps) || 0
+      currentTime -= this.frameDuration
       if (this.isCurrentPreviewPicture) currentTime = 0
       if (!this.annotations) return
 
