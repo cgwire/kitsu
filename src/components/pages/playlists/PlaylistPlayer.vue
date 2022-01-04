@@ -147,7 +147,7 @@
         @metadata-loaded="onMetadataLoaded"
         @play-next="onPlayNext"
         @repeat="onVideoRepeated"
-        @time-update="onTimeUpdate"
+        @frame-update="onFrameUpdate"
         v-show="isCurrentPreviewMovie && !isLoading"
       />
 
@@ -239,38 +239,21 @@
       :task="task"
       :is-preview="false"
       :silent="isCommentsHidden"
-      :current-time-raw="currentTimeRaw"
+      :current-time-raw="currentTimeRaw - frameDuration"
       :current-parent-preview="currentPreview"
-      @time-code-clicked="timeCodeClicked"
+      @time-code-clicked="onTimeCodeClicked"
     />
   </div>
 
-  <div
-    class="playlist-progress"
-    ref="playlist-progress"
-    v-show="isCurrentPreviewMovie && !isAddingEntity"
-  >
-    <div class="video-progress">
-      <progress
-        ref="progress"
-        value="0"
-        min="0"
-        @click="onProgressBarClicked"
-      >
-        <span
-          id="progress-bar"
-          ref="progress-bar"
-        ></span>
-      </progress>
-    </div>
-  </div>
-
-  <annotation-bar
-    class="playlist-annotations"
-    ref="playlist-annotation"
+  <video-progress
+    ref="video-progress"
+    class="video-progress pull-bottom"
     :annotations="annotations"
-    :max-duration-raw="maxDurationRaw"
-    @select-annotation="loadAnnotation"
+    :frame-duration="frameDuration"
+    :nb-frames="nbFrames"
+    @start-scrub="$refs['button-bar'].classList.add('unselectable')"
+    @end-scrub="$refs['button-bar'].classList.remove('unselectable')"
+    @progress-changed="onProgressChanged"
     v-show="isCurrentPreviewMovie && playlist.id && !isAddingEntity"
   />
 
@@ -822,8 +805,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { fabric } from 'fabric'
 import { ArrowUpRightIcon, DownloadIcon } from 'vue-feather-icons'
 
-import { formatFrame, formatTime, roundToFrame } from '@/lib/video'
-import AnnotationBar from '@/components/pages/playlists/AnnotationBar'
+import { formatFrame, formatTime, roundToFrame, floorToFrame } from '@/lib/video'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ColorPicker from '@/components/widgets/ColorPicker'
 import Combobox from '@/components/widgets/Combobox'
@@ -837,6 +819,7 @@ import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal'
 import SoundViewer from '@/components/previews/SoundViewer'
 import Spinner from '@/components/widgets/Spinner'
 import TaskInfo from '@/components/sides/TaskInfo'
+import VideoProgress from '@/components/previews/VideoProgress'
 
 import { annotationMixin } from '@/components/mixins/annotation'
 import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
@@ -847,7 +830,6 @@ export default {
   mixins: [annotationMixin, domMixin],
 
   components: {
-    AnnotationBar,
     ArrowUpRightIcon,
     ButtonSimple,
     ColorPicker,
@@ -862,7 +844,8 @@ export default {
     SelectTaskTypeModal,
     SoundViewer,
     Spinner,
-    TaskInfo
+    TaskInfo,
+    VideoProgress
   },
 
   props: {
@@ -969,7 +952,6 @@ export default {
     } else {
       this.entityList = []
     }
-    this.updateProgressBar()
     if (this.picturePlayer) {
       this.picturePlayer.addEventListener('load', async () => {
         const wasPlaying = this.isPlaying
@@ -983,6 +965,7 @@ export default {
       this.resetCanvas()
       this.setPlayerSpeed(1)
       this.rebuildComparisonOptions()
+      this.onFrameUpdate(1)
     })
   },
 
@@ -1237,8 +1220,16 @@ export default {
       return `/api/data/playlists/${this.playlist.id}/download/zip`
     },
 
+    frameNumber () {
+      let frameNumber = this.currentTimeRaw / this.frameDuration
+      if (frameNumber >= this.nbFrames) {
+        frameNumber = this.nbFrames
+      }
+      return Math.round(frameNumber) - 1
+    },
+
     currentFrame () {
-      return formatFrame(this.currentTimeRaw, this.fps)
+      return formatFrame(this.frameNumber + 1)
     },
 
     currentFrameMovieOrPicture () {
@@ -1278,13 +1269,13 @@ export default {
       }
     },
 
-    frameFactor () {
+    frameDuration () {
       return Math.round((1 / this.fps) * 10000) / 10000
     },
 
     fps () {
       return this.currentProduction
-        ? this.currentProduction.fps || 24
+        ? parseInt(this.currentProduction.fps)
         : 24
     },
 
@@ -1313,15 +1304,7 @@ export default {
     },
 
     progress () {
-      return this.$refs.progress
-    },
-
-    progressBar () {
-      return this.$refs['progress-bar']
-    },
-
-    progressCursor () {
-      return this.$refs['progress-cursor']
+      return this.$refs['video-progress']
     },
 
     video () {
@@ -1332,6 +1315,10 @@ export default {
       return this.playlist.build_jobs
         .filter(job => job.status === 'running')
         .length !== 0
+    },
+
+    nbFrames () {
+      return Math.round(this.maxDurationRaw * this.fps)
     }
   },
 
@@ -1407,22 +1394,6 @@ export default {
 
     formatTime,
 
-    getTimelinePosition (time, index) {
-      if (this.$refs.movie && this.progress) {
-        let position = Math.round(
-          (time / this.$refs.movie.duration) * this.progress.offsetWidth
-        )
-        position = position - index * 10 - 5
-        if (position < 0) position = 0
-        if (position + 10 > this.progress.offsetWidth) {
-          position = position - 5
-        }
-        return position
-      } else {
-        return 0
-      }
-    },
-
     displayBars () {
       if (this.$refs['button-bar']) {
         if (this.$refs.header) {
@@ -1431,11 +1402,8 @@ export default {
         if (this.$refs['button-bar']) {
           this.$refs['button-bar'].style.opacity = 1
         }
-        if (this.$refs['playlist-progress']) {
-          this.$refs['playlist-progress'].style.opacity = 1
-        }
-        if (this.$refs['playlist-annotation']) {
-          this.$refs['playlist-annotation'].$el.style.opacity = 1
+        if (this.$refs['video-progress']) {
+          this.$refs['video-progress'].$el.style.opacity = 1
         }
         this.container.style.cursor = 'default'
       }
@@ -1444,8 +1412,7 @@ export default {
     hideBars () {
       this.$refs.header.style.opacity = 0
       this.$refs['button-bar'].style.opacity = 0
-      this.$refs['playlist-progress'].style.opacity = 0
-      this.$refs['playlist-annotation'].$el.style.opacity = 0
+      this.$refs['video-progress'].$el.style.opacity = 0
     },
 
     showDeleteModal () {
@@ -1472,9 +1439,7 @@ export default {
 
     updateProgressBar () {
       if (this.progress) {
-        const factor = this.currentTimeRaw / this.maxDurationRaw
-        this.progress.value = this.currentTimeRaw
-        this.progressBar.style.width = Math.floor(factor * 100) + '%'
+        this.progress.updateProgressBar(this.frameNumber)
       }
     },
 
@@ -1526,7 +1491,7 @@ export default {
 
     pauseClicked () {
       this.pause()
-      this.sendUpdatePlayingStatus()
+      this.updatePlayingStatus()
     },
 
     play () {
@@ -1601,28 +1566,28 @@ export default {
     },
 
     syncComparisonPlayer () {
-      const currentTimeRaw = this.rawPlayer.getCurrentTimeRaw()
-      this.rawPlayerComparison.currentPlayer.currentTime = currentTimeRaw
+      if (this.rawPlayerComparison && this.rawPlayerComparison.currentPlayer) {
+        const currentTimeRaw = this.rawPlayer.getCurrentTimeRaw()
+        this.rawPlayerComparison.currentPlayer.currentTime = currentTimeRaw
+      }
     },
 
     goPreviousFrame () {
       this.clearCanvas()
       this.rawPlayer.goPreviousFrame()
-      if (this.isComparing) {
-        this.syncComparisonPlayer()
-      }
-      const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
-      if (annotation) this.loadAnnotation(annotation)
+      if (this.isComparing) this.syncComparisonPlayer()
+      const annotation = this.getAnnotation(
+        this.rawPlayer.getCurrentTime() - this.frameDuration)
+      if (annotation) this.loadSingleAnnotation(annotation)
     },
 
     goNextFrame () {
       this.clearCanvas()
       this.rawPlayer.goNextFrame()
-      if (this.isComparing) {
-        this.syncComparisonPlayer()
-      }
-      const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
-      if (annotation) this.loadAnnotation(annotation)
+      if (this.isComparing) this.syncComparisonPlayer()
+      const annotation = this.getAnnotation(
+        this.rawPlayer.getCurrentTime() - this.frameDuration)
+      if (annotation) this.loadSingleAnnotation(annotation)
     },
 
     removeEntity (entity) {
@@ -1675,18 +1640,16 @@ export default {
       )
     },
 
-    onProgressBarClicked (e) {
+    onProgressChanged (frameNumber) {
       this.clearCanvas()
-      const pos =
-        (e.pageX - this.progress.offsetLeft) / this.progress.offsetWidth
-      const currentTime = pos * this.maxDurationRaw
-      this.rawPlayer.setCurrentTimeRaw(currentTime)
-      if (this.isComparing) {
-        this.rawPlayerComparison.setCurrentTimeRaw(currentTime)
-      }
-      const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
+      this.rawPlayer.setCurrentFrame(frameNumber + 1)
+      this.syncComparisonPlayer()
+      const annotation = this.getAnnotation(
+        frameNumber * this.frameDuration
+      )
       if (annotation) this.loadAnnotation(annotation)
       this.sendUpdatePlayingStatus()
+      this.onFrameUpdate(frameNumber + 1)
     },
 
     onPreviousFrameClicked () {
@@ -1904,25 +1867,23 @@ export default {
       this.rawPlayerComparison.setSpeed(rate)
     },
 
-    onTimeUpdate () {
-      if (this.rawPlayer && this.rawPlayer.currentPlayer) {
-        this.currentTimeRaw =
-          this.rawPlayer.currentPlayer.currentTime - this.frameFactor
-      } else {
-        this.currentTimeRaw = 0 + this.frameFactor
-      }
+    onFrameUpdate (frame) {
+      this.currentTimeRaw = frame * this.frameDuration
       this.currentTime = this.formatTime(this.currentTimeRaw)
       this.updateProgressBar()
       const actions = this.onNextTimeUpdateActions
-      this.onNextTimeUpdateActions = []
       actions.forEach(action => action())
+      this.onNextTimeUpdateActions = []
     },
 
     onMaxDurationUpdate (duration) {
-      this.maxDurationRaw = duration - this.frameFactor
-      this.maxDuration = this.formatTime(duration)
-      if (this.progress) {
-        this.progress.setAttribute('max', this.maxDurationRaw)
+      if (duration) {
+        duration = floorToFrame(duration, this.fps)
+        this.maxDurationRaw = duration
+        this.maxDuration = this.formatTime(duration)
+      } else {
+        this.maxDurationRaw = 0
+        this.maxDuration = '00.00.000'
       }
     },
 
@@ -2062,17 +2023,14 @@ export default {
           height = this.container ? this.container.offsetHeight : 0
         }
         height -= this.$refs.header ? this.$refs.header.offsetHeight : 0
-        if (this.$refs['playlist-progress']) {
-          height -= this.$refs['playlist-progress'].offsetHeight
-        }
         if (this.$refs['button-bar']) {
           height -= this.$refs['button-bar'].offsetHeight
         }
         if (this.$refs['playlisted-entities']) {
           height -= this.$refs['playlisted-entities'].offsetHeight
         }
-        if (this.$refs['playlist-annotation']) {
-          height -= this.$refs['playlist-annotation'].$el.offsetHeight
+        if (this.$refs['video-progress']) {
+          height -= this.$refs['video-progress'].$el.offsetHeight
         }
         if (this.$refs['video-container']) {
           this.$refs['video-container'].style.height = `${height}px`
@@ -2366,10 +2324,9 @@ export default {
       const currentTime = annotation ? annotation.time || 0 : 0
       if (this.rawPlayer || this.picturePlayer) {
         if (this.rawPlayer) {
-          this.rawPlayer.setCurrentTime(currentTime)
-          if (this.isComparing) {
-            this.$refs['raw-player-comparison'].setCurrentTime(currentTime)
-          }
+          const frameNumber = currentTime / this.frameDuration
+          this.rawPlayer.setCurrentFrame(frameNumber)
+          this.syncComparisonPlayer()
           this.currentTimeRaw = currentTime
           this.updateProgressBar()
         }
@@ -2380,6 +2337,7 @@ export default {
 
     saveAnnotations () {
       let currentTime = roundToFrame(this.currentTimeRaw, this.fps) || 0
+      currentTime -= this.frameDuration
       if (this.isCurrentPreviewPicture) currentTime = 0
       if (!this.annotations) return
 
@@ -2594,7 +2552,7 @@ export default {
       return false
     },
 
-    timeCodeClicked (
+    onTimeCodeClicked (
       { versionRevision, minutes, seconds, milliseconds, frame }
     ) {
       const previews = this.currentEntity.preview_files[this.task.task_type_id]
@@ -2604,10 +2562,10 @@ export default {
       this.onPreviewChanged(this.currentEntity, previewFile)
       const time = parseInt(minutes) * 60 + parseInt(seconds) + parseInt(milliseconds) / 1000
       setTimeout(() => {
-        this.rawPlayer.setCurrentTime(time)
-        if (this.isComparing) {
-          this.rawPlayerComparison.setCurrentTime(time)
-        }
+        const frameNumber = time / this.frameDuration
+        this.rawPlayer.setCurrentFrame(frameNumber)
+        this.onFrameUpdate(frameNumber)
+        this.syncComparisonPlayer()
       }, 20)
     },
 
@@ -2624,7 +2582,7 @@ export default {
         this.$nextTick(() => {
           this.pause()
           this.rawPlayerComparison.loadEntity(this.playingEntityIndex)
-          this.rawPlayerComparison.setCurrentTime(this.currentTimeRaw)
+          this.rawPlayerComparison.setCurrentTimeRaw(this.currentTimeRaw)
         })
       }
     },
@@ -2766,7 +2724,7 @@ export default {
       })
       this.playingEntityIndex = 0
       this.pause()
-      if (this.rawPlayer) this.rawPlayer.setCurrentTime(0)
+      if (this.rawPlayer) this.rawPlayer.setCurrentFrame(1)
       this.currentTimeRaw = 0
       this.updateProgressBar()
       this.updateTaskPanel()
@@ -2888,11 +2846,11 @@ export default {
             this.isCurrentPreviewMovie &&
             eventData.current_frame_number !== parseInt(this.currentFrame)
           ) {
-            const time = eventData.current_frame_number / this.fps
-            this.rawPlayer.setCurrentTime(time)
-            if (this.isComparing) {
-              this.$refs['raw-player-comparison'].setCurrentTime(time)
-            }
+            const frameNumber = eventData.current_frame_number
+            this.rawPlayer.setCurrentFrame(frameNumber)
+            this.currentTimeRaw = this.rawPlayer.getCurrentTimeRaw()
+            this.syncComparisonPlayer()
+            this.updateProgressBar()
           } else if (
             this.isCurrentPreviewPicture &&
             eventData.current_frame_number !== this.framesSeenOfPicture
@@ -2920,6 +2878,7 @@ export default {
         }
 
         if (eventData.is_playing !== this.isPlaying) {
+          console.log(eventData.is_playing, 'ok play/pause')
           if (eventData.is_playing) {
             this.play()
           } else {
@@ -2995,7 +2954,6 @@ export default {
 }
 
 .playlisted-entities,
-.playlist-progress,
 .playlist-footer {
   background: $dark-grey-light;
   color: $white-grey;
@@ -3123,16 +3081,6 @@ progress {
   background-color: #43B581;
 }
 
-.video-progress {
-  cursor: pointer;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: $grey;
-  height: 8px;
-}
-
 .mr1 {
   margin-right: 1em;
 }
@@ -3141,25 +3089,9 @@ progress {
   margin-right: 0;
 }
 
-.playlist-progress {
-  width: 100%;
-}
-
 .playlist-header,
-.playlist-progress,
-.playlist-progress {
+.video-progress {
   transition: opacity 0.5s ease
-}
-
-.progress-cursor {
-  position: absolute;
-  display: block;
-  background-color: #43B581;
-  border-radius: 50%;
-  width: 14px;
-  height: 14px;
-  z-index: 200;
-  cursor: pointer;
 }
 
 .comparison-list,
@@ -3245,24 +3177,6 @@ progress {
 .spinner {
   margin-top: 80px;
   margin-left: 1em;
-}
-
-.progress {
-  width: 100px;
-  height: 10px;
-  margin-right: 1em;
-  border-radius: 5px;
-  background: $grey;
-
-  span {
-    background: $dark-purple;
-    height: 10px;
-    display: block;
-
-    &.complete {
-      background: $green;
-    }
-  }
 }
 
 .annotation-tools {

@@ -189,8 +189,7 @@ const getters = {
   personMap: state => state.personMap,
   personEmailMap: state => {
     const emailMap = new Map()
-    Array.from(state.personMap.keys()).forEach(personId => {
-      const person = state.personMap.get(personId)
+    state.people.forEach(person => {
       emailMap.set(person.email, person)
     })
     return emailMap

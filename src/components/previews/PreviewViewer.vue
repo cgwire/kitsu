@@ -32,8 +32,9 @@
       :preview="preview"
       :full-screen="fullScreen"
       @size-changed="dimensions => $emit('size-changed', dimensions)"
+      @video-loaded="$emit('video-loaded')"
       @duration-changed="duration => $emit('duration-changed', duration)"
-      @time-update="time => $emit('time-update', time)"
+      @frame-update="frameNumber => $emit('frame-update', frameNumber)"
       @play-ended="$emit('play-ended')"
       @video-end="$emit('video-end')"
       v-show="isMovie"
@@ -378,12 +379,11 @@ export default {
       } else if (this.isPicture) {
         return this.pictureViewer.getDimensions()
       }
-      console.log(dimensions)
       return dimensions
     },
 
-    setCurrentTime (time) {
-      this.videoViewer.setCurrentTime(time)
+    setCurrentFrame (frameNumber) {
+      this.videoViewer.setCurrentFrame(frameNumber)
     },
 
     // To use when you don't want to handle back pressure and rounding
@@ -407,6 +407,17 @@ export default {
 
     updateLoupePosition (event, canvasDimensions) {
       this.pictureViewer.updateLoupePosition(event, canvasDimensions)
+    },
+
+    extractFrame (canvas, frame) {
+      this.videoViewer.setCurrentFrame(frame)
+      const video = this.videoViewer.video
+      const context = canvas.getContext('2d')
+      const dimensions = this.videoViewer.getNaturalDimensions()
+      canvas.width = dimensions.width
+      canvas.height = dimensions.height
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.drawImage(video, 0, 0, canvas.width, canvas.height)
     }
   },
 

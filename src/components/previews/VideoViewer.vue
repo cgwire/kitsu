@@ -7,12 +7,12 @@
     <video
       ref="movie"
       class="annotation-movie"
-      preload="auto"
       :style="{
         display: isLoading ? 'none' : 'block'
       }"
       :src="moviePath"
       :poster="posterPath"
+      preload="auto"
       type="video/mp4"
     >
     </video>
@@ -23,7 +23,7 @@
 <script>
 import { mapGetters } from 'vuex'
 
-import { formatFrame, formatTime, roundToFrame } from '../../lib/video'
+import { formatFrame, formatTime, floorToFrame } from '../../lib/video'
 import Spinner from '../widgets/Spinner'
 
 import { domMixin } from '@/components/mixins/dom'
@@ -102,7 +102,6 @@ export default {
     this.$options.currentTimeCalls = []
 
     this.container.style.height = this.defaultHeight + 'px'
-    console.log('mount')
     this.isLoading = true
     if (this.isMuted) {
       this.video.muted = this.isMuted
@@ -115,23 +114,20 @@ export default {
         this.video.addEventListener('loadedmetadata', () => {
           this.configureVideo()
           this.onWindowResize()
-          this.video.removeEventListener('timeupdate', this.onTimeUpdate)
-          this.video.addEventListener('timeupdate', this.onTimeUpdate)
           this.isLoading = false
+          this.setCurrentTime(0)
+          this.$emit('video-loaded')
         })
 
         this.video.addEventListener('ended', () => {
           this.isLoading = false
         })
 
-        this.video.addEventListener('error', () => {
-          console.log('error')
+        this.video.addEventListener('error', (err) => {
+          console.error('An error occured while loading a video', err)
           this.$refs.movie.style.height = this.defaultHeight + 'px'
           this.isLoading = false
         })
-
-        this.video.removeEventListener('timeupdate', this.onTimeUpdate)
-        this.video.addEventListener('timeupdate', this.onTimeUpdate)
         window.addEventListener('resize', this.onWindowResize)
       }
     }, 0)
@@ -139,7 +135,6 @@ export default {
 
   beforeDestroy () {
     this.pause()
-    this.video.removeEventListener('timeupdate', this.onTimeUpdate)
     window.removeEventListener('keydown', this.onKeyDown)
     window.removeEventListener('resize', this.onWindowResize)
   },
@@ -149,16 +144,32 @@ export default {
       'currentProduction'
     ]),
 
-    currentFrame () {
-      return formatFrame(this.currentTimeRaw, this.fps)
-    },
-
     container () {
       return this.$refs.container
     },
 
+    extension () {
+      return this.preview ? this.preview.extension : ''
+    },
+
     fps () {
       return this.currentProduction.fps || 24
+    },
+
+    frameDuration () {
+      return Math.round((1 / this.fps) * 10000) / 10000
+    },
+
+    isAvailable () {
+      return !['broken', 'processing'].includes(this.status)
+    },
+
+    isMovie () {
+      return this.extension === 'mp4'
+    },
+
+    isVideo () {
+      return this.$refs.movie && this.videoDuration && this.videoDuration > 0
     },
 
     status () {
@@ -167,12 +178,12 @@ export default {
         : 'ready'
     },
 
-    isAvailable () {
-      return !['broken', 'processing'].includes(this.status)
+    video () {
+      return this.$refs.movie
     },
 
-    isVideo () {
-      return this.$refs.movie && this.videoDuration && this.videoDuration > 0
+    videoWrapper () {
+      return this.$refs['video-wrapper']
     },
 
     moviePath () {
@@ -199,26 +210,6 @@ export default {
       } else {
         return null
       }
-    },
-
-    video () {
-      return this.$refs.movie
-    },
-
-    videoWrapper () {
-      return this.$refs['video-wrapper']
-    },
-
-    extension () {
-      return this.preview ? this.preview.extension : ''
-    },
-
-    isMovie () {
-      return this.extension === 'mp4'
-    },
-
-    frameFactor () {
-      return Math.round((1 / this.fps) * 10000) / 10000
     }
   },
 
@@ -245,7 +236,6 @@ export default {
         height = fullHeight
         width = height / ratio
       }
-      console.log('getDimensions', width, height)
       return { width, height }
     },
 
@@ -258,7 +248,12 @@ export default {
       }
     },
 
+    setCurrentFrame (frameNumber) {
+      this.setCurrentTime(frameNumber * this.frameDuration)
+    },
+
     setCurrentTimeRaw (currentTime) {
+      if (currentTime < this.frameDuration) currentTime = 0
       this.video.currentTime = currentTime
     },
 
@@ -276,9 +271,10 @@ export default {
       } else {
         this.$options.running = true
         const currentTime = this.$options.currentTimeCalls.shift()
-        // currentTime = roundToFrame(currentTime, this.fps)
-        if (this.video.currentTime !== currentTime + this.frameFactor) {
-          this.video.currentTime = currentTime + this.frameFactor
+        if (this.video.currentTime !== currentTime + this.frameDuration) {
+          // tweaks needed because the html video player is messy with frames
+          this.video.currentTime = currentTime + this.frameDuration + 0.01
+          this.onTimeUpdate()
         }
         setTimeout(() => {
           this.runSetCurrentTime()
@@ -286,8 +282,21 @@ export default {
       }
     },
 
+    _setRoundedTime (time) {
+      time = floorToFrame(time, this.fps)
+      if (time < this.frameDuration) {
+        time = 0
+      } else if (
+        time > (this.video.duration - this.frameDuration)
+      ) {
+        time = this.video.duration - this.frameDuration
+      } else {
+      }
+      this.setCurrentTime(time)
+      return time
+    },
+
     configureVideo () {
-      this.video.addEventListener('timeupdate', this.onTimeUpdate)
       this.video.onended = this.onVideoEnd
       if (this.video.currentTime === 0) {
         this.mountVideo()
@@ -300,7 +309,6 @@ export default {
       this.videoDuration = this.video.duration
       this.isLoading = false
       this.$emit('duration-changed', this.videoDuration)
-
       if (this.container) {
         this.resetSize()
         setTimeout(this.resetSize)
@@ -308,11 +316,9 @@ export default {
     },
 
     resetSize () {
-      console.log('reset size')
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
-      console.log('reset size', width, height)
       if (height > 0) {
         this.container.style.height = this.defaultHeight + 'px'
         // Those two lines are commented out because fixing the width was
@@ -321,19 +327,28 @@ export default {
         // this.video.style.width = width + 'px'
         this.videoWrapper.style.height = height + 'px'
         this.video.style.height = height + 'px'
-        console.log('ok reset size', width, height)
-        console.log(this.video.style.height)
         this.$emit('size-changed', { width, height })
       }
     },
 
     onTimeUpdate (time) {
       if (this.video) {
-        this.currentTimeRaw = this.video.currentTime - this.frameFactor
+        this.currentTimeRaw = this.video.currentTime - this.frameDuration
       } else {
-        this.currentTimeRaw = 0 + this.frameFactor
+        this.currentTimeRaw = 0 + this.frameDuration
       }
-      this.$emit('time-update', this.currentTimeRaw)
+      this.$emit(
+        'frame-update',
+        Math.round(this.currentTimeRaw / this.frameDuration)
+      )
+    },
+
+    runEmitTimeUpdateLoop () {
+      clearInterval(this.$options.playLoop)
+      this.$options.playLoop = setInterval(
+        this.onTimeUpdate,
+        1000 / this.fps
+      )
     },
 
     play () {
@@ -341,10 +356,13 @@ export default {
         this.setCurrentTime(0)
       }
       this.video.play()
+      this.runEmitTimeUpdateLoop()
     },
 
     pause () {
       this.video.pause()
+      this._setRoundedTime(this.currentTimeRaw)
+      clearInterval(this.$options.playLoop)
     },
 
     toggleMute () {
@@ -353,28 +371,19 @@ export default {
 
     goPreviousFrame () {
       const time = this.getLastPushedCurrentTime()
-      const newTime = roundToFrame(time, this.fps) - this.frameFactor
-      if (newTime < 0) {
-        this.setCurrentTime(0)
-      } else {
-        this.setCurrentTime(newTime)
-      }
-      return newTime > 0 ? newTime + this.frameFactor : 0
+      const newTime = time - this.frameDuration
+      return this._setRoundedTime(newTime)
     },
 
     goNextFrame () {
       const time = this.getLastPushedCurrentTime()
-      const newTime = roundToFrame(time, this.fps) + this.frameFactor
-      if (newTime > this.video.duration) {
-        this.setCurrentTime(this.video.duration)
-      } else {
-        this.setCurrentTime(newTime)
-      }
-      return newTime > 0 ? newTime + this.frameFactor : 0
+      const newTime = time + this.frameDuration
+      return this._setRoundedTime(newTime)
     },
 
     onVideoEnd () {
       this.isPlaying = false
+      clearInterval(this.$options.playLoop)
       if (this.isRepeating) {
         this.$emit('video-end')
         this.video.currentTime = 0

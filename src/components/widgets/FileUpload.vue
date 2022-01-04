@@ -15,14 +15,14 @@
           }">
           {{ label }}
           <input
-            type="file"
             ref="uploadInput"
+            class="visuallyhidden"
+            type="file"
             :accept="accept"
             :name="uploadFieldName"
             :disabled="isSaving || disabled"
-            @change="filesChange($event.target.name, $event.target.files)"
-            class="visuallyhidden"
             :multiple="multiple"
+            @change="filesChange($event.target.name, $event.target.files)"
           >
         </label>
         <span class="file-upload-status" v-if="this.uploadedFiles.length > 1">

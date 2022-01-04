@@ -9,6 +9,22 @@ export const roundToFrame = (time, fps) => {
   return roundedTime
 }
 
+export const ceilToFrame = (time, fps) => {
+  const frameFactor = Math.round((1 / fps) * 10000) / 10000
+  const frameNumber = Math.ceil(time / frameFactor)
+  let roundedTime = frameNumber * frameFactor
+  roundedTime = Math.ceil((roundedTime) * 10000) / 10000
+  return roundedTime
+}
+
+export const floorToFrame = (time, fps) => {
+  const frameFactor = Math.round((1 / fps) * 10000) / 10000
+  const frameNumber = Math.floor(time / frameFactor)
+  let roundedTime = frameNumber * frameFactor
+  roundedTime = Math.floor((roundedTime) * 10000) / 10000
+  return roundedTime
+}
+
 /*
  * Turn a frame number into seconds depending on context.
  */
@@ -39,8 +55,7 @@ export const formatTime = (seconds) => {
 /*
  * Convert time to a frame string.
  */
-export const formatFrame = (rawTime, fps) => {
-  let frame = Math.floor(rawTime.toFixed(5) * fps)
+export const formatFrame = (frame) => {
   if (frame < 0) frame = 0
   return `${frame}`.padStart(3, '0')
 }
