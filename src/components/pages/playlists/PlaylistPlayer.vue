@@ -1275,7 +1275,7 @@ export default {
 
     fps () {
       return this.currentProduction
-        ? parseInt(this.currentProduction.fps)
+        ? parseInt(this.currentProduction.fps || '24')
         : 24
     },
 
@@ -1566,7 +1566,11 @@ export default {
     },
 
     syncComparisonPlayer () {
-      if (this.rawPlayerComparison && this.rawPlayerComparison.currentPlayer) {
+      if (
+        this.rawPlayerComparison &&
+        this.isComparing &&
+        this.rawPlayerComparison.currentPlayer
+      ) {
         const currentTimeRaw = this.rawPlayer.getCurrentTimeRaw()
         this.rawPlayerComparison.currentPlayer.currentTime = currentTimeRaw
       }

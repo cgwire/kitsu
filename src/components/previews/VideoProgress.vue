@@ -19,9 +19,9 @@
       class="annotation-mark"
       :style="{
         left: getAnnotationPosition(annotation) + 'px',
-        width: frameSize + 'px'
+        width: Math.max(frameSize - 1, 5) + 'px'
       }"
-      @click="onProgressClicked"
+      @click="_emitProgressEvent(annotation)"
       v-for="(annotation, index) in annotations"
     >
     </span>
@@ -75,7 +75,7 @@ export default {
       if (this.videoDuration) {
         return (200 / this.nbFrames) + '% 100%'
       } else {
-        return '100%'
+        return '300%'
       }
     },
 
@@ -122,18 +122,20 @@ export default {
       if (this.progressDragging) this._emitProgressEvent()
     },
 
-    onProgressClicked (e) {
+    onProgressClicked () {
       this._emitProgressEvent()
     },
 
-    _emitProgressEvent () {
+    _emitProgressEvent (annotation) {
       let left = this.progress.parentElement.offsetLeft
       if (left === 0 && !this.fullScreen) {
         left = this.progress.parentElement.offsetParent.offsetLeft
       }
       const position = event.x - left
       const ratio = position / this.width
-      let duration = this.videoDuration * ratio
+      let duration = annotation
+        ? annotation.time
+        : this.videoDuration * ratio
       if (duration < 0) duration = 0
       const frameNumber = Math.floor(duration / this.frameDuration)
       this.$emit('progress-changed', frameNumber)

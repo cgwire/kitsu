@@ -153,7 +153,7 @@ export default {
     },
 
     fps () {
-      return this.currentProduction.fps || 24
+      return parseInt(this.currentProduction.fps || '24')
     },
 
     frameDuration () {

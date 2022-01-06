@@ -154,7 +154,7 @@
           class="flexrow-item time-indicator mr1"
           :title="$t('playlists.actions.frame_number')"
         >
-          ({{ currentFrame }} / {{ nbFrames }})
+          ({{ currentFrame }})
         </span>
       </div>
 
@@ -830,6 +830,7 @@ export default {
         this.isPlaying = false
         if (this.previewViewer) this.previewViewer.pause()
         if (this.comparisonViewer) this.comparisonViewer.pause()
+        this.syncComparisonViewer()
       }
     },
 
@@ -846,7 +847,7 @@ export default {
     },
 
     syncComparisonViewer () {
-      if (this.comparisonViewer) {
+      if (this.comparisonViewer && this.isComparing) {
         // Dirty fix: add a missing frame to the comparaison video
         this.comparisonViewer.setCurrentTimeRaw(
           this.previewViewer.getCurrentTimeRaw() + this.frameDuration
