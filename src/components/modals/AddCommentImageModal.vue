@@ -167,7 +167,6 @@ export default {
       if (this.active && event.clipboardData.files) {
         this.addFiles(event.clipboardData.files)
       }
-      event.preventDefault()
     },
 
     getURL (form) {
