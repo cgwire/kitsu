@@ -1365,13 +1365,14 @@ const mutations = {
     state.displayedEpisodesLength = state.episodes.length
 
     if (state.episodes.length > 0) {
-      if (routeEpisodeId === 'all') {
+      if (!routeEpisodeId || routeEpisodeId === 'all') {
         state.currentEpisode = { id: 'all' }
       } else if (routeEpisodeId === 'main') {
         state.currentEpisode = { id: 'main' }
       } else if (routeEpisodeId) {
         state.currentEpisode = state.episodeMap.get(routeEpisodeId)
-      } else {
+      }
+      if (!state.currentEpisode) {
         state.currentEpisode = state.episodes[0]
       }
     } else {
