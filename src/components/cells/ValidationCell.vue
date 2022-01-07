@@ -2,7 +2,7 @@
 <td
   ref="cell"
   :class="{
-    validation: selectable && !isCurrentUserClient,
+    validation: selectable,
     selected: selectable & selected
   }"
   :style="{
@@ -296,7 +296,7 @@ export default {
 
     select (event) {
       const isUserClick = event.isUserClick !== false
-      if (this.selectable && !this.isCurrentUserClient) {
+      if (this.selectable) {
         if (this.$refs.cell &&
             this.$refs.cell.className.indexOf('selected') < 0) {
           this.$emit('select', {
