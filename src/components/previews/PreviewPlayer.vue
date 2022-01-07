@@ -1428,6 +1428,7 @@ export default {
       if (frameNumber !== this.frameNumber) {
         this.previewViewer.setCurrentFrame(frameNumber)
         this.syncComparisonViewer()
+        setTimeout(this.syncComparisonViewer(), this.frameDuration)
       }
     },
 
