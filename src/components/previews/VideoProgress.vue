@@ -184,6 +184,7 @@ progress::-moz-progress-bar {
 }
 
 progress::-webkit-progress-value {
+  background-color: #43B581;
   opacity: 0.6;
 }
 
