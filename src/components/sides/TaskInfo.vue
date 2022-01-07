@@ -422,9 +422,8 @@ export default {
       const isAssigned = this.task.assignees.find(
         (personId) => personId === this.user.id
       )
-      const isClientInPlaylist =
-        this.$route.path.indexOf('playlist') > 0 && this.isCurrentUserClient
-      return isManager || isAssigned || isClientInPlaylist
+      const isClient = this.isCurrentUserClient
+      return isManager || isAssigned || isClient
     },
 
     isSetThumbnailAllowed () {

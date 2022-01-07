@@ -1,7 +1,7 @@
 <template>
 <router-link
   :to="taskTypePath"
-  v-if="productionId"
+  v-if="productionId && !isCurrentUserClient"
 >
   <span
     class="tag task-type-name"
@@ -48,6 +48,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'isCurrentUserClient'
     ]),
 
     color () {
@@ -84,13 +85,13 @@ export default {
 
 <style lang="scss" scoped>
 .tag {
-  margin: 0;
-  padding: 0 0.7em;
-  font-size: 0.9em;
-  line-height: 0.8em;
-  color: $grey-strong;
   border-radius: 0;
+  color: var(--text);
+  font-size: 0.9em;
   font-weight: bold;
+  line-height: 0.8em;
+  padding: 0 0.7em;
+  margin: 0;
 }
 
 .tag.deletable {
@@ -98,7 +99,6 @@ export default {
 }
 
 .dark .tag {
-  color: $white-grey;
   background: $dark-grey-lightest;
 }
 
@@ -119,5 +119,7 @@ export default {
 }
 
 .no-link {
+  color: var(--text);
+  cursor: default;
 }
 </style>

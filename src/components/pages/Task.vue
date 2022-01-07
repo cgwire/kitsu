@@ -403,6 +403,7 @@ export default {
       'getTaskComment',
       'isCurrentUserAdmin',
       'isCurrentUserArtist',
+      'isCurrentUserClient',
       'isCurrentUserManager',
       'isSingleEpisode',
       'isTVShow',
@@ -419,6 +420,7 @@ export default {
 
     isPreviewButtonVisible () {
       return (
+        this.isCurrentUserManager &&
         this.currentTask &&
         this.currentTask.entity &&
         this.currentTask.entity.preview_file_id !== this.currentPreviewId &&
@@ -462,8 +464,12 @@ export default {
     },
 
     isCommentingAllowed () {
-      return this.isCurrentUserManager || this.currentTask.assignees.find(
-        (personId) => personId === this.user.id
+      return (
+        this.isCurrentUserManager ||
+        this.isCurrentUserClient ||
+        this.currentTask.assignees.find(
+          (personId) => personId === this.user.id
+        )
       )
     },
 
@@ -1459,7 +1465,7 @@ video {
 .page-header .tag {
   border-radius: 0;
   font-weight: bold;
-  color: $grey-strong;
+  margin-right: 0.5em;
 }
 
 .assignees {
