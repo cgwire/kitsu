@@ -2,7 +2,7 @@
 <div
   id="sound-container"
   :style="{
-    height: '100%',
+    height: defaultHeight + 'px',
     width: '100%'
   }"
 >
