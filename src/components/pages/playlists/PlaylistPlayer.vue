@@ -160,7 +160,7 @@
           opacity: overlayOpacity
         }"
         :full-screen="fullScreen"
-        v-show="isCurrentPreviewModel && !isLoading"
+        v-if="isCurrentPreviewModel && !isLoading"
       />
 
       <sound-viewer
@@ -169,7 +169,7 @@
         :preview-url="currentPreviewDlPath"
         :full-screen="fullScreen"
         @play-ended="pause"
-        v-show="isCurrentPreviewSound && !isLoading"
+        v-if="isCurrentPreviewSound && !isLoading"
       />
 
       <p
