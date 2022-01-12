@@ -1,5 +1,9 @@
 <template>
-<div class="unselectable">
+<div
+  class="unselectable"
+  @mouseenter="isFrameNumberVisible = true"
+  @mouseout="isFrameNumberVisible = false"
+>
   <div
     class="progress-wrapper"
     :style="{
@@ -21,9 +25,20 @@
         left: getAnnotationPosition(annotation) + 'px',
         width: Math.max(frameSize - 1, 5) + 'px'
       }"
+      @mouseenter="isFrameNumberVisible = true"
+      @mouseleave="isFrameNumberVisible = true"
       @click="_emitProgressEvent(annotation)"
       v-for="(annotation, index) in annotations"
     >
+    </span>
+    <span
+      class="frame-number"
+      :style="{
+        display: isFrameNumberVisible ? null : 'none',
+        left: frameNumberLeftPosition + 'px'
+      }"
+    >
+      {{ hoverFrame }}
     </span>
   </div>
 </div>
@@ -49,6 +64,9 @@ export default {
 
   data () {
     return {
+      frameNumberLeftPosition: 0,
+      isFrameNumberVisible: false,
+      hoverFrame: 0,
       width: 0
     }
   },
@@ -119,14 +137,21 @@ export default {
     },
 
     doProgressDrag (event) {
-      if (this.progressDragging) this._emitProgressEvent()
+      if (this.progressDragging || this.isFrameNumberVisible) {
+        const frameNumber = this._getMouseFrame()
+        this.hoverFrame = frameNumber + 1
+        this.frameNumberLeftPosition = this.width / this.nbFrames * frameNumber
+        if (this.progressDragging) {
+          this.$emit('progress-changed', frameNumber)
+        }
+      }
     },
 
     onProgressClicked () {
       this._emitProgressEvent()
     },
 
-    _emitProgressEvent (annotation) {
+    _getMouseFrame (annotation) {
       let left = this.progress.parentElement.offsetLeft
       if (left === 0 && !this.fullScreen) {
         left = this.progress.parentElement.offsetParent.offsetLeft
@@ -138,6 +163,11 @@ export default {
         : this.videoDuration * ratio
       if (duration < 0) duration = 0
       const frameNumber = Math.floor(duration / this.frameDuration)
+      return frameNumber
+    },
+
+    _emitProgressEvent (annotation) {
+      const frameNumber = this._getMouseFrame(annotation)
       this.$emit('progress-changed', frameNumber)
     }
   },
@@ -200,5 +230,16 @@ progress {
   margin: 0;
   padding: 0;
   width: 100%;
+}
+
+.frame-number {
+  background: $black;
+  border: 1px solid $white;
+  border-radius: 5px;
+  position: relative;
+  padding: 0.3em;
+  top: 8px;
+  color: $white;
+  z-index: 800;
 }
 </style>
