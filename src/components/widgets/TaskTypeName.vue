@@ -100,6 +100,7 @@ export default {
 
 .dark .tag {
   background: $dark-grey-lightest;
+  color: white;
 }
 
 .delete-times:hover {
