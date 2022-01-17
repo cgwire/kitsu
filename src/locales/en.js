@@ -820,11 +820,11 @@ export default {
     month_label: 'Month',
     no_quota: 'There is no quota for this task type.',
     name: 'Name',
-    quota_day: 'Quota per day',
-    quota_week: 'Quota per week',
-    quota_month: 'Quota per month',
+    quota_day: 'Quotas per day',
+    quota_week: 'Quotas per week',
+    quota_month: 'Quotas per month',
     year_label: 'Year',
-    title: 'Quota',
+    title: 'Quotas',
     type_label: 'Type'
   },
 

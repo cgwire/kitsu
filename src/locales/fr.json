@@ -746,9 +746,9 @@
             "month_label": "Mois",
             "no_quota": "Il n'y a pas de quota pour ce type de tâche.",
             "name": "Nom",
-            "quota_day": "Quota par jour",
-            "quota_week": "Quota par semaine",
-            "quota_month": "Quota par mois",
+            "quota_day": "Quotas par jour",
+            "quota_week": "Quotas par semaine",
+            "quota_month": "Quotas par mois",
             "year_label": "Année",
             "title": "Quotas",
             "type_label": "Type"
