@@ -16,7 +16,7 @@
       </p>
 
       <file-upload
-        ref="image-field"
+        ref="file-field"
         :label="$t('main.select_file')"
         :accept="extensions"
         :multiple="true"
@@ -141,8 +141,8 @@ export default {
     ...mapGetters([
     ]),
 
-    imageField () {
-      return this.$refs['image-field']
+    fileField () {
+      return this.$refs['file-field']
     }
   },
 
@@ -159,7 +159,7 @@ export default {
     },
 
     reset () {
-      this.imageField.reset()
+      this.fileField.reset()
       this.forms = null
     },
 
@@ -179,6 +179,10 @@ export default {
 
     isVideo (form) {
       return form.get('file').type.startsWith('video')
+    },
+
+    isPdf (form) {
+      return form.get('file').type.indexOf('pdf') > 0
     },
 
     addFiles (files) {
