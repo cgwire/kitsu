@@ -217,8 +217,8 @@ export default {
 
     goPreviousFrame () {
       if (this.currentPlayer) {
-        const time = this.getLastPushedCurrentTime()
-        let newTime = time - this.frameDuration
+        const time = this.currentTimeRaw
+        let newTime = floorToFrame(time - this.frameDuration, this.fps)
         newTime = this._setCurrentTime(newTime)
         const frameNumber = newTime / this.frameDuration
         this.$emit('frame-update', frameNumber)
@@ -227,8 +227,8 @@ export default {
 
     goNextFrame () {
       if (this.currentPlayer) {
-        const time = this.getLastPushedCurrentTime()
-        let newTime = time + this.frameDuration
+        const time = this.currentTimeRaw
+        let newTime = floorToFrame(time + this.frameDuration, this.fps)
         newTime = this._setCurrentTime(newTime)
         const frameNumber = newTime / this.frameDuration
         this.$emit('frame-update', frameNumber)
@@ -289,6 +289,10 @@ export default {
         this.currentPlayer.curentTime = roundToFrame(
           this.currentPlayer.currentTime, this.fps
         )
+        this.currentTimeRaw = this.currentPlayer.currentTime
+        const frameNumber =
+          Math.round(this.currentPlayer.currentTime / this.frameDuration)
+        this.$emit('frame-update', frameNumber)
         clearInterval(this.$options.playLoop)
       }
       this.isPlaying = false
@@ -394,16 +398,31 @@ export default {
       } else {
         this.$options.running = true
         const currentTime = this.$options.currentTimeCalls.shift()
-        if (this.currentPlayer &&
-            this.currentPlayer.currentTime !== currentTime) {
-          if (this.currentPlayer) {
-            this.currentPlayer.currentTime = currentTime.toFixed(3)
-          }
+        if (
+          this.currentPlayer &&
+          this.currentPlayer.currentTime !== currentTime + this.frameDuration
+        ) {
+          // tweaks needed because the html video player is messy with frames
+          this.currentPlayer.currentTime =
+            currentTime + this.frameDuration + 0.01
+          this.onTimeUpdate()
         }
         setTimeout(() => {
           this.runSetCurrentTime()
         }, 10)
       }
+    },
+
+    onTimeUpdate () {
+      if (this.currentPlayer) {
+        this.currentTimeRaw = this.currentPlayer.currentTime - this.frameDuration
+      } else {
+        this.currentTimeRaw = 0 + this.frameDuration
+      }
+      this.$emit(
+        'frame-update',
+        Math.round(this.currentTimeRaw / this.frameDuration)
+      )
     },
 
     switchPlayers () {

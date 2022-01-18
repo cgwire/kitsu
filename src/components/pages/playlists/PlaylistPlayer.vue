@@ -1229,7 +1229,7 @@ export default {
     },
 
     currentFrame () {
-      return formatFrame(this.frameNumber + 1)
+      return formatFrame(this.frameNumber + 2)
     },
 
     currentFrameMovieOrPicture () {
@@ -1439,7 +1439,7 @@ export default {
 
     updateProgressBar () {
       if (this.progress) {
-        this.progress.updateProgressBar(this.frameNumber)
+        this.progress.updateProgressBar(this.frameNumber + 1)
       }
     },
 
@@ -1646,14 +1646,14 @@ export default {
 
     onProgressChanged (frameNumber) {
       this.clearCanvas()
-      this.rawPlayer.setCurrentFrame(frameNumber + 1)
+      this.rawPlayer.setCurrentFrame(frameNumber)
       this.syncComparisonPlayer()
       const annotation = this.getAnnotation(
         frameNumber * this.frameDuration
       )
       if (annotation) this.loadAnnotation(annotation)
       this.sendUpdatePlayingStatus()
-      this.onFrameUpdate(frameNumber + 1)
+      this.onFrameUpdate(frameNumber)
     },
 
     onPreviousFrameClicked () {
@@ -2341,7 +2341,7 @@ export default {
 
     saveAnnotations () {
       let currentTime = roundToFrame(this.currentTimeRaw, this.fps) || 0
-      currentTime -= this.frameDuration
+      if (currentTime < 0) currentTime = 0
       if (this.isCurrentPreviewPicture) currentTime = 0
       if (!this.annotations) return
 
@@ -2403,6 +2403,7 @@ export default {
         this.annotations = this.currentEntity.preview_file_annotations
       }
       time = roundToFrame(time, this.fps)
+
       if (this.annotations && this.annotations.find) {
         let annotation = this.annotations.find(
           (annotation) => annotation.time === time
@@ -2882,7 +2883,6 @@ export default {
         }
 
         if (eventData.is_playing !== this.isPlaying) {
-          console.log(eventData.is_playing, 'ok play/pause')
           if (eventData.is_playing) {
             this.play()
           } else {

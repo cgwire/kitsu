@@ -575,9 +575,11 @@ export const annotationMixin = {
     pasteAnnotations () {
       this.fabricCanvas.discardActiveObject()
       const clonedObj = clipboard.pasteAnnotations()
-      this.addObject(clonedObj)
-      this.fabricCanvas.setActiveObject(clonedObj)
-      this.fabricCanvas.requestRenderAll()
+      if (clonedObj._set) {
+        this.addObject(clonedObj)
+        this.fabricCanvas.setActiveObject(clonedObj)
+        this.fabricCanvas.requestRenderAll()
+      }
     },
 
     // Saving
