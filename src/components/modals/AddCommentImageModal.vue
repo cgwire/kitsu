@@ -186,7 +186,7 @@ export default {
     },
 
     addFiles (files) {
-      this.imageField.filesChange('', files)
+      this.fileField.filesChange('', files)
     }
   },
 
