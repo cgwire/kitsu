@@ -175,7 +175,7 @@ export default {
       if (this.form.chat_webhook_mattermost === '') {
         this.errors.webhook_error = false
         return true
-      } else if (!this.form.chat_webhook_mattermost.match('https://(.)+.[a-z]{3}/hooks/[a-zA-Z0-9]+')) {
+      } else if (!this.form.chat_webhook_mattermost.match('/hooks/[a-zA-Z0-9]+$')) {
         this.errors.webhook_error = true
         return false
       } else {
