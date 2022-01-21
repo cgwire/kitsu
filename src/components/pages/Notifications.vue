@@ -8,7 +8,9 @@
     >
     <div
       class="empty-list has-text-centered"
-      v-if="!loading.notifications && (!notifications || notifications.length === 0)"
+      v-if="
+        !loading.notifications && (!notifications || notifications.length === 0)
+      "
     >
       {{ $t('notifications.no_notifications') }}
     </div>
@@ -40,6 +42,10 @@
           <message-square-icon
             class="icon flexrow-item"
             v-if="isComment(notification)"
+          />
+          <corner-up-left-icon
+            class="icon flexrow-item"
+            v-if="isReply(notification)"
           />
           <user-icon
             class="icon flexrow-item"
@@ -91,6 +97,13 @@
 
           <span
             class="explaination flexrow-item"
+            v-if="isReply(notification)"
+          >
+            {{ $t('notifications.replied_on') }}
+          </span>
+
+          <span
+            class="explaination flexrow-item"
             v-if="isAssignation(notification)"
           >
             {{ $t('notifications.assigned_you') }}
@@ -113,10 +126,20 @@
       </div>
       <div
         class="comment-text"
-        v-html="renderComment(notification.comment_text, notification.mentions,
-                             personMap)"
-        v-if="(isComment(notification) || isMention(notification)) && notification.comment_text"
+        v-html="renderComment(
+                  notification.comment_text,
+                  notification.mentions,
+                  personMap
+                )"
+        v-if="isComment(notification) ||
+              isMention(notification) ||
+              notification.comment_text"
       >
+      </div>
+      <div
+          v-if="isReply(notification)"
+      >
+      ...
       </div>
       <div class="flexrow"
           v-if="notification.preview_file_id"
@@ -134,10 +157,25 @@
       </div>
       <div
         class="comment-text"
-        v-if="(isComment(notification) || isMention(notification)) && !notification.comment_text"
+        v-if="(
+          isComment(notification) ||
+          isMention(notification)) &&
+          !notification.comment_text"
       >
         {{ $t('comments.empty_text') }}
       </div>
+
+      <div
+        class="comment-text reply-text"
+        v-html="renderComment(
+                  notification.reply_text,
+                  [],
+                  personMap
+                )"
+        v-if="isReply(notification)"
+      >
+      </div>
+
       <div class="date flexrow">
         <span class="flexrow-item">
           {{ formatDate(notification.created_at) }}
@@ -166,6 +204,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import {
   AtSignIcon,
+  CornerUpLeftIcon,
   MessageSquareIcon,
   PaperclipIcon,
   UserIcon
@@ -185,6 +224,7 @@ export default {
   name: 'notification-page',
   components: {
     AtSignIcon,
+    CornerUpLeftIcon,
     EntityThumbnail,
     PaperclipIcon,
     PeopleAvatar,
@@ -333,14 +373,15 @@ export default {
     },
 
     renderComment,
+    isAssignation: notification => {
+      return notification.notification_type === 'assignation'
+    },
     isComment: notification => {
       return !notification.notification_type ||
              notification.notification_type === 'comment'
     },
     isMention: notification => notification.notification_type === 'mention',
-    isAssignation: notification => {
-      return notification.notification_type === 'assignation'
-    }
+    isReply: notification => notification.notification_type === 'reply'
   },
 
   socket: {

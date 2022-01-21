@@ -16,7 +16,7 @@ describe('News store', () => {
       const state = {
         newsList: [
           { id: 'news-2', created_at: '2019-05-04T13:12:23' },
-          { id: 'news-1', created_at: '2019-05-04T11:12:23' },
+          { id: 'news-1', created_at: '2019-05-04T11:12:23' }
         ]
       }
       const newsListByDay = store.getters.newsListByDay(state)(timezone)
@@ -32,7 +32,7 @@ describe('News store', () => {
       const state = {
         newsList: [
           { id: 'news-2', created_at: '2019-05-04T23:12:23' },
-          { id: 'news-1', created_at: '2019-05-04T21:12:23' },
+          { id: 'news-1', created_at: '2019-05-04T21:12:23' }
         ]
       }
       const newsListByDay = store.getters.newsListByDay(state)(timezone)
@@ -46,7 +46,6 @@ describe('News store', () => {
       ])
     })
 
-
     test('newsByDay - 2 days', () => {
       const state = {
         newsList: [
@@ -59,7 +58,7 @@ describe('News store', () => {
       expect(newsListByDay).toEqual([
         [
           { id: 'news-3', created_at: '2019-05-04T13:12:23' },
-          { id: 'news-2', created_at: '2019-05-04T11:12:23' },
+          { id: 'news-2', created_at: '2019-05-04T11:12:23' }
         ],
         [
           { id: 'news-1', created_at: '2019-05-03T13:12:23' }
@@ -125,7 +124,7 @@ describe('News store', () => {
 
     test('ADD_FIRST_NEWS', () => {
       store.mutations.ADD_FIRST_NEWS(state, {
-        id: 'news-4', created_at: '2019-05-06T23:12:23',
+        id: 'news-4', created_at: '2019-05-06T23:12:23'
       })
       expect(state.newsList).toEqual([
         { id: 'news-4', created_at: '2019-05-06T23:12:23' },

@@ -31,7 +31,7 @@ const rootGetters = {
 }
 const getters = {
   assetTaskTypes: taskTypes.filter(t => !t.for_shots),
-  shotTaskTypes: taskTypes.filter(t => t.for_shots),
+  shotTaskTypes: taskTypes.filter(t => t.for_shots)
 }
 
 describe('Task types store', () => {
@@ -62,7 +62,7 @@ describe('Task types store', () => {
     test('getTaskTypeOptions', () => {
       expect(
         store.getters.getTaskTypeOptions(state, null, null, rootGetters
-      )[0])
+        )[0])
         .toStrictEqual({
           label: 'Modeling',
           value: 'task-type-1'
@@ -71,7 +71,7 @@ describe('Task types store', () => {
     test('getAssetTaskTypeOptions', () => {
       expect(
         store.getters.getAssetTaskTypeOptions(state, getters, null, rootGetters)
-      [0])
+          [0])
         .toStrictEqual({
           label: 'Modeling',
           value: 'task-type-1'
@@ -80,7 +80,7 @@ describe('Task types store', () => {
     test('getShotTaskTypeOptions', () => {
       expect(
         store.getters.getShotTaskTypeOptions(state, getters, null, rootGetters)
-      [0])
+          [0])
         .toStrictEqual({
           label: 'Animation',
           value: 'task-type-3'
@@ -133,8 +133,8 @@ describe('Task types store', () => {
     test('DELETE_TASK_TYPE_END', () => {
       store.mutations.RESET_ALL(state)
       store.mutations.LOAD_TASK_TYPES_END(state, taskTypes)
-      store.mutations.DELETE_TASK_TYPE_END(state, { id: 'task-type-2'})
-      expect(state.taskTypes.length).toEqual(2)
+      store.mutations.DELETE_TASK_TYPE_END(state, { id: 'task-type-2' })
+      expect(state.taskTypes).toHaveLength(2)
       expect(state.taskTypeMap.size).toEqual(2)
     })
   })

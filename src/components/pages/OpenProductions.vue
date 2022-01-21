@@ -12,17 +12,14 @@
         {{ $t('productions.home.title') }}
       </h1>
       <div class="filler"></div>
-      <div
+      <a
         id="create-production-button"
         class="button flexrow-item"
+        @click="newProductionPage"
         v-if="isCurrentUserAdmin"
       >
-        <a
-          @click="newProductionPage"
-        >
-          {{ $t('productions.home.create_new') }}
-        </a>
-      </div>
+        {{ $t('productions.home.create_new') }}
+      </a>
     </div>
     <div
       class="open-productions-box"

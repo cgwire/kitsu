@@ -16,15 +16,27 @@
       </p>
 
       <file-upload
-        ref="image-field"
-        :label="$t('main.csv.upload_file')"
+        ref="file-field"
+        :label="$t('main.select_file')"
         :accept="extensions"
-        @fileselected="onFileSelected"
         :multiple="true"
+        @fileselected="onFileSelected"
       />
-
       <p class="error" v-if="isError">
-        {{ $t("tasks.add_preview_error") }}
+        $t('main.add')
+      </p>
+
+      <p class="mt1" v-if="isMovie">
+        Or:
+      </p>
+
+      <p v-if="isMovie">
+        <button
+          @click="$emit('add-snapshots')"
+          class="button"
+        >
+          {{ $t('main.attach_snapshots') }}
+        </button>
       </p>
 
       <p class="has-text-right">
@@ -69,7 +81,7 @@
             frameborder="0"
             :src="getURL(form)"
             :key="i"
-            v-else
+            v-else-if="isPdf(form)"
           />
         </template>
       </p>
@@ -109,6 +121,10 @@ export default {
       type: Boolean,
       default: false
     },
+    isMovie: {
+      type: Boolean,
+      default: false
+    },
     extensions: {
       type: String,
       default: files.ALL_EXTENSIONS_STRING
@@ -125,8 +141,8 @@ export default {
     ...mapGetters([
     ]),
 
-    imageField () {
-      return this.$refs['image-field']
+    fileField () {
+      return this.$refs['file-field']
     }
   },
 
@@ -143,13 +159,13 @@ export default {
     },
 
     reset () {
-      this.imageField.reset()
+      this.fileField.reset()
       this.forms = null
     },
 
     onPaste (event) {
       if (this.active && event.clipboardData.files) {
-        this.imageField.filesChange('', event.clipboardData.files)
+        this.addFiles(event.clipboardData.files)
       }
     },
 
@@ -163,6 +179,14 @@ export default {
 
     isVideo (form) {
       return form.get('file').type.startsWith('video')
+    },
+
+    isPdf (form) {
+      return form.get('file').type.indexOf('pdf') > 0
+    },
+
+    addFiles (files) {
+      this.fileField.filesChange('', files)
     }
   },
 

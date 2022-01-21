@@ -6,7 +6,6 @@ import {
 } from '../../../src/lib/video'
 
 describe('video', () => {
-
   describe('Mount', () => {
     it('roundToFrame', () => {
       expect(roundToFrame(1, 24)).toBe(1.0008)
@@ -25,18 +24,18 @@ describe('video', () => {
     })
 
     it('frameToSeconds', () => {
-      expect(frameToSeconds(1, {fps: 24})).toBe(0.042)
-      expect(frameToSeconds(10, {fps: 24})).toBe(0.417)
-      expect(frameToSeconds(24, {fps: 24})).toBe(1)
-      expect(frameToSeconds(48, {fps: 24})).toBe(2)
-      expect(frameToSeconds(32, {fps: 24})).toBe(1.333)
-      expect(frameToSeconds(47, {fps: 24})).toBe(1.958)
-      expect(frameToSeconds(1, {fps: 25})).toBe(0.04)
-      expect(frameToSeconds(10, {fps: 25})).toBe(0.4)
-      expect(frameToSeconds(25, {fps: 25})).toBe(1)
-      expect(frameToSeconds(50, {fps: 25})).toBe(2)
-      expect(frameToSeconds(32, {fps: 25})).toBe(1.28)
-      expect(frameToSeconds(47, {fps: 25})).toBe(1.88)
+      expect(frameToSeconds(1, { fps: 24 })).toBe(0.042)
+      expect(frameToSeconds(10, { fps: 24 })).toBe(0.417)
+      expect(frameToSeconds(24, { fps: 24 })).toBe(1)
+      expect(frameToSeconds(48, { fps: 24 })).toBe(2)
+      expect(frameToSeconds(32, { fps: 24 })).toBe(1.333)
+      expect(frameToSeconds(47, { fps: 24 })).toBe(1.958)
+      expect(frameToSeconds(1, { fps: 25 })).toBe(0.04)
+      expect(frameToSeconds(10, { fps: 25 })).toBe(0.4)
+      expect(frameToSeconds(25, { fps: 25 })).toBe(1)
+      expect(frameToSeconds(50, { fps: 25 })).toBe(2)
+      expect(frameToSeconds(32, { fps: 25 })).toBe(1.28)
+      expect(frameToSeconds(47, { fps: 25 })).toBe(1.88)
     })
 
     it('formatFrame', () => {

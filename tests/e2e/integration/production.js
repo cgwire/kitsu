@@ -1,7 +1,7 @@
 describe('Production creation', () => {
   beforeEach(() => {
     cy.request('POST', '/api/auth/login', {
-      email: 'admin@example.com' ,
+      email: 'admin@example.com',
       password: 'mysecretpassword'
     })
       .its('body')

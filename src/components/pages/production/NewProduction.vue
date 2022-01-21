@@ -160,7 +160,7 @@
             />
             <combobox-task-type
               slot="footer"
-              class="is-inline"
+              class="is-inline inline-task-type-combo"
               :task-type-list="availableAssetTaskTypes"
               add-placeholder
               @input="id => productionToCreate.assetTaskTypes.push(
@@ -192,7 +192,7 @@
             />
             <combobox-task-type
               slot="footer"
-              class="is-inline"
+              class="is-inline inline-task-type-combo"
               :task-type-list="availableShotTaskTypes"
               add-placeholder
               @input="id => productionToCreate.shotTaskTypes.push(
@@ -327,9 +327,10 @@
             @click="createProduction"
           >
             <spinner
-              v-if="loading.createProduction"
+              class="mr05 mt05"
               :size="20"
-              class="mr1"
+              is-white
+              v-if="loading.createProduction"
             />
             {{ $t('productions.creation.create_button') }}
           </button>
@@ -481,9 +482,9 @@ export default {
         sequencesToCreate: [],
         settings: {
           type: PRODUCTION_TYPE_OPTIONS[0].value,
-          fps: null, // eg: '24'
-          ratio: [], // eg: [4, 3]
-          resolution: [], // eg: [1440, 1080]
+          fps: 25, // eg: '24'
+          ratio: [16, 9], // eg: [4, 3]
+          resolution: [1920, 1080], // eg: [1440, 1080]
           dateStart: null,
           dateEnd: null
         },
@@ -976,7 +977,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .dark .tag {
 }
 
@@ -1019,54 +1020,31 @@ span.input-separator {
   }
 }
 
->>> .input.is-small {
-  height: 2rem;
-  font-size: 1rem;
-  padding: 0 0.5rem;
-}
-
->>> .input.is-size-2 {
-  width: 3rem;
-}
-
->>> .input.is-size-3 {
-  width: 3.5rem;
-}
-
->>> .input.is-size-4 {
-  width: 5rem;
-}
-
->>> .datepicker {
-  display: inline-flex;
-}
-
 .date-picker-wrapper {
   margin-top: .5rem;
   display: flex;
   align-items: center;
 }
 
->>> .datepicker input.date-input {
-  width: 6.5rem;
+.task-type {
+  margin-top: 4px;
 }
 
->>> .task-type.task-type-name:hover {
+.task-type.task-type-name:hover {
   cursor: grab;
 }
->>> .task-type.task-type-name {
+
+.task-type.task-type-name {
   margin-right: 5px;
   margin-bottom: 5px;
   height: 2.3rem;
 }
->>> .task-type-combo {
+
+.inline-task-type-combo {
   display: inline-flex;
   width: auto;
   min-width: auto;
-}
->>> .selected-task-type-line {
-  padding: 0;
-  margin-right: 0;
+  border: 0;
 }
 
 .import-content {
@@ -1106,5 +1084,14 @@ span.input-separator {
 .explaination {
   font-style: italic;
   margin-top: 0.2em;
+}
+
+.big-button {
+  max-width: 100%;
+
+  &:active,
+  &:focus {
+    color: white;
+  }
 }
 </style>

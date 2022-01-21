@@ -116,23 +116,94 @@
               </span>
             </a>
           </p>
+          <div class="replies">
+            <div>
+              <div
+                :key="replyComment.id"
+                class="reply-comment"
+                v-for="replyComment in (comment.replies || [])"
+              >
+                <div class="flexrow">
+                  <people-avatar
+                    class="flexrow-item"
+                    :size="18"
+                    :font-size="10"
+                    :person="personMap.get(replyComment.person_id)"
+                  />
+                  <strong class="flexrow-item">
+                    <people-name
+                      class=""
+                      :person="personMap.get(replyComment.person_id)"
+                    />
+                  </strong>
+                  <span
+                    class="flexrow-item reply-date"
+                    :title="replyDate(replyComment.date)"
+                  >
+                    {{ renderDate(replyComment.date) }}
+                  </span>
+                  <span class="filler">
+                  </span>
+                  <span
+                    class="flexrow-item reply-delete"
+                    :title="$t('main.delete')"
+                    @click="onDeleteReplyClicked(replyComment)"
+                    v-if="isCurrentUserAdmin || replyComment.person_id === user.id"
+                  >
+                    x
+                  </span>
+                </div>
+                <p
+                  v-html="renderComment(replyComment.text, [], personMap, '')"
+                  class="comment-text"
+                >
+                </p>
+              </div>
+            </div>
+            <textarea
+              ref="reply"
+              class="reply"
+              @keyup.ctrl.enter="onReplyClicked"
+              v-model="replyText"
+              v-show="showReply"
+            />
+            <div class="has-text-right">
+              <button-simple
+                class="reply-button"
+                :text="$t('main.reply')"
+                :is-loading="isReplyLoading"
+                @click="onReplyClicked"
+                v-show="showReply"
+              />
+            </div>
+          </div>
+
           <div
-            class="comment-like"
+            class="flexrow"
             :title="isLikedBy"
-            @click="acknowledgeComment(comment)"
             v-if="comment.text.length > 0"
           >
             <button
               :class="{
                 'like-button': true,
-                'like-button--empty': comment.like === undefined ? true : false
+                'like-button--empty': comment.like === undefined ? true : false,
+                'flexrow-item': true
               }"
+              @click="acknowledgeComment(comment)"
               type="button"
-              disabled="comment.person_id !== user.id"
             >
-              <thumbs-up-icon size="1x"/>
+              <thumbs-up-icon size="1x" />
               <span>{{ comment.acknowledgements.length }}</span>
             </button>
+            <span class="filler">
+            </span>
+            <span
+              class="flexrow-item reply-button"
+              @click="showReplyWidget"
+              v-if="!showReply"
+            >
+              {{ $t('main.reply') }}
+            </span>
           </div>
           <p class="pinned-text" v-if="comment.pinned">
             {{ $t('comments.pinned') }}
@@ -150,6 +221,14 @@
       >
         Revision {{ comment.previews[0].revision }}
       </router-link>
+      <span
+        class="flexrow-item preview-status"
+        :title="comment.previews[0].validation_status"
+        :style="getPreviewValidationStyle(comment.previews[0])"
+        @click="changePreviewValidationStatus(comment.previews[0])"
+      >
+        &nbsp;
+      </span>
     </div>
 
     <div
@@ -200,9 +279,8 @@
 </template>
 
 <script>
-
 import moment from 'moment'
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import { remove } from '@/lib/models'
 import { renderComment } from '@/lib/render'
 import { sortByName } from '@/lib/sorting'
@@ -216,15 +294,17 @@ import {
   PaperclipIcon,
   ThumbsUpIcon
 } from 'vue-feather-icons'
-import CommentMenu from './CommentMenu.vue'
-import PeopleAvatar from './PeopleAvatar.vue'
-import PeopleName from './PeopleName.vue'
-import Checklist from './Checklist'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import CommentMenu from '@/components/widgets/CommentMenu'
+import Checklist from '@/components/widgets/Checklist'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import PeopleName from '@/components/widgets/PeopleName'
 import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
   name: 'comment',
   components: {
+    ButtonSimple,
     Checklist,
     ChevronDownIcon,
     CopyIcon,
@@ -239,6 +319,9 @@ export default {
   data () {
     return {
       checklist: [],
+      isReplyLoading: false,
+      replyText: '',
+      showReply: false,
       uniqueClassName: (Math.random() + 1).toString(36).substring(2)
     }
   },
@@ -305,6 +388,8 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'isCurrentUserAdmin',
+      'isCurrentUserManager',
       'isDarkTheme',
       'user',
       'personMap',
@@ -421,11 +506,7 @@ export default {
     },
 
     shortDate () {
-      if (moment().diff(this.commentDate, 'days') > 1) {
-        return this.commentDate.tz(this.user.timezone).format('MM/DD')
-      } else {
-        return this.commentDate.tz(this.user.timezone).format('HH:mm')
-      }
+      return this.renderDate(this.commentDate)
     },
 
     boxShadowStyle () {
@@ -443,8 +524,29 @@ export default {
   },
 
   methods: {
+    ...mapActions([
+      'deleteReply',
+      'replyToComment',
+      'updatePreviewFileValidationStatus'
+    ]),
+
     formatDate (date) {
       return formatDate(date)
+    },
+
+    replyDate (date) {
+      return moment(date)
+        .tz(this.user.timezone)
+        .format('YYYY-MM-DD HH:mm:ss')
+    },
+
+    renderDate (date) {
+      date = moment(date)
+      if (moment().diff(date, 'days') > 1) {
+        return date.tz(this.user.timezone).format('MM/DD')
+      } else {
+        return date.tz(this.user.timezone).format('HH:mm')
+      }
     },
 
     getPath (name) {
@@ -503,7 +605,56 @@ export default {
       this.$emit('time-code-clicked', event.target.dataset)
     },
 
-    renderComment
+    getPreviewValidationStyle (previewFile) {
+      let color = '#AAA'
+      if (previewFile.validation_status === 'validated') {
+        color = '#67BE48' // green
+      } else if (previewFile.validation_status === 'rejected') {
+        color = '#FF3860' // red
+      }
+      return { background: color }
+    },
+
+    changePreviewValidationStatus (previewFile) {
+      if (!this.isCurrentUserManager) return
+      let status = previewFile.status
+      if (previewFile.validation_status === 'validated') {
+        status = 'rejected'
+      } else if (previewFile.validation_status === 'rejected') {
+        status = 'neutral'
+      } else {
+        status = 'validated'
+      }
+      this.updatePreviewFileValidationStatus({ previewFile, status })
+    },
+
+    renderComment,
+
+    showReplyWidget () {
+      this.showReply = true
+      this.$nextTick(() => {
+        this.$refs.reply.focus()
+      })
+    },
+
+    onReplyClicked () {
+      this.isReplyLoading = true
+      this.replyToComment({ comment: this.comment, text: this.replyText })
+        .then(() => {
+          this.isReplyLoading = false
+          this.replyText = ''
+          this.showReply = false
+        })
+        .catch(console.error)
+    },
+
+    onDeleteReplyClicked (reply) {
+      this.deleteReply({ comment: this.comment, reply })
+        .then(() => {
+          this.isReplyLoading = false
+        })
+        .catch(console.error)
+    }
   },
 
   watch: {
@@ -673,15 +824,7 @@ article.comment {
   margin: 0;
   padding: .3rem 0;
   width: 100%;
-
-  &:hover,
-  &:focus {
-    background-color: $dark-grey-lightest;
-  }
-
-  &[disabled] {
-    pointer-events: none;
-  }
+  z-index: 10;
 
   span {
     margin-left: 0.3em;
@@ -699,10 +842,6 @@ article.comment {
 
 .comment-content {
   padding: 0em;
-}
-
-.comment-like {
-  cursor: pointer;
 }
 
 .infos {
@@ -753,6 +892,81 @@ p {
 
 .congrats-picture {
   max-width: 300px;
+}
+
+.reply-button {
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.8em;
+  padding-right: 0.5em;
+  text-align: right;
+  width: 50px;
+}
+
+textarea.reply {
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-strong);
+  font-size: 0.9em;
+  margin-top: 0.5em;
+  margin-left: 0.5em;
+  padding: 0.5em;
+  width: calc(100% - 0.5em);
+}
+
+.replies {
+  padding-bottom: 0.5em;
+  margin-right: 0.2em;
+}
+
+.reply-comment {
+  border-left: 3px solid var(--border);
+  border-bottom: 1px dashed var(--border);
+  font-size: 0.9em;
+  margin-left: 0.5em;
+  padding-left: 0.8em;
+  padding-top: 0.8em;
+  padding-bottom: 0.4em;
+
+  &:last-child {
+    border-bottom: 1px solid var(--border);
+  }
+
+  &:hover {
+    .reply-delete {
+      opacity: 1;
+    }
+  }
+
+  .reply-date {
+    padding-top: 1px;
+    font-size: 0.8em;
+    color: var(--text);
+  }
+}
+
+.reply-button {
+  border-radius: 5px;
+  color: var(--text);
+  padding: 0;
+  text-transform: lowercase;
+}
+
+.reply-delete {
+  color: $grey;
+  cursor: pointer;
+  margin-top: -2px;
+  margin-right: 0px;
+  opacity: 0;
+}
+
+.preview-status {
+  border-radius: 50%;
+  border: 2px solid $grey;
+  cursor: pointer;
+  height: 20px;
+  transition: background 0.3s ease;
+  width: 20px;
 }
 
 @media screen and (max-width: 768px) {

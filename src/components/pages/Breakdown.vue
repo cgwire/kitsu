@@ -262,6 +262,7 @@ export default {
       editedAssetLinkLabel: null,
       episodeId: '',
       importCsvFormData: {},
+      isLocked: false,
       isLoading: false,
       isOnlyCurrentEpisode: false,
       isTextMode: false,
@@ -520,7 +521,16 @@ export default {
       })
     },
 
+    setLock () {
+      if (!this.$options.lockTimeout) {
+        this.$options.lockTimeout = setTimeout(() => {
+          this.isLocked = false
+        }, 3000)
+      }
+    },
+
     addOneAsset (assetId) {
+      this.isLocked = true
       Object.keys(this.selection)
         .filter(key => this.selection[key])
         .forEach((entityId) => {
@@ -531,29 +541,36 @@ export default {
             label: this.castingType === 'shot' ? 'animate' : 'fixed'
           })
           this.saveCasting(entityId)
+            .then(this.setLock)
             .catch(console.error)
         })
     },
 
     addTenAssets (assetId) {
+      this.isLocked = true
       Object.keys(this.selection)
         .filter(key => this.selection[key])
         .forEach((entityId) => {
           this.addAssetToCasting({ entityId, assetId, nbOccurences: 10 })
           this.saveCasting(entityId)
+            .then(this.setLock)
             .catch(console.error)
         })
     },
 
     removeOneAsset (assetId, entityId) {
+      this.isLocked = true
       this.removeAssetFromCasting({ entityId, assetId, nbOccurences: 1 })
       this.saveCasting(entityId)
+        .then(this.setLock)
         .catch(console.error)
     },
 
     removeTenAssets (assetId, entityId) {
+      this.isLocked = true
       this.removeAssetFromCasting({ entityId, assetId, nbOccurences: 10 })
       this.saveCasting(entityId)
+        .then(this.setLock)
         .catch(console.error)
     },
 
@@ -838,14 +855,22 @@ export default {
     events: {
       'shot:casting-update' (eventData) {
         const shot = this.shotMap.get(eventData.shot_id)
-        if (shot && shot.sequence_id === this.sequenceId) {
+        if (
+          shot &&
+          shot.sequence_id === this.sequenceId &&
+          !this.isLocked
+        ) {
           this.loadShotCasting(shot)
         }
       },
 
       'asset:casting-update' (eventData) {
         const asset = this.assetMap.get(eventData.asset_id)
-        if (asset && asset.asset_type_id === this.assetTypeId) {
+        if (
+          asset &&
+          asset.asset_type_id === this.assetTypeId &&
+          !this.isLocked
+        ) {
           this.loadAssetCasting(asset)
         }
       }

@@ -34,6 +34,7 @@ import {
   REMOVE_BUILD_JOB,
 
   UPDATE_PREVIEW_ANNOTATION,
+  UPDATE_PREVIEW_VALIDATION_STATUS,
 
   RESET_ALL
 } from '../mutation-types'
@@ -230,6 +231,15 @@ const actions = {
 
   getRunningPreviewFiles () {
     return playlistsApi.getRunningPreviewFiles()
+  },
+
+  markPreviewFileAsBroken (utils, previewFileId) {
+    return playlistsApi.markPreviewFileAsBroken(previewFileId)
+  },
+
+  updatePreviewFileValidationStatus ({ commit }, { previewFile, status }) {
+    commit(UPDATE_PREVIEW_VALIDATION_STATUS, { previewFile, status })
+    return playlistsApi.updatePreviewFileValidationStatus(previewFile, status)
   }
 }
 
@@ -275,6 +285,10 @@ const mutations = {
     if (entity) {
       entity.preview_file_annotations = annotations
     }
+  },
+
+  [UPDATE_PREVIEW_VALIDATION_STATUS] (state, { previewFile, status }) {
+    previewFile.validation_status = status
   },
 
   [EDIT_PLAYLIST_START] (state, data) {

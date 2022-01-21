@@ -153,8 +153,12 @@ export default {
       return this.extension === 'mp4'
     },
 
+    isPicture () {
+      return ['gif', 'png', 'jpg', 'jpeg'].includes(this.extension)
+    },
+
     pictureOriginalPath () {
-      if (this.preview && this.isAvailable && !this.isMovie) {
+      if (this.preview && this.isAvailable && this.isPicture) {
         const previewId = this.preview.id
         return `/api/pictures/originals/preview-files/${previewId}.png`
       } else {
@@ -241,15 +245,15 @@ export default {
       this.pictureBig.height = height
       this.pictureGif.width = width
       this.pictureGif.height = height
-      if (!this.isMovie) this.$emit('size-changed', dimensions)
+      if (this.isPicture) this.$emit('size-changed', dimensions)
     },
 
     setPicturePath () {
-      if (this.isGif && this.isAvailable && !this.isMovie) {
+      if (this.isGif && this.isAvailable && this.isPicture) {
         const previewId = this.preview.id
         this.pictureGifPath =
           `/api/pictures/originals/preview-files/${previewId}.gif`
-      } else if (this.preview && this.isAvailable && !this.isMovie) {
+      } else if (this.preview && this.isAvailable && this.isPicture) {
         const previewId = this.preview.id
         this.picturePath =
           `/api/pictures/previews/preview-files/${previewId}.png`
@@ -258,7 +262,7 @@ export default {
     },
 
     setPictureDlPath () {
-      if (this.preview && this.isAvailable && !this.isMovie) {
+      if (this.preview && this.isAvailable && this.isPicture) {
         const previewId = this.preview.id
         this.pictureDlPath =
           `/api/pictures/originals/preview-files/${previewId}/download`

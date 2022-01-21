@@ -2,7 +2,7 @@
 <td
   ref="cell"
   :class="{
-    validation: selectable && !isCurrentUserClient,
+    validation: selectable,
     selected: selectable & selected
   }"
   :style="{
@@ -34,6 +34,25 @@
       <span class="priority" v-if="!isCurrentUserClient">
         {{ priority }}
       </span>
+      <span
+        class="casting-status"
+        :title="castingTitle"
+        v-if="!isCurrentUserClient && isCastingReady"
+      >
+        <img src="@/assets/icons/casting-ready.png" width=20>
+      </span>
+      <span
+        class="casting-status"
+        :title="castingTitle"
+        v-else-if="!isCurrentUserClient"
+      >
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+      </span>
+    </span>
+    <span>
     </span>
     <span
       class="avatar has-text-centered"
@@ -105,6 +124,14 @@ export default {
     taskTest: {
       default: null,
       type: Object
+    },
+    isCastingReady: {
+      default: false,
+      type: Boolean
+    },
+    castingTitle: {
+      default: '',
+      type: String
     },
     isBorder: {
       default: true,
@@ -269,7 +296,7 @@ export default {
 
     select (event) {
       const isUserClick = event.isUserClick !== false
-      if (this.selectable && !this.isCurrentUserClient) {
+      if (this.selectable) {
         if (this.$refs.cell &&
             this.$refs.cell.className.indexOf('selected') < 0) {
           this.$emit('select', {
@@ -357,6 +384,7 @@ export default {
 }
 
 .wrapper {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
 }
@@ -400,5 +428,15 @@ span.person-avatar:nth-child(2) {
 .priority {
   color: red;
   margin-right: 3px;
+}
+
+.casting-status {
+  position: absolute;
+  right: -5px;
+  top: -8px;
+
+  img {
+    width: 12px;
+  }
 }
 </style>

@@ -3,12 +3,12 @@ import store from '../../../src/store/modules/departments'
 const departments = [
   {
     name: 'NAME1',
-    id: "1",
+    id: '1',
     color: '#ffffff'
   },
   {
     name: 'NAME2',
-    id: "2",
+    id: '2',
     color: '#eeeeee'
   }
 ]
@@ -32,9 +32,9 @@ describe('Productions store', () => {
       expect(store.getters.departments(rootState)).toStrictEqual(departments)
     }),
     test('getDepartments', () => {
-        expect(
-          store.getters.getDepartments(rootState)(departments[0].id))
-          .toStrictEqual(departments[0])
+      expect(
+        store.getters.getDepartments(rootState)(departments[0].id))
+        .toStrictEqual(departments[0])
     })
   })
 

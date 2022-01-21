@@ -32,8 +32,9 @@
       :preview="preview"
       :full-screen="fullScreen"
       @size-changed="dimensions => $emit('size-changed', dimensions)"
+      @video-loaded="$emit('video-loaded')"
       @duration-changed="duration => $emit('duration-changed', duration)"
-      @time-update="time => $emit('time-update', time)"
+      @frame-update="frameNumber => $emit('frame-update', frameNumber)"
       @play-ended="$emit('play-ended')"
       @video-end="$emit('video-end')"
       v-show="isMovie"
@@ -52,7 +53,7 @@
 
     />
 
-    <!--model-viewer
+    <object-viewer
       class="model-viewer"
       :default-height="defaultHeight"
       :preview-url="originalPath"
@@ -62,7 +63,16 @@
       v-show="is3DModel"
     />
 
-    <pdf
+    <sound-viewer
+      ref="sound-viewer"
+      class="sound-viewer"
+      :preview-url="originalPath"
+      :file-name="fileTitle"
+      @play-ended="$emit('play-ended')"
+      v-show="isSound"
+    />
+
+    <!--pdf
       class="pdf-viewer"
       :height="defaultHeight"
       :src="originalPath"
@@ -100,8 +110,9 @@ import { domMixin } from '@/components/mixins/dom'
 import {
   DownloadIcon
 } from 'vue-feather-icons'
-// import ModelViewer from '@/components/previews/ModelViewer'
+import ObjectViewer from '@/components/previews/ObjectViewer'
 import PictureViewer from '@/components/previews/PictureViewer'
+import SoundViewer from '@/components/previews/SoundViewer'
 import Spinner from '@/components/widgets/Spinner'
 import VideoViewer from '@/components/previews/VideoViewer'
 
@@ -110,10 +121,11 @@ export default {
   mixins: [domMixin],
 
   components: {
-    // ModelViewer,
+    ObjectViewer,
     // pdf,
     DownloadIcon,
     PictureViewer,
+    SoundViewer,
     Spinner,
     VideoViewer
   },
@@ -190,6 +202,10 @@ export default {
       return this.$refs['picture-viewer']
     },
 
+    soundViewer () {
+      return this.$refs['sound-viewer']
+    },
+
     //  Utils
 
     fileTitle () {
@@ -236,12 +252,19 @@ export default {
     },
 
     is3DModel () {
-      return this.isReady && this.extension === 'obj'
+      return this.isReady && ['glb', 'gltf'].includes(this.extension)
+    },
+
+    isSound () {
+      return this.isReady && ['wav', 'mp3'].includes(this.extension)
     },
 
     isFile () {
-      return this.isReady && !this.isPicture && !this.isMovie
-      // && !this.is3DModel && !this.isPdf
+      return this.isReady &&
+        !this.isPicture &&
+        !this.isMovie &&
+        !this.is3DModel &&
+        !this.isSound // && !this.isPdf
     },
 
     originalPath () {
@@ -300,11 +323,17 @@ export default {
       if (this.videoViewer) {
         this.videoViewer.play()
       }
+      if (this.isSound) {
+        this.soundViewer.play()
+      }
     },
 
     pause () {
       this.isPlaying = false
       if (this.videoViewer) this.videoViewer.pause()
+      if (this.isSound) {
+        this.soundViewer.pause()
+      }
     },
 
     goPreviousFrame () {
@@ -340,16 +369,21 @@ export default {
 
     resize () {
       if (this.videoViewer) this.videoViewer.onWindowResize()
+      if (this.isSound) this.soundViewer.redraw()
     },
 
     getPreviewDimensions () {
-      if (this.isMovie) return this.videoViewer.getDimensions()
-      else if (this.isPicture) return this.pictureViewer.getDimensions()
-      else return { width: 0, height: 0 }
+      const dimensions = { width: 0, height: 0 }
+      if (this.isMovie) {
+        return this.videoViewer.getDimensions()
+      } else if (this.isPicture) {
+        return this.pictureViewer.getDimensions()
+      }
+      return dimensions
     },
 
-    setCurrentTime (time) {
-      this.videoViewer.setCurrentTime(time)
+    setCurrentFrame (frameNumber) {
+      this.videoViewer.setCurrentFrame(frameNumber)
     },
 
     // To use when you don't want to handle back pressure and rounding
@@ -373,6 +407,17 @@ export default {
 
     updateLoupePosition (event, canvasDimensions) {
       this.pictureViewer.updateLoupePosition(event, canvasDimensions)
+    },
+
+    extractFrame (canvas, frame) {
+      this.videoViewer.setCurrentFrame(frame)
+      const video = this.videoViewer.video
+      const context = canvas.getContext('2d')
+      const dimensions = this.videoViewer.getNaturalDimensions()
+      canvas.width = dimensions.width
+      canvas.height = dimensions.height
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.drawImage(video, 0, 0, canvas.width, canvas.height)
     }
   },
 

@@ -30,7 +30,7 @@ export const entityMixin = {
           .sort((a, b) => {
             const taskTypeAPriority = this.getTaskTypePriority(a.task_type_id)
             const taskTypeBPriority = this.getTaskTypePriority(b.task_type_id)
-            return taskTypeAPriority > taskTypeBPriority
+            return taskTypeAPriority - taskTypeBPriority
           })
         : []
     },

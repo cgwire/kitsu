@@ -63,7 +63,7 @@ export default {
     )
   },
 
-  getTaskComment (data, callback) {
+  getTaskComment (data) {
     return client.pget(`/api/data/comments/${data.id}`)
   },
 
@@ -198,6 +198,19 @@ export default {
     const path =
       `/api/data/tasks/${comment.object_id}/comments/${comment.id}/ack`
     return client.ppost(path, {})
+  },
+
+  replyToComment (comment, text) {
+    const path =
+      `/api/data/tasks/${comment.object_id}/comments/${comment.id}/reply`
+    return client.ppost(path, { text })
+  },
+
+  deleteReply (comment, reply) {
+    const path =
+      `/api/data/tasks/${comment.object_id}` +
+      `/comments/${comment.id}/reply/${reply.id}`
+    return client.pdel(path)
   },
 
   updateRevisionPreviewPosition (previewId, position) {

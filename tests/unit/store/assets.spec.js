@@ -611,9 +611,13 @@ describe('Assets store', () => {
           hours_by_day: 8
         },
         isTVShow: true,
+        personMap: new Map(Object.entries({
+          'person-1': { full_name: 'Jhon Doe' }
+        })),
         taskMap: new Map(Object.entries({
           'task-id-1': {
-            task_status_short_name: 'shortName1'
+            task_status_short_name: 'shortName1',
+            assignees: [ 'person-1' ]
           }
         }))
       }
@@ -659,6 +663,8 @@ describe('Assets store', () => {
         '2.08',
         '4.17',
         'shortName1',
+        'Jhon Doe',
+        '',
         ''
       ])
       expect(lines[1]).toEqual([
@@ -670,6 +676,8 @@ describe('Assets store', () => {
         'descriptor5',
         '4.17',
         '8.33',
+        '',
+        '',
         '',
         ''
       ])
@@ -1725,8 +1733,8 @@ describe('Assets store', () => {
       store.mutations.CREATE_TASKS_END(state, tasks)
       expect(state.assetMap.get('asset-id').validations).toEqual(
         new Map(Object.entries({
-        task_type_id: 'task-id'
-      })))
+          task_type_id: 'task-id'
+        })))
     })
 
     test('SET_ASSET_TYPE_SEARCH', () => {

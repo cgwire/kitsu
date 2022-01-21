@@ -353,6 +353,26 @@ export default {
         }
       },
 
+      'task:update-casting-stats' (eventData) {
+        const task = this.taskMap.get(eventData.task_id)
+        if (task) {
+          this.$store.commit('UPDATE_TASK', {
+            task,
+            nbAssetsReady: eventData.nb_assets_ready
+          })
+        }
+      },
+
+      'shot:casting-update' (eventData) {
+        const shot = this.shotMap.get(eventData.shot_id)
+        if (shot) {
+          this.$store.commit('UPDATE_SHOT', {
+            id: shot.id,
+            nb_entities_out: eventData.nb_entities_out
+          })
+        }
+      },
+
       'metadata-descriptor:new' (eventData) {
         this.refreshMetadataDescriptor(eventData.metadata_descriptor_id)
       },
@@ -850,6 +870,13 @@ input.input:focus {
 .button,
 .button.is-small {
   border-radius: 2em;
+}
+
+.datepicker .input.is-small {
+  font-size: 1em;
+  padding: 0.5em;
+  height: 2.3em;
+  width: 100px;
 }
 
 .button:focus {

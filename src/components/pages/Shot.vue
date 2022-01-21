@@ -162,6 +162,17 @@
                     ({{ asset.nb_occurences }})
                   </span>
                 </div>
+                <div
+                  class="ready-for flexrow"
+                >
+                  <task-type-name
+                    class="flexrow-item"
+                    :task-type="taskTypeMap.get(asset.ready_for)"
+                    :current-production-id="currentProduction.id"
+                    :title="'Ready for: ' + taskTypeMap.get(asset.ready_for).name"
+                    v-if="asset.ready_for"
+                  />
+                </div>
               </router-link>
             </div>
           </div>
@@ -217,6 +228,7 @@ import PageSubtitle from '@/components/widgets/PageSubtitle'
 import Schedule from '../pages/schedule/Schedule'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskInfo from '@/components/sides/TaskInfo'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
   name: 'shot',
@@ -232,7 +244,8 @@ export default {
     PageTitle,
     Schedule,
     TableInfo,
-    TaskInfo
+    TaskInfo,
+    TaskTypeName
   },
 
   data () {
@@ -563,7 +576,7 @@ h2.subtitle {
 
 .schedule {
   position: relative;
-  height: 280px;
+  height: 300px;
   padding: 10px;
 
   .schedule-title {

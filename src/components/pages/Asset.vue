@@ -24,6 +24,21 @@
           v-if="isCurrentUserManager"
         />
       </div>
+      <div class="filler">
+      </div>
+      <div
+        class="ready-for flexrow"
+        v-if="currentAsset && currentAsset.ready_for"
+      >
+        <span class="flexrow-item">
+          Ready for:
+        </span>
+        <task-type-name
+          class="flexrow-item"
+          :task-type="taskTypeMap.get(currentAsset.ready_for)"
+          :current-production-id="this.currentProduction.id"
+        />
+      </div>
     </div>
 
     <div class="flexrow infos">
@@ -75,7 +90,7 @@
           :start-date="tasksStartDate"
           :end-date="tasksEndDate"
           :hierarchy="scheduleItems"
-          :zoom-level="2"
+          :zoom-level="1"
           :height="400"
           :is-loading="false"
           :is-estimation-linked="true"
@@ -220,6 +235,7 @@ import PageTitle from '../widgets/PageTitle'
 import PageSubtitle from '../widgets/PageSubtitle'
 import Schedule from '../pages/schedule/Schedule'
 import TableInfo from '../widgets/TableInfo'
+import TaskTypeName from '../widgets/TaskTypeName'
 import TaskInfo from '../sides/TaskInfo'
 
 export default {
@@ -236,7 +252,8 @@ export default {
     PageTitle,
     Schedule,
     TableInfo,
-    TaskInfo
+    TaskInfo,
+    TaskTypeName
   },
 
   data () {
@@ -572,7 +589,7 @@ h2.subtitle {
 
 .schedule {
   position: relative;
-  height: 280px;
+  height: 300px;
   padding: 10px;
 
   .schedule-title {

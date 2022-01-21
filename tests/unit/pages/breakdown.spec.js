@@ -16,7 +16,7 @@ describe('Breakdown', () => {
   beforeEach(() => {
     userStore = {
       getters: {
-        isCurrentUserManager: () => true,
+        isCurrentUserManager: () => true
       },
       actions: {
         setLastProductionScreen: () => true
@@ -80,7 +80,6 @@ describe('Breakdown', () => {
     })
   })
 
-
   describe('Mount', () => {
     test('mounted', () => {
     })
@@ -100,7 +99,6 @@ describe('Breakdown', () => {
   })
 
   describe('Methods', () => {
-
     test('loadFollowingNews', () => {
     })
   })

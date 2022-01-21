@@ -1,6 +1,6 @@
 {
   "name": "kitsu",
-  "version": "0.13.26",
+  "version": "0.13.42",
   "description": "Production Management Software (user interface)",
   "author": "Frank Rousseau <frank@cg-wire.com>",
   "repository": "https://github.com/cgwire/kitsu",
@@ -14,6 +14,7 @@
     "test:functional": "$(npm bin)/cypress open"
   },
   "dependencies": {
+    "@google/model-viewer": "^1.9.2",
     "async": "3.2.0",
     "bowser": "2.11.0",
     "chart.js": "2.9.4",
@@ -62,14 +63,15 @@
     "vuedraggable": "2.24.3",
     "vuejs-datepicker": "1.6.2",
     "vuex": "3.6.2",
-    "vuex-router-sync": "5.0.0"
+    "vuex-router-sync": "5.0.0",
+    "wavesurfer.js": "5.2.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "4.5.13",
     "@vue/cli-plugin-e2e-cypress": "4.5.13",
     "@vue/cli-plugin-eslint": "5.0.0-beta.2",
     "@vue/cli-plugin-unit-jest": "4.5.13",
-    "@vue/cli-service": "4.5.13",
+    "@vue/cli-service": "4.5.15",
     "@vue/eslint-config-standard": "5.1.2",
     "@vue/test-utils": "1.2.2",
     "babel-core": "7.0.0-bridge.0",
@@ -83,7 +85,7 @@
     "localStorage": "1.0.4",
     "ncu": "0.2.1",
     "vue-template-compiler": "2.6.14",
-    "webpack": "5.40.0"
+    "webpack": "4.46.0"
   },
   "babel": {},
   "engines": {

@@ -6,7 +6,7 @@ describe('AnnotationBar', () => {
     propsData: {
       annotations: [
         { time: 10 },
-        { time: 20 },
+        { time: 20 }
       ],
       maxDurationRaw: 100,
       width: 100
@@ -16,7 +16,7 @@ describe('AnnotationBar', () => {
   describe('Mount', () => {
     test('Ensure marks are there', () => {
       const marks = wrapper.findAll('.annotation-mark')
-      expect(marks.length).toEqual(2)
+      expect(marks).toHaveLength(2)
       expect(marks.at(0).element.style.left).toEqual('7px')
     })
   })

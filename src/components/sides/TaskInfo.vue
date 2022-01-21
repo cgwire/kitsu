@@ -140,9 +140,11 @@
               :fps="parseInt(currentFps)"
               :time="isPreview ? currentTime : currentTimeRaw"
               :revision="currentRevision"
+              :is-movie="isMoviePreview"
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
               @file-drop="selectFile"
+              @annotation-snapshots-requested="extractAnnotationSnapshots"
               v-if="isCommentingAllowed"
             />
 
@@ -420,9 +422,8 @@ export default {
       const isAssigned = this.task.assignees.find(
         (personId) => personId === this.user.id
       )
-      const isClientInPlaylist =
-        this.$route.path.indexOf('playlist') > 0 && this.isCurrentUserClient
-      return isManager || isAssigned || isClientInPlaylist
+      const isClient = this.isCurrentUserClient
+      return isManager || isAssigned || isClient
     },
 
     isSetThumbnailAllowed () {
@@ -463,7 +464,7 @@ export default {
     },
 
     currentRevision () {
-      return this.currentParentPreview
+      return this.currentParentPreview && this.currentParentPreview.revision
         ? this.currentParentPreview.revision
         : this.currentPreview ? this.currentPreview.revision : 0
     },
@@ -567,6 +568,7 @@ export default {
       'loadTaskSubscribed',
       'refreshPreview',
       'pinComment',
+      'refreshComment',
       'setPreview',
       'subscribeToTask',
       'unsubscribeFromTask',
@@ -977,15 +979,20 @@ export default {
       this.changeCurrentPreview(this.taskPreviews.find(
         p => p.revision === parseInt(versionRevision)
       ))
-      const time = parseInt(minutes) * 60 + parseInt(seconds) + parseInt(milliseconds) / 1000
       setTimeout(() => {
-        this.previewPlayer.setCurrentTime(time)
+        this.previewPlayer.setCurrentFrame(frame - 1)
         this.previewPlayer.focus()
       }, 20)
     },
 
     onTimeUpdated (time) {
       this.currentTime = time
+    },
+
+    async extractAnnotationSnapshots () {
+      const files = await this.previewPlayer.extractAnnotationSnapshots()
+      this.$refs['add-comment'].setAnnotationSnapshots(files)
+      return files
     }
   },
 
@@ -1006,18 +1013,34 @@ export default {
       },
 
       'preview-file:update' (eventData) {
-        if (!this.taskPreviews) return
-        const preview = this.taskPreviews.find(preview => {
-          return preview.id === eventData.preview_file_id
-        })
-        if (preview && this.task) {
+        const comment = this.taskComments.find(
+          c => (
+            c.previews &&
+            c.previews.length > 0 &&
+            c.previews[0].id === eventData.preview_file_id
+          )
+        )
+        if (comment && this.task) {
           this.refreshPreview({
             taskId: this.task.id,
             previewId: eventData.preview_file_id
           }).then(preview => {
-            this.taskPreviews = this.getTaskPreviews(this.task.id)
+            comment.previews[0].validation_status = preview.validation_status
           })
         }
+      },
+
+      'comment:new' (eventData) {
+        setTimeout(() => {
+          if (
+            this.task &&
+            this.getTaskComments(this.task.id).length !==
+            this.taskComments.length
+          ) {
+            this.taskComments = this.getTaskComments(this.task.id)
+            this.taskPreviews = this.getTaskPreviews(this.task.id)
+          }
+        }, 1000)
       },
 
       'comment:acknowledge' (eventData) {
@@ -1026,6 +1049,45 @@ export default {
 
       'comment:unacknowledge' (eventData) {
         this.onRemoteAcknowledge(eventData, 'unack')
+      },
+
+      'comment:reply' (eventData) {
+        if (this.task) {
+          const comment = this.taskComments.find(
+            c => c.id === eventData.comment_id
+          )
+          if (comment) {
+            if (!comment.replies) comment.replies = []
+            const reply = comment.replies.find(
+              r => r.id === eventData.reply_id
+            )
+            if (!reply) {
+              this.refreshComment({
+                taskId: this.task.id,
+                commentId: eventData.comment_id
+              })
+                .then(remoteComment => {
+                  comment.replies = remoteComment.replies
+                })
+                .catch(console.error)
+            }
+          }
+        }
+      },
+
+      'comment:delete-reply' (eventData) {
+        if (this.task) {
+          const comment = this.taskComments.find(
+            c => c.id === eventData.comment_id
+          )
+          if (comment) {
+            if (!comment.replies) comment.replies = []
+            this.$store.commit('REMOVE_REPLY_FROM_COMMENT', {
+              comment,
+              reply: { id: eventData.reply_id }
+            })
+          }
+        }
       }
     }
   }

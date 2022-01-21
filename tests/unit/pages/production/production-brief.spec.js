@@ -13,56 +13,56 @@ localVue.use(Vuex)
 localVue.use(vuescroll)
 
 function initialiseStore (actions) {
-    const userStore = {
-      getters: {
-        user: () => ({ id: 'user-1', timezone: 'Europe/Paris' }),
-        isCurrentUserAdmin: () => true,
-        isCurrentUserManager: () => true
-      },
+  const userStore = {
+    getters: {
+      user: () => ({ id: 'user-1', timezone: 'Europe/Paris' }),
+      isCurrentUserAdmin: () => true,
+      isCurrentUserManager: () => true
     }
+  }
 
-    return new Vuex.Store({
-      strict: true,
-      modules: {
-        productions: {
-          ...productionStoreFixture,
-          state: {
-            currentProduction: {
-              id: 'production-1',
-              description: 'initial brief',
-              name: 'Caminandes',
-              team: ['person-2', 'person-3'],
-              task_statuses: []
-            }
-          },
-          mutations: {
-            setCurrentProduction(state, production) {
-              state.currentProduction = production
-            },
-          },
-          actions: {
-            setProduction () {
-              return new Promise((resolve, reject) => {
-                resolve()
-              })
-            },
-            ...actions
-          },
-          getters: {
-            currentProduction: (state) => state.currentProduction
+  return new Vuex.Store({
+    strict: true,
+    modules: {
+      productions: {
+        ...productionStoreFixture,
+        state: {
+          currentProduction: {
+            id: 'production-1',
+            description: 'initial brief',
+            name: 'Caminandes',
+            team: ['person-2', 'person-3'],
+            task_statuses: []
           }
         },
-        user: userStore,
-      }
-    })
+        mutations: {
+          setCurrentProduction (state, production) {
+            state.currentProduction = production
+          }
+        },
+        actions: {
+          setProduction () {
+            return new Promise((resolve, reject) => {
+              resolve()
+            })
+          },
+          ...actions
+        },
+        getters: {
+          currentProduction: (state) => state.currentProduction
+        }
+      },
+      user: userStore
+    }
+  })
 }
 
-function initialiseWrapper(store, localVue, i18n) {
-    return shallowMount(ProductionBrief, {
-      store,
-      localVue,
-      i18n
-    })
+function initialiseWrapper (store, localVue, i18n) {
+  return shallowMount(ProductionBrief, {
+    store,
+    localVue,
+    i18n
+  })
 }
 
 describe('ProductionBrief', () => {
@@ -70,9 +70,9 @@ describe('ProductionBrief', () => {
   })
 
   describe('Methods', () => {
-    test('editBrief', async() => {
+    test('editBrief', async () => {
       const store = initialiseStore({
-        editProduction({commit}, production) {
+        editProduction ({ commit }, production) {
           return new Promise((resolve) => {
             commit('setCurrentProduction', production)
             resolve(production)
@@ -80,25 +80,25 @@ describe('ProductionBrief', () => {
         }
       })
       const wrapper = initialiseWrapper(store, localVue, i18n)
-      const brief = "BRIEF"
+      const brief = 'BRIEF'
       expect(wrapper.vm.brief).toBe('initial brief')
-      wrapper.setData({ brief, isLoading: true});
+      wrapper.setData({ brief, isLoading: true })
       await wrapper.vm.editBrief()
       await Vue.nextTick()
       expect(wrapper.vm.isLoading).toBe(false)
       expect(store.getters.currentProduction.description).toBe(brief)
     }),
 
-    test('editBrief error', async() => {
+    test('editBrief error', async () => {
       const store = initialiseStore({
-         editProduction () {
+        editProduction () {
           return Promise.reject()
-        },
+        }
       })
       const wrapper = initialiseWrapper(store, localVue, i18n)
-      const brief = "BRIEF"
+      const brief = 'BRIEF'
       expect(wrapper.vm.brief).toBe('initial brief')
-      wrapper.setData({ brief, isLoading: true});
+      wrapper.setData({ brief, isLoading: true })
       await wrapper.vm.editBrief()
       await Vue.nextTick()
       expect(wrapper.vm.isLoading).toBe(false)

@@ -88,7 +88,7 @@ import moment from 'moment-timezone'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
 
-import { sortScheduleItems } from '../../lib/sorting'
+import { sortTaskTypeScheduleItems } from '../../lib/sorting'
 import { getTaskTypeSchedulePath } from '../../lib/path'
 import { daysToMinutes, parseDate } from '../../lib/time'
 
@@ -215,8 +215,11 @@ export default {
               children: []
             }
           })
-          this.scheduleItems =
-            sortScheduleItems(scheduleItems)
+          this.scheduleItems = sortTaskTypeScheduleItems(
+            scheduleItems,
+            this.currentProduction,
+            this.taskTypeMap
+          )
           this.loading.schedule = false
         })
         .then(this.loadMilestones)

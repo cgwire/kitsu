@@ -75,6 +75,7 @@
         :label="$t('main.sorted_by')"
         :sorting="assetSorting"
         @clear-sorting="onChangeSortClicked(null)"
+        v-if="assetSorting && assetSorting.length > 0"
       />
       <asset-list
         ref="asset-list"
@@ -93,6 +94,7 @@
         @edit-metadata="onEditMetadataClicked"
         @delete-metadata="onDeleteMetadataClicked"
         @metadata-changed="onMetadataChanged"
+        @asset-changed="onAssetChanged"
         @field-changed="onFieldChanged"
         @scroll="saveScrollPosition"
       />
@@ -925,6 +927,7 @@ export default {
           this.assetValidationColumns
             .forEach((taskTypeId) => {
               headers.push(this.taskTypeMap.get(taskTypeId).name)
+              headers.push('Assignations')
             })
           csv.buildCsvFile(name, [headers].concat(assetLines))
         })
@@ -959,6 +962,10 @@ export default {
         data: metadata
       }
       this.editAsset(data)
+    },
+
+    onAssetChanged (asset) {
+      this.editAsset(asset)
     },
 
     reset () {

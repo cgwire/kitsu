@@ -2,7 +2,8 @@
 <div :class="{
   'preview-row': true,
   'has-text-center': true,
-  selected: selected
+  selected: selected,
+  green: preview.validation_status === 'validated'
 }">
   <button-link
     :text="label"
@@ -55,6 +56,14 @@ export default {
 
 .preview-row:hover a {
   border: 3px solid #E1D4F9;
+}
+
+.preview-row.green a {
+  border: 3px solid $light-green;
+}
+
+.preview-row.red a {
+  border: 3px solid $dark-red;
 }
 
 .preview-row.selected a {

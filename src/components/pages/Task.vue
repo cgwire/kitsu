@@ -65,8 +65,9 @@
           <div>
             <add-comment
               ref="add-comment"
-              :is-loading="loading.addComment"
               :is-error="errors.addComment"
+              :is-loading="loading.addComment"
+              :is-movie="isMovie"
               :user="user"
               :team="currentTeam"
               :task="currentTask"
@@ -79,6 +80,7 @@
               @add-preview="onAddPreviewClicked"
               @duplicate-comment="onDuplicateComment"
               @file-drop="selectFile"
+              @annotation-snapshots-requested="extractAnnotationSnapshots"
               v-if="isCommentingAllowed"
             />
             <div
@@ -198,7 +200,7 @@
         </div>
         <div class="flexrow-item task-information">
           <page-subtitle :text="$t('main.info')" />
-          <div class="table-body">
+          <div class="table-body mt1">
             <table class="datatable" v-if="currentTask">
               <tbody class="table-body">
                 <tr class="datatable-row">
@@ -218,8 +220,8 @@
                   <td>{{ formatSimpleDate(currentTask.start_date) }}</td>
                 </tr>
                 <tr class="datatable-row">
-                  <td class="field-label">{{ $t('tasks.fields.end_date') }}</td>
-                  <td>{{ formatSimpleDate(currentTask.end_date) }}</td>
+                  <td class="field-label">{{ $t('tasks.fields.due_date') }}</td>
+                  <td>{{ formatSimpleDate(currentTask.due_date) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -282,7 +284,7 @@
       @confirm="confirmDeleteTaskPreview"
     />
   </div>
-  </div>
+</div>
 </template>
 
 <script>
@@ -401,6 +403,7 @@ export default {
       'getTaskComment',
       'isCurrentUserAdmin',
       'isCurrentUserArtist',
+      'isCurrentUserClient',
       'isCurrentUserManager',
       'isSingleEpisode',
       'isTVShow',
@@ -417,11 +420,16 @@ export default {
 
     isPreviewButtonVisible () {
       return (
+        this.isCurrentUserManager &&
         this.currentTask &&
         this.currentTask.entity &&
         this.currentTask.entity.preview_file_id !== this.currentPreviewId &&
         ['png', 'mp4'].includes(this.extension)
       )
+    },
+
+    isMovie () {
+      return this.extension === 'mp4'
     },
 
     extension () {
@@ -456,8 +464,12 @@ export default {
     },
 
     isCommentingAllowed () {
-      return this.isCurrentUserManager || this.currentTask.assignees.find(
-        (personId) => personId === this.user.id
+      return (
+        this.isCurrentUserManager ||
+        this.isCurrentUserClient ||
+        this.currentTask.assignees.find(
+          (personId) => personId === this.user.id
+        )
       )
     },
 
@@ -719,6 +731,7 @@ export default {
       'loadPreviewFileFormData',
       'loadTaskComments',
       'loadTaskSubscribed',
+      'refreshComment',
       'refreshPreview',
       'pinComment',
       'subscribeToTask',
@@ -1197,11 +1210,16 @@ export default {
       this.changeCurrentPreview(this.currentTaskPreviews.find(
         p => p.revision === parseInt(versionRevision)
       ))
-      const time = parseInt(minutes) * 60 + parseInt(seconds) + parseInt(milliseconds) / 1000
       setTimeout(() => {
-        this.previewPlayer.setCurrentTime(time)
+        this.previewPlayer.setCurrentFrame(frame - 1)
         this.previewPlayer.focus()
       }, 20)
+    },
+
+    async extractAnnotationSnapshots () {
+      const files = await this.previewPlayer.extractAnnotationSnapshots()
+      this.$refs['add-comment'].setAnnotationSnapshots(files)
+      return files
     }
   },
 
@@ -1225,6 +1243,75 @@ export default {
 
       'comment:unacknowledge' (eventData) {
         this.onRemoteAcknowledge(eventData, 'unack')
+      },
+
+      'preview-file:update' (eventData) {
+        const comment = this.currentTaskComments.find(
+          c => (
+            c.previews &&
+            c.previews.length > 0 &&
+            c.previews[0].id === eventData.preview_file_id
+          )
+        )
+        if (comment && this.currentTask) {
+          this.refreshPreview({
+            taskId: this.currentTask.id,
+            previewId: eventData.preview_file_id
+          }).then(preview => {
+            comment.previews[0].validation_status = preview.validation_status
+          })
+        }
+      },
+
+      'comment:new' (eventData) {
+        setTimeout(() => {
+          if (
+            this.getCurrentTaskComments().length !==
+            this.currentTaskComments.length
+          ) {
+            this.currentTaskComments = this.getCurrentTaskComments()
+            this.currentTaskPreviews = this.getCurrentTaskPreviews()
+          }
+        }, 1000)
+      },
+
+      'comment:reply' (eventData) {
+        if (this.currentTask) {
+          const comment = this.currentTaskComments.find(
+            c => c.id === eventData.comment_id
+          )
+          if (comment) {
+            if (!comment.replies) comment.replies = []
+            const reply = comment.replies.find(
+              r => r.id === eventData.reply_id
+            )
+            if (!reply) {
+              this.refreshComment({
+                taskId: this.currentTask.id,
+                commentId: eventData.comment_id
+              })
+                .then(remoteComment => {
+                  comment.replies = remoteComment.replies
+                })
+                .catch(console.error)
+            }
+          }
+        }
+      },
+
+      'comment:delete-reply' (eventData) {
+        if (this.currentTask) {
+          const comment = this.currentTaskComments.find(
+            c => c.id === eventData.comment_id
+          )
+          if (comment) {
+            if (!comment.replies) comment.replies = []
+            this.$store.commit('REMOVE_REPLY_FROM_COMMENT', {
+              comment,
+              reply: { id: eventData.reply_id }
+            })
+          }
+        }
       }
     }
   },
@@ -1378,7 +1465,7 @@ video {
 .page-header .tag {
   border-radius: 0;
   font-weight: bold;
-  color: $grey-strong;
+  margin-right: 0.5em;
 }
 
 .assignees {

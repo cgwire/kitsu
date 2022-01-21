@@ -25,6 +25,10 @@ export default {
       default: 0,
       type: Number
     },
+    nbFrames: {
+      default: 0,
+      type: Number
+    },
     width: {
       default: 0,
       type: Number
@@ -40,9 +44,11 @@ export default {
         const progressCoordinates = progressBar.getBoundingClientRect()
         width = progressCoordinates.width
       }
-      let left = width * factor - 3
+      const dotWidth = 6
+      const frameSize = this.width / this.nbFrames
+      let left = (width * factor) - (frameSize / 2) - 3
       if (left >= width) {
-        left -= this.isFullScreen() ? 9 : 6
+        left -= this.isFullScreen() ? 1.5 * dotWidth : dotWidth
       }
       return left
     },
@@ -63,7 +69,7 @@ export default {
 <style lang="scss" scoped>
 .annotation-bar {
   width: 100%;
-  height: 20px;
+  height: 10px;
   position: relative;
   background: $dark-grey;
   overflow: hidden;
@@ -75,7 +81,7 @@ export default {
   width: 8px;
   height: 8px;
   display: inline-block;
-  top: 6px;
+  top: 1px;
   position: absolute;
   border-radius: 50%;
   cursor: pointer;

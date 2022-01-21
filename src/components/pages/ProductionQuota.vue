@@ -10,7 +10,7 @@
         <combobox-task-type
           class="flexrow-item"
           :label="$t('quota.type_label')"
-          :task-type-list="shotTaskTypes"
+          :task-type-list="productionShotTaskTypes"
           v-model="taskTypeId"
         />
       </div>
@@ -140,6 +140,7 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
+      'productionShotTaskTypes',
       'shotTaskTypes',
       'personMap'
     ]),

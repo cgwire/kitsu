@@ -12,7 +12,7 @@
             :font-size="60"
           />
 
-          <p v-if="!isLdap">
+          <p>
             <button
               class="button is-link change-avatar-button"
               @click="showAvatarModal"

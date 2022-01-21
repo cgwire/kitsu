@@ -101,6 +101,24 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.input.is-size-2 {
+  width: 3rem;
+}
+
+.input.is-size-3 {
+  width: 3.5rem;
+}
+
+.input.is-size-4 {
+  width: 5rem;
+}
+
+.input.is-small {
+  height: 2rem;
+  font-size: 1rem;
+  padding: 0 0.5rem;
+}
+
 input.input {
   font-size: 1.2em;
 

@@ -89,7 +89,7 @@ export default {
     'isLoading',
     'isUpdateDepartmentsError',
     'isUpdateDepartmentsLoading',
-    'personToEdit',
+    'personToEdit'
   ],
 
   data () {
@@ -160,7 +160,7 @@ export default {
           departments: []
         }
       }
-    },
+    }
   },
 
   watch: {

@@ -46,5 +46,4 @@ describe('render', () => {
     expect(result.trim()).toEqual(
       '<p>Text <strong>bold</strong> <img src=\"picture.png\" /></p>')
   })
-
 })
