@@ -505,6 +505,8 @@
             "notifications_enabled": "Notificações de email habilitadas",
             "notifications_slack_enabled": "Notificações do Slack habilitadas",
             "notifications_slack_user": "Nome de usuário do Slack",
+            "notifications_mattermost_enabled": "Notificações do Mattermost habilitadas",
+            "notifications_mattermost_user": "Nome de usuário do Mattermost",
             "password_title": "Alterar senha",
             "timezone": "Timezone",
             "title": "Seu Perfil",
@@ -530,10 +532,12 @@
             "no_logo": "Sem logo definida.",
             "set_logo": "Escolher logo do estúdio",
             "title": "Configurações",
+            "webhook_error": "Une erreur est survenue en postant le webhook",
             "fields": {
                 "name": "Nome do estúdio",
                 "hours_by_day": "Horas por dia",
                 "slack_token": "Slack Token (Opcional)",
+                "mattermost_webhook": "Mattermost Webhook (Opcionnal)",
                 "use_original_name": "Usar nome original dos arquivos para download"
             },
             "production": {

@@ -630,6 +630,8 @@
             "notifications_enabled": "Notificaciones de correo electrónico habilitadas",
             "notifications_slack_enabled": "Notificaciones de Slack activadas",
             "notifications_slack_user": "Slack ID",
+            "notifications_mattermost_enabled": "Notificationes de Mattermost activadas",
+            "notifications_mattermost_user": "Mattermost ID",
             "password_title": "Cambiar contraseña",
             "timezone": "Zona horaria",
             "title": "Su perfil",
@@ -655,10 +657,12 @@
             "no_logo": "No hay conjunto de logotipos.",
             "set_logo": "Logotipo de estudio",
             "title": "Ajustes",
+            "webhook_error": "An error occurred while posting webhook",
             "fields": {
                 "name": "Nombre del estudio",
                 "hours_by_day": "Horas por día",
                 "slack_token": "Slack token (opcional)",
+                "mattermost_webhook": "Mattermost Webhook (Optional)",
                 "use_original_name": "Usar el nombre del archivo original para las descargas",
                 "timesheets_locked": ""
             },

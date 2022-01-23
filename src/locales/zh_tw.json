@@ -630,6 +630,8 @@
             "notifications_enabled": "電子郵件通知已啟用",
             "notifications_slack_enabled": "Slack通知已啟用",
             "notifications_slack_user": "Slack 用戶名",
+            "notifications_mattermost_enabled": "Mattermost通知已啟用",
+            "notifications_mattermost_user": "Mattermost 用戶名",
             "password_title": "更改密碼",
             "timezone": "時區",
             "title": "您的簡介",
@@ -655,10 +657,12 @@
             "no_logo": "沒有設置Logo",
             "set_logo": "設置公司Logo",
             "title": "設置",
+            "webhook_error": "Une erreur est survenue en postant le webhook",
             "fields": {
                 "name": "公司名稱",
                 "hours_by_day": "每天工作時間",
                 "slack_token": "Slack Token （可選）",
+                "mattermost_webhook": "Mattermost Webhook（可選）",
                 "use_original_name": "使用原始檔案名進行下載",
                 "timesheets_locked": ""
             },

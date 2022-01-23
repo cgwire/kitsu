@@ -503,6 +503,8 @@ export default {
     notifications_enabled: 'E-Mail-Benachrichtigungen aktiviert',
     notifications_slack_enabled: 'Slack-Benachrichtigungen aktiviert',
     notifications_slack_user: 'Slack-Benutzername',
+    notifications_mattermost_enabled: 'Mattermost-Benachrichtigungen aktiviert',
+    notifications_mattermost_user: 'Mattermost-Benutzername',
     password_title: 'Passwort ändern',
     timezone: 'Zeitzone',
     title: 'Dein Profil',
@@ -547,10 +549,12 @@ export default {
     no_logo: 'Es gibt kein Logo-Set.',
     set_logo: 'Logo Studio-Set',
     title: 'Einstellungen',
+    webhook_error: 'An error occurred while posting webhook',
     fields: {
       name: 'Studio-Name',
       hours_by_day: 'Stunden am Tag',
       slack_token: 'Slack Token (Optional)',
+      mattermost_webhook: 'Mattermost Webhook (Optional)',
       use_original_name: 'Original-Dateinamen für Downloads verwenden'
     },
     production: {

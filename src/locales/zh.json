@@ -630,6 +630,8 @@
             "notifications_enabled": "电子邮件通知已启用",
             "notifications_slack_enabled": "Slack通知已启用",
             "notifications_slack_user": "Slack 用户名",
+            "notifications_mattermost_enabled": "Mattermost通知已启用",
+            "notifications_mattermost_user": "Mattermost 用户名",
             "password_title": "更改密码",
             "timezone": "时区",
             "title": "您的简介",
@@ -655,10 +657,12 @@
             "no_logo": "没有设置Logo",
             "set_logo": "设置工作室Logo",
             "title": "设置",
+            "webhook_error": "Une erreur est survenue en postant le webhook",
             "fields": {
                 "name": "工作室名字",
                 "hours_by_day": "每天营业时间",
                 "slack_token": "Slack Token （可选）",
+                "mattermost_webhook": "Mattermost Webhook （可选）",
                 "use_original_name": "使用原始文件名进行下载",
                 "timesheets_locked": ""
             },

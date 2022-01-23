@@ -630,6 +630,8 @@
             "notifications_enabled": "Notifications mail activées",
             "notifications_slack_enabled": "Notifications Slack activées",
             "notifications_slack_user": "Nom d'utilisateur Slack",
+            "notifications_mattermost_enabled": "Notifications Mattermost activées",
+            "notifications_mattermost_user": "Nom d'utilisateur Mattermost",
             "password_title": "Changement de mot de passe",
             "timezone": "Fuseau horaire",
             "title": "Votre Profil",
@@ -655,10 +657,12 @@
             "no_logo": "Aucun logo n' a été positionné.",
             "set_logo": "Changer le logo",
             "title": "Paramètres",
+            "webhook_error": "Une erreur est survenue en postant le webhook",
             "fields": {
                 "name": "Nom du studio",
                 "hours_by_day": "Heures par jour",
                 "slack_token": "Token Slack (optionnel)",
+                "mattermost_webhook": "Webhook Mattermost (optionnel)",
                 "use_original_name": "Utiliser les noms de fichiers originaux pour le téléchargement",
                 "timesheets_locked": "Bloquer les feuilles de temps des artistes de plus d'une semaine"
             },

@@ -630,6 +630,8 @@
             "notifications_enabled": "E-mail értesítések bekapcsolba",
             "notifications_slack_enabled": "Slack értesítések bekapcsolva",
             "notifications_slack_user": "Slack felhasználónév",
+            "notifications_mattermost_enabled": "Mattermost értesítések bekapcsolva",
+            "notifications_mattermost_user": "Mattermost felhasználónév",
             "password_title": "Jelszó megváltoztatása",
             "timezone": "Időzóna",
             "title": "Profilod",
@@ -655,10 +657,12 @@
             "no_logo": "Nincs logó beállítva",
             "set_logo": "Stúdió logó beállítása",
             "title": "Beállítások",
+            "webhook_error": "Une erreur est survenue en postant le webhook",
             "fields": {
                 "name": "Stúdió név",
                 "hours_by_day": "Napi munkaórák",
                 "slack_token": "Slack Token (nem kötelező)",
+                "mattermost_webhook": "Mattermost Webhook (nem kötelező)",
                 "use_original_name": "Eredeti file-nevek használata letöltéskor",
                 "timesheets_locked": "Egy hétnél régebbi művész munkaidő-táblák lezárása"
             },

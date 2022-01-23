@@ -527,6 +527,8 @@ export default {
     notifications_enabled: 'Отправлять уведомления на почту?',
     notifications_slack_enabled: 'Отправлять уведомления в Slack?',
     notifications_slack_user: 'Имя пользователя в Slack',
+    notifications_mattermost_enabled: 'Отправлять уведомления в Mattermost?',
+    notifications_mattermost_user: 'Имя пользователя в Mattermost',
     password_title: 'Изменить пароль',
     timezone: 'Часовой пояс',
     title: 'Профиль',
@@ -553,10 +555,12 @@ export default {
     no_logo: 'Нет логотипа',
     set_logo: 'Добавить логотип студии',
     title: 'Настройки',
+    webhook_error: 'Une erreur est survenue en postant le webhook',
     fields: {
       name: 'Название студии',
       hours_by_day: 'Часов в день',
       slack_token: 'Токен Slack (Опционально)',
+      mattermost_webhook: 'Webhook Mattermost (Опционально)',
       use_original_name: 'Использовать оригинальное название файла при скачивании'
     },
     production: {
