@@ -50,7 +50,7 @@ export default {
       if (left >= width) {
         left -= this.isFullScreen() ? 1.5 * dotWidth : dotWidth
       }
-      return left
+      return Math.round(left)
     },
 
     isFullScreen () {

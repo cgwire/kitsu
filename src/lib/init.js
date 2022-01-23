@@ -10,7 +10,7 @@ import {
  */
 const init = (callback) => {
   store.commit(DATA_LOADING_START)
-  store.dispatch('loadContext')
+  return store.dispatch('loadContext')
     .then(() => {
       // We run login success mutation when done because init
       // happens either after successful login or at first connexion
@@ -18,7 +18,7 @@ const init = (callback) => {
       store.commit(DATA_LOADING_END)
       callback()
     })
-    .catch((err) => {
+    .catch(err => {
       console.error('An init operation failed: ', err)
     })
 }

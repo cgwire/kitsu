@@ -9,6 +9,7 @@ describe('AnnotationBar', () => {
         { time: 20 }
       ],
       maxDurationRaw: 100,
+      nbFrames: 500,
       width: 100
     }
   })

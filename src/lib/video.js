@@ -53,7 +53,7 @@ export const formatTime = (seconds) => {
 }
 
 /*
- * Convert time to a frame string.
+ * Convert frame to a frame string.
  */
 export const formatFrame = (frame) => {
   if (frame < 0) frame = 0
