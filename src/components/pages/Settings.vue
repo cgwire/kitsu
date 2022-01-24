@@ -171,7 +171,6 @@ export default {
     ]),
 
     checkWebhook () {
-      console.log(this.errors.webhook_error)
       if (this.form.chat_webhook_mattermost === '') {
         this.errors.webhook_error = false
         return true
@@ -189,20 +188,19 @@ export default {
     },
 
     saveSettings () {
-      console.log(this.errors.webhook_error)
       if (this.checkWebhook()) {
         this.loading.save = true
         this.errors.save = false
         this.saveOrganisation(this.form)
-        .then(() => {
-          this.loading.save = false
-          this.errors.save = false
-        })
-        .catch((err) => {
-          console.error(err)
-          this.loading.save = false
-          this.errors.save = true
-        })
+          .then(() => {
+            this.loading.save = false
+            this.errors.save = false
+          })
+          .catch((err) => {
+            console.error(err)
+            this.loading.save = false
+            this.errors.save = true
+          })
       }
     },
 
