@@ -126,6 +126,21 @@ export const buildShotIndex = (shots) => {
 }
 
 /*
+ * Generate an index to find edit easily. Search will be based on the episode
+ * and edit names at the same time.
+ * Results are arrays of edits.
+ */
+export const buildEditIndex = (edits) => {
+  const index = Object.create(null)
+  const editIndex = Object.create(null)
+  edits.forEach((edit) => {
+    const words = [edit.name, edit.episode_name]
+    indexWords(index, editIndex, edit, words)
+  })
+  return index
+}
+
+/*
  * Generate an index to find sequence easily. Search will be based on the
  * episode and sequence names at the same time.
  * Results are arrays of sequences.

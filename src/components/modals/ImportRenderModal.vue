@@ -214,7 +214,8 @@ export default {
     ...mapGetters([
       'assetMetadataDescriptors',
       'isTVShow',
-      'shotMetadataDescriptors'
+      'shotMetadataDescriptors',
+      'editMetadataDescriptors'
     ]),
 
     columnsRequired () {
@@ -228,9 +229,14 @@ export default {
     metadataDescriptors () {
       if (this.$route.path.indexOf('assets') > 0) {
         return this.assetMetadataDescriptors
-      } else {
+      }
+      if (this.$route.path.indexOf('shots') > 0) {
         return this.shotMetadataDescriptors
       }
+      if (this.$route.path.indexOf('edits') > 0) {
+        return this.editMetadataDescriptors
+      }
+      return null
     },
 
     columnsAllowed () {

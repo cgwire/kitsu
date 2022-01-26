@@ -269,11 +269,16 @@ export default {
       'openProductions',
       'openProductionOptions',
       'productionMap',
+      'productionEditTaskTypes',
       'user'
     ]),
 
     assetSections () {
       return ['assets', 'assetTypes', 'playlists']
+    },
+
+    editSections () {
+      return ['edits']
     },
 
     // Asset pages require a all section and a main pack section.
@@ -288,12 +293,16 @@ export default {
           { label: this.$t('main.all_assets'), value: 'all' },
           { label: 'Main Pack', value: 'main' }
         ].concat(this.episodeOptions)
+      } else if (['edits'].includes(this.currentProjectSection)) {
+        return [
+          { label: this.$t('main.all_edits'), value: 'all' }
+        ].concat(this.episodeOptions)
       } else {
         return this.episodeOptions
       }
     },
 
-    isShotPage () {
+    hasEpisodeId () {
       return this.$route.params.episode_id
     },
 
@@ -304,7 +313,7 @@ export default {
 
     isEpisodeContext () {
       return this.isTVShow &&
-             this.isShotPage &&
+             this.hasEpisodeId &&
              // Do not display combobox if there is no episode
              this.episodes.length > 0
     },
@@ -327,6 +336,7 @@ export default {
         }
       }
       if (production.production_type === 'tvshow') {
+        console.log('lastSectionPath sets ', production.first_episode_id)
         route.name = `episode-${section}`
         route.params.episode_id = production.first_episode_id
       }
@@ -344,7 +354,12 @@ export default {
         },
         { label: this.$t('playlists.title'), value: 'playlists' }
       ]
-
+      // Show only if there are task types for Edit in this production.
+      if (this.productionEditTaskTypes.length > 0) {
+        options = options.concat([
+          { label: this.$t('edits.title'), value: 'edits' }
+        ])
+      }
       // Show these sections to studio members only.
       if (!this.isCurrentUserClient) {
         options = options.concat([
@@ -593,6 +608,8 @@ export default {
       const section =
         this.currentProjectSection || this.getCurrentSectionFromRoute()
       const isAssetSection = this.assetSections.includes(section)
+      const isEditSection = this.editSections.includes(section)
+      console.log('resetEpisodeForTVShow', this.editSections, isAssetSection, isEditSection)
       const isAssetEpisode =
         ['all', 'main'].includes(this.currentEpisodeId)
       const production = this.productionMap.get(this.currentProductionId)
@@ -612,7 +629,7 @@ export default {
       // If no episode is set and we are in a tv show, select the first one.
       if (isTVShow) {
         // It's an asset section, and episode is not set, we chose all
-        if (isAssetSection && !this.currentEpisodeId) {
+        if ((isAssetSection || isEditSection) && !this.currentEpisodeId) {
           this.currentEpisodeId = 'all'
           this.setCurrentEpisode(this.currentEpisodeId)
         // It's a shot section, and episode is not set, we chose the first one

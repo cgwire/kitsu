@@ -177,7 +177,7 @@ export default {
     all_episodes: 'All',
     edit_error: 'An error occurred while saving this episode. Are you sure there is no episode with similar name?',
     delete_error: 'An error occurred while deleting this episode. There are probably data linked to it. Are you sure this episode has no sequence linked to it?',
-    delete_text: 'Are you sure you want to remove {name} from your database? Every related shots and previews will be deleted. Pleas confirm by typing the episode name below.',
+    delete_text: 'Are you sure you want to remove {name} from your database? Every related shots and previews will be deleted. Please confirm by typing the episode name below.',
     edit_title: 'Edit episode',
     empty_list: 'There is no episode in the production. What about creating some?',
     empty_list_client: 'There is no episode in this production.',
@@ -260,6 +260,7 @@ export default {
     add: 'add',
     all: 'All',
     all_assets: 'All assets',
+    all_edits: 'All edits',
     admin: 'Admin',
     after: 'After',
     attach_snapshots: 'Attach snapshots from your annotation',
@@ -374,6 +375,7 @@ export default {
     create_tasks: 'Create tasks',
     delete_assets: 'Delete assets',
     delete_shots: 'Delete shots',
+    delete_edits: 'Delete edits',
     delete_tasks: 'Delete tasks',
     generate_playlists: 'Generate playlists',
     run_custom_action: 'Run custom action',
@@ -625,6 +627,8 @@ export default {
       select_asset_task_type_description: 'These task types define the building steps of your assets.',
       select_shot_task_type: 'Select shot task type',
       select_shot_task_type_description: 'These task types define the building steps of your shots.',
+      select_edit_task_type: 'Select edit task type',
+      select_edit_task_type_description: 'These task types define the building steps of your edits.',
       select_task_status: 'Select task status',
       select_task_status_description: 'Select the task statuses you will use during the production.',
       start_and_end_dates: 'Start and end dates',
@@ -802,6 +806,27 @@ export default {
     }
   },
 
+  edits: {
+    all_edits: 'All edits',
+    manage: 'Create an edit',
+    creation_explaination: 'Upload an edit file to create a new edit',
+    edit_error: 'An error occurred while saving this edit. Are you sure there is no edit with similar name?',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occurred while deleting this edit. There are probably data linked to it.',
+    delete_for_selection: 'Delete {nbSelectedEdits} selected edits:',
+    edit_title: 'Change edit',
+    empty_list: 'There are no edits in the production. What about creating some?',
+    empty_list_client: 'There are no edits in this production.',
+    new_edit: 'New edit',
+    number: 'edits | edits',
+    title: 'Edits',
+    fields: {
+      name: 'name',
+      episode: 'Ep.',
+      description: 'description'
+    }
+  },
+
   schedule: {
     title: 'Schedule',
     title_main: 'Main Schedule',
@@ -920,6 +945,9 @@ export default {
     create_tasks_asset: 'Add tasks for current assets',
     create_tasks_asset_explaination: 'You are going to create a new task for each asset of current project for the given task type. Do you want to continue?',
     create_tasks_asset_failed: 'A server error occurred while proceeding creations.',
+    create_tasks_edit: 'Add tasks for current edits',
+    create_tasks_edit_explaination: 'You are going to create a new task for each edit of current project for the given task type. Do you want to continue?',
+    create_tasks_edit_failed: 'A server error occurred while proceeding creations.',
     current: 'Task to do',
     current_status: 'Current status :',
     delete_all_text: 'Are you sure you want to delete all tasks for given {name}? Please, confirm by typing the task type name of the tasks you want to delete in the text field.',

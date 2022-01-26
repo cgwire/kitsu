@@ -312,6 +312,9 @@ export default {
       'shotMetadataDescriptors',
       'shotSearchText',
       'shotValidationColumns',
+      'editMetadataDescriptors',
+      'editSearchText',
+      'editValidationColumns',
       'taskTypeMap',
       'taskStatusMap'
     ]),
@@ -319,16 +322,23 @@ export default {
     isAssets () {
       return this.entityType === 'asset'
     },
+    isShots () {
+      return this.entityType === 'shot'
+    },
+    isEdits () {
+      return this.entityType === 'edit'
+    },
 
     assetTypeOptions () {
       return [
         { label: this.$t('entities.build_filter.all_types'), value: '-' },
-        ...this.productionAssetTypes.map((assetType) => {
-          return {
-            label: assetType.name,
-            value: assetType.id
-          }
-        })
+        ...this.productionAssetTypes.filter(assetType => assetType !== undefined)
+          .map((assetType) => {
+            return {
+              label: assetType.name,
+              value: assetType.id
+            }
+          })
       ]
     },
 
@@ -336,10 +346,16 @@ export default {
       if (this.isAssets) {
         return this.assetValidationColumns
           .map((taskTypeId) => this.taskTypeMap.get(taskTypeId))
-      } else {
+      }
+      if (this.isShots) {
         return this.shotValidationColumns
           .map((taskTypeId) => this.taskTypeMap.get(taskTypeId))
       }
+      if (this.isEdits) {
+        return this.editValidationColumns
+          .map((taskTypeId) => this.taskTypeMap.get(taskTypeId))
+      }
+      return null
     },
 
     team () {
@@ -356,6 +372,7 @@ export default {
     metadataDescriptors () {
       let descriptors = this.shotMetadataDescriptors
       if (this.isAssets) descriptors = this.assetMetadataDescriptors
+      if (this.isEdits) descriptors = this.editMetadataDescriptors
       return descriptors
     }
   },
