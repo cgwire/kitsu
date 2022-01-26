@@ -189,7 +189,7 @@ const getters = {
 
   productionAssetTaskTypeIds: (state, getters) => {
     return getters.productionTaskTypes
-      .filter(taskType => !taskType.for_shots)
+      .filter(taskType => !taskType.for_shots && taskType.for_entity === 'Asset')
       .map(taskType => taskType.id)
   },
 
@@ -199,14 +199,25 @@ const getters = {
       .map(taskType => taskType.id)
   },
 
+  productionEditTaskTypeIds: (state, getters) => {
+    return getters.productionTaskTypes
+      .filter(taskType => taskType.for_entity === 'Edit')
+      .map(taskType => taskType.id)
+  },
+
   productionAssetTaskTypes: (state, getters) => {
     return getters.productionTaskTypes
-      .filter(taskType => !taskType.for_shots)
+      .filter(taskType => !taskType.for_shots && taskType.for_entity === 'Asset')
   },
 
   productionShotTaskTypes: (state, getters) => {
     return getters.productionTaskTypes
       .filter(taskType => taskType.for_shots)
+  },
+
+  productionEditTaskTypes: (state, getters) => {
+    return getters.productionTaskTypes
+      .filter(taskType => taskType.for_entity === 'Edit')
   },
 
   currentProduction: (state) => {
@@ -242,6 +253,17 @@ const getters = {
       return sortByName(
         state.currentProduction.descriptors
           .filter(d => d.entity_type === 'Shot')
+      )
+    }
+  },
+
+  editMetadataDescriptors: (state) => {
+    if (!state.currentProduction || !state.currentProduction.descriptors) {
+      return []
+    } else {
+      return sortByName(
+        state.currentProduction.descriptors
+          .filter(d => d.entity_type === 'Edit')
       )
     }
   },

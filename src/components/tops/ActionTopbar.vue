@@ -342,6 +342,31 @@
           </div>
         </div>
 
+        <div
+          class="flexrow-item"
+          v-if="selectedBar === 'delete-edits'"
+        >
+          <div class="flexrow">
+            <div class="flexrow-item strong bigger hide-small-screen">
+              {{ $t('edits.delete_for_selection', {nbSelectedEdits}) }}
+            </div>
+            <div class="flexrow-item" v-if="!isEditDeletionLoading">
+              <button
+                class="button is-danger confirm-button"
+                @click="confirmEditDeletion"
+              >
+                {{ $t('main.confirmation') }}
+              </button>
+            </div>
+            <div class="flexrow-item" v-else>
+              <spinner :is-white="true" />
+            </div>
+            <div class="flexrow-item error" v-if="errors.deleteEdit">
+              {{ $t('edits.multiple_delete_error') }}
+            </div>
+          </div>
+        </div>
+
         <div class="flexrow-item clear-selection-container has-text-right">
           <div class="flexrow has-text-right">
             <div style="flex: 1"></div>
@@ -461,6 +486,17 @@
         >
           {{ $t('menu.delete_shots') }}
         </div>
+
+        <div
+          class="more-menu-item"
+          v-if="
+            isCurrentViewEdit &&
+            isCurrentUserManager &&
+            !isTaskSelection"
+          @click="selectBar('delete-edits')"
+        >
+          {{ $t('menu.delete_edits') }}
+        </div>
       </div>
     </div>
 
@@ -523,6 +559,7 @@ export default {
       isDeletionLoading: false,
       isMoreMenuDisplayed: true,
       isShotDeletionLoading: false,
+      isEditDeletionLoading: false,
       person: null,
       priority: '0',
       selectedBar: 'assignation',
@@ -575,6 +612,7 @@ export default {
       'selectedTasks',
       'selectedAssets',
       'selectedShots',
+      'selectedEdits',
       'shotCustomActions',
       'taskStatusForCurrentUser',
       'taskTypeMap',
@@ -586,7 +624,7 @@ export default {
     },
 
     isEntitySelection () {
-      return this.selectedAssets.size > 0 || this.selectedShots.size > 0
+      return this.selectedAssets.size > 0 || this.selectedShots.size > 0 || this.selectedEdits.size > 0
     },
 
     nbSelectedAssets () {
@@ -597,17 +635,23 @@ export default {
       return this.selectedShots.size
     },
 
+    nbSelectedEdits () {
+      return this.selectedEdits.size
+    },
+
     isHidden () {
       return (
         this.nbSelectedTasks === 0 &&
         this.nbSelectedValidations === 0 &&
         this.nbSelectedAssets === 0 &&
-        this.nbSelectedShots === 0
+        this.nbSelectedShots === 0 &&
+        this.nbSelectedEdits === 0
       ) ||
       !(
         this.isCurrentViewAsset ||
         this.isCurrentViewTodos ||
-        this.isCurrentViewShot
+        this.isCurrentViewShot ||
+        this.isCurrentViewEdit
       )
     },
 
@@ -639,6 +683,11 @@ export default {
     isCurrentViewShot () {
       return this.$route.path.indexOf('shot') > 0 &&
              !this.$route.params.shot_id
+    },
+
+    isCurrentViewEdit () {
+      return this.$route.path.indexOf('edit') > 0 &&
+             !this.$route.params.edit_id
     },
 
     isCurrentViewTodos () {
@@ -688,6 +737,7 @@ export default {
         'delete-tasks': 'menu.delete_tasks',
         'delete-assets': 'menu.delete_assets',
         'delete-shots': 'menu.delete_shots',
+        'delete-edits': 'menu.delete_edits',
         'custom-actions': 'menu.run_custom_action'
       }
       return this.$t(labels[this.selectedBar])
@@ -708,10 +758,12 @@ export default {
       'assignSelectedTasks',
       'clearSelectedAssets',
       'clearSelectedShots',
+      'clearSelectedEdits',
       'createSelectedTasks',
       'deleteSelectedAssets',
       'deleteSelectedShots',
       'deleteSelectedTasks',
+      'deleteSelectedEdits',
       'unassignSelectedTasks',
       'changeSelectedTaskStatus',
       'changeSelectedPriorities',
@@ -823,6 +875,21 @@ export default {
         })
     },
 
+    confirmEditDeletion () {
+      this.isEditDeletionLoading = true
+      this.errors.deleteEdit = false
+      this.deleteSelectedEdits()
+        .then(() => {
+          this.isEditDeletionLoading = false
+          this.clearSelectedEdits()
+        })
+        .catch((err) => {
+          console.error(err)
+          this.isEditDeletionLoading = false
+          this.errors.deleteEdit = true
+        })
+    },
+
     confirmPlaylistGeneration () {
       this.modals.playlist = true
     },
@@ -894,6 +961,7 @@ export default {
       this.clearSelectedAssets()
       this.clearSelectedShots()
       this.clearSelectedTasks()
+      this.clearSelectedEdits()
     },
 
     autoChooseSelectBar () {
@@ -905,6 +973,10 @@ export default {
         }
         if (this.isCurrentViewShot && this.nbSelectedShots > 0) {
           this.selectedBar = 'delete-shots'
+          return
+        }
+        if (this.isCurrentViewEdit && this.nbSelectedEdits > 0) {
+          this.selectedBar = 'delete-edits'
           return
         }
 

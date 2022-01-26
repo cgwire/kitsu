@@ -31,7 +31,7 @@
       </div>
 
       <template
-        v-for="(taskListObject, index) in [assetTaskTypes, shotTaskTypes]"
+        v-for="(taskListObject, index) in [assetTaskTypes, shotTaskTypes, editTaskTypes]"
         v-else
       >
         <div
@@ -119,6 +119,7 @@ export default {
   data () {
     return {
       assetTaskTypes: { list: [] },
+      editTaskTypes: { list: [] },
       episode_span: 0,
       shotTaskTypes: { list: [] },
       taskTypeId: '',
@@ -155,6 +156,9 @@ export default {
       'currentProduction',
       'currentScheduleItems',
       'productionTaskTypes',
+      'productionAssetTaskTypes',
+      'productionShotTaskTypes',
+      'productionEditTaskTypes',
       'taskStatusMap',
       'taskTypeMap',
       'taskTypes',
@@ -189,6 +193,7 @@ export default {
     resetDisplayedTaskTypes () {
       this.resetAssetTaskTypes()
       this.resetShotTaskTypes()
+      this.resetEditTaskTypes()
     },
 
     getScheduleItemForTaskType (taskType) {
@@ -256,14 +261,13 @@ export default {
     */
     resetAssetTaskTypes () {
       const list = sortTaskTypes(
-        [...this.productionTaskTypes], this.currentProduction
-      ).filter(t => !t.for_shots)
-        .map(taskType => {
-          return {
-            taskType,
-            scheduleItem: this.getScheduleItemForTaskType(taskType)
-          }
-        })
+        [...this.productionAssetTaskTypes], this.currentProduction
+      ).map(taskType => {
+        return {
+          taskType,
+          scheduleItem: this.getScheduleItemForTaskType(taskType)
+        }
+      })
       this.assetTaskTypes = {
         title: this.$t('assets.title'),
         list
@@ -280,16 +284,30 @@ export default {
     */
     resetShotTaskTypes () {
       const list = sortTaskTypes(
-        [...this.productionTaskTypes], this.currentProduction
-      ).filter(t => t.for_shots)
-        .map(taskType => {
-          return {
-            taskType,
-            scheduleItem: this.getScheduleItemForTaskType(taskType)
-          }
-        })
+        [...this.productionShotTaskTypes], this.currentProduction
+      ).map(taskType => {
+        return {
+          taskType,
+          scheduleItem: this.getScheduleItemForTaskType(taskType)
+        }
+      })
       this.shotTaskTypes = {
         title: this.$t('shots.title'),
+        list
+      }
+    },
+
+    resetEditTaskTypes () {
+      const list = sortTaskTypes(
+        [...this.productionEditTaskTypes], this.currentProduction
+      ).map(taskType => {
+        return {
+          taskType,
+          scheduleItem: this.getScheduleItemForTaskType(taskType)
+        }
+      })
+      this.editTaskTypes = {
+        title: this.$t('edits.title'),
         list
       }
     },

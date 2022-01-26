@@ -52,12 +52,17 @@ const getters = {
 
   assetTaskTypes: (state, getters, rootState, rootGetters) => {
     return state.taskTypes
-      .filter(taskType => !taskType.for_shots)
+      .filter(taskType => !taskType.for_shots && taskType.for_entity === 'Asset')
   },
 
   shotTaskTypes: (state, getters, rootState, rootGetters) => {
     return state.taskTypes
       .filter(taskType => taskType.for_shots)
+  },
+
+  editTaskTypes: (state, getters, rootState, rootGetters) => {
+    return state.taskTypes
+      .filter(taskType => taskType.for_entity === 'Edit')
   },
 
   getTaskTypeOptions: state => state.taskTypes.map(
@@ -70,6 +75,11 @@ const getters = {
     ),
 
   getShotTaskTypeOptions: (state, getters) => getters.shotTaskTypes
+    .map(
+      (type) => { return { label: type.name, value: type.id } }
+    ),
+
+  getEditTaskTypeOptions: (state, getters) => getters.editTaskTypes
     .map(
       (type) => { return { label: type.name, value: type.id } }
     ),

@@ -19,6 +19,7 @@ import ProductionNewsFeed from '../components/pages/ProductionNewsFeed'
 import Shots from '../components/pages/Shots'
 import TaskType from '../components/pages/TaskType'
 import Todos from '../components/pages/Todos'
+import Edits from '../components/pages/Edits'
 
 const AssetTypes = () => import('../components/pages/AssetTypes')
 const Asset = () => import('../components/pages/Asset')
@@ -50,6 +51,7 @@ const TaskStatus = () => import('../components/pages/TaskStatus')
 const TaskTypes = () => import('../components/pages/TaskTypes')
 const Departements = () => import('../components/pages/departments/Departments')
 const WrongBrowser = () => import('../components/pages/WrongBrowser')
+const Edit = () => import('../components/pages/Edit')
 
 const ADMIN_PAGES = [
   'asset-types',
@@ -624,6 +626,40 @@ export const routes = [
       },
 
       {
+        path: 'productions/:production_id/edits',
+        component: Edits,
+        name: 'edits',
+        children: [
+          {
+            path: 'delete-all-tasks/:task_type_id',
+            component: Edits,
+            name: 'delete-all-edit-tasks'
+          },
+          {
+            path: 'edit/:edit_id',
+            component: Edits,
+            name: 'edit-edit'
+          },
+          {
+            path: 'delete/:edit_id',
+            component: Edits,
+            name: 'delete-edit'
+          },
+          {
+            path: 'restore/:edit_id',
+            component: Edits,
+            name: 'restore-edit'
+          }
+        ]
+      },
+
+      {
+        path: 'productions/:production_id/edits/:edit_id',
+        component: Edit,
+        name: 'edit'
+      },
+
+      {
         path: 'productions/:production_id/sequences',
         component: Sequences,
         name: 'sequences',
@@ -838,6 +874,45 @@ export const routes = [
         path: 'productions/:production_id/episodes/:episode_id/shots/:shot_id',
         component: Shot,
         name: 'episode-shot'
+      },
+
+      {
+        path: 'productions/:production_id/episodes/:episode_id/edits',
+        component: Edits,
+        name: 'episode-edits',
+        children: [
+          {
+            path: 'edits/manage',
+            component: Edits,
+            name: 'episode-manage-edits'
+          },
+          {
+            path: 'delete-all-tasks/:task_type_id',
+            component: Edits,
+            name: 'episode-delete-all-edit-tasks'
+          },
+          {
+            path: 'edit/:edit_id',
+            component: Edits,
+            name: 'episode-edit-edit'
+          },
+          {
+            path: 'delete/:edit_id',
+            component: Edits,
+            name: 'episode-delete-edit'
+          },
+          {
+            path: 'edits/restore/:edit_id',
+            component: Edits,
+            name: 'episode-restore-edit'
+          }
+        ]
+      },
+
+      {
+        path: 'productions/:production_id/episodes/:episode_id/edits/:edit_id',
+        component: Edit,
+        name: 'episode-edit'
       },
 
       {
