@@ -231,13 +231,13 @@
       </span>
     </div>
 
-    <div
+    <!--div
       class="has-text-centered add-checklist"
       @click="addChecklistEntry()"
       v-if="isAddChecklistAllowed"
     >
       {{ $t('comments.add_checklist') }}
-    </div>
+    </div-->
   </article>
   <div class="empty-comment" v-else>
     <div class="flexrow content-wrapper">
@@ -574,10 +574,15 @@ export default {
     },
 
     addChecklistEntry () {
+      this.$options.silent = true
       this.checklist.push({
         text: '',
         checked: false
       })
+      this.$nextTick()
+        .then(() => {
+          this.$options.silent = false
+        })
     },
 
     removeTask (entry) {
