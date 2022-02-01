@@ -243,7 +243,6 @@ const helpers = {
     state.editFilledColumns = getFilledColumns(displayedEdits)
     helpers.setListStats(state, result)
     state.editSearchText = editSearch
-    console.log('buildResult', editSearch, query)
     state.editSelectionGrid = buildSelectionGrid(maxX, maxY)
   },
 
@@ -495,7 +494,6 @@ const actions = {
     const taskMap = rootGetters.taskMap
     const production = rootGetters.currentProduction
     const persons = rootGetters.people
-    console.log('setEditSearch', editSearch)
     commit(
       SET_EDIT_SEARCH,
       {
