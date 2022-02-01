@@ -614,7 +614,6 @@ export default {
       const isAssetSection = this.assetSections.includes(section)
       const isEditSection = this.editSections.includes(section)
       const isShotSection = this.shotSections.includes(section)
-      console.log('resetEpisodeForTVShow', this.editSections, isAssetSection, isEditSection)
       const isAssetEpisode =
         ['all', 'main'].includes(this.currentEpisodeId)
       const production = this.productionMap.get(this.currentProductionId)

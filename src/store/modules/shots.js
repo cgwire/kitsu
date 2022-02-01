@@ -871,7 +871,6 @@ const actions = {
   },
 
   setCurrentEpisode ({ commit, rootGetters }, episodeId) {
-    console.log('SHOTS setCurrentEpisode', episodeId)
     commit(SET_CURRENT_EPISODE, episodeId)
 
     const productionId = rootGetters.currentProduction.id
