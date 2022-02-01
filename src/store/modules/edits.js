@@ -66,7 +66,6 @@ import {
   SET_EDIT_SEARCH,
 
   SET_CURRENT_PRODUCTION,
-  SET_CURRENT_EPISODE,
   DISPLAY_MORE_EDITS,
 
   SET_EDIT_LIST_SCROLL_POSITION,
@@ -349,19 +348,16 @@ const actions = {
       if (!episode) {
         if (state.episodes.length > 0) {
           episode = state.episodes.length > 0 ? state.episodes[0] : null
-          commit(SET_CURRENT_EPISODE, episode.id)
         } else {
           return Promise.resolve([])
         }
       } else if (['all'].includes(episode.id)) {
         episode = null
-        commit(SET_CURRENT_EPISODE, null)
       }
     }
 
     if (!isTVShow && episode) {
       episode = null
-      commit(SET_CURRENT_EPISODE, null)
     }
 
     if (state.isEditsLoading) {
@@ -1009,17 +1005,6 @@ const mutations = {
     })
     state.selectedEdits = new Map() // unselect all previously selected lines
     state.editSelectionGrid = tmpGrid
-  },
-
-  [SET_CURRENT_EPISODE] (state, episodeId) {
-    console.log('SET_CURRENT_EPISODE', episodeId, state.currentEpisode)
-    if (episodeId) {
-      if (episodeId === 'all') {
-        state.currentEpisode = { id: 'all' }
-      } else {
-        state.currentEpisode = state.episodeMap.get(episodeId)
-      }
-    }
   },
 
   [ADD_EDIT] (state, {
