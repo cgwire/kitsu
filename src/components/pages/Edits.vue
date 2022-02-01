@@ -16,7 +16,7 @@
                     ? applySearch(query)
                     : saveEditSearch(query)"
                   @save="saveSearchQuery"
-                  placeholder="ex: e01 s01 anim=wip"
+                  placeholder="ex: e01 edit=wip"
                 />
                 <button-simple
                   class="flexrow-item"
