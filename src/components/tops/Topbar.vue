@@ -281,6 +281,10 @@ export default {
       return ['edits']
     },
 
+    shotSections () {
+      return ['shots']
+    },
+
     // Asset pages require a all section and a main pack section.
     currentEpisodeOptions () {
       if (this.assetSections.includes(this.currentProjectSection)) {
@@ -336,7 +340,6 @@ export default {
         }
       }
       if (production.production_type === 'tvshow') {
-        console.log('lastSectionPath sets ', production.first_episode_id)
         route.name = `episode-${section}`
         route.params.episode_id = production.first_episode_id
       }
@@ -547,7 +550,8 @@ export default {
       this.currentProductionId = productionId
       this.currentProjectSection = section
       const isAssetSection = this.assetSections.includes(section)
-      if (!isAssetSection && ['all', 'main'].includes(episodeId)) {
+      const isEditSection = this.editSections.includes(section)
+      if (!isAssetSection && !isEditSection && ['all', 'main'].includes(episodeId)) {
         episodeId = this.episodes[0].id
         this.currentEpisodeId = episodeId
         this.pushContextRoute(section)
@@ -609,6 +613,7 @@ export default {
         this.currentProjectSection || this.getCurrentSectionFromRoute()
       const isAssetSection = this.assetSections.includes(section)
       const isEditSection = this.editSections.includes(section)
+      const isShotSection = this.shotSections.includes(section)
       console.log('resetEpisodeForTVShow', this.editSections, isAssetSection, isEditSection)
       const isAssetEpisode =
         ['all', 'main'].includes(this.currentEpisodeId)
@@ -619,7 +624,7 @@ export default {
       if (isAssetEpisode) {
         // It's an asset episode. We have to switch if we are in a shot
         // section.
-        if (!isAssetSection) {
+        if (isShotSection) {
           // Set current episode to first episode if it's a shot section.
           this.currentEpisodeId =
             this.episodes.length > 0 ? this.episodes[0].id : null
