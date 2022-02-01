@@ -679,7 +679,6 @@ export default {
       }
 
       if (this.isTVShow && this.currentEpisode) {
-        console.log('getPath sets', this.currentEpisode.id)
         route.name = `episode-${section}`
         route.params.episode_id = this.currentEpisode.id
       }

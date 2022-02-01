@@ -114,6 +114,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'currentEpisode',
       'editCreated',
       'editMetadataDescriptors',
       'edits',
@@ -130,7 +131,8 @@ export default {
           value: episode.id
         }
       })
-      return options
+      // It might be usefull to allow Edits not linked to any episodes.
+      return [{ label: '-', value: null }].concat(options)
     }
   },
 
@@ -180,7 +182,7 @@ export default {
           project_id: this.editToEdit.project_id,
           name: this.editToEdit.name,
           description: this.editToEdit.description,
-          parent_id: this.editToEdit.parent_id || this.editToEdit.episode_id,
+          parent_id: this.editToEdit.parent_id,
           data: { ...this.editToEdit.data } || {}
         }
       }
