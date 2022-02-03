@@ -268,6 +268,41 @@ export default {
     return client.pget(path)
   },
 
+  getPersonQuotaShots (
+    productionId,
+    taskTypeId,
+    personId,
+    detailLevel,
+    year,
+    month,
+    week,
+    day
+  ) {
+    let path = `/api/data/persons/${personId}/quota-shots/`
+
+    if (detailLevel === 'year') {
+      path += `year/${year}`
+    } else if (detailLevel === 'month') {
+      path += `month/${year}/${month}`
+    } else if (detailLevel === 'week') {
+      path += `week/${year}/${week}`
+    } else {
+      path += `day/${year}/${month}/${day}`
+    }
+
+    if (productionId) {
+      path += `?project_id=${productionId}`
+    }
+
+    if (taskTypeId) {
+      if (!productionId) path += '?'
+      else path += '&'
+      path += `&task_type_id=${taskTypeId}`
+    }
+
+    return client.pget(path)
+  },
+
   getContext () {
     return client.pget('/api/data/user/context')
   }

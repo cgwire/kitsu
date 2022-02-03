@@ -573,6 +573,23 @@ const actions = {
         commit(REMOVE_PEOPLE_SEARCH_END, { searchQuery })
         return Promise.resolve()
       })
+  },
+
+  getPersonQuotaShots (
+    { commit, state, rootGetters },
+    { taskTypeId, detailLevel, personId, year, month, week, day }
+  ) {
+    const production = rootGetters.currentProduction
+    return peopleApi.getPersonQuotaShots(
+      production.id,
+      taskTypeId,
+      personId,
+      detailLevel,
+      year,
+      month,
+      week,
+      day
+    )
   }
 }
 

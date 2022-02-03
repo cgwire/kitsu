@@ -305,24 +305,77 @@ const csv = {
         }
       })
 
-      /*
-      const takeLines = []
-      if (entryId !== 'all') {
-        taskTypeIds.forEach(taskTypeId => {
-          if (taskTypeId !== 'all') {
-            const takeNumbers = Object.keys(
-              mainStats[entryId][taskTypeId].evolution)
-            takeNumbers.forEach(takeNumber => {
-              console.log(takeNumber)
-            })
-          }
-        })
-      }
-      */
-
       entries = entries.concat(Object.values(lineMap))
-      // entries = entries.concat(takeLines)
       entries.push([''])
+    })
+    return entries
+  },
+
+  generateQuotas (
+    name,
+    quotas,
+    people,
+    countMode,
+    detailLevel,
+    year,
+    month,
+    week
+  ) {
+    const headers = csv.getTimesheetHeaders(
+      {},
+      detailLevel,
+      year,
+      month,
+      year,
+      month,
+      week
+    )
+    const entries = csv.getQuotaEntries(
+      quotas,
+      people,
+      countMode,
+      detailLevel,
+      headers,
+      year,
+      month,
+      week
+    )
+    csv.buildCsvFile(name, entries)
+  },
+
+  getQuotaEntries (
+    quotas,
+    people,
+    countMode,
+    detailLevel,
+    headers,
+    year,
+    month,
+    week
+  ) {
+    const entries = [headers]
+    people.forEach(person => {
+      const line = [person.full_name]
+      headers.forEach((h, index) => {
+        if (index > 0) {
+          let key = year
+          if (detailLevel === 'day') {
+            key = `${year}-${(month + '').padStart(2, '0')}-${(index + '').padStart(2, '0')}`
+          } else {
+            key = `${year}-${('' + index).padStart(2, '0')}`
+          }
+          if (
+            quotas &&
+            quotas[person.id] &&
+            quotas[person.id][detailLevel][countMode][key]
+          ) {
+            line.push(quotas[person.id][detailLevel][countMode][key])
+          } else {
+            line.push('-')
+          }
+        }
+      })
+      entries.push(line)
     })
     return entries
   },

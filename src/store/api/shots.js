@@ -138,5 +138,10 @@ export default {
 
   loadShotHistory (shotId) {
     return client.pget(`/api/data/shots/${shotId}/versions`)
+  },
+
+  getQuotas (productionId, taskTypeId, detailLevel) {
+    return client.pget(`/api/data/projects/${productionId}/quotas/` +
+                       `${taskTypeId}?detail=${detailLevel}`)
   }
 }
