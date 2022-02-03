@@ -53,6 +53,11 @@
           @enter="confirmClicked"
           v-model="form.is_client_allowed"
         />
+        <combobox-boolean
+          :label="$t('task_status.fields.is_feedback_request')"
+          @enter="confirmClicked"
+          v-model="form.is_feedback_request"
+        />
 
         <color-field
           ref="colorField"
@@ -110,7 +115,8 @@ export default {
         short_name: '',
         color: '$grey999',
         is_reviewable: 'true',
-        is_done: 'false'
+        is_done: 'false',
+        is_feedback_request: 'false'
       },
       isRetakeOptions: [
         { label: this.$t('main.yes'), value: 'true' },
@@ -180,7 +186,9 @@ export default {
           is_done: String(this.taskStatusToEdit.is_done),
           is_retake: String(this.taskStatusToEdit.is_retake || false),
           is_artist_allowed: String(this.taskStatusToEdit.is_artist_allowed),
-          is_client_allowed: String(this.taskStatusToEdit.is_client_allowed)
+          is_client_allowed: String(this.taskStatusToEdit.is_client_allowed),
+          is_feedback_request:
+            String(this.taskStatusToEdit.is_feedback_request || false)
         }
       }
     }

@@ -22,6 +22,9 @@
           <th scope="col" class="is-client-allowed">
             {{ $t('task_status.fields.is_client_allowed') }}
           </th>
+          <th scope="col" class="is-feedback-request">
+            {{ $t('task_status.fields.is_feedback_request') }}
+          </th>
           <th scope="col" class="actions"></th>
         </tr>
       </thead>
@@ -42,6 +45,9 @@
           </td>
           <td class="is-client-allowed">
             {{ formatBoolean(entry.is_client_allowed) }}
+          </td>
+          <td class="is-feedback-request">
+            {{ formatBoolean(entry.is_feedback_request) }}
           </td>
           <row-actions-cell
             :entry-id="entry.id"
