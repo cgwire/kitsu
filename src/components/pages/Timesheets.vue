@@ -209,6 +209,7 @@ export default {
       'isCurrentUserAdmin',
       'isCurrentUserManager',
       'openProductions',
+      'organisation',
       'people',
       'personMap',
       'timesheet'
@@ -415,6 +416,8 @@ export default {
         name,
         this.timesheet,
         this.filteredPeople,
+        this.unit,
+        this.organisation,
         this.detailLevel,
         this.currentYear,
         this.currentMonth,

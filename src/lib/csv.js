@@ -2,7 +2,8 @@ import Papa from 'papaparse'
 import {
   getDayRange,
   getMonthRange,
-  getWeekRange
+  getWeekRange,
+  hoursToDays
 } from './time'
 import {
   getPercentage
@@ -13,6 +14,8 @@ const csv = {
     name,
     timesheet,
     people,
+    unit,
+    organisation,
     detailLevel,
     year,
     month,
@@ -30,6 +33,8 @@ const csv = {
       currentWeek
     )
     const entries = csv.getTimesheetEntries(
+      organisation,
+      unit,
       detailLevel,
       headers,
       people,
@@ -64,7 +69,14 @@ const csv = {
     return headers
   },
 
-  getTimesheetEntries (detailLevel, headers, people, timesheet) {
+  getTimesheetEntries (
+    organisation,
+    unit,
+    detailLevel,
+    headers,
+    people,
+    timesheet
+  ) {
     const entries = [headers]
     people.forEach(person => {
       const line = [person.full_name]
@@ -72,7 +84,9 @@ const csv = {
         headers.forEach((h, index) => {
           if (index > 0) {
             if (timesheet[h]) {
-              line.push(timesheet[h][person.id] / 60)
+              let value = timesheet[h][person.id] / 60
+              if (unit !== 'hour') value = hoursToDays(organisation, value)
+              line.push(value)
             } else {
               line.push('-')
             }
@@ -87,7 +101,9 @@ const csv = {
               timesheet[index] &&
               timesheet[index][person.id]
             ) {
-              line.push(timesheet[index][person.id] / 60)
+              let value = timesheet[h][person.id] / 60
+              if (unit !== 'hour') value = hoursToDays(organisation, value)
+              line.push(value)
             } else {
               line.push('-')
             }
