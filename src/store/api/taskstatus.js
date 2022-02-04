@@ -9,6 +9,7 @@ const sanitizeTaskStatus = (taskStatus) => {
     is_retake: Boolean(taskStatus.is_retake === 'true'),
     is_artist_allowed: Boolean(taskStatus.is_artist_allowed === 'true'),
     is_client_allowed: Boolean(taskStatus.is_client_allowed === 'true'),
+    is_feedback_request: Boolean(taskStatus.is_feedback_request === 'true'),
     color: taskStatus.color
   }
 }

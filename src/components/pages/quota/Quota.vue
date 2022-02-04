@@ -54,7 +54,7 @@
       >
         <tr
           class="datatable-row"
-          v-for="key in personIds"
+          v-for="key in filteredPersonIds"
           :key="'name-' + key"
         >
           <th scope="row" class="name datatable-row-header">
@@ -86,7 +86,8 @@
           </td>
           <td
             :class="{
-              selected: isMonthSelected(key, year, month)
+              selected: isMonthSelected(key, year, month),
+              'quota-low': isMonthQuotaLow(key, year, month)
             }"
             :key="'month-' + month"
             v-for="month in monthRange"
@@ -111,7 +112,8 @@
 
           <td
             :class="{
-              selected: isWeekSelected(key, year, week)
+              selected: isWeekSelected(key, year, week),
+              'quota-low': isWeekQuotaLow(key, year, month)
             }"
             :key="'week-' + week"
             v-for="week in weekRange"
@@ -139,7 +141,8 @@
           <td
             :class="{
               weekend: isWeekend(year, month, day),
-              selected: isDaySelected(key, year, month, day)
+              selected: isDaySelected(key, year, month, day),
+              'quota-low': isDayQuotaLow(key, year, month, day)
             }"
             :key="'day-' + day"
             v-for="day in dayRange"
@@ -186,15 +189,19 @@
 
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
-import { episodifyRoute } from '../../../lib/path'
-import PeopleAvatar from '../../widgets/PeopleAvatar'
-import TableInfo from '../../widgets/TableInfo'
+import { episodifyRoute } from '@/lib/path'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import TableInfo from '@/components/widgets/TableInfo'
+import {
+  buildNameIndex,
+  indexSearch
+} from '@/lib/indexing'
 import {
   monthToString,
   getMonthRange,
   getWeekRange,
   getDayRange
-} from '../../../lib/time'
+} from '@/lib/time'
 
 export default {
   name: 'quota',
@@ -234,6 +241,13 @@ export default {
     day: {
       type: Number,
       default: 0
+    },
+    searchText: {
+      type: String,
+      default: ''
+    },
+    maxQuota: {
+      default: 0
     }
   },
 
@@ -247,6 +261,7 @@ export default {
       isPanelShown: false,
       isLoading: true,
       isError: false,
+      personIds: [],
       quotaMap: {},
       quotaLength: 0,
       selected: undefined,
@@ -297,13 +312,13 @@ export default {
       return getWeekRange(this.year, this.currentYear, this.currentWeek)
     },
 
-    personIds () {
-      const personIds = Object.keys(this.quotaMap)
-      return personIds.sort((a, b) => {
-        const personAName = this.personMap.get(a).full_name
-        const personBName = this.personMap.get(b).full_name
-        return personAName.localeCompare(personBName)
-      })
+    filteredPersonIds () {
+      let personIds = this.personIds
+      if (this.searchText.length > 0) {
+        personIds = indexSearch(this.personIndex, this.searchText.split(' '))
+          .map(person => person.id)
+      }
+      return personIds
     }
   },
 
@@ -372,29 +387,36 @@ export default {
 
     getQuota (personId, opt = {}) {
       if (opt.day) {
-        const yearKey =
+        const dayKey =
           `${opt.year}-${this.dateDigit(opt.month)}-${this.dateDigit(opt.day)}`
-        return this.quotaMap[personId][yearKey]
+        return this.quotaMap[personId].day[this.countMode][dayKey]
       } else if (opt.week) {
         const weekKey = `${opt.year}-${opt.week}`
-        return this.quotaMap[personId][weekKey]
+        return this.quotaMap[personId].week[this.countMode][weekKey]
       } else {
-        const dayKey = `${opt.year}-${this.dateDigit(opt.month)}`
-        return this.quotaMap[personId][dayKey]
+        const monthKey = `${opt.year}-${this.dateDigit(opt.month)}`
+        return this.quotaMap[personId].month[this.countMode][monthKey]
       }
     },
 
     getQuotaAverage (personId, opt = {}) {
-      let average
-      if (opt.month) {
-        const monthKey = opt.year + '-' + this.dateDigit(opt.month)
-        average = this.quotaMap[personId].average[monthKey]
-      } else if (opt.week) {
-        const weekKey = `${opt.year}-${opt.week}`
-        average = this.quotaMap[personId].average[weekKey]
-      } else if (this.quotaMap[personId].average) {
-        average = this.quotaMap[personId].average[opt.year]
+      let average = 0
+      let total = 0
+      let nbEntries
+      if (this.detailLevel === 'day') {
+        const monthKey = `${opt.year}-${this.dateDigit(opt.month)}`
+        total = this.quotaMap[personId].month[this.countMode][monthKey]
+        nbEntries = this.quotaMap[personId].day.entries[monthKey]
+      } else if (this.detailLevel === 'week') {
+        const yearKey = opt.year
+        total = this.quotaMap[personId].year[this.countMode][yearKey]
+        nbEntries = this.quotaMap[personId].week.entries[yearKey]
+      } else if (this.detailLevel === 'month') {
+        const yearKey = opt.year
+        total = this.quotaMap[personId].year[this.countMode][yearKey]
+        nbEntries = this.quotaMap[personId].month.entries[yearKey]
       }
+      average = total / nbEntries
       return average ? average.toFixed(2) : '-'
     },
 
@@ -402,9 +424,9 @@ export default {
       return (
         this.$route.params.person_id &&
         this.$route.params.person_id === personId &&
-        this.$route.params.year === year &&
-        this.$route.params.month === month &&
-        this.$route.params.day === day
+        '' + this.$route.params.year === '' + year &&
+        '' + this.$route.params.month === '' + month &&
+        '' + this.$route.params.day === '' + day
       )
     },
 
@@ -412,8 +434,8 @@ export default {
       return (
         this.$route.params.person_id &&
         this.$route.params.person_id === personId &&
-        this.$route.params.year === year &&
-        this.$route.params.week === week
+        '' + this.$route.params.year === '' + year &&
+        '' + this.$route.params.week === '' + week
       )
     },
 
@@ -421,15 +443,42 @@ export default {
       return (
         this.$route.params.person_id &&
         this.$route.params.person_id === personId &&
-        this.$route.params.year === year &&
-        this.$route.params.month === month
+        '' + this.$route.params.year === '' + year &&
+        '' + this.$route.params.month === '' + month
       )
+    },
+
+    isDayQuotaLow (personId, year, month, day) {
+      const quota = this.getQuota(personId, { year, month, day })
+      return (
+        quota !== null &&
+        this.maxQuota > quota
+      )
+    },
+
+    isWeekQuotaLow (personId, year, week) {
+      return this.maxQuota > this.getQuota(personId, { year, week })
+    },
+
+    isMonthQuotaLow (personId, year, month) {
+      return this.maxQuota > this.getQuota(personId, { year, month })
     },
 
     calcAverageColumnX () {
       if (this.quotaLength > 0) {
         this.averageColumnX = `${this.$refs.rowHeaderName.offsetWidth}px`
       }
+    },
+
+    resetPersonIds () {
+      const personIds = Object.keys(this.quotaMap)
+      const persons = personIds.map(pId => this.personMap.get(pId))
+      this.personIndex = buildNameIndex(persons)
+      this.personIds = personIds.sort((a, b) => {
+        const personAName = this.personMap.get(a).full_name
+        const personBName = this.personMap.get(b).full_name
+        return personAName.localeCompare(personBName)
+      })
     }
   },
 
@@ -441,11 +490,13 @@ export default {
     },
 
     detailLevel () {
-      this.loadData()
     },
 
     countMode () {
-      this.loadData()
+    },
+
+    quotaMap () {
+      this.resetPersonIds()
     },
 
     $route () {
@@ -461,90 +512,93 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-  .dark {
-    .weekend {
-      background-color: $dark-grey;
-    }
-   .quota-button:hover {
-      color: #333;
-    }
-    .info {
-      color: $white;
-    }
+.dark {
+  .weekend {
+    background-color: $dark-grey;
   }
-
-  .data-list {
-    margin-top: 0;
-  }
-
-  .datatable-wrapper {
-    overflow: auto;
-    margin-bottom: 1rem;
-  }
-
-  .datatable {
-    min-width: auto;
-    .name {
-      min-width: 12rem;
-      text-align: left;
-      justify-content: flex-start;
-      .avatar {
-        margin-right: .5rem;
-      }
-    }
-    .average {
-      width: 8rem;
-    }
-    th,
-    td {
-      text-align: center
-    }
-  }
-
-  .datatable-head th {
-    min-width: 4rem;
-  }
-
-  .datatable-body th {
-    padding: 1rem;
-  }
-
-  .datatable-body {
-    th, td {
-      border: 0;
-    }
-  }
-
-  .quota-button {
-    border-radius: .5rem;
-    padding: .5rem;
-    background: transparent;
-    border: 0;
-    cursor: pointer;
-    color: inherit;
-    font-size: inherit;
-    &:hover,
-    &:focus,
-    &.is-selected {
-      background-color: $dark-grey-lightest;
-    }
-  }
-
-  .empty-quota {
-    width: 100%;
-  }
-
-  .selected .quota-button {
-    background: $purple;
+ .quota-button:hover {
     color: #333;
   }
-
-  .quota-button:hover {
-    background: #BBEEBB;
+  .info {
+    color: $white;
   }
+}
 
-  .weekend {
-    background-color: $white-grey;
+.data-list {
+  margin-top: 0;
+}
+
+.datatable-wrapper {
+  overflow: auto;
+  margin-bottom: 1rem;
+}
+
+.datatable {
+  min-width: auto;
+  .name {
+    min-width: 12rem;
+    text-align: left;
+    justify-content: flex-start;
+    .avatar {
+      margin-right: .5rem;
+    }
   }
+  .average {
+    width: 8rem;
+  }
+  th,
+  td {
+    text-align: center
+  }
+}
+
+.datatable-head th {
+  min-width: 4rem;
+}
+
+.datatable-body th {
+  padding: 1rem;
+}
+
+.datatable-body {
+  th, td {
+    border: 0;
+  }
+}
+
+.quota-low {
+  color: red;
+}
+
+.quota-button {
+  border-radius: .5rem;
+  padding: .5rem;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: inherit;
+  font-size: inherit;
+  &:hover,
+  &:focus,
+  &.is-selected {
+    background-color: $dark-grey-lightest;
+  }
+}
+
+.empty-quota {
+  width: 100%;
+}
+
+.selected .quota-button {
+  background: $purple;
+  color: #333;
+}
+
+.quota-button:hover {
+  background: #BBEEBB;
+}
+
+.weekend {
+  background-color: $white-grey;
+}
 </style>

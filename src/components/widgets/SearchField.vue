@@ -7,9 +7,6 @@
   <div class="flexrow-item search-field">
     <input
       ref="input"
-      :style="{
-        color: active ? 'inherit' : '#999'
-      }"
       class="search-input"
       type="text"
       :placeholder="placeholder"
@@ -136,10 +133,6 @@ export default {
     }
   }
 
-  .search-input {
-    color: white;
-  }
-
   .search-input::placeholder {
     color: $grey;
   }
@@ -158,6 +151,11 @@ export default {
 .search-input {
   width: 300px;
   background: inherit;
+  color: var(--text);
+}
+
+.search-icon {
+  color: var(--text);
 }
 
 .search-input::placeholder {

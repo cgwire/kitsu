@@ -7,7 +7,7 @@ export const buildNameIndex = (entries, split = true) => {
   entries.forEach((entry) => {
     if (entry) {
       let words
-      if (entry.name) {
+      if (entry.name || entry.full_name) {
         if (split) {
           words = entry.name.split(' ')
         } else {

@@ -26,7 +26,7 @@
       @keyup.backspace.native="removeChecklistEntry(index)"
       @keyup.up.native="focusPrevious(index)"
       @keyup.down.native="focusNext(index)"
-      :disabled="disabled"
+      :disabled="entry.text.length !== 0 && disabled"
       v-model="entry.text"
     ></textarea-autosize>
   </div>
