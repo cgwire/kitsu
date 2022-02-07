@@ -158,7 +158,8 @@ export default {
   data () {
     return {
       assetsItems: [],
-      shotsItems: []
+      shotsItems: [],
+      editsItems: []
     }
   },
 
@@ -178,24 +179,25 @@ export default {
     ]),
 
     assetTaskTypes () {
-      // FIXME: Even though it'd make sense to rely on "for_entity" property,
-      // a lot of existing code uses "for_shots" flag instead.
-      // We keep this behaviour to avoid breaking Kitsu for already existing productions.
-      return this.entries.filter(taskType => !taskType.for_shots && taskType.for_entity === 'Asset')
+      return this.getTaskTypesForEntity('Asset')
     },
 
     shotTaskTypes () {
-      return this.entries.filter(taskType => taskType.for_shots)
+      return this.getTaskTypesForEntity('Shot')
     },
 
     editTaskTypes () {
-      return this.entries.filter(taskType => taskType.for_entity === 'Edit')
+      return this.getTaskTypesForEntity('Edit')
     }
   },
 
   methods: {
     ...mapActions([
     ]),
+
+    getTaskTypesForEntity (entity) {
+      return this.entries.filter(taskType => taskType.for_entity === entity)
+    },
 
     updatePriority (items) {
       const forms = []
