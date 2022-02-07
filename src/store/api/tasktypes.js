@@ -10,7 +10,10 @@ export default {
       name: taskType.name,
       color: taskType.color,
       priority: Number(taskType.priority),
-      for_shots: Boolean(taskType.for_shots === 'true'),
+      // FIXME: the "for_shots" clause should probably be removed, unless there's a reason
+      // "for_entity" cannot be relied on everywhere.
+      for_shots: Boolean(taskType.for_shots === 'true' || taskType.for_entity === 'Shot'),
+      for_entity: taskType.for_entity,
       allow_timelog: Boolean(taskType.allow_timelog === 'true'),
       department_id: taskType.department_id
     }

@@ -28,7 +28,7 @@
           :label="$t('task_types.fields.dedicated_to')"
           :options="dedicatedToOptions"
           @enter="confirmClicked"
-          v-model="form.for_shots"
+          v-model="form.for_entity"
            v-if="!isEditing"
         />
         <combobox-boolean
@@ -100,6 +100,7 @@ export default {
           name: this.taskTypeToEdit.name,
           color: this.taskTypeToEdit.color,
           for_shots: String(this.taskTypeToEdit.for_shots === true),
+          for_entity: this.taskTypeToEdit.for_entity,
           allow_timelog: String(this.taskTypeToEdit.allow_timelog === true),
           department_id: this.taskTypeToEdit.department_id
         }
@@ -112,13 +113,14 @@ export default {
       form: {
         name: '',
         color: '$grey',
-        for_shots: 'false',
+        for_entity: 'Asset',
         allow_timelog: 'false',
         department_id: null
       },
       dedicatedToOptions: [
-        { label: this.$t('assets.title'), value: 'false' },
-        { label: this.$t('shots.title'), value: 'true' }
+        { label: this.$t('assets.title'), value: 'Asset' },
+        { label: this.$t('shots.title'), value: 'Shot' },
+        { label: this.$t('edits.title'), value: 'Edit' }
       ]
     }
   },
@@ -138,17 +140,13 @@ export default {
     ...mapActions([
     ]),
 
-    newPriority (forShots) {
-      if (forShots === 'true') {
-        return this.entries.filter(taskType => taskType.for_shots).length + 1
-      } else {
-        return this.entries.filter(taskType => !taskType.for_shots).length + 1
-      }
+    newPriority (forEntity) {
+      return this.entries.filter(taskType => taskType.for_entity === forEntity).length + 1
     },
 
     confirmClicked () {
       if (!this.isEditing) {
-        this.form.priority = this.newPriority(this.form.for_shots)
+        this.form.priority = this.newPriority(this.form.for_entity)
       }
       this.$emit('confirm', this.form)
     }
