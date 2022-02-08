@@ -32,8 +32,11 @@
 
       <p v-if="isMovie">
         <button
+          :class="{
+            button: true,
+            'is-loading': isAnnotationLoading
+          }"
           @click="$emit('add-snapshots')"
-          class="button"
         >
           {{ $t('main.attach_snapshots') }}
         </button>
@@ -47,7 +50,8 @@
             'is-loading': isLoading,
             'is-disabled': forms == undefined
           }"
-          @click="confirm()">
+          @click="confirm()"
+        >
           {{ $t("main.confirmation") }}
         </a>
         <button
@@ -133,7 +137,8 @@ export default {
 
   data () {
     return {
-      forms: null
+      forms: null,
+      isAnnotationLoading: false
     }
   },
 
@@ -187,6 +192,14 @@ export default {
 
     addFiles (files) {
       this.fileField.filesChange('', files)
+    },
+
+    showAnnotationLoading () {
+      this.isAnnotationLoading = true
+    },
+
+    hideAnnotationLoading () {
+      this.isAnnotationLoading = false
     }
   },
 

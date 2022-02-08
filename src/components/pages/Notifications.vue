@@ -209,7 +209,7 @@ import {
   PaperclipIcon,
   UserIcon
 } from 'vue-feather-icons'
-import marked from 'marked'
+import { marked } from 'marked'
 import moment from 'moment-timezone'
 import { renderComment } from '../../lib/render'
 
@@ -335,7 +335,7 @@ export default {
     },
 
     compileMarkdown (input) {
-      return marked(input || '')
+      return marked.parse(input || '')
     },
 
     personName (notification) {

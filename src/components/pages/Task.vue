@@ -1217,8 +1217,10 @@ export default {
     },
 
     async extractAnnotationSnapshots () {
+      this.$refs['add-comment'].showAnnotationLoading()
       const files = await this.previewPlayer.extractAnnotationSnapshots()
       this.$refs['add-comment'].setAnnotationSnapshots(files)
+      this.$refs['add-comment'].hideAnnotationLoading()
       return files
     }
   },

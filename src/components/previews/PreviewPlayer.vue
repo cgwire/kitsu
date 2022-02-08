@@ -1216,10 +1216,12 @@ export default {
     extractVideoFrame (canvas, frameNumber) {
       return new Promise(resolve => {
         this.setCurrentFrame(frameNumber)
-        setTimeout(() => {
-          this.previewViewer.extractFrame(canvas, frameNumber)
-          resolve()
-        }, 100)
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.previewViewer.extractFrame(canvas, frameNumber)
+            resolve()
+          }, 500)
+        })
       })
     },
 
@@ -1252,7 +1254,10 @@ export default {
         files.push(file)
         index++
       }
-      this.previewViewer.setCurrentFrame(currentFrame)
+      this.previewViewer.setCurrentFrame(currentFrame - 1)
+      this.$nextTick(() => {
+        this.clearCanvas()
+      })
       return files
     },
 

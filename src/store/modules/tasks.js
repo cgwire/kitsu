@@ -55,6 +55,7 @@ import {
   REMOVE_SELECTED_TASK,
   CLEAR_SELECTED_TASKS,
   ASSIGN_TASKS,
+  UNASSIGN_TASK,
   UNASSIGN_TASKS,
 
   SET_PREVIEW,
@@ -273,7 +274,6 @@ const actions = {
         commit(CREATE_TASKS_END, tasks)
         tasks.forEach((task) => {
           commit(REMOVE_SELECTED_TASK, validationInfo)
-          task.assigneesInfo = []
           validationInfo.task = task
           commit(ADD_SELECTED_TASK, validationInfo)
         })
@@ -567,6 +567,14 @@ const actions = {
       if (!err) commit(UNASSIGN_TASKS, selectedTaskIds)
       if (callback) callback(err)
     })
+  },
+
+  unassignPersonFromTask ({ commit, state }, { task, person }) {
+    return tasksApi.unassignPersonFromTask(task.id, person.id)
+      .then(() => {
+        commit(UNASSIGN_TASK, { task, person })
+      })
+      .catch(console.error)
   },
 
   showAssignations ({ commit, state }) {
@@ -1079,9 +1087,14 @@ const mutations = {
       const task = state.taskMap.get(taskId)
       if (task) {
         task.assignees = []
-        task.assigneesInfo = []
       }
     })
+  },
+
+  [UNASSIGN_TASK] (state, { person, task }) {
+    if (task) {
+      task.assignees = task.assignees.filter(pId => pId !== person.id)
+    }
   },
 
   [SET_PREVIEW] (state, { taskId, previewId }) {

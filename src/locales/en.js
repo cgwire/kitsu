@@ -972,7 +972,7 @@ export default {
       end_date: 'Feedback date',
       entity: 'Entity',
       entity_name: 'Name',
-      estimated_quota: 'Avg. Quota',
+      estimated_quota: 'Quota',
       estimation: 'Estimation',
       frames: 'Fram.',
       last_comment: 'Last comment',

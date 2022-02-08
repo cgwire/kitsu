@@ -379,8 +379,11 @@ export default {
     title () {
       if (this.currentProduction) {
         if (this.isTVShow && this.currentEpisode) {
+          const episodeName = this.currentEpisode.id === 'all'
+            ? this.$t('main.all_assets')
+            : this.currentEpisode.name
           return `${this.currentProduction.name} / ` +
-                 `${this.currentEpisode.name} / ` +
+                 `${episodeName} / ` +
                  `${this.currentTaskType.name}`
         } else {
           return `${this.currentProduction.name} / ${this.currentTaskType.name}`

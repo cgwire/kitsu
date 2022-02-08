@@ -321,6 +321,14 @@ export default {
       this.$refs['comment-textarea'].focus()
     },
 
+    showAnnotationLoading () {
+      this.attachmentModal.showAnnotationLoading()
+    },
+
+    hideAnnotationLoading () {
+      this.attachmentModal.hideAnnotationLoading()
+    },
+
     onDragover () {
       this.isDragging = true
     },

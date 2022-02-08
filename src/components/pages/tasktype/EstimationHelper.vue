@@ -147,7 +147,13 @@
               {{ $t('tasks.fields.estimation').substring(0, 3) }}.
             </th>
             <th class="quota numeric-cell">
-              {{ $t('tasks.fields.estimated_quota') }}.
+              {{ $t('tasks.fields.estimated_quota') + ' '+ $t('tasks.fields.seconds').substring(0, 3) }}.
+            </th>
+            <th class="quota numeric-cell">
+              {{ $t('tasks.fields.estimated_quota') + ' ' + $t('tasks.fields.frames').substring(0, 3) }}.
+            </th>
+            <th class="quota numeric-cell">
+              {{ $t('tasks.fields.estimated_quota') + ' ' + $t('tasks.fields.count') }}.
             </th>
             <th class="empty">
               &nbsp;
@@ -193,6 +199,12 @@
             </td>
             <td class="quota numeric-cell">
               {{ person.quota }}
+            </td>
+            <td class="quota numeric-cell">
+              {{ person.quotaFrames }}
+            </td>
+            <td class="quota numeric-cell">
+              {{ person.quotaCount }}
             </td>
             <td>
             </td>
@@ -298,14 +310,19 @@ export default {
           const estimation = estimationMap.get(person.id) || 0
           const seconds = secondMap.get(person.id) || 0
           const frames = frameMap.get(person.id) || 0
+          const count = countMap.get(person.id) || 0
           const estimationDays = minutesToDays(this.organisation, estimation)
           const quota = estimation > 0 ? (seconds / estimationDays) : 0
+          const quotaCount = estimation > 0 ? (count / estimationDays) : 0
+          const quotaFrames = estimation > 0 ? (frames / estimationDays) : 0
           return {
             ...person,
             count: countMap.get(person.id) || 0,
             estimation: this.formatDuration(estimation),
             frames,
             quota: quota.toFixed(2),
+            quotaFrames: quotaFrames.toFixed(2),
+            quotaCount: quotaCount.toFixed(2),
             seconds: seconds.toFixed(2)
           }
         })
@@ -469,9 +486,9 @@ td {
 }
 
 .assignees {
-  min-width: 260px;
-  max-width: 260px;
-  width: 260px;
+  min-width: 240px;
+  max-width: 240px;
+  width: 240px;
 
   span {
     margin-top: 0.2em;

@@ -69,6 +69,7 @@
             :hidden-columns="hiddenColumns"
             :column-id="columnId"
             :task-type-map="taskTypeMap"
+            :title="taskTypeMap.get(columnId).name"
             :validation-style="getValidationStyle(columnId)"
             :left="offsets['validation-' + columnIndexInGrid] ? `${offsets['validation-' + columnIndexInGrid]}px` : '0'"
             type="assets"

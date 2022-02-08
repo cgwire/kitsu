@@ -1,15 +1,15 @@
 <template>
   <v-autocomplete
-    :items="items"
-    :get-label="getAssignationLabel"
-    :component-item="assignationItem"
-    :min-len="1"
+    ref="autocomplete"
     :auto-select-one-item="false"
+    :component-item="assignationItem"
+    :get-label="getAssignationLabel"
+    :items="items"
     :input-attrs="{
       placeholder: this.$t('people.select_person'),
       class: big ? 'big v-autocomplete-input' : 'v-autocomplete-input'
     }"
-    ref="autocomplete"
+    :min-len="1"
     @update-items="update"
     @input="onChange"
     v-model="item"
@@ -175,7 +175,6 @@ export default {
     border: 1px solid $green;
     border-left-bottom-radius: 0px;
     border-right-bottom-radius: 0px;
-
   }
 
   &:hover {

@@ -24,6 +24,11 @@
                   icon="funnel"
                   @click="() => modals.isBuildFilterDisplayed = true"
                 />
+                <info-question-mark
+                  class="flexrow-item mt05"
+                  :text="currentEpisode.description"
+                  v-if="currentEpisode && currentEpisode.description"
+                />
               </div>
             </div>
           </div>
@@ -276,6 +281,7 @@ import DeleteModal from '../modals/DeleteModal'
 import EditShotModal from '../modals/EditShotModal'
 import ImportRenderModal from '../modals/ImportRenderModal'
 import ImportModal from '../modals/ImportModal'
+import InfoQuestionMark from '../widgets/InfoQuestionMark'
 import HardDeleteModal from '../modals/HardDeleteModal'
 import ManageShotsModal from '../modals/ManageShotsModal'
 import SearchField from '../widgets/SearchField'
@@ -304,6 +310,7 @@ export default {
     HardDeleteModal,
     ManageShotsModal,
     ImportRenderModal,
+    InfoQuestionMark,
     SearchField,
     SearchQueryList,
     SortingInfo,
