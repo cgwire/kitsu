@@ -1,20 +1,16 @@
-<<<<<<< HEAD
-# Kitsu
+[![Kitsu](https://www.cg-wire.com/en/images/kitsu.png)](https://kitsu.cg-wire.com)
 
-Branch containing the files to deploy to run Kitsu
-=======
-[![Kitsu](https://kitsu.cg-wire.com/img/kitsu.png)](https://kitsu.cg-wire.com)
+# Kitsu, Collaboration Platform for Animation Studios
 
-# Kitsu, CG Production Manager
+Kitsu is a web application to share the progress of your productions and 
+validate your deliveries. It improves the communication between all stakeholders. 
+Which leads to better pictures, shipped faster. 
 
-Kitsu is a web tool to improve validation tracking in CG productions. By
-offering a clean UI and a shared database, it allows you to communicate
-efficiently with all the shareholders of the production: CG artists, 
-production managers, TDs, supervisors and clients
+[![Build
+badge](https://app.travis-ci.com/cgwire/kitsu.svg?branch=master)](https://app.travis-ci.com/cgwire/kitsu)
 
-![Build badge](https://travis-ci.org/cgwire/kitsu.svg?branch=master)
+[![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.com/invite/VbCxtKN)
 
-[![Gitter badge](https://badges.gitter.im/cgwire/Lobby.png)](https://gitter.im/cgwire/Lobby)
 
 ## Documentation 
 
@@ -23,27 +19,66 @@ For further information about features and installation, please refer to the
 
 ## Contributing
 
-All contributions are welcome as long as they respect the [C4
+As any open source project, we enjoy any contribution! You will find below 
+how you can help the Kitsu project to get better.
+
+### Bug reports 
+
+All bugs must be submitted directly in 
+[the issue page](https://github.com/cgwire/kitsu/issues) of this repository.
+
+### Feature requests
+
+Feature requests must be posted on our [Canny page](https://cgwire.canny.io/).
+
+### Translations
+
+If you want to contribute to translations, you can connect directly to the 
+[POEditor platform](https://poeditor.com/join/project?hash=fpUejpWDVo).
+
+### Code
+
+All contributions are welcomed as long as they respect the [C4
 contract](https://rfc.zeromq.org/spec:42/C4).
 
 The Kitsu code is written with Javascript (ES6) and is based on the 
 [VueJS](https://vuejs.org/v2/guide/) framework extended with 
 the [Vuex](https://vuex.vuejs.org) plugin.
 
-To install the development environment, follow [the dedicated guide](https://kitsu.cg-wire.com/chapter-2/).
+To install the development environment, follow [the dedicated guide](https://kitsu.cg-wire.com/development-environment/).
 
+## Sponsors
+
+<a href="http://www.les-fees-speciales.coop">
+<img alt="Les Fées Spéciales" src="https://www.cg-wire.com/images/logo-les-fees-speciales.png" width=100 />
+</a>
+<a href="https://www.cube-creative.com">
+<img alt="Cube Creative" src="https://www.cg-wire.com/images/logo-cube.png" width=100 />
+</a>
+<a href="https://cloud.blender.org">
+<img alt="Blender Studio" src="https://www.cg-wire.com/images/logo-blender.png" width=100 />
+</a>
+<a href="http://nousvoir.com/en/home">
+<img alt="TNZPV" src="https://www.cg-wire.com/images/logo-tnzpv.png" width=100 />
+</a>
+<a href="http://leefilm.se">
+<img alt="Lee Film" src="https://www.cg-wire.com/images/logo-lee.png" width=100 />
+</a>
+<a href="http://miyu.fr">
+<img alt="Miyu" src="https://www.cg-wire.com/images/logo-miyu.png" width=100 />
+</a>
 
 ## About authors
 
-Kitsu is written by CG Wire, a company based in France. We help small to
-midsize CG studios to manage their production and build pipeline efficiently.
+Kitsu is written by CGWire, a company based in France. We help teams of animation
+studios to collaborate better. We provide tools to more than 50 studios spread
+all around the world.
 
-We apply software craftmanship principles as much as possible. We love coding
-and consider that strong quality and good developer experience matter a lot.
-Our extensive experience allows studios to get better at doing software and
-focus more on the artistic work.
+On the technical side, we apply software craftmanship principles as much as
+possible. We love coding and consider that strong quality and good developer
+experience matter a lot.
+
 
 Visit [cg-wire.com](https://cg-wire.com) for more information.
 
 [![CGWire Logo](https://zou.cg-wire.com/cgwire.png)](https://cg-wire.com)
->>>>>>> e49188f87993a53004ec70c930e6ec46f0193a70
