@@ -187,6 +187,16 @@ export default {
     )
   },
 
+  unassignPersonFromTask (taskId, personId) {
+    return client.pput(
+      '/api/actions/tasks/clear-assignation',
+      {
+        task_ids: [taskId],
+        person_id: personId
+      }
+    )
+  },
+
   pinComment (comment) {
     const data = {
       pinned: comment.pinned

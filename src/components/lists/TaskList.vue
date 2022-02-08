@@ -102,12 +102,13 @@
           />
           <td class="assignees">
             <div class="flexrow">
-              <people-avatar
+              <people-avatar-with-menu
                 class="flexrow-item"
                 :key="task.id + '-' + personId"
                 :person="personMap.get(personId)"
                 :size="30"
                 :font-size="17"
+                @unassign="person => onUnassign(task, person)"
                 v-for="personId in task.assignees"
               />
             </div>
@@ -216,7 +217,7 @@ import { domMixin } from '@/components/mixins/dom'
 
 import DateField from '@/components/widgets/DateField'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import PeopleAvatarWithMenu from '@/components/widgets/PeopleAvatarWithMenu'
 import TableInfo from '@/components/widgets/TableInfo'
 import ValidationCell from '@/components/cells/ValidationCell'
 
@@ -227,7 +228,7 @@ export default {
   components: {
     DateField,
     EntityThumbnail,
-    PeopleAvatar,
+    PeopleAvatarWithMenu,
     TableInfo,
     ValidationCell
   },
@@ -327,6 +328,7 @@ export default {
       'addSelectedTasks',
       'clearSelectedTasks',
       'updateTask',
+      'unassignPersonFromTask',
       'removeSelectedTask'
     ]),
 
@@ -347,6 +349,10 @@ export default {
     updateEstimation (days) {
       const estimation = daysToMinutes(this.organisation, days)
       this.updateTasksEstimation({ estimation })
+    },
+
+    onUnassign (task, person) {
+      this.unassignPersonFromTask({ task, person })
     },
 
     updateStartDate (date) {
