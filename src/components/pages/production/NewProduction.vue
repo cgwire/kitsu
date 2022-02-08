@@ -46,11 +46,13 @@
           <div class="flexrow">
             <text-field
               class="flexrow-item"
-              input-class=" is-small is-size-3"
+              input-class=" is-small is-size-4"
               :label="$t('productions.fields.fps')"
               type="number"
-              :step="1"
+              :max="60"
+              :step="0.01"
               :placeholder="$t('productions.creation.placeholder_fps')"
+              :errored="!hasValidFPS"
               v-model="productionToCreate.settings.fps"
               thin
             />
@@ -601,7 +603,8 @@ export default {
     },
 
     hasValidFPS () {
-      return this.isInteger(this.productionToCreate.settings.fps)
+      const fps = parseInt(this.productionToCreate.settings.fps)
+      return fps > 0 && fps <= 60
     },
 
     hasValidRatio () {
