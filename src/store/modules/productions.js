@@ -139,6 +139,7 @@ const getters = {
   teamPath: state => state.teamPath,
 
   productionAssetTypes: (state, getters, rootState) => {
+    if (!state.currentProduction) return []
     if (helpers.isEmptyArray(state.currentProduction, 'asset_types')) {
       return rootState.assetTypes.assetTypes
     } else {
