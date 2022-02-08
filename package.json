@@ -1,6 +1,6 @@
 {
   "name": "kitsu",
-  "version": "0.13.42",
+  "version": "0.13.43",
   "description": "Production Management Software (user interface)",
   "author": "Frank Rousseau <frank@cg-wire.com>",
   "repository": "https://github.com/cgwire/kitsu",
@@ -28,7 +28,7 @@
     "esm": "3.2.25",
     "fabric": "4.5.1",
     "js-3d-model-viewer": "0.1.6",
-    "marked": "2.1.3",
+    "marked": "4.0.10",
     "moment": "2.29.1",
     "moment-timezone": "0.5.33",
     "papaparse": "5.3.1",
