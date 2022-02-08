@@ -24,7 +24,7 @@ describe('path', () => {
       {
         id: 6
       },
-      new Map([[3, { for_shots: true }]])
+      new Map([[3, { for_entity: 'Shot' }]])
     )).toEqual({
       name: 'episode-task',
       params: {
@@ -48,7 +48,7 @@ describe('path', () => {
       {
         id: 6
       },
-      new Map([[3, { for_shots: true }]])
+      new Map([[3, { for_entity: 'Shot' }]])
     )).toEqual({
       name: 'task',
       params: {
@@ -69,7 +69,7 @@ describe('path', () => {
       },
       true,
       null,
-      new Map([[3, { for_shots: true }]])
+      new Map([[3, { for_entity: 'Shot' }]])
     )).toEqual({
       name: 'task',
       params: {
@@ -90,7 +90,7 @@ describe('path', () => {
       },
       true,
       null,
-      new Map([[3, { for_shots: true }]])
+      new Map([[3, { for_entity: 'Shot' }]])
     )).toEqual({
       name: 'task',
       params: {
@@ -111,7 +111,7 @@ describe('path', () => {
       },
       true,
       null,
-      new Map([[3, { for_shots: false }]])
+      new Map([[3, { for_entity: 'Asset' }]])
     )).toEqual({
       name: 'task',
       params: {

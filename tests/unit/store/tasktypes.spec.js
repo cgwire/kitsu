@@ -5,28 +5,24 @@ const taskTypes = [
     name: 'Modeling',
     id: 'task-type-1',
     color: '#ffffff',
-    for_shots: false,
     for_entity: 'Asset'
   },
   {
     name: 'Shading',
     id: 'task-type-2',
     color: '#eeeeee',
-    for_shots: false,
     for_entity: 'Asset'
   },
   {
     name: 'Animation',
     id: 'task-type-3',
     color: '#00eeee',
-    for_shots: true,
-    for_entity: 'Asset'
+    for_entity: 'Shot'
   },
   {
     name: 'Edit',
     id: 'task-type-4',
     color: '#ff0f0f',
-    for_shots: false,
     for_entity: 'Edit'
   }
 ]
@@ -40,8 +36,8 @@ const rootGetters = {
   productionTaskTypes: taskTypes
 }
 const getters = {
-  assetTaskTypes: taskTypes.filter(t => !t.for_shots && t.for_entity === 'Asset'),
-  shotTaskTypes: taskTypes.filter(t => t.for_shots),
+  assetTaskTypes: taskTypes.filter(t => t.for_entity === 'Asset'),
+  shotTaskTypes: taskTypes.filter(t => t.for_entity === 'Shot'),
   editTaskTypes: taskTypes.filter(t => t.for_entity === 'Edit')
 }
 

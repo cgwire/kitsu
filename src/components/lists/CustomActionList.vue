@@ -86,11 +86,7 @@ export default {
     ...mapActions([
     ]),
     renderForShots (entry) {
-      if (entry.for_shots) {
-        return this.$tc('shots.title')
-      } else {
-        return this.$tc('assets.title')
-      }
+      return this.$tc(`${entry.toLowerCase()}.title`)
     }
   }
 }

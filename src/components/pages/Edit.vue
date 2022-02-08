@@ -4,7 +4,7 @@
     <div class="page-header flexrow">
       <router-link
         class="flexrow-item has-text-centered back-link"
-        :to="getEditsRoute"
+        :to="editsPath"
       >
         <chevron-left-icon />
       </router-link>
@@ -185,6 +185,7 @@ export default {
       'route',
       'editMap',
       'editMetadataDescriptors',
+      'editsPath',
       'taskMap',
       'taskTypeMap'
     ]),
@@ -211,23 +212,6 @@ export default {
       return this.currentEdit &&
         this.currentEdit.preview_file_id &&
         this.currentEdit.preview_file_id.length > 0
-    },
-
-    getEditsRoute () {
-      const route = {
-        name: 'edits',
-        params: {
-          production_id: this.currentProduction.id
-        },
-        query: {
-          search: ''
-        }
-      }
-      if (this.currentEpisode) {
-        route.name = 'episode-edits'
-        route.params.episode_id = this.currentEpisode.id
-      }
-      return route
     }
   },
 

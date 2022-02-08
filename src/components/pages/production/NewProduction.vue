@@ -770,7 +770,7 @@ export default {
       ).map(
         // add task types
         async (taskType, index) => {
-          const finalIndex = taskType.for_shots
+          const finalIndex = taskType.for_entity === 'Shot'
             ? index - this.productionToCreate.assetTaskTypes.length
             : index
           return await this.addTaskTypeToProduction({
