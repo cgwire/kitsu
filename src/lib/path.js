@@ -19,7 +19,15 @@ export const getTaskPath = (
     route.params.episode_id = task.episode_id || episode.id
   }
   const taskType = taskTypeMap.get(task.task_type_id)
-  route.params.type = taskType.for_shots ? 'shots' : (taskType.for_entity === 'Edit' ? 'edits' : 'assets')
+  if (taskType.for_entity === 'Shot') {
+    route.params.type = 'shots'
+  }
+  if (taskType.for_entity === 'Asset') {
+    route.params.type = 'assets'
+  }
+  if (taskType.for_entity === 'Edit') {
+    route.params.type = 'edits'
+  }
   return route
 }
 
@@ -28,19 +36,12 @@ export const getTaskEntityPath = (task, episodeId) => {
     const type = task.entity_type_name
     const entityId = task.entity ? task.entity.id : task.entity_id
     const route = {
-      name: type === 'Shot' ? 'shot' : (type === 'Asset' ? 'asset' : 'edit'),
+      name: type.toLowerCase(),
       params: {
         production_id: task.project_id
       }
     }
-
-    if (type === 'Shot') {
-      route.params.shot_id = entityId
-    } else if (type === 'Asset') {
-      route.params.asset_id = entityId
-    } else if (type === 'Edit') {
-      route.params.edit_id = entityId
-    }
+    route.params[`${route.name}_id`] = entityId
 
     if (episodeId) {
       route.name = `episode-${route.name}`

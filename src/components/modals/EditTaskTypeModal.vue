@@ -99,7 +99,6 @@ export default {
         this.form = {
           name: this.taskTypeToEdit.name,
           color: this.taskTypeToEdit.color,
-          for_shots: String(this.taskTypeToEdit.for_shots === true),
           for_entity: this.taskTypeToEdit.for_entity,
           allow_timelog: String(this.taskTypeToEdit.allow_timelog === true),
           department_id: this.taskTypeToEdit.department_id

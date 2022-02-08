@@ -395,7 +395,7 @@
         <div
           class="more-menu-item"
           v-if="
-            (isCurrentViewAsset || isCurrentViewShot) &&
+            (isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit) &&
             isCurrentUserManager &&
             !isEntitySelection"
           @click="selectBar('assignation')"
@@ -414,7 +414,7 @@
         <div
           class="more-menu-item"
           v-if="
-            (isCurrentViewAsset || isCurrentViewShot || isCurrentViewPerson) &&
+            (isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit || isCurrentViewPerson) &&
             isCurrentUserManager &&
             !isEntitySelection"
           @click="selectBar('priorities')"
@@ -425,7 +425,7 @@
         <div
           class="more-menu-item"
           v-if="
-            ((isCurrentViewAsset || isCurrentViewShot) && !isCurrentViewTaskType) &&
+            ((isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit) && !isCurrentViewTaskType) &&
             isCurrentUserManager &&
             !isEntitySelection"
           @click="selectBar('tasks')"
@@ -446,7 +446,7 @@
         <div
           class="more-menu-item"
           v-if="
-            (isCurrentViewAsset || isCurrentViewShot) &&
+            (isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit) &&
             isCurrentUserManager &&
             !isEntitySelection"
           @click="selectBar('delete-tasks')"

@@ -60,7 +60,6 @@ export const entityMixin = {
         id: 'root',
         name: 'Tasks',
         color: '#888',
-        for_shots: false,
         priority: 1,
         expanded: true,
         loading: false,

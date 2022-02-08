@@ -91,7 +91,7 @@ export const sortRevisionPreviewFiles = (previewFiles) => {
 
 export const sortTaskTypes = (taskTypes, currentProduction) => {
   return taskTypes.sort(
-    firstBy('for_shots')
+    firstBy('for_entity')
       .thenBy((taskTypeA, taskTypeB) => {
         const taskTypeAPriority = getTaskTypePriorityOfProd(
           taskTypeA, currentProduction
@@ -115,7 +115,7 @@ export const sortTaskTypeScheduleItems = (
   currentProduction,
   taskTypeMap
 ) => {
-  const sortFunc = firstBy('for_shots')
+  const sortFunc = firstBy('for_entity')
     .thenBy((itemA, itemB) => {
       const taskTypeA = taskTypeMap.get(itemA.task_type_id)
       const taskTypeB = taskTypeMap.get(itemB.task_type_id)

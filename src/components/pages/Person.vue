@@ -413,7 +413,6 @@ export default {
         ...project,
         avatar: true,
         color: colors.fromString(project.name, true),
-        for_shots: false,
         priority: 1,
         expanded: true,
         loading: false,

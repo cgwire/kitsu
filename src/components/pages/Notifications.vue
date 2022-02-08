@@ -310,7 +310,7 @@ export default {
 
     entityPath (notification) {
       const taskType = this.taskTypeMap.get(notification.task_type_id)
-      const type = taskType.for_shots ? 'shot' : 'asset'
+      const type = taskType.for_entity.toLowerCase()
 
       const route = {
         name: 'task',
