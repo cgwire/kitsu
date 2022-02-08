@@ -1,17 +1,19 @@
 <template>
 <div
   class="question-mark"
-  :style="sizeStyle"
 >
   <help-circle-icon />
-  <div class="question-text">
-    {{ text }}
+  <div
+    class="question-text"
+    v-html="renderMarkdown(text)"
+  >
   </div>
 </div>
 </template>
 
 <script>
 import { HelpCircleIcon } from 'vue-feather-icons'
+import { renderMarkdown } from '@/lib/render'
 
 export default {
   name: 'spinner',
@@ -26,22 +28,26 @@ export default {
   },
 
   computed: {
+  },
+
+  methods: {
+    renderMarkdown
   }
 }
 </script>
 
 <style lang="scss" scoped>
 .question-mark {
-  position: absolute;
+  position: relative;
 
   .question-text {
     background: var(--background-alt);
     border-radius: 5px;
     box-shadow: 0 2px 6px var(--box-shadow);
     display: none;
-    max-width: 300px;
+    min-width: 300px;
     padding: 0.5em;
-    position: relative;
+    position: absolute;
     z-index: 300;
   }
 
