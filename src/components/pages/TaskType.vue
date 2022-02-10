@@ -322,6 +322,7 @@ export default {
       'currentEpisode',
       'currentProduction',
       'currentTaskType',
+      'editsPath',
       'isCurrentUserManager',
       'isTVShow',
       'nbSelectedTasks',
@@ -406,10 +407,14 @@ export default {
           query: { search: '' }
         }
       } else {
-        if (this.currentTaskType.for_shots) {
+        if (this.currentTaskType.for_entity === 'Shot') {
           route = this.shotsPath
-        } else {
+        }
+        if (this.currentTaskType.for_entity === 'Asset') {
           route = this.assetsPath
+        }
+        if (this.currentTaskType.for_entity === 'Edit') {
+          route = this.editsPath
         }
       }
       return {
@@ -811,7 +816,6 @@ export default {
           id: person.id,
           name: 'Unassigned',
           color: '#888',
-          for_shots: false,
           priority: 1,
           expanded: true,
           loading: false,
@@ -828,7 +832,6 @@ export default {
           id: person.id,
           name: person.full_name,
           color: person.color,
-          for_shots: false,
           priority: 1,
           expanded: true,
           loading: false,

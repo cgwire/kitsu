@@ -198,7 +198,7 @@ export default {
             return {
               ...item,
               color: taskType.color,
-              for_shots: taskType.for_shots,
+              for_entity: taskType.for_entity,
               name: taskType.name,
               priority: taskType.priority,
               startDate: startDate,
@@ -210,7 +210,7 @@ export default {
                 taskType.id,
                 this.currentProduction.id,
                 this.currentEpisode ? this.currentEpisode.id : null,
-                taskType.for_shots ? 'shots' : 'assets'
+                this.$tc(taskType.for_entity.toLowerCase(), 2)
               ),
               children: []
             }
@@ -276,7 +276,7 @@ export default {
             item.task_type_id,
             this.currentProduction.id,
             item.object_id,
-            taskTypeElement.for_shots ? 'shots' : 'assets'
+            this.$tc(taskTypeElement.for_entity.toLowerCase(), 2)
           )
         }
         return scheduleItem
@@ -293,7 +293,7 @@ export default {
       if (taskTypeElement.expanded) {
         taskTypeElement.loading = true
         let action = 'loadAssetTypeScheduleItems'
-        if (taskTypeElement.for_shots) {
+        if (taskTypeElement.for_entity === 'Shot') {
           if (this.isTVShow) action = 'loadEpisodeScheduleItems'
           else action = 'loadSequenceScheduleItems'
         }

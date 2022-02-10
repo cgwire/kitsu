@@ -264,11 +264,11 @@ describe('lib/sorting', () => {
 
   it('sortTaskTypes', () => {
     const entries = [
-      { for_shots: false, priority: 1, name: 'Modeling', id: 'task-type-2' },
-      { for_shots: false, priority: 2, name: 'Setup', id: 'task-type-5' },
-      { for_shots: false, priority: 1, name: 'Modeling Low', id: 'task-type-4' },
-      { for_shots: false, priority: 1, name: 'Modeling Hi', id: 'task-type-3' },
-      { for_shots: true, priority: 1, name: 'Animation', id: 'task-type-1' }
+      { for_entity: 'Asset', priority: 1, name: 'Modeling', id: 'task-type-2' },
+      { for_entity: 'Asset', priority: 2, name: 'Setup', id: 'task-type-5' },
+      { for_entity: 'Asset', priority: 1, name: 'Modeling Low', id: 'task-type-4' },
+      { for_entity: 'Asset', priority: 1, name: 'Modeling Hi', id: 'task-type-3' },
+      { for_entity: 'Shot', priority: 1, name: 'Animation', id: 'task-type-1' }
     ]
     const production = {
       task_types_priority: {
@@ -398,7 +398,7 @@ describe('lib/sorting', () => {
       {
         id: 1,
         task_type_id: 'task-type-1',
-        for_shots: false,
+        for_entity: 'Asset',
         priority: 2,
         name: 'Modeling',
         start_date: '2019-08-01'
@@ -406,7 +406,7 @@ describe('lib/sorting', () => {
       {
         id: 2,
         task_type_id: 'task-type-2',
-        for_shots: true,
+        for_entity: 'Shot',
         priority: 2,
         name: 'Animation',
         start_date: '2019-08-01'
@@ -414,7 +414,7 @@ describe('lib/sorting', () => {
       {
         id: 3,
         task_type_id: 'task-type-3',
-        for_shots: false,
+        for_entity: 'Asset',
         priority: 1,
         name: 'Concept',
         start_date: '2019-08-01'
@@ -422,7 +422,7 @@ describe('lib/sorting', () => {
       {
         id: 4,
         task_type_id: 'task-type-4',
-        for_shots: true,
+        for_entity: 'Shot',
         priority: 1,
         name: 'Layout',
         start_date: '2019-08-01'
@@ -430,10 +430,10 @@ describe('lib/sorting', () => {
     ]
 
     const taskTypeMap = new Map()
-    taskTypeMap.set('task-type-1', { priority: 2, for_shots: false })
-    taskTypeMap.set('task-type-2', { priority: 2, for_shots: true })
-    taskTypeMap.set('task-type-3', { priority: 1, for_shots: false })
-    taskTypeMap.set('task-type-4', { priority: 1, for_shots: true })
+    taskTypeMap.set('task-type-1', { priority: 2, for_entity: 'Asset' })
+    taskTypeMap.set('task-type-2', { priority: 2, for_entity: 'Shot' })
+    taskTypeMap.set('task-type-3', { priority: 1, for_entity: 'Asset' })
+    taskTypeMap.set('task-type-4', { priority: 1, for_entity: 'Shot' })
 
     const production = {
       id: 'production-1',

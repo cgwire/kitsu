@@ -10,7 +10,7 @@ export default {
       name: taskType.name,
       color: taskType.color,
       priority: Number(taskType.priority),
-      for_shots: Boolean(taskType.for_shots === 'true'),
+      for_entity: taskType.for_entity,
       allow_timelog: Boolean(taskType.allow_timelog === 'true'),
       department_id: taskType.department_id
     }
@@ -28,9 +28,6 @@ export default {
     }
     if (taskType.allow_timelog !== undefined) {
       data.allow_timelog = Boolean(taskType.allow_timelog === 'true')
-    }
-    if (taskType.for_shots !== undefined) {
-      data.for_shots = Boolean(taskType.for_shots === 'true')
     }
     return client.pput(`/api/data/task-types/${taskType.id}`, data)
   },

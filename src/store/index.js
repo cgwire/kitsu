@@ -8,6 +8,7 @@ import assets from './modules/assets'
 import breakdown from './modules/breakdown'
 import customActions from './modules/customactions'
 import departments from './modules/departments'
+import edits from './modules/edits'
 import login from './modules/login'
 import main from './modules/main'
 import news from './modules/news'
@@ -30,6 +31,7 @@ const modules = {
   breakdown,
   customActions,
   departments,
+  edits,
   login,
   main,
   people,

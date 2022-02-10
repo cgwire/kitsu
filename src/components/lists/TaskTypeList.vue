@@ -87,6 +87,42 @@
           />
         </tr>
       </draggable>
+      <draggable
+        class="datatable-body"
+        v-model="editsItems"
+        draggable=".tasktype-item"
+        tag="tbody"
+        :sort="true"
+        @end="updatePriorityEdits"
+      >
+        <tr class="datatable-type-header" slot="header">
+          <th scope="rowgroup" colspan="4">
+            <span class="datatable-row-header">
+              {{ $t('edits.title') }}
+            </span>
+          </th>
+        </tr>
+        <tr
+          class="datatable-row tasktype-item"
+          v-for="taskType in editsItems" :key="taskType.id"
+        >
+          <td class="department">
+            <department-name
+              :department="getDepartments(taskType.department_id)"
+              v-if="!isEmpty(taskType.department_id)"
+            />
+          </td>
+          <task-type-cell class="name" :task-type="taskType" />
+          <td class="allow-timelog">
+            {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
+          </td>
+          <row-actions-cell
+            :taskType-id="taskType.id"
+            @delete-clicked="$emit('delete-clicked', taskType)"
+            @edit-clicked="$emit('edit-clicked', taskType)"
+          />
+        </tr>
+      </draggable>
     </table>
   </div>
 
@@ -122,7 +158,8 @@ export default {
   data () {
     return {
       assetsItems: [],
-      shotsItems: []
+      shotsItems: [],
+      editsItems: []
     }
   },
 
@@ -142,11 +179,15 @@ export default {
     ]),
 
     assetTaskTypes () {
-      return this.entries.filter(taskType => !taskType.for_shots)
+      return this.getTaskTypesForEntity('Asset')
     },
 
     shotTaskTypes () {
-      return this.entries.filter(taskType => taskType.for_shots)
+      return this.getTaskTypesForEntity('Shot')
+    },
+
+    editTaskTypes () {
+      return this.getTaskTypesForEntity('Edit')
     }
   },
 
@@ -154,9 +195,13 @@ export default {
     ...mapActions([
     ]),
 
-    updatePriorityAssets () {
+    getTaskTypesForEntity (entity) {
+      return this.entries.filter(taskType => taskType.for_entity === entity)
+    },
+
+    updatePriority (items) {
       const forms = []
-      this.assetsItems.forEach((item, index) => {
+      items.forEach((item, index) => {
         index += 1
         const form = {
           id: item.id,
@@ -169,20 +214,18 @@ export default {
       this.$emit('update-priorities', forms)
     },
 
-    updatePriorityShots () {
-      const forms = []
-      this.shotsItems.forEach((item, index) => {
-        index += 1
-        const form = {
-          id: item.id,
-          name: item.name,
-          priority: String(index)
-        }
-        item.priority = index
-        forms.push(form)
-      })
-      this.$emit('update-priorities', forms)
+    updatePriorityAssets () {
+      this.updatePriority(this.assetsItems)
     },
+
+    updatePriorityShots () {
+      this.updatePriority(this.shotsItems)
+    },
+
+    updatePriorityEdits () {
+      this.updatePriority(this.editsItems)
+    },
+
     isEmpty (value) {
       return value === undefined || value === null || value === ''
     }
@@ -195,6 +238,7 @@ export default {
         setTimeout(() => {
           this.assetsItems = JSON.parse(JSON.stringify(this.assetTaskTypes))
           this.shotsItems = JSON.parse(JSON.stringify(this.shotTaskTypes))
+          this.editsItems = JSON.parse(JSON.stringify(this.editTaskTypes))
         }, 100)
       }
     }

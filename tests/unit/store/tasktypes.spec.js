@@ -5,19 +5,25 @@ const taskTypes = [
     name: 'Modeling',
     id: 'task-type-1',
     color: '#ffffff',
-    for_shots: false
+    for_entity: 'Asset'
   },
   {
     name: 'Shading',
     id: 'task-type-2',
     color: '#eeeeee',
-    for_shots: false
+    for_entity: 'Asset'
   },
   {
     name: 'Animation',
     id: 'task-type-3',
     color: '#00eeee',
-    for_shots: true
+    for_entity: 'Shot'
+  },
+  {
+    name: 'Edit',
+    id: 'task-type-4',
+    color: '#ff0f0f',
+    for_entity: 'Edit'
   }
 ]
 
@@ -30,8 +36,9 @@ const rootGetters = {
   productionTaskTypes: taskTypes
 }
 const getters = {
-  assetTaskTypes: taskTypes.filter(t => !t.for_shots),
-  shotTaskTypes: taskTypes.filter(t => t.for_shots)
+  assetTaskTypes: taskTypes.filter(t => t.for_entity === 'Asset'),
+  shotTaskTypes: taskTypes.filter(t => t.for_entity === 'Shot'),
+  editTaskTypes: taskTypes.filter(t => t.for_entity === 'Edit')
 }
 
 describe('Task types store', () => {
@@ -56,6 +63,10 @@ describe('Task types store', () => {
         .toHaveLength(2)
     })
     test('shotTaskTypes', () => {
+      expect(store.getters.shotTaskTypes(state, null, null, rootGetters))
+        .toHaveLength(1)
+    })
+    test('editTaskTypes', () => {
       expect(store.getters.shotTaskTypes(state, null, null, rootGetters))
         .toHaveLength(1)
     })
@@ -84,6 +95,15 @@ describe('Task types store', () => {
         .toStrictEqual({
           label: 'Animation',
           value: 'task-type-3'
+        })
+    })
+    test('getEditTaskTypeOptions', () => {
+      expect(
+        store.getters.getEditTaskTypeOptions(state, getters, null, rootGetters)
+          [0])
+        .toStrictEqual({
+          label: 'Edit',
+          value: 'task-type-4'
         })
     })
   })
@@ -127,15 +147,15 @@ describe('Task types store', () => {
       store.mutations.RESET_ALL(state)
       store.mutations.LOAD_TASK_TYPES_END(state, taskTypes)
       expect(state.taskTypes).toStrictEqual(taskTypes)
-      expect(state.taskTypeMap.size).toEqual(3)
+      expect(state.taskTypeMap.size).toEqual(4)
     })
 
     test('DELETE_TASK_TYPE_END', () => {
       store.mutations.RESET_ALL(state)
       store.mutations.LOAD_TASK_TYPES_END(state, taskTypes)
       store.mutations.DELETE_TASK_TYPE_END(state, { id: 'task-type-2' })
-      expect(state.taskTypes).toHaveLength(2)
-      expect(state.taskTypeMap.size).toEqual(2)
+      expect(state.taskTypes).toHaveLength(3)
+      expect(state.taskTypeMap.size).toEqual(3)
     })
   })
 })

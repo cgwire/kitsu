@@ -151,9 +151,8 @@ export default {
     },
 
     taskTypeList () {
-      const forShots = this.form.for_entity !== 'asset'
       const taskTypes = [...this.productionTaskTypes]
-        .filter(taskType => taskType.for_shots === forShots)
+        .filter(taskType => taskType.for_entity === this.form.for_entity)
       return [{
         id: '',
         color: '#999',

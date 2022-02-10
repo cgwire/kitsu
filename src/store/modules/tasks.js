@@ -16,6 +16,7 @@ import personStore from './people'
 import taskTypeStore from './tasktypes'
 import assetStore from './assets'
 import shotStore from './shots'
+import editStore from './edits'
 
 import {
   LOAD_ASSETS_END,
@@ -244,8 +245,10 @@ const actions = {
     if (payload.selectionOnly) {
       if (payload.type === 'shots') {
         entityIds = shotStore.cache.result.map(shot => shot.id)
-      } else {
+      } else if (payload.type === 'assets') {
         entityIds = assetStore.cache.result.map(asset => asset.id)
+      } else if (payload.type === 'edits') {
+        entityIds = editStore.cache.result.map(edit => edit.id)
       }
     }
     const data = {

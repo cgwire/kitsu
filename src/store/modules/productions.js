@@ -73,6 +73,7 @@ const initialState = {
   assetsPath: { name: 'open-productions' },
   assetTypesPath: { name: 'open-productions' },
   shotsPath: { name: 'open-productions' },
+  editsPath: { name: 'open-productions' },
   sequencesPath: { name: 'open-productions' },
   episodesPath: { name: 'open-productions' },
   breakdownPath: { name: 'open-productions' },
@@ -101,7 +102,7 @@ const helpers = {
         }
       }
     }
-    if (['assets', 'shots'].includes(routeName)) {
+    if (['assets', 'shots', 'edits'].includes(routeName)) {
       route.query = { search: '' }
     }
     return route
@@ -132,6 +133,7 @@ const getters = {
   assetsPath: state => state.assetsPath,
   assetTypesPath: state => state.assetTypesPath,
   shotsPath: state => state.shotsPath,
+  editsPath: state => state.editsPath,
   sequencesPath: state => state.sequencesPath,
   episodesPath: state => state.episodesPath,
   breakdownPath: state => state.breakdownPath,
@@ -190,24 +192,35 @@ const getters = {
 
   productionAssetTaskTypeIds: (state, getters) => {
     return getters.productionTaskTypes
-      .filter(taskType => !taskType.for_shots)
+      .filter(taskType => taskType.for_entity === 'Asset')
       .map(taskType => taskType.id)
   },
 
   productionShotTaskTypeIds: (state, getters) => {
     return getters.productionTaskTypes
-      .filter(taskType => taskType.for_shots)
+      .filter(taskType => taskType.for_entity === 'Shot')
+      .map(taskType => taskType.id)
+  },
+
+  productionEditTaskTypeIds: (state, getters) => {
+    return getters.productionTaskTypes
+      .filter(taskType => taskType.for_entity === 'Edit')
       .map(taskType => taskType.id)
   },
 
   productionAssetTaskTypes: (state, getters) => {
     return getters.productionTaskTypes
-      .filter(taskType => !taskType.for_shots)
+      .filter(taskType => taskType.for_entity === 'Asset')
   },
 
   productionShotTaskTypes: (state, getters) => {
     return getters.productionTaskTypes
-      .filter(taskType => taskType.for_shots)
+      .filter(taskType => taskType.for_entity === 'Shot')
+  },
+
+  productionEditTaskTypes: (state, getters) => {
+    return getters.productionTaskTypes
+      .filter(taskType => taskType.for_entity === 'Edit')
   },
 
   currentProduction: (state) => {
@@ -243,6 +256,17 @@ const getters = {
       return sortByName(
         state.currentProduction.descriptors
           .filter(d => d.entity_type === 'Shot')
+      )
+    }
+  },
+
+  editMetadataDescriptors: (state) => {
+    if (!state.currentProduction || !state.currentProduction.descriptors) {
+      return []
+    } else {
+      return sortByName(
+        state.currentProduction.descriptors
+          .filter(d => d.entity_type === 'Edit')
       )
     }
   },
@@ -703,6 +727,8 @@ const mutations = {
       'production-asset-types', productionId, episodeId)
     state.shotsPath = helpers.getProductionComponentPath(
       'shots', productionId, episodeId)
+    state.editsPath = helpers.getProductionComponentPath(
+      'edits', productionId, episodeId)
     state.sequencesPath = helpers.getProductionComponentPath(
       'sequences', productionId, episodeId)
     state.episodesPath = helpers.getProductionComponentPath(

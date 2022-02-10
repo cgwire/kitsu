@@ -172,7 +172,7 @@ export default {
           route.params.episode_id = 'all'
         }
       }
-      if (['assets', 'shots'].includes(section)) {
+      if (['assets', 'shots', 'edits'].includes(section)) {
         route.query.search = ''
       }
       return route

@@ -269,11 +269,20 @@ export default {
       'openProductions',
       'openProductionOptions',
       'productionMap',
+      'productionEditTaskTypes',
       'user'
     ]),
 
     assetSections () {
       return ['assets', 'assetTypes', 'playlists']
+    },
+
+    editSections () {
+      return ['edits']
+    },
+
+    shotSections () {
+      return ['shots']
     },
 
     // Asset pages require a all section and a main pack section.
@@ -288,12 +297,16 @@ export default {
           { label: this.$t('main.all_assets'), value: 'all' },
           { label: 'Main Pack', value: 'main' }
         ].concat(this.episodeOptions)
+      } else if (['edits'].includes(this.currentProjectSection)) {
+        return [
+          { label: this.$t('main.all_edits'), value: 'all' }
+        ].concat(this.episodeOptions)
       } else {
         return this.episodeOptions
       }
     },
 
-    isShotPage () {
+    hasEpisodeId () {
       return this.$route.params.episode_id
     },
 
@@ -304,7 +317,7 @@ export default {
 
     isEpisodeContext () {
       return this.isTVShow &&
-             this.isShotPage &&
+             this.hasEpisodeId &&
              // Do not display combobox if there is no episode
              this.episodes.length > 0
     },
@@ -336,14 +349,24 @@ export default {
     sectionOptions () {
       let options = [
         { label: this.$t('assets.title'), value: 'assets' },
-        { label: this.$t('shots.title'), value: 'shots' },
+        { label: this.$t('shots.title'), value: 'shots' }
+      ]
+
+      // Show only if there are task types for Edit in this production.
+      if (this.productionEditTaskTypes.length > 0) {
+        options = options.concat([
+          { label: this.$t('edits.title'), value: 'edits' }
+        ])
+      }
+
+      options = options.concat([
         { label: this.$t('sequences.title'), value: 'sequences' },
         { label: this.$t('episodes.title'), value: 'episodes' },
         {
           label: this.$t('asset_types.production_title'), value: 'assetTypes'
         },
         { label: this.$t('playlists.title'), value: 'playlists' }
-      ]
+      ])
 
       // Show these sections to studio members only.
       if (!this.isCurrentUserClient) {
@@ -532,7 +555,8 @@ export default {
       this.currentProductionId = productionId
       this.currentProjectSection = section
       const isAssetSection = this.assetSections.includes(section)
-      if (!isAssetSection && ['all', 'main'].includes(episodeId)) {
+      const isEditSection = this.editSections.includes(section)
+      if (!isAssetSection && !isEditSection && ['all', 'main'].includes(episodeId)) {
         episodeId = this.episodes[0].id
         this.currentEpisodeId = episodeId
         this.pushContextRoute(section)
@@ -593,6 +617,8 @@ export default {
       const section =
         this.currentProjectSection || this.getCurrentSectionFromRoute()
       const isAssetSection = this.assetSections.includes(section)
+      const isEditSection = this.editSections.includes(section)
+      const isShotSection = this.shotSections.includes(section)
       const isAssetEpisode =
         ['all', 'main'].includes(this.currentEpisodeId)
       const production = this.productionMap.get(this.currentProductionId)
@@ -602,7 +628,7 @@ export default {
       if (isAssetEpisode) {
         // It's an asset episode. We have to switch if we are in a shot
         // section.
-        if (!isAssetSection) {
+        if (isShotSection) {
           // Set current episode to first episode if it's a shot section.
           this.currentEpisodeId =
             this.episodes.length > 0 ? this.episodes[0].id : null
@@ -612,7 +638,7 @@ export default {
       // If no episode is set and we are in a tv show, select the first one.
       if (isTVShow) {
         // It's an asset section, and episode is not set, we chose all
-        if (isAssetSection && !this.currentEpisodeId) {
+        if ((isAssetSection || isEditSection) && !this.currentEpisodeId) {
           this.currentEpisodeId = 'all'
           this.setCurrentEpisode(this.currentEpisodeId)
         // It's a shot section, and episode is not set, we chose the first one

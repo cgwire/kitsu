@@ -18,12 +18,20 @@ export const descriptorMixin = {
   computed: {
     ...mapGetters([
       'selectedAssets',
-      'selectedShots'
+      'selectedShots',
+      'selectedEdits'
     ]),
     descriptorLength () {
-      return this.shotMetadataDescriptors
-        ? this.shotMetadataDescriptors.length
-        : this.assetMetadataDescriptors.length
+      if (this.shotMetadataDescriptors.length !== undefined) {
+        return this.shotMetadataDescriptors.length
+      }
+      if (this.assetMetadataDescriptors.length !== undefined) {
+        return this.assetMetadataDescriptors.length
+      }
+      if (this.editMetadataDescriptors.length !== undefined) {
+        return this.editMetadataDescriptors.length
+      }
+      return 0
     }
   },
 

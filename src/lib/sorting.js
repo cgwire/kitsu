@@ -18,6 +18,14 @@ export const sortShots = (shots) => {
   )
 }
 
+export const sortEdits = (shots) => {
+  return shots.sort(
+    firstBy('canceled')
+      .thenBy(sortByEpisode)
+      .thenBy((a, b) => a.name.localeCompare(b.name))
+  )
+}
+
 export const sortSequences = (sequences) => {
   return sequences.sort(
     firstBy('canceled')
@@ -83,7 +91,7 @@ export const sortRevisionPreviewFiles = (previewFiles) => {
 
 export const sortTaskTypes = (taskTypes, currentProduction) => {
   return taskTypes.sort(
-    firstBy('for_shots')
+    firstBy('for_entity')
       .thenBy((taskTypeA, taskTypeB) => {
         const taskTypeAPriority = getTaskTypePriorityOfProd(
           taskTypeA, currentProduction
@@ -107,7 +115,7 @@ export const sortTaskTypeScheduleItems = (
   currentProduction,
   taskTypeMap
 ) => {
-  const sortFunc = firstBy('for_shots')
+  const sortFunc = firstBy('for_entity')
     .thenBy((itemA, itemB) => {
       const taskTypeA = taskTypeMap.get(itemA.task_type_id)
       const taskTypeB = taskTypeMap.get(itemB.task_type_id)
@@ -216,6 +224,28 @@ export const sortShotResult = (
     )
   } else {
     result = sortShots(result)
+  }
+  return result
+}
+
+export const sortEditResult = (
+  result,
+  sorting,
+  taskTypeMap,
+  taskMap
+) => {
+  if (sorting && sorting.length > 0) {
+    const sortInfo = sorting[0]
+    let sortEntities = sortByTaskType(taskMap, sortInfo)
+    if (sortInfo.type === 'metadata') sortEntities = sortByMetadata(sortInfo)
+    result = result.sort(
+      firstBy('canceled')
+        .thenBy(sortEntities)
+        .thenBy(sortByEpisode)
+        .thenBy((a, b) => a.name.localeCompare(b.name))
+    )
+  } else {
+    result = sortEdits(result)
   }
   return result
 }

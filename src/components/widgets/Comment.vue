@@ -436,7 +436,7 @@ export default {
         route.params.episode_id = this.task.entity.episode_id
       }
       const taskType = this.taskTypeMap.get(this.task.task_type_id)
-      route.params.type = taskType.for_shots ? 'shots' : 'assets'
+      route.params.type = this.$tc(taskType.for_entity.toLowerCase(), 2)
       return route
     },
 
