@@ -848,7 +848,7 @@ export default {
     details_name: 'Name',
     details_seconds: 'Seconds',
     details_frames: 'Frames',
-    explaination: 'Shots are considered ended on the first feedback request. Then, quotas are weighted following time spent on the task (when the artist filled his timesheet). If no time is filled, it considers that the task was done the day the feedback request was made.',
+    explaination: 'Shots are considered ended on the first feedback request. Then, quotas are weighted following time spent on the task (when the artist filled his timesheet).\n If no time is filled, it considers that:\n * The task was started at the first status chanse to WIP \n* The task was done the day the feedback request was made.\n * It splits the done frames among all business days between the start and the end.',
     export_quotas: 'Export quotas',
     highlight_quotas: 'Highlight quotas below:',
     month_label: 'Month',

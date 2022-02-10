@@ -48,6 +48,7 @@
       </div>
       <div class="flexrow-item">
         <info-question-mark
+          class="mt2"
           :text="$t('quota.explaination')"
         />
       </div>
