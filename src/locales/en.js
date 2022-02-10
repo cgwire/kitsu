@@ -859,7 +859,8 @@ export default {
     quota_month: 'Quotas per month',
     year_label: 'Year',
     title: 'Quotas',
-    type_label: 'Type'
+    type_label: 'Type',
+    weight: 'Weight'
   },
 
   shots: {

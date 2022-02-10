@@ -11,16 +11,18 @@
             : $t('quota.details_frames')
         }}
         </th>
+        <th>{{ $t('quota.weight') }}</th>
       </tr>
     </thead>
     <tbody>
-      <tr
-        :key="`shot-quota-${shot.id}`"
-        v-for="shot in shots"
-      >
-        <td>{{ shot.full_name }}</td>
-        <td>{{ getQuota(shot) }}</td>
-      </tr>
+     <tr
+       :key="`shot-quota-${shot.id}`"
+       v-for="shot in shots"
+     >
+       <td>{{ shot.full_name }}</td>
+       <td>{{ getQuota(shot) }}</td>
+       <td>{{ shot.weight }}</td>
+     </tr>
     </tbody>
   </table>
 
