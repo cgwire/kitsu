@@ -66,7 +66,7 @@
     <sound-viewer
       ref="sound-viewer"
       class="sound-viewer"
-      :preview-url="originalPath"
+      :preview-url="isSound ? originalPath : ''"
       :file-name="fileTitle"
       @play-ended="$emit('play-ended')"
       v-show="isSound"
