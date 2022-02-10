@@ -349,20 +349,25 @@ export default {
     sectionOptions () {
       let options = [
         { label: this.$t('assets.title'), value: 'assets' },
-        { label: this.$t('shots.title'), value: 'shots' },
-        { label: this.$t('sequences.title'), value: 'sequences' },
-        { label: this.$t('episodes.title'), value: 'episodes' },
-        {
-          label: this.$t('asset_types.production_title'), value: 'assetTypes'
-        },
-        { label: this.$t('playlists.title'), value: 'playlists' }
+        { label: this.$t('shots.title'), value: 'shots' }
       ]
+
       // Show only if there are task types for Edit in this production.
       if (this.productionEditTaskTypes.length > 0) {
         options = options.concat([
           { label: this.$t('edits.title'), value: 'edits' }
         ])
       }
+
+      options = options.concat([
+        { label: this.$t('sequences.title'), value: 'sequences' },
+        { label: this.$t('episodes.title'), value: 'episodes' },
+        {
+          label: this.$t('asset_types.production_title'), value: 'assetTypes'
+        },
+        { label: this.$t('playlists.title'), value: 'playlists' }
+      ])
+
       // Show these sections to studio members only.
       if (!this.isCurrentUserClient) {
         options = options.concat([
