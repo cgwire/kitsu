@@ -251,8 +251,8 @@
     :annotations="annotations"
     :frame-duration="frameDuration"
     :nb-frames="nbFrames"
-    @start-scrub="$refs['button-bar'].classList.add('unselectable')"
-    @end-scrub="$refs['button-bar'].classList.remove('unselectable')"
+    @start-scrub="onScrubStart"
+    @end-scrub="onScrubEnd"
     @progress-changed="onProgressChanged"
     v-show="isCurrentPreviewMovie && playlist.id && !isAddingEntity"
   />
@@ -1642,6 +1642,18 @@ export default {
         document.msFullscreenElement ||
         document.fullscreenElement
       )
+    },
+
+    onScrubStart () {
+      if (this.$refs['button-bar']) {
+        this.$refs['button-bar'].classList.add('unselectable')
+      }
+    },
+
+    onScrubEnd () {
+      if (this.$refs['button-bar']) {
+        this.$refs['button-bar'].classList.remove('unselectable')
+      }
     },
 
     onProgressChanged (frameNumber) {
