@@ -25,7 +25,8 @@
                 "production": "道具",
                 "time_spent": "时间",
                 "type": "类型",
-                "hidden_from_client": "显示到客户端"
+                "hidden_from_client": "显示到客户端",
+                "ready_for": ""
             },
             "cancel_text": "",
             "delete_for_selection": "",
@@ -314,7 +315,11 @@
             "show": "",
             "stick": "",
             "timeSpent": "",
-            "unstick": ""
+            "unstick": "",
+            "all_edits": "",
+            "attach_snapshots": "",
+            "reply": "",
+            "select_file": ""
         },
         "menu": {
             "assign_tasks": "分配任务",
@@ -326,7 +331,8 @@
             "run_custom_action": "执行自定义操作",
             "set_estimations": "设定预算",
             "delete_assets": "",
-            "delete_shots": ""
+            "delete_shots": "",
+            "delete_edits": ""
         },
         "news": {
             "all": "全部",
@@ -355,7 +361,8 @@
             "no_notifications": "目前没有关于您当前项目的通知.",
             "unread_notifications": "未读通知",
             "title": "通知",
-            "with_preview": "带有预览"
+            "with_preview": "带有预览",
+            "replied_on": ""
         },
         "people": {
             "active": "活动",
@@ -509,10 +516,14 @@
                 "overlay": "",
                 "side_by_side": "",
                 "switch_ld": "",
-                "switch_hd": ""
+                "switch_hd": "",
+                "frames_per_picture": ""
             },
             "download_csv": "",
-            "filter_task_type": ""
+            "filter_task_type": "",
+            "comparing_missing_plan": "",
+            "join_room": "",
+            "leave_room": ""
         },
         "productions": {
             "current": "所选制作",
@@ -620,7 +631,9 @@
                 "select_task_status": "",
                 "select_task_status_description": "",
                 "start_and_end_dates": "",
-                "shots_to_import": ""
+                "shots_to_import": "",
+                "select_edit_task_type": "",
+                "select_edit_task_type_description": ""
             }
         },
         "profile": {
@@ -630,8 +643,6 @@
             "notifications_enabled": "电子邮件通知已启用",
             "notifications_slack_enabled": "Slack通知已启用",
             "notifications_slack_user": "Slack 用户名",
-            "notifications_mattermost_enabled": "Mattermost通知已启用",
-            "notifications_mattermost_user": "Mattermost 用户名",
             "password_title": "更改密码",
             "timezone": "时区",
             "title": "您的简介",
@@ -648,7 +659,10 @@
             "save": {
                 "button": "保存更改",
                 "error": "保存更改时出现错误"
-            }
+            },
+            "notifications_mattermost_enabled": "",
+            "notifications_mattermost_user": "",
+            "webhook_error": ""
         },
         "settings": {
             "change_logo": "更改Logo",
@@ -657,14 +671,13 @@
             "no_logo": "没有设置Logo",
             "set_logo": "设置工作室Logo",
             "title": "设置",
-            "webhook_error": "Une erreur est survenue en postant le webhook",
             "fields": {
                 "name": "工作室名字",
                 "hours_by_day": "每天营业时间",
                 "slack_token": "Slack Token （可选）",
-                "mattermost_webhook": "Mattermost Webhook （可选）",
                 "use_original_name": "使用原始文件名进行下载",
-                "timesheets_locked": ""
+                "timesheets_locked": "",
+                "mattermost_webhook": ""
             },
             "production": {
                 "empty_list": "该列表当前为空。 这意味着用户可以使用主设置中的所有数据。 添加一些条目以限制此产品的选择。"
@@ -672,7 +685,9 @@
             "save": {
                 "button": "保存设置",
                 "error": "保存设置时发生服务器错误"
-            }
+            },
+            "show_hd_default": "",
+            "webhook_error": ""
         },
         "task_status": {
             "create_error": "保存此任务状态时发生错误。 您确定没有名称相似的任务状态吗？",
@@ -690,7 +705,8 @@
                 "is_reviewable": "可审查",
                 "is_retake": "重新赋值",
                 "name": "名称",
-                "short_name": "简称"
+                "short_name": "简称",
+                "is_feedback_request": ""
             },
             "name": "任务状态"
         },
@@ -755,7 +771,11 @@
             "quota_month": "每月配额",
             "year_label": "年",
             "title": "配额",
-            "type_label": "类型"
+            "type_label": "类型",
+            "explaination": "",
+            "export_quotas": "",
+            "highlight_quotas": "",
+            "weight": ""
         },
         "shots": {
             "casting": "镜头的角色分配",
@@ -869,7 +889,6 @@
             "show_assignations": "显示多个任务分配",
             "show_infos": "显示其他信息",
             "subscribe_notifications": "订阅通知",
-            "select_image_file": "请从磁盘中选择您要附加到备注的图片:",
             "tasks": "任务(多个)",
             "validation": "确认",
             "with_comment": "",
@@ -916,7 +935,12 @@
             "for_project": "项目",
             "all_tasks": "",
             "due_this_week": "",
-            "select_file": ""
+            "select_file": "",
+            "big_thumbnails": "",
+            "create_tasks_edit": "",
+            "create_tasks_edit_explaination": "",
+            "create_tasks_edit_failed": "",
+            "smaller": ""
         },
         "timesheets": {
             "detail_level": "细节层次",
@@ -929,7 +953,8 @@
             "year": "年",
             "confirm_day_off": "",
             "day_off": "",
-            "export_timespents": ""
+            "export_timespents": "",
+            "unit": ""
         },
         "wrong_browser": {
             "title": "Kitsu不支持您的浏览器",
@@ -955,17 +980,37 @@
             }
         },
         "departments": {
-            "all_asset_types": "",
-            "create_error": "",
+            "all_asset_types": "所有部门",
+            "create_error": "保存该部门时出错。你确定没有类似名字的部门吗？",
+            "delete_text": "您确定要从数据库中删除 {name} 吗？",
+            "delete_error": "删除此部门时出错。",
+            "edit_title": "编辑部门",
+            "new_departments": "添加新的部门",
+            "number": "",
+            "title": "部门",
+            "fields": {
+                "name": "名称",
+                "color": ""
+            }
+        },
+        "edits": {
+            "all_edits": "",
+            "manage": "",
+            "creation_explaination": "",
+            "edit_error": "",
             "delete_text": "",
             "delete_error": "",
+            "delete_for_selection": "",
             "edit_title": "",
-            "new_departments": "",
+            "empty_list": "",
+            "empty_list_client": "",
+            "new_edit": "",
             "number": "",
             "title": "",
             "fields": {
                 "name": "",
-                "color": ""
+                "episode": "",
+                "description": ""
             }
         }
     }
