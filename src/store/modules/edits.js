@@ -265,7 +265,6 @@ const helpers = {
 const initialState = {
   editMap: new Map(),
   episodeMap: new Map(),
-  episodes: [],
   editSearchText: '',
   editSearchQueries: [],
   editSorting: [],
@@ -345,8 +344,8 @@ const actions = {
 
     if (isTVShow) {
       if (!episode) {
-        if (state.episodes.length > 0) {
-          episode = state.episodes.length > 0 ? state.episodes[0] : null
+        if (rootGetters.episodes.length > 0) {
+          episode = rootGetters.episodes.length > 0 ? rootGetters.episodes[0] : null
         } else {
           return Promise.resolve([])
         }
