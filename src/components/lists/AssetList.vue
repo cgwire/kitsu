@@ -132,6 +132,7 @@
             class="ready-for"
             :title="$t('assets.fields.ready_for')"
             ref="th-ready-for"
+            v-if="isShowInfos && metadataDisplayHeaders.readyFor"
           >
             {{ $t('assets.fields.ready_for') }}
           </th>
@@ -180,7 +181,7 @@
               class="is-small is-pulled-right"
               icon="down"
               @click="toggleColumnSelector"
-              v-if="assetMetadataDescriptors.length > 0 && isShowInfos"
+              v-if="isShowInfos"
             />
           </th>
         </tr>
@@ -390,6 +391,7 @@
 
           <td
             class="task-type-name ready-for"
+            v-if="isShowInfos && metadataDisplayHeaders.readyFor"
           >
             <combobox-task-type
               class="mb0"
@@ -554,6 +556,7 @@ export default {
       lastHeaderMenuDisplayedIndexInGrid: null,
       metadataDisplayHeaders: {
         estimation: true,
+        readyFor: true,
         timeSpent: true
       },
       stickedColumns: {},
@@ -967,7 +970,7 @@ td.metadata-descriptor {
     &:active,
     &:hover {
       background: $dark-grey-light;
-    }
+   }
   }
 }
 

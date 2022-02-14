@@ -52,11 +52,12 @@ export default {
   data () {
     return {
       fieldToName: {
+        estimation: this.$t('main.estimation'),
         fps: this.$t('main.fps'),
         frameIn: this.$t('main.frameIn'),
         frameOut: this.$t('main.frameOut'),
         frames: this.$t('main.frames'),
-        estimation: this.$t('main.estimation'),
+        readyFor: this.$t('assets.fields.ready_for'),
         timeSpent: this.$t('main.timeSpent')
       }
     }
@@ -77,6 +78,7 @@ export default {
         localMetadataDisplayHeaders[descriptor.field_name] = true
       }
     }
+    console.log(this.descriptors)
     this.$emit('update:metadataDisplayHeaders', localMetadataDisplayHeaders)
   },
 
@@ -104,6 +106,7 @@ export default {
     filteredMetadataDescriptors () {
       return this.metadataDescriptors
         .filter(descriptor => {
+          console.log(descriptor.field_name)
           return !this.exclude[descriptor.field_name]
         })
     }
@@ -129,6 +132,10 @@ export default {
 .dark .column-menu {
   background-color: $dark-grey-light;
   box-shadow: 0 2px 6px $dark-grey-light;
+
+ .checkbox:hover {
+   color: $white;
+ }
 }
 
 .column-menu {

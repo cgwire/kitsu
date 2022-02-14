@@ -181,7 +181,7 @@
               class="is-small is-pulled-right"
               icon="down"
               @click="toggleColumnSelector"
-              v-if="shotMetadataDescriptors.length > 0 && isShowInfos"
+              v-if="isShowInfos"
             />
           </th>
         </tr>
