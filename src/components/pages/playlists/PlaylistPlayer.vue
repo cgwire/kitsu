@@ -2864,10 +2864,15 @@ export default {
             eventData.current_frame_number !== parseInt(this.currentFrame)
           ) {
             const frameNumber = eventData.current_frame_number
-            this.rawPlayer.setCurrentFrame(frameNumber)
-            this.currentTimeRaw = this.rawPlayer.getCurrentTimeRaw()
+            this.rawPlayer.setCurrentFrame(frameNumber - 1)
+            this.currentTimeRaw = (frameNumber - 1) * this.frameDuration + 0.01
             this.syncComparisonPlayer()
             this.updateProgressBar()
+            this.clearCanvas()
+            const annotation = this.getAnnotation(
+              (frameNumber - 1) * this.frameDuration
+            )
+            if (annotation) this.loadAnnotation(annotation)
           } else if (
             this.isCurrentPreviewPicture &&
             eventData.current_frame_number !== this.framesSeenOfPicture
