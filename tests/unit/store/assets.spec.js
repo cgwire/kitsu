@@ -617,7 +617,7 @@ describe('Assets store', () => {
         taskMap: new Map(Object.entries({
           'task-id-1': {
             task_status_short_name: 'shortName1',
-            assignees: [ 'person-1' ]
+            assignees: ['person-1']
           }
         }))
       }
