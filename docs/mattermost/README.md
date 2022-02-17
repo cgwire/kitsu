@@ -11,7 +11,7 @@ it the *Team Admin* privilege, to allow it to set a webhook.
 Then to be able to send notifications to users, we have to create a dedicated
 channel. Let's name it *Kitsu*. 
 
-## Set the webhook in mattermost
+## Set a webhook in mattermost
 
 Connect in Mattermost with the user account "Kitsu". Go to the 
 "Integrations" / "Incoming Webhooks" / "Add incoming Webhook" section and

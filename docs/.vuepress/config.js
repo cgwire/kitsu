@@ -13,9 +13,10 @@ module.exports = {
        '/getting-started-production/',
 	   '/getting-started-advanced/',
        '/getting-started-artist/',
-	   '/getting-started-client/',	   
+	   '/getting-started-client/',
        '/permissions/',
        '/slack/',
+       '/mattermost/',
        '/custom-actions/'
      ]
    },
@@ -29,7 +30,7 @@ module.exports = {
 	   '/department/',
 	   '/customization/'
      ]
-	}, 
+	},
 	{
      title: 'FAQ',
      collapsable: false,
@@ -39,7 +40,7 @@ module.exports = {
 	   '/faq-notification/',
 	   '/faq-production-report/'
      ]
-	}, 
+	},
     {
      title: 'Open Source Setup',
      collapsable: false,
