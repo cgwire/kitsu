@@ -32,6 +32,7 @@ export const annotationMixin = {
       additions: [],
       deletions: [],
       updates: [],
+      objIndex: new Map(),
       isShowingPalette: false,
       isShowingPencilPalette: false,
       notSave: false
@@ -59,6 +60,9 @@ export const annotationMixin = {
 
   methods: {
     // Objects
+    getObjectById (objectId) {
+      return this.fabricCanvas.getObjects().find(obj => obj.id === objectId)
+    },
 
     setObjectData (object) {
       if (!object.id) object.id = uuidv4()
@@ -68,7 +72,7 @@ export const annotationMixin = {
       return object
     },
 
-    addObject (activeObject) {
+    addObject (activeObject, persist = true) {
       if (activeObject._objects) {
         activeObject._objects.forEach((obj) => {
           this.fabricCanvas.add(obj)
@@ -77,8 +81,10 @@ export const annotationMixin = {
       } else {
         this.fabricCanvas.add(activeObject)
       }
-      this.$options.doneActionStack.push({ type: 'add', obj: activeObject })
-      this.saveAnnotations()
+      if (persist) {
+        this.$options.doneActionStack.push({ type: 'add', obj: activeObject })
+        this.saveAnnotations()
+      }
     },
 
     addText () {
@@ -146,15 +152,40 @@ export const annotationMixin = {
         activeObject._objects.forEach(obj => {
           this.fabricCanvas.remove(obj)
           this.addToDeletions(obj)
+          this.$options.doneActionStack.push({
+            type: 'remove', obj
+          })
         })
       } else if (activeObject) {
         this.fabricCanvas.remove(activeObject)
         this.addToDeletions(activeObject)
+        this.$options.doneActionStack.push({
+          type: 'remove', obj: activeObject
+        })
       }
-      this.$options.doneActionStack.push({
-        type: 'remove', obj: activeObject
-      })
       this.saveAnnotations()
+    },
+
+    removeObjectFromCanvas (deletedObject) {
+      const obj = this.getObjectById(deletedObject.id)
+      if (obj) {
+        if (obj._objects) {
+          obj._objects.forEach(this.fabricCanvas.remove)
+          this.fabricCanvas.remove(obj)
+        } else {
+          this.fabricCanvas.remove(obj)
+        }
+      }
+      this.objIndex.delete(deletedObject.id)
+    },
+
+    updateObjectInCanvas (annotation, updatedObject) {
+      const obj = this.getObjectById(updatedObject.id)
+      if (obj) {
+        this.removeObjectFromCanvas(obj)
+        this.objIndex.set(updatedObject.id, updatedObject)
+        this.addObjectToCanvas(annotation, updatedObject)
+      }
     },
 
     addToAdditions (obj) {
@@ -169,6 +200,11 @@ export const annotationMixin = {
           drawing: { objects: [obj.serialize()] }
         })
       }
+      this.postAnnotationAddition(currentTime, obj.serialize())
+    },
+
+    postAnnotationAddition (currentTime, obj) {
+      // Aimed at being supercharged
     },
 
     removeFromAdditions (obj) {
@@ -193,6 +229,14 @@ export const annotationMixin = {
           objects: [obj.id]
         })
       }
+      this.postAnnotationDeletion(
+        currentTime,
+        obj.toJSON(['id', 'canvasWidth', 'canvasHeight'])
+      )
+    },
+
+    postAnnotationDeletion (currentTime, obj) {
+      // Aimed at being supercharged
     },
 
     removeFromDeletions (obj) {
@@ -221,6 +265,11 @@ export const annotationMixin = {
           drawing: { objects: [obj.serialize()] }
         })
       }
+      this.postAnnotationUpdate(currentTime, obj.serialize())
+    },
+
+    postAnnotationUpdate (currentTime, obj) {
+      // Aimed at being supercharged
     },
 
     clearModifications () {
@@ -295,98 +344,108 @@ export const annotationMixin = {
     },
 
     loadSingleAnnotation (annotation) {
+      annotation.drawing.objects.forEach(obj => {
+        this.addObjectToCanvas(annotation, obj)
+      })
+    },
+
+    addObjectToCanvas (
+      annotation,
+      obj
+    ) {
+      if (!obj) return
+      if (this.getObjectById(obj.id)) return
+      this.objIndex.set(obj.id, obj)
       let scaleMultiplierX = 1
       let scaleMultiplierY = 1
-      if (annotation.width) {
+      if (annotation && annotation.width) {
         scaleMultiplierX = this.fabricCanvas.width / annotation.width
         scaleMultiplierY = this.fabricCanvas.width / annotation.width
       }
-      if (annotation.height) {
+      if (annotation && annotation.height) {
         scaleMultiplierY = this.fabricCanvas.height / annotation.height
       }
+      const canvasWidth = obj.canvasWidth || annotation.width
+      const canvasHeight = obj.canvasHeight
 
-      annotation.drawing.objects.forEach(obj => {
-        const canvasWidth = obj.canvasWidth || annotation.width
-        const canvasHeight = obj.canvasHeight
-        if (canvasWidth) {
-          scaleMultiplierX = this.fabricCanvas.width / canvasWidth
-          scaleMultiplierY = this.fabricCanvas.width / canvasWidth
-        }
-        if (canvasHeight) {
-          scaleMultiplierY = this.fabricCanvas.height / canvasHeight
-        }
+      if (canvasWidth) {
+        scaleMultiplierX = this.fabricCanvas.width / canvasWidth
+        scaleMultiplierY = this.fabricCanvas.width / canvasWidth
+      }
+      if (canvasHeight) {
+        scaleMultiplierY = this.fabricCanvas.height / canvasHeight
+      }
 
-        const base = {
-          id: obj.id,
-          left: obj.left * scaleMultiplierX,
-          top: obj.top * scaleMultiplierY,
-          fill: 'transparent',
-          stroke: obj.stroke,
-          strokeWidth: obj.strokeWidth,
-          radius: obj.radius,
-          width: obj.width,
-          height: obj.height,
-          scaleX: obj.scaleX * scaleMultiplierX,
-          scaleY: obj.scaleY * scaleMultiplierY
+      const base = {
+        id: obj.id,
+        left: obj.left * scaleMultiplierX,
+        top: obj.top * scaleMultiplierY,
+        fill: 'transparent',
+        stroke: obj.stroke,
+        strokeWidth: obj.strokeWidth,
+        radius: obj.radius,
+        width: obj.width,
+        height: obj.height,
+        scaleX: obj.scaleX * scaleMultiplierX,
+        scaleY: obj.scaleY * scaleMultiplierY
+      }
+      if (obj.type === 'path') {
+        let strokeMultiplier = 1
+        if (obj.canvasWidth) {
+          strokeMultiplier = canvasWidth / this.fabricCanvas.width
         }
-        if (obj.type === 'path') {
-          let strokeMultiplier = 1
-          if (obj.canvasWidth) {
-            strokeMultiplier = canvasWidth / this.fabricCanvas.width
+        if (this.fabricCanvas.width < 420) strokeMultiplier /= 2
+        const path = new fabric.Path(
+          obj.path,
+          {
+            ...base,
+            strokeWidth: obj.strokeWidth * strokeMultiplier,
+            canvasWidth: obj.canvasWidth
           }
-          if (this.fabricCanvas.width < 420) strokeMultiplier /= 2
-          const path = new fabric.Path(
-            obj.path,
-            {
-              ...base,
-              strokeWidth: obj.strokeWidth * strokeMultiplier,
-              canvasWidth: obj.canvasWidth
-            }
-          )
-          path.setControlsVisibility({
-            mt: false,
-            mb: false,
-            ml: false,
-            mr: false,
-            bl: false,
-            br: false,
-            tl: false,
-            tr: false,
-            mtr: false
-          })
-          this.$options.silentAnnnotation = true
-          this.fabricCanvas.add(path)
-          this.$options.silentAnnnotation = false
-        } else if ((obj.type === 'i-text') || (obj.type === 'text')) {
-          const text = new fabric.Text(
-            obj.text,
-            {
-              ...base,
-              fill: obj.fill,
-              left: obj.left * scaleMultiplierX,
-              top: obj.top * scaleMultiplierY,
-              fontFamily: obj.fontFamily,
-              fontSize: obj.fontSize,
-              backgroundColor: 'rgba(255,255,255, 0.8)',
-              padding: 10
-            }
-          )
-          text.setControlsVisibility({
-            mt: false,
-            mb: false,
-            ml: false,
-            mr: false,
-            bl: false,
-            br: false,
-            tl: false,
-            tr: false,
-            mtr: false
-          })
-          this.$options.silentAnnnotation = true
-          this.fabricCanvas.add(text)
-          this.$options.silentAnnnotation = false
-        }
-      })
+        )
+        path.setControlsVisibility({
+          mt: false,
+          mb: false,
+          ml: false,
+          mr: false,
+          bl: false,
+          br: false,
+          tl: false,
+          tr: false,
+          mtr: false
+        })
+        this.$options.silentAnnnotation = true
+        this.fabricCanvas.add(path)
+        this.$options.silentAnnnotation = false
+      } else if ((obj.type === 'i-text') || (obj.type === 'text')) {
+        const text = new fabric.Text(
+          obj.text,
+          {
+            ...base,
+            fill: obj.fill,
+            left: obj.left * scaleMultiplierX,
+            top: obj.top * scaleMultiplierY,
+            fontFamily: obj.fontFamily,
+            fontSize: obj.fontSize,
+            backgroundColor: 'rgba(255,255,255, 0.8)',
+            padding: 10
+          }
+        )
+        text.setControlsVisibility({
+          mt: false,
+          mb: false,
+          ml: false,
+          mr: false,
+          bl: false,
+          br: false,
+          tl: false,
+          tr: false,
+          mtr: false
+        })
+        this.$options.silentAnnnotation = true
+        this.fabricCanvas.add(text)
+        this.$options.silentAnnnotation = false
+      }
     },
 
     // Events
@@ -559,6 +618,7 @@ export const annotationMixin = {
     clearCanvas () {
       if (this.fabricCanvas) {
         this.fabricCanvas.clear()
+        this.objIndex.clear()
       }
     },
 

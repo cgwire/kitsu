@@ -440,6 +440,10 @@ export default {
       }
     },
 
+    getSpeed (rate) {
+      return this.currentPlayer ? this.currentPlayer.playbackRate : 0
+    },
+
     setSpeed (rate) {
       this.$options.rate = rate
       if (this.currentPlayer) this.currentPlayer.playbackRate = rate
