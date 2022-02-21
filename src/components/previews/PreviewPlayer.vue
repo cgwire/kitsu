@@ -402,6 +402,8 @@
   <!-- used only for picture saving purpose, it is not displayed -->
   <canvas id="annotation-snapshot" ref="annotation-snapshot">
   </canvas>
+  <canvas id="resize-annotation-canvas" ref="resize-annotation-canvas">
+  </canvas>
   <!-- end -->
 </div>
 </template>
@@ -1231,9 +1233,18 @@ export default {
         this.loadSingleAnnotation(annotation)
         setTimeout(() => {
           const context = canvas.getContext('2d')
-          const source = document.getElementById('annotation-canvas')
-          context.drawImage(source, 0, 0, canvas.width, canvas.height)
-          return resolve()
+          const scaleRatio = canvas.width / this.fabricCanvas.width
+          const tmpSource = document.getElementById('resize-annotation-canvas')
+          const tmpCanvas = new fabric.Canvas('resize-annotation-canvas', {
+            width: canvas.width,
+            height: canvas.height
+          })
+          this.fabricCanvas.getObjects().find(tmpCanvas.add)
+          tmpCanvas.setZoom(scaleRatio)
+          setTimeout(() => {
+            context.drawImage(tmpSource, 0, 0, canvas.width, canvas.height)
+            return resolve()
+          }, 100)
         }, 100)
       })
     },
@@ -1807,6 +1818,7 @@ export default {
   display: flex;
 }
 
+#resize-annotation-canvas,
 #annotation-snapshot {
   display: none;
 }
