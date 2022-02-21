@@ -387,29 +387,19 @@ export default {
           newTime = duration
         }
       }
-      this.$options.currentTimeCalls.push(newTime)
-      if (!this.$options.running) this.runSetCurrentTime()
+      this.runSetCurrentTime(newTime)
       return newTime
     },
 
-    runSetCurrentTime () {
-      if (this.$options.currentTimeCalls.length === 0) {
-        this.$options.running = false
-      } else {
-        this.$options.running = true
-        const currentTime = this.$options.currentTimeCalls.shift()
-        if (
-          this.currentPlayer &&
-          this.currentPlayer.currentTime !== currentTime + this.frameDuration
-        ) {
-          // tweaks needed because the html video player is messy with frames
-          this.currentPlayer.currentTime =
-            currentTime + this.frameDuration + 0.01
-          this.onTimeUpdate()
-        }
-        setTimeout(() => {
-          this.runSetCurrentTime()
-        }, 10)
+    runSetCurrentTime (currentTime) {
+      if (
+        this.currentPlayer &&
+        this.currentPlayer.currentTime !== currentTime + this.frameDuration
+      ) {
+        // tweaks needed because the html video player is messy with frames
+        this.currentPlayer.currentTime =
+          currentTime + this.frameDuration + 0.01
+        this.onTimeUpdate()
       }
     },
 
@@ -448,6 +438,10 @@ export default {
       if (this.currentPlayer) {
         this.$emit('max-duration-update', this.currentPlayer.duration)
       }
+    },
+
+    getSpeed (rate) {
+      return this.currentPlayer ? this.currentPlayer.playbackRate : 0
     },
 
     setSpeed (rate) {

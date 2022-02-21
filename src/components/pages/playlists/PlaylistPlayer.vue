@@ -41,6 +41,7 @@
         :person="personEmailMap.get(personEmail)"
         :size="30"
         :font-size="15"
+        :is-link="false"
         v-for="personEmail in room.people"
         v-if="personEmailMap.get(personEmail)"
       />
@@ -1818,13 +1819,15 @@ export default {
       }
     },
 
-    reloadAnnotations () {
+    reloadAnnotations (current = true) {
       if (!this.annotations) return
       const annotations = this.annotations.map(a => ({ ...a }))
       this.annotations = []
       setTimeout(() => {
         this.annotations = annotations
-        this.reloadCurrentAnnotation()
+        if (current) {
+          this.reloadCurrentAnnotation()
+        }
       }, 200)
     },
 
@@ -1876,6 +1879,7 @@ export default {
       if (this.speed === 2) rate = 0.5
       if (this.speed === 1) rate = 0.25
       this.setPlayerSpeed(rate)
+      this.updatePlayingStatus()
     },
 
     setPlayerSpeed (rate) {
@@ -2292,12 +2296,6 @@ export default {
       })
     },
 
-    clearCanvas () {
-      if (this.fabricCanvas) {
-        this.fabricCanvas.clear()
-      }
-    },
-
     onAnnotateClicked () {
       this.showCanvas()
       if (this.isDrawing) {
@@ -2615,7 +2613,20 @@ export default {
       }
 
       this.$socket.emit('preview-room:join', {
-        user_id: this.user.id, playlist_id: this.playlist.id
+        user_id: this.user.id,
+        playlist_id: this.playlist.id,
+        is_playing: this.isPlaying,
+        current_entity_index: this.playingEntityIndex,
+        current_frame: this.currentFrameMovieOrPicture,
+        is_repeating: this.isRepeating,
+        speed: this.speed,
+        comparing: {
+          enable: this.isComparing,
+          task_type: this.taskTypeToCompare,
+          revision: this.revisionToCompare,
+          mode: this.comparisonMode,
+          comparison_preview_index: this.currentComparisonPreviewIndex
+        }
       })
     },
 
@@ -2651,8 +2662,9 @@ export default {
         playlist_id: this.playlist.id,
         is_playing: this.isPlaying,
         current_entity_index: this.playingEntityIndex,
-        current_frame_number: this.currentFrameMovieOrPicture,
+        current_frame: this.currentFrameMovieOrPicture,
         is_repeating: this.isRepeating,
+        speed: this.speed,
         comparing: {
           enable: this.isComparing,
           task_type: this.taskTypeToCompare,
@@ -2661,6 +2673,122 @@ export default {
           comparison_preview_index: this.currentComparisonPreviewIndex
         }
       })
+    },
+
+    postAnnotationAddition (time, serializedObj) {
+      this.$socket.emit('preview-room:add-annotation', {
+        playlist_id: this.playlist.id,
+        data: {
+          user_id: this.user.id,
+          time,
+          obj: serializedObj
+        }
+      })
+    },
+
+    postAnnotationDeletion (time, serializedObj) {
+      this.$socket.emit('preview-room:remove-annotation', {
+        playlist_id: this.playlist.id,
+        data: {
+          user_id: this.user.id,
+          time,
+          obj: serializedObj
+        }
+      })
+    },
+
+    postAnnotationUpdate (time, serializedObj) {
+      this.$socket.emit('preview-room:update-annotation', {
+        playlist_id: this.playlist.id,
+        data: {
+          user_id: this.user.id,
+          time,
+          obj: serializedObj
+        }
+      })
+    },
+
+    loadRoomCurrentState (eventData) {
+      if (eventData.is_playing !== this.isPlaying && !eventData.is_playing) {
+        // pause if needed to prevent screen flickering
+        this.pause()
+      }
+
+      let isEntityChanged = false
+      if (
+        this.exists(eventData.current_entity_index) &&
+        eventData.current_entity_index !== this.playingEntityIndex
+      ) {
+        this.playEntity(eventData.current_entity_index)
+        isEntityChanged = true
+      }
+
+      if (this.exists(eventData.current_frame)) {
+        this.$nextTick(() => {
+          this.loadRoomCurrentFrame(eventData)
+          if (isEntityChanged) {
+            this.$nextTick(() => {
+              this.updateProgressBar()
+              this.onWindowResize() // needed due to a progress bar display bug
+            })
+          }
+        })
+      }
+
+      if (
+        this.exists(eventData.is_repeating) &&
+        eventData.is_repeating !== this.isRepeating
+      ) {
+        this.isRepeating = eventData.is_repeating
+      }
+
+      if (this.exists(eventData.speed) && eventData.speed !== this.speed) {
+        this.speed = eventData.speed
+        let rate = 1
+        if (this.speed === 2) rate = 0.5
+        if (this.speed === 1) rate = 0.25
+        this.setPlayerSpeed(rate)
+      }
+
+      if (this.exists(eventData.comparing)) {
+        this.isComparing = eventData.comparing.enable
+        this.taskTypeToCompare = eventData.comparing.task_type
+        this.revisionToCompare = eventData.comparing.revision
+        this.comparisonMode = eventData.comparing.mode
+        this.currentComparisonPreviewIndex =
+          eventData.comparing.comparison_preview_index
+      }
+
+      if (eventData.is_playing !== this.isPlaying) {
+        if (eventData.is_playing) {
+          this.play()
+        } else {
+          this.pause()
+        }
+      }
+    },
+
+    loadRoomCurrentFrame (eventData) {
+      if (
+        eventData.current_frame !== this.currentFrameMovieOrPicture
+      ) {
+        const frameNumber = eventData.current_frame
+        this.rawPlayer.setCurrentFrame(frameNumber - 1)
+        this.currentTimeRaw = (frameNumber - 1) * this.frameDuration + 0.01
+        this.syncComparisonPlayer()
+        this.updateProgressBar()
+
+        this.clearCanvas()
+        const annotation = this.getAnnotation(
+          (frameNumber - 1) * this.frameDuration
+        )
+        if (annotation) this.loadAnnotation(annotation)
+      } else if (
+        this.isCurrentPreviewPicture &&
+        eventData.current_frame !== this.framesSeenOfPicture
+      ) {
+        this.framesSeenOfPicture = eventData.current_frame
+      }
     }
   },
 
@@ -2808,8 +2936,9 @@ export default {
               const isAnnotationSizeChanged =
                 this.annotations.length !== preview.annotations.length
               this.annotations = preview.annotations
-              if (isAnnotationSizeChanged) this.reloadAnnotations()
-              this.reloadCurrentAnnotation()
+              const isLiveRoom =
+                !this.room.people || this.room.people.length === 0
+              if (isAnnotationSizeChanged) this.reloadAnnotations(isLiveRoom)
             }
             this.$emit('annotations-refreshed', preview)
           })
@@ -2818,97 +2947,50 @@ export default {
 
       'preview-room:room-people-updated' (eventData) {
         // someone joined the room
-        this.room.people = eventData.people
-
-        if (!this.joinedRoom) {
-          return
+        if (this.joinedRoom) {
+          this.room.people = eventData.people
+        } else {
+          this.room.people = eventData.people
+          if (this.joinedRoom) {
+            this.room.newComer = false
+            this.loadRoomCurrentState(eventData)
+          }
         }
-        if (this.room.newComer) {
-          this.room.newComer = false
-          return
-        }
-
-        this.$socket.emit('preview-room:sync-newcomer', {
-          playlist_id: this.playlist.id,
-          is_playing: this.isPlaying,
-          current_entity_index: this.playingEntityIndex,
-          current_frame_number: this.currentFrameMovieOrPicture
-        })
       },
 
       'preview-room:room-updated' (eventData) {
         this.room.people = eventData.people
+        if (!this.joinedRoom) return
+        if (eventData.only_newcomer && !this.room.newComer) return
+        this.loadRoomCurrentState(eventData)
+      },
 
-        if (!this.joinedRoom) {
-          return
-        }
-        if (eventData.only_newcomer && !this.room.newComer) {
-          return
-        }
+      'preview-room:add-annotation' (eventData) {
+        if (!this.joinedRoom) return
+        if (this.user.id === eventData.data.user_id) return
+        const annotation = this.getAnnotation(eventData.time)
+        const obj = eventData.data.obj
+        this.addObjectToCanvas(annotation, obj)
+      },
 
-        if (eventData.is_playing !== this.isPlaying && !eventData.is_playing) {
-          // pause if needed to prevent screen flickering
-          this.pause()
-        }
+      'preview-room:remove-annotation' (eventData) {
+        if (!this.joinedRoom) return
+        if (this.user.id === eventData.data.user_id) return
+        const obj = eventData.data.obj
+        this.removeObjectFromCanvas(obj)
+      },
 
-        if (
-          this.exists(eventData.current_entity_index) &&
-          eventData.current_entity_index !== this.playingEntityIndex
-        ) {
-          this.playEntity(eventData.current_entity_index)
-        }
-
-        if (this.exists(eventData.current_frame_number)) {
-          if (
-            this.isCurrentPreviewMovie &&
-            eventData.current_frame_number !== parseInt(this.currentFrame)
-          ) {
-            const frameNumber = eventData.current_frame_number
-            this.rawPlayer.setCurrentFrame(frameNumber)
-            this.currentTimeRaw = this.rawPlayer.getCurrentTimeRaw()
-            this.syncComparisonPlayer()
-            this.updateProgressBar()
-          } else if (
-            this.isCurrentPreviewPicture &&
-            eventData.current_frame_number !== this.framesSeenOfPicture
-          ) {
-            this.framesSeenOfPicture = eventData.current_frame_number
-          }
-        }
-
-        if (
-          this.exists(eventData.is_repeating) &&
-          eventData.is_repeating !== this.isRepeating
-        ) {
-          this.isRepeating = eventData.is_repeating
-        }
-
-        if (
-          this.exists(eventData.comparing)
-        ) {
-          this.isComparing = eventData.comparing.enable
-          this.taskTypeToCompare = eventData.comparing.task_type
-          this.revisionToCompare = eventData.comparing.revision
-          this.comparisonMode = eventData.comparing.mode
-          this.currentComparisonPreviewIndex =
-            eventData.comparing.comparison_preview_index
-        }
-
-        if (eventData.is_playing !== this.isPlaying) {
-          if (eventData.is_playing) {
-            this.play()
-          } else {
-            this.pause()
-          }
-        }
+      'preview-room:update-annotation' (eventData) {
+        if (!this.joinedRoom) return
+        if (this.user.id === eventData.data.user_id) return
+        const annotation = this.getAnnotation(eventData.time)
+        const obj = eventData.data.obj
+        this.updateObjectInCanvas(annotation, obj)
       }
 
       // TODO (?) :
       // - handle updating the playlist order, adding/removing items
-      // - sync playing speed
       // - sync number of frames per image
-      // - sync annotations
-      //   (maybe already done, see preview-file:annotation-update)
     }
   }
 }
