@@ -1239,7 +1239,13 @@ export default {
             width: canvas.width,
             height: canvas.height
           })
-          this.fabricCanvas.getObjects().find(tmpCanvas.add)
+          this.fabricCanvas.getObjects().find(obj => {
+            if (obj._objects) {
+              obj._objects.forEach(tmpCanvas.add)
+            } else {
+              tmpCanvas.add(obj)
+            }
+          })
           tmpCanvas.setZoom(scaleRatio)
           setTimeout(() => {
             context.drawImage(tmpSource, 0, 0, canvas.width, canvas.height)
