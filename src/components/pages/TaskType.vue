@@ -17,10 +17,16 @@
           <div class="filler"></div>
           <div class="flexrow-item">
             <button-simple
+              icon="upload"
+              :title="$t('main.csv.import_file')"
+              @click="showImportModal"
+              v-if="!isActiveTab('schedule') && !isActiveTab('estimation')"
+            />
+            <button-simple
               icon="download"
               :title="$t('main.csv.export_file')"
               @click="onExportClick"
-              v-if="!isActiveTab('schedule')"
+              v-if="!isActiveTab('schedule') && !isActiveTab('estimation')"
             />
           </div>
         </div>
@@ -175,6 +181,33 @@
         />
       </div>
 
+      <import-render-modal
+        :active="modals.isImportRenderDisplayed"
+        :is-loading="loading.importing"
+        :is-error="errors.importing"
+        :import-error="errors.importingError"
+        :parsed-csv="parsedCSV"
+        :form-data="importCsvFormData"
+        :columns="csvColumns"
+        :dataMatchers="dataMatchers"
+        :database="{}"
+        :disable-update=true
+        @reupload="resetImport"
+        @cancel="hideImportRenderModal"
+        @confirm="uploadImportFile"
+      />
+
+      <import-modal
+        ref="import-modal"
+        :active="modals.importing"
+        :is-loading="loading.importing"
+        :is-error="errors.importing"
+        :form-data="importCsvFormData"
+        :columns="csvColumns"
+        @cancel="hideImportModal"
+        @confirm="renderImport"
+      />
+
     </div>
   </div>
 
@@ -230,6 +263,8 @@ import SearchQueryList from '@/components/widgets/SearchQueryList'
 import TaskInfo from '@/components/sides/TaskInfo'
 import TaskList from '@/components/lists/TaskList'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
+import ImportModal from '@/components/modals/ImportModal'
+import ImportRenderModal from '@/components/modals/ImportRenderModal'
 
 export default {
   name: 'task-type-page',
@@ -244,6 +279,8 @@ export default {
     Schedule,
     SearchField,
     SearchQueryList,
+    ImportModal,
+    ImportRenderModal,
     TaskList,
     TaskInfo,
     TaskTypeName
@@ -261,10 +298,13 @@ export default {
       tasks: [],
       selection: {},
       errors: {
-        entities: false
+        entities: false,
+        importing: false,
+        importingError: null
       },
       loading: {
-        entities: false
+        entities: false,
+        importing: false
       },
       schedule: {
         currentColor: 'status',
@@ -285,7 +325,25 @@ export default {
           { label: 'Status', value: 'status' },
           { label: 'Late', value: 'late' }
         ]
-      }
+      },
+      modals: {
+        isImportRenderDisplayed: false,
+        importing: false
+      },
+      parsedCSV: [],
+      importCsvFormData: {},
+      csvColumns: [
+        'Parent',
+        'Entity',
+        'Estimation',
+        'Start date',
+        'Due date'
+      ],
+      dataMatchers: [
+        'Parent',
+        'Entity',
+        'Estimation'
+      ]
     }
   },
 
@@ -488,7 +546,8 @@ export default {
       'setProduction',
       'subscribeToSequence',
       'updateTask',
-      'unsubscribeFromSequence'
+      'unsubscribeFromSequence',
+      'uploadTaskTypeEstimations'
     ]),
 
     initData (force) {
@@ -995,6 +1054,70 @@ export default {
           }
         }
       })
+    },
+
+    showImportModal () {
+      this.modals.importing = true
+    },
+
+    hideImportModal () {
+      this.modals.importing = false
+    },
+
+    showImportRenderModal () {
+      this.modals.isImportRenderDisplayed = true
+    },
+
+    hideImportRenderModal () {
+      this.modals.isImportRenderDisplayed = false
+    },
+
+    resetImport () {
+      this.errors.importing = false
+      this.errors.importingError = null
+      this.hideImportRenderModal()
+      this.importCsvFormData = undefined
+      this.$refs['import-modal'].reset()
+      this.showImportModal()
+    },
+
+    uploadImportFile (data) {
+      const formData = new FormData()
+      const filename = 'import.csv'
+      const file = new File([data.join('\n')], filename, { type: 'text/csv' })
+
+      formData.append('file', file)
+
+      this.loading.importing = true
+      this.errors.importing = false
+      this.errors.importingError = null
+      this.importCsvFormData = formData
+
+      this.uploadTaskTypeEstimations(this.importCsvFormData) // to change
+        .then(() => {
+          this.loading.importing = false
+          this.hideImportRenderModal()
+        })
+        .catch(err => {
+          this.loading.importing = false
+          this.errors.importingError = err
+          this.errors.importing = true
+        })
+    },
+
+    renderImport (data, mode) {
+      this.loading.importing = true
+      this.errors.importing = false
+      if (mode === 'file') {
+        data = data.get('file')
+      }
+      csv.processCSV(data)
+        .then((results) => {
+          this.parsedCSV = results
+          this.hideImportModal()
+          this.loading.importing = false
+          this.showImportRenderModal()
+        })
     }
   },
 
