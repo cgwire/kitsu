@@ -99,6 +99,10 @@ const getters = {
 
 const actions = {
 
+  uploadTaskTypeEstimations ({ commit, state, rootGetters }, formData) {
+    return taskTypesApi.postTaskTypeEstimations(rootGetters.currentProduction, rootGetters.currentEpisode, rootGetters.currentTaskType, formData)
+  },
+
   loadTaskTypes ({ commit, state }) {
     commit(LOAD_TASK_TYPES_START)
     return taskTypesApi.getTaskTypes()
