@@ -78,7 +78,6 @@ export default {
         localMetadataDisplayHeaders[descriptor.field_name] = true
       }
     }
-    console.log(this.descriptors)
     this.$emit('update:metadataDisplayHeaders', localMetadataDisplayHeaders)
   },
 
@@ -106,7 +105,6 @@ export default {
     filteredMetadataDescriptors () {
       return this.metadataDescriptors
         .filter(descriptor => {
-          console.log(descriptor.field_name)
           return !this.exclude[descriptor.field_name]
         })
     }
