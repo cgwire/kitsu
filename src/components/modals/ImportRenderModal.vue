@@ -236,7 +236,7 @@ export default {
       if (this.$route.path.indexOf('edits') > 0) {
         return this.editMetadataDescriptors
       }
-      return null
+      return []
     },
 
     columnsAllowed () {
