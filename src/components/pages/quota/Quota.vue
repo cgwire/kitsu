@@ -105,7 +105,11 @@
               })"
               v-if="getQuota(key, {year, month})"
             >
-              {{ getQuota(key, {year, month}) }}
+              {{
+                countMode === 'seconds'
+                ? getQuota(key, {year, month}).toFixed(2)
+                : getQuota(key, {year, month})
+              }}
             </router-link>
             <span v-else>-</span>
           </td>
@@ -131,7 +135,11 @@
               })"
               v-if="getQuota(key, {year, week})"
             >
-              {{ getQuota(key, {year, week}) }}
+              {{
+                countMode === 'seconds'
+                ? getQuota(key, {year, week}).toFixed(2)
+                : getQuota(key, {year, week})
+              }}
             </router-link>
             <span v-else>
             -
@@ -161,7 +169,11 @@
               })"
               v-if="getQuota(key, {year, month, day})"
             >
-              {{ getQuota(key, {year, month, day}) }}
+              {{
+                countMode === 'seconds'
+                ? getQuota(key, {year, month, day}).toFixed(2)
+                : getQuota(key, {year, month, day})
+              }}
             </router-link>
             <span v-else>
             -
@@ -271,11 +283,9 @@ export default {
 
   mounted () {
     if (this.shotMap.size < 2) {
+      this.isLoading = true
       setTimeout(() => {
         this.loadShots((err) => {
-          setTimeout(() => {
-            this.isLoading = false
-          }, 200)
           if (!err) {
             this.loadData()
           }
@@ -344,6 +354,7 @@ export default {
 
     loadData () {
       if (this.taskTypeId) {
+        this.isLoading = true
         this.computeQuota({
           taskTypeId: this.taskTypeId,
           detailLevel: this.detailLevel,
@@ -351,9 +362,11 @@ export default {
         })
           .then(quotas => {
             this.quotaMap = quotas
-            this.isLoading = false
             this.quotaLength = Object.keys(this.quotaMap).length
             this.calcAverageColumnX()
+            this.$nextTick(() => {
+              this.isLoading = false
+            })
           })
       }
     },
@@ -373,7 +386,6 @@ export default {
             })
               .then(shots => {
                 this.detailsMap = shots
-                this.isLoading = false
               })
           }
         }
