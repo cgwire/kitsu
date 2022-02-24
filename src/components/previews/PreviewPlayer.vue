@@ -1249,6 +1249,9 @@ export default {
           tmpCanvas.setZoom(scaleRatio)
           setTimeout(() => {
             context.drawImage(tmpSource, 0, 0, canvas.width, canvas.height)
+            setTimeout(() => {
+              tmpCanvas.dispose()
+            }, 100)
             return resolve()
           }, 100)
         }, 100)
