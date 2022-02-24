@@ -80,7 +80,7 @@
             </div>
             <div class="flexrow-item">
               <combobox-status
-                :task-status-list="taskStatusForCurrentUser"
+                :task-status-list="availableTaskStatuses"
                 v-model="taskStatusId"
               />
             </div>
@@ -520,6 +520,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { intersection } from '@/lib/array'
 import { sortPeople } from '@/lib/sorting'
 
 import { ChevronDownIcon, XIcon } from 'vue-feather-icons'
@@ -548,6 +549,7 @@ export default {
 
   data () {
     return {
+      availableTaskStatuses: [],
       currentTeam: [],
       customAction: {},
       customActions: [],
@@ -602,6 +604,7 @@ export default {
       'assetCustomActions',
       'currentProduction',
       'getPersonOptions',
+      'isCurrentUserArtist',
       'isCurrentUserManager',
       'isShowAssignations',
       'nbSelectedTasks',
@@ -609,6 +612,7 @@ export default {
       'organisation',
       'people',
       'personMap',
+      'productionMap',
       'selectedTasks',
       'selectedAssets',
       'selectedShots',
@@ -764,11 +768,11 @@ export default {
       'deleteSelectedShots',
       'deleteSelectedTasks',
       'deleteSelectedEdits',
-      'unassignSelectedTasks',
       'changeSelectedTaskStatus',
       'changeSelectedPriorities',
       'clearSelectedTasks',
-      'postCustomAction'
+      'postCustomAction',
+      'unassignSelectedTasks'
     ]),
 
     confirmAssign () {
@@ -789,7 +793,7 @@ export default {
     confirmTaskStatusChange () {
       this.isChangeStatusLoading = true
       if (!this.taskStatusId) {
-        this.taskStatusId = this.taskStatusForCurrentUser[0].id
+        this.taskStatusId = this.availableTaskStatus[0].id
       }
       this.changeSelectedTaskStatus({
         taskStatusId: this.taskStatusId,
@@ -994,6 +998,24 @@ export default {
       } else {
         window.removeEventListener('keydown', this.onKeyDown)
       }
+    },
+
+    setAvailableStatus () {
+      if (this.selectedTasks.size === 0) this.availableTaskStatuses = []
+      else if (this.isCurrentViewTodos) {
+        const productions = new Map()
+        this.selectedTasks.forEach(task => {
+          const project = this.productionMap.get(task.project_id)
+          productions.set(task.project_id, project)
+        })
+        const statusLists =
+          Array.from(productions.values()).map(p => p.task_statuses)
+        const availableStatus = new Set(intersection(statusLists))
+        this.availableTaskStatuses = this.taskStatusForCurrentUser
+          .filter(status => availableStatus.has(status.id))
+      } else {
+        this.availableTaskStatuses = this.taskStatusForCurrentUser
+      }
     }
   },
 
@@ -1017,16 +1039,12 @@ export default {
       this.autoChooseSelectBar()
     },
 
-    selectedTasks () {
-      this.selectedTaskIds = Array.from(this.selectedTasks.keys())
-    },
-
     nbSelectedTasks () {
       this.selectedTaskIds = Array.from(this.selectedTasks.keys())
       if (this.nbSelectedTasks > 0) {
         let isShotSelected = false
         let isAssetSelected = false
-
+        this.setAvailableStatus()
         this.selectedTaskIds.forEach(taskId => {
           const task = this.selectedTasks.get(taskId)
           if (task && task.sequence_name) {
