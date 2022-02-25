@@ -378,6 +378,7 @@ export default {
       this.checklist = comment.checklist
       this.$nextTick(() => {
         this.$refs['comment-textarea'].value = comment.text
+        this.text = comment.text
       })
     },
 
