@@ -729,7 +729,6 @@ export default {
     logo: 'Studio logo',
     no_logo: 'There is no logo set.',
     set_logo: 'Set studio logo',
-    show_hd_default: 'Show picture with HD quality by default',
     title: 'Settings',
     webhook_error: 'An error occurred while posting webhook',
     fields: {
@@ -738,7 +737,8 @@ export default {
       slack_token: 'Slack Token (Optional)',
       mattermost_webhook: 'Mattermost Webhook (Optional)',
       timesheets_locked: 'Lock artist timesheets older than 1 week',
-      use_original_name: 'Use original file name for downloads'
+      use_original_name: 'Use original file name for downloads',
+      show_hd_default: 'Show picture with HD quality by default'
     },
     production: {
       empty_list: 'The list is currently empty. It means that all data from the main settings are available to users. Add some entries to limit choices for this production.'
