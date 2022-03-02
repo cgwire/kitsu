@@ -140,8 +140,11 @@ export default {
     return client.pget(`/api/data/shots/${shotId}/versions`)
   },
 
-  getQuotas (productionId, taskTypeId, detailLevel) {
-    return client.pget(`/api/data/projects/${productionId}/quotas/` +
-                       `${taskTypeId}?detail=${detailLevel}`)
+  getQuotas (productionId, taskTypeId, detailLevel, computeMode) {
+    const weighted = computeMode === 'weighted'
+    return client.pget(
+      `/api/data/projects/${productionId}/quotas/` +
+       `${taskTypeId}?detail=${detailLevel}&weighted=${weighted}`
+    )
   }
 }

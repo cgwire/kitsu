@@ -46,10 +46,19 @@
           v-model="countMode"
         />
       </div>
+      <combobox
+        class="flexrow-item"
+        :label="$t('quota.compute_mode')"
+        :options="computeModeOptions"
+        v-model="computeMode"
+      />
       <div class="flexrow-item">
         <info-question-mark
           class="mt2"
-          :text="$t('quota.explaination')"
+          :text="computeMode === 'weighted'
+                 ? $t('quota.explaination')
+                 : $t('quota.explaination_feedback')
+                "
         />
       </div>
       <div class="filler"></div>
@@ -89,6 +98,7 @@
       :day="currentDay"
       :currentPerson="currentPerson"
       :countMode="currentMode"
+      :computeMode="computeMode"
       :searchText="searchText"
       :maxQuota="maxQuota"
     />
@@ -149,15 +159,20 @@ export default {
       taskTypeId: '',
       countMode: 'frames',
       countModeOptions: [
-        { label: 'Frames', value: 'frames' },
-        { label: 'Seconds', value: 'seconds' },
-        { label: 'Count', value: 'count' }
+        { label: this.$t('quota.frames'), value: 'frames' },
+        { label: this.$t('quota.seconds'), value: 'seconds' },
+        { label: this.$t('quota.count'), value: 'count' }
       ],
       detailLevelOptions: [
-        { label: 'Day', value: 'day' },
-        { label: 'Week', value: 'week' },
-        { label: 'Month', value: 'month' }
+        { label: this.$t('quota.day'), value: 'day' },
+        { label: this.$t('quota.week'), value: 'week' },
+        { label: this.$t('quota.month'), value: 'month' }
       ],
+      computeModeOptions: [
+        { label: this.$t('quota.weighted'), value: 'weighted' },
+        { label: this.$t('quota.feedback_date'), value: 'feedback' }
+      ],
+      computeMode: 'weighted',
       currentYear: moment().year(),
       currentMonth: moment().month() + 1,
       currentWeek: moment().week(),
@@ -221,7 +236,6 @@ export default {
 
   methods: {
     ...mapActions([
-      'computeQuota',
       'getPersonQuotaShots',
       'loadShots'
     ]),
@@ -237,7 +251,7 @@ export default {
 
     loadRoute () {
       const { month, year, week, day } = this.$route.params
-      const { countMode, taskTypeId } = this.$route.query
+      const { countMode, taskTypeId, computeMode } = this.$route.query
 
       if (this.$route.path.indexOf('week') > 0) this.detailLevel = 'week'
       if (this.$route.path.indexOf('month') > 0) this.detailLevel = 'month'
@@ -255,6 +269,9 @@ export default {
         const key = `quota:${this.currentProduction.id}:task-type-id`
         this.taskTypeId =
           localStorage.getItem(key) || this.shotTaskTypes[0].id
+      }
+      if (computeMode) {
+        this.computeMode = computeMode
       }
       if (month) {
         this.currentMonth = Number(month)
@@ -281,7 +298,8 @@ export default {
           year,
           month,
           week,
-          day
+          day,
+          computeMode: this.computeMode
         })
           .then(shots => {
             this.isPersonShotsLoading = false
@@ -346,7 +364,8 @@ export default {
             year: this.currentYear
           },
           query: {
-            countMode: this.countMode
+            countMode: this.countMode,
+            computeMode: this.computeMode
           }
         }
         if (this.detailLevelString === 'day') {
@@ -366,7 +385,8 @@ export default {
             year: year
           },
           query: {
-            countMode: this.countMode
+            countMode: this.countMode,
+            computeMode: this.computeMode
           }
         }
         if (this.detailLevelString === 'day') {
@@ -385,7 +405,8 @@ export default {
             month: Number(this.monthString)
           },
           query: {
-            countMode: this.countMode
+            countMode: this.countMode,
+            computeMode: this.computeMode
           }
         }
         this.$router.push(this.episodifyRoute(route))
@@ -397,11 +418,22 @@ export default {
         if (this.$route.query.countMode !== this.countMode) {
           this.$router.push({
             query: {
-              countMode: this.countMode
+              countMode: this.countMode,
+              computeMode: this.computeMode
             }
           })
         }
         this.currentMode = this.countMode
+      }
+    },
+
+    computeMode () {
+      if (this.$route.query.computeMode !== this.computeMode) {
+        this.$router.push({
+          query: {
+            computeMode: this.computeMode
+          }
+        })
       }
     },
 
