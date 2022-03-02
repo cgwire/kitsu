@@ -40,7 +40,7 @@
           v-model="form.use_original_file_name"
         />
         <combobox-boolean
-          :label="$t('settings.fields.show_hd_preview')"
+          :label="$t('settings.fields.show_hd_default')"
           @enter="saveSettings()"
           v-model="form.hd_by_default"
         />

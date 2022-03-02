@@ -88,16 +88,22 @@ const getters = {
     return state.taskTypeMap.get(id)
   },
 
-  getTaskTypePriority: (state, getters, rootState, rootGetters) => (taskTypeId) => {
-    const taskType = getters.getTaskType(taskTypeId)
-    if (!taskType) {
-      return null
+  getTaskTypePriority: (state, getters, rootState, rootGetters) =>
+    (taskTypeId) => {
+      const taskType = getters.getTaskType(taskTypeId)
+      if (!taskType) {
+        return null
+      }
+      return getTaskTypePriorityOfProd(taskType, rootGetters.currentProduction)
     }
-    return getTaskTypePriorityOfProd(taskType, rootGetters.currentProduction)
-  }
 }
 
 const actions = {
+
+  uploadTaskTypeEstimations ({ commit, state, rootGetters }, formData) {
+    return taskTypesApi.postTaskTypeEstimations(rootGetters.currentProduction,
+      rootGetters.currentEpisode, rootGetters.currentTaskType, formData)
+  },
 
   loadTaskTypes ({ commit, state }) {
     commit(LOAD_TASK_TYPES_START)
