@@ -996,9 +996,11 @@ const actions = {
 
   computeQuota (
     { commit, state, rootGetters },
-    { taskTypeId, detailLevel, countMode }) {
+    { taskTypeId, detailLevel, countMode, computeMode }) {
     const production = rootGetters.currentProduction
-    return shotsApi.getQuotas(production.id, taskTypeId, detailLevel)
+    return shotsApi.getQuotas(
+      production.id, taskTypeId, detailLevel, computeMode
+    )
   },
 
   changeShotSort ({ commit, rootGetters }, sortInfo) {

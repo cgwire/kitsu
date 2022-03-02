@@ -843,24 +843,34 @@ export default {
 
   quota: {
     average: 'Average',
-    count_label: 'Count mode',
+    count: 'Count',
+    count_label: 'Count unit',
+    compute_mode: 'Compute mode',
+    day: 'Day',
     detail_label: 'Detail level',
     details_name: 'Name',
     details_seconds: 'Seconds',
     details_frames: 'Frames',
+    feedback_date: 'Feddback date',
     explaination: 'Shots are considered ended on the first feedback request. Then, quotas are weighted following time spent on the task (when the artist filled his timesheet).\n If no time is filled, it considers that:\n * The task was started at the first status chanse to WIP \n* The task was done the day the feedback request was made.\n * It splits the done frames among all business days between the start and the end.',
+    explaination_feedback: 'The shot is done on the first feedback request. Its number of frames is added to the quotas for this day.',
     export_quotas: 'Export quotas',
+    frames: 'Frames',
     highlight_quotas: 'Highlight quotas below:',
+    month: 'Month,',
     month_label: 'Month',
     no_quota: 'There is no quota for this task type.',
     name: 'Name',
     quota_day: 'Quotas per day',
     quota_week: 'Quotas per week',
     quota_month: 'Quotas per month',
+    seconds: 'Seconds',
     year_label: 'Year',
     title: 'Quotas',
     type_label: 'Type',
-    weight: 'Weight'
+    weight: 'Weight',
+    weighted: 'Weighted',
+    week: 'Week'
   },
 
   shots: {

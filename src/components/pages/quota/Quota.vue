@@ -238,6 +238,11 @@ export default {
       default: 'frames',
       required: true
     },
+    computeMode: {
+      type: String,
+      default: 'weighted',
+      required: true
+    },
     year: {
       type: Number,
       default: 0
@@ -358,7 +363,8 @@ export default {
         this.computeQuota({
           taskTypeId: this.taskTypeId,
           detailLevel: this.detailLevel,
-          countMode: this.countMode
+          countMode: this.countMode,
+          computeMode: this.computeMode
         })
           .then(quotas => {
             this.quotaMap = quotas
@@ -495,28 +501,28 @@ export default {
   },
 
   watch: {
-    taskTypeId () {
-      if (this.taskTypeId) {
-        this.loadData()
-      }
-    },
-
-    detailLevel () {
-    },
-
-    countMode () {
-    },
-
-    quotaMap () {
-      this.resetPersonIds()
-    },
-
     $route () {
       const els = document.getElementsByClassName('selected')
       if (els.length === 0) { // selected element is not visible
         setTimeout(() => {
           this.$refs.body.scrollLeft += 380
         }, 100)
+      }
+    },
+
+    computeMode () {
+      if (this.taskTypeId) {
+        this.loadData()
+      }
+    },
+
+    quotaMap () {
+      this.resetPersonIds()
+    },
+
+    taskTypeId () {
+      if (this.taskTypeId) {
+        this.loadData()
       }
     }
   }

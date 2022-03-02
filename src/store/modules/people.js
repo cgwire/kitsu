@@ -577,7 +577,7 @@ const actions = {
 
   getPersonQuotaShots (
     { commit, state, rootGetters },
-    { taskTypeId, detailLevel, personId, year, month, week, day }
+    { taskTypeId, detailLevel, personId, year, month, week, day, computeMode }
   ) {
     const production = rootGetters.currentProduction
     return peopleApi.getPersonQuotaShots(
@@ -588,7 +588,8 @@ const actions = {
       year,
       month,
       week,
-      day
+      day,
+      computeMode
     )
   }
 }
