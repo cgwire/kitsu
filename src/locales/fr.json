@@ -677,7 +677,8 @@
                 "slack_token": "Token Slack (optionnel)",
                 "use_original_name": "Utiliser les noms de fichiers originaux pour le téléchargement",
                 "timesheets_locked": "Bloquer les feuilles de temps des artistes de plus d'une semaine",
-                "mattermost_webhook": "Webhook Mattermost (optionnel)"
+                "mattermost_webhook": "Webhook Mattermost (optionnel)",
+                "show_hd_default": "Mettre les previews en HD par défaut"
             },
             "production": {
                 "empty_list": "La liste est vide. Cela signifie que tous les entrées sont disponibles aux utilisateurs. Ajouter des éléments à cette liste si vous voulez limiter les choix disponibles aux utilisateurs."
@@ -686,7 +687,6 @@
                 "button": "Sauvegarder les paramètres",
                 "error": "Une erreur serveur est survenue en sauvegardant les paramètres"
             },
-            "show_hd_default": "Mettre les previews en HD par défaut",
             "webhook_error": "La webhook Mattermost renvoie une erreur"
         },
         "task_status": {

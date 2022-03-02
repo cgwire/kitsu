@@ -677,7 +677,8 @@
                 "slack_token": "Slack Token （可选）",
                 "use_original_name": "使用原始文件名进行下载",
                 "timesheets_locked": "",
-                "mattermost_webhook": ""
+                "mattermost_webhook": "",
+                "show_hd_default": ""
             },
             "production": {
                 "empty_list": "该列表当前为空。 这意味着用户可以使用主设置中的所有数据。 添加一些条目以限制此产品的选择。"
@@ -686,7 +687,6 @@
                 "button": "保存设置",
                 "error": "保存设置时发生服务器错误"
             },
-            "show_hd_default": "",
             "webhook_error": ""
         },
         "task_status": {
