@@ -546,6 +546,7 @@ export default {
       hours_by_day: 'ساعت در روز',
       slack_token: 'Slack Token (Optional)',
       mattermost_webhook: 'Mattermost Webhook (Optional)',
+      discord_token: 'Discord Token (Optional)',
       use_original_name: 'استفاده از اسم اصلی فایل برای دانلود.'
     },
     save: {

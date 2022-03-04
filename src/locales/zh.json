@@ -662,6 +662,8 @@
             },
             "notifications_mattermost_enabled": "",
             "notifications_mattermost_user": "",
+            "notifications_discord_enabled": "",
+            "notifications_discord_user": "",
             "webhook_error": ""
         },
         "settings": {
@@ -678,6 +680,7 @@
                 "use_original_name": "使用原始文件名进行下载",
                 "timesheets_locked": "",
                 "mattermost_webhook": "",
+                "discord_token": "Discord Token （可选）",
                 "show_hd_default": ""
             },
             "production": {

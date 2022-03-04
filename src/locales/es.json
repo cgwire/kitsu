@@ -632,6 +632,8 @@
             "notifications_slack_user": "Slack ID",
             "notifications_mattermost_enabled": "Notificationes de Mattermost activadas",
             "notifications_mattermost_user": "Mattermost ID",
+            "notifications_discord_enabled": "Notificationes de Discord activadas",
+            "notifications_discord_user": "Discord ID",
             "password_title": "Cambiar contraseña",
             "timezone": "Zona horaria",
             "title": "Su perfil",
@@ -663,6 +665,7 @@
                 "hours_by_day": "Horas por día",
                 "slack_token": "Slack token (opcional)",
                 "mattermost_webhook": "Mattermost Webhook (Optional)",
+                "discord_token": "Discord token (opcional)",
                 "use_original_name": "Usar el nombre del archivo original para las descargas",
                 "timesheets_locked": ""
             },

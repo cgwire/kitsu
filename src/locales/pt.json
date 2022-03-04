@@ -507,6 +507,8 @@
             "notifications_slack_user": "Nome de usuário do Slack",
             "notifications_mattermost_enabled": "Notificações do Mattermost habilitadas",
             "notifications_mattermost_user": "Nome de usuário do Mattermost",
+            "notifications_discord_enabled": "Notificações do Discord habilitadas",
+            "notifications_discord_user": "Nome de usuário do Discord",
             "password_title": "Alterar senha",
             "timezone": "Timezone",
             "title": "Seu Perfil",
@@ -538,6 +540,7 @@
                 "hours_by_day": "Horas por dia",
                 "slack_token": "Slack Token (Opcional)",
                 "mattermost_webhook": "Mattermost Webhook (Opcionnal)",
+                "discord_token": "Discord Token (Opcional)",
                 "use_original_name": "Usar nome original dos arquivos para download"
             },
             "production": {
