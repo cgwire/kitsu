@@ -529,6 +529,8 @@ export default {
     notifications_slack_user: 'Имя пользователя в Slack',
     notifications_mattermost_enabled: 'Отправлять уведомления в Mattermost?',
     notifications_mattermost_user: 'Имя пользователя в Mattermost',
+    notifications_discord_enabled: 'Отправлять уведомления в Discord?',
+    notifications_discord_user: 'Имя пользователя в Discord',
     password_title: 'Изменить пароль',
     timezone: 'Часовой пояс',
     title: 'Профиль',
@@ -561,6 +563,7 @@ export default {
       hours_by_day: 'Часов в день',
       slack_token: 'Токен Slack (Опционально)',
       mattermost_webhook: 'Webhook Mattermost (Опционально)',
+      discord_token: 'Токен Discord (Опционально)',
       use_original_name: 'Использовать оригинальное название файла при скачивании'
     },
     production: {

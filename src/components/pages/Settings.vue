@@ -58,6 +58,12 @@
           v-model="form.chat_token_slack"
         />
 
+        <text-field
+          :label="$t('settings.fields.discord_token')"
+          @enter="saveSettings()"
+          v-model="form.chat_token_discord"
+        />
+
         <div id="mattermost_integrations">
           <text-field
           :label="$t('settings.fields.mattermost_webhook')"
@@ -68,8 +74,8 @@
             class="error pull-right"
             v-if="this.errors.webhook_error === true"
           >
-          <em>{{ $t('settings.webhook_error') }}</em>
-      </div>
+            <em>{{ $t('settings.webhook_error') }}</em>
+          </div>
         </div>
 
         <button
@@ -133,7 +139,8 @@ export default {
         original_file_name: 'false',
         hd_by_default: 'false',
         chat_token_slack: '',
-        chat_webhook_mattermost: ''
+        chat_webhook_mattermost: '',
+        chat_token_discord: ''
       },
       errors: {
         save: false,
@@ -241,6 +248,7 @@ export default {
         hd_by_default:
           this.organisation.hd_by_default ? 'true' : 'false',
         chat_token_slack: this.organisation.chat_token_slack,
+        chat_token_discord: this.organisation.chat_token_discord,
         chat_webhook_mattermost: this.organisation.chat_webhook_mattermost
       }
     }

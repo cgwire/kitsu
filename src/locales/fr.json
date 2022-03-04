@@ -662,6 +662,8 @@
             },
             "notifications_mattermost_enabled": "Activation des notifications Mattermost",
             "notifications_mattermost_user": "Nom de l'utilisateur Mattermost",
+            "notifications_discord_enabled": "Activation des notifications Discord",
+            "notifications_discord_user": "Nom de l'utilisateur Discord",
             "webhook_error": "La webhook ne correspond pas à un webhook Mattermost"
         },
         "settings": {
@@ -678,6 +680,7 @@
                 "use_original_name": "Utiliser les noms de fichiers originaux pour le téléchargement",
                 "timesheets_locked": "Bloquer les feuilles de temps des artistes de plus d'une semaine",
                 "mattermost_webhook": "Webhook Mattermost (optionnel)",
+                "discord_token": "Discord Slack (optionnel)",
                 "show_hd_default": "Mettre les previews en HD par défaut"
             },
             "production": {
