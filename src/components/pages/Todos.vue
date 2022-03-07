@@ -171,6 +171,7 @@ export default {
         'entity_name',
         'priority',
         'task_status_short_name',
+        'start_date',
         'due_date',
         'estimation',
         'last_comment_date'

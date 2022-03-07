@@ -1027,6 +1027,7 @@ export default {
       seconds: 'Seconds',
       sequence: 'Sequence',
       start_date: 'Start date',
+      start_date_short: 'Start',
       task_status: 'Status',
       task_status_short_name: 'Status',
       task_type: 'Type'

@@ -44,6 +44,9 @@
           <th scope="col" class="estimation">
             {{ $t('tasks.fields.duration').substring(0, 3) }}.
           </th>
+          <th scope="col" class="start-date">
+            {{ $t('tasks.fields.start_date_short') }}
+          </th>
           <th scope="col" class="due-date">
             {{ $t('tasks.fields.due_date') }}
           </th>
@@ -107,6 +110,9 @@
           </td>
           <td class="estimation">
             {{ formatDuration(entry.duration) }}
+          </td>
+          <td class="start-date">
+            {{ formatDate(entry.start_date) }}
           </td>
           <td class="due-date">
             {{ formatDate(entry.due_date) }}
@@ -494,6 +500,7 @@ export default {
   min-width: 60px;
 }
 
+.start-date,
 .due-date {
   width: 110px;
   min-width: 110px;

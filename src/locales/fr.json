@@ -927,6 +927,7 @@
                 "seconds": "Secondes",
                 "sequence": "Séquence",
                 "start_date": "Date de début",
+                "start_date_short": "Début",
                 "task_status": "Statut",
                 "task_status_short_name": "Statut",
                 "task_type": "Type"
