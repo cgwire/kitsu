@@ -12,7 +12,8 @@ export default {
           use_original_file_name: false,
           timesheets_locked: false,
           chat_token_slack: '',
-          chat_webhook_mattermost: ''
+          chat_webhook_mattermost: '',
+          chat_token_discord: ''
         }
         if (organisations.length > 0) organisation = organisations[0]
         organisation.use_original_file_name =
@@ -31,7 +32,8 @@ export default {
       use_original_file_name: organisation.use_original_file_name === 'true',
       hd_by_default: organisation.hd_by_default === 'true',
       chat_token_slack: organisation.chat_token_slack,
-      chat_webhook_mattermost: organisation.chat_webhook_mattermost
+      chat_webhook_mattermost: organisation.chat_webhook_mattermost,
+      chat_token_discord: organisation.chat_token_discord
     }
     return client.pput(`/api/data/organisations/${organisation.id}`, data)
   },
@@ -83,6 +85,8 @@ export default {
       notifications_slack_userid: person.notifications_slack_userid,
       notifications_mattermost_enabled: person.notifications_mattermost_enabled === 'true',
       notifications_mattermost_userid: person.notifications_mattermost_userid,
+      notifications_discord_enabled: person.notifications_discord_enabled === 'true',
+      notifications_discord_userid: person.notifications_discord_userid,
       departments: person.departments
     }
     return client.pput(`/api/data/persons/${person.id}`, data)

@@ -505,6 +505,8 @@ export default {
     notifications_slack_user: 'Slack-Benutzername',
     notifications_mattermost_enabled: 'Mattermost-Benachrichtigungen aktiviert',
     notifications_mattermost_user: 'Mattermost-Benutzername',
+    notifications_discord_enabled: 'Discord-Benachrichtigungen aktiviert',
+    notifications_discord_user: 'Discord-Benutzername',
     password_title: 'Passwort ändern',
     timezone: 'Zeitzone',
     title: 'Dein Profil',
@@ -555,6 +557,7 @@ export default {
       hours_by_day: 'Stunden am Tag',
       slack_token: 'Slack Token (Optional)',
       mattermost_webhook: 'Mattermost Webhook (Optional)',
+      discord_token: 'Discord Token (Optional)',
       use_original_name: 'Original-Dateinamen für Downloads verwenden'
     },
     production: {

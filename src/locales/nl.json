@@ -632,6 +632,8 @@
             "notifications_slack_user": "Slack gebruikersnaam",
             "notifications_mattermost_enabled": "Mattermost notificaties ingeschakeld",
             "notifications_mattermost_user": "Mattermost gebruikersnaam",
+            "notifications_discord_enabled": "Discord notificaties ingeschakeld",
+            "notifications_discord_user": "Discord gebruikersnaam",
             "password_title": "Wachtwoord aanpassen",
             "timezone": "Tijdzone",
             "title": "Jouw profiel",
@@ -663,6 +665,7 @@
                 "hours_by_day": "Uren per dag",
                 "slack_token": "Slack Token (Optioneel)",
                 "mattermost_webhook": "Mattermost Webhook (Optioneel)",
+                "discord_token": "Discord Token (Optioneel)",
                 "use_original_name": "Gebruik originele bestandsnamen voor downloads",
                 "timesheets_locked": "Timesheets van artists ouder dan 1 week vergrendelen"
             },
