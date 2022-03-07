@@ -47,5 +47,11 @@ export default {
 
   getTaskType (taskTypeId) {
     return client.pget(`/api/data/task-types/${taskTypeId}`)
+  },
+
+  postTaskTypeEstimations (production, episode, taskType, formData) {
+    const episodePath = episode ? `episodes/${episode.id}/` : ''
+    const path = `/api/import/csv/projects/${production.id}/${episodePath}task-types/${taskType.id}/estimations`
+    return client.ppost(path, formData)
   }
 }
