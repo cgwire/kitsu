@@ -14,7 +14,7 @@ module.exports = {
   devServer: {
     proxy: {
       '/api': {
-        target: process.env.KITSU_API_TARGET || 'http://localhost:5000',
+        target: process.env.KITSU_API_TARGET || 'http://127.0.0.1:5000',
         changeOrigin: true,
         pathRewrite: {
           '^/api': ''
