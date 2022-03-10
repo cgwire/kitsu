@@ -178,15 +178,13 @@ export default {
     ]),
 
     checkWebhook () {
-      if (this.form.chat_webhook_mattermost === '') {
+      if (!this.form.chat_webhook_mattermost ||
+      this.form.chat_webhook_mattermost.match('/hooks/[a-zA-Z0-9]+$')) {
         this.errors.webhook_error = false
         return true
-      } else if (!this.form.chat_webhook_mattermost.match('/hooks/[a-zA-Z0-9]+$')) {
+      } else {
         this.errors.webhook_error = true
         return false
-      } else {
-        this.errors.webhook_error = false
-        return true
       }
     },
 
