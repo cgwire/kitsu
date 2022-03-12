@@ -17,6 +17,7 @@ module.exports = {
        '/permissions/',
        '/slack/',
        '/mattermost/',
+       '/discord/',
        '/custom-actions/'
      ]
    },
