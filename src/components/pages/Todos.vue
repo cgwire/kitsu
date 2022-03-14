@@ -252,6 +252,7 @@ export default {
       const isName = this.currentSort === 'entity_name'
       const isPriority = this.currentSort === 'priority'
       const isDueDate = this.currentSort === 'due_date'
+      const isStartDate = this.currentSort === 'start_date'
       const tasks = this.currentFilter === 'all_tasks'
         ? [...this.displayedTodos]
         : this.displayedTodos.filter(t => {
@@ -285,6 +286,19 @@ export default {
               if (!a.due_date) return 1
               else if (!b.due_date) return -1
               else return a.due_date.localeCompare(b.due_date)
+            }
+          )
+            .thenBy('project_name')
+            .thenBy('task_type_name')
+            .thenBy('entity_name')
+        )
+      } else if (isStartDate) {
+        return tasks.sort(
+          firstBy(
+            (a, b) => {
+              if (!a.start_date) return 1
+              else if (!b.start_date) return -1
+              else return a.start_date.localeCompare(b.start_date)
             }
           )
             .thenBy('project_name')
