@@ -1285,7 +1285,7 @@ export default {
 
     onKeyDown (event) {
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
-        if (event.keyCode === 46) {
+        if (event.keyCode === 46 || event.keyCode === 8) {
           this.deleteSelection()
         } else if (event.keyCode === 37) { // arrow left
           this.goPreviousFrame()

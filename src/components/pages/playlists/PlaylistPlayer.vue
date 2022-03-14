@@ -1768,7 +1768,7 @@ export default {
     onKeyDown (event) {
       this.displayBars()
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
-        if (event.keyCode === 46 && this.fabricCanvas) {
+        if ((event.keyCode === 46 || event.keyCode === 8) && this.fabricCanvas) {
           this.deleteSelection()
         } else if (event.keyCode === 37) {
           event.preventDefault()
