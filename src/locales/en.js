@@ -821,7 +821,7 @@ export default {
     empty_list: 'There are no edits in the production. What about creating some?',
     empty_list_client: 'There are no edits in this production.',
     new_edit: 'New edit',
-    number: 'edits | edits',
+    number: 'edit | edits',
     title: 'Edits',
     fields: {
       name: 'name',
