@@ -432,7 +432,7 @@
     ({{ formatDuration(displayedEditsTimeSpent) }}
      {{ $tc('main.days_spent', displayedEditsTimeSpent) }},
      {{ formatDuration(displayedEditsEstimation) }}
-     {{ $tc('main.man_days', displayedEditsEstimation) }}
+     {{ $tc('main.man_days', displayedEditsEstimation) }})
   </p>
 
 </div>
