@@ -54,7 +54,7 @@ export const renderComment = (
 }
 
 export const renderMarkdown = (input) => {
-  const compiled = marked(input || '')
+  const compiled = marked.parse(input || '')
   return sanitize(compiled)
 }
 
