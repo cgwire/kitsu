@@ -14,6 +14,7 @@
   </td>
   <td class="end-date">
    <date-field
+      :disabled-dates="endDateTimeRange"
       v-model="endDate"
    />
   </td>
@@ -73,6 +74,14 @@ export default {
     productionTimeRange () {
       const dates = {
         to: parseDate(this.currentProduction.start_date).toDate(),
+        from: parseDate(this.currentProduction.end_date).toDate()
+      }
+      return dates
+    },
+
+    endDateTimeRange () {
+      const dates = {
+        to: this.startDate,
         from: parseDate(this.currentProduction.end_date).toDate()
       }
       return dates
