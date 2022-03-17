@@ -209,6 +209,7 @@ import {
   formatSimpleDate,
   getDatesFromStartDate,
   getDatesFromEndDate,
+  parseSimpleDate,
   minutesToDays,
   range
 } from '@/lib/time'
@@ -362,7 +363,7 @@ export default {
           due_date: null
         }
         const task = this.taskMap.get(taskId)
-        const dueDate = task.due_date ? moment(task.due_date) : null
+        const dueDate = task.due_date ? parseSimpleDate(task.due_date) : null
         if (date) {
           const startDate = moment(date)
           if (
@@ -394,7 +395,7 @@ export default {
           due_date: null
         }
         const task = this.taskMap.get(taskId)
-        const startDate = task.start_date ? moment(task.start_date) : null
+        const startDate = task.start_date ? parseSimpleDate(task.start_date) : null
         if (date) {
           const dueDate = moment(date)
           if (
