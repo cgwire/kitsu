@@ -88,6 +88,7 @@ export const annotationMixin = {
     },
 
     addText () {
+      if (this.fabricCanvas.getActiveObject()) return
       const canvas = this.canvas || this.canvasWrapper
       const offsetCanvas = canvas.getBoundingClientRect()
       const posX = event.clientX - offsetCanvas.x
@@ -428,7 +429,8 @@ export const annotationMixin = {
             fontFamily: obj.fontFamily,
             fontSize: obj.fontSize,
             backgroundColor: 'rgba(255,255,255, 0.8)',
-            padding: 10
+            padding: 10,
+            editable: true
           }
         )
         text.setControlsVisibility({
