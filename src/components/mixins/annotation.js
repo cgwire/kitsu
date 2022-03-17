@@ -68,7 +68,9 @@ export const annotationMixin = {
       if (!object.id) object.id = uuidv4()
       object.canvasWidth = this.fabricCanvas.width
       object.canvasHeight = this.fabricCanvas.height
-      object.serialize = () => object.toJSON(['id', 'canvasWidth', 'canvasHeight'])
+      object.serialize =
+        () => object.toJSON(
+          ['id', 'canvasWidth', 'canvasHeight', 'angle', 'scale'])
       return object
     },
 
@@ -232,7 +234,7 @@ export const annotationMixin = {
       }
       this.postAnnotationDeletion(
         currentTime,
-        obj.toJSON(['id', 'canvasWidth', 'canvasHeight'])
+        obj.toJSON(['id', 'canvasWidth', 'canvasHeight', 'angle', 'scale'])
       )
     },
 
@@ -308,10 +310,10 @@ export const annotationMixin = {
             ml: false,
             mr: false,
             bl: false,
-            br: false,
+            br: true,
             tl: false,
             tr: false,
-            mtr: false
+            mtr: true
           })
         }
       })
@@ -388,7 +390,10 @@ export const annotationMixin = {
         width: obj.width,
         height: obj.height,
         scaleX: obj.scaleX * scaleMultiplierX,
-        scaleY: obj.scaleY * scaleMultiplierY
+        scaleY: obj.scaleY * scaleMultiplierY,
+        angle: obj.angle,
+        scale: obj.scale,
+        editable: true
       }
       if (obj.type === 'path') {
         let strokeMultiplier = 1
@@ -410,16 +415,16 @@ export const annotationMixin = {
           ml: false,
           mr: false,
           bl: false,
-          br: false,
+          br: true,
           tl: false,
           tr: false,
-          mtr: false
+          mtr: true
         })
         this.$options.silentAnnnotation = true
         this.fabricCanvas.add(path)
         this.$options.silentAnnnotation = false
       } else if ((obj.type === 'i-text') || (obj.type === 'text')) {
-        const text = new fabric.Text(
+        const text = new fabric.IText(
           obj.text,
           {
             ...base,
@@ -429,8 +434,7 @@ export const annotationMixin = {
             fontFamily: obj.fontFamily,
             fontSize: obj.fontSize,
             backgroundColor: 'rgba(255,255,255, 0.8)',
-            padding: 10,
-            editable: true
+            padding: 10
           }
         )
         text.setControlsVisibility({
@@ -439,10 +443,10 @@ export const annotationMixin = {
           ml: false,
           mr: false,
           bl: false,
-          br: false,
+          br: true,
           tl: false,
           tr: false,
-          mtr: false
+          mtr: true
         })
         this.$options.silentAnnnotation = true
         this.fabricCanvas.add(text)
@@ -585,12 +589,14 @@ export const annotationMixin = {
     configureCanvas () {
       this.fabricCanvas.off('object:moved', this.onObjectMoved)
       this.fabricCanvas.off('text:changed', this.onObjectMoved)
+      this.fabricCanvas.off('object:modified', this.onObjectMoved)
       this.fabricCanvas.off('object:added', this.onObjectAdded)
       this.fabricCanvas.off('mouse:up', this.endDrawing)
       this.fabricCanvas.off('mouse:up', this.onCanvasReleased)
       this.fabricCanvas.off('mouse:move', this.onCanvasMouseMoved)
       this.fabricCanvas.off('mouse:down', this.onCanvasClicked)
       this.fabricCanvas.on('object:moved', this.onObjectMoved)
+      this.fabricCanvas.on('object:modified', this.onObjectMoved)
       this.fabricCanvas.on('text:changed', this.onObjectMoved)
       this.fabricCanvas.on('object:added', this.onObjectAdded)
       this.fabricCanvas.on('mouse:up', this.endDrawing)
