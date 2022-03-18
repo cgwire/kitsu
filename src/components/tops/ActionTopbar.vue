@@ -793,7 +793,7 @@ export default {
     confirmTaskStatusChange () {
       this.isChangeStatusLoading = true
       if (!this.taskStatusId) {
-        this.taskStatusId = this.availableTaskStatus[0].id
+        this.taskStatusId = this.availableTaskStatuses[0].id
       }
       this.changeSelectedTaskStatus({
         taskStatusId: this.taskStatusId,
