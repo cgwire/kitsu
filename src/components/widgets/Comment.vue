@@ -905,7 +905,7 @@ p {
   font-size: 0.8em;
   padding-right: 0.5em;
   text-align: right;
-  width: 50px;
+  width: 60px;
 }
 
 textarea.reply {
