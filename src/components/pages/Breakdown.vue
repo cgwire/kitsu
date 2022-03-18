@@ -312,7 +312,6 @@ export default {
       'castingAssetTypesOptions',
       'castingByType',
       'castingCurrentShot',
-      'castingSequenceId',
       'castingSequenceOptions',
       'castingSequenceShots',
       'currentEpisode',
@@ -775,6 +774,7 @@ export default {
       }
       if (this.isAssetCasting && this.castingAssetTypesOptions.length > 0) {
         const assetTypeId = this.$route.params.asset_type_id
+        this.sequenceId = ''
         this.castingType = 'asset'
         if (assetTypeId) {
           this.assetTypeId = assetTypeId
@@ -785,7 +785,7 @@ export default {
     },
 
     sequenceId () {
-      if (this.sequences && this.sequences.length > 0) {
+      if (this.sequenceId && this.sequences && this.sequences.length > 0) {
         this.setCastingSequence(this.sequenceId)
         this.updateUrl()
         this.resetSelection()
