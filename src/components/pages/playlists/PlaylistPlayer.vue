@@ -431,7 +431,7 @@
         class="flexrow-item time-indicator mr1"
         :title="$t('playlists.actions.frame_number')"
       >
-        ({{ currentFrame }})
+        ({{ currentFrame }} / {{ (nbFrames + '').padStart(3, '0') }})
       </span>
       <button-simple
         class="button playlist-button flexrow-item"
