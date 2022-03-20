@@ -3,7 +3,7 @@
   <div ref="body" class="datatable-wrapper" v-scroll="onBodyScroll">
     <table class="datatable">
       <thead ref="thead" class="datatable-head">
-        <tr>
+        <tr class="row-header">
           <th class="thumbnail" ref="th-thumbnail">
           </th>
           <th class="asset-type" ref="th-type" v-if="isAssets">
@@ -755,6 +755,7 @@ td.retake-count {
 
 .datatable-body {
   overflow-x: auto;
+  overflow-y: scroll;
   min-height: 100%;
 
   td,

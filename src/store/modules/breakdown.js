@@ -152,7 +152,7 @@ const actions = {
     if (!asset) return Promise.resolve({})
     const assetMap = rootGetters.assetMap
     return breakdownApi.getAssetCasting(asset)
-      .then((casting) => {
+      .then(casting => {
         commit(LOAD_ASSET_CASTING_END, { asset, casting, assetMap })
         return Promise.resolve(casting)
       })
@@ -162,7 +162,7 @@ const actions = {
     if (!shot) return Promise.resolve({})
     const assetMap = rootGetters.assetMap
     return breakdownApi.getShotCasting(shot)
-      .then((casting) => {
+      .then(casting => {
         commit(LOAD_SHOT_CASTING_END, { shot, casting, assetMap })
         return Promise.resolve(casting)
       })
@@ -172,7 +172,7 @@ const actions = {
     if (!asset) return Promise.resolve({})
     const shotMap = rootState.shots.shotMap
     return breakdownApi.getAssetCastIn(asset)
-      .then((castIn) => {
+      .then(castIn => {
         commit(LOAD_ASSET_CAST_IN_END, { asset, castIn, shotMap })
         return Promise.resolve(castIn)
       })

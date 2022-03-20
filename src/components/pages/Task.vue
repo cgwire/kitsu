@@ -1390,10 +1390,6 @@ h2.subtitle {
   color: $grey;
 }
 
-.task-information {
-  margin-top: 1em;
-}
-
 .selected {
   border: 0;
 }

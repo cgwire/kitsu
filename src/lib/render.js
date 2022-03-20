@@ -25,7 +25,7 @@ export const getTaskTypeStyle = (task) => {
 export const renderComment = (
   input, mentions, personMap, className = ''
 ) => {
-  let compiled = marked.parse(input || '')
+  let compiled = '' // marked.parse(input || '')
   if (mentions) {
     mentions.forEach(personId => {
       const person = personMap.get(personId)

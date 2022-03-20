@@ -242,6 +242,7 @@
                 v-if="!isTVShow"
               >
               <entity-thumbnail
+                class="entity-thumbnail"
                 :entity="asset"
                 :width="isBigThumbnails ? 150 : 50"
                 :height="isBigThumbnails ? 100 : 30"

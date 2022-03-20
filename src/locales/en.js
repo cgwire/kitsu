@@ -200,6 +200,17 @@ export default {
       undefined: 'Undefined',
       undefined_pattern: 'Undefined',
       upload: 'Add Thumbnails'
+    },
+
+    preview_files: {
+      task_type: 'Task type',
+      revision: 'Revision',
+      position: 'Position',
+      original_file_name: 'Original File Name',
+      extension: 'Extension',
+      size: 'Size',
+      status: 'Status',
+      uploader: 'Uploaded by'
     }
   },
 
@@ -1062,7 +1073,7 @@ export default {
       seconds: 'Seconds',
       sequence: 'Sequence',
       start_date: 'Start date',
-      start_date_short: 'Start',
+      start_date_short: 'Start date',
       task_status: 'Status',
       task_status_short_name: 'Status',
       task_type: 'Type'

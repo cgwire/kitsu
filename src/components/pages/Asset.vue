@@ -1,37 +1,53 @@
 <template>
 <div class="columns fixed-page asset">
-  <div class="column main-column">
+  <div class="page column main-column">
     <div class="page-header flexrow">
-      <router-link
-        class="flexrow-item has-text-centered back-link"
-        :to="assetsPath"
+      <!--router-link
+        class="flexrow-item has-text-centered back-link ml1"
+        :to="previousAssetPath"
       >
         <chevron-left-icon />
       </router-link>
-      <entity-thumbnail
-        class="asset-thumbnail flexrow-item"
-        :entity="currentAsset"
-        :with-link="false"
-        v-if="currentAsset"
-      />
+      <router-link
+        class="flexrow-item has-text-centered back-link"
+        :to="nextAssetPath"
+      >
+        <chevron-right-icon />
+      </router-link-->
+      <router-link
+        class="flexrow-item has-text-centered back-link ml1"
+        :to="assetsPath"
+      >
+        <corner-left-up-icon />
+      </router-link>
+      <span
+        class="flexrow-item ml2"
+        @click="onMainThumbnailClicked"
+      >
+        <entity-thumbnail
+          class="entity-thumbnail"
+          :entity="currentAsset"
+          :empty-width="100"
+          :empty-height="60"
+          :width="100"
+          :with-link="false"
+          v-if="currentAsset"
+        />
+      </span>
       <div class="flexrow-item">
         <page-title :text="title" class="entity-title" />
-      </div>
-      <div class="flexrow-item">
-        <button-simple
-          icon="edit"
-          @click="modals.edit = true"
-          v-if="isCurrentUserManager"
-        />
       </div>
       <div class="filler">
       </div>
       <div
-        class="ready-for flexrow"
-        v-if="currentAsset && currentAsset.ready_for"
+        class="ready-for flexrow block mr0"
+        v-if="
+          currentAsset
+          && currentAsset.ready_for
+          && currentAsset.ready_for !== 'None'"
       >
         <span class="flexrow-item">
-          Ready for:
+          {{ $t('assets.fields.ready_for') }}
         </span>
         <task-type-name
           class="flexrow-item"
@@ -42,7 +58,7 @@
     </div>
 
     <div class="flexrow infos">
-      <div class="flexrow-item">
+      <div class="flexrow-item block flexcolumn">
         <page-subtitle :text="$t('assets.tasks')" />
         <entity-task-list
           class="task-list"
@@ -52,8 +68,22 @@
           @task-selected="onTaskSelected"
         />
       </div>
-      <div class="flexrow-item">
-        <page-subtitle :text="$t('main.info')" />
+      <div class="flexrow-item block flexcolumn">
+        <div class="flexrow">
+          <page-subtitle
+            :text="$t('main.info')"
+          />
+          <div class="filler">
+          </div>
+          <div class="flexrow-item has-text-right">
+            <button-simple
+              icon="edit"
+              @click="modals.edit = true"
+              v-if="isCurrentUserManager"
+            />
+          </div>
+        </div>
+
         <div class="table-body">
           <table class="datatable" v-if="currentAsset">
             <tbody class="table-body">
@@ -82,76 +112,90 @@
       </div>
     </div>
 
-    <div class="infos schedule" v-if="scheduleItems[0].children.length > 0">
-      <page-subtitle class="schedule-title" text="Schedule" />
-      <div class="wrapper">
-        <schedule
-          ref="schedule-widget"
-          :start-date="tasksStartDate"
-          :end-date="tasksEndDate"
-          :hierarchy="scheduleItems"
-          :zoom-level="1"
-          :height="400"
-          :is-loading="false"
-          :is-estimation-linked="true"
-          :hide-root="true"
-          :with-milestones="false"
+    <div
+      class="asset-data block"
+    >
+      <div class="flexrow">
+        <combobox-styled
+          class="section-combo flexrow-item"
+          :options="entityNavOptions"
+          v-model="currentSection"
+        />
+        <div class="filler"></div>
+        <span
+          class="flexrow-item mt05"
+          v-show="currentSection === 'schedule'"
+        >
+          {{ $t('schedule.zoom_level') }}:
+        </span>
+        <combobox-number
+          class="zoom-level flexrow-item "
+          :options="zoomOptions"
+          is-simple
+          v-model="zoomLevel"
+          v-show="currentSection === 'schedule'"
         />
       </div>
-    </div>
 
-    <div class="asset-casted-in">
-      <page-subtitle :text="$t('assets.cast_in')" />
-      <div v-if="currentAsset">
-        <div
-          v-if="currentAsset.castInShotsBySequence &&
-                currentAsset.castInShotsBySequence[0].length > 0"
-        >
+      <div
+        class="asset-casted-in"
+        v-show="currentSection === 'casting'"
+      >
+        <div v-if="currentAsset">
           <div
-            class="sequence-shots"
-            :key="sequenceShots.length > 0 ? sequenceShots[0].sequence_name : ''"
-            v-if="sequenceShots[0].sequence_name"
-            v-for="sequenceShots in currentAsset.castInShotsBySequence"
+            v-if="currentAsset.castInShotsBySequence &&
+                  currentAsset.castInShotsBySequence[0].length > 0"
           >
-            <div class="shot-sequence">
-              {{ sequenceShots.length > 0 ? sequenceShots[0].sequence_name : '' }}
-            </div>
-            <div class="shot-list">
-              <router-link
-                class="shot-link"
-                :key="shot.shot_id"
-                :to="shotPath(shot)"
-                v-for="shot in sequenceShots"
-              >
-                <entity-thumbnail
-                  :entity="shot"
-                  :square="true"
-                  :empty-width="103"
-                  :empty-height="103"
-                  :with-link="false"
-                />
-                <div>
-                  <span>{{ shot.shot_name }}</span>
-                  <span v-if="shot.nb_occurences > 1">
-                    ({{ shot.nb_occurences }})
-                  </span>
-                </div>
-              </router-link>
+            <div
+              class="sequence-shots"
+              :key="sequenceShots.length > 0 ? sequenceShots[0].sequence_name : ''"
+              v-if="sequenceShots[0].sequence_name"
+              v-for="sequenceShots in currentAsset.castInShotsBySequence"
+            >
+              <div class="shot-sequence">
+                {{ sequenceShots.length > 0 ? sequenceShots[0].sequence_name : '' }}
+              </div>
+              <div class="shot-list">
+                <router-link
+                  class="shot-link"
+                  :key="shot.shot_id"
+                  :to="shotPath(shot)"
+                  v-for="shot in sequenceShots"
+                >
+                  <entity-thumbnail
+                    class="entity-thumbnail"
+                    :entity="shot"
+                    :square="true"
+                    :empty-width="103"
+                    :empty-height="103"
+                    :with-link="false"
+                  />
+                  <div>
+                    <span>{{ shot.shot_name }}</span>
+                    <span v-if="shot.nb_occurences > 1">
+                      ({{ shot.nb_occurences }})
+                    </span>
+                  </div>
+                </router-link>
+              </div>
             </div>
           </div>
+          <div v-else>
+            {{ $t('assets.no_cast_in') }}
+          </div>
         </div>
-        <div v-else>
-          {{ $t('assets.no_cast_in') }}
-        </div>
+          <table-info
+          :is-loading="castIn.isLoadin"
+          :is-error="castIn.isError"
+          v-else
+        />
       </div>
-      <table-info
-        :is-loading="castIn.isLoadin"
-        :is-error="castIn.isError"
-        v-else
-      />
 
-      <div v-if="currentAsset && currentAsset.castingAssetsByType &&
-          currentAsset.castingAssetsByType[0].length > 0">
+      <div
+        v-if="currentAsset &&
+              currentAsset.castingAssetsByType &&
+              currentAsset.castingAssetsByType[0].length > 0"
+      >
         <page-subtitle text="Linked" />
         <div
             v-if="currentAsset.castingAssetsByType && currentAsset.castingAssetsByType[0].length > 0"
@@ -179,6 +223,7 @@
                 v-for="asset in typeAssets"
               >
                 <entity-thumbnail
+                  class="entity-thumbnail"
                   :entity="asset"
                   :square="true"
                   :empty-width="103"
@@ -196,6 +241,43 @@
           </div>
         </div>
       </div>
+
+      <div
+        class="schedule mt1"
+        v-if="scheduleItems[0].children.length > 0"
+        v-show="currentSection === 'schedule'"
+       >
+        <div class="wrapper">
+          <schedule
+            ref="schedule-widget"
+            :start-date="tasksStartDate"
+            :end-date="tasksEndDate"
+            :hierarchy="scheduleItems"
+            :zoom-level="zoomLevel"
+            :is-loading="false"
+            :is-estimation-linked="true"
+            :hide-root="true"
+            :with-milestones="false"
+          />
+        </div>
+      </div>
+
+      <entity-preview-files
+        :entity="currentAsset"
+        @thumbnail-clicked="onThumbnailClicked"
+        v-if="currentSection === 'preview-files'"
+      />
+
+      <entity-news
+        :entity="currentAsset"
+        v-if="currentSection === 'activity'"
+      />
+
+      <entity-time-logs
+        :entity="currentAsset"
+        v-if="currentSection === 'time-logs'"
+      />
+
     </div>
   </div>
 
@@ -217,6 +299,12 @@
     @cancel="modals.edit = false"
     @confirm="confirmEditAsset"
   />
+
+  <preview-modal
+    :active="modals.preview"
+    :preview-file-id="previewFileIdToShow"
+    @cancel="modals.preview = false"
+  />
 </div>
 </template>
 
@@ -225,31 +313,49 @@ import { mapGetters, mapActions } from 'vuex'
 import { entityMixin } from '@/components/mixins/entity'
 import { formatListMixin } from '@/components/mixins/format'
 
-import { ChevronLeftIcon } from 'vue-feather-icons'
-import ButtonSimple from '../widgets/ButtonSimple'
-import DescriptionCell from '../cells/DescriptionCell'
-import EditAssetModal from '../modals/EditAssetModal'
-import EntityTaskList from '../lists/EntityTaskList'
-import EntityThumbnail from '../widgets/EntityThumbnail'
-import PageTitle from '../widgets/PageTitle'
-import PageSubtitle from '../widgets/PageSubtitle'
-import Schedule from '../pages/schedule/Schedule'
-import TableInfo from '../widgets/TableInfo'
-import TaskTypeName from '../widgets/TaskTypeName'
-import TaskInfo from '../sides/TaskInfo'
+import {
+  CornerLeftUpIcon//,
+  // ChevronLeftIcon,
+  // ChevronRightIcon
+} from 'vue-feather-icons'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import ComboboxNumber from '@/components/widgets/ComboboxNumber'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
+import DescriptionCell from '@/components/cells/DescriptionCell'
+import EditAssetModal from '@/components/modals/EditAssetModal'
+import EntityNews from '@/components/pages/entities/EntityNews'
+import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles'
+import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs'
+import EntityTaskList from '@/components/lists/EntityTaskList'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import PageTitle from '@/components/widgets/PageTitle'
+import PageSubtitle from '@/components/widgets/PageSubtitle'
+import PreviewModal from '@/components/modals/PreviewModal'
+import Schedule from '@/components/pages/schedule/Schedule'
+import TableInfo from '@/components/widgets/TableInfo'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
+import TaskInfo from '@/components/sides/TaskInfo'
 
 export default {
   name: 'asset',
   mixins: [entityMixin, formatListMixin],
   components: {
     ButtonSimple,
-    ChevronLeftIcon,
+    ComboboxNumber,
+    CornerLeftUpIcon,
+    // ChevronLeftIcon,
+    // ChevronRightIcon,
+    ComboboxStyled,
     DescriptionCell,
     EditAssetModal,
+    EntityNews,
+    EntityPreviewFiles,
     EntityThumbnail,
     EntityTaskList,
+    EntityTimeLogs,
     PageSubtitle,
     PageTitle,
+    PreviewModal,
     Schedule,
     TableInfo,
     TaskInfo,
@@ -260,6 +366,7 @@ export default {
     return {
       currentAsset: null,
       currentTask: null,
+      previewFileIdToShow: '',
       castIn: {
         isLoading: false,
         isError: false
@@ -271,30 +378,36 @@ export default {
         edit: false
       },
       modals: {
-        edit: false
+        edit: false,
+        preview: false
       }
     }
   },
 
   mounted () {
     this.clearSelectedTasks()
-    this.currentAsset = this.getCurrentAsset()
-
-    this.castIn.isLoading = true
-    this.castIn.isError = false
-    if (this.currentAsset) {
-      this.loadAssetCastIn(this.currentAsset)
-        .then(() => this.loadAssetCasting(this.currentAsset))
-        .then(() => {
-          this.castIn.isLoading = false
-        })
-        .catch((err) => {
-          this.castIn.isError = true
-          console.error(err)
-        })
-    } else {
-      this.resetData()
-    }
+    this.getCurrentAsset()
+      .then(asset => {
+        this.currentAsset = asset
+        this.currentSection = this.route.query.section || 'casting'
+        this.castIn.isLoading = true
+        this.castIn.isError = false
+        if (this.currentAsset) {
+          this.loadAssetCastIn(this.currentAsset)
+            .then(() => this.loadAssetCasting(this.currentAsset))
+            .then(() => {
+              this.castIn.isLoading = false
+            })
+            .catch((err) => {
+              this.castIn.isLoading = false
+              this.castIn.isError = true
+              console.error(err)
+            })
+        } else {
+          this.resetData()
+        }
+      })
+      .catch(console.error)
   },
 
   computed: {
@@ -332,6 +445,62 @@ export default {
         this.currentAsset.preview_file_id.length > 0
     },
 
+    previousAssetPath () {
+      const assets = Array.from(this.assetMap.values())
+      if (assets.length === 0) return { name: 'open-productions' }
+      const currentIndex = assets.findIndex(asset => {
+        return asset &&
+          this.currentAsset &&
+          asset.id === this.currentAsset.id
+      })
+      const index = currentIndex !== 0 ? currentIndex - 1 : assets.length - 1
+      const asset = assets[index]
+      if (!asset) return { name: 'open-productions' }
+      const route = {
+        name: 'asset',
+        params: {
+          production_id: this.currentProduction.id,
+          asset_id: asset.id
+        },
+        query: {
+          search: ''
+        }
+      }
+      if (this.currentEpisode) {
+        route.name = 'episode-asset'
+        route.params.episode_id = this.currentEpisode.id
+      }
+      return route
+    },
+
+    nextAssetPath () {
+      const assets = Array.from(this.assetMap.values())
+      if (assets.length === 0) return { name: 'open-productions' }
+      const currentIndex = assets.findIndex(asset => {
+        return asset &&
+          this.currentAsset &&
+          asset.id === this.currentAsset.id
+      })
+      const index = currentIndex === assets.length - 1 ? 0 : currentIndex + 1
+      const asset = assets[index]
+      if (!asset) return { name: 'open-productions' }
+      const route = {
+        name: 'asset',
+        params: {
+          production_id: this.currentProduction.id,
+          asset_id: asset.id
+        },
+        query: {
+          search: ''
+        }
+      }
+      if (this.currentEpisode) {
+        route.name = 'episode-asset'
+        route.params.episode_id = this.currentEpisode.id
+      }
+      return route
+    },
+
     assetsPath () {
       const route = {
         name: 'assets',
@@ -354,6 +523,7 @@ export default {
     ...mapActions([
       'clearSelectedTasks',
       'editAsset',
+      'loadAsset',
       'loadAssets',
       'loadAssetCastIn',
       'loadAssetCasting',
@@ -366,7 +536,16 @@ export default {
     },
 
     getCurrentAsset () {
-      return this.assetMap.get(this.route.params.asset_id) || null
+      return new Promise((resolve, reject) => {
+        const assetId = this.route.params.asset_id
+        const asset = this.assetMap.get(assetId) || null
+        if (!asset) {
+          return this.loadAsset(assetId)
+            .then(resolve)
+        } else {
+          return resolve(asset)
+        }
+      })
     },
 
     onEditClicked () {
@@ -389,10 +568,6 @@ export default {
         })
     },
 
-    onTaskSelected (task) {
-      this.currentTask = task
-    },
-
     resetData () {
       this.castIn.isLoading = true
       if (this.$route.params.episode_id === 'main') {
@@ -400,9 +575,9 @@ export default {
       }
       // Next tick is needed to wait for the episode change.
       this.$nextTick(() => {
-        this.loadAssets()
-          .then(() => {
-            this.currentAsset = this.getCurrentAsset()
+        this.getCurrentAsset()
+          .then(asset => {
+            this.currentAsset = asset
             return this.loadAssetCastIn(this.currentAsset)
           })
           .then(() => this.loadAssetCasting(this.currentAsset))
@@ -429,14 +604,7 @@ export default {
     }
   },
 
-  watch: { // Needed when reloading the page with F5
-    currentProduction () {
-      if (!this.isTVShow) this.resetData()
-    },
-
-    currentEpisode () {
-      if (this.isTVShow && this.currentEpisode.id !== 'main') this.resetData()
-    }
+  watch: {
   },
 
   metaInfo () {
@@ -453,15 +621,6 @@ export default {
     padding-bottom: 1em;
   }
 
-  .page-header,
-  .asset-casted-in,
-  .infos,
-  .column {
-    background: #46494F;
-    border-color: $dark-grey;
-    box-shadow: 0px 0px 6px #333;
-  }
-
   .task-list,
   .table-body {
     border: 1px solid $dark-grey;
@@ -472,6 +631,13 @@ export default {
   }
 }
 
+.main-column {
+  display: flex;
+  flex-direction: column;
+  background: var(--background-page);
+  padding-bottom: 1em;
+}
+
 h2.subtitle {
   margin-top: 0;
   margin-bottom: 0.5em;
@@ -479,42 +645,42 @@ h2.subtitle {
   font-size: 1.5em;
 }
 
-.column.main-column {
-  background: var(--background-page);
-  padding-bottom: 1em;
-}
-
 .page-header {
-  padding: 1em 1em 1em 1em;
-  background: white;
-  box-shadow: 0px 0px 6px #E0E0E0;
   margin-top: calc(50px + 2em);
-  margin-bottom: 1.5em;
+  margin-bottom: 0.8em;
   margin-left: 1em;
   margin-right: 1em;
+  .entity-title {
+    font-weight: bold;
+  }
 }
 
 .infos {
-  padding: 1em 1em 1em 1em;
-  background: white;
-  box-shadow: 0px 0px 6px #E0E0E0;
-  margin-bottom: 1.5em;
+  height: 250px;
+  margin-bottom: 1em;
   margin-left: 1em;
   margin-right: 1em;
 
   .flexrow-item {
     align-self: flex-start;
+    height: 100%;
     flex: 1;
   }
 }
 
+.asset-data {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin: 0 1em 0 1em;
+  max-height: 100%;
+  overflow: hidden;
+}
+
 .asset-casting,
 .asset-casted-in {
-  margin-left: 1em;
-  margin-right: 1em;
-  background: white;
-  padding: 1em;
-  box-shadow: 0px 0px 6px #E0E0E0;
+  overflow-y: auto;
+  margin-top: 1em;
 }
 
 .thumbnail-picture {
@@ -570,11 +736,6 @@ h2.subtitle {
   align-items: center;
 }
 
-.page-header .thumbnail-picture {
-  margin: 0 1em 0 0;
-  max-width: 80px;
-}
-
 .back-link {
   padding-top: 3px;
 }
@@ -589,17 +750,33 @@ h2.subtitle {
 
 .schedule {
   position: relative;
-  height: 300px;
-  padding: 10px;
+  height: 100%;
+
+  .timelien-wrapper,
+  .timeline {
+    height: 100%;
+  }
 
   .schedule-title {
     margin-bottom: 5px;
   }
 
   .wrapper {
-    height: 230px;
+    height: 100%;
     border-radius: 10px;
   }
+}
+
+.section-combo {
+  width: 150px;
+
+  .option-line {
+    width: 150px;
+  }
+}
+
+.entity-thumbnail {
+  margin-bottom: 0;
 }
 
 @media screen and (max-width: 768px) {

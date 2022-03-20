@@ -1607,15 +1607,14 @@ export default {
 
       .month-name {
         border-left: 2px solid black;
+        bottom: 0;
+        color: black;
         font-size: 0.9em;
-        position: absolute;
-        padding-bottom: 12px;
+        padding-bottom: 24px;
         padding-left: 1em;
         top: 10px;
-        bottom: 0;
         text-transform: uppercase;
-        color: black;
-        z-index: -300;
+        position:absolute;
       }
     }
   }
