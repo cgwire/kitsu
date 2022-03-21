@@ -9,12 +9,14 @@
   <td class="start-date">
    <date-field
       :disabled-dates="productionTimeRange"
+      :can-delete="false"
       v-model="startDate"
    />
   </td>
   <td class="end-date">
    <date-field
       :disabled-dates="endDateTimeRange"
+      :can-delete="false"
       v-model="endDate"
    />
   </td>
