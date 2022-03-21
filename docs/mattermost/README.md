@@ -1,16 +1,27 @@
 # Mattermost Integration
 
-## Enable custom username and profile picture for webhooks
+## Enable incoming webhooks, custom username and profile picture for webhooks
 
-This step requires a system admin account.
-First, you need to check if your Mattermost installation can set custom username and profile picture for webhooks.
-Go to the "System Console" / "Integrations" / "Integration Management" and check if the parameters "Enable integrations to override usernames" and "Enable integrations to override profile picture icons" are set to true (if not set them to true).
+1. Make sure you are logged as a system admin account in your Mattermost server.
+2. You need to check if your Mattermost installation can receive incoming webhooks and set custom username and profile picture for webhooks. 
+   1. Go to the "System Console" --> "Integrations" --> "Integration Management".
+   
+   ![Integration management](../img/mattermost/integration-management.png)
+   
+   2. Check if the parameters "Enable incoming Webhooks", "Enable integrations to override usernames" and "Enable integrations to override profile picture icons" are set to true (if not set them to true).
+
+   ![Enable incoming webhooks](../img/mattermost/enable-incoming-webhooks.png)
 
 ## Set a webhook in Mattermost
 
-This step requires a system admin account.
-Go to the "Integrations" / "Incoming Webhooks" / "Add incoming Webhook" section and
-create a new webhook with the following parameters:
+1. Make sure you are logged as a system admin account in your Mattermost server.
+2. Go to the "Integrations" --> "Incoming Webhooks" --> "Add incoming Webhook" section.
+
+   ![Add incoming webhook](../img/mattermost/add-incoming-webhook.png)
+
+3. Create the incoming webhook :
+
+   ![Create incoming webhook](../img/mattermost/create-incoming-webhook.png)
 
 * **Title**: Kitsu
 * **Description**: Kitsu
@@ -19,15 +30,21 @@ create a new webhook with the following parameters:
 * **Username**: kitsu / Not important it will be overridden by Kitsu.
 * **Profile Picture**: Not important it will be overridden by Kitsu.
 
-Mattermost proposes you a new URL that you must copy.
+4. After clicking on "save", Mattermost proposes you a new URL that you must copy.
 
-## Configure Kitsu
+5. Copy that URL in the "Settings" of Kitsu and in the text field "Mattermost Webhooks (optional)" and after click on "Save settings".
 
-Paste the URL generated in Mattermost into the *Organisation settings* page of
-the Kitsu UI inside the "Mattermost Webhook (Optional)" field.
+   ![Add mattermost webhook settings](../img/mattermost/add_mattermost_webhook_settings.png)
 
-Once done, each user can set in their profiles the notification push to
-Mattermost. They have to switch the "Mattermost notifications Enabled" 
-field to "Yes" and enter their "Mattermost Username". 
+> **_Note:_** The users who wants to have notifications enabled have to be the same Mattermost server than the one you use in these steps.
+
+## Enable notifications
+
+Each user can set in their profiles the notification push to
+Discord. They have to switch the "Discord notifications enabled" 
+field to "Yes" and enter their "Mattermost username".
+
+![Add Mattermost username in profile](../img/mattermost/add_mattermost_username_profile.png)
+
 
 You're done!
