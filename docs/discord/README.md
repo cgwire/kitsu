@@ -27,7 +27,7 @@ It will be the same icon used when the bot chat.
 
 9. Copy the token using the "Copy" button. 
 
-10. Copy the token in Kitsu in "Settings" and in the text field "Discord token (optionnal)" and after click on "Save settings"
+10. Copy the token in "Settings" of Kitsu and in the text field "Discord token (optional)" and after click on "Save settings".
 
 ![Add discord token to settings](../img/discord/add_discord_token_settings.png)
 
@@ -41,15 +41,15 @@ To add the bot in a server, follow these steps:
 2. Navigate to the [application page](https://discord.com/developers/applications).
 3. Click on your bot’s page.
 4. Go to the “OAuth2” tab and after "URL Generator".
-5. In "Scopes", tick only "bot"
+5. In "Scopes", tick only "bot".
 
 ![URL Generator Scopes](../img/discord/url_generator_scopes.png)
 
-5. In "Bot permissions" tick only "Send Messages"
+6. In "Bot permissions" tick only "Send Messages".
 
 ![URL Generator Bot permissions](../img/discord/bot_permissions.png)
 
-6. Now the resulting URL can be used to add your bot to a server. Copy and paste the URL into your browser, choose a server to invite the bot to, and click “Authorize”.
+7. Now the resulting URL can be used to add your bot to a server. Copy and paste the URL into your browser, choose a server to invite the bot to, and click “Authorize”.
 
 > **_Note:_** The person adding the bot needs “Manage Server” permissions to do so.
 
