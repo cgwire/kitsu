@@ -115,13 +115,12 @@ export default {
   },
 
   status_automations: {
-    create_error: 'An error occurred while saving this custom custom action. Are you sure that there is no other action with the same name?',
-    delete_text: 'Are you sure you want to remove custom action {name} from your database?',
-    delete_error: 'An error occurred while deleting this custom custom action.',
-    edit_title: 'Edit a custom action',
-    new_custom_action: 'Add a custom action',
+    create_error: 'An error occurred while saving this status automation. Are you sure that there is no other action with the same name?',
+    delete_text: 'Are you sure you want to remove status automation {name} from your database?',
+    delete_error: 'An error occurred while deleting this status automation.',
+    edit_title: 'Edit a status automation',
     number: 'status automation | status automations',
-    run_for_selection: 'Run custom action for selected tasks:',
+    run_for_selection: 'Run status automation for selected tasks:',
     title: 'Status Automations',
     in_title: 'IN',
     out_title: 'OUT',
