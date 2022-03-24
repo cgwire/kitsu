@@ -64,6 +64,7 @@ import {
   LOAD_TASK_TYPES_END,
   LOAD_PEOPLE_END,
   LOAD_CUSTOM_ACTIONS_END,
+  LOAD_STATUS_AUTOMATIONS_END,
   LOAD_ASSET_TYPES_END,
   SET_NOTIFICATION_COUNT,
   LOAD_OPEN_PRODUCTIONS_END,
@@ -300,6 +301,7 @@ const actions = {
           userFilters: rootGetters.userFilters
         })
         commit(LOAD_CUSTOM_ACTIONS_END, context.custom_actions)
+        commit(LOAD_STATUS_AUTOMATIONS_END, context.status_automations)
         commit(LOAD_ASSET_TYPES_END, context.asset_types)
         commit(SET_NOTIFICATION_COUNT, context.notification_count)
         commit(LOAD_OPEN_PRODUCTIONS_END, context.projects)

@@ -28,6 +28,11 @@
             {{ $t('asset_types.title')}}
           </a>
         </li>
+        <li :class="{'is-active': isActiveTab('statusAutomations')}">
+          <a @click="activeTab = 'statusAutomations'">
+            {{ $t('status_automations.title')}}
+          </a>
+        </li>
       </ul>
     </div>
 
@@ -151,6 +156,10 @@
         </tbody>
       </table>
     </div>
+
+    <div class="tab" v-show="isActiveTab('statusAutomations')">
+      <production-status-automations />
+    </div>
   </div>
   </div>
 </template>
@@ -163,6 +172,7 @@ import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ProductionBrief from '@/components/pages/production/ProductionBrief'
 import ProductionParameters from '@/components/pages/production/ProductionParameters'
 import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes'
+import ProductionStatusAutomations from '@/components/pages/production/ProductionStatusAutomations'
 import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
@@ -171,6 +181,7 @@ export default {
     ProductionBrief,
     ProductionParameters,
     ProductionTaskTypes,
+    ProductionStatusAutomations,
     Combobox,
     ComboboxStatus,
     ValidationTag
@@ -204,6 +215,7 @@ export default {
       'productionAssetTypes',
       'productionTaskTypes',
       'productionTaskStatuses',
+      'productionStatusAutomations',
       'taskStatus',
       'taskStatusMap',
       'taskTypeMap',

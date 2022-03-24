@@ -7,6 +7,7 @@ import assetTypes from './modules/assettypes'
 import assets from './modules/assets'
 import breakdown from './modules/breakdown'
 import customActions from './modules/customactions'
+import statusAutomations from './modules/statusautomation'
 import departments from './modules/departments'
 import edits from './modules/edits'
 import login from './modules/login'
@@ -30,6 +31,7 @@ const modules = {
   assets,
   breakdown,
   customActions,
+  statusAutomations,
   departments,
   edits,
   login,

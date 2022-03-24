@@ -104,6 +104,12 @@
              </router-link>
            </p>
            <p @click="toggleSidebar()">
+             <router-link :to="{name: 'status-automations'}">
+               <git-pull-request-icon size="0.9x" />
+               {{ $t("status_automations.title") }}
+             </router-link>
+           </p>
+           <p @click="toggleSidebar()">
              <router-link :to="{name: 'settings'}">
                <settings-icon size="0.9x" />
                {{ $t("settings.title") }}
@@ -222,7 +228,7 @@ aside {
   top: 0;
   bottom: 0;
   left: 0;
-  width: 230px;
+  width: 250px;
   background-color: white;
   padding: 15px;
   overflow-y: auto;
@@ -237,7 +243,7 @@ aside {
 }
 
 aside.hidden-bar {
-  left: -230px;
+  left: -250px;
   transition: all 0.3s ease;
 }
 
