@@ -10,7 +10,7 @@
     <div class="box">
 
       <h1 class="title" v-if="isEditing()">
-        {{ $t("status_automations.fields.edit_title") }}
+        {{ $t("status_automations.edit_title") }}
       </h1>
       <h1 class="title" v-else>
         {{ $t("status_automations.new_status_automation") }}
@@ -25,18 +25,13 @@
           locale-key-prefix="status_automations.entity_types."
           @enter="confirmClicked"
         />
+        <span
+        v-else
+        > {{ form.entityType }} </span>
 
         <h3>{{ $t("status_automations.in_title") }}</h3>
 
         <div class="flexrow">
-          <!-- <combobox class="flexrow-item"
-            :label="$t('status_automations.fields.in_field_type')"
-            :options="fieldTypeOptions"
-            v-if="!isEditing()"
-            v-model="form.inFieldType"
-            locale-key-prefix="status_automations.field_types."
-            @enter="confirmClicked"
-          /> -->
 
           <combobox-task-type class="flexrow-item"
             :label="$t('status_automations.fields.in_task_type')"
