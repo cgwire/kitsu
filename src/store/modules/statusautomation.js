@@ -1,6 +1,4 @@
 import statusAutomationsApi from '../api/statusautomation'
-import taskStatusStore from './taskstatus'
-import taskTypesStore from './tasktypes'
 
 import {
   LOAD_STATUS_AUTOMATIONS_START,
@@ -26,15 +24,6 @@ const initialState = {
   deleteStatusAutomation: {
     isLoading: false,
     isError: false
-  }
-}
-
-const helpers = {
-  getTaskStatus (taskStatusId) {
-    return taskStatusStore.state.taskStatusMap.get(taskStatusId)
-  },
-  getTaskType (taskTypeId) {
-    return taskTypesStore.state.taskTypeMap.get(taskTypeId)
   }
 }
 
@@ -135,6 +124,5 @@ export default {
   state,
   getters,
   actions,
-  mutations,
-  helpers
+  mutations
 }

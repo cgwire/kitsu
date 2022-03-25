@@ -25,9 +25,7 @@
           locale-key-prefix="status_automations.entity_types."
           @enter="confirmClicked"
         />
-        <span
-        v-else
-        > {{ form.entityType }} </span>
+        <span v-else> {{ form.entityType }} </span>
 
         <h3>{{ $t("status_automations.in_title") }}</h3>
 
