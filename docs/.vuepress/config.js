@@ -11,25 +11,31 @@ module.exports = {
      children: [
        ['/', 'Introduction'],
        '/getting-started-production/',
-	   '/getting-started-advanced/',
+	     '/getting-started-advanced/',
        '/getting-started-artist/',
-	   '/getting-started-client/',
-       '/permissions/',
+	     '/getting-started-client/',
+       '/permissions/'
+     ]
+   },
+   {
+     title: 'Chat Integrations',
+     collapsable: false,
+     children: [
        '/slack/',
        '/mattermost/',
        '/discord/',
-       '/custom-actions/'
      ]
-   },
-    {
+	},
+  {
      title: 'Modules',
      collapsable: false,
      children: [
        '/Schedules/',
        '/batch-action/',
-	   '/playlist/',
-	   '/department/',
-	   '/customization/'
+	     '/playlist/',
+	     '/department/',
+	     '/customization/',
+       '/custom-actions/'
      ]
 	},
 	{
@@ -37,9 +43,9 @@ module.exports = {
      collapsable: false,
      children: [
        '/faq-deletion/',
-	   '/faq-filter/',
-	   '/faq-notification/',
-	   '/faq-production-report/'
+	     '/faq-filter/',
+	     '/faq-notification/',
+	     '/faq-production-report/'
      ]
 	},
     {
