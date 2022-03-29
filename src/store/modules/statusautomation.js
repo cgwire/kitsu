@@ -37,7 +37,15 @@ const getters = {
   isStatusAutomationsLoadingError: state => state.isStatusAutomationsLoadingError,
 
   editStatusAutomation: state => state.editStatusAutomation,
-  deleteStatusAutomation: state => state.deleteStatusAutomation
+  deleteStatusAutomation: state => state.deleteStatusAutomation,
+
+  /* If automation in production automations and if
+   * out field type is not ready for and IN priority is below OUT priority
+  */
+  isStatusAutomationDisabled: (state, getters, rootState, rootGetters) => (statusAutomation) => {
+    return statusAutomation.out_field_type !== 'ready_for' &&
+    !rootGetters.isTaskTypePriorityHigherById(statusAutomation.out_task_type_id, statusAutomation.in_task_type_id)
+  }
 }
 
 const actions = {

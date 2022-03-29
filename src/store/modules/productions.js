@@ -189,14 +189,10 @@ const getters = {
     }
   },
 
-  /* If automation in production automations and if
-   * out field type is not ready for and IN priority is below OUT priority
-  */
   remainingStatusAutomations: (state, getters, rootState, rootGetters) => {
     return rootState.statusAutomations.statusAutomations
       .filter(s => !state.currentProduction.status_automations.includes(s.id) &&
-      (s.out_field_type === 'ready_for' ||
-      rootGetters.isTaskTypePriorityHigherById(s.out_task_type_id, s.in_task_type_id)))
+      !rootGetters.isStatusAutomationDisabled(s))
   },
 
   productionTaskTypes: (state, getters, rootState) => {

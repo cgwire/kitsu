@@ -2,6 +2,7 @@
 <td class="name">
   <div
     class="tag"
+    v-bind:class="[!disable ? '' : 'canceled']"
     :style="{
       background: color,
       color: textColor
@@ -24,6 +25,10 @@ export default {
     entry: {
       type: Object,
       default: () => {}
+    },
+    disable: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {

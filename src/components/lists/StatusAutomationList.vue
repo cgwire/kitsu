@@ -24,9 +24,9 @@
         </tr>
       </thead>
       <tbody class="datatable-body">
-        <tr
-          class="datatable-row"
+        <tr class="datatable-row"
           v-for="statusAutomation in entries"
+          v-bind:class="[isStatusAutomationDisabled(statusAutomation) ? 'canceled' : '']"
           :key="statusAutomation.id"
         >
           <th scope="row" class="name">
@@ -35,10 +35,12 @@
           <task-type-name
             class="in-task-type"
             :task-type="getTaskType(statusAutomation.in_task_type_id)"
+            :disable="isStatusAutomationDisabled(statusAutomation)"
           />
           <task-status-name class="in-task-status"
             v-if="statusAutomation.in_field_type === 'status'"
             :entry="getTaskStatus(statusAutomation.in_task_status_id)"
+            :disable="isStatusAutomationDisabled(statusAutomation)"
           />
           <td class="input-separator">
             =={{ statusAutomation.out_field_type === 'ready_for' ? 'Ready For' : '' }}==>
@@ -46,10 +48,12 @@
           <task-type-name
             class="out-task-type"
             :task-type="getTaskType(statusAutomation.out_task_type_id)"
+            :disable="isStatusAutomationDisabled(statusAutomation)"
           />
           <task-status-name class="out-task-status"
             v-if="statusAutomation.out_field_type === 'status'"
             :entry="getTaskStatus(statusAutomation.out_task_status_id)"
+            :disable="isStatusAutomationDisabled(statusAutomation)"
           />
           <td class="name out-task-status"
           v-else
@@ -122,6 +126,7 @@ export default {
       'getTaskStatus',
       'getTaskType',
       'isTaskTypePriorityHigherById',
+      'isStatusAutomationDisabled',
       'remainingStatusAutomations'
     ])
   },
