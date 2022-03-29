@@ -121,6 +121,7 @@ export default {
     ...mapGetters([
       'getTaskStatus',
       'getTaskType',
+      'isTaskTypePriorityHigherById',
       'remainingStatusAutomations'
     ])
   },

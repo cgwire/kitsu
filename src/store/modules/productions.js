@@ -1,7 +1,5 @@
 import Vue from 'vue'
 import productionsApi from '../api/productions'
-import { getTaskType } from '@/lib/tasktypes'
-import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { sortProductions, sortByName } from '../../lib/sorting'
 import {
   addToIdList,
@@ -194,12 +192,11 @@ const getters = {
   /* If automation in production automations and if
    * out field type is not ready for and IN priority is below OUT priority
   */
-  remainingStatusAutomations: (state, getters, rootState) => {
+  remainingStatusAutomations: (state, getters, rootState, rootGetters) => {
     return rootState.statusAutomations.statusAutomations
       .filter(s => !state.currentProduction.status_automations.includes(s.id) &&
       (s.out_field_type === 'ready_for' ||
-      getTaskTypePriorityOfProd(getTaskType(s.out_task_type_id), state.currentProduction) >
-      getTaskTypePriorityOfProd(getTaskType(s.in_task_type_id), state.currentProduction)))
+      rootGetters.isTaskTypePriorityHigherById(s.out_task_type_id, s.in_task_type_id)))
   },
 
   productionTaskTypes: (state, getters, rootState) => {
