@@ -18,15 +18,6 @@ module.exports = {
      ]
    },
    {
-     title: 'Chat Integrations',
-     collapsable: false,
-     children: [
-       '/slack/',
-       '/mattermost/',
-       '/discord/',
-     ]
-	},
-  {
      title: 'Modules',
      collapsable: false,
      children: [
@@ -37,7 +28,17 @@ module.exports = {
 	     '/customization/',
        '/custom-actions/'
      ]
+   },
+   {
+     title: 'Chat Integrations',
+     collapsable: false,
+     children: [
+       '/slack/',
+       '/mattermost/',
+       '/discord/',
+     ]
 	},
+
 	{
      title: 'FAQ',
      collapsable: false,
