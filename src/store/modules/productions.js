@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import productionsApi from '../api/productions'
+import { getTaskType } from '@/lib/tasktypes'
+import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { sortProductions, sortByName } from '../../lib/sorting'
 import {
   addToIdList,
@@ -189,9 +191,12 @@ const getters = {
     }
   },
 
+  /* If automation in production automations and if IN priority is below OUT priority */
   remainingStatusAutomations: (state, getters, rootState) => {
     return rootState.statusAutomations.statusAutomations
-      .filter(s => !state.currentProduction.status_automations.includes(s.id))
+      .filter(s => !state.currentProduction.status_automations.includes(s.id) &&
+      getTaskTypePriorityOfProd(getTaskType(s.out_task_type_id), state.currentProduction) >
+      getTaskTypePriorityOfProd(getTaskType(s.in_task_type_id), state.currentProduction))
   },
 
   productionTaskTypes: (state, getters, rootState) => {
