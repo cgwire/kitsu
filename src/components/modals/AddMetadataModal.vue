@@ -31,14 +31,6 @@
         v-focus
       />
 
-      <combobox-boolean
-        ref="hiddenField"
-        :label="$t('assets.fields.hidden_from_client')"
-        v-model="form.for_client"
-        @enter="confirm"
-        v-focus
-      />
-
       <div v-if="type === 'choices'">
         <p class="strong">
           {{ $t('productions.metadata.available_values') }}
@@ -78,6 +70,51 @@
         />
       </div>
 
+      <div
+        class="departments"
+      >
+        <label class="label">{{ $t('people.fields.departments') }}</label>
+        <div
+          class="department-element mb1"
+          :key="departmentId"
+          @click="removeDepartment(departmentId)"
+          v-for="departmentId in form.departments"
+        >
+          <department-name
+            :department="departmentMap.get(departmentId)"
+            v-if="departmentId"
+          />
+        </div>
+        <div class="flexrow">
+          <combobox-department
+            class="flexrow-item"
+            :selectable-departments="selectableDepartments"
+            :max-height="160"
+            @enter="confirm"
+            v-model="selectedDepartment"
+            v-if="selectableDepartments.length > 0"
+          />
+          <button
+            class="button is-success flexrow-item mb2"
+            :class="{
+              'is-disabled': selectedDepartment === null
+            }"
+            @click="addDepartment"
+            v-if="selectableDepartments.length > 0"
+          >
+            {{ $t('main.add')}}
+          </button>
+        </div>
+      </div>
+
+      <combobox-boolean
+        ref="hiddenField"
+        :label="$t('assets.fields.hidden_from_client')"
+        v-model="form.for_client"
+        @enter="confirm"
+        v-focus
+      />
+
       <modal-footer
         :error-text="$t('productions.metadata.error')"
         :is-loading="isLoading"
@@ -99,6 +136,8 @@ import Combobox from '../widgets/Combobox'
 import ComboboxBoolean from '../widgets/ComboboxBoolean'
 import ModalFooter from './ModalFooter'
 import TextField from '../widgets/TextField'
+import ComboboxDepartment from '../widgets/ComboboxDepartment'
+import DepartmentName from '../widgets/DepartmentName'
 
 export default {
   name: 'add-metadata-modal',
@@ -107,6 +146,8 @@ export default {
   components: {
     Combobox,
     ComboboxBoolean,
+    ComboboxDepartment,
+    DepartmentName,
     ModalFooter,
     TextField
   },
@@ -135,7 +176,8 @@ export default {
       form: {
         name: '',
         for_client: 'false',
-        values: []
+        values: [],
+        departments: []
       },
       valueToAdd: '',
       type: 'free',
@@ -148,7 +190,8 @@ export default {
           label: this.$t('productions.metadata.choices'),
           value: 'choices'
         }
-      ]
+      ],
+      selectedDepartment: null
     }
   },
 
@@ -158,7 +201,17 @@ export default {
 
   computed: {
     ...mapGetters([
+      'departments',
+      'departmentMap'
     ]),
+
+    selectableDepartments () {
+      return this.departments.filter(department => {
+        return this.form.departments.findIndex(
+          selectedDepartment => selectedDepartment === department.id
+        ) === -1
+      })
+    },
 
     isFormFilled () {
       return this.form.name.length > 0 &&
@@ -195,10 +248,23 @@ export default {
       this.form.values = remove(this.form.values, valueToRemove)
     },
 
+    addDepartment () {
+      this.form.departments.push(this.selectedDepartment)
+      this.selectedDepartment = null
+    },
+
+    removeDepartment (idToRemove) {
+      const departmentIndex = this.form.departments.indexOf(idToRemove)
+      if (departmentIndex >= 0) {
+        this.form.departments.splice(departmentIndex, 1)
+      }
+    },
+
     reset () {
       this.form = {
         name: '',
-        values: []
+        values: [],
+        departments: []
       }
       this.valueToAdd = ''
       if (this.descriptorToEdit.name) {
@@ -206,7 +272,8 @@ export default {
           id: this.descriptorToEdit.id,
           name: `${this.descriptorToEdit.name}`,
           values: [...this.descriptorToEdit.choices],
-          for_client: this.descriptorToEdit.for_client ? 'true' : 'false'
+          for_client: this.descriptorToEdit.for_client ? 'true' : 'false',
+          departments: [...this.descriptorToEdit.departments]
         }
       }
       this.type = this.form.values.length > 0 ? 'choices' : 'free'
@@ -272,5 +339,11 @@ export default {
 .remove-button:hover {
   background: $white-grey;
   border-radius: 50%;
+}
+
+.department-element {
+  display: inline-block;
+  margin-right: 0.2em;
+  cursor: pointer;
 }
 </style>

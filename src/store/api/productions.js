@@ -114,7 +114,8 @@ export default {
         name: descriptor.name,
         choices: descriptor.values,
         for_client: descriptor.for_client === 'true',
-        entity_type: descriptor.entity_type
+        entity_type: descriptor.entity_type,
+        departments: descriptor.departments
       }
       client.post(
         `/api/data/projects/${productionId}/metadata-descriptors`,
@@ -146,7 +147,8 @@ export default {
         name: descriptor.name,
         choices: descriptor.values,
         for_client: descriptor.for_client === 'true',
-        entity_type: descriptor.entity_type
+        entity_type: descriptor.entity_type,
+        departments: descriptor.departments
       }
       client.put(
         `/api/data/projects/${productionId}/metadata-descriptors/${descriptor.id}`,

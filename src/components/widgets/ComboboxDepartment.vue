@@ -22,6 +22,9 @@
     <div
       class="select-input"
       ref="select"
+      v-bind:style="{
+       'max-height': maxHeight + 'px',
+      }"
       v-if="showDepartmentList"
     >
       <div
@@ -77,6 +80,10 @@ export default {
     selectableDepartments: {
       type: Array,
       required: false
+    },
+    maxHeight: {
+      default: 200,
+      type: Number
     }
   },
 
