@@ -640,6 +640,17 @@ The new page is the **Supervisor view**. You have more detailed information spec
 
 ![Supervisor page](../img/getting-started/supervisor_page.png)
 
+
+To add an estimation to a task, click on the line, and type the number of days you estimate. You can select multiple assets or shots at the same time.
+
+You can also define a **Start date** by clicking on it.
+A calendar will open and let you choose your start date.
+
+The **Due date** is automatically calculated with the **Estimation**.
+ 
+![start date](../img/getting-started/set_estimation.png)
+
+
 To go further in detail with the Supervisor view :  
 - (1) You can see and change the status of a task
 - (2) You can assign people to tasks
@@ -651,19 +662,11 @@ To go further in detail with the Supervisor view :
 - (5) The number of back and forths with the retake status
 - (6) You can add a start date for the task (with the calendar)
 - (7) Kitsu calculates the due date with the Start Date and the estimation
-- (8)(9) the Wip and Validation dates are automatically filled
+- (8)(9) the Wip and Feedback dates are automatically filled
 - (10) the Last comment section help you to keep an eye on the last activity of this task type.
 
 (7) to (10) is automatically filled.
 
-To add an estimation to a task, click on the line, and type the number of days you estimate. You can select multiple assets or shots at the same time.
-
-You can also define a **Start date** by clicking on it.
-A calendar will open and let you choose your start date.
-
-The **Due date** is automatically calculated with the **Estimation**.
- 
-![start date](../img/getting-started/set_estimation.png)
   
 To help you to set a correct estimation, you can use the **Estimation** Tab.
 
