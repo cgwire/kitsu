@@ -62,7 +62,7 @@ Now the shots are not sorted by name but by the custom column information.
 You can also select in the menu if you want to edit the name of the custom column and its information or if you want to delete it.
 
 You can also use the **CSV Import** to fill your custom column quickly.
-You need first to create your **Custom Column** into kitsu, add it in your spreadsheet, then copy-paste your data into the **CSV Import**.
+First, you need to create your **Custom Column** into kitsu, add it to your spreadsheet, and copy-paste your data into the **CSV Import**.
 
 [Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
 
@@ -121,7 +121,7 @@ The action menu appears on the top of the screen.
 
 ![Blue menu](../img/getting-started/blue_menu.png)
 
-Click on the name on the left on the action menu, and choose 
+Click on the name on the left of the action menu, and choose 
 **Change priority**.
 
 ![Change priority](../img/getting-started/change_priority.png)
@@ -166,7 +166,7 @@ You validate the new status with the **Confirm** button.
 ## Simplify the global page
 
 You may need to reduce a task type column on a global page. For example, you may be 
-only interested in layout and animation but not so much about the shipment for the client.
+only interested in layout and animation but not so much in the shipment for the client.
 
 Close to each task type name, you can click on the arrow 
 ![Arrow](../img/getting-started/arrow.png) to unfold a submenu. 
@@ -188,7 +188,7 @@ To hide your custom column, click on the arrow on the right border of the global
 Here you can choose which column you want to **hide** or **display**.
 
 You can also hide all the non-essential columns, like **Description**, **Custom column**, 
-even the minimize columns.
+even the minimized columns.
 
 Just click on the **Hide additional information** 
 ![minimize button](../img/getting-started/minimize.png) button on the top right of the page.
@@ -200,14 +200,35 @@ To make the information reappear, click on the same button,
 
 ## Quotas stat
 
-Kitsu grabs the number of frames (or seconds) validated per day/week/month per Artist.
+Kitsu has two ways to calculate the quotas per **shot Task Type**.
 
-![Quotat stat page](../img/getting-started/quotas_week.png)
+The first is linked to the timesheet : 
+Shots are considered ended on the first feedback request. Then, quotas are weighted following time spent on the task (when the Artist filled his timesheet). 
+
+![Quotat stat page day weighted](../img/getting-started/quotas_day_weighted.png)
+
+In this example, Kitsu has weighted the quota per day linked to the timesheet.
+
+![Quotat stat page day weighted detail](../img/getting-started/quotas_day_weighted_detail.png)
+
+
+If no timesheet is filled, then Kitsu considers that:
+
+The task was started at the first status change to WIP
+The task was done the day the feedback request was made.
+It splits the done frames among all business days between the start and the end.
+
+Kitsu grabs the number of frames (or seconds, or number of tasks) submitted per day/week/month per Artist.
+
+![Quotat stat page day weighted](../img/getting-started/quotas_day_status.png)
+
+
+
 
 **1**: Select the Task Type
 
-**2**: Select the level of details, Day, Week or Month
+**2**: Select the level of details, Day, Week, or Month
 
-**3**: Select the count mode, per Frame or Seconds.
+**3**: Select the count mode, per Frame, Seconds, or tasks.
 
-At any time, you can click on a number and see its detail on the right panel.
+You can click on a number and see its detail on the right panel at any time.
