@@ -422,6 +422,10 @@
                 "vendor": "Fournisseur"
             }
         },
+        "preview_room": {
+            "join_room": "Rejoindre l'espace de lecture",
+            "leave_room": "Quitter l'espace de lecture"
+        },
         "playlists": {
             "add_assets": "Ajouter des assets",
             "add_selection": "Ajouter la sélection",
@@ -521,9 +525,7 @@
             },
             "download_csv": "Télécharger .csv",
             "filter_task_type": "Filtrer par type de tâche",
-            "comparing_missing_plan": "Plans manquants pour le type courant",
-            "join_room": "Rejoindre l'espace de lecture",
-            "leave_room": "Quitter l'espace de lecture"
+            "comparing_missing_plan": "Plans manquants pour le type courant"
         },
         "productions": {
             "current": "Production sélectionnée ",

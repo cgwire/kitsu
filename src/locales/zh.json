@@ -422,6 +422,10 @@
                 "vendor": "供应商"
             }
         },
+        "preview_room": {
+            "join_room": "",
+            "leave_room": ""
+        },
         "playlists": {
             "add_assets": "添加资产",
             "add_selection": "添加选择",
@@ -521,9 +525,7 @@
             },
             "download_csv": "",
             "filter_task_type": "",
-            "comparing_missing_plan": "",
-            "join_room": "",
-            "leave_room": ""
+            "comparing_missing_plan": ""
         },
         "productions": {
             "current": "所选制作",

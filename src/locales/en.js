@@ -474,6 +474,11 @@ export default {
     }
   },
 
+  preview_room: {
+    join_room: 'Join Room',
+    leave_room: 'Leave Room'
+  },
+
   playlists: {
     add_assets: 'Add assets',
     add_selection: 'Add selection',
@@ -502,10 +507,8 @@ export default {
     for_client: 'The Client',
     for_studio: 'The Studio',
     edit_title: 'Edit playlist',
-    join_room: 'Join Room',
     last_creation: 'Last creations',
     last_modification: 'Last modifications',
-    leave_room: 'Leave Room',
     loading_error: 'A server error occurred. Playlists cannot be loaded.',
     new_playlist: 'Add a playlist',
     no_build: 'No build',
@@ -822,11 +825,12 @@ export default {
     empty_list_client: 'There are no edits in this production.',
     new_edit: 'New edit',
     number: 'edit | edits',
+    tasks: 'Edit tasks',
     title: 'Edits',
     fields: {
       name: 'name',
       episode: 'Ep.',
-      description: 'description'
+      description: 'Description'
     }
   },
 

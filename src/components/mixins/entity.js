@@ -6,7 +6,7 @@ import {
 import moment from 'moment'
 
 /*
- * Common functions to shot and asset pages.
+ * Common functions to shot, asset and edit pages.
  */
 export const entityMixin = {
 
@@ -21,7 +21,7 @@ export const entityMixin = {
 
   computed: {
     currentTasks () {
-      const entity = this.currentAsset || this.currentShot
+      const entity = this.currentAsset || this.currentShot || this.currentEdit
       return entity
         ? entity
           .tasks
