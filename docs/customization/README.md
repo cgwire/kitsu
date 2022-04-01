@@ -79,7 +79,8 @@ You can change :
 - (4) If this status is used to give comment a task (useful to keep track of the back and forth in the task type page, and for the episode stats page)
 - (5) Can the artist use this status. If **No** the artist won't see this status on his list. But he can post on top of it.
 - (6) Can the client use this status. If **No** the client won't see this status on his list
-- (7) Choose a color you like
+- (7) This option is linked to the quotas. This designed status will stop the quotas calculation
+- (8) Choose a color you like
 
 ![Edit status](../img/getting-started/edit_status.png)
 
