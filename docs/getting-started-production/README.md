@@ -30,6 +30,7 @@ See the batch Action section for more details.
 
 Validate everything with the ![All done](../img/getting-started/all_done_go.png) button.
 
+
 ## Introduction to Kitsu global page
 
 Welcome to the global asset page of Kitsu.
@@ -151,72 +152,7 @@ To extend the description on the main asset page, click on the first words (2), 
 To delete an asset see the FAQ : [How to delete an asset](../faq-deletion/README.md##how-to-delete-an-asset)
 
 
-## Create extra tasks for the assets
 
-If you realize you miss some task type on your pipeline, you need to add the new task type to your library.
-
-(To add new Task Type see [Customization of the workflow](../customization/README.md#create-a-new-task-type) )
-
-Once it's done, you need to add them to your **Setting** page too. 
-
-Then, click on the **+ Add tasks** on the spreadsheet. 
-
-![Add tasks button](../img/getting-started/add_tasks_asset.png)
-
-A new window will open, and on the list, you can choose the task you need to add.
-You can also create tasks for **the project**  or **For current list and filters** and validate it by the **Confirm** button.
-
-![Add task to an asset](../img/getting-started/add_task.png)
-
-## Create tasks for specific assets type
-
-You can choose to create tasks only for **filtered elements**. For example, you want to create 
-**Rigg** tasks only for the characters.
-
-You need to type **Characters** on the search bar on the global asset page.
-
-![Characters filtered](../img/getting-started/chara_filtered.png)
-
-Then click on **+ Add tasks**. Next, select the task type, here **Rigging**, and switch to **For current list and filters**.
-
-Valid with **Confirm**.
-
-![Tasks filtered](../img/getting-started/task_filtered.png)
-
-If you remove the filter characters, you will see the tasks only created for the selected elements.
-
-![Tasks filtered Created](../img/getting-started/delete_task_done_chara.png)
-
-You can also delete tasks for specific Asset Types. 
-For example, you want to keep **Rig** only for the characters.
-
-You need to type **-Characters** on the search bar on the global asset page. This way, the page will filter 
-everything **but** the characters.
-
-![Tasks filtered](../img/getting-started/no_character_filtered.png)
-
-Then select the task type you want to delete for the filtered view. Click on the arrow next to the name 
-of the task type and select **Delete all**.
-
-![Tasks filtered no chara](../img/getting-started/no_character_delete.png)
-
-Once the pop-up opens, type the name of the task type and double-check it's set to **For current list and filters**.
-
-![Tasks filtered no chara rigging erased](../img/getting-started/delete_task_done.png)
-
-If you remove the filter **-characters**, you will see the tasks only created for the selected elements.
-
-
-![Tasks filtered no chara rigging erased](../img/getting-started/delete_task_done_chara.png)
-
-
-You can also delete only a task or selected tasks. If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
-then select the ** delete tasks** (2) on the left top
-of the page.
-![Delete button](../img/getting-started/delete_task.png) 
-
-Now that we have created all the assets and related tasks, we can now add the
-artists to the team and assign tasks to them.
 
 
 ## Create (episodes) sequences and shots
@@ -317,24 +253,106 @@ You can have access to the shot values history too.
 
 ![Shot Values History](../img/getting-started/shot_values_history.png)
 
+## Create a breakdown list
+
+Filling the breakdown help you with the assembly of the shots. With the
+breakdown, you have all the details of the assets you need to add to create your
+shot. We are sure to omit nothing.
+
+On the drop-down menu, choose **BREAKDOWN**.
+
+![drop down Menu breakdown](../img/getting-started/drop_down_menu_breakdown.png)
+
+On the left part of the breakdown page is the episode/sequence/shot menu (1); you can choose between those you created. They are the right part of
+the screen; all the assets created are available for this production (main pack and episodes) (3). Moreover, in
+the middle section, it is your selection for the shot (2).
+
+![Breakdown page](../img/getting-started/breakdown_general_empty.png)
+
+So now you have to select the shot you want to cast.
+
+If you don't have thumbnails yet, you can choose to display the assets as text.
 
 
-## Create extra tasks for the shots
+![Breakdown page text display](../img/getting-started/breakdown_text_display.png)
 
-If you realize you miss some task type on your pipeline, you need to add the new task type to your library.
+During your breakdown, you may also realize that an asset is missing from the list.
 
-(To add new Task Type see [Customization of the workflow](../customization/README.md#create-a-new-task-type) )
+You can create a new asset directly from the breakdown page. Click on the **+** on the right of the **All available assets**.
 
-Once it's done, you need to add them to your **Setting** page too.
+![Breakdown page create asset](../img/getting-started/breakdown_create_asset.png)
 
-Then,  click on
-the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png)
-on the top of the spreadsheet. 
 
-A new pop-up opens and lets you choose what task you want to add. All the
-shots are linked to the tasks if you select the **For project** option.
+You can also choose multiple shots at the same time. Click on the first shot, hold the **shift** key and click on the last shot of your selection.
 
-![List of tasks for the shots](../img/getting-started/task_shots.png)
+![Breakdown page global bulk select](../img/getting-started/breakdown_general_bulk_select.png)
+
+Then click on the assets you want
+to assign: characters, backgrounds, ... from the right part (3). 
+If you have selected multiple shots, your selection is also applied to the numerous shots.
+
+You can see a **+1** or **+10**when you pass over the asset. It's the number
+of times you add this asset, and you can click as many times as you need on it.
+
+![Breakdown add asset](../img/getting-started/breakdown_add_asset.png)
+
+You can now see the asset appearing in the middle part of the screen (2). Next
+to the asset's name is the number of times it has been added. In this
+example, we have added two times the character asset Llama.
+
+
+If you add an asset twice by mistake, you have to go to the middle part of
+the screen to select assets for this shot (2). From there, click on
+**-1**. When you are done with this shot, go on with the other shots. 
+Your selection is automatically saved.
+
+![Breakdown remove asset](../img/getting-started/breakdown_remove_asset.png)
+
+If a new asset is created during the storyboard, get back to the asset
+page (using the drop-down menu), create the assets you
+need. The tasks previously created are applied immediately to these new
+assets. However, you have to do the assignment, and then you are good to
+continue with the breakdown.
+
+Now your **Breakdown** page should look like this.
+
+![breakdown add asset bulk](../img/getting-started/breakdown_general_bulk_select_full.png)
+
+You can also make a breakdown list for your assets if you need to assemble them and keep track of the separated parts.
+
+On the top left corner of the screen, choose **asset** in the drop-down menu, below **FOR**.
+
+![Breakdown asset menu](../img/getting-started/breakdown_asset_menu.png)
+
+You now have access to a second drop-down menu, where you can choose your asset type: **Character**, **Environment**, **Props**, **FX**, ...
+
+![Breakdown asset type](../img/getting-started/breakdown_asset_menu_type.png)
+
+You can fill the asset breakdown page the same way as the shots. First, select one or more assets on the left part and then add the right part's elements.
+
+## Change asset status
+
+For example, when an asset is validated at the **Concept** stage, it can be used for the storyboard. 
+Then when it's validated at the **Modeling** stage, you can use it for the layout and so on.
+
+![Asset Status](../img/getting-started/asset_status.png)
+
+It's useful to know the global status of the state of life of an asset, especially when the breakdown is complete.
+
+On the global page of the shot, you will see a green box: all the assets cast in this shot are ready for this specific task.
+
+![Asset Status](../img/getting-started/asset_status_box.png)
+
+If you don't see the green box, Kitsu will display how many assets are ready.
+
+![Asset Status](../img/getting-started/asset_status_empty.png)
+
+ Then you can click on the shot's name to go to its detail page.
+Then you will see all the assets cast in this shot and their status.
+
+![Asset Status](../img/getting-started/asset_status_detail.png)
+
+It's the fastest way to know if you can start a shot for a specific task.
 
 
 ## Add a new user
@@ -491,83 +509,6 @@ On the list page, click on the status you want, then on the right panel, click o
 Once you have clicked on the button, you see the thumbnail appears, and the button turns gray.
 
 ![thumbnail applied](../img/getting-started/pannel_history_thumbnail.png)
-
-## Create a breakdown list
-
-Filling the breakdown help you with the assembly of the shots. With the
-breakdown, you have all the details of the assets you need to add to create your
-shot. We are sure to omit nothing.
-
-On the drop-down menu, choose **BREAKDOWN**.
-
-![drop down Menu breakdown](../img/getting-started/drop_down_menu_breakdown.png)
-
-On the left part of the breakdown page is the episode/sequence/shot menu (1); you can choose between those you created. They are the right part of
-the screen; all the assets created are available for this production (main pack and episodes) (3). Moreover, in
-the middle section, it is your selection for the shot (2).
-
-![Breakdown page](../img/getting-started/breakdown_general_empty.png)
-
-So now you have to select the shot you want to cast.
-
-If you don't have thumbnails yet, you can choose to display the assets as text.
-
-
-![Breakdown page text display](../img/getting-started/breakdown_text_display.png)
-
-During your breakdown, you may also realize that an asset is missing from the list.
-
-You can create a new asset directly from the breakdown page. Click on the **+** on the right of the **All available assets**.
-
-![Breakdown page create asset](../img/getting-started/breakdown_create_asset.png)
-
-
-You can also choose multiple shots at the same time. Click on the first shot, hold the **shift** key and click on the last shot of your selection.
-
-![Breakdown page global bulk select](../img/getting-started/breakdown_general_bulk_select.png)
-
-Then click on the assets you want
-to assign: characters, backgrounds, ... from the right part (3). 
-If you have selected multiple shots, your selection is also applied to the numerous shots.
-
-You can see a **+1** or **+10**when you pass over the asset. It's the number
-of times you add this asset, and you can click as many times as you need on it.
-
-![Breakdown add asset](../img/getting-started/breakdown_add_asset.png)
-
-You can now see the asset appearing in the middle part of the screen (2). Next
-to the asset's name is the number of times it has been added. In this
-example, we have added two times the character asset Llama.
-
-
-If you add an asset twice by mistake, you have to go to the middle part of
-the screen to select assets for this shot (2). From there, click on
-**-1**. When you are done with this shot, go on with the other shots. 
-Your selection is automatically saved.
-
-![Breakdown remove asset](../img/getting-started/breakdown_remove_asset.png)
-
-If a new asset is created during the storyboard, get back to the asset
-page (using the drop-down menu), create the assets you
-need. The tasks previously created are applied immediately to these new
-assets. However, you have to do the assignment, and then you are good to
-continue with the breakdown.
-
-Now your **Breakdown** page should look like this.
-
-![breakdown add asset bulk](../img/getting-started/breakdown_general_bulk_select_full.png)
-
-You can also make a breakdown list for your assets if you need to assemble them and keep track of the separated parts.
-
-On the top left corner of the screen, choose **asset** in the drop-down menu, below **FOR**.
-
-![Breakdown asset menu](../img/getting-started/breakdown_asset_menu.png)
-
-You now have access to a second drop-down menu, where you can choose your asset type: **Character**, **Environment**, **Props**, **FX**, ...
-
-![Breakdown asset type](../img/getting-started/breakdown_asset_menu_type.png)
-
-You can fill the asset breakdown page the same way as the shots. First, select one or more assets on the left part and then add the right part's elements.
 
 
 
