@@ -1,10 +1,10 @@
-# Batch Action
+# Batch Actions
 
 
 ## Create assets from a CSV spreadsheet file
 
 You may already have your asset list ready in a spreadsheet file.
-With Kitsu, you have two ways to import them; the first is to import a `.csv` file directly, the second is to copy-paste your data directly into Kitsu.
+With Kitsu, you have two ways to import them; the first is to import a `.csv` file, the second is to copy-paste your data directly into Kitsu.
 
 First, save your spreadsheet as a `.csv` file.
 
@@ -30,7 +30,7 @@ Now, you have all your assets imported into Kitsu and the task created according
 ![Import data copy paste data](../img/getting-started/import_result_asset.png)
 
 
-## Create assets by copy/paste a spreadsheet file
+## Create assets by copy/pasting a spreadsheet file
 
 Open your spreadsheet, select your data and copy them.
 
@@ -73,7 +73,7 @@ will be highlighted in blue.
 
 
 
-## Update assets by copy/paste a spreadsheet file
+## Update assets by copy/pasting a spreadsheet file
 
 Open your spreadsheet, select your data and copy them.
 
@@ -134,7 +134,7 @@ Now, you have all your shots imported into Kitsu, and the task created according
 ![Import data copy paste data](../img/getting-started/import_result_shot.png)
 
 
-## Create shots with copy/paste a spreadsheet file
+## Create shots by copy/pasting a spreadsheet file
 
 Open your spreadsheet, select your data and copy them.
 
@@ -164,7 +164,7 @@ Now, you have all your shots imported into Kitsu, and the task created according
 ![Import data copy paste data](../img/getting-started/import_result_shot.png)
 
 
-## Update Shots information with CSV Import
+## Update shots information with CSV Import
 
 You can use the **CSV Import** to update your data as the **NB Frames**, **Frame IN**, **Frame Out** or any **Custom Column**
 
@@ -224,7 +224,7 @@ Now, you have your breakdown imported into Kitsu.
 ![Breakdown import Preview](../img/getting-started/breakdown_general_bulk_select_full.png)
 
 
-## Create a breakdown list with copy/paste a spreadsheet file
+## Create a breakdown list by copy/pasting a spreadsheet file
 
 Open your spreadsheet, select your data and copy them.
 

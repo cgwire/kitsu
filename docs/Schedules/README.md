@@ -1,7 +1,7 @@
 # Schedules
 
 
-## Production Schedule
+## Production schedule
 
 As Studio Manager, you can set the global Schedule as a reference for your production. 
 
@@ -89,7 +89,7 @@ Now to go to further detail and keep track of the tasks, you can click on the ta
 It will lead you to the **Schedule** tab of the task type page.
 
 
-## Add an estimation for a task
+## Set a task estimation
 
 Click on the name of a task type.
 
@@ -151,7 +151,7 @@ Depending on the **FPS** you have set for the production, the number of **Second
  
  
  
-## Task Type Schedule
+## Task type schedule
 
 If you need more details than the production schedule, you can go to the **Task Type** page.
 
@@ -213,7 +213,7 @@ But you can also see the **Due date** and **Estimation** days on the **Todo Page
 
 Everybody has access to this page, but only the **Studio Manager** can modify it.
 
-## Studio Schedule
+## Studio schedule
 
 As a production manager, you have access to the Studio Schedule.
 The schedules of all the production are in one place and help you prepare your productions better.

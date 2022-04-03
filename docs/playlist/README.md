@@ -1,4 +1,4 @@
-# Playlist
+# Playlists
 
 ## Create a playlist
 
@@ -44,7 +44,7 @@ automatically saved.
 ![Playlist page](../img/getting-started/playlist_example.png)
 
 
-## Validate with a playlist
+## Review and validations
 
 Once you have created a playlist; you have several options:
 

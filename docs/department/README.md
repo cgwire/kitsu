@@ -1,6 +1,6 @@
-# Department
+# Departments
 
-## Create Departments
+## Create departments
 
 You can create as many ** Departments** you need.
 
@@ -25,7 +25,7 @@ Once you finish creating the department, the page should look like this.
 
 ![Customized department](../img/getting-started/customized_department.png)
 
-## Modify Departments
+## Modify departments
 
 You can modify any **Department** you need.
 
@@ -54,7 +54,7 @@ Once you finish modifying the department, the page should look like this.
 ![Customized department](../img/getting-started/customized_department.png)
 
 
-## Link Department to Task Types
+## Organize your task types into Departments
 
 You can now link your freshly created **Department** to **Task Types**.
 
@@ -82,7 +82,7 @@ Once you're done, the **Task types** page should look like this.
 ![Department task types filled](../img/getting-started/Task_deparment_filled.png)
 
 
-## Link Department to People
+## Link people to departments
 
 You can now link your freshly created **Department** to **People**.
 
@@ -96,7 +96,8 @@ You can notice the empty column on the right part of the screen **Departments**.
 
 ![people department](../img/getting-started/people_department_empty.png)
 
-You need to edit the **People** to add **Department**
+You need to edit directly a **People** entry to link a **Department** to this
+person.
 
 ![People edit option](../img/getting-started/people_edit.png)
 

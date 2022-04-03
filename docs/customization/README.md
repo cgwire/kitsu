@@ -1,4 +1,4 @@
-# Customization of the workflow
+# Workflow customization
 
 
 ## Modify an existing Task Type
