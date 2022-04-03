@@ -16,29 +16,29 @@ img[src$='#logo-kitsu'] {
 
 # Kitsu Documentation
 
-Kitsu is a validation tracking app for animation productions. Through
+Kitsu is a collaboration platform for animation productions. Through
 its clean UI and shared database it allows you to communicate
 efficiently with all the shareholders of the production: Artists,
-Production managers, TDs, Supervisors, Vendors, and Clients.
+Production managers, Supervisors, Vendors, and Clients.
 
 ## Getting Started
 
-Depending on your role in the studio, we propose you two tutorials:
+Depending on your role in the studio, we propose you several tutorials:
 
-* [Getting Started as a Production Manager](getting-started-production/README.md): you will learn how to set up a full production and dispatch tasks to your team.
-* [Getting Started as a Production Manager - Advanced Users](getting-started-advanced/README.md): you will learn advanced technic as batch importing, customize our pages...
-* [Getting Started as an artist](getting-started-artist/README.md): you will find all the information required to access your task list, share your progress and upload your results.
- * [Getting Started as a client](getting-started-client/README.md): you will find all the information required to access your playlists, share your comments and validations. 
+* [Getting Started as a Production Manager](getting-started-production/README.md): Set up a full production and dispatch tasks to your team
+* [Getting Started as a Production Manager - Advanced Users](getting-started-advanced/README.md): Prepare advanced project and go further with customization
+* [Getting Started as an artist](getting-started-artist/README.md): Access your task list, share your progress and upload your results
+ * [Getting Started as a client](getting-started-client/README.md): Browse playlists and provide feedback on the deliveries
   
 ## Modules
 
-In this section, we will detail all of Kitsu's different modules.
+In this section, we will give more information about Kitsu main modules:
 
-* [Schedules](Schedules/README.md): Everything you need to know to set your schedules  
-* [Batch Action](batch-action/README.md): Let Kitsu do all the heavy lifting for you
-* [Playlist](playlist/README.md): Stay focus during the review and gain more time with the Playlist 
-* [Customization of the workflow](customization/READMe.md): Every production are unique, so should be your workflow
-* [Deparment](department/README.md): We all need to stay organized
+* [Schedules](Schedules/README.md): Everything you need to know to setup your schedules  
+* [Batch Actions](batch-action/README.md): Run several actions in a click, let Kitsu work for you
+* [Playlists](playlist/README.md): Gather video versions in a glimpse and stay focus during the review 
+* [Workflow customization](customization/README.md): Adapt Kitsu to your productions
+* [Deparment](department/README.md): Define your main departments and show ligther tables to your teams
   
 
 ## Tutorials
@@ -51,25 +51,24 @@ Kitsu. You will find them via the link below:
 
 ## Frequently Asked Questions
 
-It's the place to find common questions asked by the studios and their answers.
-Tutorials don't cover everything... Fortunately, this FAQ is here to add the
-missing part!
+It's the place to find common questions asked by studios and their answers.
+Tutorials don't cover everything... This FAQ is here to add the missing part!
 
-* [How to delete...](faq-deletion): You need to delete something? The answer is here
-* [How to filter...](faq-filter): You need to focus on specific information? Learn how to do it
-* [How to get notified...](faq-notification): You need to be aware of everything? Be ubiquitous
-* [How to report...](faq-production-report): You have to do a lot of production reports? Gain some time!
+* [How to delete...](faq-deletion): Every questions you have about how to clean your data
+* [How to filter...](faq-filter): Quickly find specific data
+* [How to get notified...](faq-notification): Make sure you don't miss any change
+* [How to report...](faq-production-report): Build production reports in a glimpse
 
 
 ## About authors
 
-Kitsu is written by CG Wire, a company based in France. We help small to
-midsize CG studios to manage their production and build pipelines efficiently.
+Kitsu is written by CG Wire, a company based in France. We help animation studios to manage their production and build pipelines efficiently.
 
 We apply software craftmanship principles as much as possible. We love coding
 and consider that strong quality and good developer experience matter a lot.
-Our extensive experience allows studios to get better at doing software and
-focus more on artistic work.
+Our extensive experience allows studios to get better at dealing with the
+complexity of productions. They can collaborate more efficiently, deliver
+faster and make better pictures.
 
 Visit [cg-wire.com](https://cg-wire.com) for more information.
 
