@@ -13,19 +13,19 @@ module.exports = {
        '/getting-started-production/',
 	     '/getting-started-advanced/',
        '/getting-started-artist/',
-	     '/getting-started-client/',
-       '/permissions/'
+	     '/getting-started-client/'
      ]
    },
    {
      title: 'Modules',
      collapsable: false,
      children: [
-       '/Schedules/',
-       '/batch-action/',
-	     '/playlist/',
 	     '/department/',
 	     '/customization/',
+       '/permissions/',
+	     '/playlist/',
+       '/Schedules/',
+       '/batch-action/',
        '/custom-actions/'
      ]
    },
@@ -33,9 +33,9 @@ module.exports = {
      title: 'Chat Integrations',
      collapsable: false,
      children: [
-       '/slack/',
-       '/mattermost/',
        '/discord/',
+       '/mattermost/',
+       '/slack/',
      ]
 	},
 
