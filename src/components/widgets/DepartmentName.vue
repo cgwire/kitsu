@@ -3,7 +3,7 @@
 >
   <span
     class="dot"
-    :style="{ 'border': '5px solid ' + color, color }"
+    :style="{ 'border': '5px solid ' + color }"
   >
   </span>
   <span>
@@ -32,9 +32,7 @@ export default {
     ]),
 
     color () {
-      if (this.department.color.toUpperCase() === '#000000') {
-        return '$grey-strong'
-      } else return this.department.color
+      return this.department.color
     }
   },
 

@@ -29,6 +29,16 @@
                   :text="currentEpisode.description"
                   v-if="currentEpisode && currentEpisode.description"
                 />
+                <combobox-department
+                  class="combobox-department flexrow-item"
+                  :selectable-departments="departments"
+                  :value="selectedDepartment"
+                  :dispay-all-and-my-departments="true"
+                  :width="250"
+                  @input="onSelectedDepartment"
+                  v-model="selectedDepartment"
+                  v-if="departments.length > 0"
+                />
               </div>
             </div>
           </div>
@@ -91,6 +101,7 @@
         :is-loading="isShotsLoading || initialLoading"
         :is-error="isShotsLoadingError"
         :validation-columns="shotValidationColumns"
+        :department-filter="departmentFilter"
         @add-metadata="onAddMetadataClicked"
         @add-shots="showManageShots"
         @change-sort="onChangeSortClicked"
@@ -276,6 +287,7 @@ import AddThumbnailsModal from '../modals/AddThumbnailsModal'
 import BigThumbnailsButton from '../widgets/BigThumbnailsButton'
 import BuildFilterModal from '../modals/BuildFilterModal'
 import ButtonSimple from '../widgets/ButtonSimple'
+import ComboboxDepartment from '../widgets/ComboboxDepartment'
 import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../modals/DeleteModal'
 import EditShotModal from '../modals/EditShotModal'
@@ -303,6 +315,7 @@ export default {
     BigThumbnailsButton,
     BuildFilterModal,
     ButtonSimple,
+    ComboboxDepartment,
     CreateTasksModal,
     DeleteModal,
     EditShotModal,
@@ -333,6 +346,8 @@ export default {
       shotToDelete: null,
       shotToEdit: null,
       taskTypeForTaskDeletion: null,
+      selectedDepartment: 'MY_DEPARTMENTS',
+      departmentFilter: [],
       modals: {
         isAddMetadataDisplayed: false,
         isAddThumbnailsDisplayed: false,
@@ -423,6 +438,7 @@ export default {
         this.shotListScrollPosition
       )
     }
+    this.departmentFilter = this.user.departments
   },
 
   computed: {
@@ -432,6 +448,7 @@ export default {
       'displayedShotsBySequence',
       'episodeMap',
       'episodes',
+      'departments',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isFrames',
@@ -459,7 +476,8 @@ export default {
       'shotValidationColumns',
       'shotListScrollPosition',
       'shotSorting',
-      'taskTypeMap'
+      'taskTypeMap',
+      'user'
     ]),
 
     searchField () {
@@ -1146,5 +1164,10 @@ export default {
 
 .main-column {
   border-right: 3px solid $light-grey;
+}
+
+.combobox-department {
+  margin-bottom: 0px;
+  padding-right: 20px;
 }
 </style>

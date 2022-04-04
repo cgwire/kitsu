@@ -46,6 +46,16 @@ export const entitiesMixin = {
 
     hideAddThumbnailsModal () {
       this.modals.isAddThumbnailsDisplayed = false
+    },
+
+    onSelectedDepartment (departmentId) {
+      if (departmentId === 'ALL') {
+        this.departmentFilter = []
+      } else if (departmentId === 'MY_DEPARTMENTS') {
+        this.departmentFilter = this.user.departments
+      } else {
+        this.departmentFilter = [departmentId]
+      }
     }
   }
 }

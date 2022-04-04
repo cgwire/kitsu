@@ -40,25 +40,29 @@ export const entityListMixin = {
 
     nonStickedVisibleMetadataDescriptors () {
       return this.visibleMetadataDescriptors.filter(
-        descriptor => !this.stickedColumns[descriptor.id]
+        descriptor => !this.stickedColumns[descriptor.id] &&
+        this.metadataDescriptorIsInDepartmentFilter(descriptor)
       )
     },
 
     stickedVisibleMetadataDescriptors () {
       return this.visibleMetadataDescriptors.filter(
-        descriptor => this.stickedColumns[descriptor.id]
+        descriptor => this.stickedColumns[descriptor.id] &&
+        this.metadataDescriptorIsInDepartmentFilter(descriptor)
       )
     },
 
     nonStickedDisplayedValidationColumns () {
       return this.displayedValidationColumns.filter(
-        columnId => !this.stickedColumns[columnId]
+        columnId => !this.stickedColumns[columnId] &&
+        this.validationColumnsIsInDepartmentFilter(columnId)
       )
     },
 
     stickedDisplayedValidationColumns () {
       return this.displayedValidationColumns.filter(
-        columnId => this.stickedColumns[columnId]
+        columnId => this.stickedColumns[columnId] &&
+        this.validationColumnsIsInDepartmentFilter(columnId)
       )
     }
   },
@@ -308,6 +312,19 @@ export const entityListMixin = {
 
     toggleColumnSelector () {
       this.columnSelectorDisplayed = !this.columnSelectorDisplayed
+    },
+
+    metadataDescriptorIsInDepartmentFilter (metadataDescriptor) {
+      return this.departmentFilter.length === 0 ||
+        metadataDescriptor.departments.length === 0 ||
+        this.departmentFilter.some(d =>
+          metadataDescriptor.departments.includes(d))
+    },
+
+    validationColumnsIsInDepartmentFilter (columnId) {
+      return this.departmentFilter.length === 0 ||
+        this.departmentFilter.includes(
+          this.taskTypeMap.get(columnId).department_id)
     }
   }
 }

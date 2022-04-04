@@ -1078,6 +1078,10 @@ export default {
       normal: 'Normal',
       high: 'High',
       very_high: 'Very High'
+    },
+    combobox_departments: {
+      all_departments: 'All the departments',
+      my_departments: 'My departments'
     }
   },
 

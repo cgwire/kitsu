@@ -543,6 +543,10 @@ export default {
     validationColumns: {
       type: Array,
       default: () => []
+    },
+    departmentFilter: {
+      type: Array,
+      default: () => []
     }
   },
 

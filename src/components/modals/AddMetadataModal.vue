@@ -89,8 +89,7 @@
           <combobox-department
             class="flexrow-item"
             :selectable-departments="selectableDepartments"
-            :max-height="160"
-            @enter="confirm"
+            :max-height-select-input="160"
             v-model="selectedDepartment"
             v-if="selectableDepartments.length > 0"
           />

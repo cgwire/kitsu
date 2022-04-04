@@ -22,11 +22,21 @@
                   icon="funnel"
                   @click="modals.isBuildFilterDisplayed = true"
                 />
+                <combobox-department
+                  class="combobox-department flexrow-item"
+                  :selectable-departments="departments"
+                  :value="selectedDepartment"
+                  :dispay-all-and-my-departments="true"
+                  :width="250"
+                  @input="onSelectedDepartment"
+                  v-model="selectedDepartment"
+                  v-if="departments.length > 0"
+                />
               </div>
             </div>
           </div>
 
-          <div class="level-right flexrow">
+          <div class="level-right">
             <div class="flexrow" v-if="!isCurrentUserClient">
               <show-assignations-button class="flexrow-item" />
               <show-infos-button class="flexrow-item" />
@@ -34,30 +44,30 @@
               <div class="flexrow-item"></div>
             </div>
             <div class="flexrow" v-if="isCurrentUserManager">
-            <button-simple
-              class="flexrow-item"
-              :title="$t('entities.thumbnails.title')"
-              icon="image"
-              @click="showAddThumbnailsModal"
-            />
-            <button-simple
-              class="flexrow-item"
-              :title="$t('main.csv.import_file')"
-              icon="upload"
-              @click="showImportModal"
-            />
-            <button-simple
-              class="flexrow-item"
-              icon="download"
-              :title="$t('main.csv.export_file')"
-              @click="onExportClick"
-            />
-            <button-simple
-              class="flexrow-item"
-              :text="$t('assets.new_asset')"
-              icon="plus"
-              @click="showNewModal"
-            />
+              <button-simple
+                class="flexrow-item"
+                :title="$t('entities.thumbnails.title')"
+                icon="image"
+                @click="showAddThumbnailsModal"
+              />
+              <button-simple
+                class="flexrow-item"
+                :title="$t('main.csv.import_file')"
+                icon="upload"
+                @click="showImportModal"
+              />
+              <button-simple
+                class="flexrow-item"
+                icon="download"
+                :title="$t('main.csv.export_file')"
+                @click="onExportClick"
+              />
+              <button-simple
+                class="flexrow-item"
+                :text="$t('assets.new_asset')"
+                icon="plus"
+                @click="showNewModal"
+              />
             </div>
           </div>
         </div>
@@ -83,6 +93,7 @@
         :is-loading="isAssetsLoading || initialLoading"
         :is-error="isAssetsLoadingError"
         :validation-columns="assetValidationColumns"
+        :department-filter="departmentFilter"
         @change-sort="onChangeSortClicked"
         @create-tasks="showCreateTasksModal"
         @delete-all-tasks="onDeleteAllTasksClicked"
@@ -253,6 +264,7 @@ import AddThumbnailsModal from '../modals/AddThumbnailsModal'
 import BigThumbnailsButton from '../widgets/BigThumbnailsButton'
 import BuildFilterModal from '../modals/BuildFilterModal'
 import ButtonSimple from '../widgets/ButtonSimple'
+import ComboboxDepartment from '../widgets/ComboboxDepartment'
 import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../modals/DeleteModal'
 import EditAssetModal from '../modals/EditAssetModal'
@@ -277,6 +289,7 @@ export default {
     BigThumbnailsButton,
     BuildFilterModal,
     ButtonSimple,
+    ComboboxDepartment,
     CreateTasksModal,
     DeleteModal,
     EditAssetModal,
@@ -312,6 +325,8 @@ export default {
       ],
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
+      selectedDepartment: 'MY_DEPARTMENTS',
+      departmentFilter: [],
       errors: {
         addMetadata: false,
         addThumbnails: false,
@@ -407,6 +422,7 @@ export default {
       if (!this.isAssetsLoading) this.initialLoading = false
       finalize()
     }
+    this.departmentFilter = this.user.departments
   },
 
   beforeDestroy () {
@@ -425,6 +441,7 @@ export default {
       'assetValidationColumns',
       'currentEpisode',
       'currentProduction',
+      'departments',
       'displayedAssetsByType',
       'episodeMap',
       'openProductions',
@@ -439,7 +456,8 @@ export default {
       'selectedTasks',
       'assetSorting',
       'taskTypeMap',
-      'taskTypes'
+      'taskTypes',
+      'user'
     ]),
 
     newAssetPath () {
@@ -1050,5 +1068,10 @@ export default {
 
 .main-column {
   border-right: 3px solid $light-grey;
+}
+
+.combobox-department {
+  margin-bottom: 0px;
+  padding-right: 20px;
 }
 </style>

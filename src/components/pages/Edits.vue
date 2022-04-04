@@ -24,6 +24,16 @@
                   icon="funnel"
                   @click="() => modals.isBuildFilterDisplayed = true"
                 />
+                <combobox-department
+                  class="combobox-department flexrow-item"
+                  :selectable-departments="departments"
+                  :value="selectedDepartment"
+                  :dispay-all-and-my-departments="true"
+                  :width="250"
+                  @input="onSelectedDepartment"
+                  v-model="selectedDepartment"
+                  v-if="departments.length > 0"
+                />
               </div>
             </div>
           </div>
@@ -86,6 +96,7 @@
         :is-loading="isEditsLoading || initialLoading"
         :is-error="isEditsLoadingError"
         :validation-columns="editValidationColumns"
+        :department-filter="departmentFilter"
         @add-metadata="onAddMetadataClicked"
         @change-sort="onChangeSortClicked"
         @create-tasks="showCreateTasksModal"
@@ -257,6 +268,7 @@ import AddThumbnailsModal from '../modals/AddThumbnailsModal'
 import BigThumbnailsButton from '../widgets/BigThumbnailsButton'
 import BuildFilterModal from '../modals/BuildFilterModal'
 import ButtonSimple from '../widgets/ButtonSimple'
+import ComboboxDepartment from '../widgets/ComboboxDepartment'
 import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../modals/DeleteModal'
 import EditEditModal from '../modals/EditEditModal'
@@ -282,6 +294,7 @@ export default {
     BigThumbnailsButton,
     BuildFilterModal,
     ButtonSimple,
+    ComboboxDepartment,
     CreateTasksModal,
     DeleteModal,
     EditEditModal,
@@ -310,6 +323,8 @@ export default {
       editToDelete: null,
       editToEdit: null,
       taskTypeForTaskDeletion: null,
+      selectedDepartment: 'MY_DEPARTMENTS',
+      departmentFilter: [],
       modals: {
         isAddMetadataDisplayed: false,
         isAddThumbnailsDisplayed: false,
@@ -408,6 +423,7 @@ export default {
       'currentEpisode',
       'currentProduction',
       'displayedEdits',
+      'departments',
       'episodeMap',
       'episodes',
       'isCurrentUserClient',
@@ -1035,5 +1051,10 @@ export default {
 
 .main-column {
   border-right: 3px solid $light-grey;
+}
+
+.combobox-department {
+  margin-bottom: 0px;
+  padding-right: 20px;
 }
 </style>
