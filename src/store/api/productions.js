@@ -96,6 +96,18 @@ export default {
     return client.pdel(path)
   },
 
+  addStatusAutomationToProduction (productionId, statusAutomationId) {
+    const data = { status_automation_id: statusAutomationId }
+    const path = `/api/data/projects/${productionId}/settings/status-automations`
+    return client.ppost(path, data)
+  },
+
+  removeStatusAutomationFromProduction (productionId, statusAutomationId) {
+    const path =
+      `/api/data/projects/${productionId}/settings/status-automations/${statusAutomationId}`
+    return client.pdel(path)
+  },
+
   addMetadataDescriptor (productionId, descriptor) {
     return new Promise((resolve, reject) => {
       const data = {

@@ -3,6 +3,7 @@
   <task-type-name
     :task-type="taskType"
     :production-id="productionId"
+    :disable="disable"
   />
 </td>
 </template>
@@ -26,6 +27,10 @@ export default {
     productionId: {
       type: String,
       default: null
+    },
+    disable: {
+      type: Boolean,
+      default: false
     }
   },
 

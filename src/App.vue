@@ -774,7 +774,8 @@ a:hover {
 }
 
 .canceled td:not(.actions),
-.canceled th {
+.canceled th,
+.canceled {
   text-decoration: line-through;
 }
 

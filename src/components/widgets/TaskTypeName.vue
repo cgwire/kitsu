@@ -12,7 +12,7 @@
 </router-link>
 <div
   class="tag task-type-name no-link"
-  :class="{ deletable }"
+  v-bind:class="[{ deletable }, !disable ? '' : 'canceled']"
   :style="{ 'border-left': '4px solid ' + color }"
   v-else
 >
@@ -43,12 +43,17 @@ export default {
     deletable: {
       type: Boolean,
       default: false
+    },
+    disable: {
+      type: Boolean,
+      default: false
     }
   },
 
   computed: {
     ...mapGetters([
-      'isCurrentUserClient'
+      'isCurrentUserClient',
+      'isTaskTypePriorityHigherById'
     ]),
 
     color () {

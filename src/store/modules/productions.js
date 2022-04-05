@@ -45,6 +45,8 @@ import {
   PRODUCTION_REMOVE_TASK_TYPE,
   PRODUCTION_ADD_TASK_STATUS,
   PRODUCTION_REMOVE_TASK_STATUS,
+  PRODUCTION_ADD_STATUS_AUTOMATION,
+  PRODUCTION_REMOVE_STATUS_AUTOMATION,
   ASSIGN_TASKS,
 
   ADD_METADATA_DESCRIPTOR_END,
@@ -176,6 +178,21 @@ const getters = {
           .map(id => rootState.taskStatus.taskStatusMap.get(id))
       )
     }
+  },
+
+  productionStatusAutomations: (state, getters, rootState) => {
+    if (helpers.isEmptyArray(state.currentProduction, 'status_automations')) {
+      return rootState.statusAutomations.statusAutomations
+    } else {
+      return state.currentProduction.status_automations
+        .map(id => rootState.statusAutomations.statusAutomationMap.get(id))
+    }
+  },
+
+  remainingStatusAutomations: (state, getters, rootState, rootGetters) => {
+    return rootState.statusAutomations.statusAutomations
+      .filter(s => !state.currentProduction.status_automations.includes(s.id) &&
+      !rootGetters.isStatusAutomationDisabled(s))
   },
 
   productionTaskTypes: (state, getters, rootState) => {
@@ -459,6 +476,22 @@ const actions = {
     )
   },
 
+  addStatusAutomationToProduction ({ commit, state }, statusAutomationId) {
+    commit(PRODUCTION_ADD_STATUS_AUTOMATION, statusAutomationId)
+    return productionsApi.addStatusAutomationToProduction(
+      state.currentProduction.id,
+      statusAutomationId
+    )
+  },
+
+  removeStatusAutomationFromProduction ({ commit, state }, statusAutomationId) {
+    commit(PRODUCTION_REMOVE_STATUS_AUTOMATION, statusAutomationId)
+    return productionsApi.removeStatusAutomationFromProduction(
+      state.currentProduction.id,
+      statusAutomationId
+    )
+  },
+
   addMetadataDescriptor ({ commit, state }, descriptor) {
     if (descriptor.id) {
       const previousDescriptorFieldName =
@@ -645,6 +678,7 @@ const mutations = {
       newProduction.task_statuses = []
       newProduction.asset_types = []
       newProduction.task_types = []
+      newProduction.status_automations = []
       state.productions.push(newProduction)
       state.productionMap.set(newProduction.id, newProduction)
       if (!openProduction) {
@@ -771,6 +805,14 @@ const mutations = {
 
   [PRODUCTION_REMOVE_TASK_TYPE] (state, taskTypeId) {
     removeFromIdList(state.currentProduction, 'task_types', taskTypeId)
+  },
+
+  [PRODUCTION_ADD_STATUS_AUTOMATION] (state, statusAutomationId) {
+    addToIdList(state.currentProduction, 'status_automations', statusAutomationId)
+  },
+
+  [PRODUCTION_REMOVE_STATUS_AUTOMATION] (state, statusAutomationId) {
+    removeFromIdList(state.currentProduction, 'status_automations', statusAutomationId)
   },
 
   [ADD_METADATA_DESCRIPTOR_END] (state, { production, descriptor }) {

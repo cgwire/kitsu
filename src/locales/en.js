@@ -114,6 +114,36 @@ export default {
     }
   },
 
+  status_automations: {
+    create_error: 'An error occurred while saving this status automation. Are you sure that there is no other action with the same name?',
+    delete_text: 'Are you sure you want to remove status automation {name} from your database?',
+    delete_error: 'An error occurred while deleting this status automation.',
+    edit_title: 'Edit a status automation',
+    number: 'status automation | status automations',
+    run_for_selection: 'Run status automation for selected tasks:',
+    title: 'Status Automations',
+    in_title: 'IN',
+    out_title: 'OUT',
+    new_status_automation: 'Add status automation',
+    fields: {
+      entity_type: 'Entity Type',
+      in_field_type: 'Input Field Type',
+      in_task_type: 'Input Type',
+      in_task_status: 'Input Status',
+      out_field_type: 'Output Field Type',
+      out_task_type: 'Output Type',
+      out_task_status: 'Output Status'
+    },
+    entity_types: {
+      asset: 'Asset',
+      shot: 'Shot'
+    },
+    field_types: {
+      status: 'Status',
+      ready_for: 'Ready For'
+    }
+  },
+
   departments: {
     all_asset_types: 'All departments',
     create_error: 'An error occurred while saving this department. Are you sure there is no department with similar name?',

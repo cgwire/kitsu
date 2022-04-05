@@ -738,7 +738,8 @@ describe('Productions store', () => {
         team: [],
         task_statuses: [],
         asset_types: [],
-        task_types: []
+        task_types: [],
+        status_automations: [],
       })
     })
 
