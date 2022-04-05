@@ -33,7 +33,8 @@
     >
       <div
         class="department-line"
-        v-for="department in departmentList"
+        v-for="department in departmentList.filter(
+          (departement) => departement.id !== this.value)"
         @click="selectDepartment(department)"
         :key="department.id"
       >
@@ -109,8 +110,9 @@ export default {
     ]),
 
     departmentsToTakeAccount () {
-      if (this.selectableDepartments) return this.selectableDepartments
-      return this.departments
+      const departments = (this.selectableDepartments)
+        ? [...this.selectableDepartments] : [...this.departments]
+      return departments.sort((a, b) => a.name.localeCompare(b.name))
     },
 
     departmentList () {
