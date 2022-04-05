@@ -201,15 +201,19 @@ export default {
   computed: {
     ...mapGetters([
       'departments',
-      'departmentMap'
+      'departmentMap',
+      'currentProduction',
+      'taskTypeMap'
     ]),
 
     selectableDepartments () {
-      return this.departments.filter(department => {
-        return this.form.departments.findIndex(
-          selectedDepartment => selectedDepartment === department.id
-        ) === -1
-      })
+      return this.currentProduction.task_types
+        .map((taskType) =>
+          this.departmentMap.get(this.taskTypeMap.get(taskType).department_id))
+        .filter((department, index, self) =>
+          department && (self.indexOf(department) === index) &&
+          this.form.departments.findIndex(
+            selectedDepartment => selectedDepartment === department.id) === -1)
     },
 
     isFormFilled () {

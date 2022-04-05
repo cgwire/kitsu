@@ -24,7 +24,7 @@
                 />
                 <combobox-department
                   class="combobox-department flexrow-item"
-                  :selectable-departments="departments"
+                  :selectable-departments="selectableDepartments()"
                   :value="selectedDepartment"
                   :dispay-all-and-my-departments="true"
                   :width="250"
@@ -457,7 +457,8 @@ export default {
       'assetSorting',
       'taskTypeMap',
       'taskTypes',
-      'user'
+      'user',
+      'departmentMap'
     ]),
 
     newAssetPath () {

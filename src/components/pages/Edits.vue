@@ -26,7 +26,7 @@
                 />
                 <combobox-department
                   class="combobox-department flexrow-item"
-                  :selectable-departments="departments"
+                  :selectable-departments="selectableDepartments()"
                   :value="selectedDepartment"
                   :dispay-all-and-my-departments="true"
                   :width="250"
@@ -416,6 +416,7 @@ export default {
       if (!this.isEditsLoading) this.initialLoading = false
       finalize()
     }
+    this.departmentFilter = this.user.departments
   },
 
   computed: {
@@ -447,7 +448,9 @@ export default {
       'editValidationColumns',
       'editListScrollPosition',
       'editSorting',
-      'taskTypeMap'
+      'taskTypeMap',
+      'user',
+      'departmentMap'
     ]),
 
     searchField () {

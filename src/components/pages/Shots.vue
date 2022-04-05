@@ -31,7 +31,7 @@
                 />
                 <combobox-department
                   class="combobox-department flexrow-item"
-                  :selectable-departments="departments"
+                  :selectable-departments="selectableDepartments()"
                   :value="selectedDepartment"
                   :dispay-all-and-my-departments="true"
                   :width="250"
@@ -477,7 +477,8 @@ export default {
       'shotListScrollPosition',
       'shotSorting',
       'taskTypeMap',
-      'user'
+      'user',
+      'departmentMap'
     ]),
 
     searchField () {
