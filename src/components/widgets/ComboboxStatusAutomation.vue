@@ -181,8 +181,6 @@ export default {
 
 .status-automation-combo {
   background: $white;
-  // min-width: 500px;
-  // width: 500px;
   border: 1px solid $light-grey-light;
   user-select: none;
   cursor: pointer;
@@ -227,13 +225,12 @@ export default {
 
 .select-input {
   background: $white;
-  // width: 300px;
   position: absolute;
   border: 1px solid $light-grey-light;
   z-index: 300;
   margin-left: -1px;
   max-height: 180px;
-  top: 33px;
+  top: 54px;
   left: 0;
   overflow-y: auto;
 }

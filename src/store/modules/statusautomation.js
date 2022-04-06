@@ -1,4 +1,5 @@
-import statusAutomationsApi from '../api/statusautomation'
+import statusAutomationsApi from '@/store/api/statusautomation'
+import { removeModelFromList } from '@/lib/models'
 
 import {
   LOAD_STATUS_AUTOMATIONS_START,
@@ -13,8 +14,6 @@ import {
 
 const initialState = {
   statusAutomations: [],
-  isStatusAutomationsLoading: false,
-  isStatusAutomationsLoadingError: false,
 
   editStatusAutomation: {
     isLoading: false,
@@ -33,19 +32,17 @@ const getters = {
   statusAutomations: state => state.statusAutomations,
   statusAutomationMap: state => state.statusAutomationMap,
 
-  isStatusAutomationsLoading: state => state.isStatusAutomationsLoading,
-  isStatusAutomationsLoadingError: state => state.isStatusAutomationsLoadingError,
-
-  editStatusAutomation: state => state.editStatusAutomation,
-  deleteStatusAutomation: state => state.deleteStatusAutomation,
-
-  /* If automation in production automations and if
-   * out field type is not ready for and IN priority is below OUT priority
-  */
-  isStatusAutomationDisabled: (state, getters, rootState, rootGetters) => (statusAutomation) => {
-    return statusAutomation.out_field_type !== 'ready_for' &&
-    !rootGetters.isTaskTypePriorityHigherById(statusAutomation.out_task_type_id, statusAutomation.in_task_type_id)
-  }
+  // Used to know if the automation will apply in the current production.
+  isStatusAutomationDisabled: (state, getters, rootState, rootGetters) =>
+    (statusAutomation) => {
+      return (
+        statusAutomation.out_field_type !== 'ready_for' &&
+        !rootGetters.isTaskTypePriorityHigherById(
+          statusAutomation.out_task_type_id,
+          statusAutomation.in_task_type_id
+        )
+      )
+    }
 }
 
 const actions = {
@@ -106,21 +103,22 @@ const mutations = {
     })
   },
 
-  [EDIT_STATUS_AUTOMATION_END] (state, newStatusAutomation) {
-    const statusAutomation = getters.statusAutomation(state)(newStatusAutomation.id)
-
-    if (statusAutomation && statusAutomation.id) {
-      Object.assign(statusAutomation, newStatusAutomation)
+  [EDIT_STATUS_AUTOMATION_END] (state, newAutomation) {
+    const automation = state.statusAutomationMap.get(newAutomation.id)
+    if (automation && automation.id) {
+      Object.assign(automation, newAutomation)
     } else {
-      state.statusAutomations.push(newStatusAutomation)
+      state.statusAutomations.push(newAutomation)
     }
+    state.statusAutomationMap.set(newAutomation.id, newAutomation)
   },
 
   [DELETE_STATUS_AUTOMATION_END] (state, statusAutomationToDelete) {
-    const statusAutomationToDeleteIndex = state.statusAutomations.findIndex(
-      (statusAutomation) => statusAutomation.id === statusAutomationToDelete.id
+    state.statusAutomations = removeModelFromList(
+      state.statusAutomations,
+      statusAutomationToDelete
     )
-    state.statusAutomations.splice(statusAutomationToDeleteIndex, 1)
+    state.statusAutomationMap.delete(statusAutomationToDelete.id)
   },
 
   [RESET_ALL] (state) {

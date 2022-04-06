@@ -105,7 +105,7 @@
            </p>
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'status-automations'}">
-               <git-pull-request-icon size="0.9x" />
+               <tool-icon size="0.9x" />
                {{ $t("status_automations.title") }}
              </router-link>
            </p>
@@ -147,6 +147,7 @@ import {
   HexagonIcon,
   ListIcon,
   SettingsIcon,
+  ToolIcon,
   UsersIcon
 } from 'vue-feather-icons'
 
@@ -164,6 +165,7 @@ export default {
     HexagonIcon,
     ListIcon,
     SettingsIcon,
+    ToolIcon,
     UsersIcon
   },
 

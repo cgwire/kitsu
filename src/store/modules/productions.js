@@ -182,7 +182,7 @@ const getters = {
 
   productionStatusAutomations: (state, getters, rootState) => {
     if (helpers.isEmptyArray(state.currentProduction, 'status_automations')) {
-      return rootState.statusAutomations.statusAutomations
+      return []
     } else {
       return state.currentProduction.status_automations
         .map(id => rootState.statusAutomations.statusAutomationMap.get(id))

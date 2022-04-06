@@ -115,24 +115,28 @@ export default {
   },
 
   status_automations: {
+    change_ready_for: 'changes "ready for" to',
+    change_status: 'changes task status to',
     create_error: 'An error occurred while saving this status automation. Are you sure that there is no other action with the same name?',
     delete_text: 'Are you sure you want to remove status automation {name} from your database?',
     delete_error: 'An error occurred while deleting this status automation.',
     edit_title: 'Edit a status automation',
+    entity_title: 'Entity type concerned by the trigger',
     number: 'status automation | status automations',
+    in_title: 'Status triggering a change',
+    out_title: 'The change that will be applied on trigger firing',
+    new_status_automation: 'Add status automation',
     run_for_selection: 'Run status automation for selected tasks:',
     title: 'Status Automations',
-    in_title: 'IN',
-    out_title: 'OUT',
-    new_status_automation: 'Add status automation',
+    wrong_automation: 'This automation applies on a backward task type. It is not permitted by Kitsu (to avoid cycles). It will have no effect.',
     fields: {
       entity_type: 'Entity Type',
       in_field_type: 'Input Field Type',
-      in_task_type: 'Input Type',
-      in_task_status: 'Input Status',
-      out_field_type: 'Output Field Type',
-      out_task_type: 'Output Type',
-      out_task_status: 'Output Status'
+      in_task_type: 'Task Type',
+      in_task_status: 'Task Status',
+      out_field_type: 'Trigger',
+      out_task_type: 'Applied Task Type',
+      out_task_status: 'Applied Task Status'
     },
     entity_types: {
       asset: 'Asset',
@@ -774,7 +778,8 @@ export default {
       show_hd_default: 'Show picture with HD quality by default'
     },
     production: {
-      empty_list: 'The list is currently empty. It means that all data from the main settings are available to users. Add some entries to limit choices for this production.'
+      empty_list: 'The list is currently empty. It means that all data from the main settings are available to users. Add some entries to limit choices for this production.',
+      empty_automation_list: 'There is no automation set for this production.'
     },
     save: {
       button: 'Save settings',

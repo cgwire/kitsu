@@ -13,7 +13,9 @@
           <th scope="col" class="in-task-status">
             {{ $t('status_automations.fields.in_task_status') }}
           </th>
-          <th scope="col" class="separator">====></th>
+          <th scope="col" class="automation-type">
+            {{ $t('status_automations.fields.out_field_type') }}
+          </th>
           <th scope="col" class="out-task-type">
             {{ $t('status_automations.fields.out_task_type') }}
           </th>
@@ -24,51 +26,61 @@
         </tr>
       </thead>
       <tbody class="datatable-body">
-        <tr class="datatable-row"
+        <tr
+          class="datatable-row"
           v-for="statusAutomation in entries"
-          v-bind:class="[isStatusAutomationDisabled(statusAutomation) ? 'canceled' : '']"
           :key="statusAutomation.id"
         >
           <th scope="row" class="name">
-            {{ statusAutomation.entity_type }}
+            <div class="flexrow">
+              <span
+                class="flexrow-item"
+                :title="$t('status_automations.wrong_automation')"
+                v-if="isStatusAutomationDisabled(statusAutomation)"
+              >
+                <alert-triangle-icon/>
+              </span>
+              <span
+                class="flexrow-item"
+              >
+                {{ statusAutomation.entity_type }}
+              </span>
+            </div>
           </th>
           <task-type-name
             class="in-task-type"
             :task-type="getTaskType(statusAutomation.in_task_type_id)"
-            :disable="isStatusAutomationDisabled(statusAutomation)"
           />
           <task-status-name class="in-task-status"
-            v-if="statusAutomation.in_field_type === 'status'"
             :entry="getTaskStatus(statusAutomation.in_task_status_id)"
-            :disable="isStatusAutomationDisabled(statusAutomation)"
           />
           <td class="input-separator">
-            =={{ statusAutomation.out_field_type === 'ready_for' ? 'Ready For' : '' }}==>
+            {{
+              statusAutomation.out_field_type === 'ready_for'
+              ? $t('status_automations.change_ready_for')
+              : $t('status_automations.change_status')
+            }}
           </td>
           <task-type-name
             class="out-task-type"
             :task-type="getTaskType(statusAutomation.out_task_type_id)"
-            :disable="isStatusAutomationDisabled(statusAutomation)"
           />
           <task-status-name class="out-task-status"
             v-if="statusAutomation.out_field_type === 'status'"
             :entry="getTaskStatus(statusAutomation.out_task_status_id)"
-            :disable="isStatusAutomationDisabled(statusAutomation)"
           />
-          <td class="name out-task-status"
-          v-else
+          <td
+            class="name out-task-status"
+            v-else
           >
-            ---------------
           </td>
           <row-actions-cell
-            v-if="isEditable"
             :entry-id="statusAutomation.id"
             @edit-clicked="$emit('edit-clicked', statusAutomation)"
             @delete-clicked="$emit('delete-clicked', statusAutomation)"
+            v-if="isEditable"
           />
-          <td
-          v-else
-          >
+          <td v-else>
             <button
               class="button"
               @click="removeStatusAutomation(statusAutomation.id)"
@@ -97,6 +109,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { formatListMixin } from '@/components/mixins/format'
 
+import { AlertTriangleIcon } from 'vue-feather-icons'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskTypeName from '../cells/TaskTypeName'
@@ -106,6 +119,13 @@ export default {
   name: 'status-automation-list',
   mixins: [formatListMixin],
 
+  components: {
+    AlertTriangleIcon,
+    RowActionsCell,
+    TableInfo,
+    TaskTypeName,
+    TaskStatusName
+  },
   props: [
     'entries',
     'isLoading',
@@ -115,12 +135,7 @@ export default {
   data () {
     return {}
   },
-  components: {
-    RowActionsCell,
-    TableInfo,
-    TaskTypeName,
-    TaskStatusName
-  },
+
   computed: {
     ...mapGetters([
       'getTaskStatus',
@@ -148,10 +163,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;
+}
+
+.name {
+  text-transform: capitalize;
+  width: 120px;
+  min-width: 120px;
 }
 
 .in-task-type {
@@ -181,5 +201,9 @@ export default {
 
 .thead {
   width: 100%
+}
+
+.nb-status-automations {
+  color: var(--text);
 }
 </style>

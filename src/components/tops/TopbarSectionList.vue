@@ -182,7 +182,8 @@ export default {
 
   &:hover {
     background: #EEE;
-  } }
+  }
+}
 
 .down-icon {
   width: 15px;
@@ -199,7 +200,7 @@ export default {
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   margin-left: -6px;
-  max-height: 410px;
+  max-height: 435px;
   min-width: 180px;
   overflow-y: auto;
   padding: 5px;

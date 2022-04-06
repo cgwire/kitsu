@@ -1,41 +1,48 @@
 <template>
-<router-link
-  :to="statusAutomationPath"
-  v-if="productionId && !isCurrentUserClient"
+<div
+  class="status-automation flexrow"
 >
-  <span
-    class="status-automation"
-    v-if="statusAutomation"
-  >
+  <span class="flexrow-item entity-type">
     {{ statusAutomation.entity_type }}
   </span>
-
-</router-link>
-<div
-  class="tag status-automation no-link"
-  :class="{ deletable }"
-  v-else
->
-  {{ statusAutomation.entity_type }}
-  <task-type-name
-    class="in-task-type"
-    :task-type="getTaskType(statusAutomation.in_task_type_id)"
-  />
-  <task-status-name class="in-task-status"
-    v-if="statusAutomation.in_field_type === 'status'"
-    :entry="getTaskStatus(statusAutomation.in_task_status_id)"
-  />
-  <span class="input-separator">
-    =={{ statusAutomation.out_field_type === 'ready_for' ? 'Ready For' : '' }}==>
+  <span class="in-task-type flexrow-item">
+    <task-type-name
+      class="in-task-type flexrow-item"
+      :task-type="getTaskType(statusAutomation.in_task_type_id)"
+    />
   </span>
-  <task-type-name
-    class="out-task-type"
-    :task-type="getTaskType(statusAutomation.out_task_type_id)"
-  />
-  <task-status-name class="out-task-status"
+  <span class="in-task-status flexrow-item">
+    <task-status-name
+      :entry="getTaskStatus(statusAutomation.in_task_status_id)"
+      v-if="statusAutomation.in_field_type !== 'ready_for'"
+    />
+  </span>
+  <span class="flexrow-item trigger-type">
+    changes {{
+      statusAutomation.out_field_type === 'ready_for'
+      ? 'ready for to'
+      : 'task status for'
+    }}
+  </span>
+  <span
+    class="out-task-type flexrow-item"
+  >
+    <task-type-name
+      :task-type="getTaskType(statusAutomation.out_task_type_id)"
+    />
+  </span>
+  <span
+    class="flexrow-item"
     v-if="statusAutomation.out_field_type === 'status'"
-    :entry="getTaskStatus(statusAutomation.out_task_status_id)"
-  />
+  >
+    to
+  </span>
+  <span class="out-task-status flexrow-item">
+    <task-status-name
+      :entry="getTaskStatus(statusAutomation.out_task_status_id)"
+      v-if="statusAutomation.out_field_type === 'status'"
+    />
+  </span>
 </div>
 </template>
 
@@ -101,42 +108,30 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.tag {
-  border-radius: 0;
+.status-automation {
+  text-transform: none;
   color: var(--text);
-  font-size: 0.9em;
-  font-weight: bold;
-  line-height: 0.8em;
-  padding: 0 0.7em;
-  margin: 0;
+  padding: 1em;
 }
 
-.tag.deletable {
-  padding-right: 0;
+.flexrow-item {
+  text-align: left;
 }
 
-.dark .tag {
-  background: $dark-grey-lightest;
+.entity-type {
+  text-transform: capitalize;
+  min-width: 40px;
 }
 
-.delete-times:hover {
-  cursor: pointer;
+.in-task-type {
+  text-align: left;
 }
 
-.delete-times {
-  font-size: 1.2rem;
-  font-weight: bold;
-  padding-left: 7px;
-  padding-bottom: 2px;
-  padding-right: 0.7rem;
+.out-task-status {
+min-width: 100px;
 }
 
-.delete-times:hover {
-  color: black
-}
-
-.no-link {
-  color: var(--text);
-  cursor: default;
+.trigger-type {
+  min-width: 160px;
 }
 </style>

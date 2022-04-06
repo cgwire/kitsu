@@ -4,7 +4,7 @@
       <template v-if="remainingStatusAutomations.length > 0">
         <div
           class="flexrow mt1 mb1 add-status-automation"
-          v-if="!isEmpty(remainingStatusAutomations)"
+          v-if="remainingStatusAutomations"
         >
           <combobox-status-automation
             class="flexrow-item selector"
@@ -22,21 +22,22 @@
 
       <div
         class="box"
-        v-if="isEmpty(currentProduction.status_automations)"
+        v-if="isEmpty(productionStatusAutomations)"
       >
-        {{ $t('settings.production.empty_list') }}
+        {{ $t('settings.production.empty_automation_list') }}
       </div>
 
       <status-automation-list
         :entries="productionStatusAutomations"
+        v-if="!isEmpty(productionStatusAutomations)"
       />
   </div>
 </div>
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import ComboboxStatusAutomation from '@/components/widgets/ComboboxStatusAutomation'
 import StatusAutomationList from '@/components/lists/StatusAutomationList'
-import ComboboxStatusAutomation from '../../widgets/ComboboxStatusAutomation.vue'
 
 export default {
   name: 'production-status-automations',
@@ -48,6 +49,7 @@ export default {
 
   data () {
     return {
+      statusAutomations: [],
       statusAutomationId: ''
     }
   },
@@ -62,7 +64,6 @@ export default {
     ...mapGetters([
       'currentProduction',
       'productionStatusAutomations',
-      'statusAutomations',
       'statusAutomationMap',
       'remainingStatusAutomations'
     ])
@@ -77,10 +78,6 @@ export default {
       return !list || list.length === 0
     },
 
-    resetDisplayedStatusAutomations () {
-      this.resetStatusAutomations()
-    },
-
     addStatusAutomation () {
       this.addStatusAutomationToProduction(this.statusAutomationId)
       if (this.remainingStatusAutomations.length > 0) {
@@ -89,29 +86,10 @@ export default {
         // Clean data to avoid duplicated data in combobox
         this.statusAutomationId = ''
       }
-    },
-
-    /*
-      Return an object with the following structure:
-      {
-        title: 'title of the first column of the tab (Assets or short)',
-        list:  [{taskTypes, scheduleItem}]
-        // A list of objects that represents a couple of taskType and their
-        linked scheduleItem.
-      }
-    */
-    resetStatusAutomations () {
-      this.statusAutomations = this.productionStatusAutomations
     }
   },
 
   watch: {
-    currentProduction: {
-      handler () {
-        this.resetDisplayedStatusAutomations()
-      },
-      deep: true
-    }
   }
 }
 </script>

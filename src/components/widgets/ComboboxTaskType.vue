@@ -25,7 +25,8 @@
     </div>
     <div
       :class="{
-        'select-input': true
+        'select-input': true,
+        'open-top': openTop
       }"
       ref="select"
       v-if="showTaskTypeList"
@@ -90,6 +91,10 @@ export default {
       type: Boolean
     },
     addPlaceholder: {
+      default: false,
+      type: Boolean
+    },
+    openTop: {
       default: false,
       type: Boolean
     }
@@ -187,6 +192,10 @@ export default {
   margin-left: -1px;
   max-height: 200px;
   overflow-y: auto;
+
+  &.open-top {
+    bottom: 41px;
+  }
 }
 
 .task-type-combo.shy {

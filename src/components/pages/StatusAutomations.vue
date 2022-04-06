@@ -49,8 +49,8 @@ export default {
   components: {
     DeleteModal,
     EditStatusAutomationModal,
-    StatusAutomationList,
-    ListPageHeader
+    ListPageHeader,
+    StatusAutomationList
   },
 
   data () {
@@ -103,9 +103,9 @@ export default {
 
   methods: {
     ...mapActions([
-      'loadTaskStatuses',
       'deleteStatusAutomation',
       'editStatusAutomation',
+      'loadTaskStatuses',
       'loadStatusAutomations',
       'newStatusAutomation'
     ]),
@@ -127,7 +127,7 @@ export default {
         .catch((err) => {
           console.error(err)
           this.errors.edit = true
-          this.modals.isNewDisplayed = false
+          this.loading.edit = false
         })
     },
 
