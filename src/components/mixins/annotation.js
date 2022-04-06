@@ -393,7 +393,8 @@ export const annotationMixin = {
         scaleY: obj.scaleY * scaleMultiplierY,
         angle: obj.angle,
         scale: obj.scale,
-        editable: true
+        editable: !this.isCurrentUserArtist,
+        selectable: !this.isCurrentUserArtist
       }
       if (obj.type === 'path') {
         let strokeMultiplier = 1
@@ -415,10 +416,10 @@ export const annotationMixin = {
           ml: false,
           mr: false,
           bl: false,
-          br: true,
+          br: !this.isCurrentUserArtist,
           tl: false,
           tr: false,
-          mtr: true
+          mtr: !this.isCurrentUserArtist
         })
         this.$options.silentAnnnotation = true
         this.fabricCanvas.add(path)
@@ -443,10 +444,10 @@ export const annotationMixin = {
           ml: false,
           mr: false,
           bl: false,
-          br: true,
+          br: !this.isCurrentUserArtist,
           tl: false,
           tr: false,
-          mtr: true
+          mtr: !this.isCurrentUserArtist
         })
         this.$options.silentAnnnotation = true
         this.fabricCanvas.add(text)
