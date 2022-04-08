@@ -895,7 +895,7 @@ export default {
     export_quotas: 'Export quotas',
     frames: 'Frames',
     highlight_quotas: 'Highlight quotas below:',
-    month: 'Month,',
+    month: 'Month',
     month_label: 'Month',
     no_quota: 'There is no quota for this task type.',
     name: 'Name',
