@@ -106,7 +106,9 @@ export default {
   computed: {
     ...mapGetters([
       'departmentMap',
-      'departments'
+      'departments',
+      'isCurrentUserManager',
+      'user'
     ]),
 
     departmentsToTakeAccount () {
@@ -117,9 +119,21 @@ export default {
 
     departmentList () {
       if (this.dispayAllAndMyDepartments) {
-        return [{ name: this.$t('tasks.combobox_departments.my_departments'), id: 'MY_DEPARTMENTS', color: '#000000' },
-          { name: this.$t('tasks.combobox_departments.all_departments'), id: 'ALL', color: '#000000' },
-          ...this.departmentsToTakeAccount]
+        const departmentFilter = [
+          {
+            name: this.$t('tasks.combobox_departments.all_departments'),
+            id: 'ALL',
+            color: '#000000'
+          }]
+        if (!this.isCurrentUserManager && this.user.departments.length > 0) {
+          departmentFilter.unshift(
+            {
+              name: this.$t('tasks.combobox_departments.my_departments'),
+              id: 'MY_DEPARTMENTS',
+              color: '#000000'
+            })
+        }
+        return [...departmentFilter, ...this.departmentsToTakeAccount]
       } else {
         return [{ name: '---', id: null, color: '#000000' },
           ...this.departmentsToTakeAccount]

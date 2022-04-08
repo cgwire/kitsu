@@ -323,7 +323,7 @@ export default {
       editToDelete: null,
       editToEdit: null,
       taskTypeForTaskDeletion: null,
-      selectedDepartment: 'MY_DEPARTMENTS',
+      selectedDepartment: 'ALL',
       departmentFilter: [],
       modals: {
         isAddMetadataDisplayed: false,
@@ -416,7 +416,12 @@ export default {
       if (!this.isEditsLoading) this.initialLoading = false
       finalize()
     }
-    this.departmentFilter = this.user.departments
+    if (!this.isCurrentUserManager && this.user.departments.length > 0) {
+      this.selectedDepartment = 'MY_DEPARTMENTS'
+      this.departmentFilter = this.user.departments
+    } else {
+      this.departmentFilter = []
+    }
   },
 
   computed: {
