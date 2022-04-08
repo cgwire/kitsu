@@ -3,72 +3,64 @@
   <div class="column main-column">
     <div class="assets page">
       <div class="asset-list-header page-header">
-        <div class="level header-title">
-          <div class="level-left flexcolumn">
-            <div class="filters-area flexcolumn-item">
-              <div class="flexrow">
-                <search-field
-                  ref="asset-search-field"
-                  class="flexrow-item"
-                  :can-save="true"
-                  @change="onSearchChange"
-                  @enter="saveSearchQuery"
-                  @save="saveSearchQuery"
-                  placeholder="ex: props modeling=wip"
-                />
-                <button-simple
-                  class="flexrow-item"
-                  :title="$t('entities.build_filter.title')"
-                  icon="funnel"
-                  @click="modals.isBuildFilterDisplayed = true"
-                />
-                <combobox-department
-                  class="combobox-department flexrow-item"
-                  :selectable-departments="selectableDepartments()"
-                  :value="selectedDepartment"
-                  :dispay-all-and-my-departments="true"
-                  :width="250"
-                  @input="onSelectedDepartment"
-                  v-model="selectedDepartment"
-                  v-if="departments.length > 0"
-                />
-              </div>
-            </div>
+        <div class="flexrow mb1">
+          <search-field
+            ref="asset-search-field"
+            class="flexrow-item"
+            :can-save="true"
+            @change="onSearchChange"
+            @enter="saveSearchQuery"
+            @save="saveSearchQuery"
+            placeholder="ex: props modeling=wip"
+          />
+          <button-simple
+            class="flexrow-item"
+            :title="$t('entities.build_filter.title')"
+            icon="funnel"
+            @click="modals.isBuildFilterDisplayed = true"
+          />
+          <combobox-department
+            class="combobox-department flexrow-item"
+            :selectable-departments="selectableDepartments()"
+            :value="selectedDepartment"
+            :dispay-all-and-my-departments="true"
+            :width="230"
+            rounded
+            @input="onSelectedDepartment"
+            v-model="selectedDepartment"
+            v-if="departments.length > 0"
+          />
+          <div class="flexrow-item filler"></div>
+          <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
+            <show-assignations-button class="flexrow-item" />
+            <show-infos-button class="flexrow-item" />
+            <big-thumbnails-button class="flexrow-item" />
           </div>
-
-          <div class="level-right">
-            <div class="flexrow" v-if="!isCurrentUserClient">
-              <show-assignations-button class="flexrow-item" />
-              <show-infos-button class="flexrow-item" />
-              <big-thumbnails-button class="flexrow-item" />
-              <div class="flexrow-item"></div>
-            </div>
-            <div class="flexrow" v-if="isCurrentUserManager">
-              <button-simple
-                class="flexrow-item"
-                :title="$t('entities.thumbnails.title')"
-                icon="image"
-                @click="showAddThumbnailsModal"
-              />
-              <button-simple
-                class="flexrow-item"
-                :title="$t('main.csv.import_file')"
-                icon="upload"
-                @click="showImportModal"
-              />
-              <button-simple
-                class="flexrow-item"
-                icon="download"
-                :title="$t('main.csv.export_file')"
-                @click="onExportClick"
-              />
-              <button-simple
-                class="flexrow-item"
-                :text="$t('assets.new_asset')"
-                icon="plus"
-                @click="showNewModal"
-              />
-            </div>
+          <div class="flexrow" v-if="isCurrentUserManager">
+            <button-simple
+              class="flexrow-item"
+              :title="$t('entities.thumbnails.title')"
+              icon="image"
+              @click="showAddThumbnailsModal"
+            />
+            <button-simple
+              class="flexrow-item"
+              :title="$t('main.csv.import_file')"
+              icon="upload"
+              @click="showImportModal"
+            />
+            <button-simple
+              class="flexrow-item"
+              icon="download"
+              :title="$t('main.csv.export_file')"
+              @click="onExportClick"
+            />
+            <button-simple
+              class="flexrow-item"
+              :text="$t('assets.new_asset')"
+              icon="plus"
+              @click="showNewModal"
+            />
           </div>
         </div>
         <div class="query-list">

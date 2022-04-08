@@ -4,7 +4,11 @@
     {{ label }}
   </label>
   <div
-    class="department-combo"
+    :class="{
+      'department-combo': true,
+      'opened': showDepartmentList,
+      rounded: rounded
+    }"
     v-bind:style="{
       width: width + 'px'
     }"
@@ -27,7 +31,7 @@
       ref="select"
       v-bind:style="{
        'max-height': maxHeightSelectInput + 'px',
-       width: width + 'px'
+       width: width + 2 + 'px'
       }"
       v-if="showDepartmentList"
     >
@@ -95,6 +99,10 @@ export default {
       type: Number
     },
     dispayAllAndMyDepartments: {
+      default: false,
+      type: Boolean
+    },
+    rounded: {
       default: false,
       type: Boolean
     }
@@ -187,8 +195,6 @@ export default {
 
 .department-combo {
   background: $white;
-  min-width: 200px;
-  width: 200px;
   border: 1px solid $light-grey-light;
   user-select: none;
   cursor: pointer;
@@ -229,16 +235,32 @@ export default {
 
 .select-input {
   background: $white;
-  width: 200px;
   position: absolute;
   border: 1px solid $light-grey-light;
   z-index: 300;
   margin-left: -1px;
   max-height: 200px;
   overflow-y: auto;
+  top: 36px;
+  left: 0;
 }
 
 .field .label {
   padding-top: 5px;
+}
+
+.rounded {
+  border-radius: 20px;
+
+  &.opened {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+  }
+
+  .selected-department-line {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    border-radius: 50px;
+  }
 }
 </style>
