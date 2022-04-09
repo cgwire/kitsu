@@ -76,7 +76,6 @@
             :key="columnId"
             :hidden-columns="hiddenColumns"
             :column-id="columnId"
-            :task-type-map="taskTypeMap"
             :validation-style="getValidationStyle(columnId)"
             :left="offsets['validation-' + columnIndexInGrid] ? `${offsets['validation-' + columnIndexInGrid]}px` : '0'"
             type="edits"
@@ -129,7 +128,6 @@
             :key="columnId"
             :hidden-columns="hiddenColumns"
             :column-id="columnId"
-            :task-type-map="taskTypeMap"
             :validation-style="getValidationStyle(columnId)"
             type="edits"
             @show-header-menu="event => {

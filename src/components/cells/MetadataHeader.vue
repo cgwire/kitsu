@@ -6,6 +6,13 @@
     :style="{'left': left}"
   >
     <div class="flexrow">
+      <department-name
+        :key="department.id"
+        :department="department"
+        :only-dot="true"
+        :style="{'padding': '0px 0px'}"
+        v-for="department in currentDepartments"
+      />
       <span class="flexrow-item descriptor-name">
         {{ descriptor.name }}
       </span>
@@ -22,6 +29,9 @@ import {
   ChevronDownIcon
 } from 'vue-feather-icons'
 
+import { mapGetters } from 'vuex'
+import DepartmentName from '@/components/widgets/DepartmentName'
+
 export default {
   name: 'MetadataHeader',
   props: {
@@ -35,8 +45,19 @@ export default {
       default: '0px'
     }
   },
-  components: { ChevronDownIcon }
+  components: { ChevronDownIcon, DepartmentName },
+  computed: {
+    ...mapGetters([
+      'departmentMap',
+      'taskTypeMap'
+    ]),
+
+    currentDepartments () {
+      return this.descriptor.departments.map((departmentId) => this.departmentMap.get(departmentId))
+    }
+  }
 }
+
 </script>
 
 <style lang="scss" scoped>

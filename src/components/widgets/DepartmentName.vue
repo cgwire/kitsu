@@ -4,9 +4,17 @@
   <span
     class="dot"
     :style="{ 'border': '5px solid ' + color }"
+    v-if="!onlyDot"
   >
   </span>
-  <span>
+  <span
+    class="dot"
+    :style="{ 'border': '5px solid ' + color }"
+    :title="department.name"
+    v-if="onlyDot"
+  >
+  </span>
+  <span v-if="!onlyDot">
     {{ department.name }}
   </span>
 </div>
@@ -24,6 +32,10 @@ export default {
     department: {
       type: Object,
       default: null
+    },
+    onlyDot: {
+      type: Boolean,
+      default: false
     }
   },
 

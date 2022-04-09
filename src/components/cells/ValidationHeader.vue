@@ -12,6 +12,12 @@
       class="flexrow validation-content"
       :style="validationStyle"
     >
+      <department-name
+        :department="currentDepartment"
+        :only-dot="true"
+        :style="{'padding': '0px 0px'}"
+        v-if="currentDepartment"
+      />
       <router-link
         class="flexrow-item datatable-dropdown task-type-name"
         style="margin-right: 0;"
@@ -45,6 +51,7 @@ import {
   ChevronDownIcon
 } from 'vue-feather-icons'
 import { mapGetters } from 'vuex'
+import DepartmentName from '@/components/widgets/DepartmentName'
 
 export default {
   name: 'ValidationHeader',
@@ -52,7 +59,6 @@ export default {
     hiddenColumns: Object,
     columnId: String,
     validationStyle: Object,
-    taskTypeMap: Map,
     isStick: {
       type: Boolean,
       default: false
@@ -66,14 +72,20 @@ export default {
       default: 'assets'
     }
   },
-  components: { ChevronDownIcon },
+  components: { ChevronDownIcon, DepartmentName },
   computed: {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
       'isCurrentUserClient',
-      'isTVShow'
-    ])
+      'isTVShow',
+      'departmentMap',
+      'taskTypeMap'
+    ]),
+
+    currentDepartment () {
+      return this.departmentMap.get(this.taskTypeMap.get(this.columnId).department_id)
+    }
   },
   methods: {
     taskTypePath (taskTypeId) {
