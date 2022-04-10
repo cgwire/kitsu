@@ -63,9 +63,20 @@
             </div>
           </th>
 
+          <metadata-header
+            :ref="`editor-${j}`"
+            :key="'sticky-header' + descriptor.id"
+            :descriptor="descriptor"
+            :left="offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'"
+            is-stick
+            @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
+            v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+            v-if="isShowInfos"
+          />
+
           <validation-header
             :ref="`validation-${columnIndexInGrid}`"
-            :key="columnId"
+            :key="'sticky-header' + columnId"
             :hidden-columns="hiddenColumns"
             :column-id="columnId"
             :validation-style="getValidationStyle(columnId)"
@@ -75,17 +86,6 @@
             @show-header-menu="event => showHeaderMenu(columnId, columnIndexInGrid, event)"
             v-for="(columnId, columnIndexInGrid) in stickedDisplayedValidationColumns"
             v-if="!isLoading"
-          />
-
-          <metadata-header
-            :ref="`editor-${j}`"
-            :key="descriptor.id"
-            :descriptor="descriptor"
-            :left="offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'"
-            is-stick
-            @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
-            v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-            v-if="isShowInfos"
           />
 
           <th
@@ -131,7 +131,7 @@
           </th>
 
           <metadata-header
-            :key="descriptor.id"
+            :key="'header' + descriptor.id"
             :descriptor="descriptor"
             @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
             v-for="descriptor in nonStickedVisibleMetadataDescriptors"
@@ -139,7 +139,7 @@
           />
 
           <validation-header
-            :key="columnId"
+            :key="'header' + columnId"
             :hidden-columns="hiddenColumns"
             :column-id="columnId"
             :title="taskTypeMap.get(columnId).name"
@@ -190,7 +190,7 @@
 
       <tbody
         class="datatable-body"
-        :key="getGroupKey(group, k, 'asset_type_id')"
+        :key="'group-' + getGroupKey(group, k, 'asset_type_id')"
         v-for="(group, k) in displayedAssets"
         v-if="!isLoading && isListVisible"
       >
@@ -207,7 +207,7 @@
         <tr
           class="datatable-row"
           scope="row"
-          :key="asset.id"
+          :key="'row' + asset.id"
           :class="{canceled: asset.canceled}"
           v-for="(asset, i) in group"
         >
@@ -264,7 +264,7 @@
             class="metadata-descriptor datatable-row-header"
             :title="asset.data ? asset.data[descriptor.field_name] : ''"
             :style="{'left': offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'}"
-            :key="asset.id + '-' + descriptor.id"
+            :key="'sticky-desc-' + asset.id + '-' + descriptor.id"
             v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
             v-if="isShowInfos"
           >
@@ -286,7 +286,7 @@
             >
               <option
                 v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
-                :key="`${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+                :key="`sticky-desc-value-${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
                 :value="option.value"
                 :selected="getMetadataFieldValue(descriptor, asset) === option.value"
               >
@@ -306,7 +306,7 @@
               'hidden-validation-cell': hiddenColumns[columnId],
               'datatable-row-header': true
             }"
-            :key="columnId + '-' + asset.id"
+            :key="'sticky-validation-' + columnId + '-' + asset.id"
             :column="taskTypeMap.get(columnId)"
             :entity="asset"
             :task-test="taskMap.get(asset.validations.get(columnId))"
@@ -370,7 +370,7 @@
           <td
             class="metadata-descriptor"
             :title="asset.data ? asset.data[descriptor.field_name] : ''"
-            :key="asset.id + '-' + descriptor.id"
+            :key="'desc' + asset.id + '-' + descriptor.id"
             v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
             v-if="isShowInfos"
           >
@@ -392,7 +392,7 @@
             >
               <option
                 v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
-                :key="`${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+                :key="`desc-value-${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
                 :value="option.value"
                 :selected="getMetadataFieldValue(descriptor, asset) === option.value"
               >
@@ -411,7 +411,7 @@
               'validation-cell': !hiddenColumns[columnId],
               'hidden-validation-cell': hiddenColumns[columnId]
             }"
-            :key="columnId + '-' + asset.id"
+            :key="'validation' + columnId + '-' + asset.id"
             :column="taskTypeMap.get(columnId)"
             :entity="asset"
             :task-test="taskMap.get(asset.validations.get(columnId))"

@@ -324,6 +324,26 @@
           />
 
           <!-- Fixed attributes -->
+          <td
+            class="time-spent selectable"
+            v-if="!isCurrentUserClient &&
+                  isShowInfos &&
+                  isShotTime &&
+                  metadataDisplayHeaders.timeSpent"
+          >
+            {{ formatDuration(shot.timeSpent) }}
+          </td>
+
+          <td
+            class="estimation selectable"
+            v-if="!isCurrentUserClient &&
+                  isShowInfos &&
+                  isShotEstimation &&
+                  metadataDisplayHeaders.estimation"
+          >
+            {{ formatDuration(shot.estimation) }}
+          </td>
+
           <td class="frames"
             v-if="isFrames && isShowInfos && metadataDisplayHeaders.frames"
           >
@@ -374,6 +394,7 @@
               {{ getMetadataFieldValue({field_name: 'frame_out'}, shot) }}
             </span>
           </td>
+
           <td class="fps" v-if="isFps && isShowInfos && metadataDisplayHeaders.fps">
             <input
               class="input-editor"
@@ -387,44 +408,6 @@
             />
             <span class="metadata-value selectable" v-else>
               {{ getMetadataFieldValue({field_name: 'fps'}, shot) }}
-            </span>
-          </td>
-
-          <td
-            class="metadata-descriptor"
-            :title="shot.data ? shot.data[descriptor.field_name] : ''"
-            :key="shot.id + '-' + descriptor.id"
-            v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
-            v-if="isShowInfos"
-          >
-            <input
-              class="input-editor"
-              :value="getMetadataFieldValue(descriptor, shot)"
-              @input="event => onMetadataFieldChanged(shot, descriptor, event)"
-              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
-            />
-            <span
-              class="select"
-              v-else-if="isCurrentUserManager"
-            >
-            <select
-              class="select-input"
-              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-              @change="event => onMetadataFieldChanged(shot, descriptor, event)"
-            >
-              <option
-                v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
-                :key="`${shot.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
-                :value="option.value"
-                :selected="getMetadataFieldValue(descriptor, shot) === option.value"
-              >
-                {{ option.label }}
-              </option>
-            </select>
-            </span>
-              <span class="metadata-value selectable" v-else>
-              {{ getMetadataFieldValue(descriptor, shot) }}
             </span>
           </td>
 

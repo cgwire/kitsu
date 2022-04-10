@@ -3,7 +3,7 @@
   <div class="column main-column">
     <div class="shots page">
       <div class="shot-list-header page-header">
-        <div class="flexrow">
+        <div class="flexrow mb1">
           <search-field
             ref="shot-search-field"
             :can-save="true"
