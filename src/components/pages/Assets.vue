@@ -19,19 +19,19 @@
             icon="funnel"
             @click="modals.isBuildFilterDisplayed = true"
           />
-          <combobox-department
-            class="combobox-department flexrow-item"
-            :selectable-departments="selectableDepartments()"
-            :value="selectedDepartment"
-            :dispay-all-and-my-departments="true"
-            :width="230"
-            rounded
-            @input="onSelectedDepartment"
-            v-model="selectedDepartment"
-            v-if="departments.length > 0"
-          />
           <div class="flexrow-item filler"></div>
           <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
+            <combobox-department
+              class="combobox-department flexrow-item"
+              :selectable-departments="selectableDepartments()"
+              :value="selectedDepartment"
+              :dispay-all-and-my-departments="true"
+              :width="230"
+              rounded
+              @input="onSelectedDepartment"
+              v-model="selectedDepartment"
+              v-if="departments.length > 0"
+            />
             <show-assignations-button class="flexrow-item" />
             <show-infos-button class="flexrow-item" />
             <big-thumbnails-button class="flexrow-item" />
@@ -1070,6 +1070,5 @@ export default {
 
 .combobox-department {
   margin-bottom: 0px;
-  padding-right: 20px;
 }
 </style>

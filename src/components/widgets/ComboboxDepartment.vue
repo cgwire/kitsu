@@ -31,7 +31,7 @@
       ref="select"
       v-bind:style="{
        'max-height': maxHeightSelectInput + 'px',
-       width: width + 2 + 'px'
+       width: width + 'px'
       }"
       v-if="showDepartmentList"
     >
@@ -241,7 +241,7 @@ export default {
   margin-left: -1px;
   max-height: 200px;
   overflow-y: auto;
-  top: 36px;
+  top: 30px;
   left: 0;
 }
 
@@ -259,6 +259,7 @@ export default {
 
   .selected-department-line {
     padding-top: 0px;
+
     padding-bottom: 0px;
     border-radius: 50px;
   }

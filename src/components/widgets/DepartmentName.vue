@@ -59,7 +59,7 @@ export default {
 div {
   border-radius: 5px;
   display: inline-block;
-  padding: 0.4em 0.6em;
+  padding: 0.2em 0.6em;
 }
 
 span.dot {
