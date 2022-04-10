@@ -244,9 +244,9 @@ export default {
   },
 
   props: {
-    isAssets: {
-      type: Boolean,
-      default: true
+    entityType: {
+      type: String,
+      default: 'Asset'
     },
     isError: {
       type: Boolean,
@@ -277,6 +277,7 @@ export default {
   computed: {
     ...mapGetters([
       'assetMap',
+      'editMap',
       'nbSelectedTasks',
       'personMap',
       'user',
@@ -284,6 +285,10 @@ export default {
       'shotMap',
       'taskMap'
     ]),
+
+    isAssets () {
+      return this.entityType === 'Asset'
+    },
 
     timeSpent () {
       return this.tasks.reduce((acc, task) => acc + task.duration, 0)
@@ -464,9 +469,12 @@ export default {
     getEntity (entityId) {
       if (this.isAssets) {
         return this.assetMap.get(entityId)
-      } else {
+      } else if (this.entityType === 'Shot') {
         return this.shotMap.get(entityId)
+      } else if (this.entityType === 'Edit') {
+        return this.editMap.get(entityId)
       }
+      return this.assetMap.get(entityId)
     },
 
     onKeyDown (event) {

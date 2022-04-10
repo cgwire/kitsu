@@ -46,6 +46,24 @@ export const entitiesMixin = {
 
     hideAddThumbnailsModal () {
       this.modals.isAddThumbnailsDisplayed = false
+    },
+
+    onSelectedDepartment (departmentId) {
+      if (departmentId === 'ALL') {
+        this.departmentFilter = []
+      } else if (departmentId === 'MY_DEPARTMENTS') {
+        this.departmentFilter = this.user.departments
+      } else {
+        this.departmentFilter = [departmentId]
+      }
+    },
+
+    selectableDepartments () {
+      return this.currentProduction.task_types
+        .map((taskType) =>
+          this.departmentMap.get(this.taskTypeMap.get(taskType).department_id))
+        .filter((department, index, self) =>
+          department && self.indexOf(department) === index)
     }
   }
 }

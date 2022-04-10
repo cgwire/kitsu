@@ -4,7 +4,14 @@
     {{ label }}
   </label>
   <div
-    class="department-combo"
+    :class="{
+      'department-combo': true,
+      'opened': showDepartmentList,
+      rounded: rounded
+    }"
+    v-bind:style="{
+      width: width + 'px'
+    }"
   >
     <div
       class="flexrow"
@@ -22,11 +29,16 @@
     <div
       class="select-input"
       ref="select"
+      v-bind:style="{
+       'max-height': maxHeightSelectInput + 'px',
+       width: width + 'px'
+      }"
       v-if="showDepartmentList"
     >
       <div
         class="department-line"
-        v-for="department in departmentList"
+        v-for="department in departmentList.filter(
+          (departement) => departement.id !== this.value)"
         @click="selectDepartment(department)"
         :key="department.id"
       >
@@ -77,6 +89,22 @@ export default {
     selectableDepartments: {
       type: Array,
       required: false
+    },
+    maxHeightSelectInput: {
+      default: 200,
+      type: Number
+    },
+    width: {
+      default: 200,
+      type: Number
+    },
+    dispayAllAndMyDepartments: {
+      default: false,
+      type: Boolean
+    },
+    rounded: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -86,21 +114,48 @@ export default {
   computed: {
     ...mapGetters([
       'departmentMap',
-      'departments'
+      'departments',
+      'isCurrentUserManager',
+      'user'
     ]),
 
     departmentsToTakeAccount () {
-      if (this.selectableDepartments) return this.selectableDepartments
-      return this.departments
+      const departments = (this.selectableDepartments)
+        ? [...this.selectableDepartments] : [...this.departments]
+      return departments.sort((a, b) => a.name.localeCompare(b.name))
     },
 
     departmentList () {
-      return [{ name: '---', id: null, color: '#000000' }, ...this.departmentsToTakeAccount]
+      if (this.dispayAllAndMyDepartments) {
+        const departmentFilter = [
+          {
+            name: this.$t('tasks.combobox_departments.all_departments'),
+            id: 'ALL',
+            color: '#000000'
+          }]
+        if (!this.isCurrentUserManager && this.user.departments.length > 0) {
+          departmentFilter.unshift(
+            {
+              name: this.$t('tasks.combobox_departments.my_departments'),
+              id: 'MY_DEPARTMENTS',
+              color: '#000000'
+            })
+        }
+        return [...departmentFilter, ...this.departmentsToTakeAccount]
+      } else {
+        return [{ name: '---', id: null, color: '#000000' },
+          ...this.departmentsToTakeAccount]
+      }
     },
 
     currentDepartment () {
       if (this.value) {
-        return this.departmentMap.get(this.value)
+        const departmentMapped = this.departmentMap.get(this.value)
+        if (departmentMapped) {
+          return departmentMapped
+        } else {
+          return this.departmentList.find(d => d.id === this.value)
+        }
       } else {
         return this.departmentList[0]
       }
@@ -140,8 +195,6 @@ export default {
 
 .department-combo {
   background: $white;
-  min-width: 200px;
-  width: 200px;
   border: 1px solid $light-grey-light;
   user-select: none;
   cursor: pointer;
@@ -182,16 +235,33 @@ export default {
 
 .select-input {
   background: $white;
-  width: 200px;
   position: absolute;
   border: 1px solid $light-grey-light;
   z-index: 300;
   margin-left: -1px;
   max-height: 200px;
   overflow-y: auto;
+  top: 30px;
+  left: 0;
 }
 
 .field .label {
   padding-top: 5px;
+}
+
+.rounded {
+  border-radius: 20px;
+
+  &.opened {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+  }
+
+  .selected-department-line {
+    padding-top: 0px;
+
+    padding-bottom: 0px;
+    border-radius: 50px;
+  }
 }
 </style>

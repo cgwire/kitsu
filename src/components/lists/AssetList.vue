@@ -43,6 +43,7 @@
           >
             {{ $t('assets.fields.episode') }}
           </th>
+
           <th
             scope="col"
             class="name datatable-row-header"
@@ -62,6 +63,20 @@
             </div>
           </th>
 
+          <validation-header
+            :ref="`validation-${columnIndexInGrid}`"
+            :key="columnId"
+            :hidden-columns="hiddenColumns"
+            :column-id="columnId"
+            :validation-style="getValidationStyle(columnId)"
+            :left="offsets['validation-' + columnIndexInGrid] ? `${offsets['validation-' + columnIndexInGrid]}px` : '0'"
+            type="assets"
+            is-stick
+            @show-header-menu="event => showHeaderMenu(columnId, columnIndexInGrid, event)"
+            v-for="(columnId, columnIndexInGrid) in stickedDisplayedValidationColumns"
+            v-if="!isLoading"
+          />
+
           <metadata-header
             :ref="`editor-${j}`"
             :key="descriptor.id"
@@ -72,20 +87,6 @@
             v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
             v-if="isShowInfos"
           />
-          <validation-header
-            :ref="`validation-${columnIndexInGrid}`"
-            :key="columnId"
-            :hidden-columns="hiddenColumns"
-            :column-id="columnId"
-            :task-type-map="taskTypeMap"
-            :validation-style="getValidationStyle(columnId)"
-            :left="offsets['validation-' + columnIndexInGrid] ? `${offsets['validation-' + columnIndexInGrid]}px` : '0'"
-            type="assets"
-            is-stick
-            @show-header-menu="event => showHeaderMenu(columnId, columnIndexInGrid, event)"
-            v-for="(columnId, columnIndexInGrid) in stickedDisplayedValidationColumns"
-            v-if="!isLoading"
-          />
 
           <th
             scope="col"
@@ -95,14 +96,6 @@
           >
             {{ $t('assets.fields.description') }}
           </th>
-
-          <metadata-header
-            :key="descriptor.id"
-            :descriptor="descriptor"
-            @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
-            v-for="descriptor in nonStickedVisibleMetadataDescriptors"
-            v-if="isShowInfos"
-          />
           <th
             scope="col"
             class="time-spent"
@@ -128,20 +121,27 @@
           </th>
 
           <th
+            ref="th-ready-for"
             scope="col"
             class="ready-for"
             :title="$t('assets.fields.ready_for')"
-            ref="th-ready-for"
             v-if="isShowInfos && metadataDisplayHeaders.readyFor"
           >
             {{ $t('assets.fields.ready_for') }}
           </th>
 
+          <metadata-header
+            :key="descriptor.id"
+            :descriptor="descriptor"
+            @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
+            v-for="descriptor in nonStickedVisibleMetadataDescriptors"
+            v-if="isShowInfos"
+          />
+
           <validation-header
             :key="columnId"
             :hidden-columns="hiddenColumns"
             :column-id="columnId"
-            :task-type-map="taskTypeMap"
             :title="taskTypeMap.get(columnId).name"
             :validation-style="getValidationStyle(columnId)"
             type="assets"
@@ -151,6 +151,7 @@
             v-for="(columnId, columnIndexInGrid) in nonStickedDisplayedValidationColumns"
             v-if="!isLoading"
           />
+
           <th scope="col" class="actions" ref="actionsSection">
             <button-simple
               :class="{
@@ -322,6 +323,7 @@
             v-for="(columnId, j) in stickedDisplayedValidationColumns"
             v-if="!isLoading"
           />
+
           <description-cell
             class="description"
             @description-changed="value => onDescriptionChanged(asset, value)"
@@ -329,6 +331,40 @@
             v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
             :entry="asset"
           />
+
+          <td
+            class="time-spent selectable"
+            v-if="!isCurrentUserClient &&
+                  isShowInfos &&
+                  isAssetTime &&
+                  metadataDisplayHeaders.timeSpent"
+          >
+            {{ formatDuration(asset.timeSpent) }}
+          </td>
+
+          <td
+            class="estimation selectable"
+            v-if="!isCurrentUserClient &&
+                  isShowInfos &&
+                  isAssetEstimation &&
+                  metadataDisplayHeaders.estimation"
+          >
+            {{ formatDuration(asset.estimation) }}
+          </td>
+
+          <td
+            class="task-type-name ready-for"
+            v-if="isShowInfos && metadataDisplayHeaders.readyFor"
+          >
+            <combobox-task-type
+              class="mb0"
+              :value="asset.ready_for"
+              production-id="this.currentProduction.id"
+              :task-type-list="readyForTaskTypes"
+              :shy="true"
+              @input="(taskTypeId) => onReadyForChanged(asset, taskTypeId)"
+            />
+          </td>
 
           <!-- other Metadata cells -->
           <td
@@ -369,40 +405,6 @@
             </span>
           </td>
 
-          <td
-            class="time-spent selectable"
-            v-if="!isCurrentUserClient &&
-                  isShowInfos &&
-                  isAssetTime &&
-                  metadataDisplayHeaders.timeSpent"
-          >
-            {{ formatDuration(asset.timeSpent) }}
-          </td>
-
-          <td
-            class="estimation selectable"
-            v-if="!isCurrentUserClient &&
-                  isShowInfos &&
-                  isAssetEstimation &&
-                  metadataDisplayHeaders.estimation"
-          >
-            {{ formatDuration(asset.estimation) }}
-          </td>
-
-          <td
-            class="task-type-name ready-for"
-            v-if="isShowInfos && metadataDisplayHeaders.readyFor"
-          >
-            <combobox-task-type
-              class="mb0"
-              :value="asset.ready_for"
-              production-id="this.currentProduction.id"
-              :task-type-list="readyForTaskTypes"
-              :shy="true"
-              @input="(taskTypeId) => onReadyForChanged(asset, taskTypeId)"
-            />
-          </td>
-
           <validation-cell
             :ref="`validation-${getIndex(i, k)}-${j + stickedDisplayedValidationColumns.length}`"
             :class="{
@@ -424,6 +426,7 @@
             v-for="(columnId, j) in nonStickedDisplayedValidationColumns"
             v-if="!isLoading"
           />
+
           <row-actions-cell
             :entry="asset"
             @edit-clicked="$emit('edit-clicked', asset)"
@@ -541,6 +544,10 @@ export default {
       default: true
     },
     validationColumns: {
+      type: Array,
+      default: () => []
+    },
+    departmentFilter: {
       type: Array,
       default: () => []
     }

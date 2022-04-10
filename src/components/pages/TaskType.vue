@@ -143,7 +143,7 @@
       <task-list
         ref="task-list"
         :tasks="tasks"
-        :is-assets="isAssets"
+        :entity-type="entityType"
         :is-loading="loading.entities"
         :is-error="errors.entities"
         @task-selected="onTaskSelected"
@@ -175,7 +175,7 @@
       >
         <estimation-helper
           ref="estimation-widget"
-          :is-assets="isAssets"
+          :entity-type="entityType"
           :tasks="tasks"
           @estimation-changed="updateEstimation"
         />
@@ -294,7 +294,7 @@ export default {
       currentSort: 'entity_name',
       currentScheduleItem: null,
       currentTask: null,
-      isAssets: true,
+      entityType: 'Asset',
       tasks: [],
       selection: {},
       errors: {
@@ -358,7 +358,9 @@ export default {
   },
 
   mounted () {
-    this.isAssets = this.$route.path.includes('assets')
+    const isAssets = this.$route.path.includes('assets')
+    const isShots = this.$route.path.includes('shots')
+    this.entityType = isAssets ? 'Asset' : isShots ? 'Shot' : 'Edit'
     this.updateActiveTab()
     setTimeout(() => {
       this.initData(false)
@@ -381,6 +383,7 @@ export default {
       'currentProduction',
       'currentTaskType',
       'editsPath',
+      'editMap',
       'isCurrentUserManager',
       'isTVShow',
       'nbSelectedTasks',
@@ -398,7 +401,14 @@ export default {
     ]),
 
     entityMap () {
-      return this.isAssets ? this.assetMap : this.shotMap
+      if (this.entityType === 'Asset') {
+        return this.assetMap
+      } else if (this.entityType === 'Shot') {
+        return this.shotMap
+      } else if (this.entityType === 'Edit') {
+        return this.editMap
+      }
+      return this.assetMap
     },
 
     locale () {
@@ -433,6 +443,10 @@ export default {
 
     shotTasks () {
       return this.getTasks(Array.from(this.shotMap.values()))
+    },
+
+    editTasks () {
+      return this.getTasks(Array.from(this.editMap.values()))
     },
 
     title () {
@@ -511,11 +525,9 @@ export default {
     },
 
     searchQueries () {
-      if (this.isAssets) {
-        return this.taskSearchQueries.filter(t => t.entity_type === 'Asset')
-      } else {
-        return this.taskSearchQueries
-      }
+      return this.taskSearchQueries.filter(
+        t => t.entity_type === this.entityType
+      )
     },
 
     scheduleTeam () {
@@ -669,7 +681,7 @@ export default {
       if (query && query.length !== 1) {
         query = query.toLowerCase().trim()
         const descriptors = (this.currentProduction.descriptors || [])
-          .filter(d => d.entityType === this.isAssets ? 'Asset' : 'Shot')
+          .filter(d => d.entityType === this.entityType)
         const keywords = getKeyWords(query) || []
         const excludingKeyWords = getExcludingKeyWords(query) || []
         const descFilters = getDescFilters(descriptors, query)
@@ -703,7 +715,7 @@ export default {
     },
 
     saveSearchQuery (searchQuery) {
-      const entityType = this.isAssets ? 'Asset' : 'Shot'
+      const entityType = this.entityType
       this.saveTaskSearch({ searchQuery, entityType })
         .then(() => {
         })
@@ -729,8 +741,10 @@ export default {
 
     resetTasks () {
       let tasks = this.assetTasks
-      if (!this.isAssets) {
+      if (this.entityType === 'Shot') {
         tasks = this.shotTasks
+      } else if (this.entityType === 'Edit') {
+        tasks = this.editTasks
       }
       tasks = tasks.filter((task) => {
         const entity = this.entityMap.get(task.entity_id)
