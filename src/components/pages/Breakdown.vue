@@ -9,6 +9,7 @@
             :label="$t('main.for')"
             :options="castingTypeOptions"
             v-model="castingType"
+            v-if="!isEpisodeCasting"
           />
           <combobox-styled
             :label="$t('shots.fields.sequence')"
@@ -308,6 +309,7 @@ export default {
       'assetMap',
       'assetsByType',
       'casting',
+      'castingEpisodes',
       'castingAssetTypeAssets',
       'castingAssetTypesOptions',
       'castingByType',
@@ -322,6 +324,7 @@ export default {
       'isAssetsLoading',
       'isShotsLoading',
       'isTVShow',
+      'episodeMap',
       'sequences',
       'sequenceMap',
       'shotMap'
@@ -350,16 +353,24 @@ export default {
       return path
     },
 
+    isEpisodeCasting () {
+      return this.currentEpisode.id === 'all'
+    },
+
     isAssetCasting () {
-      return this.castingType === 'asset'
+      return !this.isEpisodeCasting && this.castingType === 'asset'
     },
 
     isShotCasting () {
-      return this.castingType === 'shot'
+      return !this.isEpisodeCasting && this.castingType === 'shot'
     },
 
     castingEntities () {
-      return this.isShotCasting ? this.castingSequenceShots : this.castingAssetTypeAssets
+      if (this.isEpisodeCasting) {
+        return this.castingEpisodes
+      } else {
+        return this.isShotCasting ? this.castingSequenceShots : this.castingAssetTypeAssets
+      }
     },
 
     editLabelModal () {
@@ -387,6 +398,8 @@ export default {
     ...mapActions([
       'addAssetToCasting',
       'displayMoreAssets',
+      'loadEpisodeCasting',
+      'loadEpisodes',
       'loadAssetCasting',
       'loadAssets',
       'loadShotCasting',
@@ -395,11 +408,12 @@ export default {
       'removeAssetFromCasting',
       'saveCasting',
       'setAssetSearch',
+      'setCastingEpisodes',
       'setCastingAssetType',
       'setCastingAssetTypes',
       'setCastingEpisode',
+      'setCastingForProductionEpisodes',
       'setCastingSequence',
-      'setCastingShot',
       'setCurrentEpisode',
       'setAssetLinkLabel',
       'setLastProductionScreen',
@@ -421,7 +435,7 @@ export default {
       }, 100)
     },
 
-    reloadShots () {
+    reloadShots () { // TODO shouldn't it be renamed reloadEntities?
       this.isLoading = true
       this.loadShots(() => {
         if (this.isTVShow) {
@@ -440,11 +454,23 @@ export default {
             this.resetSelection()
           })
       })
+      this.loadEpisodes()
+        .then(() => {
+          console.log('loadEpisodes')
+          this.isLoading = false
+          this.setCastingForProductionEpisodes()
+          console.log('tata', this.$route)
+          this.resetSelection()
+        })
     },
 
     resetSelection () {
       const selection = {}
-      if (this.isShotCasting) {
+      if (this.isEpisodeCasting) {
+        this.castingEpisodes.forEach((episode) => {
+          selection[episode.id] = false
+        })
+      } else if (this.isShotCasting) {
         this.castingSequenceShots.forEach((shot) => {
           selection[shot.id] = false
         })
@@ -651,7 +677,19 @@ export default {
     updateUrl () {
       let isChange = false
       let route = {}
-      if (this.isAssetCasting) {
+      if (this.isEpisodeCasting) {
+        const episodeId = this.$route.params.episode_id
+        if (episodeId !== this.episodeId) {
+          isChange = true
+          route = {
+            name: 'breakdown-episode',
+            params: {
+              production_id: this.currentProduction.id,
+              episode_id: this.episodeId
+            }
+          }
+        }
+      } else if (this.isAssetCasting) {
         const assetTypeId = this.$route.params.asset_type_id
         if (assetTypeId !== this.assetTypeId) {
           isChange = true
@@ -800,9 +838,16 @@ export default {
       }
     },
 
-    episodeId () {},
+    episodeId () {
+      if (this.episodeId && this.episodes && this.episodes.length > 0) {
+        console.log('episodeId watch', this.currentProduction)
+        this.setCastingForProductionEpisodes(this.episodeId)
+        this.updateUrl()
+        this.resetSelection()
+      }
+    },
 
-    castingSequenceOptions () {
+    castingSequenceOptions () { // TODO should be put to plural castingSequencesOptions
       if (this.$route.path.indexOf('asset-type') < 0) {
         const sequenceId = this.$route.params.sequence_id
         if (
@@ -853,6 +898,17 @@ export default {
 
   socket: {
     events: {
+      'episode:casting-update' (eventData) {
+        const episode = this.episodeMap.get(eventData.episode_id)
+        console.log('titi', episode)
+        if (
+          episode &&
+          !this.isLocked
+        ) {
+          this.loadEpisodeCasting(episode)
+        }
+      },
+
       'shot:casting-update' (eventData) {
         const shot = this.shotMap.get(eventData.shot_id)
         if (
