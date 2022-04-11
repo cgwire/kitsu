@@ -726,7 +726,7 @@ export default {
     },
 
     currentProductionTeam () {
-      return this.currentProduction ? this.currentProduction.team : []
+      return this.currentProduction ? this.currentProduction.team || [] : []
     },
 
     isInDepartment () {
@@ -940,7 +940,7 @@ export default {
     setCurrentTeam () {
       if (this.people.length > 10 && this.currentProduction) {
         this.currentTeam = sortPeople(
-          this.currentProduction.team.map((personId) => {
+          this.currentProductionTeam.map((personId) => {
             return this.personMap.get(personId)
           })
         )

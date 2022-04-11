@@ -644,7 +644,6 @@ export const annotationMixin = {
     pasteAnnotations () {
       this.fabricCanvas.discardActiveObject()
       const clonedObj = clipboard.pasteAnnotations()
-      console.log(clonedObj)
       if (clonedObj._objects) {
         clonedObj._objects.forEach(obj => this.addObject(obj))
         this.fabricCanvas.requestRenderAll()

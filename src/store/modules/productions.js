@@ -353,6 +353,7 @@ const actions = {
     return productionsApi.newProduction(data)
       .then(production => {
         commit(EDIT_PRODUCTION_END, production)
+        return Promise.resolve(production)
       })
   },
 

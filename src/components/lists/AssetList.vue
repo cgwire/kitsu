@@ -38,15 +38,6 @@
         <tr>
           <th
             scope="col"
-            class="episode"
-            ref="th-episode"
-            v-if="isTVShow"
-          >
-            {{ $t('assets.fields.episode') }}
-          </th>
-
-          <th
-            scope="col"
             class="name datatable-row-header"
             ref="th-name"
           >
@@ -63,6 +54,15 @@
                   && !isLoading"
               />
             </div>
+          </th>
+
+          <th
+            scope="col"
+            class="episode"
+            ref="th-episode"
+            v-if="isTVShow"
+          >
+            {{ $t('assets.fields.episode') }}
           </th>
 
           <metadata-header
@@ -209,6 +209,7 @@
             </span>
           </th>
         </tr>
+
         <tr
           class="datatable-row"
           scope="row"
@@ -216,22 +217,6 @@
           :class="{canceled: asset.canceled}"
           v-for="(asset, i) in group"
         >
-          <td class="episode" v-if="isTVShow">
-            <div class="flexrow">
-              <input
-                type="checkbox"
-                class="mr1"
-                :checked="selectedAssets.has(asset.id)"
-                @input="event => toggleLine(asset, event)"
-                v-show="!isCurrentUserClient"
-              >
-              {{
-                episodeMap.get(asset.episode_id)
-                ? episodeMap.get(asset.episode_id).name
-                : 'MP'
-              }}
-            </div>
-          </td>
           <th
             :class="{
               'datatable-row-header': true,
@@ -244,7 +229,6 @@
                 class="mr1"
                 :checked="selectedAssets.has(asset.id)"
                 @input="event => toggleLine(asset, event)"
-                v-if="!isTVShow"
               >
               <entity-thumbnail
                 class="entity-thumbnail"
@@ -264,6 +248,15 @@
               </router-link>
             </div>
           </th>
+
+          <td class="episode" v-if="isTVShow">
+            <div
+              class="flexrow"
+              :title="assetEpisodes(asset, true)"
+            >
+              {{ assetEpisodes(asset, false)}}
+            </div>
+          </td>
 
           <!-- Metadata stick -->
           <td
@@ -746,6 +739,29 @@ export default {
       'setAssetSelection'
     ]),
 
+    assetEpisodes (asset, full) {
+      const mainEpisode = this.episodeMap.get(asset.episode_id)
+      const mainEpisodeName = mainEpisode ? mainEpisode.name : 'MP'
+      const episodeNames = (asset.casting_episode_ids || [])
+        .map(eId => this.episodeMap.get(eId).name)
+        .filter(
+          name => name !== mainEpisodeName
+        )
+      let episodeNameString = ''
+      if (episodeNames.length > 2) {
+        if (full) {
+          episodeNameString = episodeNames.join(', ')
+        } else {
+          episodeNameString = episodeNames.slice(0, 2).join(', ') + ', ...'
+        }
+      } else if (episodeNames.length > 0) {
+        episodeNameString = episodeNames.join(', ')
+      }
+      return episodeNames.length > 0
+        ? mainEpisodeName + ', ' + episodeNameString
+        : mainEpisodeName
+    },
+
     isSelected (indexInGroup, groupIndex, columnIndex) {
       const lineIndex = this.getIndex(indexInGroup, groupIndex)
       return this.assetSelectionGrid[lineIndex][columnIndex]
@@ -966,8 +982,8 @@ td.ready-for {
 }
 
 .episode {
-  min-width: 50px;
-  width: 50px;
+  min-width: 130px;
+  width: 130px;
 }
 
 .bold {

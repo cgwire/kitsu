@@ -117,7 +117,7 @@ export const getProductionPath = (production, section = 'assets', episodeId) => 
     route = episodifyRoute(route, episodeId || 'all')
   }
 
-  if (['assets', 'shots', 'edits'].includes(section)) {
+  if (['assets', 'shots', 'edits', 'breakdown'].includes(section)) {
     route.query = { search: '' }
   }
 

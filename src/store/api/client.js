@@ -99,8 +99,9 @@ const client = {
     })
   },
 
-  getModel (modelName, modelId) {
-    const path = `/api/data/${modelName}/${modelId}`
+  getModel (modelName, modelId, relations = false) {
+    let path = `/api/data/${modelName}/${modelId}`
+    if (relations) path += '?relations=true'
     return client.pget(path)
   },
 

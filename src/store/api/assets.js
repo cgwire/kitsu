@@ -13,7 +13,7 @@ export default {
   },
 
   getAsset (assetId) {
-    return client.getModel('assets', assetId)
+    return client.getModel('assets', assetId, true)
   },
 
   newAsset (asset) {

@@ -849,7 +849,7 @@ export default {
       this.errors.creatingProduction = false
       this.errors.creatingProductionError = ''
       try {
-        await this.newProduction({
+        const createdProduction = await this.newProduction({
           name: this.productionToCreate.name,
           project_status_id: this.productionStatus[0].id,
           fps: this.productionToCreate.settings.fps,
@@ -859,7 +859,6 @@ export default {
           start_date: this.productionToCreate.settings.dateStart,
           end_date: this.productionToCreate.settings.dateEnd
         })
-        const createdProduction = this.productions[this.productions.length - 1]
         await this.setProduction(createdProduction.id)
         await this.createTaskTypesAndStatuses()
         await this.createAssetTypes()

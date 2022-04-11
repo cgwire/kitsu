@@ -1,6 +1,13 @@
 import client from './client'
 
 export default {
+
+  getProductionEpisodesCasting (productionId) {
+    const path =
+      `/api/data/projects/${productionId}/episodes/casting`
+    return client.pget(path)
+  },
+
   getSequenceCasting (productionId, sequenceId) {
     const path =
       `/api/data/projects/${productionId}/sequences/${sequenceId}/casting`
@@ -13,7 +20,7 @@ export default {
     return client.pget(path)
   },
 
-  updateCasting (productionId, shotId, casting, callback) {
+  updateCasting (productionId, shotId, casting, callback) { // TODO rename shotId to entityId
     const path =
       `/api/data/projects/${productionId}/entities/${shotId}/casting`
     return client.pput(path, casting)
@@ -26,6 +33,13 @@ export default {
 
   getAssetCastIn (asset) {
     return client.pget(`/api/data/assets/${asset.id}/cast-in`)
+  },
+
+  getEpisodeCasting (episode) {
+    const path =
+      `/api/data/projects/${episode.project_id}/entities/` +
+      `${episode.id}/casting`
+    return client.pget(path)
   },
 
   getShotCasting (shot) {
