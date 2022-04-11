@@ -30,7 +30,7 @@
           <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
             <combobox-department
               class="combobox-department flexrow-item"
-              :selectable-departments="selectableDepartments()"
+              :selectable-departments="selectableDepartments('Shot')"
               :value="selectedDepartment"
               :dispay-all-and-my-departments="true"
               :width="230"
@@ -233,6 +233,7 @@
     :is-loading-stay="loading.addMetadata"
     :is-error="errors.addMetadata"
     :descriptor-to-edit="descriptorToEdit"
+    entity-type="Shot"
     @cancel="closeMetadataModal"
     @confirm="confirmAddMetadata"
   />
