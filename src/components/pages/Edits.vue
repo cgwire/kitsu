@@ -23,7 +23,7 @@
           />
           <combobox-department
             class="combobox-department flexrow-item"
-            :selectable-departments="selectableDepartments()"
+            :selectable-departments="selectableDepartments('Edit')"
             :value="selectedDepartment"
             :dispay-all-and-my-departments="true"
             :width="230"
@@ -214,6 +214,7 @@
     :is-loading-stay="loading.addMetadata"
     :is-error="errors.addMetadata"
     :descriptor-to-edit="descriptorToEdit"
+    entity-type="Edit"
     @cancel="closeMetadataModal"
     @confirm="confirmAddMetadata"
   />

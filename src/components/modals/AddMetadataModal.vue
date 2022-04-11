@@ -167,6 +167,10 @@ export default {
     isError: {
       type: Boolean,
       default: false
+    },
+    entityType: {
+      type: String,
+      default: 'Asset'
     }
   },
 
@@ -208,8 +212,11 @@ export default {
 
     selectableDepartments () {
       return this.currentProduction.task_types
-        .map((taskType) =>
-          this.departmentMap.get(this.taskTypeMap.get(taskType).department_id))
+        .map(taskTypeId => {
+          const taskType = this.taskTypeMap.get(taskTypeId)
+          return (taskType.for_entity === this.entityType)
+            ? this.departmentMap.get(taskType.department_id) : false
+        })
         .filter((department, index, self) =>
           department && (self.indexOf(department) === index) &&
           this.form.departments.findIndex(

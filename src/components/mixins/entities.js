@@ -58,10 +58,13 @@ export const entitiesMixin = {
       }
     },
 
-    selectableDepartments () {
+    selectableDepartments (forEntity) {
       return this.currentProduction.task_types
-        .map((taskType) =>
-          this.departmentMap.get(this.taskTypeMap.get(taskType).department_id))
+        .map(taskTypeId => {
+          const taskType = this.taskTypeMap.get(taskTypeId)
+          return (taskType.for_entity === forEntity)
+            ? this.departmentMap.get(taskType.department_id) : false
+        })
         .filter((department, index, self) =>
           department && self.indexOf(department) === index)
     }
