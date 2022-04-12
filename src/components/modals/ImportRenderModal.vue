@@ -215,7 +215,10 @@ export default {
       'assetMetadataDescriptors',
       'isTVShow',
       'shotMetadataDescriptors',
-      'editMetadataDescriptors'
+      'editMetadataDescriptors',
+      'productionAssetTaskTypes',
+      'productionShotTaskTypes',
+      'productionEditTaskTypes'
     ]),
 
     columnsRequired () {
@@ -239,11 +242,33 @@ export default {
       return []
     },
 
+    entityTaskTypes () {
+      if (this.$route.path.indexOf('assets') > 0) {
+        return this.productionAssetTaskTypes
+      }
+      if (this.$route.path.indexOf('shots') > 0) {
+        return this.productionShotTaskTypes
+      }
+      if (this.$route.path.indexOf('edits') > 0) {
+        return this.productionEditTaskTypes
+      }
+      return []
+    },
+
     columnsAllowed () {
       const list = [...this.columns]
       this.metadataDescriptors.forEach(item => {
         if (!list.includes(item.name)) {
           list.push(item.name)
+        }
+      })
+      const taskNames = this.entityTaskTypes.map(item => item.name)
+      const taskComments = taskNames.map(item => item + ' Comment')
+      this.parsedCsv[0].forEach(item => {
+        if (!list.includes(item)) {
+          if (taskNames.includes(item) || taskComments.includes(item)) {
+            list.push(item)
+          }
         }
       })
       return list
