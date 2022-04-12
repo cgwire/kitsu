@@ -70,7 +70,7 @@ const actions = {
      Array.from(rootState.shots.episodeMap.values())
        .sort((a, b) => a.name.localeCompare(b.name))
     commit(CASTING_SET_FOR_EPISODES, episodes)
-    return breakdownApi.getProductionEpisodeCasting(production.id, episodeId)
+    return breakdownApi.getProductionEpisodesCasting(production.id, episodeId)
       .then((casting) => {
         commit(CASTING_SET_CASTING, { casting, assetMap })
       })

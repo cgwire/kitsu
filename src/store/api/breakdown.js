@@ -1,15 +1,10 @@
 import client from './client'
 
 export default {
-  // getEpisodeCasting (productionId, episodeId) {
-  //   const path =
-  //     `/api/data/projects/${productionId}/episodes/${episodeId}/casting`
-  //   return client.pget(path)
-  // },
 
-  getProductionEpisodeCasting (productionId, episodeId) {
+  getProductionEpisodesCasting (productionId) {
     const path =
-      `/api/data/projects/${productionId}/episodes/${episodeId}/casting`
+      `/api/data/projects/${productionId}/episodes/casting`
     return client.pget(path)
   },
 

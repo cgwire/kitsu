@@ -456,10 +456,8 @@ export default {
       })
       this.loadEpisodes()
         .then(() => {
-          console.log('loadEpisodes')
           this.isLoading = false
           this.setCastingForProductionEpisodes()
-          console.log('tata', this.$route)
           this.resetSelection()
         })
     },
