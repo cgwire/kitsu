@@ -694,6 +694,7 @@ export default {
       add_new_values: 'There is currently no available values.',
       available_values: 'Available values',
       choices: 'List of values',
+      checklist: 'Checklist',
       delete_text: 'Are you sure you want to delete this column and related data for all assets of this production?',
       delete_error: 'An error occurred while deleting this metadata column.',
       edit_title: 'Edit metadata column',

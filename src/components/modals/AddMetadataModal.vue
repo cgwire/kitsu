@@ -70,6 +70,31 @@
         />
       </div>
 
+      <div v-if="type === 'checklist'">
+        <p class="strong">
+          {{ $t('productions.metadata.checklist') }}
+        </p>
+
+        <div class="checklist-wrapper">
+          <checklist
+            :checklist="checklist"
+            @add-item="onAddChecklistItem"
+            @remove-task="removeTask"
+            v-if="checklist.length > 0"
+          />
+          <button-simple
+            :class="{
+              'button': true,
+              'active': checklist.length !== 0
+            }"
+            icon="plus"
+            :title="$t('comments.add_checklist')"
+            @click="addChecklistEntry(-1)"
+          >
+          </button-simple>
+        </div>
+      </div>
+
       <div
         class="departments"
       >
@@ -129,6 +154,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
+import { descriptorMixin } from '../mixins/descriptors'
 import { remove } from '../../lib/models'
 
 import Combobox from '../widgets/Combobox'
@@ -137,10 +163,12 @@ import ModalFooter from './ModalFooter'
 import TextField from '../widgets/TextField'
 import ComboboxDepartment from '../widgets/ComboboxDepartment'
 import DepartmentName from '../widgets/DepartmentName'
+import ButtonSimple from '../widgets/ButtonSimple'
+import Checklist from '../widgets/Checklist'
 
 export default {
   name: 'add-metadata-modal',
-  mixins: [modalMixin],
+  mixins: [descriptorMixin, modalMixin],
 
   components: {
     Combobox,
@@ -148,7 +176,9 @@ export default {
     ComboboxDepartment,
     DepartmentName,
     ModalFooter,
-    TextField
+    TextField,
+    ButtonSimple,
+    Checklist
   },
 
   props: {
@@ -183,6 +213,7 @@ export default {
         departments: []
       },
       valueToAdd: '',
+      checklist: [],
       type: 'free',
       typeOptions: [
         {
@@ -192,6 +223,10 @@ export default {
         {
           label: this.$t('productions.metadata.choices'),
           value: 'choices'
+        },
+        {
+          label: this.$t('productions.metadata.checklist'),
+          value: 'checklist'
         }
       ],
       selectedDepartment: null
@@ -225,7 +260,11 @@ export default {
 
     isFormFilled () {
       return this.form.name.length > 0 &&
-        (this.form.values.length > 0 || this.type === 'free')
+        (
+          this.type === 'free' ||
+          (this.form.values.length > 0 && this.type === 'choices') ||
+          (this.checklist.length > 0 && this.type === 'checklist')
+        )
     },
 
     valueList () {
@@ -251,6 +290,9 @@ export default {
 
     confirm () {
       if (this.type === 'free') this.form.values = []
+      if (this.type === 'checklist') {
+        this.form.values = this.checklist.map(x => (x.checked ? '[x] ' : '[ ] ') + x.text)
+      }
       return this.$emit('confirm', this.form)
     },
 
@@ -270,12 +312,32 @@ export default {
       }
     },
 
+    addChecklistEntry (index) {
+      if (index === -1 || index === this.checklist.length - 1) {
+        this.checklist.push({
+          text: '',
+          checked: false
+        })
+      }
+    },
+
+    onAddChecklistItem (item) {
+      this.checklist[item.index].text = this.checklist[item.index].text.trim()
+      delete item.index
+      this.checklist.push(item)
+    },
+
+    removeTask (entry) {
+      this.checklist = remove(this.checklist, entry)
+    },
+
     reset () {
       this.form = {
         name: '',
         values: [],
         departments: []
       }
+      this.checklist = []
       this.valueToAdd = ''
       if (this.descriptorToEdit.name) {
         this.form = {
@@ -285,8 +347,19 @@ export default {
           for_client: this.descriptorToEdit.for_client ? 'true' : 'false',
           departments: [...this.descriptorToEdit.departments]
         }
+        this.checklist = this.getDescriptorChecklistValues(this.descriptorToEdit)
       }
-      this.type = this.form.values.length > 0 ? 'choices' : 'free'
+      if (this.form.values.length > 0) {
+        if (this.checklist.length === this.form.values.length) {
+          this.form.values = []
+          this.type = 'checklist'
+        } else {
+          this.checklist = []
+          this.type = 'choices'
+        }
+      } else {
+        this.type = 'free'
+      }
     }
   },
 
@@ -355,5 +428,11 @@ export default {
   display: inline-block;
   margin-right: 0.2em;
   cursor: pointer;
+}
+</style>
+
+<style lang="scss">
+.checklist-entry.checked .checklist-text {
+  text-decoration: none !important;
 }
 </style>
