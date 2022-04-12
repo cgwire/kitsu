@@ -263,7 +263,10 @@ export default {
         (
           this.type === 'free' ||
           (this.form.values.length > 0 && this.type === 'choices') ||
-          (this.checklist.length > 0 && this.type === 'checklist')
+          (
+            this.checklist.filter(x => x.text.trim() !== '').length > 0 &&
+            this.type === 'checklist'
+          )
         )
     },
 
@@ -291,7 +294,11 @@ export default {
     confirm () {
       if (this.type === 'free') this.form.values = []
       if (this.type === 'checklist') {
-        this.form.values = this.checklist.map(x => (x.checked ? '[x] ' : '[ ] ') + x.text)
+        this.form.values = this.checklist.filter(
+          value => value.text.trim() !== ''
+        ).map(
+          x => (x.checked ? '[x] ' : '[ ] ') + x.text
+        )
       }
       return this.$emit('confirm', this.form)
     },
@@ -429,6 +436,15 @@ export default {
   margin-right: 0.2em;
   cursor: pointer;
 }
+
+.checklist-wrapper{
+  margin-bottom: 1em;
+}
+
+.checklist-wrapper .button{
+  margin: 0.5em 0.2em;
+}
+
 </style>
 
 <style lang="scss">
