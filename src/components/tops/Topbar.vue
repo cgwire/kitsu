@@ -354,14 +354,25 @@ export default {
 
       // Show only if there are task types for Edit in this production.
       if (this.productionEditTaskTypes.length > 0) {
-        options = options.concat([
+        options.push(
           { label: this.$t('edits.title'), value: 'edits' }
-        ])
+        )
       }
 
+      // Add sequences
+      options.push(
+        { label: this.$t('sequences.title'), value: 'sequences' }
+      )
+
+      // Add episodes for tv show only
+      if (this.isTVShow) {
+        options.push(
+          { label: this.$t('episodes.title'), value: 'episodes' }
+        )
+      }
+
+      // Add asset types stats and playlists
       options = options.concat([
-        { label: this.$t('sequences.title'), value: 'sequences' },
-        { label: this.$t('episodes.title'), value: 'episodes' },
         {
           label: this.$t('asset_types.production_title'), value: 'assetTypes'
         },
@@ -392,20 +403,19 @@ export default {
         options = [
           { label: this.$t('assets.title'), value: 'assets' },
           { label: this.$t('shots.title'), value: 'shots' },
-          { label: this.$t('sequences.title'), value: 'sequences' },
-          { label: this.$t('episodes.title'), value: 'episodes' },
-          {
-            label: this.$t('asset_types.production_title'), value: 'assetTypes'
-          }
+          { label: this.$t('sequences.title'), value: 'sequences' }
         ]
+
+        if (this.isTVShow) {
+          options.push(
+            { label: this.$t('episodes.title'), value: 'episodes' }
+          )
+        }
+        options.push({
+          label: this.$t('asset_types.production_title'), value: 'assetTypes'
+        })
       }
 
-      // Remove episode Section from the list.
-      if (!this.isTVShow && !this.isCurrentUserClient) {
-        options.splice(3, 1)
-      } else if (!this.isTVShow) {
-        options.splice(4, 1)
-      }
       return options
     },
 
