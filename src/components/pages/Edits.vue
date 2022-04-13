@@ -21,6 +21,7 @@
             icon="funnel"
             @click="() => modals.isBuildFilterDisplayed = true"
           />
+          <div class="filler"></div>
           <combobox-department
             class="combobox-department flexrow-item"
             :selectable-departments="selectableDepartments('Edit')"
@@ -32,7 +33,6 @@
             v-model="selectedDepartment"
             v-if="departments.length > 0"
           />
-          <div class="filler"></div>
           <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
             <show-assignations-button class="flexrow-item" />
             <show-infos-button class="flexrow-item" />
@@ -1056,6 +1056,5 @@ export default {
 
 .combobox-department {
   margin-bottom: 0px;
-  padding-right: 20px;
 }
 </style>
