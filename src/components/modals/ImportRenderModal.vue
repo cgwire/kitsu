@@ -263,10 +263,12 @@ export default {
         }
       })
       const taskNames = this.entityTaskTypes.map(item => item.name)
-      const taskComments = taskNames.map(item => item + ' Comment')
-      this.parsedCsv[0].forEach(item => {
-        if (!list.includes(item)) {
-          if (taskNames.includes(item) || taskComments.includes(item)) {
+      this.parsedCsv[0].forEach((item, index) => {
+        if (taskNames.includes(item) && !list.includes(item)) {
+          list.push(item)
+        } else {
+          item = this.checkForComment(index)
+          if (item && !list.includes(item)) {
             list.push(item)
           }
         }
@@ -341,6 +343,21 @@ export default {
       if (this.duplicates.includes(this.columnSelect[index])) {
         return true
       }
+    },
+
+    checkForComment (index) {
+      let columnName = this.columnSelect[index]
+      let commentName = ''
+      if (columnName === 'Comment' && index > 0) {
+        columnName = this.columnSelect[index - 1] + ' Comment'
+      }
+      this.entityTaskTypes.forEach(item => {
+        if (columnName === item.name + ' Comment') {
+          this.columnSelect[index] = columnName
+          commentName = columnName
+        }
+      })
+      return commentName
     },
 
     existingData (index) {
