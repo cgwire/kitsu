@@ -5,7 +5,7 @@
     :class="{'datatable-row-header': isStick}"
     :style="{'left': left}"
   >
-    <div class="flexrow">
+    <div class="flexrow metadata-wrapper-header">
       <department-name
         :key="department.id"
         :department="department"
@@ -16,10 +16,14 @@
       <span class="flexrow-item descriptor-name">
         {{ descriptor.name }}
       </span>
-      <chevron-down-icon
+      <span
+        class="metadata-menu-button header-icon"
         @click="$emit('show-metadata-header-menu', $event)"
-        class="header-icon flexrow-item"
-      />
+      >
+        <chevron-down-icon
+          size="12px"
+        />
+      </span>
     </div>
   </th>
 </template>
@@ -73,4 +77,16 @@ th.metadata-descriptor {
   hyphens: auto;
 }
 
+.metadata-wrapper-header {
+  position: relative;
+}
+
+.metadata-menu-button {
+  background: var(--background);
+  border-radius: 50%;
+  height: 15px;
+  width: 15px;
+  position: absolute;
+  right: 0;
+}
 </style>
