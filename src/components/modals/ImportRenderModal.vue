@@ -262,15 +262,18 @@ export default {
           list.push(item.name)
         }
       })
-      const taskNames = this.entityTaskTypes.map(item => item.name)
-      this.parsedCsv[0].forEach((item, index) => {
-        if (taskNames.includes(item) && !list.includes(item)) {
-          list.push(item)
-        } else {
-          item = this.checkForComment(index)
-          if (item && !list.includes(item)) {
-            list.push(item)
-          }
+      this.entityTaskTypes.forEach(item => {
+        if (
+          !list.includes(item.name) &&
+          this.columnSelect.includes(item.name)
+        ) {
+          list.push(item.name)
+        }
+        if (
+          !list.includes(item.name + ' Comment') &&
+          this.hasComment(item.name)
+        ) {
+          list.push(item.name + ' Comment')
         }
       })
       return list
@@ -345,19 +348,18 @@ export default {
       }
     },
 
-    checkForComment (index) {
-      let columnName = this.columnSelect[index]
-      let commentName = ''
-      if (columnName === 'Comment' && index > 0) {
-        columnName = this.columnSelect[index - 1] + ' Comment'
-      }
-      this.entityTaskTypes.forEach(item => {
-        if (columnName === item.name + ' Comment') {
-          this.columnSelect[index] = columnName
-          commentName = columnName
+    hasComment (taskName) {
+      let result = false
+      this.columnSelect.forEach((item, index) => {
+        if (item === 'Comment' && index > 0) {
+          item = this.columnSelect[index - 1] + ' Comment'
+        }
+        if (item === taskName + ' Comment') {
+          this.columnSelect[index] = item
+          result = true
         }
       })
-      return commentName
+      return result
     },
 
     existingData (index) {
