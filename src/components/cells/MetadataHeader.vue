@@ -53,7 +53,10 @@ export default {
     ]),
 
     currentDepartments () {
-      return this.descriptor.departments.map((departmentId) => this.departmentMap.get(departmentId))
+      const departemts = this.descriptor.departments || []
+      return departemts.map(
+        departmentId => this.departmentMap.get(departmentId)
+      )
     }
   }
 }
