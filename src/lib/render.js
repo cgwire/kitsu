@@ -76,3 +76,17 @@ export const replaceTimeWithTimecode = (
     return ''
   }
 }
+
+export const renderFileSize = (size) => {
+  let renderedSize = ''
+  if (size > 1000000000) {
+    renderedSize = (size / 1000000000).toFixed(1) + 'G'
+  } else if (size > 1000000) {
+    renderedSize = (size / 1000000).toFixed(1) + 'M'
+  } else if (size > 1000) {
+    renderedSize = (size / 1000).toFixed(0) + 'K'
+  } else {
+    renderedSize = size + ''
+  }
+  return renderedSize
+}

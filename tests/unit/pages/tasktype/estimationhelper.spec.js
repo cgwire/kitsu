@@ -49,8 +49,16 @@ describe('EstimationHelper', () => {
         assetSearchText: (state) => state.assetSearchText,
         assetValidationColumns: () => ['task-type-1', 'task-type-2'],
         assetMap: () => new Map(Object.entries({
-          'asset-1': { id: 'asset-1', name: 'Lama' },
-          'asset-2': { id: 'asset-2', name: 'Pingu' }
+          'asset-1': {
+            id: 'asset-1',
+            name: 'Lama' ,
+            asset_type_name: 'Characters'
+          },
+          'asset-2': {
+            id: 'asset-2',
+            name: 'Pingu',
+            asset_type_name: 'Characters'
+          }
         }))
       },
       mutations: {
@@ -158,7 +166,7 @@ describe('EstimationHelper', () => {
     describe('computed', () => {
       it('tasksByPerson', async (done) => {
         await wrapper.setProps({
-          isAssets: false,
+          entityType: 'Shot',
           tasks
         })
         wrapper.vm.$nextTick(() => {
@@ -186,7 +194,7 @@ describe('EstimationHelper', () => {
     describe('methods', () => {
       it('getEntity', async () => {
         expect(wrapper.vm.getEntity('asset-1').name).toBe('Lama')
-        await wrapper.setProps({ isAssets: false })
+        await wrapper.setProps({ entityType: 'Shot' })
         expect(wrapper.vm.getEntity('asset-1')).toBe(undefined)
         expect(wrapper.vm.getEntity('shot-1').name).toBe('SH01')
       })

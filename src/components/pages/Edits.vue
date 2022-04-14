@@ -21,6 +21,7 @@
             icon="funnel"
             @click="() => modals.isBuildFilterDisplayed = true"
           />
+          <div class="filler"></div>
           <combobox-department
             class="combobox-department flexrow-item"
             :selectable-departments="selectableDepartments('Edit')"
@@ -32,7 +33,6 @@
             v-model="selectedDepartment"
             v-if="departments.length > 0"
           />
-          <div class="filler"></div>
           <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
             <show-assignations-button class="flexrow-item" />
             <show-infos-button class="flexrow-item" />
@@ -108,7 +108,7 @@
 
   <div
     class="column side-column"
-    v-if="nbSelectedTasks === 1"
+    v-show="nbSelectedTasks === 1"
   >
     <task-info
       :task="selectedTasks.values().next().value"
@@ -178,7 +178,8 @@
     :parsed-csv="parsedCSV"
     :form-data="editsCsvFormData"
     :columns="columns"
-    :dataMatchers="dataMatchers"
+    :data-matchers="dataMatchers"
+    :database="filteredEdits"
     @reupload="resetImport"
     @cancel="hideImportRenderModal"
     @confirm="uploadImportFile"
@@ -481,7 +482,16 @@ export default {
     },
 
     filteredEdits () {
-      return this.displayedEdits
+      const edits = {}
+      this.displayedEdits.forEach(edit => {
+        let editKey = ''
+        if (this.istvshow && edit.episode_id) {
+          editKey += this.episodeMap.get(edit.episode_id).name
+        }
+        editKey += `${edit.name}`
+        edits[editKey] = true
+      })
+      return edits
     },
 
     metadataDescriptors () {
@@ -885,7 +895,7 @@ export default {
 
     onExportClick () {
       this.getEditsCsvLines()
-        .then((editLines) => {
+        .then(editLines => {
           const nameData = [
             moment().format('YYYY-MM-DD'),
             'kitsu',
@@ -1056,6 +1066,5 @@ export default {
 
 .combobox-department {
   margin-bottom: 0px;
-  padding-right: 20px;
 }
 </style>

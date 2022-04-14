@@ -106,7 +106,7 @@
 
   <div
     class="column side-column"
-    v-if="nbSelectedTasks === 1"
+    v-show="nbSelectedTasks === 1"
   >
     <task-info
       :task="selectedTasks.values().next().value"

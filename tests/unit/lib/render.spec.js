@@ -1,4 +1,9 @@
-import { getTaskTypeStyle, renderComment, renderMarkdown } from '@/lib/render'
+import {
+  getTaskTypeStyle,
+  renderComment,
+  renderFileSize,
+  renderMarkdown
+} from '@/lib/render'
 
 describe('render', () => {
   test('getTaskTypeStyle', () => {
@@ -45,5 +50,14 @@ describe('render', () => {
     result = renderMarkdown(input)
     expect(result.trim()).toEqual(
       '<p>Text <strong>bold</strong> <img src=\"picture.png\" /></p>')
+  })
+
+  test('renderFileSize', () => {
+    let size = 1200000
+    let result = renderFileSize(size)
+    expect(result.trim()).toEqual('1.2M')
+    size = 1200000000
+    result = renderFileSize(size)
+    expect(result.trim()).toEqual('1.2G')
   })
 })
