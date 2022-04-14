@@ -4,7 +4,10 @@
   :title="title"
   :to="path"
 >
-  <span class="icon is-small" v-if="icon.length > 0 && icon.startsWith('fa')">
+  <span
+    class="icon is-small"
+    v-if="icon.length > 0 && icon.startsWith('fa')"
+  >
     <i :class="'fa ' + icon"></i>
   </span>
   <plus-icon
