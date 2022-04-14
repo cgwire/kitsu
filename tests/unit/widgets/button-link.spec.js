@@ -1,7 +1,7 @@
 import { mount, createLocalVue } from '@vue/test-utils'
-import router from '../../../src/router'
-import ButtonLink from '../../../src/components/widgets/ButtonLink'
 import VueRouter from 'vue-router'
+import router from '../../../src/testrouter'
+import ButtonLink from '../../../src/components/widgets/ButtonLink'
 
 const localVue = createLocalVue()
 localVue.use(VueRouter)
