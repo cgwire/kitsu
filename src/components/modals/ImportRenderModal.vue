@@ -242,6 +242,10 @@ export default {
       return []
     },
 
+    /**
+     * Get all task types depending on the routed entity type.
+     * Return a list of TaskTypes Object.
+     */
     entityTaskTypes () {
       if (this.$route.path.indexOf('assets') > 0) {
         return this.productionAssetTaskTypes
@@ -262,13 +266,18 @@ export default {
           list.push(item.name)
         }
       })
+      // We don't want to overload the column options with all entity task types
+      // so we pick only if parsing the csv header content return a task column
+      // name and/or this comment section.
       this.entityTaskTypes.forEach(item => {
+        // Push task name option used to update status.
         if (
           !list.includes(item.name) &&
           this.columnSelect.includes(item.name)
         ) {
           list.push(item.name)
         }
+        // Push task comment option.
         if (
           !list.includes(item.name + ' Comment') &&
           this.hasComment(item.name)
@@ -348,14 +357,22 @@ export default {
       }
     },
 
+    /**
+     * Check if task has this 'Comment' column.
+     * Return true if '{taskName} Comment' exists in the header of
+     * the parsed csv or if a 'Comment' column follow a '{taskName}' column.
+     * @param {string} taskName - The task name.
+     */
     hasComment (taskName) {
       let result = false
       this.columnSelect.forEach((item, index) => {
+        // If a 'Comment' column follow a '{taskName}' column we need to update
+        // this comment column name with '{taskName} Comment' naming convention.
         if (item === 'Comment' && index > 0) {
           item = this.columnSelect[index - 1] + ' Comment'
         }
         if (item === taskName + ' Comment') {
-          this.columnSelect[index] = item
+          this.columnSelect[index] = item // force update the column name.
           result = true
         }
       })
