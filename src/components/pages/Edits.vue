@@ -108,7 +108,7 @@
 
   <div
     class="column side-column"
-    v-if="nbSelectedTasks === 1"
+    v-show="nbSelectedTasks === 1"
   >
     <task-info
       :task="selectedTasks.values().next().value"
@@ -178,7 +178,8 @@
     :parsed-csv="parsedCSV"
     :form-data="editsCsvFormData"
     :columns="columns"
-    :dataMatchers="dataMatchers"
+    :data-matchers="dataMatchers"
+    :database="filteredEdits"
     @reupload="resetImport"
     @cancel="hideImportRenderModal"
     @confirm="uploadImportFile"
@@ -481,7 +482,16 @@ export default {
     },
 
     filteredEdits () {
-      return this.displayedEdits
+      const edits = {}
+      this.displayedEdits.forEach(edit => {
+        let editKey = ''
+        if (this.istvshow && edit.episode_id) {
+          editKey += this.episodeMap.get(edit.episode_id).name
+        }
+        editKey += `${edit.name}`
+        edits[editKey] = true
+      })
+      return edits
     },
 
     metadataDescriptors () {
@@ -885,7 +895,7 @@ export default {
 
     onExportClick () {
       this.getEditsCsvLines()
-        .then((editLines) => {
+        .then(editLines => {
           const nameData = [
             moment().format('YYYY-MM-DD'),
             'kitsu',
