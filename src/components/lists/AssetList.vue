@@ -219,11 +219,7 @@
                 @input="event => toggleLine(asset, event)"
                 v-show="!isCurrentUserClient"
               >
-              {{
-                episodeMap.get(asset.episode_id)
-                ? episodeMap.get(asset.episode_id).name
-                : 'MP'
-              }}
+              {{ asset.episodes_names ? asset.episodes_names.join(', ') : 'MP' }}
             </div>
           </td>
           <th
