@@ -1,6 +1,6 @@
 module.exports = {
   title: 'Kitsu Documentation',
-  description: 'Documentation for the production tracker Kitsu',
+  description: 'The documentation for Kitsu, the collaboration platform for Animation studios',
   head: [
      ['link', { rel: 'shortcut icon', type: "image/x-icon", href: `./img/favicon.ico` }]
   ],
