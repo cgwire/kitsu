@@ -3,7 +3,7 @@
  */
 import { mapGetters } from 'vuex'
 
-import { formatDate, formatSimpleDate } from '@/lib/time'
+import { formatDate, formatFullDate, formatSimpleDate } from '@/lib/time'
 
 export const formatListMixin = {
 
@@ -28,6 +28,7 @@ export const formatListMixin = {
     },
 
     formatDate,
+    formatFullDate,
     formatSimpleDate,
 
     formatDuration (duration) {

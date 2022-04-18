@@ -1,7 +1,7 @@
 import {
   getFirstStartDate,
   getLastEndDate,
-  parseDate
+  parseSimpleDate
 } from '@/lib/time'
 import moment from 'moment'
 
@@ -57,6 +57,7 @@ export const entityMixin = {
       if (this.scheduleItems.length > 0 &&
           this.scheduleItems[0].children.length > 0) {
         return getFirstStartDate(this.scheduleItems[0].children)
+          .clone()
           .add(-60, 'days')
       } else {
         return moment()
@@ -97,15 +98,15 @@ export const entityMixin = {
             !task.due_date && !task.end_date) return null
 
         if (task.start_date) {
-          startDate = parseDate(task.start_date)
+          startDate = parseSimpleDate(task.start_date)
         } else if (task.real_start_date) {
-          startDate = parseDate(task.real_start_date)
+          startDate = parseSimpleDate(task.real_start_date)
         }
 
         if (task.due_date) {
-          endDate = parseDate(task.due_date)
+          endDate = parseSimpleDate(task.due_date)
         } else if (task.end_date) {
-          endDate = parseDate(task.end_date)
+          endDate = parseSimpleDate(task.end_date)
         } else if (task.estimation) {
           endDate = startDate.clone().add(estimation, 'days')
         }
