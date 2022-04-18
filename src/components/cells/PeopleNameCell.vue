@@ -1,10 +1,10 @@
 <template>
-<th scope="row" class="name">
+<td scope="row" class="name">
   <div class="people-name">
     <people-avatar class="avatar" :person="person" />
     <people-name class="people-name" with-link :person="person" />
   </div>
-</th>
+</td>
 </template>
 
 <script>

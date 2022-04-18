@@ -11,8 +11,13 @@
   </span>
 </router-link>
 <div
-  class="tag task-type-name no-link"
-  v-bind:class="[{ deletable }, !disable ? '' : 'canceled']"
+  :class="{
+    tag: true,
+    'task-type-name': true,
+    'no-link': true,
+    deletable,
+    canceled: disable
+  }"
   :style="{ 'border-left': '4px solid ' + color }"
   v-else
 >

@@ -200,6 +200,7 @@ export default {
 }
 
 .select-input {
+  background: var(--background);
   border: 1px solid $light-grey-light;
   border-bottom-left-radius: 1em;
   border-bottom-right-radius: 1em;
