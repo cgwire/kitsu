@@ -27,9 +27,9 @@ export default {
       type: Boolean,
       default: false
     },
-    entity: {
-      type: Object,
-      default: () => {}
+    previewFileId: {
+      type: String,
+      default: ''
     }
   },
 
@@ -46,9 +46,9 @@ export default {
     ]),
 
     previewPath () {
-      const previewFileId = this.entity ? this.entity.preview_file_id : ''
-      return this.active && this.entity
-        ? '/api/pictures/originals/preview-files/' + previewFileId + '.png'
+      const id = this.previewFileId
+      return this.active && this.previewFileId
+        ? '/api/pictures/originals/preview-files/' + id + '.png'
         : ''
     }
   },
