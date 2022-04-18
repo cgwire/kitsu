@@ -25,8 +25,12 @@ export const formatSimpleDate = (date) => {
 }
 
 export const formatFullDate = (date) => {
-  const utcDate = moment.tz(date, 'UTC')
-  return utcDate.format('YYYY-MM-DD HH:mm:ss')
+  if (date) {
+    const utcDate = moment.tz(date, 'UTC')
+    return utcDate.format('YYYY-MM-DD HH:mm:ss')
+  } else {
+    return ''
+  }
 }
 
 export const formatFullDateWithTimezone = (dateString, timezone) => {
