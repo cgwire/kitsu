@@ -261,7 +261,6 @@ const mutations = {
   },
 
   [CASTING_SET_EPISODES] (state, { production, episodes }) { // TODO CASTING must be renamed to BREAKDOWN when used for namespacing, and CASTING must be kept for meaningful mutations
-    console.log('CASTING_SET_EPISODES')
     state.castingEpisodes = episodes
     state.castingEpisodeOptions = episodes.map((production) => {
       const route = {

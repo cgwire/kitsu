@@ -96,7 +96,6 @@ export default {
     getEpisodePath () {
       const currentProduction = this.currentProduction
       const section = this.section
-      // console.log('getEpisodePath', this.currentProduction, this.episodeId)
       return (episodeId) => {
         const path = getProductionPath(
           currentProduction,
