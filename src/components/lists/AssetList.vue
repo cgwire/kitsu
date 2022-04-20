@@ -199,7 +199,10 @@
             scope="rowgroup"
             :colspan="visibleColumns"
           >
-            <span class="datatable-row-header">
+            <span
+              class="datatable-row-header pointer"
+              @click="$emit('asset-type-clicked', group[0].asset_type_name)"
+            >
               {{ group[0] ? group[0].asset_type_name : '' }}
             </span>
           </th>
