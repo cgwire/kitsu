@@ -8,10 +8,10 @@
       combo: true,
       open: showList
     }"
+    @click="toggleList"
   >
     <div
       class="flexrow"
-      @click="toggleList"
     >
       <div
         class="selected-line flexrow-item"
@@ -23,6 +23,7 @@
     <div
       class="select-input"
       ref="select"
+      @click="toggleList"
       v-if="showList"
     >
       <div
@@ -99,7 +100,7 @@ export default {
     selectOption (option) {
       this.$emit('input', option.value)
       this.selectedOption = option
-      this.showList = false
+      this.toggleList()
     },
 
     openRoute (option) {
@@ -150,13 +151,14 @@ export default {
 
 .combo {
   background: $white;
-  max-width: 200px;
+  color: var(--text);
   border: 1px solid $light-grey-light;
   border-radius: 0.5em;
   user-select: none;
   cursor: pointer;
   margin: 0;
   margin-top: 1px;
+  max-width: 200px;
   padding: 0.5em;
   position: relative;
   vertical-align: middle;
@@ -181,6 +183,8 @@ export default {
   cursor: pointer;
   margin: 0;
   padding: 0.5em;
+  min-width: 150px;
+  width: inherit;
 
   &:hover {
     background: $purple;
@@ -196,17 +200,19 @@ export default {
 }
 
 .select-input {
+  background: var(--background);
   border: 1px solid $light-grey-light;
   border-bottom-left-radius: 1em;
   border-bottom-right-radius: 1em;
   left: 0;
   margin-left: -1px;
   max-height: 180px;
+  overflow-x: hidden;
   overflow-y: auto;
   position: absolute;
-  top: 38px;
   width: inherit;
-  z-index: 200;
+  top: 38px;
+  z-index: 2000;
 
   .option-line {
     padding-right: 27px;

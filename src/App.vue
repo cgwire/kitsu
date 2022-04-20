@@ -807,6 +807,10 @@ a:hover {
   margin-top: 0.5em;
 }
 
+.ml1 {
+  margin-leftc: 1em;
+}
+
 .mt1 {
   margin-top: 1em;
 }
@@ -821,10 +825,6 @@ a:hover {
 
 .ml1 {
   margin-left: 1em;
-}
-
-.mr1 {
-  margin-right: 1em;
 }
 
 .mb0 {
@@ -845,6 +845,10 @@ a:hover {
 
 .filler {
   flex: 1;
+}
+
+.z300 {
+  z-index: 300000;
 }
 
 label.label {
@@ -1592,6 +1596,18 @@ tbody:last-child .empty-line:last-child {
   font-size: 1.5em;
 }
 
+.entity-thumbnail {
+  border-radius: .5em;
+  box-shadow: 0px 0px 6px var(--box-shadow);
+  cursor: pointer;
+  transition: transform ease 0.3s;
+  max-width: 90px;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
 th.validation-cell {
   &:hover {
     text-decoration: underline $light-grey;
@@ -1608,6 +1624,19 @@ th.validation-cell {
 
   .popover-arrow {
     border-color: var(--background);
+  }
+}
+
+.block {
+  background: var(--background-block);
+  border-radius: 1em;
+  box-shadow: 0px 0px 6px var(--box-shadow);
+  padding: 1.5em;
+
+  &.ready-for {
+    color: var(--text);
+    border-radius: 1em;
+    padding: 1em;
   }
 }
 

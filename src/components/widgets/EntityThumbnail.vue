@@ -12,16 +12,18 @@
   <img
     class="thumbnail-picture"
     :style="imgStyle"
+  :width="width || ''"
     v-lazy="thumbnailPath"
     :key="thumbnailKey"
   />
 </a>
 
 <img
+  :key="thumbnailKey"
   class="thumbnail-picture"
   style="imgStyle"
+  :width="width || ''"
   v-lazy="thumbnailPath"
-  :key="thumbnailKey"
   v-else-if="isPreview && !withLink"
 />
 

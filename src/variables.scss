@@ -40,10 +40,11 @@ $blue: #7289DA;
 
 :root {
   --background: #FFFFFF;
-  --background-page: #F6F6F6;
-  --background-alt: #F6F6F6;
   --background-rgb: 255, 255, 255;
+  --background-alt: #F6F6F6;
   --background-alt-rgb: 246, 246, 246;
+  --background-block: #FFFFFF;
+  --background-page: #F6F6F6;
   --background-hover: #E1E4FF;
   --background-hover-rgb: 240, 255, 240;
   --background-tag:  #EEE;
@@ -62,12 +63,13 @@ $blue: #7289DA;
 
 .dark {
   --background: #36393F;
-  --background-page: #36393F;
   --background-rgb: 54, 57, 63;
   --background-alt: #46494F;
   --background-alt-rgb: 70, 73, 79;
+  --background-block: #46494F;
   --background-hover: #5E6169;
   --background-hover-rgb: 94, 97, 105;
+  --background-page: #36393F;
   --background-tag:  #36393F; 
   --background-tag-button: #4E5159; 
   --background-selectable: #7E80CA;
