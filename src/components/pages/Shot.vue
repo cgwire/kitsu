@@ -10,7 +10,6 @@
       </router-link>
       <span
         class="flexrow-item ml2"
-        @click="onMainThumbnailClicked"
       >
         <entity-thumbnail
           class="entity-thumbnail"
@@ -18,7 +17,6 @@
           :empty-width="120"
           :empty-height="50"
           :width="120"
-          :with-link="false"
           v-if="currentShot"
         />
       </span>
@@ -237,7 +235,6 @@
 
       <entity-preview-files
         :entity="currentShot"
-        @thumbnail-clicked="onThumbnailClicked"
         v-if="currentSection === 'preview-files'"
       />
 
@@ -271,12 +268,6 @@
     @cancel="modals.edit = false"
     @confirm="confirmEditShot"
   />
-
-  <preview-modal
-    :active="modals.preview"
-    :preview-file-id="previewFileIdToShow"
-    @cancel="modals.preview = false"
-  />
 </div>
 </template>
 
@@ -300,7 +291,6 @@ import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PageTitle from '@/components/widgets/PageTitle'
 import PageSubtitle from '@/components/widgets/PageSubtitle'
-import PreviewModal from '@/components/modals/PreviewModal'
 import Schedule from '@/components/pages/schedule/Schedule'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskInfo from '@/components/sides/TaskInfo'
@@ -323,7 +313,6 @@ export default {
     EntityThumbnail,
     PageSubtitle,
     PageTitle,
-    PreviewModal,
     Schedule,
     TableInfo,
     TaskInfo,
@@ -334,7 +323,6 @@ export default {
     return {
       currentShot: null,
       currentTask: null,
-      previewFileIdToShow: null,
       casting: {
         isLoading: false,
         isError: false

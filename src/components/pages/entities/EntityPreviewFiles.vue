@@ -43,14 +43,12 @@
         >
           <td
             class="thumbnail"
-            @click="$emit('thumbnail-clicked', previewFile.id)"
           >
             <entity-thumbnail
               class="preview-thumbnail"
               :preview-file-id="previewFile.id"
               :empty-width="60"
               :width="60"
-              :with-link="false"
             />
           </td>
 

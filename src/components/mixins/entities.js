@@ -67,6 +67,12 @@ export const entitiesMixin = {
         })
         .filter((department, index, self) =>
           department && self.indexOf(department) === index)
+    },
+
+    onEntityThumbnailClicked (entityId) {
+      if (!entityId) return
+      this.previvewFileIdToShow = entityId
+      this.modals.isPreviewDisplayed = true
     }
   }
 }

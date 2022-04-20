@@ -4,9 +4,14 @@
   'is-active': active
 }">
   <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div class="new-window">
+    <a target="_blank" :href="previewPath">
+      <arrow-up-right-icon />
+    </a>
+  </div>
 
   <div class="modal-content">
-      <img :src="previewPath">
+    <img :src="previewPath">
   </div>
 </div>
 </template>
@@ -15,11 +20,14 @@
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
 
+import { ArrowUpRightIcon } from 'vue-feather-icons'
+
 export default {
   name: 'preview-modal',
   mixins: [modalMixin],
 
   components: {
+    ArrowUpRightIcon
   },
 
   props: {
@@ -66,5 +74,12 @@ export default {
 <style lang="scss" scoped>
 .error {
   margin-top: 1em;
+}
+
+.new-window {
+  color: $grey;
+  position: absolute;
+  right: 1em;
+  top: 1em;
 }
 </style>
