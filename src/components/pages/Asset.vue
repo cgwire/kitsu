@@ -413,6 +413,7 @@ export default {
   computed: {
     ...mapGetters([
       'assetMap',
+      'assetSearchText',
       'assetMetadataDescriptors',
       'currentEpisode',
       'currentProduction',
@@ -508,7 +509,7 @@ export default {
           production_id: this.currentProduction.id
         },
         query: {
-          search: ''
+          search: this.assetSearchText || ''
         }
       }
       if (this.currentEpisode) {
@@ -538,10 +539,13 @@ export default {
     getCurrentAsset () {
       return new Promise((resolve, reject) => {
         const assetId = this.route.params.asset_id
+        if (!assetId) resolve(null)
         const asset = this.assetMap.get(assetId) || null
         if (!asset) {
-          return this.loadAsset(assetId)
-            .then(resolve)
+          if (assetId) {
+            return this.loadAsset(assetId)
+              .then(resolve)
+          }
         } else {
           return resolve(asset)
         }

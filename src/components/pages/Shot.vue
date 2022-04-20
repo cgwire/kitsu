@@ -388,6 +388,7 @@ export default {
       'route',
       'shotMap',
       'shotMetadataDescriptors',
+      'shotSearchText',
       'shotsPath',
       'taskMap',
       'taskTypeMap'
@@ -426,7 +427,7 @@ export default {
           production_id: this.currentProduction.id
         },
         query: {
-          search: ''
+          search: this.shotSearchText
         }
       }
       if (this.currentEpisode) {
