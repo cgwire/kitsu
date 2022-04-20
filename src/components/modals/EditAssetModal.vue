@@ -44,8 +44,37 @@
           :key="descriptor.id"
           v-for="descriptor in assetMetadataDescriptors"
         >
+          <div
+            class="field"
+            v-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+            :key="`${descriptor.id}-checklist-wrapper`"
+          >
+            <label
+              class="label"
+              v-html="descriptor.name"
+              :key="`${descriptor.id}-${descriptor.name}`"
+            />
+            <div
+              class="checkbox-wrapper"
+              v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+              :key="`${descriptor.id}-${i}-${option.text}-wrapper`"
+            >
+              <input
+                type="checkbox"
+                :checked="getMetadataChecklistValues(descriptor, assetToEdit)[option.text]"
+                @change="event => onMetadataCheckboxChanged(descriptor, option.text, event)"
+                :id="`${descriptor.id}-${i}-${option.text}-checkbox`"
+              />
+              <label
+                class="checkbox-label"
+                :for="`${descriptor.id}-${i}-${option.text}-checkbox`"
+              >
+                <span>{{ option.text }}</span>
+              </label>
+            </div>
+          </div>
           <combobox
-            v-if="descriptor.choices.length > 0"
+            v-else-if="descriptor.choices.length > 0"
             :label="descriptor.name"
             :options="getDescriptorChoicesOptions(descriptor)"
             v-model="form.data[descriptor.field_name]"
@@ -206,6 +235,17 @@ export default {
     ...mapActions([
     ]),
 
+    onMetadataCheckboxChanged (descriptor, option, event) {
+      var values = {}
+      try {
+        values = JSON.parse(this.form.data[descriptor.field_name])
+      } catch {
+        values = {}
+      }
+      values[option] = event.target.checked
+      this.form.data[descriptor.field_name] = JSON.stringify(values)
+    },
+
     runConfirmation () {
       if (this.form.name.length > 0) {
         if (this.isEditing()) {
@@ -303,4 +343,20 @@ export default {
 .info-message {
   margin-top: 1em;
 }
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  position: relative;
+  padding-left: .5rem;
+  padding-right: .5rem;
+  white-space: normal;
+  cursor: pointer;
+}
+
 </style>

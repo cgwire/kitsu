@@ -265,6 +265,28 @@
               :value="getMetadataFieldValue(descriptor, shot)"
               v-if="descriptor.choices.length === 0 && isCurrentUserManager"
             />
+            <div
+              class="metadata-value selectable"
+              v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+            >
+              <p
+                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+                :key="`${shot.id}-${descriptor.id}-${i}-${option.text}-div`"
+              >
+                <input
+                  type="checkbox"
+                  @change="event => onMetadataChecklistChanged(shot, descriptor, option.text, event)"
+                  :id="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :checked="getMetadataChecklistValues(descriptor, shot)[option.text]"
+                />
+                <label
+                  style="cursor: pointer;"
+                  :for="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
+                >
+                  {{ option.text }}
+                </label>
+              </p>
+            </div>
             <span
               class="select"
               v-else-if="isCurrentUserManager"
@@ -426,6 +448,28 @@
               :value="getMetadataFieldValue(descriptor, shot)"
               v-if="descriptor.choices.length === 0 && isCurrentUserManager"
             />
+            <div
+              class="metadata-value selectable"
+              v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+            >
+              <p
+                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+                :key="`${shot.id}-${descriptor.id}-${i}-${option.text}-div`"
+              >
+                <input
+                  type="checkbox"
+                  @change="event => onMetadataChecklistChanged(shot, descriptor, option.text, event)"
+                  :id="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :checked="getMetadataChecklistValues(descriptor, shot)[option.text]"
+                />
+                <label
+                  style="cursor: pointer;"
+                  :for="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
+                >
+                  {{ option.text }}
+                </label>
+              </p>
+            </div>
             <span
               class="select"
               v-else-if="isCurrentUserManager"

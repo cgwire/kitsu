@@ -276,6 +276,28 @@
               :value="getMetadataFieldValue(descriptor, asset)"
               v-if="descriptor.choices.length === 0 && isCurrentUserManager"
             />
+            <div
+              class="metadata-value selectable"
+              v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+            >
+              <p
+                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+                :key="`${asset.id}-${descriptor.id}-${i}-${option.text}-div`"
+              >
+                <input
+                  type="checkbox"
+                  @change="event => onMetadataChecklistChanged(asset, descriptor, option.text, event)"
+                  :id="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :checked="getMetadataChecklistValues(descriptor, asset)[option.text]"
+                />
+                <label
+                  style="cursor: pointer;"
+                  :for="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
+                >
+                  {{ option.text }}
+                </label>
+              </p>
+            </div>
             <span
               class="select"
               v-else-if="isCurrentUserManager"
@@ -382,6 +404,28 @@
               :value="getMetadataFieldValue(descriptor, asset)"
               v-if="descriptor.choices.length === 0 && isCurrentUserManager"
             />
+            <div
+              class="metadata-value selectable"
+              v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+            >
+              <p
+                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+                :key="`${asset.id}-${descriptor.id}-${i}-${option.text}-div`"
+              >
+                <input
+                  type="checkbox"
+                  @change="event => onMetadataChecklistChanged(asset, descriptor, option.text, event)"
+                  :id="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :checked="getMetadataChecklistValues(descriptor, asset)[option.text]"
+                />
+                <label
+                  style="cursor: pointer;"
+                  :for="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
+                >
+                  {{ option.text }}
+                </label>
+              </p>
+            </div>
             <span
               class="select"
               v-else-if="isCurrentUserManager"
