@@ -100,6 +100,7 @@
         @asset-changed="onAssetChanged"
         @field-changed="onFieldChanged"
         @scroll="saveScrollPosition"
+        @asset-type-clicked="onAssetTypeClicked"
       />
     </div>
   </div>
@@ -948,6 +949,11 @@ export default {
             })
           csv.buildCsvFile(name, [headers].concat(assetLines))
         })
+    },
+
+    onAssetTypeClicked (assetType) {
+      this.searchField.setValue(`${this.assetSearchText} type=${assetType}`)
+      this.onSearchChange()
     },
 
     resetCsvColumns () {

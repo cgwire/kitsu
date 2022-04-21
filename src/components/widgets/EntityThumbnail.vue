@@ -1,18 +1,18 @@
 <template>
 <a
-  class="thumbnail-wrapper"
-  :href="originalPath"
+  class="thumbnail-wrapper thumbnail-picture"
   target="_blank"
   :style="{
     width: emptyWidth + 'px',
     height: emptyHeight + 'px',
   }"
+  @click="onClicked"
   v-if="isPreview && withLink"
 >
   <img
     class="thumbnail-picture"
     :style="imgStyle"
-  :width="width || ''"
+    :width="width || ''"
     v-lazy="thumbnailPath"
     :key="thumbnailKey"
   />
@@ -130,6 +130,14 @@ export default {
       const previewFileId = this.previewFileId || this.entity.preview_file_id
       return `thumbnail-${previewFileId}`
     }
+  },
+
+  methods: {
+    onClicked () {
+      const previewFileId = this.previewFileId || this.entity.preview_file_id
+      console.log(previewFileId)
+      this.$store.commit('SHOW_PREVIEW_FILE', previewFileId)
+    }
   }
 }
 </script>
@@ -141,6 +149,7 @@ export default {
 }
 
 .thumbnail-picture {
+  border-radius: 4px;
   margin: 0;
 }
 
@@ -161,9 +170,13 @@ table .thumbnail-picture.thumbnail-empty {
 
 table .thumbnail-picture {
   margin: 0px;
+  padding: 0px;
 }
 
 .thumbnail-wrapper {
+  padding: 0px;
+  border: 0;
+  border-radius: 4px;
   display: inline-block;
 }
 </style>

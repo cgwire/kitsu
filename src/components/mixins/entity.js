@@ -149,17 +149,6 @@ export const entityMixin = {
   },
 
   methods: {
-    onMainThumbnailClicked () {
-      this.modals.preview = true
-      const entity = this.currentAsset || this.currentShot
-      this.previewFileIdToShow = entity.preview_file_id
-    },
-
-    onThumbnailClicked (previewFileId) {
-      this.modals.preview = true
-      this.previewFileIdToShow = previewFileId
-    },
-
     onTaskSelected (task) {
       if (!this.currentTask || this.currentTask.id !== task.id) {
         this.currentTask = task

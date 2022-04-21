@@ -1374,7 +1374,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .page-header,
 .dark .task-information,
 .dark .add-comment,
 .dark .comment,

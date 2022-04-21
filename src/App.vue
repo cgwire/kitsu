@@ -8,18 +8,26 @@
       <spinner class="mt2" />
     </div>
     <router-view v-else />
+
+    <preview-modal
+      :active="previewFileIdToShow.length > 0"
+      :preview-file-id="previewFileIdToShow"
+      @cancel="() => $store.commit('HIDE_PREVIEW_FILE')"
+    />
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import Spinner from './components/widgets/Spinner.vue'
-import crisp from './lib/crisp'
+import PreviewModal from '@/components/modals/PreviewModal'
+import Spinner from '@/components/widgets/Spinner'
+import crisp from '@/lib/crisp'
 
 export default {
   name: 'app',
 
   components: {
+    PreviewModal,
     Spinner
   },
 
@@ -32,10 +40,12 @@ export default {
       'episodeMap',
       'isCurrentUserAdmin',
       'isDataLoading',
+      'isPreviewFileDisplayed',
       'isDarkTheme',
       'isLoginLoading',
       'isSavingCommentPreview',
       'isTVShow',
+      'previewFileIdToShow',
       'route',
       'personMap',
       'productionMap',
@@ -1501,6 +1511,10 @@ tbody:last-child .empty-line:last-child {
 
 .flexrow-item:last-child {
   margin-right: 0;
+}
+
+.pointer {
+  cursor: pointer;
 }
 
 .side {

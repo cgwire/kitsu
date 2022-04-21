@@ -10,6 +10,9 @@ import {
 
   SET_CURRENT_PRODUCTION,
 
+  SHOW_PREVIEW_FILE,
+  HIDE_PREVIEW_FILE,
+
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -19,18 +22,20 @@ const initialState = {
   isSidebarHidden: true,
   isUserMenuHidden: true,
   lastProductionScreen: 'assets',
-  lastProductionViewed: null
+  lastProductionViewed: null,
+  previewFileIdToShow: ''
 }
 
 const state = { ...initialState }
 
 const getters = {
+  currentProductionScreen: state => state.currentProductionScreen,
   isDarkTheme: state => state.isDarkTheme,
   isSidebarHidden: state => state.isSidebarHidden,
   isUserMenuHidden: state => state.isUserMenuHidden,
   lastProductionScreen: state => state.lastProductionScreen,
   lastProductionViewed: state => state.lastProductionViewed,
-  currentProductionScreen: state => state.currentProductionScreen
+  previewFileIdToShow: state => state.previewFileIdToShow
 }
 
 const actions = {
@@ -83,6 +88,14 @@ const mutations = {
     if (user && user.role === 'client') {
       state.lastProductionScreen = 'playlists'
     }
+  },
+
+  [SHOW_PREVIEW_FILE] (state, previewFileId) {
+    state.previewFileIdToShow = previewFileId
+  },
+
+  [HIDE_PREVIEW_FILE] (state) {
+    state.previewFileIdToShow = ''
   },
 
   [RESET_ALL] (state) {

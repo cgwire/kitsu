@@ -22,7 +22,6 @@
       </router-link>
       <span
         class="flexrow-item ml2"
-        @click="onMainThumbnailClicked"
       >
         <entity-thumbnail
           class="entity-thumbnail"
@@ -30,7 +29,6 @@
           :empty-width="100"
           :empty-height="60"
           :width="100"
-          :with-link="false"
           v-if="currentAsset"
         />
       </span>
@@ -264,7 +262,6 @@
 
       <entity-preview-files
         :entity="currentAsset"
-        @thumbnail-clicked="onThumbnailClicked"
         v-if="currentSection === 'preview-files'"
       />
 
@@ -299,12 +296,6 @@
     @cancel="modals.edit = false"
     @confirm="confirmEditAsset"
   />
-
-  <preview-modal
-    :active="modals.preview"
-    :preview-file-id="previewFileIdToShow"
-    @cancel="modals.preview = false"
-  />
 </div>
 </template>
 
@@ -330,7 +321,6 @@ import EntityTaskList from '@/components/lists/EntityTaskList'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PageTitle from '@/components/widgets/PageTitle'
 import PageSubtitle from '@/components/widgets/PageSubtitle'
-import PreviewModal from '@/components/modals/PreviewModal'
 import Schedule from '@/components/pages/schedule/Schedule'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
@@ -355,7 +345,6 @@ export default {
     EntityTimeLogs,
     PageSubtitle,
     PageTitle,
-    PreviewModal,
     Schedule,
     TableInfo,
     TaskInfo,
@@ -366,7 +355,6 @@ export default {
     return {
       currentAsset: null,
       currentTask: null,
-      previewFileIdToShow: '',
       castIn: {
         isLoading: false,
         isError: false
@@ -413,6 +401,7 @@ export default {
   computed: {
     ...mapGetters([
       'assetMap',
+      'assetSearchText',
       'assetMetadataDescriptors',
       'currentEpisode',
       'currentProduction',
@@ -508,7 +497,7 @@ export default {
           production_id: this.currentProduction.id
         },
         query: {
-          search: ''
+          search: this.assetSearchText || ''
         }
       }
       if (this.currentEpisode) {
@@ -538,10 +527,13 @@ export default {
     getCurrentAsset () {
       return new Promise((resolve, reject) => {
         const assetId = this.route.params.asset_id
+        if (!assetId) resolve(null)
         const asset = this.assetMap.get(assetId) || null
         if (!asset) {
-          return this.loadAsset(assetId)
-            .then(resolve)
+          if (assetId) {
+            return this.loadAsset(assetId)
+              .then(resolve)
+          }
         } else {
           return resolve(asset)
         }

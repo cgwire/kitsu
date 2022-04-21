@@ -72,7 +72,7 @@ export default {
         params: {
           production_id: this.productionId,
           task_type_id: this.taskType.id,
-          type: this.$tc(this.taskType.for_entity.toLowerCase(), 2)
+          type: this.$tc(this.taskType.for_entity.toLowerCase(), 2) + 's'
         }
       }
 
@@ -83,7 +83,6 @@ export default {
       }
       return route
     }
-
   },
 
   methods: {
