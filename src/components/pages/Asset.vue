@@ -187,54 +187,54 @@
           :is-error="castIn.isError"
           v-else
         />
-      </div>
 
-      <div
-        v-if="currentAsset &&
-              currentAsset.castingAssetsByType &&
-              currentAsset.castingAssetsByType[0].length > 0"
-      >
-        <page-subtitle text="Linked" />
         <div
-            v-if="currentAsset.castingAssetsByType && currentAsset.castingAssetsByType[0].length > 0"
+          v-if="currentAsset &&
+                currentAsset.castingAssetsByType &&
+                currentAsset.castingAssetsByType[0].length > 0"
         >
+          <page-subtitle text="Linked" />
           <div
-            class="type-assets"
-            :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
-            v-for="typeAssets in currentAsset.castingAssetsByType"
+              v-if="currentAsset.castingAssetsByType && currentAsset.castingAssetsByType[0].length > 0"
           >
-            <div class="asset-type">
-              {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
-              ({{ typeAssets.length }})
-            </div>
-            <div class="asset-list">
-              <router-link
-                class="asset-link"
-                :key="asset.id"
-                :to="{
-                  name: 'asset',
-                  params: {
-                    production_id: currentProduction.id,
-                    asset_id: asset.asset_id
-                  }
-                }"
-                v-for="asset in typeAssets"
-              >
-                <entity-thumbnail
-                  class="entity-thumbnail"
-                  :entity="asset"
-                  :square="true"
-                  :empty-width="103"
-                  :empty-height="103"
-                  :with-link="false"
-                />
-                <div>
-                  <span>{{ asset.asset_name }}</span>
-                  <span v-if="asset.nb_occurences > 1">
-                    ({{ asset.nb_occurences }})
-                  </span>
-                </div>
-              </router-link>
+            <div
+              class="type-assets"
+              :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
+              v-for="typeAssets in currentAsset.castingAssetsByType"
+            >
+              <div class="asset-type">
+                {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
+                ({{ typeAssets.length }})
+              </div>
+              <div class="asset-list">
+                <router-link
+                  class="asset-link"
+                  :key="asset.id"
+                  :to="{
+                    name: 'asset',
+                    params: {
+                      production_id: currentProduction.id,
+                      asset_id: asset.asset_id
+                    }
+                  }"
+                  v-for="asset in typeAssets"
+                >
+                  <entity-thumbnail
+                    class="entity-thumbnail"
+                    :entity="asset"
+                    :square="true"
+                    :empty-width="103"
+                    :empty-height="103"
+                    :with-link="false"
+                  />
+                  <div>
+                    <span>{{ asset.asset_name }}</span>
+                    <span v-if="asset.nb_occurences > 1">
+                      ({{ asset.nb_occurences }})
+                    </span>
+                  </div>
+                </router-link>
+              </div>
             </div>
           </div>
         </div>
