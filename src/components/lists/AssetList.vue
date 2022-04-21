@@ -468,6 +468,8 @@
             :minimized="hiddenColumns[columnId]"
             :is-static="true"
             :is-assignees="isShowAssignations"
+            :selectable="isSelectable(asset, columnId)"
+            :disabled="!isSelectable(asset, columnId)"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             v-for="(columnId, j) in nonStickedDisplayedValidationColumns"
@@ -627,6 +629,7 @@ export default {
       'assetMetadataDescriptors',
       'assetSearchText',
       'assetSelectionGrid',
+      'assetTypeMap',
       'episodeMap',
       'currentEpisode',
       'currentProduction',
@@ -644,6 +647,7 @@ export default {
       'isAssetEstimation',
       'isAssetTime',
       'isTVShow',
+      'productionAssetTaskTypes',
       'productionShotTaskTypes',
       'selectedAssets',
       'selectedTasks',
@@ -760,6 +764,22 @@ export default {
       return episodeNames.length > 0
         ? mainEpisodeName + ', ' + episodeNameString
         : mainEpisodeName
+    },
+
+    // Selectable if the task type is included in the workflow.
+    isSelectable (asset, columnId) {
+      const key = asset.asset_type_id + columnId
+      if (this.isSelectableMap === undefined) this.isSelectableMap = {}
+      if (this.isSelectableMap[key] === undefined) {
+        const taskType = this.taskTypeMap.get(columnId)
+        const assetType = this.assetTypeMap.get(asset.asset_type_id)
+        let taskTypes = assetType.task_types || []
+        if (taskTypes.length === 0) {
+          taskTypes = this.productionAssetTaskTypes.map(t => t.id)
+        }
+        this.isSelectable[key] = taskTypes.includes(taskType.id)
+      }
+      return this.isSelectable[key]
     },
 
     isSelected (indexInGroup, groupIndex, columnIndex) {
@@ -924,6 +944,11 @@ export default {
 
     isLoading () {
       this.updateOffsets()
+    },
+
+    currentProduction () {
+      // Map used for performance reasons, to avoid array traversals
+      this.isSelectableMap = {}
     }
   },
 

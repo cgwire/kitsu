@@ -443,26 +443,34 @@ const actions = {
       return Promise.reject(new Error('Asset already exsists'))
     }
     return assetsApi.newAsset(data)
-      .then((asset) => {
+      .then(asset => {
         const assetTypeMap = rootGetters.assetTypeMap
-        commit(EDIT_ASSET_END, { newAsset: asset, assetTypeMap })
+        const assetType = assetTypeMap.get(asset.entity_type_id)
+        const workflow = assetType.task_types || []
+        let taskTypeIds = rootGetters.productionAssetTaskTypeIds
         const sortInfo = state.assetSorting && state.assetSorting.length > 0
           ? state.assetSorting[0]
           : []
+        // Add asset to the list
+        commit(EDIT_ASSET_END, { newAsset: asset, assetTypeMap })
+        // Sort list
         dispatch('changeAssetSort', sortInfo)
-        const taskTypeIds = rootGetters.productionAssetTaskTypeIds
-        const createTaskPromises = taskTypeIds.map(
-          (taskTypeId) => dispatch('createTask', {
+        // Creates tasks related to the asset type workflow
+        if (workflow.length > 0) {
+          taskTypeIds = taskTypeIds.filter(taskTypeId => {
+            return workflow.includes(taskTypeId)
+          })
+        }
+        const createTaskPromises = taskTypeIds.map(taskTypeId => {
+          return dispatch('createTask', {
             entityId: asset.id,
             projectId: asset.project_id,
             taskTypeId: taskTypeId,
             type: 'assets'
           })
-        )
+        })
         return Promise.all(createTaskPromises)
-          .then(() => {
-            return Promise.resolve(asset)
-          })
+          .then(() => Promise.resolve(asset))
       })
   },
 

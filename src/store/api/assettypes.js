@@ -11,14 +11,16 @@ export default {
 
   newAssetType (assetType, callback) {
     const data = {
-      name: assetType.name
+      name: assetType.name,
+      task_types: assetType.task_types
     }
     return client.ppost('/api/data/entity-types', data)
   },
 
   updateAssetType (assetType, callback) {
     const data = {
-      name: assetType.name
+      name: assetType.name,
+      task_types: assetType.task_types
     }
     return client.pput(`/api/data/entity-types/${assetType.id}`, data)
   },

@@ -2,6 +2,7 @@
 <td
   ref="cell"
   :class="{
+    disabled: disabled,
     validation: selectable,
     selected: selectable & selected
   }"
@@ -161,6 +162,10 @@ export default {
       default: false,
       type: Boolean
     },
+    disabled: {
+      default: false,
+      type: Boolean
+    },
     rowX: {
       default: 0,
       type: Number
@@ -263,7 +268,9 @@ export default {
     ]),
 
     getBackground () {
-      if (this.isBorder && !this.sticked) {
+      if (this.disabled) {
+        return 'rgba(0, 0, 0, 0.15)'
+      } else if (this.isBorder && !this.sticked) {
         const opacity = this.isDarkTheme ? 0.15 : 0.08
         return colors.hexToRGBa(this.column.color, opacity)
       } else {
@@ -432,6 +439,10 @@ span.person-avatar:nth-child(2) {
 .priority {
   color: red;
   margin-right: 3px;
+}
+
+.disabled .tag {
+  opacity: 0;
 }
 
 .casting-status {

@@ -40,12 +40,14 @@ export default {
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this asset type. There are probably data linked to it. Are you sure this asset type has no asset linked to it?',
     edit_title: 'Edit asset type',
+    include_all: 'Includes all asset task types',
     new_asset_type: 'Add an asset type',
     number: 'asset type | asset types',
     title: 'Asset Types',
     production_title: 'Asset Types Stats',
     fields: {
-      name: 'Name'
+      name: 'Name',
+      task_types: 'Workflow'
     }
   },
 

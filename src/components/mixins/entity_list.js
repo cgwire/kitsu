@@ -155,13 +155,20 @@ export const entityListMixin = {
               if (!grid[i][j]) {
                 let y = validationCell.columnY
                 if (!sticked) y += columnOffset
-                selection.push({
-                  entity: validationCell.entity,
-                  column: validationCell.column,
-                  task: validationCell.task,
-                  x: validationCell.rowX,
-                  y
-                })
+
+                // Check if cell is selectable based on asset types list from entity's task type
+                const isSelectable = validationCell.entity.task_types.includes(validationCell.column.task_type_id)
+
+                // Add cell to selection
+                if (isSelectable) {
+                  selection.push({
+                    entity: validationCell.entity,
+                    column: validationCell.column,
+                    task: validationCell.task,
+                    x: validationCell.rowX,
+                    y
+                  })
+                }
               }
             }
           }

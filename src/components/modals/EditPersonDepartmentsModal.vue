@@ -83,7 +83,7 @@ import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
 import DepartmentName from '@/components/widgets/DepartmentName'
 
 export default {
-  name: 'edit-person-departments-modal',
+  name: 'edit-person-departments-modal',  // TODO this file seems deprecated, we must delete it
   mixins: [modalMixin],
   props: [
     'isLoading',

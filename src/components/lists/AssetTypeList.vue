@@ -5,6 +5,9 @@
       <thead class="datatable-head">
         <tr>
           <th scope="col" class="name">{{ $t('asset_types.fields.name') }}</th>
+          <th scope="col" class="task-types">
+            {{ $t('asset_types.fields.task_types') }}
+          </th>
           <th scope="col" class="actions"></th>
         </tr>
       </thead>
@@ -12,6 +15,21 @@
         <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
           <td class="name">
              {{ entry.name }}
+          </td>
+          <td class="task-types" v-if="(entry.task_types || []).length > 0">
+            <span
+              :key="taskType.id"
+              class="task-type-name flexrow-item"
+              v-for="taskType in sortTaskTypes(entry.task_types)"
+            >
+              <task-type-name
+                :task-type="taskType"
+                v-if="taskType.id"
+              />
+            </span>
+          </td>
+          <td class="task-types" v-else>
+            {{ $t('asset_types.include_all') }}
           </td>
           <row-actions-cell
             :entry-id="entry.id"
@@ -37,9 +55,12 @@
 </template>
 
 <script>
+import { sortTaskTypes } from '@/lib/sorting'
+
 import { mapGetters, mapActions } from 'vuex'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
   name: 'asset-type-list',
@@ -52,16 +73,24 @@ export default {
     return {}
   },
   components: {
+    TaskTypeName,
     RowActionsCell,
     TableInfo
   },
   computed: {
     ...mapGetters([
+      'taskTypeMap'
     ])
   },
   methods: {
     ...mapActions([
-    ])
+    ]),
+
+    sortTaskTypes (taskTypeIds = []) {
+      const taskTypes = taskTypeIds
+        .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
+      return sortTaskTypes(taskTypes)
+    }
   }
 }
 </script>

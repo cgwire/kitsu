@@ -343,6 +343,7 @@ describe('Assets store', () => {
     test('newAsset', async () => {
       const rootGetters = {
         assetTypeMap: 1,
+        taskTypeMap: 5,
         productionAssetTaskTypeIds: [
           1, 2
         ]
@@ -356,7 +357,7 @@ describe('Assets store', () => {
         { commit: mockCommit, state, rootGetters, dispatch: mockDispatch }, 1)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(
-        1, EDIT_ASSET_END, { newAsset: asset, assetTypeMap: 1 })
+        1, EDIT_ASSET_END, { newAsset: asset, assetTypeMap: 1, taskTypeMap: 5 })
       expect(mockDispatch).toBeCalledTimes(3)
       expect(mockDispatch).toHaveBeenNthCalledWith(2, 'createTask', {
         entityId: 1,
