@@ -41,6 +41,30 @@
           @enter="confirmClicked"
           v-model="form.department_id"
         />
+        <label class="label">
+          {{ $t('task_types.fields.set_asset_types') }}
+        </label>
+        <div class="flexrow asset-types mb1">
+          <span
+            :key="assetType.id"
+            class="asset-type-name flexrow-item"
+            @click="deleteFromList(assetType, 'assetTypes')"
+            v-for="assetType in form.asset_types"
+          >
+            {{ assetType.name }}
+          </span>
+          <combobox
+            class="flexrow-item"
+            :options="availableAssetTypes"
+            :with-margin="false"
+            @input="id => {
+              assetTypeMap.get(id) && form.asset_types.push(
+                assetTypeMap.get(id)
+              )
+            }"
+            v-if="availableAssetTypes.length > 1"
+          />
+        </div>
         <color-field
           ref="colorField"
           :label="$t('task_types.fields.color')"
@@ -63,6 +87,9 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
+
+import { removeModelFromList } from '@/lib/models'
+import { sortByName } from '@/lib/sorting'
 
 import Combobox from '../widgets/Combobox.vue'
 import ComboboxBoolean from '../widgets/ComboboxBoolean.vue'
@@ -96,12 +123,14 @@ export default {
   watch: {
     taskTypeToEdit () {
       if (this.taskTypeToEdit) {
+        console.log('taskTypeToEdit', this.taskTypeToEdit, this.taskTypeToEdit.asset_types)
         this.form = {
           name: this.taskTypeToEdit.name,
           color: this.taskTypeToEdit.color,
           for_entity: this.taskTypeToEdit.for_entity,
           allow_timelog: String(this.taskTypeToEdit.allow_timelog === true),
-          department_id: this.taskTypeToEdit.department_id
+          department_id: this.taskTypeToEdit.department_id,
+          asset_types: this.taskTypeToEdit.asset_types
         }
       }
     }
@@ -114,7 +143,8 @@ export default {
         color: '$grey',
         for_entity: 'Asset',
         allow_timelog: 'false',
-        department_id: null
+        department_id: null,
+        asset_types: []
       },
       dedicatedToOptions: [
         { label: this.$t('assets.title'), value: 'Asset' },
@@ -126,18 +156,48 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetTypes',
+      'assetTypeMap',
       'taskTypes',
       'taskTypeStatusOptions',
       'departments'
     ]),
+
     isEditing () {
       return this.taskTypeToEdit && this.taskTypeToEdit.id
+    },
+
+    availableAssetTypes () {
+      console.log('availableAssetTypes', this.assetTypes, this.form.asset_types)
+      const assetTypes = sortByName(this.assetTypes.filter(assetType => {
+        return this.form.asset_types.indexOf(assetType) === -1
+      }))
+      return [
+        {
+          name: '+ Asset Type',
+          id: '-'
+        },
+        ...assetTypes
+      ].map(assetType => {
+        return {
+          label: assetType.name,
+          value: assetType.id
+        }
+      })
     }
   },
 
   methods: {
     ...mapActions([
+      'loadAssetTypes'
     ]),
+    removeModelFromList,
+
+    deleteFromList (object, listName) {
+      this.form[listName] = removeModelFromList(
+        this.form[listName], object
+      )
+    },
 
     newPriority (forEntity) {
       return this.entries.filter(taskType => taskType.for_entity === forEntity).length + 1
@@ -160,5 +220,12 @@ export default {
 .is-danger {
   color: #ff3860;
   font-style: italic;
+}
+
+.asset-type-name {
+  border: 1px solid var(--text);
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
 }
 </style>
