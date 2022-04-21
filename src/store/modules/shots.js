@@ -592,6 +592,16 @@ const actions = {
       .catch(console.error)
   },
 
+  loadSequences ({ commit, state, _, rootGetters }) {
+    const production = rootGetters.currentProduction
+    const isTVShow = rootGetters.isTVShow
+    const episode = isTVShow ? rootGetters.currentEpisode : null
+    shotsApi.getSequences(production, episode, (err, sequences) => {
+      if (err) console.error(err)
+      commit(LOAD_SEQUENCES_END, sequences)
+    })
+  },
+
   /*
    * Function useds mainly to reload shot data after an update or creation
    * event. If the shot was updated a few times ago, it is not reloaded.

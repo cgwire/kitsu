@@ -53,7 +53,7 @@
             <tbody class="datatable-body">
               <tr
                 class="datatable-row"
-                v-if="currentShot.data && currentShot.data.fps"
+                v-if="currentShot && currentShot.data && currentShot.data.fps"
               >
                 <td class="field-label">{{ $t('shots.fields.fps') }}</td>
                 <td>
@@ -63,7 +63,7 @@
 
               <tr
                 class="datatable-row"
-                v-if="currentShot.data && currentShot.data.frame_in"
+                v-if="currentShot && currentShot.data && currentShot.data.frame_in"
               >
                 <td class="field-label">{{ $t('shots.fields.frame_in') }}</td>
                 <td>
@@ -73,7 +73,7 @@
 
               <tr
                 class="datatable-row"
-                v-if="currentShot.data && currentShot.data.frame_out"
+                v-if="currentShot && currentShot.data && currentShot.data.frame_out"
               >
                 <td class="field-label">{{ $t('shots.fields.frame_out') }}</td>
                 <td>
@@ -107,7 +107,7 @@
               >
                 <td class="field-label">{{ descriptor.name }}</td>
                 <td>
-                  {{ currentShot.data ? currentShot.data[descriptor.field_name] : '' }}
+                  {{ currentShot && currentShot.data ? currentShot.data[descriptor.field_name] : '' }}
                 </td>
               </tr>
 
@@ -153,7 +153,8 @@
           v-if="currentShot"
         >
           <div
-            v-if="currentShot.castingAssetsByType &&
+            v-if="currentShot &&
+                  currentShot.castingAssetsByType &&
                   currentShot.castingAssetsByType[0].length > 0"
           >
             <div
@@ -427,7 +428,11 @@ export default {
 
     nbAssets () {
       let nbAssets = 0
-      if (this.currentSection === 'casting') {
+      if (
+        this.currentShot &&
+        this.currentSection === 'casting' &&
+        this.currentShot.castingAssetsByType
+      ) {
         this.currentShot.castingAssetsByType.forEach(group => {
           nbAssets += group.length
         })
