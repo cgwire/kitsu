@@ -591,6 +591,7 @@ h2.subtitle {
 }
 
 .shot-casting {
+  overflow-y: auto;
 }
 
 .asset-link .thumbnail-picture {
