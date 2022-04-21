@@ -1,5 +1,5 @@
 <template>
-  <div class="mt1 flexcolumn wrapper time-logs">
+  <div class="mt1 wrapper time-logs">
     <div class="has-text-centered" v-if="isLoading">
       <spinner />
     </div>
@@ -16,7 +16,7 @@
         </tr>
       </thead>
     </table>
-    <table class="datatable" style="overflow: auto;">
+    <table class="datatable">
       <tbody class="datatable-body">
         <tr
           :key="log.id"
@@ -128,4 +128,13 @@ export default {
 .person { width: 200px; }
 .type { width: 150px; }
 .duration { width: 50px; }
+
+.time-logs {
+  overflow-y: auto;
+}
+
+.datatable-row-header::after {
+  display: none;
+}
+
 </style>
