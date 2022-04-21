@@ -10,7 +10,10 @@
     </a>
   </div>
 
-  <div class="modal-content">
+  <div
+    class="modal-content"
+    @click="$emit('cancel')"
+  >
     <img :src="previewPath">
   </div>
 </div>
@@ -81,5 +84,10 @@ export default {
   position: absolute;
   right: 1em;
   top: 1em;
+}
+
+.modal-content {
+  width: 100%;
+  text-align: center;
 }
 </style>
