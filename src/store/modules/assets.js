@@ -908,7 +908,9 @@ const mutations = {
     if (asset) {
       newAsset.episode_id = newAsset.source_id
       delete newAsset.tasks
-      Object.assign(asset, newAsset)
+      const copyNewAsset = { ...newAsset }
+      copyNewAsset.data = { ...asset.data, ...newAsset.data }
+      Object.assign(asset, copyNewAsset)
     } else {
       newAsset.validations = new Map()
       newAsset.production_id = newAsset.project_id

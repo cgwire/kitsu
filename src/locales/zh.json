@@ -416,7 +416,8 @@
             "role": {
                 "admin": "工作室经理",
                 "client": "客户",
-                "manager": "监制",
+                "manager": "Production manager",
+                "supervisor": "Supervisor",
                 "user": "CG艺术家",
                 "undefined": "未定义",
                 "vendor": "供应商"

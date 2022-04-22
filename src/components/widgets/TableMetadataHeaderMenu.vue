@@ -2,7 +2,7 @@
   <div class="header-menu hidden">
     <div
       @click="$emit('edit-clicked')"
-      v-if="isCurrentUserAdmin"
+      v-if="isEditAllowed"
     >
       {{ $t('main.edit') }}
     </div>
@@ -24,7 +24,7 @@
     <div
       class="error"
       @click="$emit('delete-clicked')"
-      v-if="isCurrentUserAdmin"
+      v-if="isEditAllowed"
     >
       {{ $t('main.delete') }}
     </div>
@@ -38,7 +38,7 @@ export default {
   name: 'table-metadata-header-menu',
 
   props: {
-    isCurrentUserAdmin: {
+    isEditAllowed: {
       type: Boolean,
       default: false
     },

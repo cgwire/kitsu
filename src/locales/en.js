@@ -512,7 +512,8 @@ export default {
     role: {
       admin: 'Studio Manager',
       client: 'Client',
-      manager: 'Supervisor',
+      manager: 'Production Manager',
+      supervisor: 'Supervisor',
       user: 'Artist',
       undefined: '',
       vendor: 'Vendor'

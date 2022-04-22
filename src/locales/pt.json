@@ -367,7 +367,8 @@
             "role": {
                 "admin": "Gerente de Estúdio",
                 "client": "Cliente",
-                "manager": "Supervisor",
+                "manager": "Production manager",
+                "supervisor": "Supervisor",
                 "user": "Artista",
                 "undefined": "desconhecido",
                 "vendor": "Fornecedor"

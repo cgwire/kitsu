@@ -409,7 +409,8 @@
             "role": {
                 "admin": "Studio Manager",
                 "client": "Cliënt",
-                "manager": "Supervisor",
+                "manager": "Production manager",
+                "supervisor": "Supervisor",
                 "user": "Artist",
                 "undefined": "ongedefinieerd",
                 "vendor": "Leverancier"

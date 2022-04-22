@@ -1028,12 +1028,10 @@ export default {
     },
 
     onMetadataChanged ({ entry, descriptor, value }) {
-      const metadata = { ...entry.data }
+      const metadata = {}
       metadata[descriptor.field_name] = value
       const data = {
         id: entry.id,
-        nb_frames: entry.nb_frames,
-        description: entry.description,
         data: metadata
       }
       this.editShot(data)

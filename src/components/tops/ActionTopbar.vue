@@ -16,12 +16,13 @@
         </div>
 
         <div class="flexrow-item" v-if="selectedBar === 'assignation'">
-          <div class="flexrow" v-if="isCurrentUserManager || isInDepartment">
+          <div class="flexrow" v-if="isCurrentUserManager
+            || isInDepartment">
             <div class="assignation flexrow-item hide-small-screen">
               <span>
                 {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
               </span>
-              <span v-show="!isCurrentUserManager">
+              <span v-show="isCurrentUserArtist">
                 myself
               </span>
             </div>
@@ -30,7 +31,7 @@
                 ref="assignation-field"
                 :people="currentTeam"
                 v-model="person"
-                v-show="isCurrentUserManager"
+                v-show="isCurrentUserManager || isCurrentUserSupervisor"
               />
             </div>
             <div class="" v-if="isAssignationLoading">
@@ -396,7 +397,7 @@
           class="more-menu-item"
           v-if="
             (isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit) &&
-            isCurrentUserManager &&
+            (isCurrentUserManager || isCurrentUserSupervisor) &&
             !isEntitySelection"
           @click="selectBar('assignation')"
         >
@@ -406,17 +407,17 @@
         <div
           class="more-menu-item"
           @click="selectBar('change-status')"
-          v-if="isCurrentUserManager && !isEntitySelection"
+          v-if="(isCurrentUserManager || isSupervisorInDepartment)
+            && !isEntitySelection"
         >
           {{ $t('menu.change_status') }}
         </div>
 
         <div
           class="more-menu-item"
-          v-if="
-            (isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit || isCurrentViewPerson) &&
-            isCurrentUserManager &&
-            !isEntitySelection"
+          v-if="(isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit ||
+            isCurrentViewPerson) && (isCurrentUserManager ||
+            isSupervisorInDepartment) && !isEntitySelection"
           @click="selectBar('priorities')"
         >
           {{ $t('menu.change_priority') }}
@@ -425,8 +426,8 @@
         <div
           class="more-menu-item"
           v-if="
-            ((isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit) && !isCurrentViewTaskType) &&
-            isCurrentUserManager &&
+            ((isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit) &&
+            !isCurrentViewTaskType) && isCurrentUserManager &&
             !isEntitySelection"
           @click="selectBar('tasks')"
         >
@@ -436,8 +437,8 @@
         <div
           class="more-menu-item"
           v-if="
-            (isCurrentViewAsset || isCurrentViewShot || isCurrentViewTaskType) &&
-            !isEntitySelection"
+            (isCurrentViewAsset || isCurrentViewShot ||
+            isCurrentViewTaskType) && !isEntitySelection"
           @click="selectBar('playlists')"
         >
           {{ $t('menu.generate_playlists') }}
@@ -458,7 +459,7 @@
           class="more-menu-item"
           v-if="
             !isCurrentViewTaskType &&
-            isCurrentUserManager &&
+            (isCurrentUserManager || isSupervisorInDepartment) &&
             !isEntitySelection"
           @click="selectBar('custom-actions')"
         >
@@ -606,6 +607,7 @@ export default {
       'getPersonOptions',
       'isCurrentUserArtist',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'isShowAssignations',
       'nbSelectedTasks',
       'nbSelectedValidations',
@@ -628,7 +630,8 @@ export default {
     },
 
     isEntitySelection () {
-      return this.selectedAssets.size > 0 || this.selectedShots.size > 0 || this.selectedEdits.size > 0
+      return this.selectedAssets.size > 0 || this.selectedShots.size > 0 ||
+        this.selectedEdits.size > 0
     },
 
     nbSelectedAssets () {
@@ -725,10 +728,15 @@ export default {
 
     isInDepartment () {
       const selectedTasks = Array.from(this.selectedTasks.values())
-      if (selectedTasks.length !== 1) return false
-      const taskType = this.taskTypeMap.get(selectedTasks[0].task_type_id)
-      return taskType.department_id &&
-        this.user.departments.includes(taskType.department_id)
+      return selectedTasks.every(task => {
+        const taskType = this.taskTypeMap.get(selectedTasks[0].task_type_id)
+        return taskType.department_id && this.user.departments.includes(
+          taskType.department_id)
+      })
+    },
+
+    isSupervisorInDepartment () {
+      return this.isCurrentUserSupervisor && this.isInDepartment
     },
 
     currentMenuLabel () {
@@ -778,7 +786,8 @@ export default {
     confirmAssign () {
       if (this.selectedPersonId || this.isInDepartment) {
         this.isAssignationLoading = true
-        const personId = this.isCurrentUserManager
+        const personId = (this.isCurrentUserManager ||
+          this.isCurrentUserSupervisor)
           ? this.selectedPersonId
           : this.user.id
         this.assignSelectedTasks({
@@ -933,7 +942,12 @@ export default {
           })
         )
       } else {
-        this.currentTeam = this.people
+        this.currentTeam = [...this.people]
+      }
+      if (this.isCurrentUserSupervisor && this.user.departments.length > 0) {
+        this.currentTeam = this.currentTeam.filter(person =>
+          person.departments.some(
+            department => this.user.departments.includes(department)))
       }
       return this.currentTeam
     },

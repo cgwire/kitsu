@@ -242,11 +242,13 @@ export default {
       'departments',
       'departmentMap',
       'currentProduction',
-      'taskTypeMap'
+      'taskTypeMap',
+      'isCurrentUserSupervisor',
+      'user'
     ]),
 
     selectableDepartments () {
-      return this.currentProduction.task_types
+      let departments = this.currentProduction.task_types
         .map(taskTypeId => {
           const taskType = this.taskTypeMap.get(taskTypeId)
           return (taskType.for_entity === this.entityType)
@@ -256,6 +258,10 @@ export default {
           department && (self.indexOf(department) === index) &&
           this.form.departments.findIndex(
             selectedDepartment => selectedDepartment === department.id) === -1)
+      if (this.isCurrentUserSupervisor && this.user.departments.length > 0) {
+        departments = departments.filter((department) => this.user.departments.indexOf(department.id) >= 0)
+      }
+      return departments
     },
 
     isFormFilled () {
@@ -267,7 +273,9 @@ export default {
             this.checklist.filter(x => x.text.trim() !== '').length > 0 &&
             this.type === 'checklist'
           )
-        )
+        ) && (!this.isCurrentUserSupervisor ||
+        this.user.departments.length === 0 ||
+        this.form.departments.length > 0)
     },
 
     valueList () {

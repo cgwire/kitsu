@@ -416,7 +416,8 @@
             "role": {
                 "admin": "Studio Manager",
                 "client": "Client",
-                "manager": "Superviseur",
+                "manager": "Chargé de production",
+                "supervisor": "Superviseur",
                 "user": "Graphiste",
                 "undefined": "Non défini",
                 "vendor": "Fournisseur"

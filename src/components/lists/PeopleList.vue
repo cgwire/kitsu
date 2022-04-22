@@ -200,8 +200,8 @@ export default {
   user-select: text;
 }
 .role {
-  width: 150px;
-  min-width: 150px;
+  width: 200px;
+  min-width: 200px;
 }
 .actions {
   min-width: 100px;

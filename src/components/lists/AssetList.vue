@@ -9,7 +9,7 @@
     <table-header-menu
       ref="headerMenu"
       :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"
-      :is-current-user-admin="isCurrentUserAdmin"
+      :is-edit-allowed="isCurrentUserManager"
       :is-sticked="stickedColumns[lastHeaderMenuDisplayed]"
       @minimize-clicked="onMinimizeColumnToggled()"
       @delete-all-clicked="onDeleteAllTasksClicked()"
@@ -20,7 +20,8 @@
 
     <table-metadata-header-menu
       ref="headerMetadataMenu"
-      :is-current-user-admin="isCurrentUserAdmin"
+      :is-edit-allowed="
+        isMetadataColumnEditAllowed(lastMetadaDataHeaderMenuDisplayed)"
       :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
       @edit-clicked="onEditMetadataClicked()"
       @delete-clicked="onDeleteMetadataClicked()"
@@ -58,7 +59,8 @@
                 icon="plus"
                 :text="''"
                 @click="onAddMetadataClicked"
-                v-if="isCurrentUserAdmin && !isLoading"
+                v-if="(isCurrentUserManager || isCurrentUserSupervisor)
+                  && !isLoading"
               />
             </div>
           </th>
@@ -125,7 +127,7 @@
             scope="col"
             class="ready-for"
             :title="$t('assets.fields.ready_for')"
-            v-if="isShowInfos && metadataDisplayHeaders.readyFor"
+            v-if="isCurrentUserManager && isShowInfos && metadataDisplayHeaders.readyFor"
           >
             {{ $t('assets.fields.ready_for') }}
           </th>
@@ -277,7 +279,8 @@
               @input="event => onMetadataFieldChanged(asset, descriptor, event)"
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
               :value="getMetadataFieldValue(descriptor, asset)"
-              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+              v-if="descriptor.choices.length === 0 && (isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments))"
             />
             <div
               class="metadata-value selectable"
@@ -303,7 +306,8 @@
             </div>
             <span
               class="select"
-              v-else-if="isCurrentUserManager"
+              v-else-if="isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments)"
             >
             <select
               class="select-input"
@@ -380,7 +384,7 @@
 
           <td
             class="task-type-name ready-for"
-            v-if="isShowInfos && metadataDisplayHeaders.readyFor"
+            v-if="isCurrentUserManager && isShowInfos && metadataDisplayHeaders.readyFor"
           >
             <combobox-task-type
               class="mb0"
@@ -405,7 +409,8 @@
               @input="event => onMetadataFieldChanged(asset, descriptor, event)"
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
               :value="getMetadataFieldValue(descriptor, asset)"
-              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+              v-if="descriptor.choices.length === 0 && (isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments))"
             />
             <div
               class="metadata-value selectable"
@@ -431,7 +436,8 @@
             </div>
             <span
               class="select"
-              v-else-if="isCurrentUserManager"
+              v-else-if="isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments)"
             >
             <select
               class="select-input"
@@ -637,9 +643,9 @@ export default {
       'nbSelectedTasks',
       'isAssetDescription',
       'isBigThumbnails',
-      'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'isShowAssignations',
       'isShowInfos',
       'isAssetEstimation',
@@ -649,7 +655,8 @@ export default {
       'selectedAssets',
       'selectedTasks',
       'taskMap',
-      'taskTypeMap'
+      'taskTypeMap',
+      'user'
     ]),
 
     createTasksPath () {
@@ -990,9 +997,6 @@ td.ready-for {
 .datatable-row th.name {
   font-size: 1.1em;
   padding: 6px;
-
-  .flexrow {
-  }
 }
 
 .asset-name {
