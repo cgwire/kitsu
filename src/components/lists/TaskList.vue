@@ -118,7 +118,7 @@
           </td>
           <td class="estimation">
             <input
-              v-if="selectionGrid[task.id]"
+              v-if="isInDepartment(task) && selectionGrid[task.id]"
               :ref="task.id + '-estimation'"
               class="input"
               @change="updateEstimation($event.target.value)"
@@ -148,7 +148,7 @@
               :with-margin="false"
               :value="getDate(task.start_date)"
               @input="updateStartDate"
-              v-if="selectionGrid[task.id]"
+              v-if="isInDepartment(task) && selectionGrid[task.id]"
             />
             <span v-else>
               {{ formatDate(task.start_date) }}
@@ -160,7 +160,7 @@
               :with-margin="false"
               :value="getDate(task.due_date)"
               @input="updateDueDate"
-              v-if="selectionGrid[task.id]"
+              v-if="isInDepartment(task) && selectionGrid[task.id]"
             />
             <span v-else>
               {{ formatDate(task.due_date) }}
@@ -283,7 +283,10 @@ export default {
       'user',
       'selectedTasks',
       'shotMap',
-      'taskMap'
+      'taskMap',
+      'isCurrentUserManager',
+      'isCurrentUserSupervisor',
+      'taskTypeMap'
     ]),
 
     isAssets () {
@@ -560,6 +563,22 @@ export default {
             this.$refs.body.scrollTop - scrollingRequired
           )
         }
+      }
+    },
+
+    isInDepartment (task) {
+      if (this.isCurrentUserManager) {
+        return true
+      } else if (this.isCurrentUserSupervisor) {
+        if (this.user.departments.length === 0) {
+          return true
+        } else {
+          const taskType = this.taskTypeMap.get(task.task_type_id)
+          return taskType.department_id && this.user.departments.includes(
+            taskType.department_id)
+        }
+      } else {
+        return false
       }
     },
 
