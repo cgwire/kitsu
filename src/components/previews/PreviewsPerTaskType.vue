@@ -1,32 +1,21 @@
 <template>
 <div class="flexrow">
 
-  <div class="flexrow-item">
-    <div
-      class="preview-choice"
-      v-if="taskTypeOptions.length > 0"
-    >
-      <combobox
-        ref="task-type-combobox"
-        :thin="true"
-        :width="150"
-        :options="taskTypeOptions"
-        v-model="taskTypeId"
-      />
-    </div>
-  </div>
+  <combobox-styled
+    ref="task-type-combobox"
+    class="flexrow-item"
+    :options="taskTypeOptions"
+    v-model="taskTypeId"
+    v-if="taskTypeOptions.length > 0"
+  />
 
-  <div class="flexrow-item">
-    <combobox
-      class="version-combo"
-      :thin="true"
-      :width="150"
-      :options="previewFileOptions"
-      v-if="previewFileOptions.length"
-      v-model="previewFileId"
-    />
-    <span class="text" v-else>Selected task has no previews.</span>
-  </div>
+  <combobox-styled
+    class="flexrow-item"
+    :options="previewFileOptions"
+    v-if="previewFileOptions.length"
+    v-model="previewFileId"
+  />
+  <span class="text flexrow-item" v-else>Selected task has no previews.</span>
 
   <div class="flexrow-item" v-if="taskStatus">
     <validation-tag
@@ -47,14 +36,14 @@
 import firstBy from 'thenby'
 import { mapGetters } from 'vuex'
 
-import Combobox from '../widgets/Combobox'
+import ComboboxStyled from '../widgets/ComboboxStyled'
 import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
   name: 'previews-per-task-type',
 
   components: {
-    Combobox,
+    ComboboxStyled,
     ValidationTag
   },
 
@@ -205,10 +194,6 @@ export default {
 <style lang="scss" scoped>
 .field {
   margin-bottom: 0em;
-}
-
-.version-combo {
-  margin-top: 0.1em;
 }
 .text {
   color: var(--text);
