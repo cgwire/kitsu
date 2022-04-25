@@ -35,9 +35,7 @@ export const previewRoomMixin = {
     },
 
     joinRoom () {
-      if (!this.previewRoom()) {
-        return
-      }
+      if (!this.previewRoom()) return
 
       this.$socket.emit('preview-room:join', {
         user_id: this.user.id,
@@ -59,9 +57,7 @@ export const previewRoomMixin = {
     },
 
     leaveRoom () {
-      if (!this.previewRoom()) {
-        return
-      }
+      if (!this.previewRoom()) return
 
       this.$socket.emit('preview-room:leave', {
         user_id: this.user.id, playlist_id: this.previewRoom().roomId
@@ -79,12 +75,8 @@ export const previewRoomMixin = {
     },
 
     updatePlayingStatus () {
-      if (!this.previewRoom()) {
-        return
-      }
-      if (!this.joinedRoom) {
-        return
-      }
+      if (!this.previewRoom()) return
+      if (!this.joinedRoom) return
 
       this.$socket.emit('preview-room:update-playing-status', {
         playlist_id: this.previewRoom().roomId,
