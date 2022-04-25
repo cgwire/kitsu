@@ -1,15 +1,15 @@
 <template v-if="roomId">
   <div class="flexrow-item preview-room">
     <button-simple
-      @click="leaveRoom(); openRoom()"
       :text="$t('preview_room.leave_room')"
       class="preview-room-button"
+      @click="leaveRoom(); openRoom()"
       v-if="joinedRoom"
     />
     <button-simple
-      @click="joinRoom"
       :text="$t('preview_room.join_room')"
       class="preview-room-button"
+      @click="joinRoom"
       v-else
     />
     <people-avatar
