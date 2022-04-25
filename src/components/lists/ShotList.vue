@@ -53,6 +53,7 @@
               />
             </div>
           </th>
+
           <metadata-header
             :ref="`editor-${j}`"
             :key="descriptor.id"
@@ -63,12 +64,12 @@
             v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
             v-if="isShowInfos"
           />
+
           <validation-header
             :ref="`validation-${columnIndexInGrid}`"
             :key="columnId"
             :hidden-columns="hiddenColumns"
             :column-id="columnId"
-            :task-type-map="taskTypeMap"
             :title="taskTypeMap.get(columnId).name"
             :validation-style="getValidationStyle(columnId)"
             :left="offsets['validation-' + columnIndexInGrid] ? `${offsets['validation-' + columnIndexInGrid]}px` : '0'"
@@ -86,35 +87,7 @@
           >
             {{ $t('shots.fields.description') }}
           </th>
-          <metadata-header
-            :key="descriptor.id"
-            :descriptor="descriptor"
-            @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
-            v-for="descriptor in nonStickedVisibleMetadataDescriptors"
-            v-if="isShowInfos"
-          />
 
-          <th
-            class="frames"
-            scope="col"
-            v-if="isFrames && isShowInfos && metadataDisplayHeaders.frames"
-          >
-            {{ $t('shots.fields.nb_frames') }}
-          </th>
-          <th
-            scope="col"
-            class="framein"
-            v-if="isFrameIn && isShowInfos && metadataDisplayHeaders.frameIn"
-          >
-            {{ $t('shots.fields.frame_in') }}
-          </th>
-          <th
-            scope="col"
-            class="frameout"
-            v-if="isFrameOut && isShowInfos && metadataDisplayHeaders.frameOut"
-          >
-            {{ $t('shots.fields.frame_out') }}
-          </th>
           <th scope="col" class="fps" v-if="isFps && isShowInfos && metadataDisplayHeaders.fps">
             {{ $t('shots.fields.fps') }}
           </th>
@@ -138,17 +111,47 @@
             {{ $t('main.estimation_short') }}
           </th>
 
+          <th
+            class="frames"
+            scope="col"
+            v-if="isFrames && isShowInfos && metadataDisplayHeaders.frames"
+          >
+            {{ $t('shots.fields.nb_frames') }}
+          </th>
+          <th
+            scope="col"
+            class="framein"
+            v-if="isFrameIn && isShowInfos && metadataDisplayHeaders.frameIn"
+          >
+            {{ $t('shots.fields.frame_in') }}
+          </th>
+          <th
+            scope="col"
+            class="frameout"
+            v-if="isFrameOut && isShowInfos && metadataDisplayHeaders.frameOut"
+          >
+            {{ $t('shots.fields.frame_out') }}
+          </th>
+
+          <metadata-header
+            :key="descriptor.id"
+            :descriptor="descriptor"
+            @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
+            v-for="descriptor in nonStickedVisibleMetadataDescriptors"
+            v-if="isShowInfos"
+          />
+
           <validation-header
             :key="columnId"
             :hidden-columns="hiddenColumns"
             :column-id="columnId"
-            :task-type-map="taskTypeMap"
             :validation-style="getValidationStyle(columnId)"
             type="shots"
             @show-header-menu="event => showHeaderMenu(columnId, columnIndexInGrid, event)"
             v-for="(columnId, columnIndexInGrid) in nonStickedDisplayedValidationColumns"
             v-if="!isLoading"
           />
+
           <th scope="col" class="actions" ref="actionsSection">
             <button-simple
               :class="{
@@ -186,6 +189,7 @@
           </th>
         </tr>
       </thead>
+
       <tbody
         class="datatable-body"
         :key="getGroupKey(group, k, 'sequence_id')"
@@ -261,6 +265,28 @@
               :value="getMetadataFieldValue(descriptor, shot)"
               v-if="descriptor.choices.length === 0 && isCurrentUserManager"
             />
+            <div
+              class="metadata-value selectable"
+              v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+            >
+              <p
+                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+                :key="`${shot.id}-${descriptor.id}-${i}-${option.text}-div`"
+              >
+                <input
+                  type="checkbox"
+                  @change="event => onMetadataChecklistChanged(shot, descriptor, option.text, event)"
+                  :id="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :checked="getMetadataChecklistValues(descriptor, shot)[option.text]"
+                />
+                <label
+                  style="cursor: pointer;"
+                  :for="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
+                >
+                  {{ option.text }}
+                </label>
+              </p>
+            </div>
             <span
               class="select"
               v-else-if="isCurrentUserManager"
@@ -319,44 +345,27 @@
             v-if="!isCurrentUserClient && isShowInfos && isShotDescription"
           />
 
-          <!-- other Metadata cells -->
+          <!-- Fixed attributes -->
           <td
-            class="metadata-descriptor"
-            :title="shot.data ? shot.data[descriptor.field_name] : ''"
-            :key="shot.id + '-' + descriptor.id"
-            v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
-            v-if="isShowInfos"
+            class="time-spent selectable"
+            v-if="!isCurrentUserClient &&
+                  isShowInfos &&
+                  isShotTime &&
+                  metadataDisplayHeaders.timeSpent"
           >
-            <input
-              class="input-editor"
-              @input="event => onMetadataFieldChanged(shot, descriptor, event)"
-              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-              :value="getMetadataFieldValue(descriptor, shot)"
-              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
-            />
-            <span
-              class="select"
-              v-else-if="isCurrentUserManager"
-            >
-            <select
-              class="select-input"
-              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-              @change="event => onMetadataFieldChanged(shot, descriptor, event)"
-            >
-              <option
-                v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
-                :key="`${shot.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
-                :value="option.value"
-                :selected="getMetadataFieldValue(descriptor, shot) === option.value"
-              >
-                {{ option.label }}
-              </option>
-            </select>
-            </span>
-              <span class="metadata-value selectable" v-else>
-              {{ getMetadataFieldValue(descriptor, shot) }}
-            </span>
+            {{ formatDuration(shot.timeSpent) }}
           </td>
+
+          <td
+            class="estimation selectable"
+            v-if="!isCurrentUserClient &&
+                  isShowInfos &&
+                  isShotEstimation &&
+                  metadataDisplayHeaders.estimation"
+          >
+            {{ formatDuration(shot.estimation) }}
+          </td>
+
           <td class="frames"
             v-if="isFrames && isShowInfos && metadataDisplayHeaders.frames"
           >
@@ -407,6 +416,7 @@
               {{ getMetadataFieldValue({field_name: 'frame_out'}, shot) }}
             </span>
           </td>
+
           <td class="fps" v-if="isFps && isShowInfos && metadataDisplayHeaders.fps">
             <input
               class="input-editor"
@@ -423,18 +433,65 @@
             </span>
           </td>
 
+          <!-- other metadata cells -->
           <td
-            class="time-spent selectable"
-            v-if="!isCurrentUserClient && isShowInfos && isShotTime && metadataDisplayHeaders.timeSpent"
+            class="metadata-descriptor"
+            :title="shot.data ? shot.data[descriptor.field_name] : ''"
+            :key="shot.id + '-' + descriptor.id"
+            v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
+            v-if="isShowInfos"
           >
-            {{ formatDuration(shot.timeSpent) }}
-          </td>
-
-          <td
-            class="estimation selectable"
-            v-if="!isCurrentUserClient && isShowInfos && isShotEstimation && metadataDisplayHeaders.estimation"
-          >
-            {{ formatDuration(shot.estimation) }}
+            <input
+              class="input-editor"
+              @input="event => onMetadataFieldChanged(shot, descriptor, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+              :value="getMetadataFieldValue(descriptor, shot)"
+              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+            />
+            <div
+              class="metadata-value selectable"
+              v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+            >
+              <p
+                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+                :key="`${shot.id}-${descriptor.id}-${i}-${option.text}-div`"
+              >
+                <input
+                  type="checkbox"
+                  @change="event => onMetadataChecklistChanged(shot, descriptor, option.text, event)"
+                  :id="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :checked="getMetadataChecklistValues(descriptor, shot)[option.text]"
+                />
+                <label
+                  style="cursor: pointer;"
+                  :for="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
+                >
+                  {{ option.text }}
+                </label>
+              </p>
+            </div>
+            <span
+              class="select"
+              v-else-if="isCurrentUserManager"
+            >
+            <select
+              class="select-input"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+              @change="event => onMetadataFieldChanged(shot, descriptor, event)"
+            >
+              <option
+                v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
+                :key="`${shot.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+                :value="option.value"
+                :selected="getMetadataFieldValue(descriptor, shot) === option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+            </span>
+              <span class="metadata-value selectable" v-else>
+              {{ getMetadataFieldValue(descriptor, shot) }}
+            </span>
           </td>
 
           <validation-cell
@@ -567,6 +624,10 @@ export default {
       default: false
     },
     validationColumns: {
+      type: Array,
+      default: () => []
+    },
+    departmentFilter: {
       type: Array,
       default: () => []
     }

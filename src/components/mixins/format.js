@@ -3,7 +3,7 @@
  */
 import { mapGetters } from 'vuex'
 
-import { formatDate, formatSimpleDate } from '@/lib/time'
+import { formatDate, formatFullDate, formatSimpleDate } from '@/lib/time'
 
 export const formatListMixin = {
 
@@ -28,6 +28,7 @@ export const formatListMixin = {
     },
 
     formatDate,
+    formatFullDate,
     formatSimpleDate,
 
     formatDuration (duration) {
@@ -38,6 +39,20 @@ export const formatListMixin = {
       } else {
         return 0
       }
+    },
+
+    formatPriority (priority) {
+      let label = priority + ''
+      if (priority === 0) {
+        label = 'normal'
+      } else if (priority === 1) {
+        label = this.$('tasks.priority.high')
+      } else if (priority === 2) {
+        label = this.$('tasks.priority.very_high')
+      } else if (priority === 3) {
+        label = this.$('tasks.priority.emergency')
+      }
+      return label
     },
 
     sanitizeInteger (value) {

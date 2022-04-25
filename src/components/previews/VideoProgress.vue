@@ -158,7 +158,7 @@ export default {
       }
       const position = event.x - left
       const ratio = position / this.width
-      let duration = annotation
+      let duration = annotation && this.frameSize < 3
         ? annotation.time
         : this.videoDuration * ratio
       if (duration < 0) duration = 0

@@ -65,7 +65,7 @@ const csv = {
     } else if (detailLevel === 'day') {
       range = getDayRange(year, month, currentYear, currentMonth)
     }
-    for (const unit in range) headers.push(unit)
+    for (const unit in range) headers.push(parseInt(unit) + 1)
     return headers
   },
 
@@ -317,6 +317,8 @@ const csv = {
     people,
     countMode,
     detailLevel,
+    todayYear,
+    todayMonth,
     year,
     month,
     week
@@ -324,8 +326,8 @@ const csv = {
     const headers = csv.getTimesheetHeaders(
       {},
       detailLevel,
-      year,
-      month,
+      todayYear,
+      todayMonth,
       year,
       month,
       week

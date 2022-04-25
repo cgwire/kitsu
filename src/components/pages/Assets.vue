@@ -3,37 +3,40 @@
   <div class="column main-column">
     <div class="assets page">
       <div class="asset-list-header page-header">
-        <div class="level header-title">
-          <div class="level-left flexcolumn">
-            <div class="filters-area flexcolumn-item">
-              <div class="flexrow">
-                <search-field
-                  ref="asset-search-field"
-                  class="flexrow-item"
-                  :can-save="true"
-                  @change="onSearchChange"
-                  @enter="saveSearchQuery"
-                  @save="saveSearchQuery"
-                  placeholder="ex: props modeling=wip"
-                />
-                <button-simple
-                  class="flexrow-item"
-                  :title="$t('entities.build_filter.title')"
-                  icon="funnel"
-                  @click="modals.isBuildFilterDisplayed = true"
-                />
-              </div>
-            </div>
+        <div class="flexrow mb1">
+          <search-field
+            ref="asset-search-field"
+            class="flexrow-item"
+            :can-save="true"
+            @change="onSearchChange"
+            @enter="saveSearchQuery"
+            @save="saveSearchQuery"
+            placeholder="ex: props modeling=wip"
+          />
+          <button-simple
+            class="flexrow-item"
+            :title="$t('entities.build_filter.title')"
+            icon="funnel"
+            @click="modals.isBuildFilterDisplayed = true"
+          />
+          <div class="flexrow-item filler"></div>
+          <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
+            <combobox-department
+              class="combobox-department flexrow-item"
+              :selectable-departments="selectableDepartments('Asset')"
+              :value="selectedDepartment"
+              :dispay-all-and-my-departments="true"
+              :width="230"
+              rounded
+              @input="onSelectedDepartment"
+              v-model="selectedDepartment"
+              v-if="departments.length > 0"
+            />
+            <show-assignations-button class="flexrow-item" />
+            <show-infos-button class="flexrow-item" />
+            <big-thumbnails-button class="flexrow-item" />
           </div>
-
-          <div class="level-right flexrow">
-            <div class="flexrow" v-if="!isCurrentUserClient">
-              <show-assignations-button class="flexrow-item" />
-              <show-infos-button class="flexrow-item" />
-              <big-thumbnails-button class="flexrow-item" />
-              <div class="flexrow-item"></div>
-            </div>
-            <div class="flexrow" v-if="isCurrentUserManager">
+          <div class="flexrow" v-if="isCurrentUserManager">
             <button-simple
               class="flexrow-item"
               :title="$t('entities.thumbnails.title')"
@@ -58,7 +61,6 @@
               icon="plus"
               @click="showNewModal"
             />
-            </div>
           </div>
         </div>
         <div class="query-list">
@@ -83,6 +85,7 @@
         :is-loading="isAssetsLoading || initialLoading"
         :is-error="isAssetsLoadingError"
         :validation-columns="assetValidationColumns"
+        :department-filter="departmentFilter"
         @change-sort="onChangeSortClicked"
         @create-tasks="showCreateTasksModal"
         @delete-all-tasks="onDeleteAllTasksClicked"
@@ -97,13 +100,14 @@
         @asset-changed="onAssetChanged"
         @field-changed="onFieldChanged"
         @scroll="saveScrollPosition"
+        @asset-type-clicked="onAssetTypeClicked"
       />
     </div>
   </div>
 
   <div
     class="column side-column"
-    v-if="nbSelectedTasks === 1"
+    v-show="nbSelectedTasks === 1"
   >
     <task-info
       :task="selectedTasks.values().next().value"
@@ -214,6 +218,7 @@
     :is-loading-stay="loading.addMetadata"
     :is-error="errors.addMetadata"
     :descriptor-to-edit="descriptorToEdit"
+    entity-type="Asset"
     @confirm="confirmAddMetadata"
     @cancel="modals.isAddMetadataDisplayed = false"
   />
@@ -253,6 +258,7 @@ import AddThumbnailsModal from '../modals/AddThumbnailsModal'
 import BigThumbnailsButton from '../widgets/BigThumbnailsButton'
 import BuildFilterModal from '../modals/BuildFilterModal'
 import ButtonSimple from '../widgets/ButtonSimple'
+import ComboboxDepartment from '../widgets/ComboboxDepartment'
 import CreateTasksModal from '../modals/CreateTasksModal'
 import DeleteModal from '../modals/DeleteModal'
 import EditAssetModal from '../modals/EditAssetModal'
@@ -277,6 +283,7 @@ export default {
     BigThumbnailsButton,
     BuildFilterModal,
     ButtonSimple,
+    ComboboxDepartment,
     CreateTasksModal,
     DeleteModal,
     EditAssetModal,
@@ -312,6 +319,8 @@ export default {
       ],
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
+      selectedDepartment: 'ALL',
+      departmentFilter: [],
       errors: {
         addMetadata: false,
         addThumbnails: false,
@@ -407,6 +416,12 @@ export default {
       if (!this.isAssetsLoading) this.initialLoading = false
       finalize()
     }
+    if (!this.isCurrentUserManager && this.user.departments.length > 0) {
+      this.selectedDepartment = 'MY_DEPARTMENTS'
+      this.departmentFilter = this.user.departments
+    } else {
+      this.departmentFilter = []
+    }
   },
 
   beforeDestroy () {
@@ -425,6 +440,7 @@ export default {
       'assetValidationColumns',
       'currentEpisode',
       'currentProduction',
+      'departments',
       'displayedAssetsByType',
       'episodeMap',
       'openProductions',
@@ -439,7 +455,9 @@ export default {
       'selectedTasks',
       'assetSorting',
       'taskTypeMap',
-      'taskTypes'
+      'taskTypes',
+      'user',
+      'departmentMap'
     ]),
 
     newAssetPath () {
@@ -933,6 +951,11 @@ export default {
         })
     },
 
+    onAssetTypeClicked (assetType) {
+      this.searchField.setValue(`${this.assetSearchText} type=${assetType}`)
+      this.onSearchChange()
+    },
+
     resetCsvColumns () {
       const columns = this.isTVShow ? ['Episode'] : []
       this.columns = columns.concat([
@@ -1050,5 +1073,9 @@ export default {
 
 .main-column {
   border-right: 3px solid $light-grey;
+}
+
+.combobox-department {
+  margin-bottom: 0px;
 }
 </style>

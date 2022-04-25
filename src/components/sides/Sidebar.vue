@@ -15,7 +15,8 @@
               v-if="organisation && organisation.has_avatar"
             />
             <img
-              src="../../assets/kitsu.png"
+              src="../../assets/kitsu.svg"
+              width="180"
               v-else
             />
           </div>
@@ -104,6 +105,12 @@
              </router-link>
            </p>
            <p @click="toggleSidebar()">
+             <router-link :to="{name: 'status-automations'}">
+               <tool-icon size="0.9x" />
+               {{ $t("status_automations.title") }}
+             </router-link>
+           </p>
+           <p @click="toggleSidebar()">
              <router-link :to="{name: 'settings'}">
                <settings-icon size="0.9x" />
                {{ $t("settings.title") }}
@@ -141,6 +148,7 @@ import {
   HexagonIcon,
   ListIcon,
   SettingsIcon,
+  ToolIcon,
   UsersIcon
 } from 'vue-feather-icons'
 
@@ -158,6 +166,7 @@ export default {
     HexagonIcon,
     ListIcon,
     SettingsIcon,
+    ToolIcon,
     UsersIcon
   },
 
@@ -222,7 +231,7 @@ aside {
   top: 0;
   bottom: 0;
   left: 0;
-  width: 230px;
+  width: 250px;
   background-color: white;
   padding: 15px;
   overflow-y: auto;
@@ -237,7 +246,7 @@ aside {
 }
 
 aside.hidden-bar {
-  left: -230px;
+  left: -250px;
   transition: all 0.3s ease;
 }
 

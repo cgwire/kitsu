@@ -235,7 +235,7 @@
             "for": "Pour",
             "go_productions": "Aller aux productions",
             "history": "Historique",
-            "info": "Information",
+            "info": "Informations",
             "or": "ou",
             "no": "non",
             "loading": "Chargement...",
@@ -956,7 +956,11 @@
             "create_tasks_edit": "Ajouter des tâches pour les montages courants",
             "create_tasks_edit_explaination": "Vous allez créer une tâche pour chaque montage du projet courant pour le type de tâche donné. Est-ce que vous-voulez continuer ?",
             "create_tasks_edit_failed": "Une erreur est survenue en créant les tâches.",
-            "smaller": "Réduire le panneau"
+            "smaller": "Réduire le panneau",
+            "combobox_departments": {
+                "all_departments": "Tous les départements",
+                "my_departments": "Mes départments"
+              }
         },
         "timesheets": {
             "detail_level": "Niveau de détail",
@@ -1022,7 +1026,7 @@
             "empty_list_client": "Vide",
             "new_edit": "Nouveau montage",
             "number": "montage | montages",
-            "title": "Montage",
+            "title": "Montages",
             "fields": {
                 "name": "Nom",
                 "episode": "Épisode",

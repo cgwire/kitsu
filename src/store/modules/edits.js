@@ -553,17 +553,18 @@ const actions = {
     if (cache.result && cache.result.length > 0) {
       edits = cache.result
     }
-    const lines = edits.map((edit) => {
+    const lines = edits.map(edit => {
       let editLine = []
       editLine = editLine.concat([
         edit.name,
-        edit.description
+        edit.description || ''
       ])
-      sortByName([...production.descriptors])
+      const descriptors = sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Edit')
-        .forEach((descriptor) => {
+        .forEach(descriptor => {
           editLine.push(edit.data[descriptor.field_name])
         })
+      editLine = editLine.concat(descriptors)
       if (state.isEditTime) {
         editLine.push(minutesToDays(organisation, edit.timeSpent).toFixed(2))
       }

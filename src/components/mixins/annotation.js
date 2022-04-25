@@ -393,7 +393,8 @@ export const annotationMixin = {
         scaleY: obj.scaleY * scaleMultiplierY,
         angle: obj.angle,
         scale: obj.scale,
-        editable: true
+        editable: !this.isCurrentUserArtist,
+        selectable: !this.isCurrentUserArtist
       }
       if (obj.type === 'path') {
         let strokeMultiplier = 1
@@ -415,10 +416,10 @@ export const annotationMixin = {
           ml: false,
           mr: false,
           bl: false,
-          br: true,
+          br: !this.isCurrentUserArtist,
           tl: false,
           tr: false,
-          mtr: true
+          mtr: !this.isCurrentUserArtist
         })
         this.$options.silentAnnnotation = true
         this.fabricCanvas.add(path)
@@ -443,10 +444,10 @@ export const annotationMixin = {
           ml: false,
           mr: false,
           bl: false,
-          br: true,
+          br: !this.isCurrentUserArtist,
           tl: false,
           tr: false,
-          mtr: true
+          mtr: !this.isCurrentUserArtist
         })
         this.$options.silentAnnnotation = true
         this.fabricCanvas.add(text)
@@ -643,7 +644,11 @@ export const annotationMixin = {
     pasteAnnotations () {
       this.fabricCanvas.discardActiveObject()
       const clonedObj = clipboard.pasteAnnotations()
-      if (clonedObj._set) {
+      console.log(clonedObj)
+      if (clonedObj._objects) {
+        clonedObj._objects.forEach(obj => this.addObject(obj))
+        this.fabricCanvas.requestRenderAll()
+      } else if (clonedObj._set) {
         this.addObject(clonedObj)
         this.fabricCanvas.setActiveObject(clonedObj)
         this.fabricCanvas.requestRenderAll()

@@ -3,13 +3,10 @@
     <div class="container has-text-centered">
       <div class="box has-text-left">
         <div class="has-text-centered login-header">
-          <img src="../../assets/kitsu.png" />
-          <h1 class="title">
-            Kitsu
-          </h1>
+          <img src="../../assets/kitsu-text.svg" />
         </div>
         <form>
-          <div class="field mt1">
+          <div class="field mt2">
             <p class="control has-icon">
               <input
                 class="input is-medium email"
@@ -30,7 +27,8 @@
                 type="password"
                 :placeholder="$t('login.fields.password')"
                 @input="updatePassword"
-                @keyup.enter="confirmLogIn">
+                @keyup.enter="confirmLogIn"
+              >
               <span class="icon">
                 <lock-icon width=20 height=20 />
               </span>
@@ -38,13 +36,15 @@
           </div>
         </form>
         <p class="control">
-          <a v-bind:class="{
-            button: true,
-            'main-button': true,
-            'is-fullwidth': true,
-            'is-loading': isLoginLoading
-          }"
-            @click="confirmLogIn">
+          <a
+            :class="{
+              button: true,
+              'main-button': true,
+              'is-fullwidth': true,
+              'is-loading': isLoginLoading
+            }"
+            @click="confirmLogIn"
+          >
             {{ $t("login.login") }}
           </a>
         </p>
@@ -137,6 +137,11 @@ export default {
     color: #4a4a4a;
     margin-bottom: 1em;
   }
+}
+
+.login-header img {
+  margin: 2.5em 0;
+  width: 150px;
 }
 
 .field {

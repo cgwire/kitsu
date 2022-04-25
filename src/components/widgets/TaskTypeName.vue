@@ -11,8 +11,13 @@
   </span>
 </router-link>
 <div
-  class="tag task-type-name no-link"
-  :class="{ deletable }"
+  :class="{
+    tag: true,
+    'task-type-name': true,
+    'no-link': true,
+    deletable,
+    canceled: disable
+  }"
   :style="{ 'border-left': '4px solid ' + color }"
   v-else
 >
@@ -43,12 +48,17 @@ export default {
     deletable: {
       type: Boolean,
       default: false
+    },
+    disable: {
+      type: Boolean,
+      default: false
     }
   },
 
   computed: {
     ...mapGetters([
-      'isCurrentUserClient'
+      'isCurrentUserClient',
+      'isTaskTypePriorityHigherById'
     ]),
 
     color () {
@@ -62,7 +72,7 @@ export default {
         params: {
           production_id: this.productionId,
           task_type_id: this.taskType.id,
-          type: this.$tc(this.taskType.for_entity.toLowerCase(), 2)
+          type: this.$tc(this.taskType.for_entity.toLowerCase(), 2) + 's'
         }
       }
 
@@ -73,7 +83,6 @@ export default {
       }
       return route
     }
-
   },
 
   methods: {

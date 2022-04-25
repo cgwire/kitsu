@@ -139,7 +139,10 @@
             :task-type="{
               id: task.task_type_id,
               name: task.task_type_name,
-              color: task.task_type_color
+              color: task.task_type_color,
+              for_entity: ['Shot', 'Edit'].includes(task.entity_type_name)
+                ? task.entity_type_name
+                : 'Asset'
             }"
             :style="{left: colTypePosX}"
           />

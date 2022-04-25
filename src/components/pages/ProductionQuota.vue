@@ -344,6 +344,8 @@ export default {
         people,
         this.countMode,
         this.detailLevel,
+        moment().year(),
+        moment().month() + 1,
         this.currentYear,
         this.currentMonth,
         this.currentWeek

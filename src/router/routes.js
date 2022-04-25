@@ -25,6 +25,7 @@ const AssetTypes = () => import('../components/pages/AssetTypes')
 const Asset = () => import('../components/pages/Asset')
 const Breakdown = () => import('../components/pages/Breakdown')
 const CustomActions = () => import('../components/pages/CustomActions')
+const StatusAutomations = () => import('../components/pages/StatusAutomations')
 const Episodes = () => import('../components/pages/Episodes')
 const MainSchedule = () => import('../components/pages/MainSchedule')
 const NotFound = () => import('../components/pages/NotFound')
@@ -56,6 +57,7 @@ const Edit = () => import('../components/pages/Edit')
 const ADMIN_PAGES = [
   'asset-types',
   'custom-actions',
+  'status-automations',
   'departments',
   'logs',
   'main-schedule',
@@ -203,6 +205,29 @@ export const routes = [
             name: 'delete-custom-action',
             path: 'delete/:custom_action_id',
             component: CustomActions
+          }
+        ]
+      },
+
+      {
+        name: 'status-automations',
+        path: 'status-automations',
+        component: StatusAutomations,
+        children: [
+          {
+            name: 'status-automations-new',
+            path: 'new',
+            component: StatusAutomations
+          },
+          {
+            name: 'edit-status-automation',
+            path: 'edit/:status_automation_id',
+            component: StatusAutomations
+          },
+          {
+            name: 'delete-status-automation',
+            path: 'delete/:status_automation_id',
+            component: StatusAutomations
           }
         ]
       },

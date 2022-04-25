@@ -547,6 +547,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'isCurrentUserArtist',
       'organisation',
       'user'
     ]),

@@ -3,10 +3,18 @@
 >
   <span
     class="dot"
-    :style="{ 'border': '5px solid ' + color, color }"
+    :style="{ 'border': '5px solid ' + color }"
+    v-if="!onlyDot"
   >
   </span>
-  <span>
+  <span
+    class="dot"
+    :style="{ 'border': '5px solid ' + color }"
+    :title="department.name"
+    v-if="onlyDot"
+  >
+  </span>
+  <span v-if="!onlyDot">
     {{ department.name }}
   </span>
 </div>
@@ -24,6 +32,10 @@ export default {
     department: {
       type: Object,
       default: null
+    },
+    onlyDot: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -32,9 +44,7 @@ export default {
     ]),
 
     color () {
-      if (this.department.color.toUpperCase() === '#000000') {
-        return '$grey-strong'
-      } else return this.department.color
+      return this.department.color
     }
   },
 
@@ -49,7 +59,7 @@ export default {
 div {
   border-radius: 5px;
   display: inline-block;
-  padding: 0.4em 0.6em;
+  padding: 0.2em 0.6em;
 }
 
 span.dot {

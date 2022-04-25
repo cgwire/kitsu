@@ -96,13 +96,26 @@ export default {
     return client.pdel(path)
   },
 
+  addStatusAutomationToProduction (productionId, statusAutomationId) {
+    const data = { status_automation_id: statusAutomationId }
+    const path = `/api/data/projects/${productionId}/settings/status-automations`
+    return client.ppost(path, data)
+  },
+
+  removeStatusAutomationFromProduction (productionId, statusAutomationId) {
+    const path =
+      `/api/data/projects/${productionId}/settings/status-automations/${statusAutomationId}`
+    return client.pdel(path)
+  },
+
   addMetadataDescriptor (productionId, descriptor) {
     return new Promise((resolve, reject) => {
       const data = {
         name: descriptor.name,
         choices: descriptor.values,
         for_client: descriptor.for_client === 'true',
-        entity_type: descriptor.entity_type
+        entity_type: descriptor.entity_type,
+        departments: descriptor.departments
       }
       client.post(
         `/api/data/projects/${productionId}/metadata-descriptors`,
@@ -134,7 +147,8 @@ export default {
         name: descriptor.name,
         choices: descriptor.values,
         for_client: descriptor.for_client === 'true',
-        entity_type: descriptor.entity_type
+        entity_type: descriptor.entity_type,
+        departments: descriptor.departments
       }
       client.put(
         `/api/data/projects/${productionId}/metadata-descriptors/${descriptor.id}`,

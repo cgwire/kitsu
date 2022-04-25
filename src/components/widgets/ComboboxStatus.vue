@@ -32,15 +32,18 @@
       <chevron-down-icon class="down-icon flexrow-item"/>
     </div>
     <div
-      class="select-input"
       ref="select"
+      :class="{
+        'select-input': true,
+        'open-top': openTop
+      }"
       v-if="showStatusList"
     >
       <div
-        class="status-line"
-        v-for="status in taskStatusList"
-        @click="selectStatus(status)"
         :key="status.id"
+        class="status-line"
+        @click="selectStatus(status)"
+        v-for="status in taskStatusList"
       >
         <span
           class="tag"
@@ -104,6 +107,10 @@ export default {
       type: Boolean
     },
     addPlaceholder: {
+      default: false,
+      type: Boolean
+    },
+    openTop: {
       default: false,
       type: Boolean
     }
@@ -243,6 +250,11 @@ export default {
   top: 33px;
   left: 0;
   overflow-y: auto;
+
+  &.open-top {
+    top: auto;
+    bottom: 41px;
+  }
 }
 
 .field .label {
