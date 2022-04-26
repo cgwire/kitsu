@@ -6,12 +6,6 @@
         class="flexrow header-title"
         v-if="currentTask"
       >
-        <router-link
-          :to="entityPage"
-          class="flexrow-item has-text-centered back-link"
-        >
-          <corner-left-up-icon />
-        </router-link>
         <task-type-name
           class="flexrow-item task-type block"
           :task-type="currentTaskType"
@@ -309,10 +303,10 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import {
-  CornerLeftUpIcon,
   ImageIcon
 } from 'vue-feather-icons'
 
+import { getTaskEntityPath } from '@/lib/path'
 import { formatListMixin } from '@/components/mixins/format'
 
 import AddComment from '@/components/widgets/AddComment'
@@ -339,7 +333,6 @@ export default {
     AddPreviewModal,
     ComboboxStyled,
     Comment,
-    CornerLeftUpIcon,
     DeleteModal,
     EditCommentModal,
     EntityThumbnail,
@@ -358,7 +351,6 @@ export default {
     return {
       attachedFileName: '',
       currentTime: 0,
-      entityPage: this.getEntityPage(),
       selectedTab: 'validation',
       taskLoading: {
         isLoading: true,
@@ -524,33 +516,10 @@ export default {
 
     taskEntityPath () {
       if (this.currentTask) {
-        const type = this.currentTask.entity_type_name
-        let entityId = ''
-        if (this.currentTask.entity) {
-          entityId = this.currentTask.entity.id
-        } else {
-          entityId = this.currentTask.entity_id
-        }
-
-        const route = {
-          name: type === 'Shot' ? 'shot' : 'asset',
-          params: {
-            production_id: this.currentTask.project_id
-          }
-        }
-
-        if (type === 'Shot') {
-          route.params.shot_id = entityId
-        } else {
-          route.params.asset_id = entityId
-        }
-
-        if (this.$route.params.episode_id) {
-          route.name = `episode-${route.name}`
-          route.params.episode_id = this.$route.params.episode_id
-        }
-
-        return route
+        const episodeId = this.currentEpisode
+          ? this.currentEpisode.id
+          : this.$route.params.episode_id
+        return getTaskEntityPath(this.currentTask, episodeId)
       } else {
         return {
           name: 'open-productions'
@@ -773,33 +742,6 @@ export default {
       'updatePreviewAnnotation'
     ]),
 
-    getEntityPage () {
-      if (this.currentTask) {
-        const route = {
-          name: this.$route.params.type,
-          params: { production_id: this.currentTask.project_id }
-        }
-
-        if (route.name === 'asset') {
-          route.params.asset_id = this.currentTask.entity_id
-        } else {
-          route.params.shot_id = this.currentTask.entity_id
-        }
-
-        if (this.isTVShow) {
-          route.name = `episode-${route.name}`
-          route.params.episode_id =
-            this.currentEpisode ? this.currentEpisode.id : this.$route.params.episode_id
-        }
-        route.query = { search: '' }
-        return route
-      } else {
-        return {
-          name: 'open-productions'
-        }
-      }
-    },
-
     loadTaskData () {
       const task = this.getCurrentTask()
       if (!task) {
@@ -833,7 +775,6 @@ export default {
                 .then((subscribed) => {
                   this.isSubscribed = subscribed
                   this.reset()
-                  this.entityPage = this.getEntityPage()
                   this.taskLoading = { isLoading: false, isError: false }
                 }).catch((err) => {
                   console.error(err)
@@ -849,7 +790,6 @@ export default {
           .then(subscribed => {
             this.isSubscribed = subscribed
             this.reset()
-            this.entityPage = this.getEntityPage()
           })
           .catch(err => {
             console.error(err)
