@@ -89,5 +89,9 @@ export default {
 .modal-content {
   width: 100%;
   text-align: center;
+
+  img {
+    max-height: 100vh;
+  }
 }
 </style>
