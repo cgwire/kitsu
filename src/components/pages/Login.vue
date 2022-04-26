@@ -3,7 +3,8 @@
     <div class="container has-text-centered">
       <div class="box has-text-left">
         <div class="has-text-centered login-header">
-          <img src="../../assets/kitsu-text.svg" />
+          <img src="../../assets/kitsu-text-dark.svg" v-if="isDarkTheme" />
+          <img src="../../assets/kitsu-text.svg" v-else />
         </div>
         <form>
           <div class="field mt2">
@@ -79,6 +80,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'isDarkTheme',
       'isLoginLoading',
       'isLoginError'
     ])
@@ -123,6 +125,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dark {
+  .login-header img {
+  }
+}
+
 .box {
   border-radius: 1em;
 
@@ -140,8 +147,10 @@ export default {
 }
 
 .login-header img {
+  border-radius: 20%;
+  padding: 1em;
   margin: 2.5em 0;
-  width: 150px;
+  width: 200px;
 }
 
 .field {

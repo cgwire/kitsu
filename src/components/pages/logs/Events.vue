@@ -250,6 +250,7 @@ export default {
   }
 
   ul {
+    color: var(--text);
     border-left: 3px solid $light-grey;
     list-style-type: none;
     margin: 1em 1em 2em 0.2em;

@@ -1645,6 +1645,7 @@ th.validation-cell {
   background: var(--background-block);
   border-radius: 1em;
   box-shadow: 0px 0px 6px var(--box-shadow);
+  color: var(--text);
   padding: 1.5em;
 
   &.ready-for {
