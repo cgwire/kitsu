@@ -143,6 +143,7 @@ export default {
       'currentProduction',
       'isCurrentUserAdmin',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'isTVShow',
       'organisation',
       'taskTypeMap',
@@ -203,7 +204,7 @@ export default {
               priority: taskType.priority,
               startDate: startDate,
               endDate: endDate,
-              editable: this.isCurrentUserManager,
+              editable: this.isInDepartment(taskType),
               expanded: false,
               loading: false,
               route: getTaskTypeSchedulePath(
@@ -267,7 +268,7 @@ export default {
           endDate: endDate,
           expanded: false,
           loading: false,
-          editable: this.isCurrentUserManager,
+          editable: this.isInDepartment(this.taskTypeMap.get(item.task_type_id)),
           children: [],
           parentElement: taskTypeElement
         }
@@ -353,6 +354,21 @@ export default {
         }
       })
       return maxDate.clone()
+    },
+
+    isInDepartment (taskType) {
+      if (this.isCurrentUserManager) {
+        return true
+      } else if (this.isCurrentUserSupervisor) {
+        if (this.user.departments.length === 0) {
+          return true
+        } else {
+          return taskType.department_id && this.user.departments.includes(
+            taskType.department_id)
+        }
+      } else {
+        return false
+      }
     }
   },
 
