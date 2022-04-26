@@ -114,7 +114,7 @@
                 @mouseout="onInputMouseOut"
                 @mouseover="onInputMouseOver"
                 :value="formatDuration(task.estimation)"
-                v-if="isCurrentUserManager"
+                v-if="isInDepartment(task)"
               />
               <span v-else>
                 {{ formatDuration(task.estimation) }}
@@ -269,9 +269,12 @@ export default {
       'editMap',
       'currentProduction',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
+      'user',
       'organisation',
       'personMap',
-      'shotMap'
+      'shotMap',
+      'taskTypeMap'
     ]),
 
     isAssets () {
@@ -432,7 +435,7 @@ export default {
         if (!(event.ctrlKey || event.metaKey)) this.clearSelection()
         this.selectSingleTask(index)
       }
-      if (this.isCurrentUserManager) {
+      if (this.isInDepartment(task)) {
         this.focusInput(
           this.$refs[this.tasksByPerson[index].id + '-estimation'][0]
         )
@@ -470,6 +473,22 @@ export default {
       selection.forEach(taskId => {
         this.addToSelection(taskId)
       })
+    },
+
+    isInDepartment (task) {
+      if (this.isCurrentUserManager) {
+        return true
+      } else if (this.isCurrentUserSupervisor) {
+        if (this.user.departments.length === 0) {
+          return true
+        } else {
+          const taskType = this.taskTypeMap.get(task.task_type_id)
+          return taskType.department_id && this.user.departments.includes(
+            taskType.department_id)
+        }
+      } else {
+        return false
+      }
     }
   }
 }
