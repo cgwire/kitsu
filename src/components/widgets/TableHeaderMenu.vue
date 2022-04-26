@@ -31,7 +31,7 @@
     <div
       class="error"
       @click="$emit('delete-all-clicked')"
-      v-if="isCurrentUserAdmin"
+      v-if="isEditAllowed"
     >
       {{ $t('main.delete_all')}}
     </div>
@@ -49,7 +49,7 @@ export default {
       type: Boolean,
       default: false
     },
-    isCurrentUserAdmin: {
+    isEditAllowed: {
       type: Boolean,
       default: false
     },

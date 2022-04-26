@@ -1328,7 +1328,9 @@ const mutations = {
     if (sequence) newShot.sequence_name = sequence.name
 
     if (shot) {
-      Object.assign(shot, newShot)
+      const copyNewShot = { ...newShot }
+      copyNewShot.data = { ...shot.data, ...newShot.data }
+      Object.assign(shot, copyNewShot)
     } else {
       cache.shots.push(newShot)
       cache.shots = sortShots(cache.shots)

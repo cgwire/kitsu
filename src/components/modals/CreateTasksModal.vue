@@ -134,8 +134,7 @@ export default {
     ...mapGetters([
       'productionAssetTaskTypes',
       'productionShotTaskTypes',
-      'productionEditTaskTypes',
-      'taskTypes'
+      'productionEditTaskTypes'
     ]),
     isAssetTasks () {
       return this.$route.path.indexOf('assets') >= 0
@@ -180,18 +179,10 @@ export default {
   },
 
   mounted () {
-    if (this.isAssetTasks) {
-      if (this.productionAssetTaskTypes.length > 0) {
-        this.form.task_type_id = this.productionAssetTaskTypes[0].id
-      }
-    } else if (this.isShotsTasks) {
-      if (this.productionShotTaskTypes.length > 0) {
-        this.form.task_type_id = this.productionShotTaskTypes[0].id
-      }
-    } else if (this.isEditsTasks) {
-      if (this.productionEditTaskTypes.length > 0) {
-        this.form.task_type_id = this.productionEditTaskTypes[0].id
-      }
+    const taskTypes = this.getApplicableTaskTypes()
+
+    if (taskTypes.length > 0) {
+      this.form.task_type_id = taskTypes[0].id
     }
   }
 }

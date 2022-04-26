@@ -66,8 +66,10 @@ export default {
       name: shot.name,
       parent_id: shot.sequence_id,
       description: shot.description,
-      nb_frames: parseInt(shot.nb_frames),
       data: shot.data
+    }
+    if (shot.nb_frames) {
+      data.nb_frames = parseInt(shot.nb_frames)
     }
     if (
       shot.frameOut !== undefined ||

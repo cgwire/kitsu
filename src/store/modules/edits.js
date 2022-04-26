@@ -811,7 +811,9 @@ const mutations = {
     const edit = state.editMap.get(newEdit.id)
 
     if (edit) {
-      Object.assign(edit, newEdit)
+      const copyNewEdit = { ...newEdit }
+      copyNewEdit.data = { ...edit.data, ...newEdit.data }
+      Object.assign(edit, copyNewEdit)
     } else {
       cache.edits.push(newEdit)
       cache.edits = sortEdits(cache.edits)

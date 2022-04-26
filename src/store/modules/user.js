@@ -123,6 +123,7 @@ const getters = {
   isCurrentUserArtist: state => {
     return state.user && ['user', 'vendor'].includes(state.user.role)
   },
+  isCurrentUserSupervisor: state => state.user && state.user.role === 'supervisor',
   isCurrentUserClient: state => state.user && state.user.role === 'client',
   isCurrentUserVendor: state => state.user && state.user.role === 'vendor',
   isSaveProfileLoading: state => state.isSaveProfileLoading,

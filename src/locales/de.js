@@ -362,7 +362,8 @@ export default {
     role: {
       admin: 'Studio-Manager',
       client: 'Client',
-      manager: 'Vorgesetzter',
+      manager: 'Production manager',
+      supervisor: 'Supervisor',
       undefined: '',
       user: 'CG Artist',
       vendor: 'Anbieter'

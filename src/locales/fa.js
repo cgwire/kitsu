@@ -374,7 +374,8 @@ export default {
     role: {
       admin: 'مدیر استودیو',
       client: 'مشتری',
-      manager: 'سوپروایزر',
+      manager: 'Production manager',
+      supervisor: 'Supervisor',
       user: 'هنرمند',
       undefined: '',
       vendor: 'فروشنده'

@@ -116,6 +116,7 @@ export default {
       'departmentMap',
       'departments',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'user'
     ]),
 
@@ -142,6 +143,9 @@ export default {
             })
         }
         return [...departmentFilter, ...this.departmentsToTakeAccount]
+      } else if (this.isCurrentUserSupervisor &&
+          this.user.departments.length > 0) {
+        return [...this.departmentsToTakeAccount]
       } else {
         return [{ name: '---', id: null, color: '#000000' },
           ...this.departmentsToTakeAccount]

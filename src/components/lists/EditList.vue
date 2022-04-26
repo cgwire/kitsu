@@ -9,7 +9,7 @@
     <table-header-menu
       ref="headerMenu"
       :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"
-      :is-current-user-admin="isCurrentUserAdmin"
+      :is-edit-allowed="isCurrentUserManager"
       :is-sticked="stickedColumns[lastHeaderMenuDisplayed]"
       @minimize-clicked="onMinimizeColumnToggled()"
       @delete-all-clicked="onDeleteAllTasksClicked()"
@@ -20,7 +20,8 @@
 
     <table-metadata-header-menu
       ref="headerMetadataMenu"
-      :is-current-user-admin="isCurrentUserAdmin"
+      :is-edit-allowed="
+        isMetadataColumnEditAllowed(lastMetadaDataHeaderMenuDisplayed)"
       :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
       @edit-clicked="onEditMetadataClicked()"
       @delete-clicked="onDeleteMetadataClicked()"
@@ -57,7 +58,8 @@
                 icon="plus"
                 :text="''"
                 @click="onAddMetadataClicked"
-                v-if="isCurrentUserAdmin && !isLoading"
+                v-if="(isCurrentUserManager || isCurrentUserSupervisor)
+                  && !isLoading"
               />
             </div>
           </th>
@@ -243,11 +245,13 @@
               @input="event => onMetadataFieldChanged(edit, descriptor, event)"
               @keyup.ctrl="event => onInputKeyUp(event, i, j)"
               :value="getMetadataFieldValue(descriptor, edit)"
-              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+              v-if="descriptor.choices.length === 0 && (isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments))"
             />
             <span
               class="select"
-              v-else-if="isCurrentUserManager"
+              v-else-if="isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments)"
             >
             <select
               class="select-input"
@@ -315,11 +319,13 @@
               @input="event => onMetadataFieldChanged(edit, descriptor, event)"
               @keyup.ctrl="event => onInputKeyUp(event, i, j)"
               :value="getMetadataFieldValue(descriptor, edit)"
-              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+              v-if="descriptor.choices.length === 0 && (isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments))"
             />
             <span
               class="select"
-              v-else-if="isCurrentUserManager"
+              v-else-if="isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments)"
             >
             <select
               class="select-input"
@@ -535,6 +541,7 @@ export default {
       'isBigThumbnails',
       'isCurrentUserAdmin',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'isCurrentUserClient',
       'isSingleEpisode',
       'isEditDescription',
@@ -551,7 +558,8 @@ export default {
       'editSearchText',
       'editSelectionGrid',
       'taskMap',
-      'taskTypeMap'
+      'taskTypeMap',
+      'user'
     ]),
 
     isEmptyList () {
@@ -863,9 +871,6 @@ span.thumbnail-empty {
 .datatable-row th.name {
   font-size: 1.1em;
   padding: 6px;
-
-  .flexrow {
-  }
 }
 
 .datatable-row-header {

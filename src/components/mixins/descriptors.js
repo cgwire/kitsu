@@ -57,6 +57,11 @@ export const descriptorMixin = {
         this.selectedAssets.forEach((asset, _) => {
           this.emitMetadataChanged(asset, descriptor, event.target.value)
         })
+      } else if (this.selectedEdits.has(entry.id)) {
+        // if the line is selected, also modify the cells of the other selected lines
+        this.selectedEdits.forEach((edit, _) => {
+          this.emitMetadataChanged(edit, descriptor, event.target.value)
+        })
       } else {
         this.emitMetadataChanged(entry, descriptor, event.target.value)
       }

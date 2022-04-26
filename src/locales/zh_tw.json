@@ -409,7 +409,8 @@
             "role": {
                 "admin": "公司管理層",
                 "client": "客戶",
-                "manager": "總監",
+                "manager": "Production manager",
+                "supervisor": "Supervisor",
                 "user": "Artist",
                 "undefined": "未定義",
                 "vendor": "外包"

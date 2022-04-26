@@ -976,12 +976,10 @@ export default {
     },
 
     onMetadataChanged ({ entry, descriptor, value }) {
-      const metadata = { ...entry.data }
+      const metadata = {}
       metadata[descriptor.field_name] = value
       const data = {
         id: entry.id,
-        source_id: entry.episode_id,
-        episode_id: entry.episode_id,
         data: metadata
       }
       this.editAsset(data)

@@ -49,7 +49,7 @@
           }"
           @click="showAddModal"
           key="new-playlist-button"
-          v-if="isCurrentUserManager && !isListToggled"
+          v-if="(isCurrentUserManager || isCurrentUserSupervisor) && !isListToggled"
         >
           <plus-icon class="icon is-small" />
           {{ $t('playlists.new_playlist') }}
@@ -180,7 +180,7 @@
             }"
             @click="showAddModal"
             key="new-playlist-button"
-            v-if="isCurrentUserManager"
+            v-if="isCurrentUserManager || isCurrentUserSupervisor"
           >
             {{ $t('playlists.new_playlist') }}
           </button>
@@ -209,7 +209,7 @@
         />
 
         <div
-          v-if="isCurrentUserManager && isAddingEntity && !loading.playlist"
+          v-if="(isCurrentUserManager || isCurrentUserSupervisor) && isAddingEntity && !loading.playlist"
         >
           <div class="addition-header">
             <div class="flexrow">
@@ -294,7 +294,7 @@
 
         <div
           class="addition-section"
-          v-if="isCurrentUserManager && isAddingEntity"
+          v-if="(isCurrentUserManager || isCurrentUserSupervisor) && isAddingEntity"
           v-scroll="onBodyScroll"
         >
           <spinner
@@ -352,7 +352,7 @@
                     class="button"
                     @click="addSequence(sequenceShots)"
                     :key="'add-sequence-button-' + sequenceShots[0].sequence_id"
-                    v-if="isCurrentUserManager"
+                    v-if="(isCurrentUserManager || isCurrentUserSupervisor)"
                   >
                     {{ $t('playlists.add_sequence') }}
                   </button>
@@ -521,6 +521,7 @@ export default {
       'displayedShotsBySequence',
       'isAssetsLoading',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'isShotsLoading',
       'isTVShow',
       'productionTaskTypes',
