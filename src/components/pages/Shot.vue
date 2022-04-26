@@ -203,7 +203,7 @@
               </div>
             </div>
           </div>
-          <div v-else>
+          <div class="mt1" v-else>
             {{ $t('shots.no_casting') }}
           </div>
         </div>
@@ -569,7 +569,7 @@ h2.subtitle {
 }
 
 .infos {
-  height: 250px;
+  height: 350px;
   margin-bottom: 1em;
   margin-left: 1em;
   margin-right: 1em;

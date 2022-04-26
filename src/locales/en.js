@@ -187,6 +187,26 @@ export default {
       without_thumbnail: 'Without thumbnail'
     },
 
+    logs: {
+      no_logs: 'There are no time logs for this entity.'
+    },
+
+    news: {
+      no_news: 'There are no news for this entity.'
+    },
+
+    preview_files: {
+      extension: 'Extension',
+      no_preview_files: 'There are no preview files for this entity.',
+      original_file_name: 'Original File Name',
+      position: 'Position',
+      revision: 'Revision',
+      size: 'Size',
+      status: 'Status',
+      task_type: 'Task type',
+      uploader: 'Uploaded by'
+    },
+
     thumbnails: {
       error: 'An error occurred while uploading thumbnails',
       explaination: 'Adding a thumbnail requires to set a new preview. In order to set several thumbnails at the same time, you must choose first a task type that will be used to create the new previews. The thumbnails will be set from this new preview.',
@@ -200,17 +220,6 @@ export default {
       undefined: 'Undefined',
       undefined_pattern: 'Undefined',
       upload: 'Add Thumbnails'
-    },
-
-    preview_files: {
-      task_type: 'Task type',
-      revision: 'Revision',
-      position: 'Position',
-      original_file_name: 'Original File Name',
-      extension: 'Extension',
-      size: 'Size',
-      status: 'Status',
-      uploader: 'Uploaded by'
     }
   },
 

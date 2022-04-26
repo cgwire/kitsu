@@ -3,64 +3,67 @@
     <div class="has-text-centered" v-if="isLoading">
       <spinner />
     </div>
-    <div class="news">
-    <div class="timeline">
-      <div
-        :key="'news-' + news.id"
-        v-for="news in newsList"
-      >
-        <div class="news-line timeline-entry flexrow">
-          <span :class="{
-            dot: true,
-            red: hasRetakeValue(news),
-            green: hasDoneValue(news)
-          }"></span>
-          <span class="date flexrow-item">
-            {{ formatFullDate(news.created_at) }}
-          </span>
+    <div class="news" v-else-if="newsList.length > 0">
+      <div class="timeline">
+        <div
+          :key="'news-' + news.id"
+          v-for="news in newsList"
+        >
+          <div class="news-line timeline-entry flexrow">
+            <span :class="{
+              dot: true,
+              red: hasRetakeValue(news),
+              green: hasDoneValue(news)
+            }"></span>
+            <span class="date flexrow-item">
+              {{ formatFullDate(news.created_at) }}
+            </span>
 
-          <div class="flexrow-item task-type-wrapper">
-            <task-type-name
-              class="task-type-name"
-              :task-type="buildTaskTypeFromNews(news)"
-              :production-id="currentProduction.id"
-              :is-static="true"
-            />
-          </div>
-
-          <div class="flexrow-item validation-wrapper">
-            <validation-tag
-              class="validation-tag"
-              :task="taskMap.get(news.task_id)"
-              :is-static="true"
-              :thin="!news.change"
+            <div class="flexrow-item task-type-wrapper">
+              <task-type-name
+                class="task-type-name"
+                :task-type="buildTaskTypeFromNews(news)"
+                :production-id="currentProduction.id"
+                :is-static="true"
               />
             </div>
 
-            <div class="flexrow-item comment-content">
-              <div>
-                <div class="news-info flexrow">
-                  <people-avatar
-                    class="flexrow-item"
-                    :person="personMap.get(news.author_id)"
-                    :size="30"
-                    :font-size="14"
-                    :is-link="false"
-                    v-if="personMap.get(news.author_id)"
-                  />
-                  <span
-                    class="explaination flexrow-item"
-                  >
-                    <span class="strong person-name">
-                      {{ personName(news) }}
+            <div class="flexrow-item validation-wrapper">
+              <validation-tag
+                class="validation-tag"
+                :task="taskMap.get(news.task_id)"
+                :is-static="true"
+                :thin="!news.change"
+                />
+              </div>
+
+              <div class="flexrow-item comment-content">
+                <div>
+                  <div class="news-info flexrow">
+                    <people-avatar
+                      class="flexrow-item"
+                      :person="personMap.get(news.author_id)"
+                      :size="30"
+                      :font-size="14"
+                      :is-link="false"
+                      v-if="personMap.get(news.author_id)"
+                    />
+                    <span
+                      class="explaination flexrow-item"
+                    >
+                      <span class="strong person-name">
+                        {{ personName(news) }}
+                      </span>
                     </span>
-                  </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+    </div>
+    <div v-else>
+      {{ $t('entities.news.no_news') }}
     </div>
   </div>
 </template>

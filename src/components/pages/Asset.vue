@@ -648,7 +648,7 @@ h2.subtitle {
 }
 
 .infos {
-  height: 250px;
+  height: 300px;
   margin-bottom: 1em;
   margin-left: 1em;
   margin-right: 1em;

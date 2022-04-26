@@ -3,92 +3,97 @@
     <div class="has-text-centered" v-if="isLoading">
       <spinner />
     </div>
-    <table class="datatable">
-      <thead class="datatable-head">
-        <tr class="datatable-row-header">
-          <th class="thumbnail">
-          </th>
-          <th class="type">
-            {{ $t('entities.preview_files.task_type') }}
-          </th>
-          <th class="revision">
-            {{ $t('entities.preview_files.revision') }}
-          </th>
-          <th class="original-name">
-            {{ $t('entities.preview_files.original_file_name') }}
-          </th>
-          <th class="extension">
-            {{ $t('entities.preview_files.extension') }}
-          </th>
-          <th class="size">
-            {{ $t('entities.preview_files.size') }}
-          </th>
-          <th class="status">
-            {{ $t('entities.preview_files.status') }}
-          </th>
-          <th class="uploader">
-            {{ $t('entities.preview_files.uploader') }}
-          </th>
-          <th class="person"></th>
-          <th class="end-cell"></th>
-        </tr>
-      </thead>
-    </table>
-    <table class="datatable" style="overflow: auto;">
-      <tbody class="datatable-body">
-        <tr
-          :key="previewFile.id"
-          class="datatable-row"
-          v-for="previewFile in previewFiles"
-        >
-          <td
-            class="thumbnail"
+    <div v-else-if="previewFiles.length > 0">
+      <table class="datatable">
+        <thead class="datatable-head">
+          <tr class="datatable-row-header">
+            <th class="thumbnail">
+            </th>
+            <th class="type">
+              {{ $t('entities.preview_files.task_type') }}
+            </th>
+            <th class="revision">
+              {{ $t('entities.preview_files.revision') }}
+            </th>
+            <th class="original-name">
+              {{ $t('entities.preview_files.original_file_name') }}
+            </th>
+            <th class="extension">
+              {{ $t('entities.preview_files.extension') }}
+            </th>
+            <th class="size">
+              {{ $t('entities.preview_files.size') }}
+            </th>
+            <th class="status">
+              {{ $t('entities.preview_files.status') }}
+            </th>
+            <th class="uploader">
+              {{ $t('entities.preview_files.uploader') }}
+            </th>
+            <th class="person"></th>
+            <th class="end-cell"></th>
+          </tr>
+        </thead>
+      </table>
+      <table class="datatable" style="overflow: auto;">
+        <tbody class="datatable-body">
+          <tr
+            :key="previewFile.id"
+            class="datatable-row"
+            v-for="previewFile in previewFiles"
           >
-            <entity-thumbnail
-              class="preview-thumbnail"
-              :preview-file-id="previewFile.id"
-              :empty-width="60"
-              :width="60"
-            />
-          </td>
-
-          <task-type-name
-            class="type"
-            :task-type="getTaskType(previewFile)"
-            :production-id="currentProduction.id"
-          />
-          <td class="revision">
-            {{ previewFile.revision }}
-          </td>
-          <td class="original-name">
-            {{ previewFile.original_name }}
-          </td>
-          <td class="extension">
-            {{ previewFile.extension }}
-          </td>
-          <td class="size">
-            {{ renderFileSize(previewFile.file_size) }}
-          </td>
-          <td class="status">
-            {{ previewFile.validation_status }}
-          </td>
-
-          <people-name-cell
-            class="person"
-            :person="personMap.get(previewFile.person_id)"
-          />
-          <td class="download">
-            <a
-              class="button flexrow-item"
-              :href="getDownloadPath(previewFile.id)"
-              :title="$t('playlists.actions.download_file')"
+            <td
+              class="thumbnail"
             >
-              <download-icon class="icon is-small" />
-            </a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+              <entity-thumbnail
+                class="preview-thumbnail"
+                :preview-file-id="previewFile.id"
+                :empty-width="60"
+                :width="60"
+              />
+            </td>
+
+            <task-type-name
+              class="type"
+              :task-type="getTaskType(previewFile)"
+              :production-id="currentProduction.id"
+            />
+            <td class="revision">
+              {{ previewFile.revision }}
+            </td>
+            <td class="original-name">
+              {{ previewFile.original_name }}
+            </td>
+            <td class="extension">
+              {{ previewFile.extension }}
+            </td>
+            <td class="size">
+              {{ renderFileSize(previewFile.file_size) }}
+            </td>
+            <td class="status">
+              {{ previewFile.validation_status }}
+            </td>
+
+            <people-name-cell
+              class="person"
+              :person="personMap.get(previewFile.person_id)"
+            />
+            <td class="download">
+              <a
+                class="button flexrow-item"
+                :href="getDownloadPath(previewFile.id)"
+                :title="$t('playlists.actions.download_file')"
+              >
+                <download-icon class="icon is-small" />
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div v-else>
+      {{ $t('entities.preview_files.no_preview_files') }}
+    </div>
   </div>
 </template>
 
@@ -198,6 +203,7 @@ export default {
 .preview-files {
   overflow-y: auto;
 }
+.dark .preview-files.wrapper { background: transparent; }
 
 .preview-thumbnail {
   cursor: pointer;

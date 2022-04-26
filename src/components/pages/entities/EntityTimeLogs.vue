@@ -3,45 +3,56 @@
     <div class="has-text-centered" v-if="isLoading">
       <spinner />
     </div>
-    <table class="datatable">
-      <thead class="datatable-head">
-        <tr class="datatable-row-header">
-          <th class="date">Date</th>
-          <th class="person">Employee</th>
-          <th class="type">
-            {{ $t('entities.preview_files.task_type') }}
-          </th>
-          <th class="duration">Time spent</th>
-          <th class="end-cell"></th>
-        </tr>
-      </thead>
-    </table>
-    <table class="datatable">
-      <tbody class="datatable-body">
-        <tr
-          :key="log.id"
-          class="datatable-row"
-          v-for="log in logs"
-        >
-          <td class="date">
-            {{ formatSimpleDate(log.date) }}
-          </td>
-          <people-name-cell
-            class="person"
-            :person="personMap.get(log.person_id)"
-          />
-          <task-type-name
-            class="type"
-            :task-type="getTaskType(log)"
-            :production-id="currentProduction.id"
-          />
-          <td class="duration">
-            {{ formatDuration(log.duration) }}
-          </td>
-          <td class="end-cell"></td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-else-if="logs.length > 0">
+      <table class="datatable">
+        <thead class="datatable-head">
+          <tr class="datatable-row-header">
+            <th class="date">
+              {{ $t('main.date') }}
+            </th>
+            <th class="person">
+              {{ $t('main.person') }}
+            </th>
+            <th class="type">
+              {{ $t('entities.preview_files.task_type') }}
+            </th>
+            <th class="duration">
+              {{ $t('tasks.fields.duration') }}
+            </th>
+            <th class="end-cell"></th>
+          </tr>
+        </thead>
+      </table>
+      <table class="datatable">
+        <tbody class="datatable-body">
+          <tr
+            :key="log.id"
+            class="datatable-row"
+            v-for="log in logs"
+          >
+            <td class="date">
+              {{ formatSimpleDate(log.date) }}
+            </td>
+            <people-name-cell
+              class="person"
+              :person="personMap.get(log.person_id)"
+            />
+            <task-type-name
+              class="type"
+              :task-type="getTaskType(log)"
+              :production-id="currentProduction.id"
+            />
+            <td class="duration">
+              {{ formatDuration(log.duration) }}
+            </td>
+            <td class="end-cell"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div v-else>
+      {{ $t('entities.logs.no_logs') }}
+    </div>
   </div>
 </template>
 
@@ -133,8 +144,11 @@ export default {
   overflow-y: auto;
 }
 
+.dark .wrapper.time-logs {
+  background: transparent;
+}
+
 .datatable-row-header::after {
   display: none;
 }
-
 </style>
