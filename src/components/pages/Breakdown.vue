@@ -242,21 +242,6 @@ export default {
           value: 'asset'
         }
       ],
-      csvColumns: [
-        'Episode',
-        'Parent',
-        'Name',
-        'Asset Type',
-        'Asset',
-        'Occurences',
-        'Label'
-      ],
-      dataMatchers: [
-        'Episode',
-        'Name',
-        'Asset Type',
-        'Asset'
-      ],
       editedAsset: null,
       editedEntityId: null,
       editedAssetLinkLabel: null,
@@ -380,6 +365,39 @@ export default {
         }
       })
       return casting
+    },
+
+    csvColumns () {
+      return this.isTVShow
+        ? [
+          'Episode',
+          'Parent',
+          'Name',
+          'Asset Type',
+          'Asset',
+          'Occurences',
+          'Label'
+        ] : [
+          'Parent',
+          'Name',
+          'Asset Type',
+          'Asset',
+          'Occurences',
+          'Label'
+        ]
+    },
+
+    dataMatchers () {
+      return this.isTVShow
+        ? [
+          'Episode',
+          'Name',
+          'Asset Type',
+          'Asset'
+        ] : ['Name',
+          'Asset Type',
+          'Asset'
+        ]
     }
   },
 
