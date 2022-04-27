@@ -367,12 +367,13 @@ export default {
 
   mounted () {
     let searchQuery = ''
-    if (this.editSearchText.length > 0) {
+    if (this.editSearchText && this.editSearchText.length > 0) {
       this.searchField.setValue(this.editSearchText)
     }
     if (this.$route.query.search && this.$route.query.search.length > 0) {
       searchQuery = '' + this.$route.query.search
     }
+    if (searchQuery === 'undefined') searchQuery = ''
     this.$refs['edit-list'].setScrollPosition(
       this.editListScrollPosition
     )
@@ -838,7 +839,7 @@ export default {
     onSearchChange () {
       if (!this.searchField) return
       this.isSearchActive = false
-      const searchQuery = this.searchField.getValue()
+      const searchQuery = this.searchField.getValue() || ''
       if (searchQuery.length !== 1 && !this.isLongEditList) {
         this.applySearch(searchQuery)
       }

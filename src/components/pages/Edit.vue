@@ -1,20 +1,27 @@
 <template>
 <div class="columns fixed-page edit">
   <div class="column main-column">
-    <div class="page-header level" ref="page-header-row">
-      <div class="level-left">
+    <div class="page-header flexrow flexrow-item" ref="page-header-row">
+      <div class="flexrow block mb0 main-block">
         <router-link
           class="flexrow-item has-text-centered back-link"
           :to="editsPath"
         >
-          <chevron-left-icon />
+          <corner-left-up-icon />
         </router-link>
-        <entity-thumbnail
-          class="edit-thumbnail flexrow-item"
-          :entity="currentEdit"
-          :with-link="false"
-          v-if="currentEdit"
-        />
+        <span
+          class="flexrow-item"
+        >
+          <entity-thumbnail
+            class="entity-thumbnail"
+            :entity="currentEntity"
+            :empty-height="60"
+            :empty-width="100"
+            :height="60"
+            :width="100"
+            v-if="currentEntity"
+          />
+        </span>
         <div class="flexrow-item">
           <page-title :text="title" class="entity-title" />
         </div>
@@ -31,30 +38,21 @@
           />
         </div>
       </div>
-
-      <div class="level-right">
-        <div class="flexrow-item">
-          <preview-room
-            :ref="previewRoomRef"
-            :roomId="(currentEdit && isValidRoomId(currentEdit.id)) ? currentEdit.id : ''"
-            :joinRoom="joinRoom"
-            :leaveRoom="leaveRoom"
-            v-if="currentEdit && isValidRoomId(currentEdit.id) && currentPreview && currentPreview.id"
-          />
-        </div>
-        <div class="flexrow-item">
-          <button-simple
-            icon="edit"
-            @click="modals.edit = true"
-            v-if="isCurrentUserManager"
-          />
-        </div>
+      <div class="filler"></div>
+      <div class="flexrow-item block mt0">
+        <preview-room
+          :ref="previewRoomRef"
+          :roomId="(currentEdit && isValidRoomId(currentEdit.id)) ? currentEdit.id : ''"
+          :joinRoom="joinRoom"
+          :leaveRoom="leaveRoom"
+          v-if="currentEdit && isValidRoomId(currentEdit.id) && currentPreview && currentPreview.id"
+        />
       </div>
     </div>
 
     <div
       ref="container"
-      class="edit player"
+      class="edit player block"
     >
       <div
         class="flexrow filler"
@@ -175,7 +173,6 @@
           :current-parent-preview="currentPreview"
           @time-code-clicked="onTimeCodeClicked"
         />
-
       </div>
 
       <video-progress
@@ -456,52 +453,128 @@
 
     </div>
 
-    <div class="infos flexrow" ref="info-row">
-      <div class="flexrow-item">
-        <page-subtitle :text="$t('main.info')" />
-        <div class="table-body">
-          <table class="datatable" v-if="currentEdit">
-            <tbody class="datatable-body">
-              <tr class="datatable-row">
-                <td class="field-label">{{ $t('edits.fields.description') }}</td>
-                <description-cell
-                  :entry="currentEdit"
-                  :full="true"
-                />
-              </tr>
-              <tr
-                :key="descriptor.id"
-                class="datatable-row"
-                v-for="descriptor in editMetadataDescriptors"
-              >
-                <td class="field-label">{{ descriptor.name }}</td>
-                <td>
-                  {{ currentEdit.data ? currentEdit.data[descriptor.field_name] : '' }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div class="infos schedule" v-if="scheduleItems.length > 0" ref="schedule-row">
-      <page-subtitle class="schedule-title" text="Schedule" />
-      <div class="wrapper">
-        <schedule
-          ref="schedule-widget"
-          class="schedule-widget"
-          :start-date="tasksStartDate"
-          :end-date="tasksEndDate"
-          :hierarchy="scheduleItems"
-          :zoom-level="2"
-          :height="385"
-          :is-loading="false"
-          :is-estimation-linked="true"
-          :hide-root="true"
-          :with-milestones="false"
+    <div
+      class="edit-data block"
+    >
+      <div class="flexrow">
+        <combobox-styled
+          class="section-combo flexrow-item"
+          :options="entityNavOptions"
+          v-model="currentSection"
+        />
+        <div class="filler"></div>
+        <span
+          class="flexrow-item mt05"
+          v-show="currentSection === 'schedule'"
+        >
+          {{ $t('schedule.zoom_level') }}:
+        </span>
+        <combobox-number
+          class="zoom-level flexrow-item "
+          :options="zoomOptions"
+          is-simple
+          v-model="zoomLevel"
+          v-show="currentSection === 'schedule'"
         />
       </div>
+
+      <div
+        ref="info-row"
+        class="infos flexrow pa0"
+        v-if="currentSection === 'infos'"
+      >
+        <div class="flexrow-item">
+          <div class="flexrow">
+            <div class="flexcolumn flexrow-item">
+              <page-subtitle class="flerow-item" :text="$t('edits.tasks')" />
+              <entity-task-list
+                class="task-list flexrow-item"
+                :entries="currentEdit ? currentEdit.tasks : []"
+                :is-loading="!currentEdit"
+                :is-error="false"
+              />
+            </div>
+
+            <div class="flexcolumn flexrow-item">
+              <div class="flexrow">
+                <page-subtitle class="flerow-item" :text="$t('main.info')" />
+                <div class="flexrow-item has-text-right">
+                  <button-simple
+                    icon="edit"
+                    @click="modals.edit = true"
+                    v-if="isCurrentUserManager"
+                  />
+                </div>
+              </div>
+              <div class="table-body edit-metadata flexrow-item">
+                <table class="datatable" v-if="currentEdit">
+                  <tbody class="datatable-body">
+                    <tr class="datatable-row">
+                      <td class="field-label">{{ $t('edits.fields.description') }}</td>
+                      <description-cell
+                        :entry="currentEdit"
+                        :full="true"
+                      />
+                    </tr>
+                    <tr
+                      :key="descriptor.id"
+                      class="datatable-row"
+                      v-for="descriptor in editMetadataDescriptors"
+                    >
+                      <td class="field-label">{{ descriptor.name }}</td>
+                      <td>
+                        {{ currentEdit.data ? currentEdit.data[descriptor.field_name] : '' }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        ref="schedule-row"
+        class="infos schedule"
+        v-if="currentSection === 'schedule' && scheduleItems.length > 0"
+      >
+        <div
+          class="schedule mt1"
+          v-if="scheduleItems[0].children.length > 0"
+          v-show="currentSection === 'schedule'"
+        >
+          <div class="wrapper">
+            <schedule
+              ref="schedule-widget"
+              :start-date="tasksStartDate"
+              :end-date="tasksEndDate"
+              :hierarchy="scheduleItems"
+              :zoom-level="zoomLevel"
+              :is-loading="false"
+              :is-estimation-linked="true"
+              :hide-root="true"
+              :with-milestones="false"
+            />
+          </div>
+        </div>
+      </div>
+
+      <entity-preview-files
+        :entity="currentEdit"
+        v-if="currentSection === 'preview-files'"
+      />
+
+      <entity-news
+        :entity="currentEdit"
+        v-if="currentSection === 'activity'"
+      />
+
+      <entity-time-logs
+        :entity="currentEdit"
+        v-if="currentSection === 'time-logs'"
+      />
+
     </div>
   </div>
 
@@ -519,21 +592,28 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { ChevronLeftIcon, DownloadIcon } from 'vue-feather-icons'
+import { CornerLeftUpIcon, DownloadIcon } from 'vue-feather-icons'
 
 import { annotationMixin } from '@/components/mixins/annotation'
 import { domMixin } from '@/components/mixins/dom'
 import { entityMixin } from '@/components/mixins/entity'
+import { getEntitiesPath } from '@/lib/path'
 import { formatListMixin } from '@/components/mixins/format'
 import { previewRoomMixin } from '@/components/mixins/previewRoom'
 import { playerMixin } from '@/components/mixins/player'
 import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
+import ComboboxNumber from '@/components/widgets/ComboboxNumber'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EditEditModal from '@/components/modals/EditEditModal'
+import EntityNews from '@/components/pages/entities/EntityNews'
+import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles'
+import EntityTaskList from '@/components/lists/EntityTaskList'
+import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import ColorPicker from '@/components/widgets/ColorPicker'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import PageSubtitle from '@/components/widgets/PageSubtitle'
 import PageTitle from '@/components/widgets/PageTitle'
 import PencilPicker from '@/components/widgets/PencilPicker'
@@ -547,14 +627,27 @@ import VideoProgress from '@/components/previews/VideoProgress'
 
 export default {
   name: 'edit',
-  mixins: [annotationMixin, domMixin, entityMixin, formatListMixin, previewRoomMixin, playerMixin],
+  mixins: [
+    annotationMixin,
+    domMixin,
+    entityMixin,
+    formatListMixin,
+    previewRoomMixin,
+    playerMixin
+  ],
   components: {
     ButtonSimple,
-    ChevronLeftIcon,
+    CornerLeftUpIcon,
     ColorPicker,
+    ComboboxStyled,
+    ComboboxNumber,
     DescriptionCell,
     DownloadIcon,
     EditEditModal,
+    EntityNews,
+    EntityPreviewFiles,
+    EntityTaskList,
+    EntityTimeLogs,
     EntityThumbnail,
     PageSubtitle,
     PageTitle,
@@ -570,15 +663,23 @@ export default {
 
   data () {
     return {
-      tempMode: false,
-      previewRoomRef: 'edits-preview-room',
-      previewFileMap: new Map(),
       currentEdit: null,
+      currentSection: 'infos',
       isLoading: true,
       isError: false,
+      previewRoomRef: 'edits-preview-room',
+      previewFileMap: new Map(),
+      tempMode: false,
       errors: {
         edit: false
       },
+      entityNavOptions: [
+        { label: 'Infos', value: 'infos' },
+        { label: 'Schedule', value: 'schedule' },
+        { label: 'Preview Files', value: 'preview-files' },
+        { label: 'Activity', value: 'activity' },
+        { label: 'Timelog', value: 'time-logs' }
+      ],
       modals: {
         edit: false
       }
@@ -623,7 +724,6 @@ export default {
       'route',
       'editMap',
       'editMetadataDescriptors',
-      'editsPath',
       'taskMap',
       'taskTypeMap',
       'user'
@@ -640,6 +740,14 @@ export default {
       } else {
         return 'Loading...'
       }
+    },
+
+    editsPath () {
+      return getEntitiesPath(
+        this.currentProduction.id,
+        'edits',
+        this.currentEpisode ? this.currentEpisode.id : this.currentEpisode
+      )
     }
   },
 
@@ -778,7 +886,8 @@ export default {
     },
 
     scrollToEntity () {
-      // This method in unused here, required by PlaylistPlayer that shares playerMixin.
+      // This method in unused here, required by PlaylistPlayer that shares
+      // playerMixin.
     },
 
     resetData () {
@@ -895,15 +1004,37 @@ export default {
   padding-bottom: 1em;
 }
 
-.dark .page-header,
-.dark .infos {
-  background: #46494F;
-  border-color: $dark-grey;
-  box-shadow: 0px 0px 6px #333;
-}
-
 .dark .wrapper {
   background: $dark-grey-2;
+}
+
+.block {
+  margin: 0;
+}
+
+.entity-title {
+  font-weight: bold;
+}
+
+.entity-thumbnail {
+  margin-bottom: 0;
+}
+
+.main-block {
+  padding: .5em 1.5em;
+}
+
+.edit-data {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin: 0 1em 0 1em;
+  overflow: hidden;
+  min-height: 300px;
+}
+
+.edit-metadata {
+  width: 100%;
 }
 
 h2.subtitle {
@@ -919,22 +1050,13 @@ h2.subtitle {
 }
 
 .page-header {
-  padding: 1em 1em 1em 1em;
-  background: white;
-  box-shadow: 0px 0px 6px #E0E0E0;
   margin-top: calc(50px + 2em);
-  margin-bottom: 2em;
   margin-left: 1em;
   margin-right: 1em;
 }
 
 .infos {
-  background: white;
-  padding: 1em 1em 1em 1em;
-  box-shadow: 0px 0px 6px #E0E0E0;
-  margin-bottom: 1em;
-  margin-left: 1em;
-  margin-right: 1em;
+  margin-top: 1em;
 
   .flexrow-item {
     align-self: flex-start;
@@ -949,10 +1071,6 @@ h2.subtitle {
 .field-label {
   font-weight: bold;
   width: 140px;
-}
-
-.page-header {
-  align-items: center;
 }
 
 .data-list {

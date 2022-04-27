@@ -530,7 +530,7 @@ export default {
   },
 
   preview_room: {
-    join_room: 'Join Room',
+    join_room: 'Join Review Room',
     leave_room: 'Leave Room'
   },
 
@@ -871,18 +871,17 @@ export default {
 
   edits: {
     all_edits: 'All edits',
-    manage: 'Create an edit',
     creation_explaination: 'Upload an edit file to create a new edit',
-    edit_error: 'An error occurred while saving this edit. Are you sure there is no edit with similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this edit. There are probably data linked to it.',
     delete_for_selection: 'Delete {nbSelectedEdits} selected edits:',
+    edit_error: 'An error occurred while saving this edit. Are you sure there is no edit with similar name?',
     edit_title: 'Change edit',
     empty_list: 'There are no edits in the production. What about creating some?',
     empty_list_client: 'There are no edits in this production.',
     new_edit: 'New edit',
     number: 'edit | edits',
-    tasks: 'Edit tasks',
+    tasks: 'Tasks',
     title: 'Edits',
     fields: {
       name: 'name',

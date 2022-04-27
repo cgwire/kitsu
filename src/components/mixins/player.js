@@ -290,14 +290,16 @@ export const playerMixin = {
       window.addEventListener('keydown', this.onKeyDown, false)
       window.addEventListener('resize', this.onWindowResize)
       if (!this.$el.nomousemove) this.$el.onmousemove = this.onMouseMove
-      this.container.addEventListener(
-        'fullscreenchange', this.onFullScreenChange, false)
-      this.container.addEventListener(
-        'mozfullscreenchange', this.onFullScreenChange, false)
-      this.container.addEventListener(
-        'MSFullscreenChange', this.onFullScreenChange, false)
-      this.container.addEventListener(
-        'webkitfullscreenchange', this.onFullScreenChange, false)
+      if (this.container) {
+        this.container.addEventListener(
+          'fullscreenchange', this.onFullScreenChange, false)
+        this.container.addEventListener(
+          'mozfullscreenchange', this.onFullScreenChange, false)
+        this.container.addEventListener(
+          'MSFullscreenChange', this.onFullScreenChange, false)
+        this.container.addEventListener(
+          'webkitfullscreenchange', this.onFullScreenChange, false)
+      }
       window.addEventListener('beforeunload', this.onWindowsClosed)
     },
 
@@ -306,14 +308,16 @@ export const playerMixin = {
       window.removeEventListener('resize', this.onWindowResize)
       window.removeEventListener('beforeunload', this.onWindowsClosed)
       this.$el.onmousemove = null
-      this.container.removeEventListener(
-        'fullscreenchange', this.onFullScreenChange, false)
-      this.container.removeEventListener(
-        'mozfullscreenchange', this.onFullScreenChange, false)
-      this.container.removeEventListener(
-        'MSFullscreenChange', this.onFullScreenChange, false)
-      this.container.removeEventListener(
-        'webkitfullscreenchange', this.onFullScreenChange, false)
+      if (this.container) {
+        this.container.removeEventListener(
+          'fullscreenchange', this.onFullScreenChange, false)
+        this.container.removeEventListener(
+          'mozfullscreenchange', this.onFullScreenChange, false)
+        this.container.removeEventListener(
+          'MSFullscreenChange', this.onFullScreenChange, false)
+        this.container.removeEventListener(
+          'webkitfullscreenchange', this.onFullScreenChange, false)
+      }
     },
     formatTime,
 

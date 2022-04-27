@@ -58,6 +58,22 @@ export const getTaskEntityPath = (task, episodeId) => {
   }
 }
 
+export const getEntitiesPath = (productionId, type, episodeId) => {
+  const route = {
+    name: type,
+    params: {
+      production_id: productionId
+    }
+  }
+
+  if (episodeId) {
+    route.name = `episode-${type}`
+    route.params.episode_id = episodeId
+  }
+
+  return route
+}
+
 export const getEntityPath = (entityId, productionId, section, episodeId) => {
   const route = {
     name: section,

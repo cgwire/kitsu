@@ -1,5 +1,5 @@
 <template v-if="roomId">
-  <div class="flexrow-item preview-room">
+  <div class="preview-room">
     <button-simple
       :text="$t('preview_room.leave_room')"
       class="preview-room-button"
@@ -95,11 +95,9 @@ export default {
 
 <style>
 .preview-room {
-  display: flex;
-  flex: 1;
   font-size: 1.5em;
-  padding: 10px;
 }
+
 .preview-room-button.button {
   background: $dark-grey-light;
   border: 1px solid $dark-grey-strong;
@@ -110,6 +108,7 @@ export default {
     background: $dark-grey-lighter;
   }
 }
+
 .avatar.person-avatar {
   display: inline-flex;
   margin-right: 4px;
