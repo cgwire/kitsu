@@ -216,7 +216,7 @@
           </div>
 
           <div :class="{
-            'with-milestones': withMilestones,
+            'with-milestones': withMilestones && isCurrentUserManager,
             'date-widget': true
           }">
             <div
