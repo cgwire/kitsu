@@ -305,9 +305,7 @@ import { entityMixin } from '@/components/mixins/entity'
 import { formatListMixin } from '@/components/mixins/format'
 
 import {
-  CornerLeftUpIcon//,
-  // ChevronLeftIcon,
-  // ChevronRightIcon
+  CornerLeftUpIcon
 } from 'vue-feather-icons'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
@@ -333,8 +331,6 @@ export default {
     ButtonSimple,
     ComboboxNumber,
     CornerLeftUpIcon,
-    // ChevronLeftIcon,
-    // ChevronRightIcon,
     ComboboxStyled,
     DescriptionCell,
     EditAssetModal,
@@ -386,7 +382,7 @@ export default {
             .then(() => {
               this.castIn.isLoading = false
             })
-            .catch((err) => {
+            .catch(err => {
               this.castIn.isLoading = false
               this.castIn.isError = true
               console.error(err)
