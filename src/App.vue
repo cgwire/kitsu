@@ -363,6 +363,16 @@ export default {
         }
       },
 
+      'episode:casting-update' (eventData) {
+        const episode = this.episodeMap.get(eventData.episode_id)
+        if (episode) {
+          this.$store.commit('UPDATE_EPISODE', {
+            id: episode.id,
+            nb_entities_out: eventData.nb_entities_out
+          })
+        }
+      },
+
       'shot:casting-update' (eventData) {
         const shot = this.shotMap.get(eventData.shot_id)
         if (shot) {

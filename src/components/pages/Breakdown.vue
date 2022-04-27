@@ -838,7 +838,6 @@ export default {
 
     episodeId () {
       if (this.episodeId && this.episodes && this.episodes.length > 0) {
-        console.log('episodeId watch', this.currentProduction)
         this.setCastingForProductionEpisodes(this.episodeId)
         this.updateUrl()
         this.resetSelection()
@@ -898,7 +897,6 @@ export default {
     events: {
       'episode:casting-update' (eventData) {
         const episode = this.episodeMap.get(eventData.episode_id)
-        console.log('titi', episode)
         if (
           episode &&
           !this.isLocked

@@ -20,7 +20,7 @@ export default {
     return client.pget(path)
   },
 
-  updateCasting (productionId, shotId, casting, callback) {
+  updateCasting (productionId, shotId, casting, callback) { // TODO rename shotId to entityId
     const path =
       `/api/data/projects/${productionId}/entities/${shotId}/casting`
     return client.pput(path, casting)
@@ -37,7 +37,7 @@ export default {
 
   getEpisodeCasting (episode) {
     const path =
-      `/api/data/projects/${episode.project_id}/episodes/` +
+      `/api/data/projects/${episode.project_id}/entities/` +
       `${episode.id}/casting`
     return client.pget(path)
   },
