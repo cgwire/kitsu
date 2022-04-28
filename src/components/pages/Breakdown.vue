@@ -344,7 +344,13 @@ export default {
     },
 
     castingEntities () {
-      return this.isShotCasting ? this.castingSequenceShots : this.castingAssetTypeAssets
+      if (this.isShotCasting) return this.castingSequenceShots
+      else {
+        if (this.isTVShow) {
+          return this.castingAssetTypeAssets.filter(
+            asset => asset.episode_id === this.currentEpisode.id)
+        } else return this.castingAssetTypeAssets
+      }
     },
 
     editLabelModal () {
@@ -455,6 +461,9 @@ export default {
             this.isLoading = false
             this.displayMoreAssets()
             this.setCastingAssetTypes()
+            if (this.assetTypeId) {
+              this.setCastingAssetType(this.assetTypeId)
+            }
             this.resetSelection()
           })
       })
