@@ -268,7 +268,8 @@ export default {
           endDate: endDate,
           expanded: false,
           loading: false,
-          editable: this.isInDepartment(this.taskTypeMap.get(item.task_type_id)),
+          editable: this.isInDepartment(
+            this.taskTypeMap.get(item.task_type_id)),
           children: [],
           parentElement: taskTypeElement
         }

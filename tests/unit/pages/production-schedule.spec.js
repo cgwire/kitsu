@@ -30,12 +30,13 @@ describe('ProductionSchedule', () => {
   beforeEach(() => {
     taskStore = {
       getters: {
-        taskTypeMap: () => ({
-          'task-type-1': {
-            name: 'Modeling'
-          }
-        }),
-        taskStatusMap: () => ({
+        taskTypeMap: () => new Map(Object.entries({
+          'task-type-1': { id: 'task-type-1', name: 'Modeling' },
+          'task-type-2': { id: 'task-type-2', name: 'Rigging' },
+          'task-type-3': { id: 'task-type-3', name: 'Layout' },
+          'task-type-4': { id: 'task-type-4', name: 'Animation' }
+        })),
+        taskStatusMap: () => new Map(Object.entries({
           'task-status-1': {
             name: 'WIP',
             is_retake: false,
@@ -51,7 +52,7 @@ describe('ProductionSchedule', () => {
             is_retake: false,
             is_done: true
           }
-        })
+        }))
       },
       actions: {
         loadTask: jest.fn()
