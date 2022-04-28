@@ -242,21 +242,6 @@ export default {
           value: 'asset'
         }
       ],
-      csvColumns: [
-        'Episode',
-        'Parent',
-        'Name',
-        'Asset Type',
-        'Asset',
-        'Occurences',
-        'Label'
-      ],
-      dataMatchers: [
-        'Episode',
-        'Name',
-        'Asset Type',
-        'Asset'
-      ],
       editedAsset: null,
       editedEntityId: null,
       editedAssetLinkLabel: null,
@@ -359,7 +344,13 @@ export default {
     },
 
     castingEntities () {
-      return this.isShotCasting ? this.castingSequenceShots : this.castingAssetTypeAssets
+      if (this.isShotCasting) return this.castingSequenceShots
+      else {
+        if (this.isTVShow) {
+          return this.castingAssetTypeAssets.filter(
+            asset => asset.episode_id === this.currentEpisode.id)
+        } else return this.castingAssetTypeAssets
+      }
     },
 
     editLabelModal () {
@@ -380,6 +371,39 @@ export default {
         }
       })
       return casting
+    },
+
+    csvColumns () {
+      return this.isTVShow
+        ? [
+          'Episode',
+          'Parent',
+          'Name',
+          'Asset Type',
+          'Asset',
+          'Occurences',
+          'Label'
+        ] : [
+          'Parent',
+          'Name',
+          'Asset Type',
+          'Asset',
+          'Occurences',
+          'Label'
+        ]
+    },
+
+    dataMatchers () {
+      return this.isTVShow
+        ? [
+          'Episode',
+          'Name',
+          'Asset Type',
+          'Asset'
+        ] : ['Name',
+          'Asset Type',
+          'Asset'
+        ]
     }
   },
 
@@ -437,6 +461,9 @@ export default {
             this.isLoading = false
             this.displayMoreAssets()
             this.setCastingAssetTypes()
+            if (this.assetTypeId) {
+              this.setCastingAssetType(this.assetTypeId)
+            }
             this.resetSelection()
           })
       })
