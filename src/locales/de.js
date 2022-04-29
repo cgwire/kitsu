@@ -582,7 +582,6 @@ export default {
       is_client_allowed: 'Ist der Kunde erlaubt',
       color: 'Farbe',
       is_done: 'Ist erledigt',
-      is_reviewable: 'Ist überprüfbar',
       is_retake: 'Hat Wiederholungswert',
       name: 'Name',
       short_name: 'Kurzname'

@@ -568,7 +568,6 @@ export default {
       is_client_allowed: 'این مشتری اجازه دارد',
       color: 'رنگ',
       is_done: 'انجام شده',
-      is_reviewable: 'قابل بررسی',
       is_retake: 'بازنگری',
       name: 'نام',
       short_name: 'اسم کوتاه'

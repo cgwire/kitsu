@@ -827,7 +827,6 @@ export default {
       is_client_allowed: 'Is client allowed',
       is_done: 'Is done',
       is_feedback_request: 'Is feedback request',
-      is_reviewable: 'Is reviewable',
       is_retake: 'Has retake value',
       name: 'Name',
       short_name: 'Short name'

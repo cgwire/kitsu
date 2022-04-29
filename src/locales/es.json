@@ -691,7 +691,6 @@
                 "is_artist_allowed": "Se permite al artista",
                 "is_client_allowed": "Se permite al cliente",
                 "is_done": "Se hace",
-                "is_reviewable": "Es revisable",
                 "is_retake": "Tiene valor de retake",
                 "name": "Nombre",
                 "short_name": "Denominación breve"

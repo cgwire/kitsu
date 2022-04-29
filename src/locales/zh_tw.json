@@ -691,7 +691,6 @@
                 "is_artist_allowed": "Artist允許",
                 "is_client_allowed": "客戶允許",
                 "is_done": "已完成",
-                "is_reviewable": "可審查",
                 "is_retake": "重新賦值",
                 "name": "名稱",
                 "short_name": "簡稱"

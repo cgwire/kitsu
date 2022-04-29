@@ -4,7 +4,6 @@ const sanitizeTaskStatus = (taskStatus) => {
   return {
     name: taskStatus.name,
     short_name: taskStatus.short_name,
-    is_reviewable: Boolean(taskStatus.is_reviewable === 'true'),
     is_done: Boolean(taskStatus.is_done === 'true'),
     is_retake: Boolean(taskStatus.is_retake === 'true'),
     is_artist_allowed: Boolean(taskStatus.is_artist_allowed === 'true'),

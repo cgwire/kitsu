@@ -691,7 +691,6 @@
                 "is_artist_allowed": "Művész választhatja?",
                 "is_client_allowed": "Megrendelő állíthatja?",
                 "is_done": "Kész?",
-                "is_reviewable": "Ellenőrizendő?",
                 "is_retake": "Újraforgatás?",
                 "name": "Név",
                 "short_name": "Rövid név"

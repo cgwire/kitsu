@@ -114,7 +114,6 @@ export default {
         name: '',
         short_name: '',
         color: '$grey999',
-        is_reviewable: 'true',
         is_done: 'false',
         is_feedback_request: 'false'
       },
@@ -182,7 +181,6 @@ export default {
           name: this.taskStatusToEdit.name,
           short_name: this.taskStatusToEdit.short_name,
           color: this.taskStatusToEdit.color,
-          is_reviewable: String(this.taskStatusToEdit.is_reviewable),
           is_done: String(this.taskStatusToEdit.is_done),
           is_retake: String(this.taskStatusToEdit.is_retake || false),
           is_artist_allowed: String(this.taskStatusToEdit.is_artist_allowed),

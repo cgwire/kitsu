@@ -708,7 +708,6 @@
                 "is_artist_allowed": "Autorisé aux artistes",
                 "is_client_allowed": "Autorisé aux clents",
                 "is_done": "Est terminé",
-                "is_reviewable": "Est vérifiable",
                 "is_retake": "A valeur de retake",
                 "name": "Nom",
                 "short_name": "Nom court",

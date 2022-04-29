@@ -708,7 +708,6 @@
                 "is_artist_allowed": "艺术家允许",
                 "is_client_allowed": "客户允许",
                 "is_done": "已完成",
-                "is_reviewable": "可审查",
                 "is_retake": "重新赋值",
                 "name": "名称",
                 "short_name": "简称",
