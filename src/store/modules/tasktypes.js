@@ -109,7 +109,6 @@ const actions = {
     commit(LOAD_TASK_TYPES_START)
     return taskTypesApi.getTaskTypes()
       .then((taskTypes) => {
-        console.log('loadTaskTypes', taskTypes)
         commit(LOAD_TASK_TYPES_END, taskTypes)
         Promise.resolve(taskTypes)
       })

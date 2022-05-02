@@ -45,22 +45,23 @@
           {{ $t('task_types.fields.set_asset_types') }}
         </label>
         <div class="flexrow asset-types mb1">
-          <span
-            :key="assetType.id"
-            class="asset-type-name flexrow-item"
-            @click="deleteFromList(assetType, 'assetTypes')"
-            v-for="assetType in form.asset_types"
+          <div
+            class="asset-type-element mb1"
+            :key="assetTypeId"
+            @click="removeAssetType(assetTypeId)"
+            v-for="assetTypeId in form.asset_types"
           >
-            {{ assetType.name }}
-          </span>
+            <asset-type-name
+                :asset-type="assetTypeMap.get(assetTypeId)"
+                v-if="assetTypeId"
+              />
+          </div>
           <combobox
             class="flexrow-item"
             :options="availableAssetTypes"
             :with-margin="false"
             @input="id => {
-              assetTypeMap.get(id) && form.asset_types.push(
-                assetTypeMap.get(id)
-              )
+              assetTypeMap.get(id) && form.asset_types.push(id)
             }"
             v-if="availableAssetTypes.length > 1"
           />
@@ -97,11 +98,13 @@ import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ColorField from '../widgets/ColorField'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '../widgets/TextField'
+import AssetTypeName from '../widgets/AssetTypeName'
 
 export default {
   name: 'edit-task-type-modal',
   mixins: [modalMixin],
   components: {
+    AssetTypeName,
     Combobox,
     ComboboxBoolean,
     ComboboxDepartment,
@@ -130,7 +133,7 @@ export default {
           for_entity: this.taskTypeToEdit.for_entity,
           allow_timelog: String(this.taskTypeToEdit.allow_timelog === true),
           department_id: this.taskTypeToEdit.department_id,
-          asset_types: this.taskTypeToEdit.asset_types
+          asset_types: [...this.taskTypeToEdit.asset_types]
         }
       }
     }
@@ -168,9 +171,8 @@ export default {
     },
 
     availableAssetTypes () {
-      console.log('availableAssetTypes', this.assetTypes, this.form.asset_types)
       const assetTypes = sortByName(this.assetTypes.filter(assetType => {
-        return this.form.asset_types.indexOf(assetType) === -1
+        return this.form.asset_types.indexOf(assetType.id) === -1
       }))
       return [
         {
@@ -193,10 +195,11 @@ export default {
     ]),
     removeModelFromList,
 
-    deleteFromList (object, listName) {
-      this.form[listName] = removeModelFromList(
-        this.form[listName], object
-      )
+    removeAssetType (idToRemove) {
+      const assetTypeIndex = this.form.asset_types.indexOf(idToRemove)
+      if (assetTypeIndex >= 0) {
+        this.form.asset_types.splice(assetTypeIndex, 1)
+      }
     },
 
     newPriority (forEntity) {
@@ -222,10 +225,4 @@ export default {
   font-style: italic;
 }
 
-.asset-type-name {
-  border: 1px solid var(--text);
-  border-radius: 5px;
-  padding: 10px;
-  cursor: pointer;
-}
 </style>

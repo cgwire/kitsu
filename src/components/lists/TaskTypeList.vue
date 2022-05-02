@@ -11,6 +11,9 @@
           <th scope="col" class="allow-timelog">
             {{ $t('task_types.fields.allow_timelog') }}
           </th>
+          <th scope="col" class="asset-types">
+            {{ $t('task_types.fields.asset-types') }}
+          </th>
           <th scope="col" class="actions"></th>
         </tr>
       </thead>
@@ -43,6 +46,15 @@
           <task-type-cell class="name" :task-type="taskType" />
           <td class="allow-timelog">
             {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
+          </td>
+          <td class="asset-types">
+              <span
+                :key="assetType.id"
+                class="asset-type-name flexrow-item"
+                v-for="assetType in sortAssetTypes(taskType.asset_types)"
+              >
+                {{ assetType.name }}
+              </span>
           </td>
           <row-actions-cell
             :taskType-id="taskType.id"
@@ -139,6 +151,8 @@
 </template>
 
 <script>
+import { sortByName } from '@/lib/sorting'
+
 import { mapGetters, mapActions } from 'vuex'
 import draggable from 'vuedraggable'
 import RowActionsCell from '../cells/RowActionsCell'
@@ -175,7 +189,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'getDepartments'
+      'getDepartments',
+      'assetTypeMap'
     ]),
 
     assetTaskTypes () {
@@ -228,6 +243,11 @@ export default {
 
     isEmpty (value) {
       return value === undefined || value === null || value === ''
+    },
+
+    sortAssetTypes (assetTypeIds = []) {
+      return sortByName(assetTypeIds
+        .map(assetTypeId => this.assetTypeMap.get(assetTypeId)))
     }
   },
 
