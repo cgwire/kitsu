@@ -126,7 +126,6 @@ export default {
   watch: {
     taskTypeToEdit () {
       if (this.taskTypeToEdit) {
-        console.log('taskTypeToEdit', this.taskTypeToEdit, this.taskTypeToEdit.asset_types)
         this.form = {
           name: this.taskTypeToEdit.name,
           color: this.taskTypeToEdit.color,

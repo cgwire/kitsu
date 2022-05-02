@@ -2,8 +2,7 @@ import client from './client'
 
 export default {
   getTaskTypes () {
-    const tat = client.pget('/api/data/task-types')
-    return tat
+    return client.pget('/api/data/task-types')
   },
 
   newTaskType (taskType) {
@@ -49,8 +48,7 @@ export default {
   },
 
   getTaskType (taskTypeId) {
-    const tat = client.pget(`/api/data/task-types/${taskTypeId}`)
-    return tat
+    return client.pget(`/api/data/task-types/${taskTypeId}`)
   },
 
   postTaskTypeEstimations (production, episode, taskType, formData) {
