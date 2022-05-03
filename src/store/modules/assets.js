@@ -447,7 +447,13 @@ const actions = {
           : []
         dispatch('changeAssetSort', sortInfo)
         const taskTypeIds = rootGetters.productionAssetTaskTypeIds
-        const createTaskPromises = taskTypeIds.map(
+        const createTaskPromises = taskTypeIds.filter(function (taskTypeId) {
+          // Filter if task type is available for asset type
+          const taskType = rootGetters.taskTypeMap.get(taskTypeId)
+          if (taskType.asset_types.length > 0 && taskType.asset_types.includes(asset.asset_type_id)) {
+            return true
+          }
+        }).map(
           (taskTypeId) => dispatch('createTask', {
             entityId: asset.id,
             projectId: asset.project_id,
