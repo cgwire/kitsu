@@ -161,6 +161,10 @@ export default {
       default: false,
       type: Boolean
     },
+    disabled: {
+      default: false,
+      type: Boolean
+    },
     rowX: {
       default: 0,
       type: Number
@@ -259,7 +263,10 @@ export default {
     ]),
 
     getBackground () {
-      if (this.isBorder && !this.sticked) {
+      if (this.disabled) {
+        const columnDashColor = colors.hexToRGBa(this.column.color, 0.3)
+        return `repeating-linear-gradient(45deg, #ECECEC, #ECECEC 10px, ${columnDashColor} 10px, ${columnDashColor} 20px)`
+      } else if (this.isBorder && !this.sticked) {
         const opacity = this.isDarkTheme ? 0.15 : 0.08
         return colors.hexToRGBa(this.column.color, opacity)
       } else {

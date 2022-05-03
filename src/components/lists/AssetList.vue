@@ -419,6 +419,8 @@
             :minimized="hiddenColumns[columnId]"
             :is-static="true"
             :is-assignees="isShowAssignations"
+            :selectable="isSelectable(asset, columnId)"
+            :disabled="!isSelectable(asset, columnId)"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
             v-for="(columnId, j) in nonStickedDisplayedValidationColumns"
@@ -683,6 +685,12 @@ export default {
       'editAsset',
       'setAssetSelection'
     ]),
+
+    isSelectable (asset, columnId) {
+      // Selectable if no asset types set on task type or if the column's asset type is in the list of asset_types
+      const taskType = this.taskTypeMap.get(columnId)
+      return taskType.asset_types.length > 0 ? taskType.asset_types.includes(asset.asset_type_id) : true
+    },
 
     isSelected (indexInGroup, groupIndex, columnIndex) {
       const lineIndex = this.getIndex(indexInGroup, groupIndex)
