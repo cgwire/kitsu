@@ -566,6 +566,7 @@ export default {
     fields: {
       is_artist_allowed: 'این هنرمند اجازه دارد',
       is_client_allowed: 'این مشتری اجازه دارد',
+      is_default: 'Is default',
       color: 'رنگ',
       is_done: 'انجام شده',
       is_retake: 'بازنگری',

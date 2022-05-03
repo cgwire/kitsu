@@ -9,7 +9,7 @@ export const getChartData =
     return Object.keys(statusData)
       .map((taskStatusId) => {
         const data = statusData[taskStatusId]
-        const color = data.name === 'todo' ? '#6F727A' : data.color
+        const color = data.is_default ? '#6F727A' : data.color
         return [data.name, data[valueField], color]
       })
       .sort(_sortData)

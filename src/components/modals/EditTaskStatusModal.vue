@@ -37,26 +37,31 @@
           :label="$t('task_status.fields.is_done')"
           @enter="confirmClicked"
           v-model="form.is_done"
+          v-if="form.is_default === 'false'"
         />
         <combobox-boolean
           :label="$t('task_status.fields.is_retake')"
           @enter="confirmClicked"
           v-model="form.is_retake"
+          v-if="form.is_default === 'false'"
         />
         <combobox-boolean
           :label="$t('task_status.fields.is_artist_allowed')"
           @enter="confirmClicked"
           v-model="form.is_artist_allowed"
+          v-if="form.is_default === 'false'"
         />
         <combobox-boolean
           :label="$t('task_status.fields.is_client_allowed')"
           @enter="confirmClicked"
           v-model="form.is_client_allowed"
+          v-if="form.is_default === 'false'"
         />
         <combobox-boolean
           :label="$t('task_status.fields.is_feedback_request')"
           @enter="confirmClicked"
           v-model="form.is_feedback_request"
+          v-if="form.is_default === 'false'"
         />
 
         <color-field
@@ -115,7 +120,8 @@ export default {
         short_name: '',
         color: '$grey999',
         is_done: 'false',
-        is_feedback_request: 'false'
+        is_feedback_request: 'false',
+        is_default: 'false'
       },
       isRetakeOptions: [
         { label: this.$t('main.yes'), value: 'true' },
@@ -185,6 +191,7 @@ export default {
           is_retake: String(this.taskStatusToEdit.is_retake || false),
           is_artist_allowed: String(this.taskStatusToEdit.is_artist_allowed),
           is_client_allowed: String(this.taskStatusToEdit.is_client_allowed),
+          is_default: String(this.taskStatusToEdit.is_default || false),
           is_feedback_request:
             String(this.taskStatusToEdit.is_feedback_request || false)
         }

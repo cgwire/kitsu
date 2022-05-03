@@ -564,6 +564,7 @@
                 "color": "Cor",
                 "is_artist_allowed": "Artista é permitido",
                 "is_client_allowed": "O cliente é permitido",
+                "is_default": "Is default",
                 "is_done": "Está feito",
                 "is_retake": "Tem valor de retomada",
                 "name": "Nome",

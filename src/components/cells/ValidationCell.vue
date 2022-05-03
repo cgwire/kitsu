@@ -206,9 +206,9 @@ export default {
     },
 
     backgroundColor () {
-      if (this.taskStatus.short_name === 'todo' && !this.isDarkTheme) {
+      if (this.taskStatus.is_default && !this.isDarkTheme) {
         return '#ECECEC'
-      } else if (this.taskStatus.short_name === 'todo' && this.isDarkTheme) {
+      } else if (this.taskStatus.is_default && this.isDarkTheme) {
         return '#5F626A'
       } else if (this.isDarkTheme) {
         return colors.darkenColor(this.taskStatus.color)
@@ -218,7 +218,7 @@ export default {
     },
 
     color () {
-      if (this.taskStatus.short_name !== 'todo' || this.isDarkTheme) {
+      if (!this.taskStatus.is_default || this.isDarkTheme) {
         return 'white'
       } else {
         return '#333'

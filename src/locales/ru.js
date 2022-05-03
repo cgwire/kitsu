@@ -589,6 +589,7 @@ export default {
       is_artist_allowed: 'Видна художнику',
       is_client_allowed: 'Видна клиенту',
       is_done: 'Готово',
+      is_default: 'Is default',
       is_retake: 'Отправлялся на доработку',
       name: 'Название',
       short_name: 'Краткое название'

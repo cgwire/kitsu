@@ -13,6 +13,9 @@
           <th scope="col" class="is-done">
             {{ $t('task_status.fields.is_done') }}
           </th>
+          <th scope="col" class="is-default">
+            {{ $t('task_status.fields.is_default') }}
+          </th>
           <th scope="col" class="is-retake">
             {{ $t('task_status.fields.is_retake') }}
           </th>
@@ -37,6 +40,9 @@
           <td class="is-done">
             {{ formatBoolean(entry.is_done) }}
           </td>
+          <td class="is-default">
+            {{ formatBoolean(entry.is_default) }}
+          </td>
           <td class="is-retake">
             {{ formatBoolean(entry.is_retake) }}
           </td>
@@ -51,8 +57,7 @@
           </td>
           <row-actions-cell
             :entry-id="entry.id"
-            :hide-edit="entry.short_name === 'todo'"
-            :hide-delete="entry.short_name === 'todo'"
+            :hide-delete="entry.is_default === true"
             @edit-clicked="$emit('edit-clicked', entry)"
             @delete-clicked="$emit('delete-clicked', entry)"
           />
@@ -126,6 +131,7 @@ export default {
 
 .is-reviewable,
 .is-done,
+.is-default,
 .is-retake,
 .is-artist-allowed,
 .is-client-allowed {

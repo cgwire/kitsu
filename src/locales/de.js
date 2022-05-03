@@ -583,6 +583,7 @@ export default {
       color: 'Farbe',
       is_done: 'Ist erledigt',
       is_retake: 'Hat Wiederholungswert',
+      is_default: 'Is default',
       name: 'Name',
       short_name: 'Kurzname'
     }

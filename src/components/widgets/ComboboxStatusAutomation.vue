@@ -134,12 +134,12 @@ export default {
 
     backgroundColor (statusAutomation) {
       if (
-        (!statusAutomation || statusAutomation.short_name === 'todo') &&
+        (!statusAutomation || statusAutomation.is_default) &&
         !this.isDarkTheme
       ) {
         return '#ECECEC'
       } else if (
-        (!statusAutomation || statusAutomation.short_name === 'todo') &&
+        (!statusAutomation || statusAutomation.is_default) &&
         this.isDarkTheme
       ) {
         return '#5F626A'
@@ -151,7 +151,7 @@ export default {
     },
 
     color (statusAutomation) {
-      if ((!statusAutomation || statusAutomation.short_name !== 'todo') || this.isDarkTheme) {
+      if ((!statusAutomation || !statusAutomation.is_default) || this.isDarkTheme) {
         return 'white'
       } else {
         return '#333'

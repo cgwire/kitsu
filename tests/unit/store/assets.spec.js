@@ -1058,7 +1058,8 @@ describe('Assets store', () => {
       taskTypesStore.state.taskTypeMap = taskTypeMap
       tasksStore.state.taskStatusMap = new Map(Object.entries({
         todo: {
-          short_name: 'TODO'
+          short_name: 'TODO',
+          is_default: true
         }
       }))
       const state = {

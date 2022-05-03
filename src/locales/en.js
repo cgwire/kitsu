@@ -828,6 +828,7 @@ export default {
       is_done: 'Is done',
       is_feedback_request: 'Is feedback request',
       is_retake: 'Has retake value',
+      is_default: 'Is default',
       name: 'Name',
       short_name: 'Short name'
     }
