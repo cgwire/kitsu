@@ -135,6 +135,10 @@ export default {
     }
   },
 
+  mounted () {
+    this.resetForm()
+  },
+
   computed: {
     ...mapGetters([
       'currentProduction',
@@ -162,6 +166,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'loadSequences'
     ]),
 
     runConfirmation () {
@@ -219,14 +224,13 @@ export default {
     }
   },
 
-  mounted () {
-    this.resetForm()
-  },
-
   watch: {
     active () {
       this.shotSuccessText = ''
       this.resetForm()
+      if (this.sequences.length === 0) {
+        this.loadSequences()
+      }
       if (this.active) {
         setTimeout(() => {
           this.$refs.nameField.focus()

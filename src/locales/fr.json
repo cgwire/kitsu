@@ -235,7 +235,7 @@
             "for": "Pour",
             "go_productions": "Aller aux productions",
             "history": "Historique",
-            "info": "Information",
+            "info": "Informations",
             "or": "ou",
             "no": "non",
             "loading": "Chargement...",
@@ -416,11 +416,16 @@
             "role": {
                 "admin": "Studio Manager",
                 "client": "Client",
-                "manager": "Superviseur",
+                "manager": "Chargé de production",
+                "supervisor": "Superviseur",
                 "user": "Graphiste",
                 "undefined": "Non défini",
                 "vendor": "Fournisseur"
             }
+        },
+        "preview_room": {
+            "join_room": "Rejoindre l'espace de lecture",
+            "leave_room": "Quitter l'espace de lecture"
         },
         "playlists": {
             "add_assets": "Ajouter des assets",
@@ -521,9 +526,7 @@
             },
             "download_csv": "Télécharger .csv",
             "filter_task_type": "Filtrer par type de tâche",
-            "comparing_missing_plan": "Plans manquants pour le type courant",
-            "join_room": "Rejoindre l'espace de lecture",
-            "leave_room": "Quitter l'espace de lecture"
+            "comparing_missing_plan": "Plans manquants pour le type courant"
         },
         "productions": {
             "current": "Production sélectionnée ",

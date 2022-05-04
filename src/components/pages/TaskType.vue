@@ -1235,23 +1235,6 @@ export default {
   margin-right: 5px;
 }
 
-.supervisor-asset-type,
-.supervisor-sequence {
-  text-transform: uppercase;
-  color: $grey;
-  border-bottom: 1px solid $light-grey;
-  font-size: 1.2em;
-  margin-bottom: 1em;
-  padding-bottom: 0.5em;
-}
-
-.supervisor-asset-list,
-.supervisor-shot-list {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-}
-
 .task-type {
   display: flex;
   flex-direction: column;

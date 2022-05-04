@@ -90,6 +90,7 @@ describe('EstimationHelper', () => {
       getters: {
         isCurrentUserVendor: () => false,
         isCurrentUserManager: () => false,
+        isCurrentUserSupervisor: () => false,
         organisation: () => ({
           id: 'organisation-1',
           name: 'Org.'

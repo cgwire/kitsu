@@ -1,7 +1,7 @@
 <template>
 <div class="data-list">
 
-  <div style="overflow: hidden">
+  <div>
     <table class="datatable" ref="headerWrapper">
       <thead class="datatable-head">
         <tr class="datatable-row-header">
@@ -37,7 +37,7 @@
     :is-error="isError"
   />
 
-  <div v-scroll="onBodyScroll" v-if="entries.length > 0">
+  <div class="task-list-body" v-scroll="onBodyScroll" v-if="entries.length > 0">
     <table class="datatable">
       <tbody class="datatable-body">
         <tr
@@ -278,5 +278,14 @@ export default {
 
 .avatar-wrapper {
   margin-right: 0.5em;
+}
+
+.task-list-body {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.datatable-row-header::after {
+  display: none;
 }
 </style>

@@ -405,6 +405,10 @@ const actions = {
       })
   },
 
+  getAsset ({ commit, state, rootGetters }, assetId) {
+    return assetsApi.getAsset(assetId)
+  },
+
   /*
    * Function used mainly to reload asset information when a remote change
    * occurs.
@@ -418,7 +422,7 @@ const actions = {
     const taskMap = rootGetters.taskMap
     const taskTypeMap = rootGetters.taskTypeMap
     return assetsApi.getAsset(assetId)
-      .then((asset) => {
+      .then(asset => {
         if (state.assetMap.get(asset.id)) {
           commit(UPDATE_ASSET, asset)
         } else {
@@ -430,6 +434,7 @@ const actions = {
             production
           })
         }
+        return Promise.resolve(asset)
       })
       .catch(console.error)
   },
@@ -903,7 +908,9 @@ const mutations = {
     if (asset) {
       newAsset.episode_id = newAsset.source_id
       delete newAsset.tasks
-      Object.assign(asset, newAsset)
+      const copyNewAsset = { ...newAsset }
+      copyNewAsset.data = { ...asset.data, ...newAsset.data }
+      Object.assign(asset, copyNewAsset)
     } else {
       newAsset.validations = new Map()
       newAsset.production_id = newAsset.project_id

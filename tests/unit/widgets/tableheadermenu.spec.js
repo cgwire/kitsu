@@ -18,7 +18,7 @@ describe('TableHeaderMenu', () => {
   const wrapper = mount(TableHeaderMenu, {
     propsData: {
       isMinimized: true,
-      isCurrentUserAdmin: true
+      isEditAllowed: true
     },
     localVue,
     i18n

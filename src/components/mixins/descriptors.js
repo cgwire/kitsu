@@ -57,9 +57,21 @@ export const descriptorMixin = {
         this.selectedAssets.forEach((asset, _) => {
           this.emitMetadataChanged(asset, descriptor, event.target.value)
         })
+      } else if (this.selectedEdits.has(entry.id)) {
+        // if the line is selected, also modify the cells of the other selected lines
+        this.selectedEdits.forEach((edit, _) => {
+          this.emitMetadataChanged(edit, descriptor, event.target.value)
+        })
       } else {
         this.emitMetadataChanged(entry, descriptor, event.target.value)
       }
+    },
+
+    onMetadataChecklistChanged (entry, descriptor, option, event) {
+      var values = this.getMetadataChecklistValues(descriptor, entry)
+      values[option] = event.target.checked
+      event.target.value = JSON.stringify(values)
+      this.onMetadataFieldChanged(entry, descriptor, event)
     },
 
     onSortByMetadataClicked () {
@@ -109,6 +121,38 @@ export const descriptorMixin = {
 
     getMetadataFieldValue (descriptor, entity) {
       return entity.data ? entity.data[descriptor.field_name] || '' : ''
+    },
+
+    getDescriptorChecklistValues (descriptor) {
+      const values = descriptor.choices.reduce(
+        function (result, c) {
+          if (c.startsWith('[x] ')) {
+            result.push({ text: c.slice(4), checked: true })
+          } else if (c.startsWith('[ ] ')) {
+            result.push({ text: c.slice(4), checked: false })
+          }
+          return result
+        },
+        []
+      )
+      return values.length === descriptor.choices.length ? values : []
+    },
+
+    getMetadataChecklistValues (descriptor, entity) {
+      var values = {}
+      try {
+        values = JSON.parse(this.getMetadataFieldValue(descriptor, entity))
+      } catch {
+        values = {}
+      }
+      this.getDescriptorChecklistValues(descriptor).forEach(
+        function (option) {
+          if (!(option.text in values)) {
+            values[option.text] = option.checked
+          }
+        }
+      )
+      return values
     },
 
     /*

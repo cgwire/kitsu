@@ -9,7 +9,7 @@
     <table-header-menu
       ref="headerMenu"
       :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"
-      :is-current-user-admin="isCurrentUserAdmin"
+      :is-edit-allowed="isCurrentUserManager"
       :is-sticked="stickedColumns[lastHeaderMenuDisplayed]"
       @minimize-clicked="onMinimizeColumnToggled()"
       @delete-all-clicked="onDeleteAllTasksClicked()"
@@ -20,7 +20,8 @@
 
     <table-metadata-header-menu
       ref="headerMetadataMenu"
-      :is-current-user-admin="isCurrentUserAdmin"
+      :is-edit-allowed="
+        isMetadataColumnEditAllowed(lastMetadaDataHeaderMenuDisplayed)"
       :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
       @edit-clicked="onEditMetadataClicked()"
       @delete-clicked="onDeleteMetadataClicked()"
@@ -58,7 +59,8 @@
                 icon="plus"
                 :text="''"
                 @click="onAddMetadataClicked"
-                v-if="isCurrentUserAdmin && !isLoading"
+                v-if="(isCurrentUserManager || isCurrentUserSupervisor)
+                  && !isLoading"
               />
             </div>
           </th>
@@ -125,7 +127,7 @@
             scope="col"
             class="ready-for"
             :title="$t('assets.fields.ready_for')"
-            v-if="isShowInfos && metadataDisplayHeaders.readyFor"
+            v-if="isCurrentUserManager && isShowInfos && metadataDisplayHeaders.readyFor"
           >
             {{ $t('assets.fields.ready_for') }}
           </th>
@@ -199,7 +201,10 @@
             scope="rowgroup"
             :colspan="visibleColumns"
           >
-            <span class="datatable-row-header">
+            <span
+              class="datatable-row-header pointer"
+              @click="$emit('asset-type-clicked', group[0].asset_type_name)"
+            >
               {{ group[0] ? group[0].asset_type_name : '' }}
             </span>
           </th>
@@ -242,6 +247,7 @@
                 v-if="!isTVShow"
               >
               <entity-thumbnail
+                class="entity-thumbnail"
                 :entity="asset"
                 :width="isBigThumbnails ? 150 : 50"
                 :height="isBigThumbnails ? 100 : 30"
@@ -273,11 +279,35 @@
               @input="event => onMetadataFieldChanged(asset, descriptor, event)"
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
               :value="getMetadataFieldValue(descriptor, asset)"
-              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+              v-if="descriptor.choices.length === 0 && (isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments))"
             />
+            <div
+              class="metadata-value selectable"
+              v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+            >
+              <p
+                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+                :key="`${asset.id}-${descriptor.id}-${i}-${option.text}-div`"
+              >
+                <input
+                  type="checkbox"
+                  @change="event => onMetadataChecklistChanged(asset, descriptor, option.text, event)"
+                  :id="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :checked="getMetadataChecklistValues(descriptor, asset)[option.text]"
+                />
+                <label
+                  style="cursor: pointer;"
+                  :for="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
+                >
+                  {{ option.text }}
+                </label>
+              </p>
+            </div>
             <span
               class="select"
-              v-else-if="isCurrentUserManager"
+              v-else-if="isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments)"
             >
             <select
               class="select-input"
@@ -354,7 +384,7 @@
 
           <td
             class="task-type-name ready-for"
-            v-if="isShowInfos && metadataDisplayHeaders.readyFor"
+            v-if="isCurrentUserManager && isShowInfos && metadataDisplayHeaders.readyFor"
           >
             <combobox-task-type
               class="mb0"
@@ -379,11 +409,35 @@
               @input="event => onMetadataFieldChanged(asset, descriptor, event)"
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
               :value="getMetadataFieldValue(descriptor, asset)"
-              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+              v-if="descriptor.choices.length === 0 && (isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments))"
             />
+            <div
+              class="metadata-value selectable"
+              v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+            >
+              <p
+                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+                :key="`${asset.id}-${descriptor.id}-${i}-${option.text}-div`"
+              >
+                <input
+                  type="checkbox"
+                  @change="event => onMetadataChecklistChanged(asset, descriptor, option.text, event)"
+                  :id="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :checked="getMetadataChecklistValues(descriptor, asset)[option.text]"
+                />
+                <label
+                  style="cursor: pointer;"
+                  :for="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
+                >
+                  {{ option.text }}
+                </label>
+              </p>
+            </div>
             <span
               class="select"
-              v-else-if="isCurrentUserManager"
+              v-else-if="isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments)"
             >
             <select
               class="select-input"
@@ -589,9 +643,9 @@ export default {
       'nbSelectedTasks',
       'isAssetDescription',
       'isBigThumbnails',
-      'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'isShowAssignations',
       'isShowInfos',
       'isAssetEstimation',
@@ -601,7 +655,8 @@ export default {
       'selectedAssets',
       'selectedTasks',
       'taskMap',
-      'taskTypeMap'
+      'taskTypeMap',
+      'user'
     ]),
 
     createTasksPath () {
@@ -942,9 +997,6 @@ td.ready-for {
 .datatable-row th.name {
   font-size: 1.1em;
   padding: 6px;
-
-  .flexrow {
-  }
 }
 
 .asset-name {

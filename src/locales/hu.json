@@ -409,7 +409,8 @@
             "role": {
                 "admin": "Stúdió manager",
                 "client": "Kliens",
-                "manager": "Supervisor",
+                "manager": "Production manager",
+                "supervisor": "Supervisor",
                 "user": "Művész",
                 "undefined": "nincs megadva",
                 "vendor": "Kereskedő"

@@ -216,7 +216,7 @@
           </div>
 
           <div :class="{
-            'with-milestones': withMilestones,
+            'with-milestones': withMilestones && isCurrentUserManager,
             'date-widget': true
           }">
             <div
@@ -352,7 +352,7 @@
                 >
                   <div
                     :class="{
-                      'timebar-left-hand': rootElement.editable && isCurrentUserManager
+                      'timebar-left-hand': rootElement.editable
                     }"
                     @mousedown="moveTimebarLeftSide(rootElement, $event)"
                   >
@@ -364,7 +364,7 @@
                   </div>
                   <div
                     :class="{
-                      'timebar-right-hand': rootElement.editable && isCurrentUserManager
+                      'timebar-right-hand': rootElement.editable
                     }"
                     @mousedown="moveTimebarRightSide(rootElement, $event)"
                   >
@@ -398,7 +398,7 @@
                 >
                   <div
                     :class="{
-                      'timebar-left-hand': childElement.editable && !childElement.unresizable && isCurrentUserManager
+                      'timebar-left-hand': childElement.editable && !childElement.unresizable
                     }"
                     @mousedown="moveTimebarLeftSide(childElement, $event)"
                   >
@@ -410,7 +410,7 @@
                   </div>
                   <div
                     :class="{
-                      'timebar-right-hand': childElement.editable && !childElement.unresizable && isCurrentUserManager
+                      'timebar-right-hand': childElement.editable && !childElement.unresizable
                     }"
                     @mousedown="moveTimebarRightSide(childElement, $event)"
                   >
@@ -1024,8 +1024,7 @@ export default {
       if (
         !this.isChangeStartDate &&
         !this.isChangeEndDate &&
-        timeElement.editable &&
-        this.isCurrentUserManager
+        timeElement.editable
       ) {
         this.isChangeDates = true
         this.isChangeStartDate = false
@@ -1042,8 +1041,7 @@ export default {
       if (
         !this.isChangeDates &&
         !this.isChangeEndDate &&
-        timeElement.editable &&
-        this.isCurrentUserManager
+        timeElement.editable
       ) {
         this.isChangeDates = false
         this.isChangeStartDate = true
@@ -1063,8 +1061,7 @@ export default {
       if (
         !this.isChangeDates &&
         !this.isChangeStartDate &&
-        timeElement.editable &&
-        this.isCurrentUserManager
+        timeElement.editable
       ) {
         this.isChangeDates = false
         this.isChangeStartDate = false
@@ -1294,12 +1291,14 @@ export default {
     // Milestones
 
     showEditMilestoneModal (day, milestone) {
-      this.modals.edit = true
-      if (milestone) {
-        milestone.date = parseDate(milestone.date)
-        this.milestoneToEdit = milestone
-      } else {
-        this.milestoneToEdit = { date: day }
+      if (this.isCurrentUserManager) {
+        this.modals.edit = true
+        if (milestone) {
+          milestone.date = parseDate(milestone.date)
+          this.milestoneToEdit = milestone
+        } else {
+          this.milestoneToEdit = { date: day }
+        }
       }
     },
 
@@ -1607,15 +1606,14 @@ export default {
 
       .month-name {
         border-left: 2px solid black;
+        bottom: 0;
+        color: black;
         font-size: 0.9em;
-        position: absolute;
-        padding-bottom: 12px;
+        padding-bottom: 24px;
         padding-left: 1em;
         top: 10px;
-        bottom: 0;
         text-transform: uppercase;
-        color: black;
-        z-index: -300;
+        position:absolute;
       }
     }
   }

@@ -100,6 +100,7 @@
         @asset-changed="onAssetChanged"
         @field-changed="onFieldChanged"
         @scroll="saveScrollPosition"
+        @asset-type-clicked="onAssetTypeClicked"
       />
     </div>
   </div>
@@ -950,6 +951,11 @@ export default {
         })
     },
 
+    onAssetTypeClicked (assetType) {
+      this.searchField.setValue(`${this.assetSearchText} type=${assetType}`)
+      this.onSearchChange()
+    },
+
     resetCsvColumns () {
       const columns = this.isTVShow ? ['Episode'] : []
       this.columns = columns.concat([
@@ -970,12 +976,10 @@ export default {
     },
 
     onMetadataChanged ({ entry, descriptor, value }) {
-      const metadata = { ...entry.data }
+      const metadata = {}
       metadata[descriptor.field_name] = value
       const data = {
         id: entry.id,
-        source_id: entry.episode_id,
-        episode_id: entry.episode_id,
         data: metadata
       }
       this.editAsset(data)

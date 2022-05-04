@@ -409,7 +409,8 @@
             "role": {
                 "admin": "Director del estudio",
                 "client": "Mandante",
-                "manager": "Supervisor",
+                "manager": "Production manager",
+                "supervisor": "Supervisor",
                 "user": "Artista CG",
                 "undefined": "sin definir",
                 "vendor": "Proveedor"

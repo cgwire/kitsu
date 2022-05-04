@@ -187,6 +187,26 @@ export default {
       without_thumbnail: 'Without thumbnail'
     },
 
+    logs: {
+      no_logs: 'There are no time logs for this entity.'
+    },
+
+    news: {
+      no_news: 'There are no news for this entity.'
+    },
+
+    preview_files: {
+      extension: 'Extension',
+      no_preview_files: 'There are no preview files for this entity.',
+      original_file_name: 'Original File Name',
+      position: 'Position',
+      revision: 'Revision',
+      size: 'Size',
+      status: 'Status',
+      task_type: 'Task type',
+      uploader: 'Uploaded by'
+    },
+
     thumbnails: {
       error: 'An error occurred while uploading thumbnails',
       explaination: 'Adding a thumbnail requires to set a new preview. In order to set several thumbnails at the same time, you must choose first a task type that will be used to create the new previews. The thumbnails will be set from this new preview.',
@@ -501,11 +521,17 @@ export default {
     role: {
       admin: 'Studio Manager',
       client: 'Client',
-      manager: 'Supervisor',
+      manager: 'Production Manager',
+      supervisor: 'Supervisor',
       user: 'Artist',
       undefined: '',
       vendor: 'Vendor'
     }
+  },
+
+  preview_room: {
+    join_room: 'Join Review Room',
+    leave_room: 'Leave Room'
   },
 
   playlists: {
@@ -536,10 +562,8 @@ export default {
     for_client: 'The Client',
     for_studio: 'The Studio',
     edit_title: 'Edit playlist',
-    join_room: 'Join Room',
     last_creation: 'Last creations',
     last_modification: 'Last modifications',
-    leave_room: 'Leave Room',
     loading_error: 'A server error occurred. Playlists cannot be loaded.',
     new_playlist: 'Add a playlist',
     no_build: 'No build',
@@ -694,6 +718,7 @@ export default {
       add_new_values: 'There is currently no available values.',
       available_values: 'Available values',
       choices: 'List of values',
+      checklist: 'Checklist',
       delete_text: 'Are you sure you want to delete this column and related data for all assets of this production?',
       delete_error: 'An error occurred while deleting this metadata column.',
       edit_title: 'Edit metadata column',
@@ -846,22 +871,22 @@ export default {
 
   edits: {
     all_edits: 'All edits',
-    manage: 'Create an edit',
     creation_explaination: 'Upload an edit file to create a new edit',
-    edit_error: 'An error occurred while saving this edit. Are you sure there is no edit with similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this edit. There are probably data linked to it.',
     delete_for_selection: 'Delete {nbSelectedEdits} selected edits:',
+    edit_error: 'An error occurred while saving this edit. Are you sure there is no edit with similar name?',
     edit_title: 'Change edit',
     empty_list: 'There are no edits in the production. What about creating some?',
     empty_list_client: 'There are no edits in this production.',
     new_edit: 'New edit',
     number: 'edit | edits',
+    tasks: 'Tasks',
     title: 'Edits',
     fields: {
       name: 'name',
       episode: 'Ep.',
-      description: 'description'
+      description: 'Description'
     }
   },
 
@@ -1062,7 +1087,7 @@ export default {
       seconds: 'Seconds',
       sequence: 'Sequence',
       start_date: 'Start date',
-      start_date_short: 'Start',
+      start_date_short: 'Start date',
       task_status: 'Status',
       task_status_short_name: 'Status',
       task_type: 'Type'

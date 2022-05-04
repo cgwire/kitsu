@@ -383,7 +383,8 @@ export default {
     role: {
       admin: 'Администратор',
       client: 'Клиент',
-      manager: 'Супервайзер',
+      manager: 'Production manager',
+      supervisor: 'Supervisor',
       user: 'Художник',
       undefined: 'Не определён',
       vendor: 'Вендор'

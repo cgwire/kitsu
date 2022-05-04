@@ -1,38 +1,46 @@
 <template>
   <div class="fixed-page columns">
   <div class="page column main-column">
-    <div class="page-header">
+    <div class="page-header pa1">
       <div
         class="flexrow header-title"
         v-if="currentTask"
       >
-        <router-link
-          :to="entityPage"
-          class="flexrow-item has-text-centered back-link"
-        >
-          <chevron-left-icon />
-        </router-link>
-        <div class="title flexrow-item">
-          <router-link :to="taskEntityPath">
-            {{ currentTask ? title : 'Loading...'}}
-          </router-link>
-        </div>
         <task-type-name
-          class="flexrow-item task-type"
+          class="flexrow-item task-type block"
           :task-type="currentTaskType"
           :production-id="currentProduction.id"
           v-if="currentTaskType"
         />
-        <subscribe-button
-          class="flexrow-item action-button"
-          :subscribed="isAssigned || isSubscribed"
-          @click="toggleSubscribe"
-          v-if="!isAssigned"
-        />
+        <span
+          class="flexrow-item ml2"
+        >
+          <entity-thumbnail
+            class="entity-thumbnail"
+            :entity="currentTaskPreviews && currentTaskPreviews.length > 0
+              ? { preview_file_id: currentTaskPreviews[0].id }
+              : { }"
+            :empty-width="100"
+            :empty-height="60"
+            :width="100"
+            :with-link="false"
+          />
+        </span>
+        <div class="title flexrow-item">
+          <router-link :to="taskEntityPath">
+            <page-title :text="currentTask ? title : 'Loading...'" bold />
+          </router-link>
+        </div>
+        <div class="filler">
+        </div>
+        <div class="has-text-right block">
+          {{ $t('tasks.fields.priority') }}:
+          {{ formatPriority(currentTask.priority) }}
+        </div>
       </div>
 
       <div
-        class="flexrow task-information"
+        class="flexrow block mt1 mb1"
         v-if="currentTask"
       >
         <span class="flexrow-item">{{ $t('tasks.current_status') }}</span>
@@ -42,7 +50,12 @@
           :is-static="true"
           v-if="currentTask"
         />
-        <span class="flexrow-item">{{ $t('tasks.fields.assignees') }}:</span>
+        <span
+          class="flexrow-item"
+          v-if="currentTask.assignees.length > 0"
+        >
+          {{ $t('tasks.fields.assignees') }}:
+        </span>
         <span
           class="flexrow-item avatar-wrapper"
           :key="personId"
@@ -56,10 +69,118 @@
             :font-size="16"
           />
        </span>
+       <div class="filler"></div>
+       <subscribe-button
+         class="flexrow-item action-button"
+         :subscribed="isAssigned || isSubscribed"
+         @click="toggleSubscribe"
+         v-if="!isAssigned"
+       />
       </div>
     </div>
 
     <div class="task-columns" ref="task-columns">
+      <div class="task-column preview-column">
+        <div class="preview-column-content block">
+          <div class="flexrow preview-header">
+            <div class="flexrow-item" v-if="isPreviews">
+              <combobox-styled
+                class="preview-combo flexrow-item"
+                :options="previewOptions"
+                v-model="selectedPreviewId"
+              />
+            </div>
+            <div v-else>
+              <em>
+                {{ $t('tasks.no_preview')}}
+              </em>
+            </div>
+
+            <div
+              class="set-main-preview flexrow-item flexrow pull-right"
+              v-if="isPreviewButtonVisible"
+            >
+              <button
+                :class="{
+                  button: true,
+                  'flexrow-item': true,
+                  'is-loading': loading.setPreview
+                }"
+                @click="setPreview"
+                v-if="isPreviews && isCurrentUserManager"
+              >
+                <image-icon class="icon" />
+                <span class="text">
+                  {{ $t('tasks.set_preview') }}
+                </span>
+              </button>
+              <span class="error flexrow-item" v-if="errors.setPreview">
+                {{ $t('tasks.set_preview_error') }}
+              </span>
+            </div>
+            <div
+              class="set-main-preview flexrow-item pull-right"
+              v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id === currentPreviewId">
+              <em>{{ $t('tasks.set_preview_done') }}</em>
+            </div>
+          </div>
+
+          <div class="preview-area mt1">
+            <div
+              v-if="isPreviews"
+            >
+              <preview-player
+                :previews="currentPreview.previews"
+                :task-type-map="taskTypeMap"
+                :entity-preview-files="taskEntityPreviews"
+                :read-only="isCurrentUserArtist"
+                :last-preview-files="lastFivePreviews"
+                :task="currentTask"
+                :extra-wide="true"
+                @annotation-changed="onAnnotationChanged"
+                @add-extra-preview="onAddExtraPreviewClicked"
+                @remove-extra-preview="onRemoveExtraPreviewClicked"
+                @change-current-preview="changeCurrentPreview"
+                @time-updated="onTimeUpdated"
+                ref="preview-player"
+                v-if="currentPreview"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="flexrow-item block mt1 mr0 info-block">
+          <page-subtitle :text="$t('main.info')" />
+          <div class="table-body mt1">
+            <table class="datatable" v-if="currentTask">
+              <tbody class="table-body">
+                <tr class="datatable-row">
+                  <td class="field-label">{{ $t('tasks.fields.estimation') }}</td>
+                  <td>{{ currentTask.estimation }}</td>
+                </tr>
+                <tr class="datatable-row">
+                  <td class="field-label">{{ $t('tasks.fields.duration') }}</td>
+                  <td>{{ formatDuration(currentTask.duration) }}</td>
+                </tr>
+                <tr class="datatable-row">
+                  <td class="field-label">{{ $t('tasks.fields.retake_count') }}</td>
+                  <td>{{ currentTask.retake_count }}</td>
+                </tr>
+                <tr class="datatable-row">
+                  <td class="field-label">{{ $t('tasks.fields.start_date') }}</td>
+                  <td>{{ formatSimpleDate(currentTask.start_date) }}</td>
+                </tr>
+                <tr class="datatable-row">
+                  <td class="field-label">{{ $t('tasks.fields.due_date') }}</td>
+                  <td>{{ formatSimpleDate(currentTask.due_date) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="pa2">
+        </div>
+      </div>
+
       <div class="task-column comments-column">
         <div v-if="currentTask">
           <div>
@@ -122,114 +243,6 @@
         </div>
       </div>
 
-      <div class="task-column preview-column">
-        <div class="preview-column-content">
-          <div class="flexrow preview-header">
-            <h2 class="subtitle flexrow-item">
-              {{ $t('tasks.preview') }}
-            </h2>
-            <div
-              class="set-main-preview flexrow-item flexrow pull-right"
-              v-if="isPreviewButtonVisible"
-            >
-              <button
-                :class="{
-                  button: true,
-                  'flexrow-item': true,
-                  'is-loading': loading.setPreview
-                }"
-                @click="setPreview"
-                v-if="isPreviews && isCurrentUserManager"
-              >
-                <image-icon class="icon" />
-                <span class="text">
-                  {{ $t('tasks.set_preview') }}
-                </span>
-              </button>
-              <span class="error flexrow-item" v-if="errors.setPreview">
-                {{ $t('tasks.set_preview_error') }}
-              </span>
-            </div>
-            <div
-              class="set-main-preview flexrow-item pull-right"
-              v-if="currentTask && currentTask.entity && currentTask.entity.preview_file_id === currentPreviewId">
-              <em>{{ $t('tasks.set_preview_done') }}</em>
-            </div>
-          </div>
-
-          <div
-            class="preview-list mt2"
-            v-if="isPreviews"
-          >
-            <preview-row
-              :key="preview.id"
-              :preview="preview"
-              :preview-path="previewPath(preview.id)"
-              :taskId="currentTask ? currentTask.id : ''"
-              :selected="preview.id === currentPreviewId"
-              v-for="preview in currentTaskPreviews"
-            />
-          </div>
-          <div v-else>
-            <em>
-              {{ $t('tasks.no_preview')}}
-            </em>
-          </div>
-
-          <div class="preview-area">
-            <div
-              v-if="isPreviews"
-            >
-              <preview-player
-                :previews="currentPreview.previews"
-                :task-type-map="taskTypeMap"
-                :entity-preview-files="taskEntityPreviews"
-                :read-only="isCurrentUserArtist"
-                :last-preview-files="lastFivePreviews"
-                :task="currentTask"
-                @annotation-changed="onAnnotationChanged"
-                @add-extra-preview="onAddExtraPreviewClicked"
-                @remove-extra-preview="onRemoveExtraPreviewClicked"
-                @change-current-preview="changeCurrentPreview"
-                @time-updated="onTimeUpdated"
-                ref="preview-player"
-                v-if="currentPreview"
-              />
-            </div>
-          </div>
-        </div>
-        <div class="flexrow-item task-information">
-          <page-subtitle :text="$t('main.info')" />
-          <div class="table-body mt1">
-            <table class="datatable" v-if="currentTask">
-              <tbody class="table-body">
-                <tr class="datatable-row">
-                  <td class="field-label">{{ $t('tasks.fields.estimation') }}</td>
-                  <td>{{ currentTask.estimation }}</td>
-                </tr>
-                <tr class="datatable-row">
-                  <td class="field-label">{{ $t('tasks.fields.duration') }}</td>
-                  <td>{{ formatDuration(currentTask.duration) }}</td>
-                </tr>
-                <tr class="datatable-row">
-                  <td class="field-label">{{ $t('tasks.fields.retake_count') }}</td>
-                  <td>{{ currentTask.retake_count }}</td>
-                </tr>
-                <tr class="datatable-row">
-                  <td class="field-label">{{ $t('tasks.fields.start_date') }}</td>
-                  <td>{{ formatSimpleDate(currentTask.start_date) }}</td>
-                </tr>
-                <tr class="datatable-row">
-                  <td class="field-label">{{ $t('tasks.fields.due_date') }}</td>
-                  <td>{{ formatSimpleDate(currentTask.due_date) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div class="pa2">
-        </div>
-      </div>
     </div>
 
     <add-preview-modal
@@ -290,25 +303,27 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import {
-  ChevronLeftIcon,
   ImageIcon
 } from 'vue-feather-icons'
 
+import { getTaskEntityPath } from '@/lib/path'
 import { formatListMixin } from '@/components/mixins/format'
 
-import AddComment from '../widgets/AddComment'
-import AddPreviewModal from '../modals/AddPreviewModal'
-import Comment from '../widgets/Comment'
-import DeleteModal from '../modals/DeleteModal'
-import EditCommentModal from '../modals/EditCommentModal'
-import PageSubtitle from '../widgets/PageSubtitle'
-import PeopleAvatar from '../widgets/PeopleAvatar'
-import PreviewRow from '../widgets/PreviewRow'
-import Spinner from '../widgets/Spinner'
-import SubscribeButton from '../widgets/SubscribeButton'
-import TaskTypeName from '../widgets/TaskTypeName'
-import ValidationTag from '../widgets/ValidationTag'
-import PreviewPlayer from '../previews/PreviewPlayer'
+import AddComment from '@/components/widgets/AddComment'
+import AddPreviewModal from '@/components/modals/AddPreviewModal'
+import Comment from '@/components/widgets/Comment'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import DeleteModal from '@/components/modals/DeleteModal'
+import EditCommentModal from '@/components/modals/EditCommentModal'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import PageTitle from '@/components/widgets/PageTitle'
+import PageSubtitle from '@/components/widgets/PageSubtitle'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import Spinner from '@/components/widgets/Spinner'
+import SubscribeButton from '@/components/widgets/SubscribeButton'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
+import ValidationTag from '@/components/widgets/ValidationTag'
+import PreviewPlayer from '@/components/previews/PreviewPlayer'
 
 export default {
   name: 'task',
@@ -316,14 +331,15 @@ export default {
   components: {
     AddComment,
     AddPreviewModal,
+    ComboboxStyled,
     Comment,
-    ChevronLeftIcon,
     DeleteModal,
     EditCommentModal,
+    EntityThumbnail,
     ImageIcon,
     PageSubtitle,
+    PageTitle,
     PeopleAvatar,
-    PreviewRow,
     PreviewPlayer,
     Spinner,
     SubscribeButton,
@@ -335,7 +351,6 @@ export default {
     return {
       attachedFileName: '',
       currentTime: 0,
-      entityPage: this.getEntityPage(),
       selectedTab: 'validation',
       taskLoading: {
         isLoading: true,
@@ -367,13 +382,14 @@ export default {
         deleteComment: false,
         editComment: false
       },
+      addPreviewFormData: null,
+      addExtraPreviewFormData: null,
       currentTask: null,
       currentTaskComments: [],
       currentTaskPreviews: [],
       commentToEdit: null,
-      addPreviewFormData: null,
-      addExtraPreviewFormData: null,
-      isSubscribed: false
+      isSubscribed: false,
+      selectedPreviewId: null
     }
   },
 
@@ -418,6 +434,15 @@ export default {
       'user'
     ]),
 
+    previewOptions () {
+      return this.currentTaskPreviews.map(preview => {
+        return {
+          label: `v${preview.revision}`,
+          value: preview.id
+        }
+      })
+    },
+
     isPreviewButtonVisible () {
       return (
         this.isCurrentUserManager &&
@@ -444,7 +469,7 @@ export default {
       if (this.isPreviews) {
         let currentPreview = this.currentTaskPreviews[0]
         const previewId = this.route.params.preview_id
-        if (previewId) {
+        if (this.selectedPreviewId) {
           currentPreview = this.currentTaskPreviews.find((preview) => {
             return preview.id === previewId
           })
@@ -491,33 +516,10 @@ export default {
 
     taskEntityPath () {
       if (this.currentTask) {
-        const type = this.currentTask.entity_type_name
-        let entityId = ''
-        if (this.currentTask.entity) {
-          entityId = this.currentTask.entity.id
-        } else {
-          entityId = this.currentTask.entity_id
-        }
-
-        const route = {
-          name: type === 'Shot' ? 'shot' : 'asset',
-          params: {
-            production_id: this.currentTask.project_id
-          }
-        }
-
-        if (type === 'Shot') {
-          route.params.shot_id = entityId
-        } else {
-          route.params.asset_id = entityId
-        }
-
-        if (this.$route.params.episode_id) {
-          route.name = `episode-${route.name}`
-          route.params.episode_id = this.$route.params.episode_id
-        }
-
-        return route
+        const episodeId = this.currentEpisode
+          ? this.currentEpisode.id
+          : this.$route.params.episode_id
+        return getTaskEntityPath(this.currentTask, episodeId)
       } else {
         return {
           name: 'open-productions'
@@ -740,33 +742,6 @@ export default {
       'updatePreviewAnnotation'
     ]),
 
-    getEntityPage () {
-      if (this.currentTask) {
-        const route = {
-          name: this.$route.params.type,
-          params: { production_id: this.currentTask.project_id }
-        }
-
-        if (route.name === 'asset') {
-          route.params.asset_id = this.currentTask.entity_id
-        } else {
-          route.params.shot_id = this.currentTask.entity_id
-        }
-
-        if (this.isTVShow) {
-          route.name = `episode-${route.name}`
-          route.params.episode_id =
-            this.currentEpisode ? this.currentEpisode.id : this.$route.params.episode_id
-        }
-        route.query = { search: '' }
-        return route
-      } else {
-        return {
-          name: 'open-productions'
-        }
-      }
-    },
-
     loadTaskData () {
       const task = this.getCurrentTask()
       if (!task) {
@@ -800,7 +775,6 @@ export default {
                 .then((subscribed) => {
                   this.isSubscribed = subscribed
                   this.reset()
-                  this.entityPage = this.getEntityPage()
                   this.taskLoading = { isLoading: false, isError: false }
                 }).catch((err) => {
                   console.error(err)
@@ -815,9 +789,7 @@ export default {
           .then(() => this.loadTaskSubscribed({ taskId }))
           .then(subscribed => {
             this.isSubscribed = subscribed
-            this.currentTaskComments = this.getCurrentTaskComments()
-            this.currentTaskPreviews = this.getCurrentTaskPreviews()
-            this.entityPage = this.getEntityPage()
+            this.reset()
           })
           .catch(err => {
             console.error(err)
@@ -879,6 +851,11 @@ export default {
       this.currentTaskComments = this.getCurrentTaskComments()
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
       this.currentTask = this.getCurrentTask()
+      setTimeout(() => {
+        if (this.$route.params.preview_id) {
+          this.selectedPreviewId = this.$route.params.preview_id
+        }
+      }, 1000)
     },
 
     selectFile (forms) {
@@ -1230,6 +1207,12 @@ export default {
       if (this.$route.params.task_id !== this.currentTask.id) {
         this.loadTaskData()
       }
+    },
+
+    selectedPreviewId () {
+      if (this.currentTask) {
+        this.$router.push(this.previewPath(this.selectedPreviewId))
+      }
     }
   },
 
@@ -1331,12 +1314,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .page-header,
 .dark .task-information,
 .dark .add-comment,
 .dark .comment,
 .dark .no-comment,
-.dark .preview-column-content,
 .dark .column {
   background: #46494F;
   border-color: $dark-grey;
@@ -1359,20 +1340,8 @@ h2.subtitle {
   padding-bottom: 1em;
 }
 
-.task-information {
-  background: white;
-  box-shadow: 0px 0px 6px #E0E0E0;
-  margin-top: 1em;
-  margin-right: 0;
-  padding: 1em;
-}
-
 .page-header {
-  padding: 1em;
-  margin-top: 1em;
-  background: white;
-  box-shadow: 0px 0px 6px #E0E0E0;
-  margin: 2em 1em 0 1em;
+  margin: 1em 1em 0 1em;
 }
 
 .navigation-buttons {
@@ -1388,10 +1357,6 @@ h2.subtitle {
 
 .navigation-buttons a {
   color: $grey;
-}
-
-.task-information {
-  margin-top: 1em;
 }
 
 .selected {
@@ -1443,19 +1408,19 @@ video {
 }
 
 .task-column {
-  width: 50%;
   padding: 1em;
+}
+
+.comments-column {
+  flex: 1;
 }
 
 .preview-column {
   overflow: auto;
+  flex: 2;
 }
 
 .preview-column-content {
-  background: white;
-  box-shadow: 0px 0px 6px #E0E0E0;
-  padding: 1em;
-  border-radius: 5px;
   overflow-x: hidden;
 }
 
@@ -1483,7 +1448,6 @@ video {
 }
 
 .entity-thumbnail {
-  width: 50px;
   margin-right: 0.3em;
 }
 
@@ -1524,6 +1488,18 @@ video {
   overflow-y: auto;
 }
 
+.info-block {
+  margin-right: 0;
+}
+
+.task-type.block {
+  margin-bottom: 0;
+}
+
+.entity-thumbnail {
+  margin-top: 5px;
+}
+
 @media screen and (max-width: 768px) {
   .action-button {
     display: none;
@@ -1541,10 +1517,6 @@ video {
 
   .header-title .flexrow-item {
     margin-bottom: 0.5em;
-  }
-
-  .task-columns {
-    flex-direction: column-reverse;
   }
 
   .task-column {

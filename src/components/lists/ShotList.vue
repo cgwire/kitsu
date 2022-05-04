@@ -9,7 +9,7 @@
     <table-header-menu
       ref="headerMenu"
       :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"
-      :is-current-user-admin="isCurrentUserAdmin"
+      :is-edit-allowed="isCurrentUserManager"
       :is-sticked="stickedColumns[lastHeaderMenuDisplayed]"
       @minimize-clicked="onMinimizeColumnToggled()"
       @delete-all-clicked="onDeleteAllTasksClicked()"
@@ -20,7 +20,8 @@
 
     <table-metadata-header-menu
       ref="headerMetadataMenu"
-      :is-current-user-admin="isCurrentUserAdmin"
+      :is-edit-allowed="
+        isMetadataColumnEditAllowed(lastMetadaDataHeaderMenuDisplayed)"
       :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
       @edit-clicked="onEditMetadataClicked()"
       @delete-clicked="onDeleteMetadataClicked()"
@@ -49,7 +50,8 @@
                 icon="plus"
                 :text="''"
                 @click="onAddMetadataClicked"
-                v-if="isCurrentUserAdmin && !isLoading"
+                v-if="(isCurrentUserManager || isCurrentUserSupervisor)
+                  && !isLoading"
               />
             </div>
           </th>
@@ -263,11 +265,35 @@
               @input="event => onMetadataFieldChanged(shot, descriptor, event)"
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
               :value="getMetadataFieldValue(descriptor, shot)"
-              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+              v-if="descriptor.choices.length === 0 && (isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments))"
             />
+            <div
+              class="metadata-value selectable"
+              v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+            >
+              <p
+                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+                :key="`${shot.id}-${descriptor.id}-${i}-${option.text}-div`"
+              >
+                <input
+                  type="checkbox"
+                  @change="event => onMetadataChecklistChanged(shot, descriptor, option.text, event)"
+                  :id="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :checked="getMetadataChecklistValues(descriptor, shot)[option.text]"
+                />
+                <label
+                  style="cursor: pointer;"
+                  :for="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
+                >
+                  {{ option.text }}
+                </label>
+              </p>
+            </div>
             <span
               class="select"
-              v-else-if="isCurrentUserManager"
+              v-else-if="isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments)"
             >
             <select
               class="select-input"
@@ -424,11 +450,35 @@
               @input="event => onMetadataFieldChanged(shot, descriptor, event)"
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
               :value="getMetadataFieldValue(descriptor, shot)"
-              v-if="descriptor.choices.length === 0 && isCurrentUserManager"
+              v-if="descriptor.choices.length === 0 && (isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments))"
             />
+            <div
+              class="metadata-value selectable"
+              v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+            >
+              <p
+                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+                :key="`${shot.id}-${descriptor.id}-${i}-${option.text}-div`"
+              >
+                <input
+                  type="checkbox"
+                  @change="event => onMetadataChecklistChanged(shot, descriptor, option.text, event)"
+                  :id="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :checked="getMetadataChecklistValues(descriptor, shot)[option.text]"
+                />
+                <label
+                  style="cursor: pointer;"
+                  :for="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
+                >
+                  {{ option.text }}
+                </label>
+              </p>
+            </div>
             <span
               class="select"
-              v-else-if="isCurrentUserManager"
+              v-else-if="isCurrentUserManager
+              || isSupervisorInDepartments(descriptor.departments)"
             >
             <select
               class="select-input"
@@ -636,6 +686,7 @@ export default {
       'isCurrentUserAdmin',
       'isCurrentUserManager',
       'isCurrentUserClient',
+      'isCurrentUserSupervisor',
       'isFps',
       'isFrames',
       'isFrameIn',
@@ -655,7 +706,8 @@ export default {
       'shotSearchText',
       'shotSelectionGrid',
       'taskMap',
-      'taskTypeMap'
+      'taskTypeMap',
+      'user'
     ]),
 
     isEmptyList () {

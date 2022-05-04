@@ -15,7 +15,8 @@
               v-if="organisation && organisation.has_avatar"
             />
             <img
-              src="../../assets/kitsu.png"
+              src="../../assets/kitsu.svg"
+              width="180"
               v-else
             />
           </div>

@@ -1366,7 +1366,8 @@ describe('Assets store', () => {
             timeSpent: 100,
             validations: new Map(Object.entries({
               'task-type-id': 'task-id'
-            }))
+            })),
+            data: {}
           }
         })),
         displayedAssets: [
@@ -1387,7 +1388,8 @@ describe('Assets store', () => {
             timeSpent: 100,
             validations: new Map(Object.entries({
               'task-type-id': 'task-id'
-            }))
+            })),
+            data: {}
           }
         ],
         isAssetDescription: true
@@ -1409,7 +1411,8 @@ describe('Assets store', () => {
         timeSpent: 100,
         validations: new Map(Object.entries({
           'task-type-id': 'task-id'
-        }))
+        })),
+        data: {}
       }])
       expect(Object.keys(store.cache.assetIndex)).toHaveLength(11)
     })

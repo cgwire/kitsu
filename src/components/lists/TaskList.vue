@@ -3,7 +3,7 @@
   <div ref="body" class="datatable-wrapper" v-scroll="onBodyScroll">
     <table class="datatable">
       <thead ref="thead" class="datatable-head">
-        <tr>
+        <tr class="row-header">
           <th class="thumbnail" ref="th-thumbnail">
           </th>
           <th class="asset-type" ref="th-type" v-if="isAssets">
@@ -118,7 +118,7 @@
           </td>
           <td class="estimation">
             <input
-              v-if="selectionGrid[task.id]"
+              v-if="isInDepartment(task) && selectionGrid[task.id]"
               :ref="task.id + '-estimation'"
               class="input"
               @change="updateEstimation($event.target.value)"
@@ -148,7 +148,7 @@
               :with-margin="false"
               :value="getDate(task.start_date)"
               @input="updateStartDate"
-              v-if="selectionGrid[task.id]"
+              v-if="isInDepartment(task) && selectionGrid[task.id]"
             />
             <span v-else>
               {{ formatDate(task.start_date) }}
@@ -160,7 +160,7 @@
               :with-margin="false"
               :value="getDate(task.due_date)"
               @input="updateDueDate"
-              v-if="selectionGrid[task.id]"
+              v-if="isInDepartment(task) && selectionGrid[task.id]"
             />
             <span v-else>
               {{ formatDate(task.due_date) }}
@@ -283,7 +283,10 @@ export default {
       'user',
       'selectedTasks',
       'shotMap',
-      'taskMap'
+      'taskMap',
+      'isCurrentUserManager',
+      'isCurrentUserSupervisor',
+      'taskTypeMap'
     ]),
 
     isAssets () {
@@ -563,6 +566,22 @@ export default {
       }
     },
 
+    isInDepartment (task) {
+      if (this.isCurrentUserManager) {
+        return true
+      } else if (this.isCurrentUserSupervisor) {
+        if (this.user.departments.length === 0) {
+          return true
+        } else {
+          const taskType = this.taskTypeMap.get(task.task_type_id)
+          return taskType.department_id && this.user.departments.includes(
+            taskType.department_id)
+        }
+      } else {
+        return false
+      }
+    },
+
     resetSelection () {
       this.selectionGrid = {}
       this.lastSelection = null
@@ -755,6 +774,7 @@ td.retake-count {
 
 .datatable-body {
   overflow-x: auto;
+  overflow-y: scroll;
   min-height: 100%;
 
   td,

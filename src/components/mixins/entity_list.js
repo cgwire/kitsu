@@ -325,6 +325,37 @@ export const entityListMixin = {
       return this.departmentFilter.length === 0 ||
         this.departmentFilter.includes(
           this.taskTypeMap.get(columnId).department_id)
+    },
+
+    isMetadataColumnEditAllowed (descriptorId) {
+      if (typeof descriptorId === 'string') {
+        if (this.isCurrentUserManager) {
+          return true
+        } else if (this.isCurrentUserSupervisor) {
+          if (this.user.departments.length === 0) {
+            return true
+          } else {
+            const metadataDescriptor = this.visibleMetadataDescriptors.find(
+              descriptor => descriptor.id === descriptorId)
+            if (metadataDescriptor.departments.length ===
+            this.user.departments.length) {
+              return this.user.departments.every(department =>
+                metadataDescriptor.departments.includes(department))
+            }
+          }
+        }
+      }
+      return false
+    },
+
+    isSupervisorInDepartments (departments = []) {
+      if (!Array.isArray(departments)) {
+        departments = [departments]
+      }
+      return this.isCurrentUserSupervisor &&
+        (this.user.departments.length === 0 ||
+        this.user.departments.some(department =>
+          departments.includes(department)))
     }
   }
 }
