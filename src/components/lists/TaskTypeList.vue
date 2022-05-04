@@ -12,7 +12,7 @@
             {{ $t('task_types.fields.allow_timelog') }}
           </th>
           <th scope="col" class="asset-types">
-            {{ $t('task_types.fields.asset-types') }}
+            {{ $t('task_types.fields.asset_types') }}
           </th>
           <th scope="col" class="actions"></th>
         </tr>

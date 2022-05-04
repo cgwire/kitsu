@@ -42,11 +42,11 @@
           v-model="form.department_id"
         />
         <label class="label">
-          {{ $t('task_types.fields.set_asset_types') }}
+          {{ $t('task_types.fields.asset_types') }}
         </label>
         <div class="flexrow asset-types mb1">
           <div
-            class="asset-type-element mb1"
+            class="flexrow-item mb1"
             :key="assetTypeId"
             @click="removeAssetType(assetTypeId)"
             v-for="assetTypeId in form.asset_types"
@@ -57,7 +57,7 @@
               />
           </div>
           <combobox
-            class="flexrow-item"
+            class="flexrow-item mb1"
             :options="availableAssetTypes"
             :with-margin="false"
             @input="id => {
@@ -125,7 +125,8 @@ export default {
 
   watch: {
     taskTypeToEdit () {
-      if (this.taskTypeToEdit) {
+      console.log('taskTypeToEdit', this.taskTypeToEdit)
+      if (this.taskTypeToEdit.id) {
         this.form = {
           name: this.taskTypeToEdit.name,
           color: this.taskTypeToEdit.color,

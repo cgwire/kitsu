@@ -783,6 +783,7 @@ export default {
     number: 'task type | task types',
     title: 'Task Types',
     fields: {
+      asset_types: 'Used only for',
       dedicated_to: 'For',
       department: 'Department',
       color: 'Color',
