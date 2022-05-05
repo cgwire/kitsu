@@ -49,13 +49,11 @@
           :label="$t('task_status.fields.is_artist_allowed')"
           @enter="confirmClicked"
           v-model="form.is_artist_allowed"
-          v-if="form.is_default === 'false'"
         />
         <combobox-boolean
           :label="$t('task_status.fields.is_client_allowed')"
           @enter="confirmClicked"
           v-model="form.is_client_allowed"
-          v-if="form.is_default === 'false'"
         />
         <combobox-boolean
           :label="$t('task_status.fields.is_feedback_request')"
