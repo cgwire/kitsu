@@ -118,7 +118,7 @@ export default {
     },
 
     color () {
-      if (this.taskStatus.is_default || this.isDarkTheme) {
+      if (this.taskStatus.color !== '#f5f5f5' || this.isDarkTheme) {
         return 'white'
       } else {
         return '#333'
@@ -149,7 +149,7 @@ export default {
       const isTodo = this.taskStatus.is_default
       if (this.thin && !isTodo) {
         return {
-          background: 'transparent',
+          background: this.isDarkTheme ? 'rgba(255, 255, 255, 0.75)' : 'transparent',
           border: '1px solid ' + (isTodo ? 'grey' : this.backgroundColor),
           color: this.backgroundColor,
           cursor: isStatic ? 'pointer' : this.cursor
