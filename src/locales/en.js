@@ -1006,6 +1006,7 @@ export default {
     back_to_list: 'back to list',
     bigger: 'Widen task panel',
     big_thumbnails: 'Show big thumbnails',
+    small_thumbnails: 'Show small thumbnails',
     change_status_to: 'Change task status to:',
     change_preview: 'Change preview',
     change_priority: 'Change priority to:',

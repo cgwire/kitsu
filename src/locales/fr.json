@@ -954,6 +954,7 @@
             "due_this_week": "Dûes cette semaine",
             "select_file": "Sélectionner un fichier",
             "big_thumbnails": "Afficher les vignettes en grand",
+            "small_thumbnails": "Afficher les vignettes en petit",
             "create_tasks_edit": "Ajouter des tâches pour les montages courants",
             "create_tasks_edit_explaination": "Vous allez créer une tâche pour chaque montage du projet courant pour le type de tâche donné. Est-ce que vous-voulez continuer ?",
             "create_tasks_edit_failed": "Une erreur est survenue en créant les tâches.",
