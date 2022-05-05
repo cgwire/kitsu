@@ -285,7 +285,7 @@ export default {
     taskStatusColor () {
       const status = this.taskStatus.find(t => t.id === this.task_status_id) ||
         this.taskStatus[0]
-      if (status.short_name === 'todo') return '#666'
+      if (status.is_default) return '#666'
       const color = status.color
       if (this.isDarkTheme) {
         return colors.darkenColor(color)
