@@ -165,7 +165,7 @@
                 class="man-days-unit flexrow-item"
                 v-else
               >
-                {{ childElement.man_days }}
+                {{ formatDuration(childElement.man_days) }}
                 {{ $t('schedule.md') }}
               </span>
             </div>
