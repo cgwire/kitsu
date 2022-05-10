@@ -285,7 +285,6 @@ export default {
     taskStatusColor () {
       const status = this.taskStatus.find(t => t.id === this.task_status_id) ||
         this.taskStatus[0]
-      console.log(status.color)
       if (status.color === '#f5f5f5') {
         return this.isDarkTheme ? '#666' : '#999'
       } else {
