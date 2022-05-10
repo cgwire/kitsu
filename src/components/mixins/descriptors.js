@@ -124,17 +124,15 @@ export const descriptorMixin = {
     },
 
     getDescriptorChecklistValues (descriptor) {
-      const values = descriptor.choices.reduce(
-        function (result, c) {
-          if (c.startsWith('[x] ')) {
-            result.push({ text: c.slice(4), checked: true })
-          } else if (c.startsWith('[ ] ')) {
-            result.push({ text: c.slice(4), checked: false })
-          }
-          return result
-        },
-        []
-      )
+      const values = descriptor.choices.reduce((result, choice) => {
+        if (choice && choice.startsWith('[x] ')) {
+          result.push({ text: choice.slice(4), checked: true })
+        } else if (choice && choice.startsWith('[ ] ')) {
+          result.push({ text: choice.slice(4), checked: false })
+        }
+        return result
+      },
+      [])
       return values.length === descriptor.choices.length ? values : []
     },
 
