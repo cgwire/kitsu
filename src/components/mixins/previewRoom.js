@@ -97,6 +97,7 @@ export const previewRoomMixin = {
     },
 
     postAnnotationAddition (time, serializedObj) {
+      if (!this.previewRoom()) return
       this.$socket.emit('preview-room:add-annotation', {
         playlist_id: this.previewRoom().roomId,
         data: {
@@ -108,6 +109,7 @@ export const previewRoomMixin = {
     },
 
     postAnnotationDeletion (time, serializedObj) {
+      if (!this.previewRoom()) return
       this.$socket.emit('preview-room:remove-annotation', {
         playlist_id: this.previewRoom().roomId,
         data: {
@@ -119,6 +121,7 @@ export const previewRoomMixin = {
     },
 
     postAnnotationUpdate (time, serializedObj) {
+      if (!this.previewRoom()) return
       this.$socket.emit('preview-room:update-annotation', {
         playlist_id: this.previewRoom().roomId,
         data: {
