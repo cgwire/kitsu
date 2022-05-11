@@ -16,11 +16,34 @@ The Artist has access to all the features of the production, but only for displa
 
 
 
-## Supervisor
+## Department Supervisor
 
-Supervisor inherit Artist permissions.
+Department supervisors inherit Artist permissions.
 
-Supervisors have read and write access to everything production they work on:
+Department supervisors have read and write access to their department(s) they work on:
+assets, shots, tasks, assignations, statistics, breakdown, and playlists.
+
+They can:
+
+* create assets and shots, per hand, or CSV batch import. 
+* post comment on all tasks or their department(s)
+* add a task column
+* delete or add a task. 
+* add/edit a playlist for the studio or the client. 
+* see the client comments and validations. 
+* see comment on other departments.
+
+They are not allowed to access the studio team, the main timesheets, and the
+production list. They can't define task types, task statuses, and asset types
+neither.
+they can't comment on other departments than theirs, they can't assign artist from other department.
+
+
+## Production Manager
+
+Production managers inherit Department supervisor permissions.
+
+Production managers have read and write access to their production they work on:
 assets, shots, tasks, assignations, statistics, breakdown, and playlists.
 
 They can:
