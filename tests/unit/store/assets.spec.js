@@ -344,7 +344,7 @@ describe('Assets store', () => {
     test('newAsset', async () => {
       const rootGetters = {
         assetTypeMap: 1,
-        taskTypeMap: 2,
+        taskTypeMap: 5,
         productionAssetTaskTypeIds: [
           1, 2
         ]
