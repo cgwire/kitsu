@@ -25,10 +25,8 @@ assets, shots, tasks, assignations, statistics, breakdown, and playlists.
 
 They can:
 
-* create assets and shots, per hand, or CSV batch import. 
+* assign task to their team artist (same department)
 * post comment on all tasks or their department(s)
-* add a task column
-* delete or add a task. 
 * add/edit a playlist for the studio or the client. 
 * see the client comments and validations. 
 * see comment on other departments.
