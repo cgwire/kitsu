@@ -105,14 +105,17 @@ export default {
     onClicked (event) {
       this.$emit('click', this.entityId, event)
     },
+
     onEditLabelClicked (asset, label) {
       this.$emit('edit-label', asset, label, this.entityId)
     },
-    removeOneAsset (assetId) {
-      this.$emit('remove-one', assetId, this.entityId)
+
+    removeOneAsset (assetId, nbOccurences) {
+      this.$emit('remove-one', assetId, this.entityId, nbOccurences)
     },
-    removeTenAssets (assetId) {
-      this.$emit('remove-ten', assetId, this.entityId)
+
+    removeTenAssets (assetId, nbOccurences) {
+      this.$emit('remove-ten', assetId, this.entityId, nbOccurences)
     }
   }
 }

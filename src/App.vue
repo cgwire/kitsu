@@ -239,7 +239,13 @@ export default {
       },
 
       'asset:update' (eventData) {
+        console.log(
+          'asset-update',
+          eventData,
+          this.assetMap.get(eventData.asset_id)
+        )
         if (this.assetMap.get(eventData.asset_id)) {
+          console.log('asset-update ok reload')
           this.loadAsset(eventData.asset_id)
         }
       },
@@ -369,6 +375,16 @@ export default {
           this.$store.commit('UPDATE_TASK', {
             task,
             nbAssetsReady: eventData.nb_assets_ready
+          })
+        }
+      },
+
+      'episode:casting-update' (eventData) {
+        const episode = this.episodeMap.get(eventData.episode_id)
+        if (episode) {
+          this.$store.commit('UPDATE_EPISODE', {
+            id: episode.id,
+            nb_entities_out: eventData.nb_entities_out
           })
         }
       },

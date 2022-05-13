@@ -4,11 +4,18 @@
 
       <div class="breakdown-column casting-column">
         <div class="flexrow mb1">
+          <div
+            class=""
+            v-if="isEpisodeCasting"
+          >
+            <h2 class="subtitle mt05">Episode Casting</h2>
+          </div>
           <combobox-styled
             class="mr1"
             :label="$t('main.for')"
             :options="castingTypeOptions"
             v-model="castingType"
+            v-if="!isEpisodeCasting"
           />
           <combobox-styled
             :label="$t('shots.fields.sequence')"
@@ -180,14 +187,25 @@
     <edit-asset-modal
       ref="edit-asset-modal"
       :active="modals.isNewDisplayed"
+      :asset-to-edit="{}"
+      :is-error="errors.edit"
       :is-loading="loading.edit"
       :is-loading-stay="loading.stay"
-      :is-error="errors.edit"
       :is-success="success.edit"
-      :asset-to-edit="{}"
       @confirm="confirmNewAsset"
       @confirmAndStay="confirmNewAssetStay"
       @cancel="modals.isNewDisplayed = false"
+    />
+
+    <delete-modal
+      :active="modals.isRemoveConfirmationDisplayed"
+      :delete-button-text="$t('breakdown.remove.confirm')"
+      :error-text="$t('breakdown.remove.error')"
+      :is-loading="loading.remove"
+      :is-error="loading.error"
+      :text="$t('breakdown.remove.text')"
+      @confirm="confirmAssetRemoval"
+      @cancel="modals.isRemoveConfirmationDisplayed = false"
     />
 
   </div>
@@ -202,6 +220,7 @@ import BuildFilterModal from '@/components/modals/BuildFilterModal'
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
+import DeleteModal from '@/components/modals/DeleteModal'
 import EditAssetModal from '@/components/modals/EditAssetModal'
 import EditLabelModal from '@/components/modals/EditLabelModal'
 import ImportRenderModal from '@/components/modals/ImportRenderModal'
@@ -219,6 +238,7 @@ export default {
     ButtonHrefLink,
     ButtonSimple,
     ComboboxStyled,
+    DeleteModal,
     EditAssetModal,
     EditLabelModal,
     ImportModal,
@@ -251,26 +271,30 @@ export default {
       isLoading: false,
       isOnlyCurrentEpisode: false,
       isTextMode: false,
+      removalData: {},
       selection: {},
       sequenceId: '',
       errors: {
         edit: false,
-        stay: false,
         editLabel: false,
         importing: false,
-        importingError: null
+        importingError: null,
+        remove: false,
+        stay: false
       },
       loading: {
         edit: false,
-        stay: false,
         editLabel: false,
-        importing: false
+        importing: false,
+        remove: false,
+        stay: false
       },
       modals: {
         isBuildFilterDisplayed: false,
         isEditLabelDisplayed: false,
         isNewDisplayed: false,
         isImportRenderDisplayed: false,
+        isRemoveConfirmationDisplayed: false,
         importing: false
       },
       success: {
@@ -293,6 +317,7 @@ export default {
       'assetMap',
       'assetsByType',
       'casting',
+      'castingEpisodes',
       'castingAssetTypeAssets',
       'castingAssetTypesOptions',
       'castingByType',
@@ -307,6 +332,7 @@ export default {
       'isAssetsLoading',
       'isShotsLoading',
       'isTVShow',
+      'episodeMap',
       'sequences',
       'sequenceMap',
       'shotMap'
@@ -335,21 +361,30 @@ export default {
       return path
     },
 
+    isEpisodeCasting () {
+      return this.currentEpisode && this.currentEpisode.id === 'all'
+    },
+
     isAssetCasting () {
-      return this.castingType === 'asset'
+      return !this.isEpisodeCasting && this.castingType === 'asset'
     },
 
     isShotCasting () {
-      return this.castingType === 'shot'
+      return !this.isEpisodeCasting && this.castingType === 'shot'
     },
 
     castingEntities () {
-      if (this.isShotCasting) return this.castingSequenceShots
-      else {
+      if (this.isEpisodeCasting) {
+        return this.castingEpisodes
+      } else if (this.isShotCasting) {
+        return this.castingSequenceShots
+      } else {
         if (this.isTVShow) {
           return this.castingAssetTypeAssets.filter(
             asset => asset.episode_id === this.currentEpisode.id)
-        } else return this.castingAssetTypeAssets
+        } else {
+          return this.castingAssetTypeAssets
+        }
       }
     },
 
@@ -411,6 +446,8 @@ export default {
     ...mapActions([
       'addAssetToCasting',
       'displayMoreAssets',
+      'loadEpisodeCasting',
+      'loadEpisodes',
       'loadAssetCasting',
       'loadAssets',
       'loadShotCasting',
@@ -419,11 +456,12 @@ export default {
       'removeAssetFromCasting',
       'saveCasting',
       'setAssetSearch',
+      'setCastingEpisodes',
       'setCastingAssetType',
       'setCastingAssetTypes',
       'setCastingEpisode',
+      'setCastingForProductionEpisodes',
       'setCastingSequence',
-      'setCastingShot',
       'setCurrentEpisode',
       'setAssetLinkLabel',
       'setLastProductionScreen',
@@ -445,7 +483,7 @@ export default {
       }, 100)
     },
 
-    reloadShots () {
+    reloadShots () { // TODO shouldn't it be renamed reloadEntities?
       this.isLoading = true
       this.loadShots(() => {
         if (this.isTVShow) {
@@ -453,6 +491,7 @@ export default {
             this.episodeId = this.currentEpisode.id
           }
           this.setCastingEpisode(this.episodeId)
+          this.setCastingForProductionEpisodes()
         } else {
           this.setCastingEpisode(null)
         }
@@ -471,7 +510,11 @@ export default {
 
     resetSelection () {
       const selection = {}
-      if (this.isShotCasting) {
+      if (this.isEpisodeCasting) {
+        this.castingEpisodes.forEach((episode) => {
+          selection[episode.id] = false
+        })
+      } else if (this.isShotCasting) {
         this.castingSequenceShots.forEach((shot) => {
           selection[shot.id] = false
         })
@@ -584,20 +627,48 @@ export default {
         })
     },
 
-    removeOneAsset (assetId, entityId) {
-      this.isLocked = true
-      this.removeAssetFromCasting({ entityId, assetId, nbOccurences: 1 })
-      this.saveCasting(entityId)
-        .then(this.setLock)
-        .catch(console.error)
+    confirmAssetRemoval () {
+      this.saveAssetRemoval(
+        this.removalData.entityId,
+        this.removalData.assetId,
+        this.removalData.nbOccurences
+      )
     },
 
-    removeTenAssets (assetId, entityId) {
-      this.isLocked = true
-      this.removeAssetFromCasting({ entityId, assetId, nbOccurences: 10 })
+    saveAssetRemoval (entityId, assetId, nbOccurences) {
+      this.loading.remove = true
+      this.removeAssetFromCasting({ entityId, assetId, nbOccurences })
       this.saveCasting(entityId)
         .then(this.setLock)
-        .catch(console.error)
+        .then(() => {
+          this.loading.remove = false
+          this.modals.isRemoveConfirmationDisplayed = false
+        })
+        .catch(err => {
+          this.errors.remove = true
+          this.loading.remove = false
+          console.error(err)
+        })
+    },
+
+    removeOneAsset (assetId, entityId, nbOccurences) {
+      this.isLocked = true
+      if (this.isEpisodeCasting && nbOccurences === 1) {
+        this.removalData = { assetId, entityId, nbOccurences }
+        this.modals.isRemoveConfirmationDisplayed = true
+      } else {
+        this.saveAssetRemoval(entityId, assetId, 1)
+      }
+    },
+
+    removeTenAssets (assetId, entityId, nbOccurences) {
+      this.isLocked = true
+      if (this.isEpisodeCasting && nbOccurences < 10) {
+        this.removalData = { assetId, entityId, nbOccurences }
+        this.modals.isRemoveConfirmationDisplayed = true
+      } else {
+        this.saveAssetRemoval(entityId, assetId, 10)
+      }
     },
 
     onAssetListScroll (event, position) {
@@ -678,7 +749,19 @@ export default {
     updateUrl () {
       let isChange = false
       let route = {}
-      if (this.isAssetCasting) {
+      if (this.isEpisodeCasting) {
+        const episodeId = this.$route.params.episode_id
+        if (episodeId !== this.episodeId) {
+          isChange = true
+          route = {
+            name: 'breakdown-episode',
+            params: {
+              production_id: this.currentProduction.id,
+              episode_id: this.episodeId
+            }
+          }
+        }
+      } else if (this.isAssetCasting) {
         const assetTypeId = this.$route.params.asset_type_id
         if (assetTypeId !== this.assetTypeId) {
           isChange = true
@@ -711,6 +794,7 @@ export default {
         if (episodeId) {
           route.name = `episode-${route.name}`
           route.params.episode_id = episodeId
+          if (episodeId === 'all') route.params.sequence_id = 'all'
         }
         this.$router.push(route)
       }
@@ -827,9 +911,15 @@ export default {
       }
     },
 
-    episodeId () {},
+    episodeId () {
+      if (this.episodeId && this.episodes && this.episodes.length > 0) {
+        this.setCastingForProductionEpisodes(this.episodeId)
+        this.updateUrl()
+        this.resetSelection()
+      }
+    },
 
-    castingSequenceOptions () {
+    castingSequenceOptions () { // TODO should be put to plural castingSequencesOptions
       if (this.$route.path.indexOf('asset-type') < 0) {
         const sequenceId = this.$route.params.sequence_id
         if (
@@ -860,7 +950,9 @@ export default {
     },
 
     currentProduction () {
-      this.reset()
+      if (!this.isLoading) {
+        this.reset()
+      }
     },
 
     currentEpisode () {
@@ -880,6 +972,16 @@ export default {
 
   socket: {
     events: {
+      'episode:casting-update' (eventData) {
+        const episode = this.episodeMap.get(eventData.episode_id)
+        if (
+          episode &&
+          !this.isLocked
+        ) {
+          this.loadEpisodeCasting(episode)
+        }
+      },
+
       'shot:casting-update' (eventData) {
         const shot = this.shotMap.get(eventData.shot_id)
         if (

@@ -285,6 +285,10 @@ export default {
       return ['shots']
     },
 
+    breakdownSections () {
+      return ['breakdown']
+    },
+
     // Asset pages require a all section and a main pack section.
     currentEpisodeOptions () {
       if (this.assetSections.includes(this.currentProjectSection)) {
@@ -300,6 +304,10 @@ export default {
       } else if (['edits'].includes(this.currentProjectSection)) {
         return [
           { label: this.$t('main.all_edits'), value: 'all' }
+        ].concat(this.episodeOptions)
+      } else if (['breakdown'].includes(this.currentProjectSection)) {
+        return [
+          { label: this.$t('main.all'), value: 'all' }
         ].concat(this.episodeOptions)
       } else {
         return this.episodeOptions
@@ -566,7 +574,8 @@ export default {
       this.currentProjectSection = section
       const isAssetSection = this.assetSections.includes(section)
       const isEditSection = this.editSections.includes(section)
-      if (!isAssetSection && !isEditSection && ['all', 'main'].includes(episodeId)) {
+      const isBreakdownSection = this.breakdownSections.includes(section)
+      if (!isAssetSection && !isEditSection && !isBreakdownSection && ['all', 'main'].includes(episodeId)) {
         episodeId = this.episodes[0].id
         this.currentEpisodeId = episodeId
         this.pushContextRoute(section)
@@ -623,7 +632,7 @@ export default {
       return route
     },
 
-    resetEpisodeForTVShow (soft = false) {
+    resetEpisodeForTVShow (soft = false) { // TODO seems deprecated
       const section =
         this.currentProjectSection || this.getCurrentSectionFromRoute()
       const isAssetSection = this.assetSections.includes(section)

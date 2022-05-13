@@ -51,6 +51,8 @@ import {
   LOAD_SHOTS_START,
   LOAD_SHOTS_ERROR,
   LOAD_SHOTS_END,
+  LOAD_EPISODES_START,
+  LOAD_EPISODES_ERROR,
   LOAD_EPISODES_END,
   LOAD_SEQUENCES_END,
   SORT_VALIDATION_COLUMNS,
@@ -354,6 +356,9 @@ const initialState = {
   shotSelectionGrid: {},
   sequenceSelectionGrid: {},
 
+  isEpisodesLoading: false,
+  isEpisodesLoadingError: false,
+
   isShotsLoading: false,
   isShotsLoadingError: false,
   shotsCsvFormData: null,
@@ -418,6 +423,8 @@ const getters = {
     return groupEntitiesByParents(state.displayedShots, 'sequence_name')
   },
 
+  isEpisodesLoading: state => state.isEpisodesLoading,
+  isEpisodesLoadingError: state => state.isEpisodesLoadingError,
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,
   shotCreated: state => state.shotCreated,
@@ -1068,6 +1075,31 @@ const actions = {
 }
 
 const mutations = {
+  [LOAD_EPISODES_START] (state) {
+    console.log('LOAD_EPISODES_START')
+    cache.episodes = []
+    cache.result = []
+    cache.episodeIndex = {}
+    state.episodeMap = new Map()
+    state.episodeValidationColumns = []
+
+    state.isEpisodesLoading = true
+    state.isEpisodesLoadingError = false
+
+    state.displayedepisodes = []
+    state.displayedepisodesLength = 0
+    state.episodeSearchQueries = []
+    state.displayedEpisodes = []
+    state.displayedEpisodesLength = 0
+
+    state.selectedepisodes = new Map()
+  },
+
+  [LOAD_EPISODES_ERROR] (state) {
+    state.isEpisodesLoading = false
+    state.isEpisodesLoadingError = true
+  },
+
   [CLEAR_SHOTS] (state) {
     cache.shots = []
     cache.result = []
@@ -1285,6 +1317,7 @@ const mutations = {
     state.displayedEpisodes = state.episodes.slice(0, PAGE_SIZE)
     state.displayedEpisodesLength = state.episodes.length
 
+    // Set currentEpisode
     if (state.episodes.length > 0) {
       if (!routeEpisodeId || routeEpisodeId === 'all') {
         state.currentEpisode = { id: 'all' }

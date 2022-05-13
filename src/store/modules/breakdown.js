@@ -9,6 +9,8 @@ import {
   CASTING_SET_ASSETS,
   CASTING_SET_EPISODE,
   CASTING_SET_CASTING,
+  CASTING_SET_EPISODES,
+  CASTING_SET_FOR_EPISODES,
   CASTING_SET_SHOTS,
   CASTING_SET_SEQUENCE,
   CASTING_SET_SEQUENCES,
@@ -16,7 +18,9 @@ import {
   CASTING_ADD_TO_CASTING,
   CASTING_REMOVE_FROM_CASTING,
 
+  LOAD_EPISODES_START,
   LOAD_SHOTS_START,
+  LOAD_EPISODE_CASTING_END,
   LOAD_SHOT_CASTING_END,
   LOAD_ASSET_CASTING_END,
   LOAD_ASSET_CAST_IN_END,
@@ -27,8 +31,10 @@ import {
 } from '../mutation-types'
 
 const initialState = {
+  currentProduction: null,
   castingSequenceId: '',
   castingShotId: 0,
+  castingEpisodes: [],
   castingSequenceShots: [],
   castingAssetTypeAssets: [],
   castingEpisodeSequences: [],
@@ -42,6 +48,7 @@ const initialState = {
 const state = { ...initialState }
 
 const getters = {
+  castingEpisodes: state => state.castingEpisodes,
   castingEpisodeSequences: state => state.castingEpisodeSequences,
   castingSequenceId: state => state.castingSequenceId,
   castingSequenceShots: state => state.castingSequenceShots,
@@ -55,6 +62,19 @@ const getters = {
 }
 
 const actions = {
+
+  setCastingForProductionEpisodes ({ commit, rootState }, episodeId) {
+    const production = rootState.productions.currentProduction
+    const assetMap = rootState.assets.assetMap
+    const episodes =
+     Array.from(rootState.shots.episodeMap.values())
+       .sort((a, b) => a.name.localeCompare(b.name))
+    commit(CASTING_SET_FOR_EPISODES, episodes)
+    return breakdownApi.getProductionEpisodesCasting(production.id, episodeId)
+      .then((casting) => {
+        commit(CASTING_SET_CASTING, { casting, assetMap })
+      })
+  },
 
   setCastingSequence ({ commit, rootState }, sequenceId) {
     if (!sequenceId) {
@@ -96,6 +116,12 @@ const actions = {
     const sequences = rootState.shots.sequences
     commit(CASTING_SET_SEQUENCES, sequences)
     commit(CASTING_SET_EPISODE, episodeId)
+  },
+
+  setCastingEpisodes ({ commit, rootState }) {
+    const episodes = rootState.shots.episodes
+    const production = rootState.productions.currentProduction
+    commit(CASTING_SET_EPISODES, { production, episodes })
   },
 
   setCastingAssetTypes ({ commit, rootState }) {
@@ -148,6 +174,16 @@ const actions = {
     return dispatch('saveCasting', targetEntityId)
   },
 
+  loadEpisodeCasting ({ commit, rootGetters }, episode) {
+    if (!episode) return Promise.resolve({})
+    const episodeMap = rootGetters.episodeMap
+    return breakdownApi.getEpisodeCasting(episode)
+      .then((casting) => {
+        commit(LOAD_EPISODE_CASTING_END, { episode, casting, episodeMap })
+        return Promise.resolve(casting)
+      })
+  },
+
   loadAssetCasting ({ commit, rootGetters }, asset) {
     if (!asset) return Promise.resolve({})
     const assetMap = rootGetters.assetMap
@@ -180,8 +216,24 @@ const actions = {
 }
 
 const mutations = {
+  [LOAD_EPISODES_START] (state) {
+    Object.assign(state, initialState)
+  },
+
   [LOAD_SHOTS_START] (state) {
     Object.assign(state, initialState)
+  },
+
+  [CASTING_SET_FOR_EPISODES] (state, episodes) {
+    const casting = {}
+    const castingByType = []
+    state.castingEpisodes = episodes
+    episodes.forEach((episode) => {
+      casting[episode.id] = []
+      castingByType[episode.id] = []
+    })
+    state.casting = casting
+    state.castingByType = castingByType
   },
 
   [CASTING_SET_SHOTS] (state, shots) {
@@ -206,6 +258,24 @@ const mutations = {
     })
     state.casting = casting
     state.castingByType = castingByType
+  },
+
+  [CASTING_SET_EPISODES] (state, { production, episodes }) { // TODO CASTING must be renamed to BREAKDOWN when used for namespacing, and CASTING must be kept for meaningful mutations
+    state.castingEpisodes = episodes
+    state.castingEpisodeOptions = episodes.map((production) => {
+      const route = {
+        name: 'breakdown-episode',
+        params: {
+          production_id: production.id,
+          episode_id: 'all'
+        }
+      }
+      return {
+        label: 'All',
+        value: production.id,
+        route: route
+      }
+    })
   },
 
   [CASTING_SET_SEQUENCES] (state, sequences) {
@@ -278,7 +348,7 @@ const mutations = {
   },
 
   [CASTING_ADD_TO_CASTING] (state, { entityId, asset, nbOccurences, label }) {
-    if (!state.casting[entityId]) state.casting[entityId] = []
+    if (!state.casting[entityId]) Vue.set(state.casting, entityId, [])
     const previousAsset = state.casting[entityId].find(
       a => a.asset_id === asset.id
     )
@@ -296,9 +366,12 @@ const mutations = {
       }
       state.casting[entityId].push(newAsset)
     }
-    state.casting[entityId] = sortAssets(state.casting[entityId])
-    state.castingByType[entityId] =
+    Vue.set(state.casting, entityId, sortAssets(state.casting[entityId]))
+    Vue.set(
+      state.castingByType,
+      entityId,
       groupEntitiesByParents(state.casting[entityId], 'asset_type_name')
+    )
   },
 
   [CASTING_REMOVE_FROM_CASTING] (state, { entityId, asset, nbOccurences }) {
@@ -317,6 +390,19 @@ const mutations = {
         state.casting[entityId], 'asset_type_name'
       )
     }
+  },
+
+  [LOAD_EPISODE_CASTING_END] (state, { episode, casting }) {
+    casting.forEach(a => { a.name = a.asset_name || a.name })
+    const castingByType = groupEntitiesByParents(casting, 'asset_type_name')
+    episode.casting = casting
+    Vue.set(state.casting, episode.id, casting)
+    Vue.set(state.castingByType, episode.id, castingByType)
+    Vue.set(
+      episode,
+      'castingAssetsByType',
+      castingByType
+    )
   },
 
   [LOAD_ASSET_CASTING_END] (state, { asset, casting }) {

@@ -135,7 +135,6 @@ export default {
   methods: {
     onClicked () {
       const previewFileId = this.previewFileId || this.entity.preview_file_id
-      console.log(previewFileId)
       this.$store.commit('SHOW_PREVIEW_FILE', previewFileId)
     }
   }

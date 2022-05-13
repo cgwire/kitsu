@@ -108,11 +108,11 @@ export default {
 
   methods: {
     removeOneAsset (event) {
-      this.$emit('remove-one', this.asset.asset_id)
+      this.$emit('remove-one', this.asset.asset_id, this.nbOccurences)
     },
 
     removeTenAssets (event) {
-      this.$emit('remove-ten', this.asset.asset_id)
+      this.$emit('remove-ten', this.asset.asset_id, this.nbOccurences)
     },
 
     shortenName (name) {
