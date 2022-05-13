@@ -148,12 +148,12 @@ export default {
 
     backgroundColor (taskStatus) {
       if (
-        (!taskStatus || taskStatus.short_name === 'todo') &&
+        (!taskStatus || taskStatus.is_default) &&
         !this.isDarkTheme
       ) {
         return '#ECECEC'
       } else if (
-        (!taskStatus || taskStatus.short_name === 'todo') &&
+        (!taskStatus || taskStatus.is_default) &&
         this.isDarkTheme
       ) {
         return '#5F626A'
@@ -165,7 +165,7 @@ export default {
     },
 
     color (taskStatus) {
-      if ((!taskStatus || taskStatus.short_name !== 'todo') || this.isDarkTheme) {
+      if ((!taskStatus || !taskStatus.is_default) || this.isDarkTheme) {
         return 'white'
       } else {
         return '#333'

@@ -99,7 +99,7 @@
               :title="stat.name + ': ' + stat.value"
               :style="{
                 background: stat.color,
-                color: stat.name === 'TODO' ? '#666' : 'white'
+                color: stat.is_default ? '#666' : 'white'
               }"
             >
              {{ stat.name }} : {{ stat.value }}

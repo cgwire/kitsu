@@ -378,6 +378,7 @@ export default {
       'getTaskStatusForCurrentUser',
       'isCurrentUserAdmin',
       'isCurrentUserClient',
+      'isCurrentUserSupervisor',
       'isCurrentUserManager',
       'isSingleEpisode',
       'isTVShow',
@@ -417,13 +418,26 @@ export default {
     },
 
     isCommentingAllowed () {
-      if (!this.task) return false
-      const isManager = this.isCurrentUserManager
-      const isAssigned = this.task.assignees.find(
-        (personId) => personId === this.user.id
-      )
-      const isClient = this.isCurrentUserClient
-      return isManager || isAssigned || isClient
+      if (this.task) {
+        if (this.isCurrentUserManager) {
+          return true
+        } else if (this.isCurrentUserSupervisor) {
+          if (this.user.departments.length === 0) {
+            return true
+          } else {
+            const taskType = this.taskTypeMap.get(this.task.task_type_id)
+            return taskType.department_id && this.user.departments.includes(
+              taskType.department_id)
+          }
+        } else if (this.isCurrentUserClient) {
+          return true
+        } else if (this.task.assignees.find(
+          (personId) => personId === this.user.id
+        )) {
+          return true
+        }
+      }
+      return false
     },
 
     isSetThumbnailAllowed () {

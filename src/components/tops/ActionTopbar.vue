@@ -16,8 +16,10 @@
         </div>
 
         <div class="flexrow-item" v-if="selectedBar === 'assignation'">
-          <div class="flexrow" v-if="isCurrentUserManager
-            || isInDepartment">
+          <div
+            class="flexrow"
+            v-if="isCurrentUserManager || isInDepartment"
+          >
             <div class="assignation flexrow-item hide-small-screen">
               <span>
                 {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
@@ -397,7 +399,7 @@
           class="more-menu-item"
           v-if="
             (isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit) &&
-            (isCurrentUserManager || isCurrentUserSupervisor) &&
+            (isCurrentUserManager || isCurrentUserSupervisor || isInDepartment) &&
             !isEntitySelection"
           @click="selectBar('assignation')"
         >
@@ -620,6 +622,7 @@ export default {
       'selectedShots',
       'selectedEdits',
       'shotCustomActions',
+      'taskMap',
       'taskStatusForCurrentUser',
       'taskTypeMap',
       'user'
@@ -727,9 +730,9 @@ export default {
     },
 
     isInDepartment () {
-      const selectedTasks = Array.from(this.selectedTasks.values())
-      return selectedTasks.every(task => {
-        const taskType = this.taskTypeMap.get(selectedTasks[0].task_type_id)
+      return this.selectedTaskIds.every(taskId => {
+        const task = this.taskMap.get(taskId)
+        const taskType = this.taskTypeMap.get(task.task_type_id)
         return taskType.department_id && this.user.departments.includes(
           taskType.department_id)
       })

@@ -37,7 +37,7 @@ export default {
     ]),
 
     color () {
-      if (this.entry.short_name === 'todo' && this.isDarkTheme) {
+      if (this.entry.is_default && this.isDarkTheme) {
         return '#5F626A'
       } else {
         return this.entry.color
@@ -45,7 +45,7 @@ export default {
     },
 
     textColor () {
-      if (this.entry.short_name === 'todo' && !this.isDarkTheme) {
+      if (this.entry.is_default && !this.isDarkTheme) {
         return '#333'
       } else {
         return 'white'

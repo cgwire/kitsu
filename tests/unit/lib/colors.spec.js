@@ -4,7 +4,8 @@ describe('colors', () => {
   test('validationTextColor', () => {
     const taskTodo = {
       id: 'task-1',
-      task_status_short_name: 'todo'
+      task_status_short_name: 'todo',
+      is_default: true
     }
     const taskRunning = {
       id: 'task-1',

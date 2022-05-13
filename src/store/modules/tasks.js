@@ -428,7 +428,7 @@ const actions = {
 
   deleteTaskComment ({ commit, rootState }, { taskId, commentId, callback }) {
     const todoStatus = rootState.taskStatus.taskStatus.find((taskStatus) => {
-      return taskStatus.short_name === 'todo'
+      return taskStatus.is_default
     })
     return tasksApi.deleteTaskComment(taskId, commentId)
       .then(() => {

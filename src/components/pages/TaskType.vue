@@ -385,6 +385,7 @@ export default {
       'editsPath',
       'editMap',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'isTVShow',
       'nbSelectedTasks',
       'organisation',
@@ -399,6 +400,15 @@ export default {
       'taskMap',
       'user'
     ]),
+
+    isSupervisorInDepartment () {
+      const departments = this.user.departments || []
+      return this.isCurrentUserManager ||
+        (
+          this.isCurrentUserSupervisor &&
+          departments.includes((this.currentTaskType || {}).department_id)
+        )
+    },
 
     entityMap () {
       if (this.entityType === 'Asset') {
@@ -971,7 +981,7 @@ export default {
           expanded: false,
           loading: false,
           man_days: estimation,
-          editable: this.isCurrentUserManager,
+          editable: this.isSupervisorInDepartment,
           unresizable: estimation > 0,
           parentElement: personElement,
           color: this.getTaskElementColor(task, endDate),

@@ -106,9 +106,9 @@ export default {
     },
 
     backgroundColor () {
-      if (this.taskStatus.short_name === 'todo' && !this.isDarkTheme) {
+      if (this.taskStatus.is_default && !this.isDarkTheme) {
         return '#ECECEC'
-      } else if (this.taskStatus.short_name === 'todo' && this.isDarkTheme) {
+      } else if (this.taskStatus.is_default && this.isDarkTheme) {
         return '#5F626A'
       } else if (this.isDarkTheme) {
         return colors.darkenColor(this.taskStatus.color)
@@ -118,7 +118,7 @@ export default {
     },
 
     color () {
-      if (this.taskStatus.short_name !== 'todo' || this.isDarkTheme) {
+      if (this.taskStatus.color !== '#f5f5f5' || this.isDarkTheme) {
         return 'white'
       } else {
         return '#333'
@@ -146,10 +146,10 @@ export default {
 
     tagStyle () {
       const isStatic = !this.isStatic && !this.isCurrentUserClient
-      const isTodo = this.taskStatus.short_name.toLowerCase() === 'todo'
+      const isTodo = this.taskStatus.is_default
       if (this.thin && !isTodo) {
         return {
-          background: 'transparent',
+          background: this.isDarkTheme ? 'rgba(255, 255, 255, 0.75)' : 'transparent',
           border: '1px solid ' + (isTodo ? 'grey' : this.backgroundColor),
           color: this.backgroundColor,
           cursor: isStatic ? 'pointer' : this.cursor

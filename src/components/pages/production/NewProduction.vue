@@ -696,7 +696,7 @@ export default {
       return this.taskStatus.filter(
         status => (
           this.productionToCreate.taskStatuses.indexOf(status) === -1 &&
-          status.short_name !== 'todo'
+          !status.is_default
         )
       )
     },

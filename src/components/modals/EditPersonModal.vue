@@ -201,11 +201,11 @@ export default {
 
       roleOptions: [
         { label: 'user', value: 'user' },
-        { label: 'manager', value: 'manager' },
-        { label: 'admin', value: 'admin' },
         { label: 'supervisor', value: 'supervisor' },
+        { label: 'manager', value: 'manager' },
         { label: 'client', value: 'client' },
-        { label: 'vendor', value: 'vendor' }
+        { label: 'vendor', value: 'vendor' },
+        { label: 'admin', value: 'admin' }
       ],
       activeOptions: [
         { label: this.$t('main.yes'), value: 'true' },
