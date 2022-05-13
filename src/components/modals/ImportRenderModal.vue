@@ -215,10 +215,7 @@ export default {
       'assetMetadataDescriptors',
       'isTVShow',
       'shotMetadataDescriptors',
-      'editMetadataDescriptors',
-      'productionAssetTaskTypes',
-      'productionShotTaskTypes',
-      'productionEditTaskTypes'
+      'editMetadataDescriptors'
     ]),
 
     columnsRequired () {
@@ -242,47 +239,11 @@ export default {
       return []
     },
 
-    /**
-     * Get all task types depending on the routed entity type.
-     * Return a list of TaskTypes Object.
-     */
-    entityTaskTypes () {
-      if (this.$route.path.indexOf('assets') > 0) {
-        return this.productionAssetTaskTypes
-      }
-      if (this.$route.path.indexOf('shots') > 0) {
-        return this.productionShotTaskTypes
-      }
-      if (this.$route.path.indexOf('edits') > 0) {
-        return this.productionEditTaskTypes
-      }
-      return []
-    },
-
     columnsAllowed () {
       const list = [...this.columns]
       this.metadataDescriptors.forEach(item => {
         if (!list.includes(item.name)) {
           list.push(item.name)
-        }
-      })
-      // We don't want to overload the column options with all entity task types
-      // so we pick only if parsing the csv header content return a task column
-      // name and/or this comment section.
-      this.entityTaskTypes.forEach(item => {
-        // Push task name option used to update status.
-        if (
-          !list.includes(item.name) &&
-          this.columnSelect.includes(item.name)
-        ) {
-          list.push(item.name)
-        }
-        // Push task comment option.
-        if (
-          !list.includes(item.name + ' Comment') &&
-          this.hasComment(item.name)
-        ) {
-          list.push(item.name + ' Comment')
         }
       })
       return list
@@ -366,11 +327,6 @@ export default {
     hasComment (taskName) {
       let result = false
       this.columnSelect.forEach((item, index) => {
-        // If a 'Comment' column follow a '{taskName}' column we need to update
-        // this comment column name with '{taskName} Comment' naming convention.
-        if (item === 'Comment' && index > 0) {
-          item = this.columnSelect[index - 1] + ' Comment'
-        }
         if (item === taskName + ' Comment') {
           this.columnSelect[index] = item // force update the column name.
           result = true

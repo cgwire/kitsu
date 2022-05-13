@@ -185,7 +185,7 @@
     :database="filteredAssets"
     @reupload="resetImport"
     @confirm="uploadImportFile"
-    @cancel="hideImportRenderModal"
+    @cancel="cancelImportRenderModal"
   />
 
   <import-modal
@@ -196,7 +196,7 @@
     :form-data="assetsCsvFormData"
     :columns="columns"
     @confirm="renderImport"
-    @cancel="hideImportModal"
+    @cancel="cancelImportModal"
   />
 
   <create-tasks-modal
@@ -457,7 +457,8 @@ export default {
       'taskTypeMap',
       'taskTypes',
       'user',
-      'departmentMap'
+      'departmentMap',
+      'productionAssetTaskTypes'
     ]),
 
     newAssetPath () {
@@ -759,6 +760,7 @@ export default {
       csv.processCSV(data)
         .then((results) => {
           this.parsedCSV = results
+          this.updateCsvColumns()
           this.hideImportModal()
           this.loading.importing = false
           this.showImportRenderModal()
@@ -780,6 +782,8 @@ export default {
       this.uploadAssetFile(toUpdate)
         .then(() => {
           this.hideImportRenderModal()
+          this.resetCsvColumns()
+          this.parsedCSV = []
           this.loading.importing = false
           this.loadEpisodes()
             .catch(console.error)
@@ -792,11 +796,25 @@ export default {
         })
     },
 
+    cancelImportRenderModal () {
+      this.parsedCSV = []
+      this.resetCsvColumns()
+      this.hideImportRenderModal()
+    },
+
+    cancelImportModal () {
+      this.parsedCSV = []
+      this.resetCsvColumns()
+      this.hideImportModal()
+    },
+
     resetImport () {
       this.errors.importing = false
       this.hideImportRenderModal()
       this.$store.commit('ASSET_CSV_FILE_SELECTED', null)
       this.$refs['import-modal'].reset()
+      this.parsedCSV = []
+      this.resetCsvColumns()
       this.showImportModal()
     },
 
@@ -954,6 +972,27 @@ export default {
     onAssetTypeClicked (assetType) {
       this.searchField.setValue(`${this.assetSearchText} type=${assetType}`)
       this.onSearchChange()
+    },
+
+    updateCsvColumns () {
+      if (this.parsedCSV.length > 0) {
+        this.productionAssetTaskTypes.forEach(item => {
+          // Push task name option used to update status.
+          if (
+            !this.columns.includes(item.name) &&
+            this.parsedCSV[0].includes(item.name)
+          ) {
+            this.columns.push(item.name)
+          }
+          // Push task comment option.
+          if (
+            !this.columns.includes(item.name + ' Comment') &&
+            this.parsedCSV[0].includes(item.name + ' Comment')
+          ) {
+            this.columns.push(item.name + ' Comment')
+          }
+        })
+      }
     },
 
     resetCsvColumns () {
