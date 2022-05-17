@@ -9,10 +9,11 @@ img[src$='#logo-cgwire'],
 img[src$='#logo-kitsu'] {
   border: 0; 
   box-shadow: none;
+  width: 120px;
 }
 </style>
 
-![Kitsu Logo](./img/kitsu.png#logo-kitsu)
+![Kitsu Logo](./img/kitsu.svg#logo-kitsu)
 
 # Kitsu Documentation
 
