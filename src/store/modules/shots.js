@@ -1076,7 +1076,6 @@ const actions = {
 
 const mutations = {
   [LOAD_EPISODES_START] (state) {
-    console.log('LOAD_EPISODES_START')
     cache.episodes = []
     cache.result = []
     cache.episodeIndex = {}
