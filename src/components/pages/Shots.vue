@@ -199,7 +199,7 @@
     :dataMatchers="dataMatchers"
     :database="filteredShots"
     @reupload="resetImport"
-    @cancel="cancelImportRenderModal"
+    @cancel="hideImportRenderModal"
     @confirm="uploadImportFile"
   />
 
@@ -210,7 +210,7 @@
     :is-error="errors.importing"
     :form-data="shotsCsvFormData"
     :columns="columns"
-    @cancel="cancelImportModal"
+    @cancel="hideImportModal"
     @confirm="renderImport"
   />
 
@@ -501,24 +501,10 @@ export default {
       if (this.isTVShow) {
         collection.unshift('Episode')
       }
-      if (this.parsedCSV.length > 0) {
-        this.productionShotTaskTypes.forEach(item => {
-          // Push task name option used to update status.
-          if (
-            !collection.includes(item.name) &&
-            this.parsedCSV[0].includes(item.name)
-          ) {
-            collection.push(item.name)
-          }
-          // Push task comment option.
-          if (
-            !collection.includes(item.name + ' Comment') &&
-            this.parsedCSV[0].includes(item.name + ' Comment')
-          ) {
-            collection.push(item.name + ' Comment')
-          }
-        })
-      }
+      this.productionShotTaskTypes.forEach(item => {
+        collection.push(item.name)
+        collection.push(item.name + ' comment')
+      })
       return collection
     },
 
@@ -873,7 +859,6 @@ export default {
 
       this.uploadShotFile(toUpdate)
         .then(() => {
-          this.parsedCSV = []
           this.loading.importing = false
           this.loadEpisodes()
             .catch(console.error)
@@ -888,22 +873,11 @@ export default {
         })
     },
 
-    cancelImportRenderModal () {
-      this.parsedCSV = []
-      this.hideImportRenderModal()
-    },
-
-    cancelImportModal () {
-      this.parsedCSV = []
-      this.hideImportModal()
-    },
-
     resetImport () {
       this.errors.importing = false
       this.hideImportRenderModal()
       this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
       this.$refs['import-modal'].reset()
-      this.parsedCSV = []
       this.showImportModal()
     },
 

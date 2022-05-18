@@ -185,7 +185,7 @@
     :database="filteredAssets"
     @reupload="resetImport"
     @confirm="uploadImportFile"
-    @cancel="cancelImportRenderModal"
+    @cancel="hideImportRenderModal"
   />
 
   <import-modal
@@ -196,7 +196,7 @@
     :form-data="assetsCsvFormData"
     :columns="columns"
     @confirm="renderImport"
-    @cancel="cancelImportModal"
+    @cancel="hideImportModal"
   />
 
   <create-tasks-modal
@@ -312,11 +312,6 @@ export default {
       assetFilterTypes: [
         'Type'
       ],
-      columns: [
-        'Type',
-        'Name',
-        'Description'
-      ],
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
       selectedDepartment: 'ALL',
@@ -381,7 +376,6 @@ export default {
       this.assetListScrollPosition
     )
     this.onSearchChange()
-    this.resetCsvColumns()
     this.$refs['asset-list'].setScrollPosition(
       this.assetListScrollPosition
     )
@@ -389,7 +383,6 @@ export default {
       if (this.$refs['asset-list']) {
         this.$refs['asset-search-field'].setValue(searchQuery)
         this.onSearchChange()
-        this.resetCsvColumns()
         this.$refs['asset-list'].setScrollPosition(
           this.assetListScrollPosition
         )
@@ -513,6 +506,25 @@ export default {
       return this.isTVShow
         ? ['Episode', 'Type', 'Name']
         : ['Type', 'Name']
+    },
+
+    columns () {
+      const collection = [
+        'Type',
+        'Name',
+        'Description'
+      ]
+
+      if (this.isTVShow) {
+        collection.unshift('Episode')
+      }
+
+      this.productionAssetTaskTypes.forEach(item => {
+        collection.push(item.name)
+        collection.push(item.name + ' comment')
+      })
+
+      return collection
     }
   },
 
@@ -760,7 +772,6 @@ export default {
       csv.processCSV(data)
         .then((results) => {
           this.parsedCSV = results
-          this.updateCsvColumns()
           this.hideImportModal()
           this.loading.importing = false
           this.showImportRenderModal()
@@ -782,8 +793,6 @@ export default {
       this.uploadAssetFile(toUpdate)
         .then(() => {
           this.hideImportRenderModal()
-          this.resetCsvColumns()
-          this.parsedCSV = []
           this.loading.importing = false
           this.loadEpisodes()
             .catch(console.error)
@@ -796,25 +805,11 @@ export default {
         })
     },
 
-    cancelImportRenderModal () {
-      this.parsedCSV = []
-      this.resetCsvColumns()
-      this.hideImportRenderModal()
-    },
-
-    cancelImportModal () {
-      this.parsedCSV = []
-      this.resetCsvColumns()
-      this.hideImportModal()
-    },
-
     resetImport () {
       this.errors.importing = false
       this.hideImportRenderModal()
       this.$store.commit('ASSET_CSV_FILE_SELECTED', null)
       this.$refs['import-modal'].reset()
-      this.parsedCSV = []
-      this.resetCsvColumns()
       this.showImportModal()
     },
 
@@ -974,36 +969,6 @@ export default {
       this.onSearchChange()
     },
 
-    updateCsvColumns () {
-      if (this.parsedCSV.length > 0) {
-        this.productionAssetTaskTypes.forEach(item => {
-          // Push task name option used to update status.
-          if (
-            !this.columns.includes(item.name) &&
-            this.parsedCSV[0].includes(item.name)
-          ) {
-            this.columns.push(item.name)
-          }
-          // Push task comment option.
-          if (
-            !this.columns.includes(item.name + ' Comment') &&
-            this.parsedCSV[0].includes(item.name + ' Comment')
-          ) {
-            this.columns.push(item.name + ' Comment')
-          }
-        })
-      }
-    },
-
-    resetCsvColumns () {
-      const columns = this.isTVShow ? ['Episode'] : []
-      this.columns = columns.concat([
-        'Type',
-        'Name',
-        'Description'
-      ])
-    },
-
     onChangeSortClicked (sortInfo) {
       this.changeAssetSort(sortInfo)
     },
@@ -1053,7 +1018,6 @@ export default {
     currentProduction () {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
-      this.resetCsvColumns()
       this.initialLoading = true
       if (!this.isTVShow) this.reset()
     },
@@ -1062,7 +1026,6 @@ export default {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       if (this.isTVShow && this.currentEpisode) this.reset()
-      this.resetCsvColumns()
     },
 
     displayedAssets () {

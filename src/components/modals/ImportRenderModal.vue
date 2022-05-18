@@ -318,23 +318,6 @@ export default {
       }
     },
 
-    /**
-     * Check if task has this 'Comment' column.
-     * Return true if '{taskName} Comment' exists in the header of
-     * the parsed csv or if a 'Comment' column follow a '{taskName}' column.
-     * @param {string} taskName - The task name.
-     */
-    hasComment (taskName) {
-      let result = false
-      this.columnSelect.forEach((item, index) => {
-        if (item === taskName + ' Comment') {
-          this.columnSelect[index] = item // force update the column name.
-          result = true
-        }
-      })
-      return result
-    },
-
     existingData (index) {
       const csv = this.parsedCsv[index + 1]
       const db = this.database
