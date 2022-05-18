@@ -1030,19 +1030,6 @@ export default {
     }
   },
 
-  socket: {
-    events: {
-      'asset:update' (eventData) {
-        // TODO Would loadAsset be more optimized? Its logic is not fully adapted to do it smartly
-        // if (this.assetMap.get(eventData.asset_id)) {
-        //   this.loadAsset(eventData.asset_id)
-        // }
-
-        this.loadAssets()
-      }
-    }
-  },
-
   metaInfo () {
     if (this.isTVShow) {
       return { title: this.tvShowPageTitle }

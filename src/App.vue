@@ -239,13 +239,7 @@ export default {
       },
 
       'asset:update' (eventData) {
-        console.log(
-          'asset-update',
-          eventData,
-          this.assetMap.get(eventData.asset_id)
-        )
         if (this.assetMap.get(eventData.asset_id)) {
-          console.log('asset-update ok reload')
           this.loadAsset(eventData.asset_id)
         }
       },
