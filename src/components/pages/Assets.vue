@@ -512,7 +512,8 @@ export default {
       const collection = [
         'Type',
         'Name',
-        'Description'
+        'Description',
+        'Ready for'
       ]
 
       if (this.isTVShow) {
