@@ -629,7 +629,9 @@ const actions = {
       assetLine = assetLine.concat([
         asset.asset_type_name,
         asset.name,
-        asset.description
+        asset.description,
+        asset.ready_for !== 'None'
+          ? helpers.getTaskType(asset.ready_for).name : ''
       ])
       sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Asset')

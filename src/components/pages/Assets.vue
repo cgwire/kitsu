@@ -942,7 +942,8 @@ export default {
           headers = headers.concat([
             this.$t('assets.fields.type'),
             this.$t('assets.fields.name'),
-            this.$t('assets.fields.description')
+            this.$t('assets.fields.description'),
+            this.$t('assets.fields.ready_for')
           ])
           sortByName([...this.currentProduction.descriptors])
             .filter(d => d.entity_type === 'Asset')
