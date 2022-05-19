@@ -542,10 +542,10 @@ export default {
 
     renderDate (date) {
       date = moment(date)
-      if (moment().diff(date, 'days') > 1) {
-        return date.tz(this.user.timezone).format('MM/DD')
-      } else {
+      if (moment().isSame(date, 'd')) {
         return date.tz(this.user.timezone).format('HH:mm')
+      } else {
+        return date.tz(this.user.timezone).format('MM/DD')
       }
     },
 
