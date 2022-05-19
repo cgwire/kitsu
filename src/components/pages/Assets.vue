@@ -312,11 +312,6 @@ export default {
       assetFilterTypes: [
         'Type'
       ],
-      columns: [
-        'Type',
-        'Name',
-        'Description'
-      ],
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
       selectedDepartment: 'ALL',
@@ -381,7 +376,6 @@ export default {
       this.assetListScrollPosition
     )
     this.onSearchChange()
-    this.resetCsvColumns()
     this.$refs['asset-list'].setScrollPosition(
       this.assetListScrollPosition
     )
@@ -389,7 +383,6 @@ export default {
       if (this.$refs['asset-list']) {
         this.$refs['asset-search-field'].setValue(searchQuery)
         this.onSearchChange()
-        this.resetCsvColumns()
         this.$refs['asset-list'].setScrollPosition(
           this.assetListScrollPosition
         )
@@ -457,7 +450,8 @@ export default {
       'taskTypeMap',
       'taskTypes',
       'user',
-      'departmentMap'
+      'departmentMap',
+      'productionAssetTaskTypes'
     ]),
 
     newAssetPath () {
@@ -512,6 +506,26 @@ export default {
       return this.isTVShow
         ? ['Episode', 'Type', 'Name']
         : ['Type', 'Name']
+    },
+
+    columns () {
+      const collection = [
+        'Type',
+        'Name',
+        'Description',
+        'Ready for'
+      ]
+
+      if (this.isTVShow) {
+        collection.unshift('Episode')
+      }
+
+      this.productionAssetTaskTypes.forEach(item => {
+        collection.push(item.name)
+        collection.push(item.name + ' comment')
+      })
+
+      return collection
     }
   },
 
@@ -929,7 +943,8 @@ export default {
           headers = headers.concat([
             this.$t('assets.fields.type'),
             this.$t('assets.fields.name'),
-            this.$t('assets.fields.description')
+            this.$t('assets.fields.description'),
+            this.$t('assets.fields.ready_for')
           ])
           sortByName([...this.currentProduction.descriptors])
             .filter(d => d.entity_type === 'Asset')
@@ -954,15 +969,6 @@ export default {
     onAssetTypeClicked (assetType) {
       this.searchField.setValue(`${this.assetSearchText} type=${assetType}`)
       this.onSearchChange()
-    },
-
-    resetCsvColumns () {
-      const columns = this.isTVShow ? ['Episode'] : []
-      this.columns = columns.concat([
-        'Type',
-        'Name',
-        'Description'
-      ])
     },
 
     onChangeSortClicked (sortInfo) {
@@ -1014,7 +1020,6 @@ export default {
     currentProduction () {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
-      this.resetCsvColumns()
       this.initialLoading = true
       if (!this.isTVShow) this.reset()
     },
@@ -1023,7 +1028,6 @@ export default {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       if (this.isTVShow && this.currentEpisode) this.reset()
-      this.resetCsvColumns()
     },
 
     displayedAssets () {

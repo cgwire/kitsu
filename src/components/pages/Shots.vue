@@ -476,7 +476,8 @@ export default {
       'shotSorting',
       'taskTypeMap',
       'user',
-      'departmentMap'
+      'departmentMap',
+      'productionShotTaskTypes'
     ]),
 
     searchField () {
@@ -500,6 +501,10 @@ export default {
       if (this.isTVShow) {
         collection.unshift('Episode')
       }
+      this.productionShotTaskTypes.forEach(item => {
+        collection.push(item.name)
+        collection.push(item.name + ' comment')
+      })
       return collection
     },
 
