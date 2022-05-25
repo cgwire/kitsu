@@ -615,6 +615,7 @@ const actions = {
     const episodeMap = rootGetters.episodeMap
     const organisation = rootGetters.organisation
     const personMap = rootGetters.personMap
+    const taskTypeMap = rootGetters.taskTypeMap
     let assets = cache.assets
     if (cache.result && cache.result.length > 0) {
       assets = cache.result
@@ -631,7 +632,7 @@ const actions = {
         asset.name,
         asset.description,
         asset.ready_for !== 'None'
-          ? helpers.getTaskType(asset.ready_for).name : ''
+          ? taskTypeMap.get(asset.ready_for).name : ''
       ])
       sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Asset')
