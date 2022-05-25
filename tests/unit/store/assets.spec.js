@@ -12,7 +12,6 @@ import {
   IMPORT_ASSETS_END,
   IMPORT_ASSETS_START,
   LOAD_ASSETS_END,
-  LOAD_ASSETS_ERROR,
   LOAD_ASSETS_START,
   LOCK_ASSET,
   REMOVE_ASSET,
@@ -619,6 +618,11 @@ describe('Assets store', () => {
             task_status_short_name: 'shortName1',
             assignees: ['person-1']
           }
+        })),
+        taskTypeMap: new Map(Object.entries({
+          'task-type-1': {
+            name: 'task-type-1-name'
+          }
         }))
       }
       store.cache.assets = [{
@@ -629,6 +633,7 @@ describe('Assets store', () => {
         asset_type_name: 'asset_type_name',
         name: 'name',
         description: 'description',
+        ready_for: 'task-type-1',
         data: {
           descriptor1: 'descriptor1',
           descriptor2: 'descriptor2'
@@ -644,6 +649,7 @@ describe('Assets store', () => {
         asset_type_name: 'asset_type_name2',
         name: 'name2',
         description: 'description2',
+        ready_for: 'task-type-1',
         data: {
           descriptor1: 'descriptor4',
           descriptor2: 'descriptor5'
@@ -658,6 +664,7 @@ describe('Assets store', () => {
         'asset_type_name',
         'name',
         'description',
+        'task-type-1-name',
         'descriptor1',
         'descriptor2',
         '2.08',
@@ -672,6 +679,7 @@ describe('Assets store', () => {
         'asset_type_name2',
         'name2',
         'description2',
+        'task-type-1-name',
         'descriptor4',
         'descriptor5',
         '4.17',
