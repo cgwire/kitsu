@@ -21,7 +21,7 @@
         @click="$emit('show-metadata-header-menu', $event)"
       >
         <chevron-down-icon
-          size="12px"
+          :size="'12'"
         />
       </span>
     </div>
