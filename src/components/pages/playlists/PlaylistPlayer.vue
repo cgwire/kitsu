@@ -127,11 +127,11 @@
         :current-preview-index="currentPreviewIndex"
         :muted="isMuted"
         @entity-change="onPlayerEntityChange"
+        @frame-update="onFrameUpdate"
         @max-duration-update="onMaxDurationUpdate"
         @metadata-loaded="onMetadataLoaded"
         @play-next="onPlayNext"
         @repeat="onVideoRepeated"
-        @frame-update="onFrameUpdate"
         v-show="isCurrentPreviewMovie && !isLoading"
       />
 
@@ -240,6 +240,20 @@
     @progress-changed="onProgressChanged"
     v-show="isCurrentPreviewMovie && playlist.id && !isAddingEntity"
   />
+
+  <div
+    id="sound-container"
+    :style="{
+      height: isWaveformDisplayed ? '60px' : '0px',
+      width: '100%'
+    }"
+    v-show="isWaveformDisplayed"
+  >
+    <div
+      id="waveform"
+    >
+    </div>
+  </div>
 
   <div
     class="playlist-footer flexrow"
@@ -393,6 +407,20 @@
         :title="$t('playlists.actions.looping')"
         icon="repeat"
         @click="onRepeatClicked"
+      />
+      <button-simple
+        class="button playlist-button flexrow-item"
+        :active="isWaveformDisplayed"
+        :title="$t('playlists.actions.toggle_waveform')"
+        icon="music"
+        @click="isWaveformDisplayed = !isWaveformDisplayed"
+      />
+      <button-simple
+        class="button playlist-button flexrow-item"
+        :active="isShowAnnotationsWhilePlaying"
+        :title="$t('playlists.actions.toggle_playing_annotations')"
+        icon="triangle"
+        @click="isShowAnnotationsWhilePlaying = !isShowAnnotationsWhilePlaying"
       />
 
       <span
@@ -785,6 +813,7 @@
  * It is made to work with a single playlist.
  */
 import moment from 'moment-timezone'
+import WaveSurfer from 'wavesurfer.js'
 import { mapActions, mapGetters } from 'vuex'
 import { ArrowUpRightIcon, DownloadIcon } from 'vue-feather-icons'
 
@@ -870,6 +899,8 @@ export default {
       isDlButtonsHidden: true,
       isShowingPalette: false,
       isShowingPencilPalette: false,
+      isShowAnnotationsWhilePlaying: false,
+      isWaveformDisplayed: false,
       playlistToEdit: {},
       previewRoomRef: 'playlist-player-preview-room',
       revisionOptions: [],
@@ -919,6 +950,7 @@ export default {
       this.setPlayerSpeed(1)
       this.rebuildComparisonOptions()
       this.onFrameUpdate(1)
+      this.configureWaveForm()
     })
   },
 
@@ -1191,8 +1223,8 @@ export default {
     },
 
     onPlayerEntityChange (entityIndex) {
+      this.playingEntityIndex = entityIndex
       if (this.isCurrentPreviewMovie) {
-        this.playingEntityIndex = entityIndex
         if (this.isComparing) {
           const comparisonIndex = this.rawPlayerComparison.currentIndex
           if (comparisonIndex !== entityIndex) {
@@ -1246,7 +1278,17 @@ export default {
       localEntity.preview_file_extension = previewFile.extension
       localEntity.preview_file_annotations = previewFile.annotations
       localEntity.preview_file_previews = previewFile.previews
-      if (this.rawPlayer) this.rawPlayer.reloadCurrentEntity()
+      if (this.rawPlayer) {
+        // Hack needed to make sure that the same entity is selected when
+        // switching from a non-video preview to a video preview
+        // Reloading the player makes it lose the right playing index, if it
+        // was not a video before.
+        if (this.rawPlayer.getCurrentTimeRaw() < 0.1) {
+          this.rawPlayer.loadEntity(this.playingEntityIndex, 0)
+        } else {
+          this.rawPlayer.reloadCurrentEntity()
+        }
+      }
       this.$emit('preview-changed', entity, previewFile.id)
       this.clearCanvas()
       this.updateTaskPanel()
@@ -1286,6 +1328,9 @@ export default {
         }
         if (this.$refs['video-progress']) {
           height -= this.$refs['video-progress'].$el.offsetHeight
+        }
+        if (this.isWaveformDisplayed) {
+          height -= 60
         }
         if (this.$refs['video-container']) {
           this.$refs['video-container'].style.height = `${height}px`
@@ -1519,6 +1564,28 @@ export default {
     saveUserComparisonChoice () {
       this.savedTaskTypeToCompare = this.taskTypeToCompare
       this.sendUpdatePlayingStatus()
+    },
+
+    configureWaveForm () {
+      this.wavesurfer = WaveSurfer.create({
+        container: '#waveform',
+        waveColor: '#00B242', // green
+        progressColor: '#008732', // dark-green,
+        height: 60,
+        responsive: true,
+        fillParent: true,
+        minPxPerSec: 1,
+        backend: 'MediaElement'
+      })
+      this.wavesurfer.on('seek', (position) => {
+        this.setCurrentTimeRaw(this.maxDurationRaw * position)
+      })
+    },
+
+    loadWaveForm () {
+      if (this.isWaveformDisplayed) {
+        this.wavesurfer.load(this.rawPlayer.currentPlayer)
+      }
     }
   },
 
@@ -1541,6 +1608,12 @@ export default {
       this.resetUndoStacks()
       this.currentPreviewIndex = 0
       this.currentComparisonPreviewIndex = 0
+      if (this.isCurrentPreviewMovie) {
+        this.$nextTick(() => {
+          this.loadWaveForm()
+          if (this.isPlaying) this.play()
+        })
+      }
       if (this.currentEntity) {
         this.annotations = this.currentEntity.preview_file_annotations || []
       }
@@ -1632,6 +1705,13 @@ export default {
         this.resetCanvas()
           .then(this.reloadCurrentAnnotation)
       })
+    },
+
+    isWaveformDisplayed () {
+      if (this.isWaveformDisplayed) {
+        this.resetHeight()
+        this.loadWaveForm()
+      }
     }
   },
 

@@ -139,6 +139,14 @@
     :class="iconClass"
     v-if="icon === 'soundon'"
   />
+  <triangle-icon
+    :class="iconClass"
+    v-if="icon === 'triangle'"
+  />
+  <music-icon
+    :class="iconClass"
+    v-if="icon === 'music'"
+  />
 
   <span
     :class="{
@@ -171,6 +179,7 @@ import {
   MaximizeIcon,
   MessageSquareIcon,
   MinusIcon,
+  MusicIcon,
   PauseIcon,
   PlayIcon,
   PlusIcon,
@@ -183,6 +192,7 @@ import {
   TrashIcon,
   TypeIcon,
   UploadIcon,
+  TriangleIcon,
   VolumeXIcon,
   Volume2Icon,
   XIcon
@@ -208,6 +218,7 @@ export default {
     MaximizeIcon,
     MessageSquareIcon,
     MinusIcon,
+    MusicIcon,
     PauseIcon,
     PlayIcon,
     PlusIcon,
@@ -220,6 +231,7 @@ export default {
     TrashIcon,
     TypeIcon,
     UploadIcon,
+    TriangleIcon,
     VolumeXIcon,
     Volume2Icon,
     XIcon

@@ -1,4 +1,4 @@
-import { mapActions, mapGetters } from 'vuex'
+mport { mapActions, mapGetters } from 'vuex'
 import { fabric } from 'fabric'
 
 import { formatTime, formatFrame, roundToFrame, floorToFrame } from '@/lib/video'
@@ -380,7 +380,6 @@ export const playerMixin = {
         }
         this.isPlaying = this.rawPlayer.isPlaying
       }
-      this.hideCanvas()
       this.clearCanvas()
     },
 
@@ -399,7 +398,6 @@ export const playerMixin = {
     playEntity (entityIndex) {
       const entity = this.entityList[entityIndex]
       const wasDrawing = this.isDrawing === true
-      this.hideCanvas()
       this.clearCanvas()
       this.framesSeenOfPicture = 0
       this.playingEntityIndex = entityIndex
@@ -685,6 +683,18 @@ export const playerMixin = {
       return roundToFrame(this.currentTimeRaw, this.fps) || 0
     },
 
+    setCurrentTimeRaw (time) {
+      const roundedTime = roundToFrame(time, this.fps) || 0
+      const frameNumber = roundedTime / this.frameDuration
+      if (this.rawPlayer) {
+        this.rawPlayer.setCurrentFrame(frameNumber)
+        this.syncComparisonPlayer()
+        this.currentTimeRaw = roundedTime
+        this.updateProgressBar()
+      }
+      return roundedTime
+    },
+
     reloadCurrentAnnotation () {
       let currentTime = roundToFrame(this.currentTimeRaw, this.fps) || 0
       if (this.isCurrentPreviewPicture) currentTime = 0
@@ -734,6 +744,15 @@ export const playerMixin = {
       this.updateProgressBar()
       const actions = this.onNextTimeUpdateActions
       actions.forEach(action => action())
+      if (this.isShowAnnotationsWhilePlaying) {
+        const annotation = this.getAnnotation(this.currentTimeRaw)
+        if (annotation) {
+          this.clearCanvas()
+          this.loadSingleAnnotation(annotation)
+        } else {
+          this.clearCanvas()
+        }
+      }
       this.onNextTimeUpdateActions = []
     },
 
