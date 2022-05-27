@@ -78,6 +78,12 @@ const helpers = {
   }
 }
 
+const cache = {
+  doneIndex: {},
+  doneTasks: [],
+  todosIndex: {}
+}
+
 const initialState = {
   user: null,
   isAuthenticated: false,
@@ -98,7 +104,6 @@ const initialState = {
   todos: [],
   displayedTodos: [],
   displayedDoneTasks: [],
-  todosIndex: {},
   todosSearchText: '',
   todoSelectionGrid: {},
   todoSearchQueries: [],
@@ -406,9 +411,9 @@ const mutations = {
     })
     state.todoSelectionGrid = buildSelectionGrid(tasks.length, 1)
     state.todos = sortTasks(tasks, taskTypeMap)
-    state.todosIndex = buildTaskIndex(tasks)
+    cache.todosIndex = buildTaskIndex(tasks)
     const keywords = getKeyWords(state.todosSearchText)
-    const searchResult = indexSearch(state.todosIndex, keywords)
+    const searchResult = indexSearch(cache.todosIndex, keywords)
     state.displayedTodos = searchResult || state.todos
     if (userFilters.todos && userFilters.todos.all) {
       state.todoSearchQueries = userFilters.todos.all
@@ -419,10 +424,12 @@ const mutations = {
 
   [USER_LOAD_DONE_TASKS_END] (state, tasks) {
     tasks.forEach(populateTask)
-    tasks.forEach((task) => {
+    tasks.forEach(task => {
       const taskStatus = helpers.getTaskStatus(task.task_status_id)
       task.taskStatus = taskStatus
     })
+    cache.doneIndex = buildTaskIndex(tasks)
+    cache.doneTasks = tasks
     state.displayedDoneTasks = tasks
   },
 
@@ -457,15 +464,18 @@ const mutations = {
         task_status_color: taskStatus.color,
         last_comment: comment
       })
-      state.todosIndex = buildTaskIndex(state.todos)
+      cache.todosIndex = buildTaskIndex(state.todos)
+      cache.doneIndex = buildTaskIndex(cache.doneTasks)
     }
   },
 
   [SET_TODOS_SEARCH] (state, searchText) {
     const keywords = getKeyWords(searchText)
-    const searchResult = indexSearch(state.todosIndex, keywords)
+    let searchResult = indexSearch(cache.todosIndex, keywords)
     state.todosSearchText = searchText
     state.displayedTodos = searchResult || state.todos
+    searchResult = indexSearch(cache.doneIndex, keywords)
+    state.displayedDoneTasks = searchResult || cache.doneTasks
   },
 
   [SAVE_TODO_SEARCH_END] (state, { searchQuery }) {
@@ -576,6 +586,9 @@ const mutations = {
 
   [RESET_ALL] (state) {
     Object.assign(state, { ...initialState })
+    cache.doneIndex = {}
+    cache.todosIndex = {}
+    cache.doneTasks = []
   }
 }
 

@@ -150,12 +150,15 @@
          {{ maxDuration }}
         </span>
 
-        <span
+        <div
           class="flexrow-item time-indicator mr1"
           :title="$t('playlists.actions.frame_number')"
         >
-          ({{ currentFrame }})
-        </span>
+          <span v-if="light">({{ currentFrame }})</span>
+          <span v-else>
+            ({{ currentFrame }} / {{ (nbFrames + '').padStart(3, '0') }})
+          </span>
+        </div>
       </div>
 
       <div class="flexrow flexrow-item">

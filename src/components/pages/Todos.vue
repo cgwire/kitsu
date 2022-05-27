@@ -49,7 +49,6 @@
           @enter="saveSearchQuery"
           @save="saveSearchQuery"
           :can-save="true"
-          v-if="!isTabActive('done')"
         />
 
         <span class="filler"></span>
@@ -111,7 +110,7 @@
         :is-error="isTodosLoadingError"
         :time-spent-map="timeSpentMap"
         :time-spent-total="timeSpentTotal"
-        :hide-done="todosSearchText.length > 0 || loggableDoneTasks.length === 0"
+        :hide-done="loggableDoneTasks.length === 0"
         @date-changed="onDateChanged"
         @time-spent-change="onTimeSpentChange"
         @set-day-off="onSetDayOff"
@@ -235,7 +234,7 @@ export default {
 
     loggableDoneTasks () {
       return this.displayedDoneTasks
-        .filter((task) => {
+        .filter(task => {
           return this.taskTypeMap.get(task.task_type_id).allow_timelog
         })
     },

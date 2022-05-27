@@ -124,7 +124,7 @@ export default {
     change_status: 'changes task status to',
     create_error: 'An error occurred while saving this status automation. Are you sure that there is no other action with the same name?',
     delete_text: 'Are you sure you want to remove status automation {name} from your database?',
-    delete_error: 'An error occurred while deleting this status automation.',
+    delete_error: 'An error occurred while deleting this status automation. It may be linked to a project. In that case, you can\'t delete it. You have to remove it from every project first.',
     edit_title: 'Edit a status automation',
     entity_title: 'Entity type concerned by the trigger',
     number: 'status automation | status automations',
@@ -637,7 +637,9 @@ export default {
       speed: 'Change speed',
       split_screen: 'Compare with other task types',
       switch_ld: 'Switch to low definition',
-      switch_hd: 'Switch to high definition'
+      switch_hd: 'Switch to high definition',
+      toggle_playing_annotations: 'Show/Hide annotations while playing movies',
+      toggle_waveform: 'Show/Hide movie waveform'
     }
   },
 
@@ -986,7 +988,7 @@ export default {
   },
 
   server_down: {
-    text: 'Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.',
+    text: 'Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.',
     title: 'Kitsu encountered an error while reaching its data API.'
   },
 

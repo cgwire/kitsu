@@ -30,7 +30,7 @@
       :is-error="errors.del"
       :text="deleteText"
       :error-text="$t('status_automations.delete_error')"
-      @cancel="modals.delete = false"
+      @cancel="modals.del = false"
       @confirm="confirmDeleteStatusAutomation"
     />
   </div>
