@@ -155,7 +155,13 @@ export const getTaskTypeSchedulePath = (
 ) => {
   const route = getContextRoute('task-type-schedule', productionId, episodeId)
   route.params.task_type_id = taskTypeId
-  route.params.type = type
+  if (type === 'shot') {
+    route.params.type = 'shots'
+  } else if (type === 'asset') {
+    route.params.type = 'assets'
+  } else if (type === 'edit') {
+    route.params.type = 'edits'
+  }
   return route
 }
 
