@@ -237,7 +237,7 @@ describe('path', () => {
       name: 'task-type-schedule',
       params: {
         task_type_id: 1,
-        type: 'shot',
+        type: 'shots',
         production_id: 2
       }
     })
@@ -245,7 +245,7 @@ describe('path', () => {
       name: 'episode-task-type-schedule',
       params: {
         task_type_id: 1,
-        type: 'shot',
+        type: 'shots',
         production_id: 2,
         episode_id: 3
       }
