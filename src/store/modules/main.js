@@ -60,6 +60,10 @@ const actions = {
 
   loadEvents ({ commit, state }, { after, before }) {
     return client.getEvents(after, before)
+  },
+
+  searchData (_, { query }) {
+    return client.searchData(query)
   }
 }
 

@@ -1,4 +1,4 @@
-mport { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import { fabric } from 'fabric'
 
 import { formatTime, formatFrame, roundToFrame, floorToFrame } from '@/lib/video'
