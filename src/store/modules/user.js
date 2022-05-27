@@ -475,9 +475,7 @@ const mutations = {
     state.todosSearchText = searchText
     state.displayedTodos = searchResult || state.todos
     searchResult = indexSearch(cache.doneIndex, keywords)
-    console.log(searchResult, keywords)
     state.displayedDoneTasks = searchResult || cache.doneTasks
-    console.log(state.displayedDoneTasks)
   },
 
   [SAVE_TODO_SEARCH_END] (state, { searchQuery }) {
