@@ -13,8 +13,8 @@ export default {
     empty_list_client: 'There is no asset in this production.',
     multiple_delete_error: 'An error occurred while deleting an asset. There is probably some data linked to an asset. Are you sure there is no task linked to a selected asset?',
     only_current_episode: 'Only current episode',
-    new_asset: 'Create an asset',
-    new_assets: 'Add assets',
+    new_asset: 'Create assets',
+    new_assets: 'Create assets',
     new_success: 'Asset {name} successfully created.',
     no_cast_in: 'This asset is not cast in any shot.',
     number: 'asset | assets',
@@ -350,7 +350,7 @@ export default {
     frameIn: 'Frames In',
     frameOut: 'Frames Out',
     from: 'From',
-    go_productions: 'Go to productions',
+    go_productions: 'Return To Production',
     history: 'history',
     info: 'Information',
     home: 'return to home page',
@@ -651,7 +651,7 @@ export default {
     edit_title: 'Edit production',
     new_production: 'Add a production',
     number: 'production | productions',
-    open_productions: 'My productions',
+    open_productions: 'My Productions',
     picture: 'Change picture',
     title: 'Productions',
     creation: {
@@ -959,7 +959,7 @@ export default {
     history: 'Shot values history',
     multiple_delete_error: 'An error occurred while deleting a shot. There is probably some data linked to a shot. Are you sure there is no task linked to a selected shot?',
     new_shot: 'Add a shot',
-    new_shots: 'Add shots',
+    new_shots: 'Create shots',
     new_sequences: 'Add sequences',
     new_episodes: 'Add episodes',
     no_casting: 'The shot casting is empty.',
@@ -1050,7 +1050,7 @@ export default {
     for_project: 'For project',
     hide_assignations: 'Hide assignations',
     hide_infos: 'Hide additional information',
-    my_tasks: 'My tasks',
+    my_tasks: 'My Tasks',
     next: 'next task',
     no_assignation_right: 'You are not allowed to manage assignations',
     no_comment: 'There is currently no comment for this task.',
@@ -1113,8 +1113,8 @@ export default {
       very_high: 'Very High'
     },
     combobox_departments: {
-      all_departments: 'All the departments',
-      my_departments: 'My departments'
+      all_departments: 'All departments',
+      my_departments: 'My Departments'
     }
   },
 
