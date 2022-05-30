@@ -1113,7 +1113,7 @@ export default {
       very_high: 'Very High'
     },
     combobox_departments: {
-      all_departments: 'All departments',
+      all_departments: 'All Departments',
       my_departments: 'My Departments'
     }
   },
