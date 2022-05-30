@@ -102,12 +102,16 @@ export const playerMixin = {
     overlayOpacity () {
       if (this.isComparing && this.isComparisonOverlay) {
         switch (this.comparisonMode) {
+          case 'overlay0':
+            return 1
           case 'overlay25':
             return 0.25
           case 'overlay50':
             return 0.5
           case 'overlay75':
             return 0.75
+          case 'overlay100':
+            return 0
           default:
             return 1
         }
@@ -726,8 +730,9 @@ export const playerMixin = {
     },
 
     onSpeedClicked () {
-      this.speed = this.speed + 1 > 3 ? 1 : this.speed + 1
+      this.speed = this.speed + 1 > 4 ? 1 : this.speed + 1
       let rate = 1
+      if (this.speed === 4) rate = 2
       if (this.speed === 2) rate = 0.5
       if (this.speed === 1) rate = 0.25
       this.setPlayerSpeed(rate)
