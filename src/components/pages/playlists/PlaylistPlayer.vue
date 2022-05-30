@@ -1278,6 +1278,7 @@ export default {
       localEntity.preview_file_extension = previewFile.extension
       localEntity.preview_file_annotations = previewFile.annotations
       localEntity.preview_file_previews = previewFile.previews
+      localEntity.preview_file_revision = previewFile.revision
       if (this.rawPlayer) {
         // Hack needed to make sure that the same entity is selected when
         // switching from a non-video preview to a video preview

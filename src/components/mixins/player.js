@@ -159,6 +159,7 @@ export const playerMixin = {
           id: this.currentEntity.preview_file_id,
           extension: this.currentEntity.preview_file_extension,
           task_id: this.currentEntity.preview_file_task_id,
+          revision: this.currentEntity.preview_file_revision,
           annotations: this.currentEntity.preview_file_annotations || []
         }
       } else {
