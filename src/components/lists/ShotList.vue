@@ -117,10 +117,6 @@
             {{ $t('shots.fields.nb_frames') }}
           </th>
 
-          <th scope="col" class="fps" v-if="isFps && isShowInfos && metadataDisplayHeaders.fps">
-            {{ $t('shots.fields.fps') }}
-          </th>
-
           <th
             scope="col"
             class="framein"
@@ -134,6 +130,10 @@
             v-if="isFrameOut && isShowInfos && metadataDisplayHeaders.frameOut"
           >
             {{ $t('shots.fields.frame_out') }}
+          </th>
+
+          <th scope="col" class="fps" v-if="isFps && isShowInfos && metadataDisplayHeaders.fps">
+            {{ $t('shots.fields.fps') }}
           </th>
 
           <metadata-header

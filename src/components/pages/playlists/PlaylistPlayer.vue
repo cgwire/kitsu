@@ -29,6 +29,7 @@
       :leaveRoom="leaveRoom"
       v-if="isValidRoomId(playlist.id)"
     />
+    <div class="filler"></div>
     <button-simple
       @click="$emit('show-add-entities')"
       class="playlist-button topbar-button flexrow-item"
