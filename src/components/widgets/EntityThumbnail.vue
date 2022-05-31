@@ -106,7 +106,7 @@ export default {
         style['max-width'] = this.maxWidth + 'px'
       } else if (this.width) {
         style.width = this.width + 'px'
-        style.['min-width'] = this.width + 'px'
+        style['min-width'] = this.width + 'px'
       }
       if (this.maxHeight) {
         style['max-height'] = this.maxHeight + 'px'
