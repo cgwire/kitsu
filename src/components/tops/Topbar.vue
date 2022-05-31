@@ -274,7 +274,7 @@ export default {
     ]),
 
     assetSections () {
-      return ['assets', 'assetTypes', 'playlists']
+      return ['assets', 'assetTypes', 'breakdown', 'playlists']
     },
 
     editSections () {

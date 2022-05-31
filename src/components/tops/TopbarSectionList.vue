@@ -24,9 +24,9 @@
     >
       <div
         class="section-line"
-        v-for="section in sectionList"
+        v-for="(section, index) in sectionList"
         @click="selectSection(section)"
-        :key="section.value"
+        :key="section.value + '-' + index"
       >
         <router-link
           :to="getSectionPath(section)"
