@@ -59,7 +59,7 @@
           v-if="isCurrentUserManager && isPreview && extension !== 'gif'"
         />
         <subscribe-button
-          class="flexrow-item"
+          class="flexrow-item subscribe-button"
           :subscribed="isAssigned || isSubscribed"
           @click="toggleSubscribe"
           v-if="!isAssigned"
@@ -1276,7 +1276,8 @@ export default {
 }
 
 .change-wideness-button,
-.set-thumbnail-button {
+.set-thumbnail-button,
+.subscribe-button {
   margin-right: 0.2em;
 }
 
