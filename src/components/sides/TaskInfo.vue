@@ -1026,6 +1026,7 @@ export default {
       const nameData = [
         moment().format('YYYY-MM-DD'),
         'kitsu',
+        this.currentProduction.name,
         this.task.entity_name.replaceAll(' / ', '_'),
         this.taskTypeMap.get(this.task.task_type_id).name,
         'comments'
@@ -1033,7 +1034,6 @@ export default {
       const name = stringHelpers.slugify(nameData.join('_'))
       var headers = [
         this.$t('comments.fields.created_at'),
-        this.$t('comments.fields.updated_at'),
         this.$t('comments.fields.task_status'),
         this.$t('comments.fields.person'),
         this.$t('comments.fields.text'),
@@ -1044,22 +1044,20 @@ export default {
       this.getCurrentTaskComments().forEach(comment => {
         commentLines.push([
           comment.created_at,
-          comment.updated_at,
           comment.task_status.name,
           comment.person.name,
           comment.text,
           comment.checklist.map(checkListElement =>
-          `[${checkListElement.checked}] ${checkListElement.text}`)
-            .join(';'),
+          `[${checkListElement.checked ? 'x' : ' '}] ${checkListElement.text}`)
+            .join('\n'),
           comment.acknowledgements.map(personId =>
             this.personMap.get(personId).name)
-            .join(';')
+            .join(',')
         ])
         comment.replies.forEach(reply =>
           commentLines.push([
             reply.date,
-            '',
-            'reply',
+            'Reply',
             this.personMap.get(reply.person_id).name,
             reply.text
           ])
