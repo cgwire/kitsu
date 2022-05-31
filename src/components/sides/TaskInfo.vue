@@ -64,6 +64,12 @@
           @click="toggleSubscribe"
           v-if="!isAssigned"
         />
+        <button-simple
+          class="flexrow-item"
+          icon="download"
+          :title="$t('main.csv.export_file')"
+          @click="onExportClick"
+        />
         <div class="filler"></div>
         <div class="preview-list flexrow" v-if="isPreview">
           <span
@@ -267,6 +273,9 @@ import Spinner from '@/components/widgets/Spinner'
 import SubscribeButton from '@/components/widgets/SubscribeButton'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 import PreviewPlayer from '@/components/previews/PreviewPlayer'
+import csv from '../../lib/csv'
+import moment from 'moment'
+import stringHelpers from '../../lib/string'
 
 export default {
   name: 'task-info',
@@ -1011,6 +1020,50 @@ export default {
       this.$refs['add-comment'].hideAnnotationLoading()
       this.$refs['add-comment'].setAnnotationSnapshots(files)
       return files
+    },
+
+    onExportClick () {
+      const nameData = [
+        moment().format('YYYY-MM-DD'),
+        'kitsu',
+        this.task.entity_name.replaceAll(' / ', '_'),
+        this.taskTypeMap.get(this.task.task_type_id).name,
+        'comments'
+      ]
+      const name = stringHelpers.slugify(nameData.join('_'))
+      var headers = [
+        this.$t('comments.fields.created_at'),
+        this.$t('comments.fields.updated_at'),
+        this.$t('comments.fields.task_status'),
+        this.$t('comments.fields.person'),
+        this.$t('comments.fields.text'),
+        this.$t('comments.fields.checklist')
+      ]
+      var commentLines = []
+      this.getCurrentTaskComments().forEach(comment => {
+        var checkListElements = []
+        comment.checklist.forEach(checkListElement => {
+          checkListElements.push(`[${checkListElement.checked}] ${checkListElement.text}`)
+        })
+        commentLines.push([
+          comment.created_at,
+          comment.updated_at,
+          comment.task_status.name,
+          comment.person.name,
+          comment.text,
+          checkListElements.join(';')
+        ])
+        comment.replies.forEach(reply =>
+          commentLines.push([
+            reply.date,
+            '',
+            'reply',
+            this.personMap.get(reply.person_id).name,
+            reply.text
+          ])
+        )
+      })
+      csv.buildCsvFile(name, [headers].concat(commentLines))
     }
   },
 
