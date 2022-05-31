@@ -1,4 +1,4 @@
-import client from './client'
+import client from '@/store/api/client'
 
 export default {
   getEdit (editId, callback) {

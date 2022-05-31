@@ -23,8 +23,8 @@
 <script>
 import { mapGetters } from 'vuex'
 
-import { formatFrame, formatTime, floorToFrame } from '../../lib/video'
-import Spinner from '../widgets/Spinner'
+import { formatFrame, formatTime, floorToFrame } from '@/lib/video'
+import Spinner from '@/components/widgets/Spinner'
 
 import { domMixin } from '@/components/mixins/dom'
 

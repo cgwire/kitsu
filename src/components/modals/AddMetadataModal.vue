@@ -153,18 +153,18 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
-import { descriptorMixin } from '../mixins/descriptors'
-import { remove } from '../../lib/models'
+import { modalMixin } from '@/components/modals/base_modal'
+import { descriptorMixin } from '@/components/mixins/descriptors'
+import { remove } from '@/lib/models'
 
-import Combobox from '../widgets/Combobox'
-import ComboboxBoolean from '../widgets/ComboboxBoolean'
-import ModalFooter from './ModalFooter'
-import TextField from '../widgets/TextField'
-import ComboboxDepartment from '../widgets/ComboboxDepartment'
-import DepartmentName from '../widgets/DepartmentName'
-import ButtonSimple from '../widgets/ButtonSimple'
-import Checklist from '../widgets/Checklist'
+import Combobox from '@/components/widgets/Combobox'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
+import ModalFooter from '@/components/modals/ModalFooter'
+import TextField from '@/components/widgets/TextField'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
+import DepartmentName from '@/components/widgets/DepartmentName'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import Checklist from '@/components/widgets/Checklist'
 
 export default {
   name: 'add-metadata-modal',

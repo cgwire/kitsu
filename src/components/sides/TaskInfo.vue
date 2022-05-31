@@ -255,13 +255,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import {
-  getTaskEntityPath,
-  getTaskPath
-} from '@/lib/path'
-import {
-  getTaskTypeStyle
-} from '@/lib/render'
+import moment from 'moment'
+import { getTaskEntityPath, getTaskPath } from '@/lib/path'
+import { getTaskTypeStyle } from '@/lib/render'
+import csv from '@/lib/csv'
+import stringHelpers from '@/lib/string'
 
 import AddComment from '@/components/widgets/AddComment'
 import AddPreviewModal from '@/components/modals/AddPreviewModal'
@@ -273,9 +271,6 @@ import Spinner from '@/components/widgets/Spinner'
 import SubscribeButton from '@/components/widgets/SubscribeButton'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 import PreviewPlayer from '@/components/previews/PreviewPlayer'
-import csv from '../../lib/csv'
-import moment from 'moment'
-import stringHelpers from '../../lib/string'
 
 export default {
   name: 'task-info',

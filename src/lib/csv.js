@@ -4,10 +4,10 @@ import {
   getMonthRange,
   getWeekRange,
   hoursToDays
-} from './time'
+} from '@/lib/time'
 import {
   getPercentage
-} from './stats'
+} from '@/lib/stats'
 
 const csv = {
   generateTimesheet (

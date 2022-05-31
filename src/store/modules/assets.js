@@ -1,47 +1,47 @@
 import Vue from 'vue'
 
-import assetsApi from '../api/assets'
-import peopleApi from '../api/people'
-import tasksStore from './tasks'
-import taskTypesStore from './tasktypes'
-import productionsStore from './productions'
-import peopleStore from './people'
+import assetsApi from '@/store/api/assets'
+import peopleApi from '@/store/api/people'
+import tasksStore from '@/store/modules/tasks'
+import taskTypesStore from '@/store/modules/tasktypes'
+import productionsStore from '@/store/modules/productions'
+import peopleStore from '@/store/modules/people'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import {
   minutesToDays
-} from '../../lib/time'
+} from '@/lib/time'
 
-import { PAGE_SIZE } from '../../lib/pagination'
+import { PAGE_SIZE } from '@/lib/pagination'
 import {
   sortAssetResult,
   sortAssets,
   sortByName,
   sortTasks,
   sortValidationColumns
-} from '../../lib/sorting'
+} from '@/lib/sorting'
 import {
   appendSelectionGrid,
   buildSelectionGrid,
   clearSelectionGrid
-} from '../../lib/selection'
+} from '@/lib/selection'
 import {
   getFilledColumns,
   groupEntitiesByParents,
   removeModelFromList
-} from '../../lib/models'
+} from '@/lib/models'
 import {
   computeStats
-} from '../../lib/stats'
+} from '@/lib/stats'
 import {
   buildAssetIndex,
   buildNameIndex,
   indexSearch
-} from '../../lib/indexing'
+} from '@/lib/indexing'
 import {
   applyFilters,
   getKeyWords,
   getFilters
-} from '../../lib/filtering'
+} from '@/lib/filtering'
 
 import {
   CLEAR_ASSETS,
@@ -99,7 +99,7 @@ import {
 
   CLEAR_SELECTED_ASSETS,
   SET_ASSET_SELECTION
-} from '../mutation-types'
+} from '@/store/mutation-types'
 import async from 'async'
 
 const helpers = {

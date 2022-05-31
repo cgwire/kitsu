@@ -12,8 +12,8 @@ import {
 
   TOGGLE_USER_MENU,
   RESET_ALL
-} from '../mutation-types'
-import auth from '../../lib/auth'
+} from '@/store/mutation-types'
+import auth from '@/lib/auth'
 
 const initialState = {
   email: '',

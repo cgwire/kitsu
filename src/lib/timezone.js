@@ -1,6 +1,6 @@
 import moment from 'moment-timezone'
 
-import store from '../store'
+import store from '@/store'
 
 export default {
 

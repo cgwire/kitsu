@@ -203,16 +203,16 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
-import { getFilters } from '../../lib/filtering'
+import { modalMixin } from '@/components/modals/base_modal'
+import { getFilters } from '@/lib/filtering'
 
-import ButtonSimple from '../widgets/ButtonSimple'
-import Combobox from '../widgets/Combobox'
-import ComboboxStatus from '../widgets/ComboboxStatus'
-import ComboboxTaskType from '../widgets/ComboboxTaskType'
-import ModalFooter from './ModalFooter'
-import PeopleField from '../widgets/PeopleField'
-import TextField from '../widgets/TextField'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import Combobox from '@/components/widgets/Combobox'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
+import ModalFooter from '@/components/modals/ModalFooter'
+import PeopleField from '@/components/widgets/PeopleField'
+import TextField from '@/components/widgets/TextField'
 
 export default {
   name: 'build-filter-modal',

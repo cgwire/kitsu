@@ -116,9 +116,9 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import ChangeAvatarModal from '../modals/ChangeAvatarModal'
-import ComboboxBoolean from '../widgets/ComboboxBoolean'
-import TextField from '../widgets/TextField'
+import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
+import TextField from '@/components/widgets/TextField'
 
 export default {
   name: 'settings',

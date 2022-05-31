@@ -226,7 +226,7 @@ import EditLabelModal from '@/components/modals/EditLabelModal'
 import ImportRenderModal from '@/components/modals/ImportRenderModal'
 import ImportModal from '@/components/modals/ImportModal'
 import SearchField from '@/components/widgets/SearchField'
-import ShotLine from './breakdown/ShotLine'
+import ShotLine from '@/components/pages/breakdown/ShotLine'
 import Spinner from '@/components/widgets/Spinner'
 
 export default {

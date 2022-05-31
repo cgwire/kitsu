@@ -46,10 +46,10 @@ import moment from 'moment-timezone'
 
 import { mapGetters, mapActions } from 'vuex'
 import { XIcon } from 'vue-feather-icons'
-import PageTitle from '../widgets/PageTitle'
-import PeopleAvatar from '../widgets/PeopleAvatar'
-import QuotaShotList from '../lists/QuotaShotList'
-import { monthToString } from '../../lib/time'
+import PageTitle from '@/components/widgets/PageTitle'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import QuotaShotList from '@/components/lists/QuotaShotList'
+import { monthToString } from '@/lib/time'
 
 export default {
   name: 'shot-quota-info',

@@ -43,7 +43,7 @@ import EditPlaylistModal from '@/components/modals/EditPlaylistModal'
 import PlaylistPlayer from '@/components/pages/playlists/PlaylistPlayer'
 
 import { mapActions, mapGetters } from 'vuex'
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
 
 export default {
   name: 'view-playlist-modal',

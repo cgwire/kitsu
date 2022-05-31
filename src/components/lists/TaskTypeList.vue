@@ -141,10 +141,10 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import draggable from 'vuedraggable'
-import RowActionsCell from '../cells/RowActionsCell'
-import TableInfo from '../widgets/TableInfo'
-import TaskTypeCell from '../cells/TaskTypeName'
-import DepartmentName from '../widgets/DepartmentName.vue'
+import RowActionsCell from '@/components/cells/RowActionsCell'
+import TableInfo from '@/components/widgets/TableInfo'
+import TaskTypeCell from '@/components/cells/TaskTypeName'
+import DepartmentName from '@/components/widgets/DepartmentName.vue'
 
 export default {
   name: 'task-type-list',

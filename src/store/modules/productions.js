@@ -1,12 +1,12 @@
 import Vue from 'vue'
-import productionsApi from '../api/productions'
-import { sortProductions, sortByName } from '../../lib/sorting'
+import productionsApi from '@/store/api/productions'
+import { sortProductions, sortByName } from '@/lib/sorting'
 import {
   addToIdList,
   removeFromIdList,
   removeModelFromList,
   updateModelFromList
-} from '../../lib/models'
+} from '@/lib/models'
 import {
   LOAD_PRODUCTIONS_START,
   LOAD_PRODUCTIONS_ERROR,
@@ -57,7 +57,7 @@ import {
   CLEAR_ASSETS,
 
   RESET_ALL
-} from '../mutation-types'
+} from '@/store/mutation-types'
 
 const initialState = {
   productions: [],

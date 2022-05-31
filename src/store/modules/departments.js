@@ -1,4 +1,4 @@
-import departmentsApi from '../api/departments'
+import departmentsApi from '@/store/api/departments'
 import {
   LOAD_DEPARTMENTS_START,
   LOAD_DEPARTMENTS_ERROR,
@@ -12,7 +12,7 @@ import {
   RESET_ALL,
   EDIT_DEPARTMENTS_START,
   EDIT_DEPARTMENTS_ERROR
-} from '../mutation-types'
+} from '@/store/mutation-types'
 
 const initialState = {
   departments: [],

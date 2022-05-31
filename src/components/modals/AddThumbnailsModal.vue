@@ -82,18 +82,18 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
 
 import { CheckIcon } from 'vue-feather-icons'
 
-import stringHelpers from '../../lib/string'
-import assetStore from '../../store/modules/assets'
-import shotStore from '../../store/modules/shots'
+import stringHelpers from '@/lib/string'
+import assetStore from '@/store/modules/assets'
+import shotStore from '@/store/modules/shots'
 
-import ComboboxTaskType from '../widgets/ComboboxTaskType'
-import FileUpload from '../widgets/FileUpload'
-import ModalFooter from './ModalFooter'
-import Spinner from '../widgets/Spinner'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
+import FileUpload from '@/components/widgets/FileUpload'
+import ModalFooter from '@/components/modals/ModalFooter'
+import Spinner from '@/components/widgets/Spinner'
 
 export default {
   name: 'add-thumbnails-modal',

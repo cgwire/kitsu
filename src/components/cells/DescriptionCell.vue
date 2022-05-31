@@ -48,7 +48,7 @@
 <script>
 import { renderMarkdown } from '@/lib/render'
 import { mapGetters, mapActions } from 'vuex'
-import stringHelpers from '../../lib/string'
+import stringHelpers from '@/lib/string'
 
 export default {
   name: 'description-cell',

@@ -86,10 +86,10 @@ import { mapGetters, mapActions } from 'vuex'
 import { formatListMixin } from '@/components/mixins/format'
 import { getTaskPath } from '@/lib/path'
 
-import ButtonSimple from '../widgets/ButtonSimple'
-import TableInfo from '../widgets/TableInfo'
-import ProductionNameCell from '../cells/ProductionNameCell'
-import TaskTypeName from '../cells/TaskTypeName'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import TableInfo from '@/components/widgets/TableInfo'
+import ProductionNameCell from '@/components/cells/ProductionNameCell'
+import TaskTypeName from '@/components/cells/TaskTypeName'
 
 export default {
   name: 'entity-task-list',

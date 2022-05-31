@@ -3,8 +3,8 @@ import {
   buildTaskStatusIndex,
   buildNameIndex,
   indexSearch
-} from './indexing'
-import string from './string'
+} from '@/lib/indexing'
+import string from '@/lib/string'
 
 const UNION_REGEX = /\+\(.*\)/
 const EQUAL_REGEX = /\[([^[]*)\]=\[([^[]*)\]|([^ ]*)=\[([^[]*)\]|([^ ]*)=([^ ]*)|\[([^[]*)\]=([^ ]*)/g

@@ -211,14 +211,14 @@ import {
 } from 'vue-feather-icons'
 import { marked } from 'marked'
 import moment from 'moment-timezone'
-import { renderComment } from '../../lib/render'
+import { renderComment } from '@/lib/render'
 
-import EntityThumbnail from '../widgets/EntityThumbnail'
-import PeopleAvatar from '../widgets/PeopleAvatar'
-import Spinner from '../widgets/Spinner'
-import TaskInfo from '../sides/TaskInfo'
-import TaskTypeName from '../widgets/TaskTypeName'
-import ValidationTag from '../widgets/ValidationTag'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import Spinner from '@/components/widgets/Spinner'
+import TaskInfo from '@/components/sides/TaskInfo'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
+import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
   name: 'notification-page',

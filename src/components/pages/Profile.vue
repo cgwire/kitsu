@@ -234,10 +234,10 @@
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
-import ComboboxBoolean from '../widgets/ComboboxBoolean'
-import ChangeAvatarModal from '../modals/ChangeAvatarModal'
-import PeopleAvatar from '../widgets/PeopleAvatar'
-import TextField from '../widgets/TextField'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
+import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import TextField from '@/components/widgets/TextField'
 
 export default {
   name: 'profile',

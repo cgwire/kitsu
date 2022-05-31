@@ -11,7 +11,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import TaskTypeName from '../widgets/TaskTypeName'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
   name: 'task-type-cell',

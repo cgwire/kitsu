@@ -36,7 +36,7 @@
 import firstBy from 'thenby'
 import { mapGetters } from 'vuex'
 
-import ComboboxStyled from '../widgets/ComboboxStyled'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {

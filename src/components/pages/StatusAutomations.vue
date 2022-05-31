@@ -38,9 +38,9 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import StatusAutomationList from '../lists/StatusAutomationList'
-import DeleteModal from '../modals/DeleteModal'
-import EditStatusAutomationModal from '../modals/EditStatusAutomationModal'
+import StatusAutomationList from '@/components/lists/StatusAutomationList'
+import DeleteModal from '@/components/modals/DeleteModal'
+import EditStatusAutomationModal from '@/components/modals/EditStatusAutomationModal'
 import ListPageHeader from '@/components/widgets/ListPageHeader'
 
 export default {

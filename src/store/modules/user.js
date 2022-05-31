@@ -1,16 +1,16 @@
 import Vue from 'vue'
-import peopleApi from '../api/people'
-import peopleStore from './people'
-import taskStatusStore from './taskstatus'
-import auth from '../../lib/auth'
-import { sortTasks, sortByName } from '../../lib/sorting'
-import { indexSearch, buildTaskIndex } from '../../lib/indexing'
-import { getKeyWords } from '../../lib/filtering'
-import { populateTask } from '../../lib/models'
+import peopleApi from '@/store/api/people'
+import peopleStore from '@/store/modules/people'
+import taskStatusStore from '@/store/modules/taskstatus'
+import auth from '@/lib/auth'
+import { sortTasks, sortByName } from '@/lib/sorting'
+import { indexSearch, buildTaskIndex } from '@/lib/indexing'
+import { getKeyWords } from '@/lib/filtering'
+import { populateTask } from '@/lib/models'
 import {
   buildSelectionGrid,
   clearSelectionGrid
-} from '../../lib/selection'
+} from '@/lib/selection'
 
 import {
   USER_LOGIN,
@@ -70,7 +70,7 @@ import {
   LOAD_OPEN_PRODUCTIONS_END,
 
   RESET_ALL, SET_CURRENT_PRODUCTION
-} from '../mutation-types'
+} from '@/store/mutation-types'
 
 const helpers = {
   getTaskStatus (taskStatusId) {

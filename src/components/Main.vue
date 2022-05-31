@@ -8,9 +8,9 @@
 </template>
 
 <script>
-import Topbar from './tops/Topbar'
-import ActionTopbar from './tops/ActionTopbar'
-import Sidebar from './sides/Sidebar'
+import Topbar from '@/components/tops/Topbar'
+import ActionTopbar from '@/components/tops/ActionTopbar'
+import Sidebar from '@/components/sides/Sidebar'
 
 export default {
   name: 'main-wrapper',

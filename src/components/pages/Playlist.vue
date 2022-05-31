@@ -438,7 +438,7 @@ import EditPlaylistModal from '@/components/modals/EditPlaylistModal'
 import ErrorText from '@/components/widgets/ErrorText'
 import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail'
 import PageSubtitle from '@/components/widgets/PageSubtitle'
-import PlaylistPlayer from './playlists/PlaylistPlayer'
+import PlaylistPlayer from '@/components/pages/playlists/PlaylistPlayer'
 import SearchField from '@/components/widgets/SearchField'
 import Spinner from '@/components/widgets/Spinner'
 

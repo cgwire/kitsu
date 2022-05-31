@@ -22,8 +22,8 @@
 </template>
 
 <script>
-import Events from './logs/Events'
-import PreviewFiles from './logs/PreviewFiles'
+import Events from '@/components/pages/logs/Events'
+import PreviewFiles from '@/components/pages/logs/PreviewFiles'
 
 export default {
   name: 'logs',

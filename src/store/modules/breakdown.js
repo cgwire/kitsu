@@ -1,7 +1,7 @@
 import Vue from 'vue'
-import breakdownApi from '../api/breakdown'
-import { sortAssets } from '../../lib/sorting'
-import { groupEntitiesByParents } from '../../lib/models'
+import breakdownApi from '@/store/api/breakdown'
+import { sortAssets } from '@/lib/sorting'
+import { groupEntitiesByParents } from '@/lib/models'
 
 import {
   CASTING_SET_ASSET_TYPES,
@@ -28,7 +28,7 @@ import {
   CASTING_SET_LINK_LABEL,
 
   RESET_ALL
-} from '../mutation-types'
+} from '@/store/mutation-types'
 
 const initialState = {
   currentProduction: null,

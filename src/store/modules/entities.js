@@ -1,7 +1,7 @@
-import entitiesApi from '../api/entities'
+import entitiesApi from '@/store/api/entities'
 import {
   RESET_ALL
-} from '../mutation-types'
+} from '@/store/mutation-types'
 
 const initialState = {
 }

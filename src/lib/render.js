@@ -1,6 +1,6 @@
 import { marked } from 'marked'
 import sanitizeHTML from 'sanitize-html'
-import { formatFrame, formatTime } from './video'
+import { formatFrame, formatTime } from '@/lib/video'
 
 export const TIME_CODE_REGEX = /v(\d+) (\d+):(\d+)\.(\d+) \((\d+)\)/g
 

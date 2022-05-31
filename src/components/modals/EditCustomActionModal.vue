@@ -59,11 +59,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
-import Combobox from '../widgets/Combobox'
-import ComboboxBoolean from '../widgets/ComboboxBoolean'
-import ModalFooter from './ModalFooter'
-import TextField from '../widgets/TextField'
+import { modalMixin } from '@/components/modals/base_modal'
+import Combobox from '@/components/widgets/Combobox'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
+import ModalFooter from '@/components/modals/ModalFooter'
+import TextField from '@/components/widgets/TextField'
 
 export default {
   name: 'edit-custom-action-modal',

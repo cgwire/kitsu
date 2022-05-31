@@ -35,10 +35,10 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
 
-import Combobox from '../widgets/Combobox'
-import ModalFooter from './ModalFooter'
+import Combobox from '@/components/widgets/Combobox'
+import ModalFooter from '@/components/modals/ModalFooter'
 
 export default {
   name: 'edit-label-modal',

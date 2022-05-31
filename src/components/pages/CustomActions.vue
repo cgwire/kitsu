@@ -37,9 +37,9 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import CustomActionList from '../lists/CustomActionList'
-import DeleteModal from '../modals/DeleteModal'
-import EditCustomActionModal from '../modals/EditCustomActionModal'
+import CustomActionList from '@/components/lists/CustomActionList'
+import DeleteModal from '@/components/modals/DeleteModal'
+import EditCustomActionModal from '@/components/modals/EditCustomActionModal'
 import ListPageHeader from '@/components/widgets/ListPageHeader'
 
 export default {

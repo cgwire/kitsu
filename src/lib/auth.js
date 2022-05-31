@@ -1,12 +1,12 @@
 import superagent from 'superagent'
-import store from '../store'
+import store from '@/store'
 import {
   DATA_LOADING_START,
   SET_ORGANISATION,
   USER_LOGIN,
   USER_LOGOUT,
   USER_LOGIN_FAIL
-} from '../store/mutation-types.js'
+} from '@/store/mutation-types.js'
 
 const auth = {
 

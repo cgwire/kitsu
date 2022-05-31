@@ -45,12 +45,12 @@
 <script>
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
-import csv from '../../lib/csv'
-import stringHelpers from '../../lib/string'
-import ButtonSimple from '../widgets/ButtonSimple'
-import Combobox from '../widgets/Combobox'
-import ProductionAssetTypeList from '../lists/ProductionAssetTypeList.vue'
-import SearchField from '../widgets/SearchField'
+import csv from '@/lib/csv'
+import stringHelpers from '@/lib/string'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import Combobox from '@/components/widgets/Combobox'
+import ProductionAssetTypeList from '@/components/lists/ProductionAssetTypeList.vue'
+import SearchField from '@/components/widgets/SearchField'
 
 export default {
   name: 'production-asset-types',

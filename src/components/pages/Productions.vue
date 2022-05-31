@@ -50,11 +50,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import ProductionList from '../lists/ProductionList'
-import EditProductionModal from '../modals/EditProductionModal'
-import HardDeleteModal from '../modals/HardDeleteModal'
-import ButtonLink from '../widgets/ButtonLink'
-import PageTitle from '../widgets/PageTitle'
+import ProductionList from '@/components/lists/ProductionList'
+import EditProductionModal from '@/components/modals/EditProductionModal'
+import HardDeleteModal from '@/components/modals/HardDeleteModal'
+import ButtonLink from '@/components/widgets/ButtonLink'
+import PageTitle from '@/components/widgets/PageTitle'
 
 export default {
   name: 'productions',

@@ -45,11 +45,11 @@
  * Modal used to edit and create milestones.
  */
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
 
-import ButtonSimple from '../widgets/ButtonSimple'
-import ModalFooter from './ModalFooter'
-import TextField from '../widgets/TextField'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import ModalFooter from '@/components/modals/ModalFooter'
+import TextField from '@/components/widgets/TextField'
 
 export default {
   name: 'edit-milestone-modal',

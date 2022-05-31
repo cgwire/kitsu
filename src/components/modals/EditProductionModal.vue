@@ -77,12 +77,12 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
 
-import Combobox from '../widgets/Combobox'
+import Combobox from '@/components/widgets/Combobox'
 import ModalFooter from '@/components/modals/ModalFooter'
-import FileUpload from '../widgets/FileUpload'
-import TextField from '../widgets/TextField'
+import FileUpload from '@/components/widgets/FileUpload'
+import TextField from '@/components/widgets/TextField'
 import { PRODUCTION_TYPE_OPTIONS } from '@/lib/productions'
 
 export default {
