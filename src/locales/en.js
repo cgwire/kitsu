@@ -98,7 +98,8 @@ export default {
       updated_at: 'Update date',
       task_status: 'Task status',
       person: 'Person name',
-      checklist: 'Checklist'
+      checklist: 'Checklist',
+      acknowledgements: 'Acknowledgements'
     }
   },
 

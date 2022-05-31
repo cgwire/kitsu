@@ -1037,21 +1037,23 @@ export default {
         this.$t('comments.fields.task_status'),
         this.$t('comments.fields.person'),
         this.$t('comments.fields.text'),
-        this.$t('comments.fields.checklist')
+        this.$t('comments.fields.checklist'),
+        this.$t('comments.fields.acknowledgements')
       ]
       var commentLines = []
       this.getCurrentTaskComments().forEach(comment => {
-        var checkListElements = []
-        comment.checklist.forEach(checkListElement => {
-          checkListElements.push(`[${checkListElement.checked}] ${checkListElement.text}`)
-        })
         commentLines.push([
           comment.created_at,
           comment.updated_at,
           comment.task_status.name,
           comment.person.name,
           comment.text,
-          checkListElements.join(';')
+          comment.checklist.map(checkListElement =>
+          `[${checkListElement.checked}] ${checkListElement.text}`)
+            .join(';'),
+          comment.acknowledgements.map(personId =>
+            this.personMap.get(personId).name)
+            .join(';')
         ])
         comment.replies.forEach(reply =>
           commentLines.push([
