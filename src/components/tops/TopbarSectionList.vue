@@ -24,15 +24,17 @@
     >
       <div
         class="section-line"
-        v-for="section in sectionList"
+        v-for="(section, index) in sectionList"
         @click="selectSection(section)"
-        :key="section.value"
+        :key="section.value + '-' + index"
       >
         <router-link
           :to="getSectionPath(section)"
+          v-if="section.value !== 'separator'"
         >
           {{ section.label }}
         </router-link>
+        <hr v-else />
       </div>
     </div>
   </div>
@@ -101,9 +103,11 @@ export default {
 
   methods: {
     selectSection (section) {
-      this.$emit('input', section.value)
-      this.localSection = section.value
-      this.showSectionList = false
+      if (section.value !== 'separator') {
+        this.$emit('input', section.value)
+        this.localSection = section.value
+        this.showSectionList = false
+      }
     },
 
     toggleSectionList () {
@@ -212,6 +216,11 @@ export default {
 }
 
 .root-menu {
+}
+
+hr {
+  margin: 8px 8px 8px 6px;
+  border: 1px solid $light-grey;
 }
 
 .topbar-menuitem {

@@ -274,7 +274,7 @@ export default {
     ]),
 
     assetSections () {
-      return ['assets', 'assetTypes', 'playlists']
+      return ['assets', 'assetTypes', 'breakdown', 'playlists']
     },
 
     editSections () {
@@ -367,6 +367,13 @@ export default {
         )
       }
 
+      options = options.concat([
+        { label: this.$t('breakdown.title'), value: 'breakdown' },
+        { label: this.$t('playlists.title'), value: 'playlists' },
+        { label: this.$t('news.title'), value: 'newsFeed' },
+        { label: 'separator', value: 'separator' }
+      ])
+
       // Add sequences
       options.push(
         { label: this.$t('sequences.title'), value: 'sequences' }
@@ -383,15 +390,13 @@ export default {
       options = options.concat([
         {
           label: this.$t('asset_types.production_title'), value: 'assetTypes'
-        },
-        { label: this.$t('playlists.title'), value: 'playlists' }
+        }
       ])
 
       // Show these sections to studio members only.
       if (!this.isCurrentUserClient) {
         options = options.concat([
-          { label: this.$t('news.title'), value: 'newsFeed' },
-          { label: this.$t('breakdown.title'), value: 'breakdown' },
+          { label: 'separator', value: 'separator' },
           { label: this.$t('schedule.title'), value: 'schedule' },
           { label: this.$t('quota.title'), value: 'quota' },
           { label: this.$t('people.team'), value: 'team' }
@@ -399,6 +404,7 @@ export default {
 
         if (this.isCurrentUserAdmin) {
           options = options.concat([
+            { label: 'separator', value: 'separator' },
             { label: this.$t('settings.title'), value: 'production-settings' }
           ])
         }

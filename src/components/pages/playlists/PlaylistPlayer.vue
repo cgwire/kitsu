@@ -29,6 +29,7 @@
       :leaveRoom="leaveRoom"
       v-if="isValidRoomId(playlist.id)"
     />
+    <div class="filler"></div>
     <button-simple
       @click="$emit('show-add-entities')"
       class="playlist-button topbar-button flexrow-item"
@@ -368,24 +369,8 @@
         class="button playlist-button flexrow-item"
         @click="onSpeedClicked"
         :title="$t('playlists.actions.speed')"
-        text="x1.00"
-        v-if="speed === 3"
+        :text="speedTextMap[speed - 1]"
       />
-      <button-simple
-        class="button playlist-button flexrow-item"
-        @click="onSpeedClicked"
-        :title="$t('playlists.actions.speed')"
-        text="x0.50"
-        v-else-if="speed === 2"
-      />
-      <button-simple
-        class="button playlist-button flexrow-item"
-        @click="onSpeedClicked"
-        :title="$t('playlists.actions.speed')"
-        text="x0.25"
-        v-else
-      />
-
       <button-simple
         class="flexrow-item playlist-button"
         :title="$t('playlists.actions.unmute')"
@@ -922,6 +907,12 @@ export default {
       forClientOptions: [
         { label: this.$t('playlists.for_client'), value: 'true' },
         { label: this.$t('playlists.for_studio'), value: 'false' }
+      ],
+      speedTextMap: [
+        'x0.25',
+        'x0.50',
+        'x1.00',
+        'x2.00'
       ]
     }
   },
@@ -990,6 +981,10 @@ export default {
           value: 'sidebyside'
         },
         {
+          label: `${this.$t('playlists.actions.overlay')} 0%`,
+          value: 'overlay0'
+        },
+        {
           label: `${this.$t('playlists.actions.overlay')} 25%`,
           value: 'overlay25'
         },
@@ -1000,6 +995,10 @@ export default {
         {
           label: `${this.$t('playlists.actions.overlay')} 75%`,
           value: 'overlay75'
+        },
+        {
+          label: `${this.$t('playlists.actions.overlay')} 100%`,
+          value: 'overlay100'
         }
       ]
     },
@@ -1278,6 +1277,7 @@ export default {
       localEntity.preview_file_extension = previewFile.extension
       localEntity.preview_file_annotations = previewFile.annotations
       localEntity.preview_file_previews = previewFile.previews
+      localEntity.preview_file_revision = previewFile.revision
       if (this.rawPlayer) {
         // Hack needed to make sure that the same entity is selected when
         // switching from a non-video preview to a video preview

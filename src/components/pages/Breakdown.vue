@@ -379,9 +379,16 @@ export default {
       } else if (this.isShotCasting) {
         return this.castingSequenceShots
       } else {
-        if (this.isTVShow) {
+        if (this.isTVShow && this.currentEpisode.id !== 'main') {
           return this.castingAssetTypeAssets.filter(
-            asset => asset.episode_id === this.currentEpisode.id)
+            asset => (
+              asset.episode_id === this.currentEpisode.id ||
+              asset.casting_episode_ids.includes(this.currentEpisode.id)
+            )
+          )
+        } else if (this.currentEpisode.id === 'main') {
+          return this.castingAssetTypeAssets.filter(
+            asset => !asset.episode_id)
         } else {
           return this.castingAssetTypeAssets
         }

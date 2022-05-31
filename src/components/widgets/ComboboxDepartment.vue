@@ -95,7 +95,7 @@ export default {
       type: Number
     },
     width: {
-      default: 200,
+      default: 250,
       type: Number
     },
     dispayAllAndMyDepartments: {
@@ -132,7 +132,7 @@ export default {
           {
             name: this.$t('tasks.combobox_departments.all_departments'),
             id: 'ALL',
-            color: '#000000'
+            color: '#CCC'
           }]
         if (!this.isCurrentUserManager && this.user.departments.length > 0) {
           departmentFilter.unshift(
@@ -194,8 +194,7 @@ export default {
   }
 }
 
-.department-line {
-}
+.department-line { }
 
 .department-combo {
   background: $white;
@@ -239,6 +238,8 @@ export default {
 
 .select-input {
   background: $white;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
   position: absolute;
   border: 1px solid $light-grey-light;
   z-index: 300;

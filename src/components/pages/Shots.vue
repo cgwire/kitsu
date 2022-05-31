@@ -33,7 +33,6 @@
               :selectable-departments="selectableDepartments('Shot')"
               :value="selectedDepartment"
               :dispay-all-and-my-departments="true"
-              :width="230"
               rounded
               @input="onSelectedDepartment"
               v-model="selectedDepartment"

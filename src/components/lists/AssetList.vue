@@ -226,12 +226,12 @@
             <div class="flexrow">
               <input
                 type="checkbox"
-                class="mr1"
+                class="flexrow-item"
                 :checked="selectedAssets.has(asset.id)"
                 @input="event => toggleLine(asset, event)"
               >
               <entity-thumbnail
-                class="entity-thumbnail"
+                class="entity-thumbnail flexrow-item"
                 :entity="asset"
                 :width="isBigThumbnails ? 150 : 50"
                 :height="isBigThumbnails ? 100 : 30"
@@ -240,7 +240,7 @@
                />
               <router-link
                 tabindex="-1"
-                class="asset-link asset-name"
+                class="asset-link asset-name flexrow-item"
                 :to="assetPath(asset.id)"
                 :title="asset.full_name"
               >

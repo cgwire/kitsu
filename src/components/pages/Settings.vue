@@ -292,7 +292,7 @@ strong {
 
 .settings {
   background: $white-grey;
-  height: 100vh;
+  height: 100%;
 }
 
 .settings-content {

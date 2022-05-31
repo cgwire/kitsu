@@ -8,10 +8,12 @@
             class="back-link flexrow-item"
             :to="backPath"
           >
-            <chevron-left-icon />
+            <corner-left-up-icon size="1.4x" />
           </router-link>
+          <div class="flexrow-item"></div>
           <task-type-name
             class="flexrow-item"
+            style="font-size: 1.2em"
             :task-type="currentTaskType"
           />
           <div class="filler"></div>
@@ -22,6 +24,8 @@
               @click="showImportModal"
               v-if="!isActiveTab('schedule') && !isActiveTab('estimation')"
             />
+          </div>
+          <div class="flexrow-item">
             <button-simple
               icon="download"
               :title="$t('main.csv.export_file')"
@@ -251,7 +255,7 @@ import {
 
 import { formatListMixin } from '@/components/mixins/format'
 
-import { ChevronLeftIcon } from 'vue-feather-icons'
+import { CornerLeftUpIcon } from 'vue-feather-icons'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DateField from '@/components/widgets/DateField'
 import Combobox from '@/components/widgets/Combobox'
@@ -271,7 +275,7 @@ export default {
   mixins: [formatListMixin, searchMixin],
   components: {
     ButtonSimple,
-    ChevronLeftIcon,
+    CornerLeftUpIcon,
     Combobox,
     ComboboxNumber,
     DateField,
