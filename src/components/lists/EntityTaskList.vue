@@ -109,10 +109,10 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { formatListMixin } from '@/components/mixins/format'
 
-import TaskTypeCell from '../cells/TaskTypeName'
-import TableInfo from '../widgets/TableInfo'
-import ValidationTag from '../widgets/ValidationTag'
-import PeopleAvatar from '../widgets/PeopleAvatar'
+import TaskTypeCell from '@/components/cells/TaskTypeName'
+import TableInfo from '@/components/widgets/TableInfo'
+import ValidationTag from '@/components/widgets/ValidationTag'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 
 export default {
   name: 'entity-task-list',

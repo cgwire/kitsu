@@ -33,7 +33,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
 
 export default {
   name: 'delete-modal',

@@ -60,10 +60,10 @@ import moment from 'moment-timezone'
 
 import { mapGetters, mapActions } from 'vuex'
 import { XIcon } from 'vue-feather-icons'
-import PageTitle from '../widgets/PageTitle'
-import PeopleAvatar from '../widgets/PeopleAvatar'
-import TimeSpentTaskList from '../lists/TimeSpentTaskList'
-import { monthToString } from '../../lib/time'
+import PageTitle from '@/components/widgets/PageTitle'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import TimeSpentTaskList from '@/components/lists/TimeSpentTaskList'
+import { monthToString } from '@/lib/time'
 
 export default {
   name: 'people-timesheet-info',

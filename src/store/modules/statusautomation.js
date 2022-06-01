@@ -10,7 +10,7 @@ import {
   DELETE_STATUS_AUTOMATION_END,
 
   RESET_ALL
-} from '../mutation-types'
+} from '@/store/mutation-types'
 
 const initialState = {
   statusAutomations: [],

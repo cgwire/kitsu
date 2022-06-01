@@ -9,8 +9,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import PeopleAvatar from '../widgets/PeopleAvatar'
-import PeopleName from '../widgets/PeopleName'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import PeopleName from '@/components/widgets/PeopleName'
 
 export default {
   name: 'people-name-cell',

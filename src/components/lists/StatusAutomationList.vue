@@ -112,8 +112,8 @@ import { formatListMixin } from '@/components/mixins/format'
 import { AlertTriangleIcon } from 'vue-feather-icons'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
-import TaskTypeName from '../cells/TaskTypeName'
-import TaskStatusName from '../cells/TaskStatusName'
+import TaskTypeName from '@/components/cells/TaskTypeName'
+import TaskStatusName from '@/components/cells/TaskStatusName'
 
 export default {
   name: 'status-automation-list',

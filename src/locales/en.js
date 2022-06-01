@@ -93,7 +93,12 @@ export default {
     validated: 'Validated!',
     validation_required: 'Validation Required',
     fields: {
-      text: 'text'
+      text: 'Text',
+      created_at: 'Creation date',
+      task_status: 'Task status',
+      person: 'Person name',
+      checklist: 'Checklist',
+      acknowledgements: 'Acknowledgements'
     }
   },
 

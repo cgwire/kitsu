@@ -42,9 +42,9 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
-import FileUpload from '../widgets/FileUpload.vue'
-import ModalFooter from './ModalFooter.vue'
+import { modalMixin } from '@/components/modals/base_modal'
+import FileUpload from '@/components/widgets/FileUpload.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 
 export default {
   name: 'change-avatar-modal',

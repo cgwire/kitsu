@@ -101,9 +101,9 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import colors from '../../lib/colors.js'
-import EditProductionModal from '../modals/EditProductionModal'
-import Spinner from '../widgets/Spinner'
+import colors from '@/lib/colors.js'
+import EditProductionModal from '@/components/modals/EditProductionModal'
+import Spinner from '@/components/widgets/Spinner'
 
 export default {
   name: 'open-productions',

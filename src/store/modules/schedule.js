@@ -1,11 +1,11 @@
-import scheduleApi from '../api/schedule'
+import scheduleApi from '@/store/api/schedule'
 import {
   ADD_MILESTONE,
   ADD_MILESTONES,
   REMOVE_MILESTONE,
   SET_CURRENT_SCHEDULE_ITEMS,
   RESET_ALL
-} from '../mutation-types'
+} from '@/store/mutation-types'
 
 const initialState = {
   milestones: {},

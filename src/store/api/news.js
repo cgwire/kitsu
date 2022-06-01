@@ -1,5 +1,5 @@
-import client from './client'
-import { buildQueryString } from '../../lib/query'
+import client from '@/store/api/client'
+import { buildQueryString } from '@/lib/query'
 
 export default {
   getLastNews (params) {

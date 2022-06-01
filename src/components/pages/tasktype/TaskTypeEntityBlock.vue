@@ -34,8 +34,8 @@
 <script>
 import { mapGetters } from 'vuex'
 
-import EntityThumbnail from '../../widgets/EntityThumbnail'
-import ValidationTag from '../../widgets/ValidationTag'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
   name: 'task-type-entity-block',

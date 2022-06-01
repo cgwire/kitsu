@@ -69,18 +69,18 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
-import { getProductionSchedulePath } from '../../lib/path'
+import { getProductionSchedulePath } from '@/lib/path'
 
 import {
   getFirstStartDate,
   getLastEndDate,
   getStartDateFromString,
   getEndDateFromString
-} from '../../lib/time'
-import colors from '../../lib/colors'
+} from '@/lib/time'
+import colors from '@/lib/colors'
 
-import ComboboxNumber from '../widgets/ComboboxNumber'
-import Schedule from './schedule/Schedule'
+import ComboboxNumber from '@/components/widgets/ComboboxNumber'
+import Schedule from '@/components/pages/schedule/Schedule'
 
 export default {
   name: 'production-schedule',

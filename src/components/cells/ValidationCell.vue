@@ -98,7 +98,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import colors from '../../lib/colors'
+import colors from '@/lib/colors'
 
 export default {
   name: 'validation-cell',

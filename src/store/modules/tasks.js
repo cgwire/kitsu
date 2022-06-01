@@ -1,22 +1,22 @@
 import async from 'async'
 
-import tasksApi from '../api/tasks'
-import peopleApi from '../api/people'
-import playlistsApi from '../api/playlists'
+import tasksApi from '@/store/api/tasks'
+import peopleApi from '@/store/api/people'
+import playlistsApi from '@/store/api/playlists'
 import {
   sortComments,
   sortRevisionPreviewFiles,
   sortByName
-} from '../../lib/sorting'
+} from '@/lib/sorting'
 import {
   arrayMove
-} from '../../lib/models'
+} from '@/lib/models'
 
-import personStore from './people'
-import taskTypeStore from './tasktypes'
-import assetStore from './assets'
-import shotStore from './shots'
-import editStore from './edits'
+import personStore from '@/store/modules/people'
+import taskTypeStore from '@/store/modules/tasktypes'
+import assetStore from '@/store/modules/assets'
+import shotStore from '@/store/modules/shots'
+import editStore from '@/store/modules/edits'
 
 import {
   LOAD_ASSETS_END,
@@ -79,7 +79,7 @@ import {
   UPDATE_REVISION_PREVIEW_POSITION,
 
   RESET_ALL
-} from '../mutation-types'
+} from '@/store/mutation-types'
 
 const initialState = {
   taskMap: new Map(),

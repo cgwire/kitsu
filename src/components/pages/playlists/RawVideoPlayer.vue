@@ -29,7 +29,7 @@
  * }, ...]
  */
 import { mapGetters } from 'vuex'
-import { floorToFrame, roundToFrame } from '../../../lib/video'
+import { floorToFrame, roundToFrame } from '@/lib/video'
 
 export default {
   name: 'raw-video-player',

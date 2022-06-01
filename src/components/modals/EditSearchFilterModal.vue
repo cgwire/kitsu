@@ -46,7 +46,7 @@
  * Modal used to edit search filter information. Users prefer to rename the
    filter label when it's too complex to read or too long.
  */
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
 
 import TextField from '@/components/widgets/TextField'
 import ModalFooter from '@/components/modals/ModalFooter'

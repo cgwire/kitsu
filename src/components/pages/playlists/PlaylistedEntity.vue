@@ -75,8 +75,8 @@ import firstBy from 'thenby'
 import { mapGetters } from 'vuex'
 import { XIcon } from 'vue-feather-icons'
 
-import Combobox from '../../widgets/Combobox'
-import LightEntityThumbnail from '../../widgets/LightEntityThumbnail'
+import Combobox from '@/components/widgets/Combobox'
+import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail'
 
 export default {
   name: 'playlisted-entity',

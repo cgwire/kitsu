@@ -1,5 +1,5 @@
 import firstBy from 'thenby'
-import { getTaskTypePriorityOfProd } from './productions'
+import { getTaskTypePriorityOfProd } from '@/lib/productions'
 
 export const sortAssets = (assets) => {
   return assets.sort(

@@ -90,16 +90,16 @@
 <script>
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
-import csv from '../../lib/csv'
-import stringHelpers from '../../lib/string'
+import csv from '@/lib/csv'
+import stringHelpers from '@/lib/string'
 
-import ButtonSimple from '../widgets/ButtonSimple'
-import Combobox from '../widgets/Combobox'
-import HardDeleteModal from '../modals/HardDeleteModal'
-import EditSequenceModal from '../modals/EditSequenceModal'
-import SearchField from '../widgets/SearchField'
-import SearchQueryList from '../widgets/SearchQueryList'
-import SequenceList from '../lists/SequenceList.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import Combobox from '@/components/widgets/Combobox'
+import HardDeleteModal from '@/components/modals/HardDeleteModal'
+import EditSequenceModal from '@/components/modals/EditSequenceModal'
+import SearchField from '@/components/widgets/SearchField'
+import SearchQueryList from '@/components/widgets/SearchQueryList'
+import SequenceList from '@/components/lists/SequenceList.vue'
 
 export default {
   name: 'sequences',

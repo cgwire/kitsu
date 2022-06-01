@@ -1,4 +1,4 @@
-import en from './en'
+import en from '@/locales/en'
 import de from '@/locales/de.js'
 import nl from '@/locales/nl.json'
 import es from '@/locales/es.json'

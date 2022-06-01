@@ -1,6 +1,6 @@
-import taskTypesApi from '../api/tasktypes'
+import taskTypesApi from '@/store/api/tasktypes'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
-import { sortTaskTypes } from '../../lib/sorting'
+import { sortTaskTypes } from '@/lib/sorting'
 
 import {
   LOAD_TASK_TYPES_START,
@@ -16,7 +16,7 @@ import {
   DELETE_TASK_TYPE_END,
 
   RESET_ALL
-} from '../mutation-types'
+} from '@/store/mutation-types'
 
 const initialState = {
   taskTypes: [],

@@ -161,12 +161,12 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
 
-import TextField from '../widgets/TextField'
-import Combobox from '../widgets/Combobox'
-import ComboboxDepartment from '../widgets/ComboboxDepartment'
-import DepartmentName from '../widgets/DepartmentName'
+import TextField from '@/components/widgets/TextField'
+import Combobox from '@/components/widgets/Combobox'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
+import DepartmentName from '@/components/widgets/DepartmentName'
 
 export default {
   name: 'edit-modal',

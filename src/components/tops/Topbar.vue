@@ -208,7 +208,7 @@ import NotificationBell from '@/components/widgets/NotificationBell'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import ShortcutModal from '@/components/modals/ShortcutModal'
 
-import { version } from '../../../package.json'
+import { version } from '@/../package.json'
 
 export default {
   name: 'topbar',

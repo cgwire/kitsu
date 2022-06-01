@@ -38,8 +38,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import RowActionsCell from '../cells/RowActionsCell'
-import TableInfo from '../widgets/TableInfo'
+import RowActionsCell from '@/components/cells/RowActionsCell'
+import TableInfo from '@/components/widgets/TableInfo'
 
 export default {
   name: 'asset-type-list',

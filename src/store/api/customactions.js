@@ -1,4 +1,4 @@
-import client from './client'
+import client from '@/store/api/client'
 import superagent from 'superagent'
 
 export default {

@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import stringHelpers from '../../../lib/string'
+import stringHelpers from '@/lib/string'
 
 export default {
   name: 'asset-block',

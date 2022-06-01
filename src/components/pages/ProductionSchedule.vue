@@ -88,14 +88,14 @@ import moment from 'moment-timezone'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
 
-import { sortTaskTypeScheduleItems } from '../../lib/sorting'
-import { getTaskTypeSchedulePath } from '../../lib/path'
-import { daysToMinutes, parseDate } from '../../lib/time'
+import { sortTaskTypeScheduleItems } from '@/lib/sorting'
+import { getTaskTypeSchedulePath } from '@/lib/path'
+import { daysToMinutes, parseDate } from '@/lib/time'
 
-import ComboboxNumber from '../widgets/ComboboxNumber'
-import TaskInfo from '../sides/TaskInfo'
-import TextField from '../widgets/TextField'
-import Schedule from './schedule/Schedule'
+import ComboboxNumber from '@/components/widgets/ComboboxNumber'
+import TaskInfo from '@/components/sides/TaskInfo'
+import TextField from '@/components/widgets/TextField'
+import Schedule from '@/components/pages/schedule/Schedule'
 
 export default {
   name: 'production-schedule',

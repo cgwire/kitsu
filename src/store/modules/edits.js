@@ -1,13 +1,13 @@
 import Vue from 'vue'
 import moment from 'moment'
-import peopleApi from '../api/people'
-import editsApi from '../api/edits'
-import tasksStore from './tasks'
-import peopleStore from './people'
-import productionsStore from './productions'
-import taskTypesStore from './tasktypes'
+import peopleApi from '@/store/api/people'
+import editsApi from '@/store/api/edits'
+import tasksStore from '@/store/modules/tasks'
+import peopleStore from '@/store/modules/people'
+import productionsStore from '@/store/modules/productions'
+import taskTypesStore from '@/store/modules/tasktypes'
 
-import { PAGE_SIZE } from '../../lib/pagination'
+import { PAGE_SIZE } from '@/lib/pagination'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import {
   sortByName,
@@ -15,28 +15,28 @@ import {
   sortEdits,
   sortTasks,
   sortValidationColumns
-} from '../../lib/sorting'
+} from '@/lib/sorting'
 import {
   appendSelectionGrid,
   buildSelectionGrid,
   clearSelectionGrid
-} from '../../lib/selection'
+} from '@/lib/selection'
 import {
   getFilledColumns,
   removeModelFromList
-} from '../../lib/models'
+} from '@/lib/models'
 import {
   minutesToDays
-} from '../../lib/time'
+} from '@/lib/time'
 import {
   buildEditIndex,
   indexSearch
-} from '../../lib/indexing'
+} from '@/lib/indexing'
 import {
   applyFilters,
   getFilters,
   getKeyWords
-} from '../../lib/filtering'
+} from '@/lib/filtering'
 
 import {
   LOAD_EDITS_START,
@@ -90,7 +90,7 @@ import {
 
   CLEAR_SELECTED_EDITS,
   SET_EDIT_SELECTION
-} from '../mutation-types'
+} from '@/store/mutation-types'
 import async from 'async'
 
 const cache = {

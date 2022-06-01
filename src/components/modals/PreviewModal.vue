@@ -21,7 +21,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
 
 import { ArrowUpRightIcon } from 'vue-feather-icons'
 

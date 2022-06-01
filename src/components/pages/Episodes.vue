@@ -85,15 +85,15 @@
 <script>
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
-import csv from '../../lib/csv'
-import stringHelpers from '../../lib/string'
+import csv from '@/lib/csv'
+import stringHelpers from '@/lib/string'
 
-import ButtonSimple from '../widgets/ButtonSimple'
-import Combobox from '../widgets/Combobox'
-import HardDeleteModal from '../modals/HardDeleteModal'
-import EditEpisodeModal from '../modals/EditEpisodeModal'
-import EpisodeList from '../lists/EpisodeList.vue'
-import SearchField from '../widgets/SearchField'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import Combobox from '@/components/widgets/Combobox'
+import HardDeleteModal from '@/components/modals/HardDeleteModal'
+import EditEpisodeModal from '@/components/modals/EditEpisodeModal'
+import EpisodeList from '@/components/lists/EpisodeList.vue'
+import SearchField from '@/components/widgets/SearchField'
 
 export default {
   name: 'episodes',

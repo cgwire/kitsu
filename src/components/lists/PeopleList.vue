@@ -125,7 +125,7 @@ import { sortByName } from '@/lib/sorting'
 import PeopleNameCell from '@/components/cells/PeopleNameCell'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
-import DepartmentName from '../widgets/DepartmentName.vue'
+import DepartmentName from '@/components/widgets/DepartmentName.vue'
 
 export default {
   name: 'people-list',

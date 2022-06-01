@@ -140,11 +140,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
-import Combobox from '../widgets/Combobox'
-import Checkbox from '../widgets/Checkbox'
-import ButtonSimple from '../widgets/ButtonSimple'
-import ModalFooter from './ModalFooter'
+import { modalMixin } from '@/components/modals/base_modal'
+import Combobox from '@/components/widgets/Combobox'
+import Checkbox from '@/components/widgets/Checkbox'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import ModalFooter from '@/components/modals/ModalFooter'
 
 export default {
   name: 'import-render-modal',

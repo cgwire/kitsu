@@ -59,10 +59,16 @@
           v-if="isCurrentUserManager && isPreview && extension !== 'gif'"
         />
         <subscribe-button
-          class="flexrow-item"
+          class="flexrow-item subscribe-button"
           :subscribed="isAssigned || isSubscribed"
           @click="toggleSubscribe"
           v-if="!isAssigned"
+        />
+        <button-simple
+          class="flexrow-item"
+          icon="download"
+          :title="$t('main.csv.export_file')"
+          @click="onExportClick"
         />
         <div class="filler"></div>
         <div class="preview-list flexrow" v-if="isPreview">
@@ -249,13 +255,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import {
-  getTaskEntityPath,
-  getTaskPath
-} from '@/lib/path'
-import {
-  getTaskTypeStyle
-} from '@/lib/render'
+import moment from 'moment'
+import { getTaskEntityPath, getTaskPath } from '@/lib/path'
+import { getTaskTypeStyle } from '@/lib/render'
+import csv from '@/lib/csv'
+import stringHelpers from '@/lib/string'
 
 import AddComment from '@/components/widgets/AddComment'
 import AddPreviewModal from '@/components/modals/AddPreviewModal'
@@ -1011,6 +1015,50 @@ export default {
       this.$refs['add-comment'].hideAnnotationLoading()
       this.$refs['add-comment'].setAnnotationSnapshots(files)
       return files
+    },
+
+    onExportClick () {
+      const nameData = [
+        moment().format('YYYY-MM-DD'),
+        'kitsu',
+        this.currentProduction.name,
+        this.task.entity_name.replaceAll(' / ', '_'),
+        this.taskTypeMap.get(this.task.task_type_id).name,
+        'comments'
+      ]
+      const name = stringHelpers.slugify(nameData.join('_'))
+      var headers = [
+        this.$t('comments.fields.created_at'),
+        this.$t('comments.fields.task_status'),
+        this.$t('comments.fields.person'),
+        this.$t('comments.fields.text'),
+        this.$t('comments.fields.checklist'),
+        this.$t('comments.fields.acknowledgements')
+      ]
+      var commentLines = []
+      this.getCurrentTaskComments().forEach(comment => {
+        commentLines.push([
+          comment.created_at,
+          comment.task_status.name,
+          comment.person.name,
+          comment.text,
+          comment.checklist.map(checkListElement =>
+          `[${checkListElement.checked ? 'x' : ' '}] ${checkListElement.text}`)
+            .join('\n'),
+          comment.acknowledgements.map(personId =>
+            this.personMap.get(personId).name)
+            .join(',')
+        ])
+        comment.replies.forEach(reply =>
+          commentLines.push([
+            reply.date,
+            'Reply',
+            this.personMap.get(reply.person_id).name,
+            reply.text
+          ])
+        )
+      })
+      csv.buildCsvFile(name, [headers].concat(commentLines))
     }
   },
 
@@ -1223,7 +1271,8 @@ export default {
 }
 
 .change-wideness-button,
-.set-thumbnail-button {
+.set-thumbnail-button,
+.subscribe-button {
   margin-right: 0.2em;
 }
 

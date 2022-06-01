@@ -189,7 +189,7 @@ import {
   getDayRange,
   hoursToDays,
   range
-} from '../../lib/time'
+} from '@/lib/time'
 import PeopleNameCell from '@/components/cells/PeopleNameCell'
 import TableInfo from '@/components/widgets/TableInfo'
 

@@ -85,11 +85,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
-import ComboboxBoolean from '../widgets/ComboboxBoolean'
-import ColorField from '../widgets/ColorField'
-import ModalFooter from '../modals/ModalFooter'
-import TextField from '../widgets/TextField'
+import { modalMixin } from '@/components/modals/base_modal'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
+import ColorField from '@/components/widgets/ColorField'
+import ModalFooter from '@/components/modals/ModalFooter'
+import TextField from '@/components/widgets/TextField'
 
 export default {
   name: 'edit-task-status-modal',

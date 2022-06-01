@@ -77,10 +77,10 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
 
-import ComboboxDepartment from '../widgets/ComboboxDepartment'
-import DepartmentName from '../widgets/DepartmentName'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
+import DepartmentName from '@/components/widgets/DepartmentName'
 
 export default {
   name: 'edit-person-departments-modal',

@@ -31,10 +31,10 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import { sortPeople } from '../../lib/sorting'
+import { sortPeople } from '@/lib/sorting'
 
-import ProductionTeamList from '../lists/ProductionTeamList'
-import PeopleField from '../widgets/PeopleField'
+import ProductionTeamList from '@/components/lists/ProductionTeamList'
+import PeopleField from '@/components/widgets/PeopleField'
 
 export default {
   name: 'people',

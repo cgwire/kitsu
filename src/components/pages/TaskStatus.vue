@@ -39,10 +39,10 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import DeleteModal from '../modals/DeleteModal'
-import EditTaskStatusModal from '../modals/EditTaskStatusModal'
-import ListPageHeader from '../widgets/ListPageHeader'
-import TaskStatusList from '../lists/TaskStatusList'
+import DeleteModal from '@/components/modals/DeleteModal'
+import EditTaskStatusModal from '@/components/modals/EditTaskStatusModal'
+import ListPageHeader from '@/components/widgets/ListPageHeader'
+import TaskStatusList from '@/components/lists/TaskStatusList'
 
 export default {
   name: 'task-status',

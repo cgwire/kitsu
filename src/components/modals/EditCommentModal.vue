@@ -77,7 +77,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
 import { remove } from '@/lib/models'
 
 import AtTa from 'vue-at/dist/vue-at-textarea'

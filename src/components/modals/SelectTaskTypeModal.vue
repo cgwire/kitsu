@@ -49,9 +49,9 @@
 </template>
 
 <script>
-import ComboboxTaskType from '../widgets/ComboboxTaskType'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 
-import { modalMixin } from './base_modal'
+import { modalMixin } from '@/components/modals/base_modal'
 
 export default {
   name: 'select-task-type-modal',

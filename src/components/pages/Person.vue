@@ -191,15 +191,15 @@ import {
   parseDate
 } from '@/lib/time'
 
-import Combobox from '../widgets/Combobox'
-import PageTitle from '../widgets/PageTitle'
-import PeopleAvatar from '../widgets/PeopleAvatar'
-import Schedule from './schedule/Schedule'
-import SearchField from '../widgets/SearchField'
-import SearchQueryList from '../widgets/SearchQueryList'
-import TimesheetList from '../lists/TimesheetList'
-import TodosList from '../lists/TodosList'
-import TaskInfo from '../sides/TaskInfo'
+import Combobox from '@/components/widgets/Combobox'
+import PageTitle from '@/components/widgets/PageTitle'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import Schedule from '@/components/pages/schedule/Schedule'
+import SearchField from '@/components/widgets/SearchField'
+import SearchQueryList from '@/components/widgets/SearchQueryList'
+import TimesheetList from '@/components/lists/TimesheetList'
+import TodosList from '@/components/lists/TodosList'
+import TaskInfo from '@/components/sides/TaskInfo'
 
 export default {
   name: 'person',

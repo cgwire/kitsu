@@ -39,10 +39,10 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import AssetTypeList from '../lists/AssetTypeList'
-import DeleteModal from '../modals/DeleteModal'
-import EditAssetTypeModal from '../modals/EditAssetTypeModal'
-import ListPageHeader from '../widgets/ListPageHeader'
+import AssetTypeList from '@/components/lists/AssetTypeList'
+import DeleteModal from '@/components/modals/DeleteModal'
+import EditAssetTypeModal from '@/components/modals/EditAssetTypeModal'
+import ListPageHeader from '@/components/widgets/ListPageHeader'
 
 export default {
   name: 'asset-types',
