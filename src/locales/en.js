@@ -419,7 +419,9 @@ export default {
       preview_description: 'Upload a .csv file to populate your board with posts.',
       preview_required: 'NB: Headers must be included as first row.',
       preview_reupload: 'Reupload .CSV file',
-      required_fields: 'Your CSV requires the following columns',
+      required_fields: 'Your CSV requires the following columns:',
+      optional_fields: 'Optional columns:',
+      generic_fields: 'Generic columns:',
       select_file: 'Please select a file from one of your folder:',
       tab_select_file: 'Upload a CSV file',
       tab_paste_code: 'Paste a CSV data',
@@ -500,14 +502,6 @@ export default {
     team: 'Team',
     title: 'People',
     unactive: 'Unactive',
-    csv: {
-      import_file: 'Import a .csv file',
-      export_file: 'Download as a .csv file',
-      import_title: 'Import data from a CSV file',
-      required_fields: 'Your CSV file requires the following columns',
-      select_file: 'Please select a file from one of your folder:',
-      error_upload: 'An error occurred while uploading your CSV file.'
-    },
     fields: {
       active: 'Active',
       departments: 'Departments',

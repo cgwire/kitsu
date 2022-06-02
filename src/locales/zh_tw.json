@@ -378,14 +378,6 @@
             "team": "團隊",
             "title": "人員",
             "unactive": "非活動",
-            "csv": {
-                "import_file": "導入.csv檔案",
-                "export_file": "下載為.csv檔案",
-                "import_title": "從CSV檔案導入數據",
-                "required_fields": "您的CSV檔案需要有如下列項",
-                "select_file": "請從您的某個檔案夾選擇檔案:",
-                "error_upload": "上傳您的CSV檔案時出現錯誤."
-            },
             "fields": {
                 "first_name": "名字",
                 "last_name": "姓氏",

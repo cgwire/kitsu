@@ -192,7 +192,7 @@
         :import-error="errors.importingError"
         :parsed-csv="parsedCSV"
         :form-data="importCsvFormData"
-        :columns="csvColumns"
+        :columns="[...dataMatchers, ...optionalColumns]"
         :dataMatchers="dataMatchers"
         :database="{}"
         :disable-update=true
@@ -207,7 +207,8 @@
         :is-loading="loading.importing"
         :is-error="errors.importing"
         :form-data="importCsvFormData"
-        :columns="csvColumns"
+        :columns="dataMatchers"
+        :optional-columns="optionalColumns"
         @cancel="hideImportModal"
         @confirm="renderImport"
       />
@@ -336,17 +337,14 @@ export default {
       },
       parsedCSV: [],
       importCsvFormData: {},
-      csvColumns: [
-        'Parent',
-        'Entity',
+      optionalColumns: [
         'Estimation',
         'Start date',
         'Due date'
       ],
       dataMatchers: [
         'Parent',
-        'Entity',
-        'Estimation'
+        'Entity'
       ]
     }
   },

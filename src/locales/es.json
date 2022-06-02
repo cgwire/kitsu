@@ -378,14 +378,6 @@
             "team": "Equipo",
             "title": "Gente",
             "unactive": "Inactivo",
-            "csv": {
-                "import_file": "Importar un archivo.csv",
-                "export_file": "Descargar como archivo.csv",
-                "import_title": "Importar datos de un archivo CSV",
-                "required_fields": "Su archivo CSV requiere las siguientes columnas",
-                "select_file": "Por favor, seleccione un archivo de una de sus carpetas:",
-                "error_upload": "Se ha producido un error al cargar el archivo CSV."
-            },
             "fields": {
                 "first_name": "Nombre de pila",
                 "last_name": "Apellido",

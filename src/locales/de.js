@@ -333,14 +333,6 @@ export default {
     team: 'Team',
     title: 'Menschen',
     unactive: 'Inaktiv',
-    csv: {
-      import_file: 'Importieren einer.csv-Datei',
-      export_file: 'Als.csv-Datei herunterladen',
-      import_title: 'Daten aus einer CSV-Datei importieren',
-      required_fields: 'Ihre CSV-Datei benötigt die folgenden Spalten',
-      select_file: 'Bitte wählen Sie eine Datei aus einem Ihrer Ordner aus:',
-      error_upload: 'Beim Hochladen Ihrer CSV-Datei ist ein Fehler aufgetreten.'
-    },
     fields: {
       first_name: 'Vorname',
       last_name: 'Nachname',

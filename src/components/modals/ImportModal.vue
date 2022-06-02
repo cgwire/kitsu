@@ -12,14 +12,32 @@
         {{ $t("main.csv.import_title") }}
       </h1>
 
-      <p class="description">
-        {{ $t("main.csv.required_fields") }}
-        <ul>
-          <li v-for="column in columns" :key="column">
-            {{ column }}
-          </li>
-        </ul>
-      </p>
+      <div class="description">
+        <p v-if="columns.length > 0">
+          {{ $t("main.csv.required_fields") }}
+          <ul>
+            <li v-for="column in columns" :key="column">
+              {{ column }}
+            </li>
+          </ul>
+        </p>
+        <p v-if="optionalColumns.length > 0">
+          {{ $t("main.csv.optional_fields") }}
+          <ul>
+            <li v-for="optionalColumn in optionalColumns" :key="optionalColumn">
+              {{ optionalColumn }}
+            </li>
+          </ul>
+        </p>
+        <p v-if="genericColumns.length > 0">
+          {{ $t("main.csv.generic_fields") }}
+          <ul>
+            <li v-for="genericColumn in genericColumns" :key="genericColumn">
+              {{ genericColumn }}
+            </li>
+          </ul>
+        </p>
+      </div>
 
       <tabs @update="onTabUpdate">
         <tab :name="$t('main.csv.tab_select_file')" :selected="true">
@@ -91,6 +109,14 @@ export default {
       default: false
     },
     columns: {
+      type: Array,
+      default: () => []
+    },
+    optionalColumns: {
+      type: Array,
+      default: () => []
+    },
+    genericColumns: {
       type: Array,
       default: () => []
     },

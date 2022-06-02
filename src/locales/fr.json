@@ -281,6 +281,8 @@
                 "preview_required": "Note: La première ligne doit spécifier les entêtes.",
                 "preview_reupload": "Réimporter un fichier .CSV",
                 "required_fields": "Le fichier CSV à importer doit comporter les colonnes suivantes :",
+                "optionnal_fields": "Colonnes optionnelles :",
+                "generic_fields": "Colonnes génériques :",
                 "select_file": "Sélectionner un fichier depuis votre dossier :",
                 "tab_select_file": "Importer un fichier CSV",
                 "tab_paste_code": "Coller des données CSV",
@@ -385,14 +387,6 @@
             "team": "Équipe",
             "title": "Employés",
             "unactive": "Absents",
-            "csv": {
-                "import_file": "Importer",
-                "export_file": "Télécharger",
-                "import_title": "Import employees from a CSV file",
-                "required_fields": "Le fichier CSV à importer doit comporter les colonnes suivantes :",
-                "select_file": "Sélectionnez un fichier de votre disque dur :",
-                "error_upload": "Une erreur est survenue en important votre fichier CSV."
-            },
             "fields": {
                 "first_name": "Prénom",
                 "last_name": "Nom",

@@ -378,14 +378,6 @@
             "team": "Team",
             "title": "Mensen",
             "unactive": "Inactief",
-            "csv": {
-                "import_file": "Importeer een .csv bestand",
-                "export_file": "Download een .csv bestand",
-                "import_title": "Importeer data uit een CSV bestand",
-                "required_fields": "De CSV file vereist the volgende kolommen",
-                "select_file": "Selecteer een bestand uit een folder:",
-                "error_upload": "Er is een probleem opgetreden tijdens het uploaden van het CSV bestand."
-            },
             "fields": {
                 "first_name": "Voornaam",
                 "last_name": "Achternaam",

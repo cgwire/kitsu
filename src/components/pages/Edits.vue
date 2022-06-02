@@ -177,7 +177,7 @@
     :import-error="errors.importingError"
     :parsed-csv="parsedCSV"
     :form-data="editsCsvFormData"
-    :columns="columns"
+    :columns="renderColumns"
     :data-matchers="dataMatchers"
     :database="filteredEdits"
     @reupload="resetImport"
@@ -191,7 +191,9 @@
     :is-loading="loading.importing"
     :is-error="errors.importing"
     :form-data="editsCsvFormData"
-    :columns="columns"
+    :columns="dataMatchers"
+    :optional-columns="optionalColumns"
+    :generic-columns="genericColumns"
     @cancel="hideImportModal"
     @confirm="renderImport"
   />
@@ -313,6 +315,14 @@ export default {
       formData: null,
       isSearchActive: false,
       historyEdit: {},
+      optionalColumns: [
+        'Description'
+      ],
+      genericColumns: [
+        'metadata_column_name => text value',
+        'task_type_name => task_status_name',
+        'task_type_name comment => comment text'
+      ],
       parsedCSV: [],
       editToDelete: null,
       editToEdit: null,
@@ -462,14 +472,9 @@ export default {
       return this.$refs['add-thumbnails-modal']
     },
 
-    columns () {
-      const collection = [
-        'Name',
-        'Description'
-      ]
-      if (this.isTVShow) {
-        collection.unshift('Episode')
-      }
+    renderColumns () {
+      var collection = [...this.dataMatchers, ...this.optionalColumns]
+
       this.productionEditTaskTypes.forEach(item => {
         collection.push(item.name)
         collection.push(item.name + ' comment')
@@ -478,13 +483,9 @@ export default {
     },
 
     dataMatchers () {
-      const collection = [
-        'Name'
-      ]
-      if (this.isTVShow) {
-        collection.unshift('Episode')
-      }
-      return collection
+      return this.isTVShow
+        ? ['Episode', 'Name']
+        : ['Name']
     },
 
     filteredEdits () {
