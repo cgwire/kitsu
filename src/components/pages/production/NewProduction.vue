@@ -748,7 +748,7 @@ export default {
     },
 
     endDatePlaceholder () {
-      return formatSimpleDate(moment().add('month', 3))
+      return formatSimpleDate(moment().add(3, 'month'))
     }
   },
 
