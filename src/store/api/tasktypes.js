@@ -12,8 +12,7 @@ export default {
       priority: Number(taskType.priority),
       for_entity: taskType.for_entity,
       allow_timelog: Boolean(taskType.allow_timelog === 'true'),
-      department_id: taskType.department_id,
-      asset_types: taskType.asset_types
+      department_id: taskType.department_id
     }
     return client.ppost('/api/data/task-types/', data)
   },
@@ -22,8 +21,7 @@ export default {
     const data = {
       name: taskType.name,
       color: taskType.color,
-      department_id: taskType.department_id,
-      asset_types: taskType.asset_types
+      department_id: taskType.department_id
     }
     if (taskType.priority && taskType.priority > 0) {
       data.priority = Number(taskType.priority)

@@ -575,6 +575,7 @@ export default {
       'assetMetadataDescriptors',
       'assetSearchText',
       'assetSelectionGrid',
+      'assetTypeMap',
       'episodeMap',
       'currentEpisode',
       'currentProduction',
@@ -689,7 +690,8 @@ export default {
     isSelectable (asset, columnId) {
       // Selectable if no asset types set on task type or if the column's asset type is in the list of asset_types
       const taskType = this.taskTypeMap.get(columnId)
-      return taskType.asset_types.length > 0 ? taskType.asset_types.includes(asset.asset_type_id) : true
+      const assetType = this.assetTypeMap.get(asset.asset_type_id)
+      return assetType.task_types.includes(taskType.id)
     },
 
     isSelected (indexInGroup, groupIndex, columnIndex) {

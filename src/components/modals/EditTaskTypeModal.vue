@@ -41,31 +41,6 @@
           @enter="confirmClicked"
           v-model="form.department_id"
         />
-        <label class="label">
-          {{ $t('task_types.fields.asset_types') }}
-        </label>
-        <div class="flexrow asset-types mb1">
-          <div
-            class="flexrow-item mb1"
-            :key="assetTypeId"
-            @click="removeAssetType(assetTypeId)"
-            v-for="assetTypeId in form.asset_types"
-          >
-            <asset-type-name
-                :asset-type="assetTypeMap.get(assetTypeId)"
-                v-if="assetTypeId"
-              />
-          </div>
-          <combobox
-            class="flexrow-item mb1"
-            :options="availableAssetTypes"
-            :with-margin="false"
-            @input="id => {
-              assetTypeMap.get(id) && form.asset_types.push(id)
-            }"
-            v-if="availableAssetTypes.length > 1"
-          />
-        </div>
         <color-field
           ref="colorField"
           :label="$t('task_types.fields.color')"
@@ -89,22 +64,17 @@
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from './base_modal'
 
-import { removeModelFromList } from '@/lib/models'
-import { sortByName } from '@/lib/sorting'
-
 import Combobox from '../widgets/Combobox.vue'
 import ComboboxBoolean from '../widgets/ComboboxBoolean.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ColorField from '../widgets/ColorField'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '../widgets/TextField'
-import AssetTypeName from '../widgets/AssetTypeName'
 
 export default {
   name: 'edit-task-type-modal',
   mixins: [modalMixin],
   components: {
-    AssetTypeName,
     Combobox,
     ComboboxBoolean,
     ComboboxDepartment,
@@ -125,15 +95,13 @@ export default {
 
   watch: {
     taskTypeToEdit () {
-      console.log('taskTypeToEdit', this.taskTypeToEdit)
-      if (this.taskTypeToEdit.id) {
+      if (this.taskTypeToEdit) {
         this.form = {
           name: this.taskTypeToEdit.name,
           color: this.taskTypeToEdit.color,
           for_entity: this.taskTypeToEdit.for_entity,
           allow_timelog: String(this.taskTypeToEdit.allow_timelog === true),
-          department_id: this.taskTypeToEdit.department_id,
-          asset_types: [...this.taskTypeToEdit.asset_types]
+          department_id: this.taskTypeToEdit.department_id
         }
       }
     }
@@ -146,8 +114,7 @@ export default {
         color: '$grey',
         for_entity: 'Asset',
         allow_timelog: 'false',
-        department_id: null,
-        asset_types: []
+        department_id: null
       },
       dedicatedToOptions: [
         { label: this.$t('assets.title'), value: 'Asset' },
@@ -159,48 +126,18 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetTypes',
-      'assetTypeMap',
       'taskTypes',
       'taskTypeStatusOptions',
       'departments'
     ]),
-
     isEditing () {
       return this.taskTypeToEdit && this.taskTypeToEdit.id
-    },
-
-    availableAssetTypes () {
-      const assetTypes = sortByName(this.assetTypes.filter(assetType => {
-        return this.form.asset_types.indexOf(assetType.id) === -1
-      }))
-      return [
-        {
-          name: '+ Asset Type',
-          id: '-'
-        },
-        ...assetTypes
-      ].map(assetType => {
-        return {
-          label: assetType.name,
-          value: assetType.id
-        }
-      })
     }
   },
 
   methods: {
     ...mapActions([
-      'loadAssetTypes'
     ]),
-    removeModelFromList,
-
-    removeAssetType (idToRemove) {
-      const assetTypeIndex = this.form.asset_types.indexOf(idToRemove)
-      if (assetTypeIndex >= 0) {
-        this.form.asset_types.splice(assetTypeIndex, 1)
-      }
-    },
 
     newPriority (forEntity) {
       return this.entries.filter(taskType => taskType.for_entity === forEntity).length + 1
@@ -224,5 +161,4 @@ export default {
   color: #ff3860;
   font-style: italic;
 }
-
 </style>

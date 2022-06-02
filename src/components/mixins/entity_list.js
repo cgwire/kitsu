@@ -117,7 +117,7 @@ export const entityListMixin = {
       }
     },
 
-    onTaskSelected (validationInfo, sticked, selectable) {
+    onTaskSelected (validationInfo, sticked) {
       const columnOffset = this.stickedDisplayedValidationColumns.length
       const selection = []
       if (!sticked) {
@@ -153,7 +153,7 @@ export const entityListMixin = {
                 if (!sticked) y += columnOffset
 
                 // Check if cell is selectable based on asset types list from entity's task type
-                const isSelectable = (validationCell.column.asset_types.length > 0 ? validationCell.column.asset_types.includes(validationCell.entity.asset_type_id) : true)
+                const isSelectable = validationCell.entity.task_types.includes(validationCell.column.task_type_id)
 
                 // Add cell to selection
                 if (isSelectable) {

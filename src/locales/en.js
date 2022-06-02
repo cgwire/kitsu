@@ -45,7 +45,8 @@ export default {
     title: 'Asset Types',
     production_title: 'Asset Types Stats',
     fields: {
-      name: 'Name'
+      name: 'Name',
+      task_types: 'Task types workflow'
     }
   },
 
@@ -783,7 +784,6 @@ export default {
     number: 'task type | task types',
     title: 'Task Types',
     fields: {
-      asset_types: 'Used only for',
       dedicated_to: 'For',
       department: 'Department',
       color: 'Color',
