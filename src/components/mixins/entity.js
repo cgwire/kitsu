@@ -133,7 +133,7 @@ export const entityMixin = {
         }
       }).filter(c => c !== null)
       let rootStartDate = moment()
-      let rootEndDate = moment().add('days', 1)
+      let rootEndDate = moment().add(1, 'days')
       if (children.length > 0) {
         rootStartDate = getFirstStartDate(children)
         rootEndDate = getLastEndDate(children)

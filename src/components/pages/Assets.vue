@@ -179,7 +179,7 @@
     :import-error="errors.importingError"
     :parsed-csv="parsedCSV"
     :form-data="assetsCsvFormData"
-    :columns="columns"
+    :columns="renderColumns"
     :data-matchers="dataMatchers"
     :database="filteredAssets"
     @reupload="resetImport"
@@ -193,7 +193,9 @@
     :is-loading="loading.importing"
     :is-error="errors.importing"
     :form-data="assetsCsvFormData"
-    :columns="columns"
+    :columns="dataMatchers"
+    :optional-columns="optionalColumns"
+    :generic-columns="genericColumns"
     @confirm="renderImport"
     @cancel="hideImportModal"
   />
@@ -352,6 +354,15 @@ export default {
         isImportRenderDisplayed: false,
         isNewDisplayed: false
       },
+      optionalColumns: [
+        'Description',
+        'Ready for'
+      ],
+      genericColumns: [
+        'metadata_column_name => text value',
+        'task_type_name => task_status_name',
+        'task_type_name comment => comment text'
+      ],
       parsedCSV: [],
       success: {
         edit: false
@@ -507,17 +518,8 @@ export default {
         : ['Type', 'Name']
     },
 
-    columns () {
-      const collection = [
-        'Type',
-        'Name',
-        'Description',
-        'Ready for'
-      ]
-
-      if (this.isTVShow) {
-        collection.unshift('Episode')
-      }
+    renderColumns () {
+      var collection = [...this.dataMatchers, ...this.optionalColumns]
 
       this.productionAssetTaskTypes.forEach(item => {
         collection.push(item.name)

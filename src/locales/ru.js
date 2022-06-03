@@ -354,14 +354,6 @@ export default {
     team: 'Команда',
     title: 'Команда',
     unactive: 'Неактивный',
-    csv: {
-      import_file: 'Импортироать .csv файл',
-      export_file: 'Сохранить как .csv файл',
-      import_title: 'Импортировать данные из CSV',
-      required_fields: 'Вашему файлу CSV нужны седующие столбцы',
-      select_file: 'Выберите файл:',
-      error_upload: 'При загрузке CSV произошла ошибка.'
-    },
     fields: {
       first_name: 'Имя',
       last_name: 'Фамилия',

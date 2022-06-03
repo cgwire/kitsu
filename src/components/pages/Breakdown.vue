@@ -146,7 +146,7 @@
       :import-error="errors.importingError"
       :parsed-csv="parsedCSV"
       :form-data="importCsvFormData"
-      :columns="csvColumns"
+      :columns="renderColumns"
       :dataMatchers="dataMatchers"
       :database="filteredCasting"
       :disable-update=true
@@ -162,6 +162,7 @@
       :is-error="errors.importing"
       :form-data="importCsvFormData"
       :columns="csvColumns"
+      :optional-columns="optionalCsvColumns"
       @cancel="hideImportModal"
       @confirm="renderImport"
     />
@@ -300,6 +301,7 @@ export default {
       success: {
         edit: false
       },
+      optionalCsvColumns: ['Label'],
       parsedCSV: []
     }
   },
@@ -423,16 +425,18 @@ export default {
           'Name',
           'Asset Type',
           'Asset',
-          'Occurences',
-          'Label'
+          'Occurences'
         ] : [
           'Parent',
           'Name',
           'Asset Type',
           'Asset',
-          'Occurences',
-          'Label'
+          'Occurences'
         ]
+    },
+
+    renderColumns () {
+      return [...this.csvColumns, ...this.optionalCsvColumns]
     },
 
     dataMatchers () {

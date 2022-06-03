@@ -194,7 +194,7 @@
     :import-error="errors.importingError"
     :parsed-csv="parsedCSV"
     :form-data="shotsCsvFormData"
-    :columns="columns"
+    :columns="renderColumns"
     :dataMatchers="dataMatchers"
     :database="filteredShots"
     @reupload="resetImport"
@@ -208,7 +208,9 @@
     :is-loading="loading.importing"
     :is-error="errors.importing"
     :form-data="shotsCsvFormData"
-    :columns="columns"
+    :columns="dataMatchers"
+    :optional-columns="optionalColumns"
+    :generic-columns="genericColumns"
     @cancel="hideImportModal"
     @confirm="renderImport"
   />
@@ -334,6 +336,18 @@ export default {
       formData: null,
       isSearchActive: false,
       historyShot: {},
+      optionalColumns: [
+        'Description',
+        'Nb Frames',
+        'Frame In',
+        'Frame Out',
+        'FPS'
+      ],
+      genericColumns: [
+        'metadata_column_name => text value',
+        'task_type_name => task_status_name',
+        'task_type_name comment => comment text'
+      ],
       parsedCSV: [],
       shotToDelete: null,
       shotToEdit: null,
@@ -487,35 +501,21 @@ export default {
       return this.$refs['add-thumbnails-modal']
     },
 
-    columns () {
-      const collection = [
-        'Sequence',
-        'Name',
-        'Description',
-        'Nb Frames',
-        'FPS',
-        'Frame In',
-        'Frame Out'
-      ]
-      if (this.isTVShow) {
-        collection.unshift('Episode')
-      }
+    renderColumns () {
+      var collection = [...this.dataMatchers, ...this.optionalColumns]
+
       this.productionShotTaskTypes.forEach(item => {
         collection.push(item.name)
         collection.push(item.name + ' comment')
       })
+
       return collection
     },
 
     dataMatchers () {
-      const collection = [
-        'Sequence',
-        'Name'
-      ]
-      if (this.isTVShow) {
-        collection.unshift('Episode')
-      }
-      return collection
+      return this.isTVShow
+        ? ['Episode', 'Sequence', 'Name']
+        : ['Sequence', 'Name']
     },
 
     filteredShots () {

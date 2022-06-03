@@ -385,14 +385,6 @@
             "team": "团队",
             "title": "人员",
             "unactive": "非活动",
-            "csv": {
-                "import_file": "导入.csv文件",
-                "export_file": "下载为.csv文件",
-                "import_title": "从CSV文件导入数据",
-                "required_fields": "您的CSV文件需要有如下列项",
-                "select_file": "请从您的某个文件夹选择文件:",
-                "error_upload": "上传您的CSV文件时出现错误."
-            },
             "fields": {
                 "first_name": "名字",
                 "last_name": "姓氏",

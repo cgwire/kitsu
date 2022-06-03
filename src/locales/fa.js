@@ -345,14 +345,6 @@ export default {
     team: 'تیم',
     title: 'افراد',
     unactive: 'غیرفعال',
-    csv: {
-      import_file: 'وارد کردن فایل .csv',
-      export_file: 'دانلود به عنوان فایل .csv',
-      import_title: 'وارد کردن داده هااز فایل csv',
-      required_fields: 'فایل csv شما نیازمند ستون های ذیل است:',
-      select_file: 'لطفا فایل مرود نظر خود را انتخاب کنید:',
-      error_upload: 'به هنگام بارگذاری فایل خطایی رخ داده.'
-    },
     fields: {
       first_name: 'نام',
       last_name: 'نام خانوادگی',

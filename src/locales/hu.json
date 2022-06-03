@@ -378,14 +378,6 @@
             "team": "Stáb",
             "title": "Emberek",
             "unactive": "Inaktív",
-            "csv": {
-                "import_file": ".cs file importálása",
-                "export_file": ".csv file letöltése",
-                "import_title": "Adatok importálása CSV file-ból",
-                "required_fields": "A CSV file-nak az alábbi oszlopokat kell tartalmazza",
-                "select_file": "Válassz ki egy file-t a mappádból:",
-                "error_upload": "Hiba történt a CSV file feltöltésekor."
-            },
             "fields": {
                 "first_name": "Keresztnév",
                 "last_name": "Családnév",

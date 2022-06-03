@@ -68,7 +68,7 @@
       :is-error="isImportPeopleLoadingError"
       :parsed-csv="parsedCSV"
       :form-data="personCsvFormData"
-      :columns="csvColumns"
+      :columns="[...dataMatchers, csvColumns, optionalCsvColumns]"
       :dataMatchers="dataMatchers"
       :database="filteredPeople"
       @reupload="resetImport"
@@ -82,7 +82,8 @@
       :is-loading="isImportPeopleLoading"
       :is-error="isImportPeopleLoadingError"
       :form-data="personCsvFormData"
-      :columns="csvColumns"
+      :columns="[...dataMatchers, csvColumns]"
+      :optional-columns="optionalCsvColumns"
       @cancel="hideImportModal"
       @confirm="renderImport"
     />
@@ -161,8 +162,9 @@ export default {
     return {
       csvColumns: [
         'First Name',
-        'Last Name',
-        'Email',
+        'Last Name'
+      ],
+      optionalCsvColumns: [
         'Phone',
         'Role'
       ],

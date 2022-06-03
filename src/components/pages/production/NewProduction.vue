@@ -350,7 +350,7 @@
       :import-error="errors.importingAssetsError"
       :parsed-csv="parsedAssetsCSV"
       :form-data="assetsCsvFormData"
-      :columns="assetsColumns"
+      :columns="assetsRenderColumns"
       :data-matchers="assetsDataMatchers"
       :database="{}"
       :disable-update="true"
@@ -365,7 +365,9 @@
       :is-loading="loading.importingAssets"
       :is-error="errors.importingAssets"
       :form-data="assetsCsvFormData"
-      :columns="assetsColumns"
+      :columns="assetsDataMatchers"
+      :optional-columns="assetsOptionalColumns"
+      :generic-columns="genericColumns"
       @confirm="renderAssetsImport"
       @cancel="toggleModal('isAssetsImportDisplayed')"
     />
@@ -377,7 +379,7 @@
       :import-error="errors.importingShotsError"
       :parsed-csv="parsedShotsCSV"
       :form-data="shotsCsvFormData"
-      :columns="shotsColumns"
+      :columns="shotsRenderColumns"
       :data-matchers="shotsDataMatchers"
       :database="{}"
       :disable-update="true"
@@ -392,7 +394,9 @@
       :is-loading="loading.importingShots"
       :is-error="errors.importingShots"
       :form-data="shotsCsvFormData"
-      :columns="shotsColumns"
+      :columns="shotsDataMatchers"
+      :optional-columns="shotsOptionalColumns"
+      :generic-columns="genericColumns"
       @confirm="renderShotsImport"
       @cancel="toggleModal('isShotsImportDisplayed')"
     />
@@ -495,6 +499,22 @@ export default {
         shotsToCreate: [],
         taskStatuses: []
       },
+      assetsOptionalColumns: [
+        'Description',
+        'Ready for'
+      ],
+      shotsOptionalColumns: [
+        'Description',
+        'Nb Frames',
+        'Frame In',
+        'Frame Out',
+        'FPS'
+      ],
+      genericColumns: [
+        'metadata_column_name => text value',
+        'task_type_name => task_status_name',
+        'task_type_name comment => comment text'
+      ],
       productionTypeOptions: PRODUCTION_TYPE_OPTIONS
     }
   },
@@ -525,32 +545,33 @@ export default {
         : ['Type', 'Name']
     },
 
+    assetsRenderColumns () {
+      var collection = [...this.assetsDataMatchers,
+        ...this.assetsOptionalColumns]
+
+      this.productionToCreate.assetTaskTypes.forEach(item => {
+        collection.push(item.name)
+        collection.push(item.name + ' comment')
+      })
+
+      return collection
+    },
+
+    shotsRenderColumns () {
+      var collection = [...this.shotsDataMatchers, ...this.shotsOptionalColumns]
+
+      this.productionToCreate.shotTaskTypes.forEach(item => {
+        collection.push(item.name)
+        collection.push(item.name + ' comment')
+      })
+
+      return collection
+    },
+
     shotsDataMatchers () {
       return this.isTVShow
         ? ['Episode', 'Sequence', 'Name']
         : ['Sequence', 'Name']
-    },
-
-    assetsColumns () {
-      return this.isTVShow
-        ? ['Episode', 'Type', 'Name', 'Description']
-        : ['Type', 'Name', 'Description']
-    },
-
-    shotsColumns () {
-      const collection = [
-        'Sequence',
-        'Name',
-        'Description',
-        'Nb Frames',
-        'FPS',
-        'Frame In',
-        'Frame Out'
-      ]
-      if (this.isTVShow) {
-        collection.unshift('Episode')
-      }
-      return collection
     },
 
     locale () {
@@ -727,7 +748,7 @@ export default {
     },
 
     endDatePlaceholder () {
-      return formatSimpleDate(moment().add('month', 3))
+      return formatSimpleDate(moment().add(3, 'month'))
     }
   },
 

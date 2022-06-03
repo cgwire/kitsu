@@ -403,7 +403,7 @@ export default {
       const rootElements = Array.from(rootMap.values())
       rootElements.forEach(rootElement => {
         let rootStartDate = moment()
-        let rootEndDate = moment().add('days', 1)
+        let rootEndDate = moment().add(1, 'days')
         let manDays = 0
         if (rootElement.children.length > 0) {
           rootStartDate = getFirstStartDate(rootElement.children)

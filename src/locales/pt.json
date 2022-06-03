@@ -338,14 +338,6 @@
             "team": "Time",
             "title": "Pessoas",
             "unactive": "Inativo",
-            "csv": {
-                "import_file": "Importar arquivo .csv",
-                "export_file": "Baixar como .csv",
-                "import_title": "Importar dados de um arquivo CSV",
-                "required_fields": "Seu arquivo CSV precisa das seguintes colunas:",
-                "select_file": "Por favor selecione um arquivo da sua pasta:",
-                "error_upload": "Um erro ocorreu no upload do arquivo CSV."
-            },
             "fields": {
                 "first_name": "Primeiro nome",
                 "last_name": "Último nome",
