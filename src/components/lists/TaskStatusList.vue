@@ -10,11 +10,11 @@
           <th scope="col" class="short-name">
             {{ $t('task_status.fields.short_name') }}
           </th>
-          <th scope="col" class="is-done">
-            {{ $t('task_status.fields.is_done') }}
-          </th>
           <th scope="col" class="is-default">
             {{ $t('task_status.fields.is_default') }}
+          </th>
+          <th scope="col" class="is-done">
+            {{ $t('task_status.fields.is_done') }}
           </th>
           <th scope="col" class="is-retake">
             {{ $t('task_status.fields.is_retake') }}
@@ -37,11 +37,11 @@
             {{ entry.name }}
           </td>
           <task-status-name class="short-name" :entry="entry" />
-          <td class="is-done">
-            {{ formatBoolean(entry.is_done) }}
-          </td>
           <td class="is-default">
             {{ formatBoolean(entry.is_default) }}
+          </td>
+          <td class="is-done">
+            {{ formatBoolean(entry.is_done) }}
           </td>
           <td class="is-retake">
             {{ formatBoolean(entry.is_retake) }}

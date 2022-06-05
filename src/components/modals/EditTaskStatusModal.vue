@@ -23,6 +23,7 @@
           @enter="confirmClicked"
           v-model="form.name"
           v-focus
+          v-if="taskStatusToEdit.short_name !== 'todo'"
         />
         <text-field
           ref="shortNameField"
@@ -32,6 +33,12 @@
           @enter="confirmClicked"
           v-model="form.short_name"
           v-focus
+          v-if="taskStatusToEdit.short_name !== 'todo'"
+        />
+        <combobox-boolean
+          :label="$t('task_status.fields.is_default')"
+          @enter="confirmClicked"
+          v-model="form.is_default"
         />
         <combobox-boolean
           :label="$t('task_status.fields.is_done')"
@@ -67,6 +74,7 @@
           :label="$t('task_status.fields.color')"
           :colors="colors"
           v-model="form.color"
+          v-if="taskStatusToEdit.short_name !== 'todo'"
         />
       </form>
 
