@@ -19,7 +19,7 @@
           />
           <combobox-styled
             :label="$t('shots.fields.sequence')"
-            :options="castingSequenceOptions"
+            :options="castingSequencesOptions"
             v-model="sequenceId"
             v-if="isShotCasting"
           />
@@ -252,16 +252,6 @@ export default {
     return {
       assetTypeId: '',
       castingType: 'shot',
-      castingTypeOptions: [
-        {
-          label: this.$t('shots.title'),
-          value: 'shot'
-        },
-        {
-          label: this.$t('assets.title'),
-          value: 'asset'
-        }
-      ],
       editedAsset: null,
       editedEntityId: null,
       editedAssetLinkLabel: null,
@@ -322,11 +312,12 @@ export default {
       'castingAssetTypesOptions',
       'castingByType',
       'castingCurrentShot',
-      'castingSequenceOptions',
+      'castingSequencesOptions',
       'castingSequenceShots',
       'currentEpisode',
       'currentProduction',
       'displayedShots',
+      'episodes',
       'getEpisodeOptions',
       'isCurrentUserManager',
       'isAssetsLoading',
@@ -338,13 +329,35 @@ export default {
       'shotMap'
     ]),
 
+    castingTypeOptions () {
+      const options = [
+        {
+          label: this.$t('assets.title'),
+          value: 'asset'
+        }
+      ]
+      if (
+        !this.isTVShow || (
+          this.currentEpisode && this.currentEpisode.id !== 'main'
+        )
+      ) {
+        options.unshift({
+          label: this.$t('shots.title'),
+          value: 'shot'
+        })
+      }
+      return options
+    },
+
     availableAssetsByType () {
       const result = []
       this.assetsByType.forEach((typeGroup) => {
         let newGroup = typeGroup.filter(asset => !asset.canceled)
         if (this.isTVShow && this.isOnlyCurrentEpisode) {
           newGroup = typeGroup.filter(
-            asset => asset.episode_id === this.currentEpisode.id
+            asset => this.currentEpisode.id !== 'main'
+              ? asset.episode_id === this.currentEpisode.id
+              : !asset.episode_id
           )
         }
         if (newGroup.length > 0) result.push(newGroup)
@@ -386,7 +399,7 @@ export default {
               asset.casting_episode_ids.includes(this.currentEpisode.id)
             )
           )
-        } else if (this.currentEpisode.id === 'main') {
+        } else if (this.isTVShow && this.currentEpisode.id === 'main') {
           return this.castingAssetTypeAssets.filter(
             asset => !asset.episode_id)
         } else {
@@ -486,11 +499,11 @@ export default {
       }
       this.isLoading = true
       setTimeout(() => {
-        this.reloadShots()
+        this.reloadEntities()
       }, 100)
     },
 
-    reloadShots () { // TODO shouldn't it be renamed reloadEntities?
+    reloadEntities () {
       this.isLoading = true
       this.loadShots(() => {
         if (this.isTVShow) {
@@ -511,6 +524,9 @@ export default {
               this.setCastingAssetType(this.assetTypeId)
             }
             this.resetSelection()
+            if (this.currentEpisode && this.currentEpisode.id === 'main') {
+              this.castingType = 'asset'
+            }
           })
       })
     },
@@ -903,7 +919,11 @@ export default {
     },
 
     sequenceId () {
-      if (this.sequenceId && this.sequences && this.sequences.length > 0) {
+      if (
+        this.sequenceId &&
+        this.sequences &&
+        this.sequences.length > 0
+      ) {
         this.setCastingSequence(this.sequenceId)
         this.updateUrl()
         this.resetSelection()
@@ -920,13 +940,14 @@ export default {
 
     episodeId () {
       if (this.episodeId && this.episodes && this.episodes.length > 0) {
-        this.setCastingForProductionEpisodes(this.episodeId)
-        this.updateUrl()
+        if (this.episodeId === 'all') {
+          this.setCastingForProductionEpisodes(this.episodeId)
+        }
         this.resetSelection()
       }
     },
 
-    castingSequenceOptions () { // TODO should be put to plural castingSequencesOptions
+    castingSequencesOptions () {
       if (this.$route.path.indexOf('asset-type') < 0) {
         const sequenceId = this.$route.params.sequence_id
         if (
@@ -934,8 +955,8 @@ export default {
           this.sequenceMap.get(sequenceId)
         ) {
           this.sequenceId = sequenceId
-        } else if (this.castingSequenceOptions.length > 0) {
-          this.sequenceId = this.castingSequenceOptions[0].value
+        } else if (this.castingSequencesOptions.length > 0) {
+          this.sequenceId = this.castingSequencesOptions[0].value
         } else {
           this.sequenceId = ''
         }
@@ -968,7 +989,11 @@ export default {
         this.episodeId !== this.currentEpisode.id &&
         !this.isLoading
       ) {
-        this.reset()
+        if (this.currentEpisode.id === 'all') {
+          this.episodeId = 'all'
+        } else {
+          this.reset()
+        }
       }
     },
 

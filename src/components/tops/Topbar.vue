@@ -274,7 +274,7 @@ export default {
     ]),
 
     assetSections () {
-      return ['assets', 'assetTypes', 'breakdown', 'playlists']
+      return ['assets', 'assetTypes', 'playlists']
     },
 
     editSections () {
@@ -307,7 +307,8 @@ export default {
         ].concat(this.episodeOptions)
       } else if (['breakdown'].includes(this.currentProjectSection)) {
         return [
-          { label: this.$t('main.all'), value: 'all' }
+          { label: this.$t('shots.episodes'), value: 'all' },
+          { label: 'Main Pack', value: 'main' }
         ].concat(this.episodeOptions)
       } else {
         return this.episodeOptions
@@ -500,7 +501,6 @@ export default {
     setProductionFromRoute () {
       const routeProductionId = this.$route.params.production_id
       const routeEpisodeId = this.$route.params.episode_id
-
       if (this.isProductionChanged(routeProductionId)) {
         this.configureProduction(routeProductionId)
       } else if (this.isEpisodeChanged(routeEpisodeId)) {
@@ -666,7 +666,8 @@ export default {
         if ((isAssetSection || isEditSection) && !this.currentEpisodeId) {
           this.currentEpisodeId = 'all'
           this.setCurrentEpisode(this.currentEpisodeId)
-        // It's a shot section, and episode is not set, we chose the first one
+          // It's a shot section, and episode is not set, we chose the first
+          // one.
         } else if (!this.currentEpisode) {
           if (!this.currentEpisodeId) {
             if (this.episodes.length > 0) {

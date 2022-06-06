@@ -527,18 +527,19 @@ const actions = {
     let episode = isTVShow ? rootGetters.currentEpisode : null
 
     if (episode && ['all', 'main'].includes(episode.id)) {
+      // If it's a wide episode, we just store it. There isn't anything to
+      // load because we don't have episode defined.
+      commit(SET_CURRENT_EPISODE, episode.id)
+      return callback()
+    } else if (isTVShow && !episode) {
+      // If it's tv show and if we don't have any episode set, we use the first
+      // one.
       episode = state.episodes.length > 0 ? state.episodes[0] : null
-      if (episode.project_id !== production.id) return
       commit(SET_CURRENT_EPISODE, episode.id)
     }
 
     if (isTVShow && !episode && state.episodes.length === 0) {
       return callback()
-    }
-
-    if (isTVShow && !episode) {
-      episode = state.episodes.length > 0 ? state.episodes[0] : null
-      commit(SET_CURRENT_EPISODE, episode.id)
     }
 
     if (!isTVShow && episode) {

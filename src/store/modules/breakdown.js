@@ -38,7 +38,7 @@ const initialState = {
   castingSequenceShots: [],
   castingAssetTypeAssets: [],
   castingEpisodeSequences: [],
-  castingSequenceOptions: [],
+  castingSequencesOptions: [],
   castingAssetTypesOptions: [],
 
   castingCurrentShot: null,
@@ -53,7 +53,7 @@ const getters = {
   castingSequenceId: state => state.castingSequenceId,
   castingSequenceShots: state => state.castingSequenceShots,
   castingAssetTypeAssets: state => state.castingAssetTypeAssets,
-  castingSequenceOptions: state => state.castingSequenceOptions,
+  castingSequencesOptions: state => state.castingSequencesOptions,
   castingAssetTypesOptions: state => state.castingAssetTypesOptions,
 
   casting: state => state.casting,
@@ -280,7 +280,7 @@ const mutations = {
 
   [CASTING_SET_SEQUENCES] (state, sequences) {
     state.castingEpisodeSequences = sequences
-    state.castingSequenceOptions = sequences.map((sequence) => {
+    state.castingSequencesOptions = sequences.map(sequence => {
       const route = {
         name: 'breakdown-sequence',
         params: {

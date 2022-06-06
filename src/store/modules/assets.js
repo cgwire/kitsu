@@ -369,10 +369,10 @@ const actions = {
 
   loadAssets ({ commit, state, rootGetters }, all = false) {
     const production = rootGetters.currentProduction
-    const userFilters = rootGetters.userFilters
-    const personMap = rootGetters.personMap
     let episode = rootGetters.currentEpisode
     const isTVShow = rootGetters.isTVShow
+    const userFilters = rootGetters.userFilters
+    const personMap = rootGetters.personMap
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
 
@@ -390,11 +390,10 @@ const actions = {
 
     commit(LOAD_ASSETS_START)
     return assetsApi.getAssets(production, episode)
-      .then((assets) => {
+      .then(assets => {
         commit(
           LOAD_ASSETS_END,
           { production, assets, userFilters, personMap, taskMap, taskTypeMap }
-
         )
         return Promise.resolve(assets)
       })
