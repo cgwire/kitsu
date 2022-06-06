@@ -37,7 +37,7 @@ export default {
     ]),
 
     color () {
-      if (this.entry.is_default && this.isDarkTheme) {
+      if (this.entry.name === 'Todo' && this.isDarkTheme) {
         return '#5F626A'
       } else {
         return this.entry.color
