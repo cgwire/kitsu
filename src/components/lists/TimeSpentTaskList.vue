@@ -34,8 +34,12 @@
                 class="by-task-type-id datatable-row"
                 v-for="task in projects[projectId][taskTypeId]"
               >
-                <td class="name">{{ task.name }}</td>
-                <td class="duration">{{ task.duration / 60 }}</td>
+                <router-link :to="getTaskPath(task)">
+                  <td class="name">
+                      {{ task.name }}
+                  </td>
+                  <td class="duration">{{ task.duration / 60 }}</td>
+                </router-link>
               </tr>
             </tbody>
           </table>
@@ -49,10 +53,12 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import TableInfo from '@/components/widgets/TableInfo'
-import ProductionName from '@/components/widgets/ProductionName'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
 import { sortByName } from '@/lib/sorting'
+import { getTaskPath } from '@/lib/path'
+
+import ProductionName from '@/components/widgets/ProductionName'
+import TableInfo from '@/components/widgets/TableInfo'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
   name: 'timespent-task-list',
@@ -88,6 +94,7 @@ export default {
     ...mapGetters([
       'currentProduction',
       'lastProductionScreen',
+      'productionMap',
       'taskTypeMap'
     ]),
 
@@ -108,7 +115,9 @@ export default {
         }
 
         projects[task.project_id][task.task_type_id].push({
-          id: task.id,
+          id: task.task_id,
+          project_id: task.project_id,
+          task_type_id: task.task_type_id,
           name: name,
           duration: task.duration
         })
@@ -129,6 +138,14 @@ export default {
   methods: {
     ...mapActions([
     ]),
+
+    getTaskPath (task) {
+      const project = this.productionMap.get(task.project_id)
+      console.log(project)
+      const isTVShow = project.production_type === 'tvshow'
+      const episode = { id: project.first_episode_id }
+      return getTaskPath(task, null, isTVShow, episode, this.taskTypeMap)
+    },
 
     onBodyScroll (event, position) {
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
@@ -177,5 +194,9 @@ export default {
 
 .by-project {
   margin-bottom: 2em;
+}
+
+a {
+  color: var(--text);
 }
 </style>
