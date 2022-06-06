@@ -15,7 +15,12 @@
               v-if="organisation && organisation.has_avatar"
             />
             <img
-              src="../../assets/kitsu.svg"
+              src="../../assets/kitsu-text-dark.svg"
+              width="180"
+              v-else-if="isDarkTheme"
+            />
+            <img
+              src="../../assets/kitsu-text.svg"
               width="180"
               v-else
             />
@@ -183,11 +188,12 @@ export default {
 
   computed: {
     ...mapGetters([
-      'isSidebarHidden',
+      'isDarkTheme',
       'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isCurrentUserVendor',
+      'isSidebarHidden',
       'organisation'
     ])
   },

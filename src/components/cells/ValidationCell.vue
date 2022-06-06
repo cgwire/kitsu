@@ -206,19 +206,23 @@ export default {
     },
 
     backgroundColor () {
-      if (this.taskStatus.is_default && !this.isDarkTheme) {
+      const isTodo = this.taskStatus.name === 'Todo'
+      if (isTodo && !this.isDarkTheme) {
         return '#ECECEC'
-      } else if (this.taskStatus.is_default && this.isDarkTheme) {
+      } else if (isTodo && this.isDarkTheme) {
         return '#5F626A'
-      } else if (this.isDarkTheme) {
+      } else if (this.isDarkTheme && this.taskStatus.color) {
         return colors.darkenColor(this.taskStatus.color)
-      } else {
+      } else if (this.taskStatus.color) {
         return this.taskStatus.color
+      } else {
+        return 'transparent'
       }
     },
 
     color () {
-      if (!this.taskStatus.is_default || this.isDarkTheme) {
+      const isTodo = this.taskStatus.name === 'Todo'
+      if (!isTodo || this.isDarkTheme) {
         return 'white'
       } else {
         return '#333'

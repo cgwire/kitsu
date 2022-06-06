@@ -118,7 +118,8 @@ export default {
     },
 
     color () {
-      if (this.taskStatus.color !== '#f5f5f5' || this.isDarkTheme) {
+      const isTodo = this.taskStatus.name === 'Todo'
+      if (!isTodo || this.isDarkTheme) {
         return 'white'
       } else {
         return '#333'
@@ -146,10 +147,12 @@ export default {
 
     tagStyle () {
       const isStatic = !this.isStatic && !this.isCurrentUserClient
-      const isTodo = this.taskStatus.is_default
+      const isTodo = this.taskStatus.name === 'Todo'
       if (this.thin && !isTodo) {
         return {
-          background: this.isDarkTheme ? 'rgba(255, 255, 255, 0.75)' : 'transparent',
+          background: this.isDarkTheme
+            ? 'rgba(255, 255, 255, 0.75)'
+            : 'transparent',
           border: '1px solid ' + (isTodo ? 'grey' : this.backgroundColor),
           color: this.backgroundColor,
           cursor: isStatic ? 'pointer' : this.cursor
