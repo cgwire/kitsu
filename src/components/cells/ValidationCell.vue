@@ -210,10 +210,12 @@ export default {
         return '#ECECEC'
       } else if (this.taskStatus.is_default && this.isDarkTheme) {
         return '#5F626A'
-      } else if (this.isDarkTheme) {
+      } else if (this.isDarkTheme && this.taskStatus.color) {
         return colors.darkenColor(this.taskStatus.color)
-      } else {
+      } else if (this.taskStatus.color) {
         return this.taskStatus.color
+      } else {
+        return 'transparent'
       }
     },
 
