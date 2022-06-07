@@ -1040,21 +1040,23 @@ export default {
           comment.task_status.name,
           comment.person.name,
           comment.text,
-          comment.checklist.map(checkListElement =>
+          (comment.checklist) ? comment.checklist.map(checkListElement =>
           `[${checkListElement.checked ? 'x' : ' '}] ${checkListElement.text}`)
-            .join('\n'),
-          comment.acknowledgements.map(personId =>
+            .join('\n') : '',
+          (comment.acknowledgements) ? comment.acknowledgements.map(personId =>
             this.personMap.get(personId).name)
-            .join(',')
+            .join(',') : ''
         ])
-        comment.replies.forEach(reply =>
-          commentLines.push([
-            reply.date,
-            'Reply',
-            this.personMap.get(reply.person_id).name,
-            reply.text
-          ])
-        )
+        if (comment.replies) {
+          comment.replies.forEach(reply =>
+            commentLines.push([
+              reply.date,
+              'Reply',
+              this.personMap.get(reply.person_id).name,
+              reply.text
+            ])
+          )
+        }
       })
       csv.buildCsvFile(name, [headers].concat(commentLines))
     }
