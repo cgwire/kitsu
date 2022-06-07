@@ -58,6 +58,11 @@
             "options": {
                 "fixed": "fixe",
                 "animate": "animé"
+            },
+            "remove": {
+                "confirm": "Enlever les assets de cet épisode",
+                "error": "Il y a eu une erreur en supprimmant l'asset du casting. Essayez à nouveau. Si le problème persiste, veuillez contacter notre support.",
+                "text": "Si vous supprimmez l'asset de cet épisode, cela va enlever les assets de tous les shots liés. Êtes vous sur de l'enlever ?"
             }
         },
         "comments": {
@@ -84,7 +89,12 @@
             "validated": "Validé !",
             "validation_required": "Validation requise",
             "fields": {
-                "text": "Texte"
+                "text": "Texte",
+                "created_at": "Date de création",
+                "task_status": "Statut de tâches",
+                "person": "Nom de la personne",
+                "checklist": "Checklist",
+                "acknowledgements": "Remerciements"
             },
             "checklist": "Checklist"
         },
@@ -145,6 +155,23 @@
                 "undefined": "Non défini",
                 "undefined_pattern": "Non défini",
                 "upload": "Téléverser des vignettes"
+            },
+            "logs": {
+                "no_logs": "Il n'y a pas de de temps passés pour cet entité."
+            },
+            "news": {
+                "no_news": "Il n'y a pas de news pour cette entité."
+            },
+            "preview_files": {
+                "extension": "Extension",
+                "no_preview_files": "Il n'y a pas de previews pour cette entité.",
+                "original_file_name": "Nom original du fichier",
+                "position": "Position",
+                "revision": "Révision",
+                "size": "Taille",
+                "status": "Statut",
+                "task_type": "Type de tâche",
+                "uploader": "Uploadé par"
             }
         },
         "estimation": {
@@ -235,7 +262,7 @@
             "for": "Pour",
             "go_productions": "Aller aux productions",
             "history": "Historique",
-            "info": "Informations",
+            "info": "Information",
             "or": "ou",
             "no": "non",
             "loading": "Chargement...",
@@ -281,8 +308,6 @@
                 "preview_required": "Note: La première ligne doit spécifier les entêtes.",
                 "preview_reupload": "Réimporter un fichier .CSV",
                 "required_fields": "Le fichier CSV à importer doit comporter les colonnes suivantes :",
-                "optionnal_fields": "Colonnes optionnelles :",
-                "generic_fields": "Colonnes génériques :",
                 "select_file": "Sélectionner un fichier depuis votre dossier :",
                 "tab_select_file": "Importer un fichier CSV",
                 "tab_paste_code": "Coller des données CSV",
@@ -291,7 +316,9 @@
                 "options": {
                     "title": "Options",
                     "update": "Mettre à jour les données"
-                }
+                },
+                "optional_fields": "Colonnes optionnelles :",
+                "generic_fields": "Colonnes génériques :"
             },
             "after": "Après",
             "before": "avant",
@@ -410,16 +437,12 @@
             "role": {
                 "admin": "Studio Manager",
                 "client": "Client",
-                "manager": "Chargé de production",
-                "supervisor": "Superviseur",
+                "manager": "Superviseur",
                 "user": "Graphiste",
                 "undefined": "Non défini",
-                "vendor": "Fournisseur"
+                "vendor": "Fournisseur",
+                "supervisor": "Superviseur"
             }
-        },
-        "preview_room": {
-            "join_room": "Rejoindre l'espace de lecture",
-            "leave_room": "Quitter l'espace de lecture"
         },
         "playlists": {
             "add_assets": "Ajouter des assets",
@@ -516,7 +539,9 @@
                 "side_by_side": "A côté",
                 "switch_ld": "Passer en basse définition",
                 "switch_hd": "Passer en haute définition",
-                "frames_per_picture": "Frames par image"
+                "frames_per_picture": "Frames par image",
+                "toggle_playing_annotations": "Montrer/cacher les annotations en jouant le film",
+                "toggle_waveform": "Montrer/cacher la forme du son"
             },
             "download_csv": "Télécharger .csv",
             "filter_task_type": "Filtrer par type de tâche",
@@ -563,7 +588,8 @@
                 "error": "Une erreur est survenue en ajoutant la colone de métadonnées. Assurez vous qu'aucune colonne ne porte le même nom et que les champs sont bien renseignés. Si le problème persiste, contactez notre support.",
                 "free": "Valeur libre",
                 "title": "Ajouter une colonne de métadonnées",
-                "edit_title": "Éditer la colonne de metadonnées"
+                "edit_title": "Éditer la colonne de metadonnées",
+                "checklist": "Checklist"
             },
             "status": {
                 "closed": "Fermé",
@@ -659,9 +685,9 @@
             },
             "notifications_mattermost_enabled": "Activation des notifications Mattermost",
             "notifications_mattermost_user": "Nom de l'utilisateur Mattermost",
-            "notifications_discord_enabled": "Activation des notifications Discord",
-            "notifications_discord_user": "Nom de l'utilisateur Discord",
-            "webhook_error": "La webhook ne correspond pas à un webhook Mattermost"
+            "webhook_error": "La webhook ne correspond pas à un webhook Mattermost",
+            "notifications_discord_enabled": "Activation des notifications DIscord",
+            "notifications_discord_user": "Nom d'utilisateur Discord"
         },
         "settings": {
             "change_logo": "Changer logo",
@@ -677,11 +703,12 @@
                 "use_original_name": "Utiliser les noms de fichiers originaux pour le téléchargement",
                 "timesheets_locked": "Bloquer les feuilles de temps des artistes de plus d'une semaine",
                 "mattermost_webhook": "Webhook Mattermost (optionnel)",
-                "discord_token": "Discord Slack (optionnel)",
-                "show_hd_default": "Mettre les previews en HD par défaut"
+                "discord_token": "Token Discord (optionnel)",
+                "show_hd_default": "Montre les vidéos par défaut en HD"
             },
             "production": {
-                "empty_list": "La liste est vide. Cela signifie que tous les entrées sont disponibles aux utilisateurs. Ajouter des éléments à cette liste si vous voulez limiter les choix disponibles aux utilisateurs."
+                "empty_list": "La liste est vide. Cela signifie que tous les entrées sont disponibles aux utilisateurs. Ajouter des éléments à cette liste si vous voulez limiter les choix disponibles aux utilisateurs.",
+                "empty_automation_list": "Il n'a pas d'automatisations pour cette production"
             },
             "save": {
                 "button": "Sauvegarder les paramètres",
@@ -701,12 +728,12 @@
                 "color": "Couleur",
                 "is_artist_allowed": "Autorisé aux artistes",
                 "is_client_allowed": "Autorisé aux clents",
-                "is_default": "Is default",
                 "is_done": "Est terminé",
                 "is_retake": "A valeur de retake",
                 "name": "Nom",
                 "short_name": "Nom court",
-                "is_feedback_request": "Est une demande de retours"
+                "is_feedback_request": "Est une demande de retours",
+                "is_default": "Est par défaut"
             },
             "name": "Statut de tâche"
         },
@@ -758,34 +785,34 @@
         },
         "quota": {
             "average": "Moyenne",
-            "count_label": "Unité de comptage",
-            "compute_mode": "Mode de calcul",
-            "count": "Count",
-            "day": "Par jour",
+            "count_label": "Mode de comptage",
             "detail_label": "Niveau de détail",
             "details_name": "Nom",
             "details_seconds": "Secondes",
             "details_frames": "Frames",
-            "explaination": "Les plans sont considéres terminés dès lors qu'une demande validation a été envoyée. Les quotas sont ensuite calculés à partir des feuilles de temps. Chaque jour où du temps est rempli, le nombre de frame pondéré en fonction du temps total est calculé.\n\n Si aucun temps n'est renseigné, on considère que : \n * La tâche démarre quand le statut est passé à WIP \n* La tâche a été terminée à la premieère demande de retours.\n * Le nombre de frames réalisés est réparti entre le nombre de jours ouvrés entre la date de début et la date de fin.",
-            "explaination_feedback": "On considère que le shot a été réalisé le jour de la première demande de retours. Son nombre de frame est ajouté aux quotas pour ce jour-ci.",
-            "export_quotas": "Exporter les quotas (.csv)",
-            "feedback_date": "À la date de demande de retours",
-            "frames": "Frames",
-            "month": "Par mois",
             "month_label": "Mois",
             "no_quota": "Il n'y a pas de quota pour ce type de tâche.",
             "name": "Nom",
             "quota_day": "Quotas par jour",
             "quota_week": "Quotas par semaine",
             "quota_month": "Quotas par mois",
-            "week": "Par semaine",
             "year_label": "Année",
-            "seconds": "Seconds",
             "title": "Quotas",
             "type_label": "Type",
-            "highlight_quotas": "Mettre en valeur les quotas sous : ",
+            "explaination": "Les plans sont considéres terminés dès lors qu'une demande validation a été envoyée. Les quotas sont ensuite calculés à partir des feuilles de temps. Chaque jour où du temps est rempli, le nombre de frame pondéré en fonction du temps total est calculé.\\n Si aucun temps n'est renseigné, on considère que : \\n * La tâche démarre quand le statut est passé à WIP \\n* La tâche a été terminée à la premieère demande de retours.\\n * Le nombre de frames réalisés est réparti entre le nombr de jours ouvrés entre la date de début et la date de fin.\"",
+            "export_quotas": "Exporter les quotas (.csv)",
+            "highlight_quotas": "Mettre en valeurs les quotas sous : ",
             "weight": "Poids",
-            "weighted": "Pondérés"
+            "count": "Comptage",
+            "compute_mode": "Mode de calcul",
+            "day": "Jour",
+            "feedback_date": "Date de demande de retours",
+            "explaination_feedback": "Le shot est considéré comme terminé à la première demande de feedback. Son nombre de frames est ajouté aux quotas pour cette date.",
+            "frames": "Frames",
+            "month": "Mois",
+            "seconds": "Secondes",
+            "weighted": "Pondéré",
+            "week": "Semaine"
         },
         "shots": {
             "casting": "Casting",
@@ -924,10 +951,10 @@
                 "seconds": "Secondes",
                 "sequence": "Séquence",
                 "start_date": "Date de début",
-                "start_date_short": "Début",
                 "task_status": "Statut",
                 "task_status_short_name": "Statut",
-                "task_type": "Type"
+                "task_type": "Type",
+                "start_date_short": "Date de début"
             },
             "colors": {
                 "title": "Coloration",
@@ -948,15 +975,15 @@
             "due_this_week": "Dûes cette semaine",
             "select_file": "Sélectionner un fichier",
             "big_thumbnails": "Afficher les vignettes en grand",
-            "small_thumbnails": "Afficher les vignettes en petit",
             "create_tasks_edit": "Ajouter des tâches pour les montages courants",
             "create_tasks_edit_explaination": "Vous allez créer une tâche pour chaque montage du projet courant pour le type de tâche donné. Est-ce que vous-voulez continuer ?",
             "create_tasks_edit_failed": "Une erreur est survenue en créant les tâches.",
             "smaller": "Réduire le panneau",
+            "small_thumbnails": "Afficher les vignettes en petit",
             "combobox_departments": {
                 "all_departments": "Tous les départements",
-                "my_departments": "Mes départments"
-              }
+                "my_departments": "Mes Départements"
+            }
         },
         "timesheets": {
             "detail_level": "Niveau de détail",
@@ -1011,7 +1038,6 @@
         },
         "edits": {
             "all_edits": "Tous les montages",
-            "manage": "Créer un montage",
             "creation_explaination": "Envoyer un fichier de montage pour en créer un nouveau montage",
             "edit_error": "Une erreur est survenue en sauvegardant ce montage. Êtes vous sûr qu'il n'y a aucun montage avec un nom similaire ?",
             "delete_text": "Êtes vous sûr de vouloir supprimmer {name} de la base de données ?",
@@ -1022,12 +1048,50 @@
             "empty_list_client": "Vide",
             "new_edit": "Nouveau montage",
             "number": "montage | montages",
-            "title": "Montages",
+            "title": "Montage",
             "fields": {
                 "name": "Nom",
                 "episode": "Épisode",
                 "description": "Déscription"
+            },
+            "tasks": "Tâche"
+        },
+        "status_automations": {
+            "change_ready_for": "Change \"Prêt pour\" pour ",
+            "change_status": "Positionne le statut de tâche à",
+            "create_error": "Une erreur est survenue en sauvegardant l'automatisation. Êtes vous sûr qu'il n'y a pas d'autre action avec le même nom ?",
+            "delete_text": "Êtes vous sûr d'enlever l'automatisation {name} de votre base de de données ?",
+            "delete_error": "Une erreur est survenue en supprimmant cette automatisation. Elle est peut être liée à un projet. Dans ce cas, vous ne pouvez la supprimmer. Vous devez la retirer du projet d'abord.",
+            "edit_title": "Modifier une automatisation",
+            "entity_title": "Le type d'entité concernant le déclencheur",
+            "number": "automatisation | automatisations",
+            "in_title": "Statut provoquant un changement",
+            "out_title": "Le changement sera appliqué quand le déclencheur s'activera",
+            "new_status_automation": "Ajouter une automatisation",
+            "run_for_selection": "Lancer l'automatisation pour les tâches sélectionnées :",
+            "title": "Automatisations",
+            "wrong_automation": "Cette automatisation s'applique sur une tâche précédente. Cela n'est pas permis par Kitsu (pour éviter les cycles). Cela n'aura donc pas d'effets.",
+            "fields": {
+                "entity_type": "Type d'entité",
+                "in_field_type": "Type d'entrée",
+                "in_task_type": "Type de tâche",
+                "in_task_status": "Statut de tâche",
+                "out_field_type": "Déclencheur",
+                "out_task_type": "Type de tâche concerné",
+                "out_task_status": "Statut appliqué"
+            },
+            "entity_types": {
+                "asset": "Asset",
+                "shot": "Plan"
+            },
+            "field_types": {
+                "status": "Statut",
+                "ready_for": "Prêt pour"
             }
+        },
+        "preview_room": {
+            "join_room": "Rejoindre la conférence",
+            "leave_room": "Partir de la conférence"
         }
     }
 }
