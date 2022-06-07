@@ -307,6 +307,7 @@ import {
 } from 'vue-feather-icons'
 
 import { getTaskEntityPath } from '@/lib/path'
+import drafts from '@/lib/drafts'
 import { formatListMixin } from '@/components/mixins/format'
 
 import AddComment from '@/components/widgets/AddComment'
@@ -406,6 +407,13 @@ export default {
         window.scrollTo(0, 0)
       }
     })
+  },
+
+  beforeDestroy () {
+    if (this.$refs['add-comment']) {
+      const lastComment = `${this.$refs['add-comment'].text}`
+      drafts.setTaskDraft(this.currentTask.id, lastComment)
+    }
   },
 
   computed: {
@@ -851,6 +859,8 @@ export default {
       this.currentTaskComments = this.getCurrentTaskComments()
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
       this.currentTask = this.getCurrentTask()
+      const draft = drafts.getTaskDraft(this.currentTask.id)
+      if (draft) this.$refs['add-comment'].text = draft
       setTimeout(() => {
         if (this.$route.params.preview_id) {
           this.selectedPreviewId = this.$route.params.preview_id

@@ -151,7 +151,7 @@
               @add-preview="onAddPreviewClicked"
               @file-drop="selectFile"
               @annotation-snapshots-requested="extractAnnotationSnapshots"
-              v-if="isCommentingAllowed"
+              v-show="isCommentingAllowed"
             />
 
             <div
@@ -259,6 +259,7 @@ import moment from 'moment'
 import { getTaskEntityPath, getTaskPath } from '@/lib/path'
 import { getTaskTypeStyle } from '@/lib/render'
 import csv from '@/lib/csv'
+import drafts from '@/lib/drafts'
 import stringHelpers from '@/lib/string'
 
 import AddComment from '@/components/widgets/AddComment'
@@ -361,14 +362,10 @@ export default {
   mounted () {
     this.loadTaskData()
     if (this.$refs['add-comment']) {
-      this.$refs['add-comment'].text = this.lastCommentDraft
-    }
-  },
-
-  beforeDestroy () {
-    if (this.$refs['add-comment']) {
-      const lastComment = `${this.$refs['add-comment'].text}`
-      this.$store.commit('SET_LAST_COMMENT_DRAFT', lastComment)
+      const draft = drafts.getTaskDraft(this.task.id)
+      if (draft) {
+        this.$refs['add-comment'].text = draft
+      }
     }
   },
 
@@ -636,6 +633,7 @@ export default {
           if (this.$refs['add-comment-image-modal']) {
             this.$refs['add-comment-image-modal'].reset()
           }
+          drafts.clearTaskDraft(this.task.id)
           this.reset()
           this.attachedFileName = ''
           this.loading.addComment = false
@@ -1066,6 +1064,21 @@ export default {
     task () {
       this.attachedFileName = ''
       this.currentPreviewIndex = 0
+      if (
+        this.previousTaskId &&
+        this.$refs['add-comment'] &&
+        this.$refs['add-comment'].text.length > 0
+      ) {
+        const lastComment = `${this.$refs['add-comment'].text}`
+        drafts.setTaskDraft(this.previousTaskId, lastComment)
+      }
+      this.$nextTick(() => {
+        if (this.task) this.previousTaskId = this.task.id
+        if (this.task && this.$refs['add-comment']) {
+          const draft = drafts.getTaskDraft(this.task.id)
+          if (draft) this.$refs['add-comment'].text = draft
+        }
+      })
       if (!this.silent) {
         this.loadTaskData()
       }
