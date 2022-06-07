@@ -49,7 +49,7 @@
             </div>
             <div
               class="flexrow-item hide-small-screen"
-              v-if="!isAssignationLoading && isCurrentUserManager"
+              v-if="!isAssignationLoading"
             >
               {{ $t('main.or') }}
             </div>
@@ -62,6 +62,17 @@
                 @click="clearAssignation"
               >
                 {{ $t('tasks.clear_assignations') }}
+              </button>
+            </div>
+            <div
+              class="flexrow-item hide-small-screen"
+              v-else-if="!isAssignationLoading && isCurrentUserArtist"
+            >
+              <button
+                class="button is-link clear-assignation-button hide-small-screen"
+                @click="clearAssignation"
+              >
+                {{ $t('tasks.clear_own_assignations') }}
               </button>
             </div>
             <div class="flexrow-item" v-if="!isShowAssignations">
@@ -783,6 +794,7 @@ export default {
       'changeSelectedPriorities',
       'clearSelectedTasks',
       'postCustomAction',
+      'unassignPersonFromTask',
       'unassignSelectedTasks'
     ]),
 
@@ -915,12 +927,18 @@ export default {
     },
 
     clearAssignation () {
-      this.isAssignationLoading = true
-      this.unassignSelectedTasks({
-        callback: () => {
-          this.isAssignationLoading = false
-        }
-      })
+      if (this.isCurrentUserArtist) {
+        this.selectedTasks.forEach(task => {
+          this.unassignPersonFromTask({ task, person: this.user })
+        })
+      } else {
+        this.isAssignationLoading = true
+        this.unassignSelectedTasks({
+          callback: () => {
+            this.isAssignationLoading = false
+          }
+        })
+      }
     },
 
     selectBar (barName) {

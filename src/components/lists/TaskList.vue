@@ -361,6 +361,11 @@ export default {
     },
 
     onUnassign (task, person) {
+      if (this.selectedTasks.size > 0) {
+        this.selectedTasks.forEach(t => {
+          this.unassignPersonFromTask({ task: t, person })
+        })
+      }
       this.unassignPersonFromTask({ task, person })
     },
 

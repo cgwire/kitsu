@@ -1017,6 +1017,7 @@ export default {
     change_preview: 'Change preview',
     change_priority: 'Change priority to:',
     clear_assignations: 'clear assignations',
+    clear_own_assignations: 'clear you assignations',
     comment_image: 'Attach a file to your comment',
     create_for_selection: 'Create task for each empty cell:',
     create_tasks: 'Add tasks',
