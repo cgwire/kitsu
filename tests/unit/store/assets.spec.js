@@ -341,8 +341,9 @@ describe('Assets store', () => {
     })
 
     test('newAsset', async () => {
+      const assetTypeMap = new Map()
       const rootGetters = {
-        assetTypeMap: 1,
+        assetTypeMap: assetTypeMap,
         taskTypeMap: 5,
         productionAssetTaskTypeIds: [
           1, 2
@@ -354,10 +355,14 @@ describe('Assets store', () => {
       const asset = { id: 1, name: 'assetTest', project_id: 3 }
       assetsApi.newAsset = jest.fn(() => Promise.resolve(asset))
       const res = await store.actions.newAsset(
-        { commit: mockCommit, state, rootGetters, dispatch: mockDispatch }, 1)
+        { commit: mockCommit, state, rootGetters, dispatch: mockDispatch },
+        new Map()
+      )
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(
-        1, EDIT_ASSET_END, { newAsset: asset, assetTypeMap: 1, taskTypeMap: 5 })
+        1, EDIT_ASSET_END, {
+          assetTypeMap, newAsset: asset
+        })
       expect(mockDispatch).toBeCalledTimes(3)
       expect(mockDispatch).toHaveBeenNthCalledWith(2, 'createTask', {
         entityId: 1,
@@ -1325,19 +1330,21 @@ describe('Assets store', () => {
         project_name: 'production',
         description: 'azerty'
       }
-      const state = {
-        assetMap: new Map(Object.entries({
-          1: oldAsset
-        })),
-        displayedAssets: [oldAsset]
-      }
-      store.cache.assets = [oldAsset]
       const assetTypeMap = new Map(Object.entries({
         entity_type_id: {
           name: 'entity name',
           id: 'entity id'
         }
       }))
+      const state = {
+        assetTypeMap,
+        assetMap: new Map(Object.entries({
+          1: oldAsset
+        })),
+        displayedAssets: [oldAsset]
+      }
+      store.cache.assets = [oldAsset]
+
       store.mutations.EDIT_ASSET_END(state, { newAsset, assetTypeMap })
       expect(newAsset).toEqual({
         id: '1',
@@ -1358,6 +1365,7 @@ describe('Assets store', () => {
       })
       expect(state).toEqual({
         assetCreated: 'name4',
+        assetTypeMap,
         assetMap: new Map(Object.entries({
           1: {
             asset_type_name: 'entity name',
