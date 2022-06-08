@@ -535,6 +535,7 @@ const actions = {
       // If it's tv show and if we don't have any episode set, we use the first
       // one.
       episode = state.episodes.length > 0 ? state.episodes[0] : null
+      if (!episode) return callback()
       commit(SET_CURRENT_EPISODE, episode.id)
     }
 
