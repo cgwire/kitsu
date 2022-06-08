@@ -1113,12 +1113,15 @@ export default {
 
       'comment:new' (eventData) {
         setTimeout(() => {
+          const comments = this.task
+            ? this.getTaskComments(this.task.id)
+            : null
           if (
             this.task &&
-            this.getTaskComments(this.task.id).length !==
-            this.taskComments.length
+            comments &&
+            comments.length !== this.taskComments.length
           ) {
-            this.taskComments = this.getTaskComments(this.task.id)
+            this.taskComments = comments
             this.taskPreviews = this.getTaskPreviews(this.task.id)
           }
         }, 1000)
