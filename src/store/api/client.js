@@ -109,6 +109,11 @@ const client = {
     const path =
       `/api/data/events/last?after=${after}&before=${before}&page_size=100000`
     return client.pget(path)
+  },
+
+  searchData (query) {
+    const path = '/api/data/search'
+    return client.ppost(path, { query })
   }
 }
 

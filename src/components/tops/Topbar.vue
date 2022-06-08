@@ -88,6 +88,7 @@
         >
           {{ $t('timesheets.title') }}
         </router-link>
+        <global-search-field class="flexrow-item" />
         <div class="nav-item">
           <button  data-canny-changelog class="changelog-button" >
             <zap-icon />
@@ -201,12 +202,13 @@ import {
   ZapIcon
 } from 'vue-feather-icons'
 
-import TopbarEpisodeList from '@/components/tops/TopbarEpisodeList'
-import TopbarProductionList from '@/components/tops/TopbarProductionList'
-import TopbarSectionList from '@/components/tops/TopbarSectionList'
+import GlobalSearchField from '@/components/tops/GlobalSearchField'
 import NotificationBell from '@/components/widgets/NotificationBell'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import ShortcutModal from '@/components/modals/ShortcutModal'
+import TopbarEpisodeList from '@/components/tops/TopbarEpisodeList'
+import TopbarProductionList from '@/components/tops/TopbarProductionList'
+import TopbarSectionList from '@/components/tops/TopbarSectionList'
 
 import { version } from '@/../package.json'
 
@@ -215,6 +217,7 @@ export default {
   components: {
     ChevronLeftIcon,
     ChevronRightIcon,
+    GlobalSearchField,
     LogOutIcon,
     NotificationBell,
     PeopleAvatar,

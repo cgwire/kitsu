@@ -1011,11 +1011,13 @@ export default {
     // Save data
 
     onPreviewChanged (entity, previewFileId) {
+      /*
       this.changePlaylistPreview({
         playlist: this.currentPlaylist,
         entity,
         previewFileId
       })
+      */
     },
 
     onOrderChange (info) {

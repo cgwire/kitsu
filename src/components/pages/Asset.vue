@@ -101,7 +101,11 @@
               >
                 <td class="field-label">{{ descriptor.name }}</td>
                 <td>
-                  {{ currentAsset.data ? currentAsset.data[descriptor.field_name] : '' }}
+                  {{
+                    currentAsset.data
+                      ? currentAsset.data[descriptor.field_name]
+                      : ''
+                  }}
                 </td>
               </tr>
             </tbody>
@@ -370,28 +374,7 @@ export default {
 
   mounted () {
     this.clearSelectedTasks()
-    this.getCurrentAsset()
-      .then(asset => {
-        this.currentAsset = asset
-        this.currentSection = this.route.query.section || 'casting'
-        this.castIn.isLoading = true
-        this.castIn.isError = false
-        if (this.currentAsset) {
-          this.loadAssetCastIn(this.currentAsset)
-            .then(() => this.loadAssetCasting(this.currentAsset))
-            .then(() => {
-              this.castIn.isLoading = false
-            })
-            .catch(err => {
-              this.castIn.isLoading = false
-              this.castIn.isError = true
-              console.error(err)
-            })
-        } else {
-          this.resetData()
-        }
-      })
-      .catch(console.error)
+    this.init()
   },
 
   computed: {
@@ -589,10 +572,38 @@ export default {
           episode_id: shot.episode_id ? shot.episode_id : undefined
         }
       }
+    },
+
+    init () {
+      this.getCurrentAsset()
+        .then(asset => {
+          this.currentAsset = asset
+          this.currentSection = this.route.query.section || 'casting'
+          this.castIn.isLoading = true
+          this.castIn.isError = false
+          if (this.currentAsset) {
+            this.loadAssetCastIn(this.currentAsset)
+              .then(() => this.loadAssetCasting(this.currentAsset))
+              .then(() => {
+                this.castIn.isLoading = false
+              })
+              .catch(err => {
+                this.castIn.isLoading = false
+                this.castIn.isError = true
+                console.error(err)
+              })
+          } else {
+            this.resetData()
+          }
+        })
+        .catch(console.error)
     }
   },
 
   watch: {
+    $route () {
+      this.init()
+    }
   },
 
   metaInfo () {

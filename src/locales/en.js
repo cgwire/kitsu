@@ -401,6 +401,10 @@ export default {
     white_theme: 'White Theme',
     workspace: 'Workspace',
     yes: 'Yes',
+    search: {
+      type: 'Type 3 characters at least to perform the research',
+      no_result: 'There are no results for this search'
+    },
     csv: {
       choose: 'Choose',
       error_upload: 'An error occurred while uploading your CSV.',
