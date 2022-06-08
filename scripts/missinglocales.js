@@ -12,7 +12,7 @@ const firstLevelKeysEn = Object.keys(en.default)
 
 const locales = [fr, es, de]
 
-  locales.forEach(locale => {
+locales.forEach(locale => {
   const firstLevelKeysComp = Object.keys(locale.default)
   const difference = firstLevelKeysEn.filter(
     x => !firstLevelKeysComp.includes(x)

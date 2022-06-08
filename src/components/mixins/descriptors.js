@@ -120,7 +120,13 @@ export const descriptorMixin = {
     },
 
     getMetadataFieldValue (descriptor, entity) {
-      return entity.data ? entity.data[descriptor.field_name] || '' : ''
+      if (entity.data) {
+        return entity.data[descriptor.field_name] || ''
+      } else if (entity.entity_data) {
+        return entity.entity_data[descriptor.field_name] || ''
+      } else {
+        return ''
+      }
     },
 
     getDescriptorChecklistValues (descriptor) {
