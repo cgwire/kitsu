@@ -41,6 +41,7 @@
           'result-line': true,
           'selected-result': selectedIndex === index
         }"
+        @click="onElementSelected"
         v-for="(asset, index) in results"
       >
         <router-link
