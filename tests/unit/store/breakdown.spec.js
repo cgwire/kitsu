@@ -14,7 +14,7 @@ const commit = vuexStore.commit
 
 describe('Breakdown store', () => {
   let state, shots, assetCasting, casting, assetMap, production, shotMap
-  let sequences, expectedSequenceOptions, rootState, rootGetters
+  let sequences, expectedSequencesOptions, rootState, rootGetters
 
   beforeEach(() => {
     state = {
@@ -79,7 +79,7 @@ describe('Breakdown store', () => {
       acc[entity.id] = entity; return acc
     }
     shotMap = new Map(Object.entries(shots.reduce(entityMapReducer, {})))
-    expectedSequenceOptions = [{
+    expectedSequencesOptions = [{
       label: 'SE01',
       value: 'sequence-1',
       route: {
@@ -132,8 +132,8 @@ describe('Breakdown store', () => {
         { commit, rootState }, 'episode-1'
       )
       expect(vuexStore.state.castingEpisodeId).toEqual('episode-1')
-      expect(vuexStore.state.castingSequenceOptions)
-        .toEqual(expectedSequenceOptions)
+      expect(vuexStore.state.castingSequencesOptions)
+        .toEqual(expectedSequencesOptions)
     })
     test('addAssetToCasting', async () => {
       await store.actions.addAssetToCasting({ commit, rootState }, {
@@ -191,8 +191,8 @@ describe('Breakdown store', () => {
     test('CASTING_SET_SEQUENCES', () => {
       store.mutations.CASTING_SET_SEQUENCES(state, sequences)
       expect(state.castingEpisodeSequences).toEqual(sequences)
-      expect(state.castingSequenceOptions)
-        .toEqual(expectedSequenceOptions)
+      expect(state.castingSequencesOptions)
+        .toEqual(expectedSequencesOptions)
     })
 
     test('CASTING_SET_SEQUENCE', () => {
