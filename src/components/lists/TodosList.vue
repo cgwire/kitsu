@@ -51,7 +51,7 @@
             {{ $t('tasks.fields.due_date') }}
           </th>
           <metadata-header
-            :key="'descheader' + descriptor.field_name"
+            :key="'desc-header' + descriptor.field_name"
             :descriptor="descriptor"
             :no-menu="true"
             v-for="descriptor in metadataDescriptorsMap.values()"
@@ -125,7 +125,7 @@
           </td>
           <td
             class="metadata-descriptor"
-            :key="'desc' + entry.id + '-' + descriptor.field_name"
+            :key="'desc-' + entry.id + '-' + descriptor.field_name"
             v-for="descriptor in metadataDescriptorsMap.values()">
             <div
               v-if="entry.entity_data && descriptor[entry.project_id]"
@@ -287,6 +287,7 @@ export default {
       'nbSelectedTasks',
       'taskTypeMap',
       'productionMap',
+      'openProductions',
       'user'
     ]),
 
@@ -295,32 +296,38 @@ export default {
     },
 
     metadataDescriptorsMap () {
-      var metadataDescriptorsMap = new Map()
-      const projectIds = [...new Set(this.tasks.map(task => task.project_id))]
-      projectIds.forEach(projectId => this.productionMap.get(projectId)
-        .descriptors.forEach(descriptor => {
-          if (this.user.departments.some(department =>
-            descriptor.departments.includes(department))) {
-            const metadataDescriptor =
+      const metadataDescriptorsMap = new Map()
+      this.openProductions.forEach(project => {
+        project.descriptors.forEach(descriptor => {
+          const isUserDepartment = this.user.departments.some(
+            department => descriptor.departments.includes(department)
+          )
+          if (isUserDepartment) {
+            let metadataDescriptor =
               metadataDescriptorsMap.get(descriptor.field_name)
-            if (metadataDescriptor) {
-              metadataDescriptor.departments =
-                [...new Set([...metadataDescriptor.departments,
-                  ...descriptor.departments])]
-              metadataDescriptor[projectId] = descriptor
-            } else {
-              const metadataDescriptor = {
+            if (!metadataDescriptor) {
+              metadataDescriptor = {
                 departments: descriptor.departments,
                 field_name: descriptor.field_name,
                 name: descriptor.name
               }
-              metadataDescriptor[projectId] = descriptor
-              metadataDescriptorsMap.set(descriptor.field_name,
+              metadataDescriptor[project.id] = descriptor
+              metadataDescriptorsMap.set(
+                descriptor.field_name,
                 metadataDescriptor
               )
+            } else {
+              // When there are several descriptors with the same name
+              metadataDescriptor.departments = [
+                ...new Set([
+                  ...metadataDescriptor.departments,
+                  ...descriptor.departments
+                ])
+              ]
             }
           }
-        }))
+        })
+      })
       return metadataDescriptorsMap
     }
   },
