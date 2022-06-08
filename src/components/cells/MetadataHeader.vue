@@ -19,6 +19,7 @@
       <span
         class="metadata-menu-button header-icon"
         @click="$emit('show-metadata-header-menu', $event)"
+        v-if="!noMenu"
       >
         <chevron-down-icon
           :size="'12'"
@@ -47,6 +48,10 @@ export default {
     left: {
       type: String,
       default: '0px'
+    },
+    noMenu: {
+      type: Boolean,
+      default: false
     }
   },
   components: { ChevronDownIcon, DepartmentName },

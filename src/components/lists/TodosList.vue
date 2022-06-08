@@ -50,6 +50,12 @@
           <th scope="col" class="due-date">
             {{ $t('tasks.fields.due_date') }}
           </th>
+          <metadata-header
+            :key="'descheader' + descriptor.field_name"
+            :descriptor="descriptor"
+            :no-menu="true"
+            v-for="descriptor in metadataDescriptorsMap.values()"
+          />
           <th scope="col" class="status">
             {{ $t('tasks.fields.task_status') }}
           </th>
@@ -117,6 +123,47 @@
           <td class="due-date">
             {{ formatDate(entry.due_date) }}
           </td>
+          <td
+            class="metadata-descriptor"
+            :key="'desc' + entry.id + '-' + descriptor.field_name"
+            v-for="descriptor in metadataDescriptorsMap.values()">
+            <div
+              v-if="entry.entity_data && descriptor[entry.project_id]"
+            >
+              <div
+                v-if="getDescriptorChecklistValues(
+                    descriptor[entry.project_id]).length > 0"
+              >
+                <p
+                  v-for="(option, i) in
+                    getDescriptorChecklistValues(descriptor[entry.project_id])"
+                  :key="`${entry.id}-${descriptor[entry.project_id].id}
+                    -${i}-${option.text}-div`"
+                >
+                  <input
+                    type="checkbox"
+                    disabled
+                    :id="`${entry.id}-${descriptor[entry.project_id].id}
+                      -${i}-${option.text}-input`"
+                    :checked="getMetadataChecklistValues(
+                      descriptor[entry.project_id], entry)[option.text]"
+                  />
+                  <label
+                    style="cursor: pointer;"
+                    :for="`${entry.id}-${descriptor[entry.project_id].id}
+                      -${i}-${option.text}-input`"
+                  >
+                    {{ option.text }}
+                  </label>
+                </p>
+              </div>
+              <p
+                v-else
+              >
+                {{ getMetadataFieldValue(descriptor, entry) }}
+              </p>
+            </div>
+          </td>
           <validation-cell
             class="status unselectable"
             :ref="'validation-' + i + '-0'"
@@ -176,6 +223,7 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { selectionListMixin } from '@/components/mixins/selection'
 import { formatListMixin } from '@/components/mixins/format'
+import { descriptorMixin } from '@/components/mixins/descriptors'
 import { PAGE_SIZE } from '@/lib/pagination'
 import { formatSimpleDate } from '@/lib/time'
 
@@ -186,10 +234,11 @@ import ProductionNameCell from '@/components/cells/ProductionNameCell'
 import TaskTypeCell from '@/components/cells/TaskTypeName'
 import TableInfo from '@/components/widgets/TableInfo'
 import ValidationCell from '@/components/cells/ValidationCell'
+import MetadataHeader from '@/components/cells/MetadataHeader'
 
 export default {
   name: 'todos-list',
-  mixins: [formatListMixin, selectionListMixin],
+  mixins: [formatListMixin, selectionListMixin, descriptorMixin],
 
   components: {
     EntityThumbnail,
@@ -198,7 +247,8 @@ export default {
     ProductionNameCell,
     TableInfo,
     TaskTypeCell,
-    ValidationCell
+    ValidationCell,
+    MetadataHeader
   },
 
   props: [
@@ -236,11 +286,42 @@ export default {
     ...mapGetters([
       'nbSelectedTasks',
       'taskTypeMap',
-      'productionMap'
+      'productionMap',
+      'user'
     ]),
 
     displayedTasks () {
       return this.tasks.slice(0, this.page * PAGE_SIZE)
+    },
+
+    metadataDescriptorsMap () {
+      var metadataDescriptorsMap = new Map()
+      const projectIds = [...new Set(this.tasks.map(task => task.project_id))]
+      projectIds.forEach(projectId => this.productionMap.get(projectId)
+        .descriptors.forEach(descriptor => {
+          if (this.user.departments.some(department =>
+            descriptor.departments.includes(department))) {
+            const metadataDescriptor =
+              metadataDescriptorsMap.get(descriptor.field_name)
+            if (metadataDescriptor) {
+              metadataDescriptor.departments =
+                [...new Set([...metadataDescriptor.departments,
+                  ...descriptor.departments])]
+              metadataDescriptor[projectId] = descriptor
+            } else {
+              const metadataDescriptor = {
+                departments: descriptor.departments,
+                field_name: descriptor.field_name,
+                name: descriptor.name
+              }
+              metadataDescriptor[projectId] = descriptor
+              metadataDescriptorsMap.set(descriptor.field_name,
+                metadataDescriptor
+              )
+            }
+          }
+        }))
+      return metadataDescriptorsMap
     }
   },
 

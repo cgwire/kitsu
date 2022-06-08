@@ -141,7 +141,6 @@ export default {
 
     getTaskPath (task) {
       const project = this.productionMap.get(task.project_id)
-      console.log(project)
       const isTVShow = project.production_type === 'tvshow'
       const episode = { id: project.first_episode_id }
       return getTaskPath(task, null, isTVShow, episode, this.taskTypeMap)
