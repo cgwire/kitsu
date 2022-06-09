@@ -1,54 +1,54 @@
 {
     "default": {
         "assets": {
-            "cast_in": "角色分配",
-            "delete_error": "删除此资源时出现错误. 很可能存在有链接至此的数据. 您确定没有任务链接至此资源类型吗?",
+            "cast_in": "投入进",
+            "delete_error": "删除此资产时出现错误. 很可能存在有链接至此的数据. 您确定没有任务链接至此资产类型吗?",
             "delete_text": "您确定要从您的数据库移除{name}吗?",
             "edit_fail": "创建或编辑失败, 有错误出现.",
-            "edit_success": "已成功编辑资源{name}.",
-            "edit_title": "编辑资源",
-            "empty_list": "制作中没有资源. 要创建一些吗?",
-            "empty_list_client": "此制作中没有资源.",
-            "new_asset": "添加资源",
-            "new_assets": "添加多个资源",
-            "new_success": "已成功创建资源{name}.",
-            "no_cast_in": "任何镜头中都没为此资源分配角色.",
-            "number": "资源 | 资源(多个)",
+            "edit_success": "已成功编辑资产{name}.",
+            "edit_title": "编辑资产",
+            "empty_list": "制作中没有资产. 要创建一些吗?",
+            "empty_list_client": "此制作中没有资产.",
+            "new_asset": "添加资产",
+            "new_assets": "添加多个资产",
+            "new_success": "已成功创建资产{name}.",
+            "no_cast_in": "任何镜头中都没为此资产分配角色.",
+            "number": "资产 | 资产集合",
             "restore_text": "您确定要将{name}恢复进您的数据库吗?",
-            "restore_error": "恢复此资源时出现错误.",
-            "tasks": "资源任务(多个)",
-            "title": "资源(多个)",
+            "restore_error": "恢复此资产时出现错误.",
+            "tasks": "资产任务",
+            "title": "资产集合",
             "fields": {
                 "description": "说明",
-                "episode": "片段",
+                "episode": "集.",
                 "name": "名称",
                 "production": "道具",
                 "time_spent": "时间",
                 "type": "类型",
                 "hidden_from_client": "显示到客户端",
-                "ready_for": ""
+                "ready_for": "准备 为"
             },
-            "cancel_text": "",
-            "delete_for_selection": "",
-            "multiple_delete_error": "",
-            "only_current_episode": ""
+            "cancel_text": "确定要归档 {name} 吗？",
+            "delete_for_selection": "删除 {nbSelectedAssets} 选定的资产：",
+            "multiple_delete_error": "删除资产时出错。可能有一些数据与资产相关联。您确定没有任务链接到选定的资产吗？",
+            "only_current_episode": "仅当前一集"
         },
         "asset_types": {
             "all_asset_types": "所有资产种类",
             "create_error": "保存此资产类型时出错. 您确定没有相同名称的资产类型吗?",
             "delete_text": "您确定要从您的数据库移除{name}吗?",
-            "delete_error": "删除此资源类型时出现错误. 很可能存在有链接至此的数据. 您确定没有资源链接至此资源类型吗?",
-            "edit_title": "编辑资源类型",
-            "new_asset_type": "添加资源类型",
-            "number": "资源类型 | 资源类型(多种)",
-            "title": "资源类型(多种)",
+            "delete_error": "删除此资产类型时出现错误. 很可能存在有链接至此的数据. 您确定没有资产链接至此资产类型吗?",
+            "edit_title": "编辑资产类型",
+            "new_asset_type": "添加资产类型",
+            "number": "资产类型 | 资产类型",
+            "title": "资产类型",
             "production_title": "资产类型统计",
             "fields": {
                 "name": "名称"
             }
         },
         "breakdown": {
-            "all_assets": "所有可用资源",
+            "all_assets": "所有可用资产",
             "edit_label": "更改资产的标签",
             "empty": "空白标签",
             "label": "标签",
@@ -58,23 +58,28 @@
             "options": {
                 "fixed": "固定的",
                 "animate": "动画"
+            },
+            "remove": {
+                "confirm": "从剧集中移除资产",
+                "error": "移除资产时出现服务器错误。请再试一次。如果问题仍然存在，请联系我们的支持团队。",
+                "text": "如果您从所选剧集中移除此资产，它将移除所有基础镜头中的资产。您确定要删除它吗？"
             }
         },
         "comments": {
             "add_attachment": "添加附件",
             "add_checklist": "添加清单",
-            "add_comment": "添加注释...",
+            "add_comment": "添加评论...",
             "add_preview": "附加预览",
             "change_preview": "更换预览",
             "comment_from_client": "客户留言",
-            "edit_title": "编辑注释",
-            "empty_text": "此条注释为空",
+            "edit_title": "编辑评论",
+            "empty_text": "此条评论为空",
             "edit_error": "编辑评论时发生错误. 请联系我们的支持团队.",
-            "error": "发布注释时出现错误",
+            "error": "发布评论时出现错误",
             "no_file_attached": "未附加文件",
             "pin": "钉",
             "pinned": "钉住",
-            "post_status": "发布注释",
+            "post_status": "发表评论",
             "retake": "重新提交",
             "revision": "校订",
             "set_status_to": "将状态设为",
@@ -84,9 +89,14 @@
             "validated": "已确认!",
             "validation_required": "需要认证",
             "fields": {
-                "text": "文本"
+                "text": "文本",
+                "created_at": "创建日期",
+                "task_status": "任务状态",
+                "person": "人名",
+                "checklist": "清单",
+                "acknowledgements": "致谢"
             },
-            "checklist": ""
+            "checklist": "清单"
         },
         "custom_actions": {
             "create_error": "保存此自定义操作时发生错误. 您确定没有其他同名操作吗?",
@@ -94,9 +104,9 @@
             "delete_error": "删除此自定义操作时出现错误.",
             "edit_title": "编辑自定义操作",
             "new_custom_action": "添加自定义操作",
-            "number": "自定义操作 | 自定义操作(多个)",
+            "number": "自定义操作 | 自定义操作",
             "run_for_selection": "为所选的多个任务执行自定义操作:",
-            "title": "自定义操作(多个)",
+            "title": "自定义操作",
             "fields": {
                 "name": "名称",
                 "url": "URL",
@@ -130,7 +140,7 @@
                 "union_or": "匹配以下过滤器",
                 "with_thumbnail": "显示缩略图",
                 "without_thumbnail": "关闭缩略图",
-                "department": ""
+                "department": "部门"
             },
             "thumbnails": {
                 "error": "上传缩略图时发生错误",
@@ -145,6 +155,23 @@
                 "undefined": "未定义",
                 "undefined_pattern": "未定义",
                 "upload": "添加缩略图"
+            },
+            "logs": {
+                "no_logs": "该实体没有时间日志。"
+            },
+            "news": {
+                "no_news": "该实体没有消息。"
+            },
+            "preview_files": {
+                "extension": "扩展",
+                "no_preview_files": "该实体没有预览文件。",
+                "original_file_name": "原始文件名",
+                "position": "位置",
+                "revision": "返修",
+                "size": "尺寸",
+                "status": "状态",
+                "task_type": "任务类型",
+                "uploader": "上传自"
             }
         },
         "estimation": {
@@ -181,10 +208,10 @@
             "playlist_navigation": "播放列表",
             "remove_annotation": "移除播放列表",
             "shortcuts": "捷径",
-            "ctrldown": "",
-            "ctrlleft": "",
-            "ctrlright": "",
-            "ctrlup": ""
+            "ctrldown": "向下移动元数据单元格选择",
+            "ctrlleft": "向左移动元数据单元格选择",
+            "ctrlright": "向右移动元数据单元格选择",
+            "ctrlup": "上移元数据单元格选择"
         },
         "login": {
             "back_to_login": "返回登录页面",
@@ -289,37 +316,39 @@
                 "options": {
                     "title": "选项",
                     "update": "更新数据"
-                }
+                },
+                "optional_fields": "可选列：",
+                "generic_fields": "通用列："
             },
             "after": "之后",
             "before": "之前",
             "from": "从",
             "home": "返回首页",
-            "less_filters": "",
-            "more_filters": "",
+            "less_filters": "更少的过滤器",
+            "more_filters": "更多过滤器",
             "reload": "重新加载",
-            "search_query": "",
-            "search_query_edit": "",
-            "search_query_edit_error": "",
-            "to": "",
-            "workspace": "",
-            "column_visibility": "",
-            "estimation": "",
-            "estimation_short": "",
-            "fps": "",
-            "frames": "",
-            "frameIn": "",
-            "frameOut": "",
-            "man_days": "",
-            "select_column": "",
-            "show": "",
-            "stick": "",
-            "timeSpent": "",
-            "unstick": "",
-            "all_edits": "",
-            "attach_snapshots": "",
-            "reply": "",
-            "select_file": ""
+            "search_query": "搜索查询",
+            "search_query_edit": "编辑搜索过滤器",
+            "search_query_edit_error": "更新此搜索过滤器时出错。",
+            "to": "至",
+            "workspace": "工作区",
+            "column_visibility": "可见列",
+            "estimation": "预算",
+            "estimation_short": "Est.",
+            "fps": "FPS",
+            "frames": "帧",
+            "frameIn": "起始帧",
+            "frameOut": "结束帧",
+            "man_days": "人日| 人日",
+            "select_column": "选择列",
+            "show": "节目",
+            "stick": "签",
+            "timeSpent": "所花费的时间",
+            "unstick": "不签",
+            "all_edits": "所有编辑",
+            "attach_snapshots": "附加注释中的快照",
+            "reply": "回复",
+            "select_file": "选择文件"
         },
         "menu": {
             "assign_tasks": "分配任务",
@@ -330,9 +359,9 @@
             "generate_playlists": "生成列表",
             "run_custom_action": "执行自定义操作",
             "set_estimations": "设定预算",
-            "delete_assets": "",
-            "delete_shots": "",
-            "delete_edits": ""
+            "delete_assets": "删除资产",
+            "delete_shots": "删除镜头",
+            "delete_edits": "删除编辑"
         },
         "news": {
             "all": "全部",
@@ -345,9 +374,9 @@
             "task_status": "任务状态",
             "task_type": "任务类型",
             "title": "消息提要",
-            "hide_stats": "",
-            "news": "",
-            "show_stats": ""
+            "hide_stats": "隐藏统计",
+            "news": "消息",
+            "show_stats": "显示统计数据"
         },
         "not_found": {
             "text": "您所点击的链接有问题，我们建议您返回首页。",
@@ -362,12 +391,12 @@
             "unread_notifications": "未读通知",
             "title": "通知",
             "with_preview": "带有预览",
-            "replied_on": ""
+            "replied_on": "回复通知"
         },
         "people": {
             "active": "活动",
             "active_persons": "活跃用户",
-            "add_member_to_team": "向团队添加成员",
+            "add_member_to_team": "向团队添加成员： ",
             "create_invite": "创建和发送邀请",
             "create_error": "创建或更新此用户时发生错误。 您可能已达到用户数限制。 请联系我们的支持团队以获取更多信息。",
             "delete_error": "删除此人员时出现错误. 很可能存在有链接至其的数据. 您确定此人员没有分配任务或是没写注释吗?",
@@ -381,7 +410,7 @@
             "no_task_assigned": "没有分配给您正在执行的任务",
             "persons": "用户",
             "running_tasks": "在执行任务",
-            "select_person": "选择用户",
+            "select_person": "选择用户...",
             "team": "团队",
             "title": "人员",
             "unactive": "非活动",
@@ -395,7 +424,7 @@
                 "password": "新密码",
                 "password_2": "新密码(重复)",
                 "active": "活动",
-                "departments": ""
+                "departments": "部门"
             },
             "list": {
                 "name": "名称",
@@ -403,21 +432,17 @@
                 "phone": "电话",
                 "role": "职责",
                 "active": "活动",
-                "departments": ""
+                "departments": "部门"
             },
             "role": {
                 "admin": "工作室经理",
                 "client": "客户",
-                "manager": "Production manager",
-                "supervisor": "Supervisor",
+                "manager": "监制",
                 "user": "CG艺术家",
                 "undefined": "未定义",
-                "vendor": "供应商"
+                "vendor": "供应商",
+                "supervisor": "监制"
             }
-        },
-        "preview_room": {
-            "join_room": "",
-            "leave_room": ""
         },
         "playlists": {
             "add_assets": "添加资产",
@@ -492,38 +517,40 @@
                 "save_playlist": "保存播放列表",
                 "speed": "更改播放速度",
                 "split_screen": "与其他任务类型比较",
-                "annotation_draw": "",
-                "current_time": "",
-                "display_revision": "",
+                "annotation_draw": "绘制注释",
+                "current_time": "在视频中的位置",
+                "display_revision": "显示修订",
                 "download_file": "下载文件",
-                "entity_index": "",
-                "entities_number": "",
+                "entity_index": "播放列表中当前实体的索引",
+                "entities_number": "播放列表中的实体数量",
                 "frame_number": "帧数",
-                "files_add": "",
-                "files_delete": "",
-                "files_next": "",
-                "files_position": "",
-                "files_previous": "",
+                "files_add": "将文件添加到修订版",
+                "files_delete": "从修订中删除和删除文件",
+                "files_next": "此修订的下一个文件",
+                "files_position": "本次修订的文件索引",
+                "files_previous": "此修订的先前文件",
                 "looping": "循环播放当前视频",
                 "mute": "静音",
                 "unmute": "取消静音",
-                "number_of_files": "",
+                "number_of_files": "此修订的文件数",
                 "max_duration": "视频时长",
                 "see_original_file": "在新标签页中打开原始文件",
-                "overlay": "",
-                "side_by_side": "",
-                "switch_ld": "",
-                "switch_hd": "",
-                "frames_per_picture": ""
+                "overlay": "覆盖",
+                "side_by_side": "并排",
+                "switch_ld": "切换到低清晰度",
+                "switch_hd": "切换到高清",
+                "frames_per_picture": "每帧图片",
+                "toggle_playing_annotations": "播放电影时显示/隐藏注释",
+                "toggle_waveform": "显示/隐藏电影波形"
             },
-            "download_csv": "",
-            "filter_task_type": "",
-            "comparing_missing_plan": ""
+            "download_csv": "下载 .csv",
+            "filter_task_type": "按任务类型过滤",
+            "comparing_missing_plan": "对比缺失的播放列表"
         },
         "productions": {
             "current": "所选制作",
             "delete_text": "您确定要从数据库中删除{name}吗？ 请在文本字段中输入要删除的项目的名称，以进行确认。",
-            "delete_error": "删除此制作时出现错误. 很可能存在有链接至此的数据. 您确定没有任务, 镜头或资源链接至此制作吗?",
+            "delete_error": "删除此制作时出现错误。可能有与之相关的数据。你确定这个作品没有与之相关的任务、镜头或资产吗？Kitsu 不允许生产删除。如果您不想再看到该作品，则可以将其关闭。",
             "edit_title": "编辑制作",
             "new_production": "添加制作",
             "number": "制作",
@@ -548,7 +575,7 @@
                 "start_date": "开始日期",
                 "end_date": "结束日期",
                 "nb_episodes": "片段数",
-                "episode_span": ""
+                "episode_span": "剧集跨度"
             },
             "metadata": {
                 "add_explaination": "添加此项目需要的特定数据.",
@@ -556,12 +583,13 @@
                 "add_new_values": "当前没有可用值.",
                 "available_values": "可用值",
                 "choices": "值列表",
-                "delete_text": "您确定要删除此列以及此制作的所有资源方面的相关数据吗?",
+                "delete_text": "您确定要删除此列以及此制作的所有资产方面的相关数据吗?",
                 "delete_error": "删除此元数据列时出现错误.",
                 "error": "添加元数据列时出现错误. 要确保没有相似名称的列, 还要确保填充了所有字段. 如果问题仍然存在, 还请联系我们的支持团队.",
                 "free": "空闲值",
                 "title": "添加元数据列",
-                "edit_title": ""
+                "edit_title": "编辑元数据列",
+                "checklist": "清单"
             },
             "status": {
                 "closed": "已关闭",
@@ -574,7 +602,7 @@
                 "featurefilm": "故事片",
                 "tvshow": "电视节目"
             },
-            "edit_error": "",
+            "edit_error": "编辑产品时出错。请联系我们的支持团队。",
             "brief": {
                 "title": "简介",
                 "empty": "还没有简介. 创建一个?"
@@ -586,49 +614,49 @@
                 }
             },
             "creation": {
-                "add_assets": "",
-                "add_asset_types": "",
-                "add_asset_types_description": "",
-                "add_assets_button": "",
-                "add_assets_description": "",
-                "add_shots": "",
-                "add_shots_button": "",
-                "add_shots_description": "",
-                "assets_to_import": "",
-                "create_production": "",
-                "create_button": "",
-                "create_button_disabled": "",
-                "error": "",
-                "errorImportingAssets": "",
-                "errorImportingShots": "",
-                "explaination_date": "",
-                "explaination_type": "",
-                "explaination_video": "",
-                "give_a_name": "",
-                "give_a_name_description": "",
-                "import_assets_button": "",
-                "import_shots_button": "",
-                "new_project": "",
-                "placeholder_date_start": "",
-                "placeholder_date_end": "",
-                "placeholder_name": "",
-                "placeholder_fps": "",
-                "placeholder_ratio1": "",
-                "placeholder_ratio2": "",
-                "placeholder_resolution1": "",
-                "placeholder_resolution2": "",
-                "production_settings": "",
-                "production_settings_description": "",
-                "select_asset_task_type": "",
-                "select_asset_task_type_description": "",
-                "select_shot_task_type": "",
-                "select_shot_task_type_description": "",
-                "select_task_status": "",
-                "select_task_status_description": "",
-                "start_and_end_dates": "",
-                "shots_to_import": "",
-                "select_edit_task_type": "",
-                "select_edit_task_type_description": ""
+                "add_assets": "添加资产(可选)",
+                "add_asset_types": "添加资产类型",
+                "add_asset_types_description": "将资产类型添加到您的项目",
+                "add_assets_button": "添加资产",
+                "add_assets_description": "为您的作品添加或导入资产。",
+                "add_shots": "添加镜头(可选)",
+                "add_shots_button": "添加镜头",
+                "add_shots_description": "为您的作品添加或导入镜头。",
+                "assets_to_import": "要导入的资产",
+                "create_production": "创建生产",
+                "create_button": "一切搞定，走吧🚀",
+                "create_button_disabled": "请填写所有表格",
+                "error": "创建作品时出错",
+                "errorImportingAssets": "导入资产时出错。虽然已经创建了作品！",
+                "errorImportingShots": "导入镜头时出错。虽然已经创建了作品！",
+                "explaination_date": "需要这些日期来设置您的日程安排。",
+                "explaination_type": "如果您选择电视节目，则制作将分成几集。",
+                "explaination_video": "这些设置用于标准化上传的视频。",
+                "give_a_name": "为您的作品命名",
+                "give_a_name_description": "首先给你的作品一个有意义的名字。",
+                "import_assets_button": "导入资产",
+                "import_shots_button": "导入镜头",
+                "new_project": "新项目",
+                "placeholder_date_start": "开始时间",
+                "placeholder_date_end": "结束时间",
+                "placeholder_name": "我的作品名称",
+                "placeholder_fps": "25",
+                "placeholder_ratio1": "16",
+                "placeholder_ratio2": "9",
+                "placeholder_resolution1": "1920",
+                "placeholder_resolution2": "1080",
+                "production_settings": "设置您的生产参数",
+                "production_settings_description": "定义您的制作类型、视频预览的格式并安排您的制作。",
+                "select_asset_task_type": "选择资产任务类型",
+                "select_asset_task_type_description": "这些任务类型定义了资产的构建步骤。",
+                "select_shot_task_type": "选择拍摄任务类型",
+                "select_shot_task_type_description": "这些任务类型定义了镜头的构建步骤。",
+                "select_task_status": "选择任务状态",
+                "select_task_status_description": "选择您将在生产过程中使用的任务状态。",
+                "start_and_end_dates": "开始和结束日期",
+                "shots_to_import": "要导入的镜头",
+                "select_edit_task_type": "选择编辑任务类型",
+                "select_edit_task_type_description": "选择编辑任务类型描述"
             }
         },
         "profile": {
@@ -655,11 +683,11 @@
                 "button": "保存更改",
                 "error": "保存更改时出现错误"
             },
-            "notifications_mattermost_enabled": "",
-            "notifications_mattermost_user": "",
-            "notifications_discord_enabled": "",
-            "notifications_discord_user": "",
-            "webhook_error": ""
+            "notifications_mattermost_enabled": "最重要的通知已启用",
+            "notifications_mattermost_user": "最重要的通知用户",
+            "webhook_error": "webhook错误",
+            "notifications_discord_enabled": "Discord通知已启用",
+            "notifications_discord_user": "Discord用户名"
         },
         "settings": {
             "change_logo": "更改Logo",
@@ -673,19 +701,20 @@
                 "hours_by_day": "每天营业时间",
                 "slack_token": "Slack Token （可选）",
                 "use_original_name": "使用原始文件名进行下载",
-                "timesheets_locked": "",
-                "mattermost_webhook": "",
-                "discord_token": "Discord Token （可选）",
-                "show_hd_default": ""
+                "timesheets_locked": "锁定超过 1 周的艺术家时间表",
+                "mattermost_webhook": "最重要的webhook",
+                "discord_token": "Discord 令牌（可选）",
+                "show_hd_default": "默认显示高清画质"
             },
             "production": {
-                "empty_list": "该列表当前为空。 这意味着用户可以使用主设置中的所有数据。 添加一些条目以限制此产品的选择。"
+                "empty_list": "该列表当前为空。 这意味着用户可以使用主设置中的所有数据。 添加一些条目以限制此产品的选择。",
+                "empty_automation_list": "该生产没有自动化装置。"
             },
             "save": {
                 "button": "保存设置",
                 "error": "保存设置时发生服务器错误"
             },
-            "webhook_error": ""
+            "webhook_error": "webhook错误"
         },
         "task_status": {
             "create_error": "保存此任务状态时发生错误。 您确定没有名称相似的任务状态吗？",
@@ -699,12 +728,12 @@
                 "color": "颜色",
                 "is_artist_allowed": "艺术家允许",
                 "is_client_allowed": "客户允许",
-                "is_default": "Is default",
                 "is_done": "已完成",
                 "is_retake": "重新赋值",
                 "name": "名称",
                 "short_name": "简称",
-                "is_feedback_request": ""
+                "is_feedback_request": "反馈请求",
+                "is_default": "默认"
             },
             "name": "任务状态"
         },
@@ -722,7 +751,7 @@
                 "name": "名称",
                 "allow_timelog": "时间日志",
                 "priority": "优先级",
-                "department": ""
+                "department": "部门"
             }
         },
         "sequences": {
@@ -756,7 +785,7 @@
         },
         "quota": {
             "average": "平均",
-            "count_label": "",
+            "count_label": "计数模式",
             "detail_label": "细节程度",
             "details_name": "名称",
             "details_seconds": "秒",
@@ -770,14 +799,24 @@
             "year_label": "年",
             "title": "配额",
             "type_label": "类型",
-            "explaination": "",
-            "export_quotas": "",
-            "highlight_quotas": "",
-            "weight": ""
+            "explaination": "在第一次反馈请求时，镜头被视为结束。 然后，配额会根据在任务上花费的时间（当艺术家填写他的时间表时）进行加权。\n  如果没有时间填满，它认为：\n  * 任务在第一个状态通道到 WIP 时开始\n* 任务在提出反馈请求的当天完成。\n  * 它在开始和结束之间的所有工作日之间拆分完成的帧。",
+            "export_quotas": "导出配额",
+            "highlight_quotas": "高亮配额",
+            "weight": "权重",
+            "count": "计数",
+            "compute_mode": "计算模式",
+            "day": "天",
+            "feedback_date": "反馈日期",
+            "explaination_feedback": "拍摄是在第一次反馈请求时完成的。它的帧数被添加到这一天的配额中。",
+            "frames": "帧",
+            "month": "月",
+            "seconds": "秒",
+            "weighted": "加权",
+            "week": "周"
         },
         "shots": {
             "casting": "镜头的角色分配",
-            "creation_explaination": "",
+            "creation_explaination": "要添加镜头，您首先需要创建剧集和序列。在左栏底部输入剧集名称，然后单击添加以创建新剧集。选择这一集并对序列重复相同的操作。最后选择一个序列并在右栏底部的字段中输入镜头名称。点击下方的添加按钮。您的第一个镜头已创建。您现在可以添加更多！如果不是电视节目，则必须直接创建序列。",
             "delete_text": "您确定要从您的数据库移除{name}吗?",
             "delete_error": "删除此镜头时出现错误. 很可能存在有链接至此的数据. 您确定没有任务链接至此镜头吗?",
             "edit_success": "已成功编辑镜头{name}.",
@@ -785,52 +824,52 @@
             "edit_title": "编辑镜头",
             "empty_list": "制作中没有镜头. 要创建一些吗?",
             "empty_list_client": "此制作中没有镜头.",
-            "episodes": "片段(多个)",
-            "history": "",
+            "episodes": "剧集",
+            "history": "镜头值历史",
             "new_shot": "添加镜头",
             "new_shots": "添加多个镜头",
             "new_sequences": "添加多个序列",
             "new_episodes": "添加多个片段",
             "no_casting": "镜头的角色分配为空.",
-            "number": "镜头 | 镜头(多个)",
+            "number": "镜头 | 镜头集合",
             "manage": "创建多个镜头",
             "new_success": "已成功创建镜头{name}.",
-            "padding": "",
+            "padding": "镜头填充",
             "restore_text": "您确定要将{name}恢复进您的数据库吗?",
             "restore_error": "恢复此镜头时出现错误.",
-            "sequences": "序列(多个)",
-            "tasks": "镜头任务(多个)",
-            "title": "镜头(多个)",
+            "sequences": "序列集合",
+            "tasks": "镜头任务",
+            "title": "镜头集合",
             "fields": {
                 "description": "说明",
                 "nb_frames": "帧数",
-                "episode": "片段",
+                "episode": "集",
                 "frame_in": "入镜",
                 "frame_out": "出镜",
                 "fps": "FPS",
-                "name": "镜头",
+                "name": "名",
                 "production": "制作",
                 "sequence": "序列",
-                "time_spent": "时长",
-                "person": ""
+                "time_spent": "时间",
+                "person": "修改"
             },
-            "cancel_text": "",
-            "delete_for_selection": "",
-            "multiple_delete_error": ""
+            "cancel_text": "确定要归档 {name} 吗？",
+            "delete_for_selection": "删除 {nbSelectedShots} 个选定的镜头：",
+            "multiple_delete_error": "删除快照时出错。可能有一些数据与镜头相关联。您确定没有与所选镜头相关联的任务吗？"
         },
         "server_down": {
             "text": "请联系您的供应商支持, 您的系统管理员或您的IT部门来搞清楚出什么问题了.",
             "title": "Kitsu在访问其数据API时出现错误."
         },
         "statistics": {
-            "count": "",
-            "count_mode": "",
-            "display_mode": "",
+            "count": "计数",
+            "count_mode": "计数",
+            "display_mode": "显示",
             "frames": "帧数",
             "pie": "饼图",
             "shots": "镜头",
             "data_mode": "日期",
-            "retakes": "",
+            "retakes": "返修",
             "status": "状态"
         },
         "tasks": {
@@ -838,7 +877,7 @@
             "add_preview_error": "添加预览时出现错误.",
             "assign": "将单个任务分配给: | 将{nbSelectedTasks}个任务分配给:",
             "back_to_list": "返回列表",
-            "bigger": "",
+            "bigger": "加宽任务面板",
             "change_status_to": "将任务状态改为:",
             "change_preview": "更换预览",
             "change_priority": "将优先级改为:",
@@ -849,8 +888,8 @@
             "create_tasks_shot": "为当前的多个镜头添加多个任务",
             "create_tasks_shot_explaination": "您将要为当前列表的每个镜头都创建给定任务类型的新任务. 要继续吗?",
             "create_tasks_shot_failed": "继续进行多个创建时出现服务器错误.",
-            "create_tasks_asset": "为当前的多个资源添加多个任务",
-            "create_tasks_asset_explaination": "您将要为当前列表的每个资源都创建给定任务类型的新任务. 要继续吗?",
+            "create_tasks_asset": "为当前的多个资产添加多个任务",
+            "create_tasks_asset_explaination": "您将要为当前列表的每个资产都创建给定任务类型的新任务. 要继续吗?",
             "create_tasks_asset_failed": "继续进行多个创建时出现服务器错误.",
             "current": "待执行任务",
             "current_status": "当前状态:",
@@ -889,38 +928,39 @@
             "subscribe_notifications": "订阅通知",
             "tasks": "任务(多个)",
             "validation": "确认",
-            "with_comment": "",
+            "with_comment": "有评论...",
             "fields": {
                 "asset_type": "资产类别",
                 "assignees": "被分配任务人员(多名)",
-                "count": "",
+                "count": "计数",
                 "due_date": "截止日",
                 "duration": "时长",
                 "end_date": "结束日期",
                 "entity": "实体",
                 "entity_name": "名称",
-                "estimated_quota": "",
+                "estimated_quota": "配额",
                 "estimation": "估计",
-                "frames": "",
+                "frames": "帧.",
                 "last_comment": "最新注释",
                 "last_comment_date": "最新注释",
                 "priority": "优先级",
                 "production": "制作",
                 "real_end_date": "确认日期",
-                "real_start_date": "",
-                "retake_count": "",
+                "real_start_date": "WIP时间",
+                "retake_count": "返修",
                 "seconds": "秒",
                 "sequence": "序列",
                 "start_date": "开始日期",
                 "task_status": "状态",
                 "task_status_short_name": "状态",
-                "task_type": "类型"
+                "task_type": "类型",
+                "start_date_short": "开始日期"
             },
             "colors": {
-                "title": "",
-                "neutral": "",
-                "status": "",
-                "late": ""
+                "title": "颜色",
+                "neutral": "中性",
+                "status": "状态颜色",
+                "late": "迟到的红"
             },
             "priority": {
                 "emergency": "紧急",
@@ -928,17 +968,22 @@
                 "high": "高",
                 "very_high": "非常高"
             },
-            "assignation_warning": "",
-            "for_selection": "",
+            "assignation_warning": "警告：您不会看到结果，因为您隐藏了分配",
+            "for_selection": "对于当前列表和过滤",
             "for_project": "项目",
-            "all_tasks": "",
-            "due_this_week": "",
-            "select_file": "",
-            "big_thumbnails": "",
-            "create_tasks_edit": "",
-            "create_tasks_edit_explaination": "",
-            "create_tasks_edit_failed": "",
-            "smaller": ""
+            "all_tasks": "所有任务",
+            "due_this_week": "本周到期",
+            "select_file": "请从您的硬盘驱动器中选择要附加到您的评论的文件：",
+            "big_thumbnails": "大缩略图",
+            "create_tasks_edit": "创建任务编辑",
+            "create_tasks_edit_explaination": "创建任务编辑",
+            "create_tasks_edit_failed": "创建任务编辑失败",
+            "smaller": "更小",
+            "small_thumbnails": "显示小缩略图",
+            "combobox_departments": {
+                "all_departments": "所有部门",
+                "my_departments": "我的部门"
+            }
         },
         "timesheets": {
             "detail_level": "细节层次",
@@ -949,32 +994,32 @@
             "time_spents": "已用时长(小时)",
             "title": "时间表(多个)",
             "year": "年",
-            "confirm_day_off": "",
-            "day_off": "",
-            "export_timespents": "",
-            "unit": ""
+            "confirm_day_off": "将这一天设置为休息日将清除当天填写的所有时间。你确定你要继续吗？",
+            "day_off": "休假",
+            "export_timespents": "将打开项目花费的时间导出为列表",
+            "unit": "单位"
         },
         "wrong_browser": {
             "title": "Kitsu不支持您的浏览器",
-            "text": ""
+            "text": "itsu 只能与 Firefox 和 Chrome 浏览器一起使用。"
         },
         "logs": {
-            "current_date_label": "",
-            "events": "",
+            "current_date_label": "显示日志",
+            "events": "列出当天的事件",
             "empty_list": "所选日期没有日志。",
             "title": "日志",
             "preview_files": {
-                "date": "",
-                "empty_list": "",
-                "entity_name": "",
-                "explaination": "",
-                "file_name": "",
-                "person": "",
-                "production": "",
-                "revision": "",
-                "status": "",
-                "task_type_id": "",
-                "title": ""
+                "date": "创建日期",
+                "empty_list": "没有中断或正在进行的预览。",
+                "entity_name": "实体名称",
+                "explaination": "此页面列出了处于中间状态的所有预览文件：处理中或损坏。它可以让您知道有多少预览文件正在处理，或者哪些文件未能规范化并存储在 Kitsu 上。",
+                "file_name": "文件名",
+                "person": "用户",
+                "production": "生产",
+                "revision": "修订",
+                "status": "状态",
+                "task_type_id": "任务类型",
+                "title": "预览文件"
             }
         },
         "departments": {
@@ -984,32 +1029,69 @@
             "delete_error": "删除此部门时出错。",
             "edit_title": "编辑部门",
             "new_departments": "添加新的部门",
-            "number": "",
+            "number": "部门 | 部门",
             "title": "部门",
             "fields": {
                 "name": "名称",
-                "color": ""
+                "color": "颜色"
             }
         },
         "edits": {
-            "all_edits": "",
-            "manage": "",
-            "creation_explaination": "",
-            "edit_error": "",
-            "delete_text": "",
-            "delete_error": "",
-            "delete_for_selection": "",
-            "edit_title": "",
-            "empty_list": "",
-            "empty_list_client": "",
-            "new_edit": "",
-            "number": "",
-            "title": "",
+            "all_edits": "编辑所有",
+            "creation_explaination": "创建解释",
+            "edit_error": "编辑错误",
+            "delete_text": "删除文本",
+            "delete_error": "删除错误",
+            "delete_for_selection": "删除选择",
+            "edit_title": "编辑标题",
+            "empty_list": "空列表",
+            "empty_list_client": "空列表客户端",
+            "new_edit": "新编辑",
+            "number": "数量",
+            "title": "标题",
             "fields": {
-                "name": "",
-                "episode": "",
-                "description": ""
+                "name": "名字",
+                "episode": "剧集",
+                "description": "描述"
+            },
+            "tasks": "任务"
+        },
+        "status_automations": {
+            "change_ready_for": "将“准备就绪”更改为",
+            "change_status": "将任务状态更改为",
+            "create_error": "保存此状态自动化时出错。您确定没有其他同名操作吗？",
+            "delete_text": "您确定要从数据库中删除状态自动化 {name} 吗？",
+            "delete_error": "删除此状态自动化时出错。它可能与一个项目相关联。在这种情况下，您无法删除它。您必须首先从每个项目中删除它。",
+            "edit_title": "编辑状态自动化",
+            "entity_title": "触发器关注的实体类型",
+            "number": "状态自动化 | 状态自动化",
+            "in_title": "状态触发变化",
+            "out_title": "将在触发器触发时应用的更改",
+            "new_status_automation": "添加状态自动化",
+            "run_for_selection": "为选定的任务运行状态自动化：",
+            "title": "状态自动化",
+            "wrong_automation": "此自动化适用于后向任务类型。Kitsu 不允许这样做（以避免循环）。它不会有任何影响。",
+            "fields": {
+                "entity_type": "实体类型",
+                "in_field_type": "输入字段类型",
+                "in_task_type": "任务类型",
+                "in_task_status": "任务状态",
+                "out_field_type": "触发",
+                "out_task_type": "应用任务类型",
+                "out_task_status": "应用任务状态"
+            },
+            "entity_types": {
+                "asset": "资产",
+                "shot": "镜头"
+            },
+            "field_types": {
+                "status": "状态",
+                "ready_for": "准备好为"
             }
+        },
+        "preview_room": {
+            "join_room": "加入审核室",
+            "leave_room": "离开审核室"
         }
     }
 }
