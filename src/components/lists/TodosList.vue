@@ -51,10 +51,11 @@
             {{ $t('tasks.fields.due_date') }}
           </th>
           <metadata-header
-            :key="'desc-header' + descriptor.field_name"
-            :descriptor="descriptor"
+            :key="'desc-header' + field_name"
+            :descriptor="mergeMetadataDescriptors(
+              metadataDescriptorsMap[field_name])"
             :no-menu="true"
-            v-for="descriptor in metadataDescriptorsMap.values()"
+            v-for="field_name in Object.keys(metadataDescriptorsMap)"
           />
           <th scope="col" class="status">
             {{ $t('tasks.fields.task_status') }}
@@ -125,32 +126,37 @@
           </td>
           <td
             class="metadata-descriptor"
-            :key="'desc-' + entry.id + '-' + descriptor.field_name"
-            v-for="descriptor in metadataDescriptorsMap.values()">
+            :key="'desc-' + entry.id + '-' + field_name"
+            v-for="field_name in Object.keys(metadataDescriptorsMap)">
             <div
-              v-if="entry.entity_data && descriptor[entry.project_id]"
+              v-if="entry.entity_data &&
+                metadataDescriptorsMap[field_name][entry.project_id]"
             >
               <div
                 v-if="getDescriptorChecklistValues(
-                    descriptor[entry.project_id]).length > 0"
+                  metadataDescriptorsMap[field_name][entry.project_id]).length > 0"
               >
                 <p
-                  v-for="(option, i) in
-                    getDescriptorChecklistValues(descriptor[entry.project_id])"
-                  :key="`${entry.id}-${descriptor[entry.project_id].id}
+                  v-for="(option, i) in getDescriptorChecklistValues(
+                    metadataDescriptorsMap[field_name][entry.project_id])"
+                  :key="`${entry.id}-
+                    ${metadataDescriptorsMap[field_name][entry.project_id].id}
                     -${i}-${option.text}-div`"
                 >
                   <input
                     type="checkbox"
                     disabled
-                    :id="`${entry.id}-${descriptor[entry.project_id].id}
+                    :id="`${entry.id}
+                      -${metadataDescriptorsMap[field_name][entry.project_id].id}
                       -${i}-${option.text}-input`"
                     :checked="getMetadataChecklistValues(
-                      descriptor[entry.project_id], entry)[option.text]"
+                      metadataDescriptorsMap[field_name][entry.project_id]
+                      , entry)[option.text]"
                   />
                   <label
                     style="cursor: pointer;"
-                    :for="`${entry.id}-${descriptor[entry.project_id].id}
+                    :for="`${entry.id}
+                      -${metadataDescriptorsMap[field_name][entry.project_id].id}
                       -${i}-${option.text}-input`"
                   >
                     {{ option.text }}
@@ -160,7 +166,8 @@
               <p
                 v-else
               >
-                {{ getMetadataFieldValue(descriptor, entry) }}
+                {{ getMetadataFieldValue(metadataDescriptorsMap[field_name]
+                [entry.project_id], entry) }}
               </p>
             </div>
           </td>
@@ -296,35 +303,19 @@ export default {
     },
 
     metadataDescriptorsMap () {
-      const metadataDescriptorsMap = new Map()
+      const metadataDescriptorsMap = {}
       this.openProductions.forEach(project => {
         project.descriptors.forEach(descriptor => {
           const isUserDepartment = this.user.departments.some(
             department => descriptor.departments.includes(department)
           )
           if (isUserDepartment) {
-            let metadataDescriptor =
-              metadataDescriptorsMap.get(descriptor.field_name)
-            if (!metadataDescriptor) {
-              metadataDescriptor = {
-                departments: descriptor.departments,
-                field_name: descriptor.field_name,
-                name: descriptor.name
-              }
-              metadataDescriptor[project.id] = descriptor
-              metadataDescriptorsMap.set(
-                descriptor.field_name,
-                metadataDescriptor
-              )
-            } else {
-              // When there are several descriptors with the same name
-              metadataDescriptor.departments = [
-                ...new Set([
-                  ...metadataDescriptor.departments,
-                  ...descriptor.departments
-                ])
-              ]
+            // group them by field_name if they have the same
+            if (!(descriptor.field_name in metadataDescriptorsMap)) {
+              metadataDescriptorsMap[descriptor.field_name] = {}
             }
+            metadataDescriptorsMap[descriptor.field_name][project.id] =
+              descriptor
           }
         })
       })
@@ -532,6 +523,21 @@ export default {
           this.$refs['th-' + desc.name].style['min-width'] = `${width}px`
         })
       }
+    },
+
+    mergeMetadataDescriptors (descriptors) {
+      const mergedDescriptors = {
+        departments: [],
+        field_name: descriptors[Object.keys(descriptors)[0]].field_name,
+        name: descriptors[Object.keys(descriptors)[0]].name
+      }
+      // merge departments
+      Object.keys(descriptors).forEach(projectId => {
+        mergedDescriptors.departments = [
+          ...new Set([...descriptors[projectId].departments,
+            ...mergedDescriptors.departments])]
+      })
+      return mergedDescriptors
     }
   }
 }

@@ -152,7 +152,8 @@ export default {
 
     taskTypeList () {
       const taskTypes = [...this.productionTaskTypes]
-        .filter(taskType => taskType.for_entity === this.form.for_entity)
+        .filter(taskType =>
+          taskType.for_entity.toLowerCase() === this.form.for_entity)
       return [{
         id: '',
         color: '#999',
