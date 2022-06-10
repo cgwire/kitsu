@@ -876,7 +876,7 @@ export default {
     number: 'sequence | sequences',
     title: 'Sequence Stats',
     fields: {
-      name: 'name',
+      name: 'Name',
       description: 'description'
     }
   },
@@ -896,7 +896,7 @@ export default {
     tasks: 'Tasks',
     title: 'Edits',
     fields: {
-      name: 'name',
+      name: 'Name',
       episode: 'Ep.',
       description: 'Description'
     }
