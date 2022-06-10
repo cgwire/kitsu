@@ -126,37 +126,37 @@
           </td>
           <td
             class="metadata-descriptor"
-            :key="'desc-' + entry.id + '-' + field_name"
-            v-for="field_name in Object.keys(metadataDescriptorsMap)">
+            :key="'desc-' + entry.id + '-' + fieldName"
+            v-for="fieldName in Object.keys(metadataDescriptorsMap)">
             <div
               v-if="entry.entity_data &&
-                metadataDescriptorsMap[field_name][entry.project_id]"
+                getMetadataDescriptor(fieldName, entry)"
             >
               <div
                 v-if="getDescriptorChecklistValues(
-                  metadataDescriptorsMap[field_name][entry.project_id]).length > 0"
+                  getMetadataDescriptor(fieldName, entry)).length > 0"
               >
                 <p
                   v-for="(option, i) in getDescriptorChecklistValues(
-                    metadataDescriptorsMap[field_name][entry.project_id])"
+                    getMetadataDescriptor(fieldName, entry))"
                   :key="`${entry.id}-
-                    ${metadataDescriptorsMap[field_name][entry.project_id].id}
+                    ${getMetadataDescriptor(fieldName, entry).id}
                     -${i}-${option.text}-div`"
                 >
                   <input
                     type="checkbox"
                     disabled
                     :id="`${entry.id}
-                      -${metadataDescriptorsMap[field_name][entry.project_id].id}
+                      -${getMetadataDescriptor(fieldName, entry).id}
                       -${i}-${option.text}-input`"
                     :checked="getMetadataChecklistValues(
-                      metadataDescriptorsMap[field_name][entry.project_id]
+                      getMetadataDescriptor(fieldName, entry)
                       , entry)[option.text]"
                   />
                   <label
                     style="cursor: pointer;"
                     :for="`${entry.id}
-                      -${metadataDescriptorsMap[field_name][entry.project_id].id}
+                      -${getMetadataDescriptor(fieldName, entry).id}
                       -${i}-${option.text}-input`"
                   >
                     {{ option.text }}
@@ -166,8 +166,8 @@
               <p
                 v-else
               >
-                {{ getMetadataFieldValue(metadataDescriptorsMap[field_name]
-                [entry.project_id], entry) }}
+                {{ getMetadataFieldValue(getMetadataDescriptor(fieldName, entry)
+                , entry) }}
               </p>
             </div>
           </td>
@@ -310,11 +310,18 @@ export default {
             department => descriptor.departments.includes(department)
           )
           if (isUserDepartment) {
-            // group them by field_name if they have the same
+            // group them by field_name if they have the same field_name
             if (!(descriptor.field_name in metadataDescriptorsMap)) {
               metadataDescriptorsMap[descriptor.field_name] = {}
             }
-            metadataDescriptorsMap[descriptor.field_name][project.id] =
+            const descriptorFieldNameEntry =
+              metadataDescriptorsMap[descriptor.field_name]
+            // group them by entity_type if the have the same entity_type
+            if (!(descriptor.entity_type in
+              descriptorFieldNameEntry)) {
+              descriptorFieldNameEntry[descriptor.entity_type] = {}
+            }
+            descriptorFieldNameEntry[descriptor.entity_type][project.id] =
               descriptor
           }
         })
@@ -526,18 +533,33 @@ export default {
     },
 
     mergeMetadataDescriptors (descriptors) {
+      const firstKeyEntityType = Object.keys(descriptors)[0]
+      const firstKeyProjectId = Object.keys(descriptors[firstKeyEntityType])[0]
       const mergedDescriptors = {
         departments: [],
-        field_name: descriptors[Object.keys(descriptors)[0]].field_name,
-        name: descriptors[Object.keys(descriptors)[0]].name
+        field_name: descriptors[firstKeyEntityType][firstKeyProjectId]
+          .field_name,
+        name: descriptors[firstKeyEntityType][firstKeyProjectId]
+          .name
       }
       // merge departments
-      Object.keys(descriptors).forEach(projectId => {
-        mergedDescriptors.departments = [
-          ...new Set([...descriptors[projectId].departments,
-            ...mergedDescriptors.departments])]
-      })
+      Object.keys(descriptors).forEach(entityType =>
+        Object.keys(descriptors[entityType]).forEach(projectId => {
+          mergedDescriptors.departments = [
+            ...new Set([...descriptors[entityType][projectId].departments,
+              ...mergedDescriptors.departments])]
+        }))
       return mergedDescriptors
+    },
+
+    getMetadataDescriptor (fieldName, entry) {
+      const entityType = entry.task_type_for_entity
+      const projectId = entry.project_id
+      return (this.metadataDescriptorsMap[fieldName] &&
+        this.metadataDescriptorsMap[fieldName][entityType] &&
+        this.metadataDescriptorsMap[fieldName][entityType][projectId])
+        ? this.metadataDescriptorsMap[fieldName][entityType][projectId]
+        : null
     }
   }
 }
