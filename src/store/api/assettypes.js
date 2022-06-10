@@ -2,7 +2,7 @@ import client from '@/store/api/client'
 
 export default {
   getAssetTypes (callback) {
-    client.get('/api/data/asset-types', callback)
+    client.get('/api/data/asset-types?relations=true', callback)
   },
 
   getAssetType (assetTypeId, callback) {
