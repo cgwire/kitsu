@@ -492,7 +492,7 @@ export default {
       const edits = {}
       this.displayedEdits.forEach(edit => {
         let editKey = ''
-        if (this.istvshow && edit.episode_id) {
+        if (this.isTVShow && edit.episode_id) {
           editKey += this.episodeMap.get(edit.episode_id).name
         }
         editKey += `${edit.name}`
