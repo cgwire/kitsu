@@ -156,11 +156,8 @@ export const entityListMixin = {
                 let y = validationCell.columnY
                 if (!sticked) y += columnOffset
 
-                // Check if cell is selectable based on asset types list from entity's task type
-                const isSelectable = validationCell.entity.task_types.includes(validationCell.column.task_type_id)
-
                 // Add cell to selection
-                if (isSelectable) {
+                if (validationCell.selectable) {
                   selection.push({
                     entity: validationCell.entity,
                     column: validationCell.column,
