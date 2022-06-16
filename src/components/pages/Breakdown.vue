@@ -909,6 +909,7 @@ export default {
     castingType () {
       if (this.isShotCasting && this.sequences.length > 0) {
         this.sequenceId = this.sequences[0].id
+        this.assetTypeId = ''
       }
       if (this.isAssetCasting && this.castingAssetTypesOptions.length > 0) {
         const assetTypeId = this.$route.params.asset_type_id
@@ -935,7 +936,7 @@ export default {
     },
 
     assetTypeId () {
-      if (this.castingAssetTypesOptions) {
+      if (this.assetTypeId && this.castingAssetTypesOptions.length > 0) {
         this.setCastingAssetType(this.assetTypeId)
         this.updateUrl()
         this.resetSelection()
