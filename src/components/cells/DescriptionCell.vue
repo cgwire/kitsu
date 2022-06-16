@@ -104,6 +104,11 @@ export default {
         event.keyCode === 27
       ) {
         this.isOpen = !this.isOpen
+        if (!this.isOpen && this.isEditing) {
+          this.isEditing = false
+          const val = this.$refs.text.value
+          this.$emit('description-changed', val)
+        }
       }
     },
 
