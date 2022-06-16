@@ -261,6 +261,7 @@ import { getTaskTypeStyle } from '@/lib/render'
 import csv from '@/lib/csv'
 import drafts from '@/lib/drafts'
 import stringHelpers from '@/lib/string'
+import { formatDate } from '@/lib/time'
 
 import AddComment from '@/components/widgets/AddComment'
 import AddPreviewModal from '@/components/modals/AddPreviewModal'
@@ -1036,7 +1037,7 @@ export default {
       var commentLines = []
       this.getCurrentTaskComments().forEach(comment => {
         commentLines.push([
-          comment.created_at,
+          formatDate(comment.created_at),
           comment.task_status.name,
           comment.person.name,
           comment.text,
@@ -1050,7 +1051,7 @@ export default {
         if (comment.replies) {
           comment.replies.forEach(reply =>
             commentLines.push([
-              reply.date,
+              formatDate(reply.date),
               'Reply',
               this.personMap.get(reply.person_id).name,
               reply.text
