@@ -139,6 +139,7 @@
         :time-spent-map="personTimeSpentMap"
         :time-spent-total="personTimeSpentTotal"
         :hide-done="personTasksSearchText.length > 0"
+        :hide-day-off="!(isCurrentUserAdmin || this.user.id == this.person.id)"
         @date-changed="onDateChanged"
         @time-spent-change="onTimeSpentChange"
         @set-day-off="onSetDayOff"
@@ -261,6 +262,7 @@ export default {
     ...mapGetters([
       'displayedPersonTasks',
       'displayedPersonDoneTasks',
+      'isCurrentUserAdmin',
       'isCurrentUserManager',
       'nbSelectedTasks',
       'personMap',
@@ -272,7 +274,8 @@ export default {
       'personTimeSpentTotal',
       'productionMap',
       'selectedTasks',
-      'taskTypeMap'
+      'taskTypeMap',
+      'user'
     ]),
 
     loggablePersonTasks () {
