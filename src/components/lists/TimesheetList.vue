@@ -22,6 +22,7 @@
       :text="$t('timesheets.day_off')"
       :active="personIsDayOff"
       @click="toggleDayOff"
+      v-if="!hideDayOff"
     />
   </div>
 
@@ -245,6 +246,10 @@ export default {
     hideDone: {
       default: false,
       type: Boolean
+    },
+    hideDayOff: {
+      default: true,
+      type: Boolean
     }
   },
 
@@ -280,6 +285,7 @@ export default {
   computed: {
     ...mapGetters([
       'isCurrentUserArtist',
+      'isCurrentUserAdmin',
       'nbSelectedTasks',
       'organisation',
       'personIsDayOff',

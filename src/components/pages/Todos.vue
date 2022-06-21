@@ -111,6 +111,7 @@
         :time-spent-map="timeSpentMap"
         :time-spent-total="timeSpentTotal"
         :hide-done="loggableDoneTasks.length === 0"
+        :hide-day-off="false"
         @date-changed="onDateChanged"
         @time-spent-change="onTimeSpentChange"
         @set-day-off="onSetDayOff"

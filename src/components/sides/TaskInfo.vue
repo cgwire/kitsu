@@ -562,10 +562,6 @@ export default {
     pinnedCount () {
       if (!this.taskComments) return 0
       return this.taskComments.filter(c => c.pinned).length
-    },
-
-    previewPlayer () {
-      return this.$refs['preview-player']
     }
   },
 
@@ -933,7 +929,7 @@ export default {
         return comment.previews.findIndex((p) => p.id === previewId) >= 0
       })
 
-      this.previewPlayer.displayFirst()
+      this.$refs['preview-player'].displayFirst()
       this.deleteTaskPreview({
         taskId: this.task.id,
         commentId: comment.id,
@@ -997,8 +993,8 @@ export default {
         p => p.revision === parseInt(versionRevision)
       ))
       setTimeout(() => {
-        this.previewPlayer.setCurrentFrame(frame - 1)
-        this.previewPlayer.focus()
+        this.$refs['preview-player'].setCurrentFrame(frame - 1)
+        this.$refs['preview-player'].focus()
       }, 20)
     },
 
@@ -1007,8 +1003,8 @@ export default {
     },
 
     async extractAnnotationSnapshots () {
-      let previewPlayer = this.previewPlayer
-      if (!this.previewPlayer) previewPlayer = this.$parent.$parent.previewPlayer
+      let previewPlayer = this.$refs['preview-player']
+      if (!previewPlayer) previewPlayer = this.$parent.$parent.previewPlayer
       this.$refs['add-comment'].showAnnotationLoading()
       const files = await previewPlayer.extractAnnotationSnapshots()
       this.$refs['add-comment'].hideAnnotationLoading()
