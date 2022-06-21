@@ -127,7 +127,7 @@
         :is-repeating="isRepeating"
         :current-preview-index="currentPreviewIndex"
         :muted="isMuted"
-        @entity-change="onPlayerEntityChange"
+        @entity-change="onPlayerPlayingEntityChange"
         @frame-update="onFrameUpdate"
         @max-duration-update="onMaxDurationUpdate"
         @metadata-loaded="onMetadataLoaded"
@@ -1221,7 +1221,7 @@ export default {
       }
     },
 
-    onPlayerEntityChange (entityIndex) {
+    onPlayerPlayingEntityChange (entityIndex) {
       this.playingEntityIndex = entityIndex
       if (this.isCurrentPreviewMovie) {
         if (this.isComparing) {

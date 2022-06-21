@@ -246,11 +246,13 @@ export default {
       this.$emit('entity-change', this.currentIndex)
     },
 
-    reloadCurrentEntity () {
-      this.loadEntity(this.currentIndex, this.currentPlayer.currentTime)
+    reloadCurrentEntity (silent = false) {
+      this.loadEntity(
+        this.currentIndex, this.currentPlayer.currentTime, silent
+      )
     },
 
-    loadEntity (index = 0, currentTime = 0) {
+    loadEntity (index = 0, currentTime = 0, silent = false) {
       if (index < this.entities.length) {
         const nextIndex = this.getNextIndex(index)
         const entity = this.entities[index]
@@ -277,7 +279,9 @@ export default {
 
         this.setSpeed(rate)
         this._setCurrentTime(currentTime)
-        this.$emit('entity-change', this.currentIndex)
+        if (!silent) {
+          this.$emit('entity-change', this.currentIndex)
+        }
       }
     },
 
@@ -473,8 +477,9 @@ export default {
 
     currentPreviewIndex () {
       if (!this.isPlaying) {
+        const silent = true
         this.setCurrentTimeRaw(0)
-        this.reloadCurrentEntity()
+        this.reloadCurrentEntity(silent)
       }
     }
   }
