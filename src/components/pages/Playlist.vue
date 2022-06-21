@@ -1010,14 +1010,13 @@ export default {
 
     // Save data
 
+    /* When a preview is modified, the change is persisted */
     onPreviewChanged (entity, previewFileId) {
-      /*
       this.changePlaylistPreview({
         playlist: this.currentPlaylist,
         entity,
         previewFileId
       })
-      */
     },
 
     onOrderChange (info) {
