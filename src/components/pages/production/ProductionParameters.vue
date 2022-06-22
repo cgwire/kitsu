@@ -78,6 +78,15 @@
           v-model="form.resolution"
           v-if="currentProduction && currentProduction.id"
         />
+        <combobox-boolean
+          ref="isClientsIsolatedField"
+          :label="$t('productions.fields.is_clients_isolated')"
+          @enter="runConfirmation"
+          v-focus
+          v-model="form.is_clients_isolated"
+          v-if="currentProduction && currentProduction.id"
+        />
+
         <div v-if="currentProduction && currentProduction.id">
           <label class="label">{{ $t("productions.picture") }}</label>
           <file-upload
@@ -112,6 +121,7 @@ import { formatSimpleDate, parseSimpleDate } from '@/lib/time'
 import { PRODUCTION_TYPE_OPTIONS } from '@/lib/productions'
 
 import Combobox from '@/components/widgets/Combobox'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
 import DateField from '@/components/widgets/DateField'
 import FileUpload from '@/components/widgets/FileUpload'
 import TextField from '@/components/widgets/TextField'
@@ -121,6 +131,7 @@ export default {
   name: 'production-parameters',
   components: {
     Combobox,
+    ComboboxBoolean,
     DateField,
     FileUpload,
     TextField,
@@ -141,6 +152,7 @@ export default {
         nb_episodes: 0,
         episode_span: 0,
         fps: '',
+        is_clients_isolated: 'false',
         ratio: '',
         resolution: '',
         production_type: 'short'
@@ -213,6 +225,9 @@ export default {
           nb_episodes: this.currentProduction.nb_episodes,
           episode_span: this.currentProduction.episode_span,
           fps: this.currentProduction.fps,
+          is_clients_isolated: this.currentProduction.is_clients_isolated
+            ? 'true'
+            : 'false',
           ratio: this.currentProduction.ratio,
           resolution: this.currentProduction.resolution
         }
@@ -224,6 +239,7 @@ export default {
           production_type: 'short',
           nb_episodes: 0,
           episode_span: 0,
+          is_clients_isolated: 'false',
           fps: '',
           ratio: '',
           resolution: ''

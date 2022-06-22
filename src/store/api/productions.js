@@ -22,6 +22,7 @@ export default {
   },
 
   updateProduction (production) {
+    console.log(production.is_clients_isolated)
     const data = {
       name: production.name,
       description: production.description,
@@ -34,7 +35,8 @@ export default {
       end_date: production.end_date,
       man_days: production.man_days,
       nb_episodes: production.nb_episodes,
-      episode_span: production.episode_span
+      episode_span: production.episode_span,
+      is_clients_isolated: production.is_clients_isolated === 'true'
     }
     return client.pput(`/api/data/projects/${production.id}`, data)
   },
