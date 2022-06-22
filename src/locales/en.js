@@ -716,6 +716,7 @@ export default {
       end_date: 'End date',
       episode_span: 'Episode spacing',
       fps: 'FPS',
+      is_clients_isolated: 'Isolate client comments (not visible to each others)',
       name: 'Name',
       nb_episodes: 'Number of episodes',
       ratio: 'Ratio',
