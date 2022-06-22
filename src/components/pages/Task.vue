@@ -427,6 +427,7 @@ export default {
       'getTaskComment',
       'isCurrentUserAdmin',
       'isCurrentUserArtist',
+      'isCurrentUserSupervisor',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isSingleEpisode',
@@ -1205,6 +1206,23 @@ export default {
       this.$refs['add-comment'].setAnnotationSnapshots(files)
       this.$refs['add-comment'].hideAnnotationLoading()
       return files
+    },
+
+    isPreviewPlayerReadOnly () {
+      if (this.currentTask) {
+        if (this.isCurrentUserManager || this.isCurrentUserClient) {
+          return false
+        } else if (this.isCurrentUserSupervisor) {
+          if (this.user.departments.length === 0) {
+            return false
+          } else {
+            const taskType = this.taskTypeMap.get(this.currentTask.task_type_id)
+            return !(taskType.department_id && this.user.departments.includes(
+              taskType.department_id))
+          }
+        }
+      }
+      return true
     }
   },
 
