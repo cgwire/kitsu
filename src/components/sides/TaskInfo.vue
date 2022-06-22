@@ -106,7 +106,7 @@
                 :previews="currentPreview ? currentPreview.previews : []"
                 :task-type-map="taskTypeMap"
                 :light="!isWide"
-                :read-only="!isCurrentUserManager"
+                :read-only="isPreviewPlayerReadOnly"
                 :is-assigned="isAssigned"
                 :task="task"
                 :extra-wide="isExtraWide"
@@ -437,6 +437,23 @@ export default {
           (personId) => personId === this.user.id
         )) {
           return true
+        }
+      }
+      return false
+    },
+
+    isPreviewPlayerReadOnly () {
+      if (this.task) {
+        if (this.isCurrentUserManager || this.isCurrentUserClient) {
+          return false
+        } else if (this.isCurrentUserSupervisor) {
+          if (this.user.departments.length === 0) {
+            return false
+          } else {
+            const taskType = this.taskTypeMap.get(this.task.task_type_id)
+            return !(taskType.department_id && this.user.departments.includes(
+              taskType.department_id))
+          }
         }
       }
       return false
@@ -1003,10 +1020,8 @@ export default {
     },
 
     async extractAnnotationSnapshots () {
-      let previewPlayer = this.$refs['preview-player']
-      if (!previewPlayer) previewPlayer = this.$parent.$parent.previewPlayer
       this.$refs['add-comment'].showAnnotationLoading()
-      const files = await previewPlayer.extractAnnotationSnapshots()
+      const files = await this.$refs['preview-player'].extractAnnotationSnapshots()
       this.$refs['add-comment'].hideAnnotationLoading()
       this.$refs['add-comment'].setAnnotationSnapshots(files)
       return files

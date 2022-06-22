@@ -427,6 +427,7 @@ export default {
       'getTaskComment',
       'isCurrentUserAdmin',
       'isCurrentUserArtist',
+      'isCurrentUserSupervisor',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isSingleEpisode',
@@ -651,10 +652,6 @@ export default {
           name: 'open-productions'
         }
       }
-    },
-
-    previewPlayer () {
-      return this.$refs['preview-player']
     },
 
     title () {
@@ -897,7 +894,7 @@ export default {
           this.modals.addExtraPreview = false
           this.$refs['add-extra-preview-modal'].reset()
           setTimeout(() => {
-            this.previewPlayer.displayLast()
+            this.$refs['preview-player'].displayLast()
           }, 0)
         })
         .catch((err) => {
@@ -989,7 +986,7 @@ export default {
         return comment.previews.findIndex((p) => p.id === previewId) >= 0
       })
 
-      this.previewPlayer.displayFirst()
+      this.$refs['preview-player'].displayFirst()
       this.deleteTaskPreview({
         taskId: this.currentTask.id,
         commentId: comment.id,
@@ -1198,17 +1195,34 @@ export default {
         p => p.revision === parseInt(versionRevision)
       ))
       setTimeout(() => {
-        this.previewPlayer.setCurrentFrame(frame - 1)
-        this.previewPlayer.focus()
+        this.$refs['preview-player'].setCurrentFrame(frame - 1)
+        this.$refs['preview-player'].focus()
       }, 20)
     },
 
     async extractAnnotationSnapshots () {
       this.$refs['add-comment'].showAnnotationLoading()
-      const files = await this.previewPlayer.extractAnnotationSnapshots()
+      const files = await this.$refs['preview-player'].extractAnnotationSnapshots()
       this.$refs['add-comment'].setAnnotationSnapshots(files)
       this.$refs['add-comment'].hideAnnotationLoading()
       return files
+    },
+
+    isPreviewPlayerReadOnly () {
+      if (this.currentTask) {
+        if (this.isCurrentUserManager || this.isCurrentUserClient) {
+          return false
+        } else if (this.isCurrentUserSupervisor) {
+          if (this.user.departments.length === 0) {
+            return false
+          } else {
+            const taskType = this.taskTypeMap.get(this.currentTask.task_type_id)
+            return !(taskType.department_id && this.user.departments.includes(
+              taskType.department_id))
+          }
+        }
+      }
+      return true
     }
   },
 
