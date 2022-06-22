@@ -1003,10 +1003,8 @@ export default {
     },
 
     async extractAnnotationSnapshots () {
-      let previewPlayer = this.$refs['preview-player']
-      if (!previewPlayer) previewPlayer = this.$parent.$parent.previewPlayer
       this.$refs['add-comment'].showAnnotationLoading()
-      const files = await previewPlayer.extractAnnotationSnapshots()
+      const files = await this.$refs['preview-player'].extractAnnotationSnapshots()
       this.$refs['add-comment'].hideAnnotationLoading()
       this.$refs['add-comment'].setAnnotationSnapshots(files)
       return files
