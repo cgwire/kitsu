@@ -186,7 +186,7 @@ const helpers = {
     asset.production_name = production.name
 
     const taskIds = []
-    asset.tasks.forEach((task) => {
+    asset.tasks.forEach(task => {
       if (typeof task === 'string') {
         task = taskMap.get(task)
       }
@@ -425,6 +425,9 @@ const actions = {
         if (state.assetMap.get(asset.id)) {
           commit(UPDATE_ASSET, asset)
         } else {
+          asset.tasks.forEach(task => {
+            commit(NEW_TASK_END, task)
+          })
           commit(ADD_ASSET, {
             asset,
             taskTypeMap,
