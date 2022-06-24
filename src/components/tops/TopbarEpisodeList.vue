@@ -23,6 +23,7 @@
       v-if="showEpisodeList"
     >
       <div
+        :ref="'episode-' + episode.value"
         class="episode-line"
         v-for="episode in episodeList"
         @click="selectEpisode(episode)"
@@ -62,6 +63,7 @@ export default {
 
   data () {
     return {
+      lastScrollPosition: 0,
       showEpisodeList: false
     }
   },
@@ -114,7 +116,15 @@ export default {
     },
 
     toggleEpisodeList () {
+      if (this.showEpisodeList) {
+        this.lastScrollPosition = this.$refs.select.scrollTop
+      }
       this.showEpisodeList = !this.showEpisodeList
+      if (this.showEpisodeList) {
+        this.$nextTick(() => {
+          this.$refs.select.scrollTo({ top: this.lastScrollPosition, left: 0 })
+        })
+      }
     }
   }
 }

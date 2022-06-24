@@ -1,8 +1,10 @@
 <template>
-<div :class="{
-  'topbar-menuitem': true,
-  'topbar-menuitem-open': showProductionList
-}">
+<div
+  :class="{
+    'topbar-menuitem': true,
+    'topbar-menuitem-open': showProductionList
+  }"
+>
   <div
     class="production-menu"
   >
@@ -28,6 +30,8 @@
       v-if="showProductionList"
     >
       <div
+        :ref="'prod-' + production.id"
+        :id="'prod-' + production.id"
         :class="{
           'production-line': true,
           'selected': production.id === currentProduction.id
@@ -79,6 +83,7 @@ export default {
 
   data () {
     return {
+      lastScrollPosition: 0,
       showProductionList: false
     }
   },
@@ -116,7 +121,15 @@ export default {
     },
 
     toggleProductionList () {
+      if (this.showProductionList) {
+        this.lastScrollPosition = this.$refs.select.scrollTop
+      }
       this.showProductionList = !this.showProductionList
+      if (this.showProductionList) {
+        this.$nextTick(() => {
+          this.$refs.select.scrollTo({ top: this.lastScrollPosition, left: 0 })
+        })
+      }
     },
 
     getProductionPath (production) {
