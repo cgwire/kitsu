@@ -817,7 +817,11 @@ export default {
 
     onSearchChange () {
       const searchQuery = this.$refs['asset-search-field'].getValue()
-      if (searchQuery.length !== 1) {
+      if (
+        searchQuery.length !== 1 &&
+        searchQuery !== undefined &&
+        searchQuery !== 'undefined'
+      ) {
         this.setAssetSearch(searchQuery)
         this.setSearchInUrl()
       }
