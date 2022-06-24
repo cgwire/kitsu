@@ -1,7 +1,7 @@
 <template>
   <div class="fixed-page columns">
   <div class="page column main-column">
-    <div class="page-header pa1">
+    <div class="page-header pa1 mb0">
       <div
         class="flexrow header-title"
         v-if="currentTask"
@@ -12,6 +12,7 @@
           :production-id="currentProduction.id"
           v-if="currentTaskType"
         />
+
         <span
           class="flexrow-item ml2"
         >
@@ -26,56 +27,54 @@
             :with-link="false"
           />
         </span>
+
         <div class="title flexrow-item">
           <router-link :to="taskEntityPath">
             <page-title :text="currentTask ? title : 'Loading...'" bold />
           </router-link>
         </div>
-        <div class="filler">
-        </div>
-        <div class="has-text-right block">
-          {{ $t('tasks.fields.priority') }}:
-          {{ formatPriority(currentTask.priority) }}
-        </div>
-      </div>
 
-      <div
-        class="flexrow block mt1 mb1"
-        v-if="currentTask"
-      >
-        <span class="flexrow-item">{{ $t('tasks.current_status') }}</span>
-        <validation-tag
-          class="is-medium flexrow-item"
-          :task="currentTask"
-          :is-static="true"
-          v-if="currentTask"
-        />
-        <span
-          class="flexrow-item"
-          v-if="currentTask.assignees.length > 0"
-        >
-          {{ $t('tasks.fields.assignees') }}:
-        </span>
-        <span
-          class="flexrow-item avatar-wrapper"
-          :key="personId"
-          v-for="personId in currentTask.assignees"
-        >
-          <people-avatar
-            class="flexrow-item"
-            :key="personId"
-            :person="personMap.get(personId)"
-            :size="30"
-            :font-size="16"
+        <div class="filler"></div>
+        <div class="flexrow-item flexrow block">
+          <span class="flexrow-item">
+            {{ $t('tasks.current_status') }}
+          </span>
+          <validation-tag
+            class="is-medium flexrow-item"
+            :task="currentTask"
+            :is-static="true"
+            v-if="currentTask"
           />
-       </span>
-       <div class="filler"></div>
-       <subscribe-button
-         class="flexrow-item action-button"
-         :subscribed="isAssigned || isSubscribed"
-         @click="toggleSubscribe"
-         v-if="!isAssigned"
-       />
+          <span
+            class="flexrow-item"
+            v-if="currentTask.assignees.length > 0"
+          >
+            {{ $t('tasks.fields.assignees') }}:
+          </span>
+          <span
+            class="flexrow-item avatar-wrapper"
+            :key="personId"
+            v-for="personId in currentTask.assignees"
+          >
+            <people-avatar
+              class="flexrow-item"
+              :key="personId"
+              :person="personMap.get(personId)"
+              :size="30"
+              :font-size="16"
+            />
+           </span>
+           <div class="flexrow-item">
+             {{ $t('tasks.fields.priority') }}:
+             {{ formatPriority(currentTask.priority) }}
+           </div>
+         <subscribe-button
+           class="flexrow-item action-button"
+           :subscribed="isAssigned || isSubscribed"
+           @click="toggleSubscribe"
+           v-if="!isAssigned"
+         />
+        </div>
       </div>
     </div>
 
