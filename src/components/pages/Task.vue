@@ -855,8 +855,10 @@ export default {
       this.currentTaskComments = this.getCurrentTaskComments()
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
       this.currentTask = this.getCurrentTask()
-      const draft = drafts.getTaskDraft(this.currentTask.id)
-      if (draft) this.$refs['add-comment'].text = draft
+      if (this.currentTask) {
+        const draft = drafts.getTaskDraft(this.currentTask.id)
+        if (draft) this.$refs['add-comment'].text = draft
+      }
       setTimeout(() => {
         if (this.$route.params.preview_id) {
           this.selectedPreviewId = this.$route.params.preview_id
