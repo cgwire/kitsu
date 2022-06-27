@@ -51,7 +51,7 @@ You always start with the asset page, but you can switch to shots, sequence, sta
 If you have defined your production as a **TV Show**, you will have an episode drop-down menu with the **All assets**, **Main pack**, and episode options.
 
 
-On the right part of the top screen, you have the news from Kitsu. You can see with an animated gif all the new features.
+On the right part of the top screen, you have the the global search and also news from Kitsu. You can see with an animated gif all the new features.
 
  ![New features](../img/getting-started/latest_update.png). 
 
@@ -122,7 +122,7 @@ Click on ** Confirm and stay ** if you have multiple assets to create.
 
 You can change the asset type and keep adding assets. 
 
-You can also customize the asset type list. 
+You can also customize the asset type list and their tasks pipeline. 
 [Customization of the workflow](../customization/README.md#modify-an-existing-asset-types) )
 
 
@@ -216,7 +216,7 @@ To delete a sequence see the FAQ : [How to delete a Sequence](../faq-deletion/RE
 ## Add the Frameranges
 
 At this stage of the production, the animatic should be done. This means you have
-the length (** number of frames**, **frame range In**, and **frame range Out**) for each shot. You can
+the length (**number of frames**, **frame range In**, and **frame range Out**) for each shot. You can
 add this information to the spreadsheet. This way, you are sure that all
 the frames a calculated and none are missing or over computed.
 
@@ -296,6 +296,12 @@ of times you add this asset, and you can click as many times as you need on it.
 
 ![Breakdown add asset](../img/getting-started/breakdown_add_asset.png)
 
+On a TVShow you can also link all your assets to episodes without spicifying a sequence or a shot.
+
+![Breakdown episode asset](../img/getting-started/breakdown_episode.png)
+
+This way you can link all your assets to one or several episodes before the storyboard/animatic stage.
+
 You can now see the asset appearing in the middle part of the screen (2). Next
 to the asset's name is the number of times it has been added. In this
 example, we have added two times the character asset Llama.
@@ -372,14 +378,14 @@ A creation window opens. You can enter the first (1) and last name (2), the emai
 You can also add the new user to a **Department** (or several) (5).
 See **DEPARTEMENT DOCUMENTATION**
 
-Then you need to define the role of the user: ** Artist**, **Supervisor**,
+Then you need to define the role of the user: ** Artist**, **Supervisor**, **Production Manager**,
 **Studio Manager**, **Vendor** or **Client** (6).  If the Artist is working right now, keep
 him active; otherwise, select no. Validate by clicking the **Confirm** button.
 
 ![Create a new user](../img/getting-started/create_employee.png)
 
 See the [permissions](../permissions/README.md) section for more information. 
-To make it short, artists, supervisors, and clients only see the
+To make it short, artists, supervisors, production manager, vendor and clients only see the
 productions they are assigned.
 
 All the people are now part of your studio. They are added to a specific
@@ -563,6 +569,13 @@ Besides your comment, you can also attach a preview. Click on the **Add attachme
 
 ![attachment](../img/getting-started/attachment_retake.png)
 
+On the attachement option you can also choose to **Attach snapshots from your annotation**.
+
+![Attachment snapshot](../img/getting-started/attachment_snapshot.png)
+
+Once you click on the button, Kitsu will grab all the frames with an annotation, and will display the result. You can publish them with **Confirm**.
+
+![Attachment snapshot](../img/getting-started/attachment_snapshot_detail.png)
 
 You can also **tag** someone on the team in the comments. Type the `@`and it opens a sub-menu with the list of the team. 
 
