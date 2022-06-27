@@ -575,7 +575,7 @@ On the attachement option you can also choose to **Attach snapshots from your an
 
 Once you click on the button, Kitsu will grab all the frames with an annotation, and will display the result. You can publish them with **Confirm**.
 
-![Attachment snapshot](../img/getting-started/attachment_snapshot_detail.png)
+![Attachment snapshot detail](../img/getting-started/attachment_snapshot_detail.png)
 
 You can also **tag** someone on the team in the comments. Type the `@`and it opens a sub-menu with the list of the team. 
 
