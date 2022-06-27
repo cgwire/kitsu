@@ -10,6 +10,7 @@ import {
   CASTING_SET_EPISODE,
   CASTING_SET_CASTING,
   CASTING_SET_EPISODES,
+  CASTING_SET_ENTITY_CASTING,
   CASTING_SET_FOR_EPISODES,
   CASTING_SET_SHOTS,
   CASTING_SET_SEQUENCE,
@@ -145,13 +146,17 @@ const actions = {
     commit(CASTING_REMOVE_FROM_CASTING, { entityId, asset, nbOccurences })
   },
 
+  setEntityCasting ({ commit, rootState }, { entityId, casting }) {
+    commit(CASTING_SET_ENTITY_CASTING, { entityId, casting })
+  },
+
   saveCasting ({ commit, rootGetters }, entityId) {
     if (!entityId) {
       return console.error('ShotId is undefined, no casting can be saved.')
     }
     const production = rootGetters.currentProduction
     const casting = []
-    Object.values(state.casting[entityId]).forEach((asset) => {
+    Object.values(state.casting[entityId]).forEach(asset => {
       casting.push({
         asset_id: asset.asset_id,
         nb_occurences: asset.nb_occurences || 1,
@@ -228,7 +233,7 @@ const mutations = {
     const casting = {}
     const castingByType = []
     state.castingEpisodes = episodes
-    episodes.forEach((episode) => {
+    episodes.forEach(episode => {
       casting[episode.id] = []
       castingByType[episode.id] = []
     })
@@ -240,7 +245,7 @@ const mutations = {
     const casting = {}
     const castingByType = []
     state.castingSequenceShots = shots
-    shots.forEach((shot) => {
+    shots.forEach(shot => {
       casting[shot.id] = []
       castingByType[shot.id] = []
     })
@@ -252,7 +257,7 @@ const mutations = {
     const casting = {}
     const castingByType = []
     state.castingAssetTypeAssets = assets
-    assets.forEach((asset) => {
+    assets.forEach(asset => {
       casting[asset.id] = []
       castingByType[asset.id] = []
     })
@@ -262,7 +267,7 @@ const mutations = {
 
   [CASTING_SET_EPISODES] (state, { production, episodes }) { // TODO CASTING must be renamed to BREAKDOWN when used for namespacing, and CASTING must be kept for meaningful mutations
     state.castingEpisodes = episodes
-    state.castingEpisodeOptions = episodes.map((production) => {
+    state.castingEpisodeOptions = episodes.map(production => {
       const route = {
         name: 'breakdown-episode',
         params: {
@@ -390,6 +395,13 @@ const mutations = {
         state.casting[entityId], 'asset_type_name'
       )
     }
+  },
+
+  [CASTING_SET_ENTITY_CASTING] (state, { entityId, casting }) {
+    state.casting[entityId] = casting
+    state.castingByType[entityId] = groupEntitiesByParents(
+      state.casting[entityId], 'asset_type_name'
+    )
   },
 
   [LOAD_EPISODE_CASTING_END] (state, { episode, casting }) {

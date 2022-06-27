@@ -214,8 +214,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
 import { range } from '@/lib/time'
 import csv from '@/lib/csv'
+import clipboard from '@/lib/clipboard'
+
 import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock'
 import BuildFilterModal from '@/components/modals/BuildFilterModal'
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
@@ -302,6 +305,11 @@ export default {
     }
     this.setLastProductionScreen('breakdown')
     this.isTextMode = localStorage.getItem('breakdown:text-mode') === 'true'
+    window.addEventListener('keydown', this.onKeyDown, false)
+  },
+
+  beforeDestroy () {
+    window.removeEventListener('keydown', this.onKeyDown)
   },
 
   computed: {
@@ -479,6 +487,7 @@ export default {
       'newAsset',
       'removeAssetFromCasting',
       'saveCasting',
+      'setAssetLinkLabel',
       'setAssetSearch',
       'setCastingEpisodes',
       'setCastingAssetType',
@@ -487,7 +496,7 @@ export default {
       'setCastingForProductionEpisodes',
       'setCastingSequence',
       'setCurrentEpisode',
-      'setAssetLinkLabel',
+      'setEntityCasting',
       'setLastProductionScreen',
       'uploadCastingFile'
     ]),
@@ -538,15 +547,15 @@ export default {
     resetSelection () {
       const selection = {}
       if (this.isEpisodeCasting) {
-        this.castingEpisodes.forEach((episode) => {
+        this.castingEpisodes.forEach(episode => {
           selection[episode.id] = false
         })
       } else if (this.isShotCasting) {
-        this.castingSequenceShots.forEach((shot) => {
+        this.castingSequenceShots.forEach(shot => {
           selection[shot.id] = false
         })
       } else {
-        this.castingAssetTypeAssets.forEach((asset) => {
+        this.castingAssetTypeAssets.forEach(asset => {
           selection[asset.id] = false
         })
       }
@@ -629,7 +638,7 @@ export default {
       this.isLocked = true
       Object.keys(this.selection)
         .filter(key => this.selection[key])
-        .forEach((entityId) => {
+        .forEach(entityId => {
           this.addAssetToCasting({
             entityId,
             assetId,
@@ -646,7 +655,7 @@ export default {
       this.isLocked = true
       Object.keys(this.selection)
         .filter(key => this.selection[key])
-        .forEach((entityId) => {
+        .forEach(entityId => {
           this.addAssetToCasting({ entityId, assetId, nbOccurences: 10 })
           this.saveCasting(entityId)
             .then(this.setLock)
@@ -900,6 +909,39 @@ export default {
         production_id: this.currentProduction.id
       }
       this.assetToEdit = form
+    },
+
+    onKeyDown (event) {
+      if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
+        if (event.ctrlKey && event.keyCode === 67) { // ctrl + c
+          this.copyCasting()
+        } else if (event.ctrlKey && event.keyCode === 86) { // ctrl + v
+          this.pasteCasting()
+        }
+      }
+    },
+
+    copyCasting () {
+      const selectedElementId = Object.keys(this.selection)
+        .find(key => this.selection[key])
+      const selectedCasting = this.casting[selectedElementId]
+      clipboard.copyCasting(selectedCasting)
+    },
+
+    pasteCasting () {
+      const castingToPaste = clipboard.pasteCasting()
+      const selectedElements = Object.keys(this.selection)
+        .filter(key => this.selection[key])
+      selectedElements.forEach(entityId => {
+        this.setEntityCasting({
+          entityId,
+          casting: castingToPaste
+        })
+        this.saveCasting(entityId)
+          .then(this.setLock)
+          .catch(console.error)
+      })
+      return castingToPaste
     }
   },
 
