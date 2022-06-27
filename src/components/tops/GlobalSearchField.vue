@@ -11,6 +11,7 @@
   <input
     ref="global-search-field"
     class="input"
+    placeholder="ctrl+alt+f"
     @focus="isSearchActive = true"
     @blur="onBlur"
     @keyup.enter="onElementSelected"
