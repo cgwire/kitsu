@@ -100,19 +100,21 @@ Click on the **+** near the Name column.
 You may have extra information to add on your pages as the **level of difficulties**,
 the **name of the studios**, when a production is split, the shot order, etc.
 
-You can store all kinds of text information in the custom column: a **list of value** or a **free value**.
+You can store all kinds of text information in the custom column: a **list of value**, a **free value** or a **Checklist**.
+
+![Custom Column detail](../img/getting-started/custom_column_detail.png)
 
 The **free value** is different for each entity.
 
-The **list of value** gives you the same choice for each entity. Moreover, it has to be filled now. 
+The **list of value** and **Checklist** give you the same choice for each entity. Moreover, it has to be filled now. 
 
 ![Custom Column list](../img/getting-started/custom_column_list.png)
 
 Type the list elements below **Available values**, and confirm them by clicking on **Add value**.
 
-Validate the creation of the custom column with the **Confirm** button.
+You can also link the custom column to one or several departments.
 
-![Custom Column detail](../img/getting-started/custom_column_detail.png)
+Validate the creation of the custom column with the **Confirm** button.
 
 
 Back on the global spreadsheets page, you can fill this information directly on the global page.
@@ -123,7 +125,7 @@ The cases are editable.
 You can also modify the information with the edit button ![Edit button](../img/getting-started/edit_button.png).
 
 You now see a new line on the edit pop-up. You can select the information from the list, 
-alternatively, enter the free values, depending on your previous choice.
+alternatively, enter the free values or use the checklist, depending on your previous choice.
 
 Don't forget to press the **Confirm** button when you are done.
 
@@ -150,6 +152,7 @@ You can also use the **CSV Import** to fill your custom column quickly.
 First, you need to create your **Custom Column** into kitsu, add it to your spreadsheet, and copy-paste your data into the **CSV Import**.
 
 [Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
+
 
 ## Add multiple Preview
 
