@@ -111,7 +111,15 @@ export default {
     },
 
     toggleList () {
+      if (this.showList) {
+        this.lastScrollPosition = this.$refs.select.scrollTop
+      }
       this.showList = !this.showList
+      if (this.showList) {
+        this.$nextTick(() => {
+          this.$refs.select.scrollTo({ top: this.lastScrollPosition, left: 0 })
+        })
+      }
     }
   },
 

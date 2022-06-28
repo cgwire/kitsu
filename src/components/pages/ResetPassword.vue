@@ -124,4 +124,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.input {
+  height: 3em;
+  padding: 1.5em;
+  border-radius: 4px;
+
+  &::placeholder {
+    color: #999;
+  }
+
+  &:focus {
+    border: 1px solid $green;
+  }
+}
+
+.icon {
+  padding: 0.25em;
+}
 </style>

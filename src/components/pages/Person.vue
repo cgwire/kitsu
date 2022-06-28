@@ -642,7 +642,11 @@ export default {
       const personId = this.$route.params.person_id
 
       this.updateActiveTab()
-      if (this.person.id !== personId) this.loadPerson()
+      if (this.person &&
+          this.person.id !== personId
+      ) {
+        this.loadPerson(personId)
+      }
     },
 
     activeTab () {

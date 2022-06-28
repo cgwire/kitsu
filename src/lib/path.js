@@ -168,3 +168,12 @@ export const getTaskTypeSchedulePath = (
 export const getProductionSchedulePath = (productionId) => {
   return getProductionRoute('schedule', productionId)
 }
+
+export const getPersonPath = (personId) => {
+  return {
+    name: 'person',
+    params: {
+      person_id: personId
+    }
+  }
+}

@@ -11,6 +11,7 @@
   <input
     ref="global-search-field"
     class="input"
+    placeholder="ctrl+alt+f"
     @focus="isSearchActive = true"
     @blur="onBlur"
     @keyup.enter="onElementSelected"
@@ -24,7 +25,13 @@
     v-if="isSearchActive"
   >
     <div
-      v-if="results.length > 0"
+      class="result-line"
+      v-if="searchQuery.length < 3"
+    >
+      {{ $t('main.search.type') }}
+    </div>
+    <div
+      v-else-if="nbResults > 0"
     >
       <div
         class="search-loader"
@@ -42,7 +49,7 @@
           'selected-result': selectedIndex === index
         }"
         @click="onElementSelected"
-        v-for="(asset, index) in results"
+        v-for="(asset, index) in assets"
       >
         <router-link
           :id="'result-link-' + index"
@@ -78,10 +85,35 @@
           </div>
         </router-link>
       </div>
-    </div>
-
-    <div class="result-line" v-else-if="searchQuery.length < 3">
-      {{ $t('main.search.type') }}
+      <div
+        :key="person.id"
+        :class="{
+          'result-line': true,
+          'selected-result': selectedIndex === index + assets.length
+        }"
+        @click="onElementSelected"
+        v-for="(person, index) in persons"
+      >
+        <router-link
+          :id="'result-link-' + (index + assets.length)"
+          :to="personPath(person)"
+        >
+          <div
+            class="flexrow"
+            @mouseover="selectedIndex = index + assets.length"
+          >
+            <people-avatar
+              class="flexrow-item"
+              :is-link="false"
+              :person="person"
+            />
+            <people-name
+              class="flexrow-item"
+              :person="person"
+            />
+          </div>
+        </router-link>
+      </div>
     </div>
 
     <div class="result-line" v-else>
@@ -95,10 +127,14 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { getEntityPath } from '@/lib/path'
+import { getEntityPath, getPersonPath } from '@/lib/path'
 
 import { SearchIcon } from 'vue-feather-icons'
+
+import peopleStore from '@/store/modules/people'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import PeopleName from '@/components/widgets/PeopleName'
 import Spinner from '@/components/widgets/Spinner'
 
 export default {
@@ -106,15 +142,18 @@ export default {
 
   components: {
     EntityThumbnail,
+    PeopleAvatar,
+    PeopleName,
     SearchIcon,
     Spinner
   },
 
   data () {
     return {
-      isLoading: true,
+      isLoading: false,
       isSearchActive: false,
-      results: [],
+      assets: [],
+      persons: [],
       selectedIndex: 0,
       searchQuery: ''
     }
@@ -160,9 +199,15 @@ export default {
       }
     },
 
+    personPath () {
+      return (person) => {
+        return getPersonPath(person.id)
+      }
+    },
+
     nbResults () {
-      console.log(this.results.length)
-      return this.results.length > 0 ? this.results.length : 1
+      const length = this.assets.length + this.persons.length
+      return length > 0 ? length : 1
     }
   },
 
@@ -174,13 +219,13 @@ export default {
     selectPrevious () {
       this.selectedIndex--
       if (this.selectedIndex < 0) {
-        this.selectedIndex = this.results.length - 1
+        this.selectedIndex = this.nbResults - 1
       }
     },
 
     selectNext () {
       this.selectedIndex++
-      if (this.selectedIndex >= this.results.length) {
+      if (this.selectedIndex >= this.nbResults) {
         this.selectedIndex = 0
       }
     },
@@ -209,11 +254,16 @@ export default {
         this.searchData({ query: this.searchQuery })
           .then(results => {
             this.isLoading = false
-            this.results = results.assets
+            this.assets = results.assets
+            results.persons.forEach(person => {
+              peopleStore.helpers.addAdditionalInformation(person)
+            })
+            this.persons = results.persons
           })
           .catch(console.error)
       } else {
-        this.results = 0
+        this.assets = []
+        this.persons = []
       }
     },
 

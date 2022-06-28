@@ -577,7 +577,7 @@ export default {
     initData (force) {
       this.resetTasks()
       this.focusSearchField()
-      if (this.tasks.length === 0) {
+      if (this.tasks.length < 2) {
         this.loading.entities = true
         this.errors.entities = false
         this.initTaskType(force)
@@ -778,7 +778,7 @@ export default {
       const tasks = []
       entities.forEach(entity => {
         entity.tasks.forEach(taskId => {
-          const task = this.taskMap.get(taskId)
+          const task = this.taskMap.get(taskId.id || taskId)
           if (task) {
             // Hack to allow filtering on linked entity metadata.
             task.data = entity.data

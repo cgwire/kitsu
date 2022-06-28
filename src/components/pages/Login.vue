@@ -175,6 +175,12 @@ export default {
   padding: 0.25em;
 }
 
+@media (max-width: 1600px) {
+  .box {
+    margin-top: 4em;
+  }
+}
+
 @media (min-width: 500px) {
   .container {
     margin: 0 auto;

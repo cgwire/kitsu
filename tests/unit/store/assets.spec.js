@@ -23,8 +23,8 @@ import {
   UPDATE_ASSET
 } from '@/store/mutation-types'
 
-import assetsApi from '../../../src/store/api/assets'
-import peopleApi from '../../../src/store/api/people'
+import assetsApi from '@/store/api/assets'
+import peopleApi from '@/store/api/people'
 
 describe('Assets store', () => {
   describe('Getters', () => {
@@ -313,12 +313,15 @@ describe('Assets store', () => {
         assetMap: new Map()
       }
       let mockCommit = jest.fn()
-      assetsApi.getAsset = jest.fn(() => Promise.resolve({ id: 1 }))
+      assetsApi.getAsset = jest.fn(() => Promise.resolve({
+        id: 1,
+        tasks: []
+      }))
       await store.actions.loadAsset(
         { commit: mockCommit, state, rootGetters }, 1)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, ADD_ASSET, {
-        asset: { id: 1 },
+        asset: { id: 1, tasks: [] },
         taskTypeMap: 5,
         taskMap: 6,
         personMap: 3,
@@ -326,12 +329,15 @@ describe('Assets store', () => {
       })
 
       mockCommit = jest.fn()
-      assetsApi.getAsset = jest.fn(() => Promise.resolve({ id: 1 }))
-      state.assetMap.set(1, { id: 1 })
+      state.assetMap.set(1, { id: 1, tasks: [] })
       await store.actions.loadAsset(
         { commit: mockCommit, state, rootGetters }, 1)
       expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, UPDATE_ASSET, { id: 1 })
+      expect(mockCommit).toHaveBeenNthCalledWith(
+        1,
+        UPDATE_ASSET,
+        { id: 1, tasks: [] }
+      )
 
       mockCommit = jest.fn()
       state.assetMap.get(1).lock = true

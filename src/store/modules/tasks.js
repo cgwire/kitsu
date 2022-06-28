@@ -319,7 +319,7 @@ const actions = {
       const data = {
         entity_id: entityId,
         task_type_id: taskTypeId,
-        type: type,
+        type,
         project_id: projectId
       }
       tasksApi.createTask(data, (err, tasks) => {

@@ -66,7 +66,7 @@
       }"
       :key="'avatar-' + personId"
       v-for="personId in assignees"
-      v-if="isAssignees && !isCurrentUserClient"
+      v-if="isAssignees && !isCurrentUserClient && !disabled"
     >
       <img
         v-lazy="avatarPath(personId)"

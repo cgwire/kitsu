@@ -624,10 +624,13 @@ const actions = {
     const taskMap = rootGetters.taskMap
     const taskTypeMap = rootGetters.taskTypeMap
     return shotsApi.getShot(shotId)
-      .then((shot) => {
+      .then(shot => {
         if (state.shotMap.get(shot.id)) {
           commit(UPDATE_SHOT, shot)
         } else {
+          shot.tasks.forEach(task => {
+            commit(NEW_TASK_END, task)
+          })
           commit(ADD_SHOT, {
             shot,
             taskTypeMap,
@@ -1633,7 +1636,7 @@ const mutations = {
         state.shotFilledColumns[task.task_type_id] = true
       }
       // Push task and readds the whole map to activate the realtime display.
-      shot.tasks.push(task)
+      shot.tasks.push(task.id)
       if (!shot.validations) shot.validations = new Map()
       shot.validations.set(task.task_type_id, task.id)
       Vue.set(shot, 'validations', new Map(shot.validations))
