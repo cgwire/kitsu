@@ -1247,9 +1247,13 @@ export default {
           })
           this.fabricCanvas.getObjects().find(obj => {
             if (obj._objects) {
-              obj._objects.forEach(tmpCanvas.add)
+              obj._objects.forEach(obj => {
+                tmpCanvas.add(obj)
+                obj.strokeWidth = 8 / scaleRatio
+              })
             } else {
               tmpCanvas.add(obj)
+              obj.strokeWidth = 8 / scaleRatio
             }
           })
           tmpCanvas.setZoom(scaleRatio)
