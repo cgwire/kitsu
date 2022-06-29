@@ -74,12 +74,14 @@ export default {
     if (
       shot.frameOut !== undefined ||
       shot.frameIn !== undefined ||
-      shot.fps !== undefined
+      shot.fps !== undefined ||
+      shot.resolution !== undefined
     ) {
       Object.assign(data.data, {
         frame_in: shot.frameIn,
         frame_out: shot.frameOut,
-        fps: shot.fps
+        fps: shot.fps,
+        resolution: shot.resolution
       })
     }
     const path = `/api/data/entities/${shot.id}`

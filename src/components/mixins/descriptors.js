@@ -48,17 +48,20 @@ export const descriptorMixin = {
 
     onMetadataFieldChanged (entry, descriptor, event) {
       if (this.selectedShots.has(entry.id)) {
-        // if the line is selected, also modify the cells of the other selected lines
+        // if the line is selected, also modify the cells of the other selected
+        // lines.
         this.selectedShots.forEach((shot, _) => {
           this.emitMetadataChanged(shot, descriptor, event.target.value)
         })
       } else if (this.selectedAssets.has(entry.id)) {
-        // if the line is selected, also modify the cells of the other selected lines
+        // if the line is selected, also modify the cells of the other selected
+        // lines.
         this.selectedAssets.forEach((asset, _) => {
           this.emitMetadataChanged(asset, descriptor, event.target.value)
         })
       } else if (this.selectedEdits.has(entry.id)) {
-        // if the line is selected, also modify the cells of the other selected lines
+        // if the line is selected, also modify the cells of the other selected
+        // lines.
         this.selectedEdits.forEach((edit, _) => {
           this.emitMetadataChanged(edit, descriptor, event.target.value)
         })
@@ -182,8 +185,10 @@ export const descriptorMixin = {
         return
       }
       const ref = `editor-${i}-${j}`
-      const input = this.$refs[ref][0]
-      input.focus()
+      if (this.$refs[ref][0]) {
+        const input = this.$refs[ref][0]
+        input.focus()
+      }
     }
   }
 }

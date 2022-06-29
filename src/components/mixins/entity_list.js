@@ -190,6 +190,7 @@ export const entityListMixin = {
         const ref = 'validation-' + x + '-' + y
         const validationCell = this.$refs[ref][0]
         this.$nextTick(() => {
+          console.log('scroll to cell !')
           this.scrollToValidationCell(validationCell)
         })
       }

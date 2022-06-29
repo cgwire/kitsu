@@ -334,6 +334,7 @@ const initialState = {
   isFrames: false,
   isFrameIn: false,
   isFrameOut: false,
+  isResolution: false,
   isShotDescription: false,
   isShotEstimation: false,
   isShotTime: false,
@@ -398,6 +399,7 @@ const getters = {
   isFrames: state => state.isFrames,
   isFrameIn: state => state.isFrameIn,
   isFrameOut: state => state.isFrameOut,
+  isResolution: state => state.isResolution,
   isShotDescription: state => state.isShotDescription,
   isShotEstimation: state => state.isShotEstimation,
   isShotTime: state => state.isShotTime,
@@ -992,6 +994,7 @@ const actions = {
       if (state.isFrameIn) shotLine.push(shot.data.frame_in)
       if (state.isFrameOut) shotLine.push(shot.data.frame_out)
       if (state.isFps) shotLine.push(shot.data.fps)
+      if (state.isResolution) shotLine.push(shot.data.resolution)
       state.shotValidationColumns
         .forEach(validationColumn => {
           const task = rootGetters.taskMap.get(
@@ -1168,6 +1171,7 @@ const mutations = {
     let isDescription = false
     let isTime = false
     let isEstimation = false
+    let isResolution = false
     state.shotMap = new Map()
     shots.forEach(shot => {
       const taskIds = []
@@ -1213,6 +1217,7 @@ const mutations = {
       if (!isTime && shot.timeSpent > 0) isTime = true
       if (!isEstimation && shot.estimation > 0) isEstimation = true
       if (!isDescription && shot.description) isDescription = true
+      if (!isResolution && shot.data.resolution) isResolution = true
 
       state.shotMap.set(shot.id, shot)
     })
@@ -1234,6 +1239,7 @@ const mutations = {
     state.isFrameIn = isFrameIn
     state.isFrameOut = isFrameOut
     state.isShotTime = isTime
+    state.isResolution = isResolution
     state.isShotEstimation = isEstimation
     state.isShotDescription = isDescription
 
@@ -1377,10 +1383,6 @@ const mutations = {
       const maxY = state.nbValidationColumns
       state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
     }
-    state.editShot = {
-      isLoading: false,
-      isError: false
-    }
     cache.shotIndex = buildShotIndex(cache.shots)
     state.shotCreated = newShot.name
 
@@ -1391,10 +1393,13 @@ const mutations = {
     }
 
     if (!newShot.data) newShot.data = {}
-    if (newShot.data.fps && !state.isFps) state.isFps = true
+    if (newShot.data.fps && !state.isFps) state.fps = true
     if (newShot.nb_frames && !state.isFrames) state.isFrames = true
     if (newShot.data.frame_in && !state.isFrameIn) state.isFrameIn = true
     if (newShot.data.frame_out && !state.isFrameOut) state.isFrameOut = true
+    if (newShot.data.resolution && !state.isResolution) {
+      state.isResolution = true
+    }
     if (shot.description && !state.isShotDescription) {
       state.isShotDescription = true
     }
@@ -1490,6 +1495,7 @@ const mutations = {
     if (shot.nb_frames) state.isFrames = true
     if (shot.data.frame_in) state.isFrameIn = true
     if (shot.data.frame_out) state.isFrameOut = true
+    if (shot.data.resolution) state.isResolution = true
   },
 
   [NEW_SEQUENCE_END] (state, sequence) {

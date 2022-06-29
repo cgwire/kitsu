@@ -988,6 +988,7 @@ export default {
       name: 'Name',
       person: 'Modifier',
       production: 'Prod',
+      resolution: 'Resolution',
       sequence: 'Sequence',
       time_spent: 'Time'
     }

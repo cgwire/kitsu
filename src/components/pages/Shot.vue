@@ -53,11 +53,20 @@
             <tbody class="datatable-body">
               <tr
                 class="datatable-row"
-                v-if="currentShot && currentShot.data && currentShot.data.fps"
               >
-                <td class="field-label">{{ $t('shots.fields.fps') }}</td>
+                <td class="field-label">{{ $t('shots.fields.description') }}</td>
+                <description-cell
+                  :entry="currentShot"
+                  :full="true"
+                />
+              </tr>
+
+              <tr
+                class="datatable-row"
+              >
+                <td class="field-label">{{ $t('shots.fields.nb_frames') }}</td>
                 <td>
-                  {{ currentShot ? currentShot.data.fps : '' }}
+                  {{ currentShot ? currentShot.nb_frames : '' }}
                 </td>
               </tr>
 
@@ -83,20 +92,21 @@
 
               <tr
                 class="datatable-row"
+                v-if="currentShot && currentShot.data && currentShot.data.fps"
               >
-                <td class="field-label">{{ $t('shots.fields.description') }}</td>
-                <description-cell
-                  :entry="currentShot"
-                  :full="true"
-                />
+                <td class="field-label">{{ $t('shots.fields.fps') }}</td>
+                <td>
+                  {{ currentShot ? currentShot.data.fps : '' }}
+                </td>
               </tr>
 
               <tr
                 class="datatable-row"
+                v-if="currentShot && currentShot.data && currentShot.data.resolution"
               >
-                <td class="field-label">{{ $t('shots.fields.nb_frames') }}</td>
+                <td class="field-label">{{ $t('shots.fields.resolution') }}</td>
                 <td>
-                  {{ currentShot ? currentShot.nb_frames : '' }}
+                  {{ currentShot ? currentShot.data.resolution : '' }}
                 </td>
               </tr>
 

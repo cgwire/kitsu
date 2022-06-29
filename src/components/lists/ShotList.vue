@@ -74,7 +74,10 @@
             :column-id="columnId"
             :title="taskTypeMap.get(columnId).name"
             :validation-style="getValidationStyle(columnId)"
-            :left="offsets['validation-' + columnIndexInGrid] ? `${offsets['validation-' + columnIndexInGrid]}px` : '0'"
+            :left="offsets['validation-' + columnIndexInGrid]
+              ? `${offsets['validation-' + columnIndexInGrid]}px`
+              : '0'
+            "
             type="assets"
             @show-header-menu="event => showHeaderMenu(columnId, columnIndexInGrid, event)"
             is-stick
@@ -136,6 +139,14 @@
             {{ $t('shots.fields.fps') }}
           </th>
 
+          <th
+            scope="col"
+            class="resolution"
+            v-if="isResolution && isShowInfos && metadataDisplayHeaders.resolution"
+          >
+            {{ $t('shots.fields.resolution') }}
+          </th>
+
           <metadata-header
             :key="descriptor.id"
             :descriptor="descriptor"
@@ -178,7 +189,8 @@
                 frameOut: !isFrameOut,
                 fps: !isFps,
                 estimation: !isShotEstimation,
-                timeSpent: !isShotTime
+                timeSpent: !isShotTime,
+                resolution: !isResolution
               }"
               v-show="columnSelectorDisplayed && isShowInfos"
             />
@@ -422,7 +434,10 @@
             </span>
           </td>
 
-          <td class="fps" v-if="isFps && isShowInfos && metadataDisplayHeaders.fps">
+          <td
+            class="fps"
+            v-if="isFps && isShowInfos && metadataDisplayHeaders.fps"
+          >
             <input
               class="input-editor"
               step="1"
@@ -438,6 +453,25 @@
             </span>
           </td>
 
+          <td
+            class="resolution"
+            v-if="isResolution && isShowInfos && metadataDisplayHeaders.resolution"
+          >
+            <input
+              :class="{
+                'input-editor': true,
+                error: !isValidResolution(shot)
+              }"
+              :value="getMetadataFieldValue({field_name: 'resolution'}, shot)"
+              @input="event => onMetadataFieldChanged(shot, {field_name: 'resolution'}, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)"
+              v-if="isCurrentUserManager"
+            />
+            <span class="metadata-value selectable" v-else>
+              {{ getMetadataFieldValue({field_name: 'resolution'}, shot) }}
+            </span>
+          </td>
+
           <!-- other metadata cells -->
           <td
             class="metadata-descriptor"
@@ -447,6 +481,7 @@
             v-if="isShowInfos"
           >
             <input
+              :ref="`editor-${getIndex(i, k)}-${j}`"
               class="input-editor"
               @input="event => onMetadataFieldChanged(shot, descriptor, event)"
               @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
@@ -654,6 +689,7 @@ export default {
         frameOut: true,
         frames: true,
         estimation: true,
+        resolution: true,
         timeSpent: true
       },
       offsets: {},
@@ -692,6 +728,7 @@ export default {
       'isFrames',
       'isFrameIn',
       'isFrameOut',
+      'isResolution',
       'isSingleEpisode',
       'isShotDescription',
       'isShotEstimation',
@@ -758,6 +795,7 @@ export default {
       count += this.isShowInfos && this.isFrameIn && this.metadataDisplayHeaders.frameIn ? 1 : 0
       count += this.isShowInfos && this.isFrameOut && this.metadataDisplayHeaders.frameOut ? 1 : 0
       count += this.isShowInfos && this.isFps && this.metadataDisplayHeaders.fps ? 1 : 0
+      count += this.isShowInfos && this.isResolution && this.metadataDisplayHeaders.resolution ? 1 : 0
       count += this.displayedValidationColumns.length
       return count
     },
@@ -787,6 +825,14 @@ export default {
     isSelected (indexInGroup, groupIndex, columnIndex) {
       const lineIndex = this.getIndex(indexInGroup, groupIndex)
       return this.shotSelectionGrid[lineIndex][columnIndex]
+    },
+
+    isValidResolution (shot) {
+      if (!shot) return true
+      const res = this.getMetadataFieldValue({ field_name: 'resolution' }, shot)
+      if (!res || res.length === 0) return 0
+      const isValid = new RegExp(/\d{3,4}x\d{3,4}/).test(res)
+      return isValid
     },
 
     isCastingReady (shot, columnId) {
@@ -1028,6 +1074,16 @@ th.actions {
   width: 60px;
 }
 
+.resolution {
+  min-width: 110px;
+  max-width: 110px;
+  width: 110px;
+}
+
+td.input-editor.error {
+  color: $red;
+}
+
 .description {
   min-width: 200px;
   max-width: 200px;
@@ -1143,6 +1199,10 @@ td .input-editor {
 
   &:hover {
     border: 1px solid $light-green;
+  }
+
+  &.error {
+    color: $red;
   }
 }
 

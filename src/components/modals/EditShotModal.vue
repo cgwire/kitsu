@@ -63,6 +63,13 @@
           type="number"
           @enter="runConfirmation"
         />
+        <text-field
+          ref="resolutionField"
+          :label="$t('shots.fields.resolution')"
+          v-model="form.resolution"
+          @enter="runConfirmation"
+        />
+
         <div
           :key="descriptor.id"
           v-for="descriptor in shotMetadataDescriptors"
@@ -161,7 +168,12 @@ export default {
 
     fps () {
       return this.shotToEdit.data ? this.shotToEdit.data.fps : ''
+    },
+
+    resolution () {
+      return this.shotToEdit.data ? this.shotToEdit.data.resolution : ''
     }
+
   },
 
   methods: {
@@ -218,6 +230,7 @@ export default {
           frameIn: this.frameIn,
           frameOut: this.frameOut,
           fps: this.fps,
+          resolution: this.resolution,
           data: { ...this.shotToEdit.data } || {}
         }
       }
