@@ -2,6 +2,10 @@
 
 ## Create departments
 
+Departemnts are here to help the supervisors and artists to focus on their tasks.
+Once they are link to one or several departments, supervisors and artists will have direct access to their
+ filtered view. Deparments also act on the permissions.  
+
 You can create as many ** Departments** you need.
 
 On the main menu ![Main menu](../img/getting-started/main_button.png) select the 
