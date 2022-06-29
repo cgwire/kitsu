@@ -121,9 +121,15 @@ On the main page, you can edit some Asset Types already created
 
 ![Asset Task global page](../img/getting-started/asset_types_global.png)
  
-You can change the name of the Asset Types.
+You can change the name of the **Asset Type** and define its workflow. 
 
 ![Edit asset type](../img/getting-started/edit_asset_types.png)
+
+For exemple characters and backgrounds won't have similar task types. Bakcground won't use the rig.
+Per default all the asset type will use all the task type. But you can then select the task type you want to use.
+
+![Edit asset type](../img/getting-started/edit_asset_types_workflow.png)
+
 
 Click on **Confirm** to save your changes.
 
@@ -140,7 +146,15 @@ On the new pop up you can define your personalized Asset Type :
 
 ![Add asset types name](../img/getting-started/add_asset_types_name.png)
 
+You will be able to choose a name and a specific worflow for this new asset type.
+
 Click on **Confirm** to save your changes.
+
+
+# Status Atuomations
+
+
+
 
 
 ## Define specific workflow per production
