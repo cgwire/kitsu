@@ -151,8 +151,7 @@ You will be able to choose a name and a specific worflow for this new asset type
 Click on **Confirm** to save your changes.
 
 
-# Status Atuomations
-
+## Create a new Status Automation
 
 
 
