@@ -109,3 +109,26 @@ You can notice the **Department** option. You can select any previously created 
 Once you're done, the **People** page should look like this.
 
 ![Department people filled](../img/getting-started/people_department_filled.png)
+
+Once someone is linked to a deparment, the artist will have direct access to their deparment view on the global page.
+
+Deparment supervisor will ba able to comment all the tasks from their department and assign only people from the same deparment(s).
+
+![Department filtered view](../img/getting-started/department_filtered_view.png)
+
+
+## Link custom column to department
+
+You can now link your custom column to a **department**. This way this custom column will be seen on the department filtered view of the **Supervisor** and *Artist**.
+
+On the global page of the asset or the shot, click on the arrow on the direct right of your custom column, and click on **Edit**
+
+![Custom column Edit](../img/getting-started/custom_column_edit.png)
+
+From there you can link the custom column to one or more department. Click on the department from the list and then click on **add** to be effective.
+
+![Department custom column edit](../img/getting-started/custom_column_detail_department.png)
+
+Now people link to this deparment will see this custom column on their filtered view.
+
+![Department custom column filtered view](../img/getting-started/department_filtered_view_column.png)
