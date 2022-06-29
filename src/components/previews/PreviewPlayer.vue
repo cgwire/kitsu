@@ -1012,15 +1012,17 @@ export default {
         !this.isFullScreen()
       ) {
         this.isComparing = false
-        this.isCommentsHidden = true
         this.fullScreen = false
+        this.isCommentsHidden = true
         this.endAnnotationSaving()
         this.$nextTick(() => {
           this.previewViewer.resetVideo()
           this.previewViewer.resetPicture()
           this.fixCanvasSize(this.getCurrentPreviewDimensions())
-          this.reloadAnnotations()
-          this.loadAnnotation()
+          this.clearFocus()
+          this.$nextTick(() => {
+            this.loadAnnotation()
+          })
         })
       }
     },
