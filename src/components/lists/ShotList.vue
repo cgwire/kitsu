@@ -147,6 +147,14 @@
             {{ $t('shots.fields.resolution') }}
           </th>
 
+          <th
+            scope="col"
+            class="max-retakes"
+            v-if="isMaxRetakes && isShowInfos && metadataDisplayHeaders.maxRetakes"
+          >
+            {{ $t('shots.fields.max_retakes') }}
+          </th>
+
           <metadata-header
             :key="descriptor.id"
             :descriptor="descriptor"
@@ -190,7 +198,8 @@
                 fps: !isFps,
                 estimation: !isShotEstimation,
                 timeSpent: !isShotTime,
-                resolution: !isResolution
+                resolution: !isResolution,
+                max_retakes: !isMaxRetakes
               }"
               v-show="columnSelectorDisplayed && isShowInfos"
             />
@@ -472,6 +481,24 @@
             </span>
           </td>
 
+          <td
+            class="max-retakes"
+            v-if="isMaxRetakes && isShowInfos && metadataDisplayHeaders.maxRetakes"
+          >
+            <input
+              class="input-editor"
+              type="number"
+              step="1"
+              :value="getMetadataFieldValue({field_name: 'max_retakes'}, shot)"
+              @input="event => onMetadataFieldChanged(shot, {field_name: 'max_retakes'}, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)"
+              v-if="isCurrentUserManager"
+            />
+            <span class="metadata-value selectable" v-else>
+              {{ getMetadataFieldValue({field_name: 'max_retakes'}, shot) }}
+            </span>
+          </td>
+
           <!-- other metadata cells -->
           <td
             class="metadata-descriptor"
@@ -689,6 +716,7 @@ export default {
         frameOut: true,
         frames: true,
         estimation: true,
+        maxRetakes: true,
         resolution: true,
         timeSpent: true
       },
@@ -728,6 +756,7 @@ export default {
       'isFrames',
       'isFrameIn',
       'isFrameOut',
+      'isMaxRetakes',
       'isResolution',
       'isSingleEpisode',
       'isShotDescription',
@@ -791,11 +820,23 @@ export default {
         this.isShotEstimation && this.metadataDisplayHeaders.estimation
         ? 1
         : 0
-      count += this.isShowInfos && this.metadataDisplayHeaders.frames ? 1 : 0
-      count += this.isShowInfos && this.isFrameIn && this.metadataDisplayHeaders.frameIn ? 1 : 0
-      count += this.isShowInfos && this.isFrameOut && this.metadataDisplayHeaders.frameOut ? 1 : 0
-      count += this.isShowInfos && this.isFps && this.metadataDisplayHeaders.fps ? 1 : 0
-      count += this.isShowInfos && this.isResolution && this.metadataDisplayHeaders.resolution ? 1 : 0
+      count += this.isShowInfos &&
+               this.metadataDisplayHeaders.frames ? 1 : 0
+      count += this.isShowInfos &&
+               this.isFrameIn &&
+               this.metadataDisplayHeaders.frameIn ? 1 : 0
+      count += this.isShowInfos &&
+               this.isFrameOut &&
+               this.metadataDisplayHeaders.frameOut ? 1 : 0
+      count += this.isShowInfos &&
+               this.isFps &&
+               this.metadataDisplayHeaders.fps ? 1 : 0
+      count += this.isShowInfos &&
+               this.isResolution &&
+               this.metadataDisplayHeaders.resolution ? 1 : 0
+      count += this.isShowInfos &&
+               this.isMaxRetakes &&
+               this.metadataDisplayHeaders.max_retakes ? 1 : 0
       count += this.displayedValidationColumns.length
       return count
     },
@@ -1080,8 +1121,10 @@ th.actions {
   width: 110px;
 }
 
-td.input-editor.error {
-  color: $red;
+.max-retakes {
+  min-width: 80px;
+  max-width: 80px;
+  width: 80px;
 }
 
 .description {
@@ -1115,6 +1158,10 @@ td.name {
 
 td.sequence {
   font-size: 1.2em;
+}
+
+td.input-editor.error {
+  color: $red;
 }
 
 .canceled {
@@ -1170,6 +1217,8 @@ span.thumbnail-empty {
 td.frames,
 td.framein,
 td.frameout,
+td.max-retakes,
+td.resolution,
 td.fps {
   height: 3.1rem;
   padding: 0;
@@ -1208,12 +1257,12 @@ td .input-editor {
 
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 input[type="number"] {
-    -moz-appearance: textfield;
+  -moz-appearance: textfield;
 }
 
 // Metadata cell CSS

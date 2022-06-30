@@ -86,6 +86,16 @@
           v-model="form.is_clients_isolated"
           v-if="currentProduction && currentProduction.id"
         />
+        <text-field
+          ref="maxRetakesField"
+          type="number"
+          step="1"
+          :label="$t('productions.fields.max_retakes')"
+          @enter="runConfirmation"
+          v-focus
+          v-model="form.max_retakes"
+          v-if="currentProduction && currentProduction.id"
+        />
 
         <div v-if="currentProduction && currentProduction.id">
           <label class="label">{{ $t("productions.picture") }}</label>
@@ -152,6 +162,7 @@ export default {
         nb_episodes: 0,
         episode_span: 0,
         fps: '',
+        max_retakes: 0,
         is_clients_isolated: 'false',
         ratio: '',
         resolution: '',
@@ -222,9 +233,10 @@ export default {
             parseSimpleDate(this.currentProduction.start_date).toDate(),
           end_date: parseSimpleDate(this.currentProduction.end_date).toDate(),
           production_type: this.currentProduction.production_type || 'short',
-          nb_episodes: this.currentProduction.nb_episodes,
           episode_span: this.currentProduction.episode_span,
           fps: this.currentProduction.fps,
+          max_retakes: this.currentProduction.max_retakes,
+          nb_episodes: this.currentProduction.nb_episodes,
           is_clients_isolated: this.currentProduction.is_clients_isolated
             ? 'true'
             : 'false',
@@ -239,6 +251,7 @@ export default {
           production_type: 'short',
           nb_episodes: 0,
           episode_span: 0,
+          max_retakes: 0,
           is_clients_isolated: 'false',
           fps: '',
           ratio: '',
@@ -273,6 +286,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.columns {
+  margin-bottom: 2em;
+}
+
 .column {
   overflow-y: initial;
   padding: initial;

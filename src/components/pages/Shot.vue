@@ -111,6 +111,16 @@
               </tr>
 
               <tr
+                class="datatable-row"
+                v-if="currentShot && currentShot.data && currentShot.data.max_retakes"
+              >
+                <td class="field-label">{{ $t('shots.fields.max_retakes') }}</td>
+                <td>
+                  {{ currentShot ? currentShot.data.max_retakes : '' }}
+                </td>
+              </tr>
+
+              <tr
                 :key="descriptor.id"
                 class="datatable-row"
                 v-for="descriptor in shotMetadataDescriptors"

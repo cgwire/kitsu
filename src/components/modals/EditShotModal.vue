@@ -69,6 +69,12 @@
           v-model="form.resolution"
           @enter="runConfirmation"
         />
+        <text-field
+          ref="maxRetakesField"
+          :label="$t('shots.fields.max_retakes')"
+          v-model="form.max_retakes"
+          @enter="runConfirmation"
+        />
 
         <div
           :key="descriptor.id"
@@ -172,8 +178,11 @@ export default {
 
     resolution () {
       return this.shotToEdit.data ? this.shotToEdit.data.resolution : ''
-    }
+    },
 
+    maxRetakes () {
+      return this.shotToEdit.data ? this.shotToEdit.data.max_retakes : ''
+    }
   },
 
   methods: {
@@ -230,6 +239,7 @@ export default {
           frameIn: this.frameIn,
           frameOut: this.frameOut,
           fps: this.fps,
+          max_retakes: this.max_retakes,
           resolution: this.resolution,
           data: { ...this.shotToEdit.data } || {}
         }
