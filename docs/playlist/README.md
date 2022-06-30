@@ -51,37 +51,30 @@ Once you have created a playlist; you have several options:
 
 ![Playlist Global](../img/getting-started/playlist_global.png)
 
-1/ Navigate from element to element
+* Play or Pause
+* Navigate from element to element
+* See the position of the selected element compare to the total number of elements
+* Mute or unmute the sound
+* Change the speed, double speed (x2), full speed (x1), half of the speed (x0.50), or a quarter of the speed (x0.25)
+* Loop on one element
+* Display the sound wave
+* Display annotations during the play
+* TC of the element compared to the TC of the whole playlist
+* Number of frame
+* Navigate frame per frame on the preview. You can also do it with the arrow on the Keyboard.
+* Compare tool
 
-2/ you can see the position of the selected element compare to the total number of elements
 
-3/ Play or Pause
+* Undo and Redo option for the drawing comment
+* Text and drawing option, and delete selection
 
-4/ You can change the speed, full speed (x1), half of the speed (x0.50), or a quarter of the speed (x0.25)
 
-5/ Loop on one element
-
-6/ TC of the element compared to the TC of the whole playlist
-
-7/number of frame
-
-8/ Navigate frame per frame on the preview. You can also do it with the arrow on the Keyboard.
-
-9/ Compare tool
-
-10/ Undo and Redo option for the drawing comment
-
-11/ Text and drawing option, and delete selection
-
-12/change the task type of all the elements of the playlist
-
-13/ Display the comment section
-
-14/ Hide the elements of the playlist
-
-15/ Download the playlist as a **Zip** files with all the separated elements, a **.csv** text file, or **Build .mp4** to create the whole movie (only for shots)
-
-16/ Fullscreen
+* Change the task type of all the elements of the playlist
+* Display the comment section
+* Hide the elements of the playlist
+* Switch between LD (low definition) to HD (High definition)
+* Download the playlist as a **Zip** files with all the separated elements, a **.csv** text file, or **Build .mp4** to create the whole movie (only for shots)
+* Fullscreen
 
 
 
@@ -115,4 +108,15 @@ You can see the drawing comment on the video (the red dot below the timeline).
 
 You can draw or type on the video (same than 
 [Perform a review](../getting-started-production/README.md#perform-a-review)), with the **draw** button ![draw button](../img/getting-started/draw.png)
+
+
+## Review Room
+
+On top of the playlist you have a button to **Join Review Room**. The review room will synchronize all the particiapnts.
+
+Everytbody in the review room will see in real time the play and pause, the shots and frame selection.
+
+The people in the review room will also see the drawing annotation synchronised.
+
+![Playlist review room](../img/getting-started/playlist_review_room.png)
 
