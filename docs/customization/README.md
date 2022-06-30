@@ -153,6 +153,39 @@ Click on **Confirm** to save your changes.
 
 ## Create a new Status Automation
 
+Status automation is here to do the heavy lifting for you.
+
+You can create status automation for the asset and the shot tasks.
+
+For the asset you can choose to create status automation between tasks, for exemple when concept is validated then change the modeling status as ready. But you can also create a status automation that change the asset status accoring to a task status, for example when concept is validation then the asset is ready for the storyboard.
+
+Go to the main menu, and select **Status Automations**.
+
+![Main menu Status Automation](../img/getting-started/main_menu_status_automation.png)
+
+Once in the new page, you can create status automation by clicking on the **+Add status automation** button.
+
+![create Status Automation](../img/getting-started/status_automation_empy.png)
+
+You can choose between creating an asset automation for the **asset** or the **shot**.
+
+Then you can choose the **task type** and the **status** that will trigger the automation.
+
+Then you can select which task type will react to the automation and choose the status that will be changed.
+
+![detail create status automation](../img/getting-started/add_status_automation.png)
+
+To trigger the change of ready for status, you need to change the trigger from Status to **Ready For**.
+You will notice the **Applied task type** will now display **Shot task type**..
+
+![detail create status automation Ready For](../img/getting-started/add_status_automation_readyfor.png)
+
+If you want to create status automation for shots, you need to change the **Entity Type** to shots.
+
+
+## Use in production a new Status Automation
+
+Once you have created your Status Automation for asset and shots, you can then apply them in your production.
 
 
 
