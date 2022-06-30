@@ -215,13 +215,13 @@ On the **Action Menu**, choose on the drop down menu the **Setting**.
 
 ![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
 
-Per default, Kitsu will load all the Task Status of your status library into your production.
+Per default, Kitsu will load the Task Status you have define when created the production .
 
-But you can choose to use only specific status.
+But you can choose to add or remove specific status.
 
 ![Setting status new](../img/getting-started/setting_status_new.png)
 
-On the **Task Status** tab, you can choose which status you want to use on this production, 
+On the **Task Status** tab, you can choose which status you want to add or remove on this production, 
 validate your choice with the **add** button.
 
 
@@ -234,7 +234,47 @@ On the **Action Menu**, choose on the drop down menu the **Setting**.
 
 ![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
 
-Per default, Kitsu will load all the Task Types of your status library into your production.
+Per default, Kitsu will load the Task Types you have define when created the production .
+
+![Setting Task Type new](../img/getting-started/setting_task_new.png)
+
+But you can choose to add or remove specific Task Types.
+
+For example you can create a 2D and A CGI workflow on your library, and add the needed task types into this production.
+
+
+On the **Task Types** tab, you can choose which status you want to add o remove on this production, 
+validate your choice with the **add** button.
+
+
+![Setting Add Task Type](../img/getting-started/setting_task_add.png)
+
+
+### Select specific Asset Types for a production
+
+On the **Action Menu**, choose on the drop down menu the **Setting**.
+
+![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
+
+Per default, Kitsu will load the Asset Types you have define when created the production .
+
+But you can choose to add or remove specific Asset Types.
+
+![Setting Asset type new](../img/getting-started/setting_asset_new.png)
+
+On the **Asset Types** tab, you can choose which Asset Types you want to add or remove on this production, 
+validate your choice with the "add" button.
+
+![Setting Add Asset](../img/getting-started/setting_asset_add.png)
+
+
+### Select specific Status Automation for a production
+
+On the **Action Menu**, choose on the drop down menu the **Setting**.
+
+![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
+
+Per default, Kitsu will load no status automation of your status automation library into your production.
 
 ![Setting Task Type new](../img/getting-started/setting_task_new.png)
 
@@ -248,53 +288,3 @@ validate your choice with the **add** button.
 
 
 ![Setting Add Task Type](../img/getting-started/setting_task_add.png)
-
-
-### Select specific Asset Types for a production
-
-On the **Action Menu**, choose on the drop down menu the **Setting**.
-
-![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
-
-Per default, Kitsu will load all the Asset Types of your status library into your production.
-
-But you can choose to use only specific Asset Types, depending of the type of your production.
-
-![Setting Asset type new](../img/getting-started/setting_asset_new.png)
-
-On the **Asset Types** tab, you can choose which Asset Types you want to use on this production, 
-validate your choice with the "add" button.
-
-![Setting Add Asset](../img/getting-started/setting_asset_add.png)
-
-Or you can use the main menu
-
-To navigate through Kitsu sections, you need to use the sidebar. You can 
-access it through the three lines button on top of the screen 
-![Main button](../img/getting-started/main_button.png).  It opens a menu on
-the left part of the screen. We want to see the production list. 
-So below **Studio** section, click on the **PRODUCTIONS** button. 
-
-![Main menu](../img/getting-started/main_menu_production.png)
-
-There, you can see all the productions you have created, their type, and their status (open
-for an Active Production, or Closed if not Active). When your cursor is above a
-production line, you can see two news icons on the right part of the line :
-**edit** ![Edit button](../img/getting-started/edit_button.png) and **delete**
-![Delete button](../img/getting-started/delete_button.png).
-
-![Edit a production](../img/getting-started/production_edit.png)
-
-To modify a production, go into the **Edit production** page. 
-
-You can add some specific information as the **FPS** (Frames per second), 
-the **Ratio** and the **Resolution** of the picture.
-
-If nothing is filled, the **FPS** is set to **24 FPS** per default. 
-The **FPS** will be applied to re-encode the video and also to calculate the quotas.
-
-NB: The default avatar for a production is the first letter displayed on a
-colored background. You can change it with a picture if you want.
-
-![Edit the details of a production](../img/getting-started/production_edit_popup.png)
-
