@@ -187,6 +187,23 @@ If you want to create status automation for shots, you need to change the **Enti
 
 Once you have created your Status Automation for asset and shots, you can then apply them in your production.
 
+From your production, go to the **Setting** page.
+
+![dropdown menu setting](../img/getting-started/drop_down_menu_setting.png)
+
+From there go to the **Status automation** tabs
+
+
+![production setting](../img/getting-started/settings_parameters.png)
+
+On the **Status Automation** tab you will have access to all the status automation you previewsly created.
+You can now add anyone you want to use on your production. Once they are added they will be effective immediately.
+
+![production setting status automation](../img/getting-started/setting_status_automation.png)
+
+Now your setting page under the status automation tab should look like this : 
+
+![production setting status automation](../img/getting-started/status_automation_exemple.png)
 
 
 ## Define specific workflow per production
