@@ -186,6 +186,7 @@
             <add-comment
               ref="add-comment"
               :is-error="errors.addComment"
+              :is-max-retakes-error="errors.addCommentMaxRetakes"
               :is-loading="loading.addComment"
               :is-movie="isMovie"
               :user="user"
@@ -375,6 +376,7 @@ export default {
       },
       errors: {
         addComment: false,
+        addCommentMaxRetakes: false,
         addPreview: false,
         addExtraPreview: false,
         setPreview: false,
@@ -835,6 +837,7 @@ export default {
       if (this.attachedFileName) action = 'commentTaskWithPreview'
       this.loading.addComment = true
       this.errors.addComment = false
+      this.errors.addCommentMaxRetakes = false
       this.$store.dispatch(action, params)
         .then(() => {
           this.currentTaskPreviews = this.getCurrentTaskPreviews()
@@ -848,6 +851,12 @@ export default {
           console.error(err)
           this.errors.addComment = true
           this.loading.addComment = false
+          const isRetakeError =
+            err.response &&
+            err.response.body.message &&
+            err.response.body.message.indexOf('retake') > 0
+          this.errors.addComment = !isRetakeError
+          this.errors.addCommentMaxRetakes = isRetakeError
         })
     },
 
@@ -1203,7 +1212,8 @@ export default {
 
     async extractAnnotationSnapshots () {
       this.$refs['add-comment'].showAnnotationLoading()
-      const files = await this.$refs['preview-player'].extractAnnotationSnapshots()
+      const files =
+        await this.$refs['preview-player'].extractAnnotationSnapshots()
       this.$refs['add-comment'].setAnnotationSnapshots(files)
       this.$refs['add-comment'].hideAnnotationLoading()
       return files

@@ -130,6 +130,12 @@
       >
         <em>{{ $t('comments.error') }}</em>
       </div>
+      <div
+        class="error pull-right"
+        v-if="isMaxRetakesError"
+      >
+        <em>{{ $t('comments.max_retakes_error') }}</em>
+      </div>
     </div>
 
     <add-comment-image-modal
@@ -198,6 +204,10 @@ export default {
       default: null
     },
     isError: {
+      type: Boolean,
+      default: null
+    },
+    isMaxRetakesError: {
       type: Boolean,
       default: null
     },

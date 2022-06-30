@@ -143,6 +143,7 @@
               :is-loading="loading.addComment"
               :attached-file-name="attachedFileName"
               :is-error="errors.addComment"
+              :is-max-retakes-error="errors.addCommentMaxRetakes"
               :fps="parseInt(currentFps)"
               :time="isPreview ? currentTime : currentTimeRaw"
               :revision="currentRevision"
@@ -334,6 +335,7 @@ export default {
       taskPreviews: [],
       errors: {
         addComment: false,
+        addCommentMaxRetakes: false,
         addPreview: false,
         addExtraPreview: false,
         editComment: false,
@@ -641,6 +643,7 @@ export default {
       if (this.attachedFileName) action = 'commentTaskWithPreview'
       this.loading.addComment = true
       this.errors.addComment = false
+      this.errors.addCommentMaxRetakes = false
       this.$store.dispatch(action, params)
         .then(() => {
           this.$refs['add-preview-modal'].reset()
@@ -655,7 +658,12 @@ export default {
         })
         .catch((err) => {
           console.error(err)
-          this.errors.addComment = true
+          const isRetakeError =
+            err.response &&
+            err.response.body.message &&
+            err.response.body.message.indexOf('retake') > 0
+          this.errors.addComment = !isRetakeError
+          this.errors.addCommentMaxRetakes = isRetakeError
           this.loading.addComment = false
         })
     },

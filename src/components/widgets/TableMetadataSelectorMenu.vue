@@ -58,7 +58,9 @@ export default {
         frameOut: this.$t('main.frameOut'),
         frames: this.$t('main.frames'),
         readyFor: this.$t('assets.fields.ready_for'),
-        timeSpent: this.$t('main.timeSpent')
+        timeSpent: this.$t('main.timeSpent'),
+        resolution: this.$t('shots.fields.resolution'),
+        maxRetakes: this.$t('shots.fields.max_retakes')
       }
     }
   },

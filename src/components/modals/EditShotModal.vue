@@ -63,6 +63,19 @@
           type="number"
           @enter="runConfirmation"
         />
+        <text-field
+          ref="resolutionField"
+          :label="$t('shots.fields.resolution')"
+          v-model="form.resolution"
+          @enter="runConfirmation"
+        />
+        <text-field
+          ref="maxRetakesField"
+          :label="$t('shots.fields.max_retakes')"
+          v-model="form.max_retakes"
+          @enter="runConfirmation"
+        />
+
         <div
           :key="descriptor.id"
           v-for="descriptor in shotMetadataDescriptors"
@@ -161,6 +174,14 @@ export default {
 
     fps () {
       return this.shotToEdit.data ? this.shotToEdit.data.fps : ''
+    },
+
+    resolution () {
+      return this.shotToEdit.data ? this.shotToEdit.data.resolution : ''
+    },
+
+    maxRetakes () {
+      return this.shotToEdit.data ? this.shotToEdit.data.max_retakes : ''
     }
   },
 
@@ -218,6 +239,8 @@ export default {
           frameIn: this.frameIn,
           frameOut: this.frameOut,
           fps: this.fps,
+          max_retakes: this.max_retakes,
+          resolution: this.resolution,
           data: { ...this.shotToEdit.data } || {}
         }
       }

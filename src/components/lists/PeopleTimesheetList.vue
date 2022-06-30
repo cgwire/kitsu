@@ -63,7 +63,12 @@
           v-for="person in people"
           :key="person.id"
         >
-          <people-name-cell class="name" :person="person" />
+          <th class="datatable-row-header name">
+            <div class="flexrow">
+              <people-avatar class="flexrow-item" :person="person" />
+              <people-name class="flexrow-item" :person="person" />
+            </div>
+          </th>
 
           <td
             :class="{
@@ -190,14 +195,16 @@ import {
   hoursToDays,
   range
 } from '@/lib/time'
-import PeopleNameCell from '@/components/cells/PeopleNameCell'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import PeopleName from '@/components/widgets/PeopleName'
 import TableInfo from '@/components/widgets/TableInfo'
 
 export default {
   name: 'people-timesheet-list',
 
   components: {
-    PeopleNameCell,
+    PeopleAvatar,
+    PeopleName,
     TableInfo
   },
 

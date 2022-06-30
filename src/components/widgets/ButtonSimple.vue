@@ -11,6 +11,14 @@
   :title="title"
   @click="$emit('click')"
 >
+  <send-icon
+    :class="iconClass"
+    v-if="icon === 'send'"
+  />
+  <paperclip-icon
+    :class="iconClass"
+    v-if="icon === 'attach'"
+  />
   <corner-left-down-icon
     :class="iconClass"
     v-if="icon === 'undo'"
@@ -180,6 +188,7 @@ import {
   MessageSquareIcon,
   MinusIcon,
   MusicIcon,
+  PaperclipIcon,
   PauseIcon,
   PlayIcon,
   PlusIcon,
@@ -187,6 +196,7 @@ import {
   RepeatIcon,
   RotateCcwIcon,
   SaveIcon,
+  SendIcon,
   SkipBackIcon,
   SkipForwardIcon,
   TrashIcon,
@@ -219,6 +229,7 @@ export default {
     MessageSquareIcon,
     MinusIcon,
     MusicIcon,
+    PaperclipIcon,
     PauseIcon,
     PlayIcon,
     PlusIcon,
@@ -226,6 +237,7 @@ export default {
     RepeatIcon,
     RotateCcwIcon,
     SaveIcon,
+    SendIcon,
     SkipBackIcon,
     SkipForwardIcon,
     TrashIcon,

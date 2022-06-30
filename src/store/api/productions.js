@@ -34,6 +34,7 @@ export default {
       start_date: production.start_date,
       end_date: production.end_date,
       man_days: production.man_days,
+      max_retakes: production.max_retakes,
       nb_episodes: production.nb_episodes,
       episode_span: production.episode_span,
       is_clients_isolated: production.is_clients_isolated === 'true'

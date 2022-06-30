@@ -45,7 +45,7 @@ export default {
     },
 
     textColor () {
-      if (this.entry.is_default && !this.isDarkTheme) {
+      if (this.entry.name === 'Todo' && !this.isDarkTheme) {
         return '#333'
       } else {
         return 'white'

@@ -106,9 +106,9 @@ export default {
     },
 
     backgroundColor () {
-      if (this.taskStatus.is_default && !this.isDarkTheme) {
+      if (this.taskStatus.short_name === 'todo' && !this.isDarkTheme) {
         return '#ECECEC'
-      } else if (this.taskStatus.is_default && this.isDarkTheme) {
+      } else if (this.taskStatus.short_name === 'todo' && this.isDarkTheme) {
         return '#5F626A'
       } else if (this.isDarkTheme) {
         return colors.darkenColor(this.taskStatus.color)
