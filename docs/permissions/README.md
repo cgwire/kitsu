@@ -8,9 +8,14 @@ following role:
 ## Artist
 
 Artists can only display the production of which they are part of.
-They can only comment on tasks, upload media, and change their status when they are assigned to it. They only have access to a limited number of status as the Studio manager defines it.
+They can only comment tasks, upload media, and change their status when they are assigned to it. They only have access to a limited number of status as the Studio manager defines it.
 
-They can create personal filters on the global page and Task Type page.
+They can:
+
+* create personal filters on the global page and Task Type page.
+* assign and clear assignation for themselves on their department tasks.
+* create playlist-on-the-fly for every shots or assets, but won't be able to save this playlitt.
+* can't see client comments.
 
 The Artist has access to all the features of the production, but only for display.
 
