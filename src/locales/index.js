@@ -6,7 +6,7 @@ import fa from '@/locales/fa.js'
 import fr from '@/locales/fr.json'
 import hu from '@/locales/hu.json'
 import pt from '@/locales/pt.json'
-import ru from '@/locales/ru.js'
+import ru from '@/locales/ru.json'
 import zh from '@/locales/zh.json'
 import zhtw from '@/locales/zh_tw.json'
 
