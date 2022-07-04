@@ -27,7 +27,8 @@ const getters = {
 
   taskStatusForCurrentUser: (state, getters, rootState, rootGetters) => {
     const statuses = rootGetters.productionTaskStatuses
-    if (rootGetters.isCurrentUserManager) {
+    if (rootGetters.isCurrentUserManager ||
+        rootGetters.isCurrentUserSupervisor) {
       return statuses
     } else if (rootGetters.isCurrentUserClient) {
       return statuses.filter(taskStatus => {
@@ -43,7 +44,8 @@ const getters = {
   getTaskStatusForCurrentUser:
     (state, getters, rootState, rootGetters) => (projectId) => {
       const statuses = rootGetters.getProductionTaskStatuses(projectId)
-      if (rootGetters.isCurrentUserManager) {
+      if (rootGetters.isCurrentUserManager ||
+        rootGetters.isCurrentUserSupervisor) {
         return statuses
       } else if (rootGetters.isCurrentUserClient) {
         return statuses.filter(taskStatus => {
