@@ -105,6 +105,7 @@
   </div>
 
   <div
+    id="side-column"
     class="column side-column"
     v-show="nbSelectedTasks === 1"
   >
