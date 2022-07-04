@@ -139,16 +139,17 @@ export default {
 }
 
 .column-menu {
-  position: absolute;
   background: white;
-  width: 200px;
-  box-shadow: 0 2px 6px $light-grey;
-  top: 40px;
-  right: 0;
-  z-index: 100;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
+  box-shadow: 0 2px 6px $light-grey;
+  max-height: 300px;
   overflow: auto;
+  position: absolute;
+  right: 0;
+  top: 40px;
+  width: 200px;
+  z-index: 100;
 
   h2 {
     color: $grey;
