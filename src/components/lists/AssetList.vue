@@ -37,9 +37,9 @@
       >
         <tr>
           <th
-            scope="col"
-            class="name datatable-row-header"
             ref="th-name"
+            class="name datatable-row-header"
+            scope="col"
           >
             <div class="flexrow">
               <span class="flexrow-item">

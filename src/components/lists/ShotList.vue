@@ -868,14 +868,6 @@ export default {
       return this.shotSelectionGrid[lineIndex][columnIndex]
     },
 
-    isValidResolution (shot) {
-      if (!shot) return true
-      const res = this.getMetadataFieldValue({ field_name: 'resolution' }, shot)
-      if (!res || res.length === 0) return 0
-      const isValid = new RegExp(/\d{3,4}x\d{3,4}/).test(res)
-      return isValid
-    },
-
     isCastingReady (shot, columnId) {
       const task = this.taskMap.get(shot.validations.get(columnId))
       return (

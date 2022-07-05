@@ -1118,7 +1118,8 @@ export const playerMixin = {
         p => p.revision === parseInt(versionRevision)
       )
       this.onPreviewChanged(this.currentEntity, previewFile)
-      const time = parseInt(minutes) * 60 + parseInt(seconds) + parseInt(milliseconds) / 1000
+      const time =
+        parseInt(minutes) * 60 + parseInt(seconds) + parseInt(milliseconds) / 1000
       setTimeout(() => {
         const frameNumber = time / this.frameDuration
         this.rawPlayer.setCurrentFrame(frameNumber)
