@@ -59,7 +59,7 @@
         <div class="mt1" v-else>
           <shot-line
             :key="entity.id"
-            :entity-id="entity.id"
+            :entity="entity"
             :preview-file-id="entity.preview_file_id"
             :selected="selection[entity.id]"
             :name="entity.name"
@@ -70,6 +70,7 @@
             @remove-one="removeOneAsset"
             @remove-ten="removeTenAssets"
             @click="selectEntity"
+            @description-changed="onDescriptionChanged"
             v-for="entity in castingEntities"
           />
         </div>
@@ -477,6 +478,9 @@ export default {
   methods: {
     ...mapActions([
       'addAssetToCasting',
+      'editEpisode',
+      'editShot',
+      'editAsset',
       'displayMoreAssets',
       'loadEpisodeCasting',
       'loadEpisodes',
@@ -942,6 +946,17 @@ export default {
           .catch(console.error)
       })
       return castingToPaste
+    },
+
+    onDescriptionChanged (entity, value) {
+      const data = { id: entity.id, description: value }
+      if (this.isEpisodeCasting) {
+        this.editEpisode(data)
+      } else if (this.isShotCasting) {
+        this.editShot(data)
+      } else {
+        this.editAsset(data)
+      }
     }
   },
 

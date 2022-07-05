@@ -1,6 +1,6 @@
 <template>
 <div
-  :id="entityId"
+  :id="entity.id"
   :class="{
     shot: true,
     selected: selected,
@@ -21,6 +21,17 @@
     </span>
     <div class="shot-name flexrow-item">
       {{ name }}
+    </div>
+    <div class="description-column flexrow-item">
+      <input
+        class="input-editor"
+        @input="event => onDescriptionChanged(entity, event)"
+        :value="entity.description"
+        v-if="!readOnly"
+      />
+      <p v-else>
+        {{ entity.description }}
+      </p>
     </div>
     <div class="asset-list flexrow-item">
       <div
@@ -71,9 +82,9 @@ export default {
   },
 
   props: {
-    entityId: {
-      default: '',
-      type: String
+    entity: {
+      default: () => {},
+      type: Object
     },
     previewFileId: {
       default: '',
@@ -103,19 +114,23 @@ export default {
 
   methods: {
     onClicked (event) {
-      this.$emit('click', this.entityId, event)
+      this.$emit('click', this.entity.id, event)
     },
 
     onEditLabelClicked (asset, label) {
-      this.$emit('edit-label', asset, label, this.entityId)
+      this.$emit('edit-label', asset, label, this.entity.id)
     },
 
     removeOneAsset (assetId, nbOccurences) {
-      this.$emit('remove-one', assetId, this.entityId, nbOccurences)
+      this.$emit('remove-one', assetId, this.entity.id, nbOccurences)
     },
 
     removeTenAssets (assetId, nbOccurences) {
-      this.$emit('remove-ten', assetId, this.entityId, nbOccurences)
+      this.$emit('remove-ten', assetId, this.entity.id, nbOccurences)
+    },
+
+    onDescriptionChanged (entity, event) {
+      this.$emit('description-changed', entity, event.target.value)
     }
   }
 }
@@ -184,5 +199,55 @@ export default {
 .empty {
   font-style: italic;
   color: $light-grey;
+}
+
+.description-column {
+  border-left: 1px solid $light-grey;
+  width: 100px;
+  padding-top: 0;
+  align-self: stretch;
+}
+
+.dark {
+  div .input-editor {
+    color: $white;
+
+    option {
+      background: $dark-grey-light;
+      color: $white;
+    }
+
+    &:focus,
+    &:active,
+    &:hover {
+      background: $dark-grey-light;
+   }
+  }
+}
+
+div .input-editor {
+  color: $grey-strong;
+  height: 100%;
+  padding: 0.5rem;
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  z-index: 100;
+
+  &:active,
+  &:focus,
+  &:hover {
+    background: transparent;
+    background: white;
+  }
+
+  &:active,
+  &:focus {
+    border: 1px solid $green;
+  }
+
+  &:hover {
+    border: 1px solid $light-green;
+  }
 }
 </style>
