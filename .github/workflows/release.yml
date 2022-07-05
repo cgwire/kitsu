@@ -1,0 +1,56 @@
+---
+name: "Kitsu release"
+
+on:
+  push:
+    push:
+      branches: master
+    tags:
+      - '*'
+
+jobs:
+  make_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build release
+        run: |
+          npm install
+          npm run build
+          GIT_COMMIT="$(git rev-parse HEAD)"
+          GIT_TAG="$(git describe --tags)"
+          KITSU_VERSION="$(echo ${GIT_TAG} | sed 's/^v//;s/-build//')"
+          echo "${KITSU_VERSION}" > dist/.version.txt
+          echo "${GIT_COMMIT}"    > dist/.commit.txt
+          echo "${GIT_TAG}"       > dist/.tag.txt
+          CHECKSUM_FILENAME="kitsu-${KITSU_VERSION}.SHA512"
+          ARTEFACT_FILENAME="kitsu-${KITSU_VERSION}.tgz"
+          (cd dist && tar cvzf "../${ARTEFACT_FILENAME}" .)
+          sha512sum "${ARTEFACT_FILENAME}" > "${CHECKSUM_FILENAME}"
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        id: create_release
+        with:
+          artifacts: "kitsu-*.tgz,kitsu-*.SHA512"
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update "build" branch
+        run: |
+          KITSU_VERSION="$(cat dist/.version.txt)"
+          mv dist ..
+          git checkout build
+          git reset --hard origin/build
+          test -d dist && git rm -rf dist
+          test -d dist && rm -rf dist
+          mv ../dist .
+          git add -f dist
+          git config --global user.email "no-reply@cg-wire.com"
+          git config --global user.name "CGWire bot"
+          git commit -m "New release (${KITSU_VERSION})"
+          git tag ${KITSU_VERSION}-build
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tags: true
+          branch: build
