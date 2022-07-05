@@ -775,10 +775,14 @@ export default {
     },
 
     onAnnotationChanged ({ preview, additions, deletions, updates }) {
-      const taskId = this.task.id
-      this.updatePreviewAnnotation({
-        taskId, preview, additions, deletions, updates
-      })
+      const taskId = this.task
+        ? this.task.id
+        : this.previousTaskId
+      if (taskId) {
+        this.updatePreviewAnnotation({
+          taskId, preview, additions, deletions, updates
+        })
+      }
     },
 
     onAddPreviewClicked (comment) {
