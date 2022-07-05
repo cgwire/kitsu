@@ -652,6 +652,11 @@ export default {
 
     confirmEditShot (form) {
       form.id = this.shotToEdit.id
+      form.data.resolution = form.resolution
+      form.data.max_retakes = form.max_retakes
+      form.data.frame_in = form.frameIn
+      form.data.frameOut = form.frameOut
+      form.data.fps = form.fps
       this.loading.edit = true
       this.errors.edit = false
       this.editShot(form)

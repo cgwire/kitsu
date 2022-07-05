@@ -71,6 +71,7 @@
         />
         <text-field
           ref="maxRetakesField"
+          type="number"
           :label="$t('shots.fields.max_retakes')"
           v-model="form.max_retakes"
           @enter="runConfirmation"
@@ -181,7 +182,9 @@ export default {
     },
 
     maxRetakes () {
-      return this.shotToEdit.data ? this.shotToEdit.data.max_retakes : ''
+      return this.shotToEdit.data
+        ? parseInt(this.shotToEdit.data.max_retakes)
+        : ''
     }
   },
 
@@ -239,7 +242,7 @@ export default {
           frameIn: this.frameIn,
           frameOut: this.frameOut,
           fps: this.fps,
-          max_retakes: this.max_retakes,
+          max_retakes: this.maxRetakes,
           resolution: this.resolution,
           data: { ...this.shotToEdit.data } || {}
         }
