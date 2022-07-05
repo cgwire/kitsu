@@ -22,7 +22,10 @@
     <div class="shot-name flexrow-item">
       {{ name }}
     </div>
-    <div class="description-column flexrow-item">
+    <div
+      class="description-column flexrow-item"
+      v-if="isShowInfos"
+    >
       <input
         class="input-editor"
         @input="event => onDescriptionChanged(entity, event)"
@@ -33,6 +36,67 @@
         {{ entity.description }}
       </p>
     </div>
+    <td
+      class="metadata-descriptor"
+      :title="entity.data ? entity.data[descriptor.field_name] : ''"
+      :key="'desc' + entity.id + '-' + descriptor.id"
+      v-for="(descriptor, j) in visibleMetadataDescriptors"
+      v-if="isShowInfos"
+    >
+      <input
+        class="input-editor"
+        @input="event => onMetadataFieldChanged(entity, descriptor, event)"
+        @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+        :value="getMetadataFieldValue(descriptor, entity)"
+        v-if="descriptor.choices.length === 0 && (isCurrentUserManager
+        || isSupervisorInDepartments(descriptor.departments))"
+      />
+      <div
+        class="metadata-value selectable"
+        v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+      >
+        <p
+          v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+          :key="`${entity.id}-${descriptor.id}-${i}-${option.text}-div`"
+        >
+          <input
+            type="checkbox"
+            @change="event => onMetadataChecklistChanged(entity, descriptor, option.text, event)"
+            :id="`${entity.id}-${descriptor.id}-${i}-${option.text}-input`"
+            :checked="getMetadataChecklistValues(descriptor, entity)[option.text]"
+          />
+          <label
+            style="cursor: pointer;"
+            :for="`${entity.id}-${descriptor.id}-${i}-${option.text}-input`"
+          >
+            {{ option.text }}
+          </label>
+        </p>
+      </div>
+      <span
+        class="select"
+        v-else-if="isCurrentUserManager
+        || isSupervisorInDepartments(descriptor.departments)"
+      >
+      <select
+        class="select-input"
+        @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+        @change="event => onMetadataFieldChanged(entity, descriptor, event)"
+      >
+        <option
+          v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
+          :key="`desc-value-${entity.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+          :value="option.value"
+          :selected="getMetadataFieldValue(descriptor, entity) === option.value"
+        >
+          {{ option.label }}
+        </option>
+      </select>
+      </span>
+        <span class="metadata-value selectable" v-else>
+        {{ getMetadataFieldValue(descriptor, entity) }}
+      </span>
+    </td>
     <div class="asset-list flexrow-item">
       <div
         class="asset-type-line flexrow"
@@ -70,12 +134,19 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+import { entityListMixin } from '@/components/mixins/entity_list'
+import { descriptorMixin } from '@/components/mixins/descriptors'
+
 import AssetBlock from '@/components/pages/breakdown/AssetBlock'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 
 export default {
   name: 'shot-line',
-
+  mixins: [
+    entityListMixin,
+    descriptorMixin
+  ],
   components: {
     AssetBlock,
     EntityThumbnail
@@ -109,7 +180,25 @@ export default {
     textMode: {
       default: false,
       type: Boolean
+    },
+    isShowInfos: {
+      default: true,
+      type: Boolean
+    },
+    metadataDescriptors: {
+      default: () => [],
+      type: Array
+    },
+    metadataDisplayHeaders: {
+      default: () => {},
+      type: Object
     }
+  },
+
+  computed: {
+    ...mapGetters([
+      'isCurrentUserManager'
+    ])
   },
 
   methods: {

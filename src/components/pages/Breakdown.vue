@@ -66,10 +66,13 @@
             :assets="castingByType[entity.id] || []"
             :read-only="!isCurrentUserManager"
             :text-mode="isTextMode"
+            :metadata-descriptors="metadataDescriptors"
+            :metadata-display-headers="metadataDisplayHeaders"
             @edit-label="onEditLabelClicked"
             @remove-one="removeOneAsset"
             @remove-ten="removeTenAssets"
             @click="selectEntity"
+            @metadata-changed="onMetadataChanged"
             @description-changed="onDescriptionChanged"
             v-for="entity in castingEntities"
           />
@@ -316,28 +319,30 @@ export default {
   computed: {
     ...mapGetters([
       'assetMap',
+      'assetMetadataDescriptors',
       'assetsByType',
       'casting',
-      'castingEpisodes',
       'castingAssetTypeAssets',
       'castingAssetTypesOptions',
       'castingByType',
       'castingCurrentShot',
-      'castingSequencesOptions',
+      'castingEpisodes',
       'castingSequenceShots',
+      'castingSequencesOptions',
       'currentEpisode',
       'currentProduction',
       'displayedShots',
+      'episodeMap',
       'episodes',
       'getEpisodeOptions',
-      'isCurrentUserManager',
       'isAssetsLoading',
+      'isCurrentUserManager',
       'isShotsLoading',
       'isTVShow',
-      'episodeMap',
-      'sequences',
       'sequenceMap',
-      'shotMap'
+      'sequences',
+      'shotMap',
+      'shotMetadataDescriptors'
     ]),
 
     castingTypeOptions () {
@@ -472,6 +477,39 @@ export default {
           'Asset Type',
           'Asset'
         ]
+    },
+
+    metadataDescriptors () {
+      if (this.isEpisodeCasting) {
+        return []
+      } else if (this.isShotCasting) {
+        return this.shotMetadataDescriptors
+      } else {
+        return this.assetMetadataDescriptors
+      }
+    },
+
+    metadataDisplayHeaders () {
+      if (this.isEpisodeCasting) {
+        return {}
+      } else if (this.isShotCasting) {
+        return {
+          fps: false,
+          frameIn: false,
+          frameOut: false,
+          frames: false,
+          estimation: false,
+          maxRetakes: false,
+          resolution: false,
+          timeSpent: false
+        }
+      } else {
+        return {
+          estimation: false,
+          readyFor: false,
+          timeSpent: false
+        }
+      }
     }
   },
 
@@ -948,8 +986,27 @@ export default {
       return castingToPaste
     },
 
+    onMetadataChanged ({ entry, descriptor, value }) {
+      const metadata = {}
+      metadata[descriptor.field_name] = value
+      const data = {
+        id: entry.id,
+        data: metadata
+      }
+      if (this.isEpisodeCasting) {
+        this.editEpisode(data)
+      } else if (this.isShotCasting) {
+        this.editShot(data)
+      } else {
+        this.editAsset(data)
+      }
+    },
+
     onDescriptionChanged (entity, value) {
-      const data = { id: entity.id, description: value }
+      const data = {
+        id: entity.id,
+        description: value
+      }
       if (this.isEpisodeCasting) {
         this.editEpisode(data)
       } else if (this.isShotCasting) {
