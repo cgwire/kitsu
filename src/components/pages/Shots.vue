@@ -467,6 +467,8 @@ export default {
       'isFrameIn',
       'isFrameOut',
       'isFps',
+      'isMaxRetakes',
+      'isResolution',
       'isShotDescription',
       'isShotEstimation',
       'isShotTime',
@@ -997,16 +999,22 @@ export default {
             headers.push(this.$t('main.estimation_short'))
           }
           if (this.isFrames) {
-            headers.push('Nb Frames')
+            headers.push(this.$t('main.frames'))
           }
           if (this.isFrameIn) {
-            headers.push('Frame In')
+            headers.push(this.$t('main.frame_in'))
           }
           if (this.isFrameOut) {
-            headers.push('Frame Out')
+            headers.push(this.$t('main.frame_out'))
           }
           if (this.isFps) {
-            headers.push('FPS')
+            headers.push(this.$t('main.fps'))
+          }
+          if (this.isResolution) {
+            headers.push(this.$t('shots.fields.resolution'))
+          }
+          if (this.isMaxRetakes) {
+            headers.push(this.$t('shots.fields.max_retakes'))
           }
           this.shotValidationColumns
             .forEach((taskTypeId) => {

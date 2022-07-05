@@ -54,8 +54,8 @@ export default {
       fieldToName: {
         estimation: this.$t('main.estimation'),
         fps: this.$t('main.fps'),
-        frameIn: this.$t('main.frameIn'),
-        frameOut: this.$t('main.frameOut'),
+        frameIn: this.$t('main.frame_in'),
+        frameOut: this.$t('main.frame_out'),
         frames: this.$t('main.frames'),
         readyFor: this.$t('assets.fields.ready_for'),
         timeSpent: this.$t('main.timeSpent'),
