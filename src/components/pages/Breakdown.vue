@@ -30,6 +30,7 @@
             v-if="isAssetCasting"
           />
           <span class="filler"></span>
+          <show-infos-button class="flexrow-item" />
           <button-simple
             class="flexrow-item"
             :title="isTextMode ? $t('breakdown.picture_mode') : $t('breakdown.text_mode')"
@@ -235,6 +236,7 @@ import ImportRenderModal from '@/components/modals/ImportRenderModal'
 import ImportModal from '@/components/modals/ImportModal'
 import SearchField from '@/components/widgets/SearchField'
 import ShotLine from '@/components/pages/breakdown/ShotLine'
+import ShowInfosButton from '@/components/widgets/ShowInfosButton'
 import Spinner from '@/components/widgets/Spinner'
 
 export default {
@@ -253,6 +255,7 @@ export default {
     ImportRenderModal,
     SearchField,
     ShotLine,
+    ShowInfosButton,
     Spinner
   },
 

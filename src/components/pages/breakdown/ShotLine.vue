@@ -181,10 +181,6 @@ export default {
       default: false,
       type: Boolean
     },
-    isShowInfos: {
-      default: true,
-      type: Boolean
-    },
     metadataDescriptors: {
       default: () => [],
       type: Array
@@ -197,7 +193,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'isCurrentUserManager'
+      'isCurrentUserManager',
+      'isShowInfos'
     ])
   },
 
