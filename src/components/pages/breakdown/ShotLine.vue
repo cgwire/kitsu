@@ -32,12 +32,12 @@
         :value="entity.description"
         v-if="!readOnly"
       />
-      <p v-else>
+      <span class="selectable" v-else>
         {{ entity.description }}
-      </p>
+      </span>
     </div>
-    <td
-      class="metadata-descriptor"
+    <div
+      class="metadata-descriptor flexrow-item"
       :title="entity.data ? entity.data[descriptor.field_name] : ''"
       :key="'desc' + entity.id + '-' + descriptor.id"
       v-for="(descriptor, j) in visibleMetadataDescriptors"
@@ -78,25 +78,25 @@
         v-else-if="isCurrentUserManager
         || isSupervisorInDepartments(descriptor.departments)"
       >
-      <select
-        class="select-input"
-        @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-        @change="event => onMetadataFieldChanged(entity, descriptor, event)"
-      >
-        <option
-          v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
-          :key="`desc-value-${entity.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
-          :value="option.value"
-          :selected="getMetadataFieldValue(descriptor, entity) === option.value"
+        <select
+          class="select-input"
+          @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+          @change="event => onMetadataFieldChanged(entity, descriptor, event)"
         >
-          {{ option.label }}
-        </option>
-      </select>
+          <option
+            v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
+            :key="`desc-value-${entity.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+            :value="option.value"
+            :selected="getMetadataFieldValue(descriptor, entity) === option.value"
+          >
+            {{ option.label }}
+          </option>
+        </select>
       </span>
-        <span class="metadata-value selectable" v-else>
+      <span class="metadata-value selectable" v-else>
         {{ getMetadataFieldValue(descriptor, entity) }}
       </span>
-    </td>
+    </div>
     <div class="asset-list flexrow-item">
       <div
         class="asset-type-line flexrow"
@@ -232,6 +232,7 @@ export default {
   border-left: 1px solid $light-grey;
   padding-left: 1em;
   padding-top: 0.5em;
+  align-self: stretch;
 }
 
 .text-mode .asset-list {
@@ -287,14 +288,19 @@ export default {
   color: $light-grey;
 }
 
-.description-column {
+.description-column,
+.metadata-descriptor {
   border-left: 1px solid $light-grey;
-  width: 100px;
+  width: 120px;
   padding-top: 0;
   align-self: stretch;
+  margin-right: 0;
+  display: flex;
+  align-items: center;
 }
 
 .dark {
+  .select select,
   div .input-editor {
     color: $white;
 
@@ -335,5 +341,49 @@ div .input-editor {
   &:hover {
     border: 1px solid $light-green;
   }
+}
+
+.metadata-descriptor .select {
+  color: $grey-strong;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  border: 1px solid transparent;
+
+  &::after {
+    border-color: transparent;
+  }
+
+  &:active,
+  &:focus,
+  &:hover {
+    &::after {
+      border-color: $green;
+    }
+  }
+
+  select {
+    color: $grey-strong;
+    height: 100%;
+    width: 100%;
+    background: transparent;
+    border-radius: 0;
+    border: 1px solid transparent;
+
+    &:focus {
+      border: 1px solid $green;
+      background: white;
+    }
+
+    &:hover {
+      background: transparent;
+      background: white;
+      border: 1px solid $light-green;
+    }
+  }
+}
+.description-column .selectable,
+.metadata-descriptor .selectable {
+  padding-left: 1em;
 }
 </style>
