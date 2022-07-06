@@ -224,7 +224,7 @@
       :task="task"
       :is-preview="false"
       :silent="isCommentsHidden"
-      :current-time-raw="currentTimeRaw - frameDuration"
+      :current-time-raw="currentTimeRaw"
       :current-parent-preview="currentPreview"
       @time-code-clicked="onTimeCodeClicked"
     />
