@@ -30,7 +30,7 @@
             v-if="isAssetCasting"
           />
           <span class="filler"></span>
-          <show-infos-button class="flexrow-item" />
+          <show-infos-button :is-breakdown="true" class="flexrow-item" />
           <button-simple
             class="flexrow-item"
             :title="isTextMode ? $t('breakdown.picture_mode') : $t('breakdown.text_mode')"

@@ -4,9 +4,9 @@
     'level-item': true,
     button: true,
     'is-toggle': true,
-    'is-on': isShowInfos
+    'is-on': buttonIsOn
   }"
-  :title="$t(isShowInfos ? 'tasks.hide_infos' : 'tasks.show_infos')"
+  :title="$t(buttonIsOn ? 'tasks.hide_infos' : 'tasks.show_infos')"
   @click="toggleInfos"
 >
   <database-icon class="icon is-small" />
@@ -26,34 +26,65 @@ export default {
   },
 
   props: {
+    isBreakdown: {
+      default: false,
+      type: Boolean
+    }
   },
 
   computed: {
     ...mapGetters([
-      'isShowInfos'
-    ])
+      'isShowInfos',
+      'isShowInfosBreakdown'
+    ]),
+
+    buttonIsOn () {
+      if (this.isBreakdown) {
+        return this.isShowInfosBreakdown
+      } else {
+        return this.isShowInfos
+      }
+    }
   },
 
   methods: {
     ...mapActions([
       'showInfos',
-      'hideInfos'
+      'showInfosBreakdown',
+      'hideInfos',
+      'hideInfosBreakdown'
     ]),
 
     toggleInfos () {
-      if (this.isShowInfos) {
-        this.hideInfos()
+      if (!this.isBreakdown) {
+        if (this.isShowInfos) {
+          this.hideInfos()
+        } else {
+          this.showInfos()
+        }
       } else {
-        this.showInfos()
+        if (this.isShowInfosBreakdown) {
+          this.hideInfosBreakdown()
+        } else {
+          this.showInfosBreakdown()
+        }
       }
     }
   },
 
   mounted () {
-    if (localStorage.getItem('show-infos') === 'false') {
-      this.hideInfos()
+    if (!this.isBreakdown) {
+      if (localStorage.getItem('show-infos') === 'false') {
+        this.hideInfos()
+      } else {
+        this.showInfos()
+      }
     } else {
-      this.showInfos()
+      if (localStorage.getItem('show-infos-breakdown') === 'false') {
+        this.hideInfosBreakdown()
+      } else {
+        this.showInfosBreakdown()
+      }
     }
   },
 
@@ -62,6 +93,14 @@ export default {
       localStorage.setItem(
         'show-infos',
         this.isShowInfos,
+        { expires: '1M' }
+      )
+    },
+
+    isShowInfosBreakdown () {
+      localStorage.setItem(
+        'show-infos-breakdown',
+        this.isShowInfosBreakdown,
         { expires: '1M' }
       )
     }

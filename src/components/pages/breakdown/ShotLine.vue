@@ -24,7 +24,7 @@
     </div>
     <div
       class="description-column flexrow-item"
-      v-if="isShowInfos"
+      v-if="isShowInfosBreakdown"
     >
       <input
         class="input-editor"
@@ -41,7 +41,7 @@
       :title="entity.data ? entity.data[descriptor.field_name] : ''"
       :key="'desc' + entity.id + '-' + descriptor.id"
       v-for="(descriptor, j) in visibleMetadataDescriptors"
-      v-if="isShowInfos"
+      v-if="isShowInfosBreakdown"
     >
       <input
         class="input-editor"
@@ -194,7 +194,7 @@ export default {
   computed: {
     ...mapGetters([
       'isCurrentUserManager',
-      'isShowInfos'
+      'isShowInfosBreakdown'
     ])
   },
 
