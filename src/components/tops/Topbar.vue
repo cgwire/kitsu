@@ -258,9 +258,10 @@ export default {
       'currentProduction',
       'episodes',
       'episodeOptions',
-      'isCurrentUserArtist',
       'isCurrentUserAdmin',
+      'isCurrentUserArtist',
       'isCurrentUserClient',
+      'isCurrentUserManager',
       'isCurrentUserVendor',
       'isDarkTheme',
       'isSidebarHidden',
@@ -373,8 +374,16 @@ export default {
 
       options = options.concat([
         { label: this.$t('breakdown.title'), value: 'breakdown' },
-        { label: this.$t('playlists.title'), value: 'playlists' },
-        { label: this.$t('news.title'), value: 'newsFeed' },
+        { label: this.$t('playlists.title'), value: 'playlists' }
+      ])
+
+      if (!this.isCurrentUserClient) {
+        options.push(
+          { label: this.$t('news.title'), value: 'newsFeed' }
+        )
+      }
+
+      options = options.concat([
         { label: 'separator', value: 'separator' }
       ])
 
@@ -406,7 +415,7 @@ export default {
           { label: this.$t('people.team'), value: 'team' }
         ])
 
-        if (this.isCurrentUserAdmin) {
+        if (this.isCurrentUserAdmin || this.isCurrentUserManager) {
           options = options.concat([
             { label: 'separator', value: 'separator' },
             { label: this.$t('settings.title'), value: 'production-settings' }

@@ -24,11 +24,13 @@
           :size="25"
           :font-size="12"
           :person="comment.person"
+          v-if="!isCurrentUserClient || isAuthorClient"
         />
         <strong class="flexrow-item">
           <people-name
             class=""
             :person="comment.person"
+            v-if="!isCurrentUserClient || isAuthorClient"
           />
         </strong>
         <div class="filler"></div>
@@ -57,7 +59,7 @@
         <div class="content">
           <p
             class="client-comment"
-            v-if="personMap.get(comment.person_id).role === 'client'"
+            v-if="isAuthorClient && !isCurrentUserClient"
           >
             <span>
               {{ $t('comments.comment_from_client') }}
@@ -389,6 +391,7 @@ export default {
     ...mapGetters([
       'currentProduction',
       'isCurrentUserAdmin',
+      'isCurrentUserClient',
       'isCurrentUserManager',
       'isDarkTheme',
       'user',
@@ -520,6 +523,10 @@ export default {
       } else {
         return color
       }
+    },
+
+    isAuthorClient () {
+      return this.personMap.get(this.comment.person_id).role === 'client'
     }
   },
 
