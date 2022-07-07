@@ -219,7 +219,7 @@ export const playerMixin = {
 
     fps () {
       return this.currentProduction
-        ? parseInt(this.currentProduction.fps || '24')
+        ? parseFloat(this.currentProduction.fps || '24')
         : 24
     },
 

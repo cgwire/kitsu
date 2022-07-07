@@ -625,7 +625,7 @@ export default {
 
     fps () {
       return this.currentProduction.fps
-        ? parseInt(this.currentProduction.fps)
+        ? parseFloat(this.currentProduction.fps)
         : 24
     },
 
@@ -732,6 +732,7 @@ export default {
     },
 
     nbFrames () {
+      console.log(this.videoDuration, this.fps)
       return Math.round(this.videoDuration * this.fps)
     }
   },

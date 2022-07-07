@@ -101,7 +101,7 @@ export default {
     },
 
     fps () {
-      return parseInt(this.currentProduction.fps || '24')
+      return parseFloat(this.currentProduction.fps || '24')
     },
 
     player1 () {
