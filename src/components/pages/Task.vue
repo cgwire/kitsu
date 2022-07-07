@@ -34,7 +34,6 @@
           </router-link>
         </div>
 
-        <div class="filler"></div>
         <div class="flexrow-item flexrow block">
           <span class="flexrow-item">
             {{ $t('tasks.current_status') }}
@@ -1331,6 +1330,28 @@ export default {
               reply: { id: eventData.reply_id }
             })
           }
+        }
+      },
+
+      'preview-file:annotation-update' (eventData) {
+        const previewPlayer = this.$refs['preview-player']
+        const isValid = previewPlayer.isValidPreviewModification(
+          eventData.preview_file_id,
+          eventData.updated_at
+        )
+        if (isValid) {
+          this.refreshPreview({
+            previewId: previewPlayer.currentPreview.id,
+            taskId: previewPlayer.currentPreview.task_id
+          }).then(preview => {
+            if (!previewPlayer.notSaved) {
+              this.currentTaskPreviews = this.getCurrentTaskPreviews()
+              this.$nextTick(() => {
+                previewPlayer.reloadAnnotations()
+                previewPlayer.loadAnnotation()
+              })
+            }
+          })
         }
       }
     }

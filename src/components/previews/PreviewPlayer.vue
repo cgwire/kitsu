@@ -1342,7 +1342,6 @@ export default {
         if (this.$refs['task-info-player']) {
           this.$refs['task-info-player'].focusCommentTextarea()
         }
-        // this.resetHeight()
         this.previewViewer.resetVideo()
         this.previewViewer.resetPicture()
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
@@ -1490,6 +1489,15 @@ export default {
       this.$nextTick(() => {
         this.currentIndex = newIndex + 1
       })
+    },
+
+    isValidPreviewModification (previewId, updatedAt) {
+      return (
+        !this.notSaved &&
+        this.currentPreview &&
+        previewId === this.currentPreview.id &&
+        !this.isWriting(updatedAt)
+      )
     }
   },
 
@@ -1600,30 +1608,6 @@ export default {
       this.$nextTick(() => {
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
       })
-    }
-  },
-
-  socket: {
-    events: {
-      'preview-file:annotation-update' (eventData) {
-        if (
-          !this.notSaved &&
-          this.currentPreview &&
-          eventData.preview_file_id === this.currentPreview.id &&
-          !this.isWriting(eventData.updated_at)
-        ) {
-          this.refreshPreview({
-            previewId: this.currentPreview.id,
-            taskId: this.currentPreview.task_id
-          }).then(preview => {
-            if (!this.notSaved) {
-              this.reloadAnnotations()
-              if (this.isPicture) this.loadAnnotation(this.getAnnotation(0))
-              else this.loadAnnotation()
-            }
-          })
-        }
-      }
     }
   }
 }

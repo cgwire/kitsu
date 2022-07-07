@@ -356,7 +356,9 @@ export default {
     onLineClicked (i, event) {
       const ref = 'validation-' + i + '-0'
       const validationCell = this.$refs[ref][0]
-      validationCell.select(event)
+      if (validationCell) {
+        validationCell.select(event)
+      }
     },
 
     onTaskSelected (validationInfo) {

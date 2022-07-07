@@ -775,10 +775,14 @@ export default {
     },
 
     onAnnotationChanged ({ preview, additions, deletions, updates }) {
-      const taskId = this.task.id
-      this.updatePreviewAnnotation({
-        taskId, preview, additions, deletions, updates
-      })
+      const taskId = this.task
+        ? this.task.id
+        : this.previousTaskId
+      if (taskId) {
+        this.updatePreviewAnnotation({
+          taskId, preview, additions, deletions, updates
+        })
+      }
     },
 
     onAddPreviewClicked (comment) {
@@ -1193,6 +1197,27 @@ export default {
               reply: { id: eventData.reply_id }
             })
           }
+        }
+      },
+
+      'preview-file:annotation-update' (eventData) {
+        const previewPlayer = this.$refs['preview-player']
+        if (!previewPlayer) return
+        const isValid = previewPlayer.isValidPreviewModification(
+          eventData.preview_file_id,
+          eventData.updated_at
+        )
+        if (isValid) {
+          this.refreshPreview({
+            previewId: previewPlayer.currentPreview.id,
+            taskId: previewPlayer.currentPreview.task_id
+          }).then(preview => {
+            if (!previewPlayer.notSaved) {
+              this.taskPreviews = this.getTaskPreviews(this.task.id)
+              previewPlayer.reloadAnnotations()
+              previewPlayer.loadAnnotation()
+            }
+          })
         }
       }
     }
