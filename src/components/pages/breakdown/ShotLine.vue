@@ -26,15 +26,20 @@
       class="description-column flexrow-item"
       v-if="isShowInfosBreakdown"
     >
-      <input
-        class="input-editor"
-        @input="event => onDescriptionChanged(entity, event)"
+      <div
+        class="tooltip-text"
+        v-html="compileMarkdown(entity.description)"
+        v-if="readOnly"
+      >
+      </div>
+      <textarea
+        class="tooltip-editor"
+        ref="text"
         :value="entity.description"
-        v-if="!readOnly"
-      />
-      <span class="selectable" v-else>
-        {{ entity.description }}
-      </span>
+        @input="event => onDescriptionChanged(entity, event)"
+        v-else
+      >
+      </textarea>
     </div>
     <div
       class="metadata-descriptor flexrow-item"
@@ -135,6 +140,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { renderMarkdown } from '@/lib/render'
 import { entityListMixin } from '@/components/mixins/entity_list'
 import { descriptorMixin } from '@/components/mixins/descriptors'
 
@@ -217,6 +223,10 @@ export default {
 
     onDescriptionChanged (entity, event) {
       this.$emit('description-changed', entity, event.target.value)
+    },
+
+    compileMarkdown (input) {
+      return renderMarkdown(input)
     }
   }
 }
@@ -291,7 +301,6 @@ export default {
 .description-column,
 .metadata-descriptor {
   border-left: 1px solid $light-grey;
-  width: 120px;
   padding-top: 0;
   align-self: stretch;
   margin-right: 0;
@@ -299,9 +308,31 @@ export default {
   align-items: center;
 }
 
+.metadata-descriptor {
+  width: 120px;
+}
+
+.description-column {
+  width: 150px;
+}
+
+.tooltip-editor {
+  resize: none;
+}
+
+div .tooltip-text {
+  padding: 0.5rem;
+  word-break: break-all;
+}
+
+.metadata-value {
+  word-break: break-all;
+}
+
 .dark {
   .select select,
-  div .input-editor {
+  div .input-editor,
+  div .tooltip-editor {
     color: $white;
 
     option {
@@ -317,9 +348,9 @@ export default {
   }
 }
 
-div .input-editor {
+div .input-editor,
+div .tooltip-editor {
   color: $grey-strong;
-  height: 100%;
   padding: 0.5rem;
   width: 100%;
   background: transparent;
@@ -343,10 +374,18 @@ div .input-editor {
   }
 }
 
+div .input-editor {
+  height: 40px;
+}
+
+div .tooltip-editor {
+  height: 100%;
+}
+
 .metadata-descriptor .select {
   color: $grey-strong;
   margin: 0;
-  height: 100%;
+  height: 40px;
   width: 100%;
   border: 1px solid transparent;
 
@@ -384,6 +423,6 @@ div .input-editor {
 }
 .description-column .selectable,
 .metadata-descriptor .selectable {
-  padding-left: 1em;
+  padding: 0.5rem;
 }
 </style>

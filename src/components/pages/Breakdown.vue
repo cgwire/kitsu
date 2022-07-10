@@ -58,6 +58,37 @@
         </div>
         <spinner class="mt1" v-if="isLoading" />
         <div class="mt1" v-else>
+          <div class="header flexrow">
+            <div class="entity-header flexrow-item">
+              {{ $t('shots.fields.name') }}
+            </div>
+            <div
+              class="description-header flexrow-item"
+              v-if="isShowInfosBreakdown"
+            >
+              {{ $t('shots.fields.description') }}
+            </div>
+            <div
+              class="descriptor-header flexrow-item"
+              :key="'descriptor-header-' + descriptor.id"
+              v-for="descriptor in visibleMetadataDescriptors"
+              v-if="isShowInfosBreakdown"
+            >
+              <department-name
+                :key="department.id"
+                :department="department"
+                :only-dot="true"
+                :style="{'padding': '0px 0px'}"
+                v-for="department in descriptorCurrentDepartments(descriptor)"
+              />
+              <span class="flexrow-item descriptor-name">
+                {{ descriptor.name }}
+              </span>
+            </div>
+            <div class="casting-header flexrow-item">
+              Casting
+            </div>
+          </div>
           <shot-line
             :key="entity.id"
             :entity="entity"
@@ -223,6 +254,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { range } from '@/lib/time'
 import csv from '@/lib/csv'
 import clipboard from '@/lib/clipboard'
+import { entityListMixin } from '@/components/mixins/entity_list'
 
 import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock'
 import BuildFilterModal from '@/components/modals/BuildFilterModal'
@@ -238,10 +270,13 @@ import SearchField from '@/components/widgets/SearchField'
 import ShotLine from '@/components/pages/breakdown/ShotLine'
 import ShowInfosButton from '@/components/widgets/ShowInfosButton'
 import Spinner from '@/components/widgets/Spinner'
+import DepartmentName from '@/components/widgets/DepartmentName'
 
 export default {
   name: 'breakdown',
-
+  mixins: [
+    entityListMixin
+  ],
   components: {
     AvailableAssetBlock,
     BuildFilterModal,
@@ -249,6 +284,7 @@ export default {
     ButtonSimple,
     ComboboxStyled,
     DeleteModal,
+    DepartmentName,
     EditAssetModal,
     EditLabelModal,
     ImportModal,
@@ -334,6 +370,7 @@ export default {
       'castingSequencesOptions',
       'currentEpisode',
       'currentProduction',
+      'departmentMap',
       'displayedShots',
       'episodeMap',
       'episodes',
@@ -341,6 +378,7 @@ export default {
       'isAssetsLoading',
       'isCurrentUserManager',
       'isShotsLoading',
+      'isShowInfosBreakdown',
       'isTVShow',
       'sequenceMap',
       'sequences',
@@ -1017,6 +1055,13 @@ export default {
       } else {
         this.editAsset(data)
       }
+    },
+
+    descriptorCurrentDepartments (descriptor) {
+      const departemts = descriptor.departments || []
+      return departemts.map(
+        departmentId => this.departmentMap.get(departmentId)
+      )
     }
   },
 
@@ -1263,5 +1308,29 @@ export default {
   .search-field-wrapper {
     margin-right: 0.5em;
   }
+}
+
+.entity-header {
+  width: 169px;
+}
+
+.description-header {
+  width: 136px;
+}
+
+.descriptor-header {
+  width: 106px;
+}
+
+.entity-header,
+.description-header,
+.descriptor-header {
+  border-right: 1px solid $light-grey;
+}
+
+.header {
+  font-size: 1.1em;
+  padding: 0 .5em 0;
+  border-bottom: 1px solid $light-grey;
 }
 </style>

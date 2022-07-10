@@ -99,7 +99,7 @@ const initialState = {
   isBigThumbnails: false,
   isShowAssignations: true,
   isShowInfos: true,
-  isShowInfosBreakdown: true,
+  isShowInfosBreakdown: false,
 
   isSavingCommentPreview: false,
   previewForms: [],
