@@ -61,13 +61,21 @@
             >
               <input
                 type="checkbox"
-                :checked="getMetadataChecklistValues(descriptor, assetToEdit)[option.text]"
                 @change="event => onMetadataCheckboxChanged(descriptor, option.text, event)"
                 :id="`${descriptor.id}-${i}-${option.text}-checkbox`"
+                :checked="getMetadataChecklistValues(descriptor, assetToEdit)[option.text]"
+                :disabled="!(isCurrentUserManager
+                  || isSupervisorInDepartments(descriptor.departments))"
+                :style="[isCurrentUserManager
+                  || isSupervisorInDepartments(descriptor.departments) ?
+                    {cursor: 'pointer'} : {cursor: 'auto'}]"
               />
               <label
                 class="checkbox-label"
                 :for="`${descriptor.id}-${i}-${option.text}-checkbox`"
+                :style="[isCurrentUserManager
+                  || isSupervisorInDepartments(descriptor.departments) ?
+                    {cursor: 'pointer'} : {cursor: 'auto'}]"
               >
                 <span>{{ option.text }}</span>
               </label>

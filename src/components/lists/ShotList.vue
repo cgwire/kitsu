@@ -303,10 +303,17 @@
                   @change="event => onMetadataChecklistChanged(shot, descriptor, option.text, event)"
                   :id="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
                   :checked="getMetadataChecklistValues(descriptor, shot)[option.text]"
+                  :disabled="!(isCurrentUserManager
+                    || isSupervisorInDepartments(descriptor.departments))"
+                  :style="[isCurrentUserManager
+                    || isSupervisorInDepartments(descriptor.departments) ?
+                      {cursor: 'pointer'} : {cursor: 'auto'}]"
                 />
                 <label
-                  style="cursor: pointer;"
                   :for="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :style="[isCurrentUserManager
+                    || isSupervisorInDepartments(descriptor.departments) ?
+                      {cursor: 'pointer'} : {cursor: 'auto'}]"
                 >
                   {{ option.text }}
                 </label>
@@ -529,10 +536,17 @@
                   @change="event => onMetadataChecklistChanged(shot, descriptor, option.text, event)"
                   :id="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
                   :checked="getMetadataChecklistValues(descriptor, shot)[option.text]"
+                  :disabled="!(isCurrentUserManager
+                    || isSupervisorInDepartments(descriptor.departments))"
+                  :style="[isCurrentUserManager
+                    || isSupervisorInDepartments(descriptor.departments) ?
+                      {cursor: 'pointer'} : {cursor: 'auto'}]"
                 />
                 <label
-                  style="cursor: pointer;"
                   :for="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :style="[isCurrentUserManager
+                    || isSupervisorInDepartments(descriptor.departments) ?
+                      {cursor: 'pointer'} : {cursor: 'auto'}]"
                 >
                   {{ option.text }}
                 </label>
