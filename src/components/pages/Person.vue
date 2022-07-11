@@ -84,7 +84,6 @@
           @change="onSearchChange"
           @save="saveSearchQuery"
           :can-save="true"
-          v-if="!isActiveTab('done')"
         />
         <span class="filler"></span>
         <combobox
@@ -138,7 +137,7 @@
         :is-error="isTasksLoadingError"
         :time-spent-map="personTimeSpentMap"
         :time-spent-total="personTimeSpentTotal"
-        :hide-done="personTasksSearchText.length > 0"
+        :hide-done="personTasksSearchText.length === 0"
         :hide-day-off="!(isCurrentUserAdmin || this.user.id == this.person.id)"
         @date-changed="onDateChanged"
         @time-spent-change="onTimeSpentChange"
