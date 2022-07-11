@@ -22,6 +22,31 @@
     <span class="flexrow-item playlist-name">
       {{ playlist.name }}
     </span>
+    <button-simple
+      @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
+      :class="{
+        'playlist-button': true,
+        'topbar-button': true,
+        'flexrow-item': true,
+        active: isAnnotationsDisplayed
+      }"
+      icon="pen"
+      :title="$t('playlists.actions.toggle_annotations')"
+      v-if="isCurrentUserManager && !isAddingEntity"
+    />
+    <button-simple
+      @click="isLaserModeOn = !isLaserModeOn"
+      :class="{
+        'playlist-button': true,
+        'topbar-button': true,
+        'flexrow-item': true,
+        active: isLaserModeOn
+      }"
+      class="playlist-button topbar-button flexrow-item"
+      icon="laser"
+      :title="$t('playlists.actions.toggle_annotations')"
+      v-if="isCurrentUserManager && !isAddingEntity"
+    />
     <preview-room
       :ref="previewRoomRef"
       :roomId="isValidRoomId(playlist.id) ? playlist.id : ''"
@@ -203,7 +228,7 @@
         class="canvas-wrapper"
         ref="canvas-wrapper"
         oncontextmenu="return false;"
-        v-show="!isCurrentPreviewFile"
+        v-show="!isCurrentPreviewFile && isAnnotationsDisplayed"
       >
         <canvas
           id="playlist-annotation-canvas"
@@ -880,8 +905,12 @@ export default {
       comparisonEntityMissing: false,
       comparisonMode: 'sidebyside',
       currentComparisonPreviewIndex: 0,
+      handleIn: 0,
+      handleOut: 0,
+      isAnnotationsDisplayed: true,
       isBuildLaunched: false,
       isDlButtonsHidden: true,
+      isLaserModeOn: false,
       isShowingPalette: false,
       isShowingPencilPalette: false,
       isShowAnnotationsWhilePlaying: false,
@@ -1773,6 +1802,10 @@ export default {
       border: 1px solid $dark-grey-strong;
       border-radius: 10px;
       margin-right: 0.5em;
+
+      &.active {
+        color: $white;
+      }
     }
   }
 }

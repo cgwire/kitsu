@@ -501,13 +501,27 @@ export const annotationMixin = {
       let o = obj.target
       o = this.setObjectData(o)
       // if (this.fabricCanvas.width < 420) o.strokeWidth *= 2
-      this.addToAdditions(o)
-      this.stackAddAction(obj)
+      if (this.isLaserModeOn) {
+        this.fadeObject(o)
+      } else {
+        this.addToAdditions(o)
+        this.stackAddAction(obj)
+      }
     },
 
     onObjectMoved (obj) {
       this.addToUpdates(obj.target)
       this.saveAnnotations()
+    },
+
+    fadeObject (obj) {
+      obj.animate('opacity', '0', {
+        duration: 1500,
+        onChange: this.fabricCanvas.renderAll.bind(this.fabricCanvas),
+        onComplete: () => {
+          this.fabricCanvas.remove(obj)
+        }
+      })
     },
 
     // Undo / Redo
