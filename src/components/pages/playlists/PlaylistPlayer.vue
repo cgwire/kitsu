@@ -1248,6 +1248,7 @@ export default {
       this.resetHandles(nextEntity)
       if (nextEntity.preview_file_extension === 'mp4') {
         this.rawPlayer.playNext(this.handleIn)
+        this.syncComparisonPlayer()
         this._setCurrentTimeOnHandleIn()
       } else if (this.isRepeating && this.isCurrentPreviewMovie) {
         this.rawPlayer.playNext()

@@ -392,6 +392,7 @@ export const playerMixin = {
     _setCurrentTimeOnHandleIn () {
       if (this.handleIn > 1 && this.frameNumber < this.handleIn) {
         this.rawPlayer.setCurrentTimeRaw(this.handleIn * this.frameDuration)
+        this.syncComparisonPlayer()
       }
     },
 
