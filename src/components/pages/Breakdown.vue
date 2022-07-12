@@ -62,6 +62,9 @@
             <div class="entity-header flexrow-item">
               {{ $t('shots.fields.name') }}
             </div>
+            <div class="standby-header flexrow-item">
+              {{ $t('breakdown.fields.standby') }}
+            </div>
             <div
               class="description-header flexrow-item"
               v-if="isShowInfosBreakdown"
@@ -106,6 +109,7 @@
             @click="selectEntity"
             @metadata-changed="onMetadataChanged"
             @description-changed="onDescriptionChanged"
+            @standby-changed="onStandbyChanged"
             v-for="entity in castingEntities"
           />
         </div>
@@ -1057,6 +1061,20 @@ export default {
       }
     },
 
+    onStandbyChanged (entity, value) {
+      const data = {
+        id: entity.id,
+        is_casting_standby: value
+      }
+      if (this.isEpisodeCasting) {
+        this.editEpisode(data)
+      } else if (this.isShotCasting) {
+        this.editShot(data)
+      } else {
+        this.editAsset(data)
+      }
+    },
+
     descriptorCurrentDepartments (descriptor) {
       const departemts = descriptor.departments || []
       return departemts.map(
@@ -1322,9 +1340,14 @@ export default {
   width: 106px;
 }
 
+.standby-header {
+  width: 80px;
+}
+
 .entity-header,
 .description-header,
-.descriptor-header {
+.descriptor-header,
+.standby-header {
   border-right: 1px solid $light-grey;
 }
 

@@ -22,6 +22,15 @@
     <div class="shot-name flexrow-item">
       {{ name }}
     </div>
+    <div class="standby-column flexrow-item">
+      <input
+        type="checkbox"
+        :checked="entity.is_casting_standby"
+        :disabled="!isCurrentUserManager"
+        :style="[isCurrentUserManager ? {cursor: 'pointer'} : {cursor: 'auto'}]"
+        @input="event => onStandbyChanged(entity, event)"
+      />
+    </div>
     <div
       class="description-column flexrow-item"
       v-if="isShowInfosBreakdown"
@@ -232,6 +241,10 @@ export default {
       this.$emit('description-changed', entity, event.target.value)
     },
 
+    onStandbyChanged (entity, event) {
+      this.$emit('standby-changed', entity, event.target.checked)
+    },
+
     compileMarkdown (input) {
       return renderMarkdown(input)
     }
@@ -306,7 +319,8 @@ export default {
 }
 
 .description-column,
-.metadata-descriptor {
+.metadata-descriptor,
+.standby-column {
   border-left: 1px solid $light-grey;
   padding-top: 0;
   align-self: stretch;
@@ -321,6 +335,11 @@ export default {
 
 .description-column {
   width: 150px;
+}
+
+.standby-column {
+  width: 94px;
+  justify-content: center;
 }
 
 .tooltip-editor {

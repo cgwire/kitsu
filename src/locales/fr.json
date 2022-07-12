@@ -63,6 +63,9 @@
                 "confirm": "Enlever les assets de cet épisode",
                 "error": "Il y a eu une erreur en supprimmant l'asset du casting. Essayez à nouveau. Si le problème persiste, veuillez contacter notre support.",
                 "text": "Si vous supprimmez l'asset de cet épisode, cela va enlever les assets de tous les shots liés. Êtes vous sur de l'enlever ?"
+            },
+            "fields": {
+                "standby": "En attente"
             }
         },
         "comments": {

@@ -67,6 +67,9 @@ export default {
       confirm: 'Remove asset from its episode',
       error: 'There was a server error while removing asset. Please, try again. If the problem persists, contact our support team.',
       text: 'If you remove this asset from the selected episode, it will remove the assets in all the underlying shots. Are you sure you want to remove it?'
+    },
+    fields: {
+      standby: 'Standby'
     }
   },
 
