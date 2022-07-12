@@ -83,6 +83,8 @@
       :frame-duration="frameDuration"
       :nb-frames="nbFrames"
       :width="width"
+      :handle-in="-1"
+      :handle-out="-1"
       @start-scrub="$refs['button-bar'].classList.add('unselectable')"
       @end-scrub="$refs['button-bar'].classList.remove('unselectable')"
       @progress-changed="onProgressChanged"
@@ -732,7 +734,6 @@ export default {
     },
 
     nbFrames () {
-      console.log(this.videoDuration, this.fps)
       return Math.round(this.videoDuration * this.fps)
     }
   },
