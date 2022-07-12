@@ -10,6 +10,29 @@
       'background-size': backgroundSize
     }"
   >
+    <span
+      class="handle-in"
+      :style="{
+        width: handleInWidth,
+        'padding-right': handleIn > 1 ? '5px' : 0
+      }"
+      @mousedown="startHandleInDrag($event)"
+      v-if="handleIn >= 0"
+    >
+      {{ handleIn !== 0 ? handleIn + 1 : '' }}
+    </span>
+
+    <span
+      class="handle-out"
+      :style="{
+        width: frameSize * (nbFrames - handleOut) + 'px'
+      }"
+      @mousedown="startHandleOutDrag($event)"
+      v-if="handleOut >= 0"
+    >
+      {{ handleOut + 1 }}
+    </span>
+
     <progress
       ref="progress"
       value="0"
@@ -59,6 +82,14 @@ export default {
     nbFrames: {
       default: 0,
       type: Number
+    },
+    handleIn: {
+      default: 3,
+      type: Number
+    },
+    handleOut: {
+      default: 3,
+      type: Number
     }
   },
 
@@ -74,6 +105,8 @@ export default {
   mounted () {
     window.addEventListener('mousemove', this.doProgressDrag)
     window.addEventListener('mouseup', this.stopProgressDrag)
+    window.addEventListener('mouseup', this.stopHandleInDrag)
+    window.addEventListener('mouseup', this.stopHandleOutDrag)
     window.addEventListener('resize', this.onWindowResize)
     new ResizeObserver(this.onWindowResize).observe(this.progress)
 
@@ -85,6 +118,8 @@ export default {
   beforeDestroy () {
     window.removeEventListener('mousemove', this.doProgressDrag)
     window.removeEventListener('mouseup', this.stopProgressDrag)
+    window.removeEventListener('mouseup', this.stopHandleInDrag)
+    window.removeEventListener('mouseup', this.stopHandleOutDrag)
     window.removeEventListener('resize', this.onWindowResize)
   },
 
@@ -107,6 +142,10 @@ export default {
 
     videoDuration () {
       return this.nbFrames * this.frameDuration
+    },
+
+    handleInWidth () {
+      return Math.max(this.frameSize * this.handleIn, 0) + 'px'
     }
   },
 
@@ -136,9 +175,39 @@ export default {
       this.$emit('end-scrub')
     },
 
+    startHandleInDrag (event) {
+      this.handleInDragging = true
+    },
+
+    stopHandleInDrag (event) {
+      if (this.handleInDragging) {
+        this.handleInDragging = false
+        const { frameNumber } = this._getMouseFrame()
+        this.$emit('handle-in-changed', frameNumber)
+      }
+    },
+
+    startHandleOutDrag (event) {
+      this.handleOutDragging = true
+    },
+
+    stopHandleOutDrag (event) {
+      if (this.handleOutDragging) {
+        this.handleOutDragging = false
+        let { frameNumber, position } = this._getMouseFrame()
+        if (this.width - position < 4) frameNumber += 1
+        this.$emit('handle-out-changed', frameNumber)
+      }
+    },
+
     doProgressDrag (event) {
-      if (this.progressDragging || this.isFrameNumberVisible) {
-        const frameNumber = this._getMouseFrame()
+      if (
+        this.progressDragging ||
+        this.handleInDragging ||
+        this.handleOutDragging ||
+        this.isFrameNumberVisible
+      ) {
+        const { frameNumber } = this._getMouseFrame()
         this.hoverFrame = frameNumber + 1
         this.frameNumberLeftPosition = this.width / this.nbFrames * frameNumber
         if (this.progressDragging) {
@@ -163,11 +232,11 @@ export default {
         : this.videoDuration * ratio
       if (duration < 0) duration = 0
       const frameNumber = Math.floor(duration / this.frameDuration)
-      return frameNumber
+      return { frameNumber, position }
     },
 
     _emitProgressEvent (annotation) {
-      const frameNumber = this._getMouseFrame(annotation)
+      const { frameNumber } = this._getMouseFrame(annotation)
       this.$emit('progress-changed', frameNumber)
     }
   },
@@ -241,5 +310,57 @@ progress {
   top: 8px;
   color: $white;
   z-index: 800;
+}
+
+.handle-in {
+  background: $black;
+  color: $grey;
+  display: inline-block;
+  height: 28px;
+  left: 0;
+  opacity: 0.9;
+  padding-top: 3px;
+  position: absolute;
+  z-index: 100;
+  text-align: right;
+}
+
+.handle-in::after {
+  bottom: 0;
+  background: $dark-purple;
+  content: " ";
+  cursor: pointer;
+  height: 34px;
+  position: absolute;
+  right: -5px;
+  top: -2px;
+  width: 5px;
+  z-index: 120;
+}
+
+.handle-out {
+  background: $black;
+  color: $grey;
+  display: inline-block;
+  height: 28px;
+  padding-left: 10px;
+  padding-top: 3px;
+  position: absolute;
+  opacity: 0.9;
+  right: 0;
+  z-index: 100;
+}
+
+.handle-out::before {
+  bottom: 0;
+  background: $dark-purple;
+  content: " ";
+  cursor: pointer;
+  height: 34px;
+  left: 0px;
+  position: absolute;
+  top: -2px;
+  width: 5px;
+  z-index: 120;
 }
 </style>
