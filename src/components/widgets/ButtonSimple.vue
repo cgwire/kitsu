@@ -155,7 +155,20 @@
     :class="iconClass"
     v-if="icon === 'music'"
   />
-
+  <pen-tool-icon
+    :class="iconClass"
+    v-if="icon === 'pen'"
+  />
+  <square-icon
+    :class="iconClass"
+    v-if="icon === 'eraser'"
+  />
+  <span
+    :class="iconClass"
+    v-if="icon === 'laser'"
+  >
+    ⦿
+  </span>
   <span
     :class="{
       text: true,
@@ -190,6 +203,7 @@ import {
   MusicIcon,
   PaperclipIcon,
   PauseIcon,
+  PenToolIcon,
   PlayIcon,
   PlusIcon,
   RefreshCwIcon,
@@ -199,10 +213,11 @@ import {
   SendIcon,
   SkipBackIcon,
   SkipForwardIcon,
+  SquareIcon,
   TrashIcon,
   TypeIcon,
-  UploadIcon,
   TriangleIcon,
+  UploadIcon,
   VolumeXIcon,
   Volume2Icon,
   XIcon
@@ -231,6 +246,7 @@ export default {
     MusicIcon,
     PaperclipIcon,
     PauseIcon,
+    PenToolIcon,
     PlayIcon,
     PlusIcon,
     RefreshCwIcon,
@@ -240,6 +256,7 @@ export default {
     SendIcon,
     SkipBackIcon,
     SkipForwardIcon,
+    SquareIcon,
     TrashIcon,
     TypeIcon,
     UploadIcon,

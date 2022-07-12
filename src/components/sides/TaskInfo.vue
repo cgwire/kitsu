@@ -1022,7 +1022,7 @@ export default {
         p => p.revision === parseInt(versionRevision)
       ))
       setTimeout(() => {
-        this.$refs['preview-player'].setCurrentFrame(frame - 1)
+        this.$refs['preview-player'].setCurrentFrame(frame)
         this.$refs['preview-player'].focus()
       }, 20)
     },

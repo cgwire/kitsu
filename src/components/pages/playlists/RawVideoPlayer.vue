@@ -65,6 +65,14 @@ export default {
     name: { // Debug purpose
       type: String,
       default: 'main'
+    },
+    handleIn: {
+      type: Number,
+      default: 0
+    },
+    handleOut: {
+      type: Number,
+      default: 0
     }
   },
 
@@ -324,10 +332,13 @@ export default {
       }, 1000 / this.fps)
     },
 
-    playNext () {
+    playNext (handleIn) {
       if (!this.isPlaying) return
+      handleIn = handleIn || this.handleIn
       if (this.isRepeating) {
-        this.currentPlayer.currentTime = this.frameDuration
+        this.currentPlayer.currentTime = this.handleIn
+          ? this.handleIn * this.frameDuration
+          : this.frameDuration
         this.currentPlayer.play()
         this.$emit('repeat')
       } else {
@@ -337,6 +348,9 @@ export default {
 
         if (this.currentPlayer) this.currentPlayer.style.display = 'none'
         if (this.nextPlayer) {
+          this.nextPlayer.currentTime = handleIn
+            ? handleIn * this.frameDuration
+            : this.frameDuration
           this.nextPlayer.style.display = 'block'
           this.nextPlayer.play()
         }

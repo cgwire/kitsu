@@ -22,6 +22,31 @@
     <span class="flexrow-item playlist-name">
       {{ playlist.name }}
     </span>
+    <button-simple
+      @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
+      :class="{
+        'playlist-button': true,
+        'topbar-button': true,
+        'flexrow-item': true,
+        active: isAnnotationsDisplayed
+      }"
+      icon="pen"
+      :title="$t('playlists.actions.toggle_annotations')"
+      v-if="isCurrentUserManager && !isAddingEntity"
+    />
+    <button-simple
+      @click="isLaserModeOn = !isLaserModeOn"
+      :class="{
+        'playlist-button': true,
+        'topbar-button': true,
+        'flexrow-item': true,
+        active: isLaserModeOn
+      }"
+      class="playlist-button topbar-button flexrow-item"
+      icon="laser"
+      :title="$t('playlists.actions.toggle_annotations')"
+      v-if="isCurrentUserManager && !isAddingEntity"
+    />
     <preview-room
       :ref="previewRoomRef"
       :roomId="isValidRoomId(playlist.id) ? playlist.id : ''"
@@ -78,6 +103,8 @@
         :is-hd="isHd"
         :is-repeating="isRepeating"
         :muted="true"
+        :handle-in="handleIn"
+        :handle-out="handleOut"
         name="comparison"
         v-show="isComparing && isCurrentPreviewMovie &&
                 isMovieComparison && !isLoading"
@@ -203,7 +230,7 @@
         class="canvas-wrapper"
         ref="canvas-wrapper"
         oncontextmenu="return false;"
-        v-show="!isCurrentPreviewFile"
+        v-show="!isCurrentPreviewFile && isAnnotationsDisplayed"
       >
         <canvas
           id="playlist-annotation-canvas"
@@ -236,9 +263,13 @@
     :annotations="annotations"
     :frame-duration="frameDuration"
     :nb-frames="nbFrames"
+    :handle-in="playlist.for_entity === 'shot' ? handleIn : -1"
+    :handle-out="playlist.for_entity === 'shot' ? handleOut : -1"
     @start-scrub="onScrubStart"
     @end-scrub="onScrubEnd"
     @progress-changed="onProgressChanged"
+    @handle-in-changed="onHandleInChanged"
+    @handle-out-changed="onHandleOutChanged"
     v-show="isCurrentPreviewMovie && playlist.id && !isAddingEntity"
   />
 
@@ -880,8 +911,12 @@ export default {
       comparisonEntityMissing: false,
       comparisonMode: 'sidebyside',
       currentComparisonPreviewIndex: 0,
+      handleIn: 0,
+      handleOut: 0,
+      isAnnotationsDisplayed: true,
       isBuildLaunched: false,
       isDlButtonsHidden: true,
+      isLaserModeOn: false,
       isShowingPalette: false,
       isShowingPencilPalette: false,
       isShowAnnotationsWhilePlaying: false,
@@ -956,6 +991,7 @@ export default {
       'isTVShow',
       'organisation',
       'previewFileMap',
+      'shotMap',
       'taskMap',
       'taskTypeMap',
       'shotTaskTypes',
@@ -1107,7 +1143,8 @@ export default {
       'changePlaylistType',
       'deletePlaylist',
       'removeBuildJob',
-      'runPlaylistBuild'
+      'runPlaylistBuild',
+      'editShot'
     ]),
 
     getBuildPath (job) {
@@ -1208,8 +1245,10 @@ export default {
 
     onPlayNext () {
       const nextEntity = this.entityList[this.nextEntityIndex]
+      this.resetHandles(nextEntity)
       if (nextEntity.preview_file_extension === 'mp4') {
-        this.rawPlayer.playNext()
+        this.rawPlayer.playNext(this.handleIn)
+        this._setCurrentTimeOnHandleIn()
       } else if (this.isRepeating && this.isCurrentPreviewMovie) {
         this.rawPlayer.playNext()
       } else {
@@ -1586,6 +1625,21 @@ export default {
       if (this.isWaveformDisplayed) {
         this.wavesurfer.load(this.rawPlayer.currentPlayer)
       }
+    },
+
+    updateProgressBar () {
+      if (this.progress) {
+        this.progress.updateProgressBar(this.frameNumber + 1)
+      }
+    },
+
+    resetHandles (entity) {
+      if (this.playlist.for_entity === 'shot') {
+        entity = entity || this.currentEntity
+        const shot = this.shotMap.get(entity.id)
+        this.handleIn = shot.data.handle_in || 0
+        this.handleOut = shot.data.handle_out || this.nbFrames
+      }
     }
   },
 
@@ -1608,6 +1662,7 @@ export default {
       this.resetUndoStacks()
       this.currentPreviewIndex = 0
       this.currentComparisonPreviewIndex = 0
+      this.resetHandles()
       if (this.isCurrentPreviewMovie) {
         this.$nextTick(() => {
           this.loadWaveForm()
@@ -1679,6 +1734,7 @@ export default {
       this.resetCanvas()
         .then(() => {
           if (this.isCurrentPreview) {
+            this.resetHandles()
             this.annotations = this.currentEntity.preview_file_annotations
             this.loadAnnotation(this.getAnnotation(0))
           }
@@ -1773,6 +1829,10 @@ export default {
       border: 1px solid $dark-grey-strong;
       border-radius: 10px;
       margin-right: 0.5em;
+
+      &.active {
+        color: $light-green;
+      }
     }
   }
 }

@@ -379,6 +379,7 @@ export const playerMixin = {
       } else if (this.isCurrentPreviewSound) {
         this.playSound()
       } else {
+        this._setCurrentTimeOnHandleIn()
         this.rawPlayer.play()
         if (this.isComparing) {
           this.rawPlayerComparison.play()
@@ -386,6 +387,12 @@ export const playerMixin = {
         this.isPlaying = this.rawPlayer.isPlaying
       }
       this.clearCanvas()
+    },
+
+    _setCurrentTimeOnHandleIn () {
+      if (this.handleIn > 1 && this.frameNumber < this.handleIn) {
+        this.rawPlayer.setCurrentTimeRaw(this.handleIn * this.frameDuration)
+      }
     },
 
     pause () {
@@ -528,6 +535,27 @@ export const playerMixin = {
       if (annotation) this.loadAnnotation(annotation)
       this.sendUpdatePlayingStatus()
       this.onFrameUpdate(frameNumber)
+    },
+
+    onHandleInChanged (frameNumber) {
+      this.handleIn = frameNumber
+      this._saveHandles()
+    },
+
+    onHandleOutChanged (frameNumber) {
+      this.handleOut = frameNumber
+      this._saveHandles()
+    },
+
+    _saveHandles () {
+      const shot = this.shotMap.get(this.currentEntity.id)
+      const editedShot = {
+        id: shot.id,
+        data: { ...shot.data }
+      }
+      editedShot.data.handle_in = this.handleIn
+      editedShot.data.handle_out = this.handleOut
+      this.editShot(editedShot)
     },
 
     onPreviousFrameClicked () {
@@ -757,6 +785,17 @@ export const playerMixin = {
           this.loadSingleAnnotation(annotation)
         } else {
           this.clearCanvas()
+        }
+      }
+      if (
+        this.handleOut < this.nbFrames &&
+        this.frameNumber >= this.handleOut &&
+        this.isPlaying
+      ) {
+        if (this.isRepeating) {
+          this.rawPlayer.setCurrentFrame(this.handleIn)
+        } else {
+          this.onPlayNext()
         }
       }
       this.onNextTimeUpdateActions = []
