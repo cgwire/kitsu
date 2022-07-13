@@ -1663,7 +1663,6 @@ export default {
       this.resetUndoStacks()
       this.currentPreviewIndex = 0
       this.currentComparisonPreviewIndex = 0
-      this.resetHandles()
       if (this.isCurrentPreviewMovie) {
         this.$nextTick(() => {
           this.loadWaveForm()
