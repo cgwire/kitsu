@@ -123,6 +123,12 @@
           :options="entityNavOptions"
           v-model="currentSection"
         />
+        <span
+          class="tag tag-standby"
+          v-show="currentSection === 'casting' && currentAsset.is_casting_standby"
+        >
+          {{ $t('breakdown.fields.standby') }}
+        </span>
         <div class="filler"></div>
         <span
           class="flexrow-item mt05"
@@ -791,5 +797,16 @@ h2.subtitle {
     font-size: 1.3em;
     line-height: 1.5em;
   }
+}
+
+.tag-standby {
+  background: $red;
+  color: $white;
+  cursor: default;
+  text-transform: uppercase;
+}
+
+.dark .tag-standby {
+  background: $dark-red;
 }
 </style>

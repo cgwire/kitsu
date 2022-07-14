@@ -18,7 +18,8 @@ describe('ShowInfosButton', () => {
 
   beforeEach(() => {
     state = {
-      isShowInfos: true
+      isShowInfos: true,
+      isShowInfosBreakdown: true
     }
 
     mutations = {
@@ -33,7 +34,8 @@ describe('ShowInfosButton', () => {
     }
 
     getters = {
-      isShowInfos: state => state.isShowInfos
+      isShowInfos: state => state.isShowInfos,
+      isShowInfosBreakdown: state => state.isShowInfosBreakdown
     }
 
     store = new Vuex.Store({

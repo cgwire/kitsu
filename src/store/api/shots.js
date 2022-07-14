@@ -66,7 +66,8 @@ export default {
       name: shot.name,
       parent_id: shot.sequence_id,
       description: shot.description,
-      data: shot.data
+      data: shot.data,
+      is_casting_standby: Boolean(shot.is_casting_standby)
     }
     if (shot.nb_frames) {
       data.nb_frames = parseInt(shot.nb_frames)
@@ -101,7 +102,8 @@ export default {
   updateEpisode (episode) {
     const data = {
       name: episode.name,
-      description: episode.description
+      description: episode.description,
+      is_casting_standby: Boolean(episode.is_casting_standby)
     }
     return client.pput(`/api/data/entities/${episode.id}`, data)
   },

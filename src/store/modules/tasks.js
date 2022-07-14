@@ -62,6 +62,7 @@ import {
   SET_PREVIEW,
   SET_IS_SHOW_ASSIGNATIONS,
   SET_IS_SHOW_INFOS,
+  SET_IS_SHOW_INFOS_BREAKDOWN,
   SET_IS_BIG_THUMBNAILS,
   DELETE_PREVIEW_END,
 
@@ -98,6 +99,7 @@ const initialState = {
   isBigThumbnails: false,
   isShowAssignations: true,
   isShowInfos: true,
+  isShowInfosBreakdown: false,
 
   isSavingCommentPreview: false,
   previewForms: [],
@@ -159,6 +161,7 @@ const getters = {
   isBigThumbnails: state => state.isBigThumbnails,
   isShowAssignations: state => state.isShowAssignations,
   isShowInfos: state => state.isShowInfos,
+  isShowInfosBreakdown: state => state.isShowInfosBreakdown,
   taskEntityPreviews: state => state.taskEntityPreviews,
   previewForms: state => state.previewForms,
   isSavingCommentPreview: state => state.isSavingCommentPreview,
@@ -594,6 +597,14 @@ const actions = {
 
   hideInfos ({ commit, state }) {
     commit(SET_IS_SHOW_INFOS, false)
+  },
+
+  showInfosBreakdown ({ commit, state }) {
+    commit(SET_IS_SHOW_INFOS_BREAKDOWN, true)
+  },
+
+  hideInfosBreakdown ({ commit, state }) {
+    commit(SET_IS_SHOW_INFOS_BREAKDOWN, false)
   },
 
   setBigThumbnails ({ commit, state }) {
@@ -1116,6 +1127,10 @@ const mutations = {
 
   [SET_IS_SHOW_INFOS] (state, isShowInfos) {
     state.isShowInfos = isShowInfos
+  },
+
+  [SET_IS_SHOW_INFOS_BREAKDOWN] (state, isShowInfosBreakdown) {
+    state.isShowInfosBreakdown = isShowInfosBreakdown
   },
 
   [LOAD_PERSON_TASKS_END] (state, { tasks }) {

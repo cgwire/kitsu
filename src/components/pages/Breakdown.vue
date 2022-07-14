@@ -30,6 +30,7 @@
             v-if="isAssetCasting"
           />
           <span class="filler"></span>
+          <show-infos-button :is-breakdown="true" class="flexrow-item" />
           <button-simple
             class="flexrow-item"
             :title="isTextMode ? $t('breakdown.picture_mode') : $t('breakdown.text_mode')"
@@ -57,19 +58,58 @@
         </div>
         <spinner class="mt1" v-if="isLoading" />
         <div class="mt1" v-else>
+          <div class="header flexrow">
+            <div class="entity-header flexrow-item">
+              {{ $t('shots.fields.name') }}
+            </div>
+            <div class="standby-header flexrow-item">
+              {{ $t('breakdown.fields.standby') }}
+            </div>
+            <div
+              class="description-header flexrow-item"
+              v-if="isShowInfosBreakdown"
+            >
+              {{ $t('shots.fields.description') }}
+            </div>
+            <div
+              class="descriptor-header flexrow-item"
+              :key="'descriptor-header-' + descriptor.id"
+              v-for="descriptor in visibleMetadataDescriptors"
+              v-if="isShowInfosBreakdown"
+            >
+              <department-name
+                :key="department.id"
+                :department="department"
+                :only-dot="true"
+                :style="{'padding': '0px 0px'}"
+                v-for="department in descriptorCurrentDepartments(descriptor)"
+              />
+              <span class="flexrow-item descriptor-name">
+                {{ descriptor.name }}
+              </span>
+            </div>
+            <div class="casting-header flexrow-item">
+              Casting
+            </div>
+          </div>
           <shot-line
             :key="entity.id"
-            :entity-id="entity.id"
+            :entity="entity"
             :preview-file-id="entity.preview_file_id"
             :selected="selection[entity.id]"
             :name="entity.name"
             :assets="castingByType[entity.id] || []"
             :read-only="!isCurrentUserManager"
             :text-mode="isTextMode"
+            :metadata-descriptors="metadataDescriptors"
+            :metadata-display-headers="metadataDisplayHeaders"
             @edit-label="onEditLabelClicked"
             @remove-one="removeOneAsset"
             @remove-ten="removeTenAssets"
             @click="selectEntity"
+            @metadata-changed="onMetadataChanged"
+            @description-changed="onDescriptionChanged"
+            @standby-changed="onStandbyChanged"
             v-for="entity in castingEntities"
           />
         </div>
@@ -218,6 +258,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { range } from '@/lib/time'
 import csv from '@/lib/csv'
 import clipboard from '@/lib/clipboard'
+import { entityListMixin } from '@/components/mixins/entity_list'
 
 import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock'
 import BuildFilterModal from '@/components/modals/BuildFilterModal'
@@ -231,11 +272,15 @@ import ImportRenderModal from '@/components/modals/ImportRenderModal'
 import ImportModal from '@/components/modals/ImportModal'
 import SearchField from '@/components/widgets/SearchField'
 import ShotLine from '@/components/pages/breakdown/ShotLine'
+import ShowInfosButton from '@/components/widgets/ShowInfosButton'
 import Spinner from '@/components/widgets/Spinner'
+import DepartmentName from '@/components/widgets/DepartmentName'
 
 export default {
   name: 'breakdown',
-
+  mixins: [
+    entityListMixin
+  ],
   components: {
     AvailableAssetBlock,
     BuildFilterModal,
@@ -243,12 +288,14 @@ export default {
     ButtonSimple,
     ComboboxStyled,
     DeleteModal,
+    DepartmentName,
     EditAssetModal,
     EditLabelModal,
     ImportModal,
     ImportRenderModal,
     SearchField,
     ShotLine,
+    ShowInfosButton,
     Spinner
   },
 
@@ -315,28 +362,32 @@ export default {
   computed: {
     ...mapGetters([
       'assetMap',
+      'assetMetadataDescriptors',
       'assetsByType',
       'casting',
-      'castingEpisodes',
       'castingAssetTypeAssets',
       'castingAssetTypesOptions',
       'castingByType',
       'castingCurrentShot',
-      'castingSequencesOptions',
+      'castingEpisodes',
       'castingSequenceShots',
+      'castingSequencesOptions',
       'currentEpisode',
       'currentProduction',
+      'departmentMap',
       'displayedShots',
+      'episodeMap',
       'episodes',
       'getEpisodeOptions',
-      'isCurrentUserManager',
       'isAssetsLoading',
+      'isCurrentUserManager',
       'isShotsLoading',
+      'isShowInfosBreakdown',
       'isTVShow',
-      'episodeMap',
-      'sequences',
       'sequenceMap',
-      'shotMap'
+      'sequences',
+      'shotMap',
+      'shotMetadataDescriptors'
     ]),
 
     castingTypeOptions () {
@@ -471,12 +522,48 @@ export default {
           'Asset Type',
           'Asset'
         ]
+    },
+
+    metadataDescriptors () {
+      if (this.isEpisodeCasting) {
+        return []
+      } else if (this.isShotCasting) {
+        return this.shotMetadataDescriptors
+      } else {
+        return this.assetMetadataDescriptors
+      }
+    },
+
+    metadataDisplayHeaders () {
+      if (this.isEpisodeCasting) {
+        return {}
+      } else if (this.isShotCasting) {
+        return {
+          fps: false,
+          frameIn: false,
+          frameOut: false,
+          frames: false,
+          estimation: false,
+          maxRetakes: false,
+          resolution: false,
+          timeSpent: false
+        }
+      } else {
+        return {
+          estimation: false,
+          readyFor: false,
+          timeSpent: false
+        }
+      }
     }
   },
 
   methods: {
     ...mapActions([
       'addAssetToCasting',
+      'editEpisode',
+      'editShot',
+      'editAsset',
       'displayMoreAssets',
       'loadEpisodeCasting',
       'loadEpisodes',
@@ -942,6 +1029,57 @@ export default {
           .catch(console.error)
       })
       return castingToPaste
+    },
+
+    onMetadataChanged ({ entry, descriptor, value }) {
+      const metadata = {}
+      metadata[descriptor.field_name] = value
+      const data = {
+        id: entry.id,
+        data: metadata
+      }
+      if (this.isEpisodeCasting) {
+        this.editEpisode(data)
+      } else if (this.isShotCasting) {
+        this.editShot(data)
+      } else {
+        this.editAsset(data)
+      }
+    },
+
+    onDescriptionChanged (entity, value) {
+      const data = {
+        id: entity.id,
+        description: value
+      }
+      if (this.isEpisodeCasting) {
+        this.editEpisode(data)
+      } else if (this.isShotCasting) {
+        this.editShot(data)
+      } else {
+        this.editAsset(data)
+      }
+    },
+
+    onStandbyChanged (entity, value) {
+      const data = {
+        id: entity.id,
+        is_casting_standby: value
+      }
+      if (this.isEpisodeCasting) {
+        this.editEpisode(data)
+      } else if (this.isShotCasting) {
+        this.editShot(data)
+      } else {
+        this.editAsset(data)
+      }
+    },
+
+    descriptorCurrentDepartments (descriptor) {
+      const departemts = descriptor.departments || []
+      return departemts.map(
+        departmentId => this.departmentMap.get(departmentId)
+      )
     }
   },
 
@@ -1188,5 +1326,34 @@ export default {
   .search-field-wrapper {
     margin-right: 0.5em;
   }
+}
+
+.entity-header {
+  width: 169px;
+}
+
+.description-header {
+  width: 136px;
+}
+
+.descriptor-header {
+  width: 106px;
+}
+
+.standby-header {
+  width: 80px;
+}
+
+.entity-header,
+.description-header,
+.descriptor-header,
+.standby-header {
+  border-right: 1px solid $light-grey;
+}
+
+.header {
+  font-size: 1.1em;
+  padding: 0 .5em 0;
+  border-bottom: 1px solid $light-grey;
 }
 </style>

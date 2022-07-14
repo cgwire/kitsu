@@ -22,7 +22,6 @@ export default {
   },
 
   updateProduction (production) {
-    console.log(production.is_clients_isolated)
     const data = {
       name: production.name,
       description: production.description,
