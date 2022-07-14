@@ -183,7 +183,7 @@ export default {
       if (this.handleInDragging) {
         this.handleInDragging = false
         const { frameNumber } = this._getMouseFrame()
-        this.$emit('handle-in-changed', frameNumber)
+        this.$emit('handle-in-changed', { frameNumber, save: true })
       }
     },
 
@@ -196,7 +196,7 @@ export default {
         this.handleOutDragging = false
         let { frameNumber, position } = this._getMouseFrame()
         if (this.width - position < 4) frameNumber += 1
-        this.$emit('handle-out-changed', frameNumber)
+        this.$emit('handle-out-changed', { frameNumber, save: true })
       }
     },
 
@@ -212,6 +212,15 @@ export default {
         this.frameNumberLeftPosition = this.width / this.nbFrames * frameNumber
         if (this.progressDragging) {
           this.$emit('progress-changed', frameNumber)
+        }
+        if (this.handleInDragging) {
+          const { frameNumber } = this._getMouseFrame()
+          this.$emit('handle-in-changed', { frameNumber, save: false })
+        }
+        if (this.handleOutDragging) {
+          let { frameNumber, position } = this._getMouseFrame()
+          if (this.width - position < 4) frameNumber += 1
+          this.$emit('handle-out-changed', { frameNumber, save: false })
         }
       }
     },

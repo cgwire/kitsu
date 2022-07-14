@@ -538,14 +538,14 @@ export const playerMixin = {
       this.onFrameUpdate(frameNumber)
     },
 
-    onHandleInChanged (frameNumber) {
+    onHandleInChanged ({ frameNumber, save }) {
       this.handleIn = frameNumber
-      this._saveHandles()
+      if (save) this._saveHandles()
     },
 
-    onHandleOutChanged (frameNumber) {
+    onHandleOutChanged ({ frameNumber, save }) {
       this.handleOut = frameNumber
-      this._saveHandles()
+      if (save) this._saveHandles()
     },
 
     _saveHandles () {
