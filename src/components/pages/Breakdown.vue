@@ -88,7 +88,10 @@
                 {{ descriptor.name }}
               </span>
             </div>
-            <div class="casting-header flexrow-item">
+            <div
+              class="casting-header flexrow-item"
+              v-if="!isShowInfosBreakdown"
+            >
               Casting
             </div>
           </div>
@@ -1329,6 +1332,7 @@ export default {
 }
 
 .entity-header {
+  margin: 0;
   width: 169px;
 }
 
@@ -1341,7 +1345,10 @@ export default {
 }
 
 .standby-header {
-  width: 80px;
+  max-width: 60px;
+  min-width: 60px;
+  padding-left: .5em;
+  width: 60px;
 }
 
 .entity-header,
@@ -1355,5 +1362,9 @@ export default {
   font-size: 1.1em;
   padding: 0 .5em 0;
   border-bottom: 1px solid $light-grey;
+
+  div {
+    padding-bottom: .5em;
+  }
 }
 </style>

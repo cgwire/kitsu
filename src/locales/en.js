@@ -69,7 +69,7 @@ export default {
       text: 'If you remove this asset from the selected episode, it will remove the assets in all the underlying shots. Are you sure you want to remove it?'
     },
     fields: {
-      standby: 'Standby'
+      standby: 'STDB'
     }
   },
 

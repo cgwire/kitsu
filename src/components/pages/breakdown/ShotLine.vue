@@ -5,6 +5,7 @@
     shot: true,
     selected: selected,
     unselectable: true,
+    stdby: entity.is_casting_standby,
     'text-mode': textMode
   }"
   @click="onClicked($event)"
@@ -118,7 +119,10 @@
         {{ getMetadataFieldValue(descriptor, entity) }}
       </span>
     </div>
-    <div class="asset-list flexrow-item">
+    <div
+      class="asset-list flexrow-item"
+      v-if="!isShowInfosBreakdown"
+    >
       <div
         class="asset-type-line flexrow"
         :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
@@ -321,12 +325,16 @@ export default {
 .description-column,
 .metadata-descriptor,
 .standby-column {
-  border-left: 1px solid $light-grey;
-  padding-top: 0;
-  align-self: stretch;
-  margin-right: 0;
-  display: flex;
   align-items: center;
+  align-self: stretch;
+  border-left: 1px solid $light-grey;
+  display: flex;
+  margin-right: 0;
+  padding-top: 0;
+
+  &:last-child {
+    border-right: 1px solid $light-grey;
+  }
 }
 
 .metadata-descriptor {
@@ -338,7 +346,8 @@ export default {
 }
 
 .standby-column {
-  width: 94px;
+  min-width: 60px;
+  max-width: 60px;
   justify-content: center;
 }
 
@@ -450,5 +459,9 @@ div .tooltip-editor {
 .description-column .selectable,
 .metadata-descriptor .selectable {
   padding: 0.5rem;
+}
+
+.stdby {
+  background: var(--background-disabled);
 }
 </style>
