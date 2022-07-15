@@ -65,7 +65,7 @@
                 "text": "Si vous supprimmez l'asset de cet épisode, cela va enlever les assets de tous les shots liés. Êtes vous sur de l'enlever ?"
             },
             "fields": {
-                "standby": "En attente"
+                "standby": "STDB"
             }
         },
         "comments": {
