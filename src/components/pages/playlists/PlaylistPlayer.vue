@@ -630,6 +630,16 @@
         icon="pencil"
       />
       <button-simple
+        :class="{
+          'playlist-button': true,
+          'flexrow-item': true,
+          active: isDrawing
+        }"
+        :title="$t('playlists.actions.annotation_erase')"
+        @click="onEraseClicked"
+        icon="eraser"
+      />
+      <button-simple
         class="playlist-button flexrow-item"
         icon="remove"
         :title="$t('playlists.actions.annotation_delete')"
