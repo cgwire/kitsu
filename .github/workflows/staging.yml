@@ -1,0 +1,24 @@
+name: Deploy Kitsu to staging environment
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy on staging server
+      uses: appleboy/ssh-action@v0.1.4
+      with:
+       host: ${{ secrets.HOST }}
+       username: ${{ secrets.USERNAME }}
+       key: ${{ secrets.KEY }}
+       port: ${{ secrets.PORT }}
+       script: |
+         cd /opt/kitsu
+         git pull --rebase origin master
+         npm i
+         npm run build
