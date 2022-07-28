@@ -130,10 +130,9 @@ const csv = {
 
   buildCsvFile (name, entries) {
     const csvContent = csv.turnEntriesToCsvString(entries)
-    const result = 'data:text/csv;charset=utf-8,' + csvContent
-    const encodedUri = encodeURI(result)
+    const result = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent)
     const link = document.createElement('a')
-    link.setAttribute('href', encodedUri)
+    link.setAttribute('href', result)
     link.setAttribute('download', `${name}.csv`)
     document.body.appendChild(link)
     link.click()
