@@ -50,13 +50,15 @@
             </div>
             <div
               class="flexrow-item hide-small-screen"
-              v-if="!isAssignationLoading && isCurrentUserManager"
+              v-if="!isAssignationLoading && (
+                isCurrentUserManager || isSupervisorInDepartment)"
             >
               {{ $t('main.or') }}
             </div>
             <div
               class="flexrow-item hide-small-screen"
-              v-if="!isAssignationLoading && isCurrentUserManager"
+              v-if="!isAssignationLoading && (
+                isCurrentUserManager || isSupervisorInDepartment)"
             >
               <button
                 class="button is-link clear-assignation-button hide-small-screen"
