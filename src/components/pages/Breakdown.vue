@@ -432,8 +432,13 @@ export default {
     exportUrlPath () {
       let path =
         `/api/export/csv/projects/${this.currentProduction.id}/casting.csv`
+      let paramAdded = false
       if (this.currentEpisode) {
         path += `?episode_id=${this.currentEpisode.id}`
+        paramAdded = true
+      }
+      if (this.isShotCasting) {
+        path += `${(paramAdded) ? '&' : '?'}is_shot_casting=${this.isShotCasting}`
       }
       return path
     },

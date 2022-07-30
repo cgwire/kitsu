@@ -18,7 +18,8 @@
         <div class="flexrow-item" v-if="selectedBar === 'assignation'">
           <div
             class="flexrow"
-            v-if="isCurrentUserManager || isInDepartment"
+            v-if="isCurrentUserManager || isSupervisorInDepartment ||
+            isInDepartment"
           >
             <div class="assignation flexrow-item hide-small-screen">
               <span>
@@ -49,13 +50,15 @@
             </div>
             <div
               class="flexrow-item hide-small-screen"
-              v-if="!isAssignationLoading"
+              v-if="!isAssignationLoading && (
+                isCurrentUserManager || isSupervisorInDepartment)"
             >
               {{ $t('main.or') }}
             </div>
             <div
               class="flexrow-item hide-small-screen"
-              v-if="!isAssignationLoading && isCurrentUserManager"
+              v-if="!isAssignationLoading && (
+                isCurrentUserManager || isSupervisorInDepartment)"
             >
               <button
                 class="button is-link clear-assignation-button hide-small-screen"
@@ -410,7 +413,7 @@
           class="more-menu-item"
           v-if="
             (isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit) &&
-            (isCurrentUserManager || isCurrentUserSupervisor || isInDepartment) &&
+            (isCurrentUserManager || isSupervisorInDepartment || isInDepartment) &&
             !isEntitySelection"
           @click="selectBar('assignation')"
         >
@@ -750,7 +753,8 @@ export default {
     },
 
     isSupervisorInDepartment () {
-      return this.isCurrentUserSupervisor && this.isInDepartment
+      return this.isCurrentUserSupervisor && (
+        this.user.departments.length === 0 || this.isInDepartment)
     },
 
     currentMenuLabel () {
