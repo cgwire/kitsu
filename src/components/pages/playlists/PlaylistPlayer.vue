@@ -103,8 +103,8 @@
         :is-hd="isHd"
         :is-repeating="isRepeating"
         :muted="true"
-        :handle-in="handleIn"
-        :handle-out="handleOut"
+        :handle-in="playlist.for_entity === 'shot' ? handleIn : -1"
+        :handle-out="playlist.for_entity === 'shot' ? handleOut : -1"
         name="comparison"
         v-show="isComparing && isCurrentPreviewMovie &&
                 isMovieComparison && !isLoading"
