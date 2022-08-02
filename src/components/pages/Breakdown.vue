@@ -67,7 +67,7 @@
             </div>
             <div
               class="description-header flexrow-item"
-              v-if="isShowInfosBreakdown"
+              v-if="!isShowInfosBreakdown"
             >
               {{ $t('shots.fields.description') }}
             </div>
@@ -75,7 +75,7 @@
               class="descriptor-header flexrow-item"
               :key="'descriptor-header-' + descriptor.id"
               v-for="descriptor in visibleMetadataDescriptors"
-              v-if="isShowInfosBreakdown"
+              v-if="!isShowInfosBreakdown"
             >
               <department-name
                 :key="department.id"
@@ -90,7 +90,7 @@
             </div>
             <div
               class="casting-header flexrow-item"
-              v-if="!isShowInfosBreakdown"
+              v-if="isShowInfosBreakdown"
             >
               Casting
             </div>

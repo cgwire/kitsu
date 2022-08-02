@@ -40,7 +40,7 @@ export default {
 
     buttonIsOn () {
       if (this.isBreakdown) {
-        return this.isShowInfosBreakdown
+        return !this.isShowInfosBreakdown
       } else {
         return this.isShowInfos
       }

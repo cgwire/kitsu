@@ -34,7 +34,7 @@
     </div>
     <div
       class="description-column flexrow-item"
-      v-if="isShowInfosBreakdown"
+      v-if="!isShowInfosBreakdown"
     >
       <div
         class="tooltip-text"
@@ -56,7 +56,7 @@
       :title="entity.data ? entity.data[descriptor.field_name] : ''"
       :key="'desc' + entity.id + '-' + descriptor.id"
       v-for="(descriptor, j) in visibleMetadataDescriptors"
-      v-if="isShowInfosBreakdown"
+      v-if="!isShowInfosBreakdown"
     >
       <input
         class="input-editor"
@@ -121,7 +121,7 @@
     </div>
     <div
       class="asset-list flexrow-item"
-      v-if="!isShowInfosBreakdown"
+      v-if="isShowInfosBreakdown"
     >
       <div
         class="asset-type-line flexrow"
