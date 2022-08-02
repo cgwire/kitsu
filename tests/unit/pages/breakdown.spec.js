@@ -16,7 +16,8 @@ describe('Breakdown', () => {
   beforeEach(() => {
     userStore = {
       getters: {
-        isCurrentUserManager: () => true
+        isCurrentUserManager: () => true,
+        isShowInfosBreakdown: () => false
       },
       actions: {
         setLastProductionScreen: () => true
@@ -34,6 +35,7 @@ describe('Breakdown', () => {
       getters: {
         assetsByType: () => ([]),
         castingAssetTypesOptions: () => ([]),
+        castingSequencesOptions: () => ([]),
         currentEpisode: () => ([]),
         isAssetsLoading: () => ([])
       },
@@ -43,14 +45,14 @@ describe('Breakdown', () => {
     shotStore = {
       getters: {
         sequences: () => ([]),
-        curentEpisode: () => ({})
+        curentEpisode: () => ({}),
+        shotMetadataDescriptors: () => ([])
       },
       actions: {
       }
     }
     castingStore = {
       getters: {
-        castingSequenceOptions: () => ([]),
         castingSequenceOptions: () => ([]),
         castingSequenceShots: () => ([])
       },

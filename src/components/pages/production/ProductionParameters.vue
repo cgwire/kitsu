@@ -89,7 +89,7 @@
         <text-field
           ref="maxRetakesField"
           type="number"
-          step="1"
+          :step="1"
           :label="$t('productions.fields.max_retakes')"
           @enter="runConfirmation"
           v-focus
