@@ -36,6 +36,19 @@ describe('Quota', () => {
             },
             total: {
               '2020-02': 70
+            },
+            month: {
+              frames: {
+                '2020-02': 10
+              }
+            },
+            day: {
+              entries: {
+                '2020-02': 2
+              },
+              frames: {
+                '2020-02-01': 5
+              }
             }
           }
         })
@@ -45,7 +58,8 @@ describe('Quota', () => {
       getters: {
         personMap: () => new Map(Object.entries({
           'cd5f95f0-8293-4cf2-8220-6928b594ede7': {
-            full_name: 'Alicia Cooper'
+            full_name: 'Alicia Cooper',
+            name: 'Alicia Cooper'
           }
         }))
       },
@@ -72,7 +86,8 @@ describe('Quota', () => {
         year: 2020,
         month: 2,
         week: 32,
-        day: 3
+        day: 3,
+        computeMode: 'weighted'
       }
     })
   })
