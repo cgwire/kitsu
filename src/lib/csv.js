@@ -83,7 +83,7 @@ const csv = {
       if (detailLevel === 'year') {
         headers.forEach((h, index) => {
           if (index > 0) {
-            if (timesheet[h]) {
+            if (timesheet[h] && timesheet[h][person.id]) {
               let value = timesheet[h][person.id] / 60
               if (unit !== 'hour') value = hoursToDays(organisation, value)
               line.push(value)
@@ -95,13 +95,12 @@ const csv = {
       } else {
         headers.forEach((h, index) => {
           if (index > 0) {
-            index--
             if (
               timesheet &&
               timesheet[index] &&
               timesheet[index][person.id]
             ) {
-              let value = timesheet[h][person.id] / 60
+              let value = timesheet[index][person.id] / 60
               if (unit !== 'hour') value = hoursToDays(organisation, value)
               line.push(value)
             } else {
