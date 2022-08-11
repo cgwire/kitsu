@@ -1,4 +1,4 @@
-[![Kitsu](https://www.cg-wire.com/en/images/kitsu.png)](https://kitsu.cg-wire.com)
+[![Kitsu](https://zou.cg-wire.com/kitsu.png)](https://kitsu.cg-wire.com)
 
 # Kitsu, Collaboration Platform for Animation Studios
 
@@ -8,7 +8,6 @@ Which leads to better pictures, shipped faster.
 
 [![Build
 badge](https://app.travis-ci.com/cgwire/kitsu.svg?branch=master)](https://app.travis-ci.com/cgwire/kitsu)
-
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.com/invite/VbCxtKN)
 
 
@@ -70,14 +69,9 @@ To install the development environment, follow [the dedicated guide](https://kit
 
 ## About authors
 
-Kitsu is written by CGWire, a company based in France. We help teams of animation
-studios to collaborate better. We provide tools to more than 50 studios spread
-all around the world.
+Kitsu is written by CGWire, a company based in France. We help animation and VFX studios to collaborate better through efficient tooling. 
 
-On the technical side, we apply software craftmanship principles as much as
-possible. We love coding and consider that strong quality and good developer
-experience matter a lot.
-
+More than 70 studios around the world use Kitsu for their projects.
 
 Visit [cg-wire.com](https://cg-wire.com) for more information.
 
