@@ -38,6 +38,15 @@ module.exports = {
        '/slack/',
      ]
 	},
+	
+	   {
+     title: 'Kitsu Publisher',
+     collapsable: false,
+     children: [
+       '/publisher/',
+       '/dcc-plugin/',
+     ]
+	},	
 
 	{
      title: 'FAQ',
