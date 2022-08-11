@@ -38,8 +38,7 @@ module.exports = {
        '/slack/',
      ]
 	},
-	
-	   {
+	{
      title: 'Kitsu Publisher',
      collapsable: false,
      children: [
@@ -47,7 +46,6 @@ module.exports = {
        '/dcc-plugin/',
      ]
 	},	
-
 	{
      title: 'FAQ',
      collapsable: false,

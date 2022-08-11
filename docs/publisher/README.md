@@ -1,5 +1,3 @@
-[![Kitsu](https://www.cg-wire.com/en/images/kitsu.png)](https://kitsu.cg-wire.com)
-
 # Kitsu Publisher, send your files right from your DCC
 
 Kitsu is a web application to share the progress of your productions and
@@ -9,9 +7,6 @@ Which leads to better pictures, shipped faster.
 The Kitsu Publisher is a desktop application that connects DCC Tools to Kitsu.
 Through it, your artists can see their todo list, comment tasks and send previews to Kitsu
 directly from their tools.
-
-[![Build
-badge](https://travis-ci.com/cgwire/kitsu-publisher-next.svg?branch=master)](https://travis-ci.com/cgwire/kitsu-publisher-next)
 
 ## DCC integrations status:
 
@@ -240,5 +235,3 @@ possible. We love coding and consider that strong quality and good developer
 experience matter a lot.
 
 Visit [cg-wire.com](https://cg-wire.com) for more information.
-
-[![CGWire Logo](https://zou.cg-wire.com/cgwire.png)](https://cg-wire.com)
