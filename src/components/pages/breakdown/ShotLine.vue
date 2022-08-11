@@ -5,7 +5,7 @@
     shot: true,
     selected: selected,
     unselectable: true,
-    stdby: entity.is_casting_standby,
+    stdby: entity ? entity.is_casting_standby : false,
     'text-mode': textMode
   }"
   @click="onClicked($event)"
@@ -26,7 +26,7 @@
     <div class="standby-column flexrow-item">
       <input
         type="checkbox"
-        :checked="entity.is_casting_standby"
+        :checked="entity ? entity.is_casting_standby : false"
         :disabled="!isCurrentUserManager"
         :style="[isCurrentUserManager ? {cursor: 'pointer'} : {cursor: 'auto'}]"
         @input="event => onStandbyChanged(entity, event)"
@@ -456,6 +456,7 @@ div .tooltip-editor {
     }
   }
 }
+
 .description-column .selectable,
 .metadata-descriptor .selectable {
   padding: 0.5rem;

@@ -16,13 +16,17 @@ localVue.prototype.$locale = {
 describe('ShotLine', () => {
   const wrapper = shallowMount(ShotLine, {
     propsData: {
-      entityId: '',
+      entity: {
+        id: 'shot-1',
+        is_casting_stand_by: false
+      },
       selected: true,
       name: 'foobar',
       assets: []
     },
     localVue,
-    i18n
+    i18n,
+    stores: {}
   })
 
   describe('Mount', () => {
