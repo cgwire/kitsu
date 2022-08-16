@@ -457,6 +457,10 @@ div .tooltip-editor {
   }
 }
 
+.description-column {
+  width: 250px;
+}
+
 .description-column .selectable,
 .metadata-descriptor .selectable {
   padding: 0.5rem;

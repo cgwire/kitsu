@@ -136,6 +136,7 @@ export default {
   font-weight: 500;
   padding: 0.5em 1.2em;
   text-transform: uppercase;
+  transition: 0.3s ease all;
 
   &.is-true {
     color: $light-green;

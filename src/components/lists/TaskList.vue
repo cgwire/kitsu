@@ -21,20 +21,20 @@
           <th class="assignees" ref="th-assignees">
             {{ $t('tasks.fields.assignees') }}
           </th>
-          <th class="frames" ref="th-frames" v-if="!isAssets">
+          <th class="frames number-cell" ref="th-frames" v-if="!isAssets">
             {{ $t('tasks.fields.frames') }}
           </th>
           <th
             ref="th-estimation"
-            class="estimation"
+            class="estimation number-cell"
             :title="$t('main.estimation')"
           >
             {{ $t('tasks.fields.estimation').substring(0, 3) }}.
           </th>
-          <th class="duration" ref="th-duration">
+          <th class="duration number-cell" ref="th-duration">
             {{ $t('tasks.fields.duration').substring(0, 3) }}.
           </th>
-          <th class="retake-count" ref="th-retake-count">
+          <th class="retake-count number-cell" ref="th-retake-count">
             {{ $t('tasks.fields.retake_count') }}
           </th>
           <th class="start-date" ref="th-estimation">
@@ -116,7 +116,7 @@
           <td class="frames" v-if="!isAssets">
             {{ getEntity(task.entity.id).nb_frames }}
           </td>
-          <td class="estimation">
+          <td class="estimation number-cell">
             <input
               v-if="isInDepartment(task) && selectionGrid[task.id]"
               :ref="task.id + '-estimation'"
@@ -130,11 +130,12 @@
           </td>
           <td :class="{
             duration: true,
+            'number-cell': true,
             error: isEstimationBurned(task)
           }">
             {{ formatDuration(task.duration) }}
           </td>
-          <td class="retake-count">
+          <td class="retake-count number-cell">
             <span
               v-for="index in task.retake_count"
               :key="index"
@@ -696,7 +697,6 @@ export default {
 .estimation {
   min-width: 60px;
   width: 60px;
-  text-align: center;
 }
 
 .last-comment-date,
@@ -756,7 +756,7 @@ td.retake-count {
 
 .datatable-head {
   th {
-    padding-left: 0;
+    padding-left: 5px;
 
     &.retake-count {
       padding-right: 1em;
@@ -784,7 +784,8 @@ td.retake-count {
 
   td,
   tr {
-    padding: 0;
+    padding-bottom: 0;
+    padding-top: 0;
 
     &.thumbnail {
       padding: 6px;
@@ -792,7 +793,11 @@ td.retake-count {
   }
 
   td.retake-count {
-    padding-right: 1em;
+    padding-right: 0.5em;
+  }
+
+  td.name {
+    border-right: 1px solid var(--border);
   }
 
   td.status {

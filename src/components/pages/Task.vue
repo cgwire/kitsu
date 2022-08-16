@@ -149,7 +149,7 @@
         <div class="flexrow-item block mt1 mr0 info-block">
           <page-subtitle :text="$t('main.info')" />
           <div class="table-body mt1">
-            <table class="datatable" v-if="currentTask">
+            <table class="datatable no-header" v-if="currentTask">
               <tbody class="table-body">
                 <tr class="datatable-row">
                   <td class="field-label">{{ $t('tasks.fields.estimation') }}</td>

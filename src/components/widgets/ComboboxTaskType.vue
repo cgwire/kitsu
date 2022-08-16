@@ -146,7 +146,7 @@ export default {
   border: 1px solid var(--border);
   user-select: none;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 10px;
   margin: 0;
   padding: 0.15em;
   position: relative;
@@ -159,7 +159,6 @@ export default {
 .selected-task-type-line {
   background: var(--background);
   padding: 0.4em;
-  text-transform: uppercase;
   flex: 1;
 }
 
@@ -168,7 +167,6 @@ export default {
   cursor: pointer;
   padding: 0.4em;
   margin: 0;
-  text-transform: uppercase;
 
   &:hover {
     background: $purple;
@@ -185,7 +183,7 @@ export default {
 
 .select-input {
   background: $white;
-  width: 200px;
+  width: 195px;
   position: absolute;
   border: 1px solid var(--border);
   z-index: 300;

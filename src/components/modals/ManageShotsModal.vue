@@ -13,8 +13,6 @@
       <div class="explaination">{{ $t('shots.creation_explaination') }}</div>
       <div>
         <div class="flexrow">
-          <span class="filler">
-          </span>
           <combobox
             ref="shot-padding"
             :label="$t('shots.padding')"
@@ -396,11 +394,14 @@ export default {
 }
 
 .shot-column .list {
+  border: 1px solid $light-grey;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom: 0;
+  flex: 1;
+  margin-top: 4px;
   margin-right: 10px;
   overflow-y: scroll;
-  flex: 1;
-  border: 1px solid $light-grey;
-  border-bottom: 0;
 }
 
 .shot-column .field {
@@ -412,15 +413,18 @@ export default {
 
 .shot-column .button {
   margin-left: 0;
+  border-radius: 0;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
-.shot-column .button,
 .shot-column .input {
   border-radius: 0;
 }
 
 .entity-line {
   cursor: pointer;
+  padding: 0.3em;
 }
 
 .entity-line:hover {

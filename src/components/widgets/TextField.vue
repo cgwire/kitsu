@@ -135,7 +135,7 @@ export default {
 
 input.input {
   font-size: 1.2em;
-
+  border-radius: 10px;
 }
 input.input.thin {
   height: 2.4em;

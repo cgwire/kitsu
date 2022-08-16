@@ -27,4 +27,10 @@ export default {
 .bold {
   font-weight: bold;
 }
+.title {
+  color: var(--text-alt);
+  font-weight: 500;
+  font-variant: small-caps;
+  letter-spacing: 1px;
+}
 </style>

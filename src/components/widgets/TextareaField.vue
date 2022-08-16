@@ -80,6 +80,6 @@ textarea {
   height: 100%;
   min-height: 8em;
   max-height: 100%;
-  padding: 0.5em;
+  padding: 0.8em;
 }
 </style>

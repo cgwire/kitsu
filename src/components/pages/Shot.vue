@@ -49,7 +49,7 @@
           </div>
         </div>
         <div class="table-body">
-          <table class="datatable" v-if="currentShot">
+          <table class="datatable no-header" v-if="currentShot">
             <tbody class="datatable-body">
               <tr
                 class="datatable-row"
@@ -579,7 +579,6 @@ export default {
 h2.subtitle {
   margin-top: 0;
   margin-bottom: 0.5em;
-  font-weight: 300;
   font-size: 1.5em;
 }
 

@@ -1,13 +1,12 @@
 <template>
   <div class="people page fixed-page">
     <div class="flexrow mt2 add-people">
-      <span class="flexrow-item people-field-label">
-        {{ $t('people.add_member_to_team') }}
-      </span>
       <people-field
         ref="people-field"
         class="flexrow-item add-people-field"
         :people="unlistedPeople"
+        :placeholder="$t('people.add_member_to_team')"
+        big
         @enter="addPerson"
         v-model="person"
       />
@@ -102,7 +101,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.add-people-field {
-  font-size: 1.3em;
-}
 </style>

@@ -1304,8 +1304,13 @@ export default {
         } else if (event.keyCode === 39) { // arrow right
           this.goNextFrame()
         } else if (event.keyCode === 32) { // space
-          this.onPlayPauseClicked()
-          this.pauseEvent(event)
+          let styles
+          const playlistModal = document.getElementById('temp-playlist-modal')
+          if (playlistModal) styles = window.getComputedStyle(playlistModal)
+          if (styles && styles.display === 'none') {
+            this.onPlayPauseClicked()
+            this.pauseEvent(event)
+          }
           return false
         } else if (event.keyCode === 68) { // d
           this.container.focus()

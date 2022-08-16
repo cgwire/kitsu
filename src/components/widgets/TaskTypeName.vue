@@ -97,7 +97,7 @@ export default {
   border-radius: 0;
   color: var(--text);
   font-size: 0.9em;
-  font-weight: bold;
+  font-weight: 600;
   line-height: 0.8em;
   padding: 0 0.7em;
   margin: 0;

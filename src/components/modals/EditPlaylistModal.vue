@@ -22,12 +22,12 @@
           v-model="form.name"
           v-focus
         />
-        <combobox
+        <combobox-simple
           :label="$t('playlists.fields.for_client')"
           :options="forClientOptions"
           v-model="forClient"
         />
-        <combobox
+        <combobox-simple
           :label="$t('playlists.fields.for_entity')"
           :options="forEntityOptions"
           :disabled="typeDisabled"
@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import Combobox from '@/components/widgets/Combobox'
+import ComboboxSimple from '@/components/widgets/ComboboxSimple'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '@/components/widgets/TextField'
@@ -70,7 +70,7 @@ export default {
   name: 'edit-playlist-modal',
   mixins: [modalMixin],
   components: {
-    Combobox,
+    ComboboxSimple,
     ComboboxTaskType,
     ModalFooter,
     TextField

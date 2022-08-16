@@ -76,6 +76,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.modal-content .box {
+  padding: 2em;
+}
 .modal-content .box p.text {
   margin-bottom: 1em;
 }

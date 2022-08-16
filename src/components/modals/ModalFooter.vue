@@ -1,6 +1,5 @@
 <template>
-<div>
-
+<div class="modal-footer">
   <p class="has-text-right">
     <a
       :class="{
@@ -77,6 +76,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.modal-footer {
+  margin-top: 3em;
+}
+
+.button {
+  border-radius: 5px;
+}
+
 .error {
   margin-top: 1em;
 }

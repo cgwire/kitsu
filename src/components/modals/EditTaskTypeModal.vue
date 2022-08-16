@@ -29,7 +29,8 @@
           @enter="confirmClicked"
           v-model="form.allow_timelog"
         />
-        <combobox
+        <combobox-simple
+          class="field"
           :label="$t('task_types.fields.dedicated_to')"
           :options="dedicatedToOptions"
           @enter="confirmClicked"
@@ -65,7 +66,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
 import BooleanField from '@/components/widgets/BooleanField'
-import Combobox from '@/components/widgets/Combobox'
+import ComboboxSimple from '@/components/widgets/ComboboxSimple'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
 import ColorField from '@/components/widgets/ColorField'
 import ModalFooter from '@/components/modals/ModalFooter'
@@ -76,7 +77,7 @@ export default {
   mixins: [modalMixin],
   components: {
     BooleanField,
-    Combobox,
+    ComboboxSimple,
     ComboboxDepartment,
     ColorField,
     ModalFooter,

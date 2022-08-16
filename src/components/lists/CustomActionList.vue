@@ -25,9 +25,9 @@
           v-for="customAction in entries"
           :key="customAction.id"
         >
-          <th scope="row" class="name datatable-row-header">
+          <td scope="row" class="name datatable-row-header">
             {{ customAction.name }}
-          </th>
+          </td>
           <td class="url">{{ customAction.url }}</td>
           <td class="entity-type">{{ customAction.entity_type }}</td>
           <td class="is-ajax">

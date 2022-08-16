@@ -31,7 +31,7 @@
           v-for="statusAutomation in entries"
           :key="statusAutomation.id"
         >
-          <th scope="row" class="name">
+          <td scope="row" class="name">
             <div class="flexrow">
               <span
                 class="flexrow-item"
@@ -46,7 +46,7 @@
                 {{ statusAutomation.entity_type }}
               </span>
             </div>
-          </th>
+          </td>
           <task-type-name
             class="in-task-type"
             :task-type="getTaskType(statusAutomation.in_task_type_id)"

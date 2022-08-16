@@ -139,7 +139,7 @@ export default {
   border: 1px solid $light-grey-light;
   user-select: none;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 10px;
   margin: 0;
   padding: 0.15em;
   position: relative;

@@ -80,9 +80,9 @@
           v-for="entry in entries"
         >
 
-          <th scope="row" class="name datatable-row-header">
+          <td scope="row" class="name datatable-row-header">
             {{ entry.name }}
-          </th>
+          </td>
 
           <stats-cell
             :colors="chartColors(entry.id, 'all')"

@@ -7,8 +7,8 @@
       class="flexrow open-productions-header"
       v-if="!isOpenProductionsLoading && openProductions.length > 0"
     >
+      <img class="flexrow-item" src="../../assets/kitsu.png" width="23"/>
       <h1 class="title flexrow-item">
-        <img src="../../assets/kitsu.png" width="23"/>
         {{ $t('productions.home.title') }}
       </h1>
       <div class="filler"></div>
@@ -243,8 +243,11 @@ export default {
 
 h1.title {
   margin-bottom: 0;
+  font-weight: 400;
   text-transform: uppercase;
+  letter-spacing: 1px;
   color: $grey;
+  font-size: 1.9em;
 }
 
 .is-grid {
@@ -361,6 +364,10 @@ a.secondary:hover {
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
+
+  img {
+    margin-left: 3px;
+  }
 }
 
 .open-productions.page {

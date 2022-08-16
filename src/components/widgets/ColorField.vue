@@ -105,7 +105,11 @@ export default {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  transition: 0.3s ease-out border-width;
+  transition: 0.3s ease-out all;
+
+  &:hover {
+    transform: scale(1.2);
+  }
 }
 
 .color span {
