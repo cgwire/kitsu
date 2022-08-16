@@ -86,6 +86,13 @@
           :can-save="true"
         />
         <span class="filler"></span>
+        <combobox-number
+          class="flexrow-item zoom-level"
+          :label="$t('schedule.zoom_level')"
+          :options="zoomOptions"
+          v-model="zoomLevel"
+          v-if="isActiveTab('schedule')"
+        />
         <combobox
           class="flexrow-item"
           :label="$t('main.sorted_by')"
@@ -154,11 +161,10 @@
           :start-date="tasksStartDate"
           :end-date="tasksEndDate"
           :hierarchy="scheduleItems"
-          :zoom-level="2"
+          :zoom-level="zoomLevel"
           :height="scheduleHeight"
           :is-loading="isTasksLoading"
           :is-estimation-linked="true"
-          :with-milestones="false"
           v-if="scheduleItems.length > 0"
         />
         <div class="has-text-centered" v-else>
@@ -192,6 +198,7 @@ import {
 } from '@/lib/time'
 
 import Combobox from '@/components/widgets/Combobox'
+import ComboboxNumber from '@/components/widgets/ComboboxNumber'
 import PageTitle from '@/components/widgets/PageTitle'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import Schedule from '@/components/pages/schedule/Schedule'
@@ -206,6 +213,7 @@ export default {
   mixins: [formatListMixin],
   components: {
     Combobox,
+    ComboboxNumber,
     PageTitle,
     PeopleAvatar,
     Schedule,
@@ -233,7 +241,14 @@ export default {
         'due_date',
         'estimation',
         'last_comment_date'
-      ].map((name) => ({ label: name, value: name }))
+      ].map((name) => ({ label: name, value: name })),
+      zoomLevel: 1,
+      zoomOptions: [
+        { label: 'Week', value: 0 },
+        { label: '1', value: 1 },
+        { label: '2', value: 2 },
+        { label: '3', value: 3 }
+      ]
     }
   },
 

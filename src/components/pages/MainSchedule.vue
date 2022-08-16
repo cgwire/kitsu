@@ -50,8 +50,8 @@
       :is-loading="loading.schedule"
       :is-error="errors.schedule"
       :start-date="startDate"
-      :with-milestones="false"
       :zoom-level="zoomLevel"
+      :hide-man-days="true"
       @item-changed="onScheduleItemChanged"
       @change-zoom="changeZoom"
       @root-element-expanded="expandProductionElement"
@@ -99,6 +99,7 @@ export default {
       selectedEndDate: null,
       zoomLevel: 2,
       zoomOptions: [
+        { label: 'Week', value: 0 },
         { label: '1', value: 1 },
         { label: '2', value: 2 },
         { label: '3', value: 3 }
