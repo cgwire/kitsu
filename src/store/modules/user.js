@@ -48,6 +48,7 @@ import {
 
   UPLOAD_AVATAR_END,
   CHANGE_AVATAR_FILE,
+  CLEAR_AVATAR,
   EDIT_PEOPLE_END,
 
   NEW_TASK_COMMENT_END,
@@ -235,6 +236,11 @@ const actions = {
       if (!err) commit(UPLOAD_AVATAR_END, state.user.id)
       if (callback) callback(err)
     })
+  },
+
+  clearAvatar ({ commit, state }) {
+    commit(CLEAR_AVATAR)
+    return peopleApi.clearAvatar()
   },
 
   setTodosSearch ({ commit, state }, searchText) {
@@ -582,6 +588,10 @@ const mutations = {
   },
 
   [REMOVE_ASSET_SEARCH_END] (state) {
+  },
+
+  [CLEAR_AVATAR] (state) {
+    state.user.has_avatar = false
   },
 
   [RESET_ALL] (state) {
