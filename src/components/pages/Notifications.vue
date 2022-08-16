@@ -1,11 +1,36 @@
 <template>
 <div class="columns fixed-page">
   <div class="column main-column">
+
     <div
       class="notifications page"
       v-scroll="onBodyScroll"
       ref="body"
     >
+    <div class="flexrow">
+      <page-title
+        class="flexrow-item title"
+        :text="$t('notifications.title')"
+      />
+      <combobox-task-type
+        class="flexrow-item selector"
+        :label="$t('news.task_type')"
+        :task-type-list="taskTypeList"
+        v-model="taskTypeId"
+      />
+      <combobox-status
+        class="flexrow-item selector"
+        :label="$t('news.task_status')"
+        :task-status-list="taskStatusList"
+        v-model="taskStatusId"
+      />
+      <combobox-styled
+        class="flexrow-item selector field"
+        :label="$t('main.type')"
+        :options="typeOptions"
+        v-model="typeMode"
+      />
+    </div>
     <div
       class="empty-list has-text-centered"
       v-if="
@@ -59,12 +84,16 @@
           />
         </div>
 
-        <div class="mt1">
+        <div class="mt1 has-text-right">
           <validation-tag
-            class="validation-tag flexrow-item mt1"
+            class="validation-tag mt1"
             :task="buildTaskFromNotification(notification)"
             v-if="notification.change"
           />
+        </div>
+
+        <div class="date has-text-right">
+            {{ formatDate(notification.created_at) }}
         </div>
       </div>
 
@@ -175,12 +204,6 @@
         v-if="isReply(notification)"
       >
       </div>
-
-      <div class="date flexrow">
-        <span class="flexrow-item">
-          {{ formatDate(notification.created_at) }}
-        </span>
-      </div>
       </div>
     </div>
     </div>
@@ -213,7 +236,11 @@ import { marked } from 'marked'
 import moment from 'moment-timezone'
 import { renderComment } from '@/lib/render'
 
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import PageTitle from '@/components/widgets/PageTitle'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import Spinner from '@/components/widgets/Spinner'
 import TaskInfo from '@/components/sides/TaskInfo'
@@ -224,11 +251,15 @@ export default {
   name: 'notification-page',
   components: {
     AtSignIcon,
+    ComboboxTaskType,
+    ComboboxStatus,
+    ComboboxStyled,
     CornerUpLeftIcon,
     EntityThumbnail,
+    MessageSquareIcon,
     PaperclipIcon,
     PeopleAvatar,
-    MessageSquareIcon,
+    PageTitle,
     Spinner,
     TaskInfo,
     TaskTypeName,
@@ -247,7 +278,32 @@ export default {
         notifications: false
       },
       currentTask: null,
-      currentNotificationId: null
+      currentNotificationId: null,
+      taskTypeId: '',
+      taskStatusId: '',
+      typeMode: '',
+      typeOptions: [
+        {
+          label: this.$t('notifications.all_types'),
+          value: ''
+        },
+        {
+          label: this.$t('notifications.only_comments'),
+          value: 'comment'
+        },
+        {
+          label: this.$t('notifications.only_mentions'),
+          value: 'mention'
+        },
+        {
+          label: this.$t('notifications.only_assignations'),
+          value: 'assignation'
+        },
+        {
+          label: this.$t('notifications.only_replies'),
+          value: 'reply'
+        }
+      ]
     }
   },
 
@@ -256,28 +312,36 @@ export default {
   },
 
   mounted () {
-    this.loading.notifications = true
-    this.errors.notifications = false
-    this.currentTask = null
-    this.loadNotifications()
-      .then(() => {
-        this.loading.notifications = false
-      })
-      .catch((err) => {
-        console.error(err)
-        this.errors.notifications = true
-      })
+    this.reloadData()
   },
 
   computed: {
     ...mapGetters([
       'notifications',
       'personMap',
+      'taskStatus',
+      'taskTypes',
       'taskTypeMap',
       'taskStatusMap',
       'personMap',
       'user'
-    ])
+    ]),
+
+    taskStatusList () {
+      return [{
+        id: '',
+        color: '#999',
+        short_name: this.$t('news.all')
+      }].concat([...this.taskStatus])
+    },
+
+    taskTypeList () {
+      return [{
+        id: '',
+        color: '#999',
+        name: this.$t('news.all')
+      }].concat([...this.taskTypes])
+    }
   },
 
   methods: {
@@ -290,6 +354,24 @@ export default {
       'markAllNotificationsAsRead'
     ]),
 
+    reloadData () {
+      this.loading.notifications = true
+      this.errors.notifications = false
+      this.currentTask = null
+      this.loadNotifications({
+        task_status_id: this.taskStatusId,
+        task_type_id: this.taskTypeId,
+        type: this.typeMode
+      })
+        .then(() => {
+          this.loading.notifications = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.errors.notifications = true
+        })
+    },
+
     onBodyScroll (event, position) {
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
@@ -301,7 +383,11 @@ export default {
     loadFollowingNotifications () {
       if (!this.loading.more && !this.loading.notifications) {
         this.loading.more = true
-        this.loadMoreNotifications()
+        this.loadMoreNotifications({
+          task_status_id: this.taskStatusId,
+          task_type_id: this.taskTypeId,
+          type: this.typeMode
+        })
           .then(() => {
             this.loading.more = false
           })
@@ -402,6 +488,20 @@ export default {
           commentId
         })
       }
+    }
+  },
+
+  watch: {
+    taskTypeId () {
+      this.reloadData()
+    },
+
+    taskStatusId () {
+      this.reloadData()
+    },
+
+    typeMode () {
+      this.reloadData()
     }
   },
 
@@ -516,10 +616,6 @@ a {
 
 .notification-line {
   align-items: start;
-}
-
-.validation-tag {
-  margin-left: 30px;
 }
 
 .comment-content {

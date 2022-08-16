@@ -35,21 +35,21 @@ const actions = {
     commit(CLEAR_NOTIFICATIONS)
   },
 
-  loadNotifications ({ commit, state }) {
+  loadNotifications ({ commit, state }, params) {
     commit(LOAD_NOTIFICATIONS_END, [])
-    return notificationsApi.getNotifications()
+    return notificationsApi.getNotifications(params)
       .then(notifications => {
         commit(LOAD_NOTIFICATIONS_END, notifications)
         return Promise.resolve()
       })
   },
 
-  loadMoreNotifications ({ commit, state }) {
+  loadMoreNotifications ({ commit, state }, params) {
     if (state.notifications.length > 0 &&
         state.notifications.length % 100 === 0) {
       const lastNotification = state.notifications.length - 1
-      const before = state.notifications[lastNotification].created_at
-      return notificationsApi.getNotifications(before)
+      params.before = state.notifications[lastNotification].created_at
+      return notificationsApi.getNotifications(params)
         .then(notifications => {
           commit(LOAD_MORE_NOTIFICATIONS_END, notifications)
           return Promise.resolve(notifications)
