@@ -99,10 +99,15 @@ export const buildSupervisorTaskIndex = (tasks, personMap, taskStatusMap) => {
 export const buildAssetIndex = (entries) => {
   const index = Object.create(null)
   const assetIndex = Object.create(null)
-  entries.forEach((asset) => {
+  entries.forEach(asset => {
     const stringToIndex = asset.name.replace(/_/g, ' ').replace(/-/g, ' ')
     const assetTypeWords = asset.asset_type_name.split(' ')
-    const words = stringToIndex.split(' ')
+    const nameWords = stringToIndex.split(' ')
+    let words = []
+    nameWords.forEach(nameWord => {
+      words = words.concat(nameWord.split(/(?=[A-Z])/))
+    })
+    words = words
       .concat(assetTypeWords)
       .concat([asset.name])
     indexWords(index, assetIndex, asset, words)
