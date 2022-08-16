@@ -8,6 +8,7 @@
             {{ $t('productions.fields.name') }}
           </th>
           <th scope="col" class="type">{{ $t('productions.fields.type') }}</th>
+          <th scope="col" class="style">{{ $t('productions.fields.style') }}</th>
           <th scope="col" class="fps">{{ $t('productions.fields.fps') }}</th>
           <th scope="col" class="ratio">
             {{ $t('productions.fields.ratio') }}
@@ -40,6 +41,9 @@
           </th>
           <td class="type">
             {{ $t('productions.type.' + (entry.production_type || 'short')) }}
+          </td>
+          <td class="style">
+            {{ $t('productions.style.' + (entry.production_style || '3d')) }}
           </td>
           <td class="fps">
             {{ entry.fps }}
@@ -79,6 +83,9 @@
           </th>
           <td class="type">
             {{ $t('productions.type.' + (entry.production_type || 'short')) }}
+          </td>
+          <td class="style">
+            {{ $t('productions.style.' + (entry.production_style || '3d')) }}
           </td>
           <td class="fps">
             {{ entry.fps }}
@@ -174,6 +181,11 @@ export default {
 .type {
   min-width: 120px;
   width: 120px;
+}
+
+.style {
+  min-width: 150px;
+  width: 150px;
 }
 
 .status {

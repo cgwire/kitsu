@@ -27,6 +27,7 @@ export default {
       description: production.description,
       project_status_id: production.project_status_id,
       production_type: production.production_type,
+      production_style: production.production_style,
       fps: production.fps,
       ratio: production.ratio,
       resolution: production.resolution,
