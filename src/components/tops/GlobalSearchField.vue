@@ -31,17 +31,17 @@
       {{ $t('main.search.type') }}
     </div>
     <div
+      class="search-loader"
+      :style="{
+        'min-height': (nbResults * 60) + 'px'
+      }"
+      v-else-if="isLoading"
+    >
+      <div><spinner /></div>
+    </div>
+    <div
       v-else-if="nbResults > 0"
     >
-      <div
-        class="search-loader"
-        :style="{
-          'min-height': (nbResults * 60) + 'px'
-        }"
-        v-if="isLoading"
-      >
-        <div><spinner /></div>
-      </div>
       <div
         :key="asset.id"
         :class="{
@@ -207,7 +207,7 @@ export default {
 
     nbResults () {
       const length = this.assets.length + this.persons.length
-      return length > 0 ? length : 1
+      return length
     }
   },
 
