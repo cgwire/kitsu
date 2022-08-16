@@ -24,17 +24,17 @@
           @enter="confirmClicked"
           v-focus
         />
+        <boolean-field
+          :label="$t('task_types.fields.allow_timelog')"
+          @enter="confirmClicked"
+          v-model="form.allow_timelog"
+        />
         <combobox
           :label="$t('task_types.fields.dedicated_to')"
           :options="dedicatedToOptions"
           @enter="confirmClicked"
           v-model="form.for_entity"
            v-if="!isEditing"
-        />
-        <combobox-boolean
-          :label="$t('task_types.fields.allow_timelog')"
-          @enter="confirmClicked"
-          v-model="form.allow_timelog"
         />
         <combobox-department
           :label="$t('task_types.fields.department')"
@@ -64,9 +64,9 @@
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
-import Combobox from '@/components/widgets/Combobox.vue'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import BooleanField from '@/components/widgets/BooleanField'
+import Combobox from '@/components/widgets/Combobox'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
 import ColorField from '@/components/widgets/ColorField'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '@/components/widgets/TextField'
@@ -75,8 +75,8 @@ export default {
   name: 'edit-task-type-modal',
   mixins: [modalMixin],
   components: {
+    BooleanField,
     Combobox,
-    ComboboxBoolean,
     ComboboxDepartment,
     ColorField,
     ModalFooter,

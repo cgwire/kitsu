@@ -37,24 +37,12 @@
             {{ entry.name }}
           </td>
           <task-status-name class="short-name" :entry="entry" />
-          <td class="is-default">
-            {{ formatBoolean(entry.is_default) }}
-          </td>
-          <td class="is-done">
-            {{ formatBoolean(entry.is_done) }}
-          </td>
-          <td class="is-retake">
-            {{ formatBoolean(entry.is_retake) }}
-          </td>
-          <td class="is-artist-allowed">
-            {{ formatBoolean(entry.is_artist_allowed) }}
-          </td>
-          <td class="is-client-allowed">
-            {{ formatBoolean(entry.is_client_allowed) }}
-          </td>
-          <td class="is-feedback-request">
-            {{ formatBoolean(entry.is_feedback_request) }}
-          </td>
+          <boolean-cell class="is-default" :value=entry.is_default />
+          <boolean-cell class="is-done" :value=entry.is_done />
+          <boolean-cell class="is-retake" :value=entry.is_retake />
+          <boolean-cell class="is-artist-allowed" :value=entry.is_artist_allowed />
+          <boolean-cell class="is-client-allowed" :value=entry.is_client_allowed />
+          <boolean-cell class="is-feedback-request" :value=entry.is_feedback_request />
           <row-actions-cell
             :entry-id="entry.id"
             :hide-delete="entry.is_default === true"
@@ -81,6 +69,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { formatListMixin } from '@/components/mixins/format'
+import BooleanCell from '@/components/cells/BooleanCell'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskStatusName from '@/components/cells/TaskStatusName'
@@ -97,6 +86,7 @@ export default {
     return {}
   },
   components: {
+    BooleanCell,
     RowActionsCell,
     TableInfo,
     TaskStatusName
@@ -134,7 +124,9 @@ export default {
 .is-default,
 .is-retake,
 .is-artist-allowed,
-.is-client-allowed {
+.is-client-allowed,
+.is-feedback-request {
+  text-align: center;
   width: 140px;
   min-width: 140px;
 }

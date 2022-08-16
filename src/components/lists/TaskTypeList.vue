@@ -42,7 +42,9 @@
           </td>
           <task-type-cell class="name" :task-type="taskType" />
           <td class="allow-timelog">
-            {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
+            <boolean-rep
+              :value="taskType.allow_timelog"
+            />
           </td>
           <row-actions-cell
             :taskType-id="taskType.id"
@@ -78,7 +80,9 @@
           </td>
           <task-type-cell class="name" :task-type="taskType" />
           <td class="allow-timelog">
-            {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
+            <boolean-rep
+              :value="taskType.allow_timelog"
+            />
           </td>
           <row-actions-cell
             :taskType-id="taskType.id"
@@ -114,7 +118,9 @@
           </td>
           <task-type-cell class="name" :task-type="taskType" />
           <td class="allow-timelog">
-            {{ taskType.allow_timelog ? $t('main.yes') : $t('main.no')}}
+            <boolean-rep
+              :value="taskType.allow_timelog"
+            />
           </td>
           <row-actions-cell
             :taskType-id="taskType.id"
@@ -141,10 +147,11 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import draggable from 'vuedraggable'
+import BooleanRep from '@/components/widgets/BooleanRep'
+import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskTypeCell from '@/components/cells/TaskTypeName'
-import DepartmentName from '@/components/widgets/DepartmentName.vue'
 
 export default {
   name: 'task-type-list',
@@ -165,6 +172,7 @@ export default {
 
   components: {
     draggable,
+    BooleanRep,
     DepartmentName,
     RowActionsCell,
     TableInfo,
@@ -270,6 +278,7 @@ export default {
 .allow-timelog {
   width: 100px;
   min-width: 100px;
+  text-align: center;
 }
 
 .actions {
