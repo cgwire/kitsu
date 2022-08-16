@@ -27,7 +27,7 @@
     <div
       class="select-input"
       ref="select"
-      v-if="showProductionList"
+      v-show="showProductionList"
     >
       <div
         :ref="'prod-' + production.id"
@@ -124,12 +124,12 @@ export default {
       if (this.showProductionList) {
         this.lastScrollPosition = this.$refs.select.scrollTop
       }
-      this.showProductionList = !this.showProductionList
-      if (this.showProductionList) {
-        this.$nextTick(() => {
+      this.$nextTick(() => {
+        this.showProductionList = !this.showProductionList
+        if (this.showProductionList) {
           this.$refs.select.scrollTo({ top: this.lastScrollPosition, left: 0 })
-        })
-      }
+        }
+      })
     },
 
     getProductionPath (production) {
