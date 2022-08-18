@@ -356,6 +356,7 @@ export const annotationMixin = {
       annotation,
       obj
     ) {
+      console.log(obj)
       if (!obj) return
       if (this.getObjectById(obj.id)) return
       this.objIndex.set(obj.id, obj)
@@ -467,7 +468,7 @@ export const annotationMixin = {
 
     onChangeColor (color) {
       this.color = color
-      this.fabricCanvas.freeDrawingBrush.color = this.color
+      this._resetColor()
       this.isShowingPalette = false
     },
 
@@ -478,14 +479,72 @@ export const annotationMixin = {
 
     onChangePencil (pencil) {
       this.pencil = pencil
+      this._resetPencil()
+      this.isShowingPalette = false
+    },
+
+    _resetColor () {
+      this.fabricCanvas.freeDrawingBrush.color = this.color
+    },
+
+    _resetPencil () {
       const converter = {
         big: 4,
         medium: 2,
         small: 1
       }
-      const strokeWidth = converter[pencil]
+      const strokeWidth = converter[this.pencil]
       this.fabricCanvas.freeDrawingBrush.width = strokeWidth
-      this.isShowingPalette = false
+    },
+
+    onAnnotateClicked () {
+      this.showCanvas()
+      if (this.isDrawing) {
+        this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
+      } else {
+        this.isTyping = false
+        if (this.fabricCanvas) {
+          this.fabricCanvas.isDrawingMode = true
+        }
+        this.fabricCanvas.freeDrawingBrush =
+          new fabric.PencilBrush(this.fabricCanvas)
+        this._resetColor()
+        this._resetPencil()
+        this.isDrawing = true
+      }
+    },
+
+    onEraseClicked () {
+      this.showCanvas()
+      if (this.isDrawing) {
+        this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
+      } else {
+        this.isTyping = false
+        if (this.fabricCanvas) {
+          this.fabricCanvas.isDrawingMode = true
+        }
+        this.isDrawing = true
+        this.previousStrokeWidth = this.fabricCanvas.freeDrawingBrush.width
+        this.fabricCanvas.freeDrawingBrush =
+          new fabric.EraserBrush(this.fabricCanvas)
+        this.fabricCanvas.freeDrawingBrush.width = 10
+      }
+    },
+
+    onTypeClicked () {
+      const clickarea = this.canvas.getElementsByClassName('upper-canvas')[0]
+      this.showCanvas()
+      if (this.isTyping) {
+        this.isTyping = false
+        clickarea.removeEventListener('dblclick', this.addText)
+      } else {
+        this.fabricCanvas.isDrawingMode = false
+        this.isDrawing = false
+        this.isTyping = true
+        clickarea.addEventListener('dblclick', this.addText)
+      }
     },
 
     onWindowsClosed (event) {
@@ -498,7 +557,10 @@ export const annotationMixin = {
 
     onObjectAdded (obj) {
       if (this.$options.silentAnnnotation) return
-      let o = obj.target
+      console.log(obj)
+      let o = obj
+      if (obj.target) o = obj.target
+      else o = obj.targets[0]
       o = this.setObjectData(o)
       // if (this.fabricCanvas.width < 420) o.strokeWidth *= 2
       if (this.isLaserModeOn) {
@@ -614,6 +676,7 @@ export const annotationMixin = {
       this.fabricCanvas.on('object:modified', this.onObjectMoved)
       this.fabricCanvas.on('text:changed', this.onObjectMoved)
       this.fabricCanvas.on('object:added', this.onObjectAdded)
+      this.fabricCanvas.on('erasing:end', this.onObjectAdded)
       this.fabricCanvas.on('mouse:up', this.endDrawing)
       this.fabricCanvas.on('mouse:move', this.onCanvasMouseMoved)
       this.fabricCanvas.on('mouse:down', this.onCanvasClicked)

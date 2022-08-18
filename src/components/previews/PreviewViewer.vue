@@ -92,7 +92,7 @@
       >
         <download-icon class="icon" />
         <span class="text">
-          {{ $t('tasks.download_pdf_file', {extension}) }}
+          {{ $t('tasks.download_pdf_file', {extension}) }}: {{ fileTitle}}
         </span>
       </a>
     </div>
