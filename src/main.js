@@ -17,7 +17,6 @@ import VueTextareaAutosize from 'vue-textarea-autosize'
 import VTooltip from 'v-tooltip'
 import VueWebsocket from 'vue-websocket-next'
 import IO from 'socket.io-client'
-
 import 'v-autocomplete/dist/v-autocomplete.css'
 
 Vue.use(VueWebsocket, IO, '/events')

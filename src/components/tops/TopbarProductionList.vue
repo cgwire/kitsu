@@ -115,7 +115,6 @@ export default {
 
   methods: {
     selectProduction (production) {
-      this.$emit('input', production.id)
       this.value = production.id
       this.showProductionList = false
     },

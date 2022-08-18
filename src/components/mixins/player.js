@@ -954,34 +954,6 @@ export const playerMixin = {
         })
     },
 
-    onAnnotateClicked () {
-      this.showCanvas()
-      if (this.isDrawing) {
-        this.fabricCanvas.isDrawingMode = false
-        this.isDrawing = false
-      } else {
-        this.isTyping = false
-        if (this.fabricCanvas) {
-          this.fabricCanvas.isDrawingMode = true
-        }
-        this.isDrawing = true
-      }
-    },
-
-    onTypeClicked () {
-      const clickarea = this.canvas.getElementsByClassName('upper-canvas')[0]
-      this.showCanvas()
-      if (this.isTyping) {
-        this.isTyping = false
-        clickarea.removeEventListener('dblclick', this.addText)
-      } else {
-        this.fabricCanvas.isDrawingMode = false
-        this.isDrawing = false
-        this.isTyping = true
-        clickarea.addEventListener('dblclick', this.addText)
-      }
-    },
-
     showCanvas () {
       if (this.canvas) this.canvas.style.display = 'block'
     },

@@ -141,7 +141,7 @@
               :task-status="getTaskStatusForCurrentUser(task.project_id)"
               :light="true"
               :is-loading="loading.addComment"
-              :attached-file-name="attachedFileName"
+              :previewForms="previewForms"
               :is-error="errors.addComment"
               :is-max-retakes-error="errors.addCommentMaxRetakes"
               :fps="parseInt(currentFps)"
@@ -151,6 +151,8 @@
               @add-comment="addComment"
               @add-preview="onAddPreviewClicked"
               @file-drop="selectFile"
+              @clear-files="clearPreviewFiles"
+              @remove-preview="onPreviewFormRemoved"
               @annotation-snapshots-requested="extractAnnotationSnapshots"
               v-show="isCommentingAllowed"
             />
@@ -320,8 +322,7 @@ export default {
   data () {
     return {
       addExtraPreviewFormData: null,
-      attachedFileName: '',
-      attachedImage: '',
+      previewForms: [],
       currentPreviewIndex: 0,
       currentPreviewPath: '',
       currentPreviewDlPath: '',
@@ -640,7 +641,7 @@ export default {
         comment
       }
       let action = 'commentTask'
-      if (this.attachedFileName) action = 'commentTaskWithPreview'
+      if (this.previewForms.length > 0) action = 'commentTaskWithPreview'
       this.loading.addComment = true
       this.errors.addComment = false
       this.errors.addCommentMaxRetakes = false
@@ -652,7 +653,7 @@ export default {
           }
           drafts.clearTaskDraft(this.task.id)
           this.reset()
-          this.attachedFileName = ''
+          this.previewForms = []
           this.loading.addComment = false
           this.$emit('comment-added')
         })
@@ -710,9 +711,15 @@ export default {
 
     selectFile (forms) {
       this.loadPreviewFileFormData(forms)
-      this.attachedFileName = forms
-        .map((form) => form.get('file').name)
-        .join(', ')
+      this.previewForms = forms
+    },
+
+    onPreviewFormRemoved (previewForm) {
+      this.previewForms = this.previewForms.filter(f => f !== previewForm)
+    },
+
+    clearPreviewFiles () {
+      this.previewForms = []
     },
 
     createExtraPreview () {
@@ -1090,7 +1097,7 @@ export default {
 
   watch: {
     task () {
-      this.attachedFileName = ''
+      this.previewForms = []
       this.currentPreviewIndex = 0
       if (
         this.previousTaskId &&

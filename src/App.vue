@@ -1656,6 +1656,10 @@ tbody:last-child .empty-line:last-child {
   margin-left: 0.5em;
 }
 
+.modal-content label.button {
+  margin-left: 0em;
+}
+
 .modal-content .box p.text {
   margin-bottom: 1em;
 }

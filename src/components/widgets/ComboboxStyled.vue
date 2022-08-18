@@ -137,7 +137,6 @@ export default {
 
   watch: {
     options () {
-      console.log('options changed')
       if (this.options.length > 0) {
         const option = this.options.find(o => o.value === this.value)
         if (option) {

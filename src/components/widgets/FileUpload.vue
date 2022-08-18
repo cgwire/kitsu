@@ -25,11 +25,13 @@
             @change="filesChange($event.target.name, $event.target.files)"
           >
         </label>
-        <span class="file-upload-status" v-if="this.uploadedFiles.length > 1">
+        <span
+          class="file-upload-status"
+          v-if="this.uploadedFiles.length > 1 && !hideFileNames">
           {{ this.uploadedFiles.length }} {{ $tc('main.files_selected') }}
         </span>
         <span class="file-upload-status"
-          v-if="this.uploadedFiles.length === 1"
+          v-if="this.uploadedFiles.length === 1 && !hideFileNames"
         >
           {{ this.uploadedFiles[0] }}
         </span>
@@ -63,6 +65,10 @@ export default {
       type: String
     },
     disabled: {
+      type: Boolean,
+      default: false
+    },
+    hideFileNames: {
       type: Boolean,
       default: false
     }
@@ -145,5 +151,8 @@ export default {
 .file-upload-status {
   margin-left: .5rem;
   font-style: italic;
+}
+label.button.is-primary {
+  border-radius: 5px;
 }
 </style>

@@ -10,6 +10,7 @@
   </label>
   <div
     class="status-combo"
+    :style="comboStyles"
   >
     <div
       class="flexrow"
@@ -29,7 +30,11 @@
           {{ currentStatus.short_name }}
         </span>
       </div>
-      <chevron-down-icon class="down-icon flexrow-item"/>
+      <chevron-down-icon :class="{
+        'down-icon': true,
+        'flexrow-item': true,
+        'white': colorOnly
+      }"/>
     </div>
     <div
       ref="select"
@@ -86,6 +91,10 @@ export default {
   },
 
   props: {
+    colorOnly: {
+      default: false,
+      type: Boolean
+    },
     label: {
       default: '',
       type: String
@@ -137,7 +146,31 @@ export default {
       } else {
         return this.taskStatusList[0]
       }
+    },
+
+    comboStyles () {
+      return {
+        background: this.colorOnly
+          ? this.backgroundColor(this.currentStatus)
+          : 'transparent',
+        color: this.colorOnly
+          ? this.color(this.currentStatus)
+          : 'inherit',
+        'border-top-left-radius': this.colorOnly ? '20px' : '10px',
+        'border-top-right-radius': this.colorOnly ? '0px' : '10px',
+        'border-bottom-left-radius': this.showStatusList
+          ? '0'
+          : this.colorOnly
+            ? '20px'
+            : '10px',
+        'border-bottom-right-radius': this.showStatusList
+          ? '0'
+          : this.colorOnly
+            ? '0px'
+            : '10px'
+      }
     }
+
   },
 
   methods: {
@@ -215,6 +248,7 @@ export default {
 .field--narrow .status-combo {
   padding: 0;
   margin: 0;
+  border-radius: 0;
 }
 
 .selected-status-line {
@@ -249,7 +283,7 @@ export default {
   z-index: 300;
   margin-left: -1px;
   max-height: 180px;
-  top: 33px;
+  top: 38px;
   left: 0;
   overflow-y: auto;
 
@@ -261,5 +295,10 @@ export default {
 
 .field .label {
   padding-top: 5px;
+}
+
+.down-icon.white {
+  color: $white;
+  margin-right: 0.8em;
 }
 </style>
