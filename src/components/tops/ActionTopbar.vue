@@ -33,6 +33,7 @@
               <people-field
                 ref="assignation-field"
                 :people="currentTeam"
+                big
                 v-model="person"
                 v-show="isCurrentUserManager || isCurrentUserSupervisor"
               />

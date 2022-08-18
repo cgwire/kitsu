@@ -22,12 +22,21 @@
           @enter="runConfirmation"
           v-focus
         />
-        <combobox v-if="productionToEdit && productionToEdit.id"
+        <combobox-styled
+          class="field"
           :label="$t('productions.fields.status')"
           :options="productionStatusOptions"
           localeKeyPrefix="productions.status."
           @enter="runConfirmation"
           v-model="form.project_status_id"
+          v-if="productionToEdit && productionToEdit.id"
+        />
+        <combobox-styled
+          class="field"
+          :label="$t('productions.fields.style')"
+          :options="productionStyleOptions"
+          localeKeyPrefix="productions.style."
+          v-model="form.production_style"
         />
         <text-field v-if="productionToEdit && productionToEdit.id"
           ref="fpsField"
@@ -79,17 +88,17 @@
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
-import Combobox from '@/components/widgets/Combobox'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import ModalFooter from '@/components/modals/ModalFooter'
 import FileUpload from '@/components/widgets/FileUpload'
 import TextField from '@/components/widgets/TextField'
-import { PRODUCTION_TYPE_OPTIONS } from '@/lib/productions'
+import { PRODUCTION_STYLE_OPTIONS, PRODUCTION_TYPE_OPTIONS } from '@/lib/productions'
 
 export default {
   name: 'edit-production-modal',
   mixins: [modalMixin],
   components: {
-    Combobox,
+    ComboboxStyled,
     FileUpload,
     ModalFooter,
     TextField
@@ -107,20 +116,8 @@ export default {
   data () {
     const data = {
       formData: null,
-      productionTypeOptions: [
-        {
-          label: 'short',
-          value: 'short'
-        },
-        {
-          label: 'featurefilm',
-          value: 'featurefilm'
-        },
-        {
-          label: 'tvshow',
-          value: 'tvshow'
-        }
-      ]
+      productionStyleOptions: PRODUCTION_STYLE_OPTIONS,
+      productionTypeOptions: PRODUCTION_TYPE_OPTIONS
     }
 
     if (this.productionToEdit && this.productionToEdit.id) {
@@ -130,7 +127,8 @@ export default {
         fps: this.productionToEdit.fps,
         ratio: this.productionToEdit.ratio,
         resolution: this.productionToEdit.resolution,
-        production_type: this.productionToEdit.production_type || 'short'
+        production_type: this.productionToEdit.production_type || 'short',
+        production_style: this.productionToEdit.production_style || '3d'
       }
     } else {
       data.form = {
@@ -139,7 +137,8 @@ export default {
         fps: '',
         ratio: '',
         resolution: '',
-        production_type: 'short'
+        production_type: 'short',
+        production_style: '3d'
       }
     }
 

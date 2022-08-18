@@ -64,6 +64,8 @@ export default {
   padding: 1em;
   font-size: 0.8em;
   color: white;
+  letter-spacing: 1px;
+  font-weight: 600;
   text-transform: uppercase;
 }
 </style>

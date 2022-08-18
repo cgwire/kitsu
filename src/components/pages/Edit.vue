@@ -507,7 +507,7 @@
                 </div>
               </div>
               <div class="table-body edit-metadata flexrow-item">
-                <table class="datatable" v-if="currentEdit">
+                <table class="datatable no-header" v-if="currentEdit">
                   <tbody class="datatable-body">
                     <tr class="datatable-row">
                       <td class="field-label">{{ $t('edits.fields.description') }}</td>
@@ -1040,7 +1040,6 @@ export default {
 h2.subtitle {
   margin-top: 0;
   margin-bottom: 0.5em;
-  font-weight: 300;
   font-size: 1.5em;
 }
 

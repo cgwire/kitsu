@@ -195,6 +195,8 @@ export default {
 
 <style lang="scss" scoped>
 .tag {
+  letter-spacing: 1px;
+  margin-right: 0.1em;
   text-transform: uppercase;
 }
 

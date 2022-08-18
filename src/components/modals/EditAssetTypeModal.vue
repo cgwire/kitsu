@@ -173,11 +173,7 @@ export default {
       } else {
         this.form = {
           name: '',
-          task_types: this.taskTypes.filter(taskType => {
-            return taskType.for_entity === 'Asset'
-          }).map(taskType => {
-            return taskType.id
-          })
+          task_types: []
         }
       }
     }
@@ -193,5 +189,9 @@ export default {
 .is-danger {
   color: #ff3860;
   font-style: italic;
+}
+
+.task-types {
+  flex-wrap: wrap;
 }
 </style>

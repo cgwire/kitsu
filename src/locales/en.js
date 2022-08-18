@@ -170,7 +170,7 @@ export default {
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this department.',
     edit_title: 'Edit department',
-    new_departments: 'Add an department',
+    new_departments: 'Add a department',
     number: 'department | departments',
     title: 'Departments',
     fields: {
@@ -376,7 +376,7 @@ export default {
     minimize: 'Minimize',
     main_pack: 'Main Pack',
     maximize: 'Maximize',
-    man_days: 'man day | man days',
+    man_days: 'person day | person days',
     more_filters: 'More filters',
     nb_frames: 'frame | frames',
     person: 'Person',
@@ -398,8 +398,9 @@ export default {
     stick: 'Stick',
     studio: 'Studio',
     to: 'To',
-    tutorials: 'Tutorials',
     timeSpent: 'Time Spent',
+    tutorials: 'Tutorials',
+    type: 'Type',
     unstick: 'Unstick',
     user: 'User',
     white_theme: 'White Theme',
@@ -481,11 +482,15 @@ export default {
 
   notifications: {
     and_change_status: 'and changed status to',
+    all_types: 'All types',
     assigned_you: 'assigned you to',
     commented_on: 'commented on',
-    replied_on: 'replied to a comment on',
     mention_you_on: 'mentioned you on',
     no_notifications: 'There is currently no notification for you for your current projects.',
+    only_comments: 'Only comments',
+    only_mentions: 'Only mentions',
+    only_replies: 'Only replies',
+    replied_on: 'replied to a comment on',
     unread_notifications: 'unread notification | unread notifications',
     title: 'Notifications',
     with_preview: 'with a preview'
@@ -494,7 +499,7 @@ export default {
   people: {
     active: 'Active',
     active_persons: 'active user | active users',
-    add_member_to_team: 'Add a member to the team: ',
+    add_member_to_team: 'Add a member to the team',
     create_invite: 'Create and send invitation',
     create_error: 'An  error occurred while creating or update this user. You may have reach your user limit. Please contact our support team for more information.',
     delete_error: 'An error occurred while deleting this user. There are probably data linked to it. Are you sure this user has no assignation or wrote no comment?',
@@ -728,6 +733,7 @@ export default {
       resolution: 'Resolution',
       start_date: 'Start date',
       status: 'Status',
+      style: 'Style',
       type: 'Type'
     },
     metadata: {
@@ -764,15 +770,35 @@ export default {
       archived: 'Closed'
     },
 
+    style: {
+      '2d': '2D Animation',
+      '3d': '3D Animation',
+      '2d3d': '2D/3D Animation',
+      ar: 'Augmented Reality',
+      archviz: 'Archviz',
+      commercial: 'Commercial',
+      catalog: 'Catalog',
+      metaverse: 'Metaverse',
+      motion_design: 'Motion Design',
+      nft: 'NFT collection',
+      stop_motion: 'Stop Motion',
+      vfx: 'VFX',
+      video_game: 'Video Game',
+      vr: 'Virtual Reality'
+    },
+
     type: {
       short: 'Short',
       featurefilm: 'Feature Film',
-      tvshow: 'TV Show'
+      tvshow: 'TV Show',
+      assets: 'Only assets',
+      shots: 'Only shots'
     }
   },
 
   profile: {
     change_avatar: 'Change avatar',
+    clear_avatar: 'Remove avatar',
     info_title: 'Information',
     language: 'Language',
     notifications_enabled: 'Email notifications enabled',
@@ -911,7 +937,7 @@ export default {
   schedule: {
     title: 'Schedule',
     title_main: 'Main Schedule',
-    overall_man_days: 'Man-days',
+    overall_man_days: 'Person-days',
     md: 'md',
     zoom_level: 'Zoom level',
     milestone: {
@@ -990,7 +1016,7 @@ export default {
       frame_in: 'In',
       frame_out: 'Out',
       fps: 'FPS',
-      max_retakes: 'Retake cap',
+      max_retakes: 'Max Rtks',
       name: 'Name',
       person: 'Modifier',
       production: 'Prod',

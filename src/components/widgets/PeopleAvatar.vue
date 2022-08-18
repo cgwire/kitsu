@@ -138,7 +138,6 @@ export default {
 }
 
 .avatar a {
-  padding: 0;
   margin: 0;
   color: white;
 }

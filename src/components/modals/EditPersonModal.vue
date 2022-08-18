@@ -88,6 +88,7 @@
         <combobox
           :label="$t('people.fields.active')"
           :options="activeOptions"
+          :disabled="isLdap"
           @enter="confirmClicked()"
           v-model="form.active"
         />

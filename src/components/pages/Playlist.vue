@@ -322,7 +322,8 @@
                 >
                   <div
                     :class="{
-                      'addition-shot': true
+                      'addition-shot': true,
+                      playlisted: currentEntities[asset.id] !== undefined
                     }"
                     :key="asset.id"
                     @click.prevent="addEntityToPlaylist(asset)"
@@ -416,6 +417,7 @@
   </div>
 </template>
 <script>
+import Vue from 'vue'
 import firstBy from 'thenby'
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
@@ -892,7 +894,7 @@ export default {
 
     addToPlayerPlaylist (entity) {
       const playlistEntity = this.convertEntityToPlaylistFormat(entity)
-      this.currentEntities[playlistEntity.id] = playlistEntity
+      Vue.set(this.currentEntities, playlistEntity.id, playlistEntity)
       this.playlistPlayer.entityList.push(playlistEntity)
       this.$nextTick(() => {
         this.playlistPlayer.scrollToRight()
@@ -1484,6 +1486,7 @@ export default {
     img,
     span.thumbnail-picture {
       border: 2px solid $purple;
+      border-radius: 5px;
     }
   }
 }

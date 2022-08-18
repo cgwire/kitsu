@@ -29,7 +29,7 @@
       @toggle-stick="metadataStickColumnClicked($event)"
     />
 
-    <table class="datatable">
+    <table class="datatable multi-section">
       <thead
         class="datatable-head"
         id="datatable-shot"
@@ -96,7 +96,7 @@
           <th
             scope="col"
             ref="th-spent"
-            class="time-spent"
+            class="time-spent number-cell"
             v-if="!isCurrentUserClient && isShowInfos && isShotTime && metadataDisplayHeaders.timeSpent"
            >
             {{ $t('shots.fields.time_spent') }}
@@ -104,7 +104,7 @@
 
           <th
             scope="col"
-            class="estimation"
+            class="estimation number-cell"
             ref="th-spent"
             :title="$t('main.estimation')"
             v-if="!isCurrentUserClient && isShowInfos && isShotEstimation && metadataDisplayHeaders.estimation"
@@ -113,7 +113,7 @@
           </th>
 
           <th
-            class="frames"
+            class="frames number-cell"
             scope="col"
             v-if="isFrames && isShowInfos && metadataDisplayHeaders.frames"
           >
@@ -122,21 +122,33 @@
 
           <th
             scope="col"
-            class="framein"
+            class="framein number-cell"
             v-if="isFrameIn && isShowInfos && metadataDisplayHeaders.frameIn"
           >
             {{ $t('shots.fields.frame_in') }}
           </th>
           <th
             scope="col"
-            class="frameout"
+            class="frameout number-cell"
             v-if="isFrameOut && isShowInfos && metadataDisplayHeaders.frameOut"
           >
             {{ $t('shots.fields.frame_out') }}
           </th>
 
-          <th scope="col" class="fps" v-if="isFps && isShowInfos && metadataDisplayHeaders.fps">
+          <th
+            scope="col"
+            class="fps number-cell"
+            v-if="isFps && isShowInfos && metadataDisplayHeaders.fps"
+          >
             {{ $t('shots.fields.fps') }}
+          </th>
+
+          <th
+            scope="col"
+            class="max-retakes number-cell"
+            v-if="isMaxRetakes && isShowInfos && metadataDisplayHeaders.maxRetakes"
+          >
+            {{ $t('shots.fields.max_retakes') }}
           </th>
 
           <th
@@ -145,14 +157,6 @@
             v-if="isResolution && isShowInfos && metadataDisplayHeaders.resolution"
           >
             {{ $t('shots.fields.resolution') }}
-          </th>
-
-          <th
-            scope="col"
-            class="max-retakes"
-            v-if="isMaxRetakes && isShowInfos && metadataDisplayHeaders.maxRetakes"
-          >
-            {{ $t('shots.fields.max_retakes') }}
           </th>
 
           <metadata-header
@@ -380,7 +384,7 @@
 
           <!-- Fixed attributes -->
           <td
-            class="time-spent selectable"
+            class="time-spent selectable number-cell"
             v-if="!isCurrentUserClient &&
                   isShowInfos &&
                   isShotTime &&
@@ -390,7 +394,7 @@
           </td>
 
           <td
-            class="estimation selectable"
+            class="estimation selectable number-cell"
             v-if="!isCurrentUserClient &&
                   isShowInfos &&
                   isShotEstimation &&
@@ -399,7 +403,7 @@
             {{ formatDuration(shot.estimation) }}
           </td>
 
-          <td class="frames"
+          <td class="frames number-cell"
             v-if="isFrames && isShowInfos && metadataDisplayHeaders.frames"
           >
             <input
@@ -417,7 +421,10 @@
               {{ shot.nb_frames }}
             </span>
           </td>
-          <td class="framein" v-if="isFrameIn && isShowInfos && metadataDisplayHeaders.frameIn">
+          <td
+            class="framein number-cell"
+            v-if="isFrameIn && isShowInfos && metadataDisplayHeaders.frameIn"
+          >
             <input
               class="input-editor"
               step="1"
@@ -433,7 +440,10 @@
               {{ getMetadataFieldValue({field_name: 'frame_in'}, shot) }}
             </span>
           </td>
-          <td class="frameout" v-if="isFrameOut && isShowInfos && metadataDisplayHeaders.frameOut">
+          <td
+            class="frameout number-cell"
+            v-if="isFrameOut && isShowInfos && metadataDisplayHeaders.frameOut"
+          >
             <input
               class="input-editor"
               step="1"
@@ -451,7 +461,7 @@
           </td>
 
           <td
-            class="fps"
+            class="fps number-cell"
             v-if="isFps && isShowInfos && metadataDisplayHeaders.fps"
           >
             <input
@@ -466,6 +476,24 @@
             />
             <span class="metadata-value selectable" v-else>
               {{ getMetadataFieldValue({field_name: 'fps'}, shot) }}
+            </span>
+          </td>
+
+          <td
+            class="max-retakes number-cell"
+            v-if="isMaxRetakes && isShowInfos && metadataDisplayHeaders.maxRetakes"
+          >
+            <input
+              class="input-editor"
+              type="number"
+              step="1"
+              :value="getMetadataFieldValue({field_name: 'max_retakes'}, shot)"
+              @input="event => onMetadataFieldChanged(shot, {field_name: 'max_retakes'}, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)"
+              v-if="isCurrentUserManager"
+            />
+            <span class="metadata-value selectable" v-else>
+              {{ getMetadataFieldValue({field_name: 'max_retakes'}, shot) }}
             </span>
           </td>
 
@@ -485,24 +513,6 @@
             />
             <span class="metadata-value selectable" v-else>
               {{ getMetadataFieldValue({field_name: 'resolution'}, shot) }}
-            </span>
-          </td>
-
-          <td
-            class="max-retakes"
-            v-if="isMaxRetakes && isShowInfos && metadataDisplayHeaders.maxRetakes"
-          >
-            <input
-              class="input-editor"
-              type="number"
-              step="1"
-              :value="getMetadataFieldValue({field_name: 'max_retakes'}, shot)"
-              @input="event => onMetadataFieldChanged(shot, {field_name: 'max_retakes'}, event)"
-              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)"
-              v-if="isCurrentUserManager"
-            />
-            <span class="metadata-value selectable" v-else>
-              {{ getMetadataFieldValue({field_name: 'max_retakes'}, shot) }}
             </span>
           </td>
 

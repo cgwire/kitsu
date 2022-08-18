@@ -12,6 +12,7 @@
     >
       <select
         :class="{
+          combobox: true,
           thin: thin,
           'select-input': true,
           error: this.error

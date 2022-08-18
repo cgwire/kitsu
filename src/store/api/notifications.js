@@ -1,9 +1,9 @@
 import client from '@/store/api/client'
+import { buildQueryString } from '@/lib/query'
 
 export default {
-  getNotifications (before) {
-    let path = '/api/data/user/notifications'
-    if (before) path += `?before=${before}`
+  getNotifications (params) {
+    const path = buildQueryString('/api/data/user/notifications', params)
     return client.pget(path)
   },
 

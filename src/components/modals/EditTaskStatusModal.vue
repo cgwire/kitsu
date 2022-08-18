@@ -35,34 +35,34 @@
           v-focus
           v-if="taskStatusToEdit.short_name !== 'todo'"
         />
-        <combobox-boolean
+        <boolean-field
           :label="$t('task_status.fields.is_default')"
           @enter="confirmClicked"
           v-model="form.is_default"
         />
-        <combobox-boolean
+        <boolean-field
           :label="$t('task_status.fields.is_done')"
           @enter="confirmClicked"
           v-model="form.is_done"
           v-if="form.is_default === 'false'"
         />
-        <combobox-boolean
+        <boolean-field
           :label="$t('task_status.fields.is_retake')"
           @enter="confirmClicked"
           v-model="form.is_retake"
           v-if="form.is_default === 'false'"
         />
-        <combobox-boolean
+        <boolean-field
           :label="$t('task_status.fields.is_artist_allowed')"
           @enter="confirmClicked"
           v-model="form.is_artist_allowed"
         />
-        <combobox-boolean
+        <boolean-field
           :label="$t('task_status.fields.is_client_allowed')"
           @enter="confirmClicked"
           v-model="form.is_client_allowed"
         />
-        <combobox-boolean
+        <boolean-field
           :label="$t('task_status.fields.is_feedback_request')"
           @enter="confirmClicked"
           v-model="form.is_feedback_request"
@@ -94,7 +94,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
+import BooleanField from '@/components/widgets/BooleanField'
 import ColorField from '@/components/widgets/ColorField'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '@/components/widgets/TextField'
@@ -103,8 +103,8 @@ export default {
   name: 'edit-task-status-modal',
   mixins: [modalMixin],
   components: {
+    BooleanField,
     ColorField,
-    ComboboxBoolean,
     ModalFooter,
     TextField
   },
@@ -142,7 +142,9 @@ export default {
         { label: this.$t('main.no'), value: 'false' }
       ],
       colors: [
-        '#000000',
+        '#999999',
+        '#CCCCCC',
+        '#CC9999',
         '#FF3860',
         '#E81123',
         '#E74C3C',

@@ -220,7 +220,8 @@ export default {
 
 hr {
   margin: 8px 8px 8px 6px;
-  border: 1px solid $light-grey;
+  height: 1px;
+  background: var(--border-alt);
 }
 
 .topbar-menuitem {

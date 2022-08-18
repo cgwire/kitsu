@@ -21,7 +21,7 @@
       </thead>
       <tbody class="datatable-body" v-if="!isEmpty">
         <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
-          <people-name-cell class="name" :person="entry" />
+          <people-name-cell class="name datatable-row-header" :person="entry" />
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>

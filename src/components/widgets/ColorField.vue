@@ -3,12 +3,13 @@
   <label class="label">{{ label }}</label>
   <div class="control colors">
     <div
+      :ref="'color-' + index"
+      :key="'color-' + index"
       :class="{
         color: true,
         selected: value === color
       }"
-      :ref="'color-' + index"
-      :key="'color-' + index"
+      :style="{ 'border-color': color }"
       v-for="(color, index) in colors"
       @click="colorChanged(color)"
     >
@@ -45,13 +46,16 @@ export default {
     },
     colors: {
       default: () => [
+        '#CCCCCC',
         '#999999',
-        '#8D6E63',
-        '#43A047',
-        '#7CB342',
+        '#78909C',
         '#009688',
-        '#9CCC65',
+        '#33B378',
+        '#7CB342',
+        '#43A047',
+        '#8D6E63',
         '#AFB42B',
+        '#9CCC65',
         '#DCE775',
         '#FFF176',
         '#FFEB3B',
@@ -65,8 +69,7 @@ export default {
         '#039BE5',
         '#42A5F5',
         '#64B5F6',
-        '#26C6DA',
-        '#78909C'
+        '#26C6DA'
       ]
     }
   },
@@ -89,22 +92,35 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.colors {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-gap: 18px;
+}
+
 .color {
   display: inline-block;
   cursor: pointer;
-  border: 3px solid transparent;
   padding: 3px;
-  width: 52px;
-  height: 52px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: 0.3s ease-out all;
+
+  &:hover {
+    transform: scale(1.2);
+  }
 }
 
 .color span {
   display: inline-block;
-  width: 40px;
-  height: 40px;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
 }
 
 .selected {
-  border: 3px solid $light-green;
+  border: 5px solid $light-green;
+  padding: 4px;
 }
 </style>

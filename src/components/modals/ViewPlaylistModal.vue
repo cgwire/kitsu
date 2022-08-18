@@ -238,6 +238,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.modal-content .box {
+  padding: 1em;
+}
+
 .modal-content.wide {
   margin: 1em;
   height: 100%;

@@ -87,9 +87,9 @@
           v-if="isEntryStats(entry.id)"
         >
 
-          <th scope="row" class="name datatable-row-header">
+          <td scope="row" class="name datatable-row-header">
             {{ entry.name }}
-          </th>
+          </td>
 
           <description-cell
             class="description"

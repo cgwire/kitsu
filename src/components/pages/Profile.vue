@@ -17,7 +17,15 @@
               class="button is-link change-avatar-button"
               @click="showAvatarModal"
             >
-            {{ $t('profile.change_avatar') }}
+              {{ $t('profile.change_avatar') }}
+            </button>
+          </p>
+          <p>
+            <button
+              class="button is-link clear-avatar-button"
+              @click="removeAvatar"
+            >
+              {{ $t('profile.clear_avatar') }}
             </button>
           </p>
           <h1>
@@ -309,7 +317,8 @@ export default {
     ...mapActions([
       'saveProfile',
       'checkNewPasswordValidityAndSave',
-      'uploadAvatar'
+      'uploadAvatar',
+      'clearAvatar'
     ]),
 
     localeChanged () {
@@ -359,6 +368,10 @@ export default {
 
     showAvatarModal () {
       this.changeAvatar.isModalShown = true
+    },
+
+    removeAvatar () {
+      this.clearAvatar()
     }
   },
 
@@ -445,7 +458,7 @@ input, select, span.select {
 
 .profile-header h1 {
   font-size: 2em;
-  margin-top: 0.5em;
+  margin-top: 0em;
 }
 
 .profile-header, .profile-header a {
@@ -498,6 +511,12 @@ h2:first-child {
 
 .change-password-message {
   margin-top: 1em;
+}
+
+.clear-avatar-button {
+  color: white;
+  font-size: 0.7em;
+  text-transform: lowercase
 }
 
 select {

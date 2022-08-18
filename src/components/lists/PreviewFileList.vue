@@ -192,6 +192,30 @@ export default {
   margin-right: 0.5em;
 }
 
+.datatable-head {
+  th {
+    border: 0;
+  }
+}
+
+tr:first-child {
+  td:first-child {
+    border-top-left-radius: 10px;
+  }
+  td:last-child {
+    border-top-right-radius: 10px;
+  }
+}
+
+tr:last-child {
+  td:first-child {
+    border-bottom-left-radius: 10px;
+  }
+  td:last-child {
+    border-bottom-right-radius: 10px;
+  }
+}
+
 tr {
   cursor: pointer;
 }

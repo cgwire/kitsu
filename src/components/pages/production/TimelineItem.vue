@@ -139,7 +139,8 @@ export default {
     color: $dark-grey;
     font-size: 14px;
     font-weight: 400;
-    padding-left: 3px;
+    font-variant: normal;
+    letter-spacing: 0;
   }
 }
 </style>

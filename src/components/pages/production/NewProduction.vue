@@ -30,12 +30,22 @@
           :step="2"
           :is-completed="hasValidSettings"
         >
-          <div>
-            <combobox
+          <div class="flexrow">
+            <combobox-styled
+              class="flexrow-item"
               :options="productionTypeOptions"
               :label="$t('productions.fields.type')"
               localeKeyPrefix="productions.type."
               v-model="productionToCreate.settings.type"
+              thin
+              is-inline
+            />
+            <combobox-styled
+              class="flexrow-item"
+              :options="productionStyleOptions"
+              :label="$t('productions.fields.style')"
+              localeKeyPrefix="productions.style."
+              v-model="productionToCreate.settings.style"
               thin
               is-inline
             />
@@ -423,9 +433,13 @@ import csv from '@/lib/csv'
 import { removeModelFromList } from '@/lib/models'
 import { formatSimpleDate } from '@/lib/time'
 import { sortByName } from '@/lib/sorting'
-import { PRODUCTION_TYPE_OPTIONS } from '@/lib/productions'
+import {
+  PRODUCTION_STYLE_OPTIONS,
+  PRODUCTION_TYPE_OPTIONS
+} from '@/lib/productions'
 
 import Combobox from '@/components/widgets/Combobox'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ImportModal from '@/components/modals/ImportModal'
@@ -442,6 +456,7 @@ export default {
   components: {
     draggable,
     Combobox,
+    ComboboxStyled,
     ComboboxTaskType,
     ComboboxStatus,
     Datepicker,
@@ -487,12 +502,13 @@ export default {
         name: null,
         sequencesToCreate: [],
         settings: {
-          type: PRODUCTION_TYPE_OPTIONS[0].value,
+          dateStart: null,
+          dateEnd: null,
           fps: 25, // eg: '24'
           ratio: [16, 9], // eg: [4, 3]
           resolution: [1920, 1080], // eg: [1440, 1080]
-          dateStart: null,
-          dateEnd: null
+          style: PRODUCTION_STYLE_OPTIONS[0].value,
+          type: PRODUCTION_TYPE_OPTIONS[0].value
         },
         shotsToAdd: null,
         shotTaskTypes: [],
@@ -515,6 +531,7 @@ export default {
         'task_type_name => task_status_name',
         'task_type_name comment => comment text'
       ],
+      productionStyleOptions: PRODUCTION_STYLE_OPTIONS,
       productionTypeOptions: PRODUCTION_TYPE_OPTIONS
     }
   },
@@ -877,6 +894,7 @@ export default {
           ratio: this.productionToCreate.settings.ratio.join(':'),
           resolution: this.productionToCreate.settings.resolution.join('x'),
           production_type: this.productionToCreate.settings.type,
+          production_style: this.productionToCreate.settings.style,
           start_date: this.productionToCreate.settings.dateStart,
           end_date: this.productionToCreate.settings.dateEnd
         })

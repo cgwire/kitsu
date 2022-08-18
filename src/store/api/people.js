@@ -312,5 +312,9 @@ export default {
 
   getContext () {
     return client.pget('/api/data/user/context')
+  },
+
+  clearAvatar () {
+    return client.pdel('/api/actions/user/clear-avatar')
   }
 }

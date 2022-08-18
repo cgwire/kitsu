@@ -30,8 +30,9 @@
       class="select-input"
       ref="select"
       v-bind:style="{
-       'max-height': maxHeightSelectInput + 'px',
-       width: width + 'px'
+        'max-height': maxHeightSelectInput + 'px',
+        width: width + 'px',
+        top: rounded ? '30px' : '37px'
       }"
       v-if="showDepartmentList"
     >
@@ -201,7 +202,7 @@ export default {
   border: 1px solid $light-grey-light;
   user-select: none;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 10px;
   margin: 0;
   padding: 0.15em;
   position: relative;
@@ -246,7 +247,6 @@ export default {
   margin-left: -1px;
   max-height: 200px;
   overflow-y: auto;
-  top: 30px;
   left: 0;
 }
 

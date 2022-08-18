@@ -666,13 +666,17 @@ export default {
   margin-left: 0;
 }
 
+.content h3:not(:first-child) {
+  margin-top: 2.5em;
+}
+
 .subtitle {
   color: $grey;
+  font-weight: 500;
   font-size: 1em;
-  margin-top: 1.1em;
-  text-transform: uppercase;
   margin-bottom: 0.5em;
   margin-left: 0.1em;
+  text-transform: uppercase;
 }
 
 .field {

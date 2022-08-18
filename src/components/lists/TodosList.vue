@@ -103,7 +103,7 @@
                 :empty-height="40"
                 :entity="{preview_file_id: entry.entity_preview_file_id}"
               />
-              <router-link :to="entityPath(entry)">
+              <router-link class="entity-name" :to="entityPath(entry)">
                 {{ entry.full_entity_name }}
               </router-link>
             </div>
@@ -579,8 +579,8 @@ export default {
 }
 
 .name {
-  width: 280px;
-  min-width: 280px;
+  width: 300px;
+  min-width: 300px;
 }
 
 .description {
@@ -618,10 +618,18 @@ export default {
   min-width: 60px;
 }
 
+td.estimation {
+  text-align: center;
+}
+
 .start-date,
 .due-date {
   width: 110px;
   min-width: 110px;
+}
+
+td.due-date {
+  border-right: 1px solid var(--border-alt)
 }
 
 th.last-comment {
@@ -648,5 +656,10 @@ td.end-date {
 
 .empty-list img {
   max-width: 80vh;
+}
+
+.entity-name {
+  color: var(--text);
+  font-weight: bold;
 }
 </style>

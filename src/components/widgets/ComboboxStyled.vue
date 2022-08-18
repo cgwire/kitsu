@@ -16,7 +16,7 @@
       <div
         class="selected-line flexrow-item"
       >
-        {{ selectedOption ? selectedOption.label : '' }}
+        {{ selectedOption ? getOptionLabel(selectedOption) : '' }}
       </div>
       <chevron-down-icon class="down-icon flexrow-item"/>
     </div>
@@ -33,7 +33,7 @@
         @click.middle="openRoute(option)"
         :key="option.id"
       >
-        {{ option.label }}
+        {{ getOptionLabel(option) }}
       </div>
     </div>
   </div>
@@ -81,6 +81,10 @@ export default {
     value: {
       default: '',
       type: String
+    },
+    localeKeyPrefix: {
+      default: '',
+      type: String
     }
   },
 
@@ -120,11 +124,20 @@ export default {
           this.$refs.select.scrollTo({ top: this.lastScrollPosition, left: 0 })
         })
       }
+    },
+
+    getOptionLabel (option) {
+      if (this.localeKeyPrefix.length > 0) {
+        return this.$t(this.localeKeyPrefix + option.label.toLowerCase())
+      } else {
+        return option.label
+      }
     }
   },
 
   watch: {
     options () {
+      console.log('options changed')
       if (this.options.length > 0) {
         const option = this.options.find(o => o.value === this.value)
         if (option) {
@@ -161,7 +174,7 @@ export default {
   background: $white;
   color: var(--text);
   border: 1px solid $light-grey-light;
-  border-radius: 0.5em;
+  border-radius: 10px;
   user-select: none;
   cursor: pointer;
   margin: 0;

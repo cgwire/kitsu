@@ -875,13 +875,24 @@ label.label {
   color: $grey;
   text-transform: uppercase;
   font-size: 0.8em;
+  letter-spacing: 1px;
   margin-left: 2px;
 }
 
+.subtitle {
+  color: $grey;
+  font-variant: small-caps;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
 texarea,
 input.input {
   padding: 1em;
   height: 3em;
+}
+
+.select select {
+  border-radius: 10px;
 }
 
 .select select:hover,
@@ -908,10 +919,6 @@ input.input:focus {
   box-shadow: none;
 }
 
-textarea.input:focus {
-  border-color: $green;
-}
-
 .button.is-primary {
   border-radius: 2px;
   background: #00B242;
@@ -935,6 +942,18 @@ textarea.input:focus {
 .big-button:hover {
   color: white;
   background: #67BE4B;
+}
+
+input[type=checkbox] {
+  cursor: pointer;
+}
+
+textarea.input {
+  border-radius: 10px;
+}
+
+textarea.input:focus {
+  border-color: $green;
 }
 
 .error {
@@ -990,12 +1009,16 @@ textarea.input:focus {
 
 .modal-content {
   .box {
-    border-radius: 1em;
-    padding: 1.5em 1.5em 1.5em 1.5em;
+    border-radius: 0.5em;
+    padding: 2.8em 3em 3em 3em;
 
     h1.title {
-      font-weight: 300;
-      font-size: 2em;
+      font-family: Lato;
+      font-weight: 400;
+      font-size: 3em;
+      margin-top: 0;
+      padding-top: 0;
+      margin-bottom: 1em;
       border: 0;
     }
 
@@ -1159,6 +1182,7 @@ textarea.input:focus {
   flex: 1;
   overflow: auto;
   min-height: 1px;
+  border-radius: 10px;
 }
 
 .table {
@@ -1263,6 +1287,14 @@ tbody:last-child .empty-line:last-child {
     position: sticky;
   }
 
+  th.number-cell,
+  td.number-cell {
+    text-align: right;
+    input {
+      text-align: right;
+    }
+  }
+
   .datatable-row {
     .thumbnail-wrapper,
     .thumbnail-picture,
@@ -1275,19 +1307,82 @@ tbody:last-child .empty-line:last-child {
         margin: 0;
       }
     }
+
+    td {
+      border-top: 1px solid var(--border-alt);
+      border-left: 1px solid var(--border-alt);
+    }
+
+    &:last-child {
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+      td:first-child {
+        border-bottom-left-radius: 10px;
+      }
+      td:last-child {
+        border-bottom-right-radius: 10px;
+      }
+    }
+  }
+
+  &.no-header {
+    .datatable-row {
+      &:first-child {
+        td:first-child {
+          border-top-left-radius: 10px;
+        }
+        td:last-child {
+          border-top-right-radius: 10px;
+        }
+      }
+    }
+  }
+
+  &.multi-section {
+    .datatable-row {
+      &:nth-child(2) {
+        th:first-child {
+          border-top-left-radius: 10px;
+        }
+        td:first-child {
+          border-top-left-radius: 10px;
+        }
+        td:last-child {
+          border-top-right-radius: 10px;
+        }
+      }
+      &:last-child {
+        th:first-child {
+          border-bottom-left-radius: 10px;
+        }
+        td:last-child {
+          border-bottom-right-radius: 10px;
+        }
+      }
+    }
   }
 }
 
 .datatable-head {
   th {
-    top: 0;
+    background-color: var(--background);
+    border-bottom: 1px solid var(--border);
     padding: 0.5rem 0.75rem;
+    color: var(--text-alt);
     font-size: .9rem;
+    font-variant: small-caps;
+    letter-spacing: 1px;
+    top: 0;
     vertical-align: middle;
     z-index: 2;
-    background-color: var(--background);
-    color: var(--text);
-    border-bottom: 1px solid var(--border-alt);
+
+    a {
+      color: var(--text-alt);
+    }
+
+    span.dot {
+      margin-right: 7px;
+    }
 
     &:hover .header-icon {
       opacity: 1;
@@ -1549,6 +1644,10 @@ tbody:last-child .empty-line:last-child {
   border-color: #666;
 }
 
+.combobox {
+  border-radius: 10px;
+}
+
 .thumbnail-picture {
   border: 1px solid #CCC;
 }
@@ -1682,6 +1781,10 @@ th.validation-cell {
   }
 }
 
+.date-input {
+  border-radius: 10px;
+}
+
 .project-dates .date-input {
   width: 150px;
 }
@@ -1723,7 +1826,7 @@ th.validation-cell {
 
 .status-combo {
   padding: 0.3em;
-  border-radius: 3px;
+  border-radius: 10px;
 
   .selected-status-line,
   .status-line {

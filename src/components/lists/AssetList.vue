@@ -29,7 +29,7 @@
       @toggle-stick="metadataStickColumnClicked($event)"
     />
 
-    <table class="datatable">
+    <table class="datatable multi-section">
       <thead
         class="datatable-head"
         v-columns-resizable
@@ -91,6 +91,16 @@
           />
 
           <th
+            ref="th-ready-for"
+            scope="col"
+            class="ready-for"
+            :title="$t('assets.fields.ready_for')"
+            v-if="isCurrentUserManager && isShowInfos && metadataDisplayHeaders.readyFor"
+          >
+            {{ $t('assets.fields.ready_for') }}
+          </th>
+
+          <th
             scope="col"
             class="description"
             ref="th-description"
@@ -100,7 +110,7 @@
           </th>
           <th
             scope="col"
-            class="time-spent"
+            class="time-spent number-cell"
             ref="th-spent"
             v-if="!isCurrentUserClient &&
                   isShowInfos &&
@@ -109,9 +119,10 @@
           >
             {{ $t('assets.fields.time_spent') }}
           </th>
+
           <th
             scope="col"
-            class="estimation"
+            class="estimation number-cell"
             :title="$t('main.estimation')"
             ref="th-spent"
             v-if="!isCurrentUserClient &&
@@ -120,16 +131,6 @@
                   metadataDisplayHeaders.estimation"
           >
             {{ $t('main.estimation_short') }}
-          </th>
-
-          <th
-            ref="th-ready-for"
-            scope="col"
-            class="ready-for"
-            :title="$t('assets.fields.ready_for')"
-            v-if="isCurrentUserManager && isShowInfos && metadataDisplayHeaders.readyFor"
-          >
-            {{ $t('assets.fields.ready_for') }}
           </th>
 
           <metadata-header
@@ -354,34 +355,6 @@
             v-if="!isLoading"
           />
 
-          <description-cell
-            class="description"
-            @description-changed="value => onDescriptionChanged(asset, value)"
-            :editable="isCurrentUserManager"
-            v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
-            :entry="asset"
-          />
-
-          <td
-            class="time-spent selectable"
-            v-if="!isCurrentUserClient &&
-                  isShowInfos &&
-                  isAssetTime &&
-                  metadataDisplayHeaders.timeSpent"
-          >
-            {{ formatDuration(asset.timeSpent) }}
-          </td>
-
-          <td
-            class="estimation selectable"
-            v-if="!isCurrentUserClient &&
-                  isShowInfos &&
-                  isAssetEstimation &&
-                  metadataDisplayHeaders.estimation"
-          >
-            {{ formatDuration(asset.estimation) }}
-          </td>
-
           <td
             class="task-type-name ready-for"
             v-if="isCurrentUserManager && isShowInfos && metadataDisplayHeaders.readyFor"
@@ -394,6 +367,34 @@
               :shy="true"
               @input="(taskTypeId) => onReadyForChanged(asset, taskTypeId)"
             />
+          </td>
+
+          <description-cell
+            class="description"
+            @description-changed="value => onDescriptionChanged(asset, value)"
+            :editable="isCurrentUserManager"
+            v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
+            :entry="asset"
+          />
+
+          <td
+            class="time-spent selectable number-cell"
+            v-if="!isCurrentUserClient &&
+                  isShowInfos &&
+                  isAssetTime &&
+                  metadataDisplayHeaders.timeSpent"
+          >
+            {{ formatDuration(asset.timeSpent) }}
+          </td>
+
+          <td
+            class="estimation selectable number-cell"
+            v-if="!isCurrentUserClient &&
+                  isShowInfos &&
+                  isAssetEstimation &&
+                  metadataDisplayHeaders.estimation"
+          >
+            {{ formatDuration(asset.estimation) }}
           </td>
 
           <!-- other Metadata cells -->
@@ -1009,8 +1010,8 @@ th.time-spent,
 td.time-spent,
 th.estimation,
 td.estimation {
-  min-width: 70px;
-  width: 70px;
+  min-width: 60px;
+  width: 60px;
 }
 
 th.ready-for,

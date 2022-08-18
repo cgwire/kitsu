@@ -1342,7 +1342,7 @@ export default {
 }
 
 .description-header {
-  width: 136px;
+  width: 236px;
 }
 
 .descriptor-header {
@@ -1367,6 +1367,11 @@ export default {
   font-size: 1.1em;
   padding: 0 .5em 0;
   border-bottom: 1px solid $light-grey;
+  color: var(--text-alt);
+  font-size: 0.9em;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 
   div {
     padding-bottom: .5em;

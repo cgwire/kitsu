@@ -32,7 +32,7 @@
       >
         {{ taskStatus.short_name }}
       </span>
-      <span class="priority" v-if="!isCurrentUserClient">
+      <span class="priority" v-if="!isCurrentUserClient && !disabled">
         {{ priority }}
       </span>
       <span
@@ -431,9 +431,11 @@ span.person-avatar:nth-child(2) {
 }
 
 .tag {
-  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 1px;
   margin-right: 0.1em;
   margin-bottom: 0.3em;
+  text-transform: uppercase;
 }
 
 .priority {

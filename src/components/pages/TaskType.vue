@@ -921,7 +921,14 @@ export default {
           expanded: true,
           loading: false,
           children: [],
-          editable: false
+          editable: false,
+          route: {
+            name: 'person-tab',
+            params: {
+              person_id: person.id,
+              tab: 'schedule'
+            }
+          }
         }
       }
 
