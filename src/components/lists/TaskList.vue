@@ -699,6 +699,12 @@ export default {
   width: 60px;
 }
 
+.selected {
+  .estimation {
+    padding: 0;
+  }
+}
+
 .last-comment-date,
 .real-start-date,
 .real-end-date {
