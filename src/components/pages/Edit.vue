@@ -181,6 +181,8 @@
         :annotations="annotations"
         :frame-duration="frameDuration"
         :nb-frames="nbFrames"
+        :handle-in="-1"
+        :handle-out="-1"
         @start-scrub="onScrubStart"
         @end-scrub="onScrubEnd"
         @progress-changed="onProgressChanged"

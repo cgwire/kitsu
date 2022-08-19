@@ -293,6 +293,12 @@ export default {
   }
 }
 
+.field--narrow {
+  .select-input {
+    top: 33px;
+  }
+}
+
 .field .label {
   padding-top: 5px;
 }
