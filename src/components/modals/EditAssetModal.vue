@@ -213,9 +213,11 @@ export default {
       'currentProduction',
       'currentEpisode',
       'episodes',
+      'isCurrentUserManager',
+      'isTVShow',
+      'isSupervisorInDepartments',
       'productionAssetTypes',
       'productionAssetTypeOptions',
-      'isTVShow',
       'openProductions'
     ]),
 

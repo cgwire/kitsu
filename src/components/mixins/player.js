@@ -789,6 +789,7 @@ export const playerMixin = {
         }
       }
       if (
+        this.playlist &&
         this.playlist.for_entity === 'shot' &&
         this.handleOut < this.nbFrames &&
         this.frameNumber >= this.handleOut &&

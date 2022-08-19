@@ -54,7 +54,7 @@ export default {
    */
   lightenColor (colorHash, level = 0.3) {
     if (!lightenColorIndex[colorHash + level]) {
-      lightenColorIndex[colorHash + level] = Color(colorHash).fade(level)
+      lightenColorIndex[colorHash + level] = Color(colorHash).lighten(level)
     }
     return lightenColorIndex[colorHash + level]
   },
