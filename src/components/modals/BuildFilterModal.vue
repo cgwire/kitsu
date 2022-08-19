@@ -91,7 +91,7 @@
         />
       </div>
 
-      <div v-if="descriptorOptions.length > 0">
+      <div class="mt2" v-if="descriptorOptions.length > 0">
         <h3 class="subtitle">
           {{ $t('entities.build_filter.descriptor') }}
         </h3>
@@ -191,6 +191,25 @@
         v-model="hasThumbnail.value"
       />
 
+      <h3 class="subtitle flexrow-item mt2" v-if="isShots">
+        {{ $t('entities.build_filter.is_assets_ready') }}
+      </h3>
+      <div class="flexrow" v-if="isShots">
+        <combobox-task-type
+          class="flexrow-item"
+          :task-type-list="taskTypeList"
+          open-top
+          v-model="isAssetsReady.taskTypeId"
+        />
+
+        <combobox
+          class="flexrow-item"
+          :options="isAssetsReady.options"
+          locale-key-prefix="entities.build_filter."
+          v-model="isAssetsReady.value"
+        />
+      </div>
+
       <modal-footer
         :error-text="$t('entities.thumbnails.error')"
         @confirm="applyFilter"
@@ -279,6 +298,15 @@ export default {
           { label: 'no_filter', value: 'nofilter' },
           { label: 'with_thumbnail', value: 'withthumbnail' },
           { label: 'without_thumbnail', value: '-withthumbnail' }
+        ]
+      },
+      isAssetsReady: {
+        value: 'nofilter',
+        taskTypeId: '',
+        options: [
+          { label: 'no_filter', value: 'nofilter' },
+          { label: 'assets_ready', value: 'assetsready' },
+          { label: 'assets_not_ready', value: '-assetsready' }
         ]
       },
       metadataDescriptorFilters: {
@@ -396,6 +424,7 @@ export default {
       query = this.applyAssignationChoice(query)
       query = this.applyThumbnailChoice(query)
       query = this.applyUnionChoice(query)
+      query = this.applyAssetsReadyChoice(query)
       return query.trim()
     },
 
@@ -460,6 +489,18 @@ export default {
     applyUnionChoice (query) {
       if (this.union === 'or') {
         query = ` +(${query.trim()})`
+      }
+      return query
+    },
+
+    applyAssetsReadyChoice (query) {
+      if (this.isAssetsReady.value !== 'nofilter') {
+        if (this.isAssetsReady.taskTypeId.length === 0) {
+          this.isAssetsReady.taskTypeId = this.taskTypeList[0].id
+        }
+        const taskType = this.taskTypeMap.get(this.isAssetsReady.taskTypeId)
+        const operator = this.isAssetsReady.value === 'assetsready' ? '' : '-'
+        query += ` assetsready=[${operator}${taskType.name}]`
       }
       return query
     },
@@ -556,6 +597,8 @@ export default {
             this.setFiltersFromAssignedToQuery(filter)
           } else if (filter.type === 'thumbnail') {
             this.setFiltersFromThumbnailQuery(filter)
+          } else if (filter.type === 'assetsready') {
+            this.setFiltersFromAssetsReadyQuery(filter)
           }
         })
         if (filters.union) {
@@ -617,6 +660,12 @@ export default {
       } else {
         this.hasThumbnail.value = 'withthumbnail'
       }
+    },
+
+    setFiltersFromAssetsReadyQuery (filter) {
+      this.isAssetsReady.taskTypeId = filter.value
+      this.isAssetsReady.value =
+        filter.excluding ? '-assetsready' : 'assetsready'
     },
 
     setUnion () {

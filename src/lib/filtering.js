@@ -10,6 +10,7 @@ const UNION_REGEX = /\+\(.*\)/
 const EQUAL_REGEX = /\[([^[]*)\]=\[([^[]*)\]|([^ ]*)=\[([^[]*)\]|([^ ]*)=([^ ]*)|\[([^[]*)\]=([^ ]*)/g
 const EQUAL_ASSET_TYPE_REGEX = /type=\[([^[]*)\]|type=([^ ]*)|type=([^ ]*)/g
 const EQUAL_PEOPLE_DEPARTMENT_REGEX = /department=\[([^[]*)\]|department=([^ ]*)|department=([^ ]*)/g
+const EQUAL_ASSETS_READY_REGEX = /assetsready=\[([^[]*)\]|assetsready=([^ ]*)|assetsready=([^ ]*)/g
 
 /*
  * Look in the search query for task type filter like anim=wip.
@@ -109,6 +110,21 @@ const applyFiltersFunctions = {
                       entry.departments.indexOf(value.id) !== -1
     })
     return filter.excluding ? !hasDepartment : hasDepartment
+  },
+
+  assetsready (entry, filter, taskMap) {
+    let isOk = false
+    if (entry.tasks) {
+      entry.tasks.forEach(taskId => {
+        const task = taskMap.get(taskId)
+        if (task.task_type_id === filter.value) {
+          isOk = entry.nb_entities_out > 0 &&
+            entry.nb_entities_out === task.nb_assets_ready
+        }
+      })
+    }
+    if (filter.excluding) isOk = !isOk
+    return isOk
   }
 }
 
@@ -175,6 +191,7 @@ export const getFilters = (
     ...getAssignedToFilters(persons, query),
     ...getDepartmentFilters(departments, query),
     ...getThumbnailFilters(query) || [],
+    ...getAssetsReadyFilter(taskTypes, query),
     ...getExcludingFilters(entryIndex, query)
   ]
   filters.union = unionExtraction.union
@@ -452,6 +469,33 @@ export const getThumbnailFilters = (queryText) => {
     results.push({
       type: 'thumbnail',
       excluding: false
+    })
+  }
+  return results
+}
+
+export const getAssetsReadyFilter = (taskTypes, queryText) => {
+  if (!queryText) return []
+
+  const results = []
+  const rgxMatches = queryText.match(EQUAL_ASSETS_READY_REGEX)
+
+  if (rgxMatches) {
+    const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
+
+    rgxMatches.forEach(rgxMatch => {
+      const pattern = rgxMatch.split('=')
+      let taskTypeName = cleanParenthesis(pattern[1])
+      const excluding = taskTypeName.startsWith('-')
+      if (excluding) taskTypeName = taskTypeName.substring(1)
+      const taskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
+      if (taskTypes && taskTypes.length > 0) {
+        results.push({
+          value: taskTypes[0].id,
+          type: 'assetsready',
+          excluding
+        })
+      }
     })
   }
   return results
