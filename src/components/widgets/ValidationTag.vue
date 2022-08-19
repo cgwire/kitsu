@@ -39,7 +39,6 @@
     </router-link>
     <span
       class="tag"
-      :style="cursor"
       v-else
     >
       &nbsp;
@@ -149,13 +148,23 @@ export default {
       const isStatic = !this.isStatic && !this.isCurrentUserClient
       const isTodo = this.taskStatus.name === 'Todo'
       if (this.thin && !isTodo) {
-        return {
-          background: this.isDarkTheme
-            ? 'rgba(255, 255, 255, 0.75)'
-            : 'transparent',
-          border: '1px solid ' + (isTodo ? 'grey' : this.backgroundColor),
-          color: this.backgroundColor,
-          cursor: isStatic ? 'pointer' : this.cursor
+        if (this.isDarkTheme) {
+          return {
+            background: 'transparent',
+            border: '1px solid ' + (isTodo
+              ? 'grey'
+              : colors.lightenColor(this.backgroundColor, 0.5)
+            ),
+            color: colors.lightenColor(this.backgroundColor, 0.5),
+            cursor: isStatic ? 'pointer' : this.cursor
+          }
+        } else {
+          return {
+            background: 'transparent',
+            border: '1px solid ' + (isTodo ? 'grey' : this.backgroundColor),
+            color: this.backgroundColor,
+            cursor: isStatic ? 'pointer' : this.cursor
+          }
         }
       } else {
         return {
