@@ -102,18 +102,7 @@
                 v-model="taskStatusId"
               />
             </div>
-            <div class="flexrow-item" v-if="!isChangeStatusLoading">
-              <button
-                class="button is-success confirm-button"
-                @click="confirmTaskStatusChange"
-              >
-                {{ $t('main.confirmation') }}
-              </button>
-            </div>
-            <div class="flexrow-item" v-if="isChangeStatusLoading">
-              <spinner :is-white="true" />
-            </div>
-             <div
+            <div
               class="flexrow-item"
               v-if="!isChangeStatusLoading"
             >
@@ -125,9 +114,21 @@
                 @keyup.meta.enter="confirmTaskStatusChange"
                 v-model="statusComment"
               />
-            </div>
+          </div>
+
+          <div class="flexrow-item" v-if="!isChangeStatusLoading">
+            <button
+              class="button is-success confirm-button"
+              @click="confirmTaskStatusChange"
+            >
+              {{ $t('main.confirmation') }}
+            </button>
+          </div>
+          <div class="flexrow-item" v-if="isChangeStatusLoading">
+            <spinner :is-white="true" />
           </div>
         </div>
+      </div>
 
         <div
           class="flexrow-item"
@@ -1249,6 +1250,7 @@ div.combobox-item {
 }
 
 .comment-text {
+  border-radius: 10px;
   padding: 8px;
 }
 
