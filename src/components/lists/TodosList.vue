@@ -31,7 +31,11 @@
           >
             {{ $t('tasks.fields.entity') }}
           </th>
-          <th scope="col" class="description">
+          <th
+            class="description"
+            scope="col"
+            v-if="isDescriptionPresent"
+          >
             {{ $t('assets.fields.description') }}
           </th>
           <th
@@ -111,6 +115,7 @@
           <description-cell
             class="description"
             :entry="{description: entry.entity_description}"
+            v-if="isDescriptionPresent"
           />
           <td class="estimation">
             {{ formatDuration(entry.estimation) }}
@@ -300,6 +305,12 @@ export default {
 
     displayedTasks () {
       return this.tasks.slice(0, this.page * PAGE_SIZE)
+    },
+
+    isDescriptionPresent () {
+      return this.tasks.some(task => {
+        return task.entity_description && task.entity_description.length > 0
+      })
     },
 
     metadataDescriptorsMap () {
