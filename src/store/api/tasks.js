@@ -154,7 +154,7 @@ export default {
   },
 
   uploadPreview (previewId, formData) {
-    return client.ppost(
+    return client.ppostFile(
       `/api/pictures/preview-files/${previewId}`,
       formData
     )

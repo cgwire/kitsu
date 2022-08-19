@@ -96,11 +96,17 @@
         </div>
         <div
           :key="'preview-' + index"
-          class="attachment-file"
+          class="preview-file"
           v-for="(preview, index) in previewForms"
         >
-          {{ preview.get('file').name }}
-          <span @click="$emit('remove-preview', preview)">x</span>
+          <div class="m0">
+            {{ shortenText(preview.get('file').name, 40) }}
+            <span @click="$emit('remove-preview', preview)">x</span>
+          </div>
+          <progress
+            max="100"
+            :value="uploadProgress[preview.get('file').name] || 0">
+          </progress>
         </div>
 
         <div class="flexrow preview-section" v-if="mode === 'publish'">
@@ -124,7 +130,7 @@
         class="attachment-file"
         v-for="(attach, index) in attachments"
       >
-        {{ attach.get('file').name }}
+        {{ shortenText(attach.get('file').name, 40) }}
         <span @click="removeAttachment(attach)">x</span>
       </div>
 
@@ -219,6 +225,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { remove } from '@/lib/models'
+import strings from '@/lib/string'
 import colors from '@/lib/colors'
 import { replaceTimeWithTimecode } from '@/lib/render'
 
@@ -343,6 +350,7 @@ export default {
       'currentProduction',
       'isDarkTheme',
       'isCurrentUserArtist',
+      'uploadProgress',
       'taskStatusForCurrentUser',
       'taskTypeMap',
       'taskStatusMap'
@@ -376,6 +384,7 @@ export default {
   },
 
   methods: {
+    shortenText: strings.shortenText,
     runAddComment (text, attachments, checklist, taskStatusId) {
       if (this.mode === 'publish') {
         if (!this.showCommentArea) text = ''
@@ -557,7 +566,7 @@ article.add-comment {
 
     &:focus,
     &:active {
-      border-color: $light-grey-light;
+      border-color: var(--border-alt)
     }
   }
 }
@@ -608,22 +617,22 @@ article.add-comment {
     border: 0;
     margin: 0;
     margin-right: 3px;
-    color: $grey;
+    color: var(--text-alt);
     padding: 0em 10px;
 
     &:hover {
-      color: $dark-grey;
+      color: var(--text);
     }
 
     &.post-button {
+      border: 1px solid var(--border);
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
       padding-right: 1em;
+      &:hover {
+        border: 1px solid var(--border-alt);
+      }
     }
-  }
-
-  .button:last-child {
-    border: 1px solid #CCC;
   }
 }
 
@@ -670,7 +679,30 @@ article.add-comment {
   }
 }
 
+.preview-file {
+  margin-top: 1em;
+  margin-bottom: 3px;
+  margin-left: 3px;
+  margin-right: 3px;
+
+  span {
+    cursor: pointer;
+    float: right;
+  }
+}
+
 .post-area {
   padding: 0 .5em .2em .5em;
+}
+
+progress {
+  height: 3px;
+  width: 100%;
+  &::-webkit-progress-value {
+    background-color: $light-green;
+  }
+  &::-moz-progress-bar {
+    background-color: $light-green;
+  }
 }
 </style>

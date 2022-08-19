@@ -1,4 +1,5 @@
 import async from 'async'
+import Vue from 'vue'
 
 import tasksApi from '@/store/api/tasks'
 import peopleApi from '@/store/api/people'
@@ -75,6 +76,8 @@ import {
   UPDATE_COMMENT_CHECKLIST,
   UPDATE_COMMENT_REPLIES,
   SET_LAST_COMMENT_DRAFT,
+  SET_UPLOAD_PROGRESS,
+  CLEAR_UPLOAD_PROGRESS,
 
   REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD,
   UPDATE_REVISION_PREVIEW_POSITION,
@@ -104,7 +107,8 @@ const initialState = {
   isSavingCommentPreview: false,
   previewForms: [],
 
-  lastCommentDraft: ''
+  lastCommentDraft: '',
+  uploadProgress: {}
 }
 
 const state = {
@@ -165,7 +169,8 @@ const getters = {
   taskEntityPreviews: state => state.taskEntityPreviews,
   previewForms: state => state.previewForms,
   isSavingCommentPreview: state => state.isSavingCommentPreview,
-  lastCommentDraft: state => state.lastCommentDraft
+  lastCommentDraft: state => state.lastCommentDraft,
+  uploadProgress: state => state.uploadProgress
 }
 
 const actions = {
@@ -453,7 +458,7 @@ const actions = {
     commit(ADD_PREVIEW_START)
     let newComment
     return tasksApi.commentTask(data)
-      .then((comment) => {
+      .then(comment => {
         newComment = comment
         const previewData = {
           taskId,
@@ -462,7 +467,15 @@ const actions = {
         return tasksApi.addPreview(previewData)
       }).then(preview => {
         if (!form) form = state.previewForms[0]
-        return tasksApi.uploadPreview(preview.id, form)
+        const { request, promise } = tasksApi.uploadPreview(preview.id, form)
+        request.on('progress', e => {
+          commit(SET_UPLOAD_PROGRESS, {
+            previewId: preview.id,
+            percent: e.percent,
+            name: form.get('file').name
+          })
+        })
+        return promise
       }).then(preview => {
         commit(NEW_TASK_COMMENT_END, { comment: newComment, taskId })
         commit(ADD_PREVIEW_END, {
@@ -479,6 +492,7 @@ const actions = {
             previewId: preview.id
           })
         }
+        commit(CLEAR_UPLOAD_PROGRESS)
         return Promise.resolve({ newComment, preview })
       })
   },
@@ -490,8 +504,18 @@ const actions = {
     const addPreview = (form) => {
       return tasksApi
         .addExtraPreview(previewId, taskId, commentId)
-        .then(preview => tasksApi.uploadPreview(preview.id, form))
-        .then((preview) => {
+        .then(preview => {
+          const { request, promise } = tasksApi.uploadPreview(preview.id, form)
+          request.on('progress', e => {
+            commit(SET_UPLOAD_PROGRESS, {
+              previewId: preview.id,
+              percent: e.percent,
+              name: form.get('file').name
+            })
+          })
+          return promise
+        })
+        .then(preview => {
           const comment = getters.getTaskComment(taskId, commentId)
           commit(ADD_PREVIEW_END, {
             preview,
@@ -768,12 +792,12 @@ const mutations = {
       )
     })
     state.taskComments[taskId] = sortComments(comments)
-    state.taskPreviews[taskId] = comments.reduce((previews, comment) => {
+    Vue.set(state.taskPreviews, taskId, comments.reduce((previews, comment) => {
       if (comment.previews && comment.previews.length > 0) {
         const preview = comment.previews[0]
         preview.previews = sortRevisionPreviewFiles(comment.previews
-          .map((p) => {
-            return {
+          .map(p => {
+            const prev = {
               id: p.id,
               annotations: p.annotations,
               extension: p.extension,
@@ -783,6 +807,8 @@ const mutations = {
               position: p.position,
               original_name: p.original_name
             }
+            Vue.set(prev, 'status', p.status)
+            return prev
           })
         )
         previews.push(preview)
@@ -790,7 +816,7 @@ const mutations = {
       } else {
         return previews
       }
-    }, [])
+    }, []))
   },
 
   [LOAD_TASK_STATUSES_END] (state, taskStatuses) {
@@ -1248,6 +1274,17 @@ const mutations = {
 
   [REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD] (state) {
     state.previewForms = state.previewForms.splice(1)
+  },
+
+  [SET_UPLOAD_PROGRESS] (state, { name, percent }) {
+    if (!state.uploadProgress.name) {
+      Vue.set(state.uploadProgress, name, percent)
+    }
+    state.uploadProgress[name] = percent
+  },
+
+  [CLEAR_UPLOAD_PROGRESS] (state) {
+    state.uploadProgress = {}
   },
 
   [RESET_ALL] (state, shots) {

@@ -714,7 +714,7 @@ export default {
 
 article.comment {
   background: white;
-  border-radius: 5px;
+  border-radius: 10px;
   padding: 0;
   margin: 1em 0;
   word-wrap: anywhere;

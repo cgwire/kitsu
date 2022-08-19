@@ -66,6 +66,28 @@ const client = {
     })
   },
 
+  ppostFile (path, data, callback) {
+    const request = superagent
+      .post(path)
+      .send(data)
+      .on('progress', e => e)
+    return {
+      request,
+      promise: new Promise((resolve, reject) => {
+        request
+          .end((err, res) => {
+            if (res.statusCode === 401) {
+              errors.backToLogin()
+              return reject(err)
+            } else {
+              if (err) return reject(err)
+              else return resolve(res.body)
+            }
+          })
+      })
+    }
+  },
+
   pput (path, data, callback) {
     return new Promise((resolve, reject) => {
       superagent
