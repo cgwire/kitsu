@@ -1,8 +1,10 @@
 import i18n from '../../../../src/lib/i18n'
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import ShotLine from '../../../../src/components/pages/breakdown/ShotLine'
+import Vuex from 'vuex'
 
 const localVue = createLocalVue()
+localVue.use(Vuex)
 
 localVue.prototype.$locale = {
   change (locale) {
@@ -14,6 +16,17 @@ localVue.prototype.$locale = {
 }
 
 describe('ShotLine', () => {
+  const store = new Vuex.Store({
+    strict: true,
+    modules: {
+      mainStore: {
+        getters: {
+          isCurrentUserManager: (state) => true,
+          isShowInfosBreakdown: (state) => false
+        }
+      }
+    }
+  })
   const wrapper = shallowMount(ShotLine, {
     propsData: {
       entity: {
@@ -26,7 +39,7 @@ describe('ShotLine', () => {
     },
     localVue,
     i18n,
-    stores: {}
+    store
   })
 
   describe('Mount', () => {
@@ -41,10 +54,6 @@ describe('ShotLine', () => {
     it('should display the name of the shot', () => {
       const name = wrapper.findAll('.shot-name')
       expect(name.at(0).text()).toBe('foobar')
-    })
-    it('should display the text for empty collection', () => {
-      const empty = wrapper.findAll('.asset-type-line.empty')
-      expect(empty.at(0).text()).toMatch('Empty casting')
     })
   })
 })
