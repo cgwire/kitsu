@@ -60,7 +60,7 @@
             scope="col"
             class="episode"
             ref="th-episode"
-            v-if="isTVShow"
+            v-if="isTVShow && isShowInfos"
           >
             {{ $t('assets.fields.episode') }}
           </th>
@@ -70,10 +70,11 @@
             :key="'sticky-header' + descriptor.id"
             :descriptor="descriptor"
             :left="offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'"
+            @show-metadata-header-menu="
+              event => showMetadataHeaderMenu(descriptor.id, event)
+            "
             is-stick
-            @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
             v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-            v-if="isShowInfos"
           />
 
           <validation-header
@@ -250,7 +251,7 @@
             </div>
           </th>
 
-          <td class="episode" v-if="isTVShow">
+          <td class="episode" v-if="isTVShow && isShowInfos">
             <div
               class="flexrow"
               :title="assetEpisodes(asset, true)"
@@ -266,7 +267,6 @@
             :style="{'left': offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'}"
             :key="'sticky-desc-' + asset.id + '-' + descriptor.id"
             v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-            v-if="isShowInfos"
           >
             <input
               class="input-editor"
