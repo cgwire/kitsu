@@ -655,7 +655,7 @@ h2.subtitle {
   margin-left: 1em;
   margin-right: 1em;
   .entity-title {
-    font-weight: bold;
+    font-weight: 500;
   }
 }
 

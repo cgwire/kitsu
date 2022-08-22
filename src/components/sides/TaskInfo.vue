@@ -1281,6 +1281,9 @@ export default {
   flex: 1;
   font-size: 1.3em;
   line-height: 1.5em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: $grey;
 }
 
 .title a {

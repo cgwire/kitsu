@@ -589,7 +589,7 @@ h2.subtitle {
   margin-right: 1em;
 
   .entity-title {
-    font-weight: bold;
+    font-weight: 500;
   }
 }
 

@@ -881,10 +881,11 @@ label.label {
 
 .subtitle {
   color: $grey;
-  font-variant: small-caps;
   font-weight: 500;
   letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
+
 texarea,
 input.input {
   padding: 1em;
@@ -1301,6 +1302,10 @@ tbody:last-child .empty-line:last-child {
     .thumbnail-picture.thumbnail-empty {
       margin: 0 .35rem 0 0;
     }
+    &:first-child {
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
 
     .thumbnail-wrapper {
       .thumbnail-picture {
@@ -1309,8 +1314,13 @@ tbody:last-child .empty-line:last-child {
     }
 
     td {
-      border-top: 1px solid var(--border-alt);
-      border-left: 1px solid var(--border-alt);
+      border-top: 1px solid var(--border);
+      border-left: 1px solid var(--border);
+    }
+
+    td.end-cell,
+    td.actions {
+      border-left: 1px solid transparent;
     }
 
     &:last-child {
@@ -1369,9 +1379,9 @@ tbody:last-child .empty-line:last-child {
     border-bottom: 1px solid var(--border);
     padding: 0.5rem 0.75rem;
     color: var(--text-alt);
-    font-size: .9rem;
-    font-variant: small-caps;
+    font-size: .8rem;
     letter-spacing: 1px;
+    text-transform: uppercase;
     top: 0;
     vertical-align: middle;
     z-index: 2;
@@ -1431,8 +1441,8 @@ tbody:last-child .empty-line:last-child {
     background-color: var(--background);
   }
 
-  &:nth-child(2n),
-  &:nth-child(2n) .datatable-row-header {
+  &:nth-child(even),
+  &:nth-child(even) .datatable-row-header {
     background-color: var(--background-alt);
   }
 
@@ -1500,6 +1510,19 @@ tbody:last-child .empty-line:last-child {
     border-color: transparent;
     background-color: transparent;
     box-shadow: none;
+  }
+}
+
+.multi-section .datatable-row {
+
+  &:nth-child(odd),
+  &:nth-child(odd) .datatable-row-header {
+    background-color: var(--background-alt);
+  }
+
+  &:nth-child(even),
+  &:nth-child(even) .datatable-row-header {
+    background-color: var(--background);
   }
 }
 
