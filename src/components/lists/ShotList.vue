@@ -64,7 +64,6 @@
             @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
             is-stick
             v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-            v-if="isShowInfos"
           />
 
           <validation-header
@@ -284,7 +283,6 @@
             :style="{'left': offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'}"
             :key="shot.id + '-' + descriptor.id"
             v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-            v-if="isShowInfos"
           >
             <input
               class="input-editor"

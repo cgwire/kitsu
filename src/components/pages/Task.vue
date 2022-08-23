@@ -28,11 +28,11 @@
           />
         </span>
 
-        <div class="title flexrow-item">
+        <h1 class="title flexrow-item">
           <router-link :to="taskEntityPath">
             <page-title :text="currentTask ? title : 'Loading...'" bold />
           </router-link>
-        </div>
+        </h1>
 
         <div class="flexrow-item flexrow block">
           <span class="flexrow-item">

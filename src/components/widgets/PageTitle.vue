@@ -30,7 +30,7 @@ export default {
 .title {
   color: var(--text-alt);
   font-weight: 500;
-  font-variant: small-caps;
   letter-spacing: 1px;
+  text-transform: uppercase;
 }
 </style>

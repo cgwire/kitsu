@@ -142,11 +142,13 @@ const mutations = {
 
     if (taskStatus && taskStatus.id) {
       Object.assign(taskStatus, newTaskStatus)
+      state.taskStatusMap.delete(taskStatus.id)
+      state.taskStatusMap.set(taskStatus.id, taskStatus)
     } else {
       state.taskStatus.push(newTaskStatus)
       state.taskStatus = sortByName(state.taskStatus)
+      state.taskStatusMap.set(newTaskStatus.id, newTaskStatus)
     }
-    state.taskStatusMap.set(newTaskStatus.id, newTaskStatus)
   },
 
   [DELETE_TASK_STATUS_END] (state, taskStatusToDelete) {
