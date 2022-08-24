@@ -1195,6 +1195,21 @@ export default {
         }
       },
 
+      'comment:delete' (eventData) {
+        const task = this.getTask()
+        if (task) {
+          const comments = this.getComments()
+          const comment = comments.find(
+            c => c.id === eventData.comment_id
+          )
+          if (comment) {
+            this.$store.commit('REMOVE_TASK_COMMENT', { task, comment })
+            this.taskComments = this.getTaskComments(this.task.id)
+            this.taskPreviews = this.getTaskPreviews(this.task.id)
+          }
+        }
+      },
+
       'comment:delete-reply' (eventData) {
         if (this.task) {
           const comment = this.taskComments.find(

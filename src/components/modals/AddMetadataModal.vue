@@ -248,6 +248,8 @@ export default {
     ]),
 
     selectableDepartments () {
+      if (!this.currentProduction) return []
+
       let departments = this.currentProduction.task_types
         .map(taskTypeId => {
           const taskType = this.taskTypeMap.get(taskTypeId)

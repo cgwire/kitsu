@@ -1319,6 +1319,21 @@ export default {
         }
       },
 
+      'comment:delete' (eventData) {
+        const task = this.getTask()
+        if (task) {
+          const comments = this.getComments()
+          const comment = comments.find(
+            c => c.id === eventData.comment_id
+          )
+          if (comment) {
+            this.$store.commit('REMOVE_TASK_COMMENT', { task, comment })
+            this.currentTaskComments = this.getCurrentTaskComments()
+            this.currentTaskPreviews = this.getCurrentTaskPreviews()
+          }
+        }
+      },
+
       'comment:delete-reply' (eventData) {
         if (this.currentTask) {
           const comment = this.currentTaskComments.find(

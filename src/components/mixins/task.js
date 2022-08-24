@@ -27,6 +27,10 @@ export const taskMixin = {
       return this.currentTask || this.task
     },
 
+    getComments () {
+      return this.currentTaskComments || this.taskComments
+    },
+
     resetModals () {
       if (this.$refs['add-preview-modal']) {
         this.$refs['add-preview-modal'].reset()
@@ -46,6 +50,11 @@ export const taskMixin = {
           this.$refs['add-comment'].text = ''
         }
       }
+    }
+  },
+
+  socket: {
+    events: {
     }
   }
 }

@@ -43,6 +43,7 @@ import {
   DELETE_COMMENT_END,
   PIN_COMMENT,
   ACK_COMMENT,
+  REMOVE_TASK_COMMENT,
   ADD_REPLY_TO_COMMENT,
   REMOVE_REPLY_FROM_COMMENT,
 
@@ -1223,6 +1224,12 @@ const mutations = {
   [REMOVE_REPLY_FROM_COMMENT] (state, { comment, reply }) {
     if (!comment.replies) comment.replies = []
     comment.replies = comment.replies.filter(r => r.id !== reply.id)
+  },
+
+  [REMOVE_TASK_COMMENT] (state, { task, comment }) {
+    state.taskComments[task.id] = state.taskComments[task.id].filter(
+      c => c.id !== comment.id
+    )
   },
 
   [UPDATE_COMMENT_CHECKLIST] (state, { comment, checklist }) {
