@@ -265,6 +265,7 @@ import csv from '@/lib/csv'
 import drafts from '@/lib/drafts'
 import stringHelpers from '@/lib/string'
 import { formatDate } from '@/lib/time'
+import { taskMixin } from '@/components/mixins/task'
 
 import AddComment from '@/components/widgets/AddComment'
 import AddPreviewModal from '@/components/modals/AddPreviewModal'
@@ -279,6 +280,8 @@ import PreviewPlayer from '@/components/previews/PreviewPlayer'
 
 export default {
   name: 'task-info',
+  mixins: [taskMixin],
+
   components: {
     AddComment,
     AddPreviewModal,
@@ -647,10 +650,6 @@ export default {
       this.errors.addCommentMaxRetakes = false
       this.$store.dispatch(action, params)
         .then(() => {
-          this.$refs['add-preview-modal'].reset()
-          if (this.$refs['add-comment-image-modal']) {
-            this.$refs['add-comment-image-modal'].reset()
-          }
           drafts.clearTaskDraft(this.task.id)
           this.reset()
           this.previewForms = []
@@ -670,12 +669,14 @@ export default {
     },
 
     reset () {
+      this.resetModals()
       if (this.task) {
         this.taskComments = this.getTaskComments(this.task.id)
         this.taskPreviews = this.getTaskPreviews(this.task.id)
         this.setOtherPreviews()
         this.currentPreviewPath = this.getOriginalPath()
         this.currentPreviewDlPath = this.getOriginalDlPath()
+        this.resetDraft()
         this.$nextTick(() => {
           if (this.$refs['add-comment']) this.$refs['add-comment'].focus()
         })
@@ -1101,11 +1102,13 @@ export default {
       this.currentPreviewIndex = 0
       if (
         this.previousTaskId &&
-        this.$refs['add-comment'] &&
-        this.$refs['add-comment'].text.length > 0
+        this.$refs['add-comment']
       ) {
         const lastComment = `${this.$refs['add-comment'].text}`
-        drafts.setTaskDraft(this.previousTaskId, lastComment)
+        const previousDraft = drafts.getTaskDraft(this.previousTaskId)
+        if (this.$refs['add-comment'].text.length > 0 || previousDraft) {
+          drafts.setTaskDraft(this.previousTaskId, lastComment)
+        }
       }
       this.$nextTick(() => {
         if (this.task) this.previousTaskId = this.task.id

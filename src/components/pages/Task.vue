@@ -312,6 +312,7 @@ import {
 import { getTaskEntityPath } from '@/lib/path'
 import drafts from '@/lib/drafts'
 import { formatListMixin } from '@/components/mixins/format'
+import { taskMixin } from '@/components/mixins/task'
 
 import AddComment from '@/components/widgets/AddComment'
 import AddPreviewModal from '@/components/modals/AddPreviewModal'
@@ -331,7 +332,7 @@ import PreviewPlayer from '@/components/previews/PreviewPlayer'
 
 export default {
   name: 'task',
-  mixins: [formatListMixin],
+  mixins: [formatListMixin, taskMixin],
   components: {
     AddComment,
     AddPreviewModal,
@@ -411,13 +412,6 @@ export default {
         window.scrollTo(0, 0)
       }
     })
-  },
-
-  beforeDestroy () {
-    if (this.$refs['add-comment']) {
-      const lastComment = `${this.$refs['add-comment'].text}`
-      drafts.setTaskDraft(this.currentTask.id, lastComment)
-    }
   },
 
   computed: {
@@ -843,9 +837,7 @@ export default {
       this.errors.addCommentMaxRetakes = false
       this.$store.dispatch(action, params)
         .then(() => {
-          this.currentTaskPreviews = this.getCurrentTaskPreviews()
-          this.resetPreview()
-          this.$refs['add-preview-modal'].reset()
+          drafts.clearTaskDraft(this.task.id)
           this.reset()
           this.previewForms = []
           this.loading.addComment = false
@@ -864,13 +856,12 @@ export default {
     },
 
     reset () {
+      this.resetModals()
+      this.resetPreview()
       this.currentTaskComments = this.getCurrentTaskComments()
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
       this.currentTask = this.getCurrentTask()
-      if (this.currentTask) {
-        const draft = drafts.getTaskDraft(this.currentTask.id)
-        if (draft) this.$refs['add-comment'].text = draft
-      }
+      this.resetDraft()
       setTimeout(() => {
         if (this.$route.params.preview_id) {
           this.selectedPreviewId = this.$route.params.preview_id
