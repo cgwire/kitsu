@@ -714,6 +714,16 @@ ul {
   margin-left: 1em;
 }
 
+h2 {
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 1.3em;
+  font-weight: 500;
+  margin-top: 2em;
+  margin-bottom: 1em;
+  text-transform: uppercase;
+}
+
 .hero {
   background-color: #F3F3F3;
 }
@@ -1020,6 +1030,7 @@ textarea.input:focus {
       margin-top: 0;
       padding-top: 0;
       margin-bottom: 1em;
+      text-transform: capitalize;
       border: 0;
     }
 

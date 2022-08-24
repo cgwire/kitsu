@@ -7,9 +7,9 @@
           {{ $t('settings.title') }}
         </h2>
         <p>
-        <strong>
+        <label class="label">
           {{ $t('settings.logo') }}
-        </strong>
+        </label>
         </p>
         <div class="logo-wrapper" v-if="organisation.has_avatar">
           <img :src="organisationLogoPath" />
@@ -311,13 +311,6 @@ strong {
 
 input, select, span.select {
   width: 100%;
-}
-
-h2 {
-  border-bottom: 1px solid #DDD;
-  font-size: 1.5em;
-  margin-top: 2em;
-  margin-bottom: 1em;
 }
 
 h2:first-child {

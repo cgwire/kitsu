@@ -500,7 +500,7 @@ th {
 }
 
 td {
-  padding: 0;
+  padding: 0 0.4em;
 
   &.thumbnail {
     padding-top: 0.2em;
@@ -524,9 +524,9 @@ td {
 }
 
 .thumbnail {
-  min-width: 80px;
-  max-width: 80px;
-  width: 80px;
+  min-width: 64px;
+  max-width: 64px;
+  width: 64px;
 }
 
 .asset-type {
@@ -548,6 +548,7 @@ td {
 .number {
   min-width: 80px;
   width: 80px;
+  text-align: right;
 }
 
 .estimation-helper {
@@ -568,6 +569,18 @@ td {
 
 .task-list {
   flex: 1.5;
+}
+
+th.numeric-cell {
+  padding-right: 0.4em;
+}
+
+.numeric-cell {
+  text-align: right;
+
+  input {
+    text-align: right;
+  }
 }
 
 .person-list {

@@ -468,13 +468,6 @@ input, select, span.select {
 .profile-header .column {
 }
 
-h2 {
-  border-bottom: 1px solid #DDD;
-  font-size: 1.5em;
-  margin-top: 2em;
-  margin-bottom: 1em;
-}
-
 h2:first-child {
   margin-top: 0em;
 }

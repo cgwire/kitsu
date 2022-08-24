@@ -31,7 +31,7 @@
     ref="body"
     v-scroll="onBodyScroll"
   >
-    <table class="datatable">
+    <table class="datatable multi-section">
       <thead class="datatable-head">
         <tr>
           <th

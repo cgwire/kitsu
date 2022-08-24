@@ -246,7 +246,9 @@ aside {
   transition: all 0.3s ease;
 
   h2 {
+    border: 0;
     text-transform: uppercase;
+    font-size: 1em;
     color: $grey;
   }
 }

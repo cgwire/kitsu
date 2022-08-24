@@ -94,11 +94,26 @@
         />
       </form>
 
-      <p class="has-text-right">
+      <div class="flexrow">
+        <button
+          :class="{
+            button: true,
+            'flexrow-item': true,
+            'is-loading': isInviteLoading
+          }"
+          :disabled="!isValidEmail"
+          @click="invite"
+          v-if="isCurrentUserAdmin"
+        >
+          {{ $t('people.invite') }}
+        </button>
+        <div class="filler"></div>
+
         <button
           :class="{
             button: true,
             'is-primary': true,
+            'flexrow-item': true,
             'is-loading': isCreateInviteLoading
           }"
           :disabled="!isValidEmail"
@@ -107,35 +122,24 @@
         >
           {{ $t('people.create_invite') }}
         </button>
-        <button
-          :class="{
-            button: true,
-            'is-primary': true,
-            'is-loading': isInviteLoading
-          }"
-          :disabled="!isValidEmail"
-          @click="invite"
-          v-else-if="isCurrentUserAdmin"
-        >
-          {{ $t('people.invite') }}
-        </button>
         <a
           :class="{
             button: true,
             'is-primary': true,
+            'flexrow-item': true,
             'is-loading': isLoading
           }"
           :disabled="!isValidEmail"
           @click="confirmClicked">
-          {{ $t('main.confirmation') }}
+          {{ isCreating ? $t('people.create') : $t('people.confirm_edit') }}
         </a>
          <button
+            class="button is-link flexrow-item"
             @click="$emit('cancel')"
-            class="button is-link"
           >
             {{ $t("main.cancel") }}
           </button>
-      </p>
+      </div>
 
       <div
         class="success has-text-right mt1"
