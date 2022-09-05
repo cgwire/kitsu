@@ -148,6 +148,7 @@
               class="flexrow-item"
               :with-margin="false"
               :value="getDate(task.start_date)"
+              :disabled-dates="disabledDates"
               @input="updateStartDate"
               v-if="isInDepartment(task) && selectionGrid[task.id]"
             />
@@ -160,6 +161,7 @@
               class="flexrow-item"
               :with-margin="false"
               :value="getDate(task.due_date)"
+              :disabled-dates="disabledDates"
               @input="updateDueDate"
               v-if="isInDepartment(task) && selectionGrid[task.id]"
             />
@@ -245,6 +247,10 @@ export default {
   },
 
   props: {
+    disabledDates: {
+      type: Array,
+      default: () => []
+    },
     entityType: {
       type: String,
       default: 'Asset'
