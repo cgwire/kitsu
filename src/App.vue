@@ -1024,6 +1024,7 @@ textarea.input:focus {
 .main-button:focus { outline: 0; }
 
 .modal-content {
+  max-height: calc(100vh - 140px);
   .box {
     border-radius: 0.5em;
     padding: 2.8em 3em 3em 3em;
@@ -1691,8 +1692,15 @@ tbody:last-child .empty-line:last-child {
   border: 1px solid #CCC;
 }
 
-.modal-content .button {
-  margin-left: 0.5em;
+.modal-content {
+  .button {
+    margin-left: 0.5em;
+  }
+
+  h2 {
+    margin-bottom: 0;
+    border-bottom: 0;
+  }
 }
 
 .modal-content label.button {
