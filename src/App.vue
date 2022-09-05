@@ -807,6 +807,11 @@ a:hover {
 .canceled th,
 .canceled {
   text-decoration: line-through;
+  opacity: 0.7;
+
+  div span:first-child {
+    text-decoration: line-through;
+  }
 }
 
 .field {
