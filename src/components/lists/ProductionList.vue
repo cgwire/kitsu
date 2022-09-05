@@ -79,6 +79,7 @@
               :with-avatar="true"
               :entry="entry"
               :last-production-screen="lastProductionScreen"
+              :is-link="false"
             />
           </th>
           <td class="type">
