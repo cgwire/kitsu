@@ -141,6 +141,7 @@ export default {
     font-weight: 400;
     font-variant: normal;
     letter-spacing: 0;
+    text-transform: none;
   }
 }
 </style>
