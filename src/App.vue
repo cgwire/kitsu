@@ -929,6 +929,7 @@ input.input:focus {
   padding: 0.5em;
   height: 2.3em;
   width: 100px;
+  border-radius: 10px;
 }
 
 .button:focus {
