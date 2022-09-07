@@ -6,7 +6,7 @@
   <router-link
     class="flexrow flexrow-item"
     :to="productionRoute"
-    v-if="!noLink"
+    v-if="isLink"
   >
     <div
        class="flexrow-item avatar has-text-centered"
@@ -86,8 +86,8 @@ export default {
       default: false,
       type: Boolean
     },
-    noLink: {
-      default: false,
+    isLink: {
+      default: true,
       type: Boolean
     }
   },

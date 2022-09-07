@@ -62,7 +62,6 @@ export default {
 
   methods: {
     ...mapActions([
-      'getTask',
       'getRunningPreviewFiles',
       'markPreviewFileAsBroken'
     ]),
@@ -96,6 +95,10 @@ export default {
 }
 .tag {
   border-radius: 4px;
+}
+
+em {
+  color: var(--text);
 }
 
 .date {

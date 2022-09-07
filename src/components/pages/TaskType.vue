@@ -150,6 +150,7 @@
         :entity-type="entityType"
         :is-loading="loading.entities"
         :is-error="errors.entities"
+        :disabled-dates="disabledDates"
         @task-selected="onTaskSelected"
         v-if="isActiveTab('tasks')"
       />
@@ -431,17 +432,25 @@ export default {
       }
     },
 
+    disabledDates () {
+      return {
+        to: parseDate(this.currentProduction.start_date).toDate(),
+        from: parseDate(this.currentProduction.end_date).toDate(),
+        days: [6, 0]
+      }
+    },
+
     startDisabledDates () {
       return {
         to: parseDate(this.currentProduction.start_date).toDate(),
-        from: this.schedule.endDate.toDate(),
+        from: parseDate(this.currentProduction.end_date).toDate(),
         days: [6, 0]
       }
     },
 
     endDisabledDates () {
       return {
-        to: this.schedule.startDate.toDate(),
+        to: parseDate(this.currentProduction.start_date).toDate(),
         from: parseDate(this.currentProduction.end_date).toDate(),
         days: [6, 0]
       }
@@ -1161,6 +1170,8 @@ export default {
 
     currentProduction () {
       this.initData(true)
+      this.schedule.startDate = parseDate(this.currentProduction.start_date)
+      this.schedule.endDate = parseDate(this.currentProduction.end_date)
     },
 
     currentSort () {
@@ -1187,9 +1198,6 @@ export default {
 
     currentScheduleItem () {
       if (this.currentScheduleItem) {
-        this.schedule.startDate =
-          parseDate(this.currentScheduleItem.start_date)
-        this.schedule.endDate = parseDate(this.currentScheduleItem.end_date)
         this.schedule.selectedStartDate = this.schedule.startDate.toDate()
         this.schedule.selectedEndDate = this.schedule.endDate.toDate()
       }
@@ -1198,7 +1206,6 @@ export default {
     'schedule.selectedStartDate' () {
       const newDate = formatSimpleDate(this.schedule.selectedStartDate)
       if (newDate !== this.currentScheduleItem.start_date) {
-        this.schedule.startDate = parseDate(newDate)
         this.currentScheduleItem.startDate = this.schedule.startDate
         this.currentScheduleItem.endDate = this.schedule.endDate
         this.saveScheduleItem(this.currentScheduleItem)
@@ -1208,7 +1215,6 @@ export default {
     'schedule.selectedEndDate' () {
       const newDate = formatSimpleDate(this.schedule.selectedEndDate)
       if (newDate !== this.currentScheduleItem.end_date) {
-        this.schedule.endDate = parseDate(newDate)
         this.currentScheduleItem.startDate = this.schedule.startDate
         this.currentScheduleItem.endDate = this.schedule.endDate
         this.saveScheduleItem(this.currentScheduleItem)
@@ -1280,7 +1286,6 @@ export default {
 }
 
 .field {
-  margin: 0;
 }
 
 .query-list {

@@ -170,12 +170,14 @@
       >
       ...
       </div>
-      <div class="flexrow"
+      <div
           v-if="notification.preview_file_id"
       >
-          <paperclip-icon class="icon flexrow-item" />
+        <div>
+          $t('notification.new_revision')
+        </div>
         <div
-          class="thumbnail-picture-wrapper flexrow-item"
+          class="thumbnail-picture-wrapper"
           v-if="notification.preview_file_id"
         >
           <entity-thumbnail
@@ -229,7 +231,6 @@ import {
   AtSignIcon,
   CornerUpLeftIcon,
   MessageSquareIcon,
-  PaperclipIcon,
   UserIcon
 } from 'vue-feather-icons'
 import { marked } from 'marked'
@@ -257,7 +258,6 @@ export default {
     CornerUpLeftIcon,
     EntityThumbnail,
     MessageSquareIcon,
-    PaperclipIcon,
     PeopleAvatar,
     PageTitle,
     Spinner,

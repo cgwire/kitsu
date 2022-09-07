@@ -30,9 +30,6 @@
             <th class="estimation numeric-cell">
               {{ $t('tasks.fields.estimation').substring(0, 3) }}.
             </th>
-            <th class="empty">
-              &nbsp;
-            </th>
           </tr>
         </thead>
 
@@ -119,8 +116,6 @@
               <span v-else>
                 {{ formatDuration(task.estimation) }}
               </span>
-            </td>
-            <td>
             </td>
           </tr>
         </tbody>
@@ -513,9 +508,9 @@ td {
 }
 
 .assignees {
-  min-width: 240px;
-  max-width: 240px;
-  width: 240px;
+  min-width: 200px;
+  max-width: 200px;
+  width: 200px;
 
   span {
     margin-top: 0.2em;
@@ -545,6 +540,14 @@ td {
   font-weight: bold;
 }
 
+.frames,
+.estimation,
+.seconds,
+.count {
+  min-width: 60px;
+  width: 60px;
+}
+
 .number {
   min-width: 80px;
   width: 80px;
@@ -568,7 +571,9 @@ td {
 }
 
 .task-list {
-  flex: 1.5;
+  .empty {
+    border-left: 0px solid transparent;
+  }
 }
 
 th.numeric-cell {

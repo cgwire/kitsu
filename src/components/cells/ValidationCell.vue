@@ -2,6 +2,7 @@
 <td
   ref="cell"
   :class="{
+    canceled,
     disabled: disabled,
     validation: selectable,
     selected: selectable & selected
@@ -179,6 +180,10 @@ export default {
       default: '0px'
     },
     sticked: {
+      default: false,
+      type: Boolean
+    },
+    canceled: {
       default: false,
       type: Boolean
     }

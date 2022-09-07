@@ -401,11 +401,13 @@ export default {
 
   created () {
     this.clearSelectedTasks()
-    this.loadTaskData()
   },
 
   mounted () {
-    this.reset()
+    this.loadTaskData()
+      .then(() => {
+        this.reset()
+      })
     this.$nextTick(() => {
       if (this.$refs['task-columns']) {
         this.$refs['task-columns'].scrollTop = 100
@@ -749,7 +751,7 @@ export default {
       const task = this.getCurrentTask()
       if (!task) {
         this.taskLoading = { isLoading: true, isError: false }
-        this.loadTask({ taskId: this.route.params.task_id })
+        return this.loadTask({ taskId: this.route.params.task_id })
           .then(task => {
             let loadingFunction = (callback) => {
               this.loadAssets()
@@ -770,7 +772,7 @@ export default {
             }
             loadingFunction(() => {
               this.currentTask = task
-              this.loadTaskComments({
+              return this.loadTaskComments({
                 taskId: task.id,
                 entityId: task.entity_id
               })
@@ -779,6 +781,7 @@ export default {
                   this.isSubscribed = subscribed
                   this.reset()
                   this.taskLoading = { isLoading: false, isError: false }
+                  return Promise.resolve()
                 }).catch((err) => {
                   console.error(err)
                   this.taskLoading = { isLoading: false, isError: true }
@@ -788,11 +791,14 @@ export default {
       } else {
         const taskId = this.route.params.task_id
         this.currentTask = task
-        this.loadTaskComments({ taskId, entityId: task.entity_id })
+        return this.loadTaskComments({
+          taskId, entityId: task.entity_id
+        })
           .then(() => this.loadTaskSubscribed({ taskId }))
           .then(subscribed => {
             this.isSubscribed = subscribed
             this.reset()
+            return Promise.resolve()
           })
           .catch(err => {
             console.error(err)
@@ -911,7 +917,7 @@ export default {
     },
 
     resetPreview (changeRoute = true) {
-      const previews = this.currentTaskPreviews
+      const previews = this.currentTaskPreviews || []
       const preview = previews.length > 0 ? previews[0] : null
       this.currentTaskComments = this.getCurrentTaskComments()
       this.currentTaskPreviews = this.getCurrentTaskPreviews()
@@ -1397,6 +1403,7 @@ export default {
 }
 
 h2.subtitle {
+  border: 0;
   margin: 0;
   padding: 0;
 }

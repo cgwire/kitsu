@@ -129,10 +129,10 @@
             class="production datatable-row-header datatable-row-header--nobd"
             scope="row"
           >
-           <production-name-cell
-             :entry="productionMap.get(task.project_id)"
-             :only-avatar="true"
-           />
+            <production-name-cell
+              :entry="productionMap.get(task.project_id)"
+              :only-avatar="true"
+            />
           </th>
           <task-type-cell
             class="type datatable-row-header datatable-row-header--nobd"

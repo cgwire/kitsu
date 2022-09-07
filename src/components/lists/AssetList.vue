@@ -338,6 +338,7 @@
               'datatable-row-header': true
             }"
             :key="'sticky-validation-' + columnId + '-' + asset.id"
+            :canceled="asset.canceled"
             :column="taskTypeMap.get(columnId)"
             :entity="asset"
             :task-test="taskMap.get(asset.validations.get(columnId))"
@@ -474,6 +475,7 @@
               'hidden-validation-cell': hiddenColumns[columnId]
             }"
             :key="'validation' + columnId + '-' + asset.id"
+            :canceled="asset.canceled"
             :column="taskTypeMap.get(columnId)"
             :entity="asset"
             :task-test="taskMap.get(asset.validations.get(columnId))"

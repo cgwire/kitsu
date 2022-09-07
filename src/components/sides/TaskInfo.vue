@@ -87,7 +87,7 @@
             class="history-button flexrow-item"
             :to="taskPath"
           >
-            ...
+            <corner-right-up-icon size="0.9x" />
           </router-link>
         </div>
       </div>
@@ -266,6 +266,7 @@ import drafts from '@/lib/drafts'
 import stringHelpers from '@/lib/string'
 import { formatDate } from '@/lib/time'
 import { taskMixin } from '@/components/mixins/task'
+import { CornerRightUpIcon } from 'vue-feather-icons'
 
 import AddComment from '@/components/widgets/AddComment'
 import AddPreviewModal from '@/components/modals/AddPreviewModal'
@@ -287,6 +288,7 @@ export default {
     AddPreviewModal,
     ButtonSimple,
     Comment,
+    CornerRightUpIcon,
     DeleteModal,
     EditCommentModal,
     PreviewPlayer,

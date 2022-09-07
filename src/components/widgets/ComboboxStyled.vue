@@ -160,6 +160,7 @@ export default {
   .selected-line,
   .option-line,
   .combo {
+    color: var(--text);
     background: $dark-grey-light;
     border-color: $dark-grey;
   }
@@ -171,7 +172,6 @@ export default {
 
 .combo {
   background: $white;
-  color: var(--text);
   border: 1px solid $light-grey-light;
   border-radius: 10px;
   user-select: none;

@@ -350,10 +350,12 @@
             :ref="`validation-${getIndex(i, k)}-${j}`"
             :key="columnId + '-' + shot.id"
             :class="{
+              canceled: shot.canceled,
               'validation-cell': !hiddenColumns[columnId],
               'hidden-validation-cell': hiddenColumns[columnId],
               'datatable-row-header': true
             }"
+            :canceled="shot.canceled"
             :column="taskTypeMap.get(columnId)"
             :columnY="j"
             :entity="shot"
@@ -591,6 +593,7 @@
               'validation-cell': !hiddenColumns[columnId],
               'hidden-validation-cell': hiddenColumns[columnId]
             }"
+            :canceled="shot.canceled"
             :key="`${columnId}-${shot.id}`"
             :column="taskTypeMap.get(columnId)"
             :entity="shot"
@@ -1176,10 +1179,6 @@ td.sequence {
 
 td.input-editor.error {
   color: $red;
-}
-
-.canceled {
-  text-decoration: line-through;
 }
 
 span.thumbnail-empty {

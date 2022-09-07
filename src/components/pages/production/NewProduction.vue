@@ -69,10 +69,10 @@
             <span class="input-separator flexrow-item mr1"></span>
             <text-field
               class="flexrow-item mr0"
-              input-class=" is-small is-size-2"
+              input-class=" is-small is-size-3"
               :label="$t('productions.fields.ratio')"
               type="number"
-              :step="1"
+              :step="0.01"
               :placeholder="$t('productions.creation.placeholder_ratio1')"
               v-model="productionToCreate.settings.ratio[0]"
               thin
@@ -651,7 +651,7 @@ export default {
       }
       return (
         this.productionToCreate.settings.ratio.length === 2 &&
-        this.isInteger(this.productionToCreate.settings.ratio[0]) &&
+        this.isFloat(this.productionToCreate.settings.ratio[0]) &&
         this.isInteger(this.productionToCreate.settings.ratio[1])
       )
     },
@@ -796,6 +796,10 @@ export default {
         value === [] ||
         value === {}
       )
+    },
+
+    isFloat (value) {
+      return !this.isEmpty(value) && /^[(\d)*,(\d)+]|(\d)+$/.test(value)
     },
 
     isInteger (value) {
@@ -1046,6 +1050,10 @@ h1.title {
   font-size: 48px;
   line-height: 56px;
   text-transform: capitalize;
+}
+
+h2.subtitle {
+  border-bottom: 0;
 }
 
 .new-production > .columns {
