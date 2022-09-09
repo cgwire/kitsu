@@ -24,10 +24,8 @@
             <combobox-department
               class="combobox-department flexrow-item"
               :selectable-departments="selectableDepartments('Asset')"
-              :value="selectedDepartment"
               :dispay-all-and-my-departments="true"
               rounded
-              @input="onSelectedDepartment"
               v-model="selectedDepartment"
               v-if="departments.length > 0"
             />
@@ -329,6 +327,11 @@ export default {
         importing: false,
         importingError: null
       },
+      genericColumns: [
+        'metadata_column_name => text value',
+        'task_type_name => task_status_name',
+        'task_type_name comment => comment text'
+      ],
       initialLoading: true,
       loading: {
         addMetadata: false,
@@ -355,14 +358,10 @@ export default {
         isImportRenderDisplayed: false,
         isNewDisplayed: false
       },
+      pageName: 'Assets',
       optionalColumns: [
         'Description',
         'Ready for'
-      ],
-      genericColumns: [
-        'metadata_column_name => text value',
-        'task_type_name => task_status_name',
-        'task_type_name comment => comment text'
       ],
       parsedCSV: [],
       success: {
@@ -419,12 +418,6 @@ export default {
     } else {
       if (!this.isAssetsLoading) this.initialLoading = false
       finalize()
-    }
-    if (!this.isCurrentUserManager && this.user.departments.length > 0) {
-      this.selectedDepartment = 'MY_DEPARTMENTS'
-      this.departmentFilter = this.user.departments
-    } else {
-      this.departmentFilter = []
     }
   },
 

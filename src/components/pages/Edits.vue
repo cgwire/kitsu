@@ -25,11 +25,9 @@
           <combobox-department
             class="combobox-department flexrow-item"
             :selectable-departments="selectableDepartments('Edit')"
-            :value="selectedDepartment"
             :dispay-all-and-my-departments="true"
             :width="230"
             rounded
-            @input="onSelectedDepartment"
             v-model="selectedDepartment"
             v-if="departments.length > 0"
           />
@@ -310,26 +308,27 @@ export default {
 
   data () {
     return {
-      initialLoading: true,
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
+      departmentFilter: [],
+      editToDelete: null,
+      editToEdit: null,
       formData: null,
-      isSearchActive: false,
-      historyEdit: {},
-      optionalColumns: [
-        'Description'
-      ],
       genericColumns: [
         'metadata_column_name => text value',
         'task_type_name => task_status_name',
         'task_type_name comment => comment text'
       ],
+      historyEdit: {},
+      initialLoading: true,
+      isSearchActive: false,
+      optionalColumns: [
+        'Description'
+      ],
+      pageName: 'Edits',
       parsedCSV: [],
-      editToDelete: null,
-      editToEdit: null,
-      taskTypeForTaskDeletion: null,
       selectedDepartment: 'ALL',
-      departmentFilter: [],
+      taskTypeForTaskDeletion: null,
       modals: {
         isAddMetadataDisplayed: false,
         isAddThumbnailsDisplayed: false,

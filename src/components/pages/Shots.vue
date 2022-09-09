@@ -31,10 +31,8 @@
             <combobox-department
               class="combobox-department flexrow-item"
               :selectable-departments="selectableDepartments('Shot')"
-              :value="selectedDepartment"
               :dispay-all-and-my-departments="true"
               rounded
-              @input="onSelectedDepartment"
               v-model="selectedDepartment"
               v-if="departments.length > 0"
             />
@@ -350,10 +348,10 @@ export default {
         'task_type_name comment => comment text'
       ],
       parsedCSV: [],
+      selectedDepartment: 'ALL',
       shotToDelete: null,
       shotToEdit: null,
       taskTypeForTaskDeletion: null,
-      selectedDepartment: 'ALL',
       departmentFilter: [],
       modals: {
         isAddMetadataDisplayed: false,
@@ -383,6 +381,7 @@ export default {
         restore: false,
         stay: false
       },
+      pageName: 'Shots',
       errors: {
         addMetadata: false,
         deleteMetadata: false,
