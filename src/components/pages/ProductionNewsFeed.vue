@@ -706,6 +706,17 @@ export default {
             newsId: eventData.news_id
           })
         }
+      },
+
+      'task:update' (eventData) {
+        const relatedNews =
+          this.newsList.find(n => n.task_id === eventData.task_id)
+        if (relatedNews) {
+          this.loadSingleNews({
+            productionId: this.currentProduction.id,
+            newsId: relatedNews.id
+          })
+        }
       }
     }
   },
