@@ -190,8 +190,8 @@ export default {
   user-select: text;
 }
 .email {
-  width: 300px;
-  min-width: 300px;
+  width: 340px;
+  min-width: 340px;
   user-select: text;
 }
 .phone {
