@@ -208,7 +208,9 @@ export default {
       union_and: 'Match all the following filters',
       union_or: 'Match one of the following filters',
       with_thumbnail: 'With thumbnail',
-      without_thumbnail: 'Without thumbnail'
+      without_thumbnail: 'Without thumbnail',
+      checked: 'Checked',
+      not_checked: 'Not checked'
     },
 
     logs: {

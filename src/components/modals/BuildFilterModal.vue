@@ -112,6 +112,15 @@
             :options="general.operatorOptions"
             locale-key-prefix="entities.build_filter."
             v-model="descriptorFilter.operator"
+            v-if="!descriptorFilter.is_checklist"
+          />
+
+          <combobox
+            class="flexrow-item"
+            :options="general.checklistOptions"
+            locale-key-prefix="entities.build_filter."
+            v-model="descriptorFilter.values[0].checked"
+            v-else
           />
 
           <div class="flexrow-item flexrow value-column">
@@ -127,8 +136,9 @@
               />
               <combobox
                 class="flexrow-item"
-                :key="'descriptor-value-' + index"
-                :options="getDescriptorChoiceOptions(descriptorFilter.id)"
+                :key="'descriptor-list-value-' + index"
+                :options="getDescriptorChoiceOptions(
+                  descriptorFilter.id, descriptorFilter.is_checklist)"
                 v-model="descriptorFilter.values[index]"
                 v-else
               />
@@ -224,6 +234,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 import { getFilters } from '@/lib/filtering'
+import { descriptorMixin } from '@/components/mixins/descriptors'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import Combobox from '@/components/widgets/Combobox'
@@ -235,7 +246,7 @@ import TextField from '@/components/widgets/TextField'
 
 export default {
   name: 'build-filter-modal',
-  mixins: [modalMixin],
+  mixins: [modalMixin, descriptorMixin],
 
   components: {
     ButtonSimple,
@@ -281,6 +292,10 @@ export default {
           { label: 'equal', value: '=' },
           { label: 'not_equal', value: '=-' },
           { label: 'in', value: 'in' }
+        ],
+        checklistOptions: [
+          { label: 'checked', value: true },
+          { label: 'not_checked', value: false }
         ],
         taskTypeOperatorOptions: [
           { label: 'equal', value: '=' },
@@ -455,9 +470,15 @@ export default {
     applyDescriptorChoice (query) {
       this.metadataDescriptorFilters.values.forEach(descriptorFilter => {
         let operator = '=['
-        if (descriptorFilter.operator === '=-') operator = '=[-'
+        let value
+        if (descriptorFilter.is_checklist) {
+          value = descriptorFilter.values[0].text
+          value += descriptorFilter.values[0].checked ? ':true' : ':false'
+        } else {
+          if (descriptorFilter.operator === '=-') operator = '=[-'
+          value = descriptorFilter.values.join(',')
+        }
         const desc = this.getDescriptor(descriptorFilter.id)
-        const value = descriptorFilter.values.join(',')
         query += ` [${desc.name}]${operator}${value}]`
       })
       return query
@@ -534,19 +555,41 @@ export default {
 
     onDescriptorChanged (descriptorFilter) {
       const descriptor = this.getDescriptor(descriptorFilter.id)
+      let isChecklist = false
       if (descriptor.choices.length > 0) {
-        descriptorFilter.values = [descriptor.choices[0]]
+        const checklistValues = this.getDescriptorChecklistValues(descriptor)
+        if (checklistValues.length > 0) {
+          isChecklist = true
+          descriptorFilter.values = [checklistValues[0]]
+        } else {
+          descriptorFilter.values = [descriptor.choices[0]]
+        }
       } else {
         descriptorFilter.values = ['']
       }
+      descriptorFilter.is_checklist = isChecklist
     },
 
     addDescriptorFilter () {
       const desc = this.getDescriptor(this.descriptorOptions[0].value)
+      const values = []
+      let isChecklist = false
+      if (desc.choices.length > 0) {
+        const checklistValues = this.getDescriptorChecklistValues(desc)
+        if (checklistValues.length > 0) {
+          isChecklist = true
+          values.push(checklistValues[0])
+        } else {
+          values.push(desc.choices[0])
+        }
+      } else {
+        values.push('')
+      }
       const filter = {
         id: this.descriptorOptions[0].value,
         operator: '=',
-        values: [desc.choices.length > 0 ? desc.choices[0] : '']
+        values: values,
+        is_checklist: isChecklist
       }
       this.metadataDescriptorFilters.values.push(filter)
       return filter
@@ -563,10 +606,15 @@ export default {
       return this.metadataDescriptors.find(d => d.id === descriptorId)
     },
 
-    getDescriptorChoiceOptions (descriptorId) {
-      return this.getDescriptor(descriptorId)
-        .choices
-        .map(choice => ({ label: choice, value: choice }))
+    getDescriptorChoiceOptions (descriptorId, isChecklist) {
+      const desc = this.getDescriptor(descriptorId)
+      if (!isChecklist) {
+        return desc.choices.map(choice => ({ label: choice, value: choice }))
+      } else {
+        return this.getDescriptorChecklistValues(desc).map(
+          choice => ({ label: choice.text, value: choice })
+        )
+      }
     },
 
     // Helpers to set filters from search query
@@ -628,15 +676,32 @@ export default {
 
     setFiltersFromDescriptorQuery (filter) {
       let operator = '='
+      let isChecklist = false
+      let values = filter.values
       if (filter.values.length > 1) {
         operator = 'in'
-      } else if (filter.excluding) {
-        operator = '=-'
+      } else {
+        if (filter.values[0].endsWith(':true')) {
+          isChecklist = true
+          values =
+            [{
+              text: filter.values[0].replace(new RegExp(':true$'), ''),
+              checked: true
+            }]
+        } else if (filter.values[0].endsWith(':false')) {
+          isChecklist = true
+          values =
+            [{
+              text: filter.values[0].replace(new RegExp(':false$'), ''),
+              checked: false
+            }]
+        } else if (filter.excluding) operator = '=-'
       }
       this.metadataDescriptorFilters.values.push({
         id: filter.descriptor.id,
         operator,
-        values: filter.values
+        values: values,
+        is_checklist: isChecklist
       })
     },
 
