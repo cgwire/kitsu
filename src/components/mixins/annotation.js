@@ -356,7 +356,6 @@ export const annotationMixin = {
       annotation,
       obj
     ) {
-      console.log(obj)
       if (!obj) return
       if (this.getObjectById(obj.id)) return
       this.objIndex.set(obj.id, obj)
@@ -557,7 +556,6 @@ export const annotationMixin = {
 
     onObjectAdded (obj) {
       if (this.$options.silentAnnnotation) return
-      console.log(obj)
       let o = obj
       if (obj.target) o = obj.target
       else o = obj.targets[0]
