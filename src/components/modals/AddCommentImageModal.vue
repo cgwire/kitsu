@@ -40,7 +40,7 @@
       </div>
 
       <h3 class="subtitle has-text-centered" v-if="forms.length > 0">
-        Selected Files
+        {{ $t('comments.selected_files') }}
       </h3>
       <p class="upload-previews" v-if="forms.length > 0">
         <template v-for="(form, i) in forms">

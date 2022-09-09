@@ -1,5 +1,4 @@
 export default {
-
   setPreference (key, item) {
     return localStorage.setItem(key, item)
   },

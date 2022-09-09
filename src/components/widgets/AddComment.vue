@@ -103,10 +103,15 @@
             {{ shortenText(preview.get('file').name, 40) }}
             <span @click="$emit('remove-preview', preview)">x</span>
           </div>
-          <progress
-            max="100"
-            :value="uploadProgress[preview.get('file').name] || 0">
-          </progress>
+          <div class="progress-wrapper">
+            <div
+              class="progress"
+              :style="{
+                width: (uploadProgress[preview.get('file').name] || 0) + '%'
+              }"
+            >
+            </div>
+          </div>
         </div>
 
         <div class="flexrow preview-section" v-if="mode === 'publish'">
@@ -342,7 +347,6 @@ export default {
       }
     })
     this.resetStatus()
-    if (this.isCurrentUserArtist) this.mode = 'publish'
   },
 
   computed: {
@@ -695,14 +699,17 @@ article.add-comment {
   padding: 0 .5em .2em .5em;
 }
 
-progress {
-  height: 3px;
+.progress-wrapper {
+  border-radius: 5px;
+  background: var(--background-alt);
+  height: 5px;
+  margin-top: .3em;
+  margin-bottom: 1em;
+}
+
+.progress {
+  height: 5px;
   width: 100%;
-  &::-webkit-progress-value {
-    background-color: $light-green;
-  }
-  &::-moz-progress-bar {
-    background-color: $light-green;
-  }
+  background-color: $light-green;
 }
 </style>

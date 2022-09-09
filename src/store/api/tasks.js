@@ -56,6 +56,27 @@ export default {
     )
   },
 
+  addAttachmentToComment (comment, files) {
+    const attachments = new FormData()
+    const taskId = comment.object_id
+    let i = 0
+    files.forEach(attachment => {
+      attachments.append('file-' + i, attachment.get('file'))
+      i++
+    })
+    return client.ppost(
+      `/api/actions/tasks/${taskId}/comments/${comment.id}/add-attachment`,
+      attachments
+    )
+  },
+
+  deleteAttachment (comment, attachment) {
+    return client.pdel(
+      `/api/data/tasks/${comment.object_id}/comments/${comment.id}/` +
+      `attachments/${attachment.id}`
+    )
+  },
+
   commentTasks (projectId, comments) {
     return client.ppost(
       `/api/actions/projects/${projectId}/tasks/comment-many`,

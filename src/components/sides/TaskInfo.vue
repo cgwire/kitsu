@@ -592,10 +592,12 @@ export default {
 
   methods: {
     ...mapActions([
+      'addAttachmentToComment',
       'ackComment',
       'addCommentExtraPreview',
       'commentTask',
       'commentTaskWithPreview',
+      'deleteAttachment',
       'deleteTaskComment',
       'deleteTaskPreview',
       'editTaskComment',
@@ -938,24 +940,6 @@ export default {
         })
     },
 
-    confirmEditTaskComment (comment) {
-      this.loading.editComment = true
-      this.errors.editComment = false
-      this.editTaskComment({
-        taskId: this.task.id,
-        comment
-      })
-        .then(() => {
-          this.loading.editComment = false
-          this.modals.editComment = false
-        })
-        .catch((err) => {
-          console.error(err)
-          this.loading.editComment = false
-          this.errors.editComment = true
-        })
-    },
-
     getCurrentTaskComments () {
       return this.getTaskComments(this.task.id)
     },
@@ -1146,6 +1130,16 @@ export default {
           }).then(preview => {
             comment.previews[0].validation_status = preview.validation_status
           })
+        }
+      },
+
+      'task:update' (eventData) {
+        const task = this.getTask()
+        // Wait for data to be reinitialized by App.vue to update comments.
+        if (task && eventData.task_id === task.id) {
+          setTimeout(() => {
+            this.taskComments = this.getTaskComments(task.id)
+          }, 1000)
         }
       },
 

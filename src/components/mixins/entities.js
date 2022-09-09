@@ -1,3 +1,5 @@
+import preferences from '@/lib/preferences'
+
 /*
  * Common functions to shots and assets pages.
  */
@@ -7,6 +9,16 @@ export const entitiesMixin = {
   },
 
   mounted () {
+    const departmentId = preferences
+      .getPreference(this.pageName + ':departement')
+    if (departmentId) {
+      this.selectedDepartment = departmentId
+    } else {
+      if (!this.isCurrentUserManager && this.user.departments.length > 0) {
+        this.selectedDepartment = 'MY_DEPARTMENTS'
+      }
+    }
+    this.onSelectedDepartmentChanged()
   },
 
   beforeDestroy () {
@@ -48,7 +60,8 @@ export const entitiesMixin = {
       this.modals.isAddThumbnailsDisplayed = false
     },
 
-    onSelectedDepartment (departmentId) {
+    onSelectedDepartmentChanged () {
+      const departmentId = this.selectedDepartment
       if (departmentId === 'ALL') {
         this.departmentFilter = []
       } else if (departmentId === 'MY_DEPARTMENTS') {
@@ -56,6 +69,7 @@ export const entitiesMixin = {
       } else {
         this.departmentFilter = [departmentId]
       }
+      preferences.setPreference(this.pageName + ':departement', departmentId)
     },
 
     selectableDepartments (forEntity) {
@@ -73,6 +87,12 @@ export const entitiesMixin = {
       if (!entityId) return
       this.previvewFileIdToShow = entityId
       this.modals.isPreviewDisplayed = true
+    }
+  },
+
+  watch: {
+    selectedDepartment () {
+      this.onSelectedDepartmentChanged()
     }
   }
 }
