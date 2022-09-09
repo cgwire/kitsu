@@ -10,7 +10,8 @@ import {
   sortByName
 } from '@/lib/sorting'
 import {
-  arrayMove
+  arrayMove,
+  removeModelFromList
 } from '@/lib/models'
 
 import personStore from '@/store/modules/people'
@@ -79,6 +80,8 @@ import {
   SET_LAST_COMMENT_DRAFT,
   SET_UPLOAD_PROGRESS,
   CLEAR_UPLOAD_PROGRESS,
+  ADD_ATTACHMENT_TO_COMMENT,
+  REMOVE_ATTACHMENT_FROM_COMMENT,
 
   REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD,
   UPDATE_REVISION_PREVIEW_POSITION,
@@ -234,8 +237,9 @@ const actions = {
     return tasksApi.commentTask(
       { taskId, taskStatusId, comment, attachment, checklist }
     )
-      .then((comment) => {
+      .then(comment => {
         commit(NEW_TASK_COMMENT_END, { comment, taskId })
+        return Promise.resolve(comment)
       })
   },
 
@@ -243,6 +247,26 @@ const actions = {
     return tasksApi.getTaskComment({ id: commentId })
       .then(comment => {
         commit(NEW_TASK_COMMENT_END, { comment, taskId: comment.object_id })
+        return Promise.resolve(comment)
+      })
+  },
+
+  addAttachmentToComment ({ commit, state }, { comment, files }) {
+    if (files.length === 0) return Promise.resolve(comment)
+    return tasksApi.addAttachmentToComment(comment, files)
+      .then(attachmentFiles => {
+        commit(
+          ADD_ATTACHMENT_TO_COMMENT,
+          { comment, attachmentFiles }
+        )
+        return Promise.resolve(comment)
+      })
+  },
+
+  deleteAttachment ({ commit, state }, { comment, attachment }) {
+    return tasksApi.deleteAttachment(comment, attachment)
+      .then(() => {
+        commit(REMOVE_ATTACHMENT_FROM_COMMENT, { comment, attachment })
         return Promise.resolve(comment)
       })
   },
@@ -407,6 +431,7 @@ const actions = {
       })
   },
 
+  /*
   getTask ({ commit, rootGetters }, { taskId, callback }) {
     tasksApi.getTask(taskId, (err, task) => {
       if (!err) {
@@ -416,6 +441,7 @@ const actions = {
       if (callback) callback(err)
     })
   },
+  */
 
   deleteTask ({ commit }, { task, callback }) {
     tasksApi.deleteTask(task, (err) => {
@@ -779,6 +805,14 @@ const mutations = {
       state.taskMap.set(task.id, task)
     } else {
       Object.assign(state.taskMap.get(task.id), task)
+      if (state.taskComments[task.id] &&
+          state.taskComments[task.id].length > 0) {
+        const comment = state.taskComments[task.id][0]
+        Object.assign(comment, {
+          task_status_id: task.task_status_id,
+          task_status: state.taskStatusMap.get(task.task_status_id)
+        })
+      }
     }
   },
 
@@ -1248,6 +1282,26 @@ const mutations = {
       )
       localComment.replies = comment.replies
     }
+  },
+
+  [ADD_ATTACHMENT_TO_COMMENT] (state, { comment, attachmentFiles }) {
+    const oldComment = state.taskComments[comment.object_id].find(
+      c => c.id === comment.id
+    )
+    if (!comment.attachment_files) {
+      Vue.set(comment, 'attachment_files', [])
+    }
+    oldComment.attachment_files =
+      oldComment.attachment_files.concat(attachmentFiles)
+  },
+
+  [REMOVE_ATTACHMENT_FROM_COMMENT] (state, { comment, attachment }) {
+    const oldComment = state.taskComments[comment.object_id].find(
+      c => c.id === comment.id
+    )
+    oldComment.attachment_files = removeModelFromList(
+      oldComment.attachment_files, attachment
+    )
   },
 
   [CLEAR_ASSETS] (state) {

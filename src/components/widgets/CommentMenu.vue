@@ -89,6 +89,7 @@ export default {
 }
 
 .comment-menu {
+  border-radius: 10px;
   position: absolute;
   background: white;
   width: 118px;
@@ -100,6 +101,10 @@ export default {
 
 .comment-menu div {
   cursor: pointer;
+
+  &:hover {
+    background-color: var(--background-alt)
+  }
 }
 
 .comment-menu div {

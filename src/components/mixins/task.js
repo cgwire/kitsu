@@ -31,6 +31,10 @@ export const taskMixin = {
       return this.currentTaskComments || this.taskComments
     },
 
+    resetComments () {
+      this.taskComments = this.getTaskComments(this.task.id)
+    },
+
     resetModals () {
       if (this.$refs['add-preview-modal']) {
         this.$refs['add-preview-modal'].reset()
@@ -50,6 +54,42 @@ export const taskMixin = {
           this.$refs['add-comment'].text = ''
         }
       }
+    },
+
+    confirmEditTaskComment (comment) {
+      this.loading.editComment = true
+      this.errors.editComment = false
+      const attachmentFilesToDelete = comment.attachmentFilesToDelete || []
+      const newAttachmentFiles = comment.newAttachmentFiles || []
+      delete comment.attachmentFilesToDelete
+      delete comment.newAttachmentFiles
+      Promise
+        .all(attachmentFilesToDelete
+          .map(attachment => {
+            return { attachment, comment: this.commentToEdit }
+          })
+          .map(this.deleteAttachment)
+        )
+        .then(comment => this.addAttachmentToComment({
+          comment: this.commentToEdit,
+          files: newAttachmentFiles
+        }))
+        .then(() => this.editTaskComment({
+          taskId: this.getTask().id,
+          comment
+        }))
+        .then(() => {
+          this.$nextTick(() => {
+            this.resetComments()
+          })
+          this.loading.editComment = false
+          this.modals.editComment = false
+        })
+        .catch(err => {
+          console.error(err)
+          this.loading.editComment = false
+          this.errors.editComment = true
+        })
     }
   },
 
