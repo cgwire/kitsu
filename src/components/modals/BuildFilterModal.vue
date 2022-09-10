@@ -113,6 +113,7 @@
             locale-key-prefix="entities.build_filter."
             v-model="descriptorFilter.operator"
             v-if="!descriptorFilter.is_checklist"
+            @input="(operator) => onOperatorChanged(operator, descriptorFilter)"
           />
 
           <combobox
@@ -555,19 +556,19 @@ export default {
 
     onDescriptorChanged (descriptorFilter) {
       const descriptor = this.getDescriptor(descriptorFilter.id)
-      let isChecklist = false
+      descriptorFilter.is_checklist = false
       if (descriptor.choices.length > 0) {
         const checklistValues = this.getDescriptorChecklistValues(descriptor)
         if (checklistValues.length > 0) {
-          isChecklist = true
+          descriptorFilter.is_checklist = true
           descriptorFilter.values = [checklistValues[0]]
+          descriptorFilter.operator = '='
         } else {
           descriptorFilter.values = [descriptor.choices[0]]
         }
       } else {
         descriptorFilter.values = ['']
       }
-      descriptorFilter.is_checklist = isChecklist
     },
 
     addDescriptorFilter () {
@@ -614,6 +615,12 @@ export default {
         return this.getDescriptorChecklistValues(desc).map(
           choice => ({ label: choice.text, value: choice })
         )
+      }
+    },
+
+    onOperatorChanged (operator, descriptorFilter) {
+      if (operator !== 'in') {
+        descriptorFilter.values = [descriptorFilter.values[0]]
       }
     },
 
