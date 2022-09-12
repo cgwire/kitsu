@@ -28,7 +28,7 @@
         <option
           v-for="(option, i) in options"
           :key="`${i}-${option.label}-${option.value}`"
-          :value="option.value || option.label"
+          :value="option.label || option.value"
           :selected="value === option.value"
         >
           {{ getOptionLabel(option) }}
@@ -50,7 +50,7 @@ export default {
     },
     value: {
       default: '',
-      type: [Object, String]
+      type: [Object, String, Boolean]
     },
     options: {
       default: () => [],
@@ -94,11 +94,23 @@ export default {
 
   methods: {
     updateValue () {
-      this.$emit('input', this.$refs.select.value)
+      let value = this.$refs.select.value
+      this.options.forEach(option => {
+        if (option.label === value) {
+          value = option.value
+        }
+      })
+      this.$emit('input', value)
     },
 
     emitEnter () {
-      this.$emit('enter', this.$refs.select.value)
+      let value = this.$refs.select.value
+      this.options.forEach(option => {
+        if (option.label === value) {
+          value = option.value
+        }
+      })
+      this.$emit('enter', value)
     },
 
     getOptionLabel (option) {

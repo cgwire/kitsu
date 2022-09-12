@@ -72,9 +72,17 @@ const applyFiltersFunctions = {
     ) {
       let dataValue = entry.data[filter.descriptor.field_name]
       dataValue = dataValue.toLowerCase()
-      filter.values.forEach(value => {
-        isOk = isOk || dataValue.indexOf(value.toLowerCase()) >= 0
-      })
+      if (filter.values.length === 1 && filter.values[0].match(new RegExp('(:true)|(:false)$'))) {
+        const isTrue = Boolean(filter.values[0].match(new RegExp(':true$')))
+        let value = filter.values[0].replace(new RegExp('(:true)|(:false)$'), '')
+        value = value.toLowerCase()
+        dataValue = JSON.parse(dataValue)
+        isOk = isOk || ((dataValue[value] === undefined && !isTrue) || (dataValue[value] === isTrue))
+      } else {
+        filter.values.forEach(value => {
+          isOk = isOk || dataValue.indexOf(value.toLowerCase()) >= 0
+        })
+      }
     } else {
       isOk = false
     }
