@@ -44,8 +44,10 @@
             "title": "Types d'assets",
             "production_title": "Stats types d'assets",
             "fields": {
-                "name": "Nom"
-            }
+                "name": "Nom",
+                "task_types": "Type de tâches"
+            },
+            "include_all": "Inclure tous les types d'asset"
         },
         "breakdown": {
             "all_assets": "Tous les assets disponibles",
@@ -65,7 +67,7 @@
                 "text": "Si vous supprimmez l'asset de cet épisode, cela va enlever les assets de tous les shots liés. Êtes vous sur de l'enlever ?"
             },
             "fields": {
-                "standby": "STDB"
+                "standby": "Stand By"
             }
         },
         "comments": {
@@ -99,7 +101,13 @@
                 "checklist": "Checklist",
                 "acknowledgements": "Remerciements"
             },
-            "checklist": "Checklist"
+            "checklist": "Checklist",
+            "attachments": "Pièces jointes",
+            "attachments_to_add": "Fichier à attacher",
+            "max_retakes_error": "Vous ne pouvez plus faire de retakes sur cette tâche.",
+            "no_atachments": "Pas de pièces jointes",
+            "previews": "Previews",
+            "selected_files": "Fichiers sélectionnés"
         },
         "custom_actions": {
             "create_error": "Une erreur est survenue en sauvegardant cette action personnalisée. Êtes vous sûr qu'aucune autre action a un nom similaire ?",
@@ -143,7 +151,10 @@
                 "union_or": "Valide un des filtres suivants",
                 "with_thumbnail": "Avec vignette",
                 "without_thumbnail": "Sans vignette",
-                "department": "Département"
+                "department": "Département",
+                "is_assets_ready": "Les assets sont prêts",
+                "assets_ready": "Prêts",
+                "assets_not_ready": "Non prêt"
             },
             "thumbnails": {
                 "error": "Une erreur s'est produite en téléversant les vignettes",
@@ -340,8 +351,6 @@
             "estimation_short": "Ést.",
             "fps": "FPS",
             "frames": "Frames",
-            "frameIn": "Frame In",
-            "frameOut": "Frame Out",
             "man_days": "jour-homme | jour-hommes",
             "select_column": "Sélectionner colonne",
             "show": "Montrer",
@@ -351,7 +360,14 @@
             "all_edits": "Tous les montages",
             "attach_snapshots": "Attacher les snapshots de vos annotations",
             "reply": "Répondre",
-            "select_file": "Sélectionner un fichier"
+            "select_file": "Sélectionner un fichier",
+            "frame_in": "Frame In",
+            "frame_out": "Frame Out",
+            "type": "Type",
+            "search": {
+                "type": "Type",
+                "no_result": "Il n'y a pas de résultat pour cette recherche."
+            }
         },
         "menu": {
             "assign_tasks": "Assigner des tâches",
@@ -394,7 +410,13 @@
             "unread_notifications": "notification non lue | notifications non lues",
             "title": "Notifications",
             "with_preview": "avec une version",
-            "replied_on": "a répondu à un commentaire sur"
+            "replied_on": "a répondu à un commentaire sur",
+            "all_types": "Tous les types de notification",
+            "new_revision": "Nouvelle version",
+            "only_assignations": "Seulement les assignations",
+            "only_comments": "Seulement les commentaires",
+            "only_mentions": "Seulement les mentions",
+            "only_replies": "Seulement les réponses"
         },
         "people": {
             "active": "Présents",
@@ -440,12 +462,14 @@
             "role": {
                 "admin": "Studio Manager",
                 "client": "Client",
-                "manager": "Superviseur",
+                "manager": "Chargé de production",
                 "user": "Graphiste",
                 "undefined": "Non défini",
                 "vendor": "Fournisseur",
                 "supervisor": "Superviseur"
-            }
+            },
+            "confirm_edit": "Sauvegarder les changement pour cet utilisateur",
+            "create": "Créer utilisateur"
         },
         "playlists": {
             "add_assets": "Ajouter des assets",
@@ -578,7 +602,10 @@
                 "start_date": "Date de début",
                 "end_date": "Date de fin",
                 "nb_episodes": "Nombre d'épisodes",
-                "episode_span": "Espace entre les épisodes"
+                "episode_span": "Espace entre les épisodes",
+                "is_clients_isolated": "Isoler les commentaires clients (non visibles aux autres clients)",
+                "max_retakes": "Nombre de retakes maximum",
+                "style": "Style"
             },
             "metadata": {
                 "add_explaination": "Ajouter des données spécifiques au projet.",
@@ -603,7 +630,9 @@
             "type": {
                 "short": "Format court",
                 "featurefilm": "Long Métrage",
-                "tvshow": "Série télé"
+                "tvshow": "Série télé",
+                "assets": "Assets seulement",
+                "shots": "Plans seulement"
             },
             "edit_error": "Une erreur s'est produite en éditant la production. Contactez notre équipe support pour obtenir de l'aide.",
             "brief": {
@@ -660,6 +689,22 @@
                 "shots_to_import": "Plans à importer",
                 "select_edit_task_type": "Sélectionner let type de tâche pour montages",
                 "select_edit_task_type_description": "Ces types de tâches décrivent les étapes nécessaires pour fabriquer votre montage"
+            },
+            "style": {
+                "2d": "2D",
+                "3d": "3D",
+                "2d3d": "2D/3D",
+                "ar": "Réalité augmentée",
+                "archviz": "Archviz",
+                "commercial": "Publicité",
+                "catalog": "Catalogue",
+                "metaverse": "Métavers",
+                "motion_design": "Motion Design",
+                "nft": "NFT",
+                "stop_motion": "Stop Motion",
+                "vfx": "VFX",
+                "video_game": "Jeux vidéos",
+                "vr": "Réalité Virtuelle"
             }
         },
         "profile": {
@@ -690,7 +735,8 @@
             "notifications_mattermost_user": "Nom de l'utilisateur Mattermost",
             "webhook_error": "La webhook ne correspond pas à un webhook Mattermost",
             "notifications_discord_enabled": "Activation des notifications DIscord",
-            "notifications_discord_user": "Nom d'utilisateur Discord"
+            "notifications_discord_user": "Nom d'utilisateur Discord",
+            "clear_avatar": "Effacer avatar"
         },
         "settings": {
             "change_logo": "Changer logo",
@@ -854,7 +900,9 @@
                 "production": "Prod",
                 "sequence": "Séquence",
                 "time_spent": "Temps passé",
-                "person": "Modifier"
+                "person": "Modifier",
+                "max_retakes": "Nb. Retakes max",
+                "resolution": "Résolution"
             },
             "cancel_text": "Êtes-vous sûr de vouloir archiver {name} ?",
             "delete_for_selection": "Supprimer {nbSelectedShots} selected shots :",
@@ -986,7 +1034,12 @@
             "combobox_departments": {
                 "all_departments": "Tous les départements",
                 "my_departments": "Mes Départements"
-            }
+            },
+            "add_revision_confirm": "Ajouter des fichiers à publier",
+            "confirm_attachments": "Ajouter des fichiers en pièces jointes",
+            "change_status": "Changer le statut",
+            "clear_own_assignations": "Retirer vos assignations",
+            "publish": "Publier"
         },
         "timesheets": {
             "detail_level": "Niveau de détail",
