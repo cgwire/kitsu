@@ -1278,7 +1278,7 @@ export default {
       const isOdd = index % 2 === 0
       const level = isOdd ? 0.7 : 0.9
       return {
-        background: colors.lightenColor(rootElement.color, level)
+        background: colors.fadeColor(rootElement.color, level)
       }
     },
 
