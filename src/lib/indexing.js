@@ -9,7 +9,7 @@ export const buildNameIndex = (entries, split = true) => {
       let words
       if (entry.name || entry.full_name) {
         if (split) {
-          words = entry.name.split(' ')
+          words = entry.name.toLowerCase().split(' ')
         } else {
           words = [entry.name]
         }
@@ -55,7 +55,7 @@ export const buildTaskIndex = (tasks) => {
   tasks.forEach((task) => {
     const stringToIndex =
       task.full_entity_name.replace(/_/g, ' ').replace(/-/g, ' ')
-    const words = stringToIndex.split(' ').concat([
+    const words = stringToIndex.toLowerCase().split(' ').concat([
       task.task_type_name,
       task.task_status_short_name,
       task.project_name
@@ -79,7 +79,7 @@ export const buildSupervisorTaskIndex = (tasks, personMap, taskStatusMap) => {
       .replace(/_/g, ' ')
       .replace(/-/g, ' ')
     const taskStatus = taskStatusMap.get(task.task_status_id)
-    const words = stringToIndex.split(' ').concat([
+    const words = stringToIndex.toLowerCase().split(' ').concat([
       taskStatus.short_name
     ])
     task.assignees.forEach(personId => {
@@ -101,11 +101,11 @@ export const buildAssetIndex = (entries) => {
   const assetIndex = Object.create(null)
   entries.forEach(asset => {
     const stringToIndex = asset.name.replace(/_/g, ' ').replace(/-/g, ' ')
-    const assetTypeWords = asset.asset_type_name.split(' ')
-    const nameWords = stringToIndex.split(' ')
+    const assetTypeWords = asset.asset_type_name.toLowerCase().split(' ')
+    const nameWords = stringToIndex.toLowerCase().split(' ')
     let words = []
     nameWords.forEach(nameWord => {
-      words = words.concat(nameWord.split(/(?=[A-Z])/))
+      words = words.concat(nameWord.toLowerCase().split(/(?=[A-Z])/))
     })
     words = words
       .concat(assetTypeWords)
