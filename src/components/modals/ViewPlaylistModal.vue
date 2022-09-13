@@ -238,6 +238,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.modal-content {
+  max-height: calc(100vh - 20px);
+}
 .modal-content .box {
   padding: 1em;
 }
