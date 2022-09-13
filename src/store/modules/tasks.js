@@ -922,12 +922,14 @@ const mutations = {
       c => c.id !== commentId
     )
     state.taskComments[taskId] = comments
-    state.taskPreviews[taskId] = [...state.taskPreviews[taskId]].filter(
-      p => !(
-        oldComment.previews.length > 0 &&
-        oldComment.previews[0].id === p.id
+    if (oldComment) {
+      state.taskPreviews[taskId] = [...state.taskPreviews[taskId]].filter(
+        p => !(
+          oldComment.previews.length > 0 &&
+          oldComment.previews[0].id === p.id
+        )
       )
-    )
+    }
 
     if (oldCommentIndex === pinnedCount) {
       let newStatus = todoStatus
