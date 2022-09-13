@@ -2189,4 +2189,10 @@ progress {
   color: white;
   width: 3rem;
 }
+
+#resize-annotation-canvas,
+#annotation-snapshot {
+  display: none;
+}
+
 </style>
