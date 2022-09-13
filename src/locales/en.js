@@ -496,7 +496,7 @@ export default {
     assigned_you: 'assigned you to',
     commented_on: 'commented on',
     mention_you_on: 'mentioned you on',
-    new_revision: 'New revision',
+    new_revision: 'New revision published',
     no_notifications: 'There is currently no notification for you for your current projects.',
     only_assignations: 'Only assignations',
     only_comments: 'Only comments',

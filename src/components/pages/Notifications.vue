@@ -173,9 +173,9 @@
       <div
           v-if="notification.preview_file_id"
       >
-        <div>
-          $t('notification.new_revision')
-        </div>
+        <h3>
+          {{ $t('notifications.new_revision') }}
+        </h3>
         <div
           class="thumbnail-picture-wrapper"
           v-if="notification.preview_file_id"
@@ -664,5 +664,11 @@ a {
   width: 450px;
   min-width: 450px;
   max-width: 450px;
+}
+
+h3 {
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 0.5em;
 }
 </style>
