@@ -846,7 +846,9 @@ export const playerMixin = {
 
     playSound () {
       this.isPlaying = true
-      this.soundPlayer.play()
+      if (this.isCurrentPreviewSound) {
+        this.soundPlayer.play()
+      }
     },
 
     resetCanvas () {
@@ -1141,6 +1143,102 @@ export const playerMixin = {
         this.onFrameUpdate(frameNumber)
         this.syncComparisonPlayer()
       }, 20)
+    },
+
+    // Annotation extraction
+
+    extractFrame (canvas, frame) {
+      this.rawPlayer.setCurrentFrame(frame)
+      const video = this.rawPlayer.currentPlayer
+      const context = canvas.getContext('2d')
+      const dimensions = this.rawPlayer.getNaturalDimensions()
+      canvas.width = dimensions.width
+      canvas.height = dimensions.height
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.drawImage(video, 0, 0, canvas.width, canvas.height)
+    },
+
+    extractVideoFrame (canvas, frameNumber) {
+      return new Promise(resolve => {
+        this.rawPlayer.setCurrentFrame(frameNumber)
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.extractFrame(canvas, frameNumber)
+            resolve()
+          }, 500)
+        })
+      })
+    },
+
+    copyAnnotationCanvas (canvas, annotation) {
+      return new Promise(resolve => {
+        this.clearCanvas()
+        this.loadSingleAnnotation(annotation)
+        setTimeout(() => {
+          const context = canvas.getContext('2d')
+          const scaleRatio = canvas.width / this.fabricCanvas.width
+          const tmpSource = document.getElementById('resize-annotation-canvas')
+          const tmpCanvas = new fabric.Canvas('resize-annotation-canvas', {
+            width: canvas.width,
+            height: canvas.height
+          })
+          this.fabricCanvas.getObjects().find(obj => {
+            if (obj._objects) {
+              obj._objects.forEach(obj => {
+                tmpCanvas.add(obj)
+                obj.strokeWidth = 8 / scaleRatio
+              })
+            } else {
+              tmpCanvas.add(obj)
+              obj.strokeWidth = 8 / scaleRatio
+            }
+          })
+          tmpCanvas.setZoom(scaleRatio)
+          setTimeout(() => {
+            context.drawImage(tmpSource, 0, 0, canvas.width, canvas.height)
+            setTimeout(() => {
+              tmpCanvas.dispose()
+            }, 100)
+            return resolve()
+          }, 100)
+        }, 100)
+      })
+    },
+
+    async extractAnnotationSnapshots () {
+      const currentFrame = this.currentFrame
+      const annotations = this.annotations.sort((a, b) => b.time < a.time)
+      const files = []
+      let index = 1
+      for (const annotation of annotations) {
+        const canvas = document.getElementById('annotation-snapshot')
+        const filename = `annotation ${index}.png`
+        const frameNumber =
+          roundToFrame(annotation.time, this.fps) / this.frameDuration
+        await this.extractVideoFrame(canvas, frameNumber)
+        await this.copyAnnotationCanvas(canvas, annotation)
+        const file = await this.getFileFromCanvas(canvas, filename)
+        files.push(file)
+        index++
+      }
+      this.rawPlayer.setCurrentFrame(currentFrame - 1)
+      this.$nextTick(() => {
+        this.clearCanvas()
+      })
+      return files
+    },
+
+    getFileFromCanvas (canvas, filename) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => {
+          const file = new File(
+            [blob],
+            filename,
+            { type: 'image/png', lastModified: new Date().getTime() }
+          )
+          return resolve(file)
+        })
+      })
     }
   },
 

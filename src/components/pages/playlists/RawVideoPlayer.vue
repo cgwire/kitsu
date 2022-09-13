@@ -466,6 +466,13 @@ export default {
       this.$options.rate = rate
       if (this.currentPlayer) this.currentPlayer.playbackRate = rate
       if (this.nextPlayer) this.nextPlayer.playbackRate = rate
+    },
+
+    getNaturalDimensions () {
+      return {
+        height: this.currentPlayer.videoHeight,
+        width: this.currentPlayer.videoWidth
+      }
     }
   },
 
