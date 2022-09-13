@@ -12,7 +12,7 @@ localVue.use(VueRouter)
 const router = new VueRouter()
 
 describe('BuildFilterModal', () => {
-  let store, assetStore, peopleStore, productionStore, shotStore, taskStore
+  let store, assetStore, peopleStore, shotStore, taskStore
   let wrapper
   let getters
 
@@ -42,7 +42,7 @@ describe('BuildFilterModal', () => {
         ]
       },
       mutations: {
-        CHANGE_SEARCH: (state, query) => state.assetSearchText = query
+        CHANGE_SEARCH: (state, query) => { state.assetSearchText = query }
       },
       actions: {
         changeSearch ({ commit, state }, query) {
@@ -129,7 +129,7 @@ describe('BuildFilterModal', () => {
 
   describe('UI', () => {
     it('mount succeeds', () => {
-      const modal = wrapper.findComponent(BuildFilterModal)
+      wrapper.findComponent(BuildFilterModal)
     })
     describe('mount with query', () => {
       it('task types', done => {
@@ -158,7 +158,8 @@ describe('BuildFilterModal', () => {
               {
                 id: 'descriptor-1',
                 operator: '=',
-                values: ['easy']
+                values: ['easy'],
+                is_checklist: false
               }
             ]
           }
@@ -217,7 +218,7 @@ describe('BuildFilterModal', () => {
             ]
           }
         })
-        const query = wrapper.vm.applyFilter()
+        wrapper.vm.applyFilter()
         expect(wrapper.emitted().confirm).toBeTruthy()
         expect(wrapper.emitted().confirm[0][0]).toBe('[Modeling]=[WIP]')
       })
@@ -284,7 +285,8 @@ describe('BuildFilterModal', () => {
                   {
                     id: 'descriptor-1',
                     operator: '=',
-                    values: ['easy']
+                    values: ['easy'],
+                    is_checklist: false
                   }
                 ]
               }
@@ -299,7 +301,8 @@ describe('BuildFilterModal', () => {
                   {
                     id: 'descriptor-1',
                     operator: '=-',
-                    values: ['easy']
+                    values: ['easy'],
+                    is_checklist: false
                   }
                 ]
               }
@@ -314,7 +317,8 @@ describe('BuildFilterModal', () => {
                   {
                     id: 'descriptor-1',
                     operator: 'in',
-                    values: ['easy', 'hard']
+                    values: ['easy', 'hard'],
+                    is_checklist: false
                   }
                 ]
               }
@@ -451,7 +455,8 @@ describe('BuildFilterModal', () => {
               {
                 id: 'descriptor-1',
                 operator: '=',
-                values: ['easy']
+                values: ['easy'],
+                is_checklist: false
               }
             ])
           })
@@ -462,7 +467,8 @@ describe('BuildFilterModal', () => {
               {
                 id: 'descriptor-1',
                 operator: '=-',
-                values: ['easy']
+                values: ['easy'],
+                is_checklist: false
               }
             ])
           })
@@ -473,7 +479,8 @@ describe('BuildFilterModal', () => {
               {
                 id: 'descriptor-1',
                 operator: 'in',
-                values: ['easy', 'hard']
+                values: ['easy', 'hard'],
+                is_checklist: false
               }
             ])
           })
@@ -558,7 +565,8 @@ describe('BuildFilterModal', () => {
           expect(wrapper.vm.metadataDescriptorFilters.values).toStrictEqual([{
             id: 'descriptor-1',
             operator: '=',
-            values: ['easy']
+            values: ['easy'],
+            is_checklist: false
           }])
           wrapper.vm.addDescriptorFilter()
           expect(wrapper.vm.metadataDescriptorFilters.values).toHaveLength(2)
