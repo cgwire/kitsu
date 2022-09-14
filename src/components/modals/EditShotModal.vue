@@ -110,6 +110,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { formatListMixin } from '@/components/mixins/format'
 import { modalMixin } from '@/components/modals/base_modal'
 import Combobox from '@/components/widgets/Combobox'
 import ModalFooter from '@/components/modals/ModalFooter'
@@ -118,7 +119,7 @@ import TextareaField from '@/components/widgets/TextareaField'
 
 export default {
   name: 'edit-shot-modal',
-  mixins: [modalMixin],
+  mixins: [formatListMixin, modalMixin],
 
   components: {
     Combobox,
@@ -261,6 +262,31 @@ export default {
         setTimeout(() => {
           this.$refs.nameField.focus()
         }, 100)
+      }
+    },
+
+    'form.frameIn' () {
+      console.log('change')
+      const frameIn = this.sanitizeInteger(this.form.frameIn)
+      const frameOut = this.sanitizeInteger(this.form.frameOut)
+      console.log(frameIn, frameOut)
+      if (frameIn &&
+          frameOut &&
+          frameOut > frameIn) {
+        console.log('ok')
+        this.form.nb_frames = frameOut - frameIn
+        console.log('ok', this.form.nb_frames)
+      }
+    },
+
+    'form.frameOut' () {
+      console.log('change out')
+      const frameIn = this.sanitizeInteger(this.form.frameIn)
+      const frameOut = this.sanitizeInteger(this.form.frameOut)
+      if (frameIn &&
+          frameOut &&
+          frameOut > frameIn) {
+        this.form.nb_frames = frameOut - frameIn
       }
     },
 

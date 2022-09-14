@@ -656,7 +656,7 @@ export default {
       form.data.resolution = form.resolution
       form.data.max_retakes = form.max_retakes
       form.data.frame_in = form.frameIn
-      form.data.frameOut = form.frameOut
+      form.data.frame_out = form.frameOut
       form.data.fps = form.fps
       this.loading.edit = true
       this.errors.edit = false
@@ -1050,6 +1050,25 @@ export default {
       const data = {
         id: entry.id,
         data: metadata
+      }
+      const shot = this.shotMap.get(entry.id)
+      if (descriptor.field_name === 'frame_in') {
+        if (
+          shot.data.frame_out &&
+          shot.nb_frames !== shot.data.frame_out - value &&
+          shot.data.frame_out > value
+        ) {
+          data.nb_frames = shot.data.frame_out - value
+        }
+      }
+      if (descriptor.field_name === 'frame_out') {
+        if (
+          shot.data.frame_in &&
+          shot.nb_frames !== value - shot.data.frame_in &&
+          shot.data.frame_in < value
+        ) {
+          data.nb_frames = value - shot.data.frame_in
+        }
       }
       this.editShot(data)
     }

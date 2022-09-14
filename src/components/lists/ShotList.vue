@@ -982,8 +982,17 @@ export default {
     },
 
     onNbFramesChanged (entry, value) {
-      this.$emit('field-changed', {
-        entry, fieldName: 'nb_frames', value: this.sanitizeInteger(value)
+      let shotsToChange = []
+      if (this.selectedShots.has(entry.id)) {
+        shotsToChange = this.selectedShots
+      } else {
+        shotsToChange = [entry]
+      }
+
+      shotsToChange.forEach(shot => {
+        this.$emit('field-changed', {
+          entry: shot, fieldName: 'nb_frames', value: this.sanitizeInteger(value)
+        })
       })
     },
 
