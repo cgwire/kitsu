@@ -44,6 +44,7 @@ module.exports = {
      children: [
        '/publisher/',
        '/dcc-plugin/',
+	   '/using_publisher/',
      ]
 	},	
 	{
