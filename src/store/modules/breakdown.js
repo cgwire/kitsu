@@ -68,7 +68,7 @@ const actions = {
     const production = rootState.productions.currentProduction
     const assetMap = rootState.assets.assetMap
     const episodes =
-     Array.from(rootState.shots.episodeMap.values())
+     Array.from(rootState.episodes.episodeMap.values())
        .sort((a, b) => a.name.localeCompare(b.name))
     commit(CASTING_SET_FOR_EPISODES, episodes)
     return breakdownApi.getProductionEpisodesCasting(production.id, episodeId)
@@ -120,7 +120,7 @@ const actions = {
   },
 
   setCastingEpisodes ({ commit, rootState }) {
-    const episodes = rootState.shots.episodes
+    const episodes = Array.from(rootState.episodes.episodeMap.values())
     const production = rootState.productions.currentProduction
     commit(CASTING_SET_EPISODES, { production, episodes })
   },

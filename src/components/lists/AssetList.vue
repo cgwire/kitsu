@@ -624,11 +624,12 @@ export default {
 
   data () {
     return {
-      lastSelection: null,
+      type: 'asset',
+      columnSelectorDisplayed: false,
       hiddenColumns: {},
+      lastSelection: null,
       lastHeaderMenuDisplayed: null,
       lastMetadaDataHeaderMenuDisplayed: null,
-      columnSelectorDisplayed: false,
       lastHeaderMenuDisplayedIndexInGrid: null,
       metadataDisplayHeaders: {
         estimation: true,
@@ -1054,6 +1055,10 @@ td.ready-for {
   max-width: 30px;
   width: 30px;
   padding: 4px;
+}
+
+.datatable-wrapper {
+  min-height: 200px;
 }
 
 .datatable-row th.name {

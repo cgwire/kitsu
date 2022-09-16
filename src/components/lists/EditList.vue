@@ -558,12 +558,13 @@ export default {
 
   data () {
     return {
-      lastSelection: null,
+      type: 'edit',
       hiddenColumns: {},
       lastHeaderMenuDisplayed: null,
       lastMetadaDataHeaderMenuDisplayed: null,
       lastHeaderMenuDisplayedIndexInGrid: null,
       lastSelectedEdit: null,
+      lastSelection: null,
       metadataDisplayHeaders: {
         estimation: true,
         timeSpent: true

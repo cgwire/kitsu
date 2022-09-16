@@ -228,6 +228,27 @@ export const sortShotResult = (
   return result
 }
 
+export const sortEpisodeResult = (
+  result,
+  sorting,
+  taskTypeMap,
+  taskMap
+) => {
+  if (sorting && sorting.length > 0) {
+    const sortInfo = sorting[0]
+    let sortEntities = sortByTaskType(taskMap, sortInfo)
+    if (sortInfo.type === 'metadata') sortEntities = sortByMetadata(sortInfo)
+    result = result.sort(
+      firstBy('canceled')
+        .thenBy(sortEntities)
+        .thenBy((a, b) => a.name.localeCompare(b.name))
+    )
+  } else {
+    result = sortByName(result)
+  }
+  return result
+}
+
 export const sortEditResult = (
   result,
   sorting,

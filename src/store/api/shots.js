@@ -31,6 +31,11 @@ export default {
     return client.pget(path)
   },
 
+  getEpisodesWithTasks (production) {
+    const path = `/api/data/episodes/with-tasks?project_id=${production.id}`
+    return client.pget(path)
+  },
+
   getShotType (callback) {
     client.get('/api/data/shot-type', callback)
   },
@@ -55,7 +60,9 @@ export default {
 
   newEpisode (episode) {
     const data = {
-      name: episode.name
+      name: episode.name,
+      description: episode.description || '',
+      data: episode.data || {}
     }
     const path = `/api/data/projects/${episode.project_id}/episodes`
     return client.ppost(path, data)
@@ -108,7 +115,8 @@ export default {
   updateEpisode (episode) {
     const data = {
       name: episode.name,
-      description: episode.description
+      description: episode.description,
+      data: episode.data
     }
     if (episode.is_casting_standby !== undefined) {
       data.is_casting_standby = Boolean(episode.is_casting_standby)

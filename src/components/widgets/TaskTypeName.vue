@@ -67,19 +67,30 @@ export default {
     },
 
     taskTypePath () {
-      const route = {
-        name: 'task-type',
-        params: {
-          production_id: this.productionId,
-          task_type_id: this.taskType.id,
-          type: this.$tc(this.taskType.for_entity.toLowerCase(), 2) + 's'
+      let route = {}
+      if (this.taskType.for_entity === 'Episode') {
+        route = {
+          name: 'episodes-task-type',
+          params: {
+            production_id: this.productionId,
+            task_type_id: this.taskType.id
+          }
         }
-      }
+      } else {
+        route = {
+          name: 'task-type',
+          params: {
+            production_id: this.productionId,
+            task_type_id: this.taskType.id,
+            type: this.$tc(this.taskType.for_entity.toLowerCase(), 2) + 's'
+          }
+        }
 
-      if (this.taskType.episode_id || this.$route.params.episode_id) {
-        route.name = 'episode-task-type'
-        route.params.episode_id =
-          this.taskType.episode_id || this.$route.params.episode_id
+        if (this.taskType.episode_id || this.$route.params.episode_id) {
+          route.name = 'episode-task-type'
+          route.params.episode_id =
+            this.taskType.episode_id || this.$route.params.episode_id
+        }
       }
       return route
     }

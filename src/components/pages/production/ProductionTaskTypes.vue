@@ -31,7 +31,12 @@
       </div>
 
       <template
-        v-for="(taskListObject, index) in [assetTaskTypes, shotTaskTypes, editTaskTypes]"
+        v-for="(taskListObject, index) in [
+          assetTaskTypes,
+          shotTaskTypes,
+          editTaskTypes,
+          episodeTaskTypes
+        ]"
         v-else
       >
         <div
@@ -79,22 +84,6 @@
         </div>
       </template>
     </div>
-
-    <!--div class="column is-2 episode-span-column hidden">
-      <text-field
-        ref="episodesSpanField"
-        type="number"
-        :label="$t('productions.fields.episode_span')"
-        :disabled="loading.episode_span"
-        @enter="editEpisodeSpan"
-        v-focus
-        v-model="episode_span"
-        v-if="currentProduction && currentProduction.id && isTVShow"
-      />
-      <p v-if="errors.episode_span" class="error mt1">
-        {{ $t('productions.edit_error') }}
-      </p>
-    </div-->
   </div>
 </template>
 <script>
@@ -121,6 +110,7 @@ export default {
       assetTaskTypes: { list: [] },
       editTaskTypes: { list: [] },
       episode_span: 0,
+      episodeTaskTypes: { list: [] },
       shotTaskTypes: { list: [] },
       taskTypeId: '',
       loading: {
@@ -148,6 +138,9 @@ export default {
         .then(() => {
           this.resetDisplayedTaskTypes()
         })
+        .catch(err => {
+          console.error(err)
+        })
     }
   },
 
@@ -159,6 +152,7 @@ export default {
       'productionAssetTaskTypes',
       'productionShotTaskTypes',
       'productionEditTaskTypes',
+      'productionEpisodeTaskTypes',
       'taskStatusMap',
       'taskTypeMap',
       'taskTypes',
@@ -194,6 +188,7 @@ export default {
       this.resetAssetTaskTypes()
       this.resetShotTaskTypes()
       this.resetEditTaskTypes()
+      this.resetEpisodeTaskTypes()
     },
 
     getScheduleItemForTaskType (taskType) {
@@ -308,6 +303,22 @@ export default {
       })
       this.editTaskTypes = {
         title: this.$t('edits.title'),
+        list
+      }
+    },
+
+    resetEpisodeTaskTypes () {
+      let list = sortTaskTypes(
+        [...this.productionEpisodeTaskTypes], this.currentProduction
+      )
+      list = list.map(taskType => {
+        return {
+          taskType,
+          scheduleItem: this.getScheduleItemForTaskType(taskType)
+        }
+      })
+      this.episodeTaskTypes = {
+        title: this.$t('episodes.title'),
         list
       }
     },
@@ -449,5 +460,9 @@ td ::v-deep p.control.flexrow {
   margin-bottom: 1em;
   margin-top: 2em;
   text-transform: uppercase;
+}
+
+h2 {
+  border: 0;
 }
 </style>

@@ -159,15 +159,15 @@ export default {
     return client.pput(`/api/data/user/filters/${searchFilter.id}`, data)
   },
 
-  createFilter (listType, name, query, productionId, entityType, callback) {
+  createFilter (listType, name, query, productionId, entityType) {
     const data = {
       list_type: listType,
       name,
-      query: query,
+      query,
       entity_type: entityType,
       project_id: productionId
     }
-    client.post('/api/data/user/filters', data, callback)
+    return client.ppost('/api/data/user/filters', data)
   },
 
   removeFilter (searchFilter, callback) {

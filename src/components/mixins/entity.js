@@ -38,8 +38,25 @@ export const entityMixin = {
   },
 
   computed: {
+
+    thumbnailPath () {
+      const previewId = this.currentEntity.preview_file_id
+      return `/api/pictures/originals/preview-files/${previewId}.png`
+    },
+
+    isPreview () {
+      return this.currentEntity &&
+        this.currentEntity.preview_file_id &&
+        this.currentEntity.preview_file_id.length > 0
+    },
+
     currentTasks () {
-      const entity = this.currentAsset || this.currentShot || this.currentEdit
+      const entity =
+        this.currentAsset ||
+        this.currentShot ||
+        this.currentEdit ||
+        this.currentEpisode
+      if (!entity || !entity.tasks) return []
       return entity
         ? entity
           .tasks
@@ -149,6 +166,14 @@ export const entityMixin = {
   },
 
   methods: {
+    changeTab (tab) {
+      this.selectedTab = tab
+    },
+
+    onEditClicked () {
+      this.modals.edit = true
+    },
+
     onTaskSelected (task) {
       if (!this.currentTask || this.currentTask.id !== task.id) {
         this.currentTask = task

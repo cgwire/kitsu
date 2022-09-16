@@ -525,7 +525,9 @@ export default {
     this.clearSelectedTasks()
     const isAssets = this.$route.path.includes('assets')
     const isShots = this.$route.path.includes('shots')
-    this.entityType = isAssets ? 'Asset' : isShots ? 'Shot' : 'Edit'
+    const isEdits = this.$route.path.includes('edits')
+    this.entityType =
+      isAssets ? 'Asset' : isShots ? 'Shot' : isEdits ? 'Edit' : 'Episode'
     this.updateActiveTab()
     setTimeout(() => {
       this.initData(false)
@@ -549,7 +551,9 @@ export default {
       'currentProduction',
       'currentTaskType',
       'editsPath',
+      'episodesPath',
       'editMap',
+      'episodeMap',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
       'isTVShow',
@@ -649,15 +653,24 @@ export default {
       return this.getTasks(Array.from(this.editMap.values()))
     },
 
+    episodeTasks () {
+      return this.getTasks(Array.from(this.episodeMap.values()))
+    },
+
     title () {
       if (this.currentProduction) {
         if (this.isTVShow && this.currentEpisode) {
           const episodeName = this.currentEpisode.id === 'all'
             ? this.$t('main.all_assets')
             : this.currentEpisode.name
-          return `${this.currentProduction.name} / ` +
-                 `${episodeName} / ` +
-                 `${this.currentTaskType.name}`
+
+          if (this.currentTaskType.for_entity === 'Episode') {
+            return `${episodeName}`
+          } else {
+            return `${this.currentProduction.name} / ` +
+                   `${episodeName} / ` +
+                   `${this.currentTaskType.name}`
+          }
         } else {
           return `${this.currentProduction.name} / ${this.currentTaskType.name}`
         }
@@ -687,6 +700,9 @@ export default {
         }
         if (this.currentTaskType.for_entity === 'Edit') {
           route = this.editsPath
+        }
+        if (this.currentTaskType.for_entity === 'Episode') {
+          route = this.episodesPath
         }
       }
       return {
@@ -872,10 +888,13 @@ export default {
           task_type_id: taskTypeId
         }
       }
-      if (this.isTVShow && this.currentEpisode) {
+      if (this.currentTaskType.for_entity === 'Episode') {
+        route.name = `episodes-${route.name}`
+      } else if (this.isTVShow && this.currentEpisode) {
         route.name = `episode-${route.name}`
         route.params.episode_id = this.currentEpisode.id
       }
+
       return route
     },
 
@@ -958,11 +977,16 @@ export default {
         tasks = this.shotTasks
       } else if (this.entityType === 'Edit') {
         tasks = this.editTasks
+      } else if (this.entityType === 'Episode') {
+        tasks = this.episodeTasks
       }
-      tasks = tasks.filter((task) => {
-        const entity = this.entityMap.get(task.entity_id)
-        return !entity.canceled
-      })
+
+      if (this.entityType !== 'Episode') {
+        tasks = tasks.filter(task => {
+          const entity = this.entityMap.get(task.entity_id)
+          return !entity.canceled
+        })
+      }
       this.tasks = this.sortTasks(tasks)
       this.resetTaskIndex()
     },
@@ -1133,7 +1157,7 @@ export default {
         }
       }
 
-      const children = personTasks.map((task) => {
+      const children = personTasks.map(task => {
         const estimation = task.estimation
         let endDate
 

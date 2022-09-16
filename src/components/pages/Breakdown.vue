@@ -124,10 +124,11 @@
         class="breakdown-column assets-column"
         v-if="isCurrentUserManager"
       >
-        <h2 class="subtitle flexrow">
-          <span class="flexrow-item">
+        <h2 class="flexrow subtitle">
             {{ $t('breakdown.all_assets') }}
-          </span>
+        </h2>
+        <div class="flexrow mb1 mt0">
+          <span class="filler"></span>
           <button-simple
             class="flexrow-item"
             :title="$t('assets.new_asset')"
@@ -141,7 +142,7 @@
             @click="isOnlyCurrentEpisode = !isOnlyCurrentEpisode"
             v-if="isTVShow"
           />
-        </h2>
+        </div>
 
         <div class="filters-area flexrow">
           <search-field
@@ -381,7 +382,6 @@ export default {
       'displayedShots',
       'episodeMap',
       'episodes',
-      'getEpisodeOptions',
       'isAssetsLoading',
       'isCurrentUserManager',
       'isShotsLoading',
@@ -1325,7 +1325,8 @@ export default {
 }
 
 .subtitle {
-  font-size: 1.5em;
+  border-bottom: 0;
+  margin-top: 0;
 }
 
 .filters-area {

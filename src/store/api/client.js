@@ -49,7 +49,7 @@ const client = {
     })
   },
 
-  ppost (path, data, callback) {
+  ppost (path, data) {
     return new Promise((resolve, reject) => {
       superagent
         .post(path)
@@ -68,7 +68,7 @@ const client = {
     })
   },
 
-  ppostFile (path, data, callback) {
+  ppostFile (path, data) {
     const request = superagent
       .post(path)
       .send(data)
@@ -90,7 +90,7 @@ const client = {
     }
   },
 
-  pput (path, data, callback) {
+  pput (path, data) {
     return new Promise((resolve, reject) => {
       superagent
         .put(path)
@@ -107,7 +107,7 @@ const client = {
     })
   },
 
-  pdel (path, callback) {
+  pdel (path) {
     return new Promise((resolve, reject) => {
       superagent
         .del(path)

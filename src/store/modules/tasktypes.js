@@ -21,17 +21,7 @@ import {
 const initialState = {
   taskTypes: [],
   taskTypeMap: new Map(),
-  sequenceSubscriptions: {},
-
-  editTaskType: {
-    isLoading: false,
-    isError: false
-  },
-
-  deleteTaskType: {
-    isLoading: false,
-    isError: false
-  }
+  sequenceSubscriptions: {}
 }
 
 const state = {
@@ -42,9 +32,6 @@ const getters = {
   taskTypes: state => state.taskTypes,
   taskTypeMap: state => state.taskTypeMap,
   sequenceSubscriptions: state => state.sequenceSubscriptions,
-
-  editTaskType: state => state.editTaskType,
-  deleteTaskType: state => state.deleteTaskType,
 
   currentTaskType: (state, getters, rootState) => {
     return state.taskTypeMap.get(rootState.route.params.task_type_id) || {}
@@ -65,6 +52,11 @@ const getters = {
       .filter(taskType => taskType.for_entity === 'Edit')
   },
 
+  episodeTaskTypes: (state, getters, rootState, rootGetters) => {
+    return state.taskTypes
+      .filter(taskType => taskType.for_entity === 'Episode')
+  },
+
   getTaskTypeOptions: state => state.taskTypes.map(
     (type) => { return { label: type.name, value: type.id } }
   ),
@@ -80,6 +72,11 @@ const getters = {
     ),
 
   getEditTaskTypeOptions: (state, getters) => getters.editTaskTypes
+    .map(
+      (type) => { return { label: type.name, value: type.id } }
+    ),
+
+  getEpisodeTaskTypeOptions: (state, getters) => getters.episodeTaskTypes
     .map(
       (type) => { return { label: type.name, value: type.id } }
     ),
@@ -206,6 +203,14 @@ const actions = {
       } else if (rootGetters.currentTaskType.for_entity === 'Edit') {
         if (rootGetters.editMap.size < 2 || force) {
           dispatch('loadEdits')
+            .then(resolve)
+            .catch(reject)
+        } else {
+          resolve()
+        }
+      } else if (rootGetters.currentTaskType.for_entity === 'Episode') {
+        if (rootGetters.episodeMap.size < 2 || force) {
+          return dispatch('loadEpisodesWithTasks')
             .then(resolve)
             .catch(reject)
         } else {

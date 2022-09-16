@@ -36,7 +36,6 @@ import {
 import {
   buildShotIndex,
   buildSequenceIndex,
-  buildEpisodeIndex,
   indexSearch
 } from '@/lib/indexing'
 import {
@@ -51,11 +50,10 @@ import {
   LOAD_SHOTS_START,
   LOAD_SHOTS_ERROR,
   LOAD_SHOTS_END,
-  LOAD_EPISODES_START,
-  LOAD_EPISODES_ERROR,
-  LOAD_EPISODES_END,
   LOAD_SEQUENCES_END,
   SORT_VALIDATION_COLUMNS,
+
+  SET_CURRENT_EPISODE,
 
   LOAD_SHOT_END,
 
@@ -66,13 +64,9 @@ import {
 
   NEW_SHOT_END,
   NEW_SEQUENCE_END,
-  NEW_EPISODE_END,
   EDIT_SHOT_END,
   EDIT_SEQUENCE_END,
-  EDIT_EPISODE_END,
-  ADD_EPISODE,
-  UPDATE_EPISODE,
-  REMOVE_EPISODE,
+
   ADD_SEQUENCE,
   UPDATE_SEQUENCE,
   REMOVE_SEQUENCE,
@@ -82,25 +76,17 @@ import {
   CANCEL_SHOT,
   RESTORE_SHOT_END,
 
-  NEW_TASK_COMMENT_END,
   NEW_TASK_END,
   CREATE_TASKS_END,
 
   SET_SHOT_SEARCH,
   SET_SEQUENCE_SEARCH,
-  SET_EPISODE_SEARCH,
-
-  RESET_PRODUCTION_PATH,
   SET_CURRENT_PRODUCTION,
-  SET_CURRENT_EPISODE,
   DISPLAY_MORE_SHOTS,
   DISPLAY_MORE_SEQUENCES,
-  DISPLAY_MORE_EPISODES,
-  CLEAR_EPISODES,
 
   SET_SHOT_LIST_SCROLL_POSITION,
   SET_SEQUENCE_LIST_SCROLL_POSITION,
-  SET_EPISODE_LIST_SCROLL_POSITION,
 
   REMOVE_SELECTED_TASK,
   ADD_SELECTED_TASK,
@@ -116,9 +102,6 @@ import {
   REMOVE_SEQUENCE_SEARCH_END,
 
   COMPUTE_SEQUENCE_STATS,
-  COMPUTE_EPISODE_STATS,
-  SET_EPISODE_STATS,
-  SET_EPISODE_RETAKE_STATS,
 
   CHANGE_SHOT_SORT,
   UPDATE_METADATA_DESCRIPTOR_END,
@@ -296,40 +279,18 @@ const helpers = {
       shotSearchText: shotSearch,
       shotSelectionGrid: buildSelectionGrid(maxX, maxY)
     })
-  },
-
-  sortStatColumns (stats, taskTypeMap) {
-    const validationColumnsMap = {}
-    if (stats.all) {
-      Object.keys(stats.all).forEach(entryId => {
-        if (entryId !== 'all' && !stats.all[entryId].name) {
-          validationColumnsMap[entryId] = true
-        }
-      })
-    }
-    const validationColumns = Object.keys(validationColumnsMap)
-    return sortValidationColumns(
-      validationColumns, taskTypeMap, helpers.getCurrentProduction()
-    )
   }
 }
 
 const initialState = {
   shotMap: new Map(),
   sequences: [],
-  episodes: [],
   shotSearchText: '',
   shotSearchQueries: [],
   sequenceSearchQueries: [],
   sequenceSearchText: '',
   sequenceStats: {},
-  episodeSearchText: '',
-  episodeRetakeStats: {},
-  episodeStats: {},
   shotSorting: [],
-
-  currentEpisode: null,
-  episodeValidationColumns: [],
 
   isFps: false,
   isFrames: false,
@@ -349,19 +310,13 @@ const initialState = {
   displayedShotsFrames: 0,
   displayedSequences: [],
   displayedSequencesLength: 0,
-  displayedEpisodes: [],
-  displayedEpisodesLength: 0,
   sequenceIndex: {},
   shotFilledColumns: {},
 
   sequenceMap: new Map(),
-  episodeMap: new Map(),
   shotCreated: '',
   shotSelectionGrid: {},
   sequenceSelectionGrid: {},
-
-  isEpisodesLoading: false,
-  isEpisodesLoadingError: false,
 
   isShotsLoading: false,
   isShotsLoadingError: false,
@@ -369,7 +324,6 @@ const initialState = {
 
   shotListScrollPosition: 0,
   sequenceListScrollPosition: 0,
-  episodeListScrollPosition: 0,
 
   searchSequenceFilters: [],
   shotValidationColumns: [],
@@ -385,13 +339,7 @@ const getters = {
   sequences: state => state.sequences,
   sequenceMap: state => state.sequenceMap,
   sequenceStats: state => state.sequenceStats,
-  episodes: state => state.episodes,
-  episodeMap: state => state.episodeMap,
-  episodeRetakeStats: state => state.episodeRetakeStats,
-  episodeStats: state => state.episodeStats,
   shotValidationColumns: state => state.shotValidationColumns,
-
-  currentEpisode: state => state.currentEpisode,
 
   shotSearchQueries: state => state.shotSearchQueries,
   sequenceSearchQueries: state => state.sequenceSearchQueries,
@@ -410,7 +358,6 @@ const getters = {
 
   shotSearchText: state => state.shotSearchText,
   sequenceSearchText: state => state.sequenceSearchText,
-  episodeSearchText: state => state.episodeSearchText,
   shotSelectionGrid: state => state.shotSelectionGrid,
   sequenceSelectionGrid: state => state.sequenceSelectionGrid,
 
@@ -422,16 +369,12 @@ const getters = {
   displayedShotsFrames: state => state.displayedShotsFrames,
   displayedSequences: state => state.displayedSequences,
   displayedSequencesLength: state => state.displayedSequencesLength,
-  displayedEpisodes: state => state.displayedEpisodes,
-  displayedEpisodesLength: state => state.displayedEpisodesLength,
   shotFilledColumns: state => state.shotFilledColumns,
 
   displayedShotsBySequence: state => {
     return groupEntitiesByParents(state.displayedShots, 'sequence_name')
   },
 
-  isEpisodesLoading: state => state.isEpisodesLoading,
-  isEpisodesLoadingError: state => state.isEpisodesLoadingError,
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,
   shotCreated: state => state.shotCreated,
@@ -440,9 +383,6 @@ const getters = {
   shotsCsvFormData: state => state.shotsCsvFormData,
   shotListScrollPosition: state => state.shotListScrollPosition,
   sequenceListScrollPosition: state => state.sequenceListScrollPosition,
-  episodeListScrollPosition: state => state.episodeListScrollPosition,
-
-  episodeValidationColumns: state => state.episodeValidationColumns,
 
   shotsByEpisode: state => {
     const shotsBySequence = []
@@ -466,16 +406,6 @@ const getters = {
 
   getSequenceOptions: state => state.sequences.map(
     (sequence) => { return { label: sequence.name, value: sequence.id } }
-  ),
-
-  getEpisodeOptions: state => state.episodes.map(
-    (episode) => { return { label: episode.name, value: episode.id } }
-  ),
-
-  isSingleEpisode: state => state.episodes.length < 2,
-
-  episodeOptions: state => state.episodes.map(
-    (episode) => { return { label: episode.name, value: episode.id } }
   ),
 
   selectedShots: state => state.selectedShots
@@ -510,25 +440,13 @@ const actions = {
     })
   },
 
-  clearEpisodes ({ commit }) {
-    commit(CLEAR_EPISODES)
-  },
-
-  loadEpisodes ({ commit, state, rootGetters }) {
-    const currentProduction = rootGetters.currentProduction
-    const routeEpisodeId = rootGetters.route.params.episode_id
-    return shotsApi.getEpisodes(currentProduction)
-      .then(episodes => {
-        commit(LOAD_EPISODES_END, { episodes, routeEpisodeId })
-        return Promise.resolve(episodes)
-      })
-  },
-
   loadShots ({ commit, dispatch, state, rootGetters }, callback) {
     const production = rootGetters.currentProduction
+    const episodes = rootGetters.episodes
     const userFilters = rootGetters.userFilters
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
+    const episodeMap = rootGetters.episodeMap
     const personMap = rootGetters.personMap
     const isTVShow = rootGetters.isTVShow
     let episode = isTVShow ? rootGetters.currentEpisode : null
@@ -541,12 +459,12 @@ const actions = {
     } else if (isTVShow && !episode) {
       // If it's tv show and if we don't have any episode set, we use the first
       // one.
-      episode = state.episodes.length > 0 ? state.episodes[0] : null
+      episode = episodes.length > 0 ? episodes[0] : null
       if (!episode) return callback()
       commit(SET_CURRENT_EPISODE, episode.id)
     }
 
-    if (isTVShow && !episode && state.episodes.length === 0) {
+    if (isTVShow && !episode && episodes.length === 0) {
       return callback()
     }
 
@@ -565,7 +483,7 @@ const actions = {
         shotsApi.getShots(production, episode, (err, shots) => {
           if (err) commit(LOAD_SHOTS_ERROR)
           else {
-            commit(LOAD_SEQUENCES_END, sequences)
+            commit(LOAD_SEQUENCES_END, { sequences, episodeMap })
             commit(
               LOAD_SHOTS_END,
               {
@@ -574,7 +492,8 @@ const actions = {
                 userFilters,
                 taskTypeMap,
                 taskMap,
-                personMap
+                personMap,
+                episodeMap
               }
             )
             if (callback) callback(err)
@@ -584,25 +503,14 @@ const actions = {
     })
   },
 
-  loadEpisode ({ commit, state }, episodeId) {
-    return shotsApi.getEpisode(episodeId)
-      .then((episode) => {
-        if (state.episodeMap.get(episode.id)) {
-          commit(UPDATE_EPISODE, episode)
-        } else {
-          commit(ADD_EPISODE, episode)
-        }
-      })
-      .catch(console.error)
-  },
-
-  loadSequence ({ commit, state }, sequenceId) {
+  loadSequence ({ commit, state, rootGetters }, sequenceId) {
+    const episodeMap = rootGetters.episodeMap
     return shotsApi.getSequence(sequenceId)
       .then((sequence) => {
         if (state.sequenceMap.get(sequence.id)) {
           commit(UPDATE_SEQUENCE, sequence)
         } else {
-          commit(ADD_SEQUENCE, sequence)
+          commit(ADD_SEQUENCE, { sequence, episodeMap })
         }
       })
       .catch(console.error)
@@ -612,9 +520,10 @@ const actions = {
     const production = rootGetters.currentProduction
     const isTVShow = rootGetters.isTVShow
     const episode = isTVShow ? rootGetters.currentEpisode : null
+    const episodeMap = rootGetters.episodeMap
     shotsApi.getSequences(production, episode, (err, sequences) => {
       if (err) console.error(err)
-      commit(LOAD_SEQUENCES_END, sequences)
+      commit(LOAD_SEQUENCES_END, { sequences, episodeMap })
     })
   },
 
@@ -636,7 +545,7 @@ const actions = {
           commit(UPDATE_SHOT, shot)
         } else {
           shot.tasks.forEach(task => {
-            commit(NEW_TASK_END, task)
+            commit(NEW_TASK_END, { task })
           })
           commit(ADD_SHOT, {
             shot,
@@ -651,9 +560,10 @@ const actions = {
   },
 
   newShot ({ commit, dispatch, rootGetters }, shot) {
+    const episodeMap = rootGetters.episodeMap
     return shotsApi.newShot(shot)
       .then(shot => {
-        commit(NEW_SHOT_END, shot)
+        commit(NEW_SHOT_END, { shot, episodeMap })
         const taskTypeIds = rootGetters.productionShotTaskTypeIds
         const createTaskPromises = taskTypeIds.map(
           taskTypeId => dispatch('createTask', {
@@ -669,19 +579,12 @@ const actions = {
       })
   },
 
-  newSequence ({ commit, state }, sequence) {
+  newSequence ({ commit, state, rootGetters }, sequence) {
+    const episodeMap = rootGetters.episodeMap
     return shotsApi.newSequence(sequence)
-      .then((sequence) => {
-        commit(NEW_SEQUENCE_END, sequence)
+      .then(sequence => {
+        commit(NEW_SEQUENCE_END, { sequence, episodeMap })
         return Promise.resolve(sequence)
-      })
-  },
-
-  newEpisode ({ commit, state }, episode) {
-    return shotsApi.newEpisode(episode)
-      .then((episode) => {
-        commit(NEW_EPISODE_END, episode)
-        return Promise.resolve(episode)
       })
   },
 
@@ -697,17 +600,9 @@ const actions = {
       })
   },
 
-  editEpisode ({ commit, state }, data) {
-    return shotsApi.updateEpisode(data)
-      .then((episode) => {
-        commit(EDIT_EPISODE_END, episode)
-        return Promise.resolve(episode)
-      })
-  },
-
   editSequence ({ commit, state }, data) {
     return shotsApi.updateSequence(data)
-      .then((sequence) => {
+      .then(sequence => {
         commit(EDIT_SEQUENCE_END, sequence)
         return Promise.resolve(sequence)
       })
@@ -730,14 +625,6 @@ const actions = {
       })
   },
 
-  deleteEpisode ({ commit, state }, episode) {
-    return shotsApi.deleteEpisode(episode)
-      .then(() => {
-        commit(REMOVE_EPISODE, episode)
-        return Promise.resolve(episode)
-      })
-  },
-
   deleteSequence ({ commit, state }, sequence) {
     return shotsApi.deleteSequence(sequence)
       .then(() => {
@@ -748,7 +635,7 @@ const actions = {
 
   restoreShot ({ commit, state }, shot) {
     return shotsApi.restoreShot(shot)
-      .then((shot) => {
+      .then(shot => {
         commit(RESTORE_SHOT_END, shot)
         return Promise.resolve(shot)
       })
@@ -776,10 +663,6 @@ const actions = {
     commit(DISPLAY_MORE_SEQUENCES)
   },
 
-  displayMoreEpisodes ({ commit }) {
-    commit(DISPLAY_MORE_EPISODES)
-  },
-
   setShotSearch ({ commit, rootGetters }, shotSearch) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
@@ -793,32 +676,25 @@ const actions = {
   },
 
   saveShotSearch ({ commit, rootGetters }, searchQuery) {
-    return new Promise((resolve, reject) => {
-      const query = state.shotSearchQueries.find(
-        (query) => query.name === searchQuery
-      )
-      const production = rootGetters.currentProduction
+    const query = state.shotSearchQueries.find(
+      (query) => query.name === searchQuery
+    )
+    const production = rootGetters.currentProduction
 
-      if (!query) {
-        peopleApi.createFilter(
-          'shot',
-          searchQuery,
-          searchQuery,
-          production.id,
-          null,
-          (err, searchQuery) => {
-            commit(SAVE_SHOT_SEARCH_END, { searchQuery, production })
-            if (err) {
-              reject(err)
-            } else {
-              resolve(searchQuery)
-            }
-          }
-        )
-      } else {
-        resolve()
-      }
-    })
+    if (!query) {
+      return peopleApi.createFilter(
+        'shot',
+        searchQuery,
+        searchQuery,
+        production.id,
+        null
+      ).then(searchQuery => {
+        commit(SAVE_SHOT_SEARCH_END, { searchQuery, production })
+        return Promise.resolve(searchQuery)
+      })
+    } else {
+      return Promise.resolve()
+    }
   },
 
   removeShotSearch ({ commit, rootGetters }, searchQuery) {
@@ -897,74 +773,6 @@ const actions = {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskMap = rootGetters.taskMap
     commit(COMPUTE_SEQUENCE_STATS, { taskStatusMap, taskMap })
-  },
-
-  setCurrentEpisode ({ commit, rootGetters }, episodeId) {
-    commit(SET_CURRENT_EPISODE, episodeId)
-
-    const productionId = rootGetters.currentProduction.id
-    commit(RESET_PRODUCTION_PATH, { productionId, episodeId })
-  },
-
-  initEpisodes ({ commit, dispatch, state, rootState, rootGetters }) {
-    const productionId = rootState.route.params.production_id
-    const isTVShow = rootGetters.isTVShow
-    dispatch('setLastProductionScreen', 'episodes')
-    if (state.episodes.length === 0 ||
-        state.episodes[0].production_id !== productionId) {
-      if (isTVShow) {
-        return dispatch('loadEpisodes')
-          .then(() => {
-            return dispatch('loadEpisodeStats', productionId)
-          })
-          .then(() => {
-            return dispatch('loadEpisodeRetakeStats', productionId)
-          })
-      } else {
-        return dispatch('computeEpisodeStats')
-      }
-    }
-  },
-
-  loadEpisodeStats ({ commit, rootGetters }, productionId) {
-    const taskTypeMap = rootGetters.taskTypeMap
-    commit(SET_EPISODE_STATS, { episodeStats: {}, taskTypeMap })
-    return shotsApi.getEpisodeStats(productionId)
-      .then(episodeStats => {
-        commit(SET_EPISODE_STATS, { episodeStats, taskTypeMap })
-        return Promise.resolve(episodeStats)
-      })
-      .catch(console.error)
-  },
-
-  loadEpisodeRetakeStats ({ commit, rootGetters }, productionId) {
-    const taskTypeMap = rootGetters.taskTypeMap
-    commit(SET_EPISODE_RETAKE_STATS, { episodeRetakeStats: {}, taskTypeMap })
-    return shotsApi.getEpisodeRetakeStats(productionId)
-      .then(episodeRetakeStats => {
-        commit(SET_EPISODE_RETAKE_STATS, { episodeRetakeStats, taskTypeMap })
-        return Promise.resolve(episodeRetakeStats)
-      })
-      .catch(console.error)
-  },
-
-  setEpisodeSearch ({ commit }, searchQuery) {
-    commit(SET_EPISODE_SEARCH, searchQuery)
-  },
-
-  setEpisodeListScrollPosition ({ commit }, scrollPosition) {
-    commit(SET_EPISODE_LIST_SCROLL_POSITION, scrollPosition)
-  },
-
-  computeEpisodeStats ({ commit, dispatch, rootGetters }) {
-    const taskStatusMap = rootGetters.taskStatusMap
-    const taskMap = rootGetters.taskMap
-    const isTVShow = rootGetters.isTVShow
-    if (!isTVShow) {
-      commit(COMPUTE_EPISODE_STATS, { taskStatusMap, taskMap })
-    } else {
-      dispatch('loadEpisodeStats', rootGetters.currentProduction.id)
-    }
   },
 
   getShotsCsvLines ({ state, rootGetters }) {
@@ -1089,29 +897,6 @@ const actions = {
 }
 
 const mutations = {
-  [LOAD_EPISODES_START] (state) {
-    cache.episodes = []
-    cache.result = []
-    cache.episodeIndex = {}
-    state.episodeMap = new Map()
-    state.episodeValidationColumns = []
-
-    state.isEpisodesLoading = true
-    state.isEpisodesLoadingError = false
-
-    state.displayedepisodes = []
-    state.displayedepisodesLength = 0
-    state.episodeSearchQueries = []
-    state.displayedEpisodes = []
-    state.displayedEpisodesLength = 0
-
-    state.selectedepisodes = new Map()
-  },
-
-  [LOAD_EPISODES_ERROR] (state) {
-    state.isEpisodesLoading = false
-    state.isEpisodesLoadingError = true
-  },
 
   [CLEAR_SHOTS] (state) {
     cache.shots = []
@@ -1130,8 +915,6 @@ const mutations = {
     state.shotSearchQueries = []
     state.displayedSequences = []
     state.displayedSequencesLength = 0
-    state.displayedEpisodes = []
-    state.displayedEpisodesLength = 0
 
     state.selectedShots = new Map()
   },
@@ -1156,8 +939,6 @@ const mutations = {
     state.shotSearchQueries = []
     state.displayedSequences = []
     state.displayedSequencesLength = 0
-    state.displayedEpisodes = []
-    state.displayedEpisodesLength = 0
 
     state.selectedShots = new Map()
   },
@@ -1169,7 +950,15 @@ const mutations = {
 
   [LOAD_SHOTS_END] (
     state,
-    { production, shots, userFilters, taskMap, taskTypeMap, personMap }
+    {
+      production,
+      shots,
+      userFilters,
+      taskMap,
+      taskTypeMap,
+      personMap,
+      episodeMap
+    }
   ) {
     const validationColumns = {}
     let isFps = false
@@ -1188,7 +977,7 @@ const mutations = {
       let timeSpent = 0
       let estimation = 0
       const sequence = state.sequenceMap.get(shot.sequence_id)
-      const episode = state.episodeMap.get(sequence.parent_id)
+      const episode = episodeMap.get(sequence.parent_id)
       shot.sequence_name = sequence.name
       shot.episode_name = episode ? episode.name : ''
       shot.project_name = production.name
@@ -1303,12 +1092,12 @@ const mutations = {
       .filter((query) => query.name !== searchQuery.name)
   },
 
-  [LOAD_SEQUENCES_END] (state, sequences) {
+  [LOAD_SEQUENCES_END] (state, { sequences, episodeMap }) {
     const sequenceMap = new Map()
     sequences.forEach(sequence => {
       sequenceMap.set(sequence.id, sequence)
       if (sequence.parent_id) {
-        const episode = state.episodeMap.get(sequence.parent_id)
+        const episode = episodeMap.get(sequence.parent_id)
         if (episode) {
           Object.assign(sequence, {
             episode_id: episode.id,
@@ -1323,36 +1112,6 @@ const mutations = {
     state.sequenceIndex = buildSequenceIndex(sortedSequences)
     state.displayedSequences = sortedSequences.slice(0, PAGE_SIZE * 2)
     state.displayedSequencesLength = sortedSequences.length
-  },
-
-  [LOAD_EPISODES_END] (state, { episodes, routeEpisodeId }) {
-    const episodeMap = new Map()
-    if (!episodes) episodes = []
-    episodes.forEach(episode => {
-      episodeMap.set(episode.id, episode)
-    })
-    state.episodeMap = episodeMap
-    state.episodes = sortByName(episodes)
-
-    state.episodeIndex = buildEpisodeIndex(state.episodes)
-    state.displayedEpisodes = state.episodes.slice(0, PAGE_SIZE)
-    state.displayedEpisodesLength = state.episodes.length
-
-    // Set currentEpisode
-    if (state.episodes.length > 0) {
-      if (!routeEpisodeId || routeEpisodeId === 'all') {
-        state.currentEpisode = { id: 'all' }
-      } else if (routeEpisodeId === 'main') {
-        state.currentEpisode = { id: 'main' }
-      } else if (routeEpisodeId) {
-        state.currentEpisode = state.episodeMap.get(routeEpisodeId)
-      }
-      if (!state.currentEpisode) {
-        state.currentEpisode = state.episodes[0]
-      }
-    } else {
-      state.currentEpisode = null
-    }
   },
 
   [LOAD_SHOT_END] (state, { shot, taskTypeMap }) {
@@ -1426,22 +1185,12 @@ const mutations = {
     state.sequenceIndex = buildSequenceIndex(state.sequences)
   },
 
-  [EDIT_EPISODE_END] (state, newEpisode) {
-    const episode = state.episodeMap.get(newEpisode.id)
-    if (episode) {
-      Object.assign(episode, newEpisode)
-    }
-    state.episodeIndex = buildEpisodeIndex(state.episodes)
-  },
-
   [RESTORE_SHOT_END] (state, shotToRestore) {
     const shot = state.shotMap.get(shotToRestore.id)
     shot.canceled = false
     cache.shotIndex = buildShotIndex(cache.shots)
     state.displayedShotsLength = cache.result.filter(s => !s.canceled).length
   },
-
-  [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {},
 
   [SET_SHOT_SEARCH] (state, payload) {
     const sorting = state.shotSorting
@@ -1469,19 +1218,9 @@ const mutations = {
     state.sequenceSearchText = sequenceSearch
   },
 
-  [SET_EPISODE_SEARCH] (state, episodeSearch) {
-    const keywords = getKeyWords(episodeSearch)
-    const result =
-      indexSearch(state.episodeIndex, keywords) || state.episodes
-
-    state.displayedEpisodes = result.slice(0, PAGE_SIZE)
-    state.displayedEpisodesLength = result.length
-    state.episodeSearchText = episodeSearch
-  },
-
-  [NEW_SHOT_END] (state, shot) {
+  [NEW_SHOT_END] (state, { shot, episodeMap }) {
     const sequence = state.sequenceMap.get(shot.parent_id)
-    const episode = state.episodeMap.get(sequence.parent_id)
+    const episode = episodeMap.get(sequence.parent_id)
     shot.production_id = shot.project_id
     shot.sequence_name = sequence.name
     shot.sequence_id = sequence.id
@@ -1527,14 +1266,7 @@ const mutations = {
     }
   },
 
-  [NEW_EPISODE_END] (state, episode) {
-    state.episodes.push(episode)
-    state.episodes = sortByName(state.episodes)
-    state.displayedEpisodes = state.episodes
-    state.episodeMap.set(episode.id, episode)
-  },
-
-  [CREATE_TASKS_END] (state, tasks) {
+  [CREATE_TASKS_END] (state, { tasks }) {
     tasks.forEach((task) => {
       if (task) {
         const shot = state.shotMap.get(task.entity_id)
@@ -1584,26 +1316,9 @@ const mutations = {
     )
   },
 
-  [DISPLAY_MORE_EPISODES] (state, tasks) {
-    let episodes = state.episodes
-    if (state.episodeSearchText.length > 0) {
-      const keywords = getKeyWords(state.episodeSearchText)
-      episodes = indexSearch(state.episodeIndex, keywords)
-    }
-    state.displayedEpisodes = episodes.slice(
-      0,
-      state.displayedEpisodes.length + PAGE_SIZE
-    )
-  },
-
   [SET_CURRENT_PRODUCTION] (state, production) {
     state.shotSearchText = ''
     state.sequenceSearchText = ''
-  },
-
-  [CLEAR_EPISODES] (state) {
-    state.episodes = []
-    state.currentEpisode = null
   },
 
   [SET_PREVIEW] (state, { entityId, taskId, previewId, taskMap }) {
@@ -1623,10 +1338,6 @@ const mutations = {
 
   [SET_SEQUENCE_LIST_SCROLL_POSITION] (state, scrollPosition) {
     state.sequenceListScrollPosition = scrollPosition
-  },
-
-  [SET_EPISODE_LIST_SCROLL_POSITION] (state, scrollPosition) {
-    state.episodeListScrollPosition = scrollPosition
   },
 
   [REMOVE_SELECTED_TASK] (state, validationInfo) {
@@ -1649,7 +1360,7 @@ const mutations = {
     state.shotSelectionGrid = clearSelectionGrid(tmpGrid)
   },
 
-  [NEW_TASK_END] (state, task) {
+  [NEW_TASK_END] (state, { task }) {
     const shot = state.shotMap.get(task.entity_id)
     if (shot && task) {
       task = helpers.populateTask(task, shot)
@@ -1702,30 +1413,6 @@ const mutations = {
     state.shotSelectionGrid = tmpGrid
   },
 
-  [SET_CURRENT_EPISODE] (state, episodeId) {
-    if (episodeId) {
-      if (episodeId === 'main') {
-        state.currentEpisode = { id: 'main' }
-      } else if (episodeId === 'all') {
-        state.currentEpisode = { id: 'all' }
-      } else {
-        state.currentEpisode = state.episodeMap.get(episodeId)
-      }
-    }
-  },
-
-  [SET_EPISODE_STATS] (state, { episodeStats, taskTypeMap }) {
-    state.episodeValidationColumns =
-      helpers.sortStatColumns(episodeStats, taskTypeMap)
-    state.episodeStats = episodeStats
-  },
-
-  [SET_EPISODE_RETAKE_STATS] (state, { episodeRetakeStats, taskTypeMap }) {
-    // state.episodeValidationColumns =
-    //   helpers.sortStatColumns(episodeRetakeStats, taskTypeMap)
-    state.episodeRetakeStats = episodeRetakeStats
-  },
-
   [COMPUTE_SEQUENCE_STATS] (state, { taskMap, taskStatusMap }) {
     let shots = cache.shots
     if (state.searchSequenceFilters.length > 0) {
@@ -1740,45 +1427,12 @@ const mutations = {
     )
   },
 
-  [COMPUTE_EPISODE_STATS] (state, { taskMap, taskStatusMap }) {
-    state.episodeStats = computeStats(
-      cache.shots,
-      'episode_id',
-      taskStatusMap,
-      taskMap
-    )
-  },
-
-  [ADD_EPISODE] (state, episode) {
-    state.episodes.push(episode)
-    const sortedEpisodes = sortByName(state.episodes)
-    state.episodeMap.set(episode.id, episode)
-    state.episodes = sortedEpisodes
-    state.displayedEpisodes.push(episode)
-    state.displayedEpisodes = sortByName(state.displayedEpisodes)
-    state.episodeIndex = buildEpisodeIndex(sortedEpisodes)
-    state.displayedEpisodesLength = sortedEpisodes.length
-  },
-
-  [UPDATE_EPISODE] (state, episode) {
-    Object.assign(state.episodeMap.get(episode.id), episode)
-    state.episodeIndex = buildSequenceIndex(state.episodes)
-  },
-
-  [REMOVE_EPISODE] (state, episode) {
-    delete state.episodeMap.get(episode.id)
-    state.episodes = removeModelFromList(state.episodes, episode)
-    state.displayedEpisodes =
-      removeModelFromList(state.displayedEpisodes, episode)
-    state.episodeIndex = buildEpisodeIndex(state.episodes)
-  },
-
-  [ADD_SEQUENCE] (state, sequence) {
+  [ADD_SEQUENCE] (state, { sequence, episodeMap }) {
     state.sequences.push(sequence)
     const sortedSequences = sortSequences(state.sequences)
     state.sequenceMap.set(sequence.id, sequence)
     if (sequence.parent_id) {
-      const episode = state.episodeMap.get(sequence.parent_id)
+      const episode = episodeMap.get(sequence.parent_id)
       if (episode) {
         Object.assign(sequence, {
           episode_id: episode.id,
@@ -1941,7 +1595,7 @@ const mutations = {
       const maxX = state.displayedShots.length
       const maxY = state.nbValidationColumns
       // unselect previously selected tasks
-      state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+      state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
     }
   },
 

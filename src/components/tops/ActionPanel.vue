@@ -131,10 +131,10 @@
           <div
             :class="{
               'menu-item': true,
-              active: selectedBar === 'tasks'
+              active: selectedBar === 'create-tasks'
             }"
             :title="$t('menu.create_tasks')"
-            @click="selectBar('tasks')"
+            @click="selectBar('create-tasks')"
             v-if="
               (isCurrentViewEntity &&
               !isCurrentViewTaskType) && isCurrentUserManager &&
@@ -271,9 +271,14 @@
             </div>
           </div>
 
-          <div class="flexrow-item is-wide" v-if="!loading.changeStatus">
+          <div class="flexrow-item is-wide">
             <button
-              class="button confirm-button is-wide"
+              :class="{
+                button: true,
+                'confirm-button': true,
+                'is-wide': true,
+                'is-loading': loading.changeStatus
+              }"
               @click="confirmTaskStatusChange"
             >
               {{ $tc(
@@ -282,12 +287,6 @@
                  {nbSelectedTasks}
               )}}
             </button>
-          </div>
-          <div
-            class="flexrow-item has-text-centered"
-            v-if="loading.changeStatus"
-          >
-            <spinner :size="20" class="spinner" />
           </div>
         </div>
 
@@ -374,29 +373,33 @@
           </div>
           <div class="flexrow-item is-wide">
             <button
-              class="button confirm-button is-wide"
+              :class="{
+                button: true,
+                'confirm-button': true,
+                'is-wide': true,
+                'is-loading': loading.changePriority
+              }"
               @click="confirmPriorityChange"
-             v-if="!loading.changePriority"
             >
               {{ $tc('tasks.change_priority', nbSelectedTasks, {nbSelectedTasks}) }}
             </button>
-            <spinner :size="20" class="spinner" v-else />
           </div>
         </div>
 
         <div class="flexrow is-wide"
-          v-if="selectedBar === 'tasks'"
+          v-if="selectedBar === 'create-tasks'"
         >
           <button
-              class="button confirm-button is-wide"
+              :class="{
+                button: true,
+                'confirm-button': true,
+                'is-wide': true,
+                'is-loading': loading.taskCreation
+              }"
               @click="confirmTaskCreation"
-              v-if="!loading.creation"
             >
               {{ $t('tasks.create_for_selection') }}
           </button>
-          <div class="flexrow-item" v-else>
-            <spinner :size="20" class="spinner" />
-          </div>
         </div>
 
         <div
@@ -433,10 +436,17 @@
         >
           <div
             class="flexrow is-wide"
-            v-if="!loading.deletion"
           >
             <button
               class="button is-danger confirm-button is-wide"
+              :class="{
+                button: true,
+                'is-danger': true,
+                'confirm-button': true,
+                'is-wide': true,
+                'is-loading': loading.taskDeletion
+              }"
+
               @click="confirmTaskDeletion"
             >
               {{ $tc(
@@ -445,9 +455,6 @@
                 {nbSelectedTasks}
               ) }}
             </button>
-          </div>
-          <div class="flexrow-item" v-else>
-            <spinner :size="20" class="spinner" />
           </div>
           <div class="flexrow-item error" v-if="errors.taskDeletion">
             {{ $t('tasks.delete_error') }}
@@ -538,10 +545,12 @@
                 class="button is-wide"
                 @click="runCustomAction"
               >
-                {{ $tc(
-                  'custom_actions.run_for_selection',
-                  nbSelectedTasks,
-                  {nbSelectedTasks})
+                {{
+                  $tc(
+                    'custom_actions.run_for_selection',
+                    nbSelectedTasks,
+                    {nbSelectedTasks}
+                  )
                 }}
               </button>
             </div>
@@ -596,6 +605,23 @@
               {nbSelectedEdits}
             )"
             @confirm="confirmEditDeletion"
+          />
+        </div>
+
+        <div
+          class="flexrow-item is-wide"
+          v-if="selectedBar === 'delete-episodes'"
+        >
+          <delete-entities
+            :error-text="$t('episodes.multiple_delete_error') "
+            :is-loading="loading.episodeDeletion"
+            :is-error="errors.deleteEpisode"
+            :text="$tc(
+              'episodes.delete_for_selection',
+              nbSelectedEpisodes,
+              {nbSelectedEpisodes}
+            )"
+            @confirm="confirmEpisodeDeletion"
           />
         </div>
 
@@ -813,7 +839,8 @@ export default {
         this.nbSelectedValidations === 0 &&
         this.nbSelectedAssets === 0 &&
         this.nbSelectedShots === 0 &&
-        this.nbSelectedEdits === 0
+        this.nbSelectedEdits === 0 &&
+        this.nbSelectedEpisodes === 0
       ) ||
       !(
         this.isCurrentViewAsset ||
@@ -985,17 +1012,24 @@ export default {
     },
 
     confirmTaskCreation () {
-      const type = this.$route.path.indexOf('shots') > 0 ? 'shots' : 'assets'
-      this.loading.creation = true
+      const type =
+        this.$route.path.indexOf('shots') > 0
+          ? 'shots'
+          : this.$route.path.indexOf('assets') > 0
+            ? 'assets'
+            : this.$route.path.indexOf('edits') > 0
+              ? 'edits'
+              : 'episodes'
+      this.loading.taskCreation = true
       this.createSelectedTasks({
         type,
         projectId: this.currentProduction.id
       })
         .then(() => {
-          this.loading.creation = false
+          this.loading.taskCreation = false
         })
-        .catch((err) => {
-          this.loading.creation = false
+        .catch(err => {
+          this.loading.taskCreation = false
           console.error(err)
         })
     },
@@ -1152,6 +1186,10 @@ export default {
         }
         if (this.isCurrentViewEdit && this.nbSelectedEdits > 0) {
           this.selectedBar = 'delete-edits'
+          return
+        }
+        if (this.isCurrentViewEpisode && this.nbSelectedEpisodes > 0) {
+          this.selectedBar = 'delete-episodes'
           return
         }
 

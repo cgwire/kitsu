@@ -347,6 +347,7 @@ export default {
       'assetSearchText',
       'assetValidationColumns',
       'currentProduction',
+      'episodeValidationColumns',
       'isCurrentUserVendor',
       'people',
       'personMap',
@@ -372,6 +373,9 @@ export default {
     isEdits () {
       return this.entityType === 'edit'
     },
+    isEpisodes () {
+      return this.entityType === 'episode'
+    },
 
     assetTypeOptions () {
       return [
@@ -389,15 +393,19 @@ export default {
     taskTypeList () {
       if (this.isAssets) {
         return this.assetValidationColumns
-          .map((taskTypeId) => this.taskTypeMap.get(taskTypeId))
+          .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
       }
       if (this.isShots) {
         return this.shotValidationColumns
-          .map((taskTypeId) => this.taskTypeMap.get(taskTypeId))
+          .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
       }
       if (this.isEdits) {
         return this.editValidationColumns
-          .map((taskTypeId) => this.taskTypeMap.get(taskTypeId))
+          .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
+      }
+      if (this.isEpisodes) {
+        return this.episodeValidationColumns
+          .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
       }
       return null
     },

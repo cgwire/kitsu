@@ -89,18 +89,30 @@ export default {
   },
   methods: {
     taskTypePath (taskTypeId) {
-      const route = {
-        name: 'task-type',
-        params: {
-          production_id: this.currentProduction.id,
-          task_type_id: taskTypeId,
-          type: this.type
+      const taskType = this.taskTypeMap.get(taskTypeId)
+      let route = {}
+      if (taskType.for_entity === 'Episode') {
+        route = {
+          name: 'episodes-task-type',
+          params: {
+            production_id: this.currentProduction.id,
+            task_type_id: taskTypeId
+          }
         }
-      }
+      } else {
+        route = {
+          name: 'task-type',
+          params: {
+            production_id: this.currentProduction.id,
+            task_type_id: taskTypeId,
+            type: this.type
+          }
+        }
 
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = 'episode-task-type'
-        route.params.episode_id = this.currentEpisode.id
+        if (this.isTVShow && this.currentEpisode) {
+          route.name = 'episode-task-type'
+          route.params.episode_id = this.currentEpisode.id
+        }
       }
 
       return route
