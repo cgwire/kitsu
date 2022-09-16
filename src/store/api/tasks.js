@@ -106,24 +106,29 @@ export default {
     const type = data.type
     const projectId = data.project_id
     const entityIds = data.entityIds
-    return client.ppost(
+    let url =
       `/api/actions/projects/${projectId}/task-types/${taskTypeId}/${type}/` +
-      'create-tasks',
-      entityIds
-    )
+      'create-tasks'
+    if (data.type === 'episodes') {
+      url = `/api/actions/projects/${projectId}/task-types/` +
+      `${taskTypeId}/create-tasks/episode`
+    }
+    return client.ppost(url, entityIds)
   },
 
-  createTask (data, callback) {
+  createTask (data) {
     const entityId = data.entity_id
     const taskTypeId = data.task_type_id
     const type = data.type
     const projectId = data.project_id
-    client.post(
+    let url =
       `/api/actions/projects/${projectId}/task-types/${taskTypeId}/${type}/` +
-      `create-tasks?id=${entityId}`,
-      {},
-      callback
-    )
+      `create-tasks?id=${entityId}`
+    if (type === 'episodes') {
+      url = `/api/actions/projects/${projectId}/task-types/` +
+      `${taskTypeId}/create-tasks/episode?id=${entityId}`
+    }
+    return client.ppost(url, {})
   },
 
   deleteTask (task, callback) {

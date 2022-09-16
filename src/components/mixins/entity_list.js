@@ -15,6 +15,9 @@ export const entityListMixin = {
     if (this.resizeHeaders) this.resizeHeaders()
     window.addEventListener('keydown', this.onKeyDown, false)
     window.addEventListener('keyup', this.onKeyUp, false)
+    this.stickedColumns = JSON.parse(
+      localStorage.getItem(this.localStorageStickKey)
+    ) || {}
   },
 
   beforeDestroy () {
@@ -64,10 +67,59 @@ export const entityListMixin = {
         columnId => this.stickedColumns[columnId] &&
         this.validationColumnsIsInDepartmentFilter(columnId)
       )
+    },
+
+    isEmptyTask () {
+      return (
+        !this.isEmptyList &&
+        !this.isLoading &&
+        this.validationColumns &&
+        this.validationColumns.length === 0
+      )
     }
   },
 
   methods: {
+    onBodyScroll (event, position) {
+      this.$emit('scroll', position.scrollTop)
+    },
+
+    updateOffsets () {
+      if (this.isLoading) {
+        return
+      }
+      this.$nextTick(() => {
+        let offset = this.$refs['th-episode'].clientWidth
+        this.offsets = {}
+
+        if (this.isShowInfos) {
+          for (
+            let metadataCol = 0;
+            metadataCol < this.stickedVisibleMetadataDescriptors.length;
+            metadataCol++
+          ) {
+            this.offsets[`editor-${metadataCol}`] = offset
+            offset += this.$refs[`editor-${metadataCol}`][0].$el.clientWidth
+          }
+        }
+        for (
+          let validationCol = 0;
+          validationCol < this.stickedDisplayedValidationColumns.length;
+          validationCol++
+        ) {
+          this.offsets[`validation-${validationCol}`] = offset
+          offset += this.$refs[`validation-${validationCol}`][0].$el.clientWidth
+        }
+      })
+    },
+
+    onInputKeyUp (event, i, j) {
+      const listWidth = this.visibleMetadataDescriptors.length + 4
+      const listHeight = this.displayedEpisodesLength
+      this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
+      return this.pauseEvent(event)
+    },
+
     getBackground (color) {
       return colors.hexToRGBa(color, 0.08)
     },
@@ -135,9 +187,7 @@ export const entityListMixin = {
           let startY = this.lastSelection.y
           if (!sticked) startY += columnOffset
           let endY = validationInfo.y
-          let grid = this.assetSelectionGrid
-          if (!grid) grid = this.shotSelectionGrid
-
+          const grid = this[this.type + 'SelectionGrid']
           if (validationInfo.x < this.lastSelection.x) {
             startX = validationInfo.x
             endX = this.lastSelection.x
@@ -369,6 +419,31 @@ export const entityListMixin = {
       if (!res || res.length === 0) return true
       const isValid = new RegExp(/\d{3,4}x\d{3,4}/).test(res)
       return isValid
+    },
+
+    toggleStickedColumns (columnId) {
+      const sticked = !this.stickedColumns[columnId]
+      this.stickedColumns = {
+        ...this.stickedColumns,
+        [columnId]: sticked
+      }
+      localStorage.setItem(
+        this.localStorageStickKey,
+        JSON.stringify(this.stickedColumns)
+      )
+    },
+
+    stickColumnClicked () {
+      this.toggleStickedColumns(this.lastHeaderMenuDisplayed)
+      this.showHeaderMenu()
+    },
+
+    metadataStickColumnClicked (event) {
+      this.toggleStickedColumns(this.lastMetadaDataHeaderMenuDisplayed)
+      this.showMetadataHeaderMenu(
+        this.lastMetadaDataHeaderMenuDisplayed,
+        event
+      )
     }
   }
 }

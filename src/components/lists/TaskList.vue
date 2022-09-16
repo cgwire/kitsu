@@ -14,7 +14,7 @@
           <th class="asset-type" ref="th-type" v-if="isAssets">
             {{ $t('tasks.fields.asset_type') }}
           </th>
-          <th class="sequence" ref="th-type" v-else>
+          <th class="sequence" ref="th-type" v-else-if="!isEpisodes">
             {{ $t('tasks.fields.sequence') }}
           </th>
           <th class="name" ref="th-name">
@@ -26,7 +26,7 @@
           <th class="assignees" ref="th-assignees">
             {{ $t('tasks.fields.assignees') }}
           </th>
-          <th class="frames number-cell" ref="th-frames" v-if="!isAssets">
+          <th class="frames number-cell" ref="th-frames" v-if="isShots">
             {{ $t('tasks.fields.frames') }}
           </th>
           <th
@@ -91,7 +91,7 @@
           <td class="asset-type" v-if="isAssets">
             {{ getEntity(task.entity.id).asset_type_name }}
           </td>
-          <td class="sequence" v-else>
+          <td class="sequence" v-else-if="!isEpisodes">
             {{ getEntity(task.entity.id).sequence_name }}
           </td>
           <td class="name">
@@ -118,7 +118,7 @@
               />
             </div>
           </td>
-          <td class="frames" v-if="!isAssets">
+          <td class="frames" v-if="isShots">
             {{ getEntity(task.entity.id).nb_frames }}
           </td>
           <td class="estimation number-cell">
@@ -337,6 +337,7 @@ export default {
     ...mapGetters([
       'assetMap',
       'editMap',
+      'episodeMap',
       'nbSelectedTasks',
       'personMap',
       'user',
@@ -350,6 +351,14 @@ export default {
 
     isAssets () {
       return this.entityType === 'Asset'
+    },
+
+    isEpisodes () {
+      return this.entityType === 'Episode'
+    },
+
+    isShots () {
+      return this.entityType === 'Shot'
     },
 
     timeSpent () {
@@ -542,14 +551,7 @@ export default {
     },
 
     getEntity (entityId) {
-      if (this.isAssets) {
-        return this.assetMap.get(entityId)
-      } else if (this.entityType === 'Shot') {
-        return this.shotMap.get(entityId)
-      } else if (this.entityType === 'Edit') {
-        return this.editMap.get(entityId)
-      }
-      return this.assetMap.get(entityId)
+      return this[`${this.entityType.toLowerCase()}Map`].get(entityId)
     },
 
     onKeyDown (event) {

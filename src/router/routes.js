@@ -27,6 +27,8 @@ const Breakdown = () => import('../components/pages/Breakdown')
 const CustomActions = () => import('../components/pages/CustomActions')
 const StatusAutomations = () => import('../components/pages/StatusAutomations')
 const Episodes = () => import('../components/pages/Episodes')
+const Episode = () => import('../components/pages/Episode')
+const EpisodeStats = () => import('../components/pages/EpisodeStats')
 const MainSchedule = () => import('../components/pages/MainSchedule')
 const NotFound = () => import('../components/pages/NotFound')
 const Person = () => import('../components/pages/Person')
@@ -680,9 +682,15 @@ export const routes = [
       },
 
       {
-        path: 'productions/:production_id/edits/:edit_id',
-        component: Edit,
-        name: 'edit'
+        path: 'productions/:production_id/episodes',
+        component: Episodes,
+        name: 'episodes',
+        children: []
+      },
+      {
+        path: 'productions/:production_id/episodes/:episode_id',
+        component: Episode,
+        name: 'episode'
       },
 
       {
@@ -728,6 +736,19 @@ export const routes = [
       },
 
       {
+        name: 'episode-task',
+        path: 'productions/:production_id/episodes/:episode_id/:type/tasks/:task_id',
+        component: Task,
+        children: [
+          {
+            name: 'episode-task-preview',
+            path: 'previews/:preview_id',
+            component: Task
+          }
+        ]
+      },
+
+      {
         name: 'task',
         path: 'productions/:production_id/:type/tasks/:task_id',
         component: Task,
@@ -761,21 +782,10 @@ export const routes = [
       },
 
       {
-        path: 'productions/:production_id/episodes',
-        component: Episodes,
-        name: 'episodes',
-        children: [
-          {
-            path: 'edit/:episode_id',
-            component: Episodes,
-            name: 'edit-episode'
-          },
-          {
-            path: 'delete/:episode_id',
-            component: Episodes,
-            name: 'delete-episode'
-          }
-        ]
+        path: 'productions/:production_id/episode-stats',
+        component: EpisodeStats,
+        name: 'episode-stats',
+        children: []
       },
 
       {
@@ -906,33 +916,7 @@ export const routes = [
         path: 'productions/:production_id/episodes/:episode_id/edits',
         component: Edits,
         name: 'episode-edits',
-        children: [
-          {
-            path: 'edits/manage',
-            component: Edits,
-            name: 'episode-manage-edits'
-          },
-          {
-            path: 'delete-all-tasks/:task_type_id',
-            component: Edits,
-            name: 'episode-delete-all-edit-tasks'
-          },
-          {
-            path: 'edit/:edit_id',
-            component: Edits,
-            name: 'episode-edit-edit'
-          },
-          {
-            path: 'delete/:edit_id',
-            component: Edits,
-            name: 'episode-delete-edit'
-          },
-          {
-            path: 'edits/restore/:edit_id',
-            component: Edits,
-            name: 'episode-restore-edit'
-          }
-        ]
+        children: []
       },
 
       {
@@ -984,33 +968,31 @@ export const routes = [
       },
 
       {
-        path: 'productions/:production_id/episodes/:episode_id/:type/tasks/:task_id',
-        name: 'episode-task',
+        path: 'productions/:production_id/episodes/task-types/:task_type_id',
+        component: TaskType,
+        name: 'episodes-task-type',
+        children: [
+          {
+            name: 'episodes-task-type-schedule',
+            path: 'schedule',
+            component: TaskType
+          },
+          {
+            name: 'episodes-task-type-estimation',
+            path: 'estimation',
+            component: TaskType
+          }
+        ]
+      },
+
+      {
+        path: 'productions/:production_id/episodes/:episode_id/tasks/:task_id',
+        name: 'episode-episode-task',
         component: Task,
         children: [
           {
-            name: 'episode-task-delete',
-            path: 'delete',
-            component: Task
-          },
-          {
-            name: 'episode-task-change-preview',
-            path: 'comments/:comment_id/change-preview',
-            component: Task
-          },
-          {
-            name: 'episode-task-preview',
+            name: 'episode-episode-task-preview',
             path: 'previews/:preview_id',
-            component: Task
-          },
-          {
-            name: 'episode-task-edit-comment',
-            path: 'comments/:comment_id/edit',
-            component: Task
-          },
-          {
-            name: 'episode-task-delete-comment',
-            path: 'comments/:comment_id/delete',
             component: Task
           }
         ]

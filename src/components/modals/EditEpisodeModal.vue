@@ -26,17 +26,35 @@
         <textarea-field
           ref="descriptionField"
           :label="$t('episodes.fields.description')"
-          v-model="form.description"
           @keyup.ctrl.enter="runConfirmation"
           @keyup.meta.enter="runConfirmation"
+          v-model="form.description"
         />
+
+        <div
+          :key="descriptor.id"
+          v-for="descriptor in episodeMetadataDescriptors"
+        >
+          <combobox
+            v-if="descriptor.choices.length > 0"
+            :label="descriptor.name"
+            :options="getDescriptorChoicesOptions(descriptor)"
+            v-model="form.data[descriptor.field_name]"
+          />
+          <text-field
+            :label="descriptor.name"
+            @enter="runConfirmation"
+            v-model="form.data[descriptor.field_name]"
+            v-else
+          />
+        </div>
       </form>
 
       <modal-footer
         :error-text="$t('episodes.edit_error')"
         :is-loading="isLoading"
         :is-error="isError"
-        @confirm="confirmClicked"
+        @confirm="runConfirmation"
         @cancel="$emit('cancel')"
       />
     </div>
@@ -60,18 +78,24 @@ export default {
     TextareaField
   },
 
-  props: [
-    'onConfirmClicked',
-    'text',
-    'active',
-    'cancelRoute',
-    'isError',
-    'isLoading',
-    'isLoadingStay',
-    'isSuccess',
-    'episodeToEdit',
-    'errorText'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    episodeToEdit: {
+      type: Object,
+      default: () => {}
+    }
+  },
 
   data () {
     if (this.episodeToEdit && this.episodeToEdit.id) {
@@ -80,7 +104,8 @@ export default {
           id: this.episodeToEdit.id,
           name: this.episodeToEdit.name,
           description: this.episodeToEdit.description,
-          production_id: this.episodeToEdit.project_id
+          production_id: this.episodeToEdit.project_id,
+          data: this.episodeToEdit.data || {}
         },
         episodeSuccessText: ''
       }
@@ -90,7 +115,8 @@ export default {
           id: '',
           name: '',
           description: '',
-          fps: ''
+          fps: '',
+          data: {}
         },
         episodeSuccessText: ''
       }
@@ -99,7 +125,8 @@ export default {
 
   computed: {
     ...mapGetters([
-      'currentProduction'
+      'currentProduction',
+      'episodeMetadataDescriptors'
     ])
   },
 
@@ -107,11 +134,12 @@ export default {
     ...mapActions([
     ]),
 
-    runConfirmation () {
-      this.confirmClicked()
+    getDescriptorChoicesOptions (descriptor) {
+      const values = descriptor.choices.map(c => ({ label: c, value: c }))
+      return [{ label: '', value: '' }, ...values]
     },
 
-    confirmClicked () {
+    runConfirmation () {
       this.$emit('confirm', this.form)
     },
 
@@ -125,11 +153,13 @@ export default {
         this.form.id = null
         this.form.name = ''
         this.form.description = ''
+        this.form.data = {}
       } else {
         this.form = {
           id: this.episodeToEdit.id,
           name: this.episodeToEdit.name,
-          description: this.episodeToEdit.description
+          description: this.episodeToEdit.description,
+          data: this.episodeToEdit.data || {}
         }
       }
     }
@@ -141,7 +171,9 @@ export default {
 
   watch: {
     active () {
-      this.resetForm()
+      if (this.active) {
+        this.resetForm()
+      }
     },
 
     episodeToEdit () {

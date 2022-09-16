@@ -1,215 +1,581 @@
 <template>
-  <div class="episodes page fixed-page">
-    <div class="episode-list-header page-header flexrow">
-      <search-field
-        class="flexrow-item mt1"
-        ref="episode-search-field"
-        @change="onSearchChange"
-        placeholder="ex: e01 s01, anim=wip"
+<div class="columns fixed-page">
+  <action-panel />
+
+  <div class="column main-column">
+    <div class="episodes page">
+      <div class="episode-list-header page-header">
+        <div class="flexrow">
+          <search-field
+            ref="episode-search-field"
+            :can-save="true"
+            :active="isSearchActive"
+            @change="onSearchChange"
+            @enter="saveSearchQuery"
+            @save="saveSearchQuery"
+            placeholder="ex: e01 episode=wip"
+          />
+          <button-simple
+            class="flexrow-item"
+            :title="$t('entities.build_filter.title')"
+            icon="funnel"
+            @click="() => modals.isBuildFilterDisplayed = true"
+          />
+          <div class="filler"></div>
+          <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
+            <show-assignations-button class="flexrow-item" />
+            <show-infos-button class="flexrow-item" />
+            <big-thumbnails-button class="flexrow-item" />
+          </div>
+          <div class="flexrow" v-if="isCurrentUserManager">
+            <button-simple
+              class="flexrow-item"
+              :text="$t('episodes.new_episode')"
+              icon="plus"
+              @click="showNewModal"
+            />
+          </div>
+        </div>
+
+        <div class="query-list mt1">
+          <search-query-list
+            :queries="episodeSearchQueries"
+            @change-search="changeSearch"
+            @remove-search="removeSearchQuery"
+            v-if="!isEpisodesLoading && !initialLoading"
+          />
+        </div>
+      </div>
+
+      <sorting-info
+        :label="$t('main.sorted_by')"
+        :sorting="episodeSorting"
+        @clear-sorting="onChangeSortClicked(null)"
+        v-if="episodeSorting && episodeSorting.length > 0"
       />
-      <combobox
-        class="mb0 flexrow-item"
-        locale-key-prefix="statistics."
-        :label="$t('statistics.data_mode')"
-        :options="dataModeOptions"
-        v-model="dataMode"
-      />
-      <combobox
-        class="mb0 flexrow-item"
-        locale-key-prefix="statistics."
-        :label="$t('statistics.display_mode')"
-        :options="displayModeOptions"
-        v-model="displayMode"
-      />
-      <combobox
-        class="mb0 flexrow-item"
-        :label="$t('statistics.count_mode')"
-        locale-key-prefix="statistics."
-        :options="countModeOptions"
-        v-model="countMode"
-      />
-      <span class="filler"></span>
-      <button-simple
-        class="flexrow-item"
-        icon="refresh"
-        :title="$t('main.reload')"
-        @click="reset"
-      />
-      <button-simple
-        class="flexrow-item"
-        icon="download"
-        @click="exportStatisticsToCsv"
+
+      <episode-list
+        ref="episode-list"
+        :displayed-episodes="displayedEpisodes"
+        :is-loading="isEpisodesLoading || initialLoading"
+        :is-error="isEpisodesLoadingError"
+        :validation-columns="episodeValidationColumns"
+        :department-filter="departmentFilter"
+        @add-metadata="onAddMetadataClicked"
+        @change-sort="onChangeSortClicked"
+        @create-tasks="showCreateTasksModal"
+        @delete-all-tasks="onDeleteAllTasksClicked"
+        @delete-clicked="onDeleteClicked"
+        @delete-metadata="onDeleteMetadataClicked"
+        @edit-clicked="onEditClicked"
+        @edit-metadata="onEditMetadataClicked"
+        @field-changed="onFieldChanged"
+        @metadata-changed="onMetadataChanged"
+        @scroll="saveScrollPosition"
       />
     </div>
+  </div>
 
-    <episode-list
-      ref="episode-list"
-      :entries="displayedEpisodes"
-      :is-loading="isLoading"
-      :is-error="isLoadingError"
-      :validation-columns="episodeValidationColumns"
-      :episode-stats="episodeStats"
-      :episode-retakes-stats="episodeRetakeStats"
-      :data-mode="dataMode"
-      :count-mode="countMode"
-      :display-mode="displayMode"
-      :show-all="episodeSearchText.length === 0"
-      @delete-clicked="onDeleteClicked"
-      @edit-clicked="onEditClicked"
-      @field-changed="onFieldChanged"
-      @scroll="saveScrollPosition"
-    />
-
-    <edit-episode-modal
-      :active="modals.isNewDisplayed"
-      :is-loading="loading.edit"
-      :is-error="errors.edit"
-      :episode-to-edit="episodeToEdit"
-      @cancel="modals.isNewDisplayed = false"
-      @confirm="confirmEditEpisode"
-    />
-
-    <hard-delete-modal
-      :active="modals.isDeleteDisplayed"
-      :is-loading="loading.del"
-      :is-error="errors.del"
-      :text="deleteText()"
-      :error-text="$t('episodes.delete_error')"
-      :lock-text="episodeToDelete ? episodeToDelete.name : ''"
-      @cancel="modals.isDeleteDisplayed = false"
-      @confirm="confirmDeleteEpisode"
+  <div
+    id="side-column"
+    class="column side-column"
+    v-show="nbSelectedTasks === 1"
+  >
+    <task-info
+      :task="selectedTasks.values().next().value"
     />
   </div>
+
+  <edit-episode-modal
+    :active="modals.isNewDisplayed"
+    :is-loading="loading.episode"
+    :is-error="errors.episode"
+    :episode-to-episode="episodeToEdit"
+    @cancel="modals.isNewDisplayed = false"
+    @confirm="confirmEditEpisode"
+  />
+
+  <delete-modal
+    ref="delete-episode-modal"
+    :active="modals.isDeleteDisplayed"
+    :is-loading="loading.del"
+    :is-error="errors.del"
+    :text="deleteText()"
+    :error-text="$t('episodes.delete_error')"
+    @cancel="modals.isDeleteDisplayed = false"
+    @confirm="confirmDeleteEpisode"
+  />
+
+  <delete-modal
+    ref="delete-metadata-modal"
+    :active="modals.isDeleteMetadataDisplayed"
+    :is-loading="loading.deleteMetadata"
+    :is-error="errors.deleteMetadata"
+    :text="$t('productions.metadata.delete_text')"
+    :error-text="$t('productions.metadata.delete_error')"
+    @cancel="modals.isDeleteMetadataDisplayed = false"
+    @confirm="confirmDeleteMetadata"
+  />
+
+  <hard-delete-modal
+    ref="delete-all-tasks-modal"
+    :active="modals.isDeleteAllTasksDisplayed"
+    :is-loading="loading.deleteAllTasks"
+    :is-error="errors.deleteAllTasks"
+    :text="deleteAllTasksText()"
+    :error-text="$t('tasks.delete_all_error')"
+    :lock-text="deleteAllTasksLockText"
+    :selection-option="true"
+    @cancel="modals.isDeleteAllTasksDisplayed = false"
+    @confirm="confirmDeleteAllTasks"
+  />
+
+  <create-tasks-modal
+    :active="modals.isCreateTasksDisplayed"
+    :is-loading="loading.creatingTasks"
+    :is-loading-stay="loading.creatingTasksStay"
+    :is-error="errors.creatingTasks"
+    :title="$t('tasks.create_tasks_episode')"
+    :text="$t('tasks.create_tasks_episode_explaination')"
+    :error-text="$t('tasks.create_tasks_episode_failed')"
+    @cancel="hideCreateTasksModal"
+    @confirm="confirmCreateTasks"
+    @confirm-and-stay="confirmCreateTasksAndStay"
+  />
+
+  <add-metadata-modal
+    :active="modals.isAddMetadataDisplayed"
+    :is-loading="loading.addMetadata"
+    :is-loading-stay="loading.addMetadata"
+    :is-error="errors.addMetadata"
+    :descriptor-to-edit="descriptorToEdit"
+    entity-type="Episode"
+    @cancel="closeMetadataModal"
+    @confirm="confirmAddMetadata"
+  />
+
+  <add-thumbnails-modal
+    ref="add-thumbnails-modal"
+    parent="episodes"
+    :active="modals.isAddThumbnailsDisplayed"
+    :is-loading="loading.addThumbnails"
+    :is-error="errors.addThumbnails"
+    @cancel="hideAddThumbnailsModal"
+    @confirm="confirmAddThumbnails"
+  />
+
+  <build-filter-modal
+    ref="build-filter-modal"
+    :active="modals.isBuildFilterDisplayed"
+    entity-type="episode"
+    @cancel="modals.isBuildFilterDisplayed = false"
+    @confirm="confirmBuildFilter"
+  />
+
+  <edit-episode-modal
+    :active="modals.isNewDisplayed"
+    :is-loading="loading.edit"
+    :is-error="errors.edit"
+    :episode-to-edit="episodeToEdit"
+    @cancel="modals.isNewDisplayed = false"
+    @confirm="confirmEditEpisode"
+  />
+
+  <hard-delete-modal
+    :active="modals.isDeleteDisplayed"
+    :is-loading="loading.del"
+    :is-error="errors.del"
+    :text="deleteText()"
+    :error-text="$t('episodes.delete_error')"
+    :lock-text="episodeToDelete ? episodeToDelete.name : ''"
+    @cancel="modals.isDeleteDisplayed = false"
+    @confirm="confirmDeleteEpisode"
+  />
+</div>
 </template>
 
 <script>
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
+import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 
+import { searchMixin } from '@/components/mixins/search'
+import { entitiesMixin } from '@/components/mixins/entities'
+
+import AddMetadataModal from '@/components/modals/AddMetadataModal'
+import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal'
+import ActionPanel from '@/components/tops/ActionPanel'
+import BigThumbnailsButton from '@/components/widgets/BigThumbnailsButton'
+import BuildFilterModal from '@/components/modals/BuildFilterModal'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
-import Combobox from '@/components/widgets/Combobox'
-import HardDeleteModal from '@/components/modals/HardDeleteModal'
+import CreateTasksModal from '@/components/modals/CreateTasksModal'
+import DeleteModal from '@/components/modals/DeleteModal'
 import EditEpisodeModal from '@/components/modals/EditEpisodeModal'
 import EpisodeList from '@/components/lists/EpisodeList.vue'
+import HardDeleteModal from '@/components/modals/HardDeleteModal'
 import SearchField from '@/components/widgets/SearchField'
+import SearchQueryList from '@/components/widgets/SearchQueryList'
+import SortingInfo from '@/components/widgets/SortingInfo'
+import ShowAssignationsButton from '@/components/widgets/ShowAssignationsButton'
+import ShowInfosButton from '@/components/widgets/ShowInfosButton'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 export default {
   name: 'episodes',
+  mixins: [searchMixin, entitiesMixin],
 
   components: {
+    ActionPanel,
+    AddMetadataModal,
+    AddThumbnailsModal,
+    BigThumbnailsButton,
+    BuildFilterModal,
     ButtonSimple,
-    Combobox,
-    EpisodeList,
+    CreateTasksModal,
+    DeleteModal,
     EditEpisodeModal,
+    EpisodeList,
     HardDeleteModal,
-    SearchField
+    SearchField,
+    SearchQueryList,
+    SortingInfo,
+    ShowAssignationsButton,
+    ShowInfosButton,
+    TaskInfo
   },
 
   data () {
     return {
-      countMode: 'count',
-      dataMode: 'retakes',
-      displayMode: 'pie',
+      type: 'episode',
+      deleteAllTasksLockText: null,
+      descriptorToEdit: {},
+      departmentFilter: [],
       episodeToDelete: null,
       episodeToEdit: null,
-      isLoading: true,
-      isLoadingError: false,
-      countModeOptions: [
-        { label: 'shots', value: 'count' },
-        { label: 'frames', value: 'frames' }
+      formData: null,
+      genericColumns: [
+        'metadata_column_name => text value',
+        'task_type_name => task_status_name',
+        'task_type_name comment => comment text'
       ],
-      dataModeOptions: [
-        { label: 'retakes', value: 'retakes' },
-        { label: 'status', value: 'status' }
+      historyEdit: {},
+      initialLoading: true,
+      isSearchActive: false,
+      optionalColumns: [
+        'Description'
       ],
-      displayModeOptions: [
-        { label: 'pie', value: 'pie' },
-        { label: 'count', value: 'count' }
-      ],
-      errors: {
-        edit: false,
-        del: false
-      },
+      pageName: 'Episodes',
+      parsedCSV: [],
+      selectedDepartment: 'ALL',
+      taskTypeForTaskDeletion: null,
       modals: {
-        isNewDisplayed: false,
-        isDeleteDisplayed: false
+        isAddMetadataDisplayed: false,
+        isAddThumbnailsDisplayed: false,
+        isBuildFilterDisplayed: false,
+        isCreateTasksDisplayed: false,
+        isDeleteDisplayed: false,
+        isDeleteMetadataDisplayed: false,
+        isDeleteAllTasksDisplayed: false,
+        isImportRenderDisplayed: false,
+        isImportDisplayed: false,
+        isNewDisplayed: false
       },
       loading: {
-        edit: false,
-        del: false
+        addMetadata: false,
+        addThumbnails: false,
+        creatingTasks: false,
+        creatingTasksStay: false,
+        deleteAllTasks: false,
+        deleteMetadata: false,
+        episode: false,
+        del: false,
+        importing: false,
+        stay: false
+      },
+      errors: {
+        addMetadata: false,
+        deleteMetadata: false,
+        creatingTasks: false,
+        deleteAllTasks: false,
+        importing: false,
+        importingError: null
       }
     }
   },
 
+  beforeDestroy () {
+    this.clearSelectedEpisodes()
+  },
+
+  created () {
+    this.setLastProductionScreen('episodes')
+  },
+
   mounted () {
-    this.setDefaultSearchText()
-    this.setDefaultListScrollPosition()
-    this.isLoading = true
-    this.isLoadingError = false
-    this.initEpisodes()
-      .then(() => {
-        this.isLoading = false
-      })
-      .catch(err => {
-        this.isLoading = false
-        this.isLoadingError = true
-        console.error(err)
-      })
+    let searchQuery = ''
+    if (this.episodeSearchText && this.episodeSearchText.length > 0) {
+      this.searchField.setValue(this.episodeSearchText)
+    }
+    if (this.$route.query.search && this.$route.query.search.length > 0) {
+      searchQuery = '' + this.$route.query.search
+    }
+    if (searchQuery === 'undefined') searchQuery = ''
+    this.$refs['episode-list'].setScrollPosition(
+      this.episodeListScrollPosition
+    )
+    this.onSearchChange()
+    this.$refs['episode-list'].setScrollPosition(
+      this.episodeListScrollPosition
+    )
+    if (!this.isCurrentUserManager && this.user.departments.length > 0) {
+      this.selectedDepartment = 'MY_DEPARTMENTS'
+      this.departmentFilter = this.user.departments
+    } else {
+      this.departmentFilter = []
+    }
+
+    const finalize = () => {
+      this.initialLoading = false
+      if (this.$refs['episode-list']) {
+        this.$refs['episode-search-field'].setValue(searchQuery)
+        this.onSearchChange()
+        this.$refs['episode-list'].setScrollPosition(
+          this.episodeListScrollPosition
+        )
+      }
+    }
+
+    if (
+      this.episodeMap.size < 1 ||
+      this.episodeValidationColumns.length === 0 ||
+      this.episodeMap.values().next().project_id !== this.currentProduction.id
+    ) {
+      this.loadEpisodesWithTasks()
+        .then(() => {
+          this.initialLoading = false
+        })
+        .catch(console.error)
+    } else {
+      if (!this.isEpisodesLoading) this.initialLoading = false
+      finalize()
+    }
   },
 
   computed: {
     ...mapGetters([
+      'currentEpisode',
       'currentProduction',
       'displayedEpisodes',
-      'episodesPath',
-      'isCurrentUserManager',
-      'episodes',
+      'departments',
       'episodeMap',
-      'episodePath',
-      'episodeStats',
-      'episodeRetakeStats',
+      'episodes',
+      'episodeSearchQueries',
+      'isCurrentUserClient',
+      'isCurrentUserManager',
+      'isEpisodeDescription',
+      'isEpisodeEstimation',
+      'isEpisodeTime',
+      'isEpisodesLoading',
+      'isEpisodesLoadingError',
+      'isShowAssignations',
+      'isTVShow',
+      'nbSelectedTasks',
+      'openProductions',
+      'selectedTasks',
+      'episodeMap',
+      'episodeFilledColumns',
+      'episodesCsvFormData',
       'episodeSearchText',
-      'episodeListScrollPosition',
       'episodeValidationColumns',
-      'taskStatusMap',
-      'taskTypeMap'
+      'episodeListScrollPosition',
+      'episodeSorting',
+      'taskTypeMap',
+      'user',
+      'departmentMap',
+      'productionEpisodeTaskTypes'
     ]),
 
-    isRetakeDataMode () { return this.dataMode === 'retakes' }
+    renderColumns () {
+      var collection = [...this.dataMatchers, ...this.optionalColumns]
+
+      this.productionEpisodeTaskTypes.forEach(item => {
+        collection.push(item.name)
+        collection.push(item.name + ' comment')
+      })
+      return collection
+    },
+
+    filteredEpisodes () {
+      const episodes = {}
+      this.displayedEpisodes.forEach(episode => {
+        const episodeKey = episode.name
+        episodes[episodeKey] = true
+      })
+      return episodes
+    },
+
+    metadataDescriptors () {
+      return this.episodeMetadataDescriptors
+    }
   },
 
   methods: {
     ...mapActions([
-      'computeEpisodeStats',
+      'addMetadataDescriptor',
+      'createTasks',
+      'changeEpisodeSort',
+      'clearSelectedEpisodes',
+      'commentTaskWithPreview',
+      'deleteAllEpisodeTasks',
       'deleteEpisode',
+      'deleteMetadataDescriptor',
       'editEpisode',
+      'getEpisodesCsvLines',
       'hideAssignations',
-      'initEpisodes',
-      'loadEpisodeStats',
-      'loadEpisodeRetakeStats',
-      'loadShots',
+      'loadEpisodesWithTasks',
+      'newEpisode',
+      'removeEpisodeSearch',
+      'saveEpisodeSearch',
       'setLastProductionScreen',
+      'setPreview',
       'setEpisodeSearch',
-      'setEpisodeListScrollPosition',
-      'showAssignations'
+      'showAssignations',
+      'uploadEpisodeFile'
     ]),
 
-    setDefaultSearchText () {
-      if (this.episodeSearchText.length > 0) {
-        this.$refs['episode-search-field'].setValue(this.episodeSearchText)
+    confirmAddMetadata (form) {
+      this.loading.addMetadata = true
+      form.entity_type = 'Episode'
+      this.addMetadataDescriptor(form)
+        .then(() => {
+          this.loading.addMetadata = false
+          this.modals.isAddMetadataDisplayed = false
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.addMetadata = false
+          this.errors.addMetadata = true
+        })
+    },
+
+    showNewModal () {
+      this.episodeToEdit = {}
+      this.modals.isNewDisplayed = true
+    },
+
+    confirmDeleteEpisode () {
+      this.loading.del = true
+      this.errors.del = false
+      this.deleteEpisode(this.episodeToDelete)
+        .then(() => {
+          this.loading.del = false
+          this.modals.isDeleteDisplayed = false
+        })
+        .catch(err => {
+          console.error(err)
+          this.loading.del = false
+          this.errors.del = true
+        })
+    },
+
+    runTasksCreation (form, selectionOnly) {
+      this.errors.creatingTasks = false
+      return this.createTasks({
+        type: 'episodes',
+        task_type_id: form.task_type_id,
+        project_id: this.currentProduction.id,
+        selectionOnly
+      })
+    },
+
+    reset () {
+      this.initialLoading = false
+      this.loadEpisodesWithTasks((err) => {
+        if (err) console.error(err)
+        this.initialLoading = false
+      })
+    },
+
+    resetEditModal () {
+      const form = { name: '' }
+      if (this.openProductions.length > 0) {
+        form.production_id = this.openProductions[0].id
       }
+      this.episodeToEdit = form
     },
 
-    setDefaultListScrollPosition () {
-      this.$refs['episode-list'].setScrollPosition(
-        this.episodeListScrollPosition
-      )
+    applySearch (searchQuery) {
+      this.setEpisodeSearch(searchQuery)
+      this.setSearchInUrl()
+      this.isSearchActive = true
     },
 
-    navigateToList () {
-      this.$router.push(this.episodesPath)
+    saveSearchQuery (searchQuery) {
+      this.saveEpisodeSearch(searchQuery)
+        .catch(console.error)
+    },
+
+    removeSearchQuery (searchQuery) {
+      this.removeEpisodeSearch(searchQuery)
+        .catch(console.error)
+    },
+
+    onExportClick () {
+      this.getEpisodesCsvLines()
+        .then(episodeLines => {
+          const nameData = [
+            moment().format('YYYY-MM-DD'),
+            'kitsu',
+            this.currentProduction.name,
+            this.$t('episodes.title')
+          ]
+          const name = stringHelpers.slugify(nameData.join('_'))
+          const headers = [
+            this.$t('episodes.fields.name'),
+            this.$t('episodes.fields.description')
+          ]
+          if (this.currentEpisode) {
+            headers.splice(0, 0, 'Episode')
+          }
+          sortByName([...this.currentProduction.descriptors])
+            .filter(d => d.entity_type === 'Episode')
+            .forEach((descriptor) => {
+              headers.push(descriptor.name)
+            })
+          if (this.isEpisodeTime) {
+            headers.push(this.$t('episodes.fields.time_spent'))
+          }
+          if (this.isEpisodeEstimation) {
+            headers.push(this.$t('main.estimation_short'))
+          }
+          this.episodeValidationColumns
+            .forEach(taskTypeId => {
+              headers.push(this.taskTypeMap.get(taskTypeId).name)
+              headers.push('Assignations')
+            })
+          csv.buildCsvFile(name, [headers].concat(episodeLines))
+        })
+    },
+
+    onFieldChanged ({ entry, fieldName, value }) {
+      const data = {
+        id: entry.id,
+        description: entry.description
+      }
+      data[fieldName] = value
+      this.editEpisode(data)
+    },
+
+    onMetadataChanged ({ entry, descriptor, value }) {
+      const metadata = {}
+      metadata[descriptor.field_name] = value
+      const data = {
+        id: entry.id,
+        data: metadata
+      }
+      this.editEpisode(data)
     },
 
     onEditClicked (episode) {
@@ -226,40 +592,28 @@ export default {
       this.loading.edit = true
       this.errors.edit = false
 
-      this.editEpisode(form)
-        .then(() => {
-          this.loading.edit = false
-          this.modals.isNewDisplayed = false
-        })
-        .catch(() => {
-          this.loading.edit = false
-          this.errors.edit = true
-        })
-    },
-
-    confirmDeleteEpisode () {
-      this.loading.del = true
-      this.errors.edit = false
-
-      this.deleteEpisode(this.episodeToDelete)
-        .then(() => {
-          this.loading.del = false
-          this.modals.isDeleteDisplayed = false
-        }).catch(() => {
-          this.loading.del = false
-          this.errors.delete = true
-        })
-    },
-
-    resetEditModal () {
-      const form = { name: '' }
-      if (this.episodes.length > 0) {
-        form.episode_id = this.episodes[0].id
+      if (form.id) {
+        this.editEpisode(form)
+          .then(() => {
+            this.loading.edit = false
+            this.modals.isNewDisplayed = false
+          })
+          .catch(() => {
+            this.loading.edit = false
+            this.errors.edit = true
+          })
+      } else {
+        form.project_id = this.currentProduction.id
+        this.newEpisode(form)
+          .then(() => {
+            this.loading.edit = false
+            this.modals.isNewDisplayed = false
+          })
+          .catch(() => {
+            this.loading.edit = false
+            this.errors.edit = true
+          })
       }
-      if (this.openProductions.length > 0) {
-        form.production_id = this.openProductions[0].id
-      }
-      this.episodeToEdit = form
     },
 
     deleteText () {
@@ -269,79 +623,47 @@ export default {
       } else {
         return ''
       }
-    },
-
-    onSearchChange (event) {
-      const searchQuery = this.$refs['episode-search-field'].getValue()
-      this.setEpisodeSearch(searchQuery)
-    },
-
-    saveScrollPosition (scrollPosition) {
-      this.setEpisodeListScrollPosition(scrollPosition)
-    },
-
-    exportStatisticsToCsv () {
-      const nameData = [
-        moment().format('YYYYMMDD'),
-        this.currentProduction.name,
-        'episodes',
-        'statistics'
-      ]
-      if (this.isRetakeDataMode) nameData.splice(3, 0, 'retake')
-      const name = stringHelpers.slugify(nameData.join('_'))
-      if (this.isRetakeDataMode) {
-        csv.generateRetakeStatReports(
-          name,
-          this.episodeRetakeStats,
-          this.taskTypeMap,
-          this.taskStatusMap,
-          this.episodeMap,
-          this.countMode
-        )
-      } else {
-        csv.generateStatReports(
-          name,
-          this.episodeStats,
-          this.taskTypeMap,
-          this.taskStatusMap,
-          this.episodeMap,
-          this.countMode
-        )
-      }
-    },
-
-    onFieldChanged ({ entry, fieldName, value }) {
-      const data = { id: entry.id }
-      data[fieldName] = value
-      this.editEpisode(data)
-    },
-
-    reset () {
-      this.isLoading = true
-      this.isLoadingError = false
-      this.loadEpisodeStats(this.currentProduction.id)
-        .then(() => {
-          return this.loadEpisodeRetakeStats(this.currentProduction.id)
-        })
-        .then(() => {
-          this.isLoading = false
-        })
-        .catch(err => {
-          this.isLoading = false
-          this.isLoadingError = true
-          console.error(err)
-        })
     }
   },
 
   watch: {
-    displayedEpisodes () {
+    $route () {
+      if (!this.$route.query) return
+      const search = this.$route.query.search
+      const actualSearch = this.$refs['episode-search-field'].getValue()
+      if (search !== actualSearch) {
+        this.searchField.setValue(search)
+        this.applySearch(search)
+      }
     },
 
     currentProduction () {
       this.$refs['episode-search-field'].setValue('')
-      this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
+      this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
+      this.initialLoading = false
       this.reset()
+    },
+
+    isEpisodesLoading () {
+      if (!this.isEpisodesLoading) {
+        let searchQuery = ''
+        if (
+          this.$route.query.search &&
+          this.$route.query.search.length > 0
+        ) {
+          searchQuery = '' + this.$route.query.search
+        }
+        this.initialLoading = false
+        this.$refs['episode-search-field'].setValue(searchQuery)
+        this.$nextTick(() => {
+          this.applySearch(searchQuery)
+        })
+        if (this.$refs['episode-list']) {
+          this.$refs['episode-list'].setScrollPosition(
+            this.episodeListScrollPosition
+          )
+        }
+      }
     }
   },
 
@@ -354,4 +676,35 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.data-list {
+  margin-top: 0;
+}
+
+.page-header {
+  margin-bottom: 1em;
+}
+
+.flexcolumn {
+  align-items: flex-start;
+}
+
+.episodes {
+  display: flex;
+  flex-direction: column;
+}
+
+.columns {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+}
+
+.column {
+  overflow-y: auto;
+  padding: 0;
+}
+
+.main-column {
+  border-right: 3px solid $light-grey;
+}
 </style>

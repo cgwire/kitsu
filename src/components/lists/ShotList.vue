@@ -734,12 +734,13 @@ export default {
 
   data () {
     return {
-      lastSelection: null,
+      type: 'shot',
       hiddenColumns: {},
       lastHeaderMenuDisplayed: null,
       lastMetadaDataHeaderMenuDisplayed: null,
       lastHeaderMenuDisplayedIndexInGrid: null,
       lastSelectedShot: null,
+      lastSelection: null,
       metadataDisplayHeaders: {
         fps: true,
         frameIn: true,

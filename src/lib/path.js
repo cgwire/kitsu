@@ -5,8 +5,7 @@ export const getTaskPath = (
   episode,
   taskTypeMap
 ) => {
-  const productionId =
-    task.project_id ? task.project_id : production.id
+  const productionId = task.project_id ? task.project_id : production.id
   const route = {
     name: 'task',
     params: {
@@ -19,22 +18,21 @@ export const getTaskPath = (
     route.params.episode_id = task.episode_id || episode.id
   }
   const taskType = taskTypeMap.get(task.task_type_id)
-  if (taskType.for_entity === 'Shot') {
-    route.params.type = 'shots'
+  if (taskType.for_entity === 'Episode') {
+    route.name = 'episode-episode-task'
+    route.params.episode_id = task.entity_id
+    delete route.params.type
+  } else {
+    route.params.type = taskType.for_entity.toLowerCase() + 's'
   }
-  if (taskType.for_entity === 'Asset') {
-    route.params.type = 'assets'
-  }
-  if (taskType.for_entity === 'Edit') {
-    route.params.type = 'edits'
-  }
+  console.log(route)
   return route
 }
 
 export const getTaskEntityPath = (task, episodeId) => {
   if (task) {
     let type = task.entity_type_name
-    if (type !== 'Shot' && type !== 'Edit') {
+    if (!['Shot', 'Edit', 'Episode'].includes(type)) {
       type = 'Asset'
     }
     const entityId = task.entity ? task.entity.id : task.entity_id
@@ -112,7 +110,8 @@ export const getProductionPath = (production, section = 'assets', episodeId) => 
   if (section === 'newsFeed') section = 'news-feed'
   let route = getProductionRoute(section, production.id)
   if (production.production_type === 'tvshow' && ![
-    'news-feed', 'schedule', 'production-settings', 'quota', 'team', 'episodes'
+    'news-feed', 'schedule', 'production-settings', 'quota', 'team',
+    'episodes', 'episode-stats'
   ].includes(section)) {
     route = episodifyRoute(route, episodeId || 'all')
   }

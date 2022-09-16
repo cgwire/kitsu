@@ -24,7 +24,7 @@
             :empty-width="100"
             :empty-height="60"
             :width="100"
-            :with-link="false"
+            :with-link="true"
           />
         </span>
 
@@ -674,6 +674,9 @@ export default {
             .splice(1)
             .join('/')
         }
+        if (this.isTVShow && type === 'Episode') {
+          entityName = this.task.entity_name
+        }
         return `${entityName}`
       } else {
         return 'Loading...'
@@ -1081,7 +1084,13 @@ export default {
 
     previewPath (previewId) {
       const route = this.taskPath(this.task, 'task-preview')
-
+      if (this.isTVShow) {
+        const taskType = this.taskTypeMap.get(this.task.task_type_id)
+        route.name = 'episode-task-preview'
+        if (taskType.for_entity === 'Episode') {
+          route.name = 'episode-episode-task-preview'
+        }
+      }
       if (route.params) {
         route.params.preview_id = previewId
       }

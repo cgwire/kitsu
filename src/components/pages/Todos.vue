@@ -371,9 +371,7 @@ export default {
       this.saveTodoSearch(searchQuery)
         .then(() => {
         })
-        .catch((err) => {
-          if (err) console.error(err)
-        })
+        .catch(console.error)
     },
 
     removeSearchQuery (searchQuery) {

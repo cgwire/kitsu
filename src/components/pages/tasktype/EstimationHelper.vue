@@ -15,16 +15,16 @@
             <th class="asset-type" v-if="isAssets">
               {{ $t('tasks.fields.asset_type') }}
             </th>
-            <th class="sequence" v-else>
+            <th class="sequence" v-else-if="isShots">
               {{ $t('tasks.fields.sequence') }}
             </th>
             <th class="name">
               {{ $t('tasks.fields.entity_name') }}
             </th>
-            <th class="frames numeric-cell" v-if="!isAssets">
+            <th class="frames numeric-cell" v-if="isShots">
               {{ $t('tasks.fields.frames') }}
             </th>
-            <th class="seconds numeric-cell" v-if="!isAssets">
+            <th class="seconds numeric-cell" v-if="isShots">
               {{ $t('tasks.fields.seconds').substring(0, 3) }}.
             </th>
             <th class="estimation numeric-cell">
@@ -86,16 +86,16 @@
             <td class="asset-type" v-if="isAssets">
               {{ getEntity(task.entity.id).asset_type_name }}
             </td>
-            <td class="sequence" v-else>
+            <td class="sequence" v-else-if="isShots">
               {{ getEntity(task.entity.id).sequence_name }}
             </td>
             <td class="name">
               {{ getEntity(task.entity.id).name }}
             </td>
-            <td class="frames numeric-cell" v-if="!isAssets">
+            <td class="frames numeric-cell" v-if="isShots">
               {{ getEntity(task.entity.id).nb_frames }}
             </td>
-            <td class="frames numeric-cell" v-if="!isAssets">
+            <td class="frames numeric-cell" v-if="isShots">
               {{ getSeconds(task) }}
             </td>
             <td
@@ -262,6 +262,7 @@ export default {
     ...mapGetters([
       'assetMap',
       'editMap',
+      'episodeMap',
       'currentProduction',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
@@ -274,6 +275,10 @@ export default {
 
     isAssets () {
       return this.entityType === 'Asset'
+    },
+
+    isShots () {
+      return this.entityType === 'Shot'
     },
 
     assignees () {
@@ -351,6 +356,8 @@ export default {
         return this.shotMap.get(entityId)
       } else if (this.entityType === 'Edit') {
         return this.editMap.get(entityId)
+      } else if (this.entityType === 'Episode') {
+        return this.episodeMap.get(entityId)
       }
       return this.assetMap.get(entityId)
     },
@@ -520,7 +527,7 @@ td {
 
 .thumbnail {
   vertical-align: middle;
-  min-width: 40px;
+  min-width: 46px;
   max-width: 40px;
   width: 40px;
 }

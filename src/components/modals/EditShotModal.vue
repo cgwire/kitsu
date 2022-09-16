@@ -164,7 +164,6 @@ export default {
     ...mapGetters([
       'currentProduction',
       'getSequenceOptions',
-      'getOpenProductionOptions',
       'openProductions',
       'sequences',
       'shots',

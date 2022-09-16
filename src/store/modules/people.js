@@ -446,31 +446,24 @@ const actions = {
   },
 
   savePersonTasksSearch ({ commit, rootGetters }, searchQuery) {
-    return new Promise((resolve, reject) => {
-      const query = state.personTaskSearchQueries.find(
-        (query) => query.name === searchQuery
-      )
+    const query = state.personTaskSearchQueries.find(
+      (query) => query.name === searchQuery
+    )
 
-      if (!query) {
-        peopleApi.createFilter(
-          'persontasks',
-          searchQuery,
-          searchQuery,
-          null,
-          null,
-          (err, searchQuery) => {
-            commit(SAVE_PERSON_TASKS_SEARCH_END, { searchQuery })
-            if (err) {
-              reject(err)
-            } else {
-              resolve(searchQuery)
-            }
-          }
-        )
-      } else {
-        resolve()
-      }
-    })
+    if (!query) {
+      return peopleApi.createFilter(
+        'persontasks',
+        searchQuery,
+        searchQuery,
+        null,
+        null
+      ).then(searchQuery => {
+        commit(SAVE_PERSON_TASKS_SEARCH_END, { searchQuery })
+        return Promise.resolve(searchQuery)
+      })
+    } else {
+      return Promise.resolve()
+    }
   },
 
   removePersonTasksSearch ({ commit, rootGetters }, searchQuery) {
@@ -557,31 +550,24 @@ const actions = {
   },
 
   savePeopleSearch ({ commit, rootGetters }, searchQuery) {
-    return new Promise((resolve, reject) => {
-      const query = state.peopleSearchQueries.find(
-        (query) => query.name === searchQuery
-      )
+    const query = state.peopleSearchQueries.find(
+      (query) => query.name === searchQuery
+    )
 
-      if (!query) {
-        peopleApi.createFilter(
-          'people',
-          searchQuery,
-          searchQuery,
-          null,
-          null,
-          (err, searchQuery) => {
-            commit(SAVE_PEOPLE_SEARCH_END, { searchQuery })
-            if (err) {
-              reject(err)
-            } else {
-              resolve(searchQuery)
-            }
-          }
-        )
-      } else {
-        resolve()
-      }
-    })
+    if (!query) {
+      peopleApi.createFilter(
+        'people',
+        searchQuery,
+        searchQuery,
+        null,
+        null
+      ).then(searchQuery => {
+        commit(SAVE_PEOPLE_SEARCH_END, { searchQuery })
+        return Promise.resolve(searchQuery)
+      })
+    } else {
+      Promise.resolve()
+    }
   },
 
   removePeopleSearch ({ commit, rootGetters }, searchQuery) {

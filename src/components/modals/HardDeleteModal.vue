@@ -145,5 +145,6 @@ export default {
 
 .input {
   margin-bottom: 1em;
+  border-radius: 10px;
 }
 </style>
