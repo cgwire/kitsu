@@ -586,7 +586,7 @@ export const playerMixin = {
       if (!this.isCommentsHidden && !this.isFocusTextarea()) {
         this.clearFocus()
       }
-      if (this.rawPlayerComparison) {
+      if (this.isComparing) {
         this.syncComparisonPlayer()
         this.rawPlayerComparison.play()
       }
@@ -797,6 +797,7 @@ export const playerMixin = {
       ) {
         if (this.isRepeating) {
           this.rawPlayer.setCurrentFrame(this.handleIn)
+          this.rawPlayerComparison.setCurrentFrame(this.handleIn)
         } else {
           this.onPlayNext()
         }

@@ -1263,12 +1263,12 @@ export default {
     onPlayNext () {
       const nextEntity = this.entityList[this.nextEntityIndex]
       this.resetHandles(nextEntity)
-      if (nextEntity.preview_file_extension === 'mp4') {
+      if (this.isRepeating && this.isCurrentPreviewMovie) {
+        this.rawPlayer.playNext()
+      } else if (nextEntity.preview_file_extension === 'mp4') {
         this.rawPlayer.playNext(this.handleIn)
         this.syncComparisonPlayer()
         this._setCurrentTimeOnHandleIn()
-      } else if (this.isRepeating && this.isCurrentPreviewMovie) {
-        this.rawPlayer.playNext()
       } else {
         this.onPlayNextEntityClicked()
         if (this.isCurrentPreviewPicture) {
