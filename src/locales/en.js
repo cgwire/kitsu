@@ -88,7 +88,7 @@ export default {
     edit_error: 'An error occurred while editing comment. Please contact our support team.',
     error: 'An error occurred while posting comment',
     max_retakes_error: 'You cannnot add retakes anymore on this task.',
-    no_atachments: 'There are no attachments for this comment.',
+    no_attachments: 'There are no attachments for this comment.',
     no_file_attached: 'No preview attached',
     pin: 'Pin',
     pinned: 'Pinned',
@@ -623,6 +623,7 @@ export default {
       annotation_draw: 'Draw annotations',
       annotation_text: 'Double click on the preview to add some text',
       annotation_delete: 'Delete annotation',
+      annotation_erase: 'Erase annotation',
       annotation_redo: 'Redo annotation',
       annotation_undo: 'Undo annotation',
       annotation_big: 'Big',
@@ -666,6 +667,7 @@ export default {
       split_screen: 'Compare with other task types',
       switch_ld: 'Switch to low definition',
       switch_hd: 'Switch to high definition',
+      toggle_annotations: 'Show/Hide annotations while playing movies',
       toggle_playing_annotations: 'Show/Hide annotations while playing movies',
       toggle_waveform: 'Show/Hide movie waveform'
     }
