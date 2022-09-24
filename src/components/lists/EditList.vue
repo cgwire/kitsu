@@ -238,7 +238,6 @@
             :style="{'left': offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'}"
             :key="edit.id + '-' + descriptor.id"
             v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-            v-if="isShowInfos"
           >
             <input
               class="input-editor"
@@ -248,6 +247,35 @@
               v-if="descriptor.choices.length === 0 && (isCurrentUserManager
               || isSupervisorInDepartments(descriptor.departments))"
             />
+            <div
+              class="metadata-value selectable"
+              v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+            >
+              <p
+                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+                :key="`${edit.id}-${descriptor.id}-${i}-${option.text}-div`"
+              >
+                <input
+                  type="checkbox"
+                  @change="event => onMetadataChecklistChanged(edit, descriptor, option.text, event)"
+                  :id="`${edit.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :checked="getMetadataChecklistValues(descriptor, edit)[option.text]"
+                  :disabled="!(isCurrentUserManager
+                    || isSupervisorInDepartments(descriptor.departments))"
+                  :style="[isCurrentUserManager
+                    || isSupervisorInDepartments(descriptor.departments) ?
+                      {cursor: 'pointer'} : {cursor: 'auto'}]"
+                />
+                <label
+                  :for="`${edit.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :style="[isCurrentUserManager
+                    || isSupervisorInDepartments(descriptor.departments) ?
+                      {cursor: 'pointer'} : {cursor: 'auto'}]"
+                >
+                  {{ option.text }}
+                </label>
+              </p>
+            </div>
             <span
               class="select"
               v-else-if="isCurrentUserManager
@@ -322,6 +350,35 @@
               v-if="descriptor.choices.length === 0 && (isCurrentUserManager
               || isSupervisorInDepartments(descriptor.departments))"
             />
+            <div
+              class="metadata-value selectable"
+              v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+            >
+              <p
+                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+                :key="`${edit.id}-${descriptor.id}-${i}-${option.text}-div`"
+              >
+                <input
+                  type="checkbox"
+                  @change="event => onMetadataChecklistChanged(edit, descriptor, option.text, event)"
+                  :id="`${edit.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :checked="getMetadataChecklistValues(descriptor, edit)[option.text]"
+                  :disabled="!(isCurrentUserManager
+                    || isSupervisorInDepartments(descriptor.departments))"
+                  :style="[isCurrentUserManager
+                    || isSupervisorInDepartments(descriptor.departments) ?
+                      {cursor: 'pointer'} : {cursor: 'auto'}]"
+                />
+                <label
+                  :for="`${edit.id}-${descriptor.id}-${i}-${option.text}-input`"
+                  :style="[isCurrentUserManager
+                    || isSupervisorInDepartments(descriptor.departments) ?
+                      {cursor: 'pointer'} : {cursor: 'auto'}]"
+                >
+                  {{ option.text }}
+                </label>
+              </p>
+            </div>
             <span
               class="select"
               v-else-if="isCurrentUserManager
