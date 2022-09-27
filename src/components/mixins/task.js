@@ -11,14 +11,6 @@ export const taskMixin = {
   mounted () {
   },
 
-  beforeDestroy () {
-    if (this.$refs['add-comment']) {
-      const task = this.getTask()
-      const lastComment = `${this.$refs['add-comment'].text}`
-      drafts.setTaskDraft(task.id, lastComment)
-    }
-  },
-
   computed: {
   },
 

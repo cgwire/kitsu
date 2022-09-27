@@ -1092,7 +1092,10 @@ export default {
       ) {
         const lastComment = `${this.$refs['add-comment'].text}`
         const previousDraft = drafts.getTaskDraft(this.previousTaskId)
-        if (this.$refs['add-comment'].text.length > 0 || previousDraft) {
+        if (
+          (this.$refs['add-comment'].text.length > 0 || previousDraft) &&
+          this.$refs['add-comment'].text !== previousDraft
+        ) {
           drafts.setTaskDraft(this.previousTaskId, lastComment)
         }
       }
