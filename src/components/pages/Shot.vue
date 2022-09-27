@@ -582,6 +582,7 @@ export default {
 }
 
 h2.subtitle {
+  border-bottom: 0;
   margin-top: 0;
   margin-bottom: 0.5em;
   font-size: 1.5em;

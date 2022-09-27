@@ -1089,7 +1089,7 @@ export default {
     create_tasks_edit_explaination: 'You are going to create a new task for each edit of current project for the given task type. Do you want to continue?',
     create_tasks_edit_failed: 'A server error occurred while proceeding creations.',
     current: 'Task to do',
-    current_status: 'Current status :',
+    current_status: 'Current status:',
     delete_all_text: 'Are you sure you want to delete all tasks for given {name}? Please, confirm by typing the task type name of the tasks you want to delete in the text field.',
     delete_all_error: 'Deleting all tasks for given task type failed.',
     delete_error: 'An error occurred while deleting task.',
