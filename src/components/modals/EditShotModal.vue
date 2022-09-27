@@ -266,21 +266,16 @@ export default {
     },
 
     'form.frameIn' () {
-      console.log('change')
       const frameIn = this.sanitizeInteger(this.form.frameIn)
       const frameOut = this.sanitizeInteger(this.form.frameOut)
-      console.log(frameIn, frameOut)
       if (frameIn &&
           frameOut &&
           frameOut > frameIn) {
-        console.log('ok')
         this.form.nb_frames = frameOut - frameIn
-        console.log('ok', this.form.nb_frames)
       }
     },
 
     'form.frameOut' () {
-      console.log('change out')
       const frameIn = this.sanitizeInteger(this.form.frameIn)
       const frameOut = this.sanitizeInteger(this.form.frameOut)
       if (frameIn &&
