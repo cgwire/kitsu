@@ -111,7 +111,13 @@ export default {
             console.error(err)
           }
         }
-        if (success) this.$router.push('/')
+        if (success) {
+          if (this.$route.query.redirect) {
+            this.$router.push(this.$route.query.redirect)
+          } else {
+            this.$router.push('/')
+          }
+        }
       })
     }
   },
