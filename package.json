@@ -11,7 +11,9 @@
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit",
-    "test:functional": "$(npm bin)/cypress open"
+    "test:functional": "$(npm bin)/cypress open",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "dependencies": {
     "@arch-inc/fabricjs-psbrush": "^0.0.20",
@@ -68,6 +70,14 @@
     "wavesurfer.js": "5.2.0"
   },
   "devDependencies": {
+    "@storybook/addon-actions": "^6.5.12",
+    "@storybook/addon-essentials": "^6.5.12",
+    "@storybook/addon-interactions": "^6.5.12",
+    "@storybook/addon-links": "^6.5.12",
+    "@storybook/builder-webpack4": "^6.5.12",
+    "@storybook/manager-webpack4": "^6.5.12",
+    "@storybook/testing-library": "^0.0.13",
+    "@storybook/vue": "^6.5.12",
     "@vue/cli-plugin-babel": "4.5.13",
     "@vue/cli-plugin-e2e-cypress": "4.5.13",
     "@vue/cli-plugin-eslint": "5.0.0-beta.2",
@@ -85,6 +95,7 @@
     "eslint-plugin-vue": "7.15.1",
     "localStorage": "1.0.4",
     "ncu": "0.2.1",
+    "vue-loader": "^15.10.0",
     "vue-template-compiler": "2.6.14",
     "webpack": "4.46.0"
   },
