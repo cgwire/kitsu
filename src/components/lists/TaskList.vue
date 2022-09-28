@@ -248,8 +248,8 @@ export default {
 
   props: {
     disabledDates: {
-      type: Array,
-      default: () => []
+      type: Object,
+      default: () => {}
     },
     entityType: {
       type: String,

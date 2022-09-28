@@ -93,7 +93,7 @@
               :with-margin="false"
               :label="$t('main.start_date')"
               :can-delete="false"
-              v-model="schedule.selectedStartDate"
+              v-model="schedule.taskTypeStartDate"
             />
           </div>
           <div
@@ -106,7 +106,7 @@
               :with-margin="false"
               :label="$t('main.end_date')"
               :can-delete="false"
-              v-model="schedule.selectedEndDate"
+              v-model="schedule.taskTypeEndDate"
             />
           </div>
 
@@ -161,8 +161,8 @@
       >
         <schedule
           ref="schedule-widget"
-          :start-date="schedule.startDate"
-          :end-date="schedule.endDate"
+          :start-date="productionStartDate"
+          :end-date="productionEndDate"
           :hierarchy="schedule.scheduleItems"
           :zoom-level=schedule.zoomLevel
           :height="schedule.scheduleHeight"
@@ -317,8 +317,8 @@ export default {
         endDate: moment().add(3, 'months'),
         scheduleItems: [],
         scheduleHeight: 800,
-        selectedEndDate: moment().add(3, 'months').toDate(),
-        selectedStartDate: moment().add(-1, 'months').toDate(),
+        taskTypeEndDate: moment().add(3, 'months').toDate(),
+        taskTypeStartDate: moment().add(-1, 'months').toDate(),
         startDate: moment().add(-1, 'months'),
         zoomLevel: 1,
         zoomOptions: [
@@ -430,6 +430,14 @@ export default {
       } else {
         return en
       }
+    },
+
+    productionStartDate () {
+      return parseDate(this.currentProduction.start_date)
+    },
+
+    productionEndDate () {
+      return parseDate(this.currentProduction.end_date)
     },
 
     disabledDates () {
@@ -600,6 +608,7 @@ export default {
             if (searchQuery) this.onSearchChange(searchQuery)
             setTimeout(() => {
               this.setSearchFromUrl()
+              this.resetTaskTypeDates()
             }, 200)
             if (this.isActiveTab('schedule')) {
               this.resetScheduleItems()
@@ -617,6 +626,7 @@ export default {
         this.loading.entities = true
         this.setCurrentScheduleItem()
           .then(() => {
+            this.resetTaskTypeDates()
             this.loading.entities = false
             if (this.isActiveTab('schedule')) {
               this.resetScheduleItems()
@@ -1160,6 +1170,15 @@ export default {
           this.loading.importing = false
           this.showImportRenderModal()
         })
+    },
+
+    resetTaskTypeDates () {
+      if (this.currentScheduleItem) {
+        this.schedule.taskTypeStartDate =
+          parseDate(this.currentScheduleItem.start_date).toDate()
+        this.schedule.taskTypeEndDate =
+          parseDate(this.currentScheduleItem.end_date).toDate()
+      }
     }
   },
 
@@ -1170,8 +1189,6 @@ export default {
 
     currentProduction () {
       this.initData(true)
-      this.schedule.startDate = parseDate(this.currentProduction.start_date)
-      this.schedule.endDate = parseDate(this.currentProduction.end_date)
     },
 
     currentSort () {
@@ -1198,25 +1215,28 @@ export default {
 
     currentScheduleItem () {
       if (this.currentScheduleItem) {
-        this.schedule.selectedStartDate = this.schedule.startDate.toDate()
-        this.schedule.selectedEndDate = this.schedule.endDate.toDate()
+        this.resetTaskTypeDates()
       }
     },
 
-    'schedule.selectedStartDate' () {
-      const newDate = formatSimpleDate(this.schedule.selectedStartDate)
+    'schedule.taskTypeStartDate' () {
+      const newDate = formatSimpleDate(this.schedule.taskTypeStartDate)
       if (newDate !== this.currentScheduleItem.start_date) {
-        this.currentScheduleItem.startDate = this.schedule.startDate
-        this.currentScheduleItem.endDate = this.schedule.endDate
+        this.currentScheduleItem.startDate =
+          moment(this.schedule.taskTypeStartDate)
+        this.currentScheduleItem.endDate =
+          moment(this.schedule.taskTypeEndDate)
         this.saveScheduleItem(this.currentScheduleItem)
       }
     },
 
-    'schedule.selectedEndDate' () {
-      const newDate = formatSimpleDate(this.schedule.selectedEndDate)
+    'schedule.taskTypeEndDate' () {
+      const newDate = formatSimpleDate(this.schedule.taskTypeEndDate)
       if (newDate !== this.currentScheduleItem.end_date) {
-        this.currentScheduleItem.startDate = this.schedule.startDate
-        this.currentScheduleItem.endDate = this.schedule.endDate
+        this.currentScheduleItem.startDate =
+          moment(this.schedule.taskTypeStartDate)
+        this.currentScheduleItem.endDate =
+          moment(this.schedule.taskTypeEndDate)
         this.saveScheduleItem(this.currentScheduleItem)
       }
     }
