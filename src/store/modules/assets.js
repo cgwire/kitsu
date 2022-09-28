@@ -90,6 +90,7 @@ import {
   SET_ASSET_TYPE_SEARCH,
   COMPUTE_ASSET_TYPE_STATS,
   UPDATE_METADATA_DESCRIPTOR_END,
+  SET_CURRENT_EPISODE,
 
   CHANGE_ASSET_SORT,
   LOCK_ASSET,
@@ -377,6 +378,15 @@ const actions = {
     const taskMap = rootGetters.taskMap
 
     if (isTVShow && !episode) {
+      // If it's tv show and if we don't have any episode set,
+      // we use the first one.
+      episode =
+        rootGetters.episodes.length > 0 ? rootGetters.episodes[0] : null
+      if (!episode) return Promise.resolve([])
+      commit(SET_CURRENT_EPISODE, episode.id)
+    }
+
+    if (isTVShow && !episode && !all) {
       return Promise.resolve([])
     }
 
