@@ -190,9 +190,16 @@ const actions = {
         }
       } else if (rootGetters.currentTaskType.for_entity === 'Asset') {
         if (rootGetters.assetMap.size < 2 || force) {
-          dispatch('loadAssets')
-            .then(resolve)
-            .catch(reject)
+          if (rootGetters.episodes.length === 0 && rootGetters.isTVShow) {
+            dispatch('loadEpisodes')
+              .then(() => dispatch('loadAssets'))
+              .then(resolve)
+              .catch(reject)
+          } else {
+            dispatch('loadAssets')
+              .then(resolve)
+              .catch(reject)
+          }
         } else {
           resolve()
         }
