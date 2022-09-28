@@ -20,6 +20,7 @@
     "@google/model-viewer": "1.10.1",
     "async": "3.2.0",
     "bowser": "2.11.0",
+    "cache-loader": "^4.1.0",
     "chart.js": "2.9.4",
     "color-hash": "2.0.1",
     "cypress": "8.1.0",
