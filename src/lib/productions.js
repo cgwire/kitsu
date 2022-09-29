@@ -23,7 +23,7 @@ export const PRODUCTION_TYPE_OPTIONS = [
 
 export const PRODUCTION_STYLE_OPTIONS = [
   { label: '2d', value: '2d' },
-  { label: '3d', value: '2d' },
+  { label: '3d', value: '3d' },
   { label: '2d3d', value: '2d3d' },
   { label: 'vfx', value: 'vfx' },
   { label: 'stop_motion', value: 'stop-motion' },
