@@ -457,6 +457,7 @@ export default {
   methods: {
     ...mapActions([
       'clearEpisodes',
+      'clearSelectedTasks',
       'loadEpisodes',
       'loadMilestones',
       'incrementNotificationCounter',
@@ -722,6 +723,10 @@ export default {
       this.$nextTick(() => {
         this.silent = false
       })
+    },
+
+    currentSectionOption () {
+      this.clearSelectedTasks()
     }
   },
 

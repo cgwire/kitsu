@@ -1693,6 +1693,9 @@ tbody:last-child .empty-line:last-child {
   border: 1px solid #CCC;
 }
 
+.modal {
+}
+
 .modal-content {
   .button {
     margin-left: 0.5em;

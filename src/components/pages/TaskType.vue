@@ -1,5 +1,7 @@
 <template>
 <div class="task-type columns fixed-page">
+  <action-topbar />
+
   <div class="column main-column">
     <div class="task-type page" ref="page">
       <div class="task-type-header page-header flexrow-item" ref="header">
@@ -258,6 +260,8 @@ import {
 import { formatListMixin } from '@/components/mixins/format'
 
 import { CornerLeftUpIcon } from 'vue-feather-icons'
+
+import ActionTopbar from '@/components/tops/ActionTopbar'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DateField from '@/components/widgets/DateField'
 import Combobox from '@/components/widgets/Combobox'
@@ -276,6 +280,7 @@ export default {
   name: 'task-type-page',
   mixins: [formatListMixin, searchMixin],
   components: {
+    ActionTopbar,
     ButtonSimple,
     CornerLeftUpIcon,
     Combobox,
@@ -361,6 +366,7 @@ export default {
   },
 
   mounted () {
+    this.clearSelectedTasks()
     const isAssets = this.$route.path.includes('assets')
     const isShots = this.$route.path.includes('shots')
     this.entityType = isAssets ? 'Asset' : isShots ? 'Shot' : 'Edit'
@@ -375,6 +381,7 @@ export default {
   },
 
   beforeDestroy () {
+    this.clearSelectedTasks()
     window.removeEventListener('resize', this.resetScheduleHeight)
   },
 
