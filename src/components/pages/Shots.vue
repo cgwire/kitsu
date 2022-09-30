@@ -444,12 +444,6 @@ export default {
         this.shotListScrollPosition
       )
     }
-    if (!this.isCurrentUserManager && this.user.departments.length > 0) {
-      this.selectedDepartment = 'MY_DEPARTMENTS'
-      this.departmentFilter = this.user.departments
-    } else {
-      this.departmentFilter = []
-    }
   },
 
   computed: {
