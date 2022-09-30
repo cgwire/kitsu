@@ -1,245 +1,455 @@
 <template>
   <div>
-    <div :class="{
-      'action-topbar': true,
-      'hidden': isHidden
-    }">
-      <div class="flexrow action-bar">
+    <div
+      ref="action-bar"
+      :class="{
+        'action-topbar': true,
+        unselectable: true,
+        'hidden': isHidden
+      }"
+      :style="{
+        left: position.left + 'px',
+        top: position.top + 'px'
+      }"
+    >
 
-        <div class="flexrow-item more-menu-icon" @click="toggleMenu">
-          <div class="flexrow">
-            <span class="flexrow-item hide-small-screen">
-              {{ currentMenuLabel }}
-            </span>
-            <chevron-down-icon class="flexrow-item" />
-          </div>
-        </div>
-
-        <div class="flexrow-item" v-if="selectedBar === 'assignation'">
+      <div class="menu">
+        <div class="flexrow">
           <div
-            class="flexrow"
-            v-if="isCurrentUserManager || isSupervisorInDepartment ||
-            isInDepartment"
+            class="more-menu-item handle"
+            @mousedown="startDrag"
+            @mouseup="stopDrag"
+            :title="$t('main.move_action_bar')"
           >
-            <div class="assignation flexrow-item hide-small-screen">
-              <span>
-                {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
-              </span>
-              <span v-show="isCurrentUserArtist">
-                myself
-              </span>
-            </div>
-            <div class="flexrow-item combobox-item">
-              <people-field
-                ref="assignation-field"
-                :people="currentTeam"
-                big
-                v-model="person"
-                v-show="isCurrentUserManager || isCurrentUserSupervisor"
-              />
-            </div>
-            <div class="" v-if="isAssignationLoading">
-              <spinner :is-white="true" :size="25" />
-            </div>
-            <div class="flexrow-item" v-if="!isAssignationLoading">
-              <button
-                class="button is-success confirm-button"
-                @click="confirmAssign"
-              >
-                {{ $t('main.confirmation') }}
-              </button>
-            </div>
-            <div
-              class="flexrow-item hide-small-screen"
-              v-if="!isAssignationLoading && (
-                isCurrentUserManager || isSupervisorInDepartment)"
-            >
-              {{ $t('main.or') }}
-            </div>
-            <div
-              class="flexrow-item hide-small-screen"
-              v-if="!isAssignationLoading && (
-                isCurrentUserManager || isSupervisorInDepartment)"
-            >
-              <button
-                class="button is-link clear-assignation-button hide-small-screen"
-                @click="clearAssignation"
-              >
-                {{ $t('tasks.clear_assignations') }}
-              </button>
-            </div>
-            <div
-              class="flexrow-item hide-small-screen"
-              v-else-if="!isAssignationLoading && isCurrentUserArtist"
-            >
-              <button
-                class="button is-link clear-assignation-button hide-small-screen"
-                @click="clearAssignation"
-              >
-                {{ $t('tasks.clear_own_assignations') }}
-              </button>
-            </div>
-            <div class="flexrow-item" v-if="!isShowAssignations">
-              {{ $t('tasks.assignation_warning') }}
-            </div>
+            <more-vertical-icon class="handle-icon" />
+            <more-vertical-icon class="handle-icon" />
           </div>
-          <div style="padding-left: 1em;" v-else>
-            {{ $t('tasks.no_assignation_right') }}
+
+          <div
+            :class="{
+              'more-menu-item': true,
+              'status-item': true,
+              active: selectedBar === 'change-status'
+            }"
+            :title="$t('menu.change_status')"
+            @click="selectBar('change-status')"
+            v-if="(isCurrentUserManager || isSupervisorInDepartment)
+              && !isEntitySelection"
+          >
+            STATUS
+          </div>
+
+          <div
+            :class="{
+              'more-menu-item': true,
+              active: selectedBar === 'assignation'
+            }"
+            :title="$t('menu.assign_tasks')"
+            v-if="
+              isCurrentViewEntity &&
+              (
+                isCurrentUserManager ||
+                isSupervisorInDepartment ||
+                isInDepartment
+              ) &&
+              !isEntitySelection"
+            @click="selectBar('assignation')"
+          >
+            <user-icon />
+          </div>
+
+          <div
+            :class="{
+              'more-menu-item': true,
+              active: selectedBar === 'priorities'
+            }"
+            :title="$t('menu.change_priority')"
+            v-if="(isCurrentViewEntity || isCurrentViewPerson) &&
+              (isCurrentUserManager || isSupervisorInDepartment) &&
+              !isEntitySelection"
+            @click="selectBar('priorities')"
+          >
+            <alert-circle-icon />
+          </div>
+
+          <div
+            :class="{
+              'more-menu-item': true,
+              active: selectedBar === 'thumbnails'
+            }"
+            :title="$t('menu.set_thumbnails')"
+            v-if="isTaskSelection"
+            @click="selectBar('thumbnails')"
+          >
+            <image-icon />
+          </div>
+
+          <div
+            class="menu-separator"
+            v-if="!isEntitySelection"
+          >
+          </div>
+
+          <div
+            :class="{
+              'more-menu-item': true,
+              active: selectedBar === 'playlists'
+            }"
+            :title="$t('menu.generate_playlist')"
+            v-if="
+              (
+                isCurrentViewAsset ||
+                isCurrentViewShot ||
+                isCurrentViewTaskType
+              ) &&
+              !isEntitySelection &&
+              nbSelectedTasks > 1
+            "
+            @click="selectBar('playlists')"
+          >
+            <film-icon />
+          </div>
+
+          <div
+            v-if="
+              (
+                isCurrentViewAsset ||
+                isCurrentViewShot ||
+                isCurrentViewTaskType
+              ) &&
+              !isEntitySelection &&
+              nbSelectedTasks > 1
+            "
+            class="menu-separator"
+          >
+          </div>
+
+          <div
+            :class="{
+              'more-menu-item': true,
+              active: selectedBar === 'tasks'
+            }"
+            :title="$t('menu.create_tasks')"
+            @click="selectBar('tasks')"
+            v-if="
+              (isCurrentViewEntity &&
+              !isCurrentViewTaskType) && isCurrentUserManager &&
+              !isEntitySelection"
+          >
+            <check-square-icon />
+          </div>
+
+          <div
+            :class="{
+              'more-menu-item': true,
+              active: selectedBar === 'delete-tasks'
+            }"
+            :title="$t('menu.delete_tasks')"
+            @click="selectBar('delete-tasks')"
+            v-if="
+              isCurrentViewEntity &&
+              isCurrentUserManager &&
+              !isEntitySelection"
+          >
+            <trash-icon />
+          </div>
+
+          <div
+            class="menu-separator"
+            v-if="
+              !isEntitySelection &&
+              customActions &&
+              customActions.length > 0
+            "
+          >
+          </div>
+
+          <div
+            :class="{
+              'more-menu-item': true,
+              active: selectedBar === 'custom-actions'
+            }"
+            :title="$t('menu.run_custom_action')"
+            @click="selectBar('custom-actions')"
+            v-if="
+              (isCurrentUserManager || isSupervisorInDepartment) &&
+              !isEntitySelection &&
+              customActions &&
+              customActions.length > 0"
+          >
+            <play-circle-icon />
+          </div>
+
+          <div
+            class="more-menu-item"
+            :title="$t('menu.delete_assets')"
+            @click="selectBar('delete-assets')"
+            v-if="
+              isCurrentViewAsset &&
+              isCurrentUserManager &&
+              !isTaskSelection"
+          >
+            <trash-icon />
+          </div>
+
+          <div
+            class="more-menu-item"
+            :title="$t('menu.delete_shots')"
+            @click="selectBar('delete-shots')"
+            v-if="
+              isCurrentViewShot &&
+              isCurrentUserManager &&
+              !isTaskSelection"
+          >
+            <trash-icon />
+          </div>
+
+          <div
+            class="more-menu-item"
+            :title="$t('menu.delete_edits')"
+            @click="selectBar('delete-edits')"
+            v-if="
+              isCurrentViewEdit &&
+              isCurrentUserManager &&
+              !isTaskSelection"
+          >
+            <trash-icon />
+          </div>
+
+          <div class="filler"></div>
+
+          <div
+            class="flexrow-item close-bar"
+            @click="clearSelection"
+          >
+            <x-icon />
           </div>
         </div>
+      </div>
+
+      <div class="flexrow action-bar" v-if="selectedBar">
 
         <div
-          class="flexrow-item"
+          class="flexcolumn is-wide"
           v-if="selectedBar === 'change-status'"
         >
-          <div class="flexrow">
-            <div class="flexrow-item strong bigger hide-small-screen">
-              {{ $t('tasks.change_status_to') }}
-            </div>
-            <div class="flexrow-item">
+          <div class="flexrow mb05">
+            <div class="flexrow-item change-status-item">
               <combobox-status
+                :with-margin="false"
                 :task-status-list="availableTaskStatuses"
                 v-model="taskStatusId"
               />
             </div>
             <div
-              class="flexrow-item"
-              v-if="!isChangeStatusLoading"
+              class="flexrow-item is-wide"
             >
-              <input
-                class="comment-text input"
+              <textarea
+                class="comment-text input w100"
                 type="text"
-                :placeholder="$t('tasks.with_comment')"
+                :placeholder="$t('comments.add_comment')"
                 @keyup.ctrl.enter="confirmTaskStatusChange"
                 @keyup.meta.enter="confirmTaskStatusChange"
                 v-model="statusComment"
               />
+            </div>
           </div>
 
-          <div class="flexrow-item" v-if="!isChangeStatusLoading">
+          <div class="flexrow-item is-wide" v-if="!isChangeStatusLoading">
             <button
-              class="button is-success confirm-button"
+              class="button confirm-button is-wide"
               @click="confirmTaskStatusChange"
             >
-              {{ $t('main.confirmation') }}
+              {{ $tc(
+                'tasks.change_task_status',
+                 nbSelectedTasks,
+                 {nbSelectedTasks}
+              )}}
             </button>
           </div>
-          <div class="flexrow-item" v-if="isChangeStatusLoading">
-            <spinner :is-white="true" />
-          </div>
-        </div>
-      </div>
-
-        <div
-          class="flexrow-item"
-          v-if="selectedBar === 'priorities'"
-        >
-          <div class="flexrow">
-            <div class="flexrow-item strong bigger hide-small-screen">
-              {{ $t('tasks.change_priority') }}
-            </div>
-            <div class="flexrow-item priority-combobox">
-              <combobox
-                :options="priorityOptions"
-                v-model="priority"
-              />
-            </div>
-            <div class="flexrow-item" v-if="!isChangePriorityLoading">
-              <button
-                class="button is-success confirm-button"
-                @click="confirmPriorityChange"
-              >
-                {{ $t('main.confirmation') }}
-              </button>
-            </div>
-            <div class="flexrow-item" v-if="isChangePriorityLoading">
-              <spinner :is-white="true" />
-            </div>
+          <div class="flexrow-item has-text-centered" v-if="isChangeStatusLoading">
+            <spinner :size="20" class="spinner" />
           </div>
         </div>
 
         <div
-          class="flexrow-item"
-          v-if="selectedBar === 'tasks'"
+          class="flexcolumn flexrow-item is-wide"
+          v-if="selectedBar === 'assignation'"
         >
-          <div class="flexrow">
-            <div class="flexrow-item strong bigger hide-small-screen">
-              {{ $t('tasks.create_for_selection') }}
-            </div>
-            <div class="flexrow-item" v-if="!isCreationLoading">
-              <button
-                class="button is-success confirm-button"
-                @click="confirmTaskCreation"
-              >
-                {{ $t('main.confirmation') }}
-              </button>
-            </div>
-            <div class="flexrow-item" v-else>
-              <spinner :is-white="true" />
-            </div>
+          <div class="assignation flexrow-item">
+            <span v-show="isCurrentUserArtist">
+              {{ $tc('tasks.to_myself') }}
+            </span>
           </div>
-        </div>
-
-        <div
-          class="flexrow-item"
-          v-if="selectedBar === 'playlists'"
-        >
-          <div class="flexrow">
-            <div class="flexrow-item strong bigger hide-small-screen">
-              {{ $t('playlists.create_for_selection') }}
+          <div class="flexrow mb05">
+            <people-field
+              class="flexrow-item is-wide"
+              ref="assignation-field"
+              :people="currentTeam"
+              :placeholder="$t('tasks.assign_explaination')"
+              big
+              wide
+              v-model="person"
+              v-show="isCurrentUserManager || isCurrentUserSupervisor"
+            />
+          </div>
+          <div class="" v-if="isAssignationLoading">
+            <div class="flexrow-item">
+              <spinner :size="20" class="spinner" />
             </div>
             <div class="flexrow-item">
-              <button
-                class="button is-success confirm-button"
-                @click="confirmPlaylistGeneration"
-              >
-                {{ $t('main.confirmation') }}
-              </button>
+            &nbsp;
             </div>
+          </div>
+          <div class="flexrow-item is-wide" v-if="!isAssignationLoading">
+            <button
+              class="button confirm-button is-wide"
+              @click="confirmAssign"
+            >
+              {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
+            </button>
+          </div>
+          <div
+            class="flexrow-item is-wide has-text-centered flexrow"
+            v-if="!isAssignationLoading && (
+              isCurrentUserManager || isSupervisorInDepartment)"
+          >
+            <button
+              class="button is-link clear-assignation-button"
+              @click="clearAssignation"
+            >
+              {{ $t('main.or') }}
+              {{ $t('tasks.clear_assignations') }}
+            </button>
+          </div>
+          <div
+            class="flexrow-item hide-small-screen"
+            v-else-if="!isAssignationLoading && isCurrentUserArtist"
+          >
+            <button
+              class="button is-link clear-assignation-button hide-small-screen"
+              @click="clearAssignation"
+            >
+              {{ $t('tasks.clear_own_assignations') }}
+            </button>
+          </div>
+          <div class="flexrow-item" v-if="!isShowAssignations">
+            {{ $t('tasks.assignation_warning') }}
           </div>
         </div>
 
         <div
-          class="flexrow-item"
+          class="flexcolumn filler"
+          v-if="selectedBar === 'priorities'"
+        >
+          <div class="flexrow-item flexrow priority-combobox mb05">
+            <div class="flexrow-item">
+              {{ $t('tasks.change_priority_to') }}
+            </div>
+            <combobox-styled
+              class="flexrow-item"
+              is-thin
+              :options="priorityOptions"
+              v-model="priority"
+            />
+          </div>
+          <div class="flexrow-item is-wide">
+            <button
+              class="button confirm-button is-wide"
+              @click="confirmPriorityChange"
+             v-if="!isChangePriorityLoading"
+            >
+              {{ $tc('tasks.change_priority', nbSelectedTasks, {nbSelectedTasks}) }}
+            </button>
+            <spinner :size="20" class="spinner" v-else />
+          </div>
+        </div>
+
+        <div class="flexrow is-wide"
+          v-if="selectedBar === 'tasks'"
+        >
+          <button
+              class="button confirm-button is-wide"
+              @click="confirmTaskCreation"
+              v-if="!isCreationLoading"
+            >
+              {{ $t('tasks.create_for_selection') }}
+          </button>
+          <div class="flexrow-item" v-else>
+            <spinner :size="20" class="spinner" />
+          </div>
+        </div>
+
+        <div
+          class="flexrow-item is-wide"
+          v-if="selectedBar === 'thumbnails'"
+        >
+          <button
+            class="button confirm-button is-wide"
+            @click="confirmSetThumbnailsFromTasks"
+          >
+            {{ $tc(
+              'tasks.set_thumbnails_from_tasks',
+              nbSelectedTasks,
+              {nbSelectedTasks}
+            ) }}
+          </button>
+        </div>
+
+        <div
+          class="flexrow-item is-wide"
+          v-if="selectedBar === 'playlists'"
+        >
+          <button
+            class="button confirm-button is-wide"
+            @click="confirmPlaylistGeneration"
+          >
+            {{ $t('playlists.create_for_selection') }}
+          </button>
+        </div>
+
+        <div
+          class="flexrow-item is-wide"
           v-if="selectedBar === 'delete-tasks'"
         >
-          <div class="flexrow">
-            <div class="flexrow-item strong bigger hide-small-screen">
-              {{ $t('tasks.delete_for_selection') }}
-            </div>
-            <div class="flexrow-item" v-if="!isDeletionLoading">
-              <button
-                class="button is-danger confirm-button"
-                @click="confirmTaskDeletion"
-              >
-                {{ $t('main.confirmation') }}
-              </button>
-            </div>
-            <div class="flexrow-item" v-else>
-              <spinner :is-white="true" />
-            </div>
-            <div class="flexrow-item error" v-if="errors.deleteTask">
-              {{ $t('tasks.delete_error') }}
-            </div>
+          <div
+            class="flexrow is-wide"
+            v-if="!isDeletionLoading"
+          >
+            <button
+              class="button is-danger confirm-button is-wide"
+              @click="confirmTaskDeletion"
+            >
+              {{ $tc(
+                'tasks.delete_for_selection',
+                nbSelectedTasks,
+                {nbSelectedTasks}
+              ) }}
+            </button>
+          </div>
+          <div class="flexrow-item" v-else>
+            <spinner :size="20" class="spinner" />
+          </div>
+          <div class="flexrow-item error" v-if="errors.deleteTask">
+            {{ $t('tasks.delete_error') }}
           </div>
         </div>
 
         <div
-          class="flexrow-item"
+          class="flexcolumn filler"
           v-if="selectedBar === 'custom-actions'"
         >
-          <div class="flexrow">
-            <div class="flexrow-item strong bigger hide-small-screen">
-              {{ $t('custom_actions.run_for_selection') }}
-            </div>
-            <div class="flexrow-item combobox-item">
-              <combobox-model
-                :models="customActions"
-                v-model="customAction"
-              />
-            </div>
+          <div class="flexrow-item combobox-item custom-action-combobox is-wide">
+            <combobox-model
+              class="is-wide"
+              :models="customActions"
+              v-model="customAction"
+            />
+          </div>
+
+          <div class="flexrow mt05">
             <div
-              class="flexrow-item"
+              class="flexrow-item is-wide"
               v-if="customAction && !customAction.is_ajax"
             >
               <form
@@ -290,45 +500,50 @@
                   :value="currentEntityType"
                 />
                 <button
-                  class="button is-success"
+                  class="button is-wide"
                   type="submit"
                 >
-                  {{ $t('main.confirmation') }}
+                  {{ $tc(
+                    'custom_actions.run_for_selection',
+                    nbSelectedTasks,
+                    {nbSelectedTasks})
+                  }}
                 </button>
               </form>
             </div>
             <div
-              class="flexrow-item"
+              class="flexrow-item is-wide"
               v-else
             >
               <button
-                class="button is-success"
+                class="button is-wide"
                 @click="runCustomAction"
               >
-                {{ $t('main.confirmation') }}
+                {{ $tc(
+                  'custom_actions.run_for_selection',
+                  nbSelectedTasks,
+                  {nbSelectedTasks})
+                }}
               </button>
             </div>
           </div>
         </div>
 
         <div
-          class="flexrow-item"
+          class="flexrow-item is-wide"
           v-if="selectedBar === 'delete-assets'"
         >
           <div class="flexrow">
-            <div class="flexrow-item strong bigger hide-small-screen">
-              {{ $t('assets.delete_for_selection', {nbSelectedAssets}) }}
-            </div>
-            <div class="flexrow-item" v-if="!isAssetDeletionLoading">
+            <div class="flexrow-item is-wide" v-if="!isAssetDeletionLoading">
               <button
-                class="button is-danger confirm-button"
+                class="button is-danger confirm-button is-wide"
                 @click="confirmAssetDeletion"
               >
-                {{ $t('main.confirmation') }}
+                {{ $tc('assets.delete_for_selection', nbSelectedAssets, {nbSelectedAssets}) }}
               </button>
             </div>
             <div class="flexrow-item" v-else>
-              <spinner :is-white="true" />
+              <spinner :size="20" class="spinner" />
             </div>
             <div class="flexrow-item error" v-if="errors.deleteAsset">
               {{ $t('assets.multiple_delete_error') }}
@@ -337,23 +552,20 @@
         </div>
 
         <div
-          class="flexrow-item"
+          class="flexrow-item is-wide"
           v-if="selectedBar === 'delete-shots'"
         >
-          <div class="flexrow">
-            <div class="flexrow-item strong bigger hide-small-screen">
-              {{ $t('shots.delete_for_selection', {nbSelectedShots}) }}
-            </div>
-            <div class="flexrow-item" v-if="!isShotDeletionLoading">
+        <div class="flexrow">
+            <div class="flexrow-item is-wide" v-if="!isShotDeletionLoading">
               <button
-                class="button is-danger confirm-button"
+                class="button is-danger confirm-button is-wide"
                 @click="confirmShotDeletion"
               >
-                {{ $t('main.confirmation') }}
+                {{ $tc('shots.delete_for_selection', nbSelectedShots, {nbSelectedShots}) }}
               </button>
             </div>
             <div class="flexrow-item" v-else>
-              <spinner :is-white="true" />
+              <spinner :size="20" class="spinner" />
             </div>
             <div class="flexrow-item error" v-if="errors.deleteShot">
               {{ $t('shots.multiple_delete_error') }}
@@ -362,170 +574,27 @@
         </div>
 
         <div
-          class="flexrow-item"
+          class="flexrow-item is-wide"
           v-if="selectedBar === 'delete-edits'"
         >
           <div class="flexrow">
-            <div class="flexrow-item strong bigger hide-small-screen">
-              {{ $t('edits.delete_for_selection', {nbSelectedEdits}) }}
-            </div>
-            <div class="flexrow-item" v-if="!isEditDeletionLoading">
+            <div class="flexrow-item is-wide" v-if="!isEditDeletionLoading">
               <button
-                class="button is-danger confirm-button"
+                class="button is-danger confirm-button is-wide"
                 @click="confirmEditDeletion"
               >
-                {{ $t('main.confirmation') }}
+                {{ $tc('edits.delete_for_selection', nbSelectedEdits, {nbSelectedEdits}) }}
               </button>
             </div>
             <div class="flexrow-item" v-else>
-              <spinner :is-white="true" />
+              <spinner :size="20" class="spinner" />
             </div>
             <div class="flexrow-item error" v-if="errors.deleteEdit">
               {{ $t('edits.multiple_delete_error') }}
             </div>
           </div>
         </div>
-
-        <div class="flexrow-item clear-selection-container has-text-right">
-          <div class="flexrow has-text-right">
-            <div style="flex: 1"></div>
-            <notification-bell class="flexrow-item" :is-white="true" />
-            <div
-              class="clear-selection flexrow flexrow-item"
-              @click="clearSelection"
-            >
-              <x-icon class="flexrow-item">
-              </x-icon>
-              <span class="flexrow-item hide-small-screen">
-                {{ $t('main.clear_selection') }}
-              </span>
-            </div>
-          </div>
-        </div>
       </div>
-
-      <div
-        ref="moreMenu"
-        :class="{
-          'more-menu': true,
-          'is-hidden': isMoreMenuDisplayed
-        }"
-      >
-        <div
-          class="more-menu-item"
-          v-if="
-            (isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit) &&
-            (isCurrentUserManager || isSupervisorInDepartment || isInDepartment) &&
-            !isEntitySelection"
-          @click="selectBar('assignation')"
-        >
-          {{ $t('menu.assign_tasks') }}
-        </div>
-
-        <div
-          class="more-menu-item"
-          @click="selectBar('change-status')"
-          v-if="(isCurrentUserManager || isSupervisorInDepartment)
-            && !isEntitySelection"
-        >
-          {{ $t('menu.change_status') }}
-        </div>
-
-        <div
-          class="more-menu-item"
-          v-if="(isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit ||
-            isCurrentViewPerson) && (isCurrentUserManager ||
-            isSupervisorInDepartment) && !isEntitySelection"
-          @click="selectBar('priorities')"
-        >
-          {{ $t('menu.change_priority') }}
-        </div>
-
-        <div
-          class="more-menu-item"
-          v-if="
-            ((isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit) &&
-            !isCurrentViewTaskType) && isCurrentUserManager &&
-            !isEntitySelection"
-          @click="selectBar('tasks')"
-        >
-          {{ $t('menu.create_tasks') }}
-        </div>
-
-        <div
-          class="more-menu-item"
-          v-if="
-            (isCurrentViewAsset || isCurrentViewShot ||
-            isCurrentViewTaskType) && !isEntitySelection"
-          @click="selectBar('playlists')"
-        >
-          {{ $t('menu.generate_playlists') }}
-        </div>
-
-        <div
-          class="more-menu-item"
-          v-if="
-            (isCurrentViewAsset || isCurrentViewShot || isCurrentViewEdit) &&
-            isCurrentUserManager &&
-            !isEntitySelection"
-          @click="selectBar('delete-tasks')"
-        >
-          {{ $t('menu.delete_tasks') }}
-        </div>
-
-        <div
-          class="more-menu-item"
-          v-if="
-            !isCurrentViewTaskType &&
-            (isCurrentUserManager || isSupervisorInDepartment) &&
-            !isEntitySelection"
-          @click="selectBar('custom-actions')"
-        >
-          {{ $t('menu.run_custom_action') }}
-        </div>
-
-        <div
-          class="more-menu-item"
-          v-if="
-            isCurrentViewAsset &&
-            isCurrentUserManager &&
-            !isTaskSelection"
-          @click="selectBar('delete-assets')"
-        >
-          {{ $t('menu.delete_assets') }}
-        </div>
-
-        <div
-          class="more-menu-item"
-          v-if="
-            isCurrentViewShot &&
-            isCurrentUserManager &&
-            !isTaskSelection"
-          @click="selectBar('delete-shots')"
-        >
-          {{ $t('menu.delete_shots') }}
-        </div>
-
-        <div
-          class="more-menu-item"
-          v-if="
-            isCurrentViewEdit &&
-            isCurrentUserManager &&
-            !isTaskSelection"
-          @click="selectBar('delete-edits')"
-        >
-          {{ $t('menu.delete_edits') }}
-        </div>
-      </div>
-    </div>
-
-    <div
-      :class="{
-        'menu-mask': true,
-        'is-hidden': isMoreMenuDisplayed
-      }"
-      @click="toggleMenu"
-    >
     </div>
 
     <view-playlist-modal
@@ -539,29 +608,47 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { domMixin } from '@/components/mixins/dom'
 import { intersection } from '@/lib/array'
 import { sortPeople } from '@/lib/sorting'
+import preferences from '@/lib/preferences'
 
-import { ChevronDownIcon, XIcon } from 'vue-feather-icons'
-import Combobox from '@/components/widgets/Combobox'
+import {
+  AlertCircleIcon,
+  CheckSquareIcon,
+  FilmIcon,
+  ImageIcon,
+  MoreVerticalIcon,
+  PlayCircleIcon,
+  TrashIcon,
+  UserIcon,
+  XIcon
+} from 'vue-feather-icons'
 import ComboboxModel from '@/components/widgets/ComboboxModel'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal'
-import NotificationBell from '@/components/widgets/NotificationBell'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import PeopleField from '@/components/widgets/PeopleField'
 import Spinner from '@/components/widgets/Spinner'
+import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal'
 
 export default {
   name: 'action-topbar',
+  mixins: [domMixin],
 
   components: {
-    ChevronDownIcon,
-    Combobox,
+    AlertCircleIcon,
+    CheckSquareIcon,
     ComboboxModel,
     ComboboxStatus,
-    NotificationBell,
+    ComboboxStyled,
+    FilmIcon,
+    ImageIcon,
+    MoreVerticalIcon,
     PeopleField,
+    PlayCircleIcon,
     Spinner,
+    UserIcon,
+    TrashIcon,
     XIcon,
     ViewPlaylistModal
   },
@@ -578,17 +665,21 @@ export default {
       isChangeStatusLoading: false,
       isCreationLoading: false,
       isDeletionLoading: false,
-      isMoreMenuDisplayed: true,
+      isSetThumbnailsLoading: false,
       isShotDeletionLoading: false,
       isEditDeletionLoading: false,
       person: null,
       priority: '0',
-      selectedBar: 'assignation',
+      selectedBar: 'change-status',
       selectedTaskIds: [],
       taskStatusId: '',
       statusComment: '',
       modals: {
         playlist: false
+      },
+      position: {
+        top: 10,
+        left: 640
       },
       priorityOptions: [
         {
@@ -733,6 +824,12 @@ export default {
       return this.$route.path.indexOf('task-type') > 0
     },
 
+    isCurrentViewEntity () {
+      return this.isCurrentViewAsset ||
+        this.isCurrentViewShot ||
+        this.isCurrentViewEdit
+    },
+
     isList () {
       return this.isCurrentViewAsset || this.isCurrentViewShot
     },
@@ -800,11 +897,13 @@ export default {
       'changeSelectedPriorities',
       'clearSelectedTasks',
       'postCustomAction',
+      'setLastTaskPreview',
       'unassignPersonFromTask',
       'unassignSelectedTasks'
     ]),
 
     confirmAssign () {
+      if (this.$options.dragging) return
       if (this.selectedPersonId || this.isInDepartment) {
         this.isAssignationLoading = true
         const personId = (this.isCurrentUserManager ||
@@ -821,6 +920,7 @@ export default {
     },
 
     confirmTaskStatusChange () {
+      if (this.$options.dragging) return
       this.isChangeStatusLoading = true
       if (!this.taskStatusId) {
         this.taskStatusId = this.availableTaskStatuses[0].id
@@ -840,6 +940,7 @@ export default {
     },
 
     confirmPriorityChange () {
+      if (this.$options.dragging) return
       this.isChangePriorityLoading = true
       this.changeSelectedPriorities({
         priority: Number(this.priority),
@@ -850,10 +951,11 @@ export default {
     },
 
     confirmTaskCreation () {
+      if (this.$options.dragging) return
       const type = this.$route.path.indexOf('shots') > 0 ? 'shots' : 'assets'
       this.isCreationLoading = true
       this.createSelectedTasks({
-        type: type,
+        type,
         projectId: this.currentProduction.id
       })
         .then(() => {
@@ -866,6 +968,7 @@ export default {
     },
 
     confirmTaskDeletion () {
+      if (this.$options.dragging) return
       this.isDeletionLoading = true
       this.errors.deleteTask = false
       this.deleteSelectedTasks()
@@ -880,6 +983,7 @@ export default {
     },
 
     confirmAssetDeletion () {
+      if (this.$options.dragging) return
       this.isAssetDeletionLoading = true
       this.errors.deleteAsset = false
       this.deleteSelectedAssets()
@@ -895,6 +999,7 @@ export default {
     },
 
     confirmShotDeletion () {
+      if (this.$options.dragging) return
       this.isShotDeletionLoading = true
       this.errors.deleteShot = false
       this.deleteSelectedShots()
@@ -910,6 +1015,7 @@ export default {
     },
 
     confirmEditDeletion () {
+      if (this.$options.dragging) return
       this.isEditDeletionLoading = true
       this.errors.deleteEdit = false
       this.deleteSelectedEdits()
@@ -926,6 +1032,7 @@ export default {
 
     confirmPlaylistGeneration () {
       this.modals.playlist = true
+      this.selectedBar = ''
     },
 
     hidePlaylistModal () {
@@ -933,32 +1040,34 @@ export default {
     },
 
     clearAssignation () {
-      if (this.isCurrentUserArtist) {
-        this.selectedTasks.forEach(task => {
-          this.unassignPersonFromTask({ task, person: this.user })
-        })
-      } else {
+      const person = this.isCurrentUserArtist ? this.user : this.person
+      if (person) {
         this.isAssignationLoading = true
-        this.unassignSelectedTasks({
-          callback: () => {
-            this.isAssignationLoading = false
-          }
+        Promise.all(Array.from(this.selectedTasks.values()).map(task => {
+          return this.unassignPersonFromTask({ task, person })
+        })).then(() => {
+          this.isAssignationLoading = false
         })
       }
     },
 
+    confirmSetThumbnailsFromTasks () {
+      this.isSetThumbnailsLoading = true
+      Promise.all(Array.from(this.selectedTasks.values()).map(task => {
+        return this.setLastTaskPreview(task.id)
+      })).then(() => {
+        this.isSetThumbnailsLoading = false
+      })
+    },
+
     selectBar (barName) {
+      if (this.$options.dragging) return
       localStorage.setItem(
         `${this.storagePrefix}-selected-bar`,
         barName,
         { expires: '1M' }
       )
       this.selectedBar = barName
-      this.toggleMenu()
-    },
-
-    toggleMenu () {
-      this.isMoreMenuDisplayed = !this.isMoreMenuDisplayed
     },
 
     setCurrentTeam () {
@@ -1057,12 +1166,61 @@ export default {
       } else {
         this.availableTaskStatuses = this.taskStatusForCurrentUser
       }
+    },
+
+    startDrag (event) {
+      this.$options.startX = event.x
+      this.$options.startY = event.y
+      this.$options.startLeft = parseInt(this.position.left)
+      this.$options.startTop = parseInt(this.position.top)
+      this.$options.dragging = true
+    },
+
+    doDrag (event) {
+      if (this.$options.dragging) {
+        let newX = this.$options.startLeft - (this.$options.startX - event.x)
+        const barHeight = this.$refs['action-bar'].offsetHeight
+        const barWidth = this.$refs['action-bar'].offsetWidth
+        if (newX < 0) newX = 0
+        if (newX + barWidth > window.innerWidth) {
+          newX = window.innerWidth - barWidth
+        }
+        let newY = this.$options.startTop - (this.$options.startY - event.y)
+        if (newY < 65) newY = 65
+        if (newY + barHeight > window.innerHeight) {
+          newY = window.innerHeight - barHeight
+        }
+        this.position.left = newX
+        this.position.top = newY
+      }
+    },
+
+    stopDrag (event) {
+      this.pauseEvent(event)
+      this.$options.dragging = false
+    },
+
+    resetPosition () {
+      const x = preferences.getPreference('topbar:position-x') || 200
+      const y = preferences.getPreference('topbar:position-y') || 10
+      this.position.left = x
+      this.position.top = y
     }
   },
 
   mounted () {
     this.customAction = this.defaultCustomAction
     this.setCurrentTeam()
+    this.resetPosition()
+    window.removeEventListener('mousemove', this.doDrag)
+    window.removeEventListener('mouseup', this.stopDrag)
+    window.addEventListener('mousemove', this.doDrag)
+    window.addEventListener('mouseup', this.stopDrag)
+  },
+
+  beforeDestroy () {
+    preferences.setPreference('topbar:position-x', this.position.left)
+    preferences.setPreference('topbar:position-y', this.position.top)
   },
 
   watch: {
@@ -1078,6 +1236,16 @@ export default {
 
     isHidden () {
       this.autoChooseSelectBar()
+      if (this.isHidden) {
+        window.removeEventListener('mousemove', this.doDrag)
+        window.removeEventListener('mouseup', this.stopDrag)
+        preferences.setPreference('topbar:position-x', this.position.left)
+        preferences.setPreference('topbar:position-y', this.position.top)
+      } else {
+        window.addEventListener('mousemove', this.doDrag)
+        window.addEventListener('mouseup', this.stopDrag)
+        this.resetPosition()
+      }
     },
 
     nbSelectedTasks () {
@@ -1116,14 +1284,6 @@ export default {
       }
     },
 
-    selectedBar () {
-      if (this.selectedBar === 'assignation') {
-        this.$nextTick(() => {
-          this.$refs['assignation-field'].focus()
-        })
-      }
-    },
-
     currentProduction () {
       this.setCurrentTeam()
     },
@@ -1147,20 +1307,42 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.dark {
+  .action-topbar {
+    background: $dark-grey-light;
+
+    .more-menu-item {
+      color: $light-grey-light;
+
+      &.active {
+        color: $green;
+      }
+
+      &.status-item.active {
+        color: $green;
+        border-color: $green;
+      }
+    }
+
+    .menu {
+      background: $black;
+      border-bottom: 1px solid $dark-grey-light;
+    }
+  }
+}
+
 .action-topbar {
-  background: #5e60ba;
-  color: white;
-  box-shadow: 0px 0px 6px rgba(0,0,0,0.2);
-  max-height: 60px;
-  min-height: 60px;
-  z-index: 210;
-  position: fixed;
-  left: 0;
-  right: 0;
+  background: #F8F8FF;
+  border-radius: 10px;
+  box-shadow: 0px 0px 8px var(--purple);
+  color: $grey;
+  z-index: 500;
+  position: absolute;
+  left: 715px;
+  top: 145px;
 }
 
 div.assignation {
-  font-weight: bold;
   margin-right: 1em;
   padding-right: 0;
 }
@@ -1182,60 +1364,73 @@ div.combobox-item {
   margin-bottom: 0px;
 }
 
-.is-link {
-  color: white;
-}
-
 .confirm-button {
   margin-right: 1em;
 }
 
+.clear-assignation-button {
+  margin: auto;
+}
 .clear-assignation-button:focus,
 .clear-assignation-button:active,
 .clear-assignation-button:hover {
   box-shadow: none;
   background: transparent;
-  color: white;
 }
 
 .more-menu-icon {
   cursor: pointer;
-  font-weight: bold;
   font-size: 1.2em;
-  background: #4e50aa;
-  height: 60px;
+  height: 40px;
   padding: 0 0.5em 0 0.5em;
   align-items: middle;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
 }
 
-.more-menu-icon .flexrow {
-  height: 100%;
-}
-
-.more-menu {
-  position: fixed;
-  width: 200px;
+.menu {
+  background: var(--background);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  color: $grey;
+  padding-top: 0.7em;
+  border-bottom: 1px solid $light-grey-light;
   z-index: 200;
-  left: 0;
-  top: 60px;
-  background: #5e60ba;
-  color: white;
-  box-shadow: 0px 0px 6px rgba(0,0,0,0.2);
+  width: 460px;
+}
+
+textarea {
+  height: 43px;
+  min-height: 43px;
 }
 
 .more-menu-item {
-  padding: 0.4em 1em;
+  padding: .2em .6em .4em .6em;
   font-size: 1.2em;
   cursor: pointer;
-}
 
-.more-menu-item:hover {
-  background: #9f7fdf;
+  &:first-child {
+    border-top-left-radius: 10px;
+  }
+
+  &:hover {
+    color: var(--text);
+    transform: scale(1.2);
+    transition: transform ease 0.3s
+  }
+
+  &.active {
+    color: $light-green;
+
+    &:hover {
+      color: $light-green;
+    }
+  }
 }
 
 .action-bar {
-  padding: 0;
-  margin: 0;
+  border-radius: 10px;
+  padding: .5em .5em
 }
 
 .clear-selection-container {
@@ -1255,20 +1450,101 @@ div.combobox-item {
 }
 
 .priority-combobox {
-  margin-top: -5px;
+  color: var(--text);
+  margin-left: .3em;
 }
 
 .confirm-button {
   margin-top: 2px;
 }
 
-@media screen and (max-width: 768px) {
-  .level-item {
-    width: auto;
+.menu-separator {
+  padding: .2em;
+  border-right: 2px solid $light-grey-light;
+  height: 26px;
+  margin-bottom: 8px;
+}
+
+.nb-selected-tasks {
+  cursor: grab;
+  margin: 0;
+  padding: .4em 0 .4em 1.2em;
+  text-transform: uppercase;
+  font-size: .8em;
+  font-weight: 800;
+}
+
+.is-wide {
+  margin: 0;
+  border-radius: 10px;
+  flex: 1;
+  width : 100%;
+}
+
+.handle {
+  cursor: grab;
+  padding-left: 0.5em;
+  padding-right: 0em;
+  .handle-icon:last-child {
+    margin-left: -14px;
   }
 
-  .hide-small-screen {
-    display: none;
+  .handle-icon:last-child {
+    margin-left: -32px;
   }
+}
+
+.grab-bar {
+  cursor: grab;
+}
+
+.is-link {
+  color: var(--text);
+}
+
+.close-bar {
+  cursor: pointer;
+  margin-right: .5em;
+  margin-top: -1.5em;
+  // padding: .3em .5em;
+  svg {
+    width: 16px;
+  }
+}
+
+.change-status-item {
+  margin-right: .5em;
+}
+
+.status-item {
+  align-items: center;
+  border: 2px solid $light-grey;
+  border-radius: 15px;
+  font-weight: bold;
+  display: flex;
+  font-size: 0.7em;
+  justify-content: center;
+  height: 100%;
+  margin-left: 1em;
+  margin-top: -1em;
+
+  &:hover {
+    border: 2px solid var(--text);
+  }
+
+  &.active {
+    border: 2px solid $light-green;
+    color: $light-green;
+
+    &:hover {
+      border: 2px solid $light-green;
+      color: $light-green;
+    }
+  }
+}
+
+.spinner {
+  margin: auto;
+  margin-top: .5em;
 }
 </style>

@@ -7,7 +7,11 @@
     :items="items"
     :input-attrs="{
       placeholder: placeholder || this.$t('people.select_person'),
-      class: big ? 'big v-autocomplete-input' : 'v-autocomplete-input'
+      class: wide
+        ? 'big wide v-autocomplete-input'
+        : big
+          ? 'big v-autocomplete-input'
+          : 'v-autocomplete-input'
     }"
     :min-len="1"
     @update-items="update"
@@ -65,6 +69,10 @@ export default {
       default: () => []
     },
     big: {
+      type: Boolean,
+      default: false
+    },
+    wide: {
       type: Boolean,
       default: false
     },
@@ -150,25 +158,35 @@ export default {
 .dark .v-autocomplete .v-autocomplete-list {
   box-shadow: 2px 2px 2px 0px $dark-grey-light;
   border-color: $dark-grey;
-  border-radius: 10px;
 }
 
 .v-autocomplete .v-autocomplete-list {
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, .2);
   left: 6px;
   top: 41px;
   width: calc(100% - 13px);
   max-height: 300px;
   overflow-y: auto;
   z-index: 3000;
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
 .v-autocomplete .v-autocomplete-list-item {
   background: white;
+  border: 0;
+  border-bottom: 1px solid var(--border);
 }
 
 .v-autocomplete .v-autocomplete-list-item:last-child {
   background: white;
-  border-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.v-autocomplete .v-autocomplete-input-group .v-autocomplete-input.wide.big {
+  width: 100%;
 }
 
 .v-autocomplete .v-autocomplete-list-item.v-autocomplete-item-active {

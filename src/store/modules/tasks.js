@@ -575,8 +575,23 @@ const actions = {
     const taskMap = state.taskMap
     return tasksApi
       .setPreview(entityId, previewId)
-      .then((entity) => {
+      .then(entity => {
         commit(SET_PREVIEW, { taskId, entityId, previewId, taskMap })
+        return Promise.resolve()
+      })
+  },
+
+  setLastTaskPreview ({ commit, state }, taskId) {
+    const taskMap = state.taskMap
+    return tasksApi
+      .setLastTaskPreviewAsEntityThumbnail(taskId)
+      .then(entity => {
+        commit(SET_PREVIEW, {
+          taskId,
+          entityId: entity.id,
+          previewId: entity.preview_file_id,
+          taskMap
+        })
         return Promise.resolve()
       })
   },
