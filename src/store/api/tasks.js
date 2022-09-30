@@ -167,9 +167,16 @@ export default {
     )
   },
 
-  setPreview (entityId, previewId, callback) {
+  setPreview (entityId, previewId) {
     return client.pput(
       `/api/actions/preview-files/${previewId}/set-main-preview`,
+      {}
+    )
+  },
+
+  setLastTaskPreviewAsEntityThumbnail (taskId) {
+    return client.pput(
+      `/api/actions/tasks/${taskId}/set-main-preview`,
       {}
     )
   },

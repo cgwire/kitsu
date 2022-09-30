@@ -1,5 +1,7 @@
 <template>
 <div class="columns fixed-page">
+  <action-topbar />
+
   <div class="column main-column">
     <div class="edits page">
       <div class="edit-list-header page-header">
@@ -258,6 +260,7 @@ import stringHelpers from '@/lib/string'
 import { searchMixin } from '@/components/mixins/search'
 import { entitiesMixin } from '@/components/mixins/entities'
 
+import ActionTopbar from '@/components/tops/ActionTopbar'
 import AddMetadataModal from '@/components/modals/AddMetadataModal'
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal'
 import BigThumbnailsButton from '@/components/widgets/BigThumbnailsButton'
@@ -284,6 +287,7 @@ export default {
   mixins: [searchMixin, entitiesMixin],
 
   components: {
+    ActionTopbar,
     AddMetadataModal,
     AddThumbnailsModal,
     BigThumbnailsButton,
