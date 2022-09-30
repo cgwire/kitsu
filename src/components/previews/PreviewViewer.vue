@@ -60,7 +60,7 @@
       :light="light"
       :empty="!is3DModel"
       :full-screen="fullScreen"
-      v-show="is3DModel"
+      v-if="is3DModel"
     />
 
     <sound-viewer
