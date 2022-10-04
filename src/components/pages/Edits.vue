@@ -425,12 +425,6 @@ export default {
       if (!this.isEditsLoading) this.initialLoading = false
       finalize()
     }
-    if (!this.isCurrentUserManager && this.user.departments.length > 0) {
-      this.selectedDepartment = 'MY_DEPARTMENTS'
-      this.departmentFilter = this.user.departments
-    } else {
-      this.departmentFilter = []
-    }
   },
 
   computed: {
