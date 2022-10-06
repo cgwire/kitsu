@@ -61,9 +61,7 @@ export default {
   },
 
   mounted () {
-    if (this.options.length > 0) {
-      this.selectedOption = this.options[0]
-    }
+    this.resetOptions()
   },
 
   computed: {
@@ -84,11 +82,9 @@ export default {
       } else {
         return option.label
       }
-    }
-  },
+    },
 
-  watch: {
-    options () {
+    resetOptions () {
       if (this.options.length > 0) {
         const option = this.options.find(o => o.value === this.value)
         if (option) {
@@ -97,6 +93,12 @@ export default {
           this.selectedOption = this.options[0]
         }
       }
+    }
+  },
+
+  watch: {
+    options () {
+      this.resetOptions()
     },
 
     value () {
