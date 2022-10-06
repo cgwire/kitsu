@@ -1,6 +1,6 @@
 <template>
 <div class="task-type columns fixed-page">
-  <action-topbar />
+  <action-panel />
 
   <div class="column main-column">
     <div class="task-type page" ref="page">
@@ -261,7 +261,7 @@ import { formatListMixin } from '@/components/mixins/format'
 
 import { CornerLeftUpIcon } from 'vue-feather-icons'
 
-import ActionTopbar from '@/components/tops/ActionTopbar'
+import ActionPanel from '@/components/tops/ActionPanel'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DateField from '@/components/widgets/DateField'
 import Combobox from '@/components/widgets/Combobox'
@@ -280,7 +280,7 @@ export default {
   name: 'task-type-page',
   mixins: [formatListMixin, searchMixin],
   components: {
-    ActionTopbar,
+    ActionPanel,
     ButtonSimple,
     CornerLeftUpIcon,
     Combobox,
