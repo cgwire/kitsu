@@ -1143,6 +1143,7 @@ export default {
     subscribe_notifications: 'Subscribe to notifications',
     select_file: 'Please select the file from your hard drive you want to attach to your comment:',
     tasks: 'Tasks',
+    to_myself: 'To myself',
     validation: 'Validation',
     with_comment: 'With a comment...',
     fields: {

@@ -255,7 +255,7 @@
             </div>
           </div>
 
-          <div class="flexrow-item is-wide" v-if="!isChangeStatusLoading">
+          <div class="flexrow-item is-wide" v-if="!loading.changeStatus">
             <button
               class="button confirm-button is-wide"
               @click="confirmTaskStatusChange"
@@ -267,7 +267,10 @@
               )}}
             </button>
           </div>
-          <div class="flexrow-item has-text-centered" v-if="isChangeStatusLoading">
+          <div
+            class="flexrow-item has-text-centered"
+            v-if="loading.changeStatus"
+          >
             <spinner :size="20" class="spinner" />
           </div>
         </div>
@@ -293,7 +296,7 @@
               v-show="isCurrentUserManager || isCurrentUserSupervisor"
             />
           </div>
-          <div class="" v-if="isAssignationLoading">
+          <div class="" v-if="loading.assignation">
             <div class="flexrow-item">
               <spinner :size="20" class="spinner" />
             </div>
@@ -301,7 +304,7 @@
             &nbsp;
             </div>
           </div>
-          <div class="flexrow-item is-wide" v-if="!isAssignationLoading">
+          <div class="flexrow-item is-wide" v-if="!loading.assignation">
             <button
               class="button confirm-button is-wide"
               @click="confirmAssign"
@@ -311,7 +314,7 @@
           </div>
           <div
             class="flexrow-item is-wide has-text-centered flexrow"
-            v-if="!isAssignationLoading && (
+            v-if="!loading.assignation && (
               isCurrentUserManager || isSupervisorInDepartment)"
           >
             <button
@@ -324,7 +327,7 @@
           </div>
           <div
             class="flexrow-item hide-small-screen"
-            v-else-if="!isAssignationLoading && isCurrentUserArtist"
+            v-else-if="!loading.assignation && isCurrentUserArtist"
           >
             <button
               class="button is-link clear-assignation-button hide-small-screen"
@@ -357,7 +360,7 @@
             <button
               class="button confirm-button is-wide"
               @click="confirmPriorityChange"
-             v-if="!isChangePriorityLoading"
+             v-if="!loading.changePriority"
             >
               {{ $tc('tasks.change_priority', nbSelectedTasks, {nbSelectedTasks}) }}
             </button>
@@ -371,7 +374,7 @@
           <button
               class="button confirm-button is-wide"
               @click="confirmTaskCreation"
-              v-if="!isCreationLoading"
+              v-if="!loading.creation"
             >
               {{ $t('tasks.create_for_selection') }}
           </button>
@@ -414,7 +417,7 @@
         >
           <div
             class="flexrow is-wide"
-            v-if="!isDeletionLoading"
+            v-if="!loading.deletion"
           >
             <button
               class="button is-danger confirm-button is-wide"
@@ -430,7 +433,7 @@
           <div class="flexrow-item" v-else>
             <spinner :size="20" class="spinner" />
           </div>
-          <div class="flexrow-item error" v-if="errors.deleteTask">
+          <div class="flexrow-item error" v-if="errors.taskDeletion">
             {{ $t('tasks.delete_error') }}
           </div>
         </div>
@@ -533,67 +536,53 @@
           class="flexrow-item is-wide"
           v-if="selectedBar === 'delete-assets'"
         >
-          <div class="flexrow">
-            <div class="flexrow-item is-wide" v-if="!isAssetDeletionLoading">
-              <button
-                class="button is-danger confirm-button is-wide"
-                @click="confirmAssetDeletion"
-              >
-                {{ $tc('assets.delete_for_selection', nbSelectedAssets, {nbSelectedAssets}) }}
-              </button>
-            </div>
-            <div class="flexrow-item" v-else>
-              <spinner :size="20" class="spinner" />
-            </div>
-            <div class="flexrow-item error" v-if="errors.deleteAsset">
-              {{ $t('assets.multiple_delete_error') }}
-            </div>
-          </div>
+          <delete-entities
+            :error-text="$t('assets.multiple_delete_error') "
+            :is-loading="loading.assetDeletion"
+            :is-error="errors.assetDeletion"
+            :text="$tc(
+              'assets.delete_for_selection',
+              nbSelectedAssets,
+              {nbSelectedAssets}
+            )"
+            @confirm="confirmAssetDeletion"
+          />
         </div>
 
         <div
           class="flexrow-item is-wide"
           v-if="selectedBar === 'delete-shots'"
         >
-        <div class="flexrow">
-            <div class="flexrow-item is-wide" v-if="!isShotDeletionLoading">
-              <button
-                class="button is-danger confirm-button is-wide"
-                @click="confirmShotDeletion"
-              >
-                {{ $tc('shots.delete_for_selection', nbSelectedShots, {nbSelectedShots}) }}
-              </button>
-            </div>
-            <div class="flexrow-item" v-else>
-              <spinner :size="20" class="spinner" />
-            </div>
-            <div class="flexrow-item error" v-if="errors.deleteShot">
-              {{ $t('shots.multiple_delete_error') }}
-            </div>
-          </div>
+          <delete-entities
+            :error-text="$t('shots.multiple_delete_error') "
+            :is-loading="loading.shotDeletion"
+            :is-error="errors.deleteShot"
+            :text="$tc(
+              'shots.delete_for_selection',
+              nbSelectedShots,
+              {nbSelectedShots}
+            )"
+            @confirm="confirmAssetDeletion"
+          />
         </div>
 
         <div
           class="flexrow-item is-wide"
           v-if="selectedBar === 'delete-edits'"
         >
-          <div class="flexrow">
-            <div class="flexrow-item is-wide" v-if="!isEditDeletionLoading">
-              <button
-                class="button is-danger confirm-button is-wide"
-                @click="confirmEditDeletion"
-              >
-                {{ $tc('edits.delete_for_selection', nbSelectedEdits, {nbSelectedEdits}) }}
-              </button>
-            </div>
-            <div class="flexrow-item" v-else>
-              <spinner :size="20" class="spinner" />
-            </div>
-            <div class="flexrow-item error" v-if="errors.deleteEdit">
-              {{ $t('edits.multiple_delete_error') }}
-            </div>
-          </div>
+          <delete-entities
+            :error-text="$t('edits.multiple_delete_error') "
+            :is-loading="loading.editDeletion"
+            :is-error="errors.deleteEdit"
+            :text="$tc(
+              'edits.delete_for_selection',
+              nbSelectedEdits,
+              {nbSelectedEdits}
+            )"
+            @confirm="confirmEditDeletion"
+          />
         </div>
+
       </div>
     </div>
 
@@ -627,6 +616,7 @@ import {
 import ComboboxModel from '@/components/widgets/ComboboxModel'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
+import DeleteEntities from '@/components/tops/actions/DeleteEntities'
 import PeopleField from '@/components/widgets/PeopleField'
 import Spinner from '@/components/widgets/Spinner'
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal'
@@ -641,6 +631,7 @@ export default {
     ComboboxModel,
     ComboboxStatus,
     ComboboxStyled,
+    DeleteEntities,
     FilmIcon,
     ImageIcon,
     MoreVerticalIcon,
@@ -659,15 +650,6 @@ export default {
       currentTeam: [],
       customAction: {},
       customActions: [],
-      isAssignationLoading: false,
-      isAssetDeletionLoading: false,
-      isChangePriorityLoading: false,
-      isChangeStatusLoading: false,
-      isCreationLoading: false,
-      isDeletionLoading: false,
-      isSetThumbnailsLoading: false,
-      isShotDeletionLoading: false,
-      isEditDeletionLoading: false,
       person: null,
       priority: '0',
       selectedBar: 'change-status',
@@ -699,10 +681,22 @@ export default {
           value: '3'
         }
       ],
+      loading: {
+        assignation: false,
+        assetDeletion: false,
+        changePriority: false,
+        changeStatus: false,
+        editDeletion: false,
+        taskCreation: false,
+        taskDeletion: false,
+        setThumbnails: false,
+        shotDeletion: false
+      },
       errors: {
-        deleteAsset: false,
-        deleteTask: false,
-        deleteShot: false
+        assetDeletion: false,
+        taskDeletion: false,
+        editDeletion: false,
+        shotDeletion: false
       }
     }
   },
@@ -900,7 +894,7 @@ export default {
     ]),
 
     confirmTaskStatusChange () {
-      this.isChangeStatusLoading = true
+      this.loading.changeStatus = true
       if (!this.taskStatusId) {
         this.taskStatusId = this.availableTaskStatuses[0].id
       }
@@ -910,17 +904,17 @@ export default {
       })
         .then(() => {
           this.statusComment = ''
-          this.isChangeStatusLoading = false
+          this.loading.changeStatus = false
         })
         .catch(err => {
           console.error(err)
-          this.isChangeStatusLoading = false
+          this.loading.changeStatus = false
         })
     },
 
     confirmAssign () {
       if (this.selectedPersonId || this.isInDepartment) {
-        this.isAssignationLoading = true
+        this.loading.assignation = true
         const personId = (this.isCurrentUserManager ||
           this.isCurrentUserSupervisor)
           ? this.selectedPersonId
@@ -928,7 +922,7 @@ export default {
         this.assignSelectedTasks({
           personId,
           callback: () => {
-            this.isAssignationLoading = false
+            this.loading.assignation = false
           }
         })
       }
@@ -937,100 +931,100 @@ export default {
     clearAssignation () {
       const person = this.isCurrentUserArtist ? this.user : this.person
       if (person) {
-        this.isAssignationLoading = true
+        this.loading.assignation = true
         Promise.all(Array.from(this.selectedTasks.values()).map(task => {
           return this.unassignPersonFromTask({ task, person })
         })).then(() => {
-          this.isAssignationLoading = false
+          this.loading.assignation = false
         })
       }
     },
 
     confirmPriorityChange () {
-      this.isChangePriorityLoading = true
+      this.loading.changePriority = true
       this.changeSelectedPriorities({
         priority: Number(this.priority),
         callback: () => {
-          this.isChangePriorityLoading = false
+          this.loading.changePriority = false
         }
       })
     },
 
     confirmTaskCreation () {
       const type = this.$route.path.indexOf('shots') > 0 ? 'shots' : 'assets'
-      this.isCreationLoading = true
+      this.loading.creation = true
       this.createSelectedTasks({
         type,
         projectId: this.currentProduction.id
       })
         .then(() => {
-          this.isCreationLoading = false
+          this.loading.creation = false
         })
         .catch((err) => {
-          this.isCreationLoading = false
+          this.loading.creation = false
           console.error(err)
         })
     },
 
     confirmTaskDeletion () {
       if (this.$options.dragging) return
-      this.isDeletionLoading = true
-      this.errors.deleteTask = false
+      this.loading.taskDeletion = true
+      this.errors.taskDeletion = false
       this.deleteSelectedTasks()
         .then(() => {
-          this.isDeletionLoading = false
+          this.loading.taskDeletion = false
         })
         .catch((err) => {
           console.error(err)
-          this.isDeletionLoading = false
-          this.errors.deleteTask = true
+          this.loading.taskDeletion = false
+          this.errors.taskDeletion = true
         })
     },
 
     confirmAssetDeletion () {
       if (this.$options.dragging) return
-      this.isAssetDeletionLoading = true
+      this.loading.deleteAsset = true
       this.errors.deleteAsset = false
       this.deleteSelectedAssets()
         .then(() => {
-          this.isAssetDeletionLoading = false
+          this.loading.deleteAsset = false
           this.clearSelectedAssets()
         })
         .catch((err) => {
           console.error(err)
-          this.isAssetDeletionLoading = false
+          this.loading.deleteAsset = false
           this.errors.deleteAsset = true
         })
     },
 
     confirmShotDeletion () {
       if (this.$options.dragging) return
-      this.isShotDeletionLoading = true
+      this.loading.deleteShot = true
       this.errors.deleteShot = false
       this.deleteSelectedShots()
         .then(() => {
-          this.isShotDeletionLoading = false
+          this.loading.deleteShot = false
           this.clearSelectedShots()
         })
         .catch((err) => {
           console.error(err)
-          this.isShotDeletionLoading = false
+          this.loading.deleteShot = false
           this.errors.deleteShot = true
         })
     },
 
     confirmEditDeletion () {
       if (this.$options.dragging) return
-      this.isEditDeletionLoading = true
+      this.loading.deleteEdit = true
       this.errors.deleteEdit = false
       this.deleteSelectedEdits()
         .then(() => {
-          this.isEditDeletionLoading = false
+          this.loading.deleteEdit = false
           this.clearSelectedEdits()
         })
         .catch((err) => {
           console.error(err)
-          this.isEditDeletionLoading = false
+          this.loading.deleteEdit = false
           this.errors.deleteEdit = true
         })
     },
@@ -1045,11 +1039,11 @@ export default {
     },
 
     confirmSetThumbnailsFromTasks () {
-      this.isSetThumbnailsLoading = true
+      this.loading.setThumbnails = true
       Promise.all(Array.from(this.selectedTasks.values()).map(task => {
         return this.setLastTaskPreview(task.id)
       })).then(() => {
-        this.isSetThumbnailsLoading = false
+        this.loading.setThumbnails = false
       })
     },
 
