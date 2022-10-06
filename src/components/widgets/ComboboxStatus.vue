@@ -152,7 +152,9 @@ export default {
       return {
         background: this.colorOnly
           ? this.backgroundColor(this.currentStatus)
-          : 'transparent',
+          : this.isDarkTheme
+            ? '#36393F'
+            : '#FEFEFE',
         color: this.colorOnly
           ? this.color(this.currentStatus)
           : 'inherit',
@@ -229,7 +231,7 @@ export default {
 }
 
 .status-combo {
-  background: $white;
+  background: var(--background);
   min-width: 120px;
   width: 120px;
   border: 1px solid $light-grey-light;
