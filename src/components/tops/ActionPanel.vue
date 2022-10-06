@@ -13,21 +13,23 @@
       }"
     >
 
-      <div class="menu">
+      <div class="menu"
+        @mousedown="startDrag"
+      >
         <div class="flexrow">
-          <div
-            class="more-menu handle"
+          <!--div
+            class="menu-item handle"
             @mousedown="startDrag"
             @mouseup="stopDrag"
             :title="$t('main.move_action_bar')"
           >
             <more-vertical-icon class="handle-icon" />
             <more-vertical-icon class="handle-icon" />
-          </div>
+          </div-->
 
           <div
             :class="{
-              'more-menu': true,
+              'menu-item': true,
               'status-item': true,
               active: selectedBar === 'change-status'
             }"
@@ -41,7 +43,7 @@
 
           <div
             :class="{
-              'more-menu': true,
+              'menu-item': true,
               active: selectedBar === 'assignation'
             }"
             :title="$t('menu.assign_tasks')"
@@ -60,7 +62,7 @@
 
           <div
             :class="{
-              'more-menu': true,
+              'menu-item': true,
               active: selectedBar === 'priorities'
             }"
             :title="$t('menu.change_priority')"
@@ -74,7 +76,7 @@
 
           <div
             :class="{
-              'more-menu': true,
+              'menu-item': true,
               active: selectedBar === 'thumbnails'
             }"
             :title="$t('menu.set_thumbnails')"
@@ -92,7 +94,7 @@
 
           <div
             :class="{
-              'more-menu': true,
+              'menu-item': true,
               active: selectedBar === 'playlists'
             }"
             :title="$t('menu.generate_playlist')"
@@ -126,7 +128,7 @@
 
           <div
             :class="{
-              'more-menu': true,
+              'menu-item': true,
               active: selectedBar === 'tasks'
             }"
             :title="$t('menu.create_tasks')"
@@ -141,7 +143,7 @@
 
           <div
             :class="{
-              'more-menu': true,
+              'menu-item': true,
               active: selectedBar === 'delete-tasks'
             }"
             :title="$t('menu.delete_tasks')"
@@ -166,7 +168,7 @@
 
           <div
             :class="{
-              'more-menu': true,
+              'menu-item': true,
               active: selectedBar === 'custom-actions'
             }"
             :title="$t('menu.run_custom_action')"
@@ -181,7 +183,7 @@
           </div>
 
           <div
-            class="more-menu"
+            class="menu-item"
             :title="$t('menu.delete_assets')"
             @click="selectBar('delete-assets')"
             v-if="
@@ -193,7 +195,7 @@
           </div>
 
           <div
-            class="more-menu"
+            class="menu-item"
             :title="$t('menu.delete_shots')"
             @click="selectBar('delete-shots')"
             v-if="
@@ -205,7 +207,7 @@
           </div>
 
           <div
-            class="more-menu"
+            class="menu-item"
             :title="$t('menu.delete_edits')"
             @click="selectBar('delete-edits')"
             v-if="
@@ -607,7 +609,7 @@ import {
   CheckSquareIcon,
   FilmIcon,
   ImageIcon,
-  MoreVerticalIcon,
+  // MoreVerticalIcon,
   PlayCircleIcon,
   TrashIcon,
   UserIcon,
@@ -634,7 +636,7 @@ export default {
     DeleteEntities,
     FilmIcon,
     ImageIcon,
-    MoreVerticalIcon,
+    // MoreVerticalIcon,
     PeopleField,
     PlayCircleIcon,
     Spinner,
@@ -712,6 +714,7 @@ export default {
   },
 
   beforeDestroy () {
+    console.log('destroy')
     preferences.setPreference('topbar:position-x', this.position.left)
     preferences.setPreference('topbar:position-y', this.position.top)
   },
@@ -1154,6 +1157,8 @@ export default {
     },
 
     startDrag (event) {
+      console.log(event.target)
+      // if (event.target.nodeName === 'svg') return
       this.$options.startX = event.x
       this.$options.startY = event.y
       this.$options.startLeft = parseInt(this.position.left)
@@ -1186,10 +1191,23 @@ export default {
     },
 
     resetPosition () {
-      const x = preferences.getPreference('topbar:position-x') || 200
-      const y = preferences.getPreference('topbar:position-y') || 10
-      this.position.left = x
-      this.position.top = y
+      let newX = parseInt(preferences.getPreference('topbar:position-x')) || 0
+      let newY = parseInt(preferences.getPreference('topbar:position-y')) || 0
+      const barHeight = 200
+      const barWidth = 600
+      console.log(newX, newY, barHeight, barWidth)
+      if (newX < 0) newX = 0
+      if (newX + barWidth > window.innerWidth) {
+        newX = window.innerWidth - barWidth
+      }
+      if (newY < 65) newY = 65
+      if (newY + barHeight > window.innerHeight) {
+        newY = window.innerHeight - barHeight
+      }
+      console.log(newX, newY, barHeight, barWidth)
+
+      this.position.left = newX
+      this.position.top = newY
     }
   },
 
@@ -1211,6 +1229,7 @@ export default {
         window.removeEventListener('mouseup', this.stopDrag)
         preferences.setPreference('topbar:position-x', this.position.left)
         preferences.setPreference('topbar:position-y', this.position.top)
+        console.log('hidden', this.position.left, preferences.getPreference('topbar:position-x'))
       } else {
         window.addEventListener('mousemove', this.doDrag)
         window.addEventListener('mouseup', this.stopDrag)
@@ -1281,7 +1300,7 @@ export default {
   .action-topbar {
     background: $dark-grey-light;
 
-    .more-menu {
+    .menu-item {
       color: $light-grey-light;
 
       &.active {
@@ -1336,16 +1355,17 @@ div.assignation {
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
   color: $grey;
+  cursor: grab;
   padding-top: 0.7em;
   border-bottom: 1px solid $light-grey-light;
   z-index: 200;
   width: 460px;
 }
 
-.more-menu {
-  padding: .2em .6em .4em .6em;
-  font-size: 1.2em;
+.menu-item {
   cursor: pointer;
+  font-size: 1.2em;
+  padding: .2em .6em .4em .6em;
 
   &:first-child {
     border-top-left-radius: 10px;
