@@ -89,6 +89,8 @@ import {
   RESET_ALL
 } from '@/store/mutation-types'
 
+const locks = {}
+
 const initialState = {
   taskMap: new Map(),
   taskStatusMap: new Map(),
@@ -227,19 +229,6 @@ const actions = {
       .then(previewFiles => {
         commit(LOAD_TASK_ENTITY_PREVIEW_FILES_END, previewFiles)
         return Promise.resolve(previewFiles)
-      })
-  },
-
-  commentTask (
-    { commit, state },
-    { taskId, taskStatusId, comment, attachment, checklist }
-  ) {
-    return tasksApi.commentTask(
-      { taskId, taskStatusId, comment, attachment, checklist }
-    )
-      .then(comment => {
-        commit(NEW_TASK_COMMENT_END, { comment, taskId })
-        return Promise.resolve(comment)
       })
   },
 
@@ -388,7 +377,7 @@ const actions = {
       }
     })
     return tasksApi.commentTasks(production.id, tasksToChange)
-      .then((comments) => {
+      .then(comments => {
         comments.forEach(comment => {
           commit(
             NEW_TASK_COMMENT_END,
@@ -477,6 +466,19 @@ const actions = {
       })
   },
 
+  commentTask (
+    { commit, state },
+    { taskId, taskStatusId, comment, attachment, checklist }
+  ) {
+    return tasksApi.commentTask(
+      { taskId, taskStatusId, comment, attachment, checklist }
+    )
+      .then(comment => {
+        commit(NEW_TASK_COMMENT_END, { comment, taskId })
+        return Promise.resolve(comment)
+      })
+  },
+
   commentTaskWithPreview (
     { commit, getters, state, dispatch },
     { taskId, comment, taskStatusId, form, attachment, checklist }
@@ -484,6 +486,7 @@ const actions = {
     const data = { taskId, taskStatusId, comment, attachment, checklist }
     commit(ADD_PREVIEW_START)
     let newComment
+    locks[taskId] = true
     return tasksApi.commentTask(data)
       .then(comment => {
         newComment = comment
@@ -805,8 +808,11 @@ const mutations = {
       state.taskMap.set(task.id, task)
     } else {
       Object.assign(state.taskMap.get(task.id), task)
-      if (state.taskComments[task.id] &&
-          state.taskComments[task.id].length > 0) {
+      if (
+        state.taskComments[task.id] &&
+        state.taskComments[task.id].length > 0 &&
+        !locks[task.id]
+      ) {
         const comment = state.taskComments[task.id][0]
         Object.assign(comment, {
           task_status_id: task.task_status_id,
@@ -882,7 +888,7 @@ const mutations = {
     )
 
     if (!state.taskComments[taskId]) state.taskComments[taskId] = []
-    if (!state.taskComments[taskId].find((cmt) => cmt.id === comment.id)) {
+    if (!state.taskComments[taskId].find(cmt => cmt.id === comment.id)) {
       state.taskComments[taskId].unshift(comment)
     }
     state.taskComments[taskId] = sortComments(state.taskComments[taskId])
@@ -892,6 +898,7 @@ const mutations = {
         last_comment: comment
       })
     }
+    locks[taskId] = false
   },
 
   [DELETE_TASK_END] (state, task) {
