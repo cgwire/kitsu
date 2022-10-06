@@ -16,7 +16,7 @@
       <div class="menu">
         <div class="flexrow">
           <div
-            class="more-menu-item handle"
+            class="more-menu handle"
             @mousedown="startDrag"
             @mouseup="stopDrag"
             :title="$t('main.move_action_bar')"
@@ -27,7 +27,7 @@
 
           <div
             :class="{
-              'more-menu-item': true,
+              'more-menu': true,
               'status-item': true,
               active: selectedBar === 'change-status'
             }"
@@ -41,7 +41,7 @@
 
           <div
             :class="{
-              'more-menu-item': true,
+              'more-menu': true,
               active: selectedBar === 'assignation'
             }"
             :title="$t('menu.assign_tasks')"
@@ -60,7 +60,7 @@
 
           <div
             :class="{
-              'more-menu-item': true,
+              'more-menu': true,
               active: selectedBar === 'priorities'
             }"
             :title="$t('menu.change_priority')"
@@ -74,7 +74,7 @@
 
           <div
             :class="{
-              'more-menu-item': true,
+              'more-menu': true,
               active: selectedBar === 'thumbnails'
             }"
             :title="$t('menu.set_thumbnails')"
@@ -92,7 +92,7 @@
 
           <div
             :class="{
-              'more-menu-item': true,
+              'more-menu': true,
               active: selectedBar === 'playlists'
             }"
             :title="$t('menu.generate_playlist')"
@@ -126,7 +126,7 @@
 
           <div
             :class="{
-              'more-menu-item': true,
+              'more-menu': true,
               active: selectedBar === 'tasks'
             }"
             :title="$t('menu.create_tasks')"
@@ -141,7 +141,7 @@
 
           <div
             :class="{
-              'more-menu-item': true,
+              'more-menu': true,
               active: selectedBar === 'delete-tasks'
             }"
             :title="$t('menu.delete_tasks')"
@@ -166,7 +166,7 @@
 
           <div
             :class="{
-              'more-menu-item': true,
+              'more-menu': true,
               active: selectedBar === 'custom-actions'
             }"
             :title="$t('menu.run_custom_action')"
@@ -181,7 +181,7 @@
           </div>
 
           <div
-            class="more-menu-item"
+            class="more-menu"
             :title="$t('menu.delete_assets')"
             @click="selectBar('delete-assets')"
             v-if="
@@ -193,7 +193,7 @@
           </div>
 
           <div
-            class="more-menu-item"
+            class="more-menu"
             :title="$t('menu.delete_shots')"
             @click="selectBar('delete-shots')"
             v-if="
@@ -205,7 +205,7 @@
           </div>
 
           <div
-            class="more-menu-item"
+            class="more-menu"
             :title="$t('menu.delete_edits')"
             @click="selectBar('delete-edits')"
             v-if="
@@ -439,7 +439,7 @@
           class="flexcolumn filler"
           v-if="selectedBar === 'custom-actions'"
         >
-          <div class="flexrow-item combobox-item custom-action-combobox is-wide">
+          <div class="flexrow-item custom-action-combobox is-wide">
             <combobox-model
               class="is-wide"
               :models="customActions"
@@ -632,7 +632,7 @@ import Spinner from '@/components/widgets/Spinner'
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal'
 
 export default {
-  name: 'action-topbar',
+  name: 'action-panel',
   mixins: [domMixin],
 
   components: {
@@ -707,6 +707,21 @@ export default {
     }
   },
 
+  mounted () {
+    this.customAction = this.defaultCustomAction
+    this.setCurrentTeam()
+    this.resetPosition()
+    window.removeEventListener('mousemove', this.doDrag)
+    window.removeEventListener('mouseup', this.stopDrag)
+    window.addEventListener('mousemove', this.doDrag)
+    window.addEventListener('mouseup', this.stopDrag)
+  },
+
+  beforeDestroy () {
+    preferences.setPreference('topbar:position-x', this.position.left)
+    preferences.setPreference('topbar:position-y', this.position.top)
+  },
+
   computed: {
     ...mapGetters([
       'allCustomActions',
@@ -734,6 +749,28 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
+    currentUrl () {
+      return this.$route.path
+    },
+
+    currentHost () {
+      return window.location.host
+    },
+
+    currentEntityType () {
+      if (this.isCurrentViewAsset) return 'asset'
+      else if (this.isCurrentViewShot) return 'shot'
+      return 'edit'
+    },
+
+    defaultCustomAction () {
+      if (this.customActions.length > 0) {
+        return this.customActions[0]
+      } else {
+        return {}
+      }
+    },
 
     isTaskSelection () {
       return this.nbSelectedTasks > 0
@@ -770,26 +807,6 @@ export default {
         this.isCurrentViewShot ||
         this.isCurrentViewEdit
       )
-    },
-
-    currentUrl () {
-      return this.$route.path
-    },
-
-    currentHost () {
-      return window.location.host
-    },
-
-    currentEntityType () {
-      return this.isCurrentViewAsset ? 'asset' : 'shot'
-    },
-
-    defaultCustomAction () {
-      if (this.customActions.length > 0) {
-        return this.customActions[0]
-      } else {
-        return {}
-      }
     },
 
     isCurrentViewAsset () {
@@ -830,10 +847,6 @@ export default {
         this.isCurrentViewEdit
     },
 
-    isList () {
-      return this.isCurrentViewAsset || this.isCurrentViewShot
-    },
-
     selectedPersonId () {
       return this.person ? this.person.id : null
     },
@@ -854,22 +867,6 @@ export default {
     isSupervisorInDepartment () {
       return this.isCurrentUserSupervisor && (
         this.user.departments.length === 0 || this.isInDepartment)
-    },
-
-    currentMenuLabel () {
-      const labels = {
-        assignation: 'menu.assign_tasks',
-        'change-status': 'menu.change_status',
-        priorities: 'menu.change_priority',
-        playlists: 'menu.generate_playlists',
-        tasks: 'menu.create_tasks',
-        'delete-tasks': 'menu.delete_tasks',
-        'delete-assets': 'menu.delete_assets',
-        'delete-shots': 'menu.delete_shots',
-        'delete-edits': 'menu.delete_edits',
-        'custom-actions': 'menu.run_custom_action'
-      }
-      return this.$t(labels[this.selectedBar])
     },
 
     storagePrefix () {
@@ -902,25 +899,7 @@ export default {
       'unassignSelectedTasks'
     ]),
 
-    confirmAssign () {
-      if (this.$options.dragging) return
-      if (this.selectedPersonId || this.isInDepartment) {
-        this.isAssignationLoading = true
-        const personId = (this.isCurrentUserManager ||
-          this.isCurrentUserSupervisor)
-          ? this.selectedPersonId
-          : this.user.id
-        this.assignSelectedTasks({
-          personId,
-          callback: () => {
-            this.isAssignationLoading = false
-          }
-        })
-      }
-    },
-
     confirmTaskStatusChange () {
-      if (this.$options.dragging) return
       this.isChangeStatusLoading = true
       if (!this.taskStatusId) {
         this.taskStatusId = this.availableTaskStatuses[0].id
@@ -939,8 +918,35 @@ export default {
         })
     },
 
+    confirmAssign () {
+      if (this.selectedPersonId || this.isInDepartment) {
+        this.isAssignationLoading = true
+        const personId = (this.isCurrentUserManager ||
+          this.isCurrentUserSupervisor)
+          ? this.selectedPersonId
+          : this.user.id
+        this.assignSelectedTasks({
+          personId,
+          callback: () => {
+            this.isAssignationLoading = false
+          }
+        })
+      }
+    },
+
+    clearAssignation () {
+      const person = this.isCurrentUserArtist ? this.user : this.person
+      if (person) {
+        this.isAssignationLoading = true
+        Promise.all(Array.from(this.selectedTasks.values()).map(task => {
+          return this.unassignPersonFromTask({ task, person })
+        })).then(() => {
+          this.isAssignationLoading = false
+        })
+      }
+    },
+
     confirmPriorityChange () {
-      if (this.$options.dragging) return
       this.isChangePriorityLoading = true
       this.changeSelectedPriorities({
         priority: Number(this.priority),
@@ -951,7 +957,6 @@ export default {
     },
 
     confirmTaskCreation () {
-      if (this.$options.dragging) return
       const type = this.$route.path.indexOf('shots') > 0 ? 'shots' : 'assets'
       this.isCreationLoading = true
       this.createSelectedTasks({
@@ -1039,18 +1044,6 @@ export default {
       this.modals.playlist = false
     },
 
-    clearAssignation () {
-      const person = this.isCurrentUserArtist ? this.user : this.person
-      if (person) {
-        this.isAssignationLoading = true
-        Promise.all(Array.from(this.selectedTasks.values()).map(task => {
-          return this.unassignPersonFromTask({ task, person })
-        })).then(() => {
-          this.isAssignationLoading = false
-        })
-      }
-    },
-
     confirmSetThumbnailsFromTasks () {
       this.isSetThumbnailsLoading = true
       Promise.all(Array.from(this.selectedTasks.values()).map(task => {
@@ -1058,16 +1051,6 @@ export default {
       })).then(() => {
         this.isSetThumbnailsLoading = false
       })
-    },
-
-    selectBar (barName) {
-      if (this.$options.dragging) return
-      localStorage.setItem(
-        `${this.storagePrefix}-selected-bar`,
-        barName,
-        { expires: '1M' }
-      )
-      this.selectedBar = barName
     },
 
     setCurrentTeam () {
@@ -1118,6 +1101,16 @@ export default {
       this.clearSelectedEdits()
     },
 
+    selectBar (barName) {
+      if (this.$options.dragging) return
+      localStorage.setItem(
+        `${this.storagePrefix}-selected-bar`,
+        barName,
+        { expires: '1M' }
+      )
+      this.selectedBar = barName
+    },
+
     autoChooseSelectBar () {
       if (!this.isHidden) {
         window.addEventListener('keydown', this.onKeyDown)
@@ -1140,8 +1133,6 @@ export default {
           this.selectedBar = lastSelection
         } else {
           if (this.isCurrentViewAsset || this.isCurrentViewShot) {
-            this.selectedBar = 'assignation'
-          } else {
             this.selectedBar = 'change-status'
           }
         }
@@ -1206,21 +1197,6 @@ export default {
       this.position.left = x
       this.position.top = y
     }
-  },
-
-  mounted () {
-    this.customAction = this.defaultCustomAction
-    this.setCurrentTeam()
-    this.resetPosition()
-    window.removeEventListener('mousemove', this.doDrag)
-    window.removeEventListener('mouseup', this.stopDrag)
-    window.addEventListener('mousemove', this.doDrag)
-    window.addEventListener('mouseup', this.stopDrag)
-  },
-
-  beforeDestroy () {
-    preferences.setPreference('topbar:position-x', this.position.left)
-    preferences.setPreference('topbar:position-y', this.position.top)
   },
 
   watch: {
@@ -1311,7 +1287,7 @@ export default {
   .action-topbar {
     background: $dark-grey-light;
 
-    .more-menu-item {
+    .more-menu {
       color: $light-grey-light;
 
       &.active {
@@ -1347,25 +1323,8 @@ div.assignation {
   padding-right: 0;
 }
 
-div.combobox-item {
-  padding-top: 3px;
-}
-
 .hidden {
   display: none;
-}
-
-.clear-selection {
-  cursor: pointer;
-  padding-right: 0.5em;
-}
-
-.field {
-  margin-bottom: 0px;
-}
-
-.confirm-button {
-  margin-right: 1em;
 }
 
 .clear-assignation-button {
@@ -1376,16 +1335,6 @@ div.combobox-item {
 .clear-assignation-button:hover {
   box-shadow: none;
   background: transparent;
-}
-
-.more-menu-icon {
-  cursor: pointer;
-  font-size: 1.2em;
-  height: 40px;
-  padding: 0 0.5em 0 0.5em;
-  align-items: middle;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
 }
 
 .menu {
@@ -1399,12 +1348,7 @@ div.combobox-item {
   width: 460px;
 }
 
-textarea {
-  height: 43px;
-  min-height: 43px;
-}
-
-.more-menu-item {
+.more-menu {
   padding: .2em .6em .4em .6em;
   font-size: 1.2em;
   cursor: pointer;
@@ -1433,19 +1377,10 @@ textarea {
   padding: .5em .5em
 }
 
-.clear-selection-container {
-  flex: 1;
-}
-
-.clear-selection {
-}
-
-.clear-selection .flexrow-item:first-child {
-  margin-left: auto;
-}
-
 .comment-text {
   border-radius: 10px;
+  height: 43px;
+  min-height: 43px;
   padding: 8px;
 }
 
@@ -1454,24 +1389,11 @@ textarea {
   margin-left: .3em;
 }
 
-.confirm-button {
-  margin-top: 2px;
-}
-
 .menu-separator {
   padding: .2em;
   border-right: 2px solid $light-grey-light;
   height: 26px;
   margin-bottom: 8px;
-}
-
-.nb-selected-tasks {
-  cursor: grab;
-  margin: 0;
-  padding: .4em 0 .4em 1.2em;
-  text-transform: uppercase;
-  font-size: .8em;
-  font-weight: 800;
 }
 
 .is-wide {
@@ -1494,10 +1416,6 @@ textarea {
   }
 }
 
-.grab-bar {
-  cursor: grab;
-}
-
 .is-link {
   color: var(--text);
 }
@@ -1506,7 +1424,6 @@ textarea {
   cursor: pointer;
   margin-right: .5em;
   margin-top: -1.5em;
-  // padding: .3em .5em;
   svg {
     width: 16px;
   }
