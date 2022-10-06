@@ -199,15 +199,15 @@ export default {
       shotPaddingOptions: [
         {
           label: '1',
-          padding: '1'
+          value: '1'
         },
         {
           label: '2',
-          padding: '2'
+          value: '2'
         },
         {
           label: '10',
-          padding: '10'
+          value: '10'
         }
       ],
       shotPadding: '1'

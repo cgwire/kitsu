@@ -172,6 +172,7 @@ export default {
       if (this.isEditing) {
         this.form.name = this.playlistToEdit.name
         this.form.for_entity = this.playlistToEdit.for_entity
+        this.form.for_client = this.playlistToEdit.for_client
         this.form.is_for_all =
           this.currentEpisode && this.currentEpisode.id === 'all'
         this.form.task_type_id = this.playlistToEdit.task_type_id

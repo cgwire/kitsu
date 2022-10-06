@@ -805,17 +805,18 @@ export default {
 }
 
 .user-menu {
-  position: fixed;
-  width: 220px;
-  min-width: 220px;
-  right: 0;
   background-color: white;
-  padding: 1em 1em 1em 1em;
-  z-index: 203;
   box-shadow: 2px 3px 3px rgba(0,0,0,0.2);
   border-left: 1px solid $white-grey;
   border-bottom: 1px solid $white-grey;
+  border-bottom-left-radius: 10px;
+  min-width: 220px;
+  padding: 1em 1em 1em 1em;
+  position: fixed;
   transition: top .5s ease;
+  right: 0;
+  width: 220px;
+  z-index: 203;
 }
 
 .user-menu ul {
