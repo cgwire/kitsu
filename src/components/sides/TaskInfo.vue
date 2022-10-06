@@ -1389,4 +1389,8 @@ export default {
     }
   }
 }
+
+.preview-column-content {
+  border-radius: 5px;
+}
 </style>
