@@ -257,9 +257,18 @@ export default {
         } else {
           startDate = moment()
         }
+        if (startDate.isBefore(taskTypeElement.startDate)) {
+          startDate = taskTypeElement.startDate.clone()
+        }
+        if (startDate.isAfter(taskTypeElement.endDate)) {
+          startDate = taskTypeElement.endDate.clone().add(-1, 'days')
+        }
         if (item.end_date) {
           endDate = parseDate(item.end_date)
         } else {
+          endDate = startDate.clone().add(1, 'days')
+        }
+        if (endDate.isBefore(startDate)) {
           endDate = startDate.clone().add(1, 'days')
         }
         const scheduleItem = {
@@ -301,14 +310,14 @@ export default {
         }
 
         this[action](parameters)
-          .then((scheduleItems) => {
+          .then(scheduleItems => {
             taskTypeElement.loading = false
             taskTypeElement.children = this.convertScheduleItems(
               taskTypeElement,
               scheduleItems
             )
           })
-          .catch((err) => {
+          .catch(err => {
             console.error(err)
             taskTypeElement.loading = false
             taskTypeElement.children = []
