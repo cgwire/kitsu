@@ -155,6 +155,12 @@
       </div>
       <div
         class="error has-text-right mt1"
+        v-if="isUserLimitError"
+      >
+        {{ $t('people.user_limit_error') }}
+      </div>
+      <div
+        class="error has-text-right mt1"
         v-if="isError"
       >
         {{ $t('people.create_error') }}
@@ -176,23 +182,51 @@ import DepartmentName from '@/components/widgets/DepartmentName'
 export default {
   name: 'edit-modal',
   mixins: [modalMixin],
-  props: [
-    'active',
-    'cancelRoute',
-    'errorText',
-    'isLoading',
-    'isCreateInviteLoading',
-    'isInvitationSuccess',
-    'isInvitationError',
-    'isInviteLoading',
-    'isError',
-    'onConfirmClicked',
-    'personToEdit',
-    'text'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    isCreateInviteLoading: {
+      type: Boolean,
+      default: false
+    },
+    isInviteLoading: {
+      type: Boolean,
+      default: false
+    },
+    isInvitationSuccess: {
+      type: Boolean,
+      default: false
+    },
+    isInvitationError: {
+      type: Boolean,
+      default: false
+    },
+    isUserLimitError: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    personToEdit: {
+      type: Object,
+      default: () => {}
+    }
+  },
 
   data () {
     return {
+      activeOptions: [
+        { label: this.$t('main.yes'), value: 'true' },
+        { label: this.$t('main.no'), value: 'false' }
+      ],
       isValidEmail: false,
       form: {
         first_name: '',
@@ -203,7 +237,6 @@ export default {
         active: 'true',
         departments: []
       },
-
       roleOptions: [
         { label: 'user', value: 'user' },
         { label: 'supervisor', value: 'supervisor' },
@@ -211,10 +244,6 @@ export default {
         { label: 'client', value: 'client' },
         { label: 'vendor', value: 'vendor' },
         { label: 'admin', value: 'admin' }
-      ],
-      activeOptions: [
-        { label: this.$t('main.yes'), value: 'true' },
-        { label: this.$t('main.no'), value: 'false' }
       ],
       selectedDepartment: null
     }
