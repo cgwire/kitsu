@@ -108,6 +108,13 @@ export default {
     }
     setTimeout(() => {
       if (this.video) {
+        if (this.video.readyState === 4) {
+          this.configureVideo()
+          this.onWindowResize()
+          this.isLoading = false
+          this.setCurrentTime(0)
+          this.$emit('video-loaded')
+        }
         this.video.addEventListener(
           'focus', function () { this.blur() }, false
         )
