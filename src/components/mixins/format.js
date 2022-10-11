@@ -46,11 +46,11 @@ export const formatListMixin = {
       if (priority === 0) {
         label = 'normal'
       } else if (priority === 1) {
-        label = this.$('tasks.priority.high')
+        label = this.$t('tasks.priority.high')
       } else if (priority === 2) {
-        label = this.$('tasks.priority.very_high')
+        label = this.$t('tasks.priority.very_high')
       } else if (priority === 3) {
-        label = this.$('tasks.priority.emergency')
+        label = this.$t('tasks.priority.emergency')
       }
       return label
     },
