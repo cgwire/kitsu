@@ -583,7 +583,7 @@ export const playerMixin = {
     },
 
     onVideoRepeated () {
-      if (!this.isCommentsHidden && !this.isFocusTextarea()) {
+      if (!this.isCommentsHidden) {
         this.clearFocus()
       }
       if (this.isComparing) {
