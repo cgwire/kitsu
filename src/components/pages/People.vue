@@ -90,12 +90,13 @@
 
     <edit-person-modal
       :active="modals.edit"
-      :is-loading="loading.edit"
-      :is-invite-loading="loading.invite"
       :is-create-invite-loading="loading.createAndInvite"
       :is-error="errors.edit"
+      :is-invite-loading="loading.invite"
       :is-invitation-success="success.invite"
       :is-invitation-error="errors.invite"
+      :is-loading="loading.edit"
+      :is-user-limit-error="errors.userLimit"
       :person-to-edit="personToEdit"
       @cancel="modals.edit = false"
       @confirm="confirmEditPeople"
@@ -206,6 +207,17 @@ export default {
   },
 
   watch: {
+    'modals.edit' () {
+      if (this.modals.edit) {
+        this.loading.createAndInvite = false
+        this.errors.edit = false
+        this.errors.invite = false
+        this.errors.userLimit = false
+        this.loading.edit = false
+        this.loading.invite = false
+        this.success.invite = false
+      }
+    }
   },
 
   computed: {
@@ -316,14 +328,22 @@ export default {
       else form.id = this.personToEdit.id
       this.loading.edit = true
       this.errors.edit = false
+      this.errors.userLimit = false
       this[action](form)
         .then(() => {
           this.loading.edit = false
           this.modals.edit = false
         })
-        .catch((err) => {
-          console.error(err)
-          this.errors.edit = true
+        .catch(err => {
+          const isUserLimitReached =
+            err.body &&
+            err.body.message &&
+            err.body.message.indexOf('limit') > 0
+          if (isUserLimitReached) {
+            this.errors.userLimit = true
+          } else {
+            this.errors.edit = true
+          }
           this.loading.edit = false
         })
     },

@@ -59,8 +59,10 @@ const client = {
             errors.backToLogin()
             reject(err)
           } else {
-            if (err) reject(err)
-            else resolve(res.body)
+            if (err) {
+              err.body = res ? res.body : ''
+              reject(err)
+            } else resolve(res.body)
           }
         })
     })

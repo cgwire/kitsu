@@ -515,7 +515,7 @@ export default {
     confirm_edit: 'Save user changes',
     create: 'Create user',
     create_invite: 'Create user and send invitation',
-    create_error: 'An  error occurred while creating or update this user. You may have reach your user limit. Please contact our support team for more information.',
+    create_error: 'A server error occurred while creating or update this user. Please contact our support team for more information.',
     delete_error: 'An error occurred while deleting this user. There are probably data linked to it. Are you sure this user has no assignation or wrote no comment?',
     delete_text: 'Are you sure you want to remove {personName} from your database? Every related comments and previews will be deleted. Please confirm by typing the full user name below.',
     edit_title: 'Edit user',
@@ -531,6 +531,7 @@ export default {
     team: 'Team',
     title: 'People',
     unactive: 'Unactive',
+    user_limit_error: 'You have reach your user limit. Please contact our team to upgrade your plan.',
     fields: {
       active: 'Active',
       departments: 'Departments',
