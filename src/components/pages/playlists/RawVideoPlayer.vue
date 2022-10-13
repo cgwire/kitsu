@@ -92,6 +92,10 @@ export default {
     this.player1.addEventListener('loadedmetadata', this.emitLoadedEvent)
     window.addEventListener('resize', this.resetHeight)
     this.$options.currentTimeCalls = []
+    if (this.video && this.video.readyState === 4) {
+      this.$emit('metadata-loaded', event)
+      this.resetHeight()
+    }
   },
 
   beforeDestroy () {
