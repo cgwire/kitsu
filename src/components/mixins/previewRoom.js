@@ -45,6 +45,9 @@ export const previewRoomMixin = {
         current_preview_file_id: this.playingPreviewFileId,
         current_frame: this.currentFrameMovieOrPicture,
         is_repeating: this.isRepeating,
+        is_laser_mode: this.isLaserModeOn,
+        handle_in: this.handleIn,
+        handle_out: this.handleOut,
         speed: this.speed,
         comparing: {
           enable: this.isComparing,
@@ -68,13 +71,13 @@ export const previewRoomMixin = {
       if (this.isCurrentPreviewMovie) {
         // we need to wait that the video player finished updating before
         // sending the event on the websocket
-        this.onNextTimeUpdateActions.push(this.updatePlayingStatus)
+        this.onNextTimeUpdateActions.push(this.updateRoomStatus)
       } else {
-        this.updatePlayingStatus()
+        this.updateRoomStatus()
       }
     },
 
-    updatePlayingStatus () {
+    updateRoomStatus () {
       if (!this.previewRoom()) return
       if (!this.joinedRoom) return
 
@@ -85,6 +88,9 @@ export const previewRoomMixin = {
         current_preview_file_id: this.playingPreviewFileId,
         current_frame: this.currentFrameMovieOrPicture,
         is_repeating: this.isRepeating,
+        is_laser_mode: this.isLaserModeOn,
+        handle_in: this.handleIn,
+        handle_out: this.handleOut,
         speed: this.speed,
         comparing: {
           enable: this.isComparing,
@@ -198,21 +204,42 @@ export const previewRoomMixin = {
           this.pause()
         }
       }
+
+      if (
+        this.exists(eventData.is_laser_mode) &&
+        eventData.is_laser_mode !== this.isLaserModeOn
+      ) {
+        this.isLaserModeOn = eventData.is_laser_mode
+      }
+
+      if (
+        this.exists(eventData.handle_in) &&
+        eventData.handle_in !== this.handleIn
+      ) {
+        this.handleIn = eventData.handle_in
+      }
+
+      if (
+        this.exists(eventData.handle_out) &&
+        eventData.handle_out !== this.handleOut
+      ) {
+        this.handleOut = eventData.handle_out
+      }
     },
 
     loadRoomCurrentFrame (eventData) {
       if (
         eventData.current_frame !== this.currentFrameMovieOrPicture
       ) {
-        const frameNumber = eventData.current_frame
-        this.rawPlayer.setCurrentFrame(frameNumber - 1)
-        this.currentTimeRaw = (frameNumber - 1) * this.frameDuration + 0.01
+        const frameNumber = eventData.current_frame - 1
+        this.rawPlayer.setCurrentFrame(frameNumber)
+        this.currentTimeRaw = (frameNumber) * this.frameDuration + 0.01
         if (this.syncComparisonPlayer) this.syncComparisonPlayer()
         this.updateProgressBar()
 
         this.clearCanvas()
         const annotation = this.getAnnotation(
-          (frameNumber - 1) * this.frameDuration
+          (frameNumber) * this.frameDuration
         )
         if (annotation) this.loadAnnotation(annotation)
       } else if (
@@ -267,28 +294,31 @@ export const previewRoomMixin = {
 
       'preview-room:add-annotation' (eventData) {
         if (!this.previewRoom()) return
-
         if (!this.joinedRoom) return
-        if (this.user.id === eventData.data.user_id) return
         const annotation = this.getAnnotation(eventData.time)
         const obj = eventData.data.obj
-        this.addObjectToCanvas(annotation, obj)
+        if (this.getObjectById(obj)) return
+        if (this.isLaserModeOn) {
+          const o = this.addObjectToCanvas(annotation, obj)
+          this.fadeObject(o)
+        } else {
+          this.addObjectToCanvas(annotation, obj)
+        }
       },
 
       'preview-room:remove-annotation' (eventData) {
         if (!this.previewRoom()) return
 
         if (!this.joinedRoom) return
-        if (this.user.id === eventData.data.user_id) return
         const obj = eventData.data.obj
+        if (!this.getObjectById(obj)) return
         this.removeObjectFromCanvas(obj)
       },
 
       'preview-room:update-annotation' (eventData) {
         if (!this.previewRoom()) return
-
         if (!this.joinedRoom) return
-        if (this.user.id === eventData.data.user_id) return
+        // if (this.user.id === eventData.data.user_id) return
         const annotation = this.getAnnotation(eventData.time)
         const obj = eventData.data.obj
         this.updateObjectInCanvas(annotation, obj)

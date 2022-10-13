@@ -511,7 +511,7 @@
           class="playlist-button flexrow-item comparison-list"
           :options="comparisonModeOptions"
           v-model="comparisonMode"
-          @input="updatePlayingStatus"
+          @input="updateRoomStatus"
           v-if="isComparing"
         />
         <div
@@ -1230,7 +1230,7 @@ export default {
 
     entityListClicked (entityIndex) {
       this.playEntity(entityIndex)
-      this.updatePlayingStatus()
+      this.updateRoomStatus()
     },
 
     removeEntity (entity) {
@@ -1262,10 +1262,10 @@ export default {
 
     onPlayNext () {
       const nextEntity = this.entityList[this.nextEntityIndex]
-      this.resetHandles(nextEntity)
       if (this.isRepeating && this.isCurrentPreviewMovie) {
         this.rawPlayer.playNext()
       } else if (nextEntity.preview_file_extension === 'mp4') {
+        this.resetHandles(nextEntity)
         this.rawPlayer.playNext(this.handleIn)
         this.syncComparisonPlayer()
         this._setCurrentTimeOnHandleIn()
@@ -1576,40 +1576,40 @@ export default {
       const index = this.currentPreviewIndex - 1
       this.currentPreviewIndex =
         index < 0 ? this.currentEntityPreviewLength - 1 : index
-      this.updatePlayingStatus()
+      this.updateRoomStatus()
     },
 
     onNextPreviewClicked () {
       const index = this.currentPreviewIndex + 1
       this.currentPreviewIndex =
         index > this.currentEntityPreviewLength - 1 ? 0 : index
-      this.updatePlayingStatus()
+      this.updateRoomStatus()
     },
 
     onPreviousComparisonPictureClicked () {
       const index = this.currentComparisonPreviewIndex - 1
       this.currentComparisonPreviewIndex =
         index < 0 ? this.currentComparisonPreviewLength - 1 : index
-      this.updatePlayingStatus()
+      this.updateRoomStatus()
     },
 
     onNextComparisonPictureClicked () {
       const index = this.currentComparisonPreviewIndex + 1
       this.currentComparisonPreviewIndex =
         index > this.currentComparisonPreviewLength - 1 ? 0 : index
-      this.updatePlayingStatus()
+      this.updateRoomStatus()
     },
 
     onTaskTypeToCompareChanged () {
       this.saveUserComparisonChoice()
       this.rebuildEntityListToCompare()
-      this.updatePlayingStatus()
+      this.updateRoomStatus()
     },
 
     onRevisionToCompareChanged () {
       if (this.isComparing) {
         this.rebuildEntityListToCompare()
-        this.updatePlayingStatus()
+        this.updateRoomStatus()
         this.$nextTick(() => {
           this.pause()
           this.rawPlayerComparison.loadEntity(this.playingEntityIndex)
@@ -1744,6 +1744,7 @@ export default {
       this.rebuildComparisonOptions()
       this.clearCanvas()
       this.annotations = []
+      this.isComparing = false
       if (this.entityList.length === 0) {
         this.clearPlayer()
       }
@@ -1785,6 +1786,10 @@ export default {
         this.resetHeight()
         this.loadWaveForm()
       }
+    },
+
+    isLaserModeOn () {
+      this.updateRoomStatus()
     }
   },
 
