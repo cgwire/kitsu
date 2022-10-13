@@ -361,6 +361,7 @@ export default {
           this.errors.edit = true
           this.loading.createAndInvite = false
         })
+      this.onSearchChange()
     },
 
     confirmInvite (form) {
@@ -378,6 +379,7 @@ export default {
           this.success.invite = false
           this.errors.invite = true
         })
+      this.onSearchChange()
     },
 
     confirmDeletePeople () {
