@@ -103,7 +103,7 @@
           }"
           :disabled="!isValidEmail"
           @click="invite"
-          v-if="isCurrentUserAdmin"
+          v-if="!isCreating && isCurrentUserAdmin"
         >
           {{ $t('people.invite') }}
         </button>
