@@ -267,9 +267,9 @@ export default {
   border-radius: 2px;
   cursor: pointer;
   display: inline-block;
-  height: 24px;
+  height: 20px;
   position: absolute;
-  top: 2px;
+  top: 4px;
 }
 
 .progress-wrapper {
