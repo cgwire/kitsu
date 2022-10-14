@@ -78,7 +78,7 @@
           v-for="entry in unactivePeople"
           :key="entry.id"
         >
-          <people-name-cell class="name" :person="entry" />
+          <people-name-cell class="name datatable-row-header" :person="entry" />
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
