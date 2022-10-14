@@ -60,6 +60,7 @@
       :is-error="isPeopleLoadingError"
       @edit-clicked="onEditClicked"
       @delete-clicked="onDeleteClicked"
+      @change-password-clicked="onChangePasswordClicked"
     />
 
     <import-render-modal
@@ -104,6 +105,13 @@
       @invite="confirmInvite"
     />
 
+    <change-password-modal
+      :active="modals.changePassword"
+      :person="personToChangePassword"
+      @cancel="modals.changePassword = false"
+      @confirm="modals.changePassword = false"
+    />
+
     <hard-delete-modal
       :active="modals.del"
       :error-text="$t('people.delete_error')"
@@ -131,6 +139,7 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
+import ChangePasswordModal from '@/components/modals/ChangePasswordModal'
 import EditPersonModal from '@/components/modals/EditPersonModal'
 import HardDeleteModal from '@/components/modals/HardDeleteModal'
 import ImportModal from '@/components/modals/ImportModal'
@@ -149,6 +158,7 @@ export default {
     BuildPeopleFilterModal,
     ButtonHrefLink,
     ButtonSimple,
+    ChangePasswordModal,
     EditPersonModal,
     HardDeleteModal,
     ImportModal,
@@ -186,6 +196,7 @@ export default {
       modals: {
         edit: false,
         del: false,
+        changePassword: false,
         importModal: false,
         isImportRenderDisplayed: false,
         isBuildFilterDisplayed: false
@@ -193,6 +204,7 @@ export default {
       parsedCSV: [],
       personToDelete: {},
       personToEdit: { role: 'user' },
+      personToChangePassword: {},
       success: {
         invite: false
       }
@@ -416,6 +428,11 @@ export default {
       this.success.invite = false
       this.personToEdit = person
       this.modals.edit = true
+    },
+
+    onChangePasswordClicked (person) {
+      this.personToChangePassword = person
+      this.modals.changePassword = true
     },
 
     onNewClicked () {

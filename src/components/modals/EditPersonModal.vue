@@ -180,7 +180,7 @@ import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
 import DepartmentName from '@/components/widgets/DepartmentName'
 
 export default {
-  name: 'edit-modal',
+  name: 'edit-person-modal',
   mixins: [modalMixin],
   props: {
     active: {

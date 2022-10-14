@@ -448,6 +448,7 @@
             "team": "Équipe",
             "title": "Employés",
             "unactive": "Absents",
+            "change_password_for": "Changer le mot de passe pour",
             "fields": {
                 "first_name": "Prénom",
                 "last_name": "Nom",
