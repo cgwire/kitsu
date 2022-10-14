@@ -989,9 +989,11 @@ export default {
         shotsToChange = [entry]
       }
 
+      const cleanValue = this.sanitizeIntegerLight(value)
+
       shotsToChange.forEach(shot => {
         this.$emit('field-changed', {
-          entry: shot, fieldName: 'nb_frames', value: this.sanitizeInteger(value)
+          entry: shot, fieldName: 'nb_frames', value: cleanValue
         })
       })
     },
