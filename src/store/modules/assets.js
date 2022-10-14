@@ -124,18 +124,21 @@ const helpers = {
     let timeSpent = 0
     let estimations = 0
     if (assets) {
-      assets.forEach(asset => {
+      assets.filter(a => !a.canceled).forEach(asset => {
         timeSpent += asset.timeSpent
         estimations += asset.estimation
       })
       Object.assign(state, {
-        displayedAssetsLength: assets.length,
+        displayedAssetsLength: assets.filter(a => !a.canceled).length,
+        displayedAssetsCount: assets.length,
         displayedAssetsTimeSpent: timeSpent,
         displayedAssetsEstimation: estimations
       })
     } else {
       Object.assign(state, {
         displayedAssetsLength: 0,
+        displayedAssetsCount: 0,
+        displayedAssetsTimeSpent: 0,
         displayedAssetsEstimation: 0
       })
     }
@@ -286,6 +289,7 @@ const initialState = {
 
   filteredAssets: [],
   displayedAssets: [],
+  displayedAssetsCount: 0,
   displayedAssetsLength: 0,
   displayedAssetsTimeSpent: 0,
   displayedAssetsEstimation: 0,
@@ -331,6 +335,7 @@ const getters = {
   isAssetsLoadingError: state => state.isAssetsLoadingError,
 
   displayedAssets: state => state.displayedAssets,
+  displayedAssetsCount: state => state.displayedAssetsCount,
   displayedAssetsLength: state => state.displayedAssetsLength,
   displayedAssetsTimeSpent: state => state.displayedAssetsTimeSpent,
   displayedAssetsEstimation: state => state.displayedAssetsEstimation,
@@ -898,10 +903,10 @@ const mutations = {
       cache.assets = removeModelFromList(cache.assets, assetToDelete)
       state.displayedAssets =
         removeModelFromList(state.displayedAssets, assetToDelete)
-      if (assetToDelete.timeSpent) {
+      if (assetToDelete.timeSpent && !assetToDelete.canceled) {
         state.displayedAssetsTimeSpent -= assetToDelete.timeSpent
       }
-      if (assetToDelete.estimation) {
+      if (assetToDelete.estimation && !assetToDelete.canceled) {
         state.displayedAssetsEstimation -= assetToDelete.estimation
       }
       state.assetFilledColumns = getFilledColumns(state.displayedAssets)
@@ -942,7 +947,9 @@ const mutations = {
       cache.assets = sortAssets(cache.assets)
       state.displayedAssets.push(newAsset)
       state.assetFilledColumns = getFilledColumns(state.displayedAssets)
-      state.displayedAssetsLength = cache.assets.length
+      state.displayedAssetsLength =
+        cache.assets.length.filter(a => !a.canceled)
+      state.displayedAssetsCount = cache.assets.length
 
       const maxX = state.displayedAssets.length
       const maxY = state.nbValidationColumns
@@ -957,12 +964,16 @@ const mutations = {
 
   [CANCEL_ASSET] (state, asset) {
     asset.canceled = true
+    state.displayedAssetsLength =
+      cache.result.filter(a => !a.canceled).length
   },
 
   [RESTORE_ASSET_END] (state, assetToRestore) {
     const asset = state.assetMap.get(assetToRestore.id)
     asset.canceled = false
     cache.assetIndex = buildAssetIndex(cache.assets)
+    state.displayedAssetsLength =
+      cache.result.filter(a => !a.canceled).length
   },
 
   [DELETE_TASK_END] (state, task) {

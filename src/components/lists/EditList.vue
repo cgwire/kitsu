@@ -490,10 +490,12 @@
     v-if="!isEmptyList && !isLoading"
   >
     {{ displayedEditsLength }} {{ $tc('edits.number', displayedEditsLength) }}
+    <span v-if="displayedEditsTimeSpent > 0 || displayedEditsEstimation > 0">
     ({{ formatDuration(displayedEditsTimeSpent) }}
      {{ $tc('main.days_spent', displayedEditsTimeSpent) }},
      {{ formatDuration(displayedEditsEstimation) }}
      {{ $tc('main.man_days', displayedEditsEstimation) }})
+    </span>
   </p>
 
 </div>
@@ -593,6 +595,7 @@ export default {
       'episodeMap',
       'currentEpisode',
       'displayedEditsEstimation',
+      'displayedEditsCount',
       'displayedEditsLength',
       'displayedEditsTimeSpent',
       'isBigThumbnails',
@@ -639,7 +642,7 @@ export default {
         !this.isLoading &&
         !this.isError &&
         (
-          this.displayedEditsLength > 0
+          this.displayedEditsCount > 0
         )
       )
     },
@@ -759,7 +762,7 @@ export default {
 
     onInputKeyUp (event, i, j) {
       const listWidth = this.visibleMetadataDescriptors.length + 4
-      const listHeight = this.displayedEditsLength
+      const listHeight = this.displayedEditsCount
       this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
       return this.pauseEvent(event)
     },

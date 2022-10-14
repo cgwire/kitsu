@@ -420,7 +420,8 @@ const mutations = {
     cache.todosIndex = buildTaskIndex(tasks)
     const keywords = getKeyWords(state.todosSearchText)
     const searchResult = indexSearch(cache.todosIndex, keywords)
-    state.displayedTodos = searchResult || state.todos
+    state.displayedTodos =
+      (searchResult || state.todos).filter(t => !t.entity_canceled)
     if (userFilters.todos && userFilters.todos.all) {
       state.todoSearchQueries = userFilters.todos.all
     } else {
@@ -479,7 +480,8 @@ const mutations = {
     const keywords = getKeyWords(searchText)
     let searchResult = indexSearch(cache.todosIndex, keywords)
     state.todosSearchText = searchText
-    state.displayedTodos = searchResult || state.todos
+    state.displayedTodos =
+      (searchResult || state.todos).filter(t => !t.entity_canceled)
     searchResult = indexSearch(cache.doneIndex, keywords)
     state.displayedDoneTasks = searchResult || cache.doneTasks
   },

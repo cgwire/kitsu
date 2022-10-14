@@ -194,13 +194,14 @@ const helpers = {
     let timeSpent = 0
     let estimation = 0
     let nbFrames = 0
-    shots.forEach(shot => {
+    shots.filter(s => !s.canceled).forEach(shot => {
       timeSpent += shot.timeSpent
       estimation += shot.estimation
       nbFrames += shot.nb_frames
     })
     Object.assign(state, {
-      displayedShotsLength: shots.length,
+      displayedShotsCount: shots.length,
+      displayedShotsLength: shots.filter(s => !s.canceled).length,
       displayedShotsTimeSpent: timeSpent,
       displayedShotsEstimation: estimation,
       displayedShotsFrames: nbFrames
@@ -341,6 +342,7 @@ const initialState = {
   isShotTime: false,
 
   displayedShots: [],
+  displayedShotsCount: 0,
   displayedShotsLength: 0,
   displayedShotsTimeSpent: 0,
   displayedShotsEstimation: 0,
@@ -413,6 +415,7 @@ const getters = {
   sequenceSelectionGrid: state => state.sequenceSelectionGrid,
 
   displayedShots: state => state.displayedShots,
+  displayedShotsCount: state => state.displayedShotsCount,
   displayedShotsLength: state => state.displayedShotsLength,
   displayedShotsTimeSpent: state => state.displayedShotsTimeSpent,
   displayedShotsEstimation: state => state.displayedShotsEstimation,
@@ -1119,6 +1122,7 @@ const mutations = {
     state.sequences = []
     state.sequenceIndex = {}
     state.displayedShots = []
+    state.displayedShotsCount = 0
     state.displayedShotsLength = 0
     state.displayedTimeSpent = 0
     state.displayedEstimation = 0
@@ -1145,6 +1149,7 @@ const mutations = {
 
     state.sequenceIndex = {}
     state.displayedShots = []
+    state.displayedShotsCount = 0
     state.displayedShotsLength = 0
     state.displayedEstimation = 0
     state.displayedFrames = 0
@@ -1433,6 +1438,7 @@ const mutations = {
     const shot = state.shotMap.get(shotToRestore.id)
     shot.canceled = false
     cache.shotIndex = buildShotIndex(cache.shots)
+    state.displayedShotsLength = cache.result.filter(s => !s.canceled).length
   },
 
   [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {},
@@ -1838,7 +1844,8 @@ const mutations = {
 
     state.displayedShots.push(shot)
     state.displayedShots = sortShots(state.displayedShots)
-    state.displayedShotsLength = cache.shots.length
+    state.displayedShotsCount = cache.shots.length
+    state.displayedShotsLength = cache.shots.filter(s => !s.canceled).length
     state.shotFilledColumns = getFilledColumns(state.displayedShots)
 
     const maxX = state.displayedShots.length
@@ -1859,10 +1866,10 @@ const mutations = {
     cache.shotIndex = buildShotIndex(cache.shots)
     state.displayedShots =
       removeModelFromList(state.displayedShots, shotToDelete)
-    if (shotToDelete.timeSpent) {
+    if (shotToDelete.timeSpent && !shotToDelete.canceled) {
       state.displayedShotsTimeSpent -= shotToDelete.timeSpent
     }
-    if (shotToDelete.estimation) {
+    if (shotToDelete.estimation && !shotToDelete.canceled) {
       state.displayedShotsEstimation -= shotToDelete.estimation
     }
     if (shotToDelete.nb_frames) {
@@ -1872,6 +1879,7 @@ const mutations = {
 
   [CANCEL_SHOT] (state, shot) {
     shot.canceled = true
+    state.displayedShotsLength = cache.result.filter(s => !s.canceled).length
   },
 
   [CHANGE_SHOT_SORT] (state, {

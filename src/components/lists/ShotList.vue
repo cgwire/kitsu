@@ -661,12 +661,17 @@
     v-if="!isEmptyList && !isLoading"
   >
     {{ displayedShotsLength }} {{ $tc('shots.number', displayedShotsLength) }}
+    <span v-if="displayedShotsFrames">
+    -
+       {{ displayedShotsFrames }}
+       {{ $tc('main.nb_frames', displayedShotsFrames) }}
+    </span>
+    <span v-show="displayedShotsTimeSpent > 0 || displayedShotsEstimation > 0">
     ({{ formatDuration(displayedShotsTimeSpent) }}
-     {{ $tc('main.days_spent', displayedShotsTimeSpent) }},
-     {{ formatDuration(displayedShotsEstimation) }}
-     {{ $tc('main.man_days', displayedShotsEstimation) }},
-     {{ displayedShotsFrames }} {{ $tc('main.nb_frames', displayedShotsFrames) }})
-
+       {{ $tc('main.days_spent', displayedShotsTimeSpent) }},
+       {{ formatDuration(displayedShotsEstimation) }}
+       {{ $tc('main.man_days', displayedShotsEstimation) }})
+    </span>
   </p>
 
 </div>
@@ -769,6 +774,7 @@ export default {
       'currentProduction',
       'currentEpisode',
       'displayedShotsEstimation',
+      'displayedShotsCount',
       'displayedShotsLength',
       'displayedShotsTimeSpent',
       'displayedShotsFrames',
@@ -822,7 +828,7 @@ export default {
         !this.isLoading &&
         !this.isError &&
         (
-          this.displayedShotsLength > 0
+          this.displayedShotsCount > 0
         )
       )
     },
@@ -976,7 +982,7 @@ export default {
 
     onInputKeyUp (event, i, j) {
       const listWidth = this.visibleMetadataDescriptors.length + 4
-      const listHeight = this.displayedShotsLength
+      const listHeight = this.displayedShotsCount
       this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
       return this.pauseEvent(event)
     },
