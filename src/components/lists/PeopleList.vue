@@ -57,7 +57,9 @@
             v-if="isCurrentUserAdmin"
             :entry-id="entry.id"
             :hide-delete="true"
+            :hide-change-password="false"
             @edit-clicked="$emit('edit-clicked', entry)"
+            @change-password-clicked="$emit('change-password-clicked', entry)"
           />
           <td class="actions" v-else>
           </td>
@@ -95,6 +97,7 @@
           <row-actions-cell
             v-if="isCurrentUserAdmin"
             :entry-id="entry.id"
+            :hide-change-password="true"
             @edit-clicked="$emit('edit-clicked', entry)"
             @delete-clicked="$emit('delete-clicked', entry)"
           />

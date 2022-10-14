@@ -331,6 +331,10 @@ const actions = {
       })
   },
 
+  changePasswordPerson ({ commit, state }, { person, form, callback }) {
+    return peopleApi.changePasswordPerson(person, form, callback)
+  },
+
   uploadPersonFile ({ commit, state }, toUpdate) {
     commit(IMPORT_PEOPLE_START)
     return peopleApi.postCsv(state.personCsvFormData, toUpdate)

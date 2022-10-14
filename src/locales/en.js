@@ -540,6 +540,7 @@ export default {
     title: 'People',
     unactive: 'Unactive',
     user_limit_error: 'You have reach your user limit. Please contact our team to upgrade your plan.',
+    change_password_for: 'Change password for',
     fields: {
       active: 'Active',
       departments: 'Departments',

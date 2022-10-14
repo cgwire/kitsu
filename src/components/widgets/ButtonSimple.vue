@@ -163,6 +163,10 @@
     :class="iconClass"
     v-if="icon === 'eraser'"
   />
+  <key-icon
+    :class="iconClass"
+    v-if="icon == 'key'"
+  />
   <span
     :class="iconClass"
     v-if="icon === 'laser'"
@@ -195,6 +199,7 @@ import {
   FilmIcon,
   FilterIcon,
   ImageIcon,
+  KeyIcon,
   LayersIcon,
   ListIcon,
   MaximizeIcon,
@@ -238,6 +243,7 @@ export default {
     FilmIcon,
     FilterIcon,
     ImageIcon,
+    KeyIcon,
     LayersIcon,
     ListIcon,
     MaximizeIcon,
