@@ -62,6 +62,15 @@ export const formatListMixin = {
         if (value && value.length > 0) val = parseInt(value) || 0
       }
       return val
+    },
+
+    sanitizeIntegerLight (value) {
+      let val = null
+      if (typeof value === 'string') {
+        value = value.replace(/\D/g, '')
+        if (value && value.length > 0) val = parseInt(value) || null
+      }
+      return val
     }
   }
 }
