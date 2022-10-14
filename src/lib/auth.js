@@ -24,8 +24,7 @@ const auth = {
         } else {
           if (res.body.login) {
             const user = res.body.user
-            const isLdap = res.body.ldap
-            store.commit(DATA_LOADING_START, { isLdap })
+            store.commit(DATA_LOADING_START, {})
             callback(null, user)
           } else {
             store.commit(USER_LOGIN_FAIL)
@@ -88,7 +87,6 @@ const auth = {
         } else {
           const user = res.body.user
           const organisation = res.body.organisation || {}
-          const isLdap = res.body.ldap
           organisation.use_original_file_name =
             organisation.use_original_file_name ? 'true' : 'false'
           organisation.timesheets_locked =
@@ -97,7 +95,7 @@ const auth = {
             organisation.hd_by_default ? 'true' : 'false'
           store.commit(SET_ORGANISATION, organisation)
           store.commit(USER_LOGIN, user)
-          callback(null, isLdap)
+          callback(null)
         }
       })
   },
@@ -105,7 +103,7 @@ const auth = {
   // Needed for router to know if a redirection to login page is required or
   // not.
   requireAuth (to, from, next) {
-    const finalize = (isLdap) => {
+    const finalize = () => {
       if (!store.state.user.isAuthenticated) {
         store.dispatch('getOrganisation')
           .then(() => {
@@ -122,20 +120,20 @@ const auth = {
             })
           })
       } else {
-        store.commit(DATA_LOADING_START, { isLdap })
+        store.commit(DATA_LOADING_START, {})
         next()
       }
     }
 
     if (store.state.user.user === null) {
-      auth.isServerLoggedIn((err, isLdap) => {
+      auth.isServerLoggedIn((err) => {
         if (err) {
           next({
             path: '/server-down',
             query: { redirect: to.fullPath }
           })
         } else {
-          finalize(isLdap)
+          finalize()
         }
       })
     } else {
