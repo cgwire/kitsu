@@ -149,12 +149,13 @@ const helpers = {
   setListStats (state, edits) {
     let timeSpent = 0
     let estimation = 0
-    edits.forEach(edit => {
+    edits.filter(e => !e.canceled).forEach(edit => {
       timeSpent += edit.timeSpent
       estimation += edit.estimation
     })
     Object.assign(state, {
-      displayedEditsLength: edits.length,
+      displayedEditsCount: edits.length,
+      displayedEditsLength: edits.filter(e => !e.canceled).length,
       displayedEditsTimeSpent: timeSpent,
       displayedEditsEstimation: estimation
     })
@@ -276,6 +277,7 @@ const initialState = {
   isEditTime: false,
 
   displayedEdits: [],
+  displayedEditsCount: 0,
   displayedEditsLength: 0,
   displayedEditsTimeSpent: 0,
   displayedEditsEstimation: 0,
@@ -315,6 +317,7 @@ const getters = {
   editSelectionGrid: state => state.editSelectionGrid,
 
   displayedEdits: state => state.displayedEdits,
+  displayedEditsCount: state => state.displayedEditsCount,
   displayedEditsLength: state => state.displayedEditsLength,
   displayedEditsTimeSpent: state => state.displayedEditsTimeSpent,
   displayedEditsEstimation: state => state.displayedEditsEstimation,
@@ -680,6 +683,7 @@ const mutations = {
     state.isEditsLoadingError = false
 
     state.displayedEdits = []
+    state.displayedEditsCount = 0
     state.displayedEditsLength = 0
     state.displayedEstimation = 0
     state.editSearchQueries = []
@@ -1046,7 +1050,8 @@ const mutations = {
 
     state.displayedEdits.push(edit)
     state.displayedEdits = sortEdits(state.displayedEdits)
-    state.displayedEditsLength = cache.edits.length
+    state.displayedEditsCount = cache.edits.length
+    state.displayedEditsLength = cache.edits.filter(e => !e.canceled).length
     state.editFilledColumns = getFilledColumns(state.displayedEdits)
 
     const maxX = state.displayedEdits.length
@@ -1067,10 +1072,10 @@ const mutations = {
     cache.editIndex = buildEditIndex(cache.edits)
     state.displayedEdits =
       removeModelFromList(state.displayedEdits, editToDelete)
-    if (editToDelete.timeSpent) {
+    if (editToDelete.timeSpent && !editToDelete.canceled) {
       state.displayedEditsTimeSpent -= editToDelete.timeSpent
     }
-    if (editToDelete.estimation) {
+    if (editToDelete.estimation && !editToDelete.canceled) {
       state.displayedEditsEstimation -= editToDelete.estimation
     }
   },

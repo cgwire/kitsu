@@ -540,10 +540,12 @@
     v-if="!isEmptyList && !isLoading"
   >
     {{ displayedAssetsLength }} {{ $tc('assets.number', displayedAssetsLength) }}
+    <span v-show="displayedAssetsTimeSpent > 0 || displayedAssetsEstimation > 0">
     ({{ formatDuration(displayedAssetsTimeSpent) }}
-     {{ $tc('main.days_spent', displayedAssetsTimeSpent) }},
-     {{ formatDuration(displayedAssetsEstimation) }}
-     {{ $tc('main.man_days', displayedAssetsEstimation) }})
+       {{ $tc('main.days_spent', displayedAssetsTimeSpent) }},
+       {{ formatDuration(displayedAssetsEstimation) }}
+       {{ $tc('main.man_days', displayedAssetsEstimation) }})
+    </span>
   </p>
 
 </div>
@@ -650,6 +652,7 @@ export default {
       'episodeMap',
       'currentEpisode',
       'currentProduction',
+      'displayedAssetsCount',
       'displayedAssetsLength',
       'displayedAssetsTimeSpent',
       'displayedAssetsEstimation',
@@ -678,7 +681,7 @@ export default {
     },
 
     isEmptyList () {
-      return this.displayedAssetsLength === 0 &&
+      return this.displayedAssetsCount === 0 &&
              !this.isLoading &&
              !this.isError &&
              (!this.assetSearchText || this.assetSearchText.length === 0)
@@ -696,7 +699,7 @@ export default {
         !this.isLoading &&
         !this.isError &&
         (
-          this.displayedAssetsLength > 0
+          this.displayedAssetsCount > 0
         )
       )
     },
@@ -892,7 +895,7 @@ export default {
 
     onInputKeyUp (event, i, j) {
       const listWidth = this.visibleMetadataDescriptors.length
-      const listHeight = this.displayedAssetsLength
+      const listHeight = this.displayedAssetsCount
       this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
     },
 
