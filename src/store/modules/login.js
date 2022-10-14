@@ -18,7 +18,6 @@ import auth from '@/lib/auth'
 const initialState = {
   email: '',
   password: '',
-  isLdap: false,
   isLoginLoading: false,
   isLoginError: false,
   isDataLoading: false
@@ -31,7 +30,6 @@ const state = {
 const getters = {
   email: state => state.email,
   password: state => state.password,
-  isLdap: state => state.isLdap,
   isLoginLoading: state => state.isLoginLoading,
   isLoginError: state => state.isLoginError,
   isDataLoading: state => state.isDataLoading
@@ -128,7 +126,6 @@ const mutations = {
 
   [DATA_LOADING_START] (state, payload) {
     state.isDataLoading = true
-    if (payload && payload.isLdap !== undefined) state.isLdap = payload.isLdap
   },
 
   [DATA_LOADING_END] (state) {
