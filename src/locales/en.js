@@ -300,6 +300,7 @@ export default {
     forgot_password: 'Forgot password?',
     login: 'Log in',
     login_failed: 'Log in failed, please verify your credentials',
+    too_many_failed_login_attemps: 'Too many failed login attemps, please wait one minute',
     login_page: 'Cancel',
     redirecting: 'Redirecting in {secondsLeft} seconds...',
     reset_change_password: 'Change password',
