@@ -20,6 +20,9 @@ const auth = {
             err.default_password = res.body.default_password
             err.token = res.body.token
           }
+          if (res.body.too_many_failed_login_attemps) {
+            err.too_many_failed_login_attemps = true
+          }
           callback(err)
         } else {
           if (res.body.login) {

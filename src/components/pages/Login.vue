@@ -49,9 +49,13 @@
             {{ $t("login.login") }}
           </a>
         </p>
-        <p class="control error" v-show="isLoginError">
+        <p class="control error" v-show="isTooMuchLoginFailedAttemps">
+          {{ $t("login.too_many_failed_login_attemps") }}
+        </p>
+        <p class="control error" v-show="isLoginError && !isTooMuchLoginFailedAttemps">
           {{ $t("login.login_failed") }}
         </p>
+
         <p
           class="has-text-centered"
         >
@@ -78,6 +82,12 @@ export default {
     LockIcon
   },
 
+  data () {
+    return {
+      isTooMuchLoginFailedAttemps: false
+    }
+  },
+
   computed: {
     ...mapGetters([
       'isDarkTheme',
@@ -100,6 +110,7 @@ export default {
     },
 
     confirmLogIn () {
+      this.isTooMuchLoginFailedAttemps = false
       this.logIn((err, success) => {
         if (err) {
           if (err.default_password) {
@@ -107,6 +118,8 @@ export default {
               name: 'reset-change-password',
               params: { token: err.token }
             })
+          } else if (err.too_many_failed_login_attemps) {
+            this.isTooMuchLoginFailedAttemps = true
           } else {
             console.error(err)
           }
