@@ -193,7 +193,7 @@
             "login_page": "取消",
             "redirecting": "{secondsLeft} 秒內重新導向",
             "reset_change_password": "更改密碼",
-            "reset_change_password_form_failed": "您給出的密碼有問題. 請確認密碼長度大於6個字符且兩次密碼一致.",
+            "reset_change_password_form_failed": "您給出的密碼有問題. 請確認密碼長度大於8個字符且兩次密碼一致.",
             "reset_change_password_failed": "更改密碼失敗. 請重新執行整個步驟.",
             "reset_change_password_succeed": "您的密碼已成功更改. 請返回到登入頁面來使用它.",
             "reset_change_password_title": "輸入新密碼",
@@ -638,7 +638,7 @@
                 "button": "更改密碼",
                 "error": "更改密碼時出現錯誤. 請核實您當前的密碼.",
                 "success": "您的密碼已成功更改!",
-                "unvalid": "您的確認密碼與新密碼不相符或您的密碼長度太短(預期至少是7個字符)."
+                "unvalid": "您的確認密碼與新密碼不相符或您的密碼長度太短(預期至少是8個字符)."
             },
             "save": {
                 "button": "儲存更改",

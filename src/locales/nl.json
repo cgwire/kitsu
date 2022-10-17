@@ -193,7 +193,7 @@
             "login_page": "Annuleren",
             "redirecting": "Redirect in {secondsLeft} seconde...",
             "reset_change_password": "Verander wachtwoord",
-            "reset_change_password_form_failed": "Er is een probleem met het ingevulde wachtwoord. Controleer dat uw wachtwoord minstens 7 tekens lang is en beide wachtwoorden gelijk zijn.",
+            "reset_change_password_form_failed": "Er is een probleem met het ingevulde wachtwoord. Controleer dat uw wachtwoord minstens 8 tekens lang is en beide wachtwoorden gelijk zijn.",
             "reset_change_password_failed": "Wachtwoord veranderen mislukt. Probeer de hele procedure alstublieft nogmaals.",
             "reset_change_password_succeed": "Uw wachtwoord is succesvol veranderd. Ga terug naar de log-in pagina om deze te gebruiken.",
             "reset_change_password_title": "Vul een nieuw wachtwoord in",
@@ -638,7 +638,7 @@
                 "button": "Wijzig wachtwoord",
                 "error": "Er is een fout opgetreden bij het wijzigen van het wachtwoord. Gelieve je huidige wachtwoord te verifiëren",
                 "success": "Je wachtwoord is succesvol gewijzigd!",
-                "unvalid": "Je nieuwe wachtwoordbevestiging komt niet overeen of je wachtwoord is te kort (minimaal 7 tekens wordt verwacht)."
+                "unvalid": "Je nieuwe wachtwoordbevestiging komt niet overeen of je wachtwoord is te kort (minimaal 8 tekens wordt verwacht)."
             },
             "save": {
                 "button": "Wijzigingen opslaan",
