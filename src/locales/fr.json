@@ -241,7 +241,7 @@
             "login_page": "Annuler",
             "redirecting": "Redirection dans {secondsLeft} secondes...",
             "reset_change_password": "Changer le mot de passe",
-            "reset_change_password_form_failed": "Il y a un problème avec le mot de passe donné. S'il vous plait, verifiez qu'il y a au moins 7 caractèrs et que les deux mots de passe correspondent.",
+            "reset_change_password_form_failed": "Il y a un problème avec le mot de passe donné. S'il vous plait, verifiez qu'il y a au moins 8 caractèrs et que les deux mots de passe correspondent.",
             "reset_change_password_failed": "Le changement de mot de passe a échoué. Recommencez toute la procédure.",
             "reset_change_password_succeed": "Le mot de passe a changé. Revenez à la page de connexion pour vous identifier avec.",
             "reset_change_password_title": "Entrez un nouveau mot de passe",
@@ -739,7 +739,7 @@
                 "button": "Changez de mot de passe",
                 "error": "Une erreur s'est produite lors du changement de mot de passe. Veuillez vérifier votre mot de pass actuel.",
                 "success": "Votre mot de passe a été changé avec succès !",
-                "unvalid": "Les nouveaux mots de passe sont différents ou votre mot de passe est trop court (7 caractères minimum)."
+                "unvalid": "Les nouveaux mots de passe sont différents ou votre mot de passe est trop court (8 caractères minimum)."
             },
             "save": {
                 "button": "Sauvegardez vos changements",

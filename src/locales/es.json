@@ -235,7 +235,7 @@
             "login_page": "Cancelar",
             "redirecting": "Redirigiendo en {secondsLeft} segundos",
             "reset_change_password": "Cambiar contraseña",
-            "reset_change_password_form_failed": "Hay un problema con la contraseña que dio. Por favor, verifique que tenga al menos 7 caracteres y que ambas contraseñas coincidan.",
+            "reset_change_password_form_failed": "Hay un problema con la contraseña que dio. Por favor, verifique que tenga al menos 8 caracteres y que ambas contraseñas coincidan.",
             "reset_change_password_failed": "Error al cambiar la contraseña. Por favor, reinicie todo el procedimiento de nuevo.",
             "reset_change_password_succeed": "Su contraseña ha sido cambiada con éxito. Por favor, vuelva a la página de inicio de sesión para utilizarlo.",
             "reset_change_password_title": "Introduzca una nueva contraseña",
@@ -725,7 +725,7 @@
                 "button": "Cambiar contraseña",
                 "error": "Se ha producido un error al cambiar la contraseña. Por favor, verifique su contraseña actual.",
                 "success": "Su contraseña ha sido cambiada con éxito!",
-                "unvalid": "La confirmación de su nueva contraseña no coincide o es demasiado corta (se esperan al menos 7 caracteres)."
+                "unvalid": "La confirmación de su nueva contraseña no coincide o es demasiado corta (se esperan al menos 8 caracteres)."
             },
             "save": {
                 "button": "Guardar cambios",

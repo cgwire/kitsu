@@ -193,7 +193,7 @@
             "login_page": "Mégsem",
             "redirecting": "Átirányítás {secondsLeft} mp múlva...",
             "reset_change_password": "Jelszó megváltoztatása",
-            "reset_change_password_form_failed": "Probléma a megadott jelszóval. Kérlek ellenőrizd, hogy legalább 7 karakter hosszú, és megegyezik a két mezőbe begépelt.",
+            "reset_change_password_form_failed": "Probléma a megadott jelszóval. Kérlek ellenőrizd, hogy legalább 8 karakter hosszú, és megegyezik a két mezőbe begépelt.",
             "reset_change_password_failed": "Jelszó váltás sikertelen. Kérlek kezd újra a folyamatot.",
             "reset_change_password_succeed": "Jelszó váltás sikeres. Kérlek menj vissza a belépő oldalra és lépj be vele.",
             "reset_change_password_title": "Add meg az új jelszót",
@@ -638,7 +638,7 @@
                 "button": "Jelszóváltás",
                 "error": "Hiba történt a jelszó változtatásakor. Kérlek ellenőrizd a jelenlegi jelszót.",
                 "success": "Jelszóváltás sikeres!",
-                "unvalid": "Az új jelszó megerősítése nem egyezik, vagy az új jelszó túl rövid (minimum 7 karakter)."
+                "unvalid": "Az új jelszó megerősítése nem egyezik, vagy az új jelszó túl rövid (minimum 8 karakter)."
             },
             "save": {
                 "button": "Változások mentése",

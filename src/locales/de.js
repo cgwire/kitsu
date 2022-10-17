@@ -178,7 +178,7 @@ export default {
     login_page: 'Abbrechen',
     redirecting: 'Umleitung',
     reset_change_password: 'Passwort ändern',
-    reset_change_password_form_failed: 'Es gibt ein Problem mit dem von dir angegebenen Passwort. Bitte überprüfen Sie, ob es mindestens 7 Zeichen lang ist und ob beide Passwörter übereinstimmen.',
+    reset_change_password_form_failed: 'Es gibt ein Problem mit dem von dir angegebenen Passwort. Bitte überprüfen Sie, ob es mindestens 8 Zeichen lang ist und ob beide Passwörter übereinstimmen.',
     reset_change_password_failed: 'Die Änderung des Passworts ist fehlgeschlagen. Bitte starten Sie den gesamten Vorgang erneut.',
     reset_change_password_succeed: 'Dein Passwort wurde erfolgreich geändert. Bitte gehen Sie zurück zur Login-Seite, um sie zu verwenden.',
     reset_change_password_title: 'Geben Sie ein neues Passwort ein',
@@ -511,7 +511,7 @@ export default {
       button: 'Passwort ändern',
       error: 'Beim Ändern des Passworts ist ein Fehler aufgetreten. Bitte überprüfen Sie Ihr aktuelles Passwort.',
       success: 'Dein Passwort wurde erfolgreich geändert!',
-      unvalid: 'Deine neue Passwort-Bestätigung stimmt nicht oder dein Passwort ist zu kurz (es werden mindestens 7 Zeichen erwartet).'
+      unvalid: 'Deine neue Passwort-Bestätigung stimmt nicht oder dein Passwort ist zu kurz (es werden mindestens 8 Zeichen erwartet).'
     },
     save: {
       button: 'Änderungen speichern',

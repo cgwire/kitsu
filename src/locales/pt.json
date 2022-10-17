@@ -183,7 +183,7 @@
             "login_page": "Cancelar",
             "redirecting": "Redirecionando em {secondsLeft} segundos ...",
             "reset_change_password": "Mudar senha",
-            "reset_change_password_form_failed": "Há um problema com a senha que você forneceu. Por favor, verifique se ele tem pelo menos 7 caracteres e se as duas senhas correspondem.",
+            "reset_change_password_form_failed": "Há um problema com a senha que você forneceu. Por favor, verifique se ele tem pelo menos 8 caracteres e se as duas senhas correspondem.",
             "reset_change_password_failed": "Falha ao alterar a senha. Reinicie todo o procedimento novamente.",
             "reset_change_password_succeed": "Sua senha foi alterada com sucesso. Por favor, volte para a página de login para usá-lo.",
             "reset_change_password_title": "Insira uma nova senha",
@@ -513,7 +513,7 @@
                 "button": "Alterar senha",
                 "error": "\nOcorreu um erro ao alterar a senha. Por favor, verifique sua senha atual.",
                 "success": "Sua senha foi alterada com sucesso!",
-                "unvalid": "A confirmação de sua nova senha não corresponde ou sua senha é muito curta (7 caracteres, pelo menos, são esperados)."
+                "unvalid": "A confirmação de sua nova senha não corresponde ou sua senha é muito curta (8 caracteres, pelo menos, são esperados)."
             },
             "save": {
                 "button": "Salvar alterações",
