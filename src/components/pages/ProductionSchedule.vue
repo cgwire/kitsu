@@ -257,10 +257,10 @@ export default {
         } else {
           startDate = moment()
         }
-        if (startDate.isBefore(taskTypeElement.startDate)) {
+        if (taskTypeElement && startDate.isBefore(taskTypeElement.startDate)) {
           startDate = taskTypeElement.startDate.clone()
         }
-        if (startDate.isAfter(taskTypeElement.endDate)) {
+        if (taskTypeElement && startDate.isAfter(taskTypeElement.endDate)) {
           startDate = taskTypeElement.endDate.clone().add(-1, 'days')
         }
         if (item.end_date) {
