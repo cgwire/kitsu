@@ -253,22 +253,26 @@ export const annotationMixin = {
     },
 
     addToUpdates (obj) {
-      this.markLastAnnotationTime()
       this.setObjectData(obj)
+      this.addToUpdatesSerializedObject(obj.serialize())
+    },
+
+    addToUpdatesSerializedObject (obj) {
+      this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
       const updates = this.updates.find(a => a.time === currentTime)
       if (updates) {
         updates.drawing.objects = updates.drawing.objects.filter(
           o => o.id !== obj.id
         )
-        updates.drawing.objects.push(obj.serialize())
+        updates.drawing.objects.push(obj)
       } else {
         this.updates.push({
           time: currentTime,
-          drawing: { objects: [obj.serialize()] }
+          drawing: { objects: [obj] }
         })
       }
-      this.postAnnotationUpdate(currentTime, obj.serialize())
+      this.postAnnotationUpdate(currentTime, obj)
     },
 
     postAnnotationUpdate (currentTime, obj) {
@@ -574,8 +578,23 @@ export const annotationMixin = {
     },
 
     onObjectMoved (obj) {
-      this.addToUpdates(obj.target)
-      this.saveAnnotations()
+      if (!obj.target._objects) {
+        this.addToUpdates(obj.target)
+        this.saveAnnotations()
+      } else {
+        obj.target._objects.forEach(o => {
+          const oo = this.getObjectById(o.id)
+          this.setObjectData(oo)
+          const targetObj = oo.serialize()
+          targetObj.left =
+            obj.target.left + Math.round(obj.target.width / 2) + o.left
+          targetObj.top =
+            obj.target.top + Math.round(obj.target.height / 2) + o.top
+          this.setObjectData(targetObj)
+          this.addToUpdatesSerializedObject(targetObj)
+        })
+        this.saveAnnotations()
+      }
     },
 
     fadeObject (obj) {
