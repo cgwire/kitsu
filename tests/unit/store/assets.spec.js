@@ -772,6 +772,7 @@ describe('Assets store', () => {
         displayedAssets: 1,
         assetFilledColumns: 1,
         assetSearchQueries: 1,
+        displayedAssetsCount: 100,
         displayedAssetsLength: 100,
         displayedAssetsTimeSpent: 1000,
         displayedAssetsEstimation: 1000
@@ -786,6 +787,7 @@ describe('Assets store', () => {
         displayedAssets: [],
         assetFilledColumns: {},
         assetSearchQueries: [],
+        displayedAssetsCount: 0,
         displayedAssetsLength: 0,
         displayedAssetsTimeSpent: 0,
         displayedAssetsEstimation: 0,
@@ -805,6 +807,7 @@ describe('Assets store', () => {
         displayedAssets: 1,
         assetFilledColumns: 1,
         assetSearchQueries: 1,
+        displayedAssetsCount: 100,
         displayedAssetsLength: 100,
         displayedAssetsTimeSpent: 1000,
         displayedAssetsEstimation: 1000
@@ -821,6 +824,7 @@ describe('Assets store', () => {
         displayedAssets: [],
         assetFilledColumns: {},
         assetSearchQueries: [],
+        displayedAssetsCount: 0,
         displayedAssetsLength: 0,
         displayedAssetsTimeSpent: 0,
         displayedAssetsEstimation: 0,
@@ -991,7 +995,8 @@ describe('Assets store', () => {
           3: {}
         },
         displayedAssetsEstimation: 0,
-        displayedAssetsLength: 4,
+        displayedAssetsCount: 4,
+        displayedAssetsLength: 2,
         displayedAssetsTimeSpent: 0,
         assetSearchQueries: 'assetSearchQueries',
         assetMap: new Map(Object.entries({
@@ -1092,7 +1097,7 @@ describe('Assets store', () => {
       }
       const asset = {
         id: '1',
-        canceled: true,
+        canceled: false,
         asset_type_name: 'assettypename2',
         name: 'name4',
         timeSpent: 0,
@@ -1118,7 +1123,7 @@ describe('Assets store', () => {
       })
       expect(asset).toEqual({
         id: '1',
-        canceled: true,
+        canceled: false,
         asset_type_name: 'assettypename2',
         name: 'name4',
         episode_id: undefined,
@@ -1174,7 +1179,7 @@ describe('Assets store', () => {
         assetMap: new Map(Object.entries({
           1: {
             asset_type_name: 'assettypename2',
-            canceled: true,
+            canceled: false,
             description: 'azerty',
             episode_id: undefined,
             estimation: 200,
@@ -1199,7 +1204,7 @@ describe('Assets store', () => {
         displayedAssets: [
           {
             asset_type_name: 'assettypename2',
-            canceled: true,
+            canceled: false,
             description: 'azerty',
             episode_id: undefined,
             estimation: 200,
@@ -1219,12 +1224,13 @@ describe('Assets store', () => {
           }
         ],
         displayedAssetsEstimation: 200,
+        displayedAssetsCount: 1,
         displayedAssetsLength: 1,
         displayedAssetsTimeSpent: 100
       })
       expect(store.cache.assets).toEqual([{
         asset_type_name: 'assettypename2',
-        canceled: true,
+        canceled: false,
         description: 'azerty',
         episode_id: undefined,
         estimation: 200,
@@ -1278,6 +1284,7 @@ describe('Assets store', () => {
         displayedAssetsTimeSpent: 100,
         displayedAssetsEstimation: 200,
         assetFilledColumns: null,
+        displayedAssetsCount: 1,
         displayedAssetsLength: 1
       }
       store.mutations.REMOVE_ASSET(state, assetToDelete)
@@ -1287,6 +1294,7 @@ describe('Assets store', () => {
         displayedAssetsTimeSpent: 0,
         displayedAssetsEstimation: 0,
         assetFilledColumns: {},
+        displayedAssetsCount: 0,
         displayedAssetsLength: 0
       })
       expect(store.cache.assetIndex !== null).toBeTruthy()
@@ -1508,6 +1516,7 @@ describe('Assets store', () => {
         },
         displayedAssets: [],
         displayedAssetsEstimation: 0,
+        displayedAssetsCount: 0,
         displayedAssetsLength: 0,
         displayedAssetsTimeSpent: 0
       })
@@ -1866,6 +1875,7 @@ describe('Assets store', () => {
         },
         displayedAssets: [],
         displayedAssetsEstimation: 0,
+        displayedAssetsCount: 0,
         displayedAssetsLength: 0,
         displayedAssetsTimeSpent: 0
       })
@@ -1955,6 +1965,7 @@ describe('Assets store', () => {
         displayedAssetTypesLength: 0,
         displayedAssets: [],
         displayedAssetsEstimation: 0,
+        displayedAssetsCount: 0,
         displayedAssetsLength: 0,
         displayedAssetsTimeSpent: 0,
         filteredAssets: [],

@@ -365,12 +365,12 @@ export const playerMixin = {
 
     playClicked () {
       this.play()
-      this.updatePlayingStatus()
+      this.updateRoomStatus()
     },
 
     pauseClicked () {
       this.pause()
-      this.updatePlayingStatus()
+      this.updateRoomStatus()
     },
 
     play () {
@@ -541,11 +541,13 @@ export const playerMixin = {
     onHandleInChanged ({ frameNumber, save }) {
       this.handleIn = frameNumber
       if (save) this._saveHandles()
+      this.updateRoomStatus()
     },
 
     onHandleOutChanged ({ frameNumber, save }) {
       this.handleOut = frameNumber
       if (save) this._saveHandles()
+      this.updateRoomStatus()
     },
 
     _saveHandles () {
@@ -595,7 +597,7 @@ export const playerMixin = {
     onRepeatClicked () {
       this.clearFocus()
       this.isRepeating = !this.isRepeating
-      this.updatePlayingStatus()
+      this.updateRoomStatus()
     },
 
     onToggleSoundClicked () {
@@ -755,7 +757,7 @@ export const playerMixin = {
         this.saveUserComparisonChoice()
         this.comparisonEntityMissing = false
       })
-      this.updatePlayingStatus()
+      this.updateRoomStatus()
     },
 
     onSpeedClicked () {
@@ -765,7 +767,7 @@ export const playerMixin = {
       if (this.speed === 2) rate = 0.5
       if (this.speed === 1) rate = 0.25
       this.setPlayerSpeed(rate)
-      this.updatePlayingStatus()
+      this.updateRoomStatus()
     },
 
     setPlayerSpeed (rate) {
@@ -1075,6 +1077,7 @@ export const playerMixin = {
     onMetadataLoaded (event) {
       this.$nextTick(() => {
         this.resetCanvasSize()
+        if (this.resetHeight) this.resetHeight()
       })
     },
 

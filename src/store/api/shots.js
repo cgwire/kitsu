@@ -71,6 +71,8 @@ export default {
     }
     if (shot.nb_frames) {
       data.nb_frames = parseInt(shot.nb_frames)
+    } else {
+      data.nb_frames = null
     }
     if (
       shot.frameOut !== undefined ||

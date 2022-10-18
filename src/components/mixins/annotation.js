@@ -358,6 +358,7 @@ export const annotationMixin = {
     ) {
       if (!obj) return
       if (this.getObjectById(obj.id)) return
+      let path, text
       this.objIndex.set(obj.id, obj)
       let scaleMultiplierX = 1
       let scaleMultiplierY = 1
@@ -402,7 +403,7 @@ export const annotationMixin = {
           strokeMultiplier = canvasWidth / this.fabricCanvas.width
         }
         if (this.fabricCanvas.width < 420) strokeMultiplier /= 2
-        const path = new fabric.Path(
+        path = new fabric.Path(
           obj.path,
           {
             ...base,
@@ -425,7 +426,7 @@ export const annotationMixin = {
         this.fabricCanvas.add(path)
         this.$options.silentAnnnotation = false
       } else if ((obj.type === 'i-text') || (obj.type === 'text')) {
-        const text = new fabric.IText(
+        text = new fabric.IText(
           obj.text,
           {
             ...base,
@@ -453,6 +454,7 @@ export const annotationMixin = {
         this.fabricCanvas.add(text)
         this.$options.silentAnnnotation = false
       }
+      return path || text
     },
 
     // Events
@@ -562,7 +564,9 @@ export const annotationMixin = {
       o = this.setObjectData(o)
       // if (this.fabricCanvas.width < 420) o.strokeWidth *= 2
       if (this.isLaserModeOn) {
+        const currentTime = this.getCurrentTime()
         this.fadeObject(o)
+        this.postAnnotationAddition(currentTime, o.serialize())
       } else {
         this.addToAdditions(o)
         this.stackAddAction(obj)
@@ -575,6 +579,7 @@ export const annotationMixin = {
     },
 
     fadeObject (obj) {
+      if (!obj) return
       obj.animate('opacity', '0', {
         duration: 1500,
         onChange: this.fabricCanvas.renderAll.bind(this.fabricCanvas),
