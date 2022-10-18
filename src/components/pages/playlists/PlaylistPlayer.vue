@@ -440,16 +440,16 @@
       />
 
       <span
-        class="flexrow-item time-indicator"
+        class="flexrow-item time-indicator is-hidden-desktop"
         :title="$t('playlists.actions.current_time')"
       >
         {{ currentTime }}
       </span>
-      <span class="flexrow-item time-indicator">
+      <span class="flexrow-item time-indicator is-hidden-desktop">
       /
       </span>
       <span
-        class="flexrow-item time-indicator"
+        class="flexrow-item time-indicator is-hidden-desktop"
         :title="$t('playlists.actions.max_duration')"
       >
         {{ maxDuration }}

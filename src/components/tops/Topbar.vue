@@ -79,7 +79,7 @@
         </router-link>
 
         <router-link
-          class="nav-item"
+          class="nav-item mr05"
           :to="{
             name: 'todos-tab',
             params: { tab: 'timesheets' }
@@ -88,7 +88,7 @@
         >
           {{ $t('timesheets.title') }}
         </router-link>
-        <global-search-field class="flexrow-item" />
+        <global-search-field class="flexrow-item mr0" />
         <div class="nav-item">
           <button  data-canny-changelog class="changelog-button" >
             <zap-icon />

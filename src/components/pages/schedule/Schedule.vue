@@ -749,7 +749,7 @@ export default {
 
     timelineStyle () {
       const firstDay = this.daysAvailable[0]
-      const multiplier = -1 * (firstDay.isoWeekday() - 1)
+      const multiplier = firstDay ? -1 * (firstDay.isoWeekday() - 1) : 0
       return {
         'background-position-x': `${multiplier * this.cellWidth}px`
       }
