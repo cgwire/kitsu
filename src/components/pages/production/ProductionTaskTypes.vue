@@ -49,12 +49,12 @@
                 <th class="name">
                   {{ $t('task_types.fields.name') }}
                 </th>
-                <th class="start-date">
+                <!--th class="start-date">
                   {{ $t('productions.fields.start_date') }}
                 </th>
                 <th class="end-date">
                   {{ $t('productions.fields.end_date') }}
-                </th>
+                </th-->
                 <th class="remove"></th>
               </tr>
             </thead>
@@ -412,7 +412,7 @@ td p {
 }
 
 .column {
-  max-width: 800px;
+  max-width: 400px;
 }
 
 td.name {

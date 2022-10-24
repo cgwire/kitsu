@@ -6,7 +6,7 @@
   <task-type-cell
     :task-type="taskType"
   />
-  <td class="start-date">
+  <!--td class="start-date">
    <date-field
       :disabled-dates="productionTimeRange"
       :can-delete="false"
@@ -19,7 +19,7 @@
       :can-delete="false"
       v-model="endDate"
    />
-  </td>
+  </td-->
   <td class="remove">
     <button
       class="button"
@@ -35,7 +35,7 @@
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
-import DateField from '@/components/widgets/DateField'
+// import DateField from '@/components/widgets/DateField'
 import TaskTypeCell from '@/components/cells/TaskTypeName'
 
 import { parseDate } from '@/lib/time'
@@ -44,7 +44,7 @@ export default {
   name: 'production-task-type',
 
   components: {
-    DateField,
+    // DateField,
     TaskTypeCell
   },
 
