@@ -139,10 +139,10 @@
                   :task="{ task_status_id: taskStatus.id }"
                 />
               </td>
-              <td>{{ getBooleanTranslation(taskStatus.is_done) }}</td>
-              <td>{{ getBooleanTranslation(taskStatus.is_retake) }}</td>
-              <td>{{ getBooleanTranslation(taskStatus.is_artist_allowed) }}</td>
-              <td>{{ getBooleanTranslation(taskStatus.is_client_allowed) }}</td>
+              <boolean-cell :value=taskStatus.is_done />
+              <boolean-cell :value=taskStatus.is_retake />
+              <boolean-cell :value=taskStatus.is_artist_allowed />
+              <boolean-cell :value=taskStatus.is_client_allowed />
               <td>
                 <button
                   class="button"
@@ -167,6 +167,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+import BooleanCell from '@/components/cells/BooleanCell'
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ProductionBrief from '@/components/pages/production/ProductionBrief'
@@ -178,12 +179,13 @@ import ValidationTag from '@/components/widgets/ValidationTag'
 export default {
   name: 'production-settings',
   components: {
+    BooleanCell,
+    Combobox,
+    ComboboxStatus,
     ProductionBrief,
     ProductionParameters,
     ProductionTaskTypes,
     ProductionStatusAutomations,
-    Combobox,
-    ComboboxStatus,
     ValidationTag
   },
 
