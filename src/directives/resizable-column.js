@@ -42,7 +42,7 @@ export default {
           })
         }
 
-        ths.forEach((item) => {
+        ths.forEach(item => {
           if (!item.getElementsByClassName('resizable-knob').length > 0) {
             const div = document.createElement('div')
             div.className = 'resizable-knob'
