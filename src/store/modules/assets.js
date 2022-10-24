@@ -948,7 +948,7 @@ const mutations = {
       state.displayedAssets.push(newAsset)
       state.assetFilledColumns = getFilledColumns(state.displayedAssets)
       state.displayedAssetsLength =
-        cache.assets.length.filter(a => !a.canceled)
+        cache.assets.filter(a => !a.canceled).length
       state.displayedAssetsCount = cache.assets.length
 
       const maxX = state.displayedAssets.length
