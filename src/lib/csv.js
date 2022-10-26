@@ -119,7 +119,9 @@ const csv = {
     entries.forEach((infoArray) => {
       const sanitizedCells = infoArray.map((cell) => {
         const cellString = `${cell || ''}`
-        return `"${cellString.replace(/"/g, '')}"`
+        if (cellString.search('"') !== -1) {
+          return `${cellString.replace(/;/g, '')}`
+        } else return `"${cellString}"`
       })
       const line = sanitizedCells.join(';')
       if (line.length > 2) lineArray.push(line)
