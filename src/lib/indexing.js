@@ -101,15 +101,13 @@ export const buildAssetIndex = (entries) => {
   const assetIndex = Object.create(null)
   entries.forEach(asset => {
     const stringToIndex = asset.name.replace(/_/g, ' ').replace(/-/g, ' ')
-    const assetTypeWords = asset.asset_type_name.toLowerCase().split(' ')
-    const nameWords = stringToIndex.toLowerCase().split(' ')
     let words = []
-    nameWords.forEach(nameWord => {
-      words = words.concat(nameWord.toLowerCase().split(/(?=[A-Z])/))
-    })
-    words = words
-      .concat(assetTypeWords)
+      .concat(asset.asset_type_name.split(' '))
+      .concat(stringToIndex.split(' '))
       .concat([asset.name])
+    const camelWords = stringToIndex.match(/[A-Z]+[a-z0-9]*/g)
+    if (camelWords) words = words.concat(camelWords)
+    words = [...new Set(words.map(word => word.toLowerCase()))]
     indexWords(index, assetIndex, asset, words)
   })
   return index
