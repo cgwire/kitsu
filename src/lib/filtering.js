@@ -76,8 +76,12 @@ const applyFiltersFunctions = {
         const isTrue = Boolean(filter.values[0].match(new RegExp(':true$')))
         let value = filter.values[0].replace(new RegExp('(:true)|(:false)$'), '')
         value = value.toLowerCase()
-        dataValue = JSON.parse(dataValue)
-        isOk = isOk || ((dataValue[value] === undefined && !isTrue) || (dataValue[value] === isTrue))
+        try {
+          dataValue = JSON.parse(dataValue)
+          isOk = isOk || ((dataValue[value] === undefined && !isTrue) || (dataValue[value] === isTrue))
+        } catch {
+          isOk = false
+        }
       } else {
         filter.values.forEach(value => {
           isOk = isOk || dataValue.indexOf(value.toLowerCase()) >= 0
