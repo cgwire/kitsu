@@ -622,7 +622,14 @@ export default {
           taskId: this.task.id,
           entityId: this.task.entity_id
         })
-          .then(() => this.loadTaskSubscribed({ taskId: this.task.id }))
+          .then(() => {
+            if (this.task) {
+              return this.loadTaskSubscribed({ taskId: this.task.id })
+            } else {
+              this.loading.task = false
+              this.isSubscribed = false
+            }
+          })
           .then(subscribed => {
             this.loading.task = false
             this.reset()

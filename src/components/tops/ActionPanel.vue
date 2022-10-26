@@ -36,7 +36,7 @@
             :title="$t('menu.change_status')"
             @click="selectBar('change-status')"
             v-if="(isCurrentUserManager || isSupervisorInDepartment)
-              && !isEntitySelection"
+              && !isEntitySelection && isTaskSelection"
           >
             STATUS
           </div>
@@ -54,7 +54,7 @@
                 isSupervisorInDepartment ||
                 isInDepartment
               ) &&
-              !isEntitySelection"
+              !isEntitySelection && isTaskSelection"
             @click="selectBar('assignation')"
           >
             <user-icon />
@@ -68,7 +68,7 @@
             :title="$t('menu.change_priority')"
             v-if="(isCurrentViewEntity || isCurrentViewPerson) &&
               (isCurrentUserManager || isSupervisorInDepartment) &&
-              !isEntitySelection"
+              !isEntitySelection && isTaskSelection"
             @click="selectBar('priorities')"
           >
             <alert-circle-icon />
@@ -88,7 +88,7 @@
 
           <div
             class="menu-separator"
-            v-if="!isEntitySelection"
+            v-if="!isEntitySelection && isTaskSelection && nbSelectedTasks > 1"
           >
           </div>
 
@@ -105,6 +105,7 @@
                 isCurrentViewTaskType
               ) &&
               !isEntitySelection &&
+              isTaskSelection &&
               nbSelectedTasks > 1
             "
             @click="selectBar('playlists')"
@@ -120,7 +121,8 @@
                 isCurrentViewTaskType
               ) &&
               !isEntitySelection &&
-              nbSelectedTasks > 1
+              isTaskSelection &&
+              isCurrentUserManager
             "
             class="menu-separator"
           >
@@ -151,7 +153,7 @@
             v-if="
               isCurrentViewEntity &&
               isCurrentUserManager &&
-              !isEntitySelection"
+              !isEntitySelection && isTaskSelection"
           >
             <trash-icon />
           </div>
@@ -159,7 +161,7 @@
           <div
             class="menu-separator"
             v-if="
-              !isEntitySelection &&
+              !isEntitySelection && isTaskSelection && !isCurrentViewEpisode &&
               customActions &&
               customActions.length > 0
             "
@@ -175,7 +177,7 @@
             @click="selectBar('custom-actions')"
             v-if="
               (isCurrentUserManager || isSupervisorInDepartment) &&
-              !isEntitySelection &&
+              !isEntitySelection && isTaskSelection && !isCurrentViewEpisode &&
               customActions &&
               customActions.length > 0"
           >
@@ -214,6 +216,18 @@
               isCurrentViewEdit &&
               isCurrentUserManager &&
               !isTaskSelection"
+          >
+            <trash-icon />
+          </div>
+
+          <div
+            class="menu-item"
+            :title="$t('menu.delete_episodes')"
+            @click="selectBar('delete-episodes')"
+            v-if="
+              isCurrentViewEpisode &&
+              isCurrentUserManager &&
+              !isTaskSelection && isEntitySelection"
           >
             <trash-icon />
           </div>
@@ -689,6 +703,7 @@ export default {
         changePriority: false,
         changeStatus: false,
         editDeletion: false,
+        episodeDeletion: false,
         taskCreation: false,
         taskDeletion: false,
         setThumbnails: false,
@@ -698,6 +713,7 @@ export default {
         assetDeletion: false,
         taskDeletion: false,
         editDeletion: false,
+        episodeDeletion: false,
         shotDeletion: false
       }
     }
@@ -709,14 +725,14 @@ export default {
     this.resetPosition()
     window.removeEventListener('mousemove', this.doDrag)
     window.removeEventListener('mouseup', this.stopDrag)
+    window.removeEventListener('beforeunload', this.setPositionPreference)
     window.addEventListener('mousemove', this.doDrag)
     window.addEventListener('mouseup', this.stopDrag)
+    window.addEventListener('beforeunload', this.setPositionPreference)
   },
 
   beforeDestroy () {
-    console.log('destroy')
-    preferences.setPreference('topbar:position-x', this.position.left)
-    preferences.setPreference('topbar:position-y', this.position.top)
+    this.setPositionPreference()
   },
 
   computed: {
@@ -736,10 +752,10 @@ export default {
       'people',
       'personMap',
       'productionMap',
-      'selectedTasks',
       'selectedAssets',
-      'selectedShots',
       'selectedEdits',
+      'selectedShots',
+      'selectedTasks',
       'shotCustomActions',
       'taskMap',
       'taskStatusForCurrentUser',
@@ -758,7 +774,8 @@ export default {
     currentEntityType () {
       if (this.isCurrentViewAsset) return 'asset'
       else if (this.isCurrentViewShot) return 'shot'
-      return 'edit'
+      else if (this.isCurrentViewEdit) return 'edit'
+      return 'episode'
     },
 
     defaultCustomAction () {
@@ -802,6 +819,7 @@ export default {
         this.isCurrentViewAsset ||
         this.isCurrentViewTodos ||
         this.isCurrentViewShot ||
+        this.isCurrentViewEpisode ||
         this.isCurrentViewEdit
       )
     },
@@ -841,7 +859,19 @@ export default {
     isCurrentViewEntity () {
       return this.isCurrentViewAsset ||
         this.isCurrentViewShot ||
-        this.isCurrentViewEdit
+        this.isCurrentViewEdit ||
+        this.isCurrentViewEpisode
+    },
+
+    isCurrentViewEpisode () {
+      return (
+        !(
+          this.isCurrentViewAsset ||
+          this.isCurrentViewShot ||
+          this.isCurrentViewEdit
+        ) &&
+        this.$route.path.indexOf('episodes') > 0
+      )
     },
 
     selectedPersonId () {
@@ -882,11 +912,13 @@ export default {
       'clearSelectedAssets',
       'clearSelectedShots',
       'clearSelectedEdits',
+      'clearSelectedEpisodes',
       'createSelectedTasks',
       'deleteSelectedAssets',
       'deleteSelectedShots',
       'deleteSelectedTasks',
       'deleteSelectedEdits',
+      'deleteSelectedEpisodes',
       'changeSelectedTaskStatus',
       'changeSelectedPriorities',
       'clearSelectedTasks',
@@ -1032,6 +1064,22 @@ export default {
         })
     },
 
+    confirmEpisodeDeletion () {
+      if (this.$options.dragging) return
+      this.loading.deleteEpisode = true
+      this.errors.deleteEpisode = false
+      this.deleteSelectedEpisodes()
+        .then(() => {
+          this.loading.deleteEpisode = false
+          this.clearSelectedEpisodes()
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loading.deleteEpisode = false
+          this.errors.deleteEpisode = true
+        })
+    },
+
     confirmPlaylistGeneration () {
       this.modals.playlist = true
       this.selectedBar = ''
@@ -1096,6 +1144,7 @@ export default {
       this.clearSelectedShots()
       this.clearSelectedTasks()
       this.clearSelectedEdits()
+      this.clearSelectedEpisodes()
     },
 
     selectBar (barName) {
@@ -1157,7 +1206,6 @@ export default {
     },
 
     startDrag (event) {
-      console.log(event.target)
       // if (event.target.nodeName === 'svg') return
       this.$options.startX = event.x
       this.$options.startY = event.y
@@ -1193,9 +1241,8 @@ export default {
     resetPosition () {
       let newX = parseInt(preferences.getPreference('topbar:position-x')) || 0
       let newY = parseInt(preferences.getPreference('topbar:position-y')) || 0
-      const barHeight = 200
-      const barWidth = 600
-      console.log(newX, newY, barHeight, barWidth)
+      const barHeight = 148
+      const barWidth = 460
       if (newX < 0) newX = 0
       if (newX + barWidth > window.innerWidth) {
         newX = window.innerWidth - barWidth
@@ -1204,10 +1251,13 @@ export default {
       if (newY + barHeight > window.innerHeight) {
         newY = window.innerHeight - barHeight
       }
-      console.log(newX, newY, barHeight, barWidth)
-
       this.position.left = newX
       this.position.top = newY
+    },
+
+    setPositionPreference () {
+      preferences.setPreference('topbar:position-x', this.position.left)
+      preferences.setPreference('topbar:position-y', this.position.top)
     }
   },
 
@@ -1227,12 +1277,12 @@ export default {
       if (this.isHidden) {
         window.removeEventListener('mousemove', this.doDrag)
         window.removeEventListener('mouseup', this.stopDrag)
-        preferences.setPreference('topbar:position-x', this.position.left)
-        preferences.setPreference('topbar:position-y', this.position.top)
-        console.log('hidden', this.position.left, preferences.getPreference('topbar:position-x'))
+        window.removeEventListener('beforeunload', this.setPositionPreference)
+        this.setPositionPreference()
       } else {
         window.addEventListener('mousemove', this.doDrag)
         window.addEventListener('mouseup', this.stopDrag)
+        window.addEventListener('beforeunload', this.setPositionPreference)
         this.resetPosition()
       }
     },
