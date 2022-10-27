@@ -141,6 +141,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
+import { entityListMixin } from '@/components/mixins/entity_list'
 import { descriptorMixin } from '@/components/mixins/descriptors'
 
 import TextField from '@/components/widgets/TextField'
@@ -149,7 +150,7 @@ import Combobox from '@/components/widgets/Combobox'
 
 export default {
   name: 'edit-asset-modal',
-  mixins: [descriptorMixin, modalMixin],
+  mixins: [descriptorMixin, modalMixin, entityListMixin],
 
   components: {
     TextField,
@@ -215,7 +216,6 @@ export default {
       'episodes',
       'isCurrentUserManager',
       'isTVShow',
-      'isSupervisorInDepartments',
       'productionAssetTypes',
       'productionAssetTypeOptions',
       'openProductions'
