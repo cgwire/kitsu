@@ -912,7 +912,6 @@ export default {
       'clearSelectedAssets',
       'clearSelectedShots',
       'clearSelectedEdits',
-      'clearSelectedEpisodes',
       'createSelectedTasks',
       'deleteSelectedAssets',
       'deleteSelectedShots',
@@ -1064,22 +1063,6 @@ export default {
         })
     },
 
-    confirmEpisodeDeletion () {
-      if (this.$options.dragging) return
-      this.loading.deleteEpisode = true
-      this.errors.deleteEpisode = false
-      this.deleteSelectedEpisodes()
-        .then(() => {
-          this.loading.deleteEpisode = false
-          this.clearSelectedEpisodes()
-        })
-        .catch((err) => {
-          console.error(err)
-          this.loading.deleteEpisode = false
-          this.errors.deleteEpisode = true
-        })
-    },
-
     confirmPlaylistGeneration () {
       this.modals.playlist = true
       this.selectedBar = ''
@@ -1144,7 +1127,6 @@ export default {
       this.clearSelectedShots()
       this.clearSelectedTasks()
       this.clearSelectedEdits()
-      this.clearSelectedEpisodes()
     },
 
     selectBar (barName) {
