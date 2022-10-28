@@ -578,7 +578,7 @@
               nbSelectedShots,
               {nbSelectedShots}
             )"
-            @confirm="confirmAssetDeletion"
+            @confirm="confirmShotDeletion"
           />
         </div>
 
