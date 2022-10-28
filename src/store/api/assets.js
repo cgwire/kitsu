@@ -38,8 +38,10 @@ export default {
       entity_type_id: asset.entity_type_id,
       project_id: asset.project_id,
       ready_for: asset.ready_for,
-      data: asset.data,
-      is_casting_standby: Boolean(asset.is_casting_standby)
+      data: asset.data
+    }
+    if (asset.is_casting_standby) {
+      data.is_casting_standby = Boolean(asset.is_casting_standby)
     }
     if (asset.source_id === 'null' || asset.source_id) {
       data.source_id = asset.source_id
