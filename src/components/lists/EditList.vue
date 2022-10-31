@@ -189,7 +189,7 @@
                 class="mr1"
                 :checked="selectedEdits.has(edit.id)"
                 @input="event => toggleLine(edit, event)"
-                v-show="!isCurrentUserClient"
+                v-show="isCurrentUserManager"
               >
               {{
                 episodeMap.get(edit.parent_id)
@@ -211,7 +211,7 @@
                 class="mr1"
                 :checked="selectedEdits.has(edit.id)"
                 @input="event => toggleLine(edit, event)"
-                v-show="!isCurrentUserClient"
+                v-show="isCurrentUserManager"
               >
               <entity-thumbnail
                 :entity="edit"
