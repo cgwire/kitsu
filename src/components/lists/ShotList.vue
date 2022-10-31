@@ -256,7 +256,7 @@
                 class="mr1"
                 :checked="selectedShots.has(shot.id)"
                 @input="event => toggleLine(shot, event)"
-                v-show="!isCurrentUserClient"
+                v-show="isCurrentUserManager"
               >
               <entity-thumbnail
                 :entity="shot"
