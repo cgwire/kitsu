@@ -231,6 +231,7 @@
                 class="flexrow-item"
                 :checked="selectedAssets.has(asset.id)"
                 @input="event => toggleLine(asset, event)"
+                v-show="isCurrentUserManager"
               >
               <entity-thumbnail
                 class="entity-thumbnail flexrow-item"
