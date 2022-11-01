@@ -327,6 +327,7 @@ export default {
         moment.locale('zh_CN')
       } else if (this.form.locale === 'zh_Hant_TW') {
         moment.locale('zh_TW')
+        this.$i18n.locale = 'zw'
       } else {
         moment.locale(this.form.locale.substring(0, 2))
       }
