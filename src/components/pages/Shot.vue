@@ -20,8 +20,8 @@
           v-if="currentShot"
         />
       </span>
-      <div class="flexrow-item">
-        <page-title :text="title" class="entity-title" />
+      <div class="entity-title flexrow-item">
+        {{ title }}
       </div>
     </div>
 
@@ -316,7 +316,6 @@ import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles'
 import EntityTaskList from '@/components/lists/EntityTaskList'
 import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import PageTitle from '@/components/widgets/PageTitle'
 import PageSubtitle from '@/components/widgets/PageSubtitle'
 import Schedule from '@/components/pages/schedule/Schedule'
 import TableInfo from '@/components/widgets/TableInfo'
@@ -339,7 +338,6 @@ export default {
     EntityTimeLogs,
     EntityThumbnail,
     PageSubtitle,
-    PageTitle,
     Schedule,
     TableInfo,
     TaskInfo,
