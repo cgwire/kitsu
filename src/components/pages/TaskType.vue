@@ -723,14 +723,15 @@ export default {
         const keywords = getKeyWords(query) || []
         const excludingKeyWords = getExcludingKeyWords(query) || []
         const descFilters = getDescFilters(descriptors, query)
+        const taskFilters = getTaskFilters(this.$options.taskIndex, query)
         if (
           keywords.length > 0 ||
           excludingKeyWords.length > 0 ||
-          descFilters.length > 0
+          descFilters.length > 0 ||
+          taskFilters.length > 0
         ) {
           let tasks = []
-          const filters = getTaskFilters(this.$options.taskIndex, query)
-            .concat(descFilters)
+          const filters = taskFilters.concat(descFilters)
           if (keywords.length > 0) {
             tasks = indexSearch(this.$options.taskIndex, keywords)
           } else {
