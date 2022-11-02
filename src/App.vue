@@ -1786,6 +1786,14 @@ tbody:last-child .empty-line:last-child {
   }
 }
 
+.entity-title {
+  margin: 0;
+  flex: 1;
+  font-size: 2em;
+  font-weight: 500;
+  color: $grey;
+}
+
 th.validation-cell {
   &:hover {
     text-decoration: underline $light-grey;

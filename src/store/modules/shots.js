@@ -1514,15 +1514,17 @@ const mutations = {
   },
 
   [NEW_SEQUENCE_END] (state, sequence) {
-    if (sequence.parent_id) {
-      const episode = state.episodeMap.get(sequence.parent_id)
-      sequence.episode_id = episode.id
-      sequence.episode_name = episode.name
+    if (!state.sequenceMap.get(sequence.id)) {
+      if (sequence.parent_id) {
+        const episode = state.episodeMap.get(sequence.parent_id)
+        sequence.episode_id = episode.id
+        sequence.episode_name = episode.name
+      }
+      state.sequences.push(sequence)
+      state.sequences = sortSequences(state.sequences)
+      state.sequenceMap.set(sequence.id, sequence)
+      state.sequenceIndex = buildSequenceIndex(state.sequences)
     }
-    state.sequences.push(sequence)
-    state.sequences = sortSequences(state.sequences)
-    state.sequenceMap.set(sequence.id, sequence)
-    state.sequenceIndex = buildSequenceIndex(state.sequences)
   },
 
   [NEW_EPISODE_END] (state, episode) {

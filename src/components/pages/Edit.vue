@@ -22,8 +22,8 @@
             v-if="currentEntity"
           />
         </span>
-        <div class="flexrow-item">
-          <page-title :text="title" class="entity-title" />
+        <div class="entity-title flexrow-item mr1">
+          {{ title }}
         </div>
         <div
           class="flexrow-item has-text-centered"
@@ -617,7 +617,6 @@ import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import ColorPicker from '@/components/widgets/ColorPicker'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import PageSubtitle from '@/components/widgets/PageSubtitle'
-import PageTitle from '@/components/widgets/PageTitle'
 import PencilPicker from '@/components/widgets/PencilPicker'
 import PreviewRoom from '@/components/widgets/PreviewRoom'
 import PreviewsPerTaskType from '@/components/previews/PreviewsPerTaskType'
@@ -652,7 +651,6 @@ export default {
     EntityTimeLogs,
     EntityThumbnail,
     PageSubtitle,
-    PageTitle,
     PencilPicker,
     PreviewRoom,
     PreviewsPerTaskType,

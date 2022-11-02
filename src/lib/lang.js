@@ -15,6 +15,7 @@ const lang = {
       moment.locale('zh_CN')
     } else if (locale === 'zh_Hant_TW') {
       moment.locale('zh_TW')
+      i18n.locale = 'zw'
     } else {
       moment.locale(locale.substring(0, 2))
     }

@@ -30,7 +30,7 @@
 
         <h1 class="title flexrow-item">
           <router-link :to="taskEntityPath">
-            <page-title :text="task ? title : 'Loading...'" bold />
+            {{ task ? title : 'Loading...' }}
           </router-link>
         </h1>
 
@@ -321,7 +321,6 @@ import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DeleteModal from '@/components/modals/DeleteModal'
 import EditCommentModal from '@/components/modals/EditCommentModal'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import PageTitle from '@/components/widgets/PageTitle'
 import PageSubtitle from '@/components/widgets/PageSubtitle'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import Spinner from '@/components/widgets/Spinner'
@@ -343,7 +342,6 @@ export default {
     EntityThumbnail,
     ImageIcon,
     PageSubtitle,
-    PageTitle,
     PeopleAvatar,
     PreviewPlayer,
     Spinner,
@@ -1578,6 +1576,14 @@ video {
 .field-label {
   width: 130px;
   max-width: 130px;
+}
+
+.title {
+  margin: 0;
+  flex: 1;
+  line-height: 1.5em;
+  font-weight: 500;
+  color: $grey;
 }
 
 @media screen and (max-width: 768px) {
