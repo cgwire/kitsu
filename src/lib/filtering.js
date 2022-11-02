@@ -11,6 +11,7 @@ const EQUAL_REGEX = /\[([^[]*)\]=\[([^[]*)\]|([^ ]*)=\[([^[]*)\]|([^ ]*)=([^ ]*)
 const EQUAL_ASSET_TYPE_REGEX = /type=\[([^[]*)\]|type=([^ ]*)|type=([^ ]*)/g
 const EQUAL_PEOPLE_DEPARTMENT_REGEX = /department=\[([^[]*)\]|department=([^ ]*)|department=([^ ]*)/g
 const EQUAL_ASSETS_READY_REGEX = /assetsready=\[([^[]*)\]|assetsready=([^ ]*)|assetsready=([^ ]*)/g
+const MULTIPLE_REGEX = /\[([^[]*)\]/g
 
 /*
  * Look in the search query for task type filter like anim=wip.
@@ -98,6 +99,10 @@ const applyFiltersFunctions = {
     return !filter.excludedIds[entry.id]
   },
 
+  taskunion (entry, filter, taskMap) {
+    return filter.unionIds.get(entry.id)
+  },
+
   status (entry, filter, taskMap) {
     const task = taskMap.get(entry.validations.get(filter.taskType.id))
     let isOk = true
@@ -151,10 +156,33 @@ export const getKeyWords = (queryText) => {
     return queryText
       .replace(UNION_REGEX, '')
       .replace(EQUAL_REGEX, '')
+      .replace(MULTIPLE_REGEX, '')
       .split(' ')
-      .filter((query) => {
+      .filter(query => {
         return query.length > 0 && query[0] !== '-' && query !== 'withthumbnail'
       })
+  }
+}
+
+/**
+ * Extract multiple keywords from a given text. Remove equality and exclusion
+ * expressions.
+ */
+export const getMultipleKeyWords = (queryText) => {
+  if (!queryText) {
+    return []
+  } else {
+    const rgxMatches = queryText.match(MULTIPLE_REGEX)
+    if (rgxMatches) {
+      let keywords = []
+      rgxMatches.forEach(rgxMatch => {
+        rgxMatch = cleanParenthesis(rgxMatch)
+        keywords = keywords.concat(rgxMatch.split(','))
+      })
+      return keywords
+    } else {
+      return []
+    }
   }
 }
 
@@ -248,11 +276,12 @@ const getExcludingFilters = (entryIndex, query) => {
  */
 export const getTaskFilters = (entryIndex, query) => {
   const filters = []
+  const multipleKeywords = getMultipleKeyWords(query) || []
   const excludingKeywords = getExcludingKeyWords(query) || []
   excludingKeywords.forEach(keyword => {
     const excludedMap = {}
     const excludedEntries = indexSearch(entryIndex, [keyword]) || []
-    excludedEntries.forEach((entry) => {
+    excludedEntries.forEach(entry => {
       excludedMap[entry.id] = true
     })
     filters.push({
@@ -260,6 +289,19 @@ export const getTaskFilters = (entryIndex, query) => {
       excludedIds: excludedMap
     })
   })
+  const unionMap = new Map()
+  multipleKeywords.forEach(keyword => {
+    const unionEntries = indexSearch(entryIndex, [keyword]) || []
+    unionEntries.forEach(entry => {
+      unionMap.set(entry.id, true)
+    })
+  })
+  if (unionMap.size > 0) {
+    filters.push({
+      type: 'taskunion',
+      unionIds: unionMap
+    })
+  }
   return filters
 }
 

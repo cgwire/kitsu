@@ -1,6 +1,7 @@
 import {
   applyFilters,
   getKeyWords,
+  getMultipleKeyWords,
   getExcludingKeyWords,
   getFilters
 } from '@/lib/filtering'
@@ -9,7 +10,7 @@ describe('lib/filtering', () => {
   describe('getKeyWords', () => {
     it('classic query', () => {
       const keyWords = getKeyWords(
-        'chars bunny modeling=wip -bunnyfat'
+        'chars bunny modeling=wip -bunnyfat [multiple]'
       )
       expect(keyWords).toEqual(['chars', 'bunny'])
     })
@@ -26,6 +27,32 @@ describe('lib/filtering', () => {
       expect(keyWords).toEqual([])
     })
   })
+
+  describe('getMultipleKeyWords', () => {
+    it('multiple query', () => {
+      let keyWords = getMultipleKeyWords(
+        '[chars,bunny,with space]'
+      )
+      expect(keyWords).toEqual(['chars', 'bunny', 'with space'])
+      keyWords = getMultipleKeyWords(
+        '[chars]'
+      )
+      expect(keyWords).toEqual(['chars'])
+    })
+
+    it('no keyword query', () => {
+      const keyWords = getKeyWords(
+        'modeling=wip -bunnyfat'
+      )
+      expect(keyWords).toEqual([])
+    })
+
+    it('empty query', () => {
+      const keyWords = getKeyWords('')
+      expect(keyWords).toEqual([])
+    })
+  })
+
 
   describe('getExcludingKeyWords', () => {
     it('classic query', () => {
