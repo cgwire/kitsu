@@ -519,9 +519,10 @@ td {
 }
 
 .thumbnail {
-  min-width: 64px;
-  max-width: 64px;
-  width: 64px;
+  vertical-align: middle;
+  min-width: 40px;
+  max-width: 40px;
+  width: 40px;
 }
 
 .asset-type {
