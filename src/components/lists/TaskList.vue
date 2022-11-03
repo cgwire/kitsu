@@ -667,9 +667,9 @@ export default {
 
 <style scoped lang="scss">
 .thumbnail {
-  min-width: 80px;
-  max-width: 80px;
-  width: 80px;
+  min-width: 63px;
+  max-width: 63px;
+  width: 63px;
 }
 
 .asset-type {

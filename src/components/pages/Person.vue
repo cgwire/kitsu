@@ -12,8 +12,8 @@
             :is-text="false"
           />
         </div>
-        <div class="flexrow-item">
-          <page-title :text="person ? person.name : ''" />
+        <div class="flexrow-item entity-title">
+          {{ person ? person.name : '' }}
         </div>
       </div>
 
@@ -199,7 +199,6 @@ import {
 
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
-import PageTitle from '@/components/widgets/PageTitle'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import Schedule from '@/components/pages/schedule/Schedule'
 import SearchField from '@/components/widgets/SearchField'
@@ -214,7 +213,6 @@ export default {
   components: {
     Combobox,
     ComboboxNumber,
-    PageTitle,
     PeopleAvatar,
     Schedule,
     SearchField,
