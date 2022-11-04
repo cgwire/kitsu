@@ -72,6 +72,28 @@
               placeholder="ex: retake chara"
             />
           </div>
+          <div
+            class="flexrow-item"
+            v-if="isActiveTab('tasks')"
+          >
+            <combobox
+              :label="$t('tasks.due_date')"
+              :options="dueDateOptions"
+              locale-key-prefix="tasks."
+              v-model="dueDateFilter"
+            />
+          </div>
+          <div
+            class="flexrow-item"
+            v-if="isActiveTab('tasks')"
+          >
+            <combobox
+              :label="$t('tasks.late')"
+              :options="estimationOptions"
+              locale-key-prefix="tasks."
+              v-model="estimationFilter"
+            />
+          </div>
           <div class="filler"></div>
           <div
             class="flexrow-item"
@@ -276,6 +298,107 @@ import TaskTypeName from '@/components/widgets/TaskTypeName'
 import ImportModal from '@/components/modals/ImportModal'
 import ImportRenderModal from '@/components/modals/ImportRenderModal'
 
+const filters = {
+  all (tasks) {
+    return tasks
+  },
+
+  dueweek (tasks) {
+    const todayWeek = moment().isoWeek()
+    return tasks.filter(t => {
+      const dueDate = parseDate(t.due_date)
+      return dueDate.isoWeek() === todayWeek
+    })
+  },
+
+  duepreviousweek (tasks) {
+    const previousWeek = moment().add('days', -7).isoWeek()
+    return tasks.filter(t => {
+      const dueDate = parseDate(t.due_date)
+      return dueDate.isoWeek() === previousWeek
+    })
+  },
+
+  duenextweek (tasks) {
+    const nextWeek = moment().add('days', 7).isoWeek()
+    return tasks.filter(t => {
+      const dueDate = parseDate(t.due_date)
+      return dueDate.isoWeek() === nextWeek
+    })
+  },
+
+  duebeforetoday (tasks, taskStatusMap) {
+    const today = moment()
+    return tasks.filter(t => {
+      const dueDate = parseDate(t.due_date)
+      return dueDate.isBefore(today)
+    })
+  },
+
+  duemonth (tasks) {
+    const todayMonth = moment().month()
+    return tasks.filter(t => {
+      const dueDate = parseDate(t.due_date)
+      return dueDate.month() === todayMonth
+    })
+  },
+
+  duepreviousmonth (tasks) {
+    const previousMonth = moment().add('months', -1).month()
+    return tasks.filter(t => {
+      const dueDate = parseDate(t.due_date)
+      return dueDate.month() === previousMonth
+    })
+  },
+
+  duenextmonth (tasks) {
+    const nextMonth = moment().add('months', 1).month()
+    return tasks.filter(t => {
+      const dueDate = parseDate(t.due_date)
+      return dueDate.month() === nextMonth
+    })
+  },
+
+  dueaftertoday (tasks, taskStatusMap) {
+    const today = moment()
+    return tasks.filter(t => {
+      const dueDate = parseDate(t.due_date)
+      return dueDate.isAfter(today)
+    })
+  },
+
+  overestimation (tasks) {
+    return tasks.filter(t => {
+      return t.estimation && t.duration > t.estimation
+    })
+  },
+
+  approvallate (tasks, taskStatusMap) {
+    const today = moment()
+    return tasks.filter(t => {
+      const dueDate = parseDate(t.due_date)
+      return (
+        dueDate.isBefore(today) &&
+        !(
+          taskStatusMap.get(t.task_status_id).is_feedback_request ||
+          taskStatusMap.get(t.task_status_id).is_done
+        )
+      )
+    })
+  },
+
+  donelate (tasks, taskStatusMap) {
+    const today = moment()
+    return tasks.filter(t => {
+      const dueDate = parseDate(t.due_date)
+      return (
+        dueDate.isBefore(today) &&
+        !taskStatusMap.get(t.task_status_id).is_done
+      )
+    })
+  }
+}
+
 export default {
   name: 'task-type-page',
   mixins: [formatListMixin, searchMixin],
@@ -305,9 +428,28 @@ export default {
       currentSort: 'entity_name',
       currentScheduleItem: null,
       currentTask: null,
+      dueDateFilter: 'all',
       entityType: 'Asset',
+      estimationFilter: 'all',
       tasks: [],
       selection: {},
+      dueDateOptions: [
+        { label: 'all_tasks', value: 'all' },
+        { label: 'due_this_week', value: 'dueweek' },
+        { label: 'due_previous_week', value: 'duepreviousweek' },
+        { label: 'due_next_week', value: 'duenextweek' },
+        { label: 'due_this_month', value: 'duemonth' },
+        { label: 'due_previous_month', value: 'duepreviousmonth' },
+        { label: 'due_next_month', value: 'duenextmonth' },
+        { label: 'due_before_today', value: 'duebeforetoday' },
+        { label: 'due_after_today', value: 'dueaftertoday' }
+      ],
+      estimationOptions: [
+        { label: 'all_tasks', value: 'all' },
+        { label: 'estimation_over', value: 'overestimation' },
+        { label: 'estimation_approval_late', value: 'approvallate' },
+        { label: 'estimation_done_late', value: 'donelate' }
+      ],
       errors: {
         entities: false,
         importing: false,
@@ -553,6 +695,7 @@ export default {
         'estimation',
         'duration',
         'retake_count',
+        'start_date',
         'due_date',
         'real_start_date',
         'end_date',
@@ -751,6 +894,14 @@ export default {
       }
       this.setSearchInUrl()
       this.clearSelectedTasks()
+      if (filters[this.dueDateFilter]) {
+        this.tasks = filters[this.dueDateFilter](this.tasks)
+      }
+      if (filters[this.estimationFilter]) {
+        this.tasks = filters[this.estimationFilter](
+          this.tasks, this.taskStatusMap
+        )
+      }
     },
 
     saveSearchQuery (searchQuery) {
@@ -1197,6 +1348,20 @@ export default {
 
     currentProduction () {
       this.initData(true)
+    },
+
+    dueDateFilter () {
+      this.onSearchChange(this.searchField.value)
+      this.sortTasks()
+      this.$refs['task-list'].resetSelection()
+      this.clearSelectedTasks()
+    },
+
+    estimationFilter () {
+      this.onSearchChange(this.searchField.value)
+      this.sortTasks()
+      this.$refs['task-list'].resetSelection()
+      this.clearSelectedTasks()
     },
 
     currentSort () {
