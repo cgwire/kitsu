@@ -182,14 +182,13 @@ export default {
     },
 
     backgroundColor (taskStatus) {
-      const isTodo = taskStatus.name === 'Todo'
       if (
-        (!taskStatus || isTodo) &&
+        (!taskStatus || taskStatus.name === 'Todo') &&
         !this.isDarkTheme
       ) {
         return '#ECECEC'
       } else if (
-        (!taskStatus || isTodo) &&
+        (!taskStatus || taskStatus.name === 'Todo') &&
         this.isDarkTheme
       ) {
         return '#5F626A'
@@ -201,8 +200,7 @@ export default {
     },
 
     color (taskStatus) {
-      const isTodo = taskStatus.name === 'Todo'
-      if ((!taskStatus || !isTodo) || this.isDarkTheme) {
+      if ((!taskStatus || taskStatus.name !== 'Todo') || this.isDarkTheme) {
         return 'white'
       } else {
         return '#333'
