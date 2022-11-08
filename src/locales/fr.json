@@ -105,9 +105,9 @@
             "attachments": "Pièces jointes",
             "attachments_to_add": "Fichier à attacher",
             "max_retakes_error": "Vous ne pouvez plus faire de retakes sur cette tâche.",
-            "no_atachments": "Pas de pièces jointes",
             "previews": "Previews",
-            "selected_files": "Fichiers sélectionnés"
+            "selected_files": "Fichiers sélectionnés",
+            "no_attachments": "Il n'y a pas de pièces jointes pour ce commentaire."
         },
         "custom_actions": {
             "create_error": "Une erreur est survenue en sauvegardant cette action personnalisée. Êtes vous sûr qu'aucune autre action a un nom similaire ?",
@@ -116,7 +116,7 @@
             "edit_title": "Modifier une action personnalisée",
             "new_custom_action": "Ajouter une action personnalisée",
             "number": "action pesonnalisée | actions personnalisées",
-            "run_for_selection": "Lancer une action personnalisée pour les tâche sélectionnées :",
+            "run_for_selection": "Lancer une action personnalisée pour les tâche sélectionnées",
             "title": "Actions",
             "fields": {
                 "name": "Nom",
@@ -154,7 +154,9 @@
                 "department": "Département",
                 "is_assets_ready": "Les assets sont prêts",
                 "assets_ready": "Prêts",
-                "assets_not_ready": "Non prêt"
+                "assets_not_ready": "Non prêt",
+                "checked": "Actif",
+                "not_checked": "Non actif"
             },
             "thumbnails": {
                 "error": "Une erreur s'est produite en téléversant les vignettes",
@@ -186,7 +188,10 @@
                 "status": "Statut",
                 "task_type": "Type de tâche",
                 "uploader": "Uploadé par"
-            }
+            },
+            "nb_selected_assets": "{nbSelectedAssets} asset sélectionné | {nbSelectedAssets} assets sélectionnés",
+            "nb_selected_shots": "{nbSelectedShots} plan sélectionné | {nbSelectedShots} plans sélectionnés",
+            "nb_selected_edits": "{nbSelectedEdits} montage séléctionné | {nbSelectedEdits} montages sélectionnés"
         },
         "estimation": {
             "title": "Estimation"
@@ -367,7 +372,10 @@
             "search": {
                 "type": "Type",
                 "no_result": "Il n'y a pas de résultat pour cette recherche."
-            }
+            },
+            "hide_support_chat": "Chacher le chat de support",
+            "move_action_bar": "Déplacer le panneau d'actions",
+            "show_support_chat": "Montrer le chat de support"
         },
         "menu": {
             "assign_tasks": "Assigner des tâches",
@@ -375,12 +383,13 @@
             "change_status": "Changer le statut",
             "create_tasks": "Créer des tâches",
             "delete_tasks": "Supprimer des tâches",
-            "generate_playlists": "Générer des playlists",
             "run_custom_action": "Lancer des actions",
             "set_estimations": "Définir estimations",
             "delete_assets": "Supprimer les assets",
             "delete_shots": "Supprimer les plans",
-            "delete_edits": "Supprimmer les montages"
+            "delete_edits": "Supprimmer les montages",
+            "generate_playlist": "Générer une playlist",
+            "set_thumbnails": "Positionner les vignettes du dernier preview"
         },
         "news": {
             "all": "Tous",
@@ -469,7 +478,8 @@
                 "supervisor": "Superviseur"
             },
             "confirm_edit": "Sauvegarder les changement pour cet utilisateur",
-            "create": "Créer utilisateur"
+            "create": "Créer utilisateur",
+            "user_limit_error": "Vous avez atteint votre limite utilisateur. Contactez notre équipe pour augmenter votre plan."
         },
         "playlists": {
             "add_assets": "Ajouter des assets",
@@ -568,7 +578,9 @@
                 "switch_hd": "Passer en haute définition",
                 "frames_per_picture": "Frames par image",
                 "toggle_playing_annotations": "Montrer/cacher les annotations en jouant le film",
-                "toggle_waveform": "Montrer/cacher la forme du son"
+                "toggle_waveform": "Montrer/cacher la forme du son",
+                "annotation_erase": "Supprimmer l'annotation",
+                "toggle_annotations": "Montrer / Cacher l'annotation en jouant le film"
             },
             "download_csv": "Télécharger .csv",
             "filter_task_type": "Filtrer par type de tâche",
@@ -655,7 +667,7 @@
                 "add_shots_button": "Ajouter des plans",
                 "add_shots_description": "Ajouter ou importer des plans pour ta production",
                 "assets_to_import": "Assets à importer",
-                "create_production": "Créer une nouvelle production",
+                "create_production": "Créer la production",
                 "create_button": "Toute est bon, c'est parti !",
                 "create_button_disabled": "Remplissez tout le formulaire pour continuer",
                 "error": "Une erreur est survenue en créant la production",
@@ -926,7 +938,7 @@
         "tasks": {
             "add_preview": "Attacher une préviz",
             "add_preview_error": "Une erreur est survenue en ajoutant la preview.",
-            "assign": "Assigner une tâche à : | Assigner {nbSelectedTasks} tâches à :",
+            "assign": "Assigner une tâche à | Assigner {nbSelectedTasks} tâches à",
             "back_to_list": "Retour à la liste",
             "bigger": "Élargir le panneau de tâche",
             "change_status_to": "Changer le statut de la tâche à : ",
@@ -934,7 +946,7 @@
             "change_priority": "Changer le priorité de la tâche à : ",
             "clear_assignations": "effacer les assignations",
             "comment_image": "Attacher un fichier au commentaire",
-            "create_for_selection": "Créer une tâche pour chaque cellule vide :",
+            "create_for_selection": "Créer une tâche pour chaque cellule vide\n",
             "create_tasks": "Ajouter des tâches",
             "create_tasks_shot": "Ajouter des tâches pour les plans affichés",
             "create_tasks_shot_explaination": "Vous allez créer une nouvelle tâche pour chaque plan du projet. Est-ce que vous voulez continuer ?",
@@ -1039,7 +1051,26 @@
             "confirm_attachments": "Ajouter des fichiers en pièces jointes",
             "change_status": "Changer le statut",
             "clear_own_assignations": "Retirer vos assignations",
-            "publish": "Publier"
+            "publish": "Publier",
+            "all": "Toutes les tâches",
+            "assign_explaination": "Sélectionnez une personne à assigner..",
+            "change_priority_to": "Nouvelle priorité :",
+            "change_task_status": "Changer le statut de la tâche sélectionnée | Changer le statut des {nbSelectedTasks} tâches sélectionnées",
+            "due_date": "État de la date de livraison",
+            "due_after_today": "Dûe après aujourd'hui",
+            "due_before_today": "Tâches dûes avant aujourd'hui",
+            "due_next_week": "Tâches dûes la semaine prochaine",
+            "due_next_month": "Tâches dûes le mois prochain",
+            "due_previous_week": "Tâches dûes la semaine précédente",
+            "due_previous_month": "Tâches dûes le mois précédent",
+            "due_this_month": "Tâches dûes ce mois-ci",
+            "estimation_over": "L'estimation dépasse la durée",
+            "estimation_approval_late": "Date de livraison est en retard (approbation)",
+            "estimation_done_late": "Date de livraison est en retard (done)",
+            "late": "Est en retard",
+            "nb_selected_tasks": "{nbSelectedTasks} tâche sélectionnée | {nbSelectedTasks} tâches sélectionnées",
+            "set_thumbnails_from_tasks": "Positionner le dernier preview de la tâche sélectionnée comme vignette | Positionner le dernier preview des tâches sélectionnées comme vignette",
+            "to_myself": "À moi-même"
         },
         "timesheets": {
             "detail_level": "Niveau de détail",
