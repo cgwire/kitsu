@@ -62,11 +62,11 @@ const auth = {
     })
   },
 
-  resetChangePassword (token, password, password2) {
+  resetChangePassword (email, token, password, password2) {
     return new Promise((resolve, reject) => {
       superagent
         .put('/api/auth/reset-password')
-        .send({ token, password, password2 })
+        .send({ email, token, password, password2 })
         .end((err, res) => {
           if (err) reject(err)
           else resolve()

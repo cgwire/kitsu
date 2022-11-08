@@ -83,9 +83,9 @@ const actions = {
     })
   },
 
-  resetChangePassword ({ commit }, { token, password, password2 }) {
+  resetChangePassword ({ commit }, { email, token, password, password2 }) {
     return new Promise((resolve, reject) => {
-      auth.resetChangePassword(token, password, password2)
+      auth.resetChangePassword(email, token, password, password2)
         .then(() => {
           commit(LOGIN_SUCCESS)
           resolve()

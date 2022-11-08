@@ -129,7 +129,8 @@ export default {
         this.isLoading = true
         this.isSuccess = false
         this.resetChangePassword({
-          token: this.$route.params.token,
+          email: this.$route.query.email,
+          token: this.$route.query.token,
           password: this.password,
           password2: this.password2
         })
