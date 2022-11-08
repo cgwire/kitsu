@@ -4,6 +4,7 @@ import {
 
   TOGGLE_DARK_THEME,
   TOGGLE_SIDEBAR,
+  TOGGLE_SUPPORT_CHAT,
   TOGGLE_USER_MENU,
 
   SET_LAST_PRODUCTION_SCREEN,
@@ -20,6 +21,7 @@ const initialState = {
   currentProductionScreen: 'assets',
   isDarkTheme: false,
   isSidebarHidden: true,
+  isSupportChat: true,
   isUserMenuHidden: true,
   lastProductionScreen: 'assets',
   lastProductionViewed: null,
@@ -32,6 +34,7 @@ const getters = {
   currentProductionScreen: state => state.currentProductionScreen,
   isDarkTheme: state => state.isDarkTheme,
   isSidebarHidden: state => state.isSidebarHidden,
+  isSupportChat: state => state.isSupportChat,
   isUserMenuHidden: state => state.isUserMenuHidden,
   lastProductionScreen: state => state.lastProductionScreen,
   lastProductionViewed: state => state.lastProductionViewed,
@@ -43,6 +46,23 @@ const actions = {
     commit(TOGGLE_DARK_THEME)
     if (localStorage) {
       localStorage.setItem('dark-theme', state.isDarkTheme)
+    }
+  },
+
+  toggleSupportChat ({ commit, state }) {
+    commit(TOGGLE_SUPPORT_CHAT)
+    const crispEls = document.getElementsByClassName('crisp-client')
+    console.log(crispEls[0], state.isSupportChat)
+    if (crispEls[0]) {
+      const crispEl = crispEls[0]
+      if (state.isSupportChat) {
+        crispEl.style.display = ''
+      } else {
+        crispEl.style.display = 'none'
+      }
+    }
+    if (localStorage) {
+      localStorage.setItem('support-chat', state.isSupportChat)
     }
   },
 
@@ -70,6 +90,10 @@ const actions = {
 const mutations = {
   [TOGGLE_DARK_THEME] (state) {
     state.isDarkTheme = !state.isDarkTheme
+  },
+
+  [TOGGLE_SUPPORT_CHAT] (state) {
+    state.isSupportChat = !state.isSupportChat
   },
 
   [TOGGLE_SIDEBAR] (state) {
