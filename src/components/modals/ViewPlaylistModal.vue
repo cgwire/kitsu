@@ -239,7 +239,8 @@ export default {
 
 <style lang="scss" scoped>
 .modal-content {
-  max-height: calc(100vh - 20px);
+  max-height: calc(100vh - 75px);
+  top: 28px;
 }
 .modal-content .box {
   padding: 1em;
@@ -252,7 +253,7 @@ export default {
 
   .box {
     background: #3D4048;
-    height: calc(100vh - 40px);
+    padding-bottom: 0;
   }
 }
 </style>
