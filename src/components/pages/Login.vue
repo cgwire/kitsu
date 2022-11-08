@@ -12,6 +12,7 @@
               <input
                 class="input is-medium email"
                 type="text"
+                v-model="email"
                 :placeholder="$t('login.fields.email')"
                 @input="updateEmail"
                 @keyup.enter="confirmLogIn"
@@ -26,6 +27,7 @@
               <input
                 class="input is-medium password"
                 type="password"
+                v-model="password"
                 :placeholder="$t('login.fields.password')"
                 @input="updatePassword"
                 @keyup.enter="confirmLogIn"
@@ -84,8 +86,15 @@ export default {
 
   data () {
     return {
+      email: '',
+      password: '',
       isTooMuchLoginFailedAttemps: false
     }
+  },
+
+  mounted () {
+    this.email = this.$store.state.login.email
+    this.password = this.$store.state.login.password
   },
 
   computed: {
@@ -116,7 +125,7 @@ export default {
           if (err.default_password) {
             this.$router.push({
               name: 'reset-change-password',
-              params: { token: err.token }
+              query: { email: this.email, token: err.token }
             })
           } else if (err.too_many_failed_login_attemps) {
             this.isTooMuchLoginFailedAttemps = true

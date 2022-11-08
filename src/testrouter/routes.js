@@ -1029,7 +1029,7 @@ export const routes = [
     name: 'reset-password'
   },
   {
-    path: '/reset-change-password/:token',
+    path: '/reset-change-password',
     component: ResetChangePassword,
     name: 'reset-change-password'
   },
