@@ -297,6 +297,8 @@ export default {
 }
 
 .entity-title {
+  color: $white;
+  font-size: .9em;
   margin-bottom: 0.6em;
   max-width: 150px;
   word-wrap: anywhere;
