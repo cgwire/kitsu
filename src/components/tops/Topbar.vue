@@ -119,7 +119,7 @@
       class="user-menu"
       ref="user-menu"
       :style="{
-        top: isUserMenuHidden ? '-460px' : '60px'
+        top: isUserMenuHidden ? '-480px' : '60px'
       }"
     >
       <ul>
@@ -134,6 +134,14 @@
           </span>
           <span v-else>
             {{ $t("main.white_theme")}}
+          </span>
+        </li>
+        <li @click="toggleSupportChat">
+          <span v-if="isSupportChat">
+            {{ $t("main.hide_support_chat")}}
+          </span>
+          <span v-else>
+            {{ $t("main.show_support_chat")}}
           </span>
         </li>
         <hr />
@@ -265,6 +273,7 @@ export default {
       'isCurrentUserVendor',
       'isDarkTheme',
       'isSidebarHidden',
+      'isSupportChat',
       'isUserMenuHidden',
       'isTVShow',
       'isNewNotification',
@@ -465,6 +474,7 @@ export default {
       'setProduction',
       'setCurrentEpisode',
       'toggleDarkTheme',
+      'toggleSupportChat',
       'toggleSidebar',
       'toggleUserMenu'
     ]),
@@ -785,12 +795,12 @@ export default {
 
 .nav {
   box-shadow: 0px 0px 6px rgba(0,0,0,0.2);
+  left: 0;
   max-height: 60px;
   min-height: 60px;
-  z-index: 204;
   position: fixed;
-  left: 0;
   right: 0;
+  z-index: 204;
 }
 
 #toggle-menu-button {
