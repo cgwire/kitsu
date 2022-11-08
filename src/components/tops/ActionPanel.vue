@@ -106,7 +106,7 @@
               ) &&
               !isEntitySelection &&
               isTaskSelection &&
-              nbSelectedTasks > 1
+              nbSelectedTasks > 0
             "
             @click="selectBar('playlists')"
           >
@@ -1398,10 +1398,6 @@ div.assignation {
   cursor: pointer;
   font-size: 1.2em;
   padding: .2em .6em .4em .6em;
-
-  &:first-child {
-    border-top-left-radius: 10px;
-  }
 
   &:hover {
     color: var(--text);
