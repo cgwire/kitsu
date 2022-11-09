@@ -373,9 +373,9 @@
                 "type": "Type",
                 "no_result": "Il n'y a pas de résultat pour cette recherche."
             },
-            "hide_support_chat": "Chacher le chat de support",
+            "hide_support_chat": "Cacher le support",
             "move_action_bar": "Déplacer le panneau d'actions",
-            "show_support_chat": "Montrer le chat de support"
+            "show_support_chat": "Montrer le support"
         },
         "menu": {
             "assign_tasks": "Assigner des tâches",
