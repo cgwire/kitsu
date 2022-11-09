@@ -1053,19 +1053,21 @@ export default {
       if (descriptor.field_name === 'frame_in') {
         if (
           shot.data.frame_out &&
-          shot.nb_frames !== shot.data.frame_out - value &&
-          shot.data.frame_out > value
+          parseInt(shot.nb_frames) !==
+          parseInt(shot.data.frame_out) - parseInt(value) &&
+          parseInt(shot.data.frame_out) > parseInt(value)
         ) {
-          data.nb_frames = shot.data.frame_out - value
+          data.nb_frames = parseInt(shot.data.frame_out) - parseInt(value) + 1
         }
       }
       if (descriptor.field_name === 'frame_out') {
         if (
           shot.data.frame_in &&
-          shot.nb_frames !== value - shot.data.frame_in &&
-          shot.data.frame_in < value
+          parseInt(shot.nb_frames) !==
+          parseInt(value) - parseInt(shot.data.frame_in) &&
+          parseInt(shot.data.frame_in) < parseInt(value)
         ) {
-          data.nb_frames = value - shot.data.frame_in
+          data.nb_frames = parseInt(value) - parseInt(shot.data.frame_in) + 1
         }
       }
       this.editShot(data)
