@@ -363,13 +363,22 @@ export default {
     confirmCreateAndInvite (form) {
       this.loading.createAndInvite = true
       this.errors.edit = false
+      this.errors.userLimit = false
       this.newPersonAndInvite(form)
         .then(() => {
           this.loading.createAndInvite = false
           this.modals.edit = false
         })
         .catch((err) => {
-          console.error(err)
+          const isUserLimitReached =
+            err.body &&
+            err.body.message &&
+            err.body.message.indexOf('limit') > 0
+          if (isUserLimitReached) {
+            this.errors.userLimit = true
+          } else {
+            this.errors.edit = true
+          }
           this.errors.edit = true
           this.loading.createAndInvite = false
         })
