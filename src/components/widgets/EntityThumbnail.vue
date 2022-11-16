@@ -170,6 +170,8 @@ table .thumbnail-picture.thumbnail-empty {
 }
 
 table .thumbnail-picture {
+  border: 0;
+  background: black;
   margin: 0px;
   padding: 0px;
 }

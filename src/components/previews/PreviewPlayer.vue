@@ -1750,7 +1750,7 @@ export default {
   width: 100%;
   position: absolute;
   left: 0;
-  z-index: 500;
+  z-index: 200;
 }
 
 .center {

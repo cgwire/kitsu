@@ -1863,6 +1863,12 @@ export default {
 .playlist-footer {
   background: $dark-grey-light;
   color: $white-grey;
+  overflow: auto;
+}
+
+.playlist-footer {
+  overflow-x: scroll;
+  width: 100%;
 }
 
 .playlisted-entities {
