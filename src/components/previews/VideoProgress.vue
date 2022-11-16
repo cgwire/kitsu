@@ -281,6 +281,7 @@ export default {
   flex-shrink: 0;
   margin: 0;
   height: 28px;
+  overflow: hidden;
   padding: 0;
   position: relative;
   width: 100%;
