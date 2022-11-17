@@ -12,10 +12,10 @@
               <input
                 class="input is-medium email"
                 type="text"
-                v-model="email"
                 :placeholder="$t('login.fields.email')"
                 @input="updateEmail"
                 @keyup.enter="confirmLogIn"
+                v-model="email"
                 v-focus >
               <span class="icon">
                 <mail-icon width=20 height=20 />
@@ -27,10 +27,10 @@
               <input
                 class="input is-medium password"
                 type="password"
-                v-model="password"
                 :placeholder="$t('login.fields.password')"
                 @input="updatePassword"
                 @keyup.enter="confirmLogIn"
+                v-model="password"
               >
               <span class="icon">
                 <lock-icon width=20 height=20 />
