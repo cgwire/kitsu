@@ -1,3 +1,4 @@
+import auth from '@/lib/auth'
 import store from '@/store/modules/assets'
 import taskTypesStore from '@/store/modules/tasktypes'
 import tasksStore from '@/store/modules/tasks'
