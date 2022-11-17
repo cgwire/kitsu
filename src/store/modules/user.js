@@ -26,6 +26,9 @@ import {
   USER_CHANGE_PASSWORD_SUCCESS,
   USER_CHANGE_PASSWORD_UNVALID,
 
+  USER_ENABLE_TOTP_SUCCESS,
+  USER_DISABLE_TOTP_SUCCESS,
+
   USER_LOAD_TODOS_START,
   USER_LOAD_TODOS_END,
   USER_LOAD_TODOS_ERROR,
@@ -185,6 +188,24 @@ const actions = {
         commit(USER_CHANGE_PASSWORD_SUCCESS)
       }
       if (payload.callback) payload.callback()
+    })
+  },
+
+  preEnableTOTP ({ commit, state }) {
+    return peopleApi.preEnableTOTP()
+  },
+
+  enableTOTP ({ commit, state }, totp) {
+    return peopleApi.enableTOTP(totp).then((OTPRecoveryCodes) => {
+      commit(USER_ENABLE_TOTP_SUCCESS)
+      return Promise.resolve(OTPRecoveryCodes)
+    })
+  },
+
+  disableTOTP ({ commit, state }, totp) {
+    return peopleApi.disableTOTP(totp).then(() => {
+      commit(USER_DISABLE_TOTP_SUCCESS)
+      return Promise.resolve()
     })
   },
 
@@ -392,6 +413,14 @@ const mutations = {
       isSuccess: false,
       isValid: false
     }
+  },
+
+  [USER_ENABLE_TOTP_SUCCESS] (state) {
+    state.user.totp_enabled = true
+  },
+
+  [USER_DISABLE_TOTP_SUCCESS] (state) {
+    state.user.totp_enabled = false
   },
 
   [USER_LOAD_TODOS_START] (state) {

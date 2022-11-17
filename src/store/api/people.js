@@ -127,6 +127,18 @@ export default {
     client.post('/api/auth/change-password', data, callback)
   },
 
+  preEnableTOTP () {
+    return client.pput('/api/auth/totp', {}).then(body => Promise.resolve(body))
+  },
+
+  enableTOTP (totp) {
+    return client.ppost('/api/auth/totp', { totp: totp }).then(body => Promise.resolve(body.otp_recovery_codes))
+  },
+
+  disableTOTP (totp) {
+    return client.pdel('/api/auth/totp', { totp: totp })
+  },
+
   loadTodos (callback) {
     client.get('/api/data/user/tasks', callback)
   },

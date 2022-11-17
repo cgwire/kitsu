@@ -19,6 +19,7 @@
       min="0"
       :max="max || undefined"
       :step="step || undefined"
+      :readonly="readonly"
       @input="updateValue()"
       @keyup.enter="emitEnter()"
     />
@@ -86,6 +87,10 @@ export default {
       type: Boolean
     },
     emptyLabel: {
+      default: false,
+      type: Boolean
+    },
+    readonly: {
       default: false,
       type: Boolean
     }

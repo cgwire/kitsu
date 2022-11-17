@@ -7,7 +7,10 @@
           <img src="../../assets/kitsu-text.svg" v-else />
         </div>
         <form>
-          <div class="field mt2">
+          <div
+            class="field mt2"
+            v-show="!(isMissingOTP || isWrongOTP)"
+          >
             <p class="control has-icon">
               <input
                 class="input is-medium email"
@@ -16,13 +19,17 @@
                 @input="updateEmail"
                 @keyup.enter="confirmLogIn"
                 v-model="email"
-                v-focus >
+                v-focus
+              >
               <span class="icon">
                 <mail-icon width=20 height=20 />
               </span>
             </p>
           </div>
-          <div class="field">
+          <div
+            class="field"
+            v-show="!(isMissingOTP || isWrongOTP)"
+          >
             <p class="control has-icon">
               <input
                 class="input is-medium password"
@@ -31,6 +38,25 @@
                 @input="updatePassword"
                 @keyup.enter="confirmLogIn"
                 v-model="password"
+              >
+              <span class="icon">
+                <lock-icon width=20 height=20 />
+              </span>
+            </p>
+          </div>
+          <div
+            class="field mt2"
+            v-show="isMissingOTP || isWrongOTP"
+          >
+            <p class="control has-icon">
+              <input
+                class="input is-medium password"
+                type="text"
+                v-model="otp"
+                :placeholder="$t('login.fields.otp')"
+                @input="updateOTP"
+                @keyup.enter="confirmLogIn"
+                v-focus
               >
               <span class="icon">
                 <lock-icon width=20 height=20 />
@@ -51,10 +77,13 @@
             {{ $t("login.login") }}
           </a>
         </p>
-        <p class="control error" v-show="isTooMuchLoginFailedAttemps">
+        <p class="control error" v-if="isTooMuchLoginFailedAttemps">
           {{ $t("login.too_many_failed_login_attemps") }}
         </p>
-        <p class="control error" v-show="isLoginError && !isTooMuchLoginFailedAttemps">
+        <p class="control error" v-else-if="isWrongOTP">
+          {{ $t("login.wrong_otp") }}
+        </p>
+        <p class="control error" v-else-if="isLoginError && !isMissingOTP">
           {{ $t("login.login_failed") }}
         </p>
 
@@ -88,13 +117,17 @@ export default {
     return {
       email: '',
       password: '',
-      isTooMuchLoginFailedAttemps: false
+      otp: '',
+      isTooMuchLoginFailedAttemps: false,
+      isWrongOTP: false,
+      isMissingOTP: false
     }
   },
 
   mounted () {
     this.email = this.$store.state.login.email
     this.password = this.$store.state.login.password
+    this.otp = this.$store.state.login.otp
   },
 
   computed: {
@@ -118,8 +151,14 @@ export default {
       this.$store.dispatch('changePassword', e.target.value)
     },
 
+    updateOTP (e) {
+      this.$store.dispatch('changeOTP', e.target.value)
+    },
+
     confirmLogIn () {
       this.isTooMuchLoginFailedAttemps = false
+      this.isWrongOTP = false
+      this.isMissingOTP = false
       this.logIn((err, success) => {
         if (err) {
           if (err.default_password) {
@@ -129,6 +168,10 @@ export default {
             })
           } else if (err.too_many_failed_login_attemps) {
             this.isTooMuchLoginFailedAttemps = true
+          } else if (err.wrong_OTP) {
+            this.isWrongOTP = true
+          } else if (err.missing_OTP) {
+            this.isMissingOTP = true
           } else {
             console.error(err)
           }
