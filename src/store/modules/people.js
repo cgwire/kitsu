@@ -14,6 +14,7 @@ import {
   getFilters,
   getKeyWords
 } from '@/lib/filtering'
+import auth from '@/lib/auth'
 
 import taskStatusStore from '@/store/modules/taskstatus'
 import {
@@ -331,8 +332,18 @@ const actions = {
       })
   },
 
-  changePasswordPerson ({ commit, state }, { person, form, callback }) {
-    return peopleApi.changePasswordPerson(person, form, callback)
+  changePasswordPerson ({ commit, state }, { person, form }) {
+    return new Promise((resolve, reject) => {
+      if (auth.isPasswordValid(form.password, form.password2)) {
+        return peopleApi.changePasswordPerson(person, form)
+          .then(() => resolve())
+          .catch(err => reject(err))
+      } else {
+        const err = new Error('Password is not valid')
+        err.isValidPassword = false
+        return reject(err)
+      }
+    })
   },
 
   uploadPersonFile ({ commit, state }, toUpdate) {

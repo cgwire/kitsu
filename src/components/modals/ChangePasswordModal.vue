@@ -75,15 +75,19 @@ import { modalMixin } from '@/components/modals/base_modal'
 
 import TextField from '@/components/widgets/TextField'
 
-import auth from '@/lib/auth'
-
 export default {
   name: 'change-password-modal',
   mixins: [modalMixin],
-  props: [
-    'active',
-    'person'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    person: {
+      type: Object,
+      default: () => {}
+    }
+  },
 
   data () {
     return {
@@ -112,19 +116,15 @@ export default {
     ]),
 
     confirmClicked () {
-      if (auth.isPasswordValid(this.form.password, this.form.password2)) {
-        this.changePasswordPerson({
-          person: this.person,
-          form: this.form,
-          callback: (err) => {
-            if (err) this.isError = true
-            else this.$emit('confirm')
-          }
-        }
-        )
-      } else {
-        this.isValid = false
-      }
+      this.changePasswordPerson({
+        person: this.person,
+        form: this.form
+      })
+        .then(() => { this.$emit('confirm') })
+        .catch((err) => {
+          if (err.isValidPassword === false) this.isValid = false
+          else this.isError = true
+        })
     },
 
     resetForm () {
@@ -158,12 +158,12 @@ export default {
 }
 </script>
 
-    <style lang="scss" scoped>
-    .modal-content .box p.text {
-      margin-bottom: 1em;
-    }
-    .is-danger {
-      color: #ff3860;
-      font-style: italic;
-    }
-    </style>
+<style lang="scss" scoped>
+.modal-content .box p.text {
+  margin-bottom: 1em;
+}
+.is-danger {
+  color: #ff3860;
+  font-style: italic;
+}
+</style>
