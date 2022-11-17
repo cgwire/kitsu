@@ -197,7 +197,7 @@
 
         <p
           :class="{
-            'change-password-message': true,
+            'show-message': true,
             error: true,
             'is-hidden': changePassword.isValid
           }"
@@ -207,7 +207,7 @@
 
         <p
           :class="{
-            'change-password-message': true,
+            'show-message': true,
             success: true,
             'is-hidden': !changePassword.isSuccess
           }"
@@ -217,12 +217,161 @@
 
         <p
           :class="{
-            'change-password-message': true,
+            'show-message': true,
             error: true,
             'is-hidden': !changePassword.isError
           }"
         >
           {{ $t('profile.change_password.error') }}
+        </p>
+
+        <h2>
+          {{ $t('profile.two_factor_authentication.title') }}
+        </h2>
+
+        <div
+          v-if="twoFA.TOTPPreEnabled"
+          class="qrcode-informations"
+        >
+          <p>
+            {{ $t('profile.two_factor_authentication.scan_qrcode')}}
+          </p>
+
+          <qrcode-vue
+            class="qrcode"
+            :value="twoFA.TOTPProvisionningUri"
+            :size="300"
+            level="M"
+          />
+        </div>
+
+        <text-field
+            :label="$t('profile.two_factor_authentication.otp_secret')"
+            :readonly="true"
+            type="text"
+            v-model="twoFA.OTPSecret"
+            v-if="twoFA.OTPSecret"
+        />
+
+        <div
+            class="field mt2"
+            v-if="twoFA.TOTPPreEnabled || twoFA.TOTPPreDisabled"
+          >
+          <p class="control has-icon">
+            <input
+              class="input is-medium"
+              type="text"
+              v-model="twoFA.validation_otp"
+              @keyup.enter="nextEnableOrDisable"
+              :placeholder="$t('login.fields.otp')"
+              v-focus
+            >
+            <span class="icon">
+              <lock-icon width=20 height=20 />
+            </span>
+          </p>
+        </div>
+
+        <div
+          v-if="twoFA.OTPRecoveryCodes"
+        >
+          <label class="label label-recovery-codes">
+            {{ $t('profile.two_factor_authentication.recovery_codes') }}
+          </label>
+          <save-icon
+              class="action-icon"
+              @click="saveRecoveryCodesToFile"
+          />
+          <copy-icon
+              class="action-icon"
+              @click="copyRecoveryCodesToClipboard"
+          />
+          <textarea
+            class="input recovery-codes"
+            ref="textField"
+            v-text="twoFA.OTPRecoveryCodes.join('\t')"
+            readonly
+          ></textarea>
+
+          <p
+            :class="{
+              'show-message': true,
+              error: true,
+              'is-hidden': !twoFA.OTPRecoveryCodes,
+              'recovery-codes-warning': true
+            }"
+          >
+            {{ $t('profile.two_factor_authentication.warning_recovery_codes') }}
+        </p>
+        </div>
+
+        <button
+          v-if="twoFA.TOTPPreEnabled"
+          :class="{
+            button: true,
+            'save-button': true,
+            'is-medium': true,
+            'is-loading': twoFA.isLoading
+          }"
+          @click="enableTOTPRequested()"
+        >
+          {{ $t('profile.two_factor_authentication.totp.button_validate') }}
+        </button>
+
+        <button
+          v-else-if="!user.totp_enabled"
+          :class="{
+            button: true,
+            'save-button': true,
+            'is-medium': true,
+            'is-loading': twoFA.isLoading
+          }"
+          @click="preEnableTOTPRequested()"
+        >
+          {{ $t('profile.two_factor_authentication.totp.button_enable') }}
+        </button>
+
+        <button
+          v-else
+          :class="{
+            button: true,
+            'save-button': true,
+            'is-medium': true,
+            'is-loading': twoFA.isLoading
+          }"
+          @click="disableTOTPRequested()"
+        >
+          {{ $t('profile.two_factor_authentication.totp.button_disable') }}
+        </button>
+
+        <p
+          :class="{
+            'show-message': true,
+            error: true,
+            'is-hidden': !twoFA.error.isWrongOTP
+          }"
+        >
+          {{ $t('login.wrong_otp') }}
+        </p>
+
+        <p
+          :class="{
+            'show-message': true,
+            error: true,
+            'is-hidden': !twoFA.error.enableTOTP
+          }"
+        >
+          {{ $t('profile.two_factor_authentication.totp.error_enable') }}
+        </p>
+
+        <p
+          :class="{
+            'show-message': true,
+            error: true,
+            'is-hidden': !twoFA.error.disableTOTP
+          }"
+        >
+          {{ $t('profile.two_factor_authentication.totp.error_disable') }}
         </p>
 
       </div>
@@ -244,6 +393,8 @@
 
 <script>
 import moment from 'moment-timezone'
+import QrcodeVue from 'qrcode.vue'
+import { LockIcon, CopyIcon, SaveIcon } from 'vue-feather-icons'
 import { mapGetters, mapActions } from 'vuex'
 
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
@@ -258,7 +409,11 @@ export default {
     ComboboxBoolean,
     PeopleAvatar,
     ChangeAvatarModal,
-    TextField
+    TextField,
+    QrcodeVue,
+    LockIcon,
+    CopyIcon,
+    SaveIcon
   },
 
   data () {
@@ -288,6 +443,20 @@ export default {
         isLoading: false,
         isLoadingError: false,
         formData: null
+      },
+      twoFA: {
+        TOTPProvisionningUri: '',
+        OTPSecret: '',
+        OTPRecoveryCodes: null,
+        isLoading: false,
+        TOTPPreEnabled: false,
+        TOTPPreDisabled: false,
+        validation_otp: '',
+        error: {
+          isWrongOTP: false,
+          enableTOTP: false,
+          disableTOTP: false
+        }
       }
     }
   },
@@ -321,7 +490,10 @@ export default {
       'saveProfile',
       'checkNewPasswordValidityAndSave',
       'uploadAvatar',
-      'clearAvatar'
+      'clearAvatar',
+      'disableTOTP',
+      'enableTOTP',
+      'preEnableTOTP'
     ]),
 
     localeChanged () {
@@ -347,6 +519,66 @@ export default {
           }
         }
       })
+    },
+
+    enableTOTPRequested () {
+      this.twoFA.isLoading = true
+      this.twoFA.error.enableTOTP = false
+      this.twoFA.OTPRecoveryCodes = null
+      this.enableTOTP(this.twoFA.validation_otp)
+        .then(OTPRecoveryCodes => {
+          if (OTPRecoveryCodes) {
+            this.twoFA.OTPRecoveryCodes = OTPRecoveryCodes
+          }
+          this.twoFA.TOTPPreEnabled = false
+          this.twoFA.validation_otp = ''
+          this.twoFA.error.isWrongOTP = false
+          this.twoFA.OTPSecret = ''
+        })
+        .catch((err) => {
+          if (err.body.wrong_OTP) this.twoFA.error.isWrongOTP = true
+          else this.twoFA.error.EnableTOTP = true
+        })
+      this.twoFA.isLoading = false
+    },
+
+    preEnableTOTPRequested () {
+      this.twoFA.isLoading = true
+      this.twoFA.error.EnableTOTP = false
+      this.twoFA.TOTPPreEnabled = false
+      this.preEnableTOTP()
+        .then(body => {
+          this.twoFA.TOTPProvisionningUri = body.totp_provisionning_uri
+          this.twoFA.OTPSecret = body.otp_secret
+          this.twoFA.TOTPPreEnabled = true
+        })
+        .catch(this.twoFA.error.EnableTOTP = true
+        )
+        .finally(this.twoFA.isLoading = false)
+    },
+
+    disableTOTPRequested () {
+      this.twoFA.OTPRecoveryCodes = null
+      if (!this.twoFA.TOTPPreDisabled) this.twoFA.TOTPPreDisabled = true
+      else {
+        this.twoFA.isLoading = true
+        this.disableTOTP(this.twoFA.validation_otp)
+          .then(() => {
+            this.twoFA.TOTPPreDisabled = false
+            this.twoFA.validation_otp = ''
+            this.twoFA.error.isWrongOTP = false
+          })
+          .catch((err) => {
+            if (err.body.wrong_OTP) this.twoFA.error.isWrongOTP = true
+            else this.twoFA.error.disableTOTP = true
+          })
+          .finally(this.twoFA.isLoading = false)
+      }
+    },
+
+    nextEnableOrDisable () {
+      if (this.twoFA.TOTPPreEnabled) this.enableTOTPRequested()
+      else if (this.twoFA.TOTPPreDisabled) this.disableTOTPRequested()
     },
 
     selectFile (formData) {
@@ -376,6 +608,22 @@ export default {
 
     removeAvatar () {
       this.clearAvatar()
+    },
+
+    copyRecoveryCodesToClipboard () {
+      navigator.clipboard.writeText(this.twoFA.OTPRecoveryCodes.join('\n'))
+    },
+
+    saveRecoveryCodesToFile () {
+      var blob = new Blob(
+        [this.twoFA.OTPRecoveryCodes.join('\n')],
+        { type: 'text/plain;charset=utf-8' }
+      )
+      const link = document.createElement('a')
+      link.setAttribute('href', URL.createObjectURL(blob))
+      link.setAttribute('download', 'kitsu-recovery-codes.txt')
+      document.body.appendChild(link)
+      link.click()
     }
   },
 
@@ -506,7 +754,7 @@ h2:first-child {
   color: white;
 }
 
-.change-password-message {
+.show-message {
   margin-top: 1em;
 }
 
@@ -518,5 +766,42 @@ h2:first-child {
 
 select {
   height: 3em;
+}
+
+.qrcode {
+  margin-bottom: 1em;
+  margin-top: 1em;
+}
+
+.qrcode-informations {
+  text-align: center;
+}
+
+.icon {
+  padding: 0.25em;
+}
+
+.recovery-codes {
+  resize: none;
+  height: 13em;
+  font-size: 1.5em;
+  padding-left: 2.5em;
+  padding-top: 0.5em;
+  font-family: ui-monospace,SFMono-Regular,SF Mono,Menlo,
+    Consolas,Liberation Mono,monospace;
+}
+
+.action-icon {
+  cursor: pointer;
+  float: right;
+  margin-bottom: 5px;
+}
+
+.label-recovery-codes {
+  float: left;
+}
+
+.recovery-codes-warning {
+  margin-bottom: 1em;
 }
 </style>

@@ -303,8 +303,9 @@ export default {
     back_to_login: 'Go back to login page',
     forgot_password: 'Forgot password?',
     login: 'Log in',
-    login_failed: 'Log in failed, please verify your credentials',
-    too_many_failed_login_attemps: 'Too many failed login attemps, please wait one minute',
+    login_failed: 'Log in failed, please verify your credentials.',
+    too_many_failed_login_attemps: 'Too many failed login attemps, please wait one minute.',
+    wrong_otp: 'OTP verification failed.',
     login_page: 'Cancel',
     redirecting: 'Redirecting in {secondsLeft} seconds...',
     reset_change_password: 'Change password',
@@ -320,7 +321,8 @@ export default {
     fields: {
       email: 'Email',
       password: 'Password',
-      password2: 'Password again'
+      password2: 'Password again',
+      otp: 'OTP'
     }
   },
 
@@ -853,6 +855,20 @@ export default {
       error: 'An error occurred while changing password. Please verify your current password.',
       success: 'Your password was successfully changed!',
       unvalid: 'Your new password confirmation doesn\'t match or your password is too short (8 chars, at least, is expected).'
+    },
+    two_factor_authentication: {
+      title: 'Two-factor authentication',
+      scan_qrcode: 'Please scan this QR code in your TOTP application.',
+      recovery_codes: 'Recovery codes',
+      warning_recovery_codes: 'Keep your recovery codes in a safe spot. These codes are the last resort for accessing your account in case you lose your password and second factors. If you cannot find these codes, you will lose access to your account.',
+      otp_secret: 'OTP secret',
+      totp: {
+        button_enable: 'Enable TOTP',
+        button_validate: 'Validate TOTP',
+        button_disable: 'Disable TOTP',
+        error_enable: 'An error occured while enabling TOTP.',
+        error_disable: 'An error occured while disabling TOTP.'
+      }
     },
     save: {
       button: 'Save changes',
