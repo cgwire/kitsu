@@ -1,8 +1,9 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import vuescroll from 'vue-scroll'
 import Vuex from 'vuex'
-import i18n from '../../../src/lib/i18n'
-import Breakdown from '../../../src/components/pages/Breakdown'
+import i18n from '@/lib/i18n'
+import auth from '@/lib/auth'
+import Breakdown from '@/components/pages/Breakdown'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
@@ -10,7 +11,6 @@ localVue.use(vuescroll)
 
 describe('Breakdown', () => {
   let store, assetStore, userStore, shotStore, castingStore, productionStore
-  let wrapper
   let getters
 
   beforeEach(() => {
@@ -74,11 +74,12 @@ describe('Breakdown', () => {
       castingSequenceOptions: []
     }
 
-    wrapper = shallowMount(Breakdown, {
+    shallowMount(Breakdown, {
       store,
       getters,
       localVue,
-      i18n
+      i18n,
+      auth
     })
   })
 

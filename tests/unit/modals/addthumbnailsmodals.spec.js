@@ -2,8 +2,9 @@ import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 
-import i18n from '../../../src/lib/i18n'
-import AddThumbnailsModal from '../../../src/components/modals/AddThumbnailsModal'
+import i18n from '@/lib/i18n'
+import auth from '@/lib/auth'
+import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
@@ -37,6 +38,7 @@ describe('AddThumbnailsModal', () => {
       localVue,
       i18n,
       router,
+      auth,
       propsData: {
         parent: 'assets'
       }
@@ -45,7 +47,7 @@ describe('AddThumbnailsModal', () => {
 
   describe('Mount', () => {
     it('empty', () => {
-      const modal = wrapper.findComponent(AddThumbnailsModal)
+      wrapper.findComponent(AddThumbnailsModal)
     })
   })
 })
