@@ -144,9 +144,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .thumbnail-picture {
-  background-color: $dark-grey-lighter;
-  border-color: $dark-grey-light;
+.dark {
+  .thumbnail-picture {
+    background-color: $dark-grey-lighter;
+    border-color: $dark-grey-light;
+  }
+
+  table .thumbnail-picture.thumbnail-empty {
+    background: $dark-grey-lighter;
+    border-color: $dark-grey-light;
+  }
 }
 
 .thumbnail-picture {
@@ -167,7 +174,7 @@ span.thumbnail-empty {
 
 table .thumbnail-picture.thumbnail-empty {
   background: $white-grey;
-  border: 1px solid $dark-grey-light;
+  border: 1px solid $light-grey;
   margin: 0px;
 }
 
