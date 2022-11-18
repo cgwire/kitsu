@@ -68,13 +68,15 @@ export default {
       description: shot.description,
       data: shot.data
     }
-    if (shot.is_casting_standby) {
+    if (shot.is_casting_standby !== undefined) {
       data.is_casting_standby = Boolean(shot.is_casting_standby)
     }
-    if (shot.nb_frames) {
-      data.nb_frames = parseInt(shot.nb_frames)
-    } else {
-      data.nb_frames = null
+    if (shot.nb_frames !== undefined) {
+      if (shot.nb_frames !== null) {
+        data.nb_frames = parseInt(shot.nb_frames)
+      } else {
+        data.nb_frames = null
+      }
     }
     if (
       shot.frameOut !== undefined ||
@@ -108,7 +110,7 @@ export default {
       name: episode.name,
       description: episode.description
     }
-    if (episode.is_casting_standby) {
+    if (episode.is_casting_standby !== undefined) {
       data.is_casting_standby = Boolean(episode.is_casting_standby)
     }
     return client.pput(`/api/data/entities/${episode.id}`, data)
