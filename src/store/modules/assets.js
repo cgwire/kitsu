@@ -464,7 +464,7 @@ const actions = {
       .then(asset => {
         const assetTypeMap = rootGetters.assetTypeMap
         const assetType = assetTypeMap.get(asset.entity_type_id)
-        const workflow = assetType ? asset.task_types || [] : []
+        const workflow = assetType ? assetType.task_types || [] : []
         let taskTypeIds = rootGetters.productionAssetTaskTypeIds
         const sortInfo = state.assetSorting && state.assetSorting.length > 0
           ? state.assetSorting[0]
