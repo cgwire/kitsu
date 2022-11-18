@@ -166,12 +166,14 @@ span.thumbnail-empty {
 }
 
 table .thumbnail-picture.thumbnail-empty {
+  background: $white-grey;
+  border: 1px solid $dark-grey-light;
   margin: 0px;
 }
 
 table .thumbnail-picture {
-  border: 0;
   background: black;
+  border: 1px solid black;
   margin: 0px;
   padding: 0px;
 }

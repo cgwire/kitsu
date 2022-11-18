@@ -176,9 +176,10 @@ export default {
   border-radius: 10px;
   user-select: none;
   cursor: pointer;
+  display: inline-block;
   margin: 0;
   margin-top: 1px;
-  max-width: 200px;
+  max-width: 400px;
   padding: 0.5em;
   position: relative;
   vertical-align: middle;
