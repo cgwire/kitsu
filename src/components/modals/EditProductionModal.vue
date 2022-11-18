@@ -61,7 +61,7 @@
         />
 
         <div v-if="productionToEdit && productionToEdit.id">
-          <span class="label">{{ $t("productions.picture") }}</span>
+          <label class="label">{{ $t("productions.picture") }}</label>
           <file-upload
             ref="fileField"
             :label="$t('main.csv.upload_file')"

@@ -76,7 +76,7 @@
             class="flexrow-item"
             v-if="isActiveTab('tasks')"
           >
-            <combobox
+            <combobox-styled
               :label="$t('tasks.due_date')"
               :options="dueDateOptions"
               locale-key-prefix="tasks."
@@ -87,7 +87,7 @@
             class="flexrow-item"
             v-if="isActiveTab('tasks')"
           >
-            <combobox
+            <combobox-styled
               :label="$t('tasks.late')"
               :options="estimationOptions"
               locale-key-prefix="tasks."
@@ -286,7 +286,7 @@ import { CornerLeftUpIcon } from 'vue-feather-icons'
 import ActionPanel from '@/components/tops/ActionPanel'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DateField from '@/components/widgets/DateField'
-import Combobox from '@/components/widgets/Combobox'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper'
 import Schedule from '@/components/pages/schedule/Schedule'
@@ -406,8 +406,8 @@ export default {
     ActionPanel,
     ButtonSimple,
     CornerLeftUpIcon,
-    Combobox,
     ComboboxNumber,
+    ComboboxStyled,
     DateField,
     EstimationHelper,
     Schedule,

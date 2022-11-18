@@ -152,7 +152,4 @@ export default {
   margin-left: .5rem;
   font-style: italic;
 }
-label.button.is-primary {
-  border-radius: 5px;
-}
 </style>

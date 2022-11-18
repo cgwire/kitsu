@@ -455,7 +455,7 @@ export default {
       tab_select_file: 'Upload a CSV file',
       tab_paste_code: 'Paste a CSV data',
       unknown: 'Unknown column',
-      upload_file: 'Browse',
+      upload_file: 'Browse local files',
       options: {
         title: 'Options',
         update: 'Update existing data'
@@ -689,7 +689,7 @@ export default {
     delete_text: 'Are you sure you want to remove {name} from your database? Please, confirm by typing the name of the project you want to delete in the text field.',
     delete_error: 'An error occurred while deleting this production. There are probably data linked to it. Are you sure this production has no task, shot or asset linked to it? Kitsu doesn\'t allow production deletion. If you don\'t want to see the production anymore, you can close it instead.',
     edit_error: 'An error occurred while editing production. Please contact our support team.',
-    edit_title: 'Edit production',
+    edit_title: 'Edit',
     new_production: 'Add a production',
     number: 'production | productions',
     open_productions: 'My Productions',
