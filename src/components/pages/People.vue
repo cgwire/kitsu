@@ -60,6 +60,7 @@
       :is-error="isPeopleLoadingError"
       @edit-clicked="onEditClicked"
       @delete-clicked="onDeleteClicked"
+      @change-password-clicked="onChangePasswordClicked"
     />
 
     <import-render-modal
@@ -104,6 +105,13 @@
       @invite="confirmInvite"
     />
 
+    <change-password-modal
+      :active="modals.changePassword"
+      :person="personToChangePassword"
+      @cancel="modals.changePassword = false"
+      @confirm="modals.changePassword = false"
+    />
+
     <hard-delete-modal
       :active="modals.del"
       :error-text="$t('people.delete_error')"
@@ -131,6 +139,7 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
+import ChangePasswordModal from '@/components/modals/ChangePasswordModal'
 import EditPersonModal from '@/components/modals/EditPersonModal'
 import HardDeleteModal from '@/components/modals/HardDeleteModal'
 import ImportModal from '@/components/modals/ImportModal'
@@ -149,6 +158,7 @@ export default {
     BuildPeopleFilterModal,
     ButtonHrefLink,
     ButtonSimple,
+    ChangePasswordModal,
     EditPersonModal,
     HardDeleteModal,
     ImportModal,
@@ -186,6 +196,7 @@ export default {
       modals: {
         edit: false,
         del: false,
+        changePassword: false,
         importModal: false,
         isImportRenderDisplayed: false,
         isBuildFilterDisplayed: false
@@ -193,6 +204,7 @@ export default {
       parsedCSV: [],
       personToDelete: {},
       personToEdit: { role: 'user' },
+      personToChangePassword: {},
       success: {
         invite: false
       }
@@ -351,16 +363,26 @@ export default {
     confirmCreateAndInvite (form) {
       this.loading.createAndInvite = true
       this.errors.edit = false
+      this.errors.userLimit = false
       this.newPersonAndInvite(form)
         .then(() => {
           this.loading.createAndInvite = false
           this.modals.edit = false
         })
         .catch((err) => {
-          console.error(err)
+          const isUserLimitReached =
+            err.body &&
+            err.body.message &&
+            err.body.message.indexOf('limit') > 0
+          if (isUserLimitReached) {
+            this.errors.userLimit = true
+          } else {
+            this.errors.edit = true
+          }
           this.errors.edit = true
           this.loading.createAndInvite = false
         })
+      this.onSearchChange()
     },
 
     confirmInvite (form) {
@@ -378,6 +400,7 @@ export default {
           this.success.invite = false
           this.errors.invite = true
         })
+      this.onSearchChange()
     },
 
     confirmDeletePeople () {
@@ -414,6 +437,11 @@ export default {
       this.success.invite = false
       this.personToEdit = person
       this.modals.edit = true
+    },
+
+    onChangePasswordClicked (person) {
+      this.personToChangePassword = person
+      this.modals.changePassword = true
     },
 
     onNewClicked () {

@@ -89,6 +89,7 @@ export default {
   },
 
   mounted () {
+    this.email = this.$store.state.login.email
     this.isLoading = false
     this.isSuccess = false
   },

@@ -237,6 +237,7 @@
             "forgot_password": "Mot de passe oublié?",
             "login": "Se connecter",
             "login_failed": "La connexion a échoué, vérifiez vos identifiants",
+            "too_many_failed_login_attemps": "Trop d'essais ont échoué, veuillez patienter une minute",
             "login_page": "Annuler",
             "redirecting": "Redirection dans {secondsLeft} secondes...",
             "reset_change_password": "Changer le mot de passe",
@@ -448,6 +449,7 @@
             "team": "Équipe",
             "title": "Employés",
             "unactive": "Absents",
+            "change_password_for": "Changer le mot de passe pour",
             "fields": {
                 "first_name": "Prénom",
                 "last_name": "Nom",

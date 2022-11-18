@@ -300,10 +300,11 @@ export default {
     forgot_password: 'Forgot password?',
     login: 'Log in',
     login_failed: 'Log in failed, please verify your credentials',
+    too_many_failed_login_attemps: 'Too many failed login attemps, please wait one minute',
     login_page: 'Cancel',
     redirecting: 'Redirecting in {secondsLeft} seconds...',
     reset_change_password: 'Change password',
-    reset_change_password_form_failed: 'There is a problem with the password you gave. Please, verify that it is at least 7 chars long and that both passwords match.',
+    reset_change_password_form_failed: 'There is a problem with the password you gave. Please, verify that it is at least 8 chars long and that both passwords match.',
     reset_change_password_failed: 'Changing password failed. Please, restart the whole procedure again.',
     reset_change_password_succeed: 'Your password was changed successfully. Please, go back to the login page to use it.',
     reset_change_password_title: 'Enter a new password',
@@ -540,6 +541,7 @@ export default {
     title: 'People',
     unactive: 'Unactive',
     user_limit_error: 'You have reach your user limit. Please contact our team to upgrade your plan.',
+    change_password_for: 'Change password for',
     fields: {
       active: 'Active',
       departments: 'Departments',
@@ -845,7 +847,7 @@ export default {
       button: 'Change password',
       error: 'An error occurred while changing password. Please verify your current password.',
       success: 'Your password was successfully changed!',
-      unvalid: 'Your new password confirmation doesn\'t match or your password is too short (7 chars, at least, is expected).'
+      unvalid: 'Your new password confirmation doesn\'t match or your password is too short (8 chars, at least, is expected).'
     },
     save: {
       button: 'Save changes',

@@ -19,20 +19,20 @@
       <form v-on:submit.prevent>
         <text-field
           :label="$t('people.fields.first_name')"
-          :disabled="isLdap"
+          :disabled="personToEdit.is_generated_from_ldap"
           ref="name-field"
           @enter="confirmClicked()"
           v-model="form.first_name"
         />
         <text-field
           :label="$t('people.fields.last_name')"
-          :disabled="isLdap"
+          :disabled="personToEdit.is_generated_from_ldap"
           @enter="confirmClicked()"
           v-model="form.last_name"
         />
         <text-field
           :label="$t('people.fields.email')"
-          :disabled="isLdap"
+          :disabled="personToEdit.is_generated_from_ldap"
           @enter="confirmClicked()"
           v-model="form.email"
         />
@@ -88,7 +88,7 @@
         <combobox
           :label="$t('people.fields.active')"
           :options="activeOptions"
-          :disabled="isLdap"
+          :disabled="personToEdit.is_generated_from_ldap"
           @enter="confirmClicked()"
           v-model="form.active"
         />
@@ -103,7 +103,7 @@
           }"
           :disabled="!isValidEmail"
           @click="invite"
-          v-if="isCurrentUserAdmin"
+          v-if="!isCreating && isCurrentUserAdmin"
         >
           {{ $t('people.invite') }}
         </button>
@@ -180,7 +180,7 @@ import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
 import DepartmentName from '@/components/widgets/DepartmentName'
 
 export default {
-  name: 'edit-modal',
+  name: 'edit-person-modal',
   mixins: [modalMixin],
   props: {
     active: {
@@ -260,7 +260,6 @@ export default {
     ...mapGetters([
       'departments',
       'departmentMap',
-      'isLdap',
       'isCurrentUserAdmin',
       'people'
     ]),

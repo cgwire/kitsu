@@ -18,7 +18,6 @@ import auth from '@/lib/auth'
 const initialState = {
   email: '',
   password: '',
-  isLdap: false,
   isLoginLoading: false,
   isLoginError: false,
   isDataLoading: false
@@ -31,7 +30,6 @@ const state = {
 const getters = {
   email: state => state.email,
   password: state => state.password,
-  isLdap: state => state.isLdap,
   isLoginLoading: state => state.isLoginLoading,
   isLoginError: state => state.isLoginError,
   isDataLoading: state => state.isDataLoading
@@ -85,9 +83,9 @@ const actions = {
     })
   },
 
-  resetChangePassword ({ commit }, { token, password, password2 }) {
+  resetChangePassword ({ commit }, { email, token, password, password2 }) {
     return new Promise((resolve, reject) => {
-      auth.resetChangePassword(token, password, password2)
+      auth.resetChangePassword(email, token, password, password2)
         .then(() => {
           commit(LOGIN_SUCCESS)
           resolve()
@@ -128,7 +126,6 @@ const mutations = {
 
   [DATA_LOADING_START] (state, payload) {
     state.isDataLoading = true
-    if (payload && payload.isLdap !== undefined) state.isLdap = payload.isLdap
   },
 
   [DATA_LOADING_END] (state) {

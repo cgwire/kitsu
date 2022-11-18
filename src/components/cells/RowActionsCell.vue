@@ -22,6 +22,16 @@
 
   <button
     class="button"
+    data-test="button-change-password"
+    tabindex="-1"
+    @click="$emit('change-password-clicked')"
+    v-if="!hideChangePassword && !entry.canceled && isCurrentUserAdmin && !isLdap"
+  >
+    <key-icon class="icon is-small only-icon" />
+  </button>
+
+  <button
+    class="button"
     data-test="button-restore"
     tabindex="-1"
     @click="$emit('restore-clicked')"
@@ -57,6 +67,7 @@ import { mapGetters, mapActions } from 'vuex'
 import {
   ClockIcon,
   EditIcon,
+  KeyIcon,
   RotateCcwIcon,
   TrashIcon
 } from 'vue-feather-icons'
@@ -66,6 +77,7 @@ export default {
   components: {
     ClockIcon,
     EditIcon,
+    KeyIcon,
     RotateCcwIcon,
     TrashIcon
   },
@@ -88,6 +100,14 @@ export default {
     hideHistory: {
       type: Boolean,
       default: true
+    },
+    hideChangePassword: {
+      type: Boolean,
+      default: true
+    },
+    isLdap: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {

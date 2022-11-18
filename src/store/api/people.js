@@ -96,6 +96,14 @@ export default {
     return client.pdel(`/api/data/persons/${person.id}?force=true`)
   },
 
+  changePasswordPerson (person, form) {
+    const data = {
+      password: form.password,
+      password_2: form.password2
+    }
+    return client.ppost(`api/actions/persons/${person.id}/change-password`, data)
+  },
+
   postCsv (formData, toUpdate) {
     let path = '/api/import/csv/persons'
     if (toUpdate) path += '?update=true'

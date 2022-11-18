@@ -57,7 +57,10 @@
             v-if="isCurrentUserAdmin"
             :entry-id="entry.id"
             :hide-delete="true"
+            :hide-change-password="false"
+            :is-ldap="entry.is_generated_from_ldap"
             @edit-clicked="$emit('edit-clicked', entry)"
+            @change-password-clicked="$emit('change-password-clicked', entry)"
           />
           <td class="actions" v-else>
           </td>
@@ -76,7 +79,7 @@
           v-for="entry in unactivePeople"
           :key="entry.id"
         >
-          <people-name-cell class="name" :person="entry" />
+          <people-name-cell class="name datatable-row-header" :person="entry" />
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
@@ -95,6 +98,7 @@
           <row-actions-cell
             v-if="isCurrentUserAdmin"
             :entry-id="entry.id"
+            :hide-change-password="true"
             @edit-clicked="$emit('edit-clicked', entry)"
             @delete-clicked="$emit('delete-clicked', entry)"
           />

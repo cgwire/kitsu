@@ -15,6 +15,7 @@
                 :placeholder="$t('login.fields.email')"
                 @input="updateEmail"
                 @keyup.enter="confirmLogIn"
+                v-model="email"
                 v-focus >
               <span class="icon">
                 <mail-icon width=20 height=20 />
@@ -29,6 +30,7 @@
                 :placeholder="$t('login.fields.password')"
                 @input="updatePassword"
                 @keyup.enter="confirmLogIn"
+                v-model="password"
               >
               <span class="icon">
                 <lock-icon width=20 height=20 />
@@ -49,9 +51,13 @@
             {{ $t("login.login") }}
           </a>
         </p>
-        <p class="control error" v-show="isLoginError">
+        <p class="control error" v-show="isTooMuchLoginFailedAttemps">
+          {{ $t("login.too_many_failed_login_attemps") }}
+        </p>
+        <p class="control error" v-show="isLoginError && !isTooMuchLoginFailedAttemps">
           {{ $t("login.login_failed") }}
         </p>
+
         <p
           class="has-text-centered"
         >
@@ -78,6 +84,19 @@ export default {
     LockIcon
   },
 
+  data () {
+    return {
+      email: '',
+      password: '',
+      isTooMuchLoginFailedAttemps: false
+    }
+  },
+
+  mounted () {
+    this.email = this.$store.state.login.email
+    this.password = this.$store.state.login.password
+  },
+
   computed: {
     ...mapGetters([
       'isDarkTheme',
@@ -100,13 +119,16 @@ export default {
     },
 
     confirmLogIn () {
+      this.isTooMuchLoginFailedAttemps = false
       this.logIn((err, success) => {
         if (err) {
           if (err.default_password) {
             this.$router.push({
               name: 'reset-change-password',
-              params: { token: err.token }
+              query: { email: this.email, token: err.token }
             })
+          } else if (err.too_many_failed_login_attemps) {
+            this.isTooMuchLoginFailedAttemps = true
           } else {
             console.error(err)
           }

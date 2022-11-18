@@ -1,6 +1,7 @@
-import i18n from '../../../../src/lib/i18n'
+import auth from '@/lib/auth'
+import i18n from '@/lib/i18n'
 import { shallowMount, createLocalVue } from '@vue/test-utils'
-import ShotLine from '../../../../src/components/pages/breakdown/ShotLine'
+import ShotLine from '@/components/pages/breakdown/ShotLine'
 import Vuex from 'vuex'
 
 const localVue = createLocalVue()
@@ -21,8 +22,8 @@ describe('ShotLine', () => {
     modules: {
       mainStore: {
         getters: {
-          isCurrentUserManager: (state) => true,
-          isShowInfosBreakdown: (state) => false
+          isCurrentUserManager: (state) => true,
+          isShowInfosBreakdown: (state) => false
         }
       }
     }
@@ -39,6 +40,7 @@ describe('ShotLine', () => {
     },
     localVue,
     i18n,
+    auth,
     store
   })
 
