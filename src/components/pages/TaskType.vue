@@ -187,6 +187,8 @@
           ref="schedule-widget"
           :start-date="productionStartDate"
           :end-date="productionEndDate"
+          :sub-start-date="taskTypeStartDate"
+          :sub-end-date="taskTypeEndDate"
           :hierarchy="schedule.scheduleItems"
           :zoom-level=schedule.zoomLevel
           :height="schedule.scheduleHeight"
@@ -286,6 +288,7 @@ import { CornerLeftUpIcon } from 'vue-feather-icons'
 import ActionPanel from '@/components/tops/ActionPanel'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DateField from '@/components/widgets/DateField'
+import Combobox from '@/components/widgets/Combobox'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper'
@@ -407,6 +410,7 @@ export default {
     ButtonSimple,
     CornerLeftUpIcon,
     ComboboxNumber,
+    Combobox,
     ComboboxStyled,
     DateField,
     EstimationHelper,
@@ -552,6 +556,14 @@ export default {
       'taskMap',
       'user'
     ]),
+
+    taskTypeStartDate () {
+      return moment(this.schedule.taskTypeStartDate)
+    },
+
+    taskTypeEndDate () {
+      return moment(this.schedule.taskTypeEndDate)
+    },
 
     isSupervisorInDepartment () {
       const departments = this.user.departments || []
@@ -789,7 +801,8 @@ export default {
     },
 
     setCurrentScheduleItem () {
-      if (this.isTVShow) {
+      const isShots = this.$route.path.includes('shots')
+      if (this.isTVShow && isShots) {
         return this.loadEpisodeScheduleItems({
           production: this.currentProduction,
           taskType: this.currentTaskType
@@ -813,7 +826,7 @@ export default {
             if (!items) {
               Promise.resolve([])
             } else {
-              this.currentScheduleItem = items.find((item) => {
+              this.currentScheduleItem = items.find(item => {
                 return item.task_type_id === this.currentTaskType.id
               })
               Promise.resolve(this.currentScheduleItem)
@@ -1208,7 +1221,7 @@ export default {
           if (item.estimation) {
             item.endDate = addBusinessDays(
               item.startDate,
-              Math.ceil(minutesToDays(this.organisation, item.estimation))
+              Math.ceil(minutesToDays(this.organisation, item.estimation)) - 1
             )
           }
           item = { ...this.$options.savingBuffer[item.id] }
