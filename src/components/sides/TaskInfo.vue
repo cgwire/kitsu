@@ -321,6 +321,10 @@ export default {
     silent: {
       type: Boolean,
       default: false
+    },
+    panelName: {
+      type: String,
+      default: 'todefine'
     }
   },
 
@@ -1148,7 +1152,11 @@ export default {
         // Wait for data to be reinitialized by App.vue to update comments.
         if (task && eventData.task_id === task.id) {
           setTimeout(() => {
-            this.taskComments = this.getTaskComments(task.id)
+            const task = this.getTask()
+            // in case the task changed during the timeout
+            if (task && eventData.task_id === task.id) {
+              this.taskComments = this.getTaskComments(task.id)
+            }
           }, 1000)
         }
       },
@@ -1161,7 +1169,9 @@ export default {
           if (
             this.task &&
             comments &&
-            comments.length !== this.taskComments.length
+            comments.length !== this.taskComments.length &&
+            eventData.task_id === this.task.id &&
+            !this.loading.task
           ) {
             this.taskComments = comments
             this.taskPreviews = this.getTaskPreviews(this.task.id)
