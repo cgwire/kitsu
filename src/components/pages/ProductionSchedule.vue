@@ -174,6 +174,7 @@ export default {
       this.loading.schedule = true
       this.loadScheduleItems(this.currentProduction)
         .then(scheduleItems => {
+          const scheduleStartDate = parseDate(this.selectedStartDate)
           const scheduleEndDate = parseDate(this.selectedEndDate)
           scheduleItems = scheduleItems.map((item) => {
             const taskType = this.taskTypeMap.get(item.task_type_id)
@@ -187,6 +188,10 @@ export default {
               startDate = scheduleEndDate.clone().add(-1, 'days')
             }
 
+            if (startDate.isBefore(scheduleStartDate)) {
+              startDate = scheduleStartDate.clone()
+            }
+
             if (item.end_date) {
               endDate = parseDate(item.end_date)
             } else {
@@ -195,6 +200,13 @@ export default {
             if (endDate.isSameOrAfter(scheduleEndDate)) {
               endDate = scheduleEndDate.clone()
             }
+
+            const path = getTaskTypeSchedulePath(
+              taskType.id,
+              this.currentProduction.id,
+              this.currentEpisode ? this.currentEpisode.id : null,
+              this.$tc(taskType.for_entity.toLowerCase(), 2)
+            )
 
             return {
               ...item,
@@ -207,12 +219,8 @@ export default {
               editable: this.isInDepartment(taskType),
               expanded: false,
               loading: false,
-              route: getTaskTypeSchedulePath(
-                taskType.id,
-                this.currentProduction.id,
-                this.currentEpisode ? this.currentEpisode.id : null,
-                this.$tc(taskType.for_entity.toLowerCase(), 2)
-              ),
+              route:
+                taskType.for_entity === 'Shot' && this.isTVShow ? null : path,
               children: []
             }
           })
@@ -417,17 +425,9 @@ export default {
   },
 
   metaInfo () {
-    if (this.isTVShow) {
-      return {
-        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
-               ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
-               ` | ${this.$t('schedule.title')} - Kitsu`
-      }
-    } else {
-      return {
-        title: `${this.currentProduction.name} ` +
-               `| ${this.$t('schedule.title')} - Kitsu`
-      }
+    return {
+      title: `${this.currentProduction.name} ` +
+             `| ${this.$t('schedule.title')} - Kitsu`
     }
   }
 }
