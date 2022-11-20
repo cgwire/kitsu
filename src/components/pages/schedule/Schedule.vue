@@ -146,12 +146,12 @@
                 {{ childElement.name }}
               </span>
               <span
-                class="flexrow-item"
+                class="flexrow flexrow-item man-days-unit-wrapper"
                 v-if="childElement.editable"
                 v-show="!hideManDays"
               >
                 <input
-                  class="man-days-unit flexrow-item"
+                  class="flexrow-item man-days-unit"
                   type="number"
                   min="0"
                   placeholder="0"
@@ -159,7 +159,7 @@
                   @input="onChildEstimationChanged($event, childElement, rootElement)"
                   :value="formatDuration(childElement.man_days)"
                 />
-                {{ $t('schedule.md') }}
+                <span>{{ $t('schedule.md') }}</span>
               </span>
               <span
                 class="man-days-unit flexrow-item"
@@ -309,6 +309,22 @@
           @mousedown="startBrowsing"
           @mousewheel="$emit('change-zoom', $event)"
         >
+          <div
+            ref="timeline-sub-start"
+            class="sub-zone"
+            :style="timelineSubStartStyle"
+            v-if="subStartDate"
+          >
+          </div>
+
+          <div
+            ref="timeline-sub-end"
+            class="sub-zone"
+            :style="timelineSubEndStyle"
+            v-if="subEndDate"
+          >
+          </div>
+
           <div
             ref="timeline-today-position"
             class="timeline-position today"
@@ -516,6 +532,14 @@ export default {
     hierarchy: {
       default: () => [],
       type: Array
+    },
+    subEndDate: {
+      type: Object,
+      default: null
+    },
+    subStartDate: {
+      type: Object,
+      default: null
     },
     startDate: {
       type: Object,
@@ -767,6 +791,24 @@ export default {
         width: `${this.cellWidth}px`,
         left: `${this.getTimebarLeft({ startDate: today }) - 3}px`,
         display: isVisible ? 'block' : 'none'
+      }
+    },
+
+    timelineSubStartStyle () {
+      let diff = this.dateDiff(this.startDate, this.subStartDate)
+      if (diff < 0) diff = 0
+      return {
+        left: 0,
+        width: `${this.cellWidth * diff}px`
+      }
+    },
+
+    timelineSubEndStyle () {
+      let diff = this.dateDiff(this.subEndDate, this.endDate)
+      if (diff < 0) diff = 0
+      return {
+        right: 0,
+        width: `${this.cellWidth * diff}px`
       }
     },
 
@@ -1760,7 +1802,7 @@ export default {
   }
 
   input {
-    width: 50px;
+    width: 30px;
     text-align: right;
     background: transparent;
     margin-right: 0.2em;
@@ -1769,7 +1811,9 @@ export default {
 
   .man-days-unit {
     color: $dark-grey;
-    font-size: 0.7em;
+    font-size: 0.8em;
+    margin-right: .3em;
+    display: inline;
   }
 
   .avatar {
@@ -1777,6 +1821,15 @@ export default {
     margin: 0;
     padding: 0;
   }
+}
+
+.child-name .entity-name span.man-days-unit-wrapper {
+  padding-left: 0;
+  width: 60px;
+  text-align: right;
+}
+.child-name .entity-name span.man-days-unit-wrapper span {
+  padding-left: 0;
 }
 
 .children {
@@ -1952,5 +2005,13 @@ input::-webkit-inner-spin-button {
 
 input[type=number] {
   -moz-appearance: textfield;
+}
+
+.sub-zone {
+  background: $black;
+  position: absolute;
+  opacity: .8;
+  top: 0;
+  bottom: 0;
 }
 </style>
