@@ -253,6 +253,7 @@
       :silent="isCommentsHidden"
       :current-time-raw="currentTimeRaw"
       :current-parent-preview="currentPreview"
+      panel-name="playlist-side-panel"
       @time-code-clicked="onTimeCodeClicked"
     />
   </div>
@@ -1869,6 +1870,8 @@ export default {
 .playlist-footer {
   overflow-x: scroll;
   width: 100%;
+  min-height: 30px;
+  padding-right: 5px;
 }
 
 .playlisted-entities {
