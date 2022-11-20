@@ -40,7 +40,7 @@ export default {
       ready_for: asset.ready_for,
       data: asset.data
     }
-    if (asset.is_casting_standby) {
+    if (asset.is_casting_standby !== undefined) {
       data.is_casting_standby = Boolean(asset.is_casting_standby)
     }
     if (asset.source_id === 'null' || asset.source_id) {
