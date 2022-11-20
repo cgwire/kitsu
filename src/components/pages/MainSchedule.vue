@@ -97,7 +97,7 @@ export default {
       startDate: moment(),
       selectedStartDate: null,
       selectedEndDate: null,
-      zoomLevel: 2,
+      zoomLevel: 0,
       zoomOptions: [
         { label: 'Week', value: 0 },
         { label: '1', value: 1 },
