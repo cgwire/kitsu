@@ -133,9 +133,16 @@
            :src="currentComparisonPreviewPath"
            v-show="isComparing && isPictureComparison"
          />
+         <video
+           ref="picture-video-player-comparison"
+           class="picture-preview"
+           :src="currentComparisonPreviewPath"
+           controls
+           v-show="isComparing && isMovieComparison"
+         />
          <span
            class="picture-preview"
-           v-show="isComparing && !isPictureComparison"
+           v-show="isComparing && !isPictureComparison && !isMovieComparison"
          >
            It's not a picture preview
          </span>

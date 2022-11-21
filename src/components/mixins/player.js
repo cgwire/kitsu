@@ -137,10 +137,17 @@ export const playerMixin = {
     },
 
     currentComparisonPreviewPath () {
-      if (this.currentPreviewToCompare && this.isPictureComparison) {
+      if (
+        this.currentPreviewToCompare &&
+        (this.isPictureComparison || this.isMovieComparison)
+      ) {
         const extension = this.currentPreviewToCompare.extension
         const previewId = this.currentPreviewToCompare.id
-        return `/api/pictures/originals/preview-files/${previewId}.${extension}`
+        if (this.isPictureComparison) {
+          return `/api/pictures/originals/preview-files/${previewId}.${extension}`
+        } else {
+          return `/api/movies/originals/preview-files/${previewId}.${extension}`
+        }
       } else {
         return ''
       }
@@ -447,6 +454,7 @@ export const playerMixin = {
 
     syncComparisonPlayer () {
       if (
+        this.rawPlayer &&
         this.rawPlayerComparison &&
         this.isComparing &&
         this.rawPlayerComparison.currentPlayer
