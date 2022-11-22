@@ -466,7 +466,7 @@
         class="flexrow-item time-indicator mr1"
         :title="$t('playlists.actions.frame_number')"
       >
-        ({{ currentFrame }} / {{ (nbFrames + '').padStart(3, '0') }})
+        ({{ currentFrame }}&nbsp;/&nbsp;{{ (nbFrames + '').padStart(3, '0') }})
       </span>
       <button-simple
         class="button playlist-button flexrow-item"
@@ -1871,12 +1871,11 @@ export default {
 .playlist-footer {
   background: $dark-grey-light;
   color: $white-grey;
-  overflow: auto;
 }
 
 .playlist-footer {
-  overflow-x: scroll;
   width: 100%;
+  overflow-x: auto;
   min-height: 30px;
   padding-right: 5px;
 }
@@ -2181,9 +2180,11 @@ progress {
 }
 
 .comparison-combos {
+  /*
   position: absolute;
   top: 33px;
   z-index: 50;
+  */
 }
 
 .comparison-index {
