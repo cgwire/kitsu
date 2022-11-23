@@ -1875,8 +1875,7 @@ export default {
 
 .playlist-footer {
   width: 100%;
-  overflow-x: auto;
-  min-height: 30px;
+  min-height: 32px;
   padding-right: 5px;
 }
 
