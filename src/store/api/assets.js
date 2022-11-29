@@ -57,7 +57,7 @@ export default {
     }
   },
 
-  restoreAsset (asset, callback) {
+  restoreAsset (asset) {
     const data = { canceled: false }
     return client.pput(`/api/data/entities/${asset.id}`, data)
   },

@@ -9,7 +9,7 @@ export default {
     client.get(`/api/data/entity-types/${assetTypeId}`, callback)
   },
 
-  newAssetType (assetType, callback) {
+  newAssetType (assetType) {
     const data = {
       name: assetType.name,
       task_types: assetType.task_types
@@ -17,7 +17,7 @@ export default {
     return client.ppost('/api/data/entity-types', data)
   },
 
-  updateAssetType (assetType, callback) {
+  updateAssetType (assetType) {
     const data = {
       name: assetType.name,
       task_types: assetType.task_types
@@ -25,7 +25,7 @@ export default {
     return client.pput(`/api/data/entity-types/${assetType.id}`, data)
   },
 
-  deleteAssetType (assetType, callback) {
+  deleteAssetType (assetType) {
     return client.pdel(`/api/data/entity-types/${assetType.id}`)
   }
 }
