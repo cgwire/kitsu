@@ -140,13 +140,20 @@ export default {
     DepartmentName
   },
 
-  props: [
-    'entries',
-    'isLoading',
-    'isError',
-    'onEditClicked',
-    'onDeleteClicked'
-  ],
+  props: {
+    entries: {
+      type: Array,
+      default: () => []
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    }
+  },
 
   computed: {
     ...mapGetters([

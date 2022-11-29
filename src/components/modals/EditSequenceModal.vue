@@ -60,18 +60,24 @@ export default {
     TextareaField
   },
 
-  props: [
-    'onConfirmClicked',
-    'text',
-    'active',
-    'cancelRoute',
-    'isError',
-    'isLoading',
-    'isLoadingStay',
-    'isSuccess',
-    'sequenceToEdit',
-    'errorText'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    sequenceToEdit: {
+      type: Object,
+      default: () => {}
+    }
+  },
 
   data () {
     if (this.sequenceToEdit && this.sequenceToEdit.id) {

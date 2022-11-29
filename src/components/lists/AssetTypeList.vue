@@ -64,11 +64,21 @@ import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
   name: 'asset-type-list',
-  props: [
-    'entries',
-    'isLoading',
-    'isError'
-  ],
+  props: {
+    entries: {
+      type: Array,
+      default: () => []
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    }
+  },
+
   data () {
     return {}
   },

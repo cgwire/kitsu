@@ -156,11 +156,20 @@ import TaskTypeCell from '@/components/cells/TaskTypeName'
 export default {
   name: 'task-type-list',
 
-  props: [
-    'entries',
-    'isLoading',
-    'isError'
-  ],
+  props: {
+    entries: {
+      type: Array,
+      default: () => []
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    }
+  },
 
   data () {
     return {

@@ -84,15 +84,24 @@ export default {
     TextField
   },
 
-  props: [
-    'active',
-    'onConfirmClicked',
-    'entries',
-    'isLoading',
-    'isError',
-    'taskTypeToEdit',
-    'text'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    taskTypeToEdit: {
+      type: Object,
+      default: () => {}
+    }
+  },
 
   watch: {
     taskTypeToEdit () {

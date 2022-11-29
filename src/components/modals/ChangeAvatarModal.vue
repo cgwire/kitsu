@@ -55,13 +55,24 @@ export default {
     ModalFooter
   },
 
-  props: [
-    'active',
-    'cancelRoute',
-    'isLoading',
-    'isError',
-    'title'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    title: {
+      type: String,
+      default: ''
+    }
+  },
 
   data () {
     return {

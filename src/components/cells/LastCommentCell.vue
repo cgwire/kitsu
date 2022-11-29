@@ -48,9 +48,12 @@ export default {
     }
   },
 
-  props: [
-    'task'
-  ],
+  props: {
+    task: {
+      type: Object,
+      required: true
+    }
+  },
 
   computed: {
     ...mapGetters([

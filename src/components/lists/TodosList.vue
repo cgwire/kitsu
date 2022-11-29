@@ -263,13 +263,28 @@ export default {
     MetadataHeader
   },
 
-  props: [
-    'done',
-    'tasks',
-    'isLoading',
-    'isError',
-    'selectionGrid'
-  ],
+  props: {
+    done: {
+      type: Boolean,
+      default: false
+    },
+    tasks: {
+      type: Array,
+      default: () => []
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    selectionGrid: {
+      type: Boolean,
+      default: () => {}
+    }
+  },
 
   data () {
     return {
