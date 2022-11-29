@@ -733,9 +733,10 @@ export const annotationMixin = {
     copyAnnotations () {
       const activeObject = this.fabricCanvas.getActiveObject()
       if (activeObject) {
-        activeObject.clone(cloned => {
-          clipboard.copyAnnotations(cloned)
-        })
+        activeObject.clone()
+          .then(cloned => {
+            clipboard.copyAnnotations(cloned)
+          })
       }
       return activeObject
     },
