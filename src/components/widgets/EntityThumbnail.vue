@@ -71,6 +71,10 @@ export default {
       default: null,
       type: Number
     },
+    noPreview: {
+      default: false,
+      type: Boolean
+    },
     emptyHeight: {
       default: 30,
       type: Number
@@ -136,6 +140,7 @@ export default {
 
   methods: {
     onClicked () {
+      if (this.noPreview) return
       const previewFileId = this.previewFileId || this.entity.preview_file_id
       this.$store.commit('SHOW_PREVIEW_FILE', previewFileId)
     }
