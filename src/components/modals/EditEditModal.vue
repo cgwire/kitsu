@@ -86,18 +86,32 @@ export default {
     TextareaField
   },
 
-  props: [
-    'onConfirmClicked',
-    'text',
-    'active',
-    'cancelRoute',
-    'isError',
-    'isLoading',
-    'isLoadingStay',
-    'isSuccess',
-    'editToEdit',
-    'errorText'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    isLoadingStay: {
+      type: Boolean,
+      default: false
+    },
+    isSuccess: {
+      type: Boolean,
+      default: false
+    },
+    editToEdit: {
+      type: Object,
+      default: () => {}
+    }
+  },
 
   data () {
     return {

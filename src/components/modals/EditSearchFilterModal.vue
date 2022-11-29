@@ -59,12 +59,24 @@ export default {
     TextField
   },
 
-  props: [
-    'active',
-    'isLoading',
-    'isError',
-    'searchQueryToEdit'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    searchQueryToEdit: {
+      type: Object,
+      default: () => {}
+    }
+  },
 
   data () {
     if (this.searchQueryToEdit && this.searchQueryToEdit.id) {

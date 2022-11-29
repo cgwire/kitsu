@@ -113,16 +113,28 @@ export default {
     ModalFooter
   },
 
-  props: [
-    'onConfirmClicked',
-    'text',
-    'active',
-    'isLoading',
-    'isError',
-    'errorText',
-    'statusAutomationToEdit',
-    'taskStatus'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    statusAutomationToEdit: {
+      type: Object,
+      default: () => {}
+    },
+    taskStatus: {
+      type: Object,
+      default: () => {}
+    }
+  },
 
   computed: {
     ...mapGetters([

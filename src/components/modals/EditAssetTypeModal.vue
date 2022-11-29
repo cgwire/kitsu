@@ -86,15 +86,24 @@ export default {
     TextField
   },
 
-  props: [
-    'onConfirmClicked',
-    'text',
-    'active',
-    'cancelRoute',
-    'isLoading',
-    'isError',
-    'assetTypeToEdit'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    assetTypeToEdit: {
+      type: Object,
+      default: () => {}
+    }
+  },
 
   data () {
     return {
