@@ -192,7 +192,7 @@ export default {
   mounted () {
     if (this.taskTest) {
       this.task = this.taskTest
-    } else if (this.entity && this.column) {
+    } else if (this.entity && this.column && this.entity.validations) {
       this.task = this.taskMap.get(this.entity.validations.get(this.column.id))
     }
     this.changeStyleBasedOnSelected()
@@ -379,7 +379,7 @@ export default {
     taskTest () {
       if (this.taskTest) {
         this.task = this.taskTest
-      } else if (this.entity) {
+      } else if (this.entity && this.entity.validations) {
         this.task =
           this.taskMap.get(this.entity.validations.get(this.column.id))
       }

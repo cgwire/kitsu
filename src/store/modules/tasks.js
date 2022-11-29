@@ -19,6 +19,7 @@ import taskTypeStore from '@/store/modules/tasktypes'
 import assetStore from '@/store/modules/assets'
 import shotStore from '@/store/modules/shots'
 import editStore from '@/store/modules/edits'
+import episodeStore from '@/store/modules/episodes'
 
 import {
   LOAD_ASSETS_END,
@@ -271,6 +272,8 @@ const actions = {
         entityIds = assetStore.cache.result.map(asset => asset.id)
       } else if (payload.type === 'edits') {
         entityIds = editStore.cache.result.map(edit => edit.id)
+      } else if (payload.type === 'episodes') {
+        entityIds = episodeStore.cache.result.map(episode => episode.id)
       }
     }
     const data = {
@@ -283,28 +286,52 @@ const actions = {
   },
 
   createSelectedTasks (
-    { commit, state },
+    { commit, state, rootGetters },
     { type, projectId, callback }
   ) {
+    const production = rootGetters.currentProduction
+    const taskTypeMap = rootGetters.taskTypeMap
+    const taskStatusMap = rootGetters.taskStatusMap
     const selectedTaskIds = Array.from(state.selectedValidations.keys())
-    async.eachSeries(selectedTaskIds, (key, next) => {
-      const validationInfo = state.selectedValidations.get(key)
-      const data = {
-        entity_id: validationInfo.entity.id,
-        task_type_id: validationInfo.column.id,
-        type: type,
-        project_id: projectId
+    const entityIdsByTaskType = {}
+    selectedTaskIds.forEach(taskId => {
+      const validationInfo = state.selectedValidations.get(taskId)
+      const entityId = validationInfo.entity.id
+      const taskTypeId = validationInfo.column.id
+      if (!entityIdsByTaskType[taskTypeId]) {
+        entityIdsByTaskType[taskTypeId] = []
       }
-      tasksApi.createTask(data, (err, tasks) => {
-        commit(CREATE_TASKS_END, tasks)
-        tasks.forEach((task) => {
-          commit(REMOVE_SELECTED_TASK, validationInfo)
-          validationInfo.task = task
-          commit(ADD_SELECTED_TASK, validationInfo)
+      entityIdsByTaskType[taskTypeId].push(entityId)
+    })
+    return Promise.all(Object.keys(entityIdsByTaskType).map(taskTypeId => {
+      const data = {
+        task_type_id: taskTypeId,
+        type,
+        project_id: projectId,
+        entityIds: entityIdsByTaskType[taskTypeId]
+      }
+      return tasksApi.createTasks(data)
+        .then(tasks => {
+          commit(
+            CREATE_TASKS_END,
+            { tasks, production, taskStatusMap, taskTypeMap }
+          )
+          tasks.forEach(task => {
+            const validationInfo = {
+              column: { id: task.task_type_id },
+              entity: { id: task.entity_id }
+            }
+            commit(REMOVE_SELECTED_TASK, validationInfo)
+            validationInfo.task = task
+            commit(ADD_SELECTED_TASK, validationInfo)
+          })
+          return Promise.resolve(tasks)
         })
-        next(err, tasks[0])
+        .catch(console.error)
+    }))
+      .then(() => {
+        return Promise.resolve()
       })
-    }, callback)
   },
 
   deleteSelectedTasks ({ commit, state }) {
@@ -337,22 +364,17 @@ const actions = {
     { commit, state, rootGetters },
     { entityId, projectId, taskTypeId, type }
   ) {
-    return new Promise((resolve, reject) => {
-      const data = {
-        entity_id: entityId,
-        task_type_id: taskTypeId,
-        type,
-        project_id: projectId
-      }
-      tasksApi.createTask(data, (err, tasks) => {
-        if (err) {
-          reject(err)
-        } else {
-          commit(NEW_TASK_END, tasks[0])
-          resolve()
-        }
+    const data = {
+      entity_id: entityId,
+      task_type_id: taskTypeId,
+      type,
+      project_id: projectId
+    }
+    return tasksApi.createTask(data)
+      .then(tasks => {
+        commit(NEW_TASK_END, { task: tasks[0] })
+        return Promise.resolve(tasks[0])
       })
-    })
   },
 
   changeSelectedTaskStatus ({ commit, state, rootGetters }, {
@@ -705,32 +727,25 @@ const actions = {
   },
 
   saveTaskSearch ({ commit, rootGetters }, { searchQuery, entityType }) {
-    return new Promise((resolve, reject) => {
-      const query = state.taskSearchQueries.find(
-        (query) => query.name === searchQuery
-      )
-      const production = rootGetters.currentProduction
+    const query = state.taskSearchQueries.find(
+      (query) => query.name === searchQuery
+    )
+    const production = rootGetters.currentProduction
 
-      if (!query) {
-        peopleApi.createFilter(
-          'task',
-          searchQuery,
-          searchQuery,
-          production.id,
-          entityType,
-          (err, searchQuery) => {
-            commit(SAVE_TASK_SEARCH_END, { searchQuery, production })
-            if (err) {
-              reject(err)
-            } else {
-              resolve(searchQuery)
-            }
-          }
-        )
-      } else {
-        resolve()
-      }
-    })
+    if (!query) {
+      return peopleApi.createFilter(
+        'task',
+        searchQuery,
+        searchQuery,
+        production.id,
+        entityType
+      ).then(searchQuery => {
+        commit(SAVE_TASK_SEARCH_END, { searchQuery, production })
+        return Promise.resolve(searchQuery)
+      })
+    } else {
+      Promise.resolve()
+    }
   },
 
   removeTaskSearch ({ commit, rootGetters }, searchQuery) {
@@ -816,6 +831,8 @@ const mutations = {
       } else {
         task.entity_name = `${task.sequence.name} / ${task.entity.name}`
       }
+    } else if (task.entity_type.name === 'Episode') {
+      task.entity_name = `${task.entity.name}`
     } else {
       task.entity_name = `${task.entity_type.name} / ${task.entity.name}`
     }
@@ -1131,13 +1148,13 @@ const mutations = {
     state.nbSelectedValidations = 0
   },
 
-  [CREATE_TASKS_END] (state, tasks) {
+  [CREATE_TASKS_END] (state, { tasks }) {
     tasks.forEach((task) => {
       state.taskMap.set(task.id, task)
     })
   },
 
-  [NEW_TASK_END] (state, task) {
+  [NEW_TASK_END] (state, { task }) {
     state.taskMap.set(task.id, task)
   },
 

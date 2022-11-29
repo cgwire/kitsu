@@ -109,7 +109,7 @@ export default {
         this.form = {
           name: this.taskTypeToEdit.name,
           color: this.taskTypeToEdit.color,
-          for_entity: this.taskTypeToEdit.for_entity,
+          for_entity: this.taskTypeToEdit.for_entity || 'Asset',
           allow_timelog: String(this.taskTypeToEdit.allow_timelog === true),
           department_id: this.taskTypeToEdit.department_id
         }
@@ -129,7 +129,8 @@ export default {
       dedicatedToOptions: [
         { label: this.$t('assets.title'), value: 'Asset' },
         { label: this.$t('shots.title'), value: 'Shot' },
-        { label: this.$t('edits.title'), value: 'Edit' }
+        { label: this.$t('edits.title'), value: 'Edit' },
+        { label: this.$t('episodes.title'), value: 'Episode' }
       ]
     }
   },

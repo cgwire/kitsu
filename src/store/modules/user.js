@@ -261,31 +261,24 @@ const actions = {
   },
 
   saveTodoSearch ({ commit, rootGetters }, searchQuery) {
-    return new Promise((resolve, reject) => {
-      const query = state.todoSearchQueries.find(
-        (query) => query.name === searchQuery
-      )
+    const query = state.todoSearchQueries.find(
+      (query) => query.name === searchQuery
+    )
 
-      if (!query) {
-        peopleApi.createFilter(
-          'todos',
-          searchQuery,
-          searchQuery,
-          null,
-          null,
-          (err, searchQuery) => {
-            commit(SAVE_TODO_SEARCH_END, { searchQuery })
-            if (err) {
-              reject(err)
-            } else {
-              resolve(searchQuery)
-            }
-          }
-        )
-      } else {
-        resolve()
-      }
-    })
+    if (!query) {
+      return peopleApi.createFilter(
+        'todos',
+        searchQuery,
+        searchQuery,
+        null,
+        null
+      ).then(searchQuery => {
+        commit(SAVE_TODO_SEARCH_END, { searchQuery })
+        return Promise.resolve(searchQuery)
+      })
+    } else {
+      return Promise.resolve()
+    }
   },
 
   removeTodoSearch ({ commit, rootGetters }, searchQuery) {
@@ -411,7 +404,7 @@ const mutations = {
   [USER_LOAD_TODOS_END] (state, { tasks, userFilters, taskTypeMap }) {
     state.isTodosLoading = false
     tasks.forEach(populateTask)
-    tasks.forEach((task) => {
+    tasks.forEach(task => {
       const taskStatus = helpers.getTaskStatus(task.task_status_id)
       task.taskStatus = taskStatus
     })

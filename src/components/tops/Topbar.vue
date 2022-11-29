@@ -340,6 +340,7 @@ export default {
     isEpisodeContext () {
       return this.isTVShow &&
              this.hasEpisodeId &&
+             this.currentSectionOption !== 'episodes' &&
              // Do not display combobox if there is no episode
              this.episodes.length > 0
     },
@@ -381,6 +382,12 @@ export default {
         )
       }
 
+      if (this.isTVShow) {
+        options.push(
+          { label: 'Episodes', value: 'episodes' }
+        )
+      }
+
       options = options.concat([
         { label: this.$t('breakdown.title'), value: 'breakdown' },
         { label: this.$t('playlists.title'), value: 'playlists' }
@@ -404,7 +411,7 @@ export default {
       // Add episodes for tv show only
       if (this.isTVShow) {
         options.push(
-          { label: this.$t('episodes.title'), value: 'episodes' }
+          { label: this.$t('episodes.stats_title'), value: 'episode-stats' }
         )
       }
 
@@ -492,9 +499,15 @@ export default {
       let name = ''
       const segments = this.$route.path.split('/')
       if (this.isTVShow) name = segments[5]
+      if (this.isTVShow && name && name.length === 36) name = 'episodes'
       if (!name) {
         name = segments[3]
-        if (name === 'episodes' && segments.length === 6) name = segments[5]
+        if (
+          name === 'episodes' &&
+          segments.length === 6
+        ) {
+          name = segments[5]
+        }
       }
       if (name === 'asset-types') name = 'assetTypes'
       if (name === 'news-feed') name = 'newsFeed'
@@ -537,7 +550,7 @@ export default {
       this.setProduction(routeProductionId)
       if (this.isTVShow) {
         this.loadEpisodes()
-          .then((episodes) => {
+          .then(episodes => {
             this.updateCombosFromRoute()
           })
           .catch(console.error)
@@ -604,7 +617,12 @@ export default {
       const isAssetSection = this.assetSections.includes(section)
       const isEditSection = this.editSections.includes(section)
       const isBreakdownSection = this.breakdownSections.includes(section)
-      if (!isAssetSection && !isEditSection && !isBreakdownSection && ['all', 'main'].includes(episodeId)) {
+      if (
+        !isAssetSection &&
+        !isEditSection &&
+        !isBreakdownSection &&
+        ['all', 'main'].includes(episodeId)
+      ) {
         episodeId = this.episodes[0].id
         this.currentEpisodeId = episodeId
         this.pushContextRoute(section)
@@ -905,8 +923,9 @@ strong {
   cursor: pointer;
 }
 
-.topbar-menu {
+.user-menu {
   padding: 10px;
+  border-bottom-left-radius: 10px;
 }
 
 @media screen and (max-width: 768px) {

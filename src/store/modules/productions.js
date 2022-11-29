@@ -76,8 +76,9 @@ const initialState = {
   assetTypesPath: { name: 'open-productions' },
   shotsPath: { name: 'open-productions' },
   editsPath: { name: 'open-productions' },
-  sequencesPath: { name: 'open-productions' },
   episodesPath: { name: 'open-productions' },
+  sequencesPath: { name: 'open-productions' },
+  episodeStatsPath: { name: 'open-productions' },
   breakdownPath: { name: 'open-productions' },
   playlistsPath: { name: 'open-productions' },
   teamPath: { name: 'open-productions' }
@@ -104,7 +105,7 @@ const helpers = {
         }
       }
     }
-    if (['assets', 'shots', 'edits'].includes(routeName)) {
+    if (['assets', 'shots', 'edits', 'episodes'].includes(routeName)) {
       route.query = { search: '' }
     }
     return route
@@ -136,8 +137,9 @@ const getters = {
   assetTypesPath: state => state.assetTypesPath,
   shotsPath: state => state.shotsPath,
   editsPath: state => state.editsPath,
-  sequencesPath: state => state.sequencesPath,
   episodesPath: state => state.episodesPath,
+  sequencesPath: state => state.sequencesPath,
+  episodeStatsPath: state => state.episodeStatsPath,
   breakdownPath: state => state.breakdownPath,
   playlistsPath: state => state.playlistsPath,
   teamPath: state => state.teamPath,
@@ -225,6 +227,12 @@ const getters = {
       .map(taskType => taskType.id)
   },
 
+  productionEpisodeTaskTypeIds: (state, getters) => {
+    return getters.productionTaskTypes
+      .filter(taskType => taskType.for_entity === 'Episode')
+      .map(taskType => taskType.id)
+  },
+
   productionAssetTaskTypes: (state, getters) => {
     return getters.productionTaskTypes
       .filter(taskType => taskType.for_entity === 'Asset')
@@ -238,6 +246,11 @@ const getters = {
   productionEditTaskTypes: (state, getters) => {
     return getters.productionTaskTypes
       .filter(taskType => taskType.for_entity === 'Edit')
+  },
+
+  productionEpisodeTaskTypes: (state, getters) => {
+    return getters.productionTaskTypes
+      .filter(taskType => taskType.for_entity === 'Episode')
   },
 
   currentProduction: (state) => {
@@ -284,6 +297,17 @@ const getters = {
       return sortByName(
         state.currentProduction.descriptors
           .filter(d => d.entity_type === 'Edit')
+      )
+    }
+  },
+
+  episodeMetadataDescriptors: (state) => {
+    if (!state.currentProduction || !state.currentProduction.descriptors) {
+      return []
+    } else {
+      return sortByName(
+        state.currentProduction.descriptors
+          .filter(d => d.entity_type === 'Episode')
       )
     }
   },
@@ -381,7 +405,7 @@ const actions = {
     if (rootGetters.isTVShow) {
       const episode = rootGetters.currentEpisode
       const episodeId = episode ? episode.id : null
-      if (productionId && episodeId) {
+      if (productionId) {
         commit(RESET_PRODUCTION_PATH, { productionId, episodeId })
       }
     } else {
@@ -764,10 +788,12 @@ const mutations = {
       'shots', productionId, episodeId)
     state.editsPath = helpers.getProductionComponentPath(
       'edits', productionId, episodeId)
-    state.sequencesPath = helpers.getProductionComponentPath(
-      'sequences', productionId, episodeId)
     state.episodesPath = helpers.getProductionComponentPath(
       'episodes', productionId)
+    state.sequencesPath = helpers.getProductionComponentPath(
+      'sequences', productionId, episodeId)
+    state.episodeStatsPath = helpers.getProductionComponentPath(
+      'episode-stats', productionId)
     state.breakdownPath = helpers.getProductionComponentPath(
       'breakdown', productionId, episodeId)
     state.playlistsPath = helpers.getProductionComponentPath(

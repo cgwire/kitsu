@@ -510,32 +510,25 @@ const actions = {
   },
 
   saveEditSearch ({ commit, rootGetters }, searchQuery) {
-    return new Promise((resolve, reject) => {
-      const query = state.editSearchQueries.find(
-        (query) => query.name === searchQuery
-      )
-      const production = rootGetters.currentProduction
+    const query = state.editSearchQueries.find(
+      (query) => query.name === searchQuery
+    )
+    const production = rootGetters.currentProduction
 
-      if (!query) {
-        peopleApi.createFilter(
-          'edit',
-          searchQuery,
-          searchQuery,
-          production.id,
-          null,
-          (err, searchQuery) => {
-            commit(SAVE_EDIT_SEARCH_END, { searchQuery, production })
-            if (err) {
-              reject(err)
-            } else {
-              resolve(searchQuery)
-            }
-          }
-        )
-      } else {
-        resolve()
-      }
-    })
+    if (!query) {
+      return peopleApi.createFilter(
+        'edit',
+        searchQuery,
+        searchQuery,
+        production.id,
+        null
+      ).then(searchQuery => {
+        commit(SAVE_EDIT_SEARCH_END, { searchQuery, production })
+        return searchQuery
+      })
+    } else {
+      return Promise.resolve()
+    }
   },
 
   removeEditSearch ({ commit, rootGetters }, searchQuery) {
@@ -881,7 +874,7 @@ const mutations = {
     state.editSelectionGrid = buildSelectionGrid(maxX, maxY)
   },
 
-  [CREATE_TASKS_END] (state, tasks) {
+  [CREATE_TASKS_END] (state, { tasks }) {
     tasks.forEach((task) => {
       if (task) {
         const edit = state.editMap.get(task.entity_id)
@@ -958,7 +951,7 @@ const mutations = {
     state.editSelectionGrid = clearSelectionGrid(tmpGrid)
   },
 
-  [NEW_TASK_END] (state, task) {
+  [NEW_TASK_END] (state, { task }) {
     const edit = state.editMap.get(task.entity_id)
     if (edit && task) {
       task = helpers.populateTask(task, edit)

@@ -441,7 +441,7 @@ const actions = {
           commit(UPDATE_ASSET, asset)
         } else {
           asset.tasks.forEach(task => {
-            commit(NEW_TASK_END, task)
+            commit(NEW_TASK_END, { task })
           })
           commit(ADD_ASSET, {
             asset,
@@ -480,8 +480,8 @@ const actions = {
           })
         }
         const createTaskPromises = taskTypeIds.map(taskTypeId => {
-          return dispatch('createTask', {
-            entityId: asset.id,
+          return dispatch('createTasks', {
+            entityIds: asset.id,
             projectId: asset.project_id,
             taskTypeId: taskTypeId,
             type: 'assets'
@@ -566,32 +566,25 @@ const actions = {
   },
 
   saveAssetSearch ({ commit, state, rootGetters }, searchQuery) {
-    return new Promise((resolve, reject) => {
-      const query = state.assetSearchQueries.find(
-        (query) => query.name === searchQuery
-      )
-      const production = rootGetters.currentProduction
+    const query = state.assetSearchQueries.find(
+      (query) => query.name === searchQuery
+    )
+    const production = rootGetters.currentProduction
 
-      if (!query) {
-        peopleApi.createFilter(
-          'asset',
-          searchQuery,
-          searchQuery,
-          production.id,
-          null,
-          (err, searchQuery) => {
-            commit(SAVE_ASSET_SEARCH_END, { searchQuery, production })
-            if (err) {
-              reject(err)
-            } else {
-              resolve(searchQuery)
-            }
-          }
-        )
-      } else {
-        resolve()
-      }
-    })
+    if (!query) {
+      return peopleApi.createFilter(
+        'asset',
+        searchQuery,
+        searchQuery,
+        production.id,
+        null
+      ).then(searchQuery => {
+        commit(SAVE_ASSET_SEARCH_END, { searchQuery, production })
+        return Promise.resolve(searchQuery)
+      })
+    } else {
+      Promise.resolve()
+    }
   },
 
   removeAssetSearch ({ commit, rootGetters }, searchQuery) {
@@ -1105,7 +1098,7 @@ const mutations = {
     state.assetSelectionGrid = clearSelectionGrid(tmpGrid)
   },
 
-  [NEW_TASK_END] (state, task) {
+  [NEW_TASK_END] (state, { task }) {
     const asset = state.assetMap.get(task.entity_id)
     if (asset && task) {
       task = helpers.populateTask(task, asset)
@@ -1122,7 +1115,7 @@ const mutations = {
     }
   },
 
-  [CREATE_TASKS_END] (state, tasks) {
+  [CREATE_TASKS_END] (state, { tasks }) {
     tasks.forEach(task => {
       if (task) {
         const asset = state.assetMap.get(task.entity_id)

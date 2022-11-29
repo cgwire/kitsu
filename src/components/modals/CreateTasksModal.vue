@@ -133,8 +133,9 @@ export default {
   computed: {
     ...mapGetters([
       'productionAssetTaskTypes',
-      'productionShotTaskTypes',
-      'productionEditTaskTypes'
+      'productionEditTaskTypes',
+      'productionEpisodeTaskTypes',
+      'productionShotTaskTypes'
     ]),
     isAssetTasks () {
       return this.$route.path.indexOf('assets') >= 0
@@ -144,6 +145,9 @@ export default {
     },
     isEditsTasks () {
       return this.$route.path.indexOf('edits') >= 0
+    },
+    isEpisodesTasks () {
+      return this.$route.path.indexOf('episodes') >= 0
     }
   },
 
@@ -160,6 +164,9 @@ export default {
       }
       if (this.isEditsTasks) {
         return this.productionEditTaskTypes
+      }
+      if (this.isEpisodesTasks) {
+        return this.productionEpisodeTaskTypes
       }
     },
 

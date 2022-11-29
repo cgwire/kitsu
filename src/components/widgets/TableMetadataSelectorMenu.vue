@@ -153,6 +153,7 @@ export default {
 
   h2 {
     color: $grey;
+    margin-top: .1em;
     padding: 0.8em;
     text-transform: uppercase;
   }

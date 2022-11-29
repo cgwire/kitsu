@@ -52,7 +52,6 @@ const actions = {
   toggleSupportChat ({ commit, state }) {
     commit(TOGGLE_SUPPORT_CHAT)
     const crispEls = document.getElementsByClassName('crisp-client')
-    console.log(crispEls[0], state.isSupportChat)
     if (crispEls[0]) {
       const crispEl = crispEls[0]
       if (state.isSupportChat) {
