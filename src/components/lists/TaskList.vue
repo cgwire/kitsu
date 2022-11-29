@@ -1,6 +1,11 @@
 <template>
 <div class="data-list">
-  <div ref="body" class="datatable-wrapper" v-scroll="onBodyScroll">
+  <div
+    ref="body"
+    class="datatable-wrapper"
+    v-scroll="onBodyScroll"
+    v-if="!isContactSheet"
+ >
     <table class="datatable">
       <thead ref="thead" class="datatable-head">
         <tr class="row-header">
@@ -107,7 +112,7 @@
                 :key="task.id + '-' + personId"
                 :person="personMap.get(personId)"
                 :size="30"
-                :font-size="17"
+                :font-size="16"
                 @unassign="person => onUnassign(task, person)"
                 v-for="personId in task.assignees"
               />
@@ -189,6 +194,47 @@
       :is-error="isError"
     />
   </div>
+  <div
+    class="task-grid"
+    v-else
+  >
+    <div
+      :class="{
+        'task-card': true,
+        selected: selectionGrid[task.id]
+      }"
+      :key="task.id"
+      @click="selectTask($event, index, task)"
+      v-for="(task, index) in displayedTasks"
+    >
+      <entity-thumbnail
+        class="flexrow-item"
+        :entity="getEntity(task.entity.id)"
+        :width="200"
+        :height="133"
+        :empty-width="200"
+        :empty-height="133"
+        :no-preview="true"
+        v-if="task.entity"
+      />
+      <span class="task-name">
+        {{ getTaskName(task) }}
+      </span>
+      <div class="flexrow task-data">
+        <people-avatar-with-menu
+          class="flexrow-item"
+          :key="task.id + '-' + personId"
+          :person="personMap.get(personId)"
+          :size="20"
+          :font-size="10"
+          @unassign="person => onUnassign(task, person)"
+          v-for="personId in task.assignees"
+        />
+        <div class="filler"></div>
+        <validation-tag class="flexrow-item" :task="task" />
+      </div>
+    </div>
+  </div>
   <p
     class="has-text-centered nb-tasks"
     v-if="!isLoading"
@@ -224,6 +270,7 @@ import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PeopleAvatarWithMenu from '@/components/widgets/PeopleAvatarWithMenu'
 import TableInfo from '@/components/widgets/TableInfo'
 import ValidationCell from '@/components/cells/ValidationCell'
+import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
   name: 'task-list',
@@ -234,7 +281,8 @@ export default {
     EntityThumbnail,
     PeopleAvatarWithMenu,
     TableInfo,
-    ValidationCell
+    ValidationCell,
+    ValidationTag
   },
 
   data () {
@@ -254,6 +302,10 @@ export default {
     entityType: {
       type: String,
       default: 'Asset'
+    },
+    isContactSheet: {
+      type: Boolean,
+      default: false
     },
     isError: {
       type: Boolean,
@@ -347,6 +399,14 @@ export default {
       'unassignPersonFromTask',
       'removeSelectedTask'
     ]),
+
+    getTaskName (task) {
+      if (this.entityType === 'Shot') {
+        return task.sequence_name + ' / ' + this.getEntity(task.entity.id).name
+      } else {
+        return task.entity_name
+      }
+    },
 
     isTaskChanged (task, data) {
       const taskStart = task.start_date ? task.start_date.substring(0, 10) : ''
@@ -787,6 +847,45 @@ td.retake-count {
 
 .datatable-wrapper {
   min-height: calc(100% - 50px);
+}
+
+.data-list {
+  margin-top: .6em;
+}
+
+.task-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, 202px);
+  overflow-x: auto;
+  overflow-y: scroll;
+
+  .task-card {
+    border: 1px solid transparent;
+    border-radius: 5px;
+    box-shadow: 0 0 2px var(--box-shadow);
+    background: var(--background-alt);
+    cursor: pointer;
+    display: flex;
+    font-weight: bold;
+    flex-direction: column;
+    padding: 0;
+    padding-bottom: .6em;
+
+    &.selected {
+      border: 1px solid $purple;
+    }
+
+    .task-name {
+      font-size: .99em;
+      margin-bottom: .5em;
+      margin-top: .3em;
+      padding: 0 .5em;
+    }
+    .task-data {
+      padding: 0 .5em;
+    }
+  }
 }
 
 .datatable-body {
