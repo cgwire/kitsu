@@ -325,13 +325,11 @@ const actions = {
             validationInfo.task = task
             commit(ADD_SELECTED_TASK, validationInfo)
           })
-          console.log('toot')
           return Promise.resolve(tasks)
         })
         .catch(console.error)
     }))
       .then(() => {
-        console.log('taat')
         return Promise.resolve()
       })
   },

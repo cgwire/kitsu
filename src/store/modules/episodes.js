@@ -661,7 +661,6 @@ const mutations = {
   [SET_EPISODE_SEARCH] (state, payload) {
     const sorting = state.episodeSorting
     payload.sorting = sorting
-    console.log(payload)
     helpers.buildResult(state, payload)
   },
 
