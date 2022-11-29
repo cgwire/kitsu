@@ -19,6 +19,14 @@
             :task-type="currentTaskType"
           />
           <div class="filler"></div>
+          <button-simple
+            class="flexrow-item"
+            icon="grid"
+            :is-on="contactSheetMode"
+            :title="$t('tasks.show_contact_sheet')"
+            @click="contactSheetMode = !contactSheetMode"
+            v-if="isActiveTab('tasks')"
+          />
           <div class="flexrow-item">
             <button-simple
               icon="upload"
@@ -99,7 +107,7 @@
             class="flexrow-item"
             v-if="isActiveTab('tasks')"
           >
-            <combobox
+            <combobox-styled
               :label="$t('main.sorted_by')"
               :options="sortOptions"
               locale-key-prefix="tasks.fields."
@@ -108,7 +116,7 @@
           </div>
 
           <div
-            class="flexrow-item field"
+            class="flexrow-item"
             v-if="isActiveTab('schedule') && isCurrentUserManager"
           >
             <date-field
@@ -121,7 +129,7 @@
             />
           </div>
           <div
-            class="flexrow-item field"
+            class="flexrow-item"
             v-if="isActiveTab('schedule') && isCurrentUserManager"
           >
             <date-field
@@ -138,11 +146,12 @@
             class="flexrow-item color-option"
             v-if="isActiveTab('schedule')"
           >
-            <combobox
+            <combobox-styled
               class="flexrow-item"
               :label="$t('tasks.colors.title')"
               :options="schedule.colorOptions"
               locale-key-prefix="tasks.colors."
+              no-field
               v-model="schedule.currentColor"
             />
           </div>
@@ -153,6 +162,7 @@
             <combobox-number
               :label="$t('schedule.zoom_level')"
               :options="schedule.zoomOptions"
+              no-field
               v-model="schedule.zoomLevel"
               v-if="isActiveTab('schedule')"
             />
@@ -170,11 +180,12 @@
 
       <task-list
         ref="task-list"
-        :tasks="tasks"
+        :disabled-dates="disabledDates"
         :entity-type="entityType"
         :is-loading="loading.entities"
+        :is-contact-sheet="contactSheetMode"
         :is-error="errors.entities"
-        :disabled-dates="disabledDates"
+        :tasks="tasks"
         @task-selected="onTaskSelected"
         v-if="isActiveTab('tasks')"
       />
@@ -288,7 +299,6 @@ import { CornerLeftUpIcon } from 'vue-feather-icons'
 import ActionPanel from '@/components/tops/ActionPanel'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DateField from '@/components/widgets/DateField'
-import Combobox from '@/components/widgets/Combobox'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper'
@@ -410,7 +420,6 @@ export default {
     ButtonSimple,
     CornerLeftUpIcon,
     ComboboxNumber,
-    Combobox,
     ComboboxStyled,
     DateField,
     EstimationHelper,
@@ -432,6 +441,7 @@ export default {
       currentSort: 'entity_name',
       currentScheduleItem: null,
       currentTask: null,
+      contactSheetMode: false,
       dueDateFilter: 'all',
       entityType: 'Asset',
       estimationFilter: 'all',
@@ -1492,6 +1502,7 @@ export default {
 }
 
 .field {
+  margin-bottom: 0;
 }
 
 .query-list {
