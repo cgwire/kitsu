@@ -371,14 +371,14 @@ describe('Assets store', () => {
           assetTypeMap, newAsset: asset
         })
       expect(mockDispatch).toBeCalledTimes(3)
-      expect(mockDispatch).toHaveBeenNthCalledWith(2, 'createTask', {
-        entityId: 1,
+      expect(mockDispatch).toHaveBeenNthCalledWith(2, 'createTasks', {
+        entityIds: 1,
         projectId: 3,
         taskTypeId: 1,
         type: 'assets'
       })
-      expect(mockDispatch).toHaveBeenNthCalledWith(3, 'createTask', {
-        entityId: 1,
+      expect(mockDispatch).toHaveBeenNthCalledWith(3, 'createTasks', {
+        entityIds: 1,
         projectId: 3,
         taskTypeId: 2,
         type: 'assets'
@@ -490,8 +490,8 @@ describe('Assets store', () => {
 
       let mockCommit = jest.fn()
       peopleApi.createFilter = jest.fn(
-        (listType, name, query, productionId, entityType, callback) => {
-          callback(null, query)
+        (listType, name, query, productionId, entityType) => {
+          return Promise.resolve(query)
         }
       )
       await store.actions.saveAssetSearch(
@@ -1728,7 +1728,7 @@ describe('Assets store', () => {
           'old-task-id': 2
         }
       }
-      store.mutations.NEW_TASK_END(state, task)
+      store.mutations.NEW_TASK_END(state, { task })
       expect(state.assetMap.get('asset-id')).toEqual({
         tasks: ['old-task-id', 'task-id'],
         validations: new Map(Object.entries({
@@ -1767,7 +1767,7 @@ describe('Assets store', () => {
         task_type_id: 'task_type_id',
         id: 'task-id'
       }]
-      store.mutations.CREATE_TASKS_END(state, tasks)
+      store.mutations.CREATE_TASKS_END(state, { tasks })
       expect(state.assetMap.get('asset-id').validations).toEqual(
         new Map(Object.entries({
           task_type_id: 'task-id'
