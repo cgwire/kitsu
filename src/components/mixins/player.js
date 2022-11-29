@@ -1099,6 +1099,7 @@ export const playerMixin = {
     },
 
     resetPictureCanvas () {
+      if (!this.currentPreview) return Promise.resolve()
       this.annotations = this.currentPreview.annotations || []
       return this.resetCanvas()
         .then(() => {

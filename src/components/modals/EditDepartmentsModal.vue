@@ -55,15 +55,24 @@ export default {
     TextField
   },
 
-  props: [
-    'onConfirmClicked',
-    'text',
-    'active',
-    'cancelRoute',
-    'isLoading',
-    'isError',
-    'departmentToEdit'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    departmentToEdit: {
+      type: Object,
+      default: () => {}
+    }
+  },
 
   data () {
     return {

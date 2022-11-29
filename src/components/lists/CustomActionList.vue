@@ -66,11 +66,21 @@ export default {
   name: 'custom-action-list',
   mixins: [formatListMixin],
 
-  props: [
-    'entries',
-    'isLoading',
-    'isError'
-  ],
+  props: {
+    entries: {
+      type: Array,
+      default: () => []
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    }
+  },
+
   data () {
     return {}
   },

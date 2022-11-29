@@ -128,11 +128,21 @@ import TableInfo from '@/components/widgets/TableInfo'
 
 export default {
   name: 'production-list',
-  props: [
-    'entries',
-    'isLoading',
-    'isError'
-  ],
+
+  props: {
+    entries: {
+      type: Array,
+      default: () => []
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    }
+  },
 
   data () {
     return {}

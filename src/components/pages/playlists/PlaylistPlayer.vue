@@ -138,7 +138,9 @@
            class="picture-preview"
            :src="currentComparisonPreviewPath"
            controls
-           v-show="isComparing && isMovieComparison"
+           loop
+           muted
+           v-if="isComparing && isMovieComparison"
          />
          <span
            class="picture-preview"
@@ -1404,7 +1406,7 @@ export default {
           this.$refs['task-info'].$el.style.height = `${height}px`
         }
         if (this.rawPlayer) this.rawPlayer.resetHeight(height)
-        if (this.isComparing) {
+        if (this.isComparing && this.$refs['raw-player-comparison']) {
           this.$refs['raw-player-comparison'].resetHeight(height)
           if (this.$refs['picture-preview-wrapper']) {
             this.$refs['picture-preview-wrapper'].style.height = `${height}px`
@@ -1506,6 +1508,7 @@ export default {
               key = Object.keys(entity.preview_files)[0]
               previewFiles = entity.preview_files[key]
             }
+            if (!previewFiles) return null
             let preview = previewFiles.find(
               p => `${p.revision}` === this.revisionToCompare
             )

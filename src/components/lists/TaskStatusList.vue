@@ -77,11 +77,22 @@ import TaskStatusName from '@/components/cells/TaskStatusName'
 export default {
   name: 'task-status-list',
   mixins: [formatListMixin],
-  props: [
-    'entries',
-    'isLoading',
-    'isError'
-  ],
+
+  props: {
+    entries: {
+      type: Array,
+      default: () => []
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    }
+  },
+
   data () {
     return {}
   },

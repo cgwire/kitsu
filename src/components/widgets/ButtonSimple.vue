@@ -4,13 +4,17 @@
     button: true,
     active: active,
     small: isSmall,
-    'is-primary': isPrimary,
+    'is-on': isOn,
     'is-loading': isLoading,
-    'is-on': isOn
+    'is-primary': isPrimary
   }"
   :title="title"
   @click="$emit('click')"
 >
+  <grid-icon
+    :class="iconClass"
+    v-if="icon === 'grid'"
+  />
   <send-icon
     :class="iconClass"
     v-if="icon === 'send'"
@@ -196,6 +200,7 @@ import {
   DownloadIcon,
   EditIcon,
   Edit2Icon,
+  GridIcon,
   FilmIcon,
   FilterIcon,
   ImageIcon,
@@ -242,6 +247,7 @@ export default {
     Edit2Icon,
     FilmIcon,
     FilterIcon,
+    GridIcon,
     ImageIcon,
     KeyIcon,
     LayersIcon,

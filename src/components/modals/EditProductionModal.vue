@@ -104,14 +104,24 @@ export default {
     TextField
   },
 
-  props: [
-    'text',
-    'active',
-    'isLoading',
-    'isError',
-    'errorText',
-    'productionToEdit'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    productionToEdit: {
+      type: Object,
+      default: () => {}
+    }
+  },
 
   data () {
     const data = {

@@ -126,12 +126,26 @@ export default {
     TaskTypeName,
     TaskStatusName
   },
-  props: [
-    'entries',
-    'isLoading',
-    'isError',
-    'isEditable'
-  ],
+
+  props: {
+    entries: {
+      type: Array,
+      default: () => []
+    },
+    isEditable: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    }
+  },
+
   data () {
     return {}
   },

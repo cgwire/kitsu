@@ -186,10 +186,6 @@ export default {
     assetToEdit: {
       type: Object,
       default: () => {}
-    },
-    errorText: {
-      type: String,
-      default: ''
     }
   },
 

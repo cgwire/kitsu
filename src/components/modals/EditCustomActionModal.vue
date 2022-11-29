@@ -75,15 +75,24 @@ export default {
     TextField
   },
 
-  props: [
-    'onConfirmClicked',
-    'text',
-    'active',
-    'isLoading',
-    'isError',
-    'errorText',
-    'customActionToEdit'
-  ],
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    customActionToEdit: {
+      type: Object,
+      default: () => {}
+    }
+  },
 
   data () {
     return {

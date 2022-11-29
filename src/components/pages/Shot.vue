@@ -151,7 +151,9 @@
         </span>
         <span
           class="tag tag-standby"
-          v-show="currentSection === 'casting' && currentShot.is_casting_standby"
+          v-show="currentSection === 'casting' &&
+                  currentShot &&
+                  currentShot.is_casting_standby"
         >
           {{ $t('breakdown.fields.standby') }}
         </span>
