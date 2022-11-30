@@ -10,10 +10,10 @@ import {
 
 const auth = {
 
-  logIn (email, password, otp, callback) {
+  logIn (payload, callback) {
     superagent
       .post('/api/auth/login')
-      .send({ email, password, otp })
+      .send(payload)
       .end((err, res) => {
         if (err) {
           if (res.body.default_password) {
@@ -28,6 +28,10 @@ const auth = {
           }
           if (res.body.missing_OTP) {
             err.missing_OTP = true
+            err.preferred_two_factor_authentication =
+              res.body.preferred_two_factor_authentication
+            err.two_factor_authentication_enabled =
+              res.body.two_factor_authentication_enabled
           }
           callback(err)
         } else {

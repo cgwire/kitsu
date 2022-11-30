@@ -303,9 +303,22 @@ export default {
     back_to_login: 'Go back to login page',
     forgot_password: 'Forgot password?',
     login: 'Log in',
+    verify: 'Verify',
     login_failed: 'Log in failed, please verify your credentials.',
     too_many_failed_login_attemps: 'Too many failed login attemps, please wait one minute.',
-    wrong_otp: 'OTP verification failed.',
+    wrong_totp: 'TOTP verification failed.',
+    wrong_email_otp: 'OTP via email verification failed.',
+    wrong_recovery_code: 'Recovery code verification failed.',
+    information_totp: 'Open the two-factor authenticator (TOTP) app on your mobile device to view your authentication code.',
+    information_email_otp: 'Check your emails to view your authentication code.',
+    information_recovery_code: 'If you are unable to use any other two factor authentication, enter one of your recovery codes to verify your identity.',
+    unable_to_verify_totp: 'Unable to verify with TOTP?',
+    unable_to_verify_email_otp: 'Unable to verify with email?',
+    send_email_otp: 'Resend OTP by email',
+    unable_to_verify_recovery_code: 'Don\'t have a recovery code?',
+    choose_totp: 'Enter two-factor authentication code via TOTP',
+    choose_email_otp: 'Enter two-factor authentication code via email',
+    choose_recovery_code: 'Use a recovery code',
     login_page: 'Cancel',
     redirecting: 'Redirecting in {secondsLeft} seconds...',
     reset_change_password: 'Change password',
@@ -322,7 +335,9 @@ export default {
       email: 'Email',
       password: 'Password',
       password2: 'Password again',
-      otp: 'OTP'
+      totp: 'TOTP',
+      email_otp: 'OTP via email',
+      recovery_code: 'Recovery code'
     }
   },
 
@@ -859,15 +874,29 @@ export default {
     two_factor_authentication: {
       title: 'Two-factor authentication',
       scan_qrcode: 'Please scan this QR code in your TOTP application.',
-      recovery_codes: 'Recovery codes',
-      warning_recovery_codes: 'Keep your recovery codes in a safe spot. These codes are the last resort for accessing your account in case you lose your password and second factors. If you cannot find these codes, you will lose access to your account.',
       otp_secret: 'OTP secret',
       totp: {
         button_enable: 'Enable TOTP',
-        button_validate: 'Validate TOTP',
         button_disable: 'Disable TOTP',
+        button_validate_disable: 'Validate and disable TOTP',
+        button_validate: 'Validate and enable TOTP',
         error_enable: 'An error occured while enabling TOTP.',
         error_disable: 'An error occured while disabling TOTP.'
+      },
+      email_otp: {
+        button_enable: 'Enable OTP via email',
+        button_disable: 'Disable OTP via email',
+        button_validate_disable: 'Validate and disable OTP via email',
+        button_validate: 'Validate and enable OTP via email',
+        error_enable: 'An error occured while enabling OTP via email.',
+        error_disable: 'An error occured while disabling OTP via email.'
+      },
+      recovery_codes: {
+        title: 'Recovery codes',
+        button_new: 'Get new recovery codes',
+        button_validate: 'Validate and get new recovery codes',
+        warning: 'Keep your recovery codes in a safe spot. These codes are the last resort for accessing your account in case you lose your password and second factors. If you cannot find these codes, you will lose access to your account.',
+        error_new: 'An error occured while generating new recovery codes'
       }
     },
     save: {

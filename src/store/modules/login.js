@@ -1,7 +1,6 @@
 import {
   CHANGE_EMAIL,
   CHANGE_PASSWORD,
-  CHANGE_OTP,
   LOGIN_RUN,
   LOGIN_SUCCESS,
   LOGIN_FAILURE,
@@ -19,7 +18,6 @@ import auth from '@/lib/auth'
 const initialState = {
   email: '',
   password: '',
-  otp: '',
   isLoginLoading: false,
   isLoginError: false,
   isDataLoading: false
@@ -32,7 +30,6 @@ const state = {
 const getters = {
   email: state => state.email,
   password: state => state.password,
-  otp: state => state.otp,
   isLoginLoading: state => state.isLoginLoading,
   isLoginError: state => state.isLoginError,
   isDataLoading: state => state.isDataLoading
@@ -47,16 +44,15 @@ const actions = {
     commit(CHANGE_PASSWORD, password)
   },
 
-  changeOTP ({ commit, state }, otp) {
-    commit(CHANGE_OTP, otp)
-  },
-
-  logIn ({ commit, state }, callback) {
+  logIn ({ commit, state }, { twoFactorPayload, callback }) {
     commit(LOGIN_RUN)
+    const payload = {
+      email: state.email,
+      password: state.password,
+      ...twoFactorPayload
+    }
     auth.logIn(
-      state.email,
-      state.password,
-      state.otp,
+      payload,
       (err) => {
         if (err) {
           commit(LOGIN_FAILURE)
@@ -110,10 +106,6 @@ const mutations = {
 
   [CHANGE_PASSWORD] (state, password) {
     state.password = password
-  },
-
-  [CHANGE_OTP] (state, otp) {
-    state.otp = otp
   },
 
   [LOGIN_RUN] (state) {
