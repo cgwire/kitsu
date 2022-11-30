@@ -132,11 +132,35 @@ export default {
   },
 
   enableTOTP (totp) {
-    return client.ppost('/api/auth/totp', { totp: totp }).then(body => Promise.resolve(body.otp_recovery_codes))
+    return client.ppost('/api/auth/totp', { totp: totp })
+      .then(body => Promise.resolve(body.otp_recovery_codes))
   },
 
-  disableTOTP (totp) {
-    return client.pdel('/api/auth/totp', { totp: totp })
+  disableTOTP (twoFactorPayload) {
+    return client.pdel('/api/auth/totp', twoFactorPayload)
+  },
+
+  preEnableEmailOTP () {
+    return client.pput('/api/auth/email-otp', {})
+      .then(body => Promise.resolve(body))
+  },
+
+  sendEmailOTP (email) {
+    return client.pget(`/api/auth/email-otp?email=${email}`)
+  },
+
+  enableEmailOTP (emailOTP) {
+    return client.ppost('/api/auth/email-otp', { email_otp: emailOTP })
+      .then(body => Promise.resolve(body.otp_recovery_codes))
+  },
+
+  disableEmailOTP (twoFactorPayload) {
+    return client.pdel('/api/auth/email-otp', twoFactorPayload)
+  },
+
+  newRecoveryCodes (twoFactorPayload) {
+    return client.pput('/api/auth/recovery-codes', twoFactorPayload)
+      .then(body => Promise.resolve(body.otp_recovery_codes))
   },
 
   loadTodos (callback) {
