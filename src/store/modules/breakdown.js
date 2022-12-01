@@ -85,7 +85,7 @@ const actions = {
     const assetMap = rootState.assets.assetMap
     const shots =
      Array.from(rootState.shots.shotMap.values())
-       .filter((shot) => shot.sequence_id === sequenceId || sequenceId < 0)
+       .filter((shot) => shot.sequence_id === sequenceId || sequenceId === 'all')
        .sort((a, b) => a.name.localeCompare(b.name))
     commit(CASTING_SET_SEQUENCE, sequenceId)
     commit(CASTING_SET_SHOTS, shots)
@@ -306,13 +306,13 @@ const mutations = {
     if (state.castingEpisodeSequences.length > 0) {
       state.castingSequencesOptions.unshift(
         {
-          label: 'All Sequences',
-          value: -1,
+          label: 'All',
+          value: 'all',
           route: {
             name: 'breakdown-sequence',
             params: {
               production_id: state.castingEpisodeSequences[0].project_id,
-              sequence_id: -1
+              sequence_id: 'all'
             }
           }
         }
