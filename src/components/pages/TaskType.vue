@@ -182,9 +182,10 @@
         ref="task-list"
         :disabled-dates="disabledDates"
         :entity-type="entityType"
-        :is-loading="loading.entities"
         :is-contact-sheet="contactSheetMode"
         :is-error="errors.entities"
+        :is-grouped="this.currentSort === 'entity_name'"
+        :is-loading="loading.entities"
         :tasks="tasks"
         @task-selected="onTaskSelected"
         v-if="isActiveTab('tasks')"
@@ -475,12 +476,12 @@ export default {
       },
       schedule: {
         currentColor: 'status',
-        endDate: moment().add(3, 'months'),
+        startDate: null,
+        endDate: null,
         scheduleItems: [],
         scheduleHeight: 800,
-        taskTypeEndDate: moment().add(3, 'months').toDate(),
-        taskTypeStartDate: moment().add(-1, 'months').toDate(),
-        startDate: moment().add(-1, 'months'),
+        taskTypeEndDate: null,
+        taskTypeStartDate: null,
         zoomLevel: 1,
         zoomOptions: [
           { label: '1', value: 1 },
@@ -531,9 +532,7 @@ export default {
     this.updateActiveTab()
     setTimeout(() => {
       this.initData(false)
-      if (this.$refs['schedule-widget']) {
-        this.$refs['schedule-widget'].scrollToToday()
-      }
+      this.resetScheduleScroll()
     }, 100)
     window.addEventListener('resize', this.resetScheduleHeight)
   },
@@ -800,9 +799,7 @@ export default {
             }, 200)
             if (this.isActiveTab('schedule')) {
               this.resetScheduleItems()
-              if (this.$refs['schedule-widget']) {
-                this.$refs['schedule-widget'].scrollToToday()
-              }
+              this.resetScheduleScroll()
             }
           })
           .catch((err) => {
@@ -818,9 +815,7 @@ export default {
             this.loading.entities = false
             if (this.isActiveTab('schedule')) {
               this.resetScheduleItems()
-              if (this.$refs['schedule-widget']) {
-                this.$refs['schedule-widget'].scrollToToday()
-              }
+              this.resetScheduleScroll()
             }
           })
       }
@@ -1059,17 +1054,16 @@ export default {
         minutesToDays(this.organisation, estimation)
       )
       data.estimation = estimation
-      if (item && !item.startDate) {
-        item.startDate = parseDate(data.end_date)
-      }
-      if (item && !item.endDate) {
-        item.endDate = parseDate(data.end_date)
+      if (item) {
+        item.start_date = data.start_date
+        item.startDate = parseDate(data.start_date)
+        item.end_date = data.due_date
+        item.endDate = parseDate(data.due_date)
       }
       if (item && item.startDate && item.endDate) {
         item.parentElement.startDate = this.getMinDate(item.parentElement)
         item.parentElement.endDate = this.getMaxDate(item.parentElement)
       }
-
       this.updateTask({ taskId, data })
         .catch(console.error)
     },
@@ -1161,7 +1155,7 @@ export default {
         const estimation = task.estimation
         let endDate
 
-        let startDate = this.schedule.startDate.clone()
+        let startDate = moment(this.schedule.taskTypeStartDate)
         if (task.start_date) {
           startDate = parseDate(task.start_date)
         } else if (task.real_start_date) {
@@ -1278,7 +1272,8 @@ export default {
     },
 
     getMinDate (personElement) {
-      let minDate = this.schedule.endDate.clone()
+      const endDate = this.productionEndDate
+      let minDate = endDate.clone()
       personElement.children.forEach((item) => {
         if (item.startDate && item.startDate.isBefore(minDate)) {
           minDate = item.startDate
@@ -1288,7 +1283,8 @@ export default {
     },
 
     getMaxDate (personElement) {
-      let maxDate = this.schedule.startDate.clone()
+      const startDate = this.productionEndDate
+      let maxDate = startDate.clone()
       personElement.children.forEach((item) => {
         if (item.endDate && item.endDate.isAfter(maxDate)) {
           maxDate = item.endDate
@@ -1385,6 +1381,22 @@ export default {
         this.schedule.taskTypeEndDate =
           parseDate(this.currentScheduleItem.end_date).toDate()
       }
+    },
+
+    resetScheduleScroll () {
+      if (this.$refs['schedule-widget']) {
+        const today = moment()
+        if (
+          today.isBefore(moment(this.schedule.taskTypeStartDate)) ||
+          today.isAfter(moment(this.schedule.taskTypeEndDate))
+        ) {
+          this.$refs['schedule-widget'].scrollToDate(
+            moment(this.schedule.taskTypeStartDate).add('days', 20)
+          )
+        } else {
+          this.$refs['schedule-widget'].scrollToToday()
+        }
+      }
     }
   },
 
@@ -1426,9 +1438,7 @@ export default {
         this.resetScheduleItems()
         this.resetScheduleHeight()
         this.$nextTick(() => {
-          if (this.$refs['schedule-widget']) {
-            this.$refs['schedule-widget'].scrollToToday()
-          }
+          this.resetScheduleScroll()
         })
       }
     },
