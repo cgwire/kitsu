@@ -839,8 +839,7 @@ export default {
         this.nbSelectedValidations === 0 &&
         this.nbSelectedAssets === 0 &&
         this.nbSelectedShots === 0 &&
-        this.nbSelectedEdits === 0 &&
-        this.nbSelectedEpisodes === 0
+        this.nbSelectedEdits === 0
       ) ||
       !(
         this.isCurrentViewAsset ||
@@ -1395,7 +1394,7 @@ export default {
   border-radius: 10px;
   box-shadow: 0px 0px 8px var(--purple);
   color: $grey;
-  z-index: 500;
+  z-index: 1000;
   position: absolute;
   left: 715px;
   top: 145px;
