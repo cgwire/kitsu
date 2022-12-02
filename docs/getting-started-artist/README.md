@@ -5,14 +5,14 @@
 
 On your first connection, we encourage you to fill your contact information
 into your profile.
-Click on your name on the top right of the screen (1), then on **Profile** (2). You can also change the color of the **Theme** (3).
+Click on your avatar on the top right of the screen, then on **Profile**. You can also change the color of the **Theme** and hide or display the **Support Chat**.
 
-NB: A link to this **Documentation** and YouTube **Tutorials** are available (4 & 5).
-You can also jump on our Discord (7) or look at our roadmap (8).
+NB: A link to this **Documentation** and YouTube **Tutorials** are available .
+You can also jump on our Discord or look at our roadmap.
  
 ![User profile](../img/getting-started/user_profil.png)
  
-On this new page, you can check your name (1) (2), your email (3), fill your phone
+On this new page, you can check your name , your email (3), fill your phone
 number (4), change the timezone (5), the language of the website (6), and
 post a pic of yourself as your avatar (7). It helps to recognize who is
 doing what! 
@@ -74,14 +74,12 @@ text comment to it.
 For example, when you start a **new task**, you can say that everything is ok.
 If some information is missing, you can either ask all the questions you want.
 
-To change the Status, let's say from ![Todo](../img/getting-started/todo_icon.png) to ![Wip](../img/getting-started/wip_icon.png) as an example, start
-by filling the comment box (1). Then, click on the status box, choose the
-one you want (2), and upload a preview (3). 
-
-You can drag and drop your file directly into the comment section, or you can use the **Add a preview to publish** button.
+To change the Status, let's say from ![Todo](../img/getting-started/todo_icon.png) to ![Wip](../img/getting-started/wip_icon.png) as an example,select the **Change status** tab,
+type your comment. Then, click on the status box, choose the
+one you want.
 
 And validate your comment and the new Status by clicking on
-**Post comment** (4) button.
+**Post**  button.
 
 ![Changing status](../img/getting-started/changing_status.png)
 
@@ -92,18 +90,17 @@ using the **edit** button
 
 ## Ask for a review
 
-You can ask for a review by switching the Status of a task to 
+You can ask for a review by switching the tab to **Publish revision** 
+and change the Status of a task to 
 (**Waiting for Approval** ![wfa](../img/getting-started/wfa_icon.png)). 
-The first step is to change the Status of your
-task. 
-
-![Waiting for approval](../img/getting-started/wfa_status.png)
 
 You can drag and drop your file directly or click on the **Attach preview** button.
 
 ![Add preview file](../img/getting-started/add_preview.png)
 
-Moreover, then use the **Post comment** button.
+![Waiting for approval](../img/getting-started/wfa_status.png)
+
+Then use the **Post** button.
 
 Your work appears on the right part of the screen as a V1. 
 
