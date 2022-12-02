@@ -1436,6 +1436,15 @@ tbody:last-child .empty-line:last-child {
     .header-icon {
       margin: 0 auto;
     }
+
+    &:hover {
+      .department-dot {
+        display: none;
+      }
+      .validation-content {
+        padding-left: 2px;
+      }
+    }
   }
 
   .datatable-row-header {
