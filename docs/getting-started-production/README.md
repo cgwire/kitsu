@@ -241,6 +241,9 @@ directly from the global shot page.
 
 Click on the case you want to fill, and you will be able to add the data.
 
+If you fill the **Frame In** and the **Frame out** Kitsu will calculate the number
+ of frames automatically.
+
 ![Shot edit page](../img/getting-started/shot_framerange_global_edit.png)
 
 
@@ -420,7 +423,7 @@ Click on the status (1) you want to assign.
 
 ![Assigned a task](../img/getting-started/task_assigned.png)
 
-The **Action Menu** on top of the screen appears. 
+The **Action Menu Box** appears. 
 
 ![Blue menu](../img/getting-started/blue_menu.png)
 
@@ -437,11 +440,12 @@ button.
 
 ![Assigned multiple people](../img/getting-started/assigned_multiple.png)
 
-In the same way, you can click on **Clear assignations** to remove all 
-assignations, or press the **Escape** key.
 
-When you finish all the assignations, quit this mode using the **Clear
-current selection** button ![Clear current selection](../img/getting-started/clear_current_selection.png).
+In the same way, once you have selected someone, you can click on
+ **or unassign from selection** to remove this assignations.
+
+When you finish all the assignations, quit this mode using the **Escape** key, 
+or the cross on the top right corner of the action box.
 
 Now you can see next to each status the avatar of the ArtistArtist.
 
@@ -484,7 +488,12 @@ If you have defined an **FPS** for the production, Kitsu conforms to the uploade
 
 Otherwise, the video is compressed to 1080P and 30mbits/sec. 
 
-Click on the "Attach preview" button. The explorer opens and lets you choose your file or several files.
+You need to select the **Publish Revision** tab.
+
+![Publish revision tab](../img/getting-started/publish_revision.png)
+
+
+Then, click on the "Add preview revision to publish" button. The explorer opens and lets you choose your file or several files.
 
 ![attach preview](../img/getting-started/attach_preview.png)
 
@@ -503,6 +512,7 @@ You can also **drag & drop** the file in the comment section.
 
 ![attach preview drag drop](../img/getting-started/drag_drop_preview.png)
 
+You can then select your status and publish your preview with the **Post** Button
 
 ## Add a thumbnail
 
