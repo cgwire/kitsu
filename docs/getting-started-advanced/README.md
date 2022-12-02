@@ -1,92 +1,5 @@
 # Getting started as a Production Manager - Advanced Users
 
-## Create extra tasks for the assets
-
-If you realize you miss some task type on your pipeline, you need to add the new task type to your library.
-
-(To add new Task Type see [Customization of the workflow](../customization/README.md#create-a-new-task-type) )
-
-Once it's done, you need to add them to your **Setting** page too. 
-
-Then, click on the **+ Add tasks** on the spreadsheet. 
-
-![Add tasks button](../img/getting-started/add_tasks_asset.png)
-
-A new window will open, and on the list, you can choose the task you need to add.
-You can also create tasks for **the project**  or **For current list and filters** and validate it by the **Confirm** button.
-
-![Add task to an asset](../img/getting-started/add_task.png)
-
-## Create tasks for specific assets type
-
-You can choose to create tasks only for **filtered elements**. For example, you want to create 
-**Rigg** tasks only for the characters.
-
-You need to type **Characters** on the search bar on the global asset page.
-
-![Characters filtered](../img/getting-started/chara_filtered.png)
-
-Then click on **+ Add tasks**. Next, select the task type, here **Rigging**, and switch to **For current list and filters**.
-
-Valid with **Confirm**.
-
-![Tasks filtered](../img/getting-started/task_filtered.png)
-
-If you remove the filter characters, you will see the tasks only created for the selected elements.
-
-![Tasks filtered Created](../img/getting-started/delete_task_done_chara.png)
-
-You can also delete tasks for specific Asset Types. 
-For example, you want to keep **Rig** only for the characters.
-
-You need to type **-Characters** on the search bar on the global asset page. This way, the page will filter 
-everything **but** the characters.
-
-![Tasks filtered](../img/getting-started/no_character_filtered.png)
-
-Then select the task type you want to delete for the filtered view. Click on the arrow next to the name 
-of the task type and select **Delete all**.
-
-![Tasks filtered no chara](../img/getting-started/no_character_delete.png)
-
-Once the pop-up opens, type the name of the task type and double-check it's set to **For current list and filters**.
-
-![Tasks filtered no chara rigging erased](../img/getting-started/delete_task_done.png)
-
-If you remove the filter **-characters**, you will see the tasks only created for the selected elements.
-
-
-![Tasks filtered no chara rigging erased](../img/getting-started/delete_task_done_chara.png)
-
-
-You can also delete only a task or selected tasks. If some assets don't match the task (as environment and setup), click on the menu to change the action (1), 
-then select the ** delete tasks** (2) on the left top
-of the page.
-![Delete button](../img/getting-started/delete_task.png) 
-
-Now that we have created all the assets and related tasks, we can now add the
-artists to the team and assign tasks to them.
-
-
-## Create extra tasks for the shots
-
-If you realize you miss some task type on your pipeline, you need to add the new task type to your library.
-
-(To add new Task Type see [Customization of the workflow](../customization/README.md#create-a-new-task-type) )
-
-Once it's done, you need to add them to your **Setting** page too.
-
-Then,  click on
-the **+Add tasks** button ![Add task button](../img/getting-started/add_task_button.png)
-on the top of the spreadsheet. 
-
-A new pop-up opens and lets you choose what task you want to add. All the
-shots are linked to the tasks if you select the **For project** option.
-
-![List of tasks for the shots](../img/getting-started/task_shots.png)
-
-
-
 ## Add Custom columns
 
 To add more information on the general spreadsheet pages, you have to create a 
@@ -169,7 +82,7 @@ You can change the preview order if you click on the number, then drag and drop 
 ![preview drag drop](../img/getting-started/multiple_preview.png)
 
 
-To delete an additional preview, you need to enlarge the comment panel.
+To delete an additional preview, you need to enlarge the comment panel and clck on the numbers.
 
 ![enlarge comment section](../img/getting-started/enlarge_comment.png)
 
@@ -205,11 +118,11 @@ near a status task (1).
 
 ![Task assigned](../img/getting-started/task_assigned.png)
 
-The action menu appears on the top of the screen. 
+The action box appears. 
 
 ![Blue menu](../img/getting-started/blue_menu.png)
 
-Click on the name on the left of the action menu, and choose 
+Click on the icone of the action menu to choose 
 **Change priority**.
 
 ![Change priority](../img/getting-started/change_priority.png)
