@@ -75,7 +75,7 @@
             selected: selectionGrid[task.id]
           }"
           @click="selectTask($event, index, task)"
-          v-for="(task, index) in displayedTasks"
+          v-for="(task, index) in tasks"
         >
           <td class="thumbnail flexrow">
             <entity-thumbnail
@@ -195,9 +195,57 @@
     />
   </div>
   <div
-    class="task-grid"
-    v-else
+    class="list-wrapper"
+    v-else-if="tasksByParent && tasksByParent.length > 0 && this.isGrouped"
   >
+    <div
+      :key="'task-section-' + i"
+      v-for="(taskGroup, i) in tasksByParent"
+    >
+      <h2>
+      {{ taskGroup.name }}
+      </h2>
+      <div class="task-grid">
+        <div
+          :class="{
+            'task-card': true,
+            selected: selectionGrid[task.id]
+          }"
+          :key="task.id"
+          @click="selectTask($event, index, task)"
+          v-for="(task, index) in taskGroup.tasks"
+        >
+          <entity-thumbnail
+            class="flexrow-item"
+            :entity="getEntity(task.entity.id)"
+            :width="200"
+            :height="133"
+            :empty-width="200"
+            :empty-height="133"
+            no-preview
+            v-if="task.entity"
+          />
+          <span class="task-name">
+            {{ getTaskName(task) }}
+          </span>
+          <div class="flexrow task-data">
+            <validation-tag class="flexrow-item" :task="task" thin />
+            <div class="filler"></div>
+            <people-avatar-with-menu
+              class="flexrow-item"
+              :key="task.id + '-' + personId"
+              :person="personMap.get(personId)"
+              :size="20"
+              :font-size="10"
+              @unassign="person => onUnassign(task, person)"
+              v-for="personId in task.assignees"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="task-grid list-wrapper" v-else>
     <div
       :class="{
         'task-card': true,
@@ -214,13 +262,15 @@
         :height="133"
         :empty-width="200"
         :empty-height="133"
-        :no-preview="true"
+        no-preview
         v-if="task.entity"
       />
       <span class="task-name">
         {{ getTaskName(task) }}
       </span>
       <div class="flexrow task-data">
+        <validation-tag class="flexrow-item" :task="task" thin />
+        <div class="filler"></div>
         <people-avatar-with-menu
           class="flexrow-item"
           :key="task.id + '-' + personId"
@@ -230,8 +280,6 @@
           @unassign="person => onUnassign(task, person)"
           v-for="personId in task.assignees"
         />
-        <div class="filler"></div>
-        <validation-tag class="flexrow-item" :task="task" />
       </div>
     </div>
   </div>
@@ -308,6 +356,10 @@ export default {
       default: false
     },
     isError: {
+      type: Boolean,
+      default: false
+    },
+    isGrouped: {
       type: Boolean,
       default: false
     },
@@ -396,6 +448,58 @@ export default {
       } else {
         return []
       }
+    },
+
+    tasksByParent () {
+      const result = []
+      if (this.tasks.length > 0) {
+        if (this.isShots) {
+          let currentTasks = {
+            name: this.tasks[0].sequence_name,
+            tasks: []
+          }
+          let previousTask = null
+          this.tasks.forEach(task => {
+            const entity = this.shotMap.get(task.entity.id)
+            if (previousTask) {
+              const previousEntity = this.shotMap.get(previousTask.entity.id)
+              if (previousEntity.sequence_id !== entity.sequence_id) {
+                result.push(currentTasks)
+                currentTasks = {
+                  name: task.sequence_name,
+                  tasks: []
+                }
+              }
+            }
+            currentTasks.tasks.push(task)
+            previousTask = task
+          })
+          result.push(currentTasks)
+        } else if (this.isAssets) {
+          let currentTasks = {
+            name: this.tasks[0].entity_type_name,
+            tasks: []
+          }
+          let previousTask = null
+          this.tasks.forEach(task => {
+            const entity = this.assetMap.get(task.entity.id)
+            if (previousTask) {
+              const previousEntity = this.assetMap.get(previousTask.entity.id)
+              if (previousEntity.asset_type_id !== entity.asset_type_id) {
+                result.push(currentTasks)
+                currentTasks = {
+                  name: task.entity_type_name,
+                  tasks: []
+                }
+              }
+            }
+            currentTasks.tasks.push(task)
+            previousTask = task
+          })
+          result.push(currentTasks)
+        }
+      }
+      return result
     }
   },
 
@@ -560,9 +664,11 @@ export default {
         if ([37, 38].includes(event.keyCode)) {
           index = (index - 1) < 0 ? index = this.tasks.length - 1 : index - 1
           this.selectTask({}, index, this.tasks[index])
+          this.pauseEvent(event)
         } else if ([39, 40].includes(event.keyCode)) {
           index = (index + 1) >= this.tasks.length ? index = 0 : index + 1
           this.selectTask({}, index, this.tasks[index])
+          this.pauseEvent(event)
         }
       }
     },
@@ -855,15 +961,23 @@ td.retake-count {
   margin-top: .6em;
 }
 
+.list-wrapper {
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.list-wrapper div:first-child h2 {
+  margin-top: 0em;
+}
+
 .task-grid {
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(auto-fill, 202px);
-  overflow-x: auto;
-  overflow-y: scroll;
+  // grid-template-columns: repeat(auto-fill, 202px);
+  grid-template-columns: 204px 204px 204px 204px 204px 204px;
 
   .task-card {
-    border: 1px solid transparent;
+    border: 2px solid transparent;
     border-radius: 5px;
     box-shadow: 0 0 2px var(--box-shadow);
     background: var(--background-alt);
@@ -872,20 +986,25 @@ td.retake-count {
     font-weight: bold;
     flex-direction: column;
     padding: 0;
-    padding-bottom: .6em;
+    padding-bottom: .2em;
+    transition: border .3s ease;
 
     &.selected {
-      border: 1px solid $purple;
+      border: 2px solid $dark-purple;
     }
 
     .task-name {
-      font-size: .99em;
+      font-size: .9em;
       margin-bottom: .5em;
       margin-top: .3em;
       padding: 0 .5em;
     }
     .task-data {
-      padding: 0 .5em;
+      padding: 0 .1em 0 .3em;
+
+      .avatar-wrapper:last-child {
+        margin-right: 0em;
+      }
     }
   }
 }

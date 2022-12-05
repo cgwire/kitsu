@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed-page columns">
+<div class="fixed-page columns">
   <div class="page column main-column">
     <div class="page-header pa1 mb0">
       <div

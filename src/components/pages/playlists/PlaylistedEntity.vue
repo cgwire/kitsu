@@ -1,5 +1,6 @@
 <template>
 <div class="flexrow wrapper">
+
   <drag @drag="onDragged" :transfer-data="entity.id">
     <div
       :class="{
@@ -59,6 +60,9 @@
       </div>
     </div>
   </drag>
+  <drop @drop="onDropped">
+    <div class="drop-area-wide" ref="drop-area-wide"></div>
+  </drop>
   <drop @drop="onDropped">
     <div class="drop-area" ref="drop-area"></div>
   </drop>
@@ -126,6 +130,10 @@ export default {
 
     dropArea () {
       return this.$refs['drop-area']
+    },
+
+    dropAreaWide () {
+      return this.$refs['drop-area-wide']
     },
 
     taskTypeOptions () {
@@ -207,6 +215,8 @@ export default {
     setListeners () {
       this.dropArea.addEventListener('dragover', this.onDragover)
       this.dropArea.addEventListener('dragleave', this.onDragleave)
+      this.dropAreaWide.addEventListener('dragover', this.onDragover)
+      this.dropAreaWide.addEventListener('dragleave', this.onDragleave)
     },
 
     onDragged () {
@@ -278,6 +288,12 @@ export default {
   width: 15px;
   height: 100%;
   transition: width 0.3s ease;
+}
+
+.drop-area-wide {
+  height: 100%;
+  position: absolute;
+  width: 60px;
 }
 
 .playlisted-entity {

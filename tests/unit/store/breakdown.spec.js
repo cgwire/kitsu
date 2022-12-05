@@ -79,28 +79,40 @@ describe('Breakdown store', () => {
       acc[entity.id] = entity; return acc
     }
     shotMap = new Map(Object.entries(shots.reduce(entityMapReducer, {})))
-    expectedSequencesOptions = [{
-      label: 'SE01',
-      value: 'sequence-1',
-      route: {
-        name: 'breakdown-sequence',
-        params: {
-          production_id: 'production-1',
-          sequence_id: 'sequence-1'
+    expectedSequencesOptions = [
+      {
+        label: 'All',
+        value: 'all',
+        route: {
+          name: 'breakdown-sequence',
+          params: {
+            production_id: 'production-1',
+            sequence_id: 'all'
+          }
+        }
+      }, {
+        label: 'SE01',
+        value: 'sequence-1',
+        route: {
+          name: 'breakdown-sequence',
+          params: {
+            production_id: 'production-1',
+            sequence_id: 'sequence-1'
+          }
+        }
+      },
+      {
+        label: 'SE02',
+        value: 'sequence-2',
+        route: {
+          name: 'breakdown-sequence',
+          params: {
+            production_id: 'production-1',
+            sequence_id: 'sequence-2'
+          }
         }
       }
-    },
-    {
-      label: 'SE02',
-      value: 'sequence-2',
-      route: {
-        name: 'breakdown-sequence',
-        params: {
-          production_id: 'production-1',
-          sequence_id: 'sequence-2'
-        }
-      }
-    }]
+    ]
     rootState = {
       productions: { currentProduction: production },
       assets: { assetMap },

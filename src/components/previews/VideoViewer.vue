@@ -23,7 +23,7 @@
 <script>
 import { mapGetters } from 'vuex'
 
-import { formatFrame, formatTime, floorToFrame } from '@/lib/video'
+import { formatFrame, formatTime, floorToFrame, ceilToFrame } from '@/lib/video'
 import Spinner from '@/components/widgets/Spinner'
 
 import { domMixin } from '@/components/mixins/dom'
@@ -289,8 +289,12 @@ export default {
       }
     },
 
-    _setRoundedTime (time) {
-      time = floorToFrame(time, this.fps)
+    _setRoundedTime (time, ceil = false) {
+      if (ceil) {
+        time = ceilToFrame(time, this.fps)
+      } else {
+        time = floorToFrame(time, this.fps)
+      }
       if (time < this.frameDuration) {
         time = 0
       } else if (
@@ -368,7 +372,7 @@ export default {
 
     pause () {
       this.video.pause()
-      this._setRoundedTime(this.currentTimeRaw)
+      this._setRoundedTime(this.currentTimeRaw, true)
       clearInterval(this.$options.playLoop)
     },
 

@@ -1305,7 +1305,7 @@ export default {
           let styles
           const playlistModal = document.getElementById('temp-playlist-modal')
           if (playlistModal) styles = window.getComputedStyle(playlistModal)
-          if (styles && styles.display === 'none') {
+          if (!styles || (styles && styles.display === 'none')) {
             this.onPlayPauseClicked()
             this.pauseEvent(event)
           }

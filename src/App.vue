@@ -1107,6 +1107,7 @@ textarea.input:focus {
 .query-list {
   margin-bottom: 2em;
   margin-left: 1em;
+  max-with: 95%;
 }
 
 .query-list .tag {
@@ -1435,6 +1436,15 @@ tbody:last-child .empty-line:last-child {
     }
     .header-icon {
       margin: 0 auto;
+    }
+
+    &:hover {
+      .department-dot {
+        display: none;
+      }
+      .validation-content {
+        padding-left: 2px;
+      }
     }
   }
 

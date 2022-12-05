@@ -1153,6 +1153,18 @@ export default {
       }, 10)
     },
 
+    scrollToDate (date) {
+      setTimeout(() => {
+        if (date.isAfter(this.startDate) && date.isBefore(this.endDate)) {
+          const datePosition = this.getTimebarLeft({ startDate: date }) - 5
+          const newLeft =
+            datePosition - (this.schedule.offsetWidth / 2 - 300)
+          this.timelineContentWrapper.scrollLeft = newLeft
+          this.timelineHeader.scrollLeft = newLeft
+        }
+      }, 10)
+    },
+
     startBrowsing (event) {
       if (
         !this.isChangeStartDate &&
@@ -2007,10 +2019,15 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
+.dark {
+  .sub-zone {
+    opacity: .8;
+  }
+}
 .sub-zone {
   background: $black;
   position: absolute;
-  opacity: .8;
+  opacity: .4;
   top: 0;
   bottom: 0;
 }

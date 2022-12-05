@@ -299,6 +299,13 @@ textarea {
   margin-top: 2em;
 }
 
+.new-attachments {
+  max-height: 200px;
+  margin-bottom: 1em;
+  overflow-y: auto;
+  padding-right: 1em;
+}
+
 .attachment-file {
   margin-top: 3px;
   margin-bottom: 3px;
