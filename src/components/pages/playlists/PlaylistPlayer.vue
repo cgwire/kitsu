@@ -1380,6 +1380,43 @@ export default {
       this.$emit('order-change', info)
     },
 
+    moveSelectedEntityToLeft () {
+      const toMoveIndex = this.playingEntityIndex
+      const targetIndex = this.previousEntityIndex
+      this.moveSelectedEntity(toMoveIndex, targetIndex)
+      const info = {
+        before: this.entityList[targetIndex].id,
+        after: this.entityList[toMoveIndex].id
+      }
+      this.$emit('order-change', info)
+    },
+
+    moveSelectedEntityToRight () {
+      const toMoveIndex = this.playingEntityIndex
+      const targetIndex = this.nextEntityIndex
+      this.moveSelectedEntity(toMoveIndex, targetIndex)
+      const info = {
+        before: this.entityList[toMoveIndex].id,
+        after: this.entityList[targetIndex].id
+      }
+      this.$emit('order-change', info)
+    },
+
+    moveSelectedEntity (toMoveIndex, targetIndex) {
+      if (!this.currentEntity) return
+      const entityToMove = this.currentEntity
+      if (this.playingEntityIndex >= 0) {
+        if (toMoveIndex >= 0 && targetIndex >= 0) {
+          this.entityList.splice(toMoveIndex, 1)
+          this.entityList.splice(targetIndex, 0, entityToMove)
+        }
+        this.$nextTick(() => {
+          this.playingEntityIndex = targetIndex
+          this.scrollToEntity(this.playingEntityIndex)
+        })
+      }
+    },
+
     resetHeight () {
       this.$nextTick(() => {
         let height = window.innerHeight - 90
