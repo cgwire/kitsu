@@ -653,14 +653,24 @@ export const playerMixin = {
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
         if ((event.keyCode === 46 || event.keyCode === 8) && this.fabricCanvas) {
           this.deleteSelection()
-        } else if (event.keyCode === 37) {
+        } else if (event.keyCode === 37) { // left
           event.preventDefault()
           event.stopPropagation()
-          this.onPreviousFrameClicked()
+          // ctrl + shift + left
+          if (event.ctrlKey && event.shiftKey && this.moveSelectedEntityToLeft) {
+            this.moveSelectedEntityToLeft()
+          } else {
+            this.onPreviousFrameClicked()
+          }
         } else if (event.keyCode === 39) {
           event.preventDefault()
           event.stopPropagation()
-          this.onNextFrameClicked()
+          // ctrl + shift + right
+          if (event.ctrlKey && event.shiftKey && this.moveSelectedEntityToLeft) {
+            this.moveSelectedEntityToRight()
+          } else {
+            this.onNextFrameClicked()
+          }
         } else if (event.keyCode === 32) {
           event.preventDefault()
           event.stopPropagation()
