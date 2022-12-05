@@ -2019,10 +2019,15 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
+.dark {
+  .sub-zone {
+    opacity: .8;
+  }
+}
 .sub-zone {
   background: $black;
   position: absolute;
-  opacity: .8;
+  opacity: .4;
   top: 0;
   bottom: 0;
 }
