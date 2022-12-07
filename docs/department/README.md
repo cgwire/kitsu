@@ -68,7 +68,7 @@ On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 ![Task Type](../img/getting-started/menu_tasktype.png)
 
 
-You can notice the empty column on the left part of the screen **Department**.
+You can notice the column on the left part of the screen **Department**.
 
 ![Task Type department](../img/getting-started/tasktype_department_empty.png)
 
