@@ -1410,14 +1410,14 @@ export default {
     },
 
     dueDateFilter () {
-      this.onSearchChange(this.searchField.value)
+      this.onSearchChange(this.searchField.getValue())
       this.sortTasks()
       this.$refs['task-list'].resetSelection()
       this.clearSelectedTasks()
     },
 
     estimationFilter () {
-      this.onSearchChange(this.searchField.value)
+      this.onSearchChange(this.searchField.getValue())
       this.sortTasks()
       this.$refs['task-list'].resetSelection()
       this.clearSelectedTasks()
@@ -1476,7 +1476,14 @@ export default {
     events: {
       'task:update' (eventData) {
         if (this.taskMap.get(eventData.task_id)) {
-          setTimeout(this.resetTaskIndex, 1000)
+          setTimeout(() => {
+            this.resetTaskIndex()
+            this.$nextTick(() => {
+              if (!this.selectedTasks.get(eventData.task_id)) {
+                this.onSearchChange(this.searchField.getValue())
+              }
+            })
+          }, 1000)
         }
       }
     }
