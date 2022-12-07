@@ -141,4 +141,10 @@ th.metadata-descriptor {
   max-width: 95%;
 }
 
+.header-icon {
+  background: var(--background);
+  border-radius: 50%;
+  height: 18px;
+  padding: 1px;
+}
 </style>
