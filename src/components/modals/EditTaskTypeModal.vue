@@ -97,6 +97,10 @@ export default {
       type: Boolean,
       default: false
     },
+    taskTypes: {
+      type: Array,
+      default: () => []
+    },
     taskTypeToEdit: {
       type: Object,
       default: () => {}
@@ -151,7 +155,8 @@ export default {
     ]),
 
     newPriority (forEntity) {
-      return this.entries.filter(taskType => taskType.for_entity === forEntity).length + 1
+      return this.taskTypes
+        .filter(taskType => taskType.for_entity === forEntity).length + 1
     },
 
     confirmClicked () {

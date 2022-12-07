@@ -20,7 +20,7 @@
       :active="modals.edit"
       :is-loading="loading.edit"
       :is-error="errors.edit"
-      :entries="taskTypes"
+      :task-types="taskTypes"
       :task-type-to-edit="taskTypeToEdit"
       @cancel="modals.edit = false"
       @confirm="confirmEditTaskType"
