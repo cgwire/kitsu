@@ -276,7 +276,7 @@ On the **Action Menu**, choose on the drop down menu the **Setting**.
 
 Per default, Kitsu will load no status automation of your status automation library into your production.
 
-![Setting Task Type new](../img/getting-started/setting_task_new.png)
+![Setting Task Type new](../img/getting-started/setting_auto_new.png)
 
 But you can choose to use only specific Task Types, depending of the type of your production.
 
@@ -287,4 +287,4 @@ On the **Task Types** tab, you can choose which status you want to use on this p
 validate your choice with the **add** button.
 
 
-![Setting Add Task Type](../img/getting-started/setting_task_add.png)
+![Setting Add Task Type](../img/getting-started/setting_auto_add.png)
