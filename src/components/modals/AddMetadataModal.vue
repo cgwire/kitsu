@@ -98,7 +98,12 @@
       <div
         class="departments"
       >
-        <label class="label">{{ $t('people.fields.departments') }}</label>
+        <label
+          class="label"
+          v-if="form.departments && form.departments.length > 0"
+        >
+          {{ $t('people.fields.departments') }}
+        </label>
         <div
           class="department-element mb1"
           :key="departmentId"
