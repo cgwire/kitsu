@@ -347,6 +347,9 @@ export default {
       'assetSearchText',
       'assetValidationColumns',
       'currentProduction',
+      'editSearchText',
+      'episodeSearchText',
+      'episodeMetadataDescriptors',
       'episodeValidationColumns',
       'isCurrentUserVendor',
       'people',
@@ -370,12 +373,6 @@ export default {
     isShots () {
       return this.entityType === 'shot'
     },
-    isEdits () {
-      return this.entityType === 'edit'
-    },
-    isEpisodes () {
-      return this.entityType === 'episode'
-    },
 
     assetTypeOptions () {
       return [
@@ -391,23 +388,8 @@ export default {
     },
 
     taskTypeList () {
-      if (this.isAssets) {
-        return this.assetValidationColumns
-          .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
-      }
-      if (this.isShots) {
-        return this.shotValidationColumns
-          .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
-      }
-      if (this.isEdits) {
-        return this.editValidationColumns
-          .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
-      }
-      if (this.isEpisodes) {
-        return this.episodeValidationColumns
-          .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
-      }
-      return null
+      return this[`${this.entityType}ValidationColumns`]
+        .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
     },
 
     team () {
@@ -422,10 +404,7 @@ export default {
     },
 
     metadataDescriptors () {
-      let descriptors = this.shotMetadataDescriptors
-      if (this.isAssets) descriptors = this.assetMetadataDescriptors
-      if (this.isEdits) descriptors = this.editMetadataDescriptors
-      return descriptors
+      return this[`${this.entityType}MetadataDescriptors`]
     }
   },
 
@@ -635,8 +614,7 @@ export default {
     // Helpers to set filters from search query
 
     setFiltersFromCurrentQuery () {
-      const searchQuery =
-        this.isAssets ? this.assetSearchText : this.shotSearchText
+      const searchQuery = this[`${this.entityType}SearchText`]
       if (searchQuery) {
         const filters = getFilters({
           entryIndex: [], // entry list is not needed,
