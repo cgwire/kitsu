@@ -1,6 +1,7 @@
 import {
   getFirstStartDate,
   getLastEndDate,
+  parseDate,
   parseSimpleDate
 } from '@/lib/time'
 import moment from 'moment'
@@ -21,6 +22,7 @@ export const entityMixin = {
         { label: 'Timelog', value: 'time-logs' }
       ],
       zoomOptions: [
+        { label: 'Week', value: 0 },
         { label: '1', value: 1 },
         { label: '2', value: 2 },
         { label: '3', value: 3 }
@@ -77,7 +79,7 @@ export const entityMixin = {
           .clone()
           .add(-60, 'days')
       } else {
-        return moment()
+        return parseDate(this.currentProduction.start_date)
       }
     },
 
@@ -88,7 +90,7 @@ export const entityMixin = {
           .clone()
           .add(60, 'days')
       } else {
-        return moment().add(30, 'days')
+        return parseDate(this.currentProduction.end_date)
       }
     },
 
@@ -107,7 +109,7 @@ export const entityMixin = {
       }
       const limitStartDate = moment()
       const children = this.currentTasks.map(task => {
-        const estimation = this.formatDuration(task.estimation)
+        const estimation = task.estimation
         let startDate = limitStartDate.clone()
         let endDate
 
