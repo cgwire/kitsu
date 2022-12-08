@@ -132,6 +132,45 @@
 
       <draggable
         class="datatable-body"
+        v-model="sequencesItems"
+        draggable=".tasktype-item"
+        tag="tbody"
+        :sort="true"
+        @end="updatePrioritySequences"
+      >
+        <tr class="datatable-type-header" slot="header">
+          <th scope="rowgroup" colspan="4">
+            <span class="datatable-row-header">
+              {{ $t('sequences.title') }}
+            </span>
+          </th>
+        </tr>
+        <tr
+          class="datatable-row tasktype-item"
+          v-for="taskType in sequencesItems" :key="taskType.id"
+        >
+          <td class="department">
+            <department-name
+              :department="getDepartments(taskType.department_id)"
+              v-if="!isEmpty(taskType.department_id)"
+            />
+          </td>
+          <task-type-cell class="name" :task-type="taskType" />
+          <td class="allow-timelog">
+            <boolean-rep
+              :value="taskType.allow_timelog"
+            />
+          </td>
+          <row-actions-cell
+            :taskType-id="taskType.id"
+            @delete-clicked="$emit('delete-clicked', taskType)"
+            @edit-clicked="$emit('edit-clicked', taskType)"
+          />
+        </tr>
+      </draggable>
+
+      <draggable
+        class="datatable-body"
         v-model="episodesItems"
         draggable=".tasktype-item"
         tag="tbody"
@@ -216,6 +255,7 @@ export default {
       assetsItems: [],
       shotsItems: [],
       editsItems: [],
+      sequencesItems: [],
       episodesItems: []
     }
   },
@@ -246,6 +286,10 @@ export default {
 
     editTaskTypes () {
       return this.getTaskTypesForEntity('Edit')
+    },
+
+    sequenceTaskTypes () {
+      return this.getTaskTypesForEntity('Sequence')
     },
 
     episodeTaskTypes () {
@@ -288,6 +332,10 @@ export default {
       this.updatePriority(this.editsItems)
     },
 
+    updatePrioritySequences () {
+      this.updatePriority(this.sequencesItems)
+    },
+
     updatePriorityEpisodes () {
       this.updatePriority(this.episodesItems)
     },
@@ -306,6 +354,7 @@ export default {
           this.shotsItems = JSON.parse(JSON.stringify(this.shotTaskTypes))
           this.editsItems = JSON.parse(JSON.stringify(this.editTaskTypes))
           this.episodesItems = JSON.parse(JSON.stringify(this.episodeTaskTypes))
+          this.sequencesItems = JSON.parse(JSON.stringify(this.sequenceTaskTypes))
         }, 100)
       }
     }

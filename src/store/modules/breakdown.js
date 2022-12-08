@@ -23,6 +23,7 @@ import {
   LOAD_SHOTS_START,
   LOAD_EPISODE_CASTING_END,
   LOAD_SHOT_CASTING_END,
+  LOAD_SEQUENCE_CASTING_END,
   LOAD_ASSET_CASTING_END,
   LOAD_ASSET_CAST_IN_END,
 
@@ -118,8 +119,8 @@ const actions = {
       })
   },
 
-  setCastingEpisode ({ commit, rootState }, episodeId) {
-    const sequences = rootState.shots.sequences
+  setCastingEpisode ({ commit, rootGetters }, episodeId) {
+    const sequences = rootGetters.displayedSequences
     commit(CASTING_SET_SEQUENCES, sequences)
     commit(CASTING_SET_EPISODE, episodeId)
   },
@@ -210,6 +211,16 @@ const actions = {
     return breakdownApi.getShotCasting(shot)
       .then(casting => {
         commit(LOAD_SHOT_CASTING_END, { shot, casting, assetMap })
+        return Promise.resolve(casting)
+      })
+  },
+
+  loadSequenceCasting ({ commit, rootGetters }, sequence) {
+    if (!sequence) return Promise.resolve({})
+    const assetMap = rootGetters.assetMap
+    return breakdownApi.getSequenceCasting(sequence.project_id, sequence.id)
+      .then(casting => {
+        commit(LOAD_SEQUENCE_CASTING_END, { sequence, casting, assetMap })
         return Promise.resolve(casting)
       })
   },
@@ -463,8 +474,27 @@ const mutations = {
     )
   },
 
+  [LOAD_SEQUENCE_CASTING_END] (state, { sequence, casting }) {
+    const sequenceCasting = []
+    Object.keys(casting).forEach(shotId => {
+      sequenceCasting.concat(casting[shotId])
+    })
+    sequenceCasting.forEach(a => { a.name = a.asset_name || a.name })
+    const castingByType = groupEntitiesByParents(
+      sequenceCasting, 'asset_type_name'
+    )
+    sequence.casting = sequenceCasting
+    Vue.set(state.casting, sequence.id, sequenceCasting)
+    Vue.set(state.castingByType, sequence.id, castingByType)
+    Vue.set(
+      sequence,
+      'castingAssetsByType',
+      castingByType
+    )
+  },
+
   [LOAD_ASSET_CAST_IN_END] (state, { asset, castIn }) {
-    castIn.forEach((shot) => {
+    castIn.forEach(shot => {
       if (shot.episode_name) {
         shot.sequence_name = `${shot.episode_name} / ${shot.sequence_name}`
       }

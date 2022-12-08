@@ -527,8 +527,13 @@ export default {
     const isAssets = this.$route.path.includes('assets')
     const isShots = this.$route.path.includes('shots')
     const isEdits = this.$route.path.includes('edits')
+    const isSequences = this.$route.path.includes('sequences')
     this.entityType =
-      isAssets ? 'Asset' : isShots ? 'Shot' : isEdits ? 'Edit' : 'Episode'
+      isAssets
+        ? 'Asset' : isShots
+          ? 'Shot' : isEdits
+            ? 'Edit' : isSequences
+              ? 'Sequence' : 'Episode'
     this.updateActiveTab()
     setTimeout(() => {
       this.initData(false)
@@ -560,6 +565,8 @@ export default {
       'organisation',
       'personMap',
       'selectedTasks',
+      'sequenceMap',
+      'sequencesPath',
       'sequenceSubscriptions',
       'shotsByEpisode',
       'shotMap',
@@ -588,14 +595,7 @@ export default {
     },
 
     entityMap () {
-      if (this.entityType === 'Asset') {
-        return this.assetMap
-      } else if (this.entityType === 'Shot') {
-        return this.shotMap
-      } else if (this.entityType === 'Edit') {
-        return this.editMap
-      }
-      return this.assetMap
+      return this[`${this.entityType.toLowerCase()}Map`]
     },
 
     locale () {
@@ -640,20 +640,8 @@ export default {
 
     // Meta
 
-    assetTasks () {
-      return this.getTasks(Array.from(this.assetMap.values()))
-    },
-
-    shotTasks () {
-      return this.getTasks(Array.from(this.shotMap.values()))
-    },
-
-    editTasks () {
-      return this.getTasks(Array.from(this.editMap.values()))
-    },
-
-    episodeTasks () {
-      return this.getTasks(Array.from(this.episodeMap.values()))
+    entityTasks () {
+      return this.getTasks(Array.from(this.entityMap.values()))
     },
 
     title () {
@@ -662,14 +650,9 @@ export default {
           const episodeName = this.currentEpisode.id === 'all'
             ? this.$t('main.all_assets')
             : this.currentEpisode.name
-
-          if (this.currentTaskType.for_entity === 'Episode') {
-            return `${episodeName}`
-          } else {
-            return `${this.currentProduction.name} / ` +
-                   `${episodeName} / ` +
-                   `${this.currentTaskType.name}`
-          }
+          return `${this.currentProduction.name} / ` +
+                 `${episodeName} / ` +
+                 `${this.currentTaskType.name}`
         } else {
           return `${this.currentProduction.name} / ${this.currentTaskType.name}`
         }
@@ -702,6 +685,9 @@ export default {
         }
         if (this.currentTaskType.for_entity === 'Episode') {
           route = this.episodesPath
+        }
+        if (this.currentTaskType.for_entity === 'Sequence') {
+          route = this.sequencesPath
         }
       }
       return {
@@ -802,7 +788,7 @@ export default {
               this.resetScheduleScroll()
             }
           })
-          .catch((err) => {
+          .catch(err => {
             console.error(err)
             this.loading.entities = false
             this.errors.entities = true
@@ -967,16 +953,9 @@ export default {
     },
 
     resetTasks () {
-      let tasks = this.assetTasks
-      if (this.entityType === 'Shot') {
-        tasks = this.shotTasks
-      } else if (this.entityType === 'Edit') {
-        tasks = this.editTasks
-      } else if (this.entityType === 'Episode') {
-        tasks = this.episodeTasks
-      }
+      let tasks = this.entityTasks
 
-      if (this.entityType !== 'Episode') {
+      if (['Episode', 'Sequence'].includes(this.entityTypes)) {
         tasks = tasks.filter(task => {
           const entity = this.entityMap.get(task.entity_id)
           return !entity.canceled

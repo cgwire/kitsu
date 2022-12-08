@@ -13,9 +13,6 @@
           <th scope="col" class="name datatable-row-header" ref="th-episode">
             {{ $t('shots.fields.episode') }}
           </th>
-          <th scope="col" class="description">
-            {{ $t('shots.fields.description') }}
-          </th>
           <th scope="col" class="validation">{{ $t('main.all') }}</th>
           <th
             scope="col"
@@ -59,8 +56,6 @@
             {{ $t('episodes.all_episodes') }}
           </td>
 
-          <td class="description"></td>
-
           <stats-cell
             :colors="chartColors('all', 'all')"
             :data="chartData('all', 'all')"
@@ -99,13 +94,6 @@
             <td class="name datatable-row-header">
               {{ entry.name }}
             </td>
-
-            <description-cell
-              class="description"
-              :editable="isCurrentUserManager"
-              :entry="entry"
-              @description-changed="value => onDescriptionChanged(entry, value)"
-            />
 
             <stats-cell
               :colors="chartColors(entry.id, 'all')"
@@ -245,7 +233,6 @@ import {
   getChartRetakeCount,
   getRetakeChartData
 } from '@/lib/stats'
-import DescriptionCell from '@/components/cells/DescriptionCell'
 import StatsCell from '@/components/cells/StatsCell'
 import TableInfo from '@/components/widgets/TableInfo'
 
@@ -254,7 +241,6 @@ export default {
   mixins: [entityListMixin],
 
   components: {
-    DescriptionCell,
     ChevronDownIcon,
     ChevronRightIcon,
     StatsCell,

@@ -3,17 +3,17 @@
   <action-panel />
 
   <div class="column main-column">
-    <div class="sequences page">
-      <div class="sequence-list-header page-header">
+    <div class="episodes page">
+      <div class="episode-list-header page-header">
         <div class="flexrow">
           <search-field
-            ref="sequence-search-field"
+            ref="episode-search-field"
             :can-save="true"
             :active="isSearchActive"
             @change="onSearchChange"
             @enter="saveSearchQuery"
             @save="saveSearchQuery"
-            placeholder="ex: e01 sequence=wip"
+            placeholder="ex: e01 episode=wip"
           />
           <button-simple
             class="flexrow-item"
@@ -30,7 +30,7 @@
           <div class="flexrow" v-if="isCurrentUserManager">
             <button-simple
               class="flexrow-item"
-              :text="$t('sequences.new_sequence')"
+              :text="$t('episodes.new_episode')"
               icon="plus"
               @click="showNewModal"
             />
@@ -39,27 +39,27 @@
 
         <div class="query-list mt1">
           <search-query-list
-            :queries="sequenceSearchQueries"
+            :queries="episodeSearchQueries"
             @change-search="changeSearch"
             @remove-search="removeSearchQuery"
-            v-if="!isSequencesLoading && !initialLoading"
+            v-if="!isEpisodesLoading && !initialLoading"
           />
         </div>
       </div>
 
       <sorting-info
         :label="$t('main.sorted_by')"
-        :sorting="sequenceSorting"
+        :sorting="episodeSorting"
         @clear-sorting="onChangeSortClicked(null)"
-        v-if="sequenceSorting && sequenceSorting.length > 0"
+        v-if="episodeSorting && episodeSorting.length > 0"
       />
 
-      <sequence-list
-        ref="sequence-list"
-        :displayed-sequences="displayedSequences"
-        :is-loading="isSequencesLoading || initialLoading"
-        :is-error="isSequencesLoadingError"
-        :validation-columns="sequenceValidationColumns"
+      <episode-list
+        ref="episode-list"
+        :displayed-episodes="displayedEpisodes"
+        :is-loading="isEpisodesLoading || initialLoading"
+        :is-error="isEpisodesLoadingError"
+        :validation-columns="episodeValidationColumns"
         :department-filter="departmentFilter"
         @add-metadata="onAddMetadataClicked"
         @change-sort="onChangeSortClicked"
@@ -86,24 +86,24 @@
     />
   </div>
 
-  <edit-sequence-modal
+  <edit-episode-modal
     :active="modals.isNewDisplayed"
-    :is-loading="loading.sequence"
-    :is-error="errors.sequence"
-    :sequence-to-sequence="sequenceToEdit"
+    :is-loading="loading.episode"
+    :is-error="errors.episode"
+    :episode-to-episode="episodeToEdit"
     @cancel="modals.isNewDisplayed = false"
-    @confirm="confirmEditSequence"
+    @confirm="confirmEditEpisode"
   />
 
   <delete-modal
-    ref="delete-sequence-modal"
+    ref="delete-episode-modal"
     :active="modals.isDeleteDisplayed"
     :is-loading="loading.del"
     :is-error="errors.del"
     :text="deleteText()"
-    :error-text="$t('sequences.delete_error')"
+    :error-text="$t('episodes.delete_error')"
     @cancel="modals.isDeleteDisplayed = false"
-    @confirm="confirmDeleteSequence"
+    @confirm="confirmDeleteEpisode"
   />
 
   <delete-modal
@@ -135,9 +135,9 @@
     :is-loading="loading.creatingTasks"
     :is-loading-stay="loading.creatingTasksStay"
     :is-error="errors.creatingTasks"
-    :title="$t('tasks.create_tasks_sequence')"
-    :text="$t('tasks.create_tasks_sequence_explaination')"
-    :error-text="$t('tasks.create_tasks_sequence_failed')"
+    :title="$t('tasks.create_tasks_episode')"
+    :text="$t('tasks.create_tasks_episode_explaination')"
+    :error-text="$t('tasks.create_tasks_episode_failed')"
     @cancel="hideCreateTasksModal"
     @confirm="confirmCreateTasks"
     @confirm-and-stay="confirmCreateTasksAndStay"
@@ -149,14 +149,14 @@
     :is-loading-stay="loading.addMetadata"
     :is-error="errors.addMetadata"
     :descriptor-to-edit="descriptorToEdit"
-    entity-type="Sequence"
+    entity-type="Episode"
     @cancel="closeMetadataModal"
     @confirm="confirmAddMetadata"
   />
 
   <add-thumbnails-modal
     ref="add-thumbnails-modal"
-    parent="sequences"
+    parent="episodes"
     :active="modals.isAddThumbnailsDisplayed"
     :is-loading="loading.addThumbnails"
     :is-error="errors.addThumbnails"
@@ -167,18 +167,18 @@
   <build-filter-modal
     ref="build-filter-modal"
     :active="modals.isBuildFilterDisplayed"
-    entity-type="sequence"
+    entity-type="episode"
     @cancel="modals.isBuildFilterDisplayed = false"
     @confirm="confirmBuildFilter"
   />
 
-  <edit-sequence-modal
+  <edit-episode-modal
     :active="modals.isNewDisplayed"
     :is-loading="loading.edit"
     :is-error="errors.edit"
-    :sequence-to-edit="sequenceToEdit"
+    :episode-to-edit="episodeToEdit"
     @cancel="modals.isNewDisplayed = false"
-    @confirm="confirmEditSequence"
+    @confirm="confirmEditEpisode"
   />
 
   <hard-delete-modal
@@ -186,10 +186,10 @@
     :is-loading="loading.del"
     :is-error="errors.del"
     :text="deleteText()"
-    :error-text="$t('sequences.delete_error')"
-    :lock-text="sequenceToDelete ? sequenceToDelete.name : ''"
+    :error-text="$t('episodes.delete_error')"
+    :lock-text="episodeToDelete ? episodeToDelete.name : ''"
     @cancel="modals.isDeleteDisplayed = false"
-    @confirm="confirmDeleteSequence"
+    @confirm="confirmDeleteEpisode"
   />
 </div>
 </template>
@@ -212,8 +212,8 @@ import BuildFilterModal from '@/components/modals/BuildFilterModal'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import CreateTasksModal from '@/components/modals/CreateTasksModal'
 import DeleteModal from '@/components/modals/DeleteModal'
-import EditSequenceModal from '@/components/modals/EditSequenceModal'
-import SequenceList from '@/components/lists/SequenceList.vue'
+import EditEpisodeModal from '@/components/modals/EditEpisodeModal'
+import EpisodeList from '@/components/lists/EpisodeList.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal'
 import SearchField from '@/components/widgets/SearchField'
 import SearchQueryList from '@/components/widgets/SearchQueryList'
@@ -223,7 +223,7 @@ import ShowInfosButton from '@/components/widgets/ShowInfosButton'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 export default {
-  name: 'sequences',
+  name: 'episodes',
   mixins: [searchMixin, entitiesMixin],
 
   components: {
@@ -235,8 +235,8 @@ export default {
     ButtonSimple,
     CreateTasksModal,
     DeleteModal,
-    EditSequenceModal,
-    SequenceList,
+    EditEpisodeModal,
+    EpisodeList,
     HardDeleteModal,
     SearchField,
     SearchQueryList,
@@ -248,12 +248,12 @@ export default {
 
   data () {
     return {
-      type: 'sequence',
+      type: 'episode',
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
       departmentFilter: [],
-      sequenceToDelete: null,
-      sequenceToEdit: null,
+      episodeToDelete: null,
+      episodeToEdit: null,
       formData: null,
       genericColumns: [
         'metadata_column_name => text value',
@@ -266,7 +266,7 @@ export default {
       optionalColumns: [
         'Description'
       ],
-      pageName: 'Sequences',
+      pageName: 'Episodes',
       parsedCSV: [],
       selectedDepartment: 'ALL',
       taskTypeForTaskDeletion: null,
@@ -289,7 +289,7 @@ export default {
         creatingTasksStay: false,
         deleteAllTasks: false,
         deleteMetadata: false,
-        sequence: false,
+        episode: false,
         del: false,
         importing: false,
         stay: false
@@ -306,28 +306,28 @@ export default {
   },
 
   beforeDestroy () {
-    this.clearSelectedSequences()
+    this.clearSelectedEpisodes()
   },
 
   created () {
-    this.setLastProductionScreen('sequences')
+    this.setLastProductionScreen('episodes')
   },
 
   mounted () {
     let searchQuery = ''
-    if (this.sequenceSearchText && this.sequenceSearchText.length > 0) {
-      this.searchField.setValue(this.sequenceSearchText)
+    if (this.episodeSearchText && this.episodeSearchText.length > 0) {
+      this.searchField.setValue(this.episodeSearchText)
     }
     if (this.$route.query.search && this.$route.query.search.length > 0) {
       searchQuery = '' + this.$route.query.search
     }
     if (searchQuery === 'undefined') searchQuery = ''
-    this.$refs['sequence-list'].setScrollPosition(
-      this.sequenceListScrollPosition
+    this.$refs['episode-list'].setScrollPosition(
+      this.episodeListScrollPosition
     )
     this.onSearchChange()
-    this.$refs['sequence-list'].setScrollPosition(
-      this.sequenceListScrollPosition
+    this.$refs['episode-list'].setScrollPosition(
+      this.episodeListScrollPosition
     )
     if (!this.isCurrentUserManager && this.user.departments.length > 0) {
       this.selectedDepartment = 'MY_DEPARTMENTS'
@@ -338,27 +338,27 @@ export default {
 
     const finalize = () => {
       this.initialLoading = false
-      if (this.$refs['sequence-list']) {
-        this.$refs['sequence-search-field'].setValue(searchQuery)
+      if (this.$refs['episode-list']) {
+        this.$refs['episode-search-field'].setValue(searchQuery)
         this.onSearchChange()
-        this.$refs['sequence-list'].setScrollPosition(
-          this.sequenceListScrollPosition
+        this.$refs['episode-list'].setScrollPosition(
+          this.episodeListScrollPosition
         )
       }
     }
 
     if (
-      this.sequenceMap.size < 1 ||
-      this.sequenceValidationColumns.length === 0 ||
-      this.sequenceMap.values().next().project_id !== this.currentProduction.id
+      this.episodeMap.size < 1 ||
+      this.episodeValidationColumns.length === 0 ||
+      this.episodeMap.values().next().project_id !== this.currentProduction.id
     ) {
-      this.loadSequencesWithTasks()
+      this.loadEpisodesWithTasks()
         .then(() => {
           this.initialLoading = false
         })
         .catch(console.error)
     } else {
-      if (!this.isSequencesLoading) this.initialLoading = false
+      if (!this.isEpisodesLoading) this.initialLoading = false
       finalize()
     }
   },
@@ -367,57 +367,57 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
-      'displayedSequences',
+      'displayedEpisodes',
       'departments',
-      'sequenceMap',
-      'sequences',
-      'sequenceSearchQueries',
+      'episodeMap',
+      'episodes',
+      'episodeSearchQueries',
       'isCurrentUserClient',
       'isCurrentUserManager',
-      'isSequenceDescription',
-      'isSequenceEstimation',
-      'isSequenceTime',
-      'isSequencesLoading',
-      'isSequencesLoadingError',
+      'isEpisodeDescription',
+      'isEpisodeEstimation',
+      'isEpisodeTime',
+      'isEpisodesLoading',
+      'isEpisodesLoadingError',
       'isShowAssignations',
       'isTVShow',
       'nbSelectedTasks',
       'openProductions',
       'selectedTasks',
-      'sequenceMap',
-      'sequenceFilledColumns',
-      'sequencesCsvFormData',
-      'sequenceSearchText',
-      'sequenceValidationColumns',
-      'sequenceListScrollPosition',
-      'sequenceSorting',
+      'episodeMap',
+      'episodeFilledColumns',
+      'episodesCsvFormData',
+      'episodeSearchText',
+      'episodeValidationColumns',
+      'episodeListScrollPosition',
+      'episodeSorting',
       'taskTypeMap',
       'user',
       'departmentMap',
-      'productionSequenceTaskTypes'
+      'productionEpisodeTaskTypes'
     ]),
 
     renderColumns () {
       var collection = [...this.dataMatchers, ...this.optionalColumns]
 
-      this.productionSequenceTaskTypes.forEach(item => {
+      this.productionEpisodeTaskTypes.forEach(item => {
         collection.push(item.name)
         collection.push(item.name + ' comment')
       })
       return collection
     },
 
-    filteredSequences () {
-      const sequences = {}
-      this.displayedSequences.forEach(sequence => {
-        const sequenceKey = sequence.name
-        sequences[sequenceKey] = true
+    filteredEpisodes () {
+      const episodes = {}
+      this.displayedEpisodes.forEach(episode => {
+        const episodeKey = episode.name
+        episodes[episodeKey] = true
       })
-      return sequences
+      return episodes
     },
 
     metadataDescriptors () {
-      return this.sequenceMetadataDescriptors
+      return this.episodeMetadataDescriptors
     }
   },
 
@@ -425,29 +425,29 @@ export default {
     ...mapActions([
       'addMetadataDescriptor',
       'createTasks',
-      'changeSequenceSort',
-      'clearSelectedSequences',
+      'changeEpisodeSort',
+      'clearSelectedEpisodes',
       'commentTaskWithPreview',
-      'deleteAllSequenceTasks',
-      'deleteSequence',
+      'deleteAllEpisodeTasks',
+      'deleteEpisode',
       'deleteMetadataDescriptor',
-      'editSequence',
-      'getSequencesCsvLines',
+      'editEpisode',
+      'getEpisodesCsvLines',
       'hideAssignations',
-      'loadSequencesWithTasks',
-      'newSequence',
-      'removeSequenceSearch',
-      'saveSequenceSearch',
+      'loadEpisodesWithTasks',
+      'newEpisode',
+      'removeEpisodeSearch',
+      'saveEpisodeSearch',
       'setLastProductionScreen',
       'setPreview',
-      'setSequenceSearch',
+      'setEpisodeSearch',
       'showAssignations',
-      'uploadSequenceFile'
+      'uploadEpisodeFile'
     ]),
 
     confirmAddMetadata (form) {
       this.loading.addMetadata = true
-      form.entity_type = 'Sequence'
+      form.entity_type = 'Episode'
       this.addMetadataDescriptor(form)
         .then(() => {
           this.loading.addMetadata = false
@@ -461,14 +461,14 @@ export default {
     },
 
     showNewModal () {
-      this.sequenceToEdit = {}
+      this.episodeToEdit = {}
       this.modals.isNewDisplayed = true
     },
 
-    confirmDeleteSequence () {
+    confirmDeleteEpisode () {
       this.loading.del = true
       this.errors.del = false
-      this.deleteSequence(this.sequenceToDelete)
+      this.deleteEpisode(this.episodeToDelete)
         .then(() => {
           this.loading.del = false
           this.modals.isDeleteDisplayed = false
@@ -483,7 +483,7 @@ export default {
     runTasksCreation (form, selectionOnly) {
       this.errors.creatingTasks = false
       return this.createTasks({
-        type: 'sequences',
+        type: 'episodes',
         task_type_id: form.task_type_id,
         project_id: this.currentProduction.id,
         selectionOnly
@@ -492,7 +492,7 @@ export default {
 
     reset () {
       this.initialLoading = false
-      this.loadSequencesWithTasks((err) => {
+      this.loadEpisodesWithTasks((err) => {
         if (err) console.error(err)
         this.initialLoading = false
       })
@@ -503,59 +503,59 @@ export default {
       if (this.openProductions.length > 0) {
         form.production_id = this.openProductions[0].id
       }
-      this.sequenceToEdit = form
+      this.episodeToEdit = form
     },
 
     applySearch (searchQuery) {
-      this.setSequenceSearch(searchQuery)
+      this.setEpisodeSearch(searchQuery)
       this.setSearchInUrl()
       this.isSearchActive = true
     },
 
     saveSearchQuery (searchQuery) {
-      this.saveSequenceSearch(searchQuery)
+      this.saveEpisodeSearch(searchQuery)
         .catch(console.error)
     },
 
     removeSearchQuery (searchQuery) {
-      this.removeSequenceSearch(searchQuery)
+      this.removeEpisodeSearch(searchQuery)
         .catch(console.error)
     },
 
     onExportClick () {
-      this.getSequencesCsvLines()
-        .then(sequenceLines => {
+      this.getEpisodesCsvLines()
+        .then(episodeLines => {
           const nameData = [
             moment().format('YYYY-MM-DD'),
             'kitsu',
             this.currentProduction.name,
-            this.$t('sequences.title')
+            this.$t('episodes.title')
           ]
           const name = stringHelpers.slugify(nameData.join('_'))
           const headers = [
-            this.$t('sequences.fields.name'),
-            this.$t('sequences.fields.description')
+            this.$t('episodes.fields.name'),
+            this.$t('episodes.fields.description')
           ]
-          if (this.currentSequence) {
-            headers.splice(0, 0, 'Sequence')
+          if (this.currentEpisode) {
+            headers.splice(0, 0, 'Episode')
           }
           sortByName([...this.currentProduction.descriptors])
-            .filter(d => d.entity_type === 'Sequence')
+            .filter(d => d.entity_type === 'Episode')
             .forEach((descriptor) => {
               headers.push(descriptor.name)
             })
-          if (this.isSequenceTime) {
-            headers.push(this.$t('sequences.fields.time_spent'))
+          if (this.isEpisodeTime) {
+            headers.push(this.$t('episodes.fields.time_spent'))
           }
-          if (this.isSequenceEstimation) {
+          if (this.isEpisodeEstimation) {
             headers.push(this.$t('main.estimation_short'))
           }
-          this.sequenceValidationColumns
+          this.episodeValidationColumns
             .forEach(taskTypeId => {
               headers.push(this.taskTypeMap.get(taskTypeId).name)
               headers.push('Assignations')
             })
-          csv.buildCsvFile(name, [headers].concat(sequenceLines))
+          csv.buildCsvFile(name, [headers].concat(episodeLines))
         })
     },
 
@@ -565,7 +565,7 @@ export default {
         description: entry.description
       }
       data[fieldName] = value
-      this.editSequence(data)
+      this.editEpisode(data)
     },
 
     onMetadataChanged ({ entry, descriptor, value }) {
@@ -575,25 +575,25 @@ export default {
         id: entry.id,
         data: metadata
       }
-      this.editSequence(data)
+      this.editEpisode(data)
     },
 
-    onEditClicked (sequence) {
-      this.sequenceToEdit = sequence
+    onEditClicked (episode) {
+      this.episodeToEdit = episode
       this.modals.isNewDisplayed = true
     },
 
-    onDeleteClicked (sequence) {
-      this.sequenceToDelete = sequence
+    onDeleteClicked (episode) {
+      this.episodeToDelete = episode
       this.modals.isDeleteDisplayed = true
     },
 
-    confirmEditSequence (form) {
+    confirmEditEpisode (form) {
       this.loading.edit = true
       this.errors.edit = false
 
       if (form.id) {
-        this.editSequence(form)
+        this.editEpisode(form)
           .then(() => {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
@@ -604,8 +604,7 @@ export default {
           })
       } else {
         form.project_id = this.currentProduction.id
-        form.episode_id = this.currentEpisode.id
-        this.newSequence(form)
+        this.newEpisode(form)
           .then(() => {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
@@ -618,9 +617,9 @@ export default {
     },
 
     deleteText () {
-      const sequence = this.sequenceToDelete
-      if (sequence) {
-        return this.$t('sequences.delete_text', { name: sequence.name })
+      const episode = this.episodeToDelete
+      if (episode) {
+        return this.$t('episodes.delete_text', { name: episode.name })
       } else {
         return ''
       }
@@ -631,7 +630,7 @@ export default {
     $route () {
       if (!this.$route.query) return
       const search = this.$route.query.search
-      const actualSearch = this.$refs['sequence-search-field'].getValue()
+      const actualSearch = this.$refs['episode-search-field'].getValue()
       if (search !== actualSearch) {
         this.searchField.setValue(search)
         this.applySearch(search)
@@ -639,21 +638,14 @@ export default {
     },
 
     currentProduction () {
-      this.$refs['sequence-search-field'].setValue('')
-      this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
+      this.$refs['episode-search-field'].setValue('')
+      this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
       this.initialLoading = false
       this.reset()
     },
 
-    currentEpisode () {
-      this.$refs['sequence-search-field'].setValue('')
-      this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
-      this.initialLoading = false
-      this.reset()
-    },
-
-    isSequencesLoading () {
-      if (!this.isSequencesLoading) {
+    isEpisodesLoading () {
+      if (!this.isEpisodesLoading) {
         let searchQuery = ''
         if (
           this.$route.query.search &&
@@ -662,13 +654,13 @@ export default {
           searchQuery = '' + this.$route.query.search
         }
         this.initialLoading = false
-        this.$refs['sequence-search-field'].setValue(searchQuery)
+        this.$refs['episode-search-field'].setValue(searchQuery)
         this.$nextTick(() => {
           this.applySearch(searchQuery)
         })
-        if (this.$refs['sequence-list']) {
-          this.$refs['sequence-list'].setScrollPosition(
-            this.sequenceListScrollPosition
+        if (this.$refs['episode-list']) {
+          this.$refs['episode-list'].setScrollPosition(
+            this.episodeListScrollPosition
           )
         }
       }
@@ -677,7 +669,7 @@ export default {
 
   metaInfo () {
     return {
-      title: `${this.currentProduction.name} ${this.$t('sequences.title')} - Kitsu`
+      title: `${this.currentProduction.name} ${this.$t('episodes.title')} - Kitsu`
     }
   }
 }
@@ -696,7 +688,7 @@ export default {
   align-items: flex-start;
 }
 
-.sequences {
+.episodes {
   display: flex;
   flex-direction: column;
 }

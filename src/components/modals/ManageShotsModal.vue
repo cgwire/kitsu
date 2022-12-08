@@ -76,7 +76,8 @@
               :key="sequence.id"
               @keyup.tab="focusAddShot"
               @click="selectSequence(sequence.id)"
-              v-for="sequence in displayedSequences">
+              v-for="sequence in sequences"
+            >
               {{ sequence.name }}
             </div>
           </div>
@@ -192,7 +193,7 @@ export default {
         addSequence: false,
         addShot: false
       },
-      displayedSequences: [],
+      sequences: [],
       displayedShots: [],
       selectedEpisodeId: null,
       selectedSequenceId: null,
@@ -219,7 +220,7 @@ export default {
       'currentProduction',
       'episodes',
       'isTVShow',
-      'sequences',
+      'displayedSequences',
       'shotMap'
     ]),
 
@@ -260,7 +261,7 @@ export default {
     selectEpisode (episodeId) {
       if (!this.isTVShow) {
         this.selectedEpisodeId = episodeId
-        this.displayedSequences = this.sequences.filter((sequence) => {
+        this.sequences = this.displayedSequences.filter((sequence) => {
           return sequence.parent_id === episodeId
         })
         this.displayedShots = []
@@ -356,7 +357,7 @@ export default {
     active () {
       if (this.active) {
         this.shotPadding = '1'
-        this.displayedSequences = this.sequences
+        this.sequences = this.displayedSequences
         setTimeout(() => {
           if (this.isTVShow) {
             this.$refs.addEpisodeInput.focus()
@@ -368,7 +369,7 @@ export default {
     },
 
     sequences () {
-      this.displayedSequences = this.sequences
+      this.sequences = this.displayedSequences
       this.displayedShots = []
     }
   }

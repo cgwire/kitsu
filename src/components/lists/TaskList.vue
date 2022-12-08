@@ -394,6 +394,7 @@ export default {
       'personMap',
       'user',
       'selectedTasks',
+      'sequenceMap',
       'shotMap',
       'taskMap',
       'isCurrentUserManager',

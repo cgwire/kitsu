@@ -115,11 +115,12 @@ export default {
     },
 
     getSectionPath (section) {
-      return getProductionPath(
+      const result = getProductionPath(
         this.currentProduction,
         section.value,
         this.episodeId
       )
+      return result
     }
   },
 

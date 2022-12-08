@@ -57,6 +57,7 @@ export const entityMixin = {
         this.currentAsset ||
         this.currentShot ||
         this.currentEdit ||
+        this.currentSequence ||
         this.currentEpisode
       if (!entity || !entity.tasks) return []
       return entity

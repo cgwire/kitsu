@@ -20,6 +20,7 @@ import assetStore from '@/store/modules/assets'
 import shotStore from '@/store/modules/shots'
 import editStore from '@/store/modules/edits'
 import episodeStore from '@/store/modules/episodes'
+import sequenceStore from '@/store/modules/sequences'
 
 import {
   LOAD_ASSETS_END,
@@ -272,6 +273,8 @@ const actions = {
         entityIds = editStore.cache.result.map(edit => edit.id)
       } else if (payload.type === 'episodes') {
         entityIds = episodeStore.cache.result.map(episode => episode.id)
+      } else if (payload.type === 'sequences') {
+        entityIds = sequenceStore.cache.result.map(sequence => sequence.id)
       }
     }
     const data = {
@@ -362,6 +365,9 @@ const actions = {
     { commit, state, rootGetters },
     { entityId, projectId, taskTypeId, type }
   ) {
+    const production = rootGetters.currentProduction
+    const taskTypeMap = rootGetters.taskTypeMap
+    const taskStatusMap = rootGetters.taskStatusMap
     const data = {
       entity_id: entityId,
       task_type_id: taskTypeId,
@@ -370,7 +376,12 @@ const actions = {
     }
     return tasksApi.createTask(data)
       .then(tasks => {
-        commit(NEW_TASK_END, { task: tasks[0] })
+        commit(NEW_TASK_END, {
+          task: tasks[0],
+          production,
+          taskTypeMap,
+          taskStatusMap
+        })
         return Promise.resolve(tasks[0])
       })
   },
@@ -831,6 +842,13 @@ const mutations = {
       }
     } else if (task.entity_type.name === 'Episode') {
       task.entity_name = `${task.entity.name}`
+    } else if (['Sequence', 'Edit'].includes(task.entity_type_name)) {
+      if (task.episode) {
+        task.entity_name =
+          `${task.episode.name} / ${task.entity.name}`
+      } else {
+        task.entity_name = `${task.entity.name}`
+      }
     } else {
       task.entity_name = `${task.entity_type.name} / ${task.entity.name}`
     }

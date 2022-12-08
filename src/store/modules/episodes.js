@@ -399,11 +399,22 @@ const actions = {
     commit(CLEAR_EPISODES)
   },
 
-  newEpisode ({ commit, state }, episode) {
+  newEpisode ({ commit, dispatch, state, rootGetters }, episode) {
     return shotsApi.newEpisode(episode)
       .then(episode => {
         commit(NEW_EPISODE_END, episode)
-        return Promise.resolve(episode)
+        const taskTypeIds = rootGetters.productionSequenceTaskTypeIds
+        const createTaskPromises = taskTypeIds.map(
+          taskTypeId => dispatch('createTask', {
+            entityId: episode.id,
+            projectId: episode.project_id,
+            taskTypeId: taskTypeId,
+            type: 'episodes'
+          })
+        )
+        return Promise.all(createTaskPromises)
+          .then(() => Promise.resolve(episode))
+          .catch(console.error)
       })
   },
 
