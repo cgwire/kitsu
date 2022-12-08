@@ -74,8 +74,10 @@ export default {
 .header-menu {
   position: absolute;
   background: white;
-  width: 118px;
+  width: 128px;
   box-shadow: 0px 2px 6px $light-grey;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
   top: 90px;
   z-index: 100;
 }

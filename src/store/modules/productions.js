@@ -78,6 +78,7 @@ const initialState = {
   editsPath: { name: 'open-productions' },
   episodesPath: { name: 'open-productions' },
   sequencesPath: { name: 'open-productions' },
+  sequenceStatsPath: { name: 'open-productions' },
   episodeStatsPath: { name: 'open-productions' },
   breakdownPath: { name: 'open-productions' },
   playlistsPath: { name: 'open-productions' },
@@ -105,7 +106,13 @@ const helpers = {
         }
       }
     }
-    if (['assets', 'shots', 'edits', 'episodes'].includes(routeName)) {
+    if ([
+      'assets',
+      'shots',
+      'edits',
+      'sequences',
+      'episodes'
+    ].includes(routeName)) {
       route.query = { search: '' }
     }
     return route
@@ -116,6 +123,28 @@ const helpers = {
       !production ||
       !production[field] ||
       production[field].length === 0
+    )
+  }
+}
+
+const productionEntityTaskTypeIds = (entityType) => (state, getters) => {
+  return getters.productionTaskTypes
+    .filter(taskType => taskType.for_entity === entityType)
+    .map(taskType => taskType.id)
+}
+
+const productionEntityTaskTypes = (entityType) => (state, getters) => {
+  return getters.productionTaskTypes
+    .filter(taskType => taskType.for_entity === entityType)
+}
+
+const entityMetadataDescriptors = (entityType) => (state, getters) => {
+  if (!state.currentProduction || !state.currentProduction.descriptors) {
+    return []
+  } else {
+    return sortByName(
+      state.currentProduction.descriptors
+        .filter(d => d.entity_type === entityType)
     )
   }
 }
@@ -138,7 +167,6 @@ const getters = {
   shotsPath: state => state.shotsPath,
   editsPath: state => state.editsPath,
   episodesPath: state => state.episodesPath,
-  sequencesPath: state => state.sequencesPath,
   episodeStatsPath: state => state.episodeStatsPath,
   breakdownPath: state => state.breakdownPath,
   playlistsPath: state => state.playlistsPath,
@@ -209,49 +237,23 @@ const getters = {
     }
   },
 
-  productionAssetTaskTypeIds: (state, getters) => {
-    return getters.productionTaskTypes
-      .filter(taskType => taskType.for_entity === 'Asset')
-      .map(taskType => taskType.id)
-  },
+  productionAssetTaskTypeIds: productionEntityTaskTypeIds('Asset'),
+  productionShotTaskTypeIds: productionEntityTaskTypeIds('Shot'),
+  productionEditTaskTypeIds: productionEntityTaskTypeIds('Edit'),
+  productionEpisodeTaskTypeIds: productionEntityTaskTypeIds('Episode'),
+  productionSequenceTaskTypeIds: productionEntityTaskTypeIds('Sequence'),
 
-  productionShotTaskTypeIds: (state, getters) => {
-    return getters.productionTaskTypes
-      .filter(taskType => taskType.for_entity === 'Shot')
-      .map(taskType => taskType.id)
-  },
+  productionAssetTaskTypes: productionEntityTaskTypes('Asset'),
+  productionShotTaskTypes: productionEntityTaskTypes('Shot'),
+  productionEditTaskTypes: productionEntityTaskTypes('Edit'),
+  productionEpisodeTaskTypes: productionEntityTaskTypes('Episode'),
+  productionSequenceTaskTypes: productionEntityTaskTypes('Sequence'),
 
-  productionEditTaskTypeIds: (state, getters) => {
-    return getters.productionTaskTypes
-      .filter(taskType => taskType.for_entity === 'Edit')
-      .map(taskType => taskType.id)
-  },
-
-  productionEpisodeTaskTypeIds: (state, getters) => {
-    return getters.productionTaskTypes
-      .filter(taskType => taskType.for_entity === 'Episode')
-      .map(taskType => taskType.id)
-  },
-
-  productionAssetTaskTypes: (state, getters) => {
-    return getters.productionTaskTypes
-      .filter(taskType => taskType.for_entity === 'Asset')
-  },
-
-  productionShotTaskTypes: (state, getters) => {
-    return getters.productionTaskTypes
-      .filter(taskType => taskType.for_entity === 'Shot')
-  },
-
-  productionEditTaskTypes: (state, getters) => {
-    return getters.productionTaskTypes
-      .filter(taskType => taskType.for_entity === 'Edit')
-  },
-
-  productionEpisodeTaskTypes: (state, getters) => {
-    return getters.productionTaskTypes
-      .filter(taskType => taskType.for_entity === 'Episode')
-  },
+  assetMetadataDescriptors: entityMetadataDescriptors('Asset'),
+  shotMetadataDescriptors: entityMetadataDescriptors('Shot'),
+  sequenceMetadataDescriptors: entityMetadataDescriptors('Sequence'),
+  episodeMetadataDescriptors: entityMetadataDescriptors('Episode'),
+  editMetadataDescriptors: entityMetadataDescriptors('Edit'),
 
   currentProduction: (state) => {
     if (state.currentProduction) {
@@ -266,50 +268,6 @@ const getters = {
   isTVShow: (state) => {
     const production = getters.currentProduction(state)
     return production && production.production_type === 'tvshow'
-  },
-
-  assetMetadataDescriptors: (state) => {
-    if (!state.currentProduction || !state.currentProduction.descriptors) {
-      return []
-    } else {
-      return sortByName(
-        state.currentProduction.descriptors
-          .filter(d => d.entity_type === 'Asset')
-      )
-    }
-  },
-
-  shotMetadataDescriptors: (state) => {
-    if (!state.currentProduction || !state.currentProduction.descriptors) {
-      return []
-    } else {
-      return sortByName(
-        state.currentProduction.descriptors
-          .filter(d => d.entity_type === 'Shot')
-      )
-    }
-  },
-
-  editMetadataDescriptors: (state) => {
-    if (!state.currentProduction || !state.currentProduction.descriptors) {
-      return []
-    } else {
-      return sortByName(
-        state.currentProduction.descriptors
-          .filter(d => d.entity_type === 'Edit')
-      )
-    }
-  },
-
-  episodeMetadataDescriptors: (state) => {
-    if (!state.currentProduction || !state.currentProduction.descriptors) {
-      return []
-    } else {
-      return sortByName(
-        state.currentProduction.descriptors
-          .filter(d => d.entity_type === 'Episode')
-      )
-    }
   },
 
   productionAssetTypeOptions: (state, getters) => {
@@ -792,6 +750,8 @@ const mutations = {
       'episodes', productionId)
     state.sequencesPath = helpers.getProductionComponentPath(
       'sequences', productionId, episodeId)
+    state.sequenceStatsPath = helpers.getProductionComponentPath(
+      'sequence-stats', productionId, episodeId)
     state.episodeStatsPath = helpers.getProductionComponentPath(
       'episode-stats', productionId)
     state.breakdownPath = helpers.getProductionComponentPath(

@@ -846,6 +846,7 @@ export default {
         this.isCurrentViewTodos ||
         this.isCurrentViewShot ||
         this.isCurrentViewEpisode ||
+        this.isCurrentViewSequence ||
         this.isCurrentViewEdit
       )
     },
@@ -886,6 +887,7 @@ export default {
       return this.isCurrentViewAsset ||
         this.isCurrentViewShot ||
         this.isCurrentViewEdit ||
+        this.isCurrentViewSequence ||
         this.isCurrentViewEpisode
     },
 
@@ -897,6 +899,17 @@ export default {
           this.isCurrentViewEdit
         ) &&
         this.$route.path.indexOf('episodes') > 0
+      )
+    },
+
+    isCurrentViewSequence () {
+      return (
+        !(
+          this.isCurrentViewAsset ||
+          this.isCurrentViewShot ||
+          this.isCurrentViewEdit
+        ) &&
+        this.$route.path.indexOf('sequences') > 0
       )
     },
 

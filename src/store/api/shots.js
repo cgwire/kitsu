@@ -5,11 +5,11 @@ export default {
     return client.getModel('shots', shotId)
   },
 
-  getShots (production, episode, callback) {
+  getShots (production, episode) {
     let path = '/api/data/shots/with-tasks'
     if (production) path += `?project_id=${production.id}`
     if (episode) path += `&episode_id=${episode.id}`
-    client.get(path, callback)
+    return client.pget(path)
   },
 
   getSequence (sequenceId) {
@@ -19,7 +19,13 @@ export default {
   getSequences (production, episode, callback) {
     let path = `/api/data/projects/${production.id}/sequences`
     if (episode) path = `/api/data/episodes/${episode.id}/sequences`
-    client.get(path, callback)
+    return client.pget(path)
+  },
+
+  getSequencesWithTasks (production, episode) {
+    let path = `/api/data/sequences/with-tasks?project_id=${production.id}`
+    if (episode) path += `&episode_id=${episode.id}`
+    return client.pget(path)
   },
 
   getEpisode (episodeId) {
@@ -52,7 +58,9 @@ export default {
   newSequence (sequence) {
     const data = {
       name: sequence.name,
-      episode_id: sequence.episode_id
+      episode_id: sequence.episode_id,
+      description: sequence.description,
+      data: sequence.data
     }
     const path = `/api/data/projects/${sequence.project_id}/sequences`
     return client.ppost(path, data)
@@ -107,7 +115,8 @@ export default {
   updateSequence (sequence) {
     const data = {
       name: sequence.name,
-      description: sequence.description
+      description: sequence.description,
+      data: sequence.data
     }
     return client.pput(`/api/data/entities/${sequence.id}`, data)
   },

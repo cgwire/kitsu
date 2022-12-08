@@ -135,7 +135,8 @@ export default {
       'productionAssetTaskTypes',
       'productionEditTaskTypes',
       'productionEpisodeTaskTypes',
-      'productionShotTaskTypes'
+      'productionShotTaskTypes',
+      'productionSequenceTaskTypes'
     ]),
     isAssetTasks () {
       return this.$route.path.indexOf('assets') >= 0
@@ -143,11 +144,14 @@ export default {
     isShotsTasks () {
       return this.$route.path.indexOf('shots') >= 0
     },
-    isEditsTasks () {
-      return this.$route.path.indexOf('edits') >= 0
+    isSequencesTasks () {
+      return this.$route.path.indexOf('sequences') >= 0
     },
     isEpisodesTasks () {
       return this.$route.path.indexOf('episodes') >= 0
+    },
+    isEditsTasks () {
+      return this.$route.path.indexOf('edits') >= 0
     }
   },
 
@@ -162,11 +166,14 @@ export default {
       if (this.isShotsTasks) {
         return this.productionShotTaskTypes
       }
-      if (this.isEditsTasks) {
-        return this.productionEditTaskTypes
+      if (this.isSequencesTasks) {
+        return this.productionSequenceTaskTypes
       }
       if (this.isEpisodesTasks) {
         return this.productionEpisodeTaskTypes
+      }
+      if (this.isEditsTasks) {
+        return this.productionEditTaskTypes
       }
     },
 

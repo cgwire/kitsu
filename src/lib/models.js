@@ -8,10 +8,15 @@ export const populateTask = (task) => {
     } else {
       task.full_entity_name = `${task.sequence_name} / ${task.entity_name}`
     }
-  } else if (task.entity_type_name === 'Edit') {
-    task.full_entity_name = `${task.entity_name}`
   } else if (task.entity_type_name === 'Episode') {
     task.full_entity_name = `${task.entity_name}`
+  } else if (['Sequence', 'Edit'].includes(task.entity_type_name)) {
+    if (task.episode_name) {
+      task.full_entity_name =
+        `${task.episode_name} / ${task.entity_name}`
+    } else {
+      task.full_entity_name = `${task.entity_name}`
+    }
   } else {
     task.full_entity_name = `${task.entity_type_name} / ${task.entity_name}`
   }

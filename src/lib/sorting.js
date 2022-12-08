@@ -28,15 +28,16 @@ export const sortEdits = (shots) => {
 
 export const sortSequences = (sequences) => {
   return sequences.sort(
-    firstBy('canceled')
+    firstBy((a, b) => {
+      if (a.episode_name) {
+        return a.episode_name.localeCompare(b.episode_name)
+      } else {
+        return 0
+      }
+    })
       .thenBy((a, b) => {
-        if (a.episode_name) {
-          return a.episode_name.localeCompare(b.episode_name)
-        } else {
-          return 0
-        }
+        return a.name.localeCompare(b.name)
       })
-      .thenBy((a, b) => a.name.localeCompare(b.name))
   )
 }
 
@@ -224,6 +225,28 @@ export const sortShotResult = (
     )
   } else {
     result = sortShots(result)
+  }
+  return result
+}
+
+export const sortSequenceResult = (
+  result,
+  sorting,
+  taskTypeMap,
+  taskMap
+) => {
+  if (sorting && sorting.length > 0) {
+    const sortInfo = sorting[0]
+    let sortEntities = sortByTaskType(taskMap, sortInfo)
+    if (sortInfo.type === 'metadata') sortEntities = sortByMetadata(sortInfo)
+    result = result.sort(
+      firstBy('canceled')
+        .thenBy(sortEntities)
+        .thenBy(sortByEpisode)
+        .thenBy((a, b) => a.name.localeCompare(b.name))
+    )
+  } else {
+    result = sortByName(result)
   }
   return result
 }

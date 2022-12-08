@@ -575,7 +575,7 @@ export default {
         this.loadTask({
           taskId: news.task_id
         })
-          .then((task) => {
+          .then(task => {
             this.loading.currentTask = false
             this.currentTask = task
             this.currentNewsId = news.id

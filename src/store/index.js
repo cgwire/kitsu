@@ -18,6 +18,7 @@ import notifications from '@/store/modules/notifications'
 import people from '@/store/modules/people'
 import playlists from '@/store/modules/playlists'
 import productions from '@/store/modules/productions'
+import sequences from '@/store/modules/sequences'
 import schedule from '@/store/modules/schedule'
 import shots from '@/store/modules/shots'
 import statusAutomations from '@/store/modules/statusautomation'
@@ -38,6 +39,7 @@ const modules = {
   edits,
   entities,
   episodes,
+  sequences,
   login,
   main,
   people,
