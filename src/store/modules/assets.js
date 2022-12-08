@@ -481,9 +481,9 @@ const actions = {
         }
         const createTaskPromises = taskTypeIds.map(taskTypeId => {
           return dispatch('createTasks', {
-            entityIds: asset.id,
-            projectId: asset.project_id,
-            taskTypeId: taskTypeId,
+            entityIds: [asset.id],
+            project_id: asset.project_id,
+            task_type_id: taskTypeId,
             type: 'assets'
           })
         })
