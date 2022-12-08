@@ -261,9 +261,7 @@ const actions = {
       })
   },
 
-  createTasks ({ commit, state },
-    payload
-  ) {
+  createTasks ({ commit, state }, payload) {
     let entityIds = []
     if (payload.selectionOnly) {
       if (payload.type === 'shots') {
