@@ -372,15 +372,15 @@ describe('Assets store', () => {
         })
       expect(mockDispatch).toBeCalledTimes(3)
       expect(mockDispatch).toHaveBeenNthCalledWith(2, 'createTasks', {
-        entityIds: 1,
-        projectId: 3,
-        taskTypeId: 1,
+        entityIds: [1],
+        project_id: 3,
+        task_type_id: 1,
         type: 'assets'
       })
       expect(mockDispatch).toHaveBeenNthCalledWith(3, 'createTasks', {
-        entityIds: 1,
-        projectId: 3,
-        taskTypeId: 2,
+        entityIds: [1],
+        project_id: 3,
+        task_type_id: 2,
         type: 'assets'
       })
       expect(res).toEqual(asset)
