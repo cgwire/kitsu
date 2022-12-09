@@ -25,7 +25,7 @@
     data-test="button-change-password"
     tabindex="-1"
     @click="$emit('change-password-clicked')"
-    v-if="!hideChangePassword && !entry.canceled && isCurrentUserAdmin && !isLdap"
+    v-if="!hideChangePassword && !entry.canceled && isCurrentUserAdmin"
   >
     <key-icon class="icon is-small only-icon" />
   </button>
@@ -104,10 +104,6 @@ export default {
     hideChangePassword: {
       type: Boolean,
       default: true
-    },
-    isLdap: {
-      type: Boolean,
-      default: false
     }
   },
   computed: {

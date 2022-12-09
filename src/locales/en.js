@@ -564,6 +564,9 @@ export default {
     unactive: 'Unactive',
     user_limit_error: 'You have reach your user limit. Please contact our team to upgrade your plan.',
     change_password_for: 'Change password for',
+    change_password_error: 'An error occurred while changing password. Please verify the new password.',
+    disable_2FA: 'Disable 2FA',
+    disable_2FA_error: 'An error occurred while disabling two factor authentication.',
     fields: {
       active: 'Active',
       departments: 'Departments',

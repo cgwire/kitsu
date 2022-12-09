@@ -58,7 +58,6 @@
             :entry-id="entry.id"
             :hide-delete="true"
             :hide-change-password="false"
-            :is-ldap="entry.is_generated_from_ldap"
             @edit-clicked="$emit('edit-clicked', entry)"
             @change-password-clicked="$emit('change-password-clicked', entry)"
           />

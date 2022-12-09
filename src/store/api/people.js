@@ -104,6 +104,12 @@ export default {
     return client.ppost(`api/actions/persons/${person.id}/change-password`, data)
   },
 
+  disableTwoFactorAuthenticationPerson (person) {
+    return client.pdel(
+      `api/actions/persons/${person.id}/disable-two-factor-authentication`
+    )
+  },
+
   postCsv (formData, toUpdate) {
     let path = '/api/import/csv/persons'
     if (toUpdate) path += '?update=true'
