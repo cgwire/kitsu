@@ -215,4 +215,9 @@ export default {
   min-width: 100px;
 }
 
+.fps,
+.ratio {
+  text-align: right;
+}
+
 </style>
