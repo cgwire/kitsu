@@ -1352,6 +1352,8 @@ export default {
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
         this.endAnnotationSaving()
         this.$nextTick(() => {
+          this.previewViewer.resize()
+          this.comparisonViewer.resize()
           this.reloadAnnotations()
           this.loadAnnotation()
         })
