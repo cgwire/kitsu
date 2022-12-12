@@ -8,9 +8,13 @@ export default {
     return client.pget(path)
   },
 
-  getSequenceCasting (productionId, sequenceId) {
-    const path =
+  getSequenceCasting (productionId, sequenceId, episodeId) {
+    let path =
       `/api/data/projects/${productionId}/sequences/${sequenceId}/casting`
+    if (episodeId) {
+      path =
+      `/api/data/projects/${productionId}/episodes/${episodeId}/sequences/all/casting`
+    }
     return client.pget(path)
   },
 

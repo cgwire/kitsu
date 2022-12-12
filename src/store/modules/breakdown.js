@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import breakdownApi from '@/store/api/breakdown'
-import { sortAssets } from '@/lib/sorting'
+import { sortAssets, sortShots } from '@/lib/sorting'
 import { groupEntitiesByParents } from '@/lib/models'
 
 import {
@@ -77,21 +77,27 @@ const actions = {
       })
   },
 
-  setCastingSequence ({ commit, rootState }, sequenceId) {
+  setCastingSequence ({ commit, rootGetters }, sequenceId) {
     if (!sequenceId) {
       return console.error('SequenceId is undefined, no casting can be set.')
     }
-    const production = rootState.productions.currentProduction
-    const assetMap = rootState.assets.assetMap
+    const production = rootGetters.currentProduction
+    const episode = rootGetters.currentEpisode
+    console.log(episode)
+    const episodeId = episode ? episode.id : null
+    const assetMap = rootGetters.assetMap
     const shots =
-     Array.from(rootState.shots.shotMap.values())
-       .filter((shot) => shot.sequence_id === sequenceId || sequenceId === 'all')
-       .sort((a, b) => a.name.localeCompare(b.name))
+    sortShots(
+      Array.from(rootGetters.shotMap.values())
+        .filter(shot => shot.sequence_id === sequenceId || sequenceId === 'all')
+    )
     commit(CASTING_SET_SEQUENCE, sequenceId)
     commit(CASTING_SET_SHOTS, shots)
-    return breakdownApi.getSequenceCasting(production.id, sequenceId)
-      .then((casting) => {
+    return breakdownApi
+      .getSequenceCasting(production.id, sequenceId, episodeId)
+      .then(casting => {
         commit(CASTING_SET_CASTING, { casting, assetMap })
+        return Promise.resolve()
       })
   },
 
