@@ -109,9 +109,11 @@ export default {
     window.addEventListener('mouseup', this.stopHandleOutDrag)
     window.addEventListener('resize', this.onWindowResize)
     new ResizeObserver(this.onWindowResize).observe(this.progress)
-
     const progressCoordinates = this.progress.getBoundingClientRect()
     this.width = progressCoordinates.width
+    setTimeout(() => {
+      this.width = progressCoordinates.width
+    })
     this.progress.setAttribute('max', this.videoDuration)
   },
 
@@ -230,7 +232,7 @@ export default {
     },
 
     _getMouseFrame (annotation) {
-      let left = this.progress.parentElement.offsetLeft
+      let left = this.progress.getBoundingClientRect().left
       if (left === 0 && !this.fullScreen) {
         left = this.progress.parentElement.offsetParent.offsetLeft
       }
@@ -281,7 +283,6 @@ export default {
   flex-shrink: 0;
   margin: 0;
   height: 28px;
-  overflow: hidden;
   padding: 0;
   position: relative;
   width: 100%;
@@ -353,6 +354,7 @@ progress {
   color: $grey;
   display: inline-block;
   height: 28px;
+  overflow: hidden;
   padding-left: 10px;
   padding-top: 3px;
   position: absolute;
