@@ -73,7 +73,7 @@
             name: 'todos-tab',
             params: { tab: 'todos' }
           }"
-          v-if="!isCurrentUserAdmin"
+          v-if="!isCurrentUserAdmin && !isCurrentUserClient"
         >
           {{ $t('tasks.my_tasks') }}
         </router-link>
@@ -84,7 +84,7 @@
             name: 'todos-tab',
             params: { tab: 'timesheets' }
           }"
-          v-if="!isCurrentUserAdmin"
+          v-if="!isCurrentUserAdmin && !isCurrentUserClient"
         >
           {{ $t('timesheets.title') }}
         </router-link>
@@ -388,10 +388,19 @@ export default {
         )
       }
 
+      if (!this.isCurrentUserClient) {
+        options = options.concat([
+          { label: this.$t('breakdown.title'), value: 'breakdown' }
+        ])
+      }
       options = options.concat([
-        { label: this.$t('breakdown.title'), value: 'breakdown' },
         { label: this.$t('playlists.title'), value: 'playlists' }
       ])
+
+      if (this.isCurrentUserClient) {
+        const playlistSection = options.pop()
+        options = [playlistSection].concat(options)
+      }
 
       if (!this.isCurrentUserClient) {
         options.push(
@@ -410,12 +419,12 @@ export default {
 
       // Add episodes for tv show only
       if (this.isTVShow) {
-        options.push(
+        options = options.concat([
           { label: this.$t('episodes.stats_title'), value: 'episode-stats' }
-        )
+        ])
       }
 
-      // Add asset types stats and playlists
+      // Add asset types stats
       options = options.concat([
         {
           label: this.$t('asset_types.production_title'), value: 'assetTypes'
@@ -437,9 +446,6 @@ export default {
             { label: this.$t('settings.title'), value: 'production-settings' }
           ])
         }
-      } else {
-        const playlistSection = options.pop()
-        options = [playlistSection].concat(options)
       }
 
       if (this.isCurrentUserVendor) {

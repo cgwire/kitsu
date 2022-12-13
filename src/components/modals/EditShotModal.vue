@@ -276,7 +276,7 @@ export default {
       if (frameIn &&
           frameOut &&
           frameOut > frameIn) {
-        this.form.nb_frames = frameOut - frameIn
+        this.form.nb_frames = frameOut - frameIn + 1
       }
     },
 
@@ -286,7 +286,7 @@ export default {
       if (frameIn &&
           frameOut &&
           frameOut > frameIn) {
-        this.form.nb_frames = frameOut - frameIn
+        this.form.nb_frames = frameOut - frameIn + 1
       }
     },
 

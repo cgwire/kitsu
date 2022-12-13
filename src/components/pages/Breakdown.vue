@@ -100,7 +100,9 @@
             :entity="entity"
             :preview-file-id="entity.preview_file_id"
             :selected="selection[entity.id]"
-            :name="entity.name"
+            :name="sequenceId === 'all'
+              ? entity.sequence_name + ' / ' + entity.name
+              : entity.name"
             :assets="castingByType[entity.id] || []"
             :read-only="!isCurrentUserManager"
             :text-mode="isTextMode"
