@@ -119,7 +119,8 @@ describe('Breakdown store', () => {
       shots: { shotMap, sequences }
     }
     rootGetters = {
-      currentProduction: production
+      currentProduction: production,
+      shotMap
     }
     breakdownApi.getSequenceCasting.mockImplementation(
       () => Promise.resolve({ 'shot-1': assetCasting })
@@ -133,7 +134,7 @@ describe('Breakdown store', () => {
   describe('Actions', () => {
     test('setCastingSequence', async () => {
       await store.actions.setCastingSequence(
-        { commit, rootState }, 'sequence-1'
+        { commit, rootState, rootGetters }, 'sequence-1'
       )
       expect(vuexStore.state.castingSequenceId).toEqual('sequence-1')
       expect(vuexStore.state.castingSequenceShots).toEqual([shots[0]])
