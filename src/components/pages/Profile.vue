@@ -228,6 +228,16 @@
         <h2>
           {{ $t('profile.two_factor_authentication.title') }}
         </h2>
+        <p
+          v-if="twoFAButtonsDisabled"
+          class="cancel-two-factor-action"
+        >
+          <x-circle-icon
+          width=20
+          height=20
+          @click="cancelCurrentTwoFactorAuthAction"
+          />
+        </p>
 
         <div
           v-if="twoFA.TOTPPreEnabled"
@@ -243,23 +253,23 @@
             :size="300"
             level="M"
           />
-        </div>
 
-        <text-field
+          <text-field
             :label="$t('profile.two_factor_authentication.otp_secret')"
             :readonly="true"
             type="text"
             v-model="twoFA.OTPSecret"
             v-if="twoFA.OTPSecret"
-        />
+          />
+        </div>
 
         <div
-            class="field mt2"
+            class="field"
             v-if="(twoFA.TOTPPreEnabled || twoFA.emailOTPPreEnabled)"
           >
           <p class="control has-icon">
             <input
-              class="input is-medium"
+              class="input is-medium otp-input"
               type="text"
               v-model="twoFA.validation_otp"
               @keyup.enter="nextEnable"
@@ -278,6 +288,10 @@
           <label class="label label-recovery-codes">
             {{ $t('profile.two_factor_authentication.recovery_codes.title') }}
           </label>
+          <x-circle-icon
+            class="action-icon"
+            @click="cancelCurrentTwoFactorAuthAction"
+          />
           <save-icon
               class="action-icon"
               @click="saveRecoveryCodesToFile"
@@ -313,6 +327,7 @@
           :text-validate-button="textValidateTwoFA"
           :is-disable-button="validateTwoFAIsDisable"
           :is-wrong-otp="twoFA.error.isWrongOTP"
+          :is-profile="true"
           @validate="nextWithPayload"
           @changed-two-fa="changedTwoFA"
         />
@@ -333,7 +348,7 @@
 
         <p
           :class="{
-            'show-message': true,
+            'show-message-2fa': true,
             error: true,
             'is-hidden': !(twoFA.error.isWrongOTP && (twoFA.TOTPPreEnabled || twoFA.emailOTPPreEnabled))
           }"
@@ -373,7 +388,7 @@
 
         <p
           :class="{
-            'show-message': true,
+            'show-message-2fa': true,
             error: true,
             'is-hidden': !twoFA.error.enableTOTP
           }"
@@ -383,7 +398,7 @@
 
         <p
           :class="{
-            'show-message': true,
+            'show-message-2fa': true,
             error: true,
             'is-hidden': !twoFA.error.disableTOTP
           }"
@@ -423,7 +438,7 @@
 
         <p
           :class="{
-            'show-message': true,
+            'show-message-2fa': true,
             error: true,
             'is-hidden': !twoFA.error.enableEmailOTP
           }"
@@ -433,7 +448,7 @@
 
         <p
           :class="{
-            'show-message': true,
+            'show-message-2fa': true,
             error: true,
             'is-hidden': !twoFA.error.disableEmailOTP
           }"
@@ -458,7 +473,7 @@
 
         <p
           :class="{
-            'show-message': true,
+            'show-message-2fa': true,
             error: true,
             'is-hidden': !twoFA.error.newRecoveryCodes
           }"
@@ -486,7 +501,7 @@
 <script>
 import moment from 'moment-timezone'
 import QrcodeVue from 'qrcode.vue'
-import { LockIcon, CopyIcon, SaveIcon } from 'vue-feather-icons'
+import { LockIcon, CopyIcon, SaveIcon, XCircleIcon } from 'vue-feather-icons'
 import { mapGetters, mapActions } from 'vuex'
 
 import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
@@ -507,6 +522,7 @@ export default {
     LockIcon,
     CopyIcon,
     SaveIcon,
+    XCircleIcon,
     TwoFactorAuthentication
   },
 
@@ -879,6 +895,27 @@ export default {
 
     changedTwoFA (twoFA) {
       this.twoFA.error.isWrongOTP = false
+    },
+
+    cancelCurrentTwoFactorAuthAction () {
+      this.twoFA.TOTPPreEnabled = false
+      this.twoFA.TOTPNeedTwoFA = false
+      this.twoFA.emailOTPPreEnabled = false
+      this.twoFA.emailOTPNeedTwoFA = false
+      this.twoFA.newRecoveryCodesNeedTwoFA = false
+      this.twoFA.isLoading = false
+      this.twoFA.validation_otp = ''
+      this.twoFA.error.isWrongOTP = false
+      this.twoFA.error.enableTOTP = false
+      this.twoFA.error.disableTOTP = false
+      this.twoFA.error.enableEmailOTP = false
+      this.twoFA.error.disableEmailOTP = false
+      this.twoFA.error.newRecoveryCodes = false
+      this.twoFA.OTPRecoveryCodes = null
+    },
+
+    onKeyDown (event) {
+      if (event.key === 'Escape') this.cancelCurrentTwoFactorAuthAction()
     }
   },
 
@@ -892,6 +929,7 @@ export default {
       this.form.notifications_mattermost_enabled ? 'true' : 'false'
     this.form.notifications_discord_enabled =
       this.form.notifications_discord_enabled ? 'true' : 'false'
+    window.addEventListener('keydown', this.onKeyDown, false)
   },
 
   metaInfo () {
@@ -937,6 +975,10 @@ input, select, span.select {
   width: 100%;
 }
 
+.otp-input {
+  border-radius: 10px;
+}
+
 .field {
   margin-bottom: 2em;
 }
@@ -970,9 +1012,6 @@ input, select, span.select {
 
 .profile-header, .profile-header a {
   color: white;
-}
-
-.profile-header .column {
 }
 
 h2:first-child {
@@ -1013,6 +1052,10 @@ h2:first-child {
   margin-top: 1em;
 }
 
+.show-message-2fa {
+  margin-bottom: 1em;
+}
+
 .clear-avatar-button {
   color: white;
   font-size: 0.7em;
@@ -1026,6 +1069,11 @@ select {
 .qrcode {
   margin-bottom: 1em;
   margin-top: 1em;
+}
+
+.cancel-two-factor-action {
+  text-align: right;
+  margin-bottom: 0.2em;
 }
 
 .qrcode-informations {
@@ -1070,5 +1118,9 @@ select {
 
 .icon {
   padding: 0.25em;
+}
+
+.feather-x-circle {
+  cursor: pointer;
 }
 </style>
