@@ -140,6 +140,7 @@ export default {
     confirmClicked () {
       this.isErrorDisableTwoFactorAuthentication = false
       this.isError = false
+      this.isLoading = true
       this.changePasswordPerson({
         person: this.person,
         form: this.form
@@ -149,13 +150,16 @@ export default {
           if (err.isValidPassword === false) this.isValid = false
           else this.isError = true
         })
+        .finally(this.isLoading = false)
     },
 
     disableTwoFactorAuthenticationClicked () {
       this.isErrorDisableTwoFactorAuthentication = false
       this.isError = false
+      this.isLoading = true
       this.disableTwoFactorAuthenticationPerson(this.person)
-        .catch(this.isErrorDisableTwoFactorAuthentication = true)
+        .catch(() => { this.isErrorDisableTwoFactorAuthentication = true })
+        .finally(this.isLoading = false)
     },
 
     resetForm () {
