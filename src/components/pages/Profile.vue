@@ -197,7 +197,7 @@
 
         <p
           :class="{
-            'change-password-message': true,
+            'show-message': true,
             error: true,
             'is-hidden': changePassword.isValid
           }"
@@ -207,7 +207,7 @@
 
         <p
           :class="{
-            'change-password-message': true,
+            'show-message': true,
             success: true,
             'is-hidden': !changePassword.isSuccess
           }"
@@ -217,12 +217,268 @@
 
         <p
           :class="{
-            'change-password-message': true,
+            'show-message': true,
             error: true,
             'is-hidden': !changePassword.isError
           }"
         >
           {{ $t('profile.change_password.error') }}
+        </p>
+
+        <h2>
+          {{ $t('profile.two_factor_authentication.title') }}
+        </h2>
+        <p
+          v-if="twoFAButtonsDisabled"
+          class="cancel-two-factor-action"
+        >
+          <x-circle-icon
+          width=20
+          height=20
+          @click="cancelCurrentTwoFactorAuthAction"
+          />
+        </p>
+
+        <div
+          v-if="twoFA.TOTPPreEnabled"
+          class="qrcode-informations"
+        >
+          <p>
+            {{ $t('profile.two_factor_authentication.scan_qrcode')}}
+          </p>
+
+          <qrcode-vue
+            class="qrcode"
+            :value="twoFA.TOTPProvisionningUri"
+            :size="300"
+            level="M"
+          />
+
+          <text-field
+            :label="$t('profile.two_factor_authentication.otp_secret')"
+            :readonly="true"
+            type="text"
+            v-model="twoFA.OTPSecret"
+            v-if="twoFA.OTPSecret"
+          />
+        </div>
+
+        <div
+            class="field"
+            v-if="(twoFA.TOTPPreEnabled || twoFA.emailOTPPreEnabled)"
+          >
+          <p class="control has-icon">
+            <input
+              class="input is-medium otp-input"
+              type="text"
+              v-model="twoFA.validation_otp"
+              @keyup.enter="nextEnable"
+              :placeholder="placeholderInputEnableOTP"
+              v-focus
+            >
+            <span class="icon">
+              <lock-icon width=20 height=20 />
+            </span>
+          </p>
+        </div>
+
+        <div
+          v-if="twoFA.OTPRecoveryCodes"
+        >
+          <label class="label label-recovery-codes">
+            {{ $t('profile.two_factor_authentication.recovery_codes.title') }}
+          </label>
+          <x-circle-icon
+            class="action-icon"
+            @click="cancelCurrentTwoFactorAuthAction"
+          />
+          <save-icon
+              class="action-icon"
+              @click="saveRecoveryCodesToFile"
+          />
+          <copy-icon
+              class="action-icon"
+              @click="copyRecoveryCodesToClipboard"
+          />
+          <textarea
+            class="input recovery-codes"
+            ref="textField"
+            v-text="twoFA.OTPRecoveryCodes.join('\t')"
+            readonly
+          ></textarea>
+
+          <p
+            :class="{
+              'show-message': true,
+              error: true,
+              'recovery-codes-warning': true
+            }"
+          >
+            {{ $t('profile.two_factor_authentication.recovery_codes.warning') }}
+          </p>
+        </div>
+
+        <two-factor-authentication
+          v-else-if="twoFAVerificationNeeded"
+          :preferred-two-fa="user.preferred_two_factor_authentication"
+          :two-fas-enabled="twoFAsEnabled"
+          :is-loading="twoFA.isLoading"
+          :email="user.email"
+          :text-validate-button="textValidateTwoFA"
+          :is-disable-button="validateTwoFAIsDisable"
+          :is-wrong-otp="twoFA.error.isWrongOTP"
+          :is-profile="true"
+          @validate="nextWithPayload"
+          @changed-two-fa="changedTwoFA"
+        />
+
+        <button
+          v-if="twoFA.TOTPPreEnabled || twoFA.emailOTPPreEnabled"
+          :class="{
+            'two-fa-button': true,
+            button: true,
+            'save-button': true,
+            'is-medium': true,
+            'is-loading': twoFA.isLoading
+          }"
+          @click="nextEnable()"
+        >
+          {{ textValidateNewTwoFA }}
+        </button>
+
+        <p
+          :class="{
+            'show-message-2fa': true,
+            error: true,
+            'is-hidden': !(twoFA.error.isWrongOTP && (twoFA.TOTPPreEnabled || twoFA.emailOTPPreEnabled))
+          }"
+        >
+          {{ textWrongOTPError }}
+        </p>
+
+        <button
+          v-if="(!user.totp_enabled && !twoFA.TOTPPreEnabled)"
+          :class="{
+            'two-fa-button': true,
+            button: true,
+            'save-button': true,
+            'is-medium': true,
+            'is-disabled': twoFAButtonsDisabled,
+            'is-loading': twoFA.isLoading
+          }"
+          @click="preEnableTOTPRequested()"
+        >
+          {{ $t('profile.two_factor_authentication.totp.button_enable') }}
+        </button>
+
+        <button
+          v-else-if="(!twoFA.TOTPNeedTwoFA && !twoFA.TOTPPreEnabled)"
+          :class="{
+            'two-fa-button': true,
+            button: true,
+            'disable-button': true,
+            'is-medium': true,
+            'is-disabled': twoFAButtonsDisabled,
+            'is-loading': twoFA.isLoading
+          }"
+          @click="disableTOTPRequested()"
+        >
+          {{ $t('profile.two_factor_authentication.totp.button_disable') }}
+        </button>
+
+        <p
+          :class="{
+            'show-message-2fa': true,
+            error: true,
+            'is-hidden': !twoFA.error.enableTOTP
+          }"
+        >
+          {{ $t('profile.two_factor_authentication.totp.error_enable') }}
+        </p>
+
+        <p
+          :class="{
+            'show-message-2fa': true,
+            error: true,
+            'is-hidden': !twoFA.error.disableTOTP
+          }"
+        >
+          {{ $t('profile.two_factor_authentication.totp.error_disable') }}
+        </p>
+
+        <button
+          v-if="(!user.email_otp_enabled && !twoFA.emailOTPPreEnabled)"
+          :class="{
+            'two-fa-button': true,
+            button: true,
+            'save-button': true,
+            'is-medium': true,
+            'is-disabled': twoFAButtonsDisabled,
+            'is-loading': twoFA.isLoading
+          }"
+          @click="preEnableEmailOTPRequested()"
+        >
+          {{ $t('profile.two_factor_authentication.email_otp.button_enable') }}
+        </button>
+
+        <button
+          v-else-if="(!twoFA.emailOTPNeedTwoFA && !twoFA.emailOTPPreEnabled)"
+          :class="{
+            'two-fa-button': true,
+            button: true,
+            'disable-button': true,
+            'is-medium': true,
+            'is-disabled': twoFAButtonsDisabled,
+            'is-loading': twoFA.isLoading
+          }"
+          @click="disableEmailOTPRequested()"
+        >
+          {{ $t('profile.two_factor_authentication.email_otp.button_disable') }}
+        </button>
+
+        <p
+          :class="{
+            'show-message-2fa': true,
+            error: true,
+            'is-hidden': !twoFA.error.enableEmailOTP
+          }"
+        >
+          {{ $t('profile.two_factor_authentication.email_otp.error_enable') }}
+        </p>
+
+        <p
+          :class="{
+            'show-message-2fa': true,
+            error: true,
+            'is-hidden': !twoFA.error.disableEmailOTP
+          }"
+        >
+          {{ $t('profile.two_factor_authentication.email_otp.error_disable') }}
+        </p>
+
+        <button
+          v-if="(twoFAEnabled && !twoFA.newRecoveryCodesNeedTwoFA)"
+          :class="{
+            'two-fa-button': true,
+            button: true,
+            'save-button': true,
+            'is-medium': true,
+            'is-disabled': twoFAButtonsDisabled,
+            'is-loading': twoFA.isLoading
+          }"
+          @click="newRecoveryCodesRequested()"
+        >
+          {{ $t('profile.two_factor_authentication.recovery_codes.button_new') }}
+        </button>
+
+        <p
+          :class="{
+            'show-message-2fa': true,
+            error: true,
+            'is-hidden': !twoFA.error.newRecoveryCodes
+          }"
+        >
+          {{ $t('profile.two_factor_authentication.recovery_codes.error_new') }}
         </p>
 
       </div>
@@ -244,8 +500,11 @@
 
 <script>
 import moment from 'moment-timezone'
+import QrcodeVue from 'qrcode.vue'
+import { LockIcon, CopyIcon, SaveIcon, XCircleIcon } from 'vue-feather-icons'
 import { mapGetters, mapActions } from 'vuex'
 
+import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
 import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
@@ -258,7 +517,13 @@ export default {
     ComboboxBoolean,
     PeopleAvatar,
     ChangeAvatarModal,
-    TextField
+    TextField,
+    QrcodeVue,
+    LockIcon,
+    CopyIcon,
+    SaveIcon,
+    XCircleIcon,
+    TwoFactorAuthentication
   },
 
   data () {
@@ -288,6 +553,26 @@ export default {
         isLoading: false,
         isLoadingError: false,
         formData: null
+      },
+      twoFA: {
+        TOTPProvisionningUri: '',
+        OTPSecret: '',
+        OTPRecoveryCodes: null,
+        isLoading: false,
+        TOTPPreEnabled: false,
+        TOTPNeedTwoFA: false,
+        emailOTPPreEnabled: false,
+        emailOTPNeedTwoFA: false,
+        newRecoveryCodesNeedTwoFA: false,
+        validation_otp: '',
+        error: {
+          isWrongOTP: false,
+          enableTOTP: false,
+          disableTOTP: false,
+          enableEmailOTP: false,
+          disableEmailOTP: false,
+          newRecoveryCodes: false
+        }
       }
     }
   },
@@ -313,6 +598,71 @@ export default {
       return moment.tz.names().filter((timezone) => {
         return timezone.indexOf('/') > 0 && timezone.indexOf('Etc') < 0
       })
+    },
+
+    twoFAsEnabled () {
+      const twoFAsEnabled = []
+      if (this.user.totp_enabled) {
+        twoFAsEnabled.push('totp')
+      }
+      if (this.user.email_otp_enabled) {
+        twoFAsEnabled.push('email_otp')
+      }
+      if (twoFAsEnabled.length >= 0) {
+        twoFAsEnabled.push('recovery_code')
+      }
+      return twoFAsEnabled
+    },
+
+    twoFAEnabled () {
+      return this.user.totp_enabled || this.user.email_otp_enabled
+    },
+
+    twoFAVerificationNeeded () {
+      return this.twoFA.TOTPNeedTwoFA || this.twoFA.emailOTPNeedTwoFA ||
+        this.twoFA.newRecoveryCodesNeedTwoFA
+    },
+
+    twoFAButtonsDisabled () {
+      return this.twoFA.TOTPPreEnabled || this.twoFA.TOTPNeedTwoFA ||
+        this.twoFA.emailOTPPreEnabled || this.twoFA.emailOTPNeedTwoFA ||
+        this.twoFA.newRecoveryCodesNeedTwoFA
+    },
+
+    textValidateNewTwoFA () {
+      if (this.twoFA.TOTPPreEnabled) {
+        return this.$t('profile.two_factor_authentication.totp.button_validate')
+      } else if (this.twoFA.emailOTPPreEnabled) {
+        return this.$t('profile.two_factor_authentication.email_otp.button_validate')
+      } else return ''
+    },
+
+    textValidateTwoFA () {
+      if (this.twoFA.TOTPNeedTwoFA) {
+        return this.$t('profile.two_factor_authentication.totp.button_validate_disable')
+      } else if (this.twoFA.emailOTPNeedTwoFA) {
+        return this.$t('profile.two_factor_authentication.email_otp.button_validate_disable')
+      } else if (this.twoFA.newRecoveryCodesNeedTwoFA) {
+        return this.$t('profile.two_factor_authentication.recovery_codes.button_validate')
+      } else return ''
+    },
+
+    validateTwoFAIsDisable () {
+      if (this.twoFA.TOTPNeedTwoFA || this.twoFA.emailOTPNeedTwoFA) {
+        return true
+      } else return false
+    },
+
+    placeholderInputEnableOTP () {
+      if (this.twoFA.TOTPPreEnabled) return this.$t('login.fields.totp')
+      else if (this.twoFA.emailOTPPreEnabled) return this.$t('login.fields.email_otp')
+      return ''
+    },
+
+    textWrongOTPError () {
+      if (this.twoFA.TOTPPreEnabled) return this.$t('login.wrong_totp')
+      else if (this.twoFA.emailOTPPreEnabled) return this.$t('login.wrong_email_otp')
+      return ''
     }
   },
 
@@ -321,7 +671,14 @@ export default {
       'saveProfile',
       'checkNewPasswordValidityAndSave',
       'uploadAvatar',
-      'clearAvatar'
+      'clearAvatar',
+      'disableTOTP',
+      'enableTOTP',
+      'preEnableTOTP',
+      'disableEmailOTP',
+      'enableEmailOTP',
+      'preEnableEmailOTP',
+      'newRecoveryCodes'
     ]),
 
     localeChanged () {
@@ -347,6 +704,148 @@ export default {
           }
         }
       })
+    },
+
+    enableTOTPRequested () {
+      this.twoFA.isLoading = true
+      this.twoFA.error.enableTOTP = false
+      this.twoFA.OTPRecoveryCodes = null
+      this.enableTOTP(this.twoFA.validation_otp)
+        .then(OTPRecoveryCodes => {
+          if (OTPRecoveryCodes) {
+            this.twoFA.OTPRecoveryCodes = OTPRecoveryCodes
+          }
+          this.twoFA.TOTPPreEnabled = false
+          this.twoFA.validation_otp = ''
+          this.twoFA.error.isWrongOTP = false
+          this.twoFA.OTPSecret = ''
+        })
+        .catch((err) => {
+          if (err.body && err.body.wrong_OTP) this.twoFA.error.isWrongOTP = true
+          else this.twoFA.error.EnableTOTP = true
+        })
+        .finally(this.twoFA.isLoading = false)
+    },
+
+    preEnableTOTPRequested () {
+      this.twoFA.isLoading = true
+      this.twoFA.error.EnableTOTP = false
+      this.twoFA.TOTPPreEnabled = false
+      this.twoFA.OTPRecoveryCodes = null
+      this.preEnableTOTP()
+        .then(body => {
+          this.twoFA.TOTPProvisionningUri = body.totp_provisionning_uri
+          this.twoFA.OTPSecret = body.otp_secret
+          this.twoFA.TOTPPreEnabled = true
+        })
+        .catch(this.twoFA.error.EnableTOTP = true
+        )
+        .finally(this.twoFA.isLoading = false)
+    },
+
+    disableTOTPRequested (payload) {
+      this.twoFA.OTPRecoveryCodes = null
+      if (!this.twoFA.TOTPNeedTwoFA) this.twoFA.TOTPNeedTwoFA = true
+      else {
+        this.twoFA.isLoading = true
+        this.disableTOTP(payload)
+          .then(() => {
+            this.twoFA.TOTPNeedTwoFA = false
+            this.twoFA.validation_otp = ''
+            this.twoFA.error.isWrongOTP = false
+          })
+          .catch((err) => {
+            if (err.body && err.body.wrong_OTP) this.twoFA.error.isWrongOTP = true
+            else this.twoFA.error.disableTOTP = true
+          })
+          .finally(this.twoFA.isLoading = false)
+      }
+    },
+
+    enableEmailOTPRequested () {
+      this.twoFA.isLoading = true
+      this.twoFA.error.enableEmailOTP = false
+      this.twoFA.OTPRecoveryCodes = null
+      this.enableEmailOTP(this.twoFA.validation_otp)
+        .then(OTPRecoveryCodes => {
+          if (OTPRecoveryCodes) {
+            this.twoFA.OTPRecoveryCodes = OTPRecoveryCodes
+          }
+          this.twoFA.emailOTPPreEnabled = false
+          this.twoFA.validation_otp = ''
+          this.twoFA.error.isWrongOTP = false
+        })
+        .catch((err) => {
+          if (err.body && err.body.wrong_OTP) this.twoFA.error.isWrongOTP = true
+          else this.twoFA.error.enableEmailOTP = true
+        })
+        .finally(this.twoFA.isLoading = false)
+    },
+
+    preEnableEmailOTPRequested () {
+      this.twoFA.isLoading = true
+      this.twoFA.error.enableEmailOTP = false
+      this.twoFA.emailOTPPreEnabled = false
+      this.twoFA.OTPRecoveryCodes = null
+      this.preEnableEmailOTP()
+        .then(this.twoFA.emailOTPPreEnabled = true)
+        .catch(this.twoFA.error.EnableEmailOTP = true
+        )
+        .finally(this.twoFA.isLoading = false)
+    },
+
+    disableEmailOTPRequested (payload) {
+      this.twoFA.OTPRecoveryCodes = null
+      if (!this.twoFA.emailOTPNeedTwoFA) this.twoFA.emailOTPNeedTwoFA = true
+      else {
+        this.twoFA.isLoading = true
+        this.disableEmailOTP(payload)
+          .then(() => {
+            this.twoFA.emailOTPNeedTwoFA = false
+            this.twoFA.validation_otp = ''
+            this.twoFA.error.isWrongOTP = false
+          })
+          .catch((err) => {
+            if (err.body && err.body.wrong_OTP) this.twoFA.error.isWrongOTP = true
+            else this.twoFA.error.disableEmailOTP = true
+          })
+          .finally(this.twoFA.isLoading = false)
+      }
+    },
+
+    newRecoveryCodesRequested (payload) {
+      this.twoFA.OTPRecoveryCodes = null
+      if (!this.twoFA.newRecoveryCodesNeedTwoFA) {
+        this.twoFA.newRecoveryCodesNeedTwoFA = true
+      } else {
+        this.twoFA.isLoading = true
+        this.newRecoveryCodes(payload)
+          .then((OTPRecoveryCodes) => {
+            this.twoFA.OTPRecoveryCodes = OTPRecoveryCodes
+            this.twoFA.newRecoveryCodesNeedTwoFA = false
+            this.twoFA.validation_otp = ''
+            this.twoFA.error.isWrongOTP = false
+          })
+          .catch((err) => {
+            if (err.body && err.body.wrong_OTP) this.twoFA.error.isWrongOTP = true
+            else this.twoFA.error.newRecoveryCodes = true
+          })
+          .finally(this.twoFA.isLoading = false)
+      }
+    },
+
+    nextEnable () {
+      if (this.twoFA.TOTPPreEnabled) this.enableTOTPRequested()
+      else if (this.twoFA.emailOTPPreEnabled) this.enableEmailOTPRequested()
+    },
+
+    nextWithPayload (payload) {
+      if (this.twoFA.TOTPNeedTwoFA) this.disableTOTPRequested(payload)
+      else if (this.twoFA.emailOTPNeedTwoFA) {
+        this.disableEmailOTPRequested(payload)
+      } else if (this.twoFA.newRecoveryCodesNeedTwoFA) {
+        this.newRecoveryCodesRequested(payload)
+      }
     },
 
     selectFile (formData) {
@@ -376,6 +875,47 @@ export default {
 
     removeAvatar () {
       this.clearAvatar()
+    },
+
+    copyRecoveryCodesToClipboard () {
+      navigator.clipboard.writeText(this.twoFA.OTPRecoveryCodes.join('\n'))
+    },
+
+    saveRecoveryCodesToFile () {
+      var blob = new Blob(
+        [this.twoFA.OTPRecoveryCodes.join('\n')],
+        { type: 'text/plain;charset=utf-8' }
+      )
+      const link = document.createElement('a')
+      link.setAttribute('href', URL.createObjectURL(blob))
+      link.setAttribute('download', 'kitsu-recovery-codes.txt')
+      document.body.appendChild(link)
+      link.click()
+    },
+
+    changedTwoFA (twoFA) {
+      this.twoFA.error.isWrongOTP = false
+    },
+
+    cancelCurrentTwoFactorAuthAction () {
+      this.twoFA.TOTPPreEnabled = false
+      this.twoFA.TOTPNeedTwoFA = false
+      this.twoFA.emailOTPPreEnabled = false
+      this.twoFA.emailOTPNeedTwoFA = false
+      this.twoFA.newRecoveryCodesNeedTwoFA = false
+      this.twoFA.isLoading = false
+      this.twoFA.validation_otp = ''
+      this.twoFA.error.isWrongOTP = false
+      this.twoFA.error.enableTOTP = false
+      this.twoFA.error.disableTOTP = false
+      this.twoFA.error.enableEmailOTP = false
+      this.twoFA.error.disableEmailOTP = false
+      this.twoFA.error.newRecoveryCodes = false
+      this.twoFA.OTPRecoveryCodes = null
+    },
+
+    onKeyDown (event) {
+      if (event.key === 'Escape') this.cancelCurrentTwoFactorAuthAction()
     }
   },
 
@@ -389,6 +929,7 @@ export default {
       this.form.notifications_mattermost_enabled ? 'true' : 'false'
     this.form.notifications_discord_enabled =
       this.form.notifications_discord_enabled ? 'true' : 'false'
+    window.addEventListener('keydown', this.onKeyDown, false)
   },
 
   metaInfo () {
@@ -434,6 +975,10 @@ input, select, span.select {
   width: 100%;
 }
 
+.otp-input {
+  border-radius: 10px;
+}
+
 .field {
   margin-bottom: 2em;
 }
@@ -467,9 +1012,6 @@ input, select, span.select {
 
 .profile-header, .profile-header a {
   color: white;
-}
-
-.profile-header .column {
 }
 
 h2:first-child {
@@ -506,8 +1048,12 @@ h2:first-child {
   color: white;
 }
 
-.change-password-message {
+.show-message {
   margin-top: 1em;
+}
+
+.show-message-2fa {
+  margin-bottom: 1em;
 }
 
 .clear-avatar-button {
@@ -518,5 +1064,63 @@ h2:first-child {
 
 select {
   height: 3em;
+}
+
+.qrcode {
+  margin-bottom: 1em;
+  margin-top: 1em;
+}
+
+.cancel-two-factor-action {
+  text-align: right;
+  margin-bottom: 0.2em;
+}
+
+.qrcode-informations {
+  text-align: center;
+}
+
+.recovery-codes {
+  resize: none;
+  height: 13em;
+  font-size: 1.5em;
+  padding-left: 2.5em;
+  padding-top: 0.5em;
+  font-family: ui-monospace,SFMono-Regular,SF Mono,Menlo,
+    Consolas,Liberation Mono,monospace;
+}
+
+.action-icon {
+  cursor: pointer;
+  float: right;
+  margin-bottom: 5px;
+}
+
+.label-recovery-codes {
+  float: left;
+}
+
+.recovery-codes-warning {
+  margin-bottom: 1em;
+}
+
+.disable-button {
+  border-radius: 2em;
+  width: 100%;
+  background: $red;
+  border-color: $red;
+  color: white;
+}
+
+.two-fa-button {
+  margin-bottom: 1em;
+}
+
+.icon {
+  padding: 0.25em;
+}
+
+.feather-x-circle {
+  cursor: pointer;
 }
 </style>

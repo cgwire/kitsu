@@ -7,7 +7,10 @@
           <img src="../../assets/kitsu-text.svg" v-else />
         </div>
         <form>
-          <div class="field mt2">
+          <div
+            class="field mt2"
+            v-show="!(isMissingOTP || isWrongOTP)"
+          >
             <p class="control has-icon">
               <input
                 class="input is-medium email"
@@ -16,13 +19,17 @@
                 @input="updateEmail"
                 @keyup.enter="confirmLogIn"
                 v-model="email"
-                v-focus >
+                v-focus
+              >
               <span class="icon">
                 <mail-icon width=20 height=20 />
               </span>
             </p>
           </div>
-          <div class="field">
+          <div
+            class="field"
+            v-show="!(isMissingOTP || isWrongOTP)"
+          >
             <p class="control has-icon">
               <input
                 class="input is-medium password"
@@ -38,7 +45,20 @@
             </p>
           </div>
         </form>
-        <p class="control">
+        <two-factor-authentication
+          v-if="isMissingOTP || isWrongOTP"
+          :preferred-two-fa="preferredTwoFA"
+          :two-fas-enabled="TwoFAsEnabled"
+          :is-loading="isLoginLoading"
+          :email="email"
+          :is-wrong-otp="isWrongOTP"
+          @validate="confirmLogIn"
+          @changed-two-fa="changedTwoFA"
+        />
+        <p
+          v-if="!(isMissingOTP || isWrongOTP)"
+          class="control"
+        >
           <a
             :class="{
               button: true,
@@ -51,14 +71,15 @@
             {{ $t("login.login") }}
           </a>
         </p>
-        <p class="control error" v-show="isTooMuchLoginFailedAttemps">
+        <p class="control error" v-if="isTooMuchLoginFailedAttemps">
           {{ $t("login.too_many_failed_login_attemps") }}
         </p>
-        <p class="control error" v-show="isLoginError && !isTooMuchLoginFailedAttemps">
+        <p class="control error" v-else-if="(isLoginError && !isMissingOTP &&!isWrongOTP)">
           {{ $t("login.login_failed") }}
         </p>
 
         <p
+          v-if="!(isMissingOTP || isWrongOTP)"
           class="has-text-centered"
         >
           <router-link
@@ -76,19 +97,26 @@
 import { mapGetters, mapActions } from 'vuex'
 import { MailIcon, LockIcon } from 'vue-feather-icons'
 
+import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
+
 export default {
   name: 'login',
 
   components: {
     MailIcon,
-    LockIcon
+    LockIcon,
+    TwoFactorAuthentication
   },
 
   data () {
     return {
       email: '',
       password: '',
-      isTooMuchLoginFailedAttemps: false
+      isTooMuchLoginFailedAttemps: false,
+      isWrongOTP: false,
+      isMissingOTP: false,
+      preferredTwoFA: '',
+      TwoFAsEnabled: []
     }
   },
 
@@ -118,29 +146,45 @@ export default {
       this.$store.dispatch('changePassword', e.target.value)
     },
 
-    confirmLogIn () {
+    confirmLogIn (twoFactorPayload) {
       this.isTooMuchLoginFailedAttemps = false
-      this.logIn((err, success) => {
-        if (err) {
-          if (err.default_password) {
-            this.$router.push({
-              name: 'reset-change-password',
-              query: { email: this.email, token: err.token }
-            })
-          } else if (err.too_many_failed_login_attemps) {
-            this.isTooMuchLoginFailedAttemps = true
-          } else {
-            console.error(err)
+      this.isWrongOTP = false
+      this.isMissingOTP = false
+      this.logIn({
+        twoFactorPayload: twoFactorPayload,
+        callback: (err, success) => {
+          if (err) {
+            if (err.default_password) {
+              this.$router.push({
+                name: 'reset-change-password',
+                query: { email: this.email, token: err.token }
+              })
+            } else if (err.too_many_failed_login_attemps) {
+              this.isTooMuchLoginFailedAttemps = true
+            } else if (err.wrong_OTP) {
+              this.isWrongOTP = true
+            } else if (err.missing_OTP) {
+              this.isMissingOTP = true
+              this.preferredTwoFA =
+                err.preferred_two_factor_authentication
+              this.TwoFAsEnabled = err.two_factor_authentication_enabled
+            } else {
+              console.error(err)
+            }
           }
-        }
-        if (success) {
-          if (this.$route.query.redirect) {
-            this.$router.push(this.$route.query.redirect)
-          } else {
-            this.$router.push('/')
+          if (success) {
+            if (this.$route.query.redirect) {
+              this.$router.push(this.$route.query.redirect)
+            } else {
+              this.$router.push('/')
+            }
           }
         }
       })
+    },
+
+    changedTwoFA (twoFA) {
+      this.isWrongOTP = false
     }
   },
 

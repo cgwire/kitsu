@@ -104,6 +104,12 @@ export default {
     return client.ppost(`api/actions/persons/${person.id}/change-password`, data)
   },
 
+  disableTwoFactorAuthenticationPerson (person) {
+    return client.pdel(
+      `api/actions/persons/${person.id}/disable-two-factor-authentication`
+    )
+  },
+
   postCsv (formData, toUpdate) {
     let path = '/api/import/csv/persons'
     if (toUpdate) path += '?update=true'
@@ -125,6 +131,42 @@ export default {
       password_2: form.password2
     }
     client.post('/api/auth/change-password', data, callback)
+  },
+
+  preEnableTOTP () {
+    return client.pput('/api/auth/totp', {}).then(body => Promise.resolve(body))
+  },
+
+  enableTOTP (totp) {
+    return client.ppost('/api/auth/totp', { totp: totp })
+      .then(body => Promise.resolve(body.otp_recovery_codes))
+  },
+
+  disableTOTP (twoFactorPayload) {
+    return client.pdel('/api/auth/totp', twoFactorPayload)
+  },
+
+  preEnableEmailOTP () {
+    return client.pput('/api/auth/email-otp', {})
+      .then(body => Promise.resolve(body))
+  },
+
+  sendEmailOTP (email) {
+    return client.pget(`/api/auth/email-otp?email=${email}`)
+  },
+
+  enableEmailOTP (emailOTP) {
+    return client.ppost('/api/auth/email-otp', { email_otp: emailOTP })
+      .then(body => Promise.resolve(body.otp_recovery_codes))
+  },
+
+  disableEmailOTP (twoFactorPayload) {
+    return client.pdel('/api/auth/email-otp', twoFactorPayload)
+  },
+
+  newRecoveryCodes (twoFactorPayload) {
+    return client.pput('/api/auth/recovery-codes', twoFactorPayload)
+      .then(body => Promise.resolve(body.otp_recovery_codes))
   },
 
   loadTodos (callback) {

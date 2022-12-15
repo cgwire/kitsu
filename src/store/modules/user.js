@@ -26,6 +26,11 @@ import {
   USER_CHANGE_PASSWORD_SUCCESS,
   USER_CHANGE_PASSWORD_UNVALID,
 
+  USER_ENABLE_TOTP_SUCCESS,
+  USER_DISABLE_TOTP_SUCCESS,
+  USER_ENABLE_EMAIL_OTP_SUCCESS,
+  USER_DISABLE_EMAIL_OTP_SUCCESS,
+
   USER_LOAD_TODOS_START,
   USER_LOAD_TODOS_END,
   USER_LOAD_TODOS_ERROR,
@@ -186,6 +191,50 @@ const actions = {
       }
       if (payload.callback) payload.callback()
     })
+  },
+
+  preEnableTOTP ({ commit, state }) {
+    return peopleApi.preEnableTOTP()
+  },
+
+  enableTOTP ({ commit, state }, totp) {
+    return peopleApi.enableTOTP(totp).then((OTPRecoveryCodes) => {
+      commit(USER_ENABLE_TOTP_SUCCESS)
+      return Promise.resolve(OTPRecoveryCodes)
+    })
+  },
+
+  disableTOTP ({ commit, state }, twoFactorPayload) {
+    return peopleApi.disableTOTP(twoFactorPayload).then(() => {
+      commit(USER_DISABLE_TOTP_SUCCESS)
+      return Promise.resolve()
+    })
+  },
+
+  preEnableEmailOTP ({ commit, state }) {
+    return peopleApi.preEnableEmailOTP()
+  },
+
+  enableEmailOTP ({ commit, state }, otp) {
+    return peopleApi.enableEmailOTP(otp).then((OTPRecoveryCodes) => {
+      commit(USER_ENABLE_EMAIL_OTP_SUCCESS)
+      return Promise.resolve(OTPRecoveryCodes)
+    })
+  },
+
+  sendEmailOTP ({ commit, state }, email) {
+    return peopleApi.sendEmailOTP(email)
+  },
+
+  disableEmailOTP ({ commit, state }, twoFactorPayload) {
+    return peopleApi.disableEmailOTP(twoFactorPayload).then(() => {
+      commit(USER_DISABLE_EMAIL_OTP_SUCCESS)
+      return Promise.resolve()
+    })
+  },
+
+  newRecoveryCodes ({ commit, state }, twoFactorPayload) {
+    return peopleApi.newRecoveryCodes(twoFactorPayload)
   },
 
   loadTodos ({ commit, state, rootGetters }, { callback, forced, date }) {
@@ -391,6 +440,42 @@ const mutations = {
       isError: false,
       isSuccess: false,
       isValid: false
+    }
+  },
+
+  [USER_ENABLE_TOTP_SUCCESS] (state) {
+    state.user.totp_enabled = true
+    if (!state.user.preferred_two_factor_authentication) {
+      state.user.preferred_two_factor_authentication = 'totp'
+    }
+  },
+
+  [USER_DISABLE_TOTP_SUCCESS] (state) {
+    state.user.totp_enabled = false
+    if (state.user.preferred_two_factor_authentication === 'totp') {
+      if (state.user.email_otp_enabled) {
+        state.user.preferred_two_factor_authentication = 'email_otp'
+      } else {
+        state.user.preferred_two_factor_authentication = null
+      }
+    }
+  },
+
+  [USER_ENABLE_EMAIL_OTP_SUCCESS] (state) {
+    state.user.email_otp_enabled = true
+    if (!state.user.preferred_two_factor_authentication) {
+      state.user.preferred_two_factor_authentication = 'email_otp'
+    }
+  },
+
+  [USER_DISABLE_EMAIL_OTP_SUCCESS] (state) {
+    state.user.email_otp_enabled = false
+    if (state.user.preferred_two_factor_authentication === 'email_otp') {
+      if (state.user.totp_otp_enabled) {
+        state.user.preferred_two_factor_authentication = 'totp'
+      } else {
+        state.user.preferred_two_factor_authentication = null
+      }
     }
   },
 

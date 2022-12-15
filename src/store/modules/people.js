@@ -62,7 +62,9 @@ import {
   RESET_ALL,
 
   REMOVE_PEOPLE_SEARCH_END,
-  SAVE_PEOPLE_SEARCH_END
+  SAVE_PEOPLE_SEARCH_END,
+
+  DISABLE_TWO_FACTOR_AUTHENTICATION_END
 } from '@/store/mutation-types'
 
 const helpers = {
@@ -344,6 +346,14 @@ const actions = {
         return reject(err)
       }
     })
+  },
+
+  disableTwoFactorAuthenticationPerson ({ commit, state }, person) {
+    return peopleApi.disableTwoFactorAuthenticationPerson(person)
+      .then(() => {
+        commit(DISABLE_TWO_FACTOR_AUTHENTICATION_END, person.id)
+        Promise.resolve()
+      })
   },
 
   uploadPersonFile ({ commit, state }, toUpdate) {
@@ -670,6 +680,13 @@ const mutations = {
         state.displayedPeople = state.people
       }
     }
+  },
+
+  [DISABLE_TWO_FACTOR_AUTHENTICATION_END] (state, personId) {
+    const person = state.personMap.get(personId)
+    person.totp_enabled = false
+    person.email_otp_enabled = false
+    person.preferred_two_factor_authentication = null
   },
 
   [IMPORT_PEOPLE_START] (state, data) {

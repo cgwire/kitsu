@@ -37,6 +37,7 @@
     "moment-timezone": "0.5.33",
     "papaparse": "5.3.1",
     "pify": "5.0.0",
+    "qrcode.vue": "1.7.0",
     "sanitize-html": "2.4.0",
     "sass": "1.37.5",
     "sass-loader": "10.0.1",

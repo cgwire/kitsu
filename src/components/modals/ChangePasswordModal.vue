@@ -15,17 +15,19 @@
 
           <form v-on:submit.prevent>
             <text-field
-                :label="$t('people.fields.password')"
-                ref="first-password"
-                type="password"
-                @enter="confirmClicked()"
-                v-model="form.password"
+              :disabled="person.is_generated_from_ldap"
+              :label="$t('people.fields.password')"
+              ref="first-password"
+              type="password"
+              @enter="confirmClicked()"
+              v-model="form.password"
             />
             <text-field
-                :label="$t('people.fields.password_2')"
-                type="password"
-                @enter="confirmClicked()"
-                v-model="form.password2"
+              :disabled="person.is_generated_from_ldap"
+              :label="$t('people.fields.password_2')"
+              type="password"
+              @enter="confirmClicked()"
+              v-model="form.password2"
             />
           </form>
 
@@ -37,10 +39,22 @@
                 'flexrow-item': true,
                 'is-loading': isLoading
               }"
-              :disabled="false"
+              :disabled="person.is_generated_from_ldap"
               @click="confirmClicked"
             >
               {{ $t('profile.change_password.button') }}
+            </button>
+            <button
+              :class="{
+                button: true,
+                'flexrow-item': true,
+                'is-loading': isLoading,
+                'is-warning': true
+              }"
+              :disabled="!(person.totp_enabled || person.email_otp_enabled)"
+              @click="disableTwoFactorAuthenticationClicked"
+            >
+              {{ $t('people.disable_2FA') }}
             </button>
             <div class="filler"></div>
 
@@ -62,7 +76,13 @@
             class="error has-text-right mt1"
             v-if="isError"
           >
-            {{ $t('profile.change_password.error') }}
+            {{ $t('people.change_password_error') }}
+          </div>
+          <div
+            class="error has-text-right mt1"
+            v-if="isErrorDisableTwoFactorAuthentication"
+          >
+            {{ $t('people.disable_2FA_error') }}
           </div>
         </div>
       </div>
@@ -97,6 +117,7 @@ export default {
       },
       isLoading: false,
       isError: false,
+      isErrorDisableTwoFactorAuthentication: false,
       isValid: true
     }
   },
@@ -112,10 +133,14 @@ export default {
 
   methods: {
     ...mapActions([
-      'changePasswordPerson'
+      'changePasswordPerson',
+      'disableTwoFactorAuthenticationPerson'
     ]),
 
     confirmClicked () {
+      this.isErrorDisableTwoFactorAuthentication = false
+      this.isError = false
+      this.isLoading = true
       this.changePasswordPerson({
         person: this.person,
         form: this.form
@@ -125,6 +150,16 @@ export default {
           if (err.isValidPassword === false) this.isValid = false
           else this.isError = true
         })
+        .finally(this.isLoading = false)
+    },
+
+    disableTwoFactorAuthenticationClicked () {
+      this.isErrorDisableTwoFactorAuthentication = false
+      this.isError = false
+      this.isLoading = true
+      this.disableTwoFactorAuthenticationPerson(this.person)
+        .catch(() => { this.isErrorDisableTwoFactorAuthentication = true })
+        .finally(this.isLoading = false)
     },
 
     resetForm () {
@@ -135,6 +170,7 @@ export default {
         }
         this.isLoading = false
         this.isError = false
+        this.isErrorDisableTwoFactorAuthentication = false
         this.isValid = true
       }
     }

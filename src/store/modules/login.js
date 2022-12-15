@@ -44,11 +44,15 @@ const actions = {
     commit(CHANGE_PASSWORD, password)
   },
 
-  logIn ({ commit, state }, callback) {
+  logIn ({ commit, state }, { twoFactorPayload, callback }) {
     commit(LOGIN_RUN)
+    const payload = {
+      email: state.email,
+      password: state.password,
+      ...twoFactorPayload
+    }
     auth.logIn(
-      state.email,
-      state.password,
+      payload,
       (err) => {
         if (err) {
           commit(LOGIN_FAILURE)
