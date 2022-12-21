@@ -1143,7 +1143,9 @@ export default {
           (annotation) => annotation.time === time
         )
       } else if (this.isPicture) {
-        return this.annotations[0]
+        return this.annotations.find(
+          (annotation) => annotation.time === 0
+        )
       }
     },
 
