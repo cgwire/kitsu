@@ -25,7 +25,6 @@ export const getTaskPath = (
   } else {
     route.params.type = taskType.for_entity.toLowerCase() + 's'
   }
-  console.log(route)
   return route
 }
 

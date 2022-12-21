@@ -392,7 +392,8 @@ export default {
     },
 
     getCurrentTimeRaw (time) {
-      return this.videoViewer.currentTimeRaw
+      if (this.isMovie) return this.videoViewer.currentTimeRaw
+      else return 0
     },
 
     // Loupe
