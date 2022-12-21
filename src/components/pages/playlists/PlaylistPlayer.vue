@@ -1311,8 +1311,7 @@ export default {
           (durationWaited / 1000) * this.fps
         )
         this.playingPictureTimeout = setTimeout(
-          this.continuePlayingPlaylist, 100, entityIndex, startMs
-        )
+          this.continuePlayingPlaylist(entityIndex, startMs), 100)
         return
       }
 
@@ -1326,12 +1325,9 @@ export default {
       } else {
         this.currentPreviewIndex++
         this.$nextTick(() => {
-          this.playingPictureTimeout = setTimeout(
-            this.continuePlayingPlaylist,
-            100,
-            this.playingEntityIndex,
-            Date.now()
-          )
+          this.playingPictureTimeout = setTimeout(() => {
+            this.continuePlayingPlaylist(this.playingEntityIndex, Date.now())
+          }, 100)
         })
       }
     },
