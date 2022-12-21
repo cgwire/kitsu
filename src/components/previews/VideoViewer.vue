@@ -322,7 +322,7 @@ export default {
       this.$emit('duration-changed', this.videoDuration)
       if (this.container) {
         this.resetSize()
-        setTimeout(this.resetSize)
+        setTimeout(() => { this.resetSize() })
       }
     },
 

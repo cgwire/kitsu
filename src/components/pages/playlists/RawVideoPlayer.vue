@@ -497,7 +497,7 @@ export default {
         const entity = this.entities[this.currentIndex]
         if (entity && !entity.preview_file_id) this.loadNextEntity()
       }
-      setTimeout(this.resetHeight, 300)
+      setTimeout(() => { this.resetHeight() }, 300)
     },
 
     currentPreviewIndex () {

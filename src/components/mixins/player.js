@@ -857,12 +857,12 @@ export const playerMixin = {
     playPicture () {
       if (this.isPlaying) clearTimeout(this.playingPictureTimeout)
       this.isPlaying = true
-      this.playingPictureTimeout = setTimeout(
-        this.continuePlayingPlaylist,
-        100,
-        this.playingEntityIndex,
-        Date.now() - 1000 * this.framesSeenOfPicture / this.fps
-      )
+      this.playingPictureTimeout = setTimeout(() => {
+        this.continuePlayingPlaylist(
+          this.playingEntityIndex,
+          Date.now() - 1000 * this.framesSeenOfPicture / this.fps
+        )
+      }, 100)
     },
 
     playSound () {
