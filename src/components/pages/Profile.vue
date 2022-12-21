@@ -84,6 +84,7 @@
               <option value="nl_NL">Dutch</option>
               <option value="en_US">English</option>
               <option value="fr_FR">French</option>
+              <option value="ko_KR">Korean</option>
               <option value="de_DE">German</option>
               <option value="hu_HU">Hungarian</option>
               <option value="pt_BR">Portuguese (Brasilian)</option>
