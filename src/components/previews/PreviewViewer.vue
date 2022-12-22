@@ -392,7 +392,8 @@ export default {
     },
 
     getCurrentTimeRaw (time) {
-      return this.videoViewer.currentTimeRaw
+      if (this.isMovie) return this.videoViewer.currentTimeRaw
+      else return 0
     },
 
     // Loupe
@@ -428,7 +429,7 @@ export default {
         this.maxDuration = '00:00.000'
       } else if (this.isPicture) {
         this.pause()
-        setTimeout(this.pictureViewer.resetPicture, 10)
+        setTimeout(() => { this.pictureViewer.resetPicture() }, 10)
       }
     }
   }

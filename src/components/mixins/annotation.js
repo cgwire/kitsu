@@ -765,7 +765,7 @@ export const annotationMixin = {
       this.notSaved = true
       this.$options.annotatedPreview = preview
       this.$options.annotationToSave =
-        setTimeout(this.endAnnotationSaving, 3000)
+        setTimeout(() => { this.endAnnotationSaving() }, 3000)
     },
 
     endAnnotationSaving () {

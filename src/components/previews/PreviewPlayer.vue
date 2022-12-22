@@ -791,7 +791,7 @@ export default {
         parseInt(seconds) +
         parseInt(milliseconds) / 1000
       const frameNumber = Math.round(time / this.frameDuration)
-      setTimeout(this.setCurrentFrame, 20, frameNumber)
+      setTimeout(() => { this.setCurrentFrame(frameNumber) }, 20)
     },
 
     // Video
@@ -1143,7 +1143,9 @@ export default {
           (annotation) => annotation.time === time
         )
       } else if (this.isPicture) {
-        return this.annotations[0]
+        return this.annotations.find(
+          (annotation) => annotation.time === 0
+        )
       }
     },
 
@@ -1473,7 +1475,7 @@ export default {
       if (frameNumber !== this.frameNumber) {
         this.previewViewer.setCurrentFrame(frameNumber)
         this.syncComparisonViewer()
-        setTimeout(this.syncComparisonViewer(), this.frameDuration)
+        setTimeout(() => { this.syncComparisonViewer() }, this.frameDuration)
       }
     },
 
@@ -1522,9 +1524,9 @@ export default {
         this.pause()
         this.isDrawing = false
         this.refreshCanvas()
-        setTimeout(this.previewViewer.resetPicture, 10)
+        setTimeout(() => { this.previewViewer.resetPicture() }, 10)
         if (this.comparisonViewer) {
-          setTimeout(this.comparisonViewer.resetPicture, 20)
+          setTimeout(() => { this.comparisonViewer.resetPicture() }, 20)
         }
       } else if (this.isSound || this.isFile || this.is3DModel) {
         this.fixCanvasSize({ width: 0, height: 0 })
@@ -1549,7 +1551,7 @@ export default {
         this.previewToCompare = this.previewFileMap[this.previewToCompareId]
         if (this.isComparing) {
           this.setCurrentFrame(currentFrame - 1)
-          setTimeout(this.syncComparisonViewer, 200)
+          setTimeout(() => { this.syncComparisonViewer() }, 200)
           this.pause()
         }
       })

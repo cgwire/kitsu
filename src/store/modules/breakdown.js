@@ -83,7 +83,6 @@ const actions = {
     }
     const production = rootGetters.currentProduction
     const episode = rootGetters.currentEpisode
-    console.log(episode)
     const episodeId = episode ? episode.id : null
     const assetMap = rootGetters.assetMap
     const shots =
