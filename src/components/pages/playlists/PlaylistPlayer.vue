@@ -1310,7 +1310,7 @@ export default {
         this.framesSeenOfPicture = Math.floor(
           (durationWaited / 1000) * this.fps
         )
-        this.playingPictureTimeout = setTimeout(
+        this.playingPictureTimeout = setTimeout(() =>
           this.continuePlayingPlaylist(entityIndex, startMs), 100)
         return
       }
