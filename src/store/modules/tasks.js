@@ -857,7 +857,7 @@ const mutations = {
   },
 
   [LOAD_TASK_COMMENTS_END] (state, { taskId, comments }) {
-    comments.forEach((comment) => {
+    comments.forEach(comment => {
       comment.person = personStore.helpers.addAdditionalInformation(
         comment.person
       )

@@ -1854,8 +1854,9 @@ th.validation-cell {
   }
 }
 
-.date-input {
+.date-input::placeholder {
   border-radius: 10px;
+  color: $light-grey;
 }
 
 .project-dates .date-input {
