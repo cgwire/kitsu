@@ -1,5 +1,5 @@
 import async from 'async'
-import Vue from 'vue'
+import Vue from 'vue/dist/vue'
 
 import tasksApi from '@/store/api/tasks'
 import peopleApi from '@/store/api/people'

@@ -212,7 +212,7 @@
 </template>
 
 <script>
-import Vue from 'vue'
+import Vue from 'vue/dist/vue'
 import { mapGetters, mapActions } from 'vuex'
 
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'

@@ -76,7 +76,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment'
-import Vue from 'vue'
+import Vue from 'vue/dist/vue'
 
 import { formatFullDateWithRevertedTimezone } from '@/lib/time'
 import { timeMixin } from '@/components/mixins/time'

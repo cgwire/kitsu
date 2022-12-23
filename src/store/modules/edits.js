@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import Vue from 'vue/dist/vue'
 import moment from 'moment'
 import peopleApi from '@/store/api/people'
 import editsApi from '@/store/api/edits'

@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import Vue from 'vue/dist/vue'
 import peopleApi from '@/store/api/people'
 import peopleStore from '@/store/modules/people'
 import taskStatusStore from '@/store/modules/taskstatus'

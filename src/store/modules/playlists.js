@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import Vue from 'vue/dist/vue'
 import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 import playlistsApi from '@/store/api/playlists'
 import { sortByDate } from '@/lib/sorting'
