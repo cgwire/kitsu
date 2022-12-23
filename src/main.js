@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import Vue from 'vue/dist/vue'
 import { sync } from 'vuex-router-sync'
 import App from '@/App'
 import i18n from '@/lib/i18n'

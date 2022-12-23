@@ -1107,7 +1107,7 @@ textarea.input:focus {
 .query-list {
   margin-bottom: 2em;
   margin-left: 1em;
-  max-with: 95%;
+  max-width: 95%;
 }
 
 .query-list .tag {

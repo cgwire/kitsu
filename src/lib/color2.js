@@ -1,5 +1,5 @@
-const colorString = require('color-string')
-const convert = require('color-convert')
+import colorString from 'color-string'
+import convert from 'color-convert'
 
 const _slice = [].slice
 
@@ -479,4 +479,4 @@ function zeroArray (array, length) {
   return array
 }
 
-module.exports = Color
+export default Color
