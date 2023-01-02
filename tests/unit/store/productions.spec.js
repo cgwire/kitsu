@@ -838,6 +838,9 @@ describe('Productions store', () => {
         params: {
           episode_id: 'episode-id',
           production_id: 'production-id'
+        },
+        query: {
+          search: ''
         }
       })
       expect(state.episodesPath).toEqual({
