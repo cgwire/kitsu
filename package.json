@@ -10,7 +10,7 @@
     "build": "vite build",
     "serve": "vite preview",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src",
-    "tests:unit": "vitest tests/unit"
+    "test:unit": "vitest tests/unit"
   },
   "dependencies": {
     "@arch-inc/fabricjs-psbrush": "^0.0.20",
