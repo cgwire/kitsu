@@ -70,7 +70,7 @@ describe('Combobox', () => {
         label: 'yes',
         value: 'val1'
       })
-      expect(label).toEqual('Yes')
+      expect(label).toEqual('main.yes')
     })
   })
 })

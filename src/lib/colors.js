@@ -1,9 +1,13 @@
 import ColorHash from 'color-hash'
 import Color from '@/lib/color2'
+// import localStorage from 'localStorage'
 
 const darkenColorIndex = {}
 const lightenColorIndex = {}
 const fadeColorIndex = {}
+
+let colorHashConstructor = ColorHash
+if (ColorHash.default) colorHashConstructor = ColorHash.default
 
 export default {
 
@@ -23,12 +27,16 @@ export default {
    * Convert a string (it can be anything) into a HTML color hash.
    */
   fromString (str, darken = false) {
-    let colorHash = new ColorHash({ lightness: 0.7, saturation: 0.8 })
+    let colorHash = new colorHashConstructor({
+      lightness: 0.7, saturation: 0.8
+    })
     if (
       darken ||
       (localStorage && localStorage.getItem('dark-theme') === 'true')
     ) {
-      colorHash = new ColorHash({ lightness: 0.6, saturation: 0.8 })
+      colorHash = new colorHashConstructor({
+        lightness: 0.6, saturation: 0.8
+      })
     }
     return colorHash.hex(str)
   },

@@ -124,7 +124,7 @@ describe('ProductionParameters', () => {
   })
 
   describe('Methods', () => {
-    const upload = jest.fn()
+    const upload = vi.fn()
     test('editParameters', async () => {
       const store = initialiseStore(
         {

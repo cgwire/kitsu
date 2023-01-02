@@ -28,8 +28,8 @@ describe('ShowAssignationsButton', () => {
     }
 
     actions = {
-      showAssignations: jest.fn(),
-      hideAssignations: jest.fn()
+      showAssignations: vi.fn(),
+      hideAssignations: vi.fn()
     }
 
     getters = {
@@ -57,7 +57,7 @@ describe('ShowAssignationsButton', () => {
 
   describe('Mount', () => {
     it('should be On', () => {
-      expect(wrapper.element.getAttribute('title')).toMatch('Hide assignations')
+      expect(wrapper.element.getAttribute('title')).toMatch('tasks.hide_assignations')
     })
 
     it('should trigger a function on click', done => {
