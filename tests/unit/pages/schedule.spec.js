@@ -51,7 +51,7 @@ describe('Schedule', () => {
         }))
       },
       actions: {
-        loadTask: jest.fn()
+        loadTask: vi.fn()
       }
     },
     taskStatusStore = {

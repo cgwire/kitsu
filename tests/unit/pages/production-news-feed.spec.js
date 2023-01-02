@@ -9,6 +9,7 @@ import productionStoreFixture from '../fixtures/production-store.js'
 const localVue = createLocalVue()
 localVue.use(Vuex)
 localVue.use(vuescroll)
+localVue.use(i18n)
 
 describe('ProductionNewsFeed', () => {
   let store
@@ -28,8 +29,8 @@ describe('ProductionNewsFeed', () => {
         newsListByDay: () => (timezone) => []
       },
       actions: {
-        loadNews: jest.fn(),
-        loadMoreNews: jest.fn()
+        loadNews: vi.fn(),
+        loadMoreNews: vi.fn()
       }
     }
     taskStore = {
@@ -58,7 +59,7 @@ describe('ProductionNewsFeed', () => {
         }))
       },
       actions: {
-        loadTask: jest.fn()
+        loadTask: vi.fn()
       }
     },
     taskStatusStore = {

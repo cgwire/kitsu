@@ -250,7 +250,7 @@ describe('Assets store', () => {
     })
 
     test('loadAssets', async () => {
-      let mockCommit = jest.fn()
+      let mockCommit = vi.fn()
       const state = {
         episode: null,
         isAssetsLoading: true
@@ -275,8 +275,8 @@ describe('Assets store', () => {
       expect(res2).toEqual([])
       state.isAssetsLoading = false
       const assets = [{ id: 456, type: 'asset' }]
-      assetsApi.getAssets = jest.fn(() => Promise.resolve(assets))
-      mockCommit = jest.fn()
+      assetsApi.getAssets = vi.fn(() => Promise.resolve(assets))
+      mockCommit = vi.fn()
       const res3 = await store.actions.loadAssets(
         { commit: mockCommit, state, rootGetters })
       expect(mockCommit).toBeCalledTimes(2)
@@ -290,6 +290,16 @@ describe('Assets store', () => {
         taskTypeMap: 5
       })
       expect(res3).toEqual(assets)
+      /*
+      mockCommit = vi.fn()
+      assetsApi.getAssets = vi.fn(() => Promise.reject(new Error('error')))
+      const res5 = await store.actions.loadAssets(
+        { commit: mockCommit, state, rootGetters }, true)
+      expect(mockCommit).toBeCalledTimes(2)
+      expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_ASSETS_START)
+      expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_ASSETS_ERROR)
+      expect(res5).toEqual([])
+      */
     })
 
     test('loadAsset', async () => {
@@ -302,8 +312,8 @@ describe('Assets store', () => {
       const state = {
         assetMap: new Map()
       }
-      let mockCommit = jest.fn()
-      assetsApi.getAsset = jest.fn(() => Promise.resolve({
+      let mockCommit = vi.fn()
+      assetsApi.getAsset = vi.fn(() => Promise.resolve({
         id: 1,
         tasks: []
       }))
@@ -318,7 +328,7 @@ describe('Assets store', () => {
         production: 1
       })
 
-      mockCommit = jest.fn()
+      mockCommit = vi.fn()
       state.assetMap.set(1, { id: 1, tasks: [] })
       await store.actions.loadAsset(
         { commit: mockCommit, state, rootGetters }, 1)
@@ -329,7 +339,7 @@ describe('Assets store', () => {
         { id: 1, tasks: [] }
       )
 
-      mockCommit = jest.fn()
+      mockCommit = vi.fn()
       state.assetMap.get(1).lock = true
       await store.actions.loadAsset(
         { commit: mockCommit, state, rootGetters }, 1)
@@ -346,10 +356,10 @@ describe('Assets store', () => {
         ]
       }
       const state = {}
-      const mockCommit = jest.fn()
-      const mockDispatch = jest.fn()
+      const mockCommit = vi.fn()
+      const mockDispatch = vi.fn()
       const asset = { id: 1, name: 'assetTest', project_id: 3 }
-      assetsApi.newAsset = jest.fn(() => Promise.resolve(asset))
+      assetsApi.newAsset = vi.fn(() => Promise.resolve(asset))
       const res = await store.actions.newAsset(
         { commit: mockCommit, state, rootGetters, dispatch: mockDispatch },
         new Map()
@@ -381,9 +391,9 @@ describe('Assets store', () => {
           assetTypeMap: 1
         }
       }
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       const asset = { id: 1, name: 'assetTest', project_id: 3 }
-      assetsApi.updateAsset = jest.fn(() => Promise.resolve(asset))
+      assetsApi.updateAsset = vi.fn(() => Promise.resolve(asset))
       const res = await store.actions.editAsset(
         { commit: mockCommit, state: {}, rootState }, asset)
       expect(mockCommit).toBeCalledTimes(2)
@@ -397,7 +407,7 @@ describe('Assets store', () => {
       const state = {
         assetMap: new Map()
       }
-      let mockCommit = jest.fn()
+      let mockCommit = vi.fn()
       const asset = {
         id: 1,
         name: 'assetTest',
@@ -406,15 +416,15 @@ describe('Assets store', () => {
         canceled: false
       }
       state.assetMap.set(1, asset)
-      assetsApi.deleteAsset = jest.fn(() => Promise.resolve(asset))
+      assetsApi.deleteAsset = vi.fn(() => Promise.resolve(asset))
       const res1 = await store.actions.deleteAsset({ commit: mockCommit, state }, asset)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, CANCEL_ASSET, asset)
       expect(res1).toEqual(asset)
 
       asset.canceled = true
-      mockCommit = jest.fn()
-      assetsApi.deleteAsset = jest.fn(() => Promise.resolve(asset))
+      mockCommit = vi.fn()
+      assetsApi.deleteAsset = vi.fn(() => Promise.resolve(asset))
       const res2 = await store.actions.deleteAsset(
         { commit: mockCommit, state }, asset)
       expect(mockCommit).toBeCalledTimes(1)
@@ -423,9 +433,9 @@ describe('Assets store', () => {
     })
 
     test('restoreAsset', async () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       const asset = { id: 1, name: 'assetTest' }
-      assetsApi.restoreAsset = jest.fn(() => Promise.resolve(asset))
+      assetsApi.restoreAsset = vi.fn(() => Promise.resolve(asset))
       const res1 = await store.actions.restoreAsset(
         { commit: mockCommit, state: {} }, asset)
       expect(mockCommit).toBeCalledTimes(1)
@@ -434,9 +444,9 @@ describe('Assets store', () => {
     })
 
     test('uploadAssetFile', async () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       const asset = { id: 1, name: 'assetTest' }
-      assetsApi.postCsv = jest.fn(() => Promise.resolve())
+      assetsApi.postCsv = vi.fn(() => Promise.resolve())
       await store.actions.uploadAssetFile(
         { commit: mockCommit, state: {} }, asset)
       expect(mockCommit).toBeCalledTimes(2)
@@ -453,7 +463,7 @@ describe('Assets store', () => {
         people: 5
       }
 
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       await store.actions.setAssetSearch(
         { commit: mockCommit, state: {}, rootGetters }, 6)
       expect(mockCommit).toBeCalledTimes(1)
@@ -477,8 +487,8 @@ describe('Assets store', () => {
         }]
       }
 
-      let mockCommit = jest.fn()
-      peopleApi.createFilter = jest.fn(
+      let mockCommit = vi.fn()
+      peopleApi.createFilter = vi.fn(
         (listType, name, query, productionId, entityType) => {
           return Promise.resolve(query)
         }
@@ -492,8 +502,8 @@ describe('Assets store', () => {
       })
       expect(peopleApi.createFilter).toBeCalledTimes(1)
 
-      mockCommit = jest.fn()
-      peopleApi.createFilter = jest.fn()
+      mockCommit = vi.fn()
+      peopleApi.createFilter = vi.fn()
       state.assetSearchQueries.push({
         name: 'name'
       })
@@ -506,8 +516,8 @@ describe('Assets store', () => {
         currentProduction: 4
       }
 
-      const mockCommit = jest.fn()
-      peopleApi.removeFilter = jest.fn(
+      const mockCommit = vi.fn()
+      peopleApi.removeFilter = vi.fn(
         (searchQuery) => {
           return Promise.resolve()
         }
@@ -524,7 +534,7 @@ describe('Assets store', () => {
     })
 
     test('displayMoreAssets', () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       const rootGetters = {
         taskTypeMap: 1,
         taskStatusMap: 2,
@@ -542,7 +552,7 @@ describe('Assets store', () => {
     })
 
     test('initAssetTypes', async () => {
-      const dispatch = jest.fn(() => Promise.resolve())
+      const dispatch = vi.fn(() => Promise.resolve())
       await store.actions.initAssetTypes({ dispatch })
       expect(dispatch).toBeCalledTimes(3)
       expect(dispatch).toHaveBeenNthCalledWith(
@@ -554,7 +564,7 @@ describe('Assets store', () => {
     })
 
     test('setAssetTypeListScrollPosition', () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       store.actions.setAssetTypeListScrollPosition({ commit: mockCommit })
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(
@@ -562,7 +572,7 @@ describe('Assets store', () => {
     })
 
     test('computeAssetTypeStats', () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       const rootGetters = {
         taskStatusMap: 1,
         taskMap: 2
@@ -576,7 +586,7 @@ describe('Assets store', () => {
     })
 
     test('setAssetTypeSearch', () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       store.actions.setAssetTypeSearch({ commit: mockCommit }, 'searchQuery')
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(
@@ -694,7 +704,7 @@ describe('Assets store', () => {
     })
 
     test('changeAssetSort', () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       const rootGetters = {
         taskTypeMap: 1,
         taskStatus: 2,
@@ -715,7 +725,7 @@ describe('Assets store', () => {
     })
 
     test('deleteAllAssetTasks', () => {
-      const dispatch = jest.fn()
+      const dispatch = vi.fn()
       const projectId = 1
       const taskTypeId = '2'
       const selectionOnly = true
@@ -732,7 +742,7 @@ describe('Assets store', () => {
     })
 
     test('deleteSelectedAssets', async () => {
-      const dispatch = jest.fn()
+      const dispatch = vi.fn()
       const asset = {
         id: 'asset-id',
         canceled: false

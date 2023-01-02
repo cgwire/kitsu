@@ -4,8 +4,8 @@ import Vuex from 'vuex'
 import store from '../../../src/store/modules/breakdown'
 import breakdownApi from '../../../src/store/api/breakdown'
 
-breakdownApi.updateCasting = jest.fn()
-breakdownApi.getSequenceCasting = jest.fn()
+breakdownApi.updateCasting = vi.fn()
+breakdownApi.getSequenceCasting = vi.fn()
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
@@ -127,10 +127,6 @@ describe('Breakdown store', () => {
     breakdownApi.getSequenceCasting.mockImplementation(
       () => Promise.resolve({ 'shot-1': assetCasting })
     )
-  })
-
-  describe('Getters', () => {
-    // No complex getters
   })
 
   describe('Actions', () => {

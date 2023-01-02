@@ -38,9 +38,6 @@ describe('Productions store', () => {
     })
   })
 
-  describe('Actions', () => {
-  })
-
   describe('Mutations', () => {
     let rootState
     beforeEach(() => {

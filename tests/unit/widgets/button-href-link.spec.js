@@ -30,7 +30,4 @@ describe('ButtonHrefLink', () => {
       expect(buttons).toHaveLength(1)
     })
   })
-
-  describe('Methods', () => {
-  })
 })

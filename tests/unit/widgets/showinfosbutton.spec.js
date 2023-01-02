@@ -29,8 +29,8 @@ describe('ShowInfosButton', () => {
     }
 
     actions = {
-      showInfos: jest.fn(),
-      hideInfos: jest.fn()
+      showInfos: vi.fn(),
+      hideInfos: vi.fn()
     }
 
     getters = {
@@ -59,7 +59,7 @@ describe('ShowInfosButton', () => {
 
   describe('Mount', () => {
     it('should be On', () => {
-      expect(wrapper.element.getAttribute('title')).toMatch('Hide additional information')
+      expect(wrapper.element.getAttribute('title')).toMatch('tasks.hide_infos')
     })
 
     it('should trigger a function on click', done => {

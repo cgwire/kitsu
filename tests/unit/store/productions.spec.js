@@ -250,9 +250,9 @@ describe('Productions store', () => {
 
   describe('Actions', () => {
     test('loadProductionStatus', () => {
-      let mockCommit = jest.fn()
-      let mockCallback = jest.fn()
-      productionApi.getProductionStatus = jest.fn(callback => callback(1, null))
+      let mockCommit = vi.fn()
+      let mockCallback = vi.fn()
+      productionApi.getProductionStatus = vi.fn(callback => callback(1, null))
       store.actions.loadProductionStatus({ commit: mockCommit, state: null }, mockCallback)
       expect(productionApi.getProductionStatus).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(2)
@@ -261,9 +261,9 @@ describe('Productions store', () => {
       expect(mockCallback).toBeCalledTimes(1)
       expect(mockCallback).toBeCalledWith(1)
 
-      mockCommit = jest.fn()
-      mockCallback = jest.fn()
-      productionApi.getProductionStatus = jest.fn(callback => callback(null, 123))
+      mockCommit = vi.fn()
+      mockCallback = vi.fn()
+      productionApi.getProductionStatus = vi.fn(callback => callback(null, 123))
       store.actions.loadProductionStatus({ commit: mockCommit, state: null }, mockCallback)
       expect(productionApi.getProductionStatus).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(2)
@@ -274,9 +274,9 @@ describe('Productions store', () => {
     })
 
     test('loadOpenProductions', () => {
-      let mockCommit = jest.fn()
-      let mockCallback = jest.fn()
-      productionApi.getOpenProductions = jest.fn(callback => callback(1, null))
+      let mockCommit = vi.fn()
+      let mockCallback = vi.fn()
+      productionApi.getOpenProductions = vi.fn(callback => callback(1, null))
       store.actions.loadOpenProductions({ commit: mockCommit, state: null }, mockCallback)
       expect(productionApi.getOpenProductions).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(2)
@@ -285,9 +285,9 @@ describe('Productions store', () => {
       expect(mockCallback).toBeCalledTimes(1)
       expect(mockCallback).toBeCalledWith(1)
 
-      mockCommit = jest.fn()
-      mockCallback = jest.fn()
-      productionApi.getOpenProductions = jest.fn(callback => callback(null, 123))
+      mockCommit = vi.fn()
+      mockCallback = vi.fn()
+      productionApi.getOpenProductions = vi.fn(callback => callback(null, 123))
       store.actions.loadOpenProductions({ commit: mockCommit, state: null }, mockCallback)
       expect(productionApi.getOpenProductions).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(2)
@@ -298,9 +298,9 @@ describe('Productions store', () => {
     })
 
     test('loadProductions', () => {
-      let mockCommit = jest.fn()
-      let mockCallback = jest.fn()
-      productionApi.getProductions = jest.fn(callback => callback(1, null))
+      let mockCommit = vi.fn()
+      let mockCallback = vi.fn()
+      productionApi.getProductions = vi.fn(callback => callback(1, null))
       store.actions.loadProductions({ commit: mockCommit, state: null }, mockCallback)
       expect(productionApi.getProductions).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(2)
@@ -309,9 +309,9 @@ describe('Productions store', () => {
       expect(mockCallback).toBeCalledTimes(1)
       expect(mockCallback).toBeCalledWith(1)
 
-      mockCommit = jest.fn()
-      mockCallback = jest.fn()
-      productionApi.getProductions = jest.fn(callback => callback(null, 123))
+      mockCommit = vi.fn()
+      mockCallback = vi.fn()
+      productionApi.getProductions = vi.fn(callback => callback(null, 123))
       store.actions.loadProductions({ commit: mockCommit, state: null }, mockCallback)
       expect(productionApi.getProductions).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(2)
@@ -327,23 +327,23 @@ describe('Productions store', () => {
           1: { id: '1' }
         }))
       }
-      let mockCommit = jest.fn()
-      productionApi.getProduction = jest.fn(productionId => Promise.resolve({ id: '1' }))
+      let mockCommit = vi.fn()
+      productionApi.getProduction = vi.fn(productionId => Promise.resolve({ id: '1' }))
       await store.actions.loadProduction({ commit: mockCommit, state }, 'production-id')
       expect(productionApi.getProduction).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, UPDATE_PRODUCTION, { id: '1' })
 
-      mockCommit = jest.fn()
-      productionApi.getProduction = jest.fn(productionId => Promise.resolve({ id: '5' }))
+      mockCommit = vi.fn()
+      productionApi.getProduction = vi.fn(productionId => Promise.resolve({ id: '5' }))
       await store.actions.loadProduction({ commit: mockCommit, state }, 'production-id')
       expect(productionApi.getProduction).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, ADD_PRODUCTION, { id: '5' })
 
       /*
-      mockCommit = jest.fn()
-      productionApi.getProduction = jest.fn(productionId => Promise.reject(new Error('error')))
+      mockCommit = vi.fn()
+      productionApi.getProduction = vi.fn(productionId => Promise.reject(new Error('error')))
       await store.actions.loadProduction({ commit: mockCommit, state }, 'production-id')
       expect(productionApi.getProduction).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(0)
@@ -351,16 +351,16 @@ describe('Productions store', () => {
     })
 
     test('newProduction', async () => {
-      let mockCommit = jest.fn()
-      productionApi.newProduction = jest.fn(productionId => Promise.resolve({ id: '1' }))
+      let mockCommit = vi.fn()
+      productionApi.newProduction = vi.fn(productionId => Promise.resolve({ id: '1' }))
       await store.actions.newProduction({ commit: mockCommit, state: null }, 'production-id')
       expect(productionApi.newProduction).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(2)
       expect(mockCommit).toHaveBeenNthCalledWith(1, EDIT_PRODUCTION_START, 'production-id')
       expect(mockCommit).toHaveBeenNthCalledWith(2, EDIT_PRODUCTION_END, { id: '1' })
 
-      mockCommit = jest.fn()
-      productionApi.newProduction = jest.fn(productionId => Promise.reject(new Error('error')))
+      mockCommit = vi.fn()
+      productionApi.newProduction = vi.fn(productionId => Promise.reject(new Error('error')))
       try {
         await store.actions.newProduction({ commit: mockCommit, state: null }, 'production-id')
       } catch (e) {
@@ -371,16 +371,16 @@ describe('Productions store', () => {
     })
 
     test('editProduction', async () => {
-      let mockCommit = jest.fn()
-      productionApi.updateProduction = jest.fn(productionId => Promise.resolve({ id: '1' }))
+      let mockCommit = vi.fn()
+      productionApi.updateProduction = vi.fn(productionId => Promise.resolve({ id: '1' }))
       await store.actions.editProduction({ commit: mockCommit, state: null }, 'production-id')
       expect(productionApi.updateProduction).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(2)
       expect(mockCommit).toHaveBeenNthCalledWith(1, EDIT_PRODUCTION_START)
       expect(mockCommit).toHaveBeenNthCalledWith(2, EDIT_PRODUCTION_END, { id: '1' })
 
-      mockCommit = jest.fn()
-      productionApi.updateProduction = jest.fn(productionId => Promise.reject(new Error('error')))
+      mockCommit = vi.fn()
+      productionApi.updateProduction = vi.fn(productionId => Promise.reject(new Error('error')))
       try {
         await store.actions.editProduction({ commit: mockCommit, state: null }, 'production-id')
       } catch (e) {
@@ -391,8 +391,8 @@ describe('Productions store', () => {
     })
 
     test('deleteProduction', async () => {
-      let mockCommit = jest.fn()
-      productionApi.deleteProduction = jest.fn(productionId => Promise.resolve({ id: '1' }))
+      let mockCommit = vi.fn()
+      productionApi.deleteProduction = vi.fn(productionId => Promise.resolve({ id: '1' }))
       await store.actions.deleteProduction({ commit: mockCommit, state: null }, 'production-id')
       expect(productionApi.deleteProduction).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(3)
@@ -400,8 +400,8 @@ describe('Productions store', () => {
       expect(mockCommit).toHaveBeenNthCalledWith(2, REMOVE_PRODUCTION, 'production-id')
       expect(mockCommit).toHaveBeenNthCalledWith(3, DELETE_PRODUCTION_END)
 
-      mockCommit = jest.fn()
-      productionApi.deleteProduction = jest.fn(productionId => Promise.reject(new Error('error')))
+      mockCommit = vi.fn()
+      productionApi.deleteProduction = vi.fn(productionId => Promise.reject(new Error('error')))
       try {
         await store.actions.deleteProduction({ commit: mockCommit, state: null }, 'production-id')
       } catch (e) {
@@ -412,7 +412,7 @@ describe('Productions store', () => {
     })
 
     test('setProduction', () => {
-      let mockCommit = jest.fn()
+      let mockCommit = vi.fn()
       const fakeRootGetters = {
         isTVShow: true,
         currentEpisode: { id: '123' }
@@ -424,7 +424,7 @@ describe('Productions store', () => {
       expect(mockCommit).toHaveBeenNthCalledWith(3, CLEAR_SHOTS)
       expect(mockCommit).toHaveBeenNthCalledWith(4, RESET_PRODUCTION_PATH, { productionId: 'production-id', episodeId: '123' })
 
-      mockCommit = jest.fn()
+      mockCommit = vi.fn()
       fakeRootGetters.isTVShow = false
       store.actions.setProduction({ commit: mockCommit, rootGetters: fakeRootGetters }, 'production-id')
       expect(mockCommit).toBeCalledTimes(4)
@@ -433,7 +433,7 @@ describe('Productions store', () => {
       expect(mockCommit).toHaveBeenNthCalledWith(3, CLEAR_SHOTS)
       expect(mockCommit).toHaveBeenNthCalledWith(4, RESET_PRODUCTION_PATH, { productionId: 'production-id' })
 
-      mockCommit = jest.fn()
+      mockCommit = vi.fn()
       store.actions.setProduction({ commit: mockCommit, rootGetters: fakeRootGetters }, null)
       expect(mockCommit).toBeCalledTimes(3)
       expect(mockCommit).toHaveBeenNthCalledWith(1, SET_CURRENT_PRODUCTION, null)
@@ -442,24 +442,24 @@ describe('Productions store', () => {
     })
 
     test('storeProductionPicture', () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       store.actions.storeProductionPicture({ commit: mockCommit }, 'form-data')
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, PRODUCTION_PICTURE_FILE_SELECTED, 'form-data')
     })
 
     test('uploadProductionAvatar', async () => {
-      let mockCommit = jest.fn()
+      let mockCommit = vi.fn()
       const state = {
         productionAvatarFormData: 'form-data'
       }
-      productionApi.postAvatar = jest.fn((_, __, callback) => callback(null))
+      productionApi.postAvatar = vi.fn((_, __, callback) => callback(null))
       await store.actions.uploadProductionAvatar({ commit: mockCommit, state }, 'production-id')
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, PRODUCTION_AVATAR_UPLOADED, 'production-id')
 
-      mockCommit = jest.fn()
-      productionApi.postAvatar = jest.fn((_, __, callback) => callback(new Error('error')))
+      mockCommit = vi.fn()
+      productionApi.postAvatar = vi.fn((_, __, callback) => callback(new Error('error')))
       try {
         await store.actions.uploadProductionAvatar({ commit: mockCommit, state }, 'production-id')
       } catch (e) {
@@ -469,11 +469,11 @@ describe('Productions store', () => {
     })
 
     test('addPersonToTeam', () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       const state = {
         currentProduction: { id: '123' }
       }
-      productionApi.addPersonToTeam = jest.fn()
+      productionApi.addPersonToTeam = vi.fn()
       store.actions.addPersonToTeam({ commit: mockCommit, state }, { id: '456' })
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, TEAM_ADD_PERSON, '456')
@@ -481,11 +481,11 @@ describe('Productions store', () => {
     })
 
     test('removePersonFromTeam', () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       const state = {
         currentProduction: { id: '123' }
       }
-      productionApi.removePersonFromTeam = jest.fn()
+      productionApi.removePersonFromTeam = vi.fn()
       store.actions.removePersonFromTeam({ commit: mockCommit, state }, { id: '456' })
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, TEAM_REMOVE_PERSON, '456')
@@ -493,11 +493,11 @@ describe('Productions store', () => {
     })
 
     test('addAssetTypeToProduction', () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       const state = {
         currentProduction: { id: '123' }
       }
-      productionApi.addAssetTypeToProduction = jest.fn()
+      productionApi.addAssetTypeToProduction = vi.fn()
       store.actions.addAssetTypeToProduction({ commit: mockCommit, state }, '456')
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, PRODUCTION_ADD_ASSET_TYPE, '456')
@@ -505,11 +505,11 @@ describe('Productions store', () => {
     })
 
     test('removeAssetTypeFromProduction', () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       const state = {
         currentProduction: { id: '123' }
       }
-      productionApi.removeAssetTypeFromProduction = jest.fn()
+      productionApi.removeAssetTypeFromProduction = vi.fn()
       store.actions.removeAssetTypeFromProduction({ commit: mockCommit, state }, '456')
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, PRODUCTION_REMOVE_ASSET_TYPE, '456')
@@ -517,11 +517,11 @@ describe('Productions store', () => {
     })
 
     test('addTaskTypeToProduction', () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       const state = {
         currentProduction: { id: '123' }
       }
-      productionApi.addTaskTypeToProduction = jest.fn()
+      productionApi.addTaskTypeToProduction = vi.fn()
       store.actions.addTaskTypeToProduction(
         { commit: mockCommit, state },
         { taskTypeId: '456', priority: 1 }
@@ -534,11 +534,11 @@ describe('Productions store', () => {
     })
 
     test('removeTaskTypeFromProduction', () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       const state = {
         currentProduction: { id: '123' }
       }
-      productionApi.removeTaskTypeFromProduction = jest.fn()
+      productionApi.removeTaskTypeFromProduction = vi.fn()
       store.actions.removeTaskTypeFromProduction({ commit: mockCommit, state }, '456')
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, PRODUCTION_REMOVE_TASK_TYPE, '456')
@@ -546,11 +546,11 @@ describe('Productions store', () => {
     })
 
     test('addTaskStatusToProduction', () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       const state = {
         currentProduction: { id: '123' }
       }
-      productionApi.addTaskStatusToProduction = jest.fn()
+      productionApi.addTaskStatusToProduction = vi.fn()
       store.actions.addTaskStatusToProduction({ commit: mockCommit, state }, '456')
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, PRODUCTION_ADD_TASK_STATUS, '456')
@@ -558,11 +558,11 @@ describe('Productions store', () => {
     })
 
     test('removeTaskStatusFromProduction', () => {
-      const mockCommit = jest.fn()
+      const mockCommit = vi.fn()
       const state = {
         currentProduction: { id: '123' }
       }
-      productionApi.removeTaskStatusFromProduction = jest.fn()
+      productionApi.removeTaskStatusFromProduction = vi.fn()
       store.actions.removeTaskStatusFromProduction({ commit: mockCommit, state }, '456')
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, PRODUCTION_REMOVE_TASK_STATUS, '456')
@@ -570,19 +570,19 @@ describe('Productions store', () => {
     })
 
     test('addMetadataDescriptor', async () => {
-      let mockCommit = jest.fn()
+      let mockCommit = vi.fn()
       const state = {
         currentProduction: { id: '123', descriptors: [{ field_name: 'descriptor', id: 1 }] }
       }
 
-      productionApi.addMetadataDescriptor = jest.fn()
+      productionApi.addMetadataDescriptor = vi.fn()
       store.actions.addMetadataDescriptor({ commit: mockCommit, state }, { field_name: 'new descriptor' })
       expect(productionApi.addMetadataDescriptor).toBeCalledTimes(1)
       expect(productionApi.addMetadataDescriptor).toHaveBeenNthCalledWith(1, '123', { field_name: 'new descriptor' })
 
       const existingDescriptor = { field_name: 'new descriptor name', id: 1 }
-      mockCommit = jest.fn()
-      productionApi.updateMetadataDescriptor = jest.fn((_, descriptor) => Promise.resolve(descriptor))
+      mockCommit = vi.fn()
+      productionApi.updateMetadataDescriptor = vi.fn((_, descriptor) => Promise.resolve(descriptor))
       await store.actions.addMetadataDescriptor({ commit: mockCommit, state }, existingDescriptor)
       expect(productionApi.updateMetadataDescriptor).toBeCalledTimes(1)
       expect(productionApi.updateMetadataDescriptor).toHaveBeenNthCalledWith(1, '123', existingDescriptor)
@@ -591,7 +591,7 @@ describe('Productions store', () => {
     })
 
     test('refreshMetadataDescriptor', async () => {
-      let mockCommit = jest.fn()
+      let mockCommit = vi.fn()
       const state = {
         currentProduction: {
           id: '123'
@@ -603,7 +603,7 @@ describe('Productions store', () => {
       }
 
       const descriptor = { id: '456', field_name: 'descriptor name', project_id: '1' }
-      productionApi.getMetadataDescriptor = jest.fn((_, __) => Promise.resolve(descriptor))
+      productionApi.getMetadataDescriptor = vi.fn((_, __) => Promise.resolve(descriptor))
       await store.actions.refreshMetadataDescriptor({ commit: mockCommit, state }, descriptor.id)
       expect(productionApi.getMetadataDescriptor).toBeCalledTimes(1)
       expect(productionApi.getMetadataDescriptor).toHaveBeenNthCalledWith(1, '123', descriptor.id)
@@ -611,8 +611,8 @@ describe('Productions store', () => {
       expect(mockCommit).toHaveBeenNthCalledWith(1, UPDATE_METADATA_DESCRIPTOR_END, { production: { id: 1 }, descriptor })
 
       descriptor.id = '789'
-      mockCommit = jest.fn()
-      productionApi.getMetadataDescriptor = jest.fn((_, __) => Promise.resolve(descriptor))
+      mockCommit = vi.fn()
+      productionApi.getMetadataDescriptor = vi.fn((_, __) => Promise.resolve(descriptor))
       await store.actions.refreshMetadataDescriptor({ commit: mockCommit, state }, descriptor.id)
       expect(productionApi.getMetadataDescriptor).toBeCalledTimes(1)
       expect(productionApi.getMetadataDescriptor).toHaveBeenNthCalledWith(1, '123', descriptor.id)
