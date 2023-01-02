@@ -910,7 +910,7 @@ const mutations = {
 
   [LOAD_TASK_STATUSES_END] (state, taskStatuses) {
     state.taskStatuses = sortByName(taskStatuses)
-    state.taskStatuses.forEach((taskStatus) => {
+    state.taskStatuses.forEach(taskStatus => {
       state.taskStatusMap.set(taskStatus.id, taskStatus)
     })
   },
