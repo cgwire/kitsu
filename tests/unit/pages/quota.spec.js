@@ -24,7 +24,7 @@ describe('Quota', () => {
         }))
       },
       actions: {
-        loadShots: jest.fn(),
+        loadShots: vi.fn(),
         computeQuota: () => ({
           'cd5f95f0-8293-4cf2-8220-6928b594ede7': {
             '2020-02-03': 70,

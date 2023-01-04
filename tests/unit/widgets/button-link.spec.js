@@ -37,7 +37,4 @@ describe('ButtonLink', () => {
       const buttons = wrapper.findAll('button')
     })
   })
-
-  describe('Methods', () => {
-  })
 })

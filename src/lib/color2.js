@@ -1,5 +1,5 @@
-const colorString = require('color-string')
-const convert = require('color-convert')
+import colorString from 'color-string'
+import convert from 'color-convert'
 
 const _slice = [].slice
 
@@ -183,12 +183,19 @@ Color.prototype = {
 
   round (places) {
     places = Math.max(places || 0, 0)
-    return new Color(this.color.map(roundToPlace(places)).concat(this.valpha), this.model)
+    return new Color(
+      this.color.map(roundToPlace(places))
+        .concat(this.valpha),
+      this.model
+    )
   },
 
   alpha (value) {
     if (arguments.length > 0) {
-      return new Color(this.color.concat(Math.max(0, Math.min(1, value))), this.model)
+      return new Color(
+        this.color.concat(Math.max(0, Math.min(1, value))),
+        this.model
+      )
     }
 
     return this.valpha
@@ -479,4 +486,4 @@ function zeroArray (array, length) {
   return array
 }
 
-module.exports = Color
+export default Color

@@ -638,6 +638,7 @@
 </template>
 
 <script>
+import async from 'async'
 import { mapGetters, mapActions } from 'vuex'
 import { domMixin } from '@/components/mixins/dom'
 import { intersection } from '@/lib/array'
@@ -1005,7 +1006,7 @@ export default {
       const person = this.isCurrentUserArtist ? this.user : this.person
       if (person) {
         this.loading.assignation = true
-        Promise.all(Array.from(this.selectedTasks.values()).map(task => {
+        async.series(Array.from(this.selectedTasks.values()).map(task => {
           return this.unassignPersonFromTask({ task, person })
         })).then(() => {
           this.loading.assignation = false
@@ -1120,7 +1121,7 @@ export default {
 
     confirmSetThumbnailsFromTasks () {
       this.loading.setThumbnails = true
-      Promise.all(Array.from(this.selectedTasks.values()).map(task => {
+      async.series(Array.from(this.selectedTasks.values()).map(task => {
         return this.setLastTaskPreview(task.id)
       })).then(() => {
         this.loading.setThumbnails = false

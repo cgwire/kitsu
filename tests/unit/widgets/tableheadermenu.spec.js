@@ -27,7 +27,7 @@ describe('TableHeaderMenu', () => {
   describe('Mount', () => {
     it('should be minimized', () => {
       const content = wrapper.findAll('div > div').at(0)
-      expect(content.text()).toMatch('Maximize')
+      expect(content.text()).toMatch('main.maximize')
     })
 
     it('should be maximized', () => {
@@ -39,7 +39,7 @@ describe('TableHeaderMenu', () => {
         i18n
       })
       const content = wrapper.findAll('div > div').at(0)
-      expect(content.text()).toMatch('Minimize')
+      expect(content.text()).toMatch('main.minimize')
     })
 
     test('UI should be displayed as Admin', () => {

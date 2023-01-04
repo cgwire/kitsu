@@ -1,5 +1,5 @@
 import async from 'async'
-import Vue from 'vue'
+import Vue from 'vue/dist/vue'
 
 import tasksApi from '@/store/api/tasks'
 import peopleApi from '@/store/api/people'
@@ -304,7 +304,7 @@ const actions = {
       }
       entityIdsByTaskType[taskTypeId].push(entityId)
     })
-    return Promise.all(Object.keys(entityIdsByTaskType).map(taskTypeId => {
+    return async.eachSeries(Object.keys(entityIdsByTaskType).map(taskTypeId => {
       const data = {
         task_type_id: taskTypeId,
         type,
@@ -328,7 +328,10 @@ const actions = {
           })
           return Promise.resolve(tasks)
         })
-        .catch(console.error)
+        .catch(err => {
+          console.error(err)
+          return Promise.resolve([])
+        })
     }))
       .then(() => {
         return Promise.resolve()

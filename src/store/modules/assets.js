@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import Vue from 'vue/dist/vue'
 
 import assetsApi from '@/store/api/assets'
 import peopleApi from '@/store/api/people'
@@ -487,7 +487,7 @@ const actions = {
             type: 'assets'
           })
         })
-        return Promise.all(createTaskPromises)
+        return async.series(createTaskPromises)
           .then(() => Promise.resolve(asset))
       })
   },

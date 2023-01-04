@@ -2,7 +2,8 @@ module.exports = {
   root: true,
   env: {
     node: true,
-    'jest/globals': true
+    'jest/globals': true,
+    es2021: true,
   },
   plugins: ['jest'],
   extends: [
@@ -20,6 +21,5 @@ module.exports = {
     'jest/valid-expect': 'error'
   },
   parserOptions: {
-    parser: 'babel-eslint'
   }
 }

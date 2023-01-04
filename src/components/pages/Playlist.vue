@@ -417,7 +417,7 @@
   </div>
 </template>
 <script>
-import Vue from 'vue'
+import Vue from 'vue/dist/vue'
 import firstBy from 'thenby'
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'

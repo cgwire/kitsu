@@ -66,7 +66,7 @@ describe('ShotHistoryModal', () => {
       expect(tableInfo.props().isLoading).toBe(false)
       expect(modal.findAll('.shot-version')).toHaveLength(0)
     })
-    it('spinner on loading', done => {
+    it('spinner on loading', () => new Promise(done => {
       wrapper.setData({ isLoading: true })
       Vue.nextTick(() => {
         const modal = wrapper.findComponent(ShotHistoryModal)
@@ -75,7 +75,7 @@ describe('ShotHistoryModal', () => {
         expect(modal.findAll('.shot-version')).toHaveLength(0)
         done()
       })
-    })
+    }))
     it('data loaded', async () => {
       await wrapper.vm.loadData()
       const modal = wrapper.findComponent(ShotHistoryModal)

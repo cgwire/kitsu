@@ -1,7 +1,7 @@
 import func from '../../../src/lib/func'
 
 describe('func', () => {
-  test('runPromiseMapAsSeries', (done) => {
+  test('runPromiseMapAsSeries', () => new Promise((done) => {
     let counter = 0
     const mapFunc = (item) => {
       counter += item
@@ -12,5 +12,5 @@ describe('func', () => {
         expect(counter).toEqual(6)
         done()
       })
-  })
+  }))
 })

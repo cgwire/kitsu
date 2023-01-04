@@ -45,7 +45,7 @@ describe('Departements', () => {
 
   describe('Mounted', () => {
     test('mount Departements page', async () => {
-      const loadFunction = jest.fn()
+      const loadFunction = vi.fn()
       const store = initialiseStore(
         {
           loadDepartments ({ state }) {
@@ -101,7 +101,7 @@ describe('Departements', () => {
     })
 
     test('confirmDeleteDepartment', async () => {
-      const deleteFunction = jest.fn()
+      const deleteFunction = vi.fn()
       const store = initialiseStore(
         {
           deleteDepartment () {
@@ -125,7 +125,7 @@ describe('Departements', () => {
     })
 
     test('[ERROR] confirmDeleteDepartment', async () => {
-      // const deleteFunction = jest.fn()
+      // const deleteFunction = vi.fn()
       const store = initialiseStore(
         {
           deleteDepartment () {
@@ -147,7 +147,7 @@ describe('Departements', () => {
     })
 
     test('[NEW] confirmEditDepartment', async () => {
-      const newFunction = jest.fn()
+      const newFunction = vi.fn()
       const store = initialiseStore(
         {
           newDepartement ({ state }) {
@@ -177,7 +177,7 @@ describe('Departements', () => {
     })
 
     test('[EDIT] confirmEditDepartment', async () => {
-      const editFunction = jest.fn()
+      const editFunction = vi.fn()
       const store = initialiseStore(
         {
           editDepartement () {

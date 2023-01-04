@@ -14,6 +14,7 @@
     loading="eager"
     camera-controls
     :src="previewUrl"
+    autoplay
   >
   </model-viewer>
 </div>

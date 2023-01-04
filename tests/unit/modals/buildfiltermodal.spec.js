@@ -132,7 +132,7 @@ describe('BuildFilterModal', () => {
       wrapper.findComponent(BuildFilterModal)
     })
     describe('mount with query', () => {
-      it('task types', done => {
+      it('task types', () => new Promise(done => {
         expect(wrapper.find('.task-type-filter').exists()).toBeFalsy()
         wrapper.setData({
           taskTypeFilters: {
@@ -149,8 +149,8 @@ describe('BuildFilterModal', () => {
           expect(wrapper.find('.task-type-filter').exists()).toBeTruthy()
           done()
         })
-      })
-      it('descriptors', (done) => {
+      }))
+      it('descriptors', () => new Promise(done => {
         expect(wrapper.find('.descriptor-filter').exists()).toBeFalsy()
         wrapper.setData({
           metadataDescriptorFilters: {
@@ -168,7 +168,7 @@ describe('BuildFilterModal', () => {
           expect(wrapper.find('.descriptor-filter').exists()).toBeTruthy()
           done()
         })
-      })
+      }))
     })
   })
 

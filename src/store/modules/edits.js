@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import Vue from 'vue/dist/vue'
 import moment from 'moment'
 import peopleApi from '@/store/api/people'
 import editsApi from '@/store/api/edits'
@@ -424,7 +424,7 @@ const actions = {
             type: 'edits'
           })
         )
-        return Promise.all(createTaskPromises)
+        return async.series(createTaskPromises)
           .then(() => Promise.resolve(edit))
           .catch(console.error)
       })
