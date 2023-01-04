@@ -146,13 +146,13 @@ export default {
     return client.pdel('/api/auth/totp', twoFactorPayload)
   },
 
+  sendEmailOTP (email) {
+    return client.pget(`/api/auth/email-otp?email=${email}`)
+  },
+
   preEnableEmailOTP () {
     return client.pput('/api/auth/email-otp', {})
       .then(body => Promise.resolve(body))
-  },
-
-  sendEmailOTP (email) {
-    return client.pget(`/api/auth/email-otp?email=${email}`)
   },
 
   enableEmailOTP (emailOTP) {
@@ -162,6 +162,27 @@ export default {
 
   disableEmailOTP (twoFactorPayload) {
     return client.pdel('/api/auth/email-otp', twoFactorPayload)
+  },
+
+  preRegisterFIDO () {
+    return client.pput('/api/auth/fido', {})
+      .then(body => Promise.resolve(body))
+  },
+
+  registerFIDO (registrationResponse, deviceName) {
+    return client.ppost(
+      '/api/auth/fido',
+      { registration_response: registrationResponse, device_name: deviceName })
+      .then(body => Promise.resolve(body.otp_recovery_codes))
+  },
+
+  getFIDOChallenge (email) {
+    return client.pget(`/api/auth/fido?email=${email}`)
+  },
+
+  unregisterFIDO (twoFactorPayload, deviceName) {
+    const data = { ...twoFactorPayload, device_name: deviceName }
+    return client.pdel('/api/auth/fido', data)
   },
 
   newRecoveryCodes (twoFactorPayload) {

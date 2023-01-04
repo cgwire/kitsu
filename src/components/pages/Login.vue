@@ -197,11 +197,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .login-header img {
-  }
-}
-
 .box {
   border-radius: 1em;
 

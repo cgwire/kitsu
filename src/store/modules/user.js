@@ -12,6 +12,8 @@ import {
   clearSelectionGrid
 } from '@/lib/selection'
 
+import { coercePublicKeyFromJSON, coerceCredentialInfoToJSON, coerceTwoFactorPayload } from '@/lib/webauthn'
+
 import {
   USER_LOGIN,
   USER_LOGOUT,
@@ -30,6 +32,8 @@ import {
   USER_DISABLE_TOTP_SUCCESS,
   USER_ENABLE_EMAIL_OTP_SUCCESS,
   USER_DISABLE_EMAIL_OTP_SUCCESS,
+  USER_REGISTER_FIDO_SUCCESS,
+  USER_UNREGISTER_FIDO_SUCCESS,
 
   USER_LOAD_TODOS_START,
   USER_LOAD_TODOS_END,
@@ -205,10 +209,11 @@ const actions = {
   },
 
   disableTOTP ({ commit, state }, twoFactorPayload) {
-    return peopleApi.disableTOTP(twoFactorPayload).then(() => {
-      commit(USER_DISABLE_TOTP_SUCCESS)
-      return Promise.resolve()
-    })
+    return peopleApi.disableTOTP(coerceTwoFactorPayload(twoFactorPayload))
+      .then(() => {
+        commit(USER_DISABLE_TOTP_SUCCESS)
+        return Promise.resolve()
+      })
   },
 
   preEnableEmailOTP ({ commit, state }) {
@@ -227,14 +232,42 @@ const actions = {
   },
 
   disableEmailOTP ({ commit, state }, twoFactorPayload) {
-    return peopleApi.disableEmailOTP(twoFactorPayload).then(() => {
-      commit(USER_DISABLE_EMAIL_OTP_SUCCESS)
-      return Promise.resolve()
-    })
+    return peopleApi.disableEmailOTP(coerceTwoFactorPayload(twoFactorPayload))
+      .then(() => {
+        commit(USER_DISABLE_EMAIL_OTP_SUCCESS)
+        return Promise.resolve()
+      })
+  },
+
+  preRegisterFIDO ({ commit, state }) {
+    return peopleApi.preRegisterFIDO()
+      .then(body => Promise.resolve(coercePublicKeyFromJSON(body)))
+  },
+
+  registerFIDO ({ commit, state }, { registrationResponse, deviceName }) {
+    return peopleApi.registerFIDO(
+      coerceCredentialInfoToJSON(registrationResponse), deviceName)
+      .then((OTPRecoveryCodes) => {
+        commit(USER_REGISTER_FIDO_SUCCESS, deviceName)
+        return Promise.resolve(OTPRecoveryCodes)
+      })
+  },
+
+  getFIDOChallenge ({ commit, state }, email) {
+    return peopleApi.getFIDOChallenge(email)
+      .then(body => Promise.resolve(coercePublicKeyFromJSON(body)))
+  },
+
+  unregisterFIDO ({ commit, state }, { twoFactorPayload, deviceName }) {
+    return peopleApi.unregisterFIDO(coerceTwoFactorPayload(twoFactorPayload), deviceName)
+      .then(() => {
+        commit(USER_UNREGISTER_FIDO_SUCCESS, deviceName)
+        return Promise.resolve()
+      })
   },
 
   newRecoveryCodes ({ commit, state }, twoFactorPayload) {
-    return peopleApi.newRecoveryCodes(twoFactorPayload)
+    return peopleApi.newRecoveryCodes(coerceTwoFactorPayload(twoFactorPayload))
   },
 
   loadTodos ({ commit, state, rootGetters }, { callback, forced, date }) {
@@ -453,7 +486,9 @@ const mutations = {
   [USER_DISABLE_TOTP_SUCCESS] (state) {
     state.user.totp_enabled = false
     if (state.user.preferred_two_factor_authentication === 'totp') {
-      if (state.user.email_otp_enabled) {
+      if (state.user.fido_enabled) {
+        state.user.preferred_two_factor_authentication = 'fido'
+      } else if (state.user.email_otp_enabled) {
         state.user.preferred_two_factor_authentication = 'email_otp'
       } else {
         state.user.preferred_two_factor_authentication = null
@@ -471,10 +506,42 @@ const mutations = {
   [USER_DISABLE_EMAIL_OTP_SUCCESS] (state) {
     state.user.email_otp_enabled = false
     if (state.user.preferred_two_factor_authentication === 'email_otp') {
-      if (state.user.totp_otp_enabled) {
+      if (state.user.fido_enabled) {
+        state.user.preferred_two_factor_authentication = 'fido'
+      } else if (state.user.totp_otp_enabled) {
         state.user.preferred_two_factor_authentication = 'totp'
       } else {
         state.user.preferred_two_factor_authentication = null
+      }
+    }
+  },
+
+  [USER_REGISTER_FIDO_SUCCESS] (state, deviceName) {
+    state.user.fido_enabled = true
+    if (!state.user.preferred_two_factor_authentication) {
+      state.user.preferred_two_factor_authentication = 'fido'
+    }
+    if (typeof state.user.fido_devices === 'undefined') {
+      state.user.fido_devices = []
+    }
+    state.user.fido_devices.push(deviceName)
+  },
+
+  [USER_UNREGISTER_FIDO_SUCCESS] (state, deviceName) {
+    const index = state.user.fido_devices.indexOf(deviceName)
+    if (index > -1) {
+      state.user.fido_devices.splice(index, 1)
+    }
+    if (state.user.fido_devices.length === 0) {
+      state.user.fido_enabled = false
+      if (state.user.preferred_two_factor_authentication === 'fido') {
+        if (state.user.email_otp_enabled) {
+          state.user.preferred_two_factor_authentication = 'email_otp'
+        } else if (state.user.totp_otp_enabled) {
+          state.user.preferred_two_factor_authentication = 'totp'
+        } else {
+          state.user.preferred_two_factor_authentication = null
+        }
       }
     }
   },

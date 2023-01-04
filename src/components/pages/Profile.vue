@@ -272,7 +272,7 @@
             <input
               class="input is-medium otp-input"
               type="text"
-              v-model="twoFA.validation_otp"
+              v-model="twoFA.validationOTP"
               @keyup.enter="nextEnable"
               :placeholder="placeholderInputEnableOTP"
               v-focus
@@ -351,10 +351,54 @@
           :class="{
             'show-message-2fa': true,
             error: true,
-            'is-hidden': !(twoFA.error.isWrongOTP && (twoFA.TOTPPreEnabled || twoFA.emailOTPPreEnabled))
+            'is-hidden': !(twoFA.error.isWrongOTP &&
+            (twoFA.TOTPPreEnabled || twoFA.emailOTPPreEnabled))
           }"
         >
           {{ textWrongOTPError }}
+        </p>
+
+        <div
+            class="field"
+            v-if="twoFA.FIDOPreRegistered"
+        >
+          <p class="control has-icon">
+            <input
+              class="input is-medium otp-input"
+              type="text"
+              v-model="twoFA.FIDONewDeviceName"
+              @keyup.enter="registerFIDORequested"
+              :placeholder="$t('profile.two_factor_authentication.fido.device_name')"
+              v-focus
+            >
+            <span class="icon">
+              <key-icon width=20 height=20 />
+            </span>
+          </p>
+        </div>
+
+        <button
+          v-if="twoFA.FIDOPreRegistered"
+          :class="{
+            'two-fa-button': true,
+            button: true,
+            'save-button': true,
+            'is-medium': true,
+            'is-loading': twoFA.isLoading
+          }"
+          @click="registerFIDORequested()"
+        >
+          {{ $t('profile.two_factor_authentication.fido.button_register') }}
+        </button>
+
+        <p
+          :class="{
+            'show-message-2fa': true,
+            error: true,
+            'is-hidden': !twoFA.error.registerFIDO
+          }"
+        >
+          {{ $t('profile.two_factor_authentication.fido.error_register') }}
         </p>
 
         <button
@@ -458,6 +502,21 @@
         </p>
 
         <button
+          v-if="!twoFA.FIDOPreRegistered"
+          :class="{
+            'two-fa-button': true,
+            button: true,
+            'save-button': true,
+            'is-medium': true,
+            'is-disabled': twoFAButtonsDisabled,
+            'is-loading': twoFA.isLoading
+          }"
+          @click="preRegisterFIDORequested()"
+        >
+          {{ $t('profile.two_factor_authentication.fido.button_register') }}
+        </button>
+
+        <button
           v-if="(twoFAEnabled && !twoFA.newRecoveryCodesNeedTwoFA)"
           :class="{
             'two-fa-button': true,
@@ -482,6 +541,39 @@
           {{ $t('profile.two_factor_authentication.recovery_codes.error_new') }}
         </p>
 
+        <h3
+          v-if="user.fido_enabled"
+        >
+          {{ $t('profile.two_factor_authentication.fido.registered_devices_title') }}
+        </h3>
+
+        <div>
+          <ul>
+            <li
+                v-for="device in user.fido_devices"
+                :key="device"
+            >
+              {{ device }}
+              <trash-icon
+                class="trash-icon-fido-device"
+                width="15"
+                height="15"
+                @click="unregisterFIDORequested(device)"
+              />
+            </li>
+          </ul>
+        </div>
+
+        <p
+          :class="{
+            'show-message-2fa': true,
+            error: true,
+            'is-hidden': !twoFA.error.unregisterFIDO
+          }"
+        >
+          {{ $t('profile.two_factor_authentication.fido.error_unregister') }}
+        </p>
+
       </div>
     </div>
 
@@ -502,7 +594,10 @@
 <script>
 import moment from 'moment-timezone'
 import QrcodeVue from 'qrcode.vue'
-import { LockIcon, CopyIcon, SaveIcon, XCircleIcon } from 'vue-feather-icons'
+import {
+  LockIcon, CopyIcon, SaveIcon,
+  XCircleIcon, KeyIcon, TrashIcon
+} from 'vue-feather-icons'
 import { mapGetters, mapActions } from 'vuex'
 
 import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
@@ -524,6 +619,8 @@ export default {
     CopyIcon,
     SaveIcon,
     XCircleIcon,
+    KeyIcon,
+    TrashIcon,
     TwoFactorAuthentication
   },
 
@@ -564,14 +661,20 @@ export default {
         TOTPNeedTwoFA: false,
         emailOTPPreEnabled: false,
         emailOTPNeedTwoFA: false,
+        FIDONeedTwoFA: false,
+        FIDONewDeviceName: '',
+        FIDOPreRegistered: false,
+        preUnregisteredFIDODeviceName: '',
         newRecoveryCodesNeedTwoFA: false,
-        validation_otp: '',
+        validationOTP: '',
         error: {
           isWrongOTP: false,
           enableTOTP: false,
           disableTOTP: false,
           enableEmailOTP: false,
           disableEmailOTP: false,
+          registerFIDO: false,
+          unregisterFIDO: false,
           newRecoveryCodes: false
         }
       }
@@ -603,6 +706,9 @@ export default {
 
     twoFAsEnabled () {
       const twoFAsEnabled = []
+      if (this.user.fido_enabled) {
+        twoFAsEnabled.push('fido')
+      }
       if (this.user.totp_enabled) {
         twoFAsEnabled.push('totp')
       }
@@ -616,17 +722,19 @@ export default {
     },
 
     twoFAEnabled () {
-      return this.user.totp_enabled || this.user.email_otp_enabled
+      return this.user.totp_enabled || this.user.email_otp_enabled ||
+        this.user.fido_enabled
     },
 
     twoFAVerificationNeeded () {
       return this.twoFA.TOTPNeedTwoFA || this.twoFA.emailOTPNeedTwoFA ||
-        this.twoFA.newRecoveryCodesNeedTwoFA
+        this.twoFA.FIDONeedTwoFA || this.twoFA.newRecoveryCodesNeedTwoFA
     },
 
     twoFAButtonsDisabled () {
       return this.twoFA.TOTPPreEnabled || this.twoFA.TOTPNeedTwoFA ||
         this.twoFA.emailOTPPreEnabled || this.twoFA.emailOTPNeedTwoFA ||
+        this.twoFA.FIDONeedTwoFA || this.twoFA.FIDOPreRegistered ||
         this.twoFA.newRecoveryCodesNeedTwoFA
     },
 
@@ -645,13 +753,14 @@ export default {
         return this.$t('profile.two_factor_authentication.email_otp.button_validate_disable')
       } else if (this.twoFA.newRecoveryCodesNeedTwoFA) {
         return this.$t('profile.two_factor_authentication.recovery_codes.button_validate')
+      } else if (this.twoFA.FIDONeedTwoFA) {
+        return this.$t('profile.two_factor_authentication.fido.button_unregister')
       } else return ''
     },
 
     validateTwoFAIsDisable () {
-      if (this.twoFA.TOTPNeedTwoFA || this.twoFA.emailOTPNeedTwoFA) {
-        return true
-      } else return false
+      return this.twoFA.TOTPNeedTwoFA || this.twoFA.emailOTPNeedTwoFA ||
+        this.twoFA.FIDONeedTwoFA
     },
 
     placeholderInputEnableOTP () {
@@ -669,17 +778,20 @@ export default {
 
   methods: {
     ...mapActions([
-      'saveProfile',
       'checkNewPasswordValidityAndSave',
-      'uploadAvatar',
       'clearAvatar',
-      'disableTOTP',
-      'enableTOTP',
-      'preEnableTOTP',
       'disableEmailOTP',
+      'disableTOTP',
       'enableEmailOTP',
+      'enableTOTP',
+      'newRecoveryCodes',
       'preEnableEmailOTP',
-      'newRecoveryCodes'
+      'preEnableTOTP',
+      'preRegisterFIDO',
+      'registerFIDO',
+      'saveProfile',
+      'uploadAvatar',
+      'unregisterFIDO'
     ]),
 
     localeChanged () {
@@ -708,16 +820,15 @@ export default {
     },
 
     enableTOTPRequested () {
+      this.removeTwoFactorErrors()
       this.twoFA.isLoading = true
-      this.twoFA.error.enableTOTP = false
-      this.twoFA.OTPRecoveryCodes = null
-      this.enableTOTP(this.twoFA.validation_otp)
+      this.enableTOTP(this.twoFA.validationOTP)
         .then(OTPRecoveryCodes => {
           if (OTPRecoveryCodes) {
             this.twoFA.OTPRecoveryCodes = OTPRecoveryCodes
           }
           this.twoFA.TOTPPreEnabled = false
-          this.twoFA.validation_otp = ''
+          this.twoFA.validationOTP = ''
           this.twoFA.error.isWrongOTP = false
           this.twoFA.OTPSecret = ''
         })
@@ -725,77 +836,74 @@ export default {
           if (err.body && err.body.wrong_OTP) this.twoFA.error.isWrongOTP = true
           else this.twoFA.error.EnableTOTP = true
         })
-        .finally(this.twoFA.isLoading = false)
+        .finally(() => { this.twoFA.isLoading = false })
     },
 
     preEnableTOTPRequested () {
+      this.removeTwoFactorErrors()
       this.twoFA.isLoading = true
-      this.twoFA.error.EnableTOTP = false
       this.twoFA.TOTPPreEnabled = false
-      this.twoFA.OTPRecoveryCodes = null
       this.preEnableTOTP()
         .then(body => {
           this.twoFA.TOTPProvisionningUri = body.totp_provisionning_uri
           this.twoFA.OTPSecret = body.otp_secret
           this.twoFA.TOTPPreEnabled = true
         })
-        .catch(this.twoFA.error.EnableTOTP = true
-        )
-        .finally(this.twoFA.isLoading = false)
+        .catch(() => { this.twoFA.error.EnableTOTP = true })
+        .finally(() => { this.twoFA.isLoading = false })
     },
 
     disableTOTPRequested (payload) {
-      this.twoFA.OTPRecoveryCodes = null
+      this.removeTwoFactorErrors()
       if (!this.twoFA.TOTPNeedTwoFA) this.twoFA.TOTPNeedTwoFA = true
       else {
         this.twoFA.isLoading = true
         this.disableTOTP(payload)
           .then(() => {
             this.twoFA.TOTPNeedTwoFA = false
-            this.twoFA.validation_otp = ''
+            this.twoFA.validationOTP = ''
             this.twoFA.error.isWrongOTP = false
           })
           .catch((err) => {
             if (err.body && err.body.wrong_OTP) this.twoFA.error.isWrongOTP = true
             else this.twoFA.error.disableTOTP = true
           })
-          .finally(this.twoFA.isLoading = false)
+          .finally(() => { this.twoFA.isLoading = false })
       }
     },
 
     enableEmailOTPRequested () {
+      this.removeTwoFactorErrors()
       this.twoFA.isLoading = true
-      this.twoFA.error.enableEmailOTP = false
-      this.twoFA.OTPRecoveryCodes = null
-      this.enableEmailOTP(this.twoFA.validation_otp)
+      this.enableEmailOTP(this.twoFA.validationOTP)
         .then(OTPRecoveryCodes => {
           if (OTPRecoveryCodes) {
             this.twoFA.OTPRecoveryCodes = OTPRecoveryCodes
           }
           this.twoFA.emailOTPPreEnabled = false
-          this.twoFA.validation_otp = ''
+          this.twoFA.validationOTP = ''
           this.twoFA.error.isWrongOTP = false
         })
         .catch((err) => {
           if (err.body && err.body.wrong_OTP) this.twoFA.error.isWrongOTP = true
           else this.twoFA.error.enableEmailOTP = true
         })
-        .finally(this.twoFA.isLoading = false)
+        .finally(() => { this.twoFA.isLoading = false })
     },
 
     preEnableEmailOTPRequested () {
+      this.removeTwoFactorErrors()
       this.twoFA.isLoading = true
-      this.twoFA.error.enableEmailOTP = false
       this.twoFA.emailOTPPreEnabled = false
       this.twoFA.OTPRecoveryCodes = null
       this.preEnableEmailOTP()
-        .then(this.twoFA.emailOTPPreEnabled = true)
-        .catch(this.twoFA.error.EnableEmailOTP = true
-        )
-        .finally(this.twoFA.isLoading = false)
+        .then(() => { this.twoFA.emailOTPPreEnabled = true })
+        .catch(() => { this.twoFA.error.EnableEmailOTP = true })
+        .finally(() => { this.twoFA.isLoading = false })
     },
 
     disableEmailOTPRequested (payload) {
+      this.removeTwoFactorErrors()
       this.twoFA.OTPRecoveryCodes = null
       if (!this.twoFA.emailOTPNeedTwoFA) this.twoFA.emailOTPNeedTwoFA = true
       else {
@@ -803,19 +911,80 @@ export default {
         this.disableEmailOTP(payload)
           .then(() => {
             this.twoFA.emailOTPNeedTwoFA = false
-            this.twoFA.validation_otp = ''
+            this.twoFA.validationOTP = ''
             this.twoFA.error.isWrongOTP = false
           })
           .catch((err) => {
             if (err.body && err.body.wrong_OTP) this.twoFA.error.isWrongOTP = true
             else this.twoFA.error.disableEmailOTP = true
           })
-          .finally(this.twoFA.isLoading = false)
+          .finally(() => { this.twoFA.isLoading = false })
+      }
+    },
+
+    preRegisterFIDORequested () {
+      this.removeTwoFactorErrors()
+      this.twoFA.FIDOPreRegistered = true
+    },
+
+    registerFIDORequested () {
+      this.removeTwoFactorErrors()
+      this.twoFA.isLoading = true
+      this.preRegisterFIDO()
+        .then((publicKey) => {
+          return navigator.credentials.create({ publicKey: publicKey })
+        })
+        .then((newCredentialResponse) => {
+          return this.registerFIDO(
+            {
+              registrationResponse: newCredentialResponse,
+              deviceName: this.twoFA.FIDONewDeviceName
+            })
+        })
+        .then(OTPRecoveryCodes => {
+          if (OTPRecoveryCodes) {
+            this.twoFA.OTPRecoveryCodes = OTPRecoveryCodes
+          }
+        })
+        .catch((err) => {
+          if (err instanceof DOMException) console.error(err)
+          this.twoFA.error.registerFIDO = true
+        })
+        .finally(() => {
+          this.twoFA.FIDOPreRegistered = false
+          this.twoFA.isLoading = false
+          this.twoFA.FIDONewDeviceName = ''
+        })
+    },
+
+    unregisterFIDORequested (deviceName, payload) {
+      this.removeTwoFactorErrors()
+      if (!this.twoFA.FIDONeedTwoFA) {
+        this.twoFA.FIDONeedTwoFA = true
+        this.twoFA.preUnregisteredFIDODeviceName = deviceName
+      } else {
+        this.twoFA.isLoading = true
+        this.unregisterFIDO(
+          {
+            twoFactorPayload: payload,
+            deviceName: this.twoFA.preUnregisteredFIDODeviceName
+          })
+          .then(() => {
+            this.twoFA.FIDONeedTwoFA = false
+            this.twoFA.preUnregisteredFIDODeviceName = ''
+            this.twoFA.validationOTP = ''
+            this.twoFA.error.isWrongOTP = false
+          })
+          .catch((err) => {
+            if (err.body && err.body.wrong_OTP) this.twoFA.error.isWrongOTP = true
+            else this.twoFA.error.unregisterFIDO = true
+          })
+          .finally(() => { this.twoFA.isLoading = false })
       }
     },
 
     newRecoveryCodesRequested (payload) {
-      this.twoFA.OTPRecoveryCodes = null
+      this.removeTwoFactorErrors()
       if (!this.twoFA.newRecoveryCodesNeedTwoFA) {
         this.twoFA.newRecoveryCodesNeedTwoFA = true
       } else {
@@ -824,14 +993,14 @@ export default {
           .then((OTPRecoveryCodes) => {
             this.twoFA.OTPRecoveryCodes = OTPRecoveryCodes
             this.twoFA.newRecoveryCodesNeedTwoFA = false
-            this.twoFA.validation_otp = ''
+            this.twoFA.validationOTP = ''
             this.twoFA.error.isWrongOTP = false
           })
           .catch((err) => {
             if (err.body && err.body.wrong_OTP) this.twoFA.error.isWrongOTP = true
             else this.twoFA.error.newRecoveryCodes = true
           })
-          .finally(this.twoFA.isLoading = false)
+          .finally(() => { this.twoFA.isLoading = false })
       }
     },
 
@@ -846,6 +1015,9 @@ export default {
         this.disableEmailOTPRequested(payload)
       } else if (this.twoFA.newRecoveryCodesNeedTwoFA) {
         this.newRecoveryCodesRequested(payload)
+      } else if (this.twoFA.FIDONeedTwoFA) {
+        this.unregisterFIDORequested(
+          this.twoFA.preUnregisteredFIDODeviceName, payload)
       }
     },
 
@@ -904,14 +1076,32 @@ export default {
       this.twoFA.emailOTPPreEnabled = false
       this.twoFA.emailOTPNeedTwoFA = false
       this.twoFA.newRecoveryCodesNeedTwoFA = false
+      this.twoFA.FIDOPreRegistered = false
+      this.twoFA.FIDONewDeviceName = ''
+      this.twoFA.FIDONeedTwoFA = false
+      this.twoFA.preUnregisteredFIDODeviceName = ''
       this.twoFA.isLoading = false
-      this.twoFA.validation_otp = ''
+      this.twoFA.validationOTP = ''
       this.twoFA.error.isWrongOTP = false
       this.twoFA.error.enableTOTP = false
       this.twoFA.error.disableTOTP = false
       this.twoFA.error.enableEmailOTP = false
       this.twoFA.error.disableEmailOTP = false
       this.twoFA.error.newRecoveryCodes = false
+      this.twoFA.error.unregisterFIDO = false
+      this.twoFA.error.registerFIDO = false
+      this.twoFA.OTPRecoveryCodes = null
+    },
+
+    removeTwoFactorErrors () {
+      this.twoFA.error.isWrongOTP = false
+      this.twoFA.error.enableTOTP = false
+      this.twoFA.error.disableTOTP = false
+      this.twoFA.error.enableEmailOTP = false
+      this.twoFA.error.disableEmailOTP = false
+      this.twoFA.error.newRecoveryCodes = false
+      this.twoFA.error.unregisterFIDO = false
+      this.twoFA.error.registerFIDO = false
       this.twoFA.OTPRecoveryCodes = null
     },
 
@@ -1122,6 +1312,11 @@ select {
 }
 
 .feather-x-circle {
+  cursor: pointer;
+}
+
+.trash-icon-fido-device {
+  float: right;
   cursor: pointer;
 }
 </style>

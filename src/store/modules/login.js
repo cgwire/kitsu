@@ -14,6 +14,7 @@ import {
   RESET_ALL
 } from '@/store/mutation-types'
 import auth from '@/lib/auth'
+import { coerceTwoFactorPayload } from '@/lib/webauthn'
 
 const initialState = {
   email: '',
@@ -49,7 +50,7 @@ const actions = {
     const payload = {
       email: state.email,
       password: state.password,
-      ...twoFactorPayload
+      ...coerceTwoFactorPayload(twoFactorPayload)
     }
     auth.logIn(
       payload,
