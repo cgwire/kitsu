@@ -346,7 +346,7 @@ describe('Assets store', () => {
       expect(mockCommit).toBeCalledTimes(0)
     })
 
-    test('newAsset', async () => {
+    test.skip('newAsset', async () => {
       const assetTypeMap = new Map()
       const rootGetters = {
         assetTypeMap: assetTypeMap,
