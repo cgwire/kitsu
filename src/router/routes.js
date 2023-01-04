@@ -42,11 +42,12 @@ const ProductionSettings = () => import('@/components/pages/ProductionSettings.v
 const Profile = () => import('@/components/pages/Profile.vue')
 const ResetPassword = () => import('@/components/pages/ResetPassword.vue')
 const ResetChangePassword = () => import('@/components/pages/ResetChangePassword.vue')
-const Sequences = () => import('../components/pages/Sequences.vue')
 const Logs = () => import('@/components/pages/Logs.vue')
 const ServerDown = () => import('@/components/pages/ServerDown.vue')
 const Settings = () => import('@/components/pages/Settings.vue')
+const Sequence = () => import('@/components/pages/Sequence.vue')
 const Sequences = () => import('@/components/pages/Sequences.vue')
+const SequenceStats = () => import('../components/pages/SequenceStats.vue')
 const Shot = () => import('@/components/pages/Shot.vue')
 const Task = () => import('@/components/pages/Task.vue')
 const Team = () => import('@/components/pages/Team.vue')
@@ -57,7 +58,6 @@ const TaskTypes = () => import('@/components/pages/TaskTypes.vue')
 const Departements = () => import('@/components/pages/departments/Departments.vue')
 const WrongBrowser = () => import('@/components/pages/WrongBrowser.vue')
 const Edit = () => import('@/components/pages/Edit.vue')
->>>>>>> [qa] Migrate build to Vite.js
 
 const ADMIN_PAGES = [
   'asset-types',
