@@ -150,7 +150,7 @@ export default {
           if (err.isValidPassword === false) this.isValid = false
           else this.isError = true
         })
-        .finally(this.isLoading = false)
+        .finally(() => { this.isLoading = false })
     },
 
     disableTwoFactorAuthenticationClicked () {
@@ -159,7 +159,7 @@ export default {
       this.isLoading = true
       this.disableTwoFactorAuthenticationPerson(this.person)
         .catch(() => { this.isErrorDisableTwoFactorAuthentication = true })
-        .finally(this.isLoading = false)
+        .finally(() => { this.isLoading = false })
     },
 
     resetForm () {
