@@ -89,7 +89,9 @@ export const entityListMixin = {
         return
       }
       this.$nextTick(() => {
-        let offset = this.$refs['th-episode'].clientWidth
+        let offset = this.$refs['th-episode']
+          ? this.$refs['th-episode'].clientWidth
+          : 0
         this.offsets = {}
 
         if (this.isShowInfos) {

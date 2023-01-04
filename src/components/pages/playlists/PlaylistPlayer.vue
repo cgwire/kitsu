@@ -648,6 +648,7 @@
         :title="$t('playlists.actions.annotation_erase')"
         @click="onEraseClicked"
         icon="eraser"
+        v-show="false"
       />
       <button-simple
         class="playlist-button flexrow-item"

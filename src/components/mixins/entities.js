@@ -245,7 +245,7 @@ export const entitiesMixin = {
 
     confirmBuildFilter (query) {
       this.modals.isBuildFilterDisplayed = false
-      this.$refs['episode-search-field'].setValue(query)
+      this.searchField.setValue(query)
       this.applySearch(query)
     }
   },

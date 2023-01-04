@@ -35,6 +35,7 @@
           assetTaskTypes,
           shotTaskTypes,
           editTaskTypes,
+          sequenceTaskTypes,
           episodeTaskTypes
         ]"
         v-else
@@ -111,6 +112,7 @@ export default {
       editTaskTypes: { list: [] },
       episode_span: 0,
       episodeTaskTypes: { list: [] },
+      sequenceTaskTypes: { list: [] },
       shotTaskTypes: { list: [] },
       taskTypeId: '',
       loading: {
@@ -152,6 +154,7 @@ export default {
       'productionAssetTaskTypes',
       'productionShotTaskTypes',
       'productionEditTaskTypes',
+      'productionSequenceTaskTypes',
       'productionEpisodeTaskTypes',
       'taskStatusMap',
       'taskTypeMap',
@@ -185,10 +188,31 @@ export default {
     },
 
     resetDisplayedTaskTypes () {
-      this.resetAssetTaskTypes()
-      this.resetShotTaskTypes()
-      this.resetEditTaskTypes()
-      this.resetEpisodeTaskTypes()
+      /*
+        Return an object with the following structure:
+        {
+          title: 'title of the first column of the tab (Assets or short)',
+          list:  [{taskTypes, scheduleItem}]
+          // A list of objects that represents a couple of taskType and their
+          linked scheduleItem.
+        }
+      */
+      ['Asset', 'Shot', 'Sequence', 'Episode', 'Edit'].forEach(type => {
+        const arr = this[`production${type}TaskTypes`]
+        let list = sortTaskTypes(
+          [...arr], this.currentProduction
+        )
+        list = list.map(taskType => {
+          return {
+            taskType,
+            scheduleItem: this.getScheduleItemForTaskType(taskType)
+          }
+        })
+        this[`${type.toLowerCase()}TaskTypes`] = {
+          title: this.$t(`${type.toLowerCase()}s.title`),
+          list
+        }
+      })
     },
 
     getScheduleItemForTaskType (taskType) {
@@ -243,84 +267,6 @@ export default {
         this.taskTypeId = this.remainingTaskTypes[0].id
       }
       this.resetDisplayedTaskTypes()
-    },
-
-    /*
-      Return an object with the following structure:
-      {
-        title: 'title of the first column of the tab (Assets or short)',
-        list:  [{taskTypes, scheduleItem}]
-        // A list of objects that represents a couple of taskType and their
-        linked scheduleItem.
-      }
-    */
-    resetAssetTaskTypes () {
-      const list = sortTaskTypes(
-        [...this.productionAssetTaskTypes], this.currentProduction
-      ).map(taskType => {
-        return {
-          taskType,
-          scheduleItem: this.getScheduleItemForTaskType(taskType)
-        }
-      })
-      this.assetTaskTypes = {
-        title: this.$t('assets.title'),
-        list
-      }
-    },
-
-    /*
-      Return an object with the following structure:
-      {
-        title: 'title of the first column of the tab (Assets or short)',
-        list:  [{taskTypes, scheduleItem}]
-        // A list of objects that represents a couple of taskType and their
-        linked scheduleItem }
-    */
-    resetShotTaskTypes () {
-      const list = sortTaskTypes(
-        [...this.productionShotTaskTypes], this.currentProduction
-      ).map(taskType => {
-        return {
-          taskType,
-          scheduleItem: this.getScheduleItemForTaskType(taskType)
-        }
-      })
-      this.shotTaskTypes = {
-        title: this.$t('shots.title'),
-        list
-      }
-    },
-
-    resetEditTaskTypes () {
-      const list = sortTaskTypes(
-        [...this.productionEditTaskTypes], this.currentProduction
-      ).map(taskType => {
-        return {
-          taskType,
-          scheduleItem: this.getScheduleItemForTaskType(taskType)
-        }
-      })
-      this.editTaskTypes = {
-        title: this.$t('edits.title'),
-        list
-      }
-    },
-
-    resetEpisodeTaskTypes () {
-      let list = sortTaskTypes(
-        [...this.productionEpisodeTaskTypes], this.currentProduction
-      )
-      list = list.map(taskType => {
-        return {
-          taskType,
-          scheduleItem: this.getScheduleItemForTaskType(taskType)
-        }
-      })
-      this.episodeTaskTypes = {
-        title: this.$t('episodes.title'),
-        list
-      }
     },
 
     async editEpisodeSpan () {

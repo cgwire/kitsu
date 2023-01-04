@@ -18,7 +18,7 @@
       <form v-on:submit.prevent>
         <combobox
           :label="$t('shots.fields.sequence')"
-          :options="getSequenceOptions"
+          :options="sequenceOptions"
           v-model="form.sequence_id"
         />
         <text-field
@@ -163,8 +163,8 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
-      'getSequenceOptions',
       'openProductions',
+      'sequenceOptions',
       'sequences',
       'shots',
       'shotCreated',

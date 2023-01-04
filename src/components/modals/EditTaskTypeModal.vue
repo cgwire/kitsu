@@ -134,6 +134,7 @@ export default {
         { label: this.$t('assets.title'), value: 'Asset' },
         { label: this.$t('shots.title'), value: 'Shot' },
         { label: this.$t('edits.title'), value: 'Edit' },
+        { label: this.$t('sequences.title'), value: 'Sequence' },
         { label: this.$t('episodes.title'), value: 'Episode' }
       ]
     }

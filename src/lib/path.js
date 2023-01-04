@@ -84,12 +84,8 @@ export const getEntityPath = (entityId, productionId, section, episodeId) => {
     route.params.episode_id = episodeId
   }
 
-  if (section === 'shot') {
-    route.params.shot_id = entityId
-  } else if (section === 'asset') {
-    route.params.asset_id = entityId
-  } else if (section === 'edit') {
-    route.params.edit_id = entityId
+  if (['shot', 'asset', 'edit', 'sequence'].includes(section)) {
+    route.params[`${section}_id`] = entityId
   }
 
   return route

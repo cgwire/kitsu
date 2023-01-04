@@ -985,8 +985,11 @@ export default {
     empty_list: 'There is no sequence in the production. What about creating some?',
     empty_list_client: 'There is no sequence in this production.',
     new_sequence: 'New sequence',
+    no_casting: 'The sequence casting is empty.',
     number: 'sequence | sequences',
-    title: 'Sequence Stats',
+    stats_title: 'Sequence Stats',
+    title: 'Sequences',
+    tasks: 'Tasks',
     fields: {
       name: 'Name',
       description: 'description'
@@ -1159,6 +1162,9 @@ export default {
     create_tasks_episode: 'Add tasks for current episodes',
     create_tasks_episode_explaination: 'You are going to create a new task for each episode of current project for the given task type. Do you want to continue?',
     create_tasks_episode_failed: 'A server error occurred while proceeding creations.',
+    create_tasks_sequence: 'Add tasks for current sequences',
+    create_tasks_sequence_explaination: 'You are going to create a new task for each sequence of current project for the given task type. Do you want to continue?',
+    create_tasks_sequence_failed: 'A server error occurred while proceeding creations.',
     current: 'Task to do',
     current_status: 'Current status:',
     delete_all_text: 'Are you sure you want to delete all tasks for given {name}? Please, confirm by typing the task type name of the tasks you want to delete in the text field.',

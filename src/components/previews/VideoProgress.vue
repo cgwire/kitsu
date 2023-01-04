@@ -242,6 +242,9 @@ export default {
         ? annotation.time
         : this.videoDuration * ratio
       if (duration < 0) duration = 0
+      if (duration > this.videoDuration - this.frameDuration) {
+        duration = this.videoDuration - this.frameDuration
+      }
       const frameNumber = Math.floor(duration / this.frameDuration)
       return { frameNumber, position }
     },

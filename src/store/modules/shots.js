@@ -11,7 +11,6 @@ import { PAGE_SIZE } from '@/lib/pagination'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import {
   sortByName,
-  sortSequences,
   sortShotResult,
   sortShots,
   sortTasks,
@@ -28,14 +27,10 @@ import {
   removeModelFromList
 } from '@/lib/models'
 import {
-  computeStats
-} from '@/lib/stats'
-import {
   minutesToDays
 } from '@/lib/time'
 import {
   buildShotIndex,
-  buildSequenceIndex,
   indexSearch
 } from '@/lib/indexing'
 import {
@@ -50,7 +45,6 @@ import {
   LOAD_SHOTS_START,
   LOAD_SHOTS_ERROR,
   LOAD_SHOTS_END,
-  LOAD_SEQUENCES_END,
   SORT_VALIDATION_COLUMNS,
 
   SET_CURRENT_EPISODE,
@@ -63,13 +57,8 @@ import {
   LOAD_OPEN_PRODUCTIONS_END,
 
   NEW_SHOT_END,
-  NEW_SEQUENCE_END,
   EDIT_SHOT_END,
-  EDIT_SEQUENCE_END,
 
-  ADD_SEQUENCE,
-  UPDATE_SEQUENCE,
-  REMOVE_SEQUENCE,
   ADD_SHOT,
   UPDATE_SHOT,
   REMOVE_SHOT,
@@ -80,13 +69,10 @@ import {
   CREATE_TASKS_END,
 
   SET_SHOT_SEARCH,
-  SET_SEQUENCE_SEARCH,
   SET_CURRENT_PRODUCTION,
   DISPLAY_MORE_SHOTS,
-  DISPLAY_MORE_SEQUENCES,
 
   SET_SHOT_LIST_SCROLL_POSITION,
-  SET_SEQUENCE_LIST_SCROLL_POSITION,
 
   REMOVE_SELECTED_TASK,
   ADD_SELECTED_TASK,
@@ -98,10 +84,6 @@ import {
 
   SAVE_SHOT_SEARCH_END,
   REMOVE_SHOT_SEARCH_END,
-  SAVE_SEQUENCE_SEARCH_END,
-  REMOVE_SEQUENCE_SEARCH_END,
-
-  COMPUTE_SEQUENCE_STATS,
 
   CHANGE_SHOT_SORT,
   UPDATE_METADATA_DESCRIPTOR_END,
@@ -284,12 +266,8 @@ const helpers = {
 
 const initialState = {
   shotMap: new Map(),
-  sequences: [],
   shotSearchText: '',
   shotSearchQueries: [],
-  sequenceSearchQueries: [],
-  sequenceSearchText: '',
-  sequenceStats: {},
   shotSorting: [],
 
   isFps: false,
@@ -308,24 +286,17 @@ const initialState = {
   displayedShotsTimeSpent: 0,
   displayedShotsEstimation: 0,
   displayedShotsFrames: 0,
-  displayedSequences: [],
-  displayedSequencesLength: 0,
-  sequenceIndex: {},
   shotFilledColumns: {},
 
-  sequenceMap: new Map(),
   shotCreated: '',
   shotSelectionGrid: {},
-  sequenceSelectionGrid: {},
 
   isShotsLoading: false,
   isShotsLoadingError: false,
   shotsCsvFormData: null,
 
   shotListScrollPosition: 0,
-  sequenceListScrollPosition: 0,
 
-  searchSequenceFilters: [],
   shotValidationColumns: [],
 
   selectedShots: new Map()
@@ -336,13 +307,9 @@ const state = {
 }
 
 const getters = {
-  sequences: state => state.sequences,
-  sequenceMap: state => state.sequenceMap,
-  sequenceStats: state => state.sequenceStats,
   shotValidationColumns: state => state.shotValidationColumns,
 
   shotSearchQueries: state => state.shotSearchQueries,
-  sequenceSearchQueries: state => state.sequenceSearchQueries,
   shotMap: state => state.shotMap,
   shotSorting: state => state.shotSorting,
 
@@ -357,9 +324,7 @@ const getters = {
   isShotTime: state => state.isShotTime,
 
   shotSearchText: state => state.shotSearchText,
-  sequenceSearchText: state => state.sequenceSearchText,
   shotSelectionGrid: state => state.shotSelectionGrid,
-  sequenceSelectionGrid: state => state.sequenceSelectionGrid,
 
   displayedShots: state => state.displayedShots,
   displayedShotsCount: state => state.displayedShotsCount,
@@ -367,8 +332,6 @@ const getters = {
   displayedShotsTimeSpent: state => state.displayedShotsTimeSpent,
   displayedShotsEstimation: state => state.displayedShotsEstimation,
   displayedShotsFrames: state => state.displayedShotsFrames,
-  displayedSequences: state => state.displayedSequences,
-  displayedSequencesLength: state => state.displayedSequencesLength,
   shotFilledColumns: state => state.shotFilledColumns,
 
   displayedShotsBySequence: state => {
@@ -382,7 +345,6 @@ const getters = {
   isLongShotList: state => state.shotMap.size > 500,
   shotsCsvFormData: state => state.shotsCsvFormData,
   shotListScrollPosition: state => state.shotListScrollPosition,
-  sequenceListScrollPosition: state => state.sequenceListScrollPosition,
 
   shotsByEpisode: state => {
     const shotsBySequence = []
@@ -401,13 +363,6 @@ const getters = {
 
     return shotsBySequence
   },
-
-  searchSequenceFilters: state => state.searchSequenceFilters,
-
-  getSequenceOptions: state => state.sequences.map(
-    (sequence) => { return { label: sequence.name, value: sequence.id } }
-  ),
-
   selectedShots: state => state.selectedShots
 }
 
@@ -477,54 +432,32 @@ const actions = {
     }
 
     commit(LOAD_SHOTS_START)
-    shotsApi.getSequences(production, episode, (err, sequences) => {
-      if (err) commit(LOAD_SHOTS_ERROR)
-      else {
-        shotsApi.getShots(production, episode, (err, shots) => {
-          if (err) commit(LOAD_SHOTS_ERROR)
-          else {
-            commit(LOAD_SEQUENCES_END, { sequences, episodeMap })
-            commit(
-              LOAD_SHOTS_END,
-              {
-                production,
-                shots,
-                userFilters,
-                taskTypeMap,
-                taskMap,
-                personMap,
-                episodeMap
-              }
-            )
-            if (callback) callback(err)
-          }
-        })
-      }
-    })
-  },
-
-  loadSequence ({ commit, state, rootGetters }, sequenceId) {
-    const episodeMap = rootGetters.episodeMap
-    return shotsApi.getSequence(sequenceId)
-      .then((sequence) => {
-        if (state.sequenceMap.get(sequence.id)) {
-          commit(UPDATE_SEQUENCE, sequence)
-        } else {
-          commit(ADD_SEQUENCE, { sequence, episodeMap })
-        }
+    return dispatch('loadSequencesWithTasks')
+      .then(() => {
+        return shotsApi.getShots(production, episode)
       })
-      .catch(console.error)
-  },
-
-  loadSequences ({ commit, state, _, rootGetters }) {
-    const production = rootGetters.currentProduction
-    const isTVShow = rootGetters.isTVShow
-    const episode = isTVShow ? rootGetters.currentEpisode : null
-    const episodeMap = rootGetters.episodeMap
-    shotsApi.getSequences(production, episode, (err, sequences) => {
-      if (err) console.error(err)
-      commit(LOAD_SEQUENCES_END, { sequences, episodeMap })
-    })
+      .then(shots => {
+        const sequenceMap = rootGetters.sequenceMap
+        commit(
+          LOAD_SHOTS_END,
+          {
+            production,
+            shots,
+            userFilters,
+            taskTypeMap,
+            taskMap,
+            personMap,
+            sequenceMap,
+            episodeMap
+          }
+        )
+        if (callback) callback()
+      })
+      .catch(err => {
+        commit(LOAD_SHOTS_ERROR)
+        console.error(err)
+        if (callback) callback(err)
+      })
   },
 
   /*
@@ -561,9 +494,10 @@ const actions = {
 
   newShot ({ commit, dispatch, rootGetters }, shot) {
     const episodeMap = rootGetters.episodeMap
+    const sequenceMap = rootGetters.sequenceMap
     return shotsApi.newShot(shot)
       .then(shot => {
-        commit(NEW_SHOT_END, { shot, episodeMap })
+        commit(NEW_SHOT_END, { shot, episodeMap, sequenceMap })
         const taskTypeIds = rootGetters.productionShotTaskTypeIds
         const createTaskPromises = taskTypeIds.map(
           taskTypeId => dispatch('createTask', {
@@ -579,32 +513,18 @@ const actions = {
       })
   },
 
-  newSequence ({ commit, state, rootGetters }, sequence) {
-    const episodeMap = rootGetters.episodeMap
-    return shotsApi.newSequence(sequence)
-      .then(sequence => {
-        commit(NEW_SEQUENCE_END, { sequence, episodeMap })
-        return Promise.resolve(sequence)
-      })
-  },
-
-  editShot ({ commit, state }, data) {
+  editShot ({ commit, rootGetters }, data) {
     commit(LOCK_SHOT, data)
-    commit(EDIT_SHOT_END, data)
+    commit(EDIT_SHOT_END, {
+      newShot: data,
+      sequences: rootGetters.displayedSequences
+    })
     return shotsApi.updateShot(data)
       .then(shot => {
         setTimeout(() => {
           commit(UNLOCK_SHOT, shot)
         }, 2000)
         return Promise.resolve(shot)
-      })
-  },
-
-  editSequence ({ commit, state }, data) {
-    return shotsApi.updateSequence(data)
-      .then(sequence => {
-        commit(EDIT_SEQUENCE_END, sequence)
-        return Promise.resolve(sequence)
       })
   },
 
@@ -622,14 +542,6 @@ const actions = {
           commit(REMOVE_SHOT, shot)
         }
         return Promise.resolve()
-      })
-  },
-
-  deleteSequence ({ commit, state }, sequence) {
-    return shotsApi.deleteSequence(sequence)
-      .then(() => {
-        commit(REMOVE_SEQUENCE, sequence)
-        return Promise.resolve(sequence)
       })
   },
 
@@ -657,10 +569,6 @@ const actions = {
       taskMap: rootGetters.taskMap,
       production: rootGetters.currentProduction
     })
-  },
-
-  displayMoreSequences ({ commit }) {
-    commit(DISPLAY_MORE_SEQUENCES)
   },
 
   setShotSearch ({ commit, rootGetters }, shotSearch) {
@@ -704,75 +612,6 @@ const actions = {
         commit(REMOVE_SHOT_SEARCH_END, { searchQuery, production })
         return Promise.resolve()
       })
-  },
-
-  saveSequenceSearch ({ commit, rootGetters }, searchQuery) {
-    return new Promise((resolve, reject) => {
-      const query = state.sequenceSearchQueries.find(
-        (query) => query.name === searchQuery
-      )
-      const production = rootGetters.currentProduction
-
-      if (!query) {
-        peopleApi.createFilter(
-          'sequence',
-          searchQuery,
-          searchQuery,
-          production.id,
-          null,
-          (err, searchQuery) => {
-            commit(SAVE_SEQUENCE_SEARCH_END, { searchQuery, production })
-            if (err) {
-              reject(err)
-            } else {
-              resolve(searchQuery)
-            }
-          }
-        )
-      } else {
-        resolve()
-      }
-    })
-  },
-
-  removeSequenceSearch ({ commit, rootGetters }, searchQuery) {
-    const production = rootGetters.currentProduction
-    return peopleApi.removeFilter(searchQuery)
-      .then(() => {
-        commit(REMOVE_SEQUENCE_SEARCH_END, { searchQuery, production })
-        return Promise.resolve()
-      })
-  },
-
-  initSequences ({ commit, dispatch, state, rootState, rootGetters }) {
-    return new Promise((resolve, reject) => {
-      const productionId = rootState.route.params.production_id
-      dispatch('setLastProductionScreen', 'sequences')
-      if (state.sequences.length === 0 ||
-          state.sequences[0].production_id !== productionId) {
-        dispatch('computeSequenceStats')
-        resolve()
-      } else {
-        resolve()
-      }
-    })
-  },
-
-  setSequenceSearch ({ commit, rootGetters }, sequenceSearch) {
-    commit(SET_SEQUENCE_SEARCH, {
-      sequenceSearch,
-      production: rootGetters.currentProduction
-    })
-  },
-
-  setSequenceListScrollPosition ({ commit }, scrollPosition) {
-    commit(SET_SEQUENCE_LIST_SCROLL_POSITION, scrollPosition)
-  },
-
-  computeSequenceStats ({ commit, rootGetters }) {
-    const taskStatusMap = rootGetters.taskStatusMap
-    const taskMap = rootGetters.taskMap
-    commit(COMPUTE_SEQUENCE_STATS, { taskStatusMap, taskMap })
   },
 
   getShotsCsvLines ({ state, rootGetters }) {
@@ -904,8 +743,6 @@ const mutations = {
     cache.shotIndex = {}
     state.shotMap = new Map()
 
-    state.sequences = []
-    state.sequenceIndex = {}
     state.displayedShots = []
     state.displayedShotsCount = 0
     state.displayedShotsLength = 0
@@ -926,11 +763,9 @@ const mutations = {
     state.shotMap = new Map()
     state.shotValidationColumns = []
 
-    state.sequences = []
     state.isShotsLoading = true
     state.isShotsLoadingError = false
 
-    state.sequenceIndex = {}
     state.displayedShots = []
     state.displayedShotsCount = 0
     state.displayedShotsLength = 0
@@ -957,7 +792,8 @@ const mutations = {
       taskMap,
       taskTypeMap,
       personMap,
-      episodeMap
+      episodeMap,
+      sequenceMap
     }
   ) {
     const validationColumns = {}
@@ -976,7 +812,7 @@ const mutations = {
       const validations = new Map()
       let timeSpent = 0
       let estimation = 0
-      const sequence = state.sequenceMap.get(shot.sequence_id)
+      const sequence = sequenceMap.get(shot.sequence_id)
       const episode = episodeMap.get(sequence.parent_id)
       shot.sequence_name = sequence.name
       shot.episode_name = episode ? episode.name : ''
@@ -1059,12 +895,6 @@ const mutations = {
     } else {
       state.shotSearchQueries = []
     }
-
-    if (userFilters.sequence && userFilters.sequence[production.id]) {
-      state.sequenceSearchQueries = userFilters.sequence[production.id]
-    } else {
-      state.sequenceSearchQueries = []
-    }
   },
 
   [SAVE_SHOT_SEARCH_END] (state, { searchQuery }) {
@@ -1079,39 +909,6 @@ const mutations = {
     if (queryIndex >= 0) {
       state.shotSearchQueries.splice(queryIndex, 1)
     }
-  },
-
-  [SAVE_SEQUENCE_SEARCH_END] (state, { searchQuery }) {
-    state.sequenceSearchQueries.push(searchQuery)
-    state.sequenceSearchQueries = sortByName(state.sequenceSearchQueries)
-  },
-
-  [REMOVE_SEQUENCE_SEARCH_END] (state, { searchQuery }) {
-    state.sequenceSearchQueries = state
-      .sequenceSearchQueries
-      .filter((query) => query.name !== searchQuery.name)
-  },
-
-  [LOAD_SEQUENCES_END] (state, { sequences, episodeMap }) {
-    const sequenceMap = new Map()
-    sequences.forEach(sequence => {
-      sequenceMap.set(sequence.id, sequence)
-      if (sequence.parent_id) {
-        const episode = episodeMap.get(sequence.parent_id)
-        if (episode) {
-          Object.assign(sequence, {
-            episode_id: episode.id,
-            episode_name: episode.name
-          })
-        }
-      }
-    })
-    const sortedSequences = sortSequences(sequences)
-    state.sequenceMap = sequenceMap
-    state.sequences = sortedSequences
-    state.sequenceIndex = buildSequenceIndex(sortedSequences)
-    state.displayedSequences = sortedSequences.slice(0, PAGE_SIZE * 2)
-    state.displayedSequencesLength = sortedSequences.length
   },
 
   [LOAD_SHOT_END] (state, { shot, taskTypeMap }) {
@@ -1133,9 +930,9 @@ const mutations = {
     state.openProductions = projects
   },
 
-  [EDIT_SHOT_END] (state, newShot) {
+  [EDIT_SHOT_END] (state, { newShot, sequences }) {
     const shot = state.shotMap.get(newShot.id)
-    const sequence = state.sequences.find(
+    const sequence = sequences.find(
       (sequence) => sequence.id === newShot.parent_id
     )
     if (sequence) newShot.sequence_name = sequence.name
@@ -1177,14 +974,6 @@ const mutations = {
     }
   },
 
-  [EDIT_SEQUENCE_END] (state, newSequence) {
-    const sequence = state.sequenceMap.get(newSequence.id)
-    if (sequence) {
-      Object.assign(sequence, newSequence)
-    }
-    state.sequenceIndex = buildSequenceIndex(state.sequences)
-  },
-
   [RESTORE_SHOT_END] (state, shotToRestore) {
     const shot = state.shotMap.get(shotToRestore.id)
     shot.canceled = false
@@ -1198,28 +987,8 @@ const mutations = {
     helpers.buildResult(state, payload)
   },
 
-  [SET_SEQUENCE_SEARCH] (state, { sequenceSearch, production }) {
-    const keywords = getKeyWords(sequenceSearch)
-    const result =
-      indexSearch(state.sequenceIndex, keywords) || state.sequences
-
-    state.searchSequenceFilters = getFilters({
-      entryIndex: cache.shotIndex,
-      assetTypes: [],
-      taskTypes: [],
-      taskStatuses: [],
-      descriptors:
-        production.descriptors.filter(d => d.entity_type === 'Shot'),
-      persons: [],
-      query: sequenceSearch
-    })
-    state.displayedSequences = result.slice(0, PAGE_SIZE * 2)
-    state.displayedSequencesLength = result.length
-    state.sequenceSearchText = sequenceSearch
-  },
-
-  [NEW_SHOT_END] (state, { shot, episodeMap }) {
-    const sequence = state.sequenceMap.get(shot.parent_id)
+  [NEW_SHOT_END] (state, { shot, episodeMap, sequenceMap }) {
+    const sequence = sequenceMap.get(shot.parent_id)
     const episode = episodeMap.get(sequence.parent_id)
     shot.production_id = shot.project_id
     shot.sequence_name = sequence.name
@@ -1250,20 +1019,6 @@ const mutations = {
     if (shot.data.frame_out) state.isFrameOut = true
     if (shot.data.resolution) state.isResolution = true
     if (shot.data.max_retakes) state.isMaxRetakes = true
-  },
-
-  [NEW_SEQUENCE_END] (state, sequence) {
-    if (!state.sequenceMap.get(sequence.id)) {
-      if (sequence.parent_id) {
-        const episode = state.episodeMap.get(sequence.parent_id)
-        sequence.episode_id = episode.id
-        sequence.episode_name = episode.name
-      }
-      state.sequences.push(sequence)
-      state.sequences = sortSequences(state.sequences)
-      state.sequenceMap.set(sequence.id, sequence)
-      state.sequenceIndex = buildSequenceIndex(state.sequences)
-    }
   },
 
   [CREATE_TASKS_END] (state, { tasks }) {
@@ -1304,21 +1059,8 @@ const mutations = {
     }
   },
 
-  [DISPLAY_MORE_SEQUENCES] (state, tasks) {
-    let sequences = state.sequences
-    if (state.sequenceSearchText.length > 0) {
-      const keywords = getKeyWords(state.sequenceSearchText)
-      sequences = indexSearch(state.sequenceIndex, keywords)
-    }
-    state.displayedSequences = sequences.slice(
-      0,
-      state.displayedSequences.length + PAGE_SIZE
-    )
-  },
-
   [SET_CURRENT_PRODUCTION] (state, production) {
     state.shotSearchText = ''
-    state.sequenceSearchText = ''
   },
 
   [SET_PREVIEW] (state, { entityId, taskId, previewId, taskMap }) {
@@ -1336,10 +1078,6 @@ const mutations = {
     state.shotListScrollPosition = scrollPosition
   },
 
-  [SET_SEQUENCE_LIST_SCROLL_POSITION] (state, scrollPosition) {
-    state.sequenceListScrollPosition = scrollPosition
-  },
-
   [REMOVE_SELECTED_TASK] (state, validationInfo) {
     if (state.shotSelectionGrid[0] &&
         state.shotSelectionGrid[validationInfo.x]) {
@@ -1348,8 +1086,10 @@ const mutations = {
   },
 
   [ADD_SELECTED_TASK] (state, validationInfo) {
-    if (state.shotSelectionGrid[0] &&
-        state.shotSelectionGrid[validationInfo.x]) {
+    if (
+      state.shotSelectionGrid[0] &&
+      state.shotSelectionGrid[validationInfo.x]
+    ) {
       state.shotSelectionGrid[validationInfo.x][validationInfo.y] = true
       state.selectedShots = new Map() // unselect all previously selected lines
     }
@@ -1411,53 +1151,6 @@ const mutations = {
     })
     state.selectedShots = new Map() // unselect all previously selected lines
     state.shotSelectionGrid = tmpGrid
-  },
-
-  [COMPUTE_SEQUENCE_STATS] (state, { taskMap, taskStatusMap }) {
-    let shots = cache.shots
-    if (state.searchSequenceFilters.length > 0) {
-      shots = applyFilters(cache.shots, state.searchSequenceFilters, {})
-      shots = shots.filter(shot => !shot.canceled)
-    }
-    state.sequenceStats = computeStats(
-      shots,
-      'sequence_id',
-      taskStatusMap,
-      taskMap
-    )
-  },
-
-  [ADD_SEQUENCE] (state, { sequence, episodeMap }) {
-    state.sequences.push(sequence)
-    const sortedSequences = sortSequences(state.sequences)
-    state.sequenceMap.set(sequence.id, sequence)
-    if (sequence.parent_id) {
-      const episode = episodeMap.get(sequence.parent_id)
-      if (episode) {
-        Object.assign(sequence, {
-          episode_id: episode.id,
-          episode_name: episode.name
-        })
-      }
-    }
-    state.sequences = sortedSequences
-    state.displayedSequences.push(sequence)
-    state.displayedSequences = sortSequences(state.displayedSequences)
-    state.sequenceIndex = buildSequenceIndex(sortedSequences)
-    state.displayedSequencesLength = sortedSequences.length
-  },
-
-  [UPDATE_SEQUENCE] (state, sequence) {
-    Object.assign(state.sequenceMap.get(sequence.id), sequence)
-    state.sequenceIndex = buildSequenceIndex(state.sequences)
-  },
-
-  [REMOVE_SEQUENCE] (state, sequence) {
-    delete state.sequenceMap.get(sequence.id)
-    state.sequences = removeModelFromList(state.sequences, sequence)
-    state.displayedSequences =
-      removeModelFromList(state.displayedSequences, sequence)
-    state.sequenceIndex = buildSequenceIndex(state.sequences)
   },
 
   [ADD_SHOT] (state, {

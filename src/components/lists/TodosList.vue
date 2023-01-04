@@ -645,13 +645,14 @@ export default {
 }
 
 td.estimation {
-  text-align: center;
+  text-align: right;
 }
 
 .start-date,
 .due-date {
-  width: 110px;
   min-width: 110px;
+  text-align: center;
+  width: 110px;
 }
 
 td.due-date {

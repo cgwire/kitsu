@@ -372,7 +372,8 @@ export default {
     sectionOptions () {
       let options = [
         { label: this.$t('assets.title'), value: 'assets' },
-        { label: this.$t('shots.title'), value: 'shots' }
+        { label: this.$t('shots.title'), value: 'shots' },
+        { label: this.$t('sequences.title'), value: 'sequences' }
       ]
 
       // Show only if there are task types for Edit in this production.
@@ -414,7 +415,7 @@ export default {
 
       // Add sequences
       options.push(
-        { label: this.$t('sequences.title'), value: 'sequences' }
+        { label: this.$t('sequences.stats_title'), value: 'sequence-stats' }
       )
 
       // Add episodes for tv show only

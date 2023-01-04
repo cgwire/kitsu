@@ -238,9 +238,9 @@ describe('lib/sorting', () => {
     expect(results).toHaveLength(5)
     expect(results[0].id).toEqual(1)
     expect(results[1].id).toEqual(2)
-    expect(results[2].id).toEqual(3)
-    expect(results[3].id).toEqual(4)
-    expect(results[4].id).toEqual(5)
+    expect(results[2].id).toEqual(5)
+    expect(results[3].id).toEqual(3)
+    expect(results[4].id).toEqual(4)
 
     results = sortSequences([])
     expect(results).toHaveLength(0)

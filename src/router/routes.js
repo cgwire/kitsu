@@ -29,6 +29,7 @@ const StatusAutomations = () => import('../components/pages/StatusAutomations')
 const Episodes = () => import('../components/pages/Episodes')
 const Episode = () => import('../components/pages/Episode')
 const EpisodeStats = () => import('../components/pages/EpisodeStats')
+const Logs = () => import('../components/pages/Logs')
 const MainSchedule = () => import('../components/pages/MainSchedule')
 const NotFound = () => import('../components/pages/NotFound')
 const Person = () => import('../components/pages/Person')
@@ -42,10 +43,11 @@ const ProductionSettings = () => import('../components/pages/ProductionSettings'
 const Profile = () => import('../components/pages/Profile')
 const ResetPassword = () => import('../components/pages/ResetPassword')
 const ResetChangePassword = () => import('../components/pages/ResetChangePassword')
-const Logs = () => import('../components/pages/Logs')
 const ServerDown = () => import('../components/pages/ServerDown')
 const Settings = () => import('../components/pages/Settings')
 const Sequences = () => import('../components/pages/Sequences')
+const Sequence = () => import('../components/pages/Sequence')
+const SequenceStats = () => import('../components/pages/SequenceStats')
 const Shot = () => import('../components/pages/Shot')
 const Task = () => import('../components/pages/Task')
 const Team = () => import('../components/pages/Team')
@@ -582,35 +584,7 @@ export const routes = [
       {
         path: 'productions/:production_id/assets',
         component: Assets,
-        name: 'assets',
-        children: [
-          {
-            path: 'new',
-            component: Assets,
-            name: 'new-asset'
-          },
-          {
-            path:
-            'edit/:asset_id',
-            component: Assets,
-            name: 'edit-asset'
-          },
-          {
-            path: 'delete/:asset_id',
-            component: Assets,
-            name: 'delete-asset'
-          },
-          {
-            path: 'restore/:asset_id',
-            component: Assets,
-            name: 'restore-asset'
-          },
-          {
-            path: 'delete-all-tasks/:task_type_id',
-            component: Assets,
-            name: 'delete-all-asset-tasks'
-          }
-        ]
+        name: 'assets'
       },
 
       {
@@ -622,29 +596,7 @@ export const routes = [
       {
         path: 'productions/:production_id/shots',
         component: Shots,
-        name: 'shots',
-        children: [
-          {
-            path: 'delete-all-tasks/:task_type_id',
-            component: Shots,
-            name: 'delete-all-shot-tasks'
-          },
-          {
-            path: 'edit/:shot_id',
-            component: Shots,
-            name: 'edit-shot'
-          },
-          {
-            path: 'delete/:shot_id',
-            component: Shots,
-            name: 'delete-shot'
-          },
-          {
-            path: 'restore/:shot_id',
-            component: Shots,
-            name: 'restore-shot'
-          }
-        ]
+        name: 'shots'
       },
 
       {
@@ -656,29 +608,7 @@ export const routes = [
       {
         path: 'productions/:production_id/edits',
         component: Edits,
-        name: 'edits',
-        children: [
-          {
-            path: 'delete-all-tasks/:task_type_id',
-            component: Edits,
-            name: 'delete-all-edit-tasks'
-          },
-          {
-            path: 'edit/:edit_id',
-            component: Edits,
-            name: 'edit-edit'
-          },
-          {
-            path: 'delete/:edit_id',
-            component: Edits,
-            name: 'delete-edit'
-          },
-          {
-            path: 'restore/:edit_id',
-            component: Edits,
-            name: 'restore-edit'
-          }
-        ]
+        name: 'edits'
       },
 
       {
@@ -694,21 +624,21 @@ export const routes = [
       },
 
       {
+        path: 'productions/:production_id/sequences/:sequence_id',
+        component: Sequence,
+        name: 'sequence'
+      },
+
+      {
         path: 'productions/:production_id/sequences',
         component: Sequences,
-        name: 'sequences',
-        children: [
-          {
-            path: 'edit/:sequence_id',
-            component: Sequences,
-            name: 'edit-sequence'
-          },
-          {
-            path: 'delete/:sequence_id',
-            component: Sequences,
-            name: 'delete-sequence'
-          }
-        ]
+        name: 'sequences'
+      },
+
+      {
+        path: 'productions/:production_id/sequence-stats',
+        component: SequenceStats,
+        name: 'sequence-stats'
       },
 
       {
@@ -754,11 +684,6 @@ export const routes = [
         component: Task,
         children: [
           {
-            name: 'task-delete',
-            path: 'delete',
-            component: Task
-          },
-          {
             name: 'task-change-preview',
             path: 'comments/:comment_id/change-preview',
             component: Task
@@ -766,16 +691,6 @@ export const routes = [
           {
             name: 'task-preview',
             path: 'previews/:preview_id',
-            component: Task
-          },
-          {
-            name: 'task-edit-comment',
-            path: 'comments/:comment_id/edit',
-            component: Task
-          },
-          {
-            name: 'task-delete-comment',
-            path: 'comments/:comment_id/delete',
             component: Task
           }
         ]
@@ -837,34 +752,7 @@ export const routes = [
       {
         path: 'productions/:production_id/episodes/:episode_id/assets',
         component: Assets,
-        name: 'episode-assets',
-        children: [
-          {
-            path: 'new',
-            component: Assets,
-            name: 'episode-new-asset'
-          },
-          {
-            path: 'edit/:asset_id',
-            component: Assets,
-            name: 'episode-edit-asset'
-          },
-          {
-            path: 'delete/:asset_id',
-            component: Assets,
-            name: 'episode-delete-asset'
-          },
-          {
-            path: 'restore/:asset_id',
-            component: Assets,
-            name: 'episode-restore-asset'
-          },
-          {
-            path: 'delete-all-tasks/:task_type_id',
-            component: Assets,
-            name: 'episode-delete-all-asset-tasks'
-          }
-        ]
+        name: 'episode-assets'
       },
 
       {
@@ -876,34 +764,7 @@ export const routes = [
       {
         path: 'productions/:production_id/episodes/:episode_id/shots',
         component: Shots,
-        name: 'episode-shots',
-        children: [
-          {
-            path: 'shots/manage',
-            component: Shots,
-            name: 'episode-manage-shots'
-          },
-          {
-            path: 'delete-all-tasks/:task_type_id',
-            component: Shots,
-            name: 'episode-delete-all-shot-tasks'
-          },
-          {
-            path: 'edit/:shot_id',
-            component: Shots,
-            name: 'episode-edit-shot'
-          },
-          {
-            path: 'delete/:shot_id',
-            component: Shots,
-            name: 'episode-delete-shot'
-          },
-          {
-            path: 'shots/restore/:shot_id',
-            component: Shots,
-            name: 'episode-restore-shot'
-          }
-        ]
+        name: 'episode-shots'
       },
 
       {
@@ -934,19 +795,19 @@ export const routes = [
       {
         path: 'productions/:production_id/episodes/:episode_id/sequences',
         component: Sequences,
-        name: 'episode-sequences',
-        children: [
-          {
-            path: 'edit/:sequence_id',
-            component: Sequences,
-            name: 'episode-edit-sequence'
-          },
-          {
-            path: 'delete/:sequence_id',
-            component: Sequences,
-            name: 'episode-delete-sequence'
-          }
-        ]
+        name: 'episode-sequences'
+      },
+
+      {
+        path: 'productions/:production_id/episodes/:episode_id/sequences/:sequence_id',
+        component: Sequence,
+        name: 'episode-sequence'
+      },
+
+      {
+        path: 'productions/:production_id/episodes/:episode_id/sequence-stats',
+        component: SequenceStats,
+        name: 'episode-sequence-stats'
       },
 
       {

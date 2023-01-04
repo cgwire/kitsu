@@ -269,6 +269,7 @@ export default {
       'user',
       'organisation',
       'personMap',
+      'sequenceMap',
       'shotMap',
       'taskTypeMap'
     ]),
@@ -339,6 +340,10 @@ export default {
     tasksByPerson () {
       return [...this.tasks]
         .sort(firstBy(this.compareFirstAssignees))
+    },
+
+    entityMap () {
+      return this[`${this.entityType.toLowerCase()}Map`]
     }
   },
 
@@ -350,16 +355,7 @@ export default {
     frameToSeconds,
 
     getEntity (entityId) {
-      if (this.isAssets) {
-        return this.assetMap.get(entityId)
-      } else if (this.entityType === 'Shot') {
-        return this.shotMap.get(entityId)
-      } else if (this.entityType === 'Edit') {
-        return this.editMap.get(entityId)
-      } else if (this.entityType === 'Episode') {
-        return this.episodeMap.get(entityId)
-      }
-      return this.assetMap.get(entityId)
+      return this.entityMap.get(entityId)
     },
 
     compareFirstAssignees (a, b) {

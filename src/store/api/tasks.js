@@ -109,9 +109,10 @@ export default {
     let url =
       `/api/actions/projects/${projectId}/task-types/${taskTypeId}/${type}/` +
       'create-tasks'
-    if (data.type === 'episodes') {
+    if (['episodes', 'sequences'].includes(data.type)) {
       url = `/api/actions/projects/${projectId}/task-types/` +
-      `${taskTypeId}/create-tasks/episode`
+      `${taskTypeId}/create-tasks/` +
+      `${data.type.substring(0, data.type.length - 1)}`
     }
     return client.ppost(url, entityIds)
   },
@@ -124,9 +125,10 @@ export default {
     let url =
       `/api/actions/projects/${projectId}/task-types/${taskTypeId}/${type}/` +
       `create-tasks?id=${entityId}`
-    if (type === 'episodes') {
+    if (['episodes', 'sequences'].includes(data.type)) {
       url = `/api/actions/projects/${projectId}/task-types/` +
-      `${taskTypeId}/create-tasks/episode?id=${entityId}`
+      `${taskTypeId}/create-tasks/` +
+      `${data.type.substring(0, data.type.length - 1)}`
     }
     return client.ppost(url, {})
   },

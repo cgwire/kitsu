@@ -52,6 +52,11 @@ const getters = {
       .filter(taskType => taskType.for_entity === 'Edit')
   },
 
+  sequenceTaskTypes: (state, getters, rootState, rootGetters) => {
+    return state.taskTypes
+      .filter(taskType => taskType.for_entity === 'Sequence')
+  },
+
   episodeTaskTypes: (state, getters, rootState, rootGetters) => {
     return state.taskTypes
       .filter(taskType => taskType.for_entity === 'Episode')
@@ -168,19 +173,14 @@ const actions = {
       if (rootGetters.currentTaskType.for_entity === 'Shot') {
         if (rootGetters.shotMap.size < 2 || force) {
           if (rootGetters.episodes.length === 0 && rootGetters.isTVShow) {
-            dispatch('loadEpisodes')
-              .then(() => {
-                return dispatch('loadShots', (err) => {
-                  if (err) reject(err)
-                  else resolve()
-                })
-              })
+            console.log('load shots with episodes')
+            return dispatch('loadEpisodes')
+              .then(() => dispatch('loadShots'))
               .catch(reject)
           } else {
-            dispatch('loadShots', (err) => {
-              if (err) reject(err)
-              else resolve()
-            })
+            console.log('load shots simple')
+            return dispatch('loadShots')
+              .catch(reject)
           }
         } else {
           resolve()
@@ -188,12 +188,12 @@ const actions = {
       } else if (rootGetters.currentTaskType.for_entity === 'Asset') {
         if (rootGetters.assetMap.size < 2 || force) {
           if (rootGetters.episodes.length === 0 && rootGetters.isTVShow) {
-            dispatch('loadEpisodes')
+            return dispatch('loadEpisodes')
               .then(() => dispatch('loadAssets'))
               .then(resolve)
               .catch(reject)
           } else {
-            dispatch('loadAssets')
+            return dispatch('loadAssets')
               .then(resolve)
               .catch(reject)
           }
@@ -202,7 +202,7 @@ const actions = {
         }
       } else if (rootGetters.currentTaskType.for_entity === 'Edit') {
         if (rootGetters.editMap.size < 2 || force) {
-          dispatch('loadEdits')
+          return dispatch('loadEdits')
             .then(resolve)
             .catch(reject)
         } else {
@@ -211,6 +211,14 @@ const actions = {
       } else if (rootGetters.currentTaskType.for_entity === 'Episode') {
         if (rootGetters.episodeMap.size < 2 || force) {
           return dispatch('loadEpisodesWithTasks')
+            .then(resolve)
+            .catch(reject)
+        } else {
+          resolve()
+        }
+      } else if (rootGetters.currentTaskType.for_entity === 'Sequence') {
+        if (rootGetters.sequenceMap.size < 2 || force) {
+          return dispatch('loadSequencesWithTasks')
             .then(resolve)
             .catch(reject)
         } else {
