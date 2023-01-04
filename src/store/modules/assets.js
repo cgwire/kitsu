@@ -487,7 +487,7 @@ const actions = {
             type: 'assets'
           })
         })
-        return Promise.all(createTaskPromises)
+        return async.series(createTaskPromises)
           .then(() => Promise.resolve(asset))
       })
   },

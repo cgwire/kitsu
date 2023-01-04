@@ -88,6 +88,7 @@
   </div>
 </template>
 <script>
+import async from 'async'
 import draggable from 'vuedraggable'
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
@@ -300,7 +301,7 @@ export default {
       if (now - this.lastCall > 1000 && !this.isSaving) {
         this.lastCall = now
         this.isSaving = true
-        await Promise.all(forms.map(
+        await async.series(forms.map(
           async (form) => {
             return await this.editTaskTypeLink(form)
           }
