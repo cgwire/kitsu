@@ -424,7 +424,7 @@ const actions = {
             type: 'edits'
           })
         )
-        return Promise.all(createTaskPromises)
+        return async.series(createTaskPromises)
           .then(() => Promise.resolve(edit))
           .catch(console.error)
       })

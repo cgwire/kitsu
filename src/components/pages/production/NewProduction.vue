@@ -423,6 +423,7 @@
 </template>
 
 <script>
+import async from 'async'
 import draggable from 'vuedraggable'
 import Datepicker from 'vuejs-datepicker'
 import moment from 'moment'
@@ -807,7 +808,7 @@ export default {
     },
 
     async createTaskTypesAndStatuses () {
-      await Promise.all(this.productionToCreate.assetTaskTypes.concat(
+      await async.series(this.productionToCreate.assetTaskTypes.concat(
         this.productionToCreate.shotTaskTypes
       ).map(
         // add task types

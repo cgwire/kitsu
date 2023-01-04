@@ -507,7 +507,7 @@ const actions = {
             type: 'shots'
           })
         )
-        return Promise.all(createTaskPromises)
+        return async.series(createTaskPromises)
           .then(() => Promise.resolve(shot))
           .catch(console.error)
       })
