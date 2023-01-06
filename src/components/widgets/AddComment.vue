@@ -390,6 +390,7 @@ export default {
   methods: {
     shortenText: strings.shortenText,
     runAddComment (text, attachments, checklist, taskStatusId) {
+      this.$store.commit('CLEAR_UPLOAD_PROGRESS')
       if (this.mode === 'publish') {
         if (!this.showCommentArea) text = ''
         attachments = []
@@ -521,6 +522,13 @@ export default {
   watch: {
     task () {
       this.resetStatus()
+    },
+
+    task_status_id () {
+      const taskStatus = this.taskStatusMap.get(this.task_status_id)
+      if (taskStatus.is_feedback_request) {
+        this.mode = 'publish'
+      }
     },
 
     mode () {
