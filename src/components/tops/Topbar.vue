@@ -309,6 +309,10 @@ export default {
           { label: this.$t('main.all_assets'), value: 'all' },
           { label: 'Main Pack', value: 'main' }
         ].concat(this.episodeOptions)
+      } else if (['shots'].includes(this.currentProjectSection)) {
+        return [
+          { label: this.$t('main.all_shots'), value: 'all' }
+        ].concat(this.episodeOptions)
       } else if (['playlists'].includes(this.currentProjectSection)) {
         return [
           { label: this.$t('main.all_assets'), value: 'all' },
@@ -711,7 +715,7 @@ export default {
       // If no episode is set and we are in a tv show, select the first one.
       if (isTVShow) {
         // It's an asset section, and episode is not set, we chose all
-        if ((isAssetSection || isEditSection) && !this.currentEpisodeId) {
+        if (isEditSection && !this.currentEpisodeId) {
           this.currentEpisodeId = 'all'
           this.setCurrentEpisode(this.currentEpisodeId)
           // It's a shot section, and episode is not set, we chose the first
