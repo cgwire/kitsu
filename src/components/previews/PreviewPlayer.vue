@@ -10,6 +10,7 @@
           class="canvas-wrapper"
           ref="canvas-wrapper"
           oncontextmenu="return false;"
+          v-show="isAnnotationsDisplayed"
         >
           <canvas
             id="annotation-canvas"
@@ -153,12 +154,25 @@
          {{ maxDuration }}
         </span>
 
-        <div
+        <span
           class="flexrow-item time-indicator mr1"
           :title="$t('playlists.actions.frame_number')"
         >
-          ({{ currentFrame }} / {{ (nbFrames + '').padStart(3, '0') }})
-        </div>
+          ({{ currentFrame }}
+        </span>
+        <span
+          class="flexrow-item time-indicator"
+          v-if="!light || fullScreen"
+        >
+        /
+        </span>
+        <span
+          class="flexrow-item time-indicator"
+          v-if="!light || fullScreen"
+        >
+           {{ (nbFrames + '').padStart(3, '0') }}
+        </span>
+          )
       </div>
 
       <div class="flexrow flexrow-item">
@@ -282,6 +296,13 @@
             :title="$t('playlists.actions.annotation_draw')"
             @click="onPencilAnnotateClicked"
             v-if="!readOnly && (!light || fullScreen)"
+          />
+
+          <button-simple
+            @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
+            icon="pen"
+            :title="$t('playlists.actions.toggle_annotations')"
+            v-if="(isPicture || isMovie) && (!light || fullScreen)"
           />
 
           <button-simple
@@ -504,6 +525,7 @@ export default {
       color: '#ff3860',
       currentTime: '00:00.000',
       currentTimeRaw: 0,
+      isAnnotationsDisplayed: true,
       isCommentsHidden: true,
       isComparing: false,
       isDrawing: false,
@@ -1593,6 +1615,10 @@ export default {
     isDrawing () {
       if (this.fabricCanvas) this.fabricCanvas.isDrawingMode = this.isDrawing
       else this.endAnnotationSaving()
+
+      if (this.isDrawing) {
+        this.isAnnotationsDisplayed = true
+      }
     },
 
     isOrdering () {
