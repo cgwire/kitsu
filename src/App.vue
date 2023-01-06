@@ -2049,6 +2049,13 @@ th.validation-cell {
   background: black;
 }
 
+.notification .comment-text {
+  p {
+    margin-bottom: 1em;
+    max-width: 500px;
+  }
+}
+
 @media screen and (max-width: 1000px) {
   .button .icon.is-small {
     margin-right: 0;
