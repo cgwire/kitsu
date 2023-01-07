@@ -138,7 +138,7 @@ export default {
   },
 
   deleteAllTasks (projectId, taskTypeId, taskIds) {
-    if (taskIds.length > 0) {
+    if (taskIds && taskIds.length > 0) {
       return client.ppost(
         `/api/actions/projects/${projectId}/delete-tasks`,
         taskIds
