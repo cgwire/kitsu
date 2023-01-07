@@ -438,6 +438,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { formatFrame, formatTime, roundToFrame, floorToFrame } from '@/lib/video'
 import localPreferences from '@/lib/preferences'
 
+
 import { annotationMixin } from '@/components/mixins/annotation'
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { domMixin } from '@/components/mixins/dom'
@@ -1621,6 +1622,12 @@ export default {
       }
     },
 
+    isTyping () {
+      if (this.isTyping) {
+        this.isAnnotationsDisplayed = true
+      }
+    },
+
     isOrdering () {
       this.$nextTick(() => {
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
@@ -1643,6 +1650,13 @@ export default {
       this.$nextTick(() => {
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
       })
+    },
+
+    isAnnotationsDisplayed () {
+      this.previewViewer.resetZoom()
+      if (!this.isAnnotationsDisplayed) {
+        this.isDrawing = false
+      }
     }
   }
 }

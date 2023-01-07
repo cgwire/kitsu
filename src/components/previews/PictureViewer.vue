@@ -35,6 +35,7 @@
 </template>
 
 <script>
+import panzoom from 'panzoom'
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { domMixin } from '@/components/mixins/dom'
 import Spinner from '@/components/widgets/Spinner'
@@ -95,10 +96,20 @@ export default {
     this.pictureGif.addEventListener('load', this.endLoading)
     window.addEventListener('resize', this.onWindowResize)
     this.setPicturePath()
+    var element = document.querySelector('#picture-big')
+    if (!this.panzoom) {
+      this.panzoom = panzoom(element, {
+        bounds: true,
+        boundsPadding: 0.2,
+        maxZoom: 5,
+        minZoom: 1
+      })
+    }
   },
 
   beforeDestroy () {
     window.removeEventListener('resize', this.onWindowResize)
+    if (this.panzoom) this.panzoom.dispose()
   },
 
   computed: {
@@ -302,11 +313,17 @@ export default {
       const bgX = Math.min((ratioW * zx) - 150, naturalDimensions.width - 300)
       const bgY = Math.min((ratioW * zy) - 150, naturalDimensions.height - 300)
       this.$refs.loupe.style['background-position'] = `-${bgX}px -${bgY}px`
+    },
+
+    resetPanZoom () {
+      this.panzoom.moveTo(0, 0)
+      this.panzoom.zoomAbs(0, 0, 1)
     }
   },
 
   watch: {
     fullScreen () {
+      this.resetPanZoom()
       if (this.fullScreen) {
         this.isLoading = true
         this.setPictureDlPath()
@@ -323,16 +340,19 @@ export default {
     },
 
     light () {
+      this.resetPanZoom()
       this.onWindowResize()
     },
 
     isComparing () {
+      this.resetPanZoom()
       setTimeout(() => {
         this.resetPicture()
       }, 20)
     },
 
     preview () {
+      this.resetPanZoom()
       this.isLoading = true
       this.setPicturePath()
       this.setPictureDlPath()
@@ -390,6 +410,7 @@ export default {
   width: 100%;
   z-index: 300;
   margin: auto;
+  overflow: hidden;
 }
 
 .picture-subwrapper {
