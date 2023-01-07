@@ -7,7 +7,7 @@ export default {
 
   runPromiseAsSeries (promises) {
     return promises.reduce((accumulatorPromise, promise) => {
-      return accumulatorPromise.then(() => promise())
+      return accumulatorPromise.then(() => promise)
     }, Promise.resolve())
   },
 
