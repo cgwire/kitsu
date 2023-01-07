@@ -10,6 +10,7 @@ import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import {
   minutesToDays
 } from '@/lib/time'
+import func from '@/lib/func'
 
 import { PAGE_SIZE } from '@/lib/pagination'
 import {
@@ -487,7 +488,7 @@ const actions = {
             type: 'assets'
           })
         })
-        return async.series(createTaskPromises)
+        return func.runPromiseAsSeries(createTaskPromises)
           .then(() => Promise.resolve(asset))
       })
   },
@@ -1121,8 +1122,12 @@ const mutations = {
         const asset = state.assetMap.get(task.entity_id)
         if (asset) {
           if (!asset.validations) asset.validations = new Map()
+          helpers.populateTask(task, asset)
           asset.validations.set(task.task_type_id, task.id)
-          Vue.set(asset, 'validations', new Map(asset.validations))
+          const validations = asset.validations
+          asset.validations = []
+          Vue.set(asset, 'validations', validations)
+          asset.tasks.push(task.id)
         }
       }
     })

@@ -7,6 +7,7 @@ import peopleStore from '@/store/modules/people'
 import productionsStore from '@/store/modules/productions'
 import taskTypesStore from '@/store/modules/tasktypes'
 
+import func from '@/lib/func'
 import { PAGE_SIZE } from '@/lib/pagination'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import {
@@ -424,7 +425,7 @@ const actions = {
             type: 'edits'
           })
         )
-        return async.series(createTaskPromises)
+        return func.runPromiseAsSeries(createTaskPromises)
           .then(() => Promise.resolve(edit))
           .catch(console.error)
       })

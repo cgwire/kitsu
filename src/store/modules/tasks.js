@@ -262,7 +262,10 @@ const actions = {
       })
   },
 
-  createTasks ({ commit, state }, payload) {
+  createTasks ({ commit, state, rootGetters }, payload) {
+    const production = rootGetters.currentProduction
+    const taskStatusMap = rootGetters.taskStatusMap
+    const taskTypeMap = rootGetters.taskTypeMap
     let entityIds = []
     if (payload.selectionOnly) {
       if (payload.type === 'shots') {
@@ -284,6 +287,17 @@ const actions = {
       entityIds
     }
     return tasksApi.createTasks(data)
+       .then(tasks => {
+          commit(
+            CREATE_TASKS_END,
+            { tasks, production, taskStatusMap, taskTypeMap }
+          )
+          return Promise.resolve(tasks)
+        })
+        .catch(err => {
+          console.error(err)
+          return Promise.resolve([])
+        })
   },
 
   createSelectedTasks (
