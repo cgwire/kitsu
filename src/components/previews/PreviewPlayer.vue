@@ -790,7 +790,10 @@ export default {
     initPreferences () {
       const isRepeating =
         localPreferences.getBoolPreference('player:repeating')
+      const isMuted =
+        localPreferences.getBoolPreference('player:muted')
       this.isRepeating = isRepeating
+      this.isMuted = isMuted
       this.isHd = this.organisation
         ? this.organisation.hd_by_default === 'true'
         : false
@@ -821,7 +824,6 @@ export default {
 
     configureVideo () {
       this.isPlaying = false
-      this.isMuted = false
       this.isRepeating = false
     },
 
@@ -928,6 +930,7 @@ export default {
     onToggleSoundClicked () {
       this.clearFocus()
       this.isMuted = !this.isMuted
+      localPreferences.setPreference('player:muted', this.isMuted)
     },
 
     // Sizing
