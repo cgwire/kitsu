@@ -34,6 +34,7 @@
     "marked": "4.0.10",
     "moment": "2.29.1",
     "moment-timezone": "0.5.33",
+    "panzoom": "^9.4.3",
     "papaparse": "5.3.1",
     "pify": "5.0.0",
     "postcss": "^8.4.20",

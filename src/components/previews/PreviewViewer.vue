@@ -419,6 +419,10 @@ export default {
       canvas.height = dimensions.height
       context.clearRect(0, 0, canvas.width, canvas.height)
       context.drawImage(video, 0, 0, canvas.width, canvas.height)
+    },
+
+    resetZoom () {
+      this.pictureViewer.resetPanZoom()
     }
   },
 
