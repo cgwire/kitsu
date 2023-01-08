@@ -667,6 +667,10 @@ body {
     background: $dark-grey;
     color: white;
   }
+
+  h2 {
+    border-bottom: 1px solid $grey;
+  }
 } // End dark theme
 
 #app .router-link-active {
@@ -817,6 +821,17 @@ a:hover {
 
 .field {
   margin-bottom: 2em;
+}
+
+.pa0 {
+}
+
+.pa1 {
+  padding: 1em;
+}
+
+.mauto {
+  margin: auto;
 }
 
 .ml05 {
@@ -1427,6 +1442,7 @@ tbody:last-child .empty-line:last-child {
 
   .validation-content {
     padding: 0.5rem 0.75rem;
+    height: 38px;
   }
   .hidden-validation-cell {
     .validation-content {
