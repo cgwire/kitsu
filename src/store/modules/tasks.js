@@ -684,12 +684,13 @@ const actions = {
     })
   },
 
-  unassignSelectedTasks ({ commit, state }, { personId, callback }) {
+  unassignSelectedTasks ({ commit, state }) {
     const selectedTaskIds = Array.from(state.selectedTasks.keys())
-    tasksApi.unassignTasks(selectedTaskIds, (err) => {
-      if (!err) commit(UNASSIGN_TASKS, selectedTaskIds)
-      if (callback) callback(err)
-    })
+    return tasksApi.unassignTasks(selectedTaskIds)
+      .then(() => {
+        commit(UNASSIGN_TASKS, selectedTaskIds)
+        return Promise.resolve(selectedTaskIds)
+      })
   },
 
   unassignPersonFromTask ({ commit, state }, { task, person }) {
