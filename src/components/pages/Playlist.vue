@@ -108,62 +108,53 @@
         class="playlist-column no-selection"
         v-if="playlists.length > 0 && !currentPlaylist.id && !loading.playlist"
       >
-        <h2>{{ $t('playlists.last_creation') }}</h2>
-        <div class="flexrow" v-if="!loading.playlists && !loading.playlistsInit">
+        <div
+          class="flexcolumn xyz-in"
+          xyz="fade stagger"
+          v-if="!loading.playlists && !loading.playlistsInit"
+        >
           <router-link
-            class="recent-playlist flexrow-item"
+            class="recent-playlist flexrow-item flexrow"
             :key="'recent-playlist-' + playlist.id"
             :to="getPlaylistPath(playlist.id)"
-            v-for="playlist in lastPlaylistsCreated"
+            v-for="playlist in lastPlaylists"
           >
             <div class="has-text-centered">
               <light-entity-thumbnail
+                class="playlist-thumbnail"
                 :preview-file-id="playlist.first_preview_file_id"
                 type="previews"
                 width="auto"
                 height="auto"
-                max-width="300px"
-                max-height="150px"
-                empty-height="150px"
+                empty-height="252px"
               />
             </div>
-            <h3>{{ playlist.name }}</h3>
-            <span>
-              {{ $t('playlists.created_at') }}
-              {{ formatDate(playlist.created_at) }}
-            </span>
-          </router-link>
-        </div>
-        <spinner class="mt2" v-else />
-
-        <h2>{{ $t('playlists.last_modification') }}</h2>
-        <div class="flexrow" v-if="!loading.playlists">
-          <router-link
-            class="recent-playlist flexrow-item"
-            :key="'recent-modified-playlist-' + playlist.id"
-            :to="getPlaylistPath(playlist.id)"
-            v-for="playlist in lastPlaylistsUpdated"
-          >
-            <div class="has-text-centered">
-              <light-entity-thumbnail
-                :preview-file-id="playlist.first_preview_file_id"
-                type="previews"
-                width="auto"
-                height="auto"
-                max-width="300px"
-                max-height="150px"
-                empty-height="150px"
-              />
+            <div class="playlist-infos flexrow">
+              <div>
+                <h3>{{ playlist.name }}</h3>
+                <span v-if="currentSort === 'created_at'">
+                  {{ $t('playlists.created_at') }}
+                  {{ formatDate(playlist.created_at) }}
+                </span>
+                <span v-else>
+                  {{ $t('playlists.updated_at') }}
+                  {{ formatDate(playlist.updated_at) }}
+                </span>
+              </div>
+              <span class="filler">
+              </span>
+              <div>
+                <task-type-name
+                  :task-type="taskTypeMap.get(playlist.task_type_id)"
+                  v-if="playlist.task_type_id"
+                />
+              </div>
             </div>
-            <h3>{{ playlist.name }}</h3>
-            <span>
-              {{ $t('playlists.updated_at') }}
-              {{ formatDate(playlist.updated_at) }}
-            </span>
           </router-link>
         </div>
         <spinner class="mt2" v-else />
       </div>
+
       <div
         class="playlist-column no-selection has-text-centered"
         v-else-if="playlists.length === 0"
@@ -292,6 +283,7 @@
           </div>
         </div>
 
+        <div class="addition-layer">
         <div
           class="addition-section"
           v-if="(isCurrentUserManager || isCurrentUserSupervisor) && isAddingEntity"
@@ -393,6 +385,7 @@
             </div>
           </div>
         </div>
+        </div>
       </div>
     </div>
 
@@ -443,6 +436,7 @@ import PageSubtitle from '@/components/widgets/PageSubtitle'
 import PlaylistPlayer from '@/components/pages/playlists/PlaylistPlayer'
 import SearchField from '@/components/widgets/SearchField'
 import Spinner from '@/components/widgets/Spinner'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
   name: 'productions',
@@ -460,6 +454,7 @@ export default {
     PlusIcon,
     SearchField,
     Spinner,
+    TaskTypeName,
     XIcon
   },
 
@@ -558,16 +553,8 @@ export default {
       )
     },
 
-    lastPlaylistsUpdated () {
+    lastPlaylists () {
       return this.playlists
-        .concat()
-        .sort(firstBy('updated_at'))
-        .reverse()
-        .slice(0, 3)
-    },
-
-    lastPlaylistsCreated () {
-      return this.playlists.slice(0, 3)
     },
 
     playlistPlayer () {
@@ -1359,11 +1346,6 @@ export default {
     border-color: $dark-grey;
     color: $white-grey;
 
-    &.for-client {
-      background: $purple-grey;
-      border: 1px solid $dark-grey;
-    }
-
     &.selected {
       border-right: 3px solid $dark-green;
     }
@@ -1390,9 +1372,14 @@ export default {
     }
 
     .recent-playlist {
+      position: relative;
+      max-width: 800px;
+      margin: auto;
+      overflow: hidden;
       background: $dark-grey-lightmore;
       border: 2px solid $dark-grey;
       box-shadow: 0px 0px 6px #333;
+      margin-bottom: 1em;
 
       h3 {
         color: white;
@@ -1432,15 +1419,21 @@ export default {
 .playlist-item {
   display: block;
   background: white;
-  padding: 0.4em;
-  margin: 0.2em;
   border: 1px solid $white-grey;
+  border-radius: 3px;
   box-shadow: 0px 0px 6px #DDD;
   color: $grey-strong;
+  margin: 0.2em;
+  padding: 0.4em;
+  transition: all 0.2s ease;
 
   &.for-client {
-    background: $light-purple;
-    border: 1px solid $purple;
+    background: $purple-grey;
+  }
+
+  &:hover {
+    transform: scale(1.03);
+    border-right: 2px solid $dark-purple;
   }
 }
 
@@ -1496,20 +1489,11 @@ span.thumbnail-picture {
   margin-bottom: 2px;
 }
 
-.addition-header {
-  padding: 0 1em;
-
-  .subtitle {
-    margin-top: 1em;
-  }
-}
-
 .add-sequence {
   margin-bottom: 0.4em;
 }
 
 .playlist-column {
-  padding: 0;
   overflow: hidden;
   flex: 1;
   background: $dark-grey-2;
@@ -1542,7 +1526,13 @@ span.thumbnail-picture {
 
 .addition-header {
   background: var(--background);
+  border-top: 3px solid $dark-grey;
   height: 110px;
+  padding: 0 1em;
+
+  .subtitle {
+    margin-top: 1em;
+  }
 }
 
 .addition-section {
@@ -1581,20 +1571,48 @@ h2 {
     font-size: 2em;
     margin-top: 1.5em;
     margin-bottom: 0.3em;
+    border-bottom: 0;
+
+    &:first-child {
+      margin-top: .5em;
+    }
   }
 
   .recent-playlist {
-    width: 333px;
-    height: 250px;
+    height: 320px;
     background: white;
     border: 2px solid $light-grey-light;
     box-shadow: 0px 0px 6px #DDD;
     border-radius: 1em;
-    padding: 1em;
+    padding: 0;
+    width: 100%;
+    transition: all .6s ease;
+
+    img {
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    &:hover {
+      transform: scale(1.03);
+      border: 2px solid $dark-purple;
+    }
+
+    .playlist-infos {
+      background-color: rgb(0, 0, 0, 0.2);
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      align-items: middle;
+      padding: .3em 1.2em;
+      height: 65px;
+      padding-top: .3em;
+    }
 
     h3 {
       color: $grey-strong;
-      font-size: 1.2em;
+      font-size: 1.4em;
       font-weight: bold;
     }
     span {
@@ -1618,5 +1636,9 @@ h2 {
 
 .top-section {
   align-items: flex-start;
+}
+
+.addition-layer {
+  height: calc(100% - 530px);
 }
 </style>
