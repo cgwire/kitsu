@@ -13,9 +13,10 @@
     "test:unit": "vitest tests/unit"
   },
   "dependencies": {
-    "@arch-inc/fabricjs-psbrush": "^0.0.20",
+    "@animxyz/vue":"^0.6.7",
+    "@arch-inc/fabricjs-psbrush": "0.0.20",
     "@google/model-viewer": "1.10.1",
-    "@vitejs/plugin-vue2": "^2.2.0",
+    "@vitejs/plugin-vue2": "2.2.0",
     "async": "3.2.0",
     "autoprefixer": "10.4.13",
     "bowser": "2.11.0",
