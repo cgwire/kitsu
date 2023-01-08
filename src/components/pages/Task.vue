@@ -1,7 +1,7 @@
 <template>
-<div class="fixed-page columns">
+<div class="fixed-page columns xyz-in" xyz="fade">
   <div class="page column main-column">
-    <div class="page-header pa1 mb0">
+    <div class="page-header pa1 mb0" xyz="fade">
       <div
         class="flexrow header-title"
         v-if="task"
@@ -209,27 +209,32 @@
               class="comments"
               v-if="taskComments && taskComments.length > 0"
             >
-              <comment
-                :comment="comment"
-                :task="task"
-                :highlighted="false"
-                :key="comment.id"
-                :current-user="user"
-                :editable="(
-                  comment.person && user.id === comment.person.id ||
-                  isCurrentUserAdmin
-                )"
-                :is-first="index === 0"
-                :is-last="index === pinnedCount"
-                :is-change="isStatusChange(index)"
-                @ack-comment="ackComment"
-                @pin-comment="onPinComment"
-                @edit-comment="onEditComment"
-                @delete-comment="onDeleteComment"
-                @checklist-updated="saveComment"
-                @time-code-clicked="timeCodeClicked"
-                v-for="(comment, index) in taskComments"
-              />
+              <XyzTransitionGroup
+                appear
+                v-xyz="{fade: false, up: false, 'flip-up': false}"
+              >
+                <comment
+                  :key="comment.id"
+                  :comment="comment"
+                  :task="task"
+                  :highlighted="false"
+                  :current-user="user"
+                  :editable="(
+                    comment.person && user.id === comment.person.id ||
+                    isCurrentUserAdmin
+                  )"
+                  :is-first="index === 0"
+                  :is-last="index === pinnedCount"
+                  :is-change="isStatusChange(index)"
+                  @ack-comment="ackComment"
+                  @pin-comment="onPinComment"
+                  @edit-comment="onEditComment"
+                  @delete-comment="onDeleteComment"
+                  @checklist-updated="saveComment"
+                  @time-code-clicked="timeCodeClicked"
+                  v-for="(comment, index) in taskComments"
+                />
+              </XyzTransitionGroup>
             </div>
             <div class="no-comment" v-else>
               <em>

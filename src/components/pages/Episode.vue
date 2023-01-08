@@ -1,5 +1,5 @@
 <template>
-<div class="columns fixed-page episode">
+<div class="columns fixed-page episode xyz-in" xyz="fade">
   <div class="column main-column">
     <div class="page-header flexrow">
       <router-link

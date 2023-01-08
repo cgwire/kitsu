@@ -1,11 +1,14 @@
 <template>
-<div id="temp-playlist-modal" :class="{
-  dark: true,
-  'modal': true,
-  'is-active': active
-}">
+<div
+  id="temp-playlist-modal"
+  :class="{
+    dark: true,
+    'modal': true,
+    'is-active': active
+  }"
+>
   <div class="modal-background" @click="$emit('cancel')"></div>
-  <div class="modal-content wide">
+  <div class="modal-content wide xyz-in" xyz="fade">
     <div class="box">
       <playlist-player
         ref="playlist-player"
@@ -241,6 +244,7 @@ export default {
 .modal-content {
   max-height: calc(100vh - 75px);
   top: 28px;
+  overflow-x: hidden;
 }
 .modal-content .box {
   padding: 1em;

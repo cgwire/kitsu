@@ -1,7 +1,8 @@
 <template>
   <div :class="{ theme: true, dark: isDarkTheme }">
     <div
-      class="has-text-centered mt2 loading-info"
+      class="has-text-centered mt2 loading-info xyz-in"
+      xyz="fade"
       v-if="user && isDataLoading"
     >
         <span>{{ $t('main.loading_data') }}...</span>

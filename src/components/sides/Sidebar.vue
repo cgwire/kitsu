@@ -318,6 +318,8 @@ p:hover {
   cursor: pointer;
   background: $white-grey;
   border-radius: 5px;
+  transform: scale(1.05);
+  transition: 0.2s ease transform;
 }
 
 @media screen and (max-width: 768px) {

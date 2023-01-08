@@ -1,7 +1,14 @@
 <template>
   <div class="login hero is-fullheight">
     <div class="container has-text-centered">
-      <div class="box has-text-left">
+      <div
+        :class="{
+          box: true,
+          'has-text-left': true,
+          'xyz-out': fadeAway
+        }"
+        xyz="fade"
+      >
         <div class="has-text-centered login-header">
           <img src="../../assets/kitsu-text-dark.svg" v-if="isDarkTheme" />
           <img src="../../assets/kitsu-text.svg" v-else />
@@ -116,11 +123,13 @@ export default {
       isWrongOTP: false,
       isMissingOTP: false,
       preferredTwoFA: '',
-      TwoFAsEnabled: []
+      TwoFAsEnabled: [],
+      fadeAway: false
     }
   },
 
   mounted () {
+    this.fadeAway = false
     this.email = this.$store.state.login.email
     this.password = this.$store.state.login.password
   },
@@ -173,11 +182,14 @@ export default {
             }
           }
           if (success) {
-            if (this.$route.query.redirect) {
-              this.$router.push(this.$route.query.redirect)
-            } else {
-              this.$router.push('/')
-            }
+            this.fadeAway = true
+            setTimeout(() => {
+              if (this.$route.query.redirect) {
+                this.$router.push(this.$route.query.redirect)
+              } else {
+                this.$router.push('/')
+              }
+            }, 500)
           }
         }
       })
