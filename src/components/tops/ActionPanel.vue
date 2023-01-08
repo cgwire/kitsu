@@ -5,6 +5,7 @@
       :class="{
         'action-topbar': true,
         unselectable: true,
+        minimized,
         'hidden': isHidden
       }"
       :style="{
@@ -47,6 +48,7 @@
               active: selectedBar === 'assignation'
             }"
             :title="$t('menu.assign_tasks')"
+            @click="selectBar('assignation')"
             v-if="
               isCurrentViewEntity &&
               (
@@ -55,7 +57,6 @@
                 isInDepartment
               ) &&
               !isEntitySelection && isTaskSelection"
-            @click="selectBar('assignation')"
           >
             <user-icon />
           </div>
@@ -236,6 +237,14 @@
 
           <div
             class="flexrow-item close-bar"
+            @click="minimized = !minimized"
+          >
+            <minus-icon v-if="!minimized" />
+            <square-icon v-else />
+          </div>
+
+          <div
+            class="flexrow-item close-bar"
             @click="clearSelection"
           >
             <x-icon />
@@ -243,7 +252,7 @@
         </div>
       </div>
 
-      <div class="flexrow action-bar" v-if="selectedBar">
+      <div class="flexrow action-bar" v-if="selectedBar && !minimized">
 
         <div
           class="flexcolumn is-wide"
@@ -332,13 +341,23 @@
             v-if="!loading.assignation && (
               isCurrentUserManager || isSupervisorInDepartment)"
           >
+            <div class="mauto flexrow">
             <button
-              class="button is-link clear-assignation-button"
+              class="button is-link clear-assignation-button filler"
               @click="clearAssignation"
             >
-              {{ $t('main.or') }}
               {{ $t('tasks.clear_assignations') }}
             </button>
+            <span>
+              {{ $t('main.or') }}
+            </span>
+            <button
+              class="button is-link clear-assignation-button"
+              @click="clearAllAssignations"
+            >
+              {{ $t('tasks.clear_all_assignations') }}
+            </button>
+          </div>
           </div>
           <div
             class="flexrow-item hide-small-screen"
@@ -638,20 +657,21 @@
 </template>
 
 <script>
-import async from 'async'
 import { mapGetters, mapActions } from 'vuex'
 import { domMixin } from '@/components/mixins/dom'
 import { intersection } from '@/lib/array'
 import { sortPeople } from '@/lib/sorting'
 import preferences from '@/lib/preferences'
+import func from '@/lib/func'
 
 import {
   AlertCircleIcon,
   CheckSquareIcon,
   FilmIcon,
   ImageIcon,
-  // MoreVerticalIcon,
+  MinusIcon,
   PlayCircleIcon,
+  SquareIcon,
   TrashIcon,
   UserIcon,
   XIcon
@@ -677,11 +697,12 @@ export default {
     DeleteEntities,
     FilmIcon,
     ImageIcon,
-    // MoreVerticalIcon,
+    MinusIcon,
     PeopleField,
     PlayCircleIcon,
     Spinner,
     UserIcon,
+    SquareIcon,
     TrashIcon,
     XIcon,
     ViewPlaylistModal
@@ -693,6 +714,7 @@ export default {
       currentTeam: [],
       customAction: {},
       customActions: [],
+      minimized: false,
       person: null,
       priority: '0',
       selectedBar: 'change-status',
@@ -997,6 +1019,7 @@ export default {
           personId,
           callback: () => {
             this.loading.assignation = false
+            this.$refs['assignation-field'].clear()
           }
         })
       }
@@ -1006,12 +1029,24 @@ export default {
       const person = this.isCurrentUserArtist ? this.user : this.person
       if (person) {
         this.loading.assignation = true
-        async.series(Array.from(this.selectedTasks.values()).map(task => {
-          return this.unassignPersonFromTask({ task, person })
-        })).then(() => {
+        func.runPromiseAsSeries(
+          Array.from(this.selectedTasks.values()).map(task => {
+            return this.unassignPersonFromTask({ task, person })
+          })
+        ).then(() => {
           this.loading.assignation = false
         })
+        .catch(console.error)
       }
+    },
+
+    clearAllAssignations () {
+      this.loading.assignation = true
+      return this.unassignSelectedTasks()
+        .then(() => {
+          this.loading.assignation = false
+        })
+        .catch(console.error)
     },
 
     confirmPriorityChange () {
@@ -1121,11 +1156,12 @@ export default {
 
     confirmSetThumbnailsFromTasks () {
       this.loading.setThumbnails = true
-      async.series(Array.from(this.selectedTasks.values()).map(task => {
-        return this.setLastTaskPreview(task.id)
-      })).then(() => {
-        this.loading.setThumbnails = false
-      })
+      func.runPromiseAsSeries(
+        Array.from(this.selectedTasks.values()).map(task => {
+          return this.setLastTaskPreview(task.id)
+        })).then(() => {
+          this.loading.setThumbnails = false
+        })
     },
 
     setCurrentTeam () {
@@ -1467,7 +1503,13 @@ div.assignation {
 
 .action-bar {
   border-radius: 10px;
-  padding: .5em .5em
+  padding: .5em .5em;
+}
+
+.minimized {
+  .menu {
+    border-radius: 10px;
+  }
 }
 
 .comment-text {
