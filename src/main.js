@@ -18,6 +18,9 @@ import VTooltip from 'v-tooltip'
 import VueWebsocket from 'vue-websocket-next'
 import IO from 'socket.io-client'
 import 'v-autocomplete/dist/v-autocomplete.css'
+import VueAnimXYZ from '@animxyz/vue'
+import '@animxyz/core' // Import css here if you haven't elsewhere
+
 
 Vue.use(VueWebsocket, IO, '/events')
 Vue.config.productionTip = false
@@ -31,6 +34,7 @@ Vue.use(VueLazyload)
 Vue.use(vuescroll)
 Vue.use(VueDragDrop)
 Vue.use(VueTextareaAutosize)
+Vue.use(VueAnimXYZ)
 
 // Make the current route part of the main state.
 sync(store, router)
