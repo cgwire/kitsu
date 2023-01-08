@@ -161,28 +161,33 @@
               class="comments"
               v-if="taskComments && taskComments.length > 0 && !loading.task"
             >
-              <comment
-                :key="'comment' + comment.id"
-                :comment="comment"
-                :task="task"
-                :light="true"
-                :add-preview="onAddPreviewClicked"
-                :is-first="index === 0"
-                :is-last="index === pinnedCount"
-                :is-change="isStatusChange(index)"
-                :editable="(
-                  comment.person && user.id === comment.person.id ||
-                  isCurrentUserAdmin
-                )"
-                @duplicate-comment="onDuplicateComment"
-                @pin-comment="onPinComment"
-                @edit-comment="onEditComment"
-                @delete-comment="onDeleteComment"
-                @checklist-updated="saveComment"
-                @ack-comment="onAckComment"
-                @time-code-clicked="timeCodeClicked"
-                v-for="(comment, index) in taskComments"
-              />
+              <XyzTransitionGroup
+                appear
+                v-xyz="{fade: animOn, up: animOn, 'flip-up': animOn}"
+              >
+                <comment
+                  :key="'comment' + comment.id"
+                  :comment="comment"
+                  :task="task"
+                  :light="true"
+                  :add-preview="onAddPreviewClicked"
+                  :is-first="index === 0"
+                  :is-last="index === pinnedCount"
+                  :is-change="isStatusChange(index)"
+                  :editable="(
+                    comment.person && user.id === comment.person.id ||
+                    isCurrentUserAdmin
+                  )"
+                  @duplicate-comment="onDuplicateComment"
+                  @pin-comment="onPinComment"
+                  @edit-comment="onEditComment"
+                  @delete-comment="onDeleteComment"
+                  @checklist-updated="saveComment"
+                  @ack-comment="onAckComment"
+                  @time-code-clicked="timeCodeClicked"
+                  v-for="(comment, index) in taskComments"
+                />
+              </XyzTransitionGroup>
             </div>
             <div class="no-comment" v-else-if="!loading.task">
               <em>
@@ -331,6 +336,7 @@ export default {
   data () {
     return {
       addExtraPreviewFormData: null,
+      animOn: false,
       previewForms: [],
       currentPreviewIndex: 0,
       currentPreviewPath: '',
@@ -647,40 +653,46 @@ export default {
     },
 
     addComment (comment, attachment, checklist, taskStatusId) {
-      let preview = this.currentParentPreview
-        ? this.currentParentPreview : this.currentPreview
-      // find real preview, which contains the `revision`
-      preview = this.taskPreviews.find(p => p.id === preview.id)
-      const params = {
-        taskId: this.task.id,
-        taskStatusId,
-        attachment,
-        checklist,
-        comment
-      }
-      let action = 'commentTask'
-      if (this.previewForms.length > 0) action = 'commentTaskWithPreview'
-      this.loading.addComment = true
-      this.errors.addComment = false
-      this.errors.addCommentMaxRetakes = false
-      this.$store.dispatch(action, params)
-        .then(() => {
-          drafts.clearTaskDraft(this.task.id)
-          this.reset()
-          this.previewForms = []
-          this.loading.addComment = false
-          this.$emit('comment-added')
-        })
-        .catch((err) => {
-          console.error(err)
-          const isRetakeError =
-            err.response &&
-            err.response.body.message &&
-            err.response.body.message.indexOf('retake') > 0
-          this.errors.addComment = !isRetakeError
-          this.errors.addCommentMaxRetakes = isRetakeError
-          this.loading.addComment = false
-        })
+      console.log('add comment')
+      this.animOn = true
+      this.$nextTick(() => {
+        let preview = this.currentParentPreview
+          ? this.currentParentPreview : this.currentPreview
+        // find real preview, which contains the `revision`
+        preview = this.taskPreviews.find(p => p.id === preview.id)
+        const params = {
+          taskId: this.task.id,
+          taskStatusId,
+          attachment,
+          checklist,
+          comment
+        }
+        let action = 'commentTask'
+        if (this.previewForms.length > 0) action = 'commentTaskWithPreview'
+        this.loading.addComment = true
+        this.errors.addComment = false
+        this.errors.addCommentMaxRetakes = false
+        this.$store.dispatch(action, params)
+          .then(() => {
+            drafts.clearTaskDraft(this.task.id)
+            this.reset()
+            this.previewForms = []
+            this.loading.addComment = false
+            this.$emit('comment-added')
+          })
+          .catch((err) => {
+            console.error(err)
+            const isRetakeError =
+              err.response &&
+              err.response.body.message &&
+              err.response.body.message.indexOf('retake') > 0
+            this.errors.addComment = !isRetakeError
+            this.errors.addCommentMaxRetakes = isRetakeError
+            this.loading.addComment = false
+          })
+          .finally(() => {
+          })
+      })
     },
 
     reset () {
@@ -931,6 +943,7 @@ export default {
     },
 
     confirmDeleteTaskComment () {
+      this.animOn = true
       this.loading.deleteComment = true
       this.errors.deleteComment = false
       const commentId = this.commentToEdit.id
@@ -948,6 +961,9 @@ export default {
           console.error(err)
           this.loading.deleteComment = false
           this.errors.deleteComment = true
+        })
+        .finally(() => {
+          this.animOn = false
         })
     },
 
@@ -1163,6 +1179,7 @@ export default {
 
       'comment:new' (eventData) {
         setTimeout(() => {
+          this.animOn = true
           const comments = this.task
             ? this.getTaskComments(this.task.id)
             : null
@@ -1176,6 +1193,7 @@ export default {
             this.taskComments = comments
             this.taskPreviews = this.getTaskPreviews(this.task.id)
           }
+          this.animOn = false
         }, 1000)
       },
 
@@ -1213,6 +1231,7 @@ export default {
 
       'comment:delete' (eventData) {
         const task = this.getTask()
+        this.animOn = true
         if (task) {
           const comments = this.getComments()
           const comment = comments.find(
@@ -1223,6 +1242,7 @@ export default {
             this.taskComments = this.getTaskComments(this.task.id)
             this.taskPreviews = this.getTaskPreviews(this.task.id)
           }
+          this.animOn = false
         }
       },
 
