@@ -771,7 +771,7 @@ export default {
       empty: 'You don\'t have open productions. What about creating a new one?',
       no_task: 'You have no task assigned. See your supervisor to see what you can do!',
       no_prod_for_client: 'You don\'t have access to any production. Contact your contractor to obtain an access.',
-      title: 'Running Productions',
+      title: 'My Productions',
       welcome: 'Welcome to Kitsu'
     },
     fields: {
