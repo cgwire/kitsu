@@ -378,8 +378,13 @@ export default {
       let options = [
         { label: this.$t('assets.title'), value: 'assets' },
         { label: this.$t('shots.title'), value: 'shots' },
-        { label: this.$t('sequences.title'), value: 'sequences' }
       ]
+
+      if (!this.isCurrentUserClient) {
+        options.push(
+          { label: this.$t('sequences.title'), value: 'sequences' }
+        )
+      }
 
       // Show only if there are task types for Edit in this production.
       if (this.productionEditTaskTypes.length > 0) {
@@ -388,7 +393,7 @@ export default {
         )
       }
 
-      if (this.isTVShow) {
+      if (this.isTVShow && !this.isCurrentUserClient) {
         options.push(
           { label: 'Episodes', value: 'episodes' }
         )
