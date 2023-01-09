@@ -1,7 +1,8 @@
 <template>
   <div :class="{ theme: true, dark: isDarkTheme }">
     <div
-      class="has-text-centered mt2 loading-info"
+      class="has-text-centered mt2 loading-info xyz-in"
+      xyz="fade"
       v-if="user && isDataLoading"
     >
         <span>{{ $t('main.loading_data') }}...</span>
@@ -22,6 +23,7 @@ import { mapGetters, mapActions } from 'vuex'
 import PreviewModal from '@/components/modals/PreviewModal'
 import Spinner from '@/components/widgets/Spinner'
 import crisp from '@/lib/crisp'
+import localPreferences from '@/lib/preferences'
 
 export default {
   name: 'app',
@@ -67,7 +69,9 @@ export default {
       document.documentElement.style.background = '#FFF'
       document.body.style.background = '#FFF'
     }
-    crisp.init()
+    let supportChat = localPreferences.getBoolPreference('support:show', true)
+    this.setSupportChat(supportChat)
+    crisp.init(supportChat)
   },
 
   metaInfo: {
@@ -96,7 +100,8 @@ export default {
       'loadTaskStatus',
       'loadTaskType',
       'refreshMetadataDescriptor',
-      'removeAsset'
+      'removeAsset',
+      'setSupportChat'
     ]),
 
     onAssignation (eventData, assign = true) {
@@ -666,6 +671,10 @@ body {
     background: $dark-grey;
     color: white;
   }
+
+  h2 {
+    border-bottom: 1px solid $grey;
+  }
 } // End dark theme
 
 #app .router-link-active {
@@ -816,6 +825,17 @@ a:hover {
 
 .field {
   margin-bottom: 2em;
+}
+
+.pa0 {
+}
+
+.pa1 {
+  padding: 1em;
+}
+
+.mauto {
+  margin: auto;
 }
 
 .ml05 {
@@ -1426,6 +1446,7 @@ tbody:last-child .empty-line:last-child {
 
   .validation-content {
     padding: 0.5rem 0.75rem;
+    height: 38px;
   }
   .hidden-validation-cell {
     .validation-content {
@@ -2047,6 +2068,13 @@ th.validation-cell {
   width: 100%;
   height: 100%;
   background: black;
+}
+
+.notification .comment-text {
+  p {
+    margin-bottom: 1em;
+    max-width: 500px;
+  }
 }
 
 @media screen and (max-width: 1000px) {

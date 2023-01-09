@@ -136,7 +136,7 @@
             {{ $t("main.white_theme")}}
           </span>
         </li>
-        <li @click="toggleSupportChat">
+        <li @click="setSupportChat(!isSupportChat)">
           <span v-if="isSupportChat">
             {{ $t("main.hide_support_chat")}}
           </span>
@@ -210,6 +210,7 @@ import {
   ZapIcon
 } from 'vue-feather-icons'
 
+import localPreferences from '@/lib/preferences'
 import GlobalSearchField from '@/components/tops/GlobalSearchField'
 import NotificationBell from '@/components/widgets/NotificationBell'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
@@ -373,8 +374,13 @@ export default {
       let options = [
         { label: this.$t('assets.title'), value: 'assets' },
         { label: this.$t('shots.title'), value: 'shots' },
-        { label: this.$t('sequences.title'), value: 'sequences' }
       ]
+
+      if (!this.isCurrentUserClient) {
+        options.push(
+          { label: this.$t('sequences.title'), value: 'sequences' }
+        )
+      }
 
       // Show only if there are task types for Edit in this production.
       if (this.productionEditTaskTypes.length > 0) {
@@ -383,7 +389,7 @@ export default {
         )
       }
 
-      if (this.isTVShow) {
+      if (this.isTVShow && !this.isCurrentUserClient) {
         options.push(
           { label: 'Episodes', value: 'episodes' }
         )
@@ -487,8 +493,8 @@ export default {
       'logout',
       'setProduction',
       'setCurrentEpisode',
+      'setSupportChat',
       'toggleDarkTheme',
-      'toggleSupportChat',
       'toggleSidebar',
       'toggleUserMenu'
     ]),
@@ -711,7 +717,7 @@ export default {
       // If no episode is set and we are in a tv show, select the first one.
       if (isTVShow) {
         // It's an asset section, and episode is not set, we chose all
-        if ((isAssetSection || isEditSection) && !this.currentEpisodeId) {
+        if (isEditSection && !this.currentEpisodeId) {
           this.currentEpisodeId = 'all'
           this.setCurrentEpisode(this.currentEpisodeId)
           // It's a shot section, and episode is not set, we chose the first
@@ -762,6 +768,10 @@ export default {
 
     currentSectionOption () {
       this.clearSelectedTasks()
+    },
+
+    isSupportChat () {
+      localPreferences.setPreference('support:show', this.isSupportChat)
     }
   },
 

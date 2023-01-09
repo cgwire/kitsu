@@ -538,6 +538,9 @@ const mutations = {
   [CLEAR_EPISODES] (state) {
     state.episodes = []
     state.currentEpisode = null
+    cache.episodes = []
+    cache.result = []
+    cache.episodeIndex = {}
   },
 
   [SET_CURRENT_EPISODE] (state, episodeId) {

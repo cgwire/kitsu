@@ -367,6 +367,7 @@ export default {
     all: 'All',
     all_assets: 'All assets',
     all_edits: 'All edits',
+    all_shots: 'All shots',
     admin: 'Admin',
     after: 'After',
     attach_snapshots: 'Attach snapshots from your annotation',
@@ -704,6 +705,7 @@ export default {
       switch_ld: 'Switch to low definition',
       switch_hd: 'Switch to high definition',
       toggle_annotations: 'Show/Hide annotations while playing movies',
+      toggle_laser: 'Enable/Disable drawing laser mode',
       toggle_playing_annotations: 'Show/Hide annotations while playing movies',
       toggle_waveform: 'Show/Hide movie waveform'
     }
@@ -770,7 +772,7 @@ export default {
       empty: 'You don\'t have open productions. What about creating a new one?',
       no_task: 'You have no task assigned. See your supervisor to see what you can do!',
       no_prod_for_client: 'You don\'t have access to any production. Contact your contractor to obtain an access.',
-      title: 'Running Productions',
+      title: 'My Productions',
       welcome: 'Welcome to Kitsu'
     },
     fields: {
@@ -1145,6 +1147,7 @@ export default {
     change_priority: 'Change priority of the selected task | Change priority of the {nbSelectedTasks} selected tasks ',
     change_priority_to: 'New priority:',
     change_task_status: 'Change status for the selected task | Change status for the {nbSelectedTasks} selected tasks',
+    clear_all_assignations: 'unassign all',
     clear_assignations: 'unassign from selection',
     clear_own_assignations: 'clear your assignations',
     comment_image: 'Attach files to your comment',

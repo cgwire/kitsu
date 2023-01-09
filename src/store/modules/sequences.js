@@ -85,7 +85,6 @@ const helpers = {
     const taskStatuses = Array.from(taskStatusMap.values())
     const query = sequenceSearch
     const keywords = getKeyWords(query) || []
-    console.log('keywords', keywords)
     const filters = getFilters({
       entryIndex: cache.sequenceIndex,
       assetTypes: [],
@@ -370,7 +369,6 @@ const actions = {
     const isTVShow = rootGetters.isTVShow
     const episode = isTVShow ? rootGetters.currentEpisode : null
     const episodeMap = rootGetters.episodeMap
-    console.log(shotsApi)
     return shotsApi.getSequences(production, episode)
       .then(sequences => {
         commit(LOAD_SEQUENCES_END, {
@@ -413,7 +411,6 @@ const actions = {
         return Promise.resolve([])
       }
     }
-    console.log('loadSequencesWithTasks', production, episode)
     return shotsApi.getSequencesWithTasks(production, episode)
       .then(sequences => {
         commit(SET_SEQUENCES_WITH_TASKS, {
@@ -437,7 +434,6 @@ const actions = {
 
   newSequence ({ commit, dispatch, state, rootGetters }, sequence) {
     const episodeMap = rootGetters.episodeMap
-    console.log(sequence, 'new')
     return shotsApi.newSequence(sequence)
       .then(sequence => {
         commit(NEW_SEQUENCE_END, { sequence, episodeMap })
@@ -721,7 +717,6 @@ const mutations = {
     const sorting = state.sequenceSorting
     payload.sorting = sorting
     const result = helpers.buildResult(state, payload, false)
-    console.log('result', result)
 
     state.searchSequenceFilters = getFilters({
       entryIndex: shotStore.cache.shotIndex,
@@ -854,7 +849,6 @@ const mutations = {
 
   [COMPUTE_SEQUENCE_STATS] (state, { taskMap, taskStatusMap }) {
     let shots = shotStore.cache.shots
-    console.log(state.searchSequenceFilters)
     if (state.searchSequenceFilters.length > 0) {
       shots = applyFilters(shots, state.searchSequenceFilters, {})
       shots = shots.filter(shot => !shot.canceled)

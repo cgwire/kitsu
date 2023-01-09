@@ -1,9 +1,11 @@
 <template>
+<XyzTransition appear xyz="fade">
   <div class="main">
     <topbar />
     <sidebar />
     <router-view />
   </div>
+</XyzTransition>
 </template>
 
 <script>

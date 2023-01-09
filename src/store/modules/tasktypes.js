@@ -173,12 +173,10 @@ const actions = {
       if (rootGetters.currentTaskType.for_entity === 'Shot') {
         if (rootGetters.shotMap.size < 2 || force) {
           if (rootGetters.episodes.length === 0 && rootGetters.isTVShow) {
-            console.log('load shots with episodes')
             return dispatch('loadEpisodes')
               .then(() => dispatch('loadShots'))
               .catch(reject)
           } else {
-            console.log('load shots simple')
             return dispatch('loadShots')
               .catch(reject)
           }

@@ -142,11 +142,11 @@ export const entitiesMixin = {
       const projectId = this.currentProduction.id
       this.errors.deleteAllTasks = false
       this.loading.deleteAllTasks = true
-      this.deleteAllEpisodeTasks({ projectId, taskTypeId, selectionOnly })
+      this.deleteAllTasks({ projectId, taskTypeId, selectionOnly })
         .then(() => {
           this.loading.deleteAllTasks = false
           this.modals.isDeleteAllTasksDisplayed = false
-        }).catch((err) => {
+        }).catch(err => {
           console.error(err)
           this.loading.deleteAllTasks = false
           this.errors.deleteAllTasks = true

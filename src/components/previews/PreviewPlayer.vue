@@ -10,6 +10,7 @@
           class="canvas-wrapper"
           ref="canvas-wrapper"
           oncontextmenu="return false;"
+          v-show="isAnnotationsDisplayed"
         >
           <canvas
             id="annotation-canvas"
@@ -153,12 +154,25 @@
          {{ maxDuration }}
         </span>
 
-        <div
+        <span
           class="flexrow-item time-indicator mr1"
           :title="$t('playlists.actions.frame_number')"
         >
-          ({{ currentFrame }} / {{ (nbFrames + '').padStart(3, '0') }})
-        </div>
+          ({{ currentFrame }}
+        </span>
+        <span
+          class="flexrow-item time-indicator"
+          v-if="!light || fullScreen"
+        >
+        /
+        </span>
+        <span
+          class="flexrow-item time-indicator"
+          v-if="!light || fullScreen"
+        >
+           {{ (nbFrames + '').padStart(3, '0') }}
+        </span>
+          )
       </div>
 
       <div class="flexrow flexrow-item">
@@ -282,6 +296,13 @@
             :title="$t('playlists.actions.annotation_draw')"
             @click="onPencilAnnotateClicked"
             v-if="!readOnly && (!light || fullScreen)"
+          />
+
+          <button-simple
+            @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
+            icon="pen"
+            :title="$t('playlists.actions.toggle_annotations')"
+            v-if="(isPicture || isMovie) && (!light || fullScreen)"
           />
 
           <button-simple
@@ -417,6 +438,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { formatFrame, formatTime, roundToFrame, floorToFrame } from '@/lib/video'
 import localPreferences from '@/lib/preferences'
 
+
 import { annotationMixin } from '@/components/mixins/annotation'
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { domMixin } from '@/components/mixins/dom'
@@ -504,6 +526,7 @@ export default {
       color: '#ff3860',
       currentTime: '00:00.000',
       currentTimeRaw: 0,
+      isAnnotationsDisplayed: true,
       isCommentsHidden: true,
       isComparing: false,
       isDrawing: false,
@@ -767,7 +790,10 @@ export default {
     initPreferences () {
       const isRepeating =
         localPreferences.getBoolPreference('player:repeating')
+      const isMuted =
+        localPreferences.getBoolPreference('player:muted')
       this.isRepeating = isRepeating
+      this.isMuted = isMuted
       this.isHd = this.organisation
         ? this.organisation.hd_by_default === 'true'
         : false
@@ -798,7 +824,6 @@ export default {
 
     configureVideo () {
       this.isPlaying = false
-      this.isMuted = false
       this.isRepeating = false
     },
 
@@ -905,6 +930,7 @@ export default {
     onToggleSoundClicked () {
       this.clearFocus()
       this.isMuted = !this.isMuted
+      localPreferences.setPreference('player:muted', this.isMuted)
     },
 
     // Sizing
@@ -1593,6 +1619,16 @@ export default {
     isDrawing () {
       if (this.fabricCanvas) this.fabricCanvas.isDrawingMode = this.isDrawing
       else this.endAnnotationSaving()
+
+      if (this.isDrawing) {
+        this.isAnnotationsDisplayed = true
+      }
+    },
+
+    isTyping () {
+      if (this.isTyping) {
+        this.isAnnotationsDisplayed = true
+      }
     },
 
     isOrdering () {
@@ -1617,6 +1653,13 @@ export default {
       this.$nextTick(() => {
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
       })
+    },
+
+    isAnnotationsDisplayed () {
+      this.previewViewer.resetZoom()
+      if (!this.isAnnotationsDisplayed) {
+        this.isDrawing = false
+      }
     }
   }
 }

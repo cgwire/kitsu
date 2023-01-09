@@ -138,7 +138,7 @@ export default {
   },
 
   deleteAllTasks (projectId, taskTypeId, taskIds) {
-    if (taskIds.length > 0) {
+    if (taskIds && taskIds.length > 0) {
       return client.ppost(
         `/api/actions/projects/${projectId}/delete-tasks`,
         taskIds
@@ -214,11 +214,10 @@ export default {
     )
   },
 
-  unassignTasks (selectedTaskIds, callback) {
-    client.put(
+  unassignTasks (selectedTaskIds) {
+    return client.pput(
       '/api/actions/tasks/clear-assignation',
-      { task_ids: selectedTaskIds },
-      callback
+      { task_ids: selectedTaskIds }
     )
   },
 

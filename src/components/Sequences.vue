@@ -428,7 +428,7 @@ export default {
       'changeEpisodeSort',
       'clearSelectedEpisodes',
       'commentTaskWithPreview',
-      'deleteAllEpisodeTasks',
+      'deleteAllTasks',
       'deleteEpisode',
       'deleteMetadataDescriptor',
       'editEpisode',

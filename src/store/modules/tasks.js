@@ -262,7 +262,10 @@ const actions = {
       })
   },
 
-  createTasks ({ commit, state }, payload) {
+  createTasks ({ commit, state, rootGetters }, payload) {
+    const production = rootGetters.currentProduction
+    const taskStatusMap = rootGetters.taskStatusMap
+    const taskTypeMap = rootGetters.taskTypeMap
     let entityIds = []
     if (payload.selectionOnly) {
       if (payload.type === 'shots') {
@@ -284,6 +287,17 @@ const actions = {
       entityIds
     }
     return tasksApi.createTasks(data)
+       .then(tasks => {
+          commit(
+            CREATE_TASKS_END,
+            { tasks, production, taskStatusMap, taskTypeMap }
+          )
+          return Promise.resolve(tasks)
+        })
+        .catch(err => {
+          console.error(err)
+          return Promise.resolve([])
+        })
   },
 
   createSelectedTasks (
@@ -670,12 +684,13 @@ const actions = {
     })
   },
 
-  unassignSelectedTasks ({ commit, state }, { personId, callback }) {
+  unassignSelectedTasks ({ commit, state }) {
     const selectedTaskIds = Array.from(state.selectedTasks.keys())
-    tasksApi.unassignTasks(selectedTaskIds, (err) => {
-      if (!err) commit(UNASSIGN_TASKS, selectedTaskIds)
-      if (callback) callback(err)
-    })
+    return tasksApi.unassignTasks(selectedTaskIds)
+      .then(() => {
+        commit(UNASSIGN_TASKS, selectedTaskIds)
+        return Promise.resolve(selectedTaskIds)
+      })
   },
 
   unassignPersonFromTask ({ commit, state }, { task, person }) {

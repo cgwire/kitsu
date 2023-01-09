@@ -1,5 +1,5 @@
 <template>
-<div class="columns fixed-page asset">
+<div class="columns fixed-page asset xyz-in" xyz="fade">
   <div class="page column main-column">
     <div class="page-header flexrow">
       <!--router-link
