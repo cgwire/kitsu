@@ -1,4 +1,5 @@
 import client from '@/store/api/client'
+import crisp from '@/lib/crisp'
 import {
   USER_LOGIN,
 
@@ -49,20 +50,9 @@ const actions = {
     }
   },
 
-  toggleSupportChat ({ commit, state }) {
-    commit(TOGGLE_SUPPORT_CHAT)
-    const crispEls = document.getElementsByClassName('crisp-client')
-    if (crispEls[0]) {
-      const crispEl = crispEls[0]
-      if (state.isSupportChat) {
-        crispEl.style.display = ''
-      } else {
-        crispEl.style.display = 'none'
-      }
-    }
-    if (localStorage) {
-      localStorage.setItem('support-chat', state.isSupportChat)
-    }
+  setSupportChat ({ commit, state }, isSupportChat) {
+    commit(TOGGLE_SUPPORT_CHAT, isSupportChat)
+    crisp.setChatVisibilty(isSupportChat)
   },
 
   toggleSidebar ({ commit, state }) {
@@ -91,8 +81,8 @@ const mutations = {
     state.isDarkTheme = !state.isDarkTheme
   },
 
-  [TOGGLE_SUPPORT_CHAT] (state) {
-    state.isSupportChat = !state.isSupportChat
+  [TOGGLE_SUPPORT_CHAT] (state, isSupportChat) {
+    state.isSupportChat = isSupportChat
   },
 
   [TOGGLE_SIDEBAR] (state) {

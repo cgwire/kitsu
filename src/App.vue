@@ -23,6 +23,7 @@ import { mapGetters, mapActions } from 'vuex'
 import PreviewModal from '@/components/modals/PreviewModal'
 import Spinner from '@/components/widgets/Spinner'
 import crisp from '@/lib/crisp'
+import localPreferences from '@/lib/preferences'
 
 export default {
   name: 'app',
@@ -68,7 +69,9 @@ export default {
       document.documentElement.style.background = '#FFF'
       document.body.style.background = '#FFF'
     }
-    crisp.init()
+    let supportChat = localPreferences.getBoolPreference('support:show', true)
+    this.setSupportChat(supportChat)
+    crisp.init(supportChat)
   },
 
   metaInfo: {
@@ -97,7 +100,8 @@ export default {
       'loadTaskStatus',
       'loadTaskType',
       'refreshMetadataDescriptor',
-      'removeAsset'
+      'removeAsset',
+      'setSupportChat'
     ]),
 
     onAssignation (eventData, assign = true) {

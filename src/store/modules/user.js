@@ -181,7 +181,7 @@ const actions = {
     }
   },
 
-  changeUserPassword ({ commit, state }, payload) {
+  changeUserPassword ({ commit }, payload) {
     commit(USER_CHANGE_PASSWORD_LOADING)
     peopleApi.changePassword(payload.form, (err) => {
       if (err) {
@@ -193,11 +193,11 @@ const actions = {
     })
   },
 
-  preEnableTOTP ({ commit, state }) {
+  preEnableTOTP ({ state }) {
     return peopleApi.preEnableTOTP()
   },
 
-  enableTOTP ({ commit, state }, totp) {
+  enableTOTP ({ commit }, totp) {
     return peopleApi.enableTOTP(totp).then((OTPRecoveryCodes) => {
       commit(USER_ENABLE_TOTP_SUCCESS)
       return Promise.resolve(OTPRecoveryCodes)
