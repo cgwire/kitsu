@@ -310,10 +310,6 @@ export default {
           { label: this.$t('main.all_assets'), value: 'all' },
           { label: 'Main Pack', value: 'main' }
         ].concat(this.episodeOptions)
-      } else if (['shots'].includes(this.currentProjectSection)) {
-        return [
-          { label: this.$t('main.all_shots'), value: 'all' }
-        ].concat(this.episodeOptions)
       } else if (['playlists'].includes(this.currentProjectSection)) {
         return [
           { label: this.$t('main.all_assets'), value: 'all' },
