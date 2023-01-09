@@ -15,38 +15,43 @@
   >
     <div
       class="flexrow-item for-client"
-      v-if="playlist && playlist.for_client"
+      v-if="playlist && playlist.for_client && !isCurrentUserClient"
     >
       {{ $t('playlists.client_playlist') }}
     </div>
     <span class="flexrow-item playlist-name">
       {{ playlist.name }}
     </span>
+    <span
+      class="flexrow-item time-indicator"
+      :title="$t('playlists.actions.entity_index')"
+    >
+      {{ entityList.length > 0 ? playingEntityIndex + 1 : 0 }}
+    </span>
+    <span class="flexrow-item time-indicator">
+    /
+    </span>
+    <span
+      class="flexrow-item time-indicator mr1"
+      :title="$t('playlists.actions.entities_number')"
+    >
+      {{ entityList.length }}
+    </span>
+
     <button-simple
-      @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
-      :class="{
-        'playlist-button': true,
-        'topbar-button': true,
-        'flexrow-item': true,
-        active: isAnnotationsDisplayed
-      }"
-      icon="pen"
-      :title="$t('playlists.actions.toggle_annotations')"
-      v-if="isCurrentUserManager && !isAddingEntity"
+      class="button playlist-button flexrow-item"
+      @click="onPlayPreviousEntityClicked"
+      :title="$t('playlists.actions.previous_shot')"
+      icon="back"
     />
     <button-simple
-      @click="isLaserModeOn = !isLaserModeOn"
-      :class="{
-        'playlist-button': true,
-        'topbar-button': true,
-        'flexrow-item': true,
-        active: isLaserModeOn
-      }"
-      class="playlist-button topbar-button flexrow-item"
-      icon="laser"
-      :title="$t('playlists.actions.toggle_annotations')"
-      v-if="isCurrentUserManager && !isAddingEntity"
+      class="playlist-button flexrow-item"
+      @click="onPlayNextEntityClicked"
+      :title="$t('playlists.actions.next_shot')"
+      icon="forward"
     />
+
+    <div class="filler"></div>
     <preview-room
       :ref="previewRoomRef"
       :roomId="isValidRoomId(playlist.id) ? playlist.id : ''"
@@ -54,7 +59,6 @@
       :leaveRoom="leaveRoom"
       v-if="isValidRoomId(playlist.id)"
     />
-    <div class="filler"></div>
     <button-simple
       @click="$emit('show-add-entities')"
       class="playlist-button topbar-button flexrow-item"
@@ -324,38 +328,31 @@
         v-else
       />
     </div>
-    <div class="separator"></div>
 
-    <button-simple
-      class="button playlist-button flexrow-item"
-      @click="onPlayPreviousEntityClicked"
-      :title="$t('playlists.actions.previous_shot')"
-      icon="back"
-    />
-    <button-simple
-      class="playlist-button flexrow-item"
-      @click="onPlayNextEntityClicked"
-      :title="$t('playlists.actions.next_shot')"
-      icon="forward"
-    />
+    <div v-if="isCurrentPreviewMovie">
+      <span
+        class="flexrow-item time-indicator is-hidden-desktop"
+        :title="$t('playlists.actions.current_time')"
+      >
+        {{ currentTime }}
+      </span>
+      <span class="flexrow-item time-indicator is-hidden-desktop">
+      /
+      </span>
+      <span
+        class="flexrow-item time-indicator is-hidden-desktop"
+        :title="$t('playlists.actions.max_duration')"
+      >
+        {{ maxDuration }}
+      </span>
+      <span
+        class="flexrow-item time-indicator mr1"
+        :title="$t('playlists.actions.frame_number')"
+      >
+        ({{ currentFrame }}&nbsp;/&nbsp;{{ (nbFrames + '').padStart(3, '0') }})
+      </span>
+    </div>
     <div class="separator"></div>
-    <span
-      class="flexrow-item time-indicator"
-      :title="$t('playlists.actions.entity_index')"
-    >
-      {{ entityList.length > 0 ? playingEntityIndex + 1 : 0 }}
-    </span>
-    <span class="flexrow-item time-indicator">
-    /
-    </span>
-    <span
-      class="flexrow-item time-indicator mr1"
-      :title="$t('playlists.actions.entities_number')"
-    >
-      {{ entityList.length }}
-    </span>
-
-    <div class="separator ml1"></div>
     <template v-if="isCurrentPreviewPicture">
       {{ framesSeenOfPicture }} /
       <input
@@ -366,7 +363,6 @@
         v-model="framesPerImage[playingEntityIndex]"
       >
     </template>
-    <div class="separator" v-if="isCurrentPreviewPicture"></div>
 
     <div
       class="flexrow flexrow-item"
@@ -403,14 +399,35 @@
     </div>
 
     <div
-      class="flexrow flexrow-item"
+      class="flexrow flexrow-item mr0"
       v-if="isCurrentPreviewMovie"
     >
+      <button-simple
+        class="button playlist-button flexrow-item"
+        :active="isRepeating"
+        :title="$t('playlists.actions.looping')"
+        icon="repeat"
+        @click="onRepeatClicked"
+      />
+      <button-simple
+        class="playlist-button flexrow-item"
+        :title="$t('playlists.actions.' + (isHd ? 'switch_ld' : 'switch_hd'))"
+        :text="isHd ? 'HD' : 'LD'"
+        @click="isHd = !isHd"
+        v-if="isCurrentPreviewMovie"
+      />
       <button-simple
         class="button playlist-button flexrow-item"
         @click="onSpeedClicked"
         :title="$t('playlists.actions.speed')"
         :text="speedTextMap[speed - 1]"
+      />
+      <button-simple
+        class="button playlist-button flexrow-item mr0"
+        :active="isShowAnnotationsWhilePlaying"
+        :title="$t('playlists.actions.toggle_playing_annotations')"
+        icon="triangle"
+        @click="isShowAnnotationsWhilePlaying = !isShowAnnotationsWhilePlaying"
       />
       <button-simple
         class="flexrow-item playlist-button"
@@ -426,14 +443,6 @@
         @click="onToggleSoundClicked"
         v-else
       />
-
-      <button-simple
-        class="button playlist-button flexrow-item"
-        :active="isRepeating"
-        :title="$t('playlists.actions.looping')"
-        icon="repeat"
-        @click="onRepeatClicked"
-      />
       <button-simple
         class="button playlist-button flexrow-item"
         :active="isWaveformDisplayed"
@@ -441,36 +450,8 @@
         icon="music"
         @click="isWaveformDisplayed = !isWaveformDisplayed"
       />
-      <button-simple
-        class="button playlist-button flexrow-item"
-        :active="isShowAnnotationsWhilePlaying"
-        :title="$t('playlists.actions.toggle_playing_annotations')"
-        icon="triangle"
-        @click="isShowAnnotationsWhilePlaying = !isShowAnnotationsWhilePlaying"
-      />
 
-      <span
-        class="flexrow-item time-indicator is-hidden-desktop"
-        :title="$t('playlists.actions.current_time')"
-      >
-        {{ currentTime }}
-      </span>
-      <span class="flexrow-item time-indicator is-hidden-desktop">
-      /
-      </span>
-      <span
-        class="flexrow-item time-indicator is-hidden-desktop"
-        :title="$t('playlists.actions.max_duration')"
-      >
-        {{ maxDuration }}
-      </span>
-      <span
-        class="flexrow-item time-indicator mr1"
-        :title="$t('playlists.actions.frame_number')"
-      >
-        ({{ currentFrame }}&nbsp;/&nbsp;{{ (nbFrames + '').padStart(3, '0') }})
-      </span>
-      <button-simple
+      <!--button-simple
         class="button playlist-button flexrow-item"
         @click="onPreviousFrameClicked"
         :title="$t('playlists.actions.previous_frame')"
@@ -481,9 +462,17 @@
         @click="onNextFrameClicked"
         :title="$t('playlists.actions.next_frame')"
         icon="right"
-      />
+      /-->
     </div>
 
+    <div class="separator"></div>
+    <button-simple
+      class="playlist-button flexrow-item"
+      :title="$t('playlists.actions.change_task_type')"
+      icon="layers"
+      @click="showTaskTypeModal"
+      v-if="!tempMode"
+    />
     <div
       class="flexrow flexrow-item comparison-buttons"
       v-if="isCurrentPreviewMovie || isCurrentPreviewPicture"
@@ -570,7 +559,7 @@
         class="separator"
         v-if="isCurrentUserManager && tempMode"
       ></div>
-      <button-simple
+      <!--button-simple
         class="playlist-button flexrow-item"
         icon="undo"
         :title="$t('playlists.actions.annotation_undo')"
@@ -582,8 +571,18 @@
         :title="$t('playlists.actions.annotation_redo')"
         icon="redo"
         @click="redoLastAction"
+      /-->
+      <button-simple
+        @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
+        :class="{
+          'playlist-button': true,
+          'flexrow-item': true,
+          active: isAnnotationsDisplayed
+        }"
+        icon="pen"
+        :title="$t('playlists.actions.toggle_annotations')"
+        v-if="isCurrentUserManager && !isAddingEntity"
       />
-
       <transition name="slide">
         <div
           class="annotation-tools"
@@ -640,6 +639,17 @@
         icon="pencil"
       />
       <button-simple
+        @click="isLaserModeOn = !isLaserModeOn"
+        :class="{
+          'playlist-button': true,
+          'flexrow-item': true,
+          active: isLaserModeOn
+        }"
+        icon="laser"
+        :title="$t('playlists.actions.toggle_laser')"
+        v-if="isCurrentUserManager && !isAddingEntity"
+      />
+      <button-simple
         :class="{
           'playlist-button': true,
           'flexrow-item': true,
@@ -659,13 +669,6 @@
     </div>
     <div class="separator"></div>
     <button-simple
-      class="playlist-button flexrow-item"
-      :title="$t('playlists.actions.change_task_type')"
-      icon="layers"
-      @click="showTaskTypeModal"
-      v-if="!tempMode"
-    />
-    <button-simple
       class="button playlist-button flexrow-item"
       :title="$t('playlists.actions.comments')"
       @click="onCommentClicked"
@@ -677,14 +680,6 @@
       @click="onFilmClicked"
       icon="film"
     />
-    <button-simple
-      class="playlist-button flexrow-item"
-      :title="$t('playlists.actions.' + (isHd ? 'switch_ld' : 'switch_hd'))"
-      :text="isHd ? 'HD' : 'LD'"
-      @click="isHd = !isHd"
-      v-if="isCurrentPreviewMovie"
-    />
-
     <div
       class="flexrow-item playlist-button"
       style="position: relative"

@@ -283,7 +283,6 @@
           </div>
         </div>
 
-        <div class="addition-layer">
         <div
           class="addition-section"
           v-if="(isCurrentUserManager || isCurrentUserSupervisor) && isAddingEntity"
@@ -384,7 +383,6 @@
               </div>
             </div>
           </div>
-        </div>
         </div>
       </div>
     </div>
@@ -1636,9 +1634,5 @@ h2 {
 
 .top-section {
   align-items: flex-start;
-}
-
-.addition-layer {
-  height: calc(100% - 530px);
 }
 </style>
