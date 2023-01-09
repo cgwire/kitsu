@@ -64,6 +64,7 @@
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
+import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
@@ -118,6 +119,8 @@ export default {
   },
 
   mounted () {
+    const mode = preferences.getPreference('stats:episode-mode') || 'retakes'
+    this.dataMode = mode
     this.setDefaultSearchText()
     this.setDefaultListScrollPosition()
     this.isLoading = true
@@ -250,13 +253,17 @@ export default {
   },
 
   watch: {
-    displayedEpisodes () {
-    },
-
     currentProduction () {
       this.$refs['episode-search-field'].setValue('')
       this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
       this.reset()
+    },
+
+    displayedEpisodes () {
+    },
+
+    dataMode () {
+      preferences.setPreference('stats:episode-mode', this.dataMode)
     }
   },
 
