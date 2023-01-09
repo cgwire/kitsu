@@ -705,6 +705,7 @@ export default {
       switch_ld: 'Switch to low definition',
       switch_hd: 'Switch to high definition',
       toggle_annotations: 'Show/Hide annotations while playing movies',
+      toggle_laser: 'Enable/Disable drawing laser mode',
       toggle_playing_annotations: 'Show/Hide annotations while playing movies',
       toggle_waveform: 'Show/Hide movie waveform'
     }
