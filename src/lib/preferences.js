@@ -7,8 +7,12 @@ export default {
     return localStorage.getItem(key)
   },
 
-  getBoolPreference (key) {
+  getBoolPreference (key, defvalue = true) {
     const item = this.getPreference(key)
     return item === 'true'
+      ? true
+      : item === 'undefined'
+        ? defvalue
+        : false
   }
 }

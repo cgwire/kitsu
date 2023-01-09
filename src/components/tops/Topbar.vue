@@ -136,7 +136,7 @@
             {{ $t("main.white_theme")}}
           </span>
         </li>
-        <li @click="toggleSupportChat">
+        <li @click="setSupportChat(!isSupportChat)">
           <span v-if="isSupportChat">
             {{ $t("main.hide_support_chat")}}
           </span>
@@ -210,6 +210,7 @@ import {
   ZapIcon
 } from 'vue-feather-icons'
 
+import localPreferences from '@/lib/preferences'
 import GlobalSearchField from '@/components/tops/GlobalSearchField'
 import NotificationBell from '@/components/widgets/NotificationBell'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
@@ -491,8 +492,8 @@ export default {
       'logout',
       'setProduction',
       'setCurrentEpisode',
+      'setSupportChat',
       'toggleDarkTheme',
-      'toggleSupportChat',
       'toggleSidebar',
       'toggleUserMenu'
     ]),
@@ -766,6 +767,10 @@ export default {
 
     currentSectionOption () {
       this.clearSelectedTasks()
+    },
+
+    isSupportChat () {
+      localPreferences.setPreference('support:show', this.isSupportChat)
     }
   },
 
