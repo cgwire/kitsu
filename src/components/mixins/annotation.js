@@ -681,6 +681,11 @@ export const annotationMixin = {
         width: 100,
         height: 100
       })
+      if (!this.fabricCanvas.freeDrawingBrush) {
+        this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
+          this.fabricCanvas
+        )
+      }
       this.configureCanvas()
       return this.fabricCanvas
     },
