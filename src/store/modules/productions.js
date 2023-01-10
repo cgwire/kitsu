@@ -1,6 +1,9 @@
 import Vue from 'vue/dist/vue'
 import productionsApi from '@/store/api/productions'
-import { sortProductions, sortByName } from '@/lib/sorting'
+import {
+  sortProductions,
+  sortByName
+} from '@/lib/sorting'
 import {
   addToIdList,
   removeFromIdList,
