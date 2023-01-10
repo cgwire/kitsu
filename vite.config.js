@@ -9,6 +9,10 @@ export default defineConfig({
     vue()
     //, eslintPlugin()
   ],
+  target: 'es2015',
+  build: {
+    minify: true
+  },
   resolve: {
     vue: 'vue/dist/vue.esm.js',
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],

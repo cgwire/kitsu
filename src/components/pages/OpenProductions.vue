@@ -25,7 +25,6 @@
       class="open-productions-box"
       v-if="!isOpenProductionsLoading && openProductions.length > 0"
     >
-      <img src="">
       <div
         :class="{
           'open-productions-list': true,

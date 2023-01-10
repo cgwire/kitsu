@@ -170,9 +170,8 @@
           class="flexrow-item time-indicator"
           v-if="!light || fullScreen"
         >
-           {{ (nbFrames + '').padStart(3, '0') }}
+           {{ (nbFrames + '').padStart(3, '0') }})
         </span>
-          )
       </div>
 
       <div class="flexrow flexrow-item">
