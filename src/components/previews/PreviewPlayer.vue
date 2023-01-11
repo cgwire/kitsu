@@ -957,6 +957,11 @@ export default {
         width: width,
         height: height
       })
+      if (!this.fabricCanvas.freeDrawingBrush) {
+        this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
+          this.fabricCanvas
+        )
+      }
       this.configureCanvas()
     },
 
