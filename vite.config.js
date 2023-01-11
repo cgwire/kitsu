@@ -11,7 +11,8 @@ export default defineConfig({
   ],
   target: 'es2015',
   build: {
-    minify: true
+    minify: true,
+    sourcemap: true
   },
   resolve: {
     vue: 'vue/dist/vue.esm.js',
