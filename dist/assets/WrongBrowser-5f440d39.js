@@ -1,0 +1,2 @@
+import{a as t,b as r,n}from"./TaskInfo-395c8571.js";const _={name:"server-down",computed:{...t([])},methods:{...r([])},mounted(){}};var o=function(){var e=this,s=e._self._c;return s("div",{staticClass:"server-down page"},[s("h1",{staticClass:"title"},[e._v(e._s(e.$t("wrong_browser.title")))]),s("p",[e._v(" "+e._s(e.$t("wrong_browser.text"))+" ")])])},a=[],c=n(_,o,a,!1,null,"0a4fbb77",null,null);const m=c.exports;export{m as default};
+//# sourceMappingURL=WrongBrowser-5f440d39.js.map
