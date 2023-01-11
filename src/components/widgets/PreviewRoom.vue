@@ -93,7 +93,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
 .preview-room {
   font-size: 1.5em;
 }
