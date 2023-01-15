@@ -29,7 +29,7 @@
                 "ready_for": "Prêt pour"
             },
             "cancel_text": "Êtes-vous sûr de vouloir archiver {name} ?\n",
-            "delete_for_selection": "Supprimer les {nbSelectedAssets} assets sélectionnés ?",
+            "delete_for_selection": "Supprimmer l'asset sélectionné | Supprimer les {nbSelectedAssets} assets séléctionnés",
             "multiple_delete_error": "Une erreur s'est produite en supprimant l'asset. Il y a probablement des données liées à cet asset. Êtes vous sûr qu'il n'y a plus de tâches liées à cet asset ?",
             "only_current_episode": "Seulement l'épisode courant"
         },
@@ -45,7 +45,7 @@
             "production_title": "Stats types d'assets",
             "fields": {
                 "name": "Nom",
-                "task_types": "Type de tâches"
+                "task_types": "Workflow"
             },
             "include_all": "Inclure tous les types d'asset"
         },
@@ -74,7 +74,7 @@
             "add_attachment": "Ajouter une pièce jointe",
             "add_checklist": "Ajout checklist",
             "add_comment": "Ajouter un commentaire...",
-            "add_preview": "Ajouter un preview",
+            "add_preview": "Ajouter une nouvelle révision à publier",
             "change_preview": "Changer previz",
             "comment_from_client": "Commentaire du client",
             "edit_title": "Modifier le commentaire",
@@ -105,7 +105,7 @@
             "attachments": "Pièces jointes",
             "attachments_to_add": "Fichier à attacher",
             "max_retakes_error": "Vous ne pouvez plus faire de retakes sur cette tâche.",
-            "previews": "Previews",
+            "previews": "Fichiers à publier comme une nouvelle version",
             "selected_files": "Fichiers sélectionnés",
             "no_attachments": "Il n'y a pas de pièces jointes pour ce commentaire."
         },
@@ -116,7 +116,7 @@
             "edit_title": "Modifier une action personnalisée",
             "new_custom_action": "Ajouter une action personnalisée",
             "number": "action pesonnalisée | actions personnalisées",
-            "run_for_selection": "Lancer une action personnalisée pour les tâche sélectionnées",
+            "run_for_selection": "Lancer une action personnalisée pour la tâche sélectionnée | Lancer une action personnalisée pour les {nbSelectedTasks} tâches sélectionnées",
             "title": "Actions",
             "fields": {
                 "name": "Nom",
@@ -206,11 +206,15 @@
             "empty_list_client": "Il n'y a pas d'épisode pour cette production.",
             "new_episode": "Nouvel épisode",
             "number": "épisode | épisodes",
-            "title": "Stats épisodes",
+            "title": "Épisodes",
             "fields": {
                 "name": "Nom",
                 "description": "Description"
-            }
+            },
+            "no_casting": "Le casting de l'épisode est vide.",
+            "restore_error": "Une erreur est survenue en restaurant l'épisode.",
+            "tasks": "Tâches Épisodes",
+            "stats_title": "Statistiques Épisodes"
         },
         "keyboard": {
             "altdown": "Déplace la sélection d'une tâche vers le bas",
@@ -237,11 +241,10 @@
             "forgot_password": "Mot de passe oublié?",
             "login": "Se connecter",
             "login_failed": "La connexion a échoué, vérifiez vos identifiants",
-            "too_many_failed_login_attemps": "Trop d'essais ont échoué, veuillez patienter une minute",
             "login_page": "Annuler",
             "redirecting": "Redirection dans {secondsLeft} secondes...",
             "reset_change_password": "Changer le mot de passe",
-            "reset_change_password_form_failed": "Il y a un problème avec le mot de passe donné. S'il vous plait, verifiez qu'il y a au moins 8 caractèrs et que les deux mots de passe correspondent.",
+            "reset_change_password_form_failed": "Il y a un problème avec le mot de passe donné. S'il vous plait, verifiez qu'il y a moins 7 caractères et que les deux mots de passe correspondent.",
             "reset_change_password_failed": "Le changement de mot de passe a échoué. Recommencez toute la procédure.",
             "reset_change_password_succeed": "Le mot de passe a changé. Revenez à la page de connexion pour vous identifier avec.",
             "reset_change_password_title": "Entrez un nouveau mot de passe",
@@ -253,8 +256,26 @@
             "fields": {
                 "email": "Adresse Mail",
                 "password": "Mot de passe",
-                "password2": "Mot de passe à nouveau"
-            }
+                "password2": "Mot de passe à nouveau",
+                "totp": "TOTP",
+                "email_otp": "OTP via email",
+                "recovery_code": "Code de récupération"
+            },
+            "too_many_failed_login_attemps": "Trop d'échecs de connexion, attendez une minute pour rééssayer.",
+            "verify": "Vérfiez",
+            "wrong_totp": "La vérification TOTP a échoué.",
+            "wrong_email_otp": "La vérification OTP par email a échoué.",
+            "wrong_recovery_code": "La vérification des codes de récupération a échoué.",
+            "information_totp": "Ouvrez l'applcation d'authentification double facteur (TOTP) sur votre mobile pour obtenir le code d'authentification.",
+            "information_email_otp": "Vérifiez vos emails pour votre code d'authentification.",
+            "information_recovery_code": "Si vous n'êtes pas capables d'utiliser l'authentification à double facteur, entrez un de vos codes de récupération pour vérifier votre identité.",
+            "unable_to_verify_totp": "Impossible de vérifier TOTP ?",
+            "unable_to_verify_email_otp": "Impossible de vérifier par email ?",
+            "send_email_otp": "Renvoyer le code OTP par email",
+            "unable_to_verify_recovery_code": "Avez-vous un code de récupération ?",
+            "choose_totp": "Entrez le code d'authentification double facteur via OTP",
+            "choose_email_otp": "Entrez le code d'authentification double facteur via email",
+            "choose_recovery_code": "Utilisez un code de récupération"
         },
         "main": {
             "about": "À propos",
@@ -332,7 +353,7 @@
                 "tab_select_file": "Importer un fichier CSV",
                 "tab_paste_code": "Coller des données CSV",
                 "unknown": "Colonne inconnue",
-                "upload_file": "Parcourir",
+                "upload_file": "Parcourir les fichiers locaux",
                 "options": {
                     "title": "Options",
                     "update": "Mettre à jour les données"
@@ -357,7 +378,7 @@
             "estimation_short": "Ést.",
             "fps": "FPS",
             "frames": "Frames",
-            "man_days": "jour-homme | jour-hommes",
+            "man_days": "jour-homme | jours-homme",
             "select_column": "Sélectionner colonne",
             "show": "Montrer",
             "stick": "Coller",
@@ -371,12 +392,14 @@
             "frame_out": "Frame Out",
             "type": "Type",
             "search": {
-                "type": "Type",
+                "type": "Tapez trois caractères au moins pour faire une recherche",
                 "no_result": "Il n'y a pas de résultat pour cette recherche."
             },
             "hide_support_chat": "Cacher le support",
             "move_action_bar": "Déplacer le panneau d'actions",
-            "show_support_chat": "Montrer le support"
+            "show_support_chat": "Montrer le support",
+            "empty_schedule": "Il n'y a pas de tâches où elles n'ont pas de dates de début.",
+            "all_shots": "Tous les plans"
         },
         "menu": {
             "assign_tasks": "Assigner des tâches",
@@ -422,7 +445,7 @@
             "with_preview": "avec une version",
             "replied_on": "a répondu à un commentaire sur",
             "all_types": "Tous les types de notification",
-            "new_revision": "Nouvelle version",
+            "new_revision": "Nouvelle version publiée",
             "only_assignations": "Seulement les assignations",
             "only_comments": "Seulement les commentaires",
             "only_mentions": "Seulement les mentions",
@@ -431,7 +454,7 @@
         "people": {
             "active": "Présents",
             "active_persons": "présent | présents",
-            "add_member_to_team": "Ajouter un membre à l'équipe: ",
+            "add_member_to_team": "Ajouter un membre à l'équipe",
             "create_invite": "Créer et envoyer une invitation",
             "create_error": "Une erreur est survenue en créant ou modifiant l'utilisateur. Êtes vous sûr qu'il n'y a pas un utilisateur avec un nom ou un email similaire ? Si le problème persiste, contactez notre support pour discuter de ce soucis.",
             "delete_error": "Une erreur est survenue lors de la suppression. Il y a probablement des données liées à elle. Êtes vous sur que cet utilisateur n'a aucune tâche assignée et n'a fait aucun commentaire ?",
@@ -449,7 +472,6 @@
             "team": "Équipe",
             "title": "Employés",
             "unactive": "Absents",
-            "change_password_for": "Changer le mot de passe pour",
             "fields": {
                 "first_name": "Prénom",
                 "last_name": "Nom",
@@ -481,7 +503,11 @@
             },
             "confirm_edit": "Sauvegarder les changement pour cet utilisateur",
             "create": "Créer utilisateur",
-            "user_limit_error": "Vous avez atteint votre limite utilisateur. Contactez notre équipe pour augmenter votre plan."
+            "user_limit_error": "Vous avez atteint votre limite utilisateur. Contactez notre équipe pour augmenter votre plan.",
+            "change_password_for": "Changer le mot de passe pour",
+            "change_password_error": "Un erreur est survenue en changeant de mot de passe. S'il vous plait  vérifiez le nouveau mot de passe.",
+            "disable_2FA": "Désactivez l'authentification double facteur",
+            "disable_2FA_error": "Un erreur est survenue en désactivant l'authentification double facteur."
         },
         "playlists": {
             "add_assets": "Ajouter des assets",
@@ -497,7 +523,7 @@
             "build_mp4": "Construire .mp4 (beta)",
             "building": "En cours...",
             "client_playlist": "Playlist Client",
-            "create_for_selection": "Créer une playlist pour la sélection courante",
+            "create_for_selection": "Créer une playlist pour les tâches sélectionnées",
             "create_title": "Créer playlist",
             "created_at": "Créé le :",
             "delete_text": "Êtes vous sûr de vouloir supprimer {name} de la base de données ?",
@@ -582,7 +608,8 @@
                 "toggle_playing_annotations": "Montrer/cacher les annotations en jouant le film",
                 "toggle_waveform": "Montrer/cacher la forme du son",
                 "annotation_erase": "Supprimmer l'annotation",
-                "toggle_annotations": "Montrer / Cacher l'annotation en jouant le film"
+                "toggle_annotations": "Montrer / Cacher l'annotation en jouant le film",
+                "toggle_laser": "Activer/Désactiver le mode laser"
             },
             "download_csv": "Télécharger .csv",
             "filter_task_type": "Filtrer par type de tâche",
@@ -603,7 +630,7 @@
                 "empty": "Vous n'avez pas de productions ouvertes. Voulez vous en créer une nouvelle ?",
                 "no_task": "Vous n'avez pas de tâches assignées. Demandez à votre superviseur ce que vous pouvez faire !",
                 "no_prod_for_client": "Vous n'avez accès à aucune production. Contactez votre prestataire pour obtenir un accès",
-                "title": "Productions en cours",
+                "title": "Mes productions",
                 "welcome": "Bienvenue sur Kitsu"
             },
             "fields": {
@@ -714,7 +741,7 @@
                 "catalog": "Catalogue",
                 "metaverse": "Métavers",
                 "motion_design": "Motion Design",
-                "nft": "NFT",
+                "nft": "Collection NFT",
                 "stop_motion": "Stop Motion",
                 "vfx": "VFX",
                 "video_game": "Jeux vidéos",
@@ -739,7 +766,7 @@
                 "button": "Changez de mot de passe",
                 "error": "Une erreur s'est produite lors du changement de mot de passe. Veuillez vérifier votre mot de pass actuel.",
                 "success": "Votre mot de passe a été changé avec succès !",
-                "unvalid": "Les nouveaux mots de passe sont différents ou votre mot de passe est trop court (8 caractères minimum)."
+                "unvalid": "Les nouveaux mots de passe sont différents ou votre mot de passe est trop court (7 caractères minimum)."
             },
             "save": {
                 "button": "Sauvegardez vos changements",
@@ -750,7 +777,35 @@
             "webhook_error": "La webhook ne correspond pas à un webhook Mattermost",
             "notifications_discord_enabled": "Activation des notifications DIscord",
             "notifications_discord_user": "Nom d'utilisateur Discord",
-            "clear_avatar": "Effacer avatar"
+            "clear_avatar": "Effacer avatar",
+            "two_factor_authentication": {
+                "title": "Authentification double facteur",
+                "scan_qrcode": "Scannez le code QR dans votre application TOTP.",
+                "otp_secret": "Secret OPT",
+                "totp": {
+                    "button_enable": "Activer TOTP",
+                    "button_disable": "Désactiver TOTP",
+                    "button_validate_disable": "Valider et désactiver TOTP",
+                    "button_validate": "Valider et activer TOTP",
+                    "error_enable": "Une erreur est survenue en activant TOTP.",
+                    "error_disable": "Une erreur est survenue en désactivant TOTP."
+                },
+                "email_otp": {
+                    "button_enable": "Activez l'authentification OTP par email",
+                    "button_disable": "Désactivez l'authentification OTP par email",
+                    "button_validate_disable": "Validez et désactivez l'authentification OTP par email",
+                    "button_validate": "Valider et activez l'authentification OTP par email",
+                    "error_enable": "Un erreur est survenue en activant l'OTP par email.",
+                    "error_disable": "Une erreur est survenue en désactivant l'OTP par email."
+                },
+                "recovery_codes": {
+                    "title": "Codes de récupération",
+                    "button_new": "Obtenir les nouveaux codes de récupération",
+                    "button_validate": "Validez et obtenez les nouveaux codes de récupération",
+                    "warning": "Conservez vos codes de récupérations dans un endroit sûr. Ces codes sont le seul moyer de restaurer votre compte si vous perdez vos mot de passe et vos seconds facteurs. Si vous ne pouvez pas trouvez ces codes, vous perdrez l'accès du compte.",
+                    "error_new": "Une erreur est survenue en générant les nouveaux codes de récupération."
+                }
+            }
         },
         "settings": {
             "change_logo": "Changer logo",
@@ -827,16 +882,19 @@
             "empty_list_client": "Il n'y pas de séquences dans cette production.",
             "new_sequence": "Nouvelle séquence",
             "number": "séquence | séquences",
-            "title": "Stats séquences",
+            "title": "Séquences",
             "fields": {
                 "name": "Nom",
                 "description": "Description"
-            }
+            },
+            "no_casting": "Le casting de la séquence est vide.",
+            "stats_title": "Statistiques Séquences",
+            "tasks": "Tâches"
         },
         "schedule": {
             "title": "Planning",
             "title_main": "Planning principal",
-            "overall_man_days": "Jours Homme",
+            "overall_man_days": "Jours-Homme",
             "md": "jh",
             "zoom_level": "Niveau de zoom",
             "milestone": {
@@ -919,7 +977,7 @@
                 "resolution": "Résolution"
             },
             "cancel_text": "Êtes-vous sûr de vouloir archiver {name} ?",
-            "delete_for_selection": "Supprimer {nbSelectedShots} selected shots :",
+            "delete_for_selection": "Supprimmer le plan sélectionné | Supprimer les {nbSelectedShots} plans séléctionnés",
             "multiple_delete_error": "Une erreur est survenue en supprimmant le plan. Il y a probablement des données liées au plan. Êtes vous sûr qu'il n'y a pas de tâches liées au plan sélectionné ?"
         },
         "server_down": {
@@ -938,17 +996,17 @@
             "status": "Statut"
         },
         "tasks": {
-            "add_preview": "Attacher une préviz",
+            "add_preview": "Attacher des fichiers pour une nouvelle version",
             "add_preview_error": "Une erreur est survenue en ajoutant la preview.",
             "assign": "Assigner une tâche | Assigner {nbSelectedTasks} tâches",
             "back_to_list": "Retour à la liste",
             "bigger": "Élargir le panneau de tâche",
             "change_status_to": "Changer le statut de la tâche à : ",
             "change_preview": "Modifier preview",
-            "change_priority": "Changer le priorité",
-            "clear_assignations": "effacer les assignations",
+            "change_priority": "Changer le priorité de la tâche sélectionnée | Changer la priorité des {nbSelectedTasks} sélectionnées",
+            "clear_assignations": "désassigner de la sélection",
             "comment_image": "Attacher un fichier au commentaire",
-            "create_for_selection": "Créer une tâche pour chaque cellule vide\n",
+            "create_for_selection": "Créer une tâche pour chaque cellule vide",
             "create_tasks": "Ajouter des tâches",
             "create_tasks_shot": "Ajouter des tâches pour les plans affichés",
             "create_tasks_shot_explaination": "Vous allez créer une nouvelle tâche pour chaque plan du projet. Est-ce que vous voulez continuer ?",
@@ -987,7 +1045,7 @@
             "set_preview": "Utilisez cette previz comme vignette",
             "set_preview_error": "Une erreur est survenue en utilisant cette vignette.",
             "set_preview_done": "Cette previz sert de vignette à l'entité courante.",
-            "select_preview_file": "Choisissez un fichier de prévisualisation sur votre disque dur:",
+            "select_preview_file": "Choisissez un fichier de prévisualisation sur votre disque dur pour en faire une nouvelle version :",
             "show_assignations": "Voir assignations",
             "show_infos": "Montrer informations additionnelles",
             "subscribe_notifications": "S'abonner aux notifications",
@@ -1052,7 +1110,7 @@
             "add_revision_confirm": "Ajouter des fichiers à publier",
             "confirm_attachments": "Ajouter des fichiers en pièces jointes",
             "change_status": "Changer le statut",
-            "clear_own_assignations": "Retirer vos assignations",
+            "clear_own_assignations": "Effacer vos assignations",
             "publish": "Publier",
             "all": "Toutes les tâches",
             "assign_explaination": "Sélectionnez une personne à assigner..",
@@ -1072,7 +1130,14 @@
             "late": "Est en retard",
             "nb_selected_tasks": "{nbSelectedTasks} tâche sélectionnée | {nbSelectedTasks} tâches sélectionnées",
             "set_thumbnails_from_tasks": "Positionner le dernier preview de la tâche sélectionnée comme vignette | Positionner le dernier preview des tâches sélectionnées comme vignette",
-            "to_myself": "À moi-même"
+            "to_myself": "À moi-même",
+            "create_tasks_episode": "Ajouter des tâches pour l'épisode courant",
+            "create_tasks_episode_explaination": "Vous allez créer une nouvelle tâche pour chaque épisode du projet courant pour le type de tâche séléctionné. Est-ce que vous voulez continuer ?",
+            "create_tasks_episode_failed": "Une erreur serveur est survenue en procédant aux créations.",
+            "clear_all_assignations": "tout désassigner",
+            "create_tasks_sequence": "Ajouter des tâches pour les séquences courantes",
+            "create_tasks_sequence_explaination": "Vous allez créer une nouvelle tâche pour chaque séquence du projet courant pour le type de tâche donné. Est-ce que vous voulez continuer ?",
+            "create_tasks_sequence_failed": "Une erreur serveur est survenue en procédant aux créations."
         },
         "timesheets": {
             "detail_level": "Niveau de détail",
@@ -1131,13 +1196,13 @@
             "edit_error": "Une erreur est survenue en sauvegardant ce montage. Êtes vous sûr qu'il n'y a aucun montage avec un nom similaire ?",
             "delete_text": "Êtes vous sûr de vouloir supprimmer {name} de la base de données ?",
             "delete_error": "Une erreur est survenue en supprimant ce montage, il y a encore probalement des données liées.",
-            "delete_for_selection": "Supprimer pour la sélection",
+            "delete_for_selection": "Supprimer le montage sélectionné | Supprimer les {nbSelectedEdits}  montages sélectionnés",
             "edit_title": "Modifier le montage",
             "empty_list": "Il n'y a pas de montage pour cette production. Voulez-vous en créer ?",
             "empty_list_client": "Vide",
             "new_edit": "Nouveau montage",
             "number": "montage | montages",
-            "title": "Montage",
+            "title": "Montages",
             "fields": {
                 "name": "Nom",
                 "episode": "Épisode",
