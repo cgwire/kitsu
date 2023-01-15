@@ -1101,14 +1101,11 @@ describe('Assets store', () => {
           estimation: 200
         }]
       }
-
-      tasksStore.mutations.LOAD_TASK_STATUSES_END(tasksStore.state, [
-        {
-          id: 'todo',
-          short_name: 'TODO',
-          is_default: true
+      tasksStore.state.taskStatusMap = new Map(Object.entries({
+        todo: {
+          short_name: 'TODO'
         }
-      ])
+      }))
       store.mutations.ADD_ASSET(state, {
         taskTypeMap,
         taskMap,
@@ -1752,15 +1749,22 @@ describe('Assets store', () => {
       const state = {
         assetMap: new Map(Object.entries({
           'asset-id': {
-            validations: new Map()
+            validations: new Map(),
+            tasks: []
           }
         }))
       }
       const tasks = [{
         entity_id: 'asset-id',
         task_type_id: 'task_type_id',
+        task_status_id: 'todo',
         id: 'task-id'
       }]
+      tasksStore.state.taskStatusMap = new Map(Object.entries({
+        todo: {
+          short_name: 'TODO'
+        }
+      }))
       store.mutations.CREATE_TASKS_END(state, { tasks })
       expect(state.assetMap.get('asset-id').validations).toEqual(
         new Map(Object.entries({
