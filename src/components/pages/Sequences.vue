@@ -368,6 +368,7 @@ export default {
       'currentEpisode',
       'currentProduction',
       'displayedSequences',
+      'deleteAllTasks',
       'departments',
       'sequenceMap',
       'sequences',
@@ -604,7 +605,9 @@ export default {
           })
       } else {
         form.project_id = this.currentProduction.id
-        form.episode_id = this.currentEpisode.id
+        if (this.currentEpisode) {
+          form.episode_id = this.currentEpisode.id
+        }
         this.newSequence(form)
           .then(() => {
             this.loading.edit = false

@@ -1,5 +1,5 @@
 <template>
-<div class="columns fixed-page xyz-in" xyz="fade"">
+<div class="columns fixed-page">
   <action-panel />
 
   <div class="column main-column">
