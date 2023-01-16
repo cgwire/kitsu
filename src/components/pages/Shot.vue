@@ -377,7 +377,6 @@ export default {
         this.casting.isError = false
         if (this.currentShot) {
           this.loadShotCasting(this.currentShot)
-            .then(() => this.loadShotCasting(this.currentShot))
             .then(() => {
               this.casting.isLoading = false
             })

@@ -61,7 +61,8 @@ export const getFilledColumns = (entries) => {
         entry.validations
       )
     } else {
-      entry.tasks.forEach((task) => {
+      const tasks = entry.tasks || []
+      tasks.forEach(task => {
         filledColumns[task.task_type_id] = true
       })
     }
