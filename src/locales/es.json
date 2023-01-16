@@ -105,9 +105,9 @@
             "attachments": "Archivos adjuntos",
             "attachments_to_add": "Archivos adjuntos para añadir",
             "max_retakes_error": "Ya no puede retomar esta tarea.",
-            "no_atachments": "Sin archivos adjuntos",
             "previews": "vistas previas",
-            "selected_files": "recursos_seleccionados"
+            "selected_files": "recursos_seleccionados",
+            "no_attachments": "No hay archivos adjuntos para este comentario."
         },
         "custom_actions": {
             "create_error": "Se ha producido un error al guardar esta acción personalizada. ¿Está seguro de que no hay otra acción con el mismo nombre?",
@@ -154,7 +154,9 @@
                 "department": "Departamento",
                 "is_assets_ready": "Los recursos están listos",
                 "assets_ready": "Listo",
-                "assets_not_ready": "No listo"
+                "assets_not_ready": "No listo",
+                "checked": "Comprobado",
+                "not_checked": "Sin comprobar"
             },
             "thumbnails": {
                 "error": "Se ha producido un error al subir las miniaturas",
@@ -186,7 +188,10 @@
                 "status": "Estado",
                 "task_type": "Tipo de tarea",
                 "uploader": "Subido por"
-            }
+            },
+            "nb_selected_assets": "{nbSelectedAssets} activo seleccionado | {nbSelectedAssets} activos seleccionados",
+            "nb_selected_shots": "{nbSelectedShots} toma seleccionada | {nbSelectedShots} tomas seleccionadas",
+            "nb_selected_edits": "{nbSelectedEdits} edición seleccionada | {nbSelectedEdits} ediciones seleccionadas"
         },
         "estimation": {
             "title": "Estimación"
@@ -205,7 +210,11 @@
             "fields": {
                 "name": "denominación",
                 "description": "descripción"
-            }
+            },
+            "no_casting": "La selección de episodios está vacía.",
+            "restore_error": "Se ha producido un error al restaurar el episodio dado.",
+            "tasks": "Tareas de los episodios",
+            "stats_title": "Estadísticas de los episodios"
         },
         "keyboard": {
             "altdown": "Mueve la selección de una tarea hacia abajo",
@@ -235,7 +244,7 @@
             "login_page": "Cancelar",
             "redirecting": "Redirigiendo en {secondsLeft} segundos",
             "reset_change_password": "Cambiar contraseña",
-            "reset_change_password_form_failed": "Hay un problema con la contraseña que dio. Por favor, verifique que tenga al menos 8 caracteres y que ambas contraseñas coincidan.",
+            "reset_change_password_form_failed": "Hay un problema con la contraseña que dio. Por favor, verifique que tenga al menos 7 caracteres y que ambas contraseñas coincidan.",
             "reset_change_password_failed": "Error al cambiar la contraseña. Por favor, reinicie todo el procedimiento de nuevo.",
             "reset_change_password_succeed": "Su contraseña ha sido cambiada con éxito. Por favor, vuelva a la página de inicio de sesión para utilizarlo.",
             "reset_change_password_title": "Introduzca una nueva contraseña",
@@ -247,8 +256,26 @@
             "fields": {
                 "email": "Correo electrónico",
                 "password": "Contraseña",
-                "password2": "Contraseña de nuevo"
-            }
+                "password2": "Contraseña de nuevo",
+                "totp": "TOTP",
+                "email_otp": "OTP por correo electrónico",
+                "recovery_code": "Código de recuperación"
+            },
+            "too_many_failed_login_attemps": "Demasiados intentos fallidos de inicio de sesión. Espera un minuto.",
+            "verify": "Verificar",
+            "wrong_totp": "Se ha producido un error al hacer la verificación TOTP.",
+            "wrong_email_otp": "Se ha producido un error al hacer la verificación OTP por correo electrónico.",
+            "wrong_recovery_code": "Se ha producido un error al hacer la verificación del código de recuperación.",
+            "information_totp": "Abre la aplicación de autenticación de dos factores (TOTP) en el dispositivo móvil para ver el código de autenticación.",
+            "information_email_otp": "Revisa tus correos electrónicos para ver el código de autenticación.",
+            "information_recovery_code": "Introduce uno de los códigos de recuperación para verificar tu identidad si no puedes utilizar ninguna otra autenticación de dos factores.",
+            "unable_to_verify_totp": "¿No puedes hacer la verificación con TOTP?",
+            "unable_to_verify_email_otp": "¿No puedes hacer la verificación con el correo electrónico?",
+            "send_email_otp": "Reenviar OTP por correo electrónico",
+            "unable_to_verify_recovery_code": "¿No tienes un código de recuperación?",
+            "choose_totp": "Introducir código de autenticación de dos factores mediante TOTP",
+            "choose_email_otp": "Introducir código de autenticación de dos factores mediante correo electrónico",
+            "choose_recovery_code": "Utilizar un código de recuperación"
         },
         "main": {
             "about": "Acerca de",
@@ -367,7 +394,12 @@
             "search": {
                 "type": "Tipo",
                 "no_result": "No hay resultados para esta búsqueda."
-            }
+            },
+            "hide_support_chat": "Ocultar chat de asistencia",
+            "move_action_bar": "Mover barra de acción",
+            "show_support_chat": "Mostrar chat de asistencia",
+            "empty_schedule": "No hay tareas o no tienen fechas de inicio.",
+            "all_shots": "Todas las tomas"
         },
         "menu": {
             "assign_tasks": "Asignar tareas",
@@ -375,12 +407,13 @@
             "change_status": "Status de modificación",
             "create_tasks": "Crear tareas",
             "delete_tasks": "Borrar medidas",
-            "generate_playlists": "Generar playlists",
             "run_custom_action": "Ejecutar una acción personalizada",
             "set_estimations": "Fijar estimaciones",
             "delete_assets": "Borrar recursos",
             "delete_shots": "Borrar tomas",
-            "delete_edits": "Elimine las ediciones"
+            "delete_edits": "Elimine las ediciones",
+            "generate_playlist": "Generar una lista de reproducción",
+            "set_thumbnails": "Establecer miniaturas de la última vista previa"
         },
         "news": {
             "all": "Todos",
@@ -469,7 +502,12 @@
                 "supervisor": "Supervisor"
             },
             "confirm_edit": "Guardar cambios para este usuario",
-            "create": "Crear usuario"
+            "create": "Crear usuario",
+            "user_limit_error": "Has alcanzado el límite de usuarios. Ponte en contacto con nuestro equipo para actualizar el plan.",
+            "change_password_for": "Cambiar contraseña para",
+            "change_password_error": "Se ha producido un error al cambiar la contraseña. Verifica la nueva contraseña.",
+            "disable_2FA": "Desactivar 2FA",
+            "disable_2FA_error": "Se ha producido un error al desactivar la autenticación de dos factores."
         },
         "playlists": {
             "add_assets": "Añadir assets",
@@ -568,7 +606,10 @@
                 "switch_hd": "Cambiar a alta definición",
                 "frames_per_picture": "Fotogramas por imagen",
                 "toggle_playing_annotations": "Mostrar/Ocultar las anotaciones durante la reproducción",
-                "toggle_waveform": "Mostrar/Ocultar las ondas de reproducción"
+                "toggle_waveform": "Mostrar/Ocultar las ondas de reproducción",
+                "annotation_erase": "Borrar anotación",
+                "toggle_annotations": "Mostrar u ocultar anotaciones al reproducir películas",
+                "toggle_laser": "Activar o desactivar el modo láser de dibujo"
             },
             "download_csv": "Descargar .csv",
             "filter_task_type": "Filtrado por tipo de tarea",
@@ -725,7 +766,7 @@
                 "button": "Cambiar contraseña",
                 "error": "Se ha producido un error al cambiar la contraseña. Por favor, verifique su contraseña actual.",
                 "success": "Su contraseña ha sido cambiada con éxito!",
-                "unvalid": "La confirmación de su nueva contraseña no coincide o es demasiado corta (se esperan al menos 8 caracteres)."
+                "unvalid": "La confirmación de su nueva contraseña no coincide o es demasiado corta (se esperan al menos 7 caracteres)."
             },
             "save": {
                 "button": "Guardar cambios",
@@ -736,7 +777,35 @@
             "webhook_error": "el webhook mattermost no corresponde a un gancho",
             "notifications_discord_enabled": "Notificaciones de Discord activadas",
             "notifications_discord_user": "Usuario de Discord",
-            "clear_avatar": "Borrar avatar"
+            "clear_avatar": "Borrar avatar",
+            "two_factor_authentication": {
+                "title": "Autenticación de dos factores",
+                "scan_qrcode": "Escanea este código QR en la aplicación TOTP.",
+                "otp_secret": "OTP secreta",
+                "totp": {
+                    "button_enable": "Activar TOTP",
+                    "button_disable": "Desactivar TOTP",
+                    "button_validate_disable": "Validar y desactivar TOTP",
+                    "button_validate": "Validar y activar TOTP",
+                    "error_enable": "Se ha producido un error al activar TOTP.",
+                    "error_disable": "Se ha producido un error al desactivar TOTP."
+                },
+                "email_otp": {
+                    "button_enable": "Activar OTP por correo electrónico",
+                    "button_disable": "Desactivar OTP por correo electrónico",
+                    "button_validate_disable": "Validar y desactivar OTP por correo electrónico",
+                    "button_validate": "Validar y activar OTP por correo electrónico",
+                    "error_enable": "Se ha producido un error al activar OTP por correo electrónico.",
+                    "error_disable": "Se ha producido un error al desactivar OTP por correo electrónico."
+                },
+                "recovery_codes": {
+                    "title": "Códigos de recuperación",
+                    "button_new": "Obtener nuevos códigos de recuperación",
+                    "button_validate": "Validar y obtener nuevos códigos de recuperación",
+                    "warning": "Guarda los códigos de recuperación en un lugar seguro. Estos códigos son el último recurso para acceder a tu cuenta en caso de que pierdas tu contraseña y el segundo factor de autenticación. Perderás el acceso a tu cuenta si no encuentras estos códigos.",
+                    "error_new": "Se ha producido un error al generar nuevos códigos de recuperación"
+                }
+            }
         },
         "settings": {
             "change_logo": "Cambiar logotipo",
@@ -817,7 +886,10 @@
             "fields": {
                 "name": "denominar",
                 "description": "descripción"
-            }
+            },
+            "no_casting": "La selección de secuencias está vacía.",
+            "stats_title": "Estadísticas de secuencia",
+            "tasks": "Tareas"
         },
         "schedule": {
             "title": "Calendario",
@@ -1039,7 +1111,33 @@
             "confirm_attachments": "Añadir archivos como adjuntos",
             "change_status": "Cambiar estado",
             "clear_own_assignations": "Borrar asignaciones propias",
-            "publish": "Publicar"
+            "publish": "Publicar",
+            "all": "Todas las tareas",
+            "assign_explaination": "Seleccionar una persona para asignar...",
+            "change_priority_to": "Nueva prioridad:",
+            "change_task_status": "Cambiar estado de la tarea seleccionada | Cambiar estado de las {nbSelectedTasks} tareas seleccionadas",
+            "due_date": "Estado de la fecha de vencimiento",
+            "due_after_today": "Vencimiento después de hoy",
+            "due_before_today": "Vencimiento antes de hoy",
+            "due_next_week": "Vencimiento para la próxima semana",
+            "due_next_month": "Vencimiento para el próximo mes",
+            "due_previous_week": "Vencimiento para la semana anterior",
+            "due_previous_month": "Vencimiento para el mes anterior",
+            "due_this_month": "Vencimiento para este mes",
+            "estimation_over": "Estimación sobre la duración",
+            "estimation_approval_late": "La fecha de vencimiento es tardía (comentarios)",
+            "estimation_done_late": "La fecha de vencimiento es tardía (hecho)",
+            "late": "Estado tardío",
+            "nb_selected_tasks": "{nbSelectedTasks} tarea seleccionada | {nbSelectedTasks} tareas seleccionadas",
+            "set_thumbnails_from_tasks": "Establecer la última vista previa de la tarea seleccionada como miniatura | Establecer las últimas vistas previas de las tareas seleccionadas como miniaturas",
+            "to_myself": "A mí mismo",
+            "create_tasks_episode": "Añadir tareas para los episodios actuales",
+            "create_tasks_episode_explaination": "Crearás una nueva tarea para cada episodio del proyecto actual para el tipo de tarea dado. ¿Quieres continuar?",
+            "create_tasks_episode_failed": "Se ha producido un error en el servidor al continuar con las creaciones.",
+            "clear_all_assignations": "Desasignar todas",
+            "create_tasks_sequence": "Añadir tareas para las secuencias actuales",
+            "create_tasks_sequence_explaination": "Crearás una nueva tarea para cada secuencia del proyecto actual para el tipo de tarea dado. ¿Quieres continuar?",
+            "create_tasks_sequence_failed": "Se ha producido un error en el servidor al continuar con las creaciones."
         },
         "timesheets": {
             "detail_level": "Nivel de detalle",
