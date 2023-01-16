@@ -218,7 +218,7 @@ const actions = {
   loadSequenceCasting ({ commit, rootGetters }, sequence) {
     if (!sequence) return Promise.resolve({})
     const assetMap = rootGetters.assetMap
-    return breakdownApi.getSequenceCasting(sequence.project_id, sequence.id)
+    return breakdownApi.getSequenceCasting(sequence.production_id, sequence.id)
       .then(casting => {
         commit(LOAD_SEQUENCE_CASTING_END, { sequence, casting, assetMap })
         return Promise.resolve(casting)
@@ -475,11 +475,18 @@ const mutations = {
   },
 
   [LOAD_SEQUENCE_CASTING_END] (state, { sequence, casting }) {
-    const sequenceCasting = []
+    const presenceMap = {}
+    let sequenceCasting = []
     Object.keys(casting).forEach(shotId => {
-      sequenceCasting.concat(casting[shotId])
+      casting[shotId].forEach(asset => {
+        if (!presenceMap[asset.asset_id]) {
+          presenceMap[asset.asset_id] = true
+          asset.name = asset.asset_name || asset.name
+          sequenceCasting.push(asset)
+        }
+      })
     })
-    sequenceCasting.forEach(a => { a.name = a.asset_name || a.name })
+    sequenceCasting = sortAssets(sequenceCasting)
     const castingByType = groupEntitiesByParents(
       sequenceCasting, 'asset_type_name'
     )
