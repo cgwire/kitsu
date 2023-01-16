@@ -20,10 +20,11 @@
 
     <table-metadata-header-menu
       ref="headerMetadataMenu"
+      :is-edit-allowed="isCurrentUserManager"
       :is-sequence-allowed="
         isMetadataColumnEditAllowed(lastMetadaDataHeaderMenuDisplayed)"
       :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
-      @edit-clicked="onSequenceMetadataClicked()"
+      @edit-clicked="onEditMetadataClicked()"
       @delete-clicked="onDeleteMetadataClicked()"
       @sort-by-clicked="onSortByMetadataClicked()"
       @toggle-stick="metadataStickColumnClicked($event)"
