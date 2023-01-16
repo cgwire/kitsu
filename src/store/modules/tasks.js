@@ -13,6 +13,9 @@ import {
   arrayMove,
   removeModelFromList
 } from '@/lib/models'
+import {
+  formatDate
+} from '@/lib/time'
 
 import personStore from '@/store/modules/people'
 import taskTypeStore from '@/store/modules/tasktypes'
@@ -185,6 +188,11 @@ const actions = {
   loadTask ({ commit, state }, { taskId }) {
     return tasksApi.getTask(taskId)
       .then(task => {
+        const currentTask = state.taskMap.get(taskId)
+        if (currentTask && task.updated_at < currentTask.updated_at) {
+          delete task.start_date
+          delete task.due_date
+        }
         commit(LOAD_TASK_END, task)
         return Promise.resolve(task)
       })
@@ -1212,8 +1220,9 @@ const mutations = {
     }
   },
 
-  [UPDATE_TASK] (state, { task, nbAssetsReady }) {
-    task.nb_assets_ready = nbAssetsReady
+  [UPDATE_TASK] (state, { task, nbAssetsReady, updatedAt }) {
+    if (nbAssetsReady) task.nb_assets_ready = nbAssetsReady
+    if (updatedAt) task.updated_at = updatedAt
   },
 
   [EDIT_TASK_DATES] (state, { taskId, data }) {
