@@ -466,6 +466,7 @@ import colors from '@/lib/colors'
 import {
   addBusinessDays,
   daysToMinutes,
+  formatFullDate,
   parseDate
 } from '@/lib/time'
 
@@ -489,6 +490,7 @@ export default {
 
   data () {
     return {
+      currentElement: null,
       isBrowsingX: false,
       isBrowsingY: false,
       isChangeSize: false,
@@ -581,7 +583,8 @@ export default {
     ...mapGetters([
       'isCurrentUserManager',
       'organisation',
-      'milestones'
+      'milestones',
+      'taskMap'
     ]),
 
     currentMilestones () {
@@ -965,7 +968,6 @@ export default {
           if (this.isValidItemDates(newStartDate, newEndDate)) {
             this.currentElement.startDate = newStartDate
             this.currentElement.endDate = newEndDate
-            this.$emit('item-changed', this.currentElement)
           }
         }
       } else {
@@ -981,7 +983,6 @@ export default {
           if (this.isValidItemDates(newStartDate, newEndDate)) {
             this.currentElement.startDate = newStartDate
             this.currentElement.endDate = newEndDate
-            this.$emit('item-changed', this.currentElement)
           }
         }
       }
@@ -1010,7 +1011,7 @@ export default {
         : this.displayedDays[currentIndex]
       if (this.isValidItemDates(newStartDate, this.currentElement.endDate)) {
         this.currentElement.startDate = newStartDate
-        this.$emit('item-changed', this.currentElement)
+        // this.$emit('item-changed', this.currentElement)
       }
     },
 
@@ -1058,7 +1059,7 @@ export default {
         : this.displayedDays[currentIndex]
       if (this.isValidItemDates(this.currentElement.startDate, newEndDate)) {
         this.currentElement.endDate = newEndDate
-        this.$emit('item-changed', this.currentElement)
+        // this.$emit('item-changed', this.currentElement)
       }
     },
 
@@ -1189,11 +1190,15 @@ export default {
 
     stopBrowsing (event) {
       document.body.style.cursor = 'default'
+      if (this.currentElement) {
+        this.$emit('item-changed', this.currentElement)
+      }
       this.isChangeStartDate = false
       this.isChangeEndDate = false
       this.isChangeDates = false
       this.isBrowsingX = false
       this.isBrowsingY = false
+      this.currentElement = null
     },
 
     // Helpers
@@ -1429,6 +1434,15 @@ export default {
     },
     height () {
       this.$nextTick(this.resetScheduleSize)
+    },
+    currentElement () {
+      if (this.currentElement && this.currentElement.task_type_id) {
+        const task = this.taskMap.get(this.currentElement.id)
+        this.$store.commit('UPDATE_TASK', {
+          task,
+          updatedAt: formatFullDate(moment())
+        })
+      }
     }
   }
 }

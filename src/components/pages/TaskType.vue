@@ -980,6 +980,7 @@ export default {
           const task = this.taskMap.get(taskId.id || taskId)
           if (task) {
             // Hack to allow filtering on linked entity metadata.
+
             task.data = entity.data
             if (task.task_type_id === this.currentTaskType.id) {
               tasks.push(task)
@@ -1221,32 +1222,22 @@ export default {
     },
 
     saveTaskScheduleItem (item) {
-      if (!this.$options.savingBuffer) this.$options.savingBuffer = {}
-      if (!this.$options.savingBuffer[item.id]) {
-        this.$options.savingBuffer[item.id] = item
-        setTimeout(() => {
-          if (item.estimation) {
-            item.endDate = addBusinessDays(
-              item.startDate,
-              Math.ceil(minutesToDays(this.organisation, item.estimation)) - 1
-            )
+      if (item.estimation) {
+        item.endDate = addBusinessDays(
+          item.startDate,
+          Math.ceil(minutesToDays(this.organisation, item.estimation)) - 1
+        )
+      }
+      if (item.startDate && item.endDate) {
+        item.parentElement.startDate = this.getMinDate(item.parentElement)
+        item.parentElement.endDate = this.getMaxDate(item.parentElement)
+        this.updateTask({
+          taskId: item.id,
+          data: {
+            start_date: item.startDate.format('YYYY-MM-DD'),
+            due_date: item.endDate.format('YYYY-MM-DD')
           }
-          item = { ...this.$options.savingBuffer[item.id] }
-          if (item.startDate && item.endDate) {
-            item.parentElement.startDate = this.getMinDate(item.parentElement)
-            item.parentElement.endDate = this.getMaxDate(item.parentElement)
-            this.updateTask({
-              taskId: item.id,
-              data: {
-                start_date: item.startDate.format('YYYY-MM-DD'),
-                due_date: item.endDate.format('YYYY-MM-DD')
-              }
-            })
-          }
-          this.$options.savingBuffer[item.id] = undefined
-        }, 1000)
-      } else {
-        this.$options.savingBuffer[item.id] = item
+        })
       }
     },
 
@@ -1454,7 +1445,10 @@ export default {
   socket: {
     events: {
       'task:update' (eventData) {
-        if (this.taskMap.get(eventData.task_id)) {
+        if (
+          this.taskMap.get(eventData.task_id) &&
+          !this.isActiveTab('schedule')
+        ) {
           setTimeout(() => {
             this.resetTaskIndex()
             this.$nextTick(() => {
