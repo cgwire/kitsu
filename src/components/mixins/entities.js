@@ -240,7 +240,7 @@ export const entitiesMixin = {
     },
 
     onChangeSortClicked (sortInfo) {
-      this.changeEpisodeSort(sortInfo)
+      this[`change${this.type[0].toUpperCase()}${this.type.slice(1)}Sort`](sortInfo)
     },
 
     confirmBuildFilter (query) {
