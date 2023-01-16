@@ -142,7 +142,7 @@
             :text="$t('assets.only_current_episode')"
             :is-on="isOnlyCurrentEpisode"
             @click="isOnlyCurrentEpisode = !isOnlyCurrentEpisode"
-            v-if="isTVShow"
+            v-if="isTVShow && !isEpisodeCasting"
           />
         </div>
 
@@ -390,7 +390,7 @@ export default {
       'isShowInfosBreakdown',
       'isTVShow',
       'sequenceMap',
-      'sequences',
+      'displayedSequences',
       'shotMap',
       'shotMetadataDescriptors'
     ]),
@@ -420,11 +420,15 @@ export default {
       this.assetsByType.forEach((typeGroup) => {
         let newGroup = typeGroup.filter(asset => !asset.canceled)
         if (this.isTVShow && this.isOnlyCurrentEpisode) {
-          newGroup = typeGroup.filter(
-            asset => this.currentEpisode.id !== 'main'
-              ? asset.episode_id === this.currentEpisode.id
-              : !asset.episode_id
-          )
+          newGroup = typeGroup.filter(asset => {
+            return(
+              asset.episode_id === this.currentEpisode.id ||
+              (
+                asset.casting_episode_ids &&
+                asset.casting_episode_ids.includes(this.currentEpisode.id)
+              )
+            )
+          })
         }
         if (newGroup.length > 0) result.push(newGroup)
       })
@@ -632,6 +636,8 @@ export default {
             this.setCastingAssetTypes()
             if (this.assetTypeId) {
               this.setCastingAssetType(this.assetTypeId)
+            } else {
+              this.setCastingSequence(this.sequenceId)
             }
             this.resetSelection()
             if (this.currentEpisode && this.currentEpisode.id === 'main') {
@@ -1097,8 +1103,8 @@ export default {
     $route () {},
 
     castingType () {
-      if (this.isShotCasting && this.sequences.length > 0) {
-        this.sequenceId = this.sequences[0].id
+      if (this.isShotCasting && this.displayedSequences.length > 0) {
+        this.sequenceId = this.displayedSequences[0].id
         this.assetTypeId = ''
       }
       if (this.isAssetCasting && this.castingAssetTypesOptions.length > 0) {
@@ -1116,8 +1122,8 @@ export default {
     sequenceId () {
       if (
         this.sequenceId &&
-        this.sequences &&
-        this.sequences.length > 0
+        this.displayedSequences &&
+        this.displayedSequences.length > 0
       ) {
         this.setCastingSequence(this.sequenceId)
         this.updateUrl()
@@ -1192,8 +1198,8 @@ export default {
       }
     },
 
-    sequences () {
-      this.$store.commit('CASTING_SET_SEQUENCES', this.sequences)
+    displayedSequences () {
+      this.$store.commit('CASTING_SET_SEQUENCES', this.displayedSequences)
     }
   },
 
