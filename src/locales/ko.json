@@ -257,25 +257,25 @@
                 "email": "이메일",
                 "password": "비밀번호",
                 "password2": "비밀번호 재입력",
-                "totp": "",
-                "email_otp": "",
-                "recovery_code": ""
+                "totp": "TOTP",
+                "email_otp": "이메일을 통한 OTP",
+                "recovery_code": "복구 코드"
             },
             "too_many_failed_login_attemps": "실패한 로그인 시도가 너무 많습니다, 잠시만 기다려 주십시오",
-            "verify": "",
-            "wrong_totp": "",
-            "wrong_email_otp": "",
-            "wrong_recovery_code": "",
-            "information_totp": "",
-            "information_email_otp": "",
-            "information_recovery_code": "",
-            "unable_to_verify_totp": "",
-            "unable_to_verify_email_otp": "",
-            "send_email_otp": "",
-            "unable_to_verify_recovery_code": "",
-            "choose_totp": "",
-            "choose_email_otp": "",
-            "choose_recovery_code": ""
+            "verify": "확인하기",
+            "wrong_totp": "TOTP 확인이 실패했습니다.",
+            "wrong_email_otp": "이메일을 통한 OTP 확인이 실패했습니다.",
+            "wrong_recovery_code": "복구 코드 확인이 실패했습니다.",
+            "information_totp": "인증 코드를 보려면 모바일 기기에서 2단계 인증(TOTP) 앱을 여십시오.",
+            "information_email_otp": "인증 코드를 보려면 이메일을 확인하십시오.",
+            "information_recovery_code": "다른 2단계 인증을 사용할 수 없는 경우, 복구 코드 중 하나를 입력하여 신원을 확인하십시오.",
+            "unable_to_verify_totp": "TOTP로 확인할 수 없나요?",
+            "unable_to_verify_email_otp": "이메일로 확인할 수 없나요?",
+            "send_email_otp": "이메일로 OTP 재전송하기",
+            "unable_to_verify_recovery_code": "복구 코드가 없나요?",
+            "choose_totp": "TOTP를 통해 2단계 인증 코드를 입력하십시오",
+            "choose_email_otp": "이메일을 통해 2단계 인증 코드를 입력하십시오",
+            "choose_recovery_code": "복구 코드 사용하기"
         },
         "main": {
             "about": "정보",
@@ -399,7 +399,7 @@
             "move_action_bar": "작업 표시줄 이동",
             "show_support_chat": "지원 채팅 표시",
             "empty_schedule": "작업이 없거나 시작 날짜가 없습니다.",
-            "all_shots": ""
+            "all_shots": "모든 샷"
         },
         "menu": {
             "assign_tasks": "작업 할당",
@@ -505,9 +505,9 @@
             "create": "사용자 생성",
             "user_limit_error": "사용자 한도에 도달했습니다. 플랜을 업그레이드하려면 당사 팀에 문의해 주십시오.",
             "change_password_for": "비밀번호를 변경할 유저",
-            "change_password_error": "",
-            "disable_2FA": "",
-            "disable_2FA_error": ""
+            "change_password_error": "비밀번호 변경 중 오류가 발생했습니다. 새 비밀번호를 확인하십시오.",
+            "disable_2FA": "2FA 비활성화하기",
+            "disable_2FA_error": "2단계 인증을 비활성화하는 동안 오류가 발생했습니다."
         },
         "playlists": {
             "add_assets": "어셋 추가",
@@ -609,7 +609,7 @@
                 "toggle_waveform": "영화 파형 표시/숨기기",
                 "annotation_erase": "주석 지우기",
                 "toggle_annotations": "영화를 재생하는 동안 주석 표시/숨기기",
-                "toggle_laser": ""
+                "toggle_laser": "드로잉 레이저 모드 활성화/비활성화"
             },
             "download_csv": ".csv 다운로드",
             "filter_task_type": "자산 유형으로 필터됨",
@@ -779,31 +779,31 @@
             "notifications_discord_user": "Discord 사용자명",
             "clear_avatar": "아바타 지우기",
             "two_factor_authentication": {
-                "title": "",
-                "scan_qrcode": "",
-                "otp_secret": "",
+                "title": "2단계 인증",
+                "scan_qrcode": "TOTP 앱에서 이 QR 코드를 스캔하십시오.",
+                "otp_secret": "OTP 암호",
                 "totp": {
-                    "button_enable": "",
-                    "button_disable": "",
-                    "button_validate_disable": "",
-                    "button_validate": "",
-                    "error_enable": "",
-                    "error_disable": ""
+                    "button_enable": "TOTP 활성화하기",
+                    "button_disable": "TOTP 비활성화하기",
+                    "button_validate_disable": "확인하고 TOTP 비활성화하기",
+                    "button_validate": "확인하고 TOTP 활성화하기",
+                    "error_enable": "TOTP를 활성화하는 동안 오류가 발생했습니다.",
+                    "error_disable": "TOTP를 비활성화하는 동안 오류가 발생했습니다."
                 },
                 "email_otp": {
-                    "button_enable": "",
-                    "button_disable": "",
-                    "button_validate_disable": "",
-                    "button_validate": "",
-                    "error_enable": "",
-                    "error_disable": ""
+                    "button_enable": "이메일을 통해 OTP 활성화하기",
+                    "button_disable": "이메일을 통해 OTP 비활성화하기",
+                    "button_validate_disable": "확인하고 이메일을 통해 OTP 비활성화하기",
+                    "button_validate": "확인하고 이메일을 통해 OTP 활성화하기",
+                    "error_enable": "이메일을 통해 OTP를 활성화하는 동안 오류가 발생했습니다.",
+                    "error_disable": "이메일을 통해 OTP를 비활성화하는 동안 오류가 발생했습니다."
                 },
                 "recovery_codes": {
-                    "title": "",
-                    "button_new": "",
-                    "button_validate": "",
-                    "warning": "",
-                    "error_new": ""
+                    "title": "복구 코드",
+                    "button_new": "새 복구 코드 받기",
+                    "button_validate": "확인하고 새 복구 코드 받기",
+                    "warning": "복구 코드를 안전한 장소에 보관하십시오. 이 코드는 비밀번호와 2단계 인증 정보를 분실했을 경우에 자신의 계정에 접근할 수 있는 최후의 수단입니다. 이 코드를 찾을 수 없으면 계정에 접근할 수 없게 됩니다.",
+                    "error_new": "새 복구 코드를 생성하는 동안에 오류가 발생했습니다"
                 }
             }
         },
@@ -887,9 +887,9 @@
                 "name": "이름",
                 "description": "설명"
             },
-            "no_casting": "",
-            "stats_title": "",
-            "tasks": ""
+            "no_casting": "시퀀스 캐스팅이 비어 있습니다.",
+            "stats_title": "시퀀스 통계",
+            "tasks": "작업"
         },
         "schedule": {
             "title": "일정",
@@ -1134,10 +1134,10 @@
             "create_tasks_episode": "현재 에피소드에 대한 작업 추가",
             "create_tasks_episode_explaination": "주어진 작업 유형에 대한 새 작업은 현재 프로젝트의 각 에피소드에 대해 생성됩니다.  계속하시겠습니까?",
             "create_tasks_episode_failed": "작업을 생성하는 동안 서버 오류가 발생했습니다.",
-            "clear_all_assignations": "",
-            "create_tasks_sequence": "",
-            "create_tasks_sequence_explaination": "",
-            "create_tasks_sequence_failed": ""
+            "clear_all_assignations": "모든 할당 취소하기",
+            "create_tasks_sequence": "현재 시퀀스에 작업 추가하기",
+            "create_tasks_sequence_explaination": "주어진 작업 유형에 대해 현재 프로젝트의 각 시퀀스에 대해 새 작업을 생성하려고 합니다. 계속하시겠습니까?",
+            "create_tasks_sequence_failed": "생성을 진행하는 동안에 서버 오류가 발생했습니다."
         },
         "timesheets": {
             "detail_level": "세부 사항 레벨",
