@@ -9,7 +9,6 @@ export default defineConfig({
     vue()
     //, eslintPlugin()
   ],
-  target: 'es2015',
   build: {
     minify: true,
     sourcemap: true
