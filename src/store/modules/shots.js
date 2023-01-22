@@ -1023,7 +1023,7 @@ const mutations = {
   },
 
   [CREATE_TASKS_END] (state, { tasks }) {
-    tasks.forEach((task) => {
+    tasks.forEach(task => {
       if (task) {
         const shot = state.shotMap.get(task.entity_id)
         if (shot) {
