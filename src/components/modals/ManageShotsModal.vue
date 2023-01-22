@@ -35,7 +35,7 @@
               }"
               :key="episode.id"
               @click="selectEpisode(episode.id)"
-              v-for="episode in episodes"
+              v-for="episode in displayedEpisodes"
             >
               {{ episode.name }}
             </div>
@@ -76,7 +76,7 @@
               :key="sequence.id"
               @keyup.tab="focusAddShot"
               @click="selectSequence(sequence.id)"
-              v-for="sequence in sequences"
+              v-for="sequence in displayedSequences"
             >
               {{ sequence.name }}
             </div>
@@ -218,7 +218,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
-      'episodes',
+      'displayedEpisodes',
       'isTVShow',
       'displayedSequences',
       'shotMap'
@@ -226,7 +226,7 @@ export default {
 
     isAddEpisodeAllowed () {
       const isEmpty = this.names.episode === ''
-      const isExist = this.episodes.find((episode) => {
+      const isExist = this.displayedEpisodes.find((episode) => {
         return this.names.episode === episode.name
       })
       return !isEmpty && !isExist
@@ -261,9 +261,6 @@ export default {
     selectEpisode (episodeId) {
       if (!this.isTVShow) {
         this.selectedEpisodeId = episodeId
-        this.sequences = this.displayedSequences.filter((sequence) => {
-          return sequence.parent_id === episodeId
-        })
         this.displayedShots = []
       } else {
         this.selectedEpisodeId = episodeId
@@ -366,11 +363,6 @@ export default {
           }
         }, 100)
       }
-    },
-
-    sequences () {
-      this.sequences = this.displayedSequences
-      this.displayedShots = []
     }
   }
 }
