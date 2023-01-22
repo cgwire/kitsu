@@ -21,7 +21,6 @@ export default {
   setup (token, isVisible) {
     window.$crisp = []
     window.CRISP_WEBSITE_ID = token
-    console.log('setup', isVisible)
     const run = () => {
       const d = document
       const s = d.createElement('script')
