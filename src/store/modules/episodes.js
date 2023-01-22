@@ -761,7 +761,7 @@ const mutations = {
 
     // Set currentEpisode
     if (state.episodes.length > 0) {
-      if (!routeEpisodeId || routeEpisodeId === 'all') {
+      if (routeEpisodeId === 'all') {
         state.currentEpisode = { id: 'all' }
       } else if (routeEpisodeId === 'main') {
         state.currentEpisode = { id: 'main' }
