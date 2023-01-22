@@ -874,7 +874,7 @@ export default {
     },
 
     displayedValidationColumns () {
-      return this.validationColumns.filter((columnId) => {
+      return this.validationColumns.filter(columnId => {
         return this.shotFilledColumns[columnId] &&
           (!this.hiddenColumns[columnId] || this.isShowInfos)
       })

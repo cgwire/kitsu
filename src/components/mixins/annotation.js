@@ -65,12 +65,18 @@ export const annotationMixin = {
     },
 
     setObjectData (object) {
-      if (!object.id) object.id = uuidv4()
-      object.canvasWidth = this.fabricCanvas.width
-      object.canvasHeight = this.fabricCanvas.height
-      object.serialize =
-        () => object.toJSON(
-          ['id', 'canvasWidth', 'canvasHeight', 'angle', 'scale'])
+      if (!object.id) object.set('id', uuidv4())
+      object.set('canvasWidth', this.fabricCanvas.width)
+      object.set('canvasHeight', this.fabricCanvas.height)
+      object.serialize = function () {
+        const result = object.toJSON()
+        result.id = this.id
+        result.canvasWidth = this.canvasWidth
+        result.canvasHeight = this.canvasHeight
+        result.angle = this.angle
+        result.scale = this.scale
+        return result
+      }
       return object
     },
 
@@ -140,7 +146,7 @@ export const annotationMixin = {
       fabric.util.object.extend(fabric.IText.prototype, {
         initHiddenTextarea: function () {
           originalInitHiddenTextarea.call(this)
-          fabric.document.body.appendChild(this.hiddenTextarea)
+          // fabric.document.body.appendChild(this.hiddenTextarea)
         }
       })
     },
@@ -234,7 +240,7 @@ export const annotationMixin = {
       }
       this.postAnnotationDeletion(
         currentTime,
-        obj.toJSON(['id', 'canvasWidth', 'canvasHeight', 'angle', 'scale'])
+        obj.serialize()
       )
     },
 
@@ -323,9 +329,9 @@ export const annotationMixin = {
       })
 
       if (annotation) {
-        annotation.drawing = this.fabricCanvas.toJSON(
-          ['id', 'canvasWidth', 'canvasHeight']
-        )
+        annotation.drawing = {
+          objects: this.fabricCanvas._objects.map(obj => obj.serialize())
+        }
         annotation.time = currentTime
         if (annotation.drawing && annotation.drawing.objects.length < 1) {
           const index = this.annotations.findIndex(
@@ -337,9 +343,9 @@ export const annotationMixin = {
         if (!this.annotations || !this.annotations.push) this.annotations = []
         this.annotations.push({
           time: currentTime,
-          drawing: this.fabricCanvas.toJSON(
-            ['id', 'canvasHeight', 'canvasWidth']
-          )
+          drawing: {
+            objects: this.fabricCanvas._objects.map(obj => obj.serialize())
+          }
         })
         this.annotations = this.annotations.sort((a, b) => {
           return a.time < b.time
@@ -373,7 +379,8 @@ export const annotationMixin = {
       if (annotation && annotation.height) {
         scaleMultiplierY = this.fabricCanvas.height / annotation.height
       }
-      const canvasWidth = obj.canvasWidth || annotation.width
+      const canvasWidth =
+        obj.canvasWidth || annotation.width
       const canvasHeight = obj.canvasHeight
 
       if (canvasWidth) {
@@ -386,9 +393,9 @@ export const annotationMixin = {
 
       const base = {
         id: obj.id,
+        fill: 'transparent',
         left: obj.left * scaleMultiplierX,
         top: obj.top * scaleMultiplierY,
-        fill: 'transparent',
         stroke: obj.stroke,
         strokeWidth: obj.strokeWidth,
         radius: obj.radius,
@@ -415,6 +422,9 @@ export const annotationMixin = {
             canvasWidth: obj.canvasWidth
           }
         )
+        path.set('id', obj.id)
+        path.set('strokeWidth', obj.strokeWidth * strokeMultiplier)
+        path.set('canvasWidth', canvasWidth)
         path.setControlsVisibility({
           mt: false,
           mb: false,
@@ -443,6 +453,7 @@ export const annotationMixin = {
             padding: 10
           }
         )
+        text.set('id', obj.id)
         text.setControlsVisibility({
           mt: false,
           mb: false,
