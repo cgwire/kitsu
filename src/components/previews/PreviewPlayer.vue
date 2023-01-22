@@ -121,6 +121,14 @@
         />
         <button-simple
           class="flexrow-item"
+          :title="$t('playlists.actions.' + (isHd ? 'switch_ld' : 'switch_hd'))"
+          :text="isHd ? 'HD' : 'LD'"
+          @click="isHd = !isHd"
+          v-if="(!light || fullScreen) && isMovie"
+        />
+
+        <button-simple
+          class="flexrow-item"
           :title="$t('playlists.actions.unmute')"
           icon="soundoff"
           @click="onToggleSoundClicked"
@@ -370,14 +378,6 @@
           v-if="lastPreviewFiles.length > 1 && fullScreen"
         >
         </div>
-
-        <button-simple
-          class="flexrow-item"
-          :title="$t('playlists.actions.' + (isHd ? 'switch_ld' : 'switch_hd'))"
-          :text="isHd ? 'HD' : 'LD'"
-          @click="isHd = !isHd"
-          v-if="fullScreen && isMovie"
-        />
 
         <a
           class="button flexrow-item"
@@ -1198,7 +1198,9 @@ export default {
     loadAnnotation (annotation) {
       let currentTime = 0
       if (!annotation) {
-        currentTime = roundToFrame(this.currentTimeRaw, this.fps)
+        if (this.isMovie) {
+          currentTime = roundToFrame(this.currentTimeRaw, this.fps)
+        }
         annotation = this.getAnnotation(currentTime)
         if (!annotation) {
           if (!this.isMovie) {

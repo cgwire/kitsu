@@ -307,6 +307,40 @@
     v-if="playlist.id && !isAddingEntity"
   >
     <div
+      class="flexrow flexrow-item comparison-buttons"
+      v-if="tempMode"
+    >
+      <span
+        class="flexrow-item time-indicator"
+        :title="$t('playlists.actions.entity_index')"
+      >
+        {{ entityList.length > 0 ? playingEntityIndex + 1 : 0 }}
+      </span>
+      <span class="flexrow-item time-indicator">
+      /
+      </span>
+      <span
+        class="flexrow-item time-indicator mr1"
+        :title="$t('playlists.actions.entities_number')"
+      >
+        {{ entityList.length }}
+      </span>
+
+      <button-simple
+        class="button playlist-button flexrow-item"
+        @click="onPlayPreviousEntityClicked"
+        :title="$t('playlists.actions.previous_shot')"
+        icon="back"
+      />
+      <button-simple
+        class="playlist-button flexrow-item"
+        @click="onPlayNextEntityClicked"
+        :title="$t('playlists.actions.next_shot')"
+        icon="forward"
+      />
+    </div>
+
+    <div
       class="flexrow flexrow-item mr0"
       v-if="
         isCurrentPreviewMovie ||
