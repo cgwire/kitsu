@@ -707,6 +707,7 @@ export const playerMixin = {
           this.resetCanvas()
             .then(() => {
               this.reloadAnnotations()
+              this.loadAnnotation()
             })
         }, 200)
       }
