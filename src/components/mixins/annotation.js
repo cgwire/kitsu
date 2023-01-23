@@ -306,8 +306,6 @@ export const annotationMixin = {
       return this.lastAnnotationTime >= date
     },
 
-    // Annotations
-
     getNewAnnotations (currentTime, annotation) {
       this.fabricCanvas.getObjects().forEach(obj => {
         this.setObjectData(obj)
@@ -608,17 +606,6 @@ export const annotationMixin = {
       }
     },
 
-    fadeObject (obj) {
-      if (!obj) return
-      obj.animate('opacity', '0', {
-        duration: 1500,
-        onChange: this.fabricCanvas.renderAll.bind(this.fabricCanvas),
-        onComplete: () => {
-          this.fabricCanvas.remove(obj)
-        }
-      })
-    },
-
     // Undo / Redo
 
     resetUndoStacks () {
@@ -768,6 +755,17 @@ export const annotationMixin = {
         this.fabricCanvas.setActiveObject(clonedObj)
         this.fabricCanvas.requestRenderAll()
       }
+    },
+
+    fadeObject (obj) {
+      if (!obj) return
+      obj.animate('opacity', '0', {
+        duration: 1500,
+        onChange: this.fabricCanvas.renderAll.bind(this.fabricCanvas),
+        onComplete: () => {
+          this.fabricCanvas.remove(obj)
+        }
+      })
     },
 
     // Saving
