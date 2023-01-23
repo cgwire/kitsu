@@ -238,6 +238,18 @@ export const annotationMixin = {
           objects: [obj.id]
         })
       }
+      if (!obj.serialize) {
+        obj.serialize = function () {
+          const result = this.toJSON()
+          result.id = this.id
+          result.canvasWidth = this.canvasWidth
+          result.canvasHeight = this.canvasHeight
+          result.angle = this.angle
+          result.scale = this.scale
+          return result
+        }
+      }
+
       this.postAnnotationDeletion(
         currentTime,
         obj.serialize()
