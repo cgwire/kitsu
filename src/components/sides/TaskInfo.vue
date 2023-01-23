@@ -653,7 +653,6 @@ export default {
     },
 
     addComment (comment, attachment, checklist, taskStatusId) {
-      console.log('add comment')
       this.animOn = true
       this.$nextTick(() => {
         let preview = this.currentParentPreview

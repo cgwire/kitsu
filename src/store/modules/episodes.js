@@ -350,7 +350,7 @@ const actions = {
 
   loadEpisode ({ commit, state }, episodeId) {
     return shotsApi.getEpisode(episodeId)
-      .then((episode) => {
+      .then(episode => {
         if (state.episodeMap.get(episode.id)) {
           commit(UPDATE_EPISODE, episode)
         } else {
@@ -761,7 +761,7 @@ const mutations = {
 
     // Set currentEpisode
     if (state.episodes.length > 0) {
-      if (!routeEpisodeId || routeEpisodeId === 'all') {
+      if (routeEpisodeId === 'all') {
         state.currentEpisode = { id: 'all' }
       } else if (routeEpisodeId === 'main') {
         state.currentEpisode = { id: 'main' }
@@ -859,10 +859,16 @@ const mutations = {
     state.episodeSelectionGrid = clearSelectionGrid(tmpGrid)
   },
 
-  [NEW_TASK_END] (state, { task }) {
+  [NEW_TASK_END] (state, {
+    task,
+    taskTypeMap,
+    taskStatusMap,
+    production
+  }) {
     const episode = state.episodeMap.get(task.entity_id)
     if (episode && task) {
-      task = helpers.populateTask(task, episode)
+      task = helpers.populateTask(
+        production, task, episode, taskTypeMap, taskStatusMap)
       // Add Column if it is missing
       if (!state.episodeValidationColumns.includes(task.task_type_id)) {
         state.episodeValidationColumns.push(task.task_type_id)
