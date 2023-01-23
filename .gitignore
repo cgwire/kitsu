@@ -51,5 +51,4 @@ TODO
 QA
 package-lock.json
 .idea/
-release.sh
 tests/test-bundle.js
