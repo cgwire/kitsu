@@ -25,7 +25,8 @@
                 "production": "Prod",
                 "time_spent": "Tijd",
                 "type": "Type",
-                "hidden_from_client": "Getoond aan klant"
+                "hidden_from_client": "Getoond aan klant",
+                "ready_for": "Klaar voor"
             },
             "cancel_text": "Weet je zeker dat je {name} wilt archiveren?",
             "delete_for_selection": "Verwijder {nbSelectedAssets} geselecteerde assets",
@@ -33,18 +34,20 @@
             "only_current_episode": "Alleen huidige aflevering"
         },
         "asset_types": {
-            "all_asset_types": "Alle asset types",
+            "all_asset_types": "Alle assettypes",
             "create_error": "Er is een fout opgetreden bij het saven van de asset type. Weet je zeker dat er geen asset type bestaat met dezelfde naam?",
             "delete_text": "Weet u zeker dat u {name} wilt verwijderen uit uw database?",
             "delete_error": "Er is een fout opgetreden bij het verwijderen van dit asset-type. Er zijn waarschijnlijk assets aan verbonden. Weet u zeker dat er geen assets aan dit asset-type verbonden zijn?",
             "edit_title": "Asset-type aanpassen",
             "new_asset_type": "Asset-type toevoegen",
-            "number": "asset type | asset types",
-            "title": "Asset Types",
-            "production_title": "Asset Types Statistieken",
+            "number": "asset type | assettypes",
+            "title": "Assettypes",
+            "production_title": "Assettypes Statistieken",
             "fields": {
-                "name": "Naam"
-            }
+                "name": "Naam",
+                "task_types": "Taak types"
+            },
+            "include_all": "Omvat alle soorten elementtaken"
         },
         "breakdown": {
             "all_assets": "Alle beschikbare assets",
@@ -52,11 +55,19 @@
             "empty": "Lege casting",
             "label": "Label",
             "picture_mode": "Wissel naar galerij modus",
-            "text_mode": "Wissel naar text modus",
+            "text_mode": "Wissel naar tekst modus",
             "title": "Analyze",
             "options": {
                 "fixed": "opgelost",
                 "animate": "animeer"
+            },
+            "remove": {
+                "confirm": "Verwijder asset van zijn episode",
+                "error": "Er is een serverfout opgetreden bij het verwijderen van het element. Probeer het opnieuw. Neem contact op met onze helpdesk als het probleem zich blijft voordoen.",
+                "text": "Als je dit element verwijdert uit de geselecteerde aflevering, dan worden de elementen uit alle onderliggende shots verwijderd. Weet je zeker dat je het wilt verwijderen?"
+            },
+            "fields": {
+                "standby": "STDB"
             }
         },
         "comments": {
@@ -83,9 +94,20 @@
             "validated": "Gevalideerd!",
             "validation_required": "Validatie vereist",
             "fields": {
-                "text": "tekst"
+                "text": "Tekst",
+                "created_at": "Datum aanmaken",
+                "task_status": "Taak status",
+                "person": "Persoonsnaam",
+                "checklist": "Checklist",
+                "acknowledgements": "Erkenningen"
             },
-            "checklist": "Afvinklijst"
+            "checklist": "Checklist",
+            "attachments": "Bijlagen",
+            "attachments_to_add": "Bijlagen toevoegen",
+            "max_retakes_error": "Je kunt geen retakes meer toevoegen aan deze taak.",
+            "previews": "Files bekijken om te publiceren als een nieuwe revisie",
+            "selected_files": "Geselecteerde files",
+            "no_attachments": "Er zijn geen bijlagen voor deze opmerking."
         },
         "custom_actions": {
             "create_error": "Er is een fout opgetreden bij het opslaan van de zelfbepaalde actie. Weet je zeker dat er geen andere actie is met dezelfde naam?",
@@ -111,7 +133,7 @@
         "entities": {
             "build_filter": {
                 "asset_type": "Asset type",
-                "all_types": "Alle asset types",
+                "all_types": "Alle assettypes",
                 "assignation": "Toewijzing",
                 "assignation_exists_for": "Toewijzing bestaat voor",
                 "assigned_to": "Toegewezen aan",
@@ -129,7 +151,12 @@
                 "union_or": "Gebruik een van de volgende filters",
                 "with_thumbnail": "Met thumbnail",
                 "without_thumbnail": "Zonder thumbnail",
-                "department": "Afdeling"
+                "department": "Afdeling",
+                "is_assets_ready": "Elementen zijn klaar",
+                "assets_ready": "Klaar",
+                "assets_not_ready": "Niet klaar",
+                "checked": "Gecontroleerd",
+                "not_checked": "Niet gecontroleerd"
             },
             "thumbnails": {
                 "error": "Er is een fout opgetreden bij het uploaden van thumbnails",
@@ -144,7 +171,27 @@
                 "undefined": "Ongedefinieerd",
                 "undefined_pattern": "Ongedefinieerd",
                 "upload": "Voeg thumbnails toe"
-            }
+            },
+            "logs": {
+                "no_logs": "Er zijn geen tijdlogs voor deze entiteit."
+            },
+            "news": {
+                "no_news": "Er is geen nieuws voor deze entiteit."
+            },
+            "preview_files": {
+                "extension": "Extensie",
+                "no_preview_files": "Er zijn geen previewfiles voor deze entiteit.",
+                "original_file_name": "Originele filenaam",
+                "position": "Positie",
+                "revision": "Revisie",
+                "size": "Grootte",
+                "status": "Status",
+                "task_type": "Taak type",
+                "uploader": "Geupload door"
+            },
+            "nb_selected_assets": "{nbSelectedAssets} element geselecteerd | {nbSelectedAssets} elementen geselecteerd",
+            "nb_selected_shots": "{nbSelectedShots} shot geselecteerd | {nbSelectedShots} shots geselecteerd",
+            "nb_selected_edits": "{nbSelectedEdits} edit geselecteerd | {nbSelectedEdits} edits geselecteerd"
         },
         "estimation": {
             "title": "Schatting"
@@ -163,7 +210,11 @@
             "fields": {
                 "name": "naam",
                 "description": "omschrijving"
-            }
+            },
+            "no_casting": "De episode casting is leeg.",
+            "restore_error": "Er is een fout opgetreden tijdens het herstellen van een bepaalde episode.",
+            "tasks": "Episode-taken",
+            "stats_title": "Episode-statistieken"
         },
         "keyboard": {
             "altdown": "Verplaats taak selectie naar beneden",
@@ -193,7 +244,7 @@
             "login_page": "Annuleren",
             "redirecting": "Redirect in {secondsLeft} seconde...",
             "reset_change_password": "Verander wachtwoord",
-            "reset_change_password_form_failed": "Er is een probleem met het ingevulde wachtwoord. Controleer dat uw wachtwoord minstens 8 tekens lang is en beide wachtwoorden gelijk zijn.",
+            "reset_change_password_form_failed": "Er is een probleem met het ingevulde wachtwoord. Controleer dat uw wachtwoord minstens 7 tekens lang is en beide wachtwoorden gelijk zijn.",
             "reset_change_password_failed": "Wachtwoord veranderen mislukt. Probeer de hele procedure alstublieft nogmaals.",
             "reset_change_password_succeed": "Uw wachtwoord is succesvol veranderd. Ga terug naar de log-in pagina om deze te gebruiken.",
             "reset_change_password_title": "Vul een nieuw wachtwoord in",
@@ -205,8 +256,26 @@
             "fields": {
                 "email": "E-mail",
                 "password": "Wachtwoord",
-                "password2": "Wachtwoord herhalen"
-            }
+                "password2": "Wachtwoord herhalen",
+                "totp": "TOTP",
+                "email_otp": "OTP via e-mail",
+                "recovery_code": "Herstelcode"
+            },
+            "too_many_failed_login_attemps": "Te veel mislukte inlogpogingen, wacht een minuut.",
+            "verify": "Verifiëren",
+            "wrong_totp": "TOTP-verificatie mislukt.",
+            "wrong_email_otp": "OTP via e-mailverificatie mislukt.",
+            "wrong_recovery_code": "Verificatie van de herstelcode is mislukt.",
+            "information_totp": "Open de tweefactorauthenticatie-app (TOTP) op je mobiele apparaat om je authenticatiecode te bekijken.",
+            "information_email_otp": "Controleer je e-mails om je verificatiecode te bekijken.",
+            "information_recovery_code": "Als je geen andere tweefactorauthenticatie kunt gebruiken, voer dan een van je herstelcodes in om je identiteit te verifiëren.",
+            "unable_to_verify_totp": "Kan je niet verifiëren met TOTP?",
+            "unable_to_verify_email_otp": "Kan je niet verifiëren met e-mail?",
+            "send_email_otp": "OTP opnieuw verzenden per e-mail",
+            "unable_to_verify_recovery_code": "Heb je geen herstelcode?",
+            "choose_totp": "Tweefactorauthenticatiecode invoeren via TOTP",
+            "choose_email_otp": "Tweefactorauthenticatiecode invoeren via e-mail",
+            "choose_recovery_code": "Gebruik een herstelcode"
         },
         "main": {
             "about": "Over",
@@ -273,9 +342,9 @@
                 "legend_overwrite": "Data die wordt geupdate",
                 "paste": "Plakken",
                 "paste_code": "Plak hier uw CSV data",
-                "preview": "Voorbeeld",
+                "preview": "Preview",
                 "preview_episode_name": "Aflevering naam",
-                "preview_title": "Voorbeeld van de geimporteerde data",
+                "preview_title": "Preview van de geimporteerde data",
                 "preview_description": "Upload een .csv bestand om uw \"board\" te vullen met posts.",
                 "preview_required": "NB: Headers moeten inbegrepen zijn als eerste rij.",
                 "preview_reupload": "Herupload .CSV bestand",
@@ -288,7 +357,9 @@
                 "options": {
                     "title": "Opties",
                     "update": "Update bestaande data"
-                }
+                },
+                "optional_fields": "Optionele kolommen",
+                "generic_fields": "Generieke kolommen"
             },
             "after": "Na",
             "before": "Voor",
@@ -307,14 +378,28 @@
             "estimation_short": "Sch.",
             "fps": "FPS",
             "frames": "Frames",
-            "frameIn": "Frames In",
-            "frameOut": "Frames Uit",
             "man_days": "mandag | mandagen",
             "select_column": "Selecteer kolom",
             "show": "Tonen",
             "stick": "Vastmaken",
             "timeSpent": "Tijd besteed",
-            "unstick": "Losmaken"
+            "unstick": "Losmaken",
+            "all_edits": "Alle bewerkingen",
+            "attach_snapshots": "Snapshots toevoegen vanuit je annotatie",
+            "reply": "Reactie",
+            "select_file": "Selecteer een bestand van de harde schijf",
+            "frame_in": "Frame In",
+            "frame_out": "Frame Uit",
+            "type": "Type",
+            "search": {
+                "type": "Type",
+                "no_result": "Er zijn geen resultaten voor deze zoekopdracht"
+            },
+            "hide_support_chat": "Verberg helpdeskchat",
+            "move_action_bar": "Actiebalk verplaatsen",
+            "show_support_chat": "Toon helpdeskchat",
+            "empty_schedule": "Er zijn geen taken of ze hebben geen begindatum.",
+            "all_shots": "Alle pogingen"
         },
         "menu": {
             "assign_tasks": "Taak toewijzen",
@@ -322,11 +407,13 @@
             "change_status": "Status aanpassen",
             "create_tasks": "Taken aanmaken",
             "delete_tasks": "Taken verwijderen",
-            "generate_playlists": "Genereer playlists",
             "run_custom_action": "Voer zelfbepaalde actie uit",
             "set_estimations": "Stel schatting in",
             "delete_assets": "Verwijder Assets",
-            "delete_shots": "Verwijder opnames"
+            "delete_shots": "Verwijder opnames",
+            "delete_edits": "Verwijder bewerkingen",
+            "generate_playlist": "Een playlist genereren",
+            "set_thumbnails": "Thumbnails van laatste preview instellen"
         },
         "news": {
             "all": "Alles",
@@ -355,7 +442,14 @@
             "no_notifications": "Er zijn geen notificaties voor jouw huidige projecten.",
             "unread_notifications": "ongelezen notificatie | ongelezen notificaties",
             "title": "Notificaties",
-            "with_preview": "met een preview"
+            "with_preview": "met een preview",
+            "replied_on": "gereageerd op commentaar op",
+            "all_types": "Alle notificatie types",
+            "new_revision": "Nieuwe revisie gepubliceerd",
+            "only_assignations": "Alleen toewijzingen",
+            "only_comments": "Alleen opmerkingen",
+            "only_mentions": "Alleen vermeldingen",
+            "only_replies": "Alleen antwoorden"
         },
         "people": {
             "active": "Actied",
@@ -401,12 +495,19 @@
             "role": {
                 "admin": "Studio Manager",
                 "client": "Cliënt",
-                "manager": "Production manager",
-                "supervisor": "Supervisor",
+                "manager": "Supervisor",
                 "user": "Artist",
                 "undefined": "ongedefinieerd",
-                "vendor": "Leverancier"
-            }
+                "vendor": "Leverancier",
+                "supervisor": "Supervisor"
+            },
+            "confirm_edit": "Gebruikerswijzigingen opslaan",
+            "create": "Gebruiker aanmaken",
+            "user_limit_error": "Je hebt je gebruikerslimiet bereikt. Neem contact op met ons team om je abonnement te upgraden.",
+            "change_password_for": "Wachtwoord wijzigen voor",
+            "change_password_error": "Er is een fout opgetreden tijdens het wijzigen van het wachtwoord. Controleer het nieuwe wachtwoord.",
+            "disable_2FA": "2FA uitschakelen",
+            "disable_2FA_error": "Er is een fout opgetreden bij het uitschakelen van tweefactorauthenticatie."
         },
         "playlists": {
             "add_assets": "Asset toevoegen",
@@ -502,10 +603,17 @@
                 "overlay": "Overlap",
                 "side_by_side": "Zij aan zij",
                 "switch_ld": "Overschakelen naar lage resolutie",
-                "switch_hd": "Overschakelen naar hoge resolutie"
+                "switch_hd": "Overschakelen naar hoge resolutie",
+                "frames_per_picture": "Frames per afbeelding",
+                "toggle_playing_annotations": "Toon/verberg annotaties bij het afspelen van films",
+                "toggle_waveform": "Toon/Verberg film geluidsgolf",
+                "annotation_erase": "Annotatie wissen",
+                "toggle_annotations": "Toon/verberg annotaties tijdens het afspelen van films",
+                "toggle_laser": "Tekenlasermodus in-/uitschakelen"
             },
             "download_csv": "download .csv",
-            "filter_task_type": "Gefilterd op taaktype"
+            "filter_task_type": "Gefilterd op taaktype",
+            "comparing_missing_plan": "Shot ontbreekt voor huidig ​​type"
         },
         "productions": {
             "current": "Geselecteerde productie",
@@ -535,7 +643,10 @@
                 "start_date": "Startdatum",
                 "end_date": "Einddatum",
                 "nb_episodes": "Aantal afleveringen",
-                "episode_span": "Ruimte tussen afleveringen"
+                "episode_span": "Ruimte tussen afleveringen",
+                "is_clients_isolated": "Reacties van klanten isoleren (niet zichtbaar voor elkaar)",
+                "max_retakes": "Maximum aantal retakes",
+                "style": "Stijl"
             },
             "metadata": {
                 "add_explaination": "Voeg specifieke gegevens toe die nodig zijn voor dit project.",
@@ -548,7 +659,8 @@
                 "error": "Er is een fout opgetreden tijdens het toevoegen van de metadata kolom. Controleer of er geen dubbele namen zijn en dat alle velden zijn gevuld. Als het probleem blijft neem dan contact op met het support team",
                 "free": "Gegeven losmaken",
                 "title": "Metadata kolom toevoegen",
-                "edit_title": "Kolom metagegevens bewerken"
+                "edit_title": "Kolom metagegevens bewerken",
+                "checklist": "Checklist"
             },
             "status": {
                 "closed": "Gesloten",
@@ -559,7 +671,9 @@
             "type": {
                 "short": "Short",
                 "featurefilm": "Feature Film",
-                "tvshow": "TV Show"
+                "tvshow": "TV Show",
+                "assets": "Alleen elementen",
+                "shots": "Alleen shots"
             },
             "edit_error": "Er is een fout opgetreden tijdens het bewerken van de productie. Neem contact op met ons ondersteuningsteam.",
             "brief": {
@@ -574,8 +688,8 @@
             },
             "creation": {
                 "add_assets": "Assets toevoegen (optioneel)",
-                "add_asset_types": "Asset types toevoegen",
-                "add_asset_types_description": "Assets types toevoegen in je project",
+                "add_asset_types": "Assettypes toevoegen",
+                "add_asset_types_description": "Assettypes toevoegen in je project",
                 "add_assets_button": "Assets toevoegen",
                 "add_assets_description": "Assets toevoegen of importeren in je productie",
                 "add_shots": "Opnamen toevoegen (optioneel)",
@@ -605,7 +719,7 @@
                 "placeholder_resolution1": "1920",
                 "placeholder_resolution2": "1080",
                 "production_settings": "Je productieparameters instellen",
-                "production_settings_description": "Bepaal je productietype, het formaat van je videovoorbeelden en plan je productie.",
+                "production_settings_description": "Bepaal je productietype, het formaat van je videopreviews en plan je productie.",
                 "select_asset_task_type": "Selecteer asset taaktype",
                 "select_asset_task_type_description": "Deze taaktypen definiëren het stappenplan van je assets.",
                 "select_shot_task_type": "Selecteer opname taaktype",
@@ -613,7 +727,25 @@
                 "select_task_status": "Selecteer taakstatus",
                 "select_task_status_description": "Selecteer de taakstatussen die je tijdens de productie gaat gebruiken.",
                 "start_and_end_dates": "Start- en einddatum",
-                "shots_to_import": "te importeren opnamen"
+                "shots_to_import": "te importeren opnamen",
+                "select_edit_task_type": "Selecteer bewerk taak type",
+                "select_edit_task_type_description": "Deze taaktypen definiëren de bouwstappen van je edits."
+            },
+            "style": {
+                "2d": "2D-animatie",
+                "3d": "3D-animatie",
+                "2d3d": "2D/3D-animatie",
+                "ar": "Augmented Reality",
+                "archviz": "Archviz",
+                "commercial": "Reclame",
+                "catalog": "Catalogus",
+                "metaverse": "Metaverse",
+                "motion_design": "Motion Design",
+                "nft": "NFT verzameling",
+                "stop_motion": "Stop-motion",
+                "vfx": "VFX",
+                "video_game": "Videogame",
+                "vr": "Virtual reality"
             }
         },
         "profile": {
@@ -623,10 +755,6 @@
             "notifications_enabled": "E-mail notificaties ingeschakeld",
             "notifications_slack_enabled": "Slack notificaties ingeschakeld",
             "notifications_slack_user": "Slack gebruikersnaam",
-            "notifications_mattermost_enabled": "Mattermost notificaties ingeschakeld",
-            "notifications_mattermost_user": "Mattermost gebruikersnaam",
-            "notifications_discord_enabled": "Discord notificaties ingeschakeld",
-            "notifications_discord_user": "Discord gebruikersnaam",
             "password_title": "Wachtwoord aanpassen",
             "timezone": "Tijdzone",
             "title": "Jouw profiel",
@@ -638,11 +766,45 @@
                 "button": "Wijzig wachtwoord",
                 "error": "Er is een fout opgetreden bij het wijzigen van het wachtwoord. Gelieve je huidige wachtwoord te verifiëren",
                 "success": "Je wachtwoord is succesvol gewijzigd!",
-                "unvalid": "Je nieuwe wachtwoordbevestiging komt niet overeen of je wachtwoord is te kort (minimaal 8 tekens wordt verwacht)."
+                "unvalid": "Je nieuwe wachtwoordbevestiging komt niet overeen of je wachtwoord is te kort (minimaal 7 tekens wordt verwacht)."
             },
             "save": {
                 "button": "Wijzigingen opslaan",
                 "error": "Er is een fout opgetreden bij het opslaan van wijzigingen"
+            },
+            "notifications_mattermost_enabled": "Mattermost notificaties aan\n",
+            "notifications_mattermost_user": "Mattermost gebruikersnaam",
+            "webhook_error": "de webhook mattermost komt niet overeen met een hook",
+            "notifications_discord_enabled": "Discord notificaties aan",
+            "notifications_discord_user": "Discord gebruikersnaam",
+            "clear_avatar": "Avatar verwijderen",
+            "two_factor_authentication": {
+                "title": "Tweefactorauthenticatie",
+                "scan_qrcode": "Scan deze QR code in je TOTP-applicatie.",
+                "otp_secret": "OTP-geheim",
+                "totp": {
+                    "button_enable": "TOTP inschakelen",
+                    "button_disable": "TOTP uitschakelen",
+                    "button_validate_disable": "TOTP valideren en uitschakelen",
+                    "button_validate": "TOTP valideren en inschakelen",
+                    "error_enable": "Er is een fout opgetreden bij het inschakelen van TOTP.",
+                    "error_disable": "Er is een fout opgetreden bij het uitschakelen van TOTP."
+                },
+                "email_otp": {
+                    "button_enable": "OTP via e-mail inschakelen",
+                    "button_disable": "OTP via e-mail uitschakelen",
+                    "button_validate_disable": "OTP valideren en uitschakelen via e-mail",
+                    "button_validate": "OTP valideren en inschakelen via e-mail",
+                    "error_enable": "Er is een fout opgetreden bij het inschakelen van OTP via e-mail.",
+                    "error_disable": "Er is een fout opgetreden bij het uitschakelen van OTP via e-mail."
+                },
+                "recovery_codes": {
+                    "title": "Herstelcodes",
+                    "button_new": "Ontvang nieuwe herstelcodes",
+                    "button_validate": "Nieuwe herstelcodes valideren en ontvangen",
+                    "warning": "Bewaar je herstelcodes op een veilige plek. Deze codes zijn het laatste redmiddel voor toegang tot je account als je je wachtwoord en tweede factoren verliest. Als je deze codes niet kunt vinden, verlies je de toegang tot je account.",
+                    "error_new": "Er is een fout opgetreden bij het genereren van nieuwe herstelcodes"
+                }
             }
         },
         "settings": {
@@ -652,23 +814,25 @@
             "no_logo": "Er is geen logo ingesteld",
             "set_logo": "Studio logo instellen",
             "title": "Instellingen",
-            "webhook_error": "Une erreur est survenue en postant le webhook",
             "fields": {
                 "name": "Studio naam",
                 "hours_by_day": "Uren per dag",
                 "slack_token": "Slack Token (Optioneel)",
+                "use_original_name": "Gebruik originele bestandsnamen voor downloads",
+                "timesheets_locked": "Timesheets van artists ouder dan 1 week vergrendelen",
                 "mattermost_webhook": "Mattermost Webhook (Optioneel)",
                 "discord_token": "Discord Token (Optioneel)",
-                "use_original_name": "Gebruik originele bestandsnamen voor downloads",
-                "timesheets_locked": "Timesheets van artists ouder dan 1 week vergrendelen"
+                "show_hd_default": "Afbeelding standaard in HD-kwaliteit weergeven"
             },
             "production": {
-                "empty_list": "De lijst is momenteel leeg. Dit betekent dat alle gegevens uit de hoofdinstellingen beschikbaar zijn voor gebruikers. Voeg enkele gegevens toe om de keuzes voor deze productie te beperken."
+                "empty_list": "De lijst is momenteel leeg. Dit betekent dat alle gegevens uit de hoofdinstellingen beschikbaar zijn voor gebruikers. Voeg enkele gegevens toe om de keuzes voor deze productie te beperken.",
+                "empty_automation_list": "Er is geen automatisering ingesteld voor deze productie."
             },
             "save": {
                 "button": "Instellingen opslaan",
                 "error": "Er is een serverfout opgetreden tijdens het opslaan van instellingen"
-            }
+            },
+            "webhook_error": "Er is een fout opgetreden bij het posten van webhook"
         },
         "task_status": {
             "create_error": "Er is een fout opgetreden bij het opslaan van deze taakstatus. Weet je zeker dat er geen taakstatus is met een vergelijkbare naam?",
@@ -682,11 +846,12 @@
                 "color": "Kleur",
                 "is_artist_allowed": "Is artist toegestaan",
                 "is_client_allowed": "Is klant toegestaan",
-                "is_default": "Is default",
                 "is_done": "Is klaar",
                 "is_retake": "Heeft heropnamewaarde",
                 "name": "Naam",
-                "short_name": "Korte naam"
+                "short_name": "Korte naam",
+                "is_feedback_request": "is terugkoppel verzoek",
+                "is_default": "Is standaard"
             },
             "name": "taakstatus"
         },
@@ -710,7 +875,7 @@
         "sequences": {
             "all_sequences": "Alle sequenties",
             "edit_error": "Er is een fout opgetreden bij het opslaan van deze sequentie. Weet je zeker dat er geen sequentie is met een vergelijkbare naam?",
-            "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen? Alle gerelateerde opnamen en voorbeelden worden verwijderd. Bevestig door de naam van de sequentie hieronder te typen.",
+            "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen? Alle gerelateerde opnamen en previews worden verwijderd. Bevestig door de naam van de sequentie hieronder te typen.",
             "delete_error": "Er is een fout opgetreden bij het verwijderen van deze sequentie. Waarschijnlijk zijn er gegevens aan gekoppeld. Weet je zeker dat er geen opname aan deze sequentie is gekoppeld?",
             "edit_title": "Bewerk sequentie",
             "empty_list": "Er is geen sequentie in de productie. Een sequentie maken?",
@@ -721,11 +886,14 @@
             "fields": {
                 "name": "naam",
                 "description": "omschrijving"
-            }
+            },
+            "no_casting": "De sequentiecasting is leeg.",
+            "stats_title": "Sequentie-statistieken",
+            "tasks": "Taken"
         },
         "schedule": {
-            "title": "Schema",
-            "title_main": "Hoofdschema",
+            "title": "Planning",
+            "title_main": "Algemene planning",
             "overall_man_days": "Mandagen",
             "md": "md",
             "zoom_level": "Zoomniveau",
@@ -751,7 +919,21 @@
             "quota_month": "Quotum per maand",
             "year_label": "Jaar",
             "title": "Quotum",
-            "type_label": "Type"
+            "type_label": "Type",
+            "explaination": "Shots worden als beëindigd beschouwd bij het eerste verzoek om feedback. Vervolgens worden de quota gewogen volgens de tijd die aan de taak is besteed (wanneer de kunstenaar zijn timesheet heeft ingevuld).\n Als er geen tijd wordt ingevuld, wordt ervan uitgegaan dat:\n * De taak werd gestart bij de eerste statuswijziging naar WIP \n* De taak werd uitgevoerd op de dag dat het feedbackverzoek werd gedaan.\n * Het de uitgevoerde kaders verdeelt over alle werkdagen tussen het begin en het einde.",
+            "export_quotas": "Exportquota",
+            "highlight_quotas": "Markeer de onderstaande quota:",
+            "weight": "Gewicht",
+            "count": "Aantal",
+            "compute_mode": "Rekenmodus",
+            "day": "Dag",
+            "feedback_date": "Datum feedback",
+            "explaination_feedback": "Het shot is klaar bij het eerste feedbackverzoek. Het aantal frames ervan wordt toegevoegd aan de quota voor deze dag.",
+            "frames": "Frames",
+            "month": "Maand",
+            "seconds": "Seconden",
+            "weighted": "Gewogen",
+            "week": "Week"
         },
         "shots": {
             "casting": "Opname verschijning",
@@ -790,7 +972,9 @@
                 "production": "Prod",
                 "sequence": "Sequentie",
                 "time_spent": "Tijd",
-                "person": "Wijziger"
+                "person": "Wijziger",
+                "max_retakes": "Max. aantal retakes",
+                "resolution": "Resolutie"
             },
             "cancel_text": "Weet je zeker dat je {name} wilt archiveren?",
             "delete_for_selection": "Verwijder {nbSelectedShots} geselecteerde opnamen:",
@@ -812,13 +996,13 @@
             "status": "Status"
         },
         "tasks": {
-            "add_preview": "Voorbeeld toevoegen",
-            "add_preview_error": "Een fout is opgetreden tijdens het toevoegen van een voorbeeld.",
+            "add_preview": "Preview toevoegen",
+            "add_preview_error": "Een fout is opgetreden tijdens het toevoegen van een preview.",
             "assign": "Wijs één taak toe aan: | Wijs {nbSelectedTasks} taken toe aan:",
             "back_to_list": "terug naar lijst",
             "bigger": "Taakpaneel breder",
             "change_status_to": "Wijzig taakstatus in:",
-            "change_preview": "Wijzig voorbeeld",
+            "change_preview": "Wijzig preview",
             "change_priority": "Wijzig prioriteit in:",
             "clear_assignations": "Toewijzingen legen",
             "comment_image": "Voeg een afbeelding toe aan je reactie",
@@ -838,8 +1022,8 @@
             "delete_comment": "Weet je zeker dat je de reactie wilt verwijderen?",
             "delete_comment_error": "Er is een fout opgetreden bij het verwijderen van de opmerking.",
             "delete_for_selection": "Verwijder geselecteerde taken:",
-            "delete_preview": "Weet je zeker dat je dit voorbeeld wilt verwijderen?",
-            "delete_preview_error": "Er is een fout opgetreden bij het verwijderen van het voorbeeld.",
+            "delete_preview": "Weet je zeker dat je dit preview wilt verwijderen?",
+            "delete_preview_error": "Er is een fout opgetreden bij het verwijderen van de preview.",
             "edit_comment": "Reactie bewerken",
             "done": "Voltooid",
             "download_pdf_file": "Download .{extension} bestand",
@@ -851,21 +1035,20 @@
             "next": "volgende taak",
             "no_assignation_right": "Je mag geen toewijzingen beheren",
             "no_comment": "Er is momenteel geen reactie op deze taak.",
-            "no_preview": "Er is momenteel geen voorbeeld voor deze taak.",
+            "no_preview": "Er is momenteel geen preview voor deze taak.",
             "no_task_selected": "Geen taak geselecteerd",
             "number": "taak | taken",
-            "preview": "Voorbeelden",
+            "preview": "Previews",
             "previous": "vorige taak",
             "unsubscribe_notifications": "Meldingen uitschakelen",
             "set_estimations": "Tijd in schatten voor geselecteerde taken:",
-            "set_preview": "Voorbeeld als thumbnail instellen",
-            "set_preview_error": "Er is een fout opgetreden bij het instellen van voorbeeld als thumbnail",
-            "set_preview_done": "Dit voorbeeld wordt gebruikt als thumbnail voor de huidige item.",
-            "select_preview_file": "Selecteer een bestand (foto, film of iets anders) van je harde schijf om te gebruiken als voorbeeld voor de huidige taak:",
+            "set_preview": "Preview als thumbnail instellen",
+            "set_preview_error": "Er is een fout opgetreden bij het instellen van preview als thumbnail",
+            "set_preview_done": "Dit preview wordt gebruikt als thumbnail voor de huidige item.",
+            "select_preview_file": "Selecteer een bestand (afbeelding, film of iets anders) van je harde schijf om te gebruiken als preview voor de huidige taak:",
             "show_assignations": "Toon toewijzingen",
             "show_infos": "Toon aanvullende informatie",
             "subscribe_notifications": "Zet meldingen aan",
-            "select_image_file": "Selecteer de afbeelding van je harde schijf die je aan je opmerking wilt toevoegen:",
             "tasks": "Taken",
             "validation": "Validatie",
             "with_comment": "Met een opmerking...",
@@ -893,7 +1076,8 @@
                 "start_date": "Start datum",
                 "task_status": "Status",
                 "task_status_short_name": "Status",
-                "task_type": "Type"
+                "task_type": "Type",
+                "start_date_short": "Begindatum"
             },
             "colors": {
                 "title": "Kleuren",
@@ -912,7 +1096,48 @@
             "for_project": "Voor project",
             "all_tasks": "Alle taken",
             "due_this_week": "Deze week opleveren",
-            "select_file": "Selecteer het bestand van je harde schijf dat je aan je opmerking wilt toevoegen:"
+            "select_file": "Selecteer het bestand van je harde schijf dat je aan je opmerking wilt toevoegen:",
+            "big_thumbnails": "Grote thumbnails tonen",
+            "create_tasks_edit": "Voeg taken voor huidige edits toe",
+            "create_tasks_edit_explaination": "Je gaat een nieuwe taak aanmaken voor iedere edit van het huidige project voor het gegeven taaktype. Wil je doorgaan?",
+            "create_tasks_edit_failed": "Er is een serverfout opgetreden tijdens het creëren.",
+            "smaller": "Verklein taak paneel",
+            "small_thumbnails": "Kleine thumbnails tonen",
+            "combobox_departments": {
+                "all_departments": "Alle Afdelingen",
+                "my_departments": "Mijn Afdelingen"
+            },
+            "add_revision_confirm": "Voeg te publiceren bestanden toe",
+            "confirm_attachments": "Voeg bestanden toe als bijlagen",
+            "change_status": "Wijzig status",
+            "clear_own_assignations": "je toewijzingen opschonen",
+            "publish": "Revisie publiceren",
+            "all": "Alle taken",
+            "assign_explaination": "Selecteer een persoon om toe te wijzen...",
+            "change_priority_to": "Nieuwe prioriteit:",
+            "change_task_status": "Wijzig status van de geselecteerde taak | Wijzig status van de {nbSelectedTasks} geselecteerde",
+            "due_date": "Status einddatum",
+            "due_after_today": "Einddatum na vandaag",
+            "due_before_today": "Einddatum voor vandaag",
+            "due_next_week": "Einddatum volgende week",
+            "due_next_month": "Einddatum volgende maand",
+            "due_previous_week": "Einddatum vorige week",
+            "due_previous_month": "Einddatum vorige maand",
+            "due_this_month": "Einddatum deze maand",
+            "estimation_over": "Schatting over Duur",
+            "estimation_approval_late": "Einddatum is laat (feedback)",
+            "estimation_done_late": "Einddatum is laat (klaar)",
+            "late": "Late status",
+            "nb_selected_tasks": "{nbSelectedTasks} taak geselecteerd | {nbSelectedTasks} taken geselecteerd",
+            "set_thumbnails_from_tasks": "Stel de laatste preview van de geselecteerde taak in als thumbnail | Stel de laatste previews van de geselecteerde taken in als thumbnails",
+            "to_myself": "Voor mezelf",
+            "create_tasks_episode": "Taken toevoegen voor huidige episodes",
+            "create_tasks_episode_explaination": "Je staat op het punt een nieuwe taak aan te maken voor elke episode van het huidige project voor het gegeven taaktype. Wil je doorgaan?",
+            "create_tasks_episode_failed": "Er is een serverfout opgetreden tijdens het creatieproces.",
+            "clear_all_assignations": "alles ongedaan maken",
+            "create_tasks_sequence": "Taken toevoegen voor huidige sequenties",
+            "create_tasks_sequence_explaination": "Je staat op het punt een nieuwe taak aan te maken voor elke sequentie van het huidige project voor het gegeven taaktype. Wil je doorgaan?",
+            "create_tasks_sequence_failed": "Er is een serverfout opgetreden tijdens het creatieproces."
         },
         "timesheets": {
             "detail_level": "Detailniveau",
@@ -925,7 +1150,8 @@
             "year": "Jaar",
             "confirm_day_off": "Als u deze dag als vrije dag instelt, wordt alle voor de huidige dag ingevulde tijd gewist. Weet je zeker dat je door wilt gaan?",
             "day_off": "Vrije dag",
-            "export_timespents": "Tijdsbesteding voor open projecten exporteren als een lijst"
+            "export_timespents": "Tijdsbesteding voor open projecten exporteren als een lijst",
+            "unit": "Eenheid"
         },
         "wrong_browser": {
             "title": "Je browser wordt niet ondersteund door Kitsu",
@@ -940,14 +1166,14 @@
                 "date": "Aanmaak datum",
                 "empty_list": "Er zijn geen gebroken of lopende previews.",
                 "entity_name": "Item naam",
-                "explaination": "Op deze pagina staan alle voorbeeldbestanden in een tussenstatus: verwerkt of kapot. Het laat je weten hoeveel voorbeeldbestanden worden verwerkt of welke bestanden niet konden worden genormaliseerd en opgeslagen op Kitsu.",
+                "explaination": "Op deze pagina staan alle previewbestanden in een tussenstatus: verwerkt of kapot. Het laat je weten hoeveel previewbestanden worden verwerkt of welke bestanden niet konden worden genormaliseerd en opgeslagen op Kitsu.",
                 "file_name": "Bestandsnaam",
                 "person": "Gebruiker",
                 "production": "Productie",
                 "revision": "Revisie",
                 "status": "Status",
                 "task_type_id": "Taaktype",
-                "title": "Voorbeeldbestanden"
+                "title": "Previewbestanden"
             }
         },
         "departments": {
@@ -963,6 +1189,63 @@
                 "name": "Naam",
                 "color": "Kleur"
             }
+        },
+        "edits": {
+            "all_edits": "Alle bewerkingen",
+            "creation_explaination": "Upload een editfile om een nieuwe edit te creëeren",
+            "edit_error": "Er is een fout opgetreden bij het opslaan van deze edit. Weet je zeker dat er geen edit met een soortgelijke naam is?",
+            "delete_text": "Weet je zeker dat je {name} wilt verwijderen van de database?",
+            "delete_error": "Er is een fout opgetreden bij het verwijderen van deze edit. Er zijn waarschijnlijk gegevens aan gekoppeld.",
+            "delete_for_selection": "Verwijder {nbSelectedEdits} geselecteerde bewerkingen",
+            "edit_title": "Verander bewerking",
+            "empty_list": "De productie bevat geen edits. Wat dacht je ervan er een paar te maken?",
+            "empty_list_client": "Deze productie bevat geen edits.",
+            "new_edit": "Nieuwe bewerking",
+            "number": "bewerking | bewerkingen",
+            "title": "Bewerkingen",
+            "fields": {
+                "name": "naam",
+                "episode": "Ep.",
+                "description": "Omschrijving"
+            },
+            "tasks": "Taken"
+        },
+        "status_automations": {
+            "change_ready_for": "verander 'klaar voor' in",
+            "change_status": "verandert taakstatus in",
+            "create_error": "Er is een fout opgetreden bij het opslaan van deze statusautomatisering. Weet je zeker dat er geen andere actie met dezelfde naam is?",
+            "delete_text": "Weet je zeker dat je de statusautomatisering {name} uit je database wilt verwijderen?",
+            "delete_error": "Er is een fout opgetreden bij het verwijderen van deze statusautomatisering. Hij is misschien gekoppeld aan een project. In dat geval kun je hem niet verwijderen. Je moet hem eerst uit alle projecten verwijderen.",
+            "edit_title": "Bewerk een statusautomatisering",
+            "entity_title": "Entiteitstype waarop de trigger betrekking heeft",
+            "number": "statusautomatisering | statusautomatiseringen",
+            "in_title": "Status die een wijziging triggert",
+            "out_title": "De wijziging die wordt toegepast bij activatie van de trigger",
+            "new_status_automation": "Statusautomatisering toevoegen",
+            "run_for_selection": "Statusautomatisering uitvoeren voor geselecteerde taken:",
+            "title": "Status Automatiseringen",
+            "wrong_automation": "Deze automatisering is van toepassing op een achterwaarts taaktype. Het is niet toegestaan door Kitsu (om cycli te vermijden). Het zal geen effect hebben.",
+            "fields": {
+                "entity_type": "Entiteitstype",
+                "in_field_type": "Type invoerveld",
+                "in_task_type": "Taak Type",
+                "in_task_status": "Taak Status",
+                "out_field_type": "Trigger",
+                "out_task_type": "Type toegepaste taak",
+                "out_task_status": "Status toegepaste taak"
+            },
+            "entity_types": {
+                "asset": "Asset",
+                "shot": "Shot"
+            },
+            "field_types": {
+                "status": "Status",
+                "ready_for": "Klaar Voor"
+            }
+        },
+        "preview_room": {
+            "join_room": "Betreed Review Room",
+            "leave_room": "Verlaat Room"
         }
     }
 }
