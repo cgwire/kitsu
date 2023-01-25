@@ -274,7 +274,7 @@ const actions = {
     const production = rootGetters.currentProduction
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
-    let entityIds = []
+    let entityIds = payload.entityIds || []
     if (payload.selectionOnly) {
       if (payload.type === 'shots') {
         entityIds = shotStore.cache.result.map(shot => shot.id)
