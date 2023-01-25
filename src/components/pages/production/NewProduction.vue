@@ -431,6 +431,7 @@ import { en, fr } from 'vuejs-datepicker/dist/locale'
 import { mapActions, mapGetters } from 'vuex'
 
 import csv from '@/lib/csv'
+import func from '@/lib/func'
 import { removeModelFromList } from '@/lib/models'
 import { formatSimpleDate } from '@/lib/time'
 import { sortByName } from '@/lib/sorting'
@@ -808,9 +809,11 @@ export default {
     },
 
     async createTaskTypesAndStatuses () {
-      await async.series(this.productionToCreate.assetTaskTypes.concat(
-        this.productionToCreate.shotTaskTypes
-      ).map(
+      await func.runPromiseAsSeries(
+        this.productionToCreate.assetTaskTypes.concat(
+          this.productionToCreate.shotTaskTypes
+        )
+      .map(
         // add task types
         async (taskType, index) => {
           const finalIndex = taskType.for_entity === 'Shot'
