@@ -168,6 +168,7 @@ const getters = {
   assetsPath: state => state.assetsPath,
   assetTypesPath: state => state.assetTypesPath,
   shotsPath: state => state.shotsPath,
+  sequencesPath: state => state.sequencesPath,
   editsPath: state => state.editsPath,
   episodesPath: state => state.episodesPath,
   episodeStatsPath: state => state.episodeStatsPath,
