@@ -469,7 +469,7 @@ const actions = {
         let taskTypeIds = rootGetters.productionAssetTaskTypeIds
         const sortInfo = state.assetSorting && state.assetSorting.length > 0
           ? state.assetSorting[0]
-          : []
+          : null
         // Add asset to the list
         commit(EDIT_ASSET_END, { newAsset: asset, assetTypeMap })
         // Sort list
