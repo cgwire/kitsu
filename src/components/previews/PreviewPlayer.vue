@@ -1653,6 +1653,7 @@ export default {
 
     isCommentsHidden () {
       this.$nextTick(() => {
+        window.dispatchEvent(new Event('resize'))
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
       })
     },
