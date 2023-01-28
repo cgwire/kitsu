@@ -5,6 +5,7 @@ import es from '@/locales/es.json'
 import fa from '@/locales/fa.js'
 import fr from '@/locales/fr.json'
 import hu from '@/locales/hu.json'
+import ja from '@/locales/ja.json'
 import ko from '@/locales/ko.json'
 import pt from '@/locales/pt.json'
 import ru from '@/locales/ru.json'
@@ -18,6 +19,7 @@ export default {
   fa: fa,
   fr: fr.default,
   hu: hu.default,
+  ja: ja.default,
   ko: ko.default,
   nl: nl.default,
   pt: pt.default,
