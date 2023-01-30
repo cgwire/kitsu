@@ -1,7 +1,10 @@
 import { mapActions, mapGetters } from 'vuex'
-import { fabric } from 'fabric'
-
-import { formatTime, formatFrame, roundToFrame, floorToFrame } from '@/lib/video'
+import {
+  formatTime,
+  formatFrame,
+  roundToFrame,
+  floorToFrame
+} from '@/lib/video'
 
 export const playerMixin = {
 
@@ -14,7 +17,6 @@ export const playerMixin = {
       currentTimeRaw: 0,
       entityList: [],
       entityListToCompare: [],
-      fabricCanvas: null,
       framesPerImage: [],
       framesSeenOfPicture: 0,
       fullScreen: false,
@@ -442,7 +444,7 @@ export const playerMixin = {
         if (wasDrawing) {
           setTimeout(() => {
             this.isDrawing = true
-            this.fabricCanvas.isDrawingMode = true
+            this.setAnnotationDrawingMode(true)
           }, 100)
         }
         if (this.isPlaying && this.isPicture(entity.preview_file_extension)) {
@@ -623,27 +625,10 @@ export const playerMixin = {
     },
 
     onFullscreenClicked () {
-      /** @lends fabric.IText.prototype */
-      // fix for : IText not editable when canvas is in a fullscreen
-      // element on chrome
-      // https://github.com/fabricjs/fabric.js/issues/5126
-      const originalInitHiddenTextarea =
-        fabric.IText.prototype.initHiddenTextarea
+      this.configureAnnotationTextArea()
       if (this.isFullScreen()) {
-        fabric.util.object.extend(fabric.IText.prototype, {
-          initHiddenTextarea: function () {
-            originalInitHiddenTextarea.call(this)
-            fabric.document.body.appendChild(this.hiddenTextarea)
-          }
-        })
         this.exitFullScreen()
       } else {
-        fabric.util.object.extend(fabric.IText.prototype, {
-          initHiddenTextarea: function () {
-            originalInitHiddenTextarea.call(this)
-            this.canvas.wrapperEl.appendChild(this.hiddenTextarea)
-          }
-        })
         this.setFullScreen()
       }
     },
@@ -704,11 +689,7 @@ export const playerMixin = {
         this.lastCall = now
         setTimeout(() => {
           this.resetHeight()
-          this.resetCanvas()
-            .then(() => {
-              this.reloadAnnotations()
-              this.loadAnnotation()
-            })
+          this.resizeAnnotations()
         }, 200)
       }
     },
@@ -873,19 +854,10 @@ export const playerMixin = {
       }
     },
 
-    resetCanvas () {
-      this.clearCanvas()
-      return this.resetCanvasSize()
-        .then(() => {
-          if (this.fabricCanvas) this.fabricCanvas.renderAll()
-          return Promise.resolve(this.fabricCanvas)
-        })
-    },
-
     resetCanvasSize () {
       return this.$nextTick()
         .then(() => {
-          if (this.isCurrentPreviewMovie && this.fabricCanvas) {
+          if (this.isCurrentPreviewMovie && this.isAnnotationCanvas()) {
             if (this.canvas) {
               // Video Ratio
               const ratio = this.rawPlayer.getVideoRatio()
@@ -900,17 +872,20 @@ export const playerMixin = {
                 const left = Math.round((fullWidth - width) / 2)
                 this.canvas.style.left = left + 'px'
                 this.canvas.style.top = '0px'
-                this.fabricCanvas.setDimensions({ width, height: fullHeight })
+                this.setAnnotationCanvasDimensions(width, fullHeight)
               } else {
                 // Case where canvas is bigger than the container
                 const height = ratio ? Math.round(fullWidth / ratio) : fullHeight
                 const top = Math.round((fullHeight - height) / 2)
                 this.canvas.style.left = '0px'
                 this.canvas.style.top = top + 'px'
-                this.fabricCanvas.setDimensions({ width: fullWidth, height })
+                this.setAnnotationCanvasDimensions(fullWidth, height)
               }
             }
-          } else if (this.isCurrentPreviewPicture && this.fabricCanvas) {
+          } else if (
+            this.isCurrentPreviewPicture &&
+            this.isAnnotationCanvas()
+          ) {
             if (this.canvas) {
               // Picture ratio
               const naturalWidth = this.picturePlayer.naturalWidth
@@ -972,7 +947,7 @@ export const playerMixin = {
                 const left = Math.round((fullWidth - width) / 2)
                 this.canvas.style.left = left + 'px'
               }
-              this.fabricCanvas.setDimensions({ width, height })
+              this.setAnnotationCanvasDimensions(width, height)
             }
           }
           return Promise.resolve()
@@ -1191,41 +1166,6 @@ export const playerMixin = {
             resolve()
           }, 500)
         })
-      })
-    },
-
-    copyAnnotationCanvas (canvas, annotation) {
-      return new Promise(resolve => {
-        this.clearCanvas()
-        this.loadSingleAnnotation(annotation)
-        setTimeout(() => {
-          const context = canvas.getContext('2d')
-          const scaleRatio = canvas.width / this.fabricCanvas.width
-          const tmpSource = document.getElementById('resize-annotation-canvas')
-          const tmpCanvas = new fabric.Canvas('resize-annotation-canvas', {
-            width: canvas.width,
-            height: canvas.height
-          })
-          this.fabricCanvas.getObjects().find(obj => {
-            if (obj._objects) {
-              obj._objects.forEach(obj => {
-                tmpCanvas.add(obj)
-                obj.strokeWidth = 8 / scaleRatio
-              })
-            } else {
-              tmpCanvas.add(obj)
-              obj.strokeWidth = 8 / scaleRatio
-            }
-          })
-          tmpCanvas.setZoom(scaleRatio)
-          setTimeout(() => {
-            context.drawImage(tmpSource, 0, 0, canvas.width, canvas.height)
-            setTimeout(() => {
-              tmpCanvas.dispose()
-            }, 100)
-            return resolve()
-          }, 100)
-        }, 100)
       })
     },
 
