@@ -28,11 +28,11 @@ export const annotationMixin = {
 
   data () {
     return {
+      fabricCanvas: null,
       lastAnnotationTime: '',
       additions: [],
       deletions: [],
       updates: [],
-      objIndex: new Map(),
       isShowingPalette: false,
       isShowingPencilPalette: false,
       notSave: false
@@ -54,20 +54,26 @@ export const annotationMixin = {
     ]),
 
     annotationCanvas () {
-      return this.$refs['annotation-canvas']
+      return this.$refs['annotation-canvas'] // Canvas used by fabric
     }
   },
 
   methods: {
+
     // Objects
+
+    /*
+     * Get object from the canvas, find it via its unique id.
+     */
     getObjectById (objectId) {
       return this.fabricCanvas.getObjects().find(obj => obj.id === objectId)
     },
 
-    setObjectData (object) {
-      if (!object.id) object.set('id', uuidv4())
-      object.set('canvasWidth', this.fabricCanvas.width)
-      object.set('canvasHeight', this.fabricCanvas.height)
+
+    /*
+     * Make an object serializable (with its extra data).
+     */
+    addSerialization (object) {
       object.serialize = function () {
         const result = object.toJSON()
         result.id = this.id
@@ -75,11 +81,38 @@ export const annotationMixin = {
         result.canvasHeight = this.canvasHeight
         result.angle = this.angle
         result.scale = this.scale
+        result.createdBy = this.createdBy
         return result
       }
       return object
     },
 
+    /*
+     * Set extra data needed to manage the object representation and saving.
+     * It adds an unique id and canvas size. This context is needed when
+     * drawing annotations.
+     * Saving requires to be done partially to avoid collisions.
+     */
+    setObjectData (object) {
+      if (object.set) {
+        if (!object.id) object.set('id', uuidv4())
+        object.set('canvasWidth', this.fabricCanvas.width)
+        object.set('canvasHeight', this.fabricCanvas.height)
+      } else {
+        if (!object.id) object.id = uuidv4()
+        object.canvasWidth = this.fabricCanvas.width
+        object.canvasHeight = this.fabricCanvas.height
+      }
+      if (!object.createdBy) object.set('createdBy', this.userId)
+      this.addSerialization(object)
+      return object
+    },
+
+    /*
+     * Add an object to the canvas and to the action stack (undo/redo).
+     *
+     * Handle groups as a series of objects.
+     */
     addObject (activeObject, persist = true) {
       if (activeObject._objects) {
         activeObject._objects.forEach((obj) => {
@@ -95,6 +128,10 @@ export const annotationMixin = {
       }
     },
 
+    /*
+     * Add a text object to the canvas and focus on it right after to allow its
+     * edition instantly.
+     */
     addText () {
       if (this.fabricCanvas.getActiveObject()) return
       const canvas = this.canvas || this.canvasWrapper
@@ -125,11 +162,11 @@ export const annotationMixin = {
       }
     },
 
+    /** @lends fabric.IText.prototype */
+    // fix for : IText not editable when canvas is in a fullscreen
+    // element on chrome
+    // https://github.com/fabricjs/fabric.js/issues/5126
     addTypeArea () {
-      /** @lends fabric.IText.prototype */
-      // fix for : IText not editable when canvas is in a fullscreen
-      // element on chrome
-      // https://github.com/fabricjs/fabric.js/issues/5126
       const originalInitHiddenTextarea =
         fabric.IText.prototype.initHiddenTextarea
       fabric.util.object.extend(fabric.IText.prototype, {
@@ -140,6 +177,9 @@ export const annotationMixin = {
       })
     },
 
+    /*
+     * Hack needed to make text objects working properly.
+     */
     removeTypeArea () {
       const originalInitHiddenTextarea =
         fabric.IText.prototype.initHiddenTextarea
@@ -151,11 +191,18 @@ export const annotationMixin = {
       })
     },
 
+    /*
+     * Remove selected objects from the canvas and persist deletions.
+     */
     deleteSelection () {
       const activeObject = this.fabricCanvas.getActiveObject()
       this.deleteObject(activeObject)
     },
 
+    /*
+     * Remove given object from the canvas, add an operation to the action
+     * stack and persist the deletion.
+     */
     deleteObject (activeObject) {
       if (activeObject && activeObject._objects) {
         activeObject._objects.forEach(obj => {
@@ -175,6 +222,9 @@ export const annotationMixin = {
       this.saveAnnotations()
     },
 
+    /*
+     * Remove given object or group from the canvas.
+     */
     removeObjectFromCanvas (deletedObject) {
       const obj = this.getObjectById(deletedObject.id)
       if (obj) {
@@ -185,18 +235,23 @@ export const annotationMixin = {
           this.fabricCanvas.remove(obj)
         }
       }
-      this.objIndex.delete(deletedObject.id)
     },
 
+    /*
+     * Remove given object or group from the canvas and add its updated
+     * version.
+     */
     updateObjectInCanvas (annotation, updatedObject) {
       const obj = this.getObjectById(updatedObject.id)
       if (obj) {
         this.removeObjectFromCanvas(obj)
-        this.objIndex.set(updatedObject.id, updatedObject)
         this.addObjectToCanvas(annotation, updatedObject)
       }
     },
 
+    /*
+     * Add the given object to the element to persist.
+     */
     addToAdditions (obj) {
       this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
@@ -212,10 +267,16 @@ export const annotationMixin = {
       this.postAnnotationAddition(currentTime, obj.serialize())
     },
 
+    /*
+     * Hook occuring after an addition.
+     */
     postAnnotationAddition (currentTime, obj) {
       // Aimed at being supercharged
     },
 
+    /*
+     * Remove given object from the additions to persist (undo action).
+     */
     removeFromAdditions (obj) {
       const currentTime = this.getCurrentTime()
       const additions = this.additions.find(a => a.time === currentTime)
@@ -226,6 +287,9 @@ export const annotationMixin = {
       }
     },
 
+    /*
+     * Add given object to the deletions to persist (undo action).
+     */
     addToDeletions (obj) {
       this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
@@ -239,15 +303,7 @@ export const annotationMixin = {
         })
       }
       if (!obj.serialize) {
-        obj.serialize = function () {
-          const result = this.toJSON()
-          result.id = this.id
-          result.canvasWidth = this.canvasWidth
-          result.canvasHeight = this.canvasHeight
-          result.angle = this.angle
-          result.scale = this.scale
-          return result
-        }
+        addSerialization(obj)
       }
 
       this.postAnnotationDeletion(
@@ -256,10 +312,16 @@ export const annotationMixin = {
       )
     },
 
+    /*
+     * Hook occuring after a removal.
+     */
     postAnnotationDeletion (currentTime, obj) {
       // Aimed at being supercharged
     },
 
+    /*
+     * Remove given object from the deletions to persist (undo action).
+     */
     removeFromDeletions (obj) {
       const currentTime = this.getCurrentTime()
       const deletions = this.deletions.find(a => a.time === currentTime)
@@ -270,11 +332,17 @@ export const annotationMixin = {
       }
     },
 
+    /*
+     * Add given object to updates to persist.
+     */
     addToUpdates (obj) {
       this.setObjectData(obj)
       this.addToUpdatesSerializedObject(obj.serialize())
     },
 
+    /*
+     * Add non fabric object to updates to persist.
+     */
     addToUpdatesSerializedObject (obj) {
       this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
@@ -293,16 +361,26 @@ export const annotationMixin = {
       this.postAnnotationUpdate(currentTime, obj)
     },
 
+    /*
+     * Hook run after annotation updates occured.
+     */
     postAnnotationUpdate (currentTime, obj) {
       // Aimed at being supercharged
     },
 
+    /*
+     * Clear all running modifications
+     */
     clearModifications () {
       this.additions = []
       this.updates = []
       this.deletions = []
     },
 
+
+    /*
+     * Debug helper.
+     */
     printModificationStats (prefix) {
       console.log(
         prefix,
@@ -314,10 +392,21 @@ export const annotationMixin = {
       )
     },
 
+    /*
+     * True if the last annotation is superior to given date. It's a way to
+     * avoid collisions.
+     */
     isWriting (date) {
       return this.lastAnnotationTime >= date
     },
 
+    /*
+     * Build an annotation object to be persisted and used in the Vue store.
+     * All annotations are a serialized fabric objects. Add a current time
+     * indicator in the result object to tie the annotation to a given frame.
+     *
+     * Later it will be interesting to represent time in as a frame number.
+     */
     getNewAnnotations (currentTime, annotation) {
       this.fabricCanvas.getObjects().forEach(obj => {
         this.setObjectData(obj)
@@ -330,17 +419,30 @@ export const annotationMixin = {
             ml: false,
             mr: false,
             bl: false,
-            br: true,
+            br: !this.isCurrentUserArtist,
             tl: false,
             tr: false,
-            mtr: true
+            mtr: !this.isCurrentUserArtist
           })
         }
       })
 
       if (annotation) {
         annotation.drawing = {
-          objects: this.fabricCanvas._objects.map(obj => obj.serialize())
+          objects: this.fabricCanvas._objects.map(obj => {
+            const result = obj.serialize()
+            // We need to clean the coordinate modifications due to selection
+            // grouping.
+            if (obj.group) {
+              const group = obj.group
+              result.left =
+                group.left + Math.round(group.width / 2) + obj.left
+              result.top =
+                group.top + Math.round(group.height / 2) + obj.top
+              result.group = null
+            }
+            return result
+          })
         }
         annotation.time = currentTime
         if (annotation.drawing && annotation.drawing.objects.length < 1) {
@@ -366,12 +468,32 @@ export const annotationMixin = {
       return annotations
     },
 
+    /*
+     * Load an annotation directly to the canvas by adding all its object
+     * one by one to the canvas.
+     */
     loadSingleAnnotation (annotation) {
       annotation.drawing.objects.forEach(obj => {
         this.addObjectToCanvas(annotation, obj)
       })
     },
 
+    /*
+     * Add an object to the canvas if it is not already there.
+     *
+     * To add an object it computes the modifiers needed to render it properly:
+     * x-axis scale multiplier, y-axis scale multiplier and stroke multiplier.
+     * They are computed from the current canvas size and the canvas size when
+     * the annotation was saved.
+     *
+     * It creates a base object description and sets the writing permissions on
+     * it. Then it configures it as text or a path depending on the object
+     * type. Position and proportion are
+     *
+     * Finally it adds the built object to the canvas.
+     *
+     * @returns: the build object.
+     */
     addObjectToCanvas (
       annotation,
       obj
@@ -379,7 +501,6 @@ export const annotationMixin = {
       if (!obj) return
       if (this.getObjectById(obj.id)) return
       let path, text
-      this.objIndex.set(obj.id, obj)
       let scaleMultiplierX = 1
       let scaleMultiplierY = 1
       if (annotation && annotation.width) {
@@ -416,8 +537,9 @@ export const annotationMixin = {
         angle: obj.angle,
         scale: obj.scale,
         editable: !this.isCurrentUserArtist,
-        selectable: !this.isCurrentUserArtist
+        selectable: !this.isCurrentUserArtist,
       }
+
       if (obj.type === 'path') {
         let strokeMultiplier = 1
         if (obj.canvasWidth) {
@@ -427,14 +549,14 @@ export const annotationMixin = {
         path = new fabric.Path(
           obj.path,
           {
-            ...base,
-            strokeWidth: obj.strokeWidth * strokeMultiplier,
-            canvasWidth: obj.canvasWidth
+            ...base
           }
         )
         path.set('id', obj.id)
         path.set('strokeWidth', obj.strokeWidth * strokeMultiplier)
         path.set('canvasWidth', canvasWidth)
+        path.set('canvasHeight', canvasHeight)
+        this.addSerialization(path)
         path.setControlsVisibility({
           mt: false,
           mb: false,
@@ -464,16 +586,19 @@ export const annotationMixin = {
           }
         )
         text.set('id', obj.id)
+        text.set('canvasWidth', canvasWidth)
+        text.set('canvasHeight', canvasHeight)
+        this.addSerialization(text)
         text.setControlsVisibility({
           mt: false,
           mb: false,
           ml: false,
           mr: false,
           bl: false,
-          br: !this.isCurrentUserArtist,
+          br: false,
           tl: false,
           tr: false,
-          mtr: !this.isCurrentUserArtist
+          mtr: false
         })
         this.$options.silentAnnnotation = true
         this.fabricCanvas.add(text)
@@ -484,25 +609,40 @@ export const annotationMixin = {
 
     // Events
 
+    /*
+     * Enable / disabl showing pencil palette flag.
+     */
     onPickPencil () {
       this.isShowingPencilPalette = !this.isShowingPencilPalette
     },
 
+    /*
+     * Enable / disabl showing color palette flag.
+     */
     onPickColor () {
       this.isShowingPalette = !this.isShowingPalette
     },
 
+    /*
+     * When a drawing color is changed, store it in local state.
+     */
     onChangeColor (color) {
       this.color = color
       this._resetColor()
       this.isShowingPalette = false
     },
 
+    /*
+     * When a text color is changed, store it in local state.
+     */
     onChangeTextColor (color) {
       this.textColor = color
       this.isShowingPalette = false
     },
 
+    /*
+     * When a pencil is changed, store it in local state.
+     */
     onChangePencil (pencil) {
       this.pencil = pencil
       this._resetPencil()
@@ -523,6 +663,9 @@ export const annotationMixin = {
       this.fabricCanvas.freeDrawingBrush.width = strokeWidth
     },
 
+    /*
+     * Enable / disable the drawing mode. Differentiate text from path drawing.
+     */
     onAnnotateClicked () {
       this.showCanvas()
       if (this.isDrawing) {
@@ -541,6 +684,9 @@ export const annotationMixin = {
       }
     },
 
+    /*
+     * Enable / disable eraser mode.
+     */
     onEraseClicked () {
       this.showCanvas()
       if (this.isDrawing) {
@@ -559,6 +705,9 @@ export const annotationMixin = {
       }
     },
 
+    /*
+     * Enable / disable the text mode. Tetxs are added via a double click.
+     */
     onTypeClicked () {
       const clickarea = this.canvas.getElementsByClassName('upper-canvas')[0]
       this.showCanvas()
@@ -573,6 +722,10 @@ export const annotationMixin = {
       }
     },
 
+    /*
+     * When the windows is closed, display an alert if the current annotations
+     * are not saved.
+     */
     onWindowsClosed (event) {
       if (this.notSaved) {
         const confirmationMessage = 'Your annotations are not saved yet.'
@@ -581,6 +734,11 @@ export const annotationMixin = {
       }
     },
 
+    /*
+     * When an object is added, set its context data, add it to the canvas,
+     * add it to the additions to save and store an add action in the action
+     * stacks.
+     */
     onObjectAdded (obj) {
       if (this.$options.silentAnnnotation) return
       let o = obj
@@ -598,20 +756,25 @@ export const annotationMixin = {
       }
     },
 
-    onObjectMoved (obj) {
-      if (!obj.target._objects) {
-        this.addToUpdates(obj.target)
+    /*
+     * When object is moved, save infomation
+     */
+    onObjectMoved (event) {
+      const movedObject = event.target
+      if (!movedObject._objects) {
+        this.addToUpdates(movedObject)
         this.saveAnnotations()
+        this.addSerialization(movedObject)
       } else {
-        obj.target._objects.forEach(o => {
-          const oo = this.getObjectById(o.id)
-          this.setObjectData(oo)
-          const targetObj = oo.serialize()
+        const group = movedObject
+        group._objects.forEach(groupObj => {
+          const canvasObj = this.getObjectById(groupObj.id)
+          this.setObjectData(canvasObj)
+          const targetObj = canvasObj.serialize()
           targetObj.left =
-            obj.target.left + Math.round(obj.target.width / 2) + o.left
+            group.left + Math.round(group.width / 2) + groupObj.left
           targetObj.top =
-            obj.target.top + Math.round(obj.target.height / 2) + o.top
-          this.setObjectData(targetObj)
+            group.top + Math.round(group.height / 2) + groupObj.top
           this.addToUpdatesSerializedObject(targetObj)
         })
         this.saveAnnotations()
@@ -620,11 +783,17 @@ export const annotationMixin = {
 
     // Undo / Redo
 
+    /*
+     * Clear all action stacks.
+     */
     resetUndoStacks () {
       this.$options.doneActionStack = []
       this.$options.undoneActionStack = []
     },
 
+    /*
+     * Add a add action to the stack.
+     */
     stackAddAction ({ target }) {
       this.$options.doneActionStack.push({ type: 'add', obj: target })
       target.lockScalingX = true
@@ -632,6 +801,9 @@ export const annotationMixin = {
       target.rotation = true
     },
 
+    /*
+     * Undo last action, update actions stack.
+     */
     undoLastAction () {
       const action = this.$options.doneActionStack.pop()
       if (action && action.obj) {
@@ -649,6 +821,9 @@ export const annotationMixin = {
       }
     },
 
+    /*
+     * Apply last undone action, update actions stack.
+     */
     redoLastAction () {
       const action = this.$options.undoneActionStack.pop()
       if (action) {
@@ -660,12 +835,81 @@ export const annotationMixin = {
       }
     },
 
+    /*
+     * Clear all actions in the undone stack.
+     */
     clearUndoneStack () {
       this.$options.undoneActionStack = []
     },
 
     // Canvas
 
+    /*
+     * Delete all annotations from the canvas and persist the deletion.
+     */
+    deleteAllAnnotations () {
+      this.fabricCanvas._objects.forEach(this.deleteObject)
+    },
+
+    /*
+     * Cancel current selection.
+     */
+    clearAnnotationSelection () {
+      const canvas = this.fabricCanvas
+      if (canvas.activeObject) {
+        canvas.discardActiveObject()
+        canvas.renderAll()
+      }
+    },
+
+    /*
+     * Clear everything and reload annotations.
+     */
+    resizeAnnotations () {
+      this.resetCanvas()
+        .then(() => {
+          this.reloadAnnotations()
+          this.loadAnnotation()
+        })
+    },
+
+    /*
+     * Remove all annotation from the canvas and reset its size.
+     */
+    resetCanvas () {
+      this.clearCanvas()
+      return this.resetCanvasSize()
+        .then(() => {
+          if (this.fabricCanvas) this.fabricCanvas.renderAll()
+          return Promise.resolve(this.fabricCanvas)
+        })
+    },
+
+    /*
+     * Return true if the canvas object is configured.
+     */
+    isAnnotationCanvas () {
+      return !!this.fabricCanvas
+    },
+
+    /*
+     * Set canvas width and height.
+     */
+    setAnnotationCanvasDimensions (width, height) {
+      this.fabricCanvas.setDimensions({ width, height })
+    },
+
+    /*
+     * Enable/disable drawing mode.
+     */
+    setAnnotationDrawingMode (isDrawingMode) {
+      this.fabricCanvas.isDrawingMode = isDrawingMode
+    },
+
+    /*
+     * Reset annotations data at the widget level by grabbing data from the
+     * store.
+     */
     reloadAnnotations () {
       this.annotations = []
       if (this.preview.annotations) {
@@ -680,6 +924,9 @@ export const annotationMixin = {
       return this.annotations
     },
 
+    /*
+     * Setup the fabric, events and default configuration
+     */
     setupFabricCanvas () {
       if (!this.annotationCanvas) return
 
@@ -700,6 +947,10 @@ export const annotationMixin = {
       return this.fabricCanvas
     },
 
+    /*
+     * Set all events listener, the default brush parameters and the group
+     * controls visibility.
+     */
     configureCanvas () {
       this.fabricCanvas.off('object:moved', this.onObjectMoved)
       this.fabricCanvas.off('text:changed', this.onObjectMoved)
@@ -720,9 +971,26 @@ export const annotationMixin = {
       this.fabricCanvas.on('mouse:up', this.onCanvasReleased)
       this.fabricCanvas.freeDrawingBrush.color = this.color
       this.fabricCanvas.freeDrawingBrush.width = 4
+
+      fabric.Group.prototype._controlsVisibility = {
+        tl: false,
+        tr: false,
+        br: false,  // !this.isCurrentUserArtist,
+        bl: false,
+        ml: false,
+        mt: false,
+        mr: false,
+        mb: false,
+        mt: false, // !this.isCurrentUserArtist
+      }
+      fabric.Group.prototype.hasControls = false
       return this.fabricCanvas
     },
 
+    /*
+     * When drawing is finished, the undone stack is emptied and the saving
+     * procedure is started.
+     */
     endDrawing () {
       if (this.isDrawing) {
         this.clearUndoneStack()
@@ -730,6 +998,9 @@ export const annotationMixin = {
       }
     },
 
+    /*
+     * Returns true if the canvas has no object inside it.
+     */
     isEmptyCanvas () {
       if (this.fabricCanvas) {
         return this.fabricCanvas.getObjects().length > 0
@@ -738,13 +1009,18 @@ export const annotationMixin = {
       }
     },
 
+    /*
+     * Remove all drawing objects from the fabric canvas
+     */
     clearCanvas () {
       if (this.fabricCanvas) {
         this.fabricCanvas.clear()
-        this.objIndex.clear()
       }
     },
 
+    /*
+     * Store selected annotations into the clipboard.
+     */
     copyAnnotations () {
       const activeObject = this.fabricCanvas.getActiveObject()
       if (activeObject) {
@@ -756,6 +1032,9 @@ export const annotationMixin = {
       return activeObject
     },
 
+    /*
+     * Paste annotations stored in the clipboard.
+     */
     pasteAnnotations () {
       this.fabricCanvas.discardActiveObject()
       const clonedObj = clipboard.pasteAnnotations()
@@ -769,6 +1048,9 @@ export const annotationMixin = {
       }
     },
 
+    /*
+     * Slowly remove an object. It's used for the laser mode.
+     */
     fadeObject (obj) {
       if (!obj) return
       obj.animate('opacity', '0', {
@@ -782,11 +1064,19 @@ export const annotationMixin = {
 
     // Saving
 
+    /*
+     * Store the last time when an annotation was drawn. It will be useful to
+     * lock the canvas when real time applies.
+     */
     markLastAnnotationTime () {
       const time = moment().add(2, 'hour').add(6, 'seconds')
       this.lastAnnotationTime = formatFullDate(time).replace(' ', 'T')
     },
 
+    /*
+     * Run the saving procedure, prepare the data and set a 3s timer before
+     * persisting data to the server.
+     */
     startAnnotationSaving (preview, annotations) {
       this.notSaved = true
       this.$options.annotatedPreview = preview
@@ -794,6 +1084,10 @@ export const annotationMixin = {
         setTimeout(() => { this.endAnnotationSaving() }, 3000)
     },
 
+    /*
+     * Prepare the data to send to the server for persistance. Emit an event
+     * suggesting that annotations should be saved.
+     */
     endAnnotationSaving () {
       if (this.notSaved) {
         const preview = this.$options.annotatedPreview
@@ -808,6 +1102,60 @@ export const annotationMixin = {
         this.notSaved = false
         this.$emit('annotation-changed', this.$options.changesToSave)
       }
-    }
+    },
+
+    /** @lends fabric.IText.prototype */
+    // fix for : IText not editable when canvas is in a fullscreen
+    // element on chrome
+    // https://github.com/fabricjs/fabric.js/issues/5126
+    configureAnnotationTextArea () {
+      const originalInitHiddenTextarea =
+        fabric.IText.prototype.initHiddenTextarea
+      fabric.util.object.extend(fabric.IText.prototype, {
+        initHiddenTextarea: function () {
+          originalInitHiddenTextarea.call(this)
+          fabric.document.body.appendChild(this.hiddenTextarea)
+        }
+      })
+    },
+
+    /*
+     * Copy all information from the annotation into the target canvas to be
+     * able to apply operations on it, without modifiying the annotation.
+     */
+    copyAnnotationCanvas (canvas, annotation) {
+      return new Promise(resolve => {
+        this.clearCanvas()
+        this.loadSingleAnnotation(annotation)
+        setTimeout(() => {
+          const context = canvas.getContext('2d')
+          const scaleRatio = canvas.width / this.fabricCanvas.width
+          const tmpSource = document.getElementById('resize-annotation-canvas')
+          const tmpCanvas = new fabric.Canvas('resize-annotation-canvas', {
+            width: canvas.width,
+            height: canvas.height
+          })
+          this.fabricCanvas.getObjects().find(obj => {
+            if (obj._objects) {
+              obj._objects.forEach(obj => {
+                tmpCanvas.add(obj)
+                obj.strokeWidth = 8 / scaleRatio
+              })
+            } else {
+              tmpCanvas.add(obj)
+              obj.strokeWidth = 8 / scaleRatio
+            }
+          })
+          tmpCanvas.setZoom(scaleRatio)
+          setTimeout(() => {
+            context.drawImage(tmpSource, 0, 0, canvas.width, canvas.height)
+            setTimeout(() => {
+              tmpCanvas.dispose()
+            }, 100)
+            return resolve()
+          }, 100)
+        }, 100)
+      })
+    },
   }
 }
