@@ -175,9 +175,11 @@ const actions = {
           if (rootGetters.episodes.length === 0 && rootGetters.isTVShow) {
             return dispatch('loadEpisodes')
               .then(() => dispatch('loadShots'))
+              .then(resolve)
               .catch(reject)
           } else {
             return dispatch('loadShots')
+              .then(resolve)
               .catch(reject)
           }
         } else {

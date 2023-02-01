@@ -431,6 +431,7 @@ export default {
     production: 'Production',
     remove: 'Remove',
     reload: 'Reload',
+    remaining: 'Remaining',
     reply: 'Reply',
     save: 'Save',
     search_query: 'Search query',
