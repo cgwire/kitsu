@@ -411,17 +411,17 @@ const actions = {
       // If it's a wide episode, we just store it. There isn't anything to
       // load because we don't have episode defined.
       commit(SET_CURRENT_EPISODE, episode.id)
-      return callback()
+      if (callback) return callback()
     } else if (isTVShow && !episode) {
       // If it's tv show and if we don't have any episode set, we use the first
       // one.
       episode = episodes.length > 0 ? episodes[0] : null
-      if (!episode) return callback()
+      if (!episode && callback) return callback()
       commit(SET_CURRENT_EPISODE, episode.id)
     }
 
     if (isTVShow && !episode && episodes.length === 0) {
-      return callback()
+      if (callback) return callback()
     }
 
     if (!isTVShow && episode) {
@@ -429,7 +429,7 @@ const actions = {
     }
 
     if (state.isShotsLoading) {
-      return callback()
+      if (callback) return callback()
     }
 
     commit(LOAD_SHOTS_START)
