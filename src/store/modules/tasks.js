@@ -198,14 +198,6 @@ const actions = {
       })
   },
 
-  loadTaskSubscribed ({ commit, state }, { taskId, callback }) {
-    return tasksApi.getTaskSubscribed(taskId)
-      .then(subscribed => {
-        commit(LOAD_TASK_SUBSCRIBE_END, { taskId, subscribed })
-        return Promise.resolve(subscribed)
-      })
-  },
-
   subscribeToTask ({ commit, state }, taskId) {
     return tasksApi.subscribeToTask(taskId)
       .then(() => {
@@ -941,7 +933,11 @@ const mutations = {
     })
   },
 
-  [LOAD_TASK_SUBSCRIBE_END] (state, { taskId, subscribed }) {},
+  [LOAD_TASK_SUBSCRIBE_END] (state, { taskId, subscribed }) {
+    const task = state.taskMap.get(taskId)
+    console.log('setTask', subscribed)
+    task.is_subscribed = subscribed
+  },
 
   [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {
     const task = state.taskMap.get(taskId)
