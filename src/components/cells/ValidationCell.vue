@@ -89,6 +89,9 @@
         {{ personMap.get(personId).initials }}
       </span>
     </span>
+    <span class="subscribed" v-if="task && task.is_subscribed">
+      <eye-icon size="0.8x"/>
+    </span>
   </div>
   <div
     class="wrapper"
@@ -111,6 +114,8 @@
 import { mapGetters, mapActions } from 'vuex'
 import colors from '@/lib/colors'
 
+import { EyeIcon } from 'vue-feather-icons'
+
 export default {
   name: 'validation-cell',
 
@@ -121,6 +126,7 @@ export default {
   },
 
   components: {
+    EyeIcon
   },
 
   props: {

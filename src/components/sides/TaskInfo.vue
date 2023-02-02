@@ -60,7 +60,7 @@
         />
         <subscribe-button
           class="flexrow-item subscribe-button"
-          :subscribed="isAssigned || isSubscribed"
+          :subscribed="isAssigned || task.is_subscribed"
           @click="toggleSubscribe"
           v-if="!isAssigned"
         />
@@ -343,7 +343,6 @@ export default {
       currentPreviewDlPath: '',
       currentTime: 0,
       commentToEdit: null,
-      isSubscribed: false,
       isWide: false,
       isExtraWide: false,
       otherPreviews: [],
@@ -633,17 +632,8 @@ export default {
           entityId: this.task.entity_id
         })
           .then(() => {
-            if (this.task) {
-              return this.loadTaskSubscribed({ taskId: this.task.id })
-            } else {
-              this.loading.task = false
-              this.isSubscribed = false
-            }
-          })
-          .then(subscribed => {
             this.loading.task = false
             this.reset()
-            this.isSubscribed = subscribed
           })
           .catch(err => {
             console.error(err)
@@ -873,12 +863,10 @@ export default {
 
     toggleSubscribe () {
       if (this.task && !this.isAssigned) {
-        if (this.isSubscribed) {
+        if (this.task.is_subscribed) {
           this.unsubscribeFromTask(this.task.id)
-          this.isSubscribed = false
         } else {
           this.subscribeToTask(this.task.id)
-          this.isSubscribed = true
         }
       }
     },
