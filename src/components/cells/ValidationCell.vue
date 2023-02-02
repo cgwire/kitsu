@@ -33,7 +33,16 @@
       >
         {{ taskStatus.short_name }}
       </span>
-      <span class="priority" v-if="!isCurrentUserClient && !disabled">
+      <span
+        :class="{
+          priority: true,
+          high: task.priority === 1,
+          veryhigh: task.priority === 2,
+          emergency: task.priority === 3
+        }"
+        :title="formatPriority(task.priority)"
+        v-if="!isCurrentUserClient && !disabled && task.priority > 0"
+      >
         {{ priority }}
       </span>
       <span
@@ -306,8 +315,10 @@ export default {
     changeStyle (background) {
       const border =
         this.isBorder ? '1px solid ' + this.column.color : 'none'
-      this.$refs.cell.style =
-        `border-left: ${border}; background: ${background}; left: ${this.left}`
+      if (this.$refs.cell) {
+        this.$refs.cell.style =
+          `border-left: ${border}; background: ${background}; left: ${this.left}`
+      }
     },
 
     select (event) {
@@ -368,6 +379,20 @@ export default {
         )
         this.changeStyle(background)
       }
+    },
+
+    formatPriority (priority) {
+      let label = priority + ''
+      if (priority === 0) {
+        label = 'normal'
+      } else if (priority === 1) {
+        label = this.$t('tasks.priority.high')
+      } else if (priority === 2) {
+        label = this.$t('tasks.priority.very_high')
+      } else if (priority === 3) {
+        label = this.$t('tasks.priority.emergency')
+      }
+      return label
     }
   },
 
@@ -460,5 +485,34 @@ span.person-avatar:nth-child(2) {
   img {
     width: 12px;
   }
+}
+
+.subscribed {
+  position: absolute;
+  bottom: -10px;
+  right: -5px;
+  color: $grey;
+}
+
+.priority {
+  border-radius: 50%;
+  display: inline-block;
+  color: white;
+  margin-left: 5px;
+  font-weight: bold;
+  min-width: 23px;
+  text-align: center;
+}
+
+.high {
+  background: $yellow;
+}
+
+.veryhigh {
+  background: $orange;
+}
+
+.emergency {
+  background: $red;
 }
 </style>
