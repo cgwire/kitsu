@@ -976,9 +976,9 @@ export default {
     getTasks (entities) {
       const tasks = []
       entities.forEach(entity => {
-        entity.tasks.forEach(taskId => {
+        (entity.tasks || []).forEach(taskId => {
           const task = this.taskMap.get(taskId.id || taskId)
-          if (task) {
+          if (task && !entity.canceled) {
             // Hack to allow filtering on linked entity metadata.
 
             task.data = entity.data
@@ -1000,10 +1000,17 @@ export default {
       ].includes(
         this.currentSort
       )
-      return tasks.sort(
-        firstBy(this.currentSort, isDesc ? 1 : -1)
-          .thenBy('entity_name')
-      )
+      if (this.currentSort !== name) {
+        this.tasks = tasks.sort(
+          firstBy(this.currentSort, isDesc ? 1 : -1)
+            .thenBy('entity_name')
+        )
+      } else {
+        this.tasks = tasks.sort(
+          firstBy('entity_name')
+        )
+      }
+      return tasks
     },
 
     onExportClick () {

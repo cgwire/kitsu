@@ -159,51 +159,88 @@
         <tbody
           class="datatable-body"
         >
-          <tr
-            :ref="'person-' + person.id"
-            :key="person.id"
-            :class="{
-              'datatable-row': true,
-              'task-line': true
-            }"
+          <template
             v-for="person in assignees"
           >
-            <td class="person flexrow">
-              <people-avatar
-                class="flexrow-item"
-                :person="person"
-                :size="30"
-                :font-size="17"
-              />
-              <people-name
-                class="flexrow-item"
-                :person="person"
-              />
-            </td>
-            <td class="count numeric-cell">
-              {{ person.count }}
-            </td>
-            <td class="frames numeric-cell">
-              {{ person.frames }}
-            </td>
-            <td class="seconds numeric-cell">
-              {{ person.seconds }}
-            </td>
-            <td class="estimation numeric-cell">
-              {{ person.estimation }}
-            </td>
-            <td class="quota numeric-cell">
-              {{ person.quota }}
-            </td>
-            <td class="quota numeric-cell">
-              {{ person.quotaFrames }}
-            </td>
-            <td class="quota numeric-cell">
-              {{ person.quotaCount }}
-            </td>
-            <td>
-            </td>
-          </tr>
+            <tr
+              :key="person.id"
+              :class="{
+                'datatable-row': true,
+                'task-line': true
+              }"
+            >
+              <td class="person flexrow">
+                <people-avatar
+                  class="flexrow-item"
+                  :person="person"
+                  :size="30"
+                  :font-size="17"
+                />
+                <people-name
+                  class="flexrow-item"
+                  :person="person"
+                />
+              </td>
+              <td class="count numeric-cell">
+                {{ person.alltasks.count }}
+              </td>
+              <td class="frames numeric-cell">
+                {{ person.alltasks.frames }}
+              </td>
+              <td class="seconds numeric-cell">
+                {{ person.alltasks.seconds }}
+              </td>
+              <td class="estimation numeric-cell">
+                {{ person.alltasks.estimation }}
+              </td>
+              <td class="quota numeric-cell">
+                {{ person.alltasks.quota }}
+              </td>
+              <td class="quota numeric-cell">
+                {{ person.alltasks.quotaFrames }}
+              </td>
+              <td class="quota numeric-cell">
+                {{ person.alltasks.quotaCount }}
+              </td>
+              <td>
+              </td>
+            </tr>
+            <tr
+              :class="{
+                'datatable-row': true,
+                'task-line': true
+              }"
+            >
+              <td class="person flexrow">
+                <corner-down-right-icon class="ml05 mr05" size="0.9x" />
+                {{ $t('main.remaining') }}
+              </td>
+              <td class="count numeric-cell">
+                {{ person.remaining.count }}
+              </td>
+              <td class="frames numeric-cell">
+                {{ person.remaining.frames }}
+              </td>
+              <td class="seconds numeric-cell">
+                {{ person.remaining.seconds }}
+              </td>
+              <td class="estimation numeric-cell">
+                {{ person.remaining.estimation }}
+              </td>
+              <td class="quota numeric-cell">
+                {{ person.remaining.quota }}
+              </td>
+              <td class="quota numeric-cell">
+                {{ person.remaining.quotaFrames }}
+              </td>
+              <td class="quota numeric-cell">
+                {{ person.remaining.quotaCount }}
+              </td>
+              <td>
+              </td>
+            </tr>
+
+          </template>
         </tbody>
       </table>
     </div>
@@ -214,6 +251,7 @@
 <script>
 import Vue from 'vue/dist/vue'
 import { mapGetters, mapActions } from 'vuex'
+import { CornerDownRightIcon } from 'vue-feather-icons'
 
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
@@ -231,6 +269,7 @@ export default {
   mixins: [domMixin, formatListMixin],
 
   components: {
+    CornerDownRightIcon,
     EntityThumbnail,
     PeopleAvatar,
     PeopleName
@@ -271,6 +310,7 @@ export default {
       'personMap',
       'sequenceMap',
       'shotMap',
+      'taskStatusMap',
       'taskTypeMap'
     ]),
 
@@ -282,31 +322,38 @@ export default {
       return this.entityType === 'Shot'
     },
 
+    tasksByPerson () {
+      return [...this.tasks]
+        .sort(firstBy(this.compareFirstAssignees))
+    },
+
+    entityMap () {
+      return this[`${this.entityType.toLowerCase()}Map`]
+    },
+
     assignees () {
       const assigneeSet = new Set()
-      const countMap = new Map()
-      const secondMap = new Map()
-      const frameMap = new Map()
-      const estimationMap = new Map()
+      const alltasks = {
+        countMap: new Map(),
+        frameMap: new Map(),
+        estimationMap: new Map(),
+        secondMap: new Map()
+      }
+      const remaining = {
+        countMap: new Map(),
+        frameMap: new Map(),
+        estimationMap: new Map(),
+        secondMap: new Map()
+      }
       const assignees = []
       this.tasks.forEach(task => {
         const entity = this.getEntity(task.entity_id)
         task.assignees.forEach(personId => {
           assigneeSet.add(personId)
-          countMap.set(personId, (countMap.get(personId) || 0) + 1)
-          estimationMap.set(
-            personId,
-            (estimationMap.get(personId) || 0) + task.estimation
-          )
-          if (!this.isAssets) {
-            const frames = entity.nb_frames || 0
-            const seconds = frameToSeconds(
-              frames,
-              this.currentProduction,
-              entity
-            )
-            secondMap.set(personId, (secondMap.get(personId) || 0) + seconds)
-            frameMap.set(personId, (frameMap.get(personId) || 0) + frames)
+          this.addAssigneeStatsToMaps(alltasks, personId, task, entity)
+          const status = this.taskStatusMap.get(task.task_status_id)
+          if (!status.is_done && !status.is_feedback_request) {
+            this.addAssigneeStatsToMaps(remaining, personId, task, entity)
           }
         })
       })
@@ -316,34 +363,14 @@ export default {
       return assignees
         .sort(firstBy('name'))
         .map(person => {
-          const estimation = estimationMap.get(person.id) || 0
-          const seconds = secondMap.get(person.id) || 0
-          const frames = frameMap.get(person.id) || 0
-          const count = countMap.get(person.id) || 0
-          const estimationDays = minutesToDays(this.organisation, estimation)
-          const quota = estimation > 0 ? (seconds / estimationDays) : 0
-          const quotaCount = estimation > 0 ? (count / estimationDays) : 0
-          const quotaFrames = estimation > 0 ? (frames / estimationDays) : 0
+          const allTasksStats = this.getAssigneeStats(person, alltasks)
+          const remainingStats = this.getAssigneeStats(person, remaining)
           return {
             ...person,
-            count: countMap.get(person.id) || 0,
-            estimation: this.formatDuration(estimation),
-            frames,
-            quota: quota.toFixed(2),
-            quotaFrames: quotaFrames.toFixed(2),
-            quotaCount: quotaCount.toFixed(2),
-            seconds: seconds.toFixed(2)
+            alltasks: allTasksStats,
+            remaining: remainingStats
           }
         })
-    },
-
-    tasksByPerson () {
-      return [...this.tasks]
-        .sort(firstBy(this.compareFirstAssignees))
-    },
-
-    entityMap () {
-      return this[`${this.entityType.toLowerCase()}Map`]
     }
   },
 
@@ -487,6 +514,50 @@ export default {
       } else {
         return false
       }
+    },
+
+    getAssigneeStats (person, maps) {
+      const estimation = maps.estimationMap.get(person.id) || 0
+      const seconds = maps.secondMap.get(person.id) || 0
+      const frames = maps.frameMap.get(person.id) || 0
+      const count = maps.countMap.get(person.id) || 0
+      const estimationDays = minutesToDays(this.organisation, estimation)
+      const quota = estimation > 0 ? (seconds / estimationDays) : 0
+      const quotaCount = estimation > 0 ? (count / estimationDays) : 0
+      const quotaFrames = estimation > 0 ? (frames / estimationDays) : 0
+
+      return {
+        estimation,
+        count: maps.countMap.get(person.id) || 0,
+        estimation: this.formatDuration(estimation),
+        frames,
+        quota: quota.toFixed(2),
+        quotaFrames: quotaFrames.toFixed(2),
+        quotaCount: quotaCount.toFixed(2),
+        seconds: seconds.toFixed(2)
+      }
+    },
+
+    addAssigneeStatsToMaps (maps, personId, task, entity) {
+      maps.countMap.set(personId, (maps.countMap.get(personId) || 0) + 1)
+      maps.estimationMap.set(
+        personId,
+        (maps.estimationMap.get(personId) || 0) + task.estimation
+      )
+      if (!this.isAssets) {
+        const frames = entity.nb_frames || 0
+        const seconds = frameToSeconds(
+          frames,
+          this.currentProduction,
+          entity
+        )
+        maps.secondMap.set(
+          personId, (maps.secondMap.get(personId) || 0) + seconds
+        )
+        maps.frameMap.set(
+          personId, (maps.frameMap.get(personId) || 0) + frames
+        )
+      }
     }
   }
 }
@@ -523,9 +594,9 @@ td {
 
 .thumbnail {
   vertical-align: middle;
-  min-width: 46px;
-  max-width: 40px;
-  width: 40px;
+  min-width: 64px;
+  max-width: 64px;
+  width: 64px;
 }
 
 .asset-type {
@@ -580,16 +651,17 @@ td {
   }
 }
 
-th.numeric-cell {
-  padding-right: 0.4em;
-}
-
-.numeric-cell {
+.task-list .numeric-cell,
+.person-list .numeric-cell {
+  padding-right: .4em;
   text-align: right;
 
   input {
     text-align: right;
   }
+}
+.task-list .numeric-cell input.input {
+  padding-right: .5em;
 }
 
 .person-list {

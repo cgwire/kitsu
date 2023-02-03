@@ -16,6 +16,7 @@
 
       <div class="menu"
         @mousedown="startDrag"
+        @dblclick="minimized = !minimized"
       >
         <div class="flexrow">
           <!--div
@@ -85,6 +86,18 @@
             @click="selectBar('thumbnails')"
           >
             <image-icon />
+          </div>
+
+          <div
+            :class="{
+              'menu-item': true,
+              active: selectedBar === 'subscribe'
+            }"
+            :title="$t('menu.subscribe')"
+            v-if="isTaskSelection"
+            @click="selectBar('subscribe')"
+          >
+            <eye-icon />
           </div>
 
           <div
@@ -342,22 +355,22 @@
               isCurrentUserManager || isSupervisorInDepartment)"
           >
             <div class="mauto flexrow">
-            <button
-              class="button is-link clear-assignation-button filler"
-              @click="clearAssignation"
-            >
-              {{ $t('tasks.clear_assignations') }}
-            </button>
-            <span>
-              {{ $t('main.or') }}
-            </span>
-            <button
-              class="button is-link clear-assignation-button"
-              @click="clearAllAssignations"
-            >
-              {{ $t('tasks.clear_all_assignations') }}
-            </button>
-          </div>
+              <button
+                class="button is-link clear-assignation-button filler"
+                @click="clearAssignation"
+              >
+                {{ $t('tasks.clear_assignations') }}
+              </button>
+              <span>
+                {{ $t('main.or') }}
+              </span>
+              <button
+                class="button is-link clear-assignation-button"
+                @click="clearAllAssignations"
+              >
+                {{ $t('tasks.clear_all_assignations') }}
+              </button>
+            </div>
           </div>
           <div
             class="flexrow-item hide-small-screen"
@@ -435,6 +448,41 @@
               {nbSelectedTasks}
             ) }}
           </button>
+        </div>
+
+        <div
+          class="flexcolumn filler"
+          v-if="selectedBar === 'subscribe'"
+        >
+          <div class="" v-if="loading.tasksSubscription">
+            <div class="flexrow-item">
+              <spinner :size="20" class="spinner" />
+            </div>
+            <div class="flexrow-item">
+              &nbsp;
+            </div>
+          </div>
+
+          <div class="flexrow-item is-wide" v-if="!loading.tasksSubscription">
+            <button
+              :class="{
+                button: true,
+                'confirm-button': true,
+                'is-wide': true
+              }"
+              @click="confirmTasksSubscription"
+            >
+              {{ $tc('tasks.subscribe_to_tasks', nbSelectedTasks, {nbSelectedTasks}) }}
+            </button>
+          </div>
+          <div class="has-text-centered" v-if="!loading.tasksSubscription">
+            <button
+              class="button is-link filler"
+              @click="confirmTasksUnsubscription"
+            >
+              {{ $t('tasks.unsubscribe_notifications') }}
+            </button>
+          </div>
         </div>
 
         <div
@@ -667,6 +715,7 @@ import func from '@/lib/func'
 import {
   AlertCircleIcon,
   CheckSquareIcon,
+  EyeIcon,
   FilmIcon,
   ImageIcon,
   MinusIcon,
@@ -695,6 +744,7 @@ export default {
     ComboboxStatus,
     ComboboxStyled,
     DeleteEntities,
+    EyeIcon,
     FilmIcon,
     ImageIcon,
     MinusIcon,
@@ -756,7 +806,8 @@ export default {
         taskCreation: false,
         taskDeletion: false,
         setThumbnails: false,
-        shotDeletion: false
+        shotDeletion: false,
+        tasksSubscription: false
       },
       errors: {
         assetDeletion: false,
@@ -985,8 +1036,10 @@ export default {
       'clearSelectedTasks',
       'postCustomAction',
       'setLastTaskPreview',
+      'subscribeToTask',
       'unassignPersonFromTask',
-      'unassignSelectedTasks'
+      'unassignSelectedTasks',
+      'unsubscribeFromTask'
     ]),
 
     confirmTaskStatusChange () {
@@ -1148,6 +1201,36 @@ export default {
     confirmPlaylistGeneration () {
       this.modals.playlist = true
       this.selectedBar = ''
+    },
+
+    confirmTasksSubscription () {
+      this.loading.tasksSubscription = true
+      func.runPromiseAsSeries(
+        Array.from(this.selectedTasks.values()).map(task => {
+          return this.subscribeToTask(task.id)
+        })).then(() => {
+          this.loading.tasksSubscription = false
+        })
+        .catch(err => {
+          console.error(err)
+          this.loading.tasksSubscription = false
+          this.errors.tasksSubscription = false
+        })
+    },
+
+    confirmTasksUnsubscription () {
+      this.loading.tasksSubscription = true
+      func.runPromiseAsSeries(
+        Array.from(this.selectedTasks.values()).map(task => {
+          return this.unsubscribeFromTask(task.id)
+        })).then(() => {
+          this.loading.tasksSubscription = false
+        })
+        .catch(err => {
+          console.error(err)
+          this.loading.tasksSubscription = false
+          this.errors.tasksSubscription = false
+        })
     },
 
     hidePlaylistModal () {
@@ -1478,7 +1561,7 @@ div.assignation {
   padding-top: 0.7em;
   border-bottom: 1px solid $light-grey-light;
   z-index: 200;
-  width: 460px;
+  width: 500px;
 }
 
 .menu-item {

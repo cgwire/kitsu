@@ -69,7 +69,7 @@
            </div>
          <subscribe-button
            class="flexrow-item action-button"
-           :subscribed="isAssigned || isSubscribed"
+           :subscribed="isAssigned || task.is_subscribed"
            @click="toggleSubscribe"
            v-if="!isAssigned"
          />
@@ -397,7 +397,6 @@ export default {
       taskComments: [],
       taskPreviews: [],
       commentToEdit: null,
-      isSubscribed: false,
       selectedPreviewId: null
     }
   },
@@ -756,7 +755,6 @@ export default {
       'loadAssets',
       'loadPreviewFileFormData',
       'loadTaskComments',
-      'loadTaskSubscribed',
       'refreshComment',
       'refreshPreview',
       'pinComment',
@@ -795,9 +793,7 @@ export default {
                 taskId: task.id,
                 entityId: task.entity_id
               })
-                .then(() => this.loadTaskSubscribed({ taskId: task.id }))
-                .then((subscribed) => {
-                  this.isSubscribed = subscribed
+                .then(() => {
                   this.reset()
                   this.taskLoading = { isLoading: false, isError: false }
                   return Promise.resolve()
@@ -813,9 +809,7 @@ export default {
         return this.loadTaskComments({
           taskId, entityId: task.entity_id
         })
-          .then(() => this.loadTaskSubscribed({ taskId }))
-          .then(subscribed => {
-            this.isSubscribed = subscribed
+          .then(() => {
             this.reset()
             return Promise.resolve()
           })
@@ -1051,12 +1045,10 @@ export default {
 
     toggleSubscribe () {
       if (this.task && !this.isAssigned) {
-        if (this.isSubscribed) {
+        if (this.task.is_subscribed) {
           this.unsubscribeFromTask(this.task.id)
-          this.isSubscribed = false
         } else {
           this.subscribeToTask(this.task.id)
-          this.isSubscribed = true
         }
       }
     },

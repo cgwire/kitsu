@@ -21,11 +21,18 @@
       {{ taskStatus.short_name }}
     </span>
     <span
-      class="priority"
-      v-if="isPriority && !isCurrentUserClient"
+      :class="{
+        priority: true,
+        high: task.priority === 1,
+        veryhigh: task.priority === 2,
+        emergency: task.priority === 3
+      }"
+      :title="formatPriority(task.priority)"
+      v-if="isPriority && !isCurrentUserClient && task.priority > 0"
     >
       {{ priority }}
     </span>
+
   </span>
   <span v-else>
     <router-link
@@ -197,6 +204,20 @@ export default {
       route.params.type = this.$tc(taskType.for_entity.toLowerCase(), 2)
 
       return route
+    },
+
+    formatPriority (priority) {
+      let label = priority + ''
+      if (priority === 0) {
+        label = 'normal'
+      } else if (priority === 1) {
+        label = this.$t('tasks.priority.high')
+      } else if (priority === 2) {
+        label = this.$t('tasks.priority.very_high')
+      } else if (priority === 3) {
+        label = this.$t('tasks.priority.emergency')
+      }
+      return label
     }
   }
 }
@@ -216,6 +237,24 @@ export default {
 }
 
 .priority {
-  color: red;
+  border-radius: 50%;
+  display: inline-block;
+  color: white;
+  margin-left: 5px;
+  font-weight: bold;
+  min-width: 23px;
+  text-align: center;
+}
+
+.high {
+  background: $yellow;
+}
+
+.veryhigh {
+  background: $orange;
+}
+
+.emergency {
+  background: $red;
 }
 </style>

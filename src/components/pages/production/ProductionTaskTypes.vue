@@ -92,6 +92,7 @@ import async from 'async'
 import draggable from 'vuedraggable'
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
+import func from '@/lib/func'
 import { sortByName, sortTaskTypes } from '@/lib/sorting'
 import { formatFullDate } from '@/lib/time'
 
@@ -301,7 +302,7 @@ export default {
       if (now - this.lastCall > 1000 && !this.isSaving) {
         this.lastCall = now
         this.isSaving = true
-        await async.series(forms.map(
+        await func.runPromiseAsSeries(forms.map(
           async (form) => {
             return await this.editTaskTypeLink(form)
           }
