@@ -26,7 +26,7 @@
                 "time_spent": "时间",
                 "type": "类型",
                 "hidden_from_client": "显示到客户端",
-                "ready_for": "准备 为"
+                "ready_for": "准备为"
             },
             "cancel_text": "确定要归档 {name} 吗？",
             "delete_for_selection": "删除 {nbSelectedAssets} 选定的资产：",
@@ -44,8 +44,10 @@
             "title": "资产类型",
             "production_title": "资产类型统计",
             "fields": {
-                "name": "名称"
-            }
+                "name": "名称",
+                "task_types": "工作流程"
+            },
+            "include_all": "包括所有资产任务类型"
         },
         "breakdown": {
             "all_assets": "所有可用资产",
@@ -54,7 +56,7 @@
             "label": "标签",
             "picture_mode": "切换到图片模式",
             "text_mode": "切换到文字模式",
-            "title": "分解",
+            "title": "组装",
             "options": {
                 "fixed": "固定的",
                 "animate": "动画"
@@ -63,6 +65,9 @@
                 "confirm": "从剧集中移除资产",
                 "error": "移除资产时出现服务器错误。请再试一次。如果问题仍然存在，请联系我们的支持团队。",
                 "text": "如果您从所选剧集中移除此资产，它将移除所有基础镜头中的资产。您确定要删除它吗？"
+            },
+            "fields": {
+                "standby": "标准化数据库"
             }
         },
         "comments": {
@@ -96,7 +101,13 @@
                 "checklist": "清单",
                 "acknowledgements": "致谢"
             },
-            "checklist": "清单"
+            "checklist": "清单",
+            "attachments": "附件",
+            "attachments_to_add": "添加附件",
+            "max_retakes_error": "您不能再为重新提交此任务",
+            "previews": "预览要作为新版本发布的文件",
+            "selected_files": "选定的文件",
+            "no_attachments": "这条评论没有附件"
         },
         "custom_actions": {
             "create_error": "保存此自定义操作时发生错误. 您确定没有其他同名操作吗?",
@@ -140,7 +151,12 @@
                 "union_or": "匹配以下过滤器",
                 "with_thumbnail": "显示缩略图",
                 "without_thumbnail": "关闭缩略图",
-                "department": "部门"
+                "department": "部门",
+                "is_assets_ready": "资产准备就绪",
+                "assets_ready": "已准备",
+                "assets_not_ready": "未准备",
+                "checked": "已检查",
+                "not_checked": "未检查"
             },
             "thumbnails": {
                 "error": "上传缩略图时发生错误",
@@ -172,7 +188,10 @@
                 "status": "状态",
                 "task_type": "任务类型",
                 "uploader": "上传自"
-            }
+            },
+            "nb_selected_assets": "{nbSelectedAssets} 选择的资源 | {nbSelectedAssets} 选择的资源\n",
+            "nb_selected_shots": "{nbSelectedShots} 选择的镜头 | {nbSelectedShots} 选择的镜头",
+            "nb_selected_edits": "{nbSelectedEdits} 编辑选定项 | {nbSelectedEdits} 编辑选定项"
         },
         "estimation": {
             "title": "预算"
@@ -191,7 +210,11 @@
             "fields": {
                 "name": "名称",
                 "description": "说明"
-            }
+            },
+            "no_casting": "该集的演员阵容是空的",
+            "restore_error": "恢复此剧集时出现错误",
+            "tasks": "剧集任务",
+            "stats_title": "剧集状态"
         },
         "keyboard": {
             "altdown": "下移任务选择",
@@ -221,7 +244,7 @@
             "login_page": "取消",
             "redirecting": "{secondsLeft} 秒内重定向",
             "reset_change_password": "更改密码",
-            "reset_change_password_form_failed": "您给出的密码有问题. 请核实密码长度大于8个字符且两次密码一致.",
+            "reset_change_password_form_failed": "您给出的密码有问题. 请核实密码长度大于6个字符且两次密码一致.",
             "reset_change_password_failed": "更改密码失败. 请再次重启整个步骤.",
             "reset_change_password_succeed": "您的密码已成功更改. 请返回到登录页面来使用它.",
             "reset_change_password_title": "输入新密码",
@@ -233,8 +256,26 @@
             "fields": {
                 "email": "电子邮箱",
                 "password": "密码",
-                "password2": "再次输入密码"
-            }
+                "password2": "再次输入密码",
+                "totp": "动态验证码（TOTP）",
+                "email_otp": "电子邮件验证码",
+                "recovery_code": "恢复代码"
+            },
+            "too_many_failed_login_attemps": "登录失败次数太多，请等待一分钟后重试",
+            "verify": "验证",
+            "wrong_totp": "动态口令（TOTP）验证失败",
+            "wrong_email_otp": "电子邮件验证失败",
+            "wrong_recovery_code": "恢复代码验证失败",
+            "information_totp": "打开移动设备上的双验证（TOTP）程序查看验证码",
+            "information_email_otp": "检查你的电子邮件以查看验证码",
+            "information_recovery_code": "如果您无法使用任何其它双重身份验证，请输入其中一个恢复代码来验证您的身份。",
+            "unable_to_verify_totp": "无法使用动态验证码（TOTP）验证？",
+            "unable_to_verify_email_otp": "无法使用邮箱验证？",
+            "send_email_otp": "重新发送验证码到邮箱",
+            "unable_to_verify_recovery_code": "没有恢复代码？",
+            "choose_totp": "通过动态验证码（TOTP）确认双重身份验证",
+            "choose_email_otp": "通过电子邮件确认双重身份验证",
+            "choose_recovery_code": "使用一个恢复代码"
         },
         "main": {
             "about": "关于",
@@ -256,7 +297,7 @@
             "delete_text": "您确定要从您的数据库移除{name}吗?",
             "documentation": "文档",
             "edit": "编辑",
-            "empty_comment": "空注释",
+            "empty_comment": "空评论",
             "end_date": "结束日期",
             "files_selected": "选择文件",
             "for": "给",
@@ -301,7 +342,7 @@
                 "legend_overwrite": "将要更新数据",
                 "paste": "粘贴",
                 "paste_code": "请在此处粘贴您的CSV数据：",
-                "preview": "预演",
+                "preview": "预览",
                 "preview_episode_name": "剧集名称",
                 "preview_title": "预览导入的数据",
                 "preview_description": "上传.csv文件，在输入框内粘贴",
@@ -337,8 +378,6 @@
             "estimation_short": "Est.",
             "fps": "FPS",
             "frames": "帧",
-            "frameIn": "起始帧",
-            "frameOut": "结束帧",
             "man_days": "人日| 人日",
             "select_column": "选择列",
             "show": "节目",
@@ -346,9 +385,21 @@
             "timeSpent": "所花费的时间",
             "unstick": "不签",
             "all_edits": "所有编辑",
-            "attach_snapshots": "附加注释中的快照",
+            "attach_snapshots": "附加评论中的快照",
             "reply": "回复",
-            "select_file": "选择文件"
+            "select_file": "选择文件",
+            "frame_in": "帧入",
+            "frame_out": "帧出",
+            "type": "类型",
+            "search": {
+                "type": "至少键入3个字符来搜索",
+                "no_result": "没有找到搜索内容"
+            },
+            "hide_support_chat": "隐藏支持",
+            "move_action_bar": "移动操作栏",
+            "show_support_chat": "显示支持",
+            "empty_schedule": "没有任务或者未设定开始日期",
+            "all_shots": "所有镜头"
         },
         "menu": {
             "assign_tasks": "分配任务",
@@ -356,12 +407,13 @@
             "change_status": "更改状态",
             "create_tasks": "创建任务",
             "delete_tasks": "删除任务",
-            "generate_playlists": "生成列表",
             "run_custom_action": "执行自定义操作",
             "set_estimations": "设定预算",
             "delete_assets": "删除资产",
             "delete_shots": "删除镜头",
-            "delete_edits": "删除编辑"
+            "delete_edits": "删除编辑",
+            "generate_playlist": "生成播放列表",
+            "set_thumbnails": "设定最后一次预览为缩略图"
         },
         "news": {
             "all": "全部",
@@ -385,13 +437,19 @@
         "notifications": {
             "and_change_status": "将状态更改为",
             "assigned_you": "分配给你",
-            "commented_on": "已给出针对性注释, 注释对象为",
+            "commented_on": "已给出针对性评论, 评论对象为",
             "mention_you_on": "提到你的",
             "no_notifications": "目前没有关于您当前项目的通知.",
             "unread_notifications": "未读通知",
             "title": "通知",
             "with_preview": "带有预览",
-            "replied_on": "回复通知"
+            "replied_on": "回复通知",
+            "all_types": "所有类型",
+            "new_revision": "新版本发布",
+            "only_assignations": "only_assignations",
+            "only_comments": "仅评论",
+            "only_mentions": "仅提到",
+            "only_replies": "仅回复"
         },
         "people": {
             "active": "活动",
@@ -399,7 +457,7 @@
             "add_member_to_team": "向团队添加成员： ",
             "create_invite": "创建和发送邀请",
             "create_error": "创建或更新此用户时发生错误。 您可能已达到用户数限制。 请联系我们的支持团队以获取更多信息。",
-            "delete_error": "删除此人员时出现错误. 很可能存在有链接至其的数据. 您确定此人员没有分配任务或是没写注释吗?",
+            "delete_error": "删除此人员时出现错误. 很可能存在有链接至其的数据. 您确定此人员没有分配任务或是没写评论吗?",
             "delete_text": "您确定要从您的数据库移除{personName}吗?",
             "edit_title": "编辑人员",
             "empty_team": "项目团队里没有所列人员.",
@@ -442,7 +500,14 @@
                 "undefined": "未定义",
                 "vendor": "供应商",
                 "supervisor": "管理"
-            }
+            },
+            "confirm_edit": "保存更改",
+            "create": "创建用户",
+            "user_limit_error": "您已达到用户限制。请联系我们的团队升级您的计划。",
+            "change_password_for": "更改密码",
+            "change_password_error": "更改密码时出错，请验证新密码。",
+            "disable_2FA": "禁用双身份验证",
+            "disable_2FA_error": "禁用双身份验证出错"
         },
         "playlists": {
             "add_assets": "添加资产",
@@ -495,9 +560,9 @@
             "actions": {
                 "annotation": "注解",
                 "annotation_text": "双击预览并添加一些文本",
-                "annotation_delete": "删除注释",
-                "annotation_redo": "重做注释",
-                "annotation_undo": "撤消注释",
+                "annotation_delete": "删除评论",
+                "annotation_redo": "重做评论",
+                "annotation_undo": "撤消评论",
                 "annotation_big": "大",
                 "annotation_medium": "中",
                 "annotation_small": "小",
@@ -517,7 +582,7 @@
                 "save_playlist": "保存播放列表",
                 "speed": "更改播放速度",
                 "split_screen": "与其他任务类型比较",
-                "annotation_draw": "绘制注释",
+                "annotation_draw": "绘制评论",
                 "current_time": "在视频中的位置",
                 "display_revision": "显示修订",
                 "download_file": "下载文件",
@@ -540,8 +605,11 @@
                 "switch_ld": "切换到低清晰度",
                 "switch_hd": "切换到高清",
                 "frames_per_picture": "每帧图片",
-                "toggle_playing_annotations": "播放电影时显示/隐藏注释",
-                "toggle_waveform": "显示/隐藏电影波形"
+                "toggle_playing_annotations": "播放电影时显示/隐藏评论",
+                "toggle_waveform": "显示/隐藏电影波形",
+                "annotation_erase": "清除注释",
+                "toggle_annotations": "播放时显示/隐藏注释",
+                "toggle_laser": "启用/禁用绘制模式"
             },
             "download_csv": "下载 .csv",
             "filter_task_type": "按任务类型过滤",
@@ -575,7 +643,10 @@
                 "start_date": "开始日期",
                 "end_date": "结束日期",
                 "nb_episodes": "集数",
-                "episode_span": "剧集跨度"
+                "episode_span": "剧集跨度",
+                "is_clients_isolated": "单独显示客户评论（彼此不可见）",
+                "max_retakes": "最大重新提交任务次数",
+                "style": "样式"
             },
             "metadata": {
                 "add_explaination": "添加此项目需要的特定数据.",
@@ -600,7 +671,9 @@
             "type": {
                 "short": "短片",
                 "featurefilm": "故事片",
-                "tvshow": "电视节目"
+                "tvshow": "电视节目",
+                "assets": "仅资产",
+                "shots": "仅镜头"
             },
             "edit_error": "编辑产品时出错。请联系我们的支持团队。",
             "brief": {
@@ -641,7 +714,7 @@
                 "placeholder_date_end": "结束时间",
                 "placeholder_name": "我的作品名称",
                 "placeholder_fps": "25",
-                "placeholder_ratio1": "18",
+                "placeholder_ratio1": "16",
                 "placeholder_ratio2": "9",
                 "placeholder_resolution1": "1920",
                 "placeholder_resolution2": "1080",
@@ -657,6 +730,22 @@
                 "shots_to_import": "要导入的镜头",
                 "select_edit_task_type": "选择编辑任务类型",
                 "select_edit_task_type_description": "选择编辑任务类型描述"
+            },
+            "style": {
+                "2d": "2D动画",
+                "3d": "3D动画",
+                "2d3d": "2D/3D混合动画",
+                "ar": "AR增强现实",
+                "archviz": "景观",
+                "commercial": "商业",
+                "catalog": "宣传",
+                "metaverse": "元宇宙",
+                "motion_design": "动态设计",
+                "nft": "NFT集",
+                "stop_motion": "定格",
+                "vfx": "视觉特效（VFX）",
+                "video_game": "游戏视频",
+                "vr": "虚拟现实"
             }
         },
         "profile": {
@@ -687,7 +776,36 @@
             "notifications_mattermost_user": "最重要的通知用户",
             "webhook_error": "webhook错误",
             "notifications_discord_enabled": "Discord通知已启用",
-            "notifications_discord_user": "Discord用户名"
+            "notifications_discord_user": "Discord用户名",
+            "clear_avatar": "删除头像",
+            "two_factor_authentication": {
+                "title": "双身份验证",
+                "scan_qrcode": "请在双身份验证移动设备上扫描此二维码",
+                "otp_secret": "口令加密",
+                "totp": {
+                    "button_enable": "启动动态验证码",
+                    "button_disable": "禁用动态验证码",
+                    "button_validate_disable": "验证并禁用动态验证码",
+                    "button_validate": "验证并启用动态验证码",
+                    "error_enable": "动态验证码启用错误",
+                    "error_disable": "动态验证码禁用错误"
+                },
+                "email_otp": {
+                    "button_enable": "启用电子邮件验证",
+                    "button_disable": "禁用电子邮件验证",
+                    "button_validate_disable": "验证并启用电子邮件验证",
+                    "button_validate": "验证并禁用电子邮件验证",
+                    "error_enable": "启用电子邮件验证错误",
+                    "error_disable": "禁用电子邮件验证错误"
+                },
+                "recovery_codes": {
+                    "title": "恢复代码",
+                    "button_new": "获取新的恢复代码",
+                    "button_validate": "验证并获取新的恢复代码",
+                    "warning": "将恢复代码保存在安全位置。此代码是访问您的帐户的最后手段，以防您丢失密码和其他因素。如果找不到这些代码，您将无法访问您的帐户。",
+                    "error_new": "当生成新的恢复代码时发生错误"
+                }
+            }
         },
         "settings": {
             "change_logo": "更改Logo",
@@ -768,11 +886,14 @@
             "fields": {
                 "name": "名称",
                 "description": "说明"
-            }
+            },
+            "no_casting": "序列的角色分配为空",
+            "stats_title": "序列状态",
+            "tasks": "任务"
         },
         "schedule": {
-            "title": "时间表",
-            "title_main": "主要时间表",
+            "title": "日程计划",
+            "title_main": "主要日程",
             "overall_man_days": "月-日",
             "md": "工作天",
             "zoom_level": "缩放等级",
@@ -851,7 +972,9 @@
                 "production": "制作",
                 "sequence": "序列",
                 "time_spent": "时间",
-                "person": "修改"
+                "person": "修改",
+                "max_retakes": "最大提交",
+                "resolution": "分辨率"
             },
             "cancel_text": "确定要归档 {name} 吗？",
             "delete_for_selection": "删除 {nbSelectedShots} 个选定的镜头：",
@@ -896,12 +1019,12 @@
             "delete_all_text": "您确定要删除所有给定{name}的任务吗? 请通过在文本字段输入您想要删除的那些任务的任务类型名称来确认.",
             "delete_all_error": "删除所有给定任务类型的任务失败.",
             "delete_error": "删除任务时出现错误.",
-            "delete_comment": "您确定要删除最新注释吗?",
-            "delete_comment_error": "删除注释时出现错误",
+            "delete_comment": "您确定要删除最新评论吗?",
+            "delete_comment_error": "删除评论时出现错误",
             "delete_for_selection": "删除所选的多个任务:",
             "delete_preview": "您确定要删除此预览吗?",
             "delete_preview_error": "删除预览时出现错误.",
-            "edit_comment": "编辑注释",
+            "edit_comment": "编辑评论",
             "done": "已完成",
             "download_pdf_file": "下载.{extension}文件",
             "feedback": "反馈",
@@ -911,7 +1034,7 @@
             "my_tasks": "我的任务",
             "next": "下一个任务",
             "no_assignation_right": "不允许您管理多个任务分配",
-            "no_comment": "此任务当前没有注释.",
+            "no_comment": "此任务当前没有评论.",
             "no_preview": "此任务当前没有预览.",
             "no_task_selected": "未选中任务",
             "number": "任务 | 任务",
@@ -941,8 +1064,8 @@
                 "estimated_quota": "配额",
                 "estimation": "估计",
                 "frames": "帧.",
-                "last_comment": "最新注释",
-                "last_comment_date": "最新注释",
+                "last_comment": "最新评论",
+                "last_comment_date": "最新评论",
                 "priority": "优先级",
                 "production": "制作",
                 "real_end_date": "确认日期",
@@ -983,12 +1106,43 @@
             "combobox_departments": {
                 "all_departments": "所有部门",
                 "my_departments": "我的部门"
-            }
+            },
+            "add_revision_confirm": "添加要发布的文件",
+            "confirm_attachments": "添加要附加的文件",
+            "change_status": "更改状态",
+            "clear_own_assignations": "清除您的任务",
+            "publish": "发布版本",
+            "all": "所有任务",
+            "assign_explaination": "选择要分配的人员...",
+            "change_priority_to": "新的优先级：",
+            "change_task_status": "改变选择的任务状态 | 改变选择的 {nbSelectedTasks} 任务状态\n",
+            "due_date": "截止日期的状态",
+            "due_after_today": "今天后到期",
+            "due_before_today": "在前一天到期",
+            "due_next_week": "下周到期",
+            "due_next_month": "下月到期",
+            "due_previous_week": "上周到期",
+            "due_previous_month": "上月到期",
+            "due_this_month": "本月到期",
+            "estimation_over": "预估结束时间",
+            "estimation_approval_late": "晚于截止日期（反馈）",
+            "estimation_done_late": "晚于截止日期（完成）",
+            "late": "延迟状态",
+            "nb_selected_tasks": "{nbSelectedTasks} 选择的任务 | {nbSelectedTasks} 选择的任务\n",
+            "set_thumbnails_from_tasks": "设定所选任务的最后一次预览为缩略图 | 设定所选任务的最后一次预览为缩略图",
+            "to_myself": "到自己",
+            "create_tasks_episode": "添加任务到当前剧集",
+            "create_tasks_episode_explaination": "您将按照给定的任务类型为当前项目的所有剧集创建新任务。你确定继续吗？",
+            "create_tasks_episode_failed": "在创建时服务器发生错误",
+            "clear_all_assignations": "取消分配所有的",
+            "create_tasks_sequence": "添加任务到当前序列",
+            "create_tasks_sequence_explaination": "您将为给定任务类型的当前项目的每个序列创建一个新任务。是否要继续？",
+            "create_tasks_sequence_failed": "创建时服务器发生错误"
         },
         "timesheets": {
             "detail_level": "细节层次",
             "done_tasks": "已完成任务",
-            "export_timesheet": "导出时间表",
+            "export_timesheet": "导出时间计划",
             "hours": "小时",
             "month": "月",
             "time_spents": "已用时长(小时)",
