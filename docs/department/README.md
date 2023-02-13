@@ -123,7 +123,7 @@ The department supervisor will be able to comment on all the tasks from their de
 
 ## Link custom column to department
 
-You can now link your custom column to a **department**. This way, this custom column will be seen on the department-filtered view of the **Supervisor** and *Artist**.
+You can now link your custom column to a **department**. This way, this custom column will be seen on the department-filtered view of the **Supervisor** and **Artist**.
 
 On the global page of the asset or the shot, click on the arrow on the direct right of your custom column, and click on **Edit**.
 
