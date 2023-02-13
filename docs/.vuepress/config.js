@@ -22,7 +22,7 @@ module.exports = {
      children: [
 	     '/customization-kitsu/',
 	     '/customization-studio/',
-         '/customization-production/',
+         '/customization-production/'
 	  ]
    },
    {
