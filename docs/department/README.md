@@ -2,11 +2,11 @@
 
 ## Create departments
 
-Departemnts are here to help the supervisors and artists to focus on their tasks.
-Once they are link to one or several departments, supervisors and artists will have direct access to their
- filtered view. Deparments also act on the permissions.  
+Departments are here to help the supervisors and artists to focus on their tasks.
+Once they are linked to one or several departments, supervisors and artists will have direct access to their
+ filtered view, and departments also act on the permissions.  
 
-You can create as many ** Departments** you need.
+You can create as many **Departments** you need.
 
 On the main menu ![Main menu](../img/getting-started/main_button.png) select the 
 **DEPARTMENT** page under the **Admin** section.
@@ -43,7 +43,7 @@ On the main page, you can edit all the departments already created
 
 ![Task Type global page](../img/getting-started/department_global.png)
 
-You can change : 
+You can change: 
 
 - (1) The name of the department
 - (2) The color
@@ -114,25 +114,25 @@ Once you're done, the **People** page should look like this.
 
 ![Department people filled](../img/getting-started/people_department_filled.png)
 
-Once someone is linked to a deparment, the artist will have direct access to their deparment view on the global page.
+Once someone is linked to a department, the artist will directly access their department view on the global page.
 
-Deparment supervisor will ba able to comment all the tasks from their department and assign only people from the same deparment(s).
+The department supervisor will be able to comment on all the tasks from their department and assign only people from the same department (s).
 
 ![Department filtered view](../img/getting-started/department_filtered_view.png)
 
 
 ## Link custom column to department
 
-You can now link your custom column to a **department**. This way this custom column will be seen on the department filtered view of the **Supervisor** and *Artist**.
+You can now link your custom column to a **department**. This way, this custom column will be seen on the department-filtered view of the **Supervisor** and *Artist**.
 
-On the global page of the asset or the shot, click on the arrow on the direct right of your custom column, and click on **Edit**
+On the global page of the asset or the shot, click on the arrow on the direct right of your custom column, and click on **Edit**.
 
 ![Custom column Edit](../img/getting-started/custom_column_edit.png)
 
-From there you can link the custom column to one or more department. Click on the department from the list and then click on **add** to be effective.
+You can link the custom column to one or more departments. Click on the department from the list and then click on **add** to be effective.
 
 ![Department custom column edit](../img/getting-started/custom_column_detail_department.png)
 
-Now people link to this deparment will see this custom column on their filtered view.
+Now people linked to this department will see this custom column on their filtered view.
 
 ![Department custom column filtered view](../img/getting-started/department_filtered_view_column.png)
