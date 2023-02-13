@@ -1,6 +1,8 @@
-# Customation Kitsu
+# Customization Kitsu
 
-## change the logo
+You can customize your kitsu at several levels.
+
+## Change the logo
 
 ## Change the Kitsu setting
 
