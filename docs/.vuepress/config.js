@@ -30,8 +30,7 @@ module.exports = {
      collapsable: false,
      children: [
 	     '/department/',
-	     '/customization/',
-       '/permissions/',
+	    '/permissions/',
 	     '/playlist/',
        '/Schedules/',
        '/batch-action/',
