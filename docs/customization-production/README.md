@@ -55,7 +55,7 @@ But you can choose to add or remove specific Asset Types.
 ![Setting Asset type new](../img/getting-started/setting_asset_new.png)
 
 On the **Asset Types** tab, you can choose which Asset Types you want to add or remove on this production, 
-validate your choice with the "add" button.
+validate your choice with the **add** button.
 
 ![Setting Add Asset](../img/getting-started/setting_asset_add.png)
 
