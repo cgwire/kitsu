@@ -17,15 +17,6 @@ module.exports = {
      ]
    },
    {
-     title: 'Customization',
-     collapsable: false,
-     children: [
-	    '/customization-kitsu/',
-	    '/customization-studio/',
-        '/customization-production/'
-	 ]
-   },
-   {
      title: 'Modules',
      collapsable: false,
      children: [
@@ -36,6 +27,15 @@ module.exports = {
        '/batch-action/',
        '/custom-actions/'
      ]
+   },
+   {
+     title: 'Customization',
+     collapsable: false,
+     children: [
+	    '/customization-kitsu/',
+	    '/customization-studio/',
+        '/customization-production/'
+	 ]
    },
    {
      title: 'Chat Integrations',
