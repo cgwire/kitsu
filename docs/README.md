@@ -35,6 +35,7 @@ Depending on your role in the studio, we propose you several tutorials:
 
 In this section, we will give more information about Kitsu main customization:
 
+* [Kitsu customization](customization-kitsu/README.md): Adapt Kitsu to your studio
 * [Studio customization](customization-studio/README.md): Adapt Kitsu to your productions
 * [Production customization](customization-production/README.md): Adapt Kitsu to your productions
   
