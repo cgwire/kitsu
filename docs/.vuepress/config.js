@@ -17,6 +17,15 @@ module.exports = {
      ]
    },
    {
+     title: 'Customization',
+     collapsable: false,
+     children: [
+	    '/customization-kitsu/',
+	    '/customization-studio/',
+        '/customization-production/'
+	 ]
+   },
+   {
      title: 'Modules',
      collapsable: false,
      children: [
