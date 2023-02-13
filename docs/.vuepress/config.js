@@ -16,6 +16,15 @@ module.exports = {
 	     '/getting-started-client/'
      ]
    },
+    {
+     title: 'Customization',
+     collapsable: false,
+     children: [
+	    '/customization-kitsu/',
+	    '/customization-studio/',
+        '/customization-production/'
+	 ]
+   },
    {
      title: 'Kitsu Modules',
      collapsable: false,
