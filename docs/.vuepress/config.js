@@ -26,7 +26,7 @@ module.exports = {
 	 ]
    },
    {
-     title: 'Kitsu Modules',
+     title: 'Modules',
      collapsable: false,
      children: [
 	    '/department/',
