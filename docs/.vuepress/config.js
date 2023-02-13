@@ -23,7 +23,7 @@ module.exports = {
 	    '/customization-kitsu/',
 	    '/customization-studio/',
         '/customization-production/'
-	  ]
+	 ]
    },
    {
      title: 'Modules',
