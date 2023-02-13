@@ -43,7 +43,7 @@ module.exports = {
      children: [
        '/discord/',
        '/mattermost/',
-       '/slack/',
+       '/slack/'
      ]
 	},
 	{
@@ -52,7 +52,7 @@ module.exports = {
      children: [
        '/publisher/',
        '/dcc-plugin/',
-	   '/using_publisher/',
+	   '/using_publisher/'
      ]
 	},	
 	{
