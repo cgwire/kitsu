@@ -132,6 +132,7 @@ You can change :
 
 Click on **Confirm** to save your changes.
 
+
 ## Asset Types
 
 ### Create a new Asset Types

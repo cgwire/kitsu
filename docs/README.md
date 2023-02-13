@@ -31,7 +31,7 @@ Depending on your role in the studio, we propose you several tutorials:
 * [Getting Started as an artist](getting-started-artist/README.md): Access your task list, share your progress and upload your results
  * [Getting Started as a client](getting-started-client/README.md): Browse playlists and provide feedback on the deliveries
   
-## Custimzation
+## Customization
 
 * [Kitsu customization](customization-kitsu/README.md): Adapt Kitsu to your productions
 * [Studio customization](customization-studio/README.md): Adapt Kitsu to your productions
