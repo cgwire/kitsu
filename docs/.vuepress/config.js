@@ -20,18 +20,18 @@ module.exports = {
      title: 'Customization',
      collapsable: false,
      children: [
-	     '/customization-kitsu/',
-	     '/customization-studio/',
-         '/customization-production/'
+	    '/customization-kitsu/',
+	    '/customization-studio/',
+        '/customization-production/'
 	  ]
    },
    {
      title: 'Modules',
      collapsable: false,
      children: [
-	     '/department/',
+	    '/department/',
 	    '/permissions/',
-	     '/playlist/',
+	    '/playlist/',
        '/Schedules/',
        '/batch-action/',
        '/custom-actions/'
