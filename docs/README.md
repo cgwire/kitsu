@@ -33,7 +33,7 @@ Depending on your role in the studio, we propose you several tutorials:
   
 ## Customization
 
-* [Kitsu customization](customization-kitsu/README.md): Adapt Kitsu to your productions
+* [Kitsu customization](customization-kitsu/README.MD): Adapt Kitsu to your productions
 * [Studio customization](customization-studio/README.md): Adapt Kitsu to your productions
 * [Production customization](customization-production/README.md): Adapt Kitsu to your productions
   
