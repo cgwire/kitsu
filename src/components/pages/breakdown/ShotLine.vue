@@ -51,6 +51,56 @@
       >
       </textarea>
     </div>
+    <div class="frames-column flexrow-item"
+      v-if="isFrames && !isShowInfosBreakdown && metadataDisplayHeaders.frames"
+    >
+      <input
+        class="input-editor"
+        step="1"
+        :value="entity.nb_frames"
+        type="number"
+        min="0"
+        @input="event => onNbFramesChanged(entity, event.target.value)"
+        v-if="isCurrentUserManager"
+      />
+      <span class="metadata-value selectable" v-else>
+        {{ entity.nb_frames }}
+      </span>
+    </div>
+    <div
+      class="frames-column flexrow-item"
+      v-if="isFrameIn && !isShowInfosBreakdown && metadataDisplayHeaders.frameIn"
+    >
+      <input
+        class="input-editor"
+        step="1"
+        type="number"
+        min="0"
+        :value="getMetadataFieldValue({field_name: 'frame_in'}, entity)"
+        @input="event => onMetadataFieldChanged(entity, {field_name: 'frame_in'}, event)"
+        v-if="isCurrentUserManager"
+      />
+      <span class="metadata-value selectable" v-else>
+        {{ getMetadataFieldValue({field_name: 'frame_in'}, entity) }}
+      </span>
+    </div>
+    <div
+      class="frames-column flexrow-item"
+      v-if="isFrameOut && !isShowInfosBreakdown && metadataDisplayHeaders.frameOut"
+    >
+      <input
+        class="input-editor"
+        step="1"
+        type="number"
+        min="0"
+        :value="getMetadataFieldValue({field_name: 'frame_out'}, entity)"
+        @input="event => onMetadataFieldChanged(entity, {field_name: 'frame_out'}, event)"
+        v-if="isCurrentUserManager"
+      />
+      <span class="metadata-value selectable" v-else>
+        {{ getMetadataFieldValue({field_name: 'frame_out'}, entity) }}
+      </span>
+    </div>
     <div
       class="metadata-descriptor flexrow-item"
       :title="entity.data ? entity.data[descriptor.field_name] : ''"
@@ -121,16 +171,15 @@
     </div>
     <div
       class="asset-list flexrow-item"
-      v-if="isShowInfosBreakdown"
+      :key="assetType"
+      v-for="assetType in assetTypes"
     >
       <div
         class="asset-type-line flexrow"
-        :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
-        v-for="typeAssets in assets"
+        v-if="assetsByAssetTypesMap[assetType] !== undefined"
       >
         <span class="asset-type-name flexrow-item">
-          {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
-          ({{ typeAssets.reduce((acc, a) => acc + a.nb_occurences, 0) }})
+          ({{ assetsByAssetTypesMap[assetType].reduce((acc, a) => acc + a.nb_occurences, 0) }})
         </span>
         <div class="asset-type-items flexrow-item">
           <asset-block
@@ -143,13 +192,13 @@
             @edit-label="onEditLabelClicked"
             @remove-one="removeOneAsset"
             @remove-ten="removeTenAssets"
-            v-for="asset in typeAssets"
+            v-for="asset in assetsByAssetTypesMap[assetType]"
           />
         </div>
       </div>
       <div
         class="asset-type-line flexrow empty mt05 mb05"
-        v-if="assets.length === 0"
+        v-else
       >
         {{ $t('breakdown.empty') }}
       </div>
@@ -199,6 +248,10 @@ export default {
       default: () => [],
       type: Array
     },
+    assetTypes: {
+      default: () => [], 
+      type: Array
+    },
     readOnly: {
       default: false,
       type: Boolean
@@ -220,8 +273,19 @@ export default {
   computed: {
     ...mapGetters([
       'isCurrentUserManager',
-      'isShowInfosBreakdown'
-    ])
+      'isFrameIn',
+      'isFrameOut',
+      'isFrames',
+      'isShowInfosBreakdown',
+    ]),
+
+    assetsByAssetTypesMap () {
+      const assetsByAssetTypes = {}
+      this.assets.forEach(assetType => {
+        assetsByAssetTypes[assetType[0].asset_type_name] = assetType
+      })
+      return assetsByAssetTypes
+    }
   },
 
   methods: {
@@ -263,10 +327,15 @@ export default {
 }
 
 .asset-list {
-  border-left: 1px solid $light-grey;
   padding-left: 1em;
   padding-top: 0.5em;
   align-self: stretch;
+  min-width: 150px;
+  max-width: 150px;
+  border-left: 1px solid $light-grey;
+  &:last-child {
+    border-right: 1px solid $light-grey;
+  }
 }
 
 .text-mode .asset-list {
@@ -286,10 +355,6 @@ export default {
 
 .asset-type-name {
   display: flex;
-  flex: 0 0 150px;
-  align-items: center;
-  align-self: flex-start;
-  margin-right: 1em;
   width: 150px;
   height: 40px;
   color: $grey-strong;
@@ -324,6 +389,7 @@ export default {
 
 .description-column,
 .metadata-descriptor,
+.frames-column,
 .standby-column {
   align-items: center;
   align-self: stretch;
@@ -338,11 +404,18 @@ export default {
 }
 
 .metadata-descriptor {
-  width: 120px;
+  min-width: 120px;
+  max-width: 120px;
 }
 
 .description-column {
-  width: 150px;
+  min-width: 250px;
+  max-width: 250px;
+}
+
+.frames-column {
+  min-width: 81px;
+  max-width: 81px;
 }
 
 .standby-column {
@@ -455,10 +528,6 @@ div .tooltip-editor {
       border: 1px solid $light-green;
     }
   }
-}
-
-.description-column {
-  width: 250px;
 }
 
 .description-column .selectable,

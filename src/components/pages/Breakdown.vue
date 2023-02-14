@@ -72,6 +72,24 @@
               {{ $t('shots.fields.description') }}
             </div>
             <div
+              class="frames-header flexrow-item"
+              v-if="isShotCasting && isFrames && !isShowInfosBreakdown && metadataDisplayHeaders.frames"
+            >
+              {{ $t('shots.fields.nb_frames') }}
+            </div>
+            <div
+              class="frames-header flexrow-item"
+              v-if="isShotCasting && isFrameIn && !isShowInfosBreakdown && metadataDisplayHeaders.frameIn"
+            >
+              {{ $t('shots.fields.frame_in') }}
+            </div>
+            <div
+              class="frames-header flexrow-item"
+              v-if="isShotCasting && isFrameOut && !isShowInfosBreakdown && metadataDisplayHeaders.frameOut"
+            >
+              {{ $t('shots.fields.frame_out') }}
+            </div>
+            <div
               class="descriptor-header flexrow-item"
               :key="'descriptor-header-' + descriptor.id"
               v-for="descriptor in visibleMetadataDescriptors"
@@ -89,10 +107,11 @@
               </span>
             </div>
             <div
-              class="casting-header flexrow-item"
-              v-if="isShowInfosBreakdown"
+              :key="assetType"
+              class="asset-types-header flexrow-item"
+              v-for="assetType in castingAssetTypes"
             >
-              Casting
+              {{  assetType }}
             </div>
           </div>
           <shot-line
@@ -104,6 +123,7 @@
               ? entity.sequence_name + ' / ' + entity.name
               : entity.name"
             :assets="castingByType[entity.id] || []"
+            :asset-types="castingAssetTypes"
             :read-only="!isCurrentUserManager"
             :text-mode="isTextMode"
             :metadata-descriptors="metadataDescriptors"
@@ -283,7 +303,7 @@ import Spinner from '@/components/widgets/Spinner'
 import DepartmentName from '@/components/widgets/DepartmentName'
 
 export default {
-  name: 'breakdown',
+  name: 'breakdown-page',
   mixins: [
     entityListMixin
   ],
@@ -381,16 +401,19 @@ export default {
       'currentEpisode',
       'currentProduction',
       'departmentMap',
+      'displayedSequences',
       'displayedShots',
       'episodeMap',
       'episodes',
       'isAssetsLoading',
       'isCurrentUserManager',
+      'isFrameIn',
+      'isFrameOut',
+      'isFrames',
       'isShotsLoading',
       'isShowInfosBreakdown',
       'isTVShow',
       'sequenceMap',
-      'displayedSequences',
       'shotMap',
       'shotMetadataDescriptors'
     ]),
@@ -483,6 +506,19 @@ export default {
       }
     },
 
+    castingAssetTypes () {
+      const castingAssetTypes = []
+      this.castingEntities.forEach(entity => {
+        if (this.castingByType[entity.id]) {
+          this.castingByType[entity.id].forEach(type => {
+            if (castingAssetTypes.indexOf(type[0].asset_type_name) === -1)
+              castingAssetTypes.push(type[0].asset_type_name)
+          })
+        }
+      })
+      return castingAssetTypes
+    },
+
     editLabelModal () {
       return this.$refs['edit-label-modal']
     },
@@ -554,9 +590,9 @@ export default {
       } else if (this.isShotCasting) {
         return {
           fps: false,
-          frameIn: false,
-          frameOut: false,
-          frames: false,
+          frameIn: true,
+          frameOut: true,
+          frames: true,
           estimation: false,
           maxRetakes: false,
           resolution: false,
@@ -994,7 +1030,7 @@ export default {
       this.loading.edit = true
       this.errors.edit = false
       this.newAsset(form)
-        .then((form) => {
+        .then(() => {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
         })
@@ -1324,9 +1360,6 @@ export default {
   flex-wrap: wrap;
 }
 
-.level-right {
-  display-flex: row;
-}
 
 .shots-title {
   font-weight: bold;
@@ -1347,27 +1380,41 @@ export default {
 
 .entity-header {
   margin: 0;
-  width: 169px;
+  max-width: 171px;
+  min-width: 171px;
 }
 
 .description-header {
-  width: 236px;
+  min-width: 236px;
+  max-width: 236px;
 }
 
 .descriptor-header {
-  width: 106px;
+  min-width: 106px;
+  max-width: 106px;
+}
+
+.frames-header {
+  min-width: 67px;
+  max-width: 67px;
+}
+
+.asset-types-header {
+  min-width: 150px;
+  max-width: 150px;
 }
 
 .standby-header {
   max-width: 60px;
   min-width: 60px;
   padding-left: .5em;
-  width: 60px;
 }
 
 .entity-header,
 .description-header,
 .descriptor-header,
+.frames-header,
+.asset-types-header,
 .standby-header {
   border-right: 1px solid $light-grey;
 }
