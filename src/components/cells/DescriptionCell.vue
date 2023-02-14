@@ -163,7 +163,7 @@ td {
   position: absolute;
   top: -100px;
   transform: translatex(-50%);
-  width: 250px;
+  width: 320px;
   box-shadow: 0 0 3px 0 $grey;
   z-index: 100;
 
