@@ -20,9 +20,9 @@ module.exports = {
      title: 'Customization',
      collapsable: false,
      children: [
-	    '/customization-kitsu/',
-	    '/customization-studio/',
-        '/customization-production/'
+	    '/customization-pipeline/',
+        '/customization-production/',
+		 '/customization-studio/'
 	 ]
    },
    {
