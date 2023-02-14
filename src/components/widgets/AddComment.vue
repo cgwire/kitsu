@@ -528,6 +528,8 @@ export default {
       const taskStatus = this.taskStatusMap.get(this.task_status_id)
       if (taskStatus.is_feedback_request) {
         this.mode = 'publish'
+      } else {
+        this.mode = 'status'
       }
     },
 
@@ -535,6 +537,9 @@ export default {
       if (this.mode === 'publish') {
         this.checklist = []
         this.attachments = []
+        if (this.text && this.text.length > 0) {
+          this.showCommentArea = true
+        }
       } else {
         this.$emit('clear-files')
       }
