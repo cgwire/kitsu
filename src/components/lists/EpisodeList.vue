@@ -117,6 +117,15 @@
           >
             {{ $t('main.estimation_short') }}
           </th>
+          <th
+            scope="col"
+            class="status"
+            ref="th-status"
+            v-if="isShowInfos &&
+                  metadataDisplayHeaders.status"
+          >
+            {{ $t('main.status') }}
+          </th>
 
           <validation-header
             :key="columnId"
@@ -331,6 +340,30 @@
             {{ formatDuration(episode.estimation) }}
           </td>
 
+          <td
+            scope="col"
+            class="status metadata-descriptor"
+            ref="th-status"
+            v-if="isShowInfos &&
+                  metadataDisplayHeaders.status"
+          >
+            <span class="select">
+              <select
+                class="select-input"
+                @change="event => onEpisodeStatusChanged(episode, event.target.value)"
+              >
+                <option
+                  v-for="option in episodeStatusOptions"
+                  :key="`${episode.id}-status-option-${option.value}`"
+                  :value="option.value"
+                  :selected="(episode.status || 'running') === option.value"
+                >
+                  {{ $t('episodes.status.' + option.label) }}
+                </option>
+              </select>
+            </span>
+          </td>
+
           <validation-cell
             :ref="`validation-${i}-${j + stickedDisplayedValidationColumns.length}`"
             :class="{
@@ -464,10 +497,17 @@ export default {
       lastSelection: null,
       metadataDisplayHeaders: {
         estimation: true,
-        timeSpent: true
+        timeSpent: true,
+        status: true
       },
       offsets: {},
-      stickedColumns: {}
+      stickedColumns: {},
+      episodeStatusOptions: [
+        { label: 'canceled', value: 'canceled' },
+        { label: 'complete', value: 'complete' },
+        { label: 'running', value: 'running' },
+        { label: 'standby', value: 'standby' }
+      ]
     }
   },
 
@@ -600,6 +640,14 @@ export default {
         route.params.episode_id = episodeId
       }
       return route
+    },
+
+    onEpisodeStatusChanged (episode, status) {
+      this.$emit('field-changed', {
+        entry: episode,
+        fieldName: 'status',
+        value: status
+      })
     }
   },
 
@@ -675,6 +723,12 @@ th.actions {
   min-width: 200px;
   max-width: 200px;
   width: 200px;
+}
+
+.status {
+  min-width: 120px;
+  max-width: 120px;
+  width: 120px;
 }
 
 .validation-cell {
@@ -804,5 +858,73 @@ td .select {
 
 .metadata-value {
   padding: 0.8rem;
+}
+
+th .input-editor,
+td .input-editor {
+  color: $grey-strong;
+  height: 100%;
+  padding: 0.5rem;
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  z-index: 100;
+
+  &:active,
+  &:focus,
+  &:hover {
+    background: transparent;
+    background: white;
+  }
+
+  &:active,
+  &:focus {
+    border: 1px solid $green;
+  }
+
+  &:hover {
+    border: 1px solid $light-green;
+  }
+}
+
+
+td .select {
+  color: $grey-strong;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  border: 1px solid transparent;
+
+  &::after {
+    border-color: transparent;
+  }
+
+  &:active,
+  &:focus,
+  &:hover {
+    &::after {
+      border-color: $green;
+    }
+  }
+
+  select {
+    color: $grey-strong;
+    height: 100%;
+    width: 100%;
+    background: transparent;
+    border-radius: 0;
+    border: 1px solid transparent;
+
+    &:focus {
+      border: 1px solid $green;
+      background: white;
+    }
+
+    &:hover {
+      background: transparent;
+      background: white;
+      border: 1px solid $light-green;
+    }
+  }
 }
 </style>

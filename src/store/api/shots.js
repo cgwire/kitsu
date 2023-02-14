@@ -70,6 +70,7 @@ export default {
     const data = {
       name: episode.name,
       description: episode.description || '',
+      status: episode.status || 'running',
       data: episode.data || {}
     }
     const path = `/api/data/projects/${episode.project_id}/episodes`
@@ -125,6 +126,7 @@ export default {
     const data = {
       name: episode.name,
       description: episode.description,
+      status: episode.status,
       data: episode.data
     }
     if (episode.is_casting_standby !== undefined) {
