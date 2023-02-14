@@ -85,8 +85,9 @@ export default {
     return client.pget(path)
   },
 
-  loadTempPlaylist (production, taskIds) {
-    const path = `/api/data/projects/${production.id}/playlists/temp`
+  loadTempPlaylist (production, taskIds, sort) {
+    let path = `/api/data/projects/${production.id}/playlists/temp`
+    if (sort) path += '?sort=true'
     return client.ppost(path, { task_ids: taskIds })
   }
 }

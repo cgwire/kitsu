@@ -82,12 +82,13 @@
 
       <todos-list
         ref="todo-list"
-        :tasks="sortedTasks"
+        :empty-text="$t('people.no_task_assigned')"
         :is-loading="isTodosLoading"
         :is-error="isTodosLoadingError"
+        :tasks="sortedTasks"
         :selection-grid="todoSelectionGrid"
-        v-if="isTabActive('todos')"
         @scroll="setTodoListScrollPosition"
+        v-if="isTabActive('todos')"
       />
 
       <div v-if="isTabActive('done')">
@@ -493,10 +494,6 @@ export default {
 
 .data-list {
   margin-top: 0;
-}
-
-.level {
-  align-items: flex-start
 }
 
 .todos {
