@@ -178,7 +178,8 @@ export const annotationMixin = {
     },
 
     /*
-     * Hack needed to make text objects working properly.
+     * Hack needed to make text objects working properly outside of full screen
+     * mode.
      */
     removeTypeArea () {
       const originalInitHiddenTextarea =
@@ -186,7 +187,9 @@ export const annotationMixin = {
       fabric.util.object.extend(fabric.IText.prototype, {
         initHiddenTextarea: function () {
           originalInitHiddenTextarea.call(this)
-          // fabric.document.body.appendChild(this.hiddenTextarea)
+          if (fabric.document) {
+            fabric.document.body.appendChild(this.hiddenTextarea)
+          }
         }
       })
     },
@@ -1102,21 +1105,6 @@ export const annotationMixin = {
         this.notSaved = false
         this.$emit('annotation-changed', this.$options.changesToSave)
       }
-    },
-
-    /** @lends fabric.IText.prototype */
-    // fix for : IText not editable when canvas is in a fullscreen
-    // element on chrome
-    // https://github.com/fabricjs/fabric.js/issues/5126
-    configureAnnotationTextArea () {
-      const originalInitHiddenTextarea =
-        fabric.IText.prototype.initHiddenTextarea
-      fabric.util.object.extend(fabric.IText.prototype, {
-        initHiddenTextarea: function () {
-          originalInitHiddenTextarea.call(this)
-          fabric.document.body.appendChild(this.hiddenTextarea)
-        }
-      })
     },
 
     /*

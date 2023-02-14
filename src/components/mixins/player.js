@@ -625,10 +625,11 @@ export const playerMixin = {
     },
 
     onFullscreenClicked () {
-      this.configureAnnotationTextArea()
       if (this.isFullScreen()) {
+        this.removeTypeArea()
         this.exitFullScreen()
       } else {
+        this.addTypeArea()
         this.setFullScreen()
       }
     },
