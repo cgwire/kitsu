@@ -41,6 +41,8 @@ validate your choice with the **add** button.
 
 ![Setting Add Task Type](../img/getting-started/setting_task_add.png)
 
+You can go back to the global asset or shot page and add the new **task type column** to your production.
+
 
 ## Select specific Asset Types for a production
 
