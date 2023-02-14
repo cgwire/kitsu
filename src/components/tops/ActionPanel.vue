@@ -698,6 +698,7 @@
     <view-playlist-modal
       :active="modals.playlist"
       :task-ids="selectedTaskIds"
+      sort
       @cancel="hidePlaylistModal"
     />
   </div>

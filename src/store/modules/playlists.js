@@ -224,9 +224,9 @@ const actions = {
     return dispatch('editPlaylist', { data: playlist, callback })
   },
 
-  loadTempPlaylist ({ commit, dispatch, rootGetters }, taskIds) {
+  loadTempPlaylist ({ commit, dispatch, rootGetters }, { taskIds, sort }) {
     const production = rootGetters.currentProduction
-    return playlistsApi.loadTempPlaylist(production, taskIds)
+    return playlistsApi.loadTempPlaylist(production, taskIds, sort)
   },
 
   getRunningPreviewFiles () {

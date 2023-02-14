@@ -31,10 +31,13 @@
           >
             {{ $t('tasks.fields.entity') }}
           </th>
+          <th class="assignees" ref="th-assignees" v-if="isToCheck">
+            {{ $t('tasks.fields.assignees') }}
+          </th>
           <th
             class="description"
             scope="col"
-            v-if="isDescriptionPresent"
+            v-if="isDescriptionPresent && !isToCheck"
           >
             {{ $t('assets.fields.description') }}
           </th>
@@ -48,7 +51,7 @@
           <th scope="col" class="estimation">
             {{ $t('tasks.fields.duration').substring(0, 3) }}.
           </th>
-          <th scope="col" class="start-date">
+          <th scope="col" class="start-date" v-if="!isToCheck">
             {{ $t('tasks.fields.start_date_short') }}
           </th>
           <th scope="col" class="due-date">
@@ -64,11 +67,15 @@
           <th scope="col" class="status">
             {{ $t('tasks.fields.task_status') }}
           </th>
+          <template v-if="!isToCheck">
           <th scope="col" class="last-comment" v-if="!done">
             {{ $t('tasks.fields.last_comment') }}
           </th>
           <th scope="col" class="end-date" v-else>
             {{ $t('tasks.fields.end_date') }}
+          </th>
+          </template>
+          <th class="actions" v-else>
           </th>
         </tr>
       </thead>
@@ -115,15 +122,27 @@
           <description-cell
             class="description"
             :entry="{description: entry.entity_description}"
-            v-if="isDescriptionPresent"
+            v-if="isDescriptionPresent && !isToCheck"
           />
+          <td class="assignees" v-if="isToCheck">
+            <div class="flexrow">
+              <people-avatar
+                class="flexrow-item"
+                :key="entry.id + '-' + personId"
+                :person="personMap.get(personId)"
+                :size="30"
+                :font-size="16"
+                v-for="personId in entry.assignees"
+              />
+            </div>
+          </td>
           <td class="estimation">
             {{ formatDuration(entry.estimation) }}
           </td>
           <td class="estimation">
             {{ formatDuration(entry.duration) }}
           </td>
-          <td class="start-date">
+          <td class="start-date" v-if="!isToCheck">
             {{ formatDate(entry.start_date) }}
           </td>
           <td class="due-date">
@@ -187,18 +206,22 @@
             :selected="selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false"
             :rowX="i"
             :columnY="0"
+            :column="entry.taskStatus"
             @select="onTaskSelected"
             @unselect="onTaskUnselected"
-            :column="entry.taskStatus"
           />
-          <last-comment-cell
-            class="last-comment"
-            :task="entry"
-            v-if="!done"
-          />
-          <td class="end-date" v-else>
-            {{ formatDate(entry.end_date) }}
-          </td>
+          <template v-if="!isToCheck">
+            <last-comment-cell
+              class="last-comment"
+              :task="entry"
+              v-if="!done"
+            />
+            <td class="end-date" v-else>
+              {{ formatDate(entry.end_date) }}
+            </td>
+          </template>
+          <th class="actions" v-else>
+          </th>
        </tr>
       </tbody>
     </table>
@@ -217,7 +240,7 @@
       <img src="../../assets/illustrations/empty_todo.png" />
     </p>
     <p>
-      {{ $t('people.no_task_assigned') }}
+      {{ emptyText }}
     </p>
   </div>
 
@@ -243,6 +266,7 @@ import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import LastCommentCell from '@/components/cells/LastCommentCell'
 import ProductionNameCell from '@/components/cells/ProductionNameCell'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import TaskTypeCell from '@/components/cells/TaskTypeName'
 import TableInfo from '@/components/widgets/TableInfo'
 import ValidationCell from '@/components/cells/ValidationCell'
@@ -256,6 +280,7 @@ export default {
     EntityThumbnail,
     DescriptionCell,
     LastCommentCell,
+    PeopleAvatar,
     ProductionNameCell,
     TableInfo,
     TaskTypeCell,
@@ -281,8 +306,16 @@ export default {
       default: false
     },
     selectionGrid: {
-      type: Boolean,
+      type: Object,
       default: () => {}
+    },
+    isToCheck: {
+      type: Boolean,
+      default: false
+    },
+    emptyText: {
+      type: String,
+      default: ''
     }
   },
 
@@ -312,9 +345,10 @@ export default {
   computed: {
     ...mapGetters([
       'nbSelectedTasks',
-      'taskTypeMap',
-      'productionMap',
       'openProductions',
+      'personMap',
+      'productionMap',
+      'taskTypeMap',
       'user'
     ]),
 
@@ -330,28 +364,30 @@ export default {
 
     metadataDescriptorsMap () {
       const metadataDescriptorsMap = {}
-      this.openProductions.forEach(project => {
-        project.descriptors.forEach(descriptor => {
-          const isUserDepartment = this.user.departments.some(
-            department => descriptor.departments.includes(department)
-          )
-          if (isUserDepartment) {
-            // group them by field_name if they have the same field_name
-            if (!(descriptor.field_name in metadataDescriptorsMap)) {
-              metadataDescriptorsMap[descriptor.field_name] = {}
+      if (!this.isToCheck) {
+        this.openProductions.forEach(project => {
+          project.descriptors.forEach(descriptor => {
+            const isUserDepartment = this.user.departments.some(
+              department => descriptor.departments.includes(department)
+            )
+            if (isUserDepartment) {
+              // group them by field_name if they have the same field_name
+              if (!(descriptor.field_name in metadataDescriptorsMap)) {
+                metadataDescriptorsMap[descriptor.field_name] = {}
+              }
+              const descriptorFieldNameEntry =
+                metadataDescriptorsMap[descriptor.field_name]
+              // group them by entity_type if the have the same entity_type
+              if (!(descriptor.entity_type in
+                descriptorFieldNameEntry)) {
+                descriptorFieldNameEntry[descriptor.entity_type] = {}
+              }
+              descriptorFieldNameEntry[descriptor.entity_type][project.id] =
+                descriptor
             }
-            const descriptorFieldNameEntry =
-              metadataDescriptorsMap[descriptor.field_name]
-            // group them by entity_type if the have the same entity_type
-            if (!(descriptor.entity_type in
-              descriptorFieldNameEntry)) {
-              descriptorFieldNameEntry[descriptor.entity_type] = {}
-            }
-            descriptorFieldNameEntry[descriptor.entity_type][project.id] =
-              descriptor
-          }
+          })
         })
-      })
+      }
       return metadataDescriptorsMap
     }
   },
@@ -407,8 +443,10 @@ export default {
         }
       } else if (!validationInfo.isCtrlKey) {
         this.$store.commit('CLEAR_SELECTED_TASKS')
+        this.$emit('task-selection-cleared')
       }
       this.$store.commit('ADD_SELECTED_TASK', validationInfo)
+      this.$emit('task-selection-addition', validationInfo)
 
       if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
         const x = validationInfo.x
@@ -426,12 +464,16 @@ export default {
       if (!validationInfo.isCtrlKey) {
         if (this.nbSelectedTasks === 1) {
           this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
+          this.$emit('task-selection-removal', validationInfo)
         } else {
           this.$store.commit('CLEAR_SELECTED_TASKS')
+          this.$emit('task-selection-cleared')
           this.$store.commit('ADD_SELECTED_TASK', validationInfo)
+          this.$emit('task-selection-addition', validationInfo)
         }
       } else {
         this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
+        this.$emit('task-selection-removal', validationInfo)
       }
     },
 
@@ -634,9 +676,14 @@ export default {
   min-width: 130px;
 }
 
+.assignees {
+  width: 130px;
+  max-width: 130px;
+}
+
 .status {
-  width: 100px;
-  min-width: 100px;
+  width: 130px;
+  min-width: 130px;
 }
 
 .estimation {
@@ -656,7 +703,7 @@ td.estimation {
 }
 
 td.due-date {
-  border-right: 1px solid var(--border-alt)
+  border-right: 1px solid var(--border);
 }
 
 th.last-comment {
@@ -665,7 +712,7 @@ th.last-comment {
 }
 
 td.last-comment {
-  min-width: 250px;
+  min-width: 450px;
 }
 
 td.end-date {

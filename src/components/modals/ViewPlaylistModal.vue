@@ -59,8 +59,15 @@ export default {
 
   props: {
     active: {
-      default: false,
-      type: Boolean
+      type: Boolean,
+      default: false
+    },
+    taskIds: {
+      type: Array
+    },
+    sort: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -98,12 +105,12 @@ export default {
       'taskMap'
     ]),
 
-    isPlaylistPage () {
-      return this.$route.path.indexOf('playlist') > 0
+    currentTaskIds () {
+      return this.taskIds || Array.from(this.selectedTasks.keys())
     },
 
-    taskIds () {
-      return Array.from(this.selectedTasks.keys())
+    isPlaylistPage () {
+      return this.$route.path.indexOf('playlist') > 0
     },
 
     playlistPlayer () {
@@ -219,7 +226,7 @@ export default {
         this.previewFileMap = new Map()
         this.previewFileEntityMap = new Map()
         this.isLoading = true
-        this.loadTempPlaylist(Array.from(this.selectedTasks.keys()))
+        this.loadTempPlaylist({ taskIds: this.currentTaskIds, sort: this.sort})
           .then(entities => {
             this.setupEntities(entities)
             this.isLoading = false

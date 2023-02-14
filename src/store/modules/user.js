@@ -40,6 +40,7 @@ import {
   USER_LOAD_TODOS_ERROR,
   USER_LOAD_DONE_TASKS_END,
   USER_LOAD_TIME_SPENTS_END,
+  REGISTER_USER_TASKS,
   PERSON_SET_DAY_OFF,
 
   SET_TODOS_SEARCH,
@@ -295,6 +296,7 @@ const actions = {
                   USER_LOAD_TODOS_END,
                   { tasks, userFilters, taskTypeMap }
                 )
+                commit(REGISTER_USER_TASKS, { tasks })
                 return peopleApi.getDayOff(state.user.id, date)
               })
               .then(dayOff => {
@@ -311,6 +313,14 @@ const actions = {
     } else {
       if (callback) callback()
     }
+  },
+
+  loadTasksToCheck ({ commit }) {
+    return peopleApi.loadTasksToCheck()
+      .then(tasks => {
+        commit(REGISTER_USER_TASKS, { tasks })
+        return Promise.resolve(tasks)
+      })
   },
 
   uploadAvatar ({ commit, state }, callback) {

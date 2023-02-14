@@ -20,12 +20,11 @@
 </a>
 
 <img
+  v-else-if="isPreview && !withLink"
   :key="thumbnailKey"
   class="thumbnail-picture"
-  style="imgStyle"
-  :width="width || ''"
+  :style="imgStyle"
   v-lazy="thumbnailPath"
-  v-else-if="isPreview && !withLink"
 />
 
 <span
@@ -34,11 +33,9 @@
     'thumbnail-empty': true,
     square: square
   }"
-  :style="{
-    width: emptyWidth + 'px',
-    height: emptyHeight + 'px',
-  }"
-  v-else>
+  :style="imgStyle"
+v-else
+>
 </span>
 </template>
 
@@ -106,13 +103,19 @@ export default {
 
     imgStyle () {
       const style = {}
-      if (this.maxWidth) {
+      if (this.emptyWidth) {
+        style['max-width'] = this.emptyWidth + 'px'
+        style['min-width'] = this.emptyWidth + 'px'
+      } else if (this.maxWidth) {
         style['max-width'] = this.maxWidth + 'px'
       } else if (this.width) {
         style.width = this.width + 'px'
         style['min-width'] = this.width + 'px'
       }
-      if (this.maxHeight) {
+      if (this.emptyHeight) {
+        style['max-height'] = this.emptyHeight + 'px'
+        style['min-height'] = this.emptyHeight + 'px'
+      } else if (this.maxHeight) {
         style['max-height'] = this.maxHeight + 'px'
       } else if (this.height) {
         style.height = this.height + 'px'
@@ -150,11 +153,6 @@ export default {
 
 <style lang="scss" scoped>
 .dark {
-  .thumbnail-picture {
-    background-color: $dark-grey-lighter;
-    border-color: $dark-grey-light;
-  }
-
   table .thumbnail-picture.thumbnail-empty {
     background: $dark-grey-lighter;
     border-color: $dark-grey-light;
@@ -183,9 +181,12 @@ table .thumbnail-picture.thumbnail-empty {
   margin: 0px;
 }
 
+table .thumbnail-wrapper {
+}
+
 table .thumbnail-picture {
-  background: black;
-  border: 1px solid black;
+  background-color: black;
+  border: 0;
   margin: 0px;
   padding: 0px;
 }

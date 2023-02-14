@@ -70,6 +70,16 @@
         <router-link
           class="nav-item"
           :to="{
+            name: 'checks',
+          }"
+          v-if="isCurrentUserSupervisor"
+        >
+          {{ $t('tasks.my_checks') }}
+        </router-link>
+
+        <router-link
+          class="nav-item"
+          :to="{
             name: 'todos-tab',
             params: { tab: 'todos' }
           }"
@@ -271,6 +281,7 @@ export default {
       'isCurrentUserArtist',
       'isCurrentUserClient',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'isCurrentUserVendor',
       'isDarkTheme',
       'isSidebarHidden',
@@ -335,7 +346,7 @@ export default {
 
     isProductionContext () {
       return this.$route.params.production_id !== undefined ||
-        this.$route.path.indexOf('tasks') > 0
+        this.$route.path.indexOf('my-tasks') === 0
     },
 
     isEpisodeContext () {

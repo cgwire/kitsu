@@ -237,7 +237,7 @@ export default {
 }
 
 .priority {
-  border-radius: 50%;
+  border-radius: 5px;
   display: inline-block;
   color: white;
   margin-left: 5px;

@@ -2261,11 +2261,15 @@ progress {
   color: $grey;
 }
 
-@media only screen and (min-width: 1600px) {
-  .comparison-combos {
-    top: -1px;
-    left: 33px;
-  }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type=number] {
+    -moz-appearance:textfield; /* Firefox */
 }
 
 .frame-per-image-input {
@@ -2282,4 +2286,10 @@ progress {
   display: none;
 }
 
+@media only screen and (min-width: 1600px) {
+  .comparison-combos {
+    top: -1px;
+    left: 33px;
+  }
+}
 </style>
