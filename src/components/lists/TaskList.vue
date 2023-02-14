@@ -858,8 +858,8 @@ export default {
 }
 
 .status {
-  min-width: 120px;
-  width: 120px;
+  min-width: 140px;
+  width: 140px;
 }
 
 .assignees {
