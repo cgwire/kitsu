@@ -63,10 +63,10 @@
               :font-size="16"
             />
            </span>
-           <div class="flexrow-item">
+           <!--div class="flexrow-item">
              {{ $t('tasks.fields.priority') }}:
              {{ formatPriority(task.priority) }}
-           </div>
+           </div-->
          <subscribe-button
            class="flexrow-item action-button"
            :subscribed="isAssigned || task.is_subscribed"
@@ -1421,6 +1421,7 @@ h2.subtitle {
 
 .page-header {
   margin: 1em 1em 0 1em;
+  padding-right: 0;
 }
 
 .navigation-buttons {
