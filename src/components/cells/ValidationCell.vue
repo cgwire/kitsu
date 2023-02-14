@@ -501,7 +501,7 @@ span.person-avatar:nth-child(2) {
 }
 
 .priority {
-  border-radius: 50%;
+  border-radius: 5px;
   display: inline-block;
   color: white;
   margin-left: 5px;
