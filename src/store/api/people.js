@@ -198,6 +198,10 @@ export default {
     client.get('/api/data/user/done-tasks', callback)
   },
 
+  loadTasksToCheck () {
+    return client.pget('/api/data/user/tasks-to-check')
+  },
+
   loadTimeSpents (date) {
     return client.pget(`/api/data/user/time-spents/${date}`)
   },

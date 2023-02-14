@@ -30,6 +30,7 @@ const Episodes = () => import('@/components/pages/Episodes.vue')
 const Episode = () => import('@/components/pages/Episode.vue')
 const EpisodeStats = () => import('@/components/pages/EpisodeStats.vue')
 const MainSchedule = () => import('@/components/pages/MainSchedule.vue')
+const MyChecks = () => import('@/components/pages/MyChecks.vue')
 const NotFound = () => import('@/components/pages/NotFound.vue')
 const Person = () => import('@/components/pages/Person.vue')
 const People = () => import('@/components/pages/People.vue')
@@ -410,12 +411,18 @@ export const routes = [
       },
 
       {
-        path: 'todos',
+        path: 'my-tasks',
         component: Todos,
         name: 'todos',
         children: [
           { path: ':tab', component: Todos, name: 'todos-tab' }
         ]
+      },
+
+      {
+        path: 'my-checks',
+        component: MyChecks,
+        name: 'checks'
       },
 
       {

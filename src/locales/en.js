@@ -275,6 +275,12 @@ export default {
     fields: {
       name: 'name',
       description: 'description'
+    },
+    status: {
+      'canceled': 'Canceled',
+      'complete': 'Complete',
+      'standby': 'Stand By',
+      'running': 'Running'
     }
   },
 
@@ -446,6 +452,7 @@ export default {
     start_date: 'Start date',
     stick: 'Stick',
     studio: 'Studio',
+    status: 'Status',
     to: 'To',
     timeSpent: 'Time Spent',
     tutorials: 'Tutorials',
@@ -1216,6 +1223,7 @@ export default {
     hide_assignations: 'Hide assignations',
     hide_infos: 'Hide additional information',
     late: 'Late status',
+    my_checks: 'My Checks',
     my_tasks: 'My Tasks',
     nb_selected_tasks: '{nbSelectedTasks} task selected | {nbSelectedTasks} tasks selected',
     next: 'next task',

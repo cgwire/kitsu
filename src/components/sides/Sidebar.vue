@@ -37,6 +37,12 @@
                {{ $t("tasks.my_tasks") }}
              </router-link>
            </p>
+           <p @click="toggleSidebar()" v-if="isCurrentUserSupervisor">
+             <router-link :to="{name: 'checks'}">
+               <play-circle-icon size="0.9x" />
+               {{ $t("tasks.my_checks") }}
+             </router-link>
+           </p>
            <p @click="toggleSidebar()">
              <router-link :to="{name: 'open-productions'}">
                <film-icon size="0.9x" />
@@ -152,6 +158,7 @@ import {
   GitPullRequestIcon,
   HexagonIcon,
   ListIcon,
+  PlayCircleIcon,
   SettingsIcon,
   ToolIcon,
   UsersIcon
@@ -170,6 +177,7 @@ export default {
     GitPullRequestIcon,
     HexagonIcon,
     ListIcon,
+    PlayCircleIcon,
     SettingsIcon,
     ToolIcon,
     UsersIcon
@@ -192,6 +200,7 @@ export default {
       'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'isCurrentUserVendor',
       'isSidebarHidden',
       'organisation'
