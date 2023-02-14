@@ -8,7 +8,9 @@
             class=""
             v-if="isEpisodeCasting"
           >
-            <h2 class="subtitle mt05">Episode Casting</h2>
+            <h2 class="subtitle mt05">
+              {{ $t('breakdown.episode_casting') }}
+            </h2>
           </div>
           <combobox-styled
             class="mr1"
@@ -41,6 +43,13 @@
           />
           <button-simple
             class="flexrow-item"
+            icon="grid"
+            :is-on="isBigMode"
+            :title="$t('breakdown.big_pictures_mode')"
+            @click="isBigMode = !isBigMode"
+          />
+          <button-simple
+            class="flexrow-item"
             :title="$t('main.csv.import_file')"
             icon="upload"
             :is-responsive="true"
@@ -57,86 +66,92 @@
           />
         </div>
         <spinner class="mt1" v-if="isLoading" />
-        <div class="mt1" v-else>
-          <div class="header flexrow">
-            <div class="entity-header flexrow-item">
-              {{ $t('shots.fields.name') }}
+        <div class="casting-list" v-else>
+          <div class="mt1">
+            <div class="header flexrow">
+              <div class="entity-header name-header">
+                {{ $t('shots.fields.name') }}
+              </div>
+              <div
+                class="standby-header"
+                v-if="!isShowInfosBreakdown"
+              >
+                {{ $t('breakdown.fields.standby') }}
+              </div>
+              <div
+                class="description-header"
+                v-if="!isShowInfosBreakdown"
+              >
+                {{ $t('shots.fields.description') }}
+              </div>
+              <div
+                class="frames-header"
+                v-if="isShotCasting && isFrames && !isShowInfosBreakdown && metadataDisplayHeaders.frames"
+              >
+                {{ $t('shots.fields.nb_frames') }}
+              </div>
+              <div
+                class="frames-header"
+                v-if="isShotCasting && isFrameIn && !isShowInfosBreakdown && metadataDisplayHeaders.frameIn"
+              >
+                {{ $t('shots.fields.frame_in') }}
+              </div>
+              <div
+                class="frames-header"
+                v-if="isShotCasting && isFrameOut && !isShowInfosBreakdown && metadataDisplayHeaders.frameOut"
+              >
+                {{ $t('shots.fields.frame_out') }}
+              </div>
+              <div
+                class="descriptor-header"
+                :key="'descriptor-header-' + descriptor.id"
+                v-for="descriptor in visibleMetadataDescriptors"
+                v-if="!isShowInfosBreakdown"
+              >
+                <department-name
+                  :key="department.id"
+                  :department="department"
+                  :only-dot="true"
+                  :style="{'padding': '0px 0px'}"
+                  v-for="department in descriptorCurrentDepartments(descriptor)"
+                />
+                <span class="flexrow-item descriptor-name">
+                  {{ descriptor.name }}
+                </span>
+              </div>
+              <div
+                :key="assetType"
+                class="asset-type-header"
+                v-for="assetType in castingAssetTypes"
+              >
+                {{  assetType }}
+              </div>
             </div>
-            <div class="standby-header flexrow-item">
-              {{ $t('breakdown.fields.standby') }}
-            </div>
-            <div
-              class="description-header flexrow-item"
-              v-if="!isShowInfosBreakdown"
-            >
-              {{ $t('shots.fields.description') }}
-            </div>
-            <div
-              class="frames-header flexrow-item"
-              v-if="isShotCasting && isFrames && !isShowInfosBreakdown && metadataDisplayHeaders.frames"
-            >
-              {{ $t('shots.fields.nb_frames') }}
-            </div>
-            <div
-              class="frames-header flexrow-item"
-              v-if="isShotCasting && isFrameIn && !isShowInfosBreakdown && metadataDisplayHeaders.frameIn"
-            >
-              {{ $t('shots.fields.frame_in') }}
-            </div>
-            <div
-              class="frames-header flexrow-item"
-              v-if="isShotCasting && isFrameOut && !isShowInfosBreakdown && metadataDisplayHeaders.frameOut"
-            >
-              {{ $t('shots.fields.frame_out') }}
-            </div>
-            <div
-              class="descriptor-header flexrow-item"
-              :key="'descriptor-header-' + descriptor.id"
-              v-for="descriptor in visibleMetadataDescriptors"
-              v-if="!isShowInfosBreakdown"
-            >
-              <department-name
-                :key="department.id"
-                :department="department"
-                :only-dot="true"
-                :style="{'padding': '0px 0px'}"
-                v-for="department in descriptorCurrentDepartments(descriptor)"
-              />
-              <span class="flexrow-item descriptor-name">
-                {{ descriptor.name }}
-              </span>
-            </div>
-            <div
-              :key="assetType"
-              class="asset-types-header flexrow-item"
-              v-for="assetType in castingAssetTypes"
-            >
-              {{  assetType }}
-            </div>
+            <shot-line
+              :key="entity.id"
+              :entity="entity"
+              :preview-file-id="entity.preview_file_id"
+              :selected="selection[entity.id]"
+              :name="sequenceId === 'all'
+                ? entity.sequence_name + ' / ' + entity.name
+                : entity.name"
+              :assets="castingByType[entity.id] || []"
+              :asset-types="castingAssetTypes"
+              :read-only="!isCurrentUserManager"
+              :text-mode="isTextMode"
+              :metadata-descriptors="metadataDescriptors"
+              :metadata-display-headers="metadataDisplayHeaders"
+              :big-mode="isBigMode"
+              @edit-label="onEditLabelClicked"
+              @add-one="addOneAsset"
+              @remove-one="removeOneAsset"
+              @click="selectEntity"
+              @metadata-changed="onMetadataChanged"
+              @description-changed="onDescriptionChanged"
+              @standby-changed="onStandbyChanged"
+              v-for="entity in castingEntities"
+            />
           </div>
-          <shot-line
-            :key="entity.id"
-            :entity="entity"
-            :preview-file-id="entity.preview_file_id"
-            :selected="selection[entity.id]"
-            :name="sequenceId === 'all'
-              ? entity.sequence_name + ' / ' + entity.name
-              : entity.name"
-            :assets="castingByType[entity.id] || []"
-            :asset-types="castingAssetTypes"
-            :read-only="!isCurrentUserManager"
-            :text-mode="isTextMode"
-            :metadata-descriptors="metadataDescriptors"
-            :metadata-display-headers="metadataDisplayHeaders"
-            @edit-label="onEditLabelClicked"
-            @remove-one="removeOneAsset"
-            @remove-ten="removeTenAssets"
-            @click="selectEntity"
-            @metadata-changed="onMetadataChanged"
-            @description-changed="onDescriptionChanged"
-            @standby-changed="onStandbyChanged"
-            v-for="entity in castingEntities"
-          />
         </div>
       </div>
 
@@ -196,6 +211,7 @@
               :asset="asset"
               :active="Object.keys(selection).length > 0"
               :text-mode="isTextMode"
+              :big-mode="isBigMode"
               @add-one="addOneAsset"
               @add-ten="addTenAssets"
               v-for="asset in typeAssets"
@@ -284,6 +300,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { range } from '@/lib/time'
 import csv from '@/lib/csv'
 import clipboard from '@/lib/clipboard'
+import { sortByName } from '@/lib/sorting'
 import { entityListMixin } from '@/components/mixins/entity_list'
 
 import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock'
@@ -334,6 +351,7 @@ export default {
       editedAssetLinkLabel: null,
       episodeId: '',
       importCsvFormData: {},
+      isBigMode: false,
       isLocked: false,
       isLoading: false,
       isOnlyCurrentEpisode: false,
@@ -508,15 +526,18 @@ export default {
 
     castingAssetTypes () {
       const castingAssetTypes = []
+      const assetTypeNameMap = {}
       this.castingEntities.forEach(entity => {
         if (this.castingByType[entity.id]) {
           this.castingByType[entity.id].forEach(type => {
-            if (castingAssetTypes.indexOf(type[0].asset_type_name) === -1)
+            if (!assetTypeNameMap[type[0].asset_type_name]) {
+              assetTypeNameMap[type[0].asset_type_name] = true
               castingAssetTypes.push(type[0].asset_type_name)
+            }
           })
         }
       })
-      return castingAssetTypes
+      return castingAssetTypes.sort()
     },
 
     editLabelModal () {
@@ -1320,6 +1341,8 @@ export default {
 
 .breakdown-column {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   padding: 1em;
   background: white;
@@ -1333,6 +1356,7 @@ export default {
 }
 
 .casting-column {
+  overflow: hidden;
   flex: 1;
 }
 
@@ -1380,26 +1404,29 @@ export default {
 
 .entity-header {
   margin: 0;
-  max-width: 171px;
-  min-width: 171px;
+  max-width: 291px;
+  min-width: 291px;
 }
 
 .description-header {
-  min-width: 236px;
-  max-width: 236px;
+  min-width: 250px;
+  max-width: 250px;
 }
 
 .descriptor-header {
-  min-width: 106px;
-  max-width: 106px;
+  min-width: 119px;
+  max-width: 119px;
 }
 
 .frames-header {
-  min-width: 67px;
-  max-width: 67px;
+  min-width: 81px;
+  max-width: 81px;
+  text-align: right;
+  padding-right: .5em;
 }
 
-.asset-types-header {
+.asset-type-header {
+  padding-left: 1em;
   min-width: 150px;
   max-width: 150px;
 }
@@ -1407,22 +1434,22 @@ export default {
 .standby-header {
   max-width: 60px;
   min-width: 60px;
-  padding-left: .5em;
 }
 
 .entity-header,
 .description-header,
 .descriptor-header,
 .frames-header,
-.asset-types-header,
+.asset-type-header,
 .standby-header {
+  padding-left: 10px;
   border-right: 1px solid $light-grey;
 }
 
 .header {
+  border-bottom: 1px solid $light-grey;
   font-size: 1.1em;
   padding: 0 .5em 0;
-  border-bottom: 1px solid $light-grey;
   color: var(--text-alt);
   font-size: 0.9em;
   font-weight: 600;
@@ -1431,6 +1458,15 @@ export default {
 
   div {
     padding-bottom: .5em;
+  }
+}
+
+.casting-list {
+  overflow: auto;
+  display: flex;
+
+  .mt1 {
+    flex: 1;
   }
 }
 </style>

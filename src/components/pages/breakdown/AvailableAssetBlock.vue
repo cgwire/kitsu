@@ -3,6 +3,7 @@
   :id="'casting-' + asset.id"
   :class="{
     asset: true,
+    'big-asset': bigMode,
     active: active
   }"
   :title="asset.name"
@@ -20,7 +21,10 @@
     >
   + 10
   </div>
-  <div class="asset-picture" v-if="asset.preview_file_id.length > 0">
+  <div
+    class="asset-picture"
+    v-if="asset.preview_file_id.length > 0"
+  >
     <img
       v-lazy="'/api/pictures/thumbnails-square/preview-files/' + asset.preview_file_id + '.png'"
       alt=""
@@ -63,6 +67,10 @@ export default {
     },
     textMode: {
       default: false,
+      type: Boolean
+    },
+    bigMode: {
+      default: true,
       type: Boolean
     }
   },
@@ -145,6 +153,24 @@ export default {
   cursor: default;
   background: $white-grey;
   border-radius: 8px;
+
+  &.big-asset {
+    width: 100px;
+    height: 100px;
+
+    .asset-picture {
+      top: -70px;
+      left: -10px;
+      width: 120px;
+      height: 120px;
+    }
+
+    .asset-add-10,
+    .asset-add {
+      width: 100px;
+      height: 50px;
+    }
+  }
 }
 
 .asset-picture {
