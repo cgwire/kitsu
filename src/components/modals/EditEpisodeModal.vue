@@ -23,6 +23,14 @@
           @enter="runConfirmation"
           v-focus
         />
+
+        <combobox-styled
+          class="field"
+          :label="$t('main.status')"
+          :options="episodeStatusOptions"
+          v-model="form.status"
+        />
+
         <textarea-field
           ref="descriptionField"
           :label="$t('episodes.fields.description')"
@@ -35,7 +43,7 @@
           :key="descriptor.id"
           v-for="descriptor in episodeMetadataDescriptors"
         >
-          <combobox
+          <combobox-styled
             v-if="descriptor.choices.length > 0"
             :label="descriptor.name"
             :options="getDescriptorChoicesOptions(descriptor)"
@@ -65,6 +73,8 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
+
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '@/components/widgets/TextField'
 import TextareaField from '@/components/widgets/TextareaField'
@@ -73,6 +83,7 @@ export default {
   name: 'edit-episode-modal',
   mixins: [modalMixin],
   components: {
+    ComboboxStyled,
     ModalFooter,
     TextField,
     TextareaField
@@ -98,28 +109,31 @@ export default {
   },
 
   data () {
+    let form = {
+      id: '',
+      name: '',
+      description: '',
+      fps: '',
+      data: {}
+    }
     if (this.episodeToEdit && this.episodeToEdit.id) {
-      return {
-        form: {
+      form = {
           id: this.episodeToEdit.id,
           name: this.episodeToEdit.name,
           description: this.episodeToEdit.description,
           production_id: this.episodeToEdit.project_id,
           data: this.episodeToEdit.data || {}
-        },
-        episodeSuccessText: ''
       }
-    } else {
-      return {
-        form: {
-          id: '',
-          name: '',
-          description: '',
-          fps: '',
-          data: {}
-        },
-        episodeSuccessText: ''
-      }
+    }
+    return {
+      form,
+      episodeSuccessText: '',
+      episodeStatusOptions: [
+        { label: 'canceled', value: 'canceled' },
+        { label: 'complete', value: 'complete' },
+        { label: 'running', value: 'running' },
+        { label: 'standby', value: 'standby' }
+      ]
     }
   },
 
@@ -152,12 +166,14 @@ export default {
       if (!this.isEditing()) {
         this.form.id = null
         this.form.name = ''
+        this.form.status = 'running'
         this.form.description = ''
         this.form.data = {}
       } else {
         this.form = {
           id: this.episodeToEdit.id,
           name: this.episodeToEdit.name,
+          status: this.episodeToEdit.status,
           description: this.episodeToEdit.description,
           data: this.episodeToEdit.data || {}
         }

@@ -420,7 +420,7 @@ const actions = {
 
   editEpisode ({ commit, state }, data) {
     return shotsApi.updateEpisode(data)
-      .then((episode) => {
+      .then(episode => {
         commit(EDIT_EPISODE_END, episode)
         return Promise.resolve(episode)
       })
