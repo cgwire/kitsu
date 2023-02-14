@@ -66,7 +66,7 @@
         </label>
         <div
           class="attachments"
-          v-if="commentToEdit && form.attachment_files.length > 0"
+          v-if="commentToEdit && (form.attachment_files || []).length > 0"
         >
           <div
             :key="'attachment-' + index"
