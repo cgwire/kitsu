@@ -10,20 +10,26 @@
   }"
   @click="onClicked($event)"
 >
-  <div class="flexrow">
-    <span class="flexrow flexrow-item">
+  <div class="flexrow shot-line-wrapper">
+    <span class="flexrow flexrow-item thumbnail">
       <entity-thumbnail
         :entity="{}"
-        :height="30"
-        :empty-width="40"
-        :empty-height="30"
+        :height="60"
+        :width="90"
+        :empty-width="90"
+        :empty-height="60"
         :preview-file-id="previewFileId"
       />
     </span>
     <div class="shot-name flexrow-item">
-      {{ name }}
+      <div v-for="chunk in name.split(' / ')">
+        {{ chunk }}
+      </div>
     </div>
-    <div class="standby-column flexrow-item">
+    <div
+      class="standby-column flexrow-item"
+      v-if="!isShowInfosBreakdown"
+    >
       <input
         type="checkbox"
         :checked="entity ? entity.is_casting_standby : false"
@@ -171,16 +177,17 @@
     </div>
     <div
       class="asset-list flexrow-item"
-      :key="assetType"
+      :key="entity.id + '-' + assetType"
       v-for="assetType in assetTypes"
     >
       <div
-        class="asset-type-line flexrow"
+        class="asset-type-line flexcolumn"
         v-if="assetsByAssetTypesMap[assetType] !== undefined"
       >
-        <span class="asset-type-name flexrow-item">
-          ({{ assetsByAssetTypesMap[assetType].reduce((acc, a) => acc + a.nb_occurences, 0) }})
-        </span>
+        <div class="flexrow-item mb05">
+          {{ nbAssetsFoType(assetType) }}
+          {{ $tc('assets.number', nbAssetsFoType(assetType)) }}
+        </div>
         <div class="asset-type-items flexrow-item">
           <asset-block
             class="flexrow-item"
@@ -189,9 +196,10 @@
             :nb-occurences="asset.nb_occurences"
             :read-only="readOnly"
             :text-mode="textMode"
+            :big-mode="bigMode"
             @edit-label="onEditLabelClicked"
             @remove-one="removeOneAsset"
-            @remove-ten="removeTenAssets"
+            @add-one="addOneAsset"
             v-for="asset in assetsByAssetTypesMap[assetType]"
           />
         </div>
@@ -249,7 +257,7 @@ export default {
       type: Array
     },
     assetTypes: {
-      default: () => [], 
+      default: () => [],
       type: Array
     },
     readOnly: {
@@ -267,7 +275,11 @@ export default {
     metadataDisplayHeaders: {
       default: () => {},
       type: Object
-    }
+    },
+    bigMode: {
+      default: false,
+      type: Boolean
+    },
   },
 
   computed: {
@@ -301,8 +313,8 @@ export default {
       this.$emit('remove-one', assetId, this.entity.id, nbOccurences)
     },
 
-    removeTenAssets (assetId, nbOccurences) {
-      this.$emit('remove-ten', assetId, this.entity.id, nbOccurences)
+    addOneAsset (assetId, nbOccurences) {
+      this.$emit('add-one', assetId, this.entity.id, nbOccurences)
     },
 
     onDescriptionChanged (entity, event) {
@@ -315,6 +327,11 @@ export default {
 
     compileMarkdown (input) {
       return renderMarkdown(input)
+    },
+
+    nbAssetsFoType (assetType) {
+      return this.assetsByAssetTypesMap[assetType]
+        .reduce((acc, a) => acc + a.nb_occurences, 0)
     }
   }
 }
@@ -324,15 +341,20 @@ export default {
   .asset-type-name {
     color: $light-grey-light;
   }
+
+  .asset-list {
+    color: $light-grey;
+  }
 }
 
 .asset-list {
-  padding-left: 1em;
-  padding-top: 0.5em;
   align-self: stretch;
+  border-left: 1px solid $light-grey;
+  margin-right: 0;
   min-width: 150px;
   max-width: 150px;
-  border-left: 1px solid $light-grey;
+  padding-left: 1em;
+
   &:last-child {
     border-right: 1px solid $light-grey;
   }
@@ -342,14 +364,20 @@ export default {
   padding-top: 0em;
 }
 
+.asset-type-line {
+  padding-bottom: 0.5em;
+  padding-top: 0.5em;
+}
 .asset-type-line:not(:first-child) {
   margin-top: 0.5em;
 }
 
 .shot-name {
-  width: 100px;
-  padding-top: 0;
+  color: var(--text);
+  font-weight: bold;
   flex: 0 0 100px;
+  min-width: 160px;
+  padding-top: 0;
   word-break: break-all;
 }
 
@@ -370,7 +398,6 @@ export default {
 .shot {
   font-size: 1.1em;
   padding: 0 .5em 0;
-  border-bottom: 1px solid $light-grey;
   cursor: pointer;
 }
 
@@ -384,14 +411,14 @@ export default {
 
 .empty {
   font-style: italic;
-  color: $light-grey;
+  color: $grey;
 }
 
 .description-column,
 .metadata-descriptor,
 .frames-column,
 .standby-column {
-  align-items: center;
+  align-items: flex-start;
   align-self: stretch;
   border-left: 1px solid $light-grey;
   display: flex;
@@ -401,6 +428,21 @@ export default {
   &:last-child {
     border-right: 1px solid $light-grey;
   }
+}
+
+.frames-column {
+  justify-content: right;
+  .metadata-value {
+    padding-right: .5em;
+    padding-top: .5em;
+  }
+  input {
+    text-align: right;
+  }
+}
+
+.standby-column {
+  padding-top: 1em;
 }
 
 .metadata-descriptor {
@@ -537,5 +579,36 @@ div .tooltip-editor {
 
 .stdby {
   background: var(--background-disabled);
+}
+
+.thumbnail {
+  padding: 5px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type=number] {
+    -moz-appearance:textfield; /* Firefox */
+}
+
+.shot {
+  border-bottom: 1px solid $light-grey;
+  padding-right: 0;
+  color: $grey-strong;
+
+  .empty {
+    color: $light-grey;
+  }
+
+  &.selected {
+    .empty {
+      color: $grey;
+    }
+  }
 }
 </style>

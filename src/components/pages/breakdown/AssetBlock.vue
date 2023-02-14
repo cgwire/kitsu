@@ -3,6 +3,7 @@
   :class="{
     asset: true,
     big: true,
+    'big-asset': bigMode,
     casted: true,
     active: active,
     labelled: true
@@ -12,18 +13,18 @@
 >
   <div class="asset-wrapper">
     <div
+      class="asset-add-1"
+      @click="addOneAsset"
+      v-if="!readOnly"
+    >
+      + 1
+    </div>
+    <div
       class="asset-add"
       @click="removeOneAsset"
       v-if="!readOnly"
     >
-    - 1
-    </div>
-    <div
-      class="asset-add-10"
-      @click="removeTenAssets"
-      v-if="!readOnly"
-    >
-    - 10
+      - 1
     </div>
     <div class="asset-picture" v-if="asset.preview_file_id">
       <img
@@ -52,6 +53,7 @@
   <span class="asset-text-name flexrow-item">
     {{ asset.name }} ({{ nbOccurences }})
   </span>
+  <span class="filler"></span>
   <span
     class="modify-asset flexrow-item"
     @click="removeOneAsset"
@@ -100,6 +102,10 @@ export default {
     textMode: {
       default: false,
       type: Boolean
+    },
+    bigMode: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -111,8 +117,8 @@ export default {
       this.$emit('remove-one', this.asset.asset_id, this.nbOccurences)
     },
 
-    removeTenAssets (event) {
-      this.$emit('remove-ten', this.asset.asset_id, this.nbOccurences)
+    addOneAsset (event) {
+      this.$emit('add-one', this.asset.asset_id, this.nbOccurences)
     },
 
     shortenName (name) {
@@ -143,11 +149,38 @@ export default {
   position: relative;
   display: flex;
   flex-direction: row;
-  max-height: 60px;
   margin: 0 1em .5em 0;
   font-size: 0.8em;
   word-wrap: break-word;
   border-radius: 5px;
+  height: 40px;
+
+  .asset-wrapper {
+    width: 40px;
+  }
+
+  &.big-asset {
+    width: 100px;
+    height: 100px;
+
+    .asset-picture {
+      top: -10px;
+      left: -10px;
+      width: 120px;
+      height: 120px;
+    }
+
+    .asset-wrapper {
+      width: 100px;
+    }
+
+    .nb-occurences {
+      font-size: 1.2em;
+      padding: 2px;
+      right: 15px;
+      bottom: 15px;
+    }
+  }
 }
 
 .labelled {
@@ -167,20 +200,12 @@ export default {
   overflow: hidden;
 }
 
-.big {
-  height: 40px;
-
-  .asset-wrapper {
-    width: 40px;
-  }
-}
-
 .active {
   cursor: pointer;
 }
 
 .asset-add,
-.asset-add-10 {
+.asset-add-1 {
   flex: 0 0 50%;
   display: flex;
   align-items: center;
@@ -192,12 +217,12 @@ export default {
   z-index: 2;
 }
 
-.asset-add-10 {
+.asset-add-1 {
   background: $purple;
 }
 
 .asset.active:hover .asset-add,
-.asset.active:hover .asset-add-10 {
+.asset.active:hover .asset-add-1 {
   opacity: 1;
 }
 
@@ -257,5 +282,14 @@ export default {
   padding: 2px;
   right: 2px;
   bottom: 2px;
+}
+
+.asset-text {
+  width: 120px;
+  margin-right: 0;
+}
+
+.modify-asset {
+  min-width: 20px;
 }
 </style>
