@@ -1,7 +1,7 @@
 <template>
 <div
   class="flexrow production-name"
-  v-tooltip.right="tooltipOptions"
+  :title="productionInfo"
 >
   <router-link
     class="flexrow flexrow-item"
@@ -121,18 +121,9 @@ export default {
         infos.push(`${this.$t('productions.fields.resolution')}: ${resolution}`)
       }
       if (infos.length > 0 && this.isTooltip) {
-        return infos.join('<br>')
+        return infos.join(' - ')
       } else {
         return ''
-      }
-    },
-
-    tooltipOptions () {
-      return {
-        content: this.productionInfo,
-        delay: {
-          hide: 5000
-        }
       }
     }
   },
