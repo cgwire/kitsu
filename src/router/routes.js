@@ -620,6 +620,12 @@ export const routes = [
       },
 
       {
+        path: 'productions/:production_id/edits/:edit_id',
+        component: Edit,
+        name: 'edit'
+      },
+
+      {
         path: 'productions/:production_id/episodes',
         component: Episodes,
         name: 'episodes',
