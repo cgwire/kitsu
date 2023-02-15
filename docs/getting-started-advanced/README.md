@@ -1,5 +1,108 @@
 # Getting started as a Production Manager - Advanced Users
 
+## Create Task for Episode
+
+When you are in a TV Show production, you can create specific **Task type** for the episode. It's especilay usefull when 
+you have macro task to track, like script, SFx, editing, mix etc.
+
+To use this page your need to first create dedicated task type on your **Global Library**
+ with the **Episode** attribut
+
+See **Pipele csutomization** Section to create new **Task Type**.
+
+[Pipeline customization](customization-pipeline/README.md)
+
+
+Once you have create your **Task Ypes**  on your **Global Libray**, and add them to your 
+**Production Library**, you will see the **Episodes** displayed on the navigation drop-down menu.
+
+
+![Navigation Episodes](../img/getting-started/drop_down_menu_episodes.png)
+
+
+This new page behave like the asset and shot global page. You can add your taks with the
+![Add Tasks](../img/getting-started/add_task_button.png) button.
+
+You can add custom column, fill the description, etc. 
+
+You can **Rename** and **Delete** the Episodes entity on this page, as for the asset and shot entity.
+
+If you click on the name of an episode, you will see the detail page of this episode.
+
+![Episodes detailed page](../img/getting-started/episode_detail_page.png)
+
+On the detailled page, you have access to the casting of the episode. 
+You can see all the assets used on the whole episode.
+
+You also have access to the schedule, Preview Files, Activity and Timelog of the episode **tasks**. 
+
+
+## Create Task for Sequence
+
+When you are in a production, you can create specific **Task type** for the sequences. It's especilay usefull when 
+you have macro tasks to track, like Story and color Board, Color Grading etc.
+
+To use this page your need to first create dedicated task type on your **Global Library**
+ with the **Episode** attribut
+
+See **Pipele csutomization** Section to create new **Task Type**.
+
+[Pipeline customization](customization-pipeline/README.md)
+
+
+Once you have create your **Task Ypes**  on your **Global Libray**, and add them to your 
+**Production Library**, you will see the **Sequences** displayed on the navigation drop-down menu.
+
+
+![Navigation Sequences](../img/getting-started/drop_down_menu_sequence_page.png)
+
+
+This new page behave like the asset and shot global page. You can add your taks with the
+![Add Tasks](../img/getting-started/add_task_button.png) button.
+
+You can add custom column, fill the description, etc. 
+
+You can **Rename** and **Delete** the Sequence entity on this page, as for the asset and shot entity.
+
+If you click on the name of a sequence, you will see the detail page of this sequence.
+
+![Sequence detailed page](../img/getting-started/sequence_detail_page.png)
+
+On the detailled page, you have access to the casting of the sequence. 
+You can see all the assets used on the whole sequence.
+
+You also have access to the schedule, Preview Files, Activity and Timelog of the sequence **tasks**. 
+
+
+## Create Task for Edit
+
+When you are in a production, you can create specific **Task type** for the Edit. It's especilay usefull when 
+you have several to track, like Story and color Board, Color Grading etc.
+
+To use this page your need to first create dedicated task type on your **Global Library**
+ with the **Edit** attribut
+
+See **Pipele csutomization** Section to create new **Task Type**.
+
+[Pipeline customization](customization-pipeline/README.md)
+
+
+Once you have create your **Task Ypes**  on your **Global Libray**, and add them to your 
+**Production Library**, you will see the **Edit** displayed on the navigation drop-down menu.
+
+
+![Navigation Edit](../img/getting-started/drop_down_menu_edit.png)
+
+
+This new page behave like the asset and shot global page. You can add your taks with the
+![Add Tasks](../img/getting-started/add_task_button.png) button.
+
+You can add custom column, fill the description, etc. 
+
+You can **Rename** and **Delete** the Edit entity on this page, as for the asset and shot entity.
+
+
+
 ## Add Custom columns
 
 To add more information on the general spreadsheet pages, you have to create a 

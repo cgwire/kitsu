@@ -170,6 +170,8 @@ the sequences and the shots of the episode and associate assets to them.
 
 Nb: Episodes are only mandatory for **TV Show** Production.
 
+You can also create tasks for episode and shot. See the ADVANCE section
+
 You need to go to the **Shots** page: you can use the
 drop-down menu and click on the **SHOTS**.
 
