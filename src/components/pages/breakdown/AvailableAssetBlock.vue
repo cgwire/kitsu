@@ -159,7 +159,7 @@ export default {
     height: 100px;
 
     .asset-picture {
-      top: -70px;
+      top: -110px;
       left: -10px;
       width: 120px;
       height: 120px;
