@@ -10,20 +10,20 @@
   }"
   @click="onClicked($event)"
 >
-  <div class="flexrow shot-line-wrapper">
-    <span class="flexrow flexrow-item thumbnail">
+    <div class="flexrow flexrow-item sticky">
       <entity-thumbnail
+        class="flexrow-item mr1"
         :entity="{}"
-        :height="60"
-        :width="90"
-        :empty-width="90"
-        :empty-height="60"
+        :height="bigMode ? 100 : 60"
+        :width="bigMode ? 150 : 90"
+        :empty-height="bigMode ? 100 : 60"
+        :empty-width="bigMode ? 150 : 90"
         :preview-file-id="previewFileId"
       />
-    </span>
-    <div class="shot-name flexrow-item">
-      <div v-for="chunk in name.split(' / ')">
-        {{ chunk }}
+      <div class="shot-name flexrow-item ml05">
+        <div v-for="chunk in name.split(' / ')">
+          {{ chunk }}
+        </div>
       </div>
     </div>
     <div
@@ -211,7 +211,6 @@
         {{ $t('breakdown.empty') }}
       </div>
     </div>
-  </div>
 </div>
 </template>
 
@@ -345,6 +344,23 @@ export default {
   .asset-list {
     color: $light-grey;
   }
+
+  .select select,
+  div .input-editor,
+  div .tooltip-editor {
+    color: $white;
+
+    option {
+      background: $dark-grey-light;
+      color: $white;
+    }
+
+    &:focus,
+    &:active,
+    &:hover {
+      background: $dark-grey-light;
+    }
+  }
 }
 
 .asset-list {
@@ -377,6 +393,7 @@ export default {
   font-weight: bold;
   flex: 0 0 100px;
   min-width: 160px;
+  max-width: 160px;
   padding-top: 0;
   word-break: break-all;
 }
@@ -397,16 +414,48 @@ export default {
 
 .shot {
   font-size: 1.1em;
-  padding: 0 .5em 0;
+  border-bottom: 1px solid $light-grey;
+  color: $grey-strong;
   cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+
+  .empty {
+    color: $light-grey;
+  }
+
+  &.selected {
+    .empty {
+      color: $grey;
+    }
+  }
 }
 
 .shot:hover {
   background: var(--background-selectable);
+  .sticky {
+    background: var(--background-selectable);
+  }
 }
 
 .shot.selected {
   background: var(--background-selected);
+  .sticky {
+    background: var(--background-selected);
+  }
+}
+
+.sticky {
+  background: var(--background);
+  border-right: 1px solid $light-grey;
+  flex: 1;
+  left: 0;
+  padding: 0.5em;
+  position: sticky;
+  margin-right: 0;
+  width: 300px;
+  max-width: 300px;
 }
 
 .empty {
@@ -443,27 +492,28 @@ export default {
 
 .standby-column {
   padding-top: 1em;
+  min-width: 80px;
+  max-width: 80px;
+  justify-content: center;
 }
 
 .metadata-descriptor {
-  min-width: 120px;
-  max-width: 120px;
+  min-width: 119px;
+  max-width: 119px;
 }
 
 .description-column {
   min-width: 250px;
   max-width: 250px;
+
+  .tooltip-editor {
+    font-size: .85em;
+  }
 }
 
 .frames-column {
   min-width: 81px;
   max-width: 81px;
-}
-
-.standby-column {
-  min-width: 60px;
-  max-width: 60px;
-  justify-content: center;
 }
 
 .tooltip-editor {
@@ -479,25 +529,6 @@ div .tooltip-text {
   word-break: break-all;
 }
 
-.dark {
-  .select select,
-  div .input-editor,
-  div .tooltip-editor {
-    color: $white;
-
-    option {
-      background: $dark-grey-light;
-      color: $white;
-    }
-
-    &:focus,
-    &:active,
-    &:hover {
-      background: $dark-grey-light;
-   }
-  }
-}
-
 div .input-editor,
 div .tooltip-editor {
   color: $grey-strong;
@@ -505,7 +536,6 @@ div .tooltip-editor {
   width: 100%;
   background: transparent;
   border: 1px solid transparent;
-  z-index: 100;
 
   &:active,
   &:focus,
@@ -579,6 +609,9 @@ div .tooltip-editor {
 
 .stdby {
   background: var(--background-disabled);
+  .sticky {
+    background: var(--background-disabled);
+  }
 }
 
 .thumbnail {
@@ -587,28 +620,11 @@ div .tooltip-editor {
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
-    /* display: none; <- Crashes Chrome on hover */
-    -webkit-appearance: none;
-    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 input[type=number] {
-    -moz-appearance:textfield; /* Firefox */
-}
-
-.shot {
-  border-bottom: 1px solid $light-grey;
-  padding-right: 0;
-  color: $grey-strong;
-
-  .empty {
-    color: $light-grey;
-  }
-
-  &.selected {
-    .empty {
-      color: $grey;
-    }
-  }
+  -moz-appearance:textfield; /* Firefox */
 }
 </style>

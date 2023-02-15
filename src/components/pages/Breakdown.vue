@@ -65,11 +65,12 @@
             v-if="isCurrentUserManager"
           />
         </div>
+
         <spinner class="mt1" v-if="isLoading" />
         <div class="casting-list" v-else>
           <div class="mt1">
             <div class="header flexrow">
-              <div class="entity-header name-header">
+              <div class="entity-header">
                 {{ $t('shots.fields.name') }}
               </div>
               <div
@@ -132,7 +133,7 @@
               :entity="entity"
               :preview-file-id="entity.preview_file_id"
               :selected="selection[entity.id]"
-              :name="sequenceId === 'all'
+              :name="sequenceId === 'all' && (!isTVShow || (isTVShow && currentEpisode.id !== 'all'))
                 ? entity.sequence_name + ' / ' + entity.name
                 : entity.name"
               :assets="castingByType[entity.id] || []"
@@ -356,6 +357,8 @@ export default {
       isLoading: false,
       isOnlyCurrentEpisode: false,
       isTextMode: false,
+      optionalCsvColumns: ['Label'],
+      parsedCSV: [],
       removalData: {},
       selection: {},
       sequenceId: '',
@@ -384,9 +387,7 @@ export default {
       },
       success: {
         edit: false
-      },
-      optionalCsvColumns: ['Label'],
-      parsedCSV: []
+      }
     }
   },
 
@@ -458,7 +459,7 @@ export default {
 
     availableAssetsByType () {
       const result = []
-      this.assetsByType.forEach((typeGroup) => {
+      this.assetsByType.forEach(typeGroup => {
         let newGroup = typeGroup.filter(asset => !asset.canceled)
         if (this.isTVShow && this.isOnlyCurrentEpisode) {
           newGroup = typeGroup.filter(asset => {
@@ -1402,10 +1403,17 @@ export default {
   }
 }
 
-.entity-header {
-  margin: 0;
-  max-width: 291px;
-  min-width: 291px;
+.entity-header,
+.description-header,
+.descriptor-header,
+.frames-header,
+.asset-type-header,
+.standby-header {
+  border-right: 1px solid $light-grey;
+  padding-left: 10px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
 }
 
 .description-header {
@@ -1432,31 +1440,39 @@ export default {
 }
 
 .standby-header {
-  max-width: 60px;
-  min-width: 60px;
+  max-width: 80px;
+  min-width: 80px;
+  text-align: center;
+  justify-content: center;
+  padding-left: 0px;
 }
 
-.entity-header,
-.description-header,
-.descriptor-header,
-.frames-header,
-.asset-type-header,
-.standby-header {
-  padding-left: 10px;
-  border-right: 1px solid $light-grey;
+.entity-header {
+  border-right: 2px solid $light-grey;
+  margin: 0;
+  max-width: 301px;
+  min-width: 301px;
+  padding-left: 0.5em;
+  left: 0;
+  position: sticky;
 }
 
 .header {
-  border-bottom: 1px solid $light-grey;
+  border-bottom: 2px solid $light-grey;
   font-size: 1.1em;
-  padding: 0 .5em 0;
   color: var(--text-alt);
   font-size: 0.9em;
   font-weight: 600;
   letter-spacing: 1px;
+  padding: 0;
+  position: sticky;
+  top: 0;
   text-transform: uppercase;
+  z-index: 20;
 
   div {
+    background: var(--background);
+    padding-top: .5em;
     padding-bottom: .5em;
   }
 }
