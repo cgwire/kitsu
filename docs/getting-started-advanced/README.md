@@ -10,10 +10,10 @@ To use this page your need to first create dedicated task type on your **Global 
 
 See **Pipele csutomization** Section to create new **Task Type**.
 
-[Pipeline customization](customization-pipeline/README.md)
+[Pipeline customization](../customization-pipeline/README.md)
 
 
-Once you have create your **Task Ypes**  on your **Global Libray**, and add them to your 
+Once you have create your **Task Types**  on your **Global Libray**, and add them to your 
 **Production Library**, you will see the **Episodes** displayed on the navigation drop-down menu.
 
 
@@ -24,6 +24,9 @@ This new page behave like the asset and shot global page. You can add your taks 
 ![Add Tasks](../img/getting-started/add_task_button.png) button.
 
 You can add custom column, fill the description, etc. 
+
+
+
 
 You can **Rename** and **Delete** the Episodes entity on this page, as for the asset and shot entity.
 
@@ -47,10 +50,10 @@ To use this page your need to first create dedicated task type on your **Global 
 
 See **Pipele csutomization** Section to create new **Task Type**.
 
-[Pipeline customization](customization-pipeline/README.md)
+[Pipeline customization](../customization-pipeline/README.md)
 
 
-Once you have create your **Task Ypes**  on your **Global Libray**, and add them to your 
+Once you have create your **Task Types**  on your **Global Libray**, and add them to your 
 **Production Library**, you will see the **Sequences** displayed on the navigation drop-down menu.
 
 
@@ -84,10 +87,10 @@ To use this page your need to first create dedicated task type on your **Global 
 
 See **Pipele csutomization** Section to create new **Task Type**.
 
-[Pipeline customization](customization-pipeline/README.md)
+[Pipeline customization](../customization-pipeline/README.md)
 
 
-Once you have create your **Task Ypes**  on your **Global Libray**, and add them to your 
+Once you have create your **Task Types**  on your **Global Libray**, and add them to your 
 **Production Library**, you will see the **Edit** displayed on the navigation drop-down menu.
 
 
@@ -129,6 +132,9 @@ The **list of value** and **Checklist** give you the same choice for each entity
 Type the list elements below **Available values**, and confirm them by clicking on **Add value**.
 
 You can also link the custom column to one or several departments.
+
+
+If you link a custom column to a departement, the artists will see this column on their todo page, and on their departement filtered view.
 
 Validate the creation of the custom column with the **Confirm** button.
 
