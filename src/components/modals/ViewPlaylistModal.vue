@@ -258,8 +258,9 @@ export default {
 }
 
 .modal-content.wide {
-  margin: 1em;
+  overflow: hidden;
   height: 100%;
+  margin: 1em;
   width: 100%;
 
   .box {
