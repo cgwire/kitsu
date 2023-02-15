@@ -928,7 +928,7 @@ const mutations = {
 
     newAsset.tasks = []
     if (asset) {
-      newAsset.episode_id = newAsset.source_id
+      if (newAsset.source_id) newAsset.episode_id = newAsset.source_id
       delete newAsset.tasks
       const copyNewAsset = { ...newAsset }
       copyNewAsset.data = { ...asset.data, ...newAsset.data }
