@@ -63,6 +63,15 @@
               />
             </div>
           </th>
+
+          <th
+            scope="col"
+            class="resolution"
+            v-if="isShowInfos"
+          >
+            {{ $t('shots.fields.resolution') }}
+          </th>
+
           <metadata-header
             :ref="`editor-${j}`"
             :key="descriptor.id"
@@ -229,6 +238,25 @@
               </router-link>
             </div>
           </th>
+
+          <td
+            class="resolution"
+            v-if="isShowInfos"
+          >
+            <input
+              :class="{
+                'input-editor': true,
+                error: !isValidResolution(edit)
+              }"
+              :value="getMetadataFieldValue({field_name: 'resolution'}, edit)"
+              @input="event => onMetadataFieldChanged(edit, {field_name: 'resolution'}, event)"
+              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), descriptorLength)"
+              v-if="isCurrentUserManager"
+            />
+            <span class="metadata-value selectable" v-else>
+              {{ getMetadataFieldValue({field_name: 'resolution'}, edit) }}
+            </span>
+          </td>
 
           <!-- Metadata stick -->
           <td
@@ -1043,5 +1071,16 @@ td .select {
 
 .metadata-value {
   padding: 0.8rem;
+}
+
+.resolution {
+  min-width: 110px;
+  max-width: 110px;
+  width: 110px;
+}
+
+td.resolution {
+  height: 3.1rem;
+  padding: 0;
 }
 </style>
