@@ -626,7 +626,8 @@ const actions = {
     }
     const lines = shots.map(shot => {
       let shotLine = []
-      if (isTVShow) shotLine.push(shot.episode_name)
+      if (isTVShow)
+        shotLine.push(rootGetters.episodeMap.get(shot.episode_id).name)
       shotLine = shotLine.concat([
         shot.sequence_name,
         shot.name,
