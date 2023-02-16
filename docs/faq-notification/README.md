@@ -64,8 +64,6 @@ to follow: on the **assets** or **shots** pages click onto the status icon,
 then on the top right side of the page, you can see an **eye** button 
 ![Notification off](../img/getting-started/notification_off.png).
 
-![pannel notification](../img/getting-started/pannel_notif.png)
-
 
 By default you are following all the tasks you are assigned to, on the task
 page the icon is on (eye open) ![Notification on](../img/getting-started/notification_on.png). 
@@ -75,6 +73,12 @@ If you want to follow another task, click on the **crossed eye** button
 it is not crossed anymore ![Notification on](../img/getting-started/notification_on.png)
 meaning you are now following this task and receive notification about
 it. 
+
+You can also Batch select task to **Subscribe** to the notification of theses taks.
+
+Select the tasks, then with the **Action Menu**, select the eye icon and click on subscribe.
+
+![pannel notification](../img/getting-started/pannel_notif.png)
 
 On your profil page you can also choose to receive your notification per Email, or per Slack.
 

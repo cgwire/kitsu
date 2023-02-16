@@ -49,9 +49,9 @@ The shot is removed from the database and won't appear anymore on Kitsu.
 ## How to delete a sequence
 
 To delete a sequence, use the drop-down menu to
-go to the **Sequence Stats** page.
+go to the **Sequence** page.
  
-![Drop down menu sequence](../img/getting-started/drop_down_menu_sequence.png)
+![Drop down menu sequence](../img/getting-started/drop_down_menu_sequence_page.png)
  
 Then you can delete the sequence, with the 
 ![Delete button](../img/getting-started/delete_button.png) button.
@@ -62,11 +62,11 @@ Then you can delete the sequence, with the
 ## How to delete an episode
 
 To delete an episode, use the drop-down menu to
-go to the **Episode Stats** page.
+go to the **Episode** page.
  
-![Drop down menu episode](../img/getting-started/drop_down_menu_ep_seq.png)
+![Drop down menu episode](../img/getting-started/drop_down_menu_episodes.png)
  
-Then you can delete the sequence, with the 
+Then you can delete the Episode, with the 
 ![Delete button](../img/getting-started/delete_button.png) button.
 
 ![Delete sequence](../img/getting-started/delete_episode.png)
