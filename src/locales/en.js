@@ -1141,11 +1141,13 @@ export default {
   },
 
   statistics: {
+    all: 'All',
     count: 'Counts',
     count_mode: 'Count',
     data_mode: 'Data',
     display_mode: 'Display',
     frames: 'Frames',
+    only_running: 'Only running',
     pie: 'Pie charts',
     retakes: 'Retakes',
     status: 'Status',

@@ -28,6 +28,14 @@
         :options="countModeOptions"
         v-model="countMode"
       />
+      <combobox
+        class="mb0 flexrow-item"
+        :label="$t('statistics.episode_status')"
+        locale-key-prefix="statistics."
+        :options="statusModeOptions"
+        v-model="statusMode"
+      />
+
       <span class="filler"></span>
       <button-simple
         class="flexrow-item"
@@ -44,7 +52,9 @@
 
     <episode-stats-list
       ref="episode-list"
-      :entries="displayedEpisodes"
+      :entries="statusMode === 'running'
+        ? displayedEpisodes.filter(e => e.status === 'running')
+        : displayedEpisodes"
       :is-loading="isLoading"
       :is-error="isLoadingError"
       :validation-columns="episodeValidationColumns"
@@ -91,6 +101,7 @@ export default {
       episodeToEdit: null,
       isLoading: true,
       isLoadingError: false,
+      statusMode: 'running',
       countModeOptions: [
         { label: 'shots', value: 'count' },
         { label: 'frames', value: 'frames' }
@@ -102,6 +113,10 @@ export default {
       displayModeOptions: [
         { label: 'pie', value: 'pie' },
         { label: 'count', value: 'count' }
+      ],
+      statusModeOptions: [
+        { label: 'only_running', value: 'running' },
+        { label: 'all', value: 'all' }
       ],
       errors: {
         edit: false,
