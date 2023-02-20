@@ -14,6 +14,14 @@
           v-if="productionList.length > 0"
         />
 
+        <combobox
+          class="flexrow-item"
+          :label="$t('main.episode')"
+          :options="episodeOptions"
+          v-model="episodeId"
+          v-show="productionId"
+        />
+
         <combobox-task-type
           class="flexrow-item selector"
           :label="$t('news.task_type')"
@@ -21,6 +29,17 @@
           v-model="taskTypeId"
           v-if="taskTypeList.length > 0"
         />
+
+        <div class="field flexrow-item selector small">
+          <label class="label person-label">
+            {{ $t('main.person') }}
+          </label>
+          <people-field
+            :people="assignees"
+            :big="true"
+            v-model="person"
+          />
+        </div>
 
         <combobox
           class="flexrow-item"
@@ -37,6 +56,7 @@
           locale-key-prefix="tasks.fields."
           v-model="currentSort"
         />
+
       </div>
 
       <div class="flexrow">
@@ -100,6 +120,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple'
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
+import PeopleField from '@/components/widgets/PeopleField'
 import TaskInfo from '@/components/sides/TaskInfo'
 import TimesheetList from '@/components/lists/TimesheetList'
 import TodosList from '@/components/lists/TodosList'
@@ -114,6 +135,7 @@ export default {
     Combobox,
     ComboboxProduction,
     ComboboxTaskType,
+    PeopleField,
     TaskInfo,
     TimesheetList,
     TodosList,
@@ -124,6 +146,7 @@ export default {
     return {
       currentFilter: 'all_tasks',
       currentSort: 'priority',
+      episodeId: '',
       isLoading: false,
       isLoadingError: false,
       isPlaylist: false,
@@ -131,6 +154,7 @@ export default {
         'all_tasks',
         'due_this_week'
       ].map(name => ({ label: name, value: name })),
+      person: {},
       productionId: '',
       productionList: [],
       selectionGrid: {},
@@ -171,6 +195,7 @@ export default {
   computed: {
     ...mapGetters([
       'nbSelectedTasks',
+      'personMap',
       'productionMap',
       'taskStatusMap',
       'taskTypeMap',
@@ -183,10 +208,49 @@ export default {
       }).length
     },
 
-    sortedTasks () {
-      const isName = this.currentSort === 'entity_name'
-      const isPriority = this.currentSort === 'priority'
-      const isDueDate = this.currentSort === 'due_date'
+    assignees () {
+      const assignees = []
+      const assigneesMap = {}
+      this.tasksToCheck.forEach(task => {
+        task.assignees.forEach(personId => {
+          if (!assigneesMap[personId]) {
+            assignees.push(this.personMap.get(personId))
+            assigneesMap[personId] = true
+          }
+        })
+      })
+      return assignees
+    },
+
+    episodeOptions () {
+      const episodeOptions = []
+      const episodeMap = {}
+      if (!this.productionId) return []
+      const production = this.productionMap.get(this.productionId)
+      if (production.production_type !== 'tvshow') return []
+      console.log(this.tasksToCheck)
+      this.tasksToCheck
+        .filter(t => t.project_id === this.productionId)
+        .forEach(task => {
+          console.log(task)
+          if (task.episode_id &&
+              !episodeMap[task.episode_id] &&
+              task.entity_type_name === 'Shot'
+          ) {
+            episodeMap[task.episode_id] = true
+            episodeOptions.push({
+              label: task.episode_name,
+              value: task.episode_id
+            })
+          }
+        })
+      return [{
+        label: this.$t('main.all'),
+        value: 'all'
+      }].concat(episodeOptions.sort((a, b) => a.label.localeCompare(b.label)))
+    },
+
+    filteredTasks () {
       let tasks = this.currentFilter === 'all_tasks'
         ? [...this.tasksToCheck]
         : this.tasksToCheck.filter(t => {
@@ -199,7 +263,20 @@ export default {
       if (this.taskTypeId !== '') {
         tasks = tasks.filter(t => t.task_type_id === this.taskTypeId)
       }
+      if (this.person && this.person.id) {
+        tasks = tasks.filter(t => t.assignees.includes(this.person.id))
+      }
+      if (this.productionId && this.episodeId && this.episodeId !== 'all') {
+        tasks = tasks.filter(t => t.episode_id === this.episodeId)
+      }
+      return tasks
+    },
 
+    sortedTasks () {
+      const isName = this.currentSort === 'entity_name'
+      const isPriority = this.currentSort === 'priority'
+      const isDueDate = this.currentSort === 'due_date'
+      let tasks = this.filteredTasks
       if (isName) {
         return tasks.sort(
           firstBy('project_name')
@@ -311,6 +388,10 @@ export default {
   },
 
   watch: {
+    productionId () {
+      this.episodeId = ''
+    },
+
     nbSelectedTasks () {
       if (this.nbSelectedTasks === 0) {
         this.buildSelectionGrid(this.sortedTasks)
