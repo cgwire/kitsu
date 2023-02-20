@@ -456,6 +456,7 @@ export default {
   margin-right: 0;
   width: 300px;
   max-width: 300px;
+  z-index: 3;
 }
 
 .empty {
