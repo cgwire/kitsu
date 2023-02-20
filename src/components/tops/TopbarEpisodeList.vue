@@ -22,18 +22,44 @@
       ref="select"
       v-if="showEpisodeList"
     >
-      <div
-        :ref="'episode-' + episode.value"
-        class="episode-line"
-        v-for="episode in episodeList"
-        @click="selectEpisode(episode)"
-        :key="episode.value"
-      >
-        <router-link
-          :to="getEpisodePath(episode.value)"
+      <div v-for="group in episodeGroups">
+        <div
+          class="group-name"
+          v-if="showAllMode && (group.name && group.name !== 'running')"
         >
-          {{ episode.label }}
-        </router-link>
+          {{ $t('episodes.status.' + group.name) }}
+        </div>
+        <template
+          v-if="showAllMode || ['', 'running'].includes(group.name)"
+        >
+          <div
+            :key="episode.value"
+            :ref="'episode-' + episode.value"
+            class="episode-line"
+            @click="selectEpisode(episode)"
+            v-for="episode in group.episodeList"
+          >
+            <router-link
+              :to="getEpisodePath(episode.value)"
+            >
+              {{ episode.label }}
+            </router-link>
+          </div>
+        </template>
+      </div>
+      <div
+        class="group-name episode-line has-text-centered"
+        @click="showAllMode = true"
+        v-if="!showAllMode"
+      >
+        +
+      </div>
+      <div
+        class="group-name episode-line has-text-centered"
+        @click="showAllMode = false"
+        v-else
+      >
+        -
       </div>
     </div>
   </div>
@@ -63,13 +89,14 @@ export default {
 
   data () {
     return {
+      showAllMode: false,
       lastScrollPosition: 0,
       showEpisodeList: false
     }
   },
 
   props: {
-    episodeList: {
+    episodeGroups: {
       required: true,
       type: Array
     },
@@ -91,7 +118,11 @@ export default {
     ]),
 
     episodeLabel () {
-      const option = this.episodeList.find(o => o.value === this.episodeId)
+      let option
+      this.episodeGroups.forEach(group => {
+        const result = group.episodeList.find(o => o.value === this.episodeId)
+        if (result) option = result
+      })
       return option ? option.label : ''
     },
 
@@ -197,6 +228,18 @@ export default {
 
   &:hover {
     background: #EEE;
+  }
+}
+
+.group-name {
+  color: $grey;
+  font-size: .9em;
+  margin-top: 1em;
+  padding-left: .5em;
+  text-transform: uppercase;
+
+  &:first-child {
+    margin-top: .5em;
   }
 }
 

@@ -45,7 +45,7 @@
           </div>
           <div class="flexrow-item subitem">
             <topbar-episode-list
-              :episode-list="currentEpisodeOptions"
+              :episode-groups="currentEpisodeOptionGroups || []"
               :episode-id="currentEpisodeId"
               :section="currentSectionOption"
               v-if="isEpisodeContext"
@@ -58,7 +58,7 @@
         >
           <router-link
             :to="lastSectionPath"
-            class="flexrow"
+          class="flexrow"
           >
             <chevron-left-icon />
             {{ $t('main.go_productions') }}
@@ -276,7 +276,7 @@ export default {
       'currentEpisode',
       'currentProduction',
       'episodes',
-      'episodeOptions',
+      'episodeOptionGroups',
       'isCurrentUserAdmin',
       'isCurrentUserArtist',
       'isCurrentUserClient',
@@ -315,28 +315,40 @@ export default {
     },
 
     // Asset pages require a all section and a main pack section.
-    currentEpisodeOptions () {
+    currentEpisodeOptionGroups () {
       if (this.assetSections.includes(this.currentProjectSection)) {
-        return [
-          { label: this.$t('main.all_assets'), value: 'all' },
-          { label: 'Main Pack', value: 'main' }
-        ].concat(this.episodeOptions)
+        return [{
+          name: '',
+          episodeList: [
+            { label: this.$t('main.all_assets'), value: 'all' },
+            { label: 'Main Pack', value: 'main' }
+          ]
+        }].concat(this.episodeOptionGroups)
       } else if (['playlists'].includes(this.currentProjectSection)) {
-        return [
-          { label: this.$t('main.all_assets'), value: 'all' },
-          { label: 'Main Pack', value: 'main' }
-        ].concat(this.episodeOptions)
+        return [{
+          name: '',
+          episodeList: [
+            { label: this.$t('main.all_assets'), value: 'all' },
+            { label: 'Main Pack', value: 'main' }
+          ]
+        }].concat(this.episodeOptionGroups)
       } else if (['edits'].includes(this.currentProjectSection)) {
-        return [
-          { label: this.$t('main.all_edits'), value: 'all' }
-        ].concat(this.episodeOptions)
+        return [{
+          name: '',
+          episodeList: [
+            { label: this.$t('main.all_edits'), value: 'all' }
+          ]
+        }].concat(this.episodeOptionGroups)
       } else if (['breakdown'].includes(this.currentProjectSection)) {
-        return [
-          { label: this.$t('shots.episodes'), value: 'all' },
-          { label: 'Main Pack', value: 'main' }
-        ].concat(this.episodeOptions)
+        return [{
+          name: '',
+          episodeList: [
+            { label: this.$t('shots.episodes'), value: 'all' },
+            { label: 'Main Pack', value: 'main' }
+          ]
+        }].concat(this.episodeOptionGroups)
       } else {
-        return this.episodeOptions
+        return this.episodeOptionGroups
       }
     },
 
