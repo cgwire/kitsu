@@ -48,7 +48,7 @@
         </template>
       </div>
       <div
-        class="group-name episode-line has-text-centered"
+        class="group-name episode-line has-text-centered more-button"
         @click="showAllMode = true"
         v-if="!showAllMode"
       >
@@ -216,7 +216,6 @@ export default {
   cursor: pointer;
   margin: 0;
   border-radius: 5px;
-  margin-right: 10px;
 
   a {
     color: $black;
@@ -283,5 +282,9 @@ export default {
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
   }
+}
+
+.more-button {
+  margin-top: 0;
 }
 </style>
