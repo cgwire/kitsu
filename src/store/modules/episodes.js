@@ -238,10 +238,34 @@ const getters = {
   episodeValidationColumns: state => state.episodeValidationColumns,
   episodeSelectionGrid: state => state.episodeSelectionGrid,
 
-  isSingleEpisode: state => state.episodes.length < 2,
+  isSingleEpisode: state => state.displayedEpisodes.length < 2,
   episodeOptions: state => state.episodes.map(
     episode => { return { label: episode.name, value: episode.id } }
-  )
+  ),
+  episodeOptionGroups: state => {
+    const groups = []
+    const runnings = state.displayedEpisodes
+      .filter(e => e.status === 'running')
+    const standbys = state.displayedEpisodes
+      .filter(e => e.status === 'standby')
+    const completes = state.displayedEpisodes
+      .filter(e => e.status === 'complete')
+    const canceleds = state.displayedEpisodes
+      .filter(e => e.status === 'canceled')
+
+    const tmpGroups = [runnings, standbys, completes, canceleds]
+    tmpGroups.forEach(group => {
+      if (group.length > 0) {
+        groups.push({
+          name: group[0].status,
+          episodeList: group.map(
+            episode => { return { label: episode.name, value: episode.id } }
+          )
+        })
+      }
+    })
+    return groups
+  }
 }
 
 const actions = {
@@ -769,7 +793,13 @@ const mutations = {
         state.currentEpisode = state.episodeMap.get(routeEpisodeId)
       }
       if (!state.currentEpisode) {
-        state.currentEpisode = state.episodes[0]
+        const runningEpisodes =
+          state.episodes.filter(e => e.status === 'running')
+        if (runningEpisodes.length > 0) {
+          state.currentEpisode = runningEpisodes[0]
+        } else {
+          state.currentEpisode = state.episodes[0]
+        }
       }
     } else {
       state.currentEpisode = null

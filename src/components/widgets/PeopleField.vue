@@ -193,6 +193,10 @@ export default {
   background: $light-grey-light;
 }
 
+.small .v-autocomplete .v-autocomplete-input-group .v-autocomplete-input {
+  width: 200px;
+}
+
 .v-autocomplete .v-autocomplete-input-group .v-autocomplete-input {
   width: 300px;
   margin-bottom: 1px;
