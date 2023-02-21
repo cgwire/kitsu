@@ -63,6 +63,8 @@ import {
   RESET_ALL
 } from '@/store/mutation-types'
 
+const EPISODE_STATUS = ['canceled', 'complete', 'running', 'standby']
+
 const helpers = {
   buildResult (state, {
     episodeSearch,
@@ -774,6 +776,9 @@ const mutations = {
     const episodeMap = new Map()
     if (!episodes) episodes = []
     episodes.forEach(episode => {
+      if (!EPISODE_STATUS.includes(episode.status)) {
+        episode.status = 'running'
+      }
       episodeMap.set(episode.id, episode)
     })
     state.episodeMap = episodeMap
