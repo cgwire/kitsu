@@ -361,7 +361,7 @@ export default {
       parsedCSV: [],
       removalData: {},
       selection: {},
-      sequenceId: '',
+      sequenceId: 'all',
       errors: {
         edit: false,
         editLabel: false,
@@ -695,7 +695,7 @@ export default {
             if (this.assetTypeId) {
               this.setCastingAssetType(this.assetTypeId)
             } else {
-              this.setCastingSequence(this.sequenceId)
+              this.setCastingSequence(this.sequenceId || 'all')
             }
             this.resetSelection()
             if (this.currentEpisode && this.currentEpisode.id === 'main') {
@@ -924,7 +924,7 @@ export default {
           this.loading.importing = false
           this.hideImportRenderModal()
           if (this.sequenceId) {
-            this.setCastingSequence(this.sequenceId)
+            this.setCastingSequence(this.sequenceId || 'all')
           }
         })
         .catch(err => {
@@ -971,14 +971,14 @@ export default {
           }
         }
       } else {
-        const sequenceId = this.$route.params.sequence_id
+        const sequenceId = this.$route.params.sequence_id || 'all'
         if (sequenceId !== this.sequenceId) {
           isChange = true
           route = {
             name: 'breakdown-sequence',
             params: {
               production_id: this.currentProduction.id,
-              sequence_id: this.sequenceId
+              sequence_id: this.sequenceId || 'all'
             }
           }
         }
@@ -1167,7 +1167,7 @@ export default {
       }
       if (this.isAssetCasting && this.castingAssetTypesOptions.length > 0) {
         const assetTypeId = this.$route.params.asset_type_id
-        this.sequenceId = ''
+        this.sequenceId = 'all'
         this.castingType = 'asset'
         if (assetTypeId) {
           this.assetTypeId = assetTypeId
@@ -1181,7 +1181,8 @@ export default {
       if (
         this.sequenceId &&
         this.displayedSequences &&
-        this.displayedSequences.length > 0
+        this.displayedSequences.length > 0 &&
+        !this.isAssetCasting
       ) {
         this.setCastingSequence(this.sequenceId)
         this.updateUrl()
@@ -1208,7 +1209,7 @@ export default {
 
     castingSequencesOptions () {
       if (this.$route.path.indexOf('asset-type') < 0) {
-        const sequenceId = this.$route.params.sequence_id
+        const sequenceId = this.$route.params.sequence_id || 'all'
         if (
           sequenceId &&
           this.sequenceMap.get(sequenceId)
@@ -1217,7 +1218,7 @@ export default {
         } else if (this.castingSequencesOptions.length > 0) {
           this.sequenceId = this.castingSequencesOptions[0].value
         } else {
-          this.sequenceId = ''
+          this.sequenceId = 'all'
         }
       }
     },
