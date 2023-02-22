@@ -249,6 +249,10 @@
     v-if="tasks.length && !isLoading"
   >
     {{ tasks.length }} {{ $tc('tasks.tasks', tasks.length) }}
+    ({{ formatDuration(timeEstimated) }}
+     {{ $tc('main.days_estimated', isTimeEstimatedPlural) }},
+     {{ formatDuration(timeSpent) }}
+     {{ $tc('main.days_spent', isTimeSpentPlural) }})
   </p>
 </div>
 </template>
@@ -389,6 +393,28 @@ export default {
         })
       }
       return metadataDescriptorsMap
+    },
+
+    timeSpent () {
+      return this.displayedTasks.reduce((acc, task) => acc + task.duration, 0)
+    },
+
+    isTimeSpentPlural () {
+      return Math.floor(
+        (this.timeSpent ? this.timeSpent : 0) / 60 / 8
+      ) <= 1
+    },
+
+    timeEstimated () {
+      return this.displayedTasks.reduce(
+        (acc, task) => acc + task.estimation, 0
+      )
+    },
+
+    isTimeEstimatedPlural () {
+      return Math.floor(
+        (this.timeEstimated ? this.timeEstimated : 0) / 60 / 8
+      ) <= 1
     }
   },
 
