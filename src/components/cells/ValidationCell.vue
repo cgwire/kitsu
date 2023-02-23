@@ -41,7 +41,12 @@
           emergency: task.priority === 3
         }"
         :title="formatPriority(task.priority)"
-        v-if="!isCurrentUserClient && !disabled && task.priority > 0"
+        v-if="
+          !isCurrentUserClient &&
+          !disabled &&
+          task.priority > 0 &&
+          !this.taskStatus.is_done
+        "
       >
         {{ priority }}
       </span>

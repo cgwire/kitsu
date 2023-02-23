@@ -222,10 +222,6 @@ export default {
     nb_selected_shots: '{nbSelectedShots} shot selected | {nbSelectedShots} shots selected',
     nb_selected_edits: '{nbSelectedEdits} edit selected | {nbSelectedEdits} edits selected',
 
-    news: {
-      no_news: 'There are no news for this entity.'
-    },
-
     preview_files: {
       extension: 'Extension',
       no_preview_files: 'There are no preview files for this entity.',
@@ -526,6 +522,7 @@ export default {
     only_previews: 'Only previews',
     hide_stats: 'Hide stats',
     news: 'news',
+    no_news: 'There are no news for this entity.',
     set_preview_on: 'set preview on',
     show_stats: 'Show stats',
     task_status: 'Task status',

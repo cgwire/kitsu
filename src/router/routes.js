@@ -455,6 +455,12 @@ export const routes = [
       },
 
       {
+        path: 'news-feed',
+        component: ProductionNewsFeed,
+        name: 'newsfeed'
+      },
+
+      {
         path: 'productions/:production_id/news-feed',
         component: ProductionNewsFeed,
         name: 'news-feed'

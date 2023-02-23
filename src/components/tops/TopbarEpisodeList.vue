@@ -55,7 +55,7 @@
         +
       </div>
       <div
-        class="group-name episode-line has-text-centered"
+        class="group-name episode-line has-text-centered more-button"
         @click="showAllMode = false"
         v-else
       >
