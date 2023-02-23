@@ -241,6 +241,9 @@ const getters = {
   episodeSelectionGrid: state => state.episodeSelectionGrid,
 
   isSingleEpisode: state => state.displayedEpisodes.length < 2,
+  runningEpisodes: state => state.displayedEpisodes.filter(episode => {
+    return !episode.status || ['', 'running'].includes(episode.status)
+  }),
   episodeOptions: state => state.episodes.map(
     episode => { return { label: episode.name, value: episode.id } }
   ),
