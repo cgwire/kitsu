@@ -40,6 +40,13 @@
         </div>
 
         <div class="filters flexrow">
+          <combobox
+            class="flexrow-item selector"
+            :label="$t('shots.fields.episode')"
+            :options="runningEpisodeOptions"
+            v-model="episodeId"
+            v-show="isTVShow"
+          />
           <combobox-status
             class="flexrow-item selector"
             :label="$t('news.task_status')"
@@ -52,7 +59,7 @@
             :task-type-list="taskTypeList"
             v-model="taskTypeId"
           />
-          <div class="field flexrow-item selector">
+          <div class="field flexrow-item selector small">
             <label class="label person-label">
               {{ $t('main.person') }}
             </label>
@@ -63,6 +70,7 @@
             />
           </div>
         </div>
+
         <div class="filters flexrow mt1" v-show="isFiltersDisplayed">
           <date-field
             class="flexrow-item"
@@ -152,6 +160,16 @@
                   <span class="date flexrow-item">
                     {{ formatTime(news.created_at) }}
                   </span>
+
+                  <div
+                    class="flexrow-item production-name-wrapper"
+                    v-if="isStudio"
+                  >
+                    <production-name
+                      :production="productionMap.get(news.project_id)"
+                      only-avatar
+                    />
+                  </div>
 
                   <div class="flexrow-item task-type-wrapper">
                     <task-type-name
@@ -331,6 +349,7 @@ import DateField from '@/components/widgets/DateField'
 import PeopleField from '@/components/widgets/PeopleField'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import ProductionName from '@/components/widgets/ProductionName'
 import TaskInfo from '@/components/sides/TaskInfo'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 import Spinner from '@/components/widgets/Spinner'
@@ -348,11 +367,12 @@ export default {
     EntityThumbnail,
     PeopleAvatar,
     PeopleField,
+    PreviewPlayer,
+    ProductionName,
     TaskTypeName,
     ValidationTag,
     Spinner,
-    TaskInfo,
-    PreviewPlayer
+    TaskInfo
   },
 
   data () {
@@ -362,6 +382,7 @@ export default {
       currentNewsId: null,
       currentPage: 1,
       currentTask: null,
+      episodeId: '',
       isFiltersDisplayed: false,
       isStatsDisplayed: false,
       errors: {
@@ -427,13 +448,16 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'isTVShow',
       'newsList',
       'newsTotal',
       'newsStats',
       'newsListByDay',
       'personMap',
+      'productionMap',
       'productionTaskStatuses',
       'productionTaskTypes',
+      'runningEpisodes',
       'taskStatusMap',
       'taskTypeMap',
       'taskStatusMap',
@@ -441,6 +465,10 @@ export default {
       'taskTypes',
       'user'
     ]),
+
+    isStudio () {
+      return this.$route.path.indexOf('productions') < 0
+    },
 
     params () {
       const params = {
@@ -452,9 +480,11 @@ export default {
           this.taskStatusId !== '' ? this.taskStatusId : undefined,
         person_id: this.person ? this.person.id : undefined,
         page: this.currentPage,
+        episode_id: this.episodeId,
         before: formatFullDateWithRevertedTimezone(this.before, this.timezone),
         after: formatFullDateWithRevertedTimezone(this.after, this.timezone)
       }
+      if (this.episodeId === 'all') delete params['episode_id']
       return params
     },
 
@@ -472,6 +502,18 @@ export default {
         color: '#999',
         name: this.$t('news.all')
       }].concat(sortByName([...this.productionTaskTypes]))
+    },
+
+    runningEpisodeOptions () {
+      return [{
+        value: 'all',
+        label: this.$t('news.all')
+      }].concat(this.runningEpisodes.map(episode => {
+        return {
+          label: episode.name,
+          value: episode.id
+        }
+      }))
     },
 
     team () {
@@ -629,6 +671,9 @@ export default {
           task_type_id: this.params.task_type_id
         }
         if (this.$router) this.$router.push({ query })
+        if (this.$route.path.indexOf('productions') < 0) {
+          this.params.isStudio = true
+        }
         this.loadNews(this.params)
           .then(() => {
             this.loading.news = false
@@ -750,6 +795,14 @@ export default {
     },
 
     after () {
+      this.init()
+    },
+
+    $route () {
+      this.init()
+    },
+
+    episodeId () {
       this.init()
     }
   },

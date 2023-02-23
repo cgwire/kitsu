@@ -73,7 +73,7 @@
                <clock-icon size="0.9x" />
                {{ $t("timesheets.title") }}
              </router-link>
-         </p>
+           </p>
 
            <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
              <router-link :to="{name: 'main-schedule'}">
@@ -81,6 +81,14 @@
                {{ $t("schedule.title_main") }}
              </router-link>
            </p>
+
+           <p @click="toggleSidebar()">
+             <router-link :to="{name: 'newsfeed'}" v-if="isCurrentUserManager">
+               <clock-icon size="0.9x" />
+               {{ $t("news.title") }}
+             </router-link>
+           </p>
+
          </div>
 
          <div v-if="isCurrentUserAdmin">
