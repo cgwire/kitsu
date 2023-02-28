@@ -16,7 +16,7 @@ export KITSU_EVENTS_TARGET=http://$(docker-machine ip)/socket.io
 git clone https://github.com/cgwire/kitsu.git
 cd kitsu
 npm install
-npm run serve
+npm run dev
 ```
 
 After 30 or so seconds, a browser window should appear with Kitsu up and running. The development server will rebuild files automatically as they are edited.
