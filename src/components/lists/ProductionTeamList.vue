@@ -5,32 +5,39 @@
       <thead class="datatable-head">
         <tr>
           <th scope="col" class="name datatable-row-header">
-          {{ $t("people.list.name") }}
+            {{ $t("people.list.name") }}
           </th>
           <th scope="col" class="email">
-          {{ $t("people.list.email") }}
+            {{ $t("people.list.email") }}
           </th>
           <th scope="col" class="phone">
-          {{ $t("people.list.phone") }}
+            {{ $t("people.list.phone") }}
           </th>
           <th scope="col" class="role">
-          {{ $t("people.list.role") }}
+            {{ $t("people.list.role") }}
+          </th>
+          <th scope="col" class="departments">
+            {{ $t("people.list.departments") }}
           </th>
           <th scope="col" class="actions"></th>
         </tr>
       </thead>
       <tbody class="datatable-body" v-if="!isEmpty">
-        <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
-          <people-name-cell class="name datatable-row-header" :person="entry" />
-          <td class="email">{{ entry.email }}</td>
-          <td class="phone">{{ entry.phone }}</td>
-          <td class="role">{{ $t('people.role.' + entry.role) }}</td>
+        <tr class="datatable-row" v-for="person in entries" :key="person.id">
+          <people-name-cell class="name datatable-row-header" :person="person" />
+          <td class="email">{{ person.email }}</td>
+          <td class="phone">{{ person.phone }}</td>
+          <td class="role">{{ $t('people.role.' + person.role) }}</td>
+          <department-names-cell
+            class="departemnts"
+            :departments="person.departments"
+          />
           <td class="actions"
             v-if="isCurrentUserAdmin"
           >
             <button
               class="button"
-              @click="removePerson(entry)"
+              @click="removePerson(person)"
             >
               {{ $t('main.remove') }}
             </button>
@@ -54,11 +61,13 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import DepartmentNamesCell from '@/components/cells/DepartmentNamesCell'
 import PeopleNameCell from '@/components/cells/PeopleNameCell'
 
 export default {
   name: 'production-team-list',
   components: {
+    DepartmentNamesCell,
     PeopleNameCell
   },
 

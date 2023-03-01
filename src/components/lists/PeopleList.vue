@@ -41,18 +41,10 @@
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
-          <td class="departments">
-            <span
-              class="departments-element"
-              v-for="department in sortDepartments(entry.departments)"
-              :key="entry.id + '-' + department.id"
-            >
-              <department-name
-                :department="department"
-                v-if="department"
-              />
-            </span>
-          </td>
+          <department-names-cell
+            class="departments"
+            :departments="entry.departments"
+          />
           <row-actions-cell
             v-if="isCurrentUserAdmin"
             :entry-id="entry.id"
@@ -82,18 +74,10 @@
           <td class="email">{{ entry.email }}</td>
           <td class="phone">{{ entry.phone }}</td>
           <td class="role">{{ $t('people.role.' + entry.role) }}</td>
-          <td class="departments">
-            <span
-              class="departments-element"
-              v-for="department in sortDepartments(entry.departments)"
-              :key="entry.id + '-' + department.id"
-            >
-              <department-name
-                :department="department"
-                v-if="department"
-              />
-            </span>
-          </td>
+          <department-names-cell
+            class="departments"
+            :departments="entry.departments"
+          />
           <row-actions-cell
             v-if="isCurrentUserAdmin"
             :entry-id="entry.id"
@@ -123,20 +107,18 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import { sortByName } from '@/lib/sorting'
-
+import DepartmentNamesCell from '@/components/cells/DepartmentNamesCell.vue'
 import PeopleNameCell from '@/components/cells/PeopleNameCell'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
-import DepartmentName from '@/components/widgets/DepartmentName.vue'
 
 export default {
   name: 'people-list',
   components: {
+    DepartmentNamesCell,
     PeopleNameCell,
     RowActionsCell,
-    TableInfo,
-    DepartmentName
+    TableInfo
   },
 
   props: {
@@ -183,11 +165,6 @@ export default {
 
     onBodyScroll (event, position) {
       this.$refs.body.style.left = `-${position.scrollLeft}px`
-    },
-
-    sortDepartments (departmentIds = []) {
-      return sortByName(departmentIds
-        .map(departmentId => this.departmentMap.get(departmentId)))
     }
   }
 }
