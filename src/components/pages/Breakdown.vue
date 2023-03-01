@@ -56,6 +56,13 @@
             @click="showImportModal"
             v-if="isCurrentUserManager"
           />
+          <button-simple
+            class="flexrow-item"
+            icon="download"
+            :is-responsive="true"
+            :title="$t('main.csv.export_current_view')"
+            @click="exportViewToCsv"
+          />
           <button-href-link
             class="flexrow-item"
             :title="$t('main.csv.export_file')"
@@ -297,11 +304,13 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import moment from 'moment'
 
 import { range } from '@/lib/time'
 import csv from '@/lib/csv'
 import clipboard from '@/lib/clipboard'
 import { sortByName } from '@/lib/sorting'
+import stringHelpers from '@/lib/string'
 import { entityListMixin } from '@/components/mixins/entity_list'
 
 import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock'
@@ -408,6 +417,7 @@ export default {
     ...mapGetters([
       'assetMap',
       'assetMetadataDescriptors',
+      'assetTypeMap',
       'assetsByType',
       'casting',
       'castingAssetTypeAssets',
@@ -1147,13 +1157,138 @@ export default {
       } else {
         this.editAsset(data)
       }
-    },
+	},
 
     descriptorCurrentDepartments (descriptor) {
       const departemts = descriptor.departments || []
       return departemts.map(
         departmentId => this.departmentMap.get(departmentId)
       )
+    },
+
+    getEntityName (entity) {
+      return (
+        this.sequenceId === 'all' &&
+        (
+          !this.isTVShow ||
+          (this.isTVShow && this.currentEpisode.id !== 'all')
+        )
+          ? entity.sequence_name + ' / ' + entity.name
+          : entity.name
+      )
+    },
+
+		getCsvFileName () {
+			const nameData = [
+				moment().format('YYYY-MM-DD'),
+				'kitsu',
+        this.castingType + 's',
+				this.currentProduction.name,
+				this.$t('breakdown.title')
+			]
+      if (this.isTVShow) {
+        if (this.currentEpisode) {
+          if (this.currentEpisode.id == 'all') {
+            nameData.splice(4, 0, 'all')
+          } else if (this.currentEpisode.id == 'main') {
+            nameData.splice(4, 0, 'main pack')
+            if (this.assetTypeId !== 'all' && this.castingType == 'asset') {
+              nameData.splice(5, 0, this.assetTypeMap.get(this.assetTypeId).name)
+            }
+          } else {
+            nameData.splice(4, 0, this.currentEpisode.name)
+            if (this.sequenceId !== 'all' && this.castingType == 'shot') {
+              nameData.splice(5, 0, this.sequenceMap.get(this.sequenceId).name)
+            }
+            if (this.assetTypeId !== 'all' && this.castingType == 'asset') {
+              nameData.splice(5, 0, this.assetTypeMap.get(this.assetTypeId).name)
+            }
+          }
+        }
+      } else {
+        if (this.sequenceId !== 'all' && this.castingType == 'shot') {
+          nameData.splice(5, 0, this.sequenceMap.get(this.sequenceId).name)
+        }
+        if (this.assetTypeId !== 'all' && this.castingType == 'asset') {
+          nameData.splice(5, 0, this.assetTypeMap.get(this.assetTypeId).name)
+        }
+      }
+			return stringHelpers.slugify(nameData.join('_'))
+		},
+
+    getCsvFileHeaders () {
+      let headers = [
+        this.$t('shots.fields.name'),
+        this.$t('breakdown.fields.standby')
+      ]
+      if (this.isFrames) {
+        headers.push(this.$t('main.frames'))
+      }
+      if (this.isFrameIn) {
+        headers.push(this.$t('main.frame_in'))
+      }
+      if (this.isFrameOut) {
+        headers.push(this.$t('main.frame_out'))
+      }
+      this.metadataDescriptors
+        .forEach(descriptor => {
+          headers.push(descriptor.name)
+        })
+      return headers.concat(this.castingAssetTypes)
+    },
+
+    getCsvEntries () {
+      const entries = this.castingEntities.map(entity => {
+        const entry = [
+          entity.name,
+          entity.is_casting_standby ? 'X' : ''
+        ]
+        if (this.isFrames) {
+          entry.push(entity.nb_frames)
+        }
+        if (this.isFrameIn) {
+          entry.push(entity.data.frame_in)
+        }
+        if (this.isFrameOut) {
+          entry.push(entity.data.frame_out)
+        }
+        this.metadataDescriptors
+          .forEach(descriptor => {
+            entry.push(entity.data[descriptor.field_name] || '')
+          })
+
+        const assets = this.castingByType[entity.id] || []
+        const assetsByAssetTypesMap = {}
+        assets.forEach(assetTypeAssets => {
+          assetsByAssetTypesMap[assetTypeAssets[0].asset_type_name] =
+            assetTypeAssets
+        })
+        this.castingAssetTypes.forEach(assetTypeName => {
+          const typeAssets = assetsByAssetTypesMap[assetTypeName] || []
+          const nbAssetsForType = typeAssets
+            .reduce((acc, a) => acc + a.nb_occurences, 0)
+          if (nbAssetsForType > 0) {
+            let casting = nbAssetsForType + ' assets: '
+            casting += typeAssets
+              .map(asset => {
+                return asset.asset_name + ' (' + asset.nb_occurences + ')'
+              })
+              .join(', ')
+            entry.push(casting)
+          } else {
+            entry.push('')
+          }
+        })
+        return entry
+      })
+      return entries
+    },
+
+    exportViewToCsv () {
+      const entries = this.getCsvEntries()
+      const name = this.getCsvFileName()
+      const headers = this.getCsvFileHeaders()
+      csv.buildCsvFile(name, [headers].concat(entries))
     }
   },
 
