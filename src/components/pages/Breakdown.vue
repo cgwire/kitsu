@@ -88,7 +88,7 @@
               </div>
               <div
                 class="description-header"
-                v-if="!isShowInfosBreakdown"
+                v-if="!isShowInfosBreakdown && isDescription"
               >
                 {{ $t('shots.fields.description') }}
               </div>
@@ -140,9 +140,7 @@
               :entity="entity"
               :preview-file-id="entity.preview_file_id"
               :selected="selection[entity.id]"
-              :name="sequenceId === 'all' && (!isTVShow || (isTVShow && currentEpisode.id !== 'all'))
-                ? entity.sequence_name + ' / ' + entity.name
-                : entity.name"
+              :name="getEntityName(entity)"
               :assets="castingByType[entity.id] || []"
               :asset-types="castingAssetTypes"
               :read-only="!isCurrentUserManager"
@@ -150,6 +148,7 @@
               :metadata-descriptors="metadataDescriptors"
               :metadata-display-headers="metadataDisplayHeaders"
               :big-mode="isBigMode"
+              :is-description="isDescription"
               @edit-label="onEditLabelClicked"
               @add-one="addOneAsset"
               @remove-one="removeOneAsset"
@@ -569,6 +568,11 @@ export default {
         }
       })
       return casting
+    },
+
+    isDescription () {
+      return this.castingEntities.some(
+        e => e.description && e.description.length > 0)
     },
 
     csvColumns () {

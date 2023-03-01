@@ -22,7 +22,9 @@
       />
       <div class="shot-name flexrow-item ml05">
         <div v-for="chunk in name.split(' / ')">
+          <template v-if="chunk && chunk !== 'undefined'">
           {{ chunk }}
+          </template>
         </div>
       </div>
     </div>
@@ -40,7 +42,7 @@
     </div>
     <div
       class="description-column flexrow-item"
-      v-if="!isShowInfosBreakdown"
+      v-if="!isShowInfosBreakdown && isDescription"
     >
       <div
         class="tooltip-text"
@@ -185,8 +187,8 @@
         v-if="assetsByAssetTypesMap[assetType] !== undefined"
       >
         <div class="flexrow-item mb05">
-          {{ nbAssetsFoType(assetType) }}
-          {{ $tc('assets.number', nbAssetsFoType(assetType)) }}
+          {{ nbAssetsForType(assetType) }}
+          {{ $tc('assets.number', nbAssetsForType(assetType)) }}
         </div>
         <div class="asset-type-items flexrow-item">
           <asset-block
@@ -279,6 +281,10 @@ export default {
       default: false,
       type: Boolean
     },
+    isDescription: {
+      default: true,
+      type: Boolean
+    }
   },
 
   computed: {
@@ -292,8 +298,9 @@ export default {
 
     assetsByAssetTypesMap () {
       const assetsByAssetTypes = {}
-      this.assets.forEach(assetType => {
-        assetsByAssetTypes[assetType[0].asset_type_name] = assetType
+      this.assets.forEach(assetTypeAssets => {
+        assetsByAssetTypes[assetTypeAssets[0].asset_type_name] =
+          assetTypeAssets
       })
       return assetsByAssetTypes
     }
@@ -328,7 +335,7 @@ export default {
       return renderMarkdown(input)
     },
 
-    nbAssetsFoType (assetType) {
+    nbAssetsForType (assetType) {
       return this.assetsByAssetTypesMap[assetType]
         .reduce((acc, a) => acc + a.nb_occurences, 0)
     }
