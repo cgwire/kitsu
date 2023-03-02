@@ -1386,6 +1386,17 @@ export default {
       this.initData(true)
     },
 
+    // Quickfix for the edge case where the backPath is not properly set
+    // because it was set when the episode was not fully loaded.
+    currentEpisode () {
+      if (this.currentEpisode && !this.backPath.params.episode_id) {
+        this.$store.commit('RESET_PRODUCTION_PATH', {
+          productionId: this.currentProduction.id,
+          episodeId: this.currentEpisode.id,
+        })
+      }
+    },
+
     dueDateFilter () {
       this.onSearchChange(this.searchField.getValue())
       this.sortTasks()

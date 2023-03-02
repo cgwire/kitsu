@@ -466,6 +466,7 @@ export default {
     csv: {
       choose: 'Choose',
       error_upload: 'An error occurred while uploading your CSV.',
+      export_current_view: 'Export current view',
       export_file: 'Export',
       import_file: 'Import',
       import_title: 'Import data from CSV',
