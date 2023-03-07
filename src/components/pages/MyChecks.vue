@@ -20,6 +20,7 @@
           :options="episodeOptions"
           v-model="episodeId"
           v-show="productionId"
+          v-if="taskStatusList.length > 0"
         />
 
         <combobox-task-type
@@ -28,6 +29,13 @@
           :task-type-list="taskTypeList"
           v-model="taskTypeId"
           v-if="taskTypeList.length > 0"
+        />
+
+        <combobox-status
+          class="flexrow-item selector"
+          :label="$t('news.task_status')"
+          :task-status-list="taskStatusList"
+          v-model="taskStatusId"
         />
 
         <div class="field flexrow-item selector small">
@@ -118,6 +126,7 @@ import { parseDate } from '@/lib/time'
 import ActionPanel from '@/components/tops/ActionPanel'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import Combobox from '@/components/widgets/Combobox'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import PeopleField from '@/components/widgets/PeopleField'
@@ -134,6 +143,7 @@ export default {
     ButtonSimple,
     Combobox,
     ComboboxProduction,
+    ComboboxStatus,
     ComboboxTaskType,
     PeopleField,
     TaskInfo,
@@ -165,7 +175,9 @@ export default {
         'estimation',
         'last_comment_date'
       ].map(name => ({ label: name, value: name })),
+      taskStatusId: '',
       taskTypeId: '',
+      taskStatusList: [],
       taskTypeList: [],
       tasksToCheck: []
     }
@@ -180,6 +192,7 @@ export default {
           this.buildSelectionGrid(tasks)
           this.resetProductionList(tasks)
           this.resetTaskTypeList(tasks)
+          this.resetTaskStatusList(tasks)
           this.tasksToCheck = tasks
           this.isLoading = false
         }
@@ -228,11 +241,9 @@ export default {
       if (!this.productionId) return []
       const production = this.productionMap.get(this.productionId)
       if (production.production_type !== 'tvshow') return []
-      console.log(this.tasksToCheck)
       this.tasksToCheck
         .filter(t => t.project_id === this.productionId)
         .forEach(task => {
-          console.log(task)
           if (task.episode_id &&
               !episodeMap[task.episode_id] &&
               task.entity_type_name === 'Shot'
@@ -262,6 +273,9 @@ export default {
       }
       if (this.taskTypeId !== '') {
         tasks = tasks.filter(t => t.task_type_id === this.taskTypeId)
+      }
+      if (this.taskStatusId !== '') {
+        tasks = tasks.filter(t => t.task_status_id === this.taskStatusId)
       }
       if (this.person && this.person.id) {
         tasks = tasks.filter(t => t.assignees.includes(this.person.id))
@@ -362,6 +376,23 @@ export default {
         color: '#999',
         name: this.$t('news.all')
       }].concat(sortByName(taskTypeList))
+    },
+
+    resetTaskStatusList (tasks) {
+      const taskStatusIds = {}
+      const taskStatusList = []
+      tasks.forEach(task => {
+        if (!taskStatusIds[task.task_status_id]) {
+          taskStatusIds[task.task_status_id] = true
+          taskStatusList.push(this.taskStatusMap.get(task.task_status_id))
+        }
+      })
+      this.taskStatusList = [{
+        id: '',
+        color: '#999',
+        name: this.$t('news.all'),
+        short_name: this.$t('news.all')
+      }].concat(sortByName(taskStatusList))
     },
 
     onTaskSelectionCleared () {
