@@ -1105,6 +1105,7 @@ export default {
 
     pasteCasting () {
       const castingToPaste = clipboard.pasteCasting()
+      if (!castingToPaste || castingToPaste.length === 0) return
       const selectedElements = Object.keys(this.selection)
         .filter(key => this.selection[key])
       selectedElements.forEach(entityId => {
