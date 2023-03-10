@@ -1,14 +1,8 @@
 <template>
-<div
-  class="question-mark"
->
-  <help-circle-icon />
-  <div
-    class="question-text"
-    v-html="renderMarkdown(text)"
-  >
+  <div class="question-mark">
+    <help-circle-icon />
+    <div class="question-text" v-html="renderMarkdown(text)"></div>
   </div>
-</div>
 </template>
 
 <script>
@@ -27,8 +21,7 @@ export default {
     }
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
     renderMarkdown

@@ -2,11 +2,11 @@ import client from '@/store/api/client'
 import superagent from 'superagent'
 
 export default {
-  getCustomActions (callback) {
+  getCustomActions(callback) {
     client.get('/api/data/custom-actions', callback)
   },
 
-  newCustomAction (customAction) {
+  newCustomAction(customAction) {
     const data = {
       name: customAction.name,
       url: customAction.url
@@ -14,7 +14,7 @@ export default {
     return client.ppost('/api/data/custom-actions/', data)
   },
 
-  updateCustomAction (customAction) {
+  updateCustomAction(customAction) {
     const data = {
       name: customAction.name,
       url: customAction.url,
@@ -24,11 +24,11 @@ export default {
     return client.pput(`/api/data/custom-actions/${customAction.id}`, data)
   },
 
-  deleteCustomAction (customAction) {
+  deleteCustomAction(customAction) {
     return client.pdel(`/api/data/custom-actions/${customAction.id}`)
   },
 
-  postCustomAction (url, data) {
+  postCustomAction(url, data) {
     return new Promise((resolve, reject) => {
       superagent
         .post(url)

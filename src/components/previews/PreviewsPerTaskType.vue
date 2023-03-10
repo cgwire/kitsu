@@ -1,31 +1,30 @@
 <template>
-<div class="flexrow">
-
-  <combobox-styled
-    ref="task-type-combobox"
-    class="flexrow-item"
-    :options="taskTypeOptions"
-    v-model="taskTypeId"
-    v-if="taskTypeOptions.length > 0"
-  />
-
-  <combobox-styled
-    class="flexrow-item"
-    :options="previewFileOptions"
-    v-if="previewFileOptions.length"
-    v-model="previewFileId"
-  />
-  <span class="text flexrow-item" v-else>Selected task has no previews.</span>
-
-  <div class="flexrow-item" v-if="taskStatus">
-    <validation-tag
+  <div class="flexrow">
+    <combobox-styled
+      ref="task-type-combobox"
       class="flexrow-item"
-      :task="{ task_status_id: taskStatus.id}"
-      :is-static="true"
-      :thin="false"
+      :options="taskTypeOptions"
+      v-model="taskTypeId"
+      v-if="taskTypeOptions.length > 0"
     />
+
+    <combobox-styled
+      class="flexrow-item"
+      :options="previewFileOptions"
+      v-if="previewFileOptions.length"
+      v-model="previewFileId"
+    />
+    <span class="text flexrow-item" v-else>Selected task has no previews.</span>
+
+    <div class="flexrow-item" v-if="taskStatus">
+      <validation-tag
+        class="flexrow-item"
+        :task="{ task_status_id: taskStatus.id }"
+        :is-static="true"
+        :thin="false"
+      />
+    </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -47,7 +46,7 @@ export default {
     ValidationTag
   },
 
-  data () {
+  data() {
     return {
       taskTypeId: null,
       previewFileId: this.entity.preview_file_id
@@ -69,7 +68,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.setCurrentParameters()
   },
 
@@ -81,13 +80,13 @@ export default {
       'isCurrentUserManager'
     ]),
 
-    taskTypeOptions () {
+    taskTypeOptions() {
       const entity = this.entityMap.get(this.entity.id)
       return entity.tasks
         .map(taskId => this.taskMap.get(taskId))
         .map(task => this.taskTypeMap.get(task.task_type_id))
         .sort(firstBy('priority', 1).thenBy('name'))
-        .map((taskType) => {
+        .map(taskType => {
           return {
             label: taskType.name,
             value: taskType.id
@@ -95,7 +94,7 @@ export default {
         })
     },
 
-    previewFileOptions () {
+    previewFileOptions() {
       const previewFiles = this.entity.preview_files[this.taskTypeId] || []
       return previewFiles.map(previewFile => ({
         label: `v${previewFile.revision}`,
@@ -103,7 +102,7 @@ export default {
       }))
     },
 
-    taskStatus () {
+    taskStatus() {
       if (!this.entityMap) return ''
 
       const entity = this.entityMap.get(this.entity.id)
@@ -122,8 +121,8 @@ export default {
   },
 
   methods: {
-    getTaskTypeIdForPreviewFile (taskTypeIds, previewFileId) {
-      return taskTypeIds.find((taskTypeId) => {
+    getTaskTypeIdForPreviewFile(taskTypeIds, previewFileId) {
+      return taskTypeIds.find(taskTypeId => {
         const previewFiles = this.entity.preview_files[taskTypeId]
         return previewFiles.some(previewFile => {
           return previewFile.id === previewFileId
@@ -131,7 +130,7 @@ export default {
       })
     },
 
-    setCurrentParameters () {
+    setCurrentParameters() {
       // Find task type matching current preview.
       const taskTypeIds = Object.keys(this.entity.preview_files)
       if (taskTypeIds.length > 0) {
@@ -149,7 +148,7 @@ export default {
   },
 
   watch: {
-    taskTypeId () {
+    taskTypeId() {
       // Set current preview was last preview selected. If there is no preview
       // matching this task type, it selects the first preview available for
       // this task type.
@@ -168,7 +167,7 @@ export default {
       }
     },
 
-    previewFileId () {
+    previewFileId() {
       let previewFile = null
       const previewFiles = this.entity.preview_files[this.taskTypeId]
       if (previewFiles && previewFiles.length > 0) {
@@ -179,8 +178,7 @@ export default {
       this.$emit('preview-changed', this.entity, previewFile)
     },
 
-    'entity.preview_files': function () {
-    },
+    'entity.preview_files': function () {},
 
     'entity.preview_file_id': function () {
       if (this.previewFileId !== this.entity.preview_file_id) {

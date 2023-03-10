@@ -116,34 +116,32 @@
           </div>
           <div>
             <label class="label">
-              {{
-                $t('productions.creation.start_and_end_dates')
-              }}
+              {{ $t('productions.creation.start_and_end_dates') }}
             </label>
             <div class="date-picker-wrapper">
-            <datepicker
-              wrapper-class="datepicker"
-              input-class=" is-small date-input input"
-              label="Start date"
-              :placeholder="startDatePlaceholder"
-              :language="locale"
-              :disabled-dates="{ days: [6, 0] }"
-              :monday-first="true"
-              format="yyyy-MM-dd"
-              v-model="productionToCreate.settings.dateStart"
-            />
-            <span class="input-separator">-</span>
-            <datepicker
-              wrapper-class="datepicker"
-              input-class="is-small date-input input"
-              :language="locale"
-              :disabled-dates="{ days: [6, 0] }"
-              :placeholder="endDatePlaceholder"
-              :monday-first="true"
-              :disabledDates="{ to: productionToCreate.settings.dateStart }"
-              format="yyyy-MM-dd"
-              v-model="productionToCreate.settings.dateEnd"
-            />
+              <datepicker
+                wrapper-class="datepicker"
+                input-class=" is-small date-input input"
+                label="Start date"
+                :placeholder="startDatePlaceholder"
+                :language="locale"
+                :disabled-dates="{ days: [6, 0] }"
+                :monday-first="true"
+                format="yyyy-MM-dd"
+                v-model="productionToCreate.settings.dateStart"
+              />
+              <span class="input-separator">-</span>
+              <datepicker
+                wrapper-class="datepicker"
+                input-class="is-small date-input input"
+                :language="locale"
+                :disabled-dates="{ days: [6, 0] }"
+                :placeholder="endDatePlaceholder"
+                :monday-first="true"
+                :disabledDates="{ to: productionToCreate.settings.dateStart }"
+                format="yyyy-MM-dd"
+                v-model="productionToCreate.settings.dateEnd"
+              />
             </div>
           </div>
           <div class="mb1 explaination">
@@ -152,9 +150,9 @@
         </timeline-item>
         <timeline-item
           :title="$t('productions.creation.select_asset_task_type')"
-          :subtitle="$t(
-            'productions.creation.select_asset_task_type_description'
-           )"
+          :subtitle="
+            $t('productions.creation.select_asset_task_type_description')
+          "
           :step="3"
           :is-completed="hasValidAssetTaskTypes"
         >
@@ -175,18 +173,19 @@
               class="is-inline inline-task-type-combo"
               :task-type-list="availableAssetTaskTypes"
               add-placeholder
-              @input="id => productionToCreate.assetTaskTypes.push(
-                taskTypeMap.get(id)
-              )"
+              @input="
+                id =>
+                  productionToCreate.assetTaskTypes.push(taskTypeMap.get(id))
+              "
               v-if="availableAssetTaskTypes.length > 0"
             />
           </draggable>
         </timeline-item>
         <timeline-item
           :title="$t('productions.creation.select_shot_task_type')"
-          :subtitle="$t(
-            'productions.creation.select_shot_task_type_description'
-          )"
+          :subtitle="
+            $t('productions.creation.select_shot_task_type_description')
+          "
           :step="4"
           :is-completed="hasValidShotTaskTypes"
         >
@@ -207,9 +206,9 @@
               class="is-inline inline-task-type-combo"
               :task-type-list="availableShotTaskTypes"
               add-placeholder
-              @input="id => productionToCreate.shotTaskTypes.push(
-                taskTypeMap.get(id)
-              )"
+              @input="
+                id => productionToCreate.shotTaskTypes.push(taskTypeMap.get(id))
+              "
               v-if="availableShotTaskTypes.length > 0"
             />
           </draggable>
@@ -236,9 +235,10 @@
               :task-status-list="availableTaskStatuses"
               :with-margin="false"
               add-placeholder
-              @input="id => productionToCreate.taskStatuses.push(
-                taskStatusMap.get(id)
-              )"
+              @input="
+                id =>
+                  productionToCreate.taskStatuses.push(taskStatusMap.get(id))
+              "
               v-if="availableTaskStatuses.length > 0"
             />
           </div>
@@ -262,11 +262,12 @@
               class="flexrow-item"
               :options="availableAssetTypes"
               :with-margin="false"
-              @input="id => {
-                assetTypeMap.get(id) && productionToCreate.assetTypes.push(
-                  assetTypeMap.get(id)
-                )
-              }"
+              @input="
+                id => {
+                  assetTypeMap.get(id) &&
+                    productionToCreate.assetTypes.push(assetTypeMap.get(id))
+                }
+              "
               v-if="availableAssetTypes.length > 1"
             />
           </div>
@@ -310,23 +311,23 @@
             >
               {{ $t('productions.creation.import_shots_button') }}
             </button>
-<!--            <button-->
-<!--              class="button ml1"-->
-<!--              @click="toggleModal('isAddShotsDisplayed')"-->
-<!--            >-->
-<!--              + {{ $t('productions.creation.add_shots_button') }}-->
-<!--            </button>-->
+            <!--            <button-->
+            <!--              class="button ml1"-->
+            <!--              @click="toggleModal('isAddShotsDisplayed')"-->
+            <!--            >-->
+            <!--              + {{ $t('productions.creation.add_shots_button') }}-->
+            <!--            </button>-->
           </div>
         </timeline-item>
         <section class="has-text-centered mt2">
           <p v-if="errors.importingAssets" class="error">
             {{ $t('productions.creation.errorImportingAssets') }}
-            <br>
+            <br />
             {{ errors.importingAssetsError }}
           </p>
           <p v-if="errors.importingShots" class="error">
             {{ $t('productions.creation.errorImportingShots') }}
-            <br>
+            <br />
             {{ errors.importingShotsError }}
           </p>
           <p v-if="errors.creatingProduction" class="error">
@@ -418,7 +419,6 @@
       @add-shot="addShot"
       @cancel="toggleModal('isAddShotsDisplayed')"
     />
-
   </div>
 </template>
 
@@ -471,7 +471,7 @@ export default {
     TimelineItem,
     ValidationTag
   },
-  data () {
+  data() {
     return {
       errors: {
         creatingProduction: false,
@@ -517,10 +517,7 @@ export default {
         shotsToCreate: [],
         taskStatuses: []
       },
-      assetsOptionalColumns: [
-        'Description',
-        'Ready for'
-      ],
+      assetsOptionalColumns: ['Description', 'Ready for'],
       shotsOptionalColumns: [
         'Description',
         'Nb Frames',
@@ -554,19 +551,19 @@ export default {
       'user'
     ]),
 
-    isTVShow () {
+    isTVShow() {
       return this.productionToCreate.settings.type === 'tvshow'
     },
 
-    assetsDataMatchers () {
-      return this.isTVShow
-        ? ['Episode', 'Type', 'Name']
-        : ['Type', 'Name']
+    assetsDataMatchers() {
+      return this.isTVShow ? ['Episode', 'Type', 'Name'] : ['Type', 'Name']
     },
 
-    assetsRenderColumns () {
-      var collection = [...this.assetsDataMatchers,
-        ...this.assetsOptionalColumns]
+    assetsRenderColumns() {
+      var collection = [
+        ...this.assetsDataMatchers,
+        ...this.assetsOptionalColumns
+      ]
 
       this.productionToCreate.assetTaskTypes.forEach(item => {
         collection.push(item.name)
@@ -576,7 +573,7 @@ export default {
       return collection
     },
 
-    shotsRenderColumns () {
+    shotsRenderColumns() {
       var collection = [...this.shotsDataMatchers, ...this.shotsOptionalColumns]
 
       this.productionToCreate.shotTaskTypes.forEach(item => {
@@ -587,13 +584,13 @@ export default {
       return collection
     },
 
-    shotsDataMatchers () {
+    shotsDataMatchers() {
       return this.isTVShow
         ? ['Episode', 'Sequence', 'Name']
         : ['Sequence', 'Name']
     },
 
-    locale () {
+    locale() {
       if (this.user.locale === 'fr_FR') {
         return fr
       } else {
@@ -601,37 +598,35 @@ export default {
       }
     },
 
-    allowedProductionTypes () {
-      return PRODUCTION_TYPE_OPTIONS.map(
-        option => option.value
-      )
+    allowedProductionTypes() {
+      return PRODUCTION_TYPE_OPTIONS.map(option => option.value)
     },
 
-    hasValidName () {
+    hasValidName() {
       return !this.isEmpty(this.productionToCreate.name)
     },
 
-    hasValidStartDate () {
+    hasValidStartDate() {
       return !this.isEmpty(this.productionToCreate.settings.dateStart)
     },
 
-    hasValidEndDate () {
+    hasValidEndDate() {
       return !this.isEmpty(this.productionToCreate.settings.dateEnd)
     },
 
-    hasValidAssets () {
+    hasValidAssets() {
       return this.nbAssetsToImport > 0
     },
 
-    hasValidAssetTypes () {
+    hasValidAssetTypes() {
       return this.productionToCreate.assetTypes.length > 0
     },
 
-    hasValidShots () {
+    hasValidShots() {
       return this.nbShotsToImport > 0
     },
 
-    hasValidSettings () {
+    hasValidSettings() {
       return (
         this.hasValidType &&
         this.hasValidFPS &&
@@ -642,12 +637,12 @@ export default {
       )
     },
 
-    hasValidFPS () {
+    hasValidFPS() {
       const fps = parseInt(this.productionToCreate.settings.fps)
       return fps > 0 && fps <= 60
     },
 
-    hasValidRatio () {
+    hasValidRatio() {
       if (this.isEmpty(this.productionToCreate.settings.ratio)) {
         return false
       }
@@ -658,7 +653,7 @@ export default {
       )
     },
 
-    hasValidResolution () {
+    hasValidResolution() {
       if (this.isEmpty(this.productionToCreate.settings.resolution)) {
         return false
       }
@@ -669,25 +664,27 @@ export default {
       )
     },
 
-    hasValidType () {
-      return this.allowedProductionTypes.indexOf(
-        this.productionToCreate.settings.type
-      ) !== -1
+    hasValidType() {
+      return (
+        this.allowedProductionTypes.indexOf(
+          this.productionToCreate.settings.type
+        ) !== -1
+      )
     },
 
-    hasValidAssetTaskTypes () {
+    hasValidAssetTaskTypes() {
       return this.productionToCreate.assetTaskTypes.length > 0
     },
 
-    hasValidShotTaskTypes () {
+    hasValidShotTaskTypes() {
       return this.productionToCreate.shotTaskTypes.length > 0
     },
 
-    hasValidTaskStatuses () {
+    hasValidTaskStatuses() {
       return this.productionToCreate.taskStatuses.length > 0
     },
 
-    hasAllDataCorrect () {
+    hasAllDataCorrect() {
       return (
         this.hasValidName &&
         this.hasValidSettings &&
@@ -698,18 +695,19 @@ export default {
       )
     },
 
-    availableAssetTaskTypes () {
+    availableAssetTaskTypes() {
       return this.assetTaskTypes.filter(
-        assetTaskType => this.productionToCreate.assetTaskTypes.indexOf(
-          assetTaskType
-        ) === -1
+        assetTaskType =>
+          this.productionToCreate.assetTaskTypes.indexOf(assetTaskType) === -1
       )
     },
 
-    availableAssetTypes () {
-      const assetTypes = sortByName(this.assetTypes.filter(assetType => {
-        return this.productionToCreate.assetTypes.indexOf(assetType) === -1
-      }))
+    availableAssetTypes() {
+      const assetTypes = sortByName(
+        this.assetTypes.filter(assetType => {
+          return this.productionToCreate.assetTypes.indexOf(assetType) === -1
+        })
+      )
       return [
         {
           name: '+ Asset Type',
@@ -724,24 +722,22 @@ export default {
       })
     },
 
-    availableShotTaskTypes () {
+    availableShotTaskTypes() {
       return this.shotTaskTypes.filter(
-        shotTaskType => this.productionToCreate.shotTaskTypes.indexOf(
-          shotTaskType
-        ) === -1
+        shotTaskType =>
+          this.productionToCreate.shotTaskTypes.indexOf(shotTaskType) === -1
       )
     },
 
-    availableTaskStatuses () {
+    availableTaskStatuses() {
       return this.taskStatus.filter(
-        status => (
+        status =>
           this.productionToCreate.taskStatuses.indexOf(status) === -1 &&
           !status.is_default
-        )
       )
     },
 
-    nbAssetsToImport () {
+    nbAssetsToImport() {
       if (this.productionToCreate.assetsToAdd) {
         const assetsLines = this.productionToCreate.assetsToAdd.filter(
           assetLine => assetLine.length > 1
@@ -751,7 +747,7 @@ export default {
       return 0
     },
 
-    nbShotsToImport () {
+    nbShotsToImport() {
       let nbShots = this.productionToCreate.shotsToCreate.length
       if (this.productionToCreate.shotsToAdd) {
         const shotsLines = this.productionToCreate.shotsToAdd.filter(
@@ -762,11 +758,11 @@ export default {
       return nbShots
     },
 
-    startDatePlaceholder () {
+    startDatePlaceholder() {
       return formatSimpleDate(moment())
     },
 
-    endDatePlaceholder () {
+    endDatePlaceholder() {
       return formatSimpleDate(moment().add(3, 'month'))
     }
   },
@@ -784,13 +780,14 @@ export default {
     ]),
     removeModelFromList,
 
-    deleteFromList (object, listName) {
+    deleteFromList(object, listName) {
       this.productionToCreate[listName] = removeModelFromList(
-        this.productionToCreate[listName], object
+        this.productionToCreate[listName],
+        object
       )
     },
 
-    isEmpty (value) {
+    isEmpty(value) {
       return (
         value === null ||
         value === undefined ||
@@ -800,41 +797,41 @@ export default {
       )
     },
 
-    isFloat (value) {
+    isFloat(value) {
       return !this.isEmpty(value) && /^[(\d)*,(\d)+]|(\d)+$/.test(value)
     },
 
-    isInteger (value) {
+    isInteger(value) {
       return !this.isEmpty(value) && /^\d+$/.test(value)
     },
 
-    async createTaskTypesAndStatuses () {
+    async createTaskTypesAndStatuses() {
       await func.runPromiseAsSeries(
-        this.productionToCreate.assetTaskTypes.concat(
-          this.productionToCreate.shotTaskTypes
-        )
-      .map(
-        // add task types
-        async (taskType, index) => {
-          const finalIndex = taskType.for_entity === 'Shot'
-            ? index - this.productionToCreate.assetTaskTypes.length
-            : index
-          return await this.addTaskTypeToProduction({
-            taskTypeId: taskType.id,
-            priority: finalIndex + 1
-          })
-        }
-      ).concat(
-        // add task statuses
-        this.productionToCreate.taskStatuses.map(
-          async (taskStatus) => {
-            return await this.addTaskStatusToProduction(taskStatus.id)
-          }
-        )
-      ))
+        this.productionToCreate.assetTaskTypes
+          .concat(this.productionToCreate.shotTaskTypes)
+          .map(
+            // add task types
+            async (taskType, index) => {
+              const finalIndex =
+                taskType.for_entity === 'Shot'
+                  ? index - this.productionToCreate.assetTaskTypes.length
+                  : index
+              return await this.addTaskTypeToProduction({
+                taskTypeId: taskType.id,
+                priority: finalIndex + 1
+              })
+            }
+          )
+          .concat(
+            // add task statuses
+            this.productionToCreate.taskStatuses.map(async taskStatus => {
+              return await this.addTaskStatusToProduction(taskStatus.id)
+            })
+          )
+      )
     },
 
-    async createAssets () {
+    async createAssets() {
       if (this.productionToCreate.assetsToAdd !== null) {
         this.loading.importingAssets = true
         this.errors.importingAssets = false
@@ -850,15 +847,13 @@ export default {
       }
     },
 
-    createAssetTypes () {
-      this.productionToCreate.assetTypes.map(
-        async (assetType) => {
-          return await this.addAssetTypeToProduction(assetType.id)
-        }
-      )
+    createAssetTypes() {
+      this.productionToCreate.assetTypes.map(async assetType => {
+        return await this.addAssetTypeToProduction(assetType.id)
+      })
     },
 
-    async createShots () {
+    async createShots() {
       if (this.productionToCreate.shotsToAdd !== null) {
         this.loading.importingShots = true
         this.errors.importingShots = false
@@ -874,7 +869,7 @@ export default {
       }
     },
 
-    createProductionRoute (createdProduction) {
+    createProductionRoute(createdProduction) {
       const params = {
         production_id: createdProduction.id
       }
@@ -889,7 +884,7 @@ export default {
       }
     },
 
-    async createProduction () {
+    async createProduction() {
       if (this.loading.createProduction) return
       this.loading.createProduction = true
       this.errors.creatingProduction = false
@@ -923,26 +918,25 @@ export default {
       this.loading.createProduction = false
     },
 
-    toggleModal (modalName) {
+    toggleModal(modalName) {
       this.modals[modalName] = !this.modals[modalName]
     },
 
-    renderAssetsImport (data, mode) {
+    renderAssetsImport(data, mode) {
       this.loading.importingAssets = true
       this.errors.importingAssets = false
       if (mode === 'file') {
         data = data.get('file')
       }
-      csv.processCSV(data)
-        .then((results) => {
-          this.parsedAssetsCSV = results
-          this.toggleModal('isAssetsImportDisplayed')
-          this.loading.importingAssets = false
-          this.toggleModal('isAssetsImportRenderDisplayed')
-        })
+      csv.processCSV(data).then(results => {
+        this.parsedAssetsCSV = results
+        this.toggleModal('isAssetsImportDisplayed')
+        this.loading.importingAssets = false
+        this.toggleModal('isAssetsImportRenderDisplayed')
+      })
     },
 
-    resetAssetsImport () {
+    resetAssetsImport() {
       this.errors.importingAssets = false
       this.toggleModal('isAssetsImportRenderDisplayed')
       this.$store.commit('ASSET_CSV_FILE_SELECTED', null)
@@ -951,13 +945,11 @@ export default {
       this.toggleModal('isAssetsImportDisplayed')
     },
 
-    uploadAssetsImportFile (data, toUpdate) {
+    uploadAssetsImportFile(data, toUpdate) {
       const formData = new FormData()
       const filename = 'import.csv'
       const csvContent = csv.turnEntriesToCsvString(data)
-      const file = new File(
-        [csvContent], filename, { type: 'text/csv' }
-      )
+      const file = new File([csvContent], filename, { type: 'text/csv' })
 
       formData.append('file', file)
 
@@ -966,22 +958,21 @@ export default {
       this.toggleModal('isAssetsImportRenderDisplayed')
     },
 
-    renderShotsImport (data, mode) {
+    renderShotsImport(data, mode) {
       this.loading.importingShots = true
       this.errors.importingShots = false
       if (mode === 'file') {
         data = data.get('file')
       }
-      csv.processCSV(data)
-        .then((results) => {
-          this.parsedShotsCSV = results
-          this.toggleModal('isShotsImportDisplayed')
-          this.loading.importingShots = false
-          this.toggleModal('isShotsImportRenderDisplayed')
-        })
+      csv.processCSV(data).then(results => {
+        this.parsedShotsCSV = results
+        this.toggleModal('isShotsImportDisplayed')
+        this.loading.importingShots = false
+        this.toggleModal('isShotsImportRenderDisplayed')
+      })
     },
 
-    resetShotsImport () {
+    resetShotsImport() {
       this.errors.importingShots = false
       this.toggleModal('isShotsImportRenderDisplayed')
       this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
@@ -990,13 +981,11 @@ export default {
       this.toggleModal('isShotsImportDisplayed')
     },
 
-    uploadShotsImportFile (data, toUpdate) {
+    uploadShotsImportFile(data, toUpdate) {
       const formData = new FormData()
       const filename = 'import.csv'
       const csvContent = csv.turnEntriesToCsvString(data)
-      const file = new File(
-        [csvContent], filename, { type: 'text/csv' }
-      )
+      const file = new File([csvContent], filename, { type: 'text/csv' })
 
       formData.append('file', file)
 
@@ -1005,19 +994,19 @@ export default {
       this.toggleModal('isShotsImportRenderDisplayed')
     },
 
-    addEpisode (episode, callback) {
+    addEpisode(episode, callback) {
       this.productionToCreate.episodesToCreate.push(episode)
       episode.id = this.productionToCreate.episodesToCreate.length - 1
       callback(episode)
     },
 
-    addSequence (sequence, callback) {
+    addSequence(sequence, callback) {
       this.productionToCreate.sequencesToCreate.push(sequence)
       sequence.id = this.productionToCreate.sequencesToCreate.length - 1
       callback(sequence)
     },
 
-    addShot (shot, callback) {
+    addShot(shot, callback) {
       this.productionToCreate.shotsToCreate.push(shot)
       shot.id = this.productionToCreate.shotsToCreate.length - 1
       callback(shot)
@@ -1061,7 +1050,7 @@ h2.subtitle {
 }
 
 .new-production > .columns {
-  padding-bottom: 3rem
+  padding-bottom: 3rem;
 }
 
 span.input-separator {
@@ -1074,7 +1063,7 @@ span.input-separator {
 }
 
 .date-picker-wrapper {
-  margin-top: .5rem;
+  margin-top: 0.5rem;
   display: flex;
   align-items: center;
 }

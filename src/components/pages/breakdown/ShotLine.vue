@@ -1,15 +1,15 @@
 <template>
-<div
-  :id="entity.id"
-  :class="{
-    shot: true,
-    selected: selected,
-    unselectable: true,
-    stdby: entity ? entity.is_casting_standby : false,
-    'text-mode': textMode
-  }"
-  @click="onClicked($event)"
->
+  <div
+    :id="entity.id"
+    :class="{
+      shot: true,
+      selected: selected,
+      unselectable: true,
+      stdby: entity ? entity.is_casting_standby : false,
+      'text-mode': textMode
+    }"
+    @click="onClicked($event)"
+  >
     <div class="flexrow flexrow-item sticky">
       <entity-thumbnail
         class="flexrow-item mr1"
@@ -23,20 +23,19 @@
       <div class="shot-name flexrow-item ml05">
         <div v-for="chunk in name.split(' / ')">
           <template v-if="chunk && chunk !== 'undefined'">
-          {{ chunk }}
+            {{ chunk }}
           </template>
         </div>
       </div>
     </div>
-    <div
-      class="standby-column flexrow-item"
-      v-if="!isShowInfosBreakdown"
-    >
+    <div class="standby-column flexrow-item" v-if="!isShowInfosBreakdown">
       <input
         type="checkbox"
         :checked="entity ? entity.is_casting_standby : false"
         :disabled="!isCurrentUserManager"
-        :style="[isCurrentUserManager ? {cursor: 'pointer'} : {cursor: 'auto'}]"
+        :style="[
+          isCurrentUserManager ? { cursor: 'pointer' } : { cursor: 'auto' }
+        ]"
         @input="event => onStandbyChanged(entity, event)"
       />
     </div>
@@ -48,8 +47,7 @@
         class="tooltip-text"
         v-html="compileMarkdown(entity.description)"
         v-if="readOnly"
-      >
-      </div>
+      ></div>
       <textarea
         class="tooltip-editor"
         ref="text"
@@ -59,7 +57,8 @@
       >
       </textarea>
     </div>
-    <div class="frames-column flexrow-item"
+    <div
+      class="frames-column flexrow-item"
       v-if="isFrames && !isShowInfosBreakdown && metadataDisplayHeaders.frames"
     >
       <input
@@ -77,36 +76,46 @@
     </div>
     <div
       class="frames-column flexrow-item"
-      v-if="isFrameIn && !isShowInfosBreakdown && metadataDisplayHeaders.frameIn"
+      v-if="
+        isFrameIn && !isShowInfosBreakdown && metadataDisplayHeaders.frameIn
+      "
     >
       <input
         class="input-editor"
         step="1"
         type="number"
         min="0"
-        :value="getMetadataFieldValue({field_name: 'frame_in'}, entity)"
-        @input="event => onMetadataFieldChanged(entity, {field_name: 'frame_in'}, event)"
+        :value="getMetadataFieldValue({ field_name: 'frame_in' }, entity)"
+        @input="
+          event =>
+            onMetadataFieldChanged(entity, { field_name: 'frame_in' }, event)
+        "
         v-if="isCurrentUserManager"
       />
       <span class="metadata-value selectable" v-else>
-        {{ getMetadataFieldValue({field_name: 'frame_in'}, entity) }}
+        {{ getMetadataFieldValue({ field_name: 'frame_in' }, entity) }}
       </span>
     </div>
     <div
       class="frames-column flexrow-item"
-      v-if="isFrameOut && !isShowInfosBreakdown && metadataDisplayHeaders.frameOut"
+      v-if="
+        isFrameOut && !isShowInfosBreakdown && metadataDisplayHeaders.frameOut
+      "
     >
       <input
         class="input-editor"
         step="1"
         type="number"
         min="0"
-        :value="getMetadataFieldValue({field_name: 'frame_out'}, entity)"
-        @input="event => onMetadataFieldChanged(entity, {field_name: 'frame_out'}, event)"
+        :value="getMetadataFieldValue({ field_name: 'frame_out' }, entity)"
+        @input="
+          event =>
+            onMetadataFieldChanged(entity, { field_name: 'frame_out' }, event)
+        "
         v-if="isCurrentUserManager"
       />
       <span class="metadata-value selectable" v-else>
-        {{ getMetadataFieldValue({field_name: 'frame_out'}, entity) }}
+        {{ getMetadataFieldValue({ field_name: 'frame_out' }, entity) }}
       </span>
     </div>
     <div
@@ -121,12 +130,18 @@
         @input="event => onMetadataFieldChanged(entity, descriptor, event)"
         @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
         :value="getMetadataFieldValue(descriptor, entity)"
-        v-if="descriptor.choices.length === 0 && (isCurrentUserManager
-        || isSupervisorInDepartments(descriptor.departments))"
+        v-if="
+          descriptor.choices.length === 0 &&
+          (isCurrentUserManager ||
+            isSupervisorInDepartments(descriptor.departments))
+        "
       />
       <div
         class="metadata-value selectable"
-        v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
+        v-else-if="
+          descriptor.choices.length > 0 &&
+          getDescriptorChecklistValues(descriptor).length > 0
+        "
       >
         <p
           v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
@@ -134,20 +149,40 @@
         >
           <input
             type="checkbox"
-            @change="event => onMetadataChecklistChanged(entity, descriptor, option.text, event)"
+            @change="
+              event =>
+                onMetadataChecklistChanged(
+                  entity,
+                  descriptor,
+                  option.text,
+                  event
+                )
+            "
             :id="`${entity.id}-${descriptor.id}-${i}-${option.text}-input`"
-            :checked="getMetadataChecklistValues(descriptor, entity)[option.text]"
-            :disabled="!(isCurrentUserManager
-              || isSupervisorInDepartments(descriptor.departments))"
-            :style="[isCurrentUserManager
-              || isSupervisorInDepartments(descriptor.departments) ?
-                {cursor: 'pointer'} : {cursor: 'auto'}]"
+            :checked="
+              getMetadataChecklistValues(descriptor, entity)[option.text]
+            "
+            :disabled="
+              !(
+                isCurrentUserManager ||
+                isSupervisorInDepartments(descriptor.departments)
+              )
+            "
+            :style="[
+              isCurrentUserManager ||
+              isSupervisorInDepartments(descriptor.departments)
+                ? { cursor: 'pointer' }
+                : { cursor: 'auto' }
+            ]"
           />
           <label
             :for="`${entity.id}-${descriptor.id}-${i}-${option.text}-input`"
-            :style="[isCurrentUserManager
-              || isSupervisorInDepartments(descriptor.departments) ?
-                {cursor: 'pointer'} : {cursor: 'auto'}]"
+            :style="[
+              isCurrentUserManager ||
+              isSupervisorInDepartments(descriptor.departments)
+                ? { cursor: 'pointer' }
+                : { cursor: 'auto' }
+            ]"
           >
             {{ option.text }}
           </label>
@@ -155,8 +190,10 @@
       </div>
       <span
         class="select"
-        v-else-if="isCurrentUserManager
-        || isSupervisorInDepartments(descriptor.departments)"
+        v-else-if="
+          isCurrentUserManager ||
+          isSupervisorInDepartments(descriptor.departments)
+        "
       >
         <select
           class="select-input"
@@ -167,7 +204,9 @@
             v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
             :key="`desc-value-${entity.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
             :value="option.value"
-            :selected="getMetadataFieldValue(descriptor, entity) === option.value"
+            :selected="
+              getMetadataFieldValue(descriptor, entity) === option.value
+            "
           >
             {{ option.label }}
           </option>
@@ -206,14 +245,11 @@
           />
         </div>
       </div>
-      <div
-        class="asset-type-line flexrow empty mt05 mb05"
-        v-else
-      >
+      <div class="asset-type-line flexrow empty mt05 mb05" v-else>
         {{ $t('breakdown.empty') }}
       </div>
     </div>
-</div>
+  </div>
 </template>
 
 <script>
@@ -227,10 +263,7 @@ import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 
 export default {
   name: 'shot-line',
-  mixins: [
-    entityListMixin,
-    descriptorMixin
-  ],
+  mixins: [entityListMixin, descriptorMixin],
   components: {
     AssetBlock,
     EntityThumbnail
@@ -293,51 +326,52 @@ export default {
       'isFrameIn',
       'isFrameOut',
       'isFrames',
-      'isShowInfosBreakdown',
+      'isShowInfosBreakdown'
     ]),
 
-    assetsByAssetTypesMap () {
+    assetsByAssetTypesMap() {
       const assetsByAssetTypes = {}
       this.assets.forEach(assetTypeAssets => {
-        assetsByAssetTypes[assetTypeAssets[0].asset_type_name] =
-          assetTypeAssets
+        assetsByAssetTypes[assetTypeAssets[0].asset_type_name] = assetTypeAssets
       })
       return assetsByAssetTypes
     }
   },
 
   methods: {
-    onClicked (event) {
+    onClicked(event) {
       this.$emit('click', this.entity.id, event)
     },
 
-    onEditLabelClicked (asset, label) {
+    onEditLabelClicked(asset, label) {
       this.$emit('edit-label', asset, label, this.entity.id)
     },
 
-    removeOneAsset (assetId, nbOccurences) {
+    removeOneAsset(assetId, nbOccurences) {
       this.$emit('remove-one', assetId, this.entity.id, nbOccurences)
     },
 
-    addOneAsset (assetId, nbOccurences) {
+    addOneAsset(assetId, nbOccurences) {
       this.$emit('add-one', assetId, this.entity.id, nbOccurences)
     },
 
-    onDescriptionChanged (entity, event) {
+    onDescriptionChanged(entity, event) {
       this.$emit('description-changed', entity, event.target.value)
     },
 
-    onStandbyChanged (entity, event) {
+    onStandbyChanged(entity, event) {
       this.$emit('standby-changed', entity, event.target.checked)
     },
 
-    compileMarkdown (input) {
+    compileMarkdown(input) {
       return renderMarkdown(input)
     },
 
-    nbAssetsForType (assetType) {
-      return this.assetsByAssetTypesMap[assetType]
-        .reduce((acc, a) => acc + a.nb_occurences, 0)
+    nbAssetsForType(assetType) {
+      return this.assetsByAssetTypesMap[assetType].reduce(
+        (acc, a) => acc + a.nb_occurences,
+        0
+      )
     }
   }
 }
@@ -490,8 +524,8 @@ export default {
 .frames-column {
   justify-content: right;
   .metadata-value {
-    padding-right: .5em;
-    padding-top: .5em;
+    padding-right: 0.5em;
+    padding-top: 0.5em;
   }
   input {
     text-align: right;
@@ -515,7 +549,7 @@ export default {
   max-width: 250px;
 
   .tooltip-editor {
-    font-size: .85em;
+    font-size: 0.85em;
   }
 }
 
@@ -632,7 +666,7 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-input[type=number] {
-  -moz-appearance:textfield; /* Firefox */
+input[type='number'] {
+  -moz-appearance: textfield; /* Firefox */
 }
 </style>

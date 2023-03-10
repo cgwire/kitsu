@@ -4,10 +4,7 @@ import shotsApi from '@/store/api/shots'
 import shotStore from '@/store/modules/shots'
 
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
-import {
-  buildEpisodeIndex,
-  indexSearch
-} from '@/lib/indexing'
+import { buildEpisodeIndex, indexSearch } from '@/lib/indexing'
 import {
   sortByName,
   sortEpisodeResult,
@@ -18,18 +15,9 @@ import {
   buildSelectionGrid,
   clearSelectionGrid
 } from '@/lib/selection'
-import {
-  applyFilters,
-  getFilters,
-  getKeyWords
-} from '@/lib/filtering'
-import {
-  getFilledColumns,
-  removeModelFromList
-} from '@/lib/models'
-import {
-  computeStats
-} from '@/lib/stats'
+import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
+import { getFilledColumns, removeModelFromList } from '@/lib/models'
+import { computeStats } from '@/lib/stats'
 import {
   ADD_EPISODE,
   ADD_EPISODE_SEARCH,
@@ -66,15 +54,18 @@ import {
 const EPISODE_STATUS = ['canceled', 'complete', 'running', 'standby']
 
 const helpers = {
-  buildResult (state, {
-    episodeSearch,
-    production,
-    sorting,
-    taskStatusMap,
-    taskTypeMap,
-    persons,
-    taskMap
-  }) {
+  buildResult(
+    state,
+    {
+      episodeSearch,
+      production,
+      sorting,
+      taskStatusMap,
+      taskTypeMap,
+      persons,
+      taskMap
+    }
+  ) {
     const taskTypes = Array.from(taskTypeMap.values())
     const taskStatuses = Array.from(taskStatusMap.values())
     const query = episodeSearch
@@ -90,12 +81,7 @@ const helpers = {
     })
     let result = indexSearch(cache.episodeIndex, keywords) || cache.episodes
     result = applyFilters(result, filters, taskMap)
-    result = sortEpisodeResult(
-      result,
-      sorting,
-      taskTypeMap,
-      taskMap
-    )
+    result = sortEpisodeResult(result, sorting, taskTypeMap, taskMap)
     cache.result = result
 
     const displayedEpisodes = result
@@ -111,13 +97,14 @@ const helpers = {
     })
   },
 
-  populateTask (production, task, episode, taskTypeMap, taskStatusMap) {
+  populateTask(production, task, episode, taskTypeMap, taskStatusMap) {
     task.name = getTaskTypePriorityOfProd(
       taskTypeMap.get(task.task_type_id),
       production
     ).toString()
-    task.task_status_short_name =
-      taskStatusMap.get(task.task_status_id).short_name
+    task.task_status_short_name = taskStatusMap.get(
+      task.task_status_id
+    ).short_name
 
     const episodeName = episode.name
     Object.assign(task, {
@@ -134,13 +121,15 @@ const helpers = {
     return task
   },
 
-  setListStats (state, episodes) {
+  setListStats(state, episodes) {
     let timeSpent = 0
     let estimation = 0
-    episodes.filter(e => !e.canceled).forEach(episode => {
-      timeSpent += episode.timeSpent
-      estimation += episode.estimation
-    })
+    episodes
+      .filter(e => !e.canceled)
+      .forEach(episode => {
+        timeSpent += episode.timeSpent
+        estimation += episode.estimation
+      })
     Object.assign(state, {
       displayedEpisodesCount: episodes.length,
       displayedEpisodesLength: episodes.filter(e => !e.canceled).length,
@@ -149,19 +138,17 @@ const helpers = {
     })
   },
 
-  sortValidationColumns (
+  sortValidationColumns(
     production,
     validationColumns,
     episodeFilledColumns,
     taskTypeMap
   ) {
     const columns = [...validationColumns]
-    return sortValidationColumns(
-      columns, taskTypeMap, production
-    )
+    return sortValidationColumns(columns, taskTypeMap, production)
   },
 
-  sortStatColumns (stats, taskTypeMap, production) {
+  sortStatColumns(stats, taskTypeMap, production) {
     const validationColumnsMap = {}
     if (stats.all) {
       Object.keys(stats.all).forEach(entryId => {
@@ -171,9 +158,7 @@ const helpers = {
       })
     }
     const validationColumns = Object.keys(validationColumnsMap)
-    return sortValidationColumns(
-      validationColumns, taskTypeMap, production
-    )
+    return sortValidationColumns(validationColumns, taskTypeMap, production)
   }
 }
 
@@ -241,31 +226,33 @@ const getters = {
   episodeSelectionGrid: state => state.episodeSelectionGrid,
 
   isSingleEpisode: state => state.displayedEpisodes.length < 2,
-  runningEpisodes: state => state.displayedEpisodes.filter(episode => {
-    return !episode.status || ['', 'running'].includes(episode.status)
-  }),
-  episodeOptions: state => state.episodes.map(
-    episode => { return { label: episode.name, value: episode.id } }
-  ),
+  runningEpisodes: state =>
+    state.displayedEpisodes.filter(episode => {
+      return !episode.status || ['', 'running'].includes(episode.status)
+    }),
+  episodeOptions: state =>
+    state.episodes.map(episode => {
+      return { label: episode.name, value: episode.id }
+    }),
   episodeOptionGroups: state => {
     const groups = []
-    const runnings = state.displayedEpisodes
-      .filter(e => e.status === 'running')
-    const standbys = state.displayedEpisodes
-      .filter(e => e.status === 'standby')
-    const completes = state.displayedEpisodes
-      .filter(e => e.status === 'complete')
-    const canceleds = state.displayedEpisodes
-      .filter(e => e.status === 'canceled')
+    const runnings = state.displayedEpisodes.filter(e => e.status === 'running')
+    const standbys = state.displayedEpisodes.filter(e => e.status === 'standby')
+    const completes = state.displayedEpisodes.filter(
+      e => e.status === 'complete'
+    )
+    const canceleds = state.displayedEpisodes.filter(
+      e => e.status === 'canceled'
+    )
 
     const tmpGroups = [runnings, standbys, completes, canceleds]
     tmpGroups.forEach(group => {
-      if (group.length > 0) {
+      if (group.length > 0) {
         groups.push({
           name: group[0].status,
-          episodeList: group.map(
-            episode => { return { label: episode.name, value: episode.id } }
-          )
+          episodeList: group.map(episode => {
+            return { label: episode.name, value: episode.id }
+          })
         })
       }
     })
@@ -274,18 +261,17 @@ const getters = {
 }
 
 const actions = {
-
-  setCurrentEpisode ({ commit, rootGetters }, episodeId) {
+  setCurrentEpisode({ commit, rootGetters }, episodeId) {
     commit(SET_CURRENT_EPISODE, episodeId)
     const productionId = rootGetters.currentProduction.id
     commit(RESET_PRODUCTION_PATH, { productionId, episodeId })
   },
 
-  setEpisodeListScrollPosition ({ commit }, scrollPosition) {
+  setEpisodeListScrollPosition({ commit }, scrollPosition) {
     commit(SET_EPISODE_LIST_SCROLL_POSITION, scrollPosition)
   },
 
-  changeEpisodeSort ({ commit, rootGetters }, sortInfo) {
+  changeEpisodeSort({ commit, rootGetters }, sortInfo) {
     const taskStatusMap = rootGetters.taskStatus
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
@@ -293,59 +279,62 @@ const actions = {
     const production = rootGetters.currentProduction
     const sorting = sortInfo ? [sortInfo] : []
     commit(CHANGE_EPISODE_SORT, {
-      taskStatusMap, taskTypeMap, taskMap, persons, production, sorting
+      taskStatusMap,
+      taskTypeMap,
+      taskMap,
+      persons,
+      production,
+      sorting
     })
   },
 
-  setEpisodeSearch ({ commit, rootGetters }, episodeSearch) {
+  setEpisodeSearch({ commit, rootGetters }, episodeSearch) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
     const production = rootGetters.currentProduction
     const persons = rootGetters.people
-    commit(
-      SET_EPISODE_SEARCH,
-      {
-        episodeSearch,
-        persons,
-        taskStatusMap,
-        taskMap,
-        taskTypeMap,
-        production
-      }
-    )
+    commit(SET_EPISODE_SEARCH, {
+      episodeSearch,
+      persons,
+      taskStatusMap,
+      taskMap,
+      taskTypeMap,
+      production
+    })
   },
 
-  saveEpisodeSearch ({ commit, rootGetters }, searchQuery) {
+  saveEpisodeSearch({ commit, rootGetters }, searchQuery) {
     const query = state.episodeSearchQueries.find(
-      (query) => query && query.name === searchQuery
+      query => query && query.name === searchQuery
     )
     const production = rootGetters.currentProduction
     if (!query) {
-      return peopleApi.createFilter(
-        'episode',
-        searchQuery,
-        searchQuery,
-        production.id,
-        'Episode'
-      ).then(query => {
-        commit(ADD_EPISODE_SEARCH, query)
-        return Promise.resolve(query)
-      })
+      return peopleApi
+        .createFilter(
+          'episode',
+          searchQuery,
+          searchQuery,
+          production.id,
+          'Episode'
+        )
+        .then(query => {
+          commit(ADD_EPISODE_SEARCH, query)
+          return Promise.resolve(query)
+        })
     } else {
       return Promise.resolve()
     }
   },
 
-  removeEpisodeSearch ({ commit, rootGetters }, searchQuery) {
-    return peopleApi.removeFilter(searchQuery)
-      .then(() => {
-        commit(REMOVE_EPISODE_SEARCH, searchQuery)
-        return Promise.resolve()
-      })
+  removeEpisodeSearch({ commit, rootGetters }, searchQuery) {
+    return peopleApi.removeFilter(searchQuery).then(() => {
+      commit(REMOVE_EPISODE_SEARCH, searchQuery)
+      return Promise.resolve()
+    })
   },
 
-  setEpisodeSelection ({ commit, rootGetters }, { episode, selected }) {
+  setEpisodeSelection({ commit, rootGetters }, { episode, selected }) {
     commit(SET_EPISODE_SELECTION, {
       episode,
       selected,
@@ -353,16 +342,18 @@ const actions = {
     })
   },
 
-  clearSelectedEpisodes ({ commit }) {
+  clearSelectedEpisodes({ commit }) {
     commit(CLEAR_SELECTED_EPISODES)
   },
 
-  initEpisodes ({ commit, dispatch, state, rootState, rootGetters }) {
+  initEpisodes({ commit, dispatch, state, rootState, rootGetters }) {
     const productionId = rootState.route.params.production_id
     const isTVShow = rootGetters.isTVShow
     dispatch('setLastProductionScreen', 'episodes')
-    if (state.episodes.length === 0 ||
-        state.episodes[0].production_id !== productionId) {
+    if (
+      state.episodes.length === 0 ||
+      state.episodes[0].production_id !== productionId
+    ) {
       if (isTVShow) {
         return dispatch('loadEpisodes')
           .then(() => {
@@ -377,8 +368,9 @@ const actions = {
     }
   },
 
-  loadEpisode ({ commit, state }, episodeId) {
-    return shotsApi.getEpisode(episodeId)
+  loadEpisode({ commit, state }, episodeId) {
+    return shotsApi
+      .getEpisode(episodeId)
       .then(episode => {
         if (state.episodeMap.get(episode.id)) {
           commit(UPDATE_EPISODE, episode)
@@ -389,18 +381,17 @@ const actions = {
       .catch(console.error)
   },
 
-  loadEpisodes ({ commit, state, rootGetters }) {
+  loadEpisodes({ commit, state, rootGetters }) {
     const currentProduction = rootGetters.currentProduction
     const routeEpisodeId = rootGetters.route.params.episode_id
     const userFilters = rootGetters.userFilters
-    return shotsApi.getEpisodes(currentProduction)
-      .then(episodes => {
-        commit(LOAD_EPISODES_END, { episodes, routeEpisodeId, userFilters })
-        return Promise.resolve(episodes)
-      })
+    return shotsApi.getEpisodes(currentProduction).then(episodes => {
+      commit(LOAD_EPISODES_END, { episodes, routeEpisodeId, userFilters })
+      return Promise.resolve(episodes)
+    })
   },
 
-  loadEpisodesWithTasks ({ commit, state, rootGetters }) {
+  loadEpisodesWithTasks({ commit, state, rootGetters }) {
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
     const routeEpisodeId = rootGetters.route.params.episode_id
@@ -408,65 +399,62 @@ const actions = {
     const taskMap = rootGetters.taskMap
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
-    return shotsApi.getEpisodesWithTasks(production)
-      .then(episodes => {
-        commit(SET_EPISODES_WITH_TASKS, {
-          episodes,
-          routeEpisodeId,
-          personMap,
-          production,
-          userFilters,
-          taskMap,
-          taskTypeMap,
-          taskStatusMap
-        })
-        return Promise.resolve(episodes)
+    return shotsApi.getEpisodesWithTasks(production).then(episodes => {
+      commit(SET_EPISODES_WITH_TASKS, {
+        episodes,
+        routeEpisodeId,
+        personMap,
+        production,
+        userFilters,
+        taskMap,
+        taskTypeMap,
+        taskStatusMap
       })
+      return Promise.resolve(episodes)
+    })
   },
 
-  clearEpisodes ({ commit }) {
+  clearEpisodes({ commit }) {
     commit(CLEAR_EPISODES)
   },
 
-  newEpisode ({ commit, dispatch, state, rootGetters }, episode) {
-    return shotsApi.newEpisode(episode)
-      .then(episode => {
-        commit(NEW_EPISODE_END, episode)
-        const taskTypeIds = rootGetters.productionSequenceTaskTypeIds
-        const createTaskPromises = taskTypeIds.map(
-          taskTypeId => dispatch('createTask', {
-            entityId: episode.id,
-            projectId: episode.project_id,
-            taskTypeId: taskTypeId,
-            type: 'episodes'
-          })
-        )
-        return Promise.all(createTaskPromises)
-          .then(() => Promise.resolve(episode))
-          .catch(console.error)
-      })
+  newEpisode({ commit, dispatch, state, rootGetters }, episode) {
+    return shotsApi.newEpisode(episode).then(episode => {
+      commit(NEW_EPISODE_END, episode)
+      const taskTypeIds = rootGetters.productionSequenceTaskTypeIds
+      const createTaskPromises = taskTypeIds.map(taskTypeId =>
+        dispatch('createTask', {
+          entityId: episode.id,
+          projectId: episode.project_id,
+          taskTypeId: taskTypeId,
+          type: 'episodes'
+        })
+      )
+      return Promise.all(createTaskPromises)
+        .then(() => Promise.resolve(episode))
+        .catch(console.error)
+    })
   },
 
-  editEpisode ({ commit, state }, data) {
-    return shotsApi.updateEpisode(data)
-      .then(episode => {
-        commit(EDIT_EPISODE_END, episode)
-        return Promise.resolve(episode)
-      })
+  editEpisode({ commit, state }, data) {
+    return shotsApi.updateEpisode(data).then(episode => {
+      commit(EDIT_EPISODE_END, episode)
+      return Promise.resolve(episode)
+    })
   },
 
-  deleteEpisode ({ commit, state }, episode) {
-    return shotsApi.deleteEpisode(episode)
-      .then(() => {
-        commit(REMOVE_EPISODE, episode)
-        return Promise.resolve(episode)
-      })
+  deleteEpisode({ commit, state }, episode) {
+    return shotsApi.deleteEpisode(episode).then(() => {
+      commit(REMOVE_EPISODE, episode)
+      return Promise.resolve(episode)
+    })
   },
 
-  loadEpisodeStats ({ commit, rootGetters }, productionId) {
+  loadEpisodeStats({ commit, rootGetters }, productionId) {
     const taskTypeMap = rootGetters.taskTypeMap
     commit(SET_EPISODE_STATS, { episodeStats: {}, taskTypeMap })
-    return shotsApi.getEpisodeStats(productionId)
+    return shotsApi
+      .getEpisodeStats(productionId)
       .then(episodeStats => {
         commit(SET_EPISODE_STATS, { episodeStats, taskTypeMap })
         return Promise.resolve(episodeStats)
@@ -474,7 +462,7 @@ const actions = {
       .catch(console.error)
   },
 
-  loadEpisodeRetakeStats ({ commit, rootGetters }, productionId) {
+  loadEpisodeRetakeStats({ commit, rootGetters }, productionId) {
     const taskTypeMap = rootGetters.taskTypeMap
     const production = rootGetters.currentProduction
     commit(SET_EPISODE_RETAKE_STATS, {
@@ -482,7 +470,8 @@ const actions = {
       production,
       taskTypeMap
     })
-    return shotsApi.getEpisodeRetakeStats(productionId)
+    return shotsApi
+      .getEpisodeRetakeStats(productionId)
       .then(episodeRetakeStats => {
         commit(SET_EPISODE_RETAKE_STATS, {
           episodeRetakeStats,
@@ -494,7 +483,7 @@ const actions = {
       .catch(console.error)
   },
 
-  computeEpisodeStats ({ commit, dispatch, rootGetters }) {
+  computeEpisodeStats({ commit, dispatch, rootGetters }) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskMap = rootGetters.taskMap
     const isTVShow = rootGetters.isTVShow
@@ -507,17 +496,17 @@ const actions = {
 }
 
 const mutations = {
-
-  [RESET_ALL] (state) {
+  [RESET_ALL](state) {
     Object.assign(state, { ...initialState })
     cache.episodes = []
     cache.result = []
     cache.episodeIndex = {}
   },
 
-  [CHANGE_EPISODE_SORT] (state, {
-    taskStatusMap, taskTypeMap, taskMap, production, sorting, persons
-  }) {
+  [CHANGE_EPISODE_SORT](
+    state,
+    { taskStatusMap, taskTypeMap, taskMap, production, sorting, persons }
+  ) {
     const episodeSearch = state.episodeSearchText
     state.episodeSorting = sorting
     helpers.buildResult(state, {
@@ -531,21 +520,21 @@ const mutations = {
     })
   },
 
-  [ADD_EPISODE_SEARCH] (state, searchQuery) {
+  [ADD_EPISODE_SEARCH](state, searchQuery) {
     state.episodeSearchQueries.push(searchQuery)
     state.episodeSearchQueries = sortByName(state.episodeSearchQueries)
   },
 
-  [REMOVE_EPISODE_SEARCH] (state, searchQuery) {
+  [REMOVE_EPISODE_SEARCH](state, searchQuery) {
     const queryIndex = state.episodeSearchQueries.findIndex(
-      (query) => query.name === searchQuery.name
+      query => query.name === searchQuery.name
     )
     if (queryIndex >= 0) {
       state.episodeSearchQueries.splice(queryIndex, 1)
     }
   },
 
-  [SET_EPISODE_SELECTION] (state, { episode, selected, displayedEpisodes }) {
+  [SET_EPISODE_SELECTION](state, { episode, selected, displayedEpisodes }) {
     if (!selected && state.selectedEpisodes.has(episode.id)) {
       state.selectedEpisodes.delete(episode.id)
       state.selectedEpisodes = new Map(state.selectedEpisodes) // for reactivity
@@ -560,11 +549,11 @@ const mutations = {
     }
   },
 
-  [CLEAR_SELECTED_EPISODES] (state) {
+  [CLEAR_SELECTED_EPISODES](state) {
     state.selectedEpisodes = new Map()
   },
 
-  [CLEAR_EPISODES] (state) {
+  [CLEAR_EPISODES](state) {
     state.episodes = []
     state.currentEpisode = null
     cache.episodes = []
@@ -572,7 +561,7 @@ const mutations = {
     cache.episodeIndex = {}
   },
 
-  [SET_CURRENT_EPISODE] (state, episodeId) {
+  [SET_CURRENT_EPISODE](state, episodeId) {
     if (episodeId) {
       if (episodeId === 'main') {
         state.currentEpisode = { id: 'main' }
@@ -584,7 +573,7 @@ const mutations = {
     }
   },
 
-  [SET_EPISODES_WITH_TASKS] (
+  [SET_EPISODES_WITH_TASKS](
     state,
     {
       production,
@@ -611,7 +600,11 @@ const mutations = {
       episode.full_name = episode.name
       episode.tasks.forEach(task => {
         helpers.populateTask(
-          production, task, episode, taskTypeMap, taskStatusMap
+          production,
+          task,
+          episode,
+          taskTypeMap,
+          taskStatusMap
         )
         timeSpent += task.duration
         estimation += task.estimation
@@ -650,7 +643,10 @@ const mutations = {
     const filledColumns = getFilledColumns(displayedEpisodes)
 
     state.episodeValidationColumns = helpers.sortValidationColumns(
-      production, Object.values(validationColumns), filledColumns, taskTypeMap
+      production,
+      Object.values(validationColumns),
+      filledColumns,
+      taskTypeMap
     )
 
     state.nbValidationColumns = state.episodeValidationColumns.length
@@ -677,7 +673,7 @@ const mutations = {
     }
   },
 
-  [ADD_EPISODE] (state, episode) {
+  [ADD_EPISODE](state, episode) {
     state.episodes.push(episode)
     const sortedEpisodes = sortByName(state.episodes)
     state.episodeMap.set(episode.id, episode)
@@ -688,30 +684,32 @@ const mutations = {
     state.displayedEpisodesLength = sortedEpisodes.length
   },
 
-  [UPDATE_EPISODE] (state, episode) {
+  [UPDATE_EPISODE](state, episode) {
     Object.assign(state.episodeMap.get(episode.id), episode)
     state.episodeIndex = buildEpisodeIndex(state.episodes)
   },
 
-  [REMOVE_EPISODE] (state, episode) {
+  [REMOVE_EPISODE](state, episode) {
     delete state.episodeMap.get(episode.id)
     state.episodes = removeModelFromList(state.episodes, episode)
-    state.displayedEpisodes =
-      removeModelFromList(state.displayedEpisodes, episode)
+    state.displayedEpisodes = removeModelFromList(
+      state.displayedEpisodes,
+      episode
+    )
     state.episodeIndex = buildEpisodeIndex(state.episodes)
   },
 
-  [SET_EPISODE_SEARCH] (state, payload) {
+  [SET_EPISODE_SEARCH](state, payload) {
     const sorting = state.episodeSorting
     payload.sorting = sorting
     helpers.buildResult(state, payload)
   },
 
-  [SET_EPISODE_LIST_SCROLL_POSITION] (state, scrollPosition) {
+  [SET_EPISODE_LIST_SCROLL_POSITION](state, scrollPosition) {
     state.episodeListScrollPosition = scrollPosition
   },
 
-  [NEW_EPISODE_END] (state, episode) {
+  [NEW_EPISODE_END](state, episode) {
     episode.production_id = episode.project_id
     episode.preview_file_id = ''
     episode.tasks = []
@@ -731,7 +729,7 @@ const mutations = {
     // cache.episodeIndex = buildNameIndex(cache.episodes)
   },
 
-  [EDIT_EPISODE_END] (state, newEpisode) {
+  [EDIT_EPISODE_END](state, newEpisode) {
     const episode = state.episodeMap.get(newEpisode.id)
     if (episode) {
       Object.assign(episode, newEpisode)
@@ -739,7 +737,7 @@ const mutations = {
     state.episodeIndex = buildEpisodeIndex(state.episodes)
   },
 
-  [LOAD_EPISODES_START] (state) {
+  [LOAD_EPISODES_START](state) {
     cache.episodes = []
     cache.result = []
     cache.episodeIndex = {}
@@ -758,12 +756,12 @@ const mutations = {
     state.selectedepisodes = new Map()
   },
 
-  [LOAD_EPISODES_ERROR] (state) {
+  [LOAD_EPISODES_ERROR](state) {
     state.isEpisodesLoading = false
     state.isEpisodesLoadingError = true
   },
 
-  [LOAD_EPISODES_END] (state, { production, userFilters }) {
+  [LOAD_EPISODES_END](state, { production, userFilters }) {
     if (
       production &&
       userFilters.episode &&
@@ -775,7 +773,7 @@ const mutations = {
     }
   },
 
-  [LOAD_EPISODES_END] (state, { episodes, routeEpisodeId }) {
+  [LOAD_EPISODES_END](state, { episodes, routeEpisodeId }) {
     const episodeMap = new Map()
     if (!episodes) episodes = []
     episodes.forEach(episode => {
@@ -801,9 +799,10 @@ const mutations = {
         state.currentEpisode = state.episodeMap.get(routeEpisodeId)
       }
       if (!state.currentEpisode) {
-        const runningEpisodes =
-          state.episodes.filter(e => e.status === 'running')
-        if (runningEpisodes.length > 0) {
+        const runningEpisodes = state.episodes.filter(
+          e => e.status === 'running'
+        )
+        if (runningEpisodes.length > 0) {
           state.currentEpisode = runningEpisodes[0]
         } else {
           state.currentEpisode = state.episodes[0]
@@ -814,21 +813,27 @@ const mutations = {
     }
   },
 
-  [SET_EPISODE_STATS] (state, { episodeStats, taskTypeMap, production }) {
-    state.episodeValidationColumns =
-      helpers.sortStatColumns(episodeStats, taskTypeMap, production)
+  [SET_EPISODE_STATS](state, { episodeStats, taskTypeMap, production }) {
+    state.episodeValidationColumns = helpers.sortStatColumns(
+      episodeStats,
+      taskTypeMap,
+      production
+    )
     state.episodeStats = episodeStats
   },
 
-  [SET_EPISODE_RETAKE_STATS] (
-    state, { episodeRetakeStats, taskTypeMap, production }
+  [SET_EPISODE_RETAKE_STATS](
+    state,
+    { episodeRetakeStats, taskTypeMap, production }
   ) {
-    state.episodeValidationColumns =
-      helpers.sortStatColumns(episodeRetakeStats, taskTypeMap)
+    state.episodeValidationColumns = helpers.sortStatColumns(
+      episodeRetakeStats,
+      taskTypeMap
+    )
     state.episodeRetakeStats = episodeRetakeStats
   },
 
-  [COMPUTE_EPISODE_STATS] (state, { taskMap, taskStatusMap }) {
+  [COMPUTE_EPISODE_STATS](state, { taskMap, taskStatusMap }) {
     state.episodeStats = computeStats(
       shotStore.cache.shots,
       'episode_id',
@@ -837,16 +842,17 @@ const mutations = {
     )
   },
 
-  [CREATE_TASKS_END] (
-    state,
-    { tasks, production, taskTypeMap, taskStatusMap }
-  ) {
+  [CREATE_TASKS_END](state, { tasks, production, taskTypeMap, taskStatusMap }) {
     tasks.forEach(task => {
       if (task) {
         const episode = state.episodeMap.get(task.entity_id)
         if (episode) {
           helpers.populateTask(
-            production, task, episode, taskTypeMap, taskStatusMap
+            production,
+            task,
+            episode,
+            taskTypeMap,
+            taskStatusMap
           )
           episode.validations.set(task.task_type_id, task.id)
           const validations = episode.validations
@@ -858,22 +864,26 @@ const mutations = {
     })
   },
 
-  [REMOVE_SELECTED_TASK] (state, validationInfo) {
-    if (state.episodeSelectionGrid[0] &&
-        state.episodeSelectionGrid[validationInfo.x]) {
+  [REMOVE_SELECTED_TASK](state, validationInfo) {
+    if (
+      state.episodeSelectionGrid[0] &&
+      state.episodeSelectionGrid[validationInfo.x]
+    ) {
       state.episodeSelectionGrid[validationInfo.x][validationInfo.y] = false
     }
   },
 
-  [ADD_SELECTED_TASK] (state, validationInfo) {
-    if (state.episodeSelectionGrid[0] &&
-        state.episodeSelectionGrid[validationInfo.x]) {
+  [ADD_SELECTED_TASK](state, validationInfo) {
+    if (
+      state.episodeSelectionGrid[0] &&
+      state.episodeSelectionGrid[validationInfo.x]
+    ) {
       state.episodeSelectionGrid[validationInfo.x][validationInfo.y] = true
       state.selectedEpisodes = new Map() // unselect all previously selected lines
     }
   },
 
-  [ADD_SELECTED_TASKS] (state, selection) {
+  [ADD_SELECTED_TASKS](state, selection) {
     let tmpGrid = JSON.parse(JSON.stringify(state.episodeSelectionGrid))
     selection.forEach(validationInfo => {
       if (!tmpGrid[validationInfo.x]) {
@@ -892,21 +902,21 @@ const mutations = {
     state.episodeSelectionGrid = tmpGrid
   },
 
-  [CLEAR_SELECTED_TASKS] (state, validationInfo) {
+  [CLEAR_SELECTED_TASKS](state, validationInfo) {
     const tmpGrid = JSON.parse(JSON.stringify(state.episodeSelectionGrid))
     state.episodeSelectionGrid = clearSelectionGrid(tmpGrid)
   },
 
-  [NEW_TASK_END] (state, {
-    task,
-    taskTypeMap,
-    taskStatusMap,
-    production
-  }) {
+  [NEW_TASK_END](state, { task, taskTypeMap, taskStatusMap, production }) {
     const episode = state.episodeMap.get(task.entity_id)
     if (episode && task) {
       task = helpers.populateTask(
-        production, task, episode, taskTypeMap, taskStatusMap)
+        production,
+        task,
+        episode,
+        taskTypeMap,
+        taskStatusMap
+      )
       // Add Column if it is missing
       if (!state.episodeValidationColumns.includes(task.task_type_id)) {
         state.episodeValidationColumns.push(task.task_type_id)
@@ -920,7 +930,7 @@ const mutations = {
     }
   },
 
-  [DELETE_TASK_END] (state, task) {
+  [DELETE_TASK_END](state, task) {
     const episode = state.episodeMap.get(task.entity_id)
     if (episode) {
       const validations = new Map(episode.validations)
@@ -928,7 +938,7 @@ const mutations = {
       delete episode.validations
       Vue.set(episode, 'validations', validations)
       const taskIndex = episode.tasks.findIndex(
-        (episodeTaskId) => episodeTaskId === task.id
+        episodeTaskId => episodeTaskId === task.id
       )
       episode.tasks.splice(taskIndex, 1)
     }

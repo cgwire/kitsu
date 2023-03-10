@@ -1,7 +1,7 @@
 export default {
-  install (Vue) {
+  install(Vue) {
     Vue.directive('columns-resizable', {
-      componentUpdated (el) {
+      componentUpdated(el) {
         if (!el.id) {
           console.error('Resizable headers must be in a thead with an id')
           return
@@ -12,8 +12,9 @@ export default {
         }
 
         const nameThs = Array.from(el.getElementsByClassName('name'))
-        const metaThs =
-          Array.from(el.getElementsByClassName('metadata-descriptor'))
+        const metaThs = Array.from(
+          el.getElementsByClassName('metadata-descriptor')
+        )
         const ths = nameThs.concat(metaThs)
 
         const setListeners = (item, div) => {
@@ -26,7 +27,7 @@ export default {
             document.addEventListener('mousemove', function (e) {
               if (curCol) {
                 const diffX = e.pageX - pageX
-                const newWidth = (curColWidth + diffX) + 'px'
+                const newWidth = curColWidth + diffX + 'px'
                 curCol.style.minWidth = newWidth
                 curCol.style.width = newWidth
                 localStorage.setItem(`${el.id}-${item.textContent}`, newWidth)

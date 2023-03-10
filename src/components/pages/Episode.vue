@@ -1,250 +1,239 @@
 <template>
-<div class="columns fixed-page episode xyz-in" xyz="fade">
-  <div class="column main-column">
-    <div class="page-header flexrow">
-      <router-link
-        class="flexrow-item has-text-centered back-link"
-        :to="getEpisodesRoute"
-      >
-        <corner-left-up-icon />
-      </router-link>
-      <span
-        class="flexrow-item ml2"
-      >
-        <entity-thumbnail
-          class="entity-thumbnail"
-          :entity="currentEpisode"
-          :empty-width="120"
-          :empty-height="50"
-          :width="120"
-          v-if="currentEpisode"
-        />
-      </span>
-      <div class="flexrow-item">
-        <page-title :text="title" class="entity-title" />
+  <div class="columns fixed-page episode xyz-in" xyz="fade">
+    <div class="column main-column">
+      <div class="page-header flexrow">
+        <router-link
+          class="flexrow-item has-text-centered back-link"
+          :to="getEpisodesRoute"
+        >
+          <corner-left-up-icon />
+        </router-link>
+        <span class="flexrow-item ml2">
+          <entity-thumbnail
+            class="entity-thumbnail"
+            :entity="currentEpisode"
+            :empty-width="120"
+            :empty-height="50"
+            :width="120"
+            v-if="currentEpisode"
+          />
+        </span>
+        <div class="flexrow-item">
+          <page-title :text="title" class="entity-title" />
+        </div>
       </div>
-    </div>
 
-    <div class="flexrow infos">
-      <div class="flexrow-item block flexcolumn">
-        <page-subtitle :text="$t('episodes.tasks')" />
-        <entity-task-list
-          class="task-list"
-          :entries="currentTasks.map(t => t.id)"
-          :is-loading="!currentEpisode"
-          :is-error="false"
-          @task-selected="onTaskSelected"
-        />
+      <div class="flexrow infos">
+        <div class="flexrow-item block flexcolumn">
+          <page-subtitle :text="$t('episodes.tasks')" />
+          <entity-task-list
+            class="task-list"
+            :entries="currentTasks.map(t => t.id)"
+            :is-loading="!currentEpisode"
+            :is-error="false"
+            @task-selected="onTaskSelected"
+          />
+        </div>
+        <div class="flexrow-item block flexcolumn">
+          <div class="flexrow">
+            <page-subtitle :text="$t('main.info')" />
+            <div class="filler"></div>
+            <div class="flexrow-item has-text-right">
+              <button-simple
+                icon="edit"
+                @click="modals.edit = true"
+                v-if="isCurrentUserManager"
+              />
+            </div>
+          </div>
+          <div class="table-body">
+            <table class="datatable no-header" v-if="currentEpisode">
+              <tbody class="datatable-body">
+                <tr class="datatable-row">
+                  <td class="field-label">
+                    {{ $t('shots.fields.description') }}
+                  </td>
+                  <description-cell :entry="currentEpisode" :full="true" />
+                </tr>
+
+                <tr
+                  :key="descriptor.id"
+                  class="datatable-row"
+                  v-for="descriptor in episodeMetadataDescriptors"
+                >
+                  <td class="field-label">{{ descriptor.name }}</td>
+                  <td>
+                    {{
+                      currentEpisode && currentEpisode.data
+                        ? currentEpisode.data[descriptor.field_name]
+                        : ''
+                    }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-      <div class="flexrow-item block flexcolumn">
+
+      <div class="episode-data block">
         <div class="flexrow">
-          <page-subtitle :text="$t('main.info')" />
+          <combobox-styled
+            class="section-combo flexrow-item"
+            :options="entityNavOptions"
+            v-model="currentSection"
+          />
+          <span v-show="currentSection === 'casting'">
+            {{ nbAssets }} {{ $tc('assets.number', nbAssets) }}
+          </span>
+          <span
+            class="tag tag-standby"
+            v-show="
+              currentSection === 'casting' && currentEpisode.is_casting_standby
+            "
+          >
+            {{ $t('breakdown.fields.standby') }}
+          </span>
           <div class="filler"></div>
-          <div class="flexrow-item has-text-right">
-            <button-simple
-              icon="edit"
-              @click="modals.edit = true"
-              v-if="isCurrentUserManager"
+          <span
+            class="flexrow-item mt05"
+            v-show="currentSection === 'schedule'"
+          >
+            {{ $t('schedule.zoom_level') }}:
+          </span>
+          <combobox-number
+            class="zoom-level flexrow-item"
+            :options="zoomOptions"
+            is-simple
+            v-model="zoomLevel"
+            v-show="currentSection === 'schedule'"
+          />
+        </div>
+
+        <div class="episode-casting" v-show="currentSection === 'casting'">
+          <div v-if="currentEpisode">
+            <div
+              v-if="
+                currentEpisode &&
+                currentEpisode.castingAssetsByType &&
+                currentEpisode.castingAssetsByType[0].length > 0
+              "
+            >
+              <div
+                class="type-assets"
+                :key="
+                  typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''
+                "
+                v-for="typeAssets in currentEpisode.castingAssetsByType"
+              >
+                <div class="asset-type">
+                  {{
+                    typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''
+                  }}
+                  ({{ typeAssets.length }})
+                </div>
+                <div class="asset-list">
+                  <router-link
+                    class="asset-link"
+                    :key="asset.id"
+                    :to="buildAssetRoute(asset)"
+                    v-for="asset in typeAssets"
+                  >
+                    <entity-thumbnail
+                      class="entity-thumbnail"
+                      :entity="asset"
+                      :square="true"
+                      :empty-width="103"
+                      :empty-height="103"
+                      :with-link="false"
+                      :no-cache="true"
+                    />
+                    <div>
+                      {{ asset.asset_name }}
+                      <span v-if="asset.nb_occurences > 1">
+                        ({{ asset.nb_occurences }})
+                      </span>
+                    </div>
+                    <div class="ready-for flexrow">
+                      <task-type-name
+                        class="flexrow-item"
+                        :task-type="taskTypeMap.get(asset.ready_for)"
+                        :current-production-id="currentProduction.id"
+                        :title="
+                          'Ready for: ' + taskTypeMap.get(asset.ready_for).name
+                        "
+                        v-if="asset.ready_for"
+                      />
+                    </div>
+                  </router-link>
+                </div>
+              </div>
+            </div>
+            <div class="mt1" v-else>
+              {{ $t('episodes.no_casting') }}
+            </div>
+          </div>
+          <table-info
+            :is-loading="casting.isLoading"
+            :is-error="casting.isError"
+            v-else
+          />
+        </div>
+
+        <div
+          class="schedule mt1"
+          v-if="scheduleItems[0].children.length > 0"
+          v-show="currentSection === 'schedule'"
+        >
+          <div class="wrapper">
+            <schedule
+              ref="schedule-widget"
+              :start-date="tasksStartDate"
+              :end-date="tasksEndDate"
+              :hierarchy="scheduleItems"
+              :zoom-level="zoomLevel"
+              :is-loading="false"
+              :is-estimation-linked="true"
+              :hide-root="true"
+              :with-milestones="false"
             />
           </div>
         </div>
-        <div class="table-body">
-          <table class="datatable no-header" v-if="currentEpisode">
-            <tbody class="datatable-body">
-              <tr
-                class="datatable-row"
-              >
-                <td class="field-label">{{ $t('shots.fields.description') }}</td>
-                <description-cell
-                  :entry="currentEpisode"
-                  :full="true"
-                />
-              </tr>
+        <div class="mt1" v-else v-show="currentSection === 'schedule'">
+          {{ $t('main.empty_schedule') }}
+        </div>
 
-              <tr
-                :key="descriptor.id"
-                class="datatable-row"
-                v-for="descriptor in episodeMetadataDescriptors"
-              >
-                <td class="field-label">{{ descriptor.name }}</td>
-                <td>
-                  {{ currentEpisode && currentEpisode.data
-                     ? currentEpisode.data[descriptor.field_name] : '' }}
-                </td>
-              </tr>
+        <entity-preview-files
+          :entity="currentEpisode"
+          v-if="currentSection === 'preview-files'"
+        />
 
-            </tbody>
-        </table>
-      </div>
+        <entity-news
+          :entity="currentEpisode"
+          v-if="currentSection === 'activity'"
+        />
+
+        <entity-time-logs
+          :entity="currentEpisode"
+          v-if="currentSection === 'time-logs'"
+        />
       </div>
     </div>
 
-    <div class="episode-data block">
-      <div class="flexrow">
-        <combobox-styled
-          class="section-combo flexrow-item"
-          :options="entityNavOptions"
-          v-model="currentSection"
-        />
-        <span
-          v-show="currentSection === 'casting'"
-        >
-          {{ nbAssets }} {{ $tc('assets.number', nbAssets) }}
-        </span>
-        <span
-          class="tag tag-standby"
-          v-show="currentSection === 'casting' && currentEpisode.is_casting_standby"
-        >
-          {{ $t('breakdown.fields.standby') }}
-        </span>
-        <div class="filler"></div>
-        <span
-          class="flexrow-item mt05"
-          v-show="currentSection === 'schedule'"
-        >
-          {{ $t('schedule.zoom_level') }}:
-        </span>
-        <combobox-number
-          class="zoom-level flexrow-item "
-          :options="zoomOptions"
-          is-simple
-          v-model="zoomLevel"
-          v-show="currentSection === 'schedule'"
-        />
-      </div>
-
-      <div
-        class="episode-casting"
-        v-show="currentSection === 'casting'"
-      >
-        <div
-          v-if="currentEpisode"
-        >
-          <div
-            v-if="currentEpisode &&
-                  currentEpisode.castingAssetsByType &&
-                  currentEpisode.castingAssetsByType[0].length > 0"
-          >
-            <div
-              class="type-assets"
-              :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
-              v-for="typeAssets in currentEpisode.castingAssetsByType"
-            >
-              <div class="asset-type">
-                {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
-                ({{ typeAssets.length }})
-              </div>
-              <div class="asset-list">
-                <router-link
-                  class="asset-link"
-                  :key="asset.id"
-                  :to="buildAssetRoute(asset)"
-                  v-for="asset in typeAssets"
-                >
-                  <entity-thumbnail
-                    class="entity-thumbnail"
-                    :entity="asset"
-                    :square="true"
-                    :empty-width="103"
-                    :empty-height="103"
-                    :with-link="false"
-                    :no-cache="true"
-                  />
-                  <div>
-                    {{ asset.asset_name }}
-                    <span v-if="asset.nb_occurences > 1">
-                      ({{ asset.nb_occurences }})
-                    </span>
-                  </div>
-                  <div
-                    class="ready-for flexrow"
-                  >
-                    <task-type-name
-                      class="flexrow-item"
-                      :task-type="taskTypeMap.get(asset.ready_for)"
-                      :current-production-id="currentProduction.id"
-                      :title="'Ready for: ' + taskTypeMap.get(asset.ready_for).name"
-                      v-if="asset.ready_for"
-                    />
-                  </div>
-                </router-link>
-              </div>
-            </div>
-          </div>
-          <div class="mt1" v-else>
-            {{ $t('episodes.no_casting') }}
-          </div>
-        </div>
-        <table-info
-          :is-loading="casting.isLoading"
-          :is-error="casting.isError"
-          v-else
-        />
-      </div>
-
-      <div
-        class="schedule mt1"
-        v-if="scheduleItems[0].children.length > 0"
-        v-show="currentSection === 'schedule'"
-       >
-        <div class="wrapper">
-          <schedule
-            ref="schedule-widget"
-            :start-date="tasksStartDate"
-            :end-date="tasksEndDate"
-            :hierarchy="scheduleItems"
-            :zoom-level="zoomLevel"
-            :is-loading="false"
-            :is-estimation-linked="true"
-            :hide-root="true"
-            :with-milestones="false"
-          />
-        </div>
-      </div>
-      <div
-        class="mt1"
-        v-else
-        v-show="currentSection === 'schedule'"
-      >
-        {{ $t('main.empty_schedule') }}
-      </div>
-
-      <entity-preview-files
-        :entity="currentEpisode"
-        v-if="currentSection === 'preview-files'"
-      />
-
-      <entity-news
-        :entity="currentEpisode"
-        v-if="currentSection === 'activity'"
-      />
-
-      <entity-time-logs
-        :entity="currentEpisode"
-        v-if="currentSection === 'time-logs'"
-      />
+    <div class="column side-column" v-if="currentTask">
+      <task-info :task="currentTask" />
     </div>
-  </div>
 
-  <div
-    class="column side-column"
-    v-if="currentTask"
-  >
-    <task-info
-      :task="currentTask"
+    <edit-episode-modal
+      ref="edit-episode-modal"
+      :active="modals.edit"
+      :is-loading="loading.edit"
+      :is-error="errors.edit"
+      :episode-to-edit="currentEpisode"
+      @cancel="modals.edit = false"
+      @confirm="confirmEditEpisode"
     />
   </div>
-
-  <edit-episode-modal
-    ref="edit-episode-modal"
-    :active="modals.edit"
-    :is-loading="loading.edit"
-    :is-error="errors.edit"
-    :episode-to-edit="currentEpisode"
-    @cancel="modals.edit = false"
-    @confirm="confirmEditEpisode"
-  />
-</div>
 </template>
 
 <script>
@@ -295,7 +284,7 @@ export default {
     TaskTypeName
   },
 
-  data () {
+  data() {
     return {
       type: 'episode',
       currentEpisode: null,
@@ -317,7 +306,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.clearSelectedTasks()
     this.loadCurrentEpisode()
       .then(episode => {
@@ -355,7 +344,7 @@ export default {
       'taskTypeMap'
     ]),
 
-    title () {
+    title() {
       if (this.currentEpisode) {
         return `${this.currentEpisode.name}`
       } else {
@@ -363,11 +352,11 @@ export default {
       }
     },
 
-    currentEntity () {
+    currentEntity() {
       return this.currentEpisode
     },
 
-    getEpisodesRoute () {
+    getEpisodesRoute() {
       const route = {
         name: 'episodes',
         params: {
@@ -382,7 +371,7 @@ export default {
       return route
     },
 
-    nbAssets () {
+    nbAssets() {
       let nbAssets = 0
       if (
         this.currentEpisode &&
@@ -406,23 +395,22 @@ export default {
       'loadEpisodeCasting'
     ]),
 
-    loadCurrentEpisode () {
+    loadCurrentEpisode() {
       return new Promise((resolve, reject) => {
         const episodeId = this.route.params.episode_id
         const episode = this.episodeMap.get(episodeId) || null
         if (!episode || !episode.validations) {
-          return this.loadEpisodesWithTasks()
-            .then(() => {
-              const episode = this.episodeMap.get(episodeId) || null
-              return resolve(episode)
-            })
+          return this.loadEpisodesWithTasks().then(() => {
+            const episode = this.episodeMap.get(episodeId) || null
+            return resolve(episode)
+          })
         } else {
           return resolve(episode)
         }
       })
     },
 
-    confirmEditEpisode (form) {
+    confirmEditEpisode(form) {
       form.id = this.currentEpisode.id
       this.loading.edit = true
       this.errors.edit = false
@@ -431,14 +419,14 @@ export default {
           this.loading.edit = false
           this.modals.edit = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.edit = false
           this.errors.edit = true
         })
     },
 
-    buildAssetRoute (asset) {
+    buildAssetRoute(asset) {
       let episodeId = asset.episode_id
       if (!episodeId) episodeId = 'main'
       const route = {
@@ -451,7 +439,7 @@ export default {
       return episodifyRoute(route, episodeId)
     },
 
-    resetData () {
+    resetData() {
       this.casting.isLoading = true
 
       // Next tick is needed to wait for the episode change.
@@ -473,10 +461,9 @@ export default {
     }
   },
 
-  watch: {
-  },
+  watch: {},
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: `${this.title} - Kitsu`
     }

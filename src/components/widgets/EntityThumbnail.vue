@@ -1,42 +1,42 @@
 <template>
-<a
-  class="thumbnail-wrapper thumbnail-picture"
-  target="_blank"
-  :style="{
-    width: emptyWidth + 'px',
-    'min-width': emptyWidth + 'px',
-    height: emptyHeight + 'px',
-  }"
-  @click="onClicked"
-  v-if="isPreview && withLink"
->
+  <a
+    class="thumbnail-wrapper thumbnail-picture"
+    target="_blank"
+    :style="{
+      width: emptyWidth + 'px',
+      'min-width': emptyWidth + 'px',
+      height: emptyHeight + 'px'
+    }"
+    @click="onClicked"
+    v-if="isPreview && withLink"
+  >
+    <img
+      class="thumbnail-picture"
+      :style="imgStyle"
+      :width="width || ''"
+      v-lazy="thumbnailPath"
+      :key="thumbnailKey"
+    />
+  </a>
+
   <img
+    v-else-if="isPreview && !withLink"
+    :key="thumbnailKey"
     class="thumbnail-picture"
     :style="imgStyle"
-    :width="width || ''"
     v-lazy="thumbnailPath"
-    :key="thumbnailKey"
   />
-</a>
 
-<img
-  v-else-if="isPreview && !withLink"
-  :key="thumbnailKey"
-  class="thumbnail-picture"
-  :style="imgStyle"
-  v-lazy="thumbnailPath"
-/>
-
-<span
-  :class="{
-    'thumbnail-picture': true,
-    'thumbnail-empty': true,
-    square: square
-  }"
-  :style="imgStyle"
-v-else
->
-</span>
+  <span
+    :class="{
+      'thumbnail-picture': true,
+      'thumbnail-empty': true,
+      square: square
+    }"
+    :style="imgStyle"
+    v-else
+  >
+  </span>
 </template>
 
 <script>
@@ -91,17 +91,17 @@ export default {
   },
 
   computed: {
-    originalPath () {
+    originalPath() {
       const previewFileId = this.previewFileId || this.entity.preview_file_id
       return '/api/pictures/originals/preview-files/' + previewFileId + '.png'
     },
 
-    isPreview () {
+    isPreview() {
       const previewFileId = this.previewFileId || this.entity.preview_file_id
       return previewFileId && previewFileId.length > 0
     },
 
-    imgStyle () {
+    imgStyle() {
       const style = {}
       if (this.emptyWidth) {
         style['max-width'] = this.emptyWidth + 'px'
@@ -123,26 +123,30 @@ export default {
       return style
     },
 
-    thumbnailPath () {
+    thumbnailPath() {
       const previewFileId = this.previewFileId || this.entity.preview_file_id
 
       if (this.square) {
-        return '/api/pictures/thumbnails-square/preview-files/' +
-               previewFileId + '.png'
+        return (
+          '/api/pictures/thumbnails-square/preview-files/' +
+          previewFileId +
+          '.png'
+        )
       } else {
-        return '/api/pictures/thumbnails/preview-files/' +
-               previewFileId + '.png'
+        return (
+          '/api/pictures/thumbnails/preview-files/' + previewFileId + '.png'
+        )
       }
     },
 
-    thumbnailKey () {
+    thumbnailKey() {
       const previewFileId = this.previewFileId || this.entity.preview_file_id
       return `thumbnail-${previewFileId}`
     }
   },
 
   methods: {
-    onClicked () {
+    onClicked() {
       if (this.noPreview) return
       const previewFileId = this.previewFileId || this.entity.preview_file_id
       this.$store.commit('SHOW_PREVIEW_FILE', previewFileId)

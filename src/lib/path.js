@@ -100,14 +100,26 @@ const getProductionRoute = (name, productionId) => {
   }
 }
 
-export const getProductionPath = (production, section = 'assets', episodeId) => {
+export const getProductionPath = (
+  production,
+  section = 'assets',
+  episodeId
+) => {
   if (section === 'assetTypes') section = 'production-asset-types'
   if (section === 'newsFeed') section = 'news-feed'
   let route = getProductionRoute(section, production.id)
-  if (production.production_type === 'tvshow' && ![
-    'news-feed', 'schedule', 'production-settings', 'quota', 'team',
-    'episodes', 'episode-stats'
-  ].includes(section)) {
+  if (
+    production.production_type === 'tvshow' &&
+    ![
+      'news-feed',
+      'schedule',
+      'production-settings',
+      'quota',
+      'team',
+      'episodes',
+      'episode-stats'
+    ].includes(section)
+  ) {
     route = episodifyRoute(route, episodeId || 'all')
   }
 
@@ -159,11 +171,11 @@ export const getTaskTypeSchedulePath = (
   return route
 }
 
-export const getProductionSchedulePath = (productionId) => {
+export const getProductionSchedulePath = productionId => {
   return getProductionRoute('schedule', productionId)
 }
 
-export const getPersonPath = (personId) => {
+export const getPersonPath = personId => {
   return {
     name: 'person',
     params: {

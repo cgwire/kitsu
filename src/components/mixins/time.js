@@ -6,28 +6,24 @@ import moment from 'moment-timezone'
 import { formatFullDateWithTimezone } from '@/lib/time'
 
 export const timeMixin = {
+  created() {},
 
-  created () {
-  },
+  mounted() {},
 
-  mounted () {
-  },
-
-  beforeDestroy () {
-  },
+  beforeDestroy() {},
 
   computed: {
-    timezone () {
+    timezone() {
       return this.user.timezone || moment.tz.guess()
     },
 
-    today () {
+    today() {
       return moment().toDate()
     }
   },
 
   methods: {
-    formatDate (eventDate) {
+    formatDate(eventDate) {
       return formatFullDateWithTimezone(eventDate, this.timezone)
     }
   }

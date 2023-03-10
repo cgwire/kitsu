@@ -1,26 +1,16 @@
 <template>
   <div class="comment-menu hidden" ref="main">
-    <div
-      @click="onPinClicked"
-      v-show="!isEmpty"
-    >
+    <div @click="onPinClicked" v-show="!isEmpty">
       <span v-if="isPinned">
         {{ $t('comments.unpin') }}
       </span>
       <span v-else>{{ $t('comments.pin') }}</span>
     </div>
-    <div
-      @click="$emit('edit-clicked')"
-      v-if="isEditable"
-    >
-      {{ $t('main.edit')}}
+    <div @click="$emit('edit-clicked')" v-if="isEditable">
+      {{ $t('main.edit') }}
     </div>
-    <div
-      class="error"
-      @click="$emit('delete-clicked')"
-      v-if="isEditable"
-    >
-      {{ $t('main.delete')}}
+    <div class="error" @click="$emit('delete-clicked')" v-if="isEditable">
+      {{ $t('main.delete') }}
     </div>
   </div>
 </template>
@@ -50,21 +40,18 @@ export default {
     }
   },
 
-  data () {
-    return {
-    }
+  data() {
+    return {}
   },
 
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    toggle () {
+    toggle() {
       const mainEl = this.$refs.main
       if (mainEl.className === 'comment-menu') {
         mainEl.className = 'comment-menu hidden'
@@ -73,7 +60,7 @@ export default {
       }
     },
 
-    onPinClicked () {
+    onPinClicked() {
       this.$emit('pin-clicked')
       this.toggle()
     }
@@ -103,7 +90,7 @@ export default {
   cursor: pointer;
 
   &:hover {
-    background-color: var(--background-alt)
+    background-color: var(--background-alt);
   }
 }
 

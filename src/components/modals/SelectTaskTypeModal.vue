@@ -1,51 +1,52 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
-    <div class="box">
-      <h1 class="title">
-        {{ $t('playlists.select_task_type') }}
-      </h1>
+    <div class="modal-content">
+      <div class="box">
+        <h1 class="title">
+          {{ $t('playlists.select_task_type') }}
+        </h1>
 
-      <form v-on:submit.prevent>
-        <combobox-task-type
-          :task-type-list="taskTypeList"
-          :value="taskTypeId"
-          @input="onTaskTypeChanged"
-        />
-      </form>
+        <form v-on:submit.prevent>
+          <combobox-task-type
+            :task-type-list="taskTypeList"
+            :value="taskTypeId"
+            @input="onTaskTypeChanged"
+          />
+        </form>
 
-      <p>
-        {{ $t('playlists.apply_task_type_change') }}
-      </p>
+        <p>
+          {{ $t('playlists.apply_task_type_change') }}
+        </p>
 
-      <p class="has-text-right mt2">
-        <a
-          :class="{
-            button: true,
-            'is-primary': true,
-            'is-loading': isLoading
-          }"
-          @click="runConfirmation">
-          {{ $t("main.confirmation") }}
-        </a>
-        <button
-          @click="$emit('cancel')"
-          class="button is-link">
-          {{ $t("main.cancel") }}
-        </button>
-      </p>
+        <p class="has-text-right mt2">
+          <a
+            :class="{
+              button: true,
+              'is-primary': true,
+              'is-loading': isLoading
+            }"
+            @click="runConfirmation"
+          >
+            {{ $t('main.confirmation') }}
+          </a>
+          <button @click="$emit('cancel')" class="button is-link">
+            {{ $t('main.cancel') }}
+          </button>
+        </p>
 
-      <p class="error has-text-right info-message" v-if="isError">
-        {{ $t("playlist.change_task_type_fails") }}
-      </p>
+        <p class="error has-text-right info-message" v-if="isError">
+          {{ $t('playlist.change_task_type_fails') }}
+        </p>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -79,24 +80,24 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       taskTypeId: ''
     }
   },
 
   methods: {
-    onTaskTypeChanged (taskTypeId) {
+    onTaskTypeChanged(taskTypeId) {
       this.taskTypeId = taskTypeId
     },
 
-    runConfirmation () {
+    runConfirmation() {
       this.$emit('confirm', this.taskTypeId)
     }
   },
 
   watch: {
-    active () {
+    active() {
       this.taskTypeId = this.taskTypeList[0].id
     }
   }

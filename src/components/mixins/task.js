@@ -4,30 +4,26 @@ import drafts from '@/lib/drafts'
  * Helpers to display task information
  */
 export const taskMixin = {
+  created() {},
 
-  created () {
-  },
+  mounted() {},
 
-  mounted () {
-  },
-
-  computed: {
-  },
+  computed: {},
 
   methods: {
-    getTask () {
+    getTask() {
       return this.currentTask || this.task
     },
 
-    getComments () {
+    getComments() {
       return this.currentTaskComments || this.taskComments
     },
 
-    resetComments () {
+    resetComments() {
       this.taskComments = this.getTaskComments(this.task.id)
     },
 
-    resetModals () {
+    resetModals() {
       if (this.$refs['add-preview-modal']) {
         this.$refs['add-preview-modal'].reset()
       }
@@ -36,7 +32,7 @@ export const taskMixin = {
       }
     },
 
-    resetDraft () {
+    resetDraft() {
       const task = this.getTask()
       if (task && this.$refs['add-comment']) {
         const draft = drafts.getTaskDraft(task.id)
@@ -48,28 +44,32 @@ export const taskMixin = {
       }
     },
 
-    confirmEditTaskComment (comment) {
+    confirmEditTaskComment(comment) {
       this.loading.editComment = true
       this.errors.editComment = false
       const attachmentFilesToDelete = comment.attachmentFilesToDelete || []
       const newAttachmentFiles = comment.newAttachmentFiles || []
       delete comment.attachmentFilesToDelete
       delete comment.newAttachmentFiles
-      Promise
-        .all(attachmentFilesToDelete
+      Promise.all(
+        attachmentFilesToDelete
           .map(attachment => {
             return { attachment, comment: this.commentToEdit }
           })
           .map(this.deleteAttachment)
+      )
+        .then(comment =>
+          this.addAttachmentToComment({
+            comment: this.commentToEdit,
+            files: newAttachmentFiles
+          })
         )
-        .then(comment => this.addAttachmentToComment({
-          comment: this.commentToEdit,
-          files: newAttachmentFiles
-        }))
-        .then(() => this.editTaskComment({
-          taskId: this.getTask().id,
-          comment
-        }))
+        .then(() =>
+          this.editTaskComment({
+            taskId: this.getTask().id,
+            comment
+          })
+        )
         .then(() => {
           this.$nextTick(() => {
             this.resetComments()
@@ -86,7 +86,6 @@ export const taskMixin = {
   },
 
   socket: {
-    events: {
-    }
+    events: {}
   }
 }

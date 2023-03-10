@@ -1,43 +1,47 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
-    <div class="box content">
-      <h1 class="title" v-if="!isEdit">
-        {{ $t('schedule.milestone.add_milestone') }}: {{ milestoneToEdit.date.format('YYYY-MM-DD') }}
-      </h1>
-      <h1 class="title" v-else>
-        {{ $t('schedule.milestone.edit_milestone') }}: {{ milestoneToEdit.date.format('YYYY-MM-DD') }}
-      </h1>
-      <text-field
-        ref="nameField"
-        :label="$t('schedule.milestone.name')"
-        v-model="form.name"
-        @enter="confirm"
-        v-focus
-      />
-      <button-simple
-        class="button is-link error"
-        text="Delete milestone"
-        @click="$emit('remove-milestone', milestoneToEdit)"
-        v-if="isEdit"
-      />
+    <div class="modal-content">
+      <div class="box content">
+        <h1 class="title" v-if="!isEdit">
+          {{ $t('schedule.milestone.add_milestone') }}:
+          {{ milestoneToEdit.date.format('YYYY-MM-DD') }}
+        </h1>
+        <h1 class="title" v-else>
+          {{ $t('schedule.milestone.edit_milestone') }}:
+          {{ milestoneToEdit.date.format('YYYY-MM-DD') }}
+        </h1>
+        <text-field
+          ref="nameField"
+          :label="$t('schedule.milestone.name')"
+          v-model="form.name"
+          @enter="confirm"
+          v-focus
+        />
+        <button-simple
+          class="button is-link error"
+          text="Delete milestone"
+          @click="$emit('remove-milestone', milestoneToEdit)"
+          v-if="isEdit"
+        />
 
-      <modal-footer
-        :error-text="$t('schedule.milestone.error')"
-        :is-error="isError"
-        :is-loading="isLoading"
-        :is-disabled="!isFormFilled"
-        @confirm="confirm"
-        @cancel="$emit('cancel')"
-      />
+        <modal-footer
+          :error-text="$t('schedule.milestone.error')"
+          :is-error="isError"
+          :is-loading="isLoading"
+          :is-disabled="!isFormFilled"
+          @confirm="confirm"
+          @cancel="$emit('cancel')"
+        />
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -80,7 +84,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       form: {
         name: ''
@@ -88,32 +92,30 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.reset()
   },
 
   computed: {
-    ...mapGetters([
-    ]),
+    ...mapGetters([]),
 
-    isEdit () {
+    isEdit() {
       return this.milestoneToEdit.id !== undefined
     },
 
-    isFormFilled () {
+    isFormFilled() {
       return this.form.name.length > 0
     }
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    confirm () {
+    confirm() {
       return this.$emit('confirm', this.form)
     },
 
-    reset () {
+    reset() {
       this.form = {
         id: this.milestoneToEdit.id || undefined,
         name: `${this.milestoneToEdit.name || ''}`,
@@ -123,15 +125,16 @@ export default {
   },
 
   watch: {
-    active () {
+    active() {
       if (this.active) {
         this.reset()
-        this.$nextTick(() => { this.$refs.nameField.focus() })
+        this.$nextTick(() => {
+          this.$refs.nameField.focus()
+        })
       }
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

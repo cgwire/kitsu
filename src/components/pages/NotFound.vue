@@ -1,6 +1,6 @@
 <template>
   <div class="not-found page has-text-centered">
-    <img class="illustration" src="@/assets/illustrations/404.png">
+    <img class="illustration" src="@/assets/illustrations/404.png" />
     <h1 class="title">{{ $t('not_found.title') }}</h1>
     <p>
       {{ $t('not_found.text') }}
@@ -17,12 +17,10 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'not-found',
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   }
 }
 </script>

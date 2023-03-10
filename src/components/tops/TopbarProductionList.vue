@@ -1,66 +1,52 @@
 <template>
-<div
-  :class="{
-    'topbar-menuitem': true,
-    'topbar-menuitem-open': showProductionList
-  }"
->
   <div
-    class="production-menu"
+    :class="{
+      'topbar-menuitem': true,
+      'topbar-menuitem-open': showProductionList
+    }"
   >
-    <div
-      class="flexrow root-menu"
-      @click="toggleProductionList"
-    >
-      <div
-        class="selected-production-line flexrow-item unselectable"
-      >
-        <production-name
-          :production="currentProduction"
-          :no-link="true"
-          :size="25"
-          v-if="currentProduction"
-        />
+    <div class="production-menu">
+      <div class="flexrow root-menu" @click="toggleProductionList">
+        <div class="selected-production-line flexrow-item unselectable">
+          <production-name
+            :production="currentProduction"
+            :no-link="true"
+            :size="25"
+            v-if="currentProduction"
+          />
+        </div>
+        <chevron-down-icon class="down-icon flexrow-item" />
       </div>
-      <chevron-down-icon class="down-icon flexrow-item"/>
-    </div>
-    <div
-      class="select-input"
-      ref="select"
-      v-show="showProductionList"
-    >
-      <div
-        :ref="'prod-' + production.id"
-        :id="'prod-' + production.id"
-        :class="{
-          'production-line': true,
-          'selected': production.id === currentProduction.id
-        }"
-        v-for="production in productionList"
-        @click="selectProduction(production)"
-        :key="production.id"
-      >
-        <router-link
-          :to="getProductionPath(production)"
+      <div class="select-input" ref="select" v-show="showProductionList">
+        <div
+          :ref="'prod-' + production.id"
+          :id="'prod-' + production.id"
+          :class="{
+            'production-line': true,
+            selected: production.id === currentProduction.id
+          }"
+          v-for="production in productionList"
+          @click="selectProduction(production)"
+          :key="production.id"
         >
-          <span class="name-wrapper">
-            <production-name
-              class="link"
-              :size="25"
-              :no-link="true"
-              :production="production"
-            />
-          </span>
-        </router-link>
+          <router-link :to="getProductionPath(production)">
+            <span class="name-wrapper">
+              <production-name
+                class="link"
+                :size="25"
+                :no-link="true"
+                :production="production"
+              />
+            </span>
+          </router-link>
+        </div>
       </div>
     </div>
+    <combobox-mask
+      :displayed="showProductionList"
+      @click="toggleProductionList"
+    />
   </div>
-  <combobox-mask
-    :displayed="showProductionList"
-    @click="toggleProductionList"
-  />
-</div>
-
 </template>
 
 <script>
@@ -81,7 +67,7 @@ export default {
     ProductionName
   },
 
-  data () {
+  data() {
     return {
       lastScrollPosition: 0,
       showProductionList: false
@@ -103,23 +89,19 @@ export default {
     }
   },
 
-  mounted () {
-  },
+  mounted() {},
 
   computed: {
-    ...mapGetters([
-      'currentProduction',
-      'openProductions'
-    ])
+    ...mapGetters(['currentProduction', 'openProductions'])
   },
 
   methods: {
-    selectProduction (production) {
+    selectProduction(production) {
       this.value = production.id
       this.showProductionList = false
     },
 
-    toggleProductionList () {
+    toggleProductionList() {
       if (this.showProductionList) {
         this.lastScrollPosition = this.$refs.select.scrollTop
       }
@@ -131,7 +113,7 @@ export default {
       })
     },
 
-    getProductionPath (production) {
+    getProductionPath(production) {
       return getProductionPath(
         production,
         this.section,
@@ -206,7 +188,7 @@ export default {
 
   &:hover {
     .name-wrapper {
-      background: #EEE;
+      background: #eee;
     }
   }
 }

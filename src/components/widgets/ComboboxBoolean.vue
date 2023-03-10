@@ -1,12 +1,12 @@
 <template>
-<combobox
-  :label="label"
-  :disabled="disabled"
-  :options="booleanOptions"
-  :value="value"
-  @input="emitValue"
-  @enter="emitEnter"
-/>
+  <combobox
+    :label="label"
+    :disabled="disabled"
+    :options="booleanOptions"
+    :value="value"
+    @input="emitValue"
+    @enter="emitEnter"
+  />
 </template>
 
 <script>
@@ -41,7 +41,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       booleanOptions: [
         { label: this.$t('main.yes'), value: 'true' },
@@ -50,19 +50,17 @@ export default {
     }
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
-    emitValue (value) {
+    emitValue(value) {
       this.$emit('input', value)
     },
-    emitEnter (value) {
+    emitEnter(value) {
       this.$emit('enter', value)
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

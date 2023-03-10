@@ -1,27 +1,17 @@
 <template>
-<a
-  class="button"
-  :title="title"
-  :href="path"
-  :target="target"
->
-  <plus-icon class="icon is-small" v-if="icon === 'plus'" />
-  <download-icon class="icon is-small" v-if="icon === 'download'" />
-  <upload-icon class="icon is-small" v-if="icon === 'upload'" />
-  <list-icon class="icon is-small" v-if="icon === 'list'" />
-  <span class="text is-hidden-touch" v-if="text">
-    {{ text }}
-  </span>
-</a>
+  <a class="button" :title="title" :href="path" :target="target">
+    <plus-icon class="icon is-small" v-if="icon === 'plus'" />
+    <download-icon class="icon is-small" v-if="icon === 'download'" />
+    <upload-icon class="icon is-small" v-if="icon === 'upload'" />
+    <list-icon class="icon is-small" v-if="icon === 'list'" />
+    <span class="text is-hidden-touch" v-if="text">
+      {{ text }}
+    </span>
+  </a>
 </template>
 
 <script>
-import {
-  DownloadIcon,
-  ListIcon,
-  PlusIcon,
-  UploadIcon
-} from 'vue-feather-icons'
+import { DownloadIcon, ListIcon, PlusIcon, UploadIcon } from 'vue-feather-icons'
 
 export default {
   name: 'button-href-link',

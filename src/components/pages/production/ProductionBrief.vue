@@ -1,38 +1,37 @@
 <template>
-    <div class="brief">
-      <div v-if="!isEditing" class="box" @dblclick="openEditing">
-        <div v-if="isEmpty(currentProduction.description)">
-          <p>{{$t('productions.brief.empty')}}</p>
-        </div>
-        <div
-          class="content"
-          v-html="compileMarkdown(currentProduction.description)"
-          v-else
-        >
-        </div>
+  <div class="brief">
+    <div v-if="!isEditing" class="box" @dblclick="openEditing">
+      <div v-if="isEmpty(currentProduction.description)">
+        <p>{{ $t('productions.brief.empty') }}</p>
       </div>
-      <div v-else class="box has-text-right">
-        <textarea-field
-          class="editor"
-          ref="textarea"
-          input-class="textarea"
-          @keyup.ctrl.enter="editBrief"
-          v-model="brief"
-        />
-        <p v-if="errors.editBrief" class="error mt1 has-text-right">
-          {{ $t('productions.brief.edit.errorText') }}
-        </p>
-        <p>
-          <button-simple
-            :is-primary="true"
-            :is-loading="isLoading"
-            :disabled="isLoading"
-            :text="$t('main.save')"
-            @click="editBrief"
-          />
-        </p>
-      </div>
+      <div
+        class="content"
+        v-html="compileMarkdown(currentProduction.description)"
+        v-else
+      ></div>
     </div>
+    <div v-else class="box has-text-right">
+      <textarea-field
+        class="editor"
+        ref="textarea"
+        input-class="textarea"
+        @keyup.ctrl.enter="editBrief"
+        v-model="brief"
+      />
+      <p v-if="errors.editBrief" class="error mt1 has-text-right">
+        {{ $t('productions.brief.edit.errorText') }}
+      </p>
+      <p>
+        <button-simple
+          :is-primary="true"
+          :is-loading="isLoading"
+          :disabled="isLoading"
+          :text="$t('main.save')"
+          @click="editBrief"
+        />
+      </p>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -48,7 +47,7 @@ export default {
     ButtonSimple,
     TextareaField
   },
-  data () {
+  data() {
     return {
       brief: '',
       isEditing: false,
@@ -59,43 +58,39 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
-      'currentProduction'
-    ]),
+    ...mapGetters(['currentProduction']),
 
-    textarea () { return this.$refs.textarea }
+    textarea() {
+      return this.$refs.textarea
+    }
   },
-  mounted () {
+  mounted() {
     if (this.currentProduction) {
       this.brief = this.currentProduction.description
     }
   },
   methods: {
-    ...mapActions([
-      'editProduction',
-      'setProduction'
-    ]),
+    ...mapActions(['editProduction', 'setProduction']),
 
-    isEmpty (str) {
-      return (!str || str.length === 0)
+    isEmpty(str) {
+      return !str || str.length === 0
     },
 
-    openEditing () {
+    openEditing() {
       this.isEditing = true
-      this.$nextTick(() => { // Needed because of the v-if
+      this.$nextTick(() => {
+        // Needed because of the v-if
         this.textarea.focus()
       })
     },
 
-    async editBrief () {
+    async editBrief() {
       this.isLoading = true
       try {
-        await this.editProduction(
-          {
-            id: this.currentProduction.id,
-            description: this.brief
-          }
-        )
+        await this.editProduction({
+          id: this.currentProduction.id,
+          description: this.brief
+        })
       } catch {
         this.errors.editBrief = true
         this.isLoading = false
@@ -105,7 +100,7 @@ export default {
       this.isLoading = false
     },
 
-    compileMarkdown (input) {
+    compileMarkdown(input) {
       return renderMarkdown(input)
     }
   }

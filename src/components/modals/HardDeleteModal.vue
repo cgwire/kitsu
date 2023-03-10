@@ -1,52 +1,51 @@
 <template>
-
-<div :class="{
-  'modal': true,
-  'delete-modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
-  <div class="modal-content">
-    <div class="box">
-      <p class="text">{{ text }}</p>
-      <p>
-        <input
-          type="text"
-          ref="confirmation-name"
-          class="input"
-          v-model="userLockText"
-        />
-      </p>
-      <p class="is-danger" v-if="isError">{{ errorText }}</p>
-      <div class="has-text-right flexrow">
-        <div class="filler"></div>
-        <combobox
-          class="flexrow-item"
-          :options="selectionOptions"
-          :with-margin="false"
-          v-model="selectionOnly"
-          v-if="selectionOption"
-        />
-        <a
-          :class="{
-            button: true,
-            'is-danger': true,
-            'is-loading': isLoading
-          }"
-          :disabled="isLocked"
-          @click="$emit('confirm', selectionOnly === 'true')">
-          {{ $t("main.confirmation") }}
-        </a>
-        <button
-          @click="$emit('cancel')"
-          class="button is-link"
-        >
-          {{ $t('main.cancel') }}
-        </button>
+  <div
+    :class="{
+      modal: true,
+      'delete-modal': true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
+    <div class="modal-content">
+      <div class="box">
+        <p class="text">{{ text }}</p>
+        <p>
+          <input
+            type="text"
+            ref="confirmation-name"
+            class="input"
+            v-model="userLockText"
+          />
+        </p>
+        <p class="is-danger" v-if="isError">{{ errorText }}</p>
+        <div class="has-text-right flexrow">
+          <div class="filler"></div>
+          <combobox
+            class="flexrow-item"
+            :options="selectionOptions"
+            :with-margin="false"
+            v-model="selectionOnly"
+            v-if="selectionOption"
+          />
+          <a
+            :class="{
+              button: true,
+              'is-danger': true,
+              'is-loading': isLoading
+            }"
+            :disabled="isLocked"
+            @click="$emit('confirm', selectionOnly === 'true')"
+          >
+            {{ $t('main.confirmation') }}
+          </a>
+          <button @click="$emit('cancel')" class="button is-link">
+            {{ $t('main.cancel') }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -63,7 +62,7 @@ export default {
     Combobox
   },
 
-  data () {
+  data() {
     return {
       userLockText: '',
       selectionOnly: 'true',
@@ -106,24 +105,19 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ]),
+    ...mapGetters([]),
 
-    isLocked () {
-      return (
-        this.lockText === 'locked' ||
-        this.lockText !== this.userLockText
-      )
+    isLocked() {
+      return this.lockText === 'locked' || this.lockText !== this.userLockText
     }
   },
 
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   },
 
   watch: {
-    active () {
+    active() {
       if (this.active) {
         this.userLockText = ''
         this.$nextTick(() => {

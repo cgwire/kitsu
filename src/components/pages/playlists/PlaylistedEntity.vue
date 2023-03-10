@@ -1,72 +1,68 @@
 <template>
-<div class="flexrow wrapper">
-
-  <drag @drag="onDragged" :transfer-data="entity.id">
-    <div
-      :class="{
-        'playlisted-entity': true,
-        playing: isPlaying
-      }"
-    >
-      <div class="thumbnail-wrapper" @click.prevent="onPlayClick">
-        <span
-          class="remove-button flexrow-item"
-          :title="$t('playlists.remove')"
-          @click.prevent="onRemoveClick"
-          v-if="isCurrentUserManager"
-        >
-          <x-icon />
-        </span>
-        <light-entity-thumbnail
-          width="150px"
-          height="103px"
-          :preview-file-id="previewFileId"
-        />
-      </div>
-
-      <div class="entity-title">
-        <span
-          :style="{
-            color: taskStatus.color
-          }"
-          :title="taskStatus.name"
-        >
-          &bullet;
-        </span>
-        <span>{{ entity.parent_name }} / {{ entity.name }}</span>
-      </div>
-
+  <div class="flexrow wrapper">
+    <drag @drag="onDragged" :transfer-data="entity.id">
       <div
-        class="preview-choice"
-        v-if="taskTypeOptions.length > 0"
+        :class="{
+          'playlisted-entity': true,
+          playing: isPlaying
+        }"
       >
-        <combobox
-          ref="task-type-combobox"
-          :thin="true"
-          :width="150"
-          :options="taskTypeOptions"
-          v-model="taskTypeId"
-        />
-        <combobox
-          class="version-combo"
-          :thin="true"
-          :width="150"
-          :options="previewFileOptions"
-          v-model="previewFileId"
-        />
+        <div class="thumbnail-wrapper" @click.prevent="onPlayClick">
+          <span
+            class="remove-button flexrow-item"
+            :title="$t('playlists.remove')"
+            @click.prevent="onRemoveClick"
+            v-if="isCurrentUserManager"
+          >
+            <x-icon />
+          </span>
+          <light-entity-thumbnail
+            width="150px"
+            height="103px"
+            :preview-file-id="previewFileId"
+          />
+        </div>
+
+        <div class="entity-title">
+          <span
+            :style="{
+              color: taskStatus.color
+            }"
+            :title="taskStatus.name"
+          >
+            &bullet;
+          </span>
+          <span>{{ entity.parent_name }} / {{ entity.name }}</span>
+        </div>
+
+        <div class="preview-choice" v-if="taskTypeOptions.length > 0">
+          <combobox
+            ref="task-type-combobox"
+            :thin="true"
+            :width="150"
+            :options="taskTypeOptions"
+            v-model="taskTypeId"
+          />
+          <combobox
+            class="version-combo"
+            :thin="true"
+            :width="150"
+            :options="previewFileOptions"
+            v-model="previewFileId"
+          />
+        </div>
+        <div v-else>
+          {{ $t('playlists.no_preview') }}
+        </div>
       </div>
-      <div v-else>
-        {{ $t('playlists.no_preview') }}
-      </div>
-    </div>
-  </drag>
-  <drop @drop="onDropped">
-    <div class="drop-area-wide" ref="drop-area-wide"></div>
-  </drop>
-  <drop @drop="onDropped">
-    <div class="drop-area" ref="drop-area"></div>
-  </drop>
-</div>
+    </drag>
+    <drop @drop="onDropped">
+      <div class="drop-area-wide" ref="drop-area-wide"></div>
+    </drop>
+    <drop @drop="onDropped">
+      <div class="drop-area" ref="drop-area"></div>
+    </drop>
+  </div>
 </template>
 
 <script>
@@ -91,7 +87,7 @@ export default {
     XIcon
   },
 
-  data () {
+  data() {
     return {
       taskTypeId: null,
       previewFileId: this.entity.preview_file_id
@@ -113,7 +109,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.setCurrentParameters()
     this.setListeners()
   },
@@ -128,30 +124,29 @@ export default {
       'isCurrentUserManager'
     ]),
 
-    dropArea () {
+    dropArea() {
       return this.$refs['drop-area']
     },
 
-    dropAreaWide () {
+    dropAreaWide() {
       return this.$refs['drop-area-wide']
     },
 
-    taskTypeOptions () {
+    taskTypeOptions() {
       return this.entity.preview_files
-        ? Object
-          .keys(this.entity.preview_files)
-          .map(id => this.taskTypeMap.get(id))
-          .sort(firstBy('priority', 1).thenBy('name'))
-          .map((taskType) => {
-            return {
-              label: taskType.name,
-              value: taskType.id
-            }
-          })
+        ? Object.keys(this.entity.preview_files)
+            .map(id => this.taskTypeMap.get(id))
+            .sort(firstBy('priority', 1).thenBy('name'))
+            .map(taskType => {
+              return {
+                label: taskType.name,
+                value: taskType.id
+              }
+            })
         : []
     },
 
-    previewFileOptions () {
+    previewFileOptions() {
       const previewFiles = this.entity.preview_files[this.taskTypeId] || []
       return previewFiles.map(previewFile => ({
         label: `v${previewFile.revision}`,
@@ -159,7 +154,7 @@ export default {
       }))
     },
 
-    taskStatus () {
+    taskStatus() {
       let entity = this.shotMap.get(this.entity.id)
       if (!entity) entity = this.assetMap.get(this.entity.id)
       if (!entity) return ''
@@ -177,8 +172,8 @@ export default {
   },
 
   methods: {
-    getTaskTypeIdForPreviewFile (taskTypeIds, previewFileId) {
-      return taskTypeIds.find((taskTypeId) => {
+    getTaskTypeIdForPreviewFile(taskTypeIds, previewFileId) {
+      return taskTypeIds.find(taskTypeId => {
         const previewFiles = this.entity.preview_files[taskTypeId]
         return previewFiles.some(previewFile => {
           return previewFile.id === previewFileId
@@ -186,7 +181,7 @@ export default {
       })
     },
 
-    setCurrentParameters () {
+    setCurrentParameters() {
       // Find task type matching current preview.
       const taskTypeIds = Object.keys(this.entity.preview_files)
       if (taskTypeIds.length > 0) {
@@ -202,36 +197,35 @@ export default {
       }
     },
 
-    onPlayClick () {
+    onPlayClick() {
       this.$emit('play-click', this.index)
     },
 
-    onRemoveClick (event) {
+    onRemoveClick(event) {
       event.preventDefault()
       event.stopPropagation()
       this.$emit('remove-entity', this.entity)
     },
 
-    setListeners () {
+    setListeners() {
       this.dropArea.addEventListener('dragover', this.onDragover)
       this.dropArea.addEventListener('dragleave', this.onDragleave)
       this.dropAreaWide.addEventListener('dragover', this.onDragover)
       this.dropAreaWide.addEventListener('dragleave', this.onDragleave)
     },
 
-    onDragged () {
-    },
+    onDragged() {},
 
-    onDragleave () {
+    onDragleave() {
       this.dropArea.style.background = 'transparent'
       this.dropArea.style.width = '15px'
     },
 
-    onDragover () {
+    onDragover() {
       this.dropArea.style.width = '60px'
     },
 
-    onDropped (entityId) {
+    onDropped(entityId) {
       this.dropArea.style.background = 'transparent'
       this.dropArea.style.width = '15px'
       this.$emit('entity-dropped', {
@@ -242,7 +236,7 @@ export default {
   },
 
   watch: {
-    taskTypeId () {
+    taskTypeId() {
       // Set current preview was last preview selected. If there is no preview
       // matching this task type, it selects the first preview available for
       // this task type.
@@ -259,7 +253,7 @@ export default {
       }
     },
 
-    previewFileId () {
+    previewFileId() {
       let previewFile = null
       const previewFiles = this.entity.preview_files[this.taskTypeId]
       if (previewFiles && previewFiles.length > 0) {
@@ -314,7 +308,7 @@ export default {
 
 .entity-title {
   color: $white;
-  font-size: .9em;
+  font-size: 0.9em;
   margin-bottom: 0.6em;
   max-width: 150px;
   word-wrap: anywhere;

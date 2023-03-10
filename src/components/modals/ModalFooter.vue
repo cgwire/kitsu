@@ -1,29 +1,25 @@
 <template>
-<div class="modal-footer">
-  <p class="has-text-right">
-    <a
-      :class="{
-        button: true,
-        'is-primary': true,
-        'is-loading': isLoading,
-        'is-disabled': isDisabled
-      }"
-      @click="$emit('confirm')"
-    >
-      {{ confirmLabel || $t("main.confirmation") }}
-    </a>
-    <button
-      @click="$emit('cancel')"
-      class="button is-link"
-    >
-      {{ cancelLabel || $t('main.cancel') }}
-    </button>
-
-  </p>
-  <p class="error mt1 has-text-right" v-if="isError">
-    {{ errorText }}
-  </p>
-</div>
+  <div class="modal-footer">
+    <p class="has-text-right">
+      <a
+        :class="{
+          button: true,
+          'is-primary': true,
+          'is-loading': isLoading,
+          'is-disabled': isDisabled
+        }"
+        @click="$emit('confirm')"
+      >
+        {{ confirmLabel || $t('main.confirmation') }}
+      </a>
+      <button @click="$emit('cancel')" class="button is-link">
+        {{ cancelLabel || $t('main.cancel') }}
+      </button>
+    </p>
+    <p class="error mt1 has-text-right" v-if="isError">
+      {{ errorText }}
+    </p>
+  </div>
 </template>
 
 <script>
@@ -62,13 +58,11 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
 
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   },
 
   watch: {}

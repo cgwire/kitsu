@@ -15,13 +15,14 @@ const initialState = {
 const state = { ...initialState }
 
 const getters = {
-  milestones: (state) => state.milestones,
-  currentScheduleItems: (state) => state.currentScheduleItems
+  milestones: state => state.milestones,
+  currentScheduleItems: state => state.currentScheduleItems
 }
 
 const actions = {
-  loadScheduleItems ({ commit }, production) {
-    return scheduleApi.getScheduleItems(production)
+  loadScheduleItems({ commit }, production) {
+    return scheduleApi
+      .getScheduleItems(production)
       .then(scheduleItems => {
         commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
         return Promise.resolve(scheduleItems)
@@ -29,42 +30,48 @@ const actions = {
       .catch(console.error)
   },
 
-  loadAllScheduleItems ({ commit }, production) {
-    return scheduleApi.getAllScheduleItems(production)
+  loadAllScheduleItems({ commit }, production) {
+    return scheduleApi
+      .getAllScheduleItems(production)
       .then(scheduleItems => {
         commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
       })
       .catch(console.error)
   },
 
-  loadAssetTypeScheduleItems ({ commit }, { production, taskType }) {
-    return scheduleApi.getAssetTypeScheduleItems(production, taskType)
+  loadAssetTypeScheduleItems({ commit }, { production, taskType }) {
+    return scheduleApi
+      .getAssetTypeScheduleItems(production, taskType)
       .catch(console.error)
   },
 
-  loadSequenceScheduleItems ({ commit }, { production, taskType }) {
-    return scheduleApi.getSequenceScheduleItems(production, taskType)
+  loadSequenceScheduleItems({ commit }, { production, taskType }) {
+    return scheduleApi
+      .getSequenceScheduleItems(production, taskType)
       .catch(console.error)
   },
 
-  loadEpisodeScheduleItems ({ commit }, { production, taskType }) {
+  loadEpisodeScheduleItems({ commit }, { production, taskType }) {
     if (!taskType.id) {
       return Promise.reject(new Error('Wrong task type for loading schedule'))
     } else {
-      return scheduleApi.getEpisodeScheduleItems(production, taskType)
+      return scheduleApi
+        .getEpisodeScheduleItems(production, taskType)
         .catch(console.error)
     }
   },
 
-  createScheduleItem ({ commit, state }, scheduleItem) {
+  createScheduleItem({ commit, state }, scheduleItem) {
     if (!scheduleItem.object_id) {
       const previousItem = state.currentScheduleItems.find(
-        item => item.task_type_id === scheduleItem.taskTypeId &&
-                item.project_id === scheduleItem.project_id
+        item =>
+          item.task_type_id === scheduleItem.taskTypeId &&
+          item.project_id === scheduleItem.project_id
       )
       if (previousItem) return Promise.resolve(scheduleItem)
     }
-    return scheduleApi.createScheduleItem(scheduleItem)
+    return scheduleApi
+      .createScheduleItem(scheduleItem)
       .then(newScheduleItem => {
         const scheduleItems = state.currentScheduleItems.slice()
         scheduleItems.push(newScheduleItem)
@@ -74,8 +81,9 @@ const actions = {
       .catch(console.error)
   },
 
-  deleteScheduleItem ({ commit, state }, scheduleItem) {
-    return scheduleApi.deleteScheduleItem(scheduleItem)
+  deleteScheduleItem({ commit, state }, scheduleItem) {
+    return scheduleApi
+      .deleteScheduleItem(scheduleItem)
       .then(() => {
         const scheduleItems = state.currentScheduleItems.slice()
         const indexToRemove = scheduleItems.findIndex(
@@ -89,8 +97,9 @@ const actions = {
       .catch(console.error)
   },
 
-  saveScheduleItem ({ commit, state }, scheduleItem) {
-    return scheduleApi.updateScheduleItem(scheduleItem)
+  saveScheduleItem({ commit, state }, scheduleItem) {
+    return scheduleApi
+      .updateScheduleItem(scheduleItem)
       .then(updatedItem => {
         const scheduleItems = state.currentScheduleItems.slice()
         const indexUpdate = scheduleItems.findIndex(
@@ -104,34 +113,38 @@ const actions = {
       .catch(console.error)
   },
 
-  loadMilestones ({ commit, rootState }) {
+  loadMilestones({ commit, rootState }) {
     const production = rootState.productions.currentProduction
-    return scheduleApi.getMilestones(production)
-      .then((milestones) => {
+    return scheduleApi
+      .getMilestones(production)
+      .then(milestones => {
         commit(ADD_MILESTONES, milestones)
       })
       .catch(console.error)
   },
 
-  saveMilestone ({ commit, rootState }, milestone) {
+  saveMilestone({ commit, rootState }, milestone) {
     const production = rootState.productions.currentProduction
     if (!milestone.id) {
-      return scheduleApi.createMilestone(production, milestone)
-        .then((milestone) => {
+      return scheduleApi
+        .createMilestone(production, milestone)
+        .then(milestone => {
           commit(ADD_MILESTONE, milestone)
         })
     } else {
-      return scheduleApi.updateMilestone(milestone)
-        .then((milestone) => {
+      return scheduleApi
+        .updateMilestone(milestone)
+        .then(milestone => {
           commit(ADD_MILESTONE, milestone)
         })
         .catch(console.error)
     }
   },
 
-  deleteMilestone ({ commit, rootState }, milestone) {
-    return scheduleApi.deleteMilestone(milestone)
-      .then((milestone) => {
+  deleteMilestone({ commit, rootState }, milestone) {
+    return scheduleApi
+      .deleteMilestone(milestone)
+      .then(milestone => {
         commit(REMOVE_MILESTONE, milestone)
       })
       .catch(console.error)
@@ -139,26 +152,26 @@ const actions = {
 }
 
 const mutations = {
-  [ADD_MILESTONE] (state, milestone) {
+  [ADD_MILESTONE](state, milestone) {
     state.milestones[milestone.date] = milestone
   },
 
-  [ADD_MILESTONES] (state, milestones) {
+  [ADD_MILESTONES](state, milestones) {
     state.milestones = {}
-    milestones.forEach((milestone) => {
+    milestones.forEach(milestone => {
       state.milestones[milestone.date] = milestone
     })
   },
 
-  [REMOVE_MILESTONE] (state, milestone) {
+  [REMOVE_MILESTONE](state, milestone) {
     delete state.milestones[milestone.date.format('YYYY-MM-DD')]
   },
 
-  [SET_CURRENT_SCHEDULE_ITEMS] (state, items) {
+  [SET_CURRENT_SCHEDULE_ITEMS](state, items) {
     state.currentScheduleItems = items
   },
 
-  [RESET_ALL] (state) {
+  [RESET_ALL](state) {
     Object.assign(state, { ...initialState })
   }
 }

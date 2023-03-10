@@ -1,34 +1,34 @@
 <template functional>
-<div>
-  <label class="label" v-if="props.label.length > 0">
-    {{ props.label }}
-  </label>
-  <p class="control">
-    {{ value }}
-    <span
-      :class="{
-        select: true,
-        'is-top': props.isTop
-      }"
-    >
-      <select
-        class="select-input"
-        ref="select"
-        :disabled="props.disabled"
-        @change="(event, value) => listeners.input(event.target.value)"
+  <div>
+    <label class="label" v-if="props.label.length > 0">
+      {{ props.label }}
+    </label>
+    <p class="control">
+      {{ value }}
+      <span
+        :class="{
+          select: true,
+          'is-top': props.isTop
+        }"
       >
-        <option
-          v-for="(option, i) in props.options"
-          :key="`${i}-${option.label}-${option.value}`"
-          :value="option.value || option.label"
-          :selected="value === option.value"
+        <select
+          class="select-input"
+          ref="select"
+          :disabled="props.disabled"
+          @change="(event, value) => listeners.input(event.target.value)"
         >
-          {{ option.label }} {{ option.value }} {{ value }}
-        </option>
-      </select>
-    </span>
-  </p>
-</div>
+          <option
+            v-for="(option, i) in props.options"
+            :key="`${i}-${option.label}-${option.value}`"
+            :value="option.value || option.label"
+            :selected="value === option.value"
+          >
+            {{ option.label }} {{ option.value }} {{ value }}
+          </option>
+        </select>
+      </span>
+    </p>
+  </div>
 </template>
 
 <script>

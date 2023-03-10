@@ -1,27 +1,27 @@
 import client from '@/store/api/client'
 
 export default {
-  getProductions (callback) {
+  getProductions(callback) {
     client.get('/api/data/projects/all', callback)
   },
 
-  getProduction (productionId) {
+  getProduction(productionId) {
     return client.getModel('projects', productionId)
   },
 
-  getOpenProductions (callback) {
+  getOpenProductions(callback) {
     client.get('/api/data/projects/open', callback)
   },
 
-  getProductionStatus (callback) {
+  getProductionStatus(callback) {
     client.get('/api/data/project-status', callback)
   },
 
-  newProduction (production) {
+  newProduction(production) {
     return client.ppost('/api/data/projects/', production)
   },
 
-  updateProduction (production) {
+  updateProduction(production) {
     const data = {
       name: production.name,
       description: production.description,
@@ -42,7 +42,7 @@ export default {
     return client.pput(`/api/data/projects/${production.id}`, data)
   },
 
-  postAvatar (productionId, formData, callback) {
+  postAvatar(productionId, formData, callback) {
     client.post(
       `/api/pictures/thumbnails/projects/${productionId}`,
       formData,
@@ -50,68 +50,64 @@ export default {
     )
   },
 
-  deleteProduction (production) {
+  deleteProduction(production) {
     return client.pdel(`/api/data/projects/${production.id}?force=true`)
   },
 
-  addPersonToTeam (productionId, personId) {
+  addPersonToTeam(productionId, personId) {
     const data = { person_id: personId }
     return client.ppost(`/api/data/projects/${productionId}/team`, data)
   },
 
-  removePersonFromTeam (productionId, personId) {
+  removePersonFromTeam(productionId, personId) {
     return client.pdel(`/api/data/projects/${productionId}/team/${personId}`)
   },
 
-  addAssetTypeToProduction (productionId, assetTypeId) {
+  addAssetTypeToProduction(productionId, assetTypeId) {
     const data = { asset_type_id: assetTypeId }
     const path = `/api/data/projects/${productionId}/settings/asset-types`
     return client.ppost(path, data)
   },
 
-  removeAssetTypeFromProduction (productionId, assetTypeId) {
-    const path =
-      `/api/data/projects/${productionId}/settings/asset-types/${assetTypeId}`
+  removeAssetTypeFromProduction(productionId, assetTypeId) {
+    const path = `/api/data/projects/${productionId}/settings/asset-types/${assetTypeId}`
     return client.pdel(path)
   },
 
-  addTaskTypeToProduction (productionId, taskTypeId, priority) {
+  addTaskTypeToProduction(productionId, taskTypeId, priority) {
     const data = { task_type_id: taskTypeId, priority }
     const path = `/api/data/projects/${productionId}/settings/task-types`
     return client.ppost(path, data)
   },
 
-  removeTaskTypeFromProduction (productionId, taskTypeId) {
-    const path =
-      `/api/data/projects/${productionId}/settings/task-types/${taskTypeId}`
+  removeTaskTypeFromProduction(productionId, taskTypeId) {
+    const path = `/api/data/projects/${productionId}/settings/task-types/${taskTypeId}`
     return client.pdel(path).catch(console.error)
   },
 
-  addTaskStatusToProduction (productionId, taskStatusId) {
+  addTaskStatusToProduction(productionId, taskStatusId) {
     const data = { task_status_id: taskStatusId }
     const path = `/api/data/projects/${productionId}/settings/task-status`
     return client.ppost(path, data)
   },
 
-  removeTaskStatusFromProduction (productionId, taskStatusId) {
-    const path =
-      `/api/data/projects/${productionId}/settings/task-status/${taskStatusId}`
+  removeTaskStatusFromProduction(productionId, taskStatusId) {
+    const path = `/api/data/projects/${productionId}/settings/task-status/${taskStatusId}`
     return client.pdel(path)
   },
 
-  addStatusAutomationToProduction (productionId, statusAutomationId) {
+  addStatusAutomationToProduction(productionId, statusAutomationId) {
     const data = { status_automation_id: statusAutomationId }
     const path = `/api/data/projects/${productionId}/settings/status-automations`
     return client.ppost(path, data)
   },
 
-  removeStatusAutomationFromProduction (productionId, statusAutomationId) {
-    const path =
-      `/api/data/projects/${productionId}/settings/status-automations/${statusAutomationId}`
+  removeStatusAutomationFromProduction(productionId, statusAutomationId) {
+    const path = `/api/data/projects/${productionId}/settings/status-automations/${statusAutomationId}`
     return client.pdel(path)
   },
 
-  addMetadataDescriptor (productionId, descriptor) {
+  addMetadataDescriptor(productionId, descriptor) {
     return new Promise((resolve, reject) => {
       const data = {
         name: descriptor.name,
@@ -131,7 +127,7 @@ export default {
     })
   },
 
-  getMetadataDescriptor (productionId, descriptorId) {
+  getMetadataDescriptor(productionId, descriptorId) {
     return new Promise((resolve, reject) => {
       client.get(
         `/api/data/projects/${productionId}/metadata-descriptors/${descriptorId}`,
@@ -143,7 +139,7 @@ export default {
     })
   },
 
-  updateMetadataDescriptor (productionId, descriptor) {
+  updateMetadataDescriptor(productionId, descriptor) {
     return new Promise((resolve, reject) => {
       const data = {
         id: descriptor.id,
@@ -164,11 +160,11 @@ export default {
     })
   },
 
-  deleteMetadataDescriptor (productionId, descriptorId) {
+  deleteMetadataDescriptor(productionId, descriptorId) {
     return new Promise((resolve, reject) => {
       client.del(
         `/api/data/projects/${productionId}/metadata-descriptors/${descriptorId}`,
-        (err) => {
+        err => {
           if (err) reject(err)
           else resolve()
         }

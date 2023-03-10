@@ -1,42 +1,42 @@
 <template>
-<div :class="{ field: withMargin, 'is-inline': isInline }">
-  <label class="label" v-if="label.length > 0">
-    {{ label }}
-  </label>
-  <p class="control" :class="{ 'is-inline': isInline }">
-    <span
-      :class="{
-        select: true,
-        'is-top': this.isTop,
-      }"
-    >
-      <select
+  <div :class="{ field: withMargin, 'is-inline': isInline }">
+    <label class="label" v-if="label.length > 0">
+      {{ label }}
+    </label>
+    <p class="control" :class="{ 'is-inline': isInline }">
+      <span
         :class="{
-          combobox: true,
-          thin: thin,
-          'select-input': true,
-          error: this.error
+          select: true,
+          'is-top': this.isTop
         }"
-        :style="{
-          width: width ? width + 'px' : undefined
-        }"
-        ref="select"
-        :disabled="disabled"
-        @keyup.enter="emitEnter()"
-        @change="updateValue"
       >
-        <option
-          v-for="(option, i) in options"
-          :key="`${i}-${option.label}-${option.value}`"
-          :value="option.label || option.value"
-          :selected="value === option.value"
+        <select
+          :class="{
+            combobox: true,
+            thin: thin,
+            'select-input': true,
+            error: this.error
+          }"
+          :style="{
+            width: width ? width + 'px' : undefined
+          }"
+          ref="select"
+          :disabled="disabled"
+          @keyup.enter="emitEnter()"
+          @change="updateValue"
         >
-          {{ getOptionLabel(option) }}
-        </option>
-      </select>
-    </span>
-  </p>
-</div>
+          <option
+            v-for="(option, i) in options"
+            :key="`${i}-${option.label}-${option.value}`"
+            :value="option.label || option.value"
+            :selected="value === option.value"
+          >
+            {{ getOptionLabel(option) }}
+          </option>
+        </select>
+      </span>
+    </p>
+  </div>
 </template>
 
 <script>
@@ -89,11 +89,10 @@ export default {
     }
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
-    updateValue () {
+    updateValue() {
       let value = this.$refs.select.value
       this.options.forEach(option => {
         if (option.label === value) {
@@ -103,7 +102,7 @@ export default {
       this.$emit('input', value)
     },
 
-    emitEnter () {
+    emitEnter() {
       let value = this.$refs.select.value
       this.options.forEach(option => {
         if (option.label === value) {
@@ -113,7 +112,7 @@ export default {
       this.$emit('enter', value)
     },
 
-    getOptionLabel (option) {
+    getOptionLabel(option) {
       if (this.localeKeyPrefix.length > 0) {
         return this.$t(this.localeKeyPrefix + option.label.toLowerCase())
       } else {

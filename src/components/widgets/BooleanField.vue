@@ -1,40 +1,37 @@
 <template>
-<div class="field">
-  <span
-    :class="{
-      'bool-field': true,
-      flexrow: true,
-      'is-true': localValue
-    }"
-    :disabled="disabled"
-    @click="onClick"
-  >
-    <span class="icon-wrapper flexrow-item">
-      <check-icon
-        :title="$t('main.yes')"
-        class="true"
-        stroke-width="3"
-        v-show="localValue"
-      />
-      <x-icon
-        :title="$t('main.no')"
-        class="false"
-        stroke-width="3"
-        v-show="!localValue"
-      />
+  <div class="field">
+    <span
+      :class="{
+        'bool-field': true,
+        flexrow: true,
+        'is-true': localValue
+      }"
+      :disabled="disabled"
+      @click="onClick"
+    >
+      <span class="icon-wrapper flexrow-item">
+        <check-icon
+          :title="$t('main.yes')"
+          class="true"
+          stroke-width="3"
+          v-show="localValue"
+        />
+        <x-icon
+          :title="$t('main.no')"
+          class="false"
+          stroke-width="3"
+          v-show="!localValue"
+        />
+      </span>
+      <span class="flexrow-item">
+        {{ label }}
+      </span>
     </span>
-    <span class="flexrow-item">
-      {{ label }}
-    </span>
-  </span>
-</div>
+  </div>
 </template>
 
 <script>
-import {
-  CheckIcon,
-  XIcon
-} from 'vue-feather-icons'
+import { CheckIcon, XIcon } from 'vue-feather-icons'
 
 export default {
   name: 'combobox-field',
@@ -59,41 +56,40 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       localValue: false
     }
   },
 
-  mounted () {
+  mounted() {
     if (this.value === 'true') this.localValue = true
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
-    emitValue () {
+    emitValue() {
       if (this.localValue) this.$emit('input', 'true')
       else this.$emit('input', 'false')
     },
 
-    emitEnter () {
+    emitEnter() {
       this.emitValue()
     },
 
-    onClick () {
+    onClick() {
       this.localValue = !this.localValue
     }
   },
 
   watch: {
-    value () {
+    value() {
       if (this.value === 'true') this.localValue = true
       else this.localValue = false
     },
 
-    localValue () {
+    localValue() {
       this.emitValue()
     }
   }

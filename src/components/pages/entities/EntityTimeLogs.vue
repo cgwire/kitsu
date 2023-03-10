@@ -25,11 +25,7 @@
       </table>
       <table class="datatable">
         <tbody class="datatable-body">
-          <tr
-            :key="log.id"
-            class="datatable-row"
-            v-for="log in logs"
-          >
+          <tr :key="log.id" class="datatable-row" v-for="log in logs">
             <td class="date">
               {{ formatSimpleDate(log.date) }}
             </td>
@@ -80,38 +76,31 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       logs: [],
       isLoading: false
     }
   },
 
-  mounted () {
+  mounted() {
     if (!this.entity) return
     this.reset()
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction',
-      'personMap',
-      'taskMap',
-      'taskTypeMap'
-    ])
+    ...mapGetters(['currentProduction', 'personMap', 'taskMap', 'taskTypeMap'])
   },
 
   methods: {
-    ...mapActions([
-      'getEntityTimeLogs'
-    ]),
+    ...mapActions(['getEntityTimeLogs']),
 
-    getTaskType (log) {
+    getTaskType(log) {
       const task = this.taskMap.get(log.task_id)
       return this.taskTypeMap.get(task.task_type_id)
     },
 
-    reset () {
+    reset() {
       this.isLoading = true
       this.getEntityTimeLogs(this.entity.id)
         .then(logs => {
@@ -127,7 +116,7 @@ export default {
   },
 
   watch: {
-    entity () {
+    entity() {
       if (this.entity) this.reset()
     }
   }
@@ -135,10 +124,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.date { width: 100px; }
-.person { width: 200px; }
-.type { width: 150px; }
-.duration { width: 50px; }
+.date {
+  width: 100px;
+}
+.person {
+  width: 200px;
+}
+.type {
+  width: 150px;
+}
+.duration {
+  width: 50px;
+}
 
 .time-logs {
   overflow-y: auto;

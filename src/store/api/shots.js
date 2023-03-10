@@ -1,52 +1,52 @@
 import client from '@/store/api/client'
 
 export default {
-  getShot (shotId, callback) {
+  getShot(shotId, callback) {
     return client.getModel('shots', shotId)
   },
 
-  getShots (production, episode) {
+  getShots(production, episode) {
     let path = '/api/data/shots/with-tasks'
     if (production) path += `?project_id=${production.id}`
     if (episode) path += `&episode_id=${episode.id}`
     return client.pget(path)
   },
 
-  getSequence (sequenceId) {
+  getSequence(sequenceId) {
     return client.getModel('sequences', sequenceId)
   },
 
-  getSequences (production, episode, callback) {
+  getSequences(production, episode, callback) {
     let path = `/api/data/projects/${production.id}/sequences`
     if (episode) path = `/api/data/episodes/${episode.id}/sequences`
     return client.pget(path)
   },
 
-  getSequencesWithTasks (production, episode) {
+  getSequencesWithTasks(production, episode) {
     let path = `/api/data/sequences/with-tasks?project_id=${production.id}`
     if (episode) path += `&episode_id=${episode.id}`
     return client.pget(path)
   },
 
-  getEpisode (episodeId) {
+  getEpisode(episodeId) {
     return client.getModel('episodes', episodeId)
   },
 
-  getEpisodes (production) {
+  getEpisodes(production) {
     const path = `/api/data/projects/${production.id}/episodes`
     return client.pget(path)
   },
 
-  getEpisodesWithTasks (production) {
+  getEpisodesWithTasks(production) {
     const path = `/api/data/episodes/with-tasks?project_id=${production.id}`
     return client.pget(path)
   },
 
-  getShotType (callback) {
+  getShotType(callback) {
     client.get('/api/data/shot-type', callback)
   },
 
-  newShot (shot) {
+  newShot(shot) {
     const data = {
       name: shot.name,
       description: shot.description,
@@ -55,7 +55,7 @@ export default {
     return client.ppost(`/api/data/projects/${shot.project_id}/shots`, data)
   },
 
-  newSequence (sequence) {
+  newSequence(sequence) {
     const data = {
       name: sequence.name,
       episode_id: sequence.episode_id,
@@ -66,7 +66,7 @@ export default {
     return client.ppost(path, data)
   },
 
-  newEpisode (episode) {
+  newEpisode(episode) {
     const data = {
       name: episode.name,
       description: episode.description || '',
@@ -77,7 +77,7 @@ export default {
     return client.ppost(path, data)
   },
 
-  updateShot (shot) {
+  updateShot(shot) {
     const data = {
       name: shot.name,
       parent_id: shot.sequence_id,
@@ -113,7 +113,7 @@ export default {
     return client.pput(path, data)
   },
 
-  updateSequence (sequence) {
+  updateSequence(sequence) {
     const data = {
       name: sequence.name,
       description: sequence.description,
@@ -122,7 +122,7 @@ export default {
     return client.pput(`/api/data/entities/${sequence.id}`, data)
   },
 
-  updateEpisode (episode) {
+  updateEpisode(episode) {
     const data = {
       name: episode.name,
       description: episode.description,
@@ -135,7 +135,7 @@ export default {
     return client.pput(`/api/data/entities/${episode.id}`, data)
   },
 
-  deleteShot (shot) {
+  deleteShot(shot) {
     if (shot.canceled) {
       return client.pdel(`/api/data/shots/${shot.id}?force=true`)
     } else {
@@ -143,43 +143,43 @@ export default {
     }
   },
 
-  deleteSequence (sequence) {
+  deleteSequence(sequence) {
     return client.pdel(`/api/data/sequences/${sequence.id}?force=true`)
   },
 
-  deleteEpisode (episode) {
+  deleteEpisode(episode) {
     return client.pdel(`/api/data/episodes/${episode.id}?force=true`)
   },
 
-  restoreShot (shot, callback) {
+  restoreShot(shot, callback) {
     const data = { canceled: false }
     return client.pput(`/api/data/entities/${shot.id}`, data)
   },
 
-  postCsv (production, formData, toUpdate) {
+  postCsv(production, formData, toUpdate) {
     let path = `/api/import/csv/projects/${production.id}/shots`
     if (toUpdate) path += '?update=true'
     return client.ppost(path, formData)
   },
 
-  getEpisodeStats (productionId) {
+  getEpisodeStats(productionId) {
     return client.pget(`/api/data/projects/${productionId}/episodes/stats`)
   },
 
-  getEpisodeRetakeStats (productionId) {
+  getEpisodeRetakeStats(productionId) {
     const path = `/api/data/projects/${productionId}/episodes/retake-stats`
     return client.pget(path)
   },
 
-  loadShotHistory (shotId) {
+  loadShotHistory(shotId) {
     return client.pget(`/api/data/shots/${shotId}/versions`)
   },
 
-  getQuotas (productionId, taskTypeId, detailLevel, computeMode) {
+  getQuotas(productionId, taskTypeId, detailLevel, computeMode) {
     const weighted = computeMode === 'weighted'
     return client.pget(
       `/api/data/projects/${productionId}/quotas/` +
-       `${taskTypeId}?detail=${detailLevel}&weighted=${weighted}`
+        `${taskTypeId}?detail=${detailLevel}&weighted=${weighted}`
     )
   }
 }

@@ -1,7 +1,7 @@
 import client from '@/store/api/client'
 
 export default {
-  getAssets (production, episode) {
+  getAssets(production, episode) {
     let path = '/api/data/assets/with-tasks'
     if (production) {
       path += `?project_id=${production.id}`
@@ -12,11 +12,11 @@ export default {
     return client.pget(path)
   },
 
-  getAsset (assetId) {
+  getAsset(assetId) {
     return client.getModel('assets', assetId, true)
   },
 
-  newAsset (asset) {
+  newAsset(asset) {
     const data = {
       name: asset.name,
       description: asset.description,
@@ -26,12 +26,13 @@ export default {
       data.episode_id = asset.source_id
     }
 
-    const path = `/api/data/projects/${asset.project_id}/asset-types/` +
-                 `${asset.entity_type_id}/assets/new`
+    const path =
+      `/api/data/projects/${asset.project_id}/asset-types/` +
+      `${asset.entity_type_id}/assets/new`
     return client.ppost(path, data)
   },
 
-  updateAsset (asset) {
+  updateAsset(asset) {
     const data = {
       name: asset.name,
       description: asset.description,
@@ -49,7 +50,7 @@ export default {
     return client.pput(`/api/data/entities/${asset.id}`, data)
   },
 
-  deleteAsset (asset) {
+  deleteAsset(asset) {
     if (asset.canceled) {
       return client.pdel(`/api/data/assets/${asset.id}?force=true`)
     } else {
@@ -57,12 +58,12 @@ export default {
     }
   },
 
-  restoreAsset (asset) {
+  restoreAsset(asset) {
     const data = { canceled: false }
     return client.pput(`/api/data/entities/${asset.id}`, data)
   },
 
-  postCsv (production, formData, toUpdate) {
+  postCsv(production, formData, toUpdate) {
     let path = `/api/import/csv/projects/${production.id}/assets`
     if (toUpdate) path += '?update=true'
     return client.ppost(path, formData)

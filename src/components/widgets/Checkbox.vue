@@ -1,27 +1,28 @@
 <template>
-<div class="field">
-  <div
-    :class="{
-      'checkbox-field': true,
-      toggle: toggle
-    }"
-  >
-    <input
-      class="visuallyhidden"
-      ref="checkbox"
-      type="checkbox"
-      :id="id"
-      :checked="checked"
-      :disabled="disabled"
-      @change="updateStatus()"
-    />
-    <label :for="id"><span>{{ label }}</span></label>
+  <div class="field">
+    <div
+      :class="{
+        'checkbox-field': true,
+        toggle: toggle
+      }"
+    >
+      <input
+        class="visuallyhidden"
+        ref="checkbox"
+        type="checkbox"
+        :id="id"
+        :checked="checked"
+        :disabled="disabled"
+        @change="updateStatus()"
+      />
+      <label :for="id"
+        ><span>{{ label }}</span></label
+      >
+    </div>
   </div>
-</div>
 </template>
 
 <script>
-
 export default {
   name: 'checkbox',
   model: {
@@ -48,21 +49,20 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       id: null
     }
   },
 
-  mounted () {
+  mounted() {
     this.id = this._uid
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
-    updateStatus () {
+    updateStatus() {
       this.$emit('change', this.$refs.checkbox.checked)
     }
   }
@@ -110,12 +110,12 @@ export default {
     &:after {
       border-color: transparent;
       color: $dark-grey-lightest;
-      line-height: .8rem;
+      line-height: 0.8rem;
     }
   }
-  input[type=checkbox] {
+  input[type='checkbox'] {
     &[disabled] + label {
-      opacity: .5;
+      opacity: 0.5;
       cursor: default;
     }
     &:checked + label:after {
@@ -128,11 +128,11 @@ export default {
     padding-left: 3.5rem;
 
     &:before {
-       border-radius: .75rem;
-       width: 2.6rem;
-       height: 1.5rem;
-       background-color: $light-grey;
-       transition: background-color 200ms ease-in;
+      border-radius: 0.75rem;
+      width: 2.6rem;
+      height: 1.5rem;
+      background-color: $light-grey;
+      transition: background-color 200ms ease-in;
     }
     &:after {
       width: 1.3rem;
@@ -142,7 +142,7 @@ export default {
       transition: left 150ms ease-in;
     }
   }
-  input[type=checkbox]:checked + label {
+  input[type='checkbox']:checked + label {
     &:before {
       background-color: $green;
     }

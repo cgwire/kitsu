@@ -4,7 +4,7 @@
       <div class="box has-text-left">
         <div class="has-text-centered">
           <h1 class="title">
-            {{ $t("login.reset_change_password_title") }}
+            {{ $t('login.reset_change_password_title') }}
           </h1>
         </div>
 
@@ -19,7 +19,7 @@
               v-focus
             />
             <span class="icon">
-              <lock-icon width=20 height=20 />
+              <lock-icon width="20" height="20" />
             </span>
           </p>
           <p class="control has-icon">
@@ -31,48 +31,44 @@
               v-model="password2"
             />
             <span class="icon">
-              <lock-icon width=20 height=20 />
+              <lock-icon width="20" height="20" />
             </span>
           </p>
         </div>
 
         <p class="control">
-          <a :class="{
-            'main-button': true,
-            'is-fullwidth': true,
-            'is-loading': isLoading
-          }"
+          <a
+            :class="{
+              'main-button': true,
+              'is-fullwidth': true,
+              'is-loading': isLoading
+            }"
             @click="confirmResetChangePassword"
             v-if="!isSuccess"
           >
-              {{ $t("login.reset_change_password") }}
+            {{ $t('login.reset_change_password') }}
           </a>
         </p>
         <p class="error" v-show="isFormError">
-          {{ $t("login.reset_change_password_form_failed") }}
+          {{ $t('login.reset_change_password_form_failed') }}
         </p>
         <p class="error" v-show="isError">
-          {{ $t("login.reset_change_password_failed") }}
+          {{ $t('login.reset_change_password_failed') }}
         </p>
         <p class="success" v-show="isSuccess">
-          {{ $t("login.reset_change_password_succeed") }}
+          {{ $t('login.reset_change_password_succeed') }}
         </p>
         <p class="has-text-centered mt2 mb2" v-show="isSuccess">
-          {{ $t("login.redirecting", {secondsLeft}) }}
+          {{ $t('login.redirecting', { secondsLeft }) }}
         </p>
-        <p
-          class="has-text-centered"
-        >
-          <router-link
-            :to="{ name: 'login' }"
-          >
+        <p class="has-text-centered">
+          <router-link :to="{ name: 'login' }">
             <span v-if="isSuccess">
-              {{ $t("login.back_to_login")}}
+              {{ $t('login.back_to_login') }}
             </span>
             <span v-else>
-              {{ $t("login.login_page")}}
+              {{ $t('login.login_page') }}
             </span>
-
           </router-link>
         </p>
       </div>
@@ -93,7 +89,7 @@ export default {
     LockIcon
   },
 
-  data () {
+  data() {
     return {
       password: '',
       password2: '',
@@ -105,7 +101,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.$store.commit('LOGIN_SUCCESS')
     this.isLoading = false
     this.isError = false
@@ -113,16 +109,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
 
   methods: {
-    ...mapActions([
-      'resetChangePassword'
-    ]),
+    ...mapActions(['resetChangePassword']),
 
-    confirmResetChangePassword () {
+    confirmResetChangePassword() {
       this.isFormError = false
       this.isError = false
       if (auth.isPasswordValid(this.password, this.password2)) {
@@ -156,7 +149,7 @@ export default {
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: this.$t('login.reset_change_password_title')
     }

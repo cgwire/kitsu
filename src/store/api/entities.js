@@ -1,15 +1,15 @@
 import client from '@/store/api/client'
 
 export default {
-  getEntityNews (entityId) {
+  getEntityNews(entityId) {
     return client.pget(`/api/data/entities/${entityId}/news`)
   },
 
-  getEntityPreviewFiles (entityId) {
+  getEntityPreviewFiles(entityId) {
     return client.pget(`/api/data/entities/${entityId}/preview-files`)
   },
 
-  getEntityTimeLogs (entityId) {
+  getEntityTimeLogs(entityId) {
     return client.pget(`/api/data/entities/${entityId}/time-spents`)
   }
 }

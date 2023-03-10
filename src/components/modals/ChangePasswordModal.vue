@@ -1,93 +1,84 @@
 <template>
-
-    <div :class="{
-      'modal': true,
+  <div
+    :class="{
+      modal: true,
       'is-active': active
-    }">
-      <div class="modal-background" @click="$emit('cancel')" ></div>
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-      <div class="modal-content">
-        <div class="box">
+    <div class="modal-content">
+      <div class="box">
+        <h1 class="title">
+          {{ $t('people.change_password_for') }} {{ person.name }}
+        </h1>
 
-          <h1 class="title">
-            {{ $t('people.change_password_for') }} {{ person.name }}
-          </h1>
+        <form v-on:submit.prevent>
+          <text-field
+            :disabled="person.is_generated_from_ldap"
+            :label="$t('people.fields.password')"
+            ref="first-password"
+            type="password"
+            @enter="confirmClicked()"
+            v-model="form.password"
+          />
+          <text-field
+            :disabled="person.is_generated_from_ldap"
+            :label="$t('people.fields.password_2')"
+            type="password"
+            @enter="confirmClicked()"
+            v-model="form.password2"
+          />
+        </form>
 
-          <form v-on:submit.prevent>
-            <text-field
-              :disabled="person.is_generated_from_ldap"
-              :label="$t('people.fields.password')"
-              ref="first-password"
-              type="password"
-              @enter="confirmClicked()"
-              v-model="form.password"
-            />
-            <text-field
-              :disabled="person.is_generated_from_ldap"
-              :label="$t('people.fields.password_2')"
-              type="password"
-              @enter="confirmClicked()"
-              v-model="form.password2"
-            />
-          </form>
-
-          <div class="flexrow">
-            <button
-              :class="{
-                button: true,
-                'is-primary': true,
-                'flexrow-item': true,
-                'is-loading': isLoading
-              }"
-              :disabled="person.is_generated_from_ldap"
-              @click="confirmClicked"
-            >
-              {{ $t('profile.change_password.button') }}
-            </button>
-            <button
-              :class="{
-                button: true,
-                'flexrow-item': true,
-                'is-loading': isLoading,
-                'is-warning': true
-              }"
-              :disabled="!(person.totp_enabled || person.email_otp_enabled)"
-              @click="disableTwoFactorAuthenticationClicked"
-            >
-              {{ $t('people.disable_2FA') }}
-            </button>
-            <div class="filler"></div>
-
-             <button
-                class="button is-link flexrow-item"
-                @click="$emit('cancel')"
-              >
-                {{ $t("main.cancel") }}
-              </button>
-          </div>
-
-          <div
-            class="error has-text-right mt1"
-            v-if="!isValid"
+        <div class="flexrow">
+          <button
+            :class="{
+              button: true,
+              'is-primary': true,
+              'flexrow-item': true,
+              'is-loading': isLoading
+            }"
+            :disabled="person.is_generated_from_ldap"
+            @click="confirmClicked"
           >
-            {{ $t('profile.change_password.unvalid') }}
-          </div>
-          <div
-            class="error has-text-right mt1"
-            v-if="isError"
+            {{ $t('profile.change_password.button') }}
+          </button>
+          <button
+            :class="{
+              button: true,
+              'flexrow-item': true,
+              'is-loading': isLoading,
+              'is-warning': true
+            }"
+            :disabled="!(person.totp_enabled || person.email_otp_enabled)"
+            @click="disableTwoFactorAuthenticationClicked"
           >
-            {{ $t('people.change_password_error') }}
-          </div>
-          <div
-            class="error has-text-right mt1"
-            v-if="isErrorDisableTwoFactorAuthentication"
-          >
-            {{ $t('people.disable_2FA_error') }}
-          </div>
+            {{ $t('people.disable_2FA') }}
+          </button>
+          <div class="filler"></div>
+
+          <button class="button is-link flexrow-item" @click="$emit('cancel')">
+            {{ $t('main.cancel') }}
+          </button>
+        </div>
+
+        <div class="error has-text-right mt1" v-if="!isValid">
+          {{ $t('profile.change_password.unvalid') }}
+        </div>
+        <div class="error has-text-right mt1" v-if="isError">
+          {{ $t('people.change_password_error') }}
+        </div>
+        <div
+          class="error has-text-right mt1"
+          v-if="isErrorDisableTwoFactorAuthentication"
+        >
+          {{ $t('people.disable_2FA_error') }}
         </div>
       </div>
     </div>
-    </template>
+  </div>
+</template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
@@ -109,7 +100,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       form: {
         password: '',
@@ -127,8 +118,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
 
   methods: {
@@ -137,7 +127,7 @@ export default {
       'disableTwoFactorAuthenticationPerson'
     ]),
 
-    confirmClicked () {
+    confirmClicked() {
       this.isErrorDisableTwoFactorAuthentication = false
       this.isError = false
       this.isLoading = true
@@ -145,24 +135,32 @@ export default {
         person: this.person,
         form: this.form
       })
-        .then(() => { this.$emit('confirm') })
-        .catch((err) => {
+        .then(() => {
+          this.$emit('confirm')
+        })
+        .catch(err => {
           if (err.isValidPassword === false) this.isValid = false
           else this.isError = true
         })
-        .finally(() => { this.isLoading = false })
+        .finally(() => {
+          this.isLoading = false
+        })
     },
 
-    disableTwoFactorAuthenticationClicked () {
+    disableTwoFactorAuthenticationClicked() {
       this.isErrorDisableTwoFactorAuthentication = false
       this.isError = false
       this.isLoading = true
       this.disableTwoFactorAuthenticationPerson(this.person)
-        .catch(() => { this.isErrorDisableTwoFactorAuthentication = true })
-        .finally(() => { this.isLoading = false })
+        .catch(() => {
+          this.isErrorDisableTwoFactorAuthentication = true
+        })
+        .finally(() => {
+          this.isLoading = false
+        })
     },
 
-    resetForm () {
+    resetForm() {
       if (this.person) {
         this.form = {
           password: '',
@@ -174,15 +172,14 @@ export default {
         this.isValid = true
       }
     }
-
   },
 
   watch: {
-    person () {
+    person() {
       this.resetForm()
     },
 
-    active () {
+    active() {
       if (this.active) {
         this.resetForm()
         setTimeout(() => {

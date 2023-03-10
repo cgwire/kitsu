@@ -1,166 +1,153 @@
 <template>
   <div class="production-settings fixed-page">
     <div class="wrapper">
-    <div class="tabs">
-      <ul>
-        <li :class="{'is-active': isActiveTab('brief')}">
-          <a @click="activeTab = 'brief'">
-            {{ $t('productions.brief.title')}}
-          </a>
-        </li>
-        <li :class="{'is-active': isActiveTab('parameters')}">
-          <a @click="activeTab = 'parameters'">
-            {{ $t('productions.parameters.title')}}
-          </a>
-        </li>
-        <li :class="{'is-active': isActiveTab('taskStatus')}">
-          <a @click="activeTab = 'taskStatus'">
-            {{ $t('task_status.title')}}
-          </a>
-        </li>
-        <li :class="{'is-active': isActiveTab('taskTypes')}">
-          <a @click="activeTab = 'taskTypes'">
-            {{ $t('task_types.title')}}
-          </a>
-        </li>
-        <li :class="{'is-active': isActiveTab('assetTypes')}">
-          <a @click="activeTab = 'assetTypes'">
-            {{ $t('asset_types.title')}}
-          </a>
-        </li>
-        <li :class="{'is-active': isActiveTab('statusAutomations')}">
-          <a @click="activeTab = 'statusAutomations'">
-            {{ $t('status_automations.title')}}
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <div class="tab" v-show="isActiveTab('brief')">
-      <ProductionBrief />
-    </div>
-
-    <div class="tab" v-show="isActiveTab('parameters')">
-      <production-parameters />
-    </div>
-
-    <div class="tab" v-show="isActiveTab('assetTypes')">
-      <div class="flexrow mt1 mb1 add-asset-type">
-        <combobox
-          class="flexrow-item"
-          :options="remainingAssetTypes"
-          v-model="assetTypeId"
-        />
-        <button
-          class="button flexrow-item"
-          @click="addAssetType"
-        >
-          {{ $t('main.add') }}
-        </button>
+      <div class="tabs">
+        <ul>
+          <li :class="{ 'is-active': isActiveTab('brief') }">
+            <a @click="activeTab = 'brief'">
+              {{ $t('productions.brief.title') }}
+            </a>
+          </li>
+          <li :class="{ 'is-active': isActiveTab('parameters') }">
+            <a @click="activeTab = 'parameters'">
+              {{ $t('productions.parameters.title') }}
+            </a>
+          </li>
+          <li :class="{ 'is-active': isActiveTab('taskStatus') }">
+            <a @click="activeTab = 'taskStatus'">
+              {{ $t('task_status.title') }}
+            </a>
+          </li>
+          <li :class="{ 'is-active': isActiveTab('taskTypes') }">
+            <a @click="activeTab = 'taskTypes'">
+              {{ $t('task_types.title') }}
+            </a>
+          </li>
+          <li :class="{ 'is-active': isActiveTab('assetTypes') }">
+            <a @click="activeTab = 'assetTypes'">
+              {{ $t('asset_types.title') }}
+            </a>
+          </li>
+          <li :class="{ 'is-active': isActiveTab('statusAutomations') }">
+            <a @click="activeTab = 'statusAutomations'">
+              {{ $t('status_automations.title') }}
+            </a>
+          </li>
+        </ul>
       </div>
-      <div
-        class="box"
-        v-if="isEmpty(currentProduction.asset_types)"
-      >
-        {{ $t('settings.production.empty_list') }}
-      </div>
-      <table class="datatable list" v-else>
-        <tbody class="datatable-body">
-          <tr
-            class="datatable-row"
-            :key="assetType.id"
-            v-for="assetType in productionAssetTypes"
-          >
-            <td class="name">{{ assetType.name }}</td>
-            <td>
-              <button
-                class="button"
-                @click="removeAssetType(assetType.id)"
-              >
-                {{ $t('main.remove') }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
 
-    <div class="tab" v-show="isActiveTab('taskTypes')">
-      <production-task-types />
-    </div>
+      <div class="tab" v-show="isActiveTab('brief')">
+        <ProductionBrief />
+      </div>
 
-    <div class="tab" v-show="isActiveTab('taskStatus')">
-      <div
-        class="flexrow mt1 mb1 add-task-status"
-        v-if="!isEmpty(remainingTaskStatuses)"
-      >
-        <combobox-status
-          class="flexrow-item selector"
-          :task-status-list="remainingTaskStatuses"
-          v-model="taskStatusId"
-        />
-        <button
-          class="button flexrow-item"
-          @click="addTaskStatus"
-        >
-          {{ $t('main.add') }}
-        </button>
+      <div class="tab" v-show="isActiveTab('parameters')">
+        <production-parameters />
       </div>
-      <div
-        class="box"
-        v-if="isEmpty(currentProduction.task_statuses)"
-      >
-        {{ $t('settings.production.empty_list') }}
-      </div>
-      <table class="datatable" v-else>
-        <thead>
-          <tr>
-            <th class="th-name">{{ $t('task_status.fields.name') }}</th>
-            <th class="th-short-name">{{ $t('task_status.fields.short_name') }}</th>
-            <th class="th-bool">{{ $t('task_status.fields.is_done') }}</th>
-            <th class="th-bool">{{ $t('task_status.fields.is_retake') }}</th>
-            <th class="th-bool">{{ $t('task_status.fields.is_artist_allowed') }}</th>
-            <th class="th-bool">{{ $t('task_status.fields.is_client_allowed') }}</th>
-          </tr>
-        </thead>
-        <tbody class="datatable-body">
-          <template v-for="taskStatus in productionTaskStatuses">
+
+      <div class="tab" v-show="isActiveTab('assetTypes')">
+        <div class="flexrow mt1 mb1 add-asset-type">
+          <combobox
+            class="flexrow-item"
+            :options="remainingAssetTypes"
+            v-model="assetTypeId"
+          />
+          <button class="button flexrow-item" @click="addAssetType">
+            {{ $t('main.add') }}
+          </button>
+        </div>
+        <div class="box" v-if="isEmpty(currentProduction.asset_types)">
+          {{ $t('settings.production.empty_list') }}
+        </div>
+        <table class="datatable list" v-else>
+          <tbody class="datatable-body">
             <tr
               class="datatable-row"
-              :key="taskStatus.id"
-              v-if="taskStatus"
+              :key="assetType.id"
+              v-for="assetType in productionAssetTypes"
             >
+              <td class="name">{{ assetType.name }}</td>
               <td>
-                {{taskStatus.name}}
-              </td>
-              <td class="name">
-                <validation-tag
-                  :is-static="true"
-                  :task="{ task_status_id: taskStatus.id }"
-                />
-              </td>
-              <boolean-cell :value=taskStatus.is_done />
-              <boolean-cell :value=taskStatus.is_retake />
-              <boolean-cell :value=taskStatus.is_artist_allowed />
-              <boolean-cell :value=taskStatus.is_client_allowed />
-              <td>
-                <button
-                  class="button"
-                  @click="removeTaskStatus(taskStatus.id)"
-                >
+                <button class="button" @click="removeAssetType(assetType.id)">
                   {{ $t('main.remove') }}
                 </button>
               </td>
             </tr>
-          </template>
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
 
-    <div class="tab" v-show="isActiveTab('statusAutomations')">
-      <production-status-automations />
+      <div class="tab" v-show="isActiveTab('taskTypes')">
+        <production-task-types />
+      </div>
+
+      <div class="tab" v-show="isActiveTab('taskStatus')">
+        <div
+          class="flexrow mt1 mb1 add-task-status"
+          v-if="!isEmpty(remainingTaskStatuses)"
+        >
+          <combobox-status
+            class="flexrow-item selector"
+            :task-status-list="remainingTaskStatuses"
+            v-model="taskStatusId"
+          />
+          <button class="button flexrow-item" @click="addTaskStatus">
+            {{ $t('main.add') }}
+          </button>
+        </div>
+        <div class="box" v-if="isEmpty(currentProduction.task_statuses)">
+          {{ $t('settings.production.empty_list') }}
+        </div>
+        <table class="datatable" v-else>
+          <thead>
+            <tr>
+              <th class="th-name">{{ $t('task_status.fields.name') }}</th>
+              <th class="th-short-name">
+                {{ $t('task_status.fields.short_name') }}
+              </th>
+              <th class="th-bool">{{ $t('task_status.fields.is_done') }}</th>
+              <th class="th-bool">{{ $t('task_status.fields.is_retake') }}</th>
+              <th class="th-bool">
+                {{ $t('task_status.fields.is_artist_allowed') }}
+              </th>
+              <th class="th-bool">
+                {{ $t('task_status.fields.is_client_allowed') }}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="datatable-body">
+            <template v-for="taskStatus in productionTaskStatuses">
+              <tr class="datatable-row" :key="taskStatus.id" v-if="taskStatus">
+                <td>
+                  {{ taskStatus.name }}
+                </td>
+                <td class="name">
+                  <validation-tag
+                    :is-static="true"
+                    :task="{ task_status_id: taskStatus.id }"
+                  />
+                </td>
+                <boolean-cell :value="taskStatus.is_done" />
+                <boolean-cell :value="taskStatus.is_retake" />
+                <boolean-cell :value="taskStatus.is_artist_allowed" />
+                <boolean-cell :value="taskStatus.is_client_allowed" />
+                <td>
+                  <button
+                    class="button"
+                    @click="removeTaskStatus(taskStatus.id)"
+                  >
+                    {{ $t('main.remove') }}
+                  </button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tab" v-show="isActiveTab('statusAutomations')">
+        <production-status-automations />
+      </div>
     </div>
-  </div>
   </div>
 </template>
 
@@ -189,7 +176,7 @@ export default {
     ValidationTag
   },
 
-  data () {
+  data() {
     return {
       activeTab: 'brief',
       assetTypeId: '',
@@ -197,7 +184,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     if (this.remainingAssetTypes.length > 0) {
       this.assetTypeId = this.remainingAssetTypes[0].value
     }
@@ -225,15 +212,16 @@ export default {
       'isTVShow'
     ]),
 
-    remainingAssetTypes () {
+    remainingAssetTypes() {
       return this.assetTypes
         .filter(t => !this.currentProduction.asset_types.includes(t.id))
         .map(t => ({ label: t.name, value: t.id }))
     },
 
-    remainingTaskStatuses () {
-      return this.taskStatus
-        .filter(s => !this.currentProduction.task_statuses.includes(s.id))
+    remainingTaskStatuses() {
+      return this.taskStatus.filter(
+        s => !this.currentProduction.task_statuses.includes(s.id)
+      )
     }
   },
 
@@ -245,26 +233,26 @@ export default {
       'removeTaskStatusFromProduction'
     ]),
 
-    isEmpty (list) {
+    isEmpty(list) {
       return !list || list.length === 0
     },
 
-    isActiveTab (tab) {
+    isActiveTab(tab) {
       return this.activeTab === tab
     },
 
-    addAssetType () {
+    addAssetType() {
       this.addAssetTypeToProduction(this.assetTypeId)
       if (this.remainingAssetTypes.length > 0) {
         this.assetTypeId = this.remainingAssetTypes[0].value
       }
     },
 
-    removeAssetType (assetTypeId) {
+    removeAssetType(assetTypeId) {
       this.removeAssetTypeFromProduction(assetTypeId)
     },
 
-    addTaskStatus () {
+    addTaskStatus() {
       this.addTaskStatusToProduction(this.taskStatusId)
       if (this.remainingTaskStatuses.length > 0) {
         this.taskStatusId = this.remainingTaskStatuses[0].id
@@ -274,7 +262,7 @@ export default {
       }
     },
 
-    async removeTaskStatus (taskStatusId) {
+    async removeTaskStatus(taskStatusId) {
       await this.removeTaskStatusFromProduction(taskStatusId)
       await this.$nextTick()
       // Reselect the remainingTaskStatuses to avoid empty taskStatusId
@@ -283,13 +271,13 @@ export default {
       }
     },
 
-    getBooleanTranslation (bool) {
+    getBooleanTranslation(bool) {
       return bool ? this.$t('main.yes') : this.$t('main.no')
     }
   },
 
   watch: {
-    activeTab () {
+    activeTab() {
       if (this.$route.query.tab !== this.activeTab) {
         this.$router.push({
           query: {
@@ -300,9 +288,11 @@ export default {
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
-      title: `${this.currentProduction.name} | ${this.$t('settings.title')} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t(
+        'settings.title'
+      )} - Kitsu`
     }
   }
 }

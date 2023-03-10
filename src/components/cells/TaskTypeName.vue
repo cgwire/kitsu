@@ -1,11 +1,11 @@
 <template>
-<td class="name">
-  <task-type-name
-    :task-type="taskType"
-    :production-id="productionId"
-    :disable="disable"
-  />
-</td>
+  <td class="name">
+    <task-type-name
+      :task-type="taskType"
+      :production-id="productionId"
+      :disable="disable"
+    />
+  </td>
 </template>
 
 <script>
@@ -35,16 +35,14 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ]),
-    color () {
+    ...mapGetters([]),
+    color() {
       if (this.entry.color.toUpperCase() === '#000000') return '$grey-strong'
       else return this.entry.color
     }
   },
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   }
 }
 </script>

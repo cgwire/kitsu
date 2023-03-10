@@ -1,19 +1,23 @@
 // Get all data displayed in statistics (needed by the stat cell widget).
 // Data follow this format: [[task-status-1-name, value], ...]
 // Set count data or frames data depending on data type.
-export const getChartData =
-  (mainStats, entryId, columnId, dataType = 'count') => {
-    if (!mainStats[entryId] || !mainStats[entryId][columnId]) return []
-    const statusData = mainStats[entryId][columnId]
-    const valueField = dataType === 'count' ? 'count' : 'frames'
-    return Object.keys(statusData)
-      .map((taskStatusId) => {
-        const data = statusData[taskStatusId]
-        const color = data.is_default ? '#6F727A' : data.color
-        return [data.name, data[valueField], color]
-      })
-      .sort(_sortData)
-  }
+export const getChartData = (
+  mainStats,
+  entryId,
+  columnId,
+  dataType = 'count'
+) => {
+  if (!mainStats[entryId] || !mainStats[entryId][columnId]) return []
+  const statusData = mainStats[entryId][columnId]
+  const valueField = dataType === 'count' ? 'count' : 'frames'
+  return Object.keys(statusData)
+    .map(taskStatusId => {
+      const data = statusData[taskStatusId]
+      const color = data.is_default ? '#6F727A' : data.color
+      return [data.name, data[valueField], color]
+    })
+    .sort(_sortData)
+}
 
 const _sortData = (a, b) => {
   if (a[0] && b[0]) {
@@ -27,24 +31,28 @@ const _sortData = (a, b) => {
   }
 }
 
-export const getRetakeChartData =
-  (mainStats, entryId, columnId, dataType = 'count') => {
-    const colorMap = {
-      done: '#22d160',
-      retake: '#ff3860',
-      other: '#6f727a'
-    }
-    if (!mainStats[entryId] || !mainStats[entryId][columnId]) return []
-    const statusData = { ...mainStats[entryId][columnId] }
-    delete statusData.evolution
-    delete statusData.max_retake_count
-    const valueField = dataType === 'count' ? 'count' : 'frames'
-    return [
-      ['retake', statusData.retake[valueField] || 0, colorMap.retake],
-      ['other', statusData.other[valueField] || 0, colorMap.other],
-      ['done', statusData.done[valueField] || 0, colorMap.done]
-    ]
+export const getRetakeChartData = (
+  mainStats,
+  entryId,
+  columnId,
+  dataType = 'count'
+) => {
+  const colorMap = {
+    done: '#22d160',
+    retake: '#ff3860',
+    other: '#6f727a'
   }
+  if (!mainStats[entryId] || !mainStats[entryId][columnId]) return []
+  const statusData = { ...mainStats[entryId][columnId] }
+  delete statusData.evolution
+  delete statusData.max_retake_count
+  const valueField = dataType === 'count' ? 'count' : 'frames'
+  return [
+    ['retake', statusData.retake[valueField] || 0, colorMap.retake],
+    ['other', statusData.other[valueField] || 0, colorMap.other],
+    ['done', statusData.done[valueField] || 0, colorMap.done]
+  ]
+}
 
 // Get all colors displayed in statistics (needed by the stat cell widget).
 export const getChartColors = (mainStats, entry, column) => {
@@ -87,22 +95,16 @@ export const getChartRetakeCount = (mainStats, entryId, columnId) => {
 // }
 export const computeStats = (entities, idField, taskStatusMap, taskMap) => {
   const results = { all: { all: {} } }
-  entities.forEach((entity) => {
+  entities.forEach(entity => {
     if (!entity.canceled) {
       const sequenceId = entity[idField]
       if (!results[sequenceId]) {
         results[sequenceId] = { all: {} }
       }
 
-      entity.tasks.forEach((taskId) => {
+      entity.tasks.forEach(taskId => {
         const task = taskMap.get(taskId)
-        computeTaskResult(
-          taskStatusMap,
-          results,
-          sequenceId,
-          entity,
-          task
-        )
+        computeTaskResult(taskStatusMap, results, sequenceId, entity, task)
       })
     }
   })
@@ -182,8 +184,7 @@ const computeTaskResult = (
 
       if (entity.nb_frames) {
         // Slice count
-        results[sequenceId][taskTypeId][taskStatusId].frames +=
-          entity.nb_frames
+        results[sequenceId][taskTypeId][taskStatusId].frames += entity.nb_frames
         results[sequenceId].all[taskStatusId].frames += entity.nb_frames
         results.all[taskTypeId][taskStatusId].frames += entity.nb_frames
         results.all.all[taskStatusId].frames += entity.nb_frames

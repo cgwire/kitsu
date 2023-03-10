@@ -1,192 +1,67 @@
 <template>
-<button
-  :class="{
-    button: true,
-    active: active,
-    small: isSmall,
-    'is-on': isOn,
-    'is-loading': isLoading,
-    'is-primary': isPrimary
-  }"
-  :title="title"
-  @click="$emit('click')"
->
-  <grid-icon
-    :class="iconClass"
-    v-if="icon === 'grid'"
-  />
-  <send-icon
-    :class="iconClass"
-    v-if="icon === 'send'"
-  />
-  <paperclip-icon
-    :class="iconClass"
-    v-if="icon === 'attach'"
-  />
-  <corner-left-down-icon
-    :class="iconClass"
-    v-if="icon === 'undo'"
-  />
-  <corner-right-down-icon
-    :class="iconClass"
-    v-if="icon === 'redo'"
-  />
-  <save-icon
-    :class="iconClass"
-    v-if="icon === 'save'"
-  />
-  <plus-icon
-    :class="iconClass"
-    v-if="icon === 'plus'"
-  />
-  <minus-icon
-    :class="iconClass"
-    v-if="icon === 'minus'"
-  />
-  <message-square-icon
-    :class="iconClass"
-    v-if="icon === 'comment'"
-  />
-  <download-icon
-    :class="iconClass"
-    v-if="icon === 'download'"
-  />
-  <upload-icon
-    :class="iconClass"
-    v-if="icon === 'upload'"
-  />
-  <film-icon
-    :class="iconClass"
-    v-if="icon === 'film'"
-  />
-  <play-icon
-    :class="iconClass"
-    v-if="icon === 'play'"
-  />
-  <pause-icon
-    :class="iconClass"
-    v-if="icon === 'pause'"
-  />
-  <edit-icon
-    :class="iconClass"
-    v-if="icon === 'edit'"
-  />
-  <image-icon
-    :class="iconClass"
-    v-if="icon === 'image'"
-  />
-  <maximize-icon
-    :class="iconClass"
-    v-if="icon === 'maximize'"
-  />
-  <trash-icon
-    :class="iconClass"
-    v-if="icon === 'delete'"
-  />
-  <rotate-ccw-icon
-    :class="iconClass"
-    v-if="icon === 'restore'"
-  />
-  <skip-back-icon
-    :class="iconClass"
-    v-if="icon === 'back'"
-  />
-  <skip-forward-icon
-    :class="iconClass"
-    v-if="icon === 'forward'"
-  />
-  <chevron-down-icon
-    :class="iconClass"
-    v-if="icon === 'down'"
-  />
-  <chevron-left-icon
-    :class="iconClass"
-    v-if="icon === 'left'"
-  />
-  <chevron-right-icon
-    :class="iconClass"
-    v-if="icon === 'right'"
-  />
-  <copy-icon
-    :class="iconClass"
-    v-if="icon === 'compare'"
-  />
-  <x-icon
-    :class="iconClass"
-    v-if="icon === 'remove'"
-  />
-  <edit2-icon
-    :class="iconClass"
-    v-if="icon === 'pencil'"
-  />
-  <layers-icon
-    :class="iconClass"
-    v-if="icon === 'layers'"
-  />
-  <type-icon
-    :class="iconClass"
-    v-if="icon === 'type'"
-  />
-  <list-icon
-    :class="iconClass"
-    v-if="icon === 'list'"
-  />
-  <filter-icon
-    :class="iconClass"
-    v-if="icon === 'funnel'"
-  />
-  <refresh-cw-icon
-    :class="iconClass"
-    v-if="icon === 'refresh'"
-  />
-  <repeat-icon
-    :class="iconClass"
-    v-if="icon === 'repeat'"
-  />
-  <volume-x-icon
-    :class="iconClass"
-    v-if="icon === 'soundoff'"
-  />
-  <volume-2-icon
-    :class="iconClass"
-    v-if="icon === 'soundon'"
-  />
-  <triangle-icon
-    :class="iconClass"
-    v-if="icon === 'triangle'"
-  />
-  <music-icon
-    :class="iconClass"
-    v-if="icon === 'music'"
-  />
-  <pen-tool-icon
-    :class="iconClass"
-    v-if="icon === 'pen'"
-  />
-  <square-icon
-    :class="iconClass"
-    v-if="icon === 'eraser'"
-  />
-  <key-icon
-    :class="iconClass"
-    v-if="icon == 'key'"
-  />
-  <span
-    :class="iconClass"
-    v-if="icon === 'laser'"
-  >
-    ⦿
-  </span>
-  <span
+  <button
     :class="{
-      text: true,
-      'is-hidden-touch': isResponsive
+      button: true,
+      active: active,
+      small: isSmall,
+      'is-on': isOn,
+      'is-loading': isLoading,
+      'is-primary': isPrimary
     }"
-    v-if="isText"
+    :title="title"
+    @click="$emit('click')"
   >
-    {{ text }}
-  </span>
-</button>
+    <grid-icon :class="iconClass" v-if="icon === 'grid'" />
+    <send-icon :class="iconClass" v-if="icon === 'send'" />
+    <paperclip-icon :class="iconClass" v-if="icon === 'attach'" />
+    <corner-left-down-icon :class="iconClass" v-if="icon === 'undo'" />
+    <corner-right-down-icon :class="iconClass" v-if="icon === 'redo'" />
+    <save-icon :class="iconClass" v-if="icon === 'save'" />
+    <plus-icon :class="iconClass" v-if="icon === 'plus'" />
+    <minus-icon :class="iconClass" v-if="icon === 'minus'" />
+    <message-square-icon :class="iconClass" v-if="icon === 'comment'" />
+    <download-icon :class="iconClass" v-if="icon === 'download'" />
+    <upload-icon :class="iconClass" v-if="icon === 'upload'" />
+    <film-icon :class="iconClass" v-if="icon === 'film'" />
+    <play-icon :class="iconClass" v-if="icon === 'play'" />
+    <pause-icon :class="iconClass" v-if="icon === 'pause'" />
+    <edit-icon :class="iconClass" v-if="icon === 'edit'" />
+    <image-icon :class="iconClass" v-if="icon === 'image'" />
+    <maximize-icon :class="iconClass" v-if="icon === 'maximize'" />
+    <trash-icon :class="iconClass" v-if="icon === 'delete'" />
+    <rotate-ccw-icon :class="iconClass" v-if="icon === 'restore'" />
+    <skip-back-icon :class="iconClass" v-if="icon === 'back'" />
+    <skip-forward-icon :class="iconClass" v-if="icon === 'forward'" />
+    <chevron-down-icon :class="iconClass" v-if="icon === 'down'" />
+    <chevron-left-icon :class="iconClass" v-if="icon === 'left'" />
+    <chevron-right-icon :class="iconClass" v-if="icon === 'right'" />
+    <copy-icon :class="iconClass" v-if="icon === 'compare'" />
+    <x-icon :class="iconClass" v-if="icon === 'remove'" />
+    <edit2-icon :class="iconClass" v-if="icon === 'pencil'" />
+    <layers-icon :class="iconClass" v-if="icon === 'layers'" />
+    <type-icon :class="iconClass" v-if="icon === 'type'" />
+    <list-icon :class="iconClass" v-if="icon === 'list'" />
+    <filter-icon :class="iconClass" v-if="icon === 'funnel'" />
+    <refresh-cw-icon :class="iconClass" v-if="icon === 'refresh'" />
+    <repeat-icon :class="iconClass" v-if="icon === 'repeat'" />
+    <volume-x-icon :class="iconClass" v-if="icon === 'soundoff'" />
+    <volume-2-icon :class="iconClass" v-if="icon === 'soundon'" />
+    <triangle-icon :class="iconClass" v-if="icon === 'triangle'" />
+    <music-icon :class="iconClass" v-if="icon === 'music'" />
+    <pen-tool-icon :class="iconClass" v-if="icon === 'pen'" />
+    <square-icon :class="iconClass" v-if="icon === 'eraser'" />
+    <key-icon :class="iconClass" v-if="icon == 'key'" />
+    <span :class="iconClass" v-if="icon === 'laser'"> ⦿ </span>
+    <span
+      :class="{
+        text: true,
+        'is-hidden-touch': isResponsive
+      }"
+      v-if="isText"
+    >
+      {{ text }}
+    </span>
+  </button>
 </template>
 
 <script>
@@ -318,11 +193,11 @@ export default {
   },
 
   computed: {
-    isText () {
+    isText() {
       return this.text && this.text.length > 0
     },
 
-    iconClass () {
+    iconClass() {
       return {
         icon: true,
         'is-small': true,
@@ -343,7 +218,7 @@ export default {
 }
 
 .active {
-  box-shadow: inset 0 0 2px 2px var(--box-shadow)
+  box-shadow: inset 0 0 2px 2px var(--box-shadow);
 }
 
 .small {

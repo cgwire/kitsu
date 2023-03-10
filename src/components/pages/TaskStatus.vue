@@ -1,6 +1,5 @@
 <template>
   <div class="task-status page fixed-page">
-
     <list-page-header
       :title="$t('task_status.title')"
       :new-entry-label="$t('task_status.new_task_status')"
@@ -33,7 +32,6 @@
       @cancel="modals.del = false"
       @confirm="confirmDeleteTaskStatus"
     />
-
   </div>
 </template>
 
@@ -54,7 +52,7 @@ export default {
     TaskStatusList
   },
 
-  data () {
+  data() {
     return {
       taskStatusToDelete: null,
       taskStatusToEdit: { color: '#000000' },
@@ -76,21 +74,15 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'taskStatus',
-      'taskStatusMap'
-    ])
+    ...mapGetters(['taskStatus', 'taskStatusMap'])
   },
 
-  created () {
-  },
+  created() {},
 
   methods: {
-    ...mapActions([
-      'deleteTaskStatus'
-    ]),
+    ...mapActions(['deleteTaskStatus']),
 
-    confirmEditTaskStatus (form) {
+    confirmEditTaskStatus(form) {
       const isNew = !(this.taskStatusToEdit && this.taskStatusToEdit.id)
       let action = 'newTaskStatus'
       if (!isNew) {
@@ -100,19 +92,20 @@ export default {
 
       this.loading.edit = true
       this.loading.del = false
-      this.$store.dispatch(action, form)
+      this.$store
+        .dispatch(action, form)
         .then(() => {
           this.loading.edit = false
           this.modals.edit = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.edit = false
           this.errors.edit = true
         })
     },
 
-    confirmDeleteTaskStatus () {
+    confirmDeleteTaskStatus() {
       this.loading.del = true
       this.errors.del = false
       this.deleteTaskStatus(this.taskStatusToDelete)
@@ -120,14 +113,14 @@ export default {
           this.loading.del = false
           this.modals.del = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.del = false
           this.errors.del = true
         })
     },
 
-    deleteText () {
+    deleteText() {
       const taskStatus = this.taskStatusToDelete
       if (taskStatus) {
         return this.$t('task_status.delete_text', { name: taskStatus.name })
@@ -136,26 +129,25 @@ export default {
       }
     },
 
-    onNewClicked () {
+    onNewClicked() {
       this.taskStatusToEdit = { color: '#000000' }
       this.modals.edit = true
     },
 
-    onEditClicked (taskStatus) {
+    onEditClicked(taskStatus) {
       this.taskStatusToEdit = taskStatus
       this.modals.edit = true
     },
 
-    onDeleteClicked (taskStatus) {
+    onDeleteClicked(taskStatus) {
       this.taskStatusToDelete = taskStatus
       this.modals.del = true
     }
   },
 
-  watch: {
-  },
+  watch: {},
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: `${this.$t('task_status.title')} - Kitsu`
     }
@@ -163,5 +155,4 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

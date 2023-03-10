@@ -1,260 +1,262 @@
 <template>
-<div class="data-list task-list">
-  <div
-    class="datatable-wrapper"
-    ref="body"
-    v-scroll="onBodyScroll"
-  >
-    <table class="datatable">
-      <thead class="datatable-head">
-        <tr>
-          <th
-            scope="col"
-            class="production datatable-row-header datatable-row-header--nobd"
-            ref="th-prod"
-          >
-            {{ $t('tasks.fields.production') }}
-          </th>
-          <th
-            scope="col"
-            class="type datatable-row-header datatable-row-header--nobd"
-            ref="th-type"
-            :style="{left: colTypePosX}"
-          >
-            {{ $t('tasks.fields.task_type') }}
-          </th>
-          <th
-            scope="col"
-            class="name datatable-row-header"
-            ref="th-name"
-            :style="{left: colNamePosX}"
-          >
-            {{ $t('tasks.fields.entity') }}
-          </th>
-          <th class="assignees" ref="th-assignees" v-if="isToCheck">
-            {{ $t('tasks.fields.assignees') }}
-          </th>
-          <th
-            class="description"
-            scope="col"
-            v-if="isDescriptionPresent && !isToCheck"
-          >
-            {{ $t('assets.fields.description') }}
-          </th>
-          <th
-            scope="col"
-            class="estimation"
-            :title="$t('main.estimation')"
-          >
-            {{ $t('main.estimation_short') }}
-          </th>
-          <th scope="col" class="estimation">
-            {{ $t('tasks.fields.duration').substring(0, 3) }}.
-          </th>
-          <th scope="col" class="start-date" v-if="!isToCheck">
-            {{ $t('tasks.fields.start_date_short') }}
-          </th>
-          <th scope="col" class="due-date">
-            {{ $t('tasks.fields.due_date') }}
-          </th>
-          <metadata-header
-            :key="'desc-header' + field_name"
-            :descriptor="mergeMetadataDescriptors(
-              metadataDescriptorsMap[field_name])"
-            :no-menu="true"
-            v-for="field_name in Object.keys(metadataDescriptorsMap)"
-          />
-          <th scope="col" class="status">
-            {{ $t('tasks.fields.task_status') }}
-          </th>
-          <template v-if="!isToCheck">
-          <th scope="col" class="last-comment" v-if="!done">
-            {{ $t('tasks.fields.last_comment') }}
-          </th>
-          <th scope="col" class="end-date" v-else>
-            {{ $t('tasks.fields.end_date') }}
-          </th>
-          </template>
-          <th class="actions" v-else>
-          </th>
-        </tr>
-      </thead>
-      <tbody class="datatable-body" v-if="tasks.length > 0">
-        <tr
-          v-for="(entry, i) in displayedTasks"
-          :key="entry + '-' + i"
-          :class="{
-            'datatable-row': true,
-            'datatable-row--selectable': true,
-            selected:
-              selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
-          }"
-          @click="onLineClicked(i, $event)"
-        >
-          <td
-            class="production datatable-row-header datatable-row-header--nobd"
-            scope="row"
-          >
-            <production-name-cell
-              :is-tooltip="true"
-              :entry="productionMap.get(entry.project_id)"
-              :only-avatar="true"
+  <div class="data-list task-list">
+    <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
+      <table class="datatable">
+        <thead class="datatable-head">
+          <tr>
+            <th
+              scope="col"
+              class="production datatable-row-header datatable-row-header--nobd"
+              ref="th-prod"
+            >
+              {{ $t('tasks.fields.production') }}
+            </th>
+            <th
+              scope="col"
+              class="type datatable-row-header datatable-row-header--nobd"
+              ref="th-type"
+              :style="{ left: colTypePosX }"
+            >
+              {{ $t('tasks.fields.task_type') }}
+            </th>
+            <th
+              scope="col"
+              class="name datatable-row-header"
+              ref="th-name"
+              :style="{ left: colNamePosX }"
+            >
+              {{ $t('tasks.fields.entity') }}
+            </th>
+            <th class="assignees" ref="th-assignees" v-if="isToCheck">
+              {{ $t('tasks.fields.assignees') }}
+            </th>
+            <th
+              class="description"
+              scope="col"
+              v-if="isDescriptionPresent && !isToCheck"
+            >
+              {{ $t('assets.fields.description') }}
+            </th>
+            <th scope="col" class="estimation" :title="$t('main.estimation')">
+              {{ $t('main.estimation_short') }}
+            </th>
+            <th scope="col" class="estimation">
+              {{ $t('tasks.fields.duration').substring(0, 3) }}.
+            </th>
+            <th scope="col" class="start-date" v-if="!isToCheck">
+              {{ $t('tasks.fields.start_date_short') }}
+            </th>
+            <th scope="col" class="due-date">
+              {{ $t('tasks.fields.due_date') }}
+            </th>
+            <metadata-header
+              :key="'desc-header' + field_name"
+              :descriptor="
+                mergeMetadataDescriptors(metadataDescriptorsMap[field_name])
+              "
+              :no-menu="true"
+              v-for="field_name in Object.keys(metadataDescriptorsMap)"
             />
-          </td>
-          <task-type-cell
-            class="type datatable-row-header datatable-row-header--nobd"
-            :production-id="entry.project_id"
-            :task-type="getTaskType(entry)"
-            :style="{left: colTypePosX}"
-          />
-          <td class="name datatable-row-header" :style="{left: colNamePosX}">
-            <div class="flexrow">
-              <entity-thumbnail
-                :empty-width="60"
-                :empty-height="40"
-                :entity="{preview_file_id: entry.entity_preview_file_id}"
+            <th scope="col" class="status">
+              {{ $t('tasks.fields.task_status') }}
+            </th>
+            <template v-if="!isToCheck">
+              <th scope="col" class="last-comment" v-if="!done">
+                {{ $t('tasks.fields.last_comment') }}
+              </th>
+              <th scope="col" class="end-date" v-else>
+                {{ $t('tasks.fields.end_date') }}
+              </th>
+            </template>
+            <th class="actions" v-else></th>
+          </tr>
+        </thead>
+        <tbody class="datatable-body" v-if="tasks.length > 0">
+          <tr
+            v-for="(entry, i) in displayedTasks"
+            :key="entry + '-' + i"
+            :class="{
+              'datatable-row': true,
+              'datatable-row--selectable': true,
+              selected:
+                selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
+            }"
+            @click="onLineClicked(i, $event)"
+          >
+            <td
+              class="production datatable-row-header datatable-row-header--nobd"
+              scope="row"
+            >
+              <production-name-cell
+                :is-tooltip="true"
+                :entry="productionMap.get(entry.project_id)"
+                :only-avatar="true"
               />
-              <router-link class="entity-name" :to="entityPath(entry)">
-                {{ entry.full_entity_name }}
-              </router-link>
-            </div>
-          </td>
-          <description-cell
-            class="description"
-            :entry="{description: entry.entity_description}"
-            v-if="isDescriptionPresent && !isToCheck"
-          />
-          <td class="assignees" v-if="isToCheck">
-            <div class="flexrow">
-              <people-avatar
-                class="flexrow-item"
-                :key="entry.id + '-' + personId"
-                :person="personMap.get(personId)"
-                :size="30"
-                :font-size="16"
-                v-for="personId in entry.assignees"
-              />
-            </div>
-          </td>
-          <td class="estimation">
-            {{ formatDuration(entry.estimation) }}
-          </td>
-          <td class="estimation">
-            {{ formatDuration(entry.duration) }}
-          </td>
-          <td class="start-date" v-if="!isToCheck">
-            {{ formatDate(entry.start_date) }}
-          </td>
-          <td class="due-date">
-            {{ formatDate(entry.due_date) }}
-          </td>
-          <td
-            class="metadata-descriptor"
-            :key="'desc-' + entry.id + '-' + fieldName"
-            v-for="fieldName in Object.keys(metadataDescriptorsMap)">
-            <div
-              v-if="entry.entity_data &&
-                getMetadataDescriptor(fieldName, entry)"
+            </td>
+            <task-type-cell
+              class="type datatable-row-header datatable-row-header--nobd"
+              :production-id="entry.project_id"
+              :task-type="getTaskType(entry)"
+              :style="{ left: colTypePosX }"
+            />
+            <td
+              class="name datatable-row-header"
+              :style="{ left: colNamePosX }"
+            >
+              <div class="flexrow">
+                <entity-thumbnail
+                  :empty-width="60"
+                  :empty-height="40"
+                  :entity="{ preview_file_id: entry.entity_preview_file_id }"
+                />
+                <router-link class="entity-name" :to="entityPath(entry)">
+                  {{ entry.full_entity_name }}
+                </router-link>
+              </div>
+            </td>
+            <description-cell
+              class="description"
+              :entry="{ description: entry.entity_description }"
+              v-if="isDescriptionPresent && !isToCheck"
+            />
+            <td class="assignees" v-if="isToCheck">
+              <div class="flexrow">
+                <people-avatar
+                  class="flexrow-item"
+                  :key="entry.id + '-' + personId"
+                  :person="personMap.get(personId)"
+                  :size="30"
+                  :font-size="16"
+                  v-for="personId in entry.assignees"
+                />
+              </div>
+            </td>
+            <td class="estimation">
+              {{ formatDuration(entry.estimation) }}
+            </td>
+            <td class="estimation">
+              {{ formatDuration(entry.duration) }}
+            </td>
+            <td class="start-date" v-if="!isToCheck">
+              {{ formatDate(entry.start_date) }}
+            </td>
+            <td class="due-date">
+              {{ formatDate(entry.due_date) }}
+            </td>
+            <td
+              class="metadata-descriptor"
+              :key="'desc-' + entry.id + '-' + fieldName"
+              v-for="fieldName in Object.keys(metadataDescriptorsMap)"
             >
               <div
-                v-if="getDescriptorChecklistValues(
-                  getMetadataDescriptor(fieldName, entry)).length > 0"
+                v-if="
+                  entry.entity_data && getMetadataDescriptor(fieldName, entry)
+                "
               >
-                <p
-                  v-for="(option, i) in getDescriptorChecklistValues(
-                    getMetadataDescriptor(fieldName, entry))"
-                  :key="`${entry.id}-
+                <div
+                  v-if="
+                    getDescriptorChecklistValues(
+                      getMetadataDescriptor(fieldName, entry)
+                    ).length > 0
+                  "
+                >
+                  <p
+                    v-for="(option, i) in getDescriptorChecklistValues(
+                      getMetadataDescriptor(fieldName, entry)
+                    )"
+                    :key="`${entry.id}-
                     ${getMetadataDescriptor(fieldName, entry).id}
                     -${i}-${option.text}-div`"
-                >
-                  <input
-                    type="checkbox"
-                    disabled
-                    :id="`${entry.id}
-                      -${getMetadataDescriptor(fieldName, entry).id}
-                      -${i}-${option.text}-input`"
-                    :checked="getMetadataChecklistValues(
-                      getMetadataDescriptor(fieldName, entry)
-                      , entry)[option.text]"
-                  />
-                  <label
-                    style="cursor: pointer;"
-                    :for="`${entry.id}
-                      -${getMetadataDescriptor(fieldName, entry).id}
-                      -${i}-${option.text}-input`"
                   >
-                    {{ option.text }}
-                  </label>
+                    <input
+                      type="checkbox"
+                      disabled
+                      :id="`${entry.id}
+                      -${getMetadataDescriptor(fieldName, entry).id}
+                      -${i}-${option.text}-input`"
+                      :checked="
+                        getMetadataChecklistValues(
+                          getMetadataDescriptor(fieldName, entry),
+                          entry
+                        )[option.text]
+                      "
+                    />
+                    <label
+                      style="cursor: pointer"
+                      :for="`${entry.id}
+                      -${getMetadataDescriptor(fieldName, entry).id}
+                      -${i}-${option.text}-input`"
+                    >
+                      {{ option.text }}
+                    </label>
+                  </p>
+                </div>
+                <p v-else>
+                  {{
+                    getMetadataFieldValue(
+                      getMetadataDescriptor(fieldName, entry),
+                      entry
+                    )
+                  }}
                 </p>
               </div>
-              <p
-                v-else
-              >
-                {{ getMetadataFieldValue(getMetadataDescriptor(fieldName, entry)
-                , entry) }}
-              </p>
-            </div>
-          </td>
-          <validation-cell
-            class="status unselectable"
-            :ref="'validation-' + i + '-0'"
-            :task-test="entry"
-            :is-border="false"
-            :is-assignees="false"
-            :selectable="!done"
-            :clickable="false"
-            :selected="selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false"
-            :rowX="i"
-            :columnY="0"
-            :column="entry.taskStatus"
-            @select="onTaskSelected"
-            @unselect="onTaskUnselected"
-          />
-          <template v-if="!isToCheck">
-            <last-comment-cell
-              class="last-comment"
-              :task="entry"
-              v-if="!done"
-            />
-            <td class="end-date" v-else>
-              {{ formatDate(entry.end_date) }}
             </td>
-          </template>
-          <th class="actions" v-else>
-          </th>
-       </tr>
-      </tbody>
-    </table>
-  </div>
+            <validation-cell
+              class="status unselectable"
+              :ref="'validation-' + i + '-0'"
+              :task-test="entry"
+              :is-border="false"
+              :is-assignees="false"
+              :selectable="!done"
+              :clickable="false"
+              :selected="
+                selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
+              "
+              :rowX="i"
+              :columnY="0"
+              :column="entry.taskStatus"
+              @select="onTaskSelected"
+              @unselect="onTaskUnselected"
+            />
+            <template v-if="!isToCheck">
+              <last-comment-cell
+                class="last-comment"
+                :task="entry"
+                v-if="!done"
+              />
+              <td class="end-date" v-else>
+                {{ formatDate(entry.end_date) }}
+              </td>
+            </template>
+            <th class="actions" v-else></th>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
+    <table-info :is-loading="isLoading" :is-error="isError" />
 
-  <div
-    class="has-text-centered empty-list"
-    v-if="tasks.length === 0 && !isLoading"
-  >
-    <p>
-      <img src="../../assets/illustrations/empty_todo.png" />
+    <div
+      class="has-text-centered empty-list"
+      v-if="tasks.length === 0 && !isLoading"
+    >
+      <p>
+        <img src="../../assets/illustrations/empty_todo.png" />
+      </p>
+      <p>
+        {{ emptyText }}
+      </p>
+    </div>
+
+    <p class="has-text-centered footer-info" v-if="tasks.length && !isLoading">
+      {{ tasks.length }} {{ $tc('tasks.tasks', tasks.length) }} ({{
+        formatDuration(timeEstimated)
+      }}
+      {{ $tc('main.days_estimated', isTimeEstimatedPlural) }},
+      {{ formatDuration(timeSpent) }}
+      {{ $tc('main.days_spent', isTimeSpentPlural) }})
     </p>
-    <p>
-      {{ emptyText }}
-    </p>
   </div>
-
-  <p
-    class="has-text-centered footer-info"
-    v-if="tasks.length && !isLoading"
-  >
-    {{ tasks.length }} {{ $tc('tasks.tasks', tasks.length) }}
-    ({{ formatDuration(timeEstimated) }}
-     {{ $tc('main.days_estimated', isTimeEstimatedPlural) }},
-     {{ formatDuration(timeSpent) }}
-     {{ $tc('main.days_spent', isTimeSpentPlural) }})
-  </p>
-</div>
 </template>
 
 <script>
@@ -323,7 +325,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       page: 1,
       colTypePosX: '',
@@ -331,7 +333,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.page = 1
     this.resizeHeaders()
     window.addEventListener('keydown', this.onKeyDown, false)
@@ -342,7 +344,7 @@ export default {
       'px'
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     window.removeEventListener('keydown', this.onKeyDown)
   },
 
@@ -356,23 +358,23 @@ export default {
       'user'
     ]),
 
-    displayedTasks () {
+    displayedTasks() {
       return this.tasks.slice(0, this.page * PAGE_SIZE)
     },
 
-    isDescriptionPresent () {
+    isDescriptionPresent() {
       return this.tasks.some(task => {
         return task.entity_description && task.entity_description.length > 0
       })
     },
 
-    metadataDescriptorsMap () {
+    metadataDescriptorsMap() {
       const metadataDescriptorsMap = {}
       if (!this.isToCheck) {
         this.openProductions.forEach(project => {
           project.descriptors.forEach(descriptor => {
-            const isUserDepartment = this.user.departments.some(
-              department => descriptor.departments.includes(department)
+            const isUserDepartment = this.user.departments.some(department =>
+              descriptor.departments.includes(department)
             )
             if (isUserDepartment) {
               // group them by field_name if they have the same field_name
@@ -382,8 +384,7 @@ export default {
               const descriptorFieldNameEntry =
                 metadataDescriptorsMap[descriptor.field_name]
               // group them by entity_type if the have the same entity_type
-              if (!(descriptor.entity_type in
-                descriptorFieldNameEntry)) {
+              if (!(descriptor.entity_type in descriptorFieldNameEntry)) {
                 descriptorFieldNameEntry[descriptor.entity_type] = {}
               }
               descriptorFieldNameEntry[descriptor.entity_type][project.id] =
@@ -395,53 +396,48 @@ export default {
       return metadataDescriptorsMap
     },
 
-    timeSpent () {
+    timeSpent() {
       return this.displayedTasks.reduce((acc, task) => acc + task.duration, 0)
     },
 
-    isTimeSpentPlural () {
-      return Math.floor(
-        (this.timeSpent ? this.timeSpent : 0) / 60 / 8
-      ) <= 1
+    isTimeSpentPlural() {
+      return Math.floor((this.timeSpent ? this.timeSpent : 0) / 60 / 8) <= 1
     },
 
-    timeEstimated () {
-      return this.displayedTasks.reduce(
-        (acc, task) => acc + task.estimation, 0
+    timeEstimated() {
+      return this.displayedTasks.reduce((acc, task) => acc + task.estimation, 0)
+    },
+
+    isTimeEstimatedPlural() {
+      return (
+        Math.floor((this.timeEstimated ? this.timeEstimated : 0) / 60 / 8) <= 1
       )
-    },
-
-    isTimeEstimatedPlural () {
-      return Math.floor(
-        (this.timeEstimated ? this.timeEstimated : 0) / 60 / 8
-      ) <= 1
     }
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    setScrollPosition (scrollPosition) {
+    setScrollPosition(scrollPosition) {
       if (this.$refs.body) {
         this.$refs.body.scrollTop = scrollPosition
       }
     },
 
-    formatDate (date) {
+    formatDate(date) {
       return date ? formatSimpleDate(date) : ''
     },
 
-    onBodyScroll (event, position) {
+    onBodyScroll(event, position) {
       this.$emit('scroll', position.scrollTop)
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
-      if (maxHeight < (position.scrollTop + 100)) {
+      if (maxHeight < position.scrollTop + 100) {
         this.page++
       }
     },
 
-    onLineClicked (i, event) {
+    onLineClicked(i, event) {
       const ref = 'validation-' + i + '-0'
       const validationCell = this.$refs[ref][0]
       if (validationCell) {
@@ -449,7 +445,7 @@ export default {
       }
     },
 
-    onTaskSelected (validationInfo) {
+    onTaskSelected(validationInfo) {
       if (validationInfo.isShiftKey) {
         if (this.lastSelection) {
           let startX = this.lastSelection.x
@@ -486,7 +482,7 @@ export default {
       }
     },
 
-    onTaskUnselected (validationInfo) {
+    onTaskUnselected(validationInfo) {
       if (!validationInfo.isCtrlKey) {
         if (this.nbSelectedTasks === 1) {
           this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
@@ -503,17 +499,21 @@ export default {
       }
     },
 
-    getTaskType (entry) {
+    getTaskType(entry) {
       const taskType = this.taskTypeMap.get(entry.task_type_id)
       const production = this.productionMap.get(entry.project_id)
       taskType.episode_id = entry.episode_id
-      if (production && production.production_type === 'tvshow' && !entry.episode_id) {
+      if (
+        production &&
+        production.production_type === 'tvshow' &&
+        !entry.episode_id
+      ) {
         taskType.episode_id = production.first_episode_id
       }
       return taskType
     },
 
-    entityPath (entity) {
+    entityPath(entity) {
       const entityType = entity.sequence_name ? 'shot' : 'asset'
       const route = {
         name: entityType,
@@ -546,9 +546,10 @@ export default {
       return route
     },
 
-    onKeyDown (event) {
-      const lastSelection =
-        this.lastSelection ? this.lastSelection : { x: 0, y: 0 }
+    onKeyDown(event) {
+      const lastSelection = this.lastSelection
+        ? this.lastSelection
+        : { x: 0, y: 0 }
       const i = lastSelection.x
       const j = lastSelection.y
       let validationCell = null
@@ -566,7 +567,7 @@ export default {
       }
     },
 
-    scrollToValidationCell (validationCell) {
+    scrollToValidationCell(validationCell) {
       if (validationCell) {
         const margin = 20
         const rect = validationCell.$el.getBoundingClientRect()
@@ -578,14 +579,10 @@ export default {
 
         if (isBelow) {
           const scrollingRequired = rect.bottom - listRect.bottom + margin
-          this.setScrollPosition(
-            this.$refs.body.scrollTop + scrollingRequired
-          )
+          this.setScrollPosition(this.$refs.body.scrollTop + scrollingRequired)
         } else if (isAbove) {
           const scrollingRequired = listRect.top - rect.top + margin
-          this.setScrollPosition(
-            this.$refs.body.scrollTop - scrollingRequired
-          )
+          this.setScrollPosition(this.$refs.body.scrollTop - scrollingRequired)
         }
 
         if (isRight) {
@@ -602,14 +599,14 @@ export default {
       }
     },
 
-    select (i, j) {
+    select(i, j) {
       const ref = 'validation-' + i + '-' + j
       const validationCell = this.$refs[ref]
       if (validationCell) validationCell[0].$el.click()
       return validationCell ? validationCell[0] : 0
     },
 
-    resizeHeaders () {
+    resizeHeaders() {
       const tableBody = this.$refs['body-tbody']
       const isTableBodyContainLines = tableBody && tableBody.children
       if (isTableBodyContainLines) {
@@ -628,32 +625,35 @@ export default {
       }
     },
 
-    mergeMetadataDescriptors (descriptors) {
+    mergeMetadataDescriptors(descriptors) {
       const firstKeyEntityType = Object.keys(descriptors)[0]
       const firstKeyProjectId = Object.keys(descriptors[firstKeyEntityType])[0]
       const mergedDescriptors = {
         departments: [],
-        field_name: descriptors[firstKeyEntityType][firstKeyProjectId]
-          .field_name,
-        name: descriptors[firstKeyEntityType][firstKeyProjectId]
-          .name
+        field_name:
+          descriptors[firstKeyEntityType][firstKeyProjectId].field_name,
+        name: descriptors[firstKeyEntityType][firstKeyProjectId].name
       }
       // merge departments
       Object.keys(descriptors).forEach(entityType =>
         Object.keys(descriptors[entityType]).forEach(projectId => {
           mergedDescriptors.departments = [
-            ...new Set([...descriptors[entityType][projectId].departments,
-              ...mergedDescriptors.departments])]
-        }))
+            ...new Set([
+              ...descriptors[entityType][projectId].departments,
+              ...mergedDescriptors.departments
+            ])
+          ]
+        })
+      )
       return mergedDescriptors
     },
 
-    getMetadataDescriptor (fieldName, entry) {
+    getMetadataDescriptor(fieldName, entry) {
       const entityType = entry.task_type_for_entity
       const projectId = entry.project_id
-      return (this.metadataDescriptorsMap[fieldName] &&
+      return this.metadataDescriptorsMap[fieldName] &&
         this.metadataDescriptorsMap[fieldName][entityType] &&
-        this.metadataDescriptorsMap[fieldName][entityType][projectId])
+        this.metadataDescriptorsMap[fieldName][entityType][projectId]
         ? this.metadataDescriptorsMap[fieldName][entityType][projectId]
         : null
     }
@@ -662,7 +662,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;
@@ -733,8 +732,8 @@ td.due-date {
 }
 
 th.last-comment {
- max-width: 100%;
- width: 100%;
+  max-width: 100%;
+  width: 100%;
 }
 
 td.last-comment {

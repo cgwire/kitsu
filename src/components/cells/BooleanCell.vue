@@ -1,7 +1,7 @@
 <template>
-<td class="has-text-centered">
-  <boolean-rep class="bool-icon" :value="value" />
-</td>
+  <td class="has-text-centered">
+    <boolean-rep class="bool-icon" :value="value" />
+  </td>
 </template>
 
 <script>
@@ -13,7 +13,7 @@ export default {
     BooleanRep
   },
 
-  data () {
+  data() {
     return {}
   },
 
@@ -24,11 +24,9 @@ export default {
     }
   },
 
-  computed: {
-  },
+  computed: {},
 
-  methods: {
-  }
+  methods: {}
 }
 </script>
 

@@ -1,161 +1,133 @@
 <template>
-<div class="data-list">
-  <div
-    class="datatable-wrapper"
-    ref="body"
-    v-scroll="onBodyScroll"
-  >
-    <table class="datatable">
-      <thead class="datatable-head">
-        <tr>
-          <th scope="col" class="name datatable-row-header" ref="th-sequence">
-            {{ $t('shots.fields.sequence') }}
-          </th>
-          <th scope="col" class="validation">{{ $t('main.all') }}</th>
-          <th
-            scope="col"
-            class="validation validation-cell"
-            :key="columnId"
-            v-for="columnId in validationColumns"
-            v-if="!isLoading"
-          >
-            <div
-              class="flexrow validation-content"
-              :style="getValidationStyle(columnId)"
+  <div class="data-list">
+    <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
+      <table class="datatable">
+        <thead class="datatable-head">
+          <tr>
+            <th scope="col" class="name datatable-row-header" ref="th-sequence">
+              {{ $t('shots.fields.sequence') }}
+            </th>
+            <th scope="col" class="validation">{{ $t('main.all') }}</th>
+            <th
+              scope="col"
+              class="validation validation-cell"
+              :key="columnId"
+              v-for="columnId in validationColumns"
+              v-if="!isLoading"
             >
-              <router-link
-                class="flexrow-item"
-                :to="taskTypePath(columnId)"
-                v-if="!isCurrentUserClient"
+              <div
+                class="flexrow validation-content"
+                :style="getValidationStyle(columnId)"
               >
-                {{ taskTypeMap.get(columnId).name }}
-              </router-link>
-              <span
-                class="flexrow-item"
-                v-else
-              >
-                {{ taskTypeMap.get(columnId).name }}
-              </span>
-            </div>
-          </th>
-          <th scope="col" class="actions"></th>
-        </tr>
-      </thead>
-      <tbody
-        class="datatable-body"
-        v-if="!isLoading"
-      >
+                <router-link
+                  class="flexrow-item"
+                  :to="taskTypePath(columnId)"
+                  v-if="!isCurrentUserClient"
+                >
+                  {{ taskTypeMap.get(columnId).name }}
+                </router-link>
+                <span class="flexrow-item" v-else>
+                  {{ taskTypeMap.get(columnId).name }}
+                </span>
+              </div>
+            </th>
+            <th scope="col" class="actions"></th>
+          </tr>
+        </thead>
+        <tbody class="datatable-body" v-if="!isLoading">
+          <tr class="all-line datatable-row" v-if="showAll && !isEmptyList">
+            <th scope="row" class="name datatable-row-header">
+              {{ $t('sequences.all_sequences') }}
+            </th>
 
-        <tr
-          class="all-line datatable-row"
-          v-if="showAll && !isEmptyList"
-        >
-          <th scope="row" class="name datatable-row-header">
-            {{ $t('sequences.all_sequences') }}
-          </th>
+            <stats-cell
+              class="all-validation"
+              :colors="chartColors('all', 'all')"
+              :data="chartData('all', 'all')"
+              :frames-data="chartData('all', 'all', 'frames')"
+              :countMode="countMode"
+              :displayMode="displayMode"
+            />
 
-          <stats-cell
-            class="all-validation"
-            :colors="chartColors('all', 'all')"
-            :data="chartData('all', 'all')"
-            :frames-data="chartData('all', 'all', 'frames')"
-            :countMode="countMode"
-            :displayMode="displayMode"
-          />
+            <stats-cell
+              :style="getValidationStyle(columnId)"
+              :key="'all-' + columnId"
+              :colors="chartColors('all', columnId)"
+              :data="chartData('all', columnId)"
+              :frames-data="chartData('all', columnId, 'frames')"
+              :countMode="countMode"
+              :displayMode="displayMode"
+              v-for="columnId in validationColumns"
+            />
 
-          <stats-cell
-            :style="getValidationStyle(columnId)"
-            :key="'all-' + columnId"
-            :colors="chartColors('all', columnId)"
-            :data="chartData('all', columnId)"
-            :frames-data="chartData('all', columnId, 'frames')"
-            :countMode="countMode"
-            :displayMode="displayMode"
-            v-for="columnId in validationColumns"
-          />
+            <td class="actions"></td>
+          </tr>
 
-          <td class="actions"></td>
-        </tr>
-
-        <tr
-          class="datatable-row"
-          :key="entry.id"
-          v-for="entry in entries"
-          v-if="isEntryStats(entry.id)"
-        >
-
-          <td scope="row" class="name datatable-row-header">
-            {{ entry.name }}
-          </td>
-
-          <stats-cell
-            :colors="chartColors(entry.id, 'all')"
-            :data="chartData(entry.id, 'all')"
-            :frames-data="chartData(entry.id, 'all', 'frames')"
-            :countMode="countMode"
-            :displayMode="displayMode"
-            v-if="isStats(entry.id, 'all')"
-          />
-          <td
-            v-else
+          <tr
+            class="datatable-row"
+            :key="entry.id"
+            v-for="entry in entries"
+            v-if="isEntryStats(entry.id)"
           >
-          </td>
+            <td scope="row" class="name datatable-row-header">
+              {{ entry.name }}
+            </td>
 
-          <stats-cell
-            :key="entry.id + columnId"
-            :style="getValidationStyle(columnId)"
-            :colors="chartColors(entry.id, columnId)"
-            :data="chartData(entry.id, columnId)"
-            :frames-data="chartData(entry.id, columnId, 'frames')"
-            :countMode="countMode"
-            :displayMode="displayMode"
-            v-if="isStats(entry.id, columnId)"
-            v-for="columnId in validationColumns"
-          />
-          <td
-            :style="getValidationStyle(columnId)"
-            v-else
-          >
-          </td>
+            <stats-cell
+              :colors="chartColors(entry.id, 'all')"
+              :data="chartData(entry.id, 'all')"
+              :frames-data="chartData(entry.id, 'all', 'frames')"
+              :countMode="countMode"
+              :displayMode="displayMode"
+              v-if="isStats(entry.id, 'all')"
+            />
+            <td v-else></td>
 
-          <td class="actions"></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+            <stats-cell
+              :key="entry.id + columnId"
+              :style="getValidationStyle(columnId)"
+              :colors="chartColors(entry.id, columnId)"
+              :data="chartData(entry.id, columnId)"
+              :frames-data="chartData(entry.id, columnId, 'frames')"
+              :countMode="countMode"
+              :displayMode="displayMode"
+              v-if="isStats(entry.id, columnId)"
+              v-for="columnId in validationColumns"
+            />
+            <td :style="getValidationStyle(columnId)" v-else></td>
 
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
+            <td class="actions"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  <div
-    class="has-text-centered"
-    v-if="isEmptyList && !isCurrentUserClient && !isLoading"
-  >
-    <p class="info">
-      <img src="../../assets/illustrations/empty_shot.png" />
+    <table-info :is-loading="isLoading" :is-error="isError" />
+
+    <div
+      class="has-text-centered"
+      v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+    >
+      <p class="info">
+        <img src="../../assets/illustrations/empty_shot.png" />
+      </p>
+      <p class="info">{{ $t('sequences.empty_list') }}</p>
+    </div>
+    <div
+      class="has-text-centered"
+      v-if="isEmptyList && isCurrentUserClient && !isLoading"
+    >
+      <p class="info">
+        <img src="../../assets/illustrations/empty_shot.png" />
+      </p>
+      <p class="info">{{ $t('sequences.empty_list_client') }}</p>
+    </div>
+
+    <p class="has-text-centered nb-sequences" v-if="!isEmptyList && !isLoading">
+      {{ displayedSequencesLength }}
+      {{ $tc('sequences.number', displayedSequencesLength) }}
     </p>
-    <p class="info">{{ $t('sequences.empty_list') }}</p>
   </div>
-  <div
-    class="has-text-centered"
-    v-if="isEmptyList && isCurrentUserClient && !isLoading"
-  >
-    <p class="info">
-      <img src="../../assets/illustrations/empty_shot.png" />
-    </p>
-    <p class="info">{{ $t('sequences.empty_list_client') }}</p>
-  </div>
-
-  <p
-    class="has-text-centered nb-sequences"
-    v-if="!isEmptyList && !isLoading"
-  >
-    {{ displayedSequencesLength }}
-    {{ $tc('sequences.number', displayedSequencesLength) }}
-  </p>
-</div>
 </template>
 
 <script>
@@ -210,7 +182,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       busy: false,
       lastSelection: null
@@ -230,61 +202,63 @@ export default {
       'taskTypeMap'
     ]),
 
-    isEmptyList () {
-      return this.entries &&
-             this.entries.length === 0 &&
-             !this.isLoading &&
-             !this.isError &&
-             (!this.sequenceSearchText || this.sequenceSearchText.length === 0)
+    isEmptyList() {
+      return (
+        this.entries &&
+        this.entries.length === 0 &&
+        !this.isLoading &&
+        !this.isError &&
+        (!this.sequenceSearchText || this.sequenceSearchText.length === 0)
+      )
     }
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    chartColors (entryId, columnId) {
+    chartColors(entryId, columnId) {
       return getChartColors(this.sequenceStats, entryId, columnId)
     },
 
-    chartData (entryId, columnId, dataType = 'count') {
+    chartData(entryId, columnId, dataType = 'count') {
       return getChartData(this.sequenceStats, entryId, columnId, dataType)
     },
 
-    isStats (entryId, columnId) {
-      return this.sequenceStats[entryId] &&
-             this.sequenceStats[entryId][columnId]
+    isStats(entryId, columnId) {
+      return (
+        this.sequenceStats[entryId] && this.sequenceStats[entryId][columnId]
+      )
     },
 
-    isEntryStats (entryId) {
+    isEntryStats(entryId) {
       if (!this.sequenceStats[entryId] && this.sequenceSearchText) return false
       if (!this.sequenceStats[entryId]) return true
       let isStats = false
-      Object.keys(this.sequenceStats[entryId]).forEach((statKey) => {
+      Object.keys(this.sequenceStats[entryId]).forEach(statKey => {
         isStats = isStats || this.sequenceStats[entryId][statKey]
       })
       return isStats
     },
 
-    onBodyScroll (event, position) {
+    onBodyScroll(event, position) {
       this.$emit('scroll', position.scrollTop)
     },
 
-    setScrollPosition (scrollPosition) {
+    setScrollPosition(scrollPosition) {
       if (this.$refs.body) {
         this.$refs.body.scrollTop = scrollPosition
       }
     },
 
-    editPath (sequenceId) {
+    editPath(sequenceId) {
       return this.getPath('edit-sequence', sequenceId)
     },
 
-    deletePath (sequenceId) {
+    deletePath(sequenceId) {
       return this.getPath('delete-sequence', sequenceId)
     },
 
-    taskTypePath (taskTypeId) {
+    taskTypePath(taskTypeId) {
       const route = {
         name: 'task-type',
         params: {
@@ -302,7 +276,7 @@ export default {
       return route
     },
 
-    getPath (section, sequenceId) {
+    getPath(section, sequenceId) {
       const route = {
         name: section,
         params: {
@@ -325,7 +299,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;

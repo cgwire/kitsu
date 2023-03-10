@@ -5,13 +5,12 @@ import preferences from '@/lib/preferences'
  * Common functions to shots and assets pages.
  */
 export const entitiesMixin = {
+  created() {},
 
-  created () {
-  },
-
-  mounted () {
-    const departmentId = preferences
-      .getPreference(this.pageName + ':departement')
+  mounted() {
+    const departmentId = preferences.getPreference(
+      this.pageName + ':departement'
+    )
     if (departmentId) {
       this.selectedDepartment = departmentId
     } else {
@@ -22,57 +21,56 @@ export const entitiesMixin = {
     this.onSelectedDepartmentChanged()
   },
 
-  beforeDestroy () {
-  },
+  beforeDestroy() {},
 
   computed: {
-    searchField () {
+    searchField() {
       return this.$refs[`${this.type}-search-field`]
     },
 
-    addThumbnailsModal () {
+    addThumbnailsModal() {
       return this.$refs['add-thumbnails-modal']
     },
 
-    dataMatchers () {
+    dataMatchers() {
       return ['Name']
     }
   },
 
   methods: {
-    showImportModal () {
+    showImportModal() {
       this.modals.isImportDisplayed = true
     },
 
-    hideImportModal () {
+    hideImportModal() {
       this.modals.isImportDisplayed = false
     },
 
-    showImportRenderModal () {
+    showImportRenderModal() {
       this.modals.isImportRenderDisplayed = true
     },
 
-    hideImportRenderModal () {
+    hideImportRenderModal() {
       this.modals.isImportRenderDisplayed = false
     },
 
-    showCreateTasksModal () {
+    showCreateTasksModal() {
       this.modals.isCreateTasksDisplayed = true
     },
 
-    hideCreateTasksModal () {
+    hideCreateTasksModal() {
       this.modals.isCreateTasksDisplayed = false
     },
 
-    showAddThumbnailsModal () {
+    showAddThumbnailsModal() {
       this.modals.isAddThumbnailsDisplayed = true
     },
 
-    hideAddThumbnailsModal () {
+    hideAddThumbnailsModal() {
       this.modals.isAddThumbnailsDisplayed = false
     },
 
-    onSelectedDepartmentChanged () {
+    onSelectedDepartmentChanged() {
       const departmentId = this.selectedDepartment
       if (departmentId === 'ALL') {
         this.departmentFilter = []
@@ -84,28 +82,31 @@ export const entitiesMixin = {
       preferences.setPreference(this.pageName + ':departement', departmentId)
     },
 
-    selectableDepartments (forEntity) {
+    selectableDepartments(forEntity) {
       return this.currentProduction.task_types
         .map(taskTypeId => {
           const taskType = this.taskTypeMap.get(taskTypeId)
-          return (taskType.for_entity === forEntity)
-            ? this.departmentMap.get(taskType.department_id) : false
+          return taskType.for_entity === forEntity
+            ? this.departmentMap.get(taskType.department_id)
+            : false
         })
-        .filter((department, index, self) =>
-          department && self.indexOf(department) === index)
+        .filter(
+          (department, index, self) =>
+            department && self.indexOf(department) === index
+        )
     },
 
-    onEntityThumbnailClicked (entityId) {
+    onEntityThumbnailClicked(entityId) {
       if (!entityId) return
       this.previvewFileIdToShow = entityId
       this.modals.isPreviewDisplayed = true
     },
 
-    closeMetadataModal () {
+    closeMetadataModal() {
       this.modals.isAddMetadataDisplayed = false
     },
 
-    confirmDeleteMetadata () {
+    confirmDeleteMetadata() {
       this.errors.deleteMetadata = false
       this.loading.deleteMetadata = true
       this.deleteMetadataDescriptor(this.descriptorIdToDelete)
@@ -113,31 +114,32 @@ export const entitiesMixin = {
           this.errors.deleteMetadata = false
           this.loading.deleteMetadata = false
           this.modals.isDeleteMetadataDisplayed = false
-        }).catch((err) => {
+        })
+        .catch(err => {
           console.error(err)
           this.errors.deleteMetadata = true
           this.loading.deleteMetadata = false
         })
     },
 
-    onAddMetadataClicked () {
+    onAddMetadataClicked() {
       this.descriptorToEdit = {}
       this.modals.isAddMetadataDisplayed = true
     },
 
-    onDeleteMetadataClicked (descriptorId) {
+    onDeleteMetadataClicked(descriptorId) {
       this.descriptorIdToDelete = descriptorId
       this.modals.isDeleteMetadataDisplayed = true
     },
 
-    onEditMetadataClicked (descriptorId) {
+    onEditMetadataClicked(descriptorId) {
       this.descriptorToEdit = this.currentProduction.descriptors.find(
         d => d.id === descriptorId
       )
       this.modals.isAddMetadataDisplayed = true
     },
 
-    confirmDeleteAllTasks (selectionOnly) {
+    confirmDeleteAllTasks(selectionOnly) {
       const taskTypeId = this.taskTypeForTaskDeletion.id
       const projectId = this.currentProduction.id
       this.errors.deleteAllTasks = false
@@ -146,15 +148,16 @@ export const entitiesMixin = {
         .then(() => {
           this.loading.deleteAllTasks = false
           this.modals.isDeleteAllTasksDisplayed = false
-        }).catch(err => {
+        })
+        .catch(err => {
           console.error(err)
           this.loading.deleteAllTasks = false
           this.errors.deleteAllTasks = true
         })
     },
 
-    confirmAddThumbnails (forms) {
-      const addPreview = (form) => {
+    confirmAddThumbnails(forms) {
+      const addPreview = form => {
         this.addThumbnailsModal.markLoading(form.task.entity_id)
         return this.commentTaskWithPreview({
           taskId: form.task.id,
@@ -175,14 +178,13 @@ export const entitiesMixin = {
           })
       }
       this.loading.addThumbnails = true
-      func.runPromiseMapAsSeries(forms, addPreview)
-        .then(() => {
-          this.loading.addThumbnails = false
-          this.modals.isAddThumbnailsDisplayed = false
-        })
+      func.runPromiseMapAsSeries(forms, addPreview).then(() => {
+        this.loading.addThumbnails = false
+        this.modals.isAddThumbnailsDisplayed = false
+      })
     },
 
-    confirmCreateTasks ({ form, selectionOnly }) {
+    confirmCreateTasks({ form, selectionOnly }) {
       this.loading.creatingTasks = true
       this.runTasksCreation(form, selectionOnly)
         .then(() => {
@@ -196,7 +198,7 @@ export const entitiesMixin = {
         })
     },
 
-    confirmCreateTasksAndStay ({ form, selectionOnly }) {
+    confirmCreateTasksAndStay({ form, selectionOnly }) {
       this.loading.creatingTasksStay = true
       this.runTasksCreation(form, selectionOnly)
         .then(() => {
@@ -209,7 +211,7 @@ export const entitiesMixin = {
         })
     },
 
-    deleteAllTasksText () {
+    deleteAllTasksText() {
       const taskType = this.taskTypeForTaskDeletion
       if (taskType) {
         return this.$t('tasks.delete_all_text', { name: taskType.name })
@@ -218,32 +220,31 @@ export const entitiesMixin = {
       }
     },
 
-    onDeleteAllTasksClicked (taskTypeId) {
+    onDeleteAllTasksClicked(taskTypeId) {
       const taskType = this.taskTypeMap.get(taskTypeId)
       this.taskTypeForTaskDeletion = taskType
       this.deleteAllTasksLockText = taskType.name
       this.modals.isDeleteAllTasksDisplayed = true
     },
 
-    saveScrollPosition (scrollPosition) {
-      this.$store.commit(
-        'SET_EDIT_LIST_SCROLL_POSITION',
-        scrollPosition
-      )
+    saveScrollPosition(scrollPosition) {
+      this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', scrollPosition)
     },
 
-    onSearchChange () {
+    onSearchChange() {
       if (!this.searchField) return
       this.isSearchActive = false
       const searchQuery = this.searchField.getValue() || ''
       this.applySearch(searchQuery)
     },
 
-    onChangeSortClicked (sortInfo) {
-      this[`change${this.type[0].toUpperCase()}${this.type.slice(1)}Sort`](sortInfo)
+    onChangeSortClicked(sortInfo) {
+      this[`change${this.type[0].toUpperCase()}${this.type.slice(1)}Sort`](
+        sortInfo
+      )
     },
 
-    confirmBuildFilter (query) {
+    confirmBuildFilter(query) {
       this.modals.isBuildFilterDisplayed = false
       this.searchField.setValue(query)
       this.applySearch(query)
@@ -251,7 +252,7 @@ export const entitiesMixin = {
   },
 
   watch: {
-    selectedDepartment () {
+    selectedDepartment() {
       this.onSelectedDepartmentChanged()
     }
   }

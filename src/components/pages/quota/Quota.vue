@@ -1,213 +1,202 @@
 <template>
-<div class="data-list">
-  <div
-    class="datatable-wrapper"
-    ref="body"
-  >
-    <table class="datatable">
-      <thead class="datatable-head">
-        <tr>
-          <th
-            scope="col"
-            class="name datatable-row-header"
-            ref="rowHeaderName"
-          >
-            {{ $t('quota.name') }}
-          </th>
-          <th
-            scope="col"
-            class="average datatable-row-header"
-            :style="{left: averageColumnX}"
-          >
-            {{ $t('quota.average') }}
-          </th>
-          <th
-            scope="col"
-            :key="'month-' + month"
-            v-for="month in monthRange"
-            v-if="detailLevel === 'month'"
-          >
-            {{ monthToString(month) }}
-          </th>
-          <th
-            scope="col"
-            :key="'week-' + week"
-            v-for="week in weekRange"
-            v-if="detailLevel === 'week'"
-          >
-            {{ week }}
-          </th>
-
-          <th
-            scope="col"
-            :key="'day-' + day"
-            v-for="day in dayRange"
-            v-if="detailLevel === 'day'"
-          >
-            {{ day }}
-          </th>
-        </tr>
-      </thead>
-      <tbody
-        class="datatable-body"
-        v-if="this.quotaLength > 0 && !isLoading"
-      >
-        <tr
-          class="datatable-row"
-          v-for="key in filteredPersonIds"
-          :key="'name-' + key"
-        >
-          <th scope="row" class="name datatable-row-header">
-            <div class="flexrow">
-              <people-avatar :size="30" :person="personMap.get(key)"/>
-              {{ personMap.get(key).full_name }}
-            </div>
-          </th>
-          <td
-            class="average datatable-row-header"
-            :style="{left: averageColumnX}"
-            v-if="detailLevel === 'month'"
-          >
-            {{ getQuotaAverage(key, { year }) }}
-          </td>
-          <td
-            class="average datatable-row-header"
-            :style="{left: averageColumnX}"
-            v-if="detailLevel === 'week'"
-          >
-            {{ getQuotaAverage(key, { year }) }}
-          </td>
-          <td
-            class="average datatable-row-header"
-            :style="{left: averageColumnX}"
-            v-if="detailLevel === 'day'"
-          >
-            {{ getQuotaAverage(key, { year, month }) }}
-          </td>
-          <td
-            :class="{
-              selected: isMonthSelected(key, year, month),
-              'quota-low': isMonthQuotaLow(key, year, month)
-            }"
-            :key="'month-' + month"
-            v-for="month in monthRange"
-            v-if="detailLevel === 'month'"
-          >
-            <router-link
-              class="quota-button"
-              :to="episodifyRoute({
-                name: 'quota-month-person',
-                params: {
-                  person_id: key,
-                  year: year,
-                  month: month
-                }
-              })"
-              v-if="getQuota(key, {year, month})"
+  <div class="data-list">
+    <div class="datatable-wrapper" ref="body">
+      <table class="datatable">
+        <thead class="datatable-head">
+          <tr>
+            <th
+              scope="col"
+              class="name datatable-row-header"
+              ref="rowHeaderName"
             >
-              {{
-                countMode === 'seconds'
-                ? getQuota(key, {year, month}).toFixed(2)
-                : getQuota(key, {year, month})
-              }}
-            </router-link>
-            <span v-else>-</span>
-          </td>
-
-          <td
-            :class="{
-              selected: isWeekSelected(key, year, week),
-              'quota-low': isWeekQuotaLow(key, year, month)
-            }"
-            :key="'week-' + week"
-            v-for="week in weekRange"
-            v-if="detailLevel === 'week'"
-          >
-            <router-link
-              class="quota-button"
-              :to="episodifyRoute({
-                name: 'quota-week-person',
-                params: {
-                  person_id: key,
-                  year: year,
-                  week: week
-                }
-              })"
-              v-if="getQuota(key, {year, week})"
+              {{ $t('quota.name') }}
+            </th>
+            <th
+              scope="col"
+              class="average datatable-row-header"
+              :style="{ left: averageColumnX }"
             >
-              {{
-                countMode === 'seconds'
-                ? getQuota(key, {year, week}).toFixed(2)
-                : getQuota(key, {year, week})
-              }}
-            </router-link>
-            <span v-else>
-            -
-            </span>
-          </td>
-
-          <td
-            :class="{
-              weekend: isWeekend(year, month, day),
-              selected: isDaySelected(key, year, month, day),
-              'quota-low': isDayQuotaLow(key, year, month, day)
-            }"
-            :key="'day-' + day"
-            v-for="day in dayRange"
-            v-if="detailLevel === 'day'"
-          >
-            <router-link
-              class="quota-button"
-              :to="episodifyRoute({
-                name: 'quota-day-person',
-                params: {
-                  person_id: key,
-                  year: year,
-                  month: month,
-                  day: day
-                }
-              })"
-              v-if="getQuota(key, {year, month, day})"
+              {{ $t('quota.average') }}
+            </th>
+            <th
+              scope="col"
+              :key="'month-' + month"
+              v-for="month in monthRange"
+              v-if="detailLevel === 'month'"
             >
-              {{
-                countMode === 'seconds'
-                ? getQuota(key, {year, month, day}).toFixed(2)
-                : getQuota(key, {year, month, day})
-              }}
-            </router-link>
-            <span v-else>
-            -
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+              {{ monthToString(month) }}
+            </th>
+            <th
+              scope="col"
+              :key="'week-' + week"
+              v-for="week in weekRange"
+              v-if="detailLevel === 'week'"
+            >
+              {{ week }}
+            </th>
+
+            <th
+              scope="col"
+              :key="'day-' + day"
+              v-for="day in dayRange"
+              v-if="detailLevel === 'day'"
+            >
+              {{ day }}
+            </th>
+          </tr>
+        </thead>
+        <tbody class="datatable-body" v-if="this.quotaLength > 0 && !isLoading">
+          <tr
+            class="datatable-row"
+            v-for="key in filteredPersonIds"
+            :key="'name-' + key"
+          >
+            <th scope="row" class="name datatable-row-header">
+              <div class="flexrow">
+                <people-avatar :size="30" :person="personMap.get(key)" />
+                {{ personMap.get(key).full_name }}
+              </div>
+            </th>
+            <td
+              class="average datatable-row-header"
+              :style="{ left: averageColumnX }"
+              v-if="detailLevel === 'month'"
+            >
+              {{ getQuotaAverage(key, { year }) }}
+            </td>
+            <td
+              class="average datatable-row-header"
+              :style="{ left: averageColumnX }"
+              v-if="detailLevel === 'week'"
+            >
+              {{ getQuotaAverage(key, { year }) }}
+            </td>
+            <td
+              class="average datatable-row-header"
+              :style="{ left: averageColumnX }"
+              v-if="detailLevel === 'day'"
+            >
+              {{ getQuotaAverage(key, { year, month }) }}
+            </td>
+            <td
+              :class="{
+                selected: isMonthSelected(key, year, month),
+                'quota-low': isMonthQuotaLow(key, year, month)
+              }"
+              :key="'month-' + month"
+              v-for="month in monthRange"
+              v-if="detailLevel === 'month'"
+            >
+              <router-link
+                class="quota-button"
+                :to="
+                  episodifyRoute({
+                    name: 'quota-month-person',
+                    params: {
+                      person_id: key,
+                      year: year,
+                      month: month
+                    }
+                  })
+                "
+                v-if="getQuota(key, { year, month })"
+              >
+                {{
+                  countMode === 'seconds'
+                    ? getQuota(key, { year, month }).toFixed(2)
+                    : getQuota(key, { year, month })
+                }}
+              </router-link>
+              <span v-else>-</span>
+            </td>
+
+            <td
+              :class="{
+                selected: isWeekSelected(key, year, week),
+                'quota-low': isWeekQuotaLow(key, year, month)
+              }"
+              :key="'week-' + week"
+              v-for="week in weekRange"
+              v-if="detailLevel === 'week'"
+            >
+              <router-link
+                class="quota-button"
+                :to="
+                  episodifyRoute({
+                    name: 'quota-week-person',
+                    params: {
+                      person_id: key,
+                      year: year,
+                      week: week
+                    }
+                  })
+                "
+                v-if="getQuota(key, { year, week })"
+              >
+                {{
+                  countMode === 'seconds'
+                    ? getQuota(key, { year, week }).toFixed(2)
+                    : getQuota(key, { year, week })
+                }}
+              </router-link>
+              <span v-else> - </span>
+            </td>
+
+            <td
+              :class="{
+                weekend: isWeekend(year, month, day),
+                selected: isDaySelected(key, year, month, day),
+                'quota-low': isDayQuotaLow(key, year, month, day)
+              }"
+              :key="'day-' + day"
+              v-for="day in dayRange"
+              v-if="detailLevel === 'day'"
+            >
+              <router-link
+                class="quota-button"
+                :to="
+                  episodifyRoute({
+                    name: 'quota-day-person',
+                    params: {
+                      person_id: key,
+                      year: year,
+                      month: month,
+                      day: day
+                    }
+                  })
+                "
+                v-if="getQuota(key, { year, month, day })"
+              >
+                {{
+                  countMode === 'seconds'
+                    ? getQuota(key, { year, month, day }).toFixed(2)
+                    : getQuota(key, { year, month, day })
+                }}
+              </router-link>
+              <span v-else> - </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div
+      class="has-text-centered empty-quota"
+      v-if="this.quotaLength === 0 && !isLoading"
+    >
+      <p class="info">{{ $t('quota.no_quota') }}</p>
+    </div>
+
+    <table-info :is-loading="isLoading" :is-error="isError" />
   </div>
-  <div
-    class="has-text-centered empty-quota"
-    v-if="this.quotaLength === 0 && !isLoading"
-  >
-    <p class="info">{{ $t('quota.no_quota') }}</p>
-  </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
-</div>
 </template>
 
 <script>
-
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 import { episodifyRoute } from '@/lib/path'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import TableInfo from '@/components/widgets/TableInfo'
-import {
-  buildNameIndex,
-  indexSearch
-} from '@/lib/indexing'
+import { buildNameIndex, indexSearch } from '@/lib/indexing'
 import {
   monthToString,
   getMonthRange,
@@ -268,7 +257,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       currentMonth: moment().month() + 1,
       currentYear: moment().year(),
@@ -286,11 +275,11 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     if (this.shotMap.size < 2) {
       this.isLoading = true
       setTimeout(() => {
-        this.loadShots((err) => {
+        this.loadShots(err => {
           if (!err) {
             this.loadData()
           }
@@ -303,18 +292,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'isShotsLoading',
-      'shotMap',
-      'personMap'
-    ]),
+    ...mapGetters(['currentEpisode', 'isShotsLoading', 'shotMap', 'personMap']),
 
-    monthRange () {
+    monthRange() {
       return getMonthRange(this.year, this.currentYear, this.currentMonth)
     },
 
-    dayRange () {
+    dayRange() {
       return getDayRange(
         this.year,
         this.month,
@@ -323,41 +307,39 @@ export default {
       )
     },
 
-    weekRange () {
+    weekRange() {
       return getWeekRange(this.year, this.currentYear, this.currentWeek)
     },
 
-    filteredPersonIds () {
+    filteredPersonIds() {
       let personIds = this.personIds
       if (this.searchText.length > 0) {
-        personIds = indexSearch(this.personIndex, this.searchText.split(' '))
-          .map(person => person.id)
+        personIds = indexSearch(
+          this.personIndex,
+          this.searchText.split(' ')
+        ).map(person => person.id)
       }
       return personIds
     }
   },
 
   methods: {
-    ...mapActions([
-      'loadShots',
-      'computeQuota',
-      'getPeriodDetails'
-    ]),
+    ...mapActions(['loadShots', 'computeQuota', 'getPeriodDetails']),
 
-    episodifyRoute (route) {
+    episodifyRoute(route) {
       if (this.currentEpisode) {
         episodifyRoute(route, this.currentEpisode.id)
       }
       return route
     },
 
-    isWeekend (year, month, day) {
+    isWeekend(year, month, day) {
       let date = moment(`${year}-${month}-${day}`, 'YYYY-MM-DD')
       if (day < 10) date = moment(`${year}-${month}-0${day}`, 'YYYY-MM-DD')
       return [0, 6].includes(date.day())
     },
 
-    loadData () {
+    loadData() {
       if (this.taskTypeId) {
         this.isLoading = true
         this.computeQuota({
@@ -365,20 +347,19 @@ export default {
           detailLevel: this.detailLevel,
           countMode: this.countMode,
           computeMode: this.computeMode
-        })
-          .then(quotas => {
-            this.quotaMap = quotas
-            this.quotaLength = Object.keys(this.quotaMap).length
-            this.calcAverageColumnX()
-            this.$nextTick(() => {
-              this.isLoading = false
-            })
+        }).then(quotas => {
+          this.quotaMap = quotas
+          this.quotaLength = Object.keys(this.quotaMap).length
+          this.calcAverageColumnX()
+          this.$nextTick(() => {
+            this.isLoading = false
           })
+        })
       }
     },
 
-    loadDetails (personId, dateString) {
-      this.loadShots((err) => {
+    loadDetails(personId, dateString) {
+      this.loadShots(err => {
         this.isLoading = true
         if (err) {
           console.error(err)
@@ -389,24 +370,24 @@ export default {
               detailLevel: this.detailLevel,
               personId,
               dateString
+            }).then(shots => {
+              this.detailsMap = shots
             })
-              .then(shots => {
-                this.detailsMap = shots
-              })
           }
         }
       })
     },
     monthToString,
 
-    dateDigit (date) {
+    dateDigit(date) {
       return date.toString().padStart(2, '0')
     },
 
-    getQuota (personId, opt = {}) {
+    getQuota(personId, opt = {}) {
       if (opt.day) {
-        const dayKey =
-          `${opt.year}-${this.dateDigit(opt.month)}-${this.dateDigit(opt.day)}`
+        const dayKey = `${opt.year}-${this.dateDigit(
+          opt.month
+        )}-${this.dateDigit(opt.day)}`
         return this.quotaMap[personId].day[this.countMode][dayKey]
       } else if (opt.week) {
         const weekKey = `${opt.year}-${opt.week}`
@@ -417,7 +398,7 @@ export default {
       }
     },
 
-    getQuotaAverage (personId, opt = {}) {
+    getQuotaAverage(personId, opt = {}) {
       let average = 0
       let total = 0
       let nbEntries
@@ -438,7 +419,7 @@ export default {
       return average ? average.toFixed(2) : '-'
     },
 
-    isDaySelected (personId, year, month, day) {
+    isDaySelected(personId, year, month, day) {
       return (
         this.$route.params.person_id &&
         this.$route.params.person_id === personId &&
@@ -448,7 +429,7 @@ export default {
       )
     },
 
-    isWeekSelected (personId, year, week) {
+    isWeekSelected(personId, year, week) {
       return (
         this.$route.params.person_id &&
         this.$route.params.person_id === personId &&
@@ -457,7 +438,7 @@ export default {
       )
     },
 
-    isMonthSelected (personId, year, month) {
+    isMonthSelected(personId, year, month) {
       return (
         this.$route.params.person_id &&
         this.$route.params.person_id === personId &&
@@ -466,29 +447,26 @@ export default {
       )
     },
 
-    isDayQuotaLow (personId, year, month, day) {
+    isDayQuotaLow(personId, year, month, day) {
       const quota = this.getQuota(personId, { year, month, day })
-      return (
-        quota !== null &&
-        this.maxQuota > quota
-      )
+      return quota !== null && this.maxQuota > quota
     },
 
-    isWeekQuotaLow (personId, year, week) {
+    isWeekQuotaLow(personId, year, week) {
       return this.maxQuota > this.getQuota(personId, { year, week })
     },
 
-    isMonthQuotaLow (personId, year, month) {
+    isMonthQuotaLow(personId, year, month) {
       return this.maxQuota > this.getQuota(personId, { year, month })
     },
 
-    calcAverageColumnX () {
+    calcAverageColumnX() {
       if (this.quotaLength > 0) {
         this.averageColumnX = `${this.$refs.rowHeaderName.offsetWidth}px`
       }
     },
 
-    resetPersonIds () {
+    resetPersonIds() {
       const personIds = Object.keys(this.quotaMap)
       const persons = personIds.map(pId => this.personMap.get(pId))
       this.personIndex = buildNameIndex(persons)
@@ -501,26 +479,27 @@ export default {
   },
 
   watch: {
-    $route () {
+    $route() {
       const els = document.getElementsByClassName('selected')
-      if (els.length === 0) { // selected element is not visible
+      if (els.length === 0) {
+        // selected element is not visible
         setTimeout(() => {
           this.$refs.body.scrollLeft += 380
         }, 100)
       }
     },
 
-    computeMode () {
+    computeMode() {
       if (this.taskTypeId) {
         this.loadData()
       }
     },
 
-    quotaMap () {
+    quotaMap() {
       this.resetPersonIds()
     },
 
-    taskTypeId () {
+    taskTypeId() {
       if (this.taskTypeId) {
         this.loadData()
       }
@@ -534,7 +513,7 @@ export default {
   .weekend {
     background-color: $dark-grey;
   }
- .quota-button:hover {
+  .quota-button:hover {
     color: #333;
   }
   .info {
@@ -558,7 +537,7 @@ export default {
     text-align: left;
     justify-content: flex-start;
     .avatar {
-      margin-right: .5rem;
+      margin-right: 0.5rem;
     }
   }
   .average {
@@ -566,7 +545,7 @@ export default {
   }
   th,
   td {
-    text-align: center
+    text-align: center;
   }
 }
 
@@ -579,7 +558,8 @@ export default {
 }
 
 .datatable-body {
-  th, td {
+  th,
+  td {
     border: 0;
   }
 }
@@ -589,8 +569,8 @@ export default {
 }
 
 .quota-button {
-  border-radius: .5rem;
-  padding: .5rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
   background: transparent;
   border: 0;
   cursor: pointer;
@@ -613,7 +593,7 @@ export default {
 }
 
 .quota-button:hover {
-  background: #BBEEBB;
+  background: #bbeebb;
 }
 
 .weekend {

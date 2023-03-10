@@ -1,60 +1,60 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
+    <div class="modal-content">
+      <div class="box">
+        <h1 class="title" v-if="isEditing()">
+          {{ $t('custom_actions.edit_title') }} {{ customActionToEdit.name }}
+        </h1>
+        <h1 class="title" v-else>
+          {{ $t('custom_actions.new_custom_action') }}
+        </h1>
 
-    <div class="box">
+        <form v-on:submit.prevent>
+          <text-field
+            ref="nameField"
+            :label="$t('custom_actions.fields.name')"
+            v-model="form.name"
+            v-focus
+          />
 
-      <h1 class="title" v-if="isEditing()">
-        {{ $t("custom_actions.edit_title") }} {{ customActionToEdit.name }}
-      </h1>
-      <h1 class="title" v-else>
-        {{ $t("custom_actions.new_custom_action") }}
-      </h1>
+          <text-field
+            ref="urlField"
+            :label="$t('custom_actions.fields.url')"
+            v-model="form.url"
+            @enter="confirmClicked"
+          />
 
-      <form v-on:submit.prevent>
-        <text-field
-          ref="nameField"
-          :label="$t('custom_actions.fields.name')"
-          v-model="form.name"
-          v-focus
+          <combobox
+            :label="$t('custom_actions.fields.entity_type')"
+            :options="entityTypeOptions"
+            v-model="form.entityType"
+            locale-key-prefix="custom_actions.entity_types."
+            @enter="confirmClicked"
+          />
+
+          <combobox-boolean
+            :label="$t('custom_actions.fields.is_ajax')"
+            v-model="form.isAjax"
+            @enter="confirmClicked"
+          />
+        </form>
+
+        <modal-footer
+          :error-text="$t('custom_actions.create_error')"
+          :is-error="isError"
+          @confirm="confirmClicked"
+          @cancel="$emit('cancel')"
         />
-
-        <text-field
-          ref="urlField"
-          :label="$t('custom_actions.fields.url')"
-          v-model="form.url"
-          @enter="confirmClicked"
-        />
-
-        <combobox
-          :label="$t('custom_actions.fields.entity_type')"
-          :options="entityTypeOptions"
-          v-model="form.entityType"
-          locale-key-prefix="custom_actions.entity_types."
-          @enter="confirmClicked"
-        />
-
-        <combobox-boolean
-          :label="$t('custom_actions.fields.is_ajax')"
-          v-model="form.isAjax"
-          @enter="confirmClicked"
-        />
-      </form>
-
-      <modal-footer
-        :error-text="$t('custom_actions.create_error')"
-        :is-error="isError"
-        @confirm="confirmClicked"
-        @cancel="$emit('cancel')"
-      />
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -94,7 +94,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       form: {
         name: '',
@@ -120,25 +120,21 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'customActions',
-      'customActionStatusOptions'
-    ])
+    ...mapGetters(['customActions', 'customActionStatusOptions'])
   },
 
   methods: {
-    ...mapActions([
-    ]),
-    confirmClicked () {
+    ...mapActions([]),
+    confirmClicked() {
       this.$emit('confirm', this.form)
     },
-    isEditing () {
+    isEditing() {
       return this.customActionToEdit && this.customActionToEdit.id
     }
   },
 
   watch: {
-    customActionToEdit () {
+    customActionToEdit() {
       if (this.customActionToEdit) {
         this.form = {
           name: this.customActionToEdit.name,
@@ -149,7 +145,7 @@ export default {
       }
     },
 
-    active () {
+    active() {
       if (this.active) {
         setTimeout(() => {
           this.$refs.nameField.focus()

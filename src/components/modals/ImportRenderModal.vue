@@ -1,141 +1,133 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
+    <div class="modal-content">
+      <div class="box content">
+        <h1 class="title">
+          {{ $t('main.csv.preview_title') }}
+        </h1>
 
-    <div class="box content">
-      <h1 class="title">
-        {{ $t("main.csv.preview_title") }}
-      </h1>
-
-      <div class="description">
-        <div class="flex-item">
-          <p>
-            {{ $t("main.csv.preview_description") }} <br />
-            {{ $t("main.csv.preview_required") }}
-          </p>
-          <div v-show="!disableUpdate">
-            <h2 class="legend-title">{{ $t('main.csv.options.title') }}</h2>
-            <checkbox
-              :toggle="true"
-              :label="$t('main.csv.options.update')"
-              v-model="updateData"
-            />
+        <div class="description">
+          <div class="flex-item">
+            <p>
+              {{ $t('main.csv.preview_description') }} <br />
+              {{ $t('main.csv.preview_required') }}
+            </p>
+            <div v-show="!disableUpdate">
+              <h2 class="legend-title">{{ $t('main.csv.options.title') }}</h2>
+              <checkbox
+                :toggle="true"
+                :label="$t('main.csv.options.update')"
+                v-model="updateData"
+              />
+            </div>
+          </div>
+          <div class="flex-item">
+            <ul class="legend">
+              <li class="legend-definition">
+                <span class="legend-term"></span>
+                {{ $t('main.csv.legend_ok') }}
+              </li>
+              <li class="legend-definition">
+                <span class="legend-term ignored"></span>
+                {{ $t('main.csv.legend_ignored') }}
+              </li>
+              <li class="legend-definition">
+                <span class="legend-term missing"></span>
+                {{ $t('main.csv.legend_missing') }}
+              </li>
+              <li class="legend-definition">
+                <span class="legend-term disabled"></span>
+                {{ $t('main.csv.legend_disabled') }}
+              </li>
+              <li v-show="!disableUpdate" class="legend-definition">
+                <span class="legend-term overwrite"></span>
+                {{ $t('main.csv.legend_overwrite') }}
+              </li>
+            </ul>
           </div>
         </div>
-        <div class="flex-item">
-          <ul class="legend">
-            <li class="legend-definition">
-              <span class="legend-term"></span>
-              {{ $t('main.csv.legend_ok') }}
-            </li>
-            <li class="legend-definition">
-              <span class="legend-term ignored"></span>
-              {{ $t('main.csv.legend_ignored') }}
-            </li>
-            <li class="legend-definition">
-              <span class="legend-term missing"></span>
-              {{ $t('main.csv.legend_missing') }}
-            </li>
-            <li class="legend-definition">
-              <span class="legend-term disabled"></span>
-              {{ $t('main.csv.legend_disabled') }}
-            </li>
-            <li v-show="!disableUpdate" class="legend-definition">
-              <span class="legend-term overwrite"></span>
-              {{ $t('main.csv.legend_overwrite') }}
-            </li>
-          </ul>
-        </div>
-      </div>
 
-      <div class="render-container">
-        <table class="render">
-          <colgroup>
-            <col
-              v-for="(cell, index) in parsedCsv[0]"
-              :key="`col-${index}`"
-              :class="stateColumn(cell)"
-            />
-            <col
-              v-for="item in columnsRequired"
-              :key="`col-missing-${item}`"
-              class="missing"
-            />
-          </colgroup>
-          <thead>
-            <tr class="render-headers">
-              <th
+        <div class="render-container">
+          <table class="render">
+            <colgroup>
+              <col
                 v-for="(cell, index) in parsedCsv[0]"
-                :key="`header-${index}`"
+                :key="`col-${index}`"
+                :class="stateColumn(cell)"
+              />
+              <col
+                v-for="item in columnsRequired"
+                :key="`col-missing-${item}`"
+                class="missing"
+              />
+            </colgroup>
+            <thead>
+              <tr class="render-headers">
+                <th
+                  v-for="(cell, index) in parsedCsv[0]"
+                  :key="`header-${index}`"
+                >
+                  <div class="render-select">
+                    <combobox
+                      :options="columnOptions"
+                      :value="cell"
+                      :error="isDuplicated(index)"
+                      v-model="columnSelect[index]"
+                      @input="checkForDuplicate"
+                    />
+                  </div>
+                  {{ cell || '-' }}
+                </th>
+                <th v-for="cell in columnsRequired" :key="`header-${cell}`">
+                  {{ cell }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                :class="{
+                  overwrite: updateData && existingData(index),
+                  disabled: !updateData && existingData(index)
+                }"
+                v-for="(line, index) in startFrom(parsedCsv, 1)"
+                v-if="line && line.length > 1"
+                :key="`line-${index}`"
               >
-              <div class="render-select">
-                <combobox
-                  :options="columnOptions"
-                  :value="cell"
-                  :error="isDuplicated(index)"
-                  v-model="columnSelect[index]"
-                  @input="checkForDuplicate"
-                />
-              </div>
-              {{ cell || '-' }}
-              </th>
-              <th
-                v-for="cell in columnsRequired"
-                :key="`header-${cell}`"
-              >
-              {{ cell }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              :class="{
-                overwrite: updateData && existingData(index),
-                disabled: !updateData && existingData(index)
-              }"
-              v-for="(line, index) in startFrom(parsedCsv, 1)"
-              v-if="line && line.length > 1"
-              :key="`line-${index}`"
-            >
-              <td
-                v-for="(cell, index) in line"
-                :key="`cell-${index}`"
-              >
-                {{ cell || '-' }}
-              </td>
-              <td
-                v-for="cell in columnsRequired"
-                :key="`cell-${cell}`"
-              >
-                {{ '-' }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                <td v-for="(cell, index) in line" :key="`cell-${index}`">
+                  {{ cell || '-' }}
+                </td>
+                <td v-for="cell in columnsRequired" :key="`cell-${cell}`">
+                  {{ '-' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      <div class="render-footer">
-        <button-simple
-          :text="$t('main.csv.preview_reupload')"
-          @click="onReupload"
-        />
-        <modal-footer
-          :error-text="errorText"
-          :is-loading="isLoading"
-          :is-disabled="formData === undefined"
-          :is-error="isError"
-          @confirm="onConfirmClicked"
-          @cancel="$emit('cancel')"
-        />
+        <div class="render-footer">
+          <button-simple
+            :text="$t('main.csv.preview_reupload')"
+            @click="onReupload"
+          />
+          <modal-footer
+            :error-text="errorText"
+            :is-loading="isLoading"
+            :is-disabled="formData === undefined"
+            :is-error="isError"
+            @confirm="onConfirmClicked"
+            @cancel="$emit('cancel')"
+          />
+        </div>
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -156,7 +148,7 @@ export default {
     ModalFooter
   },
 
-  data () {
+  data() {
     return {
       duplicates: [],
       formData: null,
@@ -206,7 +198,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.formData = null
   },
 
@@ -218,7 +210,7 @@ export default {
       'editMetadataDescriptors'
     ]),
 
-    columnsRequired () {
+    columnsRequired() {
       if (this.parsedCsv.length !== 0) {
         return this.columns.filter(item => !this.parsedCsv[0].includes(item))
       } else {
@@ -226,7 +218,7 @@ export default {
       }
     },
 
-    metadataDescriptors () {
+    metadataDescriptors() {
       if (this.$route.path.indexOf('assets') > 0) {
         return this.assetMetadataDescriptors
       }
@@ -239,7 +231,7 @@ export default {
       return []
     },
 
-    columnsAllowed () {
+    columnsAllowed() {
       const list = [...this.columns]
       this.metadataDescriptors.forEach(item => {
         if (!list.includes(item.name)) {
@@ -249,22 +241,24 @@ export default {
       return list
     },
 
-    columnOptions () {
-      const options = [{
-        label: this.$t('main.csv.choose'),
-        value: this.$t('main.csv.unknown')
-      }]
+    columnOptions() {
+      const options = [
+        {
+          label: this.$t('main.csv.choose'),
+          value: this.$t('main.csv.unknown')
+        }
+      ]
       this.columnsAllowed.forEach(item => {
         options.push({ label: item, value: item })
       })
       return options
     },
 
-    columnSelect () {
+    columnSelect() {
       return this.parsedCsv[0]
     },
 
-    indexMatchers () {
+    indexMatchers() {
       const indexes = []
       this.dataMatchers.forEach(item => {
         indexes.push(this.parsedCsv[0].indexOf(item))
@@ -272,7 +266,7 @@ export default {
       return indexes
     },
 
-    errorText () {
+    errorText() {
       let text = this.$t('main.csv.error_upload')
       if (this.importError && this.importError.status === 400) {
         const res = this.importError.response
@@ -283,42 +277,40 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    onConfirmClicked () {
+    onConfirmClicked() {
       this.$emit('confirm', this.parsedCsv, this.updateData)
     },
 
-    onReupload () {
+    onReupload() {
       this.$emit('reupload')
     },
 
-    startFrom (arr, index) {
+    startFrom(arr, index) {
       return arr.slice(index)
     },
 
-    stateColumn (data) {
+    stateColumn(data) {
       if (!this.columnsAllowed.includes(data)) {
         return 'ignored'
       }
     },
 
-    checkForDuplicate () {
+    checkForDuplicate() {
       const ignoredItem = this.$t('main.csv.unknown')
-      this.duplicates =
-        this.columnSelect.filter(
-          (item, index) => this.columnSelect.indexOf(item) !== index
-        ).filter(item => item !== ignoredItem)
+      this.duplicates = this.columnSelect
+        .filter((item, index) => this.columnSelect.indexOf(item) !== index)
+        .filter(item => item !== ignoredItem)
     },
 
-    isDuplicated (index) {
+    isDuplicated(index) {
       if (this.duplicates.includes(this.columnSelect[index])) {
         return true
       }
     },
 
-    existingData (index) {
+    existingData(index) {
       const csv = this.parsedCsv[index + 1]
       const db = this.database
       const columns = this.indexMatchers
@@ -336,7 +328,8 @@ export default {
 .dark {
   .render-container {
     .render {
-      th, td {
+      th,
+      td {
         border: 1px solid $dark-grey-lightest;
         color: $white;
       }
@@ -355,13 +348,13 @@ export default {
     border: 1px solid $dark-grey-lightest;
   }
   .ignored {
-    background-color: $dark-grey
+    background-color: $dark-grey;
   }
   .disabled {
     background: repeating-linear-gradient(
       -45deg,
-      rgba($dark-grey, .6),
-      rgba($dark-grey, .6) 2px,
+      rgba($dark-grey, 0.6),
+      rgba($dark-grey, 0.6) 2px,
       transparent 2px,
       transparent 10px
     );
@@ -398,10 +391,11 @@ export default {
   .render {
     width: 100%;
     border: 1px solid $light-grey-light;
-    th, td {
+    th,
+    td {
       color: $dark-grey;
       border: 1px solid $light-grey-light;
-      padding: .75rem;
+      padding: 0.75rem;
     }
     tr:hover {
       background: none;
@@ -412,8 +406,8 @@ export default {
   }
 }
 .render-select {
-  margin-bottom: .75rem;
-  padding-bottom: .75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
   border-bottom: 1px solid $light-grey-light;
 }
 .render-footer {
@@ -435,7 +429,7 @@ export default {
 }
 .legend-term {
   display: inline-block;
-  margin-right: .5rem;
+  margin-right: 0.5rem;
   width: 1.5rem;
   height: 1.5rem;
   border: 1px solid $light-grey-light;
@@ -444,29 +438,29 @@ export default {
   width: 100%;
   display: flex;
   align-items: center;
-  margin: 0 1rem .5rem 0;
+  margin: 0 1rem 0.5rem 0;
 }
 .ignored {
-  background-color: rgba($light-grey-light, .6)
+  background-color: rgba($light-grey-light, 0.6);
 }
 .missing {
-  background-color: rgba($red, .6)
+  background-color: rgba($red, 0.6);
 }
 .disabled {
-  opacity: .4;
+  opacity: 0.4;
   background: repeating-linear-gradient(
-  -45deg,
-  rgba($light-grey-light, .7),
-  rgba($light-grey-light, .7) 2px,
-  transparent 2px,
-  transparent 10px
-);
+    -45deg,
+    rgba($light-grey-light, 0.7),
+    rgba($light-grey-light, 0.7) 2px,
+    transparent 2px,
+    transparent 10px
+  );
 }
 .overwrite {
-  background-color: rgba($blue, .6);
+  background-color: rgba($blue, 0.6);
 
   &:hover td {
-    background-color: rgba($blue, .4);
+    background-color: rgba($blue, 0.4);
   }
 }
 </style>

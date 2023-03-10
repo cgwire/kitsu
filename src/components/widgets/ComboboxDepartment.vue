@@ -1,60 +1,54 @@
 <template>
-<div class="field">
-  <label class="label" v-if="label.length > 0">
-    {{ label }}
-  </label>
-  <div
-    :class="{
-      'department-combo': true,
-      'opened': showDepartmentList,
-      rounded: rounded
-    }"
-    v-bind:style="{
-      width: width + 'px'
-    }"
-  >
+  <div class="field">
+    <label class="label" v-if="label.length > 0">
+      {{ label }}
+    </label>
     <div
-      class="flexrow"
-      @click="toggleDepartmentList"
-    >
-      <div
-        class="selected-department-line flexrow-item" v-if="currentDepartment"
-      >
-        <department-name
-          :department="currentDepartment"
-        />
-      </div>
-      <chevron-down-icon class="down-icon flexrow-item"/>
-    </div>
-    <div
-      class="select-input"
-      ref="select"
-      v-bind:style="{
-        'max-height': maxHeightSelectInput + 'px',
-        width: width + 'px',
-        top: rounded ? '30px' : '37px'
+      :class="{
+        'department-combo': true,
+        opened: showDepartmentList,
+        rounded: rounded
       }"
-      v-if="showDepartmentList"
+      v-bind:style="{
+        width: width + 'px'
+      }"
     >
+      <div class="flexrow" @click="toggleDepartmentList">
+        <div
+          class="selected-department-line flexrow-item"
+          v-if="currentDepartment"
+        >
+          <department-name :department="currentDepartment" />
+        </div>
+        <chevron-down-icon class="down-icon flexrow-item" />
+      </div>
       <div
-        class="department-line"
-        v-for="department in departmentList.filter(
-          (departement) => departement.id !== this.value)"
-        @click="selectDepartment(department)"
-        :key="department.id"
+        class="select-input"
+        ref="select"
+        v-bind:style="{
+          'max-height': maxHeightSelectInput + 'px',
+          width: width + 'px',
+          top: rounded ? '30px' : '37px'
+        }"
+        v-if="showDepartmentList"
       >
-        <department-name
-          :department="department"
-        />
+        <div
+          class="department-line"
+          v-for="department in departmentList.filter(
+            departement => departement.id !== this.value
+          )"
+          @click="selectDepartment(department)"
+          :key="department.id"
+        >
+          <department-name :department="department" />
+        </div>
       </div>
     </div>
+    <combobox-mask
+      :displayed="showDepartmentList"
+      @click="toggleDepartmentList"
+    />
   </div>
-  <combobox-mask
-    :displayed="showDepartmentList"
-    @click="toggleDepartmentList"
-  />
-</div>
-
 </template>
 
 <script>
@@ -72,7 +66,7 @@ export default {
     DepartmentName
   },
 
-  data () {
+  data() {
     return {
       showDepartmentList: false
     }
@@ -109,8 +103,7 @@ export default {
     }
   },
 
-  mounted () {
-  },
+  mounted() {},
 
   computed: {
     ...mapGetters([
@@ -121,39 +114,44 @@ export default {
       'user'
     ]),
 
-    departmentsToTakeAccount () {
-      const departments = (this.selectableDepartments)
-        ? [...this.selectableDepartments] : [...this.departments]
+    departmentsToTakeAccount() {
+      const departments = this.selectableDepartments
+        ? [...this.selectableDepartments]
+        : [...this.departments]
       return departments.sort((a, b) => a.name.localeCompare(b.name))
     },
 
-    departmentList () {
+    departmentList() {
       if (this.dispayAllAndMyDepartments) {
         const departmentFilter = [
           {
             name: this.$t('tasks.combobox_departments.all_departments'),
             id: 'ALL',
             color: '#CCC'
-          }]
+          }
+        ]
         if (!this.isCurrentUserManager && this.user.departments.length > 0) {
-          departmentFilter.unshift(
-            {
-              name: this.$t('tasks.combobox_departments.my_departments'),
-              id: 'MY_DEPARTMENTS',
-              color: '#000000'
-            })
+          departmentFilter.unshift({
+            name: this.$t('tasks.combobox_departments.my_departments'),
+            id: 'MY_DEPARTMENTS',
+            color: '#000000'
+          })
         }
         return [...departmentFilter, ...this.departmentsToTakeAccount]
-      } else if (this.isCurrentUserSupervisor &&
-          this.user.departments.length > 0) {
+      } else if (
+        this.isCurrentUserSupervisor &&
+        this.user.departments.length > 0
+      ) {
         return [...this.departmentsToTakeAccount]
       } else {
-        return [{ name: '---', id: null, color: '#000000' },
-          ...this.departmentsToTakeAccount]
+        return [
+          { name: '---', id: null, color: '#000000' },
+          ...this.departmentsToTakeAccount
+        ]
       }
     },
 
-    currentDepartment () {
+    currentDepartment() {
       if (this.value) {
         const departmentMapped = this.departmentMap.get(this.value)
         if (departmentMapped) {
@@ -168,12 +166,12 @@ export default {
   },
 
   methods: {
-    selectDepartment (department) {
+    selectDepartment(department) {
       this.$emit('input', department.id)
       this.showDepartmentList = false
     },
 
-    toggleDepartmentList () {
+    toggleDepartmentList() {
       this.showDepartmentList = !this.showDepartmentList
     }
   }
@@ -195,7 +193,8 @@ export default {
   }
 }
 
-.department-line { }
+.department-line {
+}
 
 .department-combo {
   background: $white;

@@ -1,36 +1,38 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
-    <div class="box content">
-      <h1 class="title">
-        {{ $t('breakdown.edit_label') }}
-      </h1>
+    <div class="modal-content">
+      <div class="box content">
+        <h1 class="title">
+          {{ $t('breakdown.edit_label') }}
+        </h1>
 
-      <form v-on:submit.prevent>
-        <combobox
-          ref="typeField"
-          :label="$t('breakdown.label')"
-          :options="typeOptions"
-          @enter="confirm"
-          v-model="form.label"
-          v-focus
-        />
+        <form v-on:submit.prevent>
+          <combobox
+            ref="typeField"
+            :label="$t('breakdown.label')"
+            :options="typeOptions"
+            @enter="confirm"
+            v-model="form.label"
+            v-focus
+          />
 
-        <modal-footer
-          :is-error="isError"
-          :is-loading="isLoading"
-          @confirm="confirm"
-          @cancel="$emit('cancel')"
-        />
-      </form>
+          <modal-footer
+            :is-error="isError"
+            :is-loading="isLoading"
+            @confirm="confirm"
+            @cancel="$emit('cancel')"
+          />
+        </form>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -67,11 +69,11 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.form.label = this.label
   },
 
-  data () {
+  data() {
     return {
       asset: null,
       form: {
@@ -91,21 +93,19 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    confirm () {
+    confirm() {
       return this.$emit('confirm', this.form)
     }
   },
 
   watch: {
-    label () {
+    label() {
       this.form.label = this.label
     }
   }
@@ -113,7 +113,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .error {
   margin-top: 1em;
 }

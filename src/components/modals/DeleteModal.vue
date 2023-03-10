@@ -1,10 +1,12 @@
 <template>
-<div :class="{
-  'modal': true,
-  'delete-modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'delete-modal': true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
     <div class="modal-content">
       <div class="box">
         <p class="text">{{ text }}</p>
@@ -16,19 +18,17 @@
               'is-danger': true,
               'is-loading': isLoading
             }"
-            @click="$emit('confirm')">
+            @click="$emit('confirm')"
+          >
             {{ deleteButtonText || $t('main.confirmation') }}
           </a>
-          <button
-            class="button is-link"
-            @click="$emit('cancel')"
-          >
-            {{ $t("main.cancel") }}
+          <button class="button is-link" @click="$emit('cancel')">
+            {{ $t('main.cancel') }}
           </button>
         </p>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -65,12 +65,10 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   }
 }
 </script>

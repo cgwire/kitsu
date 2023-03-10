@@ -1,12 +1,16 @@
 <template>
-<div>
-  <spinner class="table-info" :is-stylish="true" v-if="isLoading && !isError" />
-  <div class="has-text-centered table-info" v-if="isError">
-    <span class="tag is-danger">
-      {{ $t('main.loading_error') }}
-    </span>
+  <div>
+    <spinner
+      class="table-info"
+      :is-stylish="true"
+      v-if="isLoading && !isError"
+    />
+    <div class="has-text-centered table-info" v-if="isError">
+      <span class="tag is-danger">
+        {{ $t('main.loading_error') }}
+      </span>
+    </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -30,5 +34,4 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

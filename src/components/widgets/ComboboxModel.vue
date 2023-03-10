@@ -1,12 +1,12 @@
 <template>
-<combobox
-  :label="label"
-  :disabled="disabled"
-  :options="modelOptions"
-  :value="currentModelId"
-  @input="emitValue"
-  @enter="emitEnter"
-/>
+  <combobox
+    :label="label"
+    :disabled="disabled"
+    :options="modelOptions"
+    :value="currentModelId"
+    @input="emitValue"
+    @enter="emitEnter"
+  />
 </template>
 
 <script>
@@ -41,7 +41,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       currentModelId: '',
       modelMap: {},
@@ -49,27 +49,26 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.reset()
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
-    emitValue (value) {
+    emitValue(value) {
       this.currentModelId = value
       const model = this.modelMap[this.currentModelId]
       this.$emit('input', model)
     },
 
-    emitEnter (value) {
+    emitEnter(value) {
       this.currentModelId = value
       const model = this.modelMap[this.currentModelId]
       this.$emit('enter', model)
     },
 
-    reset () {
+    reset() {
       if (this.models.length > 0) {
         this.currentModelId = this.models[0].id
         this.modelMap = {}
@@ -77,7 +76,7 @@ export default {
           label: model.name,
           value: model.id
         }))
-        this.models.forEach((model) => {
+        this.models.forEach(model => {
           this.modelMap[model.id] = model
         })
       }
@@ -85,12 +84,11 @@ export default {
   },
 
   watch: {
-    models () {
+    models() {
       this.reset()
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

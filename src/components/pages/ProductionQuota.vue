@@ -1,126 +1,120 @@
 <template>
-<div
-  class="columns fixed-page"
->
-  <div
-    class="column main-column"
-  >
-    <div class="flexrow filters">
-      <div class="flexrow-item">
-        <combobox-task-type
-          class="flexrow-item"
-          :label="$t('quota.type_label')"
-          :task-type-list="productionShotTaskTypes"
-          v-model="taskTypeId"
-        />
-      </div>
-      <div class="flexrow-item">
+  <div class="columns fixed-page">
+    <div class="column main-column">
+      <div class="flexrow filters">
+        <div class="flexrow-item">
+          <combobox-task-type
+            class="flexrow-item"
+            :label="$t('quota.type_label')"
+            :task-type-list="productionShotTaskTypes"
+            v-model="taskTypeId"
+          />
+        </div>
+        <div class="flexrow-item">
+          <combobox
+            class="flexrow-item"
+            :label="$t('quota.detail_label')"
+            :options="detailLevelOptions"
+            v-model="detailLevelString"
+          />
+        </div>
+
         <combobox
           class="flexrow-item"
-          :label="$t('quota.detail_label')"
-          :options="detailLevelOptions"
-          v-model="detailLevelString"
+          :label="$t('quota.month_label')"
+          :options="monthOptions"
+          v-model="monthString"
+          v-if="detailLevelString === 'day'"
         />
-      </div>
 
-      <combobox
-        class="flexrow-item"
-        :label="$t('quota.month_label')"
-        :options="monthOptions"
-        v-model="monthString"
-        v-if="detailLevelString === 'day'"
-      />
-
-      <combobox
-        class="flexrow-item"
-        :label="$t('quota.year_label')"
-        :options="yearOptions"
-        v-model="yearString"
-      />
-
-      <div class="flexrow-item">
         <combobox
           class="flexrow-item"
-          :label="$t('quota.count_label')"
-          :options="countModeOptions"
-          v-model="countMode"
+          :label="$t('quota.year_label')"
+          :options="yearOptions"
+          v-model="yearString"
+        />
+
+        <div class="flexrow-item">
+          <combobox
+            class="flexrow-item"
+            :label="$t('quota.count_label')"
+            :options="countModeOptions"
+            v-model="countMode"
+          />
+        </div>
+        <combobox
+          class="flexrow-item"
+          :label="$t('quota.compute_mode')"
+          :options="computeModeOptions"
+          v-model="computeMode"
+        />
+        <div class="flexrow-item">
+          <info-question-mark
+            class="mt2"
+            :text="
+              computeMode === 'weighted'
+                ? $t('quota.explaination')
+                : $t('quota.explaination_feedback')
+            "
+          />
+        </div>
+        <div class="filler"></div>
+        <button-simple
+          class="flexrow-item"
+          :title="$t('quota.export_quotas')"
+          icon="download"
+          @click="exportQuotas"
         />
       </div>
-      <combobox
-        class="flexrow-item"
-        :label="$t('quota.compute_mode')"
-        :options="computeModeOptions"
-        v-model="computeMode"
-      />
-      <div class="flexrow-item">
-        <info-question-mark
-          class="mt2"
-          :text="computeMode === 'weighted'
-                 ? $t('quota.explaination')
-                 : $t('quota.explaination_feedback')
-                "
+
+      <div class="flexrow mb2 mt0">
+        <search-field
+          ref="search-field"
+          class="search-field flexrow-item"
+          @change="onSearchChange"
+        />
+
+        <span class="label flexrow-item">
+          {{ $t('quota.highlight_quotas') }}
+        </span>
+
+        <text-field
+          class="flexrow-item max-quota-input"
+          type="number"
+          v-model="maxQuota"
         />
       </div>
-      <div class="filler"></div>
-      <button-simple
-        class="flexrow-item"
-        :title="$t('quota.export_quotas')"
-        icon="download"
-        @click="exportQuotas"
+
+      <quota
+        ref="quota-list"
+        :taskTypeId="taskTypeId"
+        :detailLevel="detailLevelString"
+        :year="currentYear"
+        :month="currentMonth"
+        :week="currentWeek"
+        :day="currentDay"
+        :currentPerson="currentPerson"
+        :countMode="currentMode"
+        :computeMode="computeMode"
+        :searchText="searchText"
+        :maxQuota="maxQuota"
       />
     </div>
-
-    <div class="flexrow mb2 mt0">
-      <search-field
-        ref="search-field"
-        class="search-field flexrow-item"
-        @change="onSearchChange"
-      />
-
-      <span class="label flexrow-item">
-        {{ $t('quota.highlight_quotas') }}
-      </span>
-
-      <text-field
-        class="flexrow-item max-quota-input"
-        type="number"
-        v-model="maxQuota"
+    <div class="column side-column" v-if="showInfo">
+      <people-quota-info
+        :person="currentPerson"
+        :year="currentYear"
+        :month="currentMonth"
+        :week="currentWeek"
+        :day="currentDay"
+        :is-loading="isPersonShotsLoading"
+        :is-loading-error="false"
+        :shots="personShots"
+        :count-mode="countMode"
+        @close="hideSideInfo"
       />
     </div>
-
-    <quota
-      ref="quota-list"
-      :taskTypeId="taskTypeId"
-      :detailLevel="detailLevelString"
-      :year="currentYear"
-      :month="currentMonth"
-      :week="currentWeek"
-      :day="currentDay"
-      :currentPerson="currentPerson"
-      :countMode="currentMode"
-      :computeMode="computeMode"
-      :searchText="searchText"
-      :maxQuota="maxQuota"
-    />
   </div>
-  <div
-    class="column side-column"
-    v-if="showInfo"
-  >
-    <people-quota-info
-      :person="currentPerson"
-      :year="currentYear"
-      :month="currentMonth"
-      :week="currentWeek"
-      :day="currentDay"
-      :is-loading="isPersonShotsLoading"
-      :is-loading-error="false"
-      :shots="personShots"
-      :count-mode="countMode"
-      @close="hideSideInfo"
-    />
-  </div>
-</div>
 </template>
 
 <script>
@@ -154,7 +148,7 @@ export default {
     TextField
   },
 
-  data () {
+  data() {
     return {
       taskTypeId: '',
       countMode: 'frames',
@@ -196,7 +190,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.loadRoute()
   },
 
@@ -209,17 +203,16 @@ export default {
       'personMap'
     ]),
 
-    yearOptions () {
+    yearOptions() {
       const year = 2018
       const currentYear = moment().year()
-      return range(year, currentYear)
-        .map(year => ({
-          label: year,
-          value: `${year}`
-        }))
+      return range(year, currentYear).map(year => ({
+        label: year,
+        value: `${year}`
+      }))
     },
 
-    monthOptions () {
+    monthOptions() {
       const currentYear = `${moment().year()}`
       const month = 1
       const currentMonth = moment().month() + 1
@@ -235,12 +228,9 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-      'getPersonQuotaShots',
-      'loadShots'
-    ]),
+    ...mapActions(['getPersonQuotaShots', 'loadShots']),
 
-    getCurrentPerson () {
+    getCurrentPerson() {
       const personId = this.$route.params.person_id
       if (personId && this.personMap) {
         return this.personMap.get(personId)
@@ -249,7 +239,7 @@ export default {
       }
     },
 
-    loadRoute () {
+    loadRoute() {
       const { month, year, week, day } = this.$route.params
       const { countMode, taskTypeId, computeMode } = this.$route.query
 
@@ -267,8 +257,7 @@ export default {
         this.taskTypeId = taskTypeId
       } else {
         const key = `quota:${this.currentProduction.id}:task-type-id`
-        this.taskTypeId =
-          localStorage.getItem(key) || this.shotTaskTypes[0].id
+        this.taskTypeId = localStorage.getItem(key) || this.shotTaskTypes[0].id
       }
       if (computeMode) {
         this.computeMode = computeMode
@@ -300,39 +289,34 @@ export default {
           week,
           day,
           computeMode: this.computeMode
+        }).then(shots => {
+          this.isPersonShotsLoading = false
+          this.personShots = shots
+          this.showSideInfo()
         })
-          .then(shots => {
-            this.isPersonShotsLoading = false
-            this.personShots = shots
-            this.showSideInfo()
-          })
       } else {
         this.hideSideInfo()
       }
     },
 
-    showSideInfo () {
+    showSideInfo() {
       this.showInfo = true
     },
 
-    hideSideInfo () {
+    hideSideInfo() {
       this.showInfo = false
     },
 
-    episodifyRoute (route) {
+    episodifyRoute(route) {
       if (this.currentEpisode) {
         episodifyRoute(route, this.currentEpisode.id)
       }
       return route
     },
 
-    exportQuotas () {
+    exportQuotas() {
       const quotas = this.$refs['quota-list'].quotaMap
-      const nameData = [
-        'quotas',
-        this.detailLevel,
-        this.currentYear
-      ]
+      const nameData = ['quotas', this.detailLevel, this.currentYear]
       if (this.detailLevel === 'day') nameData.push(this.currentMonth)
       const name = stringHelpers.slugify(nameData.join('_'))
       const people = Object.keys(quotas)
@@ -352,13 +336,13 @@ export default {
       )
     },
 
-    onSearchChange (searchText) {
+    onSearchChange(searchText) {
       this.searchText = searchText
     }
   },
 
   watch: {
-    detailLevelString () {
+    detailLevelString() {
       if (this.detailLevel !== this.detailLevelString) {
         const route = {
           name: `quota-${this.detailLevelString}`,
@@ -377,7 +361,7 @@ export default {
       }
     },
 
-    yearString () {
+    yearString() {
       const year = Number(this.yearString)
       const currentMonth = moment().month() + 1
       if (this.currentYear !== year) {
@@ -392,13 +376,16 @@ export default {
           }
         }
         if (this.detailLevelString === 'day') {
-          route.params.month = `${Math.min(Number(this.monthString), currentMonth)}`
+          route.params.month = `${Math.min(
+            Number(this.monthString),
+            currentMonth
+          )}`
         }
         this.$router.push(this.episodifyRoute(route))
       }
     },
 
-    monthString () {
+    monthString() {
       if (this.currentMonth !== Number(this.monthString)) {
         const route = {
           name: 'quota-day',
@@ -415,7 +402,7 @@ export default {
       }
     },
 
-    countMode () {
+    countMode() {
       if (this.currentMode !== this.countMode) {
         if (this.$route.query.countMode !== this.countMode) {
           this.$router.push({
@@ -429,7 +416,7 @@ export default {
       }
     },
 
-    computeMode () {
+    computeMode() {
       if (this.$route.query.computeMode !== this.computeMode) {
         this.$router.push({
           query: {
@@ -439,7 +426,7 @@ export default {
       }
     },
 
-    taskTypeId () {
+    taskTypeId() {
       const key = `quota:${this.currentProduction.id}:task-type-id`
       localStorage.setItem(key, this.taskTypeId)
       if (this.$route.query.taskTypeId !== this.taskTypeId) {
@@ -451,7 +438,7 @@ export default {
       }
     },
 
-    currentProduction () {
+    currentProduction() {
       this.isLoading = true
       this.loadShots(() => {
         this.loadRoute()
@@ -459,7 +446,7 @@ export default {
       })
     },
 
-    currentEpisode () {
+    currentEpisode() {
       this.isLoading = true
       this.loadShots(() => {
         this.loadRoute()
@@ -467,7 +454,7 @@ export default {
       })
     },
 
-    $route () {
+    $route() {
       this.loadRoute()
     }
   }

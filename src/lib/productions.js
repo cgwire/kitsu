@@ -33,7 +33,7 @@ export const PRODUCTION_STYLE_OPTIONS = [
   { label: 'catalog', value: 'catalog' }
 ]
 
-export function getTaskTypePriorityOfProd (taskType, production) {
+export function getTaskTypePriorityOfProd(taskType, production) {
   if (!taskType) {
     return 1
   } else if (

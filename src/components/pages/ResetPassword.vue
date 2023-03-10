@@ -4,7 +4,7 @@
       <div class="box has-text-left">
         <div class="has-text-centered">
           <h1 class="title">
-            {{ $t("login.reset_password_title") }}
+            {{ $t('login.reset_password_title') }}
           </h1>
         </div>
 
@@ -19,41 +19,38 @@
               v-focus
             />
             <span class="icon">
-              <mail-icon width=20 height=20 />
+              <mail-icon width="20" height="20" />
             </span>
           </p>
         </div>
 
         <p class="control">
-          <a v-bind:class="{
-            'button': true,
-            'main-button': true,
-            'is-fullwidth': true,
-            'is-loading': isLoading
-          }"
+          <a
+            v-bind:class="{
+              button: true,
+              'main-button': true,
+              'is-fullwidth': true,
+              'is-loading': isLoading
+            }"
             @click="confirmResetPassword"
             v-if="!isSuccess"
           >
-              {{ $t("login.reset_password") }}
+            {{ $t('login.reset_password') }}
           </a>
         </p>
         <p class="error" v-show="isError">
-          {{ $t("login.reset_password_failed") }}
+          {{ $t('login.reset_password_failed') }}
         </p>
         <p class="success" v-show="isSuccess">
-          {{ $t("login.reset_password_succeed") }}
+          {{ $t('login.reset_password_succeed') }}
         </p>
-        <p
-          class="has-text-centered"
-        >
-          <router-link
-            :to="{name: 'login'}"
-          >
+        <p class="has-text-centered">
+          <router-link :to="{ name: 'login' }">
             <span v-if="isSuccess">
-              {{ $t("login.back_to_login")}}
+              {{ $t('login.back_to_login') }}
             </span>
             <span v-else>
-              {{ $t("login.login_page")}}
+              {{ $t('login.login_page') }}
             </span>
           </router-link>
         </p>
@@ -74,7 +71,7 @@ export default {
     MailIcon
   },
 
-  data () {
+  data() {
     return {
       email: '',
       isLoading: false,
@@ -84,22 +81,19 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
 
-  mounted () {
+  mounted() {
     this.email = this.$store.state.login.email
     this.isLoading = false
     this.isSuccess = false
   },
 
   methods: {
-    ...mapActions([
-      'resetPassword'
-    ]),
+    ...mapActions(['resetPassword']),
 
-    confirmResetPassword () {
+    confirmResetPassword() {
       this.isLoading = true
       this.isError = false
       this.isSuccess = false
@@ -116,7 +110,7 @@ export default {
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: this.$t('login.reset_password_title')
     }

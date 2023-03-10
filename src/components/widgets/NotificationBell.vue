@@ -1,22 +1,20 @@
 <template>
-<div
-  class="notification-bell nav-item"
->
-  <router-link :to="{name: 'notifications'}">
-    <bell-icon
-      :class="notificationBellClass"
-    />
-    <span
-      class="number"
-      :title="notificationCount + ' ' +
-              $tc('notifications.unread_notifications',
-                   notificationCount)"
-      v-if="isNewNotification"
-    >
-      {{ notificationCount }}
-    </span>
-  </router-link>
-</div>
+  <div class="notification-bell nav-item">
+    <router-link :to="{ name: 'notifications' }">
+      <bell-icon :class="notificationBellClass" />
+      <span
+        class="number"
+        :title="
+          notificationCount +
+          ' ' +
+          $tc('notifications.unread_notifications', notificationCount)
+        "
+        v-if="isNewNotification"
+      >
+        {{ notificationCount }}
+      </span>
+    </router-link>
+  </div>
 </template>
 
 <script>
@@ -43,12 +41,9 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'isNewNotification',
-      'notificationCount'
-    ]),
+    ...mapGetters(['isNewNotification', 'notificationCount']),
 
-    notificationBellClass () {
+    notificationBellClass() {
       if (this.isNewNotification) {
         return { 'has-notifications': true }
       } else {

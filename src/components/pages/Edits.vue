@@ -1,252 +1,251 @@
 <template>
-<div class="columns fixed-page">
-  <action-panel />
+  <div class="columns fixed-page">
+    <action-panel />
 
-  <div class="column main-column">
-    <div class="edits page">
-      <div class="edit-list-header page-header">
-        <div class="flexrow">
-          <search-field
-            ref="edit-search-field"
-            :can-save="true"
-            :active="isSearchActive"
-            @change="onSearchChange"
-            @enter="(query) => isLongEditList
-              ? applySearch(query)
-              : saveEditSearch(query)"
-            @save="saveSearchQuery"
-            placeholder="ex: e01 edit=wip"
-          />
-          <button-simple
-            class="flexrow-item"
-            :title="$t('entities.build_filter.title')"
-            icon="funnel"
-            @click="() => modals.isBuildFilterDisplayed = true"
-          />
-          <div class="filler"></div>
-          <combobox-department
-            class="combobox-department flexrow-item"
-            :selectable-departments="selectableDepartments('Edit')"
-            :dispay-all-and-my-departments="true"
-            :width="230"
-            rounded
-            v-model="selectedDepartment"
-            v-if="departments.length > 0"
-          />
-          <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
-            <show-assignations-button class="flexrow-item" />
-            <show-infos-button class="flexrow-item" />
-            <big-thumbnails-button class="flexrow-item" />
+    <div class="column main-column">
+      <div class="edits page">
+        <div class="edit-list-header page-header">
+          <div class="flexrow">
+            <search-field
+              ref="edit-search-field"
+              :can-save="true"
+              :active="isSearchActive"
+              @change="onSearchChange"
+              @enter="
+                query =>
+                  isLongEditList ? applySearch(query) : saveEditSearch(query)
+              "
+              @save="saveSearchQuery"
+              placeholder="ex: e01 edit=wip"
+            />
+            <button-simple
+              class="flexrow-item"
+              :title="$t('entities.build_filter.title')"
+              icon="funnel"
+              @click="() => (modals.isBuildFilterDisplayed = true)"
+            />
+            <div class="filler"></div>
+            <combobox-department
+              class="combobox-department flexrow-item"
+              :selectable-departments="selectableDepartments('Edit')"
+              :dispay-all-and-my-departments="true"
+              :width="230"
+              rounded
+              v-model="selectedDepartment"
+              v-if="departments.length > 0"
+            />
+            <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
+              <show-assignations-button class="flexrow-item" />
+              <show-infos-button class="flexrow-item" />
+              <big-thumbnails-button class="flexrow-item" />
+            </div>
+            <div class="flexrow" v-if="isCurrentUserManager">
+              <button-simple
+                class="flexrow-item"
+                :title="$t('entities.thumbnails.title')"
+                icon="image"
+                @click="showAddThumbnailsModal"
+              />
+              <button-simple
+                class="flexrow-item"
+                :title="$t('main.csv.import_file')"
+                icon="upload"
+                @click="showImportModal"
+              />
+              <button-simple
+                class="flexrow-item"
+                icon="download"
+                :title="$t('main.csv.export_file')"
+                @click="onExportClick"
+              />
+              <button-simple
+                class="flexrow-item"
+                :text="$t('edits.new_edit')"
+                icon="plus"
+                @click="showNewModal"
+              />
+            </div>
           </div>
-          <div class="flexrow" v-if="isCurrentUserManager">
-            <button-simple
-              class="flexrow-item"
-              :title="$t('entities.thumbnails.title')"
-              icon="image"
-              @click="showAddThumbnailsModal"
-            />
-            <button-simple
-              class="flexrow-item"
-              :title="$t('main.csv.import_file')"
-              icon="upload"
-              @click="showImportModal"
-            />
-            <button-simple
-              class="flexrow-item"
-              icon="download"
-              :title="$t('main.csv.export_file')"
-              @click="onExportClick"
-            />
-            <button-simple
-              class="flexrow-item"
-              :text="$t('edits.new_edit')"
-              icon="plus"
-              @click="showNewModal"
+
+          <div class="query-list">
+            <search-query-list
+              :queries="editSearchQueries"
+              @change-search="changeSearch"
+              @remove-search="removeSearchQuery"
+              v-if="!isEditsLoading && !initialLoading"
             />
           </div>
         </div>
 
-        <div class="query-list">
-          <search-query-list
-            :queries="editSearchQueries"
-            @change-search="changeSearch"
-            @remove-search="removeSearchQuery"
-            v-if="!isEditsLoading && !initialLoading"
-          />
-        </div>
+        <sorting-info
+          :label="$t('main.sorted_by')"
+          :sorting="editSorting"
+          @clear-sorting="onChangeSortClicked(null)"
+          v-if="editSorting && editSorting.length > 0"
+        />
+        <edit-list
+          ref="edit-list"
+          :displayed-edits="displayedEdits"
+          :is-loading="isEditsLoading || initialLoading"
+          :is-error="isEditsLoadingError"
+          :validation-columns="editValidationColumns"
+          :department-filter="departmentFilter"
+          @add-metadata="onAddMetadataClicked"
+          @change-sort="onChangeSortClicked"
+          @create-tasks="showCreateTasksModal"
+          @delete-all-tasks="onDeleteAllTasksClicked"
+          @delete-clicked="onDeleteClicked"
+          @delete-metadata="onDeleteMetadataClicked"
+          @edit-clicked="onEditClicked"
+          @edit-metadata="onEditMetadataClicked"
+          @field-changed="onFieldChanged"
+          @metadata-changed="onMetadataChanged"
+          @restore-clicked="onRestoreClicked"
+          @scroll="saveScrollPosition"
+          @edit-history="showEditHistoryModal"
+        />
       </div>
-
-      <sorting-info
-        :label="$t('main.sorted_by')"
-        :sorting="editSorting"
-        @clear-sorting="onChangeSortClicked(null)"
-        v-if="editSorting && editSorting.length > 0"
-      />
-      <edit-list
-        ref="edit-list"
-        :displayed-edits="displayedEdits"
-        :is-loading="isEditsLoading || initialLoading"
-        :is-error="isEditsLoadingError"
-        :validation-columns="editValidationColumns"
-        :department-filter="departmentFilter"
-        @add-metadata="onAddMetadataClicked"
-        @change-sort="onChangeSortClicked"
-        @create-tasks="showCreateTasksModal"
-        @delete-all-tasks="onDeleteAllTasksClicked"
-        @delete-clicked="onDeleteClicked"
-        @delete-metadata="onDeleteMetadataClicked"
-        @edit-clicked="onEditClicked"
-        @edit-metadata="onEditMetadataClicked"
-        @field-changed="onFieldChanged"
-        @metadata-changed="onMetadataChanged"
-        @restore-clicked="onRestoreClicked"
-        @scroll="saveScrollPosition"
-        @edit-history="showEditHistoryModal"
-      />
     </div>
-  </div>
 
-  <div
-    id="side-column"
-    class="column side-column"
-    v-show="nbSelectedTasks === 1"
-  >
-    <task-info
-      :task="selectedTasks.values().next().value"
+    <div
+      id="side-column"
+      class="column side-column"
+      v-show="nbSelectedTasks === 1"
+    >
+      <task-info :task="selectedTasks.values().next().value" />
+    </div>
+
+    <edit-edit-modal
+      :active="modals.isNewDisplayed"
+      :is-loading="loading.edit"
+      :is-error="errors.edit"
+      :edit-to-edit="editToEdit"
+      @cancel="modals.isNewDisplayed = false"
+      @confirm="confirmEditEdit"
+    />
+
+    <delete-modal
+      ref="delete-edit-modal"
+      :active="modals.isDeleteDisplayed"
+      :is-loading="loading.del"
+      :is-error="errors.del"
+      :text="deleteText()"
+      :error-text="$t('edits.delete_error')"
+      @cancel="modals.isDeleteDisplayed = false"
+      @confirm="confirmDeleteEdit"
+    />
+
+    <delete-modal
+      ref="restore-edit-modal"
+      :active="modals.isRestoreDisplayed"
+      :is-loading="loading.restore"
+      :is-error="errors.restore"
+      :text="restoreText()"
+      :error-text="$t('edits.restore_error')"
+      @cancel="modals.isRestoreDisplayed = false"
+      @confirm="confirmRestoreEdit"
+    />
+
+    <delete-modal
+      ref="delete-metadata-modal"
+      :active="modals.isDeleteMetadataDisplayed"
+      :is-loading="loading.deleteMetadata"
+      :is-error="errors.deleteMetadata"
+      @cancel="modals.isDeleteMetadataDisplayed = false"
+      :text="$t('productions.metadata.delete_text')"
+      :error-text="$t('productions.metadata.delete_error')"
+      @confirm="confirmDeleteMetadata"
+    />
+
+    <hard-delete-modal
+      ref="delete-all-tasks-modal"
+      :active="modals.isDeleteAllTasksDisplayed"
+      :is-loading="loading.deleteAllTasks"
+      :is-error="errors.deleteAllTasks"
+      :text="deleteAllTasksText()"
+      :error-text="$t('tasks.delete_all_error')"
+      :lock-text="deleteAllTasksLockText"
+      :selection-option="true"
+      @cancel="modals.isDeleteAllTasksDisplayed = false"
+      @confirm="confirmDeleteAllTasks"
+    />
+
+    <import-render-modal
+      :active="modals.isImportRenderDisplayed"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      :import-error="errors.importingError"
+      :parsed-csv="parsedCSV"
+      :form-data="editsCsvFormData"
+      :columns="renderColumns"
+      :data-matchers="dataMatchers"
+      :database="filteredEdits"
+      @reupload="resetImport"
+      @cancel="hideImportRenderModal"
+      @confirm="uploadImportFile"
+    />
+
+    <import-modal
+      ref="import-modal"
+      :active="modals.isImportDisplayed"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      :form-data="editsCsvFormData"
+      :columns="dataMatchers"
+      :optional-columns="optionalColumns"
+      :generic-columns="genericColumns"
+      @cancel="hideImportModal"
+      @confirm="renderImport"
+    />
+
+    <create-tasks-modal
+      :active="modals.isCreateTasksDisplayed"
+      :is-loading="loading.creatingTasks"
+      :is-loading-stay="loading.creatingTasksStay"
+      :is-error="errors.creatingTasks"
+      :title="$t('tasks.create_tasks_edit')"
+      :text="$t('tasks.create_tasks_edit_explaination')"
+      :error-text="$t('tasks.create_tasks_edit_failed')"
+      @cancel="hideCreateTasksModal"
+      @confirm="confirmCreateTasks"
+      @confirm-and-stay="confirmCreateTasksAndStay"
+    />
+
+    <add-metadata-modal
+      :active="modals.isAddMetadataDisplayed"
+      :is-loading="loading.addMetadata"
+      :is-loading-stay="loading.addMetadata"
+      :is-error="errors.addMetadata"
+      :descriptor-to-edit="descriptorToEdit"
+      entity-type="Edit"
+      @cancel="closeMetadataModal"
+      @confirm="confirmAddMetadata"
+    />
+
+    <add-thumbnails-modal
+      ref="add-thumbnails-modal"
+      parent="edits"
+      :active="modals.isAddThumbnailsDisplayed"
+      :is-loading="loading.addThumbnails"
+      :is-error="errors.addThumbnails"
+      @cancel="hideAddThumbnailsModal"
+      @confirm="confirmAddThumbnails"
+    />
+
+    <edit-history-modal
+      :active="modals.isEditHistoryDisplayed"
+      :edit="historyEdit"
+      @cancel="hideEditHistoryModal"
+    />
+
+    <build-filter-modal
+      ref="build-filter-modal"
+      :active="modals.isBuildFilterDisplayed"
+      entity-type="edit"
+      @cancel="modals.isBuildFilterDisplayed = false"
+      @confirm="confirmBuildFilter"
     />
   </div>
-
-  <edit-edit-modal
-    :active="modals.isNewDisplayed"
-    :is-loading="loading.edit"
-    :is-error="errors.edit"
-    :edit-to-edit="editToEdit"
-    @cancel="modals.isNewDisplayed = false"
-    @confirm="confirmEditEdit"
-  />
-
-  <delete-modal
-    ref="delete-edit-modal"
-    :active="modals.isDeleteDisplayed"
-    :is-loading="loading.del"
-    :is-error="errors.del"
-    :text="deleteText()"
-    :error-text="$t('edits.delete_error')"
-    @cancel="modals.isDeleteDisplayed = false"
-    @confirm="confirmDeleteEdit"
-  />
-
-  <delete-modal
-    ref="restore-edit-modal"
-    :active="modals.isRestoreDisplayed"
-    :is-loading="loading.restore"
-    :is-error="errors.restore"
-    :text="restoreText()"
-    :error-text="$t('edits.restore_error')"
-    @cancel="modals.isRestoreDisplayed = false"
-    @confirm="confirmRestoreEdit"
-  />
-
-  <delete-modal
-    ref="delete-metadata-modal"
-    :active="modals.isDeleteMetadataDisplayed"
-    :is-loading="loading.deleteMetadata"
-    :is-error="errors.deleteMetadata"
-    @cancel="modals.isDeleteMetadataDisplayed = false"
-    :text="$t('productions.metadata.delete_text')"
-    :error-text="$t('productions.metadata.delete_error')"
-    @confirm="confirmDeleteMetadata"
-  />
-
-  <hard-delete-modal
-    ref="delete-all-tasks-modal"
-    :active="modals.isDeleteAllTasksDisplayed"
-    :is-loading="loading.deleteAllTasks"
-    :is-error="errors.deleteAllTasks"
-    :text="deleteAllTasksText()"
-    :error-text="$t('tasks.delete_all_error')"
-    :lock-text="deleteAllTasksLockText"
-    :selection-option="true"
-    @cancel="modals.isDeleteAllTasksDisplayed = false"
-    @confirm="confirmDeleteAllTasks"
-  />
-
-  <import-render-modal
-    :active="modals.isImportRenderDisplayed"
-    :is-loading="loading.importing"
-    :is-error="errors.importing"
-    :import-error="errors.importingError"
-    :parsed-csv="parsedCSV"
-    :form-data="editsCsvFormData"
-    :columns="renderColumns"
-    :data-matchers="dataMatchers"
-    :database="filteredEdits"
-    @reupload="resetImport"
-    @cancel="hideImportRenderModal"
-    @confirm="uploadImportFile"
-  />
-
-  <import-modal
-    ref="import-modal"
-    :active="modals.isImportDisplayed"
-    :is-loading="loading.importing"
-    :is-error="errors.importing"
-    :form-data="editsCsvFormData"
-    :columns="dataMatchers"
-    :optional-columns="optionalColumns"
-    :generic-columns="genericColumns"
-    @cancel="hideImportModal"
-    @confirm="renderImport"
-  />
-
-  <create-tasks-modal
-    :active="modals.isCreateTasksDisplayed"
-    :is-loading="loading.creatingTasks"
-    :is-loading-stay="loading.creatingTasksStay"
-    :is-error="errors.creatingTasks"
-    :title="$t('tasks.create_tasks_edit')"
-    :text="$t('tasks.create_tasks_edit_explaination')"
-    :error-text="$t('tasks.create_tasks_edit_failed')"
-    @cancel="hideCreateTasksModal"
-    @confirm="confirmCreateTasks"
-    @confirm-and-stay="confirmCreateTasksAndStay"
-  />
-
-  <add-metadata-modal
-    :active="modals.isAddMetadataDisplayed"
-    :is-loading="loading.addMetadata"
-    :is-loading-stay="loading.addMetadata"
-    :is-error="errors.addMetadata"
-    :descriptor-to-edit="descriptorToEdit"
-    entity-type="Edit"
-    @cancel="closeMetadataModal"
-    @confirm="confirmAddMetadata"
-  />
-
-  <add-thumbnails-modal
-    ref="add-thumbnails-modal"
-    parent="edits"
-    :active="modals.isAddThumbnailsDisplayed"
-    :is-loading="loading.addThumbnails"
-    :is-error="errors.addThumbnails"
-    @cancel="hideAddThumbnailsModal"
-    @confirm="confirmAddThumbnails"
-  />
-
-  <edit-history-modal
-    :active="modals.isEditHistoryDisplayed"
-    :edit="historyEdit"
-    @cancel="hideEditHistoryModal"
-  />
-
-  <build-filter-modal
-    ref="build-filter-modal"
-    :active="modals.isBuildFilterDisplayed"
-    entity-type="edit"
-    @cancel="modals.isBuildFilterDisplayed = false"
-    @confirm="confirmBuildFilter"
-  />
-</div>
 </template>
 
 <script>
@@ -310,7 +309,7 @@ export default {
     TaskInfo
   },
 
-  data () {
+  data() {
     return {
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
@@ -326,9 +325,7 @@ export default {
       historyEdit: {},
       initialLoading: true,
       isSearchActive: false,
-      optionalColumns: [
-        'Description'
-      ],
+      optionalColumns: ['Description'],
       pageName: 'Edits',
       parsedCSV: [],
       selectedDepartment: 'ALL',
@@ -371,15 +368,15 @@ export default {
     }
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     this.clearSelectedEdits()
   },
 
-  created () {
+  created() {
     this.setLastProductionScreen('edits')
   },
 
-  mounted () {
+  mounted() {
     let searchQuery = ''
     if (this.editSearchText && this.editSearchText.length > 0) {
       this.searchField.setValue(this.editSearchText)
@@ -388,38 +385,29 @@ export default {
       searchQuery = '' + this.$route.query.search
     }
     if (searchQuery === 'undefined') searchQuery = ''
-    this.$refs['edit-list'].setScrollPosition(
-      this.editListScrollPosition
-    )
+    this.$refs['edit-list'].setScrollPosition(this.editListScrollPosition)
     this.onSearchChange()
-    this.$refs['edit-list'].setScrollPosition(
-      this.editListScrollPosition
-    )
+    this.$refs['edit-list'].setScrollPosition(this.editListScrollPosition)
     const finalize = () => {
       if (this.$refs['edit-list']) {
         this.$refs['edit-search-field'].setValue(searchQuery)
         this.onSearchChange()
-        this.$refs['edit-list'].setScrollPosition(
-          this.editListScrollPosition
-        )
+        this.$refs['edit-list'].setScrollPosition(this.editListScrollPosition)
       }
     }
 
     if (
       this.editMap.size < 2 ||
-      (
-        this.editValidationColumns.length > 0 &&
-        !this.editMap.get(this.editMap.keys().next().value).validations
-      )
+      (this.editValidationColumns.length > 0 &&
+        !this.editMap.get(this.editMap.keys().next().value).validations)
     ) {
       setTimeout(() => {
-        this.loadEdits()
-          .then(() => {
-            setTimeout(() => {
-              this.initialLoading = false
-              finalize()
-            }, 500)
-          })
+        this.loadEdits().then(() => {
+          setTimeout(() => {
+            this.initialLoading = false
+            finalize()
+          }, 500)
+        })
       }, 0)
     } else {
       if (!this.isEditsLoading) this.initialLoading = false
@@ -462,15 +450,15 @@ export default {
       'productionEditTaskTypes'
     ]),
 
-    searchField () {
+    searchField() {
       return this.$refs['edit-search-field']
     },
 
-    addThumbnailsModal () {
+    addThumbnailsModal() {
       return this.$refs['add-thumbnails-modal']
     },
 
-    renderColumns () {
+    renderColumns() {
       var collection = [...this.dataMatchers, ...this.optionalColumns]
 
       this.productionEditTaskTypes.forEach(item => {
@@ -480,13 +468,11 @@ export default {
       return collection
     },
 
-    dataMatchers () {
-      return this.isTVShow
-        ? ['Episode', 'Name']
-        : ['Name']
+    dataMatchers() {
+      return this.isTVShow ? ['Episode', 'Name'] : ['Name']
     },
 
-    filteredEdits () {
+    filteredEdits() {
       const edits = {}
       this.displayedEdits.forEach(edit => {
         let editKey = ''
@@ -499,7 +485,7 @@ export default {
       return edits
     },
 
-    metadataDescriptors () {
+    metadataDescriptors() {
       return this.editMetadataDescriptors
     }
   },
@@ -530,7 +516,7 @@ export default {
       'uploadEditFile'
     ]),
 
-    confirmAddMetadata (form) {
+    confirmAddMetadata(form) {
       this.loading.addMetadata = true
       form.entity_type = 'Edit'
       this.addMetadataDescriptor(form)
@@ -538,18 +524,18 @@ export default {
           this.loading.addMetadata = false
           this.modals.isAddMetadataDisplayed = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.addMetadata = false
           this.errors.addMetadata = true
         })
     },
 
-    closeMetadataModal () {
+    closeMetadataModal() {
       this.modals.isAddMetadataDisplayed = false
     },
 
-    confirmDeleteMetadata () {
+    confirmDeleteMetadata() {
       this.errors.deleteMetadata = false
       this.loading.deleteMetadata = true
       this.deleteMetadataDescriptor(this.descriptorIdToDelete)
@@ -557,51 +543,52 @@ export default {
           this.errors.deleteMetadata = false
           this.loading.deleteMetadata = false
           this.modals.isDeleteMetadataDisplayed = false
-        }).catch((err) => {
+        })
+        .catch(err => {
           console.error(err)
           this.errors.deleteMetadata = true
           this.loading.deleteMetadata = false
         })
     },
 
-    onAddMetadataClicked () {
+    onAddMetadataClicked() {
       this.descriptorToEdit = {}
       this.modals.isAddMetadataDisplayed = true
     },
 
-    onDeleteMetadataClicked (descriptorId) {
+    onDeleteMetadataClicked(descriptorId) {
       this.descriptorIdToDelete = descriptorId
       this.modals.isDeleteMetadataDisplayed = true
     },
 
-    onDeleteClicked (edit) {
+    onDeleteClicked(edit) {
       this.editToDelete = edit
       this.modals.isDeleteDisplayed = true
     },
 
-    showNewModal () {
+    showNewModal() {
       this.editToEdit = {}
       this.modals.isNewDisplayed = true
     },
 
-    onEditClicked (edit) {
+    onEditClicked(edit) {
       this.editToEdit = edit
       this.modals.isNewDisplayed = true
     },
 
-    onRestoreClicked (edit) {
+    onRestoreClicked(edit) {
       this.editToRestore = edit
       this.modals.isRestoreDisplayed = true
     },
 
-    onEditMetadataClicked (descriptorId) {
+    onEditMetadataClicked(descriptorId) {
       this.descriptorToEdit = this.currentProduction.descriptors.find(
         d => d.id === descriptorId
       )
       this.modals.isAddMetadataDisplayed = true
     },
 
-    confirmEditEdit (form) {
+    confirmEditEdit(form) {
       let action = 'newEdit'
       this.loading.edit = true
       this.errors.edit = false
@@ -610,18 +597,18 @@ export default {
         form.id = this.editToEdit.id
       }
       this[action](form)
-        .then((form) => {
+        .then(form => {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.edit = false
           this.errors.edit = true
         })
     },
 
-    confirmDeleteAllTasks (selectionOnly) {
+    confirmDeleteAllTasks(selectionOnly) {
       const taskTypeId = this.taskTypeForTaskDeletion.id
       const projectId = this.currentProduction.id
       this.errors.deleteAllTasks = false
@@ -630,14 +617,15 @@ export default {
         .then(() => {
           this.loading.deleteAllTasks = false
           this.modals.isDeleteAllTasksDisplayed = false
-        }).catch((err) => {
+        })
+        .catch(err => {
           console.error(err)
           this.loading.deleteAllTasks = false
           this.errors.deleteAllTasks = true
         })
     },
 
-    confirmDeleteEdit () {
+    confirmDeleteEdit() {
       this.loading.del = true
       this.errors.del = false
       this.deleteEdit(this.editToDelete)
@@ -645,14 +633,14 @@ export default {
           this.loading.del = false
           this.modals.isDeleteDisplayed = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.del = false
           this.errors.del = true
         })
     },
 
-    confirmRestoreEdit () {
+    confirmRestoreEdit() {
       this.loading.restore = true
       this.errors.restore = false
       this.restoreEdit(this.editToRestore)
@@ -660,15 +648,15 @@ export default {
           this.loading.restore = false
           this.modals.isRestoreDisplayed = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.restore = false
           this.errors.restore = true
         })
     },
 
-    confirmAddThumbnails (forms) {
-      const addPreview = (form) => {
+    confirmAddThumbnails(forms) {
+      const addPreview = form => {
         this.addThumbnailsModal.markLoading(form.task.entity_id)
         return this.commentTaskWithPreview({
           taskId: form.task.id,
@@ -689,14 +677,13 @@ export default {
           })
       }
       this.loading.addThumbnails = true
-      func.runPromiseMapAsSeries(forms, addPreview)
-        .then(() => {
-          this.loading.addThumbnails = false
-          this.modals.isAddThumbnailsDisplayed = false
-        })
+      func.runPromiseMapAsSeries(forms, addPreview).then(() => {
+        this.loading.addThumbnails = false
+        this.modals.isAddThumbnailsDisplayed = false
+      })
     },
 
-    confirmCreateTasks ({ form, selectionOnly }) {
+    confirmCreateTasks({ form, selectionOnly }) {
       this.loading.creatingTasks = true
       this.runTasksCreation(form, selectionOnly)
         .then(() => {
@@ -710,7 +697,7 @@ export default {
         })
     },
 
-    confirmCreateTasksAndStay ({ form, selectionOnly }) {
+    confirmCreateTasksAndStay({ form, selectionOnly }) {
       this.loading.creatingTasksStay = true
       this.runTasksCreation(form, selectionOnly)
         .then(() => {
@@ -723,7 +710,7 @@ export default {
         })
     },
 
-    runTasksCreation (form, selectionOnly) {
+    runTasksCreation(form, selectionOnly) {
       this.errors.creatingTasks = false
       return this.createTasks({
         type: 'edits',
@@ -733,15 +720,15 @@ export default {
       })
     },
 
-    reset () {
+    reset() {
       this.initialLoading = true
-      this.loadEdits((err) => {
+      this.loadEdits(err => {
         if (err) console.error(err)
         this.initialLoading = false
       })
     },
 
-    resetEditModal () {
+    resetEditModal() {
       const form = { name: '' }
       if (this.openProductions.length > 0) {
         form.production_id = this.openProductions[0].id
@@ -749,12 +736,9 @@ export default {
       this.editToEdit = form
     },
 
-    deleteText () {
+    deleteText() {
       const edit = this.editToDelete
-      if (
-        edit &&
-        (edit.canceled || !edit.tasks || edit.tasks.length === 0)
-      ) {
+      if (edit && (edit.canceled || !edit.tasks || edit.tasks.length === 0)) {
         return this.$t('edits.delete_text', { name: edit.name })
       } else if (edit) {
         return this.$t('edits.cancel_text', { name: edit.name })
@@ -763,7 +747,7 @@ export default {
       }
     },
 
-    deleteAllTasksText () {
+    deleteAllTasksText() {
       const taskType = this.taskTypeForTaskDeletion
       if (taskType) {
         return this.$t('tasks.delete_all_text', { name: taskType.name })
@@ -772,7 +756,7 @@ export default {
       }
     },
 
-    restoreText () {
+    restoreText() {
       const edit = this.editToRestore
       if (edit) {
         return this.$t('edits.restore_text', { name: edit.name })
@@ -781,23 +765,22 @@ export default {
       }
     },
 
-    renderImport (data, mode) {
+    renderImport(data, mode) {
       this.loading.importing = true
       this.errors.importing = false
       this.formData = data
       if (mode === 'file') {
         data = data.get('file')
       }
-      csv.processCSV(data)
-        .then((results) => {
-          this.parsedCSV = results
-          this.hideImportModal()
-          this.loading.importing = false
-          this.showImportRenderModal()
-        })
+      csv.processCSV(data).then(results => {
+        this.parsedCSV = results
+        this.hideImportModal()
+        this.loading.importing = false
+        this.showImportRenderModal()
+      })
     },
 
-    uploadImportFile (data, toUpdate) {
+    uploadImportFile(data, toUpdate) {
       const formData = new FormData()
       const filename = 'import.csv'
       const csvContent = csv.turnEntriesToCsvString(data)
@@ -812,8 +795,7 @@ export default {
       this.uploadEditFile(toUpdate)
         .then(() => {
           this.loading.importing = false
-          this.loadEpisodes()
-            .catch(console.error)
+          this.loadEpisodes().catch(console.error)
           this.hideImportRenderModal()
           this.loadEdits()
         })
@@ -825,7 +807,7 @@ export default {
         })
     },
 
-    resetImport () {
+    resetImport() {
       this.errors.importing = false
       this.hideImportRenderModal()
       this.$store.commit('EDIT_CSV_FILE_SELECTED', null)
@@ -833,14 +815,14 @@ export default {
       this.showImportModal()
     },
 
-    onDeleteAllTasksClicked (taskTypeId) {
+    onDeleteAllTasksClicked(taskTypeId) {
       const taskType = this.taskTypeMap.get(taskTypeId)
       this.taskTypeForTaskDeletion = taskType
       this.deleteAllTasksLockText = taskType.name
       this.modals.isDeleteAllTasksDisplayed = true
     },
 
-    onSearchChange () {
+    onSearchChange() {
       if (!this.searchField) return
       this.isSearchActive = false
       const searchQuery = this.searchField.getValue() || ''
@@ -852,30 +834,25 @@ export default {
       }
     },
 
-    saveScrollPosition (scrollPosition) {
-      this.$store.commit(
-        'SET_EDIT_LIST_SCROLL_POSITION',
-        scrollPosition
-      )
+    saveScrollPosition(scrollPosition) {
+      this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', scrollPosition)
     },
 
-    applySearch (searchQuery) {
+    applySearch(searchQuery) {
       this.setEditSearch(searchQuery)
       this.setSearchInUrl()
       this.isSearchActive = true
     },
 
-    saveSearchQuery (searchQuery) {
-      this.saveEditSearch(searchQuery)
-        .catch(console.error)
+    saveSearchQuery(searchQuery) {
+      this.saveEditSearch(searchQuery).catch(console.error)
     },
 
-    removeSearchQuery (searchQuery) {
-      this.removeEditSearch(searchQuery)
-        .catch(console.error)
+    removeSearchQuery(searchQuery) {
+      this.removeEditSearch(searchQuery).catch(console.error)
     },
 
-    getPath (section) {
+    getPath(section) {
       const route = {
         name: section,
         params: {
@@ -889,66 +866,64 @@ export default {
       return route
     },
 
-    showEditHistoryModal (edit) {
+    showEditHistoryModal(edit) {
       this.historyEdit = edit
       this.modals.isEditHistoryDisplayed = true
     },
 
-    hideEditHistoryModal () {
+    hideEditHistoryModal() {
       this.modals.isEditHistoryDisplayed = false
     },
 
-    onExportClick () {
-      this.getEditsCsvLines()
-        .then(editLines => {
-          const nameData = [
-            moment().format('YYYY-MM-DD'),
-            'kitsu',
-            this.currentProduction.name,
-            this.$t('edits.title')
-          ]
-          if (this.currentEpisode) {
-            nameData.splice(3, 0, this.currentEpisode.name)
-          }
-          const name = stringHelpers.slugify(nameData.join('_'))
-          const headers = [
-            this.$t('edits.fields.name'),
-            this.$t('edits.fields.description')
-          ]
-          if (this.currentEpisode) {
-            headers.splice(0, 0, 'Episode')
-          }
-          sortByName([...this.currentProduction.descriptors])
-            .filter(d => d.entity_type === 'Edit')
-            .forEach((descriptor) => {
-              headers.push(descriptor.name)
-            })
-          if (this.isEditTime) {
-            headers.push(this.$t('edits.fields.time_spent'))
-          }
-          if (this.isEditEstimation) {
-            headers.push(this.$t('main.estimation_short'))
-          }
-          this.editValidationColumns
-            .forEach((taskTypeId) => {
-              headers.push(this.taskTypeMap.get(taskTypeId).name)
-              headers.push('Assignations')
-            })
-          csv.buildCsvFile(name, [headers].concat(editLines))
+    onExportClick() {
+      this.getEditsCsvLines().then(editLines => {
+        const nameData = [
+          moment().format('YYYY-MM-DD'),
+          'kitsu',
+          this.currentProduction.name,
+          this.$t('edits.title')
+        ]
+        if (this.currentEpisode) {
+          nameData.splice(3, 0, this.currentEpisode.name)
+        }
+        const name = stringHelpers.slugify(nameData.join('_'))
+        const headers = [
+          this.$t('edits.fields.name'),
+          this.$t('edits.fields.description')
+        ]
+        if (this.currentEpisode) {
+          headers.splice(0, 0, 'Episode')
+        }
+        sortByName([...this.currentProduction.descriptors])
+          .filter(d => d.entity_type === 'Edit')
+          .forEach(descriptor => {
+            headers.push(descriptor.name)
+          })
+        if (this.isEditTime) {
+          headers.push(this.$t('edits.fields.time_spent'))
+        }
+        if (this.isEditEstimation) {
+          headers.push(this.$t('main.estimation_short'))
+        }
+        this.editValidationColumns.forEach(taskTypeId => {
+          headers.push(this.taskTypeMap.get(taskTypeId).name)
+          headers.push('Assignations')
         })
+        csv.buildCsvFile(name, [headers].concat(editLines))
+      })
     },
 
-    onChangeSortClicked (sortInfo) {
+    onChangeSortClicked(sortInfo) {
       this.changeEditSort(sortInfo)
     },
 
-    confirmBuildFilter (query) {
+    confirmBuildFilter(query) {
       this.modals.isBuildFilterDisplayed = false
       this.$refs['edit-search-field'].setValue(query)
       this.applySearch(query)
     },
 
-    onFieldChanged ({ entry, fieldName, value }) {
+    onFieldChanged({ entry, fieldName, value }) {
       const data = {
         id: entry.id,
         description: entry.description
@@ -957,7 +932,7 @@ export default {
       this.editEdit(data)
     },
 
-    onMetadataChanged ({ entry, descriptor, value }) {
+    onMetadataChanged({ entry, descriptor, value }) {
       const metadata = {}
       metadata[descriptor.field_name] = value
       const data = {
@@ -969,7 +944,7 @@ export default {
   },
 
   watch: {
-    $route () {
+    $route() {
       if (!this.$route.query) return
       const search = this.$route.query.search
       const actualSearch = this.$refs['edit-search-field'].getValue()
@@ -979,26 +954,23 @@ export default {
       }
     },
 
-    currentProduction () {
+    currentProduction() {
       this.$refs['edit-search-field'].setValue('')
       this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
       this.initialLoading = true
       if (!this.isTVShow) this.reset()
     },
 
-    currentEpisode () {
+    currentEpisode() {
       this.$refs['edit-search-field'].setValue('')
       this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
       if (this.isTVShow && this.currentEpisode) this.reset()
     },
 
-    isEditsLoading () {
+    isEditsLoading() {
       if (!this.isEditsLoading) {
         let searchQuery = ''
-        if (
-          this.$route.query.search &&
-          this.$route.query.search.length > 0
-        ) {
+        if (this.$route.query.search && this.$route.query.search.length > 0) {
           searchQuery = '' + this.$route.query.search
         }
         this.initialLoading = false
@@ -1007,24 +979,25 @@ export default {
           this.applySearch(searchQuery)
         })
         if (this.$refs['edit-list']) {
-          this.$refs['edit-list'].setScrollPosition(
-            this.editListScrollPosition
-          )
+          this.$refs['edit-list'].setScrollPosition(this.editListScrollPosition)
         }
       }
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     if (this.isTVShow) {
       return {
-        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
-               ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
-               ` | ${this.$t('edits.title')} - Kitsu`
+        title:
+          `${this.currentProduction ? this.currentProduction.name : ''}` +
+          ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
+          ` | ${this.$t('edits.title')} - Kitsu`
       }
     } else {
       return {
-        title: `${this.currentProduction.name} ${this.$t('edits.title')} - Kitsu`
+        title: `${this.currentProduction.name} ${this.$t(
+          'edits.title'
+        )} - Kitsu`
       }
     }
   }

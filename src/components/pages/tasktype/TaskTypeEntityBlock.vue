@@ -1,34 +1,32 @@
 <template>
-<div
-  :class="{
-    'supervisor-entity': true,
-    selected: selected
-  }"
-  @click="select"
->
-  <span
-    class="entity-block"
+  <div
+    :class="{
+      'supervisor-entity': true,
+      selected: selected
+    }"
+    @click="select"
   >
-    <entity-thumbnail
-      :entity="entity"
-      :square="true"
-      :empty-width="60"
-      :empty-height="60"
-      :width="60"
-      :height="60"
-      :with-link="false"
-    />
-    <span class="entity-name">
-      {{ entity.name }}
+    <span class="entity-block">
+      <entity-thumbnail
+        :entity="entity"
+        :square="true"
+        :empty-width="60"
+        :empty-height="60"
+        :width="60"
+        :height="60"
+        :with-link="false"
+      />
+      <span class="entity-name">
+        {{ entity.name }}
+      </span>
     </span>
-  </span>
-  <validation-tag
-    :task="task"
-    :is-static="true"
-    :pointer="true"
-    v-if="task"
-  />
-</div>
+    <validation-tag
+      :task="task"
+      :is-static="true"
+      :pointer="true"
+      v-if="task"
+    />
+  </div>
 </template>
 
 <script>
@@ -108,7 +106,7 @@ export default {
 .selected {
   border: 0;
   border-radius: 0.5em;
-  background-color: #8F91EB;
+  background-color: #8f91eb;
 }
 
 .supervisor-entity {

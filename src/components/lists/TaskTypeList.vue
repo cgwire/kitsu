@@ -1,226 +1,215 @@
 <template>
-<div class="data-list">
-  <div class="datatable-wrapper">
-    <table class="datatable multi-section">
-      <thead class="datatable-head">
-        <tr>
-          <th scope="col" class="department">
-            {{ $t('task_types.fields.department') }}
-          </th>
-          <th scope="col" class="name">{{ $t('task_types.fields.name') }}</th>
-          <th scope="col" class="allow-timelog">
-            {{ $t('task_types.fields.allow_timelog') }}
-          </th>
-          <th scope="col" class="actions"></th>
-        </tr>
-      </thead>
-      <draggable
-        class="datatable-body"
-        v-model="assetsItems"
-        draggable=".tasktype-item"
-        tag="tbody"
-        :sort="true"
-        @end="updatePriorityAssets"
-      >
-        <tr class="datatable-type-header" slot="header">
-          <th scope="rowgroup" colspan="4">
-            <span class="datatable-row-header">
-              {{ $t('assets.title') }}
-            </span>
-          </th>
-        </tr>
-        <tr
-          class="datatable-row tasktype-item"
-          :key="taskType.id"
-          v-for="taskType in assetsItems"
+  <div class="data-list">
+    <div class="datatable-wrapper">
+      <table class="datatable multi-section">
+        <thead class="datatable-head">
+          <tr>
+            <th scope="col" class="department">
+              {{ $t('task_types.fields.department') }}
+            </th>
+            <th scope="col" class="name">{{ $t('task_types.fields.name') }}</th>
+            <th scope="col" class="allow-timelog">
+              {{ $t('task_types.fields.allow_timelog') }}
+            </th>
+            <th scope="col" class="actions"></th>
+          </tr>
+        </thead>
+        <draggable
+          class="datatable-body"
+          v-model="assetsItems"
+          draggable=".tasktype-item"
+          tag="tbody"
+          :sort="true"
+          @end="updatePriorityAssets"
         >
-          <td class="department">
-            <department-name
-              :department="getDepartments(taskType.department_id)"
-              v-if="!isEmpty(taskType.department_id)"
+          <tr class="datatable-type-header" slot="header">
+            <th scope="rowgroup" colspan="4">
+              <span class="datatable-row-header">
+                {{ $t('assets.title') }}
+              </span>
+            </th>
+          </tr>
+          <tr
+            class="datatable-row tasktype-item"
+            :key="taskType.id"
+            v-for="taskType in assetsItems"
+          >
+            <td class="department">
+              <department-name
+                :department="getDepartments(taskType.department_id)"
+                v-if="!isEmpty(taskType.department_id)"
+              />
+            </td>
+            <task-type-cell class="name" :task-type="taskType" />
+            <td class="allow-timelog">
+              <boolean-rep :value="taskType.allow_timelog" />
+            </td>
+            <row-actions-cell
+              :taskType-id="taskType.id"
+              @delete-clicked="$emit('delete-clicked', taskType)"
+              @edit-clicked="$emit('edit-clicked', taskType)"
             />
-          </td>
-          <task-type-cell class="name" :task-type="taskType" />
-          <td class="allow-timelog">
-            <boolean-rep
-              :value="taskType.allow_timelog"
-            />
-          </td>
-          <row-actions-cell
-            :taskType-id="taskType.id"
-            @delete-clicked="$emit('delete-clicked', taskType)"
-            @edit-clicked="$emit('edit-clicked', taskType)"
-          />
-        </tr>
-      </draggable>
-      <draggable
-        class="datatable-body"
-        v-model="shotsItems"
-        draggable=".tasktype-item"
-        tag="tbody"
-        :sort="true"
-        @end="updatePriorityShots"
-      >
-        <tr class="datatable-type-header" slot="header">
-          <th scope="rowgroup" colspan="4">
-            <span class="datatable-row-header">
-              {{ $t('shots.title') }}
-            </span>
-          </th>
-        </tr>
-        <tr
-          class="datatable-row tasktype-item"
-          v-for="taskType in shotsItems" :key="taskType.id"
+          </tr>
+        </draggable>
+        <draggable
+          class="datatable-body"
+          v-model="shotsItems"
+          draggable=".tasktype-item"
+          tag="tbody"
+          :sort="true"
+          @end="updatePriorityShots"
         >
-          <td class="department">
-            <department-name
-              :department="getDepartments(taskType.department_id)"
-              v-if="!isEmpty(taskType.department_id)"
+          <tr class="datatable-type-header" slot="header">
+            <th scope="rowgroup" colspan="4">
+              <span class="datatable-row-header">
+                {{ $t('shots.title') }}
+              </span>
+            </th>
+          </tr>
+          <tr
+            class="datatable-row tasktype-item"
+            v-for="taskType in shotsItems"
+            :key="taskType.id"
+          >
+            <td class="department">
+              <department-name
+                :department="getDepartments(taskType.department_id)"
+                v-if="!isEmpty(taskType.department_id)"
+              />
+            </td>
+            <task-type-cell class="name" :task-type="taskType" />
+            <td class="allow-timelog">
+              <boolean-rep :value="taskType.allow_timelog" />
+            </td>
+            <row-actions-cell
+              :taskType-id="taskType.id"
+              @delete-clicked="$emit('delete-clicked', taskType)"
+              @edit-clicked="$emit('edit-clicked', taskType)"
             />
-          </td>
-          <task-type-cell class="name" :task-type="taskType" />
-          <td class="allow-timelog">
-            <boolean-rep
-              :value="taskType.allow_timelog"
-            />
-          </td>
-          <row-actions-cell
-            :taskType-id="taskType.id"
-            @delete-clicked="$emit('delete-clicked', taskType)"
-            @edit-clicked="$emit('edit-clicked', taskType)"
-          />
-        </tr>
-      </draggable>
-      <draggable
-        class="datatable-body"
-        v-model="editsItems"
-        draggable=".tasktype-item"
-        tag="tbody"
-        :sort="true"
-        @end="updatePriorityEdits"
-      >
-        <tr class="datatable-type-header" slot="header">
-          <th scope="rowgroup" colspan="4">
-            <span class="datatable-row-header">
-              {{ $t('edits.title') }}
-            </span>
-          </th>
-        </tr>
-        <tr
-          class="datatable-row tasktype-item"
-          v-for="taskType in editsItems" :key="taskType.id"
+          </tr>
+        </draggable>
+        <draggable
+          class="datatable-body"
+          v-model="editsItems"
+          draggable=".tasktype-item"
+          tag="tbody"
+          :sort="true"
+          @end="updatePriorityEdits"
         >
-          <td class="department">
-            <department-name
-              :department="getDepartments(taskType.department_id)"
-              v-if="!isEmpty(taskType.department_id)"
+          <tr class="datatable-type-header" slot="header">
+            <th scope="rowgroup" colspan="4">
+              <span class="datatable-row-header">
+                {{ $t('edits.title') }}
+              </span>
+            </th>
+          </tr>
+          <tr
+            class="datatable-row tasktype-item"
+            v-for="taskType in editsItems"
+            :key="taskType.id"
+          >
+            <td class="department">
+              <department-name
+                :department="getDepartments(taskType.department_id)"
+                v-if="!isEmpty(taskType.department_id)"
+              />
+            </td>
+            <task-type-cell class="name" :task-type="taskType" />
+            <td class="allow-timelog">
+              <boolean-rep :value="taskType.allow_timelog" />
+            </td>
+            <row-actions-cell
+              :taskType-id="taskType.id"
+              @delete-clicked="$emit('delete-clicked', taskType)"
+              @edit-clicked="$emit('edit-clicked', taskType)"
             />
-          </td>
-          <task-type-cell class="name" :task-type="taskType" />
-          <td class="allow-timelog">
-            <boolean-rep
-              :value="taskType.allow_timelog"
-            />
-          </td>
-          <row-actions-cell
-            :taskType-id="taskType.id"
-            @delete-clicked="$emit('delete-clicked', taskType)"
-            @edit-clicked="$emit('edit-clicked', taskType)"
-          />
-        </tr>
-      </draggable>
+          </tr>
+        </draggable>
 
-      <draggable
-        class="datatable-body"
-        v-model="sequencesItems"
-        draggable=".tasktype-item"
-        tag="tbody"
-        :sort="true"
-        @end="updatePrioritySequences"
-      >
-        <tr class="datatable-type-header" slot="header">
-          <th scope="rowgroup" colspan="4">
-            <span class="datatable-row-header">
-              {{ $t('sequences.title') }}
-            </span>
-          </th>
-        </tr>
-        <tr
-          class="datatable-row tasktype-item"
-          v-for="taskType in sequencesItems" :key="taskType.id"
+        <draggable
+          class="datatable-body"
+          v-model="sequencesItems"
+          draggable=".tasktype-item"
+          tag="tbody"
+          :sort="true"
+          @end="updatePrioritySequences"
         >
-          <td class="department">
-            <department-name
-              :department="getDepartments(taskType.department_id)"
-              v-if="!isEmpty(taskType.department_id)"
+          <tr class="datatable-type-header" slot="header">
+            <th scope="rowgroup" colspan="4">
+              <span class="datatable-row-header">
+                {{ $t('sequences.title') }}
+              </span>
+            </th>
+          </tr>
+          <tr
+            class="datatable-row tasktype-item"
+            v-for="taskType in sequencesItems"
+            :key="taskType.id"
+          >
+            <td class="department">
+              <department-name
+                :department="getDepartments(taskType.department_id)"
+                v-if="!isEmpty(taskType.department_id)"
+              />
+            </td>
+            <task-type-cell class="name" :task-type="taskType" />
+            <td class="allow-timelog">
+              <boolean-rep :value="taskType.allow_timelog" />
+            </td>
+            <row-actions-cell
+              :taskType-id="taskType.id"
+              @delete-clicked="$emit('delete-clicked', taskType)"
+              @edit-clicked="$emit('edit-clicked', taskType)"
             />
-          </td>
-          <task-type-cell class="name" :task-type="taskType" />
-          <td class="allow-timelog">
-            <boolean-rep
-              :value="taskType.allow_timelog"
-            />
-          </td>
-          <row-actions-cell
-            :taskType-id="taskType.id"
-            @delete-clicked="$emit('delete-clicked', taskType)"
-            @edit-clicked="$emit('edit-clicked', taskType)"
-          />
-        </tr>
-      </draggable>
+          </tr>
+        </draggable>
 
-      <draggable
-        class="datatable-body"
-        v-model="episodesItems"
-        draggable=".tasktype-item"
-        tag="tbody"
-        :sort="true"
-        @end="updatePriorityEpisodes"
-      >
-        <tr class="datatable-type-header" slot="header">
-          <th scope="rowgroup" colspan="4">
-            <span class="datatable-row-header">
-              {{ $t('episodes.title') }}
-            </span>
-          </th>
-        </tr>
-        <tr
-          class="datatable-row tasktype-item"
-          v-for="taskType in episodesItems" :key="taskType.id"
+        <draggable
+          class="datatable-body"
+          v-model="episodesItems"
+          draggable=".tasktype-item"
+          tag="tbody"
+          :sort="true"
+          @end="updatePriorityEpisodes"
         >
-          <td class="department">
-            <department-name
-              :department="getDepartments(taskType.department_id)"
-              v-if="!isEmpty(taskType.department_id)"
+          <tr class="datatable-type-header" slot="header">
+            <th scope="rowgroup" colspan="4">
+              <span class="datatable-row-header">
+                {{ $t('episodes.title') }}
+              </span>
+            </th>
+          </tr>
+          <tr
+            class="datatable-row tasktype-item"
+            v-for="taskType in episodesItems"
+            :key="taskType.id"
+          >
+            <td class="department">
+              <department-name
+                :department="getDepartments(taskType.department_id)"
+                v-if="!isEmpty(taskType.department_id)"
+              />
+            </td>
+            <task-type-cell class="name" :task-type="taskType" />
+            <td class="allow-timelog">
+              <boolean-rep :value="taskType.allow_timelog" />
+            </td>
+            <row-actions-cell
+              :taskType-id="taskType.id"
+              @delete-clicked="$emit('delete-clicked', taskType)"
+              @edit-clicked="$emit('edit-clicked', taskType)"
             />
-          </td>
-          <task-type-cell class="name" :task-type="taskType" />
-          <td class="allow-timelog">
-            <boolean-rep
-              :value="taskType.allow_timelog"
-            />
-          </td>
-          <row-actions-cell
-            :taskType-id="taskType.id"
-            @delete-clicked="$emit('delete-clicked', taskType)"
-            @edit-clicked="$emit('edit-clicked', taskType)"
-          />
-        </tr>
-      </draggable>
+          </tr>
+        </draggable>
+      </table>
+    </div>
 
-    </table>
+    <table-info :is-loading="isLoading" :is-error="isError" />
+
+    <p class="has-text-centered nb-task-types">
+      {{ entries.length }} {{ $tc('task_types.number', entries.length) }}
+    </p>
   </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
-
-  <p class="has-text-centered nb-task-types">
-    {{ entries.length }} {{ $tc('task_types.number', entries.length) }}
-  </p>
-
-</div>
 </template>
 
 <script>
@@ -250,7 +239,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       assetsItems: [],
       shotsItems: [],
@@ -269,43 +258,40 @@ export default {
     TaskTypeCell
   },
 
-  mounted () {},
+  mounted() {},
 
   computed: {
-    ...mapGetters([
-      'getDepartments'
-    ]),
+    ...mapGetters(['getDepartments']),
 
-    assetTaskTypes () {
+    assetTaskTypes() {
       return this.getTaskTypesForEntity('Asset')
     },
 
-    shotTaskTypes () {
+    shotTaskTypes() {
       return this.getTaskTypesForEntity('Shot')
     },
 
-    editTaskTypes () {
+    editTaskTypes() {
       return this.getTaskTypesForEntity('Edit')
     },
 
-    sequenceTaskTypes () {
+    sequenceTaskTypes() {
       return this.getTaskTypesForEntity('Sequence')
     },
 
-    episodeTaskTypes () {
+    episodeTaskTypes() {
       return this.getTaskTypesForEntity('Episode')
     }
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    getTaskTypesForEntity (entity) {
+    getTaskTypesForEntity(entity) {
       return this.entries.filter(taskType => taskType.for_entity === entity)
     },
 
-    updatePriority (items) {
+    updatePriority(items) {
       const forms = []
       items.forEach((item, index) => {
         index += 1
@@ -320,27 +306,27 @@ export default {
       this.$emit('update-priorities', forms)
     },
 
-    updatePriorityAssets () {
+    updatePriorityAssets() {
       this.updatePriority(this.assetsItems)
     },
 
-    updatePriorityShots () {
+    updatePriorityShots() {
       this.updatePriority(this.shotsItems)
     },
 
-    updatePriorityEdits () {
+    updatePriorityEdits() {
       this.updatePriority(this.editsItems)
     },
 
-    updatePrioritySequences () {
+    updatePrioritySequences() {
       this.updatePriority(this.sequencesItems)
     },
 
-    updatePriorityEpisodes () {
+    updatePriorityEpisodes() {
       this.updatePriority(this.episodesItems)
     },
 
-    isEmpty (value) {
+    isEmpty(value) {
       return value === undefined || value === null || value === ''
     }
   },
@@ -348,13 +334,15 @@ export default {
   watch: {
     entries: {
       immediate: true,
-      handler () {
+      handler() {
         setTimeout(() => {
           this.assetsItems = JSON.parse(JSON.stringify(this.assetTaskTypes))
           this.shotsItems = JSON.parse(JSON.stringify(this.shotTaskTypes))
           this.editsItems = JSON.parse(JSON.stringify(this.editTaskTypes))
           this.episodesItems = JSON.parse(JSON.stringify(this.episodeTaskTypes))
-          this.sequencesItems = JSON.parse(JSON.stringify(this.sequenceTaskTypes))
+          this.sequencesItems = JSON.parse(
+            JSON.stringify(this.sequenceTaskTypes)
+          )
         }, 100)
       }
     }
@@ -397,11 +385,11 @@ export default {
   width: 100px;
 }
 
-.tasktype-item[draggable=false] {
+.tasktype-item[draggable='false'] {
   cursor: grab;
 }
 
-.tasktype-item[draggable=true] {
+.tasktype-item[draggable='true'] {
   cursor: grabbing;
 }
 

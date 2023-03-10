@@ -1,6 +1,5 @@
 <template>
   <div class="task-types page fixed-page">
-
     <list-page-header
       :title="$t('task_types.title')"
       :new-entry-label="$t('task_types.new_task_type')"
@@ -35,7 +34,6 @@
       @cancel="modals.del = false"
       @confirm="confirmDeleteTaskType"
     />
-
   </div>
 </template>
 
@@ -57,7 +55,7 @@ export default {
     TaskTypeList
   },
 
-  data () {
+  data() {
     return {
       errors: {
         taskTypes: false,
@@ -81,13 +79,10 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'getTaskType',
-      'taskTypes'
-    ])
+    ...mapGetters(['getTaskType', 'taskTypes'])
   },
 
-  mounted () {
+  mounted() {
     this.loading.taskTypes = true
     this.errors.taskTypes = false
     this.loading.departments = true
@@ -96,7 +91,7 @@ export default {
       .then(() => {
         this.loading.departments = false
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(err)
         this.loading.departments = false
         this.errors.departments = true
@@ -105,7 +100,7 @@ export default {
       .then(() => {
         this.loading.taskTypes = false
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(err)
         this.loading.taskTypes = false
         this.errors.taskTypes = true
@@ -120,7 +115,7 @@ export default {
       'loadDepartments'
     ]),
 
-    confirmEditTaskType (form) {
+    confirmEditTaskType(form) {
       let action = 'newTaskType'
       if (this.taskTypeToEdit && this.taskTypeToEdit.id) {
         action = 'editTaskType'
@@ -128,42 +123,42 @@ export default {
       }
       this.loading.edit = true
       this.errors.edit = false
-      this.$store.dispatch(action, form)
+      this.$store
+        .dispatch(action, form)
         .then(() => {
           this.loading.edit = false
           this.modals.edit = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.edit = false
           this.errors.edit = true
         })
     },
 
-    updatePriorities (forms) {
-      forms.forEach((form) => {
+    updatePriorities(forms) {
+      forms.forEach(form => {
         this.$store.commit('EDIT_TASK_TYPE_END', form)
       })
       this.savePriorities(forms)
     },
 
-    savePriorities (forms) {
+    savePriorities(forms) {
       const now = new Date().getTime()
       this.lastCall = this.lastCall || 0
       if (now - this.lastCall > 1000 && !this.isSaving) {
         this.lastCall = now
         this.isSaving = true
-        func.runPromiseMapAsSeries(forms, this.editTaskType)
-          .then(() => {
-            this.isSaving = false
-            if (this.newSaveCall) this.savePriorities(forms)
-          })
+        func.runPromiseMapAsSeries(forms, this.editTaskType).then(() => {
+          this.isSaving = false
+          if (this.newSaveCall) this.savePriorities(forms)
+        })
       } else {
         this.newSaveCall = true
       }
     },
 
-    confirmDeleteTaskType () {
+    confirmDeleteTaskType() {
       this.loading.del = true
       this.errors.del = false
       this.deleteTaskType(this.taskTypeToDelete)
@@ -171,14 +166,14 @@ export default {
           this.loading.del = false
           this.modals.del = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.del = false
           this.errors.del = true
         })
     },
 
-    deleteText () {
+    deleteText() {
       const taskType = this.taskTypeToDelete
       if (taskType) {
         return this.$t('task_types.delete_text', { name: taskType.name })
@@ -187,26 +182,25 @@ export default {
       }
     },
 
-    onDeleteClicked (taskType) {
+    onDeleteClicked(taskType) {
       this.taskTypeToDelete = taskType
       this.modals.del = true
     },
 
-    onEditClicked (taskType) {
+    onEditClicked(taskType) {
       this.taskTypeToEdit = taskType
       this.modals.edit = true
     },
 
-    onNewClicked () {
+    onNewClicked() {
       this.taskTypeToEdit = { color: '#999999' }
       this.modals.edit = true
     }
   },
 
-  watch: {
-  },
+  watch: {},
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: `${this.$t('task_types.title')} - Kitsu`
     }
@@ -214,5 +208,4 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

@@ -2,15 +2,15 @@ import client from '@/store/api/client'
 import superagent from 'superagent'
 
 export default {
-  getStatusAutomations (callback) {
+  getStatusAutomations(callback) {
     client.get('/api/data/status-automations', callback)
   },
 
-  getStatusAutomation (statusAutomationId, callback) {
+  getStatusAutomation(statusAutomationId, callback) {
     client.get(`/api/data/status-automations/${statusAutomationId}`, callback)
   },
 
-  newStatusAutomation (statusAutomation) {
+  newStatusAutomation(statusAutomation) {
     const data = {
       entity_type: statusAutomation.entityType,
       in_field_type: statusAutomation.inFieldType,
@@ -23,7 +23,7 @@ export default {
     return client.ppost('/api/data/status-automations/', data)
   },
 
-  updateStatusAutomation (statusAutomation) {
+  updateStatusAutomation(statusAutomation) {
     const data = {
       entity_type: statusAutomation.entityType,
       in_field_type: statusAutomation.inFieldType,
@@ -33,14 +33,17 @@ export default {
       out_task_type_id: statusAutomation.outTaskTypeId,
       out_task_status_id: statusAutomation.outTaskStatusId
     }
-    return client.pput(`/api/data/status-automations/${statusAutomation.id}`, data)
+    return client.pput(
+      `/api/data/status-automations/${statusAutomation.id}`,
+      data
+    )
   },
 
-  deleteStatusAutomation (statusAutomation) {
+  deleteStatusAutomation(statusAutomation) {
     return client.pdel(`/api/data/status-automations/${statusAutomation.id}`)
   },
 
-  postStatusAutomation (url, data) {
+  postStatusAutomation(url, data) {
     return new Promise((resolve, reject) => {
       superagent
         .post(url)

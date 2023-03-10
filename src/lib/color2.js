@@ -21,7 +21,7 @@ for (const model of Object.keys(convert)) {
 
 const limiters = {}
 
-function Color (object, model) {
+function Color(object, model) {
   if (!(this instanceof Color)) {
     return new Color(object, model)
   }
@@ -37,7 +37,7 @@ function Color (object, model) {
   let i
   let channels
 
-  if (object == null) { // eslint-disable-line no-eq-null,eqeqeq
+  if (object == null) {
     this.model = 'rgb'
     this.color = [0, 0, 0]
     this.valpha = 1
@@ -54,7 +54,8 @@ function Color (object, model) {
     this.model = result.model
     channels = convert[this.model].channels
     this.color = result.value.slice(0, channels)
-    this.valpha = typeof result.value[channels] === 'number' ? result.value[channels] : 1
+    this.valpha =
+      typeof result.value[channels] === 'number' ? result.value[channels] : 1
   } else if (object.length > 0) {
     this.model = model || 'rgb'
     channels = convert[this.model].channels
@@ -64,11 +65,7 @@ function Color (object, model) {
   } else if (typeof object === 'number') {
     // This is always RGB - can be converted later on.
     this.model = 'rgb'
-    this.color = [
-      (object >> 16) & 0xFF,
-      (object >> 8) & 0xFF,
-      object & 0xFF
-    ]
+    this.color = [(object >> 16) & 0xff, (object >> 8) & 0xff, object & 0xff]
     this.valpha = 1
   } else {
     this.valpha = 1
@@ -81,7 +78,9 @@ function Color (object, model) {
 
     const hashedKeys = keys.sort().join('')
     if (!(hashedKeys in hashedModelKeys)) {
-      throw new Error('Unable to parse color from object: ' + JSON.stringify(object))
+      throw new Error(
+        'Unable to parse color from object: ' + JSON.stringify(object)
+      )
     }
 
     this.model = hashedModelKeys[hashedKeys]
@@ -114,32 +113,34 @@ function Color (object, model) {
 }
 
 Color.prototype = {
-  toString () {
+  toString() {
     return this.string()
   },
 
-  toJSON () {
+  toJSON() {
     return this[this.model]()
   },
 
-  string (places) {
+  string(places) {
     let self = this.model in colorString.to ? this : this.rgb()
     self = self.round(typeof places === 'number' ? places : 1)
     const args = self.valpha === 1 ? self.color : self.color.concat(this.valpha)
     return colorString.to[self.model](args)
   },
 
-  percentString (places) {
+  percentString(places) {
     const self = this.rgb().round(typeof places === 'number' ? places : 1)
     const args = self.valpha === 1 ? self.color : self.color.concat(this.valpha)
     return colorString.to.rgb.percent(args)
   },
 
-  array () {
-    return this.valpha === 1 ? this.color.slice() : this.color.concat(this.valpha)
+  array() {
+    return this.valpha === 1
+      ? this.color.slice()
+      : this.color.concat(this.valpha)
   },
 
-  object () {
+  object() {
     const result = {}
     const channels = convert[this.model].channels
     const labels = convert[this.model].labels
@@ -155,7 +156,7 @@ Color.prototype = {
     return result
   },
 
-  unitArray () {
+  unitArray() {
     const rgb = this.rgb().color
     rgb[0] /= 255
     rgb[1] /= 255
@@ -168,7 +169,7 @@ Color.prototype = {
     return rgb
   },
 
-  unitObject () {
+  unitObject() {
     const rgb = this.rgb().object()
     rgb.r /= 255
     rgb.g /= 255
@@ -181,16 +182,15 @@ Color.prototype = {
     return rgb
   },
 
-  round (places) {
+  round(places) {
     places = Math.max(places || 0, 0)
     return new Color(
-      this.color.map(roundToPlace(places))
-        .concat(this.valpha),
+      this.color.map(roundToPlace(places)).concat(this.valpha),
       this.model
     )
   },
 
-  alpha (value) {
+  alpha(value) {
     if (arguments.length > 0) {
       return new Color(
         this.color.concat(Math.max(0, Math.min(1, value))),
@@ -206,7 +206,11 @@ Color.prototype = {
   green: getset('rgb', 1, maxfn(255)),
   blue: getset('rgb', 2, maxfn(255)),
 
-  hue: getset(['hsl', 'hsv', 'hsl', 'hwb', 'hcg'], 0, value => ((value % 360) + 360) % 360),
+  hue: getset(
+    ['hsl', 'hsv', 'hsl', 'hwb', 'hcg'],
+    0,
+    value => ((value % 360) + 360) % 360
+  ),
 
   saturationl: getset('hsl', 1, maxfn(100)),
   lightness: getset('hsl', 2, maxfn(100)),
@@ -233,7 +237,7 @@ Color.prototype = {
   a: getset('lab', 1),
   b: getset('lab', 2),
 
-  keyword (value) {
+  keyword(value) {
     if (arguments.length > 0) {
       return new Color(value)
     }
@@ -241,7 +245,7 @@ Color.prototype = {
     return convert[this.model].keyword(this.color)
   },
 
-  hex (value) {
+  hex(value) {
     if (arguments.length > 0) {
       return new Color(value)
     }
@@ -249,25 +253,25 @@ Color.prototype = {
     return colorString.to.hex(this.rgb().round().color)
   },
 
-  rgbNumber () {
+  rgbNumber() {
     const rgb = this.rgb().color
-    return ((rgb[0] & 0xFF) << 16) | ((rgb[1] & 0xFF) << 8) | (rgb[2] & 0xFF)
+    return ((rgb[0] & 0xff) << 16) | ((rgb[1] & 0xff) << 8) | (rgb[2] & 0xff)
   },
 
-  luminosity () {
+  luminosity() {
     // http://www.w3.org/TR/WCAG20/#relativeluminancedef
     const rgb = this.rgb().color
 
     const lum = []
     for (const [i, element] of rgb.entries()) {
       const chan = element / 255
-      lum[i] = (chan <= 0.039_28) ? chan / 12.92 : ((chan + 0.055) / 1.055) ** 2.4
+      lum[i] = chan <= 0.039_28 ? chan / 12.92 : ((chan + 0.055) / 1.055) ** 2.4
     }
 
     return 0.2126 * lum[0] + 0.7152 * lum[1] + 0.0722 * lum[2]
   },
 
-  contrast (color2) {
+  contrast(color2) {
     // http://www.w3.org/TR/WCAG20/#contrast-ratiodef
     const lum1 = this.luminosity()
     const lum2 = color2.luminosity()
@@ -279,27 +283,27 @@ Color.prototype = {
     return (lum2 + 0.05) / (lum1 + 0.05)
   },
 
-  level (color2) {
+  level(color2) {
     const contrastRatio = this.contrast(color2)
     if (contrastRatio >= 7.1) {
       return 'AAA'
     }
 
-    return (contrastRatio >= 4.5) ? 'AA' : ''
+    return contrastRatio >= 4.5 ? 'AA' : ''
   },
 
-  isDark () {
+  isDark() {
     // YIQ equation from http://24ways.org/2010/calculating-color-contrast
     const rgb = this.rgb().color
     const yiq = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000
     return yiq < 128
   },
 
-  isLight () {
+  isLight() {
     return !this.isDark()
   },
 
-  negate () {
+  negate() {
     const rgb = this.rgb()
     for (let i = 0; i < 3; i++) {
       rgb.color[i] = 255 - rgb.color[i]
@@ -308,58 +312,58 @@ Color.prototype = {
     return rgb
   },
 
-  lighten (ratio) {
+  lighten(ratio) {
     const hsl = this.hsl()
     hsl.color[2] += hsl.color[2] * ratio
     return hsl
   },
 
-  darken (ratio) {
+  darken(ratio) {
     const hsl = this.hsl()
     hsl.color[2] -= hsl.color[2] * ratio
     return hsl
   },
 
-  saturate (ratio) {
+  saturate(ratio) {
     const hsl = this.hsl()
     hsl.color[1] += hsl.color[1] * ratio
     return hsl
   },
 
-  desaturate (ratio) {
+  desaturate(ratio) {
     const hsl = this.hsl()
     hsl.color[1] -= hsl.color[1] * ratio
     return hsl
   },
 
-  whiten (ratio) {
+  whiten(ratio) {
     const hwb = this.hwb()
     hwb.color[1] += hwb.color[1] * ratio
     return hwb
   },
 
-  blacken (ratio) {
+  blacken(ratio) {
     const hwb = this.hwb()
     hwb.color[2] += hwb.color[2] * ratio
     return hwb
   },
 
-  grayscale () {
+  grayscale() {
     // http://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale
     const rgb = this.rgb().color
     const value = rgb[0] * 0.3 + rgb[1] * 0.59 + rgb[2] * 0.11
     return Color.rgb(value, value, value)
   },
 
-  fade (ratio) {
-    return this.alpha(this.valpha - (this.valpha * ratio))
+  fade(ratio) {
+    return this.alpha(this.valpha - this.valpha * ratio)
   },
 
-  opaquer (ratio) {
-    return this.alpha(this.valpha + (this.valpha * ratio))
+  opaquer(ratio) {
+    return this.alpha(this.valpha + this.valpha * ratio)
   },
 
-  rotate (degrees) {
+  rotate(degrees) {
     const hsl = this.hsl()
     let hue = hsl.color[0]
     hue = (hue + degrees) % 360
@@ -368,11 +372,14 @@ Color.prototype = {
     return hsl
   },
 
-  mix (mixinColor, weight) {
+  mix(mixinColor, weight) {
     // Ported from sass implementation in C
     // https://github.com/sass/libsass/blob/0e6b4a2850092356aa3ece07c6b249f0221caced/functions.cpp#L209
     if (!mixinColor || !mixinColor.rgb) {
-      throw new Error('Argument to "mix" was not a Color instance, but rather an instance of ' + typeof mixinColor)
+      throw new Error(
+        'Argument to "mix" was not a Color instance, but rather an instance of ' +
+          typeof mixinColor
+      )
     }
 
     const color1 = mixinColor.rgb()
@@ -382,14 +389,15 @@ Color.prototype = {
     const w = 2 * p - 1
     const a = color1.alpha() - color2.alpha()
 
-    const w1 = (((w * a === -1) ? w : (w + a) / (1 + w * a)) + 1) / 2
+    const w1 = ((w * a === -1 ? w : (w + a) / (1 + w * a)) + 1) / 2
     const w2 = 1 - w1
 
     return Color.rgb(
       w1 * color1.red() + w2 * color2.red(),
       w1 * color1.green() + w2 * color2.green(),
       w1 * color1.blue() + w2 * color2.blue(),
-      color1.alpha() * p + color2.alpha() * (1 - p))
+      color1.alpha() * p + color2.alpha() * (1 - p)
+    )
   }
 }
 
@@ -411,8 +419,12 @@ for (const model of Object.keys(convert)) {
       return new Color(arguments, model)
     }
 
-    const newAlpha = typeof arguments[channels] === 'number' ? channels : this.valpha
-    return new Color(assertArray(convert[this.model][model].raw(this.color)).concat(newAlpha), model)
+    const newAlpha =
+      typeof arguments[channels] === 'number' ? channels : this.valpha
+    return new Color(
+      assertArray(convert[this.model][model].raw(this.color)).concat(newAlpha),
+      model
+    )
   }
 
   // 'static' construction methods
@@ -425,21 +437,21 @@ for (const model of Object.keys(convert)) {
   }
 }
 
-function roundTo (number, places) {
+function roundTo(number, places) {
   return Number(number.toFixed(places))
 }
 
-function roundToPlace (places) {
+function roundToPlace(places) {
   return function (number) {
     return roundTo(number, places)
   }
 }
 
-function getset (model, channel, modifier) {
+function getset(model, channel, modifier) {
   model = Array.isArray(model) ? model : [model]
 
   for (const m of model) {
-    (limiters[m] || (limiters[m] = []))[channel] = modifier
+    ;(limiters[m] || (limiters[m] = []))[channel] = modifier
   }
 
   model = model[0]
@@ -466,17 +478,17 @@ function getset (model, channel, modifier) {
   }
 }
 
-function maxfn (max) {
+function maxfn(max) {
   return function (v) {
     return Math.max(0, Math.min(max, v))
   }
 }
 
-function assertArray (value) {
+function assertArray(value) {
   return Array.isArray(value) ? value : [value]
 }
 
-function zeroArray (array, length) {
+function zeroArray(array, length) {
   for (let i = 0; i < length; i++) {
     if (typeof array[i] !== 'number') {
       array[i] = 0

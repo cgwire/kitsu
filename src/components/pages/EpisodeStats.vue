@@ -52,9 +52,11 @@
 
     <episode-stats-list
       ref="episode-list"
-      :entries="statusMode === 'running'
-        ? displayedEpisodes.filter(e => e.status === 'running')
-        : displayedEpisodes"
+      :entries="
+        statusMode === 'running'
+          ? displayedEpisodes.filter(e => e.status === 'running')
+          : displayedEpisodes
+      "
       :is-loading="isLoading"
       :is-error="isLoadingError"
       :validation-columns="episodeValidationColumns"
@@ -92,7 +94,7 @@ export default {
     SearchField
   },
 
-  data () {
+  data() {
     return {
       countMode: 'count',
       dataMode: 'retakes',
@@ -133,7 +135,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     const mode = preferences.getPreference('stats:episode-mode') || 'retakes'
     this.dataMode = mode
     this.setDefaultSearchText()
@@ -169,7 +171,9 @@ export default {
       'taskTypeMap'
     ]),
 
-    isRetakeDataMode () { return this.dataMode === 'retakes' }
+    isRetakeDataMode() {
+      return this.dataMode === 'retakes'
+    }
   },
 
   methods: {
@@ -188,32 +192,32 @@ export default {
       'showAssignations'
     ]),
 
-    setDefaultSearchText () {
+    setDefaultSearchText() {
       if (this.episodeSearchText.length > 0) {
         this.$refs['episode-search-field'].setValue(this.episodeSearchText)
       }
     },
 
-    setDefaultListScrollPosition () {
+    setDefaultListScrollPosition() {
       this.$refs['episode-list'].setScrollPosition(
         this.episodeListScrollPosition
       )
     },
 
-    navigateToList () {
+    navigateToList() {
       this.$router.push(this.episodesPath)
     },
 
-    onSearchChange (event) {
+    onSearchChange(event) {
       const searchQuery = this.$refs['episode-search-field'].getValue()
       this.setEpisodeSearch(searchQuery)
     },
 
-    saveScrollPosition (scrollPosition) {
+    saveScrollPosition(scrollPosition) {
       this.setEpisodeListScrollPosition(scrollPosition)
     },
 
-    exportStatisticsToCsv () {
+    exportStatisticsToCsv() {
       const nameData = [
         moment().format('YYYYMMDD'),
         this.currentProduction.name,
@@ -243,13 +247,13 @@ export default {
       }
     },
 
-    onFieldChanged ({ entry, fieldName, value }) {
+    onFieldChanged({ entry, fieldName, value }) {
       const data = { id: entry.id }
       data[fieldName] = value
       this.editEpisode(data)
     },
 
-    reset () {
+    reset() {
       this.isLoading = true
       this.isLoadingError = false
       this.loadEpisodeStats(this.currentProduction.id)
@@ -268,27 +272,27 @@ export default {
   },
 
   watch: {
-    currentProduction () {
+    currentProduction() {
       this.$refs['episode-search-field'].setValue('')
       this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
       this.reset()
     },
 
-    displayedEpisodes () {
-    },
+    displayedEpisodes() {},
 
-    dataMode () {
+    dataMode() {
       preferences.setPreference('stats:episode-mode', this.dataMode)
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
-      title: `${this.currentProduction.name} ${this.$t('episodes.title')} - Kitsu`
+      title: `${this.currentProduction.name} ${this.$t(
+        'episodes.title'
+      )} - Kitsu`
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

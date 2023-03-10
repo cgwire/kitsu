@@ -1,21 +1,26 @@
 export default {
-
   assets: {
     cast_in: 'Eingießen',
-    delete_error: 'Beim Löschen dieses Assets ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass dieser Anlagentyp keine Aufgabe hat, die mit ihm verbunden ist?',
-    delete_text: 'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
-    edit_fail: 'Erstellung oder Ausgabe fehlgeschlagen, ein Fehler ist aufgetreten.',
+    delete_error:
+      'Beim Löschen dieses Assets ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass dieser Anlagentyp keine Aufgabe hat, die mit ihm verbunden ist?',
+    delete_text:
+      'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
+    edit_fail:
+      'Erstellung oder Ausgabe fehlgeschlagen, ein Fehler ist aufgetreten.',
     edit_success: 'Anlage {name} erfolgreich bearbeitet.',
     edit_title: 'Anlage bearbeiten',
-    empty_list: 'In der Produktion gibt es keine Anlage. Wie wäre es mit der Erstellung von solchen?',
+    empty_list:
+      'In der Produktion gibt es keine Anlage. Wie wäre es mit der Erstellung von solchen?',
     empty_list_client: 'Es gibt keine Anlage in dieser Produktion.',
     new_asset: 'Hinzufügen einer Anlage',
     new_assets: 'Assets hinzufügen',
     new_success: 'Anlage {name} erfolgreich erstellt.',
     no_cast_in: 'Dieser Gegenstand wird in keinem Schuss geworfen.',
     number: 'Vermögenswerte',
-    restore_text: 'Sind Sie sicher, dass Sie {name} in Ihrer Datenbank wiederherstellen möchten?',
-    restore_error: 'Bei der Wiederherstellung dieses Assets ist ein Fehler aufgetreten.',
+    restore_text:
+      'Sind Sie sicher, dass Sie {name} in Ihrer Datenbank wiederherstellen möchten?',
+    restore_error:
+      'Bei der Wiederherstellung dieses Assets ist ein Fehler aufgetreten.',
     tasks: 'Asset-Aufgaben',
     title: 'Vermögenswerte',
     fields: {
@@ -31,8 +36,10 @@ export default {
 
   asset_types: {
     all_asset_types: 'Alle asset typen',
-    delete_text: 'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
-    delete_error: 'Beim Löschen dieses Anlagentyps ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass diese Anlageart keine Anlage mit ihr verbunden hat?',
+    delete_text:
+      'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
+    delete_error:
+      'Beim Löschen dieses Anlagentyps ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass diese Anlageart keine Anlage mit ihr verbunden hat?',
     edit_title: 'Anlagenart bearbeiten',
     new_asset_type: 'Hinzufügen einer Anlagenart',
     number: 'asset type | asset types',
@@ -83,12 +90,15 @@ export default {
   },
 
   custom_actions: {
-    delete_text: 'Sind Sie sicher, dass Sie benutzerdefinierte Aktionen {name} aus Ihrer Datenbank entfernen möchten?',
-    delete_error: 'Beim Löschen dieser benutzerdefinierten Aktion ist ein Fehler aufgetreten.',
+    delete_text:
+      'Sind Sie sicher, dass Sie benutzerdefinierte Aktionen {name} aus Ihrer Datenbank entfernen möchten?',
+    delete_error:
+      'Beim Löschen dieser benutzerdefinierten Aktion ist ein Fehler aufgetreten.',
     edit_title: 'Bearbeiten einer benutzerdefinierten Aktion',
     new_custom_action: 'Hinzufügen einer benutzerdefinierten Aktion',
     number: 'benutzerdefinierte Aktion | benutzerdefinierte Aktionen',
-    run_for_selection: 'Benutzerdefinierte Aktion für ausgewählte Aufgaben ausführen:',
+    run_for_selection:
+      'Benutzerdefinierte Aktion für ausgewählte Aufgaben ausführen:',
     title: 'Benutzerdefinierte Aktionen',
     fields: {
       name: 'Name',
@@ -123,8 +133,10 @@ export default {
     },
     thumbnails: {
       error: 'Beim Hochladen von Miniaturbildern ist ein Fehler aufgetreten',
-      explaination: 'Das Hinzufügen einer Miniaturansicht erfordert die Einstellung einer neuen Vorschau. Um mehrere Miniaturansichten gleichzeitig festzulegen, müssen Sie zunächst einen Aufgabentyp auswählen, der für die Erstellung der neuen Vorschauen verwendet wird. Die Miniaturansichten werden von dieser neuen Vorschau aus eingestellt.',
-      explaination_two: 'Dann müssen Sie die Dateien auswählen, die Sie hochladen möchten. Um die richtigen Entitäten zu finden, müssen die Dateinamen dem folgenden Muster entsprechen:',
+      explaination:
+        'Das Hinzufügen einer Miniaturansicht erfordert die Einstellung einer neuen Vorschau. Um mehrere Miniaturansichten gleichzeitig festzulegen, müssen Sie zunächst einen Aufgabentyp auswählen, der für die Erstellung der neuen Vorschauen verwendet wird. Die Miniaturansichten werden von dieser neuen Vorschau aus eingestellt.',
+      explaination_two:
+        'Dann müssen Sie die Dateien auswählen, die Sie hochladen möchten. Um die richtigen Entitäten zu finden, müssen die Dateinamen dem folgenden Muster entsprechen:',
       shots_pattern: 'SequenceName ShotName" z.B. SQ01_SH01',
       assets_pattern: 'AssetType AssetName" z.B. Umgebung_Wald',
       select_files: 'Dateien auswählen',
@@ -139,10 +151,13 @@ export default {
 
   episodes: {
     all_episodes: 'Alle Episoden',
-    delete_error: 'Beim Löschen dieser Episode ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Bist du sicher, dass diese Episode keine Sequenz hat, die mit ihr verbunden ist?',
-    delete_text: 'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
+    delete_error:
+      'Beim Löschen dieser Episode ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Bist du sicher, dass diese Episode keine Sequenz hat, die mit ihr verbunden ist?',
+    delete_text:
+      'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
     edit_title: 'Episode bearbeiten',
-    empty_list: 'Es gibt keine Episode in der Produktion. Wie wäre es mit der Erstellung von solchen?',
+    empty_list:
+      'Es gibt keine Episode in der Produktion. Wie wäre es mit der Erstellung von solchen?',
     empty_list_client: 'Es gibt keine Episode in dieser Produktion.',
     new_episode: 'Neue Episode',
     number: 'episode | episoden',
@@ -174,18 +189,25 @@ export default {
     back_to_login: 'Zurück zum Login',
     forgot_password: 'Passwort vergessen?',
     login: 'Einloggen',
-    login_failed: 'Die Anmeldung ist fehlgeschlagen, bitte überprüfen Sie Ihre Zugangsdaten.',
+    login_failed:
+      'Die Anmeldung ist fehlgeschlagen, bitte überprüfen Sie Ihre Zugangsdaten.',
     login_page: 'Abbrechen',
     redirecting: 'Umleitung',
     reset_change_password: 'Passwort ändern',
-    reset_change_password_form_failed: 'Es gibt ein Problem mit dem von dir angegebenen Passwort. Bitte überprüfen Sie, ob es mindestens 8 Zeichen lang ist und ob beide Passwörter übereinstimmen.',
-    reset_change_password_failed: 'Die Änderung des Passworts ist fehlgeschlagen. Bitte starten Sie den gesamten Vorgang erneut.',
-    reset_change_password_succeed: 'Dein Passwort wurde erfolgreich geändert. Bitte gehen Sie zurück zur Login-Seite, um sie zu verwenden.',
+    reset_change_password_form_failed:
+      'Es gibt ein Problem mit dem von dir angegebenen Passwort. Bitte überprüfen Sie, ob es mindestens 8 Zeichen lang ist und ob beide Passwörter übereinstimmen.',
+    reset_change_password_failed:
+      'Die Änderung des Passworts ist fehlgeschlagen. Bitte starten Sie den gesamten Vorgang erneut.',
+    reset_change_password_succeed:
+      'Dein Passwort wurde erfolgreich geändert. Bitte gehen Sie zurück zur Login-Seite, um sie zu verwenden.',
     reset_change_password_title: 'Geben Sie ein neues Passwort ein',
     reset_password: 'Passwort zurücksetzen',
-    reset_password_failed: 'Passwort zurücksetzen fehlgeschlagen. Bitte überprüfen Sie Ihre E-Mail-Adresse.',
-    reset_password_succeed: 'Passwort zurücksetzen erfolgreich. Bitte überprüfen Sie Ihren Posteingang.',
-    reset_password_title: 'Gib deine E-Mail-Adresse ein, um dein Passwort zurückzusetzen.',
+    reset_password_failed:
+      'Passwort zurücksetzen fehlgeschlagen. Bitte überprüfen Sie Ihre E-Mail-Adresse.',
+    reset_password_succeed:
+      'Passwort zurücksetzen erfolgreich. Bitte überprüfen Sie Ihren Posteingang.',
+    reset_password_title:
+      'Gib deine E-Mail-Adresse ein, um dein Passwort zurückzusetzen.',
     title: 'Einloggen bei Kitsu',
     fields: {
       email: 'E-Mail',
@@ -211,7 +233,8 @@ export default {
     days_spent: 'Tag verbracht | Tage verbracht',
     delete: 'Löschen',
     delete_all: 'Alle löschen',
-    delete_text: 'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
+    delete_text:
+      'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
     edit: 'Bearbeiten',
     empty_comment: 'Leerer Kommentar',
     end_date: 'Enddatum',
@@ -260,8 +283,10 @@ export default {
       preview: 'Vorschau',
       preview_episode_name: 'Episodenname',
       preview_title: 'Vorschau Ihrer importierten Daten',
-      preview_description: 'Laden Sie eine .csv-Datei hoch, um Ihr Forum mit Beiträgen zu füllen',
-      preview_required: 'NB: Kopfzeilen müssen als erste Zeile eingefügt werden',
+      preview_description:
+        'Laden Sie eine .csv-Datei hoch, um Ihr Forum mit Beiträgen zu füllen',
+      preview_required:
+        'NB: Kopfzeilen müssen als erste Zeile eingefügt werden',
       preview_reupload: 'CSV-Datei erneut hochladen',
       required_fields: 'Ihr CSV erfordert die folgenden Spalten',
       select_file: 'Bitte wählen Sie eine Datei aus einem Ihrer Ordner:',
@@ -290,7 +315,8 @@ export default {
     all: 'Alle',
     commented_on: 'kommentiert',
     infos: 'Infos',
-    no_news: 'Es gibt keine Neuigkeiten für diese Produktion oder für diesen Filter.',
+    no_news:
+      'Es gibt keine Neuigkeiten für diese Produktion oder für diesen Filter.',
     only_comments: 'Nur Kommentare',
     only_previews: 'Nur Vorschauen',
     set_preview_on: 'Vorschau einstellen auf',
@@ -301,7 +327,8 @@ export default {
 
   not_found: {
     text: 'Mit dem Link, auf den du geklickt hast, war etwas nicht in Ordnung, wir empfehlen dir, auf der Homepage wieder vorbeizuschauen.',
-    title: 'Seite nicht gefunden.... suchen Sie nach etwas, das Sie gelöscht haben?'
+    title:
+      'Seite nicht gefunden.... suchen Sie nach etwas, das Sie gelöscht haben?'
   },
 
   notifications: {
@@ -309,7 +336,8 @@ export default {
     assigned_you: 'die Sie zugeordnet haben',
     commented_on: 'kommentiert',
     mention_you_on: 'hat dich erwähnt',
-    no_notifications: 'Für Ihre aktuellen Projekte gibt es derzeit keine Benachrichtigung für Sie.',
+    no_notifications:
+      'Für Ihre aktuellen Projekte gibt es derzeit keine Benachrichtigung für Sie.',
     title: 'Benachrichtigungen',
     with_preview: 'mit einer Vorschau'
   },
@@ -318,15 +346,18 @@ export default {
     active: 'Aktiv',
     add_member_to_team: 'Füge ein Mitglied zum Team hinzu:',
     create_invite: 'Einladung erstellen und versenden',
-    delete_error: 'Beim Löschen dieser Person ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass diese Person keine Zuordnung hat oder keinen Kommentar geschrieben hat?',
-    delete_text: 'Sind Sie sicher, dass Sie {personName} aus Ihrer Datenbank entfernen möchten?',
+    delete_error:
+      'Beim Löschen dieser Person ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass diese Person keine Zuordnung hat oder keinen Kommentar geschrieben hat?',
+    delete_text:
+      'Sind Sie sicher, dass Sie {personName} aus Ihrer Datenbank entfernen möchten?',
     edit_title: 'Person bearbeiten',
     empty_team: 'Im Projektteam ist niemand gelistet.',
     invite: 'Einladung senden',
     invite_error: 'Beim Senden der Einladung ist ein Fehler aufgetreten.',
     invite_success: 'Einladung wurde erfolgreich versendet',
     new_person: 'Einen neuen Mitarbeiter hinzufügen',
-    no_task_assigned: 'Es gibt keine laufenden Aufgaben, die Ihnen zugeordnet sind.',
+    no_task_assigned:
+      'Es gibt keine laufenden Aufgaben, die Ihnen zugeordnet sind.',
     persons: 'Person | Personen',
     running_tasks: 'Laufende Aufgaben',
     select_person: 'Eine Person auswählen.....',
@@ -369,7 +400,8 @@ export default {
     add_episode: 'Ganze episode hinzufügen',
     add_movie: 'Ganze film hinzufügen',
     add_sequence: 'Ganze sequenz hinzufügen',
-    apply_task_type_change: 'Dadurch wird die letzte Revision für den gegebenen Aufgabentyp auf allen shots positioniert.',
+    apply_task_type_change:
+      'Dadurch wird die letzte Revision für den gegebenen Aufgabentyp auf allen shots positioniert.',
     available_build: 'Verfügbare Builds',
     building: 'Gebäude',
     build_daily: 'Täglich ausstehend',
@@ -379,7 +411,8 @@ export default {
     created_at: 'Erstellen Sie die:',
     create_for_selection: 'Zur Auswahl erstellen',
     create_title: 'Playlist erstellen',
-    delete_text: 'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
+    delete_text:
+      'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
     delete_error: 'Beim Löschen dieser Playlist ist ein Fehler aufgetreten.',
     download_zip: 'Download.zip',
     edit_title: 'Wiedergabeliste bearbeiten',
@@ -388,7 +421,8 @@ export default {
     for_studio: 'Das Studio',
     last_creation: 'Neueste kreationen',
     last_modification: 'Neueste änderungen',
-    loading_error: 'Es ist ein Serverfehler aufgetreten. Wiedergabelisten können nicht geladen werden.',
+    loading_error:
+      'Es ist ein Serverfehler aufgetreten. Wiedergabelisten können nicht geladen werden.',
     new_playlist: 'Eine Wiedergabeliste hinzufügen',
     no_build: 'Kein Build',
     no_playlist: 'Für dieses Projekt gibt es derzeit keine Playlist.',
@@ -411,7 +445,8 @@ export default {
       entity_list: 'Entity-Liste anzeigen/verbergen',
       comments: 'Kommentare anzeigen/verbergen',
       annotation: 'Anmerkung',
-      annotation_text: 'Doppelklicken Sie auf die Vorschau, um etwas Text hinzuzufügen',
+      annotation_text:
+        'Doppelklicken Sie auf die Vorschau, um etwas Text hinzuzufügen',
       annotation_delete: 'Annotation löschen',
       annotation_redo: 'Annotation wiederholen',
       annotation_undo: 'Annotation rückgängig machen',
@@ -438,8 +473,10 @@ export default {
 
   productions: {
     current: 'Ausgewählte Produktion',
-    delete_text: 'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
-    delete_error: 'Beim Löschen dieser Produktion ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass diese Produktion keine Aufgabe, keinen Schuss oder Vermögenswert hat, der mit ihr verbunden ist? Kitsu erlaubt es nicht, die Produktion zu löschen. Wenn du die Produktion nicht mehr sehen willst, kannst du sie stattdessen schließen.',
+    delete_text:
+      'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
+    delete_error:
+      'Beim Löschen dieser Produktion ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass diese Produktion keine Aufgabe, keinen Schuss oder Vermögenswert hat, der mit ihr verbunden ist? Kitsu erlaubt es nicht, die Produktion zu löschen. Wenn du die Produktion nicht mehr sehen willst, kannst du sie stattdessen schließen.',
     edit_title: 'Produktion bearbeiten',
     new_production: 'Eine Produktion hinzufügen',
     number: 'Produktion | Produktionen',
@@ -448,9 +485,12 @@ export default {
     title: 'Produktionen',
     home: {
       create_new: 'Erstellen Sie eine neue Produktion',
-      empty: 'Du hast keine offene Produktion. Wie wäre es mit der Erstellung eines neuen?',
-      no_task: 'Du hast keine Aufgabe zugewiesen. Wenden Sie sich an Ihren Vorgesetzten, um zu sehen, was Sie tun können!',
-      no_prod_for_client: 'Du hast keinen Zugang zu einer Produktion. Wenden Sie sich an Ihren Auftragnehmer, um einen Zugang zu erhalten.',
+      empty:
+        'Du hast keine offene Produktion. Wie wäre es mit der Erstellung eines neuen?',
+      no_task:
+        'Du hast keine Aufgabe zugewiesen. Wenden Sie sich an Ihren Vorgesetzten, um zu sehen, was Sie tun können!',
+      no_prod_for_client:
+        'Du hast keinen Zugang zu einer Produktion. Wenden Sie sich an Ihren Auftragnehmer, um einen Zugang zu erhalten.',
       title: 'Laufende Produktionen',
       welcome: 'Willkommen bei Kitsu'
     },
@@ -463,14 +503,19 @@ export default {
       type: 'Typ'
     },
     metadata: {
-      add_explaination: 'Fügen Sie spezifische Daten hinzu, die für dieses Projekt erforderlich sind.',
-      add_failed: 'Beim Hinzufügen von Metadaten zu Ihrem Projekt ist ein Fehler aufgetreten.',
+      add_explaination:
+        'Fügen Sie spezifische Daten hinzu, die für dieses Projekt erforderlich sind.',
+      add_failed:
+        'Beim Hinzufügen von Metadaten zu Ihrem Projekt ist ein Fehler aufgetreten.',
       add_new_values: 'Es sind derzeit keine Werte verfügbar.',
       available_values: 'Verfügbare Werte',
       choices: 'Liste der Werte',
-      delete_text: 'Sind Sie sicher, dass Sie diese Spalte und die zugehörigen Daten für alle Anlagen dieser Produktion löschen möchten?',
-      delete_error: 'Beim Löschen dieser Metadatenspalte ist ein Fehler aufgetreten.',
-      error: 'Beim Hinzufügen der Metadatenspalte ist ein Fehler aufgetreten. Stellen Sie sicher, dass es keine Spalte mit ähnlichem Namen gibt und dass alle Felder ausgefüllt sind. Wenn das Problem weiterhin besteht, wenden Sie sich bitte an das Support-Team.',
+      delete_text:
+        'Sind Sie sicher, dass Sie diese Spalte und die zugehörigen Daten für alle Anlagen dieser Produktion löschen möchten?',
+      delete_error:
+        'Beim Löschen dieser Metadatenspalte ist ein Fehler aufgetreten.',
+      error:
+        'Beim Hinzufügen der Metadatenspalte ist ein Fehler aufgetreten. Stellen Sie sicher, dass es keine Spalte mit ähnlichem Namen gibt und dass alle Felder ausgefüllt sind. Wenn das Problem weiterhin besteht, wenden Sie sich bitte an das Support-Team.',
       free: 'Freier Wert',
       title: 'Metadatenspalte hinzufügen'
     },
@@ -509,9 +554,11 @@ export default {
     },
     change_password: {
       button: 'Passwort ändern',
-      error: 'Beim Ändern des Passworts ist ein Fehler aufgetreten. Bitte überprüfen Sie Ihr aktuelles Passwort.',
+      error:
+        'Beim Ändern des Passworts ist ein Fehler aufgetreten. Bitte überprüfen Sie Ihr aktuelles Passwort.',
       success: 'Dein Passwort wurde erfolgreich geändert!',
-      unvalid: 'Deine neue Passwort-Bestätigung stimmt nicht oder dein Passwort ist zu kurz (es werden mindestens 8 Zeichen erwartet).'
+      unvalid:
+        'Deine neue Passwort-Bestätigung stimmt nicht oder dein Passwort ist zu kurz (es werden mindestens 8 Zeichen erwartet).'
     },
     save: {
       button: 'Änderungen speichern',
@@ -554,17 +601,21 @@ export default {
       use_original_name: 'Original-Dateinamen für Downloads verwenden'
     },
     production: {
-      empty_list: 'Die Liste ist derzeit leer. Das bedeutet, dass den Benutzern alle Daten aus den Haupteinstellungen zur Verfügung stehen. Fügen Sie einige Einträge hinzu, um die Auswahl für diese Produktion einzuschränken.'
+      empty_list:
+        'Die Liste ist derzeit leer. Das bedeutet, dass den Benutzern alle Daten aus den Haupteinstellungen zur Verfügung stehen. Fügen Sie einige Einträge hinzu, um die Auswahl für diese Produktion einzuschränken.'
     },
     save: {
       button: 'Einstellungen speichern',
-      error: 'Beim Speichern von Einstellungen ist ein Serverfehler aufgetreten.'
+      error:
+        'Beim Speichern von Einstellungen ist ein Serverfehler aufgetreten.'
     }
   },
 
   task_status: {
-    delete_text: 'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
-    delete_error: 'Beim Löschen dieses Aufgabenstatus ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass dieser Aufgabenstatus keine Aufgabe zugeordnet hat?',
+    delete_text:
+      'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
+    delete_error:
+      'Beim Löschen dieses Aufgabenstatus ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass dieser Aufgabenstatus keine Aufgabe zugeordnet hat?',
     edit_title: 'Aufgabenstatus bearbeiten',
     number: 'Aufgabenstatus | Aufgabenstatus',
     new_task_status: 'Hinzufügen eines Aufgabenstatus',
@@ -582,8 +633,10 @@ export default {
   },
 
   task_types: {
-    delete_text: 'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
-    delete_error: 'Beim Löschen dieses Aufgabentyps ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass dieser Aufgabentyp keine Aufgabe hat, die mit ihm verknüpft ist?',
+    delete_text:
+      'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
+    delete_error:
+      'Beim Löschen dieses Aufgabentyps ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass dieser Aufgabentyp keine Aufgabe hat, die mit ihm verknüpft ist?',
     edit_title: 'Aufgabentyp bearbeiten',
     new_task_type: 'Hinzufügen eines Aufgabentyps',
     number: 'Aufgabentyp | Aufgabentypen',
@@ -599,10 +652,13 @@ export default {
 
   sequences: {
     all_sequences: 'Alle Sequenzen',
-    delete_text: 'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
-    delete_error: 'Beim Löschen dieser Sequenz ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Bist du sicher, dass diese Sequenz keinen Schuss damit zu tun hat?',
+    delete_text:
+      'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
+    delete_error:
+      'Beim Löschen dieser Sequenz ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Bist du sicher, dass diese Sequenz keinen Schuss damit zu tun hat?',
     edit_title: 'Sequenz bearbeiten',
-    empty_list: 'Es gibt keine Reihenfolge in der Produktion. Wie wäre es mit der Erstellung von solchen?',
+    empty_list:
+      'Es gibt keine Reihenfolge in der Produktion. Wie wäre es mit der Erstellung von solchen?',
     empty_list_client: 'In dieser Produktion gibt es keine Reihenfolge.',
     new_sequence: 'Neue Sequenz',
     number: 'Sequenz | Sequenzen',
@@ -623,19 +679,25 @@ export default {
       add_milestone: 'Meilenstein hinzufügen für',
       edit_milestone: 'Meilenstein bearbeiten für',
       name: 'Name',
-      error: 'Beim Hinzufügen oder Bearbeiten des Meilensteins ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.'
+      error:
+        'Beim Hinzufügen oder Bearbeiten des Meilensteins ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.'
     }
   },
 
   shots: {
     casting: 'Druckguss',
-    creation_explaination: 'Um Aufnahmen hinzuzufügen, musst du zuerst eine Episode und eine Sequenz erstellen. Geben Sie unten in der linken Spalte einen Episodennamen ein und klicken Sie dann auf Hinzufügen, um eine neue Episode zu erstellen. Wählen Sie diese Episode aus und wiederholen Sie den gleichen Vorgang für die Sequenz. Wählen Sie schließlich eine Sequenz aus und geben Sie einen Schussnamen in das Feld unten in der rechten Spalte ein. Klicken Sie auf die Schaltfläche Hinzufügen unten. Dein erster Schuss wurde erstellt. Du kannst jetzt viel mehr hinzufügen! Wenn es sich nicht um eine TV-Show handelt, müssen Sie direkt eine Sequenz erstellen.',
-    delete_text: 'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
-    delete_error: 'Beim Löschen dieses Schusses ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Bist du sicher, dass diese Aufnahme keine Aufgabe hat?',
+    creation_explaination:
+      'Um Aufnahmen hinzuzufügen, musst du zuerst eine Episode und eine Sequenz erstellen. Geben Sie unten in der linken Spalte einen Episodennamen ein und klicken Sie dann auf Hinzufügen, um eine neue Episode zu erstellen. Wählen Sie diese Episode aus und wiederholen Sie den gleichen Vorgang für die Sequenz. Wählen Sie schließlich eine Sequenz aus und geben Sie einen Schussnamen in das Feld unten in der rechten Spalte ein. Klicken Sie auf die Schaltfläche Hinzufügen unten. Dein erster Schuss wurde erstellt. Du kannst jetzt viel mehr hinzufügen! Wenn es sich nicht um eine TV-Show handelt, müssen Sie direkt eine Sequenz erstellen.',
+    delete_text:
+      'Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?',
+    delete_error:
+      'Beim Löschen dieses Schusses ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Bist du sicher, dass diese Aufnahme keine Aufgabe hat?',
     edit_success: 'Shot {name} erfolgreich bearbeitet.',
-    edit_fail: 'Erstellung oder Ausgabe fehlgeschlagen, ein Fehler ist aufgetreten. Achte darauf, dass du den Schuss nicht mit einem Namen umbenennst, der bereits für eine bestimmte Sequenz vergeben wurde.',
+    edit_fail:
+      'Erstellung oder Ausgabe fehlgeschlagen, ein Fehler ist aufgetreten. Achte darauf, dass du den Schuss nicht mit einem Namen umbenennst, der bereits für eine bestimmte Sequenz vergeben wurde.',
     edit_title: 'Schuss bearbeiten',
-    empty_list: 'Es gibt keinen Schuss in der Produktion. Wie wäre es mit der Erstellung von solchen?',
+    empty_list:
+      'Es gibt keinen Schuss in der Produktion. Wie wäre es mit der Erstellung von solchen?',
     empty_list_client: 'In dieser Produktion gibt es keine Aufnahme.',
     episodes: 'Episoden',
     history: 'Filmaufnahme werte historie',
@@ -648,8 +710,10 @@ export default {
     manage: 'Schüsse erstellen',
     new_success: 'Schuss {name} erfolgreich erstellt.',
     padding: 'Schusspolsterung',
-    restore_text: 'Sind Sie sicher, dass Sie {name} in Ihrer Datenbank wiederherstellen möchten?',
-    restore_error: 'Bei der Wiederherstellung dieser Aufnahme ist ein Fehler aufgetreten.',
+    restore_text:
+      'Sind Sie sicher, dass Sie {name} in Ihrer Datenbank wiederherstellen möchten?',
+    restore_error:
+      'Bei der Wiederherstellung dieser Aufnahme ist ein Fehler aufgetreten.',
     sequences: 'Sequenzen',
     tasks: 'Schuss-Aufgaben',
     title: 'Shots',
@@ -669,7 +733,8 @@ export default {
 
   server_down: {
     text: 'Bitte wenden Sie sich an Ihren Lieferantensupport, Ihren Systemadministrator oder Ihre IT-Abteilung, um zu erfahren, was schief läuft.',
-    title: 'Kitsu ist beim Erreichen seiner Daten-API auf einen Fehler gestoßen.'
+    title:
+      'Kitsu ist beim Erreichen seiner Daten-API auf einen Fehler gestoßen.'
   },
 
   statistics: {
@@ -683,8 +748,10 @@ export default {
 
   tasks: {
     add_preview: 'Vorschau hinzufügen',
-    add_preview_error: 'Beim Hinzufügen einer Vorschau ist ein Fehler aufgetreten.',
-    assign: 'Weisen Sie eine Aufgabe zu: | Aufgaben zuweisen {nbSelectedTasks} Aufgaben zu:',
+    add_preview_error:
+      'Beim Hinzufügen einer Vorschau ist ein Fehler aufgetreten.',
+    assign:
+      'Weisen Sie eine Aufgabe zu: | Aufgaben zuweisen {nbSelectedTasks} Aufgaben zu:',
     back_to_list: 'zurück zur Liste',
     bigger: 'Erweitern Sie das Aufgabenfeld',
     change_status_to: 'Ändern des Aufgabenstatus in:',
@@ -695,21 +762,30 @@ export default {
     create_for_selection: 'Erstellen Sie eine Aufgabe für jede leere Zelle:',
     create_tasks: 'Aufgaben hinzufügen',
     create_tasks_shot: 'Aufgaben für aktuelle Aufnahmen hinzufügen',
-    create_tasks_shot_explaination: 'Du wirst eine neue Aufgabe für jeden Schuss der aktuellen Liste für den angegebenen Aufgabentyp erstellen. Willst du fortfahren?',
-    create_tasks_shot_failed: 'Beim Fortfahren der Erstellung ist ein Serverfehler aufgetreten.',
+    create_tasks_shot_explaination:
+      'Du wirst eine neue Aufgabe für jeden Schuss der aktuellen Liste für den angegebenen Aufgabentyp erstellen. Willst du fortfahren?',
+    create_tasks_shot_failed:
+      'Beim Fortfahren der Erstellung ist ein Serverfehler aufgetreten.',
     create_tasks_asset: 'Hinzufügen von Aufgaben für aktuelle Assets',
-    create_tasks_asset_explaination: 'Sie werden für jede Kühlstelle der aktuellen Liste für den angegebenen Aufgabentyp eine neue Aufgabe erstellen. Willst du fortfahren?',
-    create_tasks_asset_failed: 'Beim Fortfahren der Erstellung ist ein Serverfehler aufgetreten.',
+    create_tasks_asset_explaination:
+      'Sie werden für jede Kühlstelle der aktuellen Liste für den angegebenen Aufgabentyp eine neue Aufgabe erstellen. Willst du fortfahren?',
+    create_tasks_asset_failed:
+      'Beim Fortfahren der Erstellung ist ein Serverfehler aufgetreten.',
     current: 'Zu erledigende Aufgabe',
     current_status: 'Aktueller Status :',
-    delete_all_text: 'Sind Sie sicher, dass Sie alle Aufgaben für bestimmte {name}} löschen möchten? Bitte bestätigen Sie dies, indem Sie den Namen des Aufgabentyps der zu löschenden Aufgaben in das Textfeld eingeben.',
-    delete_all_error: 'Das Löschen aller Aufgaben für einen bestimmten Aufgabentyp ist fehlgeschlagen.',
+    delete_all_text:
+      'Sind Sie sicher, dass Sie alle Aufgaben für bestimmte {name}} löschen möchten? Bitte bestätigen Sie dies, indem Sie den Namen des Aufgabentyps der zu löschenden Aufgaben in das Textfeld eingeben.',
+    delete_all_error:
+      'Das Löschen aller Aufgaben für einen bestimmten Aufgabentyp ist fehlgeschlagen.',
     delete_error: 'Beim Löschen der Aufgabe ist ein Fehler aufgetreten.',
-    delete_comment: 'Sind Sie sicher, dass Sie den letzten Kommentar löschen möchten?',
-    delete_comment_error: 'Beim Löschen eines Kommentars ist ein Fehler aufgetreten.',
+    delete_comment:
+      'Sind Sie sicher, dass Sie den letzten Kommentar löschen möchten?',
+    delete_comment_error:
+      'Beim Löschen eines Kommentars ist ein Fehler aufgetreten.',
     delete_for_selection: 'Löschen Sie ausgewählte Aufgaben:',
     delete_preview: 'Sind Sie sicher, dass Sie diese Vorschau löschen möchten?',
-    delete_preview_error: 'Beim Löschen der Vorschau ist ein Fehler aufgetreten.',
+    delete_preview_error:
+      'Beim Löschen der Vorschau ist ein Fehler aufgetreten.',
     edit_comment: 'Bearbeiten Sie, wie',
     done: 'Erledigt',
     download_pdf_file: 'Datei herunterladen .{extension} Datei',
@@ -728,11 +804,15 @@ export default {
     previous: 'vorherige Aufgabe',
     unsubscribe_notifications: 'Abmeldung von Benachrichtigungen',
     set_estimations: 'Setzt Schätzungen für ausgewählte Aufgaben:',
-    select_image_file: 'Bitte wählen Sie das Bild von Ihrer Festplatte aus, das Sie Ihrem Kommentar beifügen möchten',
+    select_image_file:
+      'Bitte wählen Sie das Bild von Ihrer Festplatte aus, das Sie Ihrem Kommentar beifügen möchten',
     set_preview: 'Diese Vorschau als Miniaturansicht festlegen',
-    set_preview_error: 'Bei der Einstellung der Vorschau als Miniaturansicht ist ein Fehler aufgetreten.',
-    set_preview_done: 'Diese Vorschau wird als Miniaturansicht für das aktuelle Objekt verwendet.',
-    select_preview_file: 'Bitte wählen Sie ein Bild von Ihrer Festplatte aus, das Sie als Vorschau für die aktuelle Aufgabe verwenden möchten:',
+    set_preview_error:
+      'Bei der Einstellung der Vorschau als Miniaturansicht ist ein Fehler aufgetreten.',
+    set_preview_done:
+      'Diese Vorschau wird als Miniaturansicht für das aktuelle Objekt verwendet.',
+    select_preview_file:
+      'Bitte wählen Sie ein Bild von Ihrer Festplatte aus, das Sie als Vorschau für die aktuelle Aufgabe verwenden möchten:',
     show_assignations: 'Zuordnungen anzeigen',
     show_infos: 'Zusätzliche Informationen anzeigen',
     subscribe_notifications: 'Benachrichtigungen abonnieren',

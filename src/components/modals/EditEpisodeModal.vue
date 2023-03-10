@@ -1,73 +1,74 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
-    <div class="box">
+    <div class="modal-content">
+      <div class="box">
+        <h1 class="title" v-if="episodeToEdit && this.episodeToEdit.id">
+          {{ $t('episodes.edit_title') }} {{ episodeToEdit.name }}
+        </h1>
+        <h1 class="title" v-else>
+          {{ $t('episodes.new_episode') }}
+        </h1>
 
-      <h1 class="title" v-if="episodeToEdit && this.episodeToEdit.id">
-        {{ $t("episodes.edit_title") }} {{ episodeToEdit.name }}
-      </h1>
-      <h1 class="title" v-else>
-        {{ $t("episodes.new_episode") }}
-      </h1>
-
-      <form v-on:submit.prevent>
-        <text-field
-          ref="nameField"
-          :label="$t('episodes.fields.name')"
-          v-model="form.name"
-          @enter="runConfirmation"
-          v-focus
-        />
-
-        <combobox-styled
-          class="field"
-          :label="$t('main.status')"
-          :options="episodeStatusOptions"
-          v-model="form.status"
-        />
-
-        <textarea-field
-          ref="descriptionField"
-          :label="$t('episodes.fields.description')"
-          @keyup.ctrl.enter="runConfirmation"
-          @keyup.meta.enter="runConfirmation"
-          v-model="form.description"
-        />
-
-        <div
-          :key="descriptor.id"
-          v-for="descriptor in episodeMetadataDescriptors"
-        >
-          <combobox-styled
-            v-if="descriptor.choices.length > 0"
-            :label="descriptor.name"
-            :options="getDescriptorChoicesOptions(descriptor)"
-            v-model="form.data[descriptor.field_name]"
-          />
+        <form v-on:submit.prevent>
           <text-field
-            :label="descriptor.name"
+            ref="nameField"
+            :label="$t('episodes.fields.name')"
+            v-model="form.name"
             @enter="runConfirmation"
-            v-model="form.data[descriptor.field_name]"
-            v-else
+            v-focus
           />
-        </div>
-      </form>
 
-      <modal-footer
-        :error-text="$t('episodes.edit_error')"
-        :is-loading="isLoading"
-        :is-error="isError"
-        @confirm="runConfirmation"
-        @cancel="$emit('cancel')"
-      />
+          <combobox-styled
+            class="field"
+            :label="$t('main.status')"
+            :options="episodeStatusOptions"
+            v-model="form.status"
+          />
+
+          <textarea-field
+            ref="descriptionField"
+            :label="$t('episodes.fields.description')"
+            @keyup.ctrl.enter="runConfirmation"
+            @keyup.meta.enter="runConfirmation"
+            v-model="form.description"
+          />
+
+          <div
+            :key="descriptor.id"
+            v-for="descriptor in episodeMetadataDescriptors"
+          >
+            <combobox-styled
+              v-if="descriptor.choices.length > 0"
+              :label="descriptor.name"
+              :options="getDescriptorChoicesOptions(descriptor)"
+              v-model="form.data[descriptor.field_name]"
+            />
+            <text-field
+              :label="descriptor.name"
+              @enter="runConfirmation"
+              v-model="form.data[descriptor.field_name]"
+              v-else
+            />
+          </div>
+        </form>
+
+        <modal-footer
+          :error-text="$t('episodes.edit_error')"
+          :is-loading="isLoading"
+          :is-error="isError"
+          @confirm="runConfirmation"
+          @cancel="$emit('cancel')"
+        />
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -108,7 +109,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     let form = {
       id: '',
       name: '',
@@ -118,11 +119,11 @@ export default {
     }
     if (this.episodeToEdit && this.episodeToEdit.id) {
       form = {
-          id: this.episodeToEdit.id,
-          name: this.episodeToEdit.name,
-          description: this.episodeToEdit.description,
-          production_id: this.episodeToEdit.project_id,
-          data: this.episodeToEdit.data || {}
+        id: this.episodeToEdit.id,
+        name: this.episodeToEdit.name,
+        description: this.episodeToEdit.description,
+        production_id: this.episodeToEdit.project_id,
+        data: this.episodeToEdit.data || {}
       }
     }
     return {
@@ -138,30 +139,26 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction',
-      'episodeMetadataDescriptors'
-    ])
+    ...mapGetters(['currentProduction', 'episodeMetadataDescriptors'])
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    getDescriptorChoicesOptions (descriptor) {
+    getDescriptorChoicesOptions(descriptor) {
       const values = descriptor.choices.map(c => ({ label: c, value: c }))
       return [{ label: '', value: '' }, ...values]
     },
 
-    runConfirmation () {
+    runConfirmation() {
       this.$emit('confirm', this.form)
     },
 
-    isEditing () {
+    isEditing() {
       return this.episodeToEdit && this.episodeToEdit.id
     },
 
-    resetForm () {
+    resetForm() {
       this.episodeSuccessText = ''
       if (!this.isEditing()) {
         this.form.id = null
@@ -181,18 +178,18 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.resetForm()
   },
 
   watch: {
-    active () {
+    active() {
       if (this.active) {
         this.resetForm()
       }
     },
 
-    episodeToEdit () {
+    episodeToEdit() {
       this.resetForm()
     }
   }

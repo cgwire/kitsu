@@ -1,53 +1,38 @@
 <template>
-<div
-  :id="'casting-' + asset.id"
-  :class="{
-    asset: true,
-    'big-asset': bigMode,
-    active: active
-  }"
-  :title="asset.name"
-  v-if="!textMode"
->
   <div
-    class="asset-add"
-    @click="addOneAsset"
+    :id="'casting-' + asset.id"
+    :class="{
+      asset: true,
+      'big-asset': bigMode,
+      active: active
+    }"
+    :title="asset.name"
+    v-if="!textMode"
   >
-  + 1
+    <div class="asset-add" @click="addOneAsset">+ 1</div>
+    <div class="asset-add-10" @click="addTenAssets">+ 10</div>
+    <div class="asset-picture" v-if="asset.preview_file_id.length > 0">
+      <img
+        v-lazy="
+          '/api/pictures/thumbnails-square/preview-files/' +
+          asset.preview_file_id +
+          '.png'
+        "
+        alt=""
+      />
+    </div>
+    <div class="asset-picture" v-else>
+      <span class="empty-picture">
+        {{ asset.name }}
+      </span>
+    </div>
   </div>
-  <div
-    class="asset-add-10"
-    @click="addTenAssets"
-    >
-  + 10
-  </div>
-  <div
-    class="asset-picture"
-    v-if="asset.preview_file_id.length > 0"
-  >
-    <img
-      v-lazy="'/api/pictures/thumbnails-square/preview-files/' + asset.preview_file_id + '.png'"
-      alt=""
-    />
-  </div>
-  <div class="asset-picture" v-else>
-    <span class="empty-picture">
+  <div class="asset-text flexrow-item flexrow" v-else>
+    <span class="asset-text-name flexrow-item">
       {{ asset.name }}
     </span>
+    <span class="modify-asset flexrow-item" @click="addOneAsset"> + 1 </span>
   </div>
-</div>
-<div class="asset-text flexrow-item flexrow" v-else>
-  <span class="asset-text-name flexrow-item">
-    {{ asset.name }}
-  </span>
-  <span
-    class="modify-asset flexrow-item"
-    @click="addOneAsset"
-  >
-  + 1
-  </span>
-</div>
-
 </template>
 
 <script>
@@ -74,15 +59,14 @@ export default {
       type: Boolean
     }
   },
-  computed: {
-  },
+  computed: {},
   methods: {
-    addOneAsset (event) {
+    addOneAsset(event) {
       if (this.active) {
         this.$emit('add-one', this.asset.id)
       }
     },
-    addTenAssets (event) {
+    addTenAssets(event) {
       if (this.active) {
         this.$emit('add-ten', this.asset.id)
       }
@@ -99,7 +83,7 @@ export default {
 .dark .asset.casted,
 .dark .asset .asset-add,
 .dark .asset .asset-add-10 {
-  background-color: #8F91EB;
+  background-color: #8f91eb;
 }
 
 .asset-add {
@@ -108,7 +92,7 @@ export default {
   left: 0;
   width: 60px;
   height: 30px;
-  background: #F1E4FF;
+  background: #f1e4ff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -127,7 +111,7 @@ export default {
   margin-top: 0px;
   width: 60px;
   height: 30px;
-  background: #E1D4F9;
+  background: #e1d4f9;
   display: flex;
   align-items: center;
   justify-content: center;

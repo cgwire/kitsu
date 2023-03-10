@@ -7,9 +7,7 @@ import taskTypesStore from '@/store/modules/tasktypes'
 import productionsStore from '@/store/modules/productions'
 import peopleStore from '@/store/modules/people'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
-import {
-  minutesToDays
-} from '@/lib/time'
+import { minutesToDays } from '@/lib/time'
 import func from '@/lib/func'
 
 import { PAGE_SIZE } from '@/lib/pagination'
@@ -30,105 +28,81 @@ import {
   groupEntitiesByParents,
   removeModelFromList
 } from '@/lib/models'
-import {
-  computeStats
-} from '@/lib/stats'
-import {
-  buildAssetIndex,
-  buildNameIndex,
-  indexSearch
-} from '@/lib/indexing'
-import {
-  applyFilters,
-  getKeyWords,
-  getFilters
-} from '@/lib/filtering'
+import { computeStats } from '@/lib/stats'
+import { buildAssetIndex, buildNameIndex, indexSearch } from '@/lib/indexing'
+import { applyFilters, getKeyWords, getFilters } from '@/lib/filtering'
 
 import {
   CLEAR_ASSETS,
-
   LOAD_ASSETS_START,
   LOAD_ASSETS_ERROR,
   LOAD_ASSETS_END,
   SORT_VALIDATION_COLUMNS,
-
   EDIT_ASSET_END,
-
   RESTORE_ASSET_END,
-
   ADD_ASSET,
   UPDATE_ASSET,
   REMOVE_ASSET,
   CANCEL_ASSET,
-
   ASSET_CSV_FILE_SELECTED,
   IMPORT_ASSETS_START,
   IMPORT_ASSETS_END,
-
   DELETE_TASK_END,
   NEW_TASK_COMMENT_END,
   NEW_TASK_END,
-
   SET_ASSET_SEARCH,
   SET_CURRENT_PRODUCTION,
-
   DISPLAY_MORE_ASSETS,
-
   SET_PREVIEW,
-
   SET_ASSET_LIST_SCROLL_POSITION,
   SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION,
-
   REMOVE_SELECTED_TASK,
   ADD_SELECTED_TASK,
   ADD_SELECTED_TASKS,
   CLEAR_SELECTED_TASKS,
   CREATE_TASKS_END,
-
   SAVE_ASSET_SEARCH_END,
   REMOVE_ASSET_SEARCH_END,
-
   SET_ASSET_TYPE_SEARCH,
   COMPUTE_ASSET_TYPE_STATS,
   UPDATE_METADATA_DESCRIPTOR_END,
   SET_CURRENT_EPISODE,
-
   CHANGE_ASSET_SORT,
   LOCK_ASSET,
   UNLOCK_ASSET,
-
   RESET_ALL,
-
   CLEAR_SELECTED_ASSETS,
   SET_ASSET_SELECTION
 } from '@/store/mutation-types'
 import async from 'async'
 
 const helpers = {
-  getCurrentProduction () {
+  getCurrentProduction() {
     return productionsStore.getters.currentProduction(productionsStore.state)
   },
-  getTaskStatus (taskStatusId) {
+  getTaskStatus(taskStatusId) {
     return tasksStore.state.taskStatusMap.get(taskStatusId)
   },
-  getTaskType (taskTypeId) {
+  getTaskType(taskTypeId) {
     return taskTypesStore.state.taskTypeMap.get(taskTypeId)
   },
-  getTask (taskId) {
+  getTask(taskId) {
     return tasksStore.state.taskMap.get(taskId)
   },
-  getPerson (personId) {
+  getPerson(personId) {
     return peopleStore.state.personMap.get(personId)
   },
 
-  setListStats (state, assets) {
+  setListStats(state, assets) {
     let timeSpent = 0
     let estimations = 0
     if (assets) {
-      assets.filter(a => !a.canceled).forEach(asset => {
-        timeSpent += asset.timeSpent
-        estimations += asset.estimation
-      })
+      assets
+        .filter(a => !a.canceled)
+        .forEach(asset => {
+          timeSpent += asset.timeSpent
+          estimations += asset.estimation
+        })
       Object.assign(state, {
         displayedAssetsLength: assets.filter(a => !a.canceled).length,
         displayedAssetsCount: assets.length,
@@ -145,14 +119,15 @@ const helpers = {
     }
   },
 
-  populateTask (task, asset, production) {
+  populateTask(task, asset, production) {
     if (!task || typeof task !== 'object') return
     task.name = getTaskTypePriorityOfProd(
       helpers.getTaskType(task.task_type_id),
       production || helpers.getCurrentProduction()
     ).toString()
-    task.task_status_short_name =
-      helpers.getTaskStatus(task.task_status_id).short_name
+    task.task_status_short_name = helpers.getTaskStatus(
+      task.task_status_id
+    ).short_name
 
     Object.assign(task, {
       project_id: asset.production_id,
@@ -168,7 +143,7 @@ const helpers = {
     return task
   },
 
-  populateAndRegisterAsset (
+  populateAndRegisterAsset(
     assetTypeMap,
     taskMap,
     taskTypeMap,
@@ -224,7 +199,7 @@ const helpers = {
     return asset
   },
 
-  sortValidationColumns (validationColumns, assetFilledColumns, taskTypeMap) {
+  sortValidationColumns(validationColumns, assetFilledColumns, taskTypeMap) {
     const columns = [...validationColumns]
     return sortValidationColumns(
       columns,
@@ -233,15 +208,18 @@ const helpers = {
     )
   },
 
-  buildResult (state, {
-    assetSearch,
-    production,
-    sorting,
-    taskStatusMap,
-    taskTypeMap,
-    persons,
-    taskMap
-  }) {
+  buildResult(
+    state,
+    {
+      assetSearch,
+      production,
+      sorting,
+      taskStatusMap,
+      taskTypeMap,
+      persons,
+      taskMap
+    }
+  ) {
     const taskTypes = Array.from(taskTypeMap.values())
     const taskStatuses = Array.from(taskStatusMap.values())
     const query = assetSearch
@@ -257,12 +235,7 @@ const helpers = {
     })
     let result = indexSearch(cache.assetIndex, keywords) || cache.assets
     result = applyFilters(result, filters, taskMap)
-    result = sortAssetResult(
-      result,
-      sorting,
-      taskTypeMap,
-      taskMap
-    )
+    result = sortAssetResult(result, sorting, taskTypeMap, taskMap)
     cache.result = result
 
     const displayedAssets = result.slice(0, PAGE_SIZE)
@@ -356,8 +329,7 @@ const getters = {
   },
 
   assetsByType: state => {
-    const activeAssets = state.displayedAssets
-      .filter(a => !a.canceled)
+    const activeAssets = state.displayedAssets.filter(a => !a.canceled)
     return groupEntitiesByParents(activeAssets, 'asset_type_name')
   },
 
@@ -373,8 +345,7 @@ const getters = {
 }
 
 const actions = {
-
-  loadAssets ({ commit, state, rootGetters }, all = false) {
+  loadAssets({ commit, state, rootGetters }, all = false) {
     const production = rootGetters.currentProduction
     let episode = rootGetters.currentEpisode
     const isTVShow = rootGetters.isTVShow
@@ -386,8 +357,7 @@ const actions = {
     if (isTVShow && !episode) {
       // If it's tv show and if we don't have any episode set,
       // we use the first one.
-      episode =
-        rootGetters.episodes.length > 0 ? rootGetters.episodes[0] : null
+      episode = rootGetters.episodes.length > 0 ? rootGetters.episodes[0] : null
       if (!episode) return Promise.resolve([])
       commit(SET_CURRENT_EPISODE, episode.id)
     }
@@ -405,12 +375,17 @@ const actions = {
     }
 
     commit(LOAD_ASSETS_START)
-    return assetsApi.getAssets(production, episode)
+    return assetsApi
+      .getAssets(production, episode)
       .then(assets => {
-        commit(
-          LOAD_ASSETS_END,
-          { production, assets, userFilters, personMap, taskMap, taskTypeMap }
-        )
+        commit(LOAD_ASSETS_END, {
+          production,
+          assets,
+          userFilters,
+          personMap,
+          taskMap,
+          taskTypeMap
+        })
         return Promise.resolve(assets)
       })
       .catch(err => {
@@ -420,7 +395,7 @@ const actions = {
       })
   },
 
-  getAsset ({ commit, state, rootGetters }, assetId) {
+  getAsset({ commit, state, rootGetters }, assetId) {
     return assetsApi.getAsset(assetId)
   },
 
@@ -428,7 +403,7 @@ const actions = {
    * Function used mainly to reload asset information when a remote change
    * occurs.
    */
-  loadAsset ({ commit, state, rootGetters }, assetId) {
+  loadAsset({ commit, state, rootGetters }, assetId) {
     const asset = state.assetMap.get(assetId)
     if (asset && asset.lock) return
 
@@ -436,7 +411,8 @@ const actions = {
     const production = rootGetters.currentProduction
     const taskMap = rootGetters.taskMap
     const taskTypeMap = rootGetters.taskTypeMap
-    return assetsApi.getAsset(assetId)
+    return assetsApi
+      .getAsset(assetId)
       .then(asset => {
         if (state.assetMap.get(asset.id)) {
           commit(UPDATE_ASSET, asset)
@@ -457,147 +433,140 @@ const actions = {
       .catch(console.error)
   },
 
-  newAsset ({ commit, dispatch, state, rootGetters }, data) {
-    if (cache.assets.find((asset) => asset.name === data.name)) {
+  newAsset({ commit, dispatch, state, rootGetters }, data) {
+    if (cache.assets.find(asset => asset.name === data.name)) {
       return Promise.reject(new Error('Asset already exsists'))
     }
-    return assetsApi.newAsset(data)
-      .then(asset => {
-        const assetTypeMap = rootGetters.assetTypeMap
-        const assetType = assetTypeMap.get(asset.entity_type_id)
-        const workflow = assetType ? assetType.task_types || [] : []
-        let taskTypeIds = rootGetters.productionAssetTaskTypeIds
-        const sortInfo = state.assetSorting && state.assetSorting.length > 0
+    return assetsApi.newAsset(data).then(asset => {
+      const assetTypeMap = rootGetters.assetTypeMap
+      const assetType = assetTypeMap.get(asset.entity_type_id)
+      const workflow = assetType ? assetType.task_types || [] : []
+      let taskTypeIds = rootGetters.productionAssetTaskTypeIds
+      const sortInfo =
+        state.assetSorting && state.assetSorting.length > 0
           ? state.assetSorting[0]
           : null
-        // Add asset to the list
-        commit(EDIT_ASSET_END, { newAsset: asset, assetTypeMap })
-        // Sort list
-        dispatch('changeAssetSort', sortInfo)
-        // Creates tasks related to the asset type workflow
-        if (workflow.length > 0) {
-          taskTypeIds = taskTypeIds.filter(taskTypeId => {
-            return workflow.includes(taskTypeId)
-          })
-        }
-        const createTaskPromises = taskTypeIds.map(taskTypeId => {
-          return dispatch('createTasks', {
-            entityIds: [asset.id],
-            project_id: asset.project_id,
-            task_type_id: taskTypeId,
-            type: 'assets'
-          })
+      // Add asset to the list
+      commit(EDIT_ASSET_END, { newAsset: asset, assetTypeMap })
+      // Sort list
+      dispatch('changeAssetSort', sortInfo)
+      // Creates tasks related to the asset type workflow
+      if (workflow.length > 0) {
+        taskTypeIds = taskTypeIds.filter(taskTypeId => {
+          return workflow.includes(taskTypeId)
         })
-        return func.runPromiseAsSeries(createTaskPromises)
-          .then(() => Promise.resolve(asset))
+      }
+      const createTaskPromises = taskTypeIds.map(taskTypeId => {
+        return dispatch('createTasks', {
+          entityIds: [asset.id],
+          project_id: asset.project_id,
+          task_type_id: taskTypeId,
+          type: 'assets'
+        })
       })
+      return func
+        .runPromiseAsSeries(createTaskPromises)
+        .then(() => Promise.resolve(asset))
+    })
   },
 
-  editAsset ({ commit, state, rootState }, data) {
-    const existingAsset = data.name && cache.assets.find(asset => {
-      return asset.name === data.name && data.id !== asset.id
-    })
+  editAsset({ commit, state, rootState }, data) {
+    const existingAsset =
+      data.name &&
+      cache.assets.find(asset => {
+        return asset.name === data.name && data.id !== asset.id
+      })
     if (existingAsset) {
       return Promise.reject(new Error('Asset already exsists'))
     }
     const assetTypeMap = rootState.assetTypes.assetTypeMap
     commit(LOCK_ASSET, data)
     commit(EDIT_ASSET_END, { newAsset: data, assetTypeMap })
-    return assetsApi.updateAsset(data)
-      .then(asset => {
-        setTimeout(() => {
-          commit(UNLOCK_ASSET, data)
-        }, 2000)
-        return Promise.resolve(asset)
-      })
+    return assetsApi.updateAsset(data).then(asset => {
+      setTimeout(() => {
+        commit(UNLOCK_ASSET, data)
+      }, 2000)
+      return Promise.resolve(asset)
+    })
   },
 
-  deleteAsset ({ commit, state }, asset) {
-    return assetsApi.deleteAsset(asset)
-      .then(() => {
-        const previousAsset = state.assetMap.get(asset.id)
-        if (
-          previousAsset &&
-          previousAsset.tasks.length > 0 &&
-          !previousAsset.canceled
-        ) {
-          commit(CANCEL_ASSET, previousAsset)
-        } else {
-          commit(REMOVE_ASSET, asset)
-        }
-        return Promise.resolve(asset)
-      })
+  deleteAsset({ commit, state }, asset) {
+    return assetsApi.deleteAsset(asset).then(() => {
+      const previousAsset = state.assetMap.get(asset.id)
+      if (
+        previousAsset &&
+        previousAsset.tasks.length > 0 &&
+        !previousAsset.canceled
+      ) {
+        commit(CANCEL_ASSET, previousAsset)
+      } else {
+        commit(REMOVE_ASSET, asset)
+      }
+      return Promise.resolve(asset)
+    })
   },
 
-  restoreAsset ({ commit, state }, asset) {
-    return assetsApi.restoreAsset(asset)
-      .then(() => {
-        commit(RESTORE_ASSET_END, asset)
-        return Promise.resolve(asset)
-      })
+  restoreAsset({ commit, state }, asset) {
+    return assetsApi.restoreAsset(asset).then(() => {
+      commit(RESTORE_ASSET_END, asset)
+      return Promise.resolve(asset)
+    })
   },
 
-  uploadAssetFile ({ commit, state }, toUpdate) {
+  uploadAssetFile({ commit, state }, toUpdate) {
     const production = helpers.getCurrentProduction()
     commit(IMPORT_ASSETS_START)
-    return assetsApi.postCsv(production, state.assetsCsvFormData, toUpdate)
+    return assetsApi
+      .postCsv(production, state.assetsCsvFormData, toUpdate)
       .then(() => {
         commit(IMPORT_ASSETS_END)
         Promise.resolve()
       })
   },
 
-  setAssetSearch ({ commit, state, rootGetters }, assetSearch) {
+  setAssetSearch({ commit, state, rootGetters }, assetSearch) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
     const production = rootGetters.currentProduction
     const persons = rootGetters.people
-    commit(
-      SET_ASSET_SEARCH,
-      {
-        assetSearch,
-        taskMap,
-        taskStatusMap,
-        taskTypeMap,
-        persons,
-        production
-      }
-    )
+    commit(SET_ASSET_SEARCH, {
+      assetSearch,
+      taskMap,
+      taskStatusMap,
+      taskTypeMap,
+      persons,
+      production
+    })
   },
 
-  saveAssetSearch ({ commit, state, rootGetters }, searchQuery) {
+  saveAssetSearch({ commit, state, rootGetters }, searchQuery) {
     const query = state.assetSearchQueries.find(
-      (query) => query.name === searchQuery
+      query => query.name === searchQuery
     )
     const production = rootGetters.currentProduction
 
     if (!query) {
-      return peopleApi.createFilter(
-        'asset',
-        searchQuery,
-        searchQuery,
-        production.id,
-        null
-      ).then(searchQuery => {
-        commit(SAVE_ASSET_SEARCH_END, { searchQuery, production })
-        return Promise.resolve(searchQuery)
-      })
+      return peopleApi
+        .createFilter('asset', searchQuery, searchQuery, production.id, null)
+        .then(searchQuery => {
+          commit(SAVE_ASSET_SEARCH_END, { searchQuery, production })
+          return Promise.resolve(searchQuery)
+        })
     } else {
       Promise.resolve()
     }
   },
 
-  removeAssetSearch ({ commit, rootGetters }, searchQuery) {
+  removeAssetSearch({ commit, rootGetters }, searchQuery) {
     const production = rootGetters.currentProduction
-    return peopleApi.removeFilter(searchQuery)
-      .then(() => {
-        commit(REMOVE_ASSET_SEARCH_END, { searchQuery, production })
-        return Promise.resolve()
-      })
+    return peopleApi.removeFilter(searchQuery).then(() => {
+      commit(REMOVE_ASSET_SEARCH_END, { searchQuery, production })
+      return Promise.resolve()
+    })
   },
 
-  displayMoreAssets ({ commit, rootGetters }) {
+  displayMoreAssets({ commit, rootGetters }) {
     commit(DISPLAY_MORE_ASSETS, {
       taskTypeMap: rootGetters.taskTypeMap,
       taskStatusMap: rootGetters.taskStatusMap,
@@ -606,30 +575,29 @@ const actions = {
     })
   },
 
-  initAssetTypes ({ dispatch }) {
+  initAssetTypes({ dispatch }) {
     dispatch('setLastProductionScreen', 'production-asset-types')
-    return dispatch('loadAssets')
-      .then(() => {
-        dispatch('computeAssetTypeStats')
-        return Promise.resolve()
-      })
+    return dispatch('loadAssets').then(() => {
+      dispatch('computeAssetTypeStats')
+      return Promise.resolve()
+    })
   },
 
-  setAssetTypeListScrollPosition ({ commit }) {
+  setAssetTypeListScrollPosition({ commit }) {
     commit(SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION)
   },
 
-  computeAssetTypeStats ({ commit, rootGetters }) {
+  computeAssetTypeStats({ commit, rootGetters }) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskMap = rootGetters.taskMap
     commit(COMPUTE_ASSET_TYPE_STATS, { taskStatusMap, taskMap })
   },
 
-  setAssetTypeSearch ({ commit }, searchQuery) {
+  setAssetTypeSearch({ commit }, searchQuery) {
     commit(SET_ASSET_TYPE_SEARCH, searchQuery)
   },
 
-  getAssetsCsvLines ({ state, rootGetters }) {
+  getAssetsCsvLines({ state, rootGetters }) {
     const production = rootGetters.currentProduction
     const episodeMap = rootGetters.episodeMap
     const organisation = rootGetters.organisation
@@ -650,8 +618,7 @@ const actions = {
         asset.asset_type_name,
         asset.name,
         asset.description,
-        asset.ready_for !== 'None'
-          ? taskTypeMap.get(asset.ready_for).name : ''
+        asset.ready_for !== 'None' ? taskTypeMap.get(asset.ready_for).name : ''
       ])
       sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Asset')
@@ -665,26 +632,26 @@ const actions = {
       if (state.isAssetEstimation) {
         assetLine.push(minutesToDays(organisation, asset.estimation).toFixed(2))
       }
-      state.assetValidationColumns
-        .forEach(validationColumn => {
-          const task =
-            rootGetters.taskMap.get(asset.validations.get(validationColumn))
-          if (task) {
-            assetLine.push(task.task_status_short_name)
-            assetLine.push(
-              task.assignees.map(id => personMap.get(id).full_name).join(',')
-            )
-          } else {
-            assetLine.push('') // Status
-            assetLine.push('') // Assignation
-          }
-        })
+      state.assetValidationColumns.forEach(validationColumn => {
+        const task = rootGetters.taskMap.get(
+          asset.validations.get(validationColumn)
+        )
+        if (task) {
+          assetLine.push(task.task_status_short_name)
+          assetLine.push(
+            task.assignees.map(id => personMap.get(id).full_name).join(',')
+          )
+        } else {
+          assetLine.push('') // Status
+          assetLine.push('') // Assignation
+        }
+      })
       return assetLine
     })
     return lines
   },
 
-  changeAssetSort ({ commit, rootGetters }, sortInfo) {
+  changeAssetSort({ commit, rootGetters }, sortInfo) {
     const taskStatusMap = rootGetters.taskStatus
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
@@ -692,13 +659,16 @@ const actions = {
     const persons = rootGetters.people
     const sorting = sortInfo ? [sortInfo] : []
     commit(CHANGE_ASSET_SORT, {
-      taskStatusMap, taskTypeMap, taskMap, production, persons, sorting
+      taskStatusMap,
+      taskTypeMap,
+      taskMap,
+      production,
+      persons,
+      sorting
     })
   },
 
-  deleteAllAssetTasks (
-    { dispatch }, { projectId, taskTypeId, selectionOnly }
-  ) {
+  deleteAllAssetTasks({ dispatch }, { projectId, taskTypeId, selectionOnly }) {
     let taskIds = []
     if (selectionOnly) {
       taskIds = cache.result
@@ -708,38 +678,44 @@ const actions = {
     return dispatch('deleteAllTasks', { projectId, taskTypeId, taskIds })
   },
 
-  setAssetSelection ({ commit }, { asset, selected }) {
+  setAssetSelection({ commit }, { asset, selected }) {
     commit(SET_ASSET_SELECTION, { asset, selected })
   },
 
-  clearSelectedAssets ({ commit }) {
+  clearSelectedAssets({ commit }) {
     commit(CLEAR_SELECTED_ASSETS)
   },
 
-  deleteSelectedAssets ({ state, dispatch }) {
+  deleteSelectedAssets({ state, dispatch }) {
     return new Promise((resolve, reject) => {
-      let selectedAssetIds = [...state.selectedAssets.values()].filter(asset => !asset.canceled).map(asset => asset.id)
+      let selectedAssetIds = [...state.selectedAssets.values()]
+        .filter(asset => !asset.canceled)
+        .map(asset => asset.id)
       if (selectedAssetIds.length === 0) {
         selectedAssetIds = [...state.selectedAssets.keys()]
       }
-      async.eachSeries(selectedAssetIds, (assetId, next) => {
-        const asset = state.assetMap.get(assetId)
-        if (asset) {
-          dispatch('deleteAsset', asset)
+      async.eachSeries(
+        selectedAssetIds,
+        (assetId, next) => {
+          const asset = state.assetMap.get(assetId)
+          if (asset) {
+            dispatch('deleteAsset', asset)
+          }
+          next()
+        },
+        err => {
+          if (err) reject(err)
+          else {
+            resolve()
+          }
         }
-        next()
-      }, (err) => {
-        if (err) reject(err)
-        else {
-          resolve()
-        }
-      })
+      )
     })
   }
 }
 
 const mutations = {
-  [CLEAR_ASSETS] (state) {
+  [CLEAR_ASSETS](state) {
     cache.assets = []
     state.assetMap = new Map()
     cache.result = []
@@ -754,7 +730,7 @@ const mutations = {
     state.selectedAssets = new Map()
   },
 
-  [LOAD_ASSETS_START] (state) {
+  [LOAD_ASSETS_START](state) {
     cache.assets = []
     cache.result = []
     state.assetMap = new Map()
@@ -771,19 +747,15 @@ const mutations = {
     state.selectedAssets = new Map()
   },
 
-  [LOAD_ASSETS_ERROR] (state) {
+  [LOAD_ASSETS_ERROR](state) {
     state.isAssetsLoading = false
     state.isAssetsLoadingError = true
   },
 
-  [LOAD_ASSETS_END] (state, {
-    production,
-    assets,
-    userFilters,
-    personMap,
-    taskMap,
-    taskTypeMap
-  }) {
+  [LOAD_ASSETS_END](
+    state,
+    { production, assets, userFilters, personMap, taskMap, taskTypeMap }
+  ) {
     const validationColumns = {}
     const assetTypeMap = new Map()
     let isTime = false
@@ -849,13 +821,7 @@ const mutations = {
     }
   },
 
-  [ADD_ASSET] (state, {
-    taskTypeMap,
-    taskMap,
-    personMap,
-    production,
-    asset
-  }) {
+  [ADD_ASSET](state, { taskTypeMap, taskMap, personMap, production, asset }) {
     asset.tasks = sortTasks(asset.tasks, taskTypeMap)
     asset.validations = new Map()
     asset.production_id = asset.project_id
@@ -886,17 +852,19 @@ const mutations = {
     cache.assetIndex = buildAssetIndex(cache.assets)
   },
 
-  [UPDATE_ASSET] (state, asset) {
+  [UPDATE_ASSET](state, asset) {
     Object.assign(state.assetMap.get(asset.id), asset)
     cache.assetIndex = buildAssetIndex(cache.assets)
   },
 
-  [REMOVE_ASSET] (state, assetToDelete) {
+  [REMOVE_ASSET](state, assetToDelete) {
     if (state.assetMap.get(assetToDelete.id)) {
       state.assetMap.delete(assetToDelete.id)
       cache.assets = removeModelFromList(cache.assets, assetToDelete)
-      state.displayedAssets =
-        removeModelFromList(state.displayedAssets, assetToDelete)
+      state.displayedAssets = removeModelFromList(
+        state.displayedAssets,
+        assetToDelete
+      )
       if (assetToDelete.timeSpent && !assetToDelete.canceled) {
         state.displayedAssetsTimeSpent -= assetToDelete.timeSpent
       }
@@ -909,15 +877,15 @@ const mutations = {
     }
   },
 
-  [ASSET_CSV_FILE_SELECTED] (state, formData) {
+  [ASSET_CSV_FILE_SELECTED](state, formData) {
     state.assetsCsvFormData = formData
   },
-  [IMPORT_ASSETS_START] (state) {},
-  [IMPORT_ASSETS_END] (state) {
+  [IMPORT_ASSETS_START](state) {},
+  [IMPORT_ASSETS_END](state) {
     state.assetsCsvFormData = null
   },
 
-  [EDIT_ASSET_END] (state, { newAsset, assetTypeMap }) {
+  [EDIT_ASSET_END](state, { newAsset, assetTypeMap }) {
     state.assetCreated = newAsset.name
     const asset = state.assetMap.get(newAsset.id)
     const assetType = assetTypeMap.get(newAsset.entity_type_id)
@@ -941,8 +909,7 @@ const mutations = {
       cache.assets = sortAssets(cache.assets)
       state.displayedAssets.push(newAsset)
       state.assetFilledColumns = getFilledColumns(state.displayedAssets)
-      state.displayedAssetsLength =
-        cache.assets.filter(a => !a.canceled).length
+      state.displayedAssetsLength = cache.assets.filter(a => !a.canceled).length
       state.displayedAssetsCount = cache.assets.length
 
       const maxX = state.displayedAssets.length
@@ -956,23 +923,21 @@ const mutations = {
     cache.assetIndex = buildAssetIndex(cache.assets)
   },
 
-  [CANCEL_ASSET] (state, asset) {
+  [CANCEL_ASSET](state, asset) {
     asset.canceled = true
-    state.displayedAssetsLength =
-      cache.result.filter(a => !a.canceled).length
+    state.displayedAssetsLength = cache.result.filter(a => !a.canceled).length
   },
 
-  [RESTORE_ASSET_END] (state, assetToRestore) {
+  [RESTORE_ASSET_END](state, assetToRestore) {
     const asset = state.assetMap.get(assetToRestore.id)
     asset.canceled = false
     cache.assetIndex = buildAssetIndex(cache.assets)
-    state.displayedAssetsLength =
-      cache.result.filter(a => !a.canceled).length
+    state.displayedAssetsLength = cache.result.filter(a => !a.canceled).length
   },
 
-  [DELETE_TASK_END] (state, task) {
+  [DELETE_TASK_END](state, task) {
     const asset = state.displayedAssets.find(
-      (asset) => asset.id === task.entity_id
+      asset => asset.id === task.entity_id
     )
     if (asset) {
       const validations = new Map(asset.validations)
@@ -980,44 +945,39 @@ const mutations = {
       Vue.set(asset, 'validations', validations)
 
       const tasks = JSON.parse(JSON.stringify(asset.tasks))
-      const taskIndex = tasks.findIndex(
-        (assetTaskId) => assetTaskId === task.id
-      )
+      const taskIndex = tasks.findIndex(assetTaskId => assetTaskId === task.id)
       tasks.splice(taskIndex, 1)
       Vue.set(asset, 'tasks', tasks)
     }
   },
 
-  [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {
-  },
+  [NEW_TASK_COMMENT_END](state, { comment, taskId }) {},
 
-  [SET_ASSET_SEARCH] (state, payload) {
+  [SET_ASSET_SEARCH](state, payload) {
     payload.sorting = state.assetSorting
     helpers.buildResult(state, payload)
   },
 
-  [SAVE_ASSET_SEARCH_END] (state, { searchQuery }) {
+  [SAVE_ASSET_SEARCH_END](state, { searchQuery }) {
     if (!state.assetSearchQueries.includes(searchQuery)) {
       state.assetSearchQueries.push(searchQuery)
       state.assetSearchQueries = sortByName(state.assetSearchQueries)
     }
   },
 
-  [REMOVE_ASSET_SEARCH_END] (state, { searchQuery }) {
+  [REMOVE_ASSET_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.assetSearchQueries.findIndex(
-      (query) => query.name === searchQuery.name
+      query => query.name === searchQuery.name
     )
     if (queryIndex >= 0) {
       state.assetSearchQueries.splice(queryIndex, 1)
     }
   },
 
-  [DISPLAY_MORE_ASSETS] (state, {
-    taskTypeMap,
-    taskStatusMap,
-    taskMap,
-    production
-  }) {
+  [DISPLAY_MORE_ASSETS](
+    state,
+    { taskTypeMap, taskStatusMap, taskMap, production }
+  ) {
     const assets = cache.result
     const newLength = state.displayedAssets.length + PAGE_SIZE
     if (newLength < assets.length + PAGE_SIZE) {
@@ -1031,17 +991,20 @@ const mutations = {
       const maxY = state.nbValidationColumns
       if (previousX >= 0) {
         state.assetSelectionGrid = appendSelectionGrid(
-          state.assetSelectionGrid, previousX, maxX, maxY
+          state.assetSelectionGrid,
+          previousX,
+          maxX,
+          maxY
         )
       }
     }
   },
 
-  [SET_CURRENT_PRODUCTION] (state, production) {
+  [SET_CURRENT_PRODUCTION](state, production) {
     state.assetSearchText = ''
   },
 
-  [SET_PREVIEW] (state, { entityId, taskId, previewId, taskMap }) {
+  [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
     const asset = state.assetMap.get(entityId)
     if (asset) {
       asset.preview_file_id = previewId
@@ -1052,32 +1015,36 @@ const mutations = {
     }
   },
 
-  [SET_ASSET_LIST_SCROLL_POSITION] (state, scrollPosition) {
+  [SET_ASSET_LIST_SCROLL_POSITION](state, scrollPosition) {
     state.assetListScrollPosition = scrollPosition
   },
 
-  [SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION] (state, scrollPosition) {
+  [SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION](state, scrollPosition) {
     state.assetTypeListScrollPosition = scrollPosition
   },
 
-  [REMOVE_SELECTED_TASK] (state, validationInfo) {
-    if (state.assetSelectionGrid[0] &&
-        state.assetSelectionGrid[validationInfo.x]) {
+  [REMOVE_SELECTED_TASK](state, validationInfo) {
+    if (
+      state.assetSelectionGrid[0] &&
+      state.assetSelectionGrid[validationInfo.x]
+    ) {
       state.assetSelectionGrid[validationInfo.x][validationInfo.y] = false
     }
   },
 
-  [ADD_SELECTED_TASK] (state, validationInfo) {
-    if (state.assetSelectionGrid[0] &&
-        state.assetSelectionGrid[validationInfo.x]) {
+  [ADD_SELECTED_TASK](state, validationInfo) {
+    if (
+      state.assetSelectionGrid[0] &&
+      state.assetSelectionGrid[validationInfo.x]
+    ) {
       state.assetSelectionGrid[validationInfo.x][validationInfo.y] = true
       state.selectedAssets = new Map() // unselect all previously selected lines
     }
   },
 
-  [ADD_SELECTED_TASKS] (state, selection) {
+  [ADD_SELECTED_TASKS](state, selection) {
     let tmpGrid = JSON.parse(JSON.stringify(state.assetSelectionGrid))
-    selection.forEach((validationInfo) => {
+    selection.forEach(validationInfo => {
       if (!tmpGrid[validationInfo.x]) {
         tmpGrid = appendSelectionGrid(
           tmpGrid,
@@ -1094,12 +1061,12 @@ const mutations = {
     state.assetSelectionGrid = tmpGrid
   },
 
-  [CLEAR_SELECTED_TASKS] (state, validationInfo) {
+  [CLEAR_SELECTED_TASKS](state, validationInfo) {
     const tmpGrid = JSON.parse(JSON.stringify(state.assetSelectionGrid))
     state.assetSelectionGrid = clearSelectionGrid(tmpGrid)
   },
 
-  [NEW_TASK_END] (state, { task }) {
+  [NEW_TASK_END](state, { task }) {
     const asset = state.assetMap.get(task.entity_id)
     if (asset && task) {
       task = helpers.populateTask(task, asset)
@@ -1116,7 +1083,7 @@ const mutations = {
     }
   },
 
-  [CREATE_TASKS_END] (state, { tasks }) {
+  [CREATE_TASKS_END](state, { tasks }) {
     tasks.forEach(task => {
       if (task) {
         const asset = state.assetMap.get(task.entity_id)
@@ -1133,7 +1100,7 @@ const mutations = {
     })
   },
 
-  [SET_ASSET_TYPE_SEARCH] (state, searchQuery) {
+  [SET_ASSET_TYPE_SEARCH](state, searchQuery) {
     const keywords = getKeyWords(searchQuery)
     const result =
       indexSearch(cache.assetTypeIndex, keywords) || state.assetTypes
@@ -1145,15 +1112,19 @@ const mutations = {
     })
   },
 
-  [COMPUTE_ASSET_TYPE_STATS] (state, { taskStatusMap, taskMap }) {
+  [COMPUTE_ASSET_TYPE_STATS](state, { taskStatusMap, taskMap }) {
     state.assetTypeStats = computeStats(
-      cache.assets, 'asset_type_id', taskStatusMap, taskMap
+      cache.assets,
+      'asset_type_id',
+      taskStatusMap,
+      taskMap
     )
   },
 
-  [CHANGE_ASSET_SORT] (state, {
-    taskStatusMap, taskTypeMap, taskMap, production, persons, sorting
-  }) {
+  [CHANGE_ASSET_SORT](
+    state,
+    { taskStatusMap, taskTypeMap, taskMap, production, persons, sorting }
+  ) {
     const assetSearch = state.assetSearchText
     state.assetSorting = sorting
     helpers.buildResult(state, {
@@ -1167,15 +1138,16 @@ const mutations = {
     })
   },
 
-  [UPDATE_METADATA_DESCRIPTOR_END] (
-    state, { descriptor, previousDescriptorFieldName }
+  [UPDATE_METADATA_DESCRIPTOR_END](
+    state,
+    { descriptor, previousDescriptorFieldName }
   ) {
     if (
       descriptor.entity_type === 'Asset' &&
       previousDescriptorFieldName &&
       previousDescriptorFieldName !== descriptor.field_name
     ) {
-      cache.assets.forEach((asset) => {
+      cache.assets.forEach(asset => {
         asset.data[descriptor.field_name] =
           asset.data[previousDescriptorFieldName]
         delete asset.data[previousDescriptorFieldName]
@@ -1183,17 +1155,17 @@ const mutations = {
     }
   },
 
-  [LOCK_ASSET] (state, asset) {
+  [LOCK_ASSET](state, asset) {
     asset = state.assetMap.get(asset.id)
     asset.lock = true
   },
 
-  [UNLOCK_ASSET] (state, asset) {
+  [UNLOCK_ASSET](state, asset) {
     asset = state.assetMap.get(asset.id)
     asset.lock = false
   },
 
-  [RESET_ALL] (state) {
+  [RESET_ALL](state) {
     cache.assets = []
     cache.assetIndex = {}
     cache.result = []
@@ -1201,7 +1173,7 @@ const mutations = {
     Object.assign(state, { ...initialState })
   },
 
-  [SET_ASSET_SELECTION] (state, { asset, selected }) {
+  [SET_ASSET_SELECTION](state, { asset, selected }) {
     if (!selected && state.selectedAssets.has(asset.id)) {
       state.selectedAssets.delete(asset.id)
       state.selectedAssets = new Map(state.selectedAssets) // for reactivity
@@ -1216,7 +1188,7 @@ const mutations = {
     }
   },
 
-  [SORT_VALIDATION_COLUMNS] (state, taskTypeMap) {
+  [SORT_VALIDATION_COLUMNS](state, taskTypeMap) {
     const columns = [...state.assetValidationColumns]
     state.assetValidationColumns = helpers.sortValidationColumns(
       columns,
@@ -1225,7 +1197,7 @@ const mutations = {
     )
   },
 
-  [CLEAR_SELECTED_ASSETS] (state) {
+  [CLEAR_SELECTED_ASSETS](state) {
     state.selectedAssets = new Map()
   }
 }

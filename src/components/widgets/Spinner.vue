@@ -1,13 +1,10 @@
 <template>
-<div
-  class="has-text-centered"
-  :style="sizeStyle"
->
-  <img src="../../assets/spinner-white.svg" v-if="isWhite" />
-  <square-grid :style="{ margin: 'auto'}" v-else-if="isProcessing"/>
-  <origami :style="{ margin: 'auto'}" v-else-if="isStylish" />
-  <img src="../../assets/spinner.svg" v-else>
-</div>
+  <div class="has-text-centered" :style="sizeStyle">
+    <img src="../../assets/spinner-white.svg" v-if="isWhite" />
+    <square-grid :style="{ margin: 'auto' }" v-else-if="isProcessing" />
+    <origami :style="{ margin: 'auto' }" v-else-if="isStylish" />
+    <img src="../../assets/spinner.svg" v-else />
+  </div>
 </template>
 
 <script>
@@ -49,5 +46,4 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

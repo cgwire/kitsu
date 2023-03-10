@@ -1,38 +1,33 @@
 <template>
-<div class="flexrow search-field-wrapper" ref="wrapper" @click="focus">
-  <div class="flexrow-item">
-    <search-icon class="search-icon" />
-  </div>
+  <div class="flexrow search-field-wrapper" ref="wrapper" @click="focus">
+    <div class="flexrow-item">
+      <search-icon class="search-icon" />
+    </div>
 
-  <div class="flexrow-item search-field">
-    <input
-      ref="input"
-      class="search-input"
-      type="text"
-      :placeholder="placeholder"
-      @input="onSearchChange"
-      @keyup.enter="onEnterPressed"
-      @focus="setFocusedStyle"
-      @blur="unsetFocusedStyle"
-      v-focus
-    />
-  </div>
+    <div class="flexrow-item search-field">
+      <input
+        ref="input"
+        class="search-input"
+        type="text"
+        :placeholder="placeholder"
+        @input="onSearchChange"
+        @keyup.enter="onEnterPressed"
+        @focus="setFocusedStyle"
+        @blur="unsetFocusedStyle"
+        v-focus
+      />
+    </div>
 
-  <div class="flexrow-item erase-search">
-    <span
-      class="tag"
-      @click="clearSearch"
-    >
-      x
-    </span>
-  </div>
+    <div class="flexrow-item erase-search">
+      <span class="tag" @click="clearSearch"> x </span>
+    </div>
 
-  <div class="flexrow-item save-search" v-if="canSave">
-    <button class="button save-button" @click="onSaveClicked">
-      <save-icon class="icon is-small only-icon" />
-    </button>
+    <div class="flexrow-item save-search" v-if="canSave">
+      <button class="button save-button" @click="onSaveClicked">
+        <save-icon class="icon is-small only-icon" />
+      </button>
+    </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -41,9 +36,8 @@ import { SaveIcon, SearchIcon } from 'vue-feather-icons'
 export default {
   name: 'search-field',
 
-  data () {
-    return {
-    }
+  data() {
+    return {}
   },
 
   props: {
@@ -66,26 +60,25 @@ export default {
     SearchIcon
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
-    onSearchChange () {
+    onSearchChange() {
       this.$emit('change', this.$refs.input.value)
     },
 
-    onEnterPressed () {
+    onEnterPressed() {
       this.$emit('enter', this.$refs.input.value)
     },
 
-    onSaveClicked () {
+    onSaveClicked() {
       const value = this.$refs.input.value.trim()
       if (value.length > 0) {
         if (this.canSave) this.$emit('save', value)
       }
     },
 
-    getValue (value) {
+    getValue(value) {
       if (this.$refs.input) {
         return this.$refs.input.value
       } else {
@@ -93,26 +86,26 @@ export default {
       }
     },
 
-    setValue (value) {
+    setValue(value) {
       this.$refs.input.value = value
     },
 
-    focus () {
+    focus() {
       if (this.$refs.input) {
         this.$refs.input.focus()
       }
     },
 
-    clearSearch () {
+    clearSearch() {
       this.setValue('')
       this.onSearchChange()
     },
 
-    setFocusedStyle () {
+    setFocusedStyle() {
       this.$refs.wrapper.className = 'flexrow search-field-wrapper focused'
     },
 
-    unsetFocusedStyle () {
+    unsetFocusedStyle() {
       this.$refs.wrapper.className = 'flexrow search-field-wrapper'
     }
   }
@@ -182,7 +175,7 @@ export default {
 }
 
 .search-field-wrapper {
-  border: 1px solid #DDD;
+  border: 1px solid #ddd;
   border-radius: 2em;
   padding: 0.2em 1em;
   margin-right: 1em;
@@ -190,7 +183,7 @@ export default {
 
   &.focused {
     border: 1px solid $green;
-    box-shadow: 0 0 4px 3px #EEE;
+    box-shadow: 0 0 4px 3px #eee;
   }
 }
 

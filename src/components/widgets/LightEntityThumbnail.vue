@@ -1,29 +1,36 @@
 <template functional>
-<img
-  class="thumbnail-picture"
-  :style="{
-    width: props.width,
-    height: props.height,
-    'max-width': props.maxWidth,
-    'max-height': props.maxHeight
-  }"
-  v-lazy="'/api/pictures/' + props.type + '/preview-files/' + props.previewFileId + '.png'"
-  :key="props.previewFileId"
-  v-if="props.previewFileId"
-  v-bind="data.attrs"
-/>
-<span
-  :class="{
-    'thumbnail-picture': true,
-    'thumbnail-empty': true
-  }"
-  :style="{
-    width: props.width,
-    height: props.emptyHeight ? props.emptyHeight : props.height,
-  }"
-  v-bind="data.attrs"
-  v-else>
-</span>
+  <img
+    class="thumbnail-picture"
+    :style="{
+      width: props.width,
+      height: props.height,
+      'max-width': props.maxWidth,
+      'max-height': props.maxHeight
+    }"
+    v-lazy="
+      '/api/pictures/' +
+      props.type +
+      '/preview-files/' +
+      props.previewFileId +
+      '.png'
+    "
+    :key="props.previewFileId"
+    v-if="props.previewFileId"
+    v-bind="data.attrs"
+  />
+  <span
+    :class="{
+      'thumbnail-picture': true,
+      'thumbnail-empty': true
+    }"
+    :style="{
+      width: props.width,
+      height: props.emptyHeight ? props.emptyHeight : props.height
+    }"
+    v-bind="data.attrs"
+    v-else
+  >
+  </span>
 </template>
 
 <script>

@@ -1,11 +1,11 @@
 import client from '@/store/api/client'
 
 export default {
-  getTaskTypes () {
+  getTaskTypes() {
     return client.pget('/api/data/task-types')
   },
 
-  newTaskType (taskType) {
+  newTaskType(taskType) {
     const data = {
       name: taskType.name,
       color: taskType.color,
@@ -17,7 +17,7 @@ export default {
     return client.ppost('/api/data/task-types/', data)
   },
 
-  updateTaskType (taskType) {
+  updateTaskType(taskType) {
     const data = {
       name: taskType.name,
       color: taskType.color,
@@ -32,7 +32,7 @@ export default {
     return client.pput(`/api/data/task-types/${taskType.id}`, data)
   },
 
-  async updateTaskTypeLink (taskTypeLink) {
+  async updateTaskTypeLink(taskTypeLink) {
     const data = {
       project_id: taskTypeLink.projectId,
       task_type_id: taskTypeLink.taskTypeId,
@@ -41,15 +41,15 @@ export default {
     return await client.ppost('/api/data/task-type-links', data)
   },
 
-  deleteTaskType (taskType) {
+  deleteTaskType(taskType) {
     return client.pdel(`/api/data/task-types/${taskType.id}`)
   },
 
-  getTaskType (taskTypeId) {
+  getTaskType(taskTypeId) {
     return client.pget(`/api/data/task-types/${taskTypeId}`)
   },
 
-  postTaskTypeEstimations (production, episode, taskType, formData) {
+  postTaskTypeEstimations(production, episode, taskType, formData) {
     const episodePath = episode ? `episodes/${episode.id}/` : ''
     const path = `/api/import/csv/projects/${production.id}/${episodePath}task-types/${taskType.id}/estimations`
     return client.ppost(path, formData)

@@ -5,16 +5,15 @@
     </div>
     <div class="news" v-else-if="newsList.length > 0">
       <div class="timeline">
-        <div
-          :key="'news-' + news.id"
-          v-for="news in newsList"
-        >
+        <div :key="'news-' + news.id" v-for="news in newsList">
           <div class="news-line timeline-entry flexrow">
-            <span :class="{
-              dot: true,
-              red: hasRetakeValue(news),
-              green: hasDoneValue(news)
-            }"></span>
+            <span
+              :class="{
+                dot: true,
+                red: hasRetakeValue(news),
+                green: hasDoneValue(news)
+              }"
+            ></span>
             <span class="date flexrow-item">
               {{ formatFullDate(news.created_at) }}
             </span>
@@ -34,33 +33,31 @@
                 :task="taskMap.get(news.task_id)"
                 :is-static="true"
                 :thin="!news.change"
-                />
-              </div>
+              />
+            </div>
 
-              <div class="flexrow-item comment-content">
-                <div>
-                  <div class="news-info flexrow">
-                    <people-avatar
-                      class="flexrow-item"
-                      :person="personMap.get(news.author_id)"
-                      :size="30"
-                      :font-size="14"
-                      :is-link="false"
-                      v-if="personMap.get(news.author_id)"
-                    />
-                    <span
-                      class="explaination flexrow-item"
-                    >
-                      <span class="strong person-name">
-                        {{ personName(news) }}
-                      </span>
+            <div class="flexrow-item comment-content">
+              <div>
+                <div class="news-info flexrow">
+                  <people-avatar
+                    class="flexrow-item"
+                    :person="personMap.get(news.author_id)"
+                    :size="30"
+                    :font-size="14"
+                    :is-link="false"
+                    v-if="personMap.get(news.author_id)"
+                  />
+                  <span class="explaination flexrow-item">
+                    <span class="strong person-name">
+                      {{ personName(news) }}
                     </span>
-                  </div>
+                  </span>
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
     </div>
     <div v-else>
       {{ $t('entities.news.no_news') }}
@@ -90,7 +87,7 @@ export default {
     ValidationTag
   },
 
-  data () {
+  data() {
     return {
       isLoading: false,
       newsList: []
@@ -104,7 +101,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     if (!this.entity) return
     this.reset()
   },
@@ -121,43 +118,41 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-      'getEntityNews'
-    ]),
+    ...mapActions(['getEntityNews']),
 
-    buildTaskTypeFromNews (news) {
+    buildTaskTypeFromNews(news) {
       return {
         ...this.taskTypeMap.get(news.task_type_id),
         episode_id: news.episode_id
       }
     },
 
-    getTaskType (news) {
+    getTaskType(news) {
       const task = this.taskMap.get(news.task_id)
       return this.taskTypeMap.get(task.task_type_id)
     },
 
-    hasRetakeValue (news) {
+    hasRetakeValue(news) {
       const taskStatus = this.taskStatusMap.get(news.task_status_id)
       return taskStatus ? news.change && taskStatus.is_retake : false
     },
 
-    hasDoneValue (news) {
+    hasDoneValue(news) {
       const taskStatus = this.taskStatusMap.get(news.task_status_id)
       return taskStatus ? news.change && taskStatus.is_done : false
     },
 
-    formatTime (date) {
+    formatTime(date) {
       const utcDate = moment.tz(date, 'UTC').tz(this.timezone)
       return utcDate.format('HH:mm')
     },
 
-    personName (news) {
+    personName(news) {
       const person = this.personMap.get(news.author_id)
       return person ? person.full_name : ''
     },
 
-    reset () {
+    reset() {
       this.isLoading = true
       this.getEntityNews(this.entity.id)
         .then(data => {
@@ -173,7 +168,7 @@ export default {
   },
 
   watch: {
-    entity () {
+    entity() {
       if (this.entity) this.reset()
     }
   }

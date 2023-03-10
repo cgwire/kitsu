@@ -1,36 +1,29 @@
 <template>
-<div class="pencil-wrapper">
-  <button
-    type="button"
-    class="pencil-picker"
-    :title="$t(`playlists.actions.annotation_${pencil}`)"
-    :class="{
-      medium: pencil === 'medium',
-      small: pencil === 'small'
-    }"
-    @click="togglePalette"
-  />
-  <div
-    v-show="isOpen"
-    class="pencil-palette"
-  >
-    <label
-      v-for="pencil in sizes"
-      :key="pencil"
+  <div class="pencil-wrapper">
+    <button
+      type="button"
+      class="pencil-picker"
       :title="$t(`playlists.actions.annotation_${pencil}`)"
       :class="{
         medium: pencil === 'medium',
         small: pencil === 'small'
       }"
-    >
-      <input
-        type="radio"
-        :value="pencil"
-        @click="onPencilPicked(pencil)"
-      />
-    </label>
+      @click="togglePalette"
+    />
+    <div v-show="isOpen" class="pencil-palette">
+      <label
+        v-for="pencil in sizes"
+        :key="pencil"
+        :title="$t(`playlists.actions.annotation_${pencil}`)"
+        :class="{
+          medium: pencil === 'medium',
+          small: pencil === 'small'
+        }"
+      >
+        <input type="radio" :value="pencil" @click="onPencilPicked(pencil)" />
+      </label>
+    </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -46,21 +39,20 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       isOpen: false
     }
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
-    togglePalette () {
+    togglePalette() {
       this.isOpen = !this.isOpen
     },
 
-    onPencilPicked (width) {
+    onPencilPicked(width) {
       this.$emit('change', width)
       this.isOpen = false
     }
@@ -80,13 +72,13 @@ export default {
 }
 .pencil-picker {
   background-color: transparent;
-  min-width: 1.5rem
+  min-width: 1.5rem;
 }
 .pencil-picker::before,
 .pencil-palette label::before {
   display: block;
   content: '';
-  margin: .4rem auto;
+  margin: 0.4rem auto;
   width: 1rem;
   height: 1rem;
   border-radius: 50%;
@@ -95,33 +87,33 @@ export default {
 
 .pencil-picker.medium::before,
 .pencil-palette label.medium::before {
-  margin: .5rem auto;
-  width: .7rem;
-  height: .7rem;
+  margin: 0.5rem auto;
+  width: 0.7rem;
+  height: 0.7rem;
 }
 
 .pencil-picker.small::before,
 .pencil-palette label.small::before {
-  margin: .55rem auto;
-  width: .5rem;
-  height: .5rem;
+  margin: 0.55rem auto;
+  width: 0.5rem;
+  height: 0.5rem;
 }
 
 .pencil-palette {
   position: absolute;
   z-index: 900;
   left: 0;
-  bottom: calc(100% - .25rem);
+  bottom: calc(100% - 0.25rem);
   background-color: $dark-grey-light;
   border-radius: 5px;
-  padding: 0 .25rem;
+  padding: 0 0.25rem;
 }
 .preview .pencil-palette {
   background-color: $dark-grey;
 }
 .pencil-palette label {
   display: block;
-  margin: .5rem 0;
+  margin: 0.5rem 0;
   cursor: pointer;
 }
 .pencil-palette input {

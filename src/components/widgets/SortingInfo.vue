@@ -1,13 +1,8 @@
 <template functional>
-<div
-  class="has-text-right"
-  v-if="props.sorting.length > 0"
->
-  {{ props.label }} {{ props.sorting[0].name }}
-  <a
-    @click="listeners['clear-sorting']()"
-  >x</a>
-</div>
+  <div class="has-text-right" v-if="props.sorting.length > 0">
+    {{ props.label }} {{ props.sorting[0].name }}
+    <a @click="listeners['clear-sorting']()">x</a>
+  </div>
 </template>
 
 <script>
@@ -28,5 +23,4 @@ export default {
 }
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>
