@@ -261,7 +261,7 @@ export default {
   },
 
   mounted () {
-    Canny('initChangelog', { // eslint-disable-line
+    Canny('initChangelog', {
       appID: '5db968118d1a9c132c168d54',
       position: 'bottom',
       align: 'right'
