@@ -1,6 +1,6 @@
 <template>
   <div class="question-mark">
-    <help-circle-icon />
+    <help-circle-icon :size="small ? '0.5x' : '1x'" />
     <div class="question-text" v-html="renderMarkdown(text)"></div>
   </div>
 </template>
@@ -17,7 +17,12 @@ export default {
 
   props: {
     text: {
-      type: String
+      type: String,
+      required: true
+    },
+    small: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -37,6 +42,8 @@ export default {
     background: var(--background-alt);
     border-radius: 5px;
     box-shadow: 0 2px 6px var(--box-shadow);
+    font-size: 1em;
+    font-weight: normal;
     display: none;
     min-width: 300px;
     padding: 0.5em;

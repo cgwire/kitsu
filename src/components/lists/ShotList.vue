@@ -250,12 +250,17 @@
         >
           <tr class="datatable-type-header">
             <th scope="rowgroup" :colspan="visibleColumns">
-              <span
+              <div
                 class="datatable-row-header"
                 @click="$emit('sequence-clicked', group[0].sequence_name)"
               >
                 {{ group[0] ? group[0].sequence_name : '' }}
-              </span>
+                <!--info-question-mark
+                  class="flexrow-item"
+                  :text="sequenceMap.get(group[0].sequence_id).description"
+                  v-if="sequenceMap.get(group[0].sequence_id).description"
+                /-->
+              </div>
             </th>
           </tr>
           <tr
@@ -862,6 +867,7 @@ import { selectionListMixin } from '@/components/mixins/selection'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import InfoQuestionMark from '@/components/widgets/InfoQuestionMark'
 import MetadataHeader from '@/components/cells/MetadataHeader'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu'
@@ -880,6 +886,21 @@ export default {
     entityListMixin,
     selectionListMixin
   ],
+
+  components: {
+    ButtonSimple,
+    DescriptionCell,
+    EntityThumbnail,
+    InfoQuestionMark,
+    MetadataHeader,
+    RowActionsCell,
+    TableHeaderMenu,
+    TableMetadataHeaderMenu,
+    TableMetadataSelectorMenu,
+    TableInfo,
+    ValidationCell,
+    ValidationHeader
+  },
 
   props: {
     displayedShots: {
@@ -928,20 +949,6 @@ export default {
     }
   },
 
-  components: {
-    ButtonSimple,
-    DescriptionCell,
-    EntityThumbnail,
-    MetadataHeader,
-    RowActionsCell,
-    TableHeaderMenu,
-    TableMetadataHeaderMenu,
-    TableMetadataSelectorMenu,
-    TableInfo,
-    ValidationCell,
-    ValidationHeader
-  },
-
   computed: {
     ...mapGetters([
       'currentProduction',
@@ -971,6 +978,7 @@ export default {
       'isTVShow',
       'nbSelectedTasks',
       'selectedShots',
+      'sequenceMap',
       'shotFilledColumns',
       'shotMap',
       'shotMetadataDescriptors',
