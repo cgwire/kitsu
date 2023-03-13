@@ -1,25 +1,12 @@
 <template>
-<button
-  class="button"
-  :title="buttonTitle"
-  @click="$emit('click')"
->
-  <eye-icon
-    class="icon is-small only-icon"
-    v-if="subscribed"
-  />
-  <eye-off-icon
-    class="icon is-small only-icon"
-    v-else
-  />
-</button>
+  <button class="button" :title="buttonTitle" @click="$emit('click')">
+    <eye-icon class="icon is-small only-icon" v-if="subscribed" />
+    <eye-off-icon class="icon is-small only-icon" v-else />
+  </button>
 </template>
 
 <script>
-import {
-  EyeIcon,
-  EyeOffIcon
-} from 'vue-feather-icons'
+import { EyeIcon, EyeOffIcon } from 'vue-feather-icons'
 
 export default {
   name: 'subscribe-button',
@@ -35,7 +22,7 @@ export default {
   },
 
   computed: {
-    buttonTitle () {
+    buttonTitle() {
       if (!this.subscribed) {
         return this.$t('tasks.subscribe_notifications')
       } else {

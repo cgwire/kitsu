@@ -1,4 +1,2 @@
-build/*.js
-config/*.js
 src/locales/*
 src/stories/*

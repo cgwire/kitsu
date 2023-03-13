@@ -5,12 +5,10 @@ import {
   getWeekRange,
   hoursToDays
 } from '@/lib/time'
-import {
-  getPercentage
-} from '@/lib/stats'
+import { getPercentage } from '@/lib/stats'
 
 const csv = {
-  generateTimesheet (
+  generateTimesheet(
     name,
     timesheet,
     people,
@@ -43,7 +41,7 @@ const csv = {
     csv.buildCsvFile(name, entries)
   },
 
-  getTimesheetHeaders (
+  getTimesheetHeaders(
     timesheet,
     detailLevel,
     year,
@@ -69,7 +67,7 @@ const csv = {
     return headers
   },
 
-  getTimesheetEntries (
+  getTimesheetEntries(
     organisation,
     unit,
     detailLevel,
@@ -95,11 +93,7 @@ const csv = {
       } else {
         headers.forEach((h, index) => {
           if (index > 0) {
-            if (
-              timesheet &&
-              timesheet[index] &&
-              timesheet[index][person.id]
-            ) {
+            if (timesheet && timesheet[index] && timesheet[index][person.id]) {
               let value = timesheet[index][person.id] / 60
               if (unit !== 'hour') value = hoursToDays(organisation, value)
               line.push(value)
@@ -114,10 +108,10 @@ const csv = {
     return entries
   },
 
-  turnEntriesToCsvString (entries) {
+  turnEntriesToCsvString(entries) {
     const lineArray = []
-    entries.forEach((infoArray) => {
-      const sanitizedCells = infoArray.map((cell) => {
+    entries.forEach(infoArray => {
+      const sanitizedCells = infoArray.map(cell => {
         const cellString = `${cell || ''}`
         if (cellString.search('"') !== -1) {
           return `${cellString.replace(/;/g, '')}`
@@ -129,9 +123,10 @@ const csv = {
     return lineArray.join('\n')
   },
 
-  buildCsvFile (name, entries) {
+  buildCsvFile(name, entries) {
     const csvContent = csv.turnEntriesToCsvString(entries)
-    const result = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent)
+    const result =
+      'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent)
     const link = document.createElement('a')
     link.setAttribute('href', result)
     link.setAttribute('download', `${name}.csv`)
@@ -140,7 +135,7 @@ const csv = {
     return csvContent
   },
 
-  generateStatReports (
+  generateStatReports(
     name,
     mainStats,
     taskTyeMap,
@@ -148,8 +143,11 @@ const csv = {
     entryMap,
     countMode
   ) {
-    const headers =
-      csv.getStatReportsHeaders(mainStats, taskTyeMap, taskStatusMap)
+    const headers = csv.getStatReportsHeaders(
+      mainStats,
+      taskTyeMap,
+      taskStatusMap
+    )
     const entries = csv.getStatReportsEntries(
       mainStats,
       taskTyeMap,
@@ -161,7 +159,7 @@ const csv = {
     return csv.buildCsvFile(name, lines)
   },
 
-  getStatReportsHeaders (mainStats, taskTypeMap, taskStatusMap) {
+  getStatReportsHeaders(mainStats, taskTypeMap, taskStatusMap) {
     const taskTypeIds = getStatsTaskTypeIds(mainStats, taskTypeMap)
     const initialHeaders = ['Name', '', 'All', '']
     return taskTypeIds.reduce((acc, taskTypeId) => {
@@ -174,8 +172,12 @@ const csv = {
     }, initialHeaders)
   },
 
-  getStatReportsEntries (
-    mainStats, taskTypeMap, taskStatusMap, entryMap, countMode = 'count'
+  getStatReportsEntries(
+    mainStats,
+    taskTypeMap,
+    taskStatusMap,
+    entryMap,
+    countMode = 'count'
   ) {
     let entries = []
     const taskTypeIds = getStatsTaskTypeIds(mainStats, taskTypeMap)
@@ -183,7 +185,12 @@ const csv = {
 
     entryIds.forEach(entryId => {
       const taskStatusIds = getStatsTaskStatusIdsForEntry(mainStats, entryId)
-      const total = getStatsTotalCount(mainStats, taskStatusIds, countMode, entryId)
+      const total = getStatsTotalCount(
+        mainStats,
+        taskStatusIds,
+        countMode,
+        entryId
+      )
       const lineMap = buildTotalLines(
         entryMap,
         taskStatusMap,
@@ -194,7 +201,7 @@ const csv = {
         total
       )
 
-      taskTypeIds.forEach((taskTypeId) => {
+      taskTypeIds.forEach(taskTypeId => {
         if (taskTypeId !== 'all') {
           const taskTypeStats = mainStats[entryId][taskTypeId]
           if (taskTypeStats) {
@@ -215,23 +222,24 @@ const csv = {
               lineMap
             )
           } else {
-            Object.keys(mainStats[entryId].all).forEach((taskStatusId) => {
-              lineMap[taskStatusId] =
-                lineMap[taskStatusId].concat(['', ''])
+            Object.keys(mainStats[entryId].all).forEach(taskStatusId => {
+              lineMap[taskStatusId] = lineMap[taskStatusId].concat(['', ''])
             })
           }
         }
       })
 
-      entries = entries.concat(Object.values(lineMap).sort((a, b) => {
-        return a[1].localeCompare(b[1])
-      }))
+      entries = entries.concat(
+        Object.values(lineMap).sort((a, b) => {
+          return a[1].localeCompare(b[1])
+        })
+      )
       entries.push([''])
     })
     return entries
   },
 
-  generateRetakeStatReports (
+  generateRetakeStatReports(
     name,
     mainStats,
     taskTyeMap,
@@ -239,8 +247,11 @@ const csv = {
     entryMap,
     countMode
   ) {
-    const headers =
-      csv.getStatReportsHeaders(mainStats, taskTyeMap, taskStatusMap)
+    const headers = csv.getStatReportsHeaders(
+      mainStats,
+      taskTyeMap,
+      taskStatusMap
+    )
     const entries = csv.getRetakeStatReportsEntries(
       mainStats,
       taskTyeMap,
@@ -252,18 +263,27 @@ const csv = {
     return csv.buildCsvFile(name, lines)
   },
 
-  getRetakeStatReportsEntries (
-    mainStats, taskTypeMap, taskStatusMap, entryMap, countMode = 'count'
+  getRetakeStatReportsEntries(
+    mainStats,
+    taskTypeMap,
+    taskStatusMap,
+    entryMap,
+    countMode = 'count'
   ) {
     let entries = []
     const taskTypeIds = getStatsTaskTypeIds(mainStats, taskTypeMap)
     const entryIds = getStatsEntryIds(mainStats, entryMap)
 
     entryIds.forEach(entryId => {
-      const taskStatusIds = getStatsTaskStatusIdsForEntry(mainStats, entryId)
-        .filter(s => !['max_retake_count', 'evolution'].includes(s))
+      const taskStatusIds = getStatsTaskStatusIdsForEntry(
+        mainStats,
+        entryId
+      ).filter(s => !['max_retake_count', 'evolution'].includes(s))
       const total = getStatsTotalCount(
-        mainStats, taskStatusIds, countMode, entryId
+        mainStats,
+        taskStatusIds,
+        countMode,
+        entryId
       )
       const lineMap = buildTotalLines(
         entryMap,
@@ -275,7 +295,7 @@ const csv = {
         total
       )
 
-      taskTypeIds.forEach((taskTypeId) => {
+      taskTypeIds.forEach(taskTypeId => {
         if (taskTypeId === 'all') {
           Object.keys(mainStats[entryId].all).forEach(taskStatusId => {
             if (!['max_retake_count', 'evolution'].includes(taskStatusId)) {
@@ -311,7 +331,7 @@ const csv = {
     return entries
   },
 
-  generateQuotas (
+  generateQuotas(
     name,
     quotas,
     people,
@@ -345,7 +365,7 @@ const csv = {
     csv.buildCsvFile(name, entries)
   },
 
-  getQuotaEntries (
+  getQuotaEntries(
     quotas,
     people,
     countMode,
@@ -362,7 +382,9 @@ const csv = {
         if (index > 0) {
           let key = year
           if (detailLevel === 'day') {
-            key = `${year}-${(month + '').padStart(2, '0')}-${(index + '').padStart(2, '0')}`
+            key = `${year}-${(month + '').padStart(2, '0')}-${(
+              index + ''
+            ).padStart(2, '0')}`
           } else {
             key = `${year}-${('' + index).padStart(2, '0')}`
           }
@@ -388,7 +410,7 @@ const csv = {
         config: config,
         encoding: 'UTF-8',
         error: reject,
-        complete: (results) => {
+        complete: results => {
           const parsedData = csv.cleanUpCsv(results.data)
           resolve(parsedData)
         }
@@ -396,7 +418,7 @@ const csv = {
     })
   },
 
-  cleanUpCsv: (data) => {
+  cleanUpCsv: data => {
     data.forEach(item => {
       item.forEach((item, index, data) => {
         data[index] = item.trim()
@@ -420,17 +442,16 @@ const getStatsTaskTypeIds = (mainStats, taskTypeMap) => {
 }
 
 const getStatsEntryIds = (mainStats, entryMap) => {
-  return Object.keys(mainStats)
-    .sort((a, b) => {
-      if (a === 'all') return -1
-      if (b === 'all') return 1
-      return entryMap.get(a).name.localeCompare(entryMap.get(b).name)
-    })
+  return Object.keys(mainStats).sort((a, b) => {
+    if (a === 'all') return -1
+    if (b === 'all') return 1
+    return entryMap.get(a).name.localeCompare(entryMap.get(b).name)
+  })
 }
 
 const getStatsTotalCount = (mainStats, taskStatusIds, countMode, entryId) => {
   let total = 0
-  taskStatusIds.forEach((taskStatusId) => {
+  taskStatusIds.forEach(taskStatusId => {
     const taskStatusStats = mainStats[entryId].all[taskStatusId]
     total += taskStatusStats[countMode]
   })
@@ -449,10 +470,9 @@ const getStatsTotalEntryCount = (
   taskTypeId
 ) => {
   let total = 0
-  Object.keys(taskTypeStats).forEach((taskStatusId) => {
+  Object.keys(taskTypeStats).forEach(taskStatusId => {
     if (!['max_retake_count', 'evolution'].includes(taskStatusId)) {
-      const taskStatusStats =
-        mainStats[entryId][taskTypeId][taskStatusId]
+      const taskStatusStats = mainStats[entryId][taskTypeId][taskStatusId]
       total += taskStatusStats[countMode]
     }
   })
@@ -477,8 +497,12 @@ const buildTotalLines = (
     const taskStatusStats = mainStats[entryId].all[taskStatusId]
     const count = taskStatusStats[countMode]
     const percentage = getPercentage(count, total)
-    lineMap[taskStatusId] =
-      [name, taskStatusName, count || '0', percentage + '%']
+    lineMap[taskStatusId] = [
+      name,
+      taskStatusName,
+      count || '0',
+      percentage + '%'
+    ]
   })
   return lineMap
 }
@@ -492,16 +516,16 @@ const addEntryStatusStats = (
   total,
   lineMap
 ) => {
-  taskStatusIds
-    .forEach((taskStatusId) => {
-      const taskStatusStats =
-        mainStats[entryId][taskTypeId][taskStatusId]
-      let count = 0
-      if (taskStatusStats) count = taskStatusStats[countMode]
-      const percentage = getPercentage(count, total)
-      lineMap[taskStatusId] =
-        lineMap[taskStatusId].concat([count || '0', percentage + '%'])
-    })
+  taskStatusIds.forEach(taskStatusId => {
+    const taskStatusStats = mainStats[entryId][taskTypeId][taskStatusId]
+    let count = 0
+    if (taskStatusStats) count = taskStatusStats[countMode]
+    const percentage = getPercentage(count, total)
+    lineMap[taskStatusId] = lineMap[taskStatusId].concat([
+      count || '0',
+      percentage + '%'
+    ])
+  })
 }
 
 export default csv

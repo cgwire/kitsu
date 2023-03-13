@@ -1,23 +1,18 @@
 <template>
-<div
->
-  <span
-    class="dot"
-    :style="{ 'border': '5px solid ' + color }"
-    v-if="!onlyDot"
-  >
-  </span>
-  <span
-    class="dot"
-    :style="{ 'border': '5px solid ' + color }"
-    :title="department.name"
-    v-if="onlyDot"
-  >
-  </span>
-  <span v-if="!onlyDot">
-    {{ department.name }}
-  </span>
-</div>
+  <div>
+    <span class="dot" :style="{ border: '5px solid ' + color }" v-if="!onlyDot">
+    </span>
+    <span
+      class="dot"
+      :style="{ border: '5px solid ' + color }"
+      :title="department.name"
+      v-if="onlyDot"
+    >
+    </span>
+    <span v-if="!onlyDot">
+      {{ department.name }}
+    </span>
+  </div>
 </template>
 
 <script>
@@ -25,8 +20,7 @@ import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'department-name',
-  components: {
-  },
+  components: {},
 
   props: {
     department: {
@@ -40,17 +34,15 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ]),
+    ...mapGetters([]),
 
-    color () {
+    color() {
       return this.department.color
     }
   },
 
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   }
 }
 </script>

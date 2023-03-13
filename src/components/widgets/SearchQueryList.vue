@@ -1,36 +1,35 @@
 <template>
-<div class="search-queries">
-  <span
-    class="tag flexrow"
-    :key="searchQuery.id"
-    @click="changeSearch($event, searchQuery)"
-    v-for="searchQuery in userFilters"
-  >
-    <span class="flexrow-item">
-      {{ searchQuery.name }}
+  <div class="search-queries">
+    <span
+      class="tag flexrow"
+      :key="searchQuery.id"
+      @click="changeSearch($event, searchQuery)"
+      v-for="searchQuery in userFilters"
+    >
+      <span class="flexrow-item">
+        {{ searchQuery.name }}
+      </span>
+      <button
+        class="edit flexrow-item"
+        @click.prevent="editSearch(searchQuery)"
+      >
+        <edit2-icon size="0.6x" class="edit-icon" />
+      </button>
+      <button
+        class="delete flexrow-item"
+        @click.prevent="removeSearch(searchQuery)"
+      ></button>
     </span>
-    <button
-      class="edit flexrow-item"
-      @click.prevent="editSearch(searchQuery)"
-    >
-      <edit2-icon size="0.6x" class="edit-icon"/>
-    </button>
-    <button
-      class="delete flexrow-item"
-      @click.prevent="removeSearch(searchQuery)"
-    >
-    </button>
-  </span>
-  <edit-search-filter-modal
-    ref="edit-search-modal"
-    :active="modals.edit"
-    :is-loading="loading.edit"
-    :is-error="errors.edit"
-    :search-query-to-edit="searchQueryToEdit"
-    @cancel="modals.edit = false"
-    @confirm="confirmEditSearch"
-  />
-</div>
+    <edit-search-filter-modal
+      ref="edit-search-modal"
+      :active="modals.edit"
+      :is-loading="loading.edit"
+      :is-error="errors.edit"
+      :search-query-to-edit="searchQueryToEdit"
+      @cancel="modals.edit = false"
+      @confirm="confirmEditSearch"
+    />
+  </div>
 </template>
 
 <script>
@@ -39,9 +38,7 @@
  * results. It allows to modify each query too.
  */
 import { mapActions } from 'vuex'
-import {
-  Edit2Icon
-} from 'vue-feather-icons'
+import { Edit2Icon } from 'vue-feather-icons'
 
 import { sortByName } from '@/lib/sorting'
 import EditSearchFilterModal from '@/components/modals/EditSearchFilterModal'
@@ -58,7 +55,7 @@ export default {
     Edit2Icon,
     EditSearchFilterModal
   },
-  data () {
+  data() {
     return {
       searchQueryToEdit: {},
       errors: {
@@ -73,43 +70,42 @@ export default {
     }
   },
   computed: {
-    userFilters () {
+    userFilters() {
       return sortByName([...this.queries])
     }
   },
   methods: {
-    ...mapActions([
-      'updateSearchFilter'
-    ]),
+    ...mapActions(['updateSearchFilter']),
 
-    changeSearch (event, searchQuery) {
-      const isButtonClicked =
-        ['delete flexrow', 'edit flexrow'].includes(event.target.className)
+    changeSearch(event, searchQuery) {
+      const isButtonClicked = ['delete flexrow', 'edit flexrow'].includes(
+        event.target.className
+      )
       if (!isButtonClicked) {
         this.$emit('change-search', searchQuery)
       }
     },
 
-    editSearch (searchQuery) {
+    editSearch(searchQuery) {
       this.searchQueryToEdit = searchQuery
       this.modals.edit = true
     },
 
-    confirmEditSearch (searchFilter) {
+    confirmEditSearch(searchFilter) {
       this.loading.edit = true
       this.updateSearchFilter(searchFilter)
         .then(() => {
           this.loading.edit = false
           this.modals.edit = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.edit = false
           this.errors.edit = true
         })
     },
 
-    removeSearch (searchQuery) {
+    removeSearch(searchQuery) {
       this.$emit('remove-search', searchQuery)
     }
   }

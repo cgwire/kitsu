@@ -1,15 +1,15 @@
 <template>
-<div
-  :class="{
-    'group-button': true,
-    [`group-button--${align}`]: true
-  }">
-  <slot></slot>
-</div>
+  <div
+    :class="{
+      'group-button': true,
+      [`group-button--${align}`]: true
+    }"
+  >
+    <slot></slot>
+  </div>
 </template>
 
 <script>
-
 export default {
   name: 'group-button',
 
@@ -17,11 +17,7 @@ export default {
     align: {
       default: 'right',
       type: String,
-      validator: (prop) => [
-        'right',
-        'left',
-        'center'
-      ].includes(prop)
+      validator: prop => ['right', 'left', 'center'].includes(prop)
     }
   }
 }
@@ -50,7 +46,7 @@ export default {
     border-bottom-right-radius: 2rem;
   }
   & > * + *:not(:first-child) {
-    border-left: 0
+    border-left: 0;
   }
 }
 .group-button--right {

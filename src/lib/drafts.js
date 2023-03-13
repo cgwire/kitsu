@@ -1,13 +1,13 @@
 const drafts = {
-  setTaskDraft (taskId, text) {
+  setTaskDraft(taskId, text) {
     return localStorage.setItem('draft-' + taskId, text)
   },
 
-  getTaskDraft (taskId) {
+  getTaskDraft(taskId) {
     return localStorage.getItem('draft-' + taskId)
   },
 
-  clearTaskDraft (taskId) {
+  clearTaskDraft(taskId) {
     return localStorage.removeItem('draft-' + taskId)
   }
 }

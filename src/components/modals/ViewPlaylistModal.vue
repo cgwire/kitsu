@@ -1,40 +1,40 @@
 <template>
-<div
-  id="temp-playlist-modal"
-  :class="{
-    dark: true,
-    'modal': true,
-    'is-active': active
-  }"
->
-  <div class="modal-background" @click="$emit('cancel')"></div>
-  <div class="modal-content wide xyz-in" xyz="fade">
-    <div class="box">
-      <playlist-player
-        ref="playlist-player"
-        :playlist="currentPlaylist"
-        :entities="currentEntities"
-        :is-loading="isLoading"
-        :temp-mode="true"
-        :is-asset-playlist="isAssetPlaylist"
-        @save-clicked="onSaveClicked"
-        @annotation-changed="onAnnotationChanged"
-        @annotations-refreshed="onAnnotationsRefreshed"
-        v-if="!isPlaylistPage"
-      />
+  <div
+    id="temp-playlist-modal"
+    :class="{
+      dark: true,
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
+    <div class="modal-content wide xyz-in" xyz="fade">
+      <div class="box">
+        <playlist-player
+          ref="playlist-player"
+          :playlist="currentPlaylist"
+          :entities="currentEntities"
+          :is-loading="isLoading"
+          :temp-mode="true"
+          :is-asset-playlist="isAssetPlaylist"
+          @save-clicked="onSaveClicked"
+          @annotation-changed="onAnnotationChanged"
+          @annotations-refreshed="onAnnotationsRefreshed"
+          v-if="!isPlaylistPage"
+        />
+      </div>
     </div>
-  </div>
 
-  <edit-playlist-modal
-    :active="modals.edit"
-    :is-loading="loading.edit"
-    :is-error="errors.edit"
-    :playlist-to-edit="playlistToEdit"
-    :type-disabled="true"
-    @confirm="savePlaylist"
-    @cancel="modals.edit = false"
-  />
-</div>
+    <edit-playlist-modal
+      :active="modals.edit"
+      :is-loading="loading.edit"
+      :is-error="errors.edit"
+      :playlist-to-edit="playlistToEdit"
+      :type-disabled="true"
+      @confirm="savePlaylist"
+      @cancel="modals.edit = false"
+    />
+  </div>
 </template>
 
 <script>
@@ -65,13 +65,13 @@ export default {
     taskIds: {
       type: Array
     },
-    sort: {
+    sort: {
       type: Boolean,
       default: false
     }
   },
 
-  data () {
+  data() {
     return {
       previewFileMap: new Map(),
       previewFileEntityMap: new Map(),
@@ -105,19 +105,19 @@ export default {
       'taskMap'
     ]),
 
-    currentTaskIds () {
+    currentTaskIds() {
       return this.taskIds || Array.from(this.selectedTasks.keys())
     },
 
-    isPlaylistPage () {
+    isPlaylistPage() {
       return this.$route.path.indexOf('playlist') > 0
     },
 
-    playlistPlayer () {
+    playlistPlayer() {
       return this.$refs['playlist-player']
     },
 
-    isAssetPlaylist () {
+    isAssetPlaylist() {
       if (this.currentPlaylist.shots.length > 0) {
         return this.currentPlaylist.shots[0].sequence_name === undefined
       }
@@ -134,14 +134,18 @@ export default {
       'updatePreviewAnnotation'
     ]),
 
-    onAnnotationChanged ({ preview, additions, deletions, updates }) {
+    onAnnotationChanged({ preview, additions, deletions, updates }) {
       const taskId = preview.task_id
       this.updatePreviewAnnotation({
-        taskId, preview, additions, deletions, updates
+        taskId,
+        preview,
+        additions,
+        deletions,
+        updates
       })
     },
 
-    onAnnotationsRefreshed (preview) {
+    onAnnotationsRefreshed(preview) {
       const entity = this.previewFileEntityMap.get(preview.id)
       const localPreview = this.previewFileMap.get(preview.id)
       if (entity) {
@@ -152,7 +156,7 @@ export default {
       }
     },
 
-    setupEntities (entities) {
+    setupEntities(entities) {
       const entityMap = {}
       entities.forEach(entity => {
         this.previewFileEntityMap.set(entity.preview_file_id, entity)
@@ -168,7 +172,7 @@ export default {
       this.currentEntities = entityMap
     },
 
-    onSaveClicked () {
+    onSaveClicked() {
       this.errors.editPlaylist = false
       this.playlistToEdit = {
         for_entity: this.isAssetPlaylist ? 'asset' : 'shot'
@@ -176,7 +180,7 @@ export default {
       this.modals.edit = true
     },
 
-    savePlaylist (form) {
+    savePlaylist(form) {
       const newPlaylist = {
         name: form.name,
         production_id: this.currentProduction.id,
@@ -191,7 +195,7 @@ export default {
       this.errors.edit = false
       this.loading.edit = true
       this.newPlaylist(newPlaylist)
-        .then((playlist) => {
+        .then(playlist => {
           Object.assign(this.currentPlaylist, {
             id: playlist.id,
             name: playlist.name,
@@ -201,7 +205,7 @@ export default {
           })
           this.editPlaylist({
             data: this.currentPlaylist,
-            callback: (err) => {
+            callback: err => {
               if (err) {
                 this.errors.edit = true
               } else {
@@ -212,7 +216,7 @@ export default {
             }
           })
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.errors.edit = true
         })
@@ -220,13 +224,13 @@ export default {
   },
 
   watch: {
-    active () {
+    active() {
       if (this.active) {
         this.currentEntities = {}
         this.previewFileMap = new Map()
         this.previewFileEntityMap = new Map()
         this.isLoading = true
-        this.loadTempPlaylist({ taskIds: this.currentTaskIds, sort: this.sort})
+        this.loadTempPlaylist({ taskIds: this.currentTaskIds, sort: this.sort })
           .then(entities => {
             this.setupEntities(entities)
             this.isLoading = false
@@ -264,7 +268,7 @@ export default {
   width: 100%;
 
   .box {
-    background: #3D4048;
+    background: #3d4048;
     padding-bottom: 0;
   }
 }

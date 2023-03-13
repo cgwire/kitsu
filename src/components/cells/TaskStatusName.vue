@@ -1,17 +1,17 @@
 <template>
-<td class="name">
-  <div
-    class="tag"
-    v-bind:class="[!disable ? '' : 'canceled']"
-    :style="{
-      background: color,
-      color: textColor
-    }"
-    :title="entry.name"
-  >
-    {{ entry.short_name }}
-  </div>
-</td>
+  <td class="name">
+    <div
+      class="tag"
+      v-bind:class="[!disable ? '' : 'canceled']"
+      :style="{
+        background: color,
+        color: textColor
+      }"
+      :title="entry.name"
+    >
+      {{ entry.short_name }}
+    </div>
+  </td>
 </template>
 
 <script>
@@ -19,8 +19,7 @@ import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'task-status-name',
-  components: {
-  },
+  components: {},
   props: {
     entry: {
       type: Object,
@@ -32,11 +31,9 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
-      'isDarkTheme'
-    ]),
+    ...mapGetters(['isDarkTheme']),
 
-    color () {
+    color() {
       if (this.entry.name === 'Todo' && this.isDarkTheme) {
         return '#5F626A'
       } else {
@@ -44,7 +41,7 @@ export default {
       }
     },
 
-    textColor () {
+    textColor() {
       if (this.entry.name === 'Todo' && !this.isDarkTheme) {
         return '#333'
       } else {

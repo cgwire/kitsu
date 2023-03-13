@@ -21,7 +21,6 @@ import 'v-autocomplete/dist/v-autocomplete.css'
 import VueAnimXYZ from '@animxyz/vue'
 import '@animxyz/core' // Import css here if you haven't elsewhere
 
-
 Vue.use(VueWebsocket, IO, '/events')
 Vue.config.productionTip = false
 Vue.use(Autocomplete)
@@ -42,23 +41,22 @@ sync(store, router)
 // Global custom directive to enable automatic focus on field after page
 // loading.
 Vue.directive('focus', {
-  inserted (el) {
+  inserted(el) {
     el.focus()
   }
 })
 
 // Allow access to i18n object from vue instance.
 Vue.prototype.$locale = {
-  change (locale) {
+  change(locale) {
     i18n.locale = locale
   },
-  current () {
+  current() {
     return i18n.locale
   }
 }
 
 // Start application.
-/* eslint-disable no-new */
 new Vue({
   el: '#app',
   components: { App },

@@ -29,7 +29,7 @@ export default {
   },
 
   computed: {
-    nonHighilightedText () {
+    nonHighilightedText() {
       if (this.searchText === this.item.first_name) {
         return '&nbsp;' + this.item.name.substring(this.searchText.length)
       } else {
@@ -55,7 +55,7 @@ div {
   color: black;
   width: 100%;
   padding: 0.5em;
-  border-bottom: 1px solid #DDD;
+  border-bottom: 1px solid #ddd;
   border-left: 1px solid $light-grey;
   border-right: 1px solid $light-grey;
 }

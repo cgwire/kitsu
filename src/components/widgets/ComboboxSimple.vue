@@ -1,25 +1,23 @@
 <template>
-<div class="field">
-  <label class="label" v-if="label.length > 0">
-    {{ label }}
-  </label>
-  <div
-    class="flexrow"
-  >
-    <span
-      :key="option.label"
-      :class="{
-        'choice':true,
-        'flexrow-item': true,
-        'selected': selectedOption.value === option.value
-      }"
-      @click="selectOption(option)"
-      v-for="option in options"
-    >
-      {{ getOptionLabel(option) }}
-    </span>
+  <div class="field">
+    <label class="label" v-if="label.length > 0">
+      {{ label }}
+    </label>
+    <div class="flexrow">
+      <span
+        :key="option.label"
+        :class="{
+          choice: true,
+          'flexrow-item': true,
+          selected: selectedOption.value === option.value
+        }"
+        @click="selectOption(option)"
+        v-for="option in options"
+      >
+        {{ getOptionLabel(option) }}
+      </span>
+    </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -28,10 +26,9 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'combobox-styled',
 
-  components: {
-  },
+  components: {},
 
-  data () {
+  data() {
     return {
       selectedOption: {
         label: '',
@@ -60,23 +57,21 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.resetOptions()
   },
 
   computed: {
-    ...mapGetters([
-      'isDarkTheme'
-    ])
+    ...mapGetters(['isDarkTheme'])
   },
 
   methods: {
-    selectOption (option) {
+    selectOption(option) {
       this.$emit('input', option.value)
       this.selectedOption = option
     },
 
-    getOptionLabel (option) {
+    getOptionLabel(option) {
       if (this.localeKeyPrefix.length > 0) {
         return this.$t(this.localeKeyPrefix + option.label.toLowerCase())
       } else {
@@ -84,7 +79,7 @@ export default {
       }
     },
 
-    resetOptions () {
+    resetOptions() {
       if (this.options.length > 0) {
         const option = this.options.find(o => o.value === this.value)
         if (option) {
@@ -97,11 +92,11 @@ export default {
   },
 
   watch: {
-    options () {
+    options() {
       this.resetOptions()
     },
 
-    value () {
+    value() {
       this.selectedOption = this.options.find(o => o.value === this.value)
     }
   }

@@ -1,20 +1,20 @@
 <template>
-<router-link
-  class="person-name"
-  :to="{
-    name: 'person',
-    params: {
-      person_id: person.id
-    }
-  }"
-  :title="person.full_name"
-  v-if="withLink"
->
-  {{ person.first_name + ' ' + person.last_name }}
-</router-link>
-<span class="person-name" v-else>
-  {{ person.first_name + ' ' + person.last_name }}
-</span>
+  <router-link
+    class="person-name"
+    :to="{
+      name: 'person',
+      params: {
+        person_id: person.id
+      }
+    }"
+    :title="person.full_name"
+    v-if="withLink"
+  >
+    {{ person.first_name + ' ' + person.last_name }}
+  </router-link>
+  <span class="person-name" v-else>
+    {{ person.first_name + ' ' + person.last_name }}
+  </span>
 </template>
 
 <script>
@@ -32,12 +32,10 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   }
 }
 </script>

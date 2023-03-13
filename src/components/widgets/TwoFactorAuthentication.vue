@@ -6,35 +6,32 @@
     }"
   >
     <div class="field">
-      <p
-        class="control has-icon"
-        v-if="chosenTwoFA !== 'fido'"
-      >
+      <p class="control has-icon" v-if="chosenTwoFA !== 'fido'">
         <input
-            class="input is-medium password"
-            type="text"
-            :placeholder="placeholderInputText"
-            @input="updatePayload"
-            @keyup.enter="validate"
-            v-model="OTPValue"
-            v-focus
-        >
+          class="input is-medium password"
+          type="text"
+          :placeholder="placeholderInputText"
+          @input="updatePayload"
+          @keyup.enter="validate"
+          v-model="OTPValue"
+          v-focus
+        />
         <span class="icon">
-            <smartphone-icon
-                v-if="chosenTwoFA === 'totp'"
-                width=20
-                height=20
-            />
-            <mail-icon
-                v-else-if="chosenTwoFA === 'email_otp'"
-                width=20
-                height=20
-            />
-            <key-icon
-                v-else-if="chosenTwoFA === 'recovery_code'"
-                width=20
-                height=20
-            />
+          <smartphone-icon
+            v-if="chosenTwoFA === 'totp'"
+            width="20"
+            height="20"
+          />
+          <mail-icon
+            v-else-if="chosenTwoFA === 'email_otp'"
+            width="20"
+            height="20"
+          />
+          <key-icon
+            v-else-if="chosenTwoFA === 'recovery_code'"
+            width="20"
+            height="20"
+          />
         </span>
       </p>
 
@@ -54,49 +51,34 @@
         {{ wrongOTPError }}
       </p>
       <p class="control error" v-else-if="errorRequestingFIDOChallenge">
-        {{ $t('login.error_requesting_fido')}}
+        {{ $t('login.error_requesting_fido') }}
       </p>
       <p class="control error" v-else-if="errorSendingEmail">
-        {{ $t('login.error_sending_email')}}
+        {{ $t('login.error_sending_email') }}
       </p>
-      <p
-        v-if="chosenTwoFA === 'email_otp'"
-      >
-        <a
-            @click="requestSendEmailOTP"
-        >
-            {{ $t('login.send_email_otp')}}
+      <p v-if="chosenTwoFA === 'email_otp'">
+        <a @click="requestSendEmailOTP">
+          {{ $t('login.send_email_otp') }}
         </a>
       </p>
 
-      <p
-        v-if="chosenTwoFA === 'fido'"
-      >
-        <a
-            @click="requestGetFIDOChallenge"
-        >
-            {{ $t('login.retry_fido_challenge')}}
+      <p v-if="chosenTwoFA === 'fido'">
+        <a @click="requestGetFIDOChallenge">
+          {{ $t('login.retry_fido_challenge') }}
         </a>
       </p>
 
       <p class="control">
         {{ informationTwoFA }}
       </p>
-      <div
-          v-if="(othersTwoFA.length >= 1)"
-      >
+      <div v-if="othersTwoFA.length >= 1">
         <p class="control">
-            {{ unableToVerify }}
+          {{ unableToVerify }}
         </p>
         <ul>
-          <li
-              v-for="twoFA in othersTwoFA"
-              :key="twoFA"
-          >
-            <a
-                @click="changeTwoFA(twoFA)"
-            >
-                {{ changeTwoFAText(twoFA)}}
+          <li v-for="twoFA in othersTwoFA" :key="twoFA">
+            <a @click="changeTwoFA(twoFA)">
+              {{ changeTwoFAText(twoFA) }}
             </a>
           </li>
         </ul>
@@ -121,7 +103,7 @@ export default {
     ButtonSimple
   },
 
-  data () {
+  data() {
     return {
       chosenTwoFA: '',
       OTPValue: '',
@@ -167,7 +149,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.changeTwoFA(this.preferredTwoFa, false)
     if (this.textValidateButton) {
       this.textValidateButtonOrVerify = this.textValidateButton
@@ -177,10 +159,9 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ]),
+    ...mapGetters([]),
 
-    placeholderInputText () {
+    placeholderInputText() {
       switch (this.chosenTwoFA) {
         case 'totp':
           return this.$t('login.fields.totp')
@@ -192,7 +173,7 @@ export default {
       return ''
     },
 
-    wrongOTPError () {
+    wrongOTPError() {
       switch (this.chosenTwoFA) {
         case 'totp':
           return this.$t('login.wrong_totp')
@@ -206,7 +187,7 @@ export default {
       return ''
     },
 
-    informationTwoFA () {
+    informationTwoFA() {
       switch (this.chosenTwoFA) {
         case 'totp':
           return this.$t('login.information_totp')
@@ -220,7 +201,7 @@ export default {
       return ''
     },
 
-    unableToVerify () {
+    unableToVerify() {
       switch (this.chosenTwoFA) {
         case 'totp':
           return this.$t('login.unable_to_verify_totp')
@@ -234,32 +215,29 @@ export default {
       return ''
     },
 
-    othersTwoFA () {
+    othersTwoFA() {
       return this.twoFasEnabled.filter((val, _) => val !== this.chosenTwoFA)
     }
   },
 
   methods: {
-    ...mapActions([
-      'getFIDOChallenge',
-      'sendEmailOTP'
-    ]),
+    ...mapActions(['getFIDOChallenge', 'sendEmailOTP']),
 
-    updatePayload () {
+    updatePayload() {
       this.twoFactorPayload = {}
       this.twoFactorPayload[this.chosenTwoFA] = this.OTPValue
     },
 
-    validate () {
+    validate() {
       this.$emit('validate', this.twoFactorPayload)
     },
 
-    removeErrors () {
+    removeErrors() {
       this.errorRequestingFIDOChallenge = false
       this.errorSendingEmail = false
     },
 
-    changeTwoFAText (twoFA) {
+    changeTwoFAText(twoFA) {
       switch (twoFA) {
         case 'totp':
           return this.$t('login.choose_totp')
@@ -273,7 +251,7 @@ export default {
       return ''
     },
 
-    changeTwoFA (twoFA, emitChanged = true) {
+    changeTwoFA(twoFA, emitChanged = true) {
       this.removeErrors()
       this.chosenTwoFA = twoFA
       if (this.chosenTwoFA === 'email_otp') {
@@ -284,24 +262,26 @@ export default {
       if (emitChanged) this.$emit('changed-two-fa', this.chosenTwoFA)
     },
 
-    requestSendEmailOTP () {
+    requestSendEmailOTP() {
       this.removeErrors()
-      this.sendEmailOTP(this.email)
-        .catch(() => { this.errorSendingEmail = true })
+      this.sendEmailOTP(this.email).catch(() => {
+        this.errorSendingEmail = true
+      })
     },
 
-    requestGetFIDOChallenge () {
+    requestGetFIDOChallenge() {
       this.removeErrors()
       this.getFIDOChallenge(this.email)
-        .then((FIDOChallenge) => {
+        .then(FIDOChallenge => {
           return navigator.credentials.get({ publicKey: FIDOChallenge })
         })
-        .then((FIDOAuthenticationResponse) => {
+        .then(FIDOAuthenticationResponse => {
           this.twoFactorPayload = {}
-          this.twoFactorPayload.fido_authentication_response = FIDOAuthenticationResponse
+          this.twoFactorPayload.fido_authentication_response =
+            FIDOAuthenticationResponse
           this.validate()
         })
-        .catch((err) => {
+        .catch(err => {
           if (err instanceof DOMException) console.error(err)
           this.errorRequestingFIDOChallenge = true
         })

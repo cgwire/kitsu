@@ -1,40 +1,36 @@
 <template>
-<div>
-  <div
-    :class="{
-      'checklist-entry': true,
-      flexrow: true,
-      checked: entry.checked
-    }"
-    :key="'comment-checklist-' + '-' + index"
-    v-for="(entry, index) in checklist"
-  >
-    <span
-      class="flexrow-item"
-      @click="toggleEntryChecked(entry)"
+  <div>
+    <div
+      :class="{
+        'checklist-entry': true,
+        flexrow: true,
+        checked: entry.checked
+      }"
+      :key="'comment-checklist-' + '-' + index"
+      v-for="(entry, index) in checklist"
     >
-      <check-square-icon class="icon" v-if="entry.checked" />
-      <square-icon class="icon" v-else />
-    </span>
-    <textarea-autosize
-      type="text"
-      class="checklist-text flexrow-item"
-      :ref="`checklist-entry-${index}`"
-      rows="1"
-      :placeholder="$t('comments.task_placeholder')"
-      @keypress.enter.prevent.native="addChecklistEntry(index, $event)"
-      @keyup.backspace.native="removeChecklistEntry(index)"
-      @keyup.up.native="focusPrevious(index)"
-      @keyup.down.native="focusNext(index)"
-      :disabled="entry.text.length !== 0 && disabled"
-      v-model="entry.text"
-    ></textarea-autosize>
+      <span class="flexrow-item" @click="toggleEntryChecked(entry)">
+        <check-square-icon class="icon" v-if="entry.checked" />
+        <square-icon class="icon" v-else />
+      </span>
+      <textarea-autosize
+        type="text"
+        class="checklist-text flexrow-item"
+        :ref="`checklist-entry-${index}`"
+        rows="1"
+        :placeholder="$t('comments.task_placeholder')"
+        @keypress.enter.prevent.native="addChecklistEntry(index, $event)"
+        @keyup.backspace.native="removeChecklistEntry(index)"
+        @keyup.up.native="focusPrevious(index)"
+        @keyup.down.native="focusNext(index)"
+        :disabled="entry.text.length !== 0 && disabled"
+        v-model="entry.text"
+      ></textarea-autosize>
+    </div>
   </div>
-</div>
 </template>
 
 <script>
-
 import { CheckSquareIcon, SquareIcon } from 'vue-feather-icons'
 
 export default {
@@ -57,7 +53,7 @@ export default {
   },
 
   methods: {
-    addChecklistEntry (index, event) {
+    addChecklistEntry(index, event) {
       if (index === -1 || index === this.checklist.length - 1) {
         this.$emit('add-item', {
           index,
@@ -71,7 +67,7 @@ export default {
       })
     },
 
-    removeChecklistEntry (index) {
+    removeChecklistEntry(index) {
       const entry = this.checklist[index]
       if (entry.text.length === 0) {
         this.$emit('remove-task', entry)
@@ -79,7 +75,7 @@ export default {
       }
     },
 
-    focusPrevious (index) {
+    focusPrevious(index) {
       if (this.checklist.length > 0) {
         if (index === 0) index = this.checklist.length
         index--
@@ -88,7 +84,7 @@ export default {
       }
     },
 
-    focusNext (index) {
+    focusNext(index) {
       if (this.checklist.length > 0) {
         if (index === this.checklist.length - 1) index = -1
         index++
@@ -97,7 +93,7 @@ export default {
       }
     },
 
-    toggleEntryChecked (entry) {
+    toggleEntryChecked(entry) {
       entry.checked = !entry.checked
       this.$emit('emit-change')
     }
@@ -108,7 +104,6 @@ export default {
 <style lang="scss" scoped>
 .dark {
   .checklist-entry {
-
     .checklist-text {
       color: $light-grey-light;
       background: transparent;
@@ -128,7 +123,6 @@ export default {
           border: 1px solid transparent;
         }
       }
-
     }
   }
 }

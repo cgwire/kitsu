@@ -1,16 +1,16 @@
 <template>
   <div class="production-name flexrow">
     <div
-       class="flexrow-item avatar has-text-centered"
-       v-if="withAvatar"
-       :style="{
-         background: getAvatarColor(production),
-         width: size + 'px',
-         height: size + 'px',
-         'font-size': (size - 15) + 'px',
-         'line-height': size + 'px'
-       }"
-     >
+      class="flexrow-item avatar has-text-centered"
+      v-if="withAvatar"
+      :style="{
+        background: getAvatarColor(production),
+        width: size + 'px',
+        height: size + 'px',
+        'font-size': size - 15 + 'px',
+        'line-height': size + 'px'
+      }"
+    >
       <span v-if="!production.has_avatar">
         {{ generateAvatar(production) }}
       </span>
@@ -60,10 +60,9 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ]),
+    ...mapGetters([]),
 
-    productionInfo () {
+    productionInfo() {
       const fps = this.production.fps
       const ratio = this.production.ratio
       const resolution = this.production.resolution
@@ -76,19 +75,18 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    generateAvatar (production) {
+    generateAvatar(production) {
       const firstLetter = production.name.length > 0 ? production.name[0] : 'P'
       return firstLetter.toUpperCase()
     },
 
-    getAvatarColor (production) {
+    getAvatarColor(production) {
       return colors.fromString(production.name)
     },
 
-    getThumbnailPath (production) {
+    getThumbnailPath(production) {
       return `/api/pictures/thumbnails/projects/${production.id}.png`
     }
   }

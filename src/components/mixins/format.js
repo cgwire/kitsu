@@ -6,24 +6,18 @@ import { mapGetters } from 'vuex'
 import { formatDate, formatFullDate, formatSimpleDate } from '@/lib/time'
 
 export const formatListMixin = {
+  created() {},
 
-  created () {
-  },
+  mounted() {},
 
-  mounted () {
-  },
-
-  beforeDestroy () {
-  },
+  beforeDestroy() {},
 
   computed: {
-    ...mapGetters([
-      'organisation'
-    ])
+    ...mapGetters(['organisation'])
   },
 
   methods: {
-    formatBoolean (booleanValue) {
+    formatBoolean(booleanValue) {
       return booleanValue ? this.$t('main.yes') : this.$t('main.no')
     },
 
@@ -31,17 +25,18 @@ export const formatListMixin = {
     formatFullDate,
     formatSimpleDate,
 
-    formatDuration (duration) {
+    formatDuration(duration) {
       if (duration) {
         return (duration / 60 / this.organisation.hours_by_day).toLocaleString(
-          'fullwide', { maximumFractionDigits: 2 }
+          'fullwide',
+          { maximumFractionDigits: 2 }
         )
       } else {
         return 0
       }
     },
 
-    formatPriority (priority) {
+    formatPriority(priority) {
       let label = priority + ''
       if (priority === 0) {
         label = 'normal'
@@ -55,7 +50,7 @@ export const formatListMixin = {
       return label
     },
 
-    sanitizeInteger (value) {
+    sanitizeInteger(value) {
       let val = 0
       if (typeof value === 'string') {
         value = value.replace(/\D/g, '')
@@ -64,7 +59,7 @@ export const formatListMixin = {
       return val
     },
 
-    sanitizeIntegerLight (value) {
+    sanitizeIntegerLight(value) {
       let val = null
       if (typeof value === 'string') {
         value = value.replace(/\D/g, '')

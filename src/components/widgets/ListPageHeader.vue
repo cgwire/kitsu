@@ -1,17 +1,17 @@
 <template>
-<div class="level page-header">
-  <div class="level-left">
-    <page-title :text="title" />
+  <div class="level page-header">
+    <div class="level-left">
+      <page-title :text="title" />
+    </div>
+    <div class="level-right">
+      <button-simple
+        class="level-item"
+        icon="plus"
+        :text="newEntryLabel"
+        @click="$emit('new-clicked')"
+      />
+    </div>
   </div>
-  <div class="level-right">
-    <button-simple
-      class="level-item"
-      icon="plus"
-      :text="newEntryLabel"
-      @click="$emit('new-clicked')"
-    />
-  </div>
-</div>
 </template>
 
 <script>
@@ -40,18 +40,15 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
 
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   },
 
   watch: {}
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

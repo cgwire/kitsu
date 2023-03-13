@@ -1,158 +1,127 @@
 <template>
-<div class="data-list">
-  <div
-    class="datatable-wrapper"
-    ref="body"
-    v-scroll="onBodyScroll"
-  >
-    <table class="datatable">
-      <thead class="datatable-head">
-        <tr>
-          <th
-            scope="col"
-            class="name datatable-row-header"
-          >
-            {{ $t('asset_types.fields.name') }}
-          </th>
-          <th scope="col" class="validation">{{ $t('main.all') }}</th>
-          <th
-            scope="col"
-            class="validation validation-cell"
-            :key="columnId"
-            v-for="columnId in validationColumns"
-            v-if="!isLoading"
-          >
-            <div
-              class="flexrow validation-content"
-              :style="getValidationStyle(columnId)"
+  <div class="data-list">
+    <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
+      <table class="datatable">
+        <thead class="datatable-head">
+          <tr>
+            <th scope="col" class="name datatable-row-header">
+              {{ $t('asset_types.fields.name') }}
+            </th>
+            <th scope="col" class="validation">{{ $t('main.all') }}</th>
+            <th
+              scope="col"
+              class="validation validation-cell"
+              :key="columnId"
+              v-for="columnId in validationColumns"
+              v-if="!isLoading"
             >
-              <router-link
-                class="flexrow-item"
-                :to="taskTypePath(columnId)"
-                v-if="!isCurrentUserClient"
+              <div
+                class="flexrow validation-content"
+                :style="getValidationStyle(columnId)"
               >
-                {{ taskTypeMap.get(columnId).name }}
-              </router-link>
-              <span
-                class="flexrow-item"
-                v-else
-              >
-                {{ taskTypeMap.get(columnId).name }}
-              </span>
-            </div>
-          </th>
-          <th scope="col" class="actions"></th>
-        </tr>
-      </thead>
-      <tbody
-        class="datatable-body"
-        v-if="!isLoading"
-      >
-        <tr
-          class="all-line datatable-row"
-          v-if="showAll && !isEmptyList"
-        >
-          <th scope="row" class="name datatable-row-header">
-            {{ $t('asset_types.all_asset_types') }}
-          </th>
+                <router-link
+                  class="flexrow-item"
+                  :to="taskTypePath(columnId)"
+                  v-if="!isCurrentUserClient"
+                >
+                  {{ taskTypeMap.get(columnId).name }}
+                </router-link>
+                <span class="flexrow-item" v-else>
+                  {{ taskTypeMap.get(columnId).name }}
+                </span>
+              </div>
+            </th>
+            <th scope="col" class="actions"></th>
+          </tr>
+        </thead>
+        <tbody class="datatable-body" v-if="!isLoading">
+          <tr class="all-line datatable-row" v-if="showAll && !isEmptyList">
+            <th scope="row" class="name datatable-row-header">
+              {{ $t('asset_types.all_asset_types') }}
+            </th>
 
-          <stats-cell
-            :colors="chartColors('all', 'all')"
-            :data="chartData('all', 'all')"
-            :displayMode="displayMode"
-          />
+            <stats-cell
+              :colors="chartColors('all', 'all')"
+              :data="chartData('all', 'all')"
+              :displayMode="displayMode"
+            />
 
-          <stats-cell
-            :style="getValidationStyle(columnId)"
-            :key="'all-' + columnId"
-            :colors="chartColors('all', columnId)"
-            :data="chartData('all', columnId)"
-            :displayMode="displayMode"
-            v-for="columnId in validationColumns"
-          />
+            <stats-cell
+              :style="getValidationStyle(columnId)"
+              :key="'all-' + columnId"
+              :colors="chartColors('all', columnId)"
+              :data="chartData('all', columnId)"
+              :displayMode="displayMode"
+              v-for="columnId in validationColumns"
+            />
 
-          <td class="actions"></td>
-        </tr>
+            <td class="actions"></td>
+          </tr>
 
-        <tr
-          class="datatable-row"
-          :key="entry.id"
-          v-for="entry in entries"
-        >
+          <tr class="datatable-row" :key="entry.id" v-for="entry in entries">
+            <td scope="row" class="name datatable-row-header">
+              {{ entry.name }}
+            </td>
 
-          <td scope="row" class="name datatable-row-header">
-            {{ entry.name }}
-          </td>
+            <stats-cell
+              :colors="chartColors(entry.id, 'all')"
+              :data="chartData(entry.id, 'all')"
+              :displayMode="displayMode"
+              v-if="isStats(entry.id, 'all')"
+            />
+            <td v-else></td>
 
-          <stats-cell
-            :colors="chartColors(entry.id, 'all')"
-            :data="chartData(entry.id, 'all')"
-            :displayMode="displayMode"
-            v-if="isStats(entry.id, 'all')"
-          />
-          <td
-            v-else
-          >
-          </td>
+            <stats-cell
+              :key="entry.id + columnId"
+              :style="getValidationStyle(columnId)"
+              :colors="chartColors(entry.id, columnId)"
+              :data="chartData(entry.id, columnId)"
+              :displayMode="displayMode"
+              v-if="isStats(entry.id, columnId)"
+              v-for="columnId in validationColumns"
+            />
+            <td :style="getValidationStyle(columnId)" v-else></td>
 
-          <stats-cell
-            :key="entry.id + columnId"
-            :style="getValidationStyle(columnId)"
-            :colors="chartColors(entry.id, columnId)"
-            :data="chartData(entry.id, columnId)"
-            :displayMode="displayMode"
-            v-if="isStats(entry.id, columnId)"
-            v-for="columnId in validationColumns"
-          />
-          <td
-            :style="getValidationStyle(columnId)"
-            v-else
-          >
-          </td>
+            <td class="actions"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-          <td class="actions"></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <table-info :is-loading="isLoading" :is-error="isError" />
 
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
+    <div
+      class="has-text-centered"
+      v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+    >
+      <p class="info">
+        <img src="../../assets/illustrations/empty_asset.png" />
+      </p>
+      <p class="info">{{ $t('assets.empty_list') }}</p>
+      <button-link
+        class="level-item big-button"
+        :text="$t('assets.new_asset')"
+        :path="newAssetPath"
+      />
+    </div>
+    <div
+      class="has-text-centered"
+      v-if="isEmptyList && isCurrentUserClient && !isLoading"
+    >
+      <p class="info">
+        <img src="../../assets/illustrations/empty_asset.png" />
+      </p>
+      <p class="info">{{ $t('assets.empty_list_client') }}</p>
+    </div>
 
-  <div
-    class="has-text-centered"
-    v-if="isEmptyList && !isCurrentUserClient && !isLoading"
-  >
-    <p class="info">
-      <img src="../../assets/illustrations/empty_asset.png" />
+    <p
+      class="has-text-centered nb-asset-types"
+      v-if="!isEmptyList && !isLoading"
+    >
+      {{ displayedAssetTypesLength }}
+      {{ $tc('asset_types.number', displayedAssetTypesLength) }}
     </p>
-    <p class="info">{{ $t('assets.empty_list') }}</p>
-    <button-link
-      class="level-item big-button"
-      :text="$t('assets.new_asset')"
-      :path="newAssetPath"
-    />
   </div>
-  <div
-    class="has-text-centered"
-    v-if="isEmptyList && isCurrentUserClient && !isLoading"
-  >
-    <p class="info">
-      <img src="../../assets/illustrations/empty_asset.png" />
-    </p>
-    <p class="info">{{ $t('assets.empty_list_client') }}</p>
-  </div>
-
-  <p
-    class="has-text-centered nb-asset-types"
-    v-if="!isEmptyList && !isLoading"
-  >
-    {{ displayedAssetTypesLength }}
-    {{ $tc('asset_types.number', displayedAssetTypesLength) }}
-  </p>
-</div>
 </template>
 
 <script>
@@ -198,7 +167,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       busy: false,
       lastSelection: null
@@ -222,15 +191,17 @@ export default {
       'taskTypeMap'
     ]),
 
-    isEmptyList () {
-      return this.entries &&
-             this.entries.length === 0 &&
-             !this.isLoading &&
-             !this.isError &&
-             (!this.assetTypeSearchText || this.assetTypeSearchText.length === 0)
+    isEmptyList() {
+      return (
+        this.entries &&
+        this.entries.length === 0 &&
+        !this.isLoading &&
+        !this.isError &&
+        (!this.assetTypeSearchText || this.assetTypeSearchText.length === 0)
+      )
     },
 
-    newAssetPath () {
+    newAssetPath() {
       const route = {
         name: 'new-asset',
         params: {
@@ -248,37 +219,37 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    chartColors (entryId, columnId) {
+    chartColors(entryId, columnId) {
       return getChartColors(this.assetTypeStats, entryId, columnId)
     },
 
-    chartData (entryId, columnId) {
+    chartData(entryId, columnId) {
       return getChartData(this.assetTypeStats, entryId, columnId)
     },
 
-    isStats (entryId, columnId) {
-      return this.assetTypeStats[entryId] &&
-             this.assetTypeStats[entryId][columnId]
+    isStats(entryId, columnId) {
+      return (
+        this.assetTypeStats[entryId] && this.assetTypeStats[entryId][columnId]
+      )
     },
 
-    onHeaderScroll (event, position) {
+    onHeaderScroll(event, position) {
       this.$refs.tableWrapper.scrollLeft = position.scrollLeft
     },
 
-    onBodyScroll (event, position) {
+    onBodyScroll(event, position) {
       this.$emit('scroll', position.scrollTop)
     },
 
-    setScrollPosition (scrollPosition) {
+    setScrollPosition(scrollPosition) {
       if (this.$refs.body) {
         this.$refs.body.scrollTop = scrollPosition
       }
     },
 
-    taskTypePath (taskTypeId) {
+    taskTypePath(taskTypeId) {
       const route = {
         name: 'task-type',
         params: {
@@ -300,7 +271,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;

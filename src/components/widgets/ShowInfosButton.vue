@@ -1,23 +1,21 @@
 <template>
-<button
-  :class="{
-    'level-item': true,
-    button: true,
-    'is-toggle': true,
-    'is-on': buttonIsOn
-  }"
-  :title="$t(buttonIsOn ? 'tasks.hide_infos' : 'tasks.show_infos')"
-  @click="toggleInfos"
->
-  <database-icon class="icon is-small" />
-</button>
+  <button
+    :class="{
+      'level-item': true,
+      button: true,
+      'is-toggle': true,
+      'is-on': buttonIsOn
+    }"
+    :title="$t(buttonIsOn ? 'tasks.hide_infos' : 'tasks.show_infos')"
+    @click="toggleInfos"
+  >
+    <database-icon class="icon is-small" />
+  </button>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import {
-  DatabaseIcon
-} from 'vue-feather-icons'
+import { DatabaseIcon } from 'vue-feather-icons'
 
 export default {
   name: 'show-infos-button',
@@ -33,12 +31,9 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'isShowInfos',
-      'isShowInfosBreakdown'
-    ]),
+    ...mapGetters(['isShowInfos', 'isShowInfosBreakdown']),
 
-    buttonIsOn () {
+    buttonIsOn() {
       if (this.isBreakdown) {
         return !this.isShowInfosBreakdown
       } else {
@@ -55,7 +50,7 @@ export default {
       'hideInfosBreakdown'
     ]),
 
-    toggleInfos () {
+    toggleInfos() {
       if (!this.isBreakdown) {
         if (this.isShowInfos) {
           this.hideInfos()
@@ -72,7 +67,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     if (!this.isBreakdown) {
       if (localStorage.getItem('show-infos') === 'false') {
         this.hideInfos()
@@ -89,20 +84,14 @@ export default {
   },
 
   watch: {
-    isShowInfos () {
-      localStorage.setItem(
-        'show-infos',
-        this.isShowInfos,
-        { expires: '1M' }
-      )
+    isShowInfos() {
+      localStorage.setItem('show-infos', this.isShowInfos, { expires: '1M' })
     },
 
-    isShowInfosBreakdown () {
-      localStorage.setItem(
-        'show-infos-breakdown',
-        this.isShowInfosBreakdown,
-        { expires: '1M' }
-      )
+    isShowInfosBreakdown() {
+      localStorage.setItem('show-infos-breakdown', this.isShowInfosBreakdown, {
+        expires: '1M'
+      })
     }
   }
 }

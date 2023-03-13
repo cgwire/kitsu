@@ -11,8 +11,9 @@
         <label
           :class="{
             button: true,
-            'is-primary': isPrimary,
-          }">
+            'is-primary': isPrimary
+          }"
+        >
           {{ label }}
           <input
             ref="uploadInput"
@@ -23,14 +24,16 @@
             :disabled="isSaving || disabled"
             :multiple="multiple"
             @change="filesChange($event.target.name, $event.target.files)"
-          >
+          />
         </label>
         <span
           class="file-upload-status"
-          v-if="this.uploadedFiles.length > 1 && !hideFileNames">
+          v-if="this.uploadedFiles.length > 1 && !hideFileNames"
+        >
           {{ this.uploadedFiles.length }} {{ $tc('main.files_selected') }}
         </span>
-        <span class="file-upload-status"
+        <span
+          class="file-upload-status"
           v-if="this.uploadedFiles.length === 1 && !hideFileNames"
         >
           {{ this.uploadedFiles[0] }}
@@ -74,21 +77,26 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       isInitial: true,
       isSaving: false,
       uploadedFiles: []
     }
   },
-  mounted () {
+  mounted() {
     this.reset()
     const events = [
-      'drag', 'dragstart', 'dragend', 'dragover',
-      'dragenter', 'dragleave', 'drop'
+      'drag',
+      'dragstart',
+      'dragend',
+      'dragover',
+      'dragenter',
+      'dragleave',
+      'drop'
     ]
-    events.forEach((evt) => {
-      this.$refs.wrapper.addEventListener(evt, (e) => {
+    events.forEach(evt => {
+      this.$refs.wrapper.addEventListener(evt, e => {
         e.preventDefault()
         e.stopPropagation()
       })
@@ -96,7 +104,7 @@ export default {
   },
   computed: {},
   methods: {
-    filesChange (name, files) {
+    filesChange(name, files) {
       const forms = []
       for (let i = 0, numFiles = files.length; i < numFiles; i++) {
         const file = files[i]
@@ -115,22 +123,22 @@ export default {
         this.$emit('fileselected', forms[0])
       }
     },
-    reset () {
+    reset() {
       this.isSaving = false
       this.isInitial = true
       this.uploadedFiles = []
       this.$refs.uploadInput.value = ''
     },
 
-    onDragover () {
+    onDragover() {
       this.isDragging = true
     },
 
-    onDragleave () {
+    onDragleave() {
       this.isDragging = false
     },
 
-    onDrop (event) {
+    onDrop(event) {
       if (event.dataTransfer.files) {
         this.isDragging = false
         this.isSaving = false
@@ -143,13 +151,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.file-upload-wrapper {}
+.file-upload-wrapper {
+}
 .dropbox {
   display: flex;
   align-items: center;
 }
 .file-upload-status {
-  margin-left: .5rem;
+  margin-left: 0.5rem;
   font-style: italic;
 }
 </style>

@@ -1,50 +1,45 @@
 <template>
-<div class="avatar-wrapper">
-  <span
-    class="avatar has-text-centered"
-    :title="person.full_name"
-    :style="{
-      background: person.color,
-      width: size +'px',
-      height: size + 'px',
-      'font-size': fontSize + 'px'
-    }"
-  >
-    <img
-      class="avatar-image"
-      :src="avatarPath"
-      v-if="person.has_avatar && noCache"
-    />
-    <img
-      class="avatar-image"
-      v-lazy="avatarPath"
-      :key="avatarKey"
-      v-else-if="person.has_avatar"
-    />
-    <span v-else>
-      {{ initials }}
+  <div class="avatar-wrapper">
+    <span
+      class="avatar has-text-centered"
+      :title="person.full_name"
+      :style="{
+        background: person.color,
+        width: size + 'px',
+        height: size + 'px',
+        'font-size': fontSize + 'px'
+      }"
+    >
+      <img
+        class="avatar-image"
+        :src="avatarPath"
+        v-if="person.has_avatar && noCache"
+      />
+      <img
+        class="avatar-image"
+        v-lazy="avatarPath"
+        :key="avatarKey"
+        v-else-if="person.has_avatar"
+      />
+      <span v-else>
+        {{ initials }}
+      </span>
     </span>
-  </span>
 
-  <div
-    class="avatar-menu"
-  >
-    <router-link
-      :to="{ name: 'person', params: { person_id: person.id } }"
-      class="menu-button flexrow"
-    >
-      <user-icon class="flexrow-item" size="1.2x" />
-      <span class="flexrow-item">Open {{ person.name }} page</span>
-    </router-link>
-    <div
-      class="menu-button flexrow"
-      @click.stop="$emit('unassign', person)"
-    >
-      <user-minus-icon class="flexrow-item" size="1.2x" />
-      <span class="flexrow-item">Unassign {{ person.name }}</span>
+    <div class="avatar-menu">
+      <router-link
+        :to="{ name: 'person', params: { person_id: person.id } }"
+        class="menu-button flexrow"
+      >
+        <user-icon class="flexrow-item" size="1.2x" />
+        <span class="flexrow-item">Open {{ person.name }} page</span>
+      </router-link>
+      <div class="menu-button flexrow" @click.stop="$emit('unassign', person)">
+        <user-minus-icon class="flexrow-item" size="1.2x" />
+        <span class="flexrow-item">Unassign {{ person.name }}</span>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -58,7 +53,7 @@ export default {
     UserMinusIcon
   },
 
-  data () {
+  data() {
     return {
       avatarPath: '',
       avatarKey: '',
@@ -70,7 +65,8 @@ export default {
     person: {
       type: Object,
       default: () => ({
-        id: 'empty', color: '#FFF'
+        id: 'empty',
+        color: '#FFF'
       })
     },
     size: { type: Number, default: 40 },
@@ -80,29 +76,28 @@ export default {
     isMenu: { type: Boolean, default: false }
   },
 
-  created () {
+  created() {
     this.reloadAvatar()
   },
 
   methods: {
-    reloadAvatar () {
+    reloadAvatar() {
       this.avatarPath =
         this.person.avatarPath + '?unique=' + this.person.uniqueHash
-      this.avatarKey =
-        this.person.id + '-' + this.person.uniqueHash
+      this.avatarKey = this.person.id + '-' + this.person.uniqueHash
     }
   },
 
-  mounted () {
+  mounted() {
     this.initials = this.person.initials
   },
 
   watch: {
-    person () {
+    person() {
       this.reloadAvatar()
     },
 
-    'person.uniqueHash' () {
+    'person.uniqueHash'() {
       this.reloadAvatar()
     }
   }

@@ -10,8 +10,8 @@
       class: wide
         ? 'big wide v-autocomplete-input'
         : big
-          ? 'big v-autocomplete-input'
-          : 'v-autocomplete-input'
+        ? 'big v-autocomplete-input'
+        : 'v-autocomplete-input'
     }"
     :min-len="1"
     @update-items="update"
@@ -28,7 +28,7 @@ import { buildNameIndex, indexSearch } from '@/lib/indexing'
 export default {
   name: 'people-field',
 
-  data () {
+  data() {
     return {
       assignationItem: AssignationItem,
       items: [],
@@ -37,16 +37,17 @@ export default {
     }
   },
 
-  created () {
+  created() {
     this.items = this.people
     this.item = this.value
     this.index = buildNameIndex(this.people)
   },
 
-  mounted () {
+  mounted() {
     this.items = this.people
     this.$refs.autocomplete.$el.children[0].children[0].addEventListener(
-      'keyup', (event) => {
+      'keyup',
+      event => {
         if (event.keyCode === 13 && this.item) {
           this.$emit('enter')
         }
@@ -56,7 +57,8 @@ export default {
         if (!this.item && this.searchText.length === 0) {
           this.items = []
         }
-      })
+      }
+    )
   },
 
   props: {
@@ -83,13 +85,11 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'peopleIndex'
-    ])
+    ...mapGetters(['peopleIndex'])
   },
 
   methods: {
-    getAssignationLabel (item) {
+    getAssignationLabel(item) {
       if (item) {
         return item.name
       } else {
@@ -97,7 +97,7 @@ export default {
       }
     },
 
-    update (searchText) {
+    update(searchText) {
       if (searchText && searchText.length > 0) {
         const result = indexSearch(this.index, [searchText])
         this.items = result
@@ -106,28 +106,28 @@ export default {
       }
     },
 
-    onChange () {
+    onChange() {
       this.$emit('input', this.item)
     },
 
-    clear () {
+    clear() {
       this.item = null
     },
 
-    focus () {
+    focus() {
       const inputEl = this.$el.querySelector('.v-autocomplete-input')
       if (inputEl) inputEl.focus()
     }
   },
 
   watch: {
-    item () {
+    item() {
       if (!this.item) {
         this.items = this.people
       }
     },
 
-    people () {
+    people() {
       this.items = null
       this.items = this.people
       this.index = buildNameIndex(this.people)
@@ -161,7 +161,7 @@ export default {
 }
 
 .v-autocomplete .v-autocomplete-list {
-  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, .2);
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
   left: 6px;
   top: 41px;
   width: calc(100% - 13px);

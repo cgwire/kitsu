@@ -1,234 +1,226 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div @click="$emit('cancel')" class="modal-background"></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div @click="$emit('cancel')" class="modal-background"></div>
 
-  <div class="modal-content">
-    <div class="box content">
-      <h1 class="title">
-        {{ $t('entities.build_filter.title') }}
-      </h1>
+    <div class="modal-content">
+      <div class="box content">
+        <h1 class="title">
+          {{ $t('entities.build_filter.title') }}
+        </h1>
 
-      <combobox
-        class="flexrow-item"
-        :options="general.unionOptions"
-        locale-key-prefix="entities.build_filter."
-        v-model="union"
-      />
-
-      <h3
-        class="subtitle"
-        v-if="isAssets"
-      >
-        {{ $t('entities.build_filter.asset_type') }}
-      </h3>
-
-      <div
-        class="flexrow asset-type-filter"
-        v-if="isAssets"
-      >
         <combobox
           class="flexrow-item"
-          :options="general.operatorOptions"
+          :options="general.unionOptions"
           locale-key-prefix="entities.build_filter."
-          v-model="assetTypeFilters.operator"
+          v-model="union"
         />
-        <combobox
-          class="flexrow-item"
-          :options="assetTypeOptions"
-          v-model="assetTypeFilters.value"
-        />
-      </div>
 
-      <h3 class="subtitle">
-        {{ $t('entities.build_filter.status') }}
-      </h3>
-
-      <div
-        class="flexrow task-type-filter"
-        :key="'task-type-' + i"
-        v-for="(taskTypeFilter, i) in taskTypeFilters.values"
-      >
-        <combobox-task-type
-          class="flexrow-item"
-          :task-type-list="taskTypeList"
-          v-model="taskTypeFilter.id"
-        />
-        <combobox
-          class="flexrow-item"
-          :options="general.taskTypeOperatorOptions"
-          @input="onTaskTypeOperatorChanged(taskTypeFilter)"
-          locale-key-prefix="entities.build_filter."
-          v-model="taskTypeFilter.operator"
-        />
-        <div class="flexrow-item flexrow value-column">
-          <combobox-status
-            class="flexrow-item"
-            :key="'task-type-value-' + index"
-            :task-status-list="productionTaskStatuses"
-            v-model="taskTypeFilter.values[index]"
-            v-for="(statusId, index) in taskTypeFilter.values"
-          />
-          <button-simple
-            class="mt05"
-            icon="plus"
-            @click="addInTaskTypeFilter(taskTypeFilter)"
-            v-if="taskTypeFilter.operator === 'in'"
-          />
-        </div>
-        <button-simple
-          class="mt05"
-          icon="minus"
-          @click="removeTaskTypeFilter(taskTypeFilter)"
-        />
-      </div>
-      <div class="add-button">
-        <button-simple
-          icon="plus"
-          @click="addTaskTypeFilter"
-        />
-      </div>
-
-      <div class="mt2" v-if="descriptorOptions.length > 0">
-        <h3 class="subtitle">
-          {{ $t('entities.build_filter.descriptor') }}
+        <h3 class="subtitle" v-if="isAssets">
+          {{ $t('entities.build_filter.asset_type') }}
         </h3>
 
-        <div
-          class="flexrow descriptor-filter"
-          :key="'desc-' + i"
-          v-for="(descriptorFilter, i) in metadataDescriptorFilters.values"
-        >
-          <combobox
-            class="flexrow-item"
-            :options="descriptorOptions"
-            @input="onDescriptorChanged(descriptorFilter)"
-            v-model="descriptorFilter.id"
-          />
+        <div class="flexrow asset-type-filter" v-if="isAssets">
           <combobox
             class="flexrow-item"
             :options="general.operatorOptions"
             locale-key-prefix="entities.build_filter."
-            v-model="descriptorFilter.operator"
-            v-if="!descriptorFilter.is_checklist"
-            @input="(operator) => onOperatorChanged(operator, descriptorFilter)"
+            v-model="assetTypeFilters.operator"
           />
-
           <combobox
             class="flexrow-item"
-            :options="general.checklistOptions"
-            locale-key-prefix="entities.build_filter."
-            v-model="descriptorFilter.values[0].checked"
-            v-else
+            :options="assetTypeOptions"
+            v-model="assetTypeFilters.value"
           />
+        </div>
 
+        <h3 class="subtitle">
+          {{ $t('entities.build_filter.status') }}
+        </h3>
+
+        <div
+          class="flexrow task-type-filter"
+          :key="'task-type-' + i"
+          v-for="(taskTypeFilter, i) in taskTypeFilters.values"
+        >
+          <combobox-task-type
+            class="flexrow-item"
+            :task-type-list="taskTypeList"
+            v-model="taskTypeFilter.id"
+          />
+          <combobox
+            class="flexrow-item"
+            :options="general.taskTypeOperatorOptions"
+            @input="onTaskTypeOperatorChanged(taskTypeFilter)"
+            locale-key-prefix="entities.build_filter."
+            v-model="taskTypeFilter.operator"
+          />
           <div class="flexrow-item flexrow value-column">
-            <template
-              v-for="(value, index) in descriptorFilter.values"
-            >
-              <text-field
-                :key="'descriptor-value-' + index"
-                class="flexrow-item"
-                input-class=" thin"
-                v-model="descriptorFilter.values[index]"
-                v-if="getDescriptor(descriptorFilter.id).choices.length === 0"
-              />
-              <combobox
-                class="flexrow-item"
-                :key="'descriptor-list-value-' + index"
-                :options="getDescriptorChoiceOptions(
-                  descriptorFilter.id, descriptorFilter.is_checklist)"
-                v-model="descriptorFilter.values[index]"
-                v-else
-              />
-            </template>
+            <combobox-status
+              class="flexrow-item"
+              :key="'task-type-value-' + index"
+              :task-status-list="productionTaskStatuses"
+              v-model="taskTypeFilter.values[index]"
+              v-for="(statusId, index) in taskTypeFilter.values"
+            />
             <button-simple
               class="mt05"
               icon="plus"
-              @click="addInDescriptorFilter(descriptorFilter)"
-              v-if="descriptorFilter.operator === 'in'"
+              @click="addInTaskTypeFilter(taskTypeFilter)"
+              v-if="taskTypeFilter.operator === 'in'"
             />
           </div>
           <button-simple
             class="mt05"
             icon="minus"
-            @click="removeDescriptorFilter(descriptorFilter)"
+            @click="removeTaskTypeFilter(taskTypeFilter)"
           />
         </div>
         <div class="add-button">
-          <button-simple
-            icon="plus"
-            @click="addDescriptorFilter"
+          <button-simple icon="plus" @click="addTaskTypeFilter" />
+        </div>
+
+        <div class="mt2" v-if="descriptorOptions.length > 0">
+          <h3 class="subtitle">
+            {{ $t('entities.build_filter.descriptor') }}
+          </h3>
+
+          <div
+            class="flexrow descriptor-filter"
+            :key="'desc-' + i"
+            v-for="(descriptorFilter, i) in metadataDescriptorFilters.values"
+          >
+            <combobox
+              class="flexrow-item"
+              :options="descriptorOptions"
+              @input="onDescriptorChanged(descriptorFilter)"
+              v-model="descriptorFilter.id"
+            />
+            <combobox
+              class="flexrow-item"
+              :options="general.operatorOptions"
+              locale-key-prefix="entities.build_filter."
+              v-model="descriptorFilter.operator"
+              v-if="!descriptorFilter.is_checklist"
+              @input="operator => onOperatorChanged(operator, descriptorFilter)"
+            />
+
+            <combobox
+              class="flexrow-item"
+              :options="general.checklistOptions"
+              locale-key-prefix="entities.build_filter."
+              v-model="descriptorFilter.values[0].checked"
+              v-else
+            />
+
+            <div class="flexrow-item flexrow value-column">
+              <template v-for="(value, index) in descriptorFilter.values">
+                <text-field
+                  :key="'descriptor-value-' + index"
+                  class="flexrow-item"
+                  input-class=" thin"
+                  v-model="descriptorFilter.values[index]"
+                  v-if="getDescriptor(descriptorFilter.id).choices.length === 0"
+                />
+                <combobox
+                  class="flexrow-item"
+                  :key="'descriptor-list-value-' + index"
+                  :options="
+                    getDescriptorChoiceOptions(
+                      descriptorFilter.id,
+                      descriptorFilter.is_checklist
+                    )
+                  "
+                  v-model="descriptorFilter.values[index]"
+                  v-else
+                />
+              </template>
+              <button-simple
+                class="mt05"
+                icon="plus"
+                @click="addInDescriptorFilter(descriptorFilter)"
+                v-if="descriptorFilter.operator === 'in'"
+              />
+            </div>
+            <button-simple
+              class="mt05"
+              icon="minus"
+              @click="removeDescriptorFilter(descriptorFilter)"
+            />
+          </div>
+          <div class="add-button">
+            <button-simple icon="plus" @click="addDescriptorFilter" />
+          </div>
+        </div>
+
+        <h3 class="subtitle" v-if="!isCurrentUserVendor">
+          {{ $t('entities.build_filter.assignation') }}
+        </h3>
+
+        <div class="flexrow" v-if="!isCurrentUserVendor">
+          <combobox
+            class="flexrow-item"
+            :options="assignation.options"
+            locale-key-prefix="entities.build_filter."
+            v-model="assignation.value"
+          />
+
+          <combobox-task-type
+            class="flexrow-item"
+            :task-type-list="taskTypeList"
+            v-model="assignation.taskTypeId"
+            v-if="['assigned', 'unassigned'].includes(assignation.value)"
+          />
+
+          <people-field
+            class="flexrow-item"
+            :people="team"
+            v-model="assignation.person"
+            v-if="['assignedto', '-assignedto'].includes(assignation.value)"
           />
         </div>
-      </div>
 
-      <h3 class="subtitle" v-if="!isCurrentUserVendor">
-        {{ $t('entities.build_filter.assignation') }}
-      </h3>
-
-      <div class="flexrow" v-if="!isCurrentUserVendor">
-        <combobox
-          class="flexrow-item"
-          :options="assignation.options"
-          locale-key-prefix="entities.build_filter."
-          v-model="assignation.value"
-        />
-
-        <combobox-task-type
-          class="flexrow-item"
-          :task-type-list="taskTypeList"
-          v-model="assignation.taskTypeId"
-          v-if="['assigned', 'unassigned'].includes(assignation.value)"
-        />
-
-        <people-field
-          class="flexrow-item"
-          :people="team"
-          v-model="assignation.person"
-          v-if="['assignedto', '-assignedto'].includes(assignation.value)"
-        />
-      </div>
-
-      <h3 class="subtitle">
-        {{ $t('entities.build_filter.thumbnail') }}
-      </h3>
-
-      <combobox
-        :options="hasThumbnail.options"
-        locale-key-prefix="entities.build_filter."
-        v-model="hasThumbnail.value"
-      />
-
-      <h3 class="subtitle flexrow-item mt2" v-if="isShots">
-        {{ $t('entities.build_filter.is_assets_ready') }}
-      </h3>
-      <div class="flexrow" v-if="isShots">
-        <combobox-task-type
-          class="flexrow-item"
-          :task-type-list="taskTypeList"
-          open-top
-          v-model="isAssetsReady.taskTypeId"
-        />
+        <h3 class="subtitle">
+          {{ $t('entities.build_filter.thumbnail') }}
+        </h3>
 
         <combobox
-          class="flexrow-item"
-          :options="isAssetsReady.options"
+          :options="hasThumbnail.options"
           locale-key-prefix="entities.build_filter."
-          v-model="isAssetsReady.value"
+          v-model="hasThumbnail.value"
+        />
+
+        <h3 class="subtitle flexrow-item mt2" v-if="isShots">
+          {{ $t('entities.build_filter.is_assets_ready') }}
+        </h3>
+        <div class="flexrow" v-if="isShots">
+          <combobox-task-type
+            class="flexrow-item"
+            :task-type-list="taskTypeList"
+            open-top
+            v-model="isAssetsReady.taskTypeId"
+          />
+
+          <combobox
+            class="flexrow-item"
+            :options="isAssetsReady.options"
+            locale-key-prefix="entities.build_filter."
+            v-model="isAssetsReady.value"
+          />
+        </div>
+
+        <modal-footer
+          :error-text="$t('entities.thumbnails.error')"
+          @confirm="applyFilter"
+          @cancel="$emit('cancel')"
         />
       </div>
-
-      <modal-footer
-        :error-text="$t('entities.thumbnails.error')"
-        @confirm="applyFilter"
-        @cancel="$emit('cancel')"
-      />
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -270,7 +262,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       assetTypeFilters: {
         operator: '=',
@@ -335,7 +327,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.reset()
     this.setFiltersFromCurrentQuery()
   },
@@ -369,18 +361,19 @@ export default {
       'taskStatusMap'
     ]),
 
-    isAssets () {
+    isAssets() {
       return this.entityType === 'asset'
     },
-    isShots () {
+    isShots() {
       return this.entityType === 'shot'
     },
 
-    assetTypeOptions () {
+    assetTypeOptions() {
       return [
         { label: this.$t('entities.build_filter.all_types'), value: '-' },
-        ...this.productionAssetTypes.filter(assetType => assetType !== undefined)
-          .map((assetType) => {
+        ...this.productionAssetTypes
+          .filter(assetType => assetType !== undefined)
+          .map(assetType => {
             return {
               label: assetType.name,
               value: assetType.id
@@ -389,39 +382,39 @@ export default {
       ]
     },
 
-    taskTypeList () {
-      return this[`${this.entityType}ValidationColumns`]
-        .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
+    taskTypeList() {
+      return this[`${this.entityType}ValidationColumns`].map(taskTypeId =>
+        this.taskTypeMap.get(taskTypeId)
+      )
     },
 
-    team () {
+    team() {
       return this.currentProduction.team.map(pId => this.personMap.get(pId))
     },
 
-    descriptorOptions () {
+    descriptorOptions() {
       return this.metadataDescriptors.map(descriptor => ({
         label: descriptor.name,
         value: descriptor.id
       }))
     },
 
-    metadataDescriptors () {
+    metadataDescriptors() {
       return this[`${this.entityType}MetadataDescriptors`]
     }
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
     // Build filter
 
-    applyFilter () {
+    applyFilter() {
       const query = this.buildFilter()
       this.$emit('confirm', query)
     },
 
-    buildFilter () {
+    buildFilter() {
       let query = ''
       query = this.applyAssetTypeChoice(query)
       query = this.applyTaskTypeChoice(query)
@@ -433,7 +426,7 @@ export default {
       return query.trim()
     },
 
-    applyAssetTypeChoice (query) {
+    applyAssetTypeChoice(query) {
       const value = this.assetTypeFilters.value
       if (value && value !== '-') {
         let operator = '=['
@@ -444,20 +437,22 @@ export default {
       return query
     },
 
-    applyTaskTypeChoice (query) {
-      this.taskTypeFilters.values.forEach((taskTypeFilter) => {
+    applyTaskTypeChoice(query) {
+      this.taskTypeFilters.values.forEach(taskTypeFilter => {
         let operator = '=['
         if (taskTypeFilter.operator === '=-') operator = '=[-'
         const taskType = this.taskTypeMap.get(taskTypeFilter.id)
-        const value = taskTypeFilter.values.map(statusId => {
-          return this.taskStatusMap.get(statusId).short_name
-        }).join(',')
+        const value = taskTypeFilter.values
+          .map(statusId => {
+            return this.taskStatusMap.get(statusId).short_name
+          })
+          .join(',')
         query += ` [${taskType.name}]${operator}${value}]`
       })
       return query
     },
 
-    applyDescriptorChoice (query) {
+    applyDescriptorChoice(query) {
       this.metadataDescriptorFilters.values.forEach(descriptorFilter => {
         let operator = '=['
         let value
@@ -474,7 +469,7 @@ export default {
       return query
     },
 
-    applyAssignationChoice (query) {
+    applyAssignationChoice(query) {
       if (this.assignation.value !== 'nofilter') {
         if (this.assignation.person) {
           let value = this.assignation.person.name
@@ -490,21 +485,21 @@ export default {
       return query
     },
 
-    applyThumbnailChoice (query) {
+    applyThumbnailChoice(query) {
       if (this.hasThumbnail.value !== 'nofilter') {
         query += ` ${this.hasThumbnail.value}`
       }
       return query
     },
 
-    applyUnionChoice (query) {
+    applyUnionChoice(query) {
       if (this.union === 'or') {
         query = ` +(${query.trim()})`
       }
       return query
     },
 
-    applyAssetsReadyChoice (query) {
+    applyAssetsReadyChoice(query) {
       if (this.isAssetsReady.value !== 'nofilter') {
         if (this.isAssetsReady.taskTypeId.length === 0) {
           this.isAssetsReady.taskTypeId = this.taskTypeList[0].id
@@ -518,7 +513,7 @@ export default {
 
     // Task types
 
-    addTaskTypeFilter () {
+    addTaskTypeFilter() {
       const filter = {
         id: this.taskTypeList[0].id,
         operator: '=',
@@ -528,22 +523,23 @@ export default {
       return filter
     },
 
-    addInTaskTypeFilter (taskTypeFilter) {
+    addInTaskTypeFilter(taskTypeFilter) {
       taskTypeFilter.values.push(this.productionTaskStatuses[0].id)
     },
 
-    removeTaskTypeFilter (taskTypeFilter) {
-      this.taskTypeFilters.values =
-        this.taskTypeFilters.values.filter(f => f !== taskTypeFilter)
+    removeTaskTypeFilter(taskTypeFilter) {
+      this.taskTypeFilters.values = this.taskTypeFilters.values.filter(
+        f => f !== taskTypeFilter
+      )
     },
 
-    addInDescriptorFilter (descriptorFilter) {
+    addInDescriptorFilter(descriptorFilter) {
       descriptorFilter.values.push('')
     },
 
     // Descriptors
 
-    onDescriptorChanged (descriptorFilter) {
+    onDescriptorChanged(descriptorFilter) {
       const descriptor = this.getDescriptor(descriptorFilter.id)
       descriptorFilter.is_checklist = false
       if (descriptor.choices.length > 0) {
@@ -560,7 +556,7 @@ export default {
       }
     },
 
-    addDescriptorFilter () {
+    addDescriptorFilter() {
       const desc = this.getDescriptor(this.descriptorOptions[0].value)
       const values = []
       let isChecklist = false
@@ -585,29 +581,30 @@ export default {
       return filter
     },
 
-    removeDescriptorFilter (descriptorFilter) {
+    removeDescriptorFilter(descriptorFilter) {
       this.metadataDescriptorFilters.values =
         this.metadataDescriptorFilters.values.filter(
           f => f !== descriptorFilter
         )
     },
 
-    getDescriptor (descriptorId) {
+    getDescriptor(descriptorId) {
       return this.metadataDescriptors.find(d => d.id === descriptorId)
     },
 
-    getDescriptorChoiceOptions (descriptorId, isChecklist) {
+    getDescriptorChoiceOptions(descriptorId, isChecklist) {
       const desc = this.getDescriptor(descriptorId)
       if (!isChecklist) {
         return desc.choices.map(choice => ({ label: choice, value: choice }))
       } else {
-        return this.getDescriptorChecklistValues(desc).map(
-          choice => ({ label: choice.text, value: choice })
-        )
+        return this.getDescriptorChecklistValues(desc).map(choice => ({
+          label: choice.text,
+          value: choice
+        }))
       }
     },
 
-    onOperatorChanged (operator, descriptorFilter) {
+    onOperatorChanged(operator, descriptorFilter) {
       if (operator !== 'in') {
         descriptorFilter.values = [descriptorFilter.values[0]]
       }
@@ -615,7 +612,7 @@ export default {
 
     // Helpers to set filters from search query
 
-    setFiltersFromCurrentQuery () {
+    setFiltersFromCurrentQuery() {
       const searchQuery = this[`${this.entityType}SearchText`]
       if (searchQuery) {
         const filters = getFilters({
@@ -627,7 +624,7 @@ export default {
           persons: this.people,
           query: searchQuery
         })
-        filters.forEach((filter) => {
+        filters.forEach(filter => {
           if (filter.type === 'assettype') {
             this.setFiltersFromAssetTypeQuery(filter)
           } else if (filter.type === 'status') {
@@ -650,12 +647,12 @@ export default {
       }
     },
 
-    setFiltersFromAssetTypeQuery (filter) {
+    setFiltersFromAssetTypeQuery(filter) {
       this.assetTypeFilters.operator = filter.excluding ? '=-' : '='
       this.assetTypeFilters.value = filter.assetType.id
     },
 
-    setFiltersFromStatusQuery (filter) {
+    setFiltersFromStatusQuery(filter) {
       let operator = '='
       if (filter.taskStatuses.length > 1) {
         operator = 'in'
@@ -669,7 +666,7 @@ export default {
       })
     },
 
-    setFiltersFromDescriptorQuery (filter) {
+    setFiltersFromDescriptorQuery(filter) {
       let operator = '='
       let isChecklist = false
       let values = filter.values
@@ -678,18 +675,20 @@ export default {
       } else {
         if (filter.values[0].endsWith(':true')) {
           isChecklist = true
-          values =
-            [{
+          values = [
+            {
               text: filter.values[0].replace(new RegExp(':true$'), ''),
               checked: true
-            }]
+            }
+          ]
         } else if (filter.values[0].endsWith(':false')) {
           isChecklist = true
-          values =
-            [{
+          values = [
+            {
               text: filter.values[0].replace(new RegExp(':false$'), ''),
               checked: false
-            }]
+            }
+          ]
         } else if (filter.excluding) operator = '=-'
       }
       this.metadataDescriptorFilters.values.push({
@@ -700,7 +699,7 @@ export default {
       })
     },
 
-    setFiltersFromAssignationQuery (filter) {
+    setFiltersFromAssignationQuery(filter) {
       if (filter.assigned) {
         this.assignation.value = 'assigned'
       } else {
@@ -709,12 +708,12 @@ export default {
       this.assignation.taskTypeId = filter.taskType.id
     },
 
-    setFiltersFromAssignedToQuery (filter) {
+    setFiltersFromAssignedToQuery(filter) {
       this.assignation.value = filter.excluding ? '-assignedto' : 'assignedto'
       this.assignation.person = this.people.find(p => p.id === filter.personId)
     },
 
-    setFiltersFromThumbnailQuery (filter) {
+    setFiltersFromThumbnailQuery(filter) {
       if (filter.excluding) {
         this.hasThumbnail.value = '-withthumbnail'
       } else {
@@ -722,25 +721,26 @@ export default {
       }
     },
 
-    setFiltersFromAssetsReadyQuery (filter) {
+    setFiltersFromAssetsReadyQuery(filter) {
       this.isAssetsReady.taskTypeId = filter.value
-      this.isAssetsReady.value =
-        filter.excluding ? '-assetsready' : 'assetsready'
+      this.isAssetsReady.value = filter.excluding
+        ? '-assetsready'
+        : 'assetsready'
     },
 
-    setUnion () {
+    setUnion() {
       this.union = 'or'
     },
 
     // General
 
-    onTaskTypeOperatorChanged (taskTypeFilter) {
+    onTaskTypeOperatorChanged(taskTypeFilter) {
       if (taskTypeFilter.operator !== 'in') {
         taskTypeFilter.values = [taskTypeFilter.values[0]]
       }
     },
 
-    reset () {
+    reset() {
       this.assignation.value = 'nofilter'
       this.assignation.person = null
       this.assignation.taskType = ''
@@ -753,7 +753,7 @@ export default {
   },
 
   watch: {
-    active () {
+    active() {
       if (this.active) {
         this.reset()
         this.assignation.taskTypeId =

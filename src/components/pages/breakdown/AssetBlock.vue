@@ -1,67 +1,55 @@
 <template>
-<div
-  :class="{
-    asset: true,
-    big: true,
-    'big-asset': bigMode,
-    casted: true,
-    active: active,
-    labelled: true
-  }"
-  :title="`${asset.name} (${nbOccurences})`"
-  v-if="!textMode"
->
-  <div class="asset-wrapper">
-    <div
-      class="asset-add-1"
-      @click="addOneAsset"
-      v-if="!readOnly"
-    >
-      + 1
+  <div
+    :class="{
+      asset: true,
+      big: true,
+      'big-asset': bigMode,
+      casted: true,
+      active: active,
+      labelled: true
+    }"
+    :title="`${asset.name} (${nbOccurences})`"
+    v-if="!textMode"
+  >
+    <div class="asset-wrapper">
+      <div class="asset-add-1" @click="addOneAsset" v-if="!readOnly">+ 1</div>
+      <div class="asset-add" @click="removeOneAsset" v-if="!readOnly">- 1</div>
+      <div class="asset-picture" v-if="asset.preview_file_id">
+        <img
+          v-lazy="
+            '/api/pictures/thumbnails-square/preview-files/' +
+            asset.preview_file_id +
+            '.png'
+          "
+          alt=""
+        />
+        <span class="nb-occurences" v-if="nbOccurences > 1">
+          {{ nbOccurences }}
+        </span>
+      </div>
+      <div class="asset-picture" v-else>
+        <span class="empty-picture">
+          {{ shortenName(asset.name) }} ({{ nbOccurences }})
+        </span>
+      </div>
     </div>
-    <div
-      class="asset-add"
+    <div class="asset-label" :label="asset.label" @click="onEditLabelClicked">
+      {{ asset.label || $t('breakdown.options.animate') }}
+    </div>
+  </div>
+  <div class="asset-text flexrow-item flexrow" v-else>
+    <span class="asset-text-name flexrow-item">
+      {{ asset.name }} ({{ nbOccurences }})
+    </span>
+    <span class="filler"></span>
+    <span
+      class="modify-asset flexrow-item"
       @click="removeOneAsset"
       v-if="!readOnly"
     >
       - 1
-    </div>
-    <div class="asset-picture" v-if="asset.preview_file_id">
-      <img
-        v-lazy="'/api/pictures/thumbnails-square/preview-files/' + asset.preview_file_id + '.png'"
-        alt=""
-      />
-      <span class="nb-occurences" v-if="nbOccurences > 1">
-        {{ nbOccurences }}
-      </span>
-    </div>
-    <div class="asset-picture" v-else>
-      <span class="empty-picture">
-        {{ shortenName(asset.name) }} ({{ nbOccurences }})
-      </span>
-    </div>
+    </span>
   </div>
-  <div
-    class="asset-label"
-    :label="asset.label"
-    @click="onEditLabelClicked"
-  >
-    {{ asset.label || $t('breakdown.options.animate') }}
-  </div>
-</div>
-<div class="asset-text flexrow-item flexrow" v-else>
-  <span class="asset-text-name flexrow-item">
-    {{ asset.name }} ({{ nbOccurences }})
-  </span>
-  <span class="filler"></span>
-  <span
-    class="modify-asset flexrow-item"
-    @click="removeOneAsset"
-    v-if="!readOnly"
-  >
-  - 1
-  </span>
-</div>
 </template>
 
 <script>
@@ -71,7 +59,7 @@ export default {
   name: 'asset-block',
   components: {},
 
-  data () {
+  data() {
     return {
       initialLoading: true,
       loading: {
@@ -109,23 +97,22 @@ export default {
     }
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
-    removeOneAsset (event) {
+    removeOneAsset(event) {
       this.$emit('remove-one', this.asset.asset_id, this.nbOccurences)
     },
 
-    addOneAsset (event) {
+    addOneAsset(event) {
       this.$emit('add-one', this.asset.asset_id, this.nbOccurences)
     },
 
-    shortenName (name) {
+    shortenName(name) {
       return stringHelpers.shortenText(name, 13)
     },
 
-    onEditLabelClicked () {
+    onEditLabelClicked() {
       if (!this.readOnly) {
         this.$emit('edit-label', this.asset, this.asset.label)
       }
@@ -149,7 +136,7 @@ export default {
   position: relative;
   display: flex;
   flex-direction: row;
-  margin: 0 1em .5em 0;
+  margin: 0 1em 0.5em 0;
   font-size: 0.8em;
   word-wrap: break-word;
   border-radius: 5px;
@@ -258,7 +245,7 @@ export default {
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   color: $white;
-  font-size: .7em;
+  font-size: 0.7em;
   height: 20px;
   left: 100%;
   padding-top: 5px;
@@ -269,7 +256,7 @@ export default {
   width: 40px;
 }
 
-.asset-label[label=fixed] {
+.asset-label[label='fixed'] {
   background: $orange-carrot;
 }
 

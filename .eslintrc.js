@@ -2,22 +2,21 @@ module.exports = {
   root: true,
   env: {
     node: true,
-    es2021: true,
+    es2021: true
   },
-  plugins: [
-    'prettier'
-  ],
   extends: [
     'eslint:recommended',
     'plugin:vue/essential',
-    'prettier'
+    'plugin:prettier/recommended'
   ],
   rules: {
     'no-console': 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'vue/no-use-v-if-with-v-for': 'off',
-    'prettier/prettier': 'error'
+    'no-unused-vars': 'off',
+    'vue/multi-word-component-names': 'off',
+    'vue/no-use-v-if-with-v-for': 'off'
   },
-  parserOptions: {
+  globals: {
+    Canny: true
   }
 }

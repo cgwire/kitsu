@@ -20,7 +20,7 @@ export const appendSelectionGrid = (grid, previousX, maxX, maxY) => {
   return result
 }
 
-export const clearSelectionGrid = (selectionGrid) => {
+export const clearSelectionGrid = selectionGrid => {
   const maxX = Object.keys(selectionGrid).length
   const maxY = selectionGrid[0] ? Object.keys(selectionGrid[0]).length : 0
   for (let i = 0; i < maxX; i++) {

@@ -1,44 +1,42 @@
 <template>
-<div>
-  <div class="tabs">
-    <ul>
-      <li
-        :class="{ 'is-active': tab.isActive }"
-        v-for="(tab, index) in tabs"
-        :key="tab.name"
-        :ref="'tab-'+ index"
-      >
-        <a
-          @click="selectTab(tab)"
+  <div>
+    <div class="tabs">
+      <ul>
+        <li
+          :class="{ 'is-active': tab.isActive }"
+          v-for="(tab, index) in tabs"
+          :key="tab.name"
+          :ref="'tab-' + index"
         >
-          {{ tab.name }}
-        </a>
-      </li>
-    </ul>
-  </div>
+          <a @click="selectTab(tab)">
+            {{ tab.name }}
+          </a>
+        </li>
+      </ul>
+    </div>
 
-  <div class="tabs-details">
+    <div class="tabs-details">
       <slot></slot>
+    </div>
   </div>
-</div>
 </template>
 
 <script>
 export default {
   name: 'tabs',
-  data () {
+  data() {
     return { tabs: [] }
   },
-  created () {
+  created() {
     this.tabs = this.$children
   },
-  mounted () {
+  mounted() {
     this.$emit('update', this.tabs)
   },
   methods: {
-    selectTab (selectedTab) {
+    selectTab(selectedTab) {
       this.tabs.forEach(tab => {
-        tab.isActive = (tab.name === selectedTab.name)
+        tab.isActive = tab.name === selectedTab.name
       })
       this.$emit('update', this.tabs)
     }

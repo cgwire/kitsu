@@ -14,15 +14,12 @@
       <div v-if="!isLast" class="dots"></div>
     </div>
     <div class="timeline-content">
-      <h3
-        class="title"
-        :class="{ 'is-completed': isCompleted, optional }"
-      >
+      <h3 class="title" :class="{ 'is-completed': isCompleted, optional }">
         {{ title }}
       </h3>
       <p class="subtitle">{{ subtitle }}</p>
       <slot></slot>
-      <hr v-if="!isLast">
+      <hr v-if="!isLast" />
     </div>
   </div>
 </template>
@@ -59,7 +56,7 @@ export default {
 .dark {
   .timeline-content {
     p.subtitle {
-      color: $white
+      color: $white;
     }
   }
   hr {

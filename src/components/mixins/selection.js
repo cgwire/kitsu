@@ -1,22 +1,22 @@
 export const selectionListMixin = {
-  data () {
+  data() {
     return {
       shiftKeyPressed: false
     }
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
-    onKeyUp (event) {
+    onKeyUp(event) {
       this.shiftKeyPressed = event.shiftKey
     },
 
-    onKeyDown (event) {
+    onKeyDown(event) {
       this.shiftKeyPressed = event.shiftKey
-      const lastSelection =
-        this.lastSelection ? this.lastSelection : { x: 0, y: 0 }
+      const lastSelection = this.lastSelection
+        ? this.lastSelection
+        : { x: 0, y: 0 }
       const i = lastSelection.x
       const j = lastSelection.y
       let validationCell = null
@@ -35,40 +35,41 @@ export const selectionListMixin = {
       }
     },
 
-    stopEvent (e) {
+    stopEvent(e) {
       if (!e) e = window.event
       e.stopPropagation()
       e.cancelBubble = true
       e.returnValue = false
     },
 
-    setScrollPosition (scrollPosition) {
+    setScrollPosition(scrollPosition) {
       if (this.$refs.body) {
         this.$refs.body.scrollTop = scrollPosition
       }
     },
 
-    setScrollLeftPosition (scrollPosition) {
+    setScrollLeftPosition(scrollPosition) {
       if (this.$refs.body) {
         this.$refs.body.scrollLeft = scrollPosition
       }
     },
 
-    select (i, j) {
+    select(i, j) {
       const ref = 'validation-' + i + '-' + j
       const validationCell = this.$refs[ref]
       if (validationCell) validationCell[0].$el.click()
       return validationCell ? validationCell[0] : 0
     },
 
-    scrollToValidationCell (validationCell) {
+    scrollToValidationCell(validationCell) {
       if (validationCell) {
         this.$nextTick(() => {
           const margin = 20
           const sideColumn = document.getElementById('side-column')
           const sideWidth = sideColumn.offsetWidth
-          const headers =
-            document.querySelectorAll('.datatable-head .datatable-row-header')
+          const headers = document.querySelectorAll(
+            '.datatable-head .datatable-row-header'
+          )
           let stickyHeaderWidth = 0
           headers.forEach(h => {
             stickyHeaderWidth += h.offsetWidth

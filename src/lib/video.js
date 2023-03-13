@@ -5,7 +5,7 @@ export const roundToFrame = (time, fps) => {
   const frameFactor = Math.round((1 / fps) * 10000) / 10000
   const frameNumber = Math.round(time / frameFactor)
   let roundedTime = frameNumber * frameFactor
-  roundedTime = Math.round((roundedTime) * 10000) / 10000
+  roundedTime = Math.round(roundedTime * 10000) / 10000
   return roundedTime
 }
 
@@ -13,7 +13,7 @@ export const ceilToFrame = (time, fps) => {
   const frameFactor = Math.round((1 / fps) * 10000) / 10000
   const frameNumber = Math.ceil(time / frameFactor)
   let roundedTime = frameNumber * frameFactor
-  roundedTime = Math.ceil((roundedTime) * 10000) / 10000
+  roundedTime = Math.ceil(roundedTime * 10000) / 10000
   return roundedTime
 }
 
@@ -21,7 +21,7 @@ export const floorToFrame = (time, fps) => {
   const frameFactor = Math.round((1 / fps) * 10000) / 10000
   const frameNumber = Math.floor(time / frameFactor)
   let roundedTime = frameNumber * frameFactor
-  roundedTime = Math.floor((roundedTime) * 10000) / 10000
+  roundedTime = Math.floor(roundedTime * 10000) / 10000
   return roundedTime
 }
 
@@ -38,14 +38,12 @@ export const frameToSeconds = (nbFrames, production, shot) => {
 /*
  * Display time at this format.
  */
-export const formatTime = (seconds) => {
+export const formatTime = seconds => {
   if (seconds < 0) seconds = 0
   let milliseconds = `${Math.round((seconds % 1) * 1000)}`.padStart(3, '0')
   milliseconds = '.' + milliseconds
   try {
-    return new Date(1000 * seconds)
-      .toISOString()
-      .substr(14, 5) + milliseconds
+    return new Date(1000 * seconds).toISOString().substr(14, 5) + milliseconds
   } catch (err) {
     console.error(err)
     return '00:00.000'
@@ -55,7 +53,7 @@ export const formatTime = (seconds) => {
 /*
  * Convert frame to a frame string.
  */
-export const formatFrame = (frame) => {
+export const formatFrame = frame => {
   if (frame < 0) frame = 0
   return `${frame}`.padStart(3, '0')
 }

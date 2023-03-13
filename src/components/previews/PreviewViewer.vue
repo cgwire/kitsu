@@ -1,6 +1,5 @@
 <template>
-<div ref="container" class="preview-viewer dark">
-
+  <div ref="container" class="preview-viewer dark">
     <div
       class="center status-message"
       :style="{ height: defaultHeight + 'px' }"
@@ -50,7 +49,6 @@
       :preview="preview"
       @size-changed="dimensions => $emit('size-changed', dimensions)"
       v-show="isPicture"
-
     />
 
     <object-viewer
@@ -92,12 +90,11 @@
       >
         <download-icon class="icon" />
         <span class="text" :title="fileTitle">
-          {{ $t('tasks.download_pdf_file', {extension}) }}
+          {{ $t('tasks.download_pdf_file', { extension }) }}
         </span>
       </a>
     </div>
-
-</div>
+  </div>
 </template>
 
 <script>
@@ -107,9 +104,7 @@ import { formatFrame, formatTime } from '@/lib/video'
 
 import { domMixin } from '@/components/mixins/dom'
 
-import {
-  DownloadIcon
-} from 'vue-feather-icons'
+import { DownloadIcon } from 'vue-feather-icons'
 import ObjectViewer from '@/components/previews/ObjectViewer'
 import PictureViewer from '@/components/previews/PictureViewer'
 import SoundViewer from '@/components/previews/SoundViewer'
@@ -173,101 +168,96 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {}
   },
 
-  mounted () {
-  },
+  mounted() {},
 
-  beforeDestroy () {
-  },
+  beforeDestroy() {},
 
   computed: {
-    ...mapGetters([
-      'currentProduction'
-    ]),
+    ...mapGetters(['currentProduction']),
 
     // Elements
 
-    container () {
+    container() {
       return this.$refs.container
     },
 
-    videoViewer () {
+    videoViewer() {
       return this.$refs['video-viewer']
     },
 
-    pictureViewer () {
+    pictureViewer() {
       return this.$refs['picture-viewer']
     },
 
-    soundViewer () {
+    soundViewer() {
       return this.$refs['sound-viewer']
     },
 
     //  Utils
 
-    fileTitle () {
-      return (
-        this.preview
-          ? this.preview.original_name + '.' + this.preview.extension
-          : ''
-      )
+    fileTitle() {
+      return this.preview
+        ? this.preview.original_name + '.' + this.preview.extension
+        : ''
     },
 
-    extension () {
+    extension() {
       return this.preview ? this.preview.extension : ''
     },
 
-    status () {
-      return this.preview && this.preview.status
-        ? this.preview.status
-        : 'ready'
+    status() {
+      return this.preview && this.preview.status ? this.preview.status : 'ready'
     },
 
-    isBroken () {
+    isBroken() {
       return this.status === 'broken'
     },
 
-    isProcessing () {
+    isProcessing() {
       return this.status === 'processing'
     },
 
-    isReady () {
+    isReady() {
       return this.status === 'ready'
     },
 
-    isMovie () {
+    isMovie() {
       return this.isReady && this.extension === 'mp4'
     },
 
-    isPdf () {
+    isPdf() {
       return this.isReady && this.extension === 'pdf'
     },
 
-    isPicture () {
-      return this.isReady &&
-        ['gif', 'png', 'jpg', 'jpeg'].includes(this.extension)
+    isPicture() {
+      return (
+        this.isReady && ['gif', 'png', 'jpg', 'jpeg'].includes(this.extension)
+      )
     },
 
-    is3DModel () {
+    is3DModel() {
       return this.isReady && ['glb', 'gltf'].includes(this.extension)
     },
 
-    isSound () {
+    isSound() {
       return this.isReady && ['wav', 'mp3'].includes(this.extension)
     },
 
-    isFile () {
-      return this.isReady &&
+    isFile() {
+      return (
+        this.isReady &&
         !this.isPicture &&
         !this.isMovie &&
         !this.is3DModel &&
-        !this.isSound // && !this.isPdf
+        !this.isSound
+      ) // && !this.isPdf
     },
 
-    originalPath () {
+    originalPath() {
       if (this.preview) {
         const previewId = this.preview.id
         const extension = this.extension ? this.extension : 'png'
@@ -278,11 +268,13 @@ export default {
       }
     },
 
-    originalDlPath () {
+    originalDlPath() {
       if (this.preview) {
         const type = this.isMovie ? 'movies' : 'pictures'
-        return `/api/${type}/originals/preview-files/` +
-               `${this.preview.id}/download`
+        return (
+          `/api/${type}/originals/preview-files/` +
+          `${this.preview.id}/download`
+        )
       } else {
         return ''
       }
@@ -290,24 +282,22 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-      'updateRevisionPreviewPosition'
-    ]),
+    ...mapActions(['updateRevisionPreviewPosition']),
     formatFrame,
     formatTime,
 
     // Video
 
-    resetVideo () {
+    resetVideo() {
       if (this.videoViewer) this.videoViewer.mountVideo()
     },
 
-    updateTime (time) {
+    updateTime(time) {
       this.currentTimeRaw = time
       this.currentTime = this.formatTime(this.currentTimeRaw)
     },
 
-    changeMaxDuration (duration) {
+    changeMaxDuration(duration) {
       if (duration) {
         this.maxDuration = this.formatTime(duration)
         this.videoDuration = duration
@@ -317,7 +307,7 @@ export default {
       }
     },
 
-    play () {
+    play() {
       this.isPlaying = true
       this.isDrawing = false
       if (this.videoViewer) {
@@ -328,7 +318,7 @@ export default {
       }
     },
 
-    pause () {
+    pause() {
       this.isPlaying = false
       if (this.videoViewer) this.videoViewer.pause()
       if (this.isSound) {
@@ -336,15 +326,15 @@ export default {
       }
     },
 
-    goPreviousFrame () {
+    goPreviousFrame() {
       return this.videoViewer.goPreviousFrame()
     },
 
-    goNextFrame () {
+    goNextFrame() {
       return this.videoViewer.goNextFrame()
     },
 
-    onPlayPauseClicked () {
+    onPlayPauseClicked() {
       if (!this.isPlaying) {
         this.play()
       } else {
@@ -354,7 +344,7 @@ export default {
 
     // Sizing
 
-    getDimensions () {
+    getDimensions() {
       const dimensions = { width: 0, height: 0 }
       if (this.container) {
         dimensions.width = this.container.offsetWidth
@@ -363,16 +353,16 @@ export default {
       return dimensions
     },
 
-    resetPicture () {
+    resetPicture() {
       if (this.pictureViewer) this.pictureViewer.resetPicture()
     },
 
-    resize () {
+    resize() {
       if (this.videoViewer) this.videoViewer.onWindowResize()
       if (this.isSound) this.soundViewer.redraw()
     },
 
-    getPreviewDimensions () {
+    getPreviewDimensions() {
       const dimensions = { width: 0, height: 0 }
       if (this.isMovie) {
         return this.videoViewer.getDimensions()
@@ -382,35 +372,35 @@ export default {
       return dimensions
     },
 
-    setCurrentFrame (frameNumber) {
+    setCurrentFrame(frameNumber) {
       this.videoViewer.setCurrentFrame(frameNumber)
     },
 
     // To use when you don't want to handle back pressure and rounding
-    setCurrentTimeRaw (time) {
+    setCurrentTimeRaw(time) {
       this.videoViewer.setCurrentTimeRaw(time)
     },
 
-    getCurrentTimeRaw (time) {
+    getCurrentTimeRaw(time) {
       if (this.isMovie) return this.videoViewer.currentTimeRaw
       else return 0
     },
 
     // Loupe
 
-    showLoupe () {
+    showLoupe() {
       this.pictureViewer.showLoupe()
     },
 
-    hideLoupe () {
+    hideLoupe() {
       this.pictureViewer.hideLoupe()
     },
 
-    updateLoupePosition (event, canvasDimensions) {
+    updateLoupePosition(event, canvasDimensions) {
       this.pictureViewer.updateLoupePosition(event, canvasDimensions)
     },
 
-    extractFrame (canvas, frame) {
+    extractFrame(canvas, frame) {
       this.videoViewer.setCurrentFrame(frame)
       const video = this.videoViewer.video
       const context = canvas.getContext('2d')
@@ -421,19 +411,21 @@ export default {
       context.drawImage(video, 0, 0, canvas.width, canvas.height)
     },
 
-    resetZoom () {
+    resetZoom() {
       this.pictureViewer.resetPanZoom()
     }
   },
 
   watch: {
-    preview () {
+    preview() {
       if (this.isMovie) {
         this.pause()
         this.maxDuration = '00:00.000'
       } else if (this.isPicture) {
         this.pause()
-        setTimeout(() => { this.pictureViewer.resetPicture() }, 10)
+        setTimeout(() => {
+          this.pictureViewer.resetPicture()
+        }, 10)
       }
     }
   }
@@ -455,11 +447,11 @@ export default {
 .video-viewer {
   width: 100%;
   text-align: center;
-  background: #36393F;
+  background: #36393f;
 }
 
 .buttons {
-  background: #36393F;
+  background: #36393f;
   height: 32px;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
@@ -475,7 +467,7 @@ export default {
 .buttons .button {
   background: transparent;
   border-radius: 0;
-  color: #BBB;
+  color: #bbb;
   border: 0;
   margin: 0;
   transition: all 0.3s ease;
@@ -483,7 +475,7 @@ export default {
 
 .buttons .button.active,
 .buttons .button:hover {
-  color: #43B581;
+  color: #43b581;
 }
 
 .buttons .button:hover {
@@ -527,14 +519,15 @@ export default {
 }
 
 .slide-enter-active {
-  transition: all .3s ease;
+  transition: all 0.3s ease;
 }
 
 .slide-leave-active {
-  transition: all .3s ease;
+  transition: all 0.3s ease;
 }
 
-.slide-enter, .slide-leave-to {
+.slide-enter,
+.slide-leave-to {
   transform: translateX(100%);
 }
 

@@ -1,57 +1,51 @@
 <template>
-<span>
-  <span v-if="!minimized">
-    <router-link
-      class="tag dynamic"
-      :to="taskPath(task)"
-      :style="tagStyle"
-      :title="taskStatus.name"
-      v-if="!isStatic && !isCurrentUserClient"
-    >
-      {{ taskStatus.short_name }}
-    </router-link>
+  <span>
+    <span v-if="!minimized">
+      <router-link
+        class="tag dynamic"
+        :to="taskPath(task)"
+        :style="tagStyle"
+        :title="taskStatus.name"
+        v-if="!isStatic && !isCurrentUserClient"
+      >
+        {{ taskStatus.short_name }}
+      </router-link>
 
-    <span
-      class="tag"
-      :style="tagStyle"
-      :title="taskStatus.name"
-      @click="($event) => $emit('click', $event)"
-      v-else
-    >
-      {{ taskStatus.short_name }}
+      <span
+        class="tag"
+        :style="tagStyle"
+        :title="taskStatus.name"
+        @click="$event => $emit('click', $event)"
+        v-else
+      >
+        {{ taskStatus.short_name }}
+      </span>
+      <span
+        :class="{
+          priority: true,
+          high: task.priority === 1,
+          veryhigh: task.priority === 2,
+          emergency: task.priority === 3
+        }"
+        :title="formatPriority(task.priority)"
+        v-if="isPriority && !isCurrentUserClient && task.priority > 0"
+      >
+        {{ priority }}
+      </span>
     </span>
-    <span
-      :class="{
-        priority: true,
-        high: task.priority === 1,
-        veryhigh: task.priority === 2,
-        emergency: task.priority === 3
-      }"
-      :title="formatPriority(task.priority)"
-      v-if="isPriority && !isCurrentUserClient && task.priority > 0"
-    >
-      {{ priority }}
-    </span>
-
-  </span>
-  <span v-else>
-    <router-link
-      :to="taskPath(task)"
-      class="tag dynamic"
-      :style="tagStyle"
-      :title="taskStatus.name"
-      v-if="!isStatic && !isCurrentUserClient"
-    >
-       &nbsp;
-    </router-link>
-    <span
-      class="tag"
-      v-else
-    >
-      &nbsp;
+    <span v-else>
+      <router-link
+        :to="taskPath(task)"
+        class="tag dynamic"
+        :style="tagStyle"
+        :title="taskStatus.name"
+        v-if="!isStatic && !isCurrentUserClient"
+      >
+        &nbsp;
+      </router-link>
+      <span class="tag" v-else> &nbsp; </span>
     </span>
   </span>
-</span>
 </template>
 
 <script>
@@ -98,11 +92,11 @@ export default {
       'isCurrentUserClient'
     ]),
 
-    cursor () {
+    cursor() {
       return this.pointer ? 'pointer' : 'default'
     },
 
-    taskStatus () {
+    taskStatus() {
       if (this.task) {
         const taskStatusId = this.task.task_status_id
         return this.taskStatusMap ? this.taskStatusMap.get(taskStatusId) : {}
@@ -111,7 +105,7 @@ export default {
       }
     },
 
-    backgroundColor () {
+    backgroundColor() {
       if (this.taskStatus.short_name === 'todo' && !this.isDarkTheme) {
         return '#ECECEC'
       } else if (this.taskStatus.short_name === 'todo' && this.isDarkTheme) {
@@ -123,7 +117,7 @@ export default {
       }
     },
 
-    color () {
+    color() {
       const isTodo = this.taskStatus.name === 'Todo'
       if (!isTodo || this.isDarkTheme) {
         return 'white'
@@ -132,11 +126,8 @@ export default {
       }
     },
 
-    priority () {
-      if (
-        this.task.priority &&
-        !this.taskStatus.is_done
-      ) {
+    priority() {
+      if (this.task.priority && !this.taskStatus.is_done) {
         if (this.task.priority === 3) {
           return '!!!'
         } else if (this.task.priority === 2) {
@@ -151,17 +142,18 @@ export default {
       }
     },
 
-    tagStyle () {
+    tagStyle() {
       const isStatic = !this.isStatic && !this.isCurrentUserClient
       const isTodo = this.taskStatus.name === 'Todo'
       if (this.thin && !isTodo) {
         if (this.isDarkTheme) {
           return {
             background: 'transparent',
-            border: '1px solid ' + (isTodo
-              ? 'grey'
-              : colors.lightenColor(this.backgroundColor, 0.5)
-            ),
+            border:
+              '1px solid ' +
+              (isTodo
+                ? 'grey'
+                : colors.lightenColor(this.backgroundColor, 0.5)),
             color: colors.lightenColor(this.backgroundColor, 0.5),
             cursor: isStatic ? 'pointer' : this.cursor
           }
@@ -184,9 +176,10 @@ export default {
   },
 
   methods: {
-    taskPath (task) {
-      const productionId =
-        this.task.project_id ? this.task.project_id : this.currentProduction.id
+    taskPath(task) {
+      const productionId = this.task.project_id
+        ? this.task.project_id
+        : this.currentProduction.id
       const route = {
         name: 'task',
         params: {
@@ -206,7 +199,7 @@ export default {
       return route
     },
 
-    formatPriority (priority) {
+    formatPriority(priority) {
       let label = priority + ''
       if (priority === 0) {
         label = 'normal'

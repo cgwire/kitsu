@@ -1,48 +1,42 @@
 <template>
-<td
-  class="description-cell"
-  @keyup.esc="onClick"
-  @click="onClick"
->
-  <template v-if="full">
-    <div
-      class="description-shorten-text"
-      v-html="compileMarkdown(entry.description || '')"
-    >
-    </div>
-  </template>
-  <template v-else>
-    <div class="c-mask" v-if="isOpen"></div>
-    <span
-      class="description-shorten-text selectable"
-      v-html="compileMarkdown(shortenText(entry.description || '', 20))"
-    >
-    </span>
-    <div
-      class="tooltip"
-      @dblclick="onDoubleClick"
-      @keyup.esc="onClick"
-      v-if="isOpen"
-    >
+  <td class="description-cell" @keyup.esc="onClick" @click="onClick">
+    <template v-if="full">
       <div
-        class="tooltip-text"
-        @keyup.esc="onClick"
-        v-html="compileMarkdown(entry.description)"
-        v-if="!isEditing"
+        class="description-shorten-text"
+        v-html="compileMarkdown(entry.description || '')"
+      ></div>
+    </template>
+    <template v-else>
+      <div class="c-mask" v-if="isOpen"></div>
+      <span
+        class="description-shorten-text selectable"
+        v-html="compileMarkdown(shortenText(entry.description || '', 20))"
       >
+      </span>
+      <div
+        class="tooltip"
+        @dblclick="onDoubleClick"
+        @keyup.esc="onClick"
+        v-if="isOpen"
+      >
+        <div
+          class="tooltip-text"
+          @keyup.esc="onClick"
+          v-html="compileMarkdown(entry.description)"
+          v-if="!isEditing"
+        ></div>
+        <textarea
+          class="tooltip-editor"
+          ref="text"
+          :value="entry.description"
+          @keyup.esc="onClick"
+          @keyup.ctrl.enter="onDoubleClick"
+          v-else
+        >
+        </textarea>
       </div>
-      <textarea
-        class="tooltip-editor"
-        ref="text"
-        :value="entry.description"
-        @keyup.esc="onClick"
-        @keyup.ctrl.enter="onDoubleClick"
-        v-else
-      >
-      </textarea>
-    </div>
-  </template>
-</td>
+    </template>
+  </td>
 </template>
 
 <script>
@@ -52,7 +46,7 @@ import stringHelpers from '@/lib/string'
 
 export default {
   name: 'description-cell',
-  data () {
+  data() {
     return {
       isEditing: false,
       isOpen: false,
@@ -60,8 +54,7 @@ export default {
     }
   },
 
-  components: {
-  },
+  components: {},
 
   props: {
     editable: {
@@ -79,25 +72,23 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ]),
+    ...mapGetters([]),
 
-    content () {
+    content() {
       return this.compileMarkdown(this.entry.description)
     }
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    compileMarkdown (input) {
+    compileMarkdown(input) {
       return renderMarkdown(input)
     },
 
     shortenText: stringHelpers.shortenText,
 
-    onClick (event) {
+    onClick(event) {
       if (
         event.target.className.substring(0, 11) === 'description' ||
         event.target.parentNode.className.substring(0, 11) === 'description' ||
@@ -112,7 +103,7 @@ export default {
       }
     },
 
-    onDoubleClick () {
+    onDoubleClick() {
       if (this.editable) {
         if (this.isEditing) {
           const val = this.$refs.text.value
@@ -153,7 +144,7 @@ td {
 
 .description-cell .tooltip {
   background-color: $white;
-  border-radius: .5rem;
+  border-radius: 0.5rem;
   display: block;
   font-size: 0.9em;
   left: 50%;
@@ -201,7 +192,7 @@ td {
     height: 0;
     width: 0;
 
-    border: .5rem solid;
+    border: 0.5rem solid;
     border-color: $white transparent transparent;
     content: '';
   }

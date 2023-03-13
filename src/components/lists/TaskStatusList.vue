@@ -1,69 +1,74 @@
 <template>
-<div class="data-list">
-  <div class="datatable-wrapper">
-    <table class="datatable">
-      <thead class="datatable-head">
-        <tr>
-          <th scope="col" class="name">
-            {{ $t('task_status.fields.name') }}
-          </th>
-          <th scope="col" class="short-name">
-            {{ $t('task_status.fields.short_name') }}
-          </th>
-          <th scope="col" class="is-default">
-            {{ $t('task_status.fields.is_default') }}
-          </th>
-          <th scope="col" class="is-done">
-            {{ $t('task_status.fields.is_done') }}
-          </th>
-          <th scope="col" class="is-retake">
-            {{ $t('task_status.fields.is_retake') }}
-          </th>
-          <th scope="col" class="is-artist-allowed">
-            {{ $t('task_status.fields.is_artist_allowed') }}
-          </th>
-          <th scope="col" class="is-client-allowed">
-            {{ $t('task_status.fields.is_client_allowed') }}
-          </th>
-          <th scope="col" class="is-feedback-request">
-            {{ $t('task_status.fields.is_feedback_request') }}
-          </th>
-          <th scope="col" class="actions"></th>
-        </tr>
-      </thead>
-      <tbody class="datatable-body">
-        <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
-          <td class="name">
-            {{ entry.name }}
-          </td>
-          <task-status-name class="short-name" :entry="entry" />
-          <boolean-cell class="is-default" :value=entry.is_default />
-          <boolean-cell class="is-done" :value=entry.is_done />
-          <boolean-cell class="is-retake" :value=entry.is_retake />
-          <boolean-cell class="is-artist-allowed" :value=entry.is_artist_allowed />
-          <boolean-cell class="is-client-allowed" :value=entry.is_client_allowed />
-          <boolean-cell class="is-feedback-request" :value=entry.is_feedback_request />
-          <row-actions-cell
-            :entry-id="entry.id"
-            :hide-delete="entry.is_default === true"
-            @edit-clicked="$emit('edit-clicked', entry)"
-            @delete-clicked="$emit('delete-clicked', entry)"
-          />
-        </tr>
-      </tbody>
-    </table>
+  <div class="data-list">
+    <div class="datatable-wrapper">
+      <table class="datatable">
+        <thead class="datatable-head">
+          <tr>
+            <th scope="col" class="name">
+              {{ $t('task_status.fields.name') }}
+            </th>
+            <th scope="col" class="short-name">
+              {{ $t('task_status.fields.short_name') }}
+            </th>
+            <th scope="col" class="is-default">
+              {{ $t('task_status.fields.is_default') }}
+            </th>
+            <th scope="col" class="is-done">
+              {{ $t('task_status.fields.is_done') }}
+            </th>
+            <th scope="col" class="is-retake">
+              {{ $t('task_status.fields.is_retake') }}
+            </th>
+            <th scope="col" class="is-artist-allowed">
+              {{ $t('task_status.fields.is_artist_allowed') }}
+            </th>
+            <th scope="col" class="is-client-allowed">
+              {{ $t('task_status.fields.is_client_allowed') }}
+            </th>
+            <th scope="col" class="is-feedback-request">
+              {{ $t('task_status.fields.is_feedback_request') }}
+            </th>
+            <th scope="col" class="actions"></th>
+          </tr>
+        </thead>
+        <tbody class="datatable-body">
+          <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
+            <td class="name">
+              {{ entry.name }}
+            </td>
+            <task-status-name class="short-name" :entry="entry" />
+            <boolean-cell class="is-default" :value="entry.is_default" />
+            <boolean-cell class="is-done" :value="entry.is_done" />
+            <boolean-cell class="is-retake" :value="entry.is_retake" />
+            <boolean-cell
+              class="is-artist-allowed"
+              :value="entry.is_artist_allowed"
+            />
+            <boolean-cell
+              class="is-client-allowed"
+              :value="entry.is_client_allowed"
+            />
+            <boolean-cell
+              class="is-feedback-request"
+              :value="entry.is_feedback_request"
+            />
+            <row-actions-cell
+              :entry-id="entry.id"
+              :hide-delete="entry.is_default === true"
+              @edit-clicked="$emit('edit-clicked', entry)"
+              @delete-clicked="$emit('delete-clicked', entry)"
+            />
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <table-info :is-loading="isLoading" :is-error="isError" />
+
+    <p class="has-text-centered nb-task-status">
+      {{ entries.length }} {{ $tc('task_status.number', entries.length) }}
+    </p>
   </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
-
-  <p class="has-text-centered nb-task-status">
-    {{ entries.length }} {{ $tc('task_status.number', entries.length) }}
-  </p>
-
-</div>
 </template>
 
 <script>
@@ -93,7 +98,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {}
   },
   components: {
@@ -103,18 +108,15 @@ export default {
     TaskStatusName
   },
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   }
 }
 </script>
 
 <style lang="scss" scoped>
-
 .datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;

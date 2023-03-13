@@ -1,3 +1,3 @@
-export const route = (state) => {
+export const route = state => {
   return state.route
 }

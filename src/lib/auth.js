@@ -9,8 +9,7 @@ import {
 } from '@/store/mutation-types.js'
 
 const auth = {
-
-  logIn (payload, callback) {
+  logIn(payload, callback) {
     superagent
       .post('/api/auth/login')
       .send(payload)
@@ -47,20 +46,18 @@ const auth = {
       })
   },
 
-  logout (callback) {
-    superagent
-      .get('/api/auth/logout')
-      .end((err, res) => {
-        if (err) {
-          console.error(err)
-          callback(err)
-        }
-        store.commit(USER_LOGOUT)
-        callback()
-      })
+  logout(callback) {
+    superagent.get('/api/auth/logout').end((err, res) => {
+      if (err) {
+        console.error(err)
+        callback(err)
+      }
+      store.commit(USER_LOGOUT)
+      callback()
+    })
   },
 
-  resetPassword (email) {
+  resetPassword(email) {
     return new Promise((resolve, reject) => {
       superagent
         .post('/api/auth/reset-password')
@@ -72,7 +69,7 @@ const auth = {
     })
   },
 
-  resetChangePassword (email, token, password, password2) {
+  resetChangePassword(email, token, password, password2) {
     return new Promise((resolve, reject) => {
       superagent
         .put('/api/auth/reset-password')
@@ -84,48 +81,49 @@ const auth = {
     })
   },
 
-  isServerLoggedIn (callback) {
-    superagent
-      .get('/api/auth/authenticated')
-      .end((err, res) => {
-        if (err && res && [401, 422].includes(res.statusCode)) {
-          store.commit(USER_LOGIN_FAIL)
-          callback(null)
-        } else if (err) {
-          store.commit(USER_LOGIN_FAIL)
-          callback(err)
-        } else if (res && res.body === null) {
-          store.commit(USER_LOGIN_FAIL)
-          callback(err)
-        } else {
-          const user = res.body.user
-          const organisation = res.body.organisation || {}
-          organisation.use_original_file_name =
-            organisation.use_original_file_name ? 'true' : 'false'
-          organisation.timesheets_locked =
-            organisation.timesheets_locked ? 'true' : 'false'
-          organisation.hd_by_default =
-            organisation.hd_by_default ? 'true' : 'false'
-          store.commit(SET_ORGANISATION, organisation)
-          store.commit(USER_LOGIN, user)
-          callback(null)
-        }
-      })
+  isServerLoggedIn(callback) {
+    superagent.get('/api/auth/authenticated').end((err, res) => {
+      if (err && res && [401, 422].includes(res.statusCode)) {
+        store.commit(USER_LOGIN_FAIL)
+        callback(null)
+      } else if (err) {
+        store.commit(USER_LOGIN_FAIL)
+        callback(err)
+      } else if (res && res.body === null) {
+        store.commit(USER_LOGIN_FAIL)
+        callback(err)
+      } else {
+        const user = res.body.user
+        const organisation = res.body.organisation || {}
+        organisation.use_original_file_name =
+          organisation.use_original_file_name ? 'true' : 'false'
+        organisation.timesheets_locked = organisation.timesheets_locked
+          ? 'true'
+          : 'false'
+        organisation.hd_by_default = organisation.hd_by_default
+          ? 'true'
+          : 'false'
+        store.commit(SET_ORGANISATION, organisation)
+        store.commit(USER_LOGIN, user)
+        callback(null)
+      }
+    })
   },
 
   // Needed for router to know if a redirection to login page is required or
   // not.
-  requireAuth (to, from, next) {
+  requireAuth(to, from, next) {
     const finalize = () => {
       if (!store.state.user.isAuthenticated) {
-        store.dispatch('getOrganisation')
+        store
+          .dispatch('getOrganisation')
           .then(() => {
             next({
               path: '/login',
               query: { redirect: to.fullPath }
             })
           })
-          .catch((err) => {
+          .catch(err => {
             console.error(err)
             next({
               path: '/login',
@@ -139,7 +137,7 @@ const auth = {
     }
 
     if (store.state.user.user === null) {
-      auth.isServerLoggedIn((err) => {
+      auth.isServerLoggedIn(err => {
         if (err) {
           next({
             path: '/server-down',
@@ -154,7 +152,7 @@ const auth = {
     }
   },
 
-  isPasswordValid (password, password2) {
+  isPasswordValid(password, password2) {
     return password.length > 6 && password === password2
   }
 }

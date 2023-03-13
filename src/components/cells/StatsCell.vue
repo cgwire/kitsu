@@ -1,46 +1,41 @@
 <template>
-<td class="validation">
-  <div class="flexrow" v-if="displayMode === 'pie'">
-    <pie-chart
-      class="flexrow-item"
-      width="70px"
-      height="50px"
-      :legend="false"
-      :colors="colors"
-      :data="selectedData"
-    />
-    <span
-      class="tag flexrow-item"
-      :style="{ 'background-color': labelColor }"
-      v-if="label"
-    >
-      {{ label }}
-    </span>
-  </div>
-  <div v-else>
-    <div
-      :key="data[0]"
-      v-if="data[0]"
-      v-for="data in selectedData">
-      <span class="stats-name" :style="{ color: data[2] }">
-       {{ data[0] }}
-      </span>
-      <span>
-      :
-      </span>
-      <span class="stats-value">
-        {{ data[1] }} ({{ percent(data[1]) }}%)
+  <td class="validation">
+    <div class="flexrow" v-if="displayMode === 'pie'">
+      <pie-chart
+        class="flexrow-item"
+        width="70px"
+        height="50px"
+        :legend="false"
+        :colors="colors"
+        :data="selectedData"
+      />
+      <span
+        class="tag flexrow-item"
+        :style="{ 'background-color': labelColor }"
+        v-if="label"
+      >
+        {{ label }}
       </span>
     </div>
-    <span
-      class="tag flexrow-item"
-      :style="{ 'background-color': labelColor }"
-      v-if="label"
-    >
-      {{ label }}
-    </span>
-  </div>
-</td>
+    <div v-else>
+      <div :key="data[0]" v-if="data[0]" v-for="data in selectedData">
+        <span class="stats-name" :style="{ color: data[2] }">
+          {{ data[0] }}
+        </span>
+        <span> : </span>
+        <span class="stats-value">
+          {{ data[1] }} ({{ percent(data[1]) }}%)
+        </span>
+      </div>
+      <span
+        class="tag flexrow-item"
+        :style="{ 'background-color': labelColor }"
+        v-if="label"
+      >
+        {{ label }}
+      </span>
+    </div>
+  </td>
 </template>
 
 <script>
@@ -87,7 +82,7 @@ export default {
   },
 
   computed: {
-    selectedData () {
+    selectedData() {
       if (this.countMode === 'frames') {
         return this.framesData
       } else {
@@ -95,7 +90,7 @@ export default {
       }
     },
 
-    total () {
+    total() {
       return this.selectedData.reduce((acc, entry) => {
         if (entry[1]) {
           return acc + entry[1]
@@ -107,7 +102,7 @@ export default {
   },
 
   methods: {
-    percent (value) {
+    percent(value) {
       let percent = 0
       if (this.total > 0) {
         percent = (value / this.total) * 100

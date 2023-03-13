@@ -1,27 +1,24 @@
 <template>
   <div class="topbar">
-    <div id="c-mask-user-menu" @click="toggleUserMenu()"
-         v-bind:class="{'is-active': !isUserMenuHidden}"
-    >
-    </div>
+    <div
+      id="c-mask-user-menu"
+      @click="toggleUserMenu()"
+      v-bind:class="{ 'is-active': !isUserMenuHidden }"
+    ></div>
 
     <nav class="nav">
       <div class="nav-left">
         <a
-           class="nav-item sidebar-button"
-           id="toggle-menu-button"
-           @click='toggleSidebar()'
-           :class="{'selected': !isSidebarHidden}"
-           v-if="!isCurrentUserClient"
-
+          class="nav-item sidebar-button"
+          id="toggle-menu-button"
+          @click="toggleSidebar()"
+          :class="{ selected: !isSidebarHidden }"
+          v-if="!isCurrentUserClient"
         >
           ≡
         </a>
 
-        <div
-          class="flexrow topbar-menu"
-          v-if="isProductionContext"
-        >
+        <div class="flexrow topbar-menu" v-if="isProductionContext">
           <div class="flexrow-item subitem">
             <topbar-production-list
               :episode-id="currentEpisodeId"
@@ -56,10 +53,7 @@
           class="nav-item"
           v-else-if="lastProduction && $route.path !== '/open-productions'"
         >
-          <router-link
-            :to="lastSectionPath"
-          class="flexrow"
-          >
+          <router-link :to="lastSectionPath" class="flexrow">
             <chevron-left-icon />
             {{ $t('main.go_productions') }}
           </router-link>
@@ -70,7 +64,7 @@
         <router-link
           class="nav-item"
           :to="{
-            name: 'checks',
+            name: 'checks'
           }"
           v-if="isCurrentUserSupervisor"
         >
@@ -100,7 +94,7 @@
         </router-link>
         <global-search-field class="flexrow-item mr0" />
         <div class="nav-item">
-          <button  data-canny-changelog class="changelog-button" >
+          <button data-canny-changelog class="changelog-button">
             <zap-icon />
           </button>
         </div>
@@ -135,29 +129,29 @@
       <ul>
         <router-link to="/profile" @click.native="toggleUserMenu()">
           <li>
-              {{ $t("main.profile") }}
+            {{ $t('main.profile') }}
           </li>
         </router-link>
         <li @click="toggleDarkTheme">
           <span v-if="!isDarkTheme">
-            {{ $t("main.dark_theme")}}
+            {{ $t('main.dark_theme') }}
           </span>
           <span v-else>
-            {{ $t("main.white_theme")}}
+            {{ $t('main.white_theme') }}
           </span>
         </li>
         <li @click="setSupportChat(!isSupportChat)">
           <span v-if="isSupportChat">
-            {{ $t("main.hide_support_chat")}}
+            {{ $t('main.hide_support_chat') }}
           </span>
           <span v-else>
-            {{ $t("main.show_support_chat")}}
+            {{ $t('main.show_support_chat') }}
           </span>
         </li>
         <hr />
         <a href="https://kitsu.cg-wire.com" target="_blank">
           <li>
-            {{ $t("main.documentation")}}
+            {{ $t('main.documentation') }}
           </li>
         </a>
         <a
@@ -168,37 +162,29 @@
             {{ $t('main.tutorials') }}
           </li>
         </a>
-        <a
-          @click="display.shortcutModal = true"
-        >
+        <a @click="display.shortcutModal = true">
           <li>
             {{ $t('keyboard.shortcuts') }}
           </li>
         </a>
         <hr />
         <a href="https://discord.gg/VbCxtKN" target="_blank">
-          <li>
-            Discord
-          </li>
+          <li>Discord</li>
         </a>
         <a href="https://cgwire.canny.io" target="_blank">
-          <li>
-            Roadmap / Feedback
-          </li>
+          <li>Roadmap / Feedback</li>
         </a>
         <hr />
         <a href="https://cg-wire.com/en/about.html" target="_blank">
           <li>
-            {{ $t("main.about") }}
+            {{ $t('main.about') }}
           </li>
         </a>
-        <li class="version">
-          Kitsu {{ kitsuVersion }}
-        </li>
+        <li class="version">Kitsu {{ kitsuVersion }}</li>
         <hr />
         <li class="flexrow" @click="onLogoutClicked">
           <log-out-icon class="flexrow-item" size="1x" />
-          <span class="flexrow-item">{{ $t("main.logout") }}</span>
+          <span class="flexrow-item">{{ $t('main.logout') }}</span>
         </li>
       </ul>
     </nav>
@@ -207,7 +193,6 @@
       :active="display.shortcutModal"
       @cancel="display.shortcutModal = false"
     />
-
   </div>
 </template>
 
@@ -247,7 +232,7 @@ export default {
     ZapIcon
   },
 
-  data () {
+  data() {
     return {
       currentProductionId: this.$route.params.production_id,
       currentEpisodeId: this.$route.params.episode_id,
@@ -260,8 +245,8 @@ export default {
     }
   },
 
-  mounted () {
-    Canny('initChangelog', { // eslint-disable-line
+  mounted() {
+    Canny('initChangelog', {
       appID: '5db968118d1a9c132c168d54',
       position: 'bottom',
       align: 'right'
@@ -298,78 +283,88 @@ export default {
       'user'
     ]),
 
-    assetSections () {
+    assetSections() {
       return ['assets', 'assetTypes', 'playlists']
     },
 
-    editSections () {
+    editSections() {
       return ['edits']
     },
 
-    shotSections () {
+    shotSections() {
       return ['shots']
     },
 
-    breakdownSections () {
+    breakdownSections() {
       return ['breakdown']
     },
 
     // Asset pages require a all section and a main pack section.
-    currentEpisodeOptionGroups () {
+    currentEpisodeOptionGroups() {
       if (this.assetSections.includes(this.currentProjectSection)) {
-        return [{
-          name: '',
-          episodeList: [
-            { label: this.$t('main.all_assets'), value: 'all' },
-            { label: 'Main Pack', value: 'main' }
-          ]
-        }].concat(this.episodeOptionGroups)
+        return [
+          {
+            name: '',
+            episodeList: [
+              { label: this.$t('main.all_assets'), value: 'all' },
+              { label: 'Main Pack', value: 'main' }
+            ]
+          }
+        ].concat(this.episodeOptionGroups)
       } else if (['playlists'].includes(this.currentProjectSection)) {
-        return [{
-          name: '',
-          episodeList: [
-            { label: this.$t('main.all_assets'), value: 'all' },
-            { label: 'Main Pack', value: 'main' }
-          ]
-        }].concat(this.episodeOptionGroups)
+        return [
+          {
+            name: '',
+            episodeList: [
+              { label: this.$t('main.all_assets'), value: 'all' },
+              { label: 'Main Pack', value: 'main' }
+            ]
+          }
+        ].concat(this.episodeOptionGroups)
       } else if (['edits'].includes(this.currentProjectSection)) {
-        return [{
-          name: '',
-          episodeList: [
-            { label: this.$t('main.all_edits'), value: 'all' }
-          ]
-        }].concat(this.episodeOptionGroups)
+        return [
+          {
+            name: '',
+            episodeList: [{ label: this.$t('main.all_edits'), value: 'all' }]
+          }
+        ].concat(this.episodeOptionGroups)
       } else if (['breakdown'].includes(this.currentProjectSection)) {
-        return [{
-          name: '',
-          episodeList: [
-            { label: this.$t('shots.episodes'), value: 'all' },
-            { label: 'Main Pack', value: 'main' }
-          ]
-        }].concat(this.episodeOptionGroups)
+        return [
+          {
+            name: '',
+            episodeList: [
+              { label: this.$t('shots.episodes'), value: 'all' },
+              { label: 'Main Pack', value: 'main' }
+            ]
+          }
+        ].concat(this.episodeOptionGroups)
       } else {
         return this.episodeOptionGroups
       }
     },
 
-    hasEpisodeId () {
+    hasEpisodeId() {
       return this.$route.params.episode_id
     },
 
-    isProductionContext () {
-      return this.$route.params.production_id !== undefined ||
+    isProductionContext() {
+      return (
+        this.$route.params.production_id !== undefined ||
         this.$route.path.indexOf('my-tasks') === 0
+      )
     },
 
-    isEpisodeContext () {
-      return this.isTVShow &&
-             this.hasEpisodeId &&
-             this.currentSectionOption !== 'episodes' &&
-             // Do not display combobox if there is no episode
-             this.episodes.length > 0
+    isEpisodeContext() {
+      return (
+        this.isTVShow &&
+        this.hasEpisodeId &&
+        this.currentSectionOption !== 'episodes' &&
+        // Do not display combobox if there is no episode
+        this.episodes.length > 0
+      )
     },
 
-    lastProduction () {
+    lastProduction() {
       let production = this.productionMap.get(this.lastProductionViewed)
       if (!production) {
         production = this.currentProduction
@@ -377,7 +372,7 @@ export default {
       return production
     },
 
-    lastSectionPath () {
+    lastSectionPath() {
       const production = this.lastProduction
       const section = this.lastProductionScreen
       const route = {
@@ -393,29 +388,23 @@ export default {
       return route
     },
 
-    sectionOptions () {
+    sectionOptions() {
       let options = [
         { label: this.$t('assets.title'), value: 'assets' },
-        { label: this.$t('shots.title'), value: 'shots' },
+        { label: this.$t('shots.title'), value: 'shots' }
       ]
 
       if (!this.isCurrentUserClient) {
-        options.push(
-          { label: this.$t('sequences.title'), value: 'sequences' }
-        )
+        options.push({ label: this.$t('sequences.title'), value: 'sequences' })
       }
 
       // Show only if there are task types for Edit in this production.
       if (this.productionEditTaskTypes.length > 0) {
-        options.push(
-          { label: this.$t('edits.title'), value: 'edits' }
-        )
+        options.push({ label: this.$t('edits.title'), value: 'edits' })
       }
 
       if (this.isTVShow && !this.isCurrentUserClient) {
-        options.push(
-          { label: 'Episodes', value: 'episodes' }
-        )
+        options.push({ label: 'Episodes', value: 'episodes' })
       }
 
       if (!this.isCurrentUserClient) {
@@ -433,19 +422,16 @@ export default {
       }
 
       if (!this.isCurrentUserClient) {
-        options.push(
-          { label: this.$t('news.title'), value: 'newsFeed' }
-        )
+        options.push({ label: this.$t('news.title'), value: 'newsFeed' })
       }
 
-      options = options.concat([
-        { label: 'separator', value: 'separator' }
-      ])
+      options = options.concat([{ label: 'separator', value: 'separator' }])
 
       // Add sequences
-      options.push(
-        { label: this.$t('sequences.stats_title'), value: 'sequence-stats' }
-      )
+      options.push({
+        label: this.$t('sequences.stats_title'),
+        value: 'sequence-stats'
+      })
 
       // Add episodes for tv show only
       if (this.isTVShow) {
@@ -457,7 +443,8 @@ export default {
       // Add asset types stats
       options = options.concat([
         {
-          label: this.$t('asset_types.production_title'), value: 'assetTypes'
+          label: this.$t('asset_types.production_title'),
+          value: 'assetTypes'
         }
       ])
 
@@ -486,22 +473,21 @@ export default {
         ]
 
         if (this.isTVShow) {
-          options.push(
-            { label: this.$t('episodes.title'), value: 'episodes' }
-          )
+          options.push({ label: this.$t('episodes.title'), value: 'episodes' })
         }
         options.push({
-          label: this.$t('asset_types.production_title'), value: 'assetTypes'
+          label: this.$t('asset_types.production_title'),
+          value: 'assetTypes'
         })
       }
 
       return options
     },
 
-    currentSectionOption () {
+    currentSectionOption() {
       return (
-        this.sectionOptions.find(
-          o => o.value === this.currentProjectSection) || {}
+        this.sectionOptions.find(o => o.value === this.currentProjectSection) ||
+        {}
       ).value
     }
   },
@@ -522,7 +508,7 @@ export default {
       'toggleUserMenu'
     ]),
 
-    onLogoutClicked () {
+    onLogoutClicked() {
       this.logout((err, success) => {
         this.$socket.disconnect()
         if (err) console.error(err)
@@ -531,17 +517,14 @@ export default {
       })
     },
 
-    getCurrentSectionFromRoute () {
+    getCurrentSectionFromRoute() {
       let name = ''
       const segments = this.$route.path.split('/')
       if (this.isTVShow) name = segments[5]
       if (this.isTVShow && name && name.length === 36) name = 'episodes'
       if (!name) {
         name = segments[3]
-        if (
-          name === 'episodes' &&
-          segments.length === 6
-        ) {
+        if (name === 'episodes' && segments.length === 6) {
           name = segments[5]
         }
       }
@@ -550,7 +533,7 @@ export default {
       return name
     },
 
-    updateContext (productionId) {
+    updateContext(productionId) {
       if (!productionId) {
         this.clearContext()
       } else {
@@ -558,7 +541,7 @@ export default {
       }
     },
 
-    clearContext () {
+    clearContext() {
       this.silent = true
       this.currentProductionId = null
       this.currentProjectSection = null
@@ -570,7 +553,7 @@ export default {
       this.silent = false
     },
 
-    setProductionFromRoute () {
+    setProductionFromRoute() {
       const routeProductionId = this.$route.params.production_id
       const routeEpisodeId = this.$route.params.episode_id
       if (this.isProductionChanged(routeProductionId)) {
@@ -582,7 +565,7 @@ export default {
       }
     },
 
-    configureProduction (routeProductionId) {
+    configureProduction(routeProductionId) {
       this.setProduction(routeProductionId)
       if (this.isTVShow) {
         this.loadEpisodes()
@@ -596,7 +579,7 @@ export default {
       }
     },
 
-    configureEpisode (routeEpisodeId) {
+    configureEpisode(routeEpisodeId) {
       if (this.episodes.length < 2) {
         this.loadEpisodes()
           .then(episodes => {
@@ -610,7 +593,7 @@ export default {
       }
     },
 
-    isProductionChanged (productionId) {
+    isProductionChanged(productionId) {
       return (
         !this.currentProduction ||
         this.currentProductionId !== productionId ||
@@ -618,18 +601,16 @@ export default {
       )
     },
 
-    isEpisodeChanged (episodeId) {
+    isEpisodeChanged(episodeId) {
       return (
         this.isTVShow &&
-        (
-          !this.currentEpisode ||
+        (!this.currentEpisode ||
           this.currentEpisodeId !== episodeId ||
-          this.currentEpisode.id !== episodeId
-        )
+          this.currentEpisode.id !== episodeId)
       )
     },
 
-    setEpisodeFromRoute () {
+    setEpisodeFromRoute() {
       const routeEpisodeId = this.$route.params.episode_id
       if (this.isEpisodeChanged(routeEpisodeId)) {
         if (routeEpisodeId && this.isTVShow) {
@@ -643,7 +624,7 @@ export default {
       }
     },
 
-    updateCombosFromRoute () {
+    updateCombosFromRoute() {
       const productionId = this.$route.params.production_id
       const section = this.getCurrentSectionFromRoute()
       let episodeId = this.$route.params.episode_id
@@ -667,7 +648,7 @@ export default {
       }
     },
 
-    pushContextRoute (section) {
+    pushContextRoute(section) {
       const isAssetSection = this.assetSections.includes(section)
       const production = this.productionMap.get(this.currentProductionId)
       const isTVShow = production.production_type === 'tvshow'
@@ -698,7 +679,7 @@ export default {
       }
     },
 
-    episodifyRoute (route, section, episodeId, isTVShow) {
+    episodifyRoute(route, section, episodeId, isTVShow) {
       const isEpisodeContext =
         isTVShow &&
         section !== 'team' &&
@@ -715,14 +696,14 @@ export default {
       return route
     },
 
-    resetEpisodeForTVShow (soft = false) { // TODO seems deprecated
+    resetEpisodeForTVShow(soft = false) {
+      // TODO seems deprecated
       const section =
         this.currentProjectSection || this.getCurrentSectionFromRoute()
       const isAssetSection = this.assetSections.includes(section)
       const isEditSection = this.editSections.includes(section)
       const isShotSection = this.shotSections.includes(section)
-      const isAssetEpisode =
-        ['all', 'main'].includes(this.currentEpisodeId)
+      const isAssetEpisode = ['all', 'main'].includes(this.currentEpisodeId)
       const production = this.productionMap.get(this.currentProductionId)
       if (!production) return
       const isTVShow = production.production_type === 'tvshow'
@@ -764,20 +745,20 @@ export default {
   },
 
   watch: {
-    $route () {
+    $route() {
       const productionId = this.$route.params.production_id
       if (productionId) {
         this.updateContext(productionId)
       }
     },
 
-    currentProduction () {
+    currentProduction() {
       this.$nextTick(() => {
         this.loadMilestones()
       })
     },
 
-    currentEpisode () {
+    currentEpisode() {
       this.silent = true
       if (!this.currentEpisode) {
         this.currentEpisodeId = null
@@ -789,25 +770,27 @@ export default {
       })
     },
 
-    currentSectionOption () {
+    currentSectionOption() {
       this.clearSelectedTasks()
     },
 
-    isSupportChat () {
+    isSupportChat() {
       localPreferences.setPreference('support:show', this.isSupportChat)
     }
   },
 
   socket: {
     events: {
-      'notification:new' (eventData) {
-        if (this.user.id === eventData.person_id &&
-            this.$route.name !== 'notifications') {
+      'notification:new'(eventData) {
+        if (
+          this.user.id === eventData.person_id &&
+          this.$route.name !== 'notifications'
+        ) {
           this.incrementNotificationCounter()
         }
       },
 
-      'person:update' (eventData) {
+      'person:update'(eventData) {
         if (this.user.id === eventData.person_id) {
           this.$refs.avatar.reloadAvatar()
         }
@@ -832,8 +815,8 @@ export default {
   .user-menu {
     background-color: $black;
     color: $white-grey;
-    border-left: 1px solid #2F3136;
-    border-bottom: 1px solid #2F3136;
+    border-left: 1px solid #2f3136;
+    border-bottom: 1px solid #2f3136;
   }
 
   .changelog-button {
@@ -852,7 +835,7 @@ export default {
 }
 
 .nav {
-  box-shadow: 0px 0px 6px rgba(0,0,0,0.2);
+  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.2);
   left: 0;
   max-height: 60px;
   min-height: 60px;
@@ -879,14 +862,14 @@ export default {
 
 .user-menu {
   background-color: white;
-  box-shadow: 2px 3px 3px rgba(0,0,0,0.2);
+  box-shadow: 2px 3px 3px rgba(0, 0, 0, 0.2);
   border-left: 1px solid $white-grey;
   border-bottom: 1px solid $white-grey;
   border-bottom-left-radius: 10px;
   min-width: 220px;
   padding: 1em 1em 1em 1em;
   position: fixed;
-  transition: top .5s ease;
+  transition: top 0.5s ease;
   right: 0;
   width: 220px;
   z-index: 203;
@@ -975,7 +958,7 @@ strong {
 
   .nav-right {
     display: flex;
-    flex:0;
+    flex: 0;
   }
 
   .nav-item {

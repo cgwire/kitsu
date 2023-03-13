@@ -1,4 +1,4 @@
-export const coerceToArrayBuffer = (input) => {
+export const coerceToArrayBuffer = input => {
   if (typeof input === 'string') {
     // base64url to base64
     input = input.replace(/-/g, '+').replace(/_/g, '/')
@@ -30,7 +30,7 @@ export const coerceToArrayBuffer = (input) => {
   return input
 }
 
-export const coerceToBase64Url = (input) => {
+export const coerceToBase64Url = input => {
   // Array or ArrayBuffer to Uint8Array
   if (Array.isArray(input)) {
     input = Uint8Array.from(input)
@@ -62,7 +62,7 @@ export const coerceToBase64Url = (input) => {
   return input
 }
 
-export const coercePublicKeyFromJSON = (publicKey) => {
+export const coercePublicKeyFromJSON = publicKey => {
   publicKey.challenge = coerceToArrayBuffer(publicKey.challenge)
 
   if ('user' in publicKey) {
@@ -70,27 +70,28 @@ export const coercePublicKeyFromJSON = (publicKey) => {
   }
 
   if ('excludeCredentials' in publicKey) {
-    publicKey.excludeCredentials = publicKey.excludeCredentials.map((c) => {
+    publicKey.excludeCredentials = publicKey.excludeCredentials.map(c => {
       c.id = coerceToArrayBuffer(c.id)
       return c
     })
   }
 
   if ('allowCredentials' in publicKey) {
-    publicKey.allowCredentials = publicKey.allowCredentials.map((c) => {
+    publicKey.allowCredentials = publicKey.allowCredentials.map(c => {
       c.id = coerceToArrayBuffer(c.id)
       return c
     })
   }
 
   if ('authenticatorSelection' in publicKey) {
-    if (publicKey.authenticatorSelection.authenticatorAttachment === null) publicKey.authenticatorSelection.authenticatorAttachment = undefined
+    if (publicKey.authenticatorSelection.authenticatorAttachment === null)
+      publicKey.authenticatorSelection.authenticatorAttachment = undefined
   }
 
   return publicKey
 }
 
-export const coerceCredentialInfoToJSON = (publicKeyCredential) => {
+export const coerceCredentialInfoToJSON = publicKeyCredential => {
   const publicKeyCredentialJSON = {}
   publicKeyCredentialJSON.rawId = coerceToBase64Url(publicKeyCredential.rawId)
   publicKeyCredentialJSON.id = publicKeyCredential.id
@@ -101,21 +102,25 @@ export const coerceCredentialInfoToJSON = (publicKeyCredential) => {
   publicKeyCredentialJSON.response = {}
 
   publicKeyCredentialJSON.response.clientDataJSON = coerceToBase64Url(
-    publicKeyCredential.response.clientDataJSON)
+    publicKeyCredential.response.clientDataJSON
+  )
 
   if ('attestationObject' in publicKeyCredential.response) {
     publicKeyCredentialJSON.response.attestationObject = coerceToBase64Url(
-      publicKeyCredential.response.attestationObject)
+      publicKeyCredential.response.attestationObject
+    )
   }
 
   if ('authenticatorData' in publicKeyCredential.response) {
     publicKeyCredentialJSON.response.authenticatorData = coerceToBase64Url(
-      publicKeyCredential.response.authenticatorData)
+      publicKeyCredential.response.authenticatorData
+    )
   }
 
   if ('signature' in publicKeyCredential.response) {
     publicKeyCredentialJSON.response.signature = coerceToBase64Url(
-      publicKeyCredential.response.signature)
+      publicKeyCredential.response.signature
+    )
   }
 
   if ('userHandle' in publicKeyCredential.response) {
@@ -126,10 +131,11 @@ export const coerceCredentialInfoToJSON = (publicKeyCredential) => {
   return publicKeyCredentialJSON
 }
 
-export const coerceTwoFactorPayload = (twoFactorPayload) => {
+export const coerceTwoFactorPayload = twoFactorPayload => {
   if ('fido_authentication_response' in twoFactorPayload) {
-    twoFactorPayload.fido_authentication_response =
-      coerceCredentialInfoToJSON(twoFactorPayload.fido_authentication_response)
+    twoFactorPayload.fido_authentication_response = coerceCredentialInfoToJSON(
+      twoFactorPayload.fido_authentication_response
+    )
   }
   return twoFactorPayload
 }

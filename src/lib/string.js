@@ -4,7 +4,7 @@ export default {
    * increment. If there is no number, we consider that a new name
    * must be written.
    */
-  generateNextName (name, padding = 1) {
+  generateNextName(name, padding = 1) {
     const matches = name.match(/\d+$/)
     if (matches) {
       const number = matches[0]
@@ -18,7 +18,7 @@ export default {
     }
   },
 
-  shortenText (text, maxLength) {
+  shortenText(text, maxLength) {
     let result = text || ''
     if (text !== undefined && text.length > maxLength) {
       result = text.slice(0, maxLength) + '...'
@@ -28,9 +28,8 @@ export default {
     return result
   },
 
-  slugify (str) {
-    str = str.replace(/^\s+|\s+$/g, '')
-      .toLowerCase()
+  slugify(str) {
+    str = str.replace(/^\s+|\s+$/g, '').toLowerCase()
 
     const from = 'àáäâèéëêìíïîòóöôùúüûñç·/_,:'
     const to = 'aaaaeeeeiiiioooouuuunc------'
@@ -38,7 +37,8 @@ export default {
       str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i))
     }
 
-    return str.replace(/[^a-z0-9 -]/g, '')
+    return str
+      .replace(/[^a-z0-9 -]/g, '')
       .replace(/\s+/g, '_')
       .replace(/-+/g, '_')
   }

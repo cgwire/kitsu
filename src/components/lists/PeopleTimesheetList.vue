@@ -1,186 +1,162 @@
 <template>
-<div class="data-list">
-  <div
-    class="datatable-wrapper"
-    ref="body"
-  >
-    <table class="datatable">
-      <thead class="datatable-head">
-        <tr>
-          <th scope="col" class="name datatable-row-header">
-            {{ $t("people.list.name") }}
-          </th>
+  <div class="data-list">
+    <div class="datatable-wrapper" ref="body">
+      <table class="datatable">
+        <thead class="datatable-head">
+          <tr>
+            <th scope="col" class="name datatable-row-header">
+              {{ $t('people.list.name') }}
+            </th>
 
-          <th
-            scope="col"
-            class="time year"
-            :key="'year-' + year"
-            v-for="year in yearRange"
-            v-if="detailLevel === 'year'"
-          >
-            {{ year }}
-          </th>
-
-          <th
-            scope="col"
-            class="time month"
-            :key="'month-' + month"
-            v-for="month in monthRange"
-            v-if="detailLevel === 'month'"
-          >
-            {{ monthToString(month) }}
-          </th>
-
-          <th
-            scope="col"
-            class="daytime"
-            :title="getWeekTitle(week)"
-            :key="'week-' + week"
-            v-for="week in weekRange"
-            v-if="detailLevel === 'week'"
-          >
-            {{ week }}
-          </th>
-
-          <th
-            scope="col"
-            class="daytime"
-            :key="'day-' + day"
-            v-for="day in dayRange"
-            v-if="detailLevel === 'day'"
-          >
-            {{ day }}
-          </th>
-          <th scope="col" class="actions"></th>
-        </tr>
-      </thead>
-      <tbody
-        class="datatable-body"
-        v-if="!isLoading"
-      >
-        <tr
-          class="datatable-row"
-          v-for="person in people"
-          :key="person.id"
-        >
-          <th class="datatable-row-header name">
-            <div class="flexrow">
-              <people-avatar class="flexrow-item" :person="person" />
-              <people-name class="flexrow-item" :person="person" />
-            </div>
-          </th>
-
-          <td
-            :class="{
-              time: true,
-              year: true,
-              selected: isYearSelected(person.id, year)
-            }"
-            :key="'year-' + year + '-' + person.id"
-            v-for="year in yearRange"
-            v-if="detailLevel === 'year'"
-          >
-            <router-link
-              class="duration"
-              :to="getYearDetailRoute(person, year)"
-              v-if="yearDuration(year, person.id) > 0"
+            <th
+              scope="col"
+              class="time year"
+              :key="'year-' + year"
+              v-for="year in yearRange"
+              v-if="detailLevel === 'year'"
             >
-              {{ yearDuration(year, person.id) }}
-            </router-link>
-            <span v-else>
-            -
-            </span>
-          </td>
+              {{ year }}
+            </th>
 
-          <td
-            :class="{
-              time: true,
-              month: true,
-              selected: isMonthSelected(person.id, year, month)
-            }"
-            :key="'month-' + month + '-' + person.id"
-            v-for="month in monthRange"
-            v-if="detailLevel === 'month'"
-          >
-            <router-link
-              class="duration"
-              :to="getMonthDetailRoute(person, year, month)"
-              v-if="monthDuration(month, person.id) > 0"
+            <th
+              scope="col"
+              class="time month"
+              :key="'month-' + month"
+              v-for="month in monthRange"
+              v-if="detailLevel === 'month'"
             >
-              {{ monthDuration(month, person.id) }}
-            </router-link>
-            <span v-else>
-            -
-            </span>
-          </td>
+              {{ monthToString(month) }}
+            </th>
 
-          <td
-            :class="{
-              daytime: true,
-              selected: isWeekSelected(person.id, year, week)
-            }"
-            :key="'week-' + week + '-' + person.id"
-            v-for="week in weekRange"
-            v-if="detailLevel === 'week'"
-          >
-            <router-link
+            <th
+              scope="col"
+              class="daytime"
+              :title="getWeekTitle(week)"
+              :key="'week-' + week"
+              v-for="week in weekRange"
+              v-if="detailLevel === 'week'"
+            >
+              {{ week }}
+            </th>
+
+            <th
+              scope="col"
+              class="daytime"
+              :key="'day-' + day"
+              v-for="day in dayRange"
+              v-if="detailLevel === 'day'"
+            >
+              {{ day }}
+            </th>
+            <th scope="col" class="actions"></th>
+          </tr>
+        </thead>
+        <tbody class="datatable-body" v-if="!isLoading">
+          <tr class="datatable-row" v-for="person in people" :key="person.id">
+            <th class="datatable-row-header name">
+              <div class="flexrow">
+                <people-avatar class="flexrow-item" :person="person" />
+                <people-name class="flexrow-item" :person="person" />
+              </div>
+            </th>
+
+            <td
               :class="{
-                duration: true,
-                'warning': weekDuration(week, person.id) > 5 * organisation.hours_by_day
+                time: true,
+                year: true,
+                selected: isYearSelected(person.id, year)
               }"
-              :to="getWeekDetailRoute(person, year, week)"
-              v-if="weekDuration(week, person.id) > 0"
+              :key="'year-' + year + '-' + person.id"
+              v-for="year in yearRange"
+              v-if="detailLevel === 'year'"
             >
-              {{ weekDuration(week, person.id) }}
-            </router-link>
-            <span v-else>
-            -
-            </span>
-          </td>
+              <router-link
+                class="duration"
+                :to="getYearDetailRoute(person, year)"
+                v-if="yearDuration(year, person.id) > 0"
+              >
+                {{ yearDuration(year, person.id) }}
+              </router-link>
+              <span v-else> - </span>
+            </td>
 
-          <td
-            class="daytime"
-            :class="{
-              daytime: true,
-              weekend: isWeekend(year, month, day),
-              selected: isDaySelected(person.id, year, month, day)
-            }"
-            :key="'day-' + day + '-' + person.id"
-            v-for="day in dayRange"
-            v-if="detailLevel === 'day'"
-          >
-            <router-link
-              class="duration"
-              :to="getDayDetailRoute(person, year, month, day)"
-              v-if="dayDuration(day, person.id) > 0"
+            <td
+              :class="{
+                time: true,
+                month: true,
+                selected: isMonthSelected(person.id, year, month)
+              }"
+              :key="'month-' + month + '-' + person.id"
+              v-for="month in monthRange"
+              v-if="detailLevel === 'month'"
             >
-              {{ dayDuration(day, person.id) }}
-            </router-link>
-            <span v-else-if="isDayOff(person.id, day)">
-              OFF
-            </span>
-            <span v-else>
-              -
-            </span>
-          </td>
-          <td class="actions"></td>
-         </tr>
-      </tbody>
-    </table>
+              <router-link
+                class="duration"
+                :to="getMonthDetailRoute(person, year, month)"
+                v-if="monthDuration(month, person.id) > 0"
+              >
+                {{ monthDuration(month, person.id) }}
+              </router-link>
+              <span v-else> - </span>
+            </td>
+
+            <td
+              :class="{
+                daytime: true,
+                selected: isWeekSelected(person.id, year, week)
+              }"
+              :key="'week-' + week + '-' + person.id"
+              v-for="week in weekRange"
+              v-if="detailLevel === 'week'"
+            >
+              <router-link
+                :class="{
+                  duration: true,
+                  warning:
+                    weekDuration(week, person.id) >
+                    5 * organisation.hours_by_day
+                }"
+                :to="getWeekDetailRoute(person, year, week)"
+                v-if="weekDuration(week, person.id) > 0"
+              >
+                {{ weekDuration(week, person.id) }}
+              </router-link>
+              <span v-else> - </span>
+            </td>
+
+            <td
+              class="daytime"
+              :class="{
+                daytime: true,
+                weekend: isWeekend(year, month, day),
+                selected: isDaySelected(person.id, year, month, day)
+              }"
+              :key="'day-' + day + '-' + person.id"
+              v-for="day in dayRange"
+              v-if="detailLevel === 'day'"
+            >
+              <router-link
+                class="duration"
+                :to="getDayDetailRoute(person, year, month, day)"
+                v-if="dayDuration(day, person.id) > 0"
+              >
+                {{ dayDuration(day, person.id) }}
+              </router-link>
+              <span v-else-if="isDayOff(person.id, day)"> OFF </span>
+              <span v-else> - </span>
+            </td>
+            <td class="actions"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <table-info :is-loading="isLoading" :is-error="isError" />
+
+    <p class="has-text-centered footer-info" v-if="!isLoading">
+      {{ people.length }} {{ $tc('people.persons', people.length) }}
+    </p>
   </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
-
-  <p
-    class="has-text-centered footer-info"
-    v-if="!isLoading"
-  >
-    {{ people.length }} {{ $tc('people.persons', people.length) }}
-  </p>
-</div>
 </template>
 
 <script>
@@ -208,7 +184,7 @@ export default {
     TableInfo
   },
 
-  data () {
+  data() {
     return {
       currentMonth: moment().month() + 1,
       currentYear: moment().year(),
@@ -266,15 +242,15 @@ export default {
       'route'
     ]),
 
-    yearRange () {
+    yearRange() {
       return range(2018, moment().year())
     },
 
-    monthRange () {
+    monthRange() {
       return getMonthRange(this.year, this.currentYear, this.currentMonth)
     },
 
-    dayRange () {
+    dayRange() {
       return getDayRange(
         this.year,
         this.month,
@@ -283,22 +259,21 @@ export default {
       )
     },
 
-    weekRange () {
+    weekRange() {
       return getWeekRange(this.year, this.currentYear, this.currentWeek)
     },
 
-    isHours () {
+    isHours() {
       return this.unit === 'hour'
     }
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
     monthToString,
 
-    yearDuration (year, personId) {
+    yearDuration(year, personId) {
       const yearString = `${year}`
       const duration = this.getDuration(yearString, personId)
       return this.isHours
@@ -306,7 +281,7 @@ export default {
         : hoursToDays(this.organisation, duration).toFixed(2)
     },
 
-    monthDuration (month, personId) {
+    monthDuration(month, personId) {
       const monthString = `${month}`
       const duration = this.getDuration(monthString, personId)
       return this.isHours
@@ -314,16 +289,18 @@ export default {
         : hoursToDays(this.organisation, duration).toFixed(2)
     },
 
-    weekDuration (week, personId) {
+    weekDuration(week, personId) {
       const duration = this.getDuration(week, personId)
       return this.isHours
         ? duration
         : hoursToDays(this.organisation, duration).toFixed(2)
     },
 
-    dayDuration (day, personId) {
-      if (this.dayOffMap[personId] &&
-          this.dayOffMap[personId][`${day}`] === true) {
+    dayDuration(day, personId) {
+      if (
+        this.dayOffMap[personId] &&
+        this.dayOffMap[personId][`${day}`] === true
+      ) {
         return 'OFF'
       } else {
         const duration = this.getDuration(day, personId)
@@ -333,23 +310,25 @@ export default {
       }
     },
 
-    getDuration (index, personId) {
-      if (this.timesheet &&
-          this.timesheet[index] &&
-          this.timesheet[index][personId]) {
+    getDuration(index, personId) {
+      if (
+        this.timesheet &&
+        this.timesheet[index] &&
+        this.timesheet[index][personId]
+      ) {
         return this.timesheet[index][personId] / 60
       } else {
         return '-'
       }
     },
 
-    isWeekend (year, month, day) {
+    isWeekend(year, month, day) {
       let date = moment(`${year}-${month}-${day}`)
       if (day < 10) date = moment(`${year}-${month}-0${day}`)
       return [0, 6].includes(date.day())
     },
 
-    isDaySelected (personId, year, month, day) {
+    isDaySelected(personId, year, month, day) {
       return (
         this.$route.params.person_id &&
         this.$route.params.person_id === personId &&
@@ -359,7 +338,7 @@ export default {
       )
     },
 
-    isWeekSelected (personId, year, week) {
+    isWeekSelected(personId, year, week) {
       return (
         this.$route.params.person_id &&
         this.$route.params.person_id === personId &&
@@ -368,7 +347,7 @@ export default {
       )
     },
 
-    isMonthSelected (personId, year, month) {
+    isMonthSelected(personId, year, month) {
       return (
         this.$route.params.person_id &&
         this.$route.params.person_id === personId &&
@@ -377,7 +356,7 @@ export default {
       )
     },
 
-    isYearSelected (personId, year) {
+    isYearSelected(personId, year) {
       return (
         this.$route.params.person_id &&
         this.$route.params.person_id === personId &&
@@ -385,13 +364,13 @@ export default {
       )
     },
 
-    getWeekTitle (week) {
+    getWeekTitle(week) {
       const beginning = moment(this.currentYear + '-' + week, 'YYYY-W')
       const end = beginning.clone().add(6, 'days')
       return beginning.format('YYYY-MM-DD') + ' - ' + end.format('YYYY-MM-DD')
     },
 
-    getYearDetailRoute (person, year) {
+    getYearDetailRoute(person, year) {
       return {
         name: 'timesheets-year-person',
         params: {
@@ -404,7 +383,7 @@ export default {
       }
     },
 
-    getMonthDetailRoute (person, year, month) {
+    getMonthDetailRoute(person, year, month) {
       return {
         name: 'timesheets-month-person',
         params: {
@@ -418,7 +397,7 @@ export default {
       }
     },
 
-    getWeekDetailRoute (person, year, week) {
+    getWeekDetailRoute(person, year, week) {
       return {
         name: 'timesheets-week-person',
         params: {
@@ -432,7 +411,7 @@ export default {
       }
     },
 
-    getDayDetailRoute (person, year, month, day) {
+    getDayDetailRoute(person, year, month, day) {
       return {
         name: 'timesheets-day-person',
         params: {
@@ -447,16 +426,17 @@ export default {
       }
     },
 
-    isDayOff (personId, day) {
+    isDayOff(personId, day) {
       const dayString = `${day}`.padStart(2, '0')
       return this.dayOffMap[personId] && this.dayOffMap[personId][dayString]
     }
   },
 
   watch: {
-    route () {
+    route() {
       const els = document.getElementsByClassName('selected')
-      if (els.length === 0) { // selected element is not visible
+      if (els.length === 0) {
+        // selected element is not visible
         this.$refs.body.scrollLeft += 350
       }
     }

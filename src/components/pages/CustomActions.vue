@@ -52,7 +52,7 @@ export default {
     ListPageHeader
   },
 
-  data () {
+  data() {
     return {
       modals: {
         edit: false,
@@ -74,25 +74,24 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'customActions'
-    ]),
+    ...mapGetters(['customActions']),
 
-    deleteText () {
+    deleteText() {
       const customAction = this.customActionToDelete
       if (customAction) {
-        return this.$t(
-          'custom_actions.delete_text', { name: customAction.name })
+        return this.$t('custom_actions.delete_text', {
+          name: customAction.name
+        })
       } else {
         return ''
       }
     }
   },
 
-  created () {
+  created() {
     this.loading.list = true
     this.errors.list = false
-    this.loadCustomActions((err) => {
+    this.loadCustomActions(err => {
       this.loading.list = false
       if (err) {
         this.errors.list = true
@@ -108,7 +107,7 @@ export default {
       'newCustomAction'
     ]),
 
-    confirmEditCustomAction (form) {
+    confirmEditCustomAction(form) {
       let action = 'newCustomAction'
       if (this.customActionToEdit && this.customActionToEdit.id) {
         action = 'editCustomAction'
@@ -122,14 +121,14 @@ export default {
           this.loading.edit = false
           this.modals.edit = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.errors.edit = true
           this.modals.isNewDisplayed = false
         })
     },
 
-    confirmDeleteCustomAction () {
+    confirmDeleteCustomAction() {
       this.loading.del = true
       this.errors.del = false
       this.deleteCustomAction(this.customActionToDelete)
@@ -137,26 +136,26 @@ export default {
           this.loading.del = false
           this.modals.del = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.errors.del = true
           this.loading.del = false
         })
     },
 
-    onNewClicked () {
+    onNewClicked() {
       this.customActionToEdit = {}
       this.errors.edit = false
       this.modals.edit = true
     },
 
-    onEditClicked (customAction) {
+    onEditClicked(customAction) {
       this.customActionToEdit = customAction
       this.errors.edit = false
       this.modals.edit = true
     },
 
-    onDeleteClicked (customAction) {
+    onDeleteClicked(customAction) {
       this.customActionToDelete = customAction
       this.errors.del = false
       this.modals.del = true
@@ -164,10 +163,12 @@ export default {
   },
 
   watch: {
-    $route () { this.handleModalsDisplay() }
+    $route() {
+      this.handleModalsDisplay()
+    }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: `${this.$t('custom_actions.title')} - Kitsu`
     }
@@ -175,5 +176,4 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

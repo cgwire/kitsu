@@ -1,49 +1,36 @@
 <template>
-<div :class="{
-  'topbar-menuitem': true,
-  'topbar-menuitem-open': showSectionList
-}">
   <div
-    class="section-menu"
+    :class="{
+      'topbar-menuitem': true,
+      'topbar-menuitem-open': showSectionList
+    }"
   >
-    <div
-      class="flexrow unselectable root-menu"
-      @click="toggleSectionList"
-    >
-      <div
-        class="selected-section-line flexrow-item"
-      >
-       {{ currentSectionLabel }}
+    <div class="section-menu">
+      <div class="flexrow unselectable root-menu" @click="toggleSectionList">
+        <div class="selected-section-line flexrow-item">
+          {{ currentSectionLabel }}
+        </div>
+        <chevron-down-icon class="down-icon flexrow-item" />
       </div>
-      <chevron-down-icon class="down-icon flexrow-item"/>
-    </div>
-    <div
-      class="select-input"
-      ref="select"
-      v-if="showSectionList"
-    >
-      <div
-        class="section-line"
-        v-for="(section, index) in sectionList"
-        @click="selectSection(section)"
-        :key="section.value + '-' + index"
-      >
-        <router-link
-          :to="getSectionPath(section)"
-          v-if="section.value !== 'separator'"
+      <div class="select-input" ref="select" v-if="showSectionList">
+        <div
+          class="section-line"
+          v-for="(section, index) in sectionList"
+          @click="selectSection(section)"
+          :key="section.value + '-' + index"
         >
-          {{ section.label }}
-        </router-link>
-        <hr v-else />
+          <router-link
+            :to="getSectionPath(section)"
+            v-if="section.value !== 'separator'"
+          >
+            {{ section.label }}
+          </router-link>
+          <hr v-else />
+        </div>
       </div>
     </div>
+    <combobox-mask :displayed="showSectionList" @click="toggleSectionList" />
   </div>
-  <combobox-mask
-    :displayed="showSectionList"
-    @click="toggleSectionList"
-  />
-</div>
-
 </template>
 
 <script>
@@ -62,7 +49,7 @@ export default {
     ComboboxMask
   },
 
-  data () {
+  data() {
     return {
       localSection: null,
       showSectionList: false
@@ -84,16 +71,14 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.localSection = this.section
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction'
-    ]),
+    ...mapGetters(['currentProduction']),
 
-    currentSectionLabel () {
+    currentSectionLabel() {
       const section = this.localSection
       const sectionOption = this.sectionList.find(s => s.value === section)
       if (sectionOption) return sectionOption.label
@@ -102,7 +87,7 @@ export default {
   },
 
   methods: {
-    selectSection (section) {
+    selectSection(section) {
       if (section.value !== 'separator') {
         this.$emit('input', section.value)
         this.localSection = section.value
@@ -110,11 +95,11 @@ export default {
       }
     },
 
-    toggleSectionList () {
+    toggleSectionList() {
       this.showSectionList = !this.showSectionList
     },
 
-    getSectionPath (section) {
+    getSectionPath(section) {
       const result = getProductionPath(
         this.currentProduction,
         section.value,
@@ -125,7 +110,7 @@ export default {
   },
 
   watch: {
-    section () {
+    section() {
       if (this.localSection !== this.section) this.localSection = this.section
     }
   }
@@ -186,7 +171,7 @@ export default {
   }
 
   &:hover {
-    background: #EEE;
+    background: #eee;
   }
 }
 

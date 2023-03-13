@@ -14,14 +14,11 @@
         <tbody class="datatable-body" v-if="entries.length > 0">
           <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
             <td class="name">
-               {{ entry.name }}
+              {{ entry.name }}
             </td>
             <td class="color">
               <div>
-                <span
-                  :style="{ background: entry.color }"
-                >
-                </span>
+                <span :style="{ background: entry.color }"> </span>
               </div>
             </td>
             <row-actions-cell
@@ -33,11 +30,7 @@
         </tbody>
       </table>
     </div>
-    <table-info
-      :is-loading="isLoading"
-      :is-error="isError"
-    >
-    </table-info>
+    <table-info :is-loading="isLoading" :is-error="isError"> </table-info>
     <p class="has-text-centered nb-asset-types">
       {{ entries.length }} {{ $tc('departments.number', entries.length) }}
     </p>
@@ -50,12 +43,8 @@ import TableInfo from '@/components/widgets/TableInfo'
 
 export default {
   name: 'departments-list',
-  props: [
-    'entries',
-    'isLoading',
-    'isError'
-  ],
-  data () {
+  props: ['entries', 'isLoading', 'isError'],
+  data() {
     return {}
   },
   components: {
@@ -63,12 +52,10 @@ export default {
     TableInfo
   },
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   }
 }
 </script>

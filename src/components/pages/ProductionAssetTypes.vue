@@ -62,7 +62,7 @@ export default {
     SearchField
   },
 
-  data () {
+  data() {
     return {
       initialLoading: true,
       displayMode: 'pie',
@@ -91,10 +91,9 @@ export default {
     ])
   },
 
-  created () {
-  },
+  created() {},
 
-  mounted () {
+  mounted() {
     this.setDefaultSearchText()
     this.setDefaultListScrollPosition()
     setTimeout(() => {
@@ -112,34 +111,32 @@ export default {
       'setLastProductionScreen'
     ]),
 
-    setDefaultSearchText () {
+    setDefaultSearchText() {
       if (this.assetTypeSearchText.length > 0) {
-        this.$refs['asset-type-search-field'].setValue(
-          this.assetTypeSearchText
-        )
+        this.$refs['asset-type-search-field'].setValue(this.assetTypeSearchText)
       }
     },
 
-    setDefaultListScrollPosition () {
+    setDefaultListScrollPosition() {
       this.$refs['asset-type-list'].setScrollPosition(
         this.assetTypeListScrollPosition
       )
     },
 
-    navigateToList () {
+    navigateToList() {
       this.$router.push(this.assetTypesPath)
     },
 
-    onSearchChange (event) {
+    onSearchChange(event) {
       const searchQuery = this.$refs['asset-type-search-field'].getValue()
       this.setAssetTypeSearch(searchQuery)
     },
 
-    saveScrollPosition (scrollPosition) {
+    saveScrollPosition(scrollPosition) {
       this.setAssetTypeListScrollPosition(scrollPosition)
     },
 
-    exportStatisticsToCsv () {
+    exportStatisticsToCsv() {
       const nameData = [
         moment().format('YYYYMMDD'),
         this.currentProduction.name,
@@ -160,7 +157,7 @@ export default {
       )
     },
 
-    reset () {
+    reset() {
       this.initialLoading = true
       this.$refs['asset-type-search-field'].setValue('')
       this.loadAssets()
@@ -174,22 +171,23 @@ export default {
   },
 
   watch: {
-    currentProduction () {
+    currentProduction() {
       if (!this.isTVShow) this.reset()
     },
 
-    currentEpisode () {
+    currentEpisode() {
       if (this.isTVShow) this.reset()
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
-      title: `${this.currentProduction.name} | ${this.$t('asset_types.production_title')} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t(
+        'asset_types.production_title'
+      )} - Kitsu`
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

@@ -1,62 +1,67 @@
 <template>
-<router-link
-  class="button"
-  :title="title"
-  :to="path"
->
-  <span
-    class="icon is-small"
-    v-if="icon.length > 0 && icon.startsWith('fa')"
-  >
-    <i :class="'fa ' + icon"></i>
-  </span>
-  <plus-icon
-    :class="{
-      icon: true,
-      'is-small': true,
-      'only-icon': !isText
-    }" v-if="icon === 'plus'" />
-  <download-icon
-    :class="{
-      icon: true,
-      'is-small': true,
-      'only-icon': !isText
-    }" v-if="icon === 'download'" />
-  <upload-icon
-    :class="{
-      icon: true,
-      'is-small': true,
-      'only-icon': !isText
-    }" v-if="icon === 'upload'" />
-  <edit-icon
-    :class="{
-      icon: true,
-      'is-small': true,
-      'only-icon': !isText
-    }" v-if="icon === 'edit'" />
-  <trash-icon
-    :class="{
-      icon: true,
-      'is-small': true,
-      'only-icon': !isText
-    }" v-if="icon === 'delete'" />
-  <rotate-ccw-icon
-    :class="{
-      icon: true,
-      'is-small': true,
-      'only-icon': !isText
-    }" v-if="icon === 'restore'" />
+  <router-link class="button" :title="title" :to="path">
+    <span class="icon is-small" v-if="icon.length > 0 && icon.startsWith('fa')">
+      <i :class="'fa ' + icon"></i>
+    </span>
+    <plus-icon
+      :class="{
+        icon: true,
+        'is-small': true,
+        'only-icon': !isText
+      }"
+      v-if="icon === 'plus'"
+    />
+    <download-icon
+      :class="{
+        icon: true,
+        'is-small': true,
+        'only-icon': !isText
+      }"
+      v-if="icon === 'download'"
+    />
+    <upload-icon
+      :class="{
+        icon: true,
+        'is-small': true,
+        'only-icon': !isText
+      }"
+      v-if="icon === 'upload'"
+    />
+    <edit-icon
+      :class="{
+        icon: true,
+        'is-small': true,
+        'only-icon': !isText
+      }"
+      v-if="icon === 'edit'"
+    />
+    <trash-icon
+      :class="{
+        icon: true,
+        'is-small': true,
+        'only-icon': !isText
+      }"
+      v-if="icon === 'delete'"
+    />
+    <rotate-ccw-icon
+      :class="{
+        icon: true,
+        'is-small': true,
+        'only-icon': !isText
+      }"
+      v-if="icon === 'restore'"
+    />
 
-  <span
-    :class="{
-      text: true,
-      'is-hidden-touch': isResponsive
-    }"
-    v-if="isText"
-  >
-    {{ text }}
-  </span>
-</router-link>
+    <span
+      :class="{
+        text: true,
+        'is-hidden-touch': isResponsive
+      }"
+      v-if="isText"
+    >
+      {{ text }}
+    </span>
+  </router-link>
 </template>
 
 <script>
@@ -101,7 +106,7 @@ export default {
     }
   },
   computed: {
-    isText () {
+    isText() {
       return this.text && this.text.length > 0
     }
   }

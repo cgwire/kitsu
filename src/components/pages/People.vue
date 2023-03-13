@@ -41,7 +41,7 @@
         class="flexrow-item filter-button"
         :title="$t('entities.build_filter.title')"
         icon="funnel"
-        @click="() => modals.isBuildFilterDisplayed = true"
+        @click="() => (modals.isBuildFilterDisplayed = true)"
       />
     </div>
 
@@ -133,7 +133,6 @@
 </template>
 
 <script>
-
 import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
@@ -169,19 +168,11 @@ export default {
     SearchQueryList
   },
 
-  data () {
+  data() {
     return {
-      csvColumns: [
-        'First Name',
-        'Last Name'
-      ],
-      optionalCsvColumns: [
-        'Phone',
-        'Role'
-      ],
-      dataMatchers: [
-        'Email'
-      ],
+      csvColumns: ['First Name', 'Last Name'],
+      optionalCsvColumns: ['Phone', 'Role'],
+      dataMatchers: ['Email'],
       errors: {
         del: false,
         edit: false,
@@ -211,7 +202,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.loadPeople(() => {
       this.setSearchFromUrl()
       this.onSearchChange()
@@ -219,7 +210,7 @@ export default {
   },
 
   watch: {
-    'modals.edit' () {
+    'modals.edit'() {
       if (this.modals.edit) {
         this.loading.createAndInvite = false
         this.errors.edit = false
@@ -248,7 +239,7 @@ export default {
       'personCsvFormData'
     ]),
 
-    deleteText () {
+    deleteText() {
       const person = this.personToDelete
       if (person !== undefined) {
         const personName = `${person.first_name} ${person.last_name}`
@@ -258,7 +249,7 @@ export default {
       }
     },
 
-    filteredPeople () {
+    filteredPeople() {
       const persons = {}
       this.displayedPeople.forEach(person => {
         const personKey = person.email
@@ -267,7 +258,7 @@ export default {
       return persons
     },
 
-    searchField () {
+    searchField() {
       return this.$refs['people-search-field']
     }
   },
@@ -287,23 +278,22 @@ export default {
       'uploadPersonFile'
     ]),
 
-    renderImport (data, mode) {
+    renderImport(data, mode) {
       this.loading.importing = true
       this.errors.importing = false
       this.formData = data
       if (mode === 'file') {
         data = data.get('file')
       }
-      csv.processCSV(data)
-        .then((results) => {
-          this.parsedCSV = results
-          this.hideImportModal()
-          this.loading.importing = false
-          this.showImportRenderModal()
-        })
+      csv.processCSV(data).then(results => {
+        this.parsedCSV = results
+        this.hideImportModal()
+        this.loading.importing = false
+        this.showImportRenderModal()
+      })
     },
 
-    uploadImportFile (data, toUpdate) {
+    uploadImportFile(data, toUpdate) {
       const formData = new FormData()
       const filename = 'import.csv'
       const file = new File([data.join('\n')], filename, { type: 'text/csv' })
@@ -319,14 +309,14 @@ export default {
           this.$store.dispatch('loadPeople')
           this.hideImportRenderModal()
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.importing = false
           this.errors.importing = true
         })
     },
 
-    resetImport () {
+    resetImport() {
       this.errors.importing = false
       this.hideImportRenderModal()
       this.$store.commit('PERSON_CSV_FILE_SELECTED', null)
@@ -334,7 +324,7 @@ export default {
       this.showImportModal()
     },
 
-    confirmEditPeople (form) {
+    confirmEditPeople(form) {
       let action = 'editPerson'
       if (this.personToEdit.id === undefined) action = 'newPerson'
       else form.id = this.personToEdit.id
@@ -360,7 +350,7 @@ export default {
         })
     },
 
-    confirmCreateAndInvite (form) {
+    confirmCreateAndInvite(form) {
       this.loading.createAndInvite = true
       this.errors.edit = false
       this.errors.userLimit = false
@@ -369,7 +359,7 @@ export default {
           this.loading.createAndInvite = false
           this.modals.edit = false
         })
-        .catch((err) => {
+        .catch(err => {
           const isUserLimitReached =
             err.body &&
             err.body.message &&
@@ -385,7 +375,7 @@ export default {
       this.onSearchChange()
     },
 
-    confirmInvite (form) {
+    confirmInvite(form) {
       form.id = this.personToEdit.id
       this.loading.invite = true
       this.errors.invite = false
@@ -394,7 +384,7 @@ export default {
           this.loading.invite = false
           this.success.invite = true
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.invite = false
           this.success.invite = false
@@ -403,7 +393,7 @@ export default {
       this.onSearchChange()
     },
 
-    confirmDeletePeople () {
+    confirmDeletePeople() {
       this.loading.del = true
       this.errors.del = false
       this.deletePeople(this.personToDelete)
@@ -411,14 +401,14 @@ export default {
           this.loading.del = false
           this.modals.del = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.del = false
           this.errors.del = true
         })
     },
 
-    onSearchChange () {
+    onSearchChange() {
       if (!this.searchField) return
       const searchQuery = this.searchField.getValue()
       if (searchQuery.length !== 1) {
@@ -427,64 +417,62 @@ export default {
       }
     },
 
-    onDeleteClicked (person) {
+    onDeleteClicked(person) {
       this.personToDelete = person
       this.modals.del = true
     },
 
-    onEditClicked (person) {
+    onEditClicked(person) {
       this.errors.invite = false
       this.success.invite = false
       this.personToEdit = person
       this.modals.edit = true
     },
 
-    onChangePasswordClicked (person) {
+    onChangePasswordClicked(person) {
       this.personToChangePassword = person
       this.modals.changePassword = true
     },
 
-    onNewClicked () {
+    onNewClicked() {
       this.errors.invite = false
       this.success.invite = false
       this.personToEdit = { role: 'user' }
       this.modals.edit = true
     },
 
-    showImportModal () {
+    showImportModal() {
       this.modals.importModal = true
     },
 
-    hideImportModal () {
+    hideImportModal() {
       this.modals.importModal = false
     },
 
-    showImportRenderModal () {
+    showImportRenderModal() {
       this.modals.isImportRenderDisplayed = true
     },
 
-    hideImportRenderModal () {
+    hideImportRenderModal() {
       this.modals.isImportRenderDisplayed = false
     },
 
-    saveSearchQuery (searchQuery) {
-      this.savePeopleSearch(searchQuery)
-        .catch(console.error)
+    saveSearchQuery(searchQuery) {
+      this.savePeopleSearch(searchQuery).catch(console.error)
     },
 
-    removeSearchQuery (searchQuery) {
-      this.removePeopleSearch(searchQuery)
-        .catch(console.error)
+    removeSearchQuery(searchQuery) {
+      this.removePeopleSearch(searchQuery).catch(console.error)
     },
 
-    confirmBuildFilter (query) {
+    confirmBuildFilter(query) {
       this.modals.isBuildFilterDisplayed = false
       this.searchField.setValue(query)
       this.onSearchChange()
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: `${this.$t('people.title')} - Kitsu`
     }

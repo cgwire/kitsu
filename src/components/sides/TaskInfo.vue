@@ -1,13 +1,7 @@
 <template>
-  <div
-    class="side task-info"
-    ref="side-panel"
-    v-if="task"
-  >
+  <div class="side task-info" ref="side-panel" v-if="task">
     <div class="page-header">
-      <div
-        class="flexrow header-title"
-      >
+      <div class="flexrow header-title">
         <div class="title flexrow-item">
           <router-link :to="taskEntityPath">
             {{ task ? title : 'Loading...' }}
@@ -20,9 +14,7 @@
           v-if="currentTaskType"
         />
       </div>
-      <div
-        class="flexrow task-information"
-      >
+      <div class="flexrow task-information">
         <button-simple
           class="flexrow-item change-wideness-button"
           icon="right"
@@ -83,10 +75,7 @@
           >
             {{ preview.revision }}
           </span>
-          <router-link
-            class="history-button flexrow-item"
-            :to="taskPath"
-          >
+          <router-link class="history-button flexrow-item" :to="taskPath">
             <corner-right-up-icon size="0.9x" />
           </router-link>
         </div>
@@ -97,9 +86,7 @@
       <div class="task-column preview-column" v-if="isPreview">
         <div class="preview-column-content">
           <div class="preview">
-            <div
-              v-if="taskPreviews && taskPreviews.length > 0"
-            >
+            <div v-if="taskPreviews && taskPreviews.length > 0">
               <preview-player
                 :entity-preview-files="taskEntityPreviews"
                 :last-preview-files="lastFivePreviews"
@@ -163,7 +150,7 @@
             >
               <XyzTransitionGroup
                 appear
-                v-xyz="{fade: animOn, up: animOn, 'flip-up': animOn}"
+                v-xyz="{ fade: animOn, up: animOn, 'flip-up': animOn }"
               >
                 <comment
                   :key="'comment' + comment.id"
@@ -174,10 +161,10 @@
                   :is-first="index === 0"
                   :is-last="index === pinnedCount"
                   :is-change="isStatusChange(index)"
-                  :editable="(
-                    comment.person && user.id === comment.person.id ||
+                  :editable="
+                    (comment.person && user.id === comment.person.id) ||
                     isCurrentUserAdmin
-                  )"
+                  "
                   @duplicate-comment="onDuplicateComment"
                   @pin-comment="onPinComment"
                   @edit-comment="onEditComment"
@@ -191,7 +178,7 @@
             </div>
             <div class="no-comment" v-else-if="!loading.task">
               <em>
-                {{ $t('tasks.no_comment')}}
+                {{ $t('tasks.no_comment') }}
               </em>
             </div>
           </div>
@@ -333,7 +320,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       addExtraPreviewFormData: null,
       animOn: false,
@@ -377,7 +364,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.loadTaskData()
     if (this.$refs['add-comment']) {
       const draft = drafts.getTaskDraft(this.task.id)
@@ -410,23 +397,22 @@ export default {
       'user'
     ]),
 
-    currentTeam () {
+    currentTeam() {
       if (!this.task) return []
       const production = this.productionMap.get(this.task.project_id)
       return production.team.map(id => this.personMap.get(id))
     },
 
-    title () {
+    title() {
       if (this.task) {
-        const entityName =
-          this.task.full_entity_name || this.task.entity_name
+        const entityName = this.task.full_entity_name || this.task.entity_name
         return `${entityName}`
       } else {
         return 'Loading...'
       }
     },
 
-    isAssigned () {
+    isAssigned() {
       if (this.task) {
         return this.task.assignees.some(assigneeId => {
           return assigneeId === this.user.id
@@ -436,7 +422,7 @@ export default {
       }
     },
 
-    isCommentingAllowed () {
+    isCommentingAllowed() {
       if (this.task) {
         if (this.isCurrentUserManager) {
           return true
@@ -445,21 +431,23 @@ export default {
             return true
           } else {
             const taskType = this.taskTypeMap.get(this.task.task_type_id)
-            return taskType.department_id && this.user.departments.includes(
-              taskType.department_id)
+            return (
+              taskType.department_id &&
+              this.user.departments.includes(taskType.department_id)
+            )
           }
         } else if (this.isCurrentUserClient) {
           return true
-        } else if (this.task.assignees.find(
-          (personId) => personId === this.user.id
-        )) {
+        } else if (
+          this.task.assignees.find(personId => personId === this.user.id)
+        ) {
           return true
         }
       }
       return false
     },
 
-    isPreviewPlayerReadOnly () {
+    isPreviewPlayerReadOnly() {
       if (this.task) {
         if (this.isCurrentUserManager || this.isCurrentUserClient) {
           return false
@@ -468,35 +456,38 @@ export default {
             return false
           } else {
             const taskType = this.taskTypeMap.get(this.task.task_type_id)
-            return !(taskType.department_id && this.user.departments.includes(
-              taskType.department_id))
+            return !(
+              taskType.department_id &&
+              this.user.departments.includes(taskType.department_id)
+            )
           }
         }
       }
       return false
     },
 
-    isSetThumbnailAllowed () {
-      return this.currentPreviewId &&
+    isSetThumbnailAllowed() {
+      return (
+        this.currentPreviewId &&
         this.task &&
         this.task.entity &&
         this.currentPreviewId !== this.task.entity.preview_file_id &&
         this.extension !== 'gif'
+      )
     },
 
-    currentTaskType () {
+    currentTaskType() {
       return this.task ? this.taskTypeMap.get(this.task.task_type_id) : null
     },
 
-    currentPreview () {
+    currentPreview() {
       const index = this.currentPreviewIndex
-      return this.taskPreviews &&
-        this.taskPreviews.length > 0
+      return this.taskPreviews && this.taskPreviews.length > 0
         ? this.taskPreviews[index]
         : null
     },
 
-    currentPreviewId () {
+    currentPreviewId() {
       const index = this.currentPreviewIndex
       if (
         this.taskPreviews &&
@@ -509,26 +500,29 @@ export default {
       }
     },
 
-    currentFps () {
+    currentFps() {
       return this.productionMap.get(this.task.project_id).fps || '25'
     },
 
-    currentRevision () {
+    currentRevision() {
       return this.currentParentPreview && this.currentParentPreview.revision
         ? this.currentParentPreview.revision
-        : this.currentPreview ? this.currentPreview.revision : 0
+        : this.currentPreview
+        ? this.currentPreview.revision
+        : 0
     },
 
-    extension () {
+    extension() {
       const index = this.currentPreviewIndex
-      return this.taskPreviews &&
-        this.taskPreviews.length > 0
+      return this.taskPreviews && this.taskPreviews.length > 0
         ? this.taskPreviews[index].extension
         : ''
     },
 
-    isStandardPreview () {
-      return this.taskPreviews && this.taskPreviews.length > 0 &&
+    isStandardPreview() {
+      return (
+        this.taskPreviews &&
+        this.taskPreviews.length > 0 &&
         [
           'ai',
           'blend',
@@ -543,34 +537,44 @@ export default {
           'swf',
           'zip'
         ].includes(this.extension)
+      )
     },
 
-    isMoviePreview () {
-      return this.taskPreviews &&
-       this.taskPreviews.length > 0 && this.extension === 'mp4'
+    isMoviePreview() {
+      return (
+        this.taskPreviews &&
+        this.taskPreviews.length > 0 &&
+        this.extension === 'mp4'
+      )
     },
 
-    isPicturePreview () {
-      return this.taskPreviews &&
-       this.taskPreviews.length > 0 && ['png', 'gif'].includes(this.extension)
+    isPicturePreview() {
+      return (
+        this.taskPreviews &&
+        this.taskPreviews.length > 0 &&
+        ['png', 'gif'].includes(this.extension)
+      )
     },
 
-    is3DModelPreview () {
-      return this.taskPreviews &&
-       this.taskPreviews.length > 0 && this.extension === 'obj'
+    is3DModelPreview() {
+      return (
+        this.taskPreviews &&
+        this.taskPreviews.length > 0 &&
+        this.extension === 'obj'
+      )
     },
 
-    moviePath () {
+    moviePath() {
       let previewId = null
       previewId = this.currentPreview.id
       return `/api/movies/originals/preview-files/${previewId}.mp4`
     },
 
-    tasktypeStyle () {
+    tasktypeStyle() {
       return getTaskTypeStyle(this.task)
     },
 
-    taskPath () {
+    taskPath() {
       return getTaskPath(
         this.task,
         this.currentProduction,
@@ -580,12 +584,12 @@ export default {
       )
     },
 
-    taskEntityPath () {
+    taskEntityPath() {
       const episodeId = this.$route.params.episode_id
       return getTaskEntityPath(this.task, episodeId)
     },
 
-    lastFivePreviews () {
+    lastFivePreviews() {
       if (this.taskPreviews) {
         return this.taskPreviews.slice(0, 5)
       } else {
@@ -593,7 +597,7 @@ export default {
       }
     },
 
-    pinnedCount () {
+    pinnedCount() {
       if (!this.taskComments) return 0
       return this.taskComments.filter(c => c.pinned).length
     }
@@ -623,7 +627,7 @@ export default {
       'updatePreviewAnnotation'
     ]),
 
-    loadTaskData () {
+    loadTaskData() {
       if (this.task) {
         this.loading.task = true
         this.errors.task = false
@@ -642,11 +646,12 @@ export default {
       }
     },
 
-    addComment (comment, attachment, checklist, taskStatusId) {
+    addComment(comment, attachment, checklist, taskStatusId) {
       this.animOn = true
       this.$nextTick(() => {
         let preview = this.currentParentPreview
-          ? this.currentParentPreview : this.currentPreview
+          ? this.currentParentPreview
+          : this.currentPreview
         // find real preview, which contains the `revision`
         preview = this.taskPreviews.find(p => p.id === preview.id)
         const params = {
@@ -661,7 +666,8 @@ export default {
         this.loading.addComment = true
         this.errors.addComment = false
         this.errors.addCommentMaxRetakes = false
-        this.$store.dispatch(action, params)
+        this.$store
+          .dispatch(action, params)
           .then(() => {
             drafts.clearTaskDraft(this.task.id)
             this.reset()
@@ -669,7 +675,7 @@ export default {
             this.loading.addComment = false
             this.$emit('comment-added')
           })
-          .catch((err) => {
+          .catch(err => {
             console.error(err)
             const isRetakeError =
               err.response &&
@@ -679,12 +685,11 @@ export default {
             this.errors.addCommentMaxRetakes = isRetakeError
             this.loading.addComment = false
           })
-          .finally(() => {
-          })
+          .finally(() => {})
       })
     },
 
-    reset () {
+    reset() {
       this.resetModals()
       if (this.task) {
         this.taskComments = this.getTaskComments(this.task.id)
@@ -699,47 +704,44 @@ export default {
       }
     },
 
-    focusCommentTextarea () {
+    focusCommentTextarea() {
       if (this.$refs['add-comment']) this.$refs['add-comment'].focus()
     },
 
-    getOriginalPath () {
+    getOriginalPath() {
       const previewId = this.currentPreviewId
       const extension = this.extension ? this.extension : 'png'
       return `/api/pictures/originals/preview-files/${previewId}.${extension}`
     },
 
-    getOriginalDlPath () {
+    getOriginalDlPath() {
       const previewId = this.currentPreviewId
       return `/api/pictures/originals/preview-files/${previewId}/download`
     },
 
-    setOtherPreviews () {
+    setOtherPreviews() {
       if (this.taskPreviews) {
-        this.otherPreviews = this.taskPreviews.filter((p) => {
-          return (
-            p.id !== this.currentPreviewId &&
-            p.extension === 'mp4'
-          )
+        this.otherPreviews = this.taskPreviews.filter(p => {
+          return p.id !== this.currentPreviewId && p.extension === 'mp4'
         })
       }
       return this.otherPreviews
     },
 
-    selectFile (forms) {
+    selectFile(forms) {
       this.loadPreviewFileFormData(forms)
       this.previewForms = forms
     },
 
-    onPreviewFormRemoved (previewForm) {
+    onPreviewFormRemoved(previewForm) {
       this.previewForms = this.previewForms.filter(f => f !== previewForm)
     },
 
-    clearPreviewFiles () {
+    clearPreviewFiles() {
       this.previewForms = []
     },
 
-    createExtraPreview () {
+    createExtraPreview() {
       const index = this.currentPreviewIndex
       this.errors.addExtraPreview = false
       this.loading.addExtraPreview = true
@@ -757,14 +759,14 @@ export default {
           }, 0)
           this.modals.addExtraPreview = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.addExtraPreview = false
           this.errors.addExtraPreview = true
         })
     },
 
-    onPreviewAdded (eventData) {
+    onPreviewAdded(eventData) {
       const taskId = eventData.task_id
       const commentId = eventData.comment_id
       const previewId = eventData.preview_file_id
@@ -772,16 +774,12 @@ export default {
       const extension = eventData.extension
       const comment = this.getTaskComment(taskId, commentId)
 
-      if (
-        this.task
-      ) {
+      if (this.task) {
         if (
           taskId === this.task.id &&
           comment &&
-          (
-            comment.previews.length === 0 ||
-            comment.previews[0].id !== previewId
-          )
+          (comment.previews.length === 0 ||
+            comment.previews[0].id !== previewId)
         ) {
           this.$store.commit('ADD_PREVIEW_END', {
             preview: {
@@ -798,53 +796,55 @@ export default {
       }
     },
 
-    onAnnotationChanged ({ preview, additions, deletions, updates }) {
-      const taskId = this.task
-        ? this.task.id
-        : this.previousTaskId
+    onAnnotationChanged({ preview, additions, deletions, updates }) {
+      const taskId = this.task ? this.task.id : this.previousTaskId
       if (taskId) {
         this.updatePreviewAnnotation({
-          taskId, preview, additions, deletions, updates
+          taskId,
+          preview,
+          additions,
+          deletions,
+          updates
         })
       }
     },
 
-    onAddPreviewClicked (comment) {
+    onAddPreviewClicked(comment) {
       this.modals.addPreview = true
     },
 
-    onAddExtraPreview () {
+    onAddExtraPreview() {
       this.modals.addExtraPreview = true
     },
 
-    onRemoveExtraPreview (preview) {
+    onRemoveExtraPreview(preview) {
       this.currentExtraPreviewId = preview.id
       this.modals.deleteExtraPreview = true
     },
 
-    onCommentAdded () {
+    onCommentAdded() {
       this.taskComments = this.getTaskComments(this.task.id)
     },
 
-    onCancelRemoveExtraPreview () {
+    onCancelRemoveExtraPreview() {
       this.modals.deleteExtraPreview = false
     },
 
-    onClosePreview () {
+    onClosePreview() {
       this.modals.addPreview = false
     },
 
-    onCloseExtraPreview () {
+    onCloseExtraPreview() {
       this.modals.addExtraPreview = false
     },
 
-    onPreviewChanged (index) {
+    onPreviewChanged(index) {
       this.currentPreviewIndex = index
       this.currentPreviewPath = this.getOriginalPath()
       this.currentPreviewDlPath = this.getOriginalDlPath()
     },
 
-    changeCurrentPreview (previewFile) {
+    changeCurrentPreview(previewFile) {
       const index = this.taskPreviews.findIndex(p => p.id === previewFile.id)
       if (index || index === 0) {
         this.currentPreviewIndex = index
@@ -853,7 +853,7 @@ export default {
       }
     },
 
-    setCurrentPreviewAsEntityThumbnail () {
+    setCurrentPreviewAsEntityThumbnail() {
       this.setPreview({
         taskId: this.task.id,
         entityId: this.task.entity.id,
@@ -861,7 +861,7 @@ export default {
       })
     },
 
-    toggleSubscribe () {
+    toggleSubscribe() {
       if (this.task && !this.isAssigned) {
         if (this.task.is_subscribed) {
           this.unsubscribeFromTask(this.task.id)
@@ -871,7 +871,7 @@ export default {
       }
     },
 
-    toggleWidth () {
+    toggleWidth() {
       this.isWide = !this.isWide
       const panel = this.$refs['side-panel']
       if (this.isWide) {
@@ -881,7 +881,7 @@ export default {
       }
     },
 
-    toggleExtraWidth () {
+    toggleExtraWidth() {
       this.isExtraWide = !this.isExtraWide
       const panel = this.$refs['side-panel']
       if (this.isExtraWide) {
@@ -891,37 +891,37 @@ export default {
       }
     },
 
-    onAckComment (comment) {
+    onAckComment(comment) {
       this.ackComment(comment)
     },
 
-    onDuplicateComment (comment) {
+    onDuplicateComment(comment) {
       this.$refs['add-comment'].setValue(comment)
     },
 
-    onPinComment (comment) {
+    onPinComment(comment) {
       this.pinComment(comment)
     },
 
-    onEditComment (comment) {
+    onEditComment(comment) {
       this.commentToEdit = comment
       this.modals.editComment = true
     },
 
-    onDeleteComment (comment) {
+    onDeleteComment(comment) {
       this.commentToEdit = comment
       this.modals.deleteComment = true
     },
 
-    onCancelEditComment (comment) {
+    onCancelEditComment(comment) {
       this.modals.editComment = false
     },
 
-    onCancelDeleteComment (comment) {
+    onCancelDeleteComment(comment) {
       this.modals.deleteComment = false
     },
 
-    saveComment (comment, checklist) {
+    saveComment(comment, checklist) {
       this.editTaskComment({
         taskId: this.task.id,
         comment,
@@ -929,7 +929,7 @@ export default {
       })
     },
 
-    confirmDeleteTaskComment () {
+    confirmDeleteTaskComment() {
       this.animOn = true
       this.loading.deleteComment = true
       this.errors.deleteComment = false
@@ -944,7 +944,7 @@ export default {
           this.loading.deleteComment = false
           this.modals.deleteComment = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.deleteComment = false
           this.errors.deleteComment = true
@@ -954,16 +954,16 @@ export default {
         })
     },
 
-    getCurrentTaskComments () {
+    getCurrentTaskComments() {
       return this.getTaskComments(this.task.id)
     },
 
-    confirmDeleteTaskPreview () {
+    confirmDeleteTaskPreview() {
       this.loading.deleteExtraPreview = true
       this.errors.deleteExtraPreview = false
       const previewId = this.currentExtraPreviewId
-      const comment = this.getCurrentTaskComments().find((comment) => {
-        return comment.previews.findIndex((p) => p.id === previewId) >= 0
+      const comment = this.getCurrentTaskComments().find(comment => {
+        return comment.previews.findIndex(p => p.id === previewId) >= 0
       })
 
       this.$refs['preview-player'].displayFirst()
@@ -976,28 +976,22 @@ export default {
           this.loading.deleteExtraPreview = false
           this.modals.deleteExtraPreview = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.deleteExtraPreview = false
           this.errors.deleteExtraPreview = true
         })
     },
 
-    onRemoteAcknowledge (eventData, type) {
+    onRemoteAcknowledge(eventData, type) {
       if (this.task) {
         const comment = this.getTaskComment(this.task.id, eventData.comment_id)
         const user = this.personMap.get(eventData.person_id)
         if (comment && user) {
           if (this.user.id === user.id) {
             if (
-              (
-                type === 'ack' &&
-                !comment.acknowledgements.includes(user.id)
-              ) ||
-              (
-                type === 'unack' &&
-                comment.acknowledgements.includes(user.id)
-              )
+              (type === 'ack' && !comment.acknowledgements.includes(user.id)) ||
+              (type === 'unack' && comment.acknowledgements.includes(user.id))
             ) {
               this.$store.commit('ACK_COMMENT', { comment, user })
             }
@@ -1008,7 +1002,7 @@ export default {
       }
     },
 
-    isStatusChange (index) {
+    isStatusChange(index) {
       const comment = this.taskComments[index]
       return (
         index === this.taskComments.length - 1 ||
@@ -1016,30 +1010,37 @@ export default {
       )
     },
 
-    timeCodeClicked (
-      { versionRevision, minutes, seconds, milliseconds, frame }
-    ) {
+    timeCodeClicked({
+      versionRevision,
+      minutes,
+      seconds,
+      milliseconds,
+      frame
+    }) {
       if (!this.isPreview) {
-        this.$emit(
-          'time-code-clicked',
-          { versionRevision, minutes, seconds, milliseconds, frame }
-        )
+        this.$emit('time-code-clicked', {
+          versionRevision,
+          minutes,
+          seconds,
+          milliseconds,
+          frame
+        })
         return
       }
-      this.changeCurrentPreview(this.taskPreviews.find(
-        p => p.revision === parseInt(versionRevision)
-      ))
+      this.changeCurrentPreview(
+        this.taskPreviews.find(p => p.revision === parseInt(versionRevision))
+      )
       setTimeout(() => {
         this.$refs['preview-player'].setCurrentFrame(frame)
         this.$refs['preview-player'].focus()
       }, 20)
     },
 
-    onTimeUpdated (time) {
+    onTimeUpdated(time) {
       this.currentTime = time
     },
 
-    async extractAnnotationSnapshots () {
+    async extractAnnotationSnapshots() {
       let previewPlayer = this.$refs['preview-player']
       if (!previewPlayer) previewPlayer = this.$parent
       this.$refs['add-comment'].showAnnotationLoading()
@@ -1049,7 +1050,7 @@ export default {
       return files
     },
 
-    onExportClick () {
+    onExportClick() {
       const nameData = [
         moment().format('YYYY-MM-DD'),
         'kitsu',
@@ -1074,12 +1075,21 @@ export default {
           comment.task_status.name,
           comment.person.name,
           comment.text,
-          (comment.checklist) ? comment.checklist.map(checkListElement =>
-          `[${checkListElement.checked ? 'x' : ' '}] ${checkListElement.text}`)
-            .join('\n') : '',
-          (comment.acknowledgements) ? comment.acknowledgements.map(personId =>
-            this.personMap.get(personId).name)
-            .join(',') : ''
+          comment.checklist
+            ? comment.checklist
+                .map(
+                  checkListElement =>
+                    `[${checkListElement.checked ? 'x' : ' '}] ${
+                      checkListElement.text
+                    }`
+                )
+                .join('\n')
+            : '',
+          comment.acknowledgements
+            ? comment.acknowledgements
+                .map(personId => this.personMap.get(personId).name)
+                .join(',')
+            : ''
         ])
         if (comment.replies) {
           comment.replies.forEach(reply =>
@@ -1097,13 +1107,10 @@ export default {
   },
 
   watch: {
-    task () {
+    task() {
       this.previewForms = []
       this.currentPreviewIndex = 0
-      if (
-        this.previousTaskId &&
-        this.$refs['add-comment']
-      ) {
+      if (this.previousTaskId && this.$refs['add-comment']) {
         const lastComment = `${this.$refs['add-comment'].text}`
         const previousDraft = drafts.getTaskDraft(this.previousTaskId)
         if (
@@ -1128,17 +1135,16 @@ export default {
 
   socket: {
     events: {
-      'preview-file:add-file' (eventData) {
+      'preview-file:add-file'(eventData) {
         this.onPreviewAdded(eventData)
       },
 
-      'preview-file:update' (eventData) {
+      'preview-file:update'(eventData) {
         const comment = this.taskComments.find(
-          c => (
+          c =>
             c.previews &&
             c.previews.length > 0 &&
             c.previews[0].id === eventData.preview_file_id
-          )
         )
         if (comment && this.task) {
           this.refreshPreview({
@@ -1150,7 +1156,7 @@ export default {
         }
       },
 
-      'task:update' (eventData) {
+      'task:update'(eventData) {
         const task = this.getTask()
         // Wait for data to be reinitialized by App.vue to update comments.
         if (task && eventData.task_id === task.id) {
@@ -1164,12 +1170,10 @@ export default {
         }
       },
 
-      'comment:new' (eventData) {
+      'comment:new'(eventData) {
         setTimeout(() => {
           this.animOn = true
-          const comments = this.task
-            ? this.getTaskComments(this.task.id)
-            : null
+          const comments = this.task ? this.getTaskComments(this.task.id) : null
           if (
             this.task &&
             comments &&
@@ -1184,24 +1188,22 @@ export default {
         }, 1000)
       },
 
-      'comment:acknowledge' (eventData) {
+      'comment:acknowledge'(eventData) {
         this.onRemoteAcknowledge(eventData, 'ack')
       },
 
-      'comment:unacknowledge' (eventData) {
+      'comment:unacknowledge'(eventData) {
         this.onRemoteAcknowledge(eventData, 'unack')
       },
 
-      'comment:reply' (eventData) {
+      'comment:reply'(eventData) {
         if (this.task) {
           const comment = this.taskComments.find(
             c => c.id === eventData.comment_id
           )
           if (comment) {
             if (!comment.replies) comment.replies = []
-            const reply = comment.replies.find(
-              r => r.id === eventData.reply_id
-            )
+            const reply = comment.replies.find(r => r.id === eventData.reply_id)
             if (!reply) {
               this.refreshComment({
                 taskId: this.task.id,
@@ -1216,14 +1218,12 @@ export default {
         }
       },
 
-      'comment:delete' (eventData) {
+      'comment:delete'(eventData) {
         const task = this.getTask()
         this.animOn = true
         if (task) {
           const comments = this.getComments()
-          const comment = comments.find(
-            c => c.id === eventData.comment_id
-          )
+          const comment = comments.find(c => c.id === eventData.comment_id)
           if (comment) {
             this.$store.commit('REMOVE_TASK_COMMENT', { task, comment })
             this.taskComments = this.getTaskComments(this.task.id)
@@ -1233,7 +1233,7 @@ export default {
         }
       },
 
-      'comment:delete-reply' (eventData) {
+      'comment:delete-reply'(eventData) {
         if (this.task) {
           const comment = this.taskComments.find(
             c => c.id === eventData.comment_id
@@ -1248,7 +1248,7 @@ export default {
         }
       },
 
-      'preview-file:annotation-update' (eventData) {
+      'preview-file:annotation-update'(eventData) {
         const previewPlayer = this.$refs['preview-player']
         if (!previewPlayer) return
         const isValid = previewPlayer.isValidPreviewModification(
@@ -1279,7 +1279,7 @@ export default {
   .comment,
   .preview-column-content,
   .no-comment {
-    background: #46494F;
+    background: #46494f;
     border-color: $dark-grey;
     box-shadow: 0px 0px 6px #333;
   }
@@ -1289,7 +1289,7 @@ export default {
   }
 
   .side {
-    background: #36393F;
+    background: #36393f;
   }
 
   .task-info {
@@ -1298,14 +1298,14 @@ export default {
 }
 
 .side {
-  background: #F8F8F8;
+  background: #f8f8f8;
   min-height: 100%;
 }
 
 .add-comment {
   padding: 0.5em;
   margin-bottom: 0.5em;
-  box-shadow: 0px 0px 6px #E0E0E0;
+  box-shadow: 0px 0px 6px #e0e0e0;
 }
 
 .page-header {
@@ -1338,7 +1338,7 @@ export default {
   background: white;
   padding: 1em;
   border-radius: 5px;
-  box-shadow: 0px 0px 6px #E0E0E0;
+  box-shadow: 0px 0px 6px #e0e0e0;
 }
 
 .task-columns {
@@ -1355,7 +1355,7 @@ export default {
   border-bottom: 1px solid $white-grey;
   border-right: 1px solid $white-grey;
   margin-top: 0.1em;
-  box-shadow: 0px 0px 6px #E0E0E0;
+  box-shadow: 0px 0px 6px #e0e0e0;
 }
 
 .add-preview-button {
@@ -1365,7 +1365,7 @@ export default {
 
 .no-comment {
   background: white;
-  box-shadow: 0px 0px 6px #E0E0E0;
+  box-shadow: 0px 0px 6px #e0e0e0;
 }
 
 .comments {
@@ -1373,7 +1373,7 @@ export default {
 }
 
 .preview-colum-content {
-  box-shadow: 0px 0px 6px #E0E0E0;
+  box-shadow: 0px 0px 6px #e0e0e0;
 }
 
 .preview-standard-file {

@@ -1,25 +1,22 @@
 <template>
-<div class="field">
-  <label class="label">{{ label }}</label>
-  <div class="control colors">
-    <div
-      :ref="'color-' + index"
-      :key="'color-' + index"
-      :class="{
-        color: true,
-        selected: value === color
-      }"
-      :style="{ 'border-color': color }"
-      v-for="(color, index) in colors"
-      @click="colorChanged(color)"
-    >
-      <span
-        :style="{ background: color }"
+  <div class="field">
+    <label class="label">{{ label }}</label>
+    <div class="control colors">
+      <div
+        :ref="'color-' + index"
+        :key="'color-' + index"
+        :class="{
+          color: true,
+          selected: value === color
+        }"
+        :style="{ 'border-color': color }"
+        v-for="(color, index) in colors"
+        @click="colorChanged(color)"
       >
-      </span>
+        <span :style="{ background: color }"> </span>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -73,19 +70,17 @@ export default {
       ]
     }
   },
-  data () {
+  data() {
     return {
       selectedColor: '#999999'
     }
   },
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
   methods: {
-    ...mapActions([
-    ]),
-    colorChanged (color, index) {
+    ...mapActions([]),
+    colorChanged(color, index) {
       this.$emit('input', color)
     }
   }

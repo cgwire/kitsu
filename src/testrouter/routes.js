@@ -70,7 +70,6 @@ const ADMIN_PAGES = [
 ]
 
 export const routes = [
-
   {
     path: '',
     component: Main,
@@ -89,14 +88,14 @@ export const routes = [
         return next({ name: 'wrong-browser' })
       }
 
-      auth.requireAuth(to, from, (nextPath) => {
+      auth.requireAuth(to, from, nextPath => {
         if (nextPath) {
           next(nextPath)
         } else {
           timezone.setTimezone()
           lang.setLocale()
           if (store.state.productions.openProductions.length === 0) {
-            init((err) => {
+            init(err => {
               if (err) {
                 next({ name: 'server-down' })
               } else {
@@ -126,7 +125,7 @@ export const routes = [
     component: Main,
 
     beforeEnter: (to, from, next) => {
-      auth.requireAuth(to, from, (nextPath) => {
+      auth.requireAuth(to, from, nextPath => {
         if (nextPath) {
           next(nextPath)
         } else {
@@ -408,9 +407,7 @@ export const routes = [
         path: 'todos',
         component: Todos,
         name: 'todos',
-        children: [
-          { path: ':tab', component: Todos, name: 'todos-tab' }
-        ]
+        children: [{ path: ':tab', component: Todos, name: 'todos-tab' }]
       },
 
       {
@@ -588,8 +585,7 @@ export const routes = [
             name: 'new-asset'
           },
           {
-            path:
-            'edit/:asset_id',
+            path: 'edit/:asset_id',
             component: Assets,
             name: 'edit-asset'
           },

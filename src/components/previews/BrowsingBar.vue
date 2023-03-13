@@ -1,50 +1,49 @@
 <template>
-<div class="left flexrow">
-  <button-simple
-    class="flexrow-item"
-    icon="left"
-    :title="$t('playlists.actions.files_previous')"
-    @click="$emit('previous-clicked')"
-    v-if="isBigDisplay || !isMovie"
-  />
+  <div class="left flexrow">
+    <button-simple
+      class="flexrow-item"
+      icon="left"
+      :title="$t('playlists.actions.files_previous')"
+      @click="$emit('previous-clicked')"
+      v-if="isBigDisplay || !isMovie"
+    />
 
-  <div
-    class="flexrow-item bar-element current-index"
-    :title="$t('playlists.actions.files_position')"
-    @click="$emit('current-index-clicked')"
-    v-if="isBigDisplay || !isMovie"
-  >
-    <span>{{ currentIndex }}</span>
-    <span v-if="fullScreen || !isMovie"> / {{ previews.length }}</span>
+    <div
+      class="flexrow-item bar-element current-index"
+      :title="$t('playlists.actions.files_position')"
+      @click="$emit('current-index-clicked')"
+      v-if="isBigDisplay || !isMovie"
+    >
+      <span>{{ currentIndex }}</span>
+      <span v-if="fullScreen || !isMovie"> / {{ previews.length }}</span>
+    </div>
+
+    <button-simple
+      class="flexrow-item"
+      icon="right"
+      :title="$t('playlists.actions.files_next')"
+      @click="$emit('next-clicked')"
+      v-if="isBigDisplay || !isMovie"
+    />
+
+    <button-simple
+      class="flexrow-item"
+      icon="plus"
+      :title="$t('playlists.actions.files_add')"
+      @click="$emit('add-preview-clicked')"
+      v-if="(isAssigned || !readOnly) && !fullScreen"
+    />
+
+    <button-simple
+      class="flexrow-item"
+      icon="delete"
+      :title="$t('playlists.actions.files_delete')"
+      @click="$emit('remove-preview-clicked')"
+      v-if="!readOnly && !fullScreen && !light"
+    />
+
+    <div class="separator" v-if="isBigDisplay"></div>
   </div>
-
-  <button-simple
-    class="flexrow-item"
-    icon="right"
-    :title="$t('playlists.actions.files_next')"
-    @click="$emit('next-clicked')"
-    v-if="isBigDisplay || !isMovie"
-  />
-
-  <button-simple
-    class="flexrow-item"
-    icon="plus"
-    :title="$t('playlists.actions.files_add')"
-    @click="$emit('add-preview-clicked')"
-    v-if="(isAssigned || !readOnly) && !fullScreen"
-  />
-
-  <button-simple
-    class="flexrow-item"
-    icon="delete"
-    :title="$t('playlists.actions.files_delete')"
-    @click="$emit('remove-preview-clicked')"
-    v-if="!readOnly && !fullScreen && !light"
-  />
-
-  <div class="separator" v-if="isBigDisplay">
-  </div>
-</div>
 </template>
 
 <script>
@@ -86,14 +85,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ]),
+    ...mapGetters([]),
 
-    isBigDisplay () {
+    isBigDisplay() {
       return (!this.light || this.fullScreen) && this.previews.length > 1
     },
 
-    isMovie () {
+    isMovie() {
       if (this.previews.length < this.currentIndex) {
         return false
       } else {
@@ -103,8 +101,7 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   },
 
   watch: {}
@@ -119,7 +116,7 @@ export default {
 .buttons .button {
   background: $dark-grey-2;
   border-radius: 0;
-  color: #BBB;
+  color: #bbb;
   border: 0;
   margin: 0;
   transition: all 0.3 ease;
@@ -136,7 +133,7 @@ export default {
 
 .buttons .button.active,
 .buttons .button:hover {
-  color: #43B581;
+  color: #43b581;
 }
 
 .bar-element {

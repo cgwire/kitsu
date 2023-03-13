@@ -1,12 +1,11 @@
 <template>
-<div
-  @click="$emit('click')"
-  :class="{
-    'c-mask': true,
-    'is-active': displayed
-  }"
->
-</div>
+  <div
+    @click="$emit('click')"
+    :class="{
+      'c-mask': true,
+      'is-active': displayed
+    }"
+  ></div>
 </template>
 
 <script>
@@ -20,10 +19,8 @@ export default {
     }
   },
 
-  computed: {
-  }
+  computed: {}
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
