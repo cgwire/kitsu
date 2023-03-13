@@ -1,56 +1,54 @@
 <template>
-<div class="field" v-if="!isSimple">
-  <label class="label" v-if="label.length > 0">
-    {{ label }}
-  </label>
-  <p class="control">
-    <span
-      :class="{
-        select: true,
-      }"
-    >
-      <select
-        class="select-input"
-        ref="select"
-        :disabled="disabled"
-        @keyup.enter="emitEnter()"
-        @change="updateValue"
+  <div class="field" v-if="!isSimple">
+    <label class="label" v-if="label.length > 0">
+      {{ label }}
+    </label>
+    <p class="control">
+      <span
+        :class="{
+          select: true
+        }"
       >
-        <option
-          v-for="(option, i) in options"
-          :key="i + '-' + option.label + '-' + option.value"
-          :value="option.value !== null && option.value !== undefined
-            ? option.value
-            : option.label"
-          :selected="value === option.value"
+        <select
+          class="select-input"
+          ref="select"
+          :disabled="disabled"
+          @keyup.enter="emitEnter()"
+          @change="updateValue"
         >
-          {{ getOptionLabel(option) }}
-        </option>
-      </select>
-    </span>
-  </p>
-</div>
-<span
-  class="select"
-  v-else
->
-  <select
-    class="select-input"
-    ref="select"
-    @keyup.enter="emitEnter()"
-    @change="updateValue"
-  >
-    <option
-      v-for="(option, i) in options"
-      :key="i + '-' + option.label + '-' + option.value"
-      :value="option.value || option.label"
-      :selected="value === option.value"
+          <option
+            v-for="(option, i) in options"
+            :key="i + '-' + option.label + '-' + option.value"
+            :value="
+              option.value !== null && option.value !== undefined
+                ? option.value
+                : option.label
+            "
+            :selected="value === option.value"
+          >
+            {{ getOptionLabel(option) }}
+          </option>
+        </select>
+      </span>
+    </p>
+  </div>
+  <span class="select" v-else>
+    <select
+      class="select-input"
+      ref="select"
+      @keyup.enter="emitEnter()"
+      @change="updateValue"
     >
-      {{ getOptionLabel(option) }}
-    </option>
-  </select>
-</span>
-
+      <option
+        v-for="(option, i) in options"
+        :key="i + '-' + option.label + '-' + option.value"
+        :value="option.value || option.label"
+        :selected="value === option.value"
+      >
+        {{ getOptionLabel(option) }}
+      </option>
+    </select>
+  </span>
 </template>
 
 <script>
@@ -84,18 +82,17 @@ export default {
     }
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
-    updateValue () {
+    updateValue() {
       this.$emit('input', parseInt(this.$refs.select.value))
     },
-    emitEnter () {
+    emitEnter() {
       this.$emit('enter', parseInt(this.$refs.select.value))
     },
 
-    getOptionLabel (option) {
+    getOptionLabel(option) {
       if (this.localeKeyPrefix.length > 0) {
         return this.$t(this.localeKeyPrefix + option.label.toLowerCase())
       } else {

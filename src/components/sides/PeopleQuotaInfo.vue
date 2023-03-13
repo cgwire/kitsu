@@ -1,44 +1,33 @@
 <template>
-<div class="people-timesheet-info">
-  <div class="close">
-    <router-link class="close-button" :to="closeRoute">
-      <x-icon />
-    </router-link>
-  </div>
+  <div class="people-timesheet-info">
+    <div class="close">
+      <router-link class="close-button" :to="closeRoute">
+        <x-icon />
+      </router-link>
+    </div>
 
-  <div class="flexrow">
-    <people-avatar class="flexrow-item" :person="person" :no-cache=true />
-    <page-title class="flexrow-item" :text="person.full_name" />
-  </div>
-  <div
-    class="info-date"
-    v-if="isMonthInfo"
-  >
-    {{ monthString }} {{ year }}
-  </div>
+    <div class="flexrow">
+      <people-avatar class="flexrow-item" :person="person" :no-cache="true" />
+      <page-title class="flexrow-item" :text="person.full_name" />
+    </div>
+    <div class="info-date" v-if="isMonthInfo">{{ monthString }} {{ year }}</div>
 
-  <div
-    class="info-date"
-    v-else-if="isWeekInfo"
-  >
-    week {{ week }}, {{ startDay }} - {{ endDay }} {{ weekMonth }} {{ year }}
-  </div>
+    <div class="info-date" v-else-if="isWeekInfo">
+      week {{ week }}, {{ startDay }} - {{ endDay }} {{ weekMonth }} {{ year }}
+    </div>
 
-  <div
-    class="info-date"
-    v-else-if="isDayInfo"
-  >
-    {{ day }} {{ monthString }} {{ year }}
-  </div>
+    <div class="info-date" v-else-if="isDayInfo">
+      {{ day }} {{ monthString }} {{ year }}
+    </div>
 
-  <quota-shot-list
-    class="time-spent-list"
-    :count-mode="countMode"
-    :shots="shots"
-    :is-loading="isLoading"
-    :is-error="isLoadingError"
-  />
-</div>
+    <quota-shot-list
+      class="time-spent-list"
+      :count-mode="countMode"
+      :shots="shots"
+      :is-loading="isLoading"
+      :is-error="isLoadingError"
+    />
+  </div>
 </template>
 
 <script>
@@ -101,20 +90,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction'
-    ]),
+    ...mapGetters(['currentEpisode', 'currentProduction']),
 
-    startDay () {
-      return moment()
-        .day('Monday')
-        .year(this.year)
-        .week(this.week)
-        .date()
+    startDay() {
+      return moment().day('Monday').year(this.year).week(this.week).date()
     },
 
-    endDay () {
+    endDay() {
       return moment()
         .day('Monday')
         .year(this.year)
@@ -123,7 +105,7 @@ export default {
         .date()
     },
 
-    weekMonth () {
+    weekMonth() {
       return moment()
         .day('Monday')
         .year(this.year)
@@ -131,23 +113,23 @@ export default {
         .format('MMM')
     },
 
-    monthString () {
+    monthString() {
       return monthToString(this.month)
     },
 
-    isMonthInfo () {
+    isMonthInfo() {
       return this.$route.path.indexOf('month') > 0
     },
 
-    isWeekInfo () {
+    isWeekInfo() {
       return this.$route.path.indexOf('week') > 0
     },
 
-    isDayInfo () {
+    isDayInfo() {
       return this.$route.path.indexOf('day') > 0
     },
 
-    closeRoute () {
+    closeRoute() {
       if (!this.currentProduction) return {}
       let route = {
         name: 'quota',
@@ -185,10 +167,9 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    onCloseClicked () {
+    onCloseClicked() {
       this.$emit('close')
     }
   }

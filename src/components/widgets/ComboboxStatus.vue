@@ -1,72 +1,63 @@
 <template>
-<div
-  :class="{
-    field: withMargin,
-    'field--narrow': narrow
-  }"
->
-  <label class="label" v-if="label.length > 0">
-    {{ label }}
-  </label>
   <div
-    class="status-combo"
-    :style="comboStyles"
+    :class="{
+      field: withMargin,
+      'field--narrow': narrow
+    }"
   >
-    <div
-      class="flexrow"
-      @click="toggleStatusList"
-    >
-      <div
-        class="selected-status-line flexrow-item"
-      >
-        <span
-          class="tag"
-          :style="{
-            background: backgroundColor(currentStatus),
-            color: color(currentStatus)
+    <label class="label" v-if="label.length > 0">
+      {{ label }}
+    </label>
+    <div class="status-combo" :style="comboStyles">
+      <div class="flexrow" @click="toggleStatusList">
+        <div class="selected-status-line flexrow-item">
+          <span
+            class="tag"
+            :style="{
+              background: backgroundColor(currentStatus),
+              color: color(currentStatus)
+            }"
+            v-if="currentStatus"
+          >
+            {{ currentStatus.short_name }}
+          </span>
+        </div>
+        <chevron-down-icon
+          :class="{
+            'down-icon': true,
+            'flexrow-item': true,
+            white: colorOnly
           }"
-          v-if="currentStatus"
-        >
-          {{ currentStatus.short_name }}
-        </span>
+        />
       </div>
-      <chevron-down-icon :class="{
-        'down-icon': true,
-        'flexrow-item': true,
-        'white': colorOnly
-      }"/>
-    </div>
-    <div
-      ref="select"
-      :class="{
-        'select-input': true,
-        'open-top': openTop
-      }"
-      v-if="showStatusList"
-    >
       <div
-        :key="status.id"
-        class="status-line"
-        @click="selectStatus(status)"
-        v-for="status in taskStatusList"
+        ref="select"
+        :class="{
+          'select-input': true,
+          'open-top': openTop
+        }"
+        v-if="showStatusList"
       >
-        <span
-          class="tag"
-          :style="{
-            background: backgroundColor(status),
-            color: color(status)
-          }"
+        <div
+          :key="status.id"
+          class="status-line"
+          @click="selectStatus(status)"
+          v-for="status in taskStatusList"
         >
-          {{ status.short_name }}
-        </span>
+          <span
+            class="tag"
+            :style="{
+              background: backgroundColor(status),
+              color: color(status)
+            }"
+          >
+            {{ status.short_name }}
+          </span>
+        </div>
       </div>
     </div>
+    <combobox-mask :displayed="showStatusList" @click="toggleStatusList" />
   </div>
-  <combobox-mask
-    :displayed="showStatusList"
-    @click="toggleStatusList"
-  />
-</div>
 </template>
 
 <script>
@@ -84,7 +75,7 @@ export default {
     ComboboxMask
   },
 
-  data () {
+  data() {
     return {
       showStatusList: false
     }
@@ -125,17 +116,14 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.selectedTaskStatus = this.taskStatus
   },
 
   computed: {
-    ...mapGetters([
-      'isDarkTheme',
-      'taskStatusMap'
-    ]),
+    ...mapGetters(['isDarkTheme', 'taskStatusMap']),
 
-    currentStatus () {
+    currentStatus() {
       if (this.value) {
         return this.taskStatusMap.get(this.value)
       } else if (this.addPlaceholder) {
@@ -148,44 +136,38 @@ export default {
       }
     },
 
-    comboStyles () {
+    comboStyles() {
       return {
         background: this.colorOnly
           ? this.backgroundColor(this.currentStatus)
           : this.isDarkTheme
-            ? '#36393F'
-            : '#FEFEFE',
-        color: this.colorOnly
-          ? this.color(this.currentStatus)
-          : 'inherit',
+          ? '#36393F'
+          : '#FEFEFE',
+        color: this.colorOnly ? this.color(this.currentStatus) : 'inherit',
         'border-top-left-radius': this.colorOnly ? '20px' : '10px',
         'border-top-right-radius': this.colorOnly ? '0px' : '10px',
         'border-bottom-left-radius': this.showStatusList
           ? '0'
           : this.colorOnly
-            ? '20px'
-            : '10px',
+          ? '20px'
+          : '10px',
         'border-bottom-right-radius': this.showStatusList
           ? '0'
           : this.colorOnly
-            ? '0px'
-            : '10px'
+          ? '0px'
+          : '10px'
       }
     }
-
   },
 
   methods: {
-    selectStatus (status) {
+    selectStatus(status) {
       this.$emit('input', status.id)
       this.showStatusList = false
     },
 
-    backgroundColor (taskStatus) {
-      if (
-        (!taskStatus || taskStatus.name === 'Todo') &&
-        !this.isDarkTheme
-      ) {
+    backgroundColor(taskStatus) {
+      if ((!taskStatus || taskStatus.name === 'Todo') && !this.isDarkTheme) {
         return '#ECECEC'
       } else if (
         (!taskStatus || taskStatus.name === 'Todo') &&
@@ -199,15 +181,15 @@ export default {
       }
     },
 
-    color (taskStatus) {
-      if ((!taskStatus || taskStatus.name !== 'Todo') || this.isDarkTheme) {
+    color(taskStatus) {
+      if (!taskStatus || taskStatus.name !== 'Todo' || this.isDarkTheme) {
         return 'white'
       } else {
         return '#333'
       }
     },
 
-    toggleStatusList () {
+    toggleStatusList() {
       this.showStatusList = !this.showStatusList
     }
   }

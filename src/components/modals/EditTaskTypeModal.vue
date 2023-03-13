@@ -1,64 +1,64 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
+    <div class="modal-content">
+      <div class="box">
+        <h1 class="title" v-if="isEditing">
+          {{ $t('task_types.edit_title') }} {{ taskTypeToEdit.name }}
+        </h1>
+        <h1 class="title" v-else>
+          {{ $t('task_types.new_task_type') }}
+        </h1>
 
-    <div class="box">
+        <form v-on:submit.prevent>
+          <text-field
+            ref="nameField"
+            :label="$t('task_types.fields.name')"
+            v-model="form.name"
+            @enter="confirmClicked"
+            v-focus
+          />
+          <boolean-field
+            :label="$t('task_types.fields.allow_timelog')"
+            @enter="confirmClicked"
+            v-model="form.allow_timelog"
+          />
+          <combobox-simple
+            class="field"
+            :label="$t('task_types.fields.dedicated_to')"
+            :options="dedicatedToOptions"
+            @enter="confirmClicked"
+            v-model="form.for_entity"
+            v-if="!isEditing"
+          />
+          <combobox-department
+            :label="$t('task_types.fields.department')"
+            @enter="confirmClicked"
+            v-model="form.department_id"
+          />
+          <color-field
+            ref="colorField"
+            :label="$t('task_types.fields.color')"
+            v-model="form.color"
+          />
+        </form>
 
-      <h1 class="title" v-if="isEditing">
-        {{ $t("task_types.edit_title") }} {{ taskTypeToEdit.name }}
-      </h1>
-      <h1 class="title" v-else>
-        {{ $t("task_types.new_task_type") }}
-      </h1>
-
-      <form v-on:submit.prevent>
-        <text-field
-          ref="nameField"
-          :label="$t('task_types.fields.name')"
-          v-model="form.name"
-          @enter="confirmClicked"
-          v-focus
+        <modal-footer
+          :error-text="$t('task_types.create_error')"
+          :is-loading="isLoading"
+          :is-error="isError"
+          @confirm="confirmClicked"
+          @cancel="$emit('cancel')"
         />
-        <boolean-field
-          :label="$t('task_types.fields.allow_timelog')"
-          @enter="confirmClicked"
-          v-model="form.allow_timelog"
-        />
-        <combobox-simple
-          class="field"
-          :label="$t('task_types.fields.dedicated_to')"
-          :options="dedicatedToOptions"
-          @enter="confirmClicked"
-          v-model="form.for_entity"
-           v-if="!isEditing"
-        />
-        <combobox-department
-          :label="$t('task_types.fields.department')"
-          @enter="confirmClicked"
-          v-model="form.department_id"
-        />
-        <color-field
-          ref="colorField"
-          :label="$t('task_types.fields.color')"
-          v-model="form.color"
-        />
-      </form>
-
-      <modal-footer
-        :error-text="$t('task_types.create_error')"
-        :is-loading="isLoading"
-        :is-error="isError"
-        @confirm="confirmClicked"
-        @cancel="$emit('cancel')"
-      />
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -108,7 +108,7 @@ export default {
   },
 
   watch: {
-    taskTypeToEdit () {
+    taskTypeToEdit() {
       if (this.taskTypeToEdit) {
         this.form = {
           name: this.taskTypeToEdit.name,
@@ -121,7 +121,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       form: {
         name: '',
@@ -141,26 +141,23 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'taskTypes',
-      'taskTypeStatusOptions',
-      'departments'
-    ]),
-    isEditing () {
+    ...mapGetters(['taskTypes', 'taskTypeStatusOptions', 'departments']),
+    isEditing() {
       return this.taskTypeToEdit && this.taskTypeToEdit.id
     }
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    newPriority (forEntity) {
-      return this.taskTypes
-        .filter(taskType => taskType.for_entity === forEntity).length + 1
+    newPriority(forEntity) {
+      return (
+        this.taskTypes.filter(taskType => taskType.for_entity === forEntity)
+          .length + 1
+      )
     },
 
-    confirmClicked () {
+    confirmClicked() {
       if (!this.isEditing) {
         this.form.priority = this.newPriority(this.form.for_entity)
       }

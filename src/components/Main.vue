@@ -1,11 +1,11 @@
 <template>
-<XyzTransition appear xyz="fade">
-  <div class="main">
-    <topbar />
-    <sidebar />
-    <router-view />
-  </div>
-</XyzTransition>
+  <XyzTransition appear xyz="fade">
+    <div class="main">
+      <topbar />
+      <sidebar />
+      <router-view />
+    </div>
+  </XyzTransition>
 </template>
 
 <script>
@@ -19,7 +19,7 @@ export default {
     Sidebar
   },
 
-  mounted () {
+  mounted() {
     this.$socket.connect()
   }
 }

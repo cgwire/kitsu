@@ -3,7 +3,7 @@
     <div class="flexrow">
       <date-field
         class="flexrow-item"
-        :disabled-dates="{from: today}"
+        :disabled-dates="{ from: today }"
         :label="$t('logs.current_date_label')"
         v-model="currentDate"
       />
@@ -20,7 +20,7 @@
     <div class="mt2" v-if="!isLoading && events.length === 0">
       {{ $t('logs.empty_list') }}
     </div>
-    <div class="has-text-centered" v-if="isLoading" >
+    <div class="has-text-centered" v-if="isLoading">
       <spinner />
     </div>
     <div class="log-list" v-else>
@@ -99,7 +99,7 @@ export default {
     Spinner
   },
 
-  data () {
+  data() {
     return {
       currentDate: new Date(),
       events: [],
@@ -108,32 +108,26 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.loadDayEvents()
   },
 
   computed: {
-    ...mapGetters([
-      'personMap',
-      'productionMap',
-      'user'
-    ]),
+    ...mapGetters(['personMap', 'productionMap', 'user']),
 
-    today () {
+    today() {
       return moment().toDate()
     }
   },
 
   methods: {
-    ...mapActions([
-      'loadEvents'
-    ]),
+    ...mapActions(['loadEvents']),
 
-    formatType (event) {
+    formatType(event) {
       return event.name.split(':')[1].substring(0, 3)
     },
 
-    loadDayEvents () {
+    loadDayEvents() {
       const before = moment(this.currentDate).add(1, 'days')
       const after = moment(this.currentDate)
       this.selectedEvents = {}
@@ -142,26 +136,26 @@ export default {
         after: formatFullDateWithRevertedTimezone(after, this.timezone),
         before: formatFullDateWithRevertedTimezone(before, this.timezone)
       })
-        .then((events) => {
+        .then(events => {
           this.isLoading = false
           this.events = events
         })
-        .catch((err) => {
+        .catch(err => {
           this.isLoading = false
           console.error(err)
         })
     },
 
-    selectLine (event) {
+    selectLine(event) {
       Vue.set(this.selectedEvents, event.id, !this.selectedEvents[event.id])
     },
 
-    isLink (key) {
+    isLink(key) {
       const linkKeys = ['project_id', 'task_id']
       return linkKeys.includes(key)
     },
 
-    getLink (event, key) {
+    getLink(event, key) {
       const productionId = event.data.project_id
       const entityType = key.substring(0, key.length - 3)
       if (entityType === 'project') {
@@ -174,17 +168,16 @@ export default {
   },
 
   watch: {
-    currentDate () {
+    currentDate() {
       this.loadDayEvents()
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: `${this.$t('logs.title')} - Kitsu`
     }
   }
-
 }
 </script>
 
@@ -220,32 +213,32 @@ export default {
     min-width: 50px;
   }
 
-  .type[data-status="new"] {
+  .type[data-status='new'] {
     color: white;
     background: $green;
   }
 
-  .type[data-status="upd"] {
+  .type[data-status='upd'] {
     color: white;
     background: $blue;
   }
 
-  .type[data-status="add"] {
+  .type[data-status='add'] {
     color: white;
     background: $dark-purple;
   }
 
-  .type[data-status="del"] {
+  .type[data-status='del'] {
     color: white;
     background: $red;
   }
 
-  .type[data-status="sta"] {
+  .type[data-status='sta'] {
     color: white;
     background: $pink;
   }
 
-  .type[data-status="set"] {
+  .type[data-status='set'] {
     background: $purple;
   }
 

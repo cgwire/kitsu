@@ -1,68 +1,65 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
-    <div class="box content">
+    <div class="modal-content">
+      <div class="box content">
+        <page-title :text="title" />
 
-      <page-title :text="title" />
+        <p>{{ text }}</p>
 
-      <p>{{ text }}</p>
+        <form v-on:submit.prevent class="widden">
+          <combobox-task-type
+            :task-type-list="getApplicableTaskTypes()"
+            v-model="form.task_type_id"
+          />
+        </form>
 
-      <form v-on:submit.prevent class="widden">
-        <combobox-task-type
-          :task-type-list="getApplicableTaskTypes()"
-          v-model="form.task_type_id"
-        />
-      </form>
-
-      <div class="flexrow">
-        <div class="filler"></div>
-        <combobox
-          class="flexrow-item"
-          :options="selectionOptions"
-          :with-margin="false"
-          v-model="selectionOnly"
-        />
-        <a
-          :class="{
-            button: true,
-            'flexrow-item': true,
-            'is-primary': true,
-            'is-loading': isLoadingStay
-          }"
-          @click="confirmAndStayClicked"
-        >
-          {{ $t("main.confirmation_and_stay") }}
-        </a>
-        <a
-          :class="{
-            button: true,
-            'flexrow-item': true,
-            'is-primary': true,
-            'is-loading': isLoading
-          }"
-          @click="confirmClicked"
-        >
-          {{ $t("main.confirmation") }}
-        </a>
-        <button
-          @click="$emit('cancel')"
-          class="button is-link"
-        >
-          {{ $t("main.cancel") }}
-        </button>
+        <div class="flexrow">
+          <div class="filler"></div>
+          <combobox
+            class="flexrow-item"
+            :options="selectionOptions"
+            :with-margin="false"
+            v-model="selectionOnly"
+          />
+          <a
+            :class="{
+              button: true,
+              'flexrow-item': true,
+              'is-primary': true,
+              'is-loading': isLoadingStay
+            }"
+            @click="confirmAndStayClicked"
+          >
+            {{ $t('main.confirmation_and_stay') }}
+          </a>
+          <a
+            :class="{
+              button: true,
+              'flexrow-item': true,
+              'is-primary': true,
+              'is-loading': isLoading
+            }"
+            @click="confirmClicked"
+          >
+            {{ $t('main.confirmation') }}
+          </a>
+          <button @click="$emit('cancel')" class="button is-link">
+            {{ $t('main.cancel') }}
+          </button>
+        </div>
+        <p class="error has-text-right info-message" v-if="isError">
+          {{ errorText }}
+        </p>
       </div>
-      <p class="error has-text-right info-message" v-if="isError">
-        {{ errorText }}
-      </p>
-
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -117,7 +114,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       form: {
         task_type_id: ''
@@ -138,28 +135,27 @@ export default {
       'productionShotTaskTypes',
       'productionSequenceTaskTypes'
     ]),
-    isAssetTasks () {
+    isAssetTasks() {
       return this.$route.path.indexOf('assets') >= 0
     },
-    isShotsTasks () {
+    isShotsTasks() {
       return this.$route.path.indexOf('shots') >= 0
     },
-    isSequencesTasks () {
+    isSequencesTasks() {
       return this.$route.path.indexOf('sequences') >= 0
     },
-    isEpisodesTasks () {
+    isEpisodesTasks() {
       return this.$route.path.indexOf('episodes') >= 0
     },
-    isEditsTasks () {
+    isEditsTasks() {
       return this.$route.path.indexOf('edits') >= 0
     }
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    getApplicableTaskTypes () {
+    getApplicableTaskTypes() {
       if (this.isAssetTasks) {
         return this.productionAssetTaskTypes
       }
@@ -177,14 +173,14 @@ export default {
       }
     },
 
-    confirmClicked () {
+    confirmClicked() {
       this.$emit('confirm', {
         form: this.form,
         selectionOnly: this.selectionOnly === 'true'
       })
     },
 
-    confirmAndStayClicked () {
+    confirmAndStayClicked() {
       this.$emit('confirm-and-stay', {
         form: this.form,
         selectionOnly: this.selectionOnly === 'true'
@@ -192,7 +188,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     const taskTypes = this.getApplicableTaskTypes()
 
     if (taskTypes.length > 0) {

@@ -1,15 +1,9 @@
 <template>
   <div class="navbar">
-    <aside :class="{'hidden-bar': isSidebarHidden}">
+    <aside :class="{ 'hidden-bar': isSidebarHidden }">
       <div>
-        <router-link
-           class="home-link"
-           to="/"
-           @click="toggleSidebar()"
-        >
-          <div
-            class="company-logo has-text-centered"
-          >
+        <router-link class="home-link" to="/" @click="toggleSidebar()">
+          <div class="company-logo has-text-centered">
             <img
               :src="logoPath"
               v-if="organisation && organisation.has_avatar"
@@ -19,137 +13,135 @@
               width="180"
               v-else-if="isDarkTheme"
             />
-            <img
-              src="../../assets/kitsu-text.svg"
-              width="180"
-              v-else
-            />
+            <img src="../../assets/kitsu-text.svg" width="180" v-else />
           </div>
         </router-link>
 
         <section>
-         <div v-if="!isCurrentUserClient">
-           <h2>{{ $t('main.workspace')}}</h2>
+          <div v-if="!isCurrentUserClient">
+            <h2>{{ $t('main.workspace') }}</h2>
 
-           <p @click="toggleSidebar()">
-             <router-link :to="{name: 'todos'}">
-               <check-icon size="0.9x" />
-               {{ $t("tasks.my_tasks") }}
-             </router-link>
-           </p>
-           <p @click="toggleSidebar()" v-if="isCurrentUserSupervisor">
-             <router-link :to="{name: 'checks'}">
-               <play-circle-icon size="0.9x" />
-               {{ $t("tasks.my_checks") }}
-             </router-link>
-           </p>
-           <p @click="toggleSidebar()">
-             <router-link :to="{name: 'open-productions'}">
-               <film-icon size="0.9x" />
-               {{ $t("productions.open_productions") }}
-             </router-link>
-           </p>
-         </div>
+            <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'todos' }">
+                <check-icon size="0.9x" />
+                {{ $t('tasks.my_tasks') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()" v-if="isCurrentUserSupervisor">
+              <router-link :to="{ name: 'checks' }">
+                <play-circle-icon size="0.9x" />
+                {{ $t('tasks.my_checks') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'open-productions' }">
+                <film-icon size="0.9x" />
+                {{ $t('productions.open_productions') }}
+              </router-link>
+            </p>
+          </div>
 
-         <div v-if="!isCurrentUserClient && !isCurrentUserVendor">
-           <h2>{{ $t('main.studio')}}</h2>
+          <div v-if="!isCurrentUserClient && !isCurrentUserVendor">
+            <h2>{{ $t('main.studio') }}</h2>
 
-           <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
-             <router-link :to="{name: 'productions'}">
-               <film-icon size="0.9x" />
-               {{ $t("productions.title") }}
-             </router-link>
-           </p>
+            <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
+              <router-link :to="{ name: 'productions' }">
+                <film-icon size="0.9x" />
+                {{ $t('productions.title') }}
+              </router-link>
+            </p>
 
-           <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
-             <router-link :to="{name: 'people'}">
-               <users-icon size="0.9x" />
-               {{ $t("people.title") }}
-             </router-link>
-           </p>
+            <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
+              <router-link :to="{ name: 'people' }">
+                <users-icon size="0.9x" />
+                {{ $t('people.title') }}
+              </router-link>
+            </p>
 
-           <p @click="toggleSidebar()">
-             <router-link :to="{name: 'timesheets'}">
-               <clock-icon size="0.9x" />
-               {{ $t("timesheets.title") }}
-             </router-link>
-           </p>
+            <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'timesheets' }">
+                <clock-icon size="0.9x" />
+                {{ $t('timesheets.title') }}
+              </router-link>
+            </p>
 
-           <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
-             <router-link :to="{name: 'main-schedule'}">
-               <calendar-icon size="0.9x" />
-               {{ $t("schedule.title_main") }}
-             </router-link>
-           </p>
+            <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
+              <router-link :to="{ name: 'main-schedule' }">
+                <calendar-icon size="0.9x" />
+                {{ $t('schedule.title_main') }}
+              </router-link>
+            </p>
 
-           <p @click="toggleSidebar()">
-             <router-link :to="{name: 'newsfeed'}" v-if="isCurrentUserManager">
-               <clock-icon size="0.9x" />
-               {{ $t("news.title") }}
-             </router-link>
-           </p>
+            <p @click="toggleSidebar()">
+              <router-link
+                :to="{ name: 'newsfeed' }"
+                v-if="isCurrentUserManager"
+              >
+                <clock-icon size="0.9x" />
+                {{ $t('news.title') }}
+              </router-link>
+            </p>
+          </div>
 
-         </div>
-
-         <div v-if="isCurrentUserAdmin">
-           <h2>{{ $t('main.admin')}}</h2>
-           <p @click="toggleSidebar()">
-             <router-link :to="{name: 'departments'}">
-               <hexagon-icon size="0.9x" />
-               {{ $t("departments.title") }}
-             </router-link>
-           </p>
-           <p @click="toggleSidebar()">
-             <router-link to="/task-types">
-               <copy-icon size="0.9x" />
-               {{ $t("task_types.title") }}
-             </router-link>
-           </p>
-           <p @click="toggleSidebar()">
-             <router-link to="/task-status" class="task-status-link">
-               <award-icon size="0.9x" />
-               {{ $t("task_status.title") }}
-             </router-link>
-           </p>
-           <p @click="toggleSidebar()">
-             <router-link to="/asset-types">
-               <box-icon size="0.9x" />
-               {{ $t("asset_types.title") }}
-             </router-link>
-           </p>
-           <p @click="toggleSidebar()">
-             <router-link :to="{name: 'custom-actions'}">
-               <git-pull-request-icon size="0.9x" />
-               {{ $t("custom_actions.title") }}
-             </router-link>
-           </p>
-           <p @click="toggleSidebar()">
-             <router-link :to="{name: 'status-automations'}">
-               <tool-icon size="0.9x" />
-               {{ $t("status_automations.title") }}
-             </router-link>
-           </p>
-           <p @click="toggleSidebar()">
-             <router-link :to="{name: 'settings'}">
-               <settings-icon size="0.9x" />
-               {{ $t("settings.title") }}
-             </router-link>
-           </p>
-           <p @click="toggleSidebar()">
-             <router-link :to="{name: 'logs'}">
-               <list-icon size="0.9x" />
-               {{ $t("logs.title") }}
-             </router-link>
-           </p>
-         </div>
-
+          <div v-if="isCurrentUserAdmin">
+            <h2>{{ $t('main.admin') }}</h2>
+            <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'departments' }">
+                <hexagon-icon size="0.9x" />
+                {{ $t('departments.title') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
+              <router-link to="/task-types">
+                <copy-icon size="0.9x" />
+                {{ $t('task_types.title') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
+              <router-link to="/task-status" class="task-status-link">
+                <award-icon size="0.9x" />
+                {{ $t('task_status.title') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
+              <router-link to="/asset-types">
+                <box-icon size="0.9x" />
+                {{ $t('asset_types.title') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'custom-actions' }">
+                <git-pull-request-icon size="0.9x" />
+                {{ $t('custom_actions.title') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'status-automations' }">
+                <tool-icon size="0.9x" />
+                {{ $t('status_automations.title') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'settings' }">
+                <settings-icon size="0.9x" />
+                {{ $t('settings.title') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'logs' }">
+                <list-icon size="0.9x" />
+                {{ $t('logs.title') }}
+              </router-link>
+            </p>
+          </div>
         </section>
       </div>
     </aside>
-    <div id="c-mask" @click="toggleSidebar()"
-         v-bind:class="{'is-active': !isSidebarHidden}"
-    >
-    </div>
+    <div
+      id="c-mask"
+      @click="toggleSidebar()"
+      v-bind:class="{ 'is-active': !isSidebarHidden }"
+    ></div>
   </div>
 </template>
 
@@ -191,14 +183,14 @@ export default {
     UsersIcon
   },
 
-  data () {
+  data() {
     return {
       title: '',
       logoPath: ''
     }
   },
 
-  mounted () {
+  mounted() {
     this.reset()
   },
 
@@ -216,19 +208,19 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-      'toggleSidebar'
-    ]),
+    ...mapActions(['toggleSidebar']),
 
-    reset () {
+    reset() {
       this.title = this.organisation.name
-      this.logoPath = '/api/pictures/thumbnails/organisations/' +
-        `${this.organisation.id}.png?t=` + new Date().toISOString()
+      this.logoPath =
+        '/api/pictures/thumbnails/organisations/' +
+        `${this.organisation.id}.png?t=` +
+        new Date().toISOString()
     }
   },
 
   watch: {
-    organisation () {
+    organisation() {
       this.reset()
     }
   }
@@ -237,7 +229,7 @@ export default {
 
 <style lang="scss" scoped>
 .dark aside {
-  background-color: #2F3136;
+  background-color: #2f3136;
   color: $white-grey;
 
   a {
@@ -259,7 +251,7 @@ aside {
   padding: 15px;
   overflow-y: auto;
   z-index: 205;
-  box-shadow: 1px 0px 6px rgba(0,0,0,0.2);
+  box-shadow: 1px 0px 6px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
 
   h2 {

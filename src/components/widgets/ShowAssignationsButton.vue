@@ -1,23 +1,27 @@
 <template>
-<button
- :class="{
-    'level-item': true,
-    button: true,
-    'is-toggle': true,
-    'is-on': isShowAssignations
-  }"
-  :title="$t(isShowAssignations ? 'tasks.hide_assignations' : 'tasks.show_assignations')"
-  @click="toggleAssignations"
->
-  <users-icon class="icon is-small" />
-</button>
+  <button
+    :class="{
+      'level-item': true,
+      button: true,
+      'is-toggle': true,
+      'is-on': isShowAssignations
+    }"
+    :title="
+      $t(
+        isShowAssignations
+          ? 'tasks.hide_assignations'
+          : 'tasks.show_assignations'
+      )
+    "
+    @click="toggleAssignations"
+  >
+    <users-icon class="icon is-small" />
+  </button>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import {
-  UsersIcon
-} from 'vue-feather-icons'
+import { UsersIcon } from 'vue-feather-icons'
 
 export default {
   name: 'show-assignations-button',
@@ -28,18 +32,13 @@ export default {
   props: {},
 
   computed: {
-    ...mapGetters([
-      'isShowAssignations'
-    ])
+    ...mapGetters(['isShowAssignations'])
   },
 
   methods: {
-    ...mapActions([
-      'showAssignations',
-      'hideAssignations'
-    ]),
+    ...mapActions(['showAssignations', 'hideAssignations']),
 
-    toggleAssignations () {
+    toggleAssignations() {
       if (this.isShowAssignations) {
         this.hideAssignations()
       } else {
@@ -48,7 +47,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     if (localStorage.getItem('show-assignations') === 'false') {
       this.hideAssignations()
     } else {
@@ -57,12 +56,10 @@ export default {
   },
 
   watch: {
-    isShowAssignations () {
-      localStorage.setItem(
-        'show-assignations',
-        this.isShowAssignations,
-        { expires: '1M' }
-      )
+    isShowAssignations() {
+      localStorage.setItem('show-assignations', this.isShowAssignations, {
+        expires: '1M'
+      })
     }
   }
 }

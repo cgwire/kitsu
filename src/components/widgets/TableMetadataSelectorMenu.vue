@@ -1,4 +1,5 @@
-z<template>
+z
+<template>
   <div class="column-menu">
     <h2>{{ $t('main.column_visibility') }}</h2>
     <div
@@ -6,18 +7,18 @@ z<template>
       v-for="descriptor in filteredMetadataDescriptors"
       :key="descriptor.field_name"
     >
-      <label
-        class="checkbox"
-        :for="descriptor.field_name"
-      >
+      <label class="checkbox" :for="descriptor.field_name">
         <input
           type="checkbox"
           :id="descriptor.field_name"
           :checked="metadataDisplayHeaders[descriptor.field_name] !== false"
-          @change="setMetadataDisplayValue(
-            descriptor.field_name, $event.target.checked
-          )"
-        >
+          @change="
+            setMetadataDisplayValue(
+              descriptor.field_name,
+              $event.target.checked
+            )
+          "
+        />
         {{ descriptor.name }}
       </label>
     </div>
@@ -49,7 +50,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       fieldToName: {
         estimation: this.$t('main.estimation'),
@@ -65,9 +66,10 @@ export default {
     }
   },
 
-  created () {
-    const metadataDisplayHeadersString =
-      localStorage.getItem(this.localStorageKey)
+  created() {
+    const metadataDisplayHeadersString = localStorage.getItem(
+      this.localStorageKey
+    )
     let localMetadataDisplayHeaders = { ...this.metadataDisplayHeaders }
     if (metadataDisplayHeadersString) {
       localMetadataDisplayHeaders = {
@@ -84,14 +86,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ]),
+    ...mapGetters([]),
 
-    localStorageKey () {
+    localStorageKey() {
       return `metadataDisplayHeaders:${this.namespace}`
     },
 
-    metadataDescriptors () {
+    metadataDescriptors() {
       const descriptors = [...this.descriptors]
       for (const headerName in this.metadataDisplayHeaders) {
         if (this.fieldToName[headerName]) {
@@ -104,23 +105,22 @@ export default {
       return descriptors
     },
 
-    filteredMetadataDescriptors () {
-      return this.metadataDescriptors
-        .filter(descriptor => {
-          return !this.exclude[descriptor.field_name]
-        })
+    filteredMetadataDescriptors() {
+      return this.metadataDescriptors.filter(descriptor => {
+        return !this.exclude[descriptor.field_name]
+      })
     }
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    setMetadataDisplayValue (metadataName, isSelected) {
+    setMetadataDisplayValue(metadataName, isSelected) {
       const localMetadataDisplayHeaders = { ...this.metadataDisplayHeaders }
       localMetadataDisplayHeaders[metadataName] = isSelected
       localStorage.setItem(
-        this.localStorageKey, JSON.stringify(localMetadataDisplayHeaders)
+        this.localStorageKey,
+        JSON.stringify(localMetadataDisplayHeaders)
       )
       this.$emit('update:metadataDisplayHeaders', localMetadataDisplayHeaders)
     }
@@ -133,9 +133,9 @@ export default {
   background-color: $dark-grey-light;
   box-shadow: 0 2px 6px $dark-grey-light;
 
- .checkbox:hover {
-   color: $white;
- }
+  .checkbox:hover {
+    color: $white;
+  }
 }
 
 .column-menu {
@@ -153,7 +153,7 @@ export default {
 
   h2 {
     color: $grey;
-    margin-top: .1em;
+    margin-top: 0.1em;
     padding: 0.8em;
     text-transform: uppercase;
   }

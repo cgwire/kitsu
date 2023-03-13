@@ -1,555 +1,658 @@
 <template>
-<div class="data-list">
-  <div
-    class="datatable-wrapper"
-    ref="body"
-    v-scroll="onBodyScroll"
-  >
+  <div class="data-list">
+    <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
+      <table-header-menu
+        ref="headerMenu"
+        :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"
+        :is-edit-allowed="isCurrentUserManager"
+        :is-sticked="stickedColumns[lastHeaderMenuDisplayed]"
+        @minimize-clicked="onMinimizeColumnToggled()"
+        @delete-all-clicked="onDeleteAllTasksClicked()"
+        @sort-by-clicked="onSortByTaskTypeClicked()"
+        @select-column="onSelectColumn"
+        @toggle-stick="stickColumnClicked()"
+      />
 
-    <table-header-menu
-      ref="headerMenu"
-      :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"
-      :is-edit-allowed="isCurrentUserManager"
-      :is-sticked="stickedColumns[lastHeaderMenuDisplayed]"
-      @minimize-clicked="onMinimizeColumnToggled()"
-      @delete-all-clicked="onDeleteAllTasksClicked()"
-      @sort-by-clicked="onSortByTaskTypeClicked()"
-      @select-column="onSelectColumn"
-      @toggle-stick="stickColumnClicked()"
-    />
+      <table-metadata-header-menu
+        ref="headerMetadataMenu"
+        :is-edit-allowed="
+          isMetadataColumnEditAllowed(lastMetadaDataHeaderMenuDisplayed)
+        "
+        :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
+        @edit-clicked="onEditMetadataClicked()"
+        @delete-clicked="onDeleteMetadataClicked()"
+        @sort-by-clicked="onSortByMetadataClicked()"
+        @toggle-stick="metadataStickColumnClicked($event)"
+      />
 
-    <table-metadata-header-menu
-      ref="headerMetadataMenu"
-      :is-edit-allowed="
-        isMetadataColumnEditAllowed(lastMetadaDataHeaderMenuDisplayed)"
-      :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
-      @edit-clicked="onEditMetadataClicked()"
-      @delete-clicked="onDeleteMetadataClicked()"
-      @sort-by-clicked="onSortByMetadataClicked()"
-      @toggle-stick="metadataStickColumnClicked($event)"
-    />
+      <table class="datatable multi-section">
+        <thead class="datatable-head" v-columns-resizable id="datatable-asset">
+          <tr>
+            <th ref="th-name" class="name datatable-row-header" scope="col">
+              <div class="flexrow">
+                <span class="flexrow-item">
+                  {{ $t('assets.fields.name') }}
+                </span>
+                <button-simple
+                  class="is-small flexrow-item"
+                  icon="plus"
+                  :text="''"
+                  @click="onAddMetadataClicked"
+                  v-if="
+                    (isCurrentUserManager || isCurrentUserSupervisor) &&
+                    !isLoading
+                  "
+                />
+              </div>
+            </th>
 
-    <table class="datatable multi-section">
-      <thead
-        class="datatable-head"
-        v-columns-resizable
-        id="datatable-asset"
-      >
-        <tr>
-          <th
-            ref="th-name"
-            class="name datatable-row-header"
-            scope="col"
-          >
-            <div class="flexrow">
-              <span class="flexrow-item">
-                {{ $t('assets.fields.name') }}
-              </span>
-              <button-simple
-                class="is-small flexrow-item"
-                icon="plus"
-                :text="''"
-                @click="onAddMetadataClicked"
-                v-if="(isCurrentUserManager || isCurrentUserSupervisor)
-                  && !isLoading"
-              />
-            </div>
-          </th>
+            <th
+              scope="col"
+              class="episode"
+              ref="th-episode"
+              v-if="isTVShow && isShowInfos"
+            >
+              {{ $t('assets.fields.episode') }}
+            </th>
 
-          <th
-            scope="col"
-            class="episode"
-            ref="th-episode"
-            v-if="isTVShow && isShowInfos"
-          >
-            {{ $t('assets.fields.episode') }}
-          </th>
-
-          <metadata-header
-            :ref="`editor-${j}`"
-            :key="'sticky-header' + descriptor.id"
-            :descriptor="descriptor"
-            :left="offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'"
-            @show-metadata-header-menu="
-              event => showMetadataHeaderMenu(descriptor.id, event)
-            "
-            is-stick
-            v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-          />
-
-          <validation-header
-            :ref="`validation-${columnIndexInGrid}`"
-            :key="'sticky-header' + columnId"
-            :hidden-columns="hiddenColumns"
-            :column-id="columnId"
-            :validation-style="getValidationStyle(columnId)"
-            :left="offsets['validation-' + columnIndexInGrid] ? `${offsets['validation-' + columnIndexInGrid]}px` : '0'"
-            type="assets"
-            is-stick
-            @show-header-menu="event => showHeaderMenu(columnId, columnIndexInGrid, event)"
-            v-for="(columnId, columnIndexInGrid) in stickedDisplayedValidationColumns"
-            v-if="!isLoading"
-          />
-
-          <th
-            ref="th-ready-for"
-            scope="col"
-            class="ready-for"
-            :title="$t('assets.fields.ready_for')"
-            v-if="isCurrentUserManager && isShowInfos && metadataDisplayHeaders.readyFor"
-          >
-            {{ $t('assets.fields.ready_for') }}
-          </th>
-
-          <th
-            scope="col"
-            class="description"
-            ref="th-description"
-            v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
-          >
-            {{ $t('assets.fields.description') }}
-          </th>
-          <th
-            scope="col"
-            class="time-spent number-cell"
-            ref="th-spent"
-            v-if="!isCurrentUserClient &&
-                  isShowInfos &&
-                  isAssetTime &&
-                  metadataDisplayHeaders.timeSpent"
-          >
-            {{ $t('assets.fields.time_spent') }}
-          </th>
-
-          <th
-            scope="col"
-            class="estimation number-cell"
-            :title="$t('main.estimation')"
-            ref="th-spent"
-            v-if="!isCurrentUserClient &&
-                  isShowInfos &&
-                  isAssetEstimation &&
-                  metadataDisplayHeaders.estimation"
-          >
-            {{ $t('main.estimation_short') }}
-          </th>
-
-          <metadata-header
-            :key="'header' + descriptor.id"
-            :descriptor="descriptor"
-            @show-metadata-header-menu="event => showMetadataHeaderMenu(descriptor.id, event)"
-            v-for="descriptor in nonStickedVisibleMetadataDescriptors"
-            v-if="isShowInfos"
-          />
-
-          <validation-header
-            :key="'header' + columnId"
-            :hidden-columns="hiddenColumns"
-            :column-id="columnId"
-            :title="taskTypeMap.get(columnId).name"
-            :validation-style="getValidationStyle(columnId)"
-            type="assets"
-            @show-header-menu="event => {
-              showHeaderMenu(columnId, columnIndexInGrid, event)
-            }"
-            v-for="(columnId, columnIndexInGrid) in nonStickedDisplayedValidationColumns"
-            v-if="!isLoading"
-          />
-
-          <th scope="col" class="actions" ref="actionsSection">
-            <button-simple
-              :class="{
-                'is-small': true,
-                highlighted: isEmptyTask
-              }"
-              icon="plus"
-              :text="$t('tasks.create_tasks')"
-              @click="$emit('create-tasks')"
-              v-if="isCurrentUserManager &&
-                    displayedAssets.length > 0 &&
-                    !isLoading"
+            <metadata-header
+              :ref="`editor-${j}`"
+              :key="'sticky-header' + descriptor.id"
+              :descriptor="descriptor"
+              :left="
+                offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
+              "
+              @show-metadata-header-menu="
+                event => showMetadataHeaderMenu(descriptor.id, event)
+              "
+              is-stick
+              v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
             />
 
-            <table-metadata-selector-menu
-              ref="headerMetadataSelectorMenu"
-              :metadataDisplayHeaders.sync="metadataDisplayHeaders"
-              :descriptors="assetMetadataDescriptors"
-              :exclude="{
-                timeSpent: !isAssetTime,
-                estimation: !isAssetEstimation
-              }"
-              namespace="assets"
-              v-show="columnSelectorDisplayed && isShowInfos"
+            <validation-header
+              :ref="`validation-${columnIndexInGrid}`"
+              :key="'sticky-header' + columnId"
+              :hidden-columns="hiddenColumns"
+              :column-id="columnId"
+              :validation-style="getValidationStyle(columnId)"
+              :left="
+                offsets['validation-' + columnIndexInGrid]
+                  ? `${offsets['validation-' + columnIndexInGrid]}px`
+                  : '0'
+              "
+              type="assets"
+              is-stick
+              @show-header-menu="
+                event => showHeaderMenu(columnId, columnIndexInGrid, event)
+              "
+              v-for="(
+                columnId, columnIndexInGrid
+              ) in stickedDisplayedValidationColumns"
+              v-if="!isLoading"
             />
 
-            <button-simple
-              class="is-small is-pulled-right"
-              icon="down"
-              @click="toggleColumnSelector"
+            <th
+              ref="th-ready-for"
+              scope="col"
+              class="ready-for"
+              :title="$t('assets.fields.ready_for')"
+              v-if="
+                isCurrentUserManager &&
+                isShowInfos &&
+                metadataDisplayHeaders.readyFor
+              "
+            >
+              {{ $t('assets.fields.ready_for') }}
+            </th>
+
+            <th
+              scope="col"
+              class="description"
+              ref="th-description"
+              v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
+            >
+              {{ $t('assets.fields.description') }}
+            </th>
+            <th
+              scope="col"
+              class="time-spent number-cell"
+              ref="th-spent"
+              v-if="
+                !isCurrentUserClient &&
+                isShowInfos &&
+                isAssetTime &&
+                metadataDisplayHeaders.timeSpent
+              "
+            >
+              {{ $t('assets.fields.time_spent') }}
+            </th>
+
+            <th
+              scope="col"
+              class="estimation number-cell"
+              :title="$t('main.estimation')"
+              ref="th-spent"
+              v-if="
+                !isCurrentUserClient &&
+                isShowInfos &&
+                isAssetEstimation &&
+                metadataDisplayHeaders.estimation
+              "
+            >
+              {{ $t('main.estimation_short') }}
+            </th>
+
+            <metadata-header
+              :key="'header' + descriptor.id"
+              :descriptor="descriptor"
+              @show-metadata-header-menu="
+                event => showMetadataHeaderMenu(descriptor.id, event)
+              "
+              v-for="descriptor in nonStickedVisibleMetadataDescriptors"
               v-if="isShowInfos"
             />
-          </th>
-        </tr>
-      </thead>
 
-      <tbody
-        class="datatable-body"
-        :key="'group-' + getGroupKey(group, k, 'asset_type_id')"
-        v-for="(group, k) in displayedAssets"
-        v-if="!isLoading && isListVisible"
-      >
-        <tr class="datatable-type-header">
-          <th
-            scope="rowgroup"
-            :colspan="visibleColumns"
-          >
-            <span
-              class="datatable-row-header pointer"
-              @click="$emit('asset-type-clicked', group[0].asset_type_name)"
-            >
-              {{ group[0] ? group[0].asset_type_name : '' }}
-            </span>
-          </th>
-        </tr>
+            <validation-header
+              :key="'header' + columnId"
+              :hidden-columns="hiddenColumns"
+              :column-id="columnId"
+              :title="taskTypeMap.get(columnId).name"
+              :validation-style="getValidationStyle(columnId)"
+              type="assets"
+              @show-header-menu="
+                event => {
+                  showHeaderMenu(columnId, columnIndexInGrid, event)
+                }
+              "
+              v-for="(
+                columnId, columnIndexInGrid
+              ) in nonStickedDisplayedValidationColumns"
+              v-if="!isLoading"
+            />
 
-        <tr
-          class="datatable-row"
-          scope="row"
-          :key="'row' + asset.id"
-          :class="{canceled: asset.canceled}"
-          v-for="(asset, i) in group"
+            <th scope="col" class="actions" ref="actionsSection">
+              <button-simple
+                :class="{
+                  'is-small': true,
+                  highlighted: isEmptyTask
+                }"
+                icon="plus"
+                :text="$t('tasks.create_tasks')"
+                @click="$emit('create-tasks')"
+                v-if="
+                  isCurrentUserManager &&
+                  displayedAssets.length > 0 &&
+                  !isLoading
+                "
+              />
+
+              <table-metadata-selector-menu
+                ref="headerMetadataSelectorMenu"
+                :metadataDisplayHeaders.sync="metadataDisplayHeaders"
+                :descriptors="assetMetadataDescriptors"
+                :exclude="{
+                  timeSpent: !isAssetTime,
+                  estimation: !isAssetEstimation
+                }"
+                namespace="assets"
+                v-show="columnSelectorDisplayed && isShowInfos"
+              />
+
+              <button-simple
+                class="is-small is-pulled-right"
+                icon="down"
+                @click="toggleColumnSelector"
+                v-if="isShowInfos"
+              />
+            </th>
+          </tr>
+        </thead>
+
+        <tbody
+          class="datatable-body"
+          :key="'group-' + getGroupKey(group, k, 'asset_type_id')"
+          v-for="(group, k) in displayedAssets"
+          v-if="!isLoading && isListVisible"
         >
-          <th
-            :class="{
-              'datatable-row-header': true,
-              name: true,
-              bold: !asset.canceled
-            }">
-            <div class="flexrow">
+          <tr class="datatable-type-header">
+            <th scope="rowgroup" :colspan="visibleColumns">
+              <span
+                class="datatable-row-header pointer"
+                @click="$emit('asset-type-clicked', group[0].asset_type_name)"
+              >
+                {{ group[0] ? group[0].asset_type_name : '' }}
+              </span>
+            </th>
+          </tr>
+
+          <tr
+            class="datatable-row"
+            scope="row"
+            :key="'row' + asset.id"
+            :class="{ canceled: asset.canceled }"
+            v-for="(asset, i) in group"
+          >
+            <th
+              :class="{
+                'datatable-row-header': true,
+                name: true,
+                bold: !asset.canceled
+              }"
+            >
+              <div class="flexrow">
+                <input
+                  type="checkbox"
+                  class="flexrow-item"
+                  :checked="selectedAssets.has(asset.id)"
+                  @input="event => toggleLine(asset, event)"
+                  v-show="isCurrentUserManager"
+                />
+                <entity-thumbnail
+                  class="entity-thumbnail flexrow-item"
+                  :entity="asset"
+                  :width="isBigThumbnails ? 150 : 50"
+                  :height="isBigThumbnails ? 100 : 30"
+                  :empty-width="isBigThumbnails ? 150 : 50"
+                  :empty-height="isBigThumbnails ? 100 : 32"
+                />
+                <router-link
+                  tabindex="-1"
+                  class="asset-link asset-name flexrow-item"
+                  :to="assetPath(asset.id)"
+                  :title="asset.full_name"
+                >
+                  {{ asset.name }}
+                </router-link>
+              </div>
+            </th>
+
+            <td class="episode" v-if="isTVShow && isShowInfos">
+              <div class="flexrow" :title="assetEpisodes(asset, true)">
+                {{ assetEpisodes(asset, false) }}
+              </div>
+            </td>
+
+            <!-- Metadata stick -->
+            <td
+              class="metadata-descriptor datatable-row-header"
+              :title="asset.data ? asset.data[descriptor.field_name] : ''"
+              :style="{
+                left: offsets['editor-' + j]
+                  ? `${offsets['editor-' + j]}px`
+                  : '0'
+              }"
+              :key="'sticky-desc-' + asset.id + '-' + descriptor.id"
+              v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+            >
               <input
-                type="checkbox"
-                class="flexrow-item"
-                :checked="selectedAssets.has(asset.id)"
-                @input="event => toggleLine(asset, event)"
-                v-show="isCurrentUserManager"
+                class="input-editor"
+                @input="
+                  event => onMetadataFieldChanged(asset, descriptor, event)
+                "
+                @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+                :value="getMetadataFieldValue(descriptor, asset)"
+                v-if="
+                  descriptor.choices.length === 0 &&
+                  (isCurrentUserManager ||
+                    isSupervisorInDepartments(descriptor.departments))
+                "
+              />
+              <div
+                class="metadata-value selectable"
+                v-else-if="
+                  descriptor.choices.length > 0 &&
+                  getDescriptorChecklistValues(descriptor).length > 0
+                "
               >
-              <entity-thumbnail
-                class="entity-thumbnail flexrow-item"
-                :entity="asset"
-                :width="isBigThumbnails ? 150 : 50"
-                :height="isBigThumbnails ? 100 : 30"
-                :empty-width="isBigThumbnails ? 150 : 50"
-                :empty-height="isBigThumbnails ? 100 : 32"
-               />
-              <router-link
-                tabindex="-1"
-                class="asset-link asset-name flexrow-item"
-                :to="assetPath(asset.id)"
-                :title="asset.full_name"
-              >
-                {{ asset.name }}
-              </router-link>
-            </div>
-          </th>
-
-          <td class="episode" v-if="isTVShow && isShowInfos">
-            <div
-              class="flexrow"
-              :title="assetEpisodes(asset, true)"
-            >
-              {{ assetEpisodes(asset, false)}}
-            </div>
-          </td>
-
-          <!-- Metadata stick -->
-          <td
-            class="metadata-descriptor datatable-row-header"
-            :title="asset.data ? asset.data[descriptor.field_name] : ''"
-            :style="{'left': offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'}"
-            :key="'sticky-desc-' + asset.id + '-' + descriptor.id"
-            v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-          >
-            <input
-              class="input-editor"
-              @input="event => onMetadataFieldChanged(asset, descriptor, event)"
-              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-              :value="getMetadataFieldValue(descriptor, asset)"
-              v-if="descriptor.choices.length === 0 && (isCurrentUserManager
-              || isSupervisorInDepartments(descriptor.departments))"
-            />
-            <div
-              class="metadata-value selectable"
-              v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
-            >
-              <p
-                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
-                :key="`${asset.id}-${descriptor.id}-${i}-${option.text}-div`"
-              >
-                <input
-                  type="checkbox"
-                  @change="event => onMetadataChecklistChanged(asset, descriptor, option.text, event)"
-                  :id="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
-                  :checked="getMetadataChecklistValues(descriptor, asset)[option.text]"
-                  :disabled="!(isCurrentUserManager
-                    || isSupervisorInDepartments(descriptor.departments))"
-                  :style="[isCurrentUserManager
-                    || isSupervisorInDepartments(descriptor.departments) ?
-                      {cursor: 'pointer'} : {cursor: 'auto'}]"
-                />
-                <label
-                  :for="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
-                  :style="[isCurrentUserManager
-                    || isSupervisorInDepartments(descriptor.departments) ?
-                      {cursor: 'pointer'} : {cursor: 'auto'}]"
+                <p
+                  v-for="(option, i) in getDescriptorChecklistValues(
+                    descriptor
+                  )"
+                  :key="`${asset.id}-${descriptor.id}-${i}-${option.text}-div`"
                 >
-                  {{ option.text }}
-                </label>
-              </p>
-            </div>
-            <span
-              class="select"
-              v-else-if="isCurrentUserManager
-              || isSupervisorInDepartments(descriptor.departments)"
-            >
-            <select
-              class="select-input"
-              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-              @change="event => onMetadataFieldChanged(asset, descriptor, event)"
-            >
-              <option
-                v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
-                :key="`sticky-desc-value-${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
-                :value="option.value"
-                :selected="getMetadataFieldValue(descriptor, asset) === option.value"
+                  <input
+                    type="checkbox"
+                    @change="
+                      event =>
+                        onMetadataChecklistChanged(
+                          asset,
+                          descriptor,
+                          option.text,
+                          event
+                        )
+                    "
+                    :id="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
+                    :checked="
+                      getMetadataChecklistValues(descriptor, asset)[option.text]
+                    "
+                    :disabled="
+                      !(
+                        isCurrentUserManager ||
+                        isSupervisorInDepartments(descriptor.departments)
+                      )
+                    "
+                    :style="[
+                      isCurrentUserManager ||
+                      isSupervisorInDepartments(descriptor.departments)
+                        ? { cursor: 'pointer' }
+                        : { cursor: 'auto' }
+                    ]"
+                  />
+                  <label
+                    :for="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
+                    :style="[
+                      isCurrentUserManager ||
+                      isSupervisorInDepartments(descriptor.departments)
+                        ? { cursor: 'pointer' }
+                        : { cursor: 'auto' }
+                    ]"
+                  >
+                    {{ option.text }}
+                  </label>
+                </p>
+              </div>
+              <span
+                class="select"
+                v-else-if="
+                  isCurrentUserManager ||
+                  isSupervisorInDepartments(descriptor.departments)
+                "
               >
-                {{ option.label }}
-              </option>
-            </select>
-            </span>
-              <span class="metadata-value selectable" v-else>
-              {{ getMetadataFieldValue(descriptor, asset) }}
-            </span>
-          </td>
-
-          <validation-cell
-            :ref="`validation-${getIndex(i, k)}-${j}`"
-            :class="{
-              'validation-cell': !hiddenColumns[columnId],
-              'hidden-validation-cell': hiddenColumns[columnId],
-              'datatable-row-header': true
-            }"
-            :key="'sticky-validation-' + columnId + '-' + asset.id"
-            :canceled="asset.canceled"
-            :column="taskTypeMap.get(columnId)"
-            :entity="asset"
-            :task-test="taskMap.get(asset.validations.get(columnId))"
-            :selected="isSelected(i, k, j)"
-            :rowX="getIndex(i, k)"
-            :columnY="j"
-            :minimized="hiddenColumns[columnId]"
-            :is-static="true"
-            :is-assignees="isShowAssignations"
-            :left="offsets['validation-' + j] ? `${offsets['validation-' + j]}px` : '0'"
-            :sticked="true"
-            @select="(infos) => onTaskSelected(infos, true)"
-            @unselect="(infos) => onTaskUnselected(infos, true)"
-            v-for="(columnId, j) in stickedDisplayedValidationColumns"
-            v-if="!isLoading"
-          />
-
-          <td
-            class="task-type-name ready-for"
-            v-if="isCurrentUserManager && isShowInfos && metadataDisplayHeaders.readyFor"
-          >
-            <combobox-task-type
-              class="mb0"
-              :value="asset.ready_for"
-              production-id="this.currentProduction.id"
-              :task-type-list="readyForTaskTypes"
-              :shy="true"
-              @input="(taskTypeId) => onReadyForChanged(asset, taskTypeId)"
-            />
-          </td>
-
-          <description-cell
-            class="description"
-            @description-changed="value => onDescriptionChanged(asset, value)"
-            :editable="isCurrentUserManager"
-            v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
-            :entry="asset"
-          />
-
-          <td
-            class="time-spent selectable number-cell"
-            v-if="!isCurrentUserClient &&
-                  isShowInfos &&
-                  isAssetTime &&
-                  metadataDisplayHeaders.timeSpent"
-          >
-            {{ formatDuration(asset.timeSpent) }}
-          </td>
-
-          <td
-            class="estimation selectable number-cell"
-            v-if="!isCurrentUserClient &&
-                  isShowInfos &&
-                  isAssetEstimation &&
-                  metadataDisplayHeaders.estimation"
-          >
-            {{ formatDuration(asset.estimation) }}
-          </td>
-
-          <!-- other Metadata cells -->
-          <td
-            class="metadata-descriptor"
-            :title="asset.data ? asset.data[descriptor.field_name] : ''"
-            :key="'desc' + asset.id + '-' + descriptor.id"
-            v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
-            v-if="isShowInfos"
-          >
-            <input
-              class="input-editor"
-              @input="event => onMetadataFieldChanged(asset, descriptor, event)"
-              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-              :value="getMetadataFieldValue(descriptor, asset)"
-              v-if="descriptor.choices.length === 0 && (isCurrentUserManager
-              || isSupervisorInDepartments(descriptor.departments))"
-            />
-            <div
-              class="metadata-value selectable"
-              v-else-if="descriptor.choices.length > 0 && getDescriptorChecklistValues(descriptor).length > 0"
-            >
-              <p
-                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
-                :key="`${asset.id}-${descriptor.id}-${i}-${option.text}-div`"
-              >
-                <input
-                  type="checkbox"
-                  @change="event => onMetadataChecklistChanged(asset, descriptor, option.text, event)"
-                  :id="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
-                  :checked="getMetadataChecklistValues(descriptor, asset)[option.text]"
-                  :disabled="!(isCurrentUserManager
-                    || isSupervisorInDepartments(descriptor.departments))"
-                  :style="[isCurrentUserManager
-                    || isSupervisorInDepartments(descriptor.departments) ?
-                      {cursor: 'pointer'} : {cursor: 'auto'}]"
-                />
-                <label
-                  :for="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
-                  :style="[isCurrentUserManager
-                    || isSupervisorInDepartments(descriptor.departments) ?
-                      {cursor: 'pointer'} : {cursor: 'auto'}]"
+                <select
+                  class="select-input"
+                  @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+                  @change="
+                    event => onMetadataFieldChanged(asset, descriptor, event)
+                  "
                 >
-                  {{ option.text }}
-                </label>
-              </p>
-            </div>
-            <span
-              class="select"
-              v-else-if="isCurrentUserManager
-              || isSupervisorInDepartments(descriptor.departments)"
-            >
-            <select
-              class="select-input"
-              @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-              @change="event => onMetadataFieldChanged(asset, descriptor, event)"
-            >
-              <option
-                v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
-                :key="`desc-value-${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
-                :value="option.value"
-                :selected="getMetadataFieldValue(descriptor, asset) === option.value"
-              >
-                {{ option.label }}
-              </option>
-            </select>
-            </span>
+                  <option
+                    v-for="(option, i) in getDescriptorChoicesOptions(
+                      descriptor
+                    )"
+                    :key="`sticky-desc-value-${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+                    :value="option.value"
+                    :selected="
+                      getMetadataFieldValue(descriptor, asset) === option.value
+                    "
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+              </span>
               <span class="metadata-value selectable" v-else>
-              {{ getMetadataFieldValue(descriptor, asset) }}
-            </span>
-          </td>
+                {{ getMetadataFieldValue(descriptor, asset) }}
+              </span>
+            </td>
 
-          <validation-cell
-            :ref="`validation-${getIndex(i, k)}-${j + stickedDisplayedValidationColumns.length}`"
-            :class="{
-              'validation-cell': !hiddenColumns[columnId],
-              'hidden-validation-cell': hiddenColumns[columnId]
-            }"
-            :key="'validation' + columnId + '-' + asset.id"
-            :canceled="asset.canceled"
-            :column="taskTypeMap.get(columnId)"
-            :entity="asset"
-            :task-test="taskMap.get(asset.validations.get(columnId))"
-            :selected="isSelected(i, k, j + stickedDisplayedValidationColumns.length)"
-            :rowX="getIndex(i, k)"
-            :columnY="j"
-            :minimized="hiddenColumns[columnId]"
-            :is-static="true"
-            :is-assignees="isShowAssignations"
-            :selectable="isSelectable(asset, columnId)"
-            :disabled="!isSelectable(asset, columnId)"
-            @select="onTaskSelected"
-            @unselect="onTaskUnselected"
-            v-for="(columnId, j) in nonStickedDisplayedValidationColumns"
-            v-if="!isLoading"
-          />
+            <validation-cell
+              :ref="`validation-${getIndex(i, k)}-${j}`"
+              :class="{
+                'validation-cell': !hiddenColumns[columnId],
+                'hidden-validation-cell': hiddenColumns[columnId],
+                'datatable-row-header': true
+              }"
+              :key="'sticky-validation-' + columnId + '-' + asset.id"
+              :canceled="asset.canceled"
+              :column="taskTypeMap.get(columnId)"
+              :entity="asset"
+              :task-test="taskMap.get(asset.validations.get(columnId))"
+              :selected="isSelected(i, k, j)"
+              :rowX="getIndex(i, k)"
+              :columnY="j"
+              :minimized="hiddenColumns[columnId]"
+              :is-static="true"
+              :is-assignees="isShowAssignations"
+              :left="
+                offsets['validation-' + j]
+                  ? `${offsets['validation-' + j]}px`
+                  : '0'
+              "
+              :sticked="true"
+              @select="infos => onTaskSelected(infos, true)"
+              @unselect="infos => onTaskUnselected(infos, true)"
+              v-for="(columnId, j) in stickedDisplayedValidationColumns"
+              v-if="!isLoading"
+            />
 
-          <row-actions-cell
-            :entry="asset"
-            @edit-clicked="$emit('edit-clicked', asset)"
-            @delete-clicked="$emit('delete-clicked', asset)"
-            @restore-clicked="$emit('restore-clicked', asset)"
-            v-if="isCurrentUserManager"
-          />
-          <td class="actions" v-else></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+            <td
+              class="task-type-name ready-for"
+              v-if="
+                isCurrentUserManager &&
+                isShowInfos &&
+                metadataDisplayHeaders.readyFor
+              "
+            >
+              <combobox-task-type
+                class="mb0"
+                :value="asset.ready_for"
+                production-id="this.currentProduction.id"
+                :task-type-list="readyForTaskTypes"
+                :shy="true"
+                @input="taskTypeId => onReadyForChanged(asset, taskTypeId)"
+              />
+            </td>
 
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
+            <description-cell
+              class="description"
+              @description-changed="value => onDescriptionChanged(asset, value)"
+              :editable="isCurrentUserManager"
+              v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
+              :entry="asset"
+            />
 
-  <div
-    class="has-text-centered"
-    v-if="isEmptyList && !isCurrentUserClient && !isLoading"
-  >
-    <p class="info">
-      <img src="../../assets/illustrations/empty_asset.png" />
+            <td
+              class="time-spent selectable number-cell"
+              v-if="
+                !isCurrentUserClient &&
+                isShowInfos &&
+                isAssetTime &&
+                metadataDisplayHeaders.timeSpent
+              "
+            >
+              {{ formatDuration(asset.timeSpent) }}
+            </td>
+
+            <td
+              class="estimation selectable number-cell"
+              v-if="
+                !isCurrentUserClient &&
+                isShowInfos &&
+                isAssetEstimation &&
+                metadataDisplayHeaders.estimation
+              "
+            >
+              {{ formatDuration(asset.estimation) }}
+            </td>
+
+            <!-- other Metadata cells -->
+            <td
+              class="metadata-descriptor"
+              :title="asset.data ? asset.data[descriptor.field_name] : ''"
+              :key="'desc' + asset.id + '-' + descriptor.id"
+              v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
+              v-if="isShowInfos"
+            >
+              <input
+                class="input-editor"
+                @input="
+                  event => onMetadataFieldChanged(asset, descriptor, event)
+                "
+                @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+                :value="getMetadataFieldValue(descriptor, asset)"
+                v-if="
+                  descriptor.choices.length === 0 &&
+                  (isCurrentUserManager ||
+                    isSupervisorInDepartments(descriptor.departments))
+                "
+              />
+              <div
+                class="metadata-value selectable"
+                v-else-if="
+                  descriptor.choices.length > 0 &&
+                  getDescriptorChecklistValues(descriptor).length > 0
+                "
+              >
+                <p
+                  v-for="(option, i) in getDescriptorChecklistValues(
+                    descriptor
+                  )"
+                  :key="`${asset.id}-${descriptor.id}-${i}-${option.text}-div`"
+                >
+                  <input
+                    type="checkbox"
+                    @change="
+                      event =>
+                        onMetadataChecklistChanged(
+                          asset,
+                          descriptor,
+                          option.text,
+                          event
+                        )
+                    "
+                    :id="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
+                    :checked="
+                      getMetadataChecklistValues(descriptor, asset)[option.text]
+                    "
+                    :disabled="
+                      !(
+                        isCurrentUserManager ||
+                        isSupervisorInDepartments(descriptor.departments)
+                      )
+                    "
+                    :style="[
+                      isCurrentUserManager ||
+                      isSupervisorInDepartments(descriptor.departments)
+                        ? { cursor: 'pointer' }
+                        : { cursor: 'auto' }
+                    ]"
+                  />
+                  <label
+                    :for="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
+                    :style="[
+                      isCurrentUserManager ||
+                      isSupervisorInDepartments(descriptor.departments)
+                        ? { cursor: 'pointer' }
+                        : { cursor: 'auto' }
+                    ]"
+                  >
+                    {{ option.text }}
+                  </label>
+                </p>
+              </div>
+              <span
+                class="select"
+                v-else-if="
+                  isCurrentUserManager ||
+                  isSupervisorInDepartments(descriptor.departments)
+                "
+              >
+                <select
+                  class="select-input"
+                  @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
+                  @change="
+                    event => onMetadataFieldChanged(asset, descriptor, event)
+                  "
+                >
+                  <option
+                    v-for="(option, i) in getDescriptorChoicesOptions(
+                      descriptor
+                    )"
+                    :key="`desc-value-${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+                    :value="option.value"
+                    :selected="
+                      getMetadataFieldValue(descriptor, asset) === option.value
+                    "
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+              </span>
+              <span class="metadata-value selectable" v-else>
+                {{ getMetadataFieldValue(descriptor, asset) }}
+              </span>
+            </td>
+
+            <validation-cell
+              :ref="`validation-${getIndex(i, k)}-${
+                j + stickedDisplayedValidationColumns.length
+              }`"
+              :class="{
+                'validation-cell': !hiddenColumns[columnId],
+                'hidden-validation-cell': hiddenColumns[columnId]
+              }"
+              :key="'validation' + columnId + '-' + asset.id"
+              :canceled="asset.canceled"
+              :column="taskTypeMap.get(columnId)"
+              :entity="asset"
+              :task-test="taskMap.get(asset.validations.get(columnId))"
+              :selected="
+                isSelected(i, k, j + stickedDisplayedValidationColumns.length)
+              "
+              :rowX="getIndex(i, k)"
+              :columnY="j"
+              :minimized="hiddenColumns[columnId]"
+              :is-static="true"
+              :is-assignees="isShowAssignations"
+              :selectable="isSelectable(asset, columnId)"
+              :disabled="!isSelectable(asset, columnId)"
+              @select="onTaskSelected"
+              @unselect="onTaskUnselected"
+              v-for="(columnId, j) in nonStickedDisplayedValidationColumns"
+              v-if="!isLoading"
+            />
+
+            <row-actions-cell
+              :entry="asset"
+              @edit-clicked="$emit('edit-clicked', asset)"
+              @delete-clicked="$emit('delete-clicked', asset)"
+              @restore-clicked="$emit('restore-clicked', asset)"
+              v-if="isCurrentUserManager"
+            />
+            <td class="actions" v-else></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <table-info :is-loading="isLoading" :is-error="isError" />
+
+    <div
+      class="has-text-centered"
+      v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+    >
+      <p class="info">
+        <img src="../../assets/illustrations/empty_asset.png" />
+      </p>
+      <p class="info">{{ $t('assets.empty_list') }}</p>
+      <button-simple
+        class="level-item big-button"
+        :text="$t('assets.new_assets')"
+        @click="$emit('new-clicked')"
+      />
+    </div>
+    <div
+      class="has-text-centered"
+      v-if="isEmptyList && isCurrentUserClient && !isLoading"
+    >
+      <p class="info">
+        <img src="../../assets/illustrations/empty_asset.png" />
+      </p>
+      <p class="info">{{ $t('assets.empty_list_client') }}</p>
+    </div>
+
+    <p class="has-text-centered nb-assets" v-if="!isEmptyList && !isLoading">
+      {{ displayedAssetsLength }}
+      {{ $tc('assets.number', displayedAssetsLength) }}
+      <span
+        v-show="displayedAssetsTimeSpent > 0 || displayedAssetsEstimation > 0"
+      >
+        ({{ formatDuration(displayedAssetsTimeSpent) }}
+        {{ $tc('main.days_spent', displayedAssetsTimeSpent) }},
+        {{ formatDuration(displayedAssetsEstimation) }}
+        {{ $tc('main.man_days', displayedAssetsEstimation) }})
+      </span>
     </p>
-    <p class="info">{{ $t('assets.empty_list') }}</p>
-    <button-simple
-      class="level-item big-button"
-      :text="$t('assets.new_assets')"
-      @click="$emit('new-clicked')"
-    />
   </div>
-  <div
-    class="has-text-centered"
-    v-if="isEmptyList && isCurrentUserClient && !isLoading"
-  >
-    <p class="info">
-      <img src="../../assets/illustrations/empty_asset.png" />
-    </p>
-    <p class="info">{{ $t('assets.empty_list_client') }}</p>
-  </div>
-
-  <p
-    class="has-text-centered nb-assets"
-    v-if="!isEmptyList && !isLoading"
-  >
-    {{ displayedAssetsLength }} {{ $tc('assets.number', displayedAssetsLength) }}
-    <span v-show="displayedAssetsTimeSpent > 0 || displayedAssetsEstimation > 0">
-    ({{ formatDuration(displayedAssetsTimeSpent) }}
-       {{ $tc('main.days_spent', displayedAssetsTimeSpent) }},
-       {{ formatDuration(displayedAssetsEstimation) }}
-       {{ $tc('main.man_days', displayedAssetsEstimation) }})
-    </span>
-  </p>
-
-</div>
 </template>
 
 <script>
@@ -622,7 +725,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       type: 'asset',
       columnSelectorDisplayed: false,
@@ -678,101 +781,96 @@ export default {
       'user'
     ]),
 
-    createTasksPath () {
+    createTasksPath() {
       return this.getPath('create-asset-tasks')
     },
 
-    isEmptyList () {
-      return this.displayedAssetsCount === 0 &&
-             !this.isLoading &&
-             !this.isError &&
-             (!this.assetSearchText || this.assetSearchText.length === 0)
-    },
-
-    isEmptyTask () {
-      return !this.isEmptyList &&
-      !this.isLoading &&
-      this.validationColumns &&
-      this.validationColumns.length === 0
-    },
-
-    isListVisible () {
+    isEmptyList() {
       return (
+        this.displayedAssetsCount === 0 &&
         !this.isLoading &&
         !this.isError &&
-        (
-          this.displayedAssetsCount > 0
-        )
+        (!this.assetSearchText || this.assetSearchText.length === 0)
       )
     },
 
-    visibleColumns () {
+    isEmptyTask() {
+      return (
+        !this.isEmptyList &&
+        !this.isLoading &&
+        this.validationColumns &&
+        this.validationColumns.length === 0
+      )
+    },
+
+    isListVisible() {
+      return !this.isLoading && !this.isError && this.displayedAssetsCount > 0
+    },
+
+    visibleColumns() {
       let count = 1
       count += this.isTVShow ? 1 : 0
-      count += !this.isCurrentUserClient &&
-        this.isShowInfos &&
-        this.isAssetDescription
-        ? 1
-        : 0
+      count +=
+        !this.isCurrentUserClient && this.isShowInfos && this.isAssetDescription
+          ? 1
+          : 0
       count += this.visibleMetadataDescriptors.length
-      count += !this.isCurrentUserClient &&
+      count +=
+        !this.isCurrentUserClient &&
         this.isShowInfos &&
-        this.isAssetTime && this.metadataDisplayHeaders.timeSpent
-        ? 1
-        : 0
-      count += !this.isCurrentUserClient &&
+        this.isAssetTime &&
+        this.metadataDisplayHeaders.timeSpent
+          ? 1
+          : 0
+      count +=
+        !this.isCurrentUserClient &&
         this.isShowInfos &&
-        this.isAssetEstimation && this.metadataDisplayHeaders.estimation
-        ? 1
-        : 0
+        this.isAssetEstimation &&
+        this.metadataDisplayHeaders.estimation
+          ? 1
+          : 0
       count += this.displayedValidationColumns.length
       return count
     },
 
-    displayedValidationColumns () {
+    displayedValidationColumns() {
       return this.validationColumns.filter(columnId => {
-        return this.assetFilledColumns[columnId] &&
+        return (
+          this.assetFilledColumns[columnId] &&
           (!this.hiddenColumns[columnId] || this.isShowInfos)
+        )
       })
     },
 
-    metadataDescriptors () {
+    metadataDescriptors() {
       return this.assetMetadataDescriptors
     },
 
-    localStorageStickKey () {
+    localStorageStickKey() {
       return `stick-assets-${this.currentProduction.id}`
     },
 
-    readyForTaskTypes () {
+    readyForTaskTypes() {
       return [
         {
           id: null,
           name: 'No task type',
           color: '#CCC'
         },
-        ...sortTaskTypes(
-          this.productionShotTaskTypes, this.currentProduction
-        )
+        ...sortTaskTypes(this.productionShotTaskTypes, this.currentProduction)
       ]
     }
   },
 
   methods: {
-    ...mapActions([
-      'displayMoreAssets',
-      'editAsset',
-      'setAssetSelection'
-    ]),
+    ...mapActions(['displayMoreAssets', 'editAsset', 'setAssetSelection']),
 
-    assetEpisodes (asset, full) {
+    assetEpisodes(asset, full) {
       const mainEpisode = this.episodeMap.get(asset.episode_id)
       const mainEpisodeName = mainEpisode ? mainEpisode.name : 'MP'
       const episodeNames = (asset.casting_episode_ids || [])
         .map(eId => this.episodeMap.get(eId).name)
-        .filter(
-          name => name !== mainEpisodeName
-        )
+        .filter(name => name !== mainEpisodeName)
       let episodeNameString = ''
       if (episodeNames.length > 2) {
         if (full) {
@@ -789,7 +887,7 @@ export default {
     },
 
     // Selectable if the task type is included in the workflow.
-    isSelectable (asset, columnId) {
+    isSelectable(asset, columnId) {
       const key = asset.asset_type_id + columnId
       if (this.isSelectableMap === undefined) this.isSelectableMap = {}
       if (this.isSelectableMap[key] === undefined) {
@@ -804,12 +902,12 @@ export default {
       return this.isSelectable[key]
     },
 
-    isSelected (indexInGroup, groupIndex, columnIndex) {
+    isSelected(indexInGroup, groupIndex, columnIndex) {
       const lineIndex = this.getIndex(indexInGroup, groupIndex)
       return this.assetSelectionGrid[lineIndex][columnIndex]
     },
 
-    toggleLine (asset, event) {
+    toggleLine(asset, event) {
       const selected = event.target.checked
       const assetsToSelect = [asset]
       if (selected && this.shiftKeyPressed && this.lastSelectedAsset) {
@@ -821,7 +919,7 @@ export default {
           displayedAsset => displayedAsset.id === asset.id
         )
         if (startAssetIndex > endAssetIndex) {
-          [startAssetIndex, endAssetIndex] = [endAssetIndex, startAssetIndex]
+          ;[startAssetIndex, endAssetIndex] = [endAssetIndex, startAssetIndex]
         }
         if (startAssetIndex >= 0 && endAssetIndex >= 0) {
           range(startAssetIndex, endAssetIndex).forEach(index => {
@@ -837,17 +935,17 @@ export default {
       })
     },
 
-    onBodyScroll (event, position) {
+    onBodyScroll(event, position) {
       this.$emit('scroll', position.scrollTop)
 
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
-      if (maxHeight < (position.scrollTop + 100)) {
+      if (maxHeight < position.scrollTop + 100) {
         this.loadMoreAssets()
       }
     },
 
-    onReadyForChanged (asset, taskTypeId) {
+    onReadyForChanged(asset, taskTypeId) {
       if (this.selectedAssets.has(asset.id)) {
         this.selectedAssets.forEach((asset, _) => {
           const data = { id: asset.id, ready_for: taskTypeId }
@@ -859,23 +957,23 @@ export default {
       }
     },
 
-    loadMoreAssets () {
+    loadMoreAssets() {
       this.displayMoreAssets()
     },
 
-    getIndex (i, k) {
+    getIndex(i, k) {
       return this.getEntityLineNumber(this.displayedAssets, i, k)
     },
 
-    newAssetPath () {
+    newAssetPath() {
       return this.getPath('new-asset')
     },
 
-    assetPath (assetId) {
+    assetPath(assetId) {
       return this.getPath('asset', assetId)
     },
 
-    getPath (section, assetId) {
+    getPath(section, assetId) {
       const route = {
         name: section,
         params: {
@@ -895,32 +993,35 @@ export default {
       return route
     },
 
-    onInputKeyUp (event, i, j) {
+    onInputKeyUp(event, i, j) {
       const listWidth = this.visibleMetadataDescriptors.length
       const listHeight = this.displayedAssetsCount
       this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
     },
 
-    toggleStickedColumns (columnId) {
+    toggleStickedColumns(columnId) {
       const sticked = !this.stickedColumns[columnId]
       this.stickedColumns = {
         ...this.stickedColumns,
         [columnId]: sticked
       }
-      localStorage.setItem(this.localStorageStickKey, JSON.stringify(this.stickedColumns))
+      localStorage.setItem(
+        this.localStorageStickKey,
+        JSON.stringify(this.stickedColumns)
+      )
     },
 
-    stickColumnClicked () {
+    stickColumnClicked() {
       this.toggleStickedColumns(this.lastHeaderMenuDisplayed)
       this.showHeaderMenu()
     },
 
-    metadataStickColumnClicked (event) {
+    metadataStickColumnClicked(event) {
       this.toggleStickedColumns(this.lastMetadaDataHeaderMenuDisplayed)
       this.showMetadataHeaderMenu(this.lastMetadaDataHeaderMenuDisplayed, event)
     },
 
-    updateOffsets () {
+    updateOffsets() {
       if (this.isLoading) {
         return
       }
@@ -944,46 +1045,43 @@ export default {
           validationCol++
         ) {
           this.offsets[`validation-${validationCol}`] = offset
-          offset +=
-            this.$refs[`validation-${validationCol}`][0].$el.clientWidth
+          offset += this.$refs[`validation-${validationCol}`][0].$el.clientWidth
         }
       })
     }
   },
 
   watch: {
-    displayedAssets () {
+    displayedAssets() {
       this.$options.lineIndex = {}
     },
 
-    validationColumns () {
+    validationColumns() {
       this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
     },
 
-    stickedColumns () {
+    stickedColumns() {
       this.updateOffsets()
     },
 
-    isLoading () {
+    isLoading() {
       this.updateOffsets()
     },
 
-    currentProduction () {
+    currentProduction() {
       // Map used for performance reasons, to avoid array traversals
       this.isSelectableMap = {}
     }
   },
 
-  mounted () {
-    this.stickedColumns = JSON.parse(
-      localStorage.getItem(this.localStorageStickKey)
-    ) || {}
+  mounted() {
+    this.stickedColumns =
+      JSON.parse(localStorage.getItem(this.localStorageStickKey)) || {}
   }
 }
 </script>
 
 <style lang="scss" scoped>
-
 .dark thead tr a {
   color: $light-grey;
 
@@ -1067,7 +1165,7 @@ td.ready-for {
 }
 
 .asset-name {
-  color: inherit
+  color: inherit;
 }
 
 .info img {
@@ -1096,7 +1194,7 @@ td.metadata-descriptor {
     &:active,
     &:hover {
       background: $dark-grey-light;
-   }
+    }
   }
 }
 

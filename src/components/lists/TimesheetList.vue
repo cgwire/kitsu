@@ -1,186 +1,187 @@
 <template>
-<div class="user-timesheet data-list">
-  <div class="flexrow timesheet-header">
-    <div class="flexrow-item current-date">
-      <datepicker
-        wrapper-class="datepicker"
-        input-class="date-field input short"
-        :language="locale"
-        :disabled-dates="disabledDates"
-        :monday-first="true"
-        format="yyyy-MM-dd"
-        v-model="selectedDate"
+  <div class="user-timesheet data-list">
+    <div class="flexrow timesheet-header">
+      <div class="flexrow-item current-date">
+        <datepicker
+          wrapper-class="datepicker"
+          input-class="date-field input short"
+          :language="locale"
+          :disabled-dates="disabledDates"
+          :monday-first="true"
+          format="yyyy-MM-dd"
+          v-model="selectedDate"
+        />
+      </div>
+      <div class="flexrow-item flexrow time-spent-total">
+        -&nbsp;&nbsp;
+        {{ timeSpentTotal }} {{ $t('timesheets.hours') }}
+      </div>
+      <div class="filler"></div>
+      <button-simple
+        class="flexrow-item"
+        :text="$t('timesheets.day_off')"
+        :active="personIsDayOff"
+        @click="toggleDayOff"
+        v-if="!hideDayOff"
       />
     </div>
-    <div class="flexrow-item flexrow time-spent-total">
-    -&nbsp;&nbsp;
-    {{ timeSpentTotal }} {{ $t('timesheets.hours') }}
+
+    <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
+      <table class="datatable multi-section">
+        <thead class="datatable-head">
+          <tr>
+            <th
+              scope="col"
+              class="datatable-row-header datatable-row-header--nobd production"
+              ref="th-prod"
+            >
+              {{ $t('tasks.fields.production') }}
+            </th>
+            <th
+              scope="col"
+              class="type datatable-row-header datatable-row-header--nobd"
+              ref="th-type"
+              :style="{ left: colTypePosX }"
+            >
+              {{ $t('tasks.fields.task_type') }}
+            </th>
+            <th
+              scope="col"
+              class="name datatable-row-header"
+              :style="{ left: colNamePosX }"
+            >
+              {{ $t('tasks.fields.entity') }}
+            </th>
+            <th scope="col" class="time-spent">
+              {{ $t('timesheets.time_spents') }}
+            </th>
+          </tr>
+        </thead>
+        <tbody class="datatable-body" v-if="tasks.length > 0 && !isLoading">
+          <tr
+            class="datatable-row"
+            v-for="(task, i) in displayedTasks"
+            :key="task.id + '-' + i"
+          >
+            <th
+              class="production datatable-row-header datatable-row-header--nobd"
+              scope="row"
+            >
+              <production-name-cell
+                :entry="productionMap.get(task.project_id)"
+                :only-avatar="true"
+              />
+            </th>
+            <task-type-cell
+              class="type datatable-row-header datatable-row-header--nobd"
+              :production-id="task.project_id"
+              :task-type="taskTypeMap.get(task.task_type_id)"
+              :style="{ left: colTypePosX }"
+            />
+
+            <th
+              class="name datatable-row-header"
+              :style="{ left: colNamePosX }"
+            >
+              <router-link :to="entityPath(task)">
+                <div class="flexrow">
+                  <entity-thumbnail
+                    :empty-width="60"
+                    :empty-height="40"
+                    :entity="{ preview_file_id: task.entity_preview_file_id }"
+                  />
+                  <span>
+                    {{ task.full_entity_name }}
+                  </span>
+                </div>
+              </router-link>
+            </th>
+            <time-slider-cell
+              :duration="
+                timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0
+              "
+              class="time-spent"
+              :task-id="task.id"
+              @change="onSliderChange"
+              v-if="!personIsDayOff"
+            />
+            <td v-else></td>
+          </tr>
+        </tbody>
+        <tbody class="datatable-body" v-if="!isLoading && !hideDone">
+          <tr v-if="!hideDone" class="datatable-type-header">
+            <th colspan="4" scope="rowgroup">
+              <div class="datatable-row-header">
+                <page-subtitle :text="$t('timesheets.done_tasks')" />
+              </div>
+            </th>
+          </tr>
+          <tr
+            class="datatable-row"
+            v-for="(task, i) in doneTasks"
+            :key="task + '-' + i"
+          >
+            <th
+              class="production datatable-row-header datatable-row-header--nobd"
+              scope="row"
+            >
+              <production-name-cell
+                :entry="productionMap.get(task.project_id)"
+                :only-avatar="true"
+              />
+            </th>
+            <task-type-cell
+              class="type datatable-row-header datatable-row-header--nobd"
+              :production-id="task.project_id"
+              :task-type="{
+                id: task.task_type_id,
+                name: task.task_type_name,
+                color: task.task_type_color,
+                for_entity: ['Shot', 'Edit'].includes(task.entity_type_name)
+                  ? task.entity_type_name
+                  : 'Asset'
+              }"
+              :style="{ left: colTypePosX }"
+            />
+
+            <th
+              class="name datatable-row-header"
+              :style="{ left: colNamePosX }"
+            >
+              <router-link :to="task.entity_path">
+                {{ task.full_entity_name }}
+              </router-link>
+            </th>
+            <time-slider-cell
+              :duration="
+                timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0
+              "
+              class="time-spent"
+              :task-id="task.id"
+              @change="onSliderChange"
+              v-if="!personIsDayOff"
+            />
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <div class="filler"></div>
-    <button-simple
-      class="flexrow-item"
-      :text="$t('timesheets.day_off')"
-      :active="personIsDayOff"
-      @click="toggleDayOff"
-      v-if="!hideDayOff"
+
+    <table-info :is-loading="isLoading" :is-error="isError" />
+
+    <p class="has-text-centered footer-info" v-if="!isLoading">
+      {{ tasks.length }} {{ $tc('tasks.tasks', tasks.length) }}
+    </p>
+
+    <delete-modal
+      :text="$t('timesheets.confirm_day_off')"
+      @confirm="
+        modals.dayOff = false
+        $emit('set-day-off')
+      "
+      @cancel="modals.dayOff = false"
+      :active="modals.dayOff"
     />
   </div>
-
-  <div
-    class="datatable-wrapper"
-    ref="body"
-    v-scroll="onBodyScroll"
-  >
-    <table class="datatable multi-section">
-      <thead class="datatable-head">
-        <tr>
-          <th
-            scope="col"
-            class="datatable-row-header datatable-row-header--nobd production"
-            ref="th-prod"
-          >
-            {{ $t('tasks.fields.production') }}
-          </th>
-          <th
-            scope="col"
-            class="type datatable-row-header datatable-row-header--nobd"
-            ref="th-type"
-            :style="{left: colTypePosX}"
-          >
-            {{ $t('tasks.fields.task_type') }}
-          </th>
-          <th
-            scope="col"
-            class="name datatable-row-header"
-            :style="{left: colNamePosX}"
-          >
-            {{ $t('tasks.fields.entity') }}
-          </th>
-          <th scope="col" class="time-spent">
-            {{ $t('timesheets.time_spents') }}
-          </th>
-        </tr>
-      </thead>
-      <tbody
-        class="datatable-body"
-        v-if="tasks.length > 0 && !isLoading"
-      >
-        <tr
-          class="datatable-row"
-          v-for="(task, i) in displayedTasks"
-          :key="task.id + '-' + i"
-        >
-          <th
-            class="production datatable-row-header datatable-row-header--nobd"
-            scope="row"
-          >
-            <production-name-cell
-              :entry="productionMap.get(task.project_id)"
-              :only-avatar="true"
-            />
-          </th>
-          <task-type-cell
-            class="type datatable-row-header datatable-row-header--nobd"
-            :production-id="task.project_id"
-            :task-type="taskTypeMap.get(task.task_type_id)"
-            :style="{left: colTypePosX}"
-          />
-
-          <th class="name datatable-row-header" :style="{left: colNamePosX}">
-            <router-link :to="entityPath(task)">
-              <div class="flexrow">
-                <entity-thumbnail
-                  :empty-width="60"
-                  :empty-height="40"
-                  :entity="{preview_file_id: task.entity_preview_file_id}"
-                />
-                <span>
-                 {{ task.full_entity_name }}
-                </span>
-              </div>
-            </router-link>
-          </th>
-          <time-slider-cell
-            :duration="timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0"
-            class="time-spent"
-            :task-id="task.id"
-            @change="onSliderChange"
-            v-if="!personIsDayOff"
-          />
-          <td v-else></td>
-       </tr>
-      </tbody>
-      <tbody class="datatable-body" v-if="!isLoading && !hideDone">
-        <tr v-if="!hideDone" class="datatable-type-header">
-          <th colspan="4" scope="rowgroup">
-            <div class="datatable-row-header">
-              <page-subtitle
-                :text="$t('timesheets.done_tasks')"
-              />
-            </div>
-          </th>
-        </tr>
-        <tr
-          class="datatable-row"
-          v-for="(task, i) in doneTasks"
-          :key="task + '-' + i"
-        >
-          <th
-            class="production datatable-row-header datatable-row-header--nobd"
-            scope="row"
-          >
-            <production-name-cell
-              :entry="productionMap.get(task.project_id)"
-              :only-avatar="true"
-            />
-          </th>
-          <task-type-cell
-            class="type datatable-row-header datatable-row-header--nobd"
-            :production-id="task.project_id"
-            :task-type="{
-              id: task.task_type_id,
-              name: task.task_type_name,
-              color: task.task_type_color,
-              for_entity: ['Shot', 'Edit'].includes(task.entity_type_name)
-                ? task.entity_type_name
-                : 'Asset'
-            }"
-            :style="{left: colTypePosX}"
-          />
-
-          <th class="name datatable-row-header" :style="{left: colNamePosX}">
-           <router-link :to="task.entity_path">
-             {{ task.full_entity_name }}
-           </router-link>
-          </th>
-          <time-slider-cell
-            :duration="timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0"
-            class="time-spent"
-            :task-id="task.id"
-            @change="onSliderChange"
-            v-if="!personIsDayOff"
-          />
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
-
-  <p class="has-text-centered footer-info" v-if="!isLoading">
-    {{ tasks.length }} {{ $tc('tasks.tasks', tasks.length) }}
-  </p>
-
-  <delete-modal
-    :text="$t('timesheets.confirm_day_off')"
-    @confirm="modals.dayOff = false ; $emit('set-day-off')"
-    @cancel="modals.dayOff = false"
-    :active="modals.dayOff"
-  />
-</div>
 </template>
 
 <script>
@@ -253,7 +254,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       colNamePosX: '',
       colTypePosX: '',
@@ -266,7 +267,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.colTypePosX = this.$refs['th-prod'].offsetWidth + 'px'
     this.colNamePosX =
       this.$refs['th-prod'].offsetWidth +
@@ -274,10 +275,11 @@ export default {
       'px'
     const beginningOfTheWeek = moment().startOf('isoWeek').toDate()
     this.disabledDates = {
-      to: this.isCurrentUserArtist &&
-          this.organisation.timesheets_locked === 'true'
-        ? beginningOfTheWeek
-        : undefined,
+      to:
+        this.isCurrentUserArtist &&
+        this.organisation.timesheets_locked === 'true'
+          ? beginningOfTheWeek
+          : undefined,
       from: moment().toDate() // Disable dates after today.
     }
   },
@@ -294,7 +296,7 @@ export default {
       'user'
     ]),
 
-    locale () {
+    locale() {
       if (this.user.locale === 'fr_FR') {
         return fr
       } else {
@@ -302,32 +304,31 @@ export default {
       }
     },
 
-    displayedTasks () {
+    displayedTasks() {
       return this.tasks.slice(0, this.page * (PAGE_SIZE / 2))
     }
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    onBodyScroll (event, position) {
+    onBodyScroll(event, position) {
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
-      if (maxHeight < (position.scrollTop + 100)) {
+      if (maxHeight < position.scrollTop + 100) {
         this.page++
       }
     },
 
-    currentDate () {
+    currentDate() {
       return moment().format('LL')
     },
 
-    onSliderChange (valueInfo) {
+    onSliderChange(valueInfo) {
       this.$emit('time-spent-change', valueInfo)
     },
 
-    entityPath (entity) {
+    entityPath(entity) {
       const entityType = entity.sequence_name ? 'shot' : 'asset'
       const route = {
         name: entityType,
@@ -350,7 +351,7 @@ export default {
       return route
     },
 
-    toggleDayOff () {
+    toggleDayOff() {
       if (this.personIsDayOff) {
         this.$emit('unset-day-off')
       } else {
@@ -360,7 +361,7 @@ export default {
   },
 
   watch: {
-    selectedDate () {
+    selectedDate() {
       this.$emit('date-changed', this.selectedDate)
     }
   }
@@ -368,7 +369,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;

@@ -1,23 +1,22 @@
 <template>
-<div ref="container" class="video-player">
-  <div ref="video-wrapper" class="video-wrapper">
-    <div class="loading-background" v-if="isLoading" >
-      <spinner class="spinner" />
+  <div ref="container" class="video-player">
+    <div ref="video-wrapper" class="video-wrapper">
+      <div class="loading-background" v-if="isLoading">
+        <spinner class="spinner" />
+      </div>
+      <video
+        ref="movie"
+        class="annotation-movie"
+        :style="{
+          display: isLoading ? 'none' : 'block'
+        }"
+        :src="moviePath"
+        :poster="posterPath"
+        preload="auto"
+        type="video/mp4"
+      ></video>
     </div>
-    <video
-      ref="movie"
-      class="annotation-movie"
-      :style="{
-        display: isLoading ? 'none' : 'block'
-      }"
-      :src="moviePath"
-      :poster="posterPath"
-      preload="auto"
-      type="video/mp4"
-    >
-    </video>
   </div>
-</div>
 </template>
 
 <script>
@@ -87,7 +86,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       annotations: [],
       currentTimeRaw: 0,
@@ -97,7 +96,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     if (!this.container) return
     this.$options.currentTimeCalls = []
 
@@ -116,7 +115,11 @@ export default {
           this.$emit('video-loaded')
         }
         this.video.addEventListener(
-          'focus', function () { this.blur() }, false
+          'focus',
+          function () {
+            this.blur()
+          },
+          false
         )
         this.video.addEventListener('loadedmetadata', () => {
           this.configureVideo()
@@ -130,7 +133,7 @@ export default {
           this.isLoading = false
         })
 
-        this.video.addEventListener('error', (err) => {
+        this.video.addEventListener('error', err => {
           console.error('An error occured while loading a video', err)
           this.$refs.movie.style.height = this.defaultHeight + 'px'
           this.isLoading = false
@@ -140,60 +143,56 @@ export default {
     }, 0)
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     this.pause()
     window.removeEventListener('keydown', this.onKeyDown)
     window.removeEventListener('resize', this.onWindowResize)
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction'
-    ]),
+    ...mapGetters(['currentProduction']),
 
-    container () {
+    container() {
       return this.$refs.container
     },
 
-    extension () {
+    extension() {
       return this.preview ? this.preview.extension : ''
     },
 
-    fps () {
+    fps() {
       return parseFloat(this.currentProduction.fps || '24')
     },
 
-    frameDuration () {
+    frameDuration() {
       return Math.round((1 / this.fps) * 10000) / 10000
     },
 
-    isAvailable () {
+    isAvailable() {
       return !['broken', 'processing'].includes(this.status)
     },
 
-    isMovie () {
+    isMovie() {
       return this.extension === 'mp4'
     },
 
-    isVideo () {
+    isVideo() {
       return this.$refs.movie && this.videoDuration && this.videoDuration > 0
     },
 
-    status () {
-      return this.preview && this.preview.status
-        ? this.preview.status
-        : 'ready'
+    status() {
+      return this.preview && this.preview.status ? this.preview.status : 'ready'
     },
 
-    video () {
+    video() {
       return this.$refs.movie
     },
 
-    videoWrapper () {
+    videoWrapper() {
       return this.$refs['video-wrapper']
     },
 
-    moviePath () {
+    moviePath() {
       if (this.extension === 'mp4' && this.isAvailable && !this.isHd) {
         return `/api/movies/low/preview-files/${this.preview.id}.mp4`
       } else if (this.extension === 'mp4' && this.isAvailable) {
@@ -203,7 +202,7 @@ export default {
       }
     },
 
-    movieDlPath () {
+    movieDlPath() {
       if (this.preview && this.isAvailable) {
         return `/api/movies/originals/preview-files/${this.preview.id}/download`
       } else {
@@ -211,7 +210,7 @@ export default {
       }
     },
 
-    posterPath () {
+    posterPath() {
       if (this.extension === 'mp4' && this.isAvailable) {
         return `/api/pictures/previews/preview-files/${this.preview.id}.png`
       } else {
@@ -225,14 +224,14 @@ export default {
 
     formatTime,
 
-    getNaturalDimensions () {
+    getNaturalDimensions() {
       return {
         height: this.video.videoHeight,
         width: this.video.videoWidth
       }
     },
 
-    getDimensions () {
+    getDimensions() {
       const dimensions = this.getNaturalDimensions()
       const ratio = dimensions.height / dimensions.width
       const fullWidth = this.container.offsetWidth
@@ -246,7 +245,7 @@ export default {
       return { width, height }
     },
 
-    getLastPushedCurrentTime () {
+    getLastPushedCurrentTime() {
       const length = this.$options.currentTimeCalls.length
       if (length > 0) {
         return this.$options.currentTimeCalls[length - 1]
@@ -255,16 +254,16 @@ export default {
       }
     },
 
-    setCurrentFrame (frameNumber) {
+    setCurrentFrame(frameNumber) {
       this.setCurrentTime(frameNumber * this.frameDuration)
     },
 
-    setCurrentTimeRaw (currentTime) {
+    setCurrentTimeRaw(currentTime) {
       if (currentTime < this.frameDuration) currentTime = 0
       this.video.currentTime = currentTime
     },
 
-    setCurrentTime (currentTime) {
+    setCurrentTime(currentTime) {
       if (!this.$options.currentTimeCalls) {
         this.$options.currentTimeCalls = []
       }
@@ -272,7 +271,7 @@ export default {
       if (!this.$options.running) this.runSetCurrentTime()
     },
 
-    runSetCurrentTime () {
+    runSetCurrentTime() {
       if (this.$options.currentTimeCalls.length === 0) {
         this.$options.running = false
       } else {
@@ -289,7 +288,7 @@ export default {
       }
     },
 
-    _setRoundedTime (time, ceil = false) {
+    _setRoundedTime(time, ceil = false) {
       if (ceil) {
         time = ceilToFrame(time, this.fps)
       } else {
@@ -297,9 +296,7 @@ export default {
       }
       if (time < this.frameDuration) {
         time = 0
-      } else if (
-        time > (this.video.duration - this.frameDuration)
-      ) {
+      } else if (time > this.video.duration - this.frameDuration) {
         time = this.video.duration - this.frameDuration
       } else {
       }
@@ -307,14 +304,14 @@ export default {
       return time
     },
 
-    configureVideo () {
+    configureVideo() {
       this.video.onended = this.onVideoEnd
       if (this.video.currentTime === 0) {
         this.mountVideo()
       }
     },
 
-    mountVideo () {
+    mountVideo() {
       if (!this.isMovie) return
       this.video.mute = this.isMuted
       this.videoDuration = this.video.duration
@@ -322,11 +319,13 @@ export default {
       this.$emit('duration-changed', this.videoDuration)
       if (this.container) {
         this.resetSize()
-        setTimeout(() => { this.resetSize() })
+        setTimeout(() => {
+          this.resetSize()
+        })
       }
     },
 
-    resetSize () {
+    resetSize() {
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
@@ -342,7 +341,7 @@ export default {
       }
     },
 
-    onTimeUpdate (time) {
+    onTimeUpdate(time) {
       if (this.video) {
         this.currentTimeRaw = this.video.currentTime - this.frameDuration
       } else {
@@ -354,15 +353,12 @@ export default {
       )
     },
 
-    runEmitTimeUpdateLoop () {
+    runEmitTimeUpdateLoop() {
       clearInterval(this.$options.playLoop)
-      this.$options.playLoop = setInterval(
-        this.onTimeUpdate,
-        1000 / this.fps
-      )
+      this.$options.playLoop = setInterval(this.onTimeUpdate, 1000 / this.fps)
     },
 
-    play () {
+    play() {
       if (!this.isPlaying && this.videoDuration === this.video.currentTime) {
         this.setCurrentTime(0)
       }
@@ -370,29 +366,29 @@ export default {
       this.runEmitTimeUpdateLoop()
     },
 
-    pause () {
+    pause() {
       this.video.pause()
       this._setRoundedTime(this.currentTimeRaw, true)
       clearInterval(this.$options.playLoop)
     },
 
-    toggleMute () {
+    toggleMute() {
       this.video.muted = !this.video.muted
     },
 
-    goPreviousFrame () {
+    goPreviousFrame() {
       const time = this.getLastPushedCurrentTime()
       const newTime = time - this.frameDuration
       return this._setRoundedTime(newTime)
     },
 
-    goNextFrame () {
+    goNextFrame() {
       const time = this.getLastPushedCurrentTime()
       const newTime = time + this.frameDuration
       return this._setRoundedTime(newTime)
     },
 
-    onVideoEnd () {
+    onVideoEnd() {
       this.isPlaying = false
       clearInterval(this.$options.playLoop)
       if (this.isRepeating) {
@@ -404,8 +400,8 @@ export default {
       }
     },
 
-    onWindowResize () {
-      const now = (new Date().getTime())
+    onWindowResize() {
+      const now = new Date().getTime()
       this.lastCall = this.lastCall || 0
       if (now - this.lastCall > 600) {
         this.lastCall = now
@@ -418,20 +414,20 @@ export default {
   },
 
   watch: {
-    preview () {
+    preview() {
       this.maxDuration = '00:00.000'
       this.pause()
     },
 
-    light () {
+    light() {
       this.mountVideo()
     },
 
-    isComparing () {
+    isComparing() {
       this.mountVideo()
     },
 
-    isMuted () {
+    isMuted() {
       this.video.muted = this.isMuted
     }
   }
@@ -475,7 +471,7 @@ export default {
 .video-player {
   width: 100%;
   text-align: center;
-  background: #36393F;
+  background: #36393f;
 }
 
 video {

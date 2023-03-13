@@ -1,6 +1,6 @@
 import client from '@/store/api/client'
 
-const sanitizeTaskStatus = (taskStatus) => {
+const sanitizeTaskStatus = taskStatus => {
   return {
     name: taskStatus.name,
     short_name: taskStatus.short_name,
@@ -15,25 +15,25 @@ const sanitizeTaskStatus = (taskStatus) => {
 }
 
 export default {
-  getTaskStatuses (callback) {
+  getTaskStatuses(callback) {
     client.get('/api/data/task-status', callback)
   },
 
-  getTaskStatus (taskStatusId, callback) {
+  getTaskStatus(taskStatusId, callback) {
     client.get(`/api/data/task-status/${taskStatusId}`, callback)
   },
 
-  newTaskStatus (taskStatus) {
+  newTaskStatus(taskStatus) {
     const data = sanitizeTaskStatus(taskStatus)
     return client.ppost('/api/data/task-status/', data)
   },
 
-  updateTaskStatus (taskStatus) {
+  updateTaskStatus(taskStatus) {
     const data = sanitizeTaskStatus(taskStatus)
     return client.pput(`/api/data/task-status/${taskStatus.id}`, data)
   },
 
-  deleteTaskStatus (taskStatus) {
+  deleteTaskStatus(taskStatus) {
     return client.pdel(`/api/data/task-status/${taskStatus.id}`)
   }
 }

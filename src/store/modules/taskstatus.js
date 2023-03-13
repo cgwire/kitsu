@@ -5,10 +5,8 @@ import {
   LOAD_TASK_STATUSES_START,
   LOAD_TASK_STATUSES_ERROR,
   LOAD_TASK_STATUSES_END,
-
   EDIT_TASK_STATUS_END,
   DELETE_TASK_STATUS_END,
-
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -27,8 +25,10 @@ const getters = {
 
   taskStatusForCurrentUser: (state, getters, rootState, rootGetters) => {
     const statuses = rootGetters.productionTaskStatuses
-    if (rootGetters.isCurrentUserManager ||
-        rootGetters.isCurrentUserSupervisor) {
+    if (
+      rootGetters.isCurrentUserManager ||
+      rootGetters.isCurrentUserSupervisor
+    ) {
       return statuses
     } else if (rootGetters.isCurrentUserClient) {
       return statuses.filter(taskStatus => {
@@ -42,10 +42,12 @@ const getters = {
   },
 
   getTaskStatusForCurrentUser:
-    (state, getters, rootState, rootGetters) => (projectId) => {
+    (state, getters, rootState, rootGetters) => projectId => {
       const statuses = rootGetters.getProductionTaskStatuses(projectId)
-      if (rootGetters.isCurrentUserManager ||
-        rootGetters.isCurrentUserSupervisor) {
+      if (
+        rootGetters.isCurrentUserManager ||
+        rootGetters.isCurrentUserSupervisor
+      ) {
         return statuses
       } else if (rootGetters.isCurrentUserClient) {
         return statuses.filter(taskStatus => {
@@ -57,12 +59,10 @@ const getters = {
         })
       }
     }
-
 }
 
 const actions = {
-
-  loadTaskStatuses ({ commit, state }, callback) {
+  loadTaskStatuses({ commit, state }, callback) {
     commit(LOAD_TASK_STATUSES_START)
     taskStatusApi.getTaskStatuses((err, taskStatus) => {
       if (err) commit(LOAD_TASK_STATUSES_ERROR)
@@ -71,53 +71,50 @@ const actions = {
     })
   },
 
-  loadTaskStatus ({ commit, state }, taskStatusId) {
+  loadTaskStatus({ commit, state }, taskStatusId) {
     taskStatusApi.getTaskStatus(taskStatusId, (err, taskStatus) => {
       if (err) console.error(err)
       else commit(EDIT_TASK_STATUS_END, taskStatus)
     })
   },
 
-  newTaskStatus ({ commit, state }, form) {
-    return taskStatusApi.newTaskStatus(form)
-      .then((taskStatus) => {
-        commit(EDIT_TASK_STATUS_END, taskStatus)
-        Promise.resolve(taskStatus)
-      })
+  newTaskStatus({ commit, state }, form) {
+    return taskStatusApi.newTaskStatus(form).then(taskStatus => {
+      commit(EDIT_TASK_STATUS_END, taskStatus)
+      Promise.resolve(taskStatus)
+    })
   },
 
-  saveTaskStatus ({ commit, state }, form) {
-    return taskStatusApi.updateTaskStatus(form)
-      .then((taskStatus) => {
-        commit(EDIT_TASK_STATUS_END, taskStatus)
-        Promise.resolve(taskStatus)
-      })
+  saveTaskStatus({ commit, state }, form) {
+    return taskStatusApi.updateTaskStatus(form).then(taskStatus => {
+      commit(EDIT_TASK_STATUS_END, taskStatus)
+      Promise.resolve(taskStatus)
+    })
   },
 
-  deleteTaskStatus ({ commit, state }, taskStatus) {
-    return taskStatusApi.deleteTaskStatus(taskStatus)
-      .then(() => {
-        commit(DELETE_TASK_STATUS_END, taskStatus)
-        Promise.resolve(taskStatus)
-      })
+  deleteTaskStatus({ commit, state }, taskStatus) {
+    return taskStatusApi.deleteTaskStatus(taskStatus).then(() => {
+      commit(DELETE_TASK_STATUS_END, taskStatus)
+      Promise.resolve(taskStatus)
+    })
   }
 }
 
 const mutations = {
-  [LOAD_TASK_STATUSES_START] (state) {
+  [LOAD_TASK_STATUSES_START](state) {
     state.taskStatus = []
     state.taskStatusMap = new Map()
   },
 
-  [LOAD_TASK_STATUSES_ERROR] (state) {
+  [LOAD_TASK_STATUSES_ERROR](state) {
     state.taskStatus = []
     state.taskStatusMap = new Map()
   },
 
-  [LOAD_TASK_STATUSES_END] (state, taskStatus) {
+  [LOAD_TASK_STATUSES_END](state, taskStatus) {
     state.taskStatus = sortByName(taskStatus)
     state.taskStatusMap = new Map()
-    taskStatus.forEach((taskStatus) => {
+    taskStatus.forEach(taskStatus => {
       if (taskStatus.is_artist_allowed === null) {
         taskStatus.is_artist_allowed = true
       }
@@ -128,15 +125,13 @@ const mutations = {
     })
   },
 
-  [EDIT_TASK_STATUS_END] (state, newTaskStatus) {
+  [EDIT_TASK_STATUS_END](state, newTaskStatus) {
     const taskStatus = state.taskStatusMap.get(newTaskStatus.id)
 
     if (newTaskStatus.is_default) {
       state.taskStatus.forEach(status => {
-        if (
-          status.is_default &&
-          status.id !== newTaskStatus.id
-        ) status.is_default = false
+        if (status.is_default && status.id !== newTaskStatus.id)
+          status.is_default = false
       })
     }
 
@@ -151,9 +146,9 @@ const mutations = {
     }
   },
 
-  [DELETE_TASK_STATUS_END] (state, taskStatusToDelete) {
+  [DELETE_TASK_STATUS_END](state, taskStatusToDelete) {
     const taskStatusToDeleteIndex = state.taskStatus.findIndex(
-      (taskStatus) => taskStatus.id === taskStatusToDelete.id
+      taskStatus => taskStatus.id === taskStatusToDelete.id
     )
     if (taskStatusToDeleteIndex >= 0) {
       state.taskStatus.splice(taskStatusToDeleteIndex, 1)
@@ -161,7 +156,7 @@ const mutations = {
     delete state.taskStatusMap.get(taskStatusToDelete.id)
   },
 
-  [RESET_ALL] (state) {
+  [RESET_ALL](state) {
     Object.assign(state, { ...initialState })
   }
 }

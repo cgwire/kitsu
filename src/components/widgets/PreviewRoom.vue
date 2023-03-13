@@ -3,7 +3,10 @@
     <button-simple
       :text="$t('preview_room.leave_room')"
       class="preview-room-button"
-      @click="leaveRoom(); openRoom()"
+      @click="
+        leaveRoom()
+        openRoom()
+      "
       v-if="joinedRoom"
     />
     <button-simple
@@ -46,7 +49,7 @@ export default {
     leaveRoom: { type: Function }
   },
 
-  data () {
+  data() {
     return {
       room: {
         people: [],
@@ -55,20 +58,16 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.openRoom()
   },
 
-  beforeDestroy () {
-  },
+  beforeDestroy() {},
 
   computed: {
-    ...mapGetters([
-      'personMap',
-      'user'
-    ]),
+    ...mapGetters(['personMap', 'user']),
 
-    joinedRoom () {
+    joinedRoom() {
       if (!this.roomId) {
         return
       }
@@ -77,8 +76,7 @@ export default {
   },
 
   methods: {
-
-    openRoom () {
+    openRoom() {
       if (!this.roomId) {
         return
       }
@@ -88,8 +86,7 @@ export default {
     }
   },
 
-  watch: {
-  }
+  watch: {}
 }
 </script>
 

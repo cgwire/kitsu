@@ -1,16 +1,15 @@
 <template>
   <div class="logs fixed-page">
-
     <div class="tabs logs-tabs">
       <ul>
-        <li :class="{'is-active': isActiveTab('events')}">
+        <li :class="{ 'is-active': isActiveTab('events') }">
           <a @click="activeTab = 'events'">
-            {{ $t('logs.title')}}
+            {{ $t('logs.title') }}
           </a>
         </li>
-        <li :class="{'is-active': isActiveTab('preview_files')}">
+        <li :class="{ 'is-active': isActiveTab('preview_files') }">
           <a @click="activeTab = 'preview_files'">
-            {{ $t('logs.preview_files.title')}}
+            {{ $t('logs.preview_files.title') }}
           </a>
         </li>
       </ul>
@@ -33,29 +32,28 @@ export default {
     PreviewFiles
   },
 
-  data () {
+  data() {
     return {
       activeTab: 'events'
     }
   },
 
-  mounted () {
+  mounted() {
     if (this.$route.query.tab) {
       this.activeTab = this.$route.query.tab
     }
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
-    isActiveTab (tab) {
+    isActiveTab(tab) {
       return this.activeTab === tab
     }
   },
 
   watch: {
-    activeTab () {
+    activeTab() {
       if (this.$route.query.tab !== this.activeTab) {
         this.$router.push({
           query: {

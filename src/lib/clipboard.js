@@ -4,19 +4,19 @@ let annotationClipboard = []
 let castingClipboard = []
 
 export default {
-  copyAnnotations (annotations) {
+  copyAnnotations(annotations) {
     annotationClipboard = annotations
   },
 
-  pasteAnnotations () {
+  pasteAnnotations() {
     return annotationClipboard
   },
 
-  copyCasting (casting) {
+  copyCasting(casting) {
     castingClipboard = casting
   },
 
-  pasteCasting () {
+  pasteCasting() {
     return castingClipboard
   }
 }

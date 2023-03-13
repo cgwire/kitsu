@@ -1,43 +1,43 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
+    <div class="modal-content">
+      <div class="box content">
+        <h1 class="title">
+          {{ title }}
+        </h1>
 
-    <div class="box content">
-      <h1 class="title">
-        {{ title }}
-      </h1>
+        <p>
+          {{ $t('main.csv.select_file') }}
+        </p>
 
-      <p>
-        {{ $t("main.csv.select_file") }}
-      </p>
+        <file-upload
+          ref="uploadAvatarField"
+          :label="$t('main.csv.upload_file')"
+          @fileselected="onFileSelected"
+          accept=".png,.jpg,.jpeg"
+        />
 
-      <file-upload
-        ref="uploadAvatarField"
-        :label="$t('main.csv.upload_file')"
-        @fileselected="onFileSelected"
-        accept=".png,.jpg,.jpeg"
-      />
+        <p class="error" v-if="isError">
+          {{ $t('profile.avatar.error_upload') }}
+        </p>
 
-      <p class="error" v-if="isError">
-        {{ $t("profile.avatar.error_upload") }}
-      </p>
-
-      <modal-footer
-        :error-text="$t('productions.metadata.error')"
-        :is-loading="isLoading"
-        :is-disabled="!formData"
-        @confirm="onConfirmClicked"
-        @cancel="$emit('cancel')"
-      />
-
+        <modal-footer
+          :error-text="$t('productions.metadata.error')"
+          :is-loading="isLoading"
+          :is-disabled="!formData"
+          @confirm="onConfirmClicked"
+          @cancel="$emit('cancel')"
+        />
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -74,33 +74,30 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       formData: null
     }
   },
 
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
 
   methods: {
+    ...mapActions([]),
 
-    ...mapActions([
-    ]),
-
-    onFileSelected (formData) {
+    onFileSelected(formData) {
       this.formData = formData
       this.$emit('fileselected', formData)
     },
 
-    onConfirmClicked () {
+    onConfirmClicked() {
       this.$emit('confirm', this.formData)
     }
   },
   watch: {
-    active () {
+    active() {
       this.formData = null
       this.$refs.uploadAvatarField.reset()
     }

@@ -3,15 +3,14 @@ import moment from 'moment-timezone'
 export const range = (start, end) => {
   let length = end - start + 1
   if (length < 0) length = 0
-  return [...Array(length).keys()]
-    .map(i => i + start)
+  return [...Array(length).keys()].map(i => i + start)
 }
 
-export const parseDate = (date) => {
+export const parseDate = date => {
   return moment.tz(date, 'YYYY-MM-DDTHH:mm:ss', 'UTC')
 }
 
-export const parseSimpleDate = (date) => {
+export const parseSimpleDate = date => {
   if (date) {
     return moment.tz(date, 'YYYY-MM-DD', 'UTC')
   } else {
@@ -19,12 +18,12 @@ export const parseSimpleDate = (date) => {
   }
 }
 
-export const formatSimpleDate = (date) => {
+export const formatSimpleDate = date => {
   if (date) return moment(date).format('YYYY-MM-DD')
   else return ''
 }
 
-export const formatFullDate = (date) => {
+export const formatFullDate = date => {
   if (date) {
     const utcDate = moment.tz(date, 'UTC')
     return utcDate.format('YYYY-MM-DD HH:mm:ss')
@@ -34,20 +33,16 @@ export const formatFullDate = (date) => {
 }
 
 export const formatFullDateWithTimezone = (dateString, timezone) => {
-  return moment.tz(dateString, 'UTC')
-    .tz(timezone)
-    .format('YYYY-MM-DD HH:mm:ss')
+  return moment.tz(dateString, 'UTC').tz(timezone).format('YYYY-MM-DD HH:mm:ss')
 }
 
 export const formatFullDateWithRevertedTimezone = (date, timezone) => {
   if (!date) return ''
   const dateString = formatSimpleDate(date)
-  return moment.tz(dateString, timezone)
-    .tz('UTC')
-    .format('YYYY-MM-DDTHH:mm:ss')
+  return moment.tz(dateString, timezone).tz('UTC').format('YYYY-MM-DDTHH:mm:ss')
 }
 
-export const formatDate = (date) => {
+export const formatDate = date => {
   const utcDate = moment.tz(date, 'UTC')
   if (moment().diff(utcDate, 'days') > 1) {
     return utcDate.format('YYYY-MM-DD HH:mm')
@@ -56,7 +51,7 @@ export const formatDate = (date) => {
   }
 }
 
-export const monthToString = (month) => {
+export const monthToString = month => {
   const currentYear = moment().year()
   return moment(`${currentYear}-${month}`, 'YYYY-M').format('MMM')
 }
@@ -70,13 +65,10 @@ export const getMonthRange = (year, currentYear, currentMonth) => {
 }
 
 export const getDayRange = (year, month, currentYear, currentMonth) => {
-  if (currentYear === year &&
-      currentMonth === month) {
+  if (currentYear === year && currentMonth === month) {
     return range(1, moment().date())
   } else {
-    const currentDate = moment(
-      `${year}-${Number(month)}`, 'YYYY-M', 'en'
-    )
+    const currentDate = moment(`${year}-${Number(month)}`, 'YYYY-M', 'en')
     return range(1, currentDate.endOf('month').date())
   }
 }
@@ -89,7 +81,7 @@ export const getWeekRange = (year, currentYear) => {
   }
 }
 
-export const getFirstStartDateByField = (items) => {
+export const getFirstStartDateByField = items => {
   let startDate = moment()
   items.forEach(item => {
     const sDate = parseDate(item.start_date)
@@ -98,7 +90,7 @@ export const getFirstStartDateByField = (items) => {
   return startDate
 }
 
-export const getLastEndDateByField = (items) => {
+export const getLastEndDateByField = items => {
   let endDate = moment()
   items.forEach(item => {
     const eDate = parseDate(item.end_date)
@@ -107,15 +99,15 @@ export const getLastEndDateByField = (items) => {
   return endDate
 }
 
-export const getFirstStartDate = (items) => {
+export const getFirstStartDate = items => {
   let startDate = items[0].startDate
-  items.forEach((item) => {
+  items.forEach(item => {
     if (item.startDate.isBefore(startDate)) startDate = item.startDate.clone()
   })
   return startDate
 }
 
-export const getLastEndDate = (items) => {
+export const getLastEndDate = items => {
   let endDate = items[0].endDate
   items.forEach(item => {
     if (item.endDate.isAfter(endDate)) endDate = item.endDate.clone()
@@ -123,7 +115,7 @@ export const getLastEndDate = (items) => {
   return endDate
 }
 
-export const getStartDateFromString = (startDateString) => {
+export const getStartDateFromString = startDateString => {
   if (startDateString) {
     return parseSimpleDate(startDateString)
   } else {

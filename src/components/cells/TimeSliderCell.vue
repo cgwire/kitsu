@@ -1,25 +1,25 @@
 <template>
-<td>
-  <div class="flexrow">
-    <span class="value flexrow-item">
-      {{ value }}
-    </span>
-    <vue-slider
-      class="flexrow-item slider"
-      ref="slider"
-      v-model="value"
-      v-bind="options"
-    />
-    <button class="button flexrow-item" @click="setValue(1)">1</button>
-    <button class="button flexrow-item" @click="setValue(4)">4</button>
-    <button
-      class="button flexrow-item"
-      @click="setValue(organisation.hours_by_day || 8)"
-    >
-    {{ organisation.hours_by_day || 8}}
-    </button>
-  </div>
-</td>
+  <td>
+    <div class="flexrow">
+      <span class="value flexrow-item">
+        {{ value }}
+      </span>
+      <vue-slider
+        class="flexrow-item slider"
+        ref="slider"
+        v-model="value"
+        v-bind="options"
+      />
+      <button class="button flexrow-item" @click="setValue(1)">1</button>
+      <button class="button flexrow-item" @click="setValue(4)">4</button>
+      <button
+        class="button flexrow-item"
+        @click="setValue(organisation.hours_by_day || 8)"
+      >
+        {{ organisation.hours_by_day || 8 }}
+      </button>
+    </div>
+  </td>
 </template>
 
 <script>
@@ -29,7 +29,7 @@ import VueSlider from 'vue-slider-component'
 export default {
   name: 'time-slider-cell',
 
-  data () {
+  data() {
     return {
       value: this.duration,
       options: {
@@ -70,24 +70,22 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'organisation'
-    ])
+    ...mapGetters(['organisation'])
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    setValue (value) {
+    setValue(value) {
       this.value = value
     }
   },
 
   watch: {
-    value () {
+    value() {
       this.$emit('change', {
-        taskId: this.taskId, duration: this.value
+        taskId: this.taskId,
+        duration: this.value
       })
     }
   }

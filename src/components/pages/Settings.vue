@@ -1,15 +1,14 @@
 <template>
   <div class="settings page">
     <div class="settings-content">
-
       <div class="settings-body">
         <h2>
           {{ $t('settings.title') }}
         </h2>
         <p>
-        <label class="label">
-          {{ $t('settings.logo') }}
-        </label>
+          <label class="label">
+            {{ $t('settings.logo') }}
+          </label>
         </p>
         <div class="logo-wrapper" v-if="organisation.has_avatar">
           <img :src="organisationLogoPath" />
@@ -66,9 +65,9 @@
 
         <div id="mattermost_integrations">
           <text-field
-          :label="$t('settings.fields.mattermost_webhook')"
-          @enter="saveSettings()"
-          v-model="form.chat_webhook_mattermost"
+            :label="$t('settings.fields.mattermost_webhook')"
+            @enter="saveSettings()"
+            v-model="form.chat_webhook_mattermost"
           />
           <div
             class="error pull-right"
@@ -97,7 +96,6 @@
         >
           {{ $t('settings.save.error') }}
         </p>
-
       </div>
     </div>
 
@@ -109,7 +107,6 @@
       @confirm="uploadAvatarFile"
       @cancel="hideAvatarModal"
     />
-
   </div>
 </template>
 
@@ -129,7 +126,7 @@ export default {
     TextField
   },
 
-  data () {
+  data() {
     return {
       organisationLogoKey: new Date().getUTCDate(),
       organisationLogoPath: '',
@@ -157,17 +154,15 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.form = Object.assign(this.form, this.organisation)
     this.organisationLogoKey = 'key' + new Date().toISOString()
-    this.organisationLogoPath = '/api/pictures/thumbnails/organisations/' +
-                                `${this.organisation.id}.png`
+    this.organisationLogoPath =
+      '/api/pictures/thumbnails/organisations/' + `${this.organisation.id}.png`
   },
 
   computed: {
-    ...mapGetters([
-      'organisation'
-    ])
+    ...mapGetters(['organisation'])
   },
 
   methods: {
@@ -177,9 +172,11 @@ export default {
       'saveOrganisation'
     ]),
 
-    checkWebhook () {
-      if (!this.form.chat_webhook_mattermost ||
-      this.form.chat_webhook_mattermost.match('/hooks/[a-zA-Z0-9]+$')) {
+    checkWebhook() {
+      if (
+        !this.form.chat_webhook_mattermost ||
+        this.form.chat_webhook_mattermost.match('/hooks/[a-zA-Z0-9]+$')
+      ) {
         this.errors.webhook_error = false
         return true
       } else {
@@ -188,11 +185,11 @@ export default {
       }
     },
 
-    hideAvatarModal () {
+    hideAvatarModal() {
       this.modals.avatar = false
     },
 
-    saveSettings () {
+    saveSettings() {
       if (this.checkWebhook()) {
         this.loading.save = true
         this.errors.save = false
@@ -201,7 +198,7 @@ export default {
             this.loading.save = false
             this.errors.save = false
           })
-          .catch((err) => {
+          .catch(err => {
             console.error(err)
             this.loading.save = false
             this.errors.save = true
@@ -209,7 +206,7 @@ export default {
       }
     },
 
-    uploadAvatarFile (formData) {
+    uploadAvatarFile(formData) {
       this.loading.saveAvatar = true
       this.errors.saveAvatar = false
       this.uploadOrganisationLogo(formData)
@@ -219,32 +216,34 @@ export default {
             this.modals.avatar = false
             this.organisationLogoPath =
               '/api/pictures/thumbnails/organisations/' +
-              `${this.organisation.id}.png?t=` + new Date().toISOString()
+              `${this.organisation.id}.png?t=` +
+              new Date().toISOString()
           }, 500)
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.saveAvatar = false
           this.errors.saveAvatar = true
         })
     },
 
-    showAvatarModal () {
+    showAvatarModal() {
       this.modals.avatar = true
     }
   },
 
   watch: {
-    organisation () {
+    organisation() {
       this.form = {
         name: this.organisation.name,
         hours_by_day: this.organisation.hours_by_day,
-        use_original_file_name:
-          this.organisation.use_original_file_name ? 'true' : 'false',
-        timesheets_locked:
-          this.organisation.timesheets_locked ? 'true' : 'false',
-        hd_by_default:
-          this.organisation.hd_by_default ? 'true' : 'false',
+        use_original_file_name: this.organisation.use_original_file_name
+          ? 'true'
+          : 'false',
+        timesheets_locked: this.organisation.timesheets_locked
+          ? 'true'
+          : 'false',
+        hd_by_default: this.organisation.hd_by_default ? 'true' : 'false',
         chat_token_slack: this.organisation.chat_token_slack,
         chat_token_discord: this.organisation.chat_token_discord,
         chat_webhook_mattermost: this.organisation.chat_webhook_mattermost
@@ -252,7 +251,7 @@ export default {
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: `${this.$t('settings.title')} - Kitsu`
     }
@@ -263,7 +262,7 @@ export default {
 <style lang="scss" scoped>
 .dark {
   .settings {
-    background: #36393F;
+    background: #36393f;
     color: $white-grey;
   }
 
@@ -274,15 +273,15 @@ export default {
 
   .set-logo-button {
     background-color: $grey;
-    color: $dark-grey
+    color: $dark-grey;
   }
 }
 
-#mattermost_integrations{
+#mattermost_integrations {
   margin-bottom: 4em;
 }
 
-#mattermost_integrations .field{
+#mattermost_integrations .field {
   margin-bottom: 0em;
 }
 
@@ -301,7 +300,7 @@ strong {
   margin: auto;
   margin-top: 2em;
   margin-bottom: 2em;
-  box-shadow: rgba(0,0,0,0.15) 0px 1px 4px 2px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 1px 4px 2px;
   border-radius: 1em;
 }
 
@@ -309,7 +308,9 @@ strong {
   padding: 2em;
 }
 
-input, select, span.select {
+input,
+select,
+span.select {
   width: 100%;
 }
 

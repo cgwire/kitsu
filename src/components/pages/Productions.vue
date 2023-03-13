@@ -44,7 +44,6 @@
       @cancel="modals.isDeleteDisplayed = false"
       @confirm="confirmDeleteProduction"
     />
-
   </div>
 </template>
 
@@ -67,7 +66,7 @@ export default {
     ProductionList
   },
 
-  data () {
+  data() {
     return {
       errors: {
         del: false,
@@ -96,7 +95,7 @@ export default {
       'productionMap'
     ]),
 
-    currentLockText () {
+    currentLockText() {
       if (this.productionToDelete) {
         return this.productionToDelete.name
       } else {
@@ -105,7 +104,7 @@ export default {
     }
   },
 
-  created () {
+  created() {
     this.loadProductions()
   },
 
@@ -119,7 +118,7 @@ export default {
 
     // Actions
 
-    confirmEditProduction (form) {
+    confirmEditProduction(form) {
       let action = 'newProduction'
       const isEditing = this.productionToEdit && this.productionToEdit.id
       if (isEditing) {
@@ -129,25 +128,27 @@ export default {
 
       this.loading.edit = true
       this.errors.edit = false
-      this.$store.dispatch(action, form)
+      this.$store
+        .dispatch(action, form)
         .then(() => {
           if (isEditing && this.productionAvatarFormData) {
             return this.uploadProductionAvatar(form.id)
           } else {
             return Promise.resolve()
           }
-        }).then(() => {
+        })
+        .then(() => {
           this.modals.isNewDisplayed = false
           this.loading.edit = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.edit = false
           this.errors.edit = true
         })
     },
 
-    confirmDeleteProduction () {
+    confirmDeleteProduction() {
       this.loading.del = true
       this.errors.del = false
       this.deleteProduction(this.productionToDelete)
@@ -155,14 +156,14 @@ export default {
           this.modals.isDeleteDisplayed = false
           this.loading.del = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.errors.del = true
           this.loading.del = false
         })
     },
 
-    deleteText () {
+    deleteText() {
       const production = this.productionToDelete
       if (production) {
         return this.$t('productions.delete_text', { name: production.name })
@@ -173,30 +174,29 @@ export default {
 
     // Events
 
-    onEditClicked (production) {
+    onEditClicked(production) {
       this.productionToEdit = production
       this.modals.isNewDisplayed = true
     },
 
-    onDeleteClicked (production) {
+    onDeleteClicked(production) {
       this.productionToDelete = production
       this.modals.isDeleteDisplayed = true
     },
 
-    onNewClicked (production) {
+    onNewClicked(production) {
       this.productionToEdit = {}
       this.modals.isNewDisplayed = true
     },
 
-    onProductionPictureSelected (formData) {
+    onProductionPictureSelected(formData) {
       this.storeProductionPicture(formData)
     }
   },
 
-  watch: {
-  },
+  watch: {},
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: `${this.$t('productions.title')} - Kitsu`
     }
@@ -204,5 +204,4 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

@@ -10,10 +10,7 @@
         @enter="addPerson"
         v-model="person"
       />
-      <button
-        class="button flexrow-item"
-        @click="addPerson"
-      >
+      <button class="button flexrow-item" @click="addPerson">
         {{ $t('main.add') }}
       </button>
     </div>
@@ -42,7 +39,7 @@ export default {
     ProductionTeamList
   },
 
-  data () {
+  data() {
     return {
       person: null,
       isTeamLoading: false,
@@ -59,25 +56,25 @@ export default {
       'people'
     ]),
 
-    teamPersons () {
-      return sortPeople(this.currentProduction.team
-        .map(personId => this.personMap.get(personId)))
+    teamPersons() {
+      return sortPeople(
+        this.currentProduction.team.map(personId =>
+          this.personMap.get(personId)
+        )
+      )
     },
 
-    unlistedPeople () {
-      return this.people.filter((person) => {
-        return !this.currentProduction.team.includes(person.id) &&
-          person.active
+    unlistedPeople() {
+      return this.people.filter(person => {
+        return !this.currentProduction.team.includes(person.id) && person.active
       })
     }
   },
 
   methods: {
-    ...mapActions([
-      'addPersonToTeam'
-    ]),
+    ...mapActions(['addPersonToTeam']),
 
-    addPerson () {
+    addPerson() {
       if (this.person) {
         this.addPersonToTeam(this.person)
         setTimeout(() => {
@@ -86,19 +83,19 @@ export default {
       }
     },
 
-    removePerson (person) {
+    removePerson(person) {
       this.removePersonFromTeam(person)
     }
-
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
-      title: `${this.currentProduction.name} | ${this.$t('people.team')} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t(
+        'people.team'
+      )} - Kitsu`
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

@@ -1,30 +1,30 @@
 <template>
-<div :class="{ field: withMargin }">
-  <label class="label" v-if="label">{{ label }}</label>
-  <p class="control flexrow">
-    <datepicker
-      wrapper-class="datepicker"
-      :input-class="{
-        'date-input': true,
-        input: true,
-        short: shortDate
-      }"
-      :language="locale"
-      :disabled-dates="disabledDates"
-      :monday-first="true"
-      format="yyyy-MM-dd"
-      @input="$emit('input', localValue)"
-      v-model="localValue"
-    />
-    <span
-      class="clear-button unselectable"
-      @click="event => clearValue(event)"
-      v-show="localValue && canDelete"
-    >
-      +
-    </span>
-  </p>
-</div>
+  <div :class="{ field: withMargin }">
+    <label class="label" v-if="label">{{ label }}</label>
+    <p class="control flexrow">
+      <datepicker
+        wrapper-class="datepicker"
+        :input-class="{
+          'date-input': true,
+          input: true,
+          short: shortDate
+        }"
+        :language="locale"
+        :disabled-dates="disabledDates"
+        :monday-first="true"
+        format="yyyy-MM-dd"
+        @input="$emit('input', localValue)"
+        v-model="localValue"
+      />
+      <span
+        class="clear-button unselectable"
+        @click="event => clearValue(event)"
+        v-show="localValue && canDelete"
+      >
+        +
+      </span>
+    </p>
+  </div>
 </template>
 
 <script>
@@ -70,22 +70,20 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       localValue: null
     }
   },
 
-  mounted () {
+  mounted() {
     this.localValue = this.value
   },
 
   computed: {
-    ...mapGetters([
-      'user'
-    ]),
+    ...mapGetters(['user']),
 
-    locale () {
+    locale() {
       if (this.user.locale === 'fr_FR') {
         return fr
       } else {
@@ -95,10 +93,9 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    clearValue (event) {
+    clearValue(event) {
       this.pauseEvent(event)
       this.localValue = null
       this.$emit('input', null)
@@ -106,11 +103,10 @@ export default {
   },
 
   watch: {
-    value () {
+    value() {
       this.localValue = this.value
     },
-    localValue () {
-    }
+    localValue() {}
   }
 }
 </script>

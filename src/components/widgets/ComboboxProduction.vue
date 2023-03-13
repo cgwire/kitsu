@@ -1,52 +1,40 @@
 <template>
-<div class="field">
-  <label class="label" v-if="label.length > 0">
-    {{ label }}
-  </label>
-  <div
-    class="production-combo"
-  >
-    <div
-      class="flexrow"
+  <div class="field">
+    <label class="label" v-if="label.length > 0">
+      {{ label }}
+    </label>
+    <div class="production-combo">
+      <div class="flexrow" @click="toggleProductionList">
+        <div class="selected-production-line flexrow-item">
+          <production-name
+            :production="currentProduction"
+            :no-link="true"
+            :size="25"
+            v-if="currentProduction"
+          />
+        </div>
+        <chevron-down-icon class="down-icon flexrow-item" />
+      </div>
+      <div class="select-input" ref="select" v-if="showProductionList">
+        <div
+          class="production-line"
+          v-for="production in productionList"
+          @click="selectProduction(production)"
+          :key="production.id"
+        >
+          <production-name
+            :size="25"
+            :no-link="true"
+            :production="production"
+          />
+        </div>
+      </div>
+    </div>
+    <combobox-mask
+      :displayed="showProductionList"
       @click="toggleProductionList"
-    >
-      <div
-        class="selected-production-line flexrow-item"
-      >
-        <production-name
-          :production="currentProduction"
-          :no-link="true"
-          :size="25"
-          v-if="currentProduction"
-        />
-      </div>
-      <chevron-down-icon class="down-icon flexrow-item"/>
-    </div>
-    <div
-      class="select-input"
-      ref="select"
-      v-if="showProductionList"
-    >
-      <div
-        class="production-line"
-        v-for="production in productionList"
-        @click="selectProduction(production)"
-        :key="production.id"
-      >
-        <production-name
-          :size="25"
-          :no-link="true"
-          :production="production"
-        />
-      </div>
-    </div>
+    />
   </div>
-  <combobox-mask
-    :displayed="showProductionList"
-    @click="toggleProductionList"
-  />
-</div>
-
 </template>
 
 <script>
@@ -65,7 +53,7 @@ export default {
     ProductionName
   },
 
-  data () {
+  data() {
     return {
       showProductionList: false
     }
@@ -86,16 +74,12 @@ export default {
     }
   },
 
-  mounted () {
-  },
+  mounted() {},
 
   computed: {
-    ...mapGetters([
-      'openProductions',
-      'productionMap'
-    ]),
+    ...mapGetters(['openProductions', 'productionMap']),
 
-    currentProduction () {
+    currentProduction() {
       if (this.value) {
         return this.productionMap.get(this.value)
       } else {
@@ -105,12 +89,12 @@ export default {
   },
 
   methods: {
-    selectProduction (production) {
+    selectProduction(production) {
       this.$emit('input', production.id)
       this.showProductionList = false
     },
 
-    toggleProductionList () {
+    toggleProductionList() {
       this.showProductionList = !this.showProductionList
     }
   }

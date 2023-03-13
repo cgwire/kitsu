@@ -36,7 +36,7 @@ export default {
   },
 
   methods: {
-    getAnnotationPosition (annotation) {
+    getAnnotationPosition(annotation) {
       const factor = annotation.time / this.maxDurationRaw
       let width = this.width
       const progressBar = this.$parent.progress
@@ -46,14 +46,14 @@ export default {
       }
       const dotWidth = 6
       const frameSize = this.width / this.nbFrames
-      let left = (width * factor) - (frameSize / 2) - 3
+      let left = width * factor - frameSize / 2 - 3
       if (left >= width) {
         left -= this.isFullScreen() ? 1.5 * dotWidth : dotWidth
       }
       return Math.round(left)
     },
 
-    isFullScreen () {
+    isFullScreen() {
       return !!(
         document.fullScreen ||
         document.webkitIsFullScreen ||

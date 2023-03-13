@@ -1,229 +1,200 @@
 <template>
-<div class="data-list">
-  <div
-    class="datatable-wrapper"
-    ref="body"
-    v-scroll="onBodyScroll"
-  >
-    <table class="datatable">
-      <thead class="datatable-head">
-        <tr>
-          <th class="expander">
-          </th>
-          <th scope="col" class="name datatable-row-header" ref="th-episode">
-            {{ $t('shots.fields.episode') }}
-          </th>
-          <th scope="col" class="validation">{{ $t('main.all') }}</th>
-          <th
-            scope="col"
-            class="validation validation-cell"
-            :key="taskTypeMap.get(columnId).id"
-            v-for="columnId in validationColumns">
-            <div
-              class="flexrow validation-content"
-              :style="getValidationStyle(columnId)"
-            >
-              <router-link
-                class="flexrow-item"
-                :to="taskTypePath(columnId)"
-                v-if="!isCurrentUserClient"
-              >
-                {{ taskTypeMap.get(columnId).name }}
-              </router-link>
-              <span
-                class="flexrow-item"
-                v-else
-              >
-                {{ taskTypeMap.get(columnId).name }}
-              </span>
-            </div>
-          </th>
-          <th scope="col" class="actions"></th>
-        </tr>
-      </thead>
-      <tbody
-        class="datatable-body"
-        v-if="!isLoading"
-      >
-        <tr
-          class="all-line datatable-row"
-          v-if="showAll && !isEmptyList"
-        >
-          <td class="expander">
-          </td>
-
-          <td scope="col" class="name datatable-row-header">
-            {{ $t('episodes.all_episodes') }}
-          </td>
-
-          <stats-cell
-            :colors="chartColors('all', 'all')"
-            :data="chartData('all', 'all')"
-            :frames-data="chartData('all', 'all', 'frames')"
-            :countMode="countMode"
-            :displayMode="displayMode"
-          />
-
-          <stats-cell
-            :style="getValidationStyle(columnId)"
-            :key="'all-' + columnId"
-            :colors="chartColors('all', columnId)"
-            :data="chartData('all', columnId)"
-            :frames-data="chartData('all', columnId, 'frames')"
-            :countMode="countMode"
-            :displayMode="displayMode"
-            v-for="columnId in validationColumns"
-          />
-
-          <td class="actions"></td>
-        </tr>
-
-        <template
-          v-for="entry in entries"
-        >
-          <tr
-            :key="entry.id"
-            class="datatable-row"
-          >
-
-            <td class="expander" @click="toggleExpanded(entry.id)">
-              <chevron-right-icon v-if="isRetakes && expanded[entry.id] !== true" />
-              <chevron-down-icon v-if="isRetakes && expanded[entry.id] === true" />
-            </td>
-
-            <td class="name datatable-row-header">
-              {{ entry.name }}
-            </td>
-
-            <stats-cell
-              :colors="chartColors(entry.id, 'all')"
-              :data="chartData(entry.id, 'all')"
-              :frames-data="chartData(entry.id, 'all', 'frames')"
-              :countMode="countMode"
-              :displayMode="displayMode"
-              v-if="isStats(entry.id, 'all')"
-            />
-            <td
-              v-else
-            >
-            </td>
-
-            <stats-cell
-              :key="entry.id + columnId"
-              :style="getValidationStyle(columnId)"
-              :colors="chartColors(entry.id, columnId)"
-              :data="chartData(entry.id, columnId)"
-              :frames-data="chartData(entry.id, columnId, 'frames')"
-              :countMode="countMode"
-              :displayMode="displayMode"
-              :label="chartLabel(entry.id, columnId)"
-              :label-color="chartLabelColor(entry.id, columnId)"
+  <div class="data-list">
+    <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
+      <table class="datatable">
+        <thead class="datatable-head">
+          <tr>
+            <th class="expander"></th>
+            <th scope="col" class="name datatable-row-header" ref="th-episode">
+              {{ $t('shots.fields.episode') }}
+            </th>
+            <th scope="col" class="validation">{{ $t('main.all') }}</th>
+            <th
+              scope="col"
+              class="validation validation-cell"
+              :key="taskTypeMap.get(columnId).id"
               v-for="columnId in validationColumns"
-              v-if="isStats(entry.id, columnId)"
-            />
-            <td
-              :style="getValidationStyle(columnId)"
-              v-else
             >
+              <div
+                class="flexrow validation-content"
+                :style="getValidationStyle(columnId)"
+              >
+                <router-link
+                  class="flexrow-item"
+                  :to="taskTypePath(columnId)"
+                  v-if="!isCurrentUserClient"
+                >
+                  {{ taskTypeMap.get(columnId).name }}
+                </router-link>
+                <span class="flexrow-item" v-else>
+                  {{ taskTypeMap.get(columnId).name }}
+                </span>
+              </div>
+            </th>
+            <th scope="col" class="actions"></th>
+          </tr>
+        </thead>
+        <tbody class="datatable-body" v-if="!isLoading">
+          <tr class="all-line datatable-row" v-if="showAll && !isEmptyList">
+            <td class="expander"></td>
+
+            <td scope="col" class="name datatable-row-header">
+              {{ $t('episodes.all_episodes') }}
             </td>
+
+            <stats-cell
+              :colors="chartColors('all', 'all')"
+              :data="chartData('all', 'all')"
+              :frames-data="chartData('all', 'all', 'frames')"
+              :countMode="countMode"
+              :displayMode="displayMode"
+            />
+
+            <stats-cell
+              :style="getValidationStyle(columnId)"
+              :key="'all-' + columnId"
+              :colors="chartColors('all', columnId)"
+              :data="chartData('all', columnId)"
+              :frames-data="chartData('all', columnId, 'frames')"
+              :countMode="countMode"
+              :displayMode="displayMode"
+              v-for="columnId in validationColumns"
+            />
 
             <td class="actions"></td>
           </tr>
-          <template v-if="expanded[entry.id]">
-            <tr
-              class="datatable-row"
-              :key="takeNumber + '-' + entry.id"
-              v-for="takeNumber in takeRange(entry.id)"
-            >
-              <td class="expander"></td>
+
+          <template v-for="entry in entries">
+            <tr :key="entry.id" class="datatable-row">
+              <td class="expander" @click="toggleExpanded(entry.id)">
+                <chevron-right-icon
+                  v-if="isRetakes && expanded[entry.id] !== true"
+                />
+                <chevron-down-icon
+                  v-if="isRetakes && expanded[entry.id] === true"
+                />
+              </td>
+
               <td class="name datatable-row-header">
-                - Take {{ takeNumber }}
-              </td>
-              <td class="description"></td>
-              <td
-              >
+                {{ entry.name }}
               </td>
 
-              <template
+              <stats-cell
+                :colors="chartColors(entry.id, 'all')"
+                :data="chartData(entry.id, 'all')"
+                :frames-data="chartData(entry.id, 'all', 'frames')"
+                :countMode="countMode"
+                :displayMode="displayMode"
+                v-if="isStats(entry.id, 'all')"
+              />
+              <td v-else></td>
+
+              <stats-cell
+                :key="entry.id + columnId"
+                :style="getValidationStyle(columnId)"
+                :colors="chartColors(entry.id, columnId)"
+                :data="chartData(entry.id, columnId)"
+                :frames-data="chartData(entry.id, columnId, 'frames')"
+                :countMode="countMode"
+                :displayMode="displayMode"
+                :label="chartLabel(entry.id, columnId)"
+                :label-color="chartLabelColor(entry.id, columnId)"
                 v-for="columnId in validationColumns"
-              >
-                <stats-cell
-                  :key="takeNumber + entry.id + columnId"
-                  :style="getValidationStyle(columnId)"
-                  :colors="chartColors(entry.id, columnId)"
-                  :data="chartTakeData(entry.id, columnId, takeNumber)"
-                  :frames-data="chartTakeData(entry.id, columnId, takeNumber, 'frames')"
-                  :countMode="countMode"
-                  :displayMode="displayMode"
-                  v-if="chartRetakeMaxCount(entry.id, columnId) + 1 > takeNumber"
-                />
-
-                <stats-cell
-                  :key="takeNumber + entry.id + columnId"
-                  :style="getValidationStyle(columnId)"
-                  :colors="chartColors(entry.id, columnId)"
-                  :data="chartData(entry.id, columnId)"
-                  :frames-data="chartData(entry.id, columnId, 'frames')"
-                  :countMode="countMode"
-                  :displayMode="displayMode"
-                  v-else-if="
-                    isStats(entry.id, columnId) &&
-                    chartRetakeMaxCount(entry.id, columnId) + 1 === takeNumber"
-                />
-                <td
-                  :key="takeNumber + entry.id + columnId"
-                  :style="getValidationStyle(columnId)"
-                  v-else
-                >
-                </td>
-              </template>
+                v-if="isStats(entry.id, columnId)"
+              />
+              <td :style="getValidationStyle(columnId)" v-else></td>
 
               <td class="actions"></td>
             </tr>
+            <template v-if="expanded[entry.id]">
+              <tr
+                class="datatable-row"
+                :key="takeNumber + '-' + entry.id"
+                v-for="takeNumber in takeRange(entry.id)"
+              >
+                <td class="expander"></td>
+                <td class="name datatable-row-header">
+                  - Take {{ takeNumber }}
+                </td>
+                <td class="description"></td>
+                <td></td>
+
+                <template v-for="columnId in validationColumns">
+                  <stats-cell
+                    :key="takeNumber + entry.id + columnId"
+                    :style="getValidationStyle(columnId)"
+                    :colors="chartColors(entry.id, columnId)"
+                    :data="chartTakeData(entry.id, columnId, takeNumber)"
+                    :frames-data="
+                      chartTakeData(entry.id, columnId, takeNumber, 'frames')
+                    "
+                    :countMode="countMode"
+                    :displayMode="displayMode"
+                    v-if="
+                      chartRetakeMaxCount(entry.id, columnId) + 1 > takeNumber
+                    "
+                  />
+
+                  <stats-cell
+                    :key="takeNumber + entry.id + columnId"
+                    :style="getValidationStyle(columnId)"
+                    :colors="chartColors(entry.id, columnId)"
+                    :data="chartData(entry.id, columnId)"
+                    :frames-data="chartData(entry.id, columnId, 'frames')"
+                    :countMode="countMode"
+                    :displayMode="displayMode"
+                    v-else-if="
+                      isStats(entry.id, columnId) &&
+                      chartRetakeMaxCount(entry.id, columnId) + 1 === takeNumber
+                    "
+                  />
+                  <td
+                    :key="takeNumber + entry.id + columnId"
+                    :style="getValidationStyle(columnId)"
+                    v-else
+                  ></td>
+                </template>
+
+                <td class="actions"></td>
+              </tr>
+            </template>
           </template>
-        </template>
-      </tbody>
-    </table>
-  </div>
+        </tbody>
+      </table>
+    </div>
 
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isError"
-  />
+    <table-info :is-loading="isLoading" :is-error="isError" />
 
-  <div
-    class="has-text-centered"
-    v-if="!isLoading && isEmptyList && !isCurrentUserClient"
-  >
-    <p class="info">
-      <img src="../../assets/illustrations/empty_shot.png" />
+    <div
+      class="has-text-centered"
+      v-if="!isLoading && isEmptyList && !isCurrentUserClient"
+    >
+      <p class="info">
+        <img src="../../assets/illustrations/empty_shot.png" />
+      </p>
+      <p class="info">{{ $t('episodes.empty_list') }}</p>
+    </div>
+    <div
+      class="has-text-centered"
+      v-if="!isLoading && isEmptyList && isCurrentUserClient"
+    >
+      <p class="info">
+        <img src="../../assets/illustrations/empty_shot.png" />
+      </p>
+      <p class="info">{{ $t('episodes.empty_list_client') }}</p>
+    </div>
+
+    <p class="has-text-centered nb-episodes" v-if="!isEmptyList">
+      {{ displayedEpisodesLength }}
+      {{ $tc('episodes.number', displayedEpisodesLength) }}
     </p>
-    <p class="info">{{ $t('episodes.empty_list') }}</p>
   </div>
-  <div
-    class="has-text-centered"
-    v-if="!isLoading && isEmptyList && isCurrentUserClient"
-  >
-    <p class="info">
-      <img src="../../assets/illustrations/empty_shot.png" />
-    </p>
-    <p class="info">{{ $t('episodes.empty_list_client') }}</p>
-  </div>
-
-  <p class="has-text-centered nb-episodes" v-if="!isEmptyList">
-    {{ displayedEpisodesLength }}
-    {{ $tc('episodes.number', displayedEpisodesLength) }}
-  </p>
-</div>
 </template>
 
 <script>
 import Vue from 'vue/dist/vue'
 import { mapGetters, mapActions } from 'vuex'
-import {
-  ChevronDownIcon,
-  ChevronRightIcon
-} from 'vue-feather-icons'
+import { ChevronDownIcon, ChevronRightIcon } from 'vue-feather-icons'
 
 import { entityListMixin } from '@/components/mixins/entity_list'
 import { range } from '@/lib/time'
@@ -282,7 +253,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       busy: false,
       expanded: {},
@@ -291,8 +262,10 @@ export default {
     }
   },
 
-  mounted () {
-    this.entries.forEach(e => { Vue.set(this.expanded, e.id, false) })
+  mounted() {
+    this.entries.forEach(e => {
+      Vue.set(this.expanded, e.id, false)
+    })
   },
 
   computed: {
@@ -308,25 +281,25 @@ export default {
       'taskTypeMap'
     ]),
 
-    isEmptyList () {
-      return this.entries &&
-             this.entries.length === 0 &&
-             !this.isLoading &&
-             !this.isError &&
-             (!this.episodeSearchText || this.episodeSearchText.length === 0)
+    isEmptyList() {
+      return (
+        this.entries &&
+        this.entries.length === 0 &&
+        !this.isLoading &&
+        !this.isError &&
+        (!this.episodeSearchText || this.episodeSearchText.length === 0)
+      )
     },
 
-    isRetakes () {
+    isRetakes() {
       return this.dataMode === 'retakes'
     }
   },
 
   methods: {
-    ...mapActions([
-      'displayMoreEpisodes'
-    ]),
+    ...mapActions(['displayMoreEpisodes']),
 
-    chartColors (entryId, columnId) {
+    chartColors(entryId, columnId) {
       if (this.isRetakes) {
         return ['#ff3860', '#6f727a', '#22d160']
       } else {
@@ -334,17 +307,20 @@ export default {
       }
     },
 
-    chartData (entryId, columnId, dataType = 'count') {
+    chartData(entryId, columnId, dataType = 'count') {
       if (this.isRetakes) {
         return getRetakeChartData(
-          this.episodeRetakeStats, entryId, columnId, dataType
+          this.episodeRetakeStats,
+          entryId,
+          columnId,
+          dataType
         )
       } else {
         return getChartData(this.episodeStats, entryId, columnId, dataType)
       }
     },
 
-    chartTakeData (entryId, columnId, takeNumber, dataType = 'count') {
+    chartTakeData(entryId, columnId, takeNumber, dataType = 'count') {
       const evolutionStats =
         this.episodeRetakeStats[entryId][columnId].evolution
       const nbRetakes = evolutionStats[takeNumber].retake[dataType]
@@ -358,10 +334,12 @@ export default {
       ]
     },
 
-    chartLabel (entryId, columnId) {
+    chartLabel(entryId, columnId) {
       if (this.isRetakes) {
         const count = getChartRetakeCount(
-          this.episodeRetakeStats, entryId, columnId
+          this.episodeRetakeStats,
+          entryId,
+          columnId
         )
         return count >= 1 ? `Take ${count + 1}` : ''
       } else {
@@ -369,10 +347,12 @@ export default {
       }
     },
 
-    chartLabelColor (entryId, columnId) {
+    chartLabelColor(entryId, columnId) {
       if (this.isRetakes) {
         let count = getChartRetakeCount(
-          this.episodeRetakeStats, entryId, columnId
+          this.episodeRetakeStats,
+          entryId,
+          columnId
         )
         count = Math.min(count, 4)
         return this.takeLabelColors[count]
@@ -381,28 +361,27 @@ export default {
       }
     },
 
-    chartRetakeMaxCount (entryId, columnId) {
+    chartRetakeMaxCount(entryId, columnId) {
       return getChartRetakeCount(this.episodeRetakeStats, entryId, columnId)
     },
 
-    takeRange (entryId) {
+    takeRange(entryId) {
       return range(1, this.chartRetakeMaxCount(entryId, 'all') + 1)
     },
 
-    isStats (entryId, columnId) {
-      return this.episodeStats[entryId] &&
-             this.episodeStats[entryId][columnId]
+    isStats(entryId, columnId) {
+      return this.episodeStats[entryId] && this.episodeStats[entryId][columnId]
     },
 
-    onBodyScroll (event, position) {
+    onBodyScroll(event, position) {
       this.$emit('scroll', position.scrollTop)
     },
 
-    setScrollPosition (scrollPosition) {
+    setScrollPosition(scrollPosition) {
       this.$refs.body.scrollTop = scrollPosition
     },
 
-    taskTypePath (taskTypeId) {
+    taskTypePath(taskTypeId) {
       const route = {
         name: 'task-type',
         params: {
@@ -420,7 +399,7 @@ export default {
       return route
     },
 
-    getPath (section, episodeId) {
+    getPath(section, episodeId) {
       const route = {
         name: section,
         params: {
@@ -432,22 +411,24 @@ export default {
       return route
     },
 
-    toggleExpanded (episodeId) {
+    toggleExpanded(episodeId) {
       this.expanded[episodeId] = !this.expanded[episodeId]
     }
   },
 
   watch: {
-    entries () {
+    entries() {
       this.entries.forEach(e => {
         const value = this.expanded[e.id] || false
         Vue.set(this.expanded, e.id, value)
       })
     },
 
-    isRetakes () {
+    isRetakes() {
       if (!this.isRetakes) {
-        this.entries.forEach(e => { Vue.set(this.expanded, e.id, false) })
+        this.entries.forEach(e => {
+          Vue.set(this.expanded, e.id, false)
+        })
       }
     }
   }

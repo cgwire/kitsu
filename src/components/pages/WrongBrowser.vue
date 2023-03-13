@@ -13,17 +13,13 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'server-down',
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   },
-  mounted () {
-  }
+  mounted() {}
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

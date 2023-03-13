@@ -1,16 +1,8 @@
 <template>
-<div
-  class="question-mark"
->
-  <help-circle-icon
-    :size="small ? '0.5x' : '1x'"
-  />
-  <div
-    class="question-text"
-    v-html="renderMarkdown(text)"
-  >
+  <div class="question-mark">
+    <help-circle-icon :size="small ? '0.5x' : '1x'" />
+    <div class="question-text" v-html="renderMarkdown(text)"></div>
   </div>
-</div>
 </template>
 
 <script>
@@ -29,13 +21,12 @@ export default {
       required: true
     },
     small: {
-      type: Boolean,
+      type: Boolean,
       default: false
     }
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
     renderMarkdown

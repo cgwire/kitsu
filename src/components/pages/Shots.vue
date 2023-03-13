@@ -1,269 +1,268 @@
 <template>
-<div class="columns fixed-page">
-  <action-panel />
+  <div class="columns fixed-page">
+    <action-panel />
 
-  <div class="column main-column">
-    <div class="shots page">
-      <div class="shot-list-header page-header">
-        <div class="flexrow mb1">
-          <search-field
-            ref="shot-search-field"
-            :can-save="true"
-            :active="isSearchActive"
-            @change="onSearchChange"
-            @enter="(query) => isLongShotList
-              ? applySearch(query)
-              : saveShotSearch(query)"
-            @save="saveSearchQuery"
-            placeholder="ex: e01 s01 anim=wip"
-          />
-          <button-simple
-            class="flexrow-item"
-            :title="$t('entities.build_filter.title')"
-            icon="funnel"
-            @click="() => modals.isBuildFilterDisplayed = true"
-          />
-          <info-question-mark
-            class="flexrow-item mt05"
-            :text="currentEpisode.description"
-            v-if="currentEpisode && currentEpisode.description"
-          />
-          <div class="filler"></div>
-          <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
-            <combobox-department
-              class="combobox-department flexrow-item"
-              :selectable-departments="selectableDepartments('Shot')"
-              :dispay-all-and-my-departments="true"
-              rounded
-              v-model="selectedDepartment"
-              v-if="departments.length > 0"
+    <div class="column main-column">
+      <div class="shots page">
+        <div class="shot-list-header page-header">
+          <div class="flexrow mb1">
+            <search-field
+              ref="shot-search-field"
+              :can-save="true"
+              :active="isSearchActive"
+              @change="onSearchChange"
+              @enter="
+                query =>
+                  isLongShotList ? applySearch(query) : saveShotSearch(query)
+              "
+              @save="saveSearchQuery"
+              placeholder="ex: e01 s01 anim=wip"
             />
-            <show-assignations-button class="flexrow-item" />
-            <show-infos-button class="flexrow-item" />
-            <big-thumbnails-button class="flexrow-item" />
+            <button-simple
+              class="flexrow-item"
+              :title="$t('entities.build_filter.title')"
+              icon="funnel"
+              @click="() => (modals.isBuildFilterDisplayed = true)"
+            />
+            <info-question-mark
+              class="flexrow-item mt05"
+              :text="currentEpisode.description"
+              v-if="currentEpisode && currentEpisode.description"
+            />
+            <div class="filler"></div>
+            <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
+              <combobox-department
+                class="combobox-department flexrow-item"
+                :selectable-departments="selectableDepartments('Shot')"
+                :dispay-all-and-my-departments="true"
+                rounded
+                v-model="selectedDepartment"
+                v-if="departments.length > 0"
+              />
+              <show-assignations-button class="flexrow-item" />
+              <show-infos-button class="flexrow-item" />
+              <big-thumbnails-button class="flexrow-item" />
+            </div>
+            <div class="flexrow" v-if="isCurrentUserManager">
+              <button-simple
+                class="flexrow-item"
+                :title="$t('entities.thumbnails.title')"
+                icon="image"
+                @click="showAddThumbnailsModal"
+              />
+              <button-simple
+                class="flexrow-item"
+                :title="$t('main.csv.import_file')"
+                icon="upload"
+                @click="showImportModal"
+              />
+              <button-simple
+                class="flexrow-item"
+                icon="download"
+                :title="$t('main.csv.export_file')"
+                @click="onExportClick"
+              />
+              <button-simple
+                class="flexrow-item"
+                :text="$t('shots.manage')"
+                icon="plus"
+                @click="showManageShots"
+              />
+            </div>
           </div>
-          <div class="flexrow" v-if="isCurrentUserManager">
-            <button-simple
-              class="flexrow-item"
-              :title="$t('entities.thumbnails.title')"
-              icon="image"
-              @click="showAddThumbnailsModal"
-            />
-            <button-simple
-              class="flexrow-item"
-              :title="$t('main.csv.import_file')"
-              icon="upload"
-              @click="showImportModal"
-            />
-            <button-simple
-              class="flexrow-item"
-              icon="download"
-              :title="$t('main.csv.export_file')"
-              @click="onExportClick"
-            />
-            <button-simple
-              class="flexrow-item"
-              :text="$t('shots.manage')"
-              icon="plus"
-              @click="showManageShots"
+
+          <div class="query-list">
+            <search-query-list
+              :queries="shotSearchQueries"
+              @change-search="changeSearch"
+              @remove-search="removeSearchQuery"
+              v-if="!isShotsLoading && !initialLoading"
             />
           </div>
         </div>
 
-        <div class="query-list">
-          <search-query-list
-            :queries="shotSearchQueries"
-            @change-search="changeSearch"
-            @remove-search="removeSearchQuery"
-            v-if="!isShotsLoading && !initialLoading"
-          />
-        </div>
+        <sorting-info
+          :label="$t('main.sorted_by')"
+          :sorting="shotSorting"
+          @clear-sorting="onChangeSortClicked(null)"
+          v-if="shotSorting && shotSorting.length > 0"
+        />
+        <shot-list
+          ref="shot-list"
+          :displayed-shots="displayedShotsBySequence"
+          :is-loading="isShotsLoading || initialLoading"
+          :is-error="isShotsLoadingError"
+          :validation-columns="shotValidationColumns"
+          :department-filter="departmentFilter"
+          @add-metadata="onAddMetadataClicked"
+          @add-shots="showManageShots"
+          @change-sort="onChangeSortClicked"
+          @create-tasks="showCreateTasksModal"
+          @delete-all-tasks="onDeleteAllTasksClicked"
+          @delete-clicked="onDeleteClicked"
+          @delete-metadata="onDeleteMetadataClicked"
+          @edit-clicked="onEditClicked"
+          @edit-metadata="onEditMetadataClicked"
+          @field-changed="onFieldChanged"
+          @metadata-changed="onMetadataChanged"
+          @restore-clicked="onRestoreClicked"
+          @scroll="saveScrollPosition"
+          @shot-history="showShotHistoryModal"
+          @sequence-clicked="onSequenceClicked"
+        />
       </div>
-
-      <sorting-info
-        :label="$t('main.sorted_by')"
-        :sorting="shotSorting"
-        @clear-sorting="onChangeSortClicked(null)"
-        v-if="shotSorting && shotSorting.length > 0"
-      />
-      <shot-list
-        ref="shot-list"
-        :displayed-shots="displayedShotsBySequence"
-        :is-loading="isShotsLoading || initialLoading"
-        :is-error="isShotsLoadingError"
-        :validation-columns="shotValidationColumns"
-        :department-filter="departmentFilter"
-        @add-metadata="onAddMetadataClicked"
-        @add-shots="showManageShots"
-        @change-sort="onChangeSortClicked"
-        @create-tasks="showCreateTasksModal"
-        @delete-all-tasks="onDeleteAllTasksClicked"
-        @delete-clicked="onDeleteClicked"
-        @delete-metadata="onDeleteMetadataClicked"
-        @edit-clicked="onEditClicked"
-        @edit-metadata="onEditMetadataClicked"
-        @field-changed="onFieldChanged"
-        @metadata-changed="onMetadataChanged"
-        @restore-clicked="onRestoreClicked"
-        @scroll="saveScrollPosition"
-        @shot-history="showShotHistoryModal"
-        @sequence-clicked="onSequenceClicked"
-      />
     </div>
-  </div>
 
-  <div
-    id="side-column"
-    class="column side-column"
-    v-show="nbSelectedTasks === 1"
-  >
-    <task-info
-      :task="selectedTasks.values().next().value"
+    <div
+      id="side-column"
+      class="column side-column"
+      v-show="nbSelectedTasks === 1"
+    >
+      <task-info :task="selectedTasks.values().next().value" />
+    </div>
+
+    <manage-shots-modal
+      :active="modals.isManageDisplayed"
+      :is-loading="loading.manage"
+      :is-error="false"
+      :is-success="false"
+      @add-episode="addEpisode"
+      @add-sequence="addSequence"
+      @add-shot="addShot"
+      @cancel="hideManageShots"
+    />
+
+    <edit-shot-modal
+      :active="modals.isNewDisplayed"
+      :is-loading="loading.edit"
+      :is-error="errors.edit"
+      :shot-to-edit="shotToEdit"
+      @cancel="modals.isNewDisplayed = false"
+      @confirm="confirmEditShot"
+    />
+
+    <delete-modal
+      ref="delete-shot-modal"
+      :active="modals.isDeleteDisplayed"
+      :is-loading="loading.del"
+      :is-error="errors.del"
+      :text="deleteText()"
+      :error-text="$t('shots.delete_error')"
+      @cancel="modals.isDeleteDisplayed = false"
+      @confirm="confirmDeleteShot"
+    />
+
+    <delete-modal
+      ref="restore-shot-modal"
+      :active="modals.isRestoreDisplayed"
+      :is-loading="loading.restore"
+      :is-error="errors.restore"
+      :text="restoreText()"
+      :error-text="$t('shots.restore_error')"
+      @cancel="modals.isRestoreDisplayed = false"
+      @confirm="confirmRestoreShot"
+    />
+
+    <delete-modal
+      ref="delete-metadata-modal"
+      :active="modals.isDeleteMetadataDisplayed"
+      :is-loading="loading.deleteMetadata"
+      :is-error="errors.deleteMetadata"
+      @cancel="modals.isDeleteMetadataDisplayed = false"
+      :text="$t('productions.metadata.delete_text')"
+      :error-text="$t('productions.metadata.delete_error')"
+      @confirm="confirmDeleteMetadata"
+    />
+
+    <hard-delete-modal
+      ref="delete-all-tasks-modal"
+      :active="modals.isDeleteAllTasksDisplayed"
+      :is-loading="loading.deleteAllTasks"
+      :is-error="errors.deleteAllTasks"
+      :text="deleteAllTasksText()"
+      :error-text="$t('tasks.delete_all_error')"
+      :lock-text="deleteAllTasksLockText"
+      :selection-option="true"
+      @cancel="modals.isDeleteAllTasksDisplayed = false"
+      @confirm="confirmDeleteAllTasks"
+    />
+
+    <import-render-modal
+      :active="modals.isImportRenderDisplayed"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      :import-error="errors.importingError"
+      :parsed-csv="parsedCSV"
+      :form-data="shotsCsvFormData"
+      :columns="renderColumns"
+      :dataMatchers="dataMatchers"
+      :database="filteredShots"
+      @reupload="resetImport"
+      @cancel="hideImportRenderModal"
+      @confirm="uploadImportFile"
+    />
+
+    <import-modal
+      ref="import-modal"
+      :active="modals.isImportDisplayed"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      :form-data="shotsCsvFormData"
+      :columns="dataMatchers"
+      :optional-columns="optionalColumns"
+      :generic-columns="genericColumns"
+      @cancel="hideImportModal"
+      @confirm="renderImport"
+    />
+
+    <create-tasks-modal
+      :active="modals.isCreateTasksDisplayed"
+      :is-loading="loading.creatingTasks"
+      :is-loading-stay="loading.creatingTasksStay"
+      :is-error="errors.creatingTasks"
+      :title="$t('tasks.create_tasks_shot')"
+      :text="$t('tasks.create_tasks_shot_explaination')"
+      :error-text="$t('tasks.create_tasks_shot_failed')"
+      @cancel="hideCreateTasksModal"
+      @confirm="confirmCreateTasks"
+      @confirm-and-stay="confirmCreateTasksAndStay"
+    />
+
+    <add-metadata-modal
+      :active="modals.isAddMetadataDisplayed"
+      :is-loading="loading.addMetadata"
+      :is-loading-stay="loading.addMetadata"
+      :is-error="errors.addMetadata"
+      :descriptor-to-edit="descriptorToEdit"
+      entity-type="Shot"
+      @cancel="closeMetadataModal"
+      @confirm="confirmAddMetadata"
+    />
+
+    <add-thumbnails-modal
+      ref="add-thumbnails-modal"
+      parent="shots"
+      :active="modals.isAddThumbnailsDisplayed"
+      :is-loading="loading.addThumbnails"
+      :is-error="errors.addThumbnails"
+      @cancel="hideAddThumbnailsModal"
+      @confirm="confirmAddThumbnails"
+    />
+
+    <shot-history-modal
+      :active="modals.isShotHistoryDisplayed"
+      :shot="historyShot"
+      @cancel="hideShotHistoryModal"
+    />
+
+    <build-filter-modal
+      ref="build-filter-modal"
+      :active="modals.isBuildFilterDisplayed"
+      entity-type="shot"
+      @cancel="modals.isBuildFilterDisplayed = false"
+      @confirm="confirmBuildFilter"
     />
   </div>
-
-  <manage-shots-modal
-    :active="modals.isManageDisplayed"
-    :is-loading="loading.manage"
-    :is-error="false"
-    :is-success="false"
-    @add-episode="addEpisode"
-    @add-sequence="addSequence"
-    @add-shot="addShot"
-    @cancel="hideManageShots"
-  />
-
-  <edit-shot-modal
-    :active="modals.isNewDisplayed"
-    :is-loading="loading.edit"
-    :is-error="errors.edit"
-    :shot-to-edit="shotToEdit"
-    @cancel="modals.isNewDisplayed = false"
-    @confirm="confirmEditShot"
-  />
-
-  <delete-modal
-    ref="delete-shot-modal"
-    :active="modals.isDeleteDisplayed"
-    :is-loading="loading.del"
-    :is-error="errors.del"
-    :text="deleteText()"
-    :error-text="$t('shots.delete_error')"
-    @cancel="modals.isDeleteDisplayed = false"
-    @confirm="confirmDeleteShot"
-  />
-
-  <delete-modal
-    ref="restore-shot-modal"
-    :active="modals.isRestoreDisplayed"
-    :is-loading="loading.restore"
-    :is-error="errors.restore"
-    :text="restoreText()"
-    :error-text="$t('shots.restore_error')"
-    @cancel="modals.isRestoreDisplayed = false"
-    @confirm="confirmRestoreShot"
-  />
-
-  <delete-modal
-    ref="delete-metadata-modal"
-    :active="modals.isDeleteMetadataDisplayed"
-    :is-loading="loading.deleteMetadata"
-    :is-error="errors.deleteMetadata"
-    @cancel="modals.isDeleteMetadataDisplayed = false"
-    :text="$t('productions.metadata.delete_text')"
-    :error-text="$t('productions.metadata.delete_error')"
-    @confirm="confirmDeleteMetadata"
-  />
-
-  <hard-delete-modal
-    ref="delete-all-tasks-modal"
-    :active="modals.isDeleteAllTasksDisplayed"
-    :is-loading="loading.deleteAllTasks"
-    :is-error="errors.deleteAllTasks"
-    :text="deleteAllTasksText()"
-    :error-text="$t('tasks.delete_all_error')"
-    :lock-text="deleteAllTasksLockText"
-    :selection-option="true"
-    @cancel="modals.isDeleteAllTasksDisplayed = false"
-    @confirm="confirmDeleteAllTasks"
-  />
-
-  <import-render-modal
-    :active="modals.isImportRenderDisplayed"
-    :is-loading="loading.importing"
-    :is-error="errors.importing"
-    :import-error="errors.importingError"
-    :parsed-csv="parsedCSV"
-    :form-data="shotsCsvFormData"
-    :columns="renderColumns"
-    :dataMatchers="dataMatchers"
-    :database="filteredShots"
-    @reupload="resetImport"
-    @cancel="hideImportRenderModal"
-    @confirm="uploadImportFile"
-  />
-
-  <import-modal
-    ref="import-modal"
-    :active="modals.isImportDisplayed"
-    :is-loading="loading.importing"
-    :is-error="errors.importing"
-    :form-data="shotsCsvFormData"
-    :columns="dataMatchers"
-    :optional-columns="optionalColumns"
-    :generic-columns="genericColumns"
-    @cancel="hideImportModal"
-    @confirm="renderImport"
-  />
-
-  <create-tasks-modal
-    :active="modals.isCreateTasksDisplayed"
-    :is-loading="loading.creatingTasks"
-    :is-loading-stay="loading.creatingTasksStay"
-    :is-error="errors.creatingTasks"
-    :title="$t('tasks.create_tasks_shot')"
-    :text="$t('tasks.create_tasks_shot_explaination')"
-    :error-text="$t('tasks.create_tasks_shot_failed')"
-    @cancel="hideCreateTasksModal"
-    @confirm="confirmCreateTasks"
-    @confirm-and-stay="confirmCreateTasksAndStay"
-  />
-
-  <add-metadata-modal
-    :active="modals.isAddMetadataDisplayed"
-    :is-loading="loading.addMetadata"
-    :is-loading-stay="loading.addMetadata"
-    :is-error="errors.addMetadata"
-    :descriptor-to-edit="descriptorToEdit"
-    entity-type="Shot"
-    @cancel="closeMetadataModal"
-    @confirm="confirmAddMetadata"
-  />
-
-  <add-thumbnails-modal
-    ref="add-thumbnails-modal"
-    parent="shots"
-    :active="modals.isAddThumbnailsDisplayed"
-    :is-loading="loading.addThumbnails"
-    :is-error="errors.addThumbnails"
-    @cancel="hideAddThumbnailsModal"
-    @confirm="confirmAddThumbnails"
-  />
-
-  <shot-history-modal
-    :active="modals.isShotHistoryDisplayed"
-    :shot="historyShot"
-    @cancel="hideShotHistoryModal"
-  />
-
-  <build-filter-modal
-    ref="build-filter-modal"
-    :active="modals.isBuildFilterDisplayed"
-    entity-type="shot"
-    @cancel="modals.isBuildFilterDisplayed = false"
-    @confirm="confirmBuildFilter"
-  />
-</div>
 </template>
 
 <script>
@@ -331,7 +330,7 @@ export default {
     TaskInfo
   },
 
-  data () {
+  data() {
     return {
       initialLoading: true,
       deleteAllTasksLockText: null,
@@ -397,20 +396,17 @@ export default {
     }
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     this.clearSelectedShots()
   },
 
-  created () {
+  created() {
     this.setLastProductionScreen('shots')
   },
 
-  mounted () {
+  mounted() {
     let searchQuery = ''
-    if (
-      this.$route.query.search &&
-      this.$route.query.search.length > 0
-    ) {
+    if (this.$route.query.search && this.$route.query.search.length > 0) {
       searchQuery = '' + this.$route.query.search
     }
     this.$refs['shot-search-field'].setValue(searchQuery)
@@ -420,13 +416,9 @@ export default {
 
     if (
       this.shotMap.size < 2 ||
-      (
-        this.shotValidationColumns.length > 0 &&
-        (
-          !this.shotMap.get(this.shotMap.keys().next().value) ||
-          !this.shotMap.get(this.shotMap.keys().next().value).validations
-        )
-      )
+      (this.shotValidationColumns.length > 0 &&
+        (!this.shotMap.get(this.shotMap.keys().next().value) ||
+          !this.shotMap.get(this.shotMap.keys().next().value).validations))
     ) {
       setTimeout(() => {
         if (
@@ -444,9 +436,7 @@ export default {
     } else {
       if (!this.isShotsLoading) this.initialLoading = false
       this.onSearchChange()
-      this.$refs['shot-list'].setScrollPosition(
-        this.shotListScrollPosition
-      )
+      this.$refs['shot-list'].setScrollPosition(this.shotListScrollPosition)
     }
   },
 
@@ -493,15 +483,15 @@ export default {
       'productionShotTaskTypes'
     ]),
 
-    searchField () {
+    searchField() {
       return this.$refs['shot-search-field']
     },
 
-    addThumbnailsModal () {
+    addThumbnailsModal() {
       return this.$refs['add-thumbnails-modal']
     },
 
-    renderColumns () {
+    renderColumns() {
       var collection = [...this.dataMatchers, ...this.optionalColumns]
 
       this.productionShotTaskTypes.forEach(item => {
@@ -512,13 +502,13 @@ export default {
       return collection
     },
 
-    dataMatchers () {
+    dataMatchers() {
       return this.isTVShow
         ? ['Episode', 'Sequence', 'Name']
         : ['Sequence', 'Name']
     },
 
-    filteredShots () {
+    filteredShots() {
       const shots = {}
       this.displayedShotsBySequence.forEach(sequence => {
         sequence.forEach(item => {
@@ -532,7 +522,7 @@ export default {
       return shots
     },
 
-    metadataDescriptors () {
+    metadataDescriptors() {
       return this.shotMetadataDescriptors
     }
   },
@@ -565,25 +555,19 @@ export default {
       'uploadShotFile'
     ]),
 
-    addEpisode (episode, callback) {
-      this.newEpisode(episode)
-        .then(callback)
-        .catch(console.error)
+    addEpisode(episode, callback) {
+      this.newEpisode(episode).then(callback).catch(console.error)
     },
 
-    addSequence (sequence, callback) {
-      this.newSequence(sequence)
-        .then(callback)
-        .catch(console.error)
+    addSequence(sequence, callback) {
+      this.newSequence(sequence).then(callback).catch(console.error)
     },
 
-    addShot (shot, callback) {
-      this.newShot(shot)
-        .then(callback)
-        .catch(console.error)
+    addShot(shot, callback) {
+      this.newShot(shot).then(callback).catch(console.error)
     },
 
-    confirmAddMetadata (form) {
+    confirmAddMetadata(form) {
       this.loading.addMetadata = true
       form.entity_type = 'Shot'
       this.addMetadataDescriptor(form)
@@ -591,18 +575,18 @@ export default {
           this.loading.addMetadata = false
           this.modals.isAddMetadataDisplayed = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.addMetadata = false
           this.errors.addMetadata = true
         })
     },
 
-    closeMetadataModal () {
+    closeMetadataModal() {
       this.modals.isAddMetadataDisplayed = false
     },
 
-    confirmDeleteMetadata () {
+    confirmDeleteMetadata() {
       this.errors.deleteMetadata = false
       this.loading.deleteMetadata = true
       this.deleteMetadataDescriptor(this.descriptorIdToDelete)
@@ -610,46 +594,47 @@ export default {
           this.errors.deleteMetadata = false
           this.loading.deleteMetadata = false
           this.modals.isDeleteMetadataDisplayed = false
-        }).catch((err) => {
+        })
+        .catch(err => {
           console.error(err)
           this.errors.deleteMetadata = true
           this.loading.deleteMetadata = false
         })
     },
 
-    onAddMetadataClicked () {
+    onAddMetadataClicked() {
       this.descriptorToEdit = {}
       this.modals.isAddMetadataDisplayed = true
     },
 
-    onDeleteMetadataClicked (descriptorId) {
+    onDeleteMetadataClicked(descriptorId) {
       this.descriptorIdToDelete = descriptorId
       this.modals.isDeleteMetadataDisplayed = true
     },
 
-    onDeleteClicked (shot) {
+    onDeleteClicked(shot) {
       this.shotToDelete = shot
       this.modals.isDeleteDisplayed = true
     },
 
-    onEditClicked (shot) {
+    onEditClicked(shot) {
       this.shotToEdit = shot
       this.modals.isNewDisplayed = true
     },
 
-    onRestoreClicked (shot) {
+    onRestoreClicked(shot) {
       this.shotToRestore = shot
       this.modals.isRestoreDisplayed = true
     },
 
-    onEditMetadataClicked (descriptorId) {
+    onEditMetadataClicked(descriptorId) {
       this.descriptorToEdit = this.currentProduction.descriptors.find(
         d => d.id === descriptorId
       )
       this.modals.isAddMetadataDisplayed = true
     },
 
-    confirmEditShot (form) {
+    confirmEditShot(form) {
       form.id = this.shotToEdit.id
       form.data.resolution = form.resolution
       form.data.max_retakes = form.max_retakes
@@ -663,14 +648,14 @@ export default {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.edit = false
           this.errors.edit = true
         })
     },
 
-    confirmDeleteAllTasks (selectionOnly) {
+    confirmDeleteAllTasks(selectionOnly) {
       const taskTypeId = this.taskTypeForTaskDeletion.id
       const projectId = this.currentProduction.id
       this.errors.deleteAllTasks = false
@@ -679,14 +664,15 @@ export default {
         .then(() => {
           this.loading.deleteAllTasks = false
           this.modals.isDeleteAllTasksDisplayed = false
-        }).catch((err) => {
+        })
+        .catch(err => {
           console.error(err)
           this.loading.deleteAllTasks = false
           this.errors.deleteAllTasks = true
         })
     },
 
-    confirmDeleteShot () {
+    confirmDeleteShot() {
       this.loading.del = true
       this.errors.del = false
       this.deleteShot(this.shotToDelete)
@@ -694,14 +680,14 @@ export default {
           this.loading.del = false
           this.modals.isDeleteDisplayed = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.del = false
           this.errors.del = true
         })
     },
 
-    confirmRestoreShot () {
+    confirmRestoreShot() {
       this.loading.restore = true
       this.errors.restore = false
       this.restoreShot(this.shotToRestore)
@@ -709,15 +695,15 @@ export default {
           this.loading.restore = false
           this.modals.isRestoreDisplayed = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.restore = false
           this.errors.restore = true
         })
     },
 
-    confirmAddThumbnails (forms) {
-      const addPreview = (form) => {
+    confirmAddThumbnails(forms) {
+      const addPreview = form => {
         this.addThumbnailsModal.markLoading(form.task.entity_id)
         return this.commentTaskWithPreview({
           taskId: form.task.id,
@@ -738,14 +724,13 @@ export default {
           })
       }
       this.loading.addThumbnails = true
-      func.runPromiseMapAsSeries(forms, addPreview)
-        .then(() => {
-          this.loading.addThumbnails = false
-          this.modals.isAddThumbnailsDisplayed = false
-        })
+      func.runPromiseMapAsSeries(forms, addPreview).then(() => {
+        this.loading.addThumbnails = false
+        this.modals.isAddThumbnailsDisplayed = false
+      })
     },
 
-    confirmCreateTasks ({ form, selectionOnly }) {
+    confirmCreateTasks({ form, selectionOnly }) {
       this.loading.creatingTasks = true
       this.runTasksCreation(form, selectionOnly)
         .then(() => {
@@ -759,7 +744,7 @@ export default {
         })
     },
 
-    confirmCreateTasksAndStay ({ form, selectionOnly }) {
+    confirmCreateTasksAndStay({ form, selectionOnly }) {
       this.loading.creatingTasksStay = true
       this.runTasksCreation(form, selectionOnly)
         .then(() => {
@@ -772,7 +757,7 @@ export default {
         })
     },
 
-    runTasksCreation (form, selectionOnly) {
+    runTasksCreation(form, selectionOnly) {
       this.errors.creatingTasks = false
       return this.createTasks({
         task_type_id: form.task_type_id,
@@ -782,15 +767,15 @@ export default {
       })
     },
 
-    reset () {
+    reset() {
       this.initialLoading = true
-      this.loadShots((err) => {
+      this.loadShots(err => {
         if (err) console.error(err)
         this.initialLoading = false
       })
     },
 
-    resetEditModal () {
+    resetEditModal() {
       const form = { name: '' }
       if (this.sequences.length > 0) {
         form.sequence_id = this.sequences[0].id
@@ -801,12 +786,9 @@ export default {
       this.shotToEdit = form
     },
 
-    deleteText () {
+    deleteText() {
       const shot = this.shotToDelete
-      if (
-        shot &&
-        (shot.canceled || !shot.tasks || shot.tasks.length === 0)
-      ) {
+      if (shot && (shot.canceled || !shot.tasks || shot.tasks.length === 0)) {
         return this.$t('shots.delete_text', { name: shot.name })
       } else if (shot) {
         return this.$t('shots.cancel_text', { name: shot.name })
@@ -815,7 +797,7 @@ export default {
       }
     },
 
-    deleteAllTasksText () {
+    deleteAllTasksText() {
       const taskType = this.taskTypeForTaskDeletion
       if (taskType) {
         return this.$t('tasks.delete_all_text', { name: taskType.name })
@@ -824,7 +806,7 @@ export default {
       }
     },
 
-    restoreText () {
+    restoreText() {
       const shot = this.shotToRestore
       if (shot) {
         return this.$t('shots.restore_text', { name: shot.name })
@@ -833,23 +815,22 @@ export default {
       }
     },
 
-    renderImport (data, mode) {
+    renderImport(data, mode) {
       this.loading.importing = true
       this.errors.importing = false
       this.formData = data
       if (mode === 'file') {
         data = data.get('file')
       }
-      csv.processCSV(data)
-        .then((results) => {
-          this.parsedCSV = results
-          this.hideImportModal()
-          this.loading.importing = false
-          this.showImportRenderModal()
-        })
+      csv.processCSV(data).then(results => {
+        this.parsedCSV = results
+        this.hideImportModal()
+        this.loading.importing = false
+        this.showImportRenderModal()
+      })
     },
 
-    uploadImportFile (data, toUpdate) {
+    uploadImportFile(data, toUpdate) {
       const formData = new FormData()
       const filename = 'import.csv'
       const csvContent = csv.turnEntriesToCsvString(data)
@@ -864,8 +845,7 @@ export default {
       this.uploadShotFile(toUpdate)
         .then(() => {
           this.loading.importing = false
-          this.loadEpisodes()
-            .catch(console.error)
+          this.loadEpisodes().catch(console.error)
           this.hideImportRenderModal()
           this.loadShots()
         })
@@ -877,7 +857,7 @@ export default {
         })
     },
 
-    resetImport () {
+    resetImport() {
       this.errors.importing = false
       this.hideImportRenderModal()
       this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
@@ -885,19 +865,19 @@ export default {
       this.showImportModal()
     },
 
-    onDeleteAllTasksClicked (taskTypeId) {
+    onDeleteAllTasksClicked(taskTypeId) {
       const taskType = this.taskTypeMap.get(taskTypeId)
       this.taskTypeForTaskDeletion = taskType
       this.deleteAllTasksLockText = taskType.name
       this.modals.isDeleteAllTasksDisplayed = true
     },
 
-    onSequenceClicked (sequenceName) {
+    onSequenceClicked(sequenceName) {
       this.searchField.setValue(`${this.shotSearchText} ${sequenceName}`)
       this.onSearchChange()
     },
 
-    onSearchChange () {
+    onSearchChange() {
       if (!this.searchField) return
       this.isSearchActive = false
       const searchQuery = this.searchField.getValue()
@@ -909,30 +889,25 @@ export default {
       }
     },
 
-    saveScrollPosition (scrollPosition) {
-      this.$store.commit(
-        'SET_SHOT_LIST_SCROLL_POSITION',
-        scrollPosition
-      )
+    saveScrollPosition(scrollPosition) {
+      this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', scrollPosition)
     },
 
-    applySearch (searchQuery) {
+    applySearch(searchQuery) {
       this.setShotSearch(searchQuery)
       this.setSearchInUrl()
       this.isSearchActive = true
     },
 
-    saveSearchQuery (searchQuery) {
-      this.saveShotSearch(searchQuery)
-        .catch(console.error)
+    saveSearchQuery(searchQuery) {
+      this.saveShotSearch(searchQuery).catch(console.error)
     },
 
-    removeSearchQuery (searchQuery) {
-      this.removeShotSearch(searchQuery)
-        .catch(console.error)
+    removeSearchQuery(searchQuery) {
+      this.removeShotSearch(searchQuery).catch(console.error)
     },
 
-    getPath (section) {
+    getPath(section) {
       const route = {
         name: section,
         params: {
@@ -946,93 +921,91 @@ export default {
       return route
     },
 
-    showManageShots () {
+    showManageShots() {
       this.modals.isManageDisplayed = true
     },
 
-    hideManageShots () {
+    hideManageShots() {
       this.modals.isManageDisplayed = false
     },
 
-    showShotHistoryModal (shot) {
+    showShotHistoryModal(shot) {
       this.historyShot = shot
       this.modals.isShotHistoryDisplayed = true
     },
 
-    hideShotHistoryModal () {
+    hideShotHistoryModal() {
       this.modals.isShotHistoryDisplayed = false
     },
 
-    onExportClick () {
-      this.getShotsCsvLines()
-        .then((shotLines) => {
-          const nameData = [
-            moment().format('YYYY-MM-DD'),
-            'kitsu',
-            this.currentProduction.name,
-            this.$t('shots.title')
-          ]
-          if (this.currentEpisode) {
-            nameData.splice(3, 0, this.currentEpisode.name)
-          }
-          const name = stringHelpers.slugify(nameData.join('_'))
-          const headers = [
-            this.$t('shots.fields.sequence'),
-            this.$t('shots.fields.name'),
-            this.$t('shots.fields.description')
-          ]
-          if (this.currentEpisode) {
-            headers.splice(0, 0, 'Episode')
-          }
-          sortByName([...this.currentProduction.descriptors])
-            .filter(d => d.entity_type === 'Shot')
-            .forEach((descriptor) => {
-              headers.push(descriptor.name)
-            })
-          if (this.isShotTime) {
-            headers.push(this.$t('shots.fields.time_spent'))
-          }
-          if (this.isShotEstimation) {
-            headers.push(this.$t('main.estimation_short'))
-          }
-          if (this.isFrames) {
-            headers.push(this.$t('main.frames'))
-          }
-          if (this.isFrameIn) {
-            headers.push(this.$t('main.frame_in'))
-          }
-          if (this.isFrameOut) {
-            headers.push(this.$t('main.frame_out'))
-          }
-          if (this.isFps) {
-            headers.push(this.$t('main.fps'))
-          }
-          if (this.isResolution) {
-            headers.push(this.$t('shots.fields.resolution'))
-          }
-          if (this.isMaxRetakes) {
-            headers.push(this.$t('shots.fields.max_retakes'))
-          }
-          this.shotValidationColumns
-            .forEach((taskTypeId) => {
-              headers.push(this.taskTypeMap.get(taskTypeId).name)
-              headers.push('Assignations')
-            })
-          csv.buildCsvFile(name, [headers].concat(shotLines))
+    onExportClick() {
+      this.getShotsCsvLines().then(shotLines => {
+        const nameData = [
+          moment().format('YYYY-MM-DD'),
+          'kitsu',
+          this.currentProduction.name,
+          this.$t('shots.title')
+        ]
+        if (this.currentEpisode) {
+          nameData.splice(3, 0, this.currentEpisode.name)
+        }
+        const name = stringHelpers.slugify(nameData.join('_'))
+        const headers = [
+          this.$t('shots.fields.sequence'),
+          this.$t('shots.fields.name'),
+          this.$t('shots.fields.description')
+        ]
+        if (this.currentEpisode) {
+          headers.splice(0, 0, 'Episode')
+        }
+        sortByName([...this.currentProduction.descriptors])
+          .filter(d => d.entity_type === 'Shot')
+          .forEach(descriptor => {
+            headers.push(descriptor.name)
+          })
+        if (this.isShotTime) {
+          headers.push(this.$t('shots.fields.time_spent'))
+        }
+        if (this.isShotEstimation) {
+          headers.push(this.$t('main.estimation_short'))
+        }
+        if (this.isFrames) {
+          headers.push(this.$t('main.frames'))
+        }
+        if (this.isFrameIn) {
+          headers.push(this.$t('main.frame_in'))
+        }
+        if (this.isFrameOut) {
+          headers.push(this.$t('main.frame_out'))
+        }
+        if (this.isFps) {
+          headers.push(this.$t('main.fps'))
+        }
+        if (this.isResolution) {
+          headers.push(this.$t('shots.fields.resolution'))
+        }
+        if (this.isMaxRetakes) {
+          headers.push(this.$t('shots.fields.max_retakes'))
+        }
+        this.shotValidationColumns.forEach(taskTypeId => {
+          headers.push(this.taskTypeMap.get(taskTypeId).name)
+          headers.push('Assignations')
         })
+        csv.buildCsvFile(name, [headers].concat(shotLines))
+      })
     },
 
-    onChangeSortClicked (sortInfo) {
+    onChangeSortClicked(sortInfo) {
       this.changeShotSort(sortInfo)
     },
 
-    confirmBuildFilter (query) {
+    confirmBuildFilter(query) {
       this.modals.isBuildFilterDisplayed = false
       this.$refs['shot-search-field'].setValue(query)
       this.applySearch(query)
     },
 
-    onFieldChanged ({ entry, fieldName, value }) {
+    onFieldChanged({ entry, fieldName, value }) {
       const data = {
         id: entry.id,
         nb_frames: entry.nb_frames,
@@ -1042,7 +1015,7 @@ export default {
       this.editShot(data)
     },
 
-    onMetadataChanged ({ entry, descriptor, value }) {
+    onMetadataChanged({ entry, descriptor, value }) {
       const metadata = {}
       metadata[descriptor.field_name] = value
       const data = {
@@ -1050,12 +1023,18 @@ export default {
         data: metadata
       }
       const shot = this.shotMap.get(entry.id)
-      if (descriptor.field_name === 'frame_in' && shot.data.frame_out &&
-        parseInt(shot.data.frame_out) > parseInt(value)) {
+      if (
+        descriptor.field_name === 'frame_in' &&
+        shot.data.frame_out &&
+        parseInt(shot.data.frame_out) > parseInt(value)
+      ) {
         data.nb_frames = parseInt(shot.data.frame_out) - parseInt(value) + 1
       }
-      if (descriptor.field_name === 'frame_out' && shot.data.frame_in &&
-        parseInt(shot.data.frame_in) < parseInt(value)) {
+      if (
+        descriptor.field_name === 'frame_out' &&
+        shot.data.frame_in &&
+        parseInt(shot.data.frame_in) < parseInt(value)
+      ) {
         data.nb_frames = parseInt(value) - parseInt(shot.data.frame_in) + 1
       }
       this.editShot(data)
@@ -1063,7 +1042,7 @@ export default {
   },
 
   watch: {
-    $route () {
+    $route() {
       if (!this.$route.query) return
       const search = this.$route.query.search
       const actualSearch = this.$refs['shot-search-field'].getValue()
@@ -1073,7 +1052,7 @@ export default {
       }
     },
 
-    currentProduction () {
+    currentProduction() {
       this.$refs['shot-search-field'].setValue('')
       this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
 
@@ -1087,7 +1066,7 @@ export default {
       }
     },
 
-    currentEpisode () {
+    currentEpisode() {
       const finalize = () => {
         this.initialLoading = true
         this.loadShots(() => {
@@ -1111,13 +1090,10 @@ export default {
       }
     },
 
-    isShotsLoading () {
+    isShotsLoading() {
       if (!this.isShotsLoading) {
         let searchQuery = ''
-        if (
-          this.$route.query.search &&
-          this.$route.query.search.length > 0
-        ) {
+        if (this.$route.query.search && this.$route.query.search.length > 0) {
           searchQuery = '' + this.$route.query.search
         }
         this.initialLoading = false
@@ -1126,24 +1102,25 @@ export default {
           this.applySearch(searchQuery)
         })
         if (this.$refs['shot-list']) {
-          this.$refs['shot-list'].setScrollPosition(
-            this.shotListScrollPosition
-          )
+          this.$refs['shot-list'].setScrollPosition(this.shotListScrollPosition)
         }
       }
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     if (this.isTVShow) {
       return {
-        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
-               ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
-               ` | ${this.$t('shots.title')} - Kitsu`
+        title:
+          `${this.currentProduction ? this.currentProduction.name : ''}` +
+          ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
+          ` | ${this.$t('shots.title')} - Kitsu`
       }
     } else {
       return {
-        title: `${this.currentProduction.name} ${this.$t('shots.title')} - Kitsu`
+        title: `${this.currentProduction.name} ${this.$t(
+          'shots.title'
+        )} - Kitsu`
       }
     }
   }

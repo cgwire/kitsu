@@ -1,7 +1,7 @@
 import client from '@/store/api/client'
 
 export default {
-  getMilestones (production) {
+  getMilestones(production) {
     return new Promise((resolve, reject) => {
       if (production) {
         const path = `/api/data/projects/${production.id}/milestones`
@@ -15,7 +15,7 @@ export default {
     })
   },
 
-  createMilestone (production, milestone) {
+  createMilestone(production, milestone) {
     const data = {
       date: milestone.date.format('YYYY-MM-DD'),
       name: milestone.name,
@@ -25,7 +25,7 @@ export default {
     return client.ppost('/api/data/milestones', data)
   },
 
-  updateMilestone (milestone) {
+  updateMilestone(milestone) {
     const data = {
       date: milestone.date.format('YYYY-MM-DD'),
       name: milestone.name,
@@ -35,21 +35,22 @@ export default {
     return client.pput(path, data)
   },
 
-  deleteMilestone (milestone) {
+  deleteMilestone(milestone) {
     const path = `/api/data/milestones/${milestone.id}`
     return client.pdel(path)
   },
 
-  getScheduleItems (production) {
+  getScheduleItems(production) {
     return client.pget(
-      `/api/data/projects/${production.id}/schedule-items/task-types`)
+      `/api/data/projects/${production.id}/schedule-items/task-types`
+    )
   },
 
-  getAllScheduleItems (production) {
+  getAllScheduleItems(production) {
     return client.pget(`/api/data/projects/${production.id}/schedule-items/`)
   },
 
-  createScheduleItem (scheduleItem) {
+  createScheduleItem(scheduleItem) {
     if (!scheduleItem.endDate) {
       scheduleItem.endDate = scheduleItem.startDate.add('days', 1).clone()
     }
@@ -64,36 +65,31 @@ export default {
     return client.ppost('/api/data/schedule-items/', data)
   },
 
-  deleteScheduleItem (scheduleItem) {
+  deleteScheduleItem(scheduleItem) {
     const path = `/api/data/schedule-items/${scheduleItem.id}`
     return client.pdel(path)
   },
 
-  getAssetTypeScheduleItems (production, taskType) {
-    return this.getEntityScheduleItems(
-      production, taskType, 'asset-types'
-    )
+  getAssetTypeScheduleItems(production, taskType) {
+    return this.getEntityScheduleItems(production, taskType, 'asset-types')
   },
 
-  getSequenceScheduleItems (production, taskType) {
-    return this.getEntityScheduleItems(
-      production, taskType, 'sequences'
-    )
+  getSequenceScheduleItems(production, taskType) {
+    return this.getEntityScheduleItems(production, taskType, 'sequences')
   },
 
-  getEpisodeScheduleItems (production, taskType) {
-    return this.getEntityScheduleItems(
-      production, taskType, 'episodes'
-    )
+  getEpisodeScheduleItems(production, taskType) {
+    return this.getEntityScheduleItems(production, taskType, 'episodes')
   },
 
-  getEntityScheduleItems (production, taskType, entity) {
+  getEntityScheduleItems(production, taskType, entity) {
     return client.pget(
-        `/api/data/projects/${production.id}/schedule-items/` +
-        `${taskType.id}/${entity}`)
+      `/api/data/projects/${production.id}/schedule-items/` +
+        `${taskType.id}/${entity}`
+    )
   },
 
-  updateScheduleItem (scheduleItem) {
+  updateScheduleItem(scheduleItem) {
     if (!scheduleItem.endDate) {
       scheduleItem.endDate = scheduleItem.startDate.add('days', 1).clone()
     }

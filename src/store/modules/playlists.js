@@ -6,36 +6,27 @@ import { removeModelFromList, updateModelFromList } from '@/lib/models'
 
 import {
   ADD_PLAYLISTS,
-
   LOAD_PLAYLISTS_END,
-
   LOAD_PLAYLIST_START,
   LOAD_PLAYLIST_ERROR,
   LOAD_PLAYLIST_END,
-
   EDIT_PLAYLIST_START,
   EDIT_PLAYLIST_ERROR,
   EDIT_PLAYLIST_END,
-
   DELETE_PLAYLIST_START,
   DELETE_PLAYLIST_ERROR,
   DELETE_PLAYLIST_END,
-
   CHANGE_PLAYLIST_PREVIEW,
   CHANGE_PLAYLIST_ORDER,
   CHANGE_PLAYLIST_TYPE,
-
   ADD_ENTITY_TO_PLAYLIST,
   REMOVE_ENTITY_FROM_PLAYLIST,
   LOAD_ENTITY_PREVIEW_FILES_END,
-
   ADD_NEW_JOB,
   MARK_JOB_AS_DONE,
   REMOVE_BUILD_JOB,
-
   UPDATE_PREVIEW_ANNOTATION,
   UPDATE_PREVIEW_VALIDATION_STATUS,
-
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -55,9 +46,9 @@ const getters = {
 }
 
 const actions = {
-
-  loadPlaylists (
-    { commit, rootGetters }, { sortBy = 'updated_at', page = 1, taskTypeId }
+  loadPlaylists(
+    { commit, rootGetters },
+    { sortBy = 'updated_at', page = 1, taskTypeId }
   ) {
     const production = rootGetters.currentProduction
     let episode = rootGetters.currentEpisode
@@ -67,17 +58,17 @@ const actions = {
     if (!isTVShow) episode = null
 
     commit(LOAD_PLAYLISTS_END, [])
-    return playlistsApi.getPlaylists(
-      production, episode, taskTypeId, sortBy, page
-    )
+    return playlistsApi
+      .getPlaylists(production, episode, taskTypeId, sortBy, page)
       .then(playlists => {
         commit(LOAD_PLAYLISTS_END, playlists)
         return Promise.resolve(playlists)
       })
   },
 
-  loadMorePlaylists (
-    { commit, rootGetters }, { sortBy = 'updated_at', page = 1, taskTypeId }
+  loadMorePlaylists(
+    { commit, rootGetters },
+    { sortBy = 'updated_at', page = 1, taskTypeId }
   ) {
     const production = rootGetters.currentProduction
     let episode = rootGetters.currentEpisode
@@ -86,27 +77,25 @@ const actions = {
     if (state.playlists.length === 0) return Promise.resolve([])
     if (isTVShow && !episode) return Promise.resolve([])
     if (!isTVShow) episode = null
-    return playlistsApi.getPlaylists(
-      production, episode, taskTypeId, sortBy, page
-    )
+    return playlistsApi
+      .getPlaylists(production, episode, taskTypeId, sortBy, page)
       .then(playlists => {
         commit(ADD_PLAYLISTS, playlists)
         return Promise.resolve(playlists)
       })
   },
 
-  loadPlaylist ({ commit, rootGetters }, { playlist, callback }) {
+  loadPlaylist({ commit, rootGetters }, { playlist, callback }) {
     const currentProduction = rootGetters.currentProduction
     commit(LOAD_PLAYLIST_START)
-    playlistsApi.getPlaylist(
-      currentProduction, playlist, (err, playlist) => {
-        if (err) commit(LOAD_PLAYLIST_ERROR)
-        else commit(LOAD_PLAYLIST_END, playlist)
-        if (callback) callback(err, playlist)
-      })
+    playlistsApi.getPlaylist(currentProduction, playlist, (err, playlist) => {
+      if (err) commit(LOAD_PLAYLIST_ERROR)
+      else commit(LOAD_PLAYLIST_END, playlist)
+      if (callback) callback(err, playlist)
+    })
   },
 
-  refreshPlaylist ({ commit, rootGetters }, id) {
+  refreshPlaylist({ commit, rootGetters }, id) {
     return new Promise((resolve, reject) => {
       const currentProduction = rootGetters.currentProduction
       playlistsApi.getPlaylist(currentProduction, { id }, (err, playlist) => {
@@ -119,20 +108,19 @@ const actions = {
     })
   },
 
-  loadEntityPreviewFiles ({ commit }, entity) {
+  loadEntityPreviewFiles({ commit }, entity) {
     return playlistsApi.getEntityPreviewFiles(entity)
   },
 
-  newPlaylist ({ commit }, data) {
+  newPlaylist({ commit }, data) {
     commit(EDIT_PLAYLIST_START, data)
-    return playlistsApi.newPlaylist(data)
-      .then((playlist) => {
-        commit(EDIT_PLAYLIST_END, playlist)
-        return Promise.resolve(playlist)
-      })
+    return playlistsApi.newPlaylist(data).then(playlist => {
+      commit(EDIT_PLAYLIST_END, playlist)
+      return Promise.resolve(playlist)
+    })
   },
 
-  editPlaylist ({ commit, rootGetters }, { data, callback }) {
+  editPlaylist({ commit, rootGetters }, { data, callback }) {
     if (!rootGetters.isCurrentUserClient) {
       commit(EDIT_PLAYLIST_START)
       return playlistsApi.updatePlaylist(data, (err, playlist) => {
@@ -145,24 +133,25 @@ const actions = {
     }
   },
 
-  deletePlaylist ({ commit }, { playlist, callback }) {
+  deletePlaylist({ commit }, { playlist, callback }) {
     commit(DELETE_PLAYLIST_START)
-    playlistsApi.deletePlaylist(playlist, (err) => {
+    playlistsApi.deletePlaylist(playlist, err => {
       if (err) commit(DELETE_PLAYLIST_ERROR)
       else commit(DELETE_PLAYLIST_END, playlist)
       if (callback) callback(err)
     })
   },
 
-  pushEntityToPlaylist (
-    { commit, dispatch }, { playlist, entity, previewFiles, task, callback }
+  pushEntityToPlaylist(
+    { commit, dispatch },
+    { playlist, entity, previewFiles, task, callback }
   ) {
     return new Promise((resolve, reject) => {
       commit(LOAD_ENTITY_PREVIEW_FILES_END, { playlist, entity, previewFiles })
       commit(ADD_ENTITY_TO_PLAYLIST, { playlist, entity, task })
       dispatch('editPlaylist', {
         data: playlist,
-        callback: (err) => {
+        callback: err => {
           if (err) reject(err)
           resolve(entity)
         }
@@ -170,21 +159,20 @@ const actions = {
     })
   },
 
-  removeEntityPreviewFromPlaylist (
-    { commit, dispatch }, { playlist, entity, callback }
+  removeEntityPreviewFromPlaylist(
+    { commit, dispatch },
+    { playlist, entity, callback }
   ) {
     commit(REMOVE_ENTITY_FROM_PLAYLIST, { playlist, entity })
     dispatch('editPlaylist', { data: playlist, callback })
   },
 
-  changePlaylistOrder (
-    { commit, dispatch }, { playlist, info, callback }
-  ) {
+  changePlaylistOrder({ commit, dispatch }, { playlist, info, callback }) {
     commit(CHANGE_PLAYLIST_ORDER, { playlist, info })
     dispatch('editPlaylist', { data: playlist, callback })
   },
 
-  changePlaylistPreview (
+  changePlaylistPreview(
     { commit, dispatch },
     { playlist, entity, previewFileId, callback }
   ) {
@@ -196,55 +184,53 @@ const actions = {
     dispatch('editPlaylist', { data: playlist, callback })
   },
 
-  removeBuildJob ({ commit }, job) {
+  removeBuildJob({ commit }, job) {
     commit(REMOVE_BUILD_JOB, job)
     playlistsApi.deleteBuildJob(job)
   },
 
-  removeBuildJobFromList ({ commit }, job) {
+  removeBuildJobFromList({ commit }, job) {
     commit(REMOVE_BUILD_JOB, job)
   },
 
-  addNewBuildJob ({ commit }, job) {
+  addNewBuildJob({ commit }, job) {
     commit(ADD_NEW_JOB, job)
   },
 
-  markBuildJobAsDone ({ commit }, job) {
+  markBuildJobAsDone({ commit }, job) {
     commit(MARK_JOB_AS_DONE, job)
   },
 
-  runPlaylistBuild ({ commit }, { playlist, full }) {
+  runPlaylistBuild({ commit }, { playlist, full }) {
     return playlistsApi.runPlaylistBuild(playlist, full)
   },
 
-  changePlaylistType (
-    { commit, dispatch }, { playlist, taskTypeId, callback }
-  ) {
+  changePlaylistType({ commit, dispatch }, { playlist, taskTypeId, callback }) {
     commit(CHANGE_PLAYLIST_TYPE, { playlist, taskTypeId })
     return dispatch('editPlaylist', { data: playlist, callback })
   },
 
-  loadTempPlaylist ({ commit, dispatch, rootGetters }, { taskIds, sort }) {
+  loadTempPlaylist({ commit, dispatch, rootGetters }, { taskIds, sort }) {
     const production = rootGetters.currentProduction
     return playlistsApi.loadTempPlaylist(production, taskIds, sort)
   },
 
-  getRunningPreviewFiles () {
+  getRunningPreviewFiles() {
     return playlistsApi.getRunningPreviewFiles()
   },
 
-  markPreviewFileAsBroken (utils, previewFileId) {
+  markPreviewFileAsBroken(utils, previewFileId) {
     return playlistsApi.markPreviewFileAsBroken(previewFileId)
   },
 
-  updatePreviewFileValidationStatus ({ commit }, { previewFile, status }) {
+  updatePreviewFileValidationStatus({ commit }, { previewFile, status }) {
     commit(UPDATE_PREVIEW_VALIDATION_STATUS, { previewFile, status })
     return playlistsApi.updatePreviewFileValidationStatus(previewFile, status)
   }
 }
 
 const mutations = {
-  [LOAD_PLAYLISTS_END] (state, playlists) {
+  [LOAD_PLAYLISTS_END](state, playlists) {
     state.playlists = playlists
     state.playlistMap = new Map()
     playlists.forEach(playlist => {
@@ -253,13 +239,11 @@ const mutations = {
     })
   },
 
-  [LOAD_PLAYLIST_START] (state) {
-  },
+  [LOAD_PLAYLIST_START](state) {},
 
-  [LOAD_PLAYLIST_ERROR] (state) {
-  },
+  [LOAD_PLAYLIST_ERROR](state) {},
 
-  [LOAD_PLAYLIST_END] (state, playlist) {
+  [LOAD_PLAYLIST_END](state, playlist) {
     state.playlistMap.get(playlist.id).build_jobs = playlist.build_jobs
     state.previewFileMap.clear()
     state.previewFileEntityMap.clear()
@@ -276,7 +260,7 @@ const mutations = {
     }
   },
 
-  [UPDATE_PREVIEW_ANNOTATION] (state, { taskId, preview, annotations }) {
+  [UPDATE_PREVIEW_ANNOTATION](state, { taskId, preview, annotations }) {
     const previewFile = state.previewFileMap.get(preview.id)
     const entity = state.previewFileEntityMap.get(preview.id)
     if (previewFile) {
@@ -287,17 +271,15 @@ const mutations = {
     }
   },
 
-  [UPDATE_PREVIEW_VALIDATION_STATUS] (state, { previewFile, status }) {
+  [UPDATE_PREVIEW_VALIDATION_STATUS](state, { previewFile, status }) {
     previewFile.validation_status = status
   },
 
-  [EDIT_PLAYLIST_START] (state, data) {
-  },
+  [EDIT_PLAYLIST_START](state, data) {},
 
-  [EDIT_PLAYLIST_ERROR] (state) {
-  },
+  [EDIT_PLAYLIST_ERROR](state) {},
 
-  [EDIT_PLAYLIST_END] (state, newPlaylist) {
+  [EDIT_PLAYLIST_END](state, newPlaylist) {
     const playlist = state.playlistMap.get(newPlaylist.id)
     if (playlist && playlist.id) {
       Object.assign(playlist, newPlaylist)
@@ -307,16 +289,14 @@ const mutations = {
     }
   },
 
-  [DELETE_PLAYLIST_START] (state) {
-  },
-  [DELETE_PLAYLIST_ERROR] (state) {
-  },
-  [DELETE_PLAYLIST_END] (state, playlistToDelete) {
+  [DELETE_PLAYLIST_START](state) {},
+  [DELETE_PLAYLIST_ERROR](state) {},
+  [DELETE_PLAYLIST_END](state, playlistToDelete) {
     state.playlists = removeModelFromList(state.playlists, playlistToDelete)
     state.playlistMap.delete(playlistToDelete.id)
   },
 
-  [LOAD_ENTITY_PREVIEW_FILES_END] (state, { playlist, entity, previewFiles }) {
+  [LOAD_ENTITY_PREVIEW_FILES_END](state, { playlist, entity, previewFiles }) {
     let previewFileList = []
     Object.keys(previewFiles).forEach(taskTypeId => {
       previewFiles[taskTypeId].forEach(previewFile => {
@@ -345,7 +325,7 @@ const mutations = {
     entity.preview_files = previewFiles
   },
 
-  [ADD_ENTITY_TO_PLAYLIST] (state, { playlist, entity }) {
+  [ADD_ENTITY_TO_PLAYLIST](state, { playlist, entity }) {
     if (!playlist.shots) playlist.shots = []
     playlist.shots.push({
       entity_id: entity.id,
@@ -358,23 +338,23 @@ const mutations = {
     })
   },
 
-  [REMOVE_ENTITY_FROM_PLAYLIST] (state, { playlist, entity }) {
+  [REMOVE_ENTITY_FROM_PLAYLIST](state, { playlist, entity }) {
     if (!playlist.shots) playlist.shots = []
     const entityPlaylistToDeleteIndex = playlist.shots.findIndex(
-      (entityPlaylist) => entityPlaylist.entity_id === entity.id
+      entityPlaylist => entityPlaylist.entity_id === entity.id
     )
     playlist.shots.splice(entityPlaylistToDeleteIndex, 1)
   },
 
-  [CHANGE_PLAYLIST_ORDER] (state, { playlist, info }) {
+  [CHANGE_PLAYLIST_ORDER](state, { playlist, info }) {
     const entityToMove = playlist.shots.find(
-      (entityPlaylist) => entityPlaylist.entity_id === info.after
+      entityPlaylist => entityPlaylist.entity_id === info.after
     )
     const entityToMoveIndex = playlist.shots.findIndex(
-      (entityPlaylist) => entityPlaylist.entity_id === info.after
+      entityPlaylist => entityPlaylist.entity_id === info.after
     )
     let targetShotIndex = playlist.shots.findIndex(
-      (entityPlaylist) => entityPlaylist.entity_id === info.before
+      entityPlaylist => entityPlaylist.entity_id === info.before
     )
     if (entityToMoveIndex >= 0 && targetShotIndex >= 0) {
       playlist.shots.splice(entityToMoveIndex, 1)
@@ -383,7 +363,7 @@ const mutations = {
     }
   },
 
-  [CHANGE_PLAYLIST_PREVIEW] (state, { playlist, entityId, previewFileId }) {
+  [CHANGE_PLAYLIST_PREVIEW](state, { playlist, entityId, previewFileId }) {
     let entityToChange = playlist.shots.find(e => e.entity_id === entityId)
     if (!entityToChange) {
       entityToChange = playlist.shots.find(e => e.id === entityId)
@@ -393,17 +373,19 @@ const mutations = {
     }
   },
 
-  [ADD_NEW_JOB] (state, job) {
+  [ADD_NEW_JOB](state, job) {
     const playlist = state.playlistMap.get(job.playlist_id)
-    playlist.build_jobs = [{
-      id: job.build_job_id,
-      created_at: job.created_at,
-      status: 'running',
-      playlist_id: playlist.id
-    }].concat(playlist.build_jobs)
+    playlist.build_jobs = [
+      {
+        id: job.build_job_id,
+        created_at: job.created_at,
+        status: 'running',
+        playlist_id: playlist.id
+      }
+    ].concat(playlist.build_jobs)
   },
 
-  [MARK_JOB_AS_DONE] (state, job) {
+  [MARK_JOB_AS_DONE](state, job) {
     const playlist = state.playlistMap.get(job.playlist_id)
     updateModelFromList(playlist.build_jobs, {
       id: job.build_job_id,
@@ -411,14 +393,16 @@ const mutations = {
     })
   },
 
-  [REMOVE_BUILD_JOB] (state, job) {
+  [REMOVE_BUILD_JOB](state, job) {
     const playlist = state.playlistMap.get(job.playlist_id)
     Vue.set(
-      playlist, 'build_jobs', removeModelFromList(playlist.build_jobs, job)
+      playlist,
+      'build_jobs',
+      removeModelFromList(playlist.build_jobs, job)
     )
   },
 
-  [CHANGE_PLAYLIST_TYPE] (state, { playlist, taskTypeId }) {
+  [CHANGE_PLAYLIST_TYPE](state, { playlist, taskTypeId }) {
     if (playlist) {
       playlist.shots.forEach(entity => {
         if (entity.preview_files[taskTypeId]) {
@@ -434,7 +418,7 @@ const mutations = {
     }
   },
 
-  [ADD_PLAYLISTS] (state, playlists) {
+  [ADD_PLAYLISTS](state, playlists) {
     state.playlists = state.playlists.concat(playlists)
     playlists.forEach(playlist => {
       if (!playlist.entities) playlist.entities = []
@@ -442,7 +426,7 @@ const mutations = {
     })
   },
 
-  [RESET_ALL] (state) {
+  [RESET_ALL](state) {
     Object.assign(state, { ...initialState })
   }
 }

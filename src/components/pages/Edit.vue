@@ -1,595 +1,585 @@
 <template>
-<div class="columns fixed-page edit xyz-in" xyz="fade">
-  <div class="column main-column">
-    <div class="page-header flexrow flexrow-item" ref="page-header-row">
-      <div class="flexrow block mb0 main-block">
-        <router-link
-          class="flexrow-item has-text-centered back-link"
-          :to="editsPath"
-        >
-          <corner-left-up-icon />
-        </router-link>
-        <span
-          class="flexrow-item"
-        >
-          <entity-thumbnail
-            class="entity-thumbnail"
-            :entity="currentEntity"
-            :empty-height="60"
-            :empty-width="100"
-            :height="60"
-            :width="100"
-            v-if="currentEntity"
-          />
-        </span>
-        <div class="entity-title flexrow-item mr1">
-          {{ title }}
-        </div>
-        <div
-          class="flexrow-item has-text-centered"
-          :key="currentEntity.id"
-          v-if="!isLoading && currentEntity"
-        >
-          <previews-per-task-type
-            ref="previews-per-task-type"
-            :entity="currentEntity"
-            :entity-map="editMap"
-            @preview-changed="onPreviewChanged"
-          />
-        </div>
-      </div>
-      <div class="filler"></div>
-      <div class="flexrow-item block mt0">
-        <preview-room
-          :ref="previewRoomRef"
-          :roomId="(currentEdit && isValidRoomId(currentEdit.id)) ? currentEdit.id : ''"
-          :joinRoom="joinRoom"
-          :leaveRoom="leaveRoom"
-          v-if="currentEdit && isValidRoomId(currentEdit.id) && currentPreview && currentPreview.id"
-        />
-      </div>
-    </div>
-
-    <div
-      ref="container"
-      class="edit player block"
-    >
-      <div
-        class="flexrow filler"
-        v-show="!isLoading"
-      >
-        <div
-          class="flexrow filler video-container"
-          ref="video-container"
-        >
-          <raw-video-player
-            ref="raw-player"
-            class="raw-player"
-            :style="{
-              position: 'static',
-              opacity: overlayOpacity
-            }"
-            :entities="entityList"
-            :full-screen="fullScreen"
-            :is-hd="isHd"
-            :is-repeating="isRepeating"
-            :current-preview-index="currentPreviewIndex"
-            :muted="isMuted"
-            @max-duration-update="onMaxDurationUpdate"
-            @metadata-loaded="onMetadataLoaded"
-            @repeat="onVideoRepeated"
-            @frame-update="onFrameUpdate"
-            v-show="isCurrentPreviewMovie && !isLoading"
-          />
-
-          <object-viewer
-            ref="object-player"
-            class="object-player"
-            :preview-url="currentPreviewDlPath"
-            :style="{
-              position: 'static',
-              opacity: overlayOpacity
-            }"
-            :full-screen="fullScreen"
-            v-if="isCurrentPreviewModel && !isLoading"
-          />
-
-          <sound-viewer
-            ref="sound-player"
-            class="sound-player"
-            :preview-url="currentPreviewDlPath"
-            :full-screen="fullScreen"
-            @play-ended="pause"
-            v-if="isCurrentPreviewSound && !isLoading"
-          />
-
-          <p
-            :style="{width: '100%'}"
-            class="preview-standard-file has-text-centered"
-            v-show="isCurrentPreviewFile && !isLoading"
+  <div class="columns fixed-page edit xyz-in" xyz="fade">
+    <div class="column main-column">
+      <div class="page-header flexrow flexrow-item" ref="page-header-row">
+        <div class="flexrow block mb0 main-block">
+          <router-link
+            class="flexrow-item has-text-centered back-link"
+            :to="editsPath"
           >
-            <a
-              class="button"
-              ref="preview-file"
-              :href="currentPreviewDlPath"
-              v-if="extension && extension.length > 0"
-            >
-              <download-icon class="icon" />
-              <span class="text">
-                {{ $t('tasks.download_pdf_file', {extension: extension}) }}
-              </span>
-            </a>
-          </p>
-
+            <corner-left-up-icon />
+          </router-link>
+          <span class="flexrow-item">
+            <entity-thumbnail
+              class="entity-thumbnail"
+              :entity="currentEntity"
+              :empty-height="60"
+              :empty-width="100"
+              :height="60"
+              :width="100"
+              v-if="currentEntity"
+            />
+          </span>
+          <div class="entity-title flexrow-item mr1">
+            {{ title }}
+          </div>
           <div
-            class="picture-preview-wrapper flexrow"
-            ref="picture-player-wrapper"
-            :style="{
-              position: 'static',
-              opacity: overlayOpacity,
-              left: 0,
-              right: 0
-            }"
-            v-show="isCurrentPreviewPicture && !isLoading"
+            class="flexrow-item has-text-centered"
+            :key="currentEntity.id"
+            v-if="!isLoading && currentEntity"
           >
-             <img
-               ref="picture-player"
-               id="picture-player"
-               class="picture-preview"
-               :src="isCurrentPreviewPicture ? currentPreviewPath : null"
-               v-show="isCurrentPreviewPicture"
-             />
-          </div>
-
-          <div class="loading-wrapper" v-if="isLoading">
-            <spinner />
-          </div>
-
-          <div
-            class="canvas-wrapper"
-            ref="canvas-wrapper"
-            oncontextmenu="return false;"
-            v-show="!isCurrentPreviewFile"
-          >
-            <canvas
-              id="edit-annotation-canvas"
-              ref="annotation-canvas"
-              class="canvas"
-            >
-            </canvas>
-          </div>
-        </div>
-        <task-info
-          ref="task-info"
-          :class="{
-            'flexrow-item': true,
-            'task-info-column': true,
-            'hidden': isCommentsHidden
-          }"
-          :task="task"
-          :is-preview="false"
-          :silent="isCommentsHidden"
-          :current-time-raw="currentTimeRaw - frameDuration"
-          :current-parent-preview="currentPreview"
-          @time-code-clicked="onTimeCodeClicked"
-        />
-      </div>
-
-      <video-progress
-        ref="video-progress"
-        class="video-progress pull-bottom"
-        :annotations="annotations"
-        :frame-duration="frameDuration"
-        :nb-frames="nbFrames"
-        :handle-in="-1"
-        :handle-out="-1"
-        @start-scrub="onScrubStart"
-        @end-scrub="onScrubEnd"
-        @progress-changed="onProgressChanged"
-        v-show="isCurrentPreviewMovie && currentPreview.id"
-      />
-
-      <div
-        class="player-footer flexrow"
-        ref="button-bar"
-        v-if="currentEntity && currentEntity.id"
-      >
-        <div
-          class="flexrow flexrow-item mr0"
-          v-if="
-            isCurrentPreviewMovie ||
-            isCurrentPreviewPicture ||
-            isCurrentPreviewSound"
-        >
-          <button-simple
-            class="button player-button flexrow-item"
-            @click="playClicked"
-            :title="$t('playlists.actions.play')"
-            icon="play"
-            v-if="!isPlaying"
-          />
-          <button-simple
-            class="button player-button flexrow-item"
-            @click="pauseClicked"
-            :title="$t('playlists.actions.pause')"
-            icon="pause"
-            v-else
-          />
-        </div>
-        <div class="separator"></div>
-
-        <template v-if="isCurrentPreviewPicture">
-          {{ framesSeenOfPicture }} /
-          <input
-            type="number"
-            min="0"
-            class="frame-per-image-input"
-            :title="$t('playlists.actions.frames_per_picture')"
-            v-model="framesPerImage[playingEntityIndex]"
-          >
-        </template>
-        <div class="separator" v-if="isCurrentPreviewPicture"></div>
-
-        <div
-          class="flexrow flexrow-item"
-          v-if="currentEntityPreviewLength > 1"
-        >
-          <button-simple
-            class="button player-button flexrow-item"
-            icon="left"
-            :title="$t('playlists.actions.files_previous')"
-            :disabled="isPlaying"
-            @click="onPreviousPreviewClicked"
-          />
-          <span
-            class="ml05 mr05"
-            :title="$t('playlists.actions.files_position')"
-          >
-            {{ currentPreviewIndex + 1 }} / {{ currentEntityPreviewLength }}
-          </span>
-          <button-simple
-            class="button player-button flexrow-item"
-            icon="right"
-            :title="$t('playlists.actions.files_next')"
-            :disabled="isPlaying"
-            @click="onNextPreviewClicked"
-          />
-          <a
-            class="button player-button flexrow-item"
-            :href="currentPreviewPath"
-            :title="$t('playlists.actions.see_original_file')"
-            target="blank"
-          >
-            <arrow-up-right-icon class="icon is-small" />
-          </a>
-        </div>
-
-        <div
-          class="flexrow flexrow-item"
-          v-if="isCurrentPreviewMovie"
-        >
-          <button-simple
-            class="button player-button flexrow-item"
-            @click="onSpeedClicked"
-            :title="$t('playlists.actions.speed')"
-            text="x1.00"
-            v-if="speed === 3"
-          />
-          <button-simple
-            class="button player-button flexrow-item"
-            @click="onSpeedClicked"
-            :title="$t('playlists.actions.speed')"
-            text="x0.50"
-            v-else-if="speed === 2"
-          />
-          <button-simple
-            class="button player-button flexrow-item"
-            @click="onSpeedClicked"
-            :title="$t('playlists.actions.speed')"
-            text="x0.25"
-            v-else
-          />
-
-          <button-simple
-            class="flexrow-item player-button"
-            :title="$t('playlists.actions.unmute')"
-            icon="soundoff"
-            @click="onToggleSoundClicked"
-            v-if="isMuted"
-          />
-          <button-simple
-            class="flexrow-item player-button"
-            :title="$t('playlists.actions.mute')"
-            icon="soundon"
-            @click="onToggleSoundClicked"
-            v-else
-          />
-
-          <button-simple
-            class="button player-button flexrow-item"
-            :active="isRepeating"
-            :title="$t('playlists.actions.looping')"
-            icon="repeat"
-            @click="onRepeatClicked"
-          />
-
-          <span
-            class="flexrow-item time-indicator"
-            :title="$t('playlists.actions.current_time')"
-          >
-            {{ currentTime }}
-          </span>
-          <span class="flexrow-item time-indicator">
-          /
-          </span>
-          <span
-            class="flexrow-item time-indicator"
-            :title="$t('playlists.actions.max_duration')"
-          >
-            {{ maxDuration }}
-          </span>
-          <span
-            class="flexrow-item time-indicator mr1"
-            :title="$t('playlists.actions.frame_number')"
-          >
-            ({{ currentFrame }} / {{ (nbFrames + '').padStart(3, '0') }})
-          </span>
-          <button-simple
-            class="button player-button flexrow-item"
-            @click="onPreviousFrameClicked"
-            :title="$t('playlists.actions.previous_frame')"
-            icon="left"
-          />
-          <button-simple
-            class="button player-button flexrow-item"
-            @click="onNextFrameClicked"
-            :title="$t('playlists.actions.next_frame')"
-            icon="right"
-          />
-        </div>
-        <span class="filler"></span>
-
-        <div
-          class="flexrow"
-          v-if="!isCurrentUserArtist && (isCurrentPreviewMovie || isCurrentPreviewPicture)"
-        >
-          <button-simple
-            class="player-button flexrow-item"
-            icon="undo"
-            :title="$t('playlists.actions.annotation_undo')"
-            @click="undoLastAction"
-          />
-
-          <button-simple
-            class="player-button flexrow-item"
-            :title="$t('playlists.actions.annotation_redo')"
-            icon="redo"
-            @click="redoLastAction"
-          />
-
-          <transition name="slide">
-            <div
-              class="annotation-tools"
-              v-show="isTyping"
-            >
-              <color-picker
-                :isOpen="isShowingPalette"
-                :color="this.textColor"
-                @TogglePalette="onPickColor"
-                @change="onChangeTextColor"
-              />
-            </div>
-          </transition>
-          <button-simple
-            :class="{
-              'player-button': true,
-              'flexrow-item': true,
-              active: isTyping
-            }"
-            :title="$t('playlists.actions.annotation_text')"
-            @click="onTypeClicked"
-            icon="type"
-          />
-
-          <transition name="slide">
-            <div
-              class="annotation-tools"
-              v-show="isDrawing"
-            >
-              <pencil-picker
-                :isOpen="isShowingPencilPalette"
-                :pencil="pencil"
-                :sizes="this.pencilPalette"
-                @toggle-palette="onPickPencil"
-                @change="onChangePencil"
-              />
-
-              <color-picker
-                :isOpen="isShowingPalette"
-                :color="this.color"
-                @TogglePalette="onPickColor"
-                @change="onChangeColor"
-              />
-            </div>
-          </transition>
-          <button-simple
-            :class="{
-              'player-button': true,
-              'flexrow-item': true,
-              active: isDrawing
-            }"
-            :title="$t('playlists.actions.annotation_draw')"
-            @click="onAnnotateClicked"
-            icon="pencil"
-          />
-          <button-simple
-            class="player-button flexrow-item"
-            icon="remove"
-            :title="$t('playlists.actions.annotation_delete')"
-            @click="onDeleteClicked"
-          />
-        </div>
-        <div class="separator"></div>
-        <button-simple
-          class="button player-button flexrow-item"
-          :title="$t('playlists.actions.comments')"
-          @click="onCommentClicked"
-          icon="comment"
-        />
-        <button-simple
-          class="player-button flexrow-item"
-          :title="$t('playlists.actions.' + (isHd ? 'switch_ld' : 'switch_hd'))"
-          :text="isHd ? 'HD' : 'LD'"
-          @click="isHd = !isHd"
-          v-if="isCurrentPreviewMovie"
-        />
-
-        <button-simple
-          class="button player-button flexrow-item"
-          :title="$t('playlists.actions.fullscreen')"
-          @click="onFullscreenClicked"
-          icon="maximize"
-          v-if="isFullScreenEnabled"
-        />
-      </div>
-
-    </div>
-
-    <div
-      class="edit-data block"
-    >
-      <div class="flexrow">
-        <combobox-styled
-          class="section-combo flexrow-item"
-          :options="entityNavOptions"
-          v-model="currentSection"
-        />
-        <div class="filler"></div>
-        <span
-          class="flexrow-item mt05"
-          v-show="currentSection === 'schedule'"
-        >
-          {{ $t('schedule.zoom_level') }}:
-        </span>
-        <combobox-number
-          class="zoom-level flexrow-item "
-          :options="zoomOptions"
-          is-simple
-          v-model="zoomLevel"
-          v-show="currentSection === 'schedule'"
-        />
-      </div>
-
-      <div
-        ref="info-row"
-        class="infos flexrow pa0"
-        v-if="currentSection === 'infos'"
-      >
-        <div class="flexrow-item">
-          <div class="flexrow">
-            <div class="flexcolumn flexrow-item">
-              <page-subtitle class="flerow-item" :text="$t('edits.tasks')" />
-              <entity-task-list
-                class="task-list flexrow-item"
-                :entries="currentEdit ? currentEdit.tasks : []"
-                :is-loading="!currentEdit"
-                :is-error="false"
-              />
-            </div>
-
-            <div class="flexcolumn flexrow-item">
-              <div class="flexrow">
-                <page-subtitle class="flerow-item" :text="$t('main.info')" />
-                <div class="flexrow-item has-text-right">
-                  <button-simple
-                    icon="edit"
-                    @click="modals.edit = true"
-                    v-if="isCurrentUserManager"
-                  />
-                </div>
-              </div>
-              <div class="table-body edit-metadata flexrow-item">
-                <table class="datatable no-header" v-if="currentEdit">
-                  <tbody class="datatable-body">
-                    <tr class="datatable-row">
-                      <td class="field-label">{{ $t('edits.fields.description') }}</td>
-                      <description-cell
-                        :entry="currentEdit"
-                        :full="true"
-                      />
-                    </tr>
-                    <tr
-                      :key="descriptor.id"
-                      class="datatable-row"
-                      v-for="descriptor in editMetadataDescriptors"
-                    >
-                      <td class="field-label">{{ descriptor.name }}</td>
-                      <td>
-                        {{ currentEdit.data ? currentEdit.data[descriptor.field_name] : '' }}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div
-        ref="schedule-row"
-        class="infos schedule"
-        v-if="currentSection === 'schedule' && scheduleItems.length > 0"
-      >
-        <div
-          class="schedule mt1"
-          v-if="scheduleItems[0].children.length > 0"
-          v-show="currentSection === 'schedule'"
-        >
-          <div class="wrapper">
-            <schedule
-              ref="schedule-widget"
-              :start-date="tasksStartDate"
-              :end-date="tasksEndDate"
-              :hierarchy="scheduleItems"
-              :zoom-level="zoomLevel"
-              :is-loading="false"
-              :is-estimation-linked="true"
-              :hide-root="true"
-              :with-milestones="false"
+            <previews-per-task-type
+              ref="previews-per-task-type"
+              :entity="currentEntity"
+              :entity-map="editMap"
+              @preview-changed="onPreviewChanged"
             />
           </div>
         </div>
+        <div class="filler"></div>
+        <div class="flexrow-item block mt0">
+          <preview-room
+            :ref="previewRoomRef"
+            :roomId="
+              currentEdit && isValidRoomId(currentEdit.id) ? currentEdit.id : ''
+            "
+            :joinRoom="joinRoom"
+            :leaveRoom="leaveRoom"
+            v-if="
+              currentEdit &&
+              isValidRoomId(currentEdit.id) &&
+              currentPreview &&
+              currentPreview.id
+            "
+          />
+        </div>
       </div>
 
-      <entity-preview-files
-        :entity="currentEdit"
-        v-if="currentSection === 'preview-files'"
-      />
+      <div ref="container" class="edit player block">
+        <div class="flexrow filler" v-show="!isLoading">
+          <div class="flexrow filler video-container" ref="video-container">
+            <raw-video-player
+              ref="raw-player"
+              class="raw-player"
+              :style="{
+                position: 'static',
+                opacity: overlayOpacity
+              }"
+              :entities="entityList"
+              :full-screen="fullScreen"
+              :is-hd="isHd"
+              :is-repeating="isRepeating"
+              :current-preview-index="currentPreviewIndex"
+              :muted="isMuted"
+              @max-duration-update="onMaxDurationUpdate"
+              @metadata-loaded="onMetadataLoaded"
+              @repeat="onVideoRepeated"
+              @frame-update="onFrameUpdate"
+              v-show="isCurrentPreviewMovie && !isLoading"
+            />
 
-      <entity-news
-        :entity="currentEdit"
-        v-if="currentSection === 'activity'"
-      />
+            <object-viewer
+              ref="object-player"
+              class="object-player"
+              :preview-url="currentPreviewDlPath"
+              :style="{
+                position: 'static',
+                opacity: overlayOpacity
+              }"
+              :full-screen="fullScreen"
+              v-if="isCurrentPreviewModel && !isLoading"
+            />
 
-      <entity-time-logs
-        :entity="currentEdit"
-        v-if="currentSection === 'time-logs'"
-      />
+            <sound-viewer
+              ref="sound-player"
+              class="sound-player"
+              :preview-url="currentPreviewDlPath"
+              :full-screen="fullScreen"
+              @play-ended="pause"
+              v-if="isCurrentPreviewSound && !isLoading"
+            />
 
+            <p
+              :style="{ width: '100%' }"
+              class="preview-standard-file has-text-centered"
+              v-show="isCurrentPreviewFile && !isLoading"
+            >
+              <a
+                class="button"
+                ref="preview-file"
+                :href="currentPreviewDlPath"
+                v-if="extension && extension.length > 0"
+              >
+                <download-icon class="icon" />
+                <span class="text">
+                  {{ $t('tasks.download_pdf_file', { extension: extension }) }}
+                </span>
+              </a>
+            </p>
+
+            <div
+              class="picture-preview-wrapper flexrow"
+              ref="picture-player-wrapper"
+              :style="{
+                position: 'static',
+                opacity: overlayOpacity,
+                left: 0,
+                right: 0
+              }"
+              v-show="isCurrentPreviewPicture && !isLoading"
+            >
+              <img
+                ref="picture-player"
+                id="picture-player"
+                class="picture-preview"
+                :src="isCurrentPreviewPicture ? currentPreviewPath : null"
+                v-show="isCurrentPreviewPicture"
+              />
+            </div>
+
+            <div class="loading-wrapper" v-if="isLoading">
+              <spinner />
+            </div>
+
+            <div
+              class="canvas-wrapper"
+              ref="canvas-wrapper"
+              oncontextmenu="return false;"
+              v-show="!isCurrentPreviewFile"
+            >
+              <canvas
+                id="edit-annotation-canvas"
+                ref="annotation-canvas"
+                class="canvas"
+              >
+              </canvas>
+            </div>
+          </div>
+          <task-info
+            ref="task-info"
+            :class="{
+              'flexrow-item': true,
+              'task-info-column': true,
+              hidden: isCommentsHidden
+            }"
+            :task="task"
+            :is-preview="false"
+            :silent="isCommentsHidden"
+            :current-time-raw="currentTimeRaw - frameDuration"
+            :current-parent-preview="currentPreview"
+            @time-code-clicked="onTimeCodeClicked"
+          />
+        </div>
+
+        <video-progress
+          ref="video-progress"
+          class="video-progress pull-bottom"
+          :annotations="annotations"
+          :frame-duration="frameDuration"
+          :nb-frames="nbFrames"
+          :handle-in="-1"
+          :handle-out="-1"
+          @start-scrub="onScrubStart"
+          @end-scrub="onScrubEnd"
+          @progress-changed="onProgressChanged"
+          v-show="isCurrentPreviewMovie && currentPreview.id"
+        />
+
+        <div
+          class="player-footer flexrow"
+          ref="button-bar"
+          v-if="currentEntity && currentEntity.id"
+        >
+          <div
+            class="flexrow flexrow-item mr0"
+            v-if="
+              isCurrentPreviewMovie ||
+              isCurrentPreviewPicture ||
+              isCurrentPreviewSound
+            "
+          >
+            <button-simple
+              class="button player-button flexrow-item"
+              @click="playClicked"
+              :title="$t('playlists.actions.play')"
+              icon="play"
+              v-if="!isPlaying"
+            />
+            <button-simple
+              class="button player-button flexrow-item"
+              @click="pauseClicked"
+              :title="$t('playlists.actions.pause')"
+              icon="pause"
+              v-else
+            />
+          </div>
+          <div class="separator"></div>
+
+          <template v-if="isCurrentPreviewPicture">
+            {{ framesSeenOfPicture }} /
+            <input
+              type="number"
+              min="0"
+              class="frame-per-image-input"
+              :title="$t('playlists.actions.frames_per_picture')"
+              v-model="framesPerImage[playingEntityIndex]"
+            />
+          </template>
+          <div class="separator" v-if="isCurrentPreviewPicture"></div>
+
+          <div
+            class="flexrow flexrow-item"
+            v-if="currentEntityPreviewLength > 1"
+          >
+            <button-simple
+              class="button player-button flexrow-item"
+              icon="left"
+              :title="$t('playlists.actions.files_previous')"
+              :disabled="isPlaying"
+              @click="onPreviousPreviewClicked"
+            />
+            <span
+              class="ml05 mr05"
+              :title="$t('playlists.actions.files_position')"
+            >
+              {{ currentPreviewIndex + 1 }} / {{ currentEntityPreviewLength }}
+            </span>
+            <button-simple
+              class="button player-button flexrow-item"
+              icon="right"
+              :title="$t('playlists.actions.files_next')"
+              :disabled="isPlaying"
+              @click="onNextPreviewClicked"
+            />
+            <a
+              class="button player-button flexrow-item"
+              :href="currentPreviewPath"
+              :title="$t('playlists.actions.see_original_file')"
+              target="blank"
+            >
+              <arrow-up-right-icon class="icon is-small" />
+            </a>
+          </div>
+
+          <div class="flexrow flexrow-item" v-if="isCurrentPreviewMovie">
+            <button-simple
+              class="button player-button flexrow-item"
+              @click="onSpeedClicked"
+              :title="$t('playlists.actions.speed')"
+              text="x1.00"
+              v-if="speed === 3"
+            />
+            <button-simple
+              class="button player-button flexrow-item"
+              @click="onSpeedClicked"
+              :title="$t('playlists.actions.speed')"
+              text="x0.50"
+              v-else-if="speed === 2"
+            />
+            <button-simple
+              class="button player-button flexrow-item"
+              @click="onSpeedClicked"
+              :title="$t('playlists.actions.speed')"
+              text="x0.25"
+              v-else
+            />
+
+            <button-simple
+              class="flexrow-item player-button"
+              :title="$t('playlists.actions.unmute')"
+              icon="soundoff"
+              @click="onToggleSoundClicked"
+              v-if="isMuted"
+            />
+            <button-simple
+              class="flexrow-item player-button"
+              :title="$t('playlists.actions.mute')"
+              icon="soundon"
+              @click="onToggleSoundClicked"
+              v-else
+            />
+
+            <button-simple
+              class="button player-button flexrow-item"
+              :active="isRepeating"
+              :title="$t('playlists.actions.looping')"
+              icon="repeat"
+              @click="onRepeatClicked"
+            />
+
+            <span
+              class="flexrow-item time-indicator"
+              :title="$t('playlists.actions.current_time')"
+            >
+              {{ currentTime }}
+            </span>
+            <span class="flexrow-item time-indicator"> / </span>
+            <span
+              class="flexrow-item time-indicator"
+              :title="$t('playlists.actions.max_duration')"
+            >
+              {{ maxDuration }}
+            </span>
+            <span
+              class="flexrow-item time-indicator mr1"
+              :title="$t('playlists.actions.frame_number')"
+            >
+              ({{ currentFrame }} / {{ (nbFrames + '').padStart(3, '0') }})
+            </span>
+            <button-simple
+              class="button player-button flexrow-item"
+              @click="onPreviousFrameClicked"
+              :title="$t('playlists.actions.previous_frame')"
+              icon="left"
+            />
+            <button-simple
+              class="button player-button flexrow-item"
+              @click="onNextFrameClicked"
+              :title="$t('playlists.actions.next_frame')"
+              icon="right"
+            />
+          </div>
+          <span class="filler"></span>
+
+          <div
+            class="flexrow"
+            v-if="
+              !isCurrentUserArtist &&
+              (isCurrentPreviewMovie || isCurrentPreviewPicture)
+            "
+          >
+            <button-simple
+              class="player-button flexrow-item"
+              icon="undo"
+              :title="$t('playlists.actions.annotation_undo')"
+              @click="undoLastAction"
+            />
+
+            <button-simple
+              class="player-button flexrow-item"
+              :title="$t('playlists.actions.annotation_redo')"
+              icon="redo"
+              @click="redoLastAction"
+            />
+
+            <transition name="slide">
+              <div class="annotation-tools" v-show="isTyping">
+                <color-picker
+                  :isOpen="isShowingPalette"
+                  :color="this.textColor"
+                  @TogglePalette="onPickColor"
+                  @change="onChangeTextColor"
+                />
+              </div>
+            </transition>
+            <button-simple
+              :class="{
+                'player-button': true,
+                'flexrow-item': true,
+                active: isTyping
+              }"
+              :title="$t('playlists.actions.annotation_text')"
+              @click="onTypeClicked"
+              icon="type"
+            />
+
+            <transition name="slide">
+              <div class="annotation-tools" v-show="isDrawing">
+                <pencil-picker
+                  :isOpen="isShowingPencilPalette"
+                  :pencil="pencil"
+                  :sizes="this.pencilPalette"
+                  @toggle-palette="onPickPencil"
+                  @change="onChangePencil"
+                />
+
+                <color-picker
+                  :isOpen="isShowingPalette"
+                  :color="this.color"
+                  @TogglePalette="onPickColor"
+                  @change="onChangeColor"
+                />
+              </div>
+            </transition>
+            <button-simple
+              :class="{
+                'player-button': true,
+                'flexrow-item': true,
+                active: isDrawing
+              }"
+              :title="$t('playlists.actions.annotation_draw')"
+              @click="onAnnotateClicked"
+              icon="pencil"
+            />
+            <button-simple
+              class="player-button flexrow-item"
+              icon="remove"
+              :title="$t('playlists.actions.annotation_delete')"
+              @click="onDeleteClicked"
+            />
+          </div>
+          <div class="separator"></div>
+          <button-simple
+            class="button player-button flexrow-item"
+            :title="$t('playlists.actions.comments')"
+            @click="onCommentClicked"
+            icon="comment"
+          />
+          <button-simple
+            class="player-button flexrow-item"
+            :title="
+              $t('playlists.actions.' + (isHd ? 'switch_ld' : 'switch_hd'))
+            "
+            :text="isHd ? 'HD' : 'LD'"
+            @click="isHd = !isHd"
+            v-if="isCurrentPreviewMovie"
+          />
+
+          <button-simple
+            class="button player-button flexrow-item"
+            :title="$t('playlists.actions.fullscreen')"
+            @click="onFullscreenClicked"
+            icon="maximize"
+            v-if="isFullScreenEnabled"
+          />
+        </div>
+      </div>
+
+      <div class="edit-data block">
+        <div class="flexrow">
+          <combobox-styled
+            class="section-combo flexrow-item"
+            :options="entityNavOptions"
+            v-model="currentSection"
+          />
+          <div class="filler"></div>
+          <span
+            class="flexrow-item mt05"
+            v-show="currentSection === 'schedule'"
+          >
+            {{ $t('schedule.zoom_level') }}:
+          </span>
+          <combobox-number
+            class="zoom-level flexrow-item"
+            :options="zoomOptions"
+            is-simple
+            v-model="zoomLevel"
+            v-show="currentSection === 'schedule'"
+          />
+        </div>
+
+        <div
+          ref="info-row"
+          class="infos flexrow pa0"
+          v-if="currentSection === 'infos'"
+        >
+          <div class="flexrow-item">
+            <div class="flexrow">
+              <div class="flexcolumn flexrow-item">
+                <page-subtitle class="flerow-item" :text="$t('edits.tasks')" />
+                <entity-task-list
+                  class="task-list flexrow-item"
+                  :entries="currentEdit ? currentEdit.tasks : []"
+                  :is-loading="!currentEdit"
+                  :is-error="false"
+                />
+              </div>
+
+              <div class="flexcolumn flexrow-item">
+                <div class="flexrow">
+                  <page-subtitle class="flerow-item" :text="$t('main.info')" />
+                  <div class="flexrow-item has-text-right">
+                    <button-simple
+                      icon="edit"
+                      @click="modals.edit = true"
+                      v-if="isCurrentUserManager"
+                    />
+                  </div>
+                </div>
+                <div class="table-body edit-metadata flexrow-item">
+                  <table class="datatable no-header" v-if="currentEdit">
+                    <tbody class="datatable-body">
+                      <tr class="datatable-row">
+                        <td class="field-label">
+                          {{ $t('edits.fields.description') }}
+                        </td>
+                        <description-cell :entry="currentEdit" :full="true" />
+                      </tr>
+                      <tr
+                        :key="descriptor.id"
+                        class="datatable-row"
+                        v-for="descriptor in editMetadataDescriptors"
+                      >
+                        <td class="field-label">{{ descriptor.name }}</td>
+                        <td>
+                          {{
+                            currentEdit.data
+                              ? currentEdit.data[descriptor.field_name]
+                              : ''
+                          }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          ref="schedule-row"
+          class="infos schedule"
+          v-if="currentSection === 'schedule' && scheduleItems.length > 0"
+        >
+          <div
+            class="schedule mt1"
+            v-if="scheduleItems[0].children.length > 0"
+            v-show="currentSection === 'schedule'"
+          >
+            <div class="wrapper">
+              <schedule
+                ref="schedule-widget"
+                :start-date="tasksStartDate"
+                :end-date="tasksEndDate"
+                :hierarchy="scheduleItems"
+                :zoom-level="zoomLevel"
+                :is-loading="false"
+                :is-estimation-linked="true"
+                :hide-root="true"
+                :with-milestones="false"
+              />
+            </div>
+          </div>
+        </div>
+
+        <entity-preview-files
+          :entity="currentEdit"
+          v-if="currentSection === 'preview-files'"
+        />
+
+        <entity-news
+          :entity="currentEdit"
+          v-if="currentSection === 'activity'"
+        />
+
+        <entity-time-logs
+          :entity="currentEdit"
+          v-if="currentSection === 'time-logs'"
+        />
+      </div>
     </div>
-  </div>
 
-  <edit-edit-modal
-    ref="edit-edit-modal"
-    :active="modals.edit"
-    :is-loading="isLoading"
-    :is-error="errors.edit"
-    :edit-to-edit="currentEdit"
-    @cancel="modals.edit = false"
-    @confirm="confirmEditEdit"
-  />
-</div>
+    <edit-edit-modal
+      ref="edit-edit-modal"
+      :active="modals.edit"
+      :is-loading="isLoading"
+      :is-error="errors.edit"
+      :edit-to-edit="currentEdit"
+      @cancel="modals.edit = false"
+      @confirm="confirmEditEdit"
+    />
+  </div>
 </template>
 
 <script>
@@ -661,7 +651,7 @@ export default {
     VideoProgress
   },
 
-  data () {
+  data() {
     return {
       currentEdit: null,
       currentSection: 'infos',
@@ -686,7 +676,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.resetData()
     this.$on('annotation-changed', this.onAnnotationChanged)
 
@@ -709,7 +699,7 @@ export default {
     })
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     this.$off('annotation-changed', this.onAnnotationChanged)
   },
 
@@ -729,11 +719,12 @@ export default {
       'user'
     ]),
 
-    title () {
+    title() {
       if (this.currentEdit) {
         if (this.currentEdit.episode_name) {
-          return `${this.currentEdit.episode_name} / ` +
-                 `${this.currentEdit.name}`
+          return (
+            `${this.currentEdit.episode_name} / ` + `${this.currentEdit.name}`
+          )
         } else {
           return `${this.currentEdit.name}`
         }
@@ -742,7 +733,7 @@ export default {
       }
     },
 
-    editsPath () {
+    editsPath() {
       return getEntitiesPath(
         this.currentProduction.id,
         'edits',
@@ -759,7 +750,7 @@ export default {
       'updatePreviewAnnotation'
     ]),
 
-    resetPreviewFileMap () {
+    resetPreviewFileMap() {
       this.previewFileMap.clear()
       if (this.previewFiles) {
         Object.values(this.previewFiles).forEach(previewFiles => {
@@ -770,7 +761,7 @@ export default {
       }
     },
 
-    resetHeight () {
+    resetHeight() {
       this.$nextTick(() => {
         let height = window.innerHeight
         height -= this.$refs.header ? this.$refs.header.offsetHeight : 0
@@ -804,15 +795,22 @@ export default {
       })
     },
 
-    initPlayer () {
+    initPlayer() {
       if (!this.currentEdit) return
 
       this.currentPreviewIndex = 0
       // There's only one entity in this player, which is current Edit entity,
       // so playingEntityIndex is always 0
       this.playingEntityIndex = 0
-      this.entityList = [{ ...this.currentEdit, preview_file_id: null, preview_files: this.previewFiles }]
-      this.framesPerImage[0] = this.currentEdit.preview_nb_frames || DEFAULT_NB_FRAMES_PICTURE
+      this.entityList = [
+        {
+          ...this.currentEdit,
+          preview_file_id: null,
+          preview_files: this.previewFiles
+        }
+      ]
+      this.framesPerImage[0] =
+        this.currentEdit.preview_nb_frames || DEFAULT_NB_FRAMES_PICTURE
       this.pause()
       if (this.rawPlayer) this.rawPlayer.setCurrentFrame(1)
       this.currentTimeRaw = 0
@@ -821,20 +819,19 @@ export default {
       this.clearCanvas()
       this.annotations = []
       this.resetHeight()
-      this.resetCanvas()
-        .then(() => {
-          if (this.isCurrentPreview) {
-            this.annotations = this.currentEntity.preview_file_annotations
-            this.loadAnnotation(this.getAnnotation(0))
-          }
-        })
+      this.resetCanvas().then(() => {
+        if (this.isCurrentPreview) {
+          this.annotations = this.currentEntity.preview_file_annotations
+          this.loadAnnotation(this.getAnnotation(0))
+        }
+      })
     },
 
-    getCurrentEdit () {
+    getCurrentEdit() {
       return this.editMap.get(this.route.params.edit_id) || null
     },
 
-    confirmEditEdit (form) {
+    confirmEditEdit(form) {
       form.id = this.currentEdit.id
       this.isLoading = true
       this.errors.edit = false
@@ -843,20 +840,21 @@ export default {
           this.isLoading = false
           this.modals.edit = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.isLoading = false
           this.errors.edit = true
         })
     },
 
-    setPreviewFile (previewFile) {
+    setPreviewFile(previewFile) {
       this.playingPreviewFileId = previewFile.id
 
       this.currentEntity.preview_file_id = previewFile.id
       this.currentEntity.preview_file_task_id = previewFile.task_id
       this.currentEntity.preview_file_extension = previewFile.extension
-      this.currentEntity.preview_file_annotations = previewFile.annotations || []
+      this.currentEntity.preview_file_annotations =
+        previewFile.annotations || []
       this.currentEntity.preview_file_previews = previewFile.previews
 
       this.annotations = this.currentEntity.preview_file_annotations
@@ -867,75 +865,86 @@ export default {
       this.updateProgressBar()
     },
 
-    onPreviewChanged (entity, previewFile) {
+    onPreviewChanged(entity, previewFile) {
       this.pause()
       if (!previewFile) {
         // TODO: handle the situation when now preview file is selected
         // (e.g. if selected task has none)
       }
-      const isDifferentPreviewFile = this.playingPreviewFileId !== previewFile.id
+      const isDifferentPreviewFile =
+        this.playingPreviewFileId !== previewFile.id
       this.setPreviewFile(previewFile)
       if (isDifferentPreviewFile) this.sendUpdatePlayingStatus()
     },
 
-    onAnnotationChanged ({ preview, additions, deletions, updates }) {
+    onAnnotationChanged({ preview, additions, deletions, updates }) {
       const taskId = preview.task_id
       this.updatePreviewAnnotation({
-        taskId, preview, additions, deletions, updates
+        taskId,
+        preview,
+        additions,
+        deletions,
+        updates
       })
     },
 
-    scrollToEntity () {
+    scrollToEntity() {
       // This method in unused here, required by PlaylistPlayer that shares
       // playerMixin.
     },
 
-    resetData () {
+    resetData() {
       this.$nextTick(() => {
-        this.loadEdits()
-          .then(() => {
-            this.currentEdit = this.getCurrentEdit()
-            if (!this.currentEdit) {
-              return
-            }
-            this.loadTaskEntityPreviewFiles(this.currentEdit.id).then((previewFiles) => {
+        this.loadEdits().then(() => {
+          this.currentEdit = this.getCurrentEdit()
+          if (!this.currentEdit) {
+            return
+          }
+          this.loadTaskEntityPreviewFiles(this.currentEdit.id).then(
+            previewFiles => {
               this.previewFiles = previewFiles
               this.resetPreviewFileMap()
               this.initPlayer()
               this.isLoading = false
-            })
-          })
+            }
+          )
+        })
       })
     },
 
-    onPreviewFilesUpdate () {
-      this.loadTaskEntityPreviewFiles(this.currentEdit.id).then((previewFiles) => {
-        this.previewFiles = previewFiles
-        this.currentEntity.preview_files = previewFiles
-        this.resetPreviewFileMap()
-        // FIXME: combo should continue displaying currently selected task preview
-        // unless it's no longer available (e.g. was deleted along with the comment)
-        if (this.currentEntity &&
-          this.currentEntity.preview_file_id &&
-          !this.previewFileMap.has(this.currentEntity.preview_file_id)) {
-          // TODO: handle deletion of currently displayed preview file
+    onPreviewFilesUpdate() {
+      this.loadTaskEntityPreviewFiles(this.currentEdit.id).then(
+        previewFiles => {
+          this.previewFiles = previewFiles
+          this.currentEntity.preview_files = previewFiles
+          this.resetPreviewFileMap()
+          // FIXME: combo should continue displaying currently selected task preview
+          // unless it's no longer available (e.g. was deleted along with the comment)
+          if (
+            this.currentEntity &&
+            this.currentEntity.preview_file_id &&
+            !this.previewFileMap.has(this.currentEntity.preview_file_id)
+          ) {
+            // TODO: handle deletion of currently displayed preview file
+          }
         }
-      })
+      )
     }
   },
 
-  watch: { // Needed when reloading the page with F5
-    currentProduction () {
+  watch: {
+    // Needed when reloading the page with F5
+    currentProduction() {
       if (!this.isTVShow) this.resetData()
     },
 
-    currentEpisode () {
+    currentEpisode() {
       if (this.isTVShow && this.editMap.size === 0) {
         this.resetData()
       }
     },
 
-    playingPreviewFileId () {
+    playingPreviewFileId() {
       // In case preview was switched by someone else in the room,
       // make sure that comboboxes reflect this change too.
       if (!this.currentEntity || !this.playingPreviewFileId) return
@@ -945,7 +954,9 @@ export default {
 
       const previews = this.currentEntity.preview_files
       for (const taskTypeId in previews) {
-        const previewFile = previews[taskTypeId].find(p => p.id === this.playingPreviewFileId)
+        const previewFile = previews[taskTypeId].find(
+          p => p.id === this.playingPreviewFileId
+        )
         if (previewFile) {
           this.setPreviewFile(previewFile)
           if (
@@ -966,13 +977,15 @@ export default {
       ...previewRoomMixin.socket.events,
       ...playerMixin.socket.events,
 
-      'preview-file:add-file' (eventData) {
+      'preview-file:add-file'(eventData) {
         if (eventData.project_id !== this.task.project_id) return
         const taskId = eventData.task_id
 
         const previews = this.currentEntity.preview_files
         for (const taskTypeId in previews) {
-          const previewFile = previews[taskTypeId].find(p => p.task_id === taskId)
+          const previewFile = previews[taskTypeId].find(
+            p => p.task_id === taskId
+          )
           if (previewFile) {
             // Added preview affects one of the tasks, preview files must be refreshed
             this.onPreviewFilesUpdate()
@@ -981,7 +994,7 @@ export default {
         }
       },
 
-      'comment:delete' (eventData) {
+      'comment:delete'(eventData) {
         // Deleting a comment might remove a task preview, preview files must be refreshed
         if (eventData.project_id !== this.task.project_id) return
         this.onPreviewFilesUpdate()
@@ -989,7 +1002,7 @@ export default {
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: `${this.title} - Kitsu`
     }
@@ -1021,7 +1034,7 @@ export default {
 }
 
 .main-block {
-  padding: .5em 1.5em;
+  padding: 0.5em 1.5em;
 }
 
 .edit-data {
@@ -1045,7 +1058,7 @@ h2.subtitle {
 }
 
 .page {
-  background: #F9F9F9;
+  background: #f9f9f9;
   padding: 0em;
 }
 
@@ -1265,11 +1278,11 @@ h2.subtitle {
 }
 
 progress::-moz-progress-bar {
-  background-color: #43B581;
+  background-color: #43b581;
 }
 
 progress::-webkit-progress-value {
-  background-color: #43B581;
+  background-color: #43b581;
 }
 
 progress {
@@ -1288,7 +1301,7 @@ progress {
   border-radius: 0;
   margin: 0;
   padding: 0;
-  background-color: #43B581;
+  background-color: #43b581;
 }
 
 .mr1 {
@@ -1300,7 +1313,7 @@ progress {
 }
 
 .video-progress {
-  transition: opacity 0.5s ease
+  transition: opacity 0.5s ease;
 }
 
 .spinner {
@@ -1315,12 +1328,13 @@ progress {
 }
 
 .slide-enter-active {
-  transition: all .3s ease;
+  transition: all 0.3s ease;
 }
 .slide-leave-active {
-  transition: all .3s ease;
+  transition: all 0.3s ease;
 }
-.slide-enter, .slide-leave-to {
+.slide-enter,
+.slide-leave-to {
   transform: translateX(100%);
 }
 

@@ -1,12 +1,7 @@
 <template>
-<tr
-  class="datatable-row"
-  :key="taskType.id"
->
-  <task-type-cell
-    :task-type="taskType"
-  />
-  <!--td class="start-date">
+  <tr class="datatable-row" :key="taskType.id">
+    <task-type-cell :task-type="taskType" />
+    <!--td class="start-date">
    <date-field
       :disabled-dates="productionTimeRange"
       :can-delete="false"
@@ -20,15 +15,15 @@
       v-model="endDate"
    />
   </td-->
-  <td class="remove">
-    <button
-      class="button"
-      @click="$emit('remove', { scheduleItem, taskType })"
-    >
-      {{ $t('main.remove') }}
-    </button>
-  </td>
-</tr>
+    <td class="remove">
+      <button
+        class="button"
+        @click="$emit('remove', { scheduleItem, taskType })"
+      >
+        {{ $t('main.remove') }}
+      </button>
+    </td>
+  </tr>
 </template>
 
 <script>
@@ -59,7 +54,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       startDate: null,
       endDate: null,
@@ -68,12 +63,9 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction',
-      'getTaskTypePriority'
-    ]),
+    ...mapGetters(['currentProduction', 'getTaskTypePriority']),
 
-    productionTimeRange () {
+    productionTimeRange() {
       const dates = {
         to: parseDate(this.currentProduction.start_date).toDate(),
         from: parseDate(this.currentProduction.end_date).toDate()
@@ -81,7 +73,7 @@ export default {
       return dates
     },
 
-    endDateTimeRange () {
+    endDateTimeRange() {
       const dates = {
         to: this.startDate,
         from: parseDate(this.currentProduction.end_date).toDate()
@@ -90,7 +82,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.startDate = parseDate(this.scheduleItem.start_date).toDate()
     this.endDate = parseDate(this.scheduleItem.end_date).toDate()
     this.$nextTick(() => {
@@ -99,12 +91,11 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   },
 
   watch: {
-    startDate () {
+    startDate() {
       if (this.silent) return
       const startDate = moment(this.startDate)
       let endDate = moment(this.endDate)
@@ -122,7 +113,7 @@ export default {
       })
     },
 
-    endDate () {
+    endDate() {
       if (this.silent) return
       let startDate = moment(this.startDate)
       const endDate = moment(this.endDate)
@@ -140,7 +131,7 @@ export default {
       })
     },
 
-    scheduleItem () {
+    scheduleItem() {
       this.silent = true
       this.startDate = parseDate(this.scheduleItem.start_date).toDate()
       this.endDate = parseDate(this.scheduleItem.end_date).toDate()

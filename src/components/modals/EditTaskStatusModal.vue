@@ -1,94 +1,94 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
-    <div class="box">
+    <div class="modal-content">
+      <div class="box">
+        <h1 class="title" v-if="isEditing()">
+          {{ $t('task_status.edit_title') }} {{ taskStatusToEdit.name }}
+        </h1>
+        <h1 class="title" v-else>
+          {{ $t('task_status.new_task_status') }}
+        </h1>
 
-      <h1 class="title" v-if="isEditing()">
-        {{ $t("task_status.edit_title") }} {{ taskStatusToEdit.name }}
-      </h1>
-      <h1 class="title" v-else>
-        {{ $t("task_status.new_task_status") }}
-      </h1>
+        <form v-on:submit.prevent>
+          <text-field
+            ref="nameField"
+            input-class="task-status-name"
+            :label="$t('task_status.fields.name')"
+            @enter="confirmClicked"
+            v-model="form.name"
+            v-focus
+            v-if="taskStatusToEdit.short_name !== 'todo'"
+          />
+          <text-field
+            ref="shortNameField"
+            input-class="task-status-short-name"
+            :label="$t('task_status.fields.short_name')"
+            :maxlength="8"
+            @enter="confirmClicked"
+            v-model="form.short_name"
+            v-focus
+            v-if="taskStatusToEdit.short_name !== 'todo'"
+          />
+          <boolean-field
+            :label="$t('task_status.fields.is_default')"
+            @enter="confirmClicked"
+            v-model="form.is_default"
+          />
+          <boolean-field
+            :label="$t('task_status.fields.is_done')"
+            @enter="confirmClicked"
+            v-model="form.is_done"
+            v-if="form.is_default === 'false'"
+          />
+          <boolean-field
+            :label="$t('task_status.fields.is_retake')"
+            @enter="confirmClicked"
+            v-model="form.is_retake"
+            v-if="form.is_default === 'false'"
+          />
+          <boolean-field
+            :label="$t('task_status.fields.is_artist_allowed')"
+            @enter="confirmClicked"
+            v-model="form.is_artist_allowed"
+          />
+          <boolean-field
+            :label="$t('task_status.fields.is_client_allowed')"
+            @enter="confirmClicked"
+            v-model="form.is_client_allowed"
+          />
+          <boolean-field
+            :label="$t('task_status.fields.is_feedback_request')"
+            @enter="confirmClicked"
+            v-model="form.is_feedback_request"
+            v-if="form.is_default === 'false'"
+          />
 
-      <form v-on:submit.prevent>
-        <text-field
-          ref="nameField"
-          input-class="task-status-name"
-          :label="$t('task_status.fields.name')"
-          @enter="confirmClicked"
-          v-model="form.name"
-          v-focus
-          v-if="taskStatusToEdit.short_name !== 'todo'"
-        />
-        <text-field
-          ref="shortNameField"
-          input-class="task-status-short-name"
-          :label="$t('task_status.fields.short_name')"
-          :maxlength="8"
-          @enter="confirmClicked"
-          v-model="form.short_name"
-          v-focus
-          v-if="taskStatusToEdit.short_name !== 'todo'"
-        />
-        <boolean-field
-          :label="$t('task_status.fields.is_default')"
-          @enter="confirmClicked"
-          v-model="form.is_default"
-        />
-        <boolean-field
-          :label="$t('task_status.fields.is_done')"
-          @enter="confirmClicked"
-          v-model="form.is_done"
-          v-if="form.is_default === 'false'"
-        />
-        <boolean-field
-          :label="$t('task_status.fields.is_retake')"
-          @enter="confirmClicked"
-          v-model="form.is_retake"
-          v-if="form.is_default === 'false'"
-        />
-        <boolean-field
-          :label="$t('task_status.fields.is_artist_allowed')"
-          @enter="confirmClicked"
-          v-model="form.is_artist_allowed"
-        />
-        <boolean-field
-          :label="$t('task_status.fields.is_client_allowed')"
-          @enter="confirmClicked"
-          v-model="form.is_client_allowed"
-        />
-        <boolean-field
-          :label="$t('task_status.fields.is_feedback_request')"
-          @enter="confirmClicked"
-          v-model="form.is_feedback_request"
-          v-if="form.is_default === 'false'"
-        />
+          <color-field
+            ref="colorField"
+            :label="$t('task_status.fields.color')"
+            :colors="colors"
+            v-model="form.color"
+            v-if="taskStatusToEdit.short_name !== 'todo'"
+          />
+        </form>
 
-        <color-field
-          ref="colorField"
-          :label="$t('task_status.fields.color')"
-          :colors="colors"
-          v-model="form.color"
-          v-if="taskStatusToEdit.short_name !== 'todo'"
+        <modal-footer
+          :error-text="$t('task_status.create_error')"
+          :is-error="isError"
+          :is-loading="isLoading"
+          @confirm="confirmClicked"
+          @cancel="$emit('cancel')"
         />
-      </form>
-
-      <modal-footer
-        :error-text="$t('task_status.create_error')"
-        :is-error="isError"
-        :is-loading="isLoading"
-        @confirm="confirmClicked"
-        @cancel="$emit('cancel')"
-      />
+      </div>
     </div>
-
   </div>
-</div>
 </template>
 
 <script>
@@ -128,7 +128,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       form: {
         name: '',
@@ -180,25 +180,21 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'taskStatus',
-      'taskStatusStatusOptions'
-    ])
+    ...mapGetters(['taskStatus', 'taskStatusStatusOptions'])
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    confirmClicked () {
+    confirmClicked() {
       this.$emit('confirm', this.form)
     },
 
-    isEditing () {
+    isEditing() {
       return this.taskStatusToEdit && this.taskStatusToEdit.id
     },
 
-    resetForm () {
+    resetForm() {
       if (this.taskStatusToEdit) {
         this.form = {
           name: this.taskStatusToEdit.name,
@@ -209,19 +205,20 @@ export default {
           is_artist_allowed: String(this.taskStatusToEdit.is_artist_allowed),
           is_client_allowed: String(this.taskStatusToEdit.is_client_allowed),
           is_default: String(this.taskStatusToEdit.is_default || false),
-          is_feedback_request:
-            String(this.taskStatusToEdit.is_feedback_request || false)
+          is_feedback_request: String(
+            this.taskStatusToEdit.is_feedback_request || false
+          )
         }
       }
     }
   },
 
   watch: {
-    taskStatusToEdit () {
+    taskStatusToEdit() {
       this.resetForm()
     },
 
-    active () {
+    active() {
       if (this.active) {
         this.resetForm()
         setTimeout(() => {

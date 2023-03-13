@@ -1,11 +1,13 @@
 <template>
-<p :class="{
-  'error': true,
-  'has-text-right': alignRight,
-  'is-hidden': hidden
-}">
-  {{ text }}
-</p>
+  <p
+    :class="{
+      error: true,
+      'has-text-right': alignRight,
+      'is-hidden': hidden
+    }"
+  >
+    {{ text }}
+  </p>
 </template>
 
 <script>

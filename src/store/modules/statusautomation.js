@@ -5,10 +5,8 @@ import {
   LOAD_STATUS_AUTOMATIONS_START,
   LOAD_STATUS_AUTOMATIONS_ERROR,
   LOAD_STATUS_AUTOMATIONS_END,
-
   EDIT_STATUS_AUTOMATION_END,
   DELETE_STATUS_AUTOMATION_END,
-
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -33,8 +31,8 @@ const getters = {
   statusAutomationMap: state => state.statusAutomationMap,
 
   // Used to know if the automation will apply in the current production.
-  isStatusAutomationDisabled: (state, getters, rootState, rootGetters) =>
-    (statusAutomation) => {
+  isStatusAutomationDisabled:
+    (state, getters, rootState, rootGetters) => statusAutomation => {
       return (
         statusAutomation.out_field_type !== 'ready_for' &&
         !rootGetters.isTaskTypePriorityHigherById(
@@ -46,8 +44,7 @@ const getters = {
 }
 
 const actions = {
-
-  loadStatusAutomations ({ commit, state }, callback) {
+  loadStatusAutomations({ commit, state }, callback) {
     commit(LOAD_STATUS_AUTOMATIONS_START)
     statusAutomationsApi.getStatusAutomations((err, statusAutomations) => {
       if (err) commit(LOAD_STATUS_AUTOMATIONS_ERROR)
@@ -56,46 +53,49 @@ const actions = {
     })
   },
 
-  newStatusAutomation ({ commit, state }, data) {
-    return statusAutomationsApi.newStatusAutomation(data)
-      .then((statusAutomation) => {
+  newStatusAutomation({ commit, state }, data) {
+    return statusAutomationsApi
+      .newStatusAutomation(data)
+      .then(statusAutomation => {
         commit(EDIT_STATUS_AUTOMATION_END, statusAutomation)
         Promise.resolve(statusAutomation)
       })
   },
 
-  editStatusAutomation ({ commit, state }, data) {
-    return statusAutomationsApi.updateStatusAutomation(data)
-      .then((statusAutomation) => {
+  editStatusAutomation({ commit, state }, data) {
+    return statusAutomationsApi
+      .updateStatusAutomation(data)
+      .then(statusAutomation => {
         commit(EDIT_STATUS_AUTOMATION_END, statusAutomation)
         Promise.resolve(statusAutomation)
       })
   },
 
-  deleteStatusAutomation ({ commit, state }, statusAutomation) {
-    return statusAutomationsApi.deleteStatusAutomation(statusAutomation)
+  deleteStatusAutomation({ commit, state }, statusAutomation) {
+    return statusAutomationsApi
+      .deleteStatusAutomation(statusAutomation)
       .then(() => {
         commit(DELETE_STATUS_AUTOMATION_END, statusAutomation)
         Promise.resolve(statusAutomation)
       })
   },
 
-  postStatusAutomation ({ commit }, { data, url }) {
+  postStatusAutomation({ commit }, { data, url }) {
     statusAutomationsApi.postStatusAutomation(url, data)
   }
 }
 
 const mutations = {
-  [LOAD_STATUS_AUTOMATIONS_START] (state) {
+  [LOAD_STATUS_AUTOMATIONS_START](state) {
     state.statusAutomations = []
   },
 
-  [LOAD_STATUS_AUTOMATIONS_ERROR] (state) {
+  [LOAD_STATUS_AUTOMATIONS_ERROR](state) {
     state.statusAutomations = []
     state.statusAutomationMap = new Map()
   },
 
-  [LOAD_STATUS_AUTOMATIONS_END] (state, statusAutomations) {
+  [LOAD_STATUS_AUTOMATIONS_END](state, statusAutomations) {
     state.statusAutomations = statusAutomations
     state.statusAutomationMap = new Map()
     statusAutomations.forEach(statusAutomation => {
@@ -103,7 +103,7 @@ const mutations = {
     })
   },
 
-  [EDIT_STATUS_AUTOMATION_END] (state, newAutomation) {
+  [EDIT_STATUS_AUTOMATION_END](state, newAutomation) {
     const automation = state.statusAutomationMap.get(newAutomation.id)
     if (automation && automation.id) {
       Object.assign(automation, newAutomation)
@@ -113,7 +113,7 @@ const mutations = {
     state.statusAutomationMap.set(newAutomation.id, newAutomation)
   },
 
-  [DELETE_STATUS_AUTOMATION_END] (state, statusAutomationToDelete) {
+  [DELETE_STATUS_AUTOMATION_END](state, statusAutomationToDelete) {
     state.statusAutomations = removeModelFromList(
       state.statusAutomations,
       statusAutomationToDelete
@@ -121,7 +121,7 @@ const mutations = {
     state.statusAutomationMap.delete(statusAutomationToDelete.id)
   },
 
-  [RESET_ALL] (state) {
+  [RESET_ALL](state) {
     Object.assign(state, { ...initialState })
   }
 }

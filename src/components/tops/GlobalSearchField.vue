@@ -1,128 +1,108 @@
 <template>
-<div
-  :class="{
-    'global-search-field': true,
-    'global-search-field-open': isSearchActive
-  }"
->
-  <span class="search-icon">
-    <search-icon width="20" />
-  </span>
-  <input
-    ref="global-search-field"
-    class="input"
-    placeholder="ctrl+alt+f"
-    @focus="isSearchActive = true"
-    @blur="onBlur"
-    @keyup.enter="onElementSelected"
-    v-model="searchQuery"
-  />
   <div
-    class="search-results"
-    :style="{
-      'min-height': (nbResults * 60) + 'px'
+    :class="{
+      'global-search-field': true,
+      'global-search-field-open': isSearchActive
     }"
-    v-if="isSearchActive"
   >
+    <span class="search-icon">
+      <search-icon width="20" />
+    </span>
+    <input
+      ref="global-search-field"
+      class="input"
+      placeholder="ctrl+alt+f"
+      @focus="isSearchActive = true"
+      @blur="onBlur"
+      @keyup.enter="onElementSelected"
+      v-model="searchQuery"
+    />
     <div
-      class="result-line"
-      v-if="searchQuery.length < 3"
-    >
-      {{ $t('main.search.type') }}
-    </div>
-    <div
-      class="search-loader"
+      class="search-results"
       :style="{
-        'min-height': (nbResults * 60) + 'px'
+        'min-height': nbResults * 60 + 'px'
       }"
-      v-else-if="isLoading"
+      v-if="isSearchActive"
     >
-      <div><spinner /></div>
-    </div>
-    <div
-      v-else-if="nbResults > 0"
-    >
+      <div class="result-line" v-if="searchQuery.length < 3">
+        {{ $t('main.search.type') }}
+      </div>
       <div
-        :key="asset.id"
-        :class="{
-          'result-line': true,
-          'selected-result': selectedIndex === index
+        class="search-loader"
+        :style="{
+          'min-height': nbResults * 60 + 'px'
         }"
-        @click="onElementSelected"
-        v-for="(asset, index) in assets"
+        v-else-if="isLoading"
       >
-        <router-link
-          :id="'result-link-' + index"
-          :to="entityPath(asset)"
+        <div><spinner /></div>
+      </div>
+      <div v-else-if="nbResults > 0">
+        <div
+          :key="asset.id"
+          :class="{
+            'result-line': true,
+            'selected-result': selectedIndex === index
+          }"
+          @click="onElementSelected"
+          v-for="(asset, index) in assets"
         >
-          <div
-            class="flexrow"
-            @mouseover="selectedIndex = index"
+          <router-link :id="'result-link-' + index" :to="entityPath(asset)">
+            <div class="flexrow" @mouseover="selectedIndex = index">
+              <div class="flexrow-item">
+                <entity-thumbnail
+                  style="margin-top: 5px"
+                  :empty-height="40"
+                  :empty-width="60"
+                  :height="40"
+                  :width="60"
+                  :entity="asset"
+                  :with-link="false"
+                />
+              </div>
+              <div class="flexrow-item">
+                <div class="production-name">
+                  {{ asset.project_name }}
+                </div>
+                <div class="asset-type-name">
+                  {{ asset.asset_type_name }} / {{ asset.name }}
+                </div>
+              </div>
+            </div>
+          </router-link>
+        </div>
+        <div
+          :key="person.id"
+          :class="{
+            'result-line': true,
+            'selected-result': selectedIndex === index + assets.length
+          }"
+          @click="onElementSelected"
+          v-for="(person, index) in persons"
+        >
+          <router-link
+            :id="'result-link-' + (index + assets.length)"
+            :to="personPath(person)"
           >
             <div
-              class="flexrow-item"
+              class="flexrow"
+              @mouseover="selectedIndex = index + assets.length"
             >
-              <entity-thumbnail
-                style="margin-top: 5px;"
-                :empty-height="40"
-                :empty-width="60"
-                :height="40"
-                :width="60"
-                :entity="asset"
-                :with-link="false"
+              <people-avatar
+                class="flexrow-item"
+                :is-link="false"
+                :person="person"
               />
+              <people-name class="flexrow-item" :person="person" />
             </div>
-            <div
-              class="flexrow-item"
-            >
-              <div class="production-name">
-                {{ asset.project_name }}
-              </div>
-              <div class="asset-type-name">
-                {{ asset.asset_type_name }} / {{ asset.name }}
-              </div>
-            </div>
-          </div>
-        </router-link>
+          </router-link>
+        </div>
       </div>
-      <div
-        :key="person.id"
-        :class="{
-          'result-line': true,
-          'selected-result': selectedIndex === index + assets.length
-        }"
-        @click="onElementSelected"
-        v-for="(person, index) in persons"
-      >
-        <router-link
-          :id="'result-link-' + (index + assets.length)"
-          :to="personPath(person)"
-        >
-          <div
-            class="flexrow"
-            @mouseover="selectedIndex = index + assets.length"
-          >
-            <people-avatar
-              class="flexrow-item"
-              :is-link="false"
-              :person="person"
-            />
-            <people-name
-              class="flexrow-item"
-              :person="person"
-            />
-          </div>
-        </router-link>
+
+      <div class="result-line" v-else>
+        {{ $t('main.search.no_result') }}
       </div>
     </div>
-
-    <div class="result-line" v-else>
-      {{ $t('main.search.no_result') }}
-    </div>
-
   </div>
-</div>
-
 </template>
 
 <script>
@@ -148,7 +128,7 @@ export default {
     Spinner
   },
 
-  data () {
+  data() {
     return {
       isLoading: false,
       isSearchActive: false,
@@ -159,10 +139,9 @@ export default {
     }
   },
 
-  props: {
-  },
+  props: {},
 
-  mounted () {
+  mounted() {
     window.addEventListener('keydown', event => {
       if (event.ctrlKey && event.altKey && event.keyCode === 70) {
         if (this.$refs['global-search-field']) {
@@ -177,66 +156,55 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'productionMap'
-    ]),
+    ...mapGetters(['currentEpisode', 'currentProduction', 'productionMap']),
 
-    entityPath () {
+    entityPath() {
       const section = 'asset'
-      return (entity) => {
+      return entity => {
         const project = this.productionMap.get(entity.project_id)
         const isTVShow = project.production_type === 'tvshow'
         let episodeId = null
         if (isTVShow) episodeId = entity.episode_id || 'main'
-        return getEntityPath(
-          entity.id,
-          entity.project_id,
-          section,
-          episodeId
-        )
+        return getEntityPath(entity.id, entity.project_id, section, episodeId)
       }
     },
 
-    personPath () {
-      return (person) => {
+    personPath() {
+      return person => {
         return getPersonPath(person.id)
       }
     },
 
-    nbResults () {
+    nbResults() {
       const length = this.assets.length + this.persons.length
       return length
     }
   },
 
   methods: {
-    ...mapActions([
-      'searchData'
-    ]),
+    ...mapActions(['searchData']),
 
-    selectPrevious () {
+    selectPrevious() {
       this.selectedIndex--
       if (this.selectedIndex < 0) {
         this.selectedIndex = this.nbResults - 1
       }
     },
 
-    selectNext () {
+    selectNext() {
       this.selectedIndex++
       if (this.selectedIndex >= this.nbResults) {
         this.selectedIndex = 0
       }
     },
 
-    onElementSelected () {
+    onElementSelected() {
       document.getElementById('result-link-' + this.selectedIndex).click()
       this.isSearchActive = false
       this.searchQuery = ''
     },
 
-    onBlur () {
+    onBlur() {
       setTimeout(() => {
         this.isSearchActive = false
       }, 100)
@@ -244,7 +212,7 @@ export default {
   },
 
   watch: {
-    searchQuery () {
+    searchQuery() {
       if (this.searchQuery.length > 0) {
         this.isSearchActive = true
       }
@@ -267,7 +235,7 @@ export default {
       }
     },
 
-    isSearchActive () {
+    isSearchActive() {
       if (this.isSearchActive) {
         this.selectedIndex = 0
       }
@@ -277,7 +245,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .result-line {
   align-items: center;
   border: 1px solid transparent;
@@ -289,7 +256,7 @@ export default {
 
   a {
     color: var(--text);
-    padding: 0.5em ;
+    padding: 0.5em;
     padding-right: 0.8em;
     display: inline-block;
     width: 100%;

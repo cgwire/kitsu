@@ -1,197 +1,195 @@
 <template>
-<div class="columns fixed-page">
-  <action-panel />
+  <div class="columns fixed-page">
+    <action-panel />
 
-  <div class="column main-column">
-    <div class="sequences page">
-      <div class="sequence-list-header page-header">
-        <div class="flexrow">
-          <search-field
-            ref="sequence-search-field"
-            :can-save="true"
-            :active="isSearchActive"
-            @change="onSearchChange"
-            @enter="saveSearchQuery"
-            @save="saveSearchQuery"
-            placeholder="ex: e01 sequence=wip"
-          />
-          <button-simple
-            class="flexrow-item"
-            :title="$t('entities.build_filter.title')"
-            icon="funnel"
-            @click="() => modals.isBuildFilterDisplayed = true"
-          />
-          <div class="filler"></div>
-          <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
-            <show-assignations-button class="flexrow-item" />
-            <show-infos-button class="flexrow-item" />
-            <big-thumbnails-button class="flexrow-item" />
-          </div>
-          <div class="flexrow" v-if="isCurrentUserManager">
+    <div class="column main-column">
+      <div class="sequences page">
+        <div class="sequence-list-header page-header">
+          <div class="flexrow">
+            <search-field
+              ref="sequence-search-field"
+              :can-save="true"
+              :active="isSearchActive"
+              @change="onSearchChange"
+              @enter="saveSearchQuery"
+              @save="saveSearchQuery"
+              placeholder="ex: e01 sequence=wip"
+            />
             <button-simple
               class="flexrow-item"
-              :text="$t('sequences.new_sequence')"
-              icon="plus"
-              @click="showNewModal"
+              :title="$t('entities.build_filter.title')"
+              icon="funnel"
+              @click="() => (modals.isBuildFilterDisplayed = true)"
+            />
+            <div class="filler"></div>
+            <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
+              <show-assignations-button class="flexrow-item" />
+              <show-infos-button class="flexrow-item" />
+              <big-thumbnails-button class="flexrow-item" />
+            </div>
+            <div class="flexrow" v-if="isCurrentUserManager">
+              <button-simple
+                class="flexrow-item"
+                :text="$t('sequences.new_sequence')"
+                icon="plus"
+                @click="showNewModal"
+              />
+            </div>
+          </div>
+
+          <div class="query-list mt1">
+            <search-query-list
+              :queries="sequenceSearchQueries"
+              @change-search="changeSearch"
+              @remove-search="removeSearchQuery"
+              v-if="!isSequencesLoading && !initialLoading"
             />
           </div>
         </div>
 
-        <div class="query-list mt1">
-          <search-query-list
-            :queries="sequenceSearchQueries"
-            @change-search="changeSearch"
-            @remove-search="removeSearchQuery"
-            v-if="!isSequencesLoading && !initialLoading"
-          />
-        </div>
+        <sorting-info
+          :label="$t('main.sorted_by')"
+          :sorting="sequenceSorting"
+          @clear-sorting="onChangeSortClicked(null)"
+          v-if="sequenceSorting && sequenceSorting.length > 0"
+        />
+
+        <sequence-list
+          ref="sequence-list"
+          :displayed-sequences="displayedSequences"
+          :is-loading="isSequencesLoading || initialLoading"
+          :is-error="isSequencesLoadingError"
+          :validation-columns="sequenceValidationColumns"
+          :department-filter="departmentFilter"
+          @add-metadata="onAddMetadataClicked"
+          @change-sort="onChangeSortClicked"
+          @create-tasks="showCreateTasksModal"
+          @delete-all-tasks="onDeleteAllTasksClicked"
+          @delete-clicked="onDeleteClicked"
+          @delete-metadata="onDeleteMetadataClicked"
+          @edit-clicked="onEditClicked"
+          @edit-metadata="onEditMetadataClicked"
+          @field-changed="onFieldChanged"
+          @metadata-changed="onMetadataChanged"
+          @scroll="saveScrollPosition"
+        />
       </div>
-
-      <sorting-info
-        :label="$t('main.sorted_by')"
-        :sorting="sequenceSorting"
-        @clear-sorting="onChangeSortClicked(null)"
-        v-if="sequenceSorting && sequenceSorting.length > 0"
-      />
-
-      <sequence-list
-        ref="sequence-list"
-        :displayed-sequences="displayedSequences"
-        :is-loading="isSequencesLoading || initialLoading"
-        :is-error="isSequencesLoadingError"
-        :validation-columns="sequenceValidationColumns"
-        :department-filter="departmentFilter"
-        @add-metadata="onAddMetadataClicked"
-        @change-sort="onChangeSortClicked"
-        @create-tasks="showCreateTasksModal"
-        @delete-all-tasks="onDeleteAllTasksClicked"
-        @delete-clicked="onDeleteClicked"
-        @delete-metadata="onDeleteMetadataClicked"
-        @edit-clicked="onEditClicked"
-        @edit-metadata="onEditMetadataClicked"
-        @field-changed="onFieldChanged"
-        @metadata-changed="onMetadataChanged"
-        @scroll="saveScrollPosition"
-      />
     </div>
-  </div>
 
-  <div
-    id="side-column"
-    class="column side-column"
-    v-show="nbSelectedTasks === 1"
-  >
-    <task-info
-      :task="selectedTasks.values().next().value"
+    <div
+      id="side-column"
+      class="column side-column"
+      v-show="nbSelectedTasks === 1"
+    >
+      <task-info :task="selectedTasks.values().next().value" />
+    </div>
+
+    <edit-sequence-modal
+      :active="modals.isNewDisplayed"
+      :is-loading="loading.sequence"
+      :is-error="errors.sequence"
+      :sequence-to-sequence="sequenceToEdit"
+      @cancel="modals.isNewDisplayed = false"
+      @confirm="confirmEditSequence"
+    />
+
+    <delete-modal
+      ref="delete-sequence-modal"
+      :active="modals.isDeleteDisplayed"
+      :is-loading="loading.del"
+      :is-error="errors.del"
+      :text="deleteText()"
+      :error-text="$t('sequences.delete_error')"
+      @cancel="modals.isDeleteDisplayed = false"
+      @confirm="confirmDeleteSequence"
+    />
+
+    <delete-modal
+      ref="delete-metadata-modal"
+      :active="modals.isDeleteMetadataDisplayed"
+      :is-loading="loading.deleteMetadata"
+      :is-error="errors.deleteMetadata"
+      :text="$t('productions.metadata.delete_text')"
+      :error-text="$t('productions.metadata.delete_error')"
+      @cancel="modals.isDeleteMetadataDisplayed = false"
+      @confirm="confirmDeleteMetadata"
+    />
+
+    <hard-delete-modal
+      ref="delete-all-tasks-modal"
+      :active="modals.isDeleteAllTasksDisplayed"
+      :is-loading="loading.deleteAllTasks"
+      :is-error="errors.deleteAllTasks"
+      :text="deleteAllTasksText()"
+      :error-text="$t('tasks.delete_all_error')"
+      :lock-text="deleteAllTasksLockText"
+      :selection-option="true"
+      @cancel="modals.isDeleteAllTasksDisplayed = false"
+      @confirm="confirmDeleteAllTasks"
+    />
+
+    <create-tasks-modal
+      :active="modals.isCreateTasksDisplayed"
+      :is-loading="loading.creatingTasks"
+      :is-loading-stay="loading.creatingTasksStay"
+      :is-error="errors.creatingTasks"
+      :title="$t('tasks.create_tasks_sequence')"
+      :text="$t('tasks.create_tasks_sequence_explaination')"
+      :error-text="$t('tasks.create_tasks_sequence_failed')"
+      @cancel="hideCreateTasksModal"
+      @confirm="confirmCreateTasks"
+      @confirm-and-stay="confirmCreateTasksAndStay"
+    />
+
+    <add-metadata-modal
+      :active="modals.isAddMetadataDisplayed"
+      :is-loading="loading.addMetadata"
+      :is-loading-stay="loading.addMetadata"
+      :is-error="errors.addMetadata"
+      :descriptor-to-edit="descriptorToEdit"
+      entity-type="Sequence"
+      @cancel="closeMetadataModal"
+      @confirm="confirmAddMetadata"
+    />
+
+    <add-thumbnails-modal
+      ref="add-thumbnails-modal"
+      parent="sequences"
+      :active="modals.isAddThumbnailsDisplayed"
+      :is-loading="loading.addThumbnails"
+      :is-error="errors.addThumbnails"
+      @cancel="hideAddThumbnailsModal"
+      @confirm="confirmAddThumbnails"
+    />
+
+    <build-filter-modal
+      ref="build-filter-modal"
+      :active="modals.isBuildFilterDisplayed"
+      entity-type="sequence"
+      @cancel="modals.isBuildFilterDisplayed = false"
+      @confirm="confirmBuildFilter"
+    />
+
+    <edit-sequence-modal
+      :active="modals.isNewDisplayed"
+      :is-loading="loading.edit"
+      :is-error="errors.edit"
+      :sequence-to-edit="sequenceToEdit"
+      @cancel="modals.isNewDisplayed = false"
+      @confirm="confirmEditSequence"
+    />
+
+    <hard-delete-modal
+      :active="modals.isDeleteDisplayed"
+      :is-loading="loading.del"
+      :is-error="errors.del"
+      :text="deleteText()"
+      :error-text="$t('sequences.delete_error')"
+      :lock-text="sequenceToDelete ? sequenceToDelete.name : ''"
+      @cancel="modals.isDeleteDisplayed = false"
+      @confirm="confirmDeleteSequence"
     />
   </div>
-
-  <edit-sequence-modal
-    :active="modals.isNewDisplayed"
-    :is-loading="loading.sequence"
-    :is-error="errors.sequence"
-    :sequence-to-sequence="sequenceToEdit"
-    @cancel="modals.isNewDisplayed = false"
-    @confirm="confirmEditSequence"
-  />
-
-  <delete-modal
-    ref="delete-sequence-modal"
-    :active="modals.isDeleteDisplayed"
-    :is-loading="loading.del"
-    :is-error="errors.del"
-    :text="deleteText()"
-    :error-text="$t('sequences.delete_error')"
-    @cancel="modals.isDeleteDisplayed = false"
-    @confirm="confirmDeleteSequence"
-  />
-
-  <delete-modal
-    ref="delete-metadata-modal"
-    :active="modals.isDeleteMetadataDisplayed"
-    :is-loading="loading.deleteMetadata"
-    :is-error="errors.deleteMetadata"
-    :text="$t('productions.metadata.delete_text')"
-    :error-text="$t('productions.metadata.delete_error')"
-    @cancel="modals.isDeleteMetadataDisplayed = false"
-    @confirm="confirmDeleteMetadata"
-  />
-
-  <hard-delete-modal
-    ref="delete-all-tasks-modal"
-    :active="modals.isDeleteAllTasksDisplayed"
-    :is-loading="loading.deleteAllTasks"
-    :is-error="errors.deleteAllTasks"
-    :text="deleteAllTasksText()"
-    :error-text="$t('tasks.delete_all_error')"
-    :lock-text="deleteAllTasksLockText"
-    :selection-option="true"
-    @cancel="modals.isDeleteAllTasksDisplayed = false"
-    @confirm="confirmDeleteAllTasks"
-  />
-
-  <create-tasks-modal
-    :active="modals.isCreateTasksDisplayed"
-    :is-loading="loading.creatingTasks"
-    :is-loading-stay="loading.creatingTasksStay"
-    :is-error="errors.creatingTasks"
-    :title="$t('tasks.create_tasks_sequence')"
-    :text="$t('tasks.create_tasks_sequence_explaination')"
-    :error-text="$t('tasks.create_tasks_sequence_failed')"
-    @cancel="hideCreateTasksModal"
-    @confirm="confirmCreateTasks"
-    @confirm-and-stay="confirmCreateTasksAndStay"
-  />
-
-  <add-metadata-modal
-    :active="modals.isAddMetadataDisplayed"
-    :is-loading="loading.addMetadata"
-    :is-loading-stay="loading.addMetadata"
-    :is-error="errors.addMetadata"
-    :descriptor-to-edit="descriptorToEdit"
-    entity-type="Sequence"
-    @cancel="closeMetadataModal"
-    @confirm="confirmAddMetadata"
-  />
-
-  <add-thumbnails-modal
-    ref="add-thumbnails-modal"
-    parent="sequences"
-    :active="modals.isAddThumbnailsDisplayed"
-    :is-loading="loading.addThumbnails"
-    :is-error="errors.addThumbnails"
-    @cancel="hideAddThumbnailsModal"
-    @confirm="confirmAddThumbnails"
-  />
-
-  <build-filter-modal
-    ref="build-filter-modal"
-    :active="modals.isBuildFilterDisplayed"
-    entity-type="sequence"
-    @cancel="modals.isBuildFilterDisplayed = false"
-    @confirm="confirmBuildFilter"
-  />
-
-  <edit-sequence-modal
-    :active="modals.isNewDisplayed"
-    :is-loading="loading.edit"
-    :is-error="errors.edit"
-    :sequence-to-edit="sequenceToEdit"
-    @cancel="modals.isNewDisplayed = false"
-    @confirm="confirmEditSequence"
-  />
-
-  <hard-delete-modal
-    :active="modals.isDeleteDisplayed"
-    :is-loading="loading.del"
-    :is-error="errors.del"
-    :text="deleteText()"
-    :error-text="$t('sequences.delete_error')"
-    :lock-text="sequenceToDelete ? sequenceToDelete.name : ''"
-    @cancel="modals.isDeleteDisplayed = false"
-    @confirm="confirmDeleteSequence"
-  />
-</div>
 </template>
 
 <script>
@@ -246,7 +244,7 @@ export default {
     TaskInfo
   },
 
-  data () {
+  data() {
     return {
       type: 'sequence',
       deleteAllTasksLockText: null,
@@ -263,9 +261,7 @@ export default {
       historyEdit: {},
       initialLoading: true,
       isSearchActive: false,
-      optionalColumns: [
-        'Description'
-      ],
+      optionalColumns: ['Description'],
       pageName: 'Sequences',
       parsedCSV: [],
       selectedDepartment: 'ALL',
@@ -305,15 +301,15 @@ export default {
     }
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     this.clearSelectedSequences()
   },
 
-  created () {
+  created() {
     this.setLastProductionScreen('sequences')
   },
 
-  mounted () {
+  mounted() {
     let searchQuery = ''
     if (this.sequenceSearchText && this.sequenceSearchText.length > 0) {
       this.searchField.setValue(this.sequenceSearchText)
@@ -398,7 +394,7 @@ export default {
       'productionSequenceTaskTypes'
     ]),
 
-    renderColumns () {
+    renderColumns() {
       var collection = [...this.dataMatchers, ...this.optionalColumns]
 
       this.productionSequenceTaskTypes.forEach(item => {
@@ -408,7 +404,7 @@ export default {
       return collection
     },
 
-    filteredSequences () {
+    filteredSequences() {
       const sequences = {}
       this.displayedSequences.forEach(sequence => {
         const sequenceKey = sequence.name
@@ -417,7 +413,7 @@ export default {
       return sequences
     },
 
-    metadataDescriptors () {
+    metadataDescriptors() {
       return this.sequenceMetadataDescriptors
     }
   },
@@ -446,7 +442,7 @@ export default {
       'uploadSequenceFile'
     ]),
 
-    confirmAddMetadata (form) {
+    confirmAddMetadata(form) {
       this.loading.addMetadata = true
       form.entity_type = 'Sequence'
       this.addMetadataDescriptor(form)
@@ -454,19 +450,19 @@ export default {
           this.loading.addMetadata = false
           this.modals.isAddMetadataDisplayed = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.addMetadata = false
           this.errors.addMetadata = true
         })
     },
 
-    showNewModal () {
+    showNewModal() {
       this.sequenceToEdit = {}
       this.modals.isNewDisplayed = true
     },
 
-    confirmDeleteSequence () {
+    confirmDeleteSequence() {
       this.loading.del = true
       this.errors.del = false
       this.deleteSequence(this.sequenceToDelete)
@@ -481,7 +477,7 @@ export default {
         })
     },
 
-    runTasksCreation (form, selectionOnly) {
+    runTasksCreation(form, selectionOnly) {
       this.errors.creatingTasks = false
       return this.createTasks({
         type: 'sequences',
@@ -491,15 +487,15 @@ export default {
       })
     },
 
-    reset () {
+    reset() {
       this.initialLoading = false
-      this.loadSequencesWithTasks((err) => {
+      this.loadSequencesWithTasks(err => {
         if (err) console.error(err)
         this.initialLoading = false
       })
     },
 
-    resetEditModal () {
+    resetEditModal() {
       const form = { name: '' }
       if (this.openProductions.length > 0) {
         form.production_id = this.openProductions[0].id
@@ -507,60 +503,56 @@ export default {
       this.sequenceToEdit = form
     },
 
-    applySearch (searchQuery) {
+    applySearch(searchQuery) {
       this.setSequenceSearch(searchQuery)
       this.setSearchInUrl()
       this.isSearchActive = true
     },
 
-    saveSearchQuery (searchQuery) {
-      this.saveSequenceSearch(searchQuery)
-        .catch(console.error)
+    saveSearchQuery(searchQuery) {
+      this.saveSequenceSearch(searchQuery).catch(console.error)
     },
 
-    removeSearchQuery (searchQuery) {
-      this.removeSequenceSearch(searchQuery)
-        .catch(console.error)
+    removeSearchQuery(searchQuery) {
+      this.removeSequenceSearch(searchQuery).catch(console.error)
     },
 
-    onExportClick () {
-      this.getSequencesCsvLines()
-        .then(sequenceLines => {
-          const nameData = [
-            moment().format('YYYY-MM-DD'),
-            'kitsu',
-            this.currentProduction.name,
-            this.$t('sequences.title')
-          ]
-          const name = stringHelpers.slugify(nameData.join('_'))
-          const headers = [
-            this.$t('sequences.fields.name'),
-            this.$t('sequences.fields.description')
-          ]
-          if (this.currentSequence) {
-            headers.splice(0, 0, 'Sequence')
-          }
-          sortByName([...this.currentProduction.descriptors])
-            .filter(d => d.entity_type === 'Sequence')
-            .forEach((descriptor) => {
-              headers.push(descriptor.name)
-            })
-          if (this.isSequenceTime) {
-            headers.push(this.$t('sequences.fields.time_spent'))
-          }
-          if (this.isSequenceEstimation) {
-            headers.push(this.$t('main.estimation_short'))
-          }
-          this.sequenceValidationColumns
-            .forEach(taskTypeId => {
-              headers.push(this.taskTypeMap.get(taskTypeId).name)
-              headers.push('Assignations')
-            })
-          csv.buildCsvFile(name, [headers].concat(sequenceLines))
+    onExportClick() {
+      this.getSequencesCsvLines().then(sequenceLines => {
+        const nameData = [
+          moment().format('YYYY-MM-DD'),
+          'kitsu',
+          this.currentProduction.name,
+          this.$t('sequences.title')
+        ]
+        const name = stringHelpers.slugify(nameData.join('_'))
+        const headers = [
+          this.$t('sequences.fields.name'),
+          this.$t('sequences.fields.description')
+        ]
+        if (this.currentSequence) {
+          headers.splice(0, 0, 'Sequence')
+        }
+        sortByName([...this.currentProduction.descriptors])
+          .filter(d => d.entity_type === 'Sequence')
+          .forEach(descriptor => {
+            headers.push(descriptor.name)
+          })
+        if (this.isSequenceTime) {
+          headers.push(this.$t('sequences.fields.time_spent'))
+        }
+        if (this.isSequenceEstimation) {
+          headers.push(this.$t('main.estimation_short'))
+        }
+        this.sequenceValidationColumns.forEach(taskTypeId => {
+          headers.push(this.taskTypeMap.get(taskTypeId).name)
+          headers.push('Assignations')
         })
+        csv.buildCsvFile(name, [headers].concat(sequenceLines))
+      })
     },
 
-    onFieldChanged ({ entry, fieldName, value }) {
+    onFieldChanged({ entry, fieldName, value }) {
       const data = {
         id: entry.id,
         description: entry.description
@@ -569,7 +561,7 @@ export default {
       this.editSequence(data)
     },
 
-    onMetadataChanged ({ entry, descriptor, value }) {
+    onMetadataChanged({ entry, descriptor, value }) {
       const metadata = {}
       metadata[descriptor.field_name] = value
       const data = {
@@ -579,17 +571,17 @@ export default {
       this.editSequence(data)
     },
 
-    onEditClicked (sequence) {
+    onEditClicked(sequence) {
       this.sequenceToEdit = sequence
       this.modals.isNewDisplayed = true
     },
 
-    onDeleteClicked (sequence) {
+    onDeleteClicked(sequence) {
       this.sequenceToDelete = sequence
       this.modals.isDeleteDisplayed = true
     },
 
-    confirmEditSequence (form) {
+    confirmEditSequence(form) {
       this.loading.edit = true
       this.errors.edit = false
 
@@ -620,7 +612,7 @@ export default {
       }
     },
 
-    deleteText () {
+    deleteText() {
       const sequence = this.sequenceToDelete
       if (sequence) {
         return this.$t('sequences.delete_text', { name: sequence.name })
@@ -631,7 +623,7 @@ export default {
   },
 
   watch: {
-    $route () {
+    $route() {
       if (!this.$route.query) return
       const search = this.$route.query.search
       const actualSearch = this.$refs['sequence-search-field'].getValue()
@@ -641,27 +633,24 @@ export default {
       }
     },
 
-    currentProduction () {
+    currentProduction() {
       this.$refs['sequence-search-field'].setValue('')
       this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
       this.initialLoading = false
       this.reset()
     },
 
-    currentEpisode () {
+    currentEpisode() {
       this.$refs['sequence-search-field'].setValue('')
       this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
       this.initialLoading = false
       this.reset()
     },
 
-    isSequencesLoading () {
+    isSequencesLoading() {
       if (!this.isSequencesLoading) {
         let searchQuery = ''
-        if (
-          this.$route.query.search &&
-          this.$route.query.search.length > 0
-        ) {
+        if (this.$route.query.search && this.$route.query.search.length > 0) {
           searchQuery = '' + this.$route.query.search
         }
         this.initialLoading = false
@@ -678,9 +667,11 @@ export default {
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
-      title: `${this.currentProduction.name} ${this.$t('sequences.title')} - Kitsu`
+      title: `${this.currentProduction.name} ${this.$t(
+        'sequences.title'
+      )} - Kitsu`
     }
   }
 }

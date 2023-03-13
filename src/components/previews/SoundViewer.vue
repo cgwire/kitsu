@@ -1,28 +1,19 @@
 <template>
-<div
-  id="sound-container"
-  :style="{
-    height: defaultHeight + 'px',
-    width: '100%'
-  }"
->
   <div
-    class="loading"
-    v-show="isLoading"
+    id="sound-container"
+    :style="{
+      height: defaultHeight + 'px',
+      width: '100%'
+    }"
   >
-    <spinner />
+    <div class="loading" v-show="isLoading">
+      <spinner />
+    </div>
+    <div class="file-name" v-show="!isLoading">
+      {{ fileName }}
+    </div>
+    <div id="waveform"></div>
   </div>
-  <div
-    class="file-name"
-    v-show="!isLoading"
-  >
-    {{ fileName }}
-  </div>
-  <div
-    id="waveform"
-  >
-  </div>
-</div>
 </template>
 
 <script>
@@ -36,7 +27,7 @@ export default {
     Spinner
   },
 
-  data () {
+  data() {
     return {
       isLoading: false,
       wavesurfer: null
@@ -62,7 +53,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.isLoading = true
     this.wavesurfer = WaveSurfer.create({
       container: '#waveform',
@@ -84,39 +75,35 @@ export default {
   },
 
   computed: {
-    container () {
+    container() {
       return this.$refs.container
     }
   },
 
   methods: {
-    play () {
+    play() {
       this.wavesurfer.play()
     },
 
-    pause () {
+    pause() {
       this.wavesurfer.pause()
     },
 
-    redraw () {
-    }
+    redraw() {}
   },
 
   watch: {
-    defaultHeight () {
-    },
+    defaultHeight() {},
 
-    previewUrl () {
+    previewUrl() {
       if (this.previewUrl && this.previewUrl.length > 0) {
         this.isLoading = true
         this.wavesurfer.load(this.previewUrl)
       }
     },
 
-    light () {
-    }
+    light() {}
   }
-
 }
 </script>
 

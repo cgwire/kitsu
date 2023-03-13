@@ -1,15 +1,15 @@
 import client from '@/store/api/client'
 
 export default {
-  getAssetTypes (callback) {
+  getAssetTypes(callback) {
     client.get('/api/data/asset-types', callback)
   },
 
-  getAssetType (assetTypeId, callback) {
+  getAssetType(assetTypeId, callback) {
     client.get(`/api/data/entity-types/${assetTypeId}`, callback)
   },
 
-  newAssetType (assetType) {
+  newAssetType(assetType) {
     const data = {
       name: assetType.name,
       task_types: assetType.task_types
@@ -17,7 +17,7 @@ export default {
     return client.ppost('/api/data/entity-types', data)
   },
 
-  updateAssetType (assetType) {
+  updateAssetType(assetType) {
     const data = {
       name: assetType.name,
       task_types: assetType.task_types
@@ -25,7 +25,7 @@ export default {
     return client.pput(`/api/data/entity-types/${assetType.id}`, data)
   },
 
-  deleteAssetType (assetType) {
+  deleteAssetType(assetType) {
     return client.pdel(`/api/data/entity-types/${assetType.id}`)
   }
 }

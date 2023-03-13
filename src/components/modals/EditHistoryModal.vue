@@ -1,67 +1,62 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
-    <div class="box content">
-      <h1 class="title">
-        {{ $t('edits.history') }}
-      </h1>
+    <div class="modal-content">
+      <div class="box content">
+        <h1 class="title">
+          {{ $t('edits.history') }}
+        </h1>
 
-      <table class="table" ref="headerWrapper">
-        <thead class="table-header">
-          <tr>
-            <th class="date">{{ $t('main.date') }}</th>
-            <th class="name">{{ $t('edits.fields.name') }}</th>
-            <th class="person table-filler">{{ $t('edits.fields.person') }}</th>
-          </tr>
-        </thead>
-      </table>
-
-      <div
-        class="table-body"
-        v-if="!isLoading"
-      >
-        <table class="table">
-          <tbody class="table-body">
-            <tr
-              class="edit-version"
-              :key="version.id"
-              v-for="version in versions"
-            >
-              <td class="date">
-                {{ formatDate(version.created_at) }}
-              </td>
-              <td class="name">
-                {{ version.name }}
-              </td>
-              <td class="person table-filler">
-                {{ getPersonFullName(version.person_id) }}
-              </td>
+        <table class="table" ref="headerWrapper">
+          <thead class="table-header">
+            <tr>
+              <th class="date">{{ $t('main.date') }}</th>
+              <th class="name">{{ $t('edits.fields.name') }}</th>
+              <th class="person table-filler">
+                {{ $t('edits.fields.person') }}
+              </th>
             </tr>
-          </tbody>
+          </thead>
         </table>
-      </div>
 
-      <table-info
-        :is-loading="isLoading"
-        :is-error="isError"
-      />
+        <div class="table-body" v-if="!isLoading">
+          <table class="table">
+            <tbody class="table-body">
+              <tr
+                class="edit-version"
+                :key="version.id"
+                v-for="version in versions"
+              >
+                <td class="date">
+                  {{ formatDate(version.created_at) }}
+                </td>
+                <td class="name">
+                  {{ version.name }}
+                </td>
+                <td class="person table-filler">
+                  {{ getPersonFullName(version.person_id) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      <div class="has-text-right modal-footer">
-        <button
-          @click="$emit('cancel')"
-          class="button is-link"
-        >
-          {{ $t('main.cancel') }}
-        </button>
+        <table-info :is-loading="isLoading" :is-error="isError" />
+
+        <div class="has-text-right modal-footer">
+          <button @click="$emit('cancel')" class="button is-link">
+            {{ $t('main.cancel') }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -90,7 +85,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       isError: false,
       isLoading: false,
@@ -98,31 +93,27 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.reset()
   },
 
   computed: {
-    ...mapGetters([
-      'personMap'
-    ])
+    ...mapGetters(['personMap'])
   },
 
   methods: {
-    ...mapActions([
-      'loadEditHistory'
-    ]),
+    ...mapActions(['loadEditHistory']),
 
-    formatDate (dateString) {
+    formatDate(dateString) {
       return formatDate(dateString)
     },
 
-    getPersonFullName (personId) {
+    getPersonFullName(personId) {
       const person = this.personMap.get(personId)
       return person ? person.full_name : ''
     },
 
-    loadData () {
+    loadData() {
       this.isError = false
       this.isLoading = true
       return this.loadEditHistory(this.edit.id)
@@ -137,7 +128,7 @@ export default {
         })
     },
 
-    reset () {
+    reset() {
       this.versions = []
       this.isError = false
       this.isLoading = false
@@ -145,7 +136,7 @@ export default {
   },
 
   watch: {
-    active () {
+    active() {
       if (this.active) {
         this.reset()
         this.loadData()
@@ -165,12 +156,12 @@ export default {
 
   .table tr:nth-child(odd) {
     color: $white-grey;
-    background: #36393F;
+    background: #36393f;
   }
 
   .table tr:nth-child(even) {
     color: $white-grey;
-    background: #46494F;
+    background: #46494f;
   }
 }
 

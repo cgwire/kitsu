@@ -24,8 +24,7 @@
         :options="countModeOptions"
         v-model="countMode"
       />
-      <span class="filler">
-      </span>
+      <span class="filler"> </span>
       <button-simple
         class="flexrow-item"
         icon="refresh"
@@ -61,7 +60,6 @@
       @field-changed="onFieldChanged"
       @scroll="saveScrollPosition"
     />
-
   </div>
 </template>
 
@@ -88,7 +86,7 @@ export default {
     SequenceStatsList
   },
 
-  data () {
+  data() {
     return {
       countMode: 'count',
       displayMode: 'pie',
@@ -127,7 +125,7 @@ export default {
     ])
   },
 
-  mounted () {
+  mounted() {
     this.loadShots(() => {
       this.initSequences()
         .then(() => {
@@ -153,7 +151,7 @@ export default {
       'showAssignations'
     ]),
 
-    reloadData () {
+    reloadData() {
       this.initialLoading = true
       this.loadShots(() => {
         this.initialLoading = false
@@ -161,13 +159,13 @@ export default {
       })
     },
 
-    setDefaultSearchText () {
+    setDefaultSearchText() {
       if (this.sequenceSearchText.length > 0) {
         this.$refs['sequence-search-field'].setValue(this.sequenceSearchText)
       }
     },
 
-    setDefaultListScrollPosition () {
+    setDefaultListScrollPosition() {
       if (this.$refs['sequence-list']) {
         this.$refs['sequence-list'].setScrollPosition(
           this.sequenceListScrollPosition
@@ -175,36 +173,36 @@ export default {
       }
     },
 
-    navigateToList () {
+    navigateToList() {
       this.$router.push(this.sequencesPath)
     },
 
-    onSearchChange (event) {
+    onSearchChange(event) {
       const searchQuery = this.$refs['sequence-search-field'].getValue()
       this.setSequenceStatsSearch(searchQuery)
     },
 
-    changeSearch (searchQuery) {
+    changeSearch(searchQuery) {
       this.$refs['sequence-search-field'].setValue(searchQuery.search_query)
-      this.$refs['sequence-search-field']
-        .$emit('change', searchQuery.search_query)
+      this.$refs['sequence-search-field'].$emit(
+        'change',
+        searchQuery.search_query
+      )
     },
 
-    saveSearchQuery (searchQuery) {
-      this.saveSequenceSearch(searchQuery)
-        .catch(console.error)
+    saveSearchQuery(searchQuery) {
+      this.saveSequenceSearch(searchQuery).catch(console.error)
     },
 
-    removeSearchQuery (searchQuery) {
-      this.removeSequenceSearch(searchQuery)
-        .catch(console.error)
+    removeSearchQuery(searchQuery) {
+      this.removeSequenceSearch(searchQuery).catch(console.error)
     },
 
-    saveScrollPosition (scrollPosition) {
+    saveScrollPosition(scrollPosition) {
       this.setSequenceListScrollPosition(scrollPosition)
     },
 
-    exportStatisticsToCsv () {
+    exportStatisticsToCsv() {
       const nameData = [
         moment().format('YYYYMMDD'),
         this.currentProduction.name,
@@ -225,7 +223,7 @@ export default {
       )
     },
 
-    onFieldChanged ({ entry, fieldName, value }) {
+    onFieldChanged({ entry, fieldName, value }) {
       const data = { id: entry.id }
       data[fieldName] = value
       this.editSequence(data)
@@ -233,7 +231,7 @@ export default {
   },
 
   watch: {
-    currentProduction () {
+    currentProduction() {
       this.$refs['sequence-search-field'].setValue('')
       this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
 
@@ -246,7 +244,7 @@ export default {
       }
     },
 
-    currentEpisode () {
+    currentEpisode() {
       if (this.isTVShow && this.currentEpisode) {
         this.loadShots(() => {
           this.initSequences()
@@ -259,26 +257,27 @@ export default {
       }
     },
 
-    searchSequenceFilters () {
+    searchSequenceFilters() {
       this.computeSequenceStats()
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     if (this.isTVShow) {
       return {
-        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
-               ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
-               ` | ${this.$t('sequences.title')} - Kitsu`
+        title:
+          `${this.currentProduction ? this.currentProduction.name : ''}` +
+          ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
+          ` | ${this.$t('sequences.title')} - Kitsu`
       }
     } else {
       return {
-        title: `${this.currentProduction ? this.currentProduction.name : ''}` +
-               ` ${this.$t('sequences.title')} - Kitsu`
+        title:
+          `${this.currentProduction ? this.currentProduction.name : ''}` +
+          ` ${this.$t('sequences.title')} - Kitsu`
       }
     }
   }
-
 }
 </script>
 

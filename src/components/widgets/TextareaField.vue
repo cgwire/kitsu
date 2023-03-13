@@ -1,20 +1,20 @@
 <template>
-<div class="field">
-  <label class="label" v-if="label">{{ label }}</label>
-  <p class="control">
-    <textarea
-      ref="input"
-      class="input"
-      :class="'input ' + inputClass"
-      :placeholder="placeholder"
-      :type="type"
-      :value="value"
-      @input="updateValue"
-      @keyup.enter="emitEnter"
-      @keyup="emitKeyup"
-    />
-  </p>
-</div>
+  <div class="field">
+    <label class="label" v-if="label">{{ label }}</label>
+    <p class="control">
+      <textarea
+        ref="input"
+        class="input"
+        :class="'input ' + inputClass"
+        :placeholder="placeholder"
+        :type="type"
+        :value="value"
+        @input="updateValue"
+        @keyup.enter="emitEnter"
+        @keyup="emitKeyup"
+      />
+    </p>
+  </div>
 </template>
 
 <script>
@@ -45,22 +45,20 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
   methods: {
-    ...mapActions([
-    ]),
-    emitEnter () {
+    ...mapActions([]),
+    emitEnter() {
       this.$emit('enter', this.$refs.input.value)
     },
-    updateValue () {
+    updateValue() {
       this.$emit('input', this.$refs.input.value)
     },
-    emitKeyup (event) {
+    emitKeyup(event) {
       this.$emit('keyup', event)
     },
-    focus () {
+    focus() {
       if (this.$refs.input) this.$refs.input.focus()
     }
   }

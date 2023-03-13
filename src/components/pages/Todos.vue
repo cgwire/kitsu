@@ -1,136 +1,133 @@
 <template>
-<div class="columns fixed-page">
-  <div class="column main-column">
-    <div class="todos page">
-      <div class="task-tabs tabs">
-        <ul>
-          <li
-            :class="{'is-active': isTabActive('todos')}"
-          >
-            <router-link :to="{
-              name: 'todos',
-            }">
-              {{ $t('tasks.current')}}
-            </router-link>
-          </li>
-          <li
-            :class="{'is-active': isTabActive('done')}"
-            @click="selectTab('done')"
-          >
-            <router-link :to="{
-              name: 'todos-tab',
-              params: {tab: 'done'}
-            }">
-              {{ $t('tasks.done') }} ({{ displayedDoneTasks.length }})
-            </router-link>
-          </li>
-          <li
-            :class="{'is-active': isTabActive('timesheets')}"
-            @click="selectTab('timesheets')"
-          >
-            <router-link :to="{
-              name: 'todos-tab',
-              params: {tab: 'timesheets'}
-            }">
-              {{ $t('timesheets.title') }}
-            </router-link>
-          </li>
-        </ul>
-      </div>
+  <div class="columns fixed-page">
+    <div class="column main-column">
+      <div class="todos page">
+        <div class="task-tabs tabs">
+          <ul>
+            <li :class="{ 'is-active': isTabActive('todos') }">
+              <router-link
+                :to="{
+                  name: 'todos'
+                }"
+              >
+                {{ $t('tasks.current') }}
+              </router-link>
+            </li>
+            <li
+              :class="{ 'is-active': isTabActive('done') }"
+              @click="selectTab('done')"
+            >
+              <router-link
+                :to="{
+                  name: 'todos-tab',
+                  params: { tab: 'done' }
+                }"
+              >
+                {{ $t('tasks.done') }} ({{ displayedDoneTasks.length }})
+              </router-link>
+            </li>
+            <li
+              :class="{ 'is-active': isTabActive('timesheets') }"
+              @click="selectTab('timesheets')"
+            >
+              <router-link
+                :to="{
+                  name: 'todos-tab',
+                  params: { tab: 'timesheets' }
+                }"
+              >
+                {{ $t('timesheets.title') }}
+              </router-link>
+            </li>
+          </ul>
+        </div>
 
-      <div class="flexrow">
-        <search-field
-          :class="{
-            'search-field': true,
-            'flexrow-item': true
-          }"
-          ref="todos-search-field"
-          @change="onSearchChange"
-          @enter="saveSearchQuery"
-          @save="saveSearchQuery"
-          :can-save="true"
+        <div class="flexrow">
+          <search-field
+            :class="{
+              'search-field': true,
+              'flexrow-item': true
+            }"
+            ref="todos-search-field"
+            @change="onSearchChange"
+            @enter="saveSearchQuery"
+            @save="saveSearchQuery"
+            :can-save="true"
+          />
+
+          <span class="filler"></span>
+
+          <combobox
+            class="flexrow-item"
+            :label="$t('main.show')"
+            :options="filterOptions"
+            locale-key-prefix="tasks."
+            v-model="currentFilter"
+          />
+
+          <combobox
+            class="flexrow-item"
+            :label="$t('main.sorted_by')"
+            :options="sortOptions"
+            locale-key-prefix="tasks.fields."
+            v-model="currentSort"
+          />
+        </div>
+        <div
+          class="query-list"
+          v-if="isTabActive('todos') || isTabActive('timesheets')"
+        >
+          <search-query-list
+            :queries="todoSearchQueries"
+            @change-search="changeSearch"
+            @remove-search="removeSearchQuery"
+          />
+        </div>
+
+        <todos-list
+          ref="todo-list"
+          :empty-text="$t('people.no_task_assigned')"
+          :is-loading="isTodosLoading"
+          :is-error="isTodosLoadingError"
+          :tasks="sortedTasks"
+          :selection-grid="todoSelectionGrid"
+          @scroll="setTodoListScrollPosition"
+          v-if="isTabActive('todos')"
         />
 
-        <span class="filler"></span>
-
-        <combobox
-          class="flexrow-item"
-          :label="$t('main.show')"
-          :options="filterOptions"
-          locale-key-prefix="tasks."
-          v-model="currentFilter"
+        <div v-if="isTabActive('done')">&nbsp;</div>
+        <todos-list
+          ref="done-list"
+          :tasks="displayedDoneTasks"
+          :is-loading="isTodosLoading"
+          :is-error="isTodosLoadingError"
+          :done="true"
+          v-if="isTabActive('done')"
         />
 
-        <combobox
-          class="flexrow-item"
-          :label="$t('main.sorted_by')"
-          :options="sortOptions"
-          locale-key-prefix="tasks.fields."
-          v-model="currentSort"
+        <timesheet-list
+          ref="timesheet-list"
+          :tasks="loggableTodos"
+          :done-tasks="loggableDoneTasks"
+          :is-loading="isTodosLoading"
+          :is-error="isTodosLoadingError"
+          :time-spent-map="timeSpentMap"
+          :time-spent-total="timeSpentTotal"
+          :hide-done="loggableDoneTasks.length === 0"
+          :hide-day-off="false"
+          @date-changed="onDateChanged"
+          @time-spent-change="onTimeSpentChange"
+          @set-day-off="onSetDayOff"
+          @unset-day-off="onUnsetDayOff"
+          v-if="isTabActive('timesheets')"
         />
       </div>
-      <div
-        class="query-list"
-        v-if="isTabActive('todos') || isTabActive('timesheets')"
-      >
-        <search-query-list
-          :queries="todoSearchQueries"
-          @change-search="changeSearch"
-          @remove-search="removeSearchQuery"
-        />
-      </div>
+    </div>
 
-      <todos-list
-        ref="todo-list"
-        :empty-text="$t('people.no_task_assigned')"
-        :is-loading="isTodosLoading"
-        :is-error="isTodosLoadingError"
-        :tasks="sortedTasks"
-        :selection-grid="todoSelectionGrid"
-        @scroll="setTodoListScrollPosition"
-        v-if="isTabActive('todos')"
-      />
-
-      <div v-if="isTabActive('done')">
-        &nbsp;
-      </div>
-      <todos-list
-        ref="done-list"
-        :tasks="displayedDoneTasks"
-        :is-loading="isTodosLoading"
-        :is-error="isTodosLoadingError"
-        :done="true"
-        v-if="isTabActive('done')"
-      />
-
-      <timesheet-list
-        ref="timesheet-list"
-        :tasks="loggableTodos"
-        :done-tasks="loggableDoneTasks"
-        :is-loading="isTodosLoading"
-        :is-error="isTodosLoadingError"
-        :time-spent-map="timeSpentMap"
-        :time-spent-total="timeSpentTotal"
-        :hide-done="loggableDoneTasks.length === 0"
-        :hide-day-off="false"
-        @date-changed="onDateChanged"
-        @time-spent-change="onTimeSpentChange"
-        @set-day-off="onSetDayOff"
-        @unset-day-off="onUnsetDayOff"
-        v-if="isTabActive('timesheets')"
-      />
+    <div class="column side-column" v-if="nbSelectedTasks === 1">
+      <task-info :task="selectedTasks.values().next().value" />
     </div>
   </div>
-
-  <div
-    class="column side-column"
-    v-if="nbSelectedTasks === 1"
-  >
-    <task-info
-      :task="selectedTasks.values().next().value"
-    />
-  </div>
-</div>
 </template>
 
 <script>
@@ -158,15 +155,15 @@ export default {
     TodosList
   },
 
-  data () {
+  data() {
     return {
       activeTab: 'todos',
       currentFilter: 'all_tasks',
       currentSort: 'priority',
-      filterOptions: [
-        'all_tasks',
-        'due_this_week'
-      ].map((name) => ({ label: name, value: name })),
+      filterOptions: ['all_tasks', 'due_this_week'].map(name => ({
+        label: name,
+        value: name
+      })),
       selectedDate: moment().format('YYYY-MM-DD'),
       sortOptions: [
         'entity_name',
@@ -176,11 +173,11 @@ export default {
         'due_date',
         'estimation',
         'last_comment_date'
-      ].map((name) => ({ label: name, value: name }))
+      ].map(name => ({ label: name, value: name }))
     }
   },
 
-  mounted () {
+  mounted() {
     this.updateActiveTab()
     if (this.todosSearchText.length > 0) {
       this.$refs['todos-search-field'].setValue(this.todosSearchText)
@@ -191,9 +188,7 @@ export default {
         callback: () => {
           if (this.todoList) {
             this.$nextTick(() => {
-              this.todoList.setScrollPosition(
-                this.todoListScrollPosition
-              )
+              this.todoList.setScrollPosition(this.todoListScrollPosition)
             })
           }
           this.resizeHeaders()
@@ -202,11 +197,12 @@ export default {
     })
   },
 
-  afterDestroy () {
-    this.$store.commit(
-      'USER_LOAD_TODOS_END',
-      { tasks: [], userFilters: {}, taskTypeMap: this.taskTypeMap }
-    )
+  afterDestroy() {
+    this.$store.commit('USER_LOAD_TODOS_END', {
+      tasks: [],
+      userFilters: {},
+      taskTypeMap: this.taskTypeMap
+    })
   },
 
   computed: {
@@ -227,39 +223,38 @@ export default {
       'user'
     ]),
 
-    loggableTodos () {
-      return this.sortedTasks
-        .filter((task) => {
-          return this.taskTypeMap.get(task.task_type_id).allow_timelog
-        })
+    loggableTodos() {
+      return this.sortedTasks.filter(task => {
+        return this.taskTypeMap.get(task.task_type_id).allow_timelog
+      })
     },
 
-    loggableDoneTasks () {
-      return this.displayedDoneTasks
-        .filter(task => {
-          return this.taskTypeMap.get(task.task_type_id).allow_timelog
-        })
+    loggableDoneTasks() {
+      return this.displayedDoneTasks.filter(task => {
+        return this.taskTypeMap.get(task.task_type_id).allow_timelog
+      })
     },
 
-    todoList () {
+    todoList() {
       return this.$refs['todo-list']
     },
 
-    haveDoneList () {
+    haveDoneList() {
       return this.$refs['done-list']
     },
 
-    sortedTasks () {
+    sortedTasks() {
       const isName = this.currentSort === 'entity_name'
       const isPriority = this.currentSort === 'priority'
       const isDueDate = this.currentSort === 'due_date'
       const isStartDate = this.currentSort === 'start_date'
-      const tasks = this.currentFilter === 'all_tasks'
-        ? [...this.displayedTodos]
-        : this.displayedTodos.filter(t => {
-          const dueDate = parseDate(t.due_date)
-          return moment().startOf('week').isSame(dueDate, 'week')
-        })
+      const tasks =
+        this.currentFilter === 'all_tasks'
+          ? [...this.displayedTodos]
+          : this.displayedTodos.filter(t => {
+              const dueDate = parseDate(t.due_date)
+              return moment().startOf('week').isSame(dueDate, 'week')
+            })
       if (isName) {
         return tasks.sort(
           firstBy('project_name')
@@ -269,39 +264,33 @@ export default {
       } else if (isPriority) {
         return tasks.sort(
           firstBy('priority', -1)
-            .thenBy(
-              (a, b) => {
-                if (!a.due_date) return 1
-                else if (!b.due_date) return -1
-                else return a.due_date.localeCompare(b.due_date)
-              }
-            )
+            .thenBy((a, b) => {
+              if (!a.due_date) return 1
+              else if (!b.due_date) return -1
+              else return a.due_date.localeCompare(b.due_date)
+            })
             .thenBy('project_name')
             .thenBy('task_type_name')
             .thenBy('entity_name')
         )
       } else if (isDueDate) {
         return tasks.sort(
-          firstBy(
-            (a, b) => {
-              if (!a.due_date) return 1
-              else if (!b.due_date) return -1
-              else return a.due_date.localeCompare(b.due_date)
-            }
-          )
+          firstBy((a, b) => {
+            if (!a.due_date) return 1
+            else if (!b.due_date) return -1
+            else return a.due_date.localeCompare(b.due_date)
+          })
             .thenBy('project_name')
             .thenBy('task_type_name')
             .thenBy('entity_name')
         )
       } else if (isStartDate) {
         return tasks.sort(
-          firstBy(
-            (a, b) => {
-              if (!a.start_date) return 1
-              else if (!b.start_date) return -1
-              else return a.start_date.localeCompare(b.start_date)
-            }
-          )
+          firstBy((a, b) => {
+            if (!a.start_date) return 1
+            else if (!b.start_date) return -1
+            else return a.start_date.localeCompare(b.start_date)
+          })
             .thenBy('project_name')
             .thenBy('task_type_name')
             .thenBy('entity_name')
@@ -330,18 +319,18 @@ export default {
       'unsetDayOff'
     ]),
 
-    isTabActive (tab) {
+    isTabActive(tab) {
       return this.activeTab === tab
     },
 
-    resizeHeaders () {
+    resizeHeaders() {
       this.$nextTick(() => {
         if (this.todoList) this.todoList.resizeHeaders()
         if (this.haveDoneList) this.haveDoneList.resizeHeaders()
       })
     },
 
-    selectTab (tab) {
+    selectTab(tab) {
       this.activeTab = tab
       this.resizeHeaders()
       setTimeout(() => {
@@ -351,7 +340,7 @@ export default {
       }, 300)
     },
 
-    updateActiveTab () {
+    updateActiveTab() {
       if (['done', 'timesheets'].includes(this.$route.params.tab)) {
         this.activeTab = this.$route.params.tab
       } else {
@@ -359,32 +348,30 @@ export default {
       }
     },
 
-    onSearchChange (text) {
+    onSearchChange(text) {
       this.setTodosSearch(text)
     },
 
-    changeSearch (searchQuery) {
+    changeSearch(searchQuery) {
       this.$refs['todos-search-field'].setValue(searchQuery.search_query)
       this.$refs['todos-search-field'].$emit('change', searchQuery.search_query)
     },
 
-    saveSearchQuery (searchQuery) {
+    saveSearchQuery(searchQuery) {
       this.saveTodoSearch(searchQuery)
-        .then(() => {
-        })
+        .then(() => {})
         .catch(console.error)
     },
 
-    removeSearchQuery (searchQuery) {
+    removeSearchQuery(searchQuery) {
       this.removeTodoSearch(searchQuery)
-        .then(() => {
-        })
-        .catch((err) => {
+        .then(() => {})
+        .catch(err => {
           if (err) console.error(err)
         })
     },
 
-    onDateChanged (date) {
+    onDateChanged(date) {
       this.selectedDate = moment(date).format('YYYY-MM-DD')
       this.loadTodos({
         date: this.selectedDate,
@@ -392,7 +379,7 @@ export default {
       })
     },
 
-    onSetDayOff () {
+    onSetDayOff() {
       const dayOff = {
         personId: this.user.id,
         date: this.selectedDate
@@ -400,7 +387,7 @@ export default {
       this.setDayOff(dayOff)
     },
 
-    onUnsetDayOff () {
+    onUnsetDayOff() {
       const dayOff = {
         personId: this.user.id,
         date: this.selectedDate
@@ -412,13 +399,13 @@ export default {
       })
     },
 
-    onTimeSpentChange (timeSpentInfo) {
+    onTimeSpentChange(timeSpentInfo) {
       timeSpentInfo.personId = this.user.id
       timeSpentInfo.date = this.selectedDate
       this.setTimeSpent(timeSpentInfo)
     },
 
-    onAssignation (eventData) {
+    onAssignation(eventData) {
       if (this.user.id === eventData.person_id) {
         this.loadOpenProductions(() => {
           this.loadTodos({
@@ -440,23 +427,23 @@ export default {
 
   socket: {
     events: {
-      'task:assign' (eventData) {
+      'task:assign'(eventData) {
         this.onAssignation(eventData)
       },
 
-      'task:unassign' (eventData) {
+      'task:unassign'(eventData) {
         this.onAssignation(eventData)
       }
     }
   },
 
   watch: {
-    $route () {
+    $route() {
       this.updateActiveTab()
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: `${this.$t('tasks.my_tasks')} - Kitsu`
     }

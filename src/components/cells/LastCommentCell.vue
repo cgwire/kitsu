@@ -1,33 +1,31 @@
 <template>
-<td>
-  <div class="flexrow">
-    <people-avatar
-      class="flexrow-item avatar-wrapper"
-      :size="25"
-      :font-size="14"
-      :person="task.last_comment.person"
-      v-if="task.last_comment.person"
-    >
-    </people-avatar>
-    <span class="no-avatar" v-else>
-      &nbsp;
-    </span>
+  <td>
+    <div class="flexrow">
+      <people-avatar
+        class="flexrow-item avatar-wrapper"
+        :size="25"
+        :font-size="14"
+        :person="task.last_comment.person"
+        v-if="task.last_comment.person"
+      >
+      </people-avatar>
+      <span class="no-avatar" v-else> &nbsp; </span>
 
-    <span
-      class="flexrow-item last-comment pointer"
-      v-if="commentText && commentText.length > 0"
-      v-html="compileMarkdown(commentText)"
-      @click="onClick"
-    >
-    </span>
-    <span
-      class="flexrow-item last-comment no-comment"
-      v-else-if="task.last_comment.person"
-    >
-      {{ $t('main.empty_comment') }}
-    </span>
-  </div>
-</td>
+      <span
+        class="flexrow-item last-comment pointer"
+        v-if="commentText && commentText.length > 0"
+        v-html="compileMarkdown(commentText)"
+        @click="onClick"
+      >
+      </span>
+      <span
+        class="flexrow-item last-comment no-comment"
+        v-else-if="task.last_comment.person"
+      >
+        {{ $t('main.empty_comment') }}
+      </span>
+    </div>
+  </td>
 </template>
 
 <script>
@@ -41,7 +39,7 @@ export default {
     PeopleAvatar
   },
 
-  data () {
+  data() {
     return {
       isOpen: false,
       timeout: null
@@ -56,10 +54,9 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-    ]),
+    ...mapGetters([]),
 
-    commentText () {
+    commentText() {
       const text = this.task.last_comment.text
       const maxLength = 140
       let result = text || ''
@@ -71,14 +68,13 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    compileMarkdown (input) {
+    compileMarkdown(input) {
       return renderMarkdown(input)
     },
 
-    onClick () {
+    onClick() {
       this.isOpen = !this.isOpen
     }
   }

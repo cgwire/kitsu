@@ -53,7 +53,7 @@ export default {
     StatusAutomationList
   },
 
-  data () {
+  data() {
     return {
       modals: {
         edit: false,
@@ -75,25 +75,24 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'statusAutomations'
-    ]),
+    ...mapGetters(['statusAutomations']),
 
-    deleteText () {
+    deleteText() {
       const statusAutomation = this.statusAutomationToDelete
       if (statusAutomation) {
-        return this.$t(
-          'custom_actions.delete_text', { name: statusAutomation.name })
+        return this.$t('custom_actions.delete_text', {
+          name: statusAutomation.name
+        })
       } else {
         return ''
       }
     }
   },
 
-  created () {
+  created() {
     this.loading.list = true
     this.errors.list = false
-    this.loadStatusAutomations((err) => {
+    this.loadStatusAutomations(err => {
       this.loading.list = false
       if (err) {
         this.errors.list = true
@@ -110,7 +109,7 @@ export default {
       'newStatusAutomation'
     ]),
 
-    confirmEditStatusAutomation (form) {
+    confirmEditStatusAutomation(form) {
       let action = 'newStatusAutomation'
       if (this.statusAutomationToEdit && this.statusAutomationToEdit.id) {
         action = 'editStatusAutomation'
@@ -124,14 +123,14 @@ export default {
           this.loading.edit = false
           this.modals.edit = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.errors.edit = true
           this.loading.edit = false
         })
     },
 
-    confirmDeleteStatusAutomation () {
+    confirmDeleteStatusAutomation() {
       this.loading.del = true
       this.errors.del = false
       this.deleteStatusAutomation(this.statusAutomationToDelete)
@@ -139,26 +138,26 @@ export default {
           this.loading.del = false
           this.modals.del = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.errors.del = true
           this.loading.del = false
         })
     },
 
-    onNewClicked () {
+    onNewClicked() {
       this.statusAutomationToEdit = {}
       this.errors.edit = false
       this.modals.edit = true
     },
 
-    onEditClicked (statusAutomation) {
+    onEditClicked(statusAutomation) {
       this.statusAutomationToEdit = statusAutomation
       this.errors.edit = false
       this.modals.edit = true
     },
 
-    onDeleteClicked (statusAutomation) {
+    onDeleteClicked(statusAutomation) {
       this.statusAutomationToDelete = statusAutomation
       this.errors.del = false
       this.modals.del = true
@@ -166,10 +165,12 @@ export default {
   },
 
   watch: {
-    $route () { this.handleModalsDisplay() }
+    $route() {
+      this.handleModalsDisplay()
+    }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: `${this.$t('status_automations.title')} - Kitsu`
     }
@@ -177,5 +178,4 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

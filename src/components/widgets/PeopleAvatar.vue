@@ -3,9 +3,9 @@
     class="avatar has-text-centered"
     :style="{
       background: person.color,
-      width: size +'px',
+      width: size + 'px',
       height: size + 'px',
-      'min-width': size +'px',
+      'min-width': size + 'px',
       'min-height': size + 'px',
       'font-size': person.has_avatar ? 0 : fontSize + 'px'
     }"
@@ -21,19 +21,10 @@
       :title="person.full_name"
       class="avatar-link"
     >
-      <img
-        :src="avatarPath"
-        v-if="person.has_avatar && noCache"
-      />
-      <img
-        v-lazy="avatarPath"
-        :key="avatarKey"
-        v-else-if="person.has_avatar"
-      />
-      <span
-        v-if="!person.has_avatar"
-      >
-       {{ initials }}
+      <img :src="avatarPath" v-if="person.has_avatar && noCache" />
+      <img v-lazy="avatarPath" :key="avatarKey" v-else-if="person.has_avatar" />
+      <span v-if="!person.has_avatar">
+        {{ initials }}
       </span>
     </router-link>
   </span>
@@ -43,21 +34,14 @@
     :title="person.full_name"
     :style="{
       background: person.color,
-      width: size +'px',
+      width: size + 'px',
       height: size + 'px',
       'font-size': fontSize + 'px'
     }"
     v-else
   >
-    <img
-      :src="avatarPath"
-      v-if="person.has_avatar && noCache"
-    />
-    <img
-      v-lazy="avatarPath"
-      :key="avatarKey"
-      v-else-if="person.has_avatar"
-    />
+    <img :src="avatarPath" v-if="person.has_avatar && noCache" />
+    <img v-lazy="avatarPath" :key="avatarKey" v-else-if="person.has_avatar" />
     <span v-else>
       {{ initials }}
     </span>
@@ -68,7 +52,7 @@
 export default {
   name: 'person-avatar',
 
-  data () {
+  data() {
     return {
       avatarPath: '',
       avatarKey: '',
@@ -80,7 +64,8 @@ export default {
     person: {
       type: Object,
       default: () => ({
-        id: 'empty', color: '#FFF'
+        id: 'empty',
+        color: '#FFF'
       })
     },
     size: { type: Number, default: 40 },
@@ -89,29 +74,28 @@ export default {
     'no-cache': { type: Boolean, default: false }
   },
 
-  created () {
+  created() {
     this.reloadAvatar()
   },
 
   methods: {
-    reloadAvatar () {
+    reloadAvatar() {
       this.avatarPath =
         this.person.avatarPath + '?unique=' + this.person.uniqueHash
-      this.avatarKey =
-        this.person.id + '-' + this.person.uniqueHash
+      this.avatarKey = this.person.id + '-' + this.person.uniqueHash
     }
   },
 
-  mounted () {
+  mounted() {
     this.initials = this.person.initials
   },
 
   watch: {
-    person () {
+    person() {
       this.reloadAvatar()
     },
 
-    'person.uniqueHash' () {
+    'person.uniqueHash'() {
       this.reloadAvatar()
     }
   }

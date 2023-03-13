@@ -1,13 +1,9 @@
 <template>
   <div class="breakdown page">
     <div class="breakdown-columns">
-
       <div class="breakdown-column casting-column">
         <div class="flexrow mb1">
-          <div
-            class=""
-            v-if="isEpisodeCasting"
-          >
+          <div class="" v-if="isEpisodeCasting">
             <h2 class="subtitle mt05">
               {{ $t('breakdown.episode_casting') }}
             </h2>
@@ -35,7 +31,11 @@
           <show-infos-button :is-breakdown="true" class="flexrow-item" />
           <button-simple
             class="flexrow-item"
-            :title="isTextMode ? $t('breakdown.picture_mode') : $t('breakdown.text_mode')"
+            :title="
+              isTextMode
+                ? $t('breakdown.picture_mode')
+                : $t('breakdown.text_mode')
+            "
             icon="type"
             :is-on="isTextMode"
             :is-responsive="true"
@@ -80,10 +80,7 @@
               <div class="entity-header">
                 {{ $t('shots.fields.name') }}
               </div>
-              <div
-                class="standby-header"
-                v-if="!isShowInfosBreakdown"
-              >
+              <div class="standby-header" v-if="!isShowInfosBreakdown">
                 {{ $t('breakdown.fields.standby') }}
               </div>
               <div
@@ -94,19 +91,34 @@
               </div>
               <div
                 class="frames-header"
-                v-if="isShotCasting && isFrames && !isShowInfosBreakdown && metadataDisplayHeaders.frames"
+                v-if="
+                  isShotCasting &&
+                  isFrames &&
+                  !isShowInfosBreakdown &&
+                  metadataDisplayHeaders.frames
+                "
               >
                 {{ $t('shots.fields.nb_frames') }}
               </div>
               <div
                 class="frames-header"
-                v-if="isShotCasting && isFrameIn && !isShowInfosBreakdown && metadataDisplayHeaders.frameIn"
+                v-if="
+                  isShotCasting &&
+                  isFrameIn &&
+                  !isShowInfosBreakdown &&
+                  metadataDisplayHeaders.frameIn
+                "
               >
                 {{ $t('shots.fields.frame_in') }}
               </div>
               <div
                 class="frames-header"
-                v-if="isShotCasting && isFrameOut && !isShowInfosBreakdown && metadataDisplayHeaders.frameOut"
+                v-if="
+                  isShotCasting &&
+                  isFrameOut &&
+                  !isShowInfosBreakdown &&
+                  metadataDisplayHeaders.frameOut
+                "
               >
                 {{ $t('shots.fields.frame_out') }}
               </div>
@@ -120,7 +132,7 @@
                   :key="department.id"
                   :department="department"
                   :only-dot="true"
-                  :style="{'padding': '0px 0px'}"
+                  :style="{ padding: '0px 0px' }"
                   v-for="department in descriptorCurrentDepartments(descriptor)"
                 />
                 <span class="flexrow-item descriptor-name">
@@ -132,7 +144,7 @@
                 class="asset-type-header"
                 v-for="assetType in castingAssetTypes"
               >
-                {{  assetType }}
+                {{ assetType }}
               </div>
             </div>
             <shot-line
@@ -169,7 +181,7 @@
         v-if="isCurrentUserManager"
       >
         <h2 class="flexrow subtitle">
-            {{ $t('breakdown.all_assets') }}
+          {{ $t('breakdown.all_assets') }}
         </h2>
         <div class="flexrow mb1 mt0">
           <span class="filler"></span>
@@ -238,7 +250,7 @@
       :columns="renderColumns"
       :dataMatchers="dataMatchers"
       :database="filteredCasting"
-      :disable-update=true
+      :disable-update="true"
       @reupload="resetImport"
       @cancel="hideImportRenderModal"
       @confirm="uploadImportFile"
@@ -297,7 +309,6 @@
       @confirm="confirmAssetRemoval"
       @cancel="modals.isRemoveConfirmationDisplayed = false"
     />
-
   </div>
 </template>
 
@@ -330,9 +341,7 @@ import DepartmentName from '@/components/widgets/DepartmentName'
 
 export default {
   name: 'breakdown-page',
-  mixins: [
-    entityListMixin
-  ],
+  mixins: [entityListMixin],
   components: {
     AvailableAssetBlock,
     BuildFilterModal,
@@ -351,7 +360,7 @@ export default {
     Spinner
   },
 
-  data () {
+  data() {
     return {
       assetTypeId: '',
       castingType: 'shot',
@@ -399,7 +408,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     if (!this.isLoading) {
       this.reset()
     }
@@ -408,7 +417,7 @@ export default {
     window.addEventListener('keydown', this.onKeyDown, false)
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     window.removeEventListener('keydown', this.onKeyDown)
   },
 
@@ -446,7 +455,7 @@ export default {
       'shotMetadataDescriptors'
     ]),
 
-    castingTypeOptions () {
+    castingTypeOptions() {
       const options = [
         {
           label: this.$t('assets.title'),
@@ -454,9 +463,8 @@ export default {
         }
       ]
       if (
-        !this.isTVShow || (
-          this.currentEpisode && this.currentEpisode.id !== 'main'
-        )
+        !this.isTVShow ||
+        (this.currentEpisode && this.currentEpisode.id !== 'main')
       ) {
         options.unshift({
           label: this.$t('shots.title'),
@@ -466,18 +474,16 @@ export default {
       return options
     },
 
-    availableAssetsByType () {
+    availableAssetsByType() {
       const result = []
       this.assetsByType.forEach(typeGroup => {
         let newGroup = typeGroup.filter(asset => !asset.canceled)
         if (this.isTVShow && this.isOnlyCurrentEpisode) {
           newGroup = typeGroup.filter(asset => {
-            return(
+            return (
               asset.episode_id === this.currentEpisode.id ||
-              (
-                asset.casting_episode_ids &&
-                asset.casting_episode_ids.includes(this.currentEpisode.id)
-              )
+              (asset.casting_episode_ids &&
+                asset.casting_episode_ids.includes(this.currentEpisode.id))
             )
           })
         }
@@ -486,33 +492,32 @@ export default {
       return result
     },
 
-    exportUrlPath () {
-      let path =
-        `/api/export/csv/projects/${this.currentProduction.id}/casting.csv`
+    exportUrlPath() {
+      let path = `/api/export/csv/projects/${this.currentProduction.id}/casting.csv`
       let paramAdded = false
       if (this.currentEpisode) {
         path += `?episode_id=${this.currentEpisode.id}`
         paramAdded = true
       }
       if (this.isShotCasting) {
-        path += `${(paramAdded) ? '&' : '?'}is_shot_casting=${this.isShotCasting}`
+        path += `${paramAdded ? '&' : '?'}is_shot_casting=${this.isShotCasting}`
       }
       return path
     },
 
-    isEpisodeCasting () {
+    isEpisodeCasting() {
       return this.currentEpisode && this.currentEpisode.id === 'all'
     },
 
-    isAssetCasting () {
+    isAssetCasting() {
       return !this.isEpisodeCasting && this.castingType === 'asset'
     },
 
-    isShotCasting () {
+    isShotCasting() {
       return !this.isEpisodeCasting && this.castingType === 'shot'
     },
 
-    castingEntities () {
+    castingEntities() {
       if (this.isEpisodeCasting) {
         return this.castingEpisodes
       } else if (this.isShotCasting) {
@@ -520,21 +525,19 @@ export default {
       } else {
         if (this.isTVShow && this.currentEpisode.id !== 'main') {
           return this.castingAssetTypeAssets.filter(
-            asset => (
+            asset =>
               asset.episode_id === this.currentEpisode.id ||
               asset.casting_episode_ids.includes(this.currentEpisode.id)
-            )
           )
         } else if (this.isTVShow && this.currentEpisode.id === 'main') {
-          return this.castingAssetTypeAssets.filter(
-            asset => !asset.episode_id)
+          return this.castingAssetTypeAssets.filter(asset => !asset.episode_id)
         } else {
           return this.castingAssetTypeAssets
         }
       }
     },
 
-    castingAssetTypes () {
+    castingAssetTypes() {
       const castingAssetTypes = []
       const assetTypeNameMap = {}
       this.castingEntities.forEach(entity => {
@@ -550,18 +553,17 @@ export default {
       return castingAssetTypes.sort()
     },
 
-    editLabelModal () {
+    editLabelModal() {
       return this.$refs['edit-label-modal']
     },
 
-    filteredCasting () {
+    filteredCasting() {
       const casting = {}
       this.castingEntities.forEach(entity => {
         if (this.castingByType[entity.id]) {
           this.castingByType[entity.id].forEach(type => {
             type.forEach(item => {
-              const castKey =
-                `${item.asset_name}${item.asset_type_name}${item.name}`
+              const castKey = `${item.asset_name}${item.asset_type_name}${item.name}`
               casting[castKey] = true
             })
           })
@@ -570,47 +572,29 @@ export default {
       return casting
     },
 
-    isDescription () {
+    isDescription() {
       return this.castingEntities.some(
-        e => e.description && e.description.length > 0)
+        e => e.description && e.description.length > 0
+      )
     },
 
-    csvColumns () {
+    csvColumns() {
       return this.isTVShow
-        ? [
-          'Episode',
-          'Parent',
-          'Name',
-          'Asset Type',
-          'Asset',
-          'Occurences'
-        ] : [
-          'Parent',
-          'Name',
-          'Asset Type',
-          'Asset',
-          'Occurences'
-        ]
+        ? ['Episode', 'Parent', 'Name', 'Asset Type', 'Asset', 'Occurences']
+        : ['Parent', 'Name', 'Asset Type', 'Asset', 'Occurences']
     },
 
-    renderColumns () {
+    renderColumns() {
       return [...this.csvColumns, ...this.optionalCsvColumns]
     },
 
-    dataMatchers () {
+    dataMatchers() {
       return this.isTVShow
-        ? [
-          'Episode',
-          'Name',
-          'Asset Type',
-          'Asset'
-        ] : ['Name',
-          'Asset Type',
-          'Asset'
-        ]
+        ? ['Episode', 'Name', 'Asset Type', 'Asset']
+        : ['Name', 'Asset Type', 'Asset']
     },
 
-    metadataDescriptors () {
+    metadataDescriptors() {
       if (this.isEpisodeCasting) {
         return []
       } else if (this.isShotCasting) {
@@ -620,7 +604,7 @@ export default {
       }
     },
 
-    metadataDisplayHeaders () {
+    metadataDisplayHeaders() {
       if (this.isEpisodeCasting) {
         return {}
       } else if (this.isShotCasting) {
@@ -674,7 +658,7 @@ export default {
       'uploadCastingFile'
     ]),
 
-    reset () {
+    reset() {
       if (!this.isTVShow) {
         const route = { ...this.$route }
         if (route && route.params && route.params.episode_id) {
@@ -689,7 +673,7 @@ export default {
       }, 100)
     },
 
-    reloadEntities () {
+    reloadEntities() {
       this.isLoading = true
       this.loadShots(() => {
         if (this.isTVShow) {
@@ -701,25 +685,24 @@ export default {
         } else {
           this.setCastingEpisode(null)
         }
-        this.loadAssets(true)
-          .then(() => {
-            this.isLoading = false
-            this.displayMoreAssets()
-            this.setCastingAssetTypes()
-            if (this.assetTypeId) {
-              this.setCastingAssetType(this.assetTypeId)
-            } else {
-              this.setCastingSequence(this.sequenceId || 'all')
-            }
-            this.resetSelection()
-            if (this.currentEpisode && this.currentEpisode.id === 'main') {
-              this.castingType = 'asset'
-            }
-          })
+        this.loadAssets(true).then(() => {
+          this.isLoading = false
+          this.displayMoreAssets()
+          this.setCastingAssetTypes()
+          if (this.assetTypeId) {
+            this.setCastingAssetType(this.assetTypeId)
+          } else {
+            this.setCastingSequence(this.sequenceId || 'all')
+          }
+          this.resetSelection()
+          if (this.currentEpisode && this.currentEpisode.id === 'main') {
+            this.castingType = 'asset'
+          }
+        })
       })
     },
 
-    resetSelection () {
+    resetSelection() {
       const selection = {}
       if (this.isEpisodeCasting) {
         this.castingEpisodes.forEach(episode => {
@@ -737,19 +720,19 @@ export default {
       this.selection = selection
     },
 
-    confirmBuildFilter (query) {
+    confirmBuildFilter(query) {
       this.modals.isBuildFilterDisplayed = false
       this.$refs['search-field'].setValue(query)
       this.onSearchChange(query)
     },
 
-    onSearchChange (searchQuery) {
+    onSearchChange(searchQuery) {
       this.setAssetSearch(searchQuery)
       this.displayMoreAssets()
       this.displayMoreAssets()
     },
 
-    selectEntity (entityId, event) {
+    selectEntity(entityId, event) {
       const previousSelection = { ...this.selection }
       if (!(event.ctrlKey || event.metaKey) && !event.shitKey) {
         this.clearSelection()
@@ -763,9 +746,9 @@ export default {
         this.previousEntityId = entityId
       }
 
-      const nbElementsSelected = Object.keys(previousSelection)
-        .filter(k => previousSelection[k])
-        .length
+      const nbElementsSelected = Object.keys(previousSelection).filter(
+        k => previousSelection[k]
+      ).length
       if (
         !previousSelection[entityId] ||
         (nbElementsSelected > 1 && !(event.ctrlKey || event.metaKey))
@@ -779,15 +762,15 @@ export default {
       }
     },
 
-    clearSelection () {
+    clearSelection() {
       Object.keys(this.selection)
         .filter(k => this.selection[k])
-        .forEach((shotId) => {
+        .forEach(shotId => {
           this.selection[shotId] = false
         })
     },
 
-    selectRange (previousEntityId, entityId) {
+    selectRange(previousEntityId, entityId) {
       const keys = Object.keys(this.selection)
       const previousIndex = keys.findIndex(k => k === previousEntityId)
       const index = keys.findIndex(k => k === entityId)
@@ -796,12 +779,12 @@ export default {
       if (previousIndex < index) indexRange = range(previousIndex, index)
       else indexRange = range(index, previousIndex)
 
-      indexRange.forEach((i) => {
+      indexRange.forEach(i => {
         if (i >= 0) this.selection[keys[i]] = true
       })
     },
 
-    setLock () {
+    setLock() {
       if (!this.$options.lockTimeout) {
         this.$options.lockTimeout = setTimeout(() => {
           this.isLocked = false
@@ -809,7 +792,7 @@ export default {
       }
     },
 
-    addOneAsset (assetId) {
+    addOneAsset(assetId) {
       this.isLocked = true
       Object.keys(this.selection)
         .filter(key => this.selection[key])
@@ -820,25 +803,21 @@ export default {
             nbOccurences: 1,
             label: this.castingType === 'shot' ? 'animate' : 'fixed'
           })
-          this.saveCasting(entityId)
-            .then(this.setLock)
-            .catch(console.error)
+          this.saveCasting(entityId).then(this.setLock).catch(console.error)
         })
     },
 
-    addTenAssets (assetId) {
+    addTenAssets(assetId) {
       this.isLocked = true
       Object.keys(this.selection)
         .filter(key => this.selection[key])
         .forEach(entityId => {
           this.addAssetToCasting({ entityId, assetId, nbOccurences: 10 })
-          this.saveCasting(entityId)
-            .then(this.setLock)
-            .catch(console.error)
+          this.saveCasting(entityId).then(this.setLock).catch(console.error)
         })
     },
 
-    confirmAssetRemoval () {
+    confirmAssetRemoval() {
       this.saveAssetRemoval(
         this.removalData.entityId,
         this.removalData.assetId,
@@ -846,7 +825,7 @@ export default {
       )
     },
 
-    saveAssetRemoval (entityId, assetId, nbOccurences) {
+    saveAssetRemoval(entityId, assetId, nbOccurences) {
       this.loading.remove = true
       this.removeAssetFromCasting({ entityId, assetId, nbOccurences })
       this.saveCasting(entityId)
@@ -862,7 +841,7 @@ export default {
         })
     },
 
-    removeOneAsset (assetId, entityId, nbOccurences) {
+    removeOneAsset(assetId, entityId, nbOccurences) {
       this.isLocked = true
       if (this.isEpisodeCasting && nbOccurences === 1) {
         this.removalData = { assetId, entityId, nbOccurences }
@@ -872,7 +851,7 @@ export default {
       }
     },
 
-    removeTenAssets (assetId, entityId, nbOccurences) {
+    removeTenAssets(assetId, entityId, nbOccurences) {
       this.isLocked = true
       if (this.isEpisodeCasting && nbOccurences < 10) {
         this.removalData = { assetId, entityId, nbOccurences }
@@ -882,46 +861,45 @@ export default {
       }
     },
 
-    onAssetListScroll (event, position) {
+    onAssetListScroll(event, position) {
       const assetList = this.$refs['asset-list']
       const maxHeight = assetList.scrollHeight - assetList.offsetHeight
-      if (maxHeight < (position.scrollTop + 100)) {
+      if (maxHeight < position.scrollTop + 100) {
         this.displayMoreAssets()
       }
     },
 
-    showImportModal () {
+    showImportModal() {
       this.modals.importing = true
     },
 
-    hideImportModal () {
+    hideImportModal() {
       this.modals.importing = false
     },
 
-    showImportRenderModal () {
+    showImportRenderModal() {
       this.modals.isImportRenderDisplayed = true
     },
 
-    hideImportRenderModal () {
+    hideImportRenderModal() {
       this.modals.isImportRenderDisplayed = false
     },
 
-    renderImport (data, mode) {
+    renderImport(data, mode) {
       this.loading.importing = true
       this.errors.importing = false
       if (mode === 'file') {
         data = data.get('file')
       }
-      csv.processCSV(data)
-        .then((results) => {
-          this.parsedCSV = results
-          this.hideImportModal()
-          this.loading.importing = false
-          this.showImportRenderModal()
-        })
+      csv.processCSV(data).then(results => {
+        this.parsedCSV = results
+        this.hideImportModal()
+        this.loading.importing = false
+        this.showImportRenderModal()
+      })
     },
 
-    uploadImportFile (data) {
+    uploadImportFile(data) {
       const formData = new FormData()
       const filename = 'import.csv'
       const file = new File([data.join('\n')], filename, { type: 'text/csv' })
@@ -948,7 +926,7 @@ export default {
         })
     },
 
-    resetImport () {
+    resetImport() {
       this.errors.importing = false
       this.errors.importingError = null
       this.hideImportRenderModal()
@@ -957,7 +935,7 @@ export default {
       this.showImportModal()
     },
 
-    updateUrl () {
+    updateUrl() {
       let isChange = false
       let route = {}
       if (this.isEpisodeCasting) {
@@ -1011,14 +989,14 @@ export default {
       }
     },
 
-    onEditLabelClicked (asset, label, entityId) {
+    onEditLabelClicked(asset, label, entityId) {
       this.editedAsset = asset
       this.editedEntityId = entityId
       this.editedAssetLinkLabel = label
       this.modals.isEditLabelDisplayed = true
     },
 
-    confirmEditLabel (form = {}) {
+    confirmEditLabel(form = {}) {
       const label = form.label
       this.loading.editLabel = true
       this.setAssetLinkLabel({
@@ -1030,30 +1008,30 @@ export default {
           this.modals.isEditLabelDisplayed = false
           this.loading.editLabel = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.errors.editLabel = true
           this.loading.editLabel = false
         })
     },
 
-    toggleTextMode () {
+    toggleTextMode() {
       this.isTextMode = !this.isTextMode
       localStorage.setItem('breakdown:text-mode', this.isTextMode)
     },
 
-    confirmNewAssetStay (form) {
+    confirmNewAssetStay(form) {
       this.loading.stay = true
       this.success.edit = false
       this.newAsset(form)
-        .then((asset) => {
+        .then(asset => {
           this.loading.stay = false
           this.loading.edit = false
           this.resetLightEditModal(asset)
           this.$refs['edit-asset-modal'].focusName()
           this.success.edit = true
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.stay = false
           this.loading.edit = false
@@ -1062,7 +1040,7 @@ export default {
         })
     },
 
-    confirmNewAsset (form) {
+    confirmNewAsset(form) {
       this.loading.edit = true
       this.errors.edit = false
       this.newAsset(form)
@@ -1070,14 +1048,14 @@ export default {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.edit = false
           this.errors.edit = true
         })
     },
 
-    resetLightEditModal (asset) {
+    resetLightEditModal(asset) {
       const form = {
         name: '',
         entity_type_id: asset.entit_type_id,
@@ -1086,41 +1064,43 @@ export default {
       this.assetToEdit = form
     },
 
-    onKeyDown (event) {
+    onKeyDown(event) {
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
-        if (event.ctrlKey && event.keyCode === 67) { // ctrl + c
+        if (event.ctrlKey && event.keyCode === 67) {
+          // ctrl + c
           this.copyCasting()
-        } else if (event.ctrlKey && event.keyCode === 86) { // ctrl + v
+        } else if (event.ctrlKey && event.keyCode === 86) {
+          // ctrl + v
           this.pasteCasting()
         }
       }
     },
 
-    copyCasting () {
-      const selectedElementId = Object.keys(this.selection)
-        .find(key => this.selection[key])
+    copyCasting() {
+      const selectedElementId = Object.keys(this.selection).find(
+        key => this.selection[key]
+      )
       const selectedCasting = this.casting[selectedElementId]
       clipboard.copyCasting(selectedCasting)
     },
 
-    pasteCasting () {
+    pasteCasting() {
       const castingToPaste = clipboard.pasteCasting()
       if (!castingToPaste || castingToPaste.length === 0) return
-      const selectedElements = Object.keys(this.selection)
-        .filter(key => this.selection[key])
+      const selectedElements = Object.keys(this.selection).filter(
+        key => this.selection[key]
+      )
       selectedElements.forEach(entityId => {
         this.setEntityCasting({
           entityId,
           casting: castingToPaste
         })
-        this.saveCasting(entityId)
-          .then(this.setLock)
-          .catch(console.error)
+        this.saveCasting(entityId).then(this.setLock).catch(console.error)
       })
       return castingToPaste
     },
 
-    onMetadataChanged ({ entry, descriptor, value }) {
+    onMetadataChanged({ entry, descriptor, value }) {
       const metadata = {}
       metadata[descriptor.field_name] = value
       const data = {
@@ -1136,7 +1116,7 @@ export default {
       }
     },
 
-    onDescriptionChanged (entity, value) {
+    onDescriptionChanged(entity, value) {
       const data = {
         id: entity.id,
         description: value
@@ -1150,7 +1130,7 @@ export default {
       }
     },
 
-    onStandbyChanged (entity, value) {
+    onStandbyChanged(entity, value) {
       const data = {
         id: entity.id,
         is_casting_standby: value
@@ -1162,35 +1142,30 @@ export default {
       } else {
         this.editAsset(data)
       }
-	},
+    },
 
-    descriptorCurrentDepartments (descriptor) {
+    descriptorCurrentDepartments(descriptor) {
       const departemts = descriptor.departments || []
-      return departemts.map(
-        departmentId => this.departmentMap.get(departmentId)
+      return departemts.map(departmentId =>
+        this.departmentMap.get(departmentId)
       )
     },
 
-    getEntityName (entity) {
-      return (
-        this.sequenceId === 'all' &&
-        (
-          !this.isTVShow ||
-          (this.isTVShow && this.currentEpisode.id !== 'all')
-        )
-          ? entity.sequence_name + ' / ' + entity.name
-          : entity.name
-      )
+    getEntityName(entity) {
+      return this.sequenceId === 'all' &&
+        (!this.isTVShow || (this.isTVShow && this.currentEpisode.id !== 'all'))
+        ? entity.sequence_name + ' / ' + entity.name
+        : entity.name
     },
 
-		getCsvFileName () {
-			const nameData = [
-				moment().format('YYYY-MM-DD'),
-				'kitsu',
+    getCsvFileName() {
+      const nameData = [
+        moment().format('YYYY-MM-DD'),
+        'kitsu',
         this.castingType + 's',
-				this.currentProduction.name,
-				this.$t('breakdown.title')
-			]
+        this.currentProduction.name,
+        this.$t('breakdown.title')
+      ]
       if (this.isTVShow) {
         if (this.currentEpisode) {
           if (this.currentEpisode.id == 'all') {
@@ -1198,7 +1173,11 @@ export default {
           } else if (this.currentEpisode.id == 'main') {
             nameData.splice(4, 0, 'main pack')
             if (this.assetTypeId !== 'all' && this.castingType == 'asset') {
-              nameData.splice(5, 0, this.assetTypeMap.get(this.assetTypeId).name)
+              nameData.splice(
+                5,
+                0,
+                this.assetTypeMap.get(this.assetTypeId).name
+              )
             }
           } else {
             nameData.splice(4, 0, this.currentEpisode.name)
@@ -1206,7 +1185,11 @@ export default {
               nameData.splice(5, 0, this.sequenceMap.get(this.sequenceId).name)
             }
             if (this.assetTypeId !== 'all' && this.castingType == 'asset') {
-              nameData.splice(5, 0, this.assetTypeMap.get(this.assetTypeId).name)
+              nameData.splice(
+                5,
+                0,
+                this.assetTypeMap.get(this.assetTypeId).name
+              )
             }
           }
         }
@@ -1218,10 +1201,10 @@ export default {
           nameData.splice(5, 0, this.assetTypeMap.get(this.assetTypeId).name)
         }
       }
-			return stringHelpers.slugify(nameData.join('_'))
-		},
+      return stringHelpers.slugify(nameData.join('_'))
+    },
 
-    getCsvFileHeaders () {
+    getCsvFileHeaders() {
       let headers = [
         this.$t('shots.fields.name'),
         this.$t('breakdown.fields.standby')
@@ -1235,19 +1218,15 @@ export default {
       if (this.isFrameOut) {
         headers.push(this.$t('main.frame_out'))
       }
-      this.metadataDescriptors
-        .forEach(descriptor => {
-          headers.push(descriptor.name)
-        })
+      this.metadataDescriptors.forEach(descriptor => {
+        headers.push(descriptor.name)
+      })
       return headers.concat(this.castingAssetTypes)
     },
 
-    getCsvEntries () {
+    getCsvEntries() {
       const entries = this.castingEntities.map(entity => {
-        const entry = [
-          entity.name,
-          entity.is_casting_standby ? 'X' : ''
-        ]
+        const entry = [entity.name, entity.is_casting_standby ? 'X' : '']
         if (this.isFrames) {
           entry.push(entity.nb_frames)
         }
@@ -1257,10 +1236,9 @@ export default {
         if (this.isFrameOut) {
           entry.push(entity.data.frame_out)
         }
-        this.metadataDescriptors
-          .forEach(descriptor => {
-            entry.push(entity.data[descriptor.field_name] || '')
-          })
+        this.metadataDescriptors.forEach(descriptor => {
+          entry.push(entity.data[descriptor.field_name] || '')
+        })
 
         const assets = this.castingByType[entity.id] || []
         const assetsByAssetTypesMap = {}
@@ -1270,8 +1248,10 @@ export default {
         })
         this.castingAssetTypes.forEach(assetTypeName => {
           const typeAssets = assetsByAssetTypesMap[assetTypeName] || []
-          const nbAssetsForType = typeAssets
-            .reduce((acc, a) => acc + a.nb_occurences, 0)
+          const nbAssetsForType = typeAssets.reduce(
+            (acc, a) => acc + a.nb_occurences,
+            0
+          )
           if (nbAssetsForType > 0) {
             let casting = nbAssetsForType + ' assets: '
             casting += typeAssets
@@ -1289,7 +1269,7 @@ export default {
       return entries
     },
 
-    exportViewToCsv () {
+    exportViewToCsv() {
       const entries = this.getCsvEntries()
       const name = this.getCsvFileName()
       const headers = this.getCsvFileHeaders()
@@ -1298,9 +1278,9 @@ export default {
   },
 
   watch: {
-    $route () {},
+    $route() {},
 
-    castingType () {
+    castingType() {
       if (this.isShotCasting && this.displayedSequences.length > 0) {
         this.sequenceId = this.displayedSequences[0].id
         this.assetTypeId = ''
@@ -1317,7 +1297,7 @@ export default {
       }
     },
 
-    sequenceId () {
+    sequenceId() {
       if (
         this.sequenceId &&
         this.displayedSequences &&
@@ -1330,7 +1310,7 @@ export default {
       }
     },
 
-    assetTypeId () {
+    assetTypeId() {
       if (this.assetTypeId && this.castingAssetTypesOptions.length > 0) {
         this.setCastingAssetType(this.assetTypeId)
         this.updateUrl()
@@ -1338,7 +1318,7 @@ export default {
       }
     },
 
-    episodeId () {
+    episodeId() {
       if (this.episodeId && this.episodes && this.episodes.length > 0) {
         if (this.episodeId === 'all') {
           this.setCastingForProductionEpisodes(this.episodeId)
@@ -1347,13 +1327,10 @@ export default {
       }
     },
 
-    castingSequencesOptions () {
+    castingSequencesOptions() {
       if (this.$route.path.indexOf('asset-type') < 0) {
         const sequenceId = this.$route.params.sequence_id || 'all'
-        if (
-          sequenceId &&
-          this.sequenceMap.get(sequenceId)
-        ) {
+        if (sequenceId && this.sequenceMap.get(sequenceId)) {
           this.sequenceId = sequenceId
         } else if (this.castingSequencesOptions.length > 0) {
           this.sequenceId = this.castingSequencesOptions[0].value
@@ -1363,7 +1340,7 @@ export default {
       }
     },
 
-    castingAssetTypesOptions () {
+    castingAssetTypesOptions() {
       if (this.$route.path.indexOf('asset-type') > 0) {
         const assetTypeId = this.$route.params.asset_type_id
         this.castingType = 'asset'
@@ -1377,13 +1354,13 @@ export default {
       }
     },
 
-    currentProduction () {
+    currentProduction() {
       if (!this.isLoading) {
         this.reset()
       }
     },
 
-    currentEpisode () {
+    currentEpisode() {
       if (
         this.currentEpisode &&
         this.episodeId !== this.currentEpisode.id &&
@@ -1397,35 +1374,28 @@ export default {
       }
     },
 
-    displayedSequences () {
+    displayedSequences() {
       this.$store.commit('CASTING_SET_SEQUENCES', this.displayedSequences)
     }
   },
 
   socket: {
     events: {
-      'episode:casting-update' (eventData) {
+      'episode:casting-update'(eventData) {
         const episode = this.episodeMap.get(eventData.episode_id)
-        if (
-          episode &&
-          !this.isLocked
-        ) {
+        if (episode && !this.isLocked) {
           this.loadEpisodeCasting(episode)
         }
       },
 
-      'shot:casting-update' (eventData) {
+      'shot:casting-update'(eventData) {
         const shot = this.shotMap.get(eventData.shot_id)
-        if (
-          shot &&
-          shot.sequence_id === this.sequenceId &&
-          !this.isLocked
-        ) {
+        if (shot && shot.sequence_id === this.sequenceId && !this.isLocked) {
           this.loadShotCasting(shot)
         }
       },
 
-      'asset:casting-update' (eventData) {
+      'asset:casting-update'(eventData) {
         const asset = this.assetMap.get(eventData.asset_id)
         if (
           asset &&
@@ -1438,7 +1408,7 @@ export default {
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     const pageTitle = this.$t('breakdown.title')
     return {
       title: `${this.currentProduction.name} ${pageTitle} - Kitsu`
@@ -1467,7 +1437,7 @@ export default {
   bottom: 0;
   display: flex;
   flex-direction: column;
-  background: #FAFAFA;
+  background: #fafafa;
   padding-left: 1em;
   padding-right: 1em;
   padding-bottom: 1em;
@@ -1488,8 +1458,8 @@ export default {
   overflow-y: auto;
   padding: 1em;
   background: white;
-  border: 1px solid #EEE;
-  box-shadow: 0px 0px 6px #E0E0E0;
+  border: 1px solid #eee;
+  box-shadow: 0px 0px 6px #e0e0e0;
   border-radius: 1em;
 
   &:not(:first-child) {
@@ -1525,7 +1495,6 @@ export default {
   flex-direction: row;
   flex-wrap: wrap;
 }
-
 
 .shots-title {
   font-weight: bold;
@@ -1571,7 +1540,7 @@ export default {
   min-width: 81px;
   max-width: 81px;
   text-align: right;
-  padding-right: .5em;
+  padding-right: 0.5em;
 }
 
 .asset-type-header {
@@ -1613,8 +1582,8 @@ export default {
 
   div {
     background: var(--background);
-    padding-top: .5em;
-    padding-bottom: .5em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
   }
 }
 

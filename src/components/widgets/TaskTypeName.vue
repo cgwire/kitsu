@@ -1,31 +1,28 @@
 <template>
-<router-link
-  :to="taskTypePath"
-  v-if="productionId && !isCurrentUserClient"
->
-  <span
-    class="tag task-type-name"
+  <router-link :to="taskTypePath" v-if="productionId && !isCurrentUserClient">
+    <span
+      class="tag task-type-name"
+      :style="{ 'border-left': '4px solid ' + color }"
+    >
+      {{ taskType.name }}
+    </span>
+  </router-link>
+  <div
+    :class="{
+      tag: true,
+      'task-type-name': true,
+      'no-link': true,
+      deletable,
+      canceled: disable
+    }"
     :style="{ 'border-left': '4px solid ' + color }"
+    v-else
   >
     {{ taskType.name }}
-  </span>
-</router-link>
-<div
-  :class="{
-    tag: true,
-    'task-type-name': true,
-    'no-link': true,
-    deletable,
-    canceled: disable
-  }"
-  :style="{ 'border-left': '4px solid ' + color }"
-  v-else
->
-  {{ taskType.name }}
-  <span class="delete-times" v-if="deletable" @click="$emit('delete')">
-    ×
-  </span>
-</div>
+    <span class="delete-times" v-if="deletable" @click="$emit('delete')">
+      ×
+    </span>
+  </div>
 </template>
 
 <script>
@@ -33,8 +30,7 @@ import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'task-type-name',
-  components: {
-  },
+  components: {},
 
   props: {
     taskType: {
@@ -56,17 +52,14 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'isCurrentUserClient',
-      'isTaskTypePriorityHigherById'
-    ]),
+    ...mapGetters(['isCurrentUserClient', 'isTaskTypePriorityHigherById']),
 
-    color () {
+    color() {
       if (this.taskType.color.toUpperCase() === '#000000') return '$grey-strong'
       else return this.taskType.color
     },
 
-    taskTypePath () {
+    taskTypePath() {
       let route = {}
       if (this.taskType.for_entity === 'Episode') {
         route = {
@@ -97,8 +90,7 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   }
 }
 </script>
@@ -135,7 +127,7 @@ export default {
 }
 
 .delete-times:hover {
-  color: black
+  color: black;
 }
 
 .no-link {

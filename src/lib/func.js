@@ -1,20 +1,20 @@
 export default {
-  runPromiseMapAsSeries (array, promise) {
+  runPromiseMapAsSeries(array, promise) {
     return array.reduce((accumulatorPromise, item) => {
       return accumulatorPromise.then(() => promise(item))
     }, Promise.resolve())
   },
 
-  runPromiseAsSeries (promises) {
+  runPromiseAsSeries(promises) {
     return promises.reduce((accumulatorPromise, promise) => {
       return accumulatorPromise.then(() => promise)
     }, Promise.resolve())
   },
 
-  throttle (fn, delay) {
+  throttle(fn, delay) {
     let lastCall = 0
     return function (...args) {
-      const now = (new Date()).getTime()
+      const now = new Date().getTime()
       if (now - lastCall < delay) return
       lastCall = now
       return fn(...args)

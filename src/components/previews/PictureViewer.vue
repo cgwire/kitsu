@@ -1,37 +1,44 @@
 <template>
-<div ref="container" class="picture-player">
-  <div ref="picture-wrapper" class="picture-wrapper" oncontextmenu="return false;">
-    <div v-show="!isLoading" class="picture-subwrapper" ref="picture-subwrapper">
+  <div ref="container" class="picture-player">
+    <div
+      ref="picture-wrapper"
+      class="picture-wrapper"
+      oncontextmenu="return false;"
+    >
       <div
-        ref="loupe"
-        class="loupe"
-        id="loupe"
-        :style="{
-          background: 'url(' + pictureDlPath + ')'
-        }"
+        v-show="!isLoading"
+        class="picture-subwrapper"
+        ref="picture-subwrapper"
       >
+        <div
+          ref="loupe"
+          class="loupe"
+          id="loupe"
+          :style="{
+            background: 'url(' + pictureDlPath + ')'
+          }"
+        ></div>
+        <div v-show="isGif">
+          <img ref="picture-gif" :src="pictureGifPath" />
+        </div>
+        <div v-show="!isGif">
+          <img
+            ref="picture-big"
+            id="picture-big"
+            :src="pictureDlPath"
+            v-show="fullScreen"
+          />
+          <img
+            ref="picture"
+            id="picture"
+            :src="picturePath"
+            v-show="!fullScreen"
+          />
+        </div>
       </div>
-      <div v-show="isGif">
-        <img ref="picture-gif" :src="pictureGifPath" />
-      </div>
-      <div v-show="!isGif">
-        <img
-          ref="picture-big"
-          id="picture-big"
-          :src="pictureDlPath"
-          v-show="fullScreen"
-        />
-        <img
-          ref="picture"
-          id="picture"
-          :src="picturePath"
-          v-show="!fullScreen"
-        />
-      </div>
+      <spinner v-if="isLoading" />
     </div>
-    <spinner v-if="isLoading"/>
   </div>
-</div>
 </template>
 
 <script>
@@ -75,7 +82,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       isLoading: true,
       picturePath: '',
@@ -84,7 +91,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.container.style.height = this.defaultHeight + 'px'
     this.isLoading = true
     if (this.picture.complete) {
@@ -107,68 +114,65 @@ export default {
     }
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     window.removeEventListener('resize', this.onWindowResize)
     if (this.panzoom) this.panzoom.dispose()
   },
 
   computed: {
-
     // Elements
 
-    container () {
+    container() {
       return this.$refs.container
     },
 
-    picture () {
+    picture() {
       return this.$refs.picture
     },
 
-    pictureBig () {
+    pictureBig() {
       return this.$refs['picture-big']
     },
 
-    pictureGif () {
+    pictureGif() {
       return this.$refs['picture-gif']
     },
 
-    pictureWrapper () {
+    pictureWrapper() {
       return this.$refs['picture-wrapper']
     },
 
-    pictureSubWrapper () {
+    pictureSubWrapper() {
       return this.$refs['picture-subwrapper']
     },
 
-    status () {
-      return this.preview && this.preview.status
-        ? this.preview.status
-        : 'ready'
+    status() {
+      return this.preview && this.preview.status ? this.preview.status : 'ready'
     },
 
-    isAvailable () {
+    isAvailable() {
       return !['broken', 'processing'].includes(this.status)
     },
 
     // Utils
 
-    extension () {
+    extension() {
       return this.preview ? this.preview.extension : ''
     },
 
-    isGif () {
+    isGif() {
       return this.extension === 'gif'
     },
 
-    isMovie () {
+    isMovie() {
       return this.extension === 'mp4'
     },
 
-    isPicture () {
+    isPicture() {
       return ['gif', 'png', 'jpg', 'jpeg'].includes(this.extension)
     },
 
-    pictureOriginalPath () {
+    pictureOriginalPath() {
       if (this.preview && this.isAvailable && this.isPicture) {
         const previewId = this.preview.id
         return `/api/pictures/originals/preview-files/${previewId}.png`
@@ -179,14 +183,15 @@ export default {
   },
 
   methods: {
-
     // Sizing
-    getNaturalDimensions () {
+    getNaturalDimensions() {
       let picture = { naturalWidth: 0, naturalHeight: 0 }
       if (!this.fullScreen && this.picture.naturalWidth && !this.isGif) {
         picture = this.picture
       } else if (
-        this.fullScreen && this.pictureBig.naturalWidth && !this.isGif
+        this.fullScreen &&
+        this.pictureBig.naturalWidth &&
+        !this.isGif
       ) {
         picture = this.pictureBig
       } else if (this.pictureGif.naturalWidth && this.isGif) {
@@ -198,7 +203,7 @@ export default {
       }
     },
 
-    getDimensions () {
+    getDimensions() {
       let ratio = 1
       const dimensions = this.getNaturalDimensions()
       if (dimensions.width > 0) ratio = dimensions.height / dimensions.width
@@ -214,8 +219,8 @@ export default {
       return { width, height }
     },
 
-    onWindowResize () {
-      const now = (new Date().getTime())
+    onWindowResize() {
+      const now = new Date().getTime()
       this.lastCall = this.lastCall || 0
       if (now - this.lastCall > 600) {
         this.lastCall = now
@@ -228,12 +233,12 @@ export default {
 
     // Configuration
 
-    endLoading () {
+    endLoading() {
       this.isLoading = false
       this.$nextTick(this.resetPicture)
     },
 
-    resetPicture () {
+    resetPicture() {
       const heightValue = this.defaultHeight + 'px'
       this.container.style.height = heightValue
       if (this.pictureWrapper) this.pictureWrapper.style.height = heightValue
@@ -259,24 +264,21 @@ export default {
       if (this.isPicture) this.$emit('size-changed', dimensions)
     },
 
-    setPicturePath () {
+    setPicturePath() {
       if (this.isGif && this.isAvailable && this.isPicture) {
         const previewId = this.preview.id
-        this.pictureGifPath =
-          `/api/pictures/originals/preview-files/${previewId}.gif`
+        this.pictureGifPath = `/api/pictures/originals/preview-files/${previewId}.gif`
       } else if (this.preview && this.isAvailable && this.isPicture) {
         const previewId = this.preview.id
-        this.picturePath =
-          `/api/pictures/previews/preview-files/${previewId}.png`
+        this.picturePath = `/api/pictures/previews/preview-files/${previewId}.png`
       }
       this.setPictureDlPath()
     },
 
-    setPictureDlPath () {
+    setPictureDlPath() {
       if (this.preview && this.isAvailable && this.isPicture) {
         const previewId = this.preview.id
-        this.pictureDlPath =
-          `/api/pictures/originals/preview-files/${previewId}/download`
+        this.pictureDlPath = `/api/pictures/originals/preview-files/${previewId}/download`
       } else {
         this.pictureDlPath = null
       }
@@ -284,15 +286,15 @@ export default {
 
     // Loupe
 
-    showLoupe () {
+    showLoupe() {
       this.$refs.loupe.style.display = 'block'
     },
 
-    hideLoupe () {
+    hideLoupe() {
       this.$refs.loupe.style.display = 'none'
     },
 
-    updateLoupePosition (event, canvasDimensions) {
+    updateLoupePosition(event, canvasDimensions) {
       const w = canvasDimensions.width
       const h = canvasDimensions.height
       const maxWidth = parseInt(w.substring(0, w.length - 2))
@@ -310,19 +312,19 @@ export default {
       zy = Math.min(zy, maxHeight)
       const naturalDimensions = this.getNaturalDimensions()
       const ratioW = naturalDimensions.width / maxWidth
-      const bgX = Math.min((ratioW * zx) - 150, naturalDimensions.width - 300)
-      const bgY = Math.min((ratioW * zy) - 150, naturalDimensions.height - 300)
+      const bgX = Math.min(ratioW * zx - 150, naturalDimensions.width - 300)
+      const bgY = Math.min(ratioW * zy - 150, naturalDimensions.height - 300)
       this.$refs.loupe.style['background-position'] = `-${bgX}px -${bgY}px`
     },
 
-    resetPanZoom () {
+    resetPanZoom() {
       this.panzoom.moveTo(0, 0)
       this.panzoom.zoomAbs(0, 0, 1)
     }
   },
 
   watch: {
-    fullScreen () {
+    fullScreen() {
       this.resetPanZoom()
       if (this.fullScreen) {
         this.isLoading = true
@@ -333,25 +335,25 @@ export default {
       }
     },
 
-    isLoading () {
+    isLoading() {
       if (!this.isLoading) {
         setTimeout(this.resetPicture, 100)
       }
     },
 
-    light () {
+    light() {
       this.resetPanZoom()
       this.onWindowResize()
     },
 
-    isComparing () {
+    isComparing() {
       this.resetPanZoom()
       setTimeout(() => {
         this.resetPicture()
       }, 20)
     },
 
-    preview () {
+    preview() {
       this.resetPanZoom()
       this.isLoading = true
       this.setPicturePath()
@@ -420,7 +422,7 @@ export default {
 .picture-player {
   width: 100%;
   text-align: center;
-  background: #36393F;
+  background: #36393f;
 }
 
 .loupe {

@@ -1,113 +1,101 @@
 <template>
-<div class="columns fixed-page">
-  <!--action-panel /-->
+  <div class="columns fixed-page">
+    <!--action-panel /-->
 
-  <div class="column main-column">
-    <div class="todos page">
-      <div class="flexrow">
+    <div class="column main-column">
+      <div class="todos page">
+        <div class="flexrow">
+          <combobox-production
+            class="flexrow-item"
+            :label="$t('main.production')"
+            :production-list="productionList"
+            v-model="productionId"
+            v-if="productionList.length > 0"
+          />
 
-        <combobox-production
-          class="flexrow-item"
-          :label="$t('main.production')"
-          :production-list="productionList"
-          v-model="productionId"
-          v-if="productionList.length > 0"
-        />
+          <combobox
+            class="flexrow-item"
+            :label="$t('main.episode')"
+            :options="episodeOptions"
+            v-model="episodeId"
+            v-show="productionId"
+            v-if="taskStatusList.length > 0"
+          />
 
-        <combobox
-          class="flexrow-item"
-          :label="$t('main.episode')"
-          :options="episodeOptions"
-          v-model="episodeId"
-          v-show="productionId"
-          v-if="taskStatusList.length > 0"
-        />
+          <combobox-task-type
+            class="flexrow-item selector"
+            :label="$t('news.task_type')"
+            :task-type-list="taskTypeList"
+            v-model="taskTypeId"
+            v-if="taskTypeList.length > 0"
+          />
 
-        <combobox-task-type
-          class="flexrow-item selector"
-          :label="$t('news.task_type')"
-          :task-type-list="taskTypeList"
-          v-model="taskTypeId"
-          v-if="taskTypeList.length > 0"
-        />
+          <combobox-status
+            class="flexrow-item selector"
+            :label="$t('news.task_status')"
+            :task-status-list="taskStatusList"
+            v-model="taskStatusId"
+          />
 
-        <combobox-status
-          class="flexrow-item selector"
-          :label="$t('news.task_status')"
-          :task-status-list="taskStatusList"
-          v-model="taskStatusId"
-        />
+          <div class="field flexrow-item selector small">
+            <label class="label person-label">
+              {{ $t('main.person') }}
+            </label>
+            <people-field :people="assignees" :big="true" v-model="person" />
+          </div>
 
-        <div class="field flexrow-item selector small">
-          <label class="label person-label">
-            {{ $t('main.person') }}
-          </label>
-          <people-field
-            :people="assignees"
-            :big="true"
-            v-model="person"
+          <combobox
+            class="flexrow-item"
+            :label="$t('main.show')"
+            :options="filterOptions"
+            locale-key-prefix="tasks."
+            v-model="currentFilter"
+          />
+
+          <combobox
+            class="flexrow-item"
+            :label="$t('main.sorted_by')"
+            :options="sortOptions"
+            locale-key-prefix="tasks.fields."
+            v-model="currentSort"
           />
         </div>
 
-        <combobox
-          class="flexrow-item"
-          :label="$t('main.show')"
-          :options="filterOptions"
-          locale-key-prefix="tasks."
-          v-model="currentFilter"
-        />
+        <div class="flexrow">
+          <h1 class="title mt1 flerow-item">
+            {{ nbTasksToCheck }} tasks to check
+          </h1>
+          <div class="filler"></div>
+          <ButtonSimple
+            class="flexrow-item"
+            @click="isPlaylist = true"
+            text="Build playlist from list"
+          />
+        </div>
 
-        <combobox
-          class="flexrow-item"
-          :label="$t('main.sorted_by')"
-          :options="sortOptions"
-          locale-key-prefix="tasks.fields."
-          v-model="currentSort"
-        />
-
-      </div>
-
-      <div class="flexrow">
-        <h1 class="title mt1 flerow-item">
-         {{ nbTasksToCheck }} tasks to check
-        </h1>
-        <div class="filler"></div>
-        <ButtonSimple
-          class="flexrow-item"
-          @click="isPlaylist = true"
-          text="Build playlist from list"
+        <todos-list
+          :tasks="sortedTasks"
+          :is-loading="isLoading"
+          :is-error="isLoadingError"
+          :selection-grid="selectionGrid"
+          :is-to-check="true"
+          @task-selection-cleared="onTaskSelectionCleared"
+          @task-selection-addition="onTaskSelectionAdded"
+          @task-selection-removal="onTaskSelectionRemoved"
         />
       </div>
-
-      <todos-list
-        :tasks="sortedTasks"
-        :is-loading="isLoading"
-        :is-error="isLoadingError"
-        :selection-grid="selectionGrid"
-        :is-to-check="true"
-        @task-selection-cleared="onTaskSelectionCleared"
-        @task-selection-addition="onTaskSelectionAdded"
-        @task-selection-removal="onTaskSelectionRemoved"
-      />
     </div>
 
-  </div>
+    <div class="column side-column" v-if="nbSelectedTasks === 1">
+      <task-info :task="selectedTasks.values().next().value" />
+    </div>
 
-  <div
-    class="column side-column"
-    v-if="nbSelectedTasks === 1"
-  >
-    <task-info
-      :task="selectedTasks.values().next().value"
+    <view-playlist-modal
+      :active="isPlaylist"
+      :task-ids="sortedTasks.map(t => t.id)"
+      @cancel="isPlaylist = false"
     />
   </div>
-
-  <view-playlist-modal
-    :active="isPlaylist"
-    :task-ids="sortedTasks.map(t => t.id)"
-    @cancel="isPlaylist = false"
-  />
-</div>
 </template>
 
 <script>
@@ -117,10 +105,7 @@ import firstBy from 'thenby'
 
 import { populateTask } from '@/lib/models'
 import { sortByName } from '@/lib/sorting'
-import {
-  buildSelectionGrid,
-  clearSelectionGrid
-} from '@/lib/selection'
+import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
 import { parseDate } from '@/lib/time'
 
 import ActionPanel from '@/components/tops/ActionPanel'
@@ -152,7 +137,7 @@ export default {
     ViewPlaylistModal
   },
 
-  data () {
+  data() {
     return {
       currentFilter: 'all_tasks',
       currentSort: 'priority',
@@ -160,10 +145,10 @@ export default {
       isLoading: false,
       isLoadingError: false,
       isPlaylist: false,
-      filterOptions: [
-        'all_tasks',
-        'due_this_week'
-      ].map(name => ({ label: name, value: name })),
+      filterOptions: ['all_tasks', 'due_this_week'].map(name => ({
+        label: name,
+        value: name
+      })),
       person: {},
       productionId: '',
       productionList: [],
@@ -183,11 +168,11 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.isLoading = true
     this.loadTasksToCheck()
       .then(tasks => {
-        if (tasks) {
+        if (tasks) {
           tasks.forEach(populateTask)
           this.buildSelectionGrid(tasks)
           this.resetProductionList(tasks)
@@ -202,8 +187,7 @@ export default {
       })
   },
 
-  afterDestroy () {
-  },
+  afterDestroy() {},
 
   computed: {
     ...mapGetters([
@@ -215,13 +199,13 @@ export default {
       'selectedTasks'
     ]),
 
-    nbTasksToCheck () {
+    nbTasksToCheck() {
       return this.sortedTasks.filter(task => {
         return this.taskStatusMap.get(task.task_status_id).is_feedback_request
       }).length
     },
 
-    assignees () {
+    assignees() {
       const assignees = []
       const assigneesMap = {}
       this.tasksToCheck.forEach(task => {
@@ -235,7 +219,7 @@ export default {
       return assignees
     },
 
-    episodeOptions () {
+    episodeOptions() {
       const episodeOptions = []
       const episodeMap = {}
       if (!this.productionId) return []
@@ -244,9 +228,10 @@ export default {
       this.tasksToCheck
         .filter(t => t.project_id === this.productionId)
         .forEach(task => {
-          if (task.episode_id &&
-              !episodeMap[task.episode_id] &&
-              task.entity_type_name === 'Shot'
+          if (
+            task.episode_id &&
+            !episodeMap[task.episode_id] &&
+            task.entity_type_name === 'Shot'
           ) {
             episodeMap[task.episode_id] = true
             episodeOptions.push({
@@ -255,26 +240,29 @@ export default {
             })
           }
         })
-      return [{
-        label: this.$t('main.all'),
-        value: 'all'
-      }].concat(episodeOptions.sort((a, b) => a.label.localeCompare(b.label)))
+      return [
+        {
+          label: this.$t('main.all'),
+          value: 'all'
+        }
+      ].concat(episodeOptions.sort((a, b) => a.label.localeCompare(b.label)))
     },
 
-    filteredTasks () {
-      let tasks = this.currentFilter === 'all_tasks'
-        ? [...this.tasksToCheck]
-        : this.tasksToCheck.filter(t => {
-          const dueDate = parseDate(t.due_date)
-          return moment().startOf('week').isSame(dueDate, 'week')
-        })
-      if (this.productionId !== '') {
+    filteredTasks() {
+      let tasks =
+        this.currentFilter === 'all_tasks'
+          ? [...this.tasksToCheck]
+          : this.tasksToCheck.filter(t => {
+              const dueDate = parseDate(t.due_date)
+              return moment().startOf('week').isSame(dueDate, 'week')
+            })
+      if (this.productionId !== '') {
         tasks = tasks.filter(t => t.project_id === this.productionId)
       }
-      if (this.taskTypeId !== '') {
+      if (this.taskTypeId !== '') {
         tasks = tasks.filter(t => t.task_type_id === this.taskTypeId)
       }
-      if (this.taskStatusId !== '') {
+      if (this.taskStatusId !== '') {
         tasks = tasks.filter(t => t.task_status_id === this.taskStatusId)
       }
       if (this.person && this.person.id) {
@@ -286,7 +274,7 @@ export default {
       return tasks
     },
 
-    sortedTasks () {
+    sortedTasks() {
       const isName = this.currentSort === 'entity_name'
       const isPriority = this.currentSort === 'priority'
       const isDueDate = this.currentSort === 'due_date'
@@ -300,26 +288,22 @@ export default {
       } else if (isPriority) {
         return tasks.sort(
           firstBy('priority', -1)
-            .thenBy(
-              (a, b) => {
-                if (!a.due_date) return 1
-                else if (!b.due_date) return -1
-                else return a.due_date.localeCompare(b.due_date)
-              }
-            )
+            .thenBy((a, b) => {
+              if (!a.due_date) return 1
+              else if (!b.due_date) return -1
+              else return a.due_date.localeCompare(b.due_date)
+            })
             .thenBy('project_name')
             .thenBy('task_type_name')
             .thenBy('entity_name')
         )
       } else if (isDueDate) {
         return tasks.sort(
-          firstBy(
-            (a, b) => {
-              if (!a.due_date) return 1
-              else if (!b.due_date) return -1
-              else return a.due_date.localeCompare(b.due_date)
-            }
-          )
+          firstBy((a, b) => {
+            if (!a.due_date) return 1
+            else if (!b.due_date) return -1
+            else return a.due_date.localeCompare(b.due_date)
+          })
             .thenBy('project_name')
             .thenBy('task_type_name')
             .thenBy('entity_name')
@@ -343,11 +327,11 @@ export default {
       'setTodosSearch'
     ]),
 
-    buildSelectionGrid (tasks) {
+    buildSelectionGrid(tasks) {
       this.selectionGrid = buildSelectionGrid(tasks.length, 1)
     },
 
-    resetProductionList (tasks = []) {
+    resetProductionList(tasks = []) {
       const productionIds = {}
       const productionList = []
       tasks.forEach(task => {
@@ -356,13 +340,15 @@ export default {
           productionList.push(this.productionMap.get(task.project_id))
         }
       })
-      this.productionList = [{
-        id: '',
-        name: this.$t('main.all')
-      }].concat(sortByName(productionList))
+      this.productionList = [
+        {
+          id: '',
+          name: this.$t('main.all')
+        }
+      ].concat(sortByName(productionList))
     },
 
-    resetTaskTypeList (tasks) {
+    resetTaskTypeList(tasks) {
       const taskTypeIds = {}
       const taskTypeList = []
       tasks.forEach(task => {
@@ -371,14 +357,16 @@ export default {
           taskTypeList.push(this.taskTypeMap.get(task.task_type_id))
         }
       })
-      this.taskTypeList = [{
-        id: '',
-        color: '#999',
-        name: this.$t('news.all')
-      }].concat(sortByName(taskTypeList))
+      this.taskTypeList = [
+        {
+          id: '',
+          color: '#999',
+          name: this.$t('news.all')
+        }
+      ].concat(sortByName(taskTypeList))
     },
 
-    resetTaskStatusList (tasks) {
+    resetTaskStatusList(tasks) {
       const taskStatusIds = {}
       const taskStatusList = []
       tasks.forEach(task => {
@@ -387,50 +375,50 @@ export default {
           taskStatusList.push(this.taskStatusMap.get(task.task_status_id))
         }
       })
-      this.taskStatusList = [{
-        id: '',
-        color: '#999',
-        name: this.$t('news.all'),
-        short_name: this.$t('news.all')
-      }].concat(sortByName(taskStatusList))
+      this.taskStatusList = [
+        {
+          id: '',
+          color: '#999',
+          name: this.$t('news.all'),
+          short_name: this.$t('news.all')
+        }
+      ].concat(sortByName(taskStatusList))
     },
 
-    onTaskSelectionCleared () {
+    onTaskSelectionCleared() {
       this.buildSelectionGrid(this.sortedTasks)
     },
 
-    onTaskSelectionAdded (selection) {
+    onTaskSelectionAdded(selection) {
       this.selectionGrid[selection.x][selection.y] = true
     },
 
-    onTaskSelectionRemoved (selection) {
+    onTaskSelectionRemoved(selection) {
       this.selectionGrid[selection.x][selection.y] = false
     }
   },
 
   socket: {
     events: {
-      'task:assign' (eventData) {
-      },
+      'task:assign'(eventData) {},
 
-      'task:unassign' (eventData) {
-      }
+      'task:unassign'(eventData) {}
     }
   },
 
   watch: {
-    productionId () {
+    productionId() {
       this.episodeId = ''
     },
 
-    nbSelectedTasks () {
+    nbSelectedTasks() {
       if (this.nbSelectedTasks === 0) {
         this.buildSelectionGrid(this.sortedTasks)
       }
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: `${this.$t('tasks.my_checks')} - Kitsu`
     }
@@ -439,7 +427,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .data-list {
   margin-top: 0;
 }
@@ -476,5 +463,4 @@ export default {
 .field {
   margin-bottom: 0;
 }
-
 </style>

@@ -10,7 +10,7 @@ import moment from 'moment'
  * Common functions to shot, asset and edit pages.
  */
 export const entityMixin = {
-  data () {
+  data() {
     return {
       currentSection: 'Casting',
       zoomLevel: 1,
@@ -30,29 +30,27 @@ export const entityMixin = {
     }
   },
 
-  created () {
-  },
+  created() {},
 
-  mounted () {
-  },
+  mounted() {},
 
-  beforeDestroy () {
-  },
+  beforeDestroy() {},
 
   computed: {
-
-    thumbnailPath () {
+    thumbnailPath() {
       const previewId = this.currentEntity.preview_file_id
       return `/api/pictures/originals/preview-files/${previewId}.png`
     },
 
-    isPreview () {
-      return this.currentEntity &&
+    isPreview() {
+      return (
+        this.currentEntity &&
         this.currentEntity.preview_file_id &&
         this.currentEntity.preview_file_id.length > 0
+      )
     },
 
-    currentTasks () {
+    currentTasks() {
       const entity =
         this.currentAsset ||
         this.currentShot ||
@@ -61,21 +59,22 @@ export const entityMixin = {
         this.currentEpisode
       if (!entity || !entity.tasks) return []
       return entity
-        ? entity
-          .tasks
-          .map(taskId => this.taskMap.get(taskId))
-          .filter(task => task)
-          .sort((a, b) => {
-            const taskTypeAPriority = this.getTaskTypePriority(a.task_type_id)
-            const taskTypeBPriority = this.getTaskTypePriority(b.task_type_id)
-            return taskTypeAPriority - taskTypeBPriority
-          })
+        ? entity.tasks
+            .map(taskId => this.taskMap.get(taskId))
+            .filter(task => task)
+            .sort((a, b) => {
+              const taskTypeAPriority = this.getTaskTypePriority(a.task_type_id)
+              const taskTypeBPriority = this.getTaskTypePriority(b.task_type_id)
+              return taskTypeAPriority - taskTypeBPriority
+            })
         : []
     },
 
-    tasksStartDate () {
-      if (this.scheduleItems.length > 0 &&
-          this.scheduleItems[0].children.length > 0) {
+    tasksStartDate() {
+      if (
+        this.scheduleItems.length > 0 &&
+        this.scheduleItems[0].children.length > 0
+      ) {
         return getFirstStartDate(this.scheduleItems[0].children)
           .clone()
           .add(-60, 'days')
@@ -84,9 +83,11 @@ export const entityMixin = {
       }
     },
 
-    tasksEndDate () {
-      if (this.scheduleItems.length > 0 &&
-          this.scheduleItems[0].children.length > 0) {
+    tasksEndDate() {
+      if (
+        this.scheduleItems.length > 0 &&
+        this.scheduleItems[0].children.length > 0
+      ) {
         return getLastEndDate(this.scheduleItems[0].children)
           .clone()
           .add(60, 'days')
@@ -95,7 +96,7 @@ export const entityMixin = {
       }
     },
 
-    scheduleItems () {
+    scheduleItems() {
       let manDays = 0
       const rootElement = {
         avatar: false,
@@ -109,49 +110,56 @@ export const entityMixin = {
         editable: false
       }
       const limitStartDate = moment()
-      const children = this.currentTasks.map(task => {
-        const estimation = task.estimation
-        let startDate = limitStartDate.clone()
-        let endDate
+      const children = this.currentTasks
+        .map(task => {
+          const estimation = task.estimation
+          let startDate = limitStartDate.clone()
+          let endDate
 
-        if (!task.start_date && !task.real_start_date &&
-            !task.due_date && !task.end_date) return null
+          if (
+            !task.start_date &&
+            !task.real_start_date &&
+            !task.due_date &&
+            !task.end_date
+          )
+            return null
 
-        if (task.start_date) {
-          startDate = parseSimpleDate(task.start_date)
-        } else if (task.real_start_date) {
-          startDate = parseSimpleDate(task.real_start_date)
-        }
+          if (task.start_date) {
+            startDate = parseSimpleDate(task.start_date)
+          } else if (task.real_start_date) {
+            startDate = parseSimpleDate(task.real_start_date)
+          }
 
-        if (task.due_date) {
-          endDate = parseSimpleDate(task.due_date)
-        } else if (task.end_date) {
-          endDate = parseSimpleDate(task.end_date)
-        } else if (task.estimation) {
-          endDate = startDate.clone().add(estimation, 'days')
-        }
+          if (task.due_date) {
+            endDate = parseSimpleDate(task.due_date)
+          } else if (task.end_date) {
+            endDate = parseSimpleDate(task.end_date)
+          } else if (task.estimation) {
+            endDate = startDate.clone().add(estimation, 'days')
+          }
 
-        if (!endDate || endDate.isBefore(startDate)) {
-          endDate = startDate.clone().add(1, 'days')
-        }
-        if (estimation) manDays += task.estimation
-        const taskType = this.taskTypeMap.get(task.task_type_id)
+          if (!endDate || endDate.isBefore(startDate)) {
+            endDate = startDate.clone().add(1, 'days')
+          }
+          if (estimation) manDays += task.estimation
+          const taskType = this.taskTypeMap.get(task.task_type_id)
 
-        return {
-          ...task,
-          name: taskType.name,
-          startDate: startDate,
-          endDate: endDate,
-          expanded: false,
-          loading: false,
-          man_days: estimation,
-          editable: false,
-          unresizable: false,
-          parentElement: rootElement,
-          color: taskType.color,
-          children: []
-        }
-      }).filter(c => c !== null)
+          return {
+            ...task,
+            name: taskType.name,
+            startDate: startDate,
+            endDate: endDate,
+            expanded: false,
+            loading: false,
+            man_days: estimation,
+            editable: false,
+            unresizable: false,
+            parentElement: rootElement,
+            color: taskType.color,
+            children: []
+          }
+        })
+        .filter(c => c !== null)
       let rootStartDate = moment()
       let rootEndDate = moment().add(1, 'days')
       if (children.length > 0) {
@@ -169,15 +177,15 @@ export const entityMixin = {
   },
 
   methods: {
-    changeTab (tab) {
+    changeTab(tab) {
       this.selectedTab = tab
     },
 
-    onEditClicked () {
+    onEditClicked() {
       this.modals.edit = true
     },
 
-    onTaskSelected (task) {
+    onTaskSelected(task) {
       if (!this.currentTask || this.currentTask.id !== task.id) {
         this.currentTask = task
       } else {
@@ -187,7 +195,7 @@ export const entityMixin = {
   },
 
   watch: {
-    currentSection () {
+    currentSection() {
       this.$router.push({
         query: { section: this.currentSection }
       })

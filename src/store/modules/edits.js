@@ -22,36 +22,20 @@ import {
   buildSelectionGrid,
   clearSelectionGrid
 } from '@/lib/selection'
-import {
-  getFilledColumns,
-  removeModelFromList
-} from '@/lib/models'
-import {
-  minutesToDays
-} from '@/lib/time'
-import {
-  buildEditIndex,
-  indexSearch
-} from '@/lib/indexing'
-import {
-  applyFilters,
-  getFilters,
-  getKeyWords
-} from '@/lib/filtering'
+import { getFilledColumns, removeModelFromList } from '@/lib/models'
+import { minutesToDays } from '@/lib/time'
+import { buildEditIndex, indexSearch } from '@/lib/indexing'
+import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
 
 import {
   LOAD_EDITS_START,
   LOAD_EDITS_ERROR,
   LOAD_EDITS_END,
   SORT_VALIDATION_COLUMNS,
-
   LOAD_EDIT_END,
-
   EDIT_CSV_FILE_SELECTED,
   IMPORT_EDITS_END,
-
   LOAD_OPEN_PRODUCTIONS_END,
-
   NEW_EDIT_END,
   EDIT_EDIT_END,
   ADD_EDIT,
@@ -59,36 +43,25 @@ import {
   REMOVE_EDIT,
   CANCEL_EDIT,
   RESTORE_EDIT_END,
-
   NEW_TASK_COMMENT_END,
   NEW_TASK_END,
   CREATE_TASKS_END,
-
   SET_EDIT_SEARCH,
-
   SET_CURRENT_PRODUCTION,
   DISPLAY_MORE_EDITS,
-
   SET_EDIT_LIST_SCROLL_POSITION,
-
   REMOVE_SELECTED_TASK,
   ADD_SELECTED_TASK,
   ADD_SELECTED_TASKS,
   DELETE_TASK_END,
   CLEAR_SELECTED_TASKS,
-
   SET_PREVIEW,
-
   SAVE_EDIT_SEARCH_END,
   REMOVE_EDIT_SEARCH_END,
-
   UPDATE_METADATA_DESCRIPTOR_END,
-
   LOCK_EDIT,
   UNLOCK_EDIT,
-
   RESET_ALL,
-
   CLEAR_SELECTED_EDITS,
   SET_EDIT_SELECTION
 } from '@/store/mutation-types'
@@ -100,37 +73,38 @@ const cache = {
 }
 
 const helpers = {
-  getCurrentProduction () {
+  getCurrentProduction() {
     return productionsStore.getters.currentProduction(productionsStore.state)
   },
-  getTask (taskId) {
+  getTask(taskId) {
     return tasksStore.state.taskMap.get(taskId)
   },
-  getTaskStatus (taskStatusId) {
+  getTaskStatus(taskStatusId) {
     return tasksStore.state.taskStatusMap.get(taskStatusId)
   },
-  getTaskType (taskTypeId) {
+  getTaskType(taskTypeId) {
     return taskTypesStore.state.taskTypeMap.get(taskTypeId)
   },
-  getPerson (personId) {
+  getPerson(personId) {
     return peopleStore.state.personMap.get(personId)
   },
 
-  getEditName (edit) {
+  getEditName(edit) {
     return `${edit.name}`
   },
 
-  dateDigit (date) {
+  dateDigit(date) {
     return date.toString().padStart(2, '0')
   },
 
-  populateTask (task, edit) {
+  populateTask(task, edit) {
     task.name = getTaskTypePriorityOfProd(
       helpers.getTaskType(task.task_type_id),
       helpers.getCurrentProduction()
     ).toString()
-    task.task_status_short_name =
-      helpers.getTaskStatus(task.task_status_id).short_name
+    task.task_status_short_name = helpers.getTaskStatus(
+      task.task_status_id
+    ).short_name
 
     const editName = helpers.getEditName(edit)
     Object.assign(task, {
@@ -147,13 +121,15 @@ const helpers = {
     return task
   },
 
-  setListStats (state, edits) {
+  setListStats(state, edits) {
     let timeSpent = 0
     let estimation = 0
-    edits.filter(e => !e.canceled).forEach(edit => {
-      timeSpent += edit.timeSpent
-      estimation += edit.estimation
-    })
+    edits
+      .filter(e => !e.canceled)
+      .forEach(edit => {
+        timeSpent += edit.timeSpent
+        estimation += edit.estimation
+      })
     Object.assign(state, {
       displayedEditsCount: edits.length,
       displayedEditsLength: edits.filter(e => !e.canceled).length,
@@ -162,14 +138,16 @@ const helpers = {
     })
   },
 
-  sortValidationColumns (validationColumns, editFilledColumns, taskTypeMap) {
+  sortValidationColumns(validationColumns, editFilledColumns, taskTypeMap) {
     const columns = [...validationColumns]
     return sortValidationColumns(
-      columns, taskTypeMap, helpers.getCurrentProduction()
+      columns,
+      taskTypeMap,
+      helpers.getCurrentProduction()
     )
   },
 
-  getPeriod (task, detailLevel) {
+  getPeriod(task, detailLevel) {
     const endDateString = helpers.getTaskEndDate(task, detailLevel)
     let period
     if (detailLevel === 'day') {
@@ -182,7 +160,7 @@ const helpers = {
     return period
   },
 
-  getDateFromParameters ({ detailLevel, year, week, month, day }) {
+  getDateFromParameters({ detailLevel, year, week, month, day }) {
     if (detailLevel === 'day') {
       return `${year}-${helpers.dateDigit(month)}-${helpers.dateDigit(day)}`
     } else if (detailLevel === 'month') {
@@ -194,7 +172,7 @@ const helpers = {
     }
   },
 
-  getTaskEndDate (task, detailLevel) {
+  getTaskEndDate(task, detailLevel) {
     let endDateString
     if (detailLevel === 'day') {
       endDateString = moment(task.end_date, 'YYYY-MM-DD').format('YYYY-MM-DD')
@@ -206,15 +184,18 @@ const helpers = {
     return endDateString
   },
 
-  buildResult (state, {
-    editSearch,
-    production,
-    sorting,
-    taskStatusMap,
-    taskTypeMap,
-    persons,
-    taskMap
-  }) {
+  buildResult(
+    state,
+    {
+      editSearch,
+      production,
+      sorting,
+      taskStatusMap,
+      taskTypeMap,
+      persons,
+      taskMap
+    }
+  ) {
     const taskTypes = Array.from(taskTypeMap.values())
     const taskStatuses = Array.from(taskStatusMap.values())
     const query = editSearch
@@ -229,12 +210,7 @@ const helpers = {
     })
     let result = indexSearch(cache.editIndex, keywords) || cache.edits
     result = applyFilters(result, filters, taskMap)
-    result = sortEditResult(
-      result,
-      sorting,
-      taskTypeMap,
-      taskMap
-    )
+    result = sortEditResult(result, sorting, taskTypeMap, taskMap)
     cache.result = result
 
     const displayedEdits = result.slice(0, PAGE_SIZE)
@@ -248,7 +224,7 @@ const helpers = {
     state.editSelectionGrid = buildSelectionGrid(maxX, maxY)
   },
 
-  sortStatColumns (stats, taskTypeMap) {
+  sortStatColumns(stats, taskTypeMap) {
     const validationColumnsMap = {}
     if (stats.all) {
       Object.keys(stats.all).forEach(entryId => {
@@ -259,7 +235,9 @@ const helpers = {
     }
     const validationColumns = Object.keys(validationColumnsMap)
     return sortValidationColumns(
-      validationColumns, taskTypeMap, helpers.getCurrentProduction()
+      validationColumns,
+      taskTypeMap,
+      helpers.getCurrentProduction()
     )
   }
 }
@@ -336,8 +314,7 @@ const getters = {
 }
 
 const actions = {
-
-  loadEdits ({ commit, dispatch, state, rootGetters }) {
+  loadEdits({ commit, dispatch, state, rootGetters }) {
     const production = rootGetters.currentProduction
     const userFilters = rootGetters.userFilters
     const taskTypeMap = rootGetters.taskTypeMap
@@ -349,7 +326,8 @@ const actions = {
     if (isTVShow) {
       if (!episode) {
         if (rootGetters.episodes.length > 0) {
-          episode = rootGetters.episodes.length > 0 ? rootGetters.episodes[0] : null
+          episode =
+            rootGetters.episodes.length > 0 ? rootGetters.episodes[0] : null
         } else {
           return Promise.resolve([])
         }
@@ -367,13 +345,17 @@ const actions = {
     }
 
     commit(LOAD_EDITS_START)
-    return editsApi.getEdits(production, episode)
-      .then((edits) => {
-        commit(
-          LOAD_EDITS_END,
-          { production, edits, userFilters, personMap, taskMap, taskTypeMap }
-
-        )
+    return editsApi
+      .getEdits(production, episode)
+      .then(edits => {
+        commit(LOAD_EDITS_END, {
+          production,
+          edits,
+          userFilters,
+          personMap,
+          taskMap,
+          taskTypeMap
+        })
         return Promise.resolve(edits)
       })
       .catch(err => {
@@ -387,7 +369,7 @@ const actions = {
    * Function useds mainly to reload edit data after an update or creation
    * event. If the edit was updated a few times ago, it is not reloaded.
    */
-  loadEdit ({ commit, state, rootGetters }, editId) {
+  loadEdit({ commit, state, rootGetters }, editId) {
     const edit = rootGetters.editMap.get(editId)
     if (edit && edit.lock) return
 
@@ -395,8 +377,9 @@ const actions = {
     const production = rootGetters.currentProduction
     const taskMap = rootGetters.taskMap
     const taskTypeMap = rootGetters.taskTypeMap
-    return editsApi.getEdit(editId)
-      .then((edit) => {
+    return editsApi
+      .getEdit(editId)
+      .then(edit => {
         if (state.editMap.get(edit.id)) {
           commit(UPDATE_EDIT, edit)
         } else {
@@ -409,75 +392,73 @@ const actions = {
           })
         }
       })
-      .catch((err) => console.error(err))
+      .catch(err => console.error(err))
   },
 
-  newEdit ({ commit, dispatch, rootGetters }, edit) {
-    return editsApi.newEdit(edit)
-      .then(edit => {
-        commit(NEW_EDIT_END, edit)
-        const taskTypeIds = rootGetters.productionEditTaskTypeIds
-        const createTaskPromises = taskTypeIds.map(
-          taskTypeId => dispatch('createTask', {
-            entityId: edit.id,
-            projectId: edit.project_id,
-            taskTypeId: taskTypeId,
-            type: 'edits'
-          })
-        )
-        return func.runPromiseAsSeries(createTaskPromises)
-          .then(() => Promise.resolve(edit))
-          .catch(console.error)
-      })
+  newEdit({ commit, dispatch, rootGetters }, edit) {
+    return editsApi.newEdit(edit).then(edit => {
+      commit(NEW_EDIT_END, edit)
+      const taskTypeIds = rootGetters.productionEditTaskTypeIds
+      const createTaskPromises = taskTypeIds.map(taskTypeId =>
+        dispatch('createTask', {
+          entityId: edit.id,
+          projectId: edit.project_id,
+          taskTypeId: taskTypeId,
+          type: 'edits'
+        })
+      )
+      return func
+        .runPromiseAsSeries(createTaskPromises)
+        .then(() => Promise.resolve(edit))
+        .catch(console.error)
+    })
   },
 
-  editEdit ({ commit, state }, data) {
+  editEdit({ commit, state }, data) {
     commit(LOCK_EDIT, data)
     commit(EDIT_EDIT_END, data)
-    return editsApi.updateEdit(data)
-      .then(edit => {
-        setTimeout(() => {
-          commit(UNLOCK_EDIT, edit)
-        }, 2000)
-        return Promise.resolve(edit)
-      })
+    return editsApi.updateEdit(data).then(edit => {
+      setTimeout(() => {
+        commit(UNLOCK_EDIT, edit)
+      }, 2000)
+      return Promise.resolve(edit)
+    })
   },
 
-  deleteEdit ({ commit, state }, edit) {
-    return editsApi.deleteEdit(edit)
-      .then(() => {
-        const previousEdit = state.editMap.get(edit.id)
-        if (
-          previousEdit &&
-          previousEdit.tasks.length > 0 &&
-          !previousEdit.canceled
-        ) {
-          commit(CANCEL_EDIT, previousEdit)
-        } else {
-          commit(REMOVE_EDIT, edit)
-        }
-        return Promise.resolve()
-      })
+  deleteEdit({ commit, state }, edit) {
+    return editsApi.deleteEdit(edit).then(() => {
+      const previousEdit = state.editMap.get(edit.id)
+      if (
+        previousEdit &&
+        previousEdit.tasks.length > 0 &&
+        !previousEdit.canceled
+      ) {
+        commit(CANCEL_EDIT, previousEdit)
+      } else {
+        commit(REMOVE_EDIT, edit)
+      }
+      return Promise.resolve()
+    })
   },
 
-  restoreEdit ({ commit, state }, edit) {
-    return editsApi.restoreEdit(edit)
-      .then((edit) => {
-        commit(RESTORE_EDIT_END, edit)
-        return Promise.resolve(edit)
-      })
+  restoreEdit({ commit, state }, edit) {
+    return editsApi.restoreEdit(edit).then(edit => {
+      commit(RESTORE_EDIT_END, edit)
+      return Promise.resolve(edit)
+    })
   },
 
-  uploadEditFile ({ commit, state, rootGetters }, toUpdate) {
+  uploadEditFile({ commit, state, rootGetters }, toUpdate) {
     const production = rootGetters.currentProduction
-    return editsApi.postCsv(production, state.editsCsvFormData, toUpdate)
+    return editsApi
+      .postCsv(production, state.editsCsvFormData, toUpdate)
       .then(() => {
         commit(IMPORT_EDITS_END)
         return Promise.resolve()
       })
   },
 
-  displayMoreEdits ({ commit, rootGetters }) {
+  displayMoreEdits({ commit, rootGetters }) {
     commit(DISPLAY_MORE_EDITS, {
       taskTypeMap: rootGetters.taskTypeMap,
       taskStatusMap: rootGetters.taskStatusMap,
@@ -486,62 +467,54 @@ const actions = {
     })
   },
 
-  initEdits ({ dispatch }) {
+  initEdits({ dispatch }) {
     dispatch('setLastProductionScreen', 'production-edits')
     return dispatch('loadEdits')
   },
 
-  setEditSearch ({ commit, rootGetters }, editSearch) {
+  setEditSearch({ commit, rootGetters }, editSearch) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
     const production = rootGetters.currentProduction
     const persons = rootGetters.people
-    commit(
-      SET_EDIT_SEARCH,
-      {
-        editSearch,
-        persons,
-        taskStatusMap,
-        taskMap,
-        taskTypeMap,
-        production
-      }
-    )
+    commit(SET_EDIT_SEARCH, {
+      editSearch,
+      persons,
+      taskStatusMap,
+      taskMap,
+      taskTypeMap,
+      production
+    })
   },
 
-  saveEditSearch ({ commit, rootGetters }, searchQuery) {
+  saveEditSearch({ commit, rootGetters }, searchQuery) {
     const query = state.editSearchQueries.find(
-      (query) => query.name === searchQuery
+      query => query.name === searchQuery
     )
     const production = rootGetters.currentProduction
 
     if (!query) {
-      return peopleApi.createFilter(
-        'edit',
-        searchQuery,
-        searchQuery,
-        production.id,
-        null
-      ).then(searchQuery => {
-        commit(SAVE_EDIT_SEARCH_END, { searchQuery, production })
-        return searchQuery
-      })
+      return peopleApi
+        .createFilter('edit', searchQuery, searchQuery, production.id, null)
+        .then(searchQuery => {
+          commit(SAVE_EDIT_SEARCH_END, { searchQuery, production })
+          return searchQuery
+        })
     } else {
       return Promise.resolve()
     }
   },
 
-  removeEditSearch ({ commit, rootGetters }, searchQuery) {
+  removeEditSearch({ commit, rootGetters }, searchQuery) {
     const production = rootGetters.currentProduction
-    return peopleApi.removeFilter(searchQuery)
-      .then(() => {
-        commit(REMOVE_EDIT_SEARCH_END, { searchQuery, production })
-        return Promise.resolve()
-      })
+    return peopleApi.removeFilter(searchQuery).then(() => {
+      commit(REMOVE_EDIT_SEARCH_END, { searchQuery, production })
+      return Promise.resolve()
+    })
   },
 
-  getEditsCsvLines ({ state, rootGetters }) {
+  getEditsCsvLines({ state, rootGetters }) {
     const production = rootGetters.currentProduction
     const isTVShow = rootGetters.isTVShow
     const organisation = rootGetters.organisation
@@ -553,10 +526,7 @@ const actions = {
     const lines = edits.map(edit => {
       let editLine = []
       if (isTVShow) editLine.push(edit.episode_name)
-      editLine = editLine.concat([
-        edit.name,
-        edit.description || ''
-      ])
+      editLine = editLine.concat([edit.name, edit.description || ''])
       sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Edit')
         .forEach(descriptor => {
@@ -568,54 +538,58 @@ const actions = {
       if (state.isEditEstimation) {
         editLine.push(minutesToDays(organisation, edit.estimation).toFixed(2))
       }
-      state.editValidationColumns
-        .forEach(validationColumn => {
-          const task = rootGetters.taskMap.get(
-            edit.validations.get(validationColumn)
+      state.editValidationColumns.forEach(validationColumn => {
+        const task = rootGetters.taskMap.get(
+          edit.validations.get(validationColumn)
+        )
+        if (task) {
+          editLine.push(task.task_status_short_name)
+          editLine.push(
+            task.assignees.map(id => personMap.get(id).full_name).join(',')
           )
-          if (task) {
-            editLine.push(task.task_status_short_name)
-            editLine.push(
-              task.assignees.map(id => personMap.get(id).full_name).join(',')
-            )
-          } else {
-            editLine.push('') // Status
-            editLine.push('') // Assignations
-          }
-        })
+        } else {
+          editLine.push('') // Status
+          editLine.push('') // Assignations
+        }
+      })
       return editLine
     })
     return lines
   },
 
-  loadEditHistory ({ commit, state }, editId) {
+  loadEditHistory({ commit, state }, editId) {
     return editsApi.loadEditHistory(editId)
   },
 
-  getPersonEdits (
+  getPersonEdits(
     { commit, state, rootGetters },
     { taskTypeId, detailLevel, personId, year, month, week, day }
   ) {
     const taskStatusMap = rootGetters.taskStatusMap
     const dateString = helpers.getDateFromParameters({
-      detailLevel, year, month, week, day
+      detailLevel,
+      year,
+      month,
+      week,
+      day
     })
 
-    const edits = cache.edits.filter((edit) => {
-      const task = rootGetters.taskMap.get(edit.validations.get(taskTypeId))
-      if (task) {
-        const taskStatus = taskStatusMap.get(task.task_status_id)
-        const endDateString = helpers.getTaskEndDate(task, detailLevel)
-        return (
-          task &&
-          taskStatus.is_done &&
-          task.assignees.includes(personId) &&
-          endDateString === dateString
-        )
-      } else {
-        return false
-      }
-    })
+    const edits = cache.edits
+      .filter(edit => {
+        const task = rootGetters.taskMap.get(edit.validations.get(taskTypeId))
+        if (task) {
+          const taskStatus = taskStatusMap.get(task.task_status_id)
+          const endDateString = helpers.getTaskEndDate(task, detailLevel)
+          return (
+            task &&
+            taskStatus.is_done &&
+            task.assignees.includes(personId) &&
+            endDateString === dateString
+          )
+        } else {
+          return false
+        }
+      })
       .map(edit => ({
         ...edit,
         full_name: helpers.getEditName(edit)
@@ -623,8 +597,9 @@ const actions = {
     return Promise.resolve(edits)
   },
 
-  deleteAllEditTasks (
-    { commit, dispatch, state }, { projectId, taskTypeId, selectionOnly }
+  deleteAllEditTasks(
+    { commit, dispatch, state },
+    { projectId, taskTypeId, selectionOnly }
   ) {
     let taskIds = []
     if (selectionOnly) {
@@ -635,38 +610,44 @@ const actions = {
     return dispatch('deleteAllTasks', { projectId, taskTypeId, taskIds })
   },
 
-  setEditSelection ({ commit }, { edit, selected }) {
+  setEditSelection({ commit }, { edit, selected }) {
     commit(SET_EDIT_SELECTION, { edit, selected })
   },
 
-  clearSelectedEdits ({ commit }) {
+  clearSelectedEdits({ commit }) {
     commit(CLEAR_SELECTED_EDITS)
   },
 
-  deleteSelectedEdits ({ state, dispatch }) {
+  deleteSelectedEdits({ state, dispatch }) {
     return new Promise((resolve, reject) => {
-      let selectedEditIds = [...state.selectedEdits.values()].filter(edit => !edit.canceled).map(edit => edit.id)
+      let selectedEditIds = [...state.selectedEdits.values()]
+        .filter(edit => !edit.canceled)
+        .map(edit => edit.id)
       if (selectedEditIds.length === 0) {
         selectedEditIds = [...state.selectedEdits.keys()]
       }
-      async.eachSeries(selectedEditIds, (editId, next) => {
-        const edit = state.editMap.get(editId)
-        if (edit) {
-          dispatch('deleteEdit', edit)
+      async.eachSeries(
+        selectedEditIds,
+        (editId, next) => {
+          const edit = state.editMap.get(editId)
+          if (edit) {
+            dispatch('deleteEdit', edit)
+          }
+          next()
+        },
+        err => {
+          if (err) reject(err)
+          else {
+            resolve()
+          }
         }
-        next()
-      }, (err) => {
-        if (err) reject(err)
-        else {
-          resolve()
-        }
-      })
+      )
     })
   }
 }
 
 const mutations = {
-  [LOAD_EDITS_START] (state) {
+  [LOAD_EDITS_START](state) {
     cache.edits = []
     cache.result = []
     cache.editIndex = {}
@@ -685,12 +666,12 @@ const mutations = {
     state.selectedEdits = new Map()
   },
 
-  [LOAD_EDITS_ERROR] (state) {
+  [LOAD_EDITS_ERROR](state) {
     state.isEditsLoading = false
     state.isEditsLoadingError = true
   },
 
-  [LOAD_EDITS_END] (
+  [LOAD_EDITS_END](
     state,
     { production, edits, userFilters, taskMap, taskTypeMap, personMap }
   ) {
@@ -746,7 +727,9 @@ const mutations = {
     const filledColumns = getFilledColumns(displayedEdits)
 
     state.editValidationColumns = helpers.sortValidationColumns(
-      Object.values(validationColumns), filledColumns, taskTypeMap
+      Object.values(validationColumns),
+      filledColumns,
+      taskTypeMap
     )
 
     state.nbValidationColumns = state.editValidationColumns.length
@@ -772,40 +755,40 @@ const mutations = {
     }
   },
 
-  [SAVE_EDIT_SEARCH_END] (state, { searchQuery }) {
+  [SAVE_EDIT_SEARCH_END](state, { searchQuery }) {
     state.editSearchQueries.push(searchQuery)
     state.editSearchQueries = sortByName(state.editSearchQueries)
   },
 
-  [REMOVE_EDIT_SEARCH_END] (state, { searchQuery }) {
+  [REMOVE_EDIT_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.editSearchQueries.findIndex(
-      (query) => query.name === searchQuery.name
+      query => query.name === searchQuery.name
     )
     if (queryIndex >= 0) {
       state.editSearchQueries.splice(queryIndex, 1)
     }
   },
 
-  [LOAD_EDIT_END] (state, { edit, taskTypeMap }) {
-    edit.tasks.forEach((task) => {
+  [LOAD_EDIT_END](state, { edit, taskTypeMap }) {
+    edit.tasks.forEach(task => {
       helpers.populateTask(task, edit)
     })
     edit.tasks = sortTasks(edit.tasks, taskTypeMap)
     state.editMap.set(edit.id, edit)
   },
 
-  [EDIT_CSV_FILE_SELECTED] (state, formData) {
+  [EDIT_CSV_FILE_SELECTED](state, formData) {
     state.editsCsvFormData = formData
   },
-  [IMPORT_EDITS_END] (state) {
+  [IMPORT_EDITS_END](state) {
     state.editsCsvFormData = null
   },
 
-  [LOAD_OPEN_PRODUCTIONS_END] (state, projects) {
+  [LOAD_OPEN_PRODUCTIONS_END](state, projects) {
     state.openProductions = projects
   },
 
-  [EDIT_EDIT_END] (state, newEdit) {
+  [EDIT_EDIT_END](state, newEdit) {
     const edit = state.editMap.get(newEdit.id)
 
     if (edit) {
@@ -840,21 +823,21 @@ const mutations = {
     }
   },
 
-  [RESTORE_EDIT_END] (state, editToRestore) {
+  [RESTORE_EDIT_END](state, editToRestore) {
     const edit = state.editMap.get(editToRestore.id)
     edit.canceled = false
     cache.editIndex = buildEditIndex(cache.edits)
   },
 
-  [NEW_TASK_COMMENT_END] (state, { comment, taskId }) {},
+  [NEW_TASK_COMMENT_END](state, { comment, taskId }) {},
 
-  [SET_EDIT_SEARCH] (state, payload) {
+  [SET_EDIT_SEARCH](state, payload) {
     const sorting = state.editSorting
     payload.sorting = sorting
     helpers.buildResult(state, payload)
   },
 
-  [NEW_EDIT_END] (state, edit) {
+  [NEW_EDIT_END](state, edit) {
     edit.production_id = edit.project_id
     edit.preview_file_id = ''
 
@@ -875,8 +858,8 @@ const mutations = {
     state.editSelectionGrid = buildSelectionGrid(maxX, maxY)
   },
 
-  [CREATE_TASKS_END] (state, { tasks }) {
-    tasks.forEach((task) => {
+  [CREATE_TASKS_END](state, { tasks }) {
+    tasks.forEach(task => {
       if (task) {
         const edit = state.editMap.get(task.entity_id)
         if (edit) {
@@ -888,12 +871,10 @@ const mutations = {
     })
   },
 
-  [DISPLAY_MORE_EDITS] (state, {
-    taskTypeMap,
-    taskStatusMap,
-    taskMap,
-    production
-  }) {
+  [DISPLAY_MORE_EDITS](
+    state,
+    { taskTypeMap, taskStatusMap, taskMap, production }
+  ) {
     const edits = cache.result
     const newLength = state.displayedEdits.length + PAGE_SIZE
     if (newLength < edits.length + PAGE_SIZE) {
@@ -907,52 +888,59 @@ const mutations = {
       const maxY = state.nbValidationColumns
       if (previousX >= 0) {
         state.editSelectionGrid = appendSelectionGrid(
-          state.editSelectionGrid, previousX, maxX, maxY
+          state.editSelectionGrid,
+          previousX,
+          maxX,
+          maxY
         )
       }
     }
   },
 
-  [SET_CURRENT_PRODUCTION] (state, production) {
+  [SET_CURRENT_PRODUCTION](state, production) {
     state.editSearchText = ''
   },
 
-  [SET_PREVIEW] (state, { entityId, taskId, previewId, taskMap }) {
+  [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
     const edit = state.editMap.get(entityId)
     if (edit) {
       edit.preview_file_id = previewId
-      edit.tasks.forEach((taskId) => {
+      edit.tasks.forEach(taskId => {
         const task = taskMap.get(taskId)
         if (task) task.entity.preview_file_id = previewId
       })
     }
   },
 
-  [SET_EDIT_LIST_SCROLL_POSITION] (state, scrollPosition) {
+  [SET_EDIT_LIST_SCROLL_POSITION](state, scrollPosition) {
     state.editListScrollPosition = scrollPosition
   },
 
-  [REMOVE_SELECTED_TASK] (state, validationInfo) {
-    if (state.editSelectionGrid[0] &&
-        state.editSelectionGrid[validationInfo.x]) {
+  [REMOVE_SELECTED_TASK](state, validationInfo) {
+    if (
+      state.editSelectionGrid[0] &&
+      state.editSelectionGrid[validationInfo.x]
+    ) {
       state.editSelectionGrid[validationInfo.x][validationInfo.y] = false
     }
   },
 
-  [ADD_SELECTED_TASK] (state, validationInfo) {
-    if (state.editSelectionGrid[0] &&
-        state.editSelectionGrid[validationInfo.x]) {
+  [ADD_SELECTED_TASK](state, validationInfo) {
+    if (
+      state.editSelectionGrid[0] &&
+      state.editSelectionGrid[validationInfo.x]
+    ) {
       state.editSelectionGrid[validationInfo.x][validationInfo.y] = true
       state.selectedEdits = new Map() // unselect all previously selected lines
     }
   },
 
-  [CLEAR_SELECTED_TASKS] (state, validationInfo) {
+  [CLEAR_SELECTED_TASKS](state, validationInfo) {
     const tmpGrid = JSON.parse(JSON.stringify(state.editSelectionGrid))
     state.editSelectionGrid = clearSelectionGrid(tmpGrid)
   },
 
-  [NEW_TASK_END] (state, { task }) {
+  [NEW_TASK_END](state, { task }) {
     const edit = state.editMap.get(task.entity_id)
     if (edit && task) {
       task = helpers.populateTask(task, edit)
@@ -969,10 +957,8 @@ const mutations = {
     }
   },
 
-  [DELETE_TASK_END] (state, task) {
-    const edit = state.displayedEdits.find(
-      (edit) => edit.id === task.entity_id
-    )
+  [DELETE_TASK_END](state, task) {
+    const edit = state.displayedEdits.find(edit => edit.id === task.entity_id)
     if (edit) {
       const validations = new Map(edit.validations)
       validations.delete(task.task_type_id)
@@ -980,15 +966,15 @@ const mutations = {
       Vue.set(edit, 'validations', validations)
 
       const taskIndex = edit.tasks.findIndex(
-        (editTaskId) => editTaskId === task.id
+        editTaskId => editTaskId === task.id
       )
       edit.tasks.splice(taskIndex, 1)
     }
   },
 
-  [ADD_SELECTED_TASKS] (state, selection) {
+  [ADD_SELECTED_TASKS](state, selection) {
     let tmpGrid = JSON.parse(JSON.stringify(state.editSelectionGrid))
-    selection.forEach((validationInfo) => {
+    selection.forEach(validationInfo => {
       if (!tmpGrid[validationInfo.x]) {
         tmpGrid = appendSelectionGrid(
           tmpGrid,
@@ -1005,20 +991,14 @@ const mutations = {
     state.editSelectionGrid = tmpGrid
   },
 
-  [ADD_EDIT] (state, {
-    taskTypeMap,
-    taskMap,
-    personMap,
-    production,
-    edit
-  }) {
+  [ADD_EDIT](state, { taskTypeMap, taskMap, personMap, production, edit }) {
     const taskIds = []
     const validations = new Map()
     let timeSpent = 0
     let estimation = 0
     edit.project_name = production.name
     edit.production_id = production.id
-    edit.tasks.forEach((task) => {
+    edit.tasks.forEach(task => {
       helpers.populateTask(task, edit, production)
       timeSpent += task.duration
       estimation += task.estimation
@@ -1054,18 +1034,20 @@ const mutations = {
     state.editMap.set(edit.id, edit)
   },
 
-  [UPDATE_EDIT] (state, edit) {
+  [UPDATE_EDIT](state, edit) {
     Object.assign(state.editMap.get(edit.id), edit)
     cache.editIndex = buildEditIndex(cache.edits)
   },
 
-  [REMOVE_EDIT] (state, editToDelete) {
+  [REMOVE_EDIT](state, editToDelete) {
     state.editMap.delete(editToDelete.id)
     cache.edits = removeModelFromList(cache.edits, editToDelete)
     cache.result = removeModelFromList(cache.result, editToDelete)
     cache.editIndex = buildEditIndex(cache.edits)
-    state.displayedEdits =
-      removeModelFromList(state.displayedEdits, editToDelete)
+    state.displayedEdits = removeModelFromList(
+      state.displayedEdits,
+      editToDelete
+    )
     if (editToDelete.timeSpent && !editToDelete.canceled) {
       state.displayedEditsTimeSpent -= editToDelete.timeSpent
     }
@@ -1074,12 +1056,13 @@ const mutations = {
     }
   },
 
-  [CANCEL_EDIT] (state, edit) {
+  [CANCEL_EDIT](state, edit) {
     edit.canceled = true
   },
 
-  [UPDATE_METADATA_DESCRIPTOR_END] (
-    state, { descriptor, previousDescriptorFieldName }
+  [UPDATE_METADATA_DESCRIPTOR_END](
+    state,
+    { descriptor, previousDescriptorFieldName }
   ) {
     if (descriptor.entity_type === 'Edit' && previousDescriptorFieldName) {
       cache.edits.forEach(edit => {
@@ -1090,17 +1073,17 @@ const mutations = {
     }
   },
 
-  [LOCK_EDIT] (state, edit) {
+  [LOCK_EDIT](state, edit) {
     edit = state.editMap.get(edit.id)
     if (edit) edit.lock = true
   },
 
-  [UNLOCK_EDIT] (state, edit) {
+  [UNLOCK_EDIT](state, edit) {
     edit = state.editMap.get(edit.id)
     if (edit) edit.lock = false
   },
 
-  [RESET_ALL] (state) {
+  [RESET_ALL](state) {
     Object.assign(state, { ...initialState })
 
     cache.edits = []
@@ -1108,7 +1091,7 @@ const mutations = {
     cache.editIndex = {}
   },
 
-  [SET_EDIT_SELECTION] (state, { edit, selected }) {
+  [SET_EDIT_SELECTION](state, { edit, selected }) {
     if (!selected && state.selectedEdits.has(edit.id)) {
       state.selectedEdits.delete(edit.id)
       state.selectedEdits = new Map(state.selectedEdits) // for reactivity
@@ -1123,7 +1106,7 @@ const mutations = {
     }
   },
 
-  [SORT_VALIDATION_COLUMNS] (state, taskTypeMap) {
+  [SORT_VALIDATION_COLUMNS](state, taskTypeMap) {
     const columns = [...state.editValidationColumns]
     state.editValidationColumns = []
     state.editValidationColumns = helpers.sortValidationColumns(
@@ -1133,7 +1116,7 @@ const mutations = {
     )
   },
 
-  [CLEAR_SELECTED_EDITS] (state) {
+  [CLEAR_SELECTED_EDITS](state) {
     state.selectedEdits = new Map()
   }
 }

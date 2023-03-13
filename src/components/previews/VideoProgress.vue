@@ -1,70 +1,69 @@
 <template>
-<div
-  class="unselectable"
-  @mouseenter="isFrameNumberVisible = true"
-  @mouseout="isFrameNumberVisible = false"
->
   <div
-    class="progress-wrapper"
-    :style="{
-      'background-size': backgroundSize
-    }"
+    class="unselectable"
+    @mouseenter="isFrameNumberVisible = true"
+    @mouseout="isFrameNumberVisible = false"
   >
-    <span
-      class="handle-in"
+    <div
+      class="progress-wrapper"
       :style="{
-        width: handleInWidth,
-        'padding-right': handleIn > 1 ? '5px' : 0
+        'background-size': backgroundSize
       }"
-      @mousedown="startHandleInDrag($event)"
-      v-if="handleIn >= 0"
     >
-      {{ handleIn !== 0 ? handleIn + 1 : '' }}
-    </span>
+      <span
+        class="handle-in"
+        :style="{
+          width: handleInWidth,
+          'padding-right': handleIn > 1 ? '5px' : 0
+        }"
+        @mousedown="startHandleInDrag($event)"
+        v-if="handleIn >= 0"
+      >
+        {{ handleIn !== 0 ? handleIn + 1 : '' }}
+      </span>
 
-    <span
-      class="handle-out"
-      :style="{
-        width: frameSize * (nbFrames - handleOut) + 'px'
-      }"
-      @mousedown="startHandleOutDrag($event)"
-      v-if="handleOut >= 0"
-    >
-      {{ handleOut + 1 }}
-    </span>
+      <span
+        class="handle-out"
+        :style="{
+          width: frameSize * (nbFrames - handleOut) + 'px'
+        }"
+        @mousedown="startHandleOutDrag($event)"
+        v-if="handleOut >= 0"
+      >
+        {{ handleOut + 1 }}
+      </span>
 
-    <progress
-      ref="progress"
-      value="0"
-      min="0"
-      @click="onProgressClicked"
-      @mousedown="startProgressDrag($event)"
-    >
-    </progress>
-    <span
-      :key="`annotation-${index}`"
-      class="annotation-mark"
-      :style="{
-        left: getAnnotationPosition(annotation) + 'px',
-        width: Math.max(frameSize - 1, 5) + 'px'
-      }"
-      @mouseenter="isFrameNumberVisible = true"
-      @mouseleave="isFrameNumberVisible = true"
-      @click="_emitProgressEvent(annotation)"
-      v-for="(annotation, index) in annotations"
-    >
-    </span>
-    <span
-      class="frame-number"
-      :style="{
-        display: isFrameNumberVisible ? null : 'none',
-        left: frameNumberLeftPosition + 'px'
-      }"
-    >
-      {{ hoverFrame }}
-    </span>
+      <progress
+        ref="progress"
+        value="0"
+        min="0"
+        @click="onProgressClicked"
+        @mousedown="startProgressDrag($event)"
+      ></progress>
+      <span
+        :key="`annotation-${index}`"
+        class="annotation-mark"
+        :style="{
+          left: getAnnotationPosition(annotation) + 'px',
+          width: Math.max(frameSize - 1, 5) + 'px'
+        }"
+        @mouseenter="isFrameNumberVisible = true"
+        @mouseleave="isFrameNumberVisible = true"
+        @click="_emitProgressEvent(annotation)"
+        v-for="(annotation, index) in annotations"
+      >
+      </span>
+      <span
+        class="frame-number"
+        :style="{
+          display: isFrameNumberVisible ? null : 'none',
+          left: frameNumberLeftPosition + 'px'
+        }"
+      >
+        {{ hoverFrame }}
+      </span>
+    </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -93,7 +92,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       frameNumberLeftPosition: 0,
       isFrameNumberVisible: false,
@@ -102,7 +101,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     window.addEventListener('mousemove', this.doProgressDrag)
     window.addEventListener('mouseup', this.stopProgressDrag)
     window.addEventListener('mouseup', this.stopHandleInDrag)
@@ -117,7 +116,7 @@ export default {
     this.progress.setAttribute('max', this.videoDuration)
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     window.removeEventListener('mousemove', this.doProgressDrag)
     window.removeEventListener('mouseup', this.stopProgressDrag)
     window.removeEventListener('mouseup', this.stopHandleInDrag)
@@ -126,62 +125,62 @@ export default {
   },
 
   computed: {
-    backgroundSize () {
+    backgroundSize() {
       if (this.videoDuration) {
-        return (200 / this.nbFrames) + '% 100%'
+        return 200 / this.nbFrames + '% 100%'
       } else {
         return '300%'
       }
     },
 
-    frameSize () {
+    frameSize() {
       return this.width / this.nbFrames
     },
 
-    progress () {
+    progress() {
       return this.$refs.progress
     },
 
-    videoDuration () {
+    videoDuration() {
       return this.nbFrames * this.frameDuration
     },
 
-    handleInWidth () {
+    handleInWidth() {
       return Math.max(this.frameSize * this.handleIn, 0) + 'px'
     }
   },
 
   methods: {
-    onWindowResize () {
+    onWindowResize() {
       const progressCoordinates = this.progress.getBoundingClientRect()
       this.width = progressCoordinates.width
     },
 
-    getAnnotationPosition (annotation) {
+    getAnnotationPosition(annotation) {
       if (this.nbFrames === 0) return 0
       const frameNumber = Math.round(annotation.time / this.frameDuration)
       return frameNumber * this.frameSize
     },
 
-    updateProgressBar (frameNumber) {
+    updateProgressBar(frameNumber) {
       this.progress.value = (frameNumber + 1) * this.frameDuration
     },
 
-    startProgressDrag (event) {
+    startProgressDrag(event) {
       this.progressDragging = true
       this.$emit('start-scrub')
     },
 
-    stopProgressDrag (event) {
+    stopProgressDrag(event) {
       this.progressDragging = false
       this.$emit('end-scrub')
     },
 
-    startHandleInDrag (event) {
+    startHandleInDrag(event) {
       this.handleInDragging = true
     },
 
-    stopHandleInDrag (event) {
+    stopHandleInDrag(event) {
       if (this.handleInDragging) {
         this.handleInDragging = false
         const { frameNumber } = this._getMouseFrame()
@@ -189,11 +188,11 @@ export default {
       }
     },
 
-    startHandleOutDrag (event) {
+    startHandleOutDrag(event) {
       this.handleOutDragging = true
     },
 
-    stopHandleOutDrag (event) {
+    stopHandleOutDrag(event) {
       if (this.handleOutDragging) {
         this.handleOutDragging = false
         let { frameNumber, position } = this._getMouseFrame()
@@ -202,7 +201,7 @@ export default {
       }
     },
 
-    doProgressDrag (event) {
+    doProgressDrag(event) {
       if (
         this.progressDragging ||
         this.handleInDragging ||
@@ -211,7 +210,8 @@ export default {
       ) {
         const { frameNumber } = this._getMouseFrame()
         this.hoverFrame = frameNumber + 1
-        this.frameNumberLeftPosition = this.width / this.nbFrames * frameNumber
+        this.frameNumberLeftPosition =
+          (this.width / this.nbFrames) * frameNumber
         if (this.progressDragging) {
           this.$emit('progress-changed', frameNumber)
         }
@@ -227,20 +227,21 @@ export default {
       }
     },
 
-    onProgressClicked () {
+    onProgressClicked() {
       this._emitProgressEvent()
     },
 
-    _getMouseFrame (annotation) {
+    _getMouseFrame(annotation) {
       let left = this.progress.getBoundingClientRect().left
       if (left === 0 && !this.fullScreen) {
         left = this.progress.parentElement.offsetParent.offsetLeft
       }
       const position = event.x - left
       const ratio = position / this.width
-      let duration = annotation && this.frameSize < 3
-        ? annotation.time
-        : this.videoDuration * ratio
+      let duration =
+        annotation && this.frameSize < 3
+          ? annotation.time
+          : this.videoDuration * ratio
       if (duration < 0) duration = 0
       if (duration > this.videoDuration - this.frameDuration) {
         duration = this.videoDuration - this.frameDuration
@@ -249,14 +250,14 @@ export default {
       return { frameNumber, position }
     },
 
-    _emitProgressEvent (annotation) {
+    _emitProgressEvent(annotation) {
       const { frameNumber } = this._getMouseFrame(annotation)
       this.$emit('progress-changed', frameNumber)
     }
   },
 
   watch: {
-    videoDuration () {
+    videoDuration() {
       const progressCoordinates = this.progress.getBoundingClientRect()
       this.width = progressCoordinates.width
       this.progress.setAttribute('max', this.videoDuration)
@@ -292,12 +293,12 @@ export default {
 }
 
 progress::-moz-progress-bar {
-  background-color: #43B581;
+  background-color: #43b581;
   opacity: 0.6;
 }
 
 progress::-webkit-progress-value {
-  background-color: #43B581;
+  background-color: #43b581;
   opacity: 0.6;
 }
 
@@ -342,7 +343,7 @@ progress {
 .handle-in::after {
   bottom: 0;
   background: $dark-purple;
-  content: " ";
+  content: ' ';
   cursor: pointer;
   height: 34px;
   position: absolute;
@@ -369,7 +370,7 @@ progress {
 .handle-out::before {
   bottom: 0;
   background: $dark-purple;
-  content: " ";
+  content: ' ';
   cursor: pointer;
   height: 34px;
   left: 0px;

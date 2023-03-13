@@ -1,54 +1,40 @@
 <template>
-<div class="field">
-  <label class="label" v-if="label.length > 0">
-    {{ label }}
-  </label>
-  <div
-    :class="{
-      'task-type-combo': true,
-      shy: shy
-    }"
-  >
-    <div
-      class="flexrow selector"
-      @click="toggleTaskTypeList"
-    >
-      <div
-        class="selected-task-type-line flexrow-item"
-      >
-        <task-type-name
-          :task-type="currentTaskType"
-          v-if="currentTaskType"
-        />
-      </div>
-      <chevron-down-icon class="ml05 down-icon flexrow-item"/>
-    </div>
+  <div class="field">
+    <label class="label" v-if="label.length > 0">
+      {{ label }}
+    </label>
     <div
       :class="{
-        'select-input': true,
-        'open-top': openTop
+        'task-type-combo': true,
+        shy: shy
       }"
-      ref="select"
-      v-if="showTaskTypeList"
     >
+      <div class="flexrow selector" @click="toggleTaskTypeList">
+        <div class="selected-task-type-line flexrow-item">
+          <task-type-name :task-type="currentTaskType" v-if="currentTaskType" />
+        </div>
+        <chevron-down-icon class="ml05 down-icon flexrow-item" />
+      </div>
       <div
-        class="task-type-line"
-        v-for="taskType in taskTypeList"
-        @click="selectTaskType(taskType)"
-        :key="taskType.id"
+        :class="{
+          'select-input': true,
+          'open-top': openTop
+        }"
+        ref="select"
+        v-if="showTaskTypeList"
       >
-        <task-type-name
-          :task-type="taskType"
-        />
+        <div
+          class="task-type-line"
+          v-for="taskType in taskTypeList"
+          @click="selectTaskType(taskType)"
+          :key="taskType.id"
+        >
+          <task-type-name :task-type="taskType" />
+        </div>
       </div>
     </div>
+    <combobox-mask :displayed="showTaskTypeList" @click="toggleTaskTypeList" />
   </div>
-  <combobox-mask
-    :displayed="showTaskTypeList"
-    @click="toggleTaskTypeList"
-  />
-</div>
-
 </template>
 
 <script>
@@ -67,7 +53,7 @@ export default {
     TaskTypeName
   },
 
-  data () {
+  data() {
     return {
       showTaskTypeList: false
     }
@@ -100,15 +86,12 @@ export default {
     }
   },
 
-  mounted () {
-  },
+  mounted() {},
 
   computed: {
-    ...mapGetters([
-      'taskTypeMap'
-    ]),
+    ...mapGetters(['taskTypeMap']),
 
-    currentTaskType () {
+    currentTaskType() {
       if (this.value) {
         return this.taskTypeMap.get(this.value)
       } else if (this.addPlaceholder) {
@@ -120,12 +103,12 @@ export default {
   },
 
   methods: {
-    selectTaskType (taskType) {
+    selectTaskType(taskType) {
       this.$emit('input', taskType.id)
       this.showTaskTypeList = false
     },
 
-    toggleTaskTypeList () {
+    toggleTaskTypeList() {
       this.showTaskTypeList = !this.showTaskTypeList
     }
   }

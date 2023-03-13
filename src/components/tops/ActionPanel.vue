@@ -6,15 +6,15 @@
         'action-topbar': true,
         unselectable: true,
         minimized,
-        'hidden': isHidden
+        hidden: isHidden
       }"
       :style="{
         left: position.left + 'px',
         top: position.top + 'px'
       }"
     >
-
-      <div class="menu"
+      <div
+        class="menu"
         @mousedown="startDrag"
         @dblclick="minimized = !minimized"
       >
@@ -37,8 +37,11 @@
             }"
             :title="$t('menu.change_status')"
             @click="selectBar('change-status')"
-            v-if="(isCurrentUserManager || isSupervisorInDepartment)
-              && !isEntitySelection && isTaskSelection"
+            v-if="
+              (isCurrentUserManager || isSupervisorInDepartment) &&
+              !isEntitySelection &&
+              isTaskSelection
+            "
           >
             STATUS
           </div>
@@ -52,12 +55,12 @@
             @click="selectBar('assignation')"
             v-if="
               isCurrentViewEntity &&
-              (
-                isCurrentUserManager ||
+              (isCurrentUserManager ||
                 isSupervisorInDepartment ||
-                isInDepartment
-              ) &&
-              !isEntitySelection && isTaskSelection"
+                isInDepartment) &&
+              !isEntitySelection &&
+              isTaskSelection
+            "
           >
             <user-icon />
           </div>
@@ -68,9 +71,12 @@
               active: selectedBar === 'priorities'
             }"
             :title="$t('menu.change_priority')"
-            v-if="(isCurrentViewEntity || isCurrentViewPerson) &&
+            v-if="
+              (isCurrentViewEntity || isCurrentViewPerson) &&
               (isCurrentUserManager || isSupervisorInDepartment) &&
-              !isEntitySelection && isTaskSelection"
+              !isEntitySelection &&
+              isTaskSelection
+            "
             @click="selectBar('priorities')"
           >
             <alert-circle-icon />
@@ -103,8 +109,7 @@
           <div
             class="menu-separator"
             v-if="!isEntitySelection && isTaskSelection && nbSelectedTasks > 1"
-          >
-          </div>
+          ></div>
 
           <div
             :class="{
@@ -113,11 +118,9 @@
             }"
             :title="$t('menu.generate_playlist')"
             v-if="
-              (
-                isCurrentViewAsset ||
+              (isCurrentViewAsset ||
                 isCurrentViewShot ||
-                isCurrentViewTaskType
-              ) &&
+                isCurrentViewTaskType) &&
               !isEntitySelection &&
               isTaskSelection &&
               nbSelectedTasks > 0
@@ -129,18 +132,15 @@
 
           <div
             v-if="
-              (
-                isCurrentViewAsset ||
+              (isCurrentViewAsset ||
                 isCurrentViewShot ||
-                isCurrentViewTaskType
-              ) &&
+                isCurrentViewTaskType) &&
               !isEntitySelection &&
               isTaskSelection &&
               isCurrentUserManager
             "
             class="menu-separator"
-          >
-          </div>
+          ></div>
 
           <div
             :class="{
@@ -150,9 +150,11 @@
             :title="$t('menu.create_tasks')"
             @click="selectBar('create-tasks')"
             v-if="
-              (isCurrentViewEntity &&
-              !isCurrentViewTaskType) && isCurrentUserManager &&
-              !isEntitySelection"
+              isCurrentViewEntity &&
+              !isCurrentViewTaskType &&
+              isCurrentUserManager &&
+              !isEntitySelection
+            "
           >
             <check-square-icon />
           </div>
@@ -167,7 +169,9 @@
             v-if="
               isCurrentViewEntity &&
               isCurrentUserManager &&
-              !isEntitySelection && isTaskSelection"
+              !isEntitySelection &&
+              isTaskSelection
+            "
           >
             <trash-icon />
           </div>
@@ -175,12 +179,13 @@
           <div
             class="menu-separator"
             v-if="
-              !isEntitySelection && isTaskSelection && !isCurrentViewEpisode &&
+              !isEntitySelection &&
+              isTaskSelection &&
+              !isCurrentViewEpisode &&
               customActions &&
               customActions.length > 0
             "
-          >
-          </div>
+          ></div>
 
           <div
             :class="{
@@ -191,9 +196,12 @@
             @click="selectBar('custom-actions')"
             v-if="
               (isCurrentUserManager || isSupervisorInDepartment) &&
-              !isEntitySelection && isTaskSelection && !isCurrentViewEpisode &&
+              !isEntitySelection &&
+              isTaskSelection &&
+              !isCurrentViewEpisode &&
               customActions &&
-              customActions.length > 0"
+              customActions.length > 0
+            "
           >
             <play-circle-icon />
           </div>
@@ -203,9 +211,8 @@
             :title="$t('menu.delete_assets')"
             @click="selectBar('delete-assets')"
             v-if="
-              isCurrentViewAsset &&
-              isCurrentUserManager &&
-              !isTaskSelection"
+              isCurrentViewAsset && isCurrentUserManager && !isTaskSelection
+            "
           >
             <trash-icon />
           </div>
@@ -214,10 +221,7 @@
             class="menu-item"
             :title="$t('menu.delete_shots')"
             @click="selectBar('delete-shots')"
-            v-if="
-              isCurrentViewShot &&
-              isCurrentUserManager &&
-              !isTaskSelection"
+            v-if="isCurrentViewShot && isCurrentUserManager && !isTaskSelection"
           >
             <trash-icon />
           </div>
@@ -226,10 +230,7 @@
             class="menu-item"
             :title="$t('menu.delete_edits')"
             @click="selectBar('delete-edits')"
-            v-if="
-              isCurrentViewEdit &&
-              isCurrentUserManager &&
-              !isTaskSelection"
+            v-if="isCurrentViewEdit && isCurrentUserManager && !isTaskSelection"
           >
             <trash-icon />
           </div>
@@ -241,36 +242,28 @@
             v-if="
               isCurrentViewEpisode &&
               isCurrentUserManager &&
-              !isTaskSelection && isEntitySelection"
+              !isTaskSelection &&
+              isEntitySelection
+            "
           >
             <trash-icon />
           </div>
 
           <div class="filler"></div>
 
-          <div
-            class="flexrow-item close-bar"
-            @click="minimized = !minimized"
-          >
+          <div class="flexrow-item close-bar" @click="minimized = !minimized">
             <minus-icon v-if="!minimized" />
             <square-icon v-else />
           </div>
 
-          <div
-            class="flexrow-item close-bar"
-            @click="clearSelection"
-          >
+          <div class="flexrow-item close-bar" @click="clearSelection">
             <x-icon />
           </div>
         </div>
       </div>
 
       <div class="flexrow action-bar" v-if="selectedBar && !minimized">
-
-        <div
-          class="flexcolumn is-wide"
-          v-if="selectedBar === 'change-status'"
-        >
+        <div class="flexcolumn is-wide" v-if="selectedBar === 'change-status'">
           <div class="flexrow mb05">
             <div class="flexrow-item change-status-item">
               <combobox-status
@@ -279,9 +272,7 @@
                 v-model="taskStatusId"
               />
             </div>
-            <div
-              class="flexrow-item is-wide"
-            >
+            <div class="flexrow-item is-wide">
               <textarea
                 class="comment-text input w100"
                 type="text"
@@ -303,11 +294,11 @@
               }"
               @click="confirmTaskStatusChange"
             >
-              {{ $tc(
-                'tasks.change_task_status',
-                 nbSelectedTasks,
-                 {nbSelectedTasks}
-              )}}
+              {{
+                $tc('tasks.change_task_status', nbSelectedTasks, {
+                  nbSelectedTasks
+                })
+              }}
             </button>
           </div>
         </div>
@@ -337,22 +328,22 @@
             <div class="flexrow-item">
               <spinner :size="20" class="spinner" />
             </div>
-            <div class="flexrow-item">
-            &nbsp;
-            </div>
+            <div class="flexrow-item">&nbsp;</div>
           </div>
           <div class="flexrow-item is-wide" v-if="!loading.assignation">
             <button
               class="button confirm-button is-wide"
               @click="confirmAssign"
             >
-              {{ $tc('tasks.assign', nbSelectedTasks, {nbSelectedTasks}) }}
+              {{ $tc('tasks.assign', nbSelectedTasks, { nbSelectedTasks }) }}
             </button>
           </div>
           <div
             class="flexrow-item is-wide has-text-centered flexrow"
-            v-if="!loading.assignation && (
-              isCurrentUserManager || isSupervisorInDepartment)"
+            v-if="
+              !loading.assignation &&
+              (isCurrentUserManager || isSupervisorInDepartment)
+            "
           >
             <div class="mauto flexrow">
               <button
@@ -388,10 +379,7 @@
           </div>
         </div>
 
-        <div
-          class="flexcolumn filler"
-          v-if="selectedBar === 'priorities'"
-        >
+        <div class="flexcolumn filler" v-if="selectedBar === 'priorities'">
           <div class="flexrow-item flexrow priority-combobox mb05">
             <div class="flexrow-item">
               {{ $t('tasks.change_priority_to') }}
@@ -413,54 +401,48 @@
               }"
               @click="confirmPriorityChange"
             >
-              {{ $tc('tasks.change_priority', nbSelectedTasks, {nbSelectedTasks}) }}
+              {{
+                $tc('tasks.change_priority', nbSelectedTasks, {
+                  nbSelectedTasks
+                })
+              }}
             </button>
           </div>
         </div>
 
-        <div class="flexrow is-wide"
-          v-if="selectedBar === 'create-tasks'"
-        >
+        <div class="flexrow is-wide" v-if="selectedBar === 'create-tasks'">
           <button
-              :class="{
-                button: true,
-                'confirm-button': true,
-                'is-wide': true,
-                'is-loading': loading.taskCreation
-              }"
-              @click="confirmTaskCreation"
-            >
-              {{ $t('tasks.create_for_selection') }}
+            :class="{
+              button: true,
+              'confirm-button': true,
+              'is-wide': true,
+              'is-loading': loading.taskCreation
+            }"
+            @click="confirmTaskCreation"
+          >
+            {{ $t('tasks.create_for_selection') }}
           </button>
         </div>
 
-        <div
-          class="flexrow-item is-wide"
-          v-if="selectedBar === 'thumbnails'"
-        >
+        <div class="flexrow-item is-wide" v-if="selectedBar === 'thumbnails'">
           <button
             class="button confirm-button is-wide"
             @click="confirmSetThumbnailsFromTasks"
           >
-            {{ $tc(
-              'tasks.set_thumbnails_from_tasks',
-              nbSelectedTasks,
-              {nbSelectedTasks}
-            ) }}
+            {{
+              $tc('tasks.set_thumbnails_from_tasks', nbSelectedTasks, {
+                nbSelectedTasks
+              })
+            }}
           </button>
         </div>
 
-        <div
-          class="flexcolumn filler"
-          v-if="selectedBar === 'subscribe'"
-        >
+        <div class="flexcolumn filler" v-if="selectedBar === 'subscribe'">
           <div class="" v-if="loading.tasksSubscription">
             <div class="flexrow-item">
               <spinner :size="20" class="spinner" />
             </div>
-            <div class="flexrow-item">
-              &nbsp;
-            </div>
+            <div class="flexrow-item">&nbsp;</div>
           </div>
 
           <div class="flexrow-item is-wide" v-if="!loading.tasksSubscription">
@@ -472,7 +454,11 @@
               }"
               @click="confirmTasksSubscription"
             >
-              {{ $tc('tasks.subscribe_to_tasks', nbSelectedTasks, {nbSelectedTasks}) }}
+              {{
+                $tc('tasks.subscribe_to_tasks', nbSelectedTasks, {
+                  nbSelectedTasks
+                })
+              }}
             </button>
           </div>
           <div class="has-text-centered" v-if="!loading.tasksSubscription">
@@ -485,10 +471,7 @@
           </div>
         </div>
 
-        <div
-          class="flexrow-item is-wide"
-          v-if="selectedBar === 'playlists'"
-        >
+        <div class="flexrow-item is-wide" v-if="selectedBar === 'playlists'">
           <button
             class="button confirm-button is-wide"
             @click="confirmPlaylistGeneration"
@@ -497,13 +480,8 @@
           </button>
         </div>
 
-        <div
-          class="flexrow-item is-wide"
-          v-if="selectedBar === 'delete-tasks'"
-        >
-          <div
-            class="flexrow is-wide"
-          >
+        <div class="flexrow-item is-wide" v-if="selectedBar === 'delete-tasks'">
+          <div class="flexrow is-wide">
             <button
               class="button is-danger confirm-button is-wide"
               :class="{
@@ -513,14 +491,13 @@
                 'is-wide': true,
                 'is-loading': loading.taskDeletion
               }"
-
               @click="confirmTaskDeletion"
             >
-              {{ $tc(
-                'tasks.delete_for_selection',
-                nbSelectedTasks,
-                {nbSelectedTasks}
-              ) }}
+              {{
+                $tc('tasks.delete_for_selection', nbSelectedTasks, {
+                  nbSelectedTasks
+                })
+              }}
             </button>
           </div>
           <div class="flexrow-item error" v-if="errors.taskDeletion">
@@ -528,10 +505,7 @@
           </div>
         </div>
 
-        <div
-          class="flexcolumn filler"
-          v-if="selectedBar === 'custom-actions'"
-        >
+        <div class="flexcolumn filler" v-if="selectedBar === 'custom-actions'">
           <div class="flexrow-item custom-action-combobox is-wide">
             <combobox-model
               class="is-wide"
@@ -545,11 +519,7 @@
               class="flexrow-item is-wide"
               v-if="customAction && !customAction.is_ajax"
             >
-              <form
-                target="_blank"
-                method="POST"
-                :action="customAction.url"
-              >
+              <form target="_blank" method="POST" :action="customAction.url">
                 <input
                   type="hidden"
                   id="personid"
@@ -573,7 +543,7 @@
                   id="currentpath"
                   name="currentpath"
                   :value="currentUrl"
-                >
+                />
                 <input
                   type="hidden"
                   id="currentserver"
@@ -592,32 +562,21 @@
                   name="entitytype"
                   :value="currentEntityType"
                 />
-                <button
-                  class="button is-wide"
-                  type="submit"
-                >
-                  {{ $tc(
-                    'custom_actions.run_for_selection',
-                    nbSelectedTasks,
-                    {nbSelectedTasks})
+                <button class="button is-wide" type="submit">
+                  {{
+                    $tc('custom_actions.run_for_selection', nbSelectedTasks, {
+                      nbSelectedTasks
+                    })
                   }}
                 </button>
               </form>
             </div>
-            <div
-              class="flexrow-item is-wide"
-              v-else
-            >
-              <button
-                class="button is-wide"
-                @click="runCustomAction"
-              >
+            <div class="flexrow-item is-wide" v-else>
+              <button class="button is-wide" @click="runCustomAction">
                 {{
-                  $tc(
-                    'custom_actions.run_for_selection',
-                    nbSelectedTasks,
-                    {nbSelectedTasks}
-                  )
+                  $tc('custom_actions.run_for_selection', nbSelectedTasks, {
+                    nbSelectedTasks
+                  })
                 }}
               </button>
             </div>
@@ -629,48 +588,42 @@
           v-if="selectedBar === 'delete-assets'"
         >
           <delete-entities
-            :error-text="$t('assets.multiple_delete_error') "
+            :error-text="$t('assets.multiple_delete_error')"
             :is-loading="loading.assetDeletion"
             :is-error="errors.assetDeletion"
-            :text="$tc(
-              'assets.delete_for_selection',
-              nbSelectedAssets,
-              {nbSelectedAssets}
-            )"
+            :text="
+              $tc('assets.delete_for_selection', nbSelectedAssets, {
+                nbSelectedAssets
+              })
+            "
             @confirm="confirmAssetDeletion"
           />
         </div>
 
-        <div
-          class="flexrow-item is-wide"
-          v-if="selectedBar === 'delete-shots'"
-        >
+        <div class="flexrow-item is-wide" v-if="selectedBar === 'delete-shots'">
           <delete-entities
-            :error-text="$t('shots.multiple_delete_error') "
+            :error-text="$t('shots.multiple_delete_error')"
             :is-loading="loading.shotDeletion"
             :is-error="errors.deleteShot"
-            :text="$tc(
-              'shots.delete_for_selection',
-              nbSelectedShots,
-              {nbSelectedShots}
-            )"
+            :text="
+              $tc('shots.delete_for_selection', nbSelectedShots, {
+                nbSelectedShots
+              })
+            "
             @confirm="confirmShotDeletion"
           />
         </div>
 
-        <div
-          class="flexrow-item is-wide"
-          v-if="selectedBar === 'delete-edits'"
-        >
+        <div class="flexrow-item is-wide" v-if="selectedBar === 'delete-edits'">
           <delete-entities
-            :error-text="$t('edits.multiple_delete_error') "
+            :error-text="$t('edits.multiple_delete_error')"
             :is-loading="loading.editDeletion"
             :is-error="errors.deleteEdit"
-            :text="$tc(
-              'edits.delete_for_selection',
-              nbSelectedEdits,
-              {nbSelectedEdits}
-            )"
+            :text="
+              $tc('edits.delete_for_selection', nbSelectedEdits, {
+                nbSelectedEdits
+              })
+            "
             @confirm="confirmEditDeletion"
           />
         </div>
@@ -680,18 +633,17 @@
           v-if="selectedBar === 'delete-episodes'"
         >
           <delete-entities
-            :error-text="$t('episodes.multiple_delete_error') "
+            :error-text="$t('episodes.multiple_delete_error')"
             :is-loading="loading.episodeDeletion"
             :is-error="errors.deleteEpisode"
-            :text="$tc(
-              'episodes.delete_for_selection',
-              nbSelectedEpisodes,
-              {nbSelectedEpisodes}
-            )"
+            :text="
+              $tc('episodes.delete_for_selection', nbSelectedEpisodes, {
+                nbSelectedEpisodes
+              })
+            "
             @confirm="confirmEpisodeDeletion"
           />
         </div>
-
       </div>
     </div>
 
@@ -702,7 +654,6 @@
       @cancel="hidePlaylistModal"
     />
   </div>
-
 </template>
 
 <script>
@@ -759,7 +710,7 @@ export default {
     ViewPlaylistModal
   },
 
-  data () {
+  data() {
     return {
       availableTaskStatuses: [],
       currentTeam: [],
@@ -820,7 +771,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.customAction = this.defaultCustomAction
     this.setCurrentTeam()
     this.resetPosition()
@@ -832,7 +783,7 @@ export default {
     window.addEventListener('beforeunload', this.setPositionPreference)
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     this.setPositionPreference()
   },
 
@@ -864,22 +815,22 @@ export default {
       'user'
     ]),
 
-    currentUrl () {
+    currentUrl() {
       return this.$route.path
     },
 
-    currentHost () {
+    currentHost() {
       return window.location.host
     },
 
-    currentEntityType () {
+    currentEntityType() {
       if (this.isCurrentViewAsset) return 'asset'
       else if (this.isCurrentViewShot) return 'shot'
       else if (this.isCurrentViewEdit) return 'edit'
       return 'episode'
     },
 
-    defaultCustomAction () {
+    defaultCustomAction() {
       if (this.customActions.length > 0) {
         return this.customActions[0]
       } else {
@@ -887,130 +838,138 @@ export default {
       }
     },
 
-    isTaskSelection () {
+    isTaskSelection() {
       return this.nbSelectedTasks > 0
     },
 
-    isEntitySelection () {
-      return this.selectedAssets.size > 0 || this.selectedShots.size > 0 ||
-        this.selectedEdits.size > 0
-    },
-
-    nbSelectedAssets () {
-      return this.selectedAssets.size
-    },
-
-    nbSelectedShots () {
-      return this.selectedShots.size
-    },
-
-    nbSelectedEdits () {
-      return this.selectedEdits.size
-    },
-
-    isHidden () {
+    isEntitySelection() {
       return (
-        this.nbSelectedTasks === 0 &&
-        this.nbSelectedValidations === 0 &&
-        this.nbSelectedAssets === 0 &&
-        this.nbSelectedShots === 0 &&
-        this.nbSelectedEdits === 0
-      ) ||
-      !(
-        this.isCurrentViewAsset ||
-        this.isCurrentViewTodos ||
-        this.isCurrentViewShot ||
-        this.isCurrentViewEpisode ||
-        this.isCurrentViewSequence ||
-        this.isCurrentViewEdit
+        this.selectedAssets.size > 0 ||
+        this.selectedShots.size > 0 ||
+        this.selectedEdits.size > 0
       )
     },
 
-    isCurrentViewAsset () {
-      return this.$route.path.indexOf('asset') > 0 &&
-             !this.$route.params.asset_id
+    nbSelectedAssets() {
+      return this.selectedAssets.size
     },
 
-    isCurrentViewShot () {
-      return this.$route.path.indexOf('shot') > 0 &&
-             !this.$route.params.shot_id
+    nbSelectedShots() {
+      return this.selectedShots.size
     },
 
-    isCurrentViewEdit () {
-      return this.$route.path.indexOf('edit') > 0 &&
-             !this.$route.params.edit_id
+    nbSelectedEdits() {
+      return this.selectedEdits.size
     },
 
-    isCurrentViewTodos () {
-      return this.$route.path.indexOf('todos') > 0 ||
-             this.$route.path.indexOf('people/') > 0
+    isHidden() {
+      return (
+        (this.nbSelectedTasks === 0 &&
+          this.nbSelectedValidations === 0 &&
+          this.nbSelectedAssets === 0 &&
+          this.nbSelectedShots === 0 &&
+          this.nbSelectedEdits === 0) ||
+        !(
+          this.isCurrentViewAsset ||
+          this.isCurrentViewTodos ||
+          this.isCurrentViewShot ||
+          this.isCurrentViewEpisode ||
+          this.isCurrentViewSequence ||
+          this.isCurrentViewEdit
+        )
+      )
     },
 
-    isCurrentViewPerson () {
+    isCurrentViewAsset() {
+      return (
+        this.$route.path.indexOf('asset') > 0 && !this.$route.params.asset_id
+      )
+    },
+
+    isCurrentViewShot() {
+      return this.$route.path.indexOf('shot') > 0 && !this.$route.params.shot_id
+    },
+
+    isCurrentViewEdit() {
+      return this.$route.path.indexOf('edit') > 0 && !this.$route.params.edit_id
+    },
+
+    isCurrentViewTodos() {
+      return (
+        this.$route.path.indexOf('todos') > 0 ||
+        this.$route.path.indexOf('people/') > 0
+      )
+    },
+
+    isCurrentViewPerson() {
       return this.$route.path.indexOf('people/') > 0
     },
 
-    isCurrentViewPersonTasks () {
+    isCurrentViewPersonTasks() {
       return this.$route.path.indexOf('todos') > 0
     },
 
-    isCurrentViewTaskType () {
+    isCurrentViewTaskType() {
       return this.$route.path.indexOf('task-type') > 0
     },
 
-    isCurrentViewEntity () {
-      return this.isCurrentViewAsset ||
+    isCurrentViewEntity() {
+      return (
+        this.isCurrentViewAsset ||
         this.isCurrentViewShot ||
         this.isCurrentViewEdit ||
         this.isCurrentViewSequence ||
         this.isCurrentViewEpisode
+      )
     },
 
-    isCurrentViewEpisode () {
+    isCurrentViewEpisode() {
       return (
         !(
           this.isCurrentViewAsset ||
           this.isCurrentViewShot ||
           this.isCurrentViewEdit
-        ) &&
-        this.$route.path.indexOf('episodes') > 0
+        ) && this.$route.path.indexOf('episodes') > 0
       )
     },
 
-    isCurrentViewSequence () {
+    isCurrentViewSequence() {
       return (
         !(
           this.isCurrentViewAsset ||
           this.isCurrentViewShot ||
           this.isCurrentViewEdit
-        ) &&
-        this.$route.path.indexOf('sequences') > 0
+        ) && this.$route.path.indexOf('sequences') > 0
       )
     },
 
-    selectedPersonId () {
+    selectedPersonId() {
       return this.person ? this.person.id : null
     },
 
-    currentProductionTeam () {
+    currentProductionTeam() {
       return this.currentProduction ? this.currentProduction.team || [] : []
     },
 
-    isInDepartment () {
+    isInDepartment() {
       return this.selectedTaskIds.every(taskId => {
         const task = this.taskMap.get(taskId)
         const taskType = this.taskTypeMap.get(task.task_type_id)
-        return taskType.department_id && this.user.departments.includes(
-          taskType.department_id)
+        return (
+          taskType.department_id &&
+          this.user.departments.includes(taskType.department_id)
+        )
       })
     },
 
-    isSupervisorInDepartment () {
-      return this.isCurrentUserSupervisor && (
-        this.user.departments.length === 0 || this.isInDepartment)
+    isSupervisorInDepartment() {
+      return (
+        this.isCurrentUserSupervisor &&
+        (this.user.departments.length === 0 || this.isInDepartment)
+      )
     },
 
-    storagePrefix () {
+    storagePrefix() {
       let prefix = 'todos-'
       if (this.isCurrentViewAsset || this.isCurrentViewShot) {
         prefix = 'entities-'
@@ -1043,7 +1002,7 @@ export default {
       'unsubscribeFromTask'
     ]),
 
-    confirmTaskStatusChange () {
+    confirmTaskStatusChange() {
       this.loading.changeStatus = true
       if (!this.taskStatusId) {
         this.taskStatusId = this.availableTaskStatuses[0].id
@@ -1062,13 +1021,13 @@ export default {
         })
     },
 
-    confirmAssign () {
+    confirmAssign() {
       if (this.selectedPersonId || this.isInDepartment) {
         this.loading.assignation = true
-        const personId = (this.isCurrentUserManager ||
-          this.isCurrentUserSupervisor)
-          ? this.selectedPersonId
-          : this.user.id
+        const personId =
+          this.isCurrentUserManager || this.isCurrentUserSupervisor
+            ? this.selectedPersonId
+            : this.user.id
         this.assignSelectedTasks({
           personId,
           callback: () => {
@@ -1079,22 +1038,24 @@ export default {
       }
     },
 
-    clearAssignation () {
+    clearAssignation() {
       const person = this.isCurrentUserArtist ? this.user : this.person
       if (person) {
         this.loading.assignation = true
-        func.runPromiseAsSeries(
-          Array.from(this.selectedTasks.values()).map(task => {
-            return this.unassignPersonFromTask({ task, person })
+        func
+          .runPromiseAsSeries(
+            Array.from(this.selectedTasks.values()).map(task => {
+              return this.unassignPersonFromTask({ task, person })
+            })
+          )
+          .then(() => {
+            this.loading.assignation = false
           })
-        ).then(() => {
-          this.loading.assignation = false
-        })
-        .catch(console.error)
+          .catch(console.error)
       }
     },
 
-    clearAllAssignations () {
+    clearAllAssignations() {
       this.loading.assignation = true
       return this.unassignSelectedTasks()
         .then(() => {
@@ -1103,7 +1064,7 @@ export default {
         .catch(console.error)
     },
 
-    confirmPriorityChange () {
+    confirmPriorityChange() {
       this.loading.changePriority = true
       this.changeSelectedPriorities({
         priority: Number(this.priority),
@@ -1113,15 +1074,15 @@ export default {
       })
     },
 
-    confirmTaskCreation () {
+    confirmTaskCreation() {
       const type =
         this.$route.path.indexOf('shots') > 0
           ? 'shots'
           : this.$route.path.indexOf('assets') > 0
-            ? 'assets'
-            : this.$route.path.indexOf('edits') > 0
-              ? 'edits'
-              : 'episodes'
+          ? 'assets'
+          : this.$route.path.indexOf('edits') > 0
+          ? 'edits'
+          : 'episodes'
       this.loading.taskCreation = true
       this.createSelectedTasks({
         type,
@@ -1136,7 +1097,7 @@ export default {
         })
     },
 
-    confirmTaskDeletion () {
+    confirmTaskDeletion() {
       if (this.$options.dragging) return
       this.loading.taskDeletion = true
       this.errors.taskDeletion = false
@@ -1144,14 +1105,14 @@ export default {
         .then(() => {
           this.loading.taskDeletion = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.taskDeletion = false
           this.errors.taskDeletion = true
         })
     },
 
-    confirmAssetDeletion () {
+    confirmAssetDeletion() {
       if (this.$options.dragging) return
       this.loading.deleteAsset = true
       this.errors.deleteAsset = false
@@ -1160,14 +1121,14 @@ export default {
           this.loading.deleteAsset = false
           this.clearSelectedAssets()
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.deleteAsset = false
           this.errors.deleteAsset = true
         })
     },
 
-    confirmShotDeletion () {
+    confirmShotDeletion() {
       if (this.$options.dragging) return
       this.loading.deleteShot = true
       this.errors.deleteShot = false
@@ -1176,14 +1137,14 @@ export default {
           this.loading.deleteShot = false
           this.clearSelectedShots()
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.deleteShot = false
           this.errors.deleteShot = true
         })
     },
 
-    confirmEditDeletion () {
+    confirmEditDeletion() {
       if (this.$options.dragging) return
       this.loading.deleteEdit = true
       this.errors.deleteEdit = false
@@ -1192,24 +1153,27 @@ export default {
           this.loading.deleteEdit = false
           this.clearSelectedEdits()
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.deleteEdit = false
           this.errors.deleteEdit = true
         })
     },
 
-    confirmPlaylistGeneration () {
+    confirmPlaylistGeneration() {
       this.modals.playlist = true
       this.selectedBar = ''
     },
 
-    confirmTasksSubscription () {
+    confirmTasksSubscription() {
       this.loading.tasksSubscription = true
-      func.runPromiseAsSeries(
-        Array.from(this.selectedTasks.values()).map(task => {
-          return this.subscribeToTask(task.id)
-        })).then(() => {
+      func
+        .runPromiseAsSeries(
+          Array.from(this.selectedTasks.values()).map(task => {
+            return this.subscribeToTask(task.id)
+          })
+        )
+        .then(() => {
           this.loading.tasksSubscription = false
         })
         .catch(err => {
@@ -1219,12 +1183,15 @@ export default {
         })
     },
 
-    confirmTasksUnsubscription () {
+    confirmTasksUnsubscription() {
       this.loading.tasksSubscription = true
-      func.runPromiseAsSeries(
-        Array.from(this.selectedTasks.values()).map(task => {
-          return this.unsubscribeFromTask(task.id)
-        })).then(() => {
+      func
+        .runPromiseAsSeries(
+          Array.from(this.selectedTasks.values()).map(task => {
+            return this.unsubscribeFromTask(task.id)
+          })
+        )
+        .then(() => {
           this.loading.tasksSubscription = false
         })
         .catch(err => {
@@ -1234,24 +1201,27 @@ export default {
         })
     },
 
-    hidePlaylistModal () {
+    hidePlaylistModal() {
       this.modals.playlist = false
     },
 
-    confirmSetThumbnailsFromTasks () {
+    confirmSetThumbnailsFromTasks() {
       this.loading.setThumbnails = true
-      func.runPromiseAsSeries(
-        Array.from(this.selectedTasks.values()).map(task => {
-          return this.setLastTaskPreview(task.id)
-        })).then(() => {
+      func
+        .runPromiseAsSeries(
+          Array.from(this.selectedTasks.values()).map(task => {
+            return this.setLastTaskPreview(task.id)
+          })
+        )
+        .then(() => {
           this.loading.setThumbnails = false
         })
     },
 
-    setCurrentTeam () {
+    setCurrentTeam() {
       if (this.people.length > 10 && this.currentProduction) {
         this.currentTeam = sortPeople(
-          this.currentProductionTeam.map((personId) => {
+          this.currentProductionTeam.map(personId => {
             return this.personMap.get(personId)
           })
         )
@@ -1260,13 +1230,15 @@ export default {
       }
       if (this.isCurrentUserSupervisor && this.user.departments.length > 0) {
         this.currentTeam = this.currentTeam.filter(person =>
-          person.departments.some(
-            department => this.user.departments.includes(department)))
+          person.departments.some(department =>
+            this.user.departments.includes(department)
+          )
+        )
       }
       return this.currentTeam
     },
 
-    runCustomAction () {
+    runCustomAction() {
       this.postCustomAction({
         data: {
           entitytype: this.currentEntityType,
@@ -1281,7 +1253,7 @@ export default {
       })
     },
 
-    onKeyDown (event) {
+    onKeyDown(event) {
       if (event.keyCode === 27) {
         if (!this.modals.playlist) {
           this.$store.commit('CLEAR_SELECTED_TASKS')
@@ -1289,24 +1261,22 @@ export default {
       }
     },
 
-    clearSelection () {
+    clearSelection() {
       this.clearSelectedAssets()
       this.clearSelectedShots()
       this.clearSelectedTasks()
       this.clearSelectedEdits()
     },
 
-    selectBar (barName) {
+    selectBar(barName) {
       if (this.$options.dragging) return
-      localStorage.setItem(
-        `${this.storagePrefix}-selected-bar`,
-        barName,
-        { expires: '1M' }
-      )
+      localStorage.setItem(`${this.storagePrefix}-selected-bar`, barName, {
+        expires: '1M'
+      })
       this.selectedBar = barName
     },
 
-    autoChooseSelectBar () {
+    autoChooseSelectBar() {
       if (!this.isHidden) {
         window.addEventListener('keydown', this.onKeyDown)
         if (this.isCurrentViewAsset && this.nbSelectedAssets > 0) {
@@ -1340,7 +1310,7 @@ export default {
       }
     },
 
-    setAvailableStatus () {
+    setAvailableStatus() {
       if (this.selectedTasks.size === 0) this.availableTaskStatuses = []
       else if (this.isCurrentViewTodos) {
         const productions = new Map()
@@ -1348,17 +1318,19 @@ export default {
           const project = this.productionMap.get(task.project_id)
           productions.set(task.project_id, project)
         })
-        const statusLists =
-          Array.from(productions.values()).map(p => p.task_statuses)
+        const statusLists = Array.from(productions.values()).map(
+          p => p.task_statuses
+        )
         const availableStatus = new Set(intersection(statusLists))
-        this.availableTaskStatuses = this.taskStatusForCurrentUser
-          .filter(status => availableStatus.has(status.id))
+        this.availableTaskStatuses = this.taskStatusForCurrentUser.filter(
+          status => availableStatus.has(status.id)
+        )
       } else {
         this.availableTaskStatuses = this.taskStatusForCurrentUser
       }
     },
 
-    startDrag (event) {
+    startDrag(event) {
       // if (event.target.nodeName === 'svg') return
       this.$options.startX = event.x
       this.$options.startY = event.y
@@ -1367,7 +1339,7 @@ export default {
       this.$options.dragging = true
     },
 
-    doDrag (event) {
+    doDrag(event) {
       if (this.$options.dragging) {
         let newX = this.$options.startLeft - (this.$options.startX - event.x)
         const barHeight = this.$refs['action-bar'].offsetHeight
@@ -1386,12 +1358,12 @@ export default {
       }
     },
 
-    stopDrag (event) {
+    stopDrag(event) {
       this.pauseEvent(event)
       this.$options.dragging = false
     },
 
-    resetPosition () {
+    resetPosition() {
       let newX = parseInt(preferences.getPreference('topbar:position-x')) || 0
       let newY = parseInt(preferences.getPreference('topbar:position-y')) || 0
       const barHeight = 148
@@ -1408,24 +1380,24 @@ export default {
       this.position.top = newY
     },
 
-    setPositionPreference () {
+    setPositionPreference() {
       preferences.setPreference('topbar:position-x', this.position.left)
       preferences.setPreference('topbar:position-y', this.position.top)
     }
   },
 
   watch: {
-    nbSelectedAssets () {
+    nbSelectedAssets() {
       this.autoChooseSelectBar()
       if (this.nbSelectedAssets > 0) this.clearSelectedTasks()
     },
 
-    nbSelectedShots () {
+    nbSelectedShots() {
       this.autoChooseSelectBar()
       if (this.nbSelectedShots > 0) this.clearSelectedTasks()
     },
 
-    isHidden () {
+    isHidden() {
       this.autoChooseSelectBar()
       if (this.isHidden) {
         window.removeEventListener('mousemove', this.doDrag)
@@ -1440,7 +1412,7 @@ export default {
       }
     },
 
-    nbSelectedTasks () {
+    nbSelectedTasks() {
       this.selectedTaskIds = Array.from(this.selectedTasks.keys())
       if (this.nbSelectedTasks > 0) {
         let isShotSelected = false
@@ -1465,7 +1437,7 @@ export default {
         if (this.customActions.length > 0) {
           const isUrlSelected =
             this.customAction.url &&
-            this.customActions.findIndex((action) => {
+            this.customActions.findIndex(action => {
               return action.id === this.customAction.id
             }) >= 0
 
@@ -1476,19 +1448,19 @@ export default {
       }
     },
 
-    currentProduction () {
+    currentProduction() {
       this.setCurrentTeam()
     },
 
-    currentProductionTeam () {
+    currentProductionTeam() {
       this.setCurrentTeam()
     },
 
-    people () {
+    people() {
       this.setCurrentTeam()
     },
 
-    $route () {
+    $route() {
       this.selectedTaskIds = Array.from(this.selectedTasks.keys())
       if (this.nbSelectedTasks > 0) {
         this.clearSelectedTasks()
@@ -1524,7 +1496,7 @@ export default {
 }
 
 .action-topbar {
-  background: #F8F8FF;
+  background: #f8f8ff;
   border-radius: 10px;
   box-shadow: 0px 0px 8px var(--purple);
   color: $grey;
@@ -1568,12 +1540,12 @@ div.assignation {
 .menu-item {
   cursor: pointer;
   font-size: 1.2em;
-  padding: .2em .6em .4em .6em;
+  padding: 0.2em 0.6em 0.4em 0.6em;
 
   &:hover {
     color: var(--text);
     transform: scale(1.2);
-    transition: transform ease 0.3s
+    transition: transform ease 0.3s;
   }
 
   &.active {
@@ -1587,7 +1559,7 @@ div.assignation {
 
 .action-bar {
   border-radius: 10px;
-  padding: .5em .5em;
+  padding: 0.5em 0.5em;
 }
 
 .minimized {
@@ -1605,11 +1577,11 @@ div.assignation {
 
 .priority-combobox {
   color: var(--text);
-  margin-left: .3em;
+  margin-left: 0.3em;
 }
 
 .menu-separator {
-  padding: .2em;
+  padding: 0.2em;
   border-right: 2px solid $light-grey-light;
   height: 26px;
   margin-bottom: 8px;
@@ -1619,7 +1591,7 @@ div.assignation {
   margin: 0;
   border-radius: 10px;
   flex: 1;
-  width : 100%;
+  width: 100%;
 }
 
 .handle {
@@ -1641,7 +1613,7 @@ div.assignation {
 
 .close-bar {
   cursor: pointer;
-  margin-right: .5em;
+  margin-right: 0.5em;
   margin-top: -1.5em;
   svg {
     width: 16px;
@@ -1649,7 +1621,7 @@ div.assignation {
 }
 
 .change-status-item {
-  margin-right: .5em;
+  margin-right: 0.5em;
 }
 
 .status-item {
@@ -1681,6 +1653,6 @@ div.assignation {
 
 .spinner {
   margin: auto;
-  margin-top: .5em;
+  margin-top: 0.5em;
 }
 </style>

@@ -1,29 +1,27 @@
 <template>
-<div class="wrapper flexrow">
-  <drag @drag="onDragged" :transfer-data="index">
-    <div
-      :class="{
-        'flerow-item': true,
-        'revision-preview': true,
-        selected: isSelected
-      }"
-      @click.prevent="onSelected"
-    >
-      <light-entity-thumbnail
-        width="150px"
-        height="103px"
-        :preview-file-id="previewFile.id"
-        v-if="hasThumbnail"
-      />
-      <span :title="originalName" v-else>
-        .{{ previewFile.extension }}
-      </span>
-    </div>
-  </drag>
-  <drop @drop="onDropped">
-    <div class="drop-area flexrow-item" ref="drop-area"></div>
-  </drop>
-</div>
+  <div class="wrapper flexrow">
+    <drag @drag="onDragged" :transfer-data="index">
+      <div
+        :class="{
+          'flerow-item': true,
+          'revision-preview': true,
+          selected: isSelected
+        }"
+        @click.prevent="onSelected"
+      >
+        <light-entity-thumbnail
+          width="150px"
+          height="103px"
+          :preview-file-id="previewFile.id"
+          v-if="hasThumbnail"
+        />
+        <span :title="originalName" v-else> .{{ previewFile.extension }} </span>
+      </div>
+    </drag>
+    <drop @drop="onDropped">
+      <div class="drop-area flexrow-item" ref="drop-area"></div>
+    </drop>
+  </div>
 </template>
 
 <script>
@@ -43,7 +41,7 @@ export default {
     LightEntityThumbnail
   },
 
-  data () {
+  data() {
     return {}
   },
 
@@ -62,51 +60,48 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.setListeners()
   },
 
   computed: {
-    ...mapGetters([
-      'isCurrentUserManager'
-    ]),
+    ...mapGetters(['isCurrentUserManager']),
 
-    dropArea () {
+    dropArea() {
       return this.$refs['drop-area']
     },
 
-    hasThumbnail () {
+    hasThumbnail() {
       return ['mp4', 'png'].includes(this.previewFile.extension)
     },
 
-    originalName () {
+    originalName() {
       return `${this.previewFile.original_name}.${this.previewFile.extension}`
     }
   },
 
   methods: {
-    onSelected () {
+    onSelected() {
       this.$emit('selected', this.index)
     },
 
-    setListeners () {
+    setListeners() {
       this.dropArea.addEventListener('dragover', this.onDragover)
       this.dropArea.addEventListener('dragleave', this.onDragleave)
     },
 
-    onDragged () {
-    },
+    onDragged() {},
 
-    onDragleave () {
+    onDragleave() {
       this.dropArea.style.background = 'transparent'
       this.dropArea.style.width = '15px'
     },
 
-    onDragover () {
+    onDragover() {
       this.dropArea.style.width = '60px'
     },
 
-    onDropped (previousIndex) {
+    onDropped(previousIndex) {
       this.dropArea.style.background = 'transparent'
       this.dropArea.style.width = '15px'
       this.$emit('preview-dropped', {
@@ -116,8 +111,7 @@ export default {
     }
   },
 
-  watch: {
-  }
+  watch: {}
 }
 </script>
 

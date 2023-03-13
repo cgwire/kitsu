@@ -4,10 +4,7 @@ import shotsApi from '@/store/api/shots'
 import shotStore from '@/store/modules/shots'
 
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
-import {
-  buildSequenceIndex,
-  indexSearch
-} from '@/lib/indexing'
+import { buildSequenceIndex, indexSearch } from '@/lib/indexing'
 import {
   sortByName,
   sortSequences,
@@ -19,18 +16,9 @@ import {
   buildSelectionGrid,
   clearSelectionGrid
 } from '@/lib/selection'
-import {
-  applyFilters,
-  getFilters,
-  getKeyWords
-} from '@/lib/filtering'
-import {
-  getFilledColumns,
-  removeModelFromList
-} from '@/lib/models'
-import {
-  computeStats
-} from '@/lib/stats'
+import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
+import { getFilledColumns, removeModelFromList } from '@/lib/models'
+import { computeStats } from '@/lib/stats'
 import {
   ADD_SEQUENCE,
   ADD_SEQUENCE_SEARCH,
@@ -71,15 +59,18 @@ import {
 } from '@/store/mutation-types'
 
 const helpers = {
-  buildResult (state, {
-    sequenceSearch,
-    production,
-    sorting,
-    taskStatusMap,
-    taskTypeMap,
-    persons,
-    taskMap
-  }, applySequenceFilters = true
+  buildResult(
+    state,
+    {
+      sequenceSearch,
+      production,
+      sorting,
+      taskStatusMap,
+      taskTypeMap,
+      persons,
+      taskMap
+    },
+    applySequenceFilters = true
   ) {
     const taskTypes = Array.from(taskTypeMap.values())
     const taskStatuses = Array.from(taskStatusMap.values())
@@ -98,12 +89,7 @@ const helpers = {
     if (applySequenceFilters) {
       result = applyFilters(result, filters, taskMap)
     }
-    result = sortSequenceResult(
-      result,
-      sorting,
-      taskTypeMap,
-      taskMap
-    )
+    result = sortSequenceResult(result, sorting, taskTypeMap, taskMap)
     cache.result = result
 
     const displayedSequences = result
@@ -120,13 +106,14 @@ const helpers = {
     return result
   },
 
-  populateTask (production, task, sequence, taskTypeMap, taskStatusMap) {
+  populateTask(production, task, sequence, taskTypeMap, taskStatusMap) {
     task.name = getTaskTypePriorityOfProd(
       taskTypeMap.get(task.task_type_id),
       production
     ).toString()
-    task.task_status_short_name =
-      taskStatusMap.get(task.task_status_id).short_name
+    task.task_status_short_name = taskStatusMap.get(
+      task.task_status_id
+    ).short_name
 
     Object.assign(task, {
       project_id: sequence.production_id,
@@ -142,13 +129,15 @@ const helpers = {
     return task
   },
 
-  setListStats (state, sequences) {
+  setListStats(state, sequences) {
     let timeSpent = 0
     let estimation = 0
-    sequences.filter(e => !e.canceled).forEach(sequence => {
-      timeSpent += sequence.timeSpent
-      estimation += sequence.estimation
-    })
+    sequences
+      .filter(e => !e.canceled)
+      .forEach(sequence => {
+        timeSpent += sequence.timeSpent
+        estimation += sequence.estimation
+      })
     Object.assign(state, {
       displayedSequencesCount: sequences.length,
       displayedSequencesLength: sequences.filter(e => !e.canceled).length,
@@ -157,19 +146,17 @@ const helpers = {
     })
   },
 
-  sortValidationColumns (
+  sortValidationColumns(
     production,
     validationColumns,
     sequenceFilledColumns,
     taskTypeMap
   ) {
     const columns = [...validationColumns]
-    return sortValidationColumns(
-      columns, taskTypeMap, production
-    )
+    return sortValidationColumns(columns, taskTypeMap, production)
   },
 
-  sortStatColumns (stats, taskTypeMap, production) {
+  sortStatColumns(stats, taskTypeMap, production) {
     const validationColumnsMap = {}
     if (stats.all) {
       Object.keys(stats.all).forEach(entryId => {
@@ -179,9 +166,7 @@ const helpers = {
       })
     }
     const validationColumns = Object.keys(validationColumnsMap)
-    return sortValidationColumns(
-      validationColumns, taskTypeMap, production
-    )
+    return sortValidationColumns(validationColumns, taskTypeMap, production)
   }
 }
 
@@ -250,20 +235,20 @@ const getters = {
   searchSequenceFilters: state => state.searchSequenceFilters,
 
   isSingleSequence: state => cache.sequences.length < 2,
-  sequenceOptions: state => cache.sequences.map(
-    sequence => { return { label: sequence.name, value: sequence.id } }
-  )
+  sequenceOptions: state =>
+    cache.sequences.map(sequence => {
+      return { label: sequence.name, value: sequence.id }
+    })
 }
 
 const actions = {
-
-  setCurrentSequence ({ commit, rootGetters }, sequenceId) {
+  setCurrentSequence({ commit, rootGetters }, sequenceId) {
     commit(SET_CURRENT_SEQUENCE, sequenceId)
     const productionId = rootGetters.currentProduction.id
     commit(RESET_PRODUCTION_PATH, { productionId, sequenceId })
   },
 
-  changeSequenceSort ({ commit, rootGetters }, sortInfo) {
+  changeSequenceSort({ commit, rootGetters }, sortInfo) {
     const taskStatusMap = rootGetters.taskStatus
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
@@ -271,118 +256,116 @@ const actions = {
     const production = rootGetters.currentProduction
     const sorting = sortInfo ? [sortInfo] : []
     commit(CHANGE_SEQUENCE_SORT, {
-      taskStatusMap, taskTypeMap, taskMap, persons, production, sorting
+      taskStatusMap,
+      taskTypeMap,
+      taskMap,
+      persons,
+      production,
+      sorting
     })
   },
 
-  setSequenceSearch ({ commit, rootGetters }, sequenceSearch) {
+  setSequenceSearch({ commit, rootGetters }, sequenceSearch) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
     const production = rootGetters.currentProduction
     const persons = rootGetters.people
-    commit(
-      SET_SEQUENCE_SEARCH,
-      {
-        sequenceSearch,
-        persons,
-        taskStatusMap,
-        taskMap,
-        taskTypeMap,
-        production
-      }
-    )
+    commit(SET_SEQUENCE_SEARCH, {
+      sequenceSearch,
+      persons,
+      taskStatusMap,
+      taskMap,
+      taskTypeMap,
+      production
+    })
   },
 
-  setSequenceStatsSearch ({ commit, rootGetters }, sequenceSearch) {
+  setSequenceStatsSearch({ commit, rootGetters }, sequenceSearch) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
     const production = rootGetters.currentProduction
     const persons = rootGetters.people
-    commit(
-      SET_SEQUENCE_STATS_SEARCH,
-      {
-        sequenceSearch,
-        persons,
-        taskStatusMap,
-        taskMap,
-        taskTypeMap,
-        production
-      }
-    )
+    commit(SET_SEQUENCE_STATS_SEARCH, {
+      sequenceSearch,
+      persons,
+      taskStatusMap,
+      taskMap,
+      taskTypeMap,
+      production
+    })
   },
 
-  saveSequenceSearch ({ commit, rootGetters }, searchQuery) {
+  saveSequenceSearch({ commit, rootGetters }, searchQuery) {
     const query = state.sequenceSearchQueries.find(
-      (query) => query && query.name === searchQuery
+      query => query && query.name === searchQuery
     )
     const production = rootGetters.currentProduction
     if (!query) {
-      return peopleApi.createFilter(
-        'sequence',
-        searchQuery,
-        searchQuery,
-        production.id,
-        'Sequence'
-      ).then(query => {
-        commit(ADD_SEQUENCE_SEARCH, query)
-        return Promise.resolve(query)
-      })
+      return peopleApi
+        .createFilter(
+          'sequence',
+          searchQuery,
+          searchQuery,
+          production.id,
+          'Sequence'
+        )
+        .then(query => {
+          commit(ADD_SEQUENCE_SEARCH, query)
+          return Promise.resolve(query)
+        })
     } else {
       return Promise.resolve()
     }
   },
 
-  removeSequenceSearch ({ commit, rootGetters }, searchQuery) {
-    return peopleApi.removeFilter(searchQuery)
-      .then(() => {
-        commit(REMOVE_SEQUENCE_SEARCH, searchQuery)
-        return Promise.resolve()
-      })
+  removeSequenceSearch({ commit, rootGetters }, searchQuery) {
+    return peopleApi.removeFilter(searchQuery).then(() => {
+      commit(REMOVE_SEQUENCE_SEARCH, searchQuery)
+      return Promise.resolve()
+    })
   },
 
-  clearSelectedSequences ({ commit }) {
+  clearSelectedSequences({ commit }) {
     commit(CLEAR_SELECTED_SEQUENCES)
   },
 
-  initSequences ({ commit, dispatch, state, rootState, rootGetters }) {
+  initSequences({ commit, dispatch, state, rootState, rootGetters }) {
     const productionId = rootState.route.params.production_id
     dispatch('setLastProductionScreen', 'sequences')
     if (
       cache.sequences.length === 0 ||
       cache.sequences[0].production_id !== productionId
     ) {
-      return dispatch('loadSequences')
-        .then(() => {
-          return dispatch('computeSequenceStats')
-        })
+      return dispatch('loadSequences').then(() => {
+        return dispatch('computeSequenceStats')
+      })
     } else {
       return dispatch('computeSequenceStats')
     }
   },
 
-  loadSequences ({ commit, state, rootGetters }) {
+  loadSequences({ commit, state, rootGetters }) {
     const production = rootGetters.currentProduction
     const routeSequenceId = rootGetters.route.params.sequence_id
     const userFilters = rootGetters.userFilters
     const isTVShow = rootGetters.isTVShow
     const episode = isTVShow ? rootGetters.currentEpisode : null
     const episodeMap = rootGetters.episodeMap
-    return shotsApi.getSequences(production, episode)
-      .then(sequences => {
-        commit(LOAD_SEQUENCES_END, {
-          sequences,
-          episodeMap,
-          routeSequenceId,
-          production,
-          userFilters
-        })
-        return Promise.resolve(sequences)
+    return shotsApi.getSequences(production, episode).then(sequences => {
+      commit(LOAD_SEQUENCES_END, {
+        sequences,
+        episodeMap,
+        routeSequenceId,
+        production,
+        userFilters
       })
+      return Promise.resolve(sequences)
+    })
   },
 
-  loadSequencesWithTasks ({ commit, state, rootGetters }) {
+  loadSequencesWithTasks({ commit, state, rootGetters }) {
     const episodeMap = rootGetters.episodeMap
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
@@ -411,7 +394,8 @@ const actions = {
         return Promise.resolve([])
       }
     }
-    return shotsApi.getSequencesWithTasks(production, episode)
+    return shotsApi
+      .getSequencesWithTasks(production, episode)
       .then(sequences => {
         commit(SET_SEQUENCES_WITH_TASKS, {
           sequences,
@@ -428,54 +412,52 @@ const actions = {
       })
   },
 
-  clearSequences ({ commit }) {
+  clearSequences({ commit }) {
     commit(CLEAR_SEQUENCES)
   },
 
-  newSequence ({ commit, dispatch, state, rootGetters }, sequence) {
+  newSequence({ commit, dispatch, state, rootGetters }, sequence) {
     const episodeMap = rootGetters.episodeMap
-    return shotsApi.newSequence(sequence)
-      .then(sequence => {
-        commit(NEW_SEQUENCE_END, { sequence, episodeMap })
-        const taskTypeIds = rootGetters.productionSequenceTaskTypeIds
-        const createTaskPromises = taskTypeIds.map(
-          taskTypeId => dispatch('createTask', {
-            entityId: sequence.id,
-            projectId: sequence.project_id,
-            taskTypeId: taskTypeId,
-            type: 'sequences'
-          })
-        )
-        return Promise.all(createTaskPromises)
-          .then(() => Promise.resolve(sequence))
-          .catch(console.error)
-      })
+    return shotsApi.newSequence(sequence).then(sequence => {
+      commit(NEW_SEQUENCE_END, { sequence, episodeMap })
+      const taskTypeIds = rootGetters.productionSequenceTaskTypeIds
+      const createTaskPromises = taskTypeIds.map(taskTypeId =>
+        dispatch('createTask', {
+          entityId: sequence.id,
+          projectId: sequence.project_id,
+          taskTypeId: taskTypeId,
+          type: 'sequences'
+        })
+      )
+      return Promise.all(createTaskPromises)
+        .then(() => Promise.resolve(sequence))
+        .catch(console.error)
+    })
   },
 
-  editSequence ({ commit, state }, data) {
+  editSequence({ commit, state }, data) {
     commit(LOCK_SEQUENCE, data)
-    return shotsApi.updateSequence(data)
-      .then(sequence => {
-        commit(EDIT_SEQUENCE_END, sequence)
-        commit(UNLOCK_SEQUENCE, data)
-        return Promise.resolve(sequence)
-      })
+    return shotsApi.updateSequence(data).then(sequence => {
+      commit(EDIT_SEQUENCE_END, sequence)
+      commit(UNLOCK_SEQUENCE, data)
+      return Promise.resolve(sequence)
+    })
   },
 
-  deleteSequence ({ commit, state }, sequence) {
-    return shotsApi.deleteSequence(sequence)
-      .then(() => {
-        commit(REMOVE_SEQUENCE, sequence)
-        return Promise.resolve(sequence)
-      })
+  deleteSequence({ commit, state }, sequence) {
+    return shotsApi.deleteSequence(sequence).then(() => {
+      commit(REMOVE_SEQUENCE, sequence)
+      return Promise.resolve(sequence)
+    })
   },
 
-  loadSequence ({ commit, state, rootGetters }, sequenceId) {
+  loadSequence({ commit, state, rootGetters }, sequenceId) {
     const episodeMap = rootGetters.episodeMap
     const sequence = rootGetters.sequenceMap.get(sequenceId)
     if (sequence && sequence.lock) return
 
-    return shotsApi.getSequence(sequenceId)
+    return shotsApi
+      .getSequence(sequenceId)
       .then(sequence => {
         if (state.sequenceMap.get(sequence.id)) {
           commit(UPDATE_SEQUENCE, sequence)
@@ -487,10 +469,11 @@ const actions = {
       .catch(console.error)
   },
 
-  loadSequenceStats ({ commit, rootGetters }, productionId) {
+  loadSequenceStats({ commit, rootGetters }, productionId) {
     const taskTypeMap = rootGetters.taskTypeMap
     commit(SET_SEQUENCE_STATS, { sequenceStats: {}, taskTypeMap })
-    return shotsApi.getSequenceStats(productionId)
+    return shotsApi
+      .getSequenceStats(productionId)
       .then(sequenceStats => {
         commit(SET_SEQUENCE_STATS, { sequenceStats, taskTypeMap })
         return Promise.resolve(sequenceStats)
@@ -498,7 +481,7 @@ const actions = {
       .catch(console.error)
   },
 
-  loadSequenceRetakeStats ({ commit, rootGetters }, productionId) {
+  loadSequenceRetakeStats({ commit, rootGetters }, productionId) {
     const taskTypeMap = rootGetters.taskTypeMap
     const production = rootGetters.currentProduction
     commit(SET_SEQUENCE_RETAKE_STATS, {
@@ -506,7 +489,8 @@ const actions = {
       production,
       taskTypeMap
     })
-    return shotsApi.getSequenceRetakeStats(productionId)
+    return shotsApi
+      .getSequenceRetakeStats(productionId)
       .then(sequenceRetakeStats => {
         commit(SET_SEQUENCE_RETAKE_STATS, {
           sequenceRetakeStats,
@@ -518,11 +502,11 @@ const actions = {
       .catch(console.error)
   },
 
-  setSequenceListScrollPosition ({ commit }, scrollPosition) {
+  setSequenceListScrollPosition({ commit }, scrollPosition) {
     commit(SET_SEQUENCE_LIST_SCROLL_POSITION, scrollPosition)
   },
 
-  computeSequenceStats ({ commit, rootGetters }) {
+  computeSequenceStats({ commit, rootGetters }) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskMap = rootGetters.taskMap
     commit(COMPUTE_SEQUENCE_STATS, { taskStatusMap, taskMap })
@@ -530,17 +514,17 @@ const actions = {
 }
 
 const mutations = {
-
-  [RESET_ALL] (state) {
+  [RESET_ALL](state) {
     Object.assign(state, { ...initialState })
     cache.sequences = []
     cache.result = []
     cache.sequenceIndex = {}
   },
 
-  [CHANGE_SEQUENCE_SORT] (state, {
-    taskStatusMap, taskTypeMap, taskMap, production, sorting, persons
-  }) {
+  [CHANGE_SEQUENCE_SORT](
+    state,
+    { taskStatusMap, taskTypeMap, taskMap, production, sorting, persons }
+  ) {
     const sequenceSearch = state.sequenceSearchText
     state.sequenceSorting = sorting
     helpers.buildResult(state, {
@@ -554,21 +538,21 @@ const mutations = {
     })
   },
 
-  [ADD_SEQUENCE_SEARCH] (state, searchQuery) {
+  [ADD_SEQUENCE_SEARCH](state, searchQuery) {
     state.sequenceSearchQueries.push(searchQuery)
     state.sequenceSearchQueries = sortByName(state.sequenceSearchQueries)
   },
 
-  [REMOVE_SEQUENCE_SEARCH] (state, searchQuery) {
+  [REMOVE_SEQUENCE_SEARCH](state, searchQuery) {
     const queryIndex = state.sequenceSearchQueries.findIndex(
-      (query) => query.name === searchQuery.name
+      query => query.name === searchQuery.name
     )
     if (queryIndex >= 0) {
       state.sequenceSearchQueries.splice(queryIndex, 1)
     }
   },
 
-  [SET_SEQUENCE_SELECTION] (state, { sequence, selected, displayedSequences }) {
+  [SET_SEQUENCE_SELECTION](state, { sequence, selected, displayedSequences }) {
     if (!selected && state.selectedSequences.has(sequence.id)) {
       state.selectedSequences.delete(sequence.id)
       state.selectedSequences = new Map(state.selectedSequences) // for reactivity
@@ -583,20 +567,20 @@ const mutations = {
     }
   },
 
-  [CLEAR_SELECTED_SEQUENCES] (state) {
+  [CLEAR_SELECTED_SEQUENCES](state) {
     state.selectedSequences = new Map()
   },
 
-  [CLEAR_SEQUENCES] (state) {
+  [CLEAR_SEQUENCES](state) {
     cache.sequences = []
     state.currentSequence = null
   },
 
-  [SET_CURRENT_PRODUCTION] (state, production) {
+  [SET_CURRENT_PRODUCTION](state, production) {
     state.shotSearchText = ''
   },
 
-  [SET_CURRENT_SEQUENCE] (state, sequenceId) {
+  [SET_CURRENT_SEQUENCE](state, sequenceId) {
     if (sequenceId) {
       if (sequenceId === 'main') {
         state.currentSequence = { id: 'main' }
@@ -608,7 +592,7 @@ const mutations = {
     }
   },
 
-  [SET_SEQUENCES_WITH_TASKS] (
+  [SET_SEQUENCES_WITH_TASKS](
     state,
     {
       episodeMap,
@@ -641,7 +625,11 @@ const mutations = {
       }
       sequence.tasks.forEach(task => {
         helpers.populateTask(
-          production, task, sequence, taskTypeMap, taskStatusMap
+          production,
+          task,
+          sequence,
+          taskTypeMap,
+          taskStatusMap
         )
         timeSpent += task.duration
         estimation += task.estimation
@@ -680,7 +668,10 @@ const mutations = {
     const filledColumns = getFilledColumns(displayedSequences)
 
     state.sequenceValidationColumns = helpers.sortValidationColumns(
-      production, Object.values(validationColumns), filledColumns, taskTypeMap
+      production,
+      Object.values(validationColumns),
+      filledColumns,
+      taskTypeMap
     )
 
     state.nbValidationColumns = state.sequenceValidationColumns.length
@@ -707,13 +698,13 @@ const mutations = {
     }
   },
 
-  [SET_SEQUENCE_SEARCH] (state, payload) {
+  [SET_SEQUENCE_SEARCH](state, payload) {
     const sorting = state.sequenceSorting
     payload.sorting = sorting
     helpers.buildResult(state, payload)
   },
 
-  [SET_SEQUENCE_STATS_SEARCH] (state, payload) {
+  [SET_SEQUENCE_STATS_SEARCH](state, payload) {
     const sorting = state.sequenceSorting
     payload.sorting = sorting
     const result = helpers.buildResult(state, payload, false)
@@ -723,8 +714,9 @@ const mutations = {
       assetTypes: [],
       taskTypes: [],
       taskStatuses: [],
-      descriptors:
-        payload.production.descriptors.filter(d => d.entity_type === 'Shot'),
+      descriptors: payload.production.descriptors.filter(
+        d => d.entity_type === 'Shot'
+      ),
       persons: [],
       query: payload.sequenceSearch
     })
@@ -733,22 +725,22 @@ const mutations = {
     state.sequenceSearchText = payload.sequenceSearch
   },
 
-  [SET_SEQUENCE_LIST_SCROLL_POSITION] (state, scrollPosition) {
+  [SET_SEQUENCE_LIST_SCROLL_POSITION](state, scrollPosition) {
     state.sequenceListScrollPosition = scrollPosition
   },
 
-  [SAVE_SEQUENCE_SEARCH_END] (state, { searchQuery }) {
+  [SAVE_SEQUENCE_SEARCH_END](state, { searchQuery }) {
     state.sequenceSearchQueries.push(searchQuery)
     state.sequenceSearchQueries = sortByName(state.sequenceSearchQueries)
   },
 
-  [REMOVE_SEQUENCE_SEARCH_END] (state, { searchQuery }) {
-    state.sequenceSearchQueries = state
-      .sequenceSearchQueries
-      .filter((query) => query.name !== searchQuery.name)
+  [REMOVE_SEQUENCE_SEARCH_END](state, { searchQuery }) {
+    state.sequenceSearchQueries = state.sequenceSearchQueries.filter(
+      query => query.name !== searchQuery.name
+    )
   },
 
-  [NEW_SEQUENCE_END] (state, { sequence }) {
+  [NEW_SEQUENCE_END](state, { sequence }) {
     sequence.production_id = sequence.project_id
     sequence.preview_file_id = ''
     sequence.tasks = []
@@ -768,7 +760,7 @@ const mutations = {
     // cache.sequenceIndex = buildNameIndex(cache.sequences)
   },
 
-  [EDIT_SEQUENCE_END] (state, newSequence) {
+  [EDIT_SEQUENCE_END](state, newSequence) {
     const sequence = state.sequenceMap.get(newSequence.id)
     if (sequence) {
       Object.assign(sequence, newSequence)
@@ -776,7 +768,7 @@ const mutations = {
     state.sequenceIndex = buildSequenceIndex(cache.sequences)
   },
 
-  [LOAD_SEQUENCES_START] (state) {
+  [LOAD_SEQUENCES_START](state) {
     cache.sequences = []
     cache.result = []
     cache.sequenceIndex = {}
@@ -795,13 +787,14 @@ const mutations = {
     state.selectedsequences = new Map()
   },
 
-  [LOAD_SEQUENCES_ERROR] (state) {
+  [LOAD_SEQUENCES_ERROR](state) {
     state.isSequencesLoading = false
     state.isSequencesLoadingError = true
   },
 
-  [LOAD_SEQUENCES_END] (
-    state, { sequences, episodeMap, production, userFilters }
+  [LOAD_SEQUENCES_END](
+    state,
+    { sequences, episodeMap, production, userFilters }
   ) {
     const sequenceMap = new Map()
     if (
@@ -833,21 +826,27 @@ const mutations = {
     state.displayedSequencesLength = cache.sequences.length
   },
 
-  [SET_SEQUENCE_STATS] (state, { sequenceStats, taskTypeMap, production }) {
-    state.sequenceValidationColumns =
-      helpers.sortStatColumns(sequenceStats, taskTypeMap, production)
+  [SET_SEQUENCE_STATS](state, { sequenceStats, taskTypeMap, production }) {
+    state.sequenceValidationColumns = helpers.sortStatColumns(
+      sequenceStats,
+      taskTypeMap,
+      production
+    )
     state.sequenceStats = sequenceStats
   },
 
-  [SET_SEQUENCE_RETAKE_STATS] (
-    state, { sequenceRetakeStats, taskTypeMap, production }
+  [SET_SEQUENCE_RETAKE_STATS](
+    state,
+    { sequenceRetakeStats, taskTypeMap, production }
   ) {
-    state.sequenceValidationColumns =
-      helpers.sortStatColumns(sequenceRetakeStats, taskTypeMap)
+    state.sequenceValidationColumns = helpers.sortStatColumns(
+      sequenceRetakeStats,
+      taskTypeMap
+    )
     state.sequenceRetakeStats = sequenceRetakeStats
   },
 
-  [COMPUTE_SEQUENCE_STATS] (state, { taskMap, taskStatusMap }) {
+  [COMPUTE_SEQUENCE_STATS](state, { taskMap, taskStatusMap }) {
     let shots = shotStore.cache.shots
     if (state.searchSequenceFilters.length > 0) {
       shots = applyFilters(shots, state.searchSequenceFilters, {})
@@ -861,16 +860,17 @@ const mutations = {
     )
   },
 
-  [CREATE_TASKS_END] (
-    state,
-    { tasks, production, taskTypeMap, taskStatusMap }
-  ) {
+  [CREATE_TASKS_END](state, { tasks, production, taskTypeMap, taskStatusMap }) {
     tasks.forEach(task => {
       if (task) {
         const sequence = state.sequenceMap.get(task.entity_id)
         if (sequence) {
           helpers.populateTask(
-            production, task, sequence, taskTypeMap, taskStatusMap
+            production,
+            task,
+            sequence,
+            taskTypeMap,
+            taskStatusMap
           )
           sequence.validations.set(task.task_type_id, task.id)
           const validations = sequence.validations
@@ -882,22 +882,26 @@ const mutations = {
     })
   },
 
-  [REMOVE_SELECTED_TASK] (state, validationInfo) {
-    if (state.sequenceSelectionGrid[0] &&
-        state.sequenceSelectionGrid[validationInfo.x]) {
+  [REMOVE_SELECTED_TASK](state, validationInfo) {
+    if (
+      state.sequenceSelectionGrid[0] &&
+      state.sequenceSelectionGrid[validationInfo.x]
+    ) {
       state.sequenceSelectionGrid[validationInfo.x][validationInfo.y] = false
     }
   },
 
-  [ADD_SELECTED_TASK] (state, validationInfo) {
-    if (state.sequenceSelectionGrid[0] &&
-        state.sequenceSelectionGrid[validationInfo.x]) {
+  [ADD_SELECTED_TASK](state, validationInfo) {
+    if (
+      state.sequenceSelectionGrid[0] &&
+      state.sequenceSelectionGrid[validationInfo.x]
+    ) {
       state.sequenceSelectionGrid[validationInfo.x][validationInfo.y] = true
       state.selectedSequences = new Map() // unselect all previously selected lines
     }
   },
 
-  [ADD_SELECTED_TASKS] (state, selection) {
+  [ADD_SELECTED_TASKS](state, selection) {
     let tmpGrid = JSON.parse(JSON.stringify(state.sequenceSelectionGrid))
     selection.forEach(validationInfo => {
       if (!tmpGrid[validationInfo.x]) {
@@ -916,12 +920,12 @@ const mutations = {
     state.sequenceSelectionGrid = tmpGrid
   },
 
-  [CLEAR_SELECTED_TASKS] (state, validationInfo) {
+  [CLEAR_SELECTED_TASKS](state, validationInfo) {
     const tmpGrid = JSON.parse(JSON.stringify(state.sequenceSelectionGrid))
     state.sequenceSelectionGrid = clearSelectionGrid(tmpGrid)
   },
 
-  [NEW_TASK_END] (state, { task, production, taskTypeMap, taskStatusMap }) {
+  [NEW_TASK_END](state, { task, production, taskTypeMap, taskStatusMap }) {
     const sequence = state.sequenceMap.get(task.entity_id)
     if (sequence && task) {
       task = helpers.populateTask(
@@ -944,7 +948,7 @@ const mutations = {
     }
   },
 
-  [DELETE_TASK_END] (state, task) {
+  [DELETE_TASK_END](state, task) {
     const sequence = state.sequenceMap.get(task.entity_id)
     if (sequence) {
       const validations = new Map(sequence.validations)
@@ -952,13 +956,13 @@ const mutations = {
       delete sequence.validations
       Vue.set(sequence, 'validations', validations)
       const taskIndex = sequence.tasks.findIndex(
-        (sequenceTaskId) => sequenceTaskId === task.id
+        sequenceTaskId => sequenceTaskId === task.id
       )
       sequence.tasks.splice(taskIndex, 1)
     }
   },
 
-  [ADD_SEQUENCE] (state, { sequence, episodeMap }) {
+  [ADD_SEQUENCE](state, { sequence, episodeMap }) {
     cache.sequences.push(sequence)
     const sortedSequences = sortSequences(cache.sequences)
     state.sequenceMap.set(sequence.id, sequence)
@@ -978,25 +982,27 @@ const mutations = {
     state.displayedSequencesLength = sortedSequences.length
   },
 
-  [UPDATE_SEQUENCE] (state, sequence) {
+  [UPDATE_SEQUENCE](state, sequence) {
     Object.assign(state.sequenceMap.get(sequence.id), sequence)
     state.sequenceIndex = buildSequenceIndex(cache.sequences)
   },
 
-  [REMOVE_SEQUENCE] (state, sequence) {
+  [REMOVE_SEQUENCE](state, sequence) {
     delete state.sequenceMap.get(sequence.id)
     cache.sequences = removeModelFromList(cache.sequences, sequence)
-    state.displayedSequences =
-      removeModelFromList(state.displayedSequences, sequence)
+    state.displayedSequences = removeModelFromList(
+      state.displayedSequences,
+      sequence
+    )
     state.sequenceIndex = buildSequenceIndex(cache.sequences)
   },
 
-  [LOCK_SEQUENCE] (state, sequence) {
+  [LOCK_SEQUENCE](state, sequence) {
     sequence = state.sequenceMap.get(sequence.id)
     if (sequence) sequence.lock = true
   },
 
-  [UNLOCK_SEQUENCE] (state, sequence) {
+  [UNLOCK_SEQUENCE](state, sequence) {
     sequence = state.sequenceMap.get(sequence.id)
     if (sequence) sequence.lock = false
   }

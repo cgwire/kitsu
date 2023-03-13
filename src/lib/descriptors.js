@@ -1,5 +1,5 @@
 export default {
-  getChoicesOptions (descriptor) {
+  getChoicesOptions(descriptor) {
     const values = descriptor.choices.map(c => ({ label: c, value: c }))
     return [{ label: '', value: '' }, ...values]
   }

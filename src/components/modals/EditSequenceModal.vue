@@ -1,65 +1,66 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
-    <div class="box">
+    <div class="modal-content">
+      <div class="box">
+        <h1 class="title" v-if="sequenceToEdit && this.sequenceToEdit.id">
+          {{ $t('sequences.edit_title') }} {{ sequenceToEdit.name }}
+        </h1>
+        <h1 class="title" v-else>
+          {{ $t('sequences.new_sequence') }}
+        </h1>
 
-      <h1 class="title" v-if="sequenceToEdit && this.sequenceToEdit.id">
-        {{ $t("sequences.edit_title") }} {{ sequenceToEdit.name }}
-      </h1>
-      <h1 class="title" v-else>
-        {{ $t("sequences.new_sequence") }}
-      </h1>
-
-      <form v-on:submit.prevent>
-        <text-field
-          ref="nameField"
-          :label="$t('sequences.fields.name')"
-          v-model="form.name"
-          @enter="runConfirmation"
-          v-focus
-        />
-        <textarea-field
-          ref="descriptionField"
-          :label="$t('sequences.fields.description')"
-          @keyup.ctrl.enter="runConfirmation"
-          @keyup.meta.enter="runConfirmation"
-          v-model="form.description"
-        />
-
-        <div
-          :key="descriptor.id"
-          v-for="descriptor in sequenceMetadataDescriptors"
-        >
-          <combobox
-            v-if="descriptor.choices.length > 0"
-            :label="descriptor.name"
-            :options="getDescriptorChoicesOptions(descriptor)"
-            v-model="form.data[descriptor.field_name]"
-          />
+        <form v-on:submit.prevent>
           <text-field
-            :label="descriptor.name"
+            ref="nameField"
+            :label="$t('sequences.fields.name')"
+            v-model="form.name"
             @enter="runConfirmation"
-            v-model="form.data[descriptor.field_name]"
-            v-else
+            v-focus
           />
-        </div>
-      </form>
+          <textarea-field
+            ref="descriptionField"
+            :label="$t('sequences.fields.description')"
+            @keyup.ctrl.enter="runConfirmation"
+            @keyup.meta.enter="runConfirmation"
+            v-model="form.description"
+          />
 
-      <modal-footer
-        :error-text="$t('sequences.edit_error')"
-        :is-loading="isLoading"
-        :is-error="isError"
-        @confirm="runConfirmation"
-        @cancel="$emit('cancel')"
-      />
+          <div
+            :key="descriptor.id"
+            v-for="descriptor in sequenceMetadataDescriptors"
+          >
+            <combobox
+              v-if="descriptor.choices.length > 0"
+              :label="descriptor.name"
+              :options="getDescriptorChoicesOptions(descriptor)"
+              v-model="form.data[descriptor.field_name]"
+            />
+            <text-field
+              :label="descriptor.name"
+              @enter="runConfirmation"
+              v-model="form.data[descriptor.field_name]"
+              v-else
+            />
+          </div>
+        </form>
+
+        <modal-footer
+          :error-text="$t('sequences.edit_error')"
+          :is-loading="isLoading"
+          :is-error="isError"
+          @confirm="runConfirmation"
+          @cancel="$emit('cancel')"
+        />
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -99,7 +100,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     if (this.sequenceToEdit && this.sequenceToEdit.id) {
       return {
         form: {
@@ -125,34 +126,30 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction',
-      'sequenceMetadataDescriptors'
-    ])
+    ...mapGetters(['currentProduction', 'sequenceMetadataDescriptors'])
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    getDescriptorChoicesOptions (descriptor) {
+    getDescriptorChoicesOptions(descriptor) {
       const values = descriptor.choices.map(c => ({ label: c, value: c }))
       return [{ label: '', value: '' }, ...values]
     },
 
-    runConfirmation () {
+    runConfirmation() {
       this.confirmClicked()
     },
 
-    confirmClicked () {
+    confirmClicked() {
       this.$emit('confirm', this.form)
     },
 
-    isEditing () {
+    isEditing() {
       return this.sequenceToEdit && this.sequenceToEdit.id
     },
 
-    resetForm () {
+    resetForm() {
       this.sequenceSuccessText = ''
       if (!this.isEditing()) {
         this.form.id = null
@@ -169,18 +166,18 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     if (this.active) {
       this.resetForm()
     }
   },
 
   watch: {
-    active () {
+    active() {
       this.resetForm()
     },
 
-    sequenceToEdit () {
+    sequenceToEdit() {
       this.resetForm()
     }
   }

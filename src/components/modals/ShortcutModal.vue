@@ -1,60 +1,57 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
-    <div class="box content">
-      <h1 class="title">
-        {{ $t('keyboard.shortcuts') }}
-      </h1>
-
-      <div
-        class="mt2"
-        :key="shortcutGroup.label"
-        v-for="shortcutGroup in shortcutGroups"
-      >
-        <h3>
-          {{ $t(shortcutGroup.label) }}
-        </h3>
+    <div class="modal-content">
+      <div class="box content">
+        <h1 class="title">
+          {{ $t('keyboard.shortcuts') }}
+        </h1>
 
         <div
-          class="shortcut"
-          :key="`shortcut-${i}`"
-          v-for="(shortcut, i) in shortcutGroup.shortcuts"
+          class="mt2"
+          :key="shortcutGroup.label"
+          v-for="shortcutGroup in shortcutGroups"
         >
-          <div
-            class="shortcut-key-wrapper"
-          >
-            <div
-              :key="`shortcut-key-${i}-${j}`"
-              v-for="(key, j) in shortcut.keys"
-            >
-              <span class="shortcut-key">{{ key }}</span>
-              <span
-                class="shortcut-plus"
-                v-if="j !== shortcut.keys.length - 1"
-               >+
-               </span>
-            </div>
-          </div>
-          <span class="shortcut-text">{{ shortcut.text }}</span>
-        </div>
-      </div>
+          <h3>
+            {{ $t(shortcutGroup.label) }}
+          </h3>
 
-      <div class="has-text-right modal-footer">
-        <button
-          @click="$emit('cancel')"
-          class="button is-link"
-        >
-          {{ $t('main.cancel') }}
-        </button>
+          <div
+            class="shortcut"
+            :key="`shortcut-${i}`"
+            v-for="(shortcut, i) in shortcutGroup.shortcuts"
+          >
+            <div class="shortcut-key-wrapper">
+              <div
+                :key="`shortcut-key-${i}-${j}`"
+                v-for="(key, j) in shortcut.keys"
+              >
+                <span class="shortcut-key">{{ key }}</span>
+                <span
+                  class="shortcut-plus"
+                  v-if="j !== shortcut.keys.length - 1"
+                  >+
+                </span>
+              </div>
+            </div>
+            <span class="shortcut-text">{{ shortcut.text }}</span>
+          </div>
+        </div>
+
+        <div class="has-text-right modal-footer">
+          <button @click="$emit('cancel')" class="button is-link">
+            {{ $t('main.cancel') }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -65,8 +62,7 @@ export default {
   name: 'shot-history-modal',
   mixins: [modalMixin],
 
-  components: {
-  },
+  components: {},
 
   props: {
     active: {
@@ -75,7 +71,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       shortcutGroups: [
         {
@@ -149,30 +145,24 @@ export default {
             }
           ]
         }
-
       ]
     }
   },
 
-  mounted () {
+  mounted() {
     this.reset()
   },
 
   computed: {
-    ...mapGetters([
-    ])
+    ...mapGetters([])
   },
 
   methods: {
-    ...mapActions([
-      'loadShotHistory'
-    ]),
+    ...mapActions(['loadShotHistory']),
 
-    reset () {
-    },
+    reset() {},
 
-    formatDate (dateString) {
-    }
+    formatDate(dateString) {}
   }
 }
 </script>

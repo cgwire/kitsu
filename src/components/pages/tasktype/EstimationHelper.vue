@@ -1,251 +1,246 @@
 <template>
-<div class="estimation-wrapper">
-  <div
-    class="estimation-helper columns"
-  >
-    <div ref="body" class="task-list column datatable-wrapper">
-      <table class="datatable">
-        <thead class="datatable-head">
-          <tr>
-            <th class="assignees">
-              {{ $t('tasks.fields.assignees') }}
-            </th>
-            <th class="thumbnail">
-            </th>
-            <th class="asset-type" v-if="isAssets">
-              {{ $t('tasks.fields.asset_type') }}
-            </th>
-            <th class="sequence" v-else-if="isShots">
-              {{ $t('tasks.fields.sequence') }}
-            </th>
-            <th class="name">
-              {{ $t('tasks.fields.entity_name') }}
-            </th>
-            <th class="frames numeric-cell" v-if="isShots">
-              {{ $t('tasks.fields.frames') }}
-            </th>
-            <th class="seconds numeric-cell" v-if="isShots">
-              {{ $t('tasks.fields.seconds').substring(0, 3) }}.
-            </th>
-            <th class="estimation numeric-cell">
-              {{ $t('tasks.fields.estimation').substring(0, 3) }}.
-            </th>
-          </tr>
-        </thead>
+  <div class="estimation-wrapper">
+    <div class="estimation-helper columns">
+      <div ref="body" class="task-list column datatable-wrapper">
+        <table class="datatable">
+          <thead class="datatable-head">
+            <tr>
+              <th class="assignees">
+                {{ $t('tasks.fields.assignees') }}
+              </th>
+              <th class="thumbnail"></th>
+              <th class="asset-type" v-if="isAssets">
+                {{ $t('tasks.fields.asset_type') }}
+              </th>
+              <th class="sequence" v-else-if="isShots">
+                {{ $t('tasks.fields.sequence') }}
+              </th>
+              <th class="name">
+                {{ $t('tasks.fields.entity_name') }}
+              </th>
+              <th class="frames numeric-cell" v-if="isShots">
+                {{ $t('tasks.fields.frames') }}
+              </th>
+              <th class="seconds numeric-cell" v-if="isShots">
+                {{ $t('tasks.fields.seconds').substring(0, 3) }}.
+              </th>
+              <th class="estimation numeric-cell">
+                {{ $t('tasks.fields.estimation').substring(0, 3) }}.
+              </th>
+            </tr>
+          </thead>
 
-        <tbody
-          class="datatable-body"
-        >
-          <tr
-            :ref="'task-' + task.id"
-            :key="task.id"
-            :class="{
-              'datatable-row': true,
-              selected: selectionGrid[task.id],
-              'task-line': true
-            }"
-            v-for="(task, index) in tasksByPerson"
-          >
-            <td class="assignees flexrow">
-              <people-avatar
-                class="flexrow-item"
-                :person="personMap.get(personId)"
-                :size="30"
-                :font-size="17"
-                v-for="personId in task.assignees"
-                :key="task.id + '-' + personId"
-                v-if="task.assignees.length > 1"
-              />
-              <span
-                class="flexrow"
-                :key="task.id + '-' + personId"
-                v-for="personId in task.assignees"
-                v-else
+          <tbody class="datatable-body">
+            <tr
+              :ref="'task-' + task.id"
+              :key="task.id"
+              :class="{
+                'datatable-row': true,
+                selected: selectionGrid[task.id],
+                'task-line': true
+              }"
+              v-for="(task, index) in tasksByPerson"
+            >
+              <td class="assignees flexrow">
+                <people-avatar
+                  class="flexrow-item"
+                  :person="personMap.get(personId)"
+                  :size="30"
+                  :font-size="17"
+                  v-for="personId in task.assignees"
+                  :key="task.id + '-' + personId"
+                  v-if="task.assignees.length > 1"
+                />
+                <span
+                  class="flexrow"
+                  :key="task.id + '-' + personId"
+                  v-for="personId in task.assignees"
+                  v-else
+                >
+                  <people-avatar
+                    class="flexrow-item"
+                    :person="personMap.get(personId)"
+                    :size="30"
+                    :font-size="17"
+                  />
+                  <people-name
+                    class="flexrow-item"
+                    :person="personMap.get(personId)"
+                  />
+                </span>
+              </td>
+              <td class="thumbnail">
+                <entity-thumbnail
+                  :entity="getEntity(task.entity.id)"
+                  :width="50"
+                  :height="33"
+                  :empty-width="50"
+                  :empty-height="31"
+                />
+              </td>
+              <td class="asset-type" v-if="isAssets">
+                {{ getEntity(task.entity.id).asset_type_name }}
+              </td>
+              <td class="sequence" v-else-if="isShots">
+                {{ getEntity(task.entity.id).sequence_name }}
+              </td>
+              <td class="name">
+                {{ getEntity(task.entity.id).name }}
+              </td>
+              <td class="frames numeric-cell" v-if="isShots">
+                {{ getEntity(task.entity.id).nb_frames }}
+              </td>
+              <td class="frames numeric-cell" v-if="isShots">
+                {{ getSeconds(task) }}
+              </td>
+              <td
+                @click="selectTask($event, task, index)"
+                class="estimation numeric-cell"
               >
-                <people-avatar
-                  class="flexrow-item"
-                  :person="personMap.get(personId)"
-                  :size="30"
-                  :font-size="17"
+                <input
+                  :ref="task.id + '-estimation'"
+                  class="input stylehidden"
+                  @blur="onInputBlur"
+                  @change="estimationUpdated($event, task, index)"
+                  @keydown="onKeyDown"
+                  @mouseout="onInputMouseOut"
+                  @mouseover="onInputMouseOver"
+                  :value="formatDuration(task.estimation)"
+                  v-if="isInDepartment(task)"
                 />
-                <people-name
-                  class="flexrow-item"
-                  :person="personMap.get(personId)"
-                />
-              </span>
-            </td>
-            <td class="thumbnail">
-              <entity-thumbnail
-                :entity="getEntity(task.entity.id)"
-                :width="50"
-                :height="33"
-                :empty-width="50"
-                :empty-height="31"
-              />
-            </td>
-            <td class="asset-type" v-if="isAssets">
-              {{ getEntity(task.entity.id).asset_type_name }}
-            </td>
-            <td class="sequence" v-else-if="isShots">
-              {{ getEntity(task.entity.id).sequence_name }}
-            </td>
-            <td class="name">
-              {{ getEntity(task.entity.id).name }}
-            </td>
-            <td class="frames numeric-cell" v-if="isShots">
-              {{ getEntity(task.entity.id).nb_frames }}
-            </td>
-            <td class="frames numeric-cell" v-if="isShots">
-              {{ getSeconds(task) }}
-            </td>
-            <td
-              @click="selectTask($event, task, index)"
-              class="estimation numeric-cell"
-            >
-              <input
-                :ref="task.id + '-estimation'"
-                class="input stylehidden"
-                @blur="onInputBlur"
-                @change="estimationUpdated($event, task, index)"
-                @keydown="onKeyDown"
-                @mouseout="onInputMouseOut"
-                @mouseover="onInputMouseOver"
-                :value="formatDuration(task.estimation)"
-                v-if="isInDepartment(task)"
-              />
-              <span v-else>
-                {{ formatDuration(task.estimation) }}
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="person-list column datatable-wrapper">
-      <table class="datatable">
-        <thead ref="thead" class="datatable-head">
-          <tr>
-            <th class="assignees">
-              {{ $t('tasks.fields.assignees') }}
-            </th>
-            <th class="count numeric-cell">
-              {{ $t('tasks.fields.count') }}
-            </th>
-            <th class="frames numeric-cell">
-              {{ $t('tasks.fields.frames') }}
-            </th>
-            <th class="seconds numeric-cell">
-              {{ $t('tasks.fields.seconds').substring(0, 3) }}.
-            </th>
-            <th class="estimation numeric-cell">
-              {{ $t('tasks.fields.estimation').substring(0, 3) }}.
-            </th>
-            <th class="quota numeric-cell">
-              {{ $t('tasks.fields.estimated_quota') + ' '+ $t('tasks.fields.seconds').substring(0, 3) }}.
-            </th>
-            <th class="quota numeric-cell">
-              {{ $t('tasks.fields.estimated_quota') + ' ' + $t('tasks.fields.frames').substring(0, 3) }}.
-            </th>
-            <th class="quota numeric-cell">
-              {{ $t('tasks.fields.estimated_quota') + ' ' + $t('tasks.fields.count') }}.
-            </th>
-            <th class="empty">
-              &nbsp;
-            </th>
-          </tr>
-        </thead>
-
-        <tbody
-          class="datatable-body"
-        >
-          <template
-            v-for="person in assignees"
-          >
-            <tr
-              :key="person.id"
-              :class="{
-                'datatable-row': true,
-                'task-line': true
-              }"
-            >
-              <td class="person flexrow">
-                <people-avatar
-                  class="flexrow-item"
-                  :person="person"
-                  :size="30"
-                  :font-size="17"
-                />
-                <people-name
-                  class="flexrow-item"
-                  :person="person"
-                />
-              </td>
-              <td class="count numeric-cell">
-                {{ person.alltasks.count }}
-              </td>
-              <td class="frames numeric-cell">
-                {{ person.alltasks.frames }}
-              </td>
-              <td class="seconds numeric-cell">
-                {{ person.alltasks.seconds }}
-              </td>
-              <td class="estimation numeric-cell">
-                {{ person.alltasks.estimation }}
-              </td>
-              <td class="quota numeric-cell">
-                {{ person.alltasks.quota }}
-              </td>
-              <td class="quota numeric-cell">
-                {{ person.alltasks.quotaFrames }}
-              </td>
-              <td class="quota numeric-cell">
-                {{ person.alltasks.quotaCount }}
-              </td>
-              <td>
+                <span v-else>
+                  {{ formatDuration(task.estimation) }}
+                </span>
               </td>
             </tr>
-            <tr
-              :class="{
-                'datatable-row': true,
-                'task-line': true
-              }"
-            >
-              <td class="person flexrow">
-                <corner-down-right-icon class="ml05 mr05" size="0.9x" />
-                {{ $t('main.remaining') }}
-              </td>
-              <td class="count numeric-cell">
-                {{ person.remaining.count }}
-              </td>
-              <td class="frames numeric-cell">
-                {{ person.remaining.frames }}
-              </td>
-              <td class="seconds numeric-cell">
-                {{ person.remaining.seconds }}
-              </td>
-              <td class="estimation numeric-cell">
-                {{ person.remaining.estimation }}
-              </td>
-              <td class="quota numeric-cell">
-                {{ person.remaining.quota }}
-              </td>
-              <td class="quota numeric-cell">
-                {{ person.remaining.quotaFrames }}
-              </td>
-              <td class="quota numeric-cell">
-                {{ person.remaining.quotaCount }}
-              </td>
-              <td>
-              </td>
-            </tr>
+          </tbody>
+        </table>
+      </div>
 
-          </template>
-        </tbody>
-      </table>
+      <div class="person-list column datatable-wrapper">
+        <table class="datatable">
+          <thead ref="thead" class="datatable-head">
+            <tr>
+              <th class="assignees">
+                {{ $t('tasks.fields.assignees') }}
+              </th>
+              <th class="count numeric-cell">
+                {{ $t('tasks.fields.count') }}
+              </th>
+              <th class="frames numeric-cell">
+                {{ $t('tasks.fields.frames') }}
+              </th>
+              <th class="seconds numeric-cell">
+                {{ $t('tasks.fields.seconds').substring(0, 3) }}.
+              </th>
+              <th class="estimation numeric-cell">
+                {{ $t('tasks.fields.estimation').substring(0, 3) }}.
+              </th>
+              <th class="quota numeric-cell">
+                {{
+                  $t('tasks.fields.estimated_quota') +
+                  ' ' +
+                  $t('tasks.fields.seconds').substring(0, 3)
+                }}.
+              </th>
+              <th class="quota numeric-cell">
+                {{
+                  $t('tasks.fields.estimated_quota') +
+                  ' ' +
+                  $t('tasks.fields.frames').substring(0, 3)
+                }}.
+              </th>
+              <th class="quota numeric-cell">
+                {{
+                  $t('tasks.fields.estimated_quota') +
+                  ' ' +
+                  $t('tasks.fields.count')
+                }}.
+              </th>
+              <th class="empty">&nbsp;</th>
+            </tr>
+          </thead>
+
+          <tbody class="datatable-body">
+            <template v-for="person in assignees">
+              <tr
+                :key="person.id"
+                :class="{
+                  'datatable-row': true,
+                  'task-line': true
+                }"
+              >
+                <td class="person flexrow">
+                  <people-avatar
+                    class="flexrow-item"
+                    :person="person"
+                    :size="30"
+                    :font-size="17"
+                  />
+                  <people-name class="flexrow-item" :person="person" />
+                </td>
+                <td class="count numeric-cell">
+                  {{ person.alltasks.count }}
+                </td>
+                <td class="frames numeric-cell">
+                  {{ person.alltasks.frames }}
+                </td>
+                <td class="seconds numeric-cell">
+                  {{ person.alltasks.seconds }}
+                </td>
+                <td class="estimation numeric-cell">
+                  {{ person.alltasks.estimation }}
+                </td>
+                <td class="quota numeric-cell">
+                  {{ person.alltasks.quota }}
+                </td>
+                <td class="quota numeric-cell">
+                  {{ person.alltasks.quotaFrames }}
+                </td>
+                <td class="quota numeric-cell">
+                  {{ person.alltasks.quotaCount }}
+                </td>
+                <td></td>
+              </tr>
+              <tr
+                :class="{
+                  'datatable-row': true,
+                  'task-line': true
+                }"
+              >
+                <td class="person flexrow">
+                  <corner-down-right-icon class="ml05 mr05" size="0.9x" />
+                  {{ $t('main.remaining') }}
+                </td>
+                <td class="count numeric-cell">
+                  {{ person.remaining.count }}
+                </td>
+                <td class="frames numeric-cell">
+                  {{ person.remaining.frames }}
+                </td>
+                <td class="seconds numeric-cell">
+                  {{ person.remaining.seconds }}
+                </td>
+                <td class="estimation numeric-cell">
+                  {{ person.remaining.estimation }}
+                </td>
+                <td class="quota numeric-cell">
+                  {{ person.remaining.quota }}
+                </td>
+                <td class="quota numeric-cell">
+                  {{ person.remaining.quotaFrames }}
+                </td>
+                <td class="quota numeric-cell">
+                  {{ person.remaining.quotaCount }}
+                </td>
+                <td></td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -286,7 +281,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       lastSelection: 0,
       lastShiftSelection: 0,
@@ -294,8 +289,7 @@ export default {
     }
   },
 
-  mounted () {
-  },
+  mounted() {},
 
   computed: {
     ...mapGetters([
@@ -314,24 +308,23 @@ export default {
       'taskTypeMap'
     ]),
 
-    isAssets () {
+    isAssets() {
       return this.entityType === 'Asset'
     },
 
-    isShots () {
+    isShots() {
       return this.entityType === 'Shot'
     },
 
-    tasksByPerson () {
-      return [...this.tasks]
-        .sort(firstBy(this.compareFirstAssignees))
+    tasksByPerson() {
+      return [...this.tasks].sort(firstBy(this.compareFirstAssignees))
     },
 
-    entityMap () {
+    entityMap() {
       return this[`${this.entityType.toLowerCase()}Map`]
     },
 
-    assignees () {
+    assignees() {
       const assigneeSet = new Set()
       const alltasks = {
         countMap: new Map(),
@@ -357,35 +350,31 @@ export default {
           }
         })
       })
-      assigneeSet.forEach(
-        (val, personId) => assignees.push(this.personMap.get(personId))
+      assigneeSet.forEach((val, personId) =>
+        assignees.push(this.personMap.get(personId))
       )
-      return assignees
-        .sort(firstBy('name'))
-        .map(person => {
-          const allTasksStats = this.getAssigneeStats(person, alltasks)
-          const remainingStats = this.getAssigneeStats(person, remaining)
-          return {
-            ...person,
-            alltasks: allTasksStats,
-            remaining: remainingStats
-          }
-        })
+      return assignees.sort(firstBy('name')).map(person => {
+        const allTasksStats = this.getAssigneeStats(person, alltasks)
+        const remainingStats = this.getAssigneeStats(person, remaining)
+        return {
+          ...person,
+          alltasks: allTasksStats,
+          remaining: remainingStats
+        }
+      })
     }
   },
 
   methods: {
-    ...mapActions([
-      'updateTask'
-    ]),
+    ...mapActions(['updateTask']),
 
     frameToSeconds,
 
-    getEntity (entityId) {
+    getEntity(entityId) {
       return this.entityMap.get(entityId)
     },
 
-    compareFirstAssignees (a, b) {
+    compareFirstAssignees(a, b) {
       if (a.assignees.length > 0 && b.assignees.length > 0) {
         const personA = this.personMap.get(a.assignees[0])
         const personB = this.personMap.get(b.assignees[0])
@@ -399,16 +388,12 @@ export default {
       }
     },
 
-    getSeconds (task) {
+    getSeconds(task) {
       const shot = this.getEntity(task.entity_id)
-      return frameToSeconds(
-        shot.nb_frames,
-        this.currentProduction,
-        shot
-      )
+      return frameToSeconds(shot.nb_frames, this.currentProduction, shot)
     },
 
-    estimationUpdated (event, task) {
+    estimationUpdated(event, task) {
       const value = event.target.value
       if (value && value.length > 0) {
         const estimation = parseFloat(event.target.value)
@@ -416,7 +401,7 @@ export default {
       }
     },
 
-    saveEstimations (days, task) {
+    saveEstimations(days, task) {
       const selection = Object.keys(this.selectionGrid)
       if (selection.length > 1) {
         selection.forEach(taskId => {
@@ -427,7 +412,7 @@ export default {
       }
     },
 
-    onKeyDown (event) {
+    onKeyDown(event) {
       if (event.key === 'Tab') {
         this.pauseEvent(event)
         if (event.shiftKey) {
@@ -444,15 +429,15 @@ export default {
       }
     },
 
-    clearSelection () {
+    clearSelection() {
       this.selectionGrid = {}
     },
 
-    addToSelection (taskId) {
+    addToSelection(taskId) {
       Vue.set(this.selectionGrid, taskId, true)
     },
 
-    selectTask (event, task, index) {
+    selectTask(event, task, index) {
       if (event.shiftKey) {
         if (!(event.ctrlKey || event.metaKey)) this.clearSelection()
         this.selectTaskRange(index)
@@ -467,26 +452,26 @@ export default {
       }
     },
 
-    selectPrevious (shiftKey) {
+    selectPrevious(shiftKey) {
       let index = this.lastSelection
-      index = (index - 1) < 0 ? this.tasksByPerson.length - 1 : index - 1
+      index = index - 1 < 0 ? this.tasksByPerson.length - 1 : index - 1
       this.selectTask({ shiftKey }, this.tasksByPerson[index], index)
     },
 
-    selectNext (shiftKey) {
+    selectNext(shiftKey) {
       let index = this.lastSelection
-      index = (index + 1) >= this.tasksByPerson.length ? 0 : index + 1
+      index = index + 1 >= this.tasksByPerson.length ? 0 : index + 1
       this.selectTask({ shiftKey }, this.tasksByPerson[index], index)
     },
 
-    selectSingleTask (index) {
+    selectSingleTask(index) {
       const task = this.tasksByPerson[index]
       this.addToSelection(task.id)
       this.lastSelection = index
       this.lastShiftSelection = index
     },
 
-    selectTaskRange (index) {
+    selectTaskRange(index) {
       let taskIndices = []
       this.lastSelection = index
       if (this.lastShiftSelection > index) {
@@ -500,7 +485,7 @@ export default {
       })
     },
 
-    isInDepartment (task) {
+    isInDepartment(task) {
       if (this.isCurrentUserManager) {
         return true
       } else if (this.isCurrentUserSupervisor) {
@@ -508,23 +493,25 @@ export default {
           return true
         } else {
           const taskType = this.taskTypeMap.get(task.task_type_id)
-          return taskType.department_id && this.user.departments.includes(
-            taskType.department_id)
+          return (
+            taskType.department_id &&
+            this.user.departments.includes(taskType.department_id)
+          )
         }
       } else {
         return false
       }
     },
 
-    getAssigneeStats (person, maps) {
+    getAssigneeStats(person, maps) {
       const estimation = maps.estimationMap.get(person.id) || 0
       const seconds = maps.secondMap.get(person.id) || 0
       const frames = maps.frameMap.get(person.id) || 0
       const count = maps.countMap.get(person.id) || 0
       const estimationDays = minutesToDays(this.organisation, estimation)
-      const quota = estimation > 0 ? (seconds / estimationDays) : 0
-      const quotaCount = estimation > 0 ? (count / estimationDays) : 0
-      const quotaFrames = estimation > 0 ? (frames / estimationDays) : 0
+      const quota = estimation > 0 ? seconds / estimationDays : 0
+      const quotaCount = estimation > 0 ? count / estimationDays : 0
+      const quotaFrames = estimation > 0 ? frames / estimationDays : 0
 
       return {
         estimation,
@@ -538,7 +525,7 @@ export default {
       }
     },
 
-    addAssigneeStatsToMaps (maps, personId, task, entity) {
+    addAssigneeStatsToMaps(maps, personId, task, entity) {
       maps.countMap.set(personId, (maps.countMap.get(personId) || 0) + 1)
       maps.estimationMap.set(
         personId,
@@ -546,17 +533,12 @@ export default {
       )
       if (!this.isAssets) {
         const frames = entity.nb_frames || 0
-        const seconds = frameToSeconds(
-          frames,
-          this.currentProduction,
-          entity
-        )
+        const seconds = frameToSeconds(frames, this.currentProduction, entity)
         maps.secondMap.set(
-          personId, (maps.secondMap.get(personId) || 0) + seconds
+          personId,
+          (maps.secondMap.get(personId) || 0) + seconds
         )
-        maps.frameMap.set(
-          personId, (maps.frameMap.get(personId) || 0) + frames
-        )
+        maps.frameMap.set(personId, (maps.frameMap.get(personId) || 0) + frames)
       }
     }
   }
@@ -653,7 +635,7 @@ td {
 
 .task-list .numeric-cell,
 .person-list .numeric-cell {
-  padding-right: .4em;
+  padding-right: 0.4em;
   text-align: right;
 
   input {
@@ -661,7 +643,7 @@ td {
   }
 }
 .task-list .numeric-cell input.input {
-  padding-right: .5em;
+  padding-right: 0.5em;
 }
 
 .person-list {

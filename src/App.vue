@@ -5,7 +5,7 @@
       xyz="fade"
       v-if="user && isDataLoading"
     >
-        <span>{{ $t('main.loading_data') }}...</span>
+      <span>{{ $t('main.loading_data') }}...</span>
       <spinner class="mt2" />
     </div>
     <router-view v-else />
@@ -60,7 +60,7 @@ export default {
     ])
   },
 
-  mounted () {
+  mounted() {
     if (localStorage.getItem('dark-theme') === 'true' && !this.isDarkTheme) {
       this.$store.commit('TOGGLE_DARK_THEME')
       document.documentElement.style.background = '#36393F'
@@ -104,7 +104,7 @@ export default {
       'setSupportChat'
     ]),
 
-    onAssignation (eventData, assign = true) {
+    onAssignation(eventData, assign = true) {
       const personId = eventData.person_id
       const selectedTaskIds = [eventData.task_id]
 
@@ -126,7 +126,7 @@ export default {
   },
 
   watch: {
-    isDarkTheme () {
+    isDarkTheme() {
       if (this.isDarkTheme) {
         document.documentElement.style.background = '#36393F'
         document.body.style.background = '#36393F'
@@ -139,13 +139,13 @@ export default {
 
   socket: {
     events: {
-      'project:new' (eventData) {
+      'project:new'(eventData) {
         if (!this.productionMap.get(eventData.project_id)) {
           this.loadProduction(eventData.project_id)
         }
       },
 
-      'project:update' (eventData) {
+      'project:update'(eventData) {
         if (this.productionMap.get(eventData.project_id)) {
           this.loadProduction(eventData.project_id)
         } else {
@@ -153,13 +153,13 @@ export default {
         }
       },
 
-      'project:delete' (eventData) {
+      'project:delete'(eventData) {
         if (this.productionMap.get(eventData.project_id)) {
           this.$store.commit('REMOVE_PRODUCTION', { id: eventData.project_id })
         }
       },
 
-      'sequence:new' (eventData) {
+      'sequence:new'(eventData) {
         if (
           !this.sequenceMap.get(eventData.sequence_id) &&
           this.currentProduction &&
@@ -169,19 +169,19 @@ export default {
         }
       },
 
-      'sequence:update' (eventData) {
+      'sequence:update'(eventData) {
         if (this.sequenceMap.get(eventData.sequence_id)) {
           this.loadSequence(eventData.sequence_id)
         }
       },
 
-      'sequence:delete' (eventData) {
+      'sequence:delete'(eventData) {
         if (this.sequenceMap.get(eventData.sequence_id)) {
           this.$store.commit('REMOVE_SEQUENCE', { id: eventData.sequence_id })
         }
       },
 
-      'episode:new' (eventData) {
+      'episode:new'(eventData) {
         if (
           !this.episodeMap.get(eventData.episode_id) &&
           this.currentProduction &&
@@ -191,27 +191,24 @@ export default {
         }
       },
 
-      'episode:update' (eventData) {
+      'episode:update'(eventData) {
         if (this.episodeMap.get(eventData.episode_id)) {
           this.loadEpisode(eventData.episode_id)
         }
       },
 
-      'episode:delete' (eventData) {
+      'episode:delete'(eventData) {
         if (this.episodeMap.get(eventData.episode_id)) {
           this.$store.commit('REMOVE_EPISODE', { id: eventData.episode_id })
         }
       },
 
-      'shot:new' (eventData) {
+      'shot:new'(eventData) {
         if (
           !this.shotMap.get(eventData.shot_id) &&
           this.currentProduction &&
           this.currentProduction.id === eventData.project_id &&
-          (
-            !this.isTVShow ||
-            this.currentEpisode.id === eventData.episode_id
-          )
+          (!this.isTVShow || this.currentEpisode.id === eventData.episode_id)
         ) {
           setTimeout(() => {
             this.loadShot(eventData.shot_id)
@@ -219,19 +216,19 @@ export default {
         }
       },
 
-      'shot:update' (eventData) {
+      'shot:update'(eventData) {
         if (this.shotMap.get(eventData.shot_id)) {
           this.loadShot(eventData.shot_id)
         }
       },
 
-      'shot:delete' (eventData) {
+      'shot:delete'(eventData) {
         if (this.shotMap.get(eventData.shot_id)) {
           this.$store.commit('REMOVE_SHOT', { id: eventData.shot_id })
         }
       },
 
-      'asset:new' (eventData) {
+      'asset:new'(eventData) {
         if (
           !this.assetMap.get(eventData.asset_id) &&
           this.currentProduction &&
@@ -243,99 +240,96 @@ export default {
         }
       },
 
-      'asset:update' (eventData) {
+      'asset:update'(eventData) {
         if (this.assetMap.get(eventData.asset_id)) {
           this.loadAsset(eventData.asset_id)
         }
       },
 
-      'asset:delete' (eventData) {
+      'asset:delete'(eventData) {
         if (this.assetMap.get(eventData.asset_id)) {
           this.$store.commit('REMOVE_ASSET', { id: eventData.asset_id })
         }
       },
 
-      'task:delete' (eventData) {
+      'task:delete'(eventData) {
         const task = this.taskMap.get(eventData.task_id)
         if (task) {
           this.$store.commit('DELETE_TASK_END', task)
         }
       },
 
-      'task-type:new' (eventData) {
+      'task-type:new'(eventData) {
         if (!this.taskTypeMap.get(eventData.task_type_id)) {
           this.loadTaskType(eventData.task_type_id)
         }
       },
 
-      'task-type:update' (eventData) {
+      'task-type:update'(eventData) {
         // Do nothing to avoid side effects when reordering task types.
       },
 
-      'task-type:delete' (eventData) {
+      'task-type:delete'(eventData) {
         if (this.taskTypeMap.get(eventData.task_type_id)) {
-          this.$store.commit(
-            'DELETE_TASK_TYPE_END',
-            { id: eventData.task_type_id }
-          )
+          this.$store.commit('DELETE_TASK_TYPE_END', {
+            id: eventData.task_type_id
+          })
         }
       },
 
-      'task-status:new' (eventData) {
+      'task-status:new'(eventData) {
         if (!this.taskStatusMap.get(eventData.task_status_id)) {
           this.loadTaskStatus(eventData.task_status_id)
         }
       },
 
-      'task-status:update' (eventData) {
+      'task-status:update'(eventData) {
         if (this.taskStatusMap.get(eventData.task_status_id)) {
           this.loadTaskStatus(eventData.task_status_id)
         }
       },
 
-      'task-status:delete' (eventData) {
+      'task-status:delete'(eventData) {
         if (this.taskStatusMap.get(eventData.task_status_id)) {
-          this.$store.commit(
-            'DELETE_TASK_STATUS_END',
-            { id: eventData.task_status_id }
-          )
+          this.$store.commit('DELETE_TASK_STATUS_END', {
+            id: eventData.task_status_id
+          })
         }
       },
 
-      'asset-type:new' (eventData) {
+      'asset-type:new'(eventData) {
         if (!this.assetTypeMap.get(eventData.asset_type_id)) {
           this.loadAssetType(eventData.asset_type_id)
         }
       },
 
-      'asset-type:update' (eventData) {
+      'asset-type:update'(eventData) {
         if (this.assetTypeMap.get(eventData.asset_type_id)) {
           this.loadAssetType(eventData.asset_type_id)
         }
       },
 
-      'asset-type:delete' (eventData) {
+      'asset-type:delete'(eventData) {
         if (this.assetTypeMap.get(eventData.asset_type_id)) {
-          this.$store.commit(
-            'DELETE_ASSET_TYPE_END',
-            { id: eventData.asset_type_id }
-          )
+          this.$store.commit('DELETE_ASSET_TYPE_END', {
+            id: eventData.asset_type_id
+          })
         }
       },
 
-      'person:new' (eventData) {
+      'person:new'(eventData) {
         if (!this.personMap.get(eventData.person_id)) {
           this.loadPerson(eventData.person_id)
         }
       },
 
-      'person:update' (eventData) {
+      'person:update'(eventData) {
         if (this.personMap.get(eventData.person_id)) {
           this.loadPerson(eventData.person_id)
         }
       },
 
-      'person:delete' (eventData) {
+      'person:delete'(eventData) {
         const person = this.personMap.get(eventData.person_id)
         if (person) {
           this.$store.commit('DELETE_PEOPLE_START', person)
@@ -343,24 +337,25 @@ export default {
         }
       },
 
-      'task:assign' (eventData) {
+      'task:assign'(eventData) {
         this.onAssignation(eventData)
       },
 
-      'task:unassign' (eventData) {
+      'task:unassign'(eventData) {
         this.onAssignation(eventData, false)
       },
 
-      'comment:new' (eventData) {
+      'comment:new'(eventData) {
         const commentId = eventData.comment_id
-        if (!this.isSavingCommentPreview &&
-            this.taskMap.get(eventData.task_id)) {
-          this.loadComment({ commentId })
-            .catch(console.error)
+        if (
+          !this.isSavingCommentPreview &&
+          this.taskMap.get(eventData.task_id)
+        ) {
+          this.loadComment({ commentId }).catch(console.error)
         }
       },
 
-      'task:update' (eventData) {
+      'task:update'(eventData) {
         if (this.taskMap.get(eventData.task_id)) {
           this.$nextTick(() => {
             this.loadTask({ taskId: eventData.task_id })
@@ -368,7 +363,7 @@ export default {
         }
       },
 
-      'task:update-casting-stats' (eventData) {
+      'task:update-casting-stats'(eventData) {
         const task = this.taskMap.get(eventData.task_id)
         if (task) {
           this.$store.commit('UPDATE_TASK', {
@@ -378,7 +373,7 @@ export default {
         }
       },
 
-      'episode:casting-update' (eventData) {
+      'episode:casting-update'(eventData) {
         const episode = this.episodeMap.get(eventData.episode_id)
         if (episode) {
           this.$store.commit('UPDATE_EPISODE', {
@@ -388,7 +383,7 @@ export default {
         }
       },
 
-      'shot:casting-update' (eventData) {
+      'shot:casting-update'(eventData) {
         const shot = this.shotMap.get(eventData.shot_id)
         if (shot) {
           this.$store.commit('UPDATE_SHOT', {
@@ -398,21 +393,21 @@ export default {
         }
       },
 
-      'metadata-descriptor:new' (eventData) {
+      'metadata-descriptor:new'(eventData) {
         this.refreshMetadataDescriptor(eventData.metadata_descriptor_id)
       },
 
-      'metadata-descriptor:update' (eventData) {
+      'metadata-descriptor:update'(eventData) {
         this.refreshMetadataDescriptor(eventData.metadata_descriptor_id)
       },
 
-      'metadata-descriptor:delete' (eventData) {
+      'metadata-descriptor:delete'(eventData) {
         this.$store.commit('DELETE_METADATA_DESCRIPTOR_END', {
           id: eventData.metadata_descriptor_id
         })
       },
 
-      'organisation:update' (eventData) {
+      'organisation:update'(eventData) {
         if (this.isCurrentUserAdmin) {
           this.getOrganisation()
         }
@@ -423,14 +418,18 @@ export default {
 </script>
 
 <style lang="scss">
-:focus {outline:none;}
-::-moz-focus-inner {border:0;}
+:focus {
+  outline: none;
+}
+::-moz-focus-inner {
+  border: 0;
+}
 
 @font-face {
   font-family: Lato;
   font-style: normal;
   font-weight: 400;
-  src: url(./assets/fonts/Lato.woff2) format("woff2");
+  src: url(./assets/fonts/Lato.woff2) format('woff2');
 }
 
 html {
@@ -442,7 +441,7 @@ body {
   height: 100%;
   min-height: 100%;
   width: 100%;
-  background: #EEE;
+  background: #eee;
   overflow: auto;
 }
 
@@ -454,7 +453,6 @@ body {
 }
 
 .dark {
-
   .hero {
     background-color: $dark-grey;
   }
@@ -465,7 +463,7 @@ body {
   .page,
   .loading-info,
   .side-column {
-    background: #36393F;
+    background: #36393f;
     color: $white-grey;
   }
 
@@ -484,19 +482,19 @@ body {
   }
 
   textarea[disabled] {
-    background: #36393F;
-    color: #BBB;
-    border-color: #25282E;
+    background: #36393f;
+    color: #bbb;
+    border-color: #25282e;
   }
 
   select,
   textarea,
   .input {
-    border-color: #25282E;
+    border-color: #25282e;
   }
 
   .select::after {
-    border-color: #00B242;
+    border-color: #00b242;
   }
 
   .is-top select {
@@ -508,55 +506,55 @@ body {
     color: $white-grey;
   }
 
-   label.label {
+  label.label {
     color: $white-grey;
   }
 
   .box .title,
   .box {
-    background: #3D4048;
+    background: #3d4048;
     color: $white-grey;
   }
 
   .button.is-link {
     background: transparent;
     border-color: transparent;
-    color: #DDDDDD;
+    color: #dddddd;
   }
 
   .is-link:hover {
-    color: #DDDDDD;
-    background: #5E6169;
+    color: #dddddd;
+    background: #5e6169;
   }
 
   .button {
-    background: #4E5159;
-    border-color: #25282E;
+    background: #4e5159;
+    border-color: #25282e;
     color: $white-grey;
   }
 
   .button.is-danger {
-    background: #FF2B56;
+    background: #ff2b56;
   }
 
   .main-button {
-    background: #00B242;
+    background: #00b242;
   }
 
   .add-comment .select select {
-    background: #4E5159;
+    background: #4e5159;
   }
 
   .hero .box h1.title {
-    color: #DDD;
+    color: #ddd;
   }
 
   .splitted-table {
-    border-left: 1px solid #36393F;
+    border-left: 1px solid #36393f;
 
     tr {
-      border-right: 1px solid #25282E;
-      border-left: 1px solid #25282E;
+      border-right: 1px solid #25282e;
+      border-left: 1px solid #25282e;
     }
 
     thead tr {
@@ -565,7 +563,7 @@ body {
     }
 
     thead tr a {
-      color: #7A7A7A;
+      color: #7a7a7a;
     }
 
     .table-body {
@@ -575,7 +573,7 @@ body {
     }
 
     tbody {
-      border-bottom: 1px solid #25282E;
+      border-bottom: 1px solid #25282e;
     }
 
     tbody tr:first-child {
@@ -588,8 +586,8 @@ body {
     }
 
     .empty-line td {
-      border-color: #36393F;
-      background: #36393F;
+      border-color: #36393f;
+      background: #36393f;
       border: 0;
     }
   }
@@ -600,11 +598,11 @@ body {
 
   .erase-search .tag {
     background-color: #999;
-    color: #333
+    color: #333;
   }
 
   .erase-search .tag:hover {
-    background-color: #CCC;
+    background-color: #ccc;
   }
 
   .tabs a {
@@ -616,39 +614,39 @@ body {
   }
 
   .tabs li.is-active a:hover {
-    border-color: #00C252;
-    color: #00C252;
+    border-color: #00c252;
+    color: #00c252;
   }
 
   .tabs li.is-active a:hover {
-    border-color: #00C252;
-    color: #00C252;
+    border-color: #00c252;
+    color: #00c252;
   }
 
   .search-queries .tag {
-    color: #EEE;
-    background-color: #5E6169;
+    color: #eee;
+    background-color: #5e6169;
   }
 
   .vdp-datepicker__calendar {
-    background-color: #36393F;
-    border-color: #25282E;
+    background-color: #36393f;
+    border-color: #25282e;
 
     .prev,
     .next,
     .day__month_btn,
     header span:hover {
-      background: #36393F;
+      background: #36393f;
     }
 
     header .prev::after,
     header .prev::after {
-      border-right-color: #EEE;
+      border-right-color: #eee;
     }
 
     header .next::after,
     header .next::after {
-      border-left-color: #EEE;
+      border-left-color: #eee;
     }
 
     header .next.disabled::after,
@@ -693,7 +691,7 @@ body {
   border: 0 !important;
   clip: rect(1px, 1px, 1px, 1px) !important;
   -webkit-clip-path: inset(50%) !important;
-    clip-path: inset(50%) !important;
+  clip-path: inset(50%) !important;
   height: 1px !important;
   margin: -1px !important;
   overflow: hidden !important;
@@ -734,7 +732,7 @@ h2 {
 }
 
 .hero {
-  background-color: #F3F3F3;
+  background-color: #f3f3f3;
 }
 
 .avatar {
@@ -773,7 +771,7 @@ h2 {
 }
 
 .grey-background {
-  background-color: #CFCFCF;
+  background-color: #cfcfcf;
 }
 
 td strong {
@@ -796,7 +794,7 @@ tr th.actions a {
 
 tr:hover .actions button,
 tr:hover .actions a {
-  opacity: 1
+  opacity: 1;
 }
 
 a {
@@ -935,7 +933,7 @@ input.input {
 .select select:active,
 .select select:focus,
 input.input:focus {
-  border-color: #00B242;
+  border-color: #00b242;
   outline: none;
 }
 
@@ -958,18 +956,18 @@ input.input:focus {
 
 .button.is-primary {
   border-radius: 2px;
-  background: #00B242;
+  background: #00b242;
 }
 
 .button.is-primary:hover {
-  background: #67BE4B;
+  background: #67be4b;
 }
 
 .big-button {
   border-radius: 2em;
   font-weight: bold;
-  background: #00B242;
-  border-color: #00B242;
+  background: #00b242;
+  border-color: #00b242;
   color: white;
   font-size: 1.3em;
   max-width: 280px;
@@ -978,10 +976,10 @@ input.input:focus {
 
 .big-button:hover {
   color: white;
-  background: #67BE4B;
+  background: #67be4b;
 }
 
-input[type=checkbox] {
+input[type='checkbox'] {
   cursor: pointer;
 }
 
@@ -994,11 +992,11 @@ textarea.input:focus {
 }
 
 .error {
-  color: #FF1F4B;
+  color: #ff1f4b;
 }
 
 .success {
-  color: #00B242;
+  color: #00b242;
 }
 
 .strong {
@@ -1024,11 +1022,11 @@ textarea.input:focus {
   color: white;
   border-color: #5e60ba;
   padding: 12px 12px 12px 12px;
-  margin: .3em 0 0em 0;
+  margin: 0.3em 0 0em 0;
   font-size: 1.4em;
   font-weight: 500;
   letter-spacing: 1px;
-  background: #00B242;
+  background: #00b242;
   color: #fff;
   border: 0;
   transition: all 0.15s ease;
@@ -1038,11 +1036,13 @@ textarea.input:focus {
 }
 
 .main-button:hover {
-  background: #67BE4B;
+  background: #67be4b;
   color: #fff;
 }
 
-.main-button:focus { outline: 0; }
+.main-button:focus {
+  outline: 0;
+}
 
 .modal-content {
   max-height: calc(100vh - 140px);
@@ -1071,7 +1071,8 @@ textarea.input:focus {
   margin-top: 30%;
   padding: 3em 2em 2em 2em;
   border-radius: 2px;
-  box-shadow: rgba(0,0,0,0.14902) 0px 1px 1px 0px,rgba(0,0,0,0.09804) 0px 1px 2px 0px;
+  box-shadow: rgba(0, 0, 0, 0.14902) 0px 1px 1px 0px,
+    rgba(0, 0, 0, 0.09804) 0px 1px 2px 0px;
 }
 
 .box h1.title {
@@ -1090,7 +1091,7 @@ textarea.input:focus {
 }
 
 .hero .box .input:focus {
-  border: 1px solid #00B242;
+  border: 1px solid #00b242;
 }
 
 .button .icon.is-small:first-child:last-child {
@@ -1112,7 +1113,7 @@ textarea.input:focus {
 }
 
 .button.highlighted {
-  background: #00B242;
+  background: #00b242;
   color: white;
 }
 
@@ -1122,7 +1123,8 @@ textarea.input:focus {
   border-radius: 0;
 }
 
-.filters-area {}
+.filters-area {
+}
 
 .query-list {
   margin-bottom: 2em;
@@ -1137,11 +1139,11 @@ textarea.input:focus {
 }
 
 .query-list .tag .delete {
-  transform: rotate(45deg) scale(0.7)
+  transform: rotate(45deg) scale(0.7);
 }
 
 .query-list .tag:hover {
-  transform: scale(1.1)
+  transform: scale(1.1);
 }
 
 .fixed-page {
@@ -1192,7 +1194,7 @@ textarea.input:focus {
 
   thead th {
     border-width: 0 0 1px;
-      font-size: 0.9em;
+    font-size: 0.9em;
 
     &.metadata-descriptor,
     &.validation-cell {
@@ -1252,8 +1254,8 @@ textarea.input:focus {
 }
 
 .splitted-table tbody tr {
-  border-right: 1px solid #CCC;
-  border-left: 1px solid #CCC;
+  border-right: 1px solid #ccc;
+  border-left: 1px solid #ccc;
 }
 
 .splitted-table thead tr {
@@ -1262,7 +1264,7 @@ textarea.input:focus {
 }
 
 .splitted-table thead tr a {
-  color: #7A7A7A;
+  color: #7a7a7a;
 }
 
 .splitted-table .table-body {
@@ -1281,7 +1283,7 @@ textarea.input:focus {
 }
 
 .splitted-table tbody {
-  border-bottom: 1px solid #CCC;
+  border-bottom: 1px solid #ccc;
 }
 
 .splitted-table {
@@ -1339,7 +1341,7 @@ tbody:last-child .empty-line:last-child {
     .thumbnail-wrapper,
     .thumbnail-picture,
     .thumbnail-picture.thumbnail-empty {
-      margin: 0 .35rem 0 0;
+      margin: 0 0.35rem 0 0;
     }
     &:first-child {
       border-bottom-left-radius: 10px;
@@ -1418,7 +1420,7 @@ tbody:last-child .empty-line:last-child {
     border-bottom: 1px solid var(--border);
     padding: 0.5rem 0.75rem;
     color: var(--text-alt);
-    font-size: .8rem;
+    font-size: 0.8rem;
     letter-spacing: 1px;
     text-transform: uppercase;
     top: 0;
@@ -1524,7 +1526,8 @@ tbody:last-child .empty-line:last-child {
     }
   }
 
-  th, td {
+  th,
+  td {
     box-sizing: border-box;
     border-top: 1px solid var(--border);
     padding: 0.5rem 0.75rem;
@@ -1546,7 +1549,7 @@ tbody:last-child .empty-line:last-child {
     min-width: 30px;
     max-width: 30px;
     width: 30px;
-    padding: .3rem;
+    padding: 0.3rem;
   }
 
   .numeric-cell {
@@ -1563,7 +1566,6 @@ tbody:last-child .empty-line:last-child {
 }
 
 .multi-section .datatable-row {
-
   &:nth-child(odd),
   &:nth-child(odd) .datatable-row-header {
     background-color: var(--background-alt);
@@ -1579,7 +1581,7 @@ tbody:last-child .empty-line:last-child {
   position: sticky;
   left: 0;
   z-index: 1;
-  border-right: 1px solid rgba(var(--border-rgb), .5);
+  border-right: 1px solid rgba(var(--border-rgb), 0.5);
 
   &::after {
     content: '';
@@ -1588,13 +1590,13 @@ tbody:last-child .empty-line:last-child {
     left: calc(100% + 1px);
     top: 0;
     bottom: 0;
-    width: .75rem;
+    width: 0.75rem;
     background: linear-gradient(
       90deg,
-      rgba(var(--border-rgb),.4) 0%,
-      rgba(var(--border-rgb),.3) 20%,
-      rgba(var(--border-rgb),.2) 50%,
-      rgba(var(--border-rgb),0) 100%
+      rgba(var(--border-rgb), 0.4) 0%,
+      rgba(var(--border-rgb), 0.3) 20%,
+      rgba(var(--border-rgb), 0.2) 50%,
+      rgba(var(--border-rgb), 0) 100%
     );
   }
   .datatable-type-header & {
@@ -1618,12 +1620,12 @@ tbody:last-child .empty-line:last-child {
   border-bottom: 1px solid var(--background);
 
   th {
-    padding: 1.5rem 0 .5rem;
+    padding: 1.5rem 0 0.5rem;
 
     span,
     div {
       display: inline-block;
-      text-indent: .3rem;
+      text-indent: 0.3rem;
       font-size: 1.1em;
       color: var(--text);
     }
@@ -1641,7 +1643,7 @@ tbody:last-child .empty-line:last-child {
       right: 0;
       top: 0;
       bottom: 0;
-      width: .3rem;
+      width: 0.3rem;
       background: transparent;
       cursor: col-resize;
     }
@@ -1683,7 +1685,7 @@ tbody:last-child .empty-line:last-child {
 }
 
 .flexcolumn-item {
-  width: 100%
+  width: 100%;
 }
 
 .flexrow-item:last-child {
@@ -1721,7 +1723,7 @@ tbody:last-child .empty-line:last-child {
 }
 
 .thumbnail-picture {
-  border: 1px solid #CCC;
+  border: 1px solid #ccc;
 }
 
 .modal {
@@ -1777,7 +1779,7 @@ tbody:last-child .empty-line:last-child {
 }
 
 .main-column {
-  border-right: 3px solid #CCC;
+  border-right: 3px solid #ccc;
 }
 
 .playlist-column .video-player-box .video-js {
@@ -1785,8 +1787,8 @@ tbody:last-child .empty-line:last-child {
 }
 
 .tabs li.is-active a {
-  border-color: #00B242;
-  color: #00B242;
+  border-color: #00b242;
+  color: #00b242;
 }
 
 .page .columns:last-child {
@@ -1806,7 +1808,7 @@ tbody:last-child .empty-line:last-child {
 }
 
 .entity-thumbnail {
-  border-radius: .5em;
+  border-radius: 0.5em;
   box-shadow: 0px 0px 6px var(--box-shadow);
   cursor: pointer;
   transition: transform ease 0.3s;
@@ -1870,7 +1872,8 @@ th.validation-cell {
   strong {
     font-size: inherit;
   }
-  p, ul {
+  p,
+  ul {
     margin-bottom: 1em;
   }
 }
@@ -1886,11 +1889,11 @@ th.validation-cell {
 
 .dark .button.is-on {
   box-shadow: inset 0 0 10px #111;
-  border-color: #25282E;
+  border-color: #25282e;
 }
 
 .button.is-toggle {
-  transition: box-shadow ease 0.3s
+  transition: box-shadow ease 0.3s;
 }
 
 .button.is-toggle:active,
@@ -1900,7 +1903,7 @@ th.validation-cell {
 
 .dark .button.is-toggle:active,
 .dark .button.is-toggle:focus {
-  border-color: #25282E;
+  border-color: #25282e;
 }
 
 .break-word {
@@ -2056,11 +2059,11 @@ th.validation-cell {
 }
 
 .separator {
-  margin: .5rem;
+  margin: 0.5rem;
   &:before {
     content: '';
     border-left: 1px solid $dark-grey-lightest;
-    height: .5rem;
+    height: 0.5rem;
   }
 }
 
@@ -2090,7 +2093,7 @@ th.validation-cell {
   }
 
   .level-item:not(:last-child) {
-     margin-bottom: 0;
+    margin-bottom: 0;
   }
 }
 

@@ -1,247 +1,245 @@
 <template>
-<div class="columns fixed-page">
-  <action-panel />
+  <div class="columns fixed-page">
+    <action-panel />
 
-  <div class="column main-column">
-    <div class="assets page">
-      <div class="asset-list-header page-header">
-        <div class="flexrow mb1">
-          <search-field
-            ref="asset-search-field"
-            class="flexrow-item"
-            :can-save="true"
-            @change="onSearchChange"
-            @enter="saveSearchQuery"
-            @save="saveSearchQuery"
-            placeholder="ex: props modeling=wip"
-          />
-          <button-simple
-            class="flexrow-item"
-            :title="$t('entities.build_filter.title')"
-            icon="funnel"
-            @click="modals.isBuildFilterDisplayed = true"
-          />
-          <div class="flexrow-item filler"></div>
-          <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
-            <combobox-department
-              class="combobox-department flexrow-item"
-              :selectable-departments="selectableDepartments('Asset')"
-              :dispay-all-and-my-departments="true"
-              rounded
-              v-model="selectedDepartment"
-              v-if="departments.length > 0"
+    <div class="column main-column">
+      <div class="assets page">
+        <div class="asset-list-header page-header">
+          <div class="flexrow mb1">
+            <search-field
+              ref="asset-search-field"
+              class="flexrow-item"
+              :can-save="true"
+              @change="onSearchChange"
+              @enter="saveSearchQuery"
+              @save="saveSearchQuery"
+              placeholder="ex: props modeling=wip"
             />
-            <show-assignations-button class="flexrow-item" />
-            <show-infos-button class="flexrow-item" />
-            <big-thumbnails-button class="flexrow-item" />
+            <button-simple
+              class="flexrow-item"
+              :title="$t('entities.build_filter.title')"
+              icon="funnel"
+              @click="modals.isBuildFilterDisplayed = true"
+            />
+            <div class="flexrow-item filler"></div>
+            <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
+              <combobox-department
+                class="combobox-department flexrow-item"
+                :selectable-departments="selectableDepartments('Asset')"
+                :dispay-all-and-my-departments="true"
+                rounded
+                v-model="selectedDepartment"
+                v-if="departments.length > 0"
+              />
+              <show-assignations-button class="flexrow-item" />
+              <show-infos-button class="flexrow-item" />
+              <big-thumbnails-button class="flexrow-item" />
+            </div>
+            <div class="flexrow" v-if="isCurrentUserManager">
+              <button-simple
+                class="flexrow-item"
+                :title="$t('entities.thumbnails.title')"
+                icon="image"
+                @click="showAddThumbnailsModal"
+              />
+              <button-simple
+                class="flexrow-item"
+                :title="$t('main.csv.import_file')"
+                icon="upload"
+                @click="showImportModal"
+              />
+              <button-simple
+                class="flexrow-item"
+                icon="download"
+                :title="$t('main.csv.export_file')"
+                @click="onExportClick"
+              />
+              <button-simple
+                class="flexrow-item"
+                :text="$t('assets.new_asset')"
+                icon="plus"
+                @click="showNewModal"
+              />
+            </div>
           </div>
-          <div class="flexrow" v-if="isCurrentUserManager">
-            <button-simple
-              class="flexrow-item"
-              :title="$t('entities.thumbnails.title')"
-              icon="image"
-              @click="showAddThumbnailsModal"
-            />
-            <button-simple
-              class="flexrow-item"
-              :title="$t('main.csv.import_file')"
-              icon="upload"
-              @click="showImportModal"
-            />
-            <button-simple
-              class="flexrow-item"
-              icon="download"
-              :title="$t('main.csv.export_file')"
-              @click="onExportClick"
-            />
-            <button-simple
-              class="flexrow-item"
-              :text="$t('assets.new_asset')"
-              icon="plus"
-              @click="showNewModal"
+          <div class="query-list">
+            <search-query-list
+              :queries="assetSearchQueries"
+              @change-search="changeSearch"
+              @remove-search="removeSearchQuery"
+              v-if="!isAssetsLoading && !initialLoading"
             />
           </div>
         </div>
-        <div class="query-list">
-          <search-query-list
-            :queries="assetSearchQueries"
-            @change-search="changeSearch"
-            @remove-search="removeSearchQuery"
-            v-if="!isAssetsLoading && !initialLoading"
-          />
-        </div>
+
+        <sorting-info
+          :label="$t('main.sorted_by')"
+          :sorting="assetSorting"
+          @clear-sorting="onChangeSortClicked(null)"
+          v-if="assetSorting && assetSorting.length > 0"
+        />
+        <asset-list
+          ref="asset-list"
+          :displayed-assets="displayedAssetsByType"
+          :is-loading="isAssetsLoading || initialLoading"
+          :is-error="isAssetsLoadingError"
+          :validation-columns="assetValidationColumns"
+          :department-filter="departmentFilter"
+          @change-sort="onChangeSortClicked"
+          @create-tasks="showCreateTasksModal"
+          @delete-all-tasks="onDeleteAllTasksClicked"
+          @new-clicked="showNewModal"
+          @edit-clicked="onEditClicked"
+          @delete-clicked="onDeleteClicked"
+          @restore-clicked="onRestoreClicked"
+          @add-metadata="onAddMetadataClicked"
+          @edit-metadata="onEditMetadataClicked"
+          @delete-metadata="onDeleteMetadataClicked"
+          @metadata-changed="onMetadataChanged"
+          @asset-changed="onAssetChanged"
+          @field-changed="onFieldChanged"
+          @scroll="saveScrollPosition"
+          @asset-type-clicked="onAssetTypeClicked"
+        />
       </div>
-
-      <sorting-info
-        :label="$t('main.sorted_by')"
-        :sorting="assetSorting"
-        @clear-sorting="onChangeSortClicked(null)"
-        v-if="assetSorting && assetSorting.length > 0"
-      />
-      <asset-list
-        ref="asset-list"
-        :displayed-assets="displayedAssetsByType"
-        :is-loading="isAssetsLoading || initialLoading"
-        :is-error="isAssetsLoadingError"
-        :validation-columns="assetValidationColumns"
-        :department-filter="departmentFilter"
-        @change-sort="onChangeSortClicked"
-        @create-tasks="showCreateTasksModal"
-        @delete-all-tasks="onDeleteAllTasksClicked"
-        @new-clicked="showNewModal"
-        @edit-clicked="onEditClicked"
-        @delete-clicked="onDeleteClicked"
-        @restore-clicked="onRestoreClicked"
-        @add-metadata="onAddMetadataClicked"
-        @edit-metadata="onEditMetadataClicked"
-        @delete-metadata="onDeleteMetadataClicked"
-        @metadata-changed="onMetadataChanged"
-        @asset-changed="onAssetChanged"
-        @field-changed="onFieldChanged"
-        @scroll="saveScrollPosition"
-        @asset-type-clicked="onAssetTypeClicked"
-      />
     </div>
-  </div>
 
-  <div
-    id="side-column"
-    class="column side-column"
-    v-show="nbSelectedTasks === 1"
-  >
-    <task-info
-      :task="selectedTasks.values().next().value"
+    <div
+      id="side-column"
+      class="column side-column"
+      v-show="nbSelectedTasks === 1"
+    >
+      <task-info :task="selectedTasks.values().next().value" />
+    </div>
+
+    <edit-asset-modal
+      ref="edit-asset-modal"
+      :active="modals.isNewDisplayed"
+      :is-loading="loading.edit"
+      :is-loading-stay="loading.stay"
+      :is-error="errors.edit"
+      :is-success="success.edit"
+      :asset-to-edit="assetToEdit"
+      @confirm="confirmEditAsset"
+      @confirmAndStay="confirmNewAssetStay"
+      @cancel="modals.isNewDisplayed = false"
+    />
+
+    <delete-modal
+      ref="delete-asset-modal"
+      :active="modals.isDeleteDisplayed"
+      :is-loading="loading.delete"
+      :is-error="errors.delete"
+      :text="deleteText()"
+      :error-text="$t('assets.delete_error')"
+      @confirm="confirmDeleteAsset"
+      @cancel="modals.isDeleteDisplayed = false"
+    />
+
+    <delete-modal
+      ref="restore-asset-modal"
+      :active="modals.isRestoreDisplayed"
+      :is-loading="loading.restore"
+      :is-error="loading.delete"
+      :text="restoreText()"
+      :error-text="$t('assets.restore_error')"
+      @confirm="confirmRestoreAsset"
+      @cancel="modals.isRestoreDisplayed = false"
+    />
+
+    <hard-delete-modal
+      ref="delete-all-tasks-modal"
+      :active="modals.isDeleteAllTasksDisplayed"
+      :is-loading="loading.deleteAllTasks"
+      :is-error="errors.deleteAllTasks"
+      :text="deleteAllTasksText()"
+      :error-text="$t('tasks.delete_all_error')"
+      :lock-text="deleteAllTasksLockText"
+      :selection-option="true"
+      @confirm="confirmDeleteAllTasks"
+      @cancel="modals.isDeleteAllTasksDisplayed = false"
+    />
+
+    <delete-modal
+      ref="delete-metadata-modal"
+      :active="modals.isDeleteMetadataDisplayed"
+      :is-loading="loading.deleteMetadata"
+      :is-error="errors.deleteMetadata"
+      :text="$t('productions.metadata.delete_text')"
+      :error-text="$t('productions.metadata.delete_error')"
+      @confirm="confirmDeleteMetadata"
+      @cancel="modals.isDeleteMetadataDisplayed = false"
+    />
+
+    <import-render-modal
+      :active="modals.isImportRenderDisplayed"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      :import-error="errors.importingError"
+      :parsed-csv="parsedCSV"
+      :form-data="assetsCsvFormData"
+      :columns="renderColumns"
+      :data-matchers="dataMatchers"
+      :database="filteredAssets"
+      @reupload="resetImport"
+      @confirm="uploadImportFile"
+      @cancel="hideImportRenderModal"
+    />
+
+    <import-modal
+      ref="import-modal"
+      :active="modals.isImportDisplayed"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      :form-data="assetsCsvFormData"
+      :columns="dataMatchers"
+      :optional-columns="optionalColumns"
+      :generic-columns="genericColumns"
+      @confirm="renderImport"
+      @cancel="hideImportModal"
+    />
+
+    <create-tasks-modal
+      :active="modals.isCreateTasksDisplayed"
+      :is-loading="loading.creatingTasks"
+      :is-loading-stay="loading.taskStay"
+      :is-error="errors.creatingTasks"
+      :title="$t('tasks.create_tasks_asset')"
+      :text="$t('tasks.create_tasks_asset_explaination')"
+      :error-text="$t('tasks.create_tasks_asset_failed')"
+      @confirm="confirmCreateTasks"
+      @confirm-and-stay="confirmCreateTasksAndStay"
+      @cancel="hideCreateTasksModal"
+    />
+
+    <add-metadata-modal
+      :active="modals.isAddMetadataDisplayed"
+      :is-loading="loading.addMetadata"
+      :is-loading-stay="loading.addMetadata"
+      :is-error="errors.addMetadata"
+      :descriptor-to-edit="descriptorToEdit"
+      entity-type="Asset"
+      @confirm="confirmAddMetadata"
+      @cancel="modals.isAddMetadataDisplayed = false"
+    />
+
+    <add-thumbnails-modal
+      ref="add-thumbnails-modal"
+      parent="assets"
+      :active="modals.isAddThumbnailsDisplayed"
+      :is-loading="loading.addThumbnails"
+      :is-error="errors.addThumbnails"
+      @confirm="confirmAddThumbnails"
+      @cancel="hideAddThumbnailsModal"
+    />
+
+    <build-filter-modal
+      ref="build-filter-modal"
+      :active="modals.isBuildFilterDisplayed"
+      @confirm="confirmBuildFilter"
+      @cancel="modals.isBuildFilterDisplayed = false"
     />
   </div>
-
-  <edit-asset-modal
-    ref="edit-asset-modal"
-    :active="modals.isNewDisplayed"
-    :is-loading="loading.edit"
-    :is-loading-stay="loading.stay"
-    :is-error="errors.edit"
-    :is-success="success.edit"
-    :asset-to-edit="assetToEdit"
-    @confirm="confirmEditAsset"
-    @confirmAndStay="confirmNewAssetStay"
-    @cancel="modals.isNewDisplayed = false"
-  />
-
-  <delete-modal
-    ref="delete-asset-modal"
-    :active="modals.isDeleteDisplayed"
-    :is-loading="loading.delete"
-    :is-error="errors.delete"
-    :text="deleteText()"
-    :error-text="$t('assets.delete_error')"
-    @confirm="confirmDeleteAsset"
-    @cancel="modals.isDeleteDisplayed = false"
-  />
-
-  <delete-modal
-    ref="restore-asset-modal"
-    :active="modals.isRestoreDisplayed"
-    :is-loading="loading.restore"
-    :is-error="loading.delete"
-    :text="restoreText()"
-    :error-text="$t('assets.restore_error')"
-    @confirm="confirmRestoreAsset"
-    @cancel="modals.isRestoreDisplayed = false"
-  />
-
-  <hard-delete-modal
-    ref="delete-all-tasks-modal"
-    :active="modals.isDeleteAllTasksDisplayed"
-    :is-loading="loading.deleteAllTasks"
-    :is-error="errors.deleteAllTasks"
-    :text="deleteAllTasksText()"
-    :error-text="$t('tasks.delete_all_error')"
-    :lock-text="deleteAllTasksLockText"
-    :selection-option="true"
-    @confirm="confirmDeleteAllTasks"
-    @cancel="modals.isDeleteAllTasksDisplayed = false"
-  />
-
-  <delete-modal
-    ref="delete-metadata-modal"
-    :active="modals.isDeleteMetadataDisplayed"
-    :is-loading="loading.deleteMetadata"
-    :is-error="errors.deleteMetadata"
-    :text="$t('productions.metadata.delete_text')"
-    :error-text="$t('productions.metadata.delete_error')"
-    @confirm="confirmDeleteMetadata"
-    @cancel="modals.isDeleteMetadataDisplayed = false"
-  />
-
-  <import-render-modal
-    :active="modals.isImportRenderDisplayed"
-    :is-loading="loading.importing"
-    :is-error="errors.importing"
-    :import-error="errors.importingError"
-    :parsed-csv="parsedCSV"
-    :form-data="assetsCsvFormData"
-    :columns="renderColumns"
-    :data-matchers="dataMatchers"
-    :database="filteredAssets"
-    @reupload="resetImport"
-    @confirm="uploadImportFile"
-    @cancel="hideImportRenderModal"
-  />
-
-  <import-modal
-    ref="import-modal"
-    :active="modals.isImportDisplayed"
-    :is-loading="loading.importing"
-    :is-error="errors.importing"
-    :form-data="assetsCsvFormData"
-    :columns="dataMatchers"
-    :optional-columns="optionalColumns"
-    :generic-columns="genericColumns"
-    @confirm="renderImport"
-    @cancel="hideImportModal"
-  />
-
-  <create-tasks-modal
-    :active="modals.isCreateTasksDisplayed"
-    :is-loading="loading.creatingTasks"
-    :is-loading-stay="loading.taskStay"
-    :is-error="errors.creatingTasks"
-    :title="$t('tasks.create_tasks_asset')"
-    :text="$t('tasks.create_tasks_asset_explaination')"
-    :error-text="$t('tasks.create_tasks_asset_failed')"
-    @confirm="confirmCreateTasks"
-    @confirm-and-stay="confirmCreateTasksAndStay"
-    @cancel="hideCreateTasksModal"
-  />
-
-  <add-metadata-modal
-    :active="modals.isAddMetadataDisplayed"
-    :is-loading="loading.addMetadata"
-    :is-loading-stay="loading.addMetadata"
-    :is-error="errors.addMetadata"
-    :descriptor-to-edit="descriptorToEdit"
-    entity-type="Asset"
-    @confirm="confirmAddMetadata"
-    @cancel="modals.isAddMetadataDisplayed = false"
-  />
-
-  <add-thumbnails-modal
-    ref="add-thumbnails-modal"
-    parent="assets"
-    :active="modals.isAddThumbnailsDisplayed"
-    :is-loading="loading.addThumbnails"
-    :is-error="errors.addThumbnails"
-    @confirm="confirmAddThumbnails"
-    @cancel="hideAddThumbnailsModal"
-  />
-
-  <build-filter-modal
-    ref="build-filter-modal"
-    :active="modals.isBuildFilterDisplayed"
-    @confirm="confirmBuildFilter"
-    @cancel="modals.isBuildFilterDisplayed = false"
-  />
-</div>
 </template>
 
 <script>
@@ -302,20 +300,20 @@ export default {
     TaskInfo
   },
 
-  data () {
+  data() {
     return {
       assetToDelete: {},
       assetToRestore: {},
       assetToEdit: {},
-      assetFilters: [{
-        type: 'Type',
-        value: {
-          name: 'open'
+      assetFilters: [
+        {
+          type: 'Type',
+          value: {
+            name: 'open'
+          }
         }
-      }],
-      assetFilterTypes: [
-        'Type'
       ],
+      assetFilterTypes: ['Type'],
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
       selectedDepartment: 'ALL',
@@ -363,10 +361,7 @@ export default {
         isNewDisplayed: false
       },
       pageName: 'Assets',
-      optionalColumns: [
-        'Description',
-        'Ready for'
-      ],
+      optionalColumns: ['Description', 'Ready for'],
       parsedCSV: [],
       success: {
         edit: false
@@ -374,11 +369,11 @@ export default {
     }
   },
 
-  created () {
+  created() {
     this.setLastProductionScreen('assets')
   },
 
-  mounted () {
+  mounted() {
     let searchQuery = ''
     if (this.assetSearchText.length > 0) {
       this.searchField.setValue(this.assetSearchText)
@@ -386,38 +381,29 @@ export default {
     if (this.$route.query.search && this.$route.query.search.length > 0) {
       searchQuery = '' + this.$route.query.search
     }
-    this.$refs['asset-list'].setScrollPosition(
-      this.assetListScrollPosition
-    )
+    this.$refs['asset-list'].setScrollPosition(this.assetListScrollPosition)
     this.onSearchChange()
-    this.$refs['asset-list'].setScrollPosition(
-      this.assetListScrollPosition
-    )
+    this.$refs['asset-list'].setScrollPosition(this.assetListScrollPosition)
     const finalize = () => {
       if (this.$refs['asset-list']) {
         this.$refs['asset-search-field'].setValue(searchQuery)
         this.onSearchChange()
-        this.$refs['asset-list'].setScrollPosition(
-          this.assetListScrollPosition
-        )
+        this.$refs['asset-list'].setScrollPosition(this.assetListScrollPosition)
       }
     }
 
     if (
       this.assetMap.size < 2 ||
-      (
-        this.assetValidationColumns.length > 0 &&
-        !this.assetMap.get(this.assetMap.keys().next().value).validations
-      )
+      (this.assetValidationColumns.length > 0 &&
+        !this.assetMap.get(this.assetMap.keys().next().value).validations)
     ) {
       setTimeout(() => {
-        this.loadAssets()
-          .then(() => {
-            setTimeout(() => {
-              this.initialLoading = false
-              finalize()
-            }, 500)
-          })
+        this.loadAssets().then(() => {
+          setTimeout(() => {
+            this.initialLoading = false
+            finalize()
+          }, 500)
+        })
       }, 0)
     } else {
       if (!this.isAssetsLoading) this.initialLoading = false
@@ -425,7 +411,7 @@ export default {
     }
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     this.clearSelectedAssets()
   },
 
@@ -462,19 +448,19 @@ export default {
       'productionAssetTaskTypes'
     ]),
 
-    newAssetPath () {
+    newAssetPath() {
       return this.getPath('new-asset')
     },
 
-    addThumbnailsModal () {
+    addThumbnailsModal() {
       return this.$refs['add-thumbnails-modal']
     },
 
-    searchField () {
+    searchField() {
       return this.$refs['asset-search-field']
     },
 
-    filteredAssets () {
+    filteredAssets() {
       const assets = {}
       this.displayedAssetsByType.forEach(type => {
         type.forEach(item => {
@@ -491,32 +477,34 @@ export default {
 
     // Page titles
 
-    tvShowPageTitle () {
-      const productionName =
-        this.currentProduction ? this.currentProduction.name : ''
+    tvShowPageTitle() {
+      const productionName = this.currentProduction
+        ? this.currentProduction.name
+        : ''
       let episodeName = ''
       if (this.currentEpisode) {
         episodeName = this.currentEpisode.name
         if (this.currentEpisode.id === 'all') episodeName = this.$t('main.all')
         if (this.currentEpisode.id === 'main') episodeName = 'Main Pack'
       }
-      return `${productionName} - ${episodeName}` +
-             ` | ${this.$t('assets.title')} - Kitsu`
+      return (
+        `${productionName} - ${episodeName}` +
+        ` | ${this.$t('assets.title')} - Kitsu`
+      )
     },
 
-    shortPageTitle () {
-      const productionName =
-        this.currentProduction ? this.currentProduction.name : ''
+    shortPageTitle() {
+      const productionName = this.currentProduction
+        ? this.currentProduction.name
+        : ''
       return `${productionName} ${this.$t('assets.title')} - Kitsu`
     },
 
-    dataMatchers () {
-      return this.isTVShow
-        ? ['Episode', 'Type', 'Name']
-        : ['Type', 'Name']
+    dataMatchers() {
+      return this.isTVShow ? ['Episode', 'Type', 'Name'] : ['Type', 'Name']
     },
 
-    renderColumns () {
+    renderColumns() {
       var collection = [...this.dataMatchers, ...this.optionalColumns]
 
       this.productionAssetTaskTypes.forEach(item => {
@@ -552,27 +540,27 @@ export default {
       'uploadAssetFile'
     ]),
 
-    showNewModal () {
+    showNewModal() {
       this.assetToEdit = {}
       this.modals.isNewDisplayed = true
     },
 
-    onEditClicked (asset) {
+    onEditClicked(asset) {
       this.assetToEdit = asset
       this.modals.isNewDisplayed = true
     },
 
-    onDeleteClicked (asset) {
+    onDeleteClicked(asset) {
       this.assetToDelete = asset
       this.modals.isDeleteDisplayed = true
     },
 
-    onRestoreClicked (asset) {
+    onRestoreClicked(asset) {
       this.assetToRestore = asset
       this.modals.isRestoreDisplayed = true
     },
 
-    confirmNewAssetStay (form) {
+    confirmNewAssetStay(form) {
       this.loading.stay = true
       this.success.edit = false
       this.newAsset(form)
@@ -583,7 +571,7 @@ export default {
           this.$refs['edit-asset-modal'].focusName()
           this.success.edit = true
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.stay = false
           this.loading.edit = false
@@ -592,7 +580,7 @@ export default {
         })
     },
 
-    confirmEditAsset (form) {
+    confirmEditAsset(form) {
       let action = 'newAsset'
       this.loading.edit = true
       this.errors.edit = false
@@ -601,87 +589,84 @@ export default {
         form.id = this.assetToEdit.id
       }
       this[action](form)
-        .then((form) => {
+        .then(form => {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.edit = false
           this.errors.edit = true
         })
     },
 
-    confirmDeleteAsset () {
+    confirmDeleteAsset() {
       this.loading.delete = true
       this.errors.delete = false
       this.deleteAsset(this.assetToDelete)
-        .then((form) => {
+        .then(form => {
           this.loading.delete = false
           this.modals.isDeleteDisplayed = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.delete = false
           this.errors.delete = true
         })
     },
 
-    confirmRestoreAsset () {
+    confirmRestoreAsset() {
       this.loading.restore = true
       this.errors.restore = false
       this.restoreAsset(this.assetToRestore)
-        .then((form) => {
+        .then(form => {
           this.loading.restore = false
           this.modals.isRestoreDisplayed = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.restore = false
           this.errors.restore = true
         })
     },
 
-    confirmBuildFilter (query) {
+    confirmBuildFilter(query) {
       this.modals.isBuildFilterDisplayed = false
       this.$refs['asset-search-field'].setValue(query)
       this.onSearchChange()
     },
 
-    confirmCreateTasks ({ form, selectionOnly }) {
+    confirmCreateTasks({ form, selectionOnly }) {
       this.loading.creatingTasks = true
-      this.runTasksCreation(form, selectionOnly)
-        .then(() => {
-          this.reset()
-          this.hideCreateTasksModal()
-          this.loading.creatingTasks = false
-        })
+      this.runTasksCreation(form, selectionOnly).then(() => {
+        this.reset()
+        this.hideCreateTasksModal()
+        this.loading.creatingTasks = false
+      })
     },
 
-    confirmCreateTasksAndStay ({ form, selectionOnly }) {
+    confirmCreateTasksAndStay({ form, selectionOnly }) {
       this.loading.taskStay = true
-      this.runTasksCreation(form, selectionOnly)
-        .then(() => {
-          this.reset()
-          this.loading.taskStay = false
-        })
+      this.runTasksCreation(form, selectionOnly).then(() => {
+        this.reset()
+        this.loading.taskStay = false
+      })
     },
 
-    runTasksCreation (form, selectionOnly) {
+    runTasksCreation(form, selectionOnly) {
       this.errors.creatingTasks = false
       return this.createTasks({
         type: 'assets',
         task_type_id: form.task_type_id,
         project_id: this.currentProduction.id,
         selectionOnly
+      }).catch(err => {
+        this.errors.creatingTasks = true
+        console.error(err)
       })
-        .catch(err => {
-          this.errors.creatingTasks = true
-          console.error(err)
-        })
     },
 
-    confirmDeleteAllTasks (selectionOnly) {
+    confirmDeleteAllTasks(selectionOnly) {
       const taskTypeId = this.taskTypes.find(
         t => t.name === this.deleteAllTasksLockText
       ).id
@@ -693,14 +678,15 @@ export default {
           this.loading.deleteAllTasks = false
           if (!selectionOnly) this.loadAssets()
           this.modals.isDeleteAllTasksDisplayed = false
-        }).catch((err) => {
+        })
+        .catch(err => {
           console.error(err)
           this.loading.deleteAllTasks = false
           this.errors.deleteAllTasks = true
         })
     },
 
-    confirmDeleteMetadata () {
+    confirmDeleteMetadata() {
       this.errors.deleteMetadata = false
       this.loading.deleteMetadata = true
       this.deleteMetadataDescriptor(this.descriptorIdToDelete)
@@ -708,14 +694,15 @@ export default {
           this.errors.deleteMetadata = false
           this.loading.deleteMetadata = false
           this.modals.isDeleteMetadataDisplayed = false
-        }).catch((err) => {
+        })
+        .catch(err => {
           console.error(err)
           this.errors.deleteMetadata = true
           this.loading.deleteMetadata = false
         })
     },
 
-    resetLightEditModal () {
+    resetLightEditModal() {
       const form = {
         name: '',
         entity_type_id: this.assetToEdit.entity_type_id,
@@ -724,7 +711,7 @@ export default {
       this.assetToEdit = form
     },
 
-    resetEditModal () {
+    resetEditModal() {
       const form = { name: '' }
       if (this.assetTypes.length > 0) {
         form.asset_type_id = this.assetTypes[0].id
@@ -733,7 +720,7 @@ export default {
       this.assetToEdit = form
     },
 
-    deleteText () {
+    deleteText() {
       const asset = this.assetToDelete
       if (
         asset &&
@@ -747,13 +734,13 @@ export default {
       }
     },
 
-    deleteAllTasksText () {
+    deleteAllTasksText() {
       return this.$t('tasks.delete_all_text', {
         name: this.deleteAllTasksLockText
       })
     },
 
-    restoreText () {
+    restoreText() {
       const asset = this.assetToRestore
       if (asset) {
         return this.$t('assets.restore_text', { name: asset.name })
@@ -762,23 +749,22 @@ export default {
       }
     },
 
-    renderImport (data, mode) {
+    renderImport(data, mode) {
       this.loading.importing = true
       this.errors.importing = false
       this.formData = data
       if (mode === 'file') {
         data = data.get('file')
       }
-      csv.processCSV(data)
-        .then((results) => {
-          this.parsedCSV = results
-          this.hideImportModal()
-          this.loading.importing = false
-          this.showImportRenderModal()
-        })
+      csv.processCSV(data).then(results => {
+        this.parsedCSV = results
+        this.hideImportModal()
+        this.loading.importing = false
+        this.showImportRenderModal()
+      })
     },
 
-    uploadImportFile (data, toUpdate) {
+    uploadImportFile(data, toUpdate) {
       const formData = new FormData()
       const filename = 'import.csv'
       const csvContent = csv.turnEntriesToCsvString(data)
@@ -794,8 +780,7 @@ export default {
         .then(() => {
           this.hideImportRenderModal()
           this.loading.importing = false
-          this.loadEpisodes()
-            .catch(console.error)
+          this.loadEpisodes().catch(console.error)
           this.loadAssets()
         })
         .catch(err => {
@@ -805,7 +790,7 @@ export default {
         })
     },
 
-    resetImport () {
+    resetImport() {
       this.errors.importing = false
       this.hideImportRenderModal()
       this.$store.commit('ASSET_CSV_FILE_SELECTED', null)
@@ -813,7 +798,7 @@ export default {
       this.showImportModal()
     },
 
-    onSearchChange () {
+    onSearchChange() {
       const searchQuery = this.$refs['asset-search-field'].getValue()
       if (
         searchQuery.length !== 1 &&
@@ -825,29 +810,27 @@ export default {
       }
     },
 
-    saveSearchQuery (searchQuery) {
+    saveSearchQuery(searchQuery) {
       this.saveAssetSearch(searchQuery)
-        .then(() => {
-        })
-        .catch((err) => {
+        .then(() => {})
+        .catch(err => {
           if (err) console.error(err)
         })
     },
 
-    removeSearchQuery (searchQuery) {
+    removeSearchQuery(searchQuery) {
       this.removeAssetSearch(searchQuery)
-        .then(() => {
-        })
-        .catch((err) => {
+        .then(() => {})
+        .catch(err => {
           if (err) console.error(err)
         })
     },
 
-    saveScrollPosition (scrollPosition) {
+    saveScrollPosition(scrollPosition) {
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', scrollPosition)
     },
 
-    getPath (section) {
+    getPath(section) {
       const route = {
         name: section,
         params: {
@@ -861,13 +844,13 @@ export default {
       return route
     },
 
-    onDeleteAllTasksClicked (taskTypeId) {
+    onDeleteAllTasksClicked(taskTypeId) {
       const taskType = this.taskTypeMap.get(taskTypeId)
       this.deleteAllTasksLockText = taskType.name
       this.modals.isDeleteAllTasksDisplayed = true
     },
 
-    confirmAddMetadata (form) {
+    confirmAddMetadata(form) {
       this.loading.addMetadata = true
       form.entity_type = 'Asset'
       this.addMetadataDescriptor(form)
@@ -875,15 +858,15 @@ export default {
           this.loading.addMetadata = false
           this.modals.isAddMetadataDisplayed = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.addMetadata = false
           this.errors.addMetadata = true
         })
     },
 
-    confirmAddThumbnails (forms) {
-      const addPreview = (form) => {
+    confirmAddThumbnails(forms) {
+      const addPreview = form => {
         this.addThumbnailsModal.markLoading(form.task.entity_id)
         return this.commentTaskWithPreview({
           taskId: form.task.id,
@@ -905,86 +888,83 @@ export default {
       }
 
       this.loading.addThumbnails = true
-      func.runPromiseMapAsSeries(forms, addPreview)
-        .then(() => {
-          this.loading.addThumbnails = false
-          this.modals.isAddThumbnailsDisplayed = false
-        })
+      func.runPromiseMapAsSeries(forms, addPreview).then(() => {
+        this.loading.addThumbnails = false
+        this.modals.isAddThumbnailsDisplayed = false
+      })
     },
 
-    onAddMetadataClicked () {
+    onAddMetadataClicked() {
       this.descriptorToEdit = {}
       this.modals.isAddMetadataDisplayed = true
     },
 
-    onDeleteMetadataClicked (descriptorId) {
+    onDeleteMetadataClicked(descriptorId) {
       this.descriptorIdToDelete = descriptorId
       this.modals.isDeleteMetadataDisplayed = true
     },
 
-    onEditMetadataClicked (descriptorId) {
+    onEditMetadataClicked(descriptorId) {
       this.descriptorToEdit = this.currentProduction.descriptors.find(
         d => d.id === descriptorId
       )
       this.modals.isAddMetadataDisplayed = true
     },
 
-    onExportClick () {
-      this.getAssetsCsvLines()
-        .then((assetLines) => {
-          const nameData = [
-            moment().format('YYYY-MM-DD'),
-            'kitsu',
-            this.currentProduction.name,
-            this.$t('assets.title')
-          ]
-          if (this.currentEpisode) {
-            nameData.splice(3, 0, this.currentEpisode.name)
-          }
-          const name = stringHelpers.slugify(nameData.join('_'))
-          let headers = this.isTVShow ? ['Episode'] : []
-          headers = headers.concat([
-            this.$t('assets.fields.type'),
-            this.$t('assets.fields.name'),
-            this.$t('assets.fields.description'),
-            this.$t('assets.fields.ready_for')
-          ])
-          sortByName([...this.currentProduction.descriptors])
-            .filter(d => d.entity_type === 'Asset')
-            .forEach((descriptor) => {
-              headers.push(descriptor.name)
-            })
-          if (this.isAssetTime) {
-            headers.push(this.$t('assets.fields.time_spent'))
-          }
-          if (this.isAssetEstimation) {
-            headers.push(this.$t('main.estimation_short'))
-          }
-          this.assetValidationColumns
-            .forEach((taskTypeId) => {
-              headers.push(this.taskTypeMap.get(taskTypeId).name)
-              headers.push('Assignations')
-            })
-          csv.buildCsvFile(name, [headers].concat(assetLines))
+    onExportClick() {
+      this.getAssetsCsvLines().then(assetLines => {
+        const nameData = [
+          moment().format('YYYY-MM-DD'),
+          'kitsu',
+          this.currentProduction.name,
+          this.$t('assets.title')
+        ]
+        if (this.currentEpisode) {
+          nameData.splice(3, 0, this.currentEpisode.name)
+        }
+        const name = stringHelpers.slugify(nameData.join('_'))
+        let headers = this.isTVShow ? ['Episode'] : []
+        headers = headers.concat([
+          this.$t('assets.fields.type'),
+          this.$t('assets.fields.name'),
+          this.$t('assets.fields.description'),
+          this.$t('assets.fields.ready_for')
+        ])
+        sortByName([...this.currentProduction.descriptors])
+          .filter(d => d.entity_type === 'Asset')
+          .forEach(descriptor => {
+            headers.push(descriptor.name)
+          })
+        if (this.isAssetTime) {
+          headers.push(this.$t('assets.fields.time_spent'))
+        }
+        if (this.isAssetEstimation) {
+          headers.push(this.$t('main.estimation_short'))
+        }
+        this.assetValidationColumns.forEach(taskTypeId => {
+          headers.push(this.taskTypeMap.get(taskTypeId).name)
+          headers.push('Assignations')
         })
+        csv.buildCsvFile(name, [headers].concat(assetLines))
+      })
     },
 
-    onAssetTypeClicked (assetType) {
+    onAssetTypeClicked(assetType) {
       this.searchField.setValue(`${this.assetSearchText} type=${assetType}`)
       this.onSearchChange()
     },
 
-    onChangeSortClicked (sortInfo) {
+    onChangeSortClicked(sortInfo) {
       this.changeAssetSort(sortInfo)
     },
 
-    onFieldChanged ({ entry, fieldName, value }) {
+    onFieldChanged({ entry, fieldName, value }) {
       const data = { id: entry.id }
       data[fieldName] = value
       this.editAsset(data)
     },
 
-    onMetadataChanged ({ entry, descriptor, value }) {
+    onMetadataChanged({ entry, descriptor, value }) {
       const metadata = {}
       metadata[descriptor.field_name] = value
       const data = {
@@ -994,23 +974,22 @@ export default {
       this.editAsset(data)
     },
 
-    onAssetChanged (asset) {
+    onAssetChanged(asset) {
       this.editAsset(asset)
     },
 
-    reset () {
+    reset() {
       this.initialLoading = true
-      this.loadAssets()
-        .then(() => {
-          this.initialLoading = false
-          this.setSearchFromUrl()
-          this.onSearchChange()
-        })
+      this.loadAssets().then(() => {
+        this.initialLoading = false
+        this.setSearchFromUrl()
+        this.onSearchChange()
+      })
     }
   },
 
   watch: {
-    $route () {
+    $route() {
       if (!this.$route.query) return
       const search = this.$route.query.search
       const actualSearch = this.$refs['asset-search-field'].getValue()
@@ -1020,24 +999,23 @@ export default {
       }
     },
 
-    currentProduction () {
+    currentProduction() {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       this.initialLoading = true
       if (!this.isTVShow) this.reset()
     },
 
-    currentEpisode () {
+    currentEpisode() {
       this.$refs['asset-search-field'].setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       if (this.isTVShow && this.currentEpisode) this.reset()
     },
 
-    displayedAssets () {
-    }
+    displayedAssets() {}
   },
 
-  metaInfo () {
+  metaInfo() {
     if (this.isTVShow) {
       return { title: this.tvShowPageTitle }
     } else {
@@ -1057,7 +1035,7 @@ export default {
 }
 
 .level {
-  align-items: flex-start
+  align-items: flex-start;
 }
 
 .assets {

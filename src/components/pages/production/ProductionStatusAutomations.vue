@@ -11,19 +11,13 @@
             :status-automations-list="remainingStatusAutomations"
             v-model="statusAutomationId"
           />
-          <button
-            class="button flexrow-item"
-            @click="addStatusAutomation"
-          >
+          <button class="button flexrow-item" @click="addStatusAutomation">
             {{ $t('main.add') }}
           </button>
         </div>
       </template>
 
-      <div
-        class="box"
-        v-if="isEmpty(productionStatusAutomations)"
-      >
+      <div class="box" v-if="isEmpty(productionStatusAutomations)">
         {{ $t('settings.production.empty_automation_list') }}
       </div>
 
@@ -31,8 +25,8 @@
         :entries="productionStatusAutomations"
         v-if="!isEmpty(productionStatusAutomations)"
       />
+    </div>
   </div>
-</div>
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex'
@@ -47,14 +41,14 @@ export default {
     StatusAutomationList
   },
 
-  data () {
+  data() {
     return {
       statusAutomations: [],
       statusAutomationId: ''
     }
   },
 
-  mounted () {
+  mounted() {
     if (this.remainingStatusAutomations.length > 0) {
       this.statusAutomationId = this.remainingStatusAutomations[0].id
     }
@@ -70,15 +64,13 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-      'addStatusAutomationToProduction'
-    ]),
+    ...mapActions(['addStatusAutomationToProduction']),
 
-    isEmpty (list) {
+    isEmpty(list) {
       return !list || list.length === 0
     },
 
-    addStatusAutomation () {
+    addStatusAutomation() {
       this.addStatusAutomationToProduction(this.statusAutomationId)
       if (this.remainingStatusAutomations.length > 0) {
         this.statusAutomationId = this.remainingStatusAutomations[0].id
@@ -89,8 +81,7 @@ export default {
     }
   },
 
-  watch: {
-  }
+  watch: {}
 }
 </script>
 

@@ -1,6 +1,5 @@
 <template>
   <div class="asset-types page fixed-page">
-
     <list-page-header
       :title="$t('asset_types.title')"
       :new-entry-label="$t('asset_types.new_asset_type')"
@@ -54,7 +53,7 @@ export default {
     ListPageHeader
   },
 
-  data () {
+  data() {
     return {
       assetTypeToDelete: null,
       assetTypeToEdit: {},
@@ -77,12 +76,9 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'assetTypes',
-      'getAssetType'
-    ]),
+    ...mapGetters(['assetTypes', 'getAssetType']),
 
-    deleteText () {
+    deleteText() {
       const assetType = this.assetTypeToDelete
       if (assetType) {
         return this.$t('asset_types.delete_text', { name: assetType.name })
@@ -100,7 +96,7 @@ export default {
       'loadAssetTypes'
     ]),
 
-    confirmEditAssetType (form) {
+    confirmEditAssetType(form) {
       let action = 'newAssetType'
       if (this.assetTypeToEdit && this.assetTypeToEdit.id) {
         action = 'editAssetType'
@@ -114,14 +110,14 @@ export default {
           this.loading.edit = false
           this.modals.edit = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.loading.edit = false
           this.errors.edit = true
         })
     },
 
-    confirmDeleteAssetType () {
+    confirmDeleteAssetType() {
       this.loading.del = true
       this.errors.del = false
       this.deleteAssetType(this.assetTypeToDelete)
@@ -129,43 +125,40 @@ export default {
           this.loading.del = false
           this.modals.del = false
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
           this.errors.del = true
           this.loading.del = false
         })
     },
 
-    onNewClicked () {
+    onNewClicked() {
       this.assetTypeToEdit = {}
       this.errors.edit = false
       this.modals.edit = true
     },
 
-    onEditClicked (assetType) {
+    onEditClicked(assetType) {
       this.assetTypeToEdit = assetType
       this.errors.edit = false
       this.modals.edit = true
     },
 
-    onDeleteClicked (assetType) {
+    onDeleteClicked(assetType) {
       this.assetTypeToDelete = assetType
       this.errors.del = false
       this.modals.del = true
     }
   },
 
-  watch: {
-  },
+  watch: {},
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: `${this.$t('asset_types.title')} - Kitsu`
     }
   }
-
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

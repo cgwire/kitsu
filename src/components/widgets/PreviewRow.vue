@@ -1,15 +1,14 @@
 <template>
-<div :class="{
-  'preview-row': true,
-  'has-text-center': true,
-  selected: selected,
-  green: preview.validation_status === 'validated'
-}">
-  <button-link
-    :text="label"
-    :path="previewPath"
-  />
-</div>
+  <div
+    :class="{
+      'preview-row': true,
+      'has-text-center': true,
+      selected: selected,
+      green: preview.validation_status === 'validated'
+    }"
+  >
+    <button-link :text="label" :path="previewPath" />
+  </div>
 </template>
 
 <script>
@@ -35,13 +34,12 @@ export default {
     }
   },
   computed: {
-    label () {
+    label() {
       const label = `v${this.preview.revision}`
       return label
     }
   },
-  methods: {
-  }
+  methods: {}
 }
 </script>
 
@@ -55,7 +53,7 @@ export default {
 }
 
 .preview-row:hover a {
-  border: 3px solid #E1D4F9;
+  border: 3px solid #e1d4f9;
 }
 
 .preview-row.green a {
@@ -67,6 +65,6 @@ export default {
 }
 
 .preview-row.selected a {
-  border: 3px solid #8F91EB;
+  border: 3px solid #8f91eb;
 }
 </style>

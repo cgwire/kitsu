@@ -25,7 +25,8 @@ const AssetTypes = () => import('@/components/pages/AssetTypes.vue')
 const Asset = () => import('@/components/pages/Asset.vue')
 const Breakdown = () => import('@/components/pages/Breakdown.vue')
 const CustomActions = () => import('@/components/pages/CustomActions.vue')
-const StatusAutomations = () => import('@/components/pages/StatusAutomations.vue')
+const StatusAutomations = () =>
+  import('@/components/pages/StatusAutomations.vue')
 const Episodes = () => import('@/components/pages/Episodes.vue')
 const Episode = () => import('@/components/pages/Episode.vue')
 const EpisodeStats = () => import('@/components/pages/EpisodeStats.vue')
@@ -36,13 +37,17 @@ const Person = () => import('@/components/pages/Person.vue')
 const People = () => import('@/components/pages/People.vue')
 const Playlist = () => import('@/components/pages/Playlist.vue')
 const Productions = () => import('@/components/pages/Productions.vue')
-const ProductionAssetTypes = () => import('@/components/pages/ProductionAssetTypes.vue')
-const ProductionSchedule = () => import('@/components/pages/ProductionSchedule.vue')
+const ProductionAssetTypes = () =>
+  import('@/components/pages/ProductionAssetTypes.vue')
+const ProductionSchedule = () =>
+  import('@/components/pages/ProductionSchedule.vue')
 const ProductionQuota = () => import('@/components/pages/ProductionQuota.vue')
-const ProductionSettings = () => import('@/components/pages/ProductionSettings.vue')
+const ProductionSettings = () =>
+  import('@/components/pages/ProductionSettings.vue')
 const Profile = () => import('@/components/pages/Profile.vue')
 const ResetPassword = () => import('@/components/pages/ResetPassword.vue')
-const ResetChangePassword = () => import('@/components/pages/ResetChangePassword.vue')
+const ResetChangePassword = () =>
+  import('@/components/pages/ResetChangePassword.vue')
 const Logs = () => import('@/components/pages/Logs.vue')
 const ServerDown = () => import('@/components/pages/ServerDown.vue')
 const Settings = () => import('@/components/pages/Settings.vue')
@@ -56,7 +61,8 @@ const Timesheets = () => import('@/components/pages/Timesheets.vue')
 
 const TaskStatus = () => import('@/components/pages/TaskStatus.vue')
 const TaskTypes = () => import('@/components/pages/TaskTypes.vue')
-const Departements = () => import('@/components/pages/departments/Departments.vue')
+const Departements = () =>
+  import('@/components/pages/departments/Departments.vue')
 const WrongBrowser = () => import('@/components/pages/WrongBrowser.vue')
 const Edit = () => import('@/components/pages/Edit.vue')
 
@@ -76,7 +82,6 @@ const ADMIN_PAGES = [
 ]
 
 export const routes = [
-
   {
     path: '',
     component: Main,
@@ -95,14 +100,14 @@ export const routes = [
         return next({ name: 'wrong-browser' })
       }
 
-      auth.requireAuth(to, from, (nextPath) => {
+      auth.requireAuth(to, from, nextPath => {
         if (nextPath) {
           next(nextPath)
         } else {
           timezone.setTimezone()
           lang.setLocale()
           if (store.state.productions.openProductions.length === 0) {
-            init((err) => {
+            init(err => {
               if (err) {
                 next({ name: 'server-down' })
               } else {
@@ -132,7 +137,7 @@ export const routes = [
     component: Main,
 
     beforeEnter: (to, from, next) => {
-      auth.requireAuth(to, from, (nextPath) => {
+      auth.requireAuth(to, from, nextPath => {
         if (nextPath) {
           next(nextPath)
         } else {
@@ -414,9 +419,7 @@ export const routes = [
         path: 'my-tasks',
         component: Todos,
         name: 'todos',
-        children: [
-          { path: ':tab', component: Todos, name: 'todos-tab' }
-        ]
+        children: [{ path: ':tab', component: Todos, name: 'todos-tab' }]
       },
 
       {

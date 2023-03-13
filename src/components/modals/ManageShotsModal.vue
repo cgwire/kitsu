@@ -1,158 +1,154 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
-
-    <div class="box">
-
-      <page-title class="title" :text="$t('shots.manage')" />
-      <div class="explaination">{{ $t('shots.creation_explaination') }}</div>
-      <div>
-        <div class="flexrow">
-          <combobox
-            ref="shot-padding"
-            :label="$t('shots.padding')"
-            :options="shotPaddingOptions"
-            class="shot-padding flexrow-item"
-            v-model="shotPadding"
-          />
+    <div class="modal-content">
+      <div class="box">
+        <page-title class="title" :text="$t('shots.manage')" />
+        <div class="explaination">{{ $t('shots.creation_explaination') }}</div>
+        <div>
+          <div class="flexrow">
+            <combobox
+              ref="shot-padding"
+              :label="$t('shots.padding')"
+              :options="shotPaddingOptions"
+              class="shot-padding flexrow-item"
+              v-model="shotPadding"
+            />
+          </div>
         </div>
+
+        <div class="shot-columns">
+          <div class="shot-column" v-if="isTVShow">
+            <h2 class="subtitle">{{ $t('shots.episodes') }}</h2>
+
+            <div class="list">
+              <div
+                :class="{
+                  'entity-line': true,
+                  selected: episode.id === selectedEpisodeId
+                }"
+                :key="episode.id"
+                @click="selectEpisode(episode.id)"
+                v-for="episode in displayedEpisodes"
+              >
+                {{ episode.name }}
+              </div>
+            </div>
+            <div class="field">
+              <input
+                class="input"
+                ref="addEpisodeInput"
+                placeholder="EP01"
+                type="text"
+                @keyup.tab="focusAddSequence"
+                @keyup.enter="addEpisode"
+                v-model="names.episode"
+                v-focus
+              />
+              <button
+                :class="{
+                  button: true,
+                  'is-success': true,
+                  'is-loading': loading.addEpisode
+                }"
+                :disabled="!isAddEpisodeAllowed"
+                @click="addEpisode"
+              >
+                {{ $t('main.add') }}
+              </button>
+            </div>
+          </div>
+
+          <div class="shot-column">
+            <h2 class="subtitle">{{ $t('shots.sequences') }}</h2>
+            <div class="list">
+              <div
+                :class="{
+                  'entity-line': true,
+                  selected: sequence.id === selectedSequenceId
+                }"
+                :key="sequence.id"
+                @keyup.tab="focusAddShot"
+                @click="selectSequence(sequence.id)"
+                v-for="sequence in displayedSequences"
+              >
+                {{ sequence.name }}
+              </div>
+            </div>
+            <div class="field">
+              <input
+                class="input"
+                ref="addSequenceInput"
+                placeholder="SQ01"
+                type="text"
+                @keyup.enter="addSequence"
+                v-model="names.sequence"
+              />
+              <button
+                :class="{
+                  button: true,
+                  'is-success': true,
+                  'is-loading': loading.addSequence
+                }"
+                :disabled="!isAddSequenceAllowed"
+                @click="addSequence"
+              >
+                {{ $t('main.add') }}
+              </button>
+            </div>
+          </div>
+
+          <div class="shot-column">
+            <h2 class="subtitle">{{ $t('shots.title') }}</h2>
+            <div class="list">
+              <div
+                class="entity-line"
+                :key="shot.id"
+                v-for="shot in displayedShots"
+              >
+                {{ shot.name }}
+              </div>
+            </div>
+            <div class="field">
+              <input
+                class="input"
+                placeholder="SH01"
+                ref="addShotInput"
+                type="text"
+                @keyup.enter="addShot"
+                v-model="names.shot"
+              />
+            </div>
+            <div class="field">
+              <button
+                :class="{
+                  button: true,
+                  'is-success': true,
+                  'is-loading': loading.addShot
+                }"
+                :disabled="!isAddShotAllowed || loading.addShot"
+                @click="addShot"
+              >
+                {{ $t('main.add') }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <p class="has-text-right modal-footer">
+          <button @click="$emit('cancel')" class="button is-link">
+            {{ $t('main.close') }}
+          </button>
+        </p>
       </div>
-
-      <div class="shot-columns">
-        <div class="shot-column" v-if="isTVShow">
-          <h2 class="subtitle">{{ $t('shots.episodes') }}</h2>
-
-          <div class="list">
-            <div
-              :class="{
-                'entity-line': true,
-                selected: episode.id === selectedEpisodeId
-              }"
-              :key="episode.id"
-              @click="selectEpisode(episode.id)"
-              v-for="episode in displayedEpisodes"
-            >
-              {{ episode.name }}
-            </div>
-          </div>
-          <div class="field">
-            <input
-              class="input"
-              ref="addEpisodeInput"
-              placeholder="EP01"
-              type="text"
-              @keyup.tab="focusAddSequence"
-              @keyup.enter="addEpisode"
-              v-model="names.episode"
-              v-focus
-            />
-            <button
-              :class="{
-                button: true,
-                'is-success': true,
-                'is-loading': loading.addEpisode
-              }"
-              :disabled="!isAddEpisodeAllowed"
-              @click="addEpisode"
-            >
-              {{ $t('main.add')}}
-            </button>
-          </div>
-        </div>
-
-        <div class="shot-column">
-          <h2 class="subtitle">{{ $t('shots.sequences') }}</h2>
-          <div class="list">
-            <div
-              :class="{
-                'entity-line': true,
-                selected: sequence.id === selectedSequenceId
-              }"
-              :key="sequence.id"
-              @keyup.tab="focusAddShot"
-              @click="selectSequence(sequence.id)"
-              v-for="sequence in displayedSequences"
-            >
-              {{ sequence.name }}
-            </div>
-          </div>
-          <div class="field">
-            <input
-              class="input"
-              ref="addSequenceInput"
-              placeholder="SQ01"
-              type="text"
-              @keyup.enter="addSequence"
-              v-model="names.sequence"
-            />
-            <button
-              :class="{
-                button: true,
-                'is-success': true,
-                'is-loading': loading.addSequence
-              }"
-              :disabled="!isAddSequenceAllowed"
-              @click="addSequence"
-            >
-              {{ $t('main.add')}}
-            </button>
-          </div>
-        </div>
-
-        <div class="shot-column">
-          <h2 class="subtitle">{{ $t('shots.title') }}</h2>
-          <div class="list">
-            <div
-              class="entity-line"
-              :key="shot.id"
-              v-for="shot in displayedShots"
-            >
-              {{ shot.name }}
-            </div>
-          </div>
-          <div class="field">
-            <input
-              class="input"
-              placeholder="SH01"
-              ref="addShotInput"
-              type="text"
-              @keyup.enter="addShot"
-              v-model="names.shot"
-            />
-          </div>
-          <div class="field">
-            <button
-              :class="{
-                button: true,
-                'is-success': true,
-                'is-loading': loading.addShot
-              }"
-              :disabled="!isAddShotAllowed || loading.addShot"
-              @click="addShot"
-            >
-              {{ $t('main.add')}}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <p class="has-text-right modal-footer">
-        <button
-          @click="$emit('cancel')"
-          class="button is-link"
-        >
-          {{ $t("main.close") }}
-        </button>
-      </p>
     </div>
-
   </div>
-</div>
 </template>
 
 <script>
@@ -181,7 +177,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       names: {
         episode: '',
@@ -224,25 +220,25 @@ export default {
       'shotMap'
     ]),
 
-    isAddEpisodeAllowed () {
+    isAddEpisodeAllowed() {
       const isEmpty = this.names.episode === ''
-      const isExist = this.displayedEpisodes.find((episode) => {
+      const isExist = this.displayedEpisodes.find(episode => {
         return this.names.episode === episode.name
       })
       return !isEmpty && !isExist
     },
 
-    isAddSequenceAllowed () {
+    isAddSequenceAllowed() {
       const isEmpty = this.names.sequence === ''
-      const isExist = this.displayedSequences.find((sequence) => {
+      const isExist = this.displayedSequences.find(sequence => {
         return this.names.sequence === sequence.name
       })
       return !isEmpty && !isExist && (this.selectedEpisodeId || !this.isTVShow)
     },
 
-    isAddShotAllowed () {
+    isAddShotAllowed() {
       const isEmpty = this.names.shot === ''
-      const isExist = this.displayedShots.find((shot) => {
+      const isExist = this.displayedShots.find(shot => {
         return this.names.shot === shot.name
       })
       return !isEmpty && !isExist && this.selectedSequenceId
@@ -250,15 +246,15 @@ export default {
   },
 
   methods: {
-    focusAddSequence () {
+    focusAddSequence() {
       this.$refs.addSequenceInput.focus()
     },
 
-    focusAddShot () {
+    focusAddShot() {
       this.$refs.addShotInput.focus()
     },
 
-    selectEpisode (episodeId) {
+    selectEpisode(episodeId) {
       if (!this.isTVShow) {
         this.selectedEpisodeId = episodeId
         this.displayedShots = []
@@ -274,17 +270,16 @@ export default {
       }
     },
 
-    selectSequence (sequenceId) {
+    selectSequence(sequenceId) {
       this.selectedSequenceId = sequenceId
-      this.displayedShots =
-        sortByName(
-          Array.from(this.shotMap.values()).filter((shot) => {
-            return shot.sequence_id === sequenceId
-          })
-        )
+      this.displayedShots = sortByName(
+        Array.from(this.shotMap.values()).filter(shot => {
+          return shot.sequence_id === sequenceId
+        })
+      )
     },
 
-    addEpisode () {
+    addEpisode() {
       if (this.isAddEpisodeAllowed) {
         const episodeName = this.names.episode
         if (episodeName.length > 0) {
@@ -293,7 +288,7 @@ export default {
             name: this.names.episode,
             project_id: this.currentProduction.id
           }
-          this.$emit('add-episode', episode, (episode) => {
+          this.$emit('add-episode', episode, episode => {
             this.loading.addEpisode = false
             this.selectEpisode(episode.id)
             this.names.episode = stringHelpers.generateNextName(episode.name)
@@ -302,7 +297,7 @@ export default {
       }
     },
 
-    addSequence () {
+    addSequence() {
       if (this.isAddSequenceAllowed) {
         const sequenceName = this.names.sequence
         if (
@@ -315,19 +310,17 @@ export default {
             episode_id: this.selectedEpisodeId,
             project_id: this.currentProduction.id
           }
-          this.$emit('add-sequence', sequence, (sequence) => {
+          this.$emit('add-sequence', sequence, sequence => {
             this.loading.addSequence = false
             this.selectEpisode(this.selectedEpisodeId)
             this.selectSequence(sequence.id)
-            this.names.sequence = stringHelpers.generateNextName(
-              sequence.name
-            )
+            this.names.sequence = stringHelpers.generateNextName(sequence.name)
           })
         }
       }
     },
 
-    addShot () {
+    addShot() {
       if (this.isAddShotAllowed && !this.loading.addShot) {
         const shotName = this.names.shot
         this.loading.addShot = true
@@ -337,7 +330,7 @@ export default {
             sequence_id: this.selectedSequenceId,
             project_id: this.currentProduction.id
           }
-          this.$emit('add-shot', shot, (shot) => {
+          this.$emit('add-shot', shot, shot => {
             this.loading.addShot = false
             this.selectSequence(this.selectedSequenceId)
             this.names.shot = stringHelpers.generateNextName(
@@ -351,7 +344,7 @@ export default {
   },
 
   watch: {
-    active () {
+    active() {
       if (this.active) {
         this.shotPadding = '1'
         this.sequences = this.displayedSequences
@@ -434,7 +427,7 @@ export default {
 }
 
 input::placeholder {
-  color: #BBB;
+  color: #bbb;
 }
 
 .explaination {

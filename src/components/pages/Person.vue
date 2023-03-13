@@ -1,187 +1,181 @@
 <template>
-<div ref="page" class="columns fixed-page">
-  <div class="column main-column">
-    <div class="person page">
+  <div ref="page" class="columns fixed-page">
+    <div class="column main-column">
+      <div class="person page">
+        <div ref="header" class="flexrow page-header">
+          <div class="flexrow-item" v-if="person">
+            <people-avatar
+              :person="person"
+              :size="80"
+              :font-size="30"
+              :is-text="false"
+            />
+          </div>
+          <div class="flexrow-item entity-title">
+            {{ person ? person.name : '' }}
+          </div>
+        </div>
 
-      <div ref="header" class="flexrow page-header">
-        <div class="flexrow-item" v-if="person">
-          <people-avatar
-            :person="person"
-            :size="80"
-            :font-size="30"
-            :is-text="false"
+        <div ref="tabs" class="task-tabs tabs">
+          <ul v-if="person">
+            <li :class="{ 'is-active': isActiveTab('todos') }">
+              <router-link
+                :to="{
+                  name: 'person',
+                  params: {
+                    person_id: person.id
+                  }
+                }"
+              >
+                {{ $t('tasks.current') }}
+              </router-link>
+            </li>
+            <li :class="{ 'is-active': isActiveTab('done') }">
+              <router-link
+                :to="{
+                  name: 'person-tab',
+                  params: {
+                    tab: 'done',
+                    person_id: person.id
+                  }
+                }"
+              >
+                {{ $t('tasks.done') }} ({{ displayedPersonDoneTasks.length }})
+              </router-link>
+            </li>
+            <li
+              :class="{ 'is-active': isActiveTab('timesheets') }"
+              v-if="isCurrentUserManager"
+            >
+              <router-link
+                :to="{
+                  name: 'person-tab',
+                  params: {
+                    tab: 'timesheets',
+                    person_id: person.id
+                  }
+                }"
+              >
+                {{ $t('timesheets.title') }}
+              </router-link>
+            </li>
+            <li :class="{ 'is-active': isActiveTab('schedule') }">
+              <router-link
+                :to="{
+                  name: 'person-tab',
+                  params: {
+                    tab: 'schedule',
+                    person_id: person.id
+                  }
+                }"
+              >
+                {{ $t('schedule.title') }}
+              </router-link>
+            </li>
+          </ul>
+        </div>
+
+        <div ref="search" class="flexrow">
+          <search-field
+            :class="{
+              'search-field': true,
+              'flexrow-item': true
+            }"
+            ref="person-tasks-search-field"
+            @change="onSearchChange"
+            @save="saveSearchQuery"
+            :can-save="true"
+          />
+          <span class="filler"></span>
+          <combobox-number
+            class="flexrow-item zoom-level"
+            :label="$t('schedule.zoom_level')"
+            :options="zoomOptions"
+            v-model="zoomLevel"
+            v-if="isActiveTab('schedule')"
+          />
+          <combobox
+            class="flexrow-item"
+            :label="$t('main.sorted_by')"
+            :options="sortOptions"
+            locale-key-prefix="tasks.fields."
+            v-model="currentSort"
           />
         </div>
-        <div class="flexrow-item entity-title">
-          {{ person ? person.name : '' }}
+
+        <div ref="query">
+          <div
+            class="query-list"
+            v-show="isActiveTab('todos') || isActiveTab('timesheets')"
+          >
+            <search-query-list
+              :queries="personTaskSearchQueries"
+              @change-search="changeSearch"
+              @remove-search="removeSearchQuery"
+            />
+          </div>
         </div>
-      </div>
 
-      <div ref="tabs" class="task-tabs tabs">
-        <ul v-if="person">
-          <li
-            :class="{'is-active': isActiveTab('todos')}"
-          >
-            <router-link :to="{
-              name: 'person',
-              params: {
-                person_id: person.id
-              }
-            }">
-              {{ $t('tasks.current')}}
-            </router-link>
-          </li>
-          <li
-            :class="{'is-active': isActiveTab('done')}"
-          >
-            <router-link :to="{
-              name: 'person-tab',
-              params: {
-                tab: 'done',
-                person_id: person.id
-              }
-            }">
-              {{ $t('tasks.done') }} ({{ displayedPersonDoneTasks.length }})
-            </router-link>
-          </li>
-          <li
-            :class="{'is-active': isActiveTab('timesheets')}"
-            v-if="isCurrentUserManager"
-          >
-            <router-link :to="{
-              name: 'person-tab',
-              params: {
-                tab: 'timesheets',
-                person_id: person.id
-              }
-            }">
-              {{ $t('timesheets.title') }}
-            </router-link>
-          </li>
-          <li
-            :class="{'is-active': isActiveTab('schedule')}"
-          >
-            <router-link :to="{
-              name: 'person-tab',
-              params: {
-                tab: 'schedule',
-                person_id: person.id
-              }
-            }">
-              {{ $t('schedule.title')}}
-            </router-link>
-          </li>
-        </ul>
-      </div>
-
-      <div ref="search" class="flexrow">
-        <search-field
-          :class="{
-            'search-field': true,
-            'flexrow-item': true
-          }"
-          ref="person-tasks-search-field"
-          @change="onSearchChange"
-          @save="saveSearchQuery"
-          :can-save="true"
-        />
-        <span class="filler"></span>
-        <combobox-number
-          class="flexrow-item zoom-level"
-          :label="$t('schedule.zoom_level')"
-          :options="zoomOptions"
-          v-model="zoomLevel"
-          v-if="isActiveTab('schedule')"
-        />
-        <combobox
-          class="flexrow-item"
-          :label="$t('main.sorted_by')"
-          :options="sortOptions"
-          locale-key-prefix="tasks.fields."
-          v-model="currentSort"
-        />
-      </div>
-
-      <div
-        ref="query"
-      >
-        <div
-          class="query-list"
-          v-show="isActiveTab('todos') || isActiveTab('timesheets')"
-        >
-          <search-query-list
-            :queries="personTaskSearchQueries"
-            @change-search="changeSearch"
-            @remove-search="removeSearchQuery"
-          />
-        </div>
-      </div>
-
-      <todos-list
-        ref="task-list"
-        :tasks="sortedTasks"
-        :is-loading="isTasksLoading"
-        :is-error="isTasksLoadingError"
-        :selection-grid="personTaskSelectionGrid"
-        @scroll="setPersonTasksScrollPosition"
-        v-if="isActiveTab('todos')"
-      />
-
-      <todos-list
-        ref="done-list"
-        :tasks="displayedPersonDoneTasks"
-        :is-loading="isTasksLoading"
-        :is-error="isTasksLoadingError"
-        :done="true"
-        :selectionGrid="personTaskSelectionGrid"
-        v-if="isActiveTab('done')"
-      />
-
-      <timesheet-list
-        :tasks="loggablePersonTasks"
-        :done-tasks="loggableDoneTasks"
-        :is-loading="isTasksLoading"
-        :is-error="isTasksLoadingError"
-        :time-spent-map="personTimeSpentMap"
-        :time-spent-total="personTimeSpentTotal"
-        :hide-done="personTasksSearchText.length === 0"
-        :hide-day-off="!(isCurrentUserAdmin || this.user.id == this.person.id)"
-        @date-changed="onDateChanged"
-        @time-spent-change="onTimeSpentChange"
-        @set-day-off="onSetDayOff"
-        @unset-day-off="onUnsetDayOff"
-        v-if="isActiveTab('timesheets')"
-      />
-
-      <div
-        v-if="isActiveTab('schedule')"
-      >
-        <schedule
-          ref="schedule-widget"
-          :start-date="tasksStartDate"
-          :end-date="tasksEndDate"
-          :hierarchy="scheduleItems"
-          :zoom-level="zoomLevel"
-          :height="scheduleHeight"
+        <todos-list
+          ref="task-list"
+          :tasks="sortedTasks"
           :is-loading="isTasksLoading"
-          :is-estimation-linked="true"
-          v-if="scheduleItems.length > 0"
+          :is-error="isTasksLoadingError"
+          :selection-grid="personTaskSelectionGrid"
+          @scroll="setPersonTasksScrollPosition"
+          v-if="isActiveTab('todos')"
         />
-        <div class="has-text-centered" v-else>
-          There is no tasks scheduled for current person.
+
+        <todos-list
+          ref="done-list"
+          :tasks="displayedPersonDoneTasks"
+          :is-loading="isTasksLoading"
+          :is-error="isTasksLoadingError"
+          :done="true"
+          :selectionGrid="personTaskSelectionGrid"
+          v-if="isActiveTab('done')"
+        />
+
+        <timesheet-list
+          :tasks="loggablePersonTasks"
+          :done-tasks="loggableDoneTasks"
+          :is-loading="isTasksLoading"
+          :is-error="isTasksLoadingError"
+          :time-spent-map="personTimeSpentMap"
+          :time-spent-total="personTimeSpentTotal"
+          :hide-done="personTasksSearchText.length === 0"
+          :hide-day-off="
+            !(isCurrentUserAdmin || this.user.id == this.person.id)
+          "
+          @date-changed="onDateChanged"
+          @time-spent-change="onTimeSpentChange"
+          @set-day-off="onSetDayOff"
+          @unset-day-off="onUnsetDayOff"
+          v-if="isActiveTab('timesheets')"
+        />
+
+        <div v-if="isActiveTab('schedule')">
+          <schedule
+            ref="schedule-widget"
+            :start-date="tasksStartDate"
+            :end-date="tasksEndDate"
+            :hierarchy="scheduleItems"
+            :zoom-level="zoomLevel"
+            :height="scheduleHeight"
+            :is-loading="isTasksLoading"
+            :is-estimation-linked="true"
+            v-if="scheduleItems.length > 0"
+          />
+          <div class="has-text-centered" v-else>
+            There is no tasks scheduled for current person.
+          </div>
         </div>
       </div>
     </div>
+    <div class="column side-column" v-if="nbSelectedTasks === 1">
+      <task-info :task="selectedTasks.values().next().value" />
+    </div>
   </div>
-  <div
-    class="column side-column"
-    v-if="nbSelectedTasks === 1"
-  >
-    <task-info
-      :task="selectedTasks.values().next().value"
-    />
-  </div>
-</div>
 </template>
 
 <script>
@@ -191,11 +185,7 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { formatListMixin } from '@/components/mixins/format'
 import colors from '@/lib/colors'
-import {
-  getFirstStartDate,
-  getLastEndDate,
-  parseDate
-} from '@/lib/time'
+import { getFirstStartDate, getLastEndDate, parseDate } from '@/lib/time'
 
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
@@ -222,7 +212,7 @@ export default {
     TimesheetList
   },
 
-  data () {
+  data() {
     return {
       activeTab: 'todos',
       currentSort: 'entity_name',
@@ -239,7 +229,7 @@ export default {
         'due_date',
         'estimation',
         'last_comment_date'
-      ].map((name) => ({ label: name, value: name })),
+      ].map(name => ({ label: name, value: name })),
       zoomLevel: 1,
       zoomOptions: [
         { label: 'Week', value: 0 },
@@ -250,7 +240,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.updateActiveTab()
     if (this.personTasksSearchText.length > 0) {
       this.searchField.setValue(this.personTasksSearchText)
@@ -262,12 +252,13 @@ export default {
     window.addEventListener('resize', this.resetScheduleHeight)
   },
 
-  afterDestroy () {
+  afterDestroy() {
     window.removeEventListener('resize', this.resetScheduleHeight)
-    this.$store.commit(
-      'LOAD_PERSON_TASKS_END',
-      { tasks: [], userFilters: {}, taskTypeMap: this.taskTypeMap }
-    )
+    this.$store.commit('LOAD_PERSON_TASKS_END', {
+      tasks: [],
+      userFilters: {},
+      taskTypeMap: this.taskTypeMap
+    })
   },
 
   computed: {
@@ -290,33 +281,31 @@ export default {
       'user'
     ]),
 
-    loggablePersonTasks () {
-      return this.displayedPersonTasks
-        .filter((task) => {
-          return this.taskTypeMap.get(task.task_type_id).allow_timelog
-        })
+    loggablePersonTasks() {
+      return this.displayedPersonTasks.filter(task => {
+        return this.taskTypeMap.get(task.task_type_id).allow_timelog
+      })
     },
 
-    loggableDoneTasks () {
-      return this.displayedPersonDoneTasks
-        .filter((task) => {
-          return this.taskTypeMap.get(task.task_type_id).allow_timelog
-        })
+    loggableDoneTasks() {
+      return this.displayedPersonDoneTasks.filter(task => {
+        return this.taskTypeMap.get(task.task_type_id).allow_timelog
+      })
     },
 
-    searchField () {
+    searchField() {
       return this.$refs['person-tasks-search-field']
     },
 
-    taskList () {
+    taskList() {
       return this.$refs['task-list']
     },
 
-    haveDoneList () {
+    haveDoneList() {
       return this.$refs['done-list']
     },
 
-    sortedTasks () {
+    sortedTasks() {
       const isName = this.currentSort === 'entity_name'
       const isPriority = this.currentSort === 'priority'
       const isDueDate = this.currentSort === 'due_date'
@@ -331,39 +320,33 @@ export default {
       } else if (isPriority) {
         return tasks.sort(
           firstBy('priority', -1)
-            .thenBy(
-              (a, b) => {
-                if (!a.due_date) return 1
-                else if (!b.due_date) return -1
-                else return a.due_date.localeCompare(b.due_date)
-              }
-            )
+            .thenBy((a, b) => {
+              if (!a.due_date) return 1
+              else if (!b.due_date) return -1
+              else return a.due_date.localeCompare(b.due_date)
+            })
             .thenBy('project_name')
             .thenBy('task_type_name')
             .thenBy('entity_name')
         )
       } else if (isDueDate) {
         return tasks.sort(
-          firstBy(
-            (a, b) => {
-              if (!a.due_date) return 1
-              else if (!b.due_date) return -1
-              else return a.due_date.localeCompare(b.due_date)
-            }
-          )
+          firstBy((a, b) => {
+            if (!a.due_date) return 1
+            else if (!b.due_date) return -1
+            else return a.due_date.localeCompare(b.due_date)
+          })
             .thenBy('project_name')
             .thenBy('task_type_name')
             .thenBy('entity_name')
         )
       } else if (isStartDate) {
         return tasks.sort(
-          firstBy(
-            (a, b) => {
-              if (!a.start_date) return 1
-              else if (!b.start_date) return -1
-              else return a.start_date.localeCompare(b.start_date)
-            }
-          )
+          firstBy((a, b) => {
+            if (!a.start_date) return 1
+            else if (!b.start_date) return -1
+            else return a.start_date.localeCompare(b.start_date)
+          })
             .thenBy('project_name')
             .thenBy('task_type_name')
             .thenBy('entity_name')
@@ -378,7 +361,7 @@ export default {
       }
     },
 
-    tasksStartDate () {
+    tasksStartDate() {
       if (this.scheduleItems.length > 0) {
         return getFirstStartDate(this.scheduleTasks)
       } else {
@@ -386,7 +369,7 @@ export default {
       }
     },
 
-    tasksEndDate () {
+    tasksEndDate() {
       if (this.scheduleItems.length > 0) {
         return getLastEndDate(this.scheduleTasks)
       } else {
@@ -394,7 +377,7 @@ export default {
       }
     },
 
-    scheduleTasks () {
+    scheduleTasks() {
       let children = []
       this.scheduleItems.forEach(item => {
         children = children.concat(item.children)
@@ -402,7 +385,7 @@ export default {
       return children
     },
 
-    scheduleItems () {
+    scheduleItems() {
       const rootMap = new Map()
       this.sortedTasks.forEach(task => {
         if (!rootMap.get(task.project_id)) {
@@ -450,7 +433,7 @@ export default {
       'unsetDayOff'
     ]),
 
-    resetScheduleHeight () {
+    resetScheduleHeight() {
       this.$nextTick(() => {
         if (this.isActiveTab('schedule')) {
           const pageHeight = this.$refs.page.offsetHeight
@@ -467,7 +450,7 @@ export default {
       })
     },
 
-    buildProjectScheduleItem (project) {
+    buildProjectScheduleItem(project) {
       return {
         ...project,
         avatar: true,
@@ -480,12 +463,17 @@ export default {
       }
     },
 
-    buildTaskScheduleItem (rootElement, task) {
+    buildTaskScheduleItem(rootElement, task) {
       let startDate = moment()
       let endDate
 
-      if (!task.start_date && !task.real_start_date &&
-          !task.due_date && !task.end_date) return null
+      if (
+        !task.start_date &&
+        !task.real_start_date &&
+        !task.due_date &&
+        !task.end_date
+      )
+        return null
 
       if (task.start_date) {
         startDate = parseDate(task.start_date)
@@ -522,11 +510,11 @@ export default {
       }
     },
 
-    isActiveTab (tab) {
+    isActiveTab(tab) {
       return this.activeTab === tab
     },
 
-    selectTab (tab) {
+    selectTab(tab) {
       this.activeTab = tab
       if (this.isActiveTab('todos')) {
         setTimeout(() => {
@@ -535,26 +523,24 @@ export default {
       }
     },
 
-    onSearchChange (text) {
+    onSearchChange(text) {
       this.setPersonTasksSearch(text)
     },
 
-    loadPerson (personId) {
+    loadPerson(personId) {
       this.person = this.personMap.get(personId)
       this.isTasksLoading = true
       this.loadPersonTasks({
         personId: this.person.id,
         date: this.selectedDate,
-        callback: (err) => {
+        callback: err => {
           if (err) console.error(err)
           this.isTasksLoading = false
           this.isTasksLoadingError = false
           setTimeout(() => {
             if (this.taskList) {
               this.$nextTick(() => {
-                this.taskList.setScrollPosition(
-                  this.personTasksScrollPosition
-                )
+                this.taskList.setScrollPosition(this.personTasksScrollPosition)
               })
             }
             this.resizeHeaders()
@@ -563,50 +549,49 @@ export default {
       })
     },
 
-    resizeHeaders () {
+    resizeHeaders() {
       this.$nextTick(() => {
         if (this.taskList) this.taskList.resizeHeaders()
         if (this.haveDoneList) this.haveDoneList.resizeHeaders()
       })
     },
 
-    selectCurrent () {
+    selectCurrent() {
       this.activeTab = 'current'
       setTimeout(() => {
         this.$refs['person-tasks-search-field'].focus()
       }, 100)
     },
 
-    selectDone () {
+    selectDone() {
       this.activeTab = 'done'
     },
 
-    changeSearch (searchQuery) {
+    changeSearch(searchQuery) {
       this.$refs['person-tasks-search-field'].setValue(searchQuery.search_query)
       this.$refs['person-tasks-search-field'].$emit(
-        'change', searchQuery.search_query
+        'change',
+        searchQuery.search_query
       )
     },
 
-    saveSearchQuery (searchQuery) {
+    saveSearchQuery(searchQuery) {
       this.savePersonTasksSearch(searchQuery)
-        .then(() => {
-        })
-        .catch((err) => {
+        .then(() => {})
+        .catch(err => {
           if (err) console.error(err)
         })
     },
 
-    removeSearchQuery (searchQuery) {
+    removeSearchQuery(searchQuery) {
       this.removePersonTasksSearch(searchQuery)
-        .then(() => {
-        })
-        .catch((err) => {
+        .then(() => {})
+        .catch(err => {
           if (err) console.error(err)
         })
     },
 
-    updateActiveTab () {
+    updateActiveTab() {
       const availableTabs = ['done', 'timesheets', 'schedule']
       if (availableTabs.includes(this.$route.params.tab)) {
         this.activeTab = this.$route.params.tab
@@ -615,18 +600,18 @@ export default {
       }
     },
 
-    onTimeSpentChange (timeSpentInfo) {
+    onTimeSpentChange(timeSpentInfo) {
       timeSpentInfo.personId = this.person.id
       timeSpentInfo.date = this.selectedDate
       this.setTimeSpent(timeSpentInfo)
     },
 
-    onDateChanged (date) {
+    onDateChanged(date) {
       this.selectedDate = moment(date).format('YYYY-MM-DD')
       this.loadPerson(this.person.id)
     },
 
-    onSetDayOff () {
+    onSetDayOff() {
       const dayOff = {
         personId: this.person.id,
         date: this.selectedDate
@@ -634,7 +619,7 @@ export default {
       this.setDayOff(dayOff)
     },
 
-    onUnsetDayOff () {
+    onUnsetDayOff() {
       const dayOff = {
         personId: this.person.id,
         date: this.selectedDate
@@ -643,25 +628,23 @@ export default {
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: this.person ? `${this.person.name} - Kitsu` : '... - Kitsu'
     }
   },
 
   watch: {
-    $route () {
+    $route() {
       const personId = this.$route.params.person_id
 
       this.updateActiveTab()
-      if (this.person &&
-          this.person.id !== personId
-      ) {
+      if (this.person && this.person.id !== personId) {
         this.loadPerson(personId)
       }
     },
 
-    activeTab () {
+    activeTab() {
       this.resetScheduleHeight()
     }
   }

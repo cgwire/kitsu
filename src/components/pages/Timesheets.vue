@@ -74,10 +74,7 @@
         />
       </div>
     </div>
-    <div
-      class="column side-column"
-      v-if="showInfo"
-    >
+    <div class="column side-column" v-if="showInfo">
       <people-timesheet-info
         :person="currentPerson"
         :production="productionId"
@@ -124,7 +121,7 @@ export default {
     PeopleTimesheetInfo
   },
 
-  data () {
+  data() {
     return {
       detailOptions: [
         {
@@ -180,7 +177,7 @@ export default {
     }
   },
 
-  created () {
+  created() {
     this.isLoading = true
     if (this.people.length === 0) {
       this.loadPeople(() => {
@@ -191,16 +188,15 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     const productionId = this.$route.query.productionId
     if (productionId) {
       this.silent = true
       this.productionId = productionId
       this.productionIdString = productionId
-      this.reloadTimesheet()
-        .then(() => {
-          this.silent = false
-        })
+      this.reloadTimesheet().then(() => {
+        this.silent = false
+      })
     }
   },
 
@@ -215,14 +211,16 @@ export default {
       'timesheet'
     ]),
 
-    productionList () {
-      return [{
-        id: '',
-        name: this.$t('main.all')
-      }].concat([...this.openProductions])
+    productionList() {
+      return [
+        {
+          id: '',
+          name: this.$t('main.all')
+        }
+      ].concat([...this.openProductions])
     },
 
-    filteredPeople () {
+    filteredPeople() {
       return this.people.filter(person => {
         const keys = Object.keys(this.timesheet)
         let isThere = false
@@ -238,17 +236,16 @@ export default {
       })
     },
 
-    yearOptions () {
+    yearOptions() {
       const year = 2018
       const currentYear = moment().year()
-      return range(year, currentYear)
-        .map(year => ({
-          label: year,
-          value: `${year}`
-        }))
+      return range(year, currentYear).map(year => ({
+        label: year,
+        value: `${year}`
+      }))
     },
 
-    monthOptions () {
+    monthOptions() {
       const currentYear = `${moment().year()}`
       const month = 1
       const currentMonth = moment().month() + 1
@@ -272,7 +269,7 @@ export default {
       'loadTimesheets'
     ]),
 
-    reloadTimesheet () {
+    reloadTimesheet() {
       this.isLoading = true
       this.isLoadingError = false
       return this.loadTimesheets({
@@ -281,7 +278,7 @@ export default {
         month: this.currentMonth,
         productionId: this.productionId
       })
-        .then((table) => {
+        .then(table => {
           this.isLoading = false
           return Promise.resolve()
         })
@@ -293,15 +290,15 @@ export default {
         })
     },
 
-    showSideInfo () {
+    showSideInfo() {
       this.showInfo = true
     },
 
-    hideSideInfo () {
+    hideSideInfo() {
       this.showInfo = false
     },
 
-    loadRoute () {
+    loadRoute() {
       // The main idea is to build the context from the route and compare it
       // to the current context. If there are changes, it applies it.
       // It handles too the display or not of the side column.
@@ -365,7 +362,7 @@ export default {
       }
     },
 
-    loadAggregate () {
+    loadAggregate() {
       this.isInfoLoading = true
       this.isInfoLoadingError = false
       this.tasks = []
@@ -377,25 +374,28 @@ export default {
         week: this.$route.params.week,
         day: this.$route.params.day,
         productionId: this.productionId
-      }).then(tasks => {
-        this.tasks = tasks.filter(task => task.duration > 0)
-        return this.loadAggregatedPersonDaysOff({
-          personId: this.$route.params.person_id,
-          detailLevel: this.detailLevel,
-          year: this.$route.params.year,
-          month: this.$route.params.month,
-          week: this.$route.params.week
-        })
-      }).then(dayOffs => {
-        this.dayOffCount = dayOffs.length
-        this.isInfoLoading = false
-      }).catch(err => {
-        console.error(err)
-        this.isInfoLoadingError = true
       })
+        .then(tasks => {
+          this.tasks = tasks.filter(task => task.duration > 0)
+          return this.loadAggregatedPersonDaysOff({
+            personId: this.$route.params.person_id,
+            detailLevel: this.detailLevel,
+            year: this.$route.params.year,
+            month: this.$route.params.month,
+            week: this.$route.params.week
+          })
+        })
+        .then(dayOffs => {
+          this.dayOffCount = dayOffs.length
+          this.isInfoLoading = false
+        })
+        .catch(err => {
+          console.error(err)
+          this.isInfoLoadingError = true
+        })
     },
 
-    getCurrentPerson () {
+    getCurrentPerson() {
       const personId = this.$route.params.person_id
       if (personId && this.personMap) {
         return this.personMap.get(personId)
@@ -404,12 +404,8 @@ export default {
       }
     },
 
-    exportTimesheet () {
-      const nameData = [
-        'timesheet',
-        this.detailLevel,
-        this.currentYear
-      ]
+    exportTimesheet() {
+      const nameData = ['timesheet', this.detailLevel, this.currentYear]
       if (this.detailLevel === 'day') nameData.push(this.currentMonth)
       const name = stringHelpers.slugify(nameData.join('_'))
       csv.generateTimesheet(
@@ -429,7 +425,7 @@ export default {
   },
 
   watch: {
-    detailLevelString () {
+    detailLevelString() {
       if (this.silent) return
       if (this.detailLevel !== this.detailLevelString) {
         if (this.detailLevelString === 'month') {
@@ -469,7 +465,7 @@ export default {
       }
     },
 
-    yearString () {
+    yearString() {
       if (this.silent) return
       const year = Number(this.yearString)
       const currentMonth = moment().month()
@@ -499,7 +495,7 @@ export default {
       }
     },
 
-    monthString () {
+    monthString() {
       if (this.silent) return
       if (this.currentMonth !== Number(this.monthString)) {
         this.$router.push({
@@ -513,7 +509,7 @@ export default {
       }
     },
 
-    productionIdString () {
+    productionIdString() {
       if (this.silent) return
       this.$router.push({
         query: {
@@ -522,12 +518,12 @@ export default {
       })
     },
 
-    $route () {
+    $route() {
       this.loadRoute()
     }
   },
 
-  metaInfo () {
+  metaInfo() {
     return {
       title: `${this.$t('timesheets.title')} - Kitsu`
     }

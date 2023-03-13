@@ -53,7 +53,7 @@ export default {
 
   props: {},
 
-  data () {
+  data() {
     return {
       errors: {
         departments: false,
@@ -75,21 +75,19 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'departments'
-    ]),
-    deleteText () {
+    ...mapGetters(['departments']),
+    deleteText() {
       if (this.departmentToDelete) {
-        return this.$t(
-          'departments.delete_text', { name: this.departmentToDelete.name }
-        )
+        return this.$t('departments.delete_text', {
+          name: this.departmentToDelete.name
+        })
       } else {
         return ''
       }
     }
   },
 
-  mounted () {
+  mounted() {
     this.loading.departments = true
     this.errors.departments = false
     this.loadDepartments()
@@ -104,23 +102,19 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-      'deleteDepartment',
-      'loadDepartments',
-      'newDepartement'
-    ]),
+    ...mapActions(['deleteDepartment', 'loadDepartments', 'newDepartement']),
 
-    onNewClicked () {
+    onNewClicked() {
       this.departmentToEdit = { name: '', color: '#999999' }
       this.modals.edit = true
     },
 
-    onEditClicked (department) {
+    onEditClicked(department) {
       this.departmentToEdit = department
       this.modals.edit = true
     },
 
-    confirmEditDepartment (form) {
+    confirmEditDepartment(form) {
       let action = 'newDepartement'
       if (this.departmentToEdit && this.departmentToEdit.id) {
         action = 'editDepartement'
@@ -128,7 +122,8 @@ export default {
       }
       this.loading.edit = true
       this.errors.edit = false
-      this.$store.dispatch(action, form)
+      this.$store
+        .dispatch(action, form)
         .then(() => {
           this.loading.edit = false
           this.modals.edit = false
@@ -140,12 +135,12 @@ export default {
     },
 
     // Delete
-    onDeleteClicked (department) {
+    onDeleteClicked(department) {
       this.departmentToDelete = department
       this.modals.del = true
     },
 
-    async confirmDeleteDepartment () {
+    async confirmDeleteDepartment() {
       this.loading.del = true
       this.errors.del = false
       try {
@@ -161,5 +156,4 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

@@ -1,36 +1,30 @@
 <template>
-<div class="data-list">
-  <table class="details table" v-if="!isLoading">
-    <thead>
-      <tr>
-        <th>{{ $t('quota.details_name') }}</th>
-        <th>
-        {{
-          this.countMode === 'seconds'
-            ? $t('quota.details_seconds')
-            : $t('quota.details_frames')
-        }}
-        </th>
-        <th>{{ $t('quota.weight') }}</th>
-      </tr>
-    </thead>
-    <tbody>
-     <tr
-       :key="`shot-quota-${shot.id}`"
-       v-for="shot in shots"
-     >
-       <td>{{ shot.full_name }}</td>
-       <td>{{ getQuota(shot) }}</td>
-       <td>{{ shot.weight }}</td>
-     </tr>
-    </tbody>
-  </table>
+  <div class="data-list">
+    <table class="details table" v-if="!isLoading">
+      <thead>
+        <tr>
+          <th>{{ $t('quota.details_name') }}</th>
+          <th>
+            {{
+              this.countMode === 'seconds'
+                ? $t('quota.details_seconds')
+                : $t('quota.details_frames')
+            }}
+          </th>
+          <th>{{ $t('quota.weight') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr :key="`shot-quota-${shot.id}`" v-for="shot in shots">
+          <td>{{ shot.full_name }}</td>
+          <td>{{ getQuota(shot) }}</td>
+          <td>{{ shot.weight }}</td>
+        </tr>
+      </tbody>
+    </table>
 
-  <table-info
-    :is-loading="isLoading"
-    :is-error="isLoadingError"
-  />
-</div>
+    <table-info :is-loading="isLoading" :is-error="isLoadingError" />
+  </div>
 </template>
 
 <script>
@@ -46,7 +40,7 @@ export default {
     TableInfo
   },
 
-  data () {
+  data() {
     return {
       projectNames: {}
     }
@@ -72,18 +66,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction',
-      'lastProductionScreen',
-      'taskTypeMap'
-    ])
+    ...mapGetters(['currentProduction', 'lastProductionScreen', 'taskTypeMap'])
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
-    getQuota (shot) {
+    getQuota(shot) {
       if (this.countMode === 'seconds') {
         return frameToSeconds(shot.nb_frames, this.currentProduction, shot)
       } else {
@@ -92,8 +81,7 @@ export default {
     }
   },
 
-  watch: {
-  }
+  watch: {}
 }
 </script>
 
@@ -107,35 +95,35 @@ export default {
     thead,
     tbody tr:nth-child(odd) {
       color: $white-grey;
-      background: #36393F;
+      background: #36393f;
     }
 
     tbody tr:nth-child(even) {
       color: $white-grey;
-      background: #46494F;
+      background: #46494f;
     }
 
     thead th,
     thead:hover {
       color: $white-grey;
-      background: #36393F;
+      background: #36393f;
       border-color: #666666;
     }
 
     tbody td {
-      border-color: #25282E;
+      border-color: #25282e;
     }
 
     tbody tr:hover {
       color: $white-grey;
-      background: #5E6169;
+      background: #5e6169;
     }
   }
 }
 
 tbody {
   tr:nth-child(even) {
-    background: #F6F6F6;
+    background: #f6f6f6;
   }
 
   tr:hover {

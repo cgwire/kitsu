@@ -1,7 +1,7 @@
 <template>
   <div class="server-down page has-text-centered">
     <div class="illustration">
-      <img src="@/assets/illustrations/500.png">
+      <img src="@/assets/illustrations/500.png" />
     </div>
     <h1 class="title">{{ $t('server_down.title') }}</h1>
     <p>
@@ -17,17 +17,13 @@ import auth from '@/lib/auth'
 export default {
   name: 'server-down',
   computed: {
-    ...mapGetters([
-      'isAuthenticated',
-      'user'
-    ])
+    ...mapGetters(['isAuthenticated', 'user'])
   },
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   },
-  mounted () {
-    auth.isServerLoggedIn((err) => {
+  mounted() {
+    auth.isServerLoggedIn(err => {
       const target = this.$store.state.route.query.redirect
       if (!err) {
         this.$router.push(target)

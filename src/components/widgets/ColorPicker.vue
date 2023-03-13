@@ -1,34 +1,30 @@
 <template>
-<div class="color-wrapper">
-  <button
-    type="button"
-    :class="{
-      'color-picker': true
-    }"
-    :title="color"
-    :style="{ color: color }"
-    @click="togglePalette"
-  />
-  <div
-    v-show="isOpen"
-    :class="{
-      'color-palette': true,
-    }"
-  >
-    <label
-      v-for="shade in palette"
-      :key="shade"
-      :title="shade"
-      :style="{ color: shade }"
+  <div class="color-wrapper">
+    <button
+      type="button"
+      :class="{
+        'color-picker': true
+      }"
+      :title="color"
+      :style="{ color: color }"
+      @click="togglePalette"
+    />
+    <div
+      v-show="isOpen"
+      :class="{
+        'color-palette': true
+      }"
     >
-      <input
-        type="radio"
-        :value="shade"
-        @click="onColorPicked(shade)"
-      />
-    </label>
+      <label
+        v-for="shade in palette"
+        :key="shade"
+        :title="shade"
+        :style="{ color: shade }"
+      >
+        <input type="radio" :value="shade" @click="onColorPicked(shade)" />
+      </label>
+    </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -53,21 +49,20 @@ export default {
     }
   },
 
-  data () {
+  data() {
     return {
       isOpen: false
     }
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
-    togglePalette () {
+    togglePalette() {
       this.isOpen = !this.isOpen
     },
 
-    onColorPicked (shade) {
+    onColorPicked(shade) {
       this.$emit('change', shade)
       this.isOpen = false
     }
@@ -92,7 +87,7 @@ export default {
 .color-palette label::before {
   display: block;
   content: '';
-  margin: .25rem;
+  margin: 0.25rem;
   width: 1rem;
   height: 1rem;
   border-radius: 50%;
@@ -102,7 +97,7 @@ export default {
   position: absolute;
   z-index: 900;
   left: 0;
-  bottom: calc(100% - .25rem);
+  bottom: calc(100% - 0.25rem);
   background-color: $dark-grey-light;
   border-radius: 5px;
 }
@@ -111,7 +106,7 @@ export default {
 }
 .color-palette label {
   display: block;
-  margin: .5rem 0;
+  margin: 0.5rem 0;
   cursor: pointer;
 }
 .color-palette input {

@@ -4,7 +4,7 @@ import { formatFrame, formatTime } from '@/lib/video'
 
 export const TIME_CODE_REGEX = /v(\d+) (\d+):(\d+)\.(\d+) \((\d+)\)/g
 
-export const sanitize = (html) => {
+export const sanitize = html => {
   return sanitizeHTML(html, {
     allowedTags: sanitizeHTML.defaults.allowedTags.concat(['img']),
     allowedAttributes: {
@@ -14,7 +14,7 @@ export const sanitize = (html) => {
   })
 }
 
-export const getTaskTypeStyle = (task) => {
+export const getTaskTypeStyle = task => {
   let border = 'transparent'
   if (task) border = task.task_type_color
   return {
@@ -22,9 +22,7 @@ export const getTaskTypeStyle = (task) => {
   }
 }
 
-export const renderComment = (
-  input, mentions, personMap, className = ''
-) => {
+export const renderComment = (input, mentions, personMap, className = '') => {
   let compiled = marked.parse(input || '')
   if (mentions) {
     mentions.forEach(personId => {
@@ -53,7 +51,7 @@ export const renderComment = (
   )
 }
 
-export const renderMarkdown = (input) => {
+export const renderMarkdown = input => {
   const compiled = marked.parse(input || '')
   return sanitize(compiled)
 }
@@ -70,14 +68,15 @@ export const replaceTimeWithTimecode = (
     const frame = formatFrame(frameNumber + 1)
     const formatedTime = formatTime(currentTimeRaw)
     return comment.replaceAll(
-      '@frame', `v${currentPreviewRevision} ${formatedTime} (${frame})`
+      '@frame',
+      `v${currentPreviewRevision} ${formatedTime} (${frame})`
     )
   } else {
     return ''
   }
 }
 
-export const renderFileSize = (size) => {
+export const renderFileSize = size => {
   let renderedSize = ''
   if (size > 1000000000) {
     renderedSize = (size / 1000000000).toFixed(1) + 'G'

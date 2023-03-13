@@ -1,22 +1,21 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
-  <div class="new-window">
-    <a target="_blank" :href="previewPath">
-      <arrow-up-right-icon />
-    </a>
-  </div>
-
   <div
-    class="modal-content"
-    @click="$emit('cancel')"
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
   >
-    <img :src="previewPath">
+    <div class="modal-background" @click="$emit('cancel')"></div>
+    <div class="new-window">
+      <a target="_blank" :href="previewPath">
+        <arrow-up-right-icon />
+      </a>
+    </div>
+
+    <div class="modal-content" @click="$emit('cancel')">
+      <img :src="previewPath" />
+    </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -44,19 +43,16 @@ export default {
     }
   },
 
-  mounted () {
-  },
+  mounted() {},
 
-  data () {
-    return {
-    }
+  data() {
+    return {}
   },
 
   computed: {
-    ...mapGetters([
-    ]),
+    ...mapGetters([]),
 
-    previewPath () {
+    previewPath() {
       const id = this.previewFileId
       return this.active && this.previewFileId
         ? '/api/pictures/originals/preview-files/' + id + '.png'
@@ -65,12 +61,10 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-    ])
+    ...mapActions([])
   },
 
-  watch: {
-  }
+  watch: {}
 }
 </script>
 
