@@ -20,7 +20,7 @@
 
     <table-metadata-header-menu
       ref="headerMetadataMenu"
-      :is-episode-allowed="
+      :is-edit-allowed="
         isMetadataColumnEditAllowed(lastMetadaDataHeaderMenuDisplayed)"
       :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
       @edit-clicked="onEpisodeMetadataClicked()"
