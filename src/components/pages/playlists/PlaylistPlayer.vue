@@ -1394,12 +1394,7 @@ export default {
       const entityToMove = this.entityList.find(s => s.id === info.after)
       const toMoveIndex = this.entityList.findIndex(s => s.id === info.after)
       let targetIndex = this.entityList.findIndex(s => s.id === info.before)
-      if (toMoveIndex >= 0 && targetIndex >= 0) {
-        this.entityList.splice(toMoveIndex, 1)
-        if (toMoveIndex > targetIndex) targetIndex++
-        this.entityList.splice(targetIndex, 0, entityToMove)
-      }
-
+      this.moveSelectedEntity(toMoveIndex, targetIndex)
       this.$nextTick(() => {
         playlistEl.scrollLeft = scrollLeft
       })
