@@ -17,13 +17,13 @@
     />
     <people-avatar
       class="person-avatar"
-      :key="personEmailMap.get(personEmail).id"
-      :person="personEmailMap.get(personEmail)"
+      :key="personId"
+      :person="personMap.get(personId)"
       :size="30"
       :font-size="15"
       :is-link="false"
-      v-for="personEmail in room.people"
-      v-if="personEmailMap.get(personEmail)"
+      v-for="personId in room.people"
+      v-if="personMap.get(personId)"
     />
   </div>
 </template>
@@ -65,13 +65,13 @@ export default {
   beforeDestroy() {},
 
   computed: {
-    ...mapGetters(['personEmailMap', 'user']),
+    ...mapGetters(['personMap', 'user']),
 
     joinedRoom() {
       if (!this.roomId) {
         return
       }
-      return !!this.room.people.find(email => email === this.user.email)
+      return !!this.room.people.find(id => id === this.user.id)
     }
   },
 
@@ -100,6 +100,7 @@ export default {
   border: 1px solid $dark-grey-strong;
   border-radius: 10px;
   margin-right: 0.5em;
+  margin-top: 7px;
 
   &:hover {
     background: $dark-grey-lighter;
@@ -109,5 +110,6 @@ export default {
 .avatar.person-avatar {
   display: inline-flex;
   margin-right: 4px;
+  margin-top: 8px;
 }
 </style>
