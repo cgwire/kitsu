@@ -234,11 +234,12 @@ const getters = {
   sequenceSearchText: state => state.sequenceSearchText,
   searchSequenceFilters: state => state.searchSequenceFilters,
 
-  isSingleSequence: state => cache.sequences.length < 2,
+  isSingleSequence: state => state.displayedSequences.length < 2,
   sequenceOptions: state =>
-    cache.sequences.map(sequence => {
-      return { label: sequence.name, value: sequence.id }
-    })
+    state.displayedSequences.map(sequence => ({
+      label: sequence.name,
+      value: sequence.id
+    }))
 }
 
 const actions = {
@@ -348,7 +349,6 @@ const actions = {
 
   loadSequences({ commit, state, rootGetters }) {
     const production = rootGetters.currentProduction
-    const routeSequenceId = rootGetters.route.params.sequence_id
     const userFilters = rootGetters.userFilters
     const isTVShow = rootGetters.isTVShow
     const episode = isTVShow ? rootGetters.currentEpisode : null
@@ -357,7 +357,6 @@ const actions = {
       commit(LOAD_SEQUENCES_END, {
         sequences,
         episodeMap,
-        routeSequenceId,
         production,
         userFilters
       })
