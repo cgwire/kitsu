@@ -10,10 +10,14 @@ directly from their tools.
 
 ## DCC integrations status:
 
-Work in progress:
-
 - Blender
 - Toon Boom Harmony
+- Unreal Engine
+
+Work in progress:
+
+- Photoshop
+- Nuke
 
 ## Installation
 
