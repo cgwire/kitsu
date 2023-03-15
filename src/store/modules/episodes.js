@@ -720,6 +720,7 @@ const mutations = {
     const maxY = state.nbValidationColumns
     state.episodeSelectionGrid = buildSelectionGrid(maxX, maxY)
 
+    cache.episodes = state.displayedEpisodes
     cache.episodes.push(episode)
     cache.episodes = sortByName(cache.episodes)
     state.displayedEpisodes = cache.episodes
