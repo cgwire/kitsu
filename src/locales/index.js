@@ -23,7 +23,7 @@ export default {
   ko: ko.default,
   nl: nl.default,
   pt: pt.default,
-  ru: ru,
+  ru: ru.default,
   zh: zh.default,
   zw: zhtw.default
 }
