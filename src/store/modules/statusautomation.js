@@ -12,6 +12,7 @@ import {
 
 const initialState = {
   statusAutomations: [],
+  statusAutomationMap: new Map(),
 
   editStatusAutomation: {
     isLoading: false,
