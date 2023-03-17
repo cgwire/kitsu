@@ -3,6 +3,9 @@ import Vue from 'vue/dist/vue'
 import colors from '@/lib/colors'
 
 import assetStore from '@/store/modules/assets'
+import editStore from '@/store/modules/edits'
+import episodeStore from '@/store/modules/episodes'
+import sequenceStore from '@/store/modules/sequences'
 import shotStore from '@/store/modules/shots'
 
 export const entityListMixin = {
@@ -302,12 +305,31 @@ export const entityListMixin = {
       this.showHeaderMenu()
     },
 
-    onSelectColumn() {
+    onSelectColumn(type) {
       const taskTypeId = this.lastHeaderMenuDisplayed
       const selection = []
-      const entities = this.assetMap
-        ? assetStore.cache.result
-        : shotStore.cache.result
+
+      let entities
+      switch (type) {
+        case 'asset':
+          entities = assetStore.cache.result
+          break
+        case 'edit':
+          entities = editStore.cache.result
+          break
+        case 'episode':
+          entities = episodeStore.cache.result
+          break
+        case 'sequence':
+          entities = sequenceStore.cache.result
+          break
+        case 'shot':
+          entities = shotStore.cache.result
+          break
+        default:
+          throw new Error(`Invalid entity type: ${type}`)
+      }
+
       entities.forEach((entity, i) => {
         selection.push({
           entity: entity,
