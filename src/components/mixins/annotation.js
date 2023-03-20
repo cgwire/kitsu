@@ -306,7 +306,7 @@ export const annotationMixin = {
         })
       }
       if (!obj.serialize) {
-        addSerialization(obj)
+        this.addSerialization(obj)
       }
 
       this.postAnnotationDeletion(currentTime, obj.serialize())
