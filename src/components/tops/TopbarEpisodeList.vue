@@ -13,7 +13,7 @@
         <chevron-down-icon class="down-icon flexrow-item" />
       </div>
       <div class="select-input" ref="select" v-if="showEpisodeList">
-        <div v-for="group in episodeGroups">
+        <div v-for="(group, index) in episodeGroups" :key="`group-${index}`">
           <div
             class="group-name"
             v-if="showAllMode && group.name && group.name !== 'running'"

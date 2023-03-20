@@ -163,78 +163,75 @@
 
           <tbody class="datatable-body">
             <template v-for="person in assignees">
-              <tr
-                :key="person.id"
-                :class="{
-                  'datatable-row': true,
-                  'task-line': true
-                }"
-              >
-                <td class="person flexrow">
-                  <people-avatar
-                    class="flexrow-item"
-                    :person="person"
-                    :size="30"
-                    :font-size="17"
-                  />
-                  <people-name class="flexrow-item" :person="person" />
-                </td>
-                <td class="count numeric-cell">
-                  {{ person.alltasks.count }}
-                </td>
-                <td class="frames numeric-cell">
-                  {{ person.alltasks.frames }}
-                </td>
-                <td class="seconds numeric-cell">
-                  {{ person.alltasks.seconds }}
-                </td>
-                <td class="estimation numeric-cell">
-                  {{ person.alltasks.estimation }}
-                </td>
-                <td class="quota numeric-cell">
-                  {{ person.alltasks.quota }}
-                </td>
-                <td class="quota numeric-cell">
-                  {{ person.alltasks.quotaFrames }}
-                </td>
-                <td class="quota numeric-cell">
-                  {{ person.alltasks.quotaCount }}
-                </td>
-                <td></td>
-              </tr>
-              <tr
-                :class="{
-                  'datatable-row': true,
-                  'task-line': true
-                }"
-              >
-                <td class="person flexrow">
-                  <corner-down-right-icon class="ml05 mr05" size="0.9x" />
-                  {{ $t('main.remaining') }}
-                </td>
-                <td class="count numeric-cell">
-                  {{ person.remaining.count }}
-                </td>
-                <td class="frames numeric-cell">
-                  {{ person.remaining.frames }}
-                </td>
-                <td class="seconds numeric-cell">
-                  {{ person.remaining.seconds }}
-                </td>
-                <td class="estimation numeric-cell">
-                  {{ person.remaining.estimation }}
-                </td>
-                <td class="quota numeric-cell">
-                  {{ person.remaining.quota }}
-                </td>
-                <td class="quota numeric-cell">
-                  {{ person.remaining.quotaFrames }}
-                </td>
-                <td class="quota numeric-cell">
-                  {{ person.remaining.quotaCount }}
-                </td>
-                <td></td>
-              </tr>
+              <template>
+                <tr
+                  class="datatable-row task-line"
+                  :key="`${person.id}-alltasks`"
+                >
+                  <td class="person flexrow">
+                    <people-avatar
+                      class="flexrow-item"
+                      :person="person"
+                      :size="30"
+                      :font-size="17"
+                    />
+                    <people-name class="flexrow-item" :person="person" />
+                  </td>
+                  <td class="count numeric-cell">
+                    {{ person.alltasks.count }}
+                  </td>
+                  <td class="frames numeric-cell">
+                    {{ person.alltasks.frames }}
+                  </td>
+                  <td class="seconds numeric-cell">
+                    {{ person.alltasks.seconds }}
+                  </td>
+                  <td class="estimation numeric-cell">
+                    {{ person.alltasks.estimation }}
+                  </td>
+                  <td class="quota numeric-cell">
+                    {{ person.alltasks.quota }}
+                  </td>
+                  <td class="quota numeric-cell">
+                    {{ person.alltasks.quotaFrames }}
+                  </td>
+                  <td class="quota numeric-cell">
+                    {{ person.alltasks.quotaCount }}
+                  </td>
+                  <td></td>
+                </tr>
+                <tr
+                  class="datatable-row task-line"
+                  :key="`${person.id}-remaining`"
+                >
+                  <td class="person flexrow">
+                    <corner-down-right-icon class="ml05 mr05" size="0.9x" />
+                    {{ $t('main.remaining') }}
+                  </td>
+                  <td class="count numeric-cell">
+                    {{ person.remaining.count }}
+                  </td>
+                  <td class="frames numeric-cell">
+                    {{ person.remaining.frames }}
+                  </td>
+                  <td class="seconds numeric-cell">
+                    {{ person.remaining.seconds }}
+                  </td>
+                  <td class="estimation numeric-cell">
+                    {{ person.remaining.estimation }}
+                  </td>
+                  <td class="quota numeric-cell">
+                    {{ person.remaining.quota }}
+                  </td>
+                  <td class="quota numeric-cell">
+                    {{ person.remaining.quotaFrames }}
+                  </td>
+                  <td class="quota numeric-cell">
+                    {{ person.remaining.quotaCount }}
+                  </td>
+                  <td></td>
+                </tr>
+              </template>
             </template>
           </tbody>
         </table>
@@ -514,7 +511,6 @@ export default {
       const quotaFrames = estimation > 0 ? frames / estimationDays : 0
 
       return {
-        estimation,
         count: maps.countMap.get(person.id) || 0,
         estimation: this.formatDuration(estimation),
         frames,
