@@ -965,7 +965,6 @@ export const annotationMixin = {
         br: false, // !this.isCurrentUserArtist,
         bl: false,
         ml: false,
-        mt: false,
         mr: false,
         mb: false,
         mt: false // !this.isCurrentUserArtist
