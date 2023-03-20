@@ -1,84 +1,81 @@
 <template>
-<div :class="{
-  'modal': true,
-  'is-active': active
-}">
-  <div class="modal-background" @click="$emit('cancel')" ></div>
+  <div
+    :class="{
+      modal: true,
+      'is-active': active
+    }"
+  >
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
-  <div class="modal-content">
+    <div class="modal-content">
+      <div class="box content">
+        <h1 class="title">
+          {{ $t('main.csv.import_title') }}
+        </h1>
 
-    <div class="box content">
-      <h1 class="title">
-        {{ $t("main.csv.import_title") }}
-      </h1>
-
-      <div class="description">
-        <p v-if="columns.length > 0">
-          {{ $t("main.csv.required_fields") }}
+        <div v-if="columns.length > 0" class="mb1">
+          {{ $t('main.csv.required_fields') }}
           <ul>
             <li v-for="column in columns" :key="column">
               {{ column }}
             </li>
           </ul>
-        </p>
-        <p v-if="optionalColumns.length > 0">
-          {{ $t("main.csv.optional_fields") }}
+        </div>
+        <div v-if="optionalColumns.length > 0" class="mb1">
+          {{ $t('main.csv.optional_fields') }}
           <ul>
             <li v-for="optionalColumn in optionalColumns" :key="optionalColumn">
               {{ optionalColumn }}
             </li>
           </ul>
-        </p>
-        <p v-if="genericColumns.length > 0">
-          {{ $t("main.csv.generic_fields") }}
+        </div>
+        <div v-if="genericColumns.length > 0" class="mb1">
+          {{ $t('main.csv.generic_fields') }}
           <ul>
             <li v-for="genericColumn in genericColumns" :key="genericColumn">
               {{ genericColumn }}
             </li>
           </ul>
-        </p>
+        </div>
+
+        <tabs @update="onTabUpdate">
+          <tab :name="$t('main.csv.tab_select_file')" :selected="true">
+            <p>
+              {{ $t('main.csv.select_file') }}
+            </p>
+            <file-upload
+              @fileselected="onFileSelected"
+              :label="$t('main.csv.upload_file')"
+              ref="inputFile"
+            />
+          </tab>
+          <tab :name="$t('main.csv.tab_paste_code')">
+            <p>
+              {{ $t('main.csv.paste_code') }}
+            </p>
+            <textarea
+              class="paste-area"
+              :placeholder="pasteAreaPlaceholder"
+              v-model="pastedCode"
+            ></textarea>
+          </tab>
+        </tabs>
+
+        <modal-footer
+          :confirm-label="$t('main.csv.preview')"
+          :error-text="$t('main.csv.error_upload')"
+          :is-loading="isLoading"
+          :is-disabled="formData === undefined"
+          :is-error="isError"
+          @confirm="onConfirmClicked"
+          @cancel="$emit('cancel')"
+        />
       </div>
-
-      <tabs @update="onTabUpdate">
-        <tab :name="$t('main.csv.tab_select_file')" :selected="true">
-          <p>
-            {{ $t("main.csv.select_file") }}
-          </p>
-          <file-upload
-            @fileselected="onFileSelected"
-            :label="$t('main.csv.upload_file')"
-            ref="inputFile"
-          />
-        </tab>
-        <tab :name="$t('main.csv.tab_paste_code')">
-          <p>
-            {{ $t("main.csv.paste_code") }}
-          </p>
-          <textarea
-            class="paste-area"
-            :placeholder="pasteAreaPlacholder"
-            v-model="pastedCode"
-          ></textarea>
-        </tab>
-      </tabs>
-
-      <modal-footer
-        :confirm-label="$t('main.csv.preview')"
-        :error-text="$t('main.csv.error_upload')"
-        :is-loading="isLoading"
-        :is-disabled="formData === undefined"
-        :is-error="isError"
-        @confirm="onConfirmClicked"
-        @cancel="$emit('cancel')"
-      />
-
     </div>
   </div>
-</div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 import FileUpload from '@/components/widgets/FileUpload.vue'
 import ModalFooter from '@/components/modals/ModalFooter'
@@ -95,7 +92,7 @@ export default {
     Tab
   },
 
-  data () {
+  data() {
     return {
       formData: null,
       pastedCode: '',
@@ -130,14 +127,12 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.formData = null
   },
 
   computed: {
-    ...mapGetters([
-    ]),
-    pasteAreaPlacholder () {
+    pasteAreaPlaceholder() {
       let placeholder = this.columns.toString()
       placeholder = placeholder.replace(/,/g, ';')
       return placeholder
@@ -145,18 +140,15 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-    ]),
-
-    onTabUpdate (tabs) {
+    onTabUpdate(tabs) {
       this.tabs = tabs
     },
 
-    onFileSelected (formData) {
+    onFileSelected(formData) {
       this.formData = formData
     },
 
-    onConfirmClicked () {
+    onConfirmClicked() {
       let mode = ''
       let data = null
       if (this.tabs[0].isActive === true) {
@@ -169,14 +161,14 @@ export default {
       this.$emit('confirm', data, mode)
     },
 
-    reset () {
+    reset() {
       this.$refs.inputFile.reset()
       this.pastedCode = ''
     }
   },
 
   watch: {
-    active () {
+    active() {
       this.reset()
     }
   }
@@ -192,15 +184,11 @@ export default {
   margin-top: 1em;
 }
 
-.description {
-  margin-bottom: 1em;
-}
-
 .paste-area {
   margin: 0 0 1rem;
   width: 100%;
   min-height: 10rem;
-  padding: .5rem;
+  padding: 0.5rem;
   resize: vertical;
 }
 </style>
