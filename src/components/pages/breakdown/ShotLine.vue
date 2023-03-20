@@ -21,10 +21,8 @@
         :preview-file-id="previewFileId"
       />
       <div class="shot-name flexrow-item ml05">
-        <div v-for="chunk in name.split(' / ')">
-          <template v-if="chunk && chunk !== 'undefined'">
-            {{ chunk }}
-          </template>
+        <div v-for="(chunk, index) in chunks" :key="`chunk-${index}`">
+          {{ chunk }}
         </div>
       </div>
     </div>
@@ -328,6 +326,11 @@ export default {
       'isFrames',
       'isShowInfosBreakdown'
     ]),
+
+    chunks() {
+      const chunks = this.name.split(' / ')
+      return chunks.filter(chunk => chunk && chunk !== 'undefined')
+    },
 
     assetsByAssetTypesMap() {
       const assetsByAssetTypes = {}
