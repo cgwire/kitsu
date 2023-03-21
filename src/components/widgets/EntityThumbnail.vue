@@ -133,9 +133,15 @@ export default {
           '.png'
         )
       } else {
-        return (
-          '/api/pictures/thumbnails/preview-files/' + previewFileId + '.png'
-        )
+        if (this.width && this.width > 150) {
+          return (
+            '/api/pictures/previews/preview-files/' + previewFileId + '.png'
+          )
+        } else {
+          return (
+            '/api/pictures/thumbnails/preview-files/' + previewFileId + '.png'
+          )
+        }
       }
     },
 
