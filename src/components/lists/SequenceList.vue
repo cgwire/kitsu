@@ -9,7 +9,7 @@
         @minimize-clicked="onMinimizeColumnToggled()"
         @delete-all-clicked="onDeleteAllTasksClicked()"
         @sort-by-clicked="onSortByTaskTypeClicked()"
-        @select-column="onSelectColumn"
+        @select-column="onSelectColumn('sequence')"
         @toggle-stick="stickColumnClicked()"
       />
 

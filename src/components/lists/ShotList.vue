@@ -9,7 +9,7 @@
         @minimize-clicked="onMinimizeColumnToggled()"
         @delete-all-clicked="onDeleteAllTasksClicked()"
         @sort-by-clicked="onSortByTaskTypeClicked()"
-        @select-column="onSelectColumn"
+        @select-column="onSelectColumn('shot')"
         @toggle-stick="stickColumnClicked()"
       />
 
@@ -1407,9 +1407,6 @@ span.thumbnail-empty {
 .datatable-row th.name {
   font-size: 1.1em;
   padding: 6px;
-
-  .flexrow {
-  }
 }
 
 .datatable-row-header {
