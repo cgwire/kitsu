@@ -424,7 +424,7 @@ export default {
       } else if (this.isPicture) {
         this.pause()
         setTimeout(() => {
-          this.pictureViewer.resetPicture()
+          if (this.pictureViewer) this.pictureViewer.resetPicture()
         }, 10)
       }
     }

@@ -1635,6 +1635,7 @@ export default {
 
     extraWide() {
       this.endAnnotationSaving()
+      this.previewViewer.resetPicture()
       this.previewViewer.resize()
       this.$nextTick(() => {
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
