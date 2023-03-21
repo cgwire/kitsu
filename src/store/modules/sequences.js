@@ -765,6 +765,9 @@ const mutations = {
       Object.assign(sequence, newSequence)
     }
     state.sequenceIndex = buildSequenceIndex(cache.sequences)
+    if (sequence.description && !state.isSequenceDescription) {
+      state.isSequenceDescription = true
+    }
   },
 
   [LOAD_SEQUENCES_START](state) {

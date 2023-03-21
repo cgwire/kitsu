@@ -736,6 +736,9 @@ const mutations = {
       Object.assign(episode, newEpisode)
     }
     state.episodeIndex = buildEpisodeIndex(state.episodes)
+    if (episode.description && !state.isEpisodeDescription) {
+      state.isEpisodeDescription = true
+    }
   },
 
   [LOAD_EPISODES_START](state) {
