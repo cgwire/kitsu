@@ -4,7 +4,7 @@
   "description": "Production Management Software (user interface)",
   "author": "Frank Rousseau <frank@cg-wire.com>",
   "repository": "https://github.com/cgwire/kitsu",
-  "license": "AGPL v3.0",
+  "license": "AGPL-3.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
