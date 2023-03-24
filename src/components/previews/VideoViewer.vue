@@ -298,7 +298,6 @@ export default {
         time = 0
       } else if (time > this.video.duration - this.frameDuration) {
         time = this.video.duration - this.frameDuration
-      } else {
       }
       this.setCurrentTime(time)
       return time
@@ -341,7 +340,7 @@ export default {
       }
     },
 
-    onTimeUpdate(time) {
+    onTimeUpdate() {
       if (this.video) {
         this.currentTimeRaw = this.video.currentTime - this.frameDuration
       } else {

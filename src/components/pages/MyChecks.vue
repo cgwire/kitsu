@@ -1,7 +1,5 @@
 <template>
   <div class="columns fixed-page">
-    <!--action-panel /-->
-
     <div class="column main-column">
       <div class="todos page">
         <div class="flexrow">
@@ -105,10 +103,9 @@ import firstBy from 'thenby'
 
 import { populateTask } from '@/lib/models'
 import { sortByName } from '@/lib/sorting'
-import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
+import { buildSelectionGrid } from '@/lib/selection'
 import { parseDate } from '@/lib/time'
 
-import ActionPanel from '@/components/tops/ActionPanel'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
@@ -116,7 +113,6 @@ import ComboboxProduction from '@/components/widgets/ComboboxProduction'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import PeopleField from '@/components/widgets/PeopleField'
 import TaskInfo from '@/components/sides/TaskInfo'
-import TimesheetList from '@/components/lists/TimesheetList'
 import TodosList from '@/components/lists/TodosList'
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal'
 
@@ -124,7 +120,6 @@ export default {
   name: 'todos',
 
   components: {
-    ActionPanel,
     ButtonSimple,
     Combobox,
     ComboboxProduction,
@@ -132,7 +127,6 @@ export default {
     ComboboxTaskType,
     PeopleField,
     TaskInfo,
-    TimesheetList,
     TodosList,
     ViewPlaylistModal
   },

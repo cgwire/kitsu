@@ -29,7 +29,8 @@
         {{ $t('settings.production.empty_list') }}
       </div>
 
-      <template
+      <div
+        v-else
         v-for="(taskListObject, index) in [
           assetTaskTypes,
           shotTaskTypes,
@@ -37,52 +38,49 @@
           sequenceTaskTypes,
           episodeTaskTypes
         ]"
-        v-else
+        :key="index"
       >
-        <div :key="index">
-          <h2 class="section-title">
-            {{ taskListObject.title }}
-          </h2>
-          <table class="datatable list" v-if="taskListObject.list.length > 0">
-            <thead>
-              <tr>
-                <th class="name">
-                  {{ $t('task_types.fields.name') }}
-                </th>
-                <!--th class="start-date">
-                  {{ $t('productions.fields.start_date') }}
-                </th>
-                <th class="end-date">
-                  {{ $t('productions.fields.end_date') }}
-                </th-->
-                <th class="remove"></th>
-              </tr>
-            </thead>
-            <draggable
-              v-model="taskListObject.list"
-              draggable=".task-type"
-              class="datatable-body"
-              tag="tbody"
-              @end="updatePriorities(taskListObject.list)"
-            >
-              <production-task-type
-                class="task-type"
-                :key="taskTypeData.taskType.id"
-                :task-type="taskTypeData.taskType"
-                :schedule-item="taskTypeData.scheduleItem"
-                @date-changed="onDateChanged"
-                @remove="removeTaskType"
-                v-for="taskTypeData in taskListObject.list"
-              />
-            </draggable>
-          </table>
-        </div>
-      </template>
+        <h2 class="section-title">
+          {{ taskListObject.title }}
+        </h2>
+        <table class="datatable list" v-if="taskListObject.list.length > 0">
+          <thead>
+            <tr>
+              <th class="name">
+                {{ $t('task_types.fields.name') }}
+              </th>
+              <!--th class="start-date">
+                {{ $t('productions.fields.start_date') }}
+              </th>
+              <th class="end-date">
+                {{ $t('productions.fields.end_date') }}
+              </th-->
+              <th class="remove"></th>
+            </tr>
+          </thead>
+          <draggable
+            v-model="taskListObject.list"
+            draggable=".task-type"
+            class="datatable-body"
+            tag="tbody"
+            @end="updatePriorities(taskListObject.list)"
+          >
+            <production-task-type
+              class="task-type"
+              :key="taskTypeData.taskType.id"
+              :task-type="taskTypeData.taskType"
+              :schedule-item="taskTypeData.scheduleItem"
+              @date-changed="onDateChanged"
+              @remove="removeTaskType"
+              v-for="taskTypeData in taskListObject.list"
+            />
+          </draggable>
+        </table>
+      </div>
     </div>
   </div>
 </template>
 <script>
-import async from 'async'
 import draggable from 'vuedraggable'
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
