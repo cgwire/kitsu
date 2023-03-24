@@ -281,10 +281,6 @@ textarea {
   padding: 0.5em;
 }
 
-.modal-content {
-  overflow: initial;
-}
-
 .comment-checklist {
   overflow-y: auto;
   max-height: 200px;
