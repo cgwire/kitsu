@@ -29,8 +29,8 @@
                 "ready_for": "Готово для"
             },
             "cancel_text": "Вы действительно хотите отправить в архив {name}?",
-            "delete_for_selection": "",
-            "multiple_delete_error": "",
+            "delete_for_selection": "Удалить выбранный ассет | Удалить {nbSelectedAssets} выбранных ассетов",
+            "multiple_delete_error": "Произошла ошибка при удалении ассета. Вероятно, есть какие-то данные, связанные с ним. Вы уверены, что с выбранным ассетом не связана задача?",
             "only_current_episode": "Только текущий эпизод"
         },
         "asset_types": {
@@ -45,9 +45,9 @@
             "production_title": "Статистика по Типам Ассетов",
             "fields": {
                 "name": "Название",
-                "task_types": ""
+                "task_types": "Workflow"
             },
-            "include_all": ""
+            "include_all": "Включить все типы задач"
         },
         "breakdown": {
             "all_assets": "Доступные ассеты",
@@ -63,11 +63,11 @@
             },
             "remove": {
                 "confirm": "Убрать ассеты из эпизода",
-                "error": "",
-                "text": ""
+                "error": "Произошла ошибка сервера при удалении ассета. Пожалуйста, попробуйте еще раз. Если проблема не устранена, обратитесь в нашу службу поддержки.",
+                "text": "Если вы удалите этот ресурс из выбранного эпизода, он удалит его во всех дочерних шотах. Вы уверены, что хотите удалить его?"
             },
             "fields": {
-                "standby": ""
+                "standby": "STDB"
             }
         },
         "comments": {
@@ -102,12 +102,12 @@
                 "acknowledgements": "Благодарности"
             },
             "checklist": "Чеклист",
-            "attachments": "",
-            "attachments_to_add": "",
-            "max_retakes_error": "",
-            "previews": "",
-            "selected_files": "",
-            "no_attachments": ""
+            "attachments": "Вложения",
+            "attachments_to_add": "Добавиь вложение",
+            "max_retakes_error": "Вы исчерпали лимит исправлений к этой задаче.",
+            "previews": "Файлы предпросмотров для публикации в новой ревизии",
+            "selected_files": "Выбранные файлы",
+            "no_attachments": "К этому комментарию нет вложений."
         },
         "custom_actions": {
             "create_error": "Ошибка при сохранении специального действия. Вы уверены, что нет действия с таким же названием?",
@@ -152,11 +152,11 @@
                 "with_thumbnail": "С ярлыком",
                 "without_thumbnail": "Без ярлыка",
                 "department": "Отдел",
-                "is_assets_ready": "",
-                "assets_ready": "",
-                "assets_not_ready": "",
-                "checked": "",
-                "not_checked": ""
+                "is_assets_ready": "Ресурсы готовы",
+                "assets_ready": "Готовы",
+                "assets_not_ready": "Не готовы",
+                "checked": "Проверено",
+                "not_checked": "Не проверено"
             },
             "thumbnails": {
                 "error": "Ошибка при загрузке ярлыков",
@@ -173,14 +173,14 @@
                 "upload": "Добавить Ярлыки"
             },
             "logs": {
-                "no_logs": ""
+                "no_logs": "Для этого объекта нет журналов."
             },
             "news": {
                 "no_news": "Для данной сущности нет новых событий."
             },
             "preview_files": {
                 "extension": "Расширение",
-                "no_preview_files": "",
+                "no_preview_files": "Для этого объекта нет файлов предварительного просмотра.",
                 "original_file_name": "Оригинальное название файла",
                 "position": "Позиция",
                 "revision": "Ревизия",
@@ -189,9 +189,9 @@
                 "task_type": "Тип задачи",
                 "uploader": "Кем загружено"
             },
-            "nb_selected_assets": "",
-            "nb_selected_shots": "",
-            "nb_selected_edits": ""
+            "nb_selected_assets": "{nbSelectedAssets} ресурс выделен | {nbSelectedAssets} ресурсов выделено",
+            "nb_selected_shots": "{nbSelectedShots} шот выделен | {nbSelectedShots} шотов выделено",
+            "nb_selected_edits": "{nbSelectedEdits} правка выделена | {nbSelectedEdits} правок выделено"
         },
         "estimation": {
             "title": "Оценка"
@@ -374,7 +374,7 @@
             "to": "Для",
             "workspace": "Рабочее пространство",
             "column_visibility": "Видимые столбцы",
-            "estimation": "",
+            "estimation": "Оценка",
             "estimation_short": "",
             "fps": "FPS",
             "frames": "Кадры",
@@ -383,9 +383,9 @@
             "show": "Показать",
             "stick": "Закрепить",
             "timeSpent": "",
-            "unstick": "",
+            "unstick": "Открепить",
             "all_edits": "Все правки",
-            "attach_snapshots": "",
+            "attach_snapshots": "ПРисоединить снимки",
             "reply": "Ответить",
             "select_file": "Выберите файл на локальном диске",
             "frame_in": "",
@@ -409,11 +409,11 @@
             "delete_tasks": "Удалить задачи",
             "run_custom_action": "Выполнить специальное действие",
             "set_estimations": "Оценить задачу",
-            "delete_assets": "",
-            "delete_shots": "",
+            "delete_assets": "Удалить ресурсы",
+            "delete_shots": "Удалить шоты",
             "delete_edits": "Удалить правки",
-            "generate_playlist": "",
-            "set_thumbnails": ""
+            "generate_playlist": "Создать плейлист",
+            "set_thumbnails": "Установить предпросмотр для последней версии"
         },
         "news": {
             "all": "Все",
@@ -445,7 +445,7 @@
             "with_preview": "с превью",
             "replied_on": "",
             "all_types": "",
-            "new_revision": "",
+            "new_revision": "Новая версия опубликована",
             "only_assignations": "",
             "only_comments": "",
             "only_mentions": "",
@@ -501,8 +501,8 @@
                 "vendor": "Вендор",
                 "supervisor": "Супервайзер"
             },
-            "confirm_edit": "",
-            "create": "",
+            "confirm_edit": "Сохранить изменения",
+            "create": "Создать пользователя",
             "user_limit_error": "",
             "change_password_for": "",
             "change_password_error": "",
@@ -600,13 +600,13 @@
                 "number_of_files": "Количество файлов для данной ревизии",
                 "max_duration": "Продолжительность видео",
                 "see_original_file": "Открыть файл в новой вкладке",
-                "overlay": "",
+                "overlay": "Overlay",
                 "side_by_side": "",
                 "switch_ld": "Переключить на низкое качество",
                 "switch_hd": "Переключить на высокое качество",
                 "frames_per_picture": "Кадры в секунду",
                 "toggle_playing_annotations": "Показать/скрыть аннотации при проигрывании видео",
-                "toggle_waveform": "",
+                "toggle_waveform": "Показать/Скрыть звуковую волну",
                 "annotation_erase": "",
                 "toggle_annotations": "",
                 "toggle_laser": ""
@@ -672,8 +672,8 @@
                 "short": "Видео",
                 "featurefilm": "Фильм",
                 "tvshow": "ТВ шоу",
-                "assets": "",
-                "shots": ""
+                "assets": "Ресурсы",
+                "shots": "Шоты"
             },
             "edit_error": "Произошла ошибка при редактировании проекта. Пожалуйста, свяжитесь с нашей службой поддержки.",
             "brief": {
@@ -689,7 +689,7 @@
             "creation": {
                 "add_assets": "Добавить ассет (необязательно)",
                 "add_asset_types": "Добавить типы ассетов",
-                "add_asset_types_description": "",
+                "add_asset_types_description": "Добавить описание типа ассетов",
                 "add_assets_button": "Добавить ассеты",
                 "add_assets_description": "",
                 "add_shots": "Добавить шоты (необязательно)",
@@ -732,8 +732,8 @@
                 "select_edit_task_type_description": ""
             },
             "style": {
-                "2d": "",
-                "3d": "",
+                "2d": "2D анимация",
+                "3d": "3D анимация",
                 "2d3d": "",
                 "ar": "",
                 "archviz": "",
@@ -1107,35 +1107,35 @@
                 "all_departments": "Все отделы",
                 "my_departments": "Мои отделы"
             },
-            "add_revision_confirm": "",
-            "confirm_attachments": "",
-            "change_status": "",
-            "clear_own_assignations": "",
-            "publish": "",
-            "all": "",
-            "assign_explaination": "",
-            "change_priority_to": "",
-            "change_task_status": "",
-            "due_date": "",
-            "due_after_today": "",
-            "due_before_today": "",
-            "due_next_week": "",
-            "due_next_month": "",
+            "add_revision_confirm": "Добавить файлы",
+            "confirm_attachments": "Добавить файлы как вложения",
+            "change_status": "Изменить статус",
+            "clear_own_assignations": "снять назначение",
+            "publish": "Опубликовать версию",
+            "all": "Все задачи",
+            "assign_explaination": "Выберите исполнителя",
+            "change_priority_to": "Новый приоритет:",
+            "change_task_status": "Изменить статус для выбранной задачи | Изменить статус для {nbSelectedTasks} выбранных задач",
+            "due_date": "Срок выполнения",
+            "due_after_today": "Истекает завтра",
+            "due_before_today": "Истекает сегодня",
+            "due_next_week": "Истекает на следующей неделе",
+            "due_next_month": "Истекает в следующем месяце",
             "due_previous_week": "",
             "due_previous_month": "",
             "due_this_month": "",
-            "estimation_over": "",
-            "estimation_approval_late": "",
-            "estimation_done_late": "",
-            "late": "",
-            "nb_selected_tasks": "",
-            "set_thumbnails_from_tasks": "",
-            "to_myself": "",
-            "create_tasks_episode": "",
-            "create_tasks_episode_explaination": "",
-            "create_tasks_episode_failed": "",
-            "clear_all_assignations": "",
-            "create_tasks_sequence": "",
+            "estimation_over": "Оценка продолжительности",
+            "estimation_approval_late": "Срок сдачи просрочен (отзыв)",
+            "estimation_done_late": "Срок сдачи опаздывает (сделано)",
+            "late": "Просрочено",
+            "nb_selected_tasks": "{nbSelectedTasks} задача выделена | {nbSelectedTasks} задач выделено",
+            "set_thumbnails_from_tasks": "Установить последний превью из выбранной задачи как миниатюру | Установить последние превью из выбранных задач в виде миниатюр",
+            "to_myself": "Назначить себе",
+            "create_tasks_episode": "Добавить задачи в текущие эпизоды",
+            "create_tasks_episode_explaination": "Вы собираетесь создать новую задачу для каждого эпизода текущего проекта для данного типа задачи. Хотите продолжить?",
+            "create_tasks_episode_failed": "Произошла ошибка сервера при создании.",
+            "clear_all_assignations": "убрать все назначения",
+            "create_tasks_sequence": "Добавить задачи для текущих последовательностей",
             "create_tasks_sequence_explaination": "",
             "create_tasks_sequence_failed": ""
         },
