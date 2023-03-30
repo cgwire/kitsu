@@ -284,104 +284,12 @@
               :key="'sticky-desc-' + asset.id + '-' + descriptor.id"
               v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
             >
-              <input
-                class="input-editor"
-                @input="
-                  event => onMetadataFieldChanged(asset, descriptor, event)
-                "
-                @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-                :value="getMetadataFieldValue(descriptor, asset)"
-                v-if="
-                  descriptor.choices.length === 0 &&
-                  (isCurrentUserManager ||
-                    isSupervisorInDepartments(descriptor.departments))
-                "
+              <metadata-input
+                :entity="asset"
+                :descriptor="descriptor"
+                :indexes="{ i, j, k }"
+                v-on="$listeners"
               />
-              <div
-                class="metadata-value selectable"
-                v-else-if="
-                  descriptor.choices.length > 0 &&
-                  getDescriptorChecklistValues(descriptor).length > 0
-                "
-              >
-                <p
-                  v-for="(option, i) in getDescriptorChecklistValues(
-                    descriptor
-                  )"
-                  :key="`${asset.id}-${descriptor.id}-${i}-${option.text}-div`"
-                >
-                  <input
-                    type="checkbox"
-                    @change="
-                      event =>
-                        onMetadataChecklistChanged(
-                          asset,
-                          descriptor,
-                          option.text,
-                          event
-                        )
-                    "
-                    :id="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
-                    :checked="
-                      getMetadataChecklistValues(descriptor, asset)[option.text]
-                    "
-                    :disabled="
-                      !(
-                        isCurrentUserManager ||
-                        isSupervisorInDepartments(descriptor.departments)
-                      )
-                    "
-                    :style="[
-                      isCurrentUserManager ||
-                      isSupervisorInDepartments(descriptor.departments)
-                        ? { cursor: 'pointer' }
-                        : { cursor: 'auto' }
-                    ]"
-                  />
-                  <label
-                    :for="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
-                    :style="[
-                      isCurrentUserManager ||
-                      isSupervisorInDepartments(descriptor.departments)
-                        ? { cursor: 'pointer' }
-                        : { cursor: 'auto' }
-                    ]"
-                  >
-                    {{ option.text }}
-                  </label>
-                </p>
-              </div>
-              <span
-                class="select"
-                v-else-if="
-                  isCurrentUserManager ||
-                  isSupervisorInDepartments(descriptor.departments)
-                "
-              >
-                <select
-                  class="select-input"
-                  @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-                  @change="
-                    event => onMetadataFieldChanged(asset, descriptor, event)
-                  "
-                >
-                  <option
-                    v-for="(option, i) in getDescriptorChoicesOptions(
-                      descriptor
-                    )"
-                    :key="`sticky-desc-value-${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
-                    :value="option.value"
-                    :selected="
-                      getMetadataFieldValue(descriptor, asset) === option.value
-                    "
-                  >
-                    {{ option.label }}
-                  </option>
-                </select>
-              </span>
-              <span class="metadata-value selectable" v-else>
-                {{ getMetadataFieldValue(descriptor, asset) }}
-              </span>
             </td>
 
             <validation-cell
@@ -425,7 +333,6 @@
               <combobox-task-type
                 class="mb0"
                 :value="asset.ready_for"
-                production-id="this.currentProduction.id"
                 :task-type-list="readyForTaskTypes"
                 :shy="true"
                 @input="taskTypeId => onReadyForChanged(asset, taskTypeId)"
@@ -472,104 +379,12 @@
               v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
               v-if="isShowInfos"
             >
-              <input
-                class="input-editor"
-                @input="
-                  event => onMetadataFieldChanged(asset, descriptor, event)
-                "
-                @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-                :value="getMetadataFieldValue(descriptor, asset)"
-                v-if="
-                  descriptor.choices.length === 0 &&
-                  (isCurrentUserManager ||
-                    isSupervisorInDepartments(descriptor.departments))
-                "
+              <metadata-input
+                :entity="asset"
+                :descriptor="descriptor"
+                :indexes="{ i, j, k }"
+                v-on="$listeners"
               />
-              <div
-                class="metadata-value selectable"
-                v-else-if="
-                  descriptor.choices.length > 0 &&
-                  getDescriptorChecklistValues(descriptor).length > 0
-                "
-              >
-                <p
-                  v-for="(option, i) in getDescriptorChecklistValues(
-                    descriptor
-                  )"
-                  :key="`${asset.id}-${descriptor.id}-${i}-${option.text}-div`"
-                >
-                  <input
-                    type="checkbox"
-                    @change="
-                      event =>
-                        onMetadataChecklistChanged(
-                          asset,
-                          descriptor,
-                          option.text,
-                          event
-                        )
-                    "
-                    :id="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
-                    :checked="
-                      getMetadataChecklistValues(descriptor, asset)[option.text]
-                    "
-                    :disabled="
-                      !(
-                        isCurrentUserManager ||
-                        isSupervisorInDepartments(descriptor.departments)
-                      )
-                    "
-                    :style="[
-                      isCurrentUserManager ||
-                      isSupervisorInDepartments(descriptor.departments)
-                        ? { cursor: 'pointer' }
-                        : { cursor: 'auto' }
-                    ]"
-                  />
-                  <label
-                    :for="`${asset.id}-${descriptor.id}-${i}-${option.text}-input`"
-                    :style="[
-                      isCurrentUserManager ||
-                      isSupervisorInDepartments(descriptor.departments)
-                        ? { cursor: 'pointer' }
-                        : { cursor: 'auto' }
-                    ]"
-                  >
-                    {{ option.text }}
-                  </label>
-                </p>
-              </div>
-              <span
-                class="select"
-                v-else-if="
-                  isCurrentUserManager ||
-                  isSupervisorInDepartments(descriptor.departments)
-                "
-              >
-                <select
-                  class="select-input"
-                  @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-                  @change="
-                    event => onMetadataFieldChanged(asset, descriptor, event)
-                  "
-                >
-                  <option
-                    v-for="(option, i) in getDescriptorChoicesOptions(
-                      descriptor
-                    )"
-                    :key="`desc-value-${asset.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
-                    :value="option.value"
-                    :selected="
-                      getMetadataFieldValue(descriptor, asset) === option.value
-                    "
-                  >
-                    {{ option.label }}
-                  </option>
-                </select>
-              </span>
-              <span class="metadata-value selectable" v-else>
-                {{ getMetadataFieldValue(descriptor, asset) }}
-              </span>
             </td>
 
             <validation-cell
@@ -670,6 +485,7 @@ import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import MetadataHeader from '@/components/cells/MetadataHeader'
+import MetadataInput from '@/components/cells/MetadataInput'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
 import TableInfo from '@/components/widgets/TableInfo'
@@ -692,6 +508,7 @@ export default {
     ComboboxTaskType,
     DescriptionCell,
     EntityThumbnail,
+    MetadataInput,
     MetadataHeader,
     RowActionsCell,
     TableInfo,
@@ -947,7 +764,7 @@ export default {
 
     onReadyForChanged(asset, taskTypeId) {
       if (this.selectedAssets.has(asset.id)) {
-        this.selectedAssets.forEach((asset, _) => {
+        this.selectedAssets.forEach(asset => {
           const data = { id: asset.id, ready_for: taskTypeId }
           this.$emit('asset-changed', data)
         })
@@ -1172,100 +989,20 @@ td.ready-for {
   max-width: 80vh;
 }
 
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
 // Metadata cell CSS
 
 td.metadata-descriptor {
   height: 3.1rem;
   padding: 0;
-}
-
-.dark {
-  th .input-editor,
-  td .select select,
-  td .input-editor {
-    color: $white;
-
-    option {
-      background: $dark-grey-light;
-      color: $white;
-    }
-
-    &:focus,
-    &:active,
-    &:hover {
-      background: $dark-grey-light;
-    }
-  }
-}
-
-th .input-editor,
-td .input-editor {
-  color: $grey-strong;
-  height: 100%;
-  padding: 0.5rem;
-  width: 100%;
-  background: transparent;
-  border: 1px solid transparent;
-  z-index: 100;
-
-  &:active,
-  &:focus,
-  &:hover {
-    background: transparent;
-    background: white;
-  }
-
-  &:active,
-  &:focus {
-    border: 1px solid $green;
-  }
-
-  &:hover {
-    border: 1px solid $light-green;
-  }
-}
-
-td .select {
-  color: $grey-strong;
-  margin: 0;
-  height: 100%;
-  width: 100%;
-  border: 1px solid transparent;
-
-  &::after {
-    border-color: transparent;
-  }
-
-  &:active,
-  &:focus,
-  &:hover {
-    &::after {
-      border-color: $green;
-    }
-  }
-
-  select {
-    color: $grey-strong;
-    height: 100%;
-    width: 100%;
-    background: transparent;
-    border-radius: 0;
-    border: 1px solid transparent;
-
-    &:focus {
-      border: 1px solid $green;
-      background: white;
-    }
-
-    &:hover {
-      background: transparent;
-      background: white;
-      border: 1px solid $light-green;
-    }
-  }
-}
-
-.metadata-value {
-  padding: 0.8rem;
 }
 </style>

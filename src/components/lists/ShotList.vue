@@ -316,104 +316,12 @@
               :key="shot.id + '-' + descriptor.id"
               v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
             >
-              <input
-                class="input-editor"
-                @input="
-                  event => onMetadataFieldChanged(shot, descriptor, event)
-                "
-                @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-                :value="getMetadataFieldValue(descriptor, shot)"
-                v-if="
-                  descriptor.choices.length === 0 &&
-                  (isCurrentUserManager ||
-                    isSupervisorInDepartments(descriptor.departments))
-                "
+              <metadata-input
+                :entity="shot"
+                :descriptor="descriptor"
+                :indexes="{ i, j, k }"
+                v-on="$listeners"
               />
-              <div
-                class="metadata-value selectable"
-                v-else-if="
-                  descriptor.choices.length > 0 &&
-                  getDescriptorChecklistValues(descriptor).length > 0
-                "
-              >
-                <p
-                  v-for="(option, i) in getDescriptorChecklistValues(
-                    descriptor
-                  )"
-                  :key="`${shot.id}-${descriptor.id}-${i}-${option.text}-div`"
-                >
-                  <input
-                    type="checkbox"
-                    @change="
-                      event =>
-                        onMetadataChecklistChanged(
-                          shot,
-                          descriptor,
-                          option.text,
-                          event
-                        )
-                    "
-                    :id="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
-                    :checked="
-                      getMetadataChecklistValues(descriptor, shot)[option.text]
-                    "
-                    :disabled="
-                      !(
-                        isCurrentUserManager ||
-                        isSupervisorInDepartments(descriptor.departments)
-                      )
-                    "
-                    :style="[
-                      isCurrentUserManager ||
-                      isSupervisorInDepartments(descriptor.departments)
-                        ? { cursor: 'pointer' }
-                        : { cursor: 'auto' }
-                    ]"
-                  />
-                  <label
-                    :for="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
-                    :style="[
-                      isCurrentUserManager ||
-                      isSupervisorInDepartments(descriptor.departments)
-                        ? { cursor: 'pointer' }
-                        : { cursor: 'auto' }
-                    ]"
-                  >
-                    {{ option.text }}
-                  </label>
-                </p>
-              </div>
-              <span
-                class="select"
-                v-else-if="
-                  isCurrentUserManager ||
-                  isSupervisorInDepartments(descriptor.departments)
-                "
-              >
-                <select
-                  class="select-input"
-                  @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-                  @change="
-                    event => onMetadataFieldChanged(shot, descriptor, event)
-                  "
-                >
-                  <option
-                    v-for="(option, i) in getDescriptorChoicesOptions(
-                      descriptor
-                    )"
-                    :key="`${shot.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
-                    :value="option.value"
-                    :selected="
-                      getMetadataFieldValue(descriptor, shot) === option.value
-                    "
-                  >
-                    {{ option.label }}
-                  </option>
-                </select>
-              </span>
-              <span class="metadata-value selectable" v-else>
-                {{ getMetadataFieldValue(descriptor, shot) }}
-              </span>
             </td>
 
             <validation-cell
@@ -663,105 +571,12 @@
               v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
               v-if="isShowInfos"
             >
-              <input
-                :ref="`editor-${getIndex(i, k)}-${j}`"
-                class="input-editor"
-                @input="
-                  event => onMetadataFieldChanged(shot, descriptor, event)
-                "
-                @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-                :value="getMetadataFieldValue(descriptor, shot)"
-                v-if="
-                  descriptor.choices.length === 0 &&
-                  (isCurrentUserManager ||
-                    isSupervisorInDepartments(descriptor.departments))
-                "
+              <metadata-input
+                :entity="shot"
+                :descriptor="descriptor"
+                :indexes="{ i, j, k }"
+                v-on="$listeners"
               />
-              <div
-                class="metadata-value selectable"
-                v-else-if="
-                  descriptor.choices.length > 0 &&
-                  getDescriptorChecklistValues(descriptor).length > 0
-                "
-              >
-                <p
-                  v-for="(option, i) in getDescriptorChecklistValues(
-                    descriptor
-                  )"
-                  :key="`${shot.id}-${descriptor.id}-${i}-${option.text}-div`"
-                >
-                  <input
-                    type="checkbox"
-                    @change="
-                      event =>
-                        onMetadataChecklistChanged(
-                          shot,
-                          descriptor,
-                          option.text,
-                          event
-                        )
-                    "
-                    :id="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
-                    :checked="
-                      getMetadataChecklistValues(descriptor, shot)[option.text]
-                    "
-                    :disabled="
-                      !(
-                        isCurrentUserManager ||
-                        isSupervisorInDepartments(descriptor.departments)
-                      )
-                    "
-                    :style="[
-                      isCurrentUserManager ||
-                      isSupervisorInDepartments(descriptor.departments)
-                        ? { cursor: 'pointer' }
-                        : { cursor: 'auto' }
-                    ]"
-                  />
-                  <label
-                    :for="`${shot.id}-${descriptor.id}-${i}-${option.text}-input`"
-                    :style="[
-                      isCurrentUserManager ||
-                      isSupervisorInDepartments(descriptor.departments)
-                        ? { cursor: 'pointer' }
-                        : { cursor: 'auto' }
-                    ]"
-                  >
-                    {{ option.text }}
-                  </label>
-                </p>
-              </div>
-              <span
-                class="select"
-                v-else-if="
-                  isCurrentUserManager ||
-                  isSupervisorInDepartments(descriptor.departments)
-                "
-              >
-                <select
-                  class="select-input"
-                  @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
-                  @change="
-                    event => onMetadataFieldChanged(shot, descriptor, event)
-                  "
-                >
-                  <option
-                    v-for="(option, i) in getDescriptorChoicesOptions(
-                      descriptor
-                    )"
-                    :key="`${shot.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
-                    :value="option.value"
-                    :selected="
-                      getMetadataFieldValue(descriptor, shot) === option.value
-                    "
-                  >
-                    {{ option.label }}
-                  </option>
-                </select>
-              </span>
-              <span class="metadata-value selectable" v-else>
-                {{ getMetadataFieldValue(descriptor, shot) }}
-              </span>
             </td>
 
             <validation-cell
@@ -869,6 +684,7 @@ import DescriptionCell from '@/components/cells/DescriptionCell'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark'
 import MetadataHeader from '@/components/cells/MetadataHeader'
+import MetadataInput from '@/components/cells/MetadataInput'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu'
 import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu'
@@ -893,6 +709,7 @@ export default {
     EntityThumbnail,
     InfoQuestionMark,
     MetadataHeader,
+    MetadataInput,
     RowActionsCell,
     TableHeaderMenu,
     TableMetadataHeaderMenu,
@@ -1488,49 +1305,5 @@ input[type='number'] {
 td.metadata-descriptor {
   height: 3.1rem;
   padding: 0;
-}
-
-td .select {
-  color: $grey-strong;
-  margin: 0;
-  height: 100%;
-  width: 100%;
-  border: 1px solid transparent;
-
-  &::after {
-    border-color: transparent;
-  }
-
-  &:active,
-  &:focus,
-  &:hover {
-    &::after {
-      border-color: $green;
-    }
-  }
-
-  select {
-    color: $grey-strong;
-    height: 100%;
-    width: 100%;
-    background: transparent;
-    border-radius: 0;
-    border: 1px solid transparent;
-
-    &:focus {
-      border: 1px solid $green;
-      background: white;
-    }
-
-    &:hover {
-      background: transparent;
-      background: white;
-      border: 1px solid $light-green;
-    }
-  }
-}
-
-.metadata-value {
-  padding: 0.8rem;
 }
 </style>

@@ -48,16 +48,14 @@
             <div
               class="field"
               v-if="
-                descriptor.choices.length > 0 &&
-                getDescriptorChecklistValues(descriptor).length > 0
+                descriptor.data_type === 'checklist' &&
+                getDescriptorChecklistValues(descriptor).length
               "
               :key="`${descriptor.id}-checklist-wrapper`"
             >
-              <label
-                class="label"
-                v-html="descriptor.name"
-                :key="`${descriptor.id}-${descriptor.name}`"
-              />
+              <label class="label" :key="`${descriptor.id}-${descriptor.name}`">
+                {{ descriptor.name }}</label
+              >
               <div
                 class="checkbox-wrapper"
                 v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
@@ -103,13 +101,20 @@
               </div>
             </div>
             <combobox
-              v-else-if="descriptor.choices.length > 0"
+              v-else-if="descriptor.data_type === 'list'"
               :label="descriptor.name"
               :options="getDescriptorChoicesOptions(descriptor)"
               v-model="form.data[descriptor.field_name]"
             />
+            <combobox-boolean
+              :label="descriptor.name"
+              @enter="runConfirmation"
+              v-model="form.data[descriptor.field_name]"
+              v-else-if="descriptor.data_type === 'boolean'"
+            />
             <text-field
               :label="descriptor.name"
+              :type="descriptor.data_type"
               v-model="form.data[descriptor.field_name]"
               @enter="runConfirmation"
               v-else
@@ -159,21 +164,23 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
-import { entityListMixin } from '@/components/mixins/entity_list'
 import { descriptorMixin } from '@/components/mixins/descriptors'
+import { entityListMixin } from '@/components/mixins/entity_list'
 
+import Combobox from '@/components/widgets/Combobox'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
 import TextField from '@/components/widgets/TextField'
 import TextareaField from '@/components/widgets/TextareaField'
-import Combobox from '@/components/widgets/Combobox'
 
 export default {
   name: 'edit-asset-modal',
-  mixins: [descriptorMixin, modalMixin, entityListMixin],
+  mixins: [descriptorMixin, entityListMixin, modalMixin],
 
   components: {
+    Combobox,
+    ComboboxBoolean,
     TextField,
-    TextareaField,
-    Combobox
+    TextareaField
   },
 
   props: {
@@ -259,7 +266,7 @@ export default {
     ...mapActions([]),
 
     onMetadataCheckboxChanged(descriptor, option, event) {
-      var values = {}
+      let values
       try {
         values = JSON.parse(this.form.data[descriptor.field_name])
       } catch {

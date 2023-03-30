@@ -239,51 +239,12 @@
               v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
               v-if="isShowInfos"
             >
-              <input
-                class="input-editor"
-                @input="
-                  event => onMetadataFieldChanged(sequence, descriptor, event)
-                "
-                @keyup.ctrl="event => onInputKeyUp(event, i, j)"
-                :value="getMetadataFieldValue(descriptor, sequence)"
-                v-if="
-                  descriptor.choices.length === 0 &&
-                  (isCurrentUserManager ||
-                    isSupervisorInDepartments(descriptor.departments))
-                "
+              <metadata-input
+                :entity="sequence"
+                :descriptor="descriptor"
+                :indexes="{ i, j }"
+                v-on="$listeners"
               />
-              <span
-                class="select"
-                v-else-if="
-                  isCurrentUserManager ||
-                  isSupervisorInDepartments(descriptor.departments)
-                "
-              >
-                <select
-                  class="select-input"
-                  @keyup.ctrl="event => onInputKeyUp(event, i, j)"
-                  @change="
-                    event => onMetadataFieldChanged(sequence, descriptor, event)
-                  "
-                >
-                  <option
-                    v-for="(option, i) in getDescriptorChoicesOptions(
-                      descriptor
-                    )"
-                    :key="`${sequence.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
-                    :value="option.value"
-                    :selected="
-                      getMetadataFieldValue(descriptor, sequence) ===
-                      option.value
-                    "
-                  >
-                    {{ option.label }}
-                  </option>
-                </select>
-              </span>
-              <span class="metadata-value selectable" v-else>
-                {{ getMetadataFieldValue(descriptor, sequence) }}
-              </span>
             </td>
 
             <validation-cell
@@ -335,51 +296,12 @@
               v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
               v-if="isShowInfos"
             >
-              <input
-                class="input-editor"
-                @input="
-                  event => onMetadataFieldChanged(sequence, descriptor, event)
-                "
-                @keyup.ctrl="event => onInputKeyUp(event, i, j)"
-                :value="getMetadataFieldValue(descriptor, sequence)"
-                v-if="
-                  descriptor.choices.length === 0 &&
-                  (isCurrentUserManager ||
-                    isSupervisorInDepartments(descriptor.departments))
-                "
+              <metadata-input
+                :entity="sequence"
+                :descriptor="descriptor"
+                :indexes="{ i, j }"
+                v-on="$listeners"
               />
-              <span
-                class="select"
-                v-else-if="
-                  isCurrentUserManager ||
-                  isSupervisorInDepartments(descriptor.departments)
-                "
-              >
-                <select
-                  class="select-input"
-                  @keyup.ctrl="event => onInputKeyUp(event, i, j)"
-                  @change="
-                    event => onMetadataFieldChanged(sequence, descriptor, event)
-                  "
-                >
-                  <option
-                    v-for="(option, i) in getDescriptorChoicesOptions(
-                      descriptor
-                    )"
-                    :key="`${sequence.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
-                    :value="option.value"
-                    :selected="
-                      getMetadataFieldValue(descriptor, sequence) ===
-                      option.value
-                    "
-                  >
-                    {{ option.label }}
-                  </option>
-                </select>
-              </span>
-              <span class="metadata-value selectable" v-else>
-                {{ getMetadataFieldValue(descriptor, sequence) }}
-              </span>
             </td>
 
             <td
@@ -491,6 +413,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import MetadataHeader from '@/components/cells/MetadataHeader'
+import MetadataInput from '@/components/cells/MetadataInput'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu'
 import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu'
@@ -555,6 +478,7 @@ export default {
     DescriptionCell,
     EntityThumbnail,
     MetadataHeader,
+    MetadataInput,
     RowActionsCell,
     TableHeaderMenu,
     TableMetadataHeaderMenu,
