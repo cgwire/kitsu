@@ -58,6 +58,7 @@ export default {
     episode_casting: 'Episode casting',
     label: 'Label',
     picture_mode: 'Switch to picture mode',
+    save_error: 'Error while saving casting',
     text_mode: 'Switch to text mode',
     title: 'Breakdown',
     options: {
