@@ -62,7 +62,7 @@ export const selectionListMixin = {
     },
 
     scrollToValidationCell(validationCell) {
-      if (validationCell) {
+      if (validationCell && this.nbSelectedTasks > 0) {
         this.$nextTick(() => {
           const margin = 20
           const sideColumn = document.getElementById('side-column')
@@ -78,8 +78,8 @@ export const selectionListMixin = {
           const listRect = this.$refs.body.getBoundingClientRect()
           const isBelow = rect.bottom > listRect.bottom - margin
           const isAbove = rect.top < listRect.top + margin
-          const isRight = rect.right > listRect.right - margin - sideWidth
-          const isLeft = rect.left < listRect.left + margin
+          const isRight = rect.x + rect.width > listRect.width
+          const isLeft = rect.x < stickyHeaderWidth + margin
 
           if (isBelow) {
             const scrollingRequired = rect.bottom - listRect.bottom + margin
@@ -94,17 +94,15 @@ export const selectionListMixin = {
           }
 
           if (isRight) {
-            const scrollingRequired = rect.left - stickyHeaderWidth - 60
-            this.$nextTick(() => {
-              this.setScrollLeftPosition(
-                this.$refs.body.scrollLeft + scrollingRequired
-              )
-            })
-          } else if (isLeft) {
-            const scrollingRequired = listRect.left - rect.left + margin
+            const scrollingRequired = rect.right - listRect.right + margin
             this.setScrollLeftPosition(
-              this.$refs.body.scrollLeft - scrollingRequired
+              this.$refs.body.scrollLeft + scrollingRequired
             )
+          } else if (isLeft) {
+            const scrollingRequired = stickyHeaderWidth - rect.left + 2 * margin
+            this.setScrollLeftPosition(
+               this.$refs.body.scrollLeft - scrollingRequired
+             )
           }
         })
       }

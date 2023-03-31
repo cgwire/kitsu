@@ -72,6 +72,7 @@
           @field-changed="onFieldChanged"
           @metadata-changed="onMetadataChanged"
           @scroll="saveScrollPosition"
+          @keep-task-panel-open="onKeepTaskPanelOpenChanged"
         />
       </div>
     </div>

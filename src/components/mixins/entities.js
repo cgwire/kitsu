@@ -7,6 +7,12 @@ import preferences from '@/lib/preferences'
 export const entitiesMixin = {
   created() {},
 
+  data () {
+    return {
+      keepTaskPanelOpen: false
+    }
+  },
+
   mounted() {
     const departmentId = preferences.getPreference(
       this.pageName + ':departement'
@@ -248,6 +254,10 @@ export const entitiesMixin = {
       this.modals.isBuildFilterDisplayed = false
       this.searchField.setValue(query)
       this.applySearch(query)
+    },
+
+    onKeepTaskPanelOpenChanged (keepOpen) {
+      this.keepTaskPanelOpen = keepOpen
     }
   },
 
