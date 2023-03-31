@@ -111,6 +111,7 @@ export default {
     return new Promise((resolve, reject) => {
       const data = {
         name: descriptor.name,
+        data_type: descriptor.data_type,
         choices: descriptor.values,
         for_client: descriptor.for_client === 'true',
         entity_type: descriptor.entity_type,
@@ -144,6 +145,7 @@ export default {
       const data = {
         id: descriptor.id,
         name: descriptor.name,
+        data_type: descriptor.data_type,
         choices: descriptor.values,
         for_client: descriptor.for_client === 'true',
         entity_type: descriptor.entity_type,

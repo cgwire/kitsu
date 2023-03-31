@@ -32,23 +32,15 @@
             v-model="form.description"
           />
 
-          <div
+          <metadata-field
             :key="descriptor.id"
+            :descriptor="descriptor"
+            :entity="sequenceToEdit"
+            @enter="runConfirmation"
+            v-model="form.data[descriptor.field_name]"
             v-for="descriptor in sequenceMetadataDescriptors"
-          >
-            <combobox
-              v-if="descriptor.choices.length > 0"
-              :label="descriptor.name"
-              :options="getDescriptorChoicesOptions(descriptor)"
-              v-model="form.data[descriptor.field_name]"
-            />
-            <text-field
-              :label="descriptor.name"
-              @enter="runConfirmation"
-              v-model="form.data[descriptor.field_name]"
-              v-else
-            />
-          </div>
+            v-if="sequenceToEdit"
+          />
         </form>
 
         <modal-footer
@@ -66,7 +58,8 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
-import Combobox from '@/components/widgets/Combobox'
+
+import MetadataField from '@/components/widgets/MetadataField'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '@/components/widgets/TextField'
 import TextareaField from '@/components/widgets/TextareaField'
@@ -74,8 +67,9 @@ import TextareaField from '@/components/widgets/TextareaField'
 export default {
   name: 'edit-sequence-modal',
   mixins: [modalMixin],
+
   components: {
-    Combobox,
+    MetadataField,
     ModalFooter,
     TextField,
     TextareaField
@@ -126,16 +120,11 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduction', 'sequenceMetadataDescriptors'])
+    ...mapGetters(['sequenceMetadataDescriptors'])
   },
 
   methods: {
     ...mapActions([]),
-
-    getDescriptorChoicesOptions(descriptor) {
-      const values = descriptor.choices.map(c => ({ label: c, value: c }))
-      return [{ label: '', value: '' }, ...values]
-    },
 
     runConfirmation() {
       this.confirmClicked()

@@ -41,37 +41,44 @@ export const descriptorMixin = {
     },
 
     onMetadataFieldChanged(entry, descriptor, event) {
+      let value
+      if (descriptor.data_type === 'boolean') {
+        value = event.target.checked ? 'true' : 'false'
+      } else {
+        value = event.target.value
+      }
+
       if (this.selectedShots.has(entry.id)) {
         // if the line is selected, also modify the cells of the other selected
         // lines.
-        this.selectedShots.forEach((shot, _) => {
-          this.emitMetadataChanged(shot, descriptor, event.target.value)
+        this.selectedShots.forEach(shot => {
+          this.emitMetadataChanged(shot, descriptor, value)
         })
       } else if (this.selectedAssets.has(entry.id)) {
         // if the line is selected, also modify the cells of the other selected
         // lines.
-        this.selectedAssets.forEach((asset, _) => {
-          this.emitMetadataChanged(asset, descriptor, event.target.value)
+        this.selectedAssets.forEach(asset => {
+          this.emitMetadataChanged(asset, descriptor, value)
         })
       } else if (this.selectedEdits.has(entry.id)) {
         // if the line is selected, also modify the cells of the other selected
         // lines.
-        this.selectedEdits.forEach((edit, _) => {
-          this.emitMetadataChanged(edit, descriptor, event.target.value)
+        this.selectedEdits.forEach(edit => {
+          this.emitMetadataChanged(edit, descriptor, value)
         })
       } else if (this.selectedEpisodes && this.selectedEpisodes.has(entry.id)) {
         // if the line is selected, also modify the cells of the other selected
         // lines.
-        this.selectedEpisodes.forEach((edit, _) => {
-          this.emitMetadataChanged(edit, descriptor, event.target.value)
+        this.selectedEpisodes.forEach(episode => {
+          this.emitMetadataChanged(episode, descriptor, value)
         })
       } else {
-        this.emitMetadataChanged(entry, descriptor, event.target.value)
+        this.emitMetadataChanged(entry, descriptor, value)
       }
     },
 
     onMetadataChecklistChanged(entry, descriptor, option, event) {
-      var values = this.getMetadataChecklistValues(descriptor, entry)
+      const values = this.getMetadataChecklistValues(descriptor, entry)
       values[option] = event.target.checked
       event.target.value = JSON.stringify(values)
       this.onMetadataFieldChanged(entry, descriptor, event)
@@ -150,7 +157,7 @@ export const descriptorMixin = {
     },
 
     getMetadataChecklistValues(descriptor, entity) {
-      var values = {}
+      let values
       try {
         values = JSON.parse(this.getMetadataFieldValue(descriptor, entity))
       } catch {

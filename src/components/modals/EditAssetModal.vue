@@ -41,80 +41,15 @@
             v-model="form.description"
             v-focus
           />
-          <div
+          <metadata-field
             :key="descriptor.id"
+            :descriptor="descriptor"
+            :entity="assetToEdit"
+            @enter="runConfirmation"
+            v-model="form.data[descriptor.field_name]"
             v-for="descriptor in assetMetadataDescriptors"
-          >
-            <div
-              class="field"
-              v-if="
-                descriptor.choices.length > 0 &&
-                getDescriptorChecklistValues(descriptor).length > 0
-              "
-              :key="`${descriptor.id}-checklist-wrapper`"
-            >
-              <label
-                class="label"
-                v-html="descriptor.name"
-                :key="`${descriptor.id}-${descriptor.name}`"
-              />
-              <div
-                class="checkbox-wrapper"
-                v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
-                :key="`${descriptor.id}-${i}-${option.text}-wrapper`"
-              >
-                <input
-                  type="checkbox"
-                  @change="
-                    event =>
-                      onMetadataCheckboxChanged(descriptor, option.text, event)
-                  "
-                  :id="`${descriptor.id}-${i}-${option.text}-checkbox`"
-                  :checked="
-                    getMetadataChecklistValues(descriptor, assetToEdit)[
-                      option.text
-                    ]
-                  "
-                  :disabled="
-                    !(
-                      isCurrentUserManager ||
-                      isSupervisorInDepartments(descriptor.departments)
-                    )
-                  "
-                  :style="[
-                    isCurrentUserManager ||
-                    isSupervisorInDepartments(descriptor.departments)
-                      ? { cursor: 'pointer' }
-                      : { cursor: 'auto' }
-                  ]"
-                />
-                <label
-                  class="checkbox-label"
-                  :for="`${descriptor.id}-${i}-${option.text}-checkbox`"
-                  :style="[
-                    isCurrentUserManager ||
-                    isSupervisorInDepartments(descriptor.departments)
-                      ? { cursor: 'pointer' }
-                      : { cursor: 'auto' }
-                  ]"
-                >
-                  <span>{{ option.text }}</span>
-                </label>
-              </div>
-            </div>
-            <combobox
-              v-else-if="descriptor.choices.length > 0"
-              :label="descriptor.name"
-              :options="getDescriptorChoicesOptions(descriptor)"
-              v-model="form.data[descriptor.field_name]"
-            />
-            <text-field
-              :label="descriptor.name"
-              v-model="form.data[descriptor.field_name]"
-              @enter="runConfirmation"
-              v-else
-            />
-          </div>
+            v-if="assetToEdit"
+          />
         </form>
 
         <div class="has-text-right">
@@ -159,21 +94,21 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
-import { entityListMixin } from '@/components/mixins/entity_list'
-import { descriptorMixin } from '@/components/mixins/descriptors'
 
+import Combobox from '@/components/widgets/Combobox'
+import MetadataField from '@/components/widgets/MetadataField'
 import TextField from '@/components/widgets/TextField'
 import TextareaField from '@/components/widgets/TextareaField'
-import Combobox from '@/components/widgets/Combobox'
 
 export default {
   name: 'edit-asset-modal',
-  mixins: [descriptorMixin, modalMixin, entityListMixin],
+  mixins: [modalMixin],
 
   components: {
+    Combobox,
+    MetadataField,
     TextField,
-    TextareaField,
-    Combobox
+    TextareaField
   },
 
   props: {
@@ -228,7 +163,6 @@ export default {
       'currentProduction',
       'currentEpisode',
       'episodes',
-      'isCurrentUserManager',
       'isTVShow',
       'productionAssetTypes',
       'productionAssetTypeOptions',
@@ -257,17 +191,6 @@ export default {
 
   methods: {
     ...mapActions([]),
-
-    onMetadataCheckboxChanged(descriptor, option, event) {
-      var values = {}
-      try {
-        values = JSON.parse(this.form.data[descriptor.field_name])
-      } catch {
-        values = {}
-      }
-      values[option] = event.target.checked
-      this.form.data[descriptor.field_name] = JSON.stringify(values)
-    },
 
     runConfirmation() {
       if (this.form.name.length > 0) {
@@ -366,20 +289,5 @@ export default {
 
 .info-message {
   margin-top: 1em;
-}
-
-.checkbox-wrapper {
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-}
-
-.checkbox-label {
-  display: inline-flex;
-  position: relative;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  white-space: normal;
-  cursor: pointer;
 }
 </style>

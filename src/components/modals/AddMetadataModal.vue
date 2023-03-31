@@ -9,31 +9,29 @@
 
     <div class="modal-content">
       <div class="box content">
-        <h1 class="title" v-if="descriptorToEdit.id">
-          {{ $t('productions.metadata.edit_title') }}
-        </h1>
-        <h1 class="title" v-else>
-          {{ $t('productions.metadata.title') }}
+        <h1 class="title">
+          {{
+            isEditing
+              ? $t('productions.metadata.edit_title')
+              : $t('productions.metadata.title')
+          }}
         </h1>
 
         <text-field
           ref="nameField"
           :label="$t('assets.fields.name')"
-          v-model="form.name"
+          v-model.trim="form.name"
           @enter="confirm"
-          v-focus
         />
 
         <combobox
-          ref="typeField"
           :label="$t('assets.fields.type')"
-          v-model="type"
+          v-model="form.data_type"
           :options="typeOptions"
           @enter="confirm"
-          v-focus
         />
 
-        <div v-if="type === 'choices'">
+        <div v-if="form.data_type === 'list'">
           <p class="strong">
             {{ $t('productions.metadata.available_values') }}
           </p>
@@ -41,12 +39,10 @@
           <div
             ref="valueList"
             class="choice-value-wrapper"
-            v-if="form.values.length > 0"
+            v-if="form.values.length"
           >
             <p class="choice-value" :key="value" v-for="value in form.values">
-              <span>
-                {{ value }}
-              </span>
+              <span>{{ value }}</span>
               <span
                 class="remove-button pull-right"
                 @click="removeValue(value)"
@@ -61,24 +57,22 @@
 
           <text-field
             ref="addChoiceField"
-            v-model="valueToAdd"
+            v-model.trim="valueToAdd"
             :button-label="$t('Add value')"
             @enter="addValue"
-            v-focus
           />
         </div>
 
-        <div v-if="type === 'checklist'">
+        <div v-if="form.data_type === 'checklist'">
           <p class="strong">
             {{ $t('productions.metadata.checklist') }}
           </p>
-
           <div class="checklist-wrapper">
             <checklist
               :checklist="checklist"
               @add-item="onAddChecklistItem"
               @remove-task="removeTask"
-              v-if="checklist.length > 0"
+              v-if="checklist.length"
             />
             <button-simple
               :class="{
@@ -88,16 +82,12 @@
               icon="plus"
               :title="$t('comments.add_checklist')"
               @click="addChecklistEntry(-1)"
-            >
-            </button-simple>
+            />
           </div>
         </div>
 
-        <div class="departments">
-          <label
-            class="label"
-            v-if="form.departments && form.departments.length > 0"
-          >
+        <div class="departments" v-if="form.departments?.length">
+          <label class="label">
             {{ $t('people.fields.departments') }}
           </label>
           <div
@@ -106,18 +96,14 @@
             @click="removeDepartment(departmentId)"
             v-for="departmentId in form.departments"
           >
-            <department-name
-              :department="departmentMap.get(departmentId)"
-              v-if="departmentId"
-            />
+            <department-name :department="departmentMap.get(departmentId)" />
           </div>
-          <div class="flexrow">
+          <div class="flexrow" v-if="selectableDepartments.length">
             <combobox-department
               class="flexrow-item"
               :selectable-departments="selectableDepartments"
               :max-height-select-input="160"
               v-model="selectedDepartment"
-              v-if="selectableDepartments.length > 0"
             />
             <button
               class="button is-success flexrow-item mb2"
@@ -125,7 +111,6 @@
                 'is-disabled': selectedDepartment === null
               }"
               @click="addDepartment"
-              v-if="selectableDepartments.length > 0"
             >
               {{ $t('main.add') }}
             </button>
@@ -137,11 +122,11 @@
           :label="$t('assets.fields.hidden_from_client')"
           v-model="form.for_client"
           @enter="confirm"
-          v-focus
         />
 
         <modal-footer
           :error-text="$t('productions.metadata.error')"
+          :is-error="isError"
           :is-loading="isLoading"
           :is-disabled="!isFormFilled"
           @confirm="confirm"
@@ -199,6 +184,10 @@ export default {
       type: Boolean,
       default: false
     },
+    errorText: {
+      type: String,
+      default: ''
+    },
     entityType: {
       type: String,
       default: 'Asset'
@@ -209,21 +198,29 @@ export default {
     return {
       form: {
         name: '',
+        data_type: 'string',
         for_client: 'false',
         values: [],
         departments: []
       },
       valueToAdd: '',
       checklist: [],
-      type: 'free',
       typeOptions: [
         {
-          label: this.$t('productions.metadata.free'),
-          value: 'free'
+          label: this.$t('productions.metadata.string'),
+          value: 'string'
+        },
+        {
+          label: this.$t('productions.metadata.number'),
+          value: 'number'
+        },
+        {
+          label: this.$t('productions.metadata.boolean'),
+          value: 'boolean'
         },
         {
           label: this.$t('productions.metadata.choices'),
-          value: 'choices'
+          value: 'list'
         },
         {
           label: this.$t('productions.metadata.checklist'),
@@ -247,6 +244,10 @@ export default {
       'isCurrentUserSupervisor',
       'user'
     ]),
+
+    isEditing() {
+      return Boolean(this.descriptorToEdit.id)
+    },
 
     selectableDepartments() {
       if (!this.currentProduction) return []
@@ -276,14 +277,14 @@ export default {
 
     isFormFilled() {
       return (
-        this.form.name.length > 0 &&
-        (this.type === 'free' ||
-          (this.form.values.length > 0 && this.type === 'choices') ||
-          (this.checklist.filter(x => x.text.trim() !== '').length > 0 &&
-            this.type === 'checklist')) &&
+        this.form.name.length &&
+        (['string', 'number', 'boolean'].includes(this.form.data_type) ||
+          (this.form.data_type === 'list' && this.form.values.length) ||
+          (this.form.data_type === 'checklist' &&
+            this.checklist?.[0]?.text.length)) &&
         (!this.isCurrentUserSupervisor ||
-          this.user.departments.length === 0 ||
-          this.form.departments.length > 0)
+          !this.user.departments.length ||
+          this.form.departments.length)
       )
     },
 
@@ -308,10 +309,11 @@ export default {
     },
 
     confirm() {
-      if (this.type === 'free') this.form.values = []
-      if (this.type === 'checklist') {
+      if (['string', 'number', 'boolean'].includes(this.form.data_type)) {
+        this.form.values = []
+      } else if (this.form.data_type === 'checklist') {
         this.form.values = this.checklist
-          .filter(value => value.text.trim() !== '')
+          .filter(Boolean)
           .map(x => (x.checked ? '[x] ' : '[ ] ') + x.text)
       }
       return this.$emit('confirm', this.form)
@@ -343,7 +345,6 @@ export default {
     },
 
     onAddChecklistItem(item) {
-      this.checklist[item.index].text = this.checklist[item.index].text.trim()
       delete item.index
       this.checklist.push(item)
     },
@@ -353,36 +354,29 @@ export default {
     },
 
     reset() {
-      this.form = {
-        name: '',
-        values: [],
-        departments: []
-      }
-      this.checklist = []
-      this.valueToAdd = ''
-      if (this.descriptorToEdit.name) {
+      if (this.isEditing) {
         this.form = {
           id: this.descriptorToEdit.id,
-          name: `${this.descriptorToEdit.name}`,
-          values: [...this.descriptorToEdit.choices],
+          name: this.descriptorToEdit.name,
+          data_type: this.descriptorToEdit.data_type,
           for_client: this.descriptorToEdit.for_client ? 'true' : 'false',
+          values: [...this.descriptorToEdit.choices],
           departments: [...this.descriptorToEdit.departments]
         }
         this.checklist = this.getDescriptorChecklistValues(
           this.descriptorToEdit
         )
-      }
-      if (this.form.values.length > 0) {
-        if (this.checklist.length === this.form.values.length) {
-          this.form.values = []
-          this.type = 'checklist'
-        } else {
-          this.checklist = []
-          this.type = 'choices'
-        }
       } else {
-        this.type = 'free'
+        this.form = {
+          name: '',
+          data_type: 'string',
+          for_client: 'false',
+          values: [],
+          departments: []
+        }
+        this.checklist = []
       }
+      this.valueToAdd = ''
     }
   },
 

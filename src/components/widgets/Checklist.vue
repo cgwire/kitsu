@@ -24,7 +24,7 @@
         @keyup.up.native="focusPrevious(index)"
         @keyup.down.native="focusNext(index)"
         :disabled="entry.text.length !== 0 && disabled"
-        v-model="entry.text"
+        v-model.trim="entry.text"
       ></textarea-autosize>
     </div>
   </div>

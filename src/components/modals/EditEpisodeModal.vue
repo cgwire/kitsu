@@ -40,23 +40,15 @@
             v-model="form.description"
           />
 
-          <div
+          <metadata-field
             :key="descriptor.id"
+            :descriptor="descriptor"
+            :entity="episodeToEdit"
+            @enter="runConfirmation"
+            v-model="form.data[descriptor.field_name]"
             v-for="descriptor in episodeMetadataDescriptors"
-          >
-            <combobox-styled
-              v-if="descriptor.choices.length > 0"
-              :label="descriptor.name"
-              :options="getDescriptorChoicesOptions(descriptor)"
-              v-model="form.data[descriptor.field_name]"
-            />
-            <text-field
-              :label="descriptor.name"
-              @enter="runConfirmation"
-              v-model="form.data[descriptor.field_name]"
-              v-else
-            />
-          </div>
+            v-if="episodeToEdit"
+          />
         </form>
 
         <modal-footer
@@ -76,6 +68,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
+import MetadataField from '@/components/widgets/MetadataField'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '@/components/widgets/TextField'
 import TextareaField from '@/components/widgets/TextareaField'
@@ -85,6 +78,7 @@ export default {
   mixins: [modalMixin],
   components: {
     ComboboxStyled,
+    MetadataField,
     ModalFooter,
     TextField,
     TextareaField
@@ -139,16 +133,11 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduction', 'episodeMetadataDescriptors'])
+    ...mapGetters(['episodeMetadataDescriptors'])
   },
 
   methods: {
     ...mapActions([]),
-
-    getDescriptorChoicesOptions(descriptor) {
-      const values = descriptor.choices.map(c => ({ label: c, value: c }))
-      return [{ label: '', value: '' }, ...values]
-    },
 
     runConfirmation() {
       this.$emit('confirm', this.form)

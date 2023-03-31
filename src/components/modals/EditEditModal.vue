@@ -37,23 +37,15 @@
             @keyup.ctrl.enter="runConfirmation"
             @keyup.meta.enter="runConfirmation"
           />
-          <div
+          <metadata-field
             :key="descriptor.id"
+            :descriptor="descriptor"
+            :entity="editToEdit"
+            @enter="runConfirmation"
+            v-model="form.data[descriptor.field_name]"
             v-for="descriptor in editMetadataDescriptors"
-          >
-            <combobox
-              v-if="descriptor.choices.length > 0"
-              :label="descriptor.name"
-              :options="getDescriptorChoicesOptions(descriptor)"
-              v-model="form.data[descriptor.field_name]"
-            />
-            <text-field
-              :label="descriptor.name"
-              v-model="form.data[descriptor.field_name]"
-              @enter="runConfirmation"
-              v-else
-            />
-          </div>
+            v-if="editToEdit"
+          />
         </form>
 
         <modal-footer
@@ -71,7 +63,9 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
+
 import Combobox from '@/components/widgets/Combobox'
+import MetadataField from '@/components/widgets/MetadataField'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '@/components/widgets/TextField'
 import TextareaField from '@/components/widgets/TextareaField'
@@ -82,6 +76,7 @@ export default {
 
   components: {
     Combobox,
+    MetadataField,
     ModalFooter,
     TextField,
     TextareaField
@@ -168,11 +163,6 @@ export default {
 
     confirmClicked() {
       this.$emit('confirm', this.form)
-    },
-
-    getDescriptorChoicesOptions(descriptor) {
-      const values = descriptor.choices.map(c => ({ label: c, value: c }))
-      return [{ label: '', value: '' }, ...values]
     },
 
     isEditing() {
