@@ -109,6 +109,7 @@
           @scroll="saveScrollPosition"
           @shot-history="showShotHistoryModal"
           @sequence-clicked="onSequenceClicked"
+          @keep-task-panel-open="onKeepTaskPanelOpenChanged"
         />
       </div>
     </div>

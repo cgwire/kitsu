@@ -103,6 +103,7 @@
           @restore-clicked="onRestoreClicked"
           @scroll="saveScrollPosition"
           @edit-history="showEditHistoryModal"
+          @keep-task-panel-open="onKeepTaskPanelOpenChanged"
         />
       </div>
     </div>

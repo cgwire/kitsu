@@ -100,6 +100,7 @@
           @field-changed="onFieldChanged"
           @scroll="saveScrollPosition"
           @asset-type-clicked="onAssetTypeClicked"
+          @keep-task-panel-open="onKeepTaskPanelOpenChanged"
         />
       </div>
     </div>
@@ -107,7 +108,7 @@
     <div
       id="side-column"
       class="column side-column"
-      v-show="nbSelectedTasks === 1"
+      v-show="nbSelectedTasks === 1 || this.keepTaskPanelOpen"
     >
       <task-info :task="selectedTasks.values().next().value" />
     </div>
@@ -316,8 +317,8 @@ export default {
       assetFilterTypes: ['Type'],
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
-      selectedDepartment: 'ALL',
       departmentFilter: [],
+      selectedDepartment: 'ALL',
       errors: {
         addMetadata: false,
         addThumbnails: false,

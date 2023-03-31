@@ -181,6 +181,7 @@ export const entityListMixin = {
         validationInfo = { ...validationInfo }
         validationInfo.y += columnOffset
       }
+      this.$emit('keep-task-panel-open', true)
       if (validationInfo.isShiftKey) {
         if (this.lastSelection) {
           let startX = this.lastSelection.x
@@ -244,6 +245,10 @@ export const entityListMixin = {
           this.scrollToValidationCell(validationCell)
         })
       }
+
+      this.$nextTick(() => {
+        this.$emit('keep-task-panel-open', false)
+      })
     },
 
     onTaskUnselected(validationInfo, sticked) {
