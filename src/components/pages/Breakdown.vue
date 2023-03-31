@@ -161,6 +161,7 @@
               :metadata-display-headers="metadataDisplayHeaders"
               :big-mode="isBigMode"
               :is-description="isDescription"
+              :is-save-error="saveErrors[entity.id]"
               @edit-label="onEditLabelClicked"
               @add-one="addOneAsset"
               @remove-one="removeOneAsset"
@@ -319,7 +320,6 @@ import moment from 'moment'
 import { range } from '@/lib/time'
 import csv from '@/lib/csv'
 import clipboard from '@/lib/clipboard'
-import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 import { entityListMixin } from '@/components/mixins/entity_list'
 
@@ -377,6 +377,7 @@ export default {
       optionalCsvColumns: ['Label'],
       parsedCSV: [],
       removalData: {},
+      saveErrors: {},
       selection: {},
       sequenceId: 'all',
       errors: {
@@ -803,7 +804,13 @@ export default {
             nbOccurences: 1,
             label: this.castingType === 'shot' ? 'animate' : 'fixed'
           })
-          this.saveCasting(entityId).then(this.setLock).catch(console.error)
+          delete this.saveErrors[entityId]
+          this.saveCasting(entityId)
+            .then(this.setLock)
+            .catch(err => {
+              this.saveErrors[entityId] = true
+              console.error(err)
+            })
         })
     },
 
@@ -813,7 +820,13 @@ export default {
         .filter(key => this.selection[key])
         .forEach(entityId => {
           this.addAssetToCasting({ entityId, assetId, nbOccurences: 10 })
-          this.saveCasting(entityId).then(this.setLock).catch(console.error)
+          delete this.saveErrors[entityId]
+          this.saveCasting(entityId)
+            .then(this.setLock)
+            .catch(err => {
+              this.saveErrors[entityId] = true
+              console.error(err)
+            })
         })
     },
 
@@ -828,16 +841,19 @@ export default {
     saveAssetRemoval(entityId, assetId, nbOccurences) {
       this.loading.remove = true
       this.removeAssetFromCasting({ entityId, assetId, nbOccurences })
+      delete this.saveErrors[entityId]
       this.saveCasting(entityId)
-        .then(this.setLock)
         .then(() => {
-          this.loading.remove = false
+          this.setLock()
           this.modals.isRemoveConfirmationDisplayed = false
         })
         .catch(err => {
+          this.saveErrors[entityId] = true
           this.errors.remove = true
-          this.loading.remove = false
           console.error(err)
+        })
+        .finally(() => {
+          this.loading.remove = false
         })
     },
 
@@ -1095,7 +1111,13 @@ export default {
           entityId,
           casting: castingToPaste
         })
-        this.saveCasting(entityId).then(this.setLock).catch(console.error)
+        delete this.saveErrors[entityId]
+        this.saveCasting(entityId)
+          .then(this.setLock)
+          .catch(err => {
+            this.saveErrors[entityId] = true
+            console.error(err)
+          })
       })
       return castingToPaste
     },

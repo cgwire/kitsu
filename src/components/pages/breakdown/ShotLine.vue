@@ -10,19 +10,24 @@
     }"
     @click="onClicked($event)"
   >
-    <div class="flexrow flexrow-item sticky">
-      <entity-thumbnail
-        class="flexrow-item mr1"
-        :entity="{}"
-        :height="bigMode ? 100 : 60"
-        :width="bigMode ? 150 : 90"
-        :empty-height="bigMode ? 100 : 60"
-        :empty-width="bigMode ? 150 : 90"
-        :preview-file-id="previewFileId"
-      />
-      <div class="shot-name flexrow-item ml05">
-        <div v-for="(chunk, index) in chunks" :key="`chunk-${index}`">
-          {{ chunk }}
+    <div class="flexrow-item sticky">
+      <p class="error has-text-left info-message" v-if="isSaveError">
+        {{ $t('breakdown.save_error') }}
+      </p>
+      <div class="flexrow">
+        <entity-thumbnail
+          class="flexrow-item mr1"
+          :entity="{}"
+          :height="bigMode ? 100 : 60"
+          :width="bigMode ? 150 : 90"
+          :empty-height="bigMode ? 100 : 60"
+          :empty-width="bigMode ? 150 : 90"
+          :preview-file-id="previewFileId"
+        />
+        <div class="shot-name flexrow-item ml05">
+          <div v-for="(chunk, index) in chunks" :key="`chunk-${index}`">
+            {{ chunk }}
+          </div>
         </div>
       </div>
     </div>
@@ -314,6 +319,10 @@ export default {
     },
     isDescription: {
       default: true,
+      type: Boolean
+    },
+    isSaveError: {
+      default: false,
       type: Boolean
     }
   },
