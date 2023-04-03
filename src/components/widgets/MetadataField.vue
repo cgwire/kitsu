@@ -46,7 +46,7 @@
   <!-- boolean field -->
   <combobox-boolean
     :label="descriptor.name"
-    :value="value"
+    :value="value === 'true' ? value : 'false'"
     @enter="onEnter"
     @input="updateValue"
     v-else-if="descriptor.data_type === 'boolean'"
