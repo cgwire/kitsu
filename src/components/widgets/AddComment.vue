@@ -389,6 +389,8 @@ export default {
         if (!this.showCommentArea) text = ''
         attachments = []
         checklist = []
+      } else {
+        checklist = checklist.filter(item => item.text.length)
       }
       text = replaceTimeWithTimecode(text, this.revision, this.time, this.fps)
       this.$emit('add-comment', text, attachments, checklist, taskStatusId)
@@ -404,7 +406,6 @@ export default {
     },
 
     onAddChecklistItem(item) {
-      this.checklist[item.index].text = this.checklist[item.index].text.trim()
       delete item.index
       this.checklist.push(item)
     },

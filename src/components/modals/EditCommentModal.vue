@@ -55,7 +55,11 @@
           </label>
           <checklist
             class="comment-checklist"
-            :checklist="form.checklist"
+            :checklist="
+              form.checklist.length
+                ? form.checklist
+                : [{ checked: false, text: '' }]
+            "
             @add-item="onAddChecklistItem"
             @remove-task="removeTask"
           />
@@ -192,12 +196,10 @@ export default {
         const result = {
           id: this.commentToEdit.id,
           ...this.form,
+          checklist: this.form.checklist.filter(item => item.text.length),
           newAttachmentFiles: this.attachmentFiles,
           attachmentFilesToDelete: this.attachmentFilesToDelete
         }
-        const isEmptyChecklist =
-          result.checklist.length === 1 && result.checklist[0].text === ''
-        if (isEmptyChecklist) result.checklist = []
         this.$emit('confirm', result)
       }
     },
@@ -246,8 +248,6 @@ export default {
     },
 
     onAddChecklistItem(item) {
-      this.form.checklist[item.index].text =
-        this.form.checklist[item.index].text.trim()
       delete item.index
       this.form.checklist.push(item)
     }
