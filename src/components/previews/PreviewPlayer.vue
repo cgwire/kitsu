@@ -1329,9 +1329,6 @@ export default {
           this.container.focus()
           this.pauseEvent(event)
           this.onPencilAnnotateClicked()
-        } else if (event.ctrlKey && event.altKey && event.keyCode === 68) {
-          // ctrl + alt + d
-          this.onPencileAnnotateClicked()
         } else if (event.ctrlKey && event.keyCode === 90) {
           // ctrl + z
           this.undoLastAction()
@@ -1651,12 +1648,6 @@ export default {
       }
     },
 
-    isTyping() {
-      if (this.isTyping) {
-        this.isAnnotationsDisplayed = true
-      }
-    },
-
     isOrdering() {
       this.$nextTick(() => {
         this.fixCanvasSize(this.getCurrentPreviewDimensions())
@@ -1666,6 +1657,9 @@ export default {
     },
 
     isTyping() {
+      if (this.isTyping) {
+        this.isAnnotationsDisplayed = true
+      }
       const clickarea =
         this.canvasWrapper.getElementsByClassName('upper-canvas')[0]
       if (this.isTyping && clickarea) {

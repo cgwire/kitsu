@@ -920,7 +920,6 @@ const mutations = {
 
   [LOAD_TASK_SUBSCRIBE_END](state, { taskId, subscribed }) {
     const task = state.taskMap.get(taskId)
-    console.log('setTask', subscribed)
     task.is_subscribed = subscribed
   },
 

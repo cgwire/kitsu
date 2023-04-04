@@ -682,7 +682,6 @@ import { selectionListMixin } from '@/components/mixins/selection'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import InfoQuestionMark from '@/components/widgets/InfoQuestionMark'
 import MetadataHeader from '@/components/cells/MetadataHeader'
 import MetadataInput from '@/components/cells/MetadataInput'
 import RowActionsCell from '@/components/cells/RowActionsCell'
@@ -707,7 +706,6 @@ export default {
     ButtonSimple,
     DescriptionCell,
     EntityThumbnail,
-    InfoQuestionMark,
     MetadataHeader,
     MetadataInput,
     RowActionsCell,
