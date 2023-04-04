@@ -31,6 +31,8 @@
             v-model="form.last_name"
           />
           <text-field
+            type="email"
+            :errored="form.email && !isValidEmail"
             :label="$t('people.fields.email')"
             :disabled="personToEdit.is_generated_from_ldap"
             @enter="confirmClicked()"
@@ -285,7 +287,7 @@ export default {
     confirmClicked() {
       const form = { ...this.form }
       form.active = this.form.active === 'true' || this.form.active === true
-      if (this.form.email) {
+      if (this.form.email && this.isValidEmail) {
         this.$emit('confirm', form)
       }
     },
