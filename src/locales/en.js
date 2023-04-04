@@ -519,7 +519,6 @@ export default {
     all: 'All',
     commented_on: 'commented on',
     infos: 'Infos',
-    no_news: 'There is no news for this production or for this filter.',
     only_comments: 'Only comments',
     only_previews: 'Only previews',
     hide_stats: 'Hide stats',

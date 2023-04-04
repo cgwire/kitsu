@@ -101,8 +101,8 @@ export const selectionListMixin = {
           } else if (isLeft) {
             const scrollingRequired = stickyHeaderWidth - rect.left + 2 * margin
             this.setScrollLeftPosition(
-               this.$refs.body.scrollLeft - scrollingRequired
-             )
+              this.$refs.body.scrollLeft - scrollingRequired
+            )
           }
         })
       }

@@ -7,7 +7,7 @@ import preferences from '@/lib/preferences'
 export const entitiesMixin = {
   created() {},
 
-  data () {
+  data() {
     return {
       keepTaskPanelOpen: false
     }
@@ -256,7 +256,7 @@ export const entitiesMixin = {
       this.applySearch(query)
     },
 
-    onKeepTaskPanelOpenChanged (keepOpen) {
+    onKeepTaskPanelOpenChanged(keepOpen) {
       this.keepTaskPanelOpen = keepOpen
     }
   },
