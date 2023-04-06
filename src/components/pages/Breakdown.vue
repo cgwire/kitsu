@@ -3,7 +3,7 @@
     <div class="breakdown-columns">
       <div class="breakdown-column casting-column">
         <div class="flexrow mb1">
-          <div class="" v-if="isEpisodeCasting">
+          <div v-if="isEpisodeCasting">
             <h2 class="subtitle mt05">
               {{ $t('breakdown.episode_casting') }}
             </h2>

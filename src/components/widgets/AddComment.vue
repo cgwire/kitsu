@@ -166,15 +166,13 @@
             v-if="mode === 'publish'"
           />
           <div class="filler"></div>
-          <div class="">
-            <combobox-status
-              class="flexrow-item status-selector"
-              :narrow="true"
-              :color-only="true"
-              :task-status-list="taskStatus"
-              v-model="task_status_id"
-            />
-          </div>
+          <combobox-status
+            class="flexrow-item status-selector"
+            :narrow="true"
+            :color-only="true"
+            :task-status-list="taskStatus"
+            v-model="task_status_id"
+          />
           <button-simple
             :class="{
               button: true,

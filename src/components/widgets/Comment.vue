@@ -28,7 +28,6 @@
           />
           <strong class="flexrow-item">
             <people-name
-              class=""
               :person="comment.person"
               v-if="!isCurrentUserClient || isAuthorClient"
             />
@@ -140,7 +139,6 @@
                     />
                     <strong class="flexrow-item">
                       <people-name
-                        class=""
                         :person="personMap.get(replyComment.person_id)"
                       />
                     </strong>
