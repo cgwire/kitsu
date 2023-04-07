@@ -166,15 +166,13 @@
             v-if="mode === 'publish'"
           />
           <div class="filler"></div>
-          <div class="">
-            <combobox-status
-              class="flexrow-item status-selector"
-              :narrow="true"
-              :color-only="true"
-              :task-status-list="taskStatus"
-              v-model="task_status_id"
-            />
-          </div>
+          <combobox-status
+            class="flexrow-item status-selector"
+            :narrow="true"
+            :color-only="true"
+            :task-status-list="taskStatus"
+            v-model="task_status_id"
+          />
           <button-simple
             :class="{
               button: true,
@@ -347,6 +345,7 @@ export default {
       'currentProduction',
       'isDarkTheme',
       'isCurrentUserArtist',
+      'isCurrentUserClient',
       'uploadProgress',
       'taskStatusForCurrentUser',
       'taskTypeMap',
@@ -413,7 +412,10 @@ export default {
     resetStatus() {
       if (this.task) {
         const taskStatus = this.taskStatusMap.get(this.task.task_status_id)
-        if (!this.isCurrentUserArtist || taskStatus.is_artist_allowed) {
+        if (
+          (!this.isCurrentUserArtist || taskStatus.is_artist_allowed) &&
+          (!this.isCurrentUserClient || taskStatus.is_client_allowed)
+        ) {
           this.task_status_id = this.task.task_status_id
         } else {
           this.task_status_id = this.taskStatusForCurrentUser[0].id

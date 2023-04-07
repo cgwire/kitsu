@@ -324,7 +324,7 @@
               v-show="isCurrentUserManager || isCurrentUserSupervisor"
             />
           </div>
-          <div class="" v-if="loading.assignation">
+          <div v-if="loading.assignation">
             <div class="flexrow-item">
               <spinner :size="20" class="spinner" />
             </div>
@@ -438,7 +438,7 @@
         </div>
 
         <div class="flexcolumn filler" v-if="selectedBar === 'subscribe'">
-          <div class="" v-if="loading.tasksSubscription">
+          <div v-if="loading.tasksSubscription">
             <div class="flexrow-item">
               <spinner :size="20" class="spinner" />
             </div>
