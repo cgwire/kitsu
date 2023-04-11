@@ -3,6 +3,7 @@ import peopleApi from '@/store/api/people'
 import shotsApi from '@/store/api/shots'
 import shotStore from '@/store/modules/shots'
 
+import func from '@/lib/func'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { buildSequenceIndex, indexSearch } from '@/lib/indexing'
 import {
@@ -417,6 +418,16 @@ const actions = {
 
   newSequence({ commit, dispatch, state, rootGetters }, sequence) {
     const episodeMap = rootGetters.episodeMap
+    const isTVShow = rootGetters.isTVShow
+    if (
+      cache.sequences.find(
+        seq =>
+          seq.name === sequence.name &&
+          (!isTVShow || seq.episode_id === sequence.episode_id)
+      )
+    ) {
+      return Promise.reject(new Error('Sequence already exsists'))
+    }
     return shotsApi.newSequence(sequence).then(sequence => {
       commit(NEW_SEQUENCE_END, { sequence, episodeMap })
       const taskTypeIds = rootGetters.productionSequenceTaskTypeIds
@@ -428,7 +439,8 @@ const actions = {
           type: 'sequences'
         })
       )
-      return Promise.all(createTaskPromises)
+      return func
+        .runPromiseAsSeries(createTaskPromises)
         .then(() => Promise.resolve(sequence))
         .catch(console.error)
     })

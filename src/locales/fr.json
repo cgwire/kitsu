@@ -1192,6 +1192,7 @@
         },
         "edits": {
             "all_edits": "Tous les montages",
+            "cancel_text": "Êtes-vous sûr de vouloir archiver {name} ?\n",
             "creation_explaination": "Envoyer un fichier de montage pour en créer un nouveau montage",
             "edit_error": "Une erreur est survenue en sauvegardant ce montage. Êtes vous sûr qu'il n'y a aucun montage avec un nom similaire ?",
             "delete_text": "Êtes vous sûr de vouloir supprimmer {name} de la base de données ?",

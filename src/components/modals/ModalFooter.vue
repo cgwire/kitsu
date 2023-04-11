@@ -16,7 +16,7 @@
         {{ cancelLabel || $t('main.cancel') }}
       </button>
     </p>
-    <p class="error mt1 has-text-right" v-if="isError">
+    <p class="error mt1 has-text-left" v-if="isError">
       {{ errorText }}
     </p>
   </div>

@@ -396,6 +396,16 @@ const actions = {
   },
 
   newEdit({ commit, dispatch, rootGetters }, edit) {
+    const isTVShow = rootGetters.isTVShow
+    if (
+      cache.edits.find(
+        ed =>
+          ed.name === edit.name &&
+          (!isTVShow || ed.parent_id === edit.parent_id)
+      )
+    ) {
+      return Promise.reject(new Error('Edit already exsists'))
+    }
     return editsApi.newEdit(edit).then(edit => {
       commit(NEW_EDIT_END, edit)
       const taskTypeIds = rootGetters.productionEditTaskTypeIds

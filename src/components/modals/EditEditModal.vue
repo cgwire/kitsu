@@ -49,7 +49,7 @@
         </form>
 
         <modal-footer
-          :error-text="$t('edits.edit_fail')"
+          :error-text="$t('edits.edit_error')"
           :is-loading="isLoading"
           :is-error="isError"
           @confirm="confirmClicked"

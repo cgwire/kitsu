@@ -84,15 +84,6 @@
       <task-info :task="selectedTasks.values().next().value" />
     </div>
 
-    <edit-episode-modal
-      :active="modals.isNewDisplayed"
-      :is-loading="loading.episode"
-      :is-error="errors.episode"
-      :episode-to-episode="episodeToEdit"
-      @cancel="modals.isNewDisplayed = false"
-      @confirm="confirmEditEpisode"
-    />
-
     <delete-modal
       ref="delete-episode-modal"
       :active="modals.isDeleteDisplayed"
@@ -283,18 +274,20 @@ export default {
         addThumbnails: false,
         creatingTasks: false,
         creatingTasksStay: false,
+        del: false,
         deleteAllTasks: false,
         deleteMetadata: false,
+        edit: false,
         episode: false,
-        del: false,
         importing: false,
         stay: false
       },
       errors: {
         addMetadata: false,
-        deleteMetadata: false,
         creatingTasks: false,
         deleteAllTasks: false,
+        deleteMetadata: false,
+        edit: false,
         importing: false,
         importingError: null
       }
@@ -586,7 +579,8 @@ export default {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
           })
-          .catch(() => {
+          .catch(err => {
+            console.error(err)
             this.loading.edit = false
             this.errors.edit = true
           })
@@ -597,7 +591,8 @@ export default {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
           })
-          .catch(() => {
+          .catch(err => {
+            console.error(err)
             this.loading.edit = false
             this.errors.edit = true
           })
