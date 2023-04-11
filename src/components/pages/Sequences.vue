@@ -87,8 +87,8 @@
 
     <edit-sequence-modal
       :active="modals.isNewDisplayed"
-      :is-loading="loading.sequence"
-      :is-error="errors.sequence"
+      :is-loading="loading.edit"
+      :is-error="errors.edit"
       :sequence-to-sequence="sequenceToEdit"
       @cancel="modals.isNewDisplayed = false"
       @confirm="confirmEditSequence"
@@ -592,7 +592,8 @@ export default {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
           })
-          .catch(() => {
+          .catch(err => {
+            console.error(err)
             this.loading.edit = false
             this.errors.edit = true
           })
@@ -606,7 +607,8 @@ export default {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
           })
-          .catch(() => {
+          .catch(err => {
+            console.error(err)
             this.loading.edit = false
             this.errors.edit = true
           })

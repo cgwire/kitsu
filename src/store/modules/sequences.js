@@ -417,6 +417,14 @@ const actions = {
 
   newSequence({ commit, dispatch, state, rootGetters }, sequence) {
     const episodeMap = rootGetters.episodeMap
+    if (
+      cache.sequences.find(
+        seq =>
+          seq.name === sequence.name && seq.episode_id === sequence.episode_id
+      )
+    ) {
+      return Promise.reject(new Error('Sequence already exsists'))
+    }
     return shotsApi.newSequence(sequence).then(sequence => {
       commit(NEW_SEQUENCE_END, { sequence, episodeMap })
       const taskTypeIds = rootGetters.productionSequenceTaskTypeIds
