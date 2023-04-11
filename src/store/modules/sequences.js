@@ -418,10 +418,12 @@ const actions = {
 
   newSequence({ commit, dispatch, state, rootGetters }, sequence) {
     const episodeMap = rootGetters.episodeMap
+    const isTVShow = rootGetters.isTVShow
     if (
       cache.sequences.find(
         seq =>
-          seq.name === sequence.name && seq.episode_id === sequence.episode_id
+          seq.name === sequence.name &&
+          (!isTVShow || seq.episode_id === sequence.episode_id)
       )
     ) {
       return Promise.reject(new Error('Sequence already exsists'))

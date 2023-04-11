@@ -85,15 +85,6 @@
       <task-info :task="selectedTasks.values().next().value" />
     </div>
 
-    <edit-sequence-modal
-      :active="modals.isNewDisplayed"
-      :is-loading="loading.edit"
-      :is-error="errors.edit"
-      :sequence-to-sequence="sequenceToEdit"
-      @cancel="modals.isNewDisplayed = false"
-      @confirm="confirmEditSequence"
-    />
-
     <delete-modal
       ref="delete-sequence-modal"
       :active="modals.isDeleteDisplayed"
@@ -293,9 +284,10 @@ export default {
       },
       errors: {
         addMetadata: false,
-        deleteMetadata: false,
         creatingTasks: false,
         deleteAllTasks: false,
+        deleteMetadata: false,
+        edit: false,
         importing: false,
         importingError: null
       }
@@ -585,7 +577,6 @@ export default {
     confirmEditSequence(form) {
       this.loading.edit = true
       this.errors.edit = false
-
       if (form.id) {
         this.editSequence(form)
           .then(() => {
