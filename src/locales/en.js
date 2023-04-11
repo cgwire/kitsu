@@ -1024,6 +1024,7 @@ export default {
 
   edits: {
     all_edits: 'All edits',
+    cancel_text: 'Are you sure you want to archive {name}?',
     creation_explaination: 'Upload an edit file to create a new edit',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this edit. There are probably data linked to it.',
