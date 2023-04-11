@@ -275,11 +275,12 @@ export default {
         addThumbnails: false,
         creatingTasks: false,
         creatingTasksStay: false,
+        del: false,
         deleteAllTasks: false,
         deleteMetadata: false,
-        sequence: false,
-        del: false,
+        edit: false,
         importing: false,
+        sequence: false,
         stay: false
       },
       errors: {
