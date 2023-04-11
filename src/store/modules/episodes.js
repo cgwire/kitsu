@@ -3,6 +3,7 @@ import peopleApi from '@/store/api/people'
 import shotsApi from '@/store/api/shots'
 import shotStore from '@/store/modules/shots'
 
+import func from '@/lib/func'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { buildEpisodeIndex, indexSearch } from '@/lib/indexing'
 import {
@@ -419,9 +420,12 @@ const actions = {
   },
 
   newEpisode({ commit, dispatch, state, rootGetters }, episode) {
+    if (cache.episodes.find(ep => ep.name === episode.name)) {
+      return Promise.reject(new Error('Episode already exsists'))
+    }
     return shotsApi.newEpisode(episode).then(episode => {
       commit(NEW_EPISODE_END, episode)
-      const taskTypeIds = rootGetters.productionSequenceTaskTypeIds
+      const taskTypeIds = rootGetters.productionEpisodeTaskTypeIds
       const createTaskPromises = taskTypeIds.map(taskTypeId =>
         dispatch('createTask', {
           entityId: episode.id,
@@ -430,7 +434,8 @@ const actions = {
           type: 'episodes'
         })
       )
-      return Promise.all(createTaskPromises)
+      return func
+        .runPromiseAsSeries(createTaskPromises)
         .then(() => Promise.resolve(episode))
         .catch(console.error)
     })

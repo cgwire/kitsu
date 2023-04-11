@@ -87,8 +87,8 @@
 
     <edit-episode-modal
       :active="modals.isNewDisplayed"
-      :is-loading="loading.episode"
-      :is-error="errors.episode"
+      :is-loading="loading.edit"
+      :is-error="errors.edit"
       :episode-to-episode="episodeToEdit"
       @cancel="modals.isNewDisplayed = false"
       @confirm="confirmEditEpisode"
@@ -587,7 +587,8 @@ export default {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
           })
-          .catch(() => {
+          .catch(err => {
+            console.error(err)
             this.loading.edit = false
             this.errors.edit = true
           })

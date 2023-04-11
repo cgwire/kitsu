@@ -586,7 +586,8 @@ export default {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
           })
-          .catch(() => {
+          .catch(err => {
+            console.error(err)
             this.loading.edit = false
             this.errors.edit = true
           })
@@ -597,7 +598,8 @@ export default {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
           })
-          .catch(() => {
+          .catch(err => {
+            console.error(err)
             this.loading.edit = false
             this.errors.edit = true
           })
