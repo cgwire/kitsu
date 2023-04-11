@@ -3,6 +3,7 @@ import peopleApi from '@/store/api/people'
 import shotsApi from '@/store/api/shots'
 import shotStore from '@/store/modules/shots'
 
+import func from '@/lib/func'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { buildSequenceIndex, indexSearch } from '@/lib/indexing'
 import {
@@ -436,7 +437,8 @@ const actions = {
           type: 'sequences'
         })
       )
-      return Promise.all(createTaskPromises)
+      return func
+        .runPromiseAsSeries(createTaskPromises)
         .then(() => Promise.resolve(sequence))
         .catch(console.error)
     })
