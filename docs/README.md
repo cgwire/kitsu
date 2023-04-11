@@ -46,7 +46,7 @@ In this section, we will give more information about Kitsu main modules:
 * [Schedules](Schedules/README.md): Everything you need to know to setup your schedules  
 * [Batch Actions](batch-action/README.md): Run several actions in a click, let Kitsu work for you
 * [Playlists](playlist/README.md): Gather video versions in a glimpse and stay focus during the review 
-* [Deparment](department/README.md): Define your main departments and show ligther tables to your teams
+* [Department](department/README.md): Define your main departments and show ligther tables to your teams
   
 
 ## Tutorials

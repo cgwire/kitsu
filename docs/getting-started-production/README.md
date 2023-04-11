@@ -37,7 +37,7 @@ creating the production. You will be able to add them to your production later.
 
 See the **Customization** section for more details.
 
-[Pipeline Customization](../customization-pipelinen/README.md#task-type)
+[Pipeline Customization](../customization-pipeline/README.md#task-type)
 
 ## Introduction to Kitsu global page
 
