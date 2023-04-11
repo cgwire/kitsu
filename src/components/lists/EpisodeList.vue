@@ -19,7 +19,7 @@
           isMetadataColumnEditAllowed(lastMetadaDataHeaderMenuDisplayed)
         "
         :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
-        @edit-clicked="onEpisodeMetadataClicked()"
+        @edit-clicked="onEditMetadataClicked()"
         @delete-clicked="onDeleteMetadataClicked()"
         @sort-by-clicked="onSortByMetadataClicked()"
         @toggle-stick="metadataStickColumnClicked($event)"
