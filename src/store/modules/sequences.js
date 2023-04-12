@@ -56,6 +56,7 @@ import {
   SET_SEQUENCES_WITH_TASKS,
   UNLOCK_SEQUENCE,
   UPDATE_SEQUENCE,
+  UPDATE_METADATA_DESCRIPTOR_END,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -1019,6 +1020,24 @@ const mutations = {
   [UNLOCK_SEQUENCE](state, sequence) {
     sequence = state.sequenceMap.get(sequence.id)
     if (sequence) sequence.lock = false
+  },
+
+  [UPDATE_METADATA_DESCRIPTOR_END](
+    state,
+    { descriptor, previousDescriptorFieldName }
+  ) {
+    if (
+      descriptor.entity_type === 'Sequence' &&
+      previousDescriptorFieldName &&
+      previousDescriptorFieldName !== descriptor.field_name
+    ) {
+      cache.sequences.forEach(sequence => {
+        const data = { ...sequence.data }
+        data[descriptor.field_name] = data[previousDescriptorFieldName]
+        delete data[previousDescriptorFieldName]
+        sequence.data = data
+      })
+    }
   }
 }
 

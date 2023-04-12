@@ -1148,9 +1148,10 @@ const mutations = {
       previousDescriptorFieldName !== descriptor.field_name
     ) {
       cache.assets.forEach(asset => {
-        asset.data[descriptor.field_name] =
-          asset.data[previousDescriptorFieldName]
-        delete asset.data[previousDescriptorFieldName]
+        const data = { ...asset.data }
+        data[descriptor.field_name] = data[previousDescriptorFieldName]
+        delete data[previousDescriptorFieldName]
+        asset.data = data
       })
     }
   },

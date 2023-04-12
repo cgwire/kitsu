@@ -49,6 +49,7 @@ import {
   SET_EPISODE_STATS,
   SET_EPISODES_WITH_TASKS,
   UPDATE_EPISODE,
+  UPDATE_METADATA_DESCRIPTOR_END,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -950,6 +951,20 @@ const mutations = {
         episodeTaskId => episodeTaskId === task.id
       )
       episode.tasks.splice(taskIndex, 1)
+    }
+  },
+
+  [UPDATE_METADATA_DESCRIPTOR_END](
+    state,
+    { descriptor, previousDescriptorFieldName }
+  ) {
+    if (descriptor.entity_type === 'Episode' && previousDescriptorFieldName) {
+      cache.episodes.forEach(episode => {
+        const data = { ...episode.data }
+        data[descriptor.field_name] = data[previousDescriptorFieldName]
+        delete data[previousDescriptorFieldName]
+        episode.data = data
+      })
     }
   }
 }
