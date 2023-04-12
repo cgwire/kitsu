@@ -1076,9 +1076,10 @@ const mutations = {
   ) {
     if (descriptor.entity_type === 'Edit' && previousDescriptorFieldName) {
       cache.edits.forEach(edit => {
-        edit.data[descriptor.field_name] =
-          edit.data[previousDescriptorFieldName]
-        delete edit.data[previousDescriptorFieldName]
+        const data = { ...edit.data }
+        data[descriptor.field_name] = data[previousDescriptorFieldName]
+        delete data[previousDescriptorFieldName]
+        edit.data = data
       })
     }
   },
