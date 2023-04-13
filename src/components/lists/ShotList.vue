@@ -1200,10 +1200,6 @@ td.sequence {
   font-size: 1.2em;
 }
 
-td.input-editor.error {
-  color: $red;
-}
-
 span.thumbnail-empty {
   display: block;
   width: 50px;
@@ -1283,6 +1279,7 @@ td .input-editor {
     border: 1px solid $light-green;
   }
 
+  &:invalid,
   &.error {
     color: $red;
   }

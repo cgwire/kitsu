@@ -935,6 +935,10 @@ td .input-editor {
   &:hover {
     border: 1px solid $light-green;
   }
+
+  &:invalid {
+    color: $red;
+  }
 }
 
 input[type='number']::-webkit-outer-spin-button,

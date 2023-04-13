@@ -182,6 +182,10 @@ export default {
   &:hover {
     border: 1px solid $light-green;
   }
+
+  &:invalid {
+    color: $red;
+  }
 }
 
 .select {
