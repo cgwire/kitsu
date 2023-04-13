@@ -23,7 +23,7 @@
         :maxlength="maxlength"
         min="0"
         :max="max || undefined"
-        :step="step || undefined"
+        :step="step || 'any'"
         :readonly="readonly"
         @input="updateValue()"
         @keyup.enter="emitEnter()"

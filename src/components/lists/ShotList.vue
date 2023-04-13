@@ -511,6 +511,7 @@
                 :value="
                   getMetadataFieldValue({ field_name: 'max_retakes' }, shot)
                 "
+                @keydown="onNumberFieldKeyDown"
                 @input="
                   event =>
                     onMetadataFieldChanged(
