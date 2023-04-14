@@ -52,7 +52,6 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import { formatListMixin } from '@/components/mixins/format'
 
 import RowActionsCell from '@/components/cells/RowActionsCell'
@@ -83,15 +82,6 @@ export default {
   components: {
     RowActionsCell,
     TableInfo
-  },
-  computed: {
-    ...mapGetters([])
-  },
-  methods: {
-    ...mapActions([]),
-    renderForShots(entry) {
-      return this.$tc(`${entry.toLowerCase()}.title`)
-    }
   }
 }
 </script>
@@ -120,9 +110,5 @@ export default {
 .is-ajax {
   width: 150px;
   min-width: 150px;
-}
-
-.thead {
-  width: 100%;
 }
 </style>
