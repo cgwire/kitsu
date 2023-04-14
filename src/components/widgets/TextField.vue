@@ -21,9 +21,9 @@
         :value="value"
         :disabled="disabled"
         :maxlength="maxlength"
-        min="0"
+        :min="min"
         :max="max || undefined"
-        :step="step || undefined"
+        :step="step || 'any'"
         :readonly="readonly"
         @input="updateValue()"
         @keyup.enter="emitEnter()"
@@ -72,6 +72,10 @@ export default {
     buttonLabel: {
       default: '',
       type: String
+    },
+    min: {
+      default: 0,
+      type: Number
     },
     max: {
       type: Number
@@ -157,6 +161,7 @@ button {
   font-size: 1.2em;
 }
 
+.input:invalid,
 .input.errored {
   border-color: $red;
 }

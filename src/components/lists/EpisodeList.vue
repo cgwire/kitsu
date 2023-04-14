@@ -791,6 +791,10 @@ td .input-editor {
   &:hover {
     border: 1px solid $light-green;
   }
+
+  &:invalid {
+    color: $red;
+  }
 }
 
 input[type='number']::-webkit-outer-spin-button,
@@ -852,72 +856,5 @@ td .select {
 
 .metadata-value {
   padding: 0.8rem;
-}
-
-th .input-editor,
-td .input-editor {
-  color: $grey-strong;
-  height: 100%;
-  padding: 0.5rem;
-  width: 100%;
-  background: transparent;
-  border: 1px solid transparent;
-  z-index: 100;
-
-  &:active,
-  &:focus,
-  &:hover {
-    background: transparent;
-    background: white;
-  }
-
-  &:active,
-  &:focus {
-    border: 1px solid $green;
-  }
-
-  &:hover {
-    border: 1px solid $light-green;
-  }
-}
-
-td .select {
-  color: $grey-strong;
-  margin: 0;
-  height: 100%;
-  width: 100%;
-  border: 1px solid transparent;
-
-  &::after {
-    border-color: transparent;
-  }
-
-  &:active,
-  &:focus,
-  &:hover {
-    &::after {
-      border-color: $green;
-    }
-  }
-
-  select {
-    color: $grey-strong;
-    height: 100%;
-    width: 100%;
-    background: transparent;
-    border-radius: 0;
-    border: 1px solid transparent;
-
-    &:focus {
-      border: 1px solid $green;
-      background: white;
-    }
-
-    &:hover {
-      background: transparent;
-      background: white;
-      border: 1px solid $light-green;
-    }
-  }
 }
 </style>

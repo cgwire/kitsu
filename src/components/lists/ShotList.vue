@@ -479,6 +479,7 @@
             >
               <input
                 class="input-editor"
+                min="0"
                 step="1"
                 type="number"
                 :value="getMetadataFieldValue({ field_name: 'fps' }, shot)"
@@ -511,6 +512,7 @@
                 :value="
                   getMetadataFieldValue({ field_name: 'max_retakes' }, shot)
                 "
+                @keydown="onNumberFieldKeyDown"
                 @input="
                   event =>
                     onMetadataFieldChanged(
@@ -1200,10 +1202,6 @@ td.sequence {
   font-size: 1.2em;
 }
 
-td.input-editor.error {
-  color: $red;
-}
-
 span.thumbnail-empty {
   display: block;
   width: 50px;
@@ -1283,6 +1281,7 @@ td .input-editor {
     border: 1px solid $light-green;
   }
 
+  &:invalid,
   &.error {
     color: $red;
   }

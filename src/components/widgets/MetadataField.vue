@@ -56,6 +56,7 @@
     :label="descriptor.name"
     :type="descriptor.data_type"
     :value="value"
+    :min="null"
     @enter="onEnter"
     @input="updateValue"
     v-else

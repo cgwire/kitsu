@@ -1,5 +1,5 @@
 <template>
-  <!-- number or text input-->
+  <!-- text input -->
   <input
     class="input-editor"
     @input="event => onMetadataFieldChanged(entity, descriptor, event)"
@@ -11,12 +11,28 @@
           indexes.j
         )
     "
-    :type="descriptor.data_type === 'number' ? 'number' : 'text'"
     :value="getMetadataFieldValue(descriptor, entity)"
     v-if="
-      !descriptor.data_type ||
-      (['string', 'number'].includes(descriptor.data_type) && isEditable)
+      !descriptor.data_type || (descriptor.data_type === 'string' && isEditable)
     "
+  />
+  <!-- number input -->
+  <input
+    class="input-editor"
+    type="number"
+    step="any"
+    @keydown="onNumberFieldKeyDown"
+    @input="event => onMetadataFieldChanged(entity, descriptor, event)"
+    @keyup.ctrl="
+      event =>
+        onInputKeyUp(
+          event,
+          indexes.k ? getIndex(indexes.i, indexes.k) : indexes.i,
+          indexes.j
+        )
+    "
+    :value="getMetadataFieldValue(descriptor, entity)"
+    v-else-if="descriptor.data_type === 'number' && isEditable"
   />
   <!-- boolean input -->
   <input
@@ -101,11 +117,12 @@
 <script>
 import { mapGetters } from 'vuex'
 import { descriptorMixin } from '@/components/mixins/descriptors'
+import { domMixin } from '@/components/mixins/dom'
 import { entityListMixin } from '@/components/mixins/entity_list'
 
 export default {
   name: 'MetadataInput',
-  mixins: [entityListMixin, descriptorMixin],
+  mixins: [descriptorMixin, domMixin, entityListMixin],
   props: {
     entity: {
       type: Object,
@@ -181,6 +198,10 @@ export default {
 
   &:hover {
     border: 1px solid $light-green;
+  }
+
+  &:invalid {
+    color: $red;
   }
 }
 

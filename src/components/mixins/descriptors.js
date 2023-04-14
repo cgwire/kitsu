@@ -41,6 +41,10 @@ export const descriptorMixin = {
     },
 
     onMetadataFieldChanged(entry, descriptor, event) {
+      if (!event.target.validity.valid) {
+        return
+      }
+
       let value
       if (descriptor.data_type === 'boolean') {
         value = event.target.checked ? 'true' : 'false'
