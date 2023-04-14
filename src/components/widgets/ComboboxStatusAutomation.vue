@@ -175,6 +175,7 @@ export default {
 .status-automation-combo {
   background: $white;
   border: 1px solid $light-grey-light;
+  border-radius: 1em;
   user-select: none;
   cursor: pointer;
   margin: 0;
@@ -220,11 +221,14 @@ export default {
   background: $white;
   position: absolute;
   border: 1px solid $light-grey-light;
+  border-bottom-left-radius: 1em;
+  border-bottom-right-radius: 1em;
   z-index: 300;
   margin-left: -1px;
   max-height: 180px;
-  top: 54px;
+  top: 56px;
   left: 0;
+  right: 0;
   overflow-y: auto;
 }
 
