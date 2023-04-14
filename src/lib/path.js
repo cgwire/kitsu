@@ -23,7 +23,7 @@ export const getTaskPath = (
     route.params.episode_id = task.entity_id
     delete route.params.type
   } else {
-    route.params.type = taskType.for_entity.toLowerCase() + 's'
+    route.params.type = pluralizeEntityType(taskType.for_entity)
   }
   return route
 }
@@ -161,13 +161,7 @@ export const getTaskTypeSchedulePath = (
 ) => {
   const route = getContextRoute('task-type-schedule', productionId, episodeId)
   route.params.task_type_id = taskTypeId
-  if (type === 'shot') {
-    route.params.type = 'shots'
-  } else if (type === 'asset') {
-    route.params.type = 'assets'
-  } else if (type === 'edit') {
-    route.params.type = 'edits'
-  }
+  route.params.type = pluralizeEntityType(type)
   return route
 }
 
@@ -182,4 +176,11 @@ export const getPersonPath = personId => {
       person_id: personId
     }
   }
+}
+
+export const pluralizeEntityType = (type = '') => {
+  type = type.toLowerCase()
+  return ['asset', 'edit', 'episode', 'sequence', 'shot'].includes(type)
+    ? `${type}s`
+    : type
 }

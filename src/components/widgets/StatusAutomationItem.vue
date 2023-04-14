@@ -45,6 +45,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { pluralizeEntityType } from '@/lib/path'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 import TaskStatusName from '@/components/cells/TaskStatusName'
 
@@ -79,7 +80,7 @@ export default {
         params: {
           production_id: this.productionId,
           status_automation_id: this.statusAutomation.id,
-          type: this.$tc(this.statusAutomation.for_entity.toLowerCase(), 2)
+          type: pluralizeEntityType(this.statusAutomation.for_entity)
         }
       }
 

@@ -51,6 +51,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import colors from '@/lib/colors'
+import { pluralizeEntityType } from '@/lib/path'
 
 export default {
   name: 'validation-tag',
@@ -194,7 +195,7 @@ export default {
       }
 
       const taskType = this.taskTypeMap.get(task.task_type_id)
-      route.params.type = this.$tc(taskType.for_entity.toLowerCase(), 2)
+      route.params.type = pluralizeEntityType(taskType.for_entity)
 
       return route
     },

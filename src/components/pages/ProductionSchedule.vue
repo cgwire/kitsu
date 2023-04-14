@@ -197,7 +197,7 @@ export default {
               taskType.id,
               this.currentProduction.id,
               this.currentEpisode ? this.currentEpisode.id : null,
-              this.$tc(taskType.for_entity.toLowerCase(), 2)
+              taskType.for_entity
             )
 
             return {
@@ -287,7 +287,7 @@ export default {
             item.task_type_id,
             this.currentProduction.id,
             item.object_id,
-            this.$tc(taskTypeElement.for_entity.toLowerCase(), 2)
+            taskTypeElement.for_entity
           )
         }
         return scheduleItem
