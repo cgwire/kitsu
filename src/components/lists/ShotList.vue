@@ -479,6 +479,7 @@
             >
               <input
                 class="input-editor"
+                min="0"
                 step="1"
                 type="number"
                 :value="getMetadataFieldValue({ field_name: 'fps' }, shot)"

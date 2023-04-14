@@ -39,6 +39,8 @@
 
         <text-field
           ref="nbEpisodesField"
+          type="number"
+          :step="1"
           :label="$t('productions.fields.nb_episodes')"
           @enter="runConfirmation"
           v-focus
@@ -56,6 +58,7 @@
 
         <text-field
           ref="fpsField"
+          type="number"
           :label="$t('productions.fields.fps')"
           @enter="runConfirmation"
           v-focus
