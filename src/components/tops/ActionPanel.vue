@@ -19,15 +19,6 @@
         @dblclick="minimized = !minimized"
       >
         <div class="flexrow">
-          <!--div
-            class="menu-item handle"
-            @mousedown="startDrag"
-            @mouseup="stopDrag"
-            :title="$t('main.move_action_bar')"
-          >
-            <more-vertical-icon class="handle-icon" />
-            <more-vertical-icon class="handle-icon" />
-          </div-->
 
           <div
             :class="{
@@ -38,7 +29,11 @@
             :title="$t('menu.change_status')"
             @click="selectBar('change-status')"
             v-if="
-              (isCurrentUserManager || isSupervisorInDepartment) &&
+              (
+                isCurrentUserManager ||
+                isSupervisorInDepartment ||
+                isInDepartment
+              ) &&
               !isEntitySelection &&
               isTaskSelection
             "
