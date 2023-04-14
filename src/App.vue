@@ -860,10 +860,6 @@ a:hover {
   margin-top: 0.5em;
 }
 
-.ml1 {
-  margin-leftc: 1em;
-}
-
 .mt1 {
   margin-top: 1em;
 }
@@ -874,10 +870,6 @@ a:hover {
 
 .mt2 {
   margin-top: 2em;
-}
-
-.ml1 {
-  margin-left: 1em;
 }
 
 .mb0 {
@@ -1121,9 +1113,6 @@ textarea.input:focus {
   border: 0;
   box-shadow: none;
   border-radius: 0;
-}
-
-.filters-area {
 }
 
 .query-list {
