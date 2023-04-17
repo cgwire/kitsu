@@ -25,8 +25,7 @@ const AssetTypes = () => import('@/components/pages/AssetTypes.vue')
 const Asset = () => import('@/components/pages/Asset.vue')
 const Breakdown = () => import('@/components/pages/Breakdown.vue')
 const CustomActions = () => import('@/components/pages/CustomActions.vue')
-const StatusAutomations = () =>
-  import('@/components/pages/StatusAutomations.vue')
+const FirstConnection = () => import('@/components/pages/FirstConnection.vue')
 const Episodes = () => import('@/components/pages/Episodes.vue')
 const Episode = () => import('@/components/pages/Episode.vue')
 const EpisodeStats = () => import('@/components/pages/EpisodeStats.vue')
@@ -55,6 +54,8 @@ const Sequence = () => import('@/components/pages/Sequence.vue')
 const Sequences = () => import('@/components/pages/Sequences.vue')
 const SequenceStats = () => import('../components/pages/SequenceStats.vue')
 const Shot = () => import('@/components/pages/Shot.vue')
+const StatusAutomations = () =>
+  import('@/components/pages/StatusAutomations.vue')
 const Task = () => import('@/components/pages/Task.vue')
 const Team = () => import('@/components/pages/Team.vue')
 const Timesheets = () => import('@/components/pages/Timesheets.vue')
@@ -888,6 +889,11 @@ export const routes = [
     path: '/login',
     component: Login,
     name: 'login'
+  },
+  {
+    path: '/first-connection',
+    component: FirstConnection,
+    name: 'first-connection'
   },
   {
     path: '/reset-password',
