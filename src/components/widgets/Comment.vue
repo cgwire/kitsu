@@ -295,6 +295,7 @@ import { sortByName } from '@/lib/sorting'
 import { formatDate, parseDate } from '@/lib/time'
 import colors from '@/lib/colors'
 import files from '@/lib/files'
+import { pluralizeEntityType } from '@/lib/path'
 
 import {
   ChevronDownIcon,
@@ -441,7 +442,7 @@ export default {
         route.params.episode_id = this.task.entity.episode_id
       }
       const taskType = this.taskTypeMap.get(this.task.task_type_id)
-      route.params.type = this.$tc(taskType.for_entity.toLowerCase(), 2)
+      route.params.type = pluralizeEntityType(taskType.for_entity)
       return route
     },
 

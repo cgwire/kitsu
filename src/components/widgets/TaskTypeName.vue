@@ -27,6 +27,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { pluralizeEntityType } from '@/lib/path'
 
 export default {
   name: 'task-type-name',
@@ -75,7 +76,7 @@ export default {
           params: {
             production_id: this.productionId,
             task_type_id: this.taskType.id,
-            type: this.$tc(this.taskType.for_entity.toLowerCase(), 2) + 's'
+            type: pluralizeEntityType(this.taskType.for_entity)
           }
         }
 

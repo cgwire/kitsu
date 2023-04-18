@@ -216,6 +216,7 @@ import {
 } from 'vue-feather-icons'
 import { marked } from 'marked'
 import moment from 'moment-timezone'
+import { pluralizeEntityType } from '@/lib/path'
 import { renderComment } from '@/lib/render'
 
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
@@ -380,14 +381,13 @@ export default {
 
     entityPath(notification) {
       const taskType = this.taskTypeMap.get(notification.task_type_id)
-      const type = taskType.for_entity.toLowerCase()
 
       const route = {
         name: 'task',
         params: {
           production_id: notification.project_id,
           task_id: notification.task_id,
-          type: type
+          type: pluralizeEntityType(taskType.for_entity)
         }
       }
 

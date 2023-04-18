@@ -29,7 +29,7 @@
       :is-error="errors.del"
       :text="deleteText"
       :error-text="$t('custom_actions.delete_error')"
-      @cancel="modals.delete = false"
+      @cancel="modals.del = false"
       @confirm="confirmDeleteCustomAction"
     />
   </div>
