@@ -883,7 +883,7 @@ export default {
 
     reset() {
       this.resetModals()
-      this.resetPreview()
+      this.resetPreview(false)
       this.taskComments = this.getCurrentTaskComments()
       this.taskPreviews = this.getCurrentTaskPreviews()
       this.task = this.getCurrentTask()
@@ -892,7 +892,7 @@ export default {
         if (this.$route.params.preview_id) {
           this.selectedPreviewId = this.$route.params.preview_id
         }
-      }, 1000)
+      }, 200)
     },
 
     selectFile(forms) {

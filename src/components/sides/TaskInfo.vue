@@ -101,6 +101,7 @@
                 @change-current-preview="changeCurrentPreview"
                 @add-extra-preview="onAddExtraPreview"
                 @remove-extra-preview="onRemoveExtraPreview"
+                @previews-order-change="onPreviewsOrderChange"
                 @comment-added="onCommentAdded"
                 @time-updated="onTimeUpdated"
                 ref="preview-player"
@@ -794,6 +795,13 @@ export default {
           this.reset()
         }
       }
+    },
+
+    onPreviewsOrderChange() {
+      this.taskPreviews = this.getTaskPreviews(this.task.id)
+      this.setOtherPreviews()
+      this.currentPreviewPath = this.getOriginalPath()
+      this.currentPreviewDlPath = this.getOriginalDlPath()
     },
 
     onAnnotationChanged({ preview, additions, deletions, updates }) {

@@ -56,7 +56,7 @@
             <th class="datatable-row-header name">
               <div class="flexrow">
                 <people-avatar class="flexrow-item" :person="person" />
-                <people-name class="flexrow-item" :person="person" />
+                <people-name class="flexrow-item" with-link :person="person" />
               </div>
             </th>
 

@@ -784,6 +784,7 @@
         hidden: isEntitiesHidden
       }"
       ref="playlisted-entities"
+      @wheel="onEntitiesWheel"
       v-if="playlist.id"
     >
       <spinner class="spinner" v-if="isLoading" />
@@ -1634,6 +1635,11 @@ export default {
           this.rawPlayerComparison.setCurrentTimeRaw(this.currentTimeRaw)
         })
       }
+    },
+
+    onEntitiesWheel (event) {
+      event.preventDefault()
+      this.$refs["playlisted-entities"].scrollLeft += event.deltaY
     },
 
     saveUserComparisonChoice() {
