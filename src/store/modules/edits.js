@@ -1074,7 +1074,11 @@ const mutations = {
     state,
     { descriptor, previousDescriptorFieldName }
   ) {
-    if (descriptor.entity_type === 'Edit' && previousDescriptorFieldName) {
+    if (
+      descriptor.entity_type === 'Edit' &&
+      previousDescriptorFieldName &&
+      previousDescriptorFieldName !== descriptor.field_name
+    ) {
       cache.edits.forEach(edit => {
         const data = { ...edit.data }
         data[descriptor.field_name] = data[previousDescriptorFieldName]
