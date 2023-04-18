@@ -99,6 +99,15 @@
           </button>
         </div>
         <notification-bell />
+        <div class="nav-item">
+          <a
+            class="changelog-button help-button"
+            href="https://kitsu.cg-wire.com/"
+            target="_blank"
+          >
+            <help-circle-icon />
+          </a>
+        </div>
         <div
           :class="{
             'nav-item': true,
@@ -149,11 +158,6 @@
           </span>
         </li>
         <hr />
-        <a href="https://kitsu.cg-wire.com" target="_blank">
-          <li>
-            {{ $t('main.documentation') }}
-          </li>
-        </a>
         <a
           href="https://www.youtube.com/playlist?list=PLp_1gB5ZBHXqnQgZ4TCrAt7smxesaDo29"
           target="_blank"
@@ -201,6 +205,7 @@ import { mapGetters, mapActions } from 'vuex'
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
+  HelpCircleIcon,
   LogOutIcon,
   ZapIcon
 } from 'vue-feather-icons'
@@ -222,6 +227,7 @@ export default {
     ChevronLeftIcon,
     ChevronRightIcon,
     GlobalSearchField,
+    HelpCircleIcon,
     LogOutIcon,
     NotificationBell,
     PeopleAvatar,
@@ -944,6 +950,17 @@ strong {
   background: transparent;
   color: $light-grey;
   cursor: pointer;
+}
+
+.help-button {
+  background: transparent;
+  color: $light-grey;
+  cursor: pointer;
+  margin-top: 3px;
+
+  &:hover {
+    color: $light-grey;
+  }
 }
 
 .user-menu {
