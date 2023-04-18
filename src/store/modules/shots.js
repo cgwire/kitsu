@@ -1238,7 +1238,11 @@ const mutations = {
     state,
     { descriptor, previousDescriptorFieldName }
   ) {
-    if (descriptor.entity_type === 'Shot' && previousDescriptorFieldName) {
+    if (
+      descriptor.entity_type === 'Shot' &&
+      previousDescriptorFieldName &&
+      previousDescriptorFieldName !== descriptor.field_name
+    ) {
       cache.shots.forEach(shot => {
         const data = { ...shot.data }
         data[descriptor.field_name] = data[previousDescriptorFieldName]
