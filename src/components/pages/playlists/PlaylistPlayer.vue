@@ -855,7 +855,7 @@ import PreviewRoom from '@/components/widgets/PreviewRoom'
 import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal'
 import SoundViewer from '@/components/previews/SoundViewer'
 import Spinner from '@/components/widgets/Spinner'
-import TaskInfo from '@/components/sides/TaskInfo'
+const TaskInfo = () => import('@/components/sides/TaskInfo')
 import VideoProgress from '@/components/previews/VideoProgress'
 
 import { annotationMixin } from '@/components/mixins/annotation'
@@ -1341,7 +1341,8 @@ export default {
       const entityToMove = this.entityList.find(s => s.id === info.after)
       const toMoveIndex = this.entityList.findIndex(s => s.id === info.after)
       let targetIndex = this.entityList.findIndex(s => s.id === info.before)
-      this.moveSelectedEntity(toMoveIndex, targetIndex)
+      if (toMoveIndex > targetIndex) targetIndex += 1
+      this.moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
       this.$nextTick(() => {
         playlistEl.scrollLeft = scrollLeft
       })
@@ -1351,7 +1352,8 @@ export default {
     moveSelectedEntityToLeft() {
       const toMoveIndex = this.playingEntityIndex
       const targetIndex = this.previousEntityIndex
-      this.moveSelectedEntity(toMoveIndex, targetIndex)
+      const entityToMove = this.currentEntity
+      this.moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
       const info = {
         before: this.entityList[targetIndex].id,
         after: this.entityList[toMoveIndex].id
@@ -1362,7 +1364,8 @@ export default {
     moveSelectedEntityToRight() {
       const toMoveIndex = this.playingEntityIndex
       const targetIndex = this.nextEntityIndex
-      this.moveSelectedEntity(toMoveIndex, targetIndex)
+      const entityToMove = this.currentEntity
+      this.moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
       const info = {
         before: this.entityList[toMoveIndex].id,
         after: this.entityList[targetIndex].id
@@ -1370,9 +1373,8 @@ export default {
       this.$emit('order-change', info)
     },
 
-    moveSelectedEntity(toMoveIndex, targetIndex) {
+    moveSelectedEntity(entityToMove, toMoveIndex, targetIndex) {
       if (!this.currentEntity) return
-      const entityToMove = this.currentEntity
       if (this.playingEntityIndex >= 0) {
         if (toMoveIndex >= 0 && targetIndex >= 0) {
           this.entityList.splice(toMoveIndex, 1)
