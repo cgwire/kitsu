@@ -69,10 +69,22 @@
           :min-height="50"
           :max-height="300"
           @keyup.enter.ctrl.native="
-            runAddComment(text, attachments, checklist, task_status_id)
+            runAddComment(
+              text,
+              attachments,
+              checklist,
+              task_status_id,
+              nextRevision
+            )
           "
           @keyup.enter.meta.native="
-            runAddComment(text, attachments, checklist, task_status_id)
+            runAddComment(
+              text,
+              attachments,
+              checklist,
+              task_status_id,
+              nextRevision
+            )
           "
           v-model="text"
           v-focus
@@ -109,13 +121,38 @@
             </div>
           </div>
 
-          <div class="flexrow preview-section" v-if="mode === 'publish'">
+          <div class="flexrow preview-section">
             <button
               class="button flexrow-item preview-button"
               @click="$emit('add-preview')"
             >
               {{ $t('comments.add_preview') }}
             </button>
+          </div>
+          <div class="flexrow mt2 mb1" v-if="nextRevision !== undefined">
+            <label
+              class="flexrow-item column has-text-right"
+              for="input-revision"
+            >
+              {{ $t('tasks.new_revision_number') }}
+            </label>
+            <input
+              id="input-revision"
+              class="input flexrow-item column preview-revision"
+              type="number"
+              :min="revision + 1"
+              pattern="[0-9]"
+              :placeholder="revision + 1"
+              @enter="$emit('add-preview')"
+              v-model.trim="nextRevision"
+            />
+            <span
+              class="flexrow-item column preview-delete-revision"
+              :title="$t('tasks.auto_revision')"
+              @click.prevent="nextRevision = undefined"
+            >
+              x
+            </span>
           </div>
         </div>
 
@@ -175,7 +212,6 @@
           />
           <button-simple
             :class="{
-              button: true,
               'post-button': true,
               'flexrow-item': true,
               'is-loading': isLoading
@@ -184,7 +220,15 @@
             text="Post"
             :disabled="mode === 'publish' && previewForms.length === 0"
             :title="$t('comments.post_status')"
-            @click="runAddComment(text, attachments, checklist, task_status_id)"
+            @click="
+              runAddComment(
+                text,
+                attachments,
+                checklist,
+                task_status_id,
+                nextRevision
+              )
+            "
           />
         </div>
 
@@ -227,6 +271,8 @@ import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import Checklist from '@/components/widgets/Checklist'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 
+const REVISION_NUMBER_REGEX = /v(\d+)/gi
+
 export default {
   name: 'add-comment',
 
@@ -247,6 +293,7 @@ export default {
       isDragging: false,
       mode: 'status',
       showCommentArea: false,
+      nextRevision: undefined,
       text: '',
       task_status_id: null,
       errors: {
@@ -382,7 +429,7 @@ export default {
 
   methods: {
     shortenText: strings.shortenText,
-    runAddComment(text, attachments, checklist, taskStatusId) {
+    runAddComment(text, attachments, checklist, taskStatusId, revision) {
       this.$store.commit('CLEAR_UPLOAD_PROGRESS')
       if (this.mode === 'publish') {
         if (!this.showCommentArea) text = ''
@@ -392,16 +439,40 @@ export default {
         checklist = checklist.filter(item => item.text.length)
       }
       text = replaceTimeWithTimecode(text, this.revision, this.time, this.fps)
-      this.$emit('add-comment', text, attachments, checklist, taskStatusId)
+
+      revision = Number(revision)
+      if (isNaN(revision) || revision < 1) {
+        revision = undefined
+      }
+
+      this.$emit(
+        'add-comment',
+        text,
+        attachments,
+        checklist,
+        taskStatusId,
+        revision
+      )
       this.text = ''
       this.attachments = []
       this.checklist = []
+      this.nextRevision = undefined
     },
 
     focus() {
       if (this.$refs['comment-textarea']) {
         this.$refs['comment-textarea'].$el.focus()
       }
+    },
+
+    getRevision(form) {
+      if (!form) {
+        return undefined
+      }
+      const file = form.get('file')
+      const rgxMatches = file.name.matchAll(REVISION_NUMBER_REGEX)
+      const revision = Array.from(rgxMatches).pop()?.[1]
+      return revision
     },
 
     onAddChecklistItem(item) {
@@ -537,6 +608,17 @@ export default {
       }
     },
 
+    previewForms: {
+      deep: true,
+      immediate: true,
+      handler() {
+        const form = this.previewForms.findLast(
+          form => this.getRevision(form) > 0
+        )
+        this.nextRevision = this.getRevision(form)
+      }
+    },
+
     team: {
       deep: true,
       immediate: true,
@@ -588,6 +670,22 @@ article.add-comment {
     border-bottom-left-radius: 0;
     height: 34px;
     margin-top: 1px;
+  }
+}
+
+.preview-revision {
+  max-width: 30%;
+}
+
+.preview-delete-revision {
+  max-width: 10px;
+  cursor: pointer;
+}
+
+.input {
+  border-radius: 10px;
+  &:invalid {
+    color: $red;
   }
 }
 
@@ -727,5 +825,15 @@ article.add-comment {
       transform: none;
     }
   }
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
 }
 </style>

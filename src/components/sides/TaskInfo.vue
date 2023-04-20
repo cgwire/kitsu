@@ -647,7 +647,13 @@ export default {
       }
     },
 
-    addComment(comment, attachment, checklist, taskStatusId) {
+    addComment(
+      comment,
+      attachment,
+      checklist,
+      taskStatusId,
+      revision = undefined
+    ) {
       this.animOn = true
       this.$nextTick(() => {
         let preview = this.currentParentPreview
@@ -660,7 +666,8 @@ export default {
           taskStatusId,
           attachment,
           checklist,
-          comment
+          comment,
+          revision
         }
         let action = 'commentTask'
         if (this.previewForms.length > 0) action = 'commentTaskWithPreview'

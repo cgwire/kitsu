@@ -26,7 +26,7 @@
           ref="preview-field"
           :accept="extensions"
           :multiple="true"
-          :label="'Select files from your hard drive'"
+          :label="$t('main.select_file')"
           :is-primary="false"
           @fileselected="onFileSelected"
           hide-file-names
