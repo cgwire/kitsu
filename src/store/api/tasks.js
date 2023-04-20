@@ -155,9 +155,10 @@ export default {
   addPreview(data) {
     const taskId = data.taskId
     const commentId = data.commentId
+    const revision = data.revision
     return client.ppost(
       `/api/actions/tasks/${taskId}/comments/${commentId}/add-preview`,
-      {}
+      { revision }
     )
   },
 
