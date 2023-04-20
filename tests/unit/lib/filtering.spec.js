@@ -111,7 +111,13 @@ describe('lib/filtering', () => {
         id: 'descriptor-1',
         name: 'Family',
         field_name: 'family'
+      },
+      {
+        id: 'descriptor-1',
+        name: 'Modeling infos',
+        field_name: 'modeling_infos'
       }
+
     ]
     const persons = [
       {
@@ -159,7 +165,7 @@ describe('lib/filtering', () => {
         persons,
         query: 'mode=wip'
       })
-      expect(filters).toHaveLength(1)
+      expect(filters).toHaveLength(2) // the descriptor is included too
       const filter = filters[0]
       expect(filter.taskType).toEqual(taskTypes[1])
       expect(filter.taskStatuses[0]).toEqual('task-status-1')
@@ -277,7 +283,7 @@ describe('lib/filtering', () => {
         taskStatuses,
         descriptors,
         persons,
-        query: 'mode=[wip] animation=[wfa] chars'
+        query: 'modeling=[wip] animation=[wfa] chars'
       })
       expect(filters).toHaveLength(2)
       let filter = filters[0]
@@ -297,7 +303,7 @@ describe('lib/filtering', () => {
         taskStatuses,
         descriptors,
         persons,
-        query: '+(mode=[wip] animation=[wfa]) chars'
+        query: '+(modeling=[wip] animation=[wfa]) chars'
       })
       expect(filters).toHaveLength(2)
       let filter = filters[0]
@@ -317,7 +323,7 @@ describe('lib/filtering', () => {
         taskStatuses,
         descriptors,
         persons,
-        query: 'mode=assigned'
+        query: 'modeling=assigned'
       })
       expect(filters).toHaveLength(1)
       const filter = filters[0]
@@ -335,7 +341,7 @@ describe('lib/filtering', () => {
         taskStatuses,
         descriptors,
         persons,
-        query: 'mode=unassigned'
+        query: 'modeling=unassigned'
       })
       expect(filters).toHaveLength(1)
       const filter = filters[0]

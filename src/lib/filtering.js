@@ -237,7 +237,7 @@ export const getFilters = ({
   const filters = [
     ...getAssetTypeFilters(assetTypes, query),
     ...getTaskTypeFilters(taskTypes, taskStatuses, query),
-    ...getDescFilters(descriptors, query),
+    ...getDescFilters(descriptors, taskTypes, query),
     ...getAssignedToFilters(persons, query),
     ...getDepartmentFilters(departments, query),
     ...(getThumbnailFilters(query) || []),
@@ -406,7 +406,7 @@ export const getTaskTypeFilters = (taskTypes, taskStatuses, queryText) => {
  * Extract metadata filters (like size=big or size=small) from given
  * query.
  */
-export const getDescFilters = (descriptors, queryText) => {
+export const getDescFilters = (descriptors, taskTypes, queryText) => {
   if (!queryText) return []
 
   const results = []
@@ -417,7 +417,14 @@ export const getDescFilters = (descriptors, queryText) => {
     rgxMatches.forEach(rgxMatch => {
       const pattern = rgxMatch.split('=')
       const descriptorName = cleanParenthesis(pattern[0])
-      if (descriptorName === 'type' || descriptorName === 'department') return
+      if (
+        descriptorName === 'type' ||
+        descriptorName === 'department' ||
+        taskTypes.find(
+          t => t.name.toLowerCase() === descriptorName.toLowerCase()
+        )
+      ) return
+
       const matchedDescriptors =
         descriptorNameIndex[descriptorName.toLowerCase()]
       let value = cleanParenthesis(pattern[1])
