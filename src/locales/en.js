@@ -1322,6 +1322,10 @@ export default {
     }
   },
 
+  search: {
+    title: 'Entity Search'
+  },
+
   timesheets: {
     confirm_day_off: 'Setting this day as a day off will erase all time filled for the current day. Are you sure you want to continue?',
     day_off: 'Day Off',

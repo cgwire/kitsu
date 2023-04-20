@@ -48,11 +48,12 @@ const ResetPassword = () => import('@/components/pages/ResetPassword.vue')
 const ResetChangePassword = () =>
   import('@/components/pages/ResetChangePassword.vue')
 const Logs = () => import('@/components/pages/Logs.vue')
+const EntitySearch = () => import('@/components/pages/EntitySearch.vue')
 const ServerDown = () => import('@/components/pages/ServerDown.vue')
 const Settings = () => import('@/components/pages/Settings.vue')
 const Sequence = () => import('@/components/pages/Sequence.vue')
 const Sequences = () => import('@/components/pages/Sequences.vue')
-const SequenceStats = () => import('../components/pages/SequenceStats.vue')
+const SequenceStats = () => import('@/components/pages/SequenceStats.vue')
 const Shot = () => import('@/components/pages/Shot.vue')
 const StatusAutomations = () =>
   import('@/components/pages/StatusAutomations.vue')
@@ -261,6 +262,12 @@ export const routes = [
         path: 'new-production',
         component: NewProduction,
         name: 'new-production'
+      },
+
+      {
+        path: '/entity-search',
+        component: EntitySearch,
+        name: 'entity-search'
       },
 
       {
