@@ -33,7 +33,7 @@
           }"
           @click="mode = 'publish'"
         >
-          {{ $t('tasks.publish') }}
+          {{ $t('tasks.publish_revision') }}
         </span>
       </div>
 
@@ -54,6 +54,7 @@
                 :size="20"
                 :font-size="11"
                 :no-cache="true"
+                :is-link="false"
               />
               <span class="flexrow-item">
                 {{ team.item.full_name }}
@@ -217,9 +218,9 @@
               'is-loading': isLoading
             }"
             icon="send"
-            text="Post"
             :disabled="mode === 'publish' && previewForms.length === 0"
-            :title="$t('comments.post_status')"
+            :text="mode === 'publish' ? $t('tasks.publish') : $t('tasks.post')"
+            :title="mode === 'publish' ? $t('tasks.publish') : $t('comments.post_status')"
             @click="
               runAddComment(
                 text,
@@ -623,7 +624,18 @@ export default {
       deep: true,
       immediate: true,
       handler() {
-        this.atOptions = [...this.team]
+        if (this.isCurrentUserClient) {
+          this.atOptions = [...this.team.filter(person => {
+            return [
+              'admin',
+              'manager',
+              'supervisor',
+              'client'
+            ].includes(person.role)
+          })]
+        } else {
+          this.atOptions = [...this.team]
+        }
         this.atOptions.push({
           isTime: true,
           full_name: 'frame'

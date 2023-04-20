@@ -57,10 +57,10 @@
       </div>
     </drag>
     <drop @drop="onDropped">
-      <div class="drop-area-wide" ref="drop-area-wide"></div>
+      <div :id="'drop-area-wide-' + entity.id" class="drop-area-wide" ref="drop-area-wide"></div>
     </drop>
     <drop @drop="onDropped">
-      <div class="drop-area" ref="drop-area"></div>
+      <div :id="'drop-area-' + entity.id" class="drop-area" ref="drop-area"></div>
     </drop>
   </div>
 </template>
@@ -217,17 +217,20 @@ export default {
     onDragged() {},
 
     onDragleave() {
-      this.dropArea.style.background = 'transparent'
-      this.dropArea.style.width = '15px'
+      const dropArea = document.getElementById('drop-area-' + this.entity.id)
+      dropArea.style.background = 'transparent'
+      dropArea.style.width = '15px'
     },
 
     onDragover() {
-      this.dropArea.style.width = '60px'
+      const dropArea = document.getElementById('drop-area-' + this.entity.id)
+      dropArea.style.width = '60px'
     },
 
     onDropped(entityId) {
-      this.dropArea.style.background = 'transparent'
-      this.dropArea.style.width = '15px'
+      const dropArea = document.getElementById('drop-area-' + this.entity.id)
+      dropArea.style.background = 'transparent'
+      dropArea.style.width = '15px'
       this.$emit('entity-dropped', {
         before: this.entity.id,
         after: entityId

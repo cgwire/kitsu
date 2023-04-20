@@ -111,7 +111,7 @@
     <div
       id="side-column"
       class="column side-column"
-      v-show="nbSelectedTasks === 1"
+      v-show="nbSelectedTasks === 1 || this.keepTaskPanelOpen"
     >
       <task-info :task="selectedTasks.values().next().value" />
     </div>

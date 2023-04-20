@@ -125,7 +125,9 @@ th.metadata-descriptor {
 }
 
 .task-type-name {
+  font-size: 1.1em;
   max-width: 95%;
+  text-transform: none;
 }
 
 .header-icon {
