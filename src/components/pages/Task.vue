@@ -847,11 +847,18 @@ export default {
       return this.getTaskPreviews(this.route.params.task_id)
     },
 
-    addComment(comment, attachment, checklist, taskStatusId) {
+    addComment(
+      comment,
+      attachment,
+      checklist,
+      taskStatusId,
+      revision = undefined
+    ) {
       const params = {
         taskId: this.task.id,
         taskStatusId: taskStatusId,
-        comment: comment,
+        comment,
+        revision,
         checklist,
         attachment
       }
