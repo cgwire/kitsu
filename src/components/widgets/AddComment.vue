@@ -624,7 +624,18 @@ export default {
       deep: true,
       immediate: true,
       handler() {
-        this.atOptions = [...this.team]
+        if (this.isCurrentUserClient) {
+          this.atOptions = [...this.team.filter(person => {
+            return [
+              'admin',
+              'manager',
+              'supervisor',
+              'client'
+            ].includes(person.role)
+          })]
+        } else {
+          this.atOptions = [...this.team]
+        }
         this.atOptions.push({
           isTime: true,
           full_name: 'frame'
