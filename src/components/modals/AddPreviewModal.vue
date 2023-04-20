@@ -73,6 +73,12 @@
           </template>
         </p>
 
+        <div class="mt1 message">
+          <div class="message-body">
+            {{ $t('tasks.revision_preview_file') }}
+          </div>
+        </div>
+
         <p class="has-text-right">
           <a
             :class="{
@@ -260,5 +266,9 @@ h3.subtitle {
 .preview-name span {
   cursor: pointer;
   float: right;
+}
+
+.message-body {
+  border-width: 0 0 0 4px;
 }
 </style>

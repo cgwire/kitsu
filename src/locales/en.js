@@ -266,7 +266,7 @@ export default {
     new_episode: 'New episode',
     no_casting: 'The episode casting is empty.',
     number: 'episode | episodes',
-    restore_error: 'An error occured while restoring given episode.',
+    restore_error: 'An error occurred while restoring given episode.',
     tasks: 'Episode tasks',
     title: 'Episodes',
     stats_title: 'Episodes Stats',
@@ -309,8 +309,8 @@ export default {
     choose_fido: 'Use a FIDO device',
     choose_email_otp: 'Enter two-factor authentication code via email',
     choose_recovery_code: 'Use a recovery code',
-    error_requesting_fido: 'An error occured while requesting FIDO challenge.',
-    error_sending_email: 'An error occured while sending OTP via email.',
+    error_requesting_fido: 'An error occurred while requesting FIDO challenge.',
+    error_sending_email: 'An error occurred while sending OTP via email.',
     first_connection: 'For your first connection, we need you to set up a password. For that you have to run the reset password procedure.',
     first_connection_2: 'Please, give us the email used for your Kitsu account and we will send you the reset password link.',
     first_connection_title: 'Welcome to Kitsu!',
@@ -336,7 +336,7 @@ export default {
     retry_fido_challenge: 'Retry FIDO challenge',
     send_email_otp: 'Resend OTP by email',
     title: 'Log in to Kitsu',
-    too_many_failed_login_attemps: 'Too many failed login attemps, please wait one minute.',
+    too_many_failed_login_attemps: 'Too many failed login attempts, please wait one minute.',
     unable_to_verify_email_otp: 'Unable to verify with email?',
     unable_to_verify_recovery_code: 'Don\'t have a recovery code?',
     unable_to_verify_totp: 'Unable to verify with TOTP?',
@@ -629,7 +629,7 @@ export default {
     add_sequence: 'Add whole sequence',
     add_episode: 'Add whole episode',
     add_movie: 'Add whole movie',
-    apply_task_type_change: 'This will set the last revison for given task type on all shots.',
+    apply_task_type_change: 'This will set the last revision for given task type on all shots.',
     available_build: 'Available builds',
     build_daily: 'Daily pending',
     build_weekly: 'All Pending',
@@ -905,23 +905,23 @@ export default {
         button_disable: 'Disable TOTP',
         button_validate_disable: 'Validate and disable TOTP',
         button_validate: 'Validate and enable TOTP',
-        error_enable: 'An error occured while enabling TOTP.',
-        error_disable: 'An error occured while disabling TOTP.'
+        error_enable: 'An error occurred while enabling TOTP.',
+        error_disable: 'An error occurred while disabling TOTP.'
       },
       email_otp: {
         button_enable: 'Enable OTP via email',
         button_disable: 'Disable OTP via email',
         button_validate_disable: 'Validate and disable OTP via email',
         button_validate: 'Validate and enable OTP via email',
-        error_enable: 'An error occured while enabling OTP via email.',
-        error_disable: 'An error occured while disabling OTP via email.'
+        error_enable: 'An error occurred while enabling OTP via email.',
+        error_disable: 'An error occurred while disabling OTP via email.'
       },
       fido: {
         device_name: 'FIDO device name',
         registered_devices_title: 'Registered FIDO devices:',
         button_register: 'Register new FIDO device',
-        error_register: 'An error occured while registering FIDO device.',
-        error_unregister: 'An error occured while unregistering FIDO device.',
+        error_register: 'An error occurred while registering FIDO device.',
+        error_unregister: 'An error occurred while unregistering FIDO device.',
         button_unregister: 'Validate and unregister FIDO device'
       },
       recovery_codes: {
@@ -929,7 +929,7 @@ export default {
         button_new: 'Get new recovery codes',
         button_validate: 'Validate and get new recovery codes',
         warning: 'Keep your recovery codes in a safe spot. These codes are the last resort for accessing your account in case you lose your password and second factors. If you cannot find these codes, you will lose access to your account.',
-        error_new: 'An error occured while generating new recovery codes'
+        error_new: 'An error occurred while generating new recovery codes'
       }
     },
     save: {
@@ -1247,6 +1247,7 @@ export default {
     publish_revision: 'Publish revision',
     preview: 'Previews',
     previous: 'previous task',
+    revision_preview_file: 'If one of your selected files contains a revision number in its name (eg. "preview-v3.png"), then it will be suggested as a new revision name (eg. "revision 3") at the next step.',
     select_preview_file: 'Please select files (pictures, movies or others) from your hard drive to be used as a new preview revision for the current task:',
     set_estimations: 'Set estimations for selected tasks:',
     set_preview: 'Set this preview as thumbnail',
@@ -1260,7 +1261,7 @@ export default {
     select_file: 'Please select the file from your hard drive you want to attach to your comment:',
     show_contact_sheet: 'Display tasks as a contact sheet',
     subscribe_notifications: 'Subscribe to notifications',
-    subscribe_to_tasks: 'Subscribe to selected task notifictations | Subscribe to the {nbSelectedTasks} selected tasks notifications',
+    subscribe_to_tasks: 'Subscribe to selected task notifications | Subscribe to the {nbSelectedTasks} selected tasks notifications',
     unsubscribe_notifications: 'Unsubscribe from notifications',
     tasks: 'Tasks',
     to_myself: 'To myself',
