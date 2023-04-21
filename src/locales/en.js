@@ -501,6 +501,16 @@ export default {
         title: 'Options',
         update: 'Update existing data'
       }
+    },
+    edl: {
+      import_file: 'Import EDL',
+      import_title: 'Import frames / in / out from edit decision list',
+      select_file: 'Please select a file from one of your folder:',
+      upload_file: 'Browse local files',
+      error_upload: 'An error occurred while uploading your EDL.',
+      upload_edl: 'Upload EDL',
+      nomenclature: 'Nomenclature',
+      match_case: 'Match case'
     }
   },
 

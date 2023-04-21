@@ -40,7 +40,9 @@ import {
   SET_CURRENT_EPISODE,
   LOAD_SHOT_END,
   SHOT_CSV_FILE_SELECTED,
+  SHOT_EDL_FILE_SELECTED,
   IMPORT_SHOTS_END,
+  IMPORT_EDL_END,
   LOAD_OPEN_PRODUCTIONS_END,
   NEW_SHOT_END,
   EDIT_SHOT_END,
@@ -272,6 +274,7 @@ const initialState = {
   isShotsLoading: false,
   isShotsLoadingError: false,
   shotsCsvFormData: null,
+  shotsEDLFormData: null,
 
   shotListScrollPosition: 0,
 
@@ -322,6 +325,7 @@ const getters = {
 
   isLongShotList: state => state.shotMap.size > 500,
   shotsCsvFormData: state => state.shotsCsvFormData,
+  shotsEdlFormData: state => state.shotsEdlFormData,
   shotListScrollPosition: state => state.shotListScrollPosition,
 
   shotsByEpisode: state => {
@@ -531,6 +535,23 @@ const actions = {
       .postCsv(production, state.shotsCsvFormData, toUpdate)
       .then(() => {
         commit(IMPORT_SHOTS_END)
+        return Promise.resolve()
+      })
+  },
+
+  uploadEdlFile({ commit, state, rootGetters }, { nomenclature, match_case }) {
+    const production = rootGetters.currentProduction
+    let episode = rootGetters.isTVShow ? rootGetters.currentEpisode : null
+    return shotsApi
+      .postEdl(
+        production,
+        state.shotsEdlFormData,
+        nomenclature,
+        match_case,
+        episode
+      )
+      .then(() => {
+        commit(IMPORT_EDL_END)
         return Promise.resolve()
       })
   },
@@ -913,6 +934,13 @@ const mutations = {
   },
   [IMPORT_SHOTS_END](state) {
     state.shotsCsvFormData = null
+  },
+
+  [SHOT_EDL_FILE_SELECTED](state, formData) {
+    state.shotsEdlFormData = formData
+  },
+  [IMPORT_EDL_END](state) {
+    state.shotsEdlFormData = null
   },
 
   [LOAD_OPEN_PRODUCTIONS_END](state, projects) {

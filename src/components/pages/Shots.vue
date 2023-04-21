@@ -52,6 +52,12 @@
               />
               <button-simple
                 class="flexrow-item"
+                :title="$t('main.edl.import_file')"
+                icon="upload"
+                @click="showEDLImportModal"
+              />
+              <button-simple
+                class="flexrow-item"
                 :title="$t('main.csv.import_file')"
                 icon="upload"
                 @click="showImportModal"
@@ -216,6 +222,15 @@
       @confirm="renderImport"
     />
 
+    <import-edl-modal
+      ref="import-edl-modal"
+      :active="modals.isEDLImportDisplayed"
+      :is-loading="loading.importing"
+      :is-error="errors.importing"
+      @cancel="hideEDLImportModal"
+      @confirm="uploadEDLFile"
+    />
+
     <create-tasks-modal
       :active="modals.isCreateTasksDisplayed"
       :is-loading="loading.creatingTasks"
@@ -289,6 +304,7 @@ import DeleteModal from '@/components/modals/DeleteModal'
 import EditShotModal from '@/components/modals/EditShotModal'
 import ImportRenderModal from '@/components/modals/ImportRenderModal'
 import ImportModal from '@/components/modals/ImportModal'
+import ImportEdlModal from '@/components/modals/ImportEdlModal'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark'
 import HardDeleteModal from '@/components/modals/HardDeleteModal'
 import ManageShotsModal from '@/components/modals/ManageShotsModal'
@@ -317,6 +333,7 @@ export default {
     DeleteModal,
     EditShotModal,
     ImportModal,
+    ImportEdlModal,
     HardDeleteModal,
     ManageShotsModal,
     ImportRenderModal,
@@ -367,6 +384,7 @@ export default {
         isDeleteAllTasksDisplayed: false,
         isImportRenderDisplayed: false,
         isImportDisplayed: false,
+        isEDLImportDisplayed: false,
         isManageDisplayed: false,
         isNewDisplayed: false,
         isRestoreDisplayed: false,
@@ -553,7 +571,8 @@ export default {
       'setPreview',
       'setShotSearch',
       'showAssignations',
-      'uploadShotFile'
+      'uploadShotFile',
+      'uploadEdlFile'
     ]),
 
     addEpisode(episode, callback) {
@@ -1039,6 +1058,40 @@ export default {
         data.nb_frames = parseInt(value) - parseInt(shot.data.frame_in) + 1
       }
       this.editShot(data)
+    },
+
+    showEDLImportModal() {
+      this.modals.isEDLImportDisplayed = true
+    },
+
+    hideEDLImportModal() {
+      this.modals.isEDLImportDisplayed = false
+    },
+
+    uploadEDLFile(data, nomenclature, match_case) {
+      const formData = new FormData()
+      const filename = 'import.edl'
+      const file = new File([data], filename, { type: 'text/plain' })
+
+      formData.append('file', file)
+
+      this.loading.importing = true
+      this.errors.importing = false
+      this.$store.commit('SHOT_EDL_FILE_SELECTED', formData)
+
+      this.uploadEdlFile({ nomenclature, match_case })
+        .then(() => {
+          this.loading.importing = false
+          this.loadEpisodes().catch(console.error)
+          this.hideEDLImportModal()
+          this.loadShots()
+        })
+        .catch(err => {
+          console.error(err)
+          this.loading.importing = false
+          this.loading.importingError = err
+          this.errors.importing = true
+        })
     }
   },
 

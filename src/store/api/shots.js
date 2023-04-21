@@ -162,6 +162,14 @@ export default {
     return client.ppost(path, formData)
   },
 
+  postEdl(production, formData, nomenclature, match_case, episode) {
+    formData.append('nomenclature', nomenclature)
+    formData.append('match_case', match_case)
+    let path = `/api/import/edl/projects/${production.id}`
+    if (episode) path += `/episodes/${episode.id}`
+    return client.ppost(path, formData)
+  },
+
   getEpisodeStats(productionId) {
     return client.pget(`/api/data/projects/${productionId}/episodes/stats`)
   },
