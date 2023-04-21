@@ -803,7 +803,7 @@ export default {
 
     selectFile(forms) {
       this.loadPreviewFileFormData(forms)
-      this.previewForms = forms
+      this.previewForms = this.previewForms.concat(forms)
     },
 
     onPreviewFormRemoved(previewForm) {
