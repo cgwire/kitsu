@@ -1,7 +1,5 @@
 <template>
   <div class="task-type columns fixed-page">
-    <action-panel />
-
     <div class="column main-column">
       <div class="task-type page" ref="page">
         <div class="task-type-header page-header flexrow-item" ref="header">
@@ -272,7 +270,6 @@ import { formatListMixin } from '@/components/mixins/format'
 
 import { CornerLeftUpIcon } from 'vue-feather-icons'
 
-import ActionPanel from '@/components/tops/ActionPanel'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import DateField from '@/components/widgets/DateField'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
@@ -391,7 +388,6 @@ export default {
   name: 'task-type-page',
   mixins: [formatListMixin, searchMixin],
   components: {
-    ActionPanel,
     ButtonSimple,
     CornerLeftUpIcon,
     ComboboxNumber,
@@ -861,7 +857,7 @@ export default {
         )
         const keywords = getKeyWords(query) || []
         const excludingKeyWords = getExcludingKeyWords(query) || []
-        const descFilters = getDescFilters(descriptors, query)
+        const descFilters = getDescFilters(descriptors, [], query)
         const taskFilters = getTaskFilters(this.$options.taskIndex, query)
         if (
           keywords.length > 0 ||

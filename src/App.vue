@@ -826,11 +826,21 @@ a:hover {
 }
 
 .pa0 {
+  padding: 0em;
 }
 
 .pa1 {
   padding: 1em;
 }
+
+.pb0 {
+  padding-bottom: 0em;
+}
+
+.pt0 {
+  padding-top: 0em;
+}
+
 
 .mauto {
   margin: auto;
@@ -1686,7 +1696,6 @@ tbody:last-child .empty-line:last-child {
 }
 
 .side {
-  padding: 1em;
 }
 
 .menu-mask {
@@ -1768,7 +1777,6 @@ tbody:last-child .empty-line:last-child {
 }
 
 .main-column {
-  border-right: 3px solid #ccc;
 }
 
 .playlist-column .video-player-box .video-js {

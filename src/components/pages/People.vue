@@ -299,7 +299,6 @@ export default {
       const file = new File([data.join('\n')], filename, { type: 'text/csv' })
 
       formData.append('file', file)
-
       this.loading.importing = true
       this.errors.importing = false
       this.$store.commit('PERSON_CSV_FILE_SELECTED', formData)

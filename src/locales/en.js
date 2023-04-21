@@ -1235,6 +1235,7 @@ export default {
     estimation_over: 'Estimation over Duration',
     estimation_approval_late: 'Due date is late (feedback)',
     estimation_done_late: 'Due date is late (done)',
+    empty_cells_selected: 'empty cell selected | empty cells selected',
     feedback: 'feedback',
     full_screen: 'Display in full screen',
     for_selection: 'For current list and filters',

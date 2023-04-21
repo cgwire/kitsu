@@ -1,7 +1,5 @@
 <template>
   <div class="columns fixed-page">
-    <action-panel />
-
     <div class="column main-column">
       <div class="assets page">
         <div class="asset-list-header page-header">
@@ -108,9 +106,13 @@
     <div
       id="side-column"
       class="column side-column"
-      v-show="nbSelectedTasks === 1 || this.keepTaskPanelOpen"
+      v-show="isTaskSidePanelOpen"
     >
-      <task-info :task="selectedTasks.values().next().value" />
+      <task-info
+        :task="selectedTasks.values().next().value"
+        entity-type="Asset"
+        with-actions
+      />
     </div>
 
     <edit-asset-modal
@@ -253,7 +255,6 @@ import stringHelpers from '@/lib/string'
 import { searchMixin } from '@/components/mixins/search'
 import { entitiesMixin } from '@/components/mixins/entities'
 
-import ActionPanel from '@/components/tops/ActionPanel'
 import AssetList from '@/components/lists/AssetList'
 import AddMetadataModal from '@/components/modals/AddMetadataModal'
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal'
@@ -279,7 +280,6 @@ export default {
   mixins: [searchMixin, entitiesMixin],
 
   components: {
-    ActionPanel,
     AssetList,
     AddMetadataModal,
     AddThumbnailsModal,
@@ -303,6 +303,7 @@ export default {
 
   data() {
     return {
+      type: 'asset',
       assetToDelete: {},
       assetToRestore: {},
       assetToEdit: {},
@@ -414,6 +415,8 @@ export default {
 
   beforeDestroy() {
     this.clearSelectedAssets()
+    document.removeEventListener('mouseup', this.onExtendUp)
+    document.removeEventListener('mousemove', this.onExtendMove)
   },
 
   computed: {
@@ -428,6 +431,7 @@ export default {
       'assetValidationColumns',
       'currentEpisode',
       'currentProduction',
+      'departmentMap',
       'departments',
       'displayedAssetsByType',
       'episodeMap',
@@ -439,14 +443,12 @@ export default {
       'isAssetEstimation',
       'isAssetTime',
       'isTVShow',
-      'nbSelectedTasks',
-      'selectedTasks',
+      'productionAssetTaskTypes',
+      'selectedAssets',
       'assetSorting',
       'taskTypeMap',
       'taskTypes',
-      'user',
-      'departmentMap',
-      'productionAssetTaskTypes'
+      'user'
     ]),
 
     newAssetPath() {
@@ -1027,10 +1029,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .main-column {
-  border-right: 3px solid $grey-strong;
-}
-
 .data-list {
   margin-top: 0;
 }
@@ -1053,10 +1051,6 @@ export default {
 .column {
   overflow-y: auto;
   padding: 0;
-}
-
-.main-column {
-  border-right: 3px solid $light-grey;
 }
 
 .combobox-department {

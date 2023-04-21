@@ -66,8 +66,11 @@ const actions = {
     return client.getEvents(after, before)
   },
 
-  searchData(_, { query }) {
-    return client.searchData(query)
+  searchData(_, { query, limit }) {
+    if (!limit) {
+      limit = 3
+    }
+    return client.searchData(query, limit)
   }
 }
 
