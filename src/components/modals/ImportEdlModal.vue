@@ -103,7 +103,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['isTVShow'])
+    ...mapGetters(['currentProduction', 'isTVShow'])
   },
 
   methods: {
@@ -126,6 +126,14 @@ export default {
   },
 
   watch: {
+    currentProduction() {
+      if (this.isTVShow)
+        this.form.nomenclature =
+          '${project_name}_${episode_name}-${sequence_name}-${shot_name}'
+      else
+        this.form.nomenclature = '${project_name}_${sequence_name}-${shot_name}'
+    },
+
     active() {
       this.reset()
     }

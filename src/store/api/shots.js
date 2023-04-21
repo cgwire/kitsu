@@ -162,7 +162,9 @@ export default {
     return client.ppost(path, formData)
   },
 
-  postEdl(production, formData, nomenclature, match_case, episode) {
+  postEdl(production, edl_file, nomenclature, match_case, episode) {
+    const formData = new FormData()
+    formData.append('file', edl_file)
     formData.append('nomenclature', nomenclature)
     formData.append('match_case', match_case)
     let path = `/api/import/edl/projects/${production.id}`

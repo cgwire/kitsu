@@ -1069,17 +1069,13 @@ export default {
     },
 
     uploadEDLFile(data, nomenclature, match_case) {
-      const formData = new FormData()
       const filename = 'import.edl'
-      const file = new File([data], filename, { type: 'text/plain' })
-
-      formData.append('file', file)
+      const edl_file = new File([data], filename, { type: 'text/plain' })
 
       this.loading.importing = true
       this.errors.importing = false
-      this.$store.commit('SHOT_EDL_FILE_SELECTED', formData)
 
-      this.uploadEdlFile({ nomenclature, match_case })
+      this.uploadEdlFile({ edl_file, nomenclature, match_case })
         .then(() => {
           this.loading.importing = false
           this.loadEpisodes().catch(console.error)
