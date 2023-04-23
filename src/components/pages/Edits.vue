@@ -1,7 +1,5 @@
 <template>
   <div class="columns fixed-page">
-    <action-panel />
-
     <div class="column main-column">
       <div class="edits page">
         <div class="edit-list-header page-header">
@@ -111,9 +109,13 @@
     <div
       id="side-column"
       class="column side-column"
-      v-show="nbSelectedTasks === 1 || this.keepTaskPanelOpen"
+      v-show="isTaskSidePanelOpen"
     >
-      <task-info :task="selectedTasks.values().next().value" />
+      <task-info
+        :task="selectedTasks.values().next().value"
+        entity-type="Edit"
+        with-actions
+      />
     </div>
 
     <edit-edit-modal
@@ -260,7 +262,6 @@ import stringHelpers from '@/lib/string'
 import { searchMixin } from '@/components/mixins/search'
 import { entitiesMixin } from '@/components/mixins/entities'
 
-import ActionPanel from '@/components/tops/ActionPanel'
 import AddMetadataModal from '@/components/modals/AddMetadataModal'
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal'
 import BigThumbnailsButton from '@/components/widgets/BigThumbnailsButton'
@@ -287,7 +288,6 @@ export default {
   mixins: [searchMixin, entitiesMixin],
 
   components: {
-    ActionPanel,
     AddMetadataModal,
     AddThumbnailsModal,
     BigThumbnailsButton,
@@ -312,6 +312,7 @@ export default {
 
   data() {
     return {
+      type: 'edit',
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
       departmentFilter: [],
@@ -421,22 +422,8 @@ export default {
       'currentEpisode',
       'currentProduction',
       'displayedEdits',
+      'departmentMap',
       'departments',
-      'episodeMap',
-      'episodes',
-      'isCurrentUserClient',
-      'isCurrentUserManager',
-      'isEditDescription',
-      'isEditEstimation',
-      'isEditTime',
-      'isEditsLoading',
-      'isEditsLoadingError',
-      'isShowAssignations',
-      'isTVShow',
-      'nbSelectedTasks',
-      'openProductions',
-      'selectedTasks',
-      'isLongEditList',
       'editMap',
       'editFilledColumns',
       'editsCsvFormData',
@@ -445,10 +432,23 @@ export default {
       'editValidationColumns',
       'editListScrollPosition',
       'editSorting',
+      'episodeMap',
+      'episodes',
+      'openProductions',
+      'isCurrentUserClient',
+      'isCurrentUserManager',
+      'isEditDescription',
+      'isEditEstimation',
+      'isEditTime',
+      'isEditsLoading',
+      'isEditsLoadingError',
+      'isLongEditList',
+      'isShowAssignations',
+      'isTVShow',
+      'productionEditTaskTypes',
+      'selectedEdits',
       'taskTypeMap',
-      'user',
-      'departmentMap',
-      'productionEditTaskTypes'
+      'user'
     ]),
 
     searchField() {
@@ -991,7 +991,7 @@ export default {
       return {
         title:
           `${this.currentProduction ? this.currentProduction.name : ''}` +
-          ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
+          ` - ${this.currentEpisode ? (this.currentEpisode.name || this.$t('main.all')) : ''}` +
           ` | ${this.$t('edits.title')} - Kitsu`
       }
     } else {
@@ -1036,10 +1036,6 @@ export default {
 .column {
   overflow-y: auto;
   padding: 0;
-}
-
-.main-column {
-  border-right: 3px solid $light-grey;
 }
 
 .combobox-department {

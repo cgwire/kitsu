@@ -1,3 +1,5 @@
+import { mapGetters, mapActions } from 'vuex'
+
 import func from '@/lib/func'
 import preferences from '@/lib/preferences'
 
@@ -30,6 +32,12 @@ export const entitiesMixin = {
   beforeDestroy() {},
 
   computed: {
+    ...mapGetters([
+      'nbSelectedTasks',
+      'selectedTasks',
+      'nbSelectedValidations',
+    ]),
+
     searchField() {
       return this.$refs[`${this.type}-search-field`]
     },
@@ -40,6 +48,28 @@ export const entitiesMixin = {
 
     dataMatchers() {
       return ['Name']
+    },
+
+    isTaskSidePanelOpen () {
+      return (
+        this.nbSelectedTasks > 0
+        || this.keepTaskPanelOpen
+        || this.nbSelectedEntities > 0
+        || this.nbSelectedValidations > 0
+      )
+    },
+
+    nbSelectedEntities () {
+      return this.selectedEntities.size
+    },
+
+    entityTypeName () {
+      return `${this.type[0].toUpperCase()}${this.type.slice(1)}`
+    },
+
+    selectedEntities () {
+      if (['Episode', 'Sequence'].includes(this.entityTypeName)) return []
+      return this[`selected${this.entityTypeName}s`]
     }
   },
 

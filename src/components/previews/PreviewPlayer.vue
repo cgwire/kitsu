@@ -950,6 +950,9 @@ export default {
     },
 
     fixCanvasSize(dimensions) {
+      if (!dimensions) {
+        dimensions = this.getCurrentPreviewDimensions()
+      }
       const width = dimensions.width
       const height = dimensions.height
       if (this.fabricCanvas) {
@@ -988,7 +991,7 @@ export default {
       this.container.setAttribute('data-fullscreen', !!true)
       this.fullScreen = true
       this.$nextTick(() => {
-        this.fixCanvasSize(this.getCurrentPreviewDimensions())
+        this.fixCanvasSize()
         // Needed to avoid fullsceen button to be called with space bar.
         this.clearFocus()
         this.previewViewer.resize()
@@ -1002,7 +1005,7 @@ export default {
       this.isComparing = false
       this.fullScreen = false
       this.isCommentsHidden = true
-      this.fixCanvasSize(this.getCurrentPreviewDimensions())
+      this.fixCanvasSize()
       this.$nextTick(() => {
         // Needed to avoid fullsceen button to be called with space bar.
         this.clearFocus()
@@ -1029,7 +1032,7 @@ export default {
         this.$nextTick(() => {
           this.previewViewer.resetVideo()
           this.previewViewer.resetPicture()
-          this.fixCanvasSize(this.getCurrentPreviewDimensions())
+          this.fixCanvasSize()
           this.clearFocus()
           this.$nextTick(() => {
             this.loadAnnotation()
@@ -1368,7 +1371,7 @@ export default {
         }
         this.previewViewer.resetVideo()
         this.previewViewer.resetPicture()
-        this.fixCanvasSize(this.getCurrentPreviewDimensions())
+        this.fixCanvasSize()
         this.endAnnotationSaving()
         this.$nextTick(() => {
           this.previewViewer.resize()
@@ -1618,7 +1621,7 @@ export default {
         this.previewToCompareId = ''
       }
       this.$nextTick(() => {
-        this.fixCanvasSize(this.getCurrentPreviewDimensions())
+        this.fixCanvasSize()
       })
     },
 
@@ -1626,7 +1629,7 @@ export default {
       this.endAnnotationSaving()
       this.previewViewer.resize()
       this.$nextTick(() => {
-        this.fixCanvasSize(this.getCurrentPreviewDimensions())
+        this.fixCanvasSize()
       })
     },
 
@@ -1635,7 +1638,7 @@ export default {
       this.previewViewer.resetPicture()
       this.previewViewer.resize()
       this.$nextTick(() => {
-        this.fixCanvasSize(this.getCurrentPreviewDimensions())
+        this.fixCanvasSize()
       })
     },
 
@@ -1650,7 +1653,7 @@ export default {
 
     isOrdering() {
       this.$nextTick(() => {
-        this.fixCanvasSize(this.getCurrentPreviewDimensions())
+        this.fixCanvasSize()
         this.previewViewer.resetVideo()
         this.previewViewer.resetPicture()
       })
@@ -1672,7 +1675,7 @@ export default {
     isCommentsHidden() {
       this.$nextTick(() => {
         window.dispatchEvent(new Event('resize'))
-        this.fixCanvasSize(this.getCurrentPreviewDimensions())
+        this.fixCanvasSize()
       })
     },
 

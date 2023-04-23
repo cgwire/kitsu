@@ -11,6 +11,7 @@ import {
 } from '@/lib/sorting'
 import { arrayMove, removeModelFromList } from '@/lib/models'
 import { formatDate } from '@/lib/time'
+import func from '@/lib/func'
 
 import personStore from '@/store/modules/people'
 import taskTypeStore from '@/store/modules/tasktypes'
@@ -296,8 +297,7 @@ const actions = {
       }
       entityIdsByTaskType[taskTypeId].push(entityId)
     })
-    return async
-      .eachSeries(
+    return func.runPromiseAsSeries(
         Object.keys(entityIdsByTaskType).map(taskTypeId => {
           const data = {
             task_type_id: taskTypeId,

@@ -1,7 +1,5 @@
 <template>
   <div class="columns fixed-page">
-    <action-panel />
-
     <div class="column main-column">
       <div class="shots page">
         <div class="shot-list-header page-header">
@@ -123,9 +121,13 @@
     <div
       id="side-column"
       class="column side-column"
-      v-show="nbSelectedTasks === 1 || this.keepTaskPanelOpen"
+      v-show="isTaskSidePanelOpen"
     >
-      <task-info :task="selectedTasks.values().next().value" />
+      <task-info
+        :task="selectedTasks.values().next().value"
+        entity-type="Shot"
+        with-actions
+      />
     </div>
 
     <manage-shots-modal
@@ -292,7 +294,6 @@ import stringHelpers from '@/lib/string'
 import { searchMixin } from '@/components/mixins/search'
 import { entitiesMixin } from '@/components/mixins/entities'
 
-import ActionPanel from '@/components/tops/ActionPanel'
 import AddMetadataModal from '@/components/modals/AddMetadataModal'
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal'
 import BigThumbnailsButton from '@/components/widgets/BigThumbnailsButton'
@@ -322,7 +323,6 @@ export default {
   mixins: [searchMixin, entitiesMixin],
 
   components: {
-    ActionPanel,
     AddMetadataModal,
     AddThumbnailsModal,
     BigThumbnailsButton,
@@ -350,6 +350,7 @@ export default {
 
   data() {
     return {
+      type: 'shot',
       initialLoading: true,
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
@@ -463,6 +464,7 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
+      'departmentMap',
       'displayedShotsBySequence',
       'episodeMap',
       'episodes',
@@ -473,6 +475,7 @@ export default {
       'isFrameIn',
       'isFrameOut',
       'isFps',
+      'isLongShotList',
       'isMaxRetakes',
       'isResolution',
       'isShotDescription',
@@ -482,11 +485,10 @@ export default {
       'isShotsLoadingError',
       'isShowAssignations',
       'isTVShow',
-      'nbSelectedTasks',
       'openProductions',
+      'productionShotTaskTypes',
+      'selectedShots',
       'sequences',
-      'selectedTasks',
-      'isLongShotList',
       'shotMap',
       'shotFilledColumns',
       'shotsCsvFormData',
@@ -497,9 +499,7 @@ export default {
       'shotListScrollPosition',
       'shotSorting',
       'taskTypeMap',
-      'user',
-      'departmentMap',
-      'productionShotTaskTypes'
+      'user'
     ]),
 
     searchField() {
@@ -1208,10 +1208,6 @@ export default {
 .column {
   overflow-y: auto;
   padding: 0;
-}
-
-.main-column {
-  border-right: 3px solid $light-grey;
 }
 
 .combobox-department {

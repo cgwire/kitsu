@@ -1,252 +1,266 @@
 <template>
-  <div class="side task-info" ref="side-panel" v-if="task">
-    <div class="page-header">
-      <div class="flexrow header-title">
-        <div class="title flexrow-item">
-          <router-link :to="taskEntityPath">
-            {{ task ? title : 'Loading...' }}
-          </router-link>
-        </div>
-        <task-type-name
-          class="flexrow-item task-type"
-          :task-type="currentTaskType"
-          :production-id="currentProduction.id"
-          v-if="currentTaskType"
-        />
-      </div>
-      <div class="flexrow task-information">
-        <button-simple
-          class="flexrow-item change-wideness-button"
-          icon="right"
-          :title="$t('tasks.smaller')"
-          @click="toggleExtraWidth"
-          v-if="isExtraWide && isPreview"
-        />
-        <button-simple
-          class="flexrow-item change-wideness-button"
-          icon="left"
-          :title="$t('tasks.bigger')"
-          @click="toggleExtraWidth"
-          v-else-if="isWide && isPreview"
-        />
-        <button-simple
-          class="flexrow-item change-wideness-button"
-          icon="right"
-          :title="$t('tasks.smaller')"
-          @click="toggleWidth"
-          v-if="isWide && !isExtraWide && isPreview"
-        />
-        <button-simple
-          class="flexrow-item change-wideness-button"
-          icon="left"
-          :title="$t('tasks.bigger')"
-          @click="toggleWidth"
-          v-else-if="!isExtraWide && isPreview"
-        />
-        <button-simple
-          class="flexrow-item set-thumbnail-button"
-          icon="image"
-          :title="$t('tasks.set_preview')"
-          @click="setCurrentPreviewAsEntityThumbnail"
-          v-if="isCurrentUserManager && isPreview && extension !== 'gif'"
-        />
-        <subscribe-button
-          class="flexrow-item subscribe-button"
-          :subscribed="isAssigned || task.is_subscribed"
-          @click="toggleSubscribe"
-          v-if="!isAssigned"
-        />
-        <button-simple
-          class="flexrow-item"
-          icon="download"
-          :title="$t('main.csv.export_file')"
-          @click="onExportClick"
-        />
-        <div class="filler"></div>
-        <div class="preview-list flexrow" v-if="isPreview">
-          <span
-            :class="{
-              'flexrow-item': true,
-              selected: currentPreviewIndex === index
-            }"
-            :key="'preview-' + preview.id"
-            @click="onPreviewChanged(index)"
-            v-for="(preview, index) in lastFivePreviews"
-          >
-            {{ preview.revision }}
-          </span>
-          <router-link class="history-button flexrow-item" :to="taskPath">
-            <corner-right-up-icon size="0.9x" />
-          </router-link>
-        </div>
-      </div>
-    </div>
-
-    <div class="task-columns" ref="task-columns">
-      <div class="task-column preview-column" v-if="isPreview">
-        <div class="preview-column-content">
-          <div class="preview">
-            <div v-if="taskPreviews && taskPreviews.length > 0">
-              <preview-player
-                :entity-preview-files="taskEntityPreviews"
-                :last-preview-files="lastFivePreviews"
-                :previews="currentPreview ? currentPreview.previews : []"
-                :task-type-map="taskTypeMap"
-                :light="!isWide"
-                :read-only="isPreviewPlayerReadOnly"
-                :is-assigned="isAssigned"
-                :task="task"
-                :extra-wide="isExtraWide"
-                @annotation-changed="onAnnotationChanged"
-                @change-current-preview="changeCurrentPreview"
-                @add-extra-preview="onAddExtraPreview"
-                @remove-extra-preview="onRemoveExtraPreview"
-                @previews-order-change="onPreviewsOrderChange"
-                @comment-added="onCommentAdded"
-                @time-updated="onTimeUpdated"
-                ref="preview-player"
-              />
-            </div>
-
-            <div
-              class="no-preview"
-              v-if="!taskPreviews || taskPreviews.length === 0"
-            >
-              <em>{{ $t('tasks.no_preview') }}</em>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="task-column comments-column">
-        <div>
-          <div>
-            <add-comment
-              ref="add-comment"
-              :user="user"
-              :team="currentTeam"
-              :task="task"
-              :task-status="getTaskStatusForCurrentUser(task.project_id)"
-              :light="true"
-              :is-loading="loading.addComment"
-              :previewForms="previewForms"
-              :is-error="errors.addComment"
-              :is-max-retakes-error="errors.addCommentMaxRetakes"
-              :fps="parseInt(currentFps)"
-              :time="isPreview ? currentTime : currentTimeRaw"
-              :revision="currentRevision"
-              :is-movie="isMoviePreview"
-              @add-comment="addComment"
-              @add-preview="onAddPreviewClicked"
-              @file-drop="selectFile"
-              @clear-files="clearPreviewFiles"
-              @remove-preview="onPreviewFormRemoved"
-              @annotation-snapshots-requested="extractAnnotationSnapshots"
-              v-show="isCommentingAllowed"
-            />
-
-            <div
-              class="comments"
-              v-if="taskComments && taskComments.length > 0 && !loading.task"
-            >
-              <XyzTransitionGroup
-                appear
-                v-xyz="{ fade: animOn, up: animOn, 'flip-up': animOn }"
-              >
-                <comment
-                  :key="'comment' + comment.id"
-                  :comment="comment"
-                  :task="task"
-                  :light="true"
-                  :add-preview="onAddPreviewClicked"
-                  :is-first="index === 0"
-                  :is-last="index === pinnedCount"
-                  :is-change="isStatusChange(index)"
-                  :editable="
-                    (comment.person && user.id === comment.person.id) ||
-                    isCurrentUserAdmin
-                  "
-                  @duplicate-comment="onDuplicateComment"
-                  @pin-comment="onPinComment"
-                  @edit-comment="onEditComment"
-                  @delete-comment="onDeleteComment"
-                  @checklist-updated="saveComment"
-                  @ack-comment="onAckComment"
-                  @time-code-clicked="timeCodeClicked"
-                  v-for="(comment, index) in taskComments"
-                />
-              </XyzTransitionGroup>
-            </div>
-            <div class="no-comment" v-else-if="!loading.task">
-              <em>
-                {{ $t('tasks.no_comment') }}
-              </em>
-            </div>
-          </div>
-        </div>
-
-        <div class="has-text-centered" v-if="loading.task">
-          <spinner />
-        </div>
-      </div>
-    </div>
-
-    <add-preview-modal
-      ref="add-preview-modal"
-      :active="modals.addPreview"
-      :is-loading="loading.addPreview"
-      :is-error="errors.addPreview"
-      @cancel="onClosePreview"
-      @fileselected="selectFile"
-      @confirm="onClosePreview"
-    />
-
-    <add-preview-modal
-      ref="add-extra-preview-modal"
-      :active="modals.addExtraPreview"
-      :is-loading="loading.addExtraPreview"
-      :is-error="errors.addExtraPreview"
-      :form-data="addExtraPreviewFormData"
-      extensions=".png,.jpg,.jpeg"
-      @cancel="onCloseExtraPreview"
-      @fileselected="selectFile"
-      @confirm="createExtraPreview"
-    />
-
-    <edit-comment-modal
-      :active="modals.editComment"
-      :is-loading="loading.editComment"
-      :is-error="errors.editComment"
-      :comment-to-edit="commentToEdit"
-      :team="currentTeam"
-      @confirm="confirmEditTaskComment"
-      @cancel="onCancelEditComment"
-    />
-
-    <delete-modal
-      :active="modals.deleteComment"
-      :is-loading="loading.deleteComment"
-      :is-error="errors.deleteComment"
-      :text="$t('tasks.delete_comment')"
-      :error-text="$t('tasks.delete_comment_error')"
-      @confirm="confirmDeleteTaskComment"
-      @cancel="onCancelDeleteComment"
-    />
-
-    <delete-modal
-      :active="modals.deleteExtraPreview"
-      :is-loading="loading.deleteExtraPreview"
-      :is-error="errors.deleteExtraPreview"
-      :text="$t('tasks.delete_preview')"
-      :error-text="$t('tasks.delete_preview_error')"
-      @cancel="onCancelRemoveExtraPreview"
-      @confirm="confirmDeleteTaskPreview"
-    />
+<div class="side-wrapper">
+  <div
+    class="extend-bar"
+    @mouseup="onExtendUp"
+    @mousedown="onExtendDown"
+  >
   </div>
+  <div
+    class="side task-info"
+    ref="side-panel"
+  >
+    <action-panel v-if="withActions"
+      @export-task="onExportClick"
+    />
+
+    <div
+      class="multi-selection-info pa1"
+      v-if="withActions && (
+        (nbSelectedTasks || 0) > 1 ||
+        nbSelectedValidations > 0
+      )"
+    >
+      <h1 class="title">Selected tasks</h1>
+      <div class="task-list mt1">
+        <div
+          class="selected-task-line flexrow"
+          v-for="task in selectedTasksToDisplay"
+        >
+          <task-type-name
+            class="flexrow-item task-type"
+            :task-type="taskTypeMap.get(task.task_type_id)"
+            :production-id="currentProduction.id"
+          />
+          <span class="flexow-item">{{ task.entity_name }}</span>
+        </div>
+        <div class="mt2 selected-task-line" v-if="nbSelectedValidations > 0">
+          <span v-if="nbSelectedTasks > 0">+</span>
+            {{ nbSelectedValidations }}
+            {{ $tc('tasks.empty_cells_selected', nbSelectedValidations) }}
+        </div>
+      </div>
+    </div>
+
+    <div v-else-if="task">
+      <div class="pa1 pb0">
+        <div class="flexrow header-title">
+          <task-type-name
+            class="flexrow-item task-type"
+            :task-type="currentTaskType"
+            :production-id="currentProduction.id"
+            v-if="currentTaskType"
+          />
+          <div class="title flexrow-item filler">
+            <router-link :to="taskEntityPath">
+              {{ task ? title : 'Loading...' }}
+            </router-link>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-columns pa1 pt0" ref="task-columns">
+        <div class="task-column preview-column" v-if="isPreview">
+          <div class="preview-column-content">
+            <div class="flexrow">
+              <div class="filler"></div>
+              <div class="preview-list flexrow w100" v-if="isPreview">
+                <span
+                  :class="{
+                    'flexrow-item': true,
+                    selected: currentPreviewIndex === index
+                  }"
+                  :key="'preview-' + preview.id"
+                  @click="onPreviewChanged(index)"
+                  v-for="(preview, index) in lastFivePreviews"
+                >
+                  {{ preview.revision }}
+                </span>
+                <router-link class="history-button flexrow-item" :to="taskPath">
+                  <corner-right-up-icon size="0.9x" />
+                </router-link>
+              </div>
+            </div>
+
+            <div class="preview">
+              <div v-if="taskPreviews && taskPreviews.length > 0">
+                <preview-player
+                  :entity-preview-files="taskEntityPreviews"
+                  :extra-wide="isExtraWide"
+                  :is-assigned="isAssigned"
+                  :last-preview-files="lastFivePreviews"
+                  :light="!isWide"
+                  :previews="currentPreview ? currentPreview.previews : []"
+                  :read-only="isPreviewPlayerReadOnly"
+                  :task="task"
+                  :task-type-map="taskTypeMap"
+                  @annotation-changed="onAnnotationChanged"
+                  @change-current-preview="changeCurrentPreview"
+                  @add-extra-preview="onAddExtraPreview"
+                  @remove-extra-preview="onRemoveExtraPreview"
+                  @previews-order-change="onPreviewsOrderChange"
+                  @comment-added="onCommentAdded"
+                  @time-updated="onTimeUpdated"
+                  ref="preview-player"
+                />
+              </div>
+
+              <div
+                class="no-preview"
+                v-if="!taskPreviews || taskPreviews.length === 0"
+              >
+                <em>{{ $t('tasks.no_preview') }}</em>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="task-column comments-column mt1">
+          <div>
+            <div>
+              <add-comment
+                ref="add-comment"
+                :user="user"
+                :team="currentTeam"
+                :task="task"
+                :task-status="getTaskStatusForCurrentUser(task.project_id)"
+                :light="true"
+                :is-loading="loading.addComment"
+                :previewForms="previewForms"
+                :is-error="errors.addComment"
+                :is-max-retakes-error="errors.addCommentMaxRetakes"
+                :fps="parseInt(currentFps)"
+                :time="isPreview ? currentTime : currentTimeRaw"
+                :revision="currentRevision"
+                :is-movie="isMoviePreview"
+                @add-comment="addComment"
+                @add-preview="onAddPreviewClicked"
+                @file-drop="selectFile"
+                @clear-files="clearPreviewFiles"
+                @remove-preview="onPreviewFormRemoved"
+                @annotation-snapshots-requested="extractAnnotationSnapshots"
+                v-show="isCommentingAllowed"
+              />
+
+              <div
+                class="comments"
+                v-if="taskComments && taskComments.length > 0 && !loading.task"
+              >
+                <XyzTransitionGroup
+                  appear
+                  v-xyz="{ fade: animOn, up: animOn, 'flip-up': animOn }"
+                >
+                  <comment
+                    :key="'comment' + comment.id"
+                    :comment="comment"
+                    :task="task"
+                    :light="true"
+                    :add-preview="onAddPreviewClicked"
+                    :is-first="index === 0"
+                    :is-last="index === pinnedCount"
+                    :is-change="isStatusChange(index)"
+                    :editable="
+                      (comment.person && user.id === comment.person.id) ||
+                      isCurrentUserAdmin
+                    "
+                    @duplicate-comment="onDuplicateComment"
+                    @pin-comment="onPinComment"
+                    @edit-comment="onEditComment"
+                    @delete-comment="onDeleteComment"
+                    @checklist-updated="saveComment"
+                    @ack-comment="onAckComment"
+                    @time-code-clicked="timeCodeClicked"
+                    v-for="(comment, index) in taskComments"
+                  />
+                </XyzTransitionGroup>
+              </div>
+              <div class="no-comment" v-else-if="!loading.task">
+                <em>
+                  {{ $t('tasks.no_comment') }}
+                </em>
+              </div>
+            </div>
+          </div>
+
+          <div class="has-text-centered" v-if="loading.task">
+            <spinner />
+          </div>
+        </div>
+      </div>
+
+      <add-preview-modal
+        ref="add-preview-modal"
+        :active="modals.addPreview"
+        :is-loading="loading.addPreview"
+        :is-error="errors.addPreview"
+        @cancel="onClosePreview"
+        @fileselected="selectFile"
+        @confirm="onClosePreview"
+      />
+
+      <add-preview-modal
+        ref="add-extra-preview-modal"
+        :active="modals.addExtraPreview"
+        :is-loading="loading.addExtraPreview"
+        :is-error="errors.addExtraPreview"
+        :form-data="addExtraPreviewFormData"
+        extensions=".png,.jpg,.jpeg"
+        @cancel="onCloseExtraPreview"
+        @fileselected="selectFile"
+        @confirm="createExtraPreview"
+      />
+
+      <edit-comment-modal
+        :active="modals.editComment"
+        :is-loading="loading.editComment"
+        :is-error="errors.editComment"
+        :comment-to-edit="commentToEdit"
+        :team="currentTeam"
+        @confirm="confirmEditTaskComment"
+        @cancel="onCancelEditComment"
+      />
+
+      <delete-modal
+        :active="modals.deleteComment"
+        :is-loading="loading.deleteComment"
+        :is-error="errors.deleteComment"
+        :text="$t('tasks.delete_comment')"
+        :error-text="$t('tasks.delete_comment_error')"
+        @confirm="confirmDeleteTaskComment"
+        @cancel="onCancelDeleteComment"
+      />
+
+      <delete-modal
+        :active="modals.deleteExtraPreview"
+        :is-loading="loading.deleteExtraPreview"
+        :is-error="errors.deleteExtraPreview"
+        :text="$t('tasks.delete_preview')"
+        :error-text="$t('tasks.delete_preview_error')"
+        @cancel="onCancelRemoveExtraPreview"
+        @confirm="confirmDeleteTaskPreview"
+      />
+    </div>
+  <div
+    class="side task-info pa1"
+    v-else-if="nbSelectedEntities > 0"
+  >
+    <h1 class="title mt2">Selected Entities</h1>
+    <div class="pa2 mt1">
+      <div
+        class="entity-line"
+        v-for="entity in Array.from(selectedEntities.values())"
+      >
+        {{ entity.full_name }}
+      </div>
+    </div>
+  </div>
+
 
   <div class="side task-info has-text-centered" v-else>
     {{ $t('tasks.no_task_selected') }}
   </div>
+    </div>
+</div>
 </template>
 
 <script>
@@ -256,11 +270,14 @@ import { getTaskEntityPath, getTaskPath } from '@/lib/path'
 import { getTaskTypeStyle } from '@/lib/render'
 import csv from '@/lib/csv'
 import drafts from '@/lib/drafts'
+import { sortTaskNames } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 import { formatDate } from '@/lib/time'
 import { taskMixin } from '@/components/mixins/task'
+import { domMixin } from '@/components/mixins/dom'
 import { CornerRightUpIcon } from 'vue-feather-icons'
 
+import ActionPanel from '@/components/tops/ActionPanel'
 import AddComment from '@/components/widgets/AddComment'
 import AddPreviewModal from '@/components/modals/AddPreviewModal'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
@@ -274,9 +291,10 @@ import PreviewPlayer from '@/components/previews/PreviewPlayer'
 
 export default {
   name: 'task-info',
-  mixins: [taskMixin],
+  mixins: [domMixin, taskMixin],
 
   components: {
+    ActionPanel,
     AddComment,
     AddPreviewModal,
     ButtonSimple,
@@ -318,6 +336,14 @@ export default {
     panelName: {
       type: String,
       default: 'todefine'
+    },
+    withActions: {
+      type: Boolean,
+      default: false
+    },
+    entityType: {
+      type: String,
+      default: 'Asset'
     }
   },
 
@@ -334,6 +360,7 @@ export default {
       isWide: false,
       isExtraWide: false,
       otherPreviews: [],
+      panelWidth: 800,
       taskComments: [],
       taskPreviews: [],
       errors: {
@@ -373,6 +400,14 @@ export default {
         this.$refs['add-comment'].text = draft
       }
     }
+    this.isChangingWidth = false
+    document.addEventListener('mouseup', this.onExtendUp)
+    document.addEventListener('mousemove', this.onExtendMove)
+  },
+
+  beforeDestroy() {
+    document.removeEventListener('mouseup', this.onExtendUp)
+    document.removeEventListener('mousemove', this.onExtendMove)
   },
 
   computed: {
@@ -390,13 +425,27 @@ export default {
       'isSingleEpisode',
       'isTVShow',
       'lastCommentDraft',
+      'nbSelectedTasks',
       'personMap',
       'previewFormData',
       'productionMap',
+      'selectedAssets',
+      'selectedEdits',
+      'selectedShots',
+      'selectedTasks',
+      'nbSelectedValidations',
       'taskEntityPreviews',
       'taskTypeMap',
       'user'
     ]),
+
+    nbSelectedEntities () {
+      return this.selectedEntities.size
+    },
+
+    selectedEntities () {
+      return this[`selected${this.entityType}s`]
+    },
 
     currentTeam() {
       if (!this.task) return []
@@ -571,7 +620,7 @@ export default {
       return `/api/movies/originals/preview-files/${previewId}.mp4`
     },
 
-    tasktypeStyle() {
+    taskTypeStyle() {
       return getTaskTypeStyle(this.task)
     },
 
@@ -592,7 +641,7 @@ export default {
 
     lastFivePreviews() {
       if (this.taskPreviews) {
-        return this.taskPreviews.slice(0, 5)
+        return this.taskPreviews.slice(0, 10)
       } else {
         return []
       }
@@ -601,6 +650,13 @@ export default {
     pinnedCount() {
       if (!this.taskComments) return 0
       return this.taskComments.filter(c => c.pinned).length
+    },
+
+    selectedTasksToDisplay () {
+      return sortTaskNames(
+        Array.from(this.selectedTasks.values()),
+        this.taskTypeMap
+      )
     }
   },
 
@@ -1118,6 +1174,44 @@ export default {
         }
       })
       csv.buildCsvFile(name, [headers].concat(commentLines))
+    },
+
+    onExtendUp (event) {
+      this.pauseEvent(event)
+      this.isChangingWidth = false
+    },
+
+    onExtendDown(event) {
+      this.pauseEvent(event)
+      this.lastWidthX = event.clientX
+      const panel = this.$refs['side-panel']
+      const parent = panel.parentElement.parentElement
+      this.lastWidth = parent.offsetWidth
+      this.isChangingWidth = true
+    },
+
+    onExtendMove (event) {
+      if (this.isChangingWidth) {
+        this.pauseEvent(event)
+        const diff = this.lastWidthX - event.clientX
+        const panel = this.$refs['side-panel']
+        const parent = panel.parentElement.parentElement
+        const width = Math.max(this.lastWidth + diff, 420)
+        parent.style['min-width'] = width + 'px'
+        this.$refs['preview-player'].fixCanvasSize()
+
+        console.log(width)
+        if (width > 699 && width < 900) {
+          this.isWide = true
+          this.isExtraWide = false
+        } else if (width >= 900) {
+          this.isWide = true
+          this.isExtraWide = true
+        } else {
+          this.isWide = false
+          this.isExtraWide = false
+        }
+      }
     }
   },
 
@@ -1333,16 +1427,18 @@ export default {
 }
 
 .title {
-  margin: 0;
+  color: $grey;
   flex: 1;
   font-size: 1.3em;
-  line-height: 1.5em;
   font-weight: 500;
-  color: $grey;
+  line-height: 1.5em;
+  margin: 0;
+  margin-top: 3px;
 }
 
 .title a {
   color: inherit;
+  padding-top: 10px;
 }
 
 .history-button {
@@ -1362,7 +1458,6 @@ export default {
 }
 
 .task-column {
-  margin-top: 1em;
 }
 
 .comment {
@@ -1430,5 +1525,33 @@ export default {
 
 .preview-column-content {
   border-radius: 5px;
+}
+
+.selected-task-line {
+  color: $grey;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.entity-line {
+  color: $grey;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.side-wrapper {
+  display: flex;
+  align-items: stretch;
+  min-height: 100%;
+}
+
+.side {
+  flex: 1;
+}
+
+.extend-bar {
+  width: 3px;
+  background: #CCC;
+  cursor: w-resize;
 }
 </style>

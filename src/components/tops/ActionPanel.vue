@@ -5,8 +5,7 @@
       :class="{
         'action-topbar': true,
         unselectable: true,
-        minimized,
-        hidden: isHidden
+        minimized
       }"
       :style="{
         left: position.left + 'px',
@@ -15,8 +14,6 @@
     >
       <div
         class="menu"
-        @mousedown="startDrag"
-        @dblclick="minimized = !minimized"
       >
         <div class="flexrow">
 
@@ -35,7 +32,8 @@
                 isInDepartment
               ) &&
               !isEntitySelection &&
-              isTaskSelection
+              isTaskSelection &&
+              nbSelectedTasks > 1
             "
           >
             STATUS
@@ -148,7 +146,8 @@
               isCurrentViewEntity &&
               !isCurrentViewTaskType &&
               isCurrentUserManager &&
-              !isEntitySelection
+              !isEntitySelection &&
+              nbSelectedTasks !== 1
             "
           >
             <check-square-icon />
@@ -202,7 +201,10 @@
           </div>
 
           <div
-            class="menu-item"
+            :class="{
+              'menu-item': true,
+              active: selectedBar === 'delete-assets'
+            }"
             :title="$t('menu.delete_assets')"
             @click="selectBar('delete-assets')"
             v-if="
@@ -213,7 +215,10 @@
           </div>
 
           <div
-            class="menu-item"
+            :class="{
+              'menu-item': true,
+              active: selectedBar === 'delete-shots'
+            }"
             :title="$t('menu.delete_shots')"
             @click="selectBar('delete-shots')"
             v-if="isCurrentViewShot && isCurrentUserManager && !isTaskSelection"
@@ -222,7 +227,10 @@
           </div>
 
           <div
-            class="menu-item"
+            :class="{
+              'menu-item': true,
+              active: selectedBar === 'delete-edits'
+            }"
             :title="$t('menu.delete_edits')"
             @click="selectBar('delete-edits')"
             v-if="isCurrentViewEdit && isCurrentUserManager && !isTaskSelection"
@@ -230,30 +238,29 @@
             <trash-icon />
           </div>
 
-          <div
-            class="menu-item"
-            :title="$t('menu.delete_episodes')"
-            @click="selectBar('delete-episodes')"
-            v-if="
-              isCurrentViewEpisode &&
-              isCurrentUserManager &&
-              !isTaskSelection &&
-              isEntitySelection
-            "
-          >
-            <trash-icon />
-          </div>
-
           <div class="filler"></div>
 
-          <div class="flexrow-item close-bar" @click="minimized = !minimized">
-            <minus-icon v-if="!minimized" />
-            <square-icon v-else />
+          <div
+            class="menu-item mr1"
+            :title="$t('main.csv.export_file')"
+            @click="$emit('export-task')"
+            v-if="
+              isTaskSelection &&
+              !isEntitySelection &&
+              nbSelectedTasks === 1
+            "
+          >
+            <download-icon />
           </div>
 
-          <div class="flexrow-item close-bar" @click="clearSelection">
+          <!--div class="flexrow-item close-bar" @click="minimized = !minimized">
+            <minus-icon v-if="!minimized" />
+            <square-icon v-else />
+          </div-->
+
+          <!--div class="flexrow-item close-bar" @click="clearSelection">
             <x-icon />
-          </div>
+          </div-->
         </div>
       </div>
 
@@ -414,6 +421,7 @@
               'is-loading': loading.taskCreation
             }"
             @click="confirmTaskCreation"
+            v-if="nbSelectedTasks !== 1"
           >
             {{ $t('tasks.create_for_selection') }}
           </button>
@@ -662,6 +670,7 @@ import func from '@/lib/func'
 import {
   AlertCircleIcon,
   CheckSquareIcon,
+  DownloadIcon,
   EyeIcon,
   FilmIcon,
   ImageIcon,
@@ -691,6 +700,7 @@ export default {
     ComboboxStatus,
     ComboboxStyled,
     DeleteEntities,
+    DownloadIcon,
     EyeIcon,
     FilmIcon,
     ImageIcon,
@@ -711,10 +721,9 @@ export default {
       currentTeam: [],
       customAction: {},
       customActions: [],
-      minimized: false,
       person: null,
       priority: '0',
-      selectedBar: 'change-status',
+      selectedBar: '',
       selectedTaskIds: [],
       taskStatusId: '',
       statusComment: '',
@@ -809,6 +818,10 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
+    minimized () {
+      return this.selectedBar === ''
+    },
 
     currentUrl() {
       return this.$route.path
@@ -1268,7 +1281,11 @@ export default {
       localStorage.setItem(`${this.storagePrefix}-selected-bar`, barName, {
         expires: '1M'
       })
-      this.selectedBar = barName
+      if (this.selectedBar !== barName) {
+        this.selectedBar = barName
+      } else {
+        this.selectedBar = ''
+      }
     },
 
     autoChooseSelectBar() {
@@ -1286,8 +1303,8 @@ export default {
           this.selectedBar = 'delete-edits'
           return
         }
-        if (this.isCurrentViewEpisode && this.nbSelectedEpisodes > 0) {
-          this.selectedBar = 'delete-episodes'
+        if (this.nbSelectedTasks === 1) {
+          this.selectedBar = ''
           return
         }
 
@@ -1392,6 +1409,11 @@ export default {
       if (this.nbSelectedShots > 0) this.clearSelectedTasks()
     },
 
+    nbSelectedEdits() {
+      this.autoChooseSelectBar()
+      if (this.nbSelectedShots > 0) this.clearSelectedTasks()
+    },
+
     isHidden() {
       this.autoChooseSelectBar()
       if (this.isHidden) {
@@ -1439,6 +1461,13 @@ export default {
           if (!isUrlSelected) {
             this.customAction = this.customActions[0]
           }
+        }
+
+        if (this.nbSelectedTasks === 1) {
+          this.lastSelectedBar = this.selectedBar
+          this.selectedBar === ''
+        } else if (this.lastSelectedBar) {
+          this.selectedBar === this.lastSelectedBar
         }
       }
     },
@@ -1492,13 +1521,8 @@ export default {
 
 .action-topbar {
   background: #f8f8ff;
-  border-radius: 10px;
-  box-shadow: 0px 0px 8px var(--purple);
   color: $grey;
   z-index: 1000;
-  position: absolute;
-  left: 715px;
-  top: 145px;
 }
 
 div.assignation {
@@ -1529,12 +1553,11 @@ div.assignation {
   padding-top: 0.7em;
   border-bottom: 1px solid $light-grey-light;
   z-index: 200;
-  width: 500px;
 }
 
 .menu-item {
   cursor: pointer;
-  font-size: 1.2em;
+  font-size: .9em;
   padding: 0.2em 0.6em 0.4em 0.6em;
 
   &:hover {
@@ -1553,13 +1576,12 @@ div.assignation {
 }
 
 .action-bar {
-  border-radius: 10px;
   padding: 0.5em 0.5em;
+  border-bottom: 1px solid $light-grey-light;
 }
 
 .minimized {
   .menu {
-    border-radius: 10px;
   }
 }
 
@@ -1584,7 +1606,6 @@ div.assignation {
 
 .is-wide {
   margin: 0;
-  border-radius: 10px;
   flex: 1;
   width: 100%;
 }

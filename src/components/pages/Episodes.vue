@@ -1,7 +1,5 @@
 <template>
   <div class="columns fixed-page">
-    <action-panel />
-
     <div class="column main-column">
       <div class="episodes page">
         <div class="episode-list-header page-header">
@@ -80,9 +78,13 @@
     <div
       id="side-column"
       class="column side-column"
-      v-show="nbSelectedTasks === 1 || this.keepTaskPanelOpen"
+      v-show="isTaskSidebarOpen"
     >
-      <task-info :task="selectedTasks.values().next().value" />
+      <task-info
+        :task="selectedTasks.values().next().value"
+        entity-type="Episode"
+        with-actions
+      />
     </div>
 
     <delete-modal
@@ -196,7 +198,6 @@ import { entitiesMixin } from '@/components/mixins/entities'
 
 import AddMetadataModal from '@/components/modals/AddMetadataModal'
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal'
-import ActionPanel from '@/components/tops/ActionPanel'
 import BigThumbnailsButton from '@/components/widgets/BigThumbnailsButton'
 import BuildFilterModal from '@/components/modals/BuildFilterModal'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
@@ -217,7 +218,6 @@ export default {
   mixins: [searchMixin, entitiesMixin],
 
   components: {
-    ActionPanel,
     AddMetadataModal,
     AddThumbnailsModal,
     BigThumbnailsButton,
@@ -353,10 +353,18 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
+      'departmentMap',
       'displayedEpisodes',
       'departments',
       'episodeMap',
       'episodes',
+      'episodeMap',
+      'episodeFilledColumns',
+      'episodesCsvFormData',
+      'episodeSearchText',
+      'episodeValidationColumns',
+      'episodeListScrollPosition',
+      'episodeSorting',
       'episodeSearchQueries',
       'isCurrentUserClient',
       'isCurrentUserManager',
@@ -367,20 +375,11 @@ export default {
       'isEpisodesLoadingError',
       'isShowAssignations',
       'isTVShow',
-      'nbSelectedTasks',
       'openProductions',
+      'productionEpisodeTaskTypes',
       'selectedTasks',
-      'episodeMap',
-      'episodeFilledColumns',
-      'episodesCsvFormData',
-      'episodeSearchText',
-      'episodeValidationColumns',
-      'episodeListScrollPosition',
-      'episodeSorting',
       'taskTypeMap',
-      'user',
-      'departmentMap',
-      'productionEpisodeTaskTypes'
+      'user'
     ]),
 
     renderColumns() {
@@ -684,9 +683,5 @@ export default {
 .column {
   overflow-y: auto;
   padding: 0;
-}
-
-.main-column {
-  border-right: 3px solid $light-grey;
 }
 </style>

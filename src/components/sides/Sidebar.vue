@@ -81,6 +81,16 @@
                 {{ $t('news.title') }}
               </router-link>
             </p>
+
+            <p @click="toggleSidebar()">
+              <router-link
+                :to="{ name: 'entity-search' }"
+                v-if="isCurrentUserManager"
+              >
+                <search-icon size="0.9x" />
+                {{ $t('search.title') }}
+              </router-link>
+            </p>
           </div>
 
           <div v-if="isCurrentUserAdmin">
@@ -159,6 +169,7 @@ import {
   HexagonIcon,
   ListIcon,
   PlayCircleIcon,
+  SearchIcon,
   SettingsIcon,
   ToolIcon,
   UsersIcon
@@ -178,6 +189,7 @@ export default {
     HexagonIcon,
     ListIcon,
     PlayCircleIcon,
+    SearchIcon,
     SettingsIcon,
     ToolIcon,
     UsersIcon
