@@ -1676,6 +1676,10 @@ tbody:last-child .empty-line:last-child {
   &.no-margin {
     margin-right: 0;
   }
+
+  &.mr02 {
+    margin-right: 0.2em;
+  }
 }
 
 .flexcolumn {

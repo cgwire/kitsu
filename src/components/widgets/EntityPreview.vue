@@ -86,7 +86,6 @@ export default {
       style['max-width'] = width
       style['min-width'] = width
       style.width = width
-      console.log(style)
       return style
     },
 

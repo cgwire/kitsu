@@ -234,7 +234,10 @@
     </div>
 
     <div class="column side-column" v-if="nbSelectedTasks === 1">
-      <task-info :task="selectedTasks.values().next().value" />
+      <task-info
+        :task="selectedTasks.values().next().value"
+        with-actions
+      />
     </div>
   </div>
 </template>
@@ -1491,7 +1494,6 @@ export default {
 }
 
 .main-column {
-  border-right: 3px solid $light-grey;
   overflow: hidden;
 }
 

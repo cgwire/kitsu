@@ -177,10 +177,11 @@ export default {
     )
   },
 
-  setPreview(entityId, previewId) {
+  setPreview(entityId, previewId, frame) {
+    const data = frame > 1 ? { frame_number: frame } : {}
     return client.pput(
       `/api/actions/preview-files/${previewId}/set-main-preview`,
-      {}
+      data
     )
   },
 

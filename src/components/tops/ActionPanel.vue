@@ -431,13 +431,34 @@
           <button
             class="button confirm-button is-wide"
             @click="confirmSetThumbnailsFromTasks"
+            v-if="nbSelectedTasks > 1"
           >
             {{
-              $tc('tasks.set_thumbnails_from_tasks', nbSelectedTasks, {
-                nbSelectedTasks
-              })
+              $tc(
+                'tasks.set_thumbnails_from_tasks',
+                nbSelectedTasks,
+                {
+                  nbSelectedTasks
+                }
+              )
             }}
           </button>
+          <div v-else>
+            <button
+              class="button confirm-button is-wide"
+              @click="confirmSetThumbnailsFromTasks"
+            >
+              {{ $t('tasks.set_preview') }}
+            </button>
+            <input
+              class="flexrow-item mr02"
+              type="checkbox"
+              v-model="isUseCurrentFrame"
+            />
+            <span class="flexrow-item">
+              {{ $t('tasks.use_current_frame') }}
+            </span>
+          </div>
         </div>
 
         <div class="flexcolumn filler" v-if="selectedBar === 'subscribe'">
@@ -721,6 +742,7 @@ export default {
       currentTeam: [],
       customAction: {},
       customActions: [],
+      isUseCurrentFrame: false,
       person: null,
       priority: '0',
       selectedBar: '',
@@ -1215,15 +1237,20 @@ export default {
 
     confirmSetThumbnailsFromTasks() {
       this.loading.setThumbnails = true
-      func
-        .runPromiseAsSeries(
-          Array.from(this.selectedTasks.values()).map(task => {
-            return this.setLastTaskPreview(task.id)
+      if (this.nbSelectedTasks === 1) {
+        const task = this.selectedTasks.values().next().value
+        this.$emit('set-frame-thumbnail', this.isUseCurrentFrame)
+      } else {
+        func
+          .runPromiseAsSeries(
+            Array.from(this.selectedTasks.values()).map(task => {
+              return this.setLastTaskPreview(task.id)
+            })
+          )
+          .then(() => {
+            this.loading.setThumbnails = false
           })
-        )
-        .then(() => {
-          this.loading.setThumbnails = false
-        })
+      }
     },
 
     setCurrentTeam() {
@@ -1520,7 +1547,7 @@ export default {
 }
 
 .action-topbar {
-  background: #f8f8ff;
+  background: #f4f4ff;
   color: $grey;
   z-index: 1000;
 }
@@ -1553,11 +1580,13 @@ div.assignation {
   padding-top: 0.7em;
   border-bottom: 1px solid $light-grey-light;
   z-index: 200;
+  background: #fcfcff;
 }
 
 .menu-item {
   cursor: pointer;
   font-size: .9em;
+  transform: scale(0.9);
   padding: 0.2em 0.6em 0.4em 0.6em;
 
   &:hover {
@@ -1583,6 +1612,10 @@ div.assignation {
 .minimized {
   .menu {
   }
+}
+
+.button {
+  border-radius: 6px;
 }
 
 .comment-text {

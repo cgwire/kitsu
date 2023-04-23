@@ -10,8 +10,10 @@
     class="side task-info"
     ref="side-panel"
   >
-    <action-panel v-if="withActions"
+    <action-panel
+      v-if="withActions"
       @export-task="onExportClick"
+      @set-frame-thumbnail="onSetCurrentFrameAsThumbnail"
     />
 
     <div
@@ -266,15 +268,19 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment'
-import { getTaskEntityPath, getTaskPath } from '@/lib/path'
-import { getTaskTypeStyle } from '@/lib/render'
+
 import csv from '@/lib/csv'
 import drafts from '@/lib/drafts'
+import { getTaskEntityPath, getTaskPath } from '@/lib/path'
+import preferences from '@/lib/preferences'
+import { getTaskTypeStyle } from '@/lib/render'
 import { sortTaskNames } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 import { formatDate } from '@/lib/time'
+
 import { taskMixin } from '@/components/mixins/task'
 import { domMixin } from '@/components/mixins/dom'
+
 import { CornerRightUpIcon } from 'vue-feather-icons'
 
 import ActionPanel from '@/components/tops/ActionPanel'
@@ -403,6 +409,8 @@ export default {
     this.isChangingWidth = false
     document.addEventListener('mouseup', this.onExtendUp)
     document.addEventListener('mousemove', this.onExtendMove)
+
+    const width = preferences.getIntPreference('task:panel-width') || 400
   },
 
   beforeDestroy() {
@@ -924,11 +932,12 @@ export default {
       }
     },
 
-    setCurrentPreviewAsEntityThumbnail() {
+    setCurrentPreviewAsEntityThumbnail(frame) {
       this.setPreview({
         taskId: this.task.id,
         entityId: this.task.entity.id,
-        previewId: this.currentPreview.previews[0].id
+        previewId: this.currentPreview.previews[0].id,
+        frame
       })
     },
 
@@ -1176,41 +1185,65 @@ export default {
       csv.buildCsvFile(name, [headers].concat(commentLines))
     },
 
-    onExtendUp (event) {
-      this.pauseEvent(event)
+    onExtendUp(event) {
+      if (this.isChangingWidth) {
+        this.pauseEvent(event)
+        if (this.$refs['preview-player']) {
+          this.$refs['preview-player'].previewViewer.resize()
+          this.$refs['preview-player'].fixCanvasSize()
+        }
+        const panel = this.$refs['side-panel']
+        const parent = panel.parentElement.parentElement
+        const panelWidth = parent.offsetWidth
+        preferences.setPreference('task:panel-width', panelWidth)
+      }
       this.isChangingWidth = false
     },
 
     onExtendDown(event) {
       this.pauseEvent(event)
-      this.lastWidthX = event.clientX
-      const panel = this.$refs['side-panel']
-      const parent = panel.parentElement.parentElement
-      this.lastWidth = parent.offsetWidth
-      this.isChangingWidth = true
+      if (this.withActions) {
+        this.lastWidthX = event.clientX
+        const panel = this.$refs['side-panel']
+        const parent = panel.parentElement.parentElement
+        const panelWidth = parent.offsetWidth
+        this.lastWidth = parent.offsetWidth
+        this.isChangingWidth = true
+      }
     },
 
-    onExtendMove (event) {
+    onExtendMove(event) {
       if (this.isChangingWidth) {
         this.pauseEvent(event)
         const diff = this.lastWidthX - event.clientX
-        const panel = this.$refs['side-panel']
-        const parent = panel.parentElement.parentElement
         const width = Math.max(this.lastWidth + diff, 420)
-        parent.style['min-width'] = width + 'px'
-        this.$refs['preview-player'].fixCanvasSize()
+        this.setWidth(width)
+      }
+    },
 
-        console.log(width)
-        if (width > 699 && width < 900) {
-          this.isWide = true
-          this.isExtraWide = false
-        } else if (width >= 900) {
-          this.isWide = true
-          this.isExtraWide = true
-        } else {
-          this.isWide = false
-          this.isExtraWide = false
+    setWidth(width) {
+      const panel = this.$refs['side-panel']
+      const parent = panel.parentElement.parentElement
+      parent.style['min-width'] = width + 'px'
+      if (width > 699 && width < 900) {
+        this.isWide = true
+        this.isExtraWide = false
+      } else if (width >= 900) {
+        this.isWide = true
+        this.isExtraWide = true
+      } else {
+        this.isWide = false
+        this.isExtraWide = false
+      }
+    },
+
+    onSetCurrentFrameAsThumbnail(isUseCurrentFrame) {
+      if (this.$refs['preview-player']) {
+        let frame = 0
+        if (isUseCurrentFrame && this.$refs['preview-player'].isMovie) {
+          frame = parseInt(this.$refs['preview-player'].currentFrame)
         }
+        return this.setCurrentPreviewAsEntityThumbnail(frame)
       }
     }
   },

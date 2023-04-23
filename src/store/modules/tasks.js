@@ -13,13 +13,13 @@ import { arrayMove, removeModelFromList } from '@/lib/models'
 import { formatDate } from '@/lib/time'
 import func from '@/lib/func'
 
-import personStore from '@/store/modules/people'
-import taskTypeStore from '@/store/modules/tasktypes'
 import assetStore from '@/store/modules/assets'
-import shotStore from '@/store/modules/shots'
 import editStore from '@/store/modules/edits'
 import episodeStore from '@/store/modules/episodes'
+import personStore from '@/store/modules/people'
 import sequenceStore from '@/store/modules/sequences'
+import shotStore from '@/store/modules/shots'
+import taskTypeStore from '@/store/modules/tasktypes'
 
 import {
   LOAD_ASSETS_END,
@@ -608,9 +608,9 @@ const actions = {
     })
   },
 
-  setPreview({ commit, state }, { taskId, entityId, previewId }) {
+  setPreview({ commit, state }, { taskId, entityId, previewId, frame }) {
     const taskMap = state.taskMap
-    return tasksApi.setPreview(entityId, previewId).then(entity => {
+    return tasksApi.setPreview(entityId, previewId, frame).then(entity => {
       commit(SET_PREVIEW, { taskId, entityId, previewId, taskMap })
       return Promise.resolve()
     })
@@ -618,15 +618,16 @@ const actions = {
 
   setLastTaskPreview({ commit, state }, taskId) {
     const taskMap = state.taskMap
-    return tasksApi.setLastTaskPreviewAsEntityThumbnail(taskId).then(entity => {
-      commit(SET_PREVIEW, {
-        taskId,
-        entityId: entity.id,
-        previewId: entity.preview_file_id,
-        taskMap
+    return tasksApi.setLastTaskPreviewAsEntityThumbnail(taskId)
+      .then(entity => {
+        commit(SET_PREVIEW, {
+          taskId,
+          entityId: entity.id,
+          previewId: entity.preview_file_id,
+          taskMap
+        })
+        return Promise.resolve()
       })
-      return Promise.resolve()
-    })
   },
 
   updatePreviewAnnotation(
@@ -1235,7 +1236,10 @@ const mutations = {
 
   [SET_PREVIEW](state, { taskId, previewId }) {
     if (state.taskMap.get(taskId)) {
-      state.taskMap.get(taskId).entity.preview_file_id = previewId
+      state.taskMap.get(taskId).entity.preview_file_id = 'empty'
+      setTimeout(() => {
+        state.taskMap.get(taskId).entity.preview_file_id = previewId
+      }, 200)
     }
   },
 

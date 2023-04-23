@@ -1261,7 +1261,7 @@ export default {
     revision_preview_file: 'If one of your selected files contains a revision number in its name (eg. "preview-v3.png"), then it will be suggested as a new revision name (eg. "revision 3") at the next step.',
     select_preview_file: 'Please select files (pictures, movies or others) from your hard drive to be used as a new preview revision for the current task:',
     set_estimations: 'Set estimations for selected tasks:',
-    set_preview: 'Set this preview as thumbnail',
+    set_preview: 'Set current preview as thumbnail',
     set_preview_error: 'An error occurred while setting preview as thumbnail',
     set_preview_done: 'This preview is used as thumbnail for the current entity.',
     set_thumbnails_from_tasks: 'Set the last preview from the selected task as thumbnail | Set last previews from selected tasks as thumbnails',
@@ -1276,6 +1276,7 @@ export default {
     unsubscribe_notifications: 'Unsubscribe from notifications',
     tasks: 'Tasks',
     to_myself: 'To myself',
+    use_current_frame: 'Use current frame',
     validation: 'Validation',
     with_comment: 'With a comment...',
     fields: {
