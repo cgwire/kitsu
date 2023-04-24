@@ -14,7 +14,13 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-unused-vars': 'off',
     'vue/multi-word-component-names': 'off',
-    'vue/no-use-v-if-with-v-for': 'off'
+    'vue/no-use-v-if-with-v-for': 'off',
+    'prefer-const': [
+      'error',
+      {
+        destructuring: 'all'
+      }
+    ]
   },
   globals: {
     Canny: true

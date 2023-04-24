@@ -272,7 +272,7 @@ export default {
       const isName = this.currentSort === 'entity_name'
       const isPriority = this.currentSort === 'priority'
       const isDueDate = this.currentSort === 'due_date'
-      let tasks = this.filteredTasks
+      const tasks = this.filteredTasks
       if (isName) {
         return tasks.sort(
           firstBy('project_name')

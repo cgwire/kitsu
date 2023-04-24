@@ -69,7 +69,7 @@ export default {
       document.documentElement.style.background = '#FFF'
       document.body.style.background = '#FFF'
     }
-    let supportChat = localPreferences.getBoolPreference('support:show', true)
+    const supportChat = localPreferences.getBoolPreference('support:show', true)
     this.setSupportChat(supportChat)
     crisp.init(supportChat)
   },
