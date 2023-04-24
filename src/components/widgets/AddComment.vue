@@ -172,7 +172,6 @@
         <div class="flexrow button-row mt1">
           <button-simple
             :class="{
-              button: true,
               'flexrow-item': true,
               active: attachments.length !== 0
             }"
@@ -183,7 +182,6 @@
           />
           <button-simple
             :class="{
-              button: true,
               'flexrow-item': true,
               active: checklist.length !== 0
             }"
@@ -194,7 +192,6 @@
           />
           <button-simple
             :class="{
-              button: true,
               'flexrow-item': true,
               active: showCommentArea
             }"
@@ -218,7 +215,7 @@
               'is-loading': isLoading
             }"
             icon="send"
-            :disabled="mode === 'publish' && previewForms.length === 0"
+            :disabled="!isValidForm"
             :text="mode === 'publish' ? $t('tasks.publish') : $t('tasks.post')"
             :title="mode === 'publish' ? $t('tasks.publish') : $t('comments.post_status')"
             @click="
@@ -411,6 +408,16 @@ export default {
       return status.is_retake && this.checklist.length === 0
     },
 
+    isValidForm() {
+      return (
+        this.mode === 'status' ||
+        (this.mode == 'publish' &&
+          this.previewForms.length &&
+          (this.nextRevision === undefined ||
+            this.nextRevision > this.revision))
+      )
+    },
+
     taskStatusColor() {
       const status =
         this.taskStatus.find(t => t.id === this.task_status_id) ||
@@ -431,6 +438,10 @@ export default {
   methods: {
     shortenText: strings.shortenText,
     runAddComment(text, attachments, checklist, taskStatusId, revision) {
+      if (!this.isValidForm) {
+        return
+      }
+
       this.$store.commit('CLEAR_UPLOAD_PROGRESS')
       if (this.mode === 'publish') {
         if (!this.showCommentArea) text = ''
