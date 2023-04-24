@@ -24,6 +24,7 @@
         <div class="task-list mt1">
           <div
             class="selected-task-line flexrow"
+            :key="task.id"
             v-for="task in selectedTasksToDisplay"
           >
             <task-type-name
@@ -249,6 +250,7 @@
         <div class="pa2 mt1">
           <div
             class="entity-line"
+            :key="entity.id"
             v-for="entity in Array.from(selectedEntities.values())"
           >
             {{ entity.full_name }}
