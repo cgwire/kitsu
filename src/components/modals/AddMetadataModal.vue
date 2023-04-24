@@ -86,7 +86,10 @@
           </div>
         </div>
 
-        <div class="departments" v-if="form.departments?.length">
+        <div
+          class="departments"
+          v-if="form.departments.length || selectableDepartments.length"
+        >
           <label class="label">
             {{ $t('people.fields.departments') }}
           </label>
