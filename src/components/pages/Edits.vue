@@ -989,10 +989,13 @@ export default {
   metaInfo() {
     if (this.isTVShow) {
       return {
-        title:
-          `${this.currentProduction ? this.currentProduction.name : ''}` +
-          ` - ${this.currentEpisode ? (this.currentEpisode.name || this.$t('main.all')) : ''}` +
-          ` | ${this.$t('edits.title')} - Kitsu`
+        title: `${
+          this.currentProduction ? this.currentProduction.name : ''
+        } - ${
+          this.currentEpisode
+            ? this.currentEpisode.name || this.$t('main.all')
+            : ''
+        } | ${this.$t('edits.title')} - Kitsu`
       }
     } else {
       return {

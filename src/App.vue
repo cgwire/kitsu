@@ -841,7 +841,6 @@ a:hover {
   padding-top: 0em;
 }
 
-
 .mauto {
   margin: auto;
 }

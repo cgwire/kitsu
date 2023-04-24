@@ -53,17 +53,16 @@ export const sortProductions = productions => {
 export const sortTaskNames = (tasks, taskTypeMap) => {
   return tasks.sort(
     firstBy((a, b) => {
-        const taskTypeA = taskTypeMap.get(a.task_type_id)
-        const taskTypeB = taskTypeMap.get(b.task_type_id)
-        return taskTypeA.name.localeCompare(taskTypeB.name)
-      })
-      .thenBy((a, b) => {
-        if (a.full_entity_name) {
-          return a.full_entity_name.localeCompare(b.full_entity_name)
-        } else {
-          return a.entity_name.localeCompare(b.entity_name)
-        }
-      })
+      const taskTypeA = taskTypeMap.get(a.task_type_id)
+      const taskTypeB = taskTypeMap.get(b.task_type_id)
+      return taskTypeA.name.localeCompare(taskTypeB.name)
+    }).thenBy((a, b) => {
+      if (a.full_entity_name) {
+        return a.full_entity_name.localeCompare(b.full_entity_name)
+      } else {
+        return a.entity_name.localeCompare(b.entity_name)
+      }
+    })
   )
 }
 export const sortTasks = (tasks, taskTypeMap) => {

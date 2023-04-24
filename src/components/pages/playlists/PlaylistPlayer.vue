@@ -1639,9 +1639,9 @@ export default {
       }
     },
 
-    onEntitiesWheel (event) {
+    onEntitiesWheel(event) {
       event.preventDefault()
-      this.$refs["playlisted-entities"].scrollLeft += event.deltaY
+      this.$refs['playlisted-entities'].scrollLeft += event.deltaY
     },
 
     saveUserComparisonChoice() {

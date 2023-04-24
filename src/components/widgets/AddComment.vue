@@ -217,7 +217,11 @@
             icon="send"
             :disabled="!isValidForm"
             :text="mode === 'publish' ? $t('tasks.publish') : $t('tasks.post')"
-            :title="mode === 'publish' ? $t('tasks.publish') : $t('comments.post_status')"
+            :title="
+              mode === 'publish'
+                ? $t('tasks.publish')
+                : $t('comments.post_status')
+            "
             @click="
               runAddComment(
                 text,
@@ -636,14 +640,11 @@ export default {
       immediate: true,
       handler() {
         if (this.isCurrentUserClient) {
-          this.atOptions = [...this.team.filter(person => {
-            return [
-              'admin',
-              'manager',
-              'supervisor',
-              'client'
-            ].includes(person.role)
-          })]
+          this.atOptions = [
+            ...this.team.filter(person =>
+              ['admin', 'manager', 'supervisor', 'client'].includes(person.role)
+            )
+          ]
         } else {
           this.atOptions = [...this.team]
         }

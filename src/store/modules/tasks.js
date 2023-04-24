@@ -297,7 +297,8 @@ const actions = {
       }
       entityIdsByTaskType[taskTypeId].push(entityId)
     })
-    return func.runPromiseAsSeries(
+    return func
+      .runPromiseAsSeries(
         Object.keys(entityIdsByTaskType).map(taskTypeId => {
           const data = {
             task_type_id: taskTypeId,
@@ -618,16 +619,15 @@ const actions = {
 
   setLastTaskPreview({ commit, state }, taskId) {
     const taskMap = state.taskMap
-    return tasksApi.setLastTaskPreviewAsEntityThumbnail(taskId)
-      .then(entity => {
-        commit(SET_PREVIEW, {
-          taskId,
-          entityId: entity.id,
-          previewId: entity.preview_file_id,
-          taskMap
-        })
-        return Promise.resolve()
+    return tasksApi.setLastTaskPreviewAsEntityThumbnail(taskId).then(entity => {
+      commit(SET_PREVIEW, {
+        taskId,
+        entityId: entity.id,
+        previewId: entity.preview_file_id,
+        taskMap
       })
+      return Promise.resolve()
+    })
   },
 
   updatePreviewAnnotation(

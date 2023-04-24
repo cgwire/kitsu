@@ -57,10 +57,18 @@
       </div>
     </drag>
     <drop @drop="onDropped">
-      <div :id="'drop-area-wide-' + entity.id" class="drop-area-wide" ref="drop-area-wide"></div>
+      <div
+        :id="'drop-area-wide-' + entity.id"
+        class="drop-area-wide"
+        ref="drop-area-wide"
+      ></div>
     </drop>
     <drop @drop="onDropped">
-      <div :id="'drop-area-' + entity.id" class="drop-area" ref="drop-area"></div>
+      <div
+        :id="'drop-area-' + entity.id"
+        class="drop-area"
+        ref="drop-area"
+      ></div>
     </drop>
   </div>
 </template>

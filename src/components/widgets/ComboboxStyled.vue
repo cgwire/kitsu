@@ -16,11 +16,7 @@
         </div>
         <chevron-down-icon class="down-icon flexrow-item" />
       </div>
-      <div
-        class="select-input"
-        ref="select"
-        v-if="showList"
-      >
+      <div class="select-input" ref="select" v-if="showList">
         <div
           class="option-line"
           v-for="option in options"
