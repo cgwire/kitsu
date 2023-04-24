@@ -19,7 +19,6 @@
       <div
         class="select-input"
         ref="select"
-        @click="toggleList"
         v-if="showList"
       >
         <div
@@ -97,7 +96,6 @@ export default {
     selectOption(option) {
       this.$emit('input', option.value)
       this.selectedOption = option
-      this.toggleList()
     },
 
     openRoute(option) {
