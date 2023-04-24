@@ -684,12 +684,9 @@ import {
   EyeIcon,
   FilmIcon,
   ImageIcon,
-  MinusIcon,
   PlayCircleIcon,
-  SquareIcon,
   TrashIcon,
-  UserIcon,
-  XIcon
+  UserIcon
 } from 'vue-feather-icons'
 import ComboboxModel from '@/components/widgets/ComboboxModel'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
@@ -714,14 +711,11 @@ export default {
     EyeIcon,
     FilmIcon,
     ImageIcon,
-    MinusIcon,
     PeopleField,
     PlayCircleIcon,
     Spinner,
     UserIcon,
-    SquareIcon,
     TrashIcon,
-    XIcon,
     ViewPlaylistModal
   },
 

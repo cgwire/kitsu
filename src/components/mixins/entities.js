@@ -1,4 +1,4 @@
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 
 import func from '@/lib/func'
 import preferences from '@/lib/preferences'

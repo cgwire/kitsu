@@ -284,12 +284,10 @@ import { CornerRightUpIcon } from 'vue-feather-icons'
 import ActionPanel from '@/components/tops/ActionPanel'
 import AddComment from '@/components/widgets/AddComment'
 import AddPreviewModal from '@/components/modals/AddPreviewModal'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
 import Comment from '@/components/widgets/Comment'
 import DeleteModal from '@/components/modals/DeleteModal'
 import EditCommentModal from '@/components/modals/EditCommentModal'
 import Spinner from '@/components/widgets/Spinner'
-import SubscribeButton from '@/components/widgets/SubscribeButton'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 import PreviewPlayer from '@/components/previews/PreviewPlayer'
 
@@ -301,14 +299,12 @@ export default {
     ActionPanel,
     AddComment,
     AddPreviewModal,
-    ButtonSimple,
     Comment,
     CornerRightUpIcon,
     DeleteModal,
     EditCommentModal,
     PreviewPlayer,
     Spinner,
-    SubscribeButton,
     TaskTypeName
   },
 

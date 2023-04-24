@@ -10,7 +10,6 @@ import {
   sortByName
 } from '@/lib/sorting'
 import { arrayMove, removeModelFromList } from '@/lib/models'
-import { formatDate } from '@/lib/time'
 import func from '@/lib/func'
 
 import assetStore from '@/store/modules/assets'

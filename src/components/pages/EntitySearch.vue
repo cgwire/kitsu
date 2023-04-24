@@ -88,15 +88,11 @@
  */
 import { mapGetters, mapActions } from 'vuex'
 import { getEntityPath, getPersonPath } from '@/lib/path'
-import peopleStore from '@/store/modules/people'
 
 import { SearchIcon } from 'vue-feather-icons'
 
 import EntityPreview from '@/components/widgets/EntityPreview'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import PeopleName from '@/components/widgets/PeopleName'
 import Spinner from '@/components/widgets/Spinner'
-import TaskInfo from '@/components/sides/TaskInfo'
 
 export default {
   name: 'entity-search',
@@ -104,8 +100,6 @@ export default {
 
   components: {
     EntityPreview,
-    PeopleAvatar,
-    PeopleName,
     SearchIcon,
     Spinner
   },
