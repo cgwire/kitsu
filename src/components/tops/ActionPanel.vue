@@ -1543,6 +1543,10 @@ export default {
       background: $black;
       border-bottom: 1px solid $dark-grey-light;
     }
+
+    .action-bar {
+      border-bottom: 1px solid $dark-grey-light;
+    }
   }
 }
 
@@ -1573,8 +1577,6 @@ div.assignation {
 
 .menu {
   background: var(--background);
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
   color: $grey;
   cursor: grab;
   padding-top: 0.7em;

@@ -4,6 +4,7 @@
     class="extend-bar"
     @mouseup="onExtendUp"
     @mousedown="onExtendDown"
+    v-if="withActions"
   >
   </div>
   <div
@@ -1218,6 +1219,10 @@ export default {
         const diff = this.lastWidthX - event.clientX
         const width = Math.max(this.lastWidth + diff, 420)
         this.setWidth(width)
+        if (this.$refs['preview-player']) {
+          this.$refs['preview-player'].previewViewer.resize()
+          this.$refs['preview-player'].fixCanvasSize()
+        }
       }
     },
 
@@ -1419,11 +1424,14 @@ export default {
 .dark {
   .add-comment,
   .comment,
-  .preview-column-content,
   .no-comment {
     background: #46494f;
     border-color: $dark-grey;
     box-shadow: 0px 0px 6px #333;
+  }
+
+  .extend-bar {
+    background: #46494f;
   }
 
   .no-preview {
