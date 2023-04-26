@@ -25,9 +25,9 @@
 
         <br />
         <text-field
-          ref="nomenclatureField"
-          :label="$t('main.edl.nomenclature')"
-          v-model="form.nomenclature"
+          ref="namingConventionField"
+          :label="$t('main.edl.naming_convention')"
+          v-model="form.namingConvention"
           @enter="onConfirmClicked"
           v-focus
         />
@@ -35,7 +35,7 @@
         <checkbox
           :toggle="true"
           :label="$t('main.edl.match_case')"
-          v-model="form.match_case"
+          v-model="form.matchCase"
         />
 
         <modal-footer
@@ -73,8 +73,8 @@ export default {
   data() {
     return {
       form: {
-        nomenclature: '${project_name}_${sequence_name}-${shot_name}',
-        match_case: true
+        namingConvention: '${project_name}_${sequence_name}-${shot_name}',
+        matchCase: true
       },
       formData: null
     }
@@ -98,7 +98,7 @@ export default {
   mounted() {
     this.formData = null
     if (this.isTVShow)
-      this.form.nomenclature =
+      this.form.namingConvention =
         '${project_name}_${episode_name}-${sequence_name}-${shot_name}'
   },
 
@@ -115,8 +115,8 @@ export default {
       this.$emit(
         'confirm',
         this.formData.get('file'),
-        this.form.nomenclature,
-        this.form.match_case
+        this.form.namingConvention,
+        this.form.matchCase
       )
     },
 
@@ -128,13 +128,15 @@ export default {
   watch: {
     currentProduction() {
       if (this.isTVShow)
-        this.form.nomenclature =
+        this.form.namingConvention =
           '${project_name}_${episode_name}-${sequence_name}-${shot_name}'
       else
-        this.form.nomenclature = '${project_name}_${sequence_name}-${shot_name}'
+        this.form.namingConvention =
+          '${project_name}_${sequence_name}-${shot_name}'
     },
 
     active() {
+      this.formData = null
       this.reset()
     }
   }

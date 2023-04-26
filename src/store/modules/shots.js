@@ -535,11 +535,11 @@ const actions = {
       })
   },
 
-  uploadEdlFile({ rootGetters }, { edl_file, nomenclature, match_case }) {
+  uploadEdlFile({ rootGetters }, { edl_file, namingConvention, matchCase }) {
     const production = rootGetters.currentProduction
     const episode = rootGetters.isTVShow ? rootGetters.currentEpisode : null
     return shotsApi
-      .postEdl(production, edl_file, nomenclature, match_case, episode)
+      .postEdl(production, edl_file, namingConvention, matchCase, episode)
       .then(() => {
         return Promise.resolve()
       })

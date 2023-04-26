@@ -1068,14 +1068,14 @@ export default {
       this.modals.isEDLImportDisplayed = false
     },
 
-    uploadEDLFile(data, nomenclature, match_case) {
+    uploadEDLFile(data, namingConvention, matchCase) {
       const filename = 'import.edl'
       const edl_file = new File([data], filename, { type: 'text/plain' })
 
       this.loading.importing = true
       this.errors.importing = false
 
-      this.uploadEdlFile({ edl_file, nomenclature, match_case })
+      this.uploadEdlFile({ edl_file, namingConvention, matchCase })
         .then(() => {
           this.loading.importing = false
           this.loadEpisodes().catch(console.error)
