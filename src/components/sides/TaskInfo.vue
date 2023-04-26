@@ -208,7 +208,6 @@
           :is-loading="loading.addExtraPreview"
           :is-error="errors.addExtraPreview"
           :form-data="addExtraPreviewFormData"
-          extensions=".png,.jpg,.jpeg"
           @cancel="onCloseExtraPreview"
           @confirm="createExtraPreview"
         />
