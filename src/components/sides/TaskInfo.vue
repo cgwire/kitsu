@@ -198,9 +198,8 @@
           :active="modals.addPreview"
           :is-loading="loading.addPreview"
           :is-error="errors.addPreview"
-          @cancel="onClosePreview"
-          @fileselected="selectFile"
-          @confirm="onClosePreview"
+          @cancel="closeAddPreviewModal"
+          @confirm="confirmAddPreviewModal"
         />
 
         <add-preview-modal
@@ -211,7 +210,6 @@
           :form-data="addExtraPreviewFormData"
           extensions=".png,.jpg,.jpeg"
           @cancel="onCloseExtraPreview"
-          @fileselected="selectFile"
           @confirm="createExtraPreview"
         />
 
@@ -739,7 +737,6 @@ export default {
           .then(() => {
             drafts.clearTaskDraft(this.task.id)
             this.reset()
-            this.previewForms = []
             this.loading.addComment = false
             this.$emit('comment-added')
           })
@@ -759,6 +756,7 @@ export default {
 
     reset() {
       this.resetModals()
+      this.clearPreviewFiles()
       if (this.task) {
         this.taskComments = this.getTaskComments(this.task.id)
         this.taskPreviews = this.getTaskPreviews(this.task.id)
@@ -797,19 +795,24 @@ export default {
     },
 
     selectFile(forms) {
-      this.loadPreviewFileFormData(forms)
       this.previewForms = this.previewForms.concat(forms)
+      this.loadPreviewFileFormData(this.previewForms)
     },
 
     onPreviewFormRemoved(previewForm) {
       this.previewForms = this.previewForms.filter(f => f !== previewForm)
+      this.loadPreviewFileFormData(this.previewForms)
     },
 
     clearPreviewFiles() {
       this.previewForms = []
+      this.loadPreviewFileFormData(this.previewForms)
+      this.$store.commit('CLEAR_UPLOAD_PROGRESS')
     },
 
-    createExtraPreview() {
+    createExtraPreview(forms) {
+      this.selectFile(forms)
+
       const index = this.currentPreviewIndex
       this.errors.addExtraPreview = false
       this.loading.addExtraPreview = true
@@ -821,6 +824,7 @@ export default {
         .then(() => {
           this.loading.addExtraPreview = false
           this.$refs['add-extra-preview-modal'].reset()
+          this.clearPreviewFiles()
           this.reset()
           setTimeout(() => {
             this.$refs['preview-player'].displayLast()
@@ -889,6 +893,7 @@ export default {
     },
 
     onAddExtraPreview() {
+      this.clearPreviewFiles()
       this.modals.addExtraPreview = true
     },
 
@@ -905,8 +910,13 @@ export default {
       this.modals.deleteExtraPreview = false
     },
 
-    onClosePreview() {
+    closeAddPreviewModal() {
       this.modals.addPreview = false
+    },
+
+    confirmAddPreviewModal(forms) {
+      this.selectFile(forms)
+      this.closeAddPreviewModal()
     },
 
     onCloseExtraPreview() {

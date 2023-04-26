@@ -264,12 +264,11 @@
         :form-data="addPreviewFormData"
         :title="
           task
-            ? task.entity_name + ' / ' + taskTypeMap.get(task.task_type_id).name
+            ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id).name}`
             : ''
         "
-        @cancel="modals.addPreview = false"
-        @fileselected="selectFile"
-        @confirm="closeAddPreviewModal"
+        @cancel="closeAddPreviewModal"
+        @confirm="confirmAddPreviewModal"
       />
 
       <add-preview-modal
@@ -280,11 +279,10 @@
         :form-data="addExtraPreviewFormData"
         :title="
           task
-            ? task.entity_name + ' / ' + taskTypeMap.get(task.task_type_id).name
+            ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id).name}`
             : ''
         "
         @cancel="hideExtraPreviewModal"
-        @fileselected="selectFile"
         @confirm="createExtraPreview"
       />
 
@@ -872,7 +870,6 @@ export default {
         .then(() => {
           drafts.clearTaskDraft(this.task.id)
           this.reset()
-          this.previewForms = []
           this.loading.addComment = false
         })
         .catch(err => {
@@ -891,6 +888,7 @@ export default {
     reset() {
       this.resetModals()
       this.resetPreview(false)
+      this.clearPreviewFiles()
       this.taskComments = this.getCurrentTaskComments()
       this.taskPreviews = this.getCurrentTaskPreviews()
       this.task = this.getCurrentTask()
@@ -903,19 +901,23 @@ export default {
     },
 
     selectFile(forms) {
-      this.loadPreviewFileFormData(forms)
       this.previewForms = this.previewForms.concat(forms)
+      this.loadPreviewFileFormData(this.previewForms)
     },
 
     clearPreviewFiles() {
       this.previewForms = []
+      this.loadPreviewFileFormData(this.previewForms)
+      this.$store.commit('CLEAR_UPLOAD_PROGRESS')
     },
 
     isHighlighted(comment) {
       return comment.preview && comment.preview.id === this.currentPreviewId
     },
 
-    createExtraPreview() {
+    createExtraPreview(forms) {
+      this.selectFile(forms)
+
       const previews = this.taskPreviews
       const preview = previews.length > 0 ? previews[0] : null
       this.errors.addExtraPreview = false
@@ -932,6 +934,7 @@ export default {
           this.loading.addExtraPreview = false
           this.modals.addExtraPreview = false
           this.$refs['add-extra-preview-modal'].reset()
+          this.clearPreviewFiles()
           setTimeout(() => {
             this.$refs['preview-player'].displayLast()
           }, 0)
@@ -1119,6 +1122,7 @@ export default {
     },
 
     onAddExtraPreviewClicked() {
+      this.clearPreviewFiles()
       this.modals.addExtraPreview = true
     },
 
@@ -1145,6 +1149,11 @@ export default {
 
     closeAddPreviewModal() {
       this.modals.addPreview = false
+    },
+
+    confirmAddPreviewModal(forms) {
+      this.selectFile(forms)
+      this.closeAddPreviewModal()
     },
 
     onDuplicateComment(comment) {
@@ -1179,6 +1188,7 @@ export default {
 
     onPreviewFormRemoved(previewForm) {
       this.previewForms = this.previewForms.filter(f => f !== previewForm)
+      this.loadPreviewFileFormData(this.previewForms)
     },
 
     changeCurrentPreview(preview) {
