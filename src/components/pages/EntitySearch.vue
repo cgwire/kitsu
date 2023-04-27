@@ -13,10 +13,11 @@
           v-model="searchQuery"
         />
       </div>
-      <div
-        class="search-results"
-      >
-        <div class="result-line has-text-centered" v-if="searchQuery.length < 3">
+      <div class="search-results">
+        <div
+          class="result-line has-text-centered"
+          v-if="searchQuery.length < 3"
+        >
           {{ $t('main.search.type') }}
         </div>
         <div
@@ -37,32 +38,32 @@
             }"
             v-for="(asset, index) in assets"
           >
-              <div class="flexcolumn result">
-                <div class="">
-                  <entity-preview
-                    style="margin-top: 5px"
-                    :empty-height="200"
-                    :empty-width="300"
-                    :height="200"
-                    :width="300"
-                    :entity="asset"
-                  />
-                </div>
-                <router-link
-                  class="result-name"
-                  :id="'result-link-' + index"
-                  :to="entityPath(asset)"
-                >
-                  <div class="">
-                    <div class="production-name">
-                      {{ asset.project_name }}
-                    </div>
-                    <div class="asset-type-name">
-                      {{ asset.asset_type_name }} / {{ asset.name }}
-                    </div>
-                  </div>
-                </router-link>
+            <div class="flexcolumn result">
+              <div class="">
+                <entity-preview
+                  style="margin-top: 5px"
+                  :empty-height="200"
+                  :empty-width="300"
+                  :height="200"
+                  :width="300"
+                  :entity="asset"
+                />
               </div>
+              <router-link
+                class="result-name"
+                :id="'result-link-' + index"
+                :to="entityPath(asset)"
+              >
+                <div class="">
+                  <div class="production-name">
+                    {{ asset.project_name }}
+                  </div>
+                  <div class="asset-type-name">
+                    {{ asset.asset_type_name }} / {{ asset.name }}
+                  </div>
+                </div>
+              </router-link>
+            </div>
           </div>
         </div>
 
@@ -70,15 +71,14 @@
           {{ $t('main.search.no_result') }}
         </div>
       </div>
+    </div>
 
-      </div>
-
-      <div
-        class="column side-column is-hidden-mobile hide-small-screen"
-        v-if="currentTask"
-      >
-        <task-info :task="currentTask" :is-loading="loading.currentTask" />
-      </div>
+    <div
+      class="column side-column is-hidden-mobile hide-small-screen"
+      v-if="currentTask"
+    >
+      <task-info :task="currentTask" :is-loading="loading.currentTask" />
+    </div>
   </div>
 </template>
 
@@ -88,15 +88,11 @@
  */
 import { mapGetters, mapActions } from 'vuex'
 import { getEntityPath, getPersonPath } from '@/lib/path'
-import peopleStore from '@/store/modules/people'
 
 import { SearchIcon } from 'vue-feather-icons'
 
 import EntityPreview from '@/components/widgets/EntityPreview'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import PeopleName from '@/components/widgets/PeopleName'
 import Spinner from '@/components/widgets/Spinner'
-import TaskInfo from '@/components/sides/TaskInfo'
 
 export default {
   name: 'entity-search',
@@ -104,8 +100,6 @@ export default {
 
   components: {
     EntityPreview,
-    PeopleAvatar,
-    PeopleName,
     SearchIcon,
     Spinner
   },
@@ -113,7 +107,7 @@ export default {
   data() {
     return {
       assets: [],
-      currentTask: null,
+      currentTask: null,
       isLoading: false,
       selectedIndex: 0,
       searchQuery: ''
@@ -141,7 +135,7 @@ export default {
   computed: {
     ...mapGetters(['currentEpisode', 'currentProduction', 'productionMap']),
 
-    searchField () {
+    searchField() {
       return this.$refs['global-search-field']
     },
 
@@ -277,6 +271,6 @@ export default {
 }
 
 .thumbnail-wrapper {
-  margin: 0;
+  margin: 0;
 }
 </style>

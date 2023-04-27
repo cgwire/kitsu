@@ -315,7 +315,6 @@ export default {
     first_connection_2: 'Please, give us the email used for your Kitsu account and we will send you the reset password link.',
     first_connection_title: 'Welcome to Kitsu!',
     forgot_password: 'Forgot password?',
-    forgot_password: 'Forgot password?',
     information_totp: 'Open the two-factor authenticator (TOTP) app on your mobile device to view your authentication code.',
     information_fido: 'Plug your FIDO device to your computer.',
     information_email_otp: 'Check your emails to view your authentication code.',

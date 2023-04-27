@@ -1,4 +1,4 @@
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 
 import func from '@/lib/func'
 import preferences from '@/lib/preferences'
@@ -35,7 +35,7 @@ export const entitiesMixin = {
     ...mapGetters([
       'nbSelectedTasks',
       'selectedTasks',
-      'nbSelectedValidations',
+      'nbSelectedValidations'
     ]),
 
     searchField() {
@@ -50,24 +50,24 @@ export const entitiesMixin = {
       return ['Name']
     },
 
-    isTaskSidePanelOpen () {
+    isTaskSidePanelOpen() {
       return (
-        this.nbSelectedTasks > 0
-        || this.keepTaskPanelOpen
-        || this.nbSelectedEntities > 0
-        || this.nbSelectedValidations > 0
+        this.nbSelectedTasks > 0 ||
+        this.keepTaskPanelOpen ||
+        this.nbSelectedEntities > 0 ||
+        this.nbSelectedValidations > 0
       )
     },
 
-    nbSelectedEntities () {
+    nbSelectedEntities() {
       return this.selectedEntities.size
     },
 
-    entityTypeName () {
+    entityTypeName() {
       return `${this.type[0].toUpperCase()}${this.type.slice(1)}`
     },
 
-    selectedEntities () {
+    selectedEntities() {
       if (['Episode', 'Sequence'].includes(this.entityTypeName)) return []
       return this[`selected${this.entityTypeName}s`]
     }

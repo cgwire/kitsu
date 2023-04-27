@@ -423,7 +423,9 @@ export const getDescFilters = (descriptors, taskTypes, queryText) => {
         taskTypes.find(
           t => t.name.toLowerCase() === descriptorName.toLowerCase()
         )
-      ) return
+      ) {
+        return
+      }
 
       const matchedDescriptors =
         descriptorNameIndex[descriptorName.toLowerCase()]

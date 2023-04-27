@@ -423,7 +423,6 @@
 </template>
 
 <script>
-import async from 'async'
 import draggable from 'vuedraggable'
 import Datepicker from 'vuejs-datepicker'
 import moment from 'moment'

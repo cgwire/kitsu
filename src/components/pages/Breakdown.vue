@@ -1227,7 +1227,7 @@ export default {
     },
 
     getCsvFileHeaders() {
-      let headers = [
+      const headers = [
         this.$t('shots.fields.name'),
         this.$t('breakdown.fields.standby')
       ]

@@ -12,11 +12,8 @@
         top: position.top + 'px'
       }"
     >
-      <div
-        class="menu"
-      >
+      <div class="menu">
         <div class="flexrow">
-
           <div
             :class="{
               'menu-item': true,
@@ -26,11 +23,9 @@
             :title="$t('menu.change_status')"
             @click="selectBar('change-status')"
             v-if="
-              (
-                isCurrentUserManager ||
+              (isCurrentUserManager ||
                 isSupervisorInDepartment ||
-                isInDepartment
-              ) &&
+                isInDepartment) &&
               !isEntitySelection &&
               isTaskSelection &&
               nbSelectedTasks > 1
@@ -245,9 +240,7 @@
             :title="$t('main.csv.export_file')"
             @click="$emit('export-task')"
             v-if="
-              isTaskSelection &&
-              !isEntitySelection &&
-              nbSelectedTasks === 1
+              isTaskSelection && !isEntitySelection && nbSelectedTasks === 1
             "
           >
             <download-icon />
@@ -434,13 +427,9 @@
             v-if="nbSelectedTasks > 1"
           >
             {{
-              $tc(
-                'tasks.set_thumbnails_from_tasks',
-                nbSelectedTasks,
-                {
-                  nbSelectedTasks
-                }
-              )
+              $tc('tasks.set_thumbnails_from_tasks', nbSelectedTasks, {
+                nbSelectedTasks
+              })
             }}
           </button>
           <div v-else>
@@ -695,12 +684,9 @@ import {
   EyeIcon,
   FilmIcon,
   ImageIcon,
-  MinusIcon,
   PlayCircleIcon,
-  SquareIcon,
   TrashIcon,
-  UserIcon,
-  XIcon
+  UserIcon
 } from 'vue-feather-icons'
 import ComboboxModel from '@/components/widgets/ComboboxModel'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
@@ -725,14 +711,11 @@ export default {
     EyeIcon,
     FilmIcon,
     ImageIcon,
-    MinusIcon,
     PeopleField,
     PlayCircleIcon,
     Spinner,
     UserIcon,
-    SquareIcon,
     TrashIcon,
-    XIcon,
     ViewPlaylistModal
   },
 
@@ -841,7 +824,7 @@ export default {
       'user'
     ]),
 
-    minimized () {
+    minimized() {
       return this.selectedBar === ''
     },
 
@@ -1308,7 +1291,7 @@ export default {
       localStorage.setItem(`${this.storagePrefix}-selected-bar`, barName, {
         expires: '1M'
       })
-      if (this.selectedBar !== barName) {
+      if (this.selectedBar !== barName) {
         this.selectedBar = barName
       } else {
         this.selectedBar = ''
@@ -1330,7 +1313,7 @@ export default {
           this.selectedBar = 'delete-edits'
           return
         }
-        if (this.nbSelectedTasks === 1) {
+        if (this.nbSelectedTasks === 1) {
           this.selectedBar = ''
           return
         }
@@ -1587,7 +1570,7 @@ div.assignation {
 
 .menu-item {
   cursor: pointer;
-  font-size: .9em;
+  font-size: 0.9em;
   transform: scale(0.9);
   padding: 0.2em 0.6em 0.4em 0.6em;
 

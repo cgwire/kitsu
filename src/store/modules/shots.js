@@ -537,7 +537,7 @@ const actions = {
 
   uploadEdlFile({ rootGetters }, { edl_file, nomenclature, match_case }) {
     const production = rootGetters.currentProduction
-    let episode = rootGetters.isTVShow ? rootGetters.currentEpisode : null
+    const episode = rootGetters.isTVShow ? rootGetters.currentEpisode : null
     return shotsApi
       .postEdl(production, edl_file, nomenclature, match_case, episode)
       .then(() => {

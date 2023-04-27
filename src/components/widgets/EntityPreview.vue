@@ -1,25 +1,25 @@
 <template>
-<a
-  class="preview-wrapper preview-picture"
-  target="_blank"
-  :style="{
-    width: emptyWidth + 'px',
-    'min-width': emptyWidth + 'px',
-    height: emptyHeight + 'px'
-  }"
-  @click="onClicked"
->
-  <img
-    class="thumbnail-picture"
+  <a
+    class="preview-wrapper preview-picture"
+    target="_blank"
     :style="{
-      width: 'auto',
-      'max-height': emptyHeight + 'px'
+      width: emptyWidth + 'px',
+      'min-width': emptyWidth + 'px',
+      height: emptyHeight + 'px'
     }"
-    :width="width || ''"
-    v-lazy="thumbnailPath"
-    :key="thumbnailKey"
-  />
-</a>
+    @click="onClicked"
+  >
+    <img
+      class="thumbnail-picture"
+      :style="{
+        width: 'auto',
+        'max-height': emptyHeight + 'px'
+      }"
+      :width="width || ''"
+      v-lazy="thumbnailPath"
+      :key="thumbnailKey"
+    />
+  </a>
 </template>
 
 <script>
@@ -91,9 +91,7 @@ export default {
 
     thumbnailPath() {
       const previewFileId = this.previewFileId || this.entity.preview_file_id
-      return (
-        '/api/pictures/previews/preview-files/' + previewFileId + '.png'
-      )
+      return '/api/pictures/previews/preview-files/' + previewFileId + '.png'
     },
 
     thumbnailKey() {

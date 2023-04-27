@@ -87,7 +87,7 @@
               'is-loading': isLoading,
               'is-disabled': forms.length === 0
             }"
-            @click="$emit('confirm')"
+            @click="$emit('confirm', forms)"
           >
             {{ $t('tasks.add_revision_confirm') }}
           </a>
