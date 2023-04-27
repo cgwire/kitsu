@@ -508,7 +508,7 @@ export default {
       upload_file: 'Browse local files',
       error_upload: 'An error occurred while uploading your EDL.',
       upload_edl: 'Upload EDL',
-      nomenclature: 'Nomenclature',
+      naming_convention: 'Naming convention',
       match_case: 'Match case'
     }
   },
