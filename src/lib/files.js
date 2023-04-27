@@ -29,7 +29,8 @@ const ALL_EXTENSIONS = [
   'wav',
   'mp3',
   'webm',
-  'avi'
+  'avi',
+  'clip'
 ]
 
 const ALL_EXTENSIONS_STRING = ALL_EXTENSIONS.map(
