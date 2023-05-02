@@ -1,6 +1,6 @@
 <template>
   <div class="entity-search page">
-    <form @submit.prevent="onElementSelected()">
+    <form @submit.prevent="onResultSelected()">
       <div class="search-field">
         <span class="search-icon">
           <search-icon width="20" />
@@ -59,6 +59,7 @@
                 'selected-result': flattenResults[selectedIndex] === entity
               }"
               :key="entity.id"
+              @mouseover="selectResultById(entity.id)"
               v-for="entity in this.results.assets"
             >
               <entity-preview
@@ -97,6 +98,7 @@
                 'selected-result': flattenResults[selectedIndex] === entity
               }"
               :key="entity.id"
+              @mouseover="selectResultById(entity.id)"
               v-for="entity in this.results.shots"
             >
               <entity-preview
@@ -139,6 +141,7 @@
                 'selected-result': flattenResults[selectedIndex] === person
               }"
               :key="person.id"
+              @mouseover="selectResultById(person.id)"
               v-for="person in this.results.persons"
             >
               <router-link
@@ -293,7 +296,11 @@ export default {
       }
     },
 
-    onElementSelected() {
+    selectResultById(id) {
+      this.selectedIndex = this.flattenResults.findIndex(item => item.id === id)
+    },
+
+    onResultSelected() {
       const item = this.flattenResults[this.selectedIndex]
       if (item) {
         document.getElementById(`result-link-${item.id}`).click()
@@ -407,17 +414,21 @@ export default {
 
   .result {
     height: 280px;
-    background: $white-grey-light;
+    background: var(--background);
     border-radius: 1em;
     padding-top: 1em;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+
+    .dark & {
+      background: var(--background-alt);
+    }
 
     &.selected-result {
       background: var(--background-hover);
     }
 
     .result-name {
-      color: $mid-grey;
+      color: var(--text-strong);
       font-weight: bold;
       padding: 0.3em 1em;
     }
