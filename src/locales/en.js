@@ -465,7 +465,8 @@ export default {
     yes: 'Yes',
     search: {
       type: 'Type 3 characters at least to perform the research',
-      no_result: 'There are no results for this search'
+      no_result: 'There are no results for this search',
+      no_filter: 'Select at least one filter to perform the research'
     },
     csv: {
       choose: 'Choose',
@@ -1324,7 +1325,8 @@ export default {
   },
 
   search: {
-    title: 'Entity Search'
+    title: 'Entity Search',
+    placeholder: 'Search for an entity in the database...'
   },
 
   timesheets: {
