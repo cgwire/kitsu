@@ -96,20 +96,23 @@ export default {
 }
 
 .preview-room-button.button {
-  background: $dark-grey-light;
-  border: 1px solid $dark-grey-strong;
+  color: var(--text);
+  background: none;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  margin-right: 0.5em;
-  margin-top: 7px;
+  margin: 4px 0.5em 4px 0;
 
   &:hover {
-    background: $dark-grey-lighter;
+    background-color: var(--background-tag-button);
   }
 }
 
 .avatar.person-avatar {
   display: inline-flex;
-  margin-right: 4px;
-  margin-top: 8px;
+  margin: 4px 4px 4px 0;
+
+  &:last-child {
+    margin-right: 0.5em;
+  }
 }
 </style>
