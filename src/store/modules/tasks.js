@@ -1115,12 +1115,14 @@ const mutations = {
   [ADD_SELECTED_TASK](state, validationInfo) {
     if (validationInfo.task) {
       state.selectedTasks.set(validationInfo.task.id, validationInfo.task)
+      state.selectedTasks = new Map(state.selectedTasks) // for reactivity
       state.nbSelectedTasks = state.selectedTasks.size
     } else {
       const taskTypeId = validationInfo.column.id
       const entityId = validationInfo.entity.id
       const validationKey = `${entityId}-${taskTypeId}`
       state.selectedValidations.set(validationKey, validationInfo)
+      state.selectedValidations = new Map(state.selectedValidations) // for reactivity
       state.nbSelectedValidations = state.selectedValidations.size
     }
   },
@@ -1151,12 +1153,14 @@ const mutations = {
   [REMOVE_SELECTED_TASK](state, validationInfo) {
     if (validationInfo.task) {
       state.selectedTasks.delete(validationInfo.task.id)
+      state.selectedTasks = new Map(state.selectedTasks) // for reactivity
       state.nbSelectedTasks = state.selectedTasks.size
     } else {
       const taskTypeId = validationInfo.column.id
       const entityId = validationInfo.entity.id
       const validationKey = `${entityId}-${taskTypeId}`
       state.selectedValidations.delete(validationKey)
+      state.selectedValidations = new Map(state.selectedValidations) // for reactivity
       state.nbSelectedValidations = state.selectedValidations.size
     }
   },
