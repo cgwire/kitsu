@@ -20,7 +20,7 @@
           ((nbSelectedTasks || 0) > 1 || nbSelectedValidations > 0)
         "
       >
-        <h1 class="title">Selected tasks</h1>
+        <h1 class="title">{{ $tc('tasks.selected_tasks') }}</h1>
         <div class="task-list mt1">
           <div
             class="selected-task-line flexrow"
@@ -32,7 +32,7 @@
               :task-type="taskTypeMap.get(task.task_type_id)"
               :production-id="currentProduction.id"
             />
-            <span class="flexow-item">{{ task.entity_name }}</span>
+            <span class="flexrow-item">{{ task.entity_name }}</span>
           </div>
           <div class="mt2 selected-task-line" v-if="nbSelectedValidations > 0">
             <span v-if="nbSelectedTasks > 0">+</span>
@@ -243,7 +243,7 @@
         />
       </div>
       <div class="side task-info pa1" v-else-if="nbSelectedEntities > 0">
-        <h1 class="title mt2">Selected Entities</h1>
+        <h1 class="title mt2">{{ $tc('tasks.selected_entities') }}</h1>
         <div class="pa2 mt1">
           <div
             class="entity-line"

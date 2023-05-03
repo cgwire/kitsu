@@ -1259,6 +1259,8 @@ export default {
     previous: 'previous task',
     revision_preview_file: 'If one of your selected files contains a revision number in its name (eg. "preview-v3.png"), then it will be suggested as a new revision name (eg. "revision 3") at the next step.',
     select_preview_file: 'Please select files (pictures, movies or others) from your hard drive to be used as a new preview revision for the current task:',
+    selected_entities: 'Selected entities',
+    selected_tasks: 'Selected tasks',
     set_estimations: 'Set estimations for selected tasks:',
     set_preview: 'Set current preview as thumbnail',
     set_preview_error: 'An error occurred while setting preview as thumbnail',
