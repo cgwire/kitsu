@@ -227,9 +227,7 @@ export const entityListMixin = {
         this.$store.commit('CLEAR_SELECTED_TASKS')
       }
       if (selection.length === 0) {
-        this.$nextTick(() => {
-          this.$store.commit('ADD_SELECTED_TASK', validationInfo)
-        })
+        this.$store.commit('ADD_SELECTED_TASK', validationInfo)
       } else {
         this.$store.commit('ADD_SELECTED_TASKS', selection)
       }
