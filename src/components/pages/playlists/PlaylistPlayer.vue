@@ -1856,13 +1856,13 @@ export default {
 
   .playlist-button {
     margin: 0;
-    background: $dark-grey-light;
+    background: none;
     border: 0;
     border-radius: 0;
-    color: $white-grey;
+    color: var(--text);
 
     &:hover {
-      background: $dark-grey-lighter;
+      background: var(--background-tag-button);
     }
 
     &.active {
@@ -1870,7 +1870,7 @@ export default {
     }
 
     &.topbar-button {
-      border: 1px solid $dark-grey-strong;
+      border: 1px solid var(--border);
       border-radius: 10px;
       margin-right: 0.5em;
 
