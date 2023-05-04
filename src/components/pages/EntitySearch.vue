@@ -71,7 +71,7 @@
                 :entity="entity"
               />
               <router-link
-                class="result-name"
+                class="result-description"
                 :id="`result-link-${entity.id}`"
                 :to="entityPath(entity, 'asset')"
               >
@@ -80,6 +80,10 @@
                 </div>
                 <div class="entity-name">
                   {{ entity.asset_type_name }} / {{ entity.name }}
+                </div>
+                <div class="match">
+                  <span class="match-icon"><search-icon width="15" /></span>
+                  {{ getMatchDetails(entity) }}
                 </div>
               </router-link>
             </div>
@@ -110,7 +114,7 @@
                 :entity="entity"
               />
               <router-link
-                class="result-name"
+                class="result-description"
                 :id="`result-link-${entity.id}`"
                 :to="entityPath(entity, 'shot')"
               >
@@ -122,6 +126,12 @@
                     {{ entity.episode_name }} /
                   </template>
                   {{ entity.sequence_name }} / {{ entity.name }}
+                </div>
+                <div class="match">
+                  <span class="match-icon"><search-icon width="15" /></span>
+                  <span class="match-details">{{
+                    getMatchDetails(entity)
+                  }}</span>
                 </div>
               </router-link>
             </div>
@@ -156,7 +166,7 @@
                     :person="person"
                     :size="200"
                   />
-                  <div class="result-name">
+                  <div class="result-description">
                     <div class="person-name">{{ person.name }}</div>
                     <div class="person-email">{{ person.email }}</div>
                     <div class="person-role">
@@ -350,6 +360,22 @@ export default {
 
     personPath(person) {
       return getPersonPath(person.id)
+    },
+
+    getMatchDetails(entity) {
+      const target = entity.matched_terms?.[0]?.[0]
+      const term = entity.matched_terms?.[0]?.[1]
+      if (target?.startsWith('data_')) {
+        return this.$t('search.match_details_2', {
+          term,
+          target: target.replace('data_', '')
+        })
+      } else {
+        return this.$t('search.match_details', {
+          term,
+          target
+        })
+      }
     }
   },
 
@@ -426,7 +452,7 @@ export default {
   }
 
   .result {
-    height: 280px;
+    height: 300px;
     background: var(--background);
     border-radius: 1em;
     padding-top: 1em;
@@ -440,10 +466,23 @@ export default {
       background: var(--background-hover);
     }
 
-    .result-name {
+    .result-description {
       color: var(--text-strong);
       font-weight: bold;
       padding: 0.3em 1em;
+    }
+
+    .match {
+      display: inline-flex;
+      color: var(--text-alt);
+      font-weight: normal;
+      margin-top: 0.5em;
+      opacity: 0.7;
+
+      .match-icon {
+        margin-top: -2px;
+        margin-right: 0.5em;
+      }
     }
   }
 }
