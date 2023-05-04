@@ -628,6 +628,14 @@ body {
     background-color: #5e6169;
   }
 
+  .message {
+    background: $dark-grey;
+    .message-body {
+      border-left: 5px solid $dark-grey-lightest;
+      color: $white-grey;
+    }
+  }
+
   .vdp-datepicker__calendar {
     background-color: #36393f;
     border-color: #25282e;

@@ -90,6 +90,12 @@ export default {
     }
   },
 
+  data() {
+    return {
+      timer: ''
+    }
+  },
+
   computed: {
     originalPath() {
       const previewFileId = this.previewFileId || this.entity.preview_file_id
@@ -135,11 +141,11 @@ export default {
       } else {
         if (this.width && this.width > 150) {
           return (
-            '/api/pictures/previews/preview-files/' + previewFileId + '.png'
+            '/api/pictures/previews/preview-files/' + previewFileId + '.png' + this.timer
           )
         } else {
           return (
-            '/api/pictures/thumbnails/preview-files/' + previewFileId + '.png'
+            '/api/pictures/thumbnails/preview-files/' + previewFileId + '.png' + this.timer
           )
         }
       }
@@ -156,6 +162,17 @@ export default {
       if (this.noPreview) return
       const previewFileId = this.previewFileId || this.entity.preview_file_id
       this.$store.commit('SHOW_PREVIEW_FILE', previewFileId)
+    }
+  },
+
+  watch: {
+    previewFileId() {
+      this.timer = '?t=' + new Date().valueOf()
+    },
+
+    'entity.preview_file_id'() {
+      console.log('changed')
+      this.timer = '?t=' + new Date().valueOf()
     }
   }
 }

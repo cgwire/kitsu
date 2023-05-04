@@ -1007,14 +1007,11 @@ const mutations = {
   [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
     const asset = state.assetMap.get(entityId)
     if (asset) {
-      asset.preview_file_id = null
-      setTimeout(() => {
-        asset.preview_file_id = previewId
-        asset.tasks.forEach(taskId => {
-          const task = taskMap.get(taskId)
-          if (task) task.entity.preview_file_id = previewId
-        })
-      }, 1000)
+      asset.preview_file_id = previewId
+      asset.tasks.forEach(taskId => {
+        const task = taskMap.get(taskId)
+        if (task) task.entity.preview_file_id = previewId
+      })
     }
   },
 

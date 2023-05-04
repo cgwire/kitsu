@@ -422,7 +422,12 @@
 
         <div class="flexrow-item is-wide" v-if="selectedBar === 'thumbnails'">
           <button
-            class="button confirm-button is-wide"
+            :class="{
+              button: true,
+              'confirm-button': true,
+              'is-wide': true,
+              'is-loading': loading.setThumbnails
+            }"
             @click="confirmSetThumbnailsFromTasks"
             v-if="nbSelectedTasks > 1"
           >
@@ -444,7 +449,10 @@
               type="checkbox"
               v-model="isUseCurrentFrame"
             />
-            <span class="flexrow-item">
+            <span
+              class="flexrow-item pointer"
+              @click="isUseCurrentFrame = !isUseCurrentFrame"
+            >
               {{ $t('tasks.use_current_frame') }}
             </span>
           </div>
@@ -1223,6 +1231,7 @@ export default {
       if (this.nbSelectedTasks === 1) {
         const task = this.selectedTasks.values().next().value
         this.$emit('set-frame-thumbnail', this.isUseCurrentFrame)
+        this.loading.setThumbnails = false
       } else {
         func
           .runPromiseAsSeries(

@@ -611,8 +611,18 @@ const actions = {
   setPreview({ commit, state }, { taskId, entityId, previewId, frame }) {
     const taskMap = state.taskMap
     return tasksApi.setPreview(entityId, previewId, frame).then(entity => {
-      commit(SET_PREVIEW, { taskId, entityId, previewId, taskMap })
-      return Promise.resolve()
+      const task = taskMap.get(taskId)
+      if (task && task.entity_preview_file_id === previewId) {
+        commit(SET_PREVIEW, { taskId, entityId, previewId, taskMap })
+      } else {
+        // Trick needed to trigger reactivity when only the preview frame is
+        // modified and not the preview itself.
+        commit(SET_PREVIEW, { taskId, entityId, previewId: '', taskMap })
+        setTimeout(() => {
+          commit(SET_PREVIEW, { taskId, entityId, previewId, taskMap })
+          return Promise.resolve()
+        }, 0)
+      }
     })
   },
 
@@ -1239,10 +1249,7 @@ const mutations = {
 
   [SET_PREVIEW](state, { taskId, previewId }) {
     if (state.taskMap.get(taskId)) {
-      state.taskMap.get(taskId).entity.preview_file_id = 'empty'
-      setTimeout(() => {
-        state.taskMap.get(taskId).entity.preview_file_id = previewId
-      }, 200)
+      state.taskMap.get(taskId).entity.preview_file_id = previewId
     }
   },
 
