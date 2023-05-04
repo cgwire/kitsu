@@ -1,6 +1,6 @@
 <template>
   <div class="entity-search page">
-    <form @submit.prevent="onResultSelected()">
+    <form class="search-form" @submit.prevent="onResultSelected()">
       <div class="search-field">
         <span class="search-icon">
           <search-icon width="20" />
@@ -12,27 +12,36 @@
           v-model.trim="searchQuery"
         />
       </div>
-      <div class="search-filter pa1 flexrow">
-        <checkbox
-          :toggle="true"
-          :label="$t('assets.title')"
-          @change="search"
-          v-model="searchFilter.assets"
+      <div class="search-options pa1 flexrow">
+        <div class="search-filter flexrow">
+          <checkbox
+            :toggle="true"
+            :label="$t('assets.title')"
+            @change="search"
+            v-model="searchFilter.assets"
+          />
+          <checkbox
+            :toggle="true"
+            :label="$t('shots.title')"
+            @change="search"
+            v-model="searchFilter.shots"
+          />
+          <!--
+          <checkbox
+            :toggle="true"
+            :label="$t('people.title')"
+            @change="search"
+            v-model="searchFilter.persons"
+          />
+          -->
+        </div>
+        <combobox
+          class="search-limit"
+          :label="$t('search.limit')"
+          :options="limitOptions"
+          v-model="limit"
+          @input="search"
         />
-        <checkbox
-          :toggle="true"
-          :label="$t('shots.title')"
-          @change="search"
-          v-model="searchFilter.shots"
-        />
-        <!--
-        <checkbox
-          :toggle="true"
-          :label="$t('people.title')"
-          @change="search"
-          v-model="searchFilter.persons"
-        />
-        -->
       </div>
     </form>
     <div class="search-results mb2">
@@ -196,9 +205,12 @@ import { SearchIcon } from 'vue-feather-icons'
 // import peopleStore from '@/store/modules/people'
 
 import Checkbox from '@/components/widgets/Checkbox'
+import Combobox from '@/components/widgets/Combobox'
 import EntityPreview from '@/components/widgets/EntityPreview'
 // import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import Spinner from '@/components/widgets/Spinner'
+
+const AVAILABLE_LIMITS = [10, 20, 50]
 
 export default {
   name: 'entity-search',
@@ -206,6 +218,7 @@ export default {
 
   components: {
     Checkbox,
+    Combobox,
     EntityPreview,
     // PeopleAvatar,
     SearchIcon,
@@ -215,6 +228,8 @@ export default {
   data() {
     return {
       isLoading: false,
+      limit: AVAILABLE_LIMITS[0],
+      limitOptions: AVAILABLE_LIMITS.map(value => ({ label: value, value })),
       selectedIndex: 0,
       searchQuery: '',
       searchFilter: {
@@ -292,7 +307,7 @@ export default {
 
       this.searchData({
         query: this.searchQuery,
-        limit: 10,
+        limit: this.limit,
         index_names
       })
         .then(results => {
@@ -410,9 +425,12 @@ export default {
   margin-top: 0;
 }
 
-.search-field {
+.search-form {
   max-width: 800px;
   margin: auto;
+}
+
+.search-field {
   padding-top: 40px;
   position: relative;
   width: 100%;
@@ -432,11 +450,21 @@ export default {
   }
 }
 
-.search-filter {
-  position: relative;
-  max-width: 800px;
-  margin: auto;
-  gap: 2em;
+.search-options {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0 2em;
+
+  .search-filter {
+    gap: 2em;
+  }
+
+  .search-limit {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 8px;
+    gap: 0.5em;
+  }
 }
 
 .search-results {

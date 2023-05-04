@@ -1325,8 +1325,11 @@ export default {
   },
 
   search: {
+    limit: 'Max number of results',
+    match_details: '"{term}" found in {target}',
+    match_details_2: '"{term}" found in {target} metadata',
+    placeholder: 'Search for an entity in the database...',
     title: 'Entity Search',
-    placeholder: 'Search for an entity in the database...'
   },
 
   timesheets: {

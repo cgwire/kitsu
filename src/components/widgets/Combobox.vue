@@ -50,7 +50,7 @@ export default {
     },
     value: {
       default: '',
-      type: [Object, String, Boolean]
+      type: [Object, String, Boolean, Number]
     },
     options: {
       default: () => [],
