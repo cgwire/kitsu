@@ -337,7 +337,15 @@ export default {
 
       if (this.searchQuery.length > 2) {
         this.isLoading = true
-        this.searchData({ query: this.searchQuery, limit: 10 })
+        const index_names = Object.entries(this.searchFilter)
+          .map(([k, v]) => (v ? k : undefined))
+          .filter(Boolean)
+
+        this.searchData({
+          query: this.searchQuery,
+          limit: 10,
+          index_names
+        })
           .then(results => {
             // results.persons?.forEach(person => {
             //   peopleStore.helpers.addAdditionalInformation(person)
