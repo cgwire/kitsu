@@ -16,18 +16,20 @@
         <checkbox
           :toggle="true"
           :label="$t('assets.title')"
+          @change="search"
           v-model="searchFilter.assets"
         />
         <checkbox
           :toggle="true"
           :label="$t('shots.title')"
+          @change="search"
           v-model="searchFilter.shots"
         />
         <!--
         <checkbox
           :toggle="true"
           :label="$t('people.title')"
-          v-if="results.persons"
+          @change="search"
           v-model="searchFilter.persons"
         />
         -->
@@ -272,6 +274,30 @@ export default {
   methods: {
     ...mapActions(['searchData']),
 
+    search() {
+      this.isLoading = true
+      const index_names = Object.entries(this.searchFilter)
+        .map(([k, v]) => (v ? k : undefined))
+        .filter(Boolean)
+
+      this.searchData({
+        query: this.searchQuery,
+        limit: 10,
+        index_names
+      })
+        .then(results => {
+          // results.persons?.forEach(person => {
+          //   peopleStore.helpers.addAdditionalInformation(person)
+          // })
+          delete results.persons
+          this.results = results
+        })
+        .catch(console.error)
+        .finally(() => {
+          this.isLoading = false
+        })
+    },
+
     selectPrevious() {
       this.selectedIndex--
       if (this.selectedIndex < 0) {
@@ -336,27 +362,7 @@ export default {
       }
 
       if (this.searchQuery.length > 2) {
-        this.isLoading = true
-        const index_names = Object.entries(this.searchFilter)
-          .map(([k, v]) => (v ? k : undefined))
-          .filter(Boolean)
-
-        this.searchData({
-          query: this.searchQuery,
-          limit: 10,
-          index_names
-        })
-          .then(results => {
-            // results.persons?.forEach(person => {
-            //   peopleStore.helpers.addAdditionalInformation(person)
-            // })
-            delete results.persons
-            this.results = results
-          })
-          .catch(console.error)
-          .finally(() => {
-            this.isLoading = false
-          })
+        this.search()
       } else {
         this.clearSearchResult()
       }
