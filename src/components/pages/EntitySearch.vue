@@ -19,7 +19,6 @@
           v-model="searchFilter.assets"
         />
         <checkbox
-          :disabled="true"
           :toggle="true"
           :label="$t('shots.title')"
           v-model="searchFilter.shots"
@@ -208,7 +207,7 @@ export default {
       searchQuery: '',
       searchFilter: {
         assets: true,
-        shots: false,
+        shots: true,
         persons: false
       },
       results: {
