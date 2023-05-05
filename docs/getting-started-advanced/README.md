@@ -191,7 +191,7 @@ You can change the preview order if you click on the number, then drag and drop 
 ![preview drag drop](../img/getting-started/multiple_preview.png)
 
 
-To delete an additional preview, you need to enlarge the comment panel and clck on the numbers.
+To delete an additional preview, you need to enlarge the comment panel by draging it and click on the numbers of versions.
 
 ![enlarge comment section](../img/getting-started/enlarge_comment.png)
 
