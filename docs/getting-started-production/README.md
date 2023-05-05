@@ -65,7 +65,7 @@ On the right part of the top screen, you have the global search and also news fr
 
 
 Then, the bell shows you your notification (assignation, comments, tag)![Notification](../img/getting-started/notification_icon_on.png), the last icone before your avatar is the documentation button. 
-![documentation button](../img/getting-starteddocumentation_button.png)
+![documentation button](../img/getting-started/documentation_button.png)
 
 
 And then your avatar to open your menu (setting, documentation, etc.) 
