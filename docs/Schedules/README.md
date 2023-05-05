@@ -18,19 +18,7 @@ On the drop-down menu, choose **SCHEDULE**
 On top of the Schedule, you can see the start date (1) and the end date (2) you have defined when creating the production. 
 
 Click on the box to open the calendar and pick a date.
-You can add your global man-days as on your quote.
 
-The **man-days** is the reference for your production. This way, you always have the information, 
-without searching into your quote/contract.
-
-Next to each task type, there is a **MD** (man-days) that you can fill. 
-
-**It's also for reference only.**
-
-The number of **MD** will **not determine** the length of the task type.
-For example, you may have 50 days of budget for a task, five artists on the team, so that the duration will be ten days for the task. The length of the task should be ten days and not 50.
-
-It's a reminder of your contract/quote. You can also fill the **MD** for each task type.
 
 ![Production Schedule](../img/getting-started/production_schedule.png)
 
