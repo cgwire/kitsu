@@ -134,9 +134,9 @@ const client = {
     return client.pget(path)
   },
 
-  searchData(query, limit) {
+  searchData(query, limit, index_names) {
     const path = '/api/data/search'
-    return client.ppost(path, { query, limit })
+    return client.ppost(path, { query, limit, index_names })
   }
 }
 

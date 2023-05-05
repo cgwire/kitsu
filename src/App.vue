@@ -845,6 +845,10 @@ a:hover {
   padding-bottom: 0em;
 }
 
+.pb1 {
+  padding-bottom: 1em;
+}
+
 .pt0 {
   padding-top: 0em;
 }
