@@ -440,7 +440,7 @@ Click on the status (1) you want to assign.
 
 ![Assigned a task](../img/getting-started/task_assigned.png)
 
-The **Action Menu Box** appears. 
+The **comment pannel** appears on the right of the screen with the action tools. 
 
 ![Blue menu](../img/getting-started/blue_menu.png)
 
@@ -533,7 +533,7 @@ If you have defined an **FPS** for the production, Kitsu conforms to the uploade
 
 Otherwise, the video is compressed to 1080P and 30mbits/sec. 
 
-You need to select the **Publish Revision** tab.
+You need to select the **Publish Revision** tab or select a status with **IS FEEDBACK REQUEST** option.
 
 ![Publish revision tab](../img/getting-started/publish_revision.png)
 
@@ -568,7 +568,7 @@ On the list page, click on the status you want, then on the right panel, click o
 
 ![Thumbnail Button](../img/getting-started/pannel_history.png)
 
-Once you have clicked on the button, you see the thumbnail appears, and the button turns gray.
+Once you have clicked on the button, you will have the choice if you want to pick the first or any frame, once the frame selected you see the thumbnail appears, and the button turns gray.
 
 ![thumbnail applied](../img/getting-started/pannel_history_thumbnail.png)
 
@@ -578,9 +578,9 @@ Once you have clicked on the button, you see the thumbnail appears, and the butt
 
 When an artist needs a review, he changes the status of his task too![wfa](../img/getting-started/wfa_icon.png).
 
-Click on status (1) to open the right panel and start the review. 
+Click on status to open the right panel and start the review. 
 
-You can watch the version from the right panel, enlarge it (2), or even go fullscreen ![Fullscreen](../img/getting-started/fullscreen.png) (3).
+You can watch the version from the right panel, enlarge it by grabing the side of the panel, or even go fullscreen ![Fullscreen](../img/getting-started/fullscreen.png).
 
 ![review on global page](../img/getting-started/review_global.png)
 
@@ -688,6 +688,7 @@ Depending on the **FPS** you have set for the production, the number of **Second
 
 
  On the right part of the screen, you can see the full team of the department (depending on the assignments you made), the number of shots they have to do, the number of frames, seconds, and the average Quota. 
+ You will also have the **Remaining** line which give your the actual situation of your team.
  
  
  And the last column is the **Estimation**, to modify the estimation, hover the line with your mouse and click the editing zone.
