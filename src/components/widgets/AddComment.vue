@@ -607,8 +607,6 @@ export default {
       const taskStatus = this.taskStatusMap.get(this.task_status_id)
       if (taskStatus.is_feedback_request) {
         this.mode = 'publish'
-      } else {
-        this.mode = 'status'
       }
     },
 
