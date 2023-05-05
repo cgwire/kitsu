@@ -64,7 +64,7 @@ On the right part of the top screen, you have the global search and also news fr
  ![New features](../img/getting-started/latest_update.png). 
 
 
-Then, the bell shows you your notification (assignation, comments, tag)![Notification](../img/getting-started/notification_icon_on.png), the last icone before your avatar is the documentation button. 
+Then, the bell shows you your notification (assignation, comments, tag)![Notification](../img/getting-started/notification_icon_on.png), the last icon before your avatar is the documentation button. 
 ![documentation button](../img/getting-started/documentation_button.png)
 
 
@@ -289,7 +289,8 @@ the middle section, it is your selection for the shot (2).
 
 So now you have to select the shot you want to cast.
 
-You can display the assets as text if you don't have thumbnails yet.
+You can display the assets as text if you don't have thumbnails yet, or enlarge the 
+thumnbnails size.
 
 
 ![Breakdown page text display](../img/getting-started/breakdown_text_display.png)
@@ -308,6 +309,8 @@ You can also choose multiple shots at the same time. Click on the first shot, ho
 Then click on the assets you want
 to assign: characters, backgrounds, ... from the right part (3). 
 If you have selected multiple shots, your selection is also applied to the numerous shots.
+
+Keep in mind you can also copy a shot filled with assets and paste this asset selection to another shot.
 
 You can see a **+1** or **+10**when you pass over the asset. It's the number
 of times you add this asset, and you can click on it as many times as you need.
