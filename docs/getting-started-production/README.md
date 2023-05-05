@@ -64,9 +64,14 @@ On the right part of the top screen, you have the global search and also news fr
  ![New features](../img/getting-started/latest_update.png). 
 
 
-Then, the bell shows you your notification (assignation, comments, tag)![Notification](../img/getting-started/notification_icon_on.png), and then your avatar to open your menu (setting, documentation, etc.) 
+Then, the bell shows you your notification (assignation, comments, tag)![Notification](../img/getting-started/notification_icon_on.png), the last icone before your avatar is the documentation button. 
+![documentation button](../img/getting-starteddocumentation_button.png)
+
+
+And then your avatar to open your menu (setting, documentation, etc.) 
 
 ![Profil enlarged](../img/getting-started/profil_enlarge.png).
+
 
 
 The second part of the screen is common to the asset and shot page. This part always sticks to the top of the page, even if you scroll down.
@@ -83,7 +88,7 @@ You can then save all the filters and use them as your pages.
 On the right part of the screen, there are some buttons (from left to right) to hide or display the assignation, hide or display the extra column, enlarge or reduce the thumbnail, 
 ![display and Hide option](../img/getting-started/display_hide_option.png)
 
-batch import thumbnail ![batch import thumbnail](../img/getting-started/add_thumbnails.png), and finaly export ![export button](../img/getting-started/export.png) or import ![Import button](../img/getting-started/import.png) data.
+batch import thumbnail ![batch import thumbnail](../img/getting-started/add_thumbnails.png), and finaly import ![Import button](../img/getting-started/import.png) or export ![export button](../img/getting-started/export.png) data.
 
 
 Below you have the name of the column. the (+) next to **Name** ![Add custom column](../img/getting-started/add_column_custom.png) is here to create a new custom column. Then you have the name of the task type column. 
@@ -123,7 +128,7 @@ Then, you select the **Main Pack**, or the **episode** (2)
 
 We give it a **Name** (3) and enter a description that helps the Artist know what to do and quickly identify the asset.
 
-Click on ** Confirm and stay ** if you have multiple assets to create.
+Click on **Confirm and stay** if you have multiple assets to create.
 
 
 ![Create an asset](../img/getting-started/add_asset_popup.png)
