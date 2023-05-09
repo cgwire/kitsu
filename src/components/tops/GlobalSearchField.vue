@@ -245,10 +245,10 @@ export default {
       this.searchQuery = ''
     },
 
-    onBlur() {
-      setTimeout(() => {
+    onBlur(event) {
+      if (!event.relatedTarget?.id.startsWith('result-link-')) {
         this.isSearchActive = false
-      }, 100)
+      }
     }
   },
 
