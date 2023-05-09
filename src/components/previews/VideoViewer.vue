@@ -1,6 +1,19 @@
 <template>
-  <div ref="container" class="video-player">
-    <div ref="video-wrapper" class="video-wrapper">
+  <div
+    ref="container" class="video-player"
+    :style="{
+      'border-top-left-radius': isRoundedTopBorder ? '10px' : '',
+      'border-top-right-radius': isRoundedTopBorder ? '10px' : ''
+    }"
+  >
+    <div
+      ref="video-wrapper"
+      class="video-wrapper"
+      :style="{
+        'border-top-left-radius': isRoundedTopBorder ? '10px' : '',
+        'border-top-right-radius': isRoundedTopBorder ? '10px' : ''
+      }"
+    >
       <div class="loading-background" v-if="isLoading">
         <spinner class="spinner" />
       </div>
@@ -8,7 +21,7 @@
         ref="movie"
         class="annotation-movie"
         :style="{
-          display: isLoading ? 'none' : 'block'
+          display: isLoading ? 'none' : 'block',
         }"
         :src="moviePath"
         :poster="posterPath"
@@ -83,6 +96,10 @@ export default {
     fullScreen: {
       type: Boolean,
       default: false
+    },
+    isRoundedTopBorder: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -138,6 +155,32 @@ export default {
           this.$refs.movie.style.height = this.defaultHeight + 'px'
           this.isLoading = false
         })
+
+        this.video.addEventListener('seeking', () => {
+          console.log('seeking')
+        })
+
+        this.video.addEventListener('seeked', () => {
+          console.log('seeked')
+        })
+
+        this.video.addEventListener('canplay', () => {
+          console.log('canplay')
+        })
+
+        this.video.addEventListener('canplaythrough', () => {
+          console.log('canplaythrough')
+        })
+
+        this.video.addEventListener('seeked', () => {
+          console.log('seeked end')
+        })
+
+        this.video.addEventListener('stalled', () => {
+          console.log('load start')
+          this.isLoading = true
+        })
+
         window.addEventListener('resize', this.onWindowResize)
       }
     }, 0)

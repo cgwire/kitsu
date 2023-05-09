@@ -13,34 +13,30 @@
         />
       </div>
       <div class="search-options pa1 flexrow">
-        <div class="search-filter flexrow">
-          <checkbox
-            :toggle="true"
-            :label="$t('assets.title')"
-            @change="search"
-            v-model="searchFilter.assets"
-          />
-          <checkbox
-            :toggle="true"
-            :label="$t('shots.title')"
-            @change="search"
-            v-model="searchFilter.shots"
-          />
-          <!--
-          <checkbox
-            :toggle="true"
-            :label="$t('people.title')"
-            @change="search"
-            v-model="searchFilter.persons"
-          />
-          -->
-        </div>
+        <checkbox
+          class="flexrow-item"
+          :toggle="true"
+          :label="$t('assets.title')"
+          @change="search"
+          v-model="searchFilter.assets"
+        />
+        <checkbox
+          class="flexrow-item"
+          :toggle="true"
+          :label="$t('shots.title')"
+          @change="search"
+          v-model="searchFilter.shots"
+        />
+        <div class="filler"></div>
+        <span class="flexrow-item no-margin">
+          {{ $t('search.limit') }}
+        </span>
         <combobox
-          class="search-limit"
-          :label="$t('search.limit')"
+          class="search-limit flexrow-item"
           :options="limitOptions"
-          v-model="limit"
+          :with-margin="false"
           @input="search"
+          v-model="limit"
         />
       </div>
     </form>
@@ -78,6 +74,7 @@
                 :height="200"
                 :width="300"
                 :entity="entity"
+                is-rounded-top-border
               />
               <router-link
                 class="result-description"
@@ -121,6 +118,7 @@
                 :height="200"
                 :width="300"
                 :entity="entity"
+                is-rounded-top-border
               />
               <router-link
                 class="result-description"
@@ -311,9 +309,6 @@ export default {
         index_names
       })
         .then(results => {
-          // results.persons?.forEach(person => {
-          //   peopleStore.helpers.addAdditionalInformation(person)
-          // })
           delete results.persons
           this.results = results
         })
@@ -462,7 +457,6 @@ export default {
   .search-limit {
     display: inline-flex;
     align-items: center;
-    margin-top: 8px;
     gap: 0.5em;
   }
 }
@@ -475,7 +469,6 @@ export default {
   .result-list {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: 20px;
   }
 
@@ -483,7 +476,6 @@ export default {
     height: 300px;
     background: var(--background);
     border-radius: 1em;
-    padding-top: 1em;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 
     .dark & {
@@ -495,9 +487,17 @@ export default {
     }
 
     .result-description {
+      max-width: 300px;
       color: var(--text-strong);
       font-weight: bold;
       padding: 0.3em 1em;
+
+      .production-name {
+        font-size: 0.9em;
+        text-transform: uppercase;
+        font-weight: 500;
+        color: var(--text);
+      }
     }
 
     .match {

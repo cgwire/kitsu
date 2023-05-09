@@ -8,6 +8,7 @@
         id: entity.preview_file_id,
         extension: entity.preview_file_extension
       }"
+      :is-rounded-top-border="isRoundedTopBorder"
       @click.native="onVideoClicked()"
     />
     <button-simple
@@ -25,7 +26,9 @@
       width: emptyWidth + 'px',
       'min-width': emptyWidth + 'px',
       height: emptyHeight + 'px',
-      cursor: 'zoom-in'
+      cursor: 'zoom-in',
+      'border-top-left-radius': isRoundedTopBorder ? '10px' : '',
+      'border-top-right-radius': isRoundedTopBorder ? '10px' : ''
     }"
     @click="onPictureClicked()"
     v-else
@@ -97,6 +100,10 @@ export default {
     previewFileId: {
       default: null,
       type: String
+    },
+    isRoundedTopBorder: {
+      default: false,
+      type: Boolean
     }
   },
 
