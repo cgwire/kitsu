@@ -15,7 +15,7 @@
       @focus="isSearchActive = true"
       @blur="onBlur"
       @keyup.enter="onElementSelected"
-      v-model="searchQuery"
+      v-model.trim="searchQuery"
     />
     <div
       class="search-results"
@@ -46,7 +46,10 @@
           @click="onElementSelected"
           v-for="(asset, index) in assets"
         >
-          <router-link :id="'result-link-' + index" :to="entityPath(asset)">
+          <router-link
+            :id="'result-link-' + index"
+            :to="entityPath(asset, 'asset')"
+          >
             <div class="flexrow" @mouseover="selectedIndex = index">
               <div class="flexrow-item">
                 <entity-thumbnail
@@ -71,21 +74,64 @@
           </router-link>
         </div>
         <div
-          :key="person.id"
+          :key="shot.id"
           :class="{
             'result-line': true,
             'selected-result': selectedIndex === index + assets.length
           }"
           @click="onElementSelected"
-          v-for="(person, index) in persons"
+          v-for="(shot, index) in shots"
         >
           <router-link
             :id="'result-link-' + (index + assets.length)"
-            :to="personPath(person)"
+            :to="entityPath(shot, 'shot')"
           >
             <div
               class="flexrow"
               @mouseover="selectedIndex = index + assets.length"
+            >
+              <div class="flexrow-item">
+                <entity-thumbnail
+                  style="margin-top: 5px"
+                  :empty-height="40"
+                  :empty-width="60"
+                  :height="40"
+                  :width="60"
+                  :entity="shot"
+                  :with-link="false"
+                />
+              </div>
+              <div class="flexrow-item">
+                <div class="production-name">
+                  {{ shot.project_name }}
+                </div>
+                <div class="shot-type-name">
+                  <template v-if="shot.episode_name">
+                    {{ shot.episode_name }} /
+                  </template>
+                  {{ shot.sequence_name }} / {{ shot.name }}
+                </div>
+              </div>
+            </div>
+          </router-link>
+        </div>
+        <div
+          :key="person.id"
+          :class="{
+            'result-line': true,
+            'selected-result':
+              selectedIndex === index + assets.length + shots.length
+          }"
+          @click="onElementSelected"
+          v-for="(person, index) in persons"
+        >
+          <router-link
+            :id="'result-link-' + (index + assets.length + shots.length)"
+            :to="personPath(person)"
+          >
+            <div
+              class="flexrow"
+              @mouseover="selectedIndex = index + assets.length + shots.length"
             >
               <people-avatar
                 class="flexrow-item"
@@ -134,6 +180,7 @@ export default {
       isSearchActive: false,
       assets: [],
       persons: [],
+      shots: [],
       selectedIndex: 0,
       searchQuery: ''
     }
@@ -156,33 +203,27 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentEpisode', 'currentProduction', 'productionMap']),
-
-    entityPath() {
-      const section = 'asset'
-      return entity => {
-        const project = this.productionMap.get(entity.project_id)
-        const isTVShow = project.production_type === 'tvshow'
-        let episodeId = null
-        if (isTVShow) episodeId = entity.episode_id || 'main'
-        return getEntityPath(entity.id, entity.project_id, section, episodeId)
-      }
-    },
-
-    personPath() {
-      return person => {
-        return getPersonPath(person.id)
-      }
-    },
+    ...mapGetters(['productionMap']),
 
     nbResults() {
-      const length = this.assets.length + this.persons.length
-      return length
+      return this.assets.length + this.persons.length + this.shots.length
     }
   },
 
   methods: {
     ...mapActions(['searchData']),
+
+    entityPath(entity, section) {
+      const project = this.productionMap.get(entity.project_id)
+      const isTVShow = project.production_type === 'tvshow'
+      let episodeId = null
+      if (isTVShow) episodeId = entity.episode_id || 'main'
+      return getEntityPath(entity.id, entity.project_id, section, episodeId)
+    },
+
+    personPath(person) {
+      return getPersonPath(person.id)
+    },
 
     selectPrevious() {
       this.selectedIndex--
@@ -221,17 +262,21 @@ export default {
         this.isLoading = true
         this.searchData({ query: this.searchQuery })
           .then(results => {
-            this.isLoading = false
             this.assets = results.assets
             results.persons.forEach(person => {
               peopleStore.helpers.addAdditionalInformation(person)
             })
             this.persons = results.persons
+            this.shots = results.shots
           })
           .catch(console.error)
+          .finally(() => {
+            this.isLoading = false
+          })
       } else {
         this.assets = []
         this.persons = []
+        this.shots = []
       }
     },
 
