@@ -233,7 +233,7 @@
       </div>
     </div>
 
-    <div class="column side-column" v-if="nbSelectedTasks === 1">
+    <div class="column side-column" v-if="nbSelectedTasks >= 1">
       <task-info :task="selectedTasks.values().next().value" with-actions />
     </div>
   </div>
