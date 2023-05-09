@@ -464,9 +464,9 @@ export default {
     workspace: 'Workspace',
     yes: 'Yes',
     search: {
-      type: 'Type 3 characters at least to perform the research',
+      type: 'Type 3 characters at least to perform the search',
       no_result: 'There are no results for this search',
-      no_filter: 'Select at least one filter to perform the research'
+      no_filter: 'Select at least one filter to perform the search'
     },
     csv: {
       choose: 'Choose',
@@ -1327,7 +1327,7 @@ export default {
   },
 
   search: {
-    limit: 'Max number of results',
+    limit: 'Max number of results:',
     match_details: '"{term}" found in {target}',
     match_details_2: '"{term}" found in {target} metadata',
     placeholder: 'Search for an entity in the database...',
