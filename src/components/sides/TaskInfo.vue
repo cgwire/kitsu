@@ -441,7 +441,7 @@ export default {
     ]),
 
     nbSelectedEntities() {
-      return this.selectedEntities.size
+      return this.selectedEntities ? this.selectedEntities.size : 0
     },
 
     selectedEntities() {
