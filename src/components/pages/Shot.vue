@@ -383,27 +383,7 @@ export default {
 
   mounted() {
     this.clearSelectedTasks()
-    this.getCurrentShot()
-      .then(shot => {
-        this.currentShot = shot
-        this.currentSection = this.route.query.section || 'casting'
-        this.casting.isLoading = true
-        this.casting.isError = false
-        if (this.currentShot) {
-          this.loadShotCasting(this.currentShot)
-            .then(() => {
-              this.casting.isLoading = false
-            })
-            .catch(err => {
-              this.casting.isLoading = false
-              this.casting.isError = true
-              console.error(err)
-            })
-        } else {
-          this.resetData()
-        }
-      })
-      .catch(console.error)
+    this.init()
   },
 
   computed: {
@@ -554,6 +534,7 @@ export default {
       this.$nextTick(() => {
         this.getCurrentShot()
           .then(shot => {
+            console.log('reset', shot)
             this.currentShot = shot
             return this.loadShotCasting(this.currentShot)
           })
@@ -566,10 +547,39 @@ export default {
             console.error(err)
           })
       })
+    },
+
+    init() {
+      this.getCurrentShot()
+        .then(shot => {
+          console.log('sht', shot)
+          this.currentShot = shot
+          this.currentSection = this.route.query.section || 'casting'
+          this.casting.isLoading = true
+          this.casting.isError = false
+          if (this.currentShot) {
+            this.loadShotCasting(this.currentShot)
+              .then(() => {
+                this.casting.isLoading = false
+              })
+              .catch(err => {
+                this.casting.isLoading = false
+                this.casting.isError = true
+                console.error(err)
+              })
+          } else {
+            this.resetData()
+          }
+        })
+        .catch(console.error)
     }
   },
 
-  watch: {},
+  watch: {
+    $route() {
+      this.init()
+    }
+  },
 
   metaInfo() {
     return {
