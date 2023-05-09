@@ -75,7 +75,11 @@
       </div>
     </div>
 
-    <div id="side-column" class="column side-column" v-show="isTaskSidebarOpen">
+    <div
+      id="side-column"
+      class="column side-column"
+      v-show="isTaskSidePanelOpen"
+    >
       <task-info
         :task="selectedTasks.values().next().value"
         entity-type="Episode"
