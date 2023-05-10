@@ -27,7 +27,7 @@ Then enter Kitsu as name and chose the workspace you want to link with you Kitsu
 ### Set the right permissions
 
 When the app is created, go to the app page by clicking on its name in the list
-and go to the *Basic information* section. Then click on the *Permissions* 
+and go to the *Basic information* section. Then click on the *Permissions*
 button on the bottom right:
 ![Application token](../img/slack/slack_create_app_03.png)
 
@@ -39,10 +39,10 @@ The required permission scope is `chat:write:bot`:
 ![Application token](../img/slack/slack_create_app_05.png)
 
 
-### Install App in your workspace 
+### Install App in your workspace
 
-We can now proceed to the app installation in the workspace. Go to the 
-*Install App* section and proceed to installatio by clicking on the big green
+We can now proceed to the app installation in the workspace. Go to the
+*Install App* section and proceed to installation by clicking on the big green
 button:
 ![Application token](../img/slack/slack_create_app_06.png)
 
@@ -72,7 +72,7 @@ page. There you can give the token to your Kitsu instance.
 
 The final step requires to go in your profile section. From there you can put
 your Slack notifications on. It requires a last parameter: the Member ID you use
-on your Slack. 
+on your Slack.
 
 You can find it in your Slack profile by clicking on More:
 

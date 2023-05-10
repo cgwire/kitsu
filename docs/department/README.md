@@ -4,11 +4,11 @@
 
 Departments are here to help the supervisors and artists to focus on their tasks.
 Once they are linked to one or several departments, supervisors and artists will have direct access to their
- filtered view, and departments also act on the permissions.  
+ filtered view, and departments also act on the permissions.
 
 You can create as many **Departments** you need.
 
-On the main menu ![Main menu](../img/getting-started/main_button.png) select the 
+On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 **DEPARTMENT** page under the **Admin** section.
 
 ![Task Type](../img/getting-started/deparment_menu.png)
@@ -16,7 +16,7 @@ On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 On the main page, you can create new departments. Click on the **+Add a department** button
 ![create department button](../img/getting-started/create_department_button.png).
 
-To add a department, you need 
+To add a department, you need
 
 - (1) The name of the department
 - (2) The color
@@ -33,17 +33,17 @@ Once you finish creating the department, the page should look like this.
 
 You can modify any **Department** you need.
 
-On the main menu ![Main menu](../img/getting-started/main_button.png) select the 
+On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 **DEPARTMENT** page under the **Admin** section.
 
 ![Task Type](../img/getting-started/deparment_menu.png)
 
-On the main page, you can edit all the departments already created 
+On the main page, you can edit all the departments already created
 ![edit button](../img/getting-started/edit_button.png).
 
 ![Task Type global page](../img/getting-started/department_global.png)
 
-You can change: 
+You can change:
 
 - (1) The name of the department
 - (2) The color
@@ -62,7 +62,7 @@ Once you finish modifying the department, the page should look like this.
 
 You can now link your freshly created **Department** to **Task Types**.
 
-On the main menu ![Main menu](../img/getting-started/main_button.png) select the 
+On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 **TASK TYPES** page under the **Admin** section.
 
 ![Task Type](../img/getting-started/menu_tasktype.png)
@@ -90,7 +90,7 @@ Once you're done, the **Task types** page should look like this.
 
 You can now link your freshly created **Department** to **People**.
 
-On the main menu ![Main menu](../img/getting-started/main_button.png) select the 
+On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 **PEOPLE** page under the **Admin** section.
 
 ![People menu](../img/getting-started/main_menu_people.png)
@@ -121,18 +121,18 @@ The department supervisor will be able to comment on all the tasks from their de
 ![Department filtered view](../img/getting-started/department_filtered_view.png)
 
 
-## Link custom column to department
+## Link metadata column to department
 
-You can now link your custom column to a **department**. This way, this custom column will be seen on the department-filtered view of the **Supervisor** and **Artist**.
+You can now link your custom metadata column to a **department**. This way, this column will be seen on the department-filtered view of the **Supervisor** and **Artist**.
 
-On the global page of the asset or the shot, click on the arrow on the direct right of your custom column, and click on **Edit**.
+On the global page of the asset or the shot, click on the arrow on the direct right of your metadata column, and click on **Edit**.
 
-![Custom column Edit](../img/getting-started/custom_column_edit.png)
+![Metadata column Edit](../img/getting-started/custom_column_edit.png)
 
-You can link the custom column to one or more departments. Click on the department from the list and then click on **add** to be effective.
+You can link the metadata column to one or more departments. Click on the department from the list and then click on **add** to be effective.
 
-![Department custom column edit](../img/getting-started/custom_column_detail_department.png)
+![Department metadata column edit](../img/getting-started/custom_column_detail_department.png)
 
-Now people linked to this department will see this custom column on their filtered view.
+Now people linked to this department will see this metadata column on their filtered view.
 
-![Department custom column filtered view](../img/getting-started/department_filtered_view_column.png)
+![Department metadata column filtered view](../img/getting-started/department_filtered_view_column.png)

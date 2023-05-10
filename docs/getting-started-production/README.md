@@ -3,7 +3,7 @@
 ## Create your first production
 
 The first step in Kitsu is to create a production. Click on the **Create a new
-production** button.  
+production** button.
 
 ![Create a production](../img/getting-started/create_production.png)
 
@@ -11,7 +11,7 @@ Enter your production name, and choose **TV Show** if you need more than one epi
 
 Then you have to fill in technical information, such as the number of FPS, the Ration, and the Resolution.
 
-All these data will be used when Kitsu reencodes the video previews uploaded.
+All these data will be used when Kitsu re-encodes the video previews uploaded.
 
 Then you need to define start and end dates for your production.
 
@@ -24,7 +24,7 @@ First, you need to select your asset task type, shot task type, and task status 
 
 Then 7 and 8 are the option parts. If you already have a spreadsheet with your asset/shot.
 
-See the **import CSV** section for more details. 
+See the **import CSV** section for more details.
 
 [Import asset](../batch-action/README.md#create-assets-from-a-csv-spreadsheet-file)
 
@@ -32,7 +32,7 @@ See the **import CSV** section for more details.
 
 Validate everything with the ![All done](../img/getting-started/all_done_go.png) button.
 
-If you don't find all the **Task Types**, **Status**, or **Asset Types** that you need while 
+If you don't find all the **Task Types**, **Status**, or **Asset Types** that you need while
 creating the production. You will be able to add them to your production later.
 
 See the **Customization** section for more details.
@@ -51,7 +51,7 @@ On the top part (1), you have the global navigation, which is always visible thr
 
 With the main menu button ![Main menu button](../img/getting-started/main_button.png), you can go to your productions and your tasks (it's common to all permissions). And because you are an administrator, you have access to extra options, like the global view of the schedule, timesheets of your whole studio, and workflow customization.
 
-You can choose between production. The name of the actual production is displayed now, but thanks to the drop-down menu, you can navigate from production to production (if you have several). 
+You can choose between production. The name of the actual production is displayed now, but thanks to the drop-down menu, you can navigate from production to production (if you have several).
 
 The next drop-down menu is here to help you navigate through the different pages of the production.
 You always start with the asset page, but you can switch to shots, sequence, statistics, team, and breakdown. With this drop-down menu, you can also change the production setting (including the workflow).
@@ -61,16 +61,16 @@ If you have defined your production as a **TV Show**, you will have an episode d
 
 On the right part of the top screen, you have the global search and also news from Kitsu. You can see with an animated gif all the new features.
 
- ![New features](../img/getting-started/latest_update.png). 
+ ![New features](../img/getting-started/latest_update.png).
 
 
-Then, the bell shows you your notification (assignation, comments, tag)![Notification](../img/getting-started/notification_icon_on.png), the last icon before your avatar is the documentation button. 
+Then, the bell shows you your notification (assignation, comments, tag)![Notification](../img/getting-started/notification_icon_on.png), the last icon before your avatar is the documentation button.
 ![documentation button](../img/getting-started/documentation_button.png)
 
 
-And then your avatar to open your menu (setting, documentation, etc.) 
+And then your avatar to open your menu (setting, documentation, etc.)
 
-![Profil enlarged](../img/getting-started/profil_enlarge.png).
+![Profile enlarged](../img/getting-started/profil_enlarge.png).
 
 
 
@@ -78,25 +78,25 @@ The second part of the screen is common to the asset and shot page. This part al
 
 The first element on the left is the filter box. You can type anything you want for simple filtering, sequence, asset type, etc.
 
-If you need more advanced filtering, please use the filter builder button. 
+If you need more advanced filtering, please use the filter builder button.
 
 ![Filter Builder](../img/getting-started/filter_builder.png)
 
 You can then save all the filters and use them as your pages.
 
 
-On the right part of the screen, there are some buttons (from left to right) to hide or display the assignation, hide or display the extra column, enlarge or reduce the thumbnail, 
+On the right part of the screen, there are some buttons (from left to right) to hide or display the assignation, hide or display the extra column, enlarge or reduce the thumbnail,
 ![display and Hide option](../img/getting-started/display_hide_option.png)
 
-batch import thumbnail ![batch import thumbnail](../img/getting-started/add_thumbnails.png), and finaly import ![Import button](../img/getting-started/import.png) or export ![export button](../img/getting-started/export.png) data.
+batch import thumbnail ![batch import thumbnail](../img/getting-started/add_thumbnails.png), and finally import ![Import button](../img/getting-started/import.png) or export ![export button](../img/getting-started/export.png) data.
 
 
-Below you have the name of the column. the (+) next to **Name** ![Add custom column](../img/getting-started/add_column_custom.png) is here to create a new custom column. Then you have the name of the task type column. 
+Below you have the name of the column. the (+) next to **Name** ![Add metadata column](../img/getting-started/add_column_custom.png) is here to create a new metadata column. Then you have the name of the task type column.
 
 On the far right of the screen, next to the scroll bar, is the option to hide and display a text column
 ![Display/hide text column](../img/getting-started/visible_column_detail.png).
 
-We have created a **Studio** and **test** custom column in this example.
+We have created a **Studio** and **test** metadata column in this example.
 
 
 The last part (4), at the bottom of the screen, is the sum-up of your displayed page. It means the sum-up will update if you filter the page.
@@ -106,11 +106,11 @@ You can see the number of elements (assets or shots), the total number of estima
 ## Create assets
 
 So, now you have the first script for your production. Next, it's time to do the
-breakdown and the creation of the assets. Finally, it allows you to list your assets, 
+breakdown and the creation of the assets. Finally, it allows you to list your assets,
 dispatch the work to the artists, and follow each related
 task's progress.
 
-Let's begin with the asset page. You can access it via the drop-down menu at the top of the page. 
+Let's begin with the asset page. You can access it via the drop-down menu at the top of the page.
 
 ![Drop down menu asset](../img/getting-started/drop_down_menu.png).
 
@@ -119,10 +119,10 @@ On the asset page, click on **Add assets**.
 ![Asset page first time](../img/getting-started/add_assets_first.png)
 
 A pop-up window opens:
- 
+
 It asks you to choose the asset **Type** (1): Camera, Characters, Environment,
-FX, Props, ...  
-Let's start with a character. 
+FX, Props, ...
+Let's start with a character.
 
 Then, you select the **Main Pack**, or the **episode** (2)
 
@@ -133,13 +133,13 @@ Click on **Confirm and stay** if you have multiple assets to create.
 
 ![Create an asset](../img/getting-started/add_asset_popup.png)
 
-You can change the asset type and keep adding assets. 
+You can change the asset type and keep adding assets.
 
-You can also customize the asset type list and their tasks pipeline. 
+You can also customize the asset type list and their tasks pipeline.
 [Customization of the workflow](../customization/README.md#modify-an-existing-asset-types) )
 
 
-The newly created asset appears in the background every time you click on **Confirm and stay**. 
+The newly created asset appears in the background every time you click on **Confirm and stay**.
 
 
 After adding your last asset, click
@@ -154,9 +154,9 @@ You will also see the tasks are created at the same time. By default, all the ta
 
 If you need to add more **Assets**, click on the **Add assets** button.
 
-You can edit assets by going to the asset page, hovering over the asset you want to modify, and then clicking on the **edit** button 
+You can edit assets by going to the asset page, hovering over the asset you want to modify, and then clicking on the **edit** button
 ![Edit button](../img/getting-started/edit_button.png) (1) on the right side of
-the line.  
+the line.
 
 ![Edit an asset](../img/getting-started/asset_edit01.png)
 
@@ -180,7 +180,7 @@ You can also create tasks for episode and shot. See the ADVANCE section
 You need to go to the **Shots** page: you can use the
 drop-down menu and click on the **SHOTS**.
 
-![Drop down menu shot](../img/getting-started/drop_down_menu_shot.png) 
+![Drop down menu shot](../img/getting-started/drop_down_menu_shot.png)
 
 Click on the **Add shots** button to start with the shot creation.
 
@@ -210,7 +210,7 @@ You have to do the same with the sequences and episodes.
 
 If a shot is misplaced on a sequence, you have to edit the shot you want
 ![Edit button](../img/getting-started/edit_button.png), and change the
-sequence. 
+sequence.
 
 ![edit shot Change sequence](../img/getting-started/edit_shot.png)
 
@@ -218,8 +218,8 @@ sequence.
 ![Change sequence](../img/getting-started/change_seq.png)
 
 If at some point you need to delete a shot, click on the **trash can**
-icon on the right of the line ![Delete button](../img/getting-started/delete_button.png). 
-If you need to import this shot back, click on the restore button 
+icon on the right of the line ![Delete button](../img/getting-started/delete_button.png).
+If you need to import this shot back, click on the restore button
 ![Restore button](../img/getting-started/restore_button.png).
 
 To delete a shot, see the FAQ : [How to delete a shot](../faq-deletion/README.md#how-to-delete-a-shot)
@@ -243,7 +243,7 @@ side of the shot line.
 
 ![edit shot Change sequence](../img/getting-started/edit_shot.png)
 
-You can enter the **In** and **Out** of the shot on the new window. Then, save with the **Confirm** button. 
+You can enter the **In** and **Out** of the shot on the new window. Then, save with the **Confirm** button.
 
 ![Shot edit page](../img/getting-started/shot_edit.png)
 
@@ -251,7 +251,7 @@ Now the frame range appears on the general spreadsheet of the shot page.
 
 ![Shot edit page](../img/getting-started/shot_framerange_global.png)
 
-Now that you have unlocked the **Frames**, **In**, and **Out** columns, you can fill them 
+Now that you have unlocked the **Frames**, **In**, and **Out** columns, you can fill them
 directly from the global shot page.
 
 Click on the case you want to fill in and add the data.
@@ -289,8 +289,8 @@ the middle section, it is your selection for the shot (2).
 
 So now you have to select the shot you want to cast.
 
-You can display the assets as text if you don't have thumbnails yet, or enlarge the 
-thumnbnails size.
+You can display the assets as text if you don't have thumbnails yet, or enlarge the
+thumbnails size.
 
 
 ![Breakdown page text display](../img/getting-started/breakdown_text_display.png)
@@ -307,7 +307,7 @@ You can also choose multiple shots at the same time. Click on the first shot, ho
 ![Breakdown page global bulk select](../img/getting-started/breakdown_general_bulk_select.png)
 
 Then click on the assets you want
-to assign: characters, backgrounds, ... from the right part (3). 
+to assign: characters, backgrounds, ... from the right part (3).
 If you have selected multiple shots, your selection is also applied to the numerous shots.
 
 Keep in mind you can also copy a shot filled with assets and paste this asset selection to another shot.
@@ -329,7 +329,7 @@ example, we have added two times the character asset Llama.
 
 
 If you add an asset twice by mistake, you must go to the screen's middle part to select assets for this shot (2). From there, click on
-**-1**. When you finish this shot, go on with the other shots. 
+**-1**. When you finish this shot, go on with the other shots.
 Your selection is automatically saved.
 
 ![Breakdown remove asset](../img/getting-started/breakdown_remove_asset.png)
@@ -358,7 +358,7 @@ You can fill the asset breakdown page the same way as the shots. First, select o
 
 ## Change asset status
 
-For example, when an asset is validated at the **Concept** stage, it can be used for the storyboard. 
+For example, when an asset is validated at the **Concept** stage, it can be used for the storyboard.
 Then when it's validated at the **Modeling** stage, you can use it for the layout and so on.
 
 ![Asset Status](../img/getting-started/asset_status.png)
@@ -389,14 +389,14 @@ section, choose **PEOPLE** page.
 
 ![People Menu](../img/getting-started/main_menu_people.png)
 
-Then, click on the **+ Add a new user** button. 
+Then, click on the **+ Add a new user** button.
 
 ![Add a new user](../img/getting-started/add_employee.png)
 
 A creation window opens. You can enter the first (1) and last name (2), the email (which is **mandatory** to create the account) (3), and the phone number (4).
 
 You can add the new user to a **Department** (or several) (5).
-See **DEPARTEMENT DOCUMENTATION**
+See **DEPARTMENT DOCUMENTATION**
 
 Then you need to define the role of the user: ** Artist**, **Supervisor**, **Production Manager**,
 **Studio Manager**, **Vendor** or **Client** (6).  If the Artist is working right now, keep
@@ -404,7 +404,7 @@ him active; otherwise, select no. Validate by clicking the **Confirm** button.
 
 ![Create a new user](../img/getting-started/create_employee.png)
 
-See the [permissions](../permissions/README.md) section for more information. 
+See the [permissions](../permissions/README.md) section for more information.
 To make it short, artists, supervisors, production managers, vendors, and clients only see the
 productions they are assigned.
 
@@ -420,7 +420,7 @@ You need to add someone to a production to assign him a task.
 
 On the drop-down menu at the top of the page, select the **TEAM** page.
 
-![Drop down menu team](../img/getting-started/drop_down_menu_team.png) 
+![Drop down menu team](../img/getting-started/drop_down_menu_team.png)
 
 On the **Team** page, you can see all the assignations for a specific project.
 If you want to check another project team, you must switch to the page's top.
@@ -434,13 +434,13 @@ We can now get back to the **ASSETS** page via the drop-down menu.
 
 ![Drop down menu asset](../img/getting-started/drop_down_menu_asset.png).
 
-Now it's time to do your first assignment! 
+Now it's time to do your first assignment!
 
 Click on the status (1) you want to assign.
 
 ![Assigned a task](../img/getting-started/task_assigned.png)
 
-The **comment pannel** appears on the right of the screen with the action tools. 
+The **comment panel** appears on the right of the screen with the action tools.
 
 ![Blue menu](../img/getting-started/blue_menu.png)
 
@@ -453,7 +453,7 @@ him. Then click on the confirmation button to complete the assignation.
 You can assign tasks to the same person in one step (1). Once the blue menu is visible, keep **ctrl** on your Keyboard pressed and select
 multiple tasks. You can even use the **shift** key to choose a range of tasks
 (2). When you have chosen everything you need, apply with the **Confirm**
-button.  
+button.
 
 ![Assigned multiple people](../img/getting-started/assigned_multiple.png)
 
@@ -461,7 +461,7 @@ button.
 In the same way, once you have selected someone, you can click on
  **or unassign from selection** to remove this assignation.
 
-When you finish all the assignations, quit this mode using the **Escape** key, 
+When you finish all the assignations, quit this mode using the **Escape** key,
 or the cross on the top right corner of the action box.
 
 Now you can see next to each status the avatar of the ArtistArtist.
@@ -473,7 +473,7 @@ assignations** button on the top of the spreadsheet ![Hide assignations](../img/
 
 Once you assign someone, he is part of the production team. Depending
 In his position (Artist, Supervisor, Vendor), he only sees the production where
-he's assigned. 
+he's assigned.
 
 Now, everybody knows what to do and who is doing what!
 
@@ -482,7 +482,7 @@ Now, everybody knows what to do and who is doing what!
 ## Change status and write a comment
 
 To write a comment and change the status of a task, you can click on the
-status of the task (1). 
+status of the task (1).
 
 The comment uses the **Markdown** language. If you need specific syntax, feel free to look at the markdown guide website: https://www.markdownguide.org/basic-syntax/
 
@@ -492,18 +492,18 @@ The comment uses the **Markdown** language. If you need specific syntax, feel fr
 It makes a panel appear on the right, and here you can write a comment (1) and change the status (2), attach a file (3).
 
 
-You can **tag** someone on the team in the comments. Type the `@`and it opens a sub-menu with the list of the team. 
+You can **tag** someone on the team in the comments. Type the `@`and it opens a sub-menu with the list of the team.
 
 ![Tag someone](../img/getting-started/tag_team.png)
 
-You can tag a frame (whatever version you are in), type the `@`and it opens a sub-menu with the team list, and start typing **frame**. 
+You can tag a frame (whatever version you are in), type the `@`and it opens a sub-menu with the team list, and start typing **frame**.
 
 ![Tag a frame](../img/getting-started/tag_frame.png)
 
 
 You can add a **checklist** to your comments.
 
-You need to click on the **Add checklist** button, and the first item of the checklist appears. 
+You need to click on the **Add checklist** button, and the first item of the checklist appears.
 ![add checklist](../img/getting-started/add_checklist.png)
 
 Type your comments, hit the **Enter** key to add another line to your checklist, or click again on the **Add Checklist** button.
@@ -521,9 +521,9 @@ Validate the post and the new status with **Post status**
 
 ## Add a Preview
 
-Kistu will automatically switch to the **Pulish Revision** tab when you use status with the option **IS FEEDBACK REQUEST**, like the **WFA** Status.
+Kitsu will automatically switch to the **Publish Revision** tab when you use status with the option **IS FEEDBACK REQUEST**, like the **WFA** Status.
 
-You can add one or several previews to any comments. It can be a picture (`.png`, `.jpg`, `.jpeg`), a video (`.mp4`, `.mov`, `.wmv`), 
+You can add one or several previews to any comments. It can be a picture (`.png`, `.jpg`, `.jpeg`), a video (`.mp4`, `.mov`, `.wmv`),
 or an `.obj` file. You can review all the previews from the browser or mix everything.
 
 Other files like `.pdf`, `.zip`, `.rar`, `.ma` or `.mb`, however, need to be
@@ -531,7 +531,7 @@ downloaded to be reviewed.
 
 If you have defined an **FPS** for the production, Kitsu conforms to the uploaded video to this FPS.
 
-Otherwise, the video is compressed to 1080P and 30mbits/sec. 
+Otherwise, the video is compressed to 1080p and 30 Mbit/s.
 
 You need to select the **Publish Revision** tab or select a status with **IS FEEDBACK REQUEST** option.
 
@@ -551,7 +551,7 @@ You will see a preview of the attached files.
 
 Once your file is selected, you will see its name near the **Attach preview** button.
 
-![attach preview confimed](../img/getting-started/attach_preview_confirm.png)
+![attach preview confirmed](../img/getting-started/attach_preview_confirm.png)
 
 You can also **drag & drop** the file in the comment section.
 
@@ -563,7 +563,7 @@ You can select your status and publish your preview with the **Post** Button.
 ## Add a thumbnail
 
 You can use the preview as a **thumbnail** on the asset or shot spreadsheet. It
-helps to recognize the assets/shots on the main pages. 
+helps to recognize the assets/shots on the main pages.
 On the list page, click on the status you want, then on the right panel, click on the **Preview** button (1).
 
 ![Thumbnail Button](../img/getting-started/pannel_history.png)
@@ -578,13 +578,13 @@ Once you have clicked on the button, you will have the choice if you want to pic
 
 When an artist needs a review, he changes the status of his task too![wfa](../img/getting-started/wfa_icon.png).
 
-Click on status to open the right panel and start the review. 
+Click on status to open the right panel and start the review.
 
-You can watch the version from the right panel, enlarge it by grabing the side of the panel, or even go fullscreen ![Fullscreen](../img/getting-started/fullscreen.png).
+You can watch the version from the right panel, enlarge it by grabbing the side of the panel, or even go fullscreen ![Fullscreen](../img/getting-started/fullscreen.png).
 
 ![review on global page](../img/getting-started/review_global.png)
 
-You can draw directly on the preview with the **Pencil** tool and select a color ![Pencil](../img/getting-started/draw.png). 
+You can draw directly on the preview with the **Pencil** tool and select a color ![Pencil](../img/getting-started/draw.png).
 
 ![review drawing](../img/getting-started/review_comment.png)
 
@@ -592,7 +592,7 @@ You can also add **text** on the frame.
 
 ![review drawing text](../img/getting-started/review_comment_text.png)
 
-You can tag a frame (whatever version you are in), type the `@`and it opens a sub-menu with the team list, and start typing **frame**. 
+You can tag a frame (whatever version you are in), type the `@`and it opens a sub-menu with the team list, and start typing **frame**.
 
 ![Tag a frame](../img/getting-started/tag_frame.png)
 
@@ -603,17 +603,17 @@ If you need to delete your line, click again on the **pencil** icon, and the cur
 Select the line with the directional cross, and then press the **delete** icon ![Delete line](../img/getting-started/delete_line.png)
 
 
-If you go into **Full-Screen**, you can compare two task types or versions side by side when you click on the **Compare** button 
+If you go into **Full-Screen**, you can compare two task types or versions side by side when you click on the **Compare** button
 ![compare button](../img/getting-started/compare_button.png).
 
 ![compare button](../img/getting-started/compare_version.png)
 
 From there, you can change the status too![Retake](../img/getting-started/retake_icon.png) if you want that the ArtistArtist
-performs some changes. 
+performs some changes.
 
 You can add a **checklist** to your comments.
 
-You need to click on the **Add checklist** button, and the first item of the checklist appears. 
+You need to click on the **Add checklist** button, and the first item of the checklist appears.
 
 ![add checklist](../img/getting-started/add_checklist.png)
 
@@ -633,7 +633,7 @@ Once you click the button, Kitsu will grab all the frames with annotation and di
 
 ![Attachment snapshot detail](../img/getting-started/attachment_snapshot_detail.png)
 
-You can also **tag** someone on the team in the comments. Type the `@`and it opens a sub-menu with the list of the team. 
+You can also **tag** someone on the team in the comments. Type the `@`and it opens a sub-menu with the list of the team.
 
 ![Tag someone](../img/getting-started/tag_team.png)
 
@@ -657,11 +657,11 @@ You can also define a **Start date** by clicking on it.
 A calendar will open and let you choose your start date.
 
 The **Due date** is automatically calculated with the **Estimation**.
- 
+
 ![start date](../img/getting-started/set_estimation.png)
 
 
-To go further in detail with the Supervisor's view :  
+To go further in detail with the Supervisor's view :
 - (1) You can see and change the status of a task
 - (2) You can assign people to tasks
 
@@ -669,7 +669,7 @@ To go further in detail with the Supervisor's view :
 
 - (3) You can add an estimation for the task (in day unit)
 - (4) Kitsu calculates the sum of the timesheet fed by the artists
-- (5) The number of back-and-forths with the retake status
+- (5) The number of back-and-forth with the retake status
 - (6) You can add a start date for the task (with the calendar)
 - (7) Kitsu calculates the due date with the Start Date and the estimation
 - (8)(9) the Wip and Feedback dates are automatically filled
@@ -677,46 +677,46 @@ To go further in detail with the Supervisor's view :
 
 (7) to (10) is automatically filled.
 
-  
+
 To help you to set a correct estimation, you can use the **Estimation** Tab.
 
-![Estimation tab](../img/getting-started/tasktype_estimation_tab.png) 
+![Estimation tab](../img/getting-started/tasktype_estimation_tab.png)
 
 The left part of the screen lists the shots with the assignation and the number of frames (1).
-Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2). 
-(See how to set your production fps [Create your first production]((../getting-started-production/README.md#create-your-first-production) ) 
+Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2).
+(See how to set your production fps [Create your first production]((../getting-started-production/README.md#create-your-first-production) )
 
 
- On the right part of the screen, you can see the full team of the department (depending on the assignments you made), the number of shots they have to do, the number of frames, seconds, and the average Quota. 
+ On the right part of the screen, you can see the full team of the department (depending on the assignments you made), the number of shots they have to do, the number of frames, seconds, and the average Quota.
  You will also have the **Remaining** line which give your the actual situation of your team.
- 
- 
- And the last column is the **Estimation**, to modify the estimation, hover the line with your mouse and click the editing zone.
- 
- You can also select multiple shots simultaneously to edit them all the once.
- 
- ![Estimation tab edit](../img/getting-started/tasktype_estimation_tab_edit.png) 
- 
- Every time you change the **Estimation** (in the number of days) on the right part, you can see in real-time that the **Average Quota** is updated.
- 
 
- 
- For more information about the **Schedule** tab, go to the 
- [Task Type Schedule](#task-type-schedule) 
- 
- 
+
+ And the last column is the **Estimation**, to modify the estimation, hover the line with your mouse and click the editing zone.
+
+ You can also select multiple shots simultaneously to edit them all the once.
+
+ ![Estimation tab edit](../img/getting-started/tasktype_estimation_tab_edit.png)
+
+ Every time you change the **Estimation** (in the number of days) on the right part, you can see in real-time that the **Average Quota** is updated.
+
+
+
+ For more information about the **Schedule** tab, go to the
+ [Task Type Schedule](#task-type-schedule)
+
+
 
 ## The timesheets
 
 As Studio Manager, you can use the main menu to check the timesheets.
 
-Open the main menu with the ![main button](../img/getting-started/main_button.png) button. 
+Open the main menu with the ![main button](../img/getting-started/main_button.png) button.
 
 On the menu, choose the **Timesheets** page.
 
 ![main button](../img/getting-started/timesheet_menu.png)
 
-Per default, Kitsu will display the timesheet of all the production, but you can choose to see 
+Per default, Kitsu will display the timesheet of all the production, but you can choose to see
 the timesheet for a specific production only.
 
 ![main button](../img/getting-started/timesheet_day.png)
@@ -731,9 +731,9 @@ Per week, Kitsu highlights the overdue time per ArtistArtist.
 
 If you click on a number, a side panel opens with the details of the time spent per task this week.
 
-You can also set up several working hours per day. 
+You can also set up several working hours per day.
 
-Go back to the main menu and select **Settings**. 
+Go back to the main menu and select **Settings**.
 
 ![Setting](../img/getting-started/setting.png)
 

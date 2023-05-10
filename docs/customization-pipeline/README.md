@@ -2,11 +2,11 @@
 
 You can modify Kitsu to fit your **studio vocabulary** for the asset / Pre-production, task type, Status, etc.
 
-You can also **add custom columns** on the global page of the edit, episode, sequence, asset, and shots.
+You can also **add custom metadata columns** on the global page of the asset, edit, episode, sequence, and shot.
 
 In Kitsu, you have two kinds of **libraries**:
 - The first is the **Global Library** at the studio level.
-Only the Studio manager has access to it. 
+Only the Studio manager has access to it.
 
 - The second is the **Production Library**, where you will pick elements created on the global library to fill it.
 
@@ -18,13 +18,13 @@ You can create and modify the department, task type, task status, asset type, an
 You can create as many elements as possible, give the name you want, and choose the best color and options that fit your needs.
 
 Once your **Global Library** is populated, you can fill the **Production Library** with the newly created element from the **Global Library**.
- 
+
 
 ## Task Type
 
 ### Create a new Task Type
 
-On the main menu ![Main menu](../img/getting-started/main_button.png) select 
+On the main menu ![Main menu](../img/getting-started/main_button.png) select
 the **TASK TYPES** page under the **Admin** section.
 
 ![Task Type](../img/getting-started/menu_tasktype.png)
@@ -38,25 +38,25 @@ On the new pop-up, you can define your personalized task:
 - For which entity it is used
 - If the artists need to time log their work for tasks with this task type
 - To which department is it linked
-- The color 
+- The color
 
 ![Create task](../img/getting-started/create_task.png)
 
 Click on **Confirm** to save your changes.
 
-Per default, the new task type will be at the bottom of the list. 
+Per default, the new task type will be at the bottom of the list.
 To change the order, grab the **Task Type** and move it to its rightful place.
 
 ![Create task bottom list](../img/getting-started/created_task_bottom.png)
 
 ![Create task top list](../img/getting-started/created_task_top.png)
 
-Now your task is created on your **Global Library**. 
+Now your task is created on your **Global Library**.
 You need to add it to your **Production Library** to be able to use it.
 
 You need to return to your production with the **Return To Production** button on top of the screen.
 
-Then, with the navigation menu, choose **Settings** 
+Then, with the navigation menu, choose **Settings**
 
 ![Drop Down Menu Settings](../img/getting-started/drop_down_menu_setting.png)
 
@@ -64,7 +64,7 @@ On the **Drop down menu**, you can choose which **Task Type** you want to add to
 
 ![Setting Task Type new](../img/getting-started/setting_task_new.png)
 
- 
+
 Validate your choice with the **add** button.
 
 
@@ -75,28 +75,28 @@ You can return to the **global asset or shot page** and add the new **task type 
 
 ### Modify an existing Task Type
 
-On the main menu ![Main menu](../img/getting-started/main_button.png) select the 
+On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 **TASK TYPES** page under the **Admin** section.
 
 ![Task Type](../img/getting-started/menu_tasktype.png)
 
-On the main page, you can edit all the tasks already created 
+On the main page, you can edit all the tasks already created
 ![edit button](../img/getting-started/edit_button.png).
 
 ![Task Type global page](../img/getting-started/task_type_global_edit.png)
 
-You can change: 
+You can change:
 
 The order of the tasks by dragging and moving them to the wanted position.
 
 - The name of the task type
 - If the artists need to time log their work on this task type
 - To which department is it linked
-- The color 
+- The color
 
 ![Edit task](../img/getting-started/edit_task.png)
 
-Click on **Confirm** to save your changes. 
+Click on **Confirm** to save your changes.
 Now your changes are applied on all the productions the **Task Type** is used.
 
 
@@ -105,14 +105,14 @@ Now your changes are applied on all the productions the **Task Type** is used.
 
 ### Create a new Task Status
 
-On the main menu ![Main menu](../img/getting-started/main_button.png) select the 
+On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 **TASK STATUS** page under the **Admin** section.
 
 ![Task Status](../img/getting-started/menu_status_type.png)
 
 On the main page, click on the ![Add Task Status](../img/getting-started/add_task_status.png) button.
 
-On the new pop-up, you can define your personalized task : 
+On the new pop-up, you can define your personalized task :
 
 - The name of the Status
 - His short name, useful for the filters
@@ -126,7 +126,7 @@ On the new pop-up, you can define your personalized task :
 
 Click on **Confirm** to save your changes.
 
-Now your **Status** is created on your **Global Library**. 
+Now your **Status** is created on your **Global Library**.
 You need to add it to your **Production Library** to be able to use it.
 
 You need to return to your production with the **Return To Production** button on top of the screen.
@@ -148,20 +148,20 @@ You can return to the **global asset or shot page** and use the new **Status** o
 
 ### Modify an existing Task Status
 
-On the main menu ![Main menu](../img/getting-started/main_button.png) select the 
+On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 **TASK STATUS** page under the **Admin** section.
 
 ![Task Status](../img/getting-started/menu_status_type.png)
 
-On the main page, you can edit some statuses already created 
-![edit button](../img/getting-started/edit_button.png). 
+On the main page, you can edit some statuses already created
+![edit button](../img/getting-started/edit_button.png).
 Except ![Todo Status](../img/getting-started/todo_icon.png), which is part of the core
 system.
 But you can create a new custom **Default** status if needed.
 
 ![Task Status global page](../img/getting-started/task_status_global.png)
- 
-You can change : 
+
+You can change :
 - The name of the Status
 - Its short name, useful for the filters
 - If this Status is used to validate a task (useful for the quota, to clean the todo list, and episode stat page)
@@ -180,7 +180,7 @@ Click on **Confirm** to save your changes. Now your changes are applied on all t
 
 ### Create a new Asset Types
 
-On the main menu ![Main menu](../img/getting-started/main_button.png) select the 
+On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 **ASSET TYPES** page under the **Admin** section.
 
 ![Asset type menu](../img/getting-started/menu_asset_type.png)
@@ -195,7 +195,7 @@ You will be able to choose a name and a specific workflow for this new **Asset T
 
 Click on **Confirm** to save your changes.
 
-Now your new **Asset Type** is created on your **Global Library**. 
+Now your new **Asset Type** is created on your **Global Library**.
 You need to add it to your **Production Library** to be able to use it.
 
 You need to return to your production with the **Return To Production** button on top of the screen.
@@ -204,7 +204,7 @@ On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
 
 ![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
 
-On the **Asset Types** tab, you can choose which **Asset Types** you want to add or remove on this production, 
+On the **Asset Types** tab, you can choose which **Asset Types** you want to add or remove on this production,
 
 ![Setting Asset type new](../img/getting-started/setting_asset_new.png)
 
@@ -218,24 +218,24 @@ You can now create a new asset under this **Asset Type**.
 
 ### Modify an existing Asset Types
 
-On the main menu ![Main menu](../img/getting-started/main_button.png) select the 
+On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 **ASSET TYPES** page under the **Admin** section.
 
 ![Asset Type](../img/getting-started/menu_asset_type.png)
 
-On the main page, you can edit some **Asset Types** already created 
-![edit button](../img/getting-started/edit_button.png). 
+On the main page, you can edit some **Asset Types** already created
+![edit button](../img/getting-started/edit_button.png).
 
 ![Asset Task global page](../img/getting-started/asset_types_global.png)
- 
-You can change the name of the **Asset Type** and define its workflow. 
+
+You can change the name of the **Asset Type** and define its workflow.
 
 ![Edit asset type](../img/getting-started/edit_asset_types.png)
 
-For example, characters and backgrounds won't have similar **Task Yypes** pipeline.
+For example, characters and backgrounds won't have similar **Task Types** pipeline.
 The background won't use the rig for example.
 
-Per default, all the **Asset Types** will use all the **task types**. 
+Per default, all the **Asset Types** will use all the **task types**.
 You can select the task type you want to use for each asset types.
 
 ![Edit asset type](../img/getting-started/edit_asset_types_workflow.png)
@@ -243,7 +243,7 @@ You can select the task type you want to use for each asset types.
 
 Click on **Confirm** to save your changes.
 
-Your changes are applied to all the productions where the **asset type** is used, same 
+Your changes are applied to all the productions where the **asset type** is used, same
 for its workflow.
 
 
@@ -255,8 +255,8 @@ for its workflow.
 
 You can create **Status Automation** for the asset and the shot tasks.
 
-For the **asset**, you can choose to create **Status Automation** between tasks. 
-For example, the modeling status must be ready when the concept is validated. 
+For the **asset**, you can choose to create **Status Automation** between tasks.
+For example, the modeling status must be ready when the concept is validated.
 
 You can also create status automation that changes the asset status according to a task status; for example, when the concept is validated, the asset is ready for the storyboard.
 
@@ -272,7 +272,7 @@ You can choose between creating **Status Automation** for the **asset** or the *
 
 Then you can choose the **task type** and the **Status** that will trigger the Automation.
 
-Then you can select which **Task Type** will react to the Automation 
+Then you can select which **Task Type** will react to the Automation
 and choose the **Status** that will be changed.
 
 ![detail create status automation](../img/getting-started/add_status_automation.png)
@@ -287,16 +287,16 @@ To create **Status Automation** for shots, you must change the **Entity Type** t
 
 
 
-Now your new **Status Automation** is created on your **Global Library**. 
+Now your new **Status Automation** is created on your **Global Library**.
 You need to add it to your **production Library** to be able to use it.
 
 You need to return to your production with the **Return To Production** button on top of the screen.
 
 On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
 
-![Setting Status automatation new](../img/getting-started/setting_auto_new.png)
+![Setting Status automation new](../img/getting-started/setting_auto_new.png)
 
-On the **Status Automation** tab, you can choose which Automation you want to add or remove on this production, 
+On the **Status Automation** tab, you can choose which Automation you want to add or remove on this production,
 
 ![Setting Status automation](../img/getting-started/setting_auto_add.png)
 

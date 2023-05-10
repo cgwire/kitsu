@@ -7,7 +7,7 @@ img {
 
 img[src$='#logo-cgwire'],
 img[src$='#logo-kitsu'] {
-  border: 0; 
+  border: 0;
   box-shadow: none;
   width: 120px;
 }
@@ -30,7 +30,7 @@ Depending on your role in the studio, we propose you several tutorials:
 * [Getting Started as a Production Manager - Advanced Users](getting-started-advanced/README.md): Prepare advanced project and go further with customization
 * [Getting Started as an artist](getting-started-artist/README.md): Access your task list, share your progress and upload your results
  * [Getting Started as a client](getting-started-client/README.md): Browse playlists and provide feedback on the deliveries
-  
+
 ## Customization
 
 In this section, we will give more information about Kitsu main customization:
@@ -38,16 +38,16 @@ In this section, we will give more information about Kitsu main customization:
 * [Pipeline customization](customization-pipeline/README.md): Adapt Kitsu to your pipeline
 * [Production customization](customization-production/README.md): Adapt Kitsu to your production
 * [Studio customization](customization-studio/README.md): Adapt Kitsu to your studio
-  
+
 ## Modules
 
 In this section, we will give more information about Kitsu main modules:
 
-* [Schedules](Schedules/README.md): Everything you need to know to setup your schedules  
+* [Schedules](Schedules/README.md): Everything you need to know to setup your schedules
 * [Batch Actions](batch-action/README.md): Run several actions in a click, let Kitsu work for you
-* [Playlists](playlist/README.md): Gather video versions in a glimpse and stay focus during the review 
-* [Department](department/README.md): Define your main departments and show ligther tables to your teams
-  
+* [Playlists](playlist/README.md): Gather video versions in a glimpse and stay focus during the review
+* [Department](department/README.md): Define your main departments and show lighter tables to your teams
+
 
 ## Tutorials
 

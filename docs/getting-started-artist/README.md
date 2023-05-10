@@ -9,36 +9,36 @@ Click on your avatar on the top right of the screen, then on **Profile**. You ca
 
 NB: A link to this **Documentation** and YouTube **Tutorials** are available .
 You can also jump on our Discord or look at our roadmap.
- 
+
 ![User profile](../img/getting-started/user_profil.png)
- 
+
 On this new page, you can check your name , your email (3), fill your phone
 number (4), change the timezone (5), the language of the website (6), and
 post a pic of yourself as your avatar (7). It helps to recognize who is
-doing what! 
- 
+doing what!
+
 ![User detail](../img/getting-started/user_profil1.png)
- 
+
 You can also define what kind of notification you want, email or slack.
 
 ![User detail](../img/getting-started/user_profil2.png)
 
- 
+
 If you keep scrolling, you can also change your password if you want. We
 encourage you to change the default password with one of your own.
 
 ![User password](../img/getting-started/user_password.png)
- 
- 
+
+
 ## See your assignments
- 
-The central part for you, on **Kitsu**, is the **My tasks** page. 
+
+The central part for you, on **Kitsu**, is the **My tasks** page.
 It's the first landing page when you log in.
 
 
 You can see per **Production** (1) the **Entity** (2) you are assigned to, but also the **Estimation** time (3), and the **Duration** (4) you already spend, the **Due date** (5), the
-**Status** (6) of the tasks you are working on and their **priority** (7). 
- 
+**Status** (6) of the tasks you are working on and their **priority** (7).
+
 ![My tasks page](../img/getting-started/my_task_page.png)
 
 You can sort your page by **name**, **priority**, **status**, **estimation** or **last comment**.
@@ -51,14 +51,14 @@ You can also filter your tasks.
 
 
 Besides the shortcut **My Tasks** on top of the screen, you can also find it on the main menu ![Main menu](../img/getting-started/main_button.png),
-under the **User** section of **MY TASKS**. The Kistu logo is a shortcut too
+under the **User** section of **MY TASKS**. The Kitsu logo is a shortcut too
 to your task list.
 
 ![My tasks](../img/getting-started/my_tasks.png)
 
 
 
- 
+
 ## Share your progress
 
 When you start a new task you are assigned to, click on the Status![Todo](../img/getting-started/todo_icon.png)
@@ -66,8 +66,8 @@ When you start a new task you are assigned to, click on the Status![Todo](../img
 
 ![Shot status](../img/getting-started/my_task_status.png)
 
-It opens a panel on the right of the screen, where you can communicate about your work. Let your teammates know what you are doing. 
-For instance, show them you start working on something. 
+It opens a panel on the right of the screen, where you can communicate about your work. Let your teammates know what you are doing.
+For instance, show them you start working on something.
 Each time you change the status of a task, you can attach a
 text comment to it.
 
@@ -83,16 +83,16 @@ And validate your comment and the new Status by clicking on
 
 ![Changing status](../img/getting-started/changing_status.png)
 
-You can edit your last comment by clicking on the "history" button and then 
-using the **edit** button 
+You can edit your last comment by clicking on the "history" button and then
+using the **edit** button
 ![Edit button](../img/getting-started/edit_button.png).
 
 
 ## Ask for a review
 
-You can ask for a review by switching the tab to **Publish revision** 
-and change the Status of a task to 
-(**Waiting for Approval** ![wfa](../img/getting-started/wfa_icon.png)). 
+You can ask for a review by switching the tab to **Publish revision**
+and change the Status of a task to
+(**Waiting for Approval** ![wfa](../img/getting-started/wfa_icon.png)).
 
 You can drag and drop your file directly or click on the **Attach preview** button.
 
@@ -102,12 +102,12 @@ You can drag and drop your file directly or click on the **Attach preview** butt
 
 Then use the **Post** button.
 
-Your work appears on the right part of the screen as a V1. 
+Your work appears on the right part of the screen as a V1.
 
 ![Preview v1](../img/getting-started/previewv1.png)
 
 If you post several revisions, you always keep track of your previous work.
-Each time you add a new revision, the previous versions are still available. 
+Each time you add a new revision, the previous versions are still available.
 
 ![Preview v2](../img/getting-started/previewv2.png)
 
@@ -137,7 +137,7 @@ on the **Done** tab.
 
 ## Fill your timesheet
 
-Every day, you can declare how much time you spent on each task. On your **My Tasks** 
+Every day, you can declare how much time you spent on each task. On your **My Tasks**
 page, go to the **Timesheets** tab (1). Or click on the shortcut on top of the screen.
 
 ![Timesheets](../img/getting-started/timesheets.png)
@@ -151,7 +151,7 @@ go back in time and select the day you have missed. If you didn't work, you coul
 
 ![Timesheets change the date](../img/getting-started/timesheet_change_date.png)
 
-In case you forget to mention the time spent on a finished task, you can still 
+In case you forget to mention the time spent on a finished task, you can still
 find it in the **Done tasks** list located below the running tasks list.
 
 ![Timesheets done tasks](../img/getting-started/timesheet_done_task.png)

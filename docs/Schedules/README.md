@@ -3,7 +3,7 @@
 
 ## Production schedule
 
-As Studio Manager, you can set the global Schedule as a reference for your production. 
+As Studio Manager, you can set the global Schedule as a reference for your production.
 
 The main purpose of this Schedule is to keep track of the milestones link to your contract.
 
@@ -15,20 +15,20 @@ On the drop-down menu, choose **SCHEDULE**
 
 ![Menu Schedule](../img/getting-started/menu_schedule.png)
 
-On top of the Schedule, you can see the start date (1) and the end date (2) you have defined when creating the production. 
+On top of the Schedule, you can see the start date (1) and the end date (2) you have defined when creating the production.
 
 Click on the box to open the calendar and pick a date.
 
 
 ![Production Schedule](../img/getting-started/production_schedule.png)
 
-You can define, on the Gantt Schedule, the start and end date of each task type. 
+You can define, on the Gantt Schedule, the start and end date of each task type.
 The task types are the ones you have already added to your production.
 
 You can do it two ways, the first one is by moving the bar directly, the second way if entering date on the **setting page** under the **task type** section.
 
 Put your cursor on the start date; the cursor changes as a double arrow. Then drag and slide the start date.
-Do the same for the end date. 
+Do the same for the end date.
 
 ![Production Schedule gantt](../img/getting-started/schedule_production_task_type.png)
 
@@ -37,7 +37,7 @@ Once you have defined all the start and end dates of the task types, your Schedu
 
 ![Production Schedule Gantt filled](../img/getting-started/production_schedule_task_type_complete.png)
 
-Once it's done, you can unfold each task type and access to a level of detail: asset type for the assets, 
+Once it's done, you can unfold each task type and access to a level of detail: asset type for the assets,
 sequences for the shots.
 
 ![Production Schedule unfold task type](../img/getting-started/production_schedule_unfold.png)
@@ -50,7 +50,7 @@ You can do the same for the shots task types. You can determine the start and en
 
 ![Production Schedule task type sequence](../img/getting-started/production_schedule_task_type_detail_sequence.png)
 
-You can add a milestone by hovering a date. A ![Production Schedule add a milestone logo](../img/getting-started/production_schedule_add_milestone_plus.png) appears, 
+You can add a milestone by hovering a date. A ![Production Schedule add a milestone logo](../img/getting-started/production_schedule_add_milestone_plus.png) appears,
 
 ![Production Schedule add a milestone](../img/getting-started/production_schedule_add_milestone.png)
 
@@ -87,7 +87,7 @@ The new page is the **Supervisor view**. You have more detailed information spec
 
 ![Supervisor page](../img/getting-started/supervisor_page.png)
 
-To go further in detail with the Supervisor view :  
+To go further in detail with the Supervisor view :
 - (1) You can see and change the status of a task
 - (2) You can assign people to tasks
 
@@ -109,50 +109,50 @@ You can also define a **Start date** by clicking on it.
 A calendar will open and let you choose your start date.
 
 The **Due date** is automatically calculated with the **Estimation**.
- 
+
 ![start date](../img/getting-started/set_estimation.png)
-  
+
 To help you to set a correct estimation, you can use the **Estimation** Tab.
 
-![Estimation tab](../img/getting-started/tasktype_estimation_tab.png) 
+![Estimation tab](../img/getting-started/tasktype_estimation_tab.png)
 
 On the left part of the screen is the list of the shots with the assignation and the number of frames (1).
-Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2). 
-(See how to set your production fps [Create your first production]((../getting-started-production/README.md#create-your-first-production) ) 
+Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2).
+(See how to set your production fps [Create your first production]((../getting-started-production/README.md#create-your-first-production) )
 
 
- On the right part of the screen, you can see the full team of the department (depending on the assignations you made), the number of shots they have to do, the number of frames, seconds, and the average quota. 
- 
- 
+ On the right part of the screen, you can see the full team of the department (depending on the assignations you made), the number of shots they have to do, the number of frames, seconds, and the average quota.
+
+
  And the last column is the **Estimation**, to modify the estimation, hoover the line with your mouse and click and the editing zone.
- 
- You can also select multiple shots at the same time to edit them all the once.
- 
- ![Estimation tab edit](../img/getting-started/tasktype_estimation_tab_edit.png) 
- 
- Every time you change the **Estimation** in day on the right part, you can see in real-time that the **Average Quota** is updated.
- 
 
- 
- For more information about the **Schedule** tab, go to the 
- [Task Type Schedule](#task-type-schedule) 
- 
- 
- 
+ You can also select multiple shots at the same time to edit them all the once.
+
+ ![Estimation tab edit](../img/getting-started/tasktype_estimation_tab_edit.png)
+
+ Every time you change the **Estimation** in day on the right part, you can see in real-time that the **Average Quota** is updated.
+
+
+
+ For more information about the **Schedule** tab, go to the
+ [Task Type Schedule](#task-type-schedule)
+
+
+
 ## Task type schedule
 
 If you need more details than the production schedule, you can go to the **Task Type** page.
 
 ![Task type page](../img/getting-started/global_view_asset_task_export.png)
 
-You can notice there are tabs on the page, Tasks, **Schedule**, and estimation. Click on the 
+You can notice there are tabs on the page, Tasks, **Schedule**, and estimation. Click on the
 **Tasks** or **Schedule** tab.
 
-![Task type schedule tab](../img/getting-started/task_type_tab_schedule.png) 
+![Task type schedule tab](../img/getting-started/task_type_tab_schedule.png)
 
 There are two ways to set the artist's Schedule.
 
-The first way is with the **Tasks** tab, by setting the estimation time and the **Start date**. 
+The first way is with the **Tasks** tab, by setting the estimation time and the **Start date**.
 The **Due date** is filled automatically. If you navigate the **Schedule** tab, you will see
 the Gantt diagram is filled automatically.
 
@@ -160,7 +160,7 @@ You are only allowed on the **Schedule** Tab to slide the bar and change the **S
 
 **Once the estimation is set from the Tasks tab, you can change it by editing the MD column on the schedule tab**.
 
-The second way is to set the length directly (**Estimation**), **Start date**, and the **Due Date** from the Gantt diagram. 
+The second way is to set the length directly (**Estimation**), **Start date**, and the **Due Date** from the Gantt diagram.
 
 ![Task type page schedule default](../img/getting-started/task_type_schedule_emplty.png)
 
@@ -168,8 +168,8 @@ The second way is to set the length directly (**Estimation**), **Start date**, a
 Put your cursor on the start date, and the cursor changes as a double arrow. Then drag and slide the start date.
 Define your **Due date** by filling the **MD**.
 
-You can use the search bar (1) as on the other pages: you can search **status** 
-(no need to add the name of the task type as you already are on a specific task type page), 
+You can use the search bar (1) as on the other pages: you can search **status**
+(no need to add the name of the task type as you already are on a specific task type page),
 per **asset type** (or sequence), per **asset name** (or shot name), and per **Artist name**.
 
 You can also reduce or expand each Artist (2) section to ease the reading of the Schedule.
@@ -178,7 +178,7 @@ You can change the color of the bar in the Gantt diagram (3). Per default, the *
 
 ![Task type page Schedule coloring](../img/getting-started/task_type_schedule_coloring.png)
 
-**Status color** changes the color of the bar based on their status. For example, Blue is for WIP; red is for RETAKE, 
+**Status color** changes the color of the bar based on their status. For example, Blue is for WIP; red is for RETAKE,
 purple for Waiting For Approval, green is for Done.
 
 ![Task type page schedule coloring status](../img/getting-started/task_type_schedule_coloring_status.png)
@@ -189,7 +189,7 @@ In a glimpse, you can see the state of your elements and team.
 
 ![Task type page schedule coloring late in red](../img/getting-started/task_type_schedule_coloring_late.png)
 
-The Gantt diagram has an impact on the other pages on Kistu.
+The Gantt diagram has an impact on the other pages on Kitsu.
 
 The **Start date** and the **Due date** are displayed on the **Tasks** tab of the task type page.
 

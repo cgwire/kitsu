@@ -1,6 +1,6 @@
 # Publishing a preview with the Kitsu Publisher
 
-You must first have the Kitu publisher and the plugin installed on your computer.
+You must first have the Kitsu publisher and the plugin installed on your computer.
 
 ## Consult your to-do list
 
@@ -10,11 +10,11 @@ You directly arrive on your to-do list and have access to the same option as on 
 
 You can see your to-do list, the done list, and timesheets.
 
-![Kitsu Publsiher todo list](../img/getting-started/publisher_todolist.png)
+![Kitsu Publisher todo list](../img/getting-started/publisher_todolist.png)
 
 If you want to comment or publish on a task, simply click on the status.
 
-![Kitsu Publsiher todo list status](../img/getting-started/publisher_todolist_status.png)
+![Kitsu Publisher todo list status](../img/getting-started/publisher_todolist_status.png)
 
 The comment panel will open with the previews and the whole history of this task.
 
@@ -43,7 +43,7 @@ Once satisfied with the result, you can click on **Confirm**. It will close the 
 
 ![Kitsu Publisher comment](../img/getting-started/publisher_post_comment.png)
 
-Now everybody logged in to Kitsu will see your comment and publish. 
+Now everybody logged in to Kitsu will see your comment and publish.
 
 
 ## Setup the publisher

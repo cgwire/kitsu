@@ -7,32 +7,32 @@ On your first connection, we encourage you to fill your contact information
 into your profile.
 Click on your name on the top right of the screen (1) then on **Profile** (2).
 
-NB: A link to this **Documentation** is available (4), 
+NB: A link to this **Documentation** is available (4),
 and you can switch to the **Dark Theme**  in this menu, too (3). You can also jump on our slack (5), or look at our roadmap (6).
- 
+
 ![User profile](../img/getting-started/user_profil.png)
- 
+
 On this new page, you can check your name (1) (2), your email (3), fill your phone
 number (4), change the timezone (5), the language of the website (6), and
 post a pic of yourself as your avatar (7). It helps to recognize who is
-doing what! 
- 
+doing what!
+
 ![User detail](../img/getting-started/user_profil1.png)
- 
+
 You can also define what kind of notification you want, email or slack.
 
 ![User detail](../img/getting-started/user_profil2.png)
 
- 
+
 If you keep scrolling, you can also change your password if you want. We
 encourage you to change the default password with one of your own.
 
 ![User password](../img/getting-started/user_password.png)
- 
- 
+
+
 ## See your playlists
- 
-The central part for you, on **Kitsu**, is the **Playlist** page. 
+
+The central part for you, on **Kitsu**, is the **Playlist** page.
 You can access it by clicking on the production avatar.
 
 ![Client Landing page](../img/getting-started/client_landing.png)
@@ -76,24 +76,24 @@ On top of the elements (assets or shots) you have access to different options:
 * (15) Draw a comment on the picture, and change the color and the size of the line
 * (16) Select the drawing and click on the cross to delete it
 * (17) Change the task type of all the elements in the playlist
-* (18) Open the pannel section to post a comment and change the status
+* (18) Open the panel section to post a comment and change the status
 * (19) hide the list of the elements
 * (20) Download the playlist
 * (21) fullscreen
 
 
- 
+
 ## Share your comment
 
 First open the comment section. ![Comment button](../img/getting-started/comment_button.png)
 
 
 From there, you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the CG artist
-performs some changes. 
+performs some changes.
 
 You can add a **checklist** to your comments.
 
-You need to click on the **Add checklist** button, and the first item of the checklist appears. 
+You need to click on the **Add checklist** button, and the first item of the checklist appears.
 
 ![client add checklist](../img/getting-started/client_checklist_retake.png)
 
@@ -134,7 +134,7 @@ The **Sequence Stats** page is updated in real-time. Every time you look at this
 
 You can choose to display the stats per number of shots or number of frames.
 
-You can also change the **Display Mode**; you can switch from the **Pie charts** view 
+You can also change the **Display Mode**; you can switch from the **Pie charts** view
 to the **Counts** view.
 
 ![Client sequence stat count](../img/getting-started/client_sequence_stat_count.png)
