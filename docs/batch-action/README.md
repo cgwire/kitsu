@@ -166,7 +166,7 @@ Now, you have all your shots imported into Kitsu, and the task created according
 
 ## Update shots information with CSV Import
 
-You can use the **CSV Import** to update your data as the **NB Frames**, **Frame IN**, **Frame Out** or any **Custom Column**
+You can use the **CSV Import** to update your data as the **NB Frames**, **Frame IN**, **Frame Out** or any custom **Metadata column**.
 
 Open your spreadsheet, select your data and copy them.
 

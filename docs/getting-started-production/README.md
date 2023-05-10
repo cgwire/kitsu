@@ -91,12 +91,12 @@ On the right part of the screen, there are some buttons (from left to right) to 
 batch import thumbnail ![batch import thumbnail](../img/getting-started/add_thumbnails.png), and finaly import ![Import button](../img/getting-started/import.png) or export ![export button](../img/getting-started/export.png) data.
 
 
-Below you have the name of the column. the (+) next to **Name** ![Add custom column](../img/getting-started/add_column_custom.png) is here to create a new custom column. Then you have the name of the task type column. 
+Below you have the name of the column. the (+) next to **Name** ![Add metadata column](../img/getting-started/add_column_custom.png) is here to create a new metadata column. Then you have the name of the task type column. 
 
 On the far right of the screen, next to the scroll bar, is the option to hide and display a text column
 ![Display/hide text column](../img/getting-started/visible_column_detail.png).
 
-We have created a **Studio** and **test** custom column in this example.
+We have created a **Studio** and **test** metadata column in this example.
 
 
 The last part (4), at the bottom of the screen, is the sum-up of your displayed page. It means the sum-up will update if you filter the page.

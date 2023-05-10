@@ -2,7 +2,7 @@
 
 You can modify Kitsu to fit your **studio vocabulary** for the asset / Pre-production, task type, Status, etc.
 
-You can also **add custom columns** on the global page of the edit, episode, sequence, asset, and shots.
+You can also **add custom metadata columns** on the global page of the asset, edit, episode, sequence, and shot.
 
 In Kitsu, you have two kinds of **libraries**:
 - The first is the **Global Library** at the studio level.

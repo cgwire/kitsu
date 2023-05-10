@@ -316,7 +316,7 @@ When you click on it a pop up opened, and gives you several choices for your fil
 
 ![Filter Builder option](../img/getting-started/filter_builder_option.png)
 
-You can filter per **Status** on a **Task Type**, you can also filter through the custom column 
+You can filter per **Status** on a **Task Type**, you can also filter through the custom metadata column 
 [Filter Builder option](../img/getting-started/#add-custom-columns)
 
 You can also filter the global page through the assignation, per artist or per the lack of assignation.

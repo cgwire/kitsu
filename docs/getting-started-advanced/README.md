@@ -23,7 +23,7 @@ Once you have create your **Task Types**  on your **Global Library**, and add th
 This new page behave like the asset and shot global page. You can add your tasks with the
 ![Add Tasks](../img/getting-started/add_task_button.png) button.
 
-You can add custom column, fill the description, etc.
+You can add custom metadata column, fill the description, etc.
 
 
 
@@ -63,7 +63,7 @@ Once you have create your **Task Types**  on your **Global Library**, and add th
 This new page behave like the asset and shot global page. You can add your tasks with the
 ![Add Tasks](../img/getting-started/add_task_button.png) button.
 
-You can add custom column, fill the description, etc.
+You can add metadata column, fill the description, etc.
 
 You can **Rename** and **Delete** the Sequence entity on this page, as for the asset and shot entity.
 
@@ -100,78 +100,78 @@ Once you have create your **Task Types**  on your **Global Library**, and add th
 This new page behave like the asset and shot global page. You can add your tasks with the
 ![Add Tasks](../img/getting-started/add_task_button.png) button.
 
-You can add custom column, fill the description, etc.
+You can add metadata column, fill the description, etc.
 
 You can **Rename** and **Delete** the Edit entity on this page, as for the asset and shot entity.
 
 
 
-## Add Custom columns
+## Add custom Metadata columns
 
-To add more information on the general spreadsheet pages, you have to create a
-**Custom column**.
+To add more information on the general spreadsheet pages, you have to create a custom **metadata column**.
 
 
 Click on the **+** near the Name column.
 
-![Custom Column](../img/getting-started/add_column_custom.png)
+![Metadata Column](../img/getting-started/add_column_custom.png)
 
 You may have extra information to add on your pages as the **level of difficulties**,
 the **name of the studios**, when a production is split, the shot order, etc.
 
-You can store all kinds of text information in the custom column: a **list of value**, a **free value** or a **Checklist**.
+You can store all kinds of text information in the custom metadata column:
+a free **text**, a **number**, a **checkbox**, a **list of value**, or a **Checklist**.
 
-![Custom Column detail](../img/getting-started/custom_column_detail.png)
+![Metadata Column detail](../img/getting-started/custom_column_detail.png)
 
-The **free value** is different for each entity.
+The **text**, **number** and **checkbox** fields are different for each entity.
 
 The **list of value** and **Checklist** give you the same choice for each entity. Moreover, it has to be filled now.
 
-![Custom Column list](../img/getting-started/custom_column_list.png)
+![Metadata Column list](../img/getting-started/custom_column_list.png)
 
 Type the list elements below **Available values**, and confirm them by clicking on **Add value**.
 
-You can also link the custom column to one or several departments.
+You can also link the metadata column to one or several departments.
 
 
-If you link a custom column to a department, the artists will see this column on their todo page, and on their department filtered view.
+If you link a metadata column to a department, the artists will see this column on their todo page, and on their department filtered view.
 
-Validate the creation of the custom column with the **Confirm** button.
+Validate the creation of the metadata column with the **Confirm** button.
 
 
 Back on the global spreadsheets page, you can fill this information directly on the global page.
 The cases are editable.
 
-![Custom Column detail](../img/getting-started/custom_column_list_edit.png)
+![Metadata Column detail](../img/getting-started/custom_column_list_edit.png)
 
 You can also modify the information with the edit button ![Edit button](../img/getting-started/edit_button.png).
 
 You now see a new line on the edit pop-up. You can select the information from the list,
-alternatively, enter the free values or use the checklist, depending on your previous choice.
+alternatively, enter the free text or number, check a box, or use the checklist, depending on your previous choice.
 
 Don't forget to press the **Confirm** button when you are done.
 
-![Custom Column detail](../img/getting-started/edit_asset_custom.png)
+![Metadata Column detail](../img/getting-started/edit_asset_custom.png)
 
-If you need to **edit** or **delete** the custom column, go back to the general spreadsheet page.
-Nearby the name of your custom column, click on the arrow ![Custom Column detail](../img/getting-started/arrow.png).
+If you need to **edit** or **delete** the metadata column, go back to the general spreadsheet page.
+Nearby the name of your metadata column, click on the arrow ![Metadata Column detail](../img/getting-started/arrow.png).
 
-You can now **sort** your global page with this new column. For example, let's create a **Sort Order** custom column.
+You can now **sort** your global page with this new column. For example, let's create a **Sort Order** metadata column.
 
-![Custom Column example](../img/getting-started/custom_column_exemple.png)
+![Metadata Column example](../img/getting-started/custom_column_exemple.png)
 
 Then click on the arrow on the right of the column name to open his menu. Then click on **Sort By**
 
-![Custom Column Sort By](../img/getting-started/custom_column_sortby.png)
+![Metadata Column Sort By](../img/getting-started/custom_column_sortby.png)
 
-Now the shots are not sorted by name but by the custom column information.
+Now the shots are not sorted by name but by the metadata column information.
 
-![Custom Column Sort By result](../img/getting-started/custom_column_sortby_result.png)
+![Metadata Column Sort By result](../img/getting-started/custom_column_sortby_result.png)
 
-You can also select in the menu if you want to edit the name of the custom column and its information or if you want to delete it.
+You can also select in the menu if you want to edit the name of the metadata column and its information or if you want to delete it.
 
-You can also use the **CSV Import** to fill your custom column quickly.
-First, you need to create your **Custom Column** into kitsu, add it to your spreadsheet, and copy-paste your data into the **CSV Import**.
+You can also use the **CSV Import** to fill your custom metadata column quickly.
+First, you need to create your **Metadata column** into Kitsu, add it to your spreadsheet, and copy-paste your data into the **CSV Import**.
 
 [Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
 
@@ -289,15 +289,15 @@ Once the column is minimized, only colored dots show the status.
 
 ![Tasktype submenu](../img/getting-started/tasktype_small.png)
 
-You can also choose which **Custom Column** you want to display.
+You can also choose which **Metadata column** you want to display.
 
-To hide your custom column, click on the arrow on the right border of the global page.
+To hide your metadata column, click on the arrow on the right border of the global page.
 
 ![Visible column](../img/getting-started/visible_column.png)
 
 Here you can choose which column you want to **hide** or **display**.
 
-You can also hide all the non-essential columns, like **Description**, **Custom column**,
+You can also hide all the non-essential columns, like **Description**, **Metadata column**,
 even the minimized columns.
 
 Just click on the **Hide additional information**

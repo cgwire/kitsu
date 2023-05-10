@@ -29,14 +29,14 @@ When you click on it a pop up opened, and gives you several choices for your fil
 
 ![Filter Builder option](../img/getting-started/filter_builder_option.png)
 
-You can filter per **Status** on a **Task Type**, you can also filter through the custom column 
-[Filter Builder option](../img/getting-started/#add-custom-columns)
+You can filter per **Status** on a **Task Type**, you can also filter through the custom metadata column,  
+see [Filter Builder option](../getting-started-advanced/#add-custom-metadata-columns).
 
 You can also filter the global page through the assignation, per artist or per the lack of assignation.
 
 And finally you can filter per the Thumbnails presence.
 
-You can add several filters. Once you are done, validate your choice with the **Confirm"" button.
+You can add several filters. Once you are done, validate your choice with the **Confirm** button.
 
 
 ## How to filter two status of a same task?
@@ -108,7 +108,7 @@ Valid with **Confirm**.
 
 You can be even more specific, let's focus on the shots that are still on retake at the animation stage, and already started at the render stage.
 
-On the **Filter Builder** search for both task type and status (add more task type with the **+** bellow the first task type) and a custom column.
+On the **Filter Builder** search for both task type and status (add more task type with the **+** bellow the first task type) and a metadata column.
 
 ![Search layout wfa](../img/getting-started/filter_builder_option.png)
 

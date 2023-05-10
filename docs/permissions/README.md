@@ -99,7 +99,7 @@ They have full access to all productions:
 
 * They have same permission as the supervisor.
 * And they can add a task column but can also delete one.
-* They are allowed to create custom columns.
+* They are allowed to create custom metadata columns.
 
 
 ## Client
