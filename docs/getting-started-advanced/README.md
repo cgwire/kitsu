@@ -2,28 +2,28 @@
 
 ## Create Task for Episode
 
-When you are in a TV Show production, you can create specific **Task type** for the episode. It's especilay usefull when 
+When you are in a TV Show production, you can create specific **Task type** for the episode. It's especially useful when
 you have macro task to track, like script, SFx, editing, mix etc.
 
 To use this page your need to first create dedicated task type on your **Global Library**
- with the **Episode** attribut
+ with the **Episode** attribute.
 
-See **Pipele csutomization** Section to create new **Task Type**.
+See **Pipeline customization** Section to create new **Task Type**.
 
 [Pipeline customization](../customization-pipeline/README.md)
 
 
-Once you have create your **Task Types**  on your **Global Libray**, and add them to your 
+Once you have create your **Task Types**  on your **Global Library**, and add them to your
 **Production Library**, you will see the **Episodes** displayed on the navigation drop-down menu.
 
 
 ![Navigation Episodes](../img/getting-started/drop_down_menu_episodes.png)
 
 
-This new page behave like the asset and shot global page. You can add your taks with the
+This new page behave like the asset and shot global page. You can add your tasks with the
 ![Add Tasks](../img/getting-started/add_task_button.png) button.
 
-You can add custom column, fill the description, etc. 
+You can add custom column, fill the description, etc.
 
 
 
@@ -34,36 +34,36 @@ If you click on the name of an episode, you will see the detail page of this epi
 
 ![Episodes detailed page](../img/getting-started/episode_detail_page.png)
 
-On the detailled page, you have access to the casting of the episode. 
+On the detailed page, you have access to the casting of the episode.
 You can see all the assets used on the whole episode.
 
-You also have access to the schedule, Preview Files, Activity and Timelog of the episode **tasks**. 
+You also have access to the schedule, Preview Files, Activity and Timelog of the episode **tasks**.
 
 
 ## Create Task for Sequence
 
-When you are in a production, you can create specific **Task type** for the sequences. It's especilay usefull when 
+When you are in a production, you can create specific **Task type** for the sequences. It's especially useful when
 you have macro tasks to track, like Story and color Board, Color Grading etc.
 
 To use this page your need to first create dedicated task type on your **Global Library**
- with the **Episode** attribut
+ with the **Episode** attribute.
 
-See **Pipele csutomization** Section to create new **Task Type**.
+See **Pipeline customization** Section to create new **Task Type**.
 
 [Pipeline customization](../customization-pipeline/README.md)
 
 
-Once you have create your **Task Types**  on your **Global Libray**, and add them to your 
+Once you have create your **Task Types**  on your **Global Library**, and add them to your
 **Production Library**, you will see the **Sequences** displayed on the navigation drop-down menu.
 
 
 ![Navigation Sequences](../img/getting-started/drop_down_menu_sequence_page.png)
 
 
-This new page behave like the asset and shot global page. You can add your taks with the
+This new page behave like the asset and shot global page. You can add your tasks with the
 ![Add Tasks](../img/getting-started/add_task_button.png) button.
 
-You can add custom column, fill the description, etc. 
+You can add custom column, fill the description, etc.
 
 You can **Rename** and **Delete** the Sequence entity on this page, as for the asset and shot entity.
 
@@ -71,36 +71,36 @@ If you click on the name of a sequence, you will see the detail page of this seq
 
 ![Sequence detailed page](../img/getting-started/sequence_detail_page.png)
 
-On the detailled page, you have access to the casting of the sequence. 
+On the detailed page, you have access to the casting of the sequence.
 You can see all the assets used on the whole sequence.
 
-You also have access to the schedule, Preview Files, Activity and Timelog of the sequence **tasks**. 
+You also have access to the schedule, Preview Files, Activity and Timelog of the sequence **tasks**.
 
 
 ## Create Task for Edit
 
-When you are in a production, you can create specific **Task type** for the Edit. It's especilay usefull when 
+When you are in a production, you can create specific **Task type** for the Edit. It's especially useful when
 you have several to track, like Story and color Board, Color Grading etc.
 
 To use this page your need to first create dedicated task type on your **Global Library**
- with the **Edit** attribut
+ with the **Edit** attribute.
 
-See **Pipele csutomization** Section to create new **Task Type**.
+See **Pipeline customization** Section to create new **Task Type**.
 
 [Pipeline customization](../customization-pipeline/README.md)
 
 
-Once you have create your **Task Types**  on your **Global Libray**, and add them to your 
+Once you have create your **Task Types**  on your **Global Library**, and add them to your
 **Production Library**, you will see the **Edit** displayed on the navigation drop-down menu.
 
 
 ![Navigation Edit](../img/getting-started/drop_down_menu_edit.png)
 
 
-This new page behave like the asset and shot global page. You can add your taks with the
+This new page behave like the asset and shot global page. You can add your tasks with the
 ![Add Tasks](../img/getting-started/add_task_button.png) button.
 
-You can add custom column, fill the description, etc. 
+You can add custom column, fill the description, etc.
 
 You can **Rename** and **Delete** the Edit entity on this page, as for the asset and shot entity.
 
@@ -108,7 +108,7 @@ You can **Rename** and **Delete** the Edit entity on this page, as for the asset
 
 ## Add Custom columns
 
-To add more information on the general spreadsheet pages, you have to create a 
+To add more information on the general spreadsheet pages, you have to create a
 **Custom column**.
 
 
@@ -125,7 +125,7 @@ You can store all kinds of text information in the custom column: a **list of va
 
 The **free value** is different for each entity.
 
-The **list of value** and **Checklist** give you the same choice for each entity. Moreover, it has to be filled now. 
+The **list of value** and **Checklist** give you the same choice for each entity. Moreover, it has to be filled now.
 
 ![Custom Column list](../img/getting-started/custom_column_list.png)
 
@@ -134,7 +134,7 @@ Type the list elements below **Available values**, and confirm them by clicking 
 You can also link the custom column to one or several departments.
 
 
-If you link a custom column to a departement, the artists will see this column on their todo page, and on their departement filtered view.
+If you link a custom column to a department, the artists will see this column on their todo page, and on their department filtered view.
 
 Validate the creation of the custom column with the **Confirm** button.
 
@@ -146,7 +146,7 @@ The cases are editable.
 
 You can also modify the information with the edit button ![Edit button](../img/getting-started/edit_button.png).
 
-You now see a new line on the edit pop-up. You can select the information from the list, 
+You now see a new line on the edit pop-up. You can select the information from the list,
 alternatively, enter the free values or use the checklist, depending on your previous choice.
 
 Don't forget to press the **Confirm** button when you are done.
@@ -154,11 +154,11 @@ Don't forget to press the **Confirm** button when you are done.
 ![Custom Column detail](../img/getting-started/edit_asset_custom.png)
 
 If you need to **edit** or **delete** the custom column, go back to the general spreadsheet page.
-Nearby the name of your custom column, click on the arrow ![Custom Column detail](../img/getting-started/arrow.png). 
+Nearby the name of your custom column, click on the arrow ![Custom Column detail](../img/getting-started/arrow.png).
 
 You can now **sort** your global page with this new column. For example, let's create a **Sort Order** custom column.
 
-![Custom Column exemple](../img/getting-started/custom_column_exemple.png)
+![Custom Column example](../img/getting-started/custom_column_exemple.png)
 
 Then click on the arrow on the right of the column name to open his menu. Then click on **Sort By**
 
@@ -184,14 +184,14 @@ You can add multiple images simultaneously, or once you have uploaded an image, 
 
 The **Add preview** pop-up opens and asks you to choose a file.
 
-You can navigate through the pictures uploaded. 
+You can navigate through the pictures uploaded.
 
 You can change the preview order if you click on the number, then drag and drop them.
 
 ![preview drag drop](../img/getting-started/multiple_preview.png)
 
 
-To delete an additional preview, you need to enlarge the comment panel by draging it and click on the numbers of versions.
+To delete an additional preview, you need to enlarge the comment panel by dragging it and click on the numbers of versions.
 
 ![enlarge comment section](../img/getting-started/enlarge_comment.png)
 
@@ -203,15 +203,15 @@ And then click on the ![delete button](../img/getting-started/delete_button.png)
 
 ## See detail of a shot
 
-If you want to see a detail of a shot, click on its name. 
+If you want to see a detail of a shot, click on its name.
 
 ![Shot detail](../img/getting-started/shot_detail.png)
 
 A new page opens with the list of the tasks, the assignation, and the list
 of assets that appear on this shot (**Shot casting**).
- 
+
 ![Shot detail page](../img/getting-started/shot_detail_page.png)
- 
+
 You can click on the status of each task to open the comment panel and see the history of the comments and the different versions.
 
 
@@ -223,15 +223,15 @@ At some point in the production, you may want to prioritize some tasks, and
 pinpoint these urgent tasks to your team.
 
 For this, we use the same technique as before. Click on the space
-near a status task (1). 
+near a status task (1).
 
 ![Task assigned](../img/getting-started/task_assigned.png)
 
-The action box appears. 
+The action box appears.
 
 ![Blue menu](../img/getting-started/blue_menu.png)
 
-Click on the icone of the action menu to choose 
+Click on the icon of the action menu to choose
 **Change priority**.
 
 ![Change priority](../img/getting-started/change_priority.png)
@@ -246,19 +246,19 @@ the level of priority (2), and apply with **Confirm** (3).
 ![Priority selection](../img/getting-started/priority.png)
 
 You can now see next to the status of the task some **exclamation marks**. The
-more there are, the more urgent the task is.  
+more there are, the more urgent the task is.
 
-* (1) is **Normal**, 
+* (1) is **Normal**,
 * (2) is **High**,
 * (3) is **Very High**
 * (4) is for **Emergency**.
-    
+
 ![Priority level](../img/getting-started/priority_level.png)
 
 
 ## Change status per batch
 
-Alternatively, you can do it per **batch**. 
+Alternatively, you can do it per **batch**.
 
 You can select multiple shots or assets by pressing the **ctrl** or
 **shift** key.
@@ -275,11 +275,11 @@ You validate the new status with the **Confirm** button.
 
 ## Simplify the global page
 
-You may need to reduce a task type column on a global page. For example, you may be 
+You may need to reduce a task type column on a global page. For example, you may be
 only interested in layout and animation but not so much in the shipment for the client.
 
-Close to each task type name, you can click on the arrow 
-![Arrow](../img/getting-started/arrow.png) to unfold a submenu. 
+Close to each task type name, you can click on the arrow
+![Arrow](../img/getting-started/arrow.png) to unfold a submenu.
 
 You can choose to **Minimize** **Sort by**, **Select column**, **Stick** or **Delete All** the task type.
 
@@ -297,10 +297,10 @@ To hide your custom column, click on the arrow on the right border of the global
 
 Here you can choose which column you want to **hide** or **display**.
 
-You can also hide all the non-essential columns, like **Description**, **Custom column**, 
+You can also hide all the non-essential columns, like **Description**, **Custom column**,
 even the minimized columns.
 
-Just click on the **Hide additional information** 
+Just click on the **Hide additional information**
 ![minimize button](../img/getting-started/minimize.png) button on the top right of the page.
 
 To make the information reappear, click on the same button,
@@ -312,32 +312,32 @@ To make the information reappear, click on the same button,
 
 Kitsu has two ways to calculate the quotas per **shot Task Type**.
 
-The first is linked to the timesheet : 
-Shots are considered ended on the first feedback request. Then, quotas are weighted following time spent on the task (when the Artist filled his timesheet). 
+The first is linked to the timesheet :
+Shots are considered ended on the first feedback request. Then, quotas are weighted following time spent on the task (when the Artist filled his timesheet).
 
-![Quotat stat page day weighted](../img/getting-started/quotas_day_weighted.png)
+![Quotas stat page day weighted](../img/getting-started/quotas_day_weighted.png)
 
 In this example, Kitsu has weighted the quota per day linked to the timesheet.
 
-![Quotat stat page day weighted detail](../img/getting-started/quotas_day_weighted_detail.png)
+![Quotas stat page day weighted detail](../img/getting-started/quotas_day_weighted_detail.png)
 
 
 If no timesheet is filled, then Kitsu considers that:
 
-The task was started at the first status change to WIP
+The task was started at the first status change to WIP.
 The task was done the day the feedback request was made.
 It splits the done frames among all business days between the start and the end.
 
 Kitsu grabs the number of frames (or seconds, or number of tasks) submitted per day/week/month per Artist.
 
-![Quotat stat page day weighted](../img/getting-started/quotas_day_status.png)
+![Quotas stat page day weighted](../img/getting-started/quotas_day_status.png)
 
 
 
 
-**1**: Select the Task Type
+**1**: Select the Task Type.
 
-**2**: Select the level of details, Day, Week, or Month
+**2**: Select the level of details, Day, Week, or Month.
 
 **3**: Select the count mode, per Frame, Seconds, or tasks.
 
