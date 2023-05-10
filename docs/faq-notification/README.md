@@ -4,9 +4,9 @@
 ## How do notifications work?
 
 The notification symbol is the **Bell** button next to your name, top right of
-the screen. Its color is **grey** 
+the screen. Its color is **grey**
 ![Notification off](../img/getting-started/notification_icon_off.png) when you don't have
-any notification, and **orange** 
+any notification, and **orange**
 ![Notification on](../img/getting-started/notification_icon_on.png) when you have a new
 one.
 
@@ -17,7 +17,7 @@ assigned to you.
 
 ![Notification page](../img/getting-started/notification_page.png)
 
-Notifications include the following information: 
+Notifications include the following information:
 
 * If it's a notification ![Notification page](../img/getting-started/notification_icon_comment.png) or a tag ![Notification page](../img/getting-started/notification_icon_tag.png)
 
@@ -55,30 +55,30 @@ to stay up to date.
 
 ## How to get notified?
 
-As an artist, you receive a notification 
+As an artist, you receive a notification
 ![Notification](../img/getting-started/notification_icon_on.png) as soon as someone assigns you to a task, change
 the status of one of your tasks, post a comment or tag you on a comment.
 
 You can also choose to follow specific tasks. Go into the task page you want
-to follow: on the **assets** or **shots** pages click onto the status icon, 
-then on the top right side of the page, you can see an **eye** button 
+to follow: on the **assets** or **shots** pages click onto the status icon,
+then on the top right side of the page, you can see an **eye** button
 ![Notification off](../img/getting-started/notification_off.png).
 
 
 By default, you are following all the tasks you are assigned on the task
-page the icon is on (eye open) ![Notification on](../img/getting-started/notification_on.png). 
+page the icon is on (eye open) ![Notification on](../img/getting-started/notification_on.png).
 
 If you want to follow another task, click on the **crossed eye** button
 ![Notification off](../img/getting-started/notification_off.png). Its aspect changes,
 it is not crossed anymore ![Notification on](../img/getting-started/notification_on.png)
 meaning you are now following this task and receiving notifications about
-it. 
+it.
 
 You can also Batch select task to **Subscribe** to the notification of these tasks.
 
 Select the tasks with the **Action Box**, select the eye icon, and click on subscribe.
 
-![pannel notification](../img/getting-started/pannel_notif.png)
+![panel notification](../img/getting-started/pannel_notif.png)
 
 You can also receive your notification via Email or Slack on your profile page.
 
@@ -95,7 +95,7 @@ you won't receive notifications anymore.
 
 Or you can select a batch of tasks and use the **Action Box** To unsubscribe to the notification.
 
-![pannel notification](../img/getting-started/pannel_notif.png)
+![panel notification](../img/getting-started/pannel_notif.png)
 
 ------------------------------------
 
@@ -105,30 +105,30 @@ The **News feed** page is here to keep you aware of all the changes in the produ
 
 You can go there with the drop-down menu on top of a page.
 
-![newsfeed dropdown menu](../img/getting-started/drop_down_menu_newsfeed.png)
- 
+![news feed dropdown menu](../img/getting-started/drop_down_menu_newsfeed.png)
+
 On the **News Feed** page, you can see all the status changes during the production, giving you a global view of what happened.
 
-![newsfeed page](../img/getting-started/newsfeed_comment_all.png)
+![news feed page](../img/getting-started/newsfeed_comment_all.png)
 
 You can see all the **statuses** or specific ones.
 
-![newsfeed change status](../img/getting-started/newsfeed_status.png)
+![news feed change status](../img/getting-started/newsfeed_status.png)
 
 The same thing happened to the **task types**. You can choose to see them all or a specific one.
 
-![newsfeed change task](../img/getting-started/newsfeed_tasktype.png)
+![news feed change task](../img/getting-started/newsfeed_tasktype.png)
 
 You can click on each element to open the right panel and see the detail of this task. You can review and comment on this page.
 
-![newsfeed comments](../img/getting-started/newsfeed_comment_panel.png)
+![news feed comments](../img/getting-started/newsfeed_comment_panel.png)
 
 You can display the **previews** instead of the **status**.
 
-Click on **more filters**, and from there, you can choose to display data from a specific time frame or 
+Click on **more filters**, and from there, you can choose to display data from a specific time frame or
 you can display the **previews** instead of the **status**.
 
-![Newsfeed preview option](../img/getting-started/newsfeed_preview_global.png)
+![news feed preview option](../img/getting-started/newsfeed_preview_global.png)
 
 You can now see all the **previews** (images and videos) posted during the production.
 
@@ -137,11 +137,11 @@ You can also select a specific **status** or a specific **task type**.
 
 Moreover, you can also comment and review any previews from this page.
 
-![newsfeed preview comment](../img/getting-started/newsfeed_preview_comment.png)
+![news feed preview comment](../img/getting-started/newsfeed_preview_comment.png)
 
 You can also be interested in more specific information, like what an artist has done in a specific month.
 
-![newsfeed details](../img/getting-started/newsfeed_details.png)
+![news feed details](../img/getting-started/newsfeed_details.png)
 
 
 

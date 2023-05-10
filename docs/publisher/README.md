@@ -27,7 +27,7 @@ Work in progress:
 
 You need to download (or to build if you want to: see [Development Environment](#development-environment)) your preferred installer/package/portable for the app corresponding to your OS in the [releases](https://github.com/cgwire/kitsu-publisher-next/releases/latest).
 
-All comands have the keyword {version} in the filenames, you need to replace the version with the current version of the Kitsu Publisher.
+All commands have the keyword {version} in the filenames, you need to replace the version with the current version of the Kitsu Publisher.
 
 #### On Linux
 
@@ -110,7 +110,7 @@ All comands have the keyword {version} in the filenames, you need to replace the
 #### On macOS
 
 - DMG installer:
-  
+
   - Double-click on the installer (Kitsu-publisher-{version}.dmg), a window should open.
 
   - Drag and drop the Kitsu logo on the "Applications" folder and it will install directly the app.
@@ -126,10 +126,10 @@ All comands have the keyword {version} in the filenames, you need to replace the
 - Zip portable application:
 
   - Double-click on the zip (Kitsu-publisher-{version}-mac.zip) to expand the zip.
- 
+
   - Double-click on the Kitsu publisher icon it will launch the app.
-  
-  
+
+
 ## Development Environment
 
 ### Pre-requisites
