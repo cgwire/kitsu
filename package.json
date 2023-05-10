@@ -1,7 +1,7 @@
 {
   "name": "kitsu-docs",
   "version": "1.0.0",
-  "description": "Documentation for Kitsu, CG production manager",
+  "description": "Documentation for Kitsu, CG production manager",
   "main": "index.js",
   "scripts": {
     "docs:dev": "./node_modules/.bin/vuepress dev docs",
@@ -23,6 +23,6 @@
   },
   "homepage": "https://github.com/cgwire/kitsu#readme",
   "devDependencies": {
-    "vuepress": "1.5.3"
+    "vuepress": "1.9.9"
   }
 }
