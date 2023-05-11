@@ -344,7 +344,10 @@ export default {
     assetsByAssetTypesMap() {
       const assetsByAssetTypes = {}
       this.assets.forEach(assetTypeAssets => {
-        assetsByAssetTypes[assetTypeAssets[0].asset_type_name] = assetTypeAssets
+        if (assetTypeAssets[0]) {
+          assetsByAssetTypes[assetTypeAssets[0].asset_type_name] =
+            assetTypeAssets
+        }
       })
       return assetsByAssetTypes
     }
