@@ -25,7 +25,7 @@
               nbSelectedTasks > 1
             "
           >
-            STATUS
+            {{ $t('main.status') }}
           </div>
 
           <div
@@ -1548,6 +1548,7 @@ div.assignation {
   height: 100%;
   margin-left: 1em;
   margin-top: -1em;
+  text-transform: uppercase;
 
   &:hover {
     border: 2px solid var(--text);
