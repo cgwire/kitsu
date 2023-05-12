@@ -1,15 +1,9 @@
 <template>
   <div>
     <div
-      ref="action-bar"
       :class="{
         'action-topbar': true,
-        unselectable: true,
-        minimized
-      }"
-      :style="{
-        left: position.left + 'px',
-        top: position.top + 'px'
+        unselectable: true
       }"
     >
       <div class="menu">
@@ -31,7 +25,7 @@
               nbSelectedTasks > 1
             "
           >
-            STATUS
+            {{ $t('main.status') }}
           </div>
 
           <div
@@ -245,15 +239,6 @@
           >
             <download-icon />
           </div>
-
-          <!--div class="flexrow-item close-bar" @click="minimized = !minimized">
-            <minus-icon v-if="!minimized" />
-            <square-icon v-else />
-          </div-->
-
-          <!--div class="flexrow-item close-bar" @click="clearSelection">
-            <x-icon />
-          </div-->
         </div>
       </div>
 
@@ -679,10 +664,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { domMixin } from '@/components/mixins/dom'
 import { intersection } from '@/lib/array'
 import { sortPeople } from '@/lib/sorting'
-import preferences from '@/lib/preferences'
 import func from '@/lib/func'
 
 import {
@@ -706,7 +689,6 @@ import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal'
 
 export default {
   name: 'action-panel',
-  mixins: [domMixin],
 
   components: {
     AlertCircleIcon,
@@ -742,10 +724,6 @@ export default {
       statusComment: '',
       modals: {
         playlist: false
-      },
-      position: {
-        top: 10,
-        left: 640
       },
       priorityOptions: [
         {
@@ -791,17 +769,10 @@ export default {
   mounted() {
     this.customAction = this.defaultCustomAction
     this.setCurrentTeam()
-    this.resetPosition()
-    window.removeEventListener('mousemove', this.doDrag)
-    window.removeEventListener('mouseup', this.stopDrag)
-    window.removeEventListener('beforeunload', this.setPositionPreference)
-    window.addEventListener('mousemove', this.doDrag)
-    window.addEventListener('mouseup', this.stopDrag)
-    window.addEventListener('beforeunload', this.setPositionPreference)
   },
 
   beforeDestroy() {
-    this.setPositionPreference()
+    window.removeEventListener('keydown', this.onKeyDown)
   },
 
   computed: {
@@ -1119,7 +1090,6 @@ export default {
     },
 
     confirmTaskDeletion() {
-      if (this.$options.dragging) return
       this.loading.taskDeletion = true
       this.errors.taskDeletion = false
       this.deleteSelectedTasks()
@@ -1134,7 +1104,6 @@ export default {
     },
 
     confirmAssetDeletion() {
-      if (this.$options.dragging) return
       this.loading.deleteAsset = true
       this.errors.deleteAsset = false
       this.deleteSelectedAssets()
@@ -1150,7 +1119,6 @@ export default {
     },
 
     confirmShotDeletion() {
-      if (this.$options.dragging) return
       this.loading.deleteShot = true
       this.errors.deleteShot = false
       this.deleteSelectedShots()
@@ -1166,7 +1134,6 @@ export default {
     },
 
     confirmEditDeletion() {
-      if (this.$options.dragging) return
       this.loading.deleteEdit = true
       this.errors.deleteEdit = false
       this.deleteSelectedEdits()
@@ -1229,7 +1196,6 @@ export default {
     confirmSetThumbnailsFromTasks() {
       this.loading.setThumbnails = true
       if (this.nbSelectedTasks === 1) {
-        const task = this.selectedTasks.values().next().value
         this.$emit('set-frame-thumbnail', this.isUseCurrentFrame)
         this.loading.setThumbnails = false
       } else {
@@ -1296,7 +1262,6 @@ export default {
     },
 
     selectBar(barName) {
-      if (this.$options.dragging) return
       localStorage.setItem(`${this.storagePrefix}-selected-bar`, barName, {
         expires: '1M'
       })
@@ -1324,7 +1289,6 @@ export default {
         }
         if (this.nbSelectedTasks === 1) {
           this.selectedBar = ''
-          return
         }
 
         const prefix = this.storagePrefix
@@ -1359,61 +1323,6 @@ export default {
       } else {
         this.availableTaskStatuses = this.taskStatusForCurrentUser
       }
-    },
-
-    startDrag(event) {
-      // if (event.target.nodeName === 'svg') return
-      this.$options.startX = event.x
-      this.$options.startY = event.y
-      this.$options.startLeft = parseInt(this.position.left)
-      this.$options.startTop = parseInt(this.position.top)
-      this.$options.dragging = true
-    },
-
-    doDrag(event) {
-      if (this.$options.dragging) {
-        let newX = this.$options.startLeft - (this.$options.startX - event.x)
-        const barHeight = this.$refs['action-bar'].offsetHeight
-        const barWidth = this.$refs['action-bar'].offsetWidth
-        if (newX < 0) newX = 0
-        if (newX + barWidth > window.innerWidth) {
-          newX = window.innerWidth - barWidth
-        }
-        let newY = this.$options.startTop - (this.$options.startY - event.y)
-        if (newY < 65) newY = 65
-        if (newY + barHeight > window.innerHeight) {
-          newY = window.innerHeight - barHeight
-        }
-        this.position.left = newX
-        this.position.top = newY
-      }
-    },
-
-    stopDrag(event) {
-      this.pauseEvent(event)
-      this.$options.dragging = false
-    },
-
-    resetPosition() {
-      let newX = parseInt(preferences.getPreference('topbar:position-x')) || 0
-      let newY = parseInt(preferences.getPreference('topbar:position-y')) || 0
-      const barHeight = 148
-      const barWidth = 460
-      if (newX < 0) newX = 0
-      if (newX + barWidth > window.innerWidth) {
-        newX = window.innerWidth - barWidth
-      }
-      if (newY < 65) newY = 65
-      if (newY + barHeight > window.innerHeight) {
-        newY = window.innerHeight - barHeight
-      }
-      this.position.left = newX
-      this.position.top = newY
-    },
-
-    setPositionPreference() {
-      preferences.setPreference('topbar:position-x', this.position.left)
-      preferences.setPreference('topbar:position-y', this.position.top)
     }
   },
 
@@ -1435,17 +1344,6 @@ export default {
 
     isHidden() {
       this.autoChooseSelectBar()
-      if (this.isHidden) {
-        window.removeEventListener('mousemove', this.doDrag)
-        window.removeEventListener('mouseup', this.stopDrag)
-        window.removeEventListener('beforeunload', this.setPositionPreference)
-        this.setPositionPreference()
-      } else {
-        window.addEventListener('mousemove', this.doDrag)
-        window.addEventListener('mouseup', this.stopDrag)
-        window.addEventListener('beforeunload', this.setPositionPreference)
-        this.resetPosition()
-      }
     },
 
     nbSelectedTasks() {
@@ -1570,10 +1468,8 @@ div.assignation {
 .menu {
   background: var(--background);
   color: $grey;
-  cursor: grab;
   padding-top: 0.7em;
   border-bottom: 1px solid $light-grey-light;
-  z-index: 200;
   background: #fcfcff;
 }
 
@@ -1601,11 +1497,6 @@ div.assignation {
 .action-bar {
   padding: 0.5em 0.5em;
   border-bottom: 1px solid $light-grey-light;
-}
-
-.minimized {
-  .menu {
-  }
 }
 
 .button {
@@ -1637,30 +1528,8 @@ div.assignation {
   width: 100%;
 }
 
-.handle {
-  cursor: grab;
-  padding-left: 0.5em;
-  padding-right: 0em;
-  .handle-icon:last-child {
-    margin-left: -14px;
-  }
-
-  .handle-icon:last-child {
-    margin-left: -32px;
-  }
-}
-
 .is-link {
   color: var(--text);
-}
-
-.close-bar {
-  cursor: pointer;
-  margin-right: 0.5em;
-  margin-top: -1.5em;
-  svg {
-    width: 16px;
-  }
 }
 
 .change-status-item {
@@ -1678,6 +1547,7 @@ div.assignation {
   height: 100%;
   margin-left: 1em;
   margin-top: -1em;
+  text-transform: uppercase;
 
   &:hover {
     border: 2px solid var(--text);
