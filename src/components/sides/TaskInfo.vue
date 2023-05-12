@@ -1,12 +1,7 @@
 <template>
   <div class="side-wrapper">
-    <div
-      class="extend-bar"
-      @mouseup="onExtendUp"
-      @mousedown="onExtendDown"
-      v-if="withActions"
-    ></div>
-    <div class="side task-info" ref="side-panel">
+    <div class="extend-bar" @mousedown="onExtendDown" v-if="withActions"></div>
+    <div class="side task-info">
       <action-panel
         v-if="withActions"
         @export-task="onExportClick"
@@ -290,6 +285,8 @@ import Spinner from '@/components/widgets/Spinner'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 import PreviewPlayer from '@/components/previews/PreviewPlayer'
 
+const DEFAULT_PANEL_WIDTH = 400
+
 export default {
   name: 'task-info',
   mixins: [domMixin, taskMixin],
@@ -403,7 +400,15 @@ export default {
     document.addEventListener('mouseup', this.onExtendUp)
     document.addEventListener('mousemove', this.onExtendMove)
 
-    const width = preferences.getIntPreference('task:panel-width') || 400
+    if (this.sideColumnParent) {
+      const panelWidth =
+        preferences.getIntPreference('task:panel-width') || DEFAULT_PANEL_WIDTH
+      this.setWidth(panelWidth)
+      if (this.$refs['preview-player']) {
+        this.$refs['preview-player'].previewViewer.resize()
+        this.$refs['preview-player'].fixCanvasSize()
+      }
+    }
   },
 
   beforeDestroy() {
@@ -439,6 +444,13 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
+    sideColumnParent() {
+      if (this.$el.parentElement.classList.contains('side-column')) {
+        return this.$el.parentElement
+      }
+      return undefined
+    },
 
     nbSelectedEntities() {
       return this.selectedEntities ? this.selectedEntities.size : 0
@@ -887,7 +899,7 @@ export default {
       }
     },
 
-    onAddPreviewClicked(comment) {
+    onAddPreviewClicked() {
       this.modals.addPreview = true
     },
 
@@ -946,36 +958,6 @@ export default {
       })
     },
 
-    toggleSubscribe() {
-      if (this.task && !this.isAssigned) {
-        if (this.task.is_subscribed) {
-          this.unsubscribeFromTask(this.task.id)
-        } else {
-          this.subscribeToTask(this.task.id)
-        }
-      }
-    },
-
-    toggleWidth() {
-      this.isWide = !this.isWide
-      const panel = this.$refs['side-panel']
-      if (this.isWide) {
-        panel.parentElement.style['min-width'] = '700px'
-      } else {
-        panel.parentElement.style['min-width'] = '350px'
-      }
-    },
-
-    toggleExtraWidth() {
-      this.isExtraWide = !this.isExtraWide
-      const panel = this.$refs['side-panel']
-      if (this.isExtraWide) {
-        panel.parentElement.style['min-width'] = '65vw'
-      } else {
-        panel.parentElement.style['min-width'] = '700px'
-      }
-    },
-
     onAckComment(comment) {
       this.ackComment(comment)
     },
@@ -998,11 +980,11 @@ export default {
       this.modals.deleteComment = true
     },
 
-    onCancelEditComment(comment) {
+    onCancelEditComment() {
       this.modals.editComment = false
     },
 
-    onCancelDeleteComment(comment) {
+    onCancelDeleteComment() {
       this.modals.deleteComment = false
     },
 
@@ -1197,43 +1179,43 @@ export default {
           this.$refs['preview-player'].previewViewer.resize()
           this.$refs['preview-player'].fixCanvasSize()
         }
-        const panel = this.$refs['side-panel']
-        const parent = panel.parentElement.parentElement
-        const panelWidth = parent.offsetWidth
-        preferences.setPreference('task:panel-width', panelWidth)
+        if (this.sideColumnParent) {
+          const panelWidth = this.sideColumnParent.offsetWidth
+          preferences.setPreference('task:panel-width', panelWidth)
+        }
       }
       this.isChangingWidth = false
     },
 
     onExtendDown(event) {
       this.pauseEvent(event)
-      if (this.withActions) {
+      if (this.withActions && this.sideColumnParent) {
         this.lastWidthX = event.clientX
-        const panel = this.$refs['side-panel']
-        const parent = panel.parentElement.parentElement
-        const panelWidth = parent.offsetWidth
-        this.lastWidth = parent.offsetWidth
+        const panelWidth = this.sideColumnParent.offsetWidth
+        this.lastWidth = panelWidth
         this.isChangingWidth = true
       }
     },
 
     onExtendMove(event) {
-      if (this.isChangingWidth) {
-        this.pauseEvent(event)
-        const diff = this.lastWidthX - event.clientX
-        const width = Math.max(this.lastWidth + diff, 420)
-        this.setWidth(width)
-        if (this.$refs['preview-player']) {
-          this.$refs['preview-player'].previewViewer.resize()
-          this.$refs['preview-player'].fixCanvasSize()
-        }
+      if (!this.isChangingWidth) {
+        return
+      }
+      this.pauseEvent(event)
+      const diff = this.lastWidthX - event.clientX
+      const panelWidth = Math.max(this.lastWidth + diff, DEFAULT_PANEL_WIDTH)
+      this.setWidth(panelWidth)
+      if (this.$refs['preview-player']) {
+        this.$refs['preview-player'].previewViewer.resize()
+        this.$refs['preview-player'].fixCanvasSize()
       }
     },
 
     setWidth(width) {
-      const panel = this.$refs['side-panel']
-      const parent = panel.parentElement.parentElement
-      parent.style['min-width'] = width + 'px'
+      if (!this.sideColumnParent) {
+        return
+      }
+      this.sideColumnParent.style['min-width'] = `${width}px`
       if (width > 699 && width < 900) {
         this.isWide = true
         this.isExtraWide = false
@@ -1502,9 +1484,6 @@ export default {
   flex-direction: column;
 }
 
-.task-column {
-}
-
 .comment {
   border-top: 1px solid $white-grey;
   border-bottom: 1px solid $white-grey;
@@ -1597,6 +1576,6 @@ export default {
 .extend-bar {
   width: 3px;
   background: #ccc;
-  cursor: w-resize;
+  cursor: ew-resize;
 }
 </style>
