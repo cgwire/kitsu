@@ -526,7 +526,8 @@ export default {
     generate_playlist: 'Generate a playlist',
     run_custom_action: 'Run custom action',
     set_estimations: 'Set estimations',
-    set_thumbnails: 'Set thumbnails from last preview'
+    set_thumbnails: 'Set thumbnails from last preview',
+    subscribe: 'Subscribe to notifications'
   },
 
   news: {
