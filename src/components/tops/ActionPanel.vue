@@ -1289,7 +1289,6 @@ export default {
         }
         if (this.nbSelectedTasks === 1) {
           this.selectedBar = ''
-          return
         }
 
         const prefix = this.storagePrefix
