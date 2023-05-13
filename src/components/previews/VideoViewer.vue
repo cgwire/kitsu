@@ -156,6 +156,7 @@ export default {
           this.isLoading = false
         })
 
+        /*
         this.video.addEventListener('seeking', () => {
           console.log('seeking')
         })
@@ -172,14 +173,11 @@ export default {
           console.log('canplaythrough')
         })
 
-        this.video.addEventListener('seeked', () => {
-          console.log('seeked end')
-        })
-
         this.video.addEventListener('stalled', () => {
-          console.log('load start')
+          console.log('stalled')
           this.isLoading = true
         })
+        */
 
         window.addEventListener('resize', this.onWindowResize)
       }
