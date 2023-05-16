@@ -414,10 +414,7 @@ export default {
       const panelWidth =
         preferences.getIntPreference('task:panel-width') || DEFAULT_PANEL_WIDTH
       this.setWidth(panelWidth)
-      if (this.$refs['preview-player']) {
-        this.$refs['preview-player'].previewViewer.resize()
-        this.$refs['preview-player'].fixCanvasSize()
-      }
+      this.refreshPreviewPlay()
     }
   },
 
@@ -1195,18 +1192,12 @@ export default {
       const diff = this.lastWidthX - this.getClientX(event)
       const panelWidth = Math.max(this.lastWidth + diff, DEFAULT_PANEL_WIDTH)
       this.setWidth(panelWidth)
-      if (this.$refs['preview-player']) {
-        this.$refs['preview-player'].previewViewer.resize()
-        this.$refs['preview-player'].fixCanvasSize()
-      }
+      this.refreshPreviewPlay()
     },
 
     onExtendUp(event) {
       this.removeEvents(this.domEvents)
-      if (this.$refs['preview-player']) {
-        this.$refs['preview-player'].previewViewer.resize()
-        this.$refs['preview-player'].fixCanvasSize()
-      }
+      this.refreshPreviewPlay()
       if (this.sideColumnParent) {
         const panelWidth = this.sideColumnParent.offsetWidth
         preferences.setPreference('task:panel-width', panelWidth)
@@ -1229,6 +1220,13 @@ export default {
           frame = parseInt(this.$refs['preview-player'].currentFrame)
         }
         return this.setCurrentPreviewAsEntityThumbnail(frame)
+      }
+    },
+
+    refreshPreviewPlay() {
+      if (this.$refs['preview-player']) {
+        this.$refs['preview-player'].previewViewer.resize()
+        this.$refs['preview-player'].fixCanvasSize()
       }
     }
   },
