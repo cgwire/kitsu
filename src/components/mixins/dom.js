@@ -45,6 +45,22 @@ export const domMixin = {
       e.cancelBubble = true
       e.returnValue = false
       return false
+    },
+
+    addEvents(events) {
+      events.forEach(([type, listener]) => {
+        document.addEventListener(type, listener)
+      })
+    },
+
+    removeEvents(events) {
+      events.forEach(([type, listener]) => {
+        document.removeEventListener(type, listener)
+      })
+    },
+
+    getClientX(event) {
+      return event.touches?.[0].clientX || event.clientX
     }
   }
 }

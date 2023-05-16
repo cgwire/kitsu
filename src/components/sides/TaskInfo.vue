@@ -1,6 +1,11 @@
 <template>
   <div class="side-wrapper">
-    <div class="extend-bar" @mousedown="onExtendDown" v-if="withActions"></div>
+    <div
+      class="extend-bar"
+      @mousedown.prevent="onExtendDown"
+      @touchstart.prevent="onExtendDown"
+      v-if="withActions"
+    ></div>
     <div class="side task-info">
       <action-panel
         v-if="withActions"
@@ -359,6 +364,14 @@ export default {
       panelWidth: 800,
       taskComments: [],
       taskPreviews: [],
+      domEvents: [
+        ['mousemove', this.onExtendMove],
+        ['touchmove', this.onExtendMove],
+        ['mouseup', this.onExtendUp],
+        ['mouseleave', this.onExtendUp],
+        ['touchend', this.onExtendUp],
+        ['touchcancel', this.onExtendUp]
+      ],
       errors: {
         addComment: false,
         addCommentMaxRetakes: false,
@@ -396,9 +409,6 @@ export default {
         this.$refs['add-comment'].text = draft
       }
     }
-    this.isChangingWidth = false
-    document.addEventListener('mouseup', this.onExtendUp)
-    document.addEventListener('mousemove', this.onExtendMove)
 
     if (this.sideColumnParent) {
       const panelWidth =
@@ -412,8 +422,7 @@ export default {
   },
 
   beforeDestroy() {
-    document.removeEventListener('mouseup', this.onExtendUp)
-    document.removeEventListener('mousemove', this.onExtendMove)
+    this.removeEvents(this.domEvents)
   },
 
   computed: {
@@ -1172,37 +1181,18 @@ export default {
       csv.buildCsvFile(name, [headers].concat(commentLines))
     },
 
-    onExtendUp(event) {
-      if (this.isChangingWidth) {
-        this.pauseEvent(event)
-        if (this.$refs['preview-player']) {
-          this.$refs['preview-player'].previewViewer.resize()
-          this.$refs['preview-player'].fixCanvasSize()
-        }
-        if (this.sideColumnParent) {
-          const panelWidth = this.sideColumnParent.offsetWidth
-          preferences.setPreference('task:panel-width', panelWidth)
-        }
-      }
-      this.isChangingWidth = false
-    },
-
     onExtendDown(event) {
-      this.pauseEvent(event)
-      if (this.withActions && this.sideColumnParent) {
-        this.lastWidthX = event.clientX
-        const panelWidth = this.sideColumnParent.offsetWidth
-        this.lastWidth = panelWidth
-        this.isChangingWidth = true
+      if (!this.sideColumnParent) {
+        return
       }
+      this.lastWidthX = this.getClientX(event)
+      const panelWidth = this.sideColumnParent.offsetWidth
+      this.lastWidth = panelWidth
+      this.addEvents(this.domEvents)
     },
 
     onExtendMove(event) {
-      if (!this.isChangingWidth) {
-        return
-      }
-      this.pauseEvent(event)
-      const diff = this.lastWidthX - event.clientX
+      const diff = this.lastWidthX - this.getClientX(event)
       const panelWidth = Math.max(this.lastWidth + diff, DEFAULT_PANEL_WIDTH)
       this.setWidth(panelWidth)
       if (this.$refs['preview-player']) {
@@ -1211,21 +1201,25 @@ export default {
       }
     },
 
+    onExtendUp(event) {
+      this.removeEvents(this.domEvents)
+      if (this.$refs['preview-player']) {
+        this.$refs['preview-player'].previewViewer.resize()
+        this.$refs['preview-player'].fixCanvasSize()
+      }
+      if (this.sideColumnParent) {
+        const panelWidth = this.sideColumnParent.offsetWidth
+        preferences.setPreference('task:panel-width', panelWidth)
+      }
+    },
+
     setWidth(width) {
       if (!this.sideColumnParent) {
         return
       }
       this.sideColumnParent.style['min-width'] = `${width}px`
-      if (width > 699 && width < 900) {
-        this.isWide = true
-        this.isExtraWide = false
-      } else if (width >= 900) {
-        this.isWide = true
-        this.isExtraWide = true
-      } else {
-        this.isWide = false
-        this.isExtraWide = false
-      }
+      this.isWide = width > 699
+      this.isExtraWide = width >= 900
     },
 
     onSetCurrentFrameAsThumbnail(isUseCurrentFrame) {
@@ -1575,6 +1569,7 @@ export default {
 
 .extend-bar {
   width: 3px;
+  margin-left: 3px;
   background: #ccc;
   cursor: ew-resize;
 }
