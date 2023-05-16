@@ -41,13 +41,17 @@
               :is-static="true"
               v-if="task"
             />
-            <span class="flexrow-item" v-if="task.assignees.length > 0">
+            <span
+              class="flexrow-item"
+              v-if="task.assignees.length > 0 && !isCurrentUserClient"
+            >
               {{ $t('tasks.fields.assignees') }}:
             </span>
             <span
               class="flexrow-item avatar-wrapper"
               :key="personId"
               v-for="personId in task.assignees"
+              v-if="!isCurrentUserClient"
             >
               <people-avatar
                 class="flexrow-item"

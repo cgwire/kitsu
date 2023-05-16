@@ -1329,8 +1329,7 @@ export default {
 
   search: {
     limit: 'Max number of results:',
-    match_details: '"{term}" found in {target}',
-    match_details_2: '"{term}" found in {target} metadata',
+    match_details: 'match found in {target}',
     placeholder: 'Search for an entity in the database...',
     title: 'Entity Search',
   },

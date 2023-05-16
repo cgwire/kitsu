@@ -958,7 +958,7 @@ const mutations = {
     }
 
     if (!newShot.data) newShot.data = {}
-    if (newShot.data.fps && !state.isFps) state.fps = true
+    if (newShot.data.fps && !state.isFps) state.isFps = true
     if (newShot.nb_frames && !state.isFrames) state.isFrames = true
     if (newShot.data.frame_in && !state.isFrameIn) state.isFrameIn = true
     if (newShot.data.frame_out && !state.isFrameOut) state.isFrameOut = true

@@ -116,7 +116,6 @@
                 <td class="name datatable-row-header">
                   - Take {{ takeNumber }}
                 </td>
-                <td class="description"></td>
                 <td></td>
 
                 <template v-for="columnId in validationColumns">

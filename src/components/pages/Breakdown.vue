@@ -544,7 +544,7 @@ export default {
       this.castingEntities.forEach(entity => {
         if (this.castingByType[entity.id]) {
           this.castingByType[entity.id].forEach(type => {
-            if (!assetTypeNameMap[type[0].asset_type_name]) {
+            if (type[0] && !assetTypeNameMap[type[0].asset_type_name]) {
               assetTypeNameMap[type[0].asset_type_name] = true
               castingAssetTypes.push(type[0].asset_type_name)
             }

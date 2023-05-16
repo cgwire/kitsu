@@ -208,7 +208,7 @@ import EntityPreview from '@/components/widgets/EntityPreview'
 // import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import Spinner from '@/components/widgets/Spinner'
 
-const AVAILABLE_LIMITS = [10, 20, 50]
+const AVAILABLE_LIMITS = [12, 24, 48]
 
 export default {
   name: 'entity-search',
@@ -373,19 +373,11 @@ export default {
     },
 
     getMatchDetails(entity) {
-      const target = entity.matched_terms?.[0]?.[0]
-      const term = entity.matched_terms?.[0]?.[1]
-      if (target?.startsWith('data_')) {
-        return this.$t('search.match_details_2', {
-          term,
-          target: target.replace('data_', '')
-        })
-      } else {
-        return this.$t('search.match_details', {
-          term,
-          target
-        })
-      }
+      const target = entity.matched_terms.join(', ')
+      const term = this.searchQuery
+      return this.$t('search.match_details', {
+        target
+      })
     }
   },
 
