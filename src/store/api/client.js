@@ -123,6 +123,11 @@ const client = {
     })
   },
 
+  getConfig() {
+    const path = '/api/config'
+    return client.pget(path)
+  },
+
   getModel(modelName, modelId, relations = false) {
     let path = `/api/data/${modelName}/${modelId}`
     if (relations) path += '?relations=true'

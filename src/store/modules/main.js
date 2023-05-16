@@ -6,6 +6,7 @@ import {
   TOGGLE_SIDEBAR,
   TOGGLE_SUPPORT_CHAT,
   TOGGLE_USER_MENU,
+  SET_CONFIG,
   SET_LAST_PRODUCTION_SCREEN,
   SET_CURRENT_PRODUCTION,
   SHOW_PREVIEW_FILE,
@@ -21,6 +22,7 @@ const initialState = {
   isUserMenuHidden: true,
   lastProductionScreen: 'assets',
   lastProductionViewed: null,
+  mainConfig: {},
   previewFileIdToShow: ''
 }
 
@@ -34,6 +36,7 @@ const getters = {
   isUserMenuHidden: state => state.isUserMenuHidden,
   lastProductionScreen: state => state.lastProductionScreen,
   lastProductionViewed: state => state.lastProductionViewed,
+  mainConfig: state => state.mainConfig,
   previewFileIdToShow: state => state.previewFileIdToShow
 }
 
@@ -64,6 +67,13 @@ const actions = {
 
   loadEvents({ commit, state }, { after, before }) {
     return client.getEvents(after, before)
+  },
+
+  setMainConfig({ commit, state }) {
+    return client.getConfig()
+      .then(config => {
+        commit(SET_CONFIG, config)
+      })
   },
 
   searchData(_, { query, limit, index_names }) {
@@ -111,6 +121,10 @@ const mutations = {
 
   [HIDE_PREVIEW_FILE](state) {
     state.previewFileIdToShow = ''
+  },
+
+  [SET_CONFIG](state, mainConfig) {
+    state.mainConfig = mainConfig
   },
 
   [RESET_ALL](state) {

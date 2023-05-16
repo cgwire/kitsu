@@ -81,8 +81,10 @@
                 {{ $t('news.title') }}
               </router-link>
             </p>
-
-            <p @click="toggleSidebar()">
+            <p
+              @click="toggleSidebar()"
+              v-if="mainConfig.indexer_configured"
+            >
               <router-link
                 :to="{ name: 'entity-search' }"
                 v-if="isCurrentUserManager"
@@ -215,6 +217,7 @@ export default {
       'isCurrentUserSupervisor',
       'isCurrentUserVendor',
       'isSidebarHidden',
+      'mainConfig',
       'organisation'
     ])
   },
