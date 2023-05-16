@@ -376,7 +376,6 @@ export default {
       const target = entity.matched_terms.join(', ')
       const term = this.searchQuery
       return this.$t('search.match_details', {
-        term,
         target
       })
     }
