@@ -1,0 +1,2 @@
+import{m as t,b as r,n}from"./index-5d6858c3.js";const _={name:"server-down",computed:{...t([])},methods:{...r([])},mounted(){}};var o=function(){var e=this,s=e._self._c;return s("div",{staticClass:"server-down page"},[s("h1",{staticClass:"title"},[e._v(e._s(e.$t("wrong_browser.title")))]),s("p",[e._v(" "+e._s(e.$t("wrong_browser.text"))+" ")])])},a=[],c=n(_,o,a,!1,null,"779feb35",null,null);const i=c.exports;export{i as default};
+//# sourceMappingURL=WrongBrowser-13653cf5.js.map
