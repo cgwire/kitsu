@@ -72,6 +72,7 @@ export default {
     const supportChat = localPreferences.getBoolPreference('support:show', true)
     this.setSupportChat(supportChat)
     crisp.init(supportChat)
+    this.setMainConfig()
   },
 
   metaInfo: {
@@ -101,6 +102,7 @@ export default {
       'loadTaskType',
       'refreshMetadataDescriptor',
       'removeAsset',
+      'setMainConfig',
       'setSupportChat'
     ]),
 

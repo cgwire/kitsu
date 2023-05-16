@@ -92,7 +92,10 @@
         >
           {{ $t('timesheets.title') }}
         </router-link>
-        <global-search-field class="flexrow-item mr0" />
+        <global-search-field
+          class="flexrow-item mr0"
+          v-if="mainConfig.indexer_configured"
+        />
         <div class="nav-item">
           <button data-canny-changelog class="changelog-button">
             <zap-icon />
@@ -282,6 +285,7 @@ export default {
       'isNewNotification',
       'lastProductionScreen',
       'lastProductionViewed',
+      'mainConfig',
       'openProductions',
       'openProductionOptions',
       'productionMap',
