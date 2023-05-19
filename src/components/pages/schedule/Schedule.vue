@@ -1404,10 +1404,12 @@ export default {
     currentElement() {
       if (this.currentElement && this.currentElement.task_type_id) {
         const task = this.taskMap.get(this.currentElement.id)
-        this.$store.commit('UPDATE_TASK', {
-          task,
-          updatedAt: formatFullDate(moment())
-        })
+        if (task) {
+          this.$store.commit('UPDATE_TASK', {
+            task,
+            updatedAt: formatFullDate(moment())
+          })
+        }
       }
     }
   }
