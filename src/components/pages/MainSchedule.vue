@@ -78,7 +78,7 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber'
 import Schedule from '@/components/pages/schedule/Schedule'
 
 export default {
-  name: 'production-schedule',
+  name: 'main-schedule',
   components: {
     ComboboxNumber,
     Datepicker,
