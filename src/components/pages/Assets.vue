@@ -415,8 +415,6 @@ export default {
 
   beforeDestroy() {
     this.clearSelectedAssets()
-    document.removeEventListener('mouseup', this.onExtendUp)
-    document.removeEventListener('mousemove', this.onExtendMove)
   },
 
   computed: {
