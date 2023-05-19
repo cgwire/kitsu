@@ -280,7 +280,6 @@
             class="timeline-content"
             :style="timelineStyle"
             @mousedown="startBrowsing"
-            @mousewheel="$emit('change-zoom', $event)"
           >
             <div
               ref="timeline-sub-start"

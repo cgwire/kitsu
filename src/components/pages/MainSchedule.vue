@@ -49,7 +49,6 @@
         :zoom-level="zoomLevel"
         :hide-man-days="true"
         @item-changed="onScheduleItemChanged"
-        @change-zoom="changeZoom"
         @root-element-expanded="expandProductionElement"
       />
     </div>
@@ -127,11 +126,6 @@ export default {
 
   methods: {
     ...mapActions(['editProduction', 'loadScheduleItems', 'saveScheduleItem']),
-
-    changeZoom(event) {
-      if (event.wheelDelta < 0 && this.zoomLevel > 1) this.zoomLevel--
-      if (event.wheelDelta > 0 && this.zoomLevel < 3) this.zoomLevel++
-    },
 
     reset() {
       this.scheduleItems = this.convertScheduleItems(this.openProductions)
