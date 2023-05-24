@@ -141,11 +141,17 @@ export default {
       } else {
         if (this.width && this.width > 150) {
           return (
-            '/api/pictures/previews/preview-files/' + previewFileId + '.png' + this.timer
+            '/api/pictures/previews/preview-files/' +
+            previewFileId +
+            '.png' +
+            this.timer
           )
         } else {
           return (
-            '/api/pictures/thumbnails/preview-files/' + previewFileId + '.png' + this.timer
+            '/api/pictures/thumbnails/preview-files/' +
+            previewFileId +
+            '.png' +
+            this.timer
           )
         }
       }

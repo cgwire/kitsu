@@ -1,6 +1,7 @@
 <template>
   <div
-    ref="container" class="video-player"
+    ref="container"
+    class="video-player"
     :style="{
       'border-top-left-radius': isRoundedTopBorder ? '10px' : '',
       'border-top-right-radius': isRoundedTopBorder ? '10px' : ''
@@ -21,7 +22,7 @@
         ref="movie"
         class="annotation-movie"
         :style="{
-          display: isLoading ? 'none' : 'block',
+          display: isLoading ? 'none' : 'block'
         }"
         :src="moviePath"
         :poster="posterPath"

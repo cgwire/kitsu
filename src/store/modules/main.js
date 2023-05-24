@@ -70,10 +70,9 @@ const actions = {
   },
 
   setMainConfig({ commit, state }) {
-    return client.getConfig()
-      .then(config => {
-        commit(SET_CONFIG, config)
-      })
+    return client.getConfig().then(config => {
+      commit(SET_CONFIG, config)
+    })
   },
 
   searchData(_, { query, limit, index_names }) {
