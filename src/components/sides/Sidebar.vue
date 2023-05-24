@@ -81,14 +81,8 @@
                 {{ $t('news.title') }}
               </router-link>
             </p>
-            <p
-              @click="toggleSidebar()"
-              v-if="mainConfig.indexer_configured"
-            >
-              <router-link
-                :to="{ name: 'entity-search' }"
-                v-if="isCurrentUserManager"
-              >
+            <p @click="toggleSidebar()" v-if="mainConfig.indexer_configured">
+              <router-link :to="{ name: 'entity-search' }">
                 <search-icon size="0.9x" />
                 {{ $t('search.title') }}
               </router-link>
