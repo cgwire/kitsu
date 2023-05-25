@@ -1132,7 +1132,7 @@ export const playerMixin = {
 
     onCanvasMouseMoved(event) {
       if (this.isCurrentPreviewMovie && this.$options.scrubbing) {
-        const x = event.e.clientX
+        const x = this.getClientX(event)
         if (x - this.$options.scrubStartX < 0) {
           this.goPreviousFrame()
         } else {
@@ -1145,7 +1145,7 @@ export const playerMixin = {
     onCanvasClicked(event) {
       if (event.button > 1 && this.isCurrentPreviewMovie) {
         this.$options.scrubbing = true
-        this.$options.scrubStartX = event.e.clientX
+        this.$options.scrubStartX = this.getClientX(event)
         this.$options.scrubStartTime = Number(this.currentTimeRaw)
       }
       return false

@@ -3,6 +3,9 @@
     class="unselectable"
     @mouseenter="isFrameNumberVisible = true"
     @mouseout="isFrameNumberVisible = false"
+    @touchstart="isFrameNumberVisible = true"
+    @touchend="isFrameNumberVisible = false"
+    @touchcancel="isFrameNumberVisible = false"
   >
     <div
       class="progress-wrapper"
@@ -16,7 +19,8 @@
           width: handleInWidth,
           'padding-right': handleIn > 1 ? '5px' : 0
         }"
-        @mousedown="startHandleInDrag($event)"
+        @mousedown="startHandleInDrag"
+        @touchstart="startHandleInDrag"
         v-if="handleIn >= 0"
       >
         {{ handleIn !== 0 ? handleIn + 1 : '' }}
@@ -27,7 +31,8 @@
         :style="{
           width: frameSize * (nbFrames - handleOut) + 'px'
         }"
-        @mousedown="startHandleOutDrag($event)"
+        @mousedown="startHandleOutDrag"
+        @touchstart="startHandleOutDrag"
         v-if="handleOut >= 0"
       >
         {{ handleOut + 1 }}
@@ -38,7 +43,8 @@
         value="0"
         min="0"
         @click="onProgressClicked"
-        @mousedown="startProgressDrag($event)"
+        @mousedown="startProgressDrag"
+        @touchstart="startProgressDrag"
       ></progress>
       <span
         :key="`annotation-${index}`"
@@ -49,16 +55,19 @@
         }"
         @mouseenter="isFrameNumberVisible = true"
         @mouseleave="isFrameNumberVisible = true"
-        @click="_emitProgressEvent(annotation)"
+        @touchstart="isFrameNumberVisible = true"
+        @touchend="isFrameNumberVisible = false"
+        @touchcancel="isFrameNumberVisible = false"
+        @click="_emitProgressEvent($event, annotation)"
         v-for="(annotation, index) in annotations"
       >
       </span>
       <span
         class="frame-number"
         :style="{
-          display: isFrameNumberVisible ? null : 'none',
           left: frameNumberLeftPosition + 'px'
         }"
+        v-show="isFrameNumberVisible && hoverFrame > 0"
       >
         {{ hoverFrame }}
       </span>
@@ -67,8 +76,12 @@
 </template>
 
 <script>
+import { domMixin } from '@/components/mixins/dom'
+
 export default {
   name: 'video-progress',
+  mixins: [domMixin],
+
   props: {
     annotations: {
       default: () => [],
@@ -94,19 +107,33 @@ export default {
 
   data() {
     return {
+      currentMouseFrame: {},
       frameNumberLeftPosition: 0,
       isFrameNumberVisible: false,
       hoverFrame: 0,
-      width: 0
+      width: 0,
+      domEvents: [
+        ['mousemove', this.doProgressDrag],
+        ['touchmove', this.doProgressDrag],
+        ['mouseup', this.stopProgressDrag],
+        ['mouseleave', this.stopProgressDrag],
+        ['touchend', this.stopProgressDrag],
+        ['touchcancel', this.stopProgressDrag],
+        ['mouseup', this.stopHandleInDrag],
+        ['mouseleave', this.stopHandleInDrag],
+        ['touchend', this.stopHandleInDrag],
+        ['touchcancel', this.stopHandleInDrag],
+        ['mouseup', this.stopHandleOutDrag],
+        ['mouseleave', this.stopHandleOutDrag],
+        ['touchend', this.stopHandleOutDrag],
+        ['touchcancel', this.stopHandleOutDrag],
+        ['resize', this.resetScheduleSize]
+      ]
     }
   },
 
   mounted() {
-    window.addEventListener('mousemove', this.doProgressDrag)
-    window.addEventListener('mouseup', this.stopProgressDrag)
-    window.addEventListener('mouseup', this.stopHandleInDrag)
-    window.addEventListener('mouseup', this.stopHandleOutDrag)
-    window.addEventListener('resize', this.onWindowResize)
+    this.addEvents(this.domEvents)
     new ResizeObserver(this.onWindowResize).observe(this.progress)
     const progressCoordinates = this.progress.getBoundingClientRect()
     this.width = progressCoordinates.width
@@ -117,11 +144,7 @@ export default {
   },
 
   beforeDestroy() {
-    window.removeEventListener('mousemove', this.doProgressDrag)
-    window.removeEventListener('mouseup', this.stopProgressDrag)
-    window.removeEventListener('mouseup', this.stopHandleInDrag)
-    window.removeEventListener('mouseup', this.stopHandleOutDrag)
-    window.removeEventListener('resize', this.onWindowResize)
+    this.removeEvents(this.domEvents)
   },
 
   computed: {
@@ -183,7 +206,7 @@ export default {
     stopHandleInDrag(event) {
       if (this.handleInDragging) {
         this.handleInDragging = false
-        const { frameNumber } = this._getMouseFrame()
+        const { frameNumber } = this.currentMouseFrame
         this.$emit('handle-in-changed', { frameNumber, save: true })
       }
     },
@@ -195,7 +218,7 @@ export default {
     stopHandleOutDrag(event) {
       if (this.handleOutDragging) {
         this.handleOutDragging = false
-        let { frameNumber, position } = this._getMouseFrame()
+        let { frameNumber, position } = this.currentMouseFrame
         if (this.width - position < 4) frameNumber += 1
         this.$emit('handle-out-changed', { frameNumber, save: true })
       }
@@ -208,7 +231,8 @@ export default {
         this.handleOutDragging ||
         this.isFrameNumberVisible
       ) {
-        const { frameNumber } = this._getMouseFrame()
+        this.currentMouseFrame = this._getMouseFrame(event)
+        const { frameNumber } = this.currentMouseFrame
         this.hoverFrame = frameNumber + 1
         this.frameNumberLeftPosition =
           (this.width / this.nbFrames) * frameNumber
@@ -216,27 +240,26 @@ export default {
           this.$emit('progress-changed', frameNumber)
         }
         if (this.handleInDragging) {
-          const { frameNumber } = this._getMouseFrame()
           this.$emit('handle-in-changed', { frameNumber, save: false })
         }
         if (this.handleOutDragging) {
-          let { frameNumber, position } = this._getMouseFrame()
+          let { frameNumber, position } = this.currentMouseFrame
           if (this.width - position < 4) frameNumber += 1
           this.$emit('handle-out-changed', { frameNumber, save: false })
         }
       }
     },
 
-    onProgressClicked() {
-      this._emitProgressEvent()
+    onProgressClicked(event) {
+      this._emitProgressEvent(event)
     },
 
-    _getMouseFrame(annotation) {
+    _getMouseFrame(event, annotation) {
       let left = this.progress.getBoundingClientRect().left
       if (left === 0 && !this.fullScreen) {
         left = this.progress.parentElement.offsetParent.offsetLeft
       }
-      const position = event.x - left
+      const position = this.getClientX(event) - left
       const ratio = position / this.width
       let duration =
         annotation && this.frameSize < 3
@@ -250,8 +273,8 @@ export default {
       return { frameNumber, position }
     },
 
-    _emitProgressEvent(annotation) {
-      const { frameNumber } = this._getMouseFrame(annotation)
+    _emitProgressEvent(event, annotation) {
+      const { frameNumber } = this._getMouseFrame(event, annotation)
       this.$emit('progress-changed', frameNumber)
     }
   },

@@ -61,6 +61,10 @@ export const domMixin = {
 
     getClientX(event) {
       return event.touches?.[0].clientX || event.clientX
+    },
+
+    getClientY(event) {
+      return event.touches?.[0].clientY || event.clientY
     }
   }
 }

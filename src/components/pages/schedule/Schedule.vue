@@ -1,7 +1,12 @@
 <template>
   <div class="schedule-wrapper">
     <div :class="scheduleClass" ref="schedule">
-      <div ref="entity-list" class="entities" @mousedown="startBrowsingY">
+      <div
+        ref="entity-list"
+        class="entities"
+        @mousedown="startBrowsingY"
+        @touchstart="startBrowsingY"
+      >
         <div
           class="has-text-right total-man-days mr0"
           :class="{
@@ -174,6 +179,7 @@
           ref="timeline-header"
           class="timeline-header"
           @mousedown="startBrowsingX"
+          @touchstart="startBrowsingX"
           v-if="zoomLevel > 0"
         >
           <div
@@ -236,6 +242,7 @@
           ref="timeline-header"
           class="timeline-header"
           @mousedown="startBrowsingX"
+          @touchstart="startBrowsingX"
           v-else
         >
           <div
@@ -280,6 +287,7 @@
             class="timeline-content"
             :style="timelineStyle"
             @mousedown="startBrowsing"
+            @touchstart="startBrowsing"
           >
             <div
               ref="timeline-sub-start"
@@ -339,16 +347,19 @@
                         'timebar-left-hand': rootElement.editable
                       }"
                       @mousedown="moveTimebarLeftSide(rootElement, $event)"
+                      @touchstart="moveTimebarLeftSide(rootElement, $event)"
                     ></div>
                     <div
                       class="filler"
                       @mousedown="moveTimebar(rootElement, $event)"
+                      @touchstart="moveTimebar(rootElement, $event)"
                     ></div>
                     <div
                       :class="{
                         'timebar-right-hand': rootElement.editable
                       }"
                       @mousedown="moveTimebarRightSide(rootElement, $event)"
+                      @touchstart="moveTimebarRightSide(rootElement, $event)"
                     ></div>
                   </div>
                 </div>
@@ -390,10 +401,12 @@
                           childElement.editable && !childElement.unresizable
                       }"
                       @mousedown="moveTimebarLeftSide(childElement, $event)"
+                      @touchstart="moveTimebarLeftSide(childElement, $event)"
                     ></div>
                     <div
                       class="filler"
                       @mousedown="moveTimebar(childElement, $event)"
+                      @touchstart="moveTimebar(childElement, $event)"
                     ></div>
                     <div
                       :class="{
@@ -401,6 +414,7 @@
                           childElement.editable && !childElement.unresizable
                       }"
                       @mousedown="moveTimebarRightSide(childElement, $event)"
+                      @touchstart="moveTimebarRightSide(childElement, $event)"
                     ></div>
                   </div>
                 </div>
@@ -431,7 +445,9 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 
+import { domMixin } from '@/components/mixins/dom'
 import { formatListMixin } from '@/components/mixins/format'
+
 import colors from '@/lib/colors'
 import {
   addBusinessDays,
@@ -448,7 +464,7 @@ import Spinner from '@/components/widgets/Spinner'
 
 export default {
   name: 'schedule',
-  mixins: [formatListMixin],
+  mixins: [domMixin, formatListMixin],
   components: {
     ChevronDownIcon,
     ChevronRightIcon,
@@ -476,7 +492,16 @@ export default {
       },
       loading: {
         edit: false
-      }
+      },
+      domEvents: [
+        ['mousemove', this.onMouseMove],
+        ['touchmove', this.onMouseMove],
+        ['mouseup', this.stopBrowsing],
+        ['mouseleave', this.stopBrowsing],
+        ['touchend', this.stopBrowsing],
+        ['touchcancel', this.stopBrowsing],
+        ['resize', this.resetScheduleSize]
+      ]
     }
   },
 
@@ -537,15 +562,11 @@ export default {
 
   mounted() {
     this.resetScheduleSize()
-    document.addEventListener('mouseup', this.stopBrowsing)
-    document.addEventListener('mousemove', this.onMouseMove)
-    window.addEventListener('resize', this.resetScheduleSize)
+    this.addEvents(this.domEvents)
   },
 
   destroyed() {
-    document.removeEventListener('mouseup', this.stopBrowsing)
-    document.removeEventListener('mousemove', this.onMouseMove)
-    window.removeEventListener('resize', this.resetScheduleSize)
+    this.removeEvents(this.domEvents)
     document.body.style.cursor = 'default'
   },
 
@@ -791,10 +812,6 @@ export default {
       return { left: -40 - 10 * (3 - this.zoomLevel) + 'px' }
     },
 
-    dayBeforeStartDate() {
-      return this.startDate.clone().add(-1, 'days')
-    },
-
     dayAfterEndDate() {
       return this.endDate.clone().add(1, 'days')
     },
@@ -875,10 +892,14 @@ export default {
     },
 
     updatePositionBarPosition(event) {
-      let position = this.timelineContentWrapper.scrollLeft + event.clientX
+      let position =
+        this.timelineContentWrapper.scrollLeft + this.getClientX(event)
       position -= 332
       position = Math.floor(position / this.cellWidth) * this.cellWidth
-      if (event.clientX - 320 < this.timelineContentWrapper.offsetWidth) {
+      if (
+        this.getClientX(event) - 320 <
+        this.timelineContentWrapper.offsetWidth
+      ) {
         this.timelinePosition.style.left = position + 'px'
       }
     },
@@ -905,7 +926,8 @@ export default {
     },
 
     changeDates(event) {
-      const change = event.clientX - this.initialClientX - this.cellWidth / 2
+      const change =
+        this.getClientX(event) - this.initialClientX - this.cellWidth / 2
       const dayChange = Math.ceil(change / this.cellWidth)
 
       if (this.lastStartDate.isBefore(this.startDate)) {
@@ -954,7 +976,8 @@ export default {
     },
 
     changeStartDate(event) {
-      const change = event.clientX - this.initialClientX + this.cellWidth / 2
+      const change =
+        this.getClientX(event) - this.initialClientX + this.cellWidth / 2
       const dayChange = Math.floor(change / this.cellWidth)
 
       const startDate = this.lastStartDate
@@ -981,7 +1004,8 @@ export default {
     },
 
     changeEndDate(event) {
-      const change = event.clientX - this.initialClientX + this.cellWidth / 2
+      const change =
+        this.getClientX(event) - this.initialClientX + this.cellWidth / 2
       const dayChange = Math.ceil(change / this.cellWidth)
 
       if (this.currentElement.startDate.isBefore(this.startDate)) {
@@ -1029,6 +1053,7 @@ export default {
     },
 
     moveTimebar(timeElement, event) {
+      event.preventDefault() // avoid scroll of schedule on touch
       if (
         !this.isChangeStartDate &&
         !this.isChangeEndDate &&
@@ -1040,12 +1065,13 @@ export default {
         this.currentElement = timeElement
         this.lastStartDate = timeElement.startDate.clone()
         this.lastEndDate = timeElement.endDate.clone()
-        this.initialClientX = event.clientX
+        this.initialClientX = this.getClientX(event)
         document.body.style.cursor = 'ew-resize'
       }
     },
 
     moveTimebarLeftSide(timeElement, event) {
+      event.preventDefault() // avoid scroll of schedule on touch
       if (
         !this.isChangeDates &&
         !this.isChangeEndDate &&
@@ -1060,12 +1086,13 @@ export default {
         }
         this.lastStartDate = timeElement.startDate.clone()
         this.lastEndDate = timeElement.endDate.clone()
-        this.initialClientX = event.clientX
+        this.initialClientX = this.getClientX(event)
         document.body.style.cursor = 'w-resize'
       }
     },
 
     moveTimebarRightSide(timeElement, event) {
+      event.preventDefault() // avoid scroll of schedule on touch
       if (
         !this.isChangeDates &&
         !this.isChangeStartDate &&
@@ -1080,7 +1107,7 @@ export default {
         }
         this.lastStartDate = timeElement.startDate.clone()
         this.lastEndDate = timeElement.endDate.clone()
-        this.initialClientX = event.clientX
+        this.initialClientX = this.getClientX(event)
         document.body.style.cursor = 'e-resize'
       }
     },
@@ -1094,14 +1121,20 @@ export default {
 
     scrollScheduleLeft(event) {
       const previousLeft = this.timelineContentWrapper.scrollLeft
-      const newLeft = previousLeft - event.movementX
+      const movementX =
+        event.movementX || this.getClientX(event) - this.initialClientX
+      const newLeft = previousLeft - movementX
+      this.initialClientX = this.getClientX(event)
       this.timelineContentWrapper.scrollLeft = newLeft
       this.timelineHeader.scrollLeft = newLeft
     },
 
     scrollScheduleTop(event) {
       const previousTop = this.timelineContentWrapper.scrollTop
-      const newTop = previousTop - event.movementY
+      const movementY =
+        event.movementY || this.getClientY(event) - this.initialClientY
+      const newTop = previousTop - movementY
+      this.initialClientY = this.getClientY(event)
       this.timelineContentWrapper.scrollTop = newTop
       this.entityList.scrollTop = newTop
     },
@@ -1138,17 +1171,21 @@ export default {
         document.body.style.cursor = 'grabbing'
         this.isBrowsingX = true
         this.isBrowsingY = true
+        this.initialClientX = this.getClientX(event)
+        this.initialClientY = this.getClientY(event)
       }
     },
 
     startBrowsingX(event) {
       document.body.style.cursor = 'grabbing'
       this.isBrowsingX = true
+      this.initialClientX = this.getClientX(event)
     },
 
     startBrowsingY(event) {
       document.body.style.cursor = 'grabbing'
       this.isBrowsingY = true
+      this.initialClientY = this.getClientY(event)
     },
 
     stopBrowsing(event) {
@@ -1161,6 +1198,8 @@ export default {
       this.isChangeDates = false
       this.isBrowsingX = false
       this.isBrowsingY = false
+      this.initialClientX = null
+      this.initialClientY = null
       this.currentElement = null
     },
 
