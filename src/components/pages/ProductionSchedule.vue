@@ -56,7 +56,6 @@
         :hide-man-days="true"
         @item-changed="scheduleItemChanged"
         @estimation-changed="estimationChanged"
-        @change-zoom="changeZoom"
         @root-element-expanded="expandTaskTypeElement"
       />
     </div>
@@ -228,11 +227,6 @@ export default {
           console.error(err)
           this.loading.schedule = false
         })
-    },
-
-    changeZoom(event) {
-      if (event.wheelDelta < 0 && this.zoomLevel > 1) this.zoomLevel--
-      if (event.wheelDelta > 0 && this.zoomLevel < 3) this.zoomLevel++
     },
 
     reset() {

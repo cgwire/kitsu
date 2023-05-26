@@ -130,12 +130,12 @@ export const annotationMixin = {
      * Add a text object to the canvas and focus on it right after to allow its
      * edition instantly.
      */
-    addText() {
+    addText(event) {
       if (this.fabricCanvas.getActiveObject()) return
       const canvas = this.canvas || this.canvasWrapper
       const offsetCanvas = canvas.getBoundingClientRect()
-      const posX = event.clientX - offsetCanvas.x
-      const posY = event.clientY - offsetCanvas.y
+      const posX = this.getClientX(event) - offsetCanvas.x
+      const posY = this.getClientY(event) - offsetCanvas.y
       const baseHeight = 320
       let fontSize = 12
       if (this.fabricCanvas.getHeight() > baseHeight) {

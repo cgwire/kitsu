@@ -1640,8 +1640,11 @@ export default {
     },
 
     onEntitiesWheel(event) {
-      event.preventDefault()
-      this.$refs['playlisted-entities'].scrollLeft += event.deltaY
+      const isMouseWheelY = !event.deltaX
+      if (isMouseWheelY) {
+        event.preventDefault()
+        this.$refs['playlisted-entities'].scrollLeft += event.deltaY
+      }
     },
 
     saveUserComparisonChoice() {

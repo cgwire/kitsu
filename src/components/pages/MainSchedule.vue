@@ -49,7 +49,6 @@
         :zoom-level="zoomLevel"
         :hide-man-days="true"
         @item-changed="onScheduleItemChanged"
-        @change-zoom="changeZoom"
         @root-element-expanded="expandProductionElement"
       />
     </div>
@@ -79,7 +78,7 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber'
 import Schedule from '@/components/pages/schedule/Schedule'
 
 export default {
-  name: 'production-schedule',
+  name: 'main-schedule',
   components: {
     ComboboxNumber,
     Datepicker,
@@ -127,11 +126,6 @@ export default {
 
   methods: {
     ...mapActions(['editProduction', 'loadScheduleItems', 'saveScheduleItem']),
-
-    changeZoom(event) {
-      if (event.wheelDelta < 0 && this.zoomLevel > 1) this.zoomLevel--
-      if (event.wheelDelta > 0 && this.zoomLevel < 3) this.zoomLevel++
-    },
 
     reset() {
       this.scheduleItems = this.convertScheduleItems(this.openProductions)
