@@ -132,7 +132,7 @@
                   :previews="currentPreview.previews"
                   :task-type-map="taskTypeMap"
                   :entity-preview-files="taskEntityPreviews"
-                  :read-only="isCurrentUserArtist"
+                  :read-only="isPreviewPlayerReadOnly"
                   :last-preview-files="lastFivePreviews"
                   :task="task"
                   :extra-wide="true"
@@ -451,7 +451,6 @@ export default {
       'getTaskPreviews',
       'getTaskComment',
       'isCurrentUserAdmin',
-      'isCurrentUserArtist',
       'isCurrentUserSupervisor',
       'isCurrentUserClient',
       'isCurrentUserManager',
@@ -489,6 +488,25 @@ export default {
 
     isMovie() {
       return this.extension === 'mp4'
+    },
+
+    isPreviewPlayerReadOnly() {
+      if (this.task) {
+        if (this.isCurrentUserManager || this.isCurrentUserClient) {
+          return false
+        } else if (this.isCurrentUserSupervisor) {
+          if (this.user.departments.length === 0) {
+            return false
+          } else {
+            const taskType = this.taskTypeMap.get(this.task.task_type_id)
+            return !(
+              taskType.department_id &&
+              this.user.departments.includes(taskType.department_id)
+            )
+          }
+        }
+      }
+      return true
     },
 
     extension() {
@@ -1253,25 +1271,6 @@ export default {
       this.$refs['add-comment'].setAnnotationSnapshots(files)
       this.$refs['add-comment'].hideAnnotationLoading()
       return files
-    },
-
-    isPreviewPlayerReadOnly() {
-      if (this.task) {
-        if (this.isCurrentUserManager || this.isCurrentUserClient) {
-          return false
-        } else if (this.isCurrentUserSupervisor) {
-          if (this.user.departments.length === 0) {
-            return false
-          } else {
-            const taskType = this.taskTypeMap.get(this.task.task_type_id)
-            return !(
-              taskType.department_id &&
-              this.user.departments.includes(taskType.department_id)
-            )
-          }
-        }
-      }
-      return true
     }
   },
 
