@@ -152,7 +152,7 @@ export default {
         })
 
         this.video.addEventListener('error', err => {
-          console.error('An error occured while loading a video', err)
+          console.error('An error occurred while loading a video', err)
           this.$refs.movie.style.height = this.defaultHeight + 'px'
           this.isLoading = false
         })

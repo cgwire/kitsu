@@ -360,7 +360,7 @@ export const annotationMixin = {
     },
 
     /*
-     * Hook run after annotation updates occured.
+     * Hook run after annotation updates occurred.
      */
     postAnnotationUpdate(currentTime, obj) {
       // Aimed at being supercharged
