@@ -359,7 +359,7 @@ const actions = {
         return Promise.resolve(edits)
       })
       .catch(err => {
-        console.error('an error occured while loading edits', err)
+        console.error('an error occurred while loading edits', err)
         commit(LOAD_EDITS_ERROR)
         return Promise.resolve([])
       })

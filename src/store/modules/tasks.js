@@ -656,7 +656,7 @@ const actions = {
       .catch(err => {
         console.error(err)
         alert(
-          'An error occured while saving your annotation, please wait 3s for another try.'
+          'An error occurred while saving your annotation, please wait 3s for another try.'
         )
       })
   },

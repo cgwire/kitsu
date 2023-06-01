@@ -389,7 +389,7 @@ const actions = {
         return Promise.resolve(assets)
       })
       .catch(err => {
-        console.error('an error occured while loading assets', err)
+        console.error('an error occurred while loading assets', err)
         commit(LOAD_ASSETS_ERROR)
         return Promise.resolve([])
       })
