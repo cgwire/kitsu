@@ -1653,19 +1653,23 @@ export default {
     },
 
     configureWaveForm() {
-      this.wavesurfer = WaveSurfer.create({
-        container: '#waveform',
-        waveColor: '#00B242', // green
-        progressColor: '#008732', // dark-green,
-        height: 60,
-        responsive: true,
-        fillParent: true,
-        minPxPerSec: 1,
-        backend: 'MediaElement'
-      })
-      this.wavesurfer.on('seek', position => {
-        this.setCurrentTimeRaw(this.maxDurationRaw * position)
-      })
+      try {
+        this.wavesurfer = WaveSurfer.create({
+          container: '#waveform',
+          waveColor: '#00B242', // green
+          progressColor: '#008732', // dark-green,
+          height: 60,
+          responsive: true,
+          fillParent: true,
+          minPxPerSec: 1,
+          backend: 'MediaElement'
+        })
+        this.wavesurfer.on('seek', position => {
+          this.setCurrentTimeRaw(this.maxDurationRaw * position)
+        })
+      } catch(err) {
+        console.error(err)
+      }
     },
 
     loadWaveForm() {
