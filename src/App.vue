@@ -1892,6 +1892,11 @@ th.validation-cell {
   }
 }
 
+.input.date-input {
+  border-radius: 10px;
+}
+
+
 .date-input::placeholder {
   border-radius: 10px;
   color: $light-grey;
