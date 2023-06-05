@@ -459,6 +459,21 @@ describe('lib/filtering', () => {
       expect(filters[0].values).toEqual(['blue', 'red'])
       expect(filters[0].excluding).toEqual(false)
     })
+
+    it('readyfor=[animation] in query case', () => {
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        query: 'readyfor=[animation]'
+      })
+      expect(filters).toHaveLength(1)
+      expect(filters[0].type).toEqual('readyfor')
+      expect(filters[0].value).toEqual('task-type-1')
+    })
   })
 
   describe('applyFilters', () => {
@@ -820,6 +835,39 @@ describe('lib/filtering', () => {
         taskMap
       )
       expect(results).toHaveLength(2)
+    })
+
+    it('readyfor=[Animation]', () => {
+      const assetEntries = [
+        {
+          name: 'Bunny',
+          id: 'asset-1',
+          data: { },
+          validations: new Map([['task-type-1', 'task-1']]),
+          tasks: ['task-1'],
+          ready_for: 'task-type-1'
+        },
+        {
+          name: 'Lama',
+          id: 'asset-1',
+          data: { },
+          validations: new Map([['task-type-1', 'task-1']]),
+          tasks: ['task-1'],
+          ready_for: 'task-type-2'
+        }
+      ]
+      const filters = [
+        {
+          type: 'readyfor',
+          value: 'task-type-1'
+        }
+      ]
+      const results = applyFilters(
+        assetEntries,
+        filters,
+        taskMap
+      )
+      expect(results).toHaveLength(1)
     })
   })
 })
