@@ -618,6 +618,7 @@ export default {
       role: 'Role'
     },
     role: {
+      all: 'All',
       admin: 'Studio Manager',
       client: 'Client',
       manager: 'Production Manager',

@@ -101,6 +101,7 @@
           :tasks="displayedDoneTasks"
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
+          :selection-grid="doneSelectionGrid"
           :done="true"
           v-if="isTabActive('done')"
         />
@@ -124,8 +125,11 @@
       </div>
     </div>
 
-    <div class="column side-column" v-if="nbSelectedTasks === 1">
-      <task-info :task="selectedTasks.values().next().value" />
+    <div class="column side-column" v-if="nbSelectedTasks >= 1">
+      <task-info
+        :task="selectedTasks.values().next().value"
+        with-actions
+      />
     </div>
   </div>
 </template>
@@ -209,6 +213,7 @@ export default {
     ...mapGetters([
       'displayedDoneTasks',
       'displayedTodos',
+      'doneSelectionGrid',
       'isTodosLoading',
       'isTodosLoadingError',
       'nbSelectedTasks',
@@ -308,6 +313,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'clearSelectedTasks',
       'loadTodos',
       'loadOpenProductions',
       'removeTodoSearch',
@@ -346,6 +352,7 @@ export default {
       } else {
         this.activeTab = 'todos'
       }
+      this.clearSelectedTasks()
     },
 
     onSearchChange(text) {

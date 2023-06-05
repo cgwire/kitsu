@@ -105,6 +105,7 @@ const initialState = {
   displayedTodos: [],
   displayedDoneTasks: [],
   todosSearchText: '',
+  doneSelectionGrid: {},
   todoSelectionGrid: {},
   todoSearchQueries: [],
   userFilters: {},
@@ -138,6 +139,7 @@ const getters = {
 
   displayedTodos: state => state.displayedTodos,
   displayedDoneTasks: state => state.displayedDoneTasks,
+  doneSelectionGrid: state => state.doneSelectionGrid,
   todosSearchText: state => state.todosSearchText,
   todoSelectionGrid: state => state.todoSelectionGrid,
   todoSearchQueries: state => state.todoSearchQueries,
@@ -578,6 +580,7 @@ const mutations = {
       const taskStatus = helpers.getTaskStatus(task.task_status_id)
       task.taskStatus = taskStatus
     })
+    state.doneSelectionGrid = buildSelectionGrid(tasks.length, 1)
     cache.doneIndex = buildTaskIndex(tasks)
     cache.doneTasks = tasks
     state.displayedDoneTasks = tasks
@@ -644,19 +647,38 @@ const mutations = {
   },
 
   [ADD_SELECTED_TASK](state, validationInfo) {
-    if (state.todoSelectionGrid && state.todoSelectionGrid[validationInfo.x]) {
+    if (
+      validationInfo.done &&
+      state.doneSelectionGrid &&
+      state.doneSelectionGrid[validationInfo.x]
+    ) {
+      state.doneSelectionGrid[validationInfo.x][validationInfo.y] = true
+    } else if (
+      state.todoSelectionGrid &&
+      state.todoSelectionGrid[validationInfo.x]
+    ) {
       state.todoSelectionGrid[validationInfo.x][validationInfo.y] = true
     }
   },
 
   [REMOVE_SELECTED_TASK](state, validationInfo) {
-    if (state.todoSelectionGrid && state.todoSelectionGrid[validationInfo.x]) {
+    if (
+      validationInfo.done &&
+      state.doneSelectionGrid &&
+      state.doneSelectionGrid[validationInfo.x]
+    ) {
+      state.doneSelectionGrid[validationInfo.x][validationInfo.y] = false
+    } else if (
+      state.todoSelectionGrid &&
+      state.todoSelectionGrid[validationInfo.x]
+    ) {
       state.todoSelectionGrid[validationInfo.x][validationInfo.y] = false
     }
   },
 
   [CLEAR_SELECTED_TASKS](state) {
     state.todoSelectionGrid = clearSelectionGrid(state.todoSelectionGrid)
+    state.doneSelectionGrid = clearSelectionGrid(state.doneSelectionGrid)
   },
 
   [SET_TODO_LIST_SCROLL_POSITION](state, scrollPosition) {
