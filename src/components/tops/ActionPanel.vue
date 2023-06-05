@@ -41,7 +41,8 @@
                 isSupervisorInDepartment ||
                 isInDepartment) &&
               !isEntitySelection &&
-              isTaskSelection
+              isTaskSelection &&
+              !isCurrentUserArtist
             "
           >
             <user-icon />
@@ -70,7 +71,7 @@
               active: selectedBar === 'thumbnails'
             }"
             :title="$t('menu.set_thumbnails')"
-            v-if="isTaskSelection"
+            v-if="isTaskSelection && !this.isCurrentUserArtist"
             @click="selectBar('thumbnails')"
           >
             <image-icon />
@@ -840,6 +841,16 @@ export default {
         this.selectedShots.size > 0 ||
         this.selectedEdits.size > 0
       )
+    },
+
+    isAssigned() {
+      if (!this.isCurrentUserArtist) return
+      if (this.nbSelectedTasks === 0) return
+      const selectedTasks = Array.from(this.selectedTasks.values())
+      let isAssigned = selectedTasks.some(task => {
+        return task.assignees.includes(this.user.id)
+      })
+      return isAssigned
     },
 
     nbSelectedAssets() {
