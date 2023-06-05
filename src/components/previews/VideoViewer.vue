@@ -34,6 +34,7 @@
 </template>
 
 <script>
+import panzoom from 'panzoom'
 import { mapGetters } from 'vuex'
 
 import { formatFrame, formatTime, floorToFrame, ceilToFrame } from '@/lib/video'
@@ -183,12 +184,23 @@ export default {
         window.addEventListener('resize', this.onWindowResize)
       }
     }, 0)
+
+    var element = document.querySelector('.video-player')
+    if (!this.panzoom) {
+      this.panzoom = panzoom(element, {
+        bounds: true,
+        boundsPadding: 0.2,
+        maxZoom: 5,
+        minZoom: 1
+      })
+    }
   },
 
   beforeDestroy() {
     this.pause()
     window.removeEventListener('keydown', this.onKeyDown)
     window.removeEventListener('resize', this.onWindowResize)
+    if (this.panzoom) this.panzoom.dispose()
   },
 
   computed: {
@@ -451,25 +463,37 @@ export default {
           this.mountVideo()
         }, 400)
       }
+    },
+
+    resetPanZoom() {
+      this.panzoom.moveTo(0, 0)
+      this.panzoom.zoomAbs(0, 0, 1)
     }
   },
 
   watch: {
     preview() {
+      this.resetPanZoom()
       this.maxDuration = '00:00.000'
       this.pause()
     },
 
     light() {
+      this.resetPanZoom()
       this.mountVideo()
     },
 
     isComparing() {
+      this.resetPanZoom()
       this.mountVideo()
     },
 
     isMuted() {
       this.video.muted = this.isMuted
+    },
+
+    fullScreen() {
+      this.resetPanZoom()
     }
   }
 }
@@ -513,6 +537,7 @@ export default {
   width: 100%;
   text-align: center;
   background: #36393f;
+  overflow: hidden;
 }
 
 video {

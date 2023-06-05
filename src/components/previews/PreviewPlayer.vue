@@ -1680,7 +1680,11 @@ export default {
     },
 
     isAnnotationsDisplayed() {
-      this.previewViewer.resetZoom()
+      if (this.isAnnotationsDisplayed) {
+        this.$nextTick(() => {
+          this.previewViewer.resetZoom()
+        })
+      }
       if (!this.isAnnotationsDisplayed) {
         this.isDrawing = false
       }
@@ -1901,5 +1905,9 @@ export default {
 #resize-annotation-canvas,
 #annotation-snapshot {
   display: none;
+}
+
+.preview-viewer {
+  overflow: hidden;
 }
 </style>

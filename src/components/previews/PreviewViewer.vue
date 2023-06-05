@@ -412,7 +412,12 @@ export default {
     },
 
     resetZoom() {
-      this.pictureViewer.resetPanZoom()
+      if (this.pictureViewer) {
+        this.pictureViewer.resetPanZoom()
+      }
+      if (this.videoViewer) {
+        this.videoViewer.resetPanZoom()
+      }
     }
   },
 
