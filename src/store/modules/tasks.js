@@ -871,7 +871,7 @@ const mutations = {
         state.taskComments[task.id].length > 0 &&
         !locks[task.id]
       ) {
-        const comment = state.taskComments[task.id][0]
+        const comment = state.taskComments[task.id].find(c => !c.pinned)
         Object.assign(comment, {
           task_status_id: task.task_status_id,
           task_status: state.taskStatusMap.get(task.task_status_id)

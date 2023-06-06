@@ -44,10 +44,10 @@
             v-model="form.phone"
           />
 
-          <div class="departments">
+          <div class="departments field">
             <label class="label">{{ $t('people.fields.departments') }}</label>
             <div
-              class="department-element mb1"
+              class="department-element mb1 mt05"
               :key="departmentId"
               @click="removeDepartment(departmentId)"
               v-for="departmentId in form.departments"
@@ -66,7 +66,7 @@
                 v-if="selectableDepartments.length > 0"
               />
               <button
-                class="button is-success flexrow-item mb2"
+                class="button is-success flexrow-item"
                 :class="{
                   'is-disabled': selectedDepartment === null
                 }"

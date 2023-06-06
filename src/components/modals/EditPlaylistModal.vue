@@ -122,7 +122,11 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentEpisode', 'productionTaskTypes']),
+    ...mapGetters([
+      'currentEpisode',
+      'currentProduction',
+      'productionTaskTypes'
+    ]),
 
     isEditing() {
       return this.playlistToEdit && this.playlistToEdit.id
@@ -130,10 +134,19 @@ export default {
 
     forEntityOptions() {
       if (
-        this.currentEpisode &&
-        ['main', 'all'].includes(this.currentEpisode.id)
+        (
+          this.currentEpisode &&
+          ['main', 'all'].includes(this.currentEpisode.id)
+        ) ||
+        this.currentProduction.production_type === 'assets'
       ) {
         return [{ label: this.$t('assets.title'), value: 'asset' }]
+      } else if (
+        this.currentProduction.production_type === 'shots'
+      ){
+        return [
+          { label: this.$t('shots.title'), value: 'shot' }
+        ]
       } else {
         return [
           { label: this.$t('assets.title'), value: 'asset' },
@@ -143,9 +156,13 @@ export default {
     },
 
     defaultForEntity() {
+      const isOnlyAssets = this.currentProduction.production_type === 'assets'
+      const isOnlyShots = this.currentProduction.production_type === 'shots'
       const isAssetEpisode =
         this.currentEpisode && ['all', 'main'].includes(this.currentEpisode.id)
-      return isAssetEpisode ? 'asset' : 'shot'
+      return (isAssetEpisode || isOnlyAssets) && !isOnlyShots
+        ? 'asset'
+        : 'shot'
     },
 
     taskTypeList() {

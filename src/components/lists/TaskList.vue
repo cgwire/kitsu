@@ -201,13 +201,14 @@
             @click="selectTask($event, index, task)"
             v-for="(task, index) in taskGroup.tasks"
           >
-            <entity-thumbnail
+            <entity-preview
               class="flexrow-item"
               :entity="getEntity(task.entity.id)"
-              :width="200"
               :height="133"
+              :width="200"
               :empty-width="200"
               :empty-height="133"
+              :show-movie="false"
               no-preview
               v-if="task.entity"
             />
@@ -241,13 +242,14 @@
         @click="selectTask($event, index, task)"
         v-for="(task, index) in displayedTasks"
       >
-        <entity-thumbnail
+        <entity-preview
           class="flexrow-item"
           :entity="getEntity(task.entity.id)"
-          :width="200"
           :height="133"
+          :width="200"
           :empty-width="200"
           :empty-height="133"
+          :show-movie="false"
           no-preview
           v-if="task.entity"
         />
@@ -300,6 +302,7 @@ import { formatListMixin } from '@/components/mixins/format'
 import { domMixin } from '@/components/mixins/dom'
 
 import DateField from '@/components/widgets/DateField'
+import EntityPreview from '@/components/widgets/EntityPreview'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PeopleAvatarWithMenu from '@/components/widgets/PeopleAvatarWithMenu'
 import TableInfo from '@/components/widgets/TableInfo'
@@ -312,6 +315,7 @@ export default {
 
   components: {
     DateField,
+    EntityPreview,
     EntityThumbnail,
     PeopleAvatarWithMenu,
     TableInfo,

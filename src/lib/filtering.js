@@ -12,6 +12,8 @@ const EQUAL_REGEX =
 const EQUAL_ASSET_TYPE_REGEX = /type=\[([^[]*)\]|type=([^ ]*)|type=([^ ]*)/g
 const EQUAL_PEOPLE_DEPARTMENT_REGEX =
   /department=\[([^[]*)\]|department=([^ ]*)|department=([^ ]*)/g
+const EQUAL_READY_FOR_REGEX =
+  /readyfor=\[([^[]*)\]|readyfor=([^ ]*)|readyfor=([^ ]*)/g
 const EQUAL_ASSETS_READY_REGEX =
   /assetsready=\[([^[]*)\]|assetsready=([^ ]*)|assetsready=([^ ]*)/g
 const MULTIPLE_REGEX = /\[([^[]*)\]/g
@@ -140,6 +142,10 @@ const applyFiltersFunctions = {
     return filter.excluding ? !hasDepartment : hasDepartment
   },
 
+  readyfor(entry, filter, taskMap) {
+    return entry.ready_for === filter.value
+  },
+
   assetsready(entry, filter, taskMap) {
     let isOk = false
     if (entry.tasks) {
@@ -241,6 +247,7 @@ export const getFilters = ({
     ...getAssignedToFilters(persons, query),
     ...getDepartmentFilters(departments, query),
     ...(getThumbnailFilters(query) || []),
+    ...getReadyForFilter(taskTypes, query),
     ...getAssetsReadyFilter(taskTypes, query),
     ...getExcludingFilters(entryIndex, query)
   ]
@@ -540,6 +547,28 @@ export const getThumbnailFilters = queryText => {
   return results
 }
 
+export const getReadyForFilter = (taskTypes, queryText) => {
+  if (!queryText) return []
+
+  const results = []
+  const rgxMatches = queryText.match(EQUAL_READY_FOR_REGEX)
+
+  if (rgxMatches) {
+    const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
+    rgxMatches.forEach(rgxMatch => {
+      const pattern = rgxMatch.split('=')
+      let taskTypeName = cleanParenthesis(pattern[1])
+      const taskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
+      if (taskTypes && taskTypes.length > 0) {
+        results.push({
+          value: taskTypes[0].id,
+          type: 'readyfor'
+        })
+      }
+    })
+  }
+  return results
+}
 export const getAssetsReadyFilter = (taskTypes, queryText) => {
   if (!queryText) return []
 

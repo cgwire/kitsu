@@ -207,7 +207,6 @@
               :task-test="entry"
               :is-border="false"
               :is-assignees="false"
-              :selectable="!done"
               :clickable="false"
               :selected="
                 selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
@@ -446,6 +445,7 @@ export default {
     },
 
     onTaskSelected(validationInfo) {
+      validationInfo.done = this.done
       if (validationInfo.isShiftKey) {
         if (this.lastSelection) {
           let startX = this.lastSelection.x

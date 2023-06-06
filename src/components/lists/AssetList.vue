@@ -99,6 +99,7 @@
               v-if="
                 isCurrentUserManager &&
                 isShowInfos &&
+                !isAssetsOnly &&
                 metadataDisplayHeaders.readyFor
               "
             >
@@ -327,6 +328,7 @@
               v-if="
                 isCurrentUserManager &&
                 isShowInfos &&
+                !isAssetsOnly &&
                 metadataDisplayHeaders.readyFor
               "
             >
@@ -676,6 +678,10 @@ export default {
         },
         ...sortTaskTypes(this.productionShotTaskTypes, this.currentProduction)
       ]
+    },
+
+    isAssetsOnly () {
+      return this.currentProduction.production_type === 'assets'
     }
   },
 

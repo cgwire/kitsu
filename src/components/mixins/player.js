@@ -804,7 +804,7 @@ export const playerMixin = {
     },
 
     setPlayerSpeed(rate) {
-      this.rawPlayer.setSpeed(rate)
+      if (this.rawPlayer) this.rawPlayer.setSpeed(rate)
       if (this.rawPlayerComparison) this.rawPlayerComparison.setSpeed(rate)
     },
 

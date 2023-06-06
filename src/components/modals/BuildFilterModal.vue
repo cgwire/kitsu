@@ -194,6 +194,21 @@
           v-model="hasThumbnail.value"
         />
 
+        <h3
+          class="subtitle flexrow-item mt2"
+          v-if="isAssets && !isAssetsOnly"
+        >
+          {{ $t('assets.fields.ready_for') }}
+        </h3>
+        <div class="flexrow" v-if="isAssets && !isAssetsOnly">
+          <combobox-task-type
+            class="flexrow-item"
+            :task-type-list="readyForTaskTypeList"
+            open-top
+            v-model="readyFor.taskTypeId"
+          />
+        </div>
+
         <h3 class="subtitle flexrow-item mt2" v-if="isShots">
           {{ $t('entities.build_filter.is_assets_ready') }}
         </h3>
@@ -308,6 +323,9 @@ export default {
           { label: 'without_thumbnail', value: '-withthumbnail' }
         ]
       },
+      readyFor: {
+        taskTypeId: '',
+      },
       isAssetsReady: {
         value: 'nofilter',
         taskTypeId: '',
@@ -351,6 +369,7 @@ export default {
       'productionAssetTypes',
       'productionTaskStatuses',
       'productionTaskTypes',
+      'productionShotTaskTypes',
       'sequenceSearchText',
       'sequenceMetadataDescriptors',
       'sequenceValidationColumns',
@@ -366,6 +385,10 @@ export default {
     },
     isShots() {
       return this.entityType === 'shot'
+    },
+
+    isAssetsOnly () {
+      return this.currentProduction.production_type === 'assets'
     },
 
     assetTypeOptions() {
@@ -386,6 +409,16 @@ export default {
       return this[`${this.entityType}ValidationColumns`].map(taskTypeId =>
         this.taskTypeMap.get(taskTypeId)
       )
+    },
+
+    readyForTaskTypeList() {
+      return [
+        {
+          id: '',
+          color: '#999',
+          name: this.$t('news.all')
+        }
+      ].concat(this.productionShotTaskTypes)
     },
 
     team() {
@@ -422,6 +455,7 @@ export default {
       query = this.applyAssignationChoice(query)
       query = this.applyThumbnailChoice(query)
       query = this.applyUnionChoice(query)
+      query = this.applyReadyForChoice(query)
       query = this.applyAssetsReadyChoice(query)
       return query.trim()
     },
@@ -495,6 +529,15 @@ export default {
     applyUnionChoice(query) {
       if (this.union === 'or') {
         query = ` +(${query.trim()})`
+      }
+      return query
+    },
+
+    applyReadyForChoice(query) {
+      if (this.readyFor.taskTypeId !== '') {
+        const taskType = this.taskTypeMap.get(this.readyFor.taskTypeId)
+        console.log(this.readyFor.taskTypeId, taskType)
+        query = ` readyfor=[${taskType.name.toLowerCase()}]`
       }
       return query
     },
@@ -637,6 +680,8 @@ export default {
             this.setFiltersFromAssignedToQuery(filter)
           } else if (filter.type === 'thumbnail') {
             this.setFiltersFromThumbnailQuery(filter)
+          } else if (filter.type === 'readyfor') {
+            this.setFiltersFromReadyForQuery(filter)
           } else if (filter.type === 'assetsready') {
             this.setFiltersFromAssetsReadyQuery(filter)
           }
@@ -721,6 +766,10 @@ export default {
       }
     },
 
+    setFiltersFromReadyForQuery(filter) {
+      this.readyFor.taskTypeId = filter.value
+    },
+
     setFiltersFromAssetsReadyQuery(filter) {
       this.isAssetsReady.taskTypeId = filter.value
       this.isAssetsReady.value = filter.excluding
@@ -758,6 +807,7 @@ export default {
         this.reset()
         this.assignation.taskTypeId =
           this.taskTypeList.length > 0 ? this.taskTypeList[0].id : ''
+        this.readyFor.taskTypeId = ''
         this.setFiltersFromCurrentQuery()
       }
     }

@@ -17,9 +17,12 @@
             :title="$t('menu.change_status')"
             @click="selectBar('change-status')"
             v-if="
-              (isCurrentUserManager ||
+              (
+                isCurrentUserManager ||
                 isSupervisorInDepartment ||
-                isInDepartment) &&
+                isInDepartment ||
+                isCurrentViewTodos
+              ) &&
               !isEntitySelection &&
               isTaskSelection &&
               nbSelectedTasks > 1
@@ -41,7 +44,8 @@
                 isSupervisorInDepartment ||
                 isInDepartment) &&
               !isEntitySelection &&
-              isTaskSelection
+              isTaskSelection &&
+              !isCurrentUserArtist
             "
           >
             <user-icon />
@@ -70,7 +74,7 @@
               active: selectedBar === 'thumbnails'
             }"
             :title="$t('menu.set_thumbnails')"
-            v-if="isTaskSelection"
+            v-if="isTaskSelection && !this.isCurrentUserArtist"
             @click="selectBar('thumbnails')"
           >
             <image-icon />
@@ -82,7 +86,7 @@
               active: selectedBar === 'subscribe'
             }"
             :title="$t('menu.subscribe')"
-            v-if="isTaskSelection"
+            v-if="isTaskSelection && !isCurrentViewTodos"
             @click="selectBar('subscribe')"
           >
             <eye-icon />
@@ -102,6 +106,7 @@
             v-if="
               (isCurrentViewAsset ||
                 isCurrentViewShot ||
+                isCurrentViewTodos ||
                 isCurrentViewTaskType) &&
               !isEntitySelection &&
               isTaskSelection &&
@@ -842,6 +847,16 @@ export default {
       )
     },
 
+    isAssigned() {
+      if (!this.isCurrentUserArtist) return
+      if (this.nbSelectedTasks === 0) return
+      const selectedTasks = Array.from(this.selectedTasks.values())
+      let isAssigned = selectedTasks.some(task => {
+        return task.assignees.includes(this.user.id)
+      })
+      return isAssigned
+    },
+
     nbSelectedAssets() {
       return this.selectedAssets.size
     },
@@ -888,7 +903,7 @@ export default {
 
     isCurrentViewTodos() {
       return (
-        this.$route.path.indexOf('todos') > 0 ||
+        this.$route.path.indexOf('my-tasks') > 0 ||
         this.$route.path.indexOf('people/') > 0
       )
     },
@@ -946,11 +961,15 @@ export default {
     isInDepartment() {
       return this.selectedTaskIds.every(taskId => {
         const task = this.taskMap.get(taskId)
-        const taskType = this.taskTypeMap.get(task.task_type_id)
-        return (
-          taskType.department_id &&
-          this.user.departments.includes(taskType.department_id)
-        )
+        if (task) {
+          const taskType = this.taskTypeMap.get(task.task_type_id)
+          return (
+            taskType.department_id &&
+            this.user.departments.includes(taskType.department_id)
+          )
+        } else {
+          return true // We are in the artist todolist.
+        }
       })
     },
 
@@ -1387,6 +1406,10 @@ export default {
           this.selectedBar === this.lastSelectedBar
         }
       }
+    },
+
+    selectedTasks () {
+      this.selectedTaskIds = Array.from(this.selectedTasks.keys())
     },
 
     currentProduction() {

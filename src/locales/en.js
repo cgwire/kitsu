@@ -618,6 +618,7 @@ export default {
       role: 'Role'
     },
     role: {
+      all: 'All',
       admin: 'Studio Manager',
       client: 'Client',
       manager: 'Production Manager',
@@ -863,6 +864,7 @@ export default {
       archviz: 'Archviz',
       commercial: 'Commercial',
       catalog: 'Catalog',
+      immersive: 'Immersive Experience',
       metaverse: 'Metaverse',
       motion_design: 'Motion Design',
       nft: 'NFT collection',

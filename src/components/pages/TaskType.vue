@@ -758,6 +758,10 @@ export default {
               this.resetScheduleItems()
               this.resetScheduleScroll()
             }
+
+            this.dueDateFilter = this.$route.query.duedate || 'all'
+            this.estimationFilter = this.$route.query.late || 'all'
+            this.onSearchChange(this.$route.query.search)
           })
           .catch(err => {
             console.error(err)
@@ -915,7 +919,24 @@ export default {
         })
     },
 
+    updateUrlParams() {
+      const search = this.searchField.getValue()
+      const duedate = this.dueDateFilter
+      const late = this.estimationFilter
+      this.$router.push({
+        query: { search, duedate, late }
+      })
+    },
+
     // Tasks
+
+    applyTaskFilters() {
+      this.onSearchChange(this.searchField.getValue())
+      this.sortTasks()
+      this.$refs['task-list'].resetSelection()
+      this.updateUrlParams()
+      this.clearSelectedTasks()
+    },
 
     onTaskSelected(task) {
       this.currentTask = task
@@ -1365,17 +1386,11 @@ export default {
     },
 
     dueDateFilter() {
-      this.onSearchChange(this.searchField.getValue())
-      this.sortTasks()
-      this.$refs['task-list'].resetSelection()
-      this.clearSelectedTasks()
+      this.applyTaskFilters()
     },
 
     estimationFilter() {
-      this.onSearchChange(this.searchField.getValue())
-      this.sortTasks()
-      this.$refs['task-list'].resetSelection()
-      this.clearSelectedTasks()
+      this.applyTaskFilters()
     },
 
     currentSort() {

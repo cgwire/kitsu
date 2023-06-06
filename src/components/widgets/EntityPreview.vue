@@ -1,5 +1,5 @@
 <template>
-  <div class="preview-wrapper preview-video" v-if="isMovie">
+  <div class="preview-wrapper preview-video" v-if="isMovie && showMovie">
     <video-viewer
       ref="video-viewer"
       :is-repeating="true"
@@ -103,6 +103,10 @@ export default {
     },
     isRoundedTopBorder: {
       default: false,
+      type: Boolean
+    },
+    showMovie: {
+      default: true,
       type: Boolean
     }
   },

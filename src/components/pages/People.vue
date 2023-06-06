@@ -1,7 +1,10 @@
 <template>
   <div class="people page fixed-page">
     <div class="flexrow page-header">
-      <page-title class="flexrow-item filler" :text="$t('people.title')" />
+      <page-title
+        class="flexrow-item filler"
+        :text="$t('people.title')"
+      />
 
       <button-simple
         class="flexrow-item"
@@ -37,11 +40,18 @@
         @save="saveSearchQuery"
         placeholder="ex: John Doe"
       />
-      <button-simple
-        class="flexrow-item filter-button"
-        :title="$t('entities.build_filter.title')"
-        icon="funnel"
-        @click="() => (modals.isBuildFilterDisplayed = true)"
+      <combobox-department
+        class="combobox-department flexrow-item"
+        label="Department"
+        v-model="selectedDepartment"
+      />
+      <combobox-styled
+        class="flexrow-item"
+        :label="$t('people.fields.role')"
+        :options="roleOptions"
+        locale-key-prefix="people.role."
+        no-margin
+        v-model="role"
       />
     </div>
 
@@ -55,7 +65,7 @@
     </div>
 
     <people-list
-      :entries="displayedPeople"
+      :entries="currentPeople"
       :is-loading="isPeopleLoading"
       :is-error="isPeopleLoadingError"
       @edit-clicked="onEditClicked"
@@ -138,7 +148,10 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
+import BuildPeopleFilterModal from '@/components/modals/BuildPeopleFilterModal'
 import ChangePasswordModal from '@/components/modals/ChangePasswordModal'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import EditPersonModal from '@/components/modals/EditPersonModal'
 import HardDeleteModal from '@/components/modals/HardDeleteModal'
 import ImportModal from '@/components/modals/ImportModal'
@@ -148,7 +161,6 @@ import PageTitle from '@/components/widgets/PageTitle'
 import SearchField from '@/components/widgets/SearchField'
 import SearchQueryList from '@/components/widgets/SearchQueryList'
 import { searchMixin } from '@/components/mixins/search'
-import BuildPeopleFilterModal from '@/components/modals/BuildPeopleFilterModal'
 
 export default {
   name: 'people',
@@ -158,6 +170,8 @@ export default {
     ButtonHrefLink,
     ButtonSimple,
     ChangePasswordModal,
+    ComboboxStyled,
+    ComboboxDepartment,
     EditPersonModal,
     HardDeleteModal,
     ImportModal,
@@ -173,6 +187,16 @@ export default {
       csvColumns: ['First Name', 'Last Name'],
       optionalCsvColumns: ['Phone', 'Role'],
       dataMatchers: ['Email'],
+      role: 'all',
+      roleOptions: [
+        { label: 'all', value: 'all' },
+        { label: 'admin', value: 'admin' },
+        { label: 'client', value: 'client' },
+        { label: 'manager', value: 'manager' },
+        { label: 'supervisor', value: 'supervisor' },
+        { label: 'user', value: 'user' },
+        { label: 'vendor', value: 'vendor' }
+      ],
       errors: {
         del: false,
         edit: false,
@@ -196,6 +220,7 @@ export default {
       personToDelete: {},
       personToEdit: { role: 'user' },
       personToChangePassword: {},
+      selectedDepartment: '',
       success: {
         invite: false
       }
@@ -203,9 +228,12 @@ export default {
   },
 
   mounted() {
+    this.role = this.$route.query.role || 'all'
+    this.selectedDepartment = this.$route.query.department || ''
     this.loadPeople(() => {
       this.setSearchFromUrl()
       this.onSearchChange()
+      console.log(this.selectedDepartment, this.role)
     }) // Needed to show department informations
   },
 
@@ -238,6 +266,18 @@ export default {
       'peopleSearchQueries',
       'personCsvFormData'
     ]),
+
+    currentPeople () {
+      let people = this.role === 'all'
+        ? this.displayedPeople
+        : this.displayedPeople.filter(p => p.role === this.role)
+      if (this.selectedDepartment) {
+        people = people.filter(
+          p => p.departments.includes(this.selectedDepartment)
+        )
+      }
+      return people
+    },
 
     deleteText() {
       const person = this.personToDelete
@@ -412,7 +452,7 @@ export default {
       const searchQuery = this.searchField.getValue()
       if (searchQuery.length !== 1) {
         this.setPeopleSearch(searchQuery)
-        this.setSearchInUrl()
+        this.updateRoute()
       }
     },
 
@@ -468,6 +508,24 @@ export default {
       this.modals.isBuildFilterDisplayed = false
       this.searchField.setValue(query)
       this.onSearchChange()
+    },
+
+    updateRoute() {
+      const search = this.searchField.getValue()
+      const department = this.selectedDepartment
+      const role = this.role
+      this.$router.push({ query: { search, department, role }})
+    }
+  },
+
+  watch: {
+    selectedDepartment() {
+      this.updateRoute()
+    },
+
+
+    role() {
+      this.updateRoute()
     }
   },
 
@@ -487,7 +545,7 @@ export default {
   margin-top: 1.5rem;
 }
 .search-options {
-  align-items: flex-start;
+  align-items: flex-end;
 }
 .filter-button {
   margin-top: 0.3em;
