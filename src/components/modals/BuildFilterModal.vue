@@ -194,10 +194,13 @@
           v-model="hasThumbnail.value"
         />
 
-        <h3 class="subtitle flexrow-item mt2" v-if="isAssets">
+        <h3
+          class="subtitle flexrow-item mt2"
+          v-if="isAssets && !isAssetsOnly"
+        >
           {{ $t('assets.fields.ready_for') }}
         </h3>
-        <div class="flexrow" v-if="isAssets">
+        <div class="flexrow" v-if="isAssets && !isAssetsOnly">
           <combobox-task-type
             class="flexrow-item"
             :task-type-list="readyForTaskTypeList"
@@ -382,6 +385,10 @@ export default {
     },
     isShots() {
       return this.entityType === 'shot'
+    },
+
+    isAssetsOnly () {
+      return this.currentProduction.production_type === 'assets'
     },
 
     assetTypeOptions() {

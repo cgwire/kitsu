@@ -864,6 +864,7 @@ export default {
       archviz: 'Archviz',
       commercial: 'Commercial',
       catalog: 'Catalog',
+      immersive: 'Immersive Experience',
       metaverse: 'Metaverse',
       motion_design: 'Motion Design',
       nft: 'NFT collection',

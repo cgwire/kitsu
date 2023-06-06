@@ -31,13 +31,7 @@
 
       <div
         v-else
-        v-for="(taskListObject, index) in [
-          assetTaskTypes,
-          shotTaskTypes,
-          editTaskTypes,
-          sequenceTaskTypes,
-          episodeTaskTypes
-        ]"
+        v-for="(taskListObject, index) in taskTypeGroups"
         :key="index"
       >
         <h2 class="section-title">
@@ -162,6 +156,30 @@ export default {
           t => !this.currentProduction.task_types.includes(t.id)
         )
       )
+    },
+
+    isAssetsOnly() {
+      return this.currentProduction.production_type === 'assets'
+    },
+
+    isShotsOnly() {
+      return this.currentProduction.production_type === 'shots'
+    },
+
+    taskTypeGroups() {
+      let groups = []
+      if (!this.isShotsOnly) {
+        groups.push(this.assetTaskTypes)
+      }
+      if (!this.isAssetsOnly) {
+        groups = groups.concat([
+          this.shotTaskTypes,
+          this.editTaskTypes,
+          this.sequenceTaskTypes,
+          this.episodeTaskTypes
+        ])
+      }
+      return groups
     }
   },
 

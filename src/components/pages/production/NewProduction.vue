@@ -155,6 +155,7 @@
           "
           :step="3"
           :is-completed="hasValidAssetTaskTypes"
+          v-if="productionToCreate.settings.type !== 'shots'"
         >
           <draggable
             v-model="productionToCreate.assetTaskTypes"
@@ -187,7 +188,11 @@
             $t('productions.creation.select_shot_task_type_description')
           "
           :step="4"
-          :is-completed="hasValidShotTaskTypes"
+          :is-completed="
+            hasValidShotTaskTypes ||
+            productionToCreate.settings.type === 'assets'
+          "
+          v-if="productionToCreate.settings.type !== 'assets'"
         >
           <draggable
             v-model="productionToCreate.shotTaskTypes"
@@ -248,6 +253,7 @@
           :subtitle="$t('productions.creation.add_asset_types_description')"
           :step="6"
           :is-completed="hasValidAssetTypes"
+          v-if="productionToCreate.settings.type !== 'shots'"
         >
           <div class="flexrow asset-types mb1">
             <span
@@ -311,12 +317,6 @@
             >
               {{ $t('productions.creation.import_shots_button') }}
             </button>
-            <!--            <button-->
-            <!--              class="button ml1"-->
-            <!--              @click="toggleModal('isAddShotsDisplayed')"-->
-            <!--            >-->
-            <!--              + {{ $t('productions.creation.add_shots_button') }}-->
-            <!--            </button>-->
           </div>
         </timeline-item>
         <section class="has-text-centered mt2">
@@ -687,10 +687,19 @@ export default {
       return (
         this.hasValidName &&
         this.hasValidSettings &&
-        this.hasValidAssetTaskTypes &&
-        this.hasValidShotTaskTypes &&
+        (
+          this.hasValidAssetTaskTypes ||
+          this.productionToCreate.settings.type === 'shots'
+        ) &&
+        (
+          this.hasValidShotTaskTypes ||
+          this.productionToCreate.settings.type === 'assets'
+        ) &&
         this.hasValidTaskStatuses &&
-        this.hasValidAssetTypes
+        (
+          this.hasValidAssetTypes ||
+          this.productionToCreate.settings.type === 'shots'
+        )
       )
     },
 
@@ -904,7 +913,9 @@ export default {
         await this.createTaskTypesAndStatuses()
         await this.createAssetTypes()
         await this.createAssets()
-        await this.createShots()
+        if (this.productionToCreate.production_type !== 'assets') {
+          await this.createShots()
+        }
         await this.loadContext()
         await this.$router.push(this.createProductionRoute(createdProduction))
       } catch (error) {

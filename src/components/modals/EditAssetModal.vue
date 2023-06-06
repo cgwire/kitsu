@@ -154,6 +154,11 @@ export default {
     }
   },
 
+  mounted() {
+    this.resetForm()
+    this.assetSuccessText = ''
+  },
+
   computed: {
     ...mapGetters([
       'assets',
@@ -182,11 +187,6 @@ export default {
       })
       return options
     }
-  },
-
-  mounted() {
-    this.resetForm()
-    this.assetSuccessText = ''
   },
 
   methods: {

@@ -457,15 +457,23 @@ export default {
     ]),
 
     castingTypeOptions() {
-      const options = [
-        {
-          label: this.$t('assets.title'),
-          value: 'asset'
-        }
-      ]
+      const isAssetsOnly = this.currentProduction.production_type === 'assets'
+      const isShotsOnly = this.currentProduction.production_type === 'shots'
+      const options = []
+      if (!isShotsOnly) {
+        options.push(
+          {
+            label: this.$t('assets.title'),
+            value: 'asset'
+          }
+        )
+      }
       if (
-        !this.isTVShow ||
-        (this.currentEpisode && this.currentEpisode.id !== 'main')
+        !isAssetsOnly &&
+        (
+          !this.isTVShow ||
+          (this.currentEpisode && this.currentEpisode.id !== 'main')
+        )
       ) {
         options.unshift({
           label: this.$t('shots.title'),
@@ -696,7 +704,10 @@ export default {
             this.setCastingSequence(this.sequenceId || 'all')
           }
           this.resetSelection()
-          if (this.currentEpisode && this.currentEpisode.id === 'main') {
+          if (
+            (this.currentEpisode && this.currentEpisode.id === 'main') ||
+            this.currentProduction.production_type === 'assets'
+          ) {
             this.castingType = 'asset'
           }
         })

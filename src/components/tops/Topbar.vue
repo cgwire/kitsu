@@ -399,12 +399,17 @@ export default {
     },
 
     sectionOptions() {
-      let options = [
-        { label: this.$t('assets.title'), value: 'assets' },
-        { label: this.$t('shots.title'), value: 'shots' }
-      ]
+      let options = []
+      const isNotOnlyAssets = this.currentProduction.production_type !== 'assets'
+      const isNotOnlyShots = this.currentProduction.production_type !== 'shots'
 
-      if (!this.isCurrentUserClient) {
+      if (isNotOnlyShots) {
+        options.push({ label: this.$t('assets.title'), value: 'assets' })
+      }
+      if (isNotOnlyAssets) {
+        options.push({ label: this.$t('shots.title'), value: 'shots' })
+      }
+      if (!this.isCurrentUserClient && isNotOnlyAssets) {
         options.push({ label: this.$t('sequences.title'), value: 'sequences' })
       }
 
@@ -438,10 +443,12 @@ export default {
       options = options.concat([{ label: 'separator', value: 'separator' }])
 
       // Add sequences
-      options.push({
-        label: this.$t('sequences.stats_title'),
-        value: 'sequence-stats'
-      })
+      if (isNotOnlyAssets) {
+        options.push({
+          label: this.$t('sequences.stats_title'),
+          value: 'sequence-stats'
+        })
+      }
 
       // Add episodes for tv show only
       if (this.isTVShow) {
@@ -451,21 +458,25 @@ export default {
       }
 
       // Add asset types stats
-      options = options.concat([
-        {
-          label: this.$t('asset_types.production_title'),
-          value: 'assetTypes'
-        }
-      ])
+      if (isNotOnlyShots) {
+        options = options.concat([
+          {
+            label: this.$t('asset_types.production_title'),
+            value: 'assetTypes'
+          }
+        ])
+      }
 
       // Show these sections to studio members only.
       if (!this.isCurrentUserClient) {
         options = options.concat([
           { label: 'separator', value: 'separator' },
           { label: this.$t('schedule.title'), value: 'schedule' },
-          { label: this.$t('quota.title'), value: 'quota' },
-          { label: this.$t('people.team'), value: 'team' }
         ])
+        if (isNotOnlyAssets) {
+          options.push({ label: this.$t('quota.title'), value: 'quota' })
+        }
+        options.push({ label: this.$t('people.team'), value: 'team' })
 
         if (this.isCurrentUserAdmin || this.isCurrentUserManager) {
           options = options.concat([
