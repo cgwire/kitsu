@@ -1,5 +1,5 @@
 <template>
-  <div class="field">
+  <div>
     <label class="label" v-if="label.length > 0">
       {{ label }}
     </label>
@@ -213,14 +213,14 @@ export default {
 
 .selected-department-line {
   background: $white;
-  padding: 0.4em;
+  padding: 0.2em;
   flex: 1;
 }
 
 .department-line {
   background: $white;
   cursor: pointer;
-  padding: 0.4em;
+  padding: 0.2em;
   margin: 0;
 
   &:hover {
