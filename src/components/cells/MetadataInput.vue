@@ -13,7 +13,7 @@
     "
     :value="getMetadataFieldValue(descriptor, entity)"
     v-if="
-      !descriptor.data_type || (descriptor.data_type === 'string' && isEditable)
+      (!descriptor.data_type || descriptor.data_type === 'string') && isEditable
     "
   />
   <!-- number input -->
@@ -138,7 +138,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['isCurrentUserManager']),
+    ...mapGetters(['isCurrentUserManager', 'isCurrentUserSupervisor', 'user']),
     isEditable() {
       return (
         this.isCurrentUserManager ||
