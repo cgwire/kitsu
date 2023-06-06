@@ -99,7 +99,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['isCurrentUserManager']),
+    ...mapGetters(['isCurrentUserManager', 'isCurrentUserSupervisor', 'user']),
 
     descriptorChecklistValues() {
       return this.getDescriptorChecklistValues(this.descriptor)

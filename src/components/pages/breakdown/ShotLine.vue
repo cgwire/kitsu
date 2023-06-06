@@ -330,10 +330,12 @@ export default {
   computed: {
     ...mapGetters([
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'isFrameIn',
       'isFrameOut',
       'isFrames',
-      'isShowInfosBreakdown'
+      'isShowInfosBreakdown',
+      'user'
     ]),
 
     chunks() {
