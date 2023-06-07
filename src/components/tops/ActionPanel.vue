@@ -1,11 +1,6 @@
 <template>
   <div>
-    <div
-      :class="{
-        'action-topbar': true,
-        unselectable: true
-      }"
-    >
+    <div class="action-topbar unselectable">
       <div class="menu">
         <div class="flexrow">
           <div
@@ -17,12 +12,10 @@
             :title="$t('menu.change_status')"
             @click="selectBar('change-status')"
             v-if="
-              (
-                isCurrentUserManager ||
+              (isCurrentUserManager ||
                 isSupervisorInDepartment ||
                 isInDepartment ||
-                isCurrentViewTodos
-              ) &&
+                isCurrentViewTodos) &&
               !isEntitySelection &&
               isTaskSelection &&
               nbSelectedTasks > 1
@@ -429,7 +422,13 @@
           </button>
           <div v-else>
             <button
-              class="button confirm-button is-wide"
+              :class="{
+                button: true,
+                'confirm-button': true,
+                'is-wide': true,
+                'is-loading':
+                  loading.setThumbnails || isSetFrameThumbnailLoading
+              }"
               @click="confirmSetThumbnailsFromTasks"
             >
               {{ $t('tasks.set_preview') }}
@@ -695,6 +694,13 @@ import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal'
 export default {
   name: 'action-panel',
 
+  props: {
+    isSetFrameThumbnailLoading: {
+      type: Boolean,
+      default: false
+    }
+  },
+
   components: {
     AlertCircleIcon,
     CheckSquareIcon,
@@ -851,7 +857,7 @@ export default {
       if (!this.isCurrentUserArtist) return
       if (this.nbSelectedTasks === 0) return
       const selectedTasks = Array.from(this.selectedTasks.values())
-      let isAssigned = selectedTasks.some(task => {
+      const isAssigned = selectedTasks.some(task => {
         return task.assignees.includes(this.user.id)
       })
       return isAssigned
@@ -1408,7 +1414,7 @@ export default {
       }
     },
 
-    selectedTasks () {
+    selectedTasks() {
       this.selectedTaskIds = Array.from(this.selectedTasks.keys())
     },
 

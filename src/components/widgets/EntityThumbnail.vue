@@ -177,7 +177,6 @@ export default {
     },
 
     'entity.preview_file_id'() {
-      console.log('changed')
       this.timer = '?t=' + new Date().valueOf()
     }
   }
