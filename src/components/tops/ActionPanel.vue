@@ -4,9 +4,8 @@
       <div class="menu">
         <div class="flexrow">
           <div
+            class="menu-item status-item"
             :class="{
-              'menu-item': true,
-              'status-item': true,
               active: selectedBar === 'change-status'
             }"
             :title="$t('menu.change_status')"
@@ -25,8 +24,8 @@
           </div>
 
           <div
+            class="menu-item"
             :class="{
-              'menu-item': true,
               active: selectedBar === 'assignation'
             }"
             :title="$t('menu.assign_tasks')"
@@ -45,8 +44,8 @@
           </div>
 
           <div
+            class="menu-item"
             :class="{
-              'menu-item': true,
               active: selectedBar === 'priorities'
             }"
             :title="$t('menu.change_priority')"
@@ -62,8 +61,8 @@
           </div>
 
           <div
+            class="menu-item"
             :class="{
-              'menu-item': true,
               active: selectedBar === 'thumbnails'
             }"
             :title="$t('menu.set_thumbnails')"
@@ -74,8 +73,8 @@
           </div>
 
           <div
+            class="menu-item"
             :class="{
-              'menu-item': true,
               active: selectedBar === 'subscribe'
             }"
             :title="$t('menu.subscribe')"
@@ -91,8 +90,8 @@
           ></div>
 
           <div
+            class="menu-item"
             :class="{
-              'menu-item': true,
               active: selectedBar === 'playlists'
             }"
             :title="$t('menu.generate_playlist')"
@@ -123,8 +122,8 @@
           ></div>
 
           <div
+            class="menu-item"
             :class="{
-              'menu-item': true,
               active: selectedBar === 'create-tasks'
             }"
             :title="$t('menu.create_tasks')"
@@ -141,8 +140,8 @@
           </div>
 
           <div
+            class="menu-item"
             :class="{
-              'menu-item': true,
               active: selectedBar === 'delete-tasks'
             }"
             :title="$t('menu.delete_tasks')"
@@ -169,8 +168,8 @@
           ></div>
 
           <div
+            class="menu-item"
             :class="{
-              'menu-item': true,
               active: selectedBar === 'custom-actions'
             }"
             :title="$t('menu.run_custom_action')"
@@ -188,8 +187,8 @@
           </div>
 
           <div
+            class="menu-item"
             :class="{
-              'menu-item': true,
               active: selectedBar === 'delete-assets'
             }"
             :title="$t('menu.delete_assets')"
@@ -202,8 +201,8 @@
           </div>
 
           <div
+            class="menu-item"
             :class="{
-              'menu-item': true,
               active: selectedBar === 'delete-shots'
             }"
             :title="$t('menu.delete_shots')"
@@ -214,8 +213,8 @@
           </div>
 
           <div
+            class="menu-item"
             :class="{
-              'menu-item': true,
               active: selectedBar === 'delete-edits'
             }"
             :title="$t('menu.delete_edits')"
@@ -264,10 +263,8 @@
 
           <div class="flexrow-item is-wide">
             <button
+              class="button confirm-button is-wide"
               :class="{
-                button: true,
-                'confirm-button': true,
-                'is-wide': true,
                 'is-loading': loading.changeStatus
               }"
               @click="confirmTaskStatusChange"
@@ -371,10 +368,8 @@
           </div>
           <div class="flexrow-item is-wide">
             <button
+              class="button confirm-button is-wide"
               :class="{
-                button: true,
-                'confirm-button': true,
-                'is-wide': true,
                 'is-loading': loading.changePriority
               }"
               @click="confirmPriorityChange"
@@ -390,10 +385,8 @@
 
         <div class="flexrow is-wide" v-if="selectedBar === 'create-tasks'">
           <button
+            class="button confirm-button is-wide"
             :class="{
-              button: true,
-              'confirm-button': true,
-              'is-wide': true,
               'is-loading': loading.taskCreation
             }"
             @click="confirmTaskCreation"
@@ -405,10 +398,8 @@
 
         <div class="flexrow-item is-wide" v-if="selectedBar === 'thumbnails'">
           <button
+            class="button confirm-button is-wide"
             :class="{
-              button: true,
-              'confirm-button': true,
-              'is-wide': true,
               'is-loading': loading.setThumbnails
             }"
             @click="confirmSetThumbnailsFromTasks"
@@ -422,10 +413,8 @@
           </button>
           <div v-else>
             <button
+              class="button confirm-button is-wide"
               :class="{
-                button: true,
-                'confirm-button': true,
-                'is-wide': true,
                 'is-loading':
                   loading.setThumbnails || isSetFrameThumbnailLoading
               }"
@@ -457,11 +446,7 @@
 
           <div class="flexrow-item is-wide" v-if="!loading.tasksSubscription">
             <button
-              :class="{
-                button: true,
-                'confirm-button': true,
-                'is-wide': true
-              }"
+              class="button confirm-button is-wide"
               @click="confirmTasksSubscription"
             >
               {{
@@ -495,10 +480,6 @@
             <button
               class="button is-danger confirm-button is-wide"
               :class="{
-                button: true,
-                'is-danger': true,
-                'confirm-button': true,
-                'is-wide': true,
                 'is-loading': loading.taskDeletion
               }"
               @click="confirmTaskDeletion"
