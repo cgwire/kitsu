@@ -9,6 +9,7 @@
     <div class="side task-info">
       <action-panel
         v-if="withActions"
+        :is-set-frame-thumbnail-loading="loading.setFrameThumbnail"
         @export-task="onExportClick"
         @set-frame-thumbnail="onSetCurrentFrameAsThumbnail"
       />
@@ -389,7 +390,8 @@ export default {
         editComment: false,
         deleteComment: false,
         confirmDeleteTaskPreview: false,
-        task: false
+        task: false,
+        setFrameThumbnail: false
       },
       modals: {
         addPreview: false,
@@ -961,6 +963,8 @@ export default {
         entityId: this.task.entity.id,
         previewId: this.currentPreview.previews[0].id,
         frame
+      }).finally(() => {
+        this.loading.setFrameThumbnail = false
       })
     },
 
@@ -1215,6 +1219,7 @@ export default {
 
     onSetCurrentFrameAsThumbnail(isUseCurrentFrame) {
       if (this.$refs['preview-player']) {
+        this.loading.setFrameThumbnail = true
         let frame = 0
         if (isUseCurrentFrame && this.$refs['preview-player'].isMovie) {
           frame = parseInt(this.$refs['preview-player'].currentFrame)
