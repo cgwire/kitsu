@@ -37,12 +37,7 @@ const client = {
   },
 
   pget(path) {
-    return new Promise((resolve, reject) => {
-      client.get(path, (err, model) => {
-        if (err) reject(err)
-        else resolve(model)
-      })
-    })
+    return superagent.get(path).then(res => res.body)
   },
 
   ppost(path, data) {
