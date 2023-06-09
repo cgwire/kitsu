@@ -12,9 +12,9 @@
           <entity-thumbnail
             class="entity-thumbnail"
             :entity="currentShot"
-            :empty-width="120"
-            :empty-height="50"
-            :width="120"
+            :empty-width="100"
+            :empty-height="60"
+            :width="100"
             v-if="currentShot"
           />
         </span>
