@@ -339,6 +339,15 @@ const actions = {
       })
   },
 
+  async fetchPersonTasks({ commit, state, rootGetters }, personId) {
+    const tasks = await peopleApi.getPersonTasks(personId)
+    tasks.forEach(task => {
+      populateTask(task)
+      task.taskStatus = helpers.getTaskStatus(task.task_status_id)
+    })
+    return tasks
+  },
+
   loadPersonTasks(
     { commit, state, rootGetters },
     { personId, forced, date, callback }

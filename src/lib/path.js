@@ -177,6 +177,15 @@ export const getPersonPath = personId => {
     }
   }
 }
+export const getPersonTabPath = (personId, tab) => {
+  return {
+    name: 'person-tab',
+    params: {
+      person_id: personId,
+      tab
+    }
+  }
+}
 
 export const pluralizeEntityType = (type = '') => {
   type = type.toLowerCase()
