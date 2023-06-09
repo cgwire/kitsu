@@ -852,6 +852,10 @@ export default {
       return values.length ? Math.max(...values) : 0
     },
 
+    refreshItemPositions(rootElement) {
+      setItemPositions(rootElement.children, 'line')
+    },
+
     isVisible(timeElement) {
       const isStartDateOk = timeElement.startDate.isSameOrAfter(this.startDate)
       const isEndDateOk = timeElement.endDate.isSameOrBefore(
@@ -1365,7 +1369,11 @@ export default {
     // Children
 
     expandRootElement(rootElement) {
-      this.$emit('root-element-expanded', rootElement)
+      this.$emit(
+        'root-element-expanded',
+        rootElement,
+        this.multiline ? this.refreshItemPositions : undefined
+      )
     },
 
     expandChildElement(element) {},
@@ -1466,14 +1474,6 @@ export default {
   socket: {},
 
   watch: {
-    hierarchy: {
-      deep: true,
-      handler() {
-        this.hierarchy.forEach(rootElement => {
-          setItemPositions(rootElement.children, 'line')
-        })
-      }
-    },
     startDate() {
       this.resetScheduleSize()
       this.scrollToToday()

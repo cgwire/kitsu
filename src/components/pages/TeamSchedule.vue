@@ -196,7 +196,7 @@ export default {
       }
     },
 
-    async expandPersonElement(element) {
+    async expandPersonElement(element, refreshScheduleCallBack) {
       element.expanded = !element.expanded
 
       if (!element.expanded) {
@@ -227,6 +227,10 @@ export default {
         if (endDate.isAfter(this.endDate)) {
           this.endDate = endDate
           this.selectedEndDate = this.endDate.toDate()
+        }
+
+        if (refreshScheduleCallBack) {
+          refreshScheduleCallBack(element)
         }
       } catch (err) {
         console.error(err)
