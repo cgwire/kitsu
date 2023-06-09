@@ -1075,6 +1075,11 @@ export default {
     }
   },
 
+  team_schedule: {
+    title: 'Schedule',
+    title_main: 'Team Schedule'
+  },
+
   quota: {
     average: 'Average',
     count: 'Count',

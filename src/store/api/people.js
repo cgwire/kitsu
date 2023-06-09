@@ -218,6 +218,9 @@ export default {
   },
 
   getPersonTasks(personId, callback) {
+    if (!callback) {
+      return client.pget(`/api/data/persons/${personId}/tasks`)
+    }
     client.get(`/api/data/persons/${personId}/tasks`, callback)
   },
 

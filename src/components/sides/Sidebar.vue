@@ -72,6 +72,20 @@
               </router-link>
             </p>
 
+            <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
+              <router-link
+                style="position: relative"
+                :to="{ name: 'team-schedule' }"
+              >
+                <calendar-icon size="0.9x" />
+                <users-icon
+                  size="0.5x"
+                  style="position: absolute; left: 4px; bottom: 6px"
+                />
+                {{ $t('team_schedule.title_main') }}
+              </router-link>
+            </p>
+
             <p @click="toggleSidebar()">
               <router-link
                 :to="{ name: 'newsfeed' }"

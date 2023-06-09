@@ -59,6 +59,7 @@ const StatusAutomations = () =>
   import('@/components/pages/StatusAutomations.vue')
 const Task = () => import('@/components/pages/Task.vue')
 const Team = () => import('@/components/pages/Team.vue')
+import TeamSchedule from '@/components/pages/TeamSchedule'
 const Timesheets = () => import('@/components/pages/Timesheets.vue')
 
 const TaskStatus = () => import('@/components/pages/TaskStatus.vue')
@@ -306,6 +307,12 @@ export const routes = [
         path: '/main-schedule',
         component: MainSchedule,
         name: 'main-schedule'
+      },
+
+      {
+        path: '/team-schedule',
+        component: TeamSchedule,
+        name: 'team-schedule'
       },
 
       {

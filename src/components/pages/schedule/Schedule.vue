@@ -113,7 +113,7 @@
             </div>
             <div
               class="children"
-              :style="childrenStyle(rootElement)"
+              :style="childrenStyle(rootElement, multiline, true)"
               v-if="rootElement.expanded"
             >
               <div class="flexrow" v-if="rootElement.loading">
@@ -126,6 +126,7 @@
                 class="child-name"
                 :key="'entity-' + childElement.id"
                 v-for="(childElement, j) in rootElement.children"
+                v-if="!multiline"
               >
                 <div
                   class="entity-line entity-name child-line flexrow"
@@ -340,6 +341,7 @@
                     ')'
                   "
                   :style="timebarStyle(rootElement, true)"
+                  v-if="!multiline"
                 >
                   <div class="timebar" v-show="isVisible(rootElement)">
                     <div
@@ -367,7 +369,7 @@
 
               <div
                 class="children"
-                :style="childrenStyle(rootElement)"
+                :style="childrenStyle(rootElement, multiline)"
                 v-if="rootElement.expanded"
               >
                 <div class="flexrow" v-if="rootElement.loading">
@@ -379,12 +381,19 @@
 
                 <div
                   class="entity-line child-line"
+                  :class="{ multiline }"
                   :key="'entity-line-' + childElement.id"
+                  :style="
+                    multiline
+                      ? timelineMultilineStyle(childElement, rootElement)
+                      : {}
+                  "
                   v-for="childElement in rootElement.children"
                 >
                   <div
                     class="timebar"
                     :title="
+                      (multiline ? `${childElement.project_name} - ` : '') +
                       childElement.name +
                       ' (' +
                       childElement.startDate.format('DD-MM') +
@@ -392,7 +401,7 @@
                       childElement.endDate.format('DD-MM') +
                       ')'
                     "
-                    :style="timebarChildStyle(childElement, rootElement, true)"
+                    :style="timebarChildStyle(childElement, rootElement)"
                     v-show="isVisible(childElement)"
                   >
                     <div
@@ -407,7 +416,17 @@
                       class="filler"
                       @mousedown="moveTimebar(childElement, $event)"
                       @touchstart="moveTimebar(childElement, $event)"
-                    ></div>
+                    >
+                      <div
+                        class="ellipsis"
+                        :style="{ width: `${getTimebarWidth(childElement)}px` }"
+                        v-if="multiline"
+                      >
+                        <b>{{ childElement.project_name }}</b>
+                        <br />
+                        {{ childElement.name }}
+                      </div>
+                    </div>
                     <div
                       :class="{
                         'timebar-right-hand':
@@ -557,6 +576,10 @@ export default {
     zoomLevel: {
       type: Number,
       default: 2
+    },
+    multiline: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -823,6 +846,11 @@ export default {
 
   methods: {
     ...mapActions(['deleteMilestone', 'saveMilestone']),
+
+    getNbLines(element) {
+      const values = element.children.map(item => item.line || 0)
+      return values.length ? Math.max(...values) : 0
+    },
 
     isVisible(timeElement) {
       const isStartDateOk = timeElement.startDate.isSameOrAfter(this.startDate)
@@ -1286,6 +1314,12 @@ export default {
       return style
     },
 
+    timelineMultilineStyle(timeElement) {
+      return {
+        top: `${timeElement.line * 40 + 5}px`
+      }
+    },
+
     timebarChildStyle(timeElement, rootElement) {
       return {
         left: this.getTimebarLeft(timeElement) + 'px',
@@ -1344,10 +1378,19 @@ export default {
       }
     },
 
-    childrenStyle(rootElement) {
-      return {
-        'border-bottom': '1px solid ' + rootElement.color
+    childrenStyle(rootElement, isMultiline = false, setBackground = false) {
+      const style = {
+        'border-bottom': `1px solid ${rootElement.color}`
       }
+      if (isMultiline) {
+        const nbLines = this.getNbLines(rootElement)
+        style.height = `${40 * (nbLines + 1) + 10}px`
+
+        if (setBackground) {
+          style.background = colors.fadeColor(rootElement.color, 0.7)
+        }
+      }
+      return style
     },
 
     // Milestones
@@ -1423,6 +1466,14 @@ export default {
   socket: {},
 
   watch: {
+    hierarchy: {
+      deep: true,
+      handler() {
+        this.hierarchy.forEach(rootElement => {
+          setItemPositions(rootElement.children, 'line')
+        })
+      }
+    },
     startDate() {
       this.resetScheduleSize()
       this.scrollToToday()
@@ -1449,6 +1500,42 @@ export default {
             updatedAt: formatFullDate(moment())
           })
         }
+      }
+    }
+  }
+}
+
+const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
+  const matrix = []
+  const minDate = moment.min(items.map(item => item.startDate))
+  const maxDate = moment.max(items.map(item => item.endDate))
+  const nbColumns = maxDate.diff(minDate, unitOfTime) + 1
+
+  items.forEach(item => {
+    const start = item.startDate.diff(minDate, unitOfTime)
+    const end = item.endDate.diff(minDate, unitOfTime)
+    const line = getFreeLinePosition(item.id, start, end, matrix)
+    item[attributeName] = line
+  })
+
+  function getFreeLinePosition(value, start, end, matrix, line = 0) {
+    for (let index = start; index <= end; index++) {
+      // if empty line
+      if (!matrix[line]) {
+        matrix.push(Array(nbColumns).fill(0))
+        index = end
+      }
+      // if collision on line
+      else if (matrix[line][index]) {
+        // go to next line
+        return getFreeLinePosition(value, start, end, matrix, line + 1)
+      }
+
+      // if no collision for the whole item
+      if (index === end) {
+        // save item in matrix
+        matrix[line].fill(value, start, end + 1)
+        return line
       }
     }
   }
@@ -1554,7 +1641,7 @@ export default {
     .milestone-tooltip {
       background: $dark-grey-lighter;
       border: 1px solid $dark-grey;
-      box-shadow: 0 2px 2px 0px $dark-grey-strong;
+      box-shadow: 0 2px 2px 0 $dark-grey-strong;
     }
     .milestone-tooltip:after {
       border-color: transparent;
@@ -1625,7 +1712,7 @@ export default {
 
   &.child-line {
     height: 40px;
-    margin-bottom: 0px;
+    margin-bottom: 0;
     font-size: 1em;
 
     &:nth-child(even) {
@@ -1642,13 +1729,13 @@ export default {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding-top: 0px;
+  padding-top: 0;
 
   .timeline-header {
     white-space: nowrap;
     position: relative;
     margin-left: 1px;
-    padding-bottom: 0px;
+    padding-bottom: 0;
     overflow: hidden;
     padding-top: 24px;
 
@@ -1663,7 +1750,7 @@ export default {
         color: $grey;
         padding-bottom: 0em;
         margin-bottom: 0em;
-        padding-left: 0px;
+        padding-left: 0;
         text-align: center;
         padding-top: 0em;
         text-transform: uppercase;
@@ -1705,7 +1792,7 @@ export default {
       .timeline-position {
         visibility: hidden;
         position: absolute;
-        left: 0px;
+        left: 0;
         top: 0;
         bottom: 0;
         background: rgba(200, 255, 200, 0.3);
@@ -1719,7 +1806,7 @@ export default {
 
       .milestone-vertical-line {
         position: absolute;
-        left: 0px;
+        left: 0;
         top: 0;
         bottom: 0;
         background: rgba(200, 255, 200, 0.3);
@@ -1732,9 +1819,22 @@ export default {
         width: 100%;
         position: relative;
 
+        &.multiline {
+          position: absolute;
+          width: auto;
+
+          .timebar {
+            height: calc(100% - 2px);
+            padding: 2px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+        }
+
         .timebar {
           position: absolute;
-          top: 0px;
+          top: 0;
           height: 14px;
           border-radius: 0.2em;
           display: flex;
@@ -1758,6 +1858,11 @@ export default {
         }
         &.child-line {
           padding: 0;
+
+          &.multiline .timebar {
+            top: 0;
+            font-size: 0.8em;
+          }
 
           .timebar {
             background: rgba(0, 0, 50, 0.2);
@@ -1791,7 +1896,7 @@ export default {
     .timeline-header {
       .day {
         font-size: 0.8em;
-        padding-left: 0px;
+        padding-left: 0;
 
         .day-name {
           padding-left: 2px;
@@ -1850,7 +1955,7 @@ export default {
   }
 
   .avatar {
-    box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.3);
     margin: 0;
     padding: 0;
   }
@@ -1866,6 +1971,7 @@ export default {
 }
 
 .children {
+  position: relative;
   margin-bottom: 1em;
 }
 
@@ -1885,9 +1991,9 @@ export default {
   border-top-left-radius: 10px;
   height: 85px;
   margin-right: 0.5em;
-  margin-bottom: 0px;
+  margin-bottom: 0;
   min-width: 300px;
-  padding-bottom: 0px;
+  padding-bottom: 0;
   padding-right: 5px;
   padding-top: 55px;
   z-index: 2;
@@ -1909,14 +2015,14 @@ export default {
 
 .milestone {
   cursor: pointer;
-  margin-bottom: 0px;
+  margin-bottom: 0;
   position: relative;
   text-align: center;
   min-height: 35px;
 
   .flexrow-item {
     margin-left: 5px;
-    margin-right: 0px;
+    margin-right: 0;
   }
 
   .bull {
@@ -1927,7 +2033,7 @@ export default {
   .milestone-tooltip {
     border: 1px solid #eee;
     border-radius: 5px;
-    box-shadow: 0 2px 2px 0px #eee;
+    box-shadow: 0 2px 2px 0 #eee;
     font-size: 0.8em;
     font-weight: bold;
     opacity: 0;

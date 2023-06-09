@@ -47,6 +47,7 @@ import Sequences from '@/components/pages/Sequences'
 import Shot from '@/components/pages/Shot'
 import Task from '@/components/pages/Task'
 import Team from '@/components/pages/Team'
+import TeamSchedule from '@/components/pages/TeamSchedule'
 import Timesheets from '@/components/pages/Timesheets'
 import TaskStatus from '@/components/pages/TaskStatus'
 import TaskTypes from '@/components/pages/TaskTypes'
@@ -65,7 +66,7 @@ const ADMIN_PAGES = [
   'productions',
   'task-status',
   'task-types',
-  'main-schedule',
+  'team-schedule',
   'settings'
 ]
 
@@ -286,6 +287,12 @@ export const routes = [
         path: '/main-schedule',
         component: MainSchedule,
         name: 'main-schedule'
+      },
+
+      {
+        path: '/team-schedule',
+        component: TeamSchedule,
+        name: 'team-schedule'
       },
 
       {
