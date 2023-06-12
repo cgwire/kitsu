@@ -38,6 +38,11 @@
           :options="zoomOptions"
           v-model="zoomLevel"
         />
+        <combobox-department
+          class="combobox-department flexrow-item"
+          label="Department"
+          v-model="selectedDepartment"
+        />
       </div>
 
       <schedule
@@ -65,10 +70,15 @@ import { en, fr } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
 import { getPersonTabPath } from '@/lib/path'
 
-import { getFirstStartDate, getLastEndDate, parseDate } from '@/lib/time'
+import {
+  getFirstStartDate,
+  getLastEndDate,
+  parseSimpleDate
+} from '@/lib/time'
 import colors from '@/lib/colors'
 
 import { formatListMixin } from '@/components/mixins/format'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
 import Schedule from '@/components/pages/schedule/Schedule'
 import { firstBy } from 'thenby'
@@ -77,6 +87,7 @@ export default {
   name: 'team-schedule',
   mixins: [formatListMixin],
   components: {
+    ComboboxDepartment,
     ComboboxNumber,
     Datepicker,
     Schedule
@@ -84,11 +95,13 @@ export default {
 
   data() {
     return {
+      endDate: moment().add(3, 'months'),
+      personDates: {},
       scheduleItems: [],
-      startDate: moment(),
-      endDate: moment().add(1, 'months'),
-      selectedStartDate: null,
+      selectedDepartment: '',
       selectedEndDate: null,
+      selectedStartDate: null,
+      startDate: moment(),
       zoomLevel: 1,
       zoomOptions: [
         // { label: 'Week', value: 0 },
@@ -110,7 +123,11 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['displayedPeople', 'taskTypeMap', 'user']),
+    ...mapGetters([
+      'displayedPeople',
+      'taskTypeMap',
+      'user'
+    ]),
 
     locale() {
       if (this.user.locale === 'fr_FR') {
@@ -122,14 +139,41 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchPersonTasks', 'loadPeople']),
+    ...mapActions([
+      'fetchPersonTasks',
+      'getPersonsTasksDates',
+      'loadPeople'
+    ]),
 
     async reset() {
       this.loading.schedule = true
+      const personDatesList = await this.getPersonsTasksDates()
+      const scheduleStartDate = moment()
+      this.personDates = {}
+      personDatesList.forEach(p => {
+        this.personDates[p.person_id] = {
+          endDate: parseSimpleDate(p.max_date),
+          startDate: parseSimpleDate(p.min_date),
+        }
+      })
       await this.loadPeople()
-      this.scheduleItems = this.convertScheduleItems(this.displayedPeople)
+      const people = this.selectedDepartment
+        ? this.displayedPeople.filter(
+          p => p.departments.includes(this.selectedDepartment)
+        )
+        : this.displayedPeople
+      this.scheduleItems = this.convertScheduleItems(people)
       this.startDate = moment()
-      this.endDate = moment().add(1, 'months')
+      this.endDate = moment().add(3, 'months')
+      Object.values(this.personDates).forEach(dates => {
+        if (dates.startDate.isBefore(this.startDate)) {
+          this.startDate = dates.startDate.clone()
+        }
+        if (dates.endDate.isAfter(this.endDate)) {
+          this.endDate = dates.endDate.clone()
+        }
+      })
+
       this.selectedStartDate = this.startDate.toDate()
       this.selectedEndDate = this.endDate.toDate()
       // this.loading.schedule = false
@@ -137,15 +181,22 @@ export default {
 
     convertScheduleItems(scheduleItems) {
       return scheduleItems.map(item => {
+        let startDate = moment()
+        let endDate = moment()
+        const personDates = this.personDates[item.id]
+        if (personDates && personDates.startDate && personDates.endDate) {
+          startDate = parseSimpleDate(personDates.startDate)
+          endDate = parseSimpleDate(personDates.endDate)
+        }
         return {
           ...item,
           avatar: true,
           color: item.color || colors.fromString(item.name, true),
-          startDate: moment(),
-          endDate: moment(),
+          startDate,
+          endDate,
           expanded: false,
           loading: false,
-          editable: true,
+          editable: false,
           route: getPersonTabPath(item.id, 'schedule'),
           children: []
         }
@@ -157,27 +208,18 @@ export default {
       let endDate
 
       if (
-        !task.start_date &&
-        !task.real_start_date &&
-        !task.due_date &&
-        !task.end_date
+        !task.start_date ||
+        !task.due_date
       )
         return null
 
       if (task.start_date) {
-        startDate = parseDate(task.start_date)
-      } else if (task.real_start_date) {
-        startDate = parseDate(task.real_start_date)
-      }
-
+        startDate = parseSimpleDate(task.start_date)
+      } 
       const estimation = this.formatDuration(task.estimation)
       if (task.due_date) {
-        endDate = parseDate(task.due_date)
-      } else if (task.end_date) {
-        endDate = parseDate(task.end_date)
-      } else if (task.estimation) {
-        endDate = startDate.clone().add(estimation, 'days')
-      }
+        endDate = parseSimpleDate(task.due_date)
+      } 
 
       if (!endDate || endDate.isBefore(startDate)) {
         endDate = startDate.clone().add(1, 'days')
@@ -217,7 +259,7 @@ export default {
           : moment()
         const endDate = element.children.length
           ? getLastEndDate(element.children)
-          : moment().add(1, 'months')
+          : moment().add(3, 'months')
 
         if (startDate.isBefore(this.startDate)) {
           this.startDate = startDate
@@ -241,7 +283,11 @@ export default {
 
   socket: {},
 
-  watch: {},
+  watch: {
+    selectedDepartment () {
+      this.reset()
+    }
+  },
 
   metaInfo() {
     return {

@@ -1,6 +1,15 @@
 <template>
   <div class="entity-search page">
     <form class="search-form" @submit.prevent="onResultSelected()">
+      <div>
+        <combobox-production
+          class="flexrow-item production-field"
+          :label="$t('main.production')"
+          :production-list="productionList"
+          v-model="productionId"
+        />
+      </div>
+
       <div class="search-field">
         <span class="search-icon">
           <search-icon width="20" />
@@ -27,6 +36,7 @@
           @change="search"
           v-model="searchFilter.shots"
         />
+
         <div class="filler"></div>
         <span class="flexrow-item no-margin">
           {{ $t('search.limit') }}
@@ -204,6 +214,7 @@ import { SearchIcon } from 'vue-feather-icons'
 
 import Checkbox from '@/components/widgets/Checkbox'
 import Combobox from '@/components/widgets/Combobox'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction'
 import EntityPreview from '@/components/widgets/EntityPreview'
 // import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import Spinner from '@/components/widgets/Spinner'
@@ -217,6 +228,7 @@ export default {
   components: {
     Checkbox,
     Combobox,
+    ComboboxProduction,
     EntityPreview,
     // PeopleAvatar,
     SearchIcon,
@@ -228,6 +240,7 @@ export default {
       isLoading: false,
       limit: AVAILABLE_LIMITS[0],
       limitOptions: AVAILABLE_LIMITS.map(value => ({ label: value, value })),
+      productionId: '',
       selectedIndex: 0,
       searchQuery: '',
       searchFilter: {
@@ -266,7 +279,10 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['productionMap']),
+    ...mapGetters([
+      'openProductions',
+      'productionMap'
+    ]),
 
     searchField() {
       return this.$refs['search-field']
@@ -291,6 +307,15 @@ export default {
         !this.searchFilter.assets && !this.searchFilter.shots
         // && !this.searchFilter.persons
       )
+    },
+
+    productionList() {
+      return [
+        {
+          id: '',
+          name: this.$t('main.all')
+        }
+      ].concat([...this.openProductions])
     }
   },
 
@@ -306,6 +331,7 @@ export default {
       this.searchData({
         query: this.searchQuery,
         limit: this.limit,
+        productionId: this.productionId,
         index_names
       })
         .then(results => {
@@ -382,6 +408,10 @@ export default {
   },
 
   watch: {
+    productionId() {
+      this.search()
+    },
+
     searchQuery() {
       if (this.searchQuery.length) {
         this.$router.push({ query: { search: this.searchQuery } })
@@ -418,7 +448,7 @@ export default {
 }
 
 .search-field {
-  padding-top: 40px;
+  padding-top: 0px;
   position: relative;
   width: 100%;
 
@@ -435,6 +465,11 @@ export default {
     top: 55px;
     left: 10px;
   }
+}
+
+.production-field {
+  margin-bottom: 1em;
+  margin-top: 1em;
 }
 
 .search-options {

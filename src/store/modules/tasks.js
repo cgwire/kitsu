@@ -820,6 +820,10 @@ const actions = {
       payload.previewId,
       payload.newIndex
     )
+  },
+
+  getPersonsTasksDates({ commit }) {
+    return tasksApi.getPersonsTasksDates()
   }
 }
 

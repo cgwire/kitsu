@@ -225,6 +225,9 @@ export default {
   },
 
   getPersonDoneTasks(personId, callback) {
+    if (!callback) {
+      return client.pget(`/api/data/persons/${personId}/done-tasks`)
+    }
     client.get(`/api/data/persons/${personId}/done-tasks`, callback)
   },
 
