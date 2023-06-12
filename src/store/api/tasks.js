@@ -255,5 +255,9 @@ export default {
   updateRevisionPreviewPosition(previewId, position) {
     const path = `/api/actions/preview-files/${previewId}/update-position`
     return client.pput(path, { position: position + 1 })
+  },
+
+  getPersonsTasksDates() {
+    return client.pget('/api/data/persons/task-dates')
   }
 }

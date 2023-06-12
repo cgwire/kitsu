@@ -233,7 +233,6 @@ export default {
     this.loadPeople(() => {
       this.setSearchFromUrl()
       this.onSearchChange()
-      console.log(this.selectedDepartment, this.role)
     }) // Needed to show department informations
   },
 

@@ -59,7 +59,8 @@
                 <people-avatar
                   :person="rootElement"
                   :is-link="false"
-                  :size="30"
+                  :font-size="14"
+                  :size="28"
                   :no-cache="true"
                   v-else
                 />
@@ -341,7 +342,6 @@
                     ')'
                   "
                   :style="timebarStyle(rootElement, true)"
-                  v-if="!multiline"
                 >
                   <div class="timebar" v-show="isVisible(rootElement)">
                     <div
@@ -646,7 +646,7 @@ export default {
         momentDay.newMonth = nextDay.newMonth
         momentDay.weekend = nextDay.weekend
         momentDay.text = momentDay.format('YYYY-MM-DD')
-        momentDay.monthText = momentDay.format('MMMM')
+        momentDay.monthText = momentDay.format('MMMM YY')
         momentDay.dayNumber = momentDay.format('DD')
         momentDay.dayText = momentDay.format('ddd')[0]
         days.push(momentDay)
@@ -704,7 +704,7 @@ export default {
           momentDay.newMonth =
             weeks.length === 0 ||
             momentDay.month() !== weeks[weeks.length - 1].month()
-          momentDay.monthText = momentDay.format('MMMM')
+          momentDay.monthText = momentDay.format('MMMM YY')
           weeks.push(momentDay)
         }
         dayDate = nextDay
@@ -1292,12 +1292,16 @@ export default {
 
     entityLineStyle(timeElement, root = false, header = false) {
       const style = {}
+      let color = timeElement.color
+      if (root && timeElement.full_name) { // is a person
+        color = '#CCC'
+      }
       if (root) {
-        style['border-left'] = '1px solid ' + timeElement.color
-        style['border-top'] = '1px solid ' + timeElement.color
-        style['border-bottom'] = '1px solid ' + timeElement.color
+        style['border-left'] = '1px solid ' + color
+        style['border-top'] = '1px solid ' + color
+        style['border-bottom'] = '1px solid ' + color
         if (header) {
-          style.background = timeElement.color
+          style.background = color
         }
       }
       if (timeElement.expanded) {
@@ -1387,8 +1391,12 @@ export default {
     },
 
     childrenStyle(rootElement, isMultiline = false, setBackground = false) {
+      let color = rootElement.color
+      if (rootElement.full_name) { // is a person
+        color = '#CCC'
+      }
       const style = {
-        'border-bottom': `1px solid ${rootElement.color}`
+        'border-bottom': `1px solid ${color}`
       }
       if (isMultiline) {
         const nbLines = this.getNbLines(rootElement)
@@ -1694,7 +1702,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 .entity-line {
   font-size: 1.2em;
   height: 40px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   padding: 0.5em;
 
   .flexrow-item {
@@ -1931,8 +1939,8 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
   line-height: 1.1em;
 
   &.root {
-    border-top-left-radius: 1em;
-    border-bottom-left-radius: 1em;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
   }
 
   &.root.expanded {
@@ -1955,7 +1963,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
   }
 
   .avatar {
-    box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.3);
     margin: 0;
     padding: 0;
   }
