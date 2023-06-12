@@ -208,27 +208,18 @@ export default {
       let endDate
 
       if (
-        !task.start_date &&
-        !task.real_start_date &&
-        !task.due_date &&
-        !task.end_date
+        !task.start_date ||
+        !task.due_date
       )
         return null
 
       if (task.start_date) {
         startDate = parseSimpleDate(task.start_date)
-      } else if (task.real_start_date) {
-        startDate = parseSimpleDate(task.real_start_date)
-      }
-
+      } 
       const estimation = this.formatDuration(task.estimation)
       if (task.due_date) {
         endDate = parseSimpleDate(task.due_date)
-      } else if (task.end_date) {
-        endDate = parseSimpleDate(task.end_date)
-      } else if (task.estimation) {
-        endDate = startDate.clone().add(estimation, 'days')
-      }
+      } 
 
       if (!endDate || endDate.isBefore(startDate)) {
         endDate = startDate.clone().add(1, 'days')

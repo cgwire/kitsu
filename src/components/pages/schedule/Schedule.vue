@@ -332,7 +332,10 @@
                 v-show="!hideRoot"
               >
                 <div
-                  class="timebar-wrapper"
+                  :class="{
+                    'timebar-wrapper': true,
+                    thinner: multiline
+                  }"
                   :title="
                     rootElement.name +
                     ' (' +
@@ -2138,6 +2141,11 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
   .timebar {
     width: calc(100% - 0.2em);
+  }
+
+  &.thinner {
+    height: 14px;
+    top: 14px;
   }
 }
 
