@@ -340,9 +340,12 @@ const actions = {
   },
 
   async fetchPersonTasks({ commit, state, rootGetters }, personId) {
-    let tasks = await peopleApi.getPersonTasks(personId)
-    const doneTasks = await peopleApi.getPersonDoneTasks(personId)
-    tasks = tasks.concat(doneTasks)
+    const tasks = (
+      await Promise.all([
+        peopleApi.getPersonTasks(personId),
+        peopleApi.getPersonDoneTasks(personId)
+      ])
+    ).flat()
     tasks.forEach(task => {
       populateTask(task)
       task.taskStatus = helpers.getTaskStatus(task.task_status_id)
