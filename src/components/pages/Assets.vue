@@ -332,9 +332,9 @@ export default {
         importingError: null
       },
       genericColumns: [
-        'metadata_column_name => text value',
-        'task_type_name => task_status_name',
-        'task_type_name comment => comment text'
+        'Metadata column name (text value)',
+        'Task type name (task status name value)',
+        'Task type name + comment (text value)'
       ],
       initialLoading: true,
       loading: {
