@@ -10,11 +10,11 @@
             wrapper-class="datepicker"
             input-class="date-input input"
             :language="locale"
-            :disabled-dates="{ days: [6, 0] }"
             :monday-first="true"
+            :typeable="true"
             format="yyyy-MM-dd"
+            @selected="onUpdateSelectedStartDate"
             v-model="selectedStartDate"
-            disabled
           />
         </div>
         <div class="flexrow-item field">
@@ -25,11 +25,11 @@
             wrapper-class="datepicker"
             input-class="date-input input"
             :language="locale"
-            :disabled-dates="{ days: [6, 0] }"
             :monday-first="true"
+            :typeable="true"
             format="yyyy-MM-dd"
+            @selected="onUpdateSelectedEndDate"
             v-model="selectedEndDate"
-            disabled
           />
         </div>
         <combobox-number
@@ -278,6 +278,14 @@ export default {
         console.error(err)
       }
       element.loading = false
+    },
+
+    onUpdateSelectedStartDate(date) {
+      this.startDate = parseSimpleDate(date)
+    },
+
+    onUpdateSelectedEndDate(date) {
+      this.endDate = parseSimpleDate(date)
     }
   },
 

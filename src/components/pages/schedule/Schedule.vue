@@ -1799,6 +1799,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
     .timeline-content {
       position: relative;
+      overflow: hidden;
 
       .timeline-position {
         visibility: hidden;
