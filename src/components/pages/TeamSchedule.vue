@@ -10,11 +10,11 @@
             wrapper-class="datepicker"
             input-class="date-input input"
             :language="locale"
-            :disabled-dates="{ days: [6, 0] }"
             :monday-first="true"
+            :typeable="true"
             format="yyyy-MM-dd"
+            @selected="onUpdateSelectedStartDate"
             v-model="selectedStartDate"
-            disabled
           />
         </div>
         <div class="flexrow-item field">
@@ -25,11 +25,11 @@
             wrapper-class="datepicker"
             input-class="date-input input"
             :language="locale"
-            :disabled-dates="{ days: [6, 0] }"
             :monday-first="true"
+            :typeable="true"
             format="yyyy-MM-dd"
+            @selected="onUpdateSelectedEndDate"
             v-model="selectedEndDate"
-            disabled
           />
         </div>
         <combobox-number
@@ -70,11 +70,7 @@ import { en, fr } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
 import { getPersonTabPath } from '@/lib/path'
 
-import {
-  getFirstStartDate,
-  getLastEndDate,
-  parseSimpleDate
-} from '@/lib/time'
+import { parseSimpleDate } from '@/lib/time'
 import colors from '@/lib/colors'
 
 import { formatListMixin } from '@/components/mixins/format'
@@ -148,7 +144,6 @@ export default {
     async reset() {
       this.loading.schedule = true
       const personDatesList = await this.getPersonsTasksDates()
-      const scheduleStartDate = moment()
       this.personDates = {}
       personDatesList.forEach(p => {
         this.personDates[p.person_id] = {
@@ -158,9 +153,9 @@ export default {
       })
       await this.loadPeople()
       const people = this.selectedDepartment
-        ? this.displayedPeople.filter(
-          p => p.departments.includes(this.selectedDepartment)
-        )
+        ? this.displayedPeople.filter(p =>
+            p.departments.includes(this.selectedDepartment)
+          )
         : this.displayedPeople
       this.scheduleItems = this.convertScheduleItems(people)
       this.startDate = moment()
@@ -176,7 +171,6 @@ export default {
 
       this.selectedStartDate = this.startDate.toDate()
       this.selectedEndDate = this.endDate.toDate()
-      // this.loading.schedule = false
     },
 
     convertScheduleItems(scheduleItems) {
@@ -215,11 +209,11 @@ export default {
 
       if (task.start_date) {
         startDate = parseSimpleDate(task.start_date)
-      } 
+      }
       const estimation = this.formatDuration(task.estimation)
       if (task.due_date) {
         endDate = parseSimpleDate(task.due_date)
-      } 
+      }
 
       if (!endDate || endDate.isBefore(startDate)) {
         endDate = startDate.clone().add(1, 'days')
@@ -254,23 +248,6 @@ export default {
           .filter(Boolean)
           .sort(firstBy('startDate').thenBy('project_name').thenBy('name'))
 
-        const startDate = element.children.length
-          ? getFirstStartDate(element.children)
-          : moment()
-        const endDate = element.children.length
-          ? getLastEndDate(element.children)
-          : moment().add(3, 'months')
-
-        if (startDate.isBefore(this.startDate)) {
-          this.startDate = startDate
-          this.selectedStartDate = this.startDate.toDate()
-        }
-
-        if (endDate.isAfter(this.endDate)) {
-          this.endDate = endDate
-          this.selectedEndDate = this.endDate.toDate()
-        }
-
         if (refreshScheduleCallBack) {
           refreshScheduleCallBack(element)
         }
@@ -278,13 +255,21 @@ export default {
         console.error(err)
       }
       element.loading = false
+    },
+
+    onUpdateSelectedStartDate(date) {
+      this.startDate = parseSimpleDate(date)
+    },
+
+    onUpdateSelectedEndDate(date) {
+      this.endDate = parseSimpleDate(date)
     }
   },
 
   socket: {},
 
   watch: {
-    selectedDepartment () {
+    selectedDepartment() {
       this.reset()
     }
   },
