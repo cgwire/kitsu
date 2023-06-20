@@ -84,6 +84,8 @@ export default {
     attachments_to_add: 'Add attachments',
     checklist: 'Checklist',
     change_preview: 'Change preview',
+    confirm_publish: 'There is no preview files set for publishing. Are you sure you want to publish your comment?',
+    confirm_publish_button: 'Post comment without publishing files',
     comment_from_client: 'Comment from client',
     edit_title: 'Edit comment',
     empty_text: 'This comment is empty',
