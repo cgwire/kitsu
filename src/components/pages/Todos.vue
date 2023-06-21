@@ -126,7 +126,10 @@
     </div>
 
     <div class="column side-column" v-if="nbSelectedTasks >= 1">
-      <task-info :task="selectedTasks.values().next().value" with-actions />
+      <task-info
+        :task="selectedTasks.values().next().value"
+        with-actions
+      />
     </div>
   </div>
 </template>
@@ -259,7 +262,9 @@ export default {
             })
       if (isName) {
         return tasks.sort(
-          firstBy('project_name').thenBy('task_type_name').thenBy('entity_name')
+          firstBy('project_name')
+            .thenBy('task_type_name')
+            .thenBy('full_entity_name')
         )
       } else if (isPriority) {
         return tasks.sort(
