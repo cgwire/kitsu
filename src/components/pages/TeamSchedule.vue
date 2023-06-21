@@ -94,7 +94,7 @@ export default {
       endDate: moment().add(3, 'months'),
       personDates: {},
       scheduleItems: [],
-      selectedDepartment: '',
+      selectedDepartment: null,
       selectedEndDate: null,
       selectedStartDate: null,
       startDate: moment(),
@@ -115,7 +115,7 @@ export default {
   },
 
   mounted() {
-    this.reset()
+    this.init()
   },
 
   computed: {
@@ -141,23 +141,20 @@ export default {
       'loadPeople'
     ]),
 
-    async reset() {
+    async init() {
       this.loading.schedule = true
       const personDatesList = await this.getPersonsTasksDates()
       this.personDates = {}
       personDatesList.forEach(p => {
         this.personDates[p.person_id] = {
           endDate: parseSimpleDate(p.max_date),
-          startDate: parseSimpleDate(p.min_date),
+          startDate: parseSimpleDate(p.min_date)
         }
       })
       await this.loadPeople()
-      const people = this.selectedDepartment
-        ? this.displayedPeople.filter(p =>
-            p.departments.includes(this.selectedDepartment)
-          )
-        : this.displayedPeople
-      this.scheduleItems = this.convertScheduleItems(people)
+
+      this.refreshSchedule()
+
       this.startDate = moment()
       this.endDate = moment().add(3, 'months')
       Object.values(this.personDates).forEach(dates => {
@@ -171,6 +168,15 @@ export default {
 
       this.selectedStartDate = this.startDate.toDate()
       this.selectedEndDate = this.endDate.toDate()
+    },
+
+    refreshSchedule() {
+      const people = this.selectedDepartment
+        ? this.displayedPeople.filter(p =>
+            p.departments.includes(this.selectedDepartment)
+          )
+        : this.displayedPeople
+      this.scheduleItems = this.convertScheduleItems(people)
     },
 
     convertScheduleItems(scheduleItems) {
@@ -201,11 +207,9 @@ export default {
       let startDate = moment()
       let endDate
 
-      if (
-        !task.start_date ||
-        !task.due_date
-      )
+      if (!task.start_date || !task.due_date) {
         return null
+      }
 
       if (task.start_date) {
         startDate = parseSimpleDate(task.start_date)
@@ -270,7 +274,7 @@ export default {
 
   watch: {
     selectedDepartment() {
-      this.reset()
+      this.refreshSchedule()
     }
   },
 
