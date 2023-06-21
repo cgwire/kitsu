@@ -13,11 +13,11 @@
 
           <combobox
             class="flexrow-item"
-            :label="$t('main.episode')"
+            :label="$t('shots.fields.episode')"
             :options="episodeOptions"
             v-model="episodeId"
             v-show="productionId"
-            v-if="taskStatusList.length > 0"
+            v-if="episodeOptions.length > 0"
           />
 
           <combobox-task-type

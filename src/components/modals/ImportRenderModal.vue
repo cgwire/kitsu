@@ -13,23 +13,25 @@
           {{ $t('main.csv.preview_title') }}
         </h1>
 
+        <p>
+          {{ $t('main.csv.preview_required') }}
+        </p>
         <div class="description">
-          <div class="flex-item">
-            <p>
-              {{ $t('main.csv.preview_description') }} <br />
-              {{ $t('main.csv.preview_required') }}
-            </p>
-            <div v-show="!disableUpdate">
-              <h2 class="legend-title">{{ $t('main.csv.options.title') }}</h2>
-              <checkbox
-                :toggle="true"
-                :label="$t('main.csv.options.update')"
-                v-model="updateData"
-              />
-            </div>
+          <div v-show="!disableUpdate">
+            <h2 class="legend-title">
+              {{ $t('main.csv.options.title') }}
+            </h2>
+            <checkbox
+              :toggle="true"
+              :label="$t('main.csv.options.update')"
+              v-model="updateData"
+            />
           </div>
-          <div class="flex-item">
-            <ul class="legend">
+          <h3 class="legend-title">
+            {{ $t('main.csv.legend') }}
+          </h3>
+          <div class="flexrow legends">
+            <ul class="legend flexrow-item">
               <li class="legend-definition">
                 <span class="legend-term"></span>
                 {{ $t('main.csv.legend_ok') }}
@@ -41,6 +43,16 @@
               <li class="legend-definition">
                 <span class="legend-term missing"></span>
                 {{ $t('main.csv.legend_missing') }}
+              </li>
+              <li class="legend-definition">
+                <span class="legend-term missing-optional"></span>
+                {{ $t('main.csv.legend_missing_optional') }}
+              </li>
+            </ul>
+            <ul class="legend flexrow-item">
+              <li class="legend-definition">
+                <span class="legend-term"></span>
+                {{ $t('main.csv.legend_line_ok') }}
               </li>
               <li class="legend-definition">
                 <span class="legend-term disabled"></span>
@@ -58,18 +70,30 @@
           <table class="render">
             <colgroup>
               <col
+                v-for="item in columnsRequired"
+                :key="`col-missing-${item}`"
+                class="missing"
+              />
+              <col
                 v-for="(cell, index) in parsedCsv[0]"
                 :key="`col-${index}`"
                 :class="stateColumn(cell)"
               />
               <col
-                v-for="item in columnsRequired"
+                v-for="item in columnsOptional"
                 :key="`col-missing-${item}`"
-                class="missing"
+                class="missing-optional"
               />
             </colgroup>
             <thead>
               <tr class="render-headers">
+                <th
+                  class="required-header"
+                  :key="`header-${cell}`"
+                  v-for="cell in columnsRequired"
+                >
+                  {{ cell }}
+                </th>
                 <th
                   v-for="(cell, index) in parsedCsv[0]"
                   :key="`header-${index}`"
@@ -85,7 +109,11 @@
                   </div>
                   {{ cell || '-' }}
                 </th>
-                <th v-for="cell in columnsRequired" :key="`header-${cell}`">
+                <th
+                  class="optional-header"
+                  :key="`header-${cell}`"
+                  v-for="cell in columnsOptional"
+                >
                   {{ cell }}
                 </th>
               </tr>
@@ -100,10 +128,13 @@
                 v-if="line && line.length > 1"
                 :key="`line-${index}`"
               >
+                <td v-for="cell in columnsRequired" :key="`cell-${cell}`">
+                  {{ '-' }}
+                </td>
                 <td v-for="(cell, index) in line" :key="`cell-${index}`">
                   {{ cell || '-' }}
                 </td>
-                <td v-for="cell in columnsRequired" :key="`cell-${cell}`">
+                <td v-for="cell in columnsOptional" :key="`cell-${cell}`">
                   {{ '-' }}
                 </td>
               </tr>
@@ -212,9 +243,27 @@ export default {
 
     columnsRequired() {
       if (this.parsedCsv.length !== 0) {
-        return this.columns.filter(item => !this.parsedCsv[0].includes(item))
+        return this.columns.filter(item => {
+          return (
+            !this.parsedCsv[0].includes(item) &&
+            this.dataMatchers.includes(item)
+          )
+        })
       } else {
-        return undefined
+        return []
+      }
+    },
+
+    columnsOptional() {
+      if (this.parsedCsv.length !== 0) {
+        return this.columns.filter(item => {
+          return (
+            !this.parsedCsv[0].includes(item) &&
+            !this.dataMatchers.includes(item)
+          )
+        })
+      } else {
+        return []
       }
     },
 
@@ -341,9 +390,6 @@ export default {
   .render-select {
     border-color: $dark-grey-lightest;
   }
-  .legend-title {
-    color: $white;
-  }
   .legend-term {
     border: 1px solid $dark-grey-lightest;
   }
@@ -373,9 +419,8 @@ export default {
   margin-top: 1em;
 }
 .description {
-  display: flex;
   margin-bottom: 1em;
-  align-items: center;
+  margin-top: 2em;
   .flex-item {
     flex: 1 1 50%;
   }
@@ -405,20 +450,37 @@ export default {
     }
   }
 }
+
 .render-select {
   margin-bottom: 0.75rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid $light-grey-light;
 }
+
 .render-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-top: 2rem;
 }
-.legend-title {
-  font-size: 1.2rem;
+
+.modal-content .box h1.title {
+  margin-bottom: 0;
 }
+
+.legend-title {
+  color: var(--text);
+  font-size: 1em;
+  font-weight: bold;
+  margin-bottom: 1.5em;
+  margin-top: 0em;
+  text-transform: uppercase;
+}
+
+.legends {
+  align-items: flex-start;
+}
+
 .legend {
   margin: 0;
   padding: 0;
@@ -427,6 +489,7 @@ export default {
   align-items: center;
   flex-wrap: wrap;
 }
+
 .legend-term {
   display: inline-block;
   margin-right: 0.5rem;
@@ -440,12 +503,33 @@ export default {
   align-items: center;
   margin: 0 1rem 0.5rem 0;
 }
+
 .ignored {
   background-color: rgba($light-grey-light, 0.6);
 }
+
 .missing {
   background-color: rgba($red, 0.6);
 }
+
+.missing-optional {
+  background-color: rgba($red, 0.2);
+}
+
+.optional-header,
+.required-header {
+  vertical-align: bottom;
+}
+
+col.missing-optional,
+col.missing {
+  min-width: 150px;
+
+  th {
+    vertical-align: bottom;
+  }
+}
+
 .disabled {
   opacity: 0.4;
   background: repeating-linear-gradient(
@@ -457,10 +541,10 @@ export default {
   );
 }
 .overwrite {
-  background-color: rgba($blue, 0.6);
+  background-color: rgba($blue, 0.2);
 
   &:hover td {
-    background-color: rgba($blue, 0.4);
+    background-color: rgba($blue, 0.3);
   }
 }
 </style>

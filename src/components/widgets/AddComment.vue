@@ -256,7 +256,25 @@
       @confirm="addCommentAttachment"
       @add-snapshots="$emit('annotation-snapshots-requested')"
     />
+    <confirm-modal
+      :active="modals.confirmFeedbackPublish"
+      :text="$t('comments.confirm_publish')"
+      :confirm-button-text="$t('comments.confirm_publish_button')"
+      @cancel="modals.confirmFeedbackPublish = false"
+      @confirm="
+         modals.confirmFeedbackPublish = false ;
+           runAddComment(
+             text,
+             attachments,
+             checklist,
+             task_status_id,
+             nextRevision,
+             true
+           )
+         "
+    />
   </article>
+
 </template>
 
 <script>
@@ -268,6 +286,7 @@ import { replaceTimeWithTimecode } from '@/lib/render'
 
 import AtTa from 'vue-at/dist/vue-at-textarea'
 import AddCommentImageModal from '@/components/modals/AddCommentImageModal'
+import ConfirmModal from '@/components/modals/ConfirmModal'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import Checklist from '@/components/widgets/Checklist'
@@ -282,6 +301,7 @@ export default {
     AtTa,
     AddCommentImageModal,
     ButtonSimple,
+    ConfirmModal,
     Checklist,
     ComboboxStatus,
     PeopleAvatar
@@ -305,7 +325,8 @@ export default {
         addCommentAttachment: false
       },
       modals: {
-        addCommentAttachment: false
+        addCommentAttachment: false,
+        confirmFeedbackPublish: false,
       }
     }
   },
@@ -441,8 +462,19 @@ export default {
 
   methods: {
     shortenText: strings.shortenText,
-    runAddComment(text, attachments, checklist, taskStatusId, revision) {
+    runAddComment(
+      text, attachments, checklist, taskStatusId, revision, force = false
+    ) {
       if (!this.isValidForm) {
+        return
+      }
+      const taskStatus = this.taskStatusMap.get(this.task_status_id)
+      if (
+        taskStatus.is_feedback_request &&
+        this.previewForms.length === 0 &&
+        !force
+      ) {
+        this.modals.confirmFeedbackPublish = true
         return
       }
 
@@ -601,13 +633,6 @@ export default {
   watch: {
     task() {
       this.resetStatus()
-    },
-
-    task_status_id() {
-      const taskStatus = this.taskStatusMap.get(this.task_status_id)
-      if (taskStatus.is_feedback_request) {
-        this.mode = 'publish'
-      }
     },
 
     mode() {
