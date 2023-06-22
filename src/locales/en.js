@@ -401,6 +401,7 @@ export default {
     delete: 'Delete',
     delete_all: 'Delete all',
     delete_text: 'Are you sure you want to remove {name} from your database?',
+    department: 'Department',
     documentation: 'Documentation',
     edit: 'Edit',
     empty_comment: 'Empty comment',

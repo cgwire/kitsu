@@ -40,7 +40,7 @@
         />
         <combobox-department
           class="flexrow-item"
-          label="Department"
+          :label="$t('main.department')"
           v-model="selectedDepartment"
         />
         <div class="flexrow-item people-filter">

@@ -42,7 +42,7 @@
       />
       <combobox-department
         class="combobox-department flexrow-item"
-        label="Department"
+        :label="$t('main.department')"
         v-model="selectedDepartment"
       />
       <combobox-styled
