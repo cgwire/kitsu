@@ -17,7 +17,7 @@
             v-model="selectedStartDate"
           />
         </div>
-        <div class="flexrow-item field">
+        <div class="flexrow-item">
           <label class="label">
             {{ $t('main.end_date') }}
           </label>
@@ -39,10 +39,22 @@
           v-model="zoomLevel"
         />
         <combobox-department
-          class="combobox-department flexrow-item"
+          class="flexrow-item"
           label="Department"
           v-model="selectedDepartment"
         />
+        <div class="flexrow-item people-filter">
+          <label class="label">
+            {{ $t('main.person') }}
+          </label>
+          <people-field
+            ref="people-field"
+            :people="selectablePeople"
+            :placeholder="$t('team_schedule.person_placeholder')"
+            wide
+            v-model="selectedPerson"
+          />
+        </div>
       </div>
 
       <schedule
@@ -66,18 +78,19 @@
  */
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
+import { firstBy } from 'thenby'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
-import { getPersonTabPath } from '@/lib/path'
 
+import { getPersonTabPath } from '@/lib/path'
 import { parseSimpleDate } from '@/lib/time'
 import colors from '@/lib/colors'
 
 import { formatListMixin } from '@/components/mixins/format'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
+import PeopleField from '@/components/widgets/PeopleField'
 import Schedule from '@/components/pages/schedule/Schedule'
-import { firstBy } from 'thenby'
 
 export default {
   name: 'team-schedule',
@@ -86,6 +99,7 @@ export default {
     ComboboxDepartment,
     ComboboxNumber,
     Datepicker,
+    PeopleField,
     Schedule
   },
 
@@ -96,6 +110,7 @@ export default {
       scheduleItems: [],
       selectedDepartment: null,
       selectedEndDate: null,
+      selectedPerson: null,
       selectedStartDate: null,
       startDate: moment(),
       zoomLevel: 1,
@@ -119,11 +134,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'displayedPeople',
-      'taskTypeMap',
-      'user'
-    ]),
+    ...mapGetters(['displayedPeople', 'taskTypeMap', 'user']),
 
     locale() {
       if (this.user.locale === 'fr_FR') {
@@ -131,6 +142,15 @@ export default {
       } else {
         return en
       }
+    },
+
+    selectablePeople() {
+      if (this.selectedDepartment) {
+        return this.displayedPeople.filter(person =>
+          person.departments.includes(this.selectedDepartment)
+        )
+      }
+      return this.displayedPeople
     }
   },
 
@@ -171,11 +191,9 @@ export default {
     },
 
     refreshSchedule() {
-      const people = this.selectedDepartment
-        ? this.displayedPeople.filter(p =>
-            p.departments.includes(this.selectedDepartment)
-          )
-        : this.displayedPeople
+      const people = this.selectedPerson
+        ? [this.selectedPerson]
+        : this.selectablePeople
       this.scheduleItems = this.convertScheduleItems(people)
     },
 
@@ -274,6 +292,15 @@ export default {
 
   watch: {
     selectedDepartment() {
+      if (
+        this.selectedPerson &&
+        !this.selectablePeople.includes(this.selectedPerson)
+      ) {
+        this.$refs['people-field'].clear()
+      }
+      this.refreshSchedule()
+    },
+    selectedPerson() {
       this.refreshSchedule()
     }
   },
@@ -325,5 +352,10 @@ export default {
 
 .zoom-level {
   margin-top: -10px;
+  white-space: nowrap;
+}
+
+.people-filter {
+  min-width: 250px;
 }
 </style>

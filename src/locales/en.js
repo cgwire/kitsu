@@ -1081,7 +1081,8 @@ export default {
 
   team_schedule: {
     title: 'Schedule',
-    title_main: 'Team Schedule'
+    title_main: 'Team Schedule',
+    person_placeholder: 'Select a person...'
   },
 
   quota: {
