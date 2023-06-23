@@ -339,7 +339,7 @@ const actions = {
       })
   },
 
-  async fetchPersonTasks({ commit, state, rootGetters }, personId) {
+  async fetchPersonTasks({ commit, rootGetters }, personId) {
     const tasks = (
       await Promise.all([
         peopleApi.getPersonTasks(personId),
@@ -350,6 +350,14 @@ const actions = {
       populateTask(task)
       task.taskStatus = helpers.getTaskStatus(task.task_status_id)
     })
+
+    commit(LOAD_PERSON_TASKS_END, {
+      personId,
+      tasks,
+      userFilters: rootGetters.userFilters,
+      taskTypeMap: rootGetters.taskTypeMap
+    })
+
     return tasks
   },
 

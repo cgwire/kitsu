@@ -66,6 +66,7 @@
         :multiline="true"
         :start-date="startDate"
         :zoom-level="zoomLevel"
+        @item-changed="onScheduleItemChanged"
         @root-element-expanded="expandPersonElement"
       />
     </div>
@@ -158,20 +159,13 @@ export default {
     ...mapActions([
       'fetchPersonTasks',
       'getPersonsTasksDates',
-      'loadPeople'
+      'loadPeople',
+      'updateTask'
     ]),
 
     async init() {
       this.loading.schedule = true
-      const personDatesList = await this.getPersonsTasksDates()
-      this.personDates = {}
-      personDatesList.forEach(p => {
-        this.personDates[p.person_id] = {
-          endDate: parseSimpleDate(p.max_date),
-          startDate: parseSimpleDate(p.min_date)
-        }
-      })
-      await this.loadPeople()
+      await Promise.all([this.loadPeople(), this.loadPersonDates()])
 
       this.refreshSchedule()
 
@@ -188,6 +182,27 @@ export default {
 
       this.selectedStartDate = this.startDate.toDate()
       this.selectedEndDate = this.endDate.toDate()
+    },
+
+    async loadPersonDates(syncSchedule = false) {
+      const personDatesList = await this.getPersonsTasksDates()
+      this.personDates = {}
+      personDatesList.forEach(p => {
+        this.personDates[p.person_id] = {
+          endDate: parseSimpleDate(p.max_date),
+          startDate: parseSimpleDate(p.min_date)
+        }
+      })
+
+      if (syncSchedule) {
+        this.scheduleItems.forEach(scheduleItem => {
+          const personDates = this.personDates[scheduleItem.id]
+          if (personDates) {
+            scheduleItem.startDate = personDates.startDate
+            scheduleItem.endDate = personDates.endDate
+          }
+        })
+      }
     },
 
     refreshSchedule() {
@@ -221,7 +236,7 @@ export default {
       })
     },
 
-    buildTaskScheduleItem(task) {
+    buildTaskScheduleItem(parentElement, task) {
       let startDate = moment()
       let endDate
 
@@ -244,13 +259,31 @@ export default {
       return {
         ...task,
         name: `${task.full_entity_name} / ${taskType.name}`,
-        startDate: startDate,
-        endDate: endDate,
+        startDate,
+        endDate,
         loading: false,
         man_days: estimation,
-        editable: false,
-        unresizable: false,
-        color: taskType.color
+        editable: true,
+        unresizable: true,
+        color: taskType.color,
+        parentElement
+      }
+    },
+
+    saveTaskScheduleItem(task) {
+      return this.updateTask({
+        taskId: task.id,
+        data: {
+          start_date: task.startDate.format('YYYY-MM-DD'),
+          due_date: task.endDate.format('YYYY-MM-DD')
+        }
+      })
+    },
+
+    async onScheduleItemChanged(item) {
+      if (item.type === 'Task') {
+        await this.saveTaskScheduleItem(item)
+        await this.loadPersonDates(true)
       }
     },
 
@@ -266,7 +299,7 @@ export default {
       try {
         const tasks = await this.fetchPersonTasks(element.id)
         element.children = tasks
-          .map(task => this.buildTaskScheduleItem(task))
+          .map(task => this.buildTaskScheduleItem(element, task))
           .filter(Boolean)
           .sort(firstBy('startDate').thenBy('project_name').thenBy('name'))
 

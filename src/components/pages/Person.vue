@@ -463,7 +463,7 @@ export default {
       }
     },
 
-    buildTaskScheduleItem(rootElement, task) {
+    buildTaskScheduleItem(parentElement, task) {
       let startDate = moment()
       let endDate
 
@@ -497,14 +497,14 @@ export default {
       return {
         ...task,
         name: task.full_entity_name + ' / ' + taskType.name,
-        startDate: startDate,
-        endDate: endDate,
+        startDate,
+        endDate,
         expanded: false,
         loading: false,
         man_days: estimation,
         editable: false,
         unresizable: false,
-        parentElement: rootElement,
+        parentElement,
         color: taskType.color,
         children: []
       }
