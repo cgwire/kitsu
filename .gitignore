@@ -27,9 +27,9 @@ coverage
 build/Release
 
 # Dependency directories
-node_modules
-jspm_packages
-package-lock.json
+node_modules/
+jspm_packages/
+yarn.lock
 
 # Optional npm cache directory
 .npm
@@ -39,16 +39,17 @@ package-lock.json
 
 # Vue template artifacts to ignore
 .DS_Store
-node_modules/
 dist/
-npm-debug.log
+selenium-debug.log
 test/unit/coverage
 test/e2e/reports
-selenium-debug.log
 test/test-bundle.js
+tests/test-bundle.js
 
+# IDE
+.idea/
+.vscode/
+
+# Custom
 TODO
 QA
-package-lock.json
-.idea/
-tests/test-bundle.js

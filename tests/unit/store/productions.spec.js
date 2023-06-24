@@ -35,7 +35,6 @@ import {
   UPDATE_METADATA_DESCRIPTOR_END,
   UPDATE_PRODUCTION
 } from '@/store/mutation-types'
-import { destroyTooltip } from 'v-tooltip'
 import { sortByName, sortProductions } from '@/lib/sorting'
 
 describe('Productions store', () => {
