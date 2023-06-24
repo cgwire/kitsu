@@ -401,6 +401,7 @@ export default {
     delete: 'Delete',
     delete_all: 'Delete all',
     delete_text: 'Are you sure you want to remove {name} from your database?',
+    department: 'Department',
     documentation: 'Documentation',
     edit: 'Edit',
     empty_comment: 'Empty comment',
@@ -1081,7 +1082,8 @@ export default {
 
   team_schedule: {
     title: 'Schedule',
-    title_main: 'Team Schedule'
+    title_main: 'Team Schedule',
+    person_placeholder: 'Select a person...'
   },
 
   quota: {

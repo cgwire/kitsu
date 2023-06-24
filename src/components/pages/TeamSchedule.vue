@@ -17,7 +17,7 @@
             v-model="selectedStartDate"
           />
         </div>
-        <div class="flexrow-item field">
+        <div class="flexrow-item">
           <label class="label">
             {{ $t('main.end_date') }}
           </label>
@@ -39,10 +39,22 @@
           v-model="zoomLevel"
         />
         <combobox-department
-          class="combobox-department flexrow-item"
-          label="Department"
+          class="flexrow-item"
+          :label="$t('main.department')"
           v-model="selectedDepartment"
         />
+        <div class="flexrow-item people-filter">
+          <label class="label">
+            {{ $t('main.person') }}
+          </label>
+          <people-field
+            ref="people-field"
+            :people="selectablePeople"
+            :placeholder="$t('team_schedule.person_placeholder')"
+            wide
+            v-model="selectedPerson"
+          />
+        </div>
       </div>
 
       <schedule
@@ -54,6 +66,7 @@
         :multiline="true"
         :start-date="startDate"
         :zoom-level="zoomLevel"
+        @item-changed="onScheduleItemChanged"
         @root-element-expanded="expandPersonElement"
       />
     </div>
@@ -66,18 +79,19 @@
  */
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
+import { firstBy } from 'thenby'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
-import { getPersonTabPath } from '@/lib/path'
 
+import { getPersonTabPath } from '@/lib/path'
 import { parseSimpleDate } from '@/lib/time'
 import colors from '@/lib/colors'
 
 import { formatListMixin } from '@/components/mixins/format'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
+import PeopleField from '@/components/widgets/PeopleField'
 import Schedule from '@/components/pages/schedule/Schedule'
-import { firstBy } from 'thenby'
 
 export default {
   name: 'team-schedule',
@@ -86,6 +100,7 @@ export default {
     ComboboxDepartment,
     ComboboxNumber,
     Datepicker,
+    PeopleField,
     Schedule
   },
 
@@ -96,6 +111,7 @@ export default {
       scheduleItems: [],
       selectedDepartment: null,
       selectedEndDate: null,
+      selectedPerson: null,
       selectedStartDate: null,
       startDate: moment(),
       zoomLevel: 1,
@@ -119,11 +135,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'displayedPeople',
-      'taskTypeMap',
-      'user'
-    ]),
+    ...mapGetters(['displayedPeople', 'taskTypeMap', 'user']),
 
     locale() {
       if (this.user.locale === 'fr_FR') {
@@ -131,6 +143,15 @@ export default {
       } else {
         return en
       }
+    },
+
+    selectablePeople() {
+      if (this.selectedDepartment) {
+        return this.displayedPeople.filter(person =>
+          person.departments.includes(this.selectedDepartment)
+        )
+      }
+      return this.displayedPeople
     }
   },
 
@@ -138,20 +159,13 @@ export default {
     ...mapActions([
       'fetchPersonTasks',
       'getPersonsTasksDates',
-      'loadPeople'
+      'loadPeople',
+      'updateTask'
     ]),
 
     async init() {
       this.loading.schedule = true
-      const personDatesList = await this.getPersonsTasksDates()
-      this.personDates = {}
-      personDatesList.forEach(p => {
-        this.personDates[p.person_id] = {
-          endDate: parseSimpleDate(p.max_date),
-          startDate: parseSimpleDate(p.min_date)
-        }
-      })
-      await this.loadPeople()
+      await Promise.all([this.loadPeople(), this.loadPersonDates()])
 
       this.refreshSchedule()
 
@@ -170,12 +184,31 @@ export default {
       this.selectedEndDate = this.endDate.toDate()
     },
 
+    async loadPersonDates(syncSchedule = false) {
+      const personDatesList = await this.getPersonsTasksDates()
+      this.personDates = {}
+      personDatesList.forEach(p => {
+        this.personDates[p.person_id] = {
+          endDate: parseSimpleDate(p.max_date),
+          startDate: parseSimpleDate(p.min_date)
+        }
+      })
+
+      if (syncSchedule) {
+        this.scheduleItems.forEach(scheduleItem => {
+          const personDates = this.personDates[scheduleItem.id]
+          if (personDates) {
+            scheduleItem.startDate = personDates.startDate
+            scheduleItem.endDate = personDates.endDate
+          }
+        })
+      }
+    },
+
     refreshSchedule() {
-      const people = this.selectedDepartment
-        ? this.displayedPeople.filter(p =>
-            p.departments.includes(this.selectedDepartment)
-          )
-        : this.displayedPeople
+      const people = this.selectedPerson
+        ? [this.selectedPerson]
+        : this.selectablePeople
       this.scheduleItems = this.convertScheduleItems(people)
     },
 
@@ -203,7 +236,7 @@ export default {
       })
     },
 
-    buildTaskScheduleItem(task) {
+    buildTaskScheduleItem(parentElement, task) {
       let startDate = moment()
       let endDate
 
@@ -226,13 +259,31 @@ export default {
       return {
         ...task,
         name: `${task.full_entity_name} / ${taskType.name}`,
-        startDate: startDate,
-        endDate: endDate,
+        startDate,
+        endDate,
         loading: false,
         man_days: estimation,
-        editable: false,
-        unresizable: false,
-        color: taskType.color
+        editable: true,
+        unresizable: true,
+        color: taskType.color,
+        parentElement
+      }
+    },
+
+    saveTaskScheduleItem(task) {
+      return this.updateTask({
+        taskId: task.id,
+        data: {
+          start_date: task.startDate.format('YYYY-MM-DD'),
+          due_date: task.endDate.format('YYYY-MM-DD')
+        }
+      })
+    },
+
+    async onScheduleItemChanged(item) {
+      if (item.type === 'Task') {
+        await this.saveTaskScheduleItem(item)
+        await this.loadPersonDates(true)
       }
     },
 
@@ -248,7 +299,7 @@ export default {
       try {
         const tasks = await this.fetchPersonTasks(element.id)
         element.children = tasks
-          .map(task => this.buildTaskScheduleItem(task))
+          .map(task => this.buildTaskScheduleItem(element, task))
           .filter(Boolean)
           .sort(firstBy('startDate').thenBy('project_name').thenBy('name'))
 
@@ -274,6 +325,15 @@ export default {
 
   watch: {
     selectedDepartment() {
+      if (
+        this.selectedPerson &&
+        !this.selectablePeople.includes(this.selectedPerson)
+      ) {
+        this.$refs['people-field'].clear()
+      }
+      this.refreshSchedule()
+    },
+    selectedPerson() {
       this.refreshSchedule()
     }
   },
@@ -325,5 +385,10 @@ export default {
 
 .zoom-level {
   margin-top: -10px;
+  white-space: nowrap;
+}
+
+.people-filter {
+  min-width: 250px;
 }
 </style>

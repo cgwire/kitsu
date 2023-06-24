@@ -1096,7 +1096,7 @@ export default {
       ) {
         this.isChangeDates = true
         this.isChangeStartDate = false
-        this.isChangeEnd = false
+        this.isChangeEndDate = false
         this.currentElement = timeElement
         this.lastStartDate = timeElement.startDate.clone()
         this.lastEndDate = timeElement.endDate.clone()
