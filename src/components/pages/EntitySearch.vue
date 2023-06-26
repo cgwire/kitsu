@@ -448,7 +448,7 @@ export default {
 }
 
 .search-field {
-  padding-top: 0px;
+  padding-top: 0;
   position: relative;
   width: 100%;
 
@@ -462,7 +462,7 @@ export default {
     position: absolute;
     color: $grey;
     z-index: 4;
-    top: 55px;
+    top: 15px;
     left: 10px;
   }
 }
