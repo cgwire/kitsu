@@ -10,7 +10,7 @@
             v-show="isAnnotationsDisplayed"
           >
             <canvas
-              id="annotation-canvas"
+              :id="canvasId"
               ref="annotation-canvas"
               class="canvas"
             >
@@ -453,6 +453,10 @@ export default {
   },
 
   props: {
+    canvasId: {
+      type: String,
+      default: 'annotation-canvas'
+    },
     big: {
       type: Boolean,
       default: false
@@ -936,7 +940,7 @@ export default {
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
-      this.fabricCanvas = new fabric.Canvas('annotation-canvas', {
+      this.fabricCanvas = new fabric.Canvas(this.canvasId, {
         fireRightClick: true,
         width: width,
         height: height
