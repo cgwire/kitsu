@@ -14,6 +14,8 @@ const EQUAL_PEOPLE_DEPARTMENT_REGEX =
   /department=\[([^[]*)\]|department=([^ ]*)|department=([^ ]*)/g
 const EQUAL_READY_FOR_REGEX =
   /readyfor=\[([^[]*)\]|readyfor=([^ ]*)|readyfor=([^ ]*)/g
+const EQUAL_PRIORITY_REGEX =
+  /priority-\[([^[]*)\]=\d|priority-([^ ]*)=\d/g
 const EQUAL_ASSETS_READY_REGEX =
   /assetsready=\[([^[]*)\]|assetsready=([^ ]*)|assetsready=([^ ]*)/g
 const MULTIPLE_REGEX = /\[([^[]*)\]/g
@@ -142,6 +144,11 @@ const applyFiltersFunctions = {
     return filter.excluding ? !hasDepartment : hasDepartment
   },
 
+  priority(entry, filter, taskMap) {
+    const task = taskMap.get(entry.validations.get(filter.taskTypeId))
+    return task && task.priority === filter.value
+  },
+
   readyfor(entry, filter, taskMap) {
     return entry.ready_for === filter.value
   },
@@ -247,6 +254,7 @@ export const getFilters = ({
     ...getAssignedToFilters(persons, query),
     ...getDepartmentFilters(departments, query),
     ...(getThumbnailFilters(query) || []),
+    ...getPriorityFilter(taskTypes, query),
     ...getReadyForFilter(taskTypes, query),
     ...getAssetsReadyFilter(taskTypes, query),
     ...getExcludingFilters(entryIndex, query)
@@ -547,6 +555,31 @@ export const getThumbnailFilters = queryText => {
   return results
 }
 
+export const getPriorityFilter = (taskTypes, queryText) => {
+  if (!queryText) return []
+
+  const results = []
+  const rgxMatches = queryText.match(EQUAL_PRIORITY_REGEX)
+
+  if (rgxMatches) {
+    const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
+    rgxMatches.forEach(rgxMatch => {
+      const pattern = rgxMatch.split('=')
+      let taskTypeName = cleanParenthesis(pattern[0].substring(9))
+      let value = cleanParenthesis(pattern[1])
+      const taskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
+      if (taskTypes && taskTypes.length > 0) {
+        results.push({
+          taskTypeId: taskTypes[0].id,
+          value: parseInt(value),
+          type: 'priority'
+        })
+      }
+    })
+  }
+  return results
+}
+
 export const getReadyForFilter = (taskTypes, queryText) => {
   if (!queryText) return []
 
@@ -569,6 +602,7 @@ export const getReadyForFilter = (taskTypes, queryText) => {
   }
   return results
 }
+
 export const getAssetsReadyFilter = (taskTypes, queryText) => {
   if (!queryText) return []
 
