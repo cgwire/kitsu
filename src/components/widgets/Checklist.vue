@@ -124,6 +124,10 @@ export default {
         }
       }
     }
+
+    &.checked .checklist-text {
+      color: #999;
+    }
   }
 }
 
@@ -161,6 +165,7 @@ export default {
   }
 
   &.checked .checklist-text {
+    color: #BBB;
     text-decoration: line-through;
   }
 
