@@ -1195,7 +1195,7 @@ export default {
     onExtendMove(event) {
       const diff = this.lastWidthX - this.getClientX(event)
       let panelWidth = Math.max(this.lastWidth + diff, DEFAULT_PANEL_WIDTH)
-      if (panelWidth > 800) panelWidth = 900
+      if (panelWidth > 900) panelWidth = 900
       this.setWidth(panelWidth)
       this.refreshPreviewPlay()
     },
