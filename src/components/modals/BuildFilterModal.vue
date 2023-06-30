@@ -812,7 +812,6 @@ export default {
     setFiltersFromPriorityQuery(filter) {
       this.priority.taskTypeId = filter.taskTypeId
       this.priority.value = filter.value + ''
-      console.log(this.priority.value)
     },
 
     setFiltersFromReadyForQuery(filter) {
