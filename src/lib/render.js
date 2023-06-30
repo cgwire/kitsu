@@ -22,8 +22,16 @@ export const getTaskTypeStyle = task => {
   }
 }
 
-export const renderComment = (input, mentions, personMap, className = '') => {
+export const renderComment = (
+  input,
+  mentions,
+  departmentMentions,
+  personMap,
+  departmentMap,
+  className = ''
+) => {
   let compiled = marked.parse(input || '')
+  compiled = sanitize(compiled)
   if (mentions) {
     mentions.forEach(personId => {
       const person = personMap.get(personId)
@@ -32,8 +40,14 @@ export const renderComment = (input, mentions, personMap, className = '') => {
         `<a class="mention" href="/people/${person.id}">@${person.full_name}</a>`
       )
     })
+    departmentMentions.forEach(departmentId => {
+      const department = departmentMap.get(departmentId)
+      compiled = compiled.replaceAll(
+        `@${department.name}`,
+        `<span style="color: ${department.color}">@${department.name}</span>`
+      )
+    })
   }
-  compiled = sanitize(compiled)
 
   return compiled.replaceAll(
     TIME_CODE_REGEX,

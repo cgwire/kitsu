@@ -258,6 +258,19 @@ const getters = {
     return production && production.production_type === 'tvshow'
   },
 
+  productionDepartmentIds: (state, getters) => {
+    const departmentIds = {}
+    return getters.productionTaskTypes.reduce((acc, type) => {
+      if (type.department_id) {
+        if (!departmentIds[type.department_id]) {
+          departmentIds[type.department_id] = true
+          acc.push(type.department_id)
+        }
+      }
+      return acc
+    }, [])
+  },
+
   productionAssetTypeOptions: (state, getters) => {
     return getters.productionAssetTypes
       .filter(assetType => assetType !== undefined)

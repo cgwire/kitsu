@@ -46,6 +46,20 @@
       >
         <template slot="item" slot-scope="team">
           <template v-if="team.item.isTime"> ⏱️ frame </template>
+          <template v-else-if="team.item.isDepartment">
+            <span
+              class="mr05"
+              :style="{
+                background: team.item.color,
+                width: '10px',
+                height: '10px',
+                'border-radius': '50%'
+              }"
+            >
+              &nbsp;
+            </span>
+            {{ team.item.full_name }}
+          </template>
           <template v-else>
             <div class="flexrow">
               <people-avatar
@@ -413,10 +427,12 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'departmentMap',
       'isDarkTheme',
       'isCurrentUserArtist',
       'isCurrentUserClient',
       'uploadProgress',
+      'productionDepartmentIds',
       'taskStatusForCurrentUser',
       'taskTypeMap',
       'taskStatusMap'
@@ -671,6 +687,17 @@ export default {
         } else {
           this.atOptions = [...this.team]
         }
+        this.atOptions = this.atOptions.concat(
+          this.productionDepartmentIds.map(departmentId => {
+            const department = this.departmentMap.get(departmentId)
+            return {
+              isDepartment: true,
+              full_name: department.name,
+              color: department.color,
+              id: departmentId
+            }
+          })
+        )
         this.atOptions.push({
           isTime: true,
           full_name: 'frame'

@@ -1817,6 +1817,10 @@ tbody:last-child .empty-line:last-child {
   padding: 0;
 }
 
+.content ul {
+  margin: 0;
+}
+
 .main-column {
 }
 
