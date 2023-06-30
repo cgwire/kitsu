@@ -196,6 +196,26 @@
 
         <h3
           class="subtitle flexrow-item mt2"
+        >
+          {{ $t('task_types.fields.priority') }}
+        </h3>
+        <div class="flexrow">
+          <combobox-task-type
+            class="flexrow-item"
+            :task-type-list="readyForTaskTypeList"
+            open-top
+            v-model="priority.taskTypeId"
+          />
+          <combobox-styled
+            class="flexrow-item"
+            :options="priorityOptions"
+            locale-key-prefix="tasks."
+            v-model="priority.value"
+            v-show="priority.taskTypeId !== ''"
+          />
+        </div>
+        <h3
+          class="subtitle flexrow-item mt2"
           v-if="isAssets && !isAssetsOnly"
         >
           {{ $t('assets.fields.ready_for') }}
@@ -247,6 +267,7 @@ import { descriptorMixin } from '@/components/mixins/descriptors'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import ModalFooter from '@/components/modals/ModalFooter'
 import PeopleField from '@/components/widgets/PeopleField'
@@ -260,6 +281,7 @@ export default {
     ButtonSimple,
     Combobox,
     ComboboxStatus,
+    ComboboxStyled,
     ComboboxTaskType,
     ModalFooter,
     PeopleField,
@@ -322,6 +344,16 @@ export default {
           { label: 'with_thumbnail', value: 'withthumbnail' },
           { label: 'without_thumbnail', value: '-withthumbnail' }
         ]
+      },
+      priorityOptions: [
+        { label: 'priority.normal', value: '0' },
+        { label: 'priority.high', value: '1' },
+        { label: 'priority.very_high', value: '2' },
+        { label: 'priority.emergency', value: '3' }
+      ],
+      priority: {
+        taskTypeId: '',
+        value: '-1'
       },
       readyFor: {
         taskTypeId: '',
@@ -455,6 +487,7 @@ export default {
       query = this.applyAssignationChoice(query)
       query = this.applyThumbnailChoice(query)
       query = this.applyUnionChoice(query)
+      query = this.applyPriorityChoice(query)
       query = this.applyReadyForChoice(query)
       query = this.applyAssetsReadyChoice(query)
       return query.trim()
@@ -533,10 +566,18 @@ export default {
       return query
     },
 
+    applyPriorityChoice(query) {
+      if (this.priority.taskTypeId !== '' && this.priority.value !== '-1') {
+        const taskType = this.taskTypeMap.get(this.priority.taskTypeId)
+        const value = this.priority.value
+        query = ` priority-[${taskType.name.toLowerCase()}]=${value}`
+      }
+      return query
+    },
+
     applyReadyForChoice(query) {
       if (this.readyFor.taskTypeId !== '') {
         const taskType = this.taskTypeMap.get(this.readyFor.taskTypeId)
-        console.log(this.readyFor.taskTypeId, taskType)
         query = ` readyfor=[${taskType.name.toLowerCase()}]`
       }
       return query
@@ -680,6 +721,8 @@ export default {
             this.setFiltersFromAssignedToQuery(filter)
           } else if (filter.type === 'thumbnail') {
             this.setFiltersFromThumbnailQuery(filter)
+          } else if (filter.type === 'priority') {
+            this.setFiltersFromPriorityQuery(filter)
           } else if (filter.type === 'readyfor') {
             this.setFiltersFromReadyForQuery(filter)
           } else if (filter.type === 'assetsready') {
@@ -766,6 +809,11 @@ export default {
       }
     },
 
+    setFiltersFromPriorityQuery(filter) {
+      this.priority.taskTypeId = filter.taskTypeId
+      this.priority.value = filter.value + ''
+    },
+
     setFiltersFromReadyForQuery(filter) {
       this.readyFor.taskTypeId = filter.value
     },
@@ -808,6 +856,8 @@ export default {
         this.assignation.taskTypeId =
           this.taskTypeList.length > 0 ? this.taskTypeList[0].id : ''
         this.readyFor.taskTypeId = ''
+        this.priority.taskTypeId = ''
+        this.priority.value = '0'
         this.setFiltersFromCurrentQuery()
       }
     }

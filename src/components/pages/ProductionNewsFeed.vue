@@ -116,7 +116,7 @@
               <div
                 :key="'news-' + news.id"
                 :ref="'news-' + news.id"
-                v-for="news in dayList"
+                v-for="(news, index) in dayList"
               >
                 <div v-if="previewMode === 'comments'">
                   <div
@@ -275,10 +275,12 @@
                     v-if="previewMode == 'previews'"
                   >
                     <preview-player
+                      :canvas-id="`annotation-canvas-${dayList[0].created_at.substring(0, 10)}-${index}`"
                       :previews="[
                         {
                           id: news.preview_file_id,
-                          extension: news.preview_file_extension
+                          extension: news.preview_file_extension,
+                          annotations: news.preview_file_annotations
                         }
                       ]"
                       :read-only="true"
@@ -295,10 +297,15 @@
     </div>
 
     <div
-      class="column side-column is-hidden-mobile hide-small-screen"
+      id="side-column"
+      class="column side-column"
       v-if="currentTask"
     >
-      <task-info :task="currentTask" :is-loading="loading.currentTask" />
+      <task-info
+        :task="currentTask"
+        :is-loading="loading.currentTask"
+        with-actions
+      />
     </div>
   </div>
 </template>

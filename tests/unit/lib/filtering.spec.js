@@ -474,6 +474,22 @@ describe('lib/filtering', () => {
       expect(filters[0].type).toEqual('readyfor')
       expect(filters[0].value).toEqual('task-type-1')
     })
+
+    it('priority-animation=3 in query case', () => {
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        query: 'priority-animation=3'
+      })
+      expect(filters).toHaveLength(1)
+      expect(filters[0].type).toEqual('priority')
+      expect(filters[0].taskTypeId).toEqual('task-type-1')
+      expect(filters[0].value).toEqual(3)
+    })
   })
 
   describe('applyFilters', () => {
@@ -551,37 +567,44 @@ describe('lib/filtering', () => {
       'task-1': {
         id: 'task-1',
         assignees: [],
-        task_status_id: 'task-status-1'
+        task_status_id: 'task-status-1',
+        priority: 0
       },
       'task-2': {
         id: 'task-2',
         assignees: ['person-1'],
-        task_status_id: 'task-status-1'
+        task_status_id: 'task-status-1',
+        priority: 0
       },
       'task-3': {
         id: 'task-3',
         assignees: ['person-1', 'person-2'],
-        task_status_id: 'task-status-1'
+        task_status_id: 'task-status-1',
+        priority: 3
       },
       'task-4': {
         id: 'task-4',
         assignees: [],
-        task_status_id: 'task-status-2'
+        task_status_id: 'task-status-2',
+        priority: 0
       },
       'task-5': {
         id: 'task-5',
         assignees: [],
-        task_status_id: 'task-status-2'
+        task_status_id: 'task-status-2',
+        priority: 0
       },
       'task-6': {
         id: 'task-6',
         assignees: [],
-        task_status_id: 'task-status-1'
+        task_status_id: 'task-status-1',
+        priority: 0
       },
       'task-7': {
         id: 'task-7',
         assignees: [],
-        task_status_id: 'task-status-2'
+        task_status_id: 'task-status-2',
+        priority: 0
       }
     }))
     const descriptors = [
@@ -835,6 +858,22 @@ describe('lib/filtering', () => {
         taskMap
       )
       expect(results).toHaveLength(2)
+    })
+
+    it('priority-animation=3', () => {
+      const filters = [
+        {
+          type: 'priority',
+          taskTypeId: 'task-type-1',
+          value: 3,
+        }
+      ]
+      const results = applyFilters(
+        entries,
+        filters,
+        taskMap
+      )
+      expect(results).toHaveLength(1)
     })
 
     it('readyfor=[Animation]', () => {

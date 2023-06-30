@@ -87,6 +87,14 @@
                 v-model="estimationFilter"
               />
             </div>
+            <div class="flexrow-item" v-if="isActiveTab('tasks')">
+              <combobox-styled
+                :label="$t('task_types.fields.priority')"
+                :options="priorityOptions"
+								locale-key-prefix="tasks."
+                v-model="priorityFilter"
+              />
+            </div>
             <div class="filler"></div>
             <div class="flexrow-item" v-if="isActiveTab('tasks')">
               <combobox-styled
@@ -275,14 +283,14 @@ import DateField from '@/components/widgets/DateField'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper'
+import ImportModal from '@/components/modals/ImportModal'
+import ImportRenderModal from '@/components/modals/ImportRenderModal'
 import Schedule from '@/components/pages/schedule/Schedule'
 import SearchField from '@/components/widgets/SearchField'
 import SearchQueryList from '@/components/widgets/SearchQueryList'
 import TaskInfo from '@/components/sides/TaskInfo'
 import TaskList from '@/components/lists/TaskList'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
-import ImportModal from '@/components/modals/ImportModal'
-import ImportRenderModal from '@/components/modals/ImportRenderModal'
 
 const filters = {
   all(tasks) {
@@ -416,6 +424,7 @@ export default {
       dueDateFilter: 'all',
       entityType: 'Asset',
       estimationFilter: 'all',
+      priorityFilter: '-1',
       tasks: [],
       selection: {},
       dueDateOptions: [
@@ -444,6 +453,13 @@ export default {
         entities: false,
         importing: false
       },
+      priorityOptions: [
+        { label: 'all_tasks', value: '-1' },
+        { label: 'priority.normal', value: '0' },
+        { label: 'priority.high', value: '1' },
+        { label: 'priority.very_high', value: '2' },
+        { label: 'priority.emergency', value: '3' }
+      ],
       schedule: {
         currentColor: 'status',
         startDate: null,
@@ -761,6 +777,7 @@ export default {
 
             this.dueDateFilter = this.$route.query.duedate || 'all'
             this.estimationFilter = this.$route.query.late || 'all'
+            this.priorityFilter = this.$route.query.priority || '-1'
             this.onSearchChange(this.$route.query.search)
           })
           .catch(err => {
@@ -900,6 +917,10 @@ export default {
           this.taskStatusMap
         )
       }
+      if (this.priorityFilter !== '-1') {
+        this.tasks = this.tasks.filter(
+          t => t.priority === parseInt(this.priorityFilter))
+      }
     },
 
     saveSearchQuery(searchQuery) {
@@ -923,8 +944,9 @@ export default {
       const search = this.searchField.getValue()
       const duedate = this.dueDateFilter
       const late = this.estimationFilter
+      const priority = this.priorityFilter
       this.$router.push({
-        query: { search, duedate, late }
+        query: { search, duedate, late, priority }
       })
     },
 
@@ -1390,6 +1412,10 @@ export default {
     },
 
     estimationFilter() {
+      this.applyTaskFilters()
+    },
+
+    priorityFilter() {
       this.applyTaskFilters()
     },
 
