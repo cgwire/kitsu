@@ -395,6 +395,9 @@
                 >
                   <div
                     class="timebar"
+                    :class="{
+                      selected: selection.includes(childElement)
+                    }"
                     :title="
                       (multiline ? `${childElement.project_name} - ` : '') +
                       childElement.name +
@@ -499,6 +502,7 @@ export default {
   data() {
     return {
       currentElement: null,
+      selection: [],
       isBrowsingX: false,
       isBrowsingY: false,
       isChangeSize: false,
@@ -961,6 +965,11 @@ export default {
     },
 
     changeDates(event) {
+      if (!this.isSelected(this.currentElement)) {
+        // avoid side effect if item unselected
+        return
+      }
+
       const change =
         this.getClientX(event) - this.initialClientX - this.cellWidth / 2
       const dayChange = Math.ceil(change / this.cellWidth)
@@ -987,9 +996,19 @@ export default {
         const newStartDate = this.displayedDays[currentIndex]
         if (newStartDate) {
           const newEndDate = this.displayedDays[currentIndex + length]
-          if (this.isValidItemDates(newStartDate, newEndDate)) {
-            this.currentElement.startDate = newStartDate
-            this.currentElement.endDate = newEndDate
+          const dateDiff = newStartDate.diff(this.currentElement.startDate)
+          if (dateDiff && this.isValidItemDates(newStartDate, newEndDate)) {
+            // update all selected items
+            this.selection.forEach(item => {
+              item.startDate.add(dateDiff)
+              item.endDate.add(dateDiff)
+            })
+            if (this.multiline) {
+              const parentElements = [
+                ...new Set(this.selection.map(item => item.parentElement))
+              ]
+              parentElements.forEach(this.refreshItemPositions)
+            }
           }
         }
       } else {
@@ -1034,7 +1053,7 @@ export default {
         : this.displayedDays[currentIndex]
       if (this.isValidItemDates(newStartDate, this.currentElement.endDate)) {
         this.currentElement.startDate = newStartDate
-        // this.$emit('item-changed', this.currentElement)
+        this.resetSelection([this.currentElement])
       }
     },
 
@@ -1083,8 +1102,39 @@ export default {
         : this.displayedDays[currentIndex]
       if (this.isValidItemDates(this.currentElement.startDate, newEndDate)) {
         this.currentElement.endDate = newEndDate
-        // this.$emit('item-changed', this.currentElement)
+        this.resetSelection([this.currentElement])
       }
+    },
+
+    updateSelection(item, event) {
+      const isCtrlKey = event.ctrlKey || event.metaKey
+
+      if (this.isSelected(item)) {
+        if (isCtrlKey) {
+          this.removeFromSelection(item)
+        }
+      } else {
+        if (!isCtrlKey) {
+          this.resetSelection()
+        }
+        this.addToSelection(item)
+      }
+    },
+
+    isSelected(item) {
+      return this.selection.includes(item)
+    },
+
+    addToSelection(itemToAdd) {
+      this.selection.push(itemToAdd)
+    },
+
+    removeFromSelection(itemToRemove) {
+      this.selection = this.selection.filter(item => item !== itemToRemove)
+    },
+
+    resetSelection(value) {
+      this.selection = value || []
     },
 
     moveTimebar(timeElement, event) {
@@ -1102,6 +1152,8 @@ export default {
         this.lastEndDate = timeElement.endDate.clone()
         this.initialClientX = this.getClientX(event)
         document.body.style.cursor = 'ew-resize'
+
+        this.updateSelection(timeElement, event)
       }
     },
 
@@ -1123,6 +1175,8 @@ export default {
         this.lastEndDate = timeElement.endDate.clone()
         this.initialClientX = this.getClientX(event)
         document.body.style.cursor = 'w-resize'
+
+        this.updateSelection(timeElement, event)
       }
     },
 
@@ -1144,6 +1198,8 @@ export default {
         this.lastEndDate = timeElement.endDate.clone()
         this.initialClientX = this.getClientX(event)
         document.body.style.cursor = 'e-resize'
+
+        this.updateSelection(timeElement, event)
       }
     },
 
@@ -1226,7 +1282,13 @@ export default {
     stopBrowsing(event) {
       document.body.style.cursor = 'default'
       if (this.currentElement) {
-        this.$emit('item-changed', this.currentElement)
+        if (this.initialClientX !== this.getClientX(event)) {
+          this.selection.forEach(item => {
+            this.$emit('item-changed', item)
+          })
+        }
+      } else {
+        this.resetSelection()
       }
       this.isChangeStartDate = false
       this.isChangeEndDate = false
@@ -1382,8 +1444,6 @@ export default {
         this.multiline ? this.refreshItemPositions : undefined
       )
     },
-
-    expandChildElement(element) {},
 
     childNameStyle(rootElement, index) {
       const isOdd = index % 2 === 0
@@ -1851,6 +1911,10 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
           border-radius: 0.2em;
           display: flex;
           z-index: 101;
+
+          &.selected {
+            box-shadow: 0 0 2px 1px rgb(255 0 0 / 60%);
+          }
 
           .timebar-left-hand {
             cursor: w-resize;
