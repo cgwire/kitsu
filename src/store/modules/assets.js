@@ -482,11 +482,10 @@ const actions = {
     const assetTypeMap = rootState.assetTypes.assetTypeMap
     commit(LOCK_ASSET, data)
     commit(EDIT_ASSET_END, { newAsset: data, assetTypeMap })
-    return assetsApi.updateAsset(data).then(asset => {
+    return assetsApi.updateAsset(data).finally(() => {
       setTimeout(() => {
         commit(UNLOCK_ASSET, data)
       }, 2000)
-      return Promise.resolve(asset)
     })
   },
 

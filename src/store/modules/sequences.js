@@ -449,11 +449,15 @@ const actions = {
 
   editSequence({ commit, state }, data) {
     commit(LOCK_SEQUENCE, data)
-    return shotsApi.updateSequence(data).then(sequence => {
-      commit(EDIT_SEQUENCE_END, sequence)
-      commit(UNLOCK_SEQUENCE, data)
-      return Promise.resolve(sequence)
-    })
+    return shotsApi
+      .updateSequence(data)
+      .then(sequence => {
+        commit(EDIT_SEQUENCE_END, sequence)
+        return sequence
+      })
+      .finally(() => {
+        commit(UNLOCK_SEQUENCE, data)
+      })
   },
 
   deleteSequence({ commit, state }, sequence) {

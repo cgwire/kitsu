@@ -427,11 +427,10 @@ const actions = {
   editEdit({ commit, state }, data) {
     commit(LOCK_EDIT, data)
     commit(EDIT_EDIT_END, data)
-    return editsApi.updateEdit(data).then(edit => {
+    return editsApi.updateEdit(data).finally(() => {
       setTimeout(() => {
-        commit(UNLOCK_EDIT, edit)
+        commit(UNLOCK_EDIT, data)
       }, 2000)
-      return Promise.resolve(edit)
     })
   },
 

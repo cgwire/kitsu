@@ -494,11 +494,10 @@ const actions = {
       newShot: data,
       sequences: rootGetters.displayedSequences
     })
-    return shotsApi.updateShot(data).then(shot => {
+    return shotsApi.updateShot(data).finally(() => {
       setTimeout(() => {
-        commit(UNLOCK_SHOT, shot)
+        commit(UNLOCK_SHOT, data)
       }, 2000)
-      return Promise.resolve(shot)
     })
   },
 
