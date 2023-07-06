@@ -404,7 +404,7 @@ const actions = {
           (!isTVShow || ed.parent_id === edit.parent_id)
       )
     ) {
-      return Promise.reject(new Error('Edit already exsists'))
+      return Promise.reject(new Error('Edit already exists'))
     }
     return editsApi.newEdit(edit).then(edit => {
       commit(NEW_EDIT_END, edit)

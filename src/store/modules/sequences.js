@@ -427,7 +427,7 @@ const actions = {
           (!isTVShow || seq.episode_id === sequence.episode_id)
       )
     ) {
-      return Promise.reject(new Error('Sequence already exsists'))
+      return Promise.reject(new Error('Sequence already exists'))
     }
     return shotsApi.newSequence(sequence).then(sequence => {
       commit(NEW_SEQUENCE_END, { sequence, episodeMap })
