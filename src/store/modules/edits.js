@@ -371,7 +371,7 @@ const actions = {
    */
   loadEdit({ commit, state, rootGetters }, editId) {
     const edit = rootGetters.editMap.get(editId)
-    if (edit && edit.lock) return
+    if (edit?.lock) return
 
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
@@ -1089,12 +1089,16 @@ const mutations = {
 
   [LOCK_EDIT](state, edit) {
     edit = state.editMap.get(edit.id)
-    if (edit) edit.lock = true
+    if (edit) {
+      edit.lock = !edit.lock ? 1 : edit.lock + 1
+    }
   },
 
   [UNLOCK_EDIT](state, edit) {
     edit = state.editMap.get(edit.id)
-    if (edit) edit.lock = false
+    if (edit) {
+      edit.lock = !edit.lock ? 0 : edit.lock - 1
+    }
   },
 
   [RESET_ALL](state) {

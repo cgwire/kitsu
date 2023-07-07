@@ -449,15 +449,12 @@ const actions = {
 
   editSequence({ commit, state }, data) {
     commit(LOCK_SEQUENCE, data)
-    return shotsApi
-      .updateSequence(data)
-      .then(sequence => {
-        commit(EDIT_SEQUENCE_END, sequence)
-        return sequence
-      })
-      .finally(() => {
+    commit(EDIT_SEQUENCE_END, data)
+    return shotsApi.updateSequence(data).finally(() => {
+      setTimeout(() => {
         commit(UNLOCK_SEQUENCE, data)
-      })
+      }, 2000)
+    })
   },
 
   deleteSequence({ commit, state }, sequence) {
@@ -468,10 +465,10 @@ const actions = {
   },
 
   loadSequence({ commit, state, rootGetters }, sequenceId) {
-    const episodeMap = rootGetters.episodeMap
-    const sequence = rootGetters.sequenceMap.get(sequenceId)
-    if (sequence && sequence.lock) return
+    const sequence = state.sequenceMap.get(sequenceId)
+    if (sequence?.lock) return
 
+    const episodeMap = rootGetters.episodeMap
     return shotsApi
       .getSequence(sequenceId)
       .then(sequence => {
@@ -779,7 +776,9 @@ const mutations = {
   [EDIT_SEQUENCE_END](state, newSequence) {
     const sequence = state.sequenceMap.get(newSequence.id)
     if (sequence) {
-      Object.assign(sequence, newSequence)
+      const copyNewSequence = { ...newSequence }
+      copyNewSequence.data = { ...sequence.data, ...newSequence.data }
+      Object.assign(sequence, copyNewSequence)
     }
     state.sequenceIndex = buildSequenceIndex(cache.sequences)
     if (sequence.description && !state.isSequenceDescription) {
@@ -1018,12 +1017,16 @@ const mutations = {
 
   [LOCK_SEQUENCE](state, sequence) {
     sequence = state.sequenceMap.get(sequence.id)
-    if (sequence) sequence.lock = true
+    if (sequence) {
+      sequence.lock = !sequence.lock ? 1 : sequence.lock + 1
+    }
   },
 
   [UNLOCK_SEQUENCE](state, sequence) {
     sequence = state.sequenceMap.get(sequence.id)
-    if (sequence) sequence.lock = false
+    if (sequence) {
+      sequence.lock = !sequence.lock ? 0 : sequence.lock - 1
+    }
   },
 
   [UPDATE_METADATA_DESCRIPTOR_END](
