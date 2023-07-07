@@ -39,6 +39,7 @@ export default {
       'assetTypeMap',
       'currentEpisode',
       'currentProduction',
+      'editMap',
       'episodeMap',
       'isCurrentUserAdmin',
       'isDataLoading',
@@ -91,6 +92,7 @@ export default {
       'loadAsset',
       'loadAssetType',
       'loadComment',
+      'loadEdit',
       'loadEpisode',
       'loadOpenProductions',
       'loadPerson',
@@ -180,6 +182,28 @@ export default {
       'sequence:delete'(eventData) {
         if (this.sequenceMap.get(eventData.sequence_id)) {
           this.$store.commit('REMOVE_SEQUENCE', { id: eventData.sequence_id })
+        }
+      },
+
+      'edit:new'(eventData) {
+        if (
+          !this.editMap.get(eventData.edit_id) &&
+          this.currentProduction &&
+          this.currentProduction.id === eventData.project_id
+        ) {
+          this.loadEdit(eventData.edit_id)
+        }
+      },
+
+      'edit:update'(eventData) {
+        if (this.editMap.get(eventData.edit_id)) {
+          this.loadEdit(eventData.edit_id)
+        }
+      },
+
+      'edit:delete'(eventData) {
+        if (this.editMap.get(eventData.edit_id)) {
+          this.$store.commit('REMOVE_EDIT', { id: eventData.edit_id })
         }
       },
 
@@ -1895,7 +1919,6 @@ th.validation-cell {
 .input.date-input {
   border-radius: 10px;
 }
-
 
 .date-input::placeholder {
   border-radius: 10px;
