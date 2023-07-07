@@ -440,7 +440,7 @@ const actions = {
    */
   loadShot({ commit, state, rootGetters }, shotId) {
     const shot = rootGetters.shotMap.get(shotId)
-    if (shot && shot.lock) return
+    if (shot?.lock) return
 
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
@@ -494,11 +494,10 @@ const actions = {
       newShot: data,
       sequences: rootGetters.displayedSequences
     })
-    return shotsApi.updateShot(data).then(shot => {
+    return shotsApi.updateShot(data).finally(() => {
       setTimeout(() => {
-        commit(UNLOCK_SHOT, shot)
+        commit(UNLOCK_SHOT, data)
       }, 2000)
-      return Promise.resolve(shot)
     })
   },
 
@@ -1264,12 +1263,16 @@ const mutations = {
 
   [LOCK_SHOT](state, shot) {
     shot = state.shotMap.get(shot.id)
-    if (shot) shot.lock = true
+    if (shot) {
+      shot.lock = !shot.lock ? 1 : shot.lock + 1
+    }
   },
 
   [UNLOCK_SHOT](state, shot) {
     shot = state.shotMap.get(shot.id)
-    if (shot) shot.lock = false
+    if (shot) {
+      shot.lock = !shot.lock ? 0 : shot.lock - 1
+    }
   },
 
   [RESET_ALL](state) {

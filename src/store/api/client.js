@@ -4,8 +4,8 @@ import errors from '@/lib/errors'
 const client = {
   get(path, callback) {
     superagent.get(path).end((err, res) => {
-      // if (res.statusCode === 401) return errors.backToLogin()
-      callback(err, res.body)
+      // if (res?.statusCode === 401) return errors.backToLogin()
+      callback(err, res?.body)
     })
   },
 
@@ -14,8 +14,8 @@ const client = {
       .post(path)
       .send(data)
       .end((err, res) => {
-        if (res.statusCode === 401) return errors.backToLogin()
-        callback(err, res.body)
+        if (res?.statusCode === 401) return errors.backToLogin()
+        callback(err, res?.body)
       })
   },
 
@@ -24,20 +24,20 @@ const client = {
       .put(path)
       .send(data)
       .end((err, res) => {
-        if (res.statusCode === 401) return errors.backToLogin()
-        callback(err, res.body)
+        if (res?.statusCode === 401) return errors.backToLogin()
+        callback(err, res?.body)
       })
   },
 
   del(path, callback) {
     superagent.del(path).end((err, res) => {
-      if (res.statusCode === 401) return errors.backToLogin()
-      callback(err, res.body)
+      if (res?.statusCode === 401) return errors.backToLogin()
+      callback(err, res?.body)
     })
   },
 
   pget(path) {
-    return superagent.get(path).then(res => res.body)
+    return superagent.get(path).then(res => res?.body)
   },
 
   ppost(path, data) {
@@ -46,14 +46,14 @@ const client = {
         .post(path)
         .send(data)
         .end((err, res) => {
-          if (res.statusCode === 401) {
+          if (res?.statusCode === 401) {
             errors.backToLogin()
             return reject(err)
           } else {
             if (err) {
               err.body = res ? res.body : ''
               return reject(err)
-            } else return resolve(res.body)
+            } else return resolve(res?.body)
           }
         })
     })
@@ -68,12 +68,12 @@ const client = {
       request,
       promise: new Promise((resolve, reject) => {
         request.end((err, res) => {
-          if (res.statusCode === 401) {
+          if (res?.statusCode === 401) {
             errors.backToLogin()
             return reject(err)
           } else {
             if (err) return reject(err)
-            else return resolve(res.body)
+            else return resolve(res?.body)
           }
         })
       })
@@ -86,14 +86,14 @@ const client = {
         .put(path)
         .send(data)
         .end((err, res) => {
-          if (res.statusCode === 401) {
+          if (res?.statusCode === 401) {
             errors.backToLogin()
             reject(err)
           } else {
             if (err) {
               err.body = res ? res.body : ''
               return reject(err)
-            } else return resolve(res.body)
+            } else return resolve(res?.body)
           }
         })
     })
@@ -105,14 +105,14 @@ const client = {
         .del(path)
         .send(data)
         .end((err, res) => {
-          if (res.statusCode === 401) {
+          if (res?.statusCode === 401) {
             errors.backToLogin()
             reject(err)
           } else {
             if (err) {
               err.body = res ? res.body : ''
               return reject(err)
-            } else return resolve(res.body)
+            } else return resolve(res?.body)
           }
         })
     })

@@ -1916,14 +1916,19 @@ describe('Assets store', () => {
       store.mutations.LOCK_ASSET(state, asset)
       expect(asset).toEqual({
         id: 'asset-id',
-        lock: true
+        lock: 1
+      })
+      store.mutations.LOCK_ASSET(state, asset)
+      expect(asset).toEqual({
+        id: 'asset-id',
+        lock: 2
       })
     })
 
     test('UNLOCK_ASSET', () => {
       const asset = {
         id: 'asset-id',
-        lock: true
+        lock: 2
       }
       const state = {
         assetMap: new Map(Object.entries({
@@ -1933,7 +1938,12 @@ describe('Assets store', () => {
       store.mutations.UNLOCK_ASSET(state, asset)
       expect(asset).toEqual({
         id: 'asset-id',
-        lock: false
+        lock: 1
+      })
+      store.mutations.UNLOCK_ASSET(state, asset)
+      expect(asset).toEqual({
+        id: 'asset-id',
+        lock: 0
       })
     })
 

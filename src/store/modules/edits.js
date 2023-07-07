@@ -371,7 +371,7 @@ const actions = {
    */
   loadEdit({ commit, state, rootGetters }, editId) {
     const edit = rootGetters.editMap.get(editId)
-    if (edit && edit.lock) return
+    if (edit?.lock) return
 
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
@@ -404,7 +404,7 @@ const actions = {
           (!isTVShow || ed.parent_id === edit.parent_id)
       )
     ) {
-      return Promise.reject(new Error('Edit already exsists'))
+      return Promise.reject(new Error('Edit already exists'))
     }
     return editsApi.newEdit(edit).then(edit => {
       commit(NEW_EDIT_END, edit)
@@ -427,11 +427,10 @@ const actions = {
   editEdit({ commit, state }, data) {
     commit(LOCK_EDIT, data)
     commit(EDIT_EDIT_END, data)
-    return editsApi.updateEdit(data).then(edit => {
+    return editsApi.updateEdit(data).finally(() => {
       setTimeout(() => {
-        commit(UNLOCK_EDIT, edit)
+        commit(UNLOCK_EDIT, data)
       }, 2000)
-      return Promise.resolve(edit)
     })
   },
 
@@ -1090,12 +1089,16 @@ const mutations = {
 
   [LOCK_EDIT](state, edit) {
     edit = state.editMap.get(edit.id)
-    if (edit) edit.lock = true
+    if (edit) {
+      edit.lock = !edit.lock ? 1 : edit.lock + 1
+    }
   },
 
   [UNLOCK_EDIT](state, edit) {
     edit = state.editMap.get(edit.id)
-    if (edit) edit.lock = false
+    if (edit) {
+      edit.lock = !edit.lock ? 0 : edit.lock - 1
+    }
   },
 
   [RESET_ALL](state) {

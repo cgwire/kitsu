@@ -405,7 +405,7 @@ const actions = {
    */
   loadAsset({ commit, state, rootGetters }, assetId) {
     const asset = state.assetMap.get(assetId)
-    if (asset && asset.lock) return
+    if (asset?.lock) return
 
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
@@ -435,7 +435,7 @@ const actions = {
 
   newAsset({ commit, dispatch, state, rootGetters }, data) {
     if (cache.assets.find(asset => asset.name === data.name)) {
-      return Promise.reject(new Error('Asset already exsists'))
+      return Promise.reject(new Error('Asset already exists'))
     }
     return assetsApi.newAsset(data).then(asset => {
       const assetTypeMap = rootGetters.assetTypeMap
@@ -477,16 +477,15 @@ const actions = {
         return asset.name === data.name && data.id !== asset.id
       })
     if (existingAsset) {
-      return Promise.reject(new Error('Asset already exsists'))
+      return Promise.reject(new Error('Asset already exists'))
     }
     const assetTypeMap = rootState.assetTypes.assetTypeMap
     commit(LOCK_ASSET, data)
     commit(EDIT_ASSET_END, { newAsset: data, assetTypeMap })
-    return assetsApi.updateAsset(data).then(asset => {
+    return assetsApi.updateAsset(data).finally(() => {
       setTimeout(() => {
         commit(UNLOCK_ASSET, data)
       }, 2000)
-      return Promise.resolve(asset)
     })
   },
 
@@ -1158,12 +1157,16 @@ const mutations = {
 
   [LOCK_ASSET](state, asset) {
     asset = state.assetMap.get(asset.id)
-    asset.lock = true
+    if (asset) {
+      asset.lock = !asset.lock ? 1 : asset.lock + 1
+    }
   },
 
   [UNLOCK_ASSET](state, asset) {
     asset = state.assetMap.get(asset.id)
-    asset.lock = false
+    if (asset) {
+      asset.lock = !asset.lock ? 0 : asset.lock - 1
+    }
   },
 
   [RESET_ALL](state) {

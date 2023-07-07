@@ -422,7 +422,7 @@ const actions = {
 
   newEpisode({ commit, dispatch, state, rootGetters }, episode) {
     if (cache.episodes.find(ep => ep.name === episode.name)) {
-      return Promise.reject(new Error('Episode already exsists'))
+      return Promise.reject(new Error('Episode already exists'))
     }
     return shotsApi.newEpisode(episode).then(episode => {
       commit(NEW_EPISODE_END, episode)
