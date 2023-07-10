@@ -59,6 +59,8 @@
         <text-field
           ref="fpsField"
           type="number"
+          :max="60"
+          :step="0.001"
           :label="$t('productions.fields.fps')"
           @enter="runConfirmation"
           v-focus

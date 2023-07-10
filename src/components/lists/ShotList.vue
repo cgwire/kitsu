@@ -480,7 +480,8 @@
               <input
                 class="input-editor"
                 min="0"
-                step="1"
+                max="60"
+                step="0.001"
                 type="number"
                 :value="getMetadataFieldValue({ field_name: 'fps' }, shot)"
                 @keydown="onNumberFieldKeyDown"

@@ -60,8 +60,10 @@
           <text-field
             ref="fpsField"
             :label="$t('shots.fields.fps')"
-            v-model="form.fps"
             type="number"
+            :max="60"
+            :step="0.001"
+            v-model="form.fps"
             @enter="runConfirmation"
           />
           <text-field

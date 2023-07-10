@@ -44,8 +44,11 @@
             v-if="productionToEdit && productionToEdit.id"
             ref="fpsField"
             :label="$t('productions.fields.fps')"
-            v-model="form.fps"
+            type="number"
+            :max="60"
+            :step="0.001"
             @enter="runConfirmation"
+            v-model="form.fps"
             v-focus
           />
           <text-field
