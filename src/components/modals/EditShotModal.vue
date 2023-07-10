@@ -61,7 +61,7 @@
             ref="fpsField"
             :label="$t('shots.fields.fps')"
             type="number"
-            :max="60"
+            :max="1000"
             :step="0.001"
             v-model="form.fps"
             @enter="runConfirmation"
