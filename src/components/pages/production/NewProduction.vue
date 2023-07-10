@@ -60,7 +60,7 @@
               :label="$t('productions.fields.fps')"
               type="number"
               :max="60"
-              :step="0.01"
+              :step="0.001"
               :placeholder="$t('productions.creation.placeholder_fps')"
               :errored="!hasValidFPS"
               v-model="productionToCreate.settings.fps"
