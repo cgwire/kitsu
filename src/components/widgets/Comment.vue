@@ -438,7 +438,6 @@ export default {
     ...mapGetters([
       'currentProduction',
       'departmentMap',
-      'departmentMap',
       'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserManager',
@@ -748,11 +747,9 @@ export default {
       immediate: true,
       handler() {
         if (this.isCurrentUserClient) {
-          this.atOptions = [
-            ...this.team.filter(person =>
-              ['admin', 'manager', 'supervisor', 'client'].includes(person.role)
-            )
-          ]
+          this.atOptions = this.team.filter(person =>
+            ['admin', 'manager', 'supervisor', 'client'].includes(person.role)
+          )
         } else {
           this.atOptions = [...this.team]
         }

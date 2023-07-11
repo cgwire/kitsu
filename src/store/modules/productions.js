@@ -261,11 +261,9 @@ const getters = {
   productionDepartmentIds: (state, getters) => {
     const departmentIds = {}
     return getters.productionTaskTypes.reduce((acc, type) => {
-      if (type.department_id) {
-        if (!departmentIds[type.department_id]) {
-          departmentIds[type.department_id] = true
-          acc.push(type.department_id)
-        }
+      if (type.department_id && !departmentIds[type.department_id]) {
+        departmentIds[type.department_id] = true
+        acc.push(type.department_id)
       }
       return acc
     }, [])
