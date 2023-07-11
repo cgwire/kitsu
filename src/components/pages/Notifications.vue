@@ -197,7 +197,6 @@
                     isMention(notification) ||
                     isReplyMention(notification)
                   ) &&
-                  isReplyMention(notification) ||
                   !notification.comment_text
                 "
               >
@@ -208,12 +207,12 @@
                 class="comment-text reply-text"
                 v-html="renderComment(
                   notification.reply_text,
-                  notification.mentions || [],
-                  notification.department_mentions || [],
+                  notification.reply_mentions || [],
+                  notification.reply_department_mentions || [],
                   personMap,
                   departmentMap
                 )"
-                v-if="isReply(notification)"
+                v-if="isReply(notification) || isReplyMention(notification)"
               ></div>
             </div>
           </div>
