@@ -48,7 +48,8 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+import { firstBy } from 'thenby'
 
 import { sortByName } from '@/lib/sorting'
 import { getTaskPath } from '@/lib/path'
@@ -58,7 +59,7 @@ import TableInfo from '@/components/widgets/TableInfo'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
-  name: 'timespent-task-list',
+  name: 'time-spent-task-list',
 
   components: {
     TableInfo,
@@ -88,16 +89,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction',
-      'lastProductionScreen',
-      'productionMap',
-      'taskTypeMap'
-    ]),
+    ...mapGetters(['productionMap', 'taskTypeMap']),
 
     projects() {
       const projects = {}
-      this.tasks.forEach(task => {
+      const tasks = [...this.tasks].sort(firstBy('project_name'))
+
+      tasks.forEach(task => {
         if (!projects[task.project_id]) projects[task.project_id] = {}
         if (!projects[task.project_id][task.task_type_id]) {
           projects[task.project_id][task.task_type_id] = []
@@ -133,10 +131,11 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     getTaskPath(task) {
       const project = this.productionMap.get(task.project_id)
+      if (!project || project.project_status_name === 'Closed') {
+        return ''
+      }
       const isTVShow = project.production_type === 'tvshow'
       const episode = { id: project.first_episode_id }
       return getTaskPath(task, null, isTVShow, episode, this.taskTypeMap)
@@ -150,7 +149,10 @@ export default {
   watch: {
     tasks() {
       this.projectNames = this.tasks.reduce((projectNames, task) => {
-        projectNames[task.project_id] = task.project_name
+        const production = this.productionMap.get(task.project_id)
+        const suffix =
+          production?.project_status_name === 'Closed' ? ' (closed)' : ''
+        projectNames[task.project_id] = task.project_name + suffix
         return projectNames
       }, {})
     }
