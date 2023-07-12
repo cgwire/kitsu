@@ -37,8 +37,8 @@ sync(store, router)
 // Global custom directive to enable automatic focus on field after page
 // loading.
 Vue.directive('focus', {
-  inserted(el) {
-    el.focus()
+  inserted(el, binding) {
+    el.focus(binding.value)
   }
 })
 

@@ -65,6 +65,7 @@
               <search-field
                 ref="task-search-field"
                 :can-save="true"
+                :focus-options="{ preventScroll: true }"
                 @change="onSearchChange"
                 @enter="saveSearchQuery"
                 @save="saveSearchQuery"
@@ -752,7 +753,7 @@ export default {
 
     initData(force) {
       this.resetTasks()
-      this.focusSearchField()
+      this.focusSearchField({ preventScroll: true })
       if (this.tasks.length < 2) {
         this.loading.entities = true
         this.errors.entities = false
@@ -761,7 +762,7 @@ export default {
           .then(() => {
             this.loading.entities = false
             this.resetTasks()
-            this.focusSearchField()
+            this.focusSearchField({ preventScroll: true })
             const searchQuery = this.searchField
               ? this.searchField.getValue()
               : ''
