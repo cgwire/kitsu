@@ -99,6 +99,7 @@ import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
 import { monthToString, range } from '@/lib/time'
+import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
@@ -179,6 +180,7 @@ export default {
 
   created() {
     this.isLoading = true
+    this.loadProductions()
     if (this.people.length === 0) {
       this.loadPeople(() => {
         this.loadRoute()
@@ -204,20 +206,29 @@ export default {
     ...mapGetters([
       'isCurrentUserAdmin',
       'isCurrentUserManager',
-      'openProductions',
       'organisation',
       'people',
+      'productions',
       'personMap',
       'timesheet'
     ]),
 
     productionList() {
+      const productions = sortByName([...this.productions]).map(production => {
+        const suffix =
+          production.project_status_name === 'Closed' ? ' (closed)' : ''
+        return {
+          ...production,
+          name: production.name + suffix
+        }
+      })
       return [
         {
           id: '',
           name: this.$t('main.all')
-        }
-      ].concat([...this.openProductions])
+        },
+        ...productions
+      ]
     },
 
     filteredPeople() {
@@ -264,6 +275,7 @@ export default {
   methods: {
     ...mapActions([
       'loadPeople',
+      'loadProductions',
       'loadAggregatedPersonDaysOff',
       'loadAggregatedPersonTimeSpents',
       'loadTimesheets'
@@ -278,15 +290,13 @@ export default {
         month: this.currentMonth,
         productionId: this.productionId
       })
-        .then(table => {
+        .then(() => {
           this.isLoading = false
-          return Promise.resolve()
         })
         .catch(err => {
           console.error(err)
           this.isLoading = false
           this.isLoadingError = true
-          return Promise.resolve()
         })
     },
 
@@ -532,7 +542,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .main-column {
+.dark .side-column {
   border-color: $dark-grey-lightest;
 }
 
@@ -547,12 +557,12 @@ export default {
   padding-bottom: 1em;
 }
 
-.main-column {
-  border-right: 3px solid $light-grey;
-  margin: 0;
+.side-column {
+  border-left: 3px solid $light-grey;
 }
 
 .title {
   margin-right: 1em;
+  white-space: nowrap;
 }
 </style>

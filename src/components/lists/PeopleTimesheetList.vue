@@ -323,8 +323,7 @@ export default {
     },
 
     isWeekend(year, month, day) {
-      let date = moment(`${year}-${month}-${day}`)
-      if (day < 10) date = moment(`${year}-${month}-0${day}`)
+      const date = moment(`${year}-${month}-${day}`, 'YYYY-M-D')
       return [0, 6].includes(date.day())
     },
 
