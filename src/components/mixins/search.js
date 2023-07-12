@@ -19,9 +19,9 @@ export const searchMixin = {
       if (this.applySearch) this.applySearch(searchQuery.search_query)
     },
 
-    focusSearchField() {
+    focusSearchField(options) {
       if (this.searchField) {
-        this.searchField.focus()
+        this.searchField.focus(options)
       }
     },
 

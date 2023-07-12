@@ -14,7 +14,7 @@
         @keyup.enter="onEnterPressed"
         @focus="setFocusedStyle"
         @blur="unsetFocusedStyle"
-        v-focus
+        v-focus="focusOptions"
       />
     </div>
 
@@ -52,6 +52,9 @@ export default {
     active: {
       type: Boolean,
       default: true
+    },
+    focusOptions: {
+      type: Object
     }
   },
 
@@ -78,7 +81,7 @@ export default {
       }
     },
 
-    getValue(value) {
+    getValue() {
       if (this.$refs.input) {
         return this.$refs.input.value
       } else {
@@ -90,9 +93,9 @@ export default {
       this.$refs.input.value = value
     },
 
-    focus() {
+    focus(options) {
       if (this.$refs.input) {
-        this.$refs.input.focus()
+        this.$refs.input.focus(options)
       }
     },
 
