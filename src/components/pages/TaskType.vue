@@ -1208,7 +1208,7 @@ export default {
           loading: false,
           man_days: estimation,
           editable: this.isSupervisorInDepartment,
-          unresizable: estimation > 0,
+          unresizable: true,
           parentElement: personElement,
           color: this.getTaskElementColor(task, endDate),
           children: []
