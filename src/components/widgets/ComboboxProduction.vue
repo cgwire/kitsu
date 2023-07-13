@@ -38,7 +38,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import { ChevronDownIcon } from 'vue-feather-icons'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask'
@@ -74,17 +73,12 @@ export default {
     }
   },
 
-  mounted() {},
-
   computed: {
-    ...mapGetters(['openProductions', 'productionMap']),
-
     currentProduction() {
-      if (this.value) {
-        return this.productionMap.get(this.value)
-      } else {
-        return this.productionList[0]
-      }
+      return (
+        this.productionList.find(({ id }) => id === this.value) ||
+        this.productionList[0]
+      )
     }
   },
 
@@ -127,10 +121,10 @@ export default {
   margin: 0;
   padding: 0.15em;
   position: relative;
-}
 
-.production-combo:hover {
-  border: 1px solid $green;
+  &:hover {
+    border: 1px solid $green;
+  }
 }
 
 .selected-production-line {
@@ -170,7 +164,7 @@ export default {
 }
 
 .field .label {
-  padding-top: 0px;
+  padding-top: 0;
   margin-bottom: 5px;
 }
 </style>
