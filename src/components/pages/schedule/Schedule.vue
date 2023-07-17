@@ -92,7 +92,7 @@
                 v-if="
                   !rootElement.avatar && rootElement.editable && !hideManDays
                 "
-                :value="formatDuration(rootElement.man_days)"
+                :value="formatDuration(rootElement.man_days, false)"
               />
               <span
                 class="man-days-unit flexrow-item"
@@ -161,7 +161,7 @@
                           rootElement
                         )
                       "
-                      :value="formatDuration(childElement.man_days)"
+                      :value="formatDuration(childElement.man_days, false)"
                     />
                     <span>{{ $t('schedule.md') }}</span>
                   </span>

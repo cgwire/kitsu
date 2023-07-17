@@ -100,12 +100,15 @@
                 <input
                   :ref="task.id + '-estimation'"
                   class="input stylehidden"
+                  min="0"
+                  step="any"
+                  type="number"
                   @blur="onInputBlur"
                   @change="estimationUpdated($event, task, index)"
                   @keydown="onKeyDown"
                   @mouseout="onInputMouseOut"
                   @mouseover="onInputMouseOver"
-                  :value="formatDuration(task.estimation)"
+                  :value="formatDuration(task.estimation, false)"
                   v-if="isInDepartment(task)"
                 />
                 <span v-else>
@@ -648,5 +651,15 @@ td {
   td {
     padding: 0.2em;
   }
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
 }
 </style>
