@@ -1208,7 +1208,7 @@ export default {
           loading: false,
           man_days: estimation,
           editable: this.isSupervisorInDepartment,
-          unresizable: estimation > 0,
+          unresizable: true,
           parentElement: personElement,
           color: this.getTaskElementColor(task, endDate),
           children: []
@@ -1270,7 +1270,7 @@ export default {
     },
 
     getMaxDate(personElement) {
-      const startDate = this.productionEndDate
+      const startDate = this.productionStartDate
       let maxDate = startDate.clone()
       personElement.children.forEach(item => {
         if (item.endDate && item.endDate.isAfter(maxDate)) {

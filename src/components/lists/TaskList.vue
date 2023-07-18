@@ -118,11 +118,14 @@
             </td>
             <td class="estimation number-cell">
               <input
-                v-if="isInDepartment(task) && selectionGrid[task.id]"
-                :ref="task.id + '-estimation'"
                 class="input"
+                min="0"
+                step="any"
+                type="number"
+                :ref="task.id + '-estimation'"
+                :value="formatDuration(task.estimation, false)"
                 @change="updateEstimation($event.target.value)"
-                :value="formatDuration(task.estimation)"
+                v-if="isInDepartment(task) && selectionGrid[task.id]"
               />
               <span v-else>
                 {{ formatDuration(task.estimation) }}
@@ -1035,5 +1038,15 @@ td.retake-count {
   tr.task-line {
     cursor: pointer;
   }
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
 }
 </style>

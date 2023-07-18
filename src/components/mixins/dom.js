@@ -21,7 +21,7 @@ export const domMixin = {
 
     focusInput(inputEl) {
       inputEl.focus()
-      inputEl.setSelectionRange(0, inputEl.value.length)
+      inputEl.select()
       inputEl.className = 'input'
     },
 

@@ -41,32 +41,25 @@
               }"
               v-for="(task, index) in tasksByPerson"
             >
-              <td class="assignees flexrow">
-                <people-avatar
-                  class="flexrow-item"
-                  :person="personMap.get(personId)"
-                  :size="30"
-                  :font-size="17"
-                  v-for="personId in task.assignees"
-                  :key="task.id + '-' + personId"
-                  v-if="task.assignees.length > 1"
-                />
-                <span
-                  class="flexrow"
-                  :key="task.id + '-' + personId"
-                  v-for="personId in task.assignees"
-                  v-else
-                >
-                  <people-avatar
-                    class="flexrow-item"
-                    :person="personMap.get(personId)"
-                    :size="30"
-                    :font-size="17"
-                  />
-                  <people-name
-                    class="flexrow-item"
-                    :person="personMap.get(personId)"
-                  />
+              <td class="assignees">
+                <span class="flexrow" v-if="task.assignees.length">
+                  <span
+                    class="flexrow"
+                    :key="`${task.id}-${personId}`"
+                    v-for="personId in task.assignees"
+                  >
+                    <people-avatar
+                      class="flexrow-item"
+                      :person="personMap.get(personId)"
+                      :size="30"
+                      :font-size="17"
+                    />
+                    <people-name
+                      class="flexrow-item"
+                      :person="personMap.get(personId)"
+                      v-if="task.assignees.length === 1"
+                    />
+                  </span>
                 </span>
               </td>
               <td class="thumbnail">
@@ -100,12 +93,15 @@
                 <input
                   :ref="task.id + '-estimation'"
                   class="input stylehidden"
+                  min="0"
+                  step="any"
+                  type="number"
                   @blur="onInputBlur"
                   @change="estimationUpdated($event, task, index)"
                   @keydown="onKeyDown"
                   @mouseout="onInputMouseOut"
                   @mouseover="onInputMouseOver"
-                  :value="formatDuration(task.estimation)"
+                  :value="formatDuration(task.estimation, false)"
                   v-if="isInDepartment(task)"
                 />
                 <span v-else>
@@ -157,7 +153,6 @@
                   $t('tasks.fields.count')
                 }}.
               </th>
-              <th class="empty">&nbsp;</th>
             </tr>
           </thead>
 
@@ -198,7 +193,6 @@
                   <td class="quota numeric-cell">
                     {{ person.alltasks.quotaCount }}
                   </td>
-                  <td></td>
                 </tr>
                 <tr
                   class="datatable-row task-line"
@@ -229,7 +223,6 @@
                   <td class="quota numeric-cell">
                     {{ person.remaining.quotaCount }}
                   </td>
-                  <td></td>
                 </tr>
               </template>
             </template>
@@ -253,7 +246,7 @@ import { domMixin } from '@/components/mixins/dom'
 import { formatListMixin } from '@/components/mixins/format'
 import { minutesToDays, range } from '@/lib/time'
 import { frameToSeconds } from '@/lib/video'
-import firstBy from 'thenby'
+import { firstBy } from 'thenby'
 
 export default {
   name: 'estimation-helper',
@@ -314,7 +307,7 @@ export default {
     },
 
     tasksByPerson() {
-      return [...this.tasks].sort(firstBy(this.compareFirstAssignees))
+      return [...this.tasks].sort(this.compareFirstAssignees)
     },
 
     entityMap() {
@@ -589,7 +582,7 @@ td {
 
 .name {
   min-width: 120px;
-  width: 120px;
+  width: 100%;
   font-weight: bold;
 }
 
@@ -648,5 +641,15 @@ td {
   td {
     padding: 0.2em;
   }
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
 }
 </style>
