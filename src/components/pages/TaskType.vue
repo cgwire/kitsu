@@ -1270,7 +1270,7 @@ export default {
     },
 
     getMaxDate(personElement) {
-      const startDate = this.productionEndDate
+      const startDate = this.productionStartDate
       let maxDate = startDate.clone()
       personElement.children.forEach(item => {
         if (item.endDate && item.endDate.isAfter(maxDate)) {
