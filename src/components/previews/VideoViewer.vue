@@ -331,9 +331,9 @@ export default {
       } else {
         this.$options.running = true
         const currentTime = this.$options.currentTimeCalls.shift()
-        if (this.video.currentTime !== currentTime + this.frameDuration) {
+        if (this.video.currentTime !== currentTime) {
           // tweaks needed because the html video player is messy with frames
-          this.video.currentTime = currentTime + this.frameDuration + 0.01
+          this.video.currentTime = currentTime + 0.01
           this.onTimeUpdate()
         }
         setTimeout(() => {
@@ -350,8 +350,8 @@ export default {
       }
       if (time < this.frameDuration) {
         time = 0
-      } else if (time > this.video.duration - this.frameDuration) {
-        time = this.video.duration - this.frameDuration
+      } else if (time > floorToFrame(this.video.duration, this.fps) - this.frameDuration) {
+        time = floorToFrame(this.video.duration, this.fps) - this.frameDuration
       }
       this.setCurrentTime(time)
       return time
@@ -396,9 +396,9 @@ export default {
 
     onTimeUpdate() {
       if (this.video) {
-        this.currentTimeRaw = this.video.currentTime - this.frameDuration
+        this.currentTimeRaw = this.video.currentTime
       } else {
-        this.currentTimeRaw = 0 + this.frameDuration
+        this.currentTimeRaw = 0
       }
       this.$emit(
         'frame-update',
