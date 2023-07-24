@@ -417,10 +417,10 @@ export default {
     runSetCurrentTime(currentTime) {
       if (
         this.currentPlayer &&
-        this.currentPlayer.currentTime !== currentTime + this.frameDuration
+        this.currentPlayer.currentTime !== currentTime
       ) {
         // tweaks needed because the html video player is messy with frames
-        this.currentPlayer.currentTime = currentTime + this.frameDuration + 0.01
+        this.currentPlayer.currentTime = currentTime + 0.01
         this.onTimeUpdate()
       }
     },
@@ -428,9 +428,9 @@ export default {
     onTimeUpdate() {
       if (this.currentPlayer) {
         this.currentTimeRaw =
-          this.currentPlayer.currentTime - this.frameDuration
+          this.currentPlayer.currentTime
       } else {
-        this.currentTimeRaw = 0 + this.frameDuration
+        this.currentTimeRaw = 0
       }
       this.$emit(
         'frame-update',

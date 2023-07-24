@@ -259,15 +259,16 @@ export default {
       if (left === 0 && !this.fullScreen) {
         left = this.progress.parentElement.offsetParent.offsetLeft
       }
-      const position = this.getClientX(event) - left
+      let position = this.getClientX(event) - left
+      if (position > this.width) position = this.width - 1
       const ratio = position / this.width
       let duration =
         annotation && this.frameSize < 3
           ? annotation.time
           : this.videoDuration * ratio
       if (duration < 0) duration = 0
-      if (duration > this.videoDuration - this.frameDuration) {
-        duration = this.videoDuration - this.frameDuration
+      if (duration > this.videoDuration) {
+        duration = this.videoDuration
       }
       const frameNumber = Math.floor(duration / this.frameDuration)
       return { frameNumber, position }

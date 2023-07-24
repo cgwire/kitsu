@@ -61,10 +61,6 @@
                 :font-size="16"
               />
             </span>
-            <!--div class="flexrow-item">
-             {{ $t('tasks.fields.priority') }}:
-             {{ formatPriority(task.priority) }}
-           </div-->
             <subscribe-button
               class="flexrow-item action-button"
               :subscribed="isAssigned || task.is_subscribed"
@@ -226,6 +222,7 @@
                   <comment
                     :key="comment.id"
                     :comment="comment"
+                    :team="currentTeam"
                     :task="task"
                     :highlighted="false"
                     :current-user="user"

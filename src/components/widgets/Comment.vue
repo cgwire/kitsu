@@ -74,7 +74,9 @@
                 renderComment(
                   comment.text,
                   comment.mentions,
+                  comment.department_mentions || [],
                   personMap,
+                  departmentMap,
                   uniqueClassName
                 )
               "
@@ -161,18 +163,50 @@
                     </span>
                   </div>
                   <p
-                    v-html="renderComment(replyComment.text, [], personMap, '')"
+                    v-html="renderComment(
+                      replyComment.text,
+                      replyComment.mentions || [],
+                      replyComment.department_mentions || [],
+                      personMap,
+                      departmentMap,
+                      ''
+                    )"
                     class="comment-text"
                   ></p>
                 </div>
               </div>
-              <textarea
-                ref="reply"
-                class="reply"
-                @keyup.ctrl.enter="onReplyClicked"
-                v-model="replyText"
-                v-show="showReply"
-              />
+              <at-ta
+                :members="atOptions"
+                name-key="full_name"
+                :limit="2"
+                @input="onAtTextChanged"
+              >
+                <template slot="item" slot-scope="team">
+                  <template v-if="team.item.isTime"> ⏱️ frame </template>
+                  <template v-else>
+                    <div class="flexrow">
+                      <people-avatar
+                        class="flexrow-item"
+                        :person="team.item"
+                        :size="20"
+                        :font-size="11"
+                        :no-cache="true"
+                        :is-link="false"
+                      />
+                      <span class="flexrow-item">
+                        {{ team.item.full_name }}
+                      </span>
+                    </div>
+                  </template>
+                </template>
+                <textarea
+                  ref="reply"
+                  class="reply"
+                  @keyup.ctrl.enter="onReplyClicked"
+                  v-model="replyText"
+                  v-show="showReply"
+                />
+              </at-ta>
               <div class="has-text-right">
                 <button-simple
                   class="reply-button"
@@ -287,6 +321,7 @@
 </template>
 
 <script>
+import AtTa from 'vue-at/dist/vue-at-textarea'
 import moment from 'moment'
 import { mapActions, mapGetters } from 'vuex'
 import { remove } from '@/lib/models'
@@ -313,6 +348,7 @@ import ValidationTag from '@/components/widgets/ValidationTag'
 export default {
   name: 'comment',
   components: {
+    AtTa,
     ButtonSimple,
     Checklist,
     ChevronDownIcon,
@@ -327,6 +363,7 @@ export default {
 
   data() {
     return {
+      atOptions: [],
       checklist: [],
       isReplyLoading: false,
       replyText: '',
@@ -339,6 +376,10 @@ export default {
     comment: {
       type: Object,
       default: () => {}
+    },
+    team: {
+      type: Array,
+      default: () => []
     },
     task: {
       type: Object,
@@ -396,12 +437,14 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'departmentMap',
       'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isDarkTheme',
       'user',
       'personMap',
+      'productionDepartmentIds',
       'taskTypeMap',
       'taskStatusMap'
     ]),
@@ -667,6 +710,20 @@ export default {
           this.isReplyLoading = false
         })
         .catch(console.error)
+    },
+
+    onAtTextChanged(input) {
+      if (input.indexOf('@frame') >= 0) {
+        this.$nextTick(() => {
+          const text = replaceTimeWithTimecode(
+            this.$refs['comment-textarea'].value,
+            this.revision,
+            this.time,
+            this.fps
+          )
+          this.$refs['comment-textarea'].value = text
+        })
+      }
     }
   },
 
@@ -682,6 +739,35 @@ export default {
     checklist() {
       if (!this.$options.silent) {
         this.emitChangeEvent()
+      }
+    },
+
+    team: {
+      deep: true,
+      immediate: true,
+      handler() {
+        if (this.isCurrentUserClient) {
+          this.atOptions = this.team.filter(person =>
+            ['admin', 'manager', 'supervisor', 'client'].includes(person.role)
+          )
+        } else {
+          this.atOptions = [...this.team]
+        }
+        this.atOptions = this.atOptions.concat(
+          this.productionDepartmentIds.map(departmentId => {
+            const department = this.departmentMap.get(departmentId)
+            return {
+              isDepartment: true,
+              full_name: department.name,
+              color: department.color,
+              id: departmentId
+            }
+          })
+        )
+        this.atOptions.push({
+          isTime: true,
+          full_name: 'frame'
+        })
       }
     }
   }

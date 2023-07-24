@@ -979,7 +979,7 @@ export default {
       this.resetCanvas()
       this.setPlayerSpeed(1)
       this.rebuildComparisonOptions()
-      this.onFrameUpdate(1)
+      this.onFrameUpdate(0)
       this.configureWaveForm()
     })
   },

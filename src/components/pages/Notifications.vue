@@ -54,7 +54,7 @@
               <div class="flexrow">
                 <at-sign-icon
                   class="icon flexrow-item"
-                  v-if="isMention(notification)"
+                  v-if="isMention(notification) || isReplyMention(notification)"
                 />
                 <message-square-icon
                   class="icon flexrow-item"
@@ -132,9 +132,12 @@
 
                   <span
                     class="explaination flexrow-item"
-                    v-if="isMention(notification)"
+                    v-if="isMention(notification) || isReplyMention(notification)"
                   >
                     {{ $t('notifications.mention_you_on') }}
+                    <template v-if="isReplyMention(notification)">
+                      (reply)
+                    </template>
                   </span>
 
                   <router-link
@@ -152,16 +155,26 @@
                   renderComment(
                     notification.comment_text,
                     notification.mentions,
-                    personMap
+                    notification.department_mentions || [],
+                    personMap,
+                    departmentMap
                   )
                 "
                 v-if="
                   isComment(notification) ||
                   isMention(notification) ||
+                  isReplyMention(notification) ||
                   notification.comment_text
                 "
               ></div>
-              <div v-if="isReply(notification)">...</div>
+              <div
+                v-if="
+                  isReply(notification) ||
+                  isReplyMention(notification)
+                "
+              >
+                ...
+              </div>
               <div v-if="notification.preview_file_id">
                 <h3>
                   {{ $t('notifications.new_revision') }}
@@ -179,7 +192,11 @@
               <div
                 class="comment-text"
                 v-if="
-                  (isComment(notification) || isMention(notification)) &&
+                  (
+                    isComment(notification) ||
+                    isMention(notification) ||
+                    isReplyMention(notification)
+                  ) &&
                   !notification.comment_text
                 "
               >
@@ -188,8 +205,14 @@
 
               <div
                 class="comment-text reply-text"
-                v-html="renderComment(notification.reply_text, [], personMap)"
-                v-if="isReply(notification)"
+                v-html="renderComment(
+                  notification.reply_text,
+                  notification.reply_mentions || [],
+                  notification.reply_department_mentions || [],
+                  personMap,
+                  departmentMap
+                )"
+                v-if="isReply(notification) || isReplyMention(notification)"
               ></div>
             </div>
           </div>
@@ -299,13 +322,13 @@ export default {
 
   computed: {
     ...mapGetters([
+      'departmentMap',
       'notifications',
       'personMap',
       'taskStatus',
       'taskTypes',
       'taskTypeMap',
       'taskStatusMap',
-      'personMap',
       'user'
     ]),
 
@@ -453,6 +476,7 @@ export default {
       )
     },
     isMention: notification => notification.notification_type === 'mention',
+    isReplyMention: notification => notification.notification_type === 'reply-mention',
     isReply: notification => notification.notification_type === 'reply'
   },
 

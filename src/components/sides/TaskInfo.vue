@@ -160,6 +160,7 @@
                       :key="'comment' + comment.id"
                       :comment="comment"
                       :task="task"
+                      :team="currentTeam"
                       :light="true"
                       :add-preview="onAddPreviewClicked"
                       :is-first="index === 0"
