@@ -108,6 +108,7 @@
             <div
               :key="dayList.length > 0 ? dayList[0].created_at : ''"
               v-for="dayList in newsListByDay(timezone)"
+              v-if="!loading.news"
             >
               <div class="has-text-centered subtitle timeline-entry">
                 <span class="big-dot"></span>
@@ -371,7 +372,7 @@ export default {
       },
       loading: {
         more: false,
-        news: false,
+        news: true,
         currentTask: true
       },
       person: null,
@@ -647,7 +648,9 @@ export default {
         }
         this.loadNews(this.params)
           .then(() => {
-            this.loading.news = false
+            setTimeout(() => {
+              this.loading.news = false
+            }, 100)
           })
           .catch(err => {
             console.error(err)
