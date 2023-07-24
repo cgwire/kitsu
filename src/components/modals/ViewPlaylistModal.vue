@@ -16,7 +16,7 @@
           :entities="currentEntities"
           :is-loading="isLoading"
           :temp-mode="true"
-          :is-asset-playlist="isAssetPlaylist"
+          :current-entity-type="currentEntityType"
           @save-clicked="onSaveClicked"
           @annotation-changed="onAnnotationChanged"
           @annotations-refreshed="onAnnotationsRefreshed"
@@ -122,6 +122,20 @@ export default {
         return this.currentPlaylist.shots[0].sequence_name === undefined
       }
       return false
+    },
+
+    isSequencePlaylist() {
+      if (this.currentPlaylist.sequences.length > 0) {
+        return this.currentPlaylist.sequences[0].sequence_name === undefined
+      }
+      return false
+    },
+
+    currentEntityType () {
+      let type = 'shot'
+      if (this.$route.path.indexOf('asset') > 0) type = 'asset'
+      if (this.$route.path.indexOf('sequence') > 0) type = 'sequence'
+      return type
     }
   },
 
@@ -175,7 +189,7 @@ export default {
     onSaveClicked() {
       this.errors.editPlaylist = false
       this.playlistToEdit = {
-        for_entity: this.isAssetPlaylist ? 'asset' : 'shot'
+        for_entity: this.currentEntityType
       }
       this.modals.edit = true
     },
@@ -212,7 +226,7 @@ export default {
                 this.modals.edit = false
               }
               this.loading.edit = false
-              this.loadPlaylists()
+              this.loadPlaylists({})
             }
           })
         })
@@ -234,11 +248,7 @@ export default {
           .then(entities => {
             this.setupEntities(entities)
             this.isLoading = false
-            if (this.isAssetPlaylist) {
-              this.currentPlaylist.for_entity = 'asset'
-            } else {
-              this.currentPlaylist.for_entity = 'shot'
-            }
+            this.currentPlaylist.for_entity = this.currentEntityType
           })
           .catch(console.error)
       } else {

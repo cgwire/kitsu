@@ -470,6 +470,7 @@ export const LOCK_SEQUENCE = 'LOCK_SEQUENCE'
 export const UNLOCK_SEQUENCE = 'UNLOCK_SEQUENCE'
 
 export const CHANGE_EPISODE_SORT = 'CHANGE_EPISODE_SORT'
+export const RESET_SEQUENCES = 'RESET_SEQUENCES'
 
 // Profile and auth
 

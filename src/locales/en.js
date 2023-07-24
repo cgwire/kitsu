@@ -642,6 +642,7 @@ export default {
   playlists: {
     add_assets: 'Add assets',
     add_selection: 'Add selection',
+    add_sequences: 'Add sequences',
     add_shots: 'Add shots',
     add_sequence: 'Add the whole sequence',
     add_episode: 'Add the whole episode',

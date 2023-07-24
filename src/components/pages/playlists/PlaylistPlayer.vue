@@ -904,9 +904,9 @@ export default {
       type: Boolean,
       default: false
     },
-    isAssetPlaylist: {
-      type: Boolean,
-      default: false
+    currentEntityType: {
+      type: String,
+      default: 'shot'
     },
     tempMode: {
       type: Boolean,
@@ -1127,9 +1127,19 @@ export default {
     addEntitiesText() {
       if (this.isAssetPlaylist) {
         return this.$t('playlists.add_assets')
+      } else if (this.isSequencePlaylist) {
+        return this.$t('playlists.add_sequences')
       } else {
         return this.$t('playlists.add_shots')
       }
+    },
+
+    isAssetPlaylist() {
+      return this.currentEntityType === 'asset'
+    },
+
+    isSequencePlaylist() {
+      return this.currentEntityType === 'sequence'
     },
 
     isJobRunning() {

@@ -180,7 +180,7 @@
           :entities="currentEntities"
           :is-loading="loading.playlist"
           :is-adding-entity="isAddingEntity"
-          :is-asset-playlist="isAssetPlaylist"
+          :current-entity-type="currentEntityType"
           @edit-clicked="showEditModal"
           @show-add-entities="toggleAddEntities"
           @preview-changed="onPreviewChanged"
@@ -257,7 +257,7 @@
                 }"
                 :disabled="isAdditionLoading"
                 @click="addEpisodePending"
-                v-if="isTVShow && !isAssetPlaylist"
+                v-if="isTVShow && !isAssetPlaylist && !isSequencePlaylist"
               >
                 {{ $t('playlists.add_episode') }}
               </button>
@@ -314,6 +314,37 @@
                       height="100px"
                     />
                     <span class="playlisted-shot-name">{{ asset.name }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-else-if="isSequencePlaylist">
+              <div class="addition-entities">
+                <div
+                  :class="{
+                    'addition-shot': true,
+                    playlisted: currentEntities[sequence.id] !== undefined
+                  }"
+                  :key="sequence.id"
+                  @click.prevent="addEntityToPlaylist(sequence)"
+                  v-for="sequence in displayedSequences.filter(s => !s.canceled)"
+                >
+                  <light-entity-thumbnail
+                    :preview-file-id="sequence.preview_file_id"
+                    width="150px"
+                    height="100px"
+                  />
+                  <div>
+                    <span
+                      :title="getTaskStatus(sequence).name"
+                      :style="{
+                        color: getTaskStatus(sequence).color
+                      }"
+                      v-if="currentPlaylist.task_type_id"
+                    >
+                      &bullet;
+                    </span>
+                    <span class="playlisted-shot-name">{{ sequence.name }}</span>
                   </div>
                 </div>
               </div>
@@ -384,7 +415,7 @@
     <build-filter-modal
       ref="build-filter-modal"
       :active="modals.isBuildFilterDisplayed"
-      :entity-type="isAssetPlaylist ? 'asset' : 'shot'"
+      :entity-type="currentEntityType"
       @confirm="confirmBuildFilter"
       @cancel="modals.isBuildFilterDisplayed = false"
     />
@@ -491,6 +522,7 @@ export default {
       'currentProduction',
       'displayedAssets',
       'displayedAssetsByType',
+      'displayedSequences',
       'displayedShots',
       'displayedShotsBySequence',
       'isAssetsLoading',
@@ -502,6 +534,7 @@ export default {
       'playlistMap',
       'playlists',
       'playlistsPath',
+      'sequenceMap',
       'shotsByEpisode',
       'shotSearchText',
       'shotMap',
@@ -523,6 +556,14 @@ export default {
       return this.currentPlaylist.for_entity === 'asset'
     },
 
+    isSequencePlaylist() {
+      return this.currentPlaylist.for_entity === 'sequence'
+    },
+
+    currentEntityType() {
+      return this.currentPlaylist.for_entity
+    },
+
     isAddSearchVisible() {
       return (
         (this.isAssetPlaylist && this.assetSearchText) ||
@@ -541,6 +582,8 @@ export default {
     addEntitiesText() {
       if (this.isAssetPlaylist) {
         return this.$t('playlists.add_assets')
+      } else if (this.isSequencePlaylist) {
+        return this.$t('playlists.add_sequences')
       } else {
         return this.$t('playlists.add_shots')
       }
@@ -602,8 +645,10 @@ export default {
       'refreshPlaylist',
       'removeEntityPreviewFromPlaylist',
       'removeBuildJobFromList',
+      'resetSequences',
       'setAssetSearch',
       'setCurrentEpisode',
+      'setSequenceSearch',
       'setShotSearch',
       'updatePreviewAnnotation'
     ]),
@@ -780,6 +825,11 @@ export default {
       let entity
       if (this.isAssetPlaylist) {
         entity = this.assetMap.get(entityInfo.id)
+      } else if (this.isSequencePlaylist) {
+        entity = this.sequenceMap.get(entityInfo.id)
+        if (this.currentEpisode) {
+          entity.episode_name = this.currentEpisode.name
+        }
       } else {
         entity = this.shotMap.get(entityInfo.id)
       }
@@ -787,7 +837,10 @@ export default {
         const playlistEntity = {
           id: entityInfo.id,
           name: entity.name,
-          parent_name: entity.sequence_name || entity.asset_type_name,
+          parent_name:
+            entity.sequence_name ||
+            entity.episode_name ||
+            entity.asset_type_name,
           preview_files: entityInfo.preview_files,
           preview_file_id: entityInfo.preview_file_id || entity.preview_file_id,
           preview_file_extension:
@@ -1017,6 +1070,9 @@ export default {
         if (this.isAssetPlaylist) {
           this.setAssetSearch(searchQuery)
           this.displayMoreAssets()
+        } else if (this.isSequencePlaylist) {
+          this.setSequenceSearch(searchQuery)
+          this.resetSequences()
         } else {
           this.setShotSearch(searchQuery)
           this.displayMoreShots()
@@ -1024,6 +1080,8 @@ export default {
       } else {
         if (this.isAssetPlaylist) {
           this.setAssetSearch('')
+        } else if (this.isSequencePlaylist) {
+          this.setSequenceSearch('')
         } else {
           this.setShotSearch('')
         }

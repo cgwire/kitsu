@@ -145,12 +145,14 @@ export default {
         this.currentProduction.production_type === 'shots'
       ){
         return [
-          { label: this.$t('shots.title'), value: 'shot' }
+          { label: this.$t('shots.title'), value: 'shot' },
+          { label: this.$t('sequences.title'), value: 'sequence' }
         ]
       } else {
         return [
           { label: this.$t('assets.title'), value: 'asset' },
-          { label: this.$t('shots.title'), value: 'shot' }
+          { label: this.$t('shots.title'), value: 'shot' },
+          { label: this.$t('sequences.title'), value: 'sequence' }
         ]
       }
     },

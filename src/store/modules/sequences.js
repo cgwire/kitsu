@@ -57,6 +57,7 @@ import {
   UNLOCK_SEQUENCE,
   UPDATE_SEQUENCE,
   UPDATE_METADATA_DESCRIPTOR_END,
+  RESET_SEQUENCES,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -523,6 +524,10 @@ const actions = {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskMap = rootGetters.taskMap
     commit(COMPUTE_SEQUENCE_STATS, { taskStatusMap, taskMap })
+  },
+
+  resetSequences ({ commit }) {
+    commit(RESET_SEQUENCES)
   }
 }
 
@@ -1044,6 +1049,23 @@ const mutations = {
         delete data[previousDescriptorFieldName]
         sequence.data = data
       })
+    }
+  },
+
+  [RESET_SEQUENCES](state) {
+    const sequences = cache.result
+    state.displayedSequences = sequences
+    state.sequenceFilledColumns = getFilledColumns(state.displayedSequences)
+    const previousX = Object.keys(state.sequenceSelectionGrid).length
+    const maxX = state.displayedSequences.length
+    const maxY = state.nbValidationColumns
+    if (previousX >= 0) {
+      state.sequenceSelectionGrid = appendSelectionGrid(
+        state.sequenceSelectionGrid,
+        previousX,
+        maxX,
+        maxY
+      )
     }
   }
 }
