@@ -221,7 +221,7 @@
             <div
               class="flexrow"
               :title="isLikedBy"
-              v-if="comment.text.length > 0"
+              v-if="comment.text.length > 0 || comment.previews.length > 0"
             >
               <button
                 :class="{
@@ -993,9 +993,11 @@ p {
 }
 
 .reply-button {
+  border-radius: 5px;
   color: var(--text);
   cursor: pointer;
   font-size: 0.8em;
+  padding: 0;
   padding-right: 0.5em;
   text-align: right;
   width: 60px;
@@ -1041,13 +1043,6 @@ textarea.reply {
     font-size: 0.8em;
     color: var(--text);
   }
-}
-
-.reply-button {
-  border-radius: 5px;
-  color: var(--text);
-  padding: 0;
-  text-transform: lowercase;
 }
 
 .reply-delete {

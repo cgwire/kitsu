@@ -95,5 +95,6 @@ export default {
 #model-viewer {
   height: 100%;
   width: 100%;
+  --progress-bar-color: #999;
 }
 </style>

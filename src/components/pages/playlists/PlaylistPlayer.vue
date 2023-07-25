@@ -234,7 +234,11 @@
           class="canvas-wrapper"
           ref="canvas-wrapper"
           oncontextmenu="return false;"
-          v-show="!isCurrentPreviewFile && isAnnotationsDisplayed"
+          v-show="
+            !isCurrentPreviewFile &&
+            isAnnotationsDisplayed &&
+            !isCurrentPreviewModel
+          "
         >
           <canvas
             id="playlist-annotation-canvas"

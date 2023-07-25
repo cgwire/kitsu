@@ -372,7 +372,7 @@ export default {
       },
       loading: {
         more: false,
-        news: true,
+        news: false,
         currentTask: true
       },
       person: null,
@@ -633,6 +633,7 @@ export default {
     },
 
     init() {
+      if (this.loading.news) return
       if (!this.$options.silent) {
         this.currentPage = 1
         this.loading.news = true
@@ -648,9 +649,7 @@ export default {
         }
         this.loadNews(this.params)
           .then(() => {
-            setTimeout(() => {
-              this.loading.news = false
-            }, 100)
+            this.loading.news = false
           })
           .catch(err => {
             console.error(err)
@@ -740,7 +739,7 @@ export default {
 
   watch: {
     currentProduction() {
-      if (!this.loading.news) this.init()
+      this.init()
     },
 
     previewMode() {
