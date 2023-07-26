@@ -182,7 +182,7 @@
           <li>Roadmap / Feedback</li>
         </a>
         <hr />
-        <a href="https://cg-wire.com/en/about.html" target="_blank">
+        <a href="https://cg-wire.com/about" target="_blank">
           <li>
             {{ $t('main.about') }}
           </li>
