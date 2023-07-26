@@ -65,6 +65,7 @@
         :is-loading="loading.schedule"
         :multiline="true"
         :start-date="startDate"
+        :with-milestones="false"
         :zoom-level="zoomLevel"
         @item-changed="onScheduleItemChanged"
         @root-element-expanded="expandPersonElement"
