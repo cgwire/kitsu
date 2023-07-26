@@ -218,10 +218,24 @@ export default {
       return this.assetToEdit && this.assetToEdit.id
     },
 
+    getEntityTypeIdDefaultValue() {
+      let entityTypeId = this.assetToEdit.asset_type_id
+      if (!entityTypeId) {
+        entityTypeId = this.productionAssetTypeOptions[0].value
+      }
+      const isInOptions = this.productionAssetTypeOptions.find(
+        option => option.value === entityTypeId
+      )
+      if (!isInOptions) {
+        entityTypeId = this.productionAssetTypeOptions[0].value
+      }
+      return entityTypeId
+    },
+
     resetForm() {
       if (!this.isEditing()) {
         if (!this.form.entity_type_id && this.productionAssetTypes.length > 0) {
-          this.form.entity_type_id = this.productionAssetTypes[0].id
+          this.form.entity_type_id = this.productionAssetTypeOptions[0].value
         }
         if (this.openProductions.length > 0) {
           this.form.project_id = this.currentProduction
@@ -235,8 +249,9 @@ export default {
           : null
         this.form.data = {}
       } else {
+        let entityTypeId = this.getEntityTypeIdDefaultValue()
         this.form = {
-          entity_type_id: this.assetToEdit.asset_type_id,
+          entity_type_id: entityTypeId,
           project_id: this.assetToEdit.project_id,
           name: this.assetToEdit.name,
           description: this.assetToEdit.description,
