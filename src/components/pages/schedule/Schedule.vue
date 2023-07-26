@@ -176,7 +176,7 @@
         </div>
       </div>
 
-      <div class="timeline">
+      <div class="timeline" ref="timeline">
         <div
           ref="timeline-header"
           class="timeline-header"
@@ -769,6 +769,10 @@ export default {
       return this.$refs.schedule
     },
 
+    timeline() {
+      return this.$refs.timeline
+    },
+
     timelineContent() {
       return this.$refs['timeline-content']
     },
@@ -1288,7 +1292,14 @@ export default {
           })
         }
       } else {
-        this.resetSelection()
+        // reset selection if click on timeline only
+        let target = event.target
+        while (target && target !== this.timeline) {
+          target = target.parentNode
+        }
+        if (target) {
+          this.resetSelection()
+        }
       }
       this.isChangeStartDate = false
       this.isChangeEndDate = false
