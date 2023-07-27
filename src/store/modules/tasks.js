@@ -672,8 +672,8 @@ const actions = {
     })
   },
 
-  assignSelectedTasks({ commit, state }, { personId, callback }) {
-    const selectedTaskIds = Array.from(state.selectedTasks.keys())
+  assignSelectedTasks({ commit, state }, { personId, taskIds, callback }) {
+    const selectedTaskIds = taskIds || Array.from(state.selectedTasks.keys())
     tasksApi.assignTasks(personId, selectedTaskIds, err => {
       if (!err) commit(ASSIGN_TASKS, { selectedTaskIds, personId })
       if (callback) callback(err)

@@ -64,9 +64,13 @@
         :is-error="errors.schedule"
         :is-loading="loading.schedule"
         :multiline="true"
+        :reassignable="true"
         :start-date="startDate"
+        :with-milestones="false"
         :zoom-level="zoomLevel"
         @item-changed="onScheduleItemChanged"
+        @item-assign="onScheduleItemAssigned"
+        @item-unassign="onScheduleItemUnassigned"
         @root-element-expanded="expandPersonElement"
       />
     </div>
@@ -157,9 +161,11 @@ export default {
 
   methods: {
     ...mapActions([
+      'assignSelectedTasks',
       'fetchPersonTasks',
       'getPersonsTasksDates',
       'loadPeople',
+      'unassignPersonFromTask',
       'updateTask'
     ]),
 
@@ -284,6 +290,24 @@ export default {
       if (item.type === 'Task') {
         await this.saveTaskScheduleItem(item)
         await this.loadPersonDates(true)
+      }
+    },
+
+    onScheduleItemAssigned(item, person) {
+      if (item.type === 'Task') {
+        this.assignSelectedTasks({
+          personId: person.id,
+          taskIds: [item.id]
+        })
+      }
+    },
+
+    onScheduleItemUnassigned(item, person) {
+      if (item.type === 'Task') {
+        this.unassignPersonFromTask({
+          person,
+          task: item
+        })
       }
     },
 

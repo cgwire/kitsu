@@ -176,7 +176,7 @@
         </div>
       </div>
 
-      <div class="timeline">
+      <div class="timeline" ref="timeline">
         <div
           ref="timeline-header"
           class="timeline-header"
@@ -314,6 +314,7 @@
               ref="timeline-position"
               class="timeline-position"
               :style="timelinePositionStyle"
+              v-show="!isChangeDates"
             ></div>
             <div
               class="milestone-vertical-line"
@@ -323,6 +324,8 @@
               v-if="!isWeekMode"
             ></div>
             <div
+              class="root-drop"
+              :data-id="rootElement.id"
               :key="'entity-line-' + rootElement.id"
               v-for="rootElement in hierarchy"
             >
@@ -505,6 +508,7 @@ export default {
       selection: [],
       isBrowsingX: false,
       isBrowsingY: false,
+      isChangeDates: false,
       isChangeSize: false,
       milestoneToEdit: {
         date: moment()
@@ -587,6 +591,10 @@ export default {
     multiline: {
       type: Boolean,
       default: false
+    },
+    reassignable: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -595,7 +603,7 @@ export default {
     this.addEvents(this.domEvents)
   },
 
-  destroyed() {
+  beforeDestroy() {
     this.removeEvents(this.domEvents)
     document.body.style.cursor = 'default'
   },
@@ -767,6 +775,10 @@ export default {
 
     schedule() {
       return this.$refs.schedule
+    },
+
+    timeline() {
+      return this.$refs.timeline
     },
 
     timelineContent() {
@@ -974,6 +986,45 @@ export default {
         this.getClientX(event) - this.initialClientX - this.cellWidth / 2
       const dayChange = Math.ceil(change / this.cellWidth)
 
+      if (this.reassignable) {
+        let target = event.target
+        while (
+          target &&
+          (!target.classList || !target.classList.contains('root-drop'))
+        ) {
+          target = target.parentNode
+        }
+        const currentRootElement = this.currentElement.parentElement
+
+        if (target && currentRootElement.id !== target.dataset.id) {
+          const newRootElement = this.hierarchy.find(
+            rootElement => rootElement.id === target.dataset.id
+          )
+          if (newRootElement.expanded) {
+            this.selection.forEach(item => {
+              const previousRootElement = item.parentElement
+              // update assignation in element hierarchy
+              item.parentElement = newRootElement
+              previousRootElement.children =
+                previousRootElement.children.filter(child => {
+                  if (child.id !== item.id) {
+                    this.$emit('item-unassign', item, previousRootElement)
+                    return true
+                  }
+                  return false
+                })
+              newRootElement.children = newRootElement.children.filter(
+                child => child.id !== item.id
+              )
+              newRootElement.children.push(item)
+              this.$emit('item-assign', item, newRootElement)
+              this.refreshItemPositions(previousRootElement)
+            })
+            this.refreshItemPositions(newRootElement)
+          }
+        }
+      }
+
       if (this.lastStartDate.isBefore(this.startDate)) {
         this.lastStartDate = this.startDate.clone()
       }
@@ -1151,7 +1202,9 @@ export default {
         this.lastStartDate = timeElement.startDate.clone()
         this.lastEndDate = timeElement.endDate.clone()
         this.initialClientX = this.getClientX(event)
-        document.body.style.cursor = 'ew-resize'
+        document.body.style.cursor = this.reassignable
+          ? 'all-scroll'
+          : 'ew-resize'
 
         this.updateSelection(timeElement, event)
       }
@@ -1288,7 +1341,14 @@ export default {
           })
         }
       } else {
-        this.resetSelection()
+        // reset selection if click on timeline only
+        let target = event.target
+        while (target && target !== this.timeline) {
+          target = target.parentNode
+        }
+        if (target) {
+          this.resetSelection()
+        }
       }
       this.isChangeStartDate = false
       this.isChangeEndDate = false
@@ -1348,7 +1408,7 @@ export default {
       }
     },
 
-    dayStyle(day) {
+    dayStyle() {
       return {
         'min-width': this.cellWidth + 'px',
         'max-width': this.cellWidth + 'px'
@@ -1379,7 +1439,11 @@ export default {
       const style = {
         left: this.getTimebarLeft(timeElement) + 'px',
         width: this.getTimebarWidth(timeElement) + 'px',
-        cursor: timeElement.editable ? 'ew-resize' : 'default'
+        cursor: timeElement.editable
+          ? !root && this.reassignable
+            ? 'all-scroll'
+            : 'ew-resize'
+          : 'default'
       }
       if (root) {
         style['background-color'] = timeElement.color
@@ -1397,7 +1461,11 @@ export default {
       return {
         left: this.getTimebarLeft(timeElement) + 'px',
         width: this.getTimebarWidth(timeElement) + 'px',
-        cursor: timeElement.editable ? 'ew-resize' : 'default',
+        cursor: timeElement.editable
+          ? this.reassignable
+            ? 'all-scroll'
+            : 'ew-resize'
+          : 'default',
         background: timeElement.color || rootElement.color
       }
     },
