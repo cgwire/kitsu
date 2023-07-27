@@ -457,16 +457,17 @@ const actions = {
         })
       }
       const createTaskPromises = taskTypeIds.map(taskTypeId => {
-        return dispatch('createTasks', {
-          entityIds: [asset.id],
-          project_id: asset.project_id,
-          task_type_id: taskTypeId,
+        dispatch('createTask', {
+          entityId: asset.id,
+          projectId: asset.project_id,
+          taskTypeId: taskTypeId,
           type: 'assets'
         })
       })
       return func
         .runPromiseAsSeries(createTaskPromises)
         .then(() => Promise.resolve(asset))
+        .catch(console.error)
     })
   },
 
