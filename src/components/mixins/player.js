@@ -490,7 +490,7 @@ export const playerMixin = {
       this.rawPlayer.goPreviousFrame()
       if (this.isComparing) this.syncComparisonPlayer()
       const annotation = this.getAnnotation(
-        this.rawPlayer.getCurrentTime() - this.frameDuration
+        this.rawPlayer.getCurrentTime()
       )
       if (annotation) this.loadSingleAnnotation(annotation)
     },
@@ -500,7 +500,7 @@ export const playerMixin = {
       this.rawPlayer.goNextFrame()
       if (this.isComparing) this.syncComparisonPlayer()
       const annotation = this.getAnnotation(
-        this.rawPlayer.getCurrentTime() - this.frameDuration
+        this.rawPlayer.getCurrentTime()
       )
       if (annotation) this.loadSingleAnnotation(annotation)
     },
