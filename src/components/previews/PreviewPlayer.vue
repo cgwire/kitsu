@@ -816,7 +816,9 @@ export default {
     changeMaxDuration(duration) {
       if (duration) {
         duration = floorToFrame(duration, this.fps)
-        this.videoDuration = duration
+        const isChromium = !!window.chrome
+        const change = isChromium ? this.frameDuration : 0
+        this.videoDuration = duration + change
         this.maxDuration = this.formatTime(
           this.videoDuration - this.frameDuration
         )

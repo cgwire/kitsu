@@ -267,8 +267,11 @@ export default {
           ? annotation.time
           : this.videoDuration * ratio
       if (duration < 0) duration = 0
-      if (duration > this.videoDuration) {
-        duration = this.videoDuration
+
+      const isChromium = !!window.chrome
+      const change = isChromium ? this.frameDuration : 0
+      if (duration > this.videoDuration - change) {
+        duration = this.videoDuration - change
       }
       const frameNumber = Math.floor(duration / this.frameDuration)
       return { frameNumber, position }
