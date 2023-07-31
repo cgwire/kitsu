@@ -534,7 +534,6 @@ export default {
       this.$nextTick(() => {
         this.getCurrentShot()
           .then(shot => {
-            console.log('reset', shot)
             this.currentShot = shot
             return this.loadShotCasting(this.currentShot)
           })
@@ -552,7 +551,6 @@ export default {
     init() {
       this.getCurrentShot()
         .then(shot => {
-          console.log('sht', shot)
           this.currentShot = shot
           this.currentSection = this.route.query.section || 'casting'
           this.casting.isLoading = true
