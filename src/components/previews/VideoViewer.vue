@@ -329,11 +329,13 @@ export default {
       if (this.$options.currentTimeCalls.length === 0) {
         this.$options.running = false
       } else {
+        const isChromium = !!window.chrome
+        let change = isChromium ? this.frameDuration + 0.01 : 0.01
         this.$options.running = true
         const currentTime = this.$options.currentTimeCalls.shift()
         if (this.video.currentTime !== currentTime) {
           // tweaks needed because the html video player is messy with frames
-          this.video.currentTime = currentTime + 0.01
+          this.video.currentTime = currentTime + change
           this.onTimeUpdate()
         }
         setTimeout(() => {
@@ -348,10 +350,11 @@ export default {
       } else {
         time = floorToFrame(time, this.fps)
       }
+
       if (time < this.frameDuration) {
         time = 0
-      } else if (time > floorToFrame(this.video.duration, this.fps) - this.frameDuration) {
-        time = floorToFrame(this.video.duration, this.fps) - this.frameDuration
+      } else if (time > floorToFrame(this.video.duration, this.fps)) {
+        time = floorToFrame(this.video.duration, this.fps)
       }
       this.setCurrentTime(time)
       return time
@@ -395,10 +398,12 @@ export default {
     },
 
     onTimeUpdate() {
+      const isChromium = !!window.chrome
+      const change = isChromium ? this.frameDuration : 0
       if (this.video) {
-        this.currentTimeRaw = this.video.currentTime
+        this.currentTimeRaw = this.video.currentTime - change
       } else {
-        this.currentTimeRaw = 0
+        this.currentTimeRaw = 0 + change
       }
       this.$emit(
         'frame-update',
@@ -438,6 +443,9 @@ export default {
     goNextFrame() {
       const time = this.getLastPushedCurrentTime()
       const newTime = time + this.frameDuration
+      const isChromium = !!window.chrome
+      let change = !isChromium ? this.frameDuration : 0
+      if (newTime > this.video.duration - change) return
       return this._setRoundedTime(newTime)
     },
 

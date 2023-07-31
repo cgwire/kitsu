@@ -489,8 +489,10 @@ export const playerMixin = {
       this.clearCanvas()
       this.rawPlayer.goPreviousFrame()
       if (this.isComparing) this.syncComparisonPlayer()
+      const isChromium = !!window.chrome
+      const change = isChromium ? this.frameDuration : 0
       const annotation = this.getAnnotation(
-        this.rawPlayer.getCurrentTime()
+        this.rawPlayer.getCurrentTime() - change
       )
       if (annotation) this.loadSingleAnnotation(annotation)
     },
@@ -499,8 +501,10 @@ export const playerMixin = {
       this.clearCanvas()
       this.rawPlayer.goNextFrame()
       if (this.isComparing) this.syncComparisonPlayer()
+      const isChromium = !!window.chrome
+      const change = isChromium ? this.frameDuration : 0
       const annotation = this.getAnnotation(
-        this.rawPlayer.getCurrentTime()
+        this.rawPlayer.getCurrentTime() - change
       )
       if (annotation) this.loadSingleAnnotation(annotation)
     },
@@ -843,7 +847,9 @@ export const playerMixin = {
     onMaxDurationUpdate(duration) {
       if (duration) {
         duration = floorToFrame(duration, this.fps)
-        this.maxDurationRaw = duration
+        const isChromium = !!window.chrome
+        const change = isChromium ? this.frameDuration : 0
+        this.maxDurationRaw = duration + change
         this.maxDuration = this.formatTime(duration)
         this.resetHandles()
       } else {
