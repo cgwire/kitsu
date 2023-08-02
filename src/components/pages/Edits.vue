@@ -795,16 +795,17 @@ export default {
 
       this.uploadEditFile(toUpdate)
         .then(() => {
-          this.loading.importing = false
           this.loadEpisodes().catch(console.error)
           this.hideImportRenderModal()
           this.loadEdits()
         })
         .catch(err => {
           console.error(err)
-          this.loading.importing = false
           this.loading.importingError = err
           this.errors.importing = true
+        })
+        .finally(() => {
+          this.loading.importing = false
         })
     },
 

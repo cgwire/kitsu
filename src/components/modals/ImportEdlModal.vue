@@ -40,7 +40,7 @@
 
         <modal-footer
           :confirm-label="$t('main.edl.upload_edl')"
-          :error-text="$t('main.edl.error_upload')"
+          :error-text="errorText"
           :is-loading="isLoading"
           :is-disabled="formData === null"
           :is-error="isError"
@@ -92,6 +92,10 @@ export default {
     isError: {
       type: Boolean,
       default: false
+    },
+    importError: {
+      type: Error,
+      default: null
     }
   },
 
@@ -103,7 +107,16 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduction', 'isTVShow'])
+    ...mapGetters(['currentProduction', 'isTVShow']),
+
+    errorText() {
+      let text = this.$t('main.edl.error_upload')
+      if (this.importError && this.importError.status === 400) {
+        const res = this.importError.response
+        text += ` ${res.body.message}`
+      }
+      return text
+    }
   },
 
   methods: {

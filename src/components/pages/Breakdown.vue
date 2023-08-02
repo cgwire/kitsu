@@ -461,19 +461,15 @@ export default {
       const isShotsOnly = this.currentProduction.production_type === 'shots'
       const options = []
       if (!isShotsOnly) {
-        options.push(
-          {
-            label: this.$t('assets.title'),
-            value: 'asset'
-          }
-        )
+        options.push({
+          label: this.$t('assets.title'),
+          value: 'asset'
+        })
       }
       if (
         !isAssetsOnly &&
-        (
-          !this.isTVShow ||
-          (this.currentEpisode && this.currentEpisode.id !== 'main')
-        )
+        (!this.isTVShow ||
+          (this.currentEpisode && this.currentEpisode.id !== 'main'))
       ) {
         options.unshift({
           label: this.$t('shots.title'),
@@ -940,16 +936,17 @@ export default {
 
       this.uploadCastingFile(this.importCsvFormData)
         .then(() => {
-          this.loading.importing = false
           this.hideImportRenderModal()
           if (this.sequenceId) {
             this.setCastingSequence(this.sequenceId || 'all')
           }
         })
         .catch(err => {
-          this.loading.importing = false
           this.errors.importingError = err
           this.errors.importing = true
+        })
+        .finally(() => {
+          this.loading.importing = false
         })
     },
 
