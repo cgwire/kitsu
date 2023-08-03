@@ -769,6 +769,7 @@
           :title="$t('playlists.actions.download')"
           icon="download"
           @click="toggleDlButtons"
+          v-if="!isCurrentUserArtist"
         />
       </div>
 
@@ -1681,7 +1682,7 @@ export default {
         this.wavesurfer.on('seek', position => {
           this.setCurrentTimeRaw(this.maxDurationRaw * position)
         })
-      } catch(err) {
+      } catch (err) {
         console.error(err)
       }
     },
