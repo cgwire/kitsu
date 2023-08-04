@@ -842,7 +842,7 @@ const mutations = {
 
       if (!isFps && shot.data.fps) isFps = true
       if (!isFrames && shot.nb_frames) isFrames = true
-      if (!isFrameIn && shot.data.frame_in) isFrameIn = true
+      if (!isFrameIn && shot.data.frame_in != null) isFrameIn = true
       if (!isFrameOut && shot.data.frame_out) isFrameOut = true
       if (!isTime && shot.timeSpent > 0) isTime = true
       if (!isEstimation && shot.estimation > 0) isEstimation = true
@@ -959,7 +959,8 @@ const mutations = {
     if (!newShot.data) newShot.data = {}
     if (newShot.data.fps && !state.isFps) state.isFps = true
     if (newShot.nb_frames && !state.isFrames) state.isFrames = true
-    if (newShot.data.frame_in && !state.isFrameIn) state.isFrameIn = true
+    if (newShot.data.frame_in && !state.isFrameIn != null)
+      state.isFrameIn = true
     if (newShot.data.frame_out && !state.isFrameOut) state.isFrameOut = true
     if (newShot.data.resolution && !state.isResolution) {
       state.isResolution = true
@@ -1013,7 +1014,7 @@ const mutations = {
 
     if (shot.data.fps) state.isFps = true
     if (shot.nb_frames) state.isFrames = true
-    if (shot.data.frame_in) state.isFrameIn = true
+    if (shot.data.frame_in != null) state.isFrameIn = true
     if (shot.data.frame_out) state.isFrameOut = true
     if (shot.data.resolution) state.isResolution = true
     if (shot.data.max_retakes) state.isMaxRetakes = true

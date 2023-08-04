@@ -68,7 +68,9 @@
                 <tr
                   class="datatable-row"
                   v-if="
-                    currentShot && currentShot.data && currentShot.data.frame_in
+                    currentShot &&
+                    currentShot.data &&
+                    currentShot.data.frame_in !== undefined
                   "
                 >
                   <td class="field-label">{{ $t('shots.fields.frame_in') }}</td>
