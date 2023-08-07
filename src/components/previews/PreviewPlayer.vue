@@ -9,11 +9,7 @@
             oncontextmenu="return false;"
             v-show="isAnnotationsDisplayed"
           >
-            <canvas
-              :id="canvasId"
-              ref="annotation-canvas"
-              class="canvas"
-            >
+            <canvas :id="canvasId" ref="annotation-canvas" class="canvas">
             </canvas>
           </div>
           <div class="viewers">
@@ -365,6 +361,7 @@
             class="button flexrow-item"
             :href="originalDlPath"
             :title="$t('playlists.actions.download_file')"
+            v-if="!isCurrentUserArtist"
           >
             <download-icon class="icon is-small" />
           </a>

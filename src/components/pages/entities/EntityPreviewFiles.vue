@@ -80,6 +80,7 @@
                 class="button flexrow-item"
                 :href="getDownloadPath(previewFile.id)"
                 :title="$t('playlists.actions.download_file')"
+                v-if="!isCurrentUserArtist"
               >
                 <download-icon class="icon is-small" />
               </a>
@@ -134,7 +135,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduction', 'personMap', 'taskMap', 'taskTypeMap'])
+    ...mapGetters([
+      'currentProduction',
+      'isCurrentUserArtist',
+      'personMap',
+      'taskMap',
+      'taskTypeMap'
+    ])
   },
 
   methods: {

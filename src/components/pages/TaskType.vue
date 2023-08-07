@@ -92,7 +92,7 @@
               <combobox-styled
                 :label="$t('task_types.fields.priority')"
                 :options="priorityOptions"
-								locale-key-prefix="tasks."
+                locale-key-prefix="tasks."
                 v-model="priorityFilter"
               />
             </div>
@@ -920,7 +920,8 @@ export default {
       }
       if (this.priorityFilter !== '-1') {
         this.tasks = this.tasks.filter(
-          t => t.priority === parseInt(this.priorityFilter))
+          t => t.priority === parseInt(this.priorityFilter)
+        )
       }
     },
 
@@ -1336,13 +1337,14 @@ export default {
 
       this.uploadTaskTypeEstimations(this.importCsvFormData) // to change
         .then(() => {
-          this.loading.importing = false
           this.hideImportRenderModal()
         })
         .catch(err => {
-          this.loading.importing = false
           this.errors.importingError = err
           this.errors.importing = true
+        })
+        .finally(() => {
+          this.loading.importing = false
         })
     },
 

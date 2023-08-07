@@ -229,6 +229,7 @@
       :active="modals.isEDLImportDisplayed"
       :is-loading="loading.importing"
       :is-error="errors.importing"
+      :import-error="errors.importingError"
       @cancel="hideEDLImportModal"
       @confirm="uploadEDLFile"
     />
@@ -860,20 +861,22 @@ export default {
 
       this.loading.importing = true
       this.errors.importing = false
+      this.errors.importingError = null
       this.$store.commit('SHOT_CSV_FILE_SELECTED', formData)
 
       this.uploadShotFile(toUpdate)
         .then(() => {
-          this.loading.importing = false
           this.loadEpisodes().catch(console.error)
           this.hideImportRenderModal()
           this.loadShots()
         })
         .catch(err => {
           console.error(err)
-          this.loading.importing = false
-          this.loading.importingError = err
+          this.errors.importingError = err
           this.errors.importing = true
+        })
+        .finally(() => {
+          this.loading.importing = false
         })
     },
 
@@ -1074,19 +1077,21 @@ export default {
 
       this.loading.importing = true
       this.errors.importing = false
+      this.errors.importingError = null
 
       this.uploadEdlFile({ edl_file, namingConvention, matchCase })
         .then(() => {
-          this.loading.importing = false
           this.loadEpisodes().catch(console.error)
           this.hideEDLImportModal()
           this.loadShots()
         })
         .catch(err => {
           console.error(err)
-          this.loading.importing = false
-          this.loading.importingError = err
+          this.errors.importingError = err
           this.errors.importing = true
+        })
+        .finally(() => {
+          this.loading.importing = false
         })
     }
   },

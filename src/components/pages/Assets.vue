@@ -780,14 +780,15 @@ export default {
       this.uploadAssetFile(toUpdate)
         .then(() => {
           this.hideImportRenderModal()
-          this.loading.importing = false
           this.loadEpisodes().catch(console.error)
           this.loadAssets()
         })
         .catch(err => {
-          this.loading.importing = false
           this.errors.importing = true
           this.errors.importingError = err
+        })
+        .finally(() => {
+          this.loading.importing = false
         })
     },
 
