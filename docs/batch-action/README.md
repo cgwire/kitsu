@@ -1,6 +1,22 @@
 # Batch Actions
 
 
+## Add batch of thumbnails (and previews)
+
+You can use the **Add Thumbnails** button ![Add thumbnails button](../img/getting-started/add_thumbnails.png) on the global page to massively import thumbnails.
+
+
+![History](../img/getting-started/add_thumbnails_menu.png)
+
+A new pop-up opens and asks you to choose which task types the thumbnails are linked.
+
+**Thumbnails batch import accept images files and video files**.
+
+For the video files, only the first frame is used as the thumbnail.
+
+You have to name your thumbnails as sequence_shot.
+
+
 ## Create assets from a CSV spreadsheet file
 
 You may already have your asset list ready in a spreadsheet file.
@@ -283,20 +299,7 @@ Now, you have all your people imported into Kitsu.
 ![Import data copy paste data](../img/getting-started/import_result_people.png)
 
 
-## Add batch of thumbnails (and previews)
 
-You can use the **Add Thumbnails** button ![Add thumbnails button](../img/getting-started/add_thumbnails.png) on the global page to massively import thumbnails.
-
-
-![History](../img/getting-started/add_thumbnails_menu.png)
-
-A new pop-up opens and asks you to choose which task types the thumbnails are linked.
-
-**Thumbnails batch import accept images files and video files**.
-
-For the video files, only the first frame is used as the thumbnail.
-
-You have to name your thumbnails as sequence_shot.
 
 
 

@@ -224,3 +224,27 @@ The color is the same as the column on the global pages.
 **An important thing to keep in mind**: you can't modify your production schedule from this page. You have to go back to the production schedule page you want to adjust to doing it.
 
 Only the **Studio Manager** has access to this page.
+
+
+## Team schedule
+
+As a Studio Manager you need to have a constant look into what is happening with the team.
+
+For that you need a global view of each department, the best way is to go to the Team Schedule.
+
+Go to the main menu ( ![Main menu button](../img/getting-started/main_button.png) ) and click on **Team Schedule** under the **Studio** section.
+
+![Team Menu Schedule](../img/getting-started/main_menu_teamschedule.png)
+
+You will see all the people of the studio, one line each.
+
+On the top of the page you can select the timeframe you want to display **Start Date**, **End Date**, you can also select the **Zoom Level**.
+
+You can also focus on a specific **Deparment** and/or a specific **Person**.
+
+![Team Schedule global](../img/getting-started/team_schedule_global.png)
+
+If an artist has several task to do at the same time, the tasks will be on top of each other.
+
+You can select each task and move them around. Theses tasks are linked to the **task type schedule**.
+
