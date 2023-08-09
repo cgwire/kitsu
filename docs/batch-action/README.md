@@ -119,6 +119,7 @@ Now, you have all your assets imported into Kitsu and the task created according
 
 ![Import data copy paste data](../img/getting-started/import_result_asset.png)
 
+
 ## Create shots form an EDL file
 
 You may already have your shots list ready in an **EDL** file.
@@ -130,7 +131,7 @@ On the **Global Shot Page** you have an **Import EDL** button.
 
 On the pop-up you can select the naming convention of the video file used during the editing.
 
-![Import EDL Menu](../img/getting-started/import_edl_menu)
+![Import EDL Menu](../img/getting-started/import_edl_menu.png)
 
 It means the video clip on the editing is named as project_sequence_shot.extension.
 
