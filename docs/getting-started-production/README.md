@@ -478,47 +478,6 @@ he's assigned.
 Now, everybody knows what to do and who is doing what!
 
 
-
-## Change status and write a comment
-
-To write a comment and change the status of a task, you can click on the
-status of the task (1).
-
-The comment uses the **Markdown** language. If you need specific syntax, feel free to look at the markdown guide website: https://www.markdownguide.org/basic-syntax/
-
-
-![Shot status](../img/getting-started/shot_status.png)
-
-It makes a panel appear on the right, and here you can write a comment (1) and change the status (2), attach a file (3).
-
-
-You can **tag** someone on the team in the comments. Type the `@`and it opens a sub-menu with the list of the team.
-
-![Tag someone](../img/getting-started/tag_team.png)
-
-You can tag a frame (whatever version you are in), type the `@`and it opens a sub-menu with the team list, and start typing **frame**.
-
-![Tag a frame](../img/getting-started/tag_frame.png)
-
-
-You can add a **checklist** to your comments.
-
-You need to click on the **Add checklist** button, and the first item of the checklist appears.
-![add checklist](../img/getting-started/add_checklist.png)
-
-Type your comments, hit the **Enter** key to add another line to your checklist, or click again on the **Add Checklist** button.
-
-![checklist](../img/getting-started/checklist_detailed.png)
-
-Besides your comment, you can also attach a preview. Click on the **Add attachment** button.
-
-![Attachment snapshot](../img/getting-started/attachment_snapshot.png)
-
-
-Validate the post and the new status with **Post status**
-
-![Changing status](../img/getting-started/changing_status_shot.png)
-
 ## Add a Preview
 
 Kitsu will automatically switch to the **Publish Revision** tab when you use status with the option **IS FEEDBACK REQUEST**, like the **WFA** Status.
@@ -575,8 +534,46 @@ Once you have clicked on the button, you will have the choice if you want to pic
 ![thumbnail applied](../img/getting-started/pannel_history_thumbnail.png)
 
 
+## Change status and perform a review
 
-## Perform a review
+To write a comment and change the status of a task, you can click on the
+status of the task (1).
+
+The comment uses the **Markdown** language. If you need specific syntax, feel free to look at the markdown guide website: https://www.markdownguide.org/basic-syntax/
+
+
+![Shot status](../img/getting-started/shot_status.png)
+
+It makes a panel appear on the right, and here you can write a comment, change the status, and attach a file.
+
+
+You can **tag** someone on the team in the comments. Type the `@`and it opens a sub-menu with the list of the team.
+
+![Tag someone](../img/getting-started/tag_team.png)
+
+You can also **tag** a full deparmtent by typunt '@' and the deparmtent's name.
+
+![Tag department](../img/getting-started/tag_department.png)
+
+You can add a **checklist** to your comments.
+
+You need to click on the **Add checklist** button, and the first item of the checklist appears.
+
+![add checklist](../img/getting-started/add_checklist.png)
+
+Type your comments, hit the **Enter** key to add another line to your checklist, or click again on the **Add Checklist** button.
+
+![checklist](../img/getting-started/checklist_detailed.png)
+
+Besides your comment, you can also attach a preview. Click on the **Add attachment** button.
+
+![Attachment snapshot](../img/getting-started/attachment_snapshot.png)
+
+
+Validate the post and the new status with **Post status**
+
+![Changing status](../img/getting-started/changing_status_shot.png)
+
 
 When an artist needs a review, he changes the status of his task too![wfa](../img/getting-started/wfa_icon.png).
 
@@ -598,6 +595,21 @@ You can tag a frame (whatever version you are in), type the `@`and it opens a su
 
 ![Tag a frame](../img/getting-started/tag_frame.png)
 
+
+You can also export your drawings on each frame by attaching the **screenshots as attachment**.
+
+Click on the **Add attachment** button.
+
+![attachment](../img/getting-started/attachment_retake.png)
+
+You can also choose to **Attach snapshots from your annotation**on the attachment option.
+
+![Attachment snapshot](../img/getting-started/attachment_snapshot.png)
+
+Once you click the button, Kitsu will grab all the frames with annotation and display the result. You can publish them with **Confirm**.
+
+![Attachment snapshot detail](../img/getting-started/attachment_snapshot_detail.png)
+
 If you need to delete your line, click again on the **pencil** icon, and the cursor changes to a multi-directional cross ![Pencil](../img/getting-started/direction_arrow.png), and then you can select your line and move it around.
 
 ![review drawing](../img/getting-started/review_edit.png)
@@ -610,40 +622,7 @@ If you go into **Full-Screen**, you can compare two task types or versions side 
 
 ![compare button](../img/getting-started/compare_version.png)
 
-From there, you can change the status too![Retake](../img/getting-started/retake_icon.png) if you want that the ArtistArtist
-performs some changes.
-
-You can add a **checklist** to your comments.
-
-You need to click on the **Add checklist** button, and the first item of the checklist appears.
-
-![add checklist](../img/getting-started/add_checklist.png)
-
-Type your comments, hit the **Enter** key to add another line to your checklist, or click again on the **Add Checklist** button.
-
-![checklist](../img/getting-started/checklist_detailed.png)
-
-Besides your comment, you can also attach a preview. Click on the **Add attachment** button.
-
-![attachment](../img/getting-started/attachment_retake.png)
-
-You can also choose to **Attach snapshots from your annotation**on the attachment option.
-
-![Attachment snapshot](../img/getting-started/attachment_snapshot.png)
-
-Once you click the button, Kitsu will grab all the frames with annotation and display the result. You can publish them with **Confirm**.
-
-![Attachment snapshot detail](../img/getting-started/attachment_snapshot_detail.png)
-
-You can also **tag** someone on the team in the comments. Type the `@`and it opens a sub-menu with the list of the team.
-
-![Tag someone](../img/getting-started/tag_team.png)
-
-You can also **tag** a full deparmtent by typunt '@' and the deparmtent's name.
-
-![Tag department](../img/getting-started/tag_department.png)
-
-
+From there, you can change the status too![Retake](../img/getting-started/retake_icon.png) if you want that the Artist performs some changes.
 
 
 Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the ArtistArtist that his work is validated.
