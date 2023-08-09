@@ -542,7 +542,7 @@ Then, click on the "Add preview revision to publish" button. The explorer opens 
 
 ![attach preview](../img/getting-started/attach_preview.png)
 
-You can also copy-paste a screenshot, for example, to this screen.
+You can also **copy-paste a screenshot**, for example, to this screen.
 
 You will see a preview of the attached files.
 
@@ -558,6 +558,8 @@ You can also **drag & drop** the file in the comment section.
 ![attach preview drag drop](../img/getting-started/drag_drop_preview.png)
 
 You can select your status and publish your preview with the **Post** Button.
+
+
 
 
 ## Add a thumbnail
@@ -636,6 +638,12 @@ Once you click the button, Kitsu will grab all the frames with annotation and di
 You can also **tag** someone on the team in the comments. Type the `@`and it opens a sub-menu with the list of the team.
 
 ![Tag someone](../img/getting-started/tag_team.png)
+
+You can also **tag** a full deparmtent by typunt '@' and the deparmtent's name.
+
+![Tag department](../img/getting-started/tag_department.png)
+
+
 
 
 Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the ArtistArtist that his work is validated.
