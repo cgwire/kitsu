@@ -40,6 +40,8 @@ Once you have defined all the start and end dates of the task types, your Schedu
 Once it's done, you can unfold each task type and access to a level of detail: asset type for the assets,
 sequences for the shots.
 
+You can select all the Gantt Diagramm bars and move them all at once, with **CRTL** + **Left Click**.
+
 ![Production Schedule unfold task type](../img/getting-started/production_schedule_unfold.png)
 
 You can set the start and end date the same way as for the task type. You can define the work period for all the asset types.

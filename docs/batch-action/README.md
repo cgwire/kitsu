@@ -119,6 +119,35 @@ Now, you have all your assets imported into Kitsu and the task created according
 
 ![Import data copy paste data](../img/getting-started/import_result_asset.png)
 
+## Create shots form an EDL file
+
+You may already have your shots list ready in an **EDL** file.
+With Kitsu, you can import directly your **EDL** file to create the sequence, shot, number of frame, frame in and frame out.
+
+On the **Global Shot Page** you have an **Import EDL** button.
+
+![Import EDL Button](../img/getting-started/import_edl_button.png)
+
+On the pop-up you can select the naming convention of the video file used during the editing.
+
+![Import EDL Menu](../img/getting-started/import_edl_menu)
+
+It means the video clip on the editing is named as project_sequence_shot.extension.
+
+Here is an example of an EDL for the LGC production.
+
+![EDL Example](../img/getting-started/edl_example.png)
+
+The video files are named  LGC_100-000.mov, it means LGC is the production name, 100 is the sequence name, and 000 is the shot name.
+
+Once you are set with the naming convention, you can import the edl file.
+
+Then click on **Upload EDL**
+
+Then Kitsu will create the shots.
+
+![EDL Shot creation](../img/getting-started/edl_shot_creation.png)
+
 
 
 ## Create shots from a CSV spreadsheet file
