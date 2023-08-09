@@ -146,9 +146,9 @@
                     </strong>
                     <span
                       class="flexrow-item reply-date"
-                      :title="replyDate(replyComment.date)"
+                      :title="replyFullDate(replyComment.date)"
                     >
-                      {{ renderDate(replyComment.date) }}
+                      {{ replyShortDate(replyComment.date) }}
                     </span>
                     <span class="filler"> </span>
                     <span
@@ -163,14 +163,16 @@
                     </span>
                   </div>
                   <p
-                    v-html="renderComment(
-                      replyComment.text,
-                      replyComment.mentions || [],
-                      replyComment.department_mentions || [],
-                      personMap,
-                      departmentMap,
-                      ''
-                    )"
+                    v-html="
+                      renderComment(
+                        replyComment.text,
+                        replyComment.mentions || [],
+                        replyComment.department_mentions || [],
+                        personMap,
+                        departmentMap,
+                        ''
+                      )
+                    "
                     class="comment-text"
                   ></p>
                 </div>
@@ -325,7 +327,7 @@ import AtTa from 'vue-at/dist/vue-at-textarea'
 import moment from 'moment'
 import { mapActions, mapGetters } from 'vuex'
 import { remove } from '@/lib/models'
-import { renderComment } from '@/lib/render'
+import { renderComment, replaceTimeWithTimecode } from '@/lib/render'
 import { sortByName } from '@/lib/sorting'
 import { formatDate, parseDate } from '@/lib/time'
 import colors from '@/lib/colors'
@@ -586,8 +588,14 @@ export default {
       return formatDate(date)
     },
 
-    replyDate(date) {
-      return moment(date).tz(this.user.timezone).format('YYYY-MM-DD HH:mm:ss')
+    replyFullDate(date) {
+      return moment(parseDate(date))
+        .tz(this.user.timezone)
+        .format('YYYY-MM-DD HH:mm:ss')
+    },
+
+    replyShortDate(date) {
+      return this.renderDate(parseDate(date))
     },
 
     renderDate(date) {
