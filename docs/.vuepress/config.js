@@ -11,7 +11,7 @@ module.exports = {
      children: [
        ['/', 'Introduction'],
        '/first_production/',
-       '/getting-started-advanced/',
+       '/production_advanced/',
        '/getting-started-artist/',
 	     '/getting-started-client/'
      ]

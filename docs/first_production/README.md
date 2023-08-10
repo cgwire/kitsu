@@ -1,6 +1,6 @@
 # Create your First Production
 
-## New Project - Create Production
+## New Project - Create a Production
 
 The first step in Kitsu is to create a production. Click on the **Create a new
 production** button.
@@ -32,7 +32,7 @@ See the **import CSV** section for more details.
 
 Validate everything with the ![All done](../img/getting-started/all_done_go.png) button.
 
-If you don't find all the **Task Types**, **Status**, or **Asset Types** that you need while
+If you don't find all the **Task Types**, **Status**, or **Asset Types** you need while
 creating the production. You will be able to add them to your production later.
 
 See the **Customization** section for more details.
@@ -89,7 +89,7 @@ The assets are linked with the first episode **E01** (created per default by Kit
 
 You will also see the tasks are created at the same time. By default, all the tasks of your library will be added, and if you have set your parameters, only the selected tasks will be added.
 
-If you need to add more **Assets**, click on the **Add assets** button.
+If you need to add more **Assets**, click the **Add assets** button.
 
 You can edit assets by going to the asset page, hovering over the asset you want to modify, and then clicking on the **edit** button
 ![Edit button](../img/getting-started/edit_button.png) (1) on the right side of
@@ -105,14 +105,14 @@ To delete an asset, see the FAQ : [How to delete an asset](../faq-deletion/READM
 
 
 
-## Create Episodes, Sequences and Shots
+## Create Episodes, Sequences, and Shots
 
 It's time to do the breakdown of the storyboard. Meaning you can create
 the sequences and the shots of the episode and associate assets to them.
 
 Nb: Episodes are only mandatory for **TV Show** Production.
 
-You can also create tasks for episode and shot. See the ADVANCE section
+You can also create tasks for episode and shot. See the ADVANCE section.
 
 You need to go to the **Shots** page: you can use the
 drop-down menu and click on the **SHOTS**.
@@ -127,7 +127,7 @@ A new pop-up opens for the creation of the assets.
 You can now create the episodes, the sequences, and the shots.
 
 Enter the first episode using your code name, e01, then click
-on the **add** button (1). Then, for instance, do the same for the sequence, for instance, sq01,
+the **add** button (1). Then, do the same for the sequence, for instance, sq01,
 then **add** (2), and now the shots: sh001, then again **add** (3).
 You can also define padding for your shots.
 
@@ -179,12 +179,12 @@ With the main menu button ![Main menu button](../img/getting-started/main_button
 You can choose between production. The name of the actual production is displayed now, but thanks to the drop-down menu, you can navigate from production to production (if you have several).
 
 The next drop-down menu is here to help you navigate through the different pages of the production.
-You always start with the asset page, but you can switch to shots, sequence, statistics, team, and breakdown. With this drop-down menu, you can also change the production setting (including the workflow).
+You always start with the asset page, but you can switch to shots, sequence, statistics, team, and breakdown. With this drop-down menu, you can change the production setting (including the workflow).
 
 If you have defined your production as a **TV Show**, you will have an episode drop-down menu with the **All assets**, **Main pack**, and episode options.
 
 
-On the right part of the top screen, you have the global search and also news from Kitsu. You can see with an animated gif all the new features.
+On the right of the top screen, you have the global search and news from Kitsu. You can see with an animated gif all the new features.
 
  ![New features](../img/getting-started/latest_update.png).
 
@@ -253,8 +253,7 @@ him active; otherwise, select no. Validate by clicking the **Confirm** button.
 ![Create a new user](../img/getting-started/create_employee.png)
 
 See the [permissions](../permissions/README.md) section for more information.
-To make it short, artists, supervisors, production managers, vendors, and clients only see the
-productions they are assigned.
+To summarize, artists, supervisors, production managers, vendors, and clients only see their assigned productions.
 
 All the people are now part of your studio. They are added to a specific
 production when you add them to a team on a production. Otherwise, they
@@ -292,13 +291,13 @@ The **comment panel** appears on the right of the screen with the action tools.
 
 ![Blue menu](../img/getting-started/blue_menu.png)
 
-You can now do the assignment. Click on the text input, and you will see
+You can now do the assignment. Click on the text input to see
 the list of available people. Click on a person's name to perform to select
 him. Then click on the confirmation button to complete the assignation.
 
 ![Selected people](../img/getting-started/select_people.png)
 
-You can assign tasks to the same person in one step (1). Once the blue menu is visible, keep **ctrl** on your Keyboard pressed and select
+You can assign tasks to the same person in one step (1). Once the blue menu is visible, press **ctrl** on your Keyboard and select
 multiple tasks. You can even use the **shift** key to choose a range of tasks
 (2). When you have chosen everything you need, apply with the **Confirm**
 button.
@@ -335,13 +334,13 @@ the frames a calculated and none are missing or over-computed.
 
 You may also be able to add a camera as an asset!
 
-You need to edit the shots to fill the frame range information. Click on the
+You need to edit the shots to fill in the frame range information. Click on the
 edit button ![Edit button](../img/getting-started/edit_button.png) on the right
 side of the shot line.
 
 ![edit shot Change sequence](../img/getting-started/edit_shot.png)
 
-You can enter the **In** and **Out** of the shot on the new window. Then, save with the **Confirm** button.
+You can enter the shots **In** and **Out** on the new window. Then, save with the **Confirm** button.
 
 ![Shot edit page](../img/getting-started/shot_edit.png)
 
@@ -354,7 +353,7 @@ directly from the global shot page.
 
 Click on the case you want to fill in and add the data.
 
-If you fill in the **Frame In** and the **Frame out**, Kitsu will calculate the number
+If you fill in the **Frame In** and the **Frame Out**, Kitsu will calculate the number
  of frames automatically.
 
 ![Shot edit page](../img/getting-started/shot_framerange_global_edit.png)
@@ -381,7 +380,7 @@ It makes a panel appear on the right, and here you can write a comment, change t
 
 ![Comment Panel](../img/getting-started/comment_panel.png)
 
-The **Commen Panel** is split in 2 tabs : 
+The **Commen Panel** is split into 2 tabs : 
 - POST COMMENT
 - PUBLISH REVISION
 
@@ -417,19 +416,19 @@ You can select a **file from your hard drive** or past a **screenshot** here.
 ![Attachment snapshot](../img/getting-started/add_attachmen_simplet.png)
 
 
-Validate the attachemnt by clicking on **Add file as attachment**.
+Validate the attachment by clicking on **Add file as attachment**.
 
 
-Then select the **Status** that you need on the drop down menu. 
+Then select the **Status** that you need on the drop-down menu. 
 
 ![Status List](../img/getting-started/status_list.png)
 
-Then click on the **Post** buton to post it to the world.
+Then click the **Post** button to post it to the world.
 
 
 ## Publish a Preview as a Version
 
-To publish a preview, picture or video, you need to select the **PUBLISH REVISION** tab on the comment panel of the task.
+To publish a preview, picture, or video, select the **PUBLISH REVISION** tab on the comment panel of the task.
 
 Kitsu will automatically switch to the **Publish Revision** tab when you use status with the option **IS FEEDBACK REQUEST**, like the **WFA** Status.
 
@@ -439,7 +438,7 @@ Kitsu will automatically switch to the **Publish Revision** tab when you use sta
 You can add one or several previews to any comments. It can be a picture (`.png`, `.jpg`, `.jpeg`, `.gif`), a video (`.mp4`, `.mov`, `.wmv`),
 or an `.glb` file. You can review all the previews from the browser or mix everything.
 
-Other files like `.pdf`, `.zip`, `.rar`, `.ma` or `.mb`, however, need to be
+Other files like `.pdf`, `.zip`, `.rar`, `.ma`, or `.mb`, however, need to be
 downloaded to be reviewed.
 
 
@@ -463,7 +462,7 @@ You can also **drag & drop** the file in the comment section.
 ![attach preview drag drop](../img/getting-started/drag_drop_preview.png)
 
 
-On top of your preview, you can also add a **Comment**.
+On top of your preview, you can add a **Comment**.
 
 Click on the **Leave a Comment** button to unfold the comment section.
 
@@ -483,7 +482,7 @@ On the list page, click on the status you want, then on the right panel, click o
 
 ![Thumbnail Button](../img/getting-started/pannel_history.png)
 
-Once you have clicked on the button, you will have the choice if you want to pick the first or any frame, once the frame selected you see the thumbnail appears, and the button turns gray.
+Once you have clicked on the button, you will have the choice if you want to pick the first or any frame; once the frame is selected, you see the thumbnail appears, and the button turns gray.
 
 ![thumbnail applied](../img/getting-started/pannel_history_thumbnail.png)
 
@@ -516,7 +515,7 @@ You can tag a frame (whatever version you are in), type the `@`and it opens a su
 ![Tag a frame](../img/getting-started/tag_frame.png)
 
 
-You can also export your drawings on each frame by attaching the **screenshots as attachment**.
+You can also export your drawings on each frame by attaching the **screenshots as attachments**.
 
 Click on the **Add attachment** button.
 
@@ -543,7 +542,7 @@ If you go into **Full-Screen**, you can compare two task types or versions side 
 
 ![compare button](../img/getting-started/compare_version.png)
 
-From there, you can change the status too![Retake](../img/getting-started/retake_icon.png) if you want that the Artist performs some changes.
+From there, you can change the status too![Retake](../img/getting-started/retake_icon.png) if you want the Artist to perform some changes.
 
 
 Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the Artist that his work is validated.
@@ -573,9 +572,9 @@ thumbnails size.
 
 ![Breakdown page text display](../img/getting-started/breakdown_text_display.png)
 
-During your breakdown, you may also realize that an asset is missing from the list.
+You may also realize an asset needs to be added to the list during your breakdown.
 
-You can create a new asset directly from the breakdown page. Click on the **+** on the right of the **All available assets**.
+You can create a new asset directly from the breakdown page. Click the **+** on the right of the **All available assets**.
 
 ![Breakdown page create asset](../img/getting-started/breakdown_create_asset.png)
 
@@ -588,7 +587,7 @@ Then click on the assets you want
 to assign: characters, backgrounds, ... from the right part (3).
 If you have selected multiple shots, your selection is also applied to the numerous shots.
 
-Keep in mind you can also copy a shot filled with assets and paste this asset selection to another shot.
+Remember that you can also copy a shot filled with assets and paste this asset selection into another shot.
 
 You can see a **+1** or **+10**when you pass over the asset. It's the number
 of times you add this asset, and you can click on it as many times as you need.
@@ -601,7 +600,7 @@ You can also link all your assets to episodes on a TV show without specifying a 
 
 This way, you can link all your assets to one or several episodes before the storyboard/animatic stage.
 
-You can now see the asset appearing in the middle part of the screen (2). Next
+You can now see the asset in the middle of the screen (2). Next
 to the asset's name is the number of times it has been added. In this
 example, we have added two times the character asset Llama.
 
@@ -688,11 +687,11 @@ To go further in detail with the Supervisor's view :
 
 - (3) You can add an estimation for the task (in day unit)
 - (4) Kitsu calculates the sum of the timesheet fed by the artists
-- (5) The number of back-and-forth with the retake status
+- (5) The number of back-and-forths with the retake status
 - (6) You can add a start date for the task (with the calendar)
 - (7) Kitsu calculates the due date with the Start Date and the estimation
 - (8)(9) the Wip and Feedback dates are automatically filled
-- (10) the Last comment section help you to keep an eye on the last activity of this task type.
+- (10) The Last comment section help you to keep an eye on the last activity of this task type.
 
 (7) to (10) is automatically filled.
 
@@ -707,10 +706,10 @@ Depending on the **FPS** you have set for the production, the number of **Second
 
 
  On the right part of the screen, you can see the full team of the department (depending on the assignments you made), the number of shots they have to do, the number of frames, seconds, and the average Quota.
- You will also have the **Remaining** line which give your the actual situation of your team.
+ You will also have the **Remaining** line, which gives you the actual situation of your team.
 
 
- And the last column is the **Estimation**, to modify the estimation, hover the line with your mouse and click the editing zone.
+ And the last column is the **Estimation**. To modify the estimation, hover the line with your mouse and click the editing zone.
 
  You can also select multiple shots simultaneously to edit them all the once.
 
