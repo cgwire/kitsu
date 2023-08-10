@@ -199,7 +199,21 @@ And then click on the ![delete button](../img/getting-started/delete_button.png)
 
 ![enlarge comment section delete](../img/getting-started/enlarge_comment_delete.png)
 
+## See Detail of an Asset
 
+If you want to see a detail of an asset, click on its name.
+
+![Shot detail](../img/getting-started/asset_detail.png)
+
+A new page opens with the list of the tasks, the assignation, and the list
+of shots where this asset appears on this shot (**Casting**).
+
+![Shot detail page](../img/getting-started/asset_detail_page.png)
+
+You can click on the status of each task to open the comment panel and see the history of the comments and the different versions.
+
+
+![Shot detail page](../img/getting-started/asset_detail_page_panel.png)
 
 ## See Detail of a Shot
 
@@ -308,38 +322,18 @@ To make the information reappear, click on the same button,
 ![maximize button](../img/getting-started/maximize.png) it won't have the grey highlight.
 
 
+##Sticky Columns
 
-## Quotas Stat
+If an information is very important for you, you can **Stick** this column next to the shot name.
 
-Kitsu has two ways to calculate the quotas per **shot Task Type**.
+It can be a **Task Type** column, or a **Meta Data** column.
 
-The first is linked to the timesheet :
-Shots are considered ended on the first feedback request. Then, quotas are weighted following time spent on the task (when the Artist filled his timesheet).
+Click on the arrow on the left of the column to open the column menu, then choose **Stick**.
 
-![Quotas stat page day weighted](../img/getting-started/quotas_day_weighted.png)
+![Stick Option Menu](../img/getting-started/stick_option_menu.png)
 
-In this example, Kitsu has weighted the quota per day linked to the timesheet.
+Once a column is sticked, it will stay displayed even if the page is simplified.
 
-![Quotas stat page day weighted detail](../img/getting-started/quotas_day_weighted_detail.png)
-
-
-If no timesheet is filled, then Kitsu considers that:
-
-The task was started at the first status change to WIP.
-The task was done the day the feedback request was made.
-It splits the done frames among all business days between the start and the end.
-
-Kitsu grabs the number of frames (or seconds, or number of tasks) submitted per day/week/month per Artist.
-
-![Quotas stat page day weighted](../img/getting-started/quotas_day_status.png)
+![Stick column simplified](../img/getting-started/stick_simplified.png)
 
 
-
-
-**1**: Select the Task Type.
-
-**2**: Select the level of details, Day, Week, or Month.
-
-**3**: Select the count mode, per Frame, Seconds, or tasks.
-
-You can click on a number and see its detail on the right panel at any time.
