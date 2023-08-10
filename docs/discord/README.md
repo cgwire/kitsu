@@ -1,6 +1,6 @@
 # Discord Integration
 
-## Create a bot account
+## Create a Bot Account
 
 1. Make sure you're logged on to the [Discord website](https://discord.com/).
 2. Navigate to the [application page](https://discord.com/developers/applications).
@@ -31,7 +31,7 @@ It will be the same icon used when the bot chat.
 
 ![Add discord token to settings](../img/discord/add_discord_token_settings.png)
 
-## Inviting your bot
+## Inviting your Bot
 
 So you’ve made a Bot User but it’s not actually in any server.
 
@@ -55,7 +55,7 @@ To add the bot in a server, follow these steps:
 
 > **_Note:_** The users who wants to have notifications enabled have to be in a same server than the bot.
 
-## Enable notifications
+## Enable Notifications
 
 Each user can set in their profiles the notification push to
 Discord. They have to switch the "Discord notifications enabled" 

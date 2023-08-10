@@ -8,7 +8,7 @@ The Kitsu Publisher is a desktop application that connects DCC Tools to Kitsu.
 Through it, your artists can see their todo list, comment tasks and send previews to Kitsu
 directly from their tools.
 
-## DCC integrations status:
+## DCC Integrations Status:
 
 - Blender
 - Toon Boom Harmony
@@ -23,7 +23,7 @@ Work in progress:
 
 ### Installation of the Kitsu Publisher
 
-#### Pre-requisites
+#### Pre-Requisites
 
 You need to download (or to build if you want to: see [Development Environment](#development-environment)) your preferred installer/package/portable for the app corresponding to your OS in the [releases](https://github.com/cgwire/kitsu-publisher-next/releases/latest).
 
@@ -107,7 +107,7 @@ All commands have the keyword {version} in the filenames, you need to replace th
 
   - Double click on the executable (Kitsu publisher.exe) inside the extracted folder to run the app.
 
-#### On macOS
+#### On MacOS
 
 - DMG installer:
 
@@ -132,7 +132,7 @@ All commands have the keyword {version} in the filenames, you need to replace th
 
 ## Development Environment
 
-### Pre-requisites
+### Pre-Requisites
 
 To develop or to build the Electron app you need [Node.js](https://nodejs.org/en/)>=16.11 installed.
 
@@ -154,9 +154,9 @@ npm run dev
 
 It will spawn an electron instance and a Vite development server.
 
-### Build the electron app
+### Build the Electron App
 
-#### Pre-requisites
+#### Pre-Requisites
 
 - On debian based Linux you need:
 
@@ -183,7 +183,7 @@ It will spawn an electron instance and a Vite development server.
   brew install pkg-config cairo pango libpng jpeg giflib librsvg
   ```
 
-#### Building the app
+#### Building the App
 
 You need to run npm scripts:
 

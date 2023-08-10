@@ -1,4 +1,4 @@
-# Getting started as a Production Manager - Advanced Users
+# Getting Started as a Studio Manager - Advanced Users
 
 ## Create Task for Episode
 

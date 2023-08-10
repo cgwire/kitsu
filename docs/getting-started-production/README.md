@@ -1,4 +1,4 @@
-# Getting started as a Production Manager
+# Getting Started as a Studio Manager
 
 ## Create your First Production
 

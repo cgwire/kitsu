@@ -1,6 +1,6 @@
 # Mattermost Integration
 
-## Enable incoming webhooks, custom username and profile picture for webhooks
+## Enable Incoming Webhooks, Custom Username and Profile Picture for Webhooks
 
 1. Make sure you are logged as a system admin account in your Mattermost server.
 2. You need to check if your Mattermost installation can receive incoming webhooks and set custom username and profile picture for webhooks. 
@@ -12,7 +12,7 @@
 
    ![Enable incoming webhooks](../img/mattermost/enable-incoming-webhooks.png)
 
-## Set a webhook in Mattermost
+## Set a Webhook in Mattermost
 
 1. Make sure you are logged as a system admin account in your Mattermost server.
 2. Go to the "Integrations" --> "Incoming Webhooks" --> "Add incoming Webhook" section.
@@ -38,7 +38,7 @@
 
 > **_Note:_** The users who wants to have notifications enabled have to be the same Mattermost server than the one you use in these steps.
 
-## Enable notifications
+## Enable Notifications
 
 Each user can set in their profiles the notification push to
 Discord. They have to switch the "Discord notifications enabled" 

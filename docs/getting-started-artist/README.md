@@ -1,4 +1,4 @@
-# How to get started with Kitsu as an artist
+# Getting Started as an Artist
 
 
 ## First Connection

@@ -1,8 +1,8 @@
-# Publishing a preview with the Kitsu Publisher
+# Publishing a Preview with the Kitsu Publisher
 
 You must first have the Kitsu publisher and the plugin installed on your computer.
 
-## Consult your to-do list
+## Consult your To-Do List
 
 First, you must log into the publisher using your kitsu address, login, and password, as you would with your usual Kitsu.
 
@@ -25,7 +25,7 @@ The first new element is that you have direct access to your timesheet. You can 
 When you are ready to publish your work, click on the **Add a review to publish** button.
 
 
-## Publish a preview from the publisher
+## Publish a Preview from the Publisher
 
 You now have the choice between the traditional way of publishing by uploading the preview by yourself. Or you can let Kitsu Publisher do it for you.
 
@@ -46,8 +46,9 @@ Once satisfied with the result, you can click on **Confirm**. It will close the 
 Now everybody logged in to Kitsu will see your comment and publish.
 
 
-## Setup the publisher
-### Change the save directory and add scripts
+## Setup the Publisher
+
+### Change the Save Directory and Add Scripts
 
 You can go to the setting menu when you click on your avatar.
 
@@ -84,7 +85,7 @@ You can insert variables in your command. You just have to put the chosen variab
 - taskStatusName (String) : the name of the task status.
 - taskTypeName (String) : the name of the task type
 
-### View the result of the setting on the export pop-up
+### View the Result of the Setting on the Export Pop-Up
 
 Once your preview is rendered, you can check the directory and the scripts launched.
 

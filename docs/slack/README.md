@@ -6,9 +6,9 @@ process in the following!
 
 
 
-## Create a Kitsu application in Slack
+## Create a Kitsu Application in Slack
 
-### Create an application
+### Create an Application
 
 To start with the integration, we need to create an application in Slack
 dedicated to sending messages on your Kitsu instance behalf.
@@ -24,7 +24,7 @@ Then enter Kitsu as name and chose the workspace you want to link with you Kitsu
 ![Application token](../img/slack/slack_create_app_02.png)
 
 
-### Set the right permissions
+### Set the Right Permissions
 
 When the app is created, go to the app page by clicking on its name in the list
 and go to the *Basic information* section. Then click on the *Permissions*
@@ -39,7 +39,7 @@ The required permission scope is `chat:write:bot`:
 ![Application token](../img/slack/slack_create_app_05.png)
 
 
-### Install App in your workspace
+### Install App in your Workspace
 
 We can now proceed to the app installation in the workspace. Go to the
 *Install App* section and proceed to installation by clicking on the big green
@@ -52,23 +52,23 @@ Confirm the installation:
 Your Kitsu Slack App is now up and running! You just need to link your Kitsu to your notifications sent to your Slack workspace.
 
 
-### Get the token
+### Get the Token
 
 Now come back to the *Install app* section. You should see the token to use to
 link your Kitsu instance to Slack.
 
 ![Application token](../img/slack/slack_create_app_08.png)
 
-## Change Kitsu settings
+## Change Kitsu Settings
 
-### Link Kitsu to your new Slack application
+### Link Kitsu to your new Slack Application
 
 Now that you have a valid token for your Slack application, go to the settings
 page. There you can give the token to your Kitsu instance.
 
 ![Application token](../img/slack/slack_kitsu_settings.png)
 
-### Enable Slack notifications in your profile
+### Enable Slack Notifications in your Profile
 
 The final step requires to go in your profile section. From there you can put
 your Slack notifications on. It requires a last parameter: the Member ID you use

@@ -1,5 +1,4 @@
-# How to get started with Kitsu as a client
-
+# Getting Started as a Client
 
 ## First Connection
 
