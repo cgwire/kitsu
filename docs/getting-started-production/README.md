@@ -1,6 +1,6 @@
-# Getting Started as a Studio Manager
+# Create your First Production
 
-## Create your First Production
+## New Project - Create Production
 
 The first step in Kitsu is to create a production. Click on the **Create a new
 production** button.
@@ -369,7 +369,57 @@ You can have access to the shot values history too.
 ![Shot Values History](../img/getting-started/shot_values_history.png)
 
 
-## Add a Preview
+## Change Status and Add a Preview
+
+To change a status of a task or upload a preview, you need to click on the
+status of the task (1).
+
+![Shot status](../img/getting-started/shot_status.png)
+
+It makes a panel appear on the right, and here you can write a comment, change the status, and attach a file.
+
+![Comment Panel](../img/getting-started/comment_panel.png)
+
+The **Commen Panel** is split in 2 tabs : 
+- POST COMMENT
+- PUBLISH REVISION
+
+To change the **Status**, stay in **POST COMMENT** tab.
+
+The comment uses the **Markdown** language. If you need specific syntax, feel free to look at the markdown guide website: https://www.markdownguide.org/basic-syntax/
+
+
+On the **Leave a Comment...** section, you can **tag** someone on the team in the comments. Type the `@`and it opens a sub-menu with the list of the team.
+
+![Tag someone](../img/getting-started/tag_team.png)
+
+You can also **tag** a full deparmtent by typunt '@' and the department's name.
+
+![Tag department](../img/getting-started/tag_department.png)
+
+You can add a **checklist** to your comments.
+
+You need to click on the **Add checklist** button, and the first item of the checklist appears.
+
+![add checklist](../img/getting-started/add_checklist.png)
+
+Type your comments, hit the **Enter** key to add another line to your checklist, or click again on the **Add Checklist** button.
+
+![checklist](../img/getting-started/checklist_detailed.png)
+
+Besides your comment, you can also attach a file as a picture. Click on the **Add attachment** button.
+
+![Add Attachment Simple](../img/getting-started/add_attachmen_simplet.png)
+
+You can select a file from your hard drive or past a screenshot here.
+
+![Attachment snapshot](../img/getting-started/attachment_snapshot.png)
+
+
+Validate the attachemtn by clicking on **Add file as attachment**.
+
+
+Then select the **Status** that you need on the drop down menu. then click on the **Post** buton to post it to the world.
 
 Kitsu will automatically switch to the **Publish Revision** tab when you use status with the option **IS FEEDBACK REQUEST**, like the **WFA** Status.
 
@@ -425,45 +475,12 @@ Once you have clicked on the button, you will have the choice if you want to pic
 ![thumbnail applied](../img/getting-started/pannel_history_thumbnail.png)
 
 
-## Change Status and Perform a Review
-
-To write a comment and change the status of a task, you can click on the
-status of the task (1).
-
-The comment uses the **Markdown** language. If you need specific syntax, feel free to look at the markdown guide website: https://www.markdownguide.org/basic-syntax/
-
-
-![Shot status](../img/getting-started/shot_status.png)
-
-It makes a panel appear on the right, and here you can write a comment, change the status, and attach a file.
+## Perform a Review
 
 
 
 
-You can **tag** someone on the team in the comments. Type the `@`and it opens a sub-menu with the list of the team.
-
-![Tag someone](../img/getting-started/tag_team.png)
-
-You can also **tag** a full deparmtent by typunt '@' and the deparmtent's name.
-
-![Tag department](../img/getting-started/tag_department.png)
-
-You can add a **checklist** to your comments.
-
-You need to click on the **Add checklist** button, and the first item of the checklist appears.
-
-![add checklist](../img/getting-started/add_checklist.png)
-
-Type your comments, hit the **Enter** key to add another line to your checklist, or click again on the **Add Checklist** button.
-
-![checklist](../img/getting-started/checklist_detailed.png)
-
-Besides your comment, you can also attach a preview. Click on the **Add attachment** button.
-
-![Attachment snapshot](../img/getting-started/attachment_snapshot.png)
-
-
-Validate the post and the new status with **Post status**
+Then 
 
 ![Changing status](../img/getting-started/changing_status_shot.png)
 
