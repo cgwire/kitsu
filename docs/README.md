@@ -26,7 +26,7 @@ Production managers, Supervisors, Vendors, and Clients.
 
 Depending on your role in the studio, we propose you several tutorials:
 
-* [Getting Started as a Production Manager](getting-started-production/README.md): Set up a full production and dispatch tasks to your team
+* [Create your First Production](first_production/README.md): Set up a full production and dispatch tasks to your team
 * [Getting Started as a Production Manager - Advanced Users](getting-started-advanced/README.md): Prepare advanced project and go further with customization
 * [Getting Started as an artist](getting-started-artist/README.md): Access your task list, share your progress and upload your results
  * [Getting Started as a client](getting-started-client/README.md): Browse playlists and provide feedback on the deliveries
