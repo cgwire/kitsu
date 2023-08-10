@@ -1,6 +1,6 @@
 # Production Customization
 
-## Select specific Task Status for a production
+## Select Specific Task Status for a Production
 
 
 On the **Navigation Menu**, choose on the drop-down menu the **Setting**. 
@@ -20,7 +20,7 @@ validate your choice with the **add** button.
 ![Setting Add Status](../img/getting-started/setting_status_add.png)
 
 
-## Select specific Task Types for a production
+## Select Specific Task Types for a Production
 
 On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
 
@@ -44,7 +44,7 @@ validate your choice with the **add** button.
 You can go back to the global asset or shot page and add the new **task type column** to your production.
 
 
-## Select specific Asset Types for a production
+## Select Specific Asset Types for a Production
 
 On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
 
@@ -62,7 +62,7 @@ validate your choice with the **add** button.
 ![Setting Add Asset](../img/getting-started/setting_asset_add.png)
 
 
-## Select specific Status Automation for a production
+## Select Specific Status Automation for a Production
 
 On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
 

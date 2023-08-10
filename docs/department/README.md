@@ -1,6 +1,6 @@
 # Departments
 
-## Create departments
+## Create Departments
 
 Departments are here to help the supervisors and artists to focus on their tasks.
 Once they are linked to one or several departments, supervisors and artists will have direct access to their
@@ -29,7 +29,7 @@ Once you finish creating the department, the page should look like this.
 
 ![Customized department](../img/getting-started/customized_department.png)
 
-## Modify departments
+## Modify Departments
 
 You can modify any **Department** you need.
 
@@ -58,7 +58,7 @@ Once you finish modifying the department, the page should look like this.
 ![Customized department](../img/getting-started/customized_department.png)
 
 
-## Organize your task types into Departments
+## Organize your Task Types into Departments
 
 You can now link your freshly created **Department** to **Task Types**.
 
@@ -86,7 +86,7 @@ Once you're done, the **Task types** page should look like this.
 ![Department task types filled](../img/getting-started/Task_deparment_filled.png)
 
 
-## Link people to departments
+## Link People to Departments
 
 You can now link your freshly created **Department** to **People**.
 
@@ -121,7 +121,7 @@ The department supervisor will be able to comment on all the tasks from their de
 ![Department filtered view](../img/getting-started/department_filtered_view.png)
 
 
-## Link metadata column to department
+## Link Metadata Column to Department
 
 You can now link your custom metadata column to a **department**. This way, this column will be seen on the department-filtered view of the **Supervisor** and **Artist**.
 

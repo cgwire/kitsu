@@ -1,4 +1,4 @@
-# Pipeline customization
+# Pipeline Customization
 
 You can modify Kitsu to fit your **studio vocabulary** for the asset / Pre-production, task type, Status, etc.
 
@@ -22,7 +22,7 @@ Once your **Global Library** is populated, you can fill the **Production Library
 
 ## Task Type
 
-### Create a new Task Type
+### Create a New Task Type
 
 On the main menu ![Main menu](../img/getting-started/main_button.png) select
 the **TASK TYPES** page under the **Admin** section.
@@ -73,7 +73,7 @@ Validate your choice with the **add** button.
 You can return to the **global asset or shot page** and add the new **task type column** to your production.
 
 
-### Modify an existing Task Type
+### Modify an Existing Task Type
 
 On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 **TASK TYPES** page under the **Admin** section.
@@ -103,7 +103,7 @@ Now your changes are applied on all the productions the **Task Type** is used.
 ## Task Status
 
 
-### Create a new Task Status
+### Create a New Task Status
 
 On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 **TASK STATUS** page under the **Admin** section.
@@ -146,7 +146,7 @@ Validate your choice with the **add** button.
 You can return to the **global asset or shot page** and use the new **Status** on your comments.
 
 
-### Modify an existing Task Status
+### Modify an Existing Task Status
 
 On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 **TASK STATUS** page under the **Admin** section.
@@ -178,7 +178,7 @@ Click on **Confirm** to save your changes. Now your changes are applied on all t
 
 ## Asset Types
 
-### Create a new Asset Types
+### Create a New Asset Types
 
 On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 **ASSET TYPES** page under the **Admin** section.
@@ -216,7 +216,7 @@ Validate your choice with the **add** button.
 You can now create a new asset under this **Asset Type**.
 
 
-### Modify an existing Asset Types
+### Modify an Existing Asset Types
 
 On the main menu ![Main menu](../img/getting-started/main_button.png) select the
 **ASSET TYPES** page under the **Admin** section.
@@ -249,7 +249,7 @@ for its workflow.
 
 ## Status Automation
 
-### Create a new Status Automation
+### Create a New Status Automation
 
 **Status Automation** is here to do the heavy lifting for you.
 

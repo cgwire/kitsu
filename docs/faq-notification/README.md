@@ -1,7 +1,7 @@
-# How to get notified...
+# How to Get Notified...
 
 
-## How do notifications work?
+## How do Notifications Work?
 
 The notification symbol is the **Bell** button next to your name, top right of
 the screen. Its color is **grey**
@@ -53,7 +53,7 @@ to stay up to date.
 
 ![Notification example 02](../img/getting-started/notification_example02.png)
 
-## How to get notified?
+## How to Get Notified?
 
 As an artist, you receive a notification
 ![Notification](../img/getting-started/notification_icon_on.png) as soon as someone assigns you to a task, change
@@ -86,7 +86,7 @@ You can also receive your notification via Email or Slack on your profile page.
 
 (see https://kitsu.cg-wire.com/slack/#create-a-kitsu-application-in-slack)
 
-## How to not be notified anymore?
+## How to Not be Notified Anymore?
 
 If you don't want to follow a task anymore, click on the **eye** button
 ![Notification on](../img/getting-started/notification_on.png) on the task page. It is crossed ![notification off](../img/getting-started/notification_off.png), meaning
@@ -99,7 +99,7 @@ Or you can select a batch of tasks and use the **Action Box** To unsubscribe to 
 
 ------------------------------------
 
-## How to be notified of everything?
+## How to be Notified of Everything?
 
 The **News feed** page is here to keep you aware of all the changes in the production.
 

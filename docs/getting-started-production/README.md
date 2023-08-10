@@ -1,6 +1,6 @@
 # Getting started as a Production Manager
 
-## Create your first production
+## Create your First Production
 
 The first step in Kitsu is to create a production. Click on the **Create a new
 production** button.
@@ -39,7 +39,7 @@ See the **Customization** section for more details.
 
 [Pipeline Customization](../customization-pipeline/README.md#task-type)
 
-## Introduction to Kitsu global page
+## Introduction to Kitsu global Page
 
 Welcome to the global asset page of Kitsu.
 
@@ -103,7 +103,7 @@ The last part (4), at the bottom of the screen, is the sum-up of your displayed 
 
 You can see the number of elements (assets or shots), the total number of estimated days, and the total number of already spent days.
 
-## Create assets
+## Create Assets
 
 So, now you have the first script for your production. Next, it's time to do the
 breakdown and the creation of the assets. Finally, it allows you to list your assets,
@@ -168,7 +168,7 @@ To delete an asset, see the FAQ : [How to delete an asset](../faq-deletion/READM
 
 
 
-## Create (episodes) sequences and shots
+## Create Episodes, Sequences and Shots
 
 It's time to do the breakdown of the storyboard. Meaning you can create
 the sequences and the shots of the episode and associate assets to them.
@@ -271,7 +271,7 @@ You can have access to the shot values history too.
 
 ![Shot Values History](../img/getting-started/shot_values_history.png)
 
-## Create a breakdown list
+## Create a Breakdown List
 
 Filling out the breakdown helps you with the assembly of the shots. With the
 breakdown, you have all the details of the assets you need to add to create your
@@ -356,7 +356,7 @@ You now have access to a second drop-down menu, where you can choose your asset 
 
 You can fill the asset breakdown page the same way as the shots. First, select one or more assets on the left part and then add the right part's elements.
 
-## Change asset status
+## Change Asset Status
 
 For example, when an asset is validated at the **Concept** stage, it can be used for the storyboard.
 Then when it's validated at the **Modeling** stage, you can use it for the layout and so on.
@@ -381,7 +381,7 @@ Then you will see all the assets cast in this shot and their status.
 It's the fastest way to know if you can start a shot for a specific task.
 
 
-## Add a new user
+## Add a New User
 
 Each Artist required an account. Go to the drop-down menu ![Main
 menu](../img/getting-started/main_button.png), and under the **Studio**
@@ -414,7 +414,7 @@ won't have access to anything.
 
 
 
-## Add a User to the team
+## Add a User to the Team
 
 You need to add someone to a production to assign him a task.
 
@@ -428,7 +428,7 @@ If you want to check another project team, you must switch to the page's top.
 ![Team page](../img/getting-started/team_page.png)
 
 
-## Assign tasks to an Artist
+## Assign Tasks to an Artist
 
 We can now get back to the **ASSETS** page via the drop-down menu.
 
@@ -521,7 +521,7 @@ You can select your status and publish your preview with the **Post** Button.
 
 
 
-## Add a thumbnail
+## Add a Thumbnail
 
 You can use the preview as a **thumbnail** on the asset or shot spreadsheet. It
 helps to recognize the assets/shots on the main pages.
@@ -534,7 +534,7 @@ Once you have clicked on the button, you will have the choice if you want to pic
 ![thumbnail applied](../img/getting-started/pannel_history_thumbnail.png)
 
 
-## Change status and perform a review
+## Change Status and Perform a Review
 
 To write a comment and change the status of a task, you can click on the
 status of the task (1).
@@ -545,6 +545,8 @@ The comment uses the **Markdown** language. If you need specific syntax, feel fr
 ![Shot status](../img/getting-started/shot_status.png)
 
 It makes a panel appear on the right, and here you can write a comment, change the status, and attach a file.
+
+
 
 
 You can **tag** someone on the team in the comments. Type the `@`and it opens a sub-menu with the list of the team.
@@ -627,7 +629,7 @@ From there, you can change the status too![Retake](../img/getting-started/retake
 
 Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the ArtistArtist that his work is validated.
 
-## Add an estimation for a task
+## Add an Estimation for a Task
 
 Click on the name of a task type.
 
@@ -693,7 +695,7 @@ Depending on the **FPS** you have set for the production, the number of **Second
 
 
 
-## The timesheets
+## The Timesheets
 
 As Studio Manager, you can use the main menu to check the timesheets.
 

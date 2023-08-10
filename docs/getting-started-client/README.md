@@ -30,7 +30,7 @@ encourage you to change the default password with one of your own.
 ![User password](../img/getting-started/user_password.png)
 
 
-## See your playlists
+## See your Playlists
 
 The central part for you, on **Kitsu**, is the **Playlist** page.
 You can access it by clicking on the production avatar.
@@ -45,7 +45,7 @@ The playlists will gather all the assets and shots you have to comment.
 
 On the left part, you can sort the playlist per **Task Type**, **date** or per **name** (1), then the list of the playlists created for you (2). On the center part, you have fast access to the recent playlist (3).
 
-### Detail of the playlist
+### Detail of the Playlist
 
 On the left part, you keep access to the different playlists. On the center part, you see the different elements of the selected playlist. It can be assets or shots. On the right part, you have access to the comment section.
 
@@ -83,12 +83,12 @@ On top of the elements (assets or shots) you have access to different options:
 
 
 
-## Share your comment
+## Share your Comments
 
 First open the comment section. ![Comment button](../img/getting-started/comment_button.png)
 
 
-From there, you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the CG artist
+From there, you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the Artist
 performs some changes.
 
 You can add a **checklist** to your comments.
@@ -101,7 +101,7 @@ Type your comments, and hit **Enter** key to add another line on your checklist 
 
 ![checklist](../img/getting-started/checklist_detailed.png)
 
-## Global view of the assets
+## Global View of the Assets
 
 As a client, you can go to the global page of the assets with the drop-down menu on top of the screen.
 
@@ -112,7 +112,7 @@ On the global page, you will be able to see all the status of the different step
 ![Client global page Asset](../img/getting-started/client_global_asset.png)
 
 
-## Global view of the shots
+## Global View of the Shots
 
 As a client, you can go to the global page of the shots with the drop-down menu on top of the screen.
 
@@ -122,7 +122,7 @@ On the global page, you will be able to see all the status of the different step
 
 ![Client global page Shot](../img/getting-started/client_global_shot.png)
 
-## Production report
+## Production Report
 
 To ease the communication with the studio, you have direct access to the production report, separated into two parts: the **Sequence Stats** and the **Asset Types Stats**
 

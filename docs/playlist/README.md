@@ -1,6 +1,6 @@
 # Playlists
 
-## Create a playlist
+## Create a Playlist
 
 
 You can find the **Playlists** page on the drop-down menu.
@@ -44,7 +44,7 @@ automatically saved.
 ![Playlist page](../img/getting-started/playlist_example.png)
 
 
-## Review and validations
+## Review and Validations
 
 Once you have created a playlist; you have several options:
 

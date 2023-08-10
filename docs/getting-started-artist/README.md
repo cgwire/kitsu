@@ -30,7 +30,7 @@ encourage you to change the default password with one of your own.
 ![User password](../img/getting-started/user_password.png)
 
 
-## See your assignments
+## See your Assignments
 
 The central part for you, on **Kitsu**, is the **My tasks** page.
 It's the first landing page when you log in.
@@ -59,7 +59,7 @@ to your task list.
 
 
 
-## Share your progress
+## Share your Progress
 
 When you start a new task you are assigned to, click on the Status![Todo](../img/getting-started/todo_icon.png)
 (1) on your my task page. You can also do it on the shots or assets page.
@@ -88,7 +88,7 @@ using the **edit** button
 ![Edit button](../img/getting-started/edit_button.png).
 
 
-## Ask for a review
+## Ask for a Review
 
 You can ask for a review by switching the tab to **Publish revision**
 and change the Status of a task to
@@ -135,7 +135,7 @@ on the **Done** tab.
 
 ![My done tasks page](../img/getting-started/done_page.png)
 
-## Fill your timesheet
+## Fill your Timesheet
 
 Every day, you can declare how much time you spent on each task. On your **My Tasks**
 page, go to the **Timesheets** tab (1). Or click on the shortcut on top of the screen.

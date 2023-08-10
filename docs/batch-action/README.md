@@ -1,7 +1,7 @@
 # Batch Actions
 
 
-## Add batch of thumbnails (and previews)
+## Batch Upload Previews (as Thumbnails)
 
 You can use the **Add Thumbnails** button ![Add thumbnails button](../img/getting-started/add_thumbnails.png) on the global page to massively import thumbnails.
 
@@ -17,7 +17,7 @@ For the video files, only the first frame is used as the thumbnail.
 You have to name your thumbnails as sequence_shot.
 
 
-## Create assets from a CSV spreadsheet file
+## Create Assets from a CSV Spreadsheet File
 
 You may already have your asset list ready in a spreadsheet file.
 With Kitsu, you have two ways to import them; the first is to import a `.csv` file, the second is to copy-paste your data directly into Kitsu.
@@ -46,7 +46,7 @@ Now, you have all your assets imported into Kitsu and the task created according
 ![Import data copy paste data](../img/getting-started/import_result_asset.png)
 
 
-## Create assets by copy/pasting a spreadsheet file
+## Create Assets by Copy / Pasting a Spreadsheet File
 
 Open your spreadsheet, select your data and copy them.
 
@@ -76,7 +76,7 @@ Now, you have all your assets imported into Kitsu and the task created according
 ![Import data copy paste data](../img/getting-started/import_result_asset.png)
 
 
-## Update assets with the CSV import
+## Update Assets with the CSV Import
 
 You can use the CSV import to update your data quickly.
 
@@ -89,7 +89,7 @@ will be highlighted in blue.
 
 
 
-## Update assets by copy/pasting a spreadsheet file
+## Update Assets by Copy / Pasting a Spreadsheet File
 
 Open your spreadsheet, select your data and copy them.
 
@@ -120,7 +120,7 @@ Now, you have all your assets imported into Kitsu and the task created according
 ![Import data copy paste data](../img/getting-started/import_result_asset.png)
 
 
-## Create shots form an EDL file
+## Create Shots form an EDL File
 
 You may already have your shots list ready in an **EDL** file.
 With Kitsu, you can import directly your **EDL** file to create the sequence, shot, number of frame, frame in and frame out.
@@ -151,7 +151,7 @@ Then Kitsu will create the shots.
 
 
 
-## Create shots from a CSV spreadsheet file
+## Create Shots from a CSV Spreadsheet File
 
 You may already have your shots list ready in a spreadsheet file.
 With Kitsu, you have two ways to import them; the first is to import a `.csv` file directly, the second is to copy-paste your data directly into Kitsu.
@@ -180,7 +180,7 @@ Now, you have all your shots imported into Kitsu, and the task created according
 ![Import data copy paste data](../img/getting-started/import_result_shot.png)
 
 
-## Create shots by copy/pasting a spreadsheet file
+## Create Shots by Copy / Pasting a Spreadsheet File
 
 Open your spreadsheet, select your data and copy them.
 
@@ -210,7 +210,7 @@ Now, you have all your shots imported into Kitsu, and the task created according
 ![Import data copy paste data](../img/getting-started/import_result_shot.png)
 
 
-## Update shots information with CSV Import
+## Update Shots Information with CSV Import
 
 You can use the **CSV Import** to update your data as the **NB Frames**, **Frame IN**, **Frame Out** or any custom **Metadata column**.
 
@@ -243,7 +243,7 @@ Now, you have all your shots imported into Kitsu, and the task created according
 
 ![Import data copy paste data](../img/getting-started/import_result_shot.png)
 
-## Create a breakdown list from a CSV file
+## Create a Breakdown List from a CSV File
 
 You may already have your breakdown list ready in a spreadsheet file. With Kitsu, you have two ways to import it; the first is to import a .`csv` file directly, the second is to copy-paste your data directly into Kitsu.
 
@@ -270,7 +270,7 @@ Now, you have your breakdown imported into Kitsu.
 ![Breakdown import Preview](../img/getting-started/breakdown_general_bulk_select_full.png)
 
 
-## Create a breakdown list by copy/pasting a spreadsheet file
+## Create a Breakdown List by Copy / Pasting a Spreadsheet File
 
 Open your spreadsheet, select your data and copy them.
 
@@ -300,7 +300,7 @@ Now, you have all your assets imported into Kitsu.
 ![Import data copy paste data](../img/getting-started/breakdown_general_bulk_select_full.png)
 
 
-## Add employees from a CSV spreadsheet file
+## Add Employees from a CSV Spreadsheet File
 
 You may already have your employee list ready in a spreadsheet file.
 With Kitsu, you have two ways to import them; the first is to import a `.csv` file directly, the second is to copy-paste your data directly into Kitsu.

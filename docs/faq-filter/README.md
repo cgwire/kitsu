@@ -1,6 +1,6 @@
-# How to filter...
+# How to Filter...
 
-## Introduction to filters
+## Introduction to Filters
 
 In **Kitsu**, the filters are set through the **search bar**. It allows you to
 **save** your search query. Once done, you can rerun your query with a
@@ -19,7 +19,7 @@ bar](../img/getting-started/filter_save_button.png). in the following pages:
 NB: The **search bar** is available too in people episodes list.
 
 
-## How to use the Filter Builder?
+## How to Use the Filter Builder?
 
 Next to the search bar you have the icon of the **Filter Builder**
 
@@ -39,7 +39,7 @@ And finally you can filter per the Thumbnails presence.
 You can add several filters. Once you are done, validate your choice with the **Confirm** button.
 
 
-## How to filter two status of a same task?
+## How to Filter Two Status of a Same Task?
 
 You may need to filter for example all the tasks that are in **WIP** and **Done** status
 
@@ -67,7 +67,7 @@ You can now see the result
 You can save your filter with the ![Save button](../img/getting-started/filter_save_button.png) save button.
 
 
-## How to use the search bar?
+## How to Use the Search Bar?
 
 The **search bar** query is applied every time a new character is typed. You
 don't need to type everything to get a quick result.
@@ -122,7 +122,7 @@ You can also search for an **assigned** or **unassigned** task for a specific ty
 ![Search assignation](../img/getting-started/filter_builder_assignation.png)
 
 
-## How to save filter queries?
+## How to Save Filter Queries?
 
 Kitsu allows you to save your research. You can save them by pressing the
 **Enter**, or click on the **Save** button
@@ -134,7 +134,7 @@ Now under the **search bar** you can see your saved queries as buttons.
 
 Every time you get back to this page, the buttons are there. It helps you to run common queries faster.
 
-## How to rename a saved filter
+## How to Rename a Saved Filter
 
 Once a have created your filter, and saved it, it will appear as a button under the search bar.
 The search can be complex and not easy to read.
@@ -154,7 +154,7 @@ On the pop-up window, you can now change the displayed name on the **Name** sect
 ![Edit filtered name](../img/getting-started/filter_edit_name.png)
 
 
-## What filters can I create?
+## What Filters can I Create?
 
 You can create **filters** about **entities**:
 
@@ -173,7 +173,7 @@ Examples:
 
 
 
-### How to delete filters?
+## How to Delete Filters?
 
 If you have created a **filter button** by mistake, click on the cross next to
 it ![Filter delete](../img/getting-started/filter_delete.png).
@@ -182,9 +182,5 @@ The result of the filter is displayed, but not the button anymore. Just
 cancel your research by deleting the text or use the cross next to the search
 bar ![Search delete](../img/getting-started/filter_cross_delete.png)
 
-### How to rename filters?
 
-If you have created a **filter button** but the code displayed is too long,
-or not clear enough, you can rename it. Click on the edit button next to
-it ![Filter edit](../img/getting-started/filter_edit.png).
 

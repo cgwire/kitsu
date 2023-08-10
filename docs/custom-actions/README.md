@@ -1,6 +1,6 @@
 # Custom Actions
 
-## What is a custom action?
+## What is a Custom Action?
 
 A custom action is a simple HTTP request that sends information from your
 current Kitsu selection to a custom endpoint. In other terms, when your user
@@ -34,7 +34,7 @@ Note that you can also run the custom action in the background (ajax request
 instead of opening a new page), if you don't need feedback to the user.
 
 
-## How to setup a custom action
+## How to Setup a Custom Action
 
 ### Creation
 
@@ -56,7 +56,7 @@ When a user select tasks in the asset or shot lists, by going to the
 *Run custom action* section, he will be able to execute the custom action for
 the current selection.
 
-### Data sent via a custom action
+### Data Sent via a Custom Action
 
 Data are sent at JSON format. It contains an object with the following fields:
 

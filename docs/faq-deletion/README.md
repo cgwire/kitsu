@@ -1,6 +1,6 @@
-# How to delete...
+# How to Delete...
 
-## How to delete an asset
+## How to Delete an Asset
 
 Go on the main page of the assets and click on the box at the left part of the asset.
 
@@ -22,7 +22,7 @@ the box a second time anc click confirm.
 The asset is removed from the database and won't appear anymore on Kitsu.
 
 
-## How to delete a shot
+## How to Delete a Shot
 
 Go on the main page of the shots and click on the box at the left part of the asset.
 
@@ -46,7 +46,7 @@ The shot is removed from the database and won't appear anymore on Kitsu.
 
 
 
-## How to delete a sequence
+## How to Selete a Sequence
 
 To delete a sequence, use the drop-down menu to
 go to the **Sequence** page.
@@ -59,7 +59,7 @@ Then you can delete the sequence, with the
 ![Delete sequence](../img/getting-started/delete_sequence.png)
 
 
-## How to delete an episode
+## How to Delete an Episode
 
 To delete an episode, use the drop-down menu to
 go to the **Episode** page.
@@ -72,7 +72,7 @@ Then you can delete the Episode, with the
 ![Delete sequence](../img/getting-started/delete_episode.png)
 
 
-## How to delete a task type column
+## How to Delete a Task Type Column
 
 To delete a task type (shot or asset), go to the global spreadsheet page,
 and click on the arrow next to the name of the task type ![Delete sequence](../img/getting-started/arrow.png).
@@ -82,7 +82,7 @@ Once you have click on it, a message appears and ask you to type the name of the
 
 ![Delete sequence](../img/getting-started/delete_tasktype.png).
 
-## How to delete a task type column for a specific group
+## How to Delete a Task Type Column for a Specific Group
 
 To delete a task type (shot or asset), go to the global spreadsheet page,
 and click on the arrow next to the name of the task type ![Delete sequence](../img/getting-started/arrow.png).
@@ -92,7 +92,7 @@ Once you have click on it, a message appears and ask you to type the name of the
 
 ![Delete sequence](../img/getting-started/delete_tasktype.png).
 
-## How to delete a task
+## How to Delete a Task
 
 To delete a task (shot or asset), go to the global spreadsheet page,
 and click on the status of the task that you want to delete.
@@ -113,7 +113,7 @@ The second benefit will be to hide automatically this empty column once your wil
 
 
 
-## How to delete tasks for a specific asset type (or sequence)
+## How to Delete Tasks for a Specific Asset Type (or Sequence)
 
 To delete tasks (shot or asset) of a specific asset type or sequence , go to the global spreadsheet page, filter the view to display the element you want to delete.
 
@@ -137,7 +137,7 @@ The second benefit will be to hide automatically this empty column once your wil
 
 ![Delete task filter display](../img/getting-started/delete_task_filter.png)
 
-## How to delete a production
+## How to Delete a Production
 
 To delete a production, you need to close it first.
 
@@ -156,7 +156,7 @@ On the pop-up window, under the **Status** option, choose **Closed**.
 Now your production appears as **Closed**. No one will have access to it, but it's saved.
 It also means that you won't be able to delete any **task status**, **task type**, **asset type**.
 
-## How to remove access to someone?
+## How to Remove Access to Someone?
 
 At some point you may need to remove access to Kitsu to an artist, supervisor etc.
 

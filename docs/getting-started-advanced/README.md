@@ -106,7 +106,7 @@ You can **Rename** and **Delete** the Edit entity on this page, as for the asset
 
 
 
-## Add custom Metadata columns
+## Create Custom Metadata Columns
 
 To add more information on the general spreadsheet pages, you have to create a custom **metadata column**.
 
@@ -176,7 +176,7 @@ First, you need to create your **Metadata column** into Kitsu, add it to your sp
 [Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
 
 
-## Add multiple Preview
+## Add Multiple Preview as one Version
 
 You can add multiple images simultaneously, or once you have uploaded an image, you can add another one.
 
@@ -201,7 +201,7 @@ And then click on the ![delete button](../img/getting-started/delete_button.png)
 
 
 
-## See detail of a shot
+## See Detail of a Shot
 
 If you want to see a detail of a shot, click on its name.
 
@@ -217,7 +217,8 @@ You can click on the status of each task to open the comment panel and see the h
 
 ![Shot detail page](../img/getting-started/shot_detail_page_panel.png)
 
-## Change priorities
+
+## Change Priorities
 
 At some point in the production, you may want to prioritize some tasks, and
 pinpoint these urgent tasks to your team.
@@ -256,7 +257,7 @@ more there are, the more urgent the task is.
 ![Priority level](../img/getting-started/priority_level.png)
 
 
-## Change status per batch
+## Change Status per Batch
 
 Alternatively, you can do it per **batch**.
 
@@ -273,7 +274,7 @@ You validate the new status with the **Confirm** button.
 ![Change status per batch](../img/getting-started/change_status_batch.png)
 
 
-## Simplify the global page
+## Simplify the Global Page
 
 You may need to reduce a task type column on a global page. For example, you may be
 only interested in layout and animation but not so much in the shipment for the client.
@@ -308,7 +309,7 @@ To make the information reappear, click on the same button,
 
 
 
-## Quotas stat
+## Quotas Stat
 
 Kitsu has two ways to calculate the quotas per **shot Task Type**.
 

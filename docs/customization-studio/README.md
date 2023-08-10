@@ -2,7 +2,7 @@
 
 You can customize your kitsu at several levels to fit your studio's identity.
 
-## Change the logo
+## Change the Logo
 
 You can change the kitsu logo into your studio logo on the main menu and your studio name.
 
@@ -19,7 +19,7 @@ Click on the **Set studio logo** to select a picture.
 
 You can also change the **Studio Name**. Remember to **Save the Settings** at the end when you are done.
 
-## Change the Kitsu setting
+## Change the Kitsu' Setting
 
 You can change settings at the Kitsu level that will impact your whole studio and how many hours per day should be worked.
 
