@@ -39,69 +39,6 @@ See the **Customization** section for more details.
 
 [Pipeline Customization](../customization-pipeline/README.md#task-type)
 
-## Introduction to Kitsu global Page
-
-Welcome to the global asset page of Kitsu.
-
-Let's take a look around.
-
-![Presentation of the global page](../img/getting-started/presentation_global.png)
-
-On the top part (1), you have the global navigation, which is always visible throughout all the production pages.
-
-With the main menu button ![Main menu button](../img/getting-started/main_button.png), you can go to your productions and your tasks (it's common to all permissions). And because you are an administrator, you have access to extra options, like the global view of the schedule, timesheets of your whole studio, and workflow customization.
-
-You can choose between production. The name of the actual production is displayed now, but thanks to the drop-down menu, you can navigate from production to production (if you have several).
-
-The next drop-down menu is here to help you navigate through the different pages of the production.
-You always start with the asset page, but you can switch to shots, sequence, statistics, team, and breakdown. With this drop-down menu, you can also change the production setting (including the workflow).
-
-If you have defined your production as a **TV Show**, you will have an episode drop-down menu with the **All assets**, **Main pack**, and episode options.
-
-
-On the right part of the top screen, you have the global search and also news from Kitsu. You can see with an animated gif all the new features.
-
- ![New features](../img/getting-started/latest_update.png).
-
-
-Then, the bell shows you your notification (assignation, comments, tag)![Notification](../img/getting-started/notification_icon_on.png), the last icon before your avatar is the documentation button.
-![documentation button](../img/getting-started/documentation_button.png)
-
-
-And then your avatar to open your menu (setting, documentation, etc.)
-
-![Profile enlarged](../img/getting-started/profil_enlarge.png).
-
-
-
-The second part of the screen is common to the asset and shot page. This part always sticks to the top of the page, even if you scroll down.
-
-The first element on the left is the filter box. You can type anything you want for simple filtering, sequence, asset type, etc.
-
-If you need more advanced filtering, please use the filter builder button.
-
-![Filter Builder](../img/getting-started/filter_builder.png)
-
-You can then save all the filters and use them as your pages.
-
-
-On the right part of the screen, there are some buttons (from left to right) to hide or display the assignation, hide or display the extra column, enlarge or reduce the thumbnail,
-![display and Hide option](../img/getting-started/display_hide_option.png)
-
-batch import thumbnail ![batch import thumbnail](../img/getting-started/add_thumbnails.png), and finally import ![Import button](../img/getting-started/import.png) or export ![export button](../img/getting-started/export.png) data.
-
-
-Below you have the name of the column. the (+) next to **Name** ![Add metadata column](../img/getting-started/add_column_custom.png) is here to create a new metadata column. Then you have the name of the task type column.
-
-On the far right of the screen, next to the scroll bar, is the option to hide and display a text column
-![Display/hide text column](../img/getting-started/visible_column_detail.png).
-
-We have created a **Studio** and **test** metadata column in this example.
-
-
-The last part (4), at the bottom of the screen, is the sum-up of your displayed page. It means the sum-up will update if you filter the page.
-
-You can see the number of elements (assets or shots), the total number of estimated days, and the total number of already spent days.
 
 ## Create Assets
 
@@ -227,158 +164,69 @@ To delete a shot, see the FAQ : [How to delete a shot](../faq-deletion/README.md
 To delete a sequence, see the FAQ : [How to delete a Sequence](../faq-deletion/README.md#how-to-delete-a-sequence)
 
 
+## Introduction to Kitsu global Page
 
-## Add the Frameranges
+Welcome to the global asset page of Kitsu.
 
-At this stage of the production, the animatic should be done. This means you have
-the length (**number of frames**, **frame range In**, and **frame range Out**) for each shot. You can
-add this information to the spreadsheet. This way, you are sure that all
-the frames a calculated and none are missing or over-computed.
+Let's take a look around.
 
-You may also be able to add a camera as an asset!
+![Presentation of the global page](../img/getting-started/presentation_global.png)
 
-You need to edit the shots to fill the frame range information. Click on the
-edit button ![Edit button](../img/getting-started/edit_button.png) on the right
-side of the shot line.
+On the top part (1), you have the global navigation, which is always visible throughout all the production pages.
 
-![edit shot Change sequence](../img/getting-started/edit_shot.png)
+With the main menu button ![Main menu button](../img/getting-started/main_button.png), you can go to your productions and your tasks (it's common to all permissions). And because you are an administrator, you have access to extra options, like the global view of the schedule, timesheets of your whole studio, and workflow customization.
 
-You can enter the **In** and **Out** of the shot on the new window. Then, save with the **Confirm** button.
+You can choose between production. The name of the actual production is displayed now, but thanks to the drop-down menu, you can navigate from production to production (if you have several).
 
-![Shot edit page](../img/getting-started/shot_edit.png)
+The next drop-down menu is here to help you navigate through the different pages of the production.
+You always start with the asset page, but you can switch to shots, sequence, statistics, team, and breakdown. With this drop-down menu, you can also change the production setting (including the workflow).
 
-Now the frame range appears on the general spreadsheet of the shot page.
+If you have defined your production as a **TV Show**, you will have an episode drop-down menu with the **All assets**, **Main pack**, and episode options.
 
-![Shot edit page](../img/getting-started/shot_framerange_global.png)
 
-Now that you have unlocked the **Frames**, **In**, and **Out** columns, you can fill them
-directly from the global shot page.
+On the right part of the top screen, you have the global search and also news from Kitsu. You can see with an animated gif all the new features.
 
-Click on the case you want to fill in and add the data.
+ ![New features](../img/getting-started/latest_update.png).
 
-If you fill in the **Frame In** and the **Frame out**, Kitsu will calculate the number
- of frames automatically.
 
-![Shot edit page](../img/getting-started/shot_framerange_global_edit.png)
+Then, the bell shows you your notification (assignation, comments, tag)![Notification](../img/getting-started/notification_icon_on.png), the last icon before your avatar is the documentation button.
+![documentation button](../img/getting-started/documentation_button.png)
 
 
-You can also use the **CSV Import** to update your frame range quickly.
- [Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
+And then your avatar to open your menu (setting, documentation, etc.)
 
-You can have access to the shot values history too.
+![Profile enlarged](../img/getting-started/profil_enlarge.png).
 
-![Shot framerange detail](../img/getting-started/shot_framerange_detail.png)
 
-![Shot Values History](../img/getting-started/shot_values_history.png)
 
-## Create a Breakdown List
+The second part of the screen is common to the asset and shot page. This part always sticks to the top of the page, even if you scroll down.
 
-Filling out the breakdown helps you with the assembly of the shots. With the
-breakdown, you have all the details of the assets you need to add to create your
-shot, and we are sure to omit nothing.
+The first element on the left is the filter box. You can type anything you want for simple filtering, sequence, asset type, etc.
 
-On the drop-down menu, choose **BREAKDOWN**.
+If you need more advanced filtering, please use the filter builder button.
 
-![drop down Menu breakdown](../img/getting-started/drop_down_menu_breakdown.png)
+![Filter Builder](../img/getting-started/filter_builder.png)
 
-On the left of the breakdown page is the episode/sequence/shot menu (1); you can choose between those you created. They are the right part of
-the screen; all the assets created are available for this production (main pack and episodes) (3). Moreover, in
-the middle section, it is your selection for the shot (2).
+You can then save all the filters and use them as your pages.
 
-![Breakdown page](../img/getting-started/breakdown_general_empty.png)
 
-So now you have to select the shot you want to cast.
+On the right part of the screen, there are some buttons (from left to right) to hide or display the assignation, hide or display the extra column, enlarge or reduce the thumbnail,
+![display and Hide option](../img/getting-started/display_hide_option.png)
 
-You can display the assets as text if you don't have thumbnails yet, or enlarge the
-thumbnails size.
+batch import thumbnail ![batch import thumbnail](../img/getting-started/add_thumbnails.png), and finally import ![Import button](../img/getting-started/import.png) or export ![export button](../img/getting-started/export.png) data.
 
 
-![Breakdown page text display](../img/getting-started/breakdown_text_display.png)
+Below you have the name of the column. the (+) next to **Name** ![Add metadata column](../img/getting-started/add_column_custom.png) is here to create a new metadata column. Then you have the name of the task type column.
 
-During your breakdown, you may also realize that an asset is missing from the list.
+On the far right of the screen, next to the scroll bar, is the option to hide and display a text column
+![Display/hide text column](../img/getting-started/visible_column_detail.png).
 
-You can create a new asset directly from the breakdown page. Click on the **+** on the right of the **All available assets**.
+We have created a **Studio** and **test** metadata column in this example.
 
-![Breakdown page create asset](../img/getting-started/breakdown_create_asset.png)
 
+The last part (4), at the bottom of the screen, is the sum-up of your displayed page. It means the sum-up will update if you filter the page.
 
-You can also choose multiple shots at the same time. Click on the first shot, hold the **shift** key, and click on the last shot of your selection.
-
-![Breakdown page global bulk select](../img/getting-started/breakdown_general_bulk_select.png)
-
-Then click on the assets you want
-to assign: characters, backgrounds, ... from the right part (3).
-If you have selected multiple shots, your selection is also applied to the numerous shots.
-
-Keep in mind you can also copy a shot filled with assets and paste this asset selection to another shot.
-
-You can see a **+1** or **+10**when you pass over the asset. It's the number
-of times you add this asset, and you can click on it as many times as you need.
-
-![Breakdown add asset](../img/getting-started/breakdown_add_asset.png)
-
-You can also link all your assets to episodes on a TV show without specifying a sequence or shot.
-
-![Breakdown episode asset](../img/getting-started/breakdown_episode.png)
-
-This way, you can link all your assets to one or several episodes before the storyboard/animatic stage.
-
-You can now see the asset appearing in the middle part of the screen (2). Next
-to the asset's name is the number of times it has been added. In this
-example, we have added two times the character asset Llama.
-
-
-If you add an asset twice by mistake, you must go to the screen's middle part to select assets for this shot (2). From there, click on
-**-1**. When you finish this shot, go on with the other shots.
-Your selection is automatically saved.
-
-![Breakdown remove asset](../img/getting-started/breakdown_remove_asset.png)
-
-If a new asset is created during the storyboard, get back to the asset
-page (using the drop-down menu), and create the assets you
-need. The tasks previously created are applied immediately to these new
-assets. However, you have to do the assignment, and then you can
-continue with the breakdown.
-
-Now your **Breakdown** page should look like this.
-
-![breakdown add asset bulk](../img/getting-started/breakdown_general_bulk_select_full.png)
-
-You can also make a breakdown list for your assets if you need to assemble them and keep track of the separate parts.
-
-On the top left corner of the screen, choose **asset** in the drop-down menu below **FOR**.
-
-![Breakdown asset menu](../img/getting-started/breakdown_asset_menu.png)
-
-You now have access to a second drop-down menu, where you can choose your asset type: **Character**, **Environment**, **Props**, **FX**, ...
-
-![Breakdown asset type](../img/getting-started/breakdown_asset_menu_type.png)
-
-You can fill the asset breakdown page the same way as the shots. First, select one or more assets on the left part and then add the right part's elements.
-
-## Change Asset Status
-
-For example, when an asset is validated at the **Concept** stage, it can be used for the storyboard.
-Then when it's validated at the **Modeling** stage, you can use it for the layout and so on.
-
-![Asset Status](../img/getting-started/asset_status.png)
-
-It's useful to know the global status of the state of life of an asset, especially when the breakdown is complete.
-
-On the global page of the shot, you will see a green box: all the assets cast in this shot are ready for this specific task.
-
-![Asset Status](../img/getting-started/asset_status_box.png)
-
-If you don't see the green box, Kitsu will display how many assets are ready.
-
-![Asset Status](../img/getting-started/asset_status_empty.png)
-
- Then you can click on the shot's name to go to its detail page.
-Then you will see all the assets cast in this shot and their status.
-
-![Asset Status](../img/getting-started/asset_status_detail.png)
-
-It's the fastest way to know if you can start a shot for a specific task.
+You can see the number of elements (assets or shots), the total number of estimated days, and the total number of already spent days.
 
 
 ## Add a New User
@@ -476,6 +324,49 @@ In his position (Artist, Supervisor, Vendor), he only sees the production where
 he's assigned.
 
 Now, everybody knows what to do and who is doing what!
+
+## Add the Frameranges
+
+At this stage of the production, the animatic should be done. This means you have
+the length (**number of frames**, **frame range In**, and **frame range Out**) for each shot. You can
+add this information to the spreadsheet. This way, you are sure that all
+the frames a calculated and none are missing or over-computed.
+
+You may also be able to add a camera as an asset!
+
+You need to edit the shots to fill the frame range information. Click on the
+edit button ![Edit button](../img/getting-started/edit_button.png) on the right
+side of the shot line.
+
+![edit shot Change sequence](../img/getting-started/edit_shot.png)
+
+You can enter the **In** and **Out** of the shot on the new window. Then, save with the **Confirm** button.
+
+![Shot edit page](../img/getting-started/shot_edit.png)
+
+Now the frame range appears on the general spreadsheet of the shot page.
+
+![Shot edit page](../img/getting-started/shot_framerange_global.png)
+
+Now that you have unlocked the **Frames**, **In**, and **Out** columns, you can fill them
+directly from the global shot page.
+
+Click on the case you want to fill in and add the data.
+
+If you fill in the **Frame In** and the **Frame out**, Kitsu will calculate the number
+ of frames automatically.
+
+![Shot edit page](../img/getting-started/shot_framerange_global_edit.png)
+
+
+You can also use the **CSV Import** to update your frame range quickly.
+ [Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
+
+You can have access to the shot values history too.
+
+![Shot framerange detail](../img/getting-started/shot_framerange_detail.png)
+
+![Shot Values History](../img/getting-started/shot_values_history.png)
 
 
 ## Add a Preview
@@ -628,6 +519,117 @@ From there, you can change the status too![Retake](../img/getting-started/retake
 
 
 Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the ArtistArtist that his work is validated.
+
+
+## Create a Breakdown List
+
+Filling out the breakdown helps you with the assembly of the shots. With the
+breakdown, you have all the details of the assets you need to add to create your
+shot, and we are sure to omit nothing.
+
+On the drop-down menu, choose **BREAKDOWN**.
+
+![drop down Menu breakdown](../img/getting-started/drop_down_menu_breakdown.png)
+
+On the left of the breakdown page is the episode/sequence/shot menu (1); you can choose between those you created. They are the right part of
+the screen; all the assets created are available for this production (main pack and episodes) (3). Moreover, in
+the middle section, it is your selection for the shot (2).
+
+![Breakdown page](../img/getting-started/breakdown_general_empty.png)
+
+So now you have to select the shot you want to cast.
+
+You can display the assets as text if you don't have thumbnails yet, or enlarge the
+thumbnails size.
+
+
+![Breakdown page text display](../img/getting-started/breakdown_text_display.png)
+
+During your breakdown, you may also realize that an asset is missing from the list.
+
+You can create a new asset directly from the breakdown page. Click on the **+** on the right of the **All available assets**.
+
+![Breakdown page create asset](../img/getting-started/breakdown_create_asset.png)
+
+
+You can also choose multiple shots at the same time. Click on the first shot, hold the **shift** key, and click on the last shot of your selection.
+
+![Breakdown page global bulk select](../img/getting-started/breakdown_general_bulk_select.png)
+
+Then click on the assets you want
+to assign: characters, backgrounds, ... from the right part (3).
+If you have selected multiple shots, your selection is also applied to the numerous shots.
+
+Keep in mind you can also copy a shot filled with assets and paste this asset selection to another shot.
+
+You can see a **+1** or **+10**when you pass over the asset. It's the number
+of times you add this asset, and you can click on it as many times as you need.
+
+![Breakdown add asset](../img/getting-started/breakdown_add_asset.png)
+
+You can also link all your assets to episodes on a TV show without specifying a sequence or shot.
+
+![Breakdown episode asset](../img/getting-started/breakdown_episode.png)
+
+This way, you can link all your assets to one or several episodes before the storyboard/animatic stage.
+
+You can now see the asset appearing in the middle part of the screen (2). Next
+to the asset's name is the number of times it has been added. In this
+example, we have added two times the character asset Llama.
+
+
+If you add an asset twice by mistake, you must go to the screen's middle part to select assets for this shot (2). From there, click on
+**-1**. When you finish this shot, go on with the other shots.
+Your selection is automatically saved.
+
+![Breakdown remove asset](../img/getting-started/breakdown_remove_asset.png)
+
+If a new asset is created during the storyboard, get back to the asset
+page (using the drop-down menu), and create the assets you
+need. The tasks previously created are applied immediately to these new
+assets. However, you have to do the assignment, and then you can
+continue with the breakdown.
+
+Now your **Breakdown** page should look like this.
+
+![breakdown add asset bulk](../img/getting-started/breakdown_general_bulk_select_full.png)
+
+You can also make a breakdown list for your assets if you need to assemble them and keep track of the separate parts.
+
+On the top left corner of the screen, choose **asset** in the drop-down menu below **FOR**.
+
+![Breakdown asset menu](../img/getting-started/breakdown_asset_menu.png)
+
+You now have access to a second drop-down menu, where you can choose your asset type: **Character**, **Environment**, **Props**, **FX**, ...
+
+![Breakdown asset type](../img/getting-started/breakdown_asset_menu_type.png)
+
+You can fill the asset breakdown page the same way as the shots. First, select one or more assets on the left part and then add the right part's elements.
+
+## Change Asset Status
+
+For example, when an asset is validated at the **Concept** stage, it can be used for the storyboard.
+Then when it's validated at the **Modeling** stage, you can use it for the layout and so on.
+
+![Asset Status](../img/getting-started/asset_status.png)
+
+It's useful to know the global status of the state of life of an asset, especially when the breakdown is complete.
+
+On the global page of the shot, you will see a green box: all the assets cast in this shot are ready for this specific task.
+
+![Asset Status](../img/getting-started/asset_status_box.png)
+
+If you don't see the green box, Kitsu will display how many assets are ready.
+
+![Asset Status](../img/getting-started/asset_status_empty.png)
+
+ Then you can click on the shot's name to go to its detail page.
+Then you will see all the assets cast in this shot and their status.
+
+![Asset Status](../img/getting-started/asset_status_detail.png)
+
+It's the fastest way to know if you can start a shot for a specific task.
+
 
 ## Add an Estimation for a Task
 
