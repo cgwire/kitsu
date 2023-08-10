@@ -10,7 +10,8 @@ module.exports = {
      collapsable: false,
      children: [
        ['/', 'Introduction'],
-       '/getting-started-production/',
+       '/first_production/',
+	   '/getting-started-production/',
 	     '/getting-started-advanced/',
        '/getting-started-artist/',
 	     '/getting-started-client/'
