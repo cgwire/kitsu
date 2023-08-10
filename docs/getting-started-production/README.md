@@ -325,6 +325,7 @@ he's assigned.
 
 Now, everybody knows what to do and who is doing what!
 
+
 ## Add the Frameranges
 
 At this stage of the production, the animatic should be done. This means you have
@@ -369,10 +370,10 @@ You can have access to the shot values history too.
 ![Shot Values History](../img/getting-started/shot_values_history.png)
 
 
-## Change Status and Add a Preview
+## Change Status and Add a Comment
 
-To change a status of a task or upload a preview, you need to click on the
-status of the task (1).
+To change a status of a task and write a comment, you need to click on the
+status of the task.
 
 ![Shot status](../img/getting-started/shot_status.png)
 
@@ -393,7 +394,7 @@ On the **Leave a Comment...** section, you can **tag** someone on the team in th
 
 ![Tag someone](../img/getting-started/tag_team.png)
 
-You can also **tag** a full deparmtent by typunt '@' and the department's name.
+You can also **tag** a full deparmtent by typing '@' and the department's name.
 
 ![Tag department](../img/getting-started/tag_department.png)
 
@@ -409,36 +410,40 @@ Type your comments, hit the **Enter** key to add another line to your checklist,
 
 Besides your comment, you can also attach a file as a picture. Click on the **Add attachment** button.
 
-![Add Attachment Simple](../img/getting-started/add_attachmen_simplet.png)
+![Add Attachment Simple](../img/getting-started/attachment_snapshot.png)
 
 You can select a file from your hard drive or past a screenshot here.
 
-![Attachment snapshot](../img/getting-started/attachment_snapshot.png)
+![Attachment snapshot](../img/getting-started/add_attachmen_simplet.png)
 
 
-Validate the attachemtn by clicking on **Add file as attachment**.
+Validate the attachemnt by clicking on **Add file as attachment**.
 
 
-Then select the **Status** that you need on the drop down menu. then click on the **Post** buton to post it to the world.
+Then select the **Status** that you need on the drop down menu. 
+
+![Status List](../img/getting-started/status_list.png)
+
+Then click on the **Post** buton to post it to the world.
+
+
+## Publish a Version
+
+To publish a preview, picture or video, you need to select the **PUBLISH REVISION** tab on the comment panel of the task.
 
 Kitsu will automatically switch to the **Publish Revision** tab when you use status with the option **IS FEEDBACK REQUEST**, like the **WFA** Status.
 
+![Publish Revision](../img/getting-started/publish_revision.png)
+
+
 You can add one or several previews to any comments. It can be a picture (`.png`, `.jpg`, `.jpeg`), a video (`.mp4`, `.mov`, `.wmv`),
-or an `.obj` file. You can review all the previews from the browser or mix everything.
+or an `.glb` file. You can review all the previews from the browser or mix everything.
 
 Other files like `.pdf`, `.zip`, `.rar`, `.ma` or `.mb`, however, need to be
 downloaded to be reviewed.
 
-If you have defined an **FPS** for the production, Kitsu conforms to the uploaded video to this FPS.
 
-Otherwise, the video is compressed to 1080p and 30 Mbit/s.
-
-You need to select the **Publish Revision** tab or select a status with **IS FEEDBACK REQUEST** option.
-
-![Publish revision tab](../img/getting-started/publish_revision.png)
-
-
-Then, click on the "Add preview revision to publish" button. The explorer opens and lets you choose your file or several files.
+Then, click on the **Add preview revision to publish** button. The explorer opens and lets you choose your file or several files.
 
 ![attach preview](../img/getting-started/attach_preview.png)
 
