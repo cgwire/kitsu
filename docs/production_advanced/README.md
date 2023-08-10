@@ -322,7 +322,7 @@ To make the information reappear, click on the same button,
 ![maximize button](../img/getting-started/maximize.png) it won't have the grey highlight.
 
 
-##Sticky Columns
+## Sticky Columns
 
 If an information is very important for you, you can **Stick** this column next to the shot name.
 
