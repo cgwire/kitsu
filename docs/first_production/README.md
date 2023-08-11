@@ -42,8 +42,7 @@ See the **Customization** section for more details.
 
 ## Create Assets
 
-So, now you have the first script for your production. Next, it's time to do the
-breakdown and the creation of the assets. Finally, it allows you to list your assets,
+So, now you have the first script for your production. Next, it's time to break down and create the assets. Finally, it allows you to list your assets,
 dispatch the work to the artists, and follow each related
 task's progress.
 
@@ -76,7 +75,7 @@ You can also customize the asset type list and their tasks pipeline.
 [Customization of the workflow](../customization/README.md#modify-an-existing-asset-types) )
 
 
-The newly created asset appears in the background every time you click on **Confirm and stay**.
+The newly created asset appears in the background whenever you click on **Confirm and stay**.
 
 
 After adding your last asset, click
@@ -174,7 +173,7 @@ Let's take a look around.
 
 On the top part (1), you have the global navigation, which is always visible throughout all the production pages.
 
-With the main menu button ![Main menu button](../img/getting-started/main_button.png), you can go to your productions and your tasks (it's common to all permissions). And because you are an administrator, you have access to extra options, like the global view of the schedule, timesheets of your whole studio, and workflow customization.
+With the main menu button ![Main menu button](../img/getting-started/main_button.png), you can go to your productions and your tasks (it's common to all permissions). And because you are an administrator, you can access extra options, like the global view of the schedule, timesheets of your whole studio, and workflow customization.
 
 You can choose between production. The name of the actual production is displayed now, but thanks to the drop-down menu, you can navigate from production to production (if you have several).
 
@@ -253,7 +252,7 @@ him active; otherwise, select no. Validate by clicking the **Confirm** button.
 ![Create a new user](../img/getting-started/create_employee.png)
 
 See the [permissions](../permissions/README.md) section for more information.
-To summarize, artists, supervisors, production managers, vendors, and clients only see their assigned productions.
+Artists, supervisors, production managers, vendors, and clients only see their assigned productions.
 
 All the people are now part of your studio. They are added to a specific
 production when you add them to a team on a production. Otherwise, they
@@ -270,14 +269,14 @@ On the drop-down menu at the top of the page, select the **TEAM** page.
 ![Drop down menu team](../img/getting-started/drop_down_menu_team.png)
 
 On the **Team** page, you can see all the assignations for a specific project.
-If you want to check another project team, you must switch to the page's top.
+If you want to check another project team, switch to the page's top.
 
 ![Team page](../img/getting-started/team_page.png)
 
 
 ## Assign Tasks to an Artist
 
-We can now get back to the **ASSETS** page via the drop-down menu.
+We can now return to the **ASSETS** page via the drop-down menu.
 
 ![Drop down menu asset](../img/getting-started/drop_down_menu_asset.png).
 
@@ -464,7 +463,7 @@ You can also **drag & drop** the file in the comment section.
 
 On top of your preview, you can add a **Comment**.
 
-Click on the **Leave a Comment** button to unfold the comment section.
+Click the **Leave a Comment** button to unfold the comment section.
 
 ![Add a comment to a Publish](../img/getting-started/publish_revision_comment.png)
 
@@ -534,7 +533,7 @@ If you need to delete your line, click again on the **pencil** icon, and the cur
 
 ![review drawing](../img/getting-started/review_edit.png)
 
-Select the line with the directional cross, and then press the **delete** icon ![Delete line](../img/getting-started/delete_line.png)
+Select the line with the directional cross, then press the **delete** icon ![Delete line](../img/getting-started/delete_line.png)
 
 
 If you go into **Full-Screen**, you can compare two task types or versions side by side when you click on the **Compare** button
@@ -587,7 +586,7 @@ Then click on the assets you want
 to assign: characters, backgrounds, ... from the right part (3).
 If you have selected multiple shots, your selection is also applied to the numerous shots.
 
-Remember that you can also copy a shot filled with assets and paste this asset selection into another shot.
+Remember to copy a shot filled with assets and paste this asset selection into another shot.
 
 You can see a **+1** or **+10**when you pass over the asset. It's the number
 of times you add this asset, and you can click on it as many times as you need.
@@ -611,7 +610,7 @@ Your selection is automatically saved.
 
 ![Breakdown remove asset](../img/getting-started/breakdown_remove_asset.png)
 
-If a new asset is created during the storyboard, get back to the asset
+If a new asset is created during the storyboard, return to the asset
 page (using the drop-down menu), and create the assets you
 need. The tasks previously created are applied immediately to these new
 assets. However, you have to do the assignment, and then you can
@@ -702,7 +701,7 @@ To help you to set a correct estimation, you can use the **Estimation** Tab.
 
 The left part of the screen lists the shots with the assignation and the number of frames (1).
 Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2).
-(See how to set your production fps [Create your first production]((../getting-started-production/README.md#create-your-first-production) )
+
 
 
  On the right part of the screen, you can see the full team of the department (depending on the assignments you made), the number of shots they have to do, the number of frames, seconds, and the average Quota.
