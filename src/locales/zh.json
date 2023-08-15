@@ -68,7 +68,9 @@
             },
             "fields": {
                 "standby": "标准化数据库"
-            }
+            },
+            "episode_casting": "",
+            "save_error": ""
         },
         "comments": {
             "add_attachment": "添加附件",
@@ -107,7 +109,9 @@
             "max_retakes_error": "您不能再为重新提交此任务",
             "previews": "预览要作为新版本发布的文件",
             "selected_files": "选定的文件",
-            "no_attachments": "这条评论没有附件"
+            "no_attachments": "这条评论没有附件",
+            "confirm_publish": "",
+            "confirm_publish_button": ""
         },
         "custom_actions": {
             "create_error": "保存此自定义操作时发生错误. 您确定没有其他同名操作吗?",
@@ -175,9 +179,6 @@
             "logs": {
                 "no_logs": "该实体没有时间日志。"
             },
-            "news": {
-                "no_news": "该实体没有消息。"
-            },
             "preview_files": {
                 "extension": "扩展",
                 "no_preview_files": "该实体没有预览文件。",
@@ -214,7 +215,13 @@
             "no_casting": "该集的演员阵容是空的",
             "restore_error": "恢复此剧集时出现错误",
             "tasks": "剧集任务",
-            "stats_title": "剧集状态"
+            "stats_title": "剧集状态",
+            "status": {
+                "canceled": "",
+                "complete": "",
+                "standby": "",
+                "running": ""
+            }
         },
         "keyboard": {
             "altdown": "下移任务选择",
@@ -275,7 +282,17 @@
             "unable_to_verify_recovery_code": "没有恢复代码？",
             "choose_totp": "通过动态验证码（TOTP）确认双重身份验证",
             "choose_email_otp": "通过电子邮件确认双重身份验证",
-            "choose_recovery_code": "使用一个恢复代码"
+            "choose_recovery_code": "使用一个恢复代码",
+            "choose_fido": "",
+            "error_requesting_fido": "",
+            "error_sending_email": "",
+            "first_connection": "",
+            "first_connection_2": "",
+            "first_connection_title": "",
+            "information_fido": "",
+            "retry_fido_challenge": "",
+            "unable_to_verify_fido": "",
+            "wrong_fido_challenge": ""
         },
         "main": {
             "about": "关于",
@@ -359,7 +376,10 @@
                     "update": "更新数据"
                 },
                 "optional_fields": "可选列：",
-                "generic_fields": "通用列："
+                "generic_fields": "通用列：",
+                "export_current_view": "",
+                "legend_line_ok": "",
+                "legend_missing_optional": ""
             },
             "after": "之后",
             "before": "之前",
@@ -393,13 +413,27 @@
             "type": "类型",
             "search": {
                 "type": "至少键入3个字符来搜索",
-                "no_result": "没有找到搜索内容"
+                "no_result": "没有找到搜索内容",
+                "no_filter": ""
             },
             "hide_support_chat": "隐藏支持",
             "move_action_bar": "移动操作栏",
             "show_support_chat": "显示支持",
             "empty_schedule": "没有任务或者未设定开始日期",
-            "all_shots": "所有镜头"
+            "all_shots": "所有镜头",
+            "department": "",
+            "remaining": "",
+            "status": "",
+            "edl": {
+                "import_file": "",
+                "import_title": "",
+                "select_file": "",
+                "upload_file": "",
+                "error_upload": "",
+                "upload_edl": "",
+                "naming_convention": "",
+                "match_case": ""
+            }
         },
         "menu": {
             "assign_tasks": "分配任务",
@@ -413,7 +447,8 @@
             "delete_shots": "删除镜头",
             "delete_edits": "删除编辑",
             "generate_playlist": "生成播放列表",
-            "set_thumbnails": "设定最后一次预览为缩略图"
+            "set_thumbnails": "设定最后一次预览为缩略图",
+            "subscribe": ""
         },
         "news": {
             "all": "全部",
@@ -499,7 +534,8 @@
                 "user": "艺术家",
                 "undefined": "未定义",
                 "vendor": "供应商",
-                "supervisor": "管理"
+                "supervisor": "管理",
+                "all": ""
             },
             "confirm_edit": "保存更改",
             "create": "创建用户",
@@ -613,7 +649,8 @@
             },
             "download_csv": "下载 .csv",
             "filter_task_type": "按任务类型过滤",
-            "comparing_missing_plan": "对比缺失的播放列表"
+            "comparing_missing_plan": "对比缺失的播放列表",
+            "add_sequences": ""
         },
         "productions": {
             "current": "所选制作",
@@ -657,10 +694,12 @@
                 "delete_text": "您确定要删除此列以及此制作的所有资产方面的相关数据吗?",
                 "delete_error": "删除此元数据列时出现错误.",
                 "error": "添加元数据列时出现错误. 要确保没有相似名称的列, 还要确保填充了所有字段. 如果问题仍然存在, 还请联系我们的支持团队.",
-                "free": "空闲值",
                 "title": "添加元数据列",
                 "edit_title": "编辑元数据列",
-                "checklist": "清单"
+                "checklist": "清单",
+                "boolean": "",
+                "number": "",
+                "string": ""
             },
             "status": {
                 "closed": "已关闭",
@@ -745,7 +784,8 @@
                 "stop_motion": "定格",
                 "vfx": "视觉特效（VFX）",
                 "video_game": "游戏视频",
-                "vr": "虚拟现实"
+                "vr": "虚拟现实",
+                "immersive": ""
             }
         },
         "profile": {
@@ -804,6 +844,14 @@
                     "button_validate": "验证并获取新的恢复代码",
                     "warning": "将恢复代码保存在安全位置。此代码是访问您的帐户的最后手段，以防您丢失密码和其他因素。如果找不到这些代码，您将无法访问您的帐户。",
                     "error_new": "当生成新的恢复代码时发生错误"
+                },
+                "fido": {
+                    "device_name": "",
+                    "registered_devices_title": "",
+                    "button_register": "",
+                    "error_register": "",
+                    "error_unregister": "",
+                    "button_unregister": ""
                 }
             }
         },
@@ -993,7 +1041,9 @@
             "shots": "镜头",
             "data_mode": "日期",
             "retakes": "返修",
-            "status": "状态"
+            "status": "状态",
+            "all": "",
+            "only_running": ""
         },
         "tasks": {
             "add_preview": "添加预览",
@@ -1137,7 +1187,19 @@
             "clear_all_assignations": "取消分配所有的",
             "create_tasks_sequence": "添加任务到当前序列",
             "create_tasks_sequence_explaination": "您将为给定任务类型的当前项目的每个序列创建一个新任务。是否要继续？",
-            "create_tasks_sequence_failed": "创建时服务器发生错误"
+            "create_tasks_sequence_failed": "创建时服务器发生错误",
+            "auto_revision": "",
+            "empty_cells_selected": "",
+            "my_checks": "",
+            "new_revision_number": "",
+            "post": "",
+            "publish_revision": "",
+            "revision_preview_file": "",
+            "selected_entities": "",
+            "selected_tasks": "",
+            "show_contact_sheet": "",
+            "subscribe_to_tasks": "",
+            "use_current_frame": ""
         },
         "timesheets": {
             "detail_level": "细节层次",
@@ -1208,7 +1270,8 @@
                 "episode": "剧集",
                 "description": "描述"
             },
-            "tasks": "任务"
+            "tasks": "任务",
+            "cancel_text": ""
         },
         "status_automations": {
             "change_ready_for": "将“准备就绪”更改为",
@@ -1246,6 +1309,17 @@
         "preview_room": {
             "join_room": "加入审核室",
             "leave_room": "离开审核室"
+        },
+        "team_schedule": {
+            "title": "",
+            "title_main": "",
+            "person_placeholder": ""
+        },
+        "search": {
+            "limit": "",
+            "match_details": "",
+            "placeholder": "",
+            "title": ""
         }
     }
 }
