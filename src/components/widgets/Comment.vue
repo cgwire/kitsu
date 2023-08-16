@@ -990,6 +990,7 @@ p {
 
 .congrats-picture {
   max-width: 300px;
+  max-height: 300px;
 }
 
 .reply-button {

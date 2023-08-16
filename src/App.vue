@@ -1817,8 +1817,24 @@ tbody:last-child .empty-line:last-child {
   padding: 0;
 }
 
-.content ul {
-  margin: 0;
+.content {
+
+  .content ul {
+    margin: 0;
+  }
+
+  img {
+    max-height: 1em;
+  }
+
+  .comment-text ul {
+    margin-left: 1em;
+  }
+
+  blockquote {
+    background: var(--background-tag);
+    border-left: 0.4em solid var(--background-hover);
+  }
 }
 
 .main-column {
