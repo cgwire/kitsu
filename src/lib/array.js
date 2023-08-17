@@ -1,4 +1,4 @@
-/* Returns the interection of several arrays */
+/* Returns the intersection of several arrays */
 export const intersection = arrays => {
   let [first, ...rest] = arrays
   rest = rest.map(x => new Set(x))

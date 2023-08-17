@@ -109,34 +109,24 @@
                   {{ $t('tasks.set_preview_error') }}
                 </span>
               </div>
-              <div
-                class="set-main-preview flexrow-item pull-right"
-                v-if="
-                  task &&
-                  task.entity &&
-                  task.entity.preview_file_id === currentPreviewId
-                "
-              >
-                <em>{{ $t('tasks.set_preview_done') }}</em>
-              </div>
             </div>
 
             <div class="preview-area mt1">
               <div v-if="isPreviews">
                 <preview-player
-                  :previews="currentPreview.previews"
-                  :task-type-map="taskTypeMap"
-                  :entity-preview-files="taskEntityPreviews"
-                  :read-only="isPreviewPlayerReadOnly"
-                  :last-preview-files="lastFivePreviews"
-                  :task="task"
-                  :extra-wide="true"
-                  @annotation-changed="onAnnotationChanged"
-                  @add-extra-preview="onAddExtraPreviewClicked"
-                  @remove-extra-preview="onRemoveExtraPreviewClicked"
-                  @change-current-preview="changeCurrentPreview"
-                  @time-updated="onTimeUpdated"
                   ref="preview-player"
+                  :extra-wide="true"
+                  :last-preview-files="lastFivePreviews"
+                  :previews="currentPreview.previews"
+                  :read-only="isPreviewPlayerReadOnly"
+                  :task="task"
+                  :task-type-map="taskTypeMap"
+                  @add-extra-preview="onAddExtraPreviewClicked"
+                  @annotation-changed="onAnnotationChanged"
+                  @change-current-preview="changeCurrentPreview"
+                  @remove-extra-preview="onRemoveExtraPreviewClicked"
+                  @previews-order-changed="onPreviewsOrderChanged"
+                  @time-updated="onTimeUpdated"
                   v-if="currentPreview"
                 />
               </div>
@@ -1292,14 +1282,6 @@ export default {
         this.onPreviewAdded(eventData)
       },
 
-      'comment:acknowledge'(eventData) {
-        this.onRemoteAcknowledge(eventData, 'ack')
-      },
-
-      'comment:unacknowledge'(eventData) {
-        this.onRemoteAcknowledge(eventData, 'unack')
-      },
-
       'preview-file:update'(eventData) {
         const comment = this.taskComments.find(
           c =>
@@ -1315,6 +1297,14 @@ export default {
             comment.previews[0].validation_status = preview.validation_status
           })
         }
+      },
+
+      'comment:acknowledge'(eventData) {
+        this.onRemoteAcknowledge(eventData, 'ack')
+      },
+
+      'comment:unacknowledge'(eventData) {
+        this.onRemoteAcknowledge(eventData, 'unack')
       },
 
       'comment:new'(eventData) {
@@ -1384,7 +1374,7 @@ export default {
           eventData.preview_file_id,
           eventData.updated_at
         )
-        if (isValid) {
+        if (isValid && previewPlayer) {
           this.refreshPreview({
             previewId: previewPlayer.currentPreview.id,
             taskId: previewPlayer.currentPreview.task_id
