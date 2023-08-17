@@ -90,7 +90,6 @@
 
               <div
                 class="set-main-preview flexrow-item flexrow pull-right"
-                v-if="isPreviewButtonVisible"
               >
                 <button
                   :class="{
@@ -99,7 +98,7 @@
                     'is-loading': loading.setPreview
                   }"
                   @click="setPreview"
-                  v-if="isPreviews && isCurrentUserManager"
+                  v-if="isCurrentUserManager"
                 >
                   <image-icon class="icon" />
                   <span class="text">
@@ -978,11 +977,13 @@ export default {
     setPreview() {
       this.loading.setPreview = true
       this.errors.setPreview = false
+      const previewPlayer = this.$refs['preview-player']
+      const previewId = previewPlayer.currentPreview.id
       this.$store
         .dispatch('setPreview', {
           taskId: this.task.id,
           entityId: this.task.entity.id,
-          previewId: this.currentPreviewId
+          previewId
         })
         .then(() => {
           this.loading.setPreview = false

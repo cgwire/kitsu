@@ -959,10 +959,12 @@ export default {
     },
 
     setCurrentPreviewAsEntityThumbnail(frame) {
+      const previewPlayer = this.$refs['preview-player']
+      const previewId = previewPlayer.currentPreview.id
       this.setPreview({
         taskId: this.task.id,
         entityId: this.task.entity.id,
-        previewId: this.currentPreview.previews[0].id,
+        previewId,
         frame
       }).finally(() => {
         this.loading.setFrameThumbnail = false
