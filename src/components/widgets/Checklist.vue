@@ -58,6 +58,16 @@ export default {
         this.$emit('add-item', {
           index,
           text: '',
+          frame: -1,
+          revision: -1,
+          checked: false
+        })
+      } else {
+        this.$emit('insert-item', {
+          index: index + 1,
+          text: '',
+          frame: -1,
+          revision: -1,
           checked: false
         })
       }
