@@ -1823,7 +1823,7 @@ tbody:last-child .empty-line:last-child {
     margin: 0;
   }
 
-  img {
+  .comment-text img {
     max-height: 1em;
   }
 
