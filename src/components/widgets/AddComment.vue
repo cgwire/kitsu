@@ -108,6 +108,9 @@
       <div class="post-area">
         <checklist
           :checklist="checklist"
+          :frame="frame"
+          :revision="revision"
+          :is-movie-preview="isMovie"
           @add-item="onAddChecklistItem"
           @insert-item="onInsertChecklistItem"
           @remove-task="removeTask"
@@ -474,6 +477,10 @@ export default {
           return color
         }
       }
+    },
+
+    frame() {
+      return Math.floor(this.time * this.fps)
     }
   },
 

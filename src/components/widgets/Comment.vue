@@ -89,6 +89,7 @@
               @remove-task="removeTask"
               @keyup.native="emitChangeEvent($event)"
               @emit-change="emitChangeEvent"
+              @time-code-clicked="onChecklistTimecodeClicked"
               :disabled="true"
               v-if="checklist.length > 0"
             />
@@ -558,7 +559,8 @@ export default {
     },
 
     boxShadowStyle() {
-      return `0 0 3px 2px ${this.comment.task_status.color}1F`
+      const status = this.comment.task_status
+      return `0 0 3px 2px ${status.color}1F`
     },
 
     statusColor() {
@@ -659,6 +661,20 @@ export default {
 
     timeCodeClicked(event) {
       this.$emit('time-code-clicked', event.target.dataset)
+    },
+
+    onChecklistTimecodeClicked(data) {
+      this.$emit('time-code-clicked', {
+        versionRevision: data.revision,
+        frame: data.frame - 1
+      })
+    },
+
+    setFrame(data) {
+      this.$emit('time-code-clicked', {
+        versionRevision: data.revision,
+        frame: data.frame
+      })
     },
 
     getPreviewValidationStyle(previewFile) {
