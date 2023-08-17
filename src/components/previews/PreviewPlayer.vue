@@ -380,7 +380,7 @@
     <div
       class="flexrow revision-previews"
       ref="revision-previews"
-      v-if="(!light || fullScreen) && isOrdering"
+      v-if="isOrdering"
     >
       <div
         class="flexrow-item revision-preview"
@@ -430,6 +430,8 @@ import PreviewViewer from '@/components/previews/PreviewViewer'
 import RevisionPreview from '@/components/previews/RevisionPreview'
 import VideoProgress from '@/components/previews/VideoProgress'
 const TaskInfo = () => import('@/components/sides/TaskInfo')
+
+let lastIndex = 1
 
 export default {
   name: 'preview-player',
@@ -1593,7 +1595,13 @@ export default {
 
     'currentPreview.revision'() {
       this.endAnnotationSaving()
-      this.currentIndex = 1
+      this.currentIndex = lastIndex <= this.previews.length
+        ? lastIndex || 1
+        : 1
+    },
+
+    currentIndex() {
+      lastIndex = this.currentIndex
     },
 
     previewToCompareId() {
