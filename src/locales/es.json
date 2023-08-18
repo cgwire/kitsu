@@ -11,8 +11,8 @@
             "empty_list_client": "No hay ningún recurso en esta producción.",
             "new_asset": "Crear recursos",
             "new_assets": "Crear recursos",
-            "new_success": "{name} de recurso creado con éxito.",
-            "no_cast_in": "Este recurso no aparece en ningún toma.",
+            "new_success": "Recurso {name} creado con éxito.",
+            "no_cast_in": "Este recurso no aparece en ningúna toma.",
             "number": "recurso | recursos",
             "restore_text": "¿Está seguro de que desea restaurar {name} de la base de datos?",
             "restore_error": "Se ha producido un error al restaurar este recurso.",
@@ -68,7 +68,9 @@
             },
             "fields": {
                 "standby": "En Espera"
-            }
+            },
+            "episode_casting": "Reparto de episodios",
+            "save_error": "Se ha producido un error al guardar el reparto"
         },
         "comments": {
             "add_attachment": "Adjuntar archivo...",
@@ -107,7 +109,9 @@
             "max_retakes_error": "Ya no puede retomar esta tarea.",
             "previews": "vistas previas",
             "selected_files": "recursos_seleccionados",
-            "no_attachments": "No hay archivos adjuntos para este comentario."
+            "no_attachments": "No hay archivos adjuntos para este comentario.",
+            "confirm_publish": "No se han establecido archivos de vista previa para la publicación. ¿Estás seguro de que quieres publicar el comentario?",
+            "confirm_publish_button": "Publicar comentario sin publicar archivos"
         },
         "custom_actions": {
             "create_error": "Se ha producido un error al guardar esta acción personalizada. ¿Está seguro de que no hay otra acción con el mismo nombre?",
@@ -175,9 +179,6 @@
             "logs": {
                 "no_logs": "No hay registros de tiempo para esta entidad."
             },
-            "news": {
-                "no_news": "No hay noticias para esta entidad."
-            },
             "preview_files": {
                 "extension": "Extensión",
                 "no_preview_files": "No hay archivos de vista previa para esta entidad.",
@@ -214,15 +215,21 @@
             "no_casting": "La selección de episodios está vacía.",
             "restore_error": "Se ha producido un error al restaurar el episodio dado.",
             "tasks": "Tareas de los episodios",
-            "stats_title": "Estadísticas de los episodios"
+            "stats_title": "Estadísticas de los episodios",
+            "status": {
+                "canceled": "Cancelado",
+                "complete": "Completo",
+                "standby": "En espera",
+                "running": "En marcha"
+            }
         },
         "keyboard": {
             "altdown": "Mueve la selección de una tarea hacia abajo",
-            "altj": "Seleccione la vista previa",
-            "altk": "Seleccione el siguiente preview",
-            "altleft": "Mueve la selección de una tarea a la izquierda",
-            "altright": "Mueve la selección de una tarea a la derecha",
-            "altup": "Mueve la selección de una tarea hacia arriba",
+            "altj": "Seleccionar vista previa anterior",
+            "altk": "Seleccionar vista previa anterior",
+            "altleft": "Mover tarea seleccionada a la izquierda",
+            "altright": "Mover tarea seleccionada a la derecha\n",
+            "altup": "Mover tarea seleccionada arriba",
             "annotations": "Anotaciones",
             "draw": "Activar el modo de dibujo",
             "navigation": "Navegación",
@@ -244,7 +251,7 @@
             "login_page": "Cancelar",
             "redirecting": "Redirigiendo en {secondsLeft} segundos",
             "reset_change_password": "Cambiar contraseña",
-            "reset_change_password_form_failed": "Hay un problema con la contraseña que dio. Por favor, verifique que tenga al menos 7 caracteres y que ambas contraseñas coincidan.",
+            "reset_change_password_form_failed": "Hay un problema con la contraseña que dio. Por favor, verifique que tenga al menos 8 caracteres y que ambas contraseñas coincidan.",
             "reset_change_password_failed": "Error al cambiar la contraseña. Por favor, reinicie todo el procedimiento de nuevo.",
             "reset_change_password_succeed": "Su contraseña ha sido cambiada con éxito. Por favor, vuelva a la página de inicio de sesión para utilizarlo.",
             "reset_change_password_title": "Introduzca una nueva contraseña",
@@ -275,7 +282,17 @@
             "unable_to_verify_recovery_code": "¿No tienes un código de recuperación?",
             "choose_totp": "Introducir código de autenticación de dos factores mediante TOTP",
             "choose_email_otp": "Introducir código de autenticación de dos factores mediante correo electrónico",
-            "choose_recovery_code": "Utilizar un código de recuperación"
+            "choose_recovery_code": "Utilizar un código de recuperación",
+            "choose_fido": "Utilizar un dispositivo FIDO",
+            "error_requesting_fido": "Se ha producido un error al solicitar el reto FIDO.",
+            "error_sending_email": "Se ha producido un error al enviar la OTP por correo electrónico.",
+            "first_connection": "Tienes que establecer una contraseña para la primera conexión. Tienes que ejecutar el procedimiento de restablecimiento de contraseña para hacerlo.",
+            "first_connection_2": "Indícanos el correo electrónico que utilizaste para tu cuenta de Kitsu y te enviaremos el enlace para restablecer la contraseña.",
+            "first_connection_title": "¡Bienvenido a Kitsu!",
+            "information_fido": "Conecta el dispositivo FIDO al ordenador.",
+            "retry_fido_challenge": "Reintentar reto FIDO",
+            "unable_to_verify_fido": "¿No tienes el dispositivo FIDO?",
+            "wrong_fido_challenge": "Ha fallado la verificación del reto FIDO."
         },
         "main": {
             "about": "Acerca de",
@@ -290,13 +307,13 @@
             "confirmation_and_stay": "Confirmar y quedarse",
             "date": "Fecha",
             "dark_theme": "Tema oscuro",
-            "days_spent": "días pasados | días pasados",
+            "days_spent": "día usado | días usados",
             "days_estimated": "día estimado | días estimados",
             "delete": "Borrar",
             "delete_all": "Borrar todo",
             "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
             "documentation": "Documentación",
-            "edit": "Tratar",
+            "edit": "Editar",
             "empty_comment": "Sin comentario",
             "end_date": "Fecha de finalización",
             "files_selected": "archivos seleccionados",
@@ -306,15 +323,15 @@
             "info": "Información",
             "or": "o",
             "no": "No",
-            "loading": "Carga...",
-            "loading_data": "Carga de datos",
+            "loading": "Cargando...",
+            "loading_data": "Cargando de datos",
             "loading_error": "Se ha producido un error al cargar los datos.",
             "logout": "Cierre de sesión",
             "modify": "Modificar",
             "minimize": "Minimizar",
             "main_pack": "Main Pack",
             "maximize": "Maximizar",
-            "nb_frames": "marcos | marcos",
+            "nb_frames": "fotograma | fotogramas",
             "person": "person",
             "profile": "Perfil",
             "production": "Producción",
@@ -324,7 +341,7 @@
             "sorted_by": "Ordenado por",
             "start_date": "Fecha de inicio",
             "studio": "Estudio",
-            "tutorials": "Tutorials",
+            "tutorials": "Tutoriales",
             "user": "Usuario",
             "white_theme": "Tema Blanco",
             "yes": "Sí",
@@ -338,11 +355,11 @@
                 "legend_ok": "Datos reconocidos",
                 "legend_ignored": "Datos ignorados",
                 "legend_missing": "Datos perdidos",
-                "legend_disabled": "Datos que no serán actualizados ni creados",
+                "legend_disabled": "Datos que no serán actualizados o creados",
                 "legend_overwrite": "Datos que serán actualizados",
                 "paste": "Pegar",
                 "paste_code": "Por favor, pegue aquí sus datos CSV:",
-                "preview": "See preview",
+                "preview": "vista previa\n",
                 "preview_episode_name": "Nombre del episodio",
                 "preview_title": "Vista previa de sus datos importados",
                 "preview_description": "Sube un archivo .csv para llenar tu pizarra con posts",
@@ -359,7 +376,10 @@
                     "update": "Actualizar los datos existentes"
                 },
                 "optional_fields": "Columnas opcionales:",
-                "generic_fields": "Columnas genéricas:"
+                "generic_fields": "Columnas genéricas:",
+                "export_current_view": "Exportar vista actual",
+                "legend_line_ok": "Línea que se creará",
+                "legend_missing_optional": "Columna opcional que no se ha encontrado"
             },
             "after": "Después",
             "before": "Antes",
@@ -393,18 +413,32 @@
             "type": "Tipo",
             "search": {
                 "type": "Tipo",
-                "no_result": "No hay resultados para esta búsqueda."
+                "no_result": "No hay resultados para esta búsqueda.",
+                "no_filter": "Selecciona al menos un filtro para hacer la búsqueda"
             },
             "hide_support_chat": "Ocultar chat de asistencia",
             "move_action_bar": "Mover barra de acción",
             "show_support_chat": "Mostrar chat de asistencia",
             "empty_schedule": "No hay tareas o no tienen fechas de inicio.",
-            "all_shots": "Todas las tomas"
+            "all_shots": "Todas las tomas",
+            "department": "Departamento",
+            "remaining": "Restante",
+            "status": "Estado",
+            "edl": {
+                "import_file": "Importar EDL",
+                "import_title": "Importar fotogramas (de entrada o salida) de la lista de decisiones de edición",
+                "select_file": "Selecciona un archivo de una de las carpetas:",
+                "upload_file": "Explorar archivos locales",
+                "error_upload": "Se ha producido un error al subir el EDL.",
+                "upload_edl": "Subir EDL",
+                "naming_convention": "Convención de nomenclatura",
+                "match_case": "Coincidir mayúsculas y minúsculas"
+            }
         },
         "menu": {
             "assign_tasks": "Asignar tareas",
             "change_priority": "Modificar prioridad",
-            "change_status": "Status de modificación",
+            "change_status": "Cambiar status",
             "create_tasks": "Crear tareas",
             "delete_tasks": "Borrar medidas",
             "run_custom_action": "Ejecutar una acción personalizada",
@@ -413,13 +447,14 @@
             "delete_shots": "Borrar tomas",
             "delete_edits": "Elimine las ediciones",
             "generate_playlist": "Generar una lista de reproducción",
-            "set_thumbnails": "Establecer miniaturas de la última vista previa"
+            "set_thumbnails": "Establecer miniaturas de la última vista previa",
+            "subscribe": "Suscribirse a las notificaciones"
         },
         "news": {
             "all": "Todos",
             "commented_on": "comentado",
             "infos": "Información",
-            "no_news": "No hay noticias de esta producción ni de este filtro.",
+            "no_news": "No hay noticias de esta producción o de este filtro.",
             "only_comments": "Sólo comentarios",
             "only_previews": "Sólo previsualizaciones",
             "set_preview_on": "establecer vista previa en",
@@ -499,7 +534,8 @@
                 "user": "Artista CG",
                 "undefined": "sin definir",
                 "vendor": "Proveedor",
-                "supervisor": "Supervisor"
+                "supervisor": "Supervisor",
+                "all": "Todas"
             },
             "confirm_edit": "Guardar cambios para este usuario",
             "create": "Crear usuario",
@@ -613,7 +649,8 @@
             },
             "download_csv": "Descargar .csv",
             "filter_task_type": "Filtrado por tipo de tarea",
-            "comparing_missing_plan": "Toma perdida para el tipo actual"
+            "comparing_missing_plan": "Toma perdida para el tipo actual",
+            "add_sequences": "Añadir secuencias"
         },
         "productions": {
             "current": "Producción seleccionada",
@@ -657,10 +694,12 @@
                 "delete_text": "¿Está seguro de que desea borrar esta columna y los datos relacionados para todos los assets de esta producción?",
                 "delete_error": "Se ha producido un error al eliminar esta columna de metadatos.",
                 "error": "Se ha producido un error al añadir la columna de metadatos. Asegúrese de que no hay otra columna con un nombre similar y que todos los campos estén llenos. Si el problema persiste, póngase en contacto con el equipo de soporte técnico.",
-                "free": "Valor libre",
                 "title": "Añadir columna de metadatos",
                 "edit_title": "Modificar la columna de metadatos",
-                "checklist": "Lista de control"
+                "checklist": "Lista de control",
+                "boolean": "Casilla de verificación",
+                "number": "Número",
+                "string": "Texto"
             },
             "status": {
                 "closed": "Cerrado",
@@ -745,7 +784,8 @@
                 "stop_motion": "Stop Motion",
                 "vfx": "VFX",
                 "video_game": "Videojuego",
-                "vr": "RV (Realidad Virtual)"
+                "vr": "RV (Realidad Virtual)",
+                "immersive": "Experiencia inmersiva"
             }
         },
         "profile": {
@@ -804,6 +844,14 @@
                     "button_validate": "Validar y obtener nuevos códigos de recuperación",
                     "warning": "Guarda los códigos de recuperación en un lugar seguro. Estos códigos son el último recurso para acceder a tu cuenta en caso de que pierdas tu contraseña y el segundo factor de autenticación. Perderás el acceso a tu cuenta si no encuentras estos códigos.",
                     "error_new": "Se ha producido un error al generar nuevos códigos de recuperación"
+                },
+                "fido": {
+                    "device_name": "Nombre del dispositivo FIDO",
+                    "registered_devices_title": "Dispositivos FIDO registrados:",
+                    "button_register": "Registrar nuevo dispositivo FIDO",
+                    "error_register": "Se ha producido un error al registrar el dispositivo FIDO.",
+                    "error_unregister": "Se ha producido un error al anular el registro del dispositivo FIDO.",
+                    "button_unregister": "Validar y anular el registro del dispositivo FIDO"
                 }
             }
         },
@@ -993,7 +1041,9 @@
             "shots": "Tomas",
             "data_mode": "Datos",
             "retakes": "Retomas",
-            "status": "Status"
+            "status": "Status",
+            "all": "Todas",
+            "only_running": "Solo en marcha"
         },
         "tasks": {
             "add_preview": "Añadir vista previa",
@@ -1137,7 +1187,19 @@
             "clear_all_assignations": "Desasignar todas",
             "create_tasks_sequence": "Añadir tareas para las secuencias actuales",
             "create_tasks_sequence_explaination": "Crearás una nueva tarea para cada secuencia del proyecto actual para el tipo de tarea dado. ¿Quieres continuar?",
-            "create_tasks_sequence_failed": "Se ha producido un error en el servidor al continuar con las creaciones."
+            "create_tasks_sequence_failed": "Se ha producido un error en el servidor al continuar con las creaciones.",
+            "auto_revision": "Restaurar número de revisión automática",
+            "empty_cells_selected": "Celda vacía seleccionada | Celdas vacías seleccionadas",
+            "my_checks": "Mis controles",
+            "new_revision_number": "Nuevo número de revisión",
+            "post": "Publicar",
+            "publish_revision": "Publicar revisión",
+            "revision_preview_file": "Si uno de los archivos seleccionados contiene un número de revisión en su nombre (por ejemplo, «vista previa-v3.png»), se sugerirá como un nuevo nombre de revisión (por ejemplo, «revisión 3») en el siguiente paso.",
+            "selected_entities": "Entidades seleccionadas",
+            "selected_tasks": "Tareas seleccionadas",
+            "show_contact_sheet": "Mostrar tareas como una hoja de contactos",
+            "subscribe_to_tasks": "Suscribirse a las notificaciones de tareas seleccionadas | Suscribirse a las {nbSelectedTasks} notificaciones de tareas seleccionadas.",
+            "use_current_frame": "Utilizar fotograma actual"
         },
         "timesheets": {
             "detail_level": "Nivel de detalle",
@@ -1208,7 +1270,8 @@
                 "episode": "Ep.",
                 "description": "Descripción"
             },
-            "tasks": "Tareas"
+            "tasks": "Tareas",
+            "cancel_text": "¿Estás seguro de que quieres archivar {name}?"
         },
         "status_automations": {
             "change_ready_for": "cambios \"listos para\" para",
@@ -1246,6 +1309,17 @@
         "preview_room": {
             "join_room": "Unirse a la Sala de Revisión",
             "leave_room": "Dejar la Sala"
+        },
+        "team_schedule": {
+            "title": "Horario",
+            "title_main": "Horario del equipo",
+            "person_placeholder": "Selecciona una persona..."
+        },
+        "search": {
+            "limit": "Cantidad máxima de resultados:",
+            "match_details": "Se ha encontrado una coincidencia en {target}",
+            "placeholder": "Buscar una entidad en la base de datos...",
+            "title": "Búsqueda de entidades"
         }
     }
 }
