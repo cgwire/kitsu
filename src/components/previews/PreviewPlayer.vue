@@ -288,6 +288,15 @@
             />
 
             <button-simple
+              class="flexrow-item"
+              icon="loupe"
+              :active="isZoomPan"
+              :title="$t('playlists.actions.annotation_zoom_pan')"
+              @click="onZoomPanClicked"
+              v-if="!light || fullScreen"
+            />
+
+            <button-simple
               class="button playlist-button flexrow-item"
               :title="$t('playlists.actions.comments')"
               @click="onCommentClicked"
@@ -527,7 +536,8 @@ export default {
         : null,
       textColor: '#ff3860',
       videoDuration: 0,
-      width: 0
+      width: 0,
+      isZoomPan: false
     }
   },
 
@@ -1110,6 +1120,17 @@ export default {
             this.previewFileMap[previewFile.id] = previewFile
           })
         }
+      }
+    },
+
+    onZoomPanClicked() {
+      if (!this.isZoomPan) {
+        this.isDrawing = false
+        this.isAnnotationsDisplayed = false
+        this.isZoomPan = true
+      } else {
+        this.isZoomPan = false
+        this.isAnnotationsDisplayed = true
       }
     },
 
