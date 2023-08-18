@@ -5,8 +5,8 @@ import { formatFrame, formatTime } from '@/lib/video'
 import emojis from '@/lib/emojis'
 
 const options = {
-	emojis,
-	unicode: false,
+  emojis,
+	unicode: true,
 }
 marked.use(markedEmoji(options))
 
