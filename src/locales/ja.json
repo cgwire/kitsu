@@ -68,7 +68,9 @@
             },
             "fields": {
                 "standby": "STDB"
-            }
+            },
+            "episode_casting": "エピソード出演者",
+            "save_error": "出演者の保存中にエラーが発生しました"
         },
         "comments": {
             "add_attachment": "添付を追加",
@@ -107,7 +109,9 @@
             "max_retakes_error": "このタスクでは、これ以上リテイクを追加することはできません。",
             "previews": "新しいリビジョンとして公開するファイルをプレビューする",
             "selected_files": "選択されたファイル",
-            "no_attachments": "このコメントには添付ファイルがありません。"
+            "no_attachments": "このコメントには添付ファイルがありません。",
+            "confirm_publish": "公開設定になっているプレビューファイルがありません。本当にコメントを公開しますか。",
+            "confirm_publish_button": "ファイルを公開せずにコメントを投稿"
         },
         "custom_actions": {
             "create_error": "このカスタムアクションの保存中にエラーが発生しました。同じ名前のアクションはありませんか？",
@@ -175,9 +179,6 @@
             "logs": {
                 "no_logs": "このエンティティのタイムログはありません。"
             },
-            "news": {
-                "no_news": "このエンティティのニュースはありません。"
-            },
             "preview_files": {
                 "extension": "エクステンション",
                 "no_preview_files": "このエンティティのプレビューファイルはありません。",
@@ -214,7 +215,13 @@
             "no_casting": "エピソードのキャスティングが空です。",
             "restore_error": "指定されたエピソードの復元中にエラーが発生しました。",
             "tasks": "エピソードのタスク",
-            "stats_title": "エピソードのスタッツ"
+            "stats_title": "エピソードのスタッツ",
+            "status": {
+                "canceled": "キャンセル済み",
+                "complete": "完了",
+                "standby": "待機",
+                "running": "実行中"
+            }
         },
         "keyboard": {
             "altdown": "タスクの選択を下に移動",
@@ -275,7 +282,17 @@
             "unable_to_verify_recovery_code": "リカバリーコードをお持ちでない場合",
             "choose_totp": "TOTPによる二要素認証コードを入力する",
             "choose_email_otp": "メールによる二要素認証コードを入力する",
-            "choose_recovery_code": "リカバリーコードを使用する"
+            "choose_recovery_code": "リカバリーコードを使用する",
+            "choose_fido": "FIDOデバイスを使用",
+            "error_requesting_fido": "FIDOチャレンジのリクエスト中にエラーが発生しました。",
+            "error_sending_email": "メールでのワンタイムパスワードの送信中にエラーが発生しました。",
+            "first_connection": "初回接続時には、パスワードを設定する必要があります。それには、パスワードリセットの手続きを行う必要があります。",
+            "first_connection_2": "Kitsuアカウントに使用されたメールアドレスを入力してください。パスワードリセットリンクをお送りします。",
+            "first_connection_title": "Kitsuへようこそ！",
+            "information_fido": "お使いのコンピューターにFIDOデバイスを接続してください。",
+            "retry_fido_challenge": "FIDOチャレンジを再試行",
+            "unable_to_verify_fido": "FIDOデバイスをお持ちではありませんか。",
+            "wrong_fido_challenge": "FIDOチャレンジによる認証に失敗しました。"
         },
         "main": {
             "about": "当社について",
@@ -359,7 +376,10 @@
                     "update": "既存のデータを更新"
                 },
                 "optional_fields": "オプションの列：",
-                "generic_fields": "一般の列："
+                "generic_fields": "一般の列：",
+                "export_current_view": "現在のビューを書き出し",
+                "legend_line_ok": "作成される線",
+                "legend_missing_optional": "見つからなかった任意の列"
             },
             "after": "後",
             "before": "前",
@@ -393,13 +413,27 @@
             "type": "タイプ",
             "search": {
                 "type": "リサーチを行うには最低3文字を入力してください",
-                "no_result": "この検索結果に該当するものはありません"
+                "no_result": "この検索結果に該当するものはありません",
+                "no_filter": "検索を行うには少なくとも1件のフィルターを選択してください"
             },
             "hide_support_chat": "サポートチャットを非表示にする",
             "move_action_bar": "アクションバーを移動する",
             "show_support_chat": "サポートチャットを表示する",
             "empty_schedule": "タスクがありません、または開始日がありません。",
-            "all_shots": "すべてのショット"
+            "all_shots": "すべてのショット",
+            "department": "部門",
+            "remaining": "残り",
+            "status": "ステータス",
+            "edl": {
+                "import_file": "EDLを読み込み",
+                "import_title": "編集決断リスト/に/からフレームを読み込み",
+                "select_file": "いずれかのフォルダーからファイルを選択してください。",
+                "upload_file": "ローカルファイルをブラウズ",
+                "error_upload": "EDLのアップロード中にエラーが発生しました。",
+                "upload_edl": "EDLをアップロード",
+                "naming_convention": "命名規則",
+                "match_case": "大文字と小文字を区別"
+            }
         },
         "menu": {
             "assign_tasks": "タスクを割り当て",
@@ -413,7 +447,8 @@
             "delete_shots": "ショットを削除する",
             "delete_edits": "編集を削除",
             "generate_playlist": "プレイリストを作成する",
-            "set_thumbnails": "前回のプレビューからサムネイルを設定する"
+            "set_thumbnails": "前回のプレビューからサムネイルを設定する",
+            "subscribe": "通知に登録"
         },
         "news": {
             "all": "全て",
@@ -499,7 +534,8 @@
                 "user": "アーティスト",
                 "undefined": "未定",
                 "vendor": "ベンダー",
-                "supervisor": "監督"
+                "supervisor": "監督",
+                "all": "全て"
             },
             "confirm_edit": "ユーザーの変更を保存する",
             "create": "ユーザーを作成する",
@@ -613,7 +649,8 @@
             },
             "download_csv": ".csvをダウンロードする",
             "filter_task_type": "タスクタイプでフィルタリング",
-            "comparing_missing_plan": "現行タイプのショットがありません"
+            "comparing_missing_plan": "現行タイプのショットがありません",
+            "add_sequences": "シーケンスを追加"
         },
         "productions": {
             "current": "選択されたプロダクション",
@@ -657,10 +694,12 @@
                 "delete_text": "この製作のすべてのアセットについて、この列と関連するデータを削除しても本当によろしいですか？",
                 "delete_error": "このメタデータ列を削除する際にエラーが発生しました。",
                 "error": "メタデータ列の追加中にエラーが発生しました。同様の名前の列がないこと、すべてのフィールドが入力されていることを確認してください。問題が解決しない場合は、サポートチームにお問い合わせください。",
-                "free": "自由な値",
                 "title": "メタデータ列を追加",
                 "edit_title": "メタデータ列を編集",
-                "checklist": "チェックリスト"
+                "checklist": "チェックリスト",
+                "boolean": "チェックボックス",
+                "number": "数字",
+                "string": "テキスト"
             },
             "status": {
                 "closed": "閉鎖",
@@ -745,7 +784,8 @@
                 "stop_motion": "ストップモーション",
                 "vfx": "VFX",
                 "video_game": "ビデオゲーム",
-                "vr": "仮想現実"
+                "vr": "仮想現実",
+                "immersive": "没入的な体験"
             }
         },
         "profile": {
@@ -804,6 +844,14 @@
                     "button_validate": "新しいリカバリーコードを検証し、取得する",
                     "warning": "リカバリーコードは安全な場所に保管してください。これらのコードは、パスワードとセカンドファクターを紛失した場合に、アカウントにアクセスするための最後の手段です。これらのコードが見つからない場合は、アカウントへのアクセスを失うことになります。",
                     "error_new": "新しいリカバリーコードの作成中にエラーが発生しました"
+                },
+                "fido": {
+                    "device_name": "FIDOデバイスの名称",
+                    "registered_devices_title": "登録済みのFIDOデバイス：",
+                    "button_register": "新規FIDOデバイスを登録",
+                    "error_register": "FIDOデバイスの登録中にエラーが発生しました。",
+                    "error_unregister": "FIDOデバイスの登録解除中にエラーが発生しました。",
+                    "button_unregister": "FIDOデバイスを確認して登録解除"
                 }
             }
         },
@@ -993,7 +1041,9 @@
             "shots": "ショット",
             "data_mode": "データ",
             "retakes": "リテイク",
-            "status": "ステータス"
+            "status": "ステータス",
+            "all": "全て",
+            "only_running": "実行中のみ"
         },
         "tasks": {
             "add_preview": "新しいプレビューリビジョンのファイルを追加する",
@@ -1137,7 +1187,19 @@
             "clear_all_assignations": "すべての割り当てを解除する",
             "create_tasks_sequence": "現在のシーケンスにタスクを追加する",
             "create_tasks_sequence_explaination": "現在のプロジェクトの各シーケンスに対して、指定されたタスクタイプで新しいタスクを作成します。このまま続けますか？",
-            "create_tasks_sequence_failed": "作成中にサーバーエラーが発生しました。"
+            "create_tasks_sequence_failed": "作成中にサーバーエラーが発生しました。",
+            "auto_revision": "自動リビジョン番号を復元",
+            "empty_cells_selected": "空白のセルを選択済み | 空白のセルを選択済み",
+            "my_checks": "自分のチェック",
+            "new_revision_number": "新規リビジョン番号",
+            "post": "投稿",
+            "publish_revision": "リビジョンを公開",
+            "revision_preview_file": "選択されたファイルのいずれかの名称にリビジョン番号が含まれる場合（例：「プレビュー-v3.png」）、次の手順で新規リビジョン名（例：「リビジョン3」）として提案されます。",
+            "selected_entities": "選択済みのエンティティー",
+            "selected_tasks": "選択済みのタスク",
+            "show_contact_sheet": "タスクを連絡先シートとして表示",
+            "subscribe_to_tasks": "選択済みのタスク通知に登録 | 選択済みの{nbSelectedTasks}件のタスク通知に登録",
+            "use_current_frame": "現在のフレームを使用"
         },
         "timesheets": {
             "detail_level": "詳細レベル",
@@ -1208,7 +1270,8 @@
                 "episode": "Ep.",
                 "description": "説明"
             },
-            "tasks": "タスク"
+            "tasks": "タスク",
+            "cancel_text": "本当に{name}をアーカイブしますか。"
         },
         "status_automations": {
             "change_ready_for": "「以下の準備が完了」を以下に変更",
@@ -1246,6 +1309,17 @@
         "preview_room": {
             "join_room": "レビュールームに参加",
             "leave_room": "ルームを退出"
+        },
+        "team_schedule": {
+            "title": "スケジュール",
+            "title_main": "チームスケジュール",
+            "person_placeholder": "人物を選択..."
+        },
+        "search": {
+            "limit": "結果の最大数：",
+            "match_details": "{target}で一致するものが見つかりました",
+            "placeholder": "データベースでエンティティーを検索...",
+            "title": "エンティティー検索"
         }
     }
 }
