@@ -117,12 +117,12 @@ Once a task is validated, the remaining line on the **Estimation** tab of the **
 
 You can keep an eye your every member of your team and see if their **estimated quotas** stay on the line with the first established.
 
-![Supervisor Estimated Quotas](../img/getting-started/tasktype_estimation_tab.png)
+![Supervisor Estimated Quotas](../img/getting-started/supervisor_quotas_estimated)
 
 
 When you need to check on their **Actual Quotas**, you need to go to the **Quotas** page. 
 
-![Quotas](../img/getting-started/quotas_day_weighted.png)
+![Quotas](../img/getting-started/supervisor_quotas.png)
 
 
 Kitsu has two ways to calculate the quotas. The first is based on the daily Timesheets filled by the Artists.
@@ -134,7 +134,7 @@ The second way is based on the status. The calculation starts with the **WIP** s
 
 It's **First take** quotas, meaning that the back-and-forth of comments won't enter in the calculation.
 
-![Weekly Quotas](../img/getting-started/quotas_week.png)
+![Weekly Quotas](../img/getting-started/supervisor_quotas_week.png)
 
 
 This page's most important element is the first column, **Average**. Kitsu will calculate the average quotas for each Artist per **Day**, **Week**, or **Month**.
