@@ -21,7 +21,7 @@
         )"
         v-show="entry.frame >= 0"
       >
-        {{ entry.revision }} - {{ formatFrame(entry.frame) }}
+        v{{ entry.revision }} - {{ formatFrame(entry.frame) }}
       </span>
       <span
         class="flexrow-item"

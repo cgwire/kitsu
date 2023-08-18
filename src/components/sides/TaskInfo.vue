@@ -66,17 +66,28 @@
               <div class="flexrow">
                 <div class="filler"></div>
                 <div class="preview-list flexrow w100" v-if="isPreview">
-                  <span
+                  <div
                     :class="{
                       'flexrow-item': true,
+                      'revision-thumbnail': true,
                       selected: currentPreviewIndex === index
                     }"
                     :key="'preview-' + preview.id"
                     @click="onPreviewChanged(index)"
                     v-for="(preview, index) in lastFivePreviews"
                   >
-                    {{ preview.revision }}
-                  </span>
+                    <entity-thumbnail
+                      :preview-file-id="preview.id"
+                      :width="50"
+                      :height="30"
+                      :empty-width="50"
+                      :empty-height="30"
+                      no-preview
+                    />
+                    <span>
+                      {{ preview.revision }}
+                    </span>
+                  </div>
                   <router-link
                     class="history-button flexrow-item"
                     :to="taskPath"
@@ -288,9 +299,11 @@ import AddPreviewModal from '@/components/modals/AddPreviewModal'
 import Comment from '@/components/widgets/Comment'
 import DeleteModal from '@/components/modals/DeleteModal'
 import EditCommentModal from '@/components/modals/EditCommentModal'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import Spinner from '@/components/widgets/Spinner'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 import PreviewPlayer from '@/components/previews/PreviewPlayer'
+
 
 const DEFAULT_PANEL_WIDTH = 400
 
@@ -306,6 +319,7 @@ export default {
     CornerRightUpIcon,
     DeleteModal,
     EditCommentModal,
+    EntityThumbnail,
     PreviewPlayer,
     Spinner,
     TaskTypeName
@@ -663,7 +677,7 @@ export default {
 
     lastFivePreviews() {
       if (this.taskPreviews) {
-        return this.taskPreviews.slice(0, 10)
+        return this.taskPreviews.slice(0, 5)
       } else {
         return []
       }
@@ -1530,24 +1544,6 @@ export default {
   position: relative;
 }
 
-.preview-list {
-  span {
-    cursor: pointer;
-    padding: 0.2em;
-    margin: 0.2em;
-    text-align: center;
-    border-radius: 3px;
-
-    &:hover {
-      background: var(--background-selectable);
-    }
-
-    &.selected {
-      background: var(--background-selected);
-    }
-  }
-}
-
 .preview-column-content {
   border-radius: 5px;
 }
@@ -1580,5 +1576,39 @@ export default {
   margin-left: 3px;
   background: #ccc;
   cursor: ew-resize;
+}
+
+.revision-thumbnail {
+  border: 2px solid transparent;
+  border-radius: 3px;
+  height: 33px;
+  margin-bottom: 4px;
+  position: relative;
+
+  &:hover {
+    border: 2px solid $grey;
+  }
+
+  &.selected {
+    border: 2px solid $dark-purple;
+  }
+
+  span {
+    background: $dark-purple;
+    border-radius: 0;
+    border-bottom-right-radius: 4px;
+    color: $white;
+    font-size: 0.8em;
+    height: 14px;
+    line-height: 1.1em;
+    margin: 0;
+    opacity: 0.8;
+    left: 0px;
+    padding: 0;
+    position: absolute;
+    text-align: center;
+    top: 0;
+    width: 14px;
+  }
 }
 </style>

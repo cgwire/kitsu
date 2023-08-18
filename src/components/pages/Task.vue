@@ -75,6 +75,7 @@
                 <combobox-styled
                   class="preview-combo flexrow-item"
                   :options="previewOptions"
+                  is-preview
                   v-model="selectedPreviewId"
                 />
               </div>
@@ -1270,6 +1271,9 @@ export default {
     $route() {
       if (this.$route.params.task_id !== this.task.id) {
         this.loadTaskData()
+      }
+      if (this.$route.params.preview_id !== this.selectedPreviewId) {
+        this.selectedPreviewId = this.$route.params.preview_id
       }
     },
 
