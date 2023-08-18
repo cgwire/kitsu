@@ -39,12 +39,12 @@ For example, if you want to focus on a supervisor, for example, for a specific m
 
 As Production, the important thing is to know the status of your Production anytime, anywhere.
 
-So once again, you can learn everything by heart or look at the statistic page.
+So once again, you can learn everything by heart or look at the statistic pages.
 
-With the **Sequence Stats** page, you have access to the pie charts of the whole Production on a single page,
+With the **Sequence Stats** page, you have access to the pie charts of the whole production on a single page,
  sequence per sequence.
  
- The color scheme of the pie charts is the same as the status. So with a glance, you know immediately what is
+ The **color scheme** of the pie charts is the same as **the status**. So with a glance, you know immediately what is
 the state of your production.
 
 ![Global View Sequence](../img/getting-started/global_view_sequence.png)
@@ -58,7 +58,7 @@ You have the same level of information for the asset with the **Asset Types Stat
 ![Global View Asset](../img/getting-started/global_view_asset.png)
 
 
-You can also display data as **Counts**. This way, you'll see the exact number of shots / Frames with the percentage per status.
+You can also display data as **Counts**. This way, you'll see the exact number of assets / shots / frames with the percentage per status.
 
 ![Global View Sequence Counts](../img/getting-started/global_view_sequence_detail_count_stat.png)
 
@@ -71,12 +71,13 @@ You can access an extra information level on a TV show: **Episodes Stats**.
 
 You have two ways to display data on this page. The first one is **Retakes**, the setting per default.
 
-The **Retakes** display lets you see the number of retakes (back and forth) for each episode 
-on each task type. Only three colors are displayed: the **validated**, the **retakes**, and the **in progress** tasks.
+The **Retakes** display lets you see the number of retakes (back-and-forth) for each episode 
+on each task type. Only three colors are displayed: the **validated as Green**, the **retakes as Red**, and the **in progress as Grey** tasks.
  
 ![Global View Episode](../img/getting-started/global_view_episode_retake.png)
 
- If you unfold an episode, you will see the percentage of each take and the evolution of the retakes VS Validates.
+ If you unfold an episode, you will see the percentage of each take and the evolution of the retakes VS validattion.
+ 
  It helps you to see the progress of each episode task per task.
 
 ![Global View Episode Unfold](../img/getting-started/global_view_episode_retake_detail.png)
@@ -102,20 +103,19 @@ Export this page as a `.csv`text file and import it into spreadsheet software.
 
 To know if a task a late, you need two things first. 
 
-- Know the task type of the Task
+- Know the **Task Type** of the task
 - Enter an **Estimation** in number of days, and an estimate **Start date** and **Due date** for the task.
 
-When done, you can compare **estimation** versus **reality** on the **Taak Type** page.
+When done, you can compare **estimation** versus **reality** on the **Task Type** page.
 
 ![Task Type Filled](../img/getting-started/task_type_schedule_due_date.png)
 
 You can do it in two ways : 
 - By filtering **Due Date Status**
-- By looking at the Gant Diagram
+- By looking at the **Gant Diagram**
 
 Kitsu will automatically grab the date of the status of the **WIP** and **WFA**. You can now compare your
- estimate start date versus when the Artist starts, and compare the estimated due date to when the Artist
- ask for validation.
+ **estimate start date** versus **when the Artist really starts**, and compare the **estimate due date** to **when the Artist ask for a validation**.
  
 
 On the **Tasks** tab, the first filter you see is **Due Date Status**. 
@@ -146,7 +146,7 @@ With this filter, you can immediately see which tasks took more time than estima
 
 You can also filter which tasks are late with **Due date is late**.
 
-We have two ways to calculate if a task is late, the first has **estimated due date** VS **Feedback**, and the second is versus **Done**. Depending on how you calculate in your studio, you will always have the answer with Kitsu.
+We have two ways to calculate if a task is late, the first has **estimated due date** VS **Feedback**, and the second is versus **Done**. Depending on how you calculate it in your studio, you will always have the answer with Kitsu.
 
 ![Task Type Late Feedback](../img/getting-started/task_type_late_feedback.png)
 
@@ -155,7 +155,7 @@ We have two ways to calculate if a task is late, the first has **estimated due d
 
 On the top part of the screen, you can see the **Start** and **End** date of this task type, as set on the production schedule.
 
-The Gantt diagram will be dark grey before and after these dates. Visually you immediately
+The **Gantt Diagram** will be dark grey before and after these dates. Visually, you immediately
 know if you are too soon or too late.
 
 ![Task Type Schedule](../img/getting-started/task_type_schedule_emplty.png)
@@ -163,17 +163,17 @@ know if you are too soon or too late.
 
 The final step is to change the **Coloring**. Per default, it's set on **Status color**, meaning all the bars will be colored as their actual status (blue = wip, green = done, etc.).
 
-You will only see two colors with the **Late in red**. **Grey** if the Task is still on time, and **Red** if the Task is late.
+You will only see two colors with the **Late in Red**: **Grey** if the Task is still on time, and **Red** if the Task is late.
 
 ![Task Type Schedule Late](../img/getting-started/task_type_schedule_coloring_late.png)
 
 
-You can return to the **Tasks** tab for more details. Kitsu will keep you filtered from tab to tab.
+You can return to the **Tasks** tab for more details. Kitsu will keep your filterd from tab to tab.
 
   
 ## How to Know if a Task Type may be late
  
-Realizing that a task is late is good, but knowing if a task **may** ne late is better. A **Production** people, you always need to be ahead of the Production.
+Realizing that a task is late is good, but knowing if a task **may** be late is better. As **Production**, you always need to be ahead.
 
 On the **Task Type** page, use the **Due Date Status** filter.
 
@@ -186,7 +186,7 @@ Depending on how much you want to know, you can focus on the **Due this week** a
 You now have a global view of what is happening next. Feel free to use the **Status filter** for a more precise view.
 
 For example, if you are on the **Due this week** view, you may want to see if there are still **Todo** or **Ready** tasks. 
-There is likely a delay if a task needs to be finished this week and hasn't started yet. 
+There will likely be late if a task needs to be finished this week and hasn't started yet. 
 
 
 
@@ -202,12 +202,14 @@ On the **Estimation** tab, on the right part of the screen, you will see the sum
 
 The first line is the total number of tasks assigned to the Artist since the beginning of the Production. The second line, **Remaining** is what the Artist has left to do. 
 
+If the artist still have plenty task to do, he may miss the deadline, if he only have the not started to do, there is still a chance. But you need to keep an eye on thoses tasks.
+
 
 ## How to Know Why a Task is Late
 
-Now that you know tasks are late or will be late, you need to understand **why**.
+Now that you know which tasks are late or will be late, you need to understand **why**.
 
-There are several reasons why a task is late : 
+There are several reasons why a task is late: 
 - The Artist is overwhelmed and has too many tasks to do at the same time
 - There is too much back-and-forth on this Task
 - The Task is underestimated and too difficult to finish on time.
@@ -228,12 +230,16 @@ You can now see how many tasks your Artist has to do.
 
 To identify the number of **Back-and-forth**, look at the **Retakes** column on the **Tasks** tab.
 
-Each **Red Dot** is a **retake**. Click on the line to open the **Comment panel** and read the whole task history. It's the best way to understand what is happening. The Artist misunderstood the brief, or maybe the brief is changing with each version.
+Each **Red Dot** is a **retake**. Click on the line to open the **Comment panel** and read the whole task history. 
+
+It's the best way to understand what is happening. The Artist misunderstood the brief, or maybe the brief is changing with each version.
 
 ![Task Type Retake](../img/getting-started/task_type_retake.png)
 
 
-The next step is to check if the Task is not under-estimated. You can go back to the global page, click on the name of the shot or asset, and see the casting and all the extra information. Maybe there are too many characters in the scene, and maybe this is a big action scene.
+The next step is to check if the Task is not under-estimated. You can go back to the global page, click on the name of the shot or asset, and see the casting and all the extra information. 
+
+Maybe there are too many characters in the scene, and maybe this is a big action scene.
 
 ![Shot Detail Casting](../img/getting-started/shot_detail_casting.png)
 
@@ -249,7 +255,9 @@ It's time to focus on the big picture and have a global view of the **Bid**.
 
 On all the pages, you can see the sum-up at the bottom of the page of estimation **Person days** VS the reality **Days Spent**.
 
-On the global page of the shot, you can see the sum-up of all the estimations vs duration. But you can also use a filter. For example, you can focus on a specific sequence, filter your global page with the name of the sequence, and you will have the sum-up updated at the bottom.
+On the global page of the shot, you can see the **sum-up** of all the estimations vs duration. But you can also use a filter. 
+
+For example, you can focus on a specific sequence: filter your global page with the name of the sequence, and you will have the sum-up updated at the bottom.
 
 ![Global Shot Page Sumup Filtered](../img/getting-started/global_shot_sumup.png)
 
@@ -257,7 +265,9 @@ This way, you will know the **estimation** vs. **duration** for this **sequence*
 
 You can also do the same kind of filter on the global asset page.
 
-For example, you can filter on a specific **Asset Type**  as the character. Once the global page is filtered, the sum-up at the bottom will update and give you the **estimation** vs. **duration** for this **asset type**.
+For example, you can filter on a specific **Asset Type**  as the **Character**. 
+
+Once the global page is filtered, the sum-up at the bottom will update and give you the **estimation** vs. **duration** for this **asset type**.
 
 ![Global Asset Page Sumup Filtered](../img/getting-started/global_asset_sumup.png)
 
@@ -295,7 +305,7 @@ On the detail page, on the top left of the screen, you have the sum-up of the as
 Kitsu has two ways to calculate the quotas per **shot Task Type**.
 
 The first is linked to the timesheet :
-Shots are considered ended on the first feedback request. Then, quotas are weighted following time spent on the Task (when the Artist fills his timesheet).
+Shots are considered ended on the first feedback request. Then, quotas are weighted following the time spent on the task (when the Artist fills his timesheet).
 
 ![Quotas stat page day weighted](../img/getting-started/quotas_day_weighted.png)
 
@@ -306,27 +316,21 @@ In this example, Kitsu has weighted the daily quota linked to the timesheet.
 
 If no timesheet is filled, then Kitsu considers that:
 
-The Task was started at the first status change to WIP.
-The Task was done the day the feedback request was made.
-It splits the done frames among all business days between the start and the end.
+The task was started at the first status change to WIP.
 
-Kitsu grabs the number of frames (or seconds, or tasks) submitted per day/week/month per Artist.
+The task was done the day the feedback request was made.
+
+Kitsu will splits the done frames among all business days between the start and the end and grabs the number of frames (or seconds, or tasks) submitted per day/week/month per Artist.
 
 ![Quotas stat page day weighted](../img/getting-started/quotas_day_status.png)
 
-
-**1**: Select the Task Type.
-
-**2**: Select the level of details, Day, Week, or Month.
-
-**3**: Select the count mode, per Frame, Seconds, or tasks.
 
 You can click on a number and see its detail on the right panel anytime.
 
 
 ## Check the Timesheet of the Team
 
-All of the previous chapters are based on the fact that estimation and duration are filled for each Task.
+All of the previous chapters are based on the fact that **estimation** and **duration** are filled for each task.
 
 It means that everybody has to do their part. You and the supervisor will fill out the estimation, and your team will fill out the timesheet.
 
@@ -337,7 +341,7 @@ You can go to the main menu and see the Timesheet page.
 
 On this page, you can see per day the timesheet of each team member, if they fill it every day, if they took a day off, and, more important, if they are doing extra time.
 
-If you have a question about a timesheet, click on it and see the details of the Production, task type, and Task.
+If you have a question about a timesheet, click on it and see the details of the Production, task type, and task.
 
 ![Timesheet Detail Day](../img/getting-started/timesheet_detail.png)
 

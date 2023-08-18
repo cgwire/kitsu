@@ -11,7 +11,7 @@ Otherwise, you could subscribe to all the tasks and be drowned by the notificati
 
 The perfect solution will be to have all the Production changes on one page, always up-to-date.
 
-Welcome to the New Feed page.
+Welcome to the **New Feed** page.
 
 ![Newsfeed Studio Page](../img/getting-started/newsfeed_studio.png)
 
@@ -36,9 +36,9 @@ For example, if you want to focus on a supervisor, for example, for a specific m
 
 As a Producer, the important thing is to know the status of your Production anytime, anywhere.
 
-So once again, you can learn everything by heart or look at the statistic page.
+So once again, you can learn everything by heart or look at the **statistic pages**.
 
-With the **Sequence Stats** page, you have access to the pie charts of the whole Production on a single page,
+With the **Sequence Stats** page, you have access to the pie charts of the whole production on a single page,
  sequence per sequence.
  
  The color scheme of the pie charts is the same as the status. So with a glance, you know immediately what is
@@ -56,7 +56,7 @@ You have the same level of information for the asset with the **Asset Types Stat
 ![Asset Type Stat Page](../img/getting-started/global_view_asset.png)
 
 
-You can also display data as **Counts**. This way, you'll see the exact number of shots / Frames with the percentage per status.
+You can also display data as **Counts**. This way, you'll see the exact number of shots / frames with the percentage per status.
 
 ![Asset count Stat Page](../img/getting-started/global_view_asset_detail.png)
 
