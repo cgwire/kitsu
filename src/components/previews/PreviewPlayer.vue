@@ -1566,6 +1566,7 @@ export default {
         taskId: this.currentPreview.task_id,
         previewId: preview.id
       }).catch(console.error)
+      this.$emit('previews-order-changed')
       this.$nextTick(() => {
         this.currentIndex = newIndex + 1
       })

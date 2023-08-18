@@ -13,11 +13,7 @@
           <span class="flexrow-item ml2">
             <entity-thumbnail
               class="entity-thumbnail"
-              :entity="
-                taskPreviews && taskPreviews.length > 0
-                  ? { preview_file_id: taskPreviews[0].id }
-                  : {}
-              "
+              :entity="currentEntity"
               :empty-width="100"
               :empty-height="60"
               :width="100"
@@ -452,6 +448,10 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
+    currentEntity() {
+      return this.task && this.task.entity
+    },
 
     previewOptions() {
       return this.taskPreviews.map(preview => {
@@ -1248,7 +1248,11 @@ export default {
       setTimeout(() => {
         this.$refs['preview-player'].setCurrentFrame(frame)
         this.$refs['preview-player'].focus()
-      }, 20)
+      }, 100)
+    },
+
+    onPreviewsOrderChanged() {
+      this.taskPreviews = this.getCurrentTaskPreviews()
     },
 
     async extractAnnotationSnapshots() {
