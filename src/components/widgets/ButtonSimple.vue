@@ -51,6 +51,7 @@
     <pen-tool-icon :class="iconClass" v-if="icon === 'pen'" />
     <square-icon :class="iconClass" v-if="icon === 'eraser'" />
     <key-icon :class="iconClass" v-if="icon == 'key'" />
+    <zoom-in-icon :class="iconClass" v-if="icon == 'loupe'" />
     <span :class="iconClass" v-if="icon === 'laser'"> ⦿ </span>
     <span
       :class="{
@@ -105,7 +106,8 @@ import {
   UploadIcon,
   VolumeXIcon,
   Volume2Icon,
-  XIcon
+  XIcon,
+  ZoomInIcon
 } from 'vue-feather-icons'
 
 export default {
@@ -127,6 +129,7 @@ export default {
     KeyIcon,
     LayersIcon,
     ListIcon,
+    ZoomInIcon,
     MaximizeIcon,
     MessageSquareIcon,
     MinusIcon,
