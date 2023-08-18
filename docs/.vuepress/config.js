@@ -14,6 +14,7 @@ module.exports = {
        '/production_advanced/',
 	   '/getting-started-production/',
 	   '/getting-started-studio/',
+	   '/getting-started-superviseur/',
        '/getting-started-artist/',
 	     '/getting-started-client/'
      ]

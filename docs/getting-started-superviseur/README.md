@@ -13,7 +13,12 @@ It's direct access to your **to-do list**. Per default, it's sorted by priority,
 
 On the **My Tasks** page, you can filter the tasks list by **Production**, **Task Type**, **Status**, etc. 
 
+![Supervisor Todo Page](../img/getting-started/supervisor_todo_page.png)
+
+
 Then you must click on the **Status** to open the comment panel. From here, you can comment and publish a new revision.
+
+![Supervisor Todo Detailed Page](../img/getting-started/supervisor_todo_page_detail.png)
 
 
 ## Assign and Estimate Tasks to your Department
@@ -22,15 +27,25 @@ Now it's time to focus on your team. The first thing to do is to assign tasks.
 
 Your view is automatically filtered on the global shot/asset page as **My Department**. You only see your **Task Type** and the **Custom Columns** linked to your department.
 
+
+![Supervisor Global Page](../img/getting-started/supervisor_global_page.png)
+
+
 When you assign one or several tasks to someone, you will notice that you only have access to the people from your department. 
 
 It's faster for you to find the right Artist for the task.
+
+![Supervisor Assign Team](../img/getting-started/supervisor_assign_team.png)
+
 
 Now that you have assigned all your Artists, it's time to fill in the **Estimation** for each task.
 
 Click on the name of a **task Type** column to open its dedicated page.
 
 On this page, you can access three tabs: **Tasks**, **Schedule**, and **Estimation**. We will focus on the last one.
+
+![Supervisor Estimation](../img/getting-started/supervisor_estimation.png)
+
 
 The **Estimation** page is split into two parts. On the left, you have all the tasks sorted by Artist, their number of frames, and seconds.
 
@@ -41,6 +56,9 @@ With all this information, Kitsu can calculate different estimated **Quotas**: *
 You can now fill the **Estimation** column on the left and see the result on the right.
 
 As soon as you fill in an **Estimation** for a task, you will see the artist line updated on the right part.
+
+![Supervisor Estimation Filled](../img/getting-started/supervisor_estimation_filled.png)
+
 
 You know if the distribution of the tasks is fair between your team member and what are their estimated quotas for production. 
 
@@ -63,19 +81,32 @@ The second advantage is that you can focus on your work! You know when the check
 
 If you click on the **My Checks** button on top of the screen, you will have the list of all your department's **WFA** tasks.
 
+![Supervisor My Chceck Page](../img/getting-started/supervisor_mycheck.png)
+
+
 This list covers all the **Productions**, **Task Type**, and **Task Status** relevant to you.
 
 As with any other page in Kitsu, you can click on a **Status**, open the **Comment Panel** on the right, and do your review task per task.
 
-Or you can also use the **Buil playlist from list** button. Kitsu will create a playlist with all the tasks on the list displayed.
+Or you can also use the **Build playlist from list** button. Kitsu will create a playlist with all the tasks on the list displayed.
+
+![Supervisor My Chceck Playlist](../img/getting-started/supervisor_mycheck_playlist.png)
+
 
 This **playlist** has the same options as others; you can open the comment panel, compare version and task types, and draw and write text.
+
+![Supervisor My Chceck Playlist Option](../img/getting-started/supervisor_mycheck_playlist_option.png)
+
 
 Another solution is to go to the **Task Type Page** and change the **Display as contact sheet**.
 
 For example, You can filter per **Due Date Status** and select **Due this week**.
 
+![Supervisor Contact Sheet](../img/getting-started/supervisor_contactsheet.png)
+
+
 You can now click on the contact sheet to open the comment panel or select several tasks to create a playlist.
+
 
 
 ## Supervise the Quotas of your Department
@@ -86,15 +117,25 @@ Once a task is validated, the remaining line on the **Estimation** tab of the **
 
 You can keep an eye your every member of your team and see if their **estimated quotas** stay on the line with the first established.
 
+![Supervisor Estimated Quotas](../img/getting-started/tasktype_estimation_tab.png)
+
+
 When you need to check on their **Actual Quotas**, you need to go to the **Quotas** page. 
+
+![Quotas](../img/getting-started/quotas_day_weighted.png)
+
 
 Kitsu has two ways to calculate the quotas. The first is based on the daily Timesheets filled by the Artists.
 
 The calculation of the quotas will start as soon as the Artist fills out his first timesheet on this task, and it will end when he stops.
 
+
 The second way is based on the status. The calculation starts with the **WIP** status and ends with the **WFA** status.
 
 It's **First take** quotas, meaning that the back-and-forth of comments won't enter in the calculation.
+
+![Weekly Quotas](../img/getting-started/quotas_week.png)
+
 
 This page's most important element is the first column, **Average**. Kitsu will calculate the average quotas for each Artist per **Day**, **Week**, or **Month**.
 
@@ -103,5 +144,9 @@ This page's most important element is the first column, **Average**. Kitsu will 
 
 As a Supervisor, you also have to keep an eye on the hours of your team. The **Timesheet** page shows how many hours they do every day, week, and month. 
 
+![Timesheet](../img/getting-started/supervisor_timesheet_team.png)
+
+
 It's time to notice a pattern of extra hours, sick days, or no vacation. It's also your job to take care of your team, speak with them, and see if everything is fine if they are not burning.
 
+![Timesheet Detailed](../img/getting-started/supervisor_timesheet_team_detail.png)
