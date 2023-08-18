@@ -13,6 +13,7 @@ module.exports = {
        '/first_production/',
        '/production_advanced/',
 	   '/getting-started-production/',
+	   '/getting-started-studio/',
        '/getting-started-artist/',
 	     '/getting-started-client/'
      ]
