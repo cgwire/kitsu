@@ -117,7 +117,7 @@ Once a task is validated, the remaining line on the **Estimation** tab of the **
 
 You can keep an eye your every member of your team and see if their **estimated quotas** stay on the line with the first established.
 
-![Supervisor Estimated Quotas](../img/getting-started/supervisor_quotas_estimated)
+![Supervisor Estimated Quotas](../img/getting-started/supervisor_quotas_estimated.png)
 
 
 When you need to check on their **Actual Quotas**, you need to go to the **Quotas** page. 
