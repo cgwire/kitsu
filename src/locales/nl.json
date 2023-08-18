@@ -68,7 +68,9 @@
             },
             "fields": {
                 "standby": "STDB"
-            }
+            },
+            "episode_casting": "Casting van de aflevering",
+            "save_error": "Fout bij het opslaan van casting"
         },
         "comments": {
             "add_attachment": "Bijlage toevoegen",
@@ -107,7 +109,9 @@
             "max_retakes_error": "Je kunt geen retakes meer toevoegen aan deze taak.",
             "previews": "Files bekijken om te publiceren als een nieuwe revisie",
             "selected_files": "Geselecteerde files",
-            "no_attachments": "Er zijn geen bijlagen voor deze opmerking."
+            "no_attachments": "Er zijn geen bijlagen voor deze opmerking.",
+            "confirm_publish": "Er zijn geen voorbeeldbestanden ingesteld voor publicatie. Weet u zeker dat u uw reactie wilt publiceren?",
+            "confirm_publish_button": "Reactie plaatsen zonder bestanden te publiceren"
         },
         "custom_actions": {
             "create_error": "Er is een fout opgetreden bij het opslaan van de zelfbepaalde actie. Weet je zeker dat er geen andere actie is met dezelfde naam?",
@@ -175,9 +179,6 @@
             "logs": {
                 "no_logs": "Er zijn geen tijdlogs voor deze entiteit."
             },
-            "news": {
-                "no_news": "Er is geen nieuws voor deze entiteit."
-            },
             "preview_files": {
                 "extension": "Extensie",
                 "no_preview_files": "Er zijn geen previewfiles voor deze entiteit.",
@@ -214,7 +215,13 @@
             "no_casting": "De episode casting is leeg.",
             "restore_error": "Er is een fout opgetreden tijdens het herstellen van een bepaalde episode.",
             "tasks": "Episode-taken",
-            "stats_title": "Episode-statistieken"
+            "stats_title": "Episode-statistieken",
+            "status": {
+                "canceled": "Geannuleerd",
+                "complete": "Voltooid",
+                "standby": "Stand-by",
+                "running": "Lopend"
+            }
         },
         "keyboard": {
             "altdown": "Verplaats taak selectie naar beneden",
@@ -275,7 +282,17 @@
             "unable_to_verify_recovery_code": "Heb je geen herstelcode?",
             "choose_totp": "Tweefactorauthenticatiecode invoeren via TOTP",
             "choose_email_otp": "Tweefactorauthenticatiecode invoeren via e-mail",
-            "choose_recovery_code": "Gebruik een herstelcode"
+            "choose_recovery_code": "Gebruik een herstelcode",
+            "choose_fido": "Een FIDO-apparaat gebruiken",
+            "error_requesting_fido": "Er is een fout opgetreden bij het aanvragen van FIDO-challenge.",
+            "error_sending_email": "Er is een fout opgetreden tijdens het verzenden van OTP via e-mail.",
+            "first_connection": "Voor uw eerste verbinding dient u een wachtwoord in te stellen. Daarvoor moet u de procedure voor het opnieuw instellen van het wachtwoord uitvoeren.",
+            "first_connection_2": "Gelieve ons het e-mailadres te geven dat voor uw Kitsu-account is gebruikt en wij sturen u de link om uw wachtwoord opnieuw in te stellen.",
+            "first_connection_title": "Welkom bij Kitsu!",
+            "information_fido": "Sluit uw FIDO-apparaat aan op uw computer.",
+            "retry_fido_challenge": "Probeer de FIDO-challenge opnieuw",
+            "unable_to_verify_fido": "Hebt u een FIDO-apparaat?",
+            "wrong_fido_challenge": "Verificatie voor FIDO-challenge mislukt."
         },
         "main": {
             "about": "Over",
@@ -359,7 +376,10 @@
                     "update": "Update bestaande data"
                 },
                 "optional_fields": "Optionele kolommen",
-                "generic_fields": "Generieke kolommen"
+                "generic_fields": "Generieke kolommen",
+                "export_current_view": "Huidige weergave exporteren",
+                "legend_line_ok": "Lijn die zal worden aangemaakt",
+                "legend_missing_optional": "Optionele kolom die niet is gevonden"
             },
             "after": "Na",
             "before": "Voor",
@@ -393,13 +413,27 @@
             "type": "Type",
             "search": {
                 "type": "Type",
-                "no_result": "Er zijn geen resultaten voor deze zoekopdracht"
+                "no_result": "Er zijn geen resultaten voor deze zoekopdracht",
+                "no_filter": "Selecteer ten minste één filter om de zoekopdracht uit te voeren"
             },
             "hide_support_chat": "Verberg helpdeskchat",
             "move_action_bar": "Actiebalk verplaatsen",
             "show_support_chat": "Toon helpdeskchat",
             "empty_schedule": "Er zijn geen taken of ze hebben geen begindatum.",
-            "all_shots": "Alle pogingen"
+            "all_shots": "Alle pogingen",
+            "department": "Afdeling",
+            "remaining": "Resterend",
+            "status": "Status",
+            "edl": {
+                "import_file": "EDL importeren",
+                "import_title": "Frames / in / uit van de edit decision list importeren",
+                "select_file": "Selecteer een bestand uit een van uw mappen:",
+                "upload_file": "Lokale bestanden doorzoeken",
+                "error_upload": "Er is een fout opgetreden tijdens het uploaden van uw EDL.",
+                "upload_edl": "EDL uploaden",
+                "naming_convention": "Naamgevingsconventie",
+                "match_case": "Zaak matchen"
+            }
         },
         "menu": {
             "assign_tasks": "Taak toewijzen",
@@ -413,7 +447,8 @@
             "delete_shots": "Verwijder opnames",
             "delete_edits": "Verwijder bewerkingen",
             "generate_playlist": "Een playlist genereren",
-            "set_thumbnails": "Thumbnails van laatste preview instellen"
+            "set_thumbnails": "Thumbnails van laatste preview instellen",
+            "subscribe": "Aanmelden voor meldingen"
         },
         "news": {
             "all": "Alles",
@@ -499,7 +534,8 @@
                 "user": "Artist",
                 "undefined": "ongedefinieerd",
                 "vendor": "Leverancier",
-                "supervisor": "Supervisor"
+                "supervisor": "Supervisor",
+                "all": "Alles"
             },
             "confirm_edit": "Gebruikerswijzigingen opslaan",
             "create": "Gebruiker aanmaken",
@@ -613,7 +649,8 @@
             },
             "download_csv": "download .csv",
             "filter_task_type": "Gefilterd op taaktype",
-            "comparing_missing_plan": "Shot ontbreekt voor huidig ​​type"
+            "comparing_missing_plan": "Shot ontbreekt voor huidig ​​type",
+            "add_sequences": "Sequenties toevoegen"
         },
         "productions": {
             "current": "Geselecteerde productie",
@@ -657,10 +694,12 @@
                 "delete_text": "Weet je zeker dat je deze kolom en gerelateerde gegevens voor alle assets van deze productie wilt verwijderen?",
                 "delete_error": "Er is een fout opgetreden bij het verwijderen van de metadata kolom",
                 "error": "Er is een fout opgetreden tijdens het toevoegen van de metadata kolom. Controleer of er geen dubbele namen zijn en dat alle velden zijn gevuld. Als het probleem blijft neem dan contact op met het support team",
-                "free": "Gegeven losmaken",
                 "title": "Metadata kolom toevoegen",
                 "edit_title": "Kolom metagegevens bewerken",
-                "checklist": "Checklist"
+                "checklist": "Checklist",
+                "boolean": "Selectievakje",
+                "number": "Aantal",
+                "string": "Tekst"
             },
             "status": {
                 "closed": "Gesloten",
@@ -745,7 +784,8 @@
                 "stop_motion": "Stop-motion",
                 "vfx": "VFX",
                 "video_game": "Videogame",
-                "vr": "Virtual reality"
+                "vr": "Virtual reality",
+                "immersive": "Meeslepende ervaring"
             }
         },
         "profile": {
@@ -804,6 +844,14 @@
                     "button_validate": "Nieuwe herstelcodes valideren en ontvangen",
                     "warning": "Bewaar je herstelcodes op een veilige plek. Deze codes zijn het laatste redmiddel voor toegang tot je account als je je wachtwoord en tweede factoren verliest. Als je deze codes niet kunt vinden, verlies je de toegang tot je account.",
                     "error_new": "Er is een fout opgetreden bij het genereren van nieuwe herstelcodes"
+                },
+                "fido": {
+                    "device_name": "Naam FIDO-apparaat",
+                    "registered_devices_title": "Geregistreerde FIDO-apparaten",
+                    "button_register": "Nieuw FIDO-apparaat registreren",
+                    "error_register": "Er is een fout opgetreden tijdens het registreren van het FIDO-apparaat.",
+                    "error_unregister": "Er is een fout opgetreden bij het ongedaan maken van de registratie van het FIDO-apparaat.",
+                    "button_unregister": "FIDO-apparaat valideren en registratie ongedaan maken"
                 }
             }
         },
@@ -993,7 +1041,9 @@
             "shots": "Opnames",
             "data_mode": "Data",
             "retakes": "Heropnamen",
-            "status": "Status"
+            "status": "Status",
+            "all": "Alles",
+            "only_running": "Alleen lopend"
         },
         "tasks": {
             "add_preview": "Preview toevoegen",
@@ -1137,7 +1187,19 @@
             "clear_all_assignations": "alles ongedaan maken",
             "create_tasks_sequence": "Taken toevoegen voor huidige sequenties",
             "create_tasks_sequence_explaination": "Je staat op het punt een nieuwe taak aan te maken voor elke sequentie van het huidige project voor het gegeven taaktype. Wil je doorgaan?",
-            "create_tasks_sequence_failed": "Er is een serverfout opgetreden tijdens het creatieproces."
+            "create_tasks_sequence_failed": "Er is een serverfout opgetreden tijdens het creatieproces.",
+            "auto_revision": "Automatisch revisienummer herstellen",
+            "empty_cells_selected": "lege cel geselecteerd | lege cellen geselecteerd",
+            "my_checks": "Mijn controles",
+            "new_revision_number": "Nieuw revisienummer",
+            "post": "Plaatsen",
+            "publish_revision": "Revisie publiceren",
+            "revision_preview_file": "Als een van uw geselecteerde bestanden een revisienummer in de naam heeft (bijv. 'preview-v3.png'), dan wordt dit bij de volgende stap voorgesteld als een nieuwe revisienaam (bijv. 'revisie 3').",
+            "selected_entities": "Geselecteerde entiteiten",
+            "selected_tasks": "Geselecteerde taken",
+            "show_contact_sheet": "Taken weergeven als een contactblad",
+            "subscribe_to_tasks": "Aanmelden voor meldingen over geselecteerde taken | Aanmelden voor de {nbSelectedTasks} meldingen over geselecteerde taken",
+            "use_current_frame": "Het huidige frame gebruiken"
         },
         "timesheets": {
             "detail_level": "Detailniveau",
@@ -1208,7 +1270,8 @@
                 "episode": "Ep.",
                 "description": "Omschrijving"
             },
-            "tasks": "Taken"
+            "tasks": "Taken",
+            "cancel_text": "Weet u zeker dat u {name} wilt archiveren?"
         },
         "status_automations": {
             "change_ready_for": "verander 'klaar voor' in",
@@ -1246,6 +1309,17 @@
         "preview_room": {
             "join_room": "Betreed Review Room",
             "leave_room": "Verlaat Room"
+        },
+        "team_schedule": {
+            "title": "Schema",
+            "title_main": "Teamschema",
+            "person_placeholder": "Een persoon selecteren..."
+        },
+        "search": {
+            "limit": "Maximaal aantal resultaten:",
+            "match_details": "match gevonden in {target}",
+            "placeholder": "Zoeken naar een entiteit in de database...",
+            "title": "Zoeken naar entiteit"
         }
     }
 }
