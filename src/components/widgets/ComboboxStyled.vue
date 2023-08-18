@@ -18,12 +18,22 @@
       </div>
       <div class="select-input" ref="select" v-if="showList">
         <div
-          class="option-line"
+          class="option-line flexrow"
           v-for="option in options"
           @click="selectOption(option)"
           @click.middle="openRoute(option)"
           :key="option.id"
         >
+          <entity-thumbnail
+            class="revision-thumbnail"
+            :preview-file-id="option.value"
+            :width="75"
+            :height="45"
+            :empty-width="75"
+            :empty-height="45"
+            no-preview
+            v-if="isPreview"
+          />
           {{ getOptionLabel(option) }}
         </div>
       </div>
@@ -41,12 +51,14 @@
 <script>
 import { mapGetters } from 'vuex'
 import { ChevronDownIcon } from 'vue-feather-icons'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 
 export default {
   name: 'combobox-styled',
 
   components: {
-    ChevronDownIcon
+    ChevronDownIcon,
+    EntityThumbnail
   },
 
   data() {
@@ -75,6 +87,10 @@ export default {
     localeKeyPrefix: {
       default: '',
       type: String
+    },
+    isPreview: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -232,5 +248,9 @@ export default {
 
 .field .label {
   padding-top: 5px;
+}
+
+.revision-thumbnail {
+  margin-right: 0.5em;
 }
 </style>
