@@ -1,6 +1,6 @@
 # Create a Production - Advanced
 
-## Create Task for Episode
+## Create Tasks for Episode
 
 In a TV Show production, you can create a specific **Task type** for the episode. It's especially useful when
 you have macro tasks to track, like the script, SFx, editing, mix, etc.
@@ -37,10 +37,10 @@ If you click on the name of an episode, you will see the detail page of this epi
 On the detailed page, you have access to the episode's casting.
 You can see all the assets used in the whole episode.
 
-You also have access to the schedule, Preview Files, Activity, and Timelog of the episode **tasks**.
+You can also access the schedule, Preview Files, Activity, and Timelog of the episode **tasks**.
 
 
-## Create Task for Sequence
+## Create Tasks for Sequence
 
 When you are in a production, you can create specific **Task type** for the sequences. It's especially useful when
 you have macro tasks to track, like Story and color Board, Color Grading, etc.
@@ -77,7 +77,7 @@ You can see all the assets used in the whole sequence.
 You can also access the schedule, Preview Files, Activity, and Timelog of the sequence **tasks**.
 
 
-## Create Task for Edit
+## Create Tasks for Edit
 
 In a production, you can create a specific **Task type** for the Edit. It's especially useful when
 you have several to track, like Story and color Board, Color Grading, etc.
@@ -102,13 +102,13 @@ This new page behaves like the asset and shot global page. You can add your task
 
 You can add a metadata column, fill in the description, etc.
 
-You can **Rename** and **Delete** the Edit entity on this page, as for the asset and shot entity.
+You can **Rename** and **Delete** the Edit entity on this page for the asset and shot entity.
 
 
 
 ## Create Custom Metadata Columns
 
-To add more information on the general spreadsheet pages, you have to create a custom **metadata column**.
+To add more information on the general spreadsheet pages, you must create a custom **metadata column**.
 
 
 Click on the **+** near the Name column.
@@ -123,7 +123,7 @@ a free **text**, a **number**, a **checkbox**, a **list of value**, or a **Check
 
 ![Metadata Column detail](../img/getting-started/custom_column_detail.png)
 
-The **text**, **number**, and **checkbox** fields are different for each entity.
+The **text**, **number**, and **checkbox** fields differ for each entity.
 
 The **list of value** and **Checklist** give you the same choice for each entity. Moreover, it has to be filled now.
 
@@ -134,7 +134,7 @@ Type the list elements below **Available values**, and confirm them by clicking 
 You can also link the metadata column to one or several departments.
 
 
-If you link a metadata column to a department, the artists will see this column on their to-do page and department-filtered view.
+If you link a metadata column to a department, the artists will see it on their to-do page and department-filtered view.
 
 Validate the creation of the metadata column with the **Confirm** button.
 
@@ -160,7 +160,7 @@ You can now **sort** your global page with this new column. For example, let's c
 
 ![Metadata Column example](../img/getting-started/custom_column_exemple.png)
 
-Then click on the arrow on the right of the column name to open his menu. Then click on **Sort By**
+Then click the arrow on the right of the column name to open his menu. Then click on **Sort By**
 
 ![Metadata Column Sort By](../img/getting-started/custom_column_sortby.png)
 
@@ -171,12 +171,12 @@ The shots are not sorted by name but by the metadata column information.
 You can also select in the menu if you want to edit the name of the metadata column and its information or if you want to delete it.
 
 You can also use the **CSV Import** to quickly fill your custom metadata column.
-First, you need to create your **Metadata column** into Kitsu, add it to your spreadsheet, and copy-paste your data into the **CSV Import**.
+First, you must create your **Metadata column** into Kitsu, add it to your spreadsheet, and copy-paste your data into the **CSV Import**.
 
 [Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
 
 
-## Add Multiple Preview as one Version
+## Add Multiple Previews as one Version
 
 You can add multiple images simultaneously, or once you have uploaded an image, you can add another one.
 
@@ -186,7 +186,7 @@ The **Add preview** pop-up asks you to choose a file.
 
 You can navigate through the pictures uploaded.
 
-You can change the preview order if you click on the number, then drag and drop them.
+You can change the preview order by clicking the number, then drag and drop them.
 
 ![preview drag drop](../img/getting-started/multiple_preview.png)
 
@@ -199,9 +199,9 @@ And then click on the ![delete button](../img/getting-started/delete_button.png)
 
 ![enlarge comment section delete](../img/getting-started/enlarge_comment_delete.png)
 
-## See Detail of an Asset
+## See the Details of an Asset
 
-If you want to see an asset's detail, click on its name.
+To see an asset's detail, click on its name.
 
 ![Shot detail](../img/getting-started/asset_detail.png)
 
@@ -215,7 +215,7 @@ You can click on the status of each task to open the comment panel and see the h
 
 ![Shot detail page](../img/getting-started/asset_detail_page_panel.png)
 
-## See Detail of a Shot
+## See the Details of a Shot
 
 If you want to see a detail of a shot, click on its name.
 
@@ -310,7 +310,7 @@ To hide your metadata column, click on the arrow on the right border of the glob
 
 ![Visible column](../img/getting-started/visible_column.png)
 
-Here you can choose which column you want to **hide** or **display**.
+You can choose which column you want to **hide** or **display**.
 
 You can also hide all the non-essential columns, like **Description**, **Metadata column**,
 even the minimized columns.

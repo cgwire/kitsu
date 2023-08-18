@@ -12,6 +12,7 @@ module.exports = {
        ['/', 'Introduction'],
        '/first_production/',
        '/production_advanced/',
+	   '/getting-started-production/',
        '/getting-started-artist/',
 	     '/getting-started-client/'
      ]
