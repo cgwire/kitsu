@@ -1819,7 +1819,7 @@ tbody:last-child .empty-line:last-child {
 
 .content {
 
-  .content ul {
+  ul {
     margin: 0;
   }
 
