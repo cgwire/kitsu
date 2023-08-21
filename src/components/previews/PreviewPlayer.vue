@@ -7,10 +7,19 @@
             class="canvas-wrapper"
             ref="canvas-wrapper"
             oncontextmenu="return false;"
-            v-show="isAnnotationsDisplayed"
+            @click="onCanvasClicked"
+            v-show="!isZoomPan"
           >
-            <canvas :id="canvasId" ref="annotation-canvas" class="canvas">
-            </canvas>
+            <div
+              v-show="isAnnotationsDisplayed"
+            >
+              <canvas
+                ref="annotation-canvas"
+                :id="canvasId"
+                class="canvas"
+              >
+              </canvas>
+            </div>
           </div>
           <div class="viewers">
             <preview-viewer
@@ -281,9 +290,10 @@
             />
 
             <button-simple
-              @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
               icon="pen"
               :title="$t('playlists.actions.toggle_annotations')"
+              :active="isAnnotationsDisplayed"
+              @click="onAnnotationDisplayedClicked"
               v-if="(isPicture || isMovie) && (!light || fullScreen)"
             />
 
@@ -298,9 +308,9 @@
 
             <button-simple
               class="button playlist-button flexrow-item"
+              icon="comment"
               :title="$t('playlists.actions.comments')"
               @click="onCommentClicked"
-              icon="comment"
               v-if="!readOnly && fullScreen"
             />
           </div>
@@ -931,6 +941,13 @@ export default {
       localPreferences.setPreference('player:muted', this.isMuted)
     },
 
+    onCanvasClicked(event) {
+      if (!this.isAnnotationsDisplayed) {
+        console.log('onCanvasClicked', event)
+        this.pauseEvent(event)
+      }
+    },
+
     // Sizing
 
     getDimensions() {
@@ -1189,6 +1206,13 @@ export default {
 
     onAnnotationClicked(annotation) {
       this.loadAnnotation(annotation)
+    },
+
+    onAnnotationDisplayedClicked() {
+      this.clearFocus()
+      this.isAnnotationsDisplayed = !this.isAnnotationsDisplayed
+      this.isZoomPan = false
+      this.resetZoom()
     },
 
     saveAnnotations() {
