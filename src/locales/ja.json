@@ -12,7 +12,7 @@
             "new_asset": "アセットを作成する",
             "new_assets": "アセットを作成",
             "new_success": "アセット {name} の作成が完了しました。",
-            "no_cast_in": "このアセットはどのショットにもキャストされていません。",
+            "no_cast_in": "このアセットはどのカットにもキャストされていません。",
             "number": "アセット|アセット",
             "restore_text": "{name} をアーカイブから本当に復元してもよろしいですか？",
             "restore_error": "アセットの復元中にエラーが発生しました。",
@@ -64,7 +64,7 @@
             "remove": {
                 "confirm": "エピソードからアセットを削除",
                 "error": "アセットを削除中にサーバーエラーが発生しました。もう一度お試しください。問題が続く場合、サポートチームにご連絡ください。",
-                "text": "選択したエピソードからこのアセットを削除する場合、全ての基盤ショットからアセットが削除されます。削除したいですか。"
+                "text": "選択したエピソードからこのアセットを削除する場合、全ての基盤カットからアセットが削除されます。削除したいですか。"
             },
             "fields": {
                 "standby": "STDB"
@@ -126,7 +126,7 @@
             },
             "entity_types": {
                 "all": "全て",
-                "shot": "ショット",
+                "shot": "カット",
                 "asset": "アセット"
             }
         },
@@ -190,7 +190,7 @@
                 "uploader": "アップロード元"
             },
             "nb_selected_assets": "{nbSelectedAssets}のアセットが選択済み | {nbSelectedAssets}のアセットが選択済み",
-            "nb_selected_shots": "{nbSelectedShots}のショットが選択済み | {nbSelectedShots}のショットが選択済み",
+            "nb_selected_shots": "{nbSelectedShots}のカットが選択済み | {nbSelectedShots}のカットが選択済み",
             "nb_selected_edits": "{nbSelectedEdits}の編集が選択済み | {nbSelectedEdits}の編集が選択済み"
         },
         "estimation": {
@@ -199,8 +199,8 @@
         "episodes": {
             "all_episodes": "全て",
             "edit_error": "このエピソードの保存中にエラーが発生しました。似た名前のエピソードが他に存在していませんか？",
-            "delete_error": "このエピソードの削除中にエラーが発生しました。リンクされているデータが存在している可能性があります。このエピソードにリンクされているシーケンスはありませんか？",
-            "delete_text": "{name} をあなたのデータベースから本当に削除してもよろしいですか？関連するすべてのショットとプレビューが削除されます。 以下にエピソード名を入力して確認してください。",
+            "delete_error": "このエピソードの削除中にエラーが発生しました。リンクされているデータが存在している可能性があります。このエピソードにリンクされているシーンはありませんか？",
+            "delete_text": "{name} をあなたのデータベースから本当に削除してもよろしいですか？関連するすべてのカットとプレビューが削除されます。 以下にエピソード名を入力して確認してください。",
             "edit_title": "エピソードを編集",
             "empty_list": "プロダクションにはエピソードが存在していません。作成しますか？",
             "empty_list_client": "このプロダクションにはエピソードが存在していません。",
@@ -385,7 +385,7 @@
             "timeSpent": "使用時間",
             "unstick": "アンスティック",
             "all_edits": "全ての編集",
-            "attach_snapshots": "注釈からスナップショットを添付",
+            "attach_snapshots": "注釈からスナップカットを添付",
             "reply": "返信",
             "select_file": "ハードドライブからファイルを選択",
             "frame_in": "フレームイン",
@@ -399,7 +399,7 @@
             "move_action_bar": "アクションバーを移動する",
             "show_support_chat": "サポートチャットを表示する",
             "empty_schedule": "タスクがありません、または開始日がありません。",
-            "all_shots": "すべてのショット"
+            "all_shots": "すべてのカット"
         },
         "menu": {
             "assign_tasks": "タスクを割り当て",
@@ -410,7 +410,7 @@
             "run_custom_action": "カスタムアクションを実行",
             "set_estimations": "推定を設定",
             "delete_assets": "アセットを削除する",
-            "delete_shots": "ショットを削除する",
+            "delete_shots": "カットを削除する",
             "delete_edits": "編集を削除",
             "generate_playlist": "プレイリストを作成する",
             "set_thumbnails": "前回のプレビューからサムネイルを設定する"
@@ -512,11 +512,11 @@
         "playlists": {
             "add_assets": "アセットを追加する",
             "add_selection": "選択項目を追加する",
-            "add_shots": "ショットを追加する",
-            "add_sequence": "シーケンス全体を追加する",
+            "add_shots": "カットを追加する",
+            "add_sequence": "シーン全体を追加する",
             "add_episode": "エピソード全体を追加する",
             "add_movie": "ムービー全体を追加する",
-            "apply_task_type_change": "すべてのショットで、指定されたタスクタイプの最終変更が設定されます。",
+            "apply_task_type_change": "すべてのカットで、指定されたタスクタイプの最終変更が設定されます。",
             "available_build": "使用可能なビルド",
             "build_daily": "1日保留",
             "build_weekly": "すべて保留",
@@ -542,11 +542,11 @@
             "no_playlist": "現在、このプロジェクトやエピソードのプレイリストはありません。",
             "no_preview": "プレビューはありません",
             "no_selection": "左のプレイリストを選択してください。",
-            "no_sequence_for_episode": "このエピソードのシーケンスはありません",
-            "no_shot_for_production": "このプロダクションのショットはありません",
-            "select_shot": "右の欄からショットを選択してください",
+            "no_sequence_for_episode": "このエピソードのシーンはありません",
+            "no_shot_for_production": "このプロダクションのカットはありません",
+            "select_shot": "右の欄からカットを選択してください",
             "select_playlist": "左の欄からプレイリストを選択してください",
-            "select_task_type": "すべてのショットのタスクタイプを変更する",
+            "select_task_type": "すべてのカットのタスクタイプを変更する",
             "title": "プレイリスト",
             "updated_at": "更新：",
             "remove": "削除する",
@@ -613,12 +613,12 @@
             },
             "download_csv": ".csvをダウンロードする",
             "filter_task_type": "タスクタイプでフィルタリング",
-            "comparing_missing_plan": "現行タイプのショットがありません"
+            "comparing_missing_plan": "現行タイプのカットがありません"
         },
         "productions": {
             "current": "選択されたプロダクション",
             "delete_text": "本当に{name}をデータベースから削除しますか？削除するプロジェクトの名前を入力欄に入力して承認してください。",
-            "delete_error": "このプロダクションを削除する際にエラーが発生しました。関連するデータがある可能性があります。このプロダクションにはタスク、ショット、アセットが関連付けられていないことを確認しましたか？Kitsuでは、プロダクションの削除はできません。プロダクションを表示したくない場合は、プロダクションを閉じることができます。",
+            "delete_error": "このプロダクションを削除する際にエラーが発生しました。関連するデータがある可能性があります。このプロダクションにはタスク、カット、アセットが関連付けられていないことを確認しましたか？Kitsuでは、プロダクションの削除はできません。プロダクションを表示したくない場合は、プロダクションを閉じることができます。",
             "edit_title": "編集する",
             "new_production": "プロダクションを追加する",
             "number": "プロダクション｜プロダクション",
@@ -673,7 +673,7 @@
                 "featurefilm": "長編映画",
                 "tvshow": "テレビ番組",
                 "assets": "アセットのみ",
-                "shots": "ショットのみ"
+                "shots": "カットのみ"
             },
             "edit_error": "プロダクションの編集中にエラーが発生しました。サポートチームにお問い合わせください。",
             "brief": {
@@ -692,23 +692,23 @@
                 "add_asset_types_description": "プロジェクトにアセットタイプを追加する",
                 "add_assets_button": "アセットを追加する",
                 "add_assets_description": "プロダクションのアセットを追加またはインポートします。",
-                "add_shots": "ショットを追加する（オプション）",
-                "add_shots_button": "ショットを追加する",
-                "add_shots_description": "プロダクションのショットを追加またはインポートします。",
+                "add_shots": "カットを追加する（オプション）",
+                "add_shots_button": "カットを追加する",
+                "add_shots_description": "プロダクションのカットを追加またはインポートします。",
                 "assets_to_import": "インポートするアセット",
                 "create_production": "プロダクションを作成する",
                 "create_button": "準備完了です、行きましょう 🚀",
                 "create_button_disabled": "すべての項目を入力してください。",
                 "error": "プロダクションの作成中にエラーが発生しました",
                 "errorImportingAssets": "アセットのインポート中にエラーが発生しました。しかし、プロダクションは作成されました！",
-                "errorImportingShots": "ショットのインポート中にエラーが発生しました。しかし、プロダクションは作成されました！",
+                "errorImportingShots": "カットのインポート中にエラーが発生しました。しかし、プロダクションは作成されました！",
                 "explaination_date": "これらの日付は、スケジュールを設定するために必要です。",
                 "explaination_type": "テレビ番組を選択した場合、プロダクションはエピソードごとに分割されます。",
                 "explaination_video": "これらの設定は、アップロードされた動画をノーマライズするために使用されます。",
                 "give_a_name": "プロダクションに名前を付ける",
                 "give_a_name_description": "プロダクションに意味のある名前を付けることから始めます。",
                 "import_assets_button": "アセットをインポートする",
-                "import_shots_button": "ショットをインポートする",
+                "import_shots_button": "カットをインポートする",
                 "new_project": "新規プロジェクト",
                 "placeholder_date_start": "から始める",
                 "placeholder_date_end": "で終了する",
@@ -723,11 +723,11 @@
                 "select_asset_task_type": "アセットタスクタイプを選択",
                 "select_asset_task_type_description": "これらのタスクタイプにより、アセットの構築段階が定義されます。",
                 "select_shot_task_type": "短いタスクタイプを選択",
-                "select_shot_task_type_description": "これらのタスクタイプにより、ショットの構築段階が定義されます。",
+                "select_shot_task_type_description": "これらのタスクタイプにより、カットの構築段階が定義されます。",
                 "select_task_status": "タスクステータスを選択",
                 "select_task_status_description": "作品中に使用するタスクステータスを選択します。",
                 "start_and_end_dates": "開始と終了の日付",
-                "shots_to_import": "インポートするショット",
+                "shots_to_import": "インポートするカット",
                 "select_edit_task_type": "編集タスクタイプを選択",
                 "select_edit_task_type_description": "これらのタスクタイプにより、編集のステップが定義されます。"
             },
@@ -887,7 +887,7 @@
                 "name": "名前",
                 "description": "説明"
             },
-            "no_casting": "シーケンスのキャスティングが空です。",
+            "no_casting": "シーンのキャスティングが空です。",
             "stats_title": "シークエンスのスタッツ",
             "tasks": "タスク"
         },
@@ -920,7 +920,7 @@
             "year_label": "年",
             "title": "割り当て",
             "type_label": "タイプ",
-            "explaination": "ショットは最初のフィードバックリクエストで終了したと見なされます。その後、割り当てはタスクに費やした時間に応じて（アーティストがタイムシートを記入したときに）加重されます。時間が埋まっていない場合、以下のように考慮します。\n * タスクはWIPへの最初のステータス変更時に開始。 \n* タスクはフィードバックリクエストが行われた日に実行。\n * 完了したフレームを開始日と終了日の間の全ての営業日で分割。",
+            "explaination": "カットは最初のフィードバックリクエストで終了したと見なされます。その後、割り当てはタスクに費やした時間に応じて（アーティストがタイムシートを記入したときに）加重されます。時間が埋まっていない場合、以下のように考慮します。\n * タスクはWIPへの最初のステータス変更時に開始。 \n* タスクはフィードバックリクエストが行われた日に実行。\n * 完了したフレームを開始日と終了日の間の全ての営業日で分割。",
             "export_quotas": "割り当てをエクスポート",
             "highlight_quotas": "以下の割り当てをハイライト：",
             "weight": "加重",
@@ -928,7 +928,7 @@
             "compute_mode": "演算モード",
             "day": "日",
             "feedback_date": "フィードバック日",
-            "explaination_feedback": "ショットは最初のフィードバック要求時に行われます。ショットのコマ数は、当日のノルマに加算されます。",
+            "explaination_feedback": "カットは最初のフィードバック要求時に行われます。カットのコマ数は、当日のノルマに加算されます。",
             "frames": "フレーム",
             "month": "月",
             "seconds": "秒",
@@ -951,16 +951,16 @@
             "new_shots": "場面を作る",
             "new_sequences": "シークエンスを追加",
             "new_episodes": "エピソードを追加",
-            "no_casting": "ショットキャスティングは空です。",
-            "number": "ショット | ショット",
-            "manage": "ショットを作成",
-            "new_success": "ショット {name} が正常に作成されました。",
-            "padding": "ショットパディング",
+            "no_casting": "カットキャスティングは空です。",
+            "number": "カット | カット",
+            "manage": "カットを作成",
+            "new_success": "カット {name} が正常に作成されました。",
+            "padding": "カットパディング",
             "restore_text": "アーカイブから {name} を復元してもよろしいですか？",
-            "restore_error": "このショットの復元中にエラーが発生しました。",
-            "sequences": "シーケンス",
-            "tasks": "ショットのタスク",
-            "title": "ショット",
+            "restore_error": "このカットの復元中にエラーが発生しました。",
+            "sequences": "シーン",
+            "tasks": "カットのタスク",
+            "title": "カット",
             "fields": {
                 "description": "説明",
                 "nb_frames": "フレーム",
@@ -970,15 +970,15 @@
                 "fps": "FPS",
                 "name": "名前",
                 "production": "製品",
-                "sequence": "シーケンス",
+                "sequence": "シーン",
                 "time_spent": "時間",
                 "person": "モディファイア",
                 "max_retakes": "最大RTK",
                 "resolution": "解像度"
             },
             "cancel_text": "{name}をアーカイブしたいですか。",
-            "delete_for_selection": "選択したショットを削除 | 選択した{nbSelectedShots}ショットを削除",
-            "multiple_delete_error": "ショットの削除中にエラーが発生しました。おそらくデータがショットにリンクされています。選択したショットにリンクされたタスクがないことを確認してください。"
+            "delete_for_selection": "選択したカットを削除 | 選択した{nbSelectedShots}カットを削除",
+            "multiple_delete_error": "カットの削除中にエラーが発生しました。おそらくデータがカットにリンクされています。選択したカットにリンクされたタスクがないことを確認してください。"
         },
         "server_down": {
             "text": "何が問題なのかを確認するには、ベンダーサポート、システム管理者、またはIT部門に連絡してください。",
@@ -990,7 +990,7 @@
             "display_mode": "表示",
             "frames": "フレーム",
             "pie": "円グラフ",
-            "shots": "ショット",
+            "shots": "カット",
             "data_mode": "データ",
             "retakes": "リテイク",
             "status": "ステータス"
@@ -1008,8 +1008,8 @@
             "comment_image": "コメントにファイルを添付",
             "create_for_selection": "空のセルごとにタスクを作成する",
             "create_tasks": "タスクを追加",
-            "create_tasks_shot": "現在のショットにタスクを追加",
-            "create_tasks_shot_explaination": "特定のタスクタイプの、現在のプロジェクトのショットごとに新しいタスクを作成します。続行しますか？",
+            "create_tasks_shot": "現在のカットにタスクを追加",
+            "create_tasks_shot_explaination": "特定のタスクタイプの、現在のプロジェクトのカットごとに新しいタスクを作成します。続行しますか？",
             "create_tasks_shot_failed": "作成中にサーバーエラーが発生しました。",
             "create_tasks_asset": "現在のアセットにタスクを追加する",
             "create_tasks_asset_explaination": "特定のタスクタイプの現在のプロジェクトのアセットごとに新しいタスクを作成します。続行しますか？",
@@ -1072,7 +1072,7 @@
                 "real_start_date": "WIP日",
                 "retake_count": "リテイク",
                 "seconds": "秒",
-                "sequence": "シーケンス",
+                "sequence": "シーン",
                 "start_date": "開始日",
                 "task_status": "ステータス",
                 "task_status_short_name": "ステータス",
@@ -1135,8 +1135,8 @@
             "create_tasks_episode_explaination": "現在のプロジェクトの各エピソードに対して、指定されたタスクタイプで新しいタスクを作成します。このまま続けますか？",
             "create_tasks_episode_failed": "作成中にサーバーエラーが発生しました。",
             "clear_all_assignations": "すべての割り当てを解除する",
-            "create_tasks_sequence": "現在のシーケンスにタスクを追加する",
-            "create_tasks_sequence_explaination": "現在のプロジェクトの各シーケンスに対して、指定されたタスクタイプで新しいタスクを作成します。このまま続けますか？",
+            "create_tasks_sequence": "現在のシーンにタスクを追加する",
+            "create_tasks_sequence_explaination": "現在のプロジェクトの各シーンに対して、指定されたタスクタイプで新しいタスクを作成します。このまま続けますか？",
             "create_tasks_sequence_failed": "作成中にサーバーエラーが発生しました。"
         },
         "timesheets": {
@@ -1236,7 +1236,7 @@
             },
             "entity_types": {
                 "asset": "アセット",
-                "shot": "ショット"
+                "shot": "カット"
             },
             "field_types": {
                 "status": "ステータス",
