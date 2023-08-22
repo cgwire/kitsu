@@ -280,19 +280,18 @@
       :confirm-button-text="$t('comments.confirm_publish_button')"
       @cancel="modals.confirmFeedbackPublish = false"
       @confirm="
-         modals.confirmFeedbackPublish = false ;
-           runAddComment(
-             text,
-             attachments,
-             checklist,
-             task_status_id,
-             nextRevision,
-             true
-           )
-         "
+        modals.confirmFeedbackPublish = false
+        runAddComment(
+          text,
+          attachments,
+          checklist,
+          task_status_id,
+          nextRevision,
+          true
+        )
+      "
     />
   </article>
-
 </template>
 
 <script>
@@ -344,7 +343,7 @@ export default {
       },
       modals: {
         addCommentAttachment: false,
-        confirmFeedbackPublish: false,
+        confirmFeedbackPublish: false
       }
     }
   },
@@ -487,7 +486,12 @@ export default {
   methods: {
     shortenText: strings.shortenText,
     runAddComment(
-      text, attachments, checklist, taskStatusId, revision, force = false
+      text,
+      attachments,
+      checklist,
+      taskStatusId,
+      revision,
+      force = false
     ) {
       if (!this.isValidForm) {
         return

@@ -68,7 +68,9 @@
             },
             "fields": {
                 "standby": "대기"
-            }
+            },
+            "episode_casting": "에피소드 출연",
+            "save_error": "출연 저장 중 오류"
         },
         "comments": {
             "add_attachment": "첨부파일 추가",
@@ -107,7 +109,9 @@
             "max_retakes_error": "더 이상 이 작업을 다시 수행할 수 없습니다.",
             "previews": "미리보기",
             "selected_files": "선택한 파일",
-            "no_attachments": "이 코멘트에 대한 첨부파일이 없습니다."
+            "no_attachments": "이 코멘트에 대한 첨부파일이 없습니다.",
+            "confirm_publish": "발행를 위한 미리보기 파일 세트가 없습니다. 정말 댓글을 게시하시겠습니까?",
+            "confirm_publish_button": "파일 발행 없이 댓글 게시"
         },
         "custom_actions": {
             "create_error": "이 사용자 지정 행동을 저장하는 도중 오류가 발생했습니다. 같은 이름으로 다른 행동이 없는지 확인하셨습니까?",
@@ -175,9 +179,6 @@
             "logs": {
                 "no_logs": "이 개체에 대한 시간 기록이 없습니다."
             },
-            "news": {
-                "no_news": "이 개체에 대한 새 소식이 없습니다."
-            },
             "preview_files": {
                 "extension": "연장",
                 "no_preview_files": "이 개체에 대한 프리뷰 파일이 없습니다.",
@@ -214,7 +215,13 @@
             "no_casting": "출연되는 에피소드가 없습니다.",
             "restore_error": "에피소드를 복원하는 동안 오류가 발생했습니다.",
             "tasks": "에피소드 작업",
-            "stats_title": "에피소드 통계"
+            "stats_title": "에피소드 통계",
+            "status": {
+                "canceled": "취소됨",
+                "complete": "완료",
+                "standby": "준비 중",
+                "running": "진행 중"
+            }
         },
         "keyboard": {
             "altdown": "선택한 작업 아래로 이동",
@@ -275,7 +282,17 @@
             "unable_to_verify_recovery_code": "복구 코드가 없나요?",
             "choose_totp": "TOTP를 통해 2단계 인증 코드를 입력하십시오",
             "choose_email_otp": "이메일을 통해 2단계 인증 코드를 입력하십시오",
-            "choose_recovery_code": "복구 코드 사용하기"
+            "choose_recovery_code": "복구 코드 사용하기",
+            "choose_fido": "FIDO 기기 사용",
+            "error_requesting_fido": "FIDO 도전 요청 중 오류가 발생했습니다.",
+            "error_sending_email": "이메일로 OTP 발송 중 오류가 발생했습니다.",
+            "first_connection": "첫 연결을 위해 비밀번호를 설정해야 합니다. 이를 위해 비밀번호 재설정 절차를 진행해야 합니다.",
+            "first_connection_2": "Kitsu 계정에 사용한 이메일을 알려주시면 해당 메일로 비밀번호 재설정 링크가 전송됩니다.",
+            "first_connection_title": "Kitsu에 오신 것을 환영합니다!",
+            "information_fido": "FIDO 기기를 컴퓨터에 연결해 주세요.",
+            "retry_fido_challenge": "FIDO 도전 재시도",
+            "unable_to_verify_fido": "FIDO 기기가 없으신가요?",
+            "wrong_fido_challenge": "FIDO 도전 인증에 실패했습니다."
         },
         "main": {
             "about": "정보",
@@ -359,7 +376,10 @@
                     "update": "기존 데이터 업데이트"
                 },
                 "optional_fields": "선택 사항 열:",
-                "generic_fields": "일반 열:"
+                "generic_fields": "일반 열:",
+                "export_current_view": "현재 화면 내보내기",
+                "legend_line_ok": "생성될 대사",
+                "legend_missing_optional": "찾을 수 없는 옵션 열"
             },
             "after": "이후",
             "before": "이전",
@@ -393,13 +413,27 @@
             "type": "유형",
             "search": {
                 "type": "유형",
-                "no_result": "이 검색에 대한 결과가 없습니다."
+                "no_result": "이 검색에 대한 결과가 없습니다.",
+                "no_filter": "검색을 실행하려면 1개 이상의 필터를 선택하세요"
             },
             "hide_support_chat": "지원 채팅 숨기기",
             "move_action_bar": "작업 표시줄 이동",
             "show_support_chat": "지원 채팅 표시",
             "empty_schedule": "작업이 없거나 시작 날짜가 없습니다.",
-            "all_shots": "모든 샷"
+            "all_shots": "모든 샷",
+            "department": "부서",
+            "remaining": "남음",
+            "status": "상태",
+            "edl": {
+                "import_file": "EDL 불러오기",
+                "import_title": "편집 결정 목록에서 프레임 불러오기",
+                "select_file": "폴더에서 파일을 선택해 주세요:",
+                "upload_file": "로컬 파일 찾아보기",
+                "error_upload": "EDL 업로드 중 오류가 발생했습니다.",
+                "upload_edl": "EDL 업로드",
+                "naming_convention": "명명 규칙",
+                "match_case": "대소문자 구분"
+            }
         },
         "menu": {
             "assign_tasks": "작업 할당",
@@ -413,7 +447,8 @@
             "delete_shots": "샷 삭제",
             "delete_edits": "편집 삭제",
             "generate_playlist": "재생 목록 생성",
-            "set_thumbnails": "마지막 미리보기에서 섬네일 설정"
+            "set_thumbnails": "마지막 미리보기에서 섬네일 설정",
+            "subscribe": "알림에 구독"
         },
         "news": {
             "all": "모두",
@@ -499,7 +534,8 @@
                 "user": "예술가",
                 "undefined": "미정",
                 "vendor": "판매 회사",
-                "supervisor": "관리자"
+                "supervisor": "관리자",
+                "all": "모두"
             },
             "confirm_edit": "이 사용자에 대한 변경 사항 저장",
             "create": "사용자 생성",
@@ -613,7 +649,8 @@
             },
             "download_csv": ".csv 다운로드",
             "filter_task_type": "자산 유형으로 필터됨",
-            "comparing_missing_plan": "현재 유형에서 누락된 장면"
+            "comparing_missing_plan": "현재 유형에서 누락된 장면",
+            "add_sequences": "시퀀스 추가"
         },
         "productions": {
             "current": "선택된 프로덕션",
@@ -657,10 +694,12 @@
                 "delete_text": "이 프로덕션의 모든 어셋에 대한 열과 관련 데이터를 삭제하시겠습니까?",
                 "delete_error": "이 메타데이터 열을 삭제하는 동안 오류가 발생했습니다.",
                 "error": "메타데이터 열을 추가하는 동안 오류가 발생했습니다. 비슷한 이름의 열이 없고 모든 필드가 채워져 있는지 확인합니다. 문제가 지속되면 지원 팀에 문의해 주세요.",
-                "free": "값 없음",
                 "title": "메타데이터 열 추가",
                 "edit_title": "메타데이터 열 편집",
-                "checklist": "체크리스트"
+                "checklist": "체크리스트",
+                "boolean": "체크박스",
+                "number": "숫자",
+                "string": "문자"
             },
             "status": {
                 "closed": "닫힘",
@@ -745,7 +784,8 @@
                 "stop_motion": "스톱모션",
                 "vfx": "VFX",
                 "video_game": "비디오 게임",
-                "vr": "VR(가상 현실)"
+                "vr": "VR(가상 현실)",
+                "immersive": "몰입 경험"
             }
         },
         "profile": {
@@ -804,6 +844,14 @@
                     "button_validate": "확인하고 새 복구 코드 받기",
                     "warning": "복구 코드를 안전한 장소에 보관하십시오. 이 코드는 비밀번호와 2단계 인증 정보를 분실했을 경우에 자신의 계정에 접근할 수 있는 최후의 수단입니다. 이 코드를 찾을 수 없으면 계정에 접근할 수 없게 됩니다.",
                     "error_new": "새 복구 코드를 생성하는 동안에 오류가 발생했습니다"
+                },
+                "fido": {
+                    "device_name": "FIDO 기기 이름",
+                    "registered_devices_title": "등록된 FIDO 기기:",
+                    "button_register": "새 FIDO 기기 등록",
+                    "error_register": "FIDO 기기 등록 중 오류가 발생했습니다.",
+                    "error_unregister": "FIDO 등록 취소 중 오류가 발생했습니다.",
+                    "button_unregister": "FIDO 기기 유효성 검사 및 등록 취소"
                 }
             }
         },
@@ -993,7 +1041,9 @@
             "shots": "샷",
             "data_mode": "데이터",
             "retakes": "재촬영",
-            "status": "상태"
+            "status": "상태",
+            "all": "모두",
+            "only_running": "진행 중만"
         },
         "tasks": {
             "add_preview": "미리 보기 추가",
@@ -1137,7 +1187,19 @@
             "clear_all_assignations": "모든 할당 취소하기",
             "create_tasks_sequence": "현재 시퀀스에 작업 추가하기",
             "create_tasks_sequence_explaination": "주어진 작업 유형에 대해 현재 프로젝트의 각 시퀀스에 대해 새 작업을 생성하려고 합니다. 계속하시겠습니까?",
-            "create_tasks_sequence_failed": "생성을 진행하는 동안에 서버 오류가 발생했습니다."
+            "create_tasks_sequence_failed": "생성을 진행하는 동안에 서버 오류가 발생했습니다.",
+            "auto_revision": "자동 개정판 번호 복원",
+            "empty_cells_selected": "선택된 빈 셀 | 선택된 빈 셀",
+            "my_checks": "내 확인",
+            "new_revision_number": "새 개정판 번호",
+            "post": "게시",
+            "publish_revision": "개정판 발행",
+            "revision_preview_file": "선택된 파일 중 하나가 이름에 개정판 번호가 포함된 경우(예. \"preview-v3.png\"), 다음 단계에서 새 개정판 이름(예. \"revision 3\")이 제안됩니다.",
+            "selected_entities": "선택된 항목",
+            "selected_tasks": "선택된 작업",
+            "show_contact_sheet": "연락처 시트로 작업 표시",
+            "subscribe_to_tasks": "선택된 작업 알림에 구독 | {nbSelectedTasks} 선택된 작업 알림에 구독",
+            "use_current_frame": "현재 프레임 사용"
         },
         "timesheets": {
             "detail_level": "세부 사항 레벨",
@@ -1208,7 +1270,8 @@
                 "episode": "에피소드.",
                 "description": "설명"
             },
-            "tasks": "작업"
+            "tasks": "작업",
+            "cancel_text": "정말 {name}을(를) 보관하시겠습니까?"
         },
         "status_automations": {
             "change_ready_for": "\"준비 완료\" 상태를 다음으로 변경합니다",
@@ -1246,6 +1309,17 @@
         "preview_room": {
             "join_room": "검수실 참여",
             "leave_room": "검수실 나가기"
+        },
+        "team_schedule": {
+            "title": "일정",
+            "title_main": "팀 일정",
+            "person_placeholder": "사람 선택..."
+        },
+        "search": {
+            "limit": "최대 결과 수:",
+            "match_details": "{target}에서 일치 항목 발견",
+            "placeholder": "데이터베이스에서 항목 검색...",
+            "title": "항목 검색"
         }
     }
 }
