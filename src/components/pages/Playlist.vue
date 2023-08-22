@@ -327,7 +327,9 @@
                   }"
                   :key="sequence.id"
                   @click.prevent="addEntityToPlaylist(sequence)"
-                  v-for="sequence in displayedSequences.filter(s => !s.canceled)"
+                  v-for="sequence in displayedSequences.filter(
+                    s => !s.canceled
+                  )"
                 >
                   <light-entity-thumbnail
                     :preview-file-id="sequence.preview_file_id"
@@ -344,7 +346,9 @@
                     >
                       &bullet;
                     </span>
-                    <span class="playlisted-shot-name">{{ sequence.name }}</span>
+                    <span class="playlisted-shot-name">{{
+                      sequence.name
+                    }}</span>
                   </div>
                 </div>
               </div>

@@ -680,7 +680,7 @@ export default {
       ]
     },
 
-    isAssetsOnly () {
+    isAssetsOnly() {
       return this.currentProduction.production_type === 'assets'
     }
   },

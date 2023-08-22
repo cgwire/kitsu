@@ -1,10 +1,7 @@
 <template>
   <div class="people page fixed-page">
     <div class="flexrow page-header">
-      <page-title
-        class="flexrow-item filler"
-        :text="$t('people.title')"
-      />
+      <page-title class="flexrow-item filler" :text="$t('people.title')" />
 
       <button-simple
         class="flexrow-item"
@@ -266,13 +263,14 @@ export default {
       'personCsvFormData'
     ]),
 
-    currentPeople () {
-      let people = this.role === 'all'
-        ? this.displayedPeople
-        : this.displayedPeople.filter(p => p.role === this.role)
+    currentPeople() {
+      let people =
+        this.role === 'all'
+          ? this.displayedPeople
+          : this.displayedPeople.filter(p => p.role === this.role)
       if (this.selectedDepartment) {
-        people = people.filter(
-          p => p.departments.includes(this.selectedDepartment)
+        people = people.filter(p =>
+          p.departments.includes(this.selectedDepartment)
         )
       }
       return people
@@ -513,7 +511,7 @@ export default {
       const search = this.searchField.getValue()
       const department = this.selectedDepartment
       const role = this.role
-      this.$router.push({ query: { search, department, role }})
+      this.$router.push({ query: { search, department, role } })
     }
   },
 
@@ -521,7 +519,6 @@ export default {
     selectedDepartment() {
       this.updateRoute()
     },
-
 
     role() {
       this.updateRoute()

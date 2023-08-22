@@ -10,14 +10,8 @@
             @click="onCanvasClicked"
             v-show="!isZoomPan"
           >
-            <div
-              v-show="isAnnotationsDisplayed"
-            >
-              <canvas
-                ref="annotation-canvas"
-                :id="canvasId"
-                class="canvas"
-              >
+            <div v-show="isAnnotationsDisplayed">
+              <canvas ref="annotation-canvas" :id="canvasId" class="canvas">
               </canvas>
             </div>
           </div>
@@ -1641,9 +1635,7 @@ export default {
 
     'currentPreview.revision'() {
       this.endAnnotationSaving()
-      this.currentIndex = lastIndex <= this.previews.length
-        ? lastIndex || 1
-        : 1
+      this.currentIndex = lastIndex <= this.previews.length ? lastIndex || 1 : 1
     },
 
     currentIndex() {

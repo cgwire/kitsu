@@ -276,7 +276,10 @@
                     v-if="previewMode == 'previews'"
                   >
                     <preview-player
-                      :canvas-id="`annotation-canvas-${dayList[0].created_at.substring(0, 10)}-${index}`"
+                      :canvas-id="`annotation-canvas-${dayList[0].created_at.substring(
+                        0,
+                        10
+                      )}-${index}`"
                       :previews="[
                         {
                           id: news.preview_file_id,
@@ -297,11 +300,7 @@
       </div>
     </div>
 
-    <div
-      id="side-column"
-      class="column side-column"
-      v-if="currentTask"
-    >
+    <div id="side-column" class="column side-column" v-if="currentTask">
       <task-info
         :task="currentTask"
         :is-loading="loading.currentTask"

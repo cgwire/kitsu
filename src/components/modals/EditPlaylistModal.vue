@@ -134,16 +134,12 @@ export default {
 
     forEntityOptions() {
       if (
-        (
-          this.currentEpisode &&
-          ['main', 'all'].includes(this.currentEpisode.id)
-        ) ||
+        (this.currentEpisode &&
+          ['main', 'all'].includes(this.currentEpisode.id)) ||
         this.currentProduction.production_type === 'assets'
       ) {
         return [{ label: this.$t('assets.title'), value: 'asset' }]
-      } else if (
-        this.currentProduction.production_type === 'shots'
-      ){
+      } else if (this.currentProduction.production_type === 'shots') {
         return [
           { label: this.$t('shots.title'), value: 'shot' },
           { label: this.$t('sequences.title'), value: 'sequence' }
@@ -162,9 +158,7 @@ export default {
       const isOnlyShots = this.currentProduction.production_type === 'shots'
       const isAssetEpisode =
         this.currentEpisode && ['all', 'main'].includes(this.currentEpisode.id)
-      return (isAssetEpisode || isOnlyAssets) && !isOnlyShots
-        ? 'asset'
-        : 'shot'
+      return (isAssetEpisode || isOnlyAssets) && !isOnlyShots ? 'asset' : 'shot'
     },
 
     taskTypeList() {

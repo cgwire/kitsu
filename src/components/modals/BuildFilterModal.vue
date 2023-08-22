@@ -194,9 +194,7 @@
           v-model="hasThumbnail.value"
         />
 
-        <h3
-          class="subtitle flexrow-item mt2"
-        >
+        <h3 class="subtitle flexrow-item mt2">
           {{ $t('task_types.fields.priority') }}
         </h3>
         <div class="flexrow">
@@ -214,10 +212,7 @@
             v-show="priority.taskTypeId !== ''"
           />
         </div>
-        <h3
-          class="subtitle flexrow-item mt2"
-          v-if="isAssets && !isAssetsOnly"
-        >
+        <h3 class="subtitle flexrow-item mt2" v-if="isAssets && !isAssetsOnly">
           {{ $t('assets.fields.ready_for') }}
         </h3>
         <div class="flexrow" v-if="isAssets && !isAssetsOnly">
@@ -356,7 +351,7 @@ export default {
         value: '-1'
       },
       readyFor: {
-        taskTypeId: '',
+        taskTypeId: ''
       },
       isAssetsReady: {
         value: 'nofilter',
@@ -419,7 +414,7 @@ export default {
       return this.entityType === 'shot'
     },
 
-    isAssetsOnly () {
+    isAssetsOnly() {
       return this.currentProduction.production_type === 'assets'
     },
 

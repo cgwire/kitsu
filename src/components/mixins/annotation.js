@@ -768,7 +768,7 @@ export const annotationMixin = {
           this.setObjectData(canvasObj)
           const targetObj = canvasObj.serialize()
           const point = new fabric.Point(groupObj.left, groupObj.top)
-          let transformedPoint = fabric.util.transformPoint(
+          const transformedPoint = fabric.util.transformPoint(
             point,
             group.calcTransformMatrix()
           )

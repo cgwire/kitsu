@@ -526,7 +526,7 @@ const actions = {
     commit(COMPUTE_SEQUENCE_STATS, { taskStatusMap, taskMap })
   },
 
-  resetSequences ({ commit }) {
+  resetSequences({ commit }) {
     commit(RESET_SEQUENCES)
   }
 }

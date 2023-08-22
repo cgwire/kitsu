@@ -431,8 +431,7 @@ export default {
       const isChromium = !!window.chrome
       const change = isChromium ? this.frameDuration : 0
       if (this.currentPlayer) {
-        this.currentTimeRaw =
-          this.currentPlayer.currentTime - change
+        this.currentTimeRaw = this.currentPlayer.currentTime - change
       } else {
         this.currentTimeRaw = 0 + change
       }

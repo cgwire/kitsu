@@ -131,7 +131,7 @@ export default {
       return false
     },
 
-    currentEntityType () {
+    currentEntityType() {
       let type = 'shot'
       if (this.$route.path.indexOf('asset') > 0) type = 'asset'
       if (this.$route.path.indexOf('sequence') > 0) type = 'sequence'
