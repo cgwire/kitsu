@@ -78,9 +78,9 @@ export default {
 
   data() {
     return {
-      currentPlayer: this.player1,
+      currentPlayer: undefined,
       isPlaying: false,
-      nextPlayer: this.player2,
+      nextPlayer: undefined,
       playingIndex: 0
     }
   },
@@ -431,8 +431,7 @@ export default {
       const isChromium = !!window.chrome
       const change = isChromium ? this.frameDuration : 0
       if (this.currentPlayer) {
-        this.currentTimeRaw =
-          this.currentPlayer.currentTime - change
+        this.currentTimeRaw = this.currentPlayer.currentTime - change
       } else {
         this.currentTimeRaw = 0 + change
       }

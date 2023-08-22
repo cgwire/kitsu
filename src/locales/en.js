@@ -702,6 +702,7 @@ export default {
       annotation_big: 'Big',
       annotation_medium: 'Medium',
       annotation_small: 'Small',
+      annotation_zoom_pan: 'Enable zoom and pan',
       change_task_type: 'Change task type',
       current_time: 'Position in the video',
       comments: 'Show/Hide comments',

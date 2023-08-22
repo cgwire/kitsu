@@ -96,13 +96,11 @@
             }"
             :title="$t('menu.generate_playlist')"
             v-if="
-              (
-                isCurrentViewAsset ||
+              (isCurrentViewAsset ||
                 isCurrentViewShot ||
                 isCurrentViewSequence ||
                 isCurrentViewTodos ||
-                isCurrentViewTaskType
-              ) &&
+                isCurrentViewTaskType) &&
               !isEntitySelection &&
               isTaskSelection &&
               nbSelectedTasks > 0

@@ -304,7 +304,6 @@ import Spinner from '@/components/widgets/Spinner'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 import PreviewPlayer from '@/components/previews/PreviewPlayer'
 
-
 const DEFAULT_PANEL_WIDTH = 400
 
 export default {

@@ -1418,7 +1418,8 @@ export default {
     entityLineStyle(timeElement, root = false, header = false) {
       const style = {}
       let color = timeElement.color
-      if (root && timeElement.full_name) { // is a person
+      if (root && timeElement.full_name) {
+        // is a person
         color = '#CCC'
       }
       if (root) {
@@ -1523,7 +1524,8 @@ export default {
 
     childrenStyle(rootElement, isMultiline = false, setBackground = false) {
       let color = rootElement.color
-      if (rootElement.full_name) { // is a person
+      if (rootElement.full_name) {
+        // is a person
         color = '#CCC'
       }
       const style = {

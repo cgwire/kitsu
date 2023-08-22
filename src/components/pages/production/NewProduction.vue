@@ -687,19 +687,13 @@ export default {
       return (
         this.hasValidName &&
         this.hasValidSettings &&
-        (
-          this.hasValidAssetTaskTypes ||
-          this.productionToCreate.settings.type === 'shots'
-        ) &&
-        (
-          this.hasValidShotTaskTypes ||
-          this.productionToCreate.settings.type === 'assets'
-        ) &&
+        (this.hasValidAssetTaskTypes ||
+          this.productionToCreate.settings.type === 'shots') &&
+        (this.hasValidShotTaskTypes ||
+          this.productionToCreate.settings.type === 'assets') &&
         this.hasValidTaskStatuses &&
-        (
-          this.hasValidAssetTypes ||
-          this.productionToCreate.settings.type === 'shots'
-        )
+        (this.hasValidAssetTypes ||
+          this.productionToCreate.settings.type === 'shots')
       )
     },
 

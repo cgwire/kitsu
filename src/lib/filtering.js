@@ -14,8 +14,7 @@ const EQUAL_PEOPLE_DEPARTMENT_REGEX =
   /department=\[([^[]*)\]|department=([^ ]*)|department=([^ ]*)/g
 const EQUAL_READY_FOR_REGEX =
   /readyfor=\[([^[]*)\]|readyfor=([^ ]*)|readyfor=([^ ]*)/g
-const EQUAL_PRIORITY_REGEX =
-  /priority-\[([^[]*)\]=\d|priority-([^ ]*)=\d/g
+const EQUAL_PRIORITY_REGEX = /priority-\[([^[]*)\]=\d|priority-([^ ]*)=\d/g
 const EQUAL_ASSETS_READY_REGEX =
   /assetsready=\[([^[]*)\]|assetsready=([^ ]*)|assetsready=([^ ]*)/g
 const MULTIPLE_REGEX = /\[([^[]*)\]/g
@@ -565,8 +564,8 @@ export const getPriorityFilter = (taskTypes, queryText) => {
     const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
     rgxMatches.forEach(rgxMatch => {
       const pattern = rgxMatch.split('=')
-      let taskTypeName = cleanParenthesis(pattern[0].substring(9))
-      let value = cleanParenthesis(pattern[1])
+      const taskTypeName = cleanParenthesis(pattern[0].substring(9))
+      const value = cleanParenthesis(pattern[1])
       const taskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
       if (taskTypes && taskTypes.length > 0) {
         results.push({
@@ -590,7 +589,7 @@ export const getReadyForFilter = (taskTypes, queryText) => {
     const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
     rgxMatches.forEach(rgxMatch => {
       const pattern = rgxMatch.split('=')
-      let taskTypeName = cleanParenthesis(pattern[1])
+      const taskTypeName = cleanParenthesis(pattern[1])
       const taskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
       if (taskTypes && taskTypes.length > 0) {
         results.push({

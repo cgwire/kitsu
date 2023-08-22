@@ -279,10 +279,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'openProductions',
-      'productionMap'
-    ]),
+    ...mapGetters(['openProductions', 'productionMap']),
 
     searchField() {
       return this.$refs['search-field']

@@ -249,7 +249,7 @@ export default {
           : null
         this.form.data = {}
       } else {
-        let entityTypeId = this.getEntityTypeIdDefaultValue()
+        const entityTypeId = this.getEntityTypeIdDefaultValue()
         this.form = {
           entity_type_id: entityTypeId,
           project_id: this.assetToEdit.project_id,

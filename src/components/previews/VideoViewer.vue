@@ -330,7 +330,7 @@ export default {
         this.$options.running = false
       } else {
         const isChromium = !!window.chrome
-        let change = isChromium ? this.frameDuration + 0.01 : 0.01
+        const change = isChromium ? this.frameDuration + 0.01 : 0.01
         this.$options.running = true
         const currentTime = this.$options.currentTimeCalls.shift()
         if (this.video.currentTime !== currentTime) {
@@ -444,7 +444,7 @@ export default {
       const time = this.getLastPushedCurrentTime()
       const newTime = time + this.frameDuration
       const isChromium = !!window.chrome
-      let change = !isChromium ? this.frameDuration : 0
+      const change = !isChromium ? this.frameDuration : 0
       if (newTime > this.video.duration - change) return
       return this._setRoundedTime(newTime)
     },

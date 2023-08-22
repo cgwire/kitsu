@@ -15,10 +15,12 @@
       </span>
       <span
         class="flexrow-item frame pointer"
-        @click="$emit(
-          'time-code-clicked',
-          { frame: entry.frame, revision: entry.revision}
-        )"
+        @click="
+          $emit('time-code-clicked', {
+            frame: entry.frame,
+            revision: entry.revision
+          })
+        "
         v-show="entry.frame >= 0"
       >
         v{{ entry.revision }} - {{ formatFrame(entry.frame) }}
@@ -136,7 +138,7 @@ export default {
       }
     },
 
-    setFrame (item) {
+    setFrame(item) {
       item.checked = !item.checked
       item.revision = this.revision
       item.frame = this.frame
@@ -216,7 +218,7 @@ export default {
   }
 
   &.checked .checklist-text {
-    color: #BBB;
+    color: #bbb;
     text-decoration: line-through;
   }
 

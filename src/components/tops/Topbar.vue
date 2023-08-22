@@ -400,7 +400,8 @@ export default {
 
     sectionOptions() {
       let options = []
-      const isNotOnlyAssets = this.currentProduction.production_type !== 'assets'
+      const isNotOnlyAssets =
+        this.currentProduction.production_type !== 'assets'
       const isNotOnlyShots = this.currentProduction.production_type !== 'shots'
 
       if (isNotOnlyShots) {
@@ -471,7 +472,7 @@ export default {
       if (!this.isCurrentUserClient) {
         options = options.concat([
           { label: 'separator', value: 'separator' },
-          { label: this.$t('schedule.title'), value: 'schedule' },
+          { label: this.$t('schedule.title'), value: 'schedule' }
         ])
         if (isNotOnlyAssets) {
           options.push({ label: this.$t('quota.title'), value: 'quota' })

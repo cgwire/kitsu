@@ -85,9 +85,7 @@
                 </em>
               </div>
 
-              <div
-                class="set-main-preview flexrow-item flexrow pull-right"
-              >
+              <div class="set-main-preview flexrow-item flexrow pull-right">
                 <button
                   :class="{
                     button: true,

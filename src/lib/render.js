@@ -6,7 +6,7 @@ import emojis from '@/lib/emojis'
 
 const options = {
   emojis,
-	unicode: true,
+  unicode: true
 }
 marked.use(markedEmoji(options))
 
