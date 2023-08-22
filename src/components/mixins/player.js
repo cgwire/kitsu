@@ -541,7 +541,7 @@ export const playerMixin = {
 
     isFullScreen() {
       return !!(
-        document.fullScreen ||
+        document.fullscreen ||
         document.webkitIsFullScreen ||
         document.mozFullScreen ||
         document.msFullscreenElement ||
@@ -1107,7 +1107,7 @@ export const playerMixin = {
       }
     },
 
-    onMetadataLoaded(event) {
+    onMetadataLoaded() {
       this.$nextTick(() => {
         this.resetCanvasSize()
         if (this.resetHeight) this.resetHeight()
@@ -1157,7 +1157,7 @@ export const playerMixin = {
       return false
     },
 
-    onCanvasReleased(event) {
+    onCanvasReleased() {
       if (this.isCurrentPreviewMovie && this.$options.scrubbing) {
         this.$options.scrubbing = false
       }

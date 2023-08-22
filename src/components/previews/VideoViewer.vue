@@ -140,6 +140,8 @@ export default {
           },
           false
         )
+        this.video.addEventListener('resize', this.resetSize)
+        this.video.addEventListener('timeupdate', this.resetSize)
         this.video.addEventListener('loadedmetadata', () => {
           this.configureVideo()
           this.onWindowResize()
@@ -157,29 +159,6 @@ export default {
           this.$refs.movie.style.height = this.defaultHeight + 'px'
           this.isLoading = false
         })
-
-        /*
-        this.video.addEventListener('seeking', () => {
-          console.log('seeking')
-        })
-
-        this.video.addEventListener('seeked', () => {
-          console.log('seeked')
-        })
-
-        this.video.addEventListener('canplay', () => {
-          console.log('canplay')
-        })
-
-        this.video.addEventListener('canplaythrough', () => {
-          console.log('canplaythrough')
-        })
-
-        this.video.addEventListener('stalled', () => {
-          console.log('stalled')
-          this.isLoading = true
-        })
-        */
 
         window.addEventListener('resize', this.onWindowResize)
       }
@@ -287,7 +266,7 @@ export default {
 
     getDimensions() {
       const dimensions = this.getNaturalDimensions()
-      const ratio = dimensions.height / dimensions.width
+      const ratio = dimensions.height / dimensions.width || 1
       const fullWidth = this.container.offsetWidth
       const fullHeight = this.container.offsetHeight
       let width = fullWidth
@@ -387,13 +366,15 @@ export default {
       const height = dimensions.height
       if (height > 0) {
         this.container.style.height = this.defaultHeight + 'px'
-        // Those two lines are commented out because fixing the width was
-        //   breaking the comment section in the preview in full screen
-        // this.videoWrapper.style.width = width + 'px'
-        // this.video.style.width = width + 'px'
-        this.videoWrapper.style.height = height + 'px'
         this.video.style.height = height + 'px'
-        this.$emit('size-changed', { width, height })
+
+        const videoPosition = this.video.getBoundingClientRect()
+        const containerPosition = this.container.getBoundingClientRect()
+        const top = videoPosition.top - containerPosition.top
+        const left = videoPosition.left - containerPosition.left
+        this.$emit('size-changed', { width, height, top, left })
+      } else {
+        this.$emit('size-changed', { width: 0, height: 0, top: 0, left: 0 })
       }
     },
 
@@ -527,6 +508,10 @@ export default {
   flex-direction: column;
   align-content: flex-end;
   height: 100%;
+  width: 100%;
+  text-align: center;
+  background: #36393f;
+  overflow: hidden;
 }
 
 .video-wrapper {
@@ -538,14 +523,8 @@ export default {
   text-align: center;
   margin: auto;
   width: 100%;
+  height: 100%;
   position: relative;
-}
-
-.video-player {
-  width: 100%;
-  text-align: center;
-  background: #36393f;
-  overflow: hidden;
 }
 
 video {

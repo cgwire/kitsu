@@ -1243,20 +1243,20 @@ export default {
       }, 1000)
     },
 
-    onPlayPreviousEntityClicked(forcePlay = false) {
+    onPlayPreviousEntityClicked() {
       this.clearFocus()
       this.playEntity(this.previousEntityIndex)
       this.sendUpdatePlayingStatus()
     },
 
-    onPlayNextEntity(forcePlay = false) {
+    onPlayNextEntity() {
       this.clearFocus()
       this.playEntity(this.nextEntityIndex)
       this.sendUpdatePlayingStatus()
     },
 
-    onPlayNextEntityClicked(forcePlay = false) {
-      this.onPlayNextEntity(forcePlay)
+    onPlayNextEntityClicked() {
+      this.onPlayNextEntity()
       this.sendUpdatePlayingStatus()
     },
 
@@ -2213,14 +2213,6 @@ progress {
 
 .comparison-buttons {
   position: relative;
-}
-
-.comparison-combos {
-  /*
-  position: absolute;
-  top: 33px;
-  z-index: 50;
-  */
 }
 
 .comparison-index {

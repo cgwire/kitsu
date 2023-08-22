@@ -3,7 +3,7 @@
     <div
       class="center status-message"
       :style="{ height: defaultHeight + 'px' }"
-      v-show="isBroken"
+      v-if="isBroken"
     >
       <p>This preview is broken.</p>
     </div>
@@ -12,7 +12,7 @@
       class="center status-message"
       :style="{ height: defaultHeight + 'px' }"
       title="Video processing in progress..."
-      v-show="isProcessing"
+      v-if="isProcessing"
     >
       <spinner :is-processing="true" />
     </div>
@@ -77,11 +77,7 @@
       v-if="isPdf"
     /-->
 
-    <div
-      class="center"
-      :style="{ height: defaultHeight + 'px' }"
-      v-show="isFile"
-    >
+    <div class="center" :style="{ height: defaultHeight + 'px' }" v-if="isFile">
       <a
         class="button mt2"
         ref="preview-file"
@@ -271,10 +267,7 @@ export default {
     originalDlPath() {
       if (this.preview) {
         const type = this.isMovie ? 'movies' : 'pictures'
-        return (
-          `/api/${type}/originals/preview-files/` +
-          `${this.preview.id}/download`
-        )
+        return `/api/${type}/originals/preview-files/${this.preview.id}/download`
       } else {
         return ''
       }
@@ -358,18 +351,9 @@ export default {
     },
 
     resize() {
-      if (this.videoViewer) this.videoViewer.onWindowResize()
+      if (this.pictureViewer) this.pictureViewer.resetPicture()
+      if (this.videoViewer) this.videoViewer.mountVideo()
       if (this.isSound) this.soundViewer.redraw()
-    },
-
-    getPreviewDimensions() {
-      const dimensions = { width: 0, height: 0 }
-      if (this.isMovie) {
-        return this.videoViewer.getDimensions()
-      } else if (this.isPicture) {
-        return this.pictureViewer.getDimensions()
-      }
-      return dimensions
     },
 
     setCurrentFrame(frameNumber) {
@@ -381,9 +365,8 @@ export default {
       this.videoViewer.setCurrentTimeRaw(time)
     },
 
-    getCurrentTimeRaw(time) {
-      if (this.isMovie) return this.videoViewer.currentTimeRaw
-      else return 0
+    getCurrentTimeRaw() {
+      return this.isMovie ? this.videoViewer.currentTimeRaw : 0
     },
 
     // Loupe
