@@ -131,6 +131,7 @@ export default {
           this.onWindowResize()
           this.isLoading = false
           this.setCurrentTime(0)
+          this.setCurrentTimeRaw(0)
           this.$emit('video-loaded')
         }
         this.video.addEventListener(
@@ -147,6 +148,7 @@ export default {
           this.onWindowResize()
           this.isLoading = false
           this.setCurrentTime(0)
+          this.setCurrentTimeRaw(0)
           this.$emit('video-loaded')
         })
 
