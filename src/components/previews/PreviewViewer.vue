@@ -5,13 +5,13 @@
       :style="{ height: defaultHeight + 'px' }"
       v-if="isBroken"
     >
-      <p>This preview is broken.</p>
+      <p>{{ $t('preview.broken') }}</p>
     </div>
 
     <div
       class="center status-message"
       :style="{ height: defaultHeight + 'px' }"
-      title="Video processing in progress..."
+      :title="$t('preview.processing')"
       v-if="isProcessing"
     >
       <spinner :is-processing="true" />
