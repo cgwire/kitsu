@@ -244,6 +244,14 @@ export default {
         this.loading.invite = false
         this.success.invite = false
       }
+    },
+
+    selectedDepartment() {
+      this.updateRoute()
+    },
+
+    role() {
+      this.updateRoute()
     }
   },
 
@@ -512,16 +520,6 @@ export default {
       const department = this.selectedDepartment
       const role = this.role
       this.$router.push({ query: { search, department, role } })
-    }
-  },
-
-  watch: {
-    selectedDepartment() {
-      this.updateRoute()
-    },
-
-    role() {
-      this.updateRoute()
     }
   },
 

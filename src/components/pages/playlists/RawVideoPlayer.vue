@@ -78,9 +78,9 @@ export default {
 
   data() {
     return {
-      currentPlayer: this.player1,
+      currentPlayer: undefined,
       isPlaying: false,
-      nextPlayer: this.player2,
+      nextPlayer: undefined,
       playingIndex: 0
     }
   },

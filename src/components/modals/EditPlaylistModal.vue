@@ -113,7 +113,7 @@ export default {
       ],
       form: {
         name: this.playlistToEdit.name,
-        for_entity: this.playlistToEdit.for_entity || this.defaultForEntity,
+        for_entity: this.playlistToEdit.for_entity,
         for_client: this.playlistToEdit.for_client,
         is_for_all: this.currentEpisode && this.currentEpisode.id === 'all',
         task_type_id: this.taskTypeId

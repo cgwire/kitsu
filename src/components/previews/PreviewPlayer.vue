@@ -935,13 +935,6 @@ export default {
       localPreferences.setPreference('player:muted', this.isMuted)
     },
 
-    onCanvasClicked(event) {
-      if (!this.isAnnotationsDisplayed) {
-        console.log('onCanvasClicked', event)
-        this.pauseEvent(event)
-      }
-    },
-
     // Sizing
 
     getDimensions() {
