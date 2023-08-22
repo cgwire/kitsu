@@ -1,6 +1,14 @@
 import { marked } from 'marked'
+import { markedEmoji } from 'marked-emoji'
 import sanitizeHTML from 'sanitize-html'
 import { formatFrame, formatTime } from '@/lib/video'
+import emojis from '@/lib/emojis'
+
+const options = {
+  emojis,
+	unicode: true,
+}
+marked.use(markedEmoji(options))
 
 export const TIME_CODE_REGEX = /v(\d+) (\d+):(\d+)\.(\d+) \((\d+)\)/g
 

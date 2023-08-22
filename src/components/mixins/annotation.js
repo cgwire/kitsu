@@ -745,9 +745,17 @@ export const annotationMixin = {
     },
 
     /*
-     * When object is moved, save infomation
+     * When object is modified, it saves the changes to the database by saving
+     * the new position, angle and size of the object.
+     * For that it manages differet cases:
+     * * It's an object: it saves the new position, angle and size of the
+     *   object.
+     * * It's a group: it saves group element one by one. Prior to that, it
+     *   has to calculate the new position in the main reference system.
+     *   Because FabricJS provides the position of the object in the group
+     *   reference.
      */
-    onObjectMoved(event) {
+    onObjectModified(event) {
       const movedObject = event.target
       if (!movedObject._objects) {
         this.addToUpdates(movedObject)
@@ -759,10 +767,16 @@ export const annotationMixin = {
           const canvasObj = this.getObjectById(groupObj.id)
           this.setObjectData(canvasObj)
           const targetObj = canvasObj.serialize()
-          targetObj.left =
-            group.left + Math.round(group.width / 2) + groupObj.left
-          targetObj.top =
-            group.top + Math.round(group.height / 2) + groupObj.top
+          const point = new fabric.Point(groupObj.left, groupObj.top)
+          let transformedPoint = fabric.util.transformPoint(
+            point,
+            group.calcTransformMatrix()
+          )
+          targetObj.left = transformedPoint.x
+          targetObj.top = transformedPoint.y
+          targetObj.angle += group.angle
+          targetObj.scaleX *= group.scaleX
+          targetObj.scaleY *= group.scaleY
           this.addToUpdatesSerializedObject(targetObj)
         })
         this.saveAnnotations()
@@ -939,17 +953,17 @@ export const annotationMixin = {
      * controls visibility.
      */
     configureCanvas() {
-      this.fabricCanvas.off('object:moved', this.onObjectMoved)
-      this.fabricCanvas.off('text:changed', this.onObjectMoved)
-      this.fabricCanvas.off('object:modified', this.onObjectMoved)
+      this.fabricCanvas.off('object:moved', this.onObjectModified)
+      this.fabricCanvas.off('text:changed', this.onObjectModified)
+      this.fabricCanvas.off('object:modified', this.onObjectModified)
       this.fabricCanvas.off('object:added', this.onObjectAdded)
       this.fabricCanvas.off('mouse:up', this.endDrawing)
       this.fabricCanvas.off('mouse:up', this.onCanvasReleased)
       this.fabricCanvas.off('mouse:move', this.onCanvasMouseMoved)
       this.fabricCanvas.off('mouse:down', this.onCanvasClicked)
-      this.fabricCanvas.on('object:moved', this.onObjectMoved)
-      this.fabricCanvas.on('object:modified', this.onObjectMoved)
-      this.fabricCanvas.on('text:changed', this.onObjectMoved)
+      this.fabricCanvas.on('object:moved', this.onObjectModified)
+      this.fabricCanvas.on('object:modified', this.onObjectModified)
+      this.fabricCanvas.on('text:changed', this.onObjectModified)
       this.fabricCanvas.on('object:added', this.onObjectAdded)
       this.fabricCanvas.on('erasing:end', this.onObjectAdded)
       this.fabricCanvas.on('mouse:up', this.endDrawing)
@@ -962,14 +976,14 @@ export const annotationMixin = {
       fabric.Group.prototype._controlsVisibility = {
         tl: false,
         tr: false,
-        br: false, // !this.isCurrentUserArtist,
+        br: !this.isCurrentUserArtist,
         bl: false,
         ml: false,
         mr: false,
         mb: false,
-        mt: false // !this.isCurrentUserArtist
+        mt: false
       }
-      fabric.Group.prototype.hasControls = false
+      fabric.Group.prototype.hasControls = true
       return this.fabricCanvas
     },
 

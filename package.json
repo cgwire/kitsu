@@ -23,6 +23,7 @@
     "color-string": "1.9.1",
     "fabric": "cgwire/fabric.js",
     "marked": "4.3.0",
+    "marked-emoji": "1.2.2",
     "moment": "2.29.4",
     "moment-timezone": "0.5.43",
     "panzoom": "9.4.3",

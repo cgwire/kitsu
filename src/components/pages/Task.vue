@@ -13,11 +13,7 @@
           <span class="flexrow-item ml2">
             <entity-thumbnail
               class="entity-thumbnail"
-              :entity="
-                taskPreviews && taskPreviews.length > 0
-                  ? { preview_file_id: taskPreviews[0].id }
-                  : {}
-              "
+              :entity="currentEntity"
               :empty-width="100"
               :empty-height="60"
               :width="100"
@@ -79,6 +75,7 @@
                 <combobox-styled
                   class="preview-combo flexrow-item"
                   :options="previewOptions"
+                  is-preview
                   v-model="selectedPreviewId"
                 />
               </div>
@@ -90,7 +87,6 @@
 
               <div
                 class="set-main-preview flexrow-item flexrow pull-right"
-                v-if="isPreviewButtonVisible"
               >
                 <button
                   :class="{
@@ -99,7 +95,7 @@
                     'is-loading': loading.setPreview
                   }"
                   @click="setPreview"
-                  v-if="isPreviews && isCurrentUserManager"
+                  v-if="isCurrentUserManager"
                 >
                   <image-icon class="icon" />
                   <span class="text">
@@ -110,34 +106,24 @@
                   {{ $t('tasks.set_preview_error') }}
                 </span>
               </div>
-              <div
-                class="set-main-preview flexrow-item pull-right"
-                v-if="
-                  task &&
-                  task.entity &&
-                  task.entity.preview_file_id === currentPreviewId
-                "
-              >
-                <em>{{ $t('tasks.set_preview_done') }}</em>
-              </div>
             </div>
 
             <div class="preview-area mt1">
               <div v-if="isPreviews">
                 <preview-player
-                  :previews="currentPreview.previews"
-                  :task-type-map="taskTypeMap"
-                  :entity-preview-files="taskEntityPreviews"
-                  :read-only="isPreviewPlayerReadOnly"
-                  :last-preview-files="lastFivePreviews"
-                  :task="task"
-                  :extra-wide="true"
-                  @annotation-changed="onAnnotationChanged"
-                  @add-extra-preview="onAddExtraPreviewClicked"
-                  @remove-extra-preview="onRemoveExtraPreviewClicked"
-                  @change-current-preview="changeCurrentPreview"
-                  @time-updated="onTimeUpdated"
                   ref="preview-player"
+                  :extra-wide="true"
+                  :last-preview-files="lastFivePreviews"
+                  :previews="currentPreview.previews"
+                  :read-only="isPreviewPlayerReadOnly"
+                  :task="task"
+                  :task-type-map="taskTypeMap"
+                  @add-extra-preview="onAddExtraPreviewClicked"
+                  @annotation-changed="onAnnotationChanged"
+                  @change-current-preview="changeCurrentPreview"
+                  @remove-extra-preview="onRemoveExtraPreviewClicked"
+                  @previews-order-changed="onPreviewsOrderChanged"
+                  @time-updated="onTimeUpdated"
                   v-if="currentPreview"
                 />
               </div>
@@ -463,6 +449,10 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
+    currentEntity() {
+      return this.task && this.task.entity
+    },
 
     previewOptions() {
       return this.taskPreviews.map(preview => {
@@ -978,11 +968,13 @@ export default {
     setPreview() {
       this.loading.setPreview = true
       this.errors.setPreview = false
+      const previewPlayer = this.$refs['preview-player']
+      const previewId = previewPlayer.currentPreview.id
       this.$store
         .dispatch('setPreview', {
           taskId: this.task.id,
           entityId: this.task.entity.id,
-          previewId: this.currentPreviewId
+          previewId
         })
         .then(() => {
           this.loading.setPreview = false
@@ -1257,7 +1249,11 @@ export default {
       setTimeout(() => {
         this.$refs['preview-player'].setCurrentFrame(frame)
         this.$refs['preview-player'].focus()
-      }, 20)
+      }, 100)
+    },
+
+    onPreviewsOrderChanged() {
+      this.taskPreviews = this.getCurrentTaskPreviews()
     },
 
     async extractAnnotationSnapshots() {
@@ -1276,6 +1272,9 @@ export default {
       if (this.$route.params.task_id !== this.task.id) {
         this.loadTaskData()
       }
+      if (this.$route.params.preview_id !== this.selectedPreviewId) {
+        this.selectedPreviewId = this.$route.params.preview_id
+      }
     },
 
     selectedPreviewId() {
@@ -1289,14 +1288,6 @@ export default {
     events: {
       'preview-file:add-file'(eventData) {
         this.onPreviewAdded(eventData)
-      },
-
-      'comment:acknowledge'(eventData) {
-        this.onRemoteAcknowledge(eventData, 'ack')
-      },
-
-      'comment:unacknowledge'(eventData) {
-        this.onRemoteAcknowledge(eventData, 'unack')
       },
 
       'preview-file:update'(eventData) {
@@ -1314,6 +1305,14 @@ export default {
             comment.previews[0].validation_status = preview.validation_status
           })
         }
+      },
+
+      'comment:acknowledge'(eventData) {
+        this.onRemoteAcknowledge(eventData, 'ack')
+      },
+
+      'comment:unacknowledge'(eventData) {
+        this.onRemoteAcknowledge(eventData, 'unack')
       },
 
       'comment:new'(eventData) {
@@ -1383,7 +1382,7 @@ export default {
           eventData.preview_file_id,
           eventData.updated_at
         )
-        if (isValid) {
+        if (isValid && previewPlayer) {
           this.refreshPreview({
             previewId: previewPlayer.currentPreview.id,
             taskId: previewPlayer.currentPreview.task_id

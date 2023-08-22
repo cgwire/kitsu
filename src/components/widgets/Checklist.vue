@@ -13,6 +13,23 @@
         <check-square-icon class="icon" v-if="entry.checked" />
         <square-icon class="icon" v-else />
       </span>
+      <span
+        class="flexrow-item frame pointer"
+        @click="$emit(
+          'time-code-clicked',
+          { frame: entry.frame, revision: entry.revision}
+        )"
+        v-show="entry.frame >= 0"
+      >
+        v{{ entry.revision }} - {{ formatFrame(entry.frame) }}
+      </span>
+      <span
+        class="flexrow-item"
+        @click="setFrame(entry)"
+        v-show="isMoviePreview"
+      >
+        <clock-icon class="icon clock" />
+      </span>
       <textarea-autosize
         type="text"
         class="checklist-text flexrow-item"
@@ -31,13 +48,15 @@
 </template>
 
 <script>
-import { CheckSquareIcon, SquareIcon } from 'vue-feather-icons'
+import { CheckSquareIcon, ClockIcon, SquareIcon } from 'vue-feather-icons'
+import { formatFrame } from '@/lib/video'
 
 export default {
   name: 'checklist',
 
   components: {
     CheckSquareIcon,
+    ClockIcon,
     SquareIcon
   },
 
@@ -49,6 +68,18 @@ export default {
     disabled: {
       default: false,
       type: Boolean
+    },
+    frame: {
+      default: -1,
+      type: Number
+    },
+    isMoviePreview: {
+      default: false,
+      type: Boolean
+    },
+    revision: {
+      default: -1,
+      type: Number
     }
   },
 
@@ -58,6 +89,16 @@ export default {
         this.$emit('add-item', {
           index,
           text: '',
+          frame: -1,
+          revision: -1,
+          checked: false
+        })
+      } else {
+        this.$emit('insert-item', {
+          index: index + 1,
+          text: '',
+          frame: -1,
+          revision: -1,
           checked: false
         })
       }
@@ -84,6 +125,8 @@ export default {
       }
     },
 
+    formatFrame,
+
     focusNext(index) {
       if (this.checklist.length > 0) {
         if (index === this.checklist.length - 1) index = -1
@@ -91,6 +134,14 @@ export default {
         const entryRef = `checklist-entry-${index}`
         this.$refs[entryRef][0].$el.focus()
       }
+    },
+
+    setFrame (item) {
+      item.checked = !item.checked
+      item.revision = this.revision
+      item.frame = this.frame
+      item.checked = !item.checked
+      this.$emit('emit-change')
     },
 
     toggleEntryChecked(entry) {
@@ -178,6 +229,19 @@ export default {
     .icon {
       width: 20px;
     }
+
+    .clock {
+      width: 16px;
+    }
+  }
+
+  .frame {
+    border: 1px solid var(--border-alt);
+    border-radius: 4px;
+    width: 70px;
+    margin-top: 2px;
+    padding: 0 0.2em;
+    text-align: center;
   }
 }
 </style>

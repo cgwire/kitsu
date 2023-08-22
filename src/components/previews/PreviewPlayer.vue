@@ -7,10 +7,19 @@
             class="canvas-wrapper"
             ref="canvas-wrapper"
             oncontextmenu="return false;"
-            v-show="isAnnotationsDisplayed"
+            @click="onCanvasClicked"
+            v-show="!isZoomPan"
           >
-            <canvas :id="canvasId" ref="annotation-canvas" class="canvas">
-            </canvas>
+            <div
+              v-show="isAnnotationsDisplayed"
+            >
+              <canvas
+                ref="annotation-canvas"
+                :id="canvasId"
+                class="canvas"
+              >
+              </canvas>
+            </div>
           </div>
           <div class="viewers">
             <preview-viewer
@@ -281,17 +290,27 @@
             />
 
             <button-simple
-              @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
               icon="pen"
               :title="$t('playlists.actions.toggle_annotations')"
+              :active="isAnnotationsDisplayed"
+              @click="onAnnotationDisplayedClicked"
               v-if="(isPicture || isMovie) && (!light || fullScreen)"
             />
 
             <button-simple
+              class="flexrow-item"
+              icon="loupe"
+              :active="isZoomPan"
+              :title="$t('playlists.actions.annotation_zoom_pan')"
+              @click="onZoomPanClicked"
+              v-if="!light || fullScreen"
+            />
+
+            <button-simple
               class="button playlist-button flexrow-item"
+              icon="comment"
               :title="$t('playlists.actions.comments')"
               @click="onCommentClicked"
-              icon="comment"
               v-if="!readOnly && fullScreen"
             />
           </div>
@@ -380,7 +399,7 @@
     <div
       class="flexrow revision-previews"
       ref="revision-previews"
-      v-if="(!light || fullScreen) && isOrdering"
+      v-if="isOrdering"
     >
       <div
         class="flexrow-item revision-preview"
@@ -430,6 +449,8 @@ import PreviewViewer from '@/components/previews/PreviewViewer'
 import RevisionPreview from '@/components/previews/RevisionPreview'
 import VideoProgress from '@/components/previews/VideoProgress'
 const TaskInfo = () => import('@/components/sides/TaskInfo')
+
+let lastIndex = 1
 
 export default {
   name: 'preview-player',
@@ -525,7 +546,8 @@ export default {
         : null,
       textColor: '#ff3860',
       videoDuration: 0,
-      width: 0
+      width: 0,
+      isZoomPan: false
     }
   },
 
@@ -919,6 +941,13 @@ export default {
       localPreferences.setPreference('player:muted', this.isMuted)
     },
 
+    onCanvasClicked(event) {
+      if (!this.isAnnotationsDisplayed) {
+        console.log('onCanvasClicked', event)
+        this.pauseEvent(event)
+      }
+    },
+
     // Sizing
 
     getDimensions() {
@@ -1111,6 +1140,17 @@ export default {
       }
     },
 
+    onZoomPanClicked() {
+      if (!this.isZoomPan) {
+        this.isDrawing = false
+        this.isAnnotationsDisplayed = false
+        this.isZoomPan = true
+      } else {
+        this.isZoomPan = false
+        this.isAnnotationsDisplayed = true
+      }
+    },
+
     // Annotations
 
     onDeleteClicked() {
@@ -1166,6 +1206,13 @@ export default {
 
     onAnnotationClicked(annotation) {
       this.loadAnnotation(annotation)
+    },
+
+    onAnnotationDisplayedClicked() {
+      this.clearFocus()
+      this.isAnnotationsDisplayed = !this.isAnnotationsDisplayed
+      this.isZoomPan = false
+      this.resetZoom()
     },
 
     saveAnnotations() {
@@ -1543,6 +1590,7 @@ export default {
         taskId: this.currentPreview.task_id,
         previewId: preview.id
       }).catch(console.error)
+      this.$emit('previews-order-changed')
       this.$nextTick(() => {
         this.currentIndex = newIndex + 1
       })
@@ -1593,7 +1641,13 @@ export default {
 
     'currentPreview.revision'() {
       this.endAnnotationSaving()
-      this.currentIndex = 1
+      this.currentIndex = lastIndex <= this.previews.length
+        ? lastIndex || 1
+        : 1
+    },
+
+    currentIndex() {
+      lastIndex = this.currentIndex
     },
 
     previewToCompareId() {

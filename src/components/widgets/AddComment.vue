@@ -108,7 +108,11 @@
       <div class="post-area">
         <checklist
           :checklist="checklist"
+          :frame="frame"
+          :revision="revision"
+          :is-movie-preview="isMovie"
           @add-item="onAddChecklistItem"
+          @insert-item="onInsertChecklistItem"
           @remove-task="removeTask"
           v-if="checklist.length > 0"
         />
@@ -472,6 +476,10 @@ export default {
           return color
         }
       }
+    },
+
+    frame() {
+      return Math.floor(this.time * this.fps)
     }
   },
 
@@ -546,6 +554,13 @@ export default {
     onAddChecklistItem(item) {
       delete item.index
       this.checklist.push(item)
+    },
+
+    onInsertChecklistItem(item) {
+      this.checklist.splice(item.index, 0, item)
+      for (let i = 0; i < this.checklist.length; i++) {
+        this.checklist[i].index = i
+      }
     },
 
     resetStatus() {

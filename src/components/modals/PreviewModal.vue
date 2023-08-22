@@ -78,6 +78,7 @@ export default {
   position: absolute;
   right: 1em;
   top: 1em;
+  z-index: 2;
 }
 
 .modal-content {

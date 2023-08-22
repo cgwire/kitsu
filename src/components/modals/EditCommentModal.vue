@@ -61,6 +61,7 @@
                 : [{ checked: false, text: '' }]
             "
             @add-item="onAddChecklistItem"
+            @insert-item="onInsertChecklistItem"
             @remove-task="removeTask"
           />
           <label class="label">
@@ -250,6 +251,13 @@ export default {
     onAddChecklistItem(item) {
       delete item.index
       this.form.checklist.push(item)
+    },
+
+    onInsertChecklistItem(item) {
+      this.form.checklist.splice(item.index, 0, item)
+      for (let i = 0; i < this.form.checklist.length; i++) {
+        this.form.checklist[i].index = i
+      }
     }
   },
 
