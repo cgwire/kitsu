@@ -102,6 +102,10 @@ export default {
     isRoundedTopBorder: {
       type: Boolean,
       default: false
+    },
+    panzoom: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -185,9 +189,8 @@ export default {
       }
     }, 0)
 
-    var element = document.querySelector('.video-player')
-    if (!this.panzoom) {
-      this.panzoom = panzoom(element, {
+    if (this.panzoom) {
+      this.panzoomInstance = panzoom(this.container, {
         bounds: true,
         boundsPadding: 0.2,
         maxZoom: 5,
@@ -200,7 +203,7 @@ export default {
     this.pause()
     window.removeEventListener('keydown', this.onKeyDown)
     window.removeEventListener('resize', this.onWindowResize)
-    if (this.panzoom) this.panzoom.dispose()
+    this.panzoomInstance?.dispose()
   },
 
   computed: {
@@ -474,8 +477,10 @@ export default {
     },
 
     resetPanZoom() {
-      this.panzoom.moveTo(0, 0)
-      this.panzoom.zoomAbs(0, 0, 1)
+      if (this.panzoomInstance) {
+        this.panzoomInstance.moveTo(0, 0)
+        this.panzoomInstance.zoomAbs(0, 0, 1)
+      }
     }
   },
 

@@ -22,18 +22,8 @@
           <img ref="picture-gif" :src="pictureGifPath" />
         </div>
         <div v-show="!isGif">
-          <img
-            ref="picture-big"
-            id="picture-big"
-            :src="pictureDlPath"
-            v-show="fullScreen"
-          />
-          <img
-            ref="picture"
-            id="picture"
-            :src="picturePath"
-            v-show="!fullScreen"
-          />
+          <img ref="picture-big" :src="pictureDlPath" v-show="fullScreen" />
+          <img ref="picture" :src="picturePath" v-show="!fullScreen" />
         </div>
       </div>
       <spinner v-if="isLoading" />
@@ -79,6 +69,10 @@ export default {
     preview: {
       type: Object,
       default: () => {}
+    },
+    panzoom: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -87,7 +81,8 @@ export default {
       isLoading: true,
       picturePath: '',
       pictureDlPath: '',
-      pictureGifPath: ''
+      pictureGifPath: '',
+      panzoomInstances: []
     }
   },
 
@@ -103,20 +98,24 @@ export default {
     this.pictureGif.addEventListener('load', this.endLoading)
     window.addEventListener('resize', this.onWindowResize)
     this.setPicturePath()
-    var element = document.querySelector('#picture-big')
-    if (!this.panzoom) {
-      this.panzoom = panzoom(element, {
-        bounds: true,
-        boundsPadding: 0.2,
-        maxZoom: 5,
-        minZoom: 1
+
+    if (this.panzoom) {
+      ;[this.picture, this.pictureBig, this.pictureGif].forEach(picture => {
+        this.panzoomInstances.push(
+          panzoom(picture, {
+            bounds: true,
+            boundsPadding: 0.2,
+            maxZoom: 5,
+            minZoom: 1
+          })
+        )
       })
     }
   },
 
   beforeDestroy() {
     window.removeEventListener('resize', this.onWindowResize)
-    if (this.panzoom) this.panzoom.dispose()
+    this.panzoomInstances.forEach(panzoom => panzoom.dispose())
   },
 
   computed: {
@@ -318,8 +317,10 @@ export default {
     },
 
     resetPanZoom() {
-      this.panzoom.moveTo(0, 0)
-      this.panzoom.zoomAbs(0, 0, 1)
+      this.panzoomInstances.forEach(panzoom => {
+        panzoom.moveTo(0, 0)
+        panzoom.zoomAbs(0, 0, 1)
+      })
     }
   },
 
