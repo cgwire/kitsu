@@ -100,7 +100,8 @@ export default {
     this.setPicturePath()
 
     if (this.panzoom) {
-      ;[this.picture, this.pictureBig, this.pictureGif].forEach(picture => {
+      const pictures = [this.picture, this.pictureBig, this.pictureGif]
+      pictures.forEach(picture => {
         this.panzoomInstances.push(
           panzoom(picture, {
             bounds: true,
