@@ -261,7 +261,20 @@ export default {
       this.pictureBig.height = height
       this.pictureGif.width = width
       this.pictureGif.height = height
-      if (this.isPicture) this.$emit('size-changed', dimensions)
+
+      if (this.isPicture) {
+        const pictureElement = this.isGif
+          ? this.pictureGif
+          : this.fullScreen
+          ? this.pictureBig
+          : this.picture
+        const picturePosition = pictureElement.getBoundingClientRect()
+        const containerPosition = this.container.getBoundingClientRect()
+        const top = picturePosition.top - containerPosition.top
+        const left = picturePosition.left - containerPosition.left
+
+        this.$emit('size-changed', { width, height, top, left })
+      }
     },
 
     setPicturePath() {

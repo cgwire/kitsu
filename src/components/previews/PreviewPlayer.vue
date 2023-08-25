@@ -1,6 +1,6 @@
 <template>
   <div ref="container" class="preview-player dark" tabindex="-1">
-    <div class="preview" :style="{ height: defaultHeight + 'px' }">
+    <div class="preview filler">
       <div class="flexrow filler">
         <div class="preview-container filler" ref="preview-container">
           <div
@@ -554,7 +554,8 @@ export default {
     this.resetPreviewFileMap()
     this.initPreferences()
     if (this.isSound || this.is3DModel || this.isFile) {
-      this.fixCanvasSize({ width: 0, height: 0 })
+      // hide canvas
+      this.fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
     }
   },
 
@@ -625,7 +626,7 @@ export default {
 
     defaultHeight() {
       if (this.fullScreen) {
-        let height = screen.height
+        let height = screen.height - 50 // arbitrarily remove 50px from height for specific screens (e.g. with notch)
         if (this.isOrdering) height -= 140
         if (this.isMovie) height -= 60
         else height -= 30
@@ -885,7 +886,7 @@ export default {
 
     syncComparisonViewer() {
       if (this.comparisonViewer && this.isComparing) {
-        // Dirty fix: add a missing frame to the comparaison video
+        // Dirty fix: add a missing frame to the comparison video
         this.comparisonViewer.setCurrentTimeRaw(
           this.previewViewer.getCurrentTimeRaw() + this.frameDuration
         )
@@ -921,11 +922,7 @@ export default {
 
     onRepeatClicked() {
       this.clearFocus()
-      if (this.isRepeating) {
-        this.isRepeating = false
-      } else {
-        this.isRepeating = true
-      }
+      this.isRepeating = !this.isRepeating
       localPreferences.setPreference('player:repeating', this.isRepeating)
     },
 
@@ -946,19 +943,14 @@ export default {
       return dimensions
     },
 
-    getCurrentPreviewDimensions() {
-      const dim = this.previewViewer.getPreviewDimensions()
-      return dim
-    },
-
     setupFabricCanvas() {
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
       this.fabricCanvas = new fabric.Canvas(this.canvasId, {
         fireRightClick: true,
-        width: width,
-        height: height
+        width,
+        height
       })
       if (!this.fabricCanvas.freeDrawingBrush) {
         this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
@@ -969,27 +961,16 @@ export default {
     },
 
     fixCanvasSize(dimensions) {
-      if (!dimensions) {
-        dimensions = this.getCurrentPreviewDimensions()
-      }
-      const width = dimensions.width
-      const height = dimensions.height
       if (this.fabricCanvas) {
+        const { height, left, top, width } = dimensions
+
         this.fabricCanvas.setDimensions({ width, height })
         this.fabricCanvas.width = width
         this.fabricCanvas.height = height
-        const containerWidth = this.previewContainer.offsetWidth
-        const containerHeight = this.container.offsetHeight
-        let margin = Math.round((containerWidth - width) / 2)
-        if (this.isComparing) {
-          margin = Math.round((containerWidth / 2 - width) / 2)
-        }
-        let corrector = this.isMovie ? 60 : 32
-        if (this.isOrdering) corrector += 140
-        const top = Math.round((containerHeight - corrector - height) / 2)
+
         if (this.canvasWrapper) {
           this.canvasWrapper.style.top = top + 'px'
-          this.canvasWrapper.style.left = margin + 'px'
+          this.canvasWrapper.style.left = left + 'px'
           this.canvasWrapper.style.width = width + 'px'
           this.canvasWrapper.style.height = height + 'px'
           setTimeout(() => {
@@ -1010,8 +991,7 @@ export default {
       this.container.setAttribute('data-fullscreen', !!true)
       this.fullScreen = true
       this.$nextTick(() => {
-        this.fixCanvasSize()
-        // Needed to avoid fullsceen button to be called with space bar.
+        // Needed to avoid fullscreen button to be called with space bar.
         this.clearFocus()
         this.previewViewer.resize()
       })
@@ -1024,9 +1004,8 @@ export default {
       this.isComparing = false
       this.fullScreen = false
       this.isCommentsHidden = true
-      this.fixCanvasSize()
       this.$nextTick(() => {
-        // Needed to avoid fullsceen button to be called with space bar.
+        // Needed to avoid fullscreen button to be called with space bar.
         this.clearFocus()
         this.previewViewer.resize()
       })
@@ -1051,7 +1030,6 @@ export default {
         this.$nextTick(() => {
           this.previewViewer.resetVideo()
           this.previewViewer.resetPicture()
-          this.fixCanvasSize()
           this.clearFocus()
           this.$nextTick(() => {
             this.loadAnnotation()
@@ -1408,7 +1386,6 @@ export default {
         }
         this.previewViewer.resetVideo()
         this.previewViewer.resetPicture()
-        this.fixCanvasSize()
         this.endAnnotationSaving()
         this.$nextTick(() => {
           this.previewViewer.resize()
@@ -1616,7 +1593,8 @@ export default {
           }, 20)
         }
       } else if (this.isSound || this.isFile || this.is3DModel) {
-        this.fixCanvasSize({ width: 0, height: 0 })
+        // hide canvas
+        this.fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
       }
       this.$nextTick(() => {
         if (this.previewViewer && this.previewViewer.isBroken) {
@@ -1662,26 +1640,17 @@ export default {
         this.taskTypeId = ''
         this.previewToCompareId = ''
       }
-      this.$nextTick(() => {
-        this.fixCanvasSize()
-      })
     },
 
     light() {
       this.endAnnotationSaving()
       this.previewViewer.resize()
-      this.$nextTick(() => {
-        this.fixCanvasSize()
-      })
     },
 
     extraWide() {
       this.endAnnotationSaving()
       this.previewViewer.resetPicture()
       this.previewViewer.resize()
-      this.$nextTick(() => {
-        this.fixCanvasSize()
-      })
     },
 
     isDrawing() {
@@ -1695,7 +1664,6 @@ export default {
 
     isOrdering() {
       this.$nextTick(() => {
-        this.fixCanvasSize()
         this.previewViewer.resetVideo()
         this.previewViewer.resetPicture()
       })
@@ -1712,13 +1680,6 @@ export default {
       } else {
         clickarea.removeEventListener('dblclick', this.addText)
       }
-    },
-
-    isCommentsHidden() {
-      this.$nextTick(() => {
-        window.dispatchEvent(new Event('resize'))
-        this.fixCanvasSize()
-      })
     },
 
     isAnnotationsDisplayed() {

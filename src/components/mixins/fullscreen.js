@@ -24,7 +24,7 @@ export const fullScreenMixin = {
   methods: {
     isFullScreen() {
       return !!(
-        document.fullScreen ||
+        document.fullscreen ||
         document.webkitIsFullScreen ||
         document.mozFullScreen ||
         document.msFullscreenElement ||

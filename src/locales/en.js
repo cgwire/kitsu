@@ -1342,6 +1342,11 @@ export default {
     }
   },
 
+  preview: {
+    broken: 'This preview is broken.',
+    processing: 'Video processing in progress...'
+  },
+
   search: {
     limit: 'Max number of results:',
     match_details: 'match found in {target}',

@@ -1248,7 +1248,6 @@ export default {
     refreshPreviewPlay() {
       if (this.$refs['preview-player']) {
         this.$refs['preview-player'].previewViewer.resize()
-        this.$refs['preview-player'].fixCanvasSize()
       }
     }
   },
