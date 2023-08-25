@@ -1177,7 +1177,7 @@ export default {
       this.clearFocus()
       this.isAnnotationsDisplayed = !this.isAnnotationsDisplayed
       this.isZoomPan = false
-      this.resetZoom()
+      this.previewViewer.resetZoom()
     },
 
     saveAnnotations() {
