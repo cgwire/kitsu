@@ -626,7 +626,7 @@ export default {
 
     defaultHeight() {
       if (this.fullScreen) {
-        let height = screen.height - 50 // arbitrarily remove 50px from height for specific screens (e.g. with notch)
+        let height = screen.height - 40 // arbitrarily remove 40px from height for specific screens (e.g. with notch)
         if (this.isOrdering) height -= 140
         if (this.isMovie) height -= 60
         else height -= 30
