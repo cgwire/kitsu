@@ -146,7 +146,7 @@ export default {
           false
         )
         this.video.addEventListener('resize', this.resetSize)
-        this.video.addEventListener('timeupdate', this.resetSize)
+
         this.video.addEventListener('loadedmetadata', () => {
           this.configureVideo()
           this.onWindowResize()

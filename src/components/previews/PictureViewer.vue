@@ -101,16 +101,14 @@ export default {
 
     if (this.panzoom) {
       const pictures = [this.picture, this.pictureBig, this.pictureGif]
-      pictures.forEach(picture => {
-        this.panzoomInstances.push(
-          panzoom(picture, {
-            bounds: true,
-            boundsPadding: 0.2,
-            maxZoom: 5,
-            minZoom: 1
-          })
-        )
-      })
+      this.panzoomInstances = pictures.map(picture =>
+        panzoom(picture, {
+          bounds: true,
+          boundsPadding: 0.2,
+          maxZoom: 5,
+          minZoom: 1
+        })
+      )
     }
   },
 
@@ -272,6 +270,8 @@ export default {
         const containerPosition = this.container.getBoundingClientRect()
         const top = picturePosition.top - containerPosition.top
         const left = picturePosition.left - containerPosition.left
+
+        this.resetPanZoom()
 
         this.$emit('size-changed', { width, height, top, left })
       }
