@@ -271,6 +271,8 @@ export default {
         const top = picturePosition.top - containerPosition.top
         const left = picturePosition.left - containerPosition.left
 
+        this.resetPanZoom()
+
         this.$emit('size-changed', { width, height, top, left })
       }
     },
