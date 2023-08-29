@@ -543,7 +543,7 @@ export default {
     only_previews: 'Only previews',
     hide_stats: 'Hide stats',
     news: 'news',
-    no_news: 'There is no news for this entity.',
+    no_news: 'There is no news.',
     set_preview_on: 'set preview on',
     show_stats: 'Show stats',
     task_status: 'Task status',
