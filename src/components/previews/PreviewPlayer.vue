@@ -627,9 +627,9 @@ export default {
     },
 
     marginBottom() {
-      let margin = 30
-      if (this.isOrdering) margin += 140
-      if (this.isMovie) margin += 60
+      let margin = 32 // buttons bar
+      if (this.isMovie) margin += 28 // progress bar
+      if (this.isOrdering) margin += 140 // ordering menu
       return margin
     },
 
