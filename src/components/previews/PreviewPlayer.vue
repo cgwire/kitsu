@@ -22,6 +22,7 @@
               class="preview-viewer"
               :big="big"
               :default-height="defaultHeight"
+              :margin-bottom="marginBottom"
               :full-screen="fullScreen"
               :is-comparing="isComparing && isComparisonEnabled"
               :is-hd="isHd"
@@ -43,6 +44,7 @@
               class="comparison-preview-viewer"
               :big="big"
               :default-height="defaultHeight"
+              :margin-bottom="marginBottom"
               :full-screen="fullScreen"
               :is-comparing="isComparing && isComparisonEnabled"
               :is-hd="isHd"
@@ -624,13 +626,16 @@ export default {
       }
     },
 
+    marginBottom() {
+      let margin = 30
+      if (this.isOrdering) margin += 140
+      if (this.isMovie) margin += 60
+      return margin
+    },
+
     defaultHeight() {
       if (this.fullScreen) {
-        let height = screen.height - 40 // arbitrarily remove 40px from height for specific screens (e.g. with notch)
-        if (this.isOrdering) height -= 140
-        if (this.isMovie) height -= 60
-        else height -= 30
-        return height
+        return screen.height - this.marginBottom
       } else {
         let bigHeight = screen.height > 800 ? 470 : 300
         if (this.isMovie) bigHeight = screen.height > 800 ? 442 : 272

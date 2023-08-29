@@ -1,5 +1,11 @@
 <template>
-  <div ref="container" class="preview-viewer dark">
+  <div
+    ref="container"
+    class="preview-viewer dark"
+    :style="{
+      maxHeight: fullScreen ? `calc(100vh - ${marginBottom}px)` : null
+    }"
+  >
     <div
       class="center status-message"
       :style="{ height: defaultHeight + 'px' }"
@@ -133,6 +139,10 @@ export default {
       default: false
     },
     defaultHeight: {
+      type: Number,
+      default: 0
+    },
+    marginBottom: {
       type: Number,
       default: 0
     },
