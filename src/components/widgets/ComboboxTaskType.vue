@@ -166,13 +166,13 @@ export default {
 
 .select-input {
   background: $white;
-  width: 195px;
-  position: absolute;
   border: 1px solid var(--border);
-  z-index: 300;
   margin-left: -1px;
   max-height: 200px;
   overflow-y: auto;
+  position: absolute;
+  width: 195px;
+  z-index: 300;
 
   &.open-top {
     bottom: 41px;
