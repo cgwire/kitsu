@@ -352,18 +352,14 @@
 
           <div class="flexrow">
             <div class="flexrow" v-if="fullScreen">
-              <span
-                :class="{
-                  'previous-preview-file': true,
-                  'current-preview-file': isCurrentRevision(previewFile)
-                }"
-                :key="`last-preview-${previewFile.id}`"
-                :title="getRevisionTitle(previewFile)"
-                @click="changeCurrentPreview(previewFile)"
-                v-for="previewFile in lastPreviewFiles"
-              >
-                {{ previewFile.revision }}
-              </span>
+              <combobox-styled
+                class="preview-combo flexrow-item"
+                :options="lastPreviewFileOptions"
+                is-reversed
+                is-preview
+                thin
+                @input="changeCurrentPreviewFile"
+              />
             </div>
           </div>
 
@@ -441,6 +437,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple'
 import BrowsingBar from '@/components/previews/BrowsingBar'
 import ColorPicker from '@/components/widgets/ColorPicker'
 import Combobox from '@/components/widgets/Combobox'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import PencilPicker from '@/components/widgets/PencilPicker'
 import PreviewViewer from '@/components/previews/PreviewViewer'
 import RevisionPreview from '@/components/previews/RevisionPreview'
@@ -460,6 +457,7 @@ export default {
     BrowsingBar,
     ColorPicker,
     Combobox,
+    ComboboxStyled,
     DownloadIcon,
     PencilPicker,
     PreviewViewer,
@@ -735,6 +733,16 @@ export default {
             value: taskType.id
           }
         })
+    },
+
+    lastPreviewFileOptions() {
+      if (!this.lastPreviewFiles) return []
+      return this.lastPreviewFiles.map(previewFile => {
+        return {
+          label: `v${previewFile.revision}`,
+          value: previewFile.id
+        }
+      })
     },
 
     previewFileOptions() {
@@ -1453,6 +1461,13 @@ export default {
     },
 
     // Browsing
+
+    changeCurrentPreviewFile(previewFileId) {
+      const previewFile = this.lastPreviewFiles.find(
+        (previewFile) => previewFile.id === previewFileId
+      )
+      this.changeCurrentPreview(previewFile)
+    },
 
     changeCurrentPreview(previewFile) {
       this.$emit('change-current-preview', previewFile)
