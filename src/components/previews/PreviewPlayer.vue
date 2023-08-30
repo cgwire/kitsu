@@ -882,7 +882,9 @@ export default {
         this.isPlaying = false
         if (this.previewViewer) this.previewViewer.pause()
         if (this.comparisonViewer) this.comparisonViewer.pause()
-        this.syncComparisonViewer()
+        this.$nextTick(() => {
+          this.syncComparisonViewer()
+        })
       }
     },
 
@@ -902,7 +904,7 @@ export default {
       if (this.comparisonViewer && this.isComparing) {
         // Dirty fix: add a missing frame to the comparison video
         this.comparisonViewer.setCurrentTimeRaw(
-          this.previewViewer.getCurrentTimeRaw() + this.frameDuration
+          this.previewViewer.getCurrentTimeRaw()
         )
       }
     },

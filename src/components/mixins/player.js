@@ -428,8 +428,13 @@ export const playerMixin = {
       this.showCanvas()
       if (this.isCurrentPreviewMovie) {
         const comparisonPlayer = this.$refs['raw-player-comparison']
+        const currentTime = roundToFrame(this.rawPlayer.getCurrentTimeRaw(), this.fps)
         if (this.rawPlayer) this.rawPlayer.pause()
         if (comparisonPlayer) comparisonPlayer.pause()
+        if (comparisonPlayer) {
+          this.rawPlayer.setCurrentTimeRaw(currentTime)
+          comparisonPlayer.setCurrentTimeRaw(currentTime)
+        }
       } else if (this.isCurrentPreviewSound) {
         this.soundPlayer.pause()
       }
@@ -481,7 +486,7 @@ export const playerMixin = {
         this.rawPlayerComparison.currentPlayer
       ) {
         const currentTimeRaw = this.rawPlayer.getCurrentTimeRaw()
-        this.rawPlayerComparison.currentPlayer.currentTime = currentTimeRaw
+        this.rawPlayerComparison.setCurrentTimeRaw(currentTimeRaw)
       }
     },
 

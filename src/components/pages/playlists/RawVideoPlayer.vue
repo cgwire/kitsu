@@ -373,6 +373,13 @@ export default {
       }
     },
 
+    getCurrentFrame()  {
+      let time = this.getCurrentTime()
+      time = floorToFrame(time, this.fps)
+      const frameNumber = time / this.frameDuration
+      return frameNumber
+    },
+
     getLastPushedCurrentTime() {
       const length = this.$options.currentTimeCalls.length
       if (length > 0) {
@@ -382,8 +389,8 @@ export default {
       }
     },
 
-    getCurrentTimeRaw(currentTime) {
-      return this.currentPlayer.currentTime
+    getCurrentTimeRaw() {
+      return this.currentPlayer ? this.currentPlayer.currentTime : 0
     },
 
     setCurrentTimeRaw(currentTime) {
