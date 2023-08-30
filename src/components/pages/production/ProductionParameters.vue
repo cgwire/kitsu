@@ -91,6 +91,14 @@
           v-model="form.is_clients_isolated"
           v-if="currentProduction && currentProduction.id"
         />
+        <combobox-boolean
+          ref="isPreviewDownloadAllowed"
+          :label="$t('productions.fields.is_preview_download_allowed')"
+          @enter="runConfirmation"
+          v-focus
+          v-model="form.is_preview_download_allowed"
+          v-if="currentProduction && currentProduction.id"
+        />
         <text-field
           ref="maxRetakesField"
           type="number"
@@ -168,6 +176,7 @@ export default {
         fps: '',
         max_retakes: 0,
         is_clients_isolated: 'false',
+        is_preview_download_allowed: 'false',
         ratio: '',
         resolution: '',
         production_type: 'short'
@@ -245,6 +254,10 @@ export default {
           is_clients_isolated: this.currentProduction.is_clients_isolated
             ? 'true'
             : 'false',
+          is_preview_download_allowed: this.currentProduction
+            .is_preview_download_allowed
+            ? 'true'
+            : 'false',
           ratio: this.currentProduction.ratio,
           resolution: this.currentProduction.resolution
         }
@@ -258,6 +271,7 @@ export default {
           episode_span: 0,
           max_retakes: 0,
           is_clients_isolated: 'false',
+          is_preview_download_allowed: 'false',
           fps: '',
           ratio: '',
           resolution: ''

@@ -1761,6 +1761,7 @@ export default {
       this.$nextTick().then(() => {
         this.resetPictureCanvas()
         this.resetCanvas()
+        this.syncComparisonPlayer()
         this.reloadAnnotations()
       })
     },

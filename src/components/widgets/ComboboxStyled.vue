@@ -6,8 +6,11 @@
     <div
       :class="{
         combo: true,
+        thin: thin,
+        reversed: isReversed,
         open: showList
       }"
+      ref="select"
       @click="toggleList"
     >
       <div class="flexrow">
@@ -16,13 +19,13 @@
         </div>
         <chevron-down-icon class="down-icon flexrow-item" />
       </div>
-      <div class="select-input" ref="select" v-if="showList">
+      <div class="select-input" v-if="showList">
         <div
+          :key="option.id"
           class="option-line flexrow"
-          v-for="option in options"
           @click="selectOption(option)"
           @click.middle="openRoute(option)"
-          :key="option.id"
+          v-for="option in optionList"
         >
           <entity-thumbnail
             class="revision-thumbnail"
@@ -91,6 +94,14 @@ export default {
     isPreview: {
       default: false,
       type: Boolean
+    },
+    isReversed: {
+      default: false,
+      type: Boolean
+    },
+    thin: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -101,12 +112,21 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['isDarkTheme'])
+    ...mapGetters(['isDarkTheme']),
+
+    optionList() {
+      if (this.isReversed) {
+        return [...this.options].reverse()
+      } else {
+        return this.options
+      }
+    }
   },
 
   methods: {
     selectOption(option) {
       this.$emit('input', option.value)
+      this.$emit('change', option.value)
       this.selectedOption = option
     },
 
@@ -146,6 +166,20 @@ export default {
         } else {
           this.selectedOption = this.options[0]
         }
+      }
+    },
+
+    showList() {
+      if (this.showList) {
+        this.$nextTick(() => {
+          let list = null
+          for (const child of this.$refs.select.children) {
+            if (child.className !== 'flexrow') {
+              list = child
+            }
+          }
+          list.scrollTo({top: this.optionList.length * 60})
+        })
       }
     },
 
@@ -252,5 +286,34 @@ export default {
 
 .revision-thumbnail {
   margin-right: 0.5em;
+}
+
+.thin {
+  height: 30px;
+  padding: 3px 0 3px 10px;
+  margin-bottom: 3px;
+
+  .select-input {
+    top: 29px;
+  }
+}
+
+.reversed {
+
+  &.open {
+    border-top-left-radius: 0em;
+    border-top-right-radius: 0em;
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+  }
+
+  .select-input {
+    border-top-left-radius: 1em;
+    border-top-right-radius: 1em;
+    border-bottom-left-radius: 0em;
+    border-bottom-right-radius: 0em;
+    height: 180px;
+    top: -180px;
+  }
 }
 </style>

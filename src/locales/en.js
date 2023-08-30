@@ -817,6 +817,7 @@ export default {
       episode_span: 'Episode spacing',
       fps: 'FPS',
       is_clients_isolated: 'Isolate client comments (not visible to each others)',
+      is_preview_dowload_allowed: 'Allow artists to download previews',
       max_retakes: 'Maximum number of retakes',
       name: 'Name',
       nb_episodes: 'Number of episodes',

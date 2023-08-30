@@ -64,30 +64,17 @@
           <div class="task-column preview-column" v-if="isPreview">
             <div class="preview-column-content">
               <div class="flexrow">
+                <div class="preview-list flexrow w100" v-if="previewOptions.length > 0">
+                  <combobox-styled
+                    class="preview-combo flexrow-item"
+                    :options="previewOptions"
+                    is-preview
+                    thin
+                    @input="onPreviewChanged"
+                  />
+                </div>
                 <div class="filler"></div>
-                <div class="preview-list flexrow w100" v-if="isPreview">
-                  <div
-                    :class="{
-                      'flexrow-item': true,
-                      'revision-thumbnail': true,
-                      selected: currentPreviewIndex === index
-                    }"
-                    :key="'preview-' + preview.id"
-                    @click="onPreviewChanged(index)"
-                    v-for="(preview, index) in lastFivePreviews"
-                  >
-                    <entity-thumbnail
-                      :preview-file-id="preview.id"
-                      :width="50"
-                      :height="30"
-                      :empty-width="50"
-                      :empty-height="30"
-                      no-preview
-                    />
-                    <span>
-                      {{ preview.revision }}
-                    </span>
-                  </div>
+                <div>
                   <router-link
                     class="history-button flexrow-item"
                     :to="taskPath"
@@ -103,7 +90,7 @@
                     :entity-preview-files="taskEntityPreviews"
                     :extra-wide="isExtraWide"
                     :is-assigned="isAssigned"
-                    :last-preview-files="lastFivePreviews"
+                    :last-preview-files="taskPreviews"
                     :light="!isWide"
                     :previews="currentPreview ? currentPreview.previews : []"
                     :read-only="isPreviewPlayerReadOnly"
@@ -297,6 +284,7 @@ import ActionPanel from '@/components/tops/ActionPanel'
 import AddComment from '@/components/widgets/AddComment'
 import AddPreviewModal from '@/components/modals/AddPreviewModal'
 import Comment from '@/components/widgets/Comment'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DeleteModal from '@/components/modals/DeleteModal'
 import EditCommentModal from '@/components/modals/EditCommentModal'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
@@ -314,6 +302,7 @@ export default {
     ActionPanel,
     AddComment,
     AddPreviewModal,
+    ComboboxStyled,
     Comment,
     CornerRightUpIcon,
     DeleteModal,
@@ -674,6 +663,16 @@ export default {
       return getTaskEntityPath(this.task, episodeId)
     },
 
+    previewOptions() {
+      if (!this.taskPreviews) return []
+      return this.taskPreviews.map((preview, index) => {
+        return {
+          value: preview.id,
+          label: 'v' + preview.revision
+        }
+      })
+    },
+
     lastFivePreviews() {
       if (this.taskPreviews) {
         return this.taskPreviews.slice(0, 5)
@@ -956,8 +955,10 @@ export default {
       this.modals.addExtraPreview = false
     },
 
-    onPreviewChanged(index) {
-      this.currentPreviewIndex = index
+    onPreviewChanged(previewId) {
+      this.currentPreviewIndex = this.taskPreviews.findIndex(
+        p => p.id === previewId
+      )
       this.currentPreviewPath = this.getOriginalPath()
       this.currentPreviewDlPath = this.getOriginalDlPath()
     },

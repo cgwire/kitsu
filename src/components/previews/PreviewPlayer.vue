@@ -352,18 +352,14 @@
 
           <div class="flexrow">
             <div class="flexrow" v-if="fullScreen">
-              <span
-                :class="{
-                  'previous-preview-file': true,
-                  'current-preview-file': isCurrentRevision(previewFile)
-                }"
-                :key="`last-preview-${previewFile.id}`"
-                :title="getRevisionTitle(previewFile)"
-                @click="changeCurrentPreview(previewFile)"
-                v-for="previewFile in lastPreviewFiles"
-              >
-                {{ previewFile.revision }}
-              </span>
+              <combobox-styled
+                class="preview-combo flexrow-item"
+                :options="lastPreviewFileOptions"
+                is-reversed
+                is-preview
+                thin
+                @input="changeCurrentPreviewFile"
+              />
             </div>
           </div>
 
@@ -376,7 +372,8 @@
             class="button flexrow-item"
             :href="originalDlPath"
             :title="$t('playlists.actions.download_file')"
-            v-if="!isCurrentUserArtist"
+            v-if="!isCurrentUserArtist ||
+              this.currentProduction.is_preview_download_allowed"
           >
             <download-icon class="icon is-small" />
           </a>
@@ -440,6 +437,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple'
 import BrowsingBar from '@/components/previews/BrowsingBar'
 import ColorPicker from '@/components/widgets/ColorPicker'
 import Combobox from '@/components/widgets/Combobox'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import PencilPicker from '@/components/widgets/PencilPicker'
 import PreviewViewer from '@/components/previews/PreviewViewer'
 import RevisionPreview from '@/components/previews/RevisionPreview'
@@ -459,6 +457,7 @@ export default {
     BrowsingBar,
     ColorPicker,
     Combobox,
+    ComboboxStyled,
     DownloadIcon,
     PencilPicker,
     PreviewViewer,
@@ -736,6 +735,16 @@ export default {
         })
     },
 
+    lastPreviewFileOptions() {
+      if (!this.lastPreviewFiles) return []
+      return this.lastPreviewFiles.map(previewFile => {
+        return {
+          label: `v${previewFile.revision}`,
+          value: previewFile.id
+        }
+      })
+    },
+
     previewFileOptions() {
       if (!this.entityPreviewFiles) return []
       const previewFiles = this.entityPreviewFiles[this.taskTypeId]
@@ -873,7 +882,9 @@ export default {
         this.isPlaying = false
         if (this.previewViewer) this.previewViewer.pause()
         if (this.comparisonViewer) this.comparisonViewer.pause()
-        this.syncComparisonViewer()
+        this.$nextTick(() => {
+          this.syncComparisonViewer()
+        })
       }
     },
 
@@ -893,7 +904,7 @@ export default {
       if (this.comparisonViewer && this.isComparing) {
         // Dirty fix: add a missing frame to the comparison video
         this.comparisonViewer.setCurrentTimeRaw(
-          this.previewViewer.getCurrentTimeRaw() + this.frameDuration
+          this.previewViewer.getCurrentTimeRaw()
         )
       }
     },
@@ -1452,6 +1463,13 @@ export default {
     },
 
     // Browsing
+
+    changeCurrentPreviewFile(previewFileId) {
+      const previewFile = this.lastPreviewFiles.find(
+        (previewFile) => previewFile.id === previewFileId
+      )
+      this.changeCurrentPreview(previewFile)
+    },
 
     changeCurrentPreview(previewFile) {
       this.$emit('change-current-preview', previewFile)

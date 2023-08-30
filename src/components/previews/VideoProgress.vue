@@ -347,10 +347,13 @@ progress {
   background: $black;
   border: 1px solid $white;
   border-radius: 5px;
-  position: relative;
-  padding: 0.3em;
-  top: 8px;
   color: $white;
+  height: 28px;
+  position: absolute;
+  padding: 0.3em;
+  text-align: center;
+  top: 30px;
+  width: 40px;
   z-index: 800;
 }
 

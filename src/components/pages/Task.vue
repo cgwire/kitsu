@@ -111,7 +111,7 @@
                 <preview-player
                   ref="preview-player"
                   :extra-wide="true"
-                  :last-preview-files="lastFivePreviews"
+                  :last-preview-files="taskPreviews || []"
                   :previews="currentPreview.previews"
                   :read-only="isPreviewPlayerReadOnly"
                   :task="task"
@@ -559,14 +559,6 @@ export default {
         return {
           name: 'open-productions'
         }
-      }
-    },
-
-    lastFivePreviews() {
-      if (this.taskPreviews) {
-        return this.taskPreviews.slice(0, 5)
-      } else {
-        return []
       }
     },
 
