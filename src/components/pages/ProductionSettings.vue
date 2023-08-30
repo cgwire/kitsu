@@ -3,14 +3,14 @@
     <div class="wrapper">
       <div class="tabs">
         <ul>
-          <li :class="{ 'is-active': isActiveTab('brief') }">
-            <a @click="activeTab = 'brief'">
-              {{ $t('productions.brief.title') }}
-            </a>
-          </li>
           <li :class="{ 'is-active': isActiveTab('parameters') }">
             <a @click="activeTab = 'parameters'">
               {{ $t('productions.parameters.title') }}
+            </a>
+          </li>
+          <li :class="{ 'is-active': isActiveTab('brief') }">
+            <a @click="activeTab = 'brief'">
+              {{ $t('productions.brief.title') }}
             </a>
           </li>
           <li :class="{ 'is-active': isActiveTab('taskStatus') }">
@@ -36,12 +36,12 @@
         </ul>
       </div>
 
-      <div class="tab" v-show="isActiveTab('brief')">
-        <ProductionBrief />
-      </div>
-
       <div class="tab" v-show="isActiveTab('parameters')">
         <production-parameters />
+      </div>
+
+      <div class="tab" v-show="isActiveTab('brief')">
+        <ProductionBrief />
       </div>
 
       <div class="tab" v-show="isActiveTab('assetTypes')">
@@ -178,7 +178,7 @@ export default {
 
   data() {
     return {
-      activeTab: 'brief',
+      activeTab: 'parameters',
       assetTypeId: '',
       taskStatusId: ''
     }

@@ -376,7 +376,8 @@
             class="button flexrow-item"
             :href="originalDlPath"
             :title="$t('playlists.actions.download_file')"
-            v-if="!isCurrentUserArtist"
+            v-if="!isCurrentUserArtist ||
+              this.currentProduction.is_preview_download_allowed"
           >
             <download-icon class="icon is-small" />
           </a>
