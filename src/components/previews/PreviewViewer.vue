@@ -50,6 +50,7 @@
       ref="picture-viewer"
       :big="big"
       :default-height="defaultHeight"
+      :margin-bottom="marginBottom"
       :full-screen="fullScreen"
       :is-comparing="isComparing"
       :light="light"
