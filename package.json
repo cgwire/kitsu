@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src/",
     "format": "prettier --write --list-different src/**/*.{js,vue}",
-    "test:unit": "vitest tests/unit"
+    "test:unit": "vitest tests/unit",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@animxyz/vue": "0.6.7",
@@ -66,7 +67,9 @@
     "eslint-plugin-prettier": "5.0.0",
     "eslint-plugin-vue": "9.17.0",
     "esm": "3.2.25",
+    "husky": "8.0.3",
     "jsdom": "22.1.0",
+    "lint-staged": "14.0.1",
     "localStorage": "1.0.4",
     "postcss": "8.4.28",
     "prettier": "3.0.3",
@@ -79,5 +82,8 @@
   },
   "engines": {
     "node": ">=16.0"
+  },
+  "lint-staged": {
+    "*.{js,vue}": "eslint --cache --fix"
   }
 }
