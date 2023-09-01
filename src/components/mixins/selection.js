@@ -65,8 +65,6 @@ export const selectionListMixin = {
       if (validationCell && this.nbSelectedTasks > 0) {
         this.$nextTick(() => {
           const margin = 20
-          const sideColumn = document.getElementById('side-column')
-          const sideWidth = sideColumn.offsetWidth
           const headers = document.querySelectorAll(
             '.datatable-head .datatable-row-header'
           )

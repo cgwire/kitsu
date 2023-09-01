@@ -64,7 +64,10 @@
           <div class="task-column preview-column" v-if="isPreview">
             <div class="preview-column-content">
               <div class="flexrow">
-                <div class="preview-list flexrow w100" v-if="previewOptions.length > 0">
+                <div
+                  class="preview-list flexrow w100"
+                  v-if="previewOptions.length > 0"
+                >
                   <combobox-styled
                     class="preview-combo flexrow-item"
                     :options="previewOptions"
@@ -287,7 +290,6 @@ import Comment from '@/components/widgets/Comment'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DeleteModal from '@/components/modals/DeleteModal'
 import EditCommentModal from '@/components/modals/EditCommentModal'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import Spinner from '@/components/widgets/Spinner'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 import PreviewPlayer from '@/components/previews/PreviewPlayer'
@@ -307,7 +309,6 @@ export default {
     CornerRightUpIcon,
     DeleteModal,
     EditCommentModal,
-    EntityThumbnail,
     PreviewPlayer,
     Spinner,
     TaskTypeName
@@ -1154,7 +1155,7 @@ export default {
         'comments'
       ]
       const name = stringHelpers.slugify(nameData.join('_'))
-      var headers = [
+      const headers = [
         this.$t('comments.fields.created_at'),
         this.$t('comments.fields.task_status'),
         this.$t('comments.fields.person'),
@@ -1162,7 +1163,7 @@ export default {
         this.$t('comments.fields.checklist'),
         this.$t('comments.fields.acknowledgements')
       ]
-      var commentLines = []
+      const commentLines = []
       this.getCurrentTaskComments().forEach(comment => {
         commentLines.push([
           formatDate(comment.created_at),

@@ -460,7 +460,7 @@ export default {
     },
 
     renderColumns() {
-      var collection = [...this.dataMatchers, ...this.optionalColumns]
+      const collection = [...this.dataMatchers, ...this.optionalColumns]
 
       this.productionEditTaskTypes.forEach(item => {
         collection.push(item.name)

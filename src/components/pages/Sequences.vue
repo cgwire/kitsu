@@ -387,7 +387,7 @@ export default {
     ]),
 
     renderColumns() {
-      var collection = [...this.dataMatchers, ...this.optionalColumns]
+      const collection = [...this.dataMatchers, ...this.optionalColumns]
 
       this.productionSequenceTaskTypes.forEach(item => {
         collection.push(item.name)

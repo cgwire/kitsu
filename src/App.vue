@@ -1110,7 +1110,8 @@ textarea.input:focus {
   margin-top: 30%;
   padding: 3em 2em 2em 2em;
   border-radius: 2px;
-  box-shadow: rgba(0, 0, 0, 0.14902) 0px 1px 1px 0px,
+  box-shadow:
+    rgba(0, 0, 0, 0.14902) 0px 1px 1px 0px,
     rgba(0, 0, 0, 0.09804) 0px 1px 2px 0px;
 }
 

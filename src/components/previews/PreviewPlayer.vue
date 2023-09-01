@@ -372,8 +372,10 @@
             class="button flexrow-item"
             :href="originalDlPath"
             :title="$t('playlists.actions.download_file')"
-            v-if="!isCurrentUserArtist ||
-              this.currentProduction.is_preview_download_allowed"
+            v-if="
+              !isCurrentUserArtist ||
+              this.currentProduction.is_preview_download_allowed
+            "
           >
             <download-icon class="icon is-small" />
           </a>
@@ -1466,7 +1468,7 @@ export default {
 
     changeCurrentPreviewFile(previewFileId) {
       const previewFile = this.lastPreviewFiles.find(
-        (previewFile) => previewFile.id === previewFileId
+        previewFile => previewFile.id === previewFileId
       )
       this.changeCurrentPreview(previewFile)
     },

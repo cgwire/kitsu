@@ -506,7 +506,7 @@ export default {
     },
 
     renderColumns() {
-      var collection = [...this.dataMatchers, ...this.optionalColumns]
+      const collection = [...this.dataMatchers, ...this.optionalColumns]
 
       this.productionAssetTaskTypes.forEach(item => {
         collection.push(item.name)

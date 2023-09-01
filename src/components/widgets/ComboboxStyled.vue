@@ -178,7 +178,7 @@ export default {
               list = child
             }
           }
-          list.scrollTo({top: this.optionList.length * 60})
+          list.scrollTo({ top: this.optionList.length * 60 })
         })
       }
     },
@@ -299,7 +299,6 @@ export default {
 }
 
 .reversed {
-
   &.open {
     border-top-left-radius: 0em;
     border-top-right-radius: 0em;

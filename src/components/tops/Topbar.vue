@@ -722,7 +722,6 @@ export default {
       // TODO seems deprecated
       const section =
         this.currentProjectSection || this.getCurrentSectionFromRoute()
-      const isAssetSection = this.assetSections.includes(section)
       const isEditSection = this.editSections.includes(section)
       const isShotSection = this.shotSections.includes(section)
       const isAssetEpisode = ['all', 'main'].includes(this.currentEpisodeId)

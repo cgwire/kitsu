@@ -574,7 +574,6 @@ const actions = {
                   return promise
                 })
                 .then(preview => {
-                  const comment = getters.getTaskComment(taskId, newComment.id)
                   commit(ADD_PREVIEW_END, {
                     preview,
                     taskId,

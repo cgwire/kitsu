@@ -208,7 +208,7 @@ export default {
   watch: {
     statusAutomationToEdit() {
       if (this.statusAutomationToEdit) {
-        var entityTaskTypes = []
+        let entityTaskTypes = []
         if (this.form.entityType === 'asset') {
           entityTaskTypes = this.assetTaskTypes
         } else if (this.form.entityType === 'shot') {

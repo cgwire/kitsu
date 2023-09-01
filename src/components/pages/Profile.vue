@@ -1098,7 +1098,7 @@ export default {
     },
 
     saveRecoveryCodesToFile() {
-      var blob = new Blob([this.twoFA.OTPRecoveryCodes.join('\n')], {
+      const blob = new Blob([this.twoFA.OTPRecoveryCodes.join('\n')], {
         type: 'text/plain;charset=utf-8'
       })
       const link = document.createElement('a')
@@ -1329,8 +1329,14 @@ select {
   font-size: 1.5em;
   padding-left: 2.5em;
   padding-top: 0.5em;
-  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
-    Liberation Mono, monospace;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    SF Mono,
+    Menlo,
+    Consolas,
+    Liberation Mono,
+    monospace;
 }
 
 .action-icon {

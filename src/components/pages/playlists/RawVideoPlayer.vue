@@ -373,7 +373,7 @@ export default {
       }
     },
 
-    getCurrentFrame()  {
+    getCurrentFrame() {
       let time = this.getCurrentTime()
       time = floorToFrame(time, this.fps)
       const frameNumber = time / this.frameDuration
