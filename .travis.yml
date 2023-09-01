@@ -9,6 +9,7 @@ before_install:
     - git config --global url."https://".insteadOf git://
 script:
     - npm ci
+    - npm run lint -- --quiet
     - npm run test:unit
 branches:
     only:

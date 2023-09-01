@@ -428,7 +428,10 @@ export const playerMixin = {
       this.showCanvas()
       if (this.isCurrentPreviewMovie) {
         const comparisonPlayer = this.$refs['raw-player-comparison']
-        const currentTime = roundToFrame(this.rawPlayer.getCurrentTimeRaw(), this.fps)
+        const currentTime = roundToFrame(
+          this.rawPlayer.getCurrentTimeRaw(),
+          this.fps
+        )
         if (this.rawPlayer) this.rawPlayer.pause()
         if (comparisonPlayer) comparisonPlayer.pause()
         if (comparisonPlayer) {

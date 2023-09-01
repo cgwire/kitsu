@@ -39,7 +39,7 @@ export default {
       episode_span: production.episode_span,
       is_clients_isolated: production.is_clients_isolated === 'true',
       is_preview_download_allowed:
-        production.is_preview_download_allowed === 'true',
+        production.is_preview_download_allowed === 'true'
     }
     return client.pput(`/api/data/projects/${production.id}`, data)
   },

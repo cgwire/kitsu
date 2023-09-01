@@ -4,9 +4,9 @@ export const coerceToArrayBuffer = input => {
     input = input.replace(/-/g, '+').replace(/_/g, '/')
 
     // base64 to Uint8Array
-    var str = window.atob(input)
-    var bytes = new Uint8Array(str.length)
-    for (var i = 0; i < str.length; i++) {
+    const str = window.atob(input)
+    const bytes = new Uint8Array(str.length)
+    for (let i = 0; i < str.length; i++) {
       bytes[i] = str.charCodeAt(i)
     }
     input = bytes
@@ -42,10 +42,10 @@ export const coerceToBase64Url = input => {
 
   // Uint8Array to base64
   if (input instanceof Uint8Array) {
-    var str = ''
-    var len = input.byteLength
+    let str = ''
+    const len = input.byteLength
 
-    for (var i = 0; i < len; i++) {
+    for (let i = 0; i < len; i++) {
       str += String.fromCharCode(input[i])
     }
     input = window.btoa(str)

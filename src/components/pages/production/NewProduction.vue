@@ -559,7 +559,7 @@ export default {
     },
 
     assetsRenderColumns() {
-      var collection = [
+      const collection = [
         ...this.assetsDataMatchers,
         ...this.assetsOptionalColumns
       ]
@@ -573,7 +573,10 @@ export default {
     },
 
     shotsRenderColumns() {
-      var collection = [...this.shotsDataMatchers, ...this.shotsOptionalColumns]
+      const collection = [
+        ...this.shotsDataMatchers,
+        ...this.shotsOptionalColumns
+      ]
 
       this.productionToCreate.shotTaskTypes.forEach(item => {
         collection.push(item.name)
