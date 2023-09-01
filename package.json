@@ -9,7 +9,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src/",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore src/",
+    "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write --list-different src/**/*.{js,vue}",
     "test:unit": "vitest tests/unit",
     "prepare": "husky install"
