@@ -1005,9 +1005,16 @@ export default {
 
     setFullScreen() {
       this.endAnnotationSaving()
-      this.documentSetFullScreen(this.container)
+      const promise = this.documentSetFullScreen(this.container)
+      if (promise) {
+        promise.then(() => {
+          this.fullScreen = true
+        })
+      } else {
+        // fallback for legacy browsers
+        this.fullScreen = true
+      }
       this.container.setAttribute('data-fullscreen', !!true)
-      this.fullScreen = true
       this.$nextTick(() => {
         // Needed to avoid fullscreen button to be called with space bar.
         this.clearFocus()

@@ -54,6 +54,10 @@ export default {
       type: Number,
       default: 0
     },
+    marginBottom: {
+      type: Number,
+      default: 0
+    },
     fullScreen: {
       type: Boolean,
       default: false
@@ -244,9 +248,7 @@ export default {
         this.pictureWrapper.style['max-height'] = heightValue
         this.pictureSubWrapper.style['max-height'] = heightValue
       }
-      const dimensions = this.getDimensions()
-      const width = dimensions.width
-      const height = dimensions.height
+      let { width, height } = this.getDimensions()
       this.picture.style.width = width + 'px'
       this.picture.style.height = height + 'px'
       this.pictureBig.style.width = width + 'px'
@@ -260,6 +262,10 @@ export default {
       this.pictureGif.width = width
       this.pictureGif.height = height
 
+      if (this.fullScreen) {
+        this.pictureBig.style.maxHeight = `calc(100vh - ${this.marginBottom}px)`
+      }
+
       if (this.isPicture) {
         const pictureElement = this.isGif
           ? this.pictureGif
@@ -270,6 +276,8 @@ export default {
         const containerPosition = this.container.getBoundingClientRect()
         const top = picturePosition.top - containerPosition.top
         const left = picturePosition.left - containerPosition.left
+        width = picturePosition.width
+        height = picturePosition.height
 
         this.resetPanZoom()
 

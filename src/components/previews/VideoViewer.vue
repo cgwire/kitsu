@@ -366,9 +366,7 @@ export default {
     },
 
     resetSize() {
-      const dimensions = this.getDimensions()
-      const width = dimensions.width
-      const height = dimensions.height
+      let { width, height } = this.getDimensions()
       if (height > 0) {
         this.container.style.height = this.defaultHeight + 'px'
         this.video.style.height = height + 'px'
@@ -377,6 +375,8 @@ export default {
         const containerPosition = this.container.getBoundingClientRect()
         const top = videoPosition.top - containerPosition.top
         const left = videoPosition.left - containerPosition.left
+        width = videoPosition.width
+        height = videoPosition.height
         this.$emit('size-changed', { width, height, top, left })
       } else {
         this.$emit('size-changed', { width: 0, height: 0, top: 0, left: 0 })

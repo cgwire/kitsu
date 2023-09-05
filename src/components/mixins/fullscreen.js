@@ -46,7 +46,7 @@ export const fullScreenMixin = {
 
     documentSetFullScreen(element) {
       if (element.requestFullscreen) {
-        element.requestFullscreen()
+        return element.requestFullscreen()
       } else if (element.mozRequestFullScreen) {
         element.mozRequestFullScreen()
       } else if (element.webkitRequestFullScreen) {
