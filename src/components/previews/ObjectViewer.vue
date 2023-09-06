@@ -1,47 +1,33 @@
 <template>
   <div
-    id="model-container"
+    class="model-container"
+    :class="{
+      light: light && !readOnly
+    }"
     :style="{
       height: defaultHeight ? defaultHeight + 'px' : '100%',
       width: '100%'
     }"
-    :class="{
-      light: light && !readOnly
-    }"
   >
     <model-viewer
-      id="model-viewer"
-      loading="eager"
-      camera-controls
-      :src="previewUrl"
       autoplay
-    >
-    </model-viewer>
+      camera-controls
+      class="model-viewer"
+      loading="eager"
+      :skybox-image="skyboxUrl"
+      :src="previewUrl"
+    />
   </div>
 </template>
 
 <script>
-import {} from 'vue-feather-icons'
-
 import('@google/model-viewer')
 
 export default {
   name: 'object-viewer',
 
-  components: {},
-
-  data() {
-    return {
-      isLoading: false
-    }
-  },
-
   props: {
     previewUrl: {
-      default: '',
-      type: String
-    },
-    previewDlPath: {
       default: '',
       type: String
     },
@@ -53,49 +39,26 @@ export default {
       default: false,
       type: Boolean
     },
-    empty: {
-      default: false,
-      type: Boolean
-    },
     defaultHeight: {
-      type: Number,
-      default: 0
+      default: 0,
+      type: Number
     },
-    fullScreen: {
-      default: false,
-      type: Boolean
+    skyboxUrl: {
+      type: String
     }
-  },
-
-  mounted() {},
-
-  computed: {
-    container() {
-      return this.$refs.container
-    }
-  },
-
-  methods: {},
-
-  watch: {
-    defaultHeight() {},
-
-    previewUrl() {},
-
-    light() {}
   }
 }
 </script>
 
 <style lang="scss" scoped>
-#model-viewer.light {
-  height: 200px;
-}
-
-#model-viewer {
+.model-viewer {
   height: 100%;
   width: 100%;
   background-color: #333;
   --progress-bar-color: #999;
+
+  &.light {
+    height: 200px;
+  }
 }
 </style>

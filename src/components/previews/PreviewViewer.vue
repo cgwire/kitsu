@@ -66,6 +66,7 @@
       :light="light"
       :empty="!is3DModel"
       :full-screen="fullScreen"
+      :skybox-url="isObjectBackground ? objectBackgroundUrl : undefined"
       v-if="is3DModel"
     />
 
@@ -145,6 +146,13 @@ export default {
     marginBottom: {
       type: Number,
       default: 0
+    },
+    isObjectBackground: {
+      type: Boolean,
+      default: false
+    },
+    objectBackgroundUrl: {
+      type: String
     },
     isComparing: {
       type: Boolean,
