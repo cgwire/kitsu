@@ -112,11 +112,12 @@ export default {
       if (values.includes(option.value)) {
         values.splice(values.indexOf(option.value), 1)
       } else {
-        values = this.optionList.filter(oldOption => {
-          if (this.isChecked(oldOption) || oldOption.value === option.value) {
-            return true
-          }
-        }).map(oldOption => oldOption.value)
+        values = this.optionList
+          .filter(
+            oldOption =>
+              this.isChecked(oldOption) || oldOption.value === option.value
+          )
+          .map(oldOption => oldOption.value)
       }
       const value = values.join(',')
       this.$emit('input', value)
