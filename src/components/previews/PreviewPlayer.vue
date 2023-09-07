@@ -20,18 +20,19 @@
               ref="preview-viewer"
               name="player1"
               class="preview-viewer"
-              :big="big"
               :default-height="defaultHeight"
-              :margin-bottom="marginBottom"
-              :full-screen="fullScreen"
-              :is-object-background="isObjectBackground"
-              :object-background-url="objectBackgroundUrl"
+              :is-big="big"
               :is-comparing="isComparing && isComparisonEnabled"
+              :is-environment-skybox="isEnvironmentSkybox"
+              :is-full-screen="fullScreen"
+              :is-object-background="isObjectBackground"
+              :is-light="light"
               :is-hd="isHd"
               :is-muted="isMuted"
               :is-ordering="isOrdering"
               :is-repeating="isRepeating"
-              :light="light"
+              :margin-bottom="marginBottom"
+              :object-background-url="objectBackgroundUrl"
               :preview="currentPreview"
               @duration-changed="changeMaxDuration"
               @play-ended="pause"
@@ -316,10 +317,23 @@
           <div class="flexrow" v-if="is3DModel">
             <button-simple
               class="flexrow-item"
-              icon="globe"
-              :active="isObjectBackground"
+              icon="upload"
               :title="$t('playlists.actions.object_background')"
-              @click="onGlobeClicked"
+              @click="onObjectBackgroundClicked"
+            />
+            <button-simple
+              class="flexrow-item"
+              :active="isObjectBackground"
+              icon="globe"
+              :title="$t('playlists.actions.toggle_object_background')"
+              @click="isObjectBackground = !isObjectBackground"
+            />
+            <button-simple
+              class="flexrow-item"
+              :active="isEnvironmentSkybox"
+              icon="image"
+              :title="$t('playlists.actions.toggle_environment_skybox')"
+              @click="isEnvironmentSkybox = !isEnvironmentSkybox"
             />
             <input
               ref="object-background-input-file"
@@ -544,6 +558,7 @@ export default {
       isObjectBackground: false,
       objectBackgroundUrl: null,
       isAnnotationsDisplayed: true,
+      isEnvironmentSkybox: true,
       isCommentsHidden: true,
       isComparing: false,
       isDrawing: false,
@@ -1162,11 +1177,11 @@ export default {
       }
     },
 
-    onGlobeClicked() {
+    onObjectBackgroundClicked() {
       if (this.isObjectBackground) {
-        this.isObjectBackground = false
         this.$refs['object-background-input-file'].value = ''
         URL.revokeObjectURL(this.objectBackgroundUrl.replace('#.hdr', ''))
+        this.$refs['object-background-input-file'].click()
       } else {
         this.$refs['object-background-input-file'].click()
       }
