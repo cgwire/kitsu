@@ -470,6 +470,7 @@ export default {
     updateMaxDuration() {
       if (this.currentPlayer) {
         this.$emit('max-duration-update', this.currentPlayer.duration)
+        this.$emit('video-loaded')
       }
     },
 

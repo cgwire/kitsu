@@ -38,12 +38,12 @@
       :light="isLight"
       :panzoom="true"
       :preview="preview"
-      @size-changed="dimensions => $emit('size-changed', dimensions)"
-      @video-loaded="$emit('video-loaded')"
       @duration-changed="duration => $emit('duration-changed', duration)"
       @frame-update="frameNumber => $emit('frame-update', frameNumber)"
       @play-ended="$emit('play-ended')"
+      @size-changed="dimensions => $emit('size-changed', dimensions)"
       @video-end="$emit('video-end')"
+      @video-loaded="$emit('video-loaded')"
       v-show="isMovie"
     />
 
@@ -369,6 +369,14 @@ export default {
     },
 
     // Sizing
+
+    getNaturalDimensions() {
+      if (this.isMovie) {
+        return this.videoViewer.getNaturalDimensions()
+      } else {
+        return this.pictureViewer.getNaturalDimensions()
+      }
+    },
 
     getDimensions() {
       const dimensions = { width: 0, height: 0 }

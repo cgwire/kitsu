@@ -171,6 +171,8 @@ export const playerMixin = {
           extension: this.currentEntity.preview_file_extension,
           task_id: this.currentEntity.preview_file_task_id,
           revision: this.currentEntity.preview_file_revision,
+          width: this.currentEntity.preview_file_width,
+          height: this.currentEntity.preview_file_height,
           annotations: this.currentEntity.preview_file_annotations || []
         }
       } else {

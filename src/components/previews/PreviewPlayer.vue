@@ -63,6 +63,7 @@
               @size-changed="fixCanvasSize"
               @frame-update="updateFrame"
               @video-end="onVideoEnd"
+              @video-loaded="onVideoLoaded"
             />
 
             <preview-viewer
@@ -111,10 +112,13 @@
         :annotations="annotations"
         :comparison-annotations="comparisonAnnotations"
         :frame-duration="frameDuration"
+        :is-full-screen="fullScreen"
+        :movie-dimensions="movieDimensions"
         :nb-frames="nbFrames"
         :width="width"
         :handle-in="-1"
         :handle-out="-1"
+        :preview-id="currentPreview ? currentPreview.id : ''"
         @start-scrub="$refs['button-bar'].classList.add('unselectable')"
         @end-scrub="$refs['button-bar'].classList.remove('unselectable')"
         @progress-changed="onProgressChanged"
@@ -606,6 +610,10 @@ export default {
       isRepeating: false,
       isTyping: false,
       maxDuration: '00:00.000',
+      movieDimensions: {
+        width: 1920,
+        height: 1080
+      },
       pencil: 'big',
       pencilPalette: ['big', 'medium', 'small'],
       previewToCompare: null,
@@ -1601,6 +1609,15 @@ export default {
       })
     },
 
+    onVideoLoaded() {
+      if (this.isMovie) {
+        this.movieDimensions = {
+          width: this.currentPreview.width,
+          height: this.currentPreview.height
+        }
+      }
+    },
+
     configureEvents() {
       window.addEventListener('keydown', this.onKeyDown, false)
       window.addEventListener('beforeunload', this.onWindowsClosed)
@@ -1792,6 +1809,9 @@ export default {
         this.maxDuration = '00:00.000'
         this.isDrawing = false
         if (this.isComparing) this.isComparing = false
+        setTimeout(() => {
+          this.movieDimensions = this.previewViewer.getNaturalDimensions()
+        }, 10)
       } else if (this.isPicture) {
         this.pause()
         this.isDrawing = false
