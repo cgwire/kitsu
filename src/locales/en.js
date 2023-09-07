@@ -596,7 +596,7 @@ export default {
     select_person: 'Select a user...',
     team: 'Team',
     title: 'People',
-    unactive: 'Unactive',
+    unactive: 'Inactive',
     user_limit_error: 'You have reached your user limit. Please contact our team to upgrade your plan.',
     change_password_for: 'Change password for',
     change_password_error: 'An error occurred while changing password. Please verify the new password.',
@@ -818,7 +818,7 @@ export default {
       episode_span: 'Episode spacing',
       fps: 'FPS',
       is_clients_isolated: 'Isolate client comments (not visible to each others)',
-      is_preview_dowload_allowed: 'Allow artists to download previews',
+      is_preview_download_allowed: 'Allow artists to download previews',
       max_retakes: 'Maximum number of retakes',
       name: 'Name',
       nb_episodes: 'Number of episodes',
@@ -843,6 +843,7 @@ export default {
       error: 'An error occurred while adding the metadata column. Make sure there is no column with a similar name and that all fields are filled. If the problem persists, please contact the support team.',
       number: 'Number',
       string: 'Text',
+      tags: 'List of tags',
       title: 'Add metadata column'
     },
 

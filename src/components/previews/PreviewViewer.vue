@@ -3,7 +3,7 @@
     ref="container"
     class="preview-viewer dark"
     :style="{
-      maxHeight: fullScreen ? `calc(100vh - ${marginBottom}px)` : null
+      maxHeight: isFullScreen ? `calc(100vh - ${marginBottom}px)` : null
     }"
   >
     <div
@@ -27,16 +27,16 @@
       ref="video-viewer"
       class="video-viewer"
       :name="name"
-      :big="big"
+      :big="isBig"
       :default-height="defaultHeight"
+      :full-screen="isFullScreen"
       :is-comparing="isComparing"
       :is-hd="isHd"
       :is-muted="isMuted"
       :is-repeating="isRepeating"
-      :light="light"
+      :light="isLight"
       :panzoom="true"
       :preview="preview"
-      :full-screen="fullScreen"
       @size-changed="dimensions => $emit('size-changed', dimensions)"
       @video-loaded="$emit('video-loaded')"
       @duration-changed="duration => $emit('duration-changed', duration)"
@@ -48,12 +48,12 @@
 
     <picture-viewer
       ref="picture-viewer"
-      :big="big"
+      :big="isBig"
       :default-height="defaultHeight"
-      :margin-bottom="marginBottom"
-      :full-screen="fullScreen"
+      :full-screen="isFullScreen"
       :is-comparing="isComparing"
-      :light="light"
+      :light="isLight"
+      :margin-bottom="marginBottom"
       :panzoom="true"
       :preview="preview"
       @size-changed="dimensions => $emit('size-changed', dimensions)"
@@ -62,20 +62,21 @@
 
     <object-viewer
       class="model-viewer"
+      :background-url="isObjectBackground ? objectBackgroundUrl : undefined"
       :default-height="defaultHeight"
-      :preview-url="originalPath"
-      :light="light"
       :empty="!is3DModel"
-      :full-screen="fullScreen"
-      :skybox-url="isObjectBackground ? objectBackgroundUrl : undefined"
+      :full-screen="isFullScreen"
+      :is-environment-skybox="isEnvironmentSkybox"
+      :light="isLight"
+      :preview-url="originalPath"
       v-if="is3DModel"
     />
 
     <sound-viewer
       ref="sound-viewer"
       class="sound-viewer"
-      :preview-url="isSound ? originalPath : ''"
       :file-name="fileTitle"
+      :preview-url="isSound ? originalPath : ''"
       @play-ended="$emit('play-ended')"
       v-show="isSound"
     />
@@ -136,10 +137,6 @@ export default {
       type: String,
       default: ''
     },
-    big: {
-      type: Boolean,
-      default: false
-    },
     defaultHeight: {
       type: Number,
       default: 0
@@ -148,14 +145,15 @@ export default {
       type: Number,
       default: 0
     },
-    isObjectBackground: {
+    isBig: {
       type: Boolean,
       default: false
     },
-    objectBackgroundUrl: {
-      type: String
-    },
     isComparing: {
+      type: Boolean,
+      default: false
+    },
+    isFullScreen: {
       type: Boolean,
       default: false
     },
@@ -163,7 +161,7 @@ export default {
       type: Boolean,
       default: false
     },
-    fullScreen: {
+    isLight: {
       type: Boolean,
       default: false
     },
@@ -171,17 +169,25 @@ export default {
       type: Boolean,
       default: false
     },
+    isObjectBackground: {
+      type: Boolean,
+      default: false
+    },
     isRepeating: {
       type: Boolean,
       default: false
     },
-    light: {
-      type: Boolean,
-      default: false
+    objectBackgroundUrl: {
+      type: String,
+      default: ''
     },
     preview: {
       type: Object,
       default: () => {}
+    },
+    isEnvironmentSkybox: {
+      type: Boolean,
+      default: false
     }
   },
 

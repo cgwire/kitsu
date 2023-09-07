@@ -245,6 +245,7 @@
               v-if="isShowInfos"
             >
               <metadata-input
+                'z-index': 1000 - i, // Need for combo to be above the next cell
                 :entity="episode"
                 :descriptor="descriptor"
                 :indexes="{ i, j }"
@@ -811,6 +812,7 @@ input[type='number'] {
 
 td.metadata-descriptor {
   height: 3.1rem;
+  max-width: 120px;
   padding: 0;
 }
 

@@ -14,7 +14,8 @@
       camera-controls
       class="model-viewer"
       loading="eager"
-      :skybox-image="skyboxUrl"
+      :environment-image="backgroundUrl"
+      :skybox-image="isEnvironmentSkybox ? backgroundUrl : ''"
       :src="previewUrl"
     />
   </div>
@@ -43,8 +44,12 @@ export default {
       default: 0,
       type: Number
     },
-    skyboxUrl: {
+    backgroundUrl: {
       type: String
+    },
+    isEnvironmentSkybox: {
+      default: false,
+      type: Boolean
     }
   }
 }

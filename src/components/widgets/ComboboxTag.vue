@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="{ field: withMargin }">
     <label class="label" v-if="label.length > 0">
       {{ label }}
     </label>
@@ -85,6 +85,10 @@ export default {
     thin: {
       default: false,
       type: Boolean
+    },
+    withMargin: {
+      default: true,
+      type: Boolean
     }
   },
 
@@ -104,13 +108,17 @@ export default {
 
   methods: {
     selectOption(option) {
-      const values = this.value.split(',').filter(Boolean)
+      let values = this.value.split(',').filter(Boolean)
       if (values.includes(option.value)) {
         values.splice(values.indexOf(option.value), 1)
       } else {
-        values.push(option.value)
+        values = this.optionList.filter(oldOption => {
+          if (this.isChecked(oldOption) || oldOption.value === option.value) {
+            return true
+          }
+        }).map(oldOption => oldOption.value)
       }
-      const value = values.sort().join(',')
+      const value = values.join(',')
       this.$emit('input', value)
       this.$emit('change', value)
     },
@@ -184,7 +192,7 @@ export default {
   display: inline-block;
   margin: 0;
   margin-top: 1px;
-  max-width: 400px;
+  width: 100%;
   padding: 0.5em;
   position: relative;
   vertical-align: middle;
