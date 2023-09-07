@@ -34,7 +34,7 @@ import { mapGetters } from 'vuex'
 import DepartmentName from '@/components/widgets/DepartmentName'
 
 export default {
-  name: 'MetadataHeader',
+  name: 'metadata-header',
   props: {
     descriptor: Object,
     isStick: {

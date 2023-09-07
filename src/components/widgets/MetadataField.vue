@@ -51,6 +51,15 @@
     @input="updateValue"
     v-else-if="descriptor.data_type === 'boolean'"
   />
+  <!-- tag list field -->
+  <combobox-tag
+    :label="descriptor.name"
+    :options="getDescriptorChoicesOptions(descriptor, false)"
+    :value="value"
+    @enter="onEnter"
+    @input="updateValue"
+    v-else-if="descriptor.data_type === 'taglist'"
+  />
   <!-- number or text field-->
   <text-field
     :label="descriptor.name"
@@ -70,6 +79,7 @@ import { entityListMixin } from '@/components/mixins/entity_list'
 
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
+import ComboboxTag from '@/components/widgets/ComboboxTag'
 import TextField from '@/components/widgets/TextField'
 
 export default {
@@ -79,6 +89,7 @@ export default {
   components: {
     Combobox,
     ComboboxBoolean,
+    ComboboxTag,
     TextField
   },
 

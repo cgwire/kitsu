@@ -1009,6 +1009,7 @@ input[type='number'] {
 
 td.metadata-descriptor {
   height: 3.1rem;
+  max-width: 120px;
   padding: 0;
 }
 </style>

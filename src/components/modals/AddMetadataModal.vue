@@ -31,7 +31,7 @@
           @enter="confirm"
         />
 
-        <div v-if="form.data_type === 'list'">
+        <div v-if="['list', 'taglist'].includes(form.data_type)">
           <p class="strong">
             {{ $t('productions.metadata.available_values') }}
           </p>
@@ -58,7 +58,7 @@
           <text-field
             ref="addChoiceField"
             v-model.trim="valueToAdd"
-            :button-label="$t('Add value')"
+            :button-label="$t('main.add')"
             @enter="addValue"
           />
         </div>
@@ -226,6 +226,10 @@ export default {
           value: 'list'
         },
         {
+          label: this.$t('productions.metadata.tags'),
+          value: 'taglist'
+        },
+        {
           label: this.$t('productions.metadata.checklist'),
           value: 'checklist'
         }
@@ -282,7 +286,8 @@ export default {
       return (
         this.form.name.length &&
         (['string', 'number', 'boolean'].includes(this.form.data_type) ||
-          (this.form.data_type === 'list' && this.form.values.length) ||
+          (['list', 'taglist'].includes(this.form.data_type) &&
+            this.form.values.length) ||
           (this.form.data_type === 'checklist' &&
             this.checklist?.[0]?.text.length)) &&
         (!this.isCurrentUserSupervisor ||

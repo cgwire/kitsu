@@ -41,12 +41,12 @@ export const descriptorMixin = {
     },
 
     onMetadataFieldChanged(entry, descriptor, event) {
-      if (!event.target.validity.valid) {
-        return
-      }
-
       let value
-      if (descriptor.data_type === 'boolean') {
+      if (typeof event === 'string') {
+        value = event
+      } else if (!event.target.validity.valid) {
+        return
+      } else if (descriptor.data_type === 'boolean') {
         value = event.target.checked ? 'true' : 'false'
       } else {
         value = event.target.value
@@ -129,9 +129,12 @@ export const descriptorMixin = {
       this.lastMetadaDataHeaderMenuDisplayed = columnId
     },
 
-    getDescriptorChoicesOptions(descriptor) {
+    getDescriptorChoicesOptions(descriptor, emptyChoice = true) {
       const values = descriptor.choices.map(c => ({ label: c, value: c }))
-      return [{ label: '', value: '' }, ...values]
+      if (emptyChoice) {
+        values.unshift({ label: '', value: '' })
+      }
+      return values
     },
 
     getMetadataFieldValue(descriptor, entity) {

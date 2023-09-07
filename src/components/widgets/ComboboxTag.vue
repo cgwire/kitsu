@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="{ field: withMargin }">
     <label class="label" v-if="label.length > 0">
       {{ label }}
     </label>
@@ -84,6 +84,10 @@ export default {
     },
     thin: {
       default: false,
+      type: Boolean
+    },
+    withMargin: {
+      default: true,
       type: Boolean
     }
   },
@@ -184,7 +188,7 @@ export default {
   display: inline-block;
   margin: 0;
   margin-top: 1px;
-  max-width: 400px;
+  width: 100%;
   padding: 0.5em;
   position: relative;
   vertical-align: middle;
