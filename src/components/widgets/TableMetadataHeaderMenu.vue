@@ -65,7 +65,7 @@ export default {
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   top: 90px;
-  z-index: 100;
+  z-index: 1001; // Needed to be above the sticky cells
 }
 
 .header-menu div {

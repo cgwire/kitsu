@@ -245,6 +245,7 @@
               v-if="isShowInfos"
             >
               <metadata-input
+                'z-index': 1000 - i, // Need for combo to be above the next cell
                 :entity="episode"
                 :descriptor="descriptor"
                 :indexes="{ i, j }"

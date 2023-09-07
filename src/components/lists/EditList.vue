@@ -291,6 +291,7 @@
               v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
             >
               <metadata-input
+                'z-index': 1000 - i, // Need for combo to be above the next cell
                 :entity="edit"
                 :descriptor="descriptor"
                 :indexes="{ i, j }"

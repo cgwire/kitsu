@@ -278,6 +278,7 @@
               class="metadata-descriptor datatable-row-header"
               :title="asset.data ? asset.data[descriptor.field_name] : ''"
               :style="{
+                'z-index': 1000 - i, // Need for combo to be above the next cell
                 left: offsets['editor-' + j]
                   ? `${offsets['editor-' + j]}px`
                   : '0'
