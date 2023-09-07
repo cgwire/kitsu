@@ -722,6 +722,7 @@ export default {
       files_previous: 'Previous file for this revision',
       frames_per_picture: 'Frames per picture',
       fullscreen: 'See file in full screen',
+      object_background: 'Set a background to the 3D model',
       looping: 'Loop on current video',
       mute: 'Mute',
       overlay: 'Overlay',

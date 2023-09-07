@@ -24,6 +24,8 @@
               :default-height="defaultHeight"
               :margin-bottom="marginBottom"
               :full-screen="fullScreen"
+              :is-object-background="isObjectBackground"
+              :object-background-url="objectBackgroundUrl"
               :is-comparing="isComparing && isComparisonEnabled"
               :is-hd="isHd"
               :is-muted="isMuted"
@@ -311,6 +313,23 @@
             />
           </div>
 
+          <div class="flexrow" v-if="is3DModel">
+            <button-simple
+              class="flexrow-item"
+              icon="globe"
+              :active="isObjectBackground"
+              :title="$t('playlists.actions.object_background')"
+              @click="onGlobeClicked"
+            />
+            <input
+              ref="object-background-input-file"
+              accept=".hdr"
+              class="visuallyhidden"
+              type="file"
+              @change="onObjectBackgroundSelected"
+            />
+          </div>
+
           <div
             class="separator"
             v-if="!readOnly && fullScreen && isPicture"
@@ -522,6 +541,8 @@ export default {
       color: '#ff3860',
       currentTime: '00:00.000',
       currentTimeRaw: 0,
+      isObjectBackground: false,
+      objectBackgroundUrl: null,
       isAnnotationsDisplayed: true,
       isCommentsHidden: true,
       isComparing: false,
@@ -1139,6 +1160,23 @@ export default {
         this.isZoomPan = false
         this.isAnnotationsDisplayed = true
       }
+    },
+
+    onGlobeClicked() {
+      if (this.isObjectBackground) {
+        this.isObjectBackground = false
+        this.$refs['object-background-input-file'].value = ''
+        URL.revokeObjectURL(this.objectBackgroundUrl.replace('#.hdr', ''))
+      } else {
+        this.$refs['object-background-input-file'].click()
+      }
+    },
+
+    onObjectBackgroundSelected(event) {
+      const file = event.target.files[0]
+      const blobURL = URL.createObjectURL(file)
+      this.objectBackgroundUrl = `${blobURL}#.hdr`
+      this.isObjectBackground = true
     },
 
     // Annotations

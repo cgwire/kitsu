@@ -52,6 +52,7 @@
     <square-icon :class="iconClass" v-if="icon === 'eraser'" />
     <key-icon :class="iconClass" v-if="icon == 'key'" />
     <zoom-in-icon :class="iconClass" v-if="icon == 'loupe'" />
+    <globe-icon :class="iconClass" v-if="icon == 'globe'" />
     <span :class="iconClass" v-if="icon === 'laser'"> ⦿ </span>
     <span
       :class="{
@@ -76,6 +77,7 @@ import {
   DownloadIcon,
   EditIcon,
   Edit2Icon,
+  GlobeIcon,
   GridIcon,
   FilmIcon,
   FilterIcon,
@@ -124,6 +126,7 @@ export default {
     Edit2Icon,
     FilmIcon,
     FilterIcon,
+    GlobeIcon,
     GridIcon,
     ImageIcon,
     KeyIcon,
