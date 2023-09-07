@@ -108,13 +108,17 @@ export default {
 
   methods: {
     selectOption(option) {
-      const values = this.value.split(',').filter(Boolean)
+      let values = this.value.split(',').filter(Boolean)
       if (values.includes(option.value)) {
         values.splice(values.indexOf(option.value), 1)
       } else {
-        values.push(option.value)
+        values = this.optionList.filter(oldOption => {
+          if (this.isChecked(oldOption) || oldOption.value === option.value) {
+            return true
+          }
+        }).map(oldOption => oldOption.value)
       }
-      const value = values.sort().join(',')
+      const value = values.join(',')
       this.$emit('input', value)
       this.$emit('change', value)
     },
