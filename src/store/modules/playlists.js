@@ -319,6 +319,9 @@ const mutations = {
       }
       entity.preview_file_id = preview.id
       entity.preview_file_extension = preview.extension
+      entity.preview_file_revision = preview.revision
+      entity.preview_file_width = preview.width
+      entity.preview_file_height = preview.height
       entity.preview_file_annotations = preview.annotations
       entity.preview_file_task_id = preview.task_id
     }
@@ -332,6 +335,9 @@ const mutations = {
       preview_file_task_id: entity.preview_file_task_id,
       preview_file_id: entity.preview_file_id,
       preview_file_extension: entity.preview_file_extension,
+      preview_file_width: entity.preview_file_width,
+      preview_file_height: entity.preview_file_height,
+      preview_file_revision: entity.preview_file_revision,
       preview_file_annotations: entity.preview_file_annotations,
       preview_files: entity.preview_files,
       preview_nb_frames: entity.nb_frames || DEFAULT_NB_FRAMES_PICTURE
@@ -410,8 +416,14 @@ const mutations = {
           entity.preview_file_id = previewFile.id
           entity.preview_file_task_id = previewFile.task_id
           entity.preview_file_extension = previewFile.extension
+          entity.preview_file_revision = previewFile.revision
+          entity.preview_file_width = previewFile.width
+          entity.preview_file_height = previewFile.height
           entity.preview_file_annotations = previewFile.annotations
           entity.extension = previewFile.extension
+          entity.revision = previewFile.revision
+          entity.width = previewFile.width
+          entity.height = previewFile.height
           entity.annotations = previewFile.annotations
         }
       })

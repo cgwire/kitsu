@@ -849,6 +849,12 @@ export default {
           preview_file_id: entityInfo.preview_file_id || entity.preview_file_id,
           preview_file_extension:
             entityInfo.preview_file_extension || entity.preview_file_extension,
+          preview_file_revision:
+            entityInfo.preview_file_revision || entity.preview_file_revision,
+          preview_file_width:
+            entityInfo.preview_file_width || entity.preview_file_width,
+          preview_file_height:
+            entityInfo.preview_file_height || entity.preview_file_height,
           preview_file_task_id:
             entityInfo.task_id ||
             entityInfo.preview_file_task_id ||

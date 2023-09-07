@@ -80,12 +80,13 @@
       </span>
       <span
         class="frame-number"
-        :style="{
-          left: frameNumberLeftPosition + 'px'
-        }"
+        :style="getFrameNumberStyle(hoverFrame)"
         v-show="isFrameNumberVisible && hoverFrame > 0"
       >
-        {{ hoverFrame }}
+        <span>
+          {{ hoverFrame }}
+        </span>
+        <span :style="getFrameBackgroundStyle(hoverFrame)"> </span>
       </span>
     </div>
   </div>
@@ -111,6 +112,14 @@ export default {
       default: 0,
       type: Number
     },
+    isFullScreen: {
+      default: false,
+      type: Boolean
+    },
+    movieDimensions: {
+      default: () => ({}),
+      type: Object
+    },
     nbFrames: {
       default: 0,
       type: Number
@@ -122,12 +131,17 @@ export default {
     handleOut: {
       default: 3,
       type: Number
+    },
+    previewId: {
+      default: '',
+      type: String
     }
   },
 
   data() {
     return {
       currentMouseFrame: {},
+      frameNumberHeight: 0,
       frameNumberLeftPosition: 0,
       isFrameNumberVisible: false,
       hoverFrame: 0,
@@ -276,7 +290,7 @@ export default {
 
     _getMouseFrame(event, annotation) {
       let left = this.progress.getBoundingClientRect().left
-      if (left === 0 && !this.fullScreen) {
+      if (left === 0 && !this.isFullScreen) {
         left = this.progress.parentElement.offsetParent.offsetLeft
       }
       let position = this.getClientX(event) - left
@@ -300,6 +314,52 @@ export default {
     _emitProgressEvent(event, annotation) {
       const { frameNumber } = this._getMouseFrame(event, annotation)
       this.$emit('progress-changed', frameNumber)
+    },
+
+    /**
+     * Returns the background style for a given frame, calculating the
+     * background position depending on the frame number. The tile background is
+     * 5 frames wide.
+     * @param {number} frame
+     */
+    getFrameBackgroundStyle(frame) {
+      if (!frame) return {}
+      const frameX = frame % 8
+      const frameY = Math.floor(frame / 8)
+      const ratio = this.movieDimensions.width / this.movieDimensions.height
+      const frameHeight = 100
+      const frameWidth = Math.ceil(frameHeight * ratio)
+      const style = {
+        background: `url(/api/movies/tiles/preview-files/${this.previewId}.png)`,
+        'background-repeat': 'no-repeat',
+        'background-size': `${8 * frameWidth}px auto`,
+        'background-position': `-${frameX * frameWidth}px -${
+          frameY * frameHeight
+        }px`,
+        height: `${frameHeight}px`,
+        width: `${frameWidth}px`,
+        display: 'inline-block'
+      }
+      return style
+    },
+
+    getFrameNumberStyle(frame) {
+      const frameHeight = 100
+      const height = frameHeight + 30
+      const ratio = this.movieDimensions.width / this.movieDimensions.height
+      const frameWidth = Math.ceil(frameHeight * ratio)
+      const width = frameWidth + 10
+      const left = Math.min(
+        Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
+        this.width - frameWidth - 10
+      )
+
+      return {
+        height: height + 'px',
+        width: width + 'px',
+        top: this.isFullScreen ? `-${height}px` : '30px',
+        left: left + 'px'
+      }
     }
   },
 
@@ -369,16 +429,18 @@ progress {
 
 .frame-number {
   background: $black;
-  border: 1px solid $white;
   border-radius: 5px;
   color: $white;
-  height: 28px;
   position: absolute;
   padding: 0.3em;
   text-align: center;
   top: 30px;
-  width: 40px;
+  width: 110px;
   z-index: 800;
+
+  img {
+    width: 100px;
+  }
 }
 
 .handle-in {
