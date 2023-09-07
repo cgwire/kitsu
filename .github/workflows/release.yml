@@ -18,7 +18,6 @@ jobs:
         env:
           NODE_OPTIONS: "--max_old_space_size=8192"
         run: |
-          npm ci
           npm run build
           GIT_COMMIT="$(git rev-parse HEAD)"
           GIT_TAG="$(git describe --tags)"
