@@ -108,6 +108,15 @@
       </option>
     </select>
   </span>
+  <!-- tag list input -->
+  <combobox-tag
+    :options="getDescriptorChoicesOptions(descriptor, false)"
+    :shy="true"
+    :value="getMetadataFieldValue(descriptor, entity)"
+    :with-margin="false"
+    @input="value => onMetadataFieldChanged(entity, descriptor, value)"
+    v-else-if="descriptor.data_type === 'taglist' && isEditable"
+  />
   <!-- default -->
   <span class="metadata-value selectable" v-else>
     {{ getMetadataFieldValue(descriptor, entity) }}
@@ -119,10 +128,14 @@ import { mapGetters } from 'vuex'
 import { descriptorMixin } from '@/components/mixins/descriptors'
 import { domMixin } from '@/components/mixins/dom'
 import { entityListMixin } from '@/components/mixins/entity_list'
+import ComboboxTag from '@/components/widgets/ComboboxTag'
 
 export default {
   name: 'MetadataInput',
   mixins: [descriptorMixin, domMixin, entityListMixin],
+  components: {
+    ComboboxTag
+  },
   props: {
     entity: {
       type: Object,
