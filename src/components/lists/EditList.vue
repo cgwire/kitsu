@@ -283,6 +283,7 @@
               class="metadata-descriptor datatable-row-header"
               :title="edit.data ? edit.data[descriptor.field_name] : ''"
               :style="{
+                'z-index': 1000 - i, // Need for combo to be above the next cell
                 left: offsets['editor-' + j]
                   ? `${offsets['editor-' + j]}px`
                   : '0'
@@ -291,7 +292,6 @@
               v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
             >
               <metadata-input
-                'z-index': 1000 - i, // Need for combo to be above the next cell
                 :entity="edit"
                 :descriptor="descriptor"
                 :indexes="{ i, j }"

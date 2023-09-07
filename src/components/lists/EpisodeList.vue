@@ -236,6 +236,7 @@
               class="metadata-descriptor datatable-row-header"
               :title="episode.data ? episode.data[descriptor.field_name] : ''"
               :style="{
+                'z-index': 1000 - i, // Need for combo to be above the next cell
                 left: offsets['editor-' + j]
                   ? `${offsets['editor-' + j]}px`
                   : '0'
@@ -245,7 +246,6 @@
               v-if="isShowInfos"
             >
               <metadata-input
-                'z-index': 1000 - i, // Need for combo to be above the next cell
                 :entity="episode"
                 :descriptor="descriptor"
                 :indexes="{ i, j }"
