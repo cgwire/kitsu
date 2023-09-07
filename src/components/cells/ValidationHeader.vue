@@ -46,7 +46,7 @@ import { mapGetters } from 'vuex'
 import DepartmentName from '@/components/widgets/DepartmentName'
 
 export default {
-  name: 'ValidationHeader',
+  name: 'validation-header',
   props: {
     hiddenColumns: Object,
     columnId: String,

@@ -131,7 +131,7 @@ import { entityListMixin } from '@/components/mixins/entity_list'
 import ComboboxTag from '@/components/widgets/ComboboxTag'
 
 export default {
-  name: 'MetadataInput',
+  name: 'metadata-input',
   mixins: [descriptorMixin, domMixin, entityListMixin],
   components: {
     ComboboxTag
