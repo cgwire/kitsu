@@ -144,7 +144,7 @@ const actions = {
   deleteMilestone({ commit, rootState }, milestone) {
     return scheduleApi
       .deleteMilestone(milestone)
-      .then(milestone => {
+      .then(() => {
         commit(REMOVE_MILESTONE, milestone)
       })
       .catch(console.error)
