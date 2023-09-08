@@ -164,6 +164,7 @@
             :height="scheduleHeight"
             :is-loading="isTasksLoading"
             :is-estimation-linked="true"
+            :with-milestones="false"
             v-if="scheduleItems.length > 0"
           />
           <div class="has-text-centered" v-else>

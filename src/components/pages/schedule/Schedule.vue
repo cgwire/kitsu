@@ -1548,8 +1548,10 @@ export default {
       if (this.isCurrentUserManager) {
         this.modals.edit = true
         if (milestone) {
-          milestone.date = parseDate(milestone.date)
-          this.milestoneToEdit = milestone
+          this.milestoneToEdit = {
+            ...milestone,
+            date: parseDate(milestone.date)
+          }
         } else {
           this.milestoneToEdit = { date: day }
         }

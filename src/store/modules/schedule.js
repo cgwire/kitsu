@@ -144,7 +144,7 @@ const actions = {
   deleteMilestone({ commit, rootState }, milestone) {
     return scheduleApi
       .deleteMilestone(milestone)
-      .then(milestone => {
+      .then(() => {
         commit(REMOVE_MILESTONE, milestone)
       })
       .catch(console.error)
@@ -154,6 +154,7 @@ const actions = {
 const mutations = {
   [ADD_MILESTONE](state, milestone) {
     state.milestones[milestone.date] = milestone
+    state.milestones = { ...state.milestones } // for reactivity
   },
 
   [ADD_MILESTONES](state, milestones) {
@@ -165,6 +166,7 @@ const mutations = {
 
   [REMOVE_MILESTONE](state, milestone) {
     delete state.milestones[milestone.date.format('YYYY-MM-DD')]
+    state.milestones = { ...state.milestones } // for reactivity
   },
 
   [SET_CURRENT_SCHEDULE_ITEMS](state, items) {
