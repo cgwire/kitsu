@@ -504,6 +504,7 @@ export default {
   },
 
   mounted() {
+    this.searchField.setValue(this.$route.query.search || '')
     this.clearSelectedTasks()
     const isAssets = this.$route.path.includes('assets')
     const isShots = this.$route.path.includes('shots')
@@ -763,9 +764,13 @@ export default {
             this.loading.entities = false
             this.resetTasks()
             this.focusSearchField({ preventScroll: true })
-            const searchQuery = this.searchField
-              ? this.searchField.getValue()
-              : ''
+            let searchQuery = this.$route.query.search
+            if (searchQuery.length === 0) {
+              searchQuery =
+                !searchQuery && this.searchField
+                  ? this.searchField.getValue()
+                  : ''
+            }
             if (searchQuery) this.onSearchChange(searchQuery)
             setTimeout(() => {
               this.setSearchFromUrl()
@@ -791,6 +796,14 @@ export default {
         this.setCurrentScheduleItem().then(() => {
           this.resetTaskTypeDates()
           this.loading.entities = false
+          let searchQuery = this.$route.query.search
+          if (searchQuery.length === 0) {
+            searchQuery =
+              !searchQuery && this.searchField
+                ? this.searchField.getValue()
+                : ''
+          }
+          if (searchQuery) this.onSearchChange(searchQuery)
           if (this.isActiveTab('schedule')) {
             this.resetScheduleItems()
             this.resetScheduleScroll()
@@ -981,7 +994,7 @@ export default {
 
     resetTaskIndex() {
       this.$options.taskIndex = buildSupervisorTaskIndex(
-        this.tasks,
+        this.entityTasks,
         this.personMap,
         this.taskStatusMap
       )
