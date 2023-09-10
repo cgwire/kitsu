@@ -32,10 +32,12 @@
         {{ !hiddenColumns[columnId] ? taskTypeMap.get(columnId).name : '' }}
       </span>
 
-      <chevron-down-icon
+      <span
+        class="metadata-menu-button header-icon"
         @click="$emit('show-header-menu', $event)"
-        class="header-icon flexrow-item"
-      />
+      >
+        <chevron-down-icon :size="'12'" />
+      </span>
     </div>
   </th>
 </template>
@@ -135,5 +137,14 @@ th.metadata-descriptor {
   border-radius: 50%;
   height: 18px;
   padding: 1px;
+}
+
+.metadata-menu-button {
+  background: var(--background);
+  border-radius: 50%;
+  height: 15px;
+  width: 15px;
+  position: absolute;
+  right: 5px;
 }
 </style>
