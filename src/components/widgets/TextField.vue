@@ -40,8 +40,6 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
 export default {
   name: 'text-field',
   props: {
@@ -106,18 +104,23 @@ export default {
   },
 
   computed: {
-    ...mapGetters([])
+    inputValue() {
+      const input = this.$refs.input
+      if (this.type === 'number') {
+        return !isNaN(input.valueAsNumber) ? input.valueAsNumber : null
+      } else {
+        return input.value
+      }
+    }
   },
 
   methods: {
-    ...mapActions([]),
-
     emitEnter() {
-      this.$emit('enter', this.$refs.input.value)
+      this.$emit('enter', this.inputValue)
     },
 
     updateValue() {
-      this.$emit('input', this.$refs.input.value)
+      this.$emit('input', this.inputValue)
     },
 
     focus() {

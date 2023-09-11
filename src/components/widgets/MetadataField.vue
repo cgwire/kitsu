@@ -103,9 +103,8 @@ export default {
       required: true
     },
     value: {
-      type: String,
-      default: '',
-      required: true
+      type: [Number, String],
+      default: ''
     }
   },
 

@@ -48,6 +48,10 @@ export const descriptorMixin = {
         return
       } else if (descriptor.data_type === 'boolean') {
         value = event.target.checked ? 'true' : 'false'
+      } else if (descriptor.data_type === 'number') {
+        value = !isNaN(event.target.valueAsNumber)
+          ? event.target.valueAsNumber
+          : null
       } else {
         value = event.target.value
       }
