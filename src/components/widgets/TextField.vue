@@ -103,24 +103,22 @@ export default {
     }
   },
 
-  computed: {
-    inputValue() {
+  methods: {
+    getInputValue() {
       const input = this.$refs.input
       if (this.type === 'number') {
         return !isNaN(input.valueAsNumber) ? input.valueAsNumber : null
       } else {
         return input.value
       }
-    }
-  },
+    },
 
-  methods: {
     emitEnter() {
-      this.$emit('enter', this.inputValue)
+      this.$emit('enter', this.getInputValue())
     },
 
     updateValue() {
-      this.$emit('input', this.inputValue)
+      this.$emit('input', this.getInputValue())
     },
 
     focus() {
