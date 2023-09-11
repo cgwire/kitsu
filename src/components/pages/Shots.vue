@@ -9,10 +9,7 @@
               :can-save="true"
               :active="isSearchActive"
               @change="onSearchChange"
-              @enter="
-                query =>
-                  isLongShotList ? applySearch(query) : saveShotSearch(query)
-              "
+              @enter="applySearch(query)"
               @save="saveSearchQuery"
               placeholder="ex: e01 s01 anim=wip"
             />

@@ -9,10 +9,6 @@
               :can-save="true"
               :active="isSearchActive"
               @change="onSearchChange"
-              @enter="
-                query =>
-                  isLongEditList ? applySearch(query) : saveEditSearch(query)
-              "
               @save="saveSearchQuery"
               placeholder="ex: e01 edit=wip"
             />

@@ -16,6 +16,7 @@
       <span class="flexrow-item descriptor-name">
         {{ descriptor.name }}
       </span>
+
       <span
         class="metadata-menu-button header-icon"
         @click="$emit('show-metadata-header-menu', $event)"

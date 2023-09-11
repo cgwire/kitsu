@@ -9,7 +9,6 @@
               :can-save="true"
               :active="isSearchActive"
               @change="onSearchChange"
-              @enter="saveSearchQuery"
               @save="saveSearchQuery"
               placeholder="ex: e01 episode=wip"
             />
