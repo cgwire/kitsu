@@ -91,7 +91,11 @@
         :value="getMetadataFieldValue({ field_name: 'frame_in' }, entity)"
         @input="
           event =>
-            onMetadataFieldChanged(entity, { field_name: 'frame_in' }, event)
+            onMetadataFieldChanged(
+              entity,
+              { field_name: 'frame_in', data_type: 'number' },
+              event
+            )
         "
         v-if="isCurrentUserManager"
       />
@@ -113,7 +117,11 @@
         :value="getMetadataFieldValue({ field_name: 'frame_out' }, entity)"
         @input="
           event =>
-            onMetadataFieldChanged(entity, { field_name: 'frame_out' }, event)
+            onMetadataFieldChanged(
+              entity,
+              { field_name: 'frame_out', data_type: 'number' },
+              event
+            )
         "
         v-if="isCurrentUserManager"
       />
