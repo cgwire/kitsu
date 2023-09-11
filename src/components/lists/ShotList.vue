@@ -425,7 +425,7 @@
                   event =>
                     onMetadataFieldChanged(
                       shot,
-                      { field_name: 'frame_in' },
+                      { field_name: 'frame_in', data_type: 'number' },
                       event
                     )
                 "
@@ -459,7 +459,7 @@
                   event =>
                     onMetadataFieldChanged(
                       shot,
-                      { field_name: 'frame_out' },
+                      { field_name: 'frame_out', data_type: 'number' },
                       event
                     )
                 "
@@ -488,7 +488,11 @@
                 @keydown="onNumberFieldKeyDown"
                 @input="
                   event =>
-                    onMetadataFieldChanged(shot, { field_name: 'fps' }, event)
+                    onMetadataFieldChanged(
+                      shot,
+                      { field_name: 'fps', data_type: 'number' },
+                      event
+                    )
                 "
                 @keyup.ctrl="
                   event =>
@@ -519,7 +523,7 @@
                   event =>
                     onMetadataFieldChanged(
                       shot,
-                      { field_name: 'max_retakes' },
+                      { field_name: 'max_retakes', data_type: 'number' },
                       event
                     )
                 "
