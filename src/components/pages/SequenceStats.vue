@@ -6,7 +6,6 @@
         ref="sequence-search-field"
         :can-save="true"
         @change="onSearchChange"
-        @enter="saveSearchQuery"
         @save="saveSearchQuery"
         placeholder="ex: e01 s01 anim=wip"
       />

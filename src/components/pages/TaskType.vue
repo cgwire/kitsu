@@ -67,7 +67,6 @@
                 :can-save="true"
                 :focus-options="{ preventScroll: true }"
                 @change="onSearchChange"
-                @enter="saveSearchQuery"
                 @save="saveSearchQuery"
                 placeholder="ex: retake chara"
               />

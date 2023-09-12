@@ -50,7 +50,6 @@
             }"
             ref="todos-search-field"
             @change="onSearchChange"
-            @enter="saveSearchQuery"
             @save="saveSearchQuery"
             :can-save="true"
           />
