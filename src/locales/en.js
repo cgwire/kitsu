@@ -722,7 +722,7 @@ export default {
       files_previous: 'Previous file for this revision',
       frames_per_picture: 'Frames per picture',
       fullscreen: 'See file in full screen',
-      object_background: 'Set a background to the 3D model',
+      object_background: 'Set a new environment map to the 3D model',
       looping: 'Loop on current video',
       mute: 'Mute',
       overlay: 'Overlay',
@@ -744,6 +744,8 @@ export default {
       switch_hd: 'Switch to high definition',
       toggle_annotations: 'Show/Hide annotations while playing movies',
       toggle_laser: 'Enable/Disable drawing laser mode',
+      toggle_object_background: 'Enable/Disable environment map',
+      toggle_environment_skybox: 'Show/Hide skybox background',
       toggle_playing_annotations: 'Show/Hide annotations while playing movies',
       toggle_waveform: 'Show/Hide movie waveform'
     }

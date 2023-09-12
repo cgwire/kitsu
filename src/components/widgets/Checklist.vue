@@ -244,6 +244,7 @@ export default {
     margin-top: 2px;
     padding: 0 0.2em;
     text-align: center;
+    white-space: nowrap;
   }
 }
 </style>
