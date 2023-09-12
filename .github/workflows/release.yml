@@ -3,7 +3,8 @@ name: "Kitsu release"
 
 on:
   push:
-    branches: master
+    branches:
+      - master
     tags:
       - '*'
 
@@ -12,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v1
       - name: Build release
         env:
           NODE_OPTIONS: "--max_old_space_size=8192"
@@ -30,12 +31,14 @@ jobs:
           (cd dist && tar cvzf "../${ARTEFACT_FILENAME}" .)
           sha512sum "${ARTEFACT_FILENAME}" > "${CHECKSUM_FILENAME}"
       - name: Create release
+        if: startsWith(github.ref, 'refs/tags')
         uses: ncipollo/release-action@v1
         id: create_release
         with:
           artifacts: "kitsu-*.tgz,kitsu-*.SHA512"
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Update "build" branch
+        if: startsWith(github.ref, 'refs/tags')
         run: |
           KITSU_VERSION="$(cat dist/.version.txt)"
           mv dist ..
@@ -50,6 +53,7 @@ jobs:
           git commit -m "New release (${KITSU_VERSION})"
           git tag ${KITSU_VERSION}-build
       - name: Push changes
+        if: startsWith(github.ref, 'refs/tags')
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
