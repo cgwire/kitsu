@@ -11,10 +11,17 @@ on:
 
 jobs:
   ci:
+    name: Test with Node ${{ matrix.node }}
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        node: [ 18, 20 ]
     steps:
       - uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
       - name: Run tests
         env:
           NODE_OPTIONS: "--max_old_space_size=8192"
