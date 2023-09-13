@@ -9,6 +9,7 @@
               :can-save="true"
               :active="isSearchActive"
               @change="onSearchChange"
+              @enter="applySearch(searchField.getValue())"
               @save="saveSearchQuery"
               placeholder="ex: e01 edit=wip"
             />
