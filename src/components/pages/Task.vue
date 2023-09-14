@@ -110,6 +110,7 @@
               <div v-if="isPreviews">
                 <preview-player
                   ref="preview-player"
+                  :entity-preview-files="taskEntityPreviews"
                   :extra-wide="true"
                   :last-preview-files="taskPreviews || []"
                   :previews="currentPreview.previews"
