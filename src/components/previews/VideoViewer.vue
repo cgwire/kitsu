@@ -63,6 +63,10 @@ export default {
       type: Boolean,
       default: false
     },
+    isComparisonOverlay: {
+      type: Boolean,
+      default: false
+    },
     isHd: {
       type: Boolean,
       default: false
@@ -370,7 +374,6 @@ export default {
       if (height > 0) {
         this.container.style.height = this.defaultHeight + 'px'
         this.video.style.height = height + 'px'
-
         const videoPosition = this.video.getBoundingClientRect()
         const containerPosition = this.container.getBoundingClientRect()
         const top = videoPosition.top - containerPosition.top
@@ -480,6 +483,11 @@ export default {
     },
 
     isComparing() {
+      this.resetPanZoom()
+      this.mountVideo()
+    },
+
+    isComparingOverlay() {
       this.resetPanZoom()
       this.mountVideo()
     },

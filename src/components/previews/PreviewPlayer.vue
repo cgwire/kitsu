@@ -31,9 +31,13 @@
               :is-muted="isMuted"
               :is-ordering="isOrdering"
               :is-repeating="isRepeating"
+              :is-comparison-overlay="isComparisonOverlay"
               :margin-bottom="marginBottom"
               :object-background-url="objectBackgroundUrl"
               :preview="currentPreview"
+              :style="{
+                position: isComparisonOverlay ? 'absolute' : 'static'
+              }"
               @duration-changed="changeMaxDuration"
               @play-ended="pause"
               @size-changed="fixCanvasSize"
@@ -55,6 +59,9 @@
               :is-repeating="isRepeating"
               :light="light"
               :preview="previewToCompare"
+              :style="{
+                opacity: overlayOpacity
+              }"
               v-show="isComparing && previewToCompare"
             />
           </div>
@@ -197,6 +204,14 @@
             :thin="true"
             v-model="previewToCompareId"
             v-if="isComparing && (!light || isComparisonEnabled)"
+          />
+          <combobox
+            class="comparison-combobox"
+            :options="comparisonModeOptions"
+            :is-dark="true"
+            :thin="true"
+            v-model="comparisonMode"
+            v-if="isComparing && fullScreen"
           />
         </div>
 
@@ -580,7 +595,34 @@ export default {
       textColor: '#ff3860',
       videoDuration: 0,
       width: 0,
-      isZoomPan: false
+      isZoomPan: false,
+      comparisonMode: 'sidebyside',
+      comparisonModeOptions: [
+        {
+          label: this.$t('playlists.actions.side_by_side'),
+          value: 'sidebyside'
+        },
+        {
+          label: `${this.$t('playlists.actions.overlay')} 0%`,
+          value: 'overlay0'
+        },
+        {
+          label: `${this.$t('playlists.actions.overlay')} 25%`,
+          value: 'overlay25'
+        },
+        {
+          label: `${this.$t('playlists.actions.overlay')} 50%`,
+          value: 'overlay50'
+        },
+        {
+          label: `${this.$t('playlists.actions.overlay')} 75%`,
+          value: 'overlay75'
+        },
+        {
+          label: `${this.$t('playlists.actions.overlay')} 100%`,
+          value: 'overlay100'
+        }
+      ]
     }
   },
 
@@ -804,6 +846,31 @@ export default {
 
     nbFrames() {
       return Math.round(this.videoDuration * this.fps)
+    },
+
+    isComparisonOverlay() {
+      return this.comparisonMode !== 'sidebyside' && this.isComparing
+    },
+
+    overlayOpacity() {
+      if (this.isComparing && this.isComparisonOverlay) {
+        switch (this.comparisonMode) {
+          case 'overlay0':
+            return 1
+          case 'overlay25':
+            return 0.25
+          case 'overlay50':
+            return 0.5
+          case 'overlay75':
+            return 0.75
+          case 'overlay100':
+            return 0
+          default:
+            return 1
+        }
+      } else {
+        return 1
+      }
     }
   },
 
@@ -1029,6 +1096,14 @@ export default {
             this.fabricCanvas.calcOffset()
             this.fabricCanvas.setDimensions({ width, height })
             this.width = this.getDimensions().width
+            if (this.isComparing && !this.isComparisonOverlay) {
+              this.canvasComparisonWrapper.style.top = top + 'px'
+              this.canvasComparisonWrapper.style.left = left + width + 'px'
+              this.canvasComparisonWrapper.style.width = width + 'px'
+              this.canvasComparisonWrapper.style.height = height + 'px'
+              this.fabricCanvasComparison.calcOffset()
+              this.fabricCanvasComparison.setDimensions({ width, height })
+            }
             this.$nextTick(this.refreshCanvas())
           }, 10)
         }
@@ -1723,6 +1798,10 @@ export default {
         this.taskTypeId = ''
         this.previewToCompareId = ''
       }
+      this.$nextTick(() => {
+        // Hack needed to reset positioning.
+        window.dispatchEvent(new Event('resize'))
+      })
     },
 
     light() {
@@ -1774,6 +1853,13 @@ export default {
       if (!this.isAnnotationsDisplayed) {
         this.isDrawing = false
       }
+    },
+
+    isComparisonOverlay() {
+      this.$nextTick(() => {
+        // Hack needed to reset positioning.
+        window.dispatchEvent(new Event('resize'))
+      })
     }
   }
 }

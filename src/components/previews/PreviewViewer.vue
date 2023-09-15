@@ -31,6 +31,7 @@
       :default-height="defaultHeight"
       :full-screen="isFullScreen"
       :is-comparing="isComparing"
+      :is-comparison-overlay="isComparisonOverlay"
       :is-hd="isHd"
       :is-muted="isMuted"
       :is-repeating="isRepeating"
@@ -52,6 +53,7 @@
       :default-height="defaultHeight"
       :full-screen="isFullScreen"
       :is-comparing="isComparing"
+      :is-comparison-overlay="isComparisonOverlay"
       :light="isLight"
       :margin-bottom="marginBottom"
       :panzoom="true"
@@ -158,6 +160,10 @@ export default {
       default: false
     },
     isHd: {
+      type: Boolean,
+      default: false
+    },
+    isComparisonOverlay: {
       type: Boolean,
       default: false
     },
