@@ -15,6 +15,26 @@
               </canvas>
             </div>
           </div>
+          <div
+            class="canvas-comparison-wrapper"
+            ref="canvas-comparison-wrapper"
+            oncontextmenu="return false;"
+            @click="onCanvasClicked"
+            v-show="!isZoomPan"
+          >
+            <div
+              v-show="
+                isAnnotationsDisplayed && isComparing && !isComparisonOverlay
+              "
+            >
+              <canvas
+                ref="annotation-canvas-comparison"
+                :id="canvasId + '-comparison'"
+                class="canvas"
+              >
+              </canvas>
+            </div>
+          </div>
           <div class="viewers">
             <preview-viewer
               ref="preview-viewer"
@@ -89,6 +109,7 @@
         ref="progress"
         class="video-progress pull-bottom"
         :annotations="annotations"
+        :comparison-annotations="comparisonAnnotations"
         :frame-duration="frameDuration"
         :nb-frames="nbFrames"
         :width="width"
@@ -659,12 +680,22 @@ export default {
       return this.$refs.container
     },
 
+    comparisonAnnotations() {
+      return this.previewToCompare && this.isComparing
+        ? this.previewToCompare.annotations
+        : []
+    },
+
     comparisonViewer() {
       return this.$refs['comparison-preview-viewer']
     },
 
     canvasWrapper() {
       return this.$refs['canvas-wrapper']
+    },
+
+    canvasComparisonWrapper() {
+      return this.$refs['canvas-comparison-wrapper']
     },
 
     previewViewer() {
@@ -1076,6 +1107,9 @@ export default {
           this.fabricCanvas
         )
       }
+      this.fabricCanvasComparison = new fabric.StaticCanvas(
+        this.canvasId + '-comparison'
+      )
       this.configureCanvas()
     },
 
@@ -1320,10 +1354,6 @@ export default {
       }
     },
 
-    onAnnotationClicked(annotation) {
-      this.loadAnnotation(annotation)
-    },
-
     onAnnotationDisplayedClicked() {
       this.clearFocus()
       this.isAnnotationsDisplayed = !this.isAnnotationsDisplayed
@@ -1358,6 +1388,9 @@ export default {
           if (!this.isMovie) {
             console.warn('Annotations are malformed or empty.')
           }
+          if (this.isComparing && !this.isComparisonOverlay) {
+            this.loadComparisonAnnotation(currentTime)
+          }
           return
         }
       }
@@ -1368,6 +1401,27 @@ export default {
       }
       this.clearCanvas()
       this.loadSingleAnnotation(annotation)
+      if (this.isComparing && !this.isComparisonOverlay) {
+        this.loadComparisonAnnotation(currentTime)
+      }
+    },
+
+    loadComparisonAnnotation(time) {
+      this.fabricCanvasComparison.clear()
+      this.previewToCompare = this.previewFileMap[this.previewToCompareId]
+      let annotations = []
+      if (this.previewToCompare && this.previewToCompare.annotations) {
+        annotations = this.previewToCompare.annotations
+      }
+      let annotation = null
+      if (this.isMovie) {
+        annotation = annotations.find(annotation => annotation.time === time)
+      } else if (this.isPicture) {
+        annotation = annotations.find(annotation => annotation.time === 0)
+      }
+      if (annotation) {
+        this.loadSingleAnnotationComparison(annotation)
+      }
     },
 
     reloadAnnotations() {
@@ -1782,6 +1836,11 @@ export default {
             this.syncComparisonViewer()
           }, 200)
           this.pause()
+          if (this.isMovie) {
+            this.loadComparisonAnnotation(this.currentTime)
+          } else if (this.isPicture) {
+            this.loadComparisonAnnotation(0)
+          }
         }
       })
     },
@@ -2051,6 +2110,15 @@ export default {
   flex: 1 1 0;
 }
 
+.preview-viewer {
+  overflow: hidden;
+  z-index: 1;
+}
+
+.comparison-preview-viewer {
+  z-index: 2;
+}
+
 .separator {
   background: $dark-grey-2;
 }
@@ -2079,7 +2147,8 @@ export default {
   display: none;
 }
 
-.preview-viewer {
-  overflow: hidden;
+.canvas-comparison-wrapper {
+  position: absolute;
+  z-index: 5;
 }
 </style>
