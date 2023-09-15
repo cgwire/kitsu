@@ -855,9 +855,7 @@ export const playerMixin = {
     onMaxDurationUpdate(duration) {
       if (duration) {
         duration = floorToFrame(duration, this.fps)
-        const isChromium = !!window.chrome
-        const change = isChromium ? this.frameDuration : 0
-        this.maxDurationRaw = duration + change
+        this.maxDurationRaw = duration
         this.maxDuration = this.formatTime(duration)
         this.resetHandles()
       } else {
