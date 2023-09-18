@@ -164,6 +164,7 @@
           @metadata-loaded="onMetadataLoaded"
           @play-next="onPlayNext"
           @repeat="onVideoRepeated"
+          @video-loaded="onVideoLoaded"
           v-show="isCurrentPreviewMovie && !isLoading"
         />
 
@@ -271,9 +272,12 @@
       class="video-progress pull-bottom"
       :annotations="annotations"
       :frame-duration="frameDuration"
+      :is-full-screen="fullScreen"
+      :movie-dimensions="movieDimensions"
       :nb-frames="nbFrames"
       :handle-in="playlist.for_entity === 'shot' ? handleIn : -1"
       :handle-out="playlist.for_entity === 'shot' ? handleOut : -1"
+      :preview-id="currentPreview ? currentPreview.id : ''"
       @start-scrub="onScrubStart"
       @end-scrub="onScrubEnd"
       @progress-changed="onProgressChanged"
@@ -909,6 +913,7 @@ export default {
       isShowingPencilPalette: false,
       isShowAnnotationsWhilePlaying: false,
       isWaveformDisplayed: false,
+      movieDimensions: { width: 0, height: 0 },
       playlistToEdit: {},
       previewRoomRef: 'playlist-player-preview-room',
       revisionOptions: [],
@@ -1261,6 +1266,10 @@ export default {
             this.rawPlayerComparison.playNext()
           }
         }
+        this.movieDimensions = {
+          width: this.currentPreview.width,
+          height: this.currentPreview.height
+        }
       }
       if (!this.$options.silent) this.scrollToEntity(this.playingEntityIndex)
     },
@@ -1298,6 +1307,13 @@ export default {
       }
     },
 
+    onVideoLoaded() {
+      this.movieDimensions = {
+        width: this.currentPreview.width,
+        height: this.currentPreview.height
+      }
+    },
+
     onPreviewChanged(entity, previewFile) {
       this.pause()
       const localEntity = this.entityList.find(s => s.id === entity.id)
@@ -1305,6 +1321,8 @@ export default {
       localEntity.preview_file_task_id = previewFile.task_id
       localEntity.preview_file_extension = previewFile.extension
       localEntity.preview_file_annotations = previewFile.annotations
+      localEntity.preview_file_width = previewFile.width
+      localEntity.preview_file_height = previewFile.height
       localEntity.preview_file_previews = previewFile.previews
       localEntity.preview_file_revision = previewFile.revision
       if (this.rawPlayer) {
@@ -1694,6 +1712,10 @@ export default {
           this.resetCanvas()
         }
       })
+      this.movieDimensions = {
+        width: this.currentPreview.width,
+        height: this.currentPreview.height
+      }
     },
 
     playingEntityIndex() {
@@ -1710,6 +1732,10 @@ export default {
       }
       if (this.currentEntity) {
         this.annotations = this.currentEntity.preview_file_annotations || []
+        this.movieDimensions = {
+          width: this.currentPreview.width,
+          height: this.currentPreview.height
+        }
       }
       this.$nextTick(() => {
         if (this.isComparing) {
@@ -1765,6 +1791,10 @@ export default {
       this.rebuildComparisonOptions()
       this.clearCanvas()
       this.annotations = []
+      this.movieDimensions = {
+        width: 0,
+        height: 0
+      }
       this.isComparing = false
       if (this.entityList.length === 0) {
         this.clearPlayer()
@@ -1773,6 +1803,10 @@ export default {
       this.resetCanvas().then(() => {
         if (this.isCurrentPreview) {
           this.resetHandles()
+          this.movieDimensions = {
+            width: this.currentPreview.width,
+            height: this.currentPreview.height
+          }
           this.annotations = this.currentEntity.preview_file_annotations
           this.loadAnnotation(this.getAnnotation(0))
         }
@@ -1785,6 +1819,14 @@ export default {
       this.$nextTick(() => {
         this.updateProgressBar()
         this.clearCanvas()
+        this.$nextTick(() => {
+          if (this.currentPreview) {
+            this.movieDimensions = {
+              width: this.currentPreview.width,
+              height: this.currentPreview.height
+            }
+          }
+        })
       })
     },
 

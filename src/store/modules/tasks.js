@@ -943,6 +943,8 @@ const mutations = {
                 id: p.id,
                 annotations: p.annotations,
                 extension: p.extension,
+                width: p.width,
+                height: p.height,
                 task_id: p.task_id,
                 status: p.status,
                 revision: p.revision,

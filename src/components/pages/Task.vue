@@ -1043,6 +1043,7 @@ export default {
       if (
         this.task &&
         comment &&
+        comment.previews &&
         (comment.previews.length === 0 ||
           comment.previews[0].id !== previewId) &&
         taskId === this.task.id
@@ -1511,7 +1512,6 @@ video {
 }
 
 .preview-column-content {
-  overflow-x: hidden;
 }
 
 .preview-list {
