@@ -65,6 +65,7 @@
           <div class="query-list">
             <search-query-list
               :queries="editSearchQueries"
+              type="edit"
               @change-search="changeSearch"
               @remove-search="removeSearchQuery"
               v-if="!isEditsLoading && !initialLoading"

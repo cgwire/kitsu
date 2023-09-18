@@ -62,7 +62,9 @@ import {
   CLEAR_SELECTED_TASKS,
   SET_PREVIEW,
   SAVE_SHOT_SEARCH_END,
+  SAVE_SHOT_SEARCH_FILTER_GROUP_END,
   REMOVE_SHOT_SEARCH_END,
+  REMOVE_SHOT_SEARCH_FILTER_GROUP_END,
   CHANGE_SHOT_SORT,
   UPDATE_METADATA_DESCRIPTOR_END,
   LOCK_SHOT,
@@ -246,6 +248,7 @@ const initialState = {
   shotMap: new Map(),
   shotSearchText: '',
   shotSearchQueries: [],
+  shotSearchFilterGroups: [],
   shotSorting: [],
 
   isFps: false,
@@ -288,6 +291,7 @@ const getters = {
   shotValidationColumns: state => state.shotValidationColumns,
 
   shotSearchQueries: state => state.shotSearchQueries,
+  shotSearchFilterGroups: state => state.shotSearchFilterGroups,
   shotMap: state => state.shotMap,
   shotSorting: state => state.shotSorting,
 
@@ -376,6 +380,7 @@ const actions = {
     const production = rootGetters.currentProduction
     const episodes = rootGetters.episodes
     const userFilters = rootGetters.userFilters
+    const userFilterGroups = rootGetters.userFilterGroups
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
     const episodeMap = rootGetters.episodeMap
@@ -419,6 +424,7 @@ const actions = {
           production,
           shots,
           userFilters,
+          userFilterGroups,
           taskTypeMap,
           taskMap,
           personMap,
@@ -587,11 +593,41 @@ const actions = {
     }
   },
 
+  saveShotSearchFilterGroup({ commit, state, rootGetters }, filterGroup) {
+    const groupExist = state.shotSearchFilterGroups.some(
+      query => query.name === filterGroup.name
+    )
+    if (groupExist) {
+      return
+    }
+
+    const production = rootGetters.currentProduction
+    return peopleApi
+      .createFilterGroup(
+        'shot',
+        filterGroup.name,
+        filterGroup.color,
+        production.id,
+        null
+      )
+      .then(filterGroup => {
+        commit(SAVE_SHOT_SEARCH_FILTER_GROUP_END, { filterGroup, production })
+        return filterGroup
+      })
+  },
+
   removeShotSearch({ commit, rootGetters }, searchQuery) {
     const production = rootGetters.currentProduction
     return peopleApi.removeFilter(searchQuery).then(() => {
       commit(REMOVE_SHOT_SEARCH_END, { searchQuery, production })
       return Promise.resolve()
+    })
+  },
+
+  removeShotSearchFilterGroup({ commit, rootGetters }, filterGroup) {
+    const production = rootGetters.currentProduction
+    return peopleApi.removeFilterGroup(filterGroup).then(() => {
+      commit(REMOVE_SHOT_SEARCH_FILTER_GROUP_END, { filterGroup, production })
     })
   },
 
@@ -746,6 +782,7 @@ const mutations = {
     state.displayedEstimation = 0
     state.displayedFrames = 0
     state.shotSearchQueries = []
+    state.shotSearchFilterGroups = []
     state.displayedSequences = []
     state.displayedSequencesLength = 0
 
@@ -768,6 +805,7 @@ const mutations = {
     state.displayedEstimation = 0
     state.displayedFrames = 0
     state.shotSearchQueries = []
+    state.shotSearchFilterGroups = []
     state.displayedSequences = []
     state.displayedSequencesLength = 0
 
@@ -785,6 +823,7 @@ const mutations = {
       production,
       shots,
       userFilters,
+      userFilterGroups,
       taskMap,
       taskTypeMap,
       personMap,
@@ -888,16 +927,21 @@ const mutations = {
     state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
     helpers.setListStats(state, shots)
 
-    if (userFilters.shot && userFilters.shot[production.id]) {
-      state.shotSearchQueries = userFilters.shot[production.id]
-    } else {
-      state.shotSearchQueries = []
-    }
+    state.shotSearchQueries = userFilters.shot?.[production.id] || []
+
+    state.shotSearchFilterGroups = userFilterGroups.shot?.[production.id] || []
   },
 
   [SAVE_SHOT_SEARCH_END](state, { searchQuery }) {
     state.shotSearchQueries.push(searchQuery)
     state.shotSearchQueries = sortByName(state.shotSearchQueries)
+  },
+
+  [SAVE_SHOT_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
+    if (!state.shotSearchFilterGroups.includes(filterGroup)) {
+      state.shotSearchFilterGroups.push(filterGroup)
+      state.shotSearchFilterGroups = sortByName(state.shotSearchFilterGroups)
+    }
   },
 
   [REMOVE_SHOT_SEARCH_END](state, { searchQuery }) {
@@ -906,6 +950,15 @@ const mutations = {
     )
     if (queryIndex >= 0) {
       state.shotSearchQueries.splice(queryIndex, 1)
+    }
+  },
+
+  [REMOVE_SHOT_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
+    const groupIndex = state.shotSearchFilterGroups.findIndex(
+      query => query.name === filterGroup.name
+    )
+    if (groupIndex >= 0) {
+      state.shotSearchFilterGroups.splice(groupIndex, 1)
     }
   },
 

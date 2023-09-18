@@ -159,6 +159,7 @@
         <div class="query-list">
           <search-query-list
             :queries="searchQueries"
+            type="taskType"
             @change-search="changeSearch"
             @remove-search="removeSearchQuery"
             v-if="!loading.entities"
@@ -939,19 +940,15 @@ export default {
 
     saveSearchQuery(searchQuery) {
       const entityType = this.entityType
-      this.saveTaskSearch({ searchQuery, entityType })
-        .then(() => {})
-        .catch(err => {
-          console.error(err)
-        })
+      this.saveTaskSearch({ searchQuery, entityType }).catch(err => {
+        console.error(err)
+      })
     },
 
     removeSearchQuery(searchQuery) {
-      this.removeTaskSearch(searchQuery)
-        .then(() => {})
-        .catch(err => {
-          console.error(err)
-        })
+      this.removeTaskSearch(searchQuery).catch(err => {
+        console.error(err)
+      })
     },
 
     updateUrlParams() {

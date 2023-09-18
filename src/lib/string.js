@@ -41,5 +41,9 @@ export default {
       .replace(/[^a-z0-9 -]/g, '')
       .replace(/\s+/g, '_')
       .replace(/-+/g, '_')
+  },
+
+  capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1)
   }
 }

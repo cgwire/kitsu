@@ -74,7 +74,10 @@
 
           <div class="query-list">
             <search-query-list
+              :groups="shotSearchFilterGroups"
+              :is-group-enabled="true"
               :queries="shotSearchQueries"
+              type="shot"
               @change-search="changeSearch"
               @remove-search="removeSearchQuery"
               v-if="!isShotsLoading && !initialLoading"
@@ -492,6 +495,7 @@ export default {
       'shotsCsvFormData',
       'shotSearchQueries',
       'shotSearchText',
+      'shotSearchFilterGroups',
       'shotsPath',
       'shotValidationColumns',
       'shotListScrollPosition',

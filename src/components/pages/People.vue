@@ -54,6 +54,7 @@
     <div class="query-list">
       <search-query-list
         :queries="peopleSearchQueries"
+        type="people"
         @change-search="changeSearch"
         @remove-search="removeSearchQuery"
         v-if="!isPeopleLoading"

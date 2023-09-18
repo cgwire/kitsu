@@ -64,6 +64,8 @@ import {
   SAVE_ASSET_SEARCH_END,
   REMOVE_ASSET_SEARCH_END,
   SET_ASSET_TYPE_SEARCH,
+  SAVE_ASSET_SEARCH_FILTER_GROUP_END,
+  REMOVE_ASSET_SEARCH_FILTER_GROUP_END,
   COMPUTE_ASSET_TYPE_STATS,
   UPDATE_METADATA_DESCRIPTOR_END,
   SET_CURRENT_EPISODE,
@@ -271,6 +273,7 @@ const initialState = {
   assetSearchText: '',
   assetSelectionGrid: {},
   assetSearchQueries: [],
+  assetSearchFilterGroups: [],
   assetSorting: [],
 
   displayedAssetTypes: [],
@@ -302,6 +305,7 @@ const getters = {
   assetMap: state => state.assetMap,
   assetSearchText: state => state.assetSearchText,
   assetSearchQueries: state => state.assetSearchQueries,
+  assetSearchFilterGroups: state => state.assetSearchFilterGroups,
   assetSelectionGrid: state => state.assetSelectionGrid,
   assetValidationColumns: state => state.assetValidationColumns,
 
@@ -350,6 +354,7 @@ const actions = {
     let episode = rootGetters.currentEpisode
     const isTVShow = rootGetters.isTVShow
     const userFilters = rootGetters.userFilters
+    const userFilterGroups = rootGetters.userFilterGroups
     const personMap = rootGetters.personMap
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
@@ -382,6 +387,7 @@ const actions = {
           production,
           assets,
           userFilters,
+          userFilterGroups,
           personMap,
           taskMap,
           taskTypeMap
@@ -558,11 +564,41 @@ const actions = {
     }
   },
 
+  saveAssetSearchFilterGroup({ commit, state, rootGetters }, filterGroup) {
+    const groupExist = state.assetSearchFilterGroups.some(
+      query => query.name === filterGroup.name
+    )
+    if (groupExist) {
+      return
+    }
+
+    const production = rootGetters.currentProduction
+    return peopleApi
+      .createFilterGroup(
+        'asset',
+        filterGroup.name,
+        filterGroup.color,
+        production.id,
+        null
+      )
+      .then(filterGroup => {
+        commit(SAVE_ASSET_SEARCH_FILTER_GROUP_END, { filterGroup, production })
+        return filterGroup
+      })
+  },
+
   removeAssetSearch({ commit, rootGetters }, searchQuery) {
     const production = rootGetters.currentProduction
     return peopleApi.removeFilter(searchQuery).then(() => {
       commit(REMOVE_ASSET_SEARCH_END, { searchQuery, production })
       return Promise.resolve()
+    })
+  },
+
+  removeAssetSearchFilterGroup({ commit, rootGetters }, filterGroup) {
+    const production = rootGetters.currentProduction
+    return peopleApi.removeFilterGroup(filterGroup).then(() => {
+      commit(REMOVE_ASSET_SEARCH_FILTER_GROUP_END, { filterGroup, production })
     })
   },
 
@@ -726,6 +762,7 @@ const mutations = {
     state.assetFilledColumns = {}
     helpers.setListStats(state, [])
     state.assetSearchQueries = []
+    state.assetSearchFilterGroups = []
 
     state.selectedAssets = new Map()
   },
@@ -743,6 +780,7 @@ const mutations = {
     state.assetFilledColumns = {}
     helpers.setListStats(state, [])
     state.assetSearchQueries = []
+    state.assetSearchFilterGroups = []
 
     state.selectedAssets = new Map()
   },
@@ -754,7 +792,15 @@ const mutations = {
 
   [LOAD_ASSETS_END](
     state,
-    { production, assets, userFilters, personMap, taskMap, taskTypeMap }
+    {
+      production,
+      assets,
+      userFilters,
+      userFilterGroups,
+      personMap,
+      taskMap,
+      taskTypeMap
+    }
   ) {
     const validationColumns = {}
     const assetTypeMap = new Map()
@@ -814,11 +860,10 @@ const mutations = {
     const maxY = state.nbValidationColumns
     state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
 
-    if (userFilters.asset && userFilters.asset[production.id]) {
-      state.assetSearchQueries = userFilters.asset[production.id]
-    } else {
-      state.assetSearchQueries = []
-    }
+    state.assetSearchQueries = userFilters.asset?.[production.id] || []
+
+    state.assetSearchFilterGroups =
+      userFilterGroups.asset?.[production.id] || []
   },
 
   [ADD_ASSET](state, { taskTypeMap, taskMap, personMap, production, asset }) {
@@ -965,12 +1010,28 @@ const mutations = {
     }
   },
 
+  [SAVE_ASSET_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
+    if (!state.assetSearchFilterGroups.includes(filterGroup)) {
+      state.assetSearchFilterGroups.push(filterGroup)
+      state.assetSearchFilterGroups = sortByName(state.assetSearchFilterGroups)
+    }
+  },
+
   [REMOVE_ASSET_SEARCH_END](state, { searchQuery }) {
     const queryIndex = state.assetSearchQueries.findIndex(
       query => query.name === searchQuery.name
     )
     if (queryIndex >= 0) {
       state.assetSearchQueries.splice(queryIndex, 1)
+    }
+  },
+
+  [REMOVE_ASSET_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
+    const groupIndex = state.assetSearchFilterGroups.findIndex(
+      query => query.name === filterGroup.name
+    )
+    if (groupIndex >= 0) {
+      state.assetSearchFilterGroups.splice(groupIndex, 1)
     }
   },
 
