@@ -32,6 +32,7 @@ export const annotationMixin = {
   data() {
     return {
       fabricCanvas: null,
+      fabricCanvasComparison: null,
       lastAnnotationTime: '',
       additions: [],
       deletions: [],
@@ -468,9 +469,15 @@ export const annotationMixin = {
      * Load an annotation directly to the canvas by adding all its object
      * one by one to the canvas.
      */
-    loadSingleAnnotation(annotation) {
+    loadSingleAnnotation(annotation, canvas = null) {
       annotation.drawing.objects.forEach(obj => {
-        this.addObjectToCanvas(annotation, obj)
+        this.addObjectToCanvas(annotation, obj, canvas)
+      })
+    },
+
+    loadSingleAnnotationComparison(annotation) {
+      annotation.drawing.objects.forEach(obj => {
+        this.addObjectToCanvas(annotation, obj, this.fabricCanvasComparison)
       })
     },
 
@@ -490,9 +497,10 @@ export const annotationMixin = {
      *
      * @returns: the build object.
      */
-    addObjectToCanvas(annotation, obj) {
+    addObjectToCanvas(annotation, obj, canvas = null) {
       if (!obj) return
-      if (this.getObjectById(obj.id)) return
+      if (this.getObjectById(obj.id) && !canvas) return
+      if (!canvas) canvas = this.fabricCanvas
       let path, text
       let scaleMultiplierX = 1
       let scaleMultiplierY = 1
@@ -535,9 +543,9 @@ export const annotationMixin = {
       if (obj.type === 'path') {
         let strokeMultiplier = 1
         if (obj.canvasWidth) {
-          strokeMultiplier = canvasWidth / this.fabricCanvas.width
+          strokeMultiplier = canvasWidth / canvas.width
         }
-        if (this.fabricCanvas.width < 420) strokeMultiplier /= 2
+        if (canvas.width < 420) strokeMultiplier /= 2
         path = new fabric.Path(obj.path, {
           ...base
         })
@@ -558,7 +566,7 @@ export const annotationMixin = {
           mtr: !this.isCurrentUserArtist
         })
         this.$options.silentAnnnotation = true
-        this.fabricCanvas.add(path)
+        canvas.add(path)
         this.$options.silentAnnnotation = false
       } else if (obj.type === 'i-text' || obj.type === 'text') {
         text = new fabric.IText(obj.text, {
@@ -587,7 +595,7 @@ export const annotationMixin = {
           mtr: false
         })
         this.$options.silentAnnnotation = true
-        this.fabricCanvas.add(text)
+        canvas.add(text)
         this.$options.silentAnnnotation = false
       }
       return path || text
@@ -1015,6 +1023,9 @@ export const annotationMixin = {
     clearCanvas() {
       if (this.fabricCanvas) {
         this.fabricCanvas.clear()
+      }
+      if (this.fabricCanvasComparison) {
+        this.fabricCanvasComparison.clear()
       }
     },
 

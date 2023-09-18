@@ -465,19 +465,6 @@
           icon="music"
           @click="isWaveformDisplayed = !isWaveformDisplayed"
         />
-
-        <!--button-simple
-        class="button playlist-button flexrow-item"
-        @click="onPreviousFrameClicked"
-        :title="$t('playlists.actions.previous_frame')"
-        icon="left"
-      />
-      <button-simple
-        class="button playlist-button flexrow-item"
-        @click="onNextFrameClicked"
-        :title="$t('playlists.actions.next_frame')"
-        icon="right"
-      /-->
       </div>
 
       <div class="separator"></div>
@@ -574,19 +561,6 @@
         "
       >
         <div class="separator" v-if="isCurrentUserManager && tempMode"></div>
-        <!--button-simple
-        class="playlist-button flexrow-item"
-        icon="undo"
-        :title="$t('playlists.actions.annotation_undo')"
-        @click="undoLastAction"
-      />
-
-      <button-simple
-        class="playlist-button flexrow-item"
-        :title="$t('playlists.actions.annotation_redo')"
-        icon="redo"
-        @click="redoLastAction"
-      /-->
         <button-simple
           @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
           :class="{

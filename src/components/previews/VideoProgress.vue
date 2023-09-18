@@ -63,6 +63,22 @@
       >
       </span>
       <span
+        :key="`annotation-comparison-${index}`"
+        class="annotation-mark comparison-mark"
+        :style="{
+          left: getAnnotationPosition(annotation) + 'px',
+          width: Math.max(frameSize - 1, 5) + 'px'
+        }"
+        @mouseenter="isFrameNumberVisible = true"
+        @mouseleave="isFrameNumberVisible = true"
+        @touchstart="isFrameNumberVisible = true"
+        @touchend="isFrameNumberVisible = false"
+        @touchcancel="isFrameNumberVisible = false"
+        @click="_emitProgressEvent($event, annotation)"
+        v-for="(annotation, index) in comparisonAnnotations"
+      >
+      </span>
+      <span
         class="frame-number"
         :style="{
           left: frameNumberLeftPosition + 'px'
@@ -84,6 +100,10 @@ export default {
 
   props: {
     annotations: {
+      default: () => [],
+      type: Array
+    },
+    comparisonAnnotations: {
       default: () => [],
       type: Array
     },
@@ -303,6 +323,10 @@ export default {
   height: 20px;
   position: absolute;
   top: 4px;
+
+  &.comparison-mark {
+    opacity: 0.5;
+  }
 }
 
 .progress-wrapper {

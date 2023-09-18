@@ -15,6 +15,26 @@
               </canvas>
             </div>
           </div>
+          <div
+            class="canvas-comparison-wrapper"
+            ref="canvas-comparison-wrapper"
+            oncontextmenu="return false;"
+            @click="onCanvasClicked"
+            v-show="!isZoomPan"
+          >
+            <div
+              v-show="
+                isAnnotationsDisplayed && isComparing && !isComparisonOverlay
+              "
+            >
+              <canvas
+                ref="annotation-canvas-comparison"
+                :id="canvasId + '-comparison'"
+                class="canvas"
+              >
+              </canvas>
+            </div>
+          </div>
           <div class="viewers">
             <preview-viewer
               ref="preview-viewer"
@@ -31,9 +51,13 @@
               :is-muted="isMuted"
               :is-ordering="isOrdering"
               :is-repeating="isRepeating"
+              :is-comparison-overlay="isComparisonOverlay"
               :margin-bottom="marginBottom"
               :object-background-url="objectBackgroundUrl"
               :preview="currentPreview"
+              :style="{
+                position: isComparisonOverlay ? 'absolute' : 'static'
+              }"
               @duration-changed="changeMaxDuration"
               @play-ended="pause"
               @size-changed="fixCanvasSize"
@@ -55,6 +79,9 @@
               :is-repeating="isRepeating"
               :light="light"
               :preview="previewToCompare"
+              :style="{
+                opacity: overlayOpacity
+              }"
               v-show="isComparing && previewToCompare"
             />
           </div>
@@ -82,6 +109,7 @@
         ref="progress"
         class="video-progress pull-bottom"
         :annotations="annotations"
+        :comparison-annotations="comparisonAnnotations"
         :frame-duration="frameDuration"
         :nb-frames="nbFrames"
         :width="width"
@@ -197,6 +225,14 @@
             :thin="true"
             v-model="previewToCompareId"
             v-if="isComparing && (!light || isComparisonEnabled)"
+          />
+          <combobox
+            class="comparison-combobox"
+            :options="comparisonModeOptions"
+            :is-dark="true"
+            :thin="true"
+            v-model="comparisonMode"
+            v-if="isComparing && fullScreen"
           />
         </div>
 
@@ -580,7 +616,34 @@ export default {
       textColor: '#ff3860',
       videoDuration: 0,
       width: 0,
-      isZoomPan: false
+      isZoomPan: false,
+      comparisonMode: 'sidebyside',
+      comparisonModeOptions: [
+        {
+          label: this.$t('playlists.actions.side_by_side'),
+          value: 'sidebyside'
+        },
+        {
+          label: `${this.$t('playlists.actions.overlay')} 0%`,
+          value: 'overlay0'
+        },
+        {
+          label: `${this.$t('playlists.actions.overlay')} 25%`,
+          value: 'overlay25'
+        },
+        {
+          label: `${this.$t('playlists.actions.overlay')} 50%`,
+          value: 'overlay50'
+        },
+        {
+          label: `${this.$t('playlists.actions.overlay')} 75%`,
+          value: 'overlay75'
+        },
+        {
+          label: `${this.$t('playlists.actions.overlay')} 100%`,
+          value: 'overlay100'
+        }
+      ]
     }
   },
 
@@ -617,12 +680,22 @@ export default {
       return this.$refs.container
     },
 
+    comparisonAnnotations() {
+      return this.previewToCompare && this.isComparing
+        ? this.previewToCompare.annotations
+        : []
+    },
+
     comparisonViewer() {
       return this.$refs['comparison-preview-viewer']
     },
 
     canvasWrapper() {
       return this.$refs['canvas-wrapper']
+    },
+
+    canvasComparisonWrapper() {
+      return this.$refs['canvas-comparison-wrapper']
     },
 
     previewViewer() {
@@ -804,6 +877,31 @@ export default {
 
     nbFrames() {
       return Math.round(this.videoDuration * this.fps)
+    },
+
+    isComparisonOverlay() {
+      return this.comparisonMode !== 'sidebyside' && this.isComparing
+    },
+
+    overlayOpacity() {
+      if (this.isComparing && this.isComparisonOverlay) {
+        switch (this.comparisonMode) {
+          case 'overlay0':
+            return 1
+          case 'overlay25':
+            return 0.25
+          case 'overlay50':
+            return 0.5
+          case 'overlay75':
+            return 0.75
+          case 'overlay100':
+            return 0
+          default:
+            return 1
+        }
+      } else {
+        return 1
+      }
     }
   },
 
@@ -882,9 +980,7 @@ export default {
     changeMaxDuration(duration) {
       if (duration) {
         duration = floorToFrame(duration, this.fps)
-        const isChromium = !!window.chrome
-        const change = isChromium ? this.frameDuration : 0
-        this.videoDuration = duration + change
+        this.videoDuration = duration
         this.maxDuration = this.formatTime(
           this.videoDuration - this.frameDuration
         )
@@ -1011,6 +1107,9 @@ export default {
           this.fabricCanvas
         )
       }
+      this.fabricCanvasComparison = new fabric.StaticCanvas(
+        this.canvasId + '-comparison'
+      )
       this.configureCanvas()
     },
 
@@ -1031,6 +1130,14 @@ export default {
             this.fabricCanvas.calcOffset()
             this.fabricCanvas.setDimensions({ width, height })
             this.width = this.getDimensions().width
+            if (this.isComparing && !this.isComparisonOverlay) {
+              this.canvasComparisonWrapper.style.top = top + 'px'
+              this.canvasComparisonWrapper.style.left = left + width + 'px'
+              this.canvasComparisonWrapper.style.width = width + 'px'
+              this.canvasComparisonWrapper.style.height = height + 'px'
+              this.fabricCanvasComparison.calcOffset()
+              this.fabricCanvasComparison.setDimensions({ width, height })
+            }
             this.$nextTick(this.refreshCanvas())
           }, 10)
         }
@@ -1247,10 +1354,6 @@ export default {
       }
     },
 
-    onAnnotationClicked(annotation) {
-      this.loadAnnotation(annotation)
-    },
-
     onAnnotationDisplayedClicked() {
       this.clearFocus()
       this.isAnnotationsDisplayed = !this.isAnnotationsDisplayed
@@ -1285,6 +1388,9 @@ export default {
           if (!this.isMovie) {
             console.warn('Annotations are malformed or empty.')
           }
+          if (this.isComparing && !this.isComparisonOverlay) {
+            this.loadComparisonAnnotation(currentTime)
+          }
           return
         }
       }
@@ -1295,6 +1401,27 @@ export default {
       }
       this.clearCanvas()
       this.loadSingleAnnotation(annotation)
+      if (this.isComparing && !this.isComparisonOverlay) {
+        this.loadComparisonAnnotation(currentTime)
+      }
+    },
+
+    loadComparisonAnnotation(time) {
+      this.fabricCanvasComparison.clear()
+      this.previewToCompare = this.previewFileMap[this.previewToCompareId]
+      let annotations = []
+      if (this.previewToCompare && this.previewToCompare.annotations) {
+        annotations = this.previewToCompare.annotations
+      }
+      let annotation = null
+      if (this.isMovie) {
+        annotation = annotations.find(annotation => annotation.time === time)
+      } else if (this.isPicture) {
+        annotation = annotations.find(annotation => annotation.time === 0)
+      }
+      if (annotation) {
+        this.loadSingleAnnotationComparison(annotation)
+      }
     },
 
     reloadAnnotations() {
@@ -1709,6 +1836,11 @@ export default {
             this.syncComparisonViewer()
           }, 200)
           this.pause()
+          if (this.isMovie) {
+            this.loadComparisonAnnotation(this.currentTime)
+          } else if (this.isPicture) {
+            this.loadComparisonAnnotation(0)
+          }
         }
       })
     },
@@ -1725,6 +1857,10 @@ export default {
         this.taskTypeId = ''
         this.previewToCompareId = ''
       }
+      this.$nextTick(() => {
+        // Hack needed to reset positioning.
+        window.dispatchEvent(new Event('resize'))
+      })
     },
 
     light() {
@@ -1776,6 +1912,13 @@ export default {
       if (!this.isAnnotationsDisplayed) {
         this.isDrawing = false
       }
+    },
+
+    isComparisonOverlay() {
+      this.$nextTick(() => {
+        // Hack needed to reset positioning.
+        window.dispatchEvent(new Event('resize'))
+      })
     }
   }
 }
@@ -1967,6 +2110,15 @@ export default {
   flex: 1 1 0;
 }
 
+.preview-viewer {
+  overflow: hidden;
+  z-index: 1;
+}
+
+.comparison-preview-viewer {
+  z-index: 2;
+}
+
 .separator {
   background: $dark-grey-2;
 }
@@ -1995,7 +2147,8 @@ export default {
   display: none;
 }
 
-.preview-viewer {
-  overflow: hidden;
+.canvas-comparison-wrapper {
+  position: absolute;
+  z-index: 5;
 }
 </style>
