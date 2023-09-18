@@ -355,6 +355,13 @@ const actions = {
       else commit(LOAD_USER_FILTERS_END, searchFilters)
       callback(err)
     })
+    // return peopleApi.getUserSearchFilters()
+    // .then((searchFilters) => {
+    //   commit(LOAD_USER_FILTERS_END, searchFilters);
+    // })
+    // .catch((err) => {
+    //   commit(LOAD_USER_FILTERS_ERROR);
+    // })
   },
 
   saveTodoSearch({ commit, rootGetters }, searchQuery) {
