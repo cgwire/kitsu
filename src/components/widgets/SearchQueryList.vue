@@ -13,7 +13,7 @@
       :class="{ open: toggleGroupId === group.id }"
       :key="`group-${group.id}`"
       :style="{
-        backgroundColor: `${group.color}B3`
+        backgroundColor: `${group.color}23`
       }"
       @click="toggleFilterGroup(group)"
       v-for="group in userFilterGroups"
@@ -21,27 +21,31 @@
     >
       <div class="group-header">
         <span>{{ group.name }}</span>
-        <chevron-down-icon class="chevron ml05" size="12" />
+        <chevron-down-icon
+          class="chevron ml05"
+          size="12"
+          v-if="toggleGroupId !== group.id"
+        />
+        <chevron-up-icon class="chevron ml05" size="12" v-else />
         <button
           class="edit"
-          :style="{ backgroundColor: group.color }"
+          :style="{ backgroundColor: `${group.color}53` }"
           @click.stop="editGroup(group)"
         >
-          <edit2-icon size="0.7x" />
+          <edit2-icon size="0.6x" />
         </button>
         <button
           class="del"
-          :style="{ backgroundColor: group.color }"
+          :style="{ backgroundColor: `${group.color}53` }"
           @click.stop="removeGroup(group)"
           v-if="!group.queries.length"
         >
-          <trash2-icon size="0.7x" />
+          <trash2-icon size="0.6x" />
         </button>
       </div>
       <div
         :ref="`group-${group.id}`"
         class="group-list"
-        :style="{ backgroundColor: `${group.color}B3` }"
         v-if="toggleGroupId === group.id"
       >
         <span class="tag empty" v-if="!group.queries.length">
@@ -50,7 +54,7 @@
         <span
           class="tag"
           :key="searchQuery.id"
-          :style="{ backgroundColor: `${group.color}BF` }"
+          :style="{ backgroundColor: `${group.color}23` }"
           @click="changeSearch(searchQuery)"
           v-for="searchQuery in group.queries"
           v-else
@@ -61,7 +65,7 @@
           <button
             class="edit"
             :style="{
-              backgroundColor: `${group.color}`
+              backgroundColor: `${group.color}53`
             }"
             @click.stop="editSearch(searchQuery)"
           >
@@ -69,7 +73,7 @@
           </button>
           <button
             class="del"
-            :style="{ backgroundColor: `${group.color}B3` }"
+            :style="{ backgroundColor: `${group.color}53` }"
             @click.stop="removeSearch(searchQuery)"
           >
             <trash2-icon size="0.6x" />
@@ -122,6 +126,7 @@
 import { mapActions } from 'vuex'
 import {
   ChevronDownIcon,
+  ChevronUpIcon,
   Edit2Icon,
   FolderPlusIcon,
   Trash2Icon
@@ -154,6 +159,7 @@ export default {
   },
   components: {
     ChevronDownIcon,
+    ChevronUpIcon,
     Edit2Icon,
     EditSearchFilterModal,
     EditSearchFilterGroupModal,
@@ -319,19 +325,19 @@ export default {
   }
 
   .group-list {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
     align-items: flex-start;
-    padding: 0.5rem 0;
-    background-color: whitesmoke;
+    background-color: var(--background-alt);
     border-bottom-left-radius: 1em;
     border-bottom-right-radius: 1em;
+    display: flex;
+    flex-direction: column;
+    left: 0;
     max-height: 200px;
     overflow: scroll;
+    padding: 0.5rem 0;
+    position: absolute;
+    top: 100%;
+    z-index: 1000;
 
     .tag {
       margin: 0 0.5em;
@@ -350,9 +356,15 @@ export default {
   }
 }
 
-.search-queries .group.tag:not(.open):hover,
 .search-queries .tag:hover {
   transform: scale(1.1);
+}
+
+.search-queries .group.tag .group-header:hover {
+}
+
+.search-queries .group.tag.open .tag:hover {
+  transform: scale(1.03);
 }
 
 .search-queries .group.tag:hover, // avoid bug  (overflow)
@@ -405,6 +417,7 @@ export default {
   margin-left: 1em;
   margin-right: 0;
 }
+
 .search-queries .del {
   margin-left: 0.5em;
 }

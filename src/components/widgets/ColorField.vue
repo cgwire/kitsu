@@ -9,11 +9,11 @@
           color: true,
           selected: value === color
         }"
-        :style="{ 'border-color': color }"
-        v-for="(color, index) in colors"
+        :style="{ 'border-color': color + hexaOpacity }"
         @click="colorChanged(color)"
+        v-for="(color, index) in colors"
       >
-        <span :style="{ background: color }"> </span>
+        <span :style="{ background: color + hexaOpacity }"> </span>
       </div>
     </div>
   </div>
@@ -29,8 +29,8 @@ export default {
       default: '',
       type: String
     },
-    value: {
-      default: '#999999',
+    hexaOpacity: {
+      default: 'FF',
       type: String
     },
     placeholder: {
@@ -39,6 +39,10 @@ export default {
     },
     type: {
       default: 'text',
+      type: String
+    },
+    value: {
+      default: '#999999',
       type: String
     },
     colors: {
