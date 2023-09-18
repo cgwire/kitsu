@@ -37,6 +37,7 @@
           <div class="query-list mt1">
             <search-query-list
               :queries="sequenceSearchQueries"
+              type="sequence"
               @change-search="changeSearch"
               @remove-search="removeSearchQuery"
               v-if="!isSequencesLoading && !initialLoading"

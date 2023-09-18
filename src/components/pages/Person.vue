@@ -110,6 +110,7 @@
           >
             <search-query-list
               :queries="personTaskSearchQueries"
+              type="person"
               @change-search="changeSearch"
               @remove-search="removeSearchQuery"
             />
@@ -577,19 +578,15 @@ export default {
     },
 
     saveSearchQuery(searchQuery) {
-      this.savePersonTasksSearch(searchQuery)
-        .then(() => {})
-        .catch(err => {
-          if (err) console.error(err)
-        })
+      this.savePersonTasksSearch(searchQuery).catch(err => {
+        if (err) console.error(err)
+      })
     },
 
     removeSearchQuery(searchQuery) {
-      this.removePersonTasksSearch(searchQuery)
-        .then(() => {})
-        .catch(err => {
-          if (err) console.error(err)
-        })
+      this.removePersonTasksSearch(searchQuery).catch(err => {
+        if (err) console.error(err)
+      })
     },
 
     updateActiveTab() {

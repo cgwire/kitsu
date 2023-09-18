@@ -41,6 +41,7 @@
     <div class="query-list mt1">
       <search-query-list
         :queries="sequenceSearchQueries"
+        type="sequenceStat"
         @change-search="changeSearch"
         @remove-search="removeSearchQuery"
       />

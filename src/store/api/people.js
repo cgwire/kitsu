@@ -231,6 +231,33 @@ export default {
     client.get(`/api/data/persons/${personId}/done-tasks`, callback)
   },
 
+  getUserSearchFilterGroups() {
+    return client.pget('/api/data/user/filter-groups')
+  },
+
+  createFilterGroup(listType, name, color, productionId, entityType) {
+    const data = {
+      list_type: listType,
+      name,
+      color,
+      project_id: productionId,
+      entity_type: entityType
+    }
+    return client.ppost('/api/data/user/filter-groups', data)
+  },
+
+  updateFilterGroup(filterGroup) {
+    const data = {
+      name: filterGroup.name,
+      color: filterGroup.color
+    }
+    return client.pput(`/api/data/user/filter-groups/${filterGroup.id}`, data)
+  },
+
+  removeFilterGroup(filterGroup) {
+    return client.pdel(`/api/data/user/filter-groups/${filterGroup.id}`)
+  },
+
   getUserSearchFilters(callback) {
     client.get('/api/data/user/filters', callback)
   },
@@ -238,7 +265,8 @@ export default {
   updateFilter(searchFilter) {
     const data = {
       name: searchFilter.name,
-      search_query: searchFilter.search_query
+      search_query: searchFilter.search_query,
+      search_filter_group_id: searchFilter.search_filter_group_id
     }
     return client.pput(`/api/data/user/filters/${searchFilter.id}`, data)
   },
@@ -254,7 +282,7 @@ export default {
     return client.ppost('/api/data/user/filters', data)
   },
 
-  removeFilter(searchFilter, callback) {
+  removeFilter(searchFilter) {
     return client.pdel(`/api/data/user/filters/${searchFilter.id}`)
   },
 

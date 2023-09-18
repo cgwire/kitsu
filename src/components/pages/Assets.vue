@@ -61,7 +61,10 @@
           </div>
           <div class="query-list">
             <search-query-list
+              :groups="assetSearchFilterGroups"
+              :is-group-enabled="true"
               :queries="assetSearchQueries"
+              type="asset"
               @change-search="changeSearch"
               @remove-search="removeSearchQuery"
               v-if="!isAssetsLoading && !initialLoading"
@@ -423,6 +426,7 @@ export default {
       'assetListScrollPosition',
       'assetsCsvFormData',
       'assetSearchText',
+      'assetSearchFilterGroups',
       'assetSearchQueries',
       'assetTypes',
       'assetValidationColumns',
@@ -812,19 +816,15 @@ export default {
     },
 
     saveSearchQuery(searchQuery) {
-      this.saveAssetSearch(searchQuery)
-        .then(() => {})
-        .catch(err => {
-          if (err) console.error(err)
-        })
+      this.saveAssetSearch(searchQuery).catch(err => {
+        if (err) console.error(err)
+      })
     },
 
     removeSearchQuery(searchQuery) {
-      this.removeAssetSearch(searchQuery)
-        .then(() => {})
-        .catch(err => {
-          if (err) console.error(err)
-        })
+      this.removeAssetSearch(searchQuery).catch(err => {
+        if (err) console.error(err)
+      })
     },
 
     saveScrollPosition(scrollPosition) {

@@ -37,6 +37,7 @@
           <div class="query-list mt1">
             <search-query-list
               :queries="episodeSearchQueries"
+              type="episode"
               @change-search="changeSearch"
               @remove-search="removeSearchQuery"
               v-if="!isEpisodesLoading && !initialLoading"

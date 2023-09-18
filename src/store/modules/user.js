@@ -43,6 +43,9 @@ import {
   LOAD_USER_FILTERS_END,
   LOAD_USER_FILTERS_ERROR,
   UPDATE_USER_FILTER,
+  LOAD_USER_FILTER_GROUPS_END,
+  LOAD_USER_FILTER_GROUPS_ERROR,
+  UPDATE_USER_FILTER_GROUP,
   SAVE_TODO_SEARCH_END,
   REMOVE_TODO_SEARCH_END,
   ADD_SELECTED_TASK,
@@ -109,6 +112,7 @@ const initialState = {
   todoSelectionGrid: {},
   todoSearchQueries: [],
   userFilters: {},
+  userFilterGroups: {},
   todoListScrollPosition: 0,
 
   timeSpentMap: {},
@@ -144,6 +148,7 @@ const getters = {
   todoSelectionGrid: state => state.todoSelectionGrid,
   todoSearchQueries: state => state.todoSearchQueries,
   userFilters: state => state.userFilters,
+  userFilterGroups: state => state.userFilterGroups,
   isTodosLoading: state => state.isTodosLoading,
   isTodosLoadingError: state => state.isTodosLoadingError,
   todoListScrollPosition: state => state.todoListScrollPosition,
@@ -334,9 +339,14 @@ const actions = {
     commit(SET_TODOS_SEARCH, searchText)
   },
 
-  updateSearchFilter({ commit }, searchFilter) {
+  async updateSearchFilterGroup({ commit }, searchFilterGroup) {
+    await peopleApi.updateFilterGroup(searchFilterGroup)
+    commit(UPDATE_USER_FILTER_GROUP, searchFilterGroup)
+  },
+
+  async updateSearchFilter({ commit }, searchFilter) {
+    await peopleApi.updateFilter(searchFilter)
     commit(UPDATE_USER_FILTER, searchFilter)
-    return peopleApi.updateFilter(searchFilter)
   },
 
   loadUserSearchFilters({ commit }, callback) {
@@ -345,6 +355,13 @@ const actions = {
       else commit(LOAD_USER_FILTERS_END, searchFilters)
       callback(err)
     })
+    // return peopleApi.getUserSearchFilters()
+    // .then((searchFilters) => {
+    //   commit(LOAD_USER_FILTERS_END, searchFilters);
+    // })
+    // .catch((err) => {
+    //   commit(LOAD_USER_FILTERS_ERROR);
+    // })
   },
 
   saveTodoSearch({ commit, rootGetters }, searchQuery) {
@@ -378,6 +395,7 @@ const actions = {
   loadContext({ commit, rootGetters }, callback) {
     return peopleApi.getContext().then(context => {
       commit(LOAD_USER_FILTERS_END, context.search_filters)
+      commit(LOAD_USER_FILTER_GROUPS_END, context.search_filter_groups)
       commit(LOAD_PRODUCTION_STATUS_END, context.project_status)
       commit(LOAD_DEPARTMENTS_END, context.departments)
       commit(LOAD_TASK_STATUSES_END, context.task_status)
@@ -696,6 +714,24 @@ const mutations = {
         const filter = projectFilters.find(f => f.id === userFilter.id)
         if (filter) {
           Object.assign(filter, userFilter)
+        }
+      })
+    })
+  },
+
+  [LOAD_USER_FILTER_GROUPS_ERROR](state) {},
+  [LOAD_USER_FILTER_GROUPS_END](state, userFilterGroups) {
+    state.userFilterGroups = userFilterGroups
+  },
+  [UPDATE_USER_FILTER_GROUP](state, userFilterGroup) {
+    Object.keys(state.userFilterGroups).forEach(typeName => {
+      Object.keys(state.userFilterGroups[typeName]).forEach(projectId => {
+        const projectFilterGroups = state.userFilterGroups[typeName][projectId]
+        const filterGroup = projectFilterGroups.find(
+          f => f.id === userFilterGroup.id
+        )
+        if (filterGroup) {
+          Object.assign(filterGroup, userFilterGroup)
         }
       })
     })

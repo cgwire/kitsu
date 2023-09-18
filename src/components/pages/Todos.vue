@@ -78,6 +78,7 @@
         >
           <search-query-list
             :queries="todoSearchQueries"
+            type="todo"
             @change-search="changeSearch"
             @remove-search="removeSearchQuery"
           />
@@ -361,17 +362,13 @@ export default {
     },
 
     saveSearchQuery(searchQuery) {
-      this.saveTodoSearch(searchQuery)
-        .then(() => {})
-        .catch(console.error)
+      this.saveTodoSearch(searchQuery).catch(console.error)
     },
 
     removeSearchQuery(searchQuery) {
-      this.removeTodoSearch(searchQuery)
-        .then(() => {})
-        .catch(err => {
-          if (err) console.error(err)
-        })
+      this.removeTodoSearch(searchQuery).catch(err => {
+        if (err) console.error(err)
+      })
     },
 
     onDateChanged(date) {

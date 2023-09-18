@@ -9,8 +9,11 @@
 
     <div class="modal-content">
       <div class="box">
-        <h1 class="title">
-          {{ $t('main.search_query_edit') }}
+        <h1 class="title" v-if="groupToEdit.id">
+          {{ $t('main.filter_group_edit') }} "{{ groupToEdit.name }}"
+        </h1>
+        <h1 class="title" v-else>
+          {{ $t('main.filter_group_add') }}
         </h1>
 
         <form v-on:submit.prevent>
@@ -21,23 +24,15 @@
             @enter="runConfirmation"
             v-focus
           />
-
-          <text-field
-            :label="$t('main.search_query')"
-            v-model.trim="form.search_query"
-            @enter="runConfirmation"
-          />
-
-          <combobox
-            :label="$t('main.filter_group')"
-            :options="groupOptions"
-            v-model="form.search_filter_group_id"
-            v-if="isGroupEnabled"
+          <color-field
+            ref="colorField"
+            :label="$t('main.color')"
+            v-model="form.color"
           />
         </form>
 
         <modal-footer
-          :error-text="$t('main.search_query_edit_error')"
+          :error-text="$t('main.filter_group_error')"
           :is-error="isError"
           :is-loading="isLoading"
           @confirm="runConfirmation"
@@ -50,20 +45,18 @@
 
 <script>
 /*
- * Modal used to edit search filter information. Users prefer to rename the
-   filter label when it's too complex to read or too long.
+ * Modal used to edit filter group information.
  */
 import { modalMixin } from '@/components/modals/base_modal'
 import ModalFooter from '@/components/modals/ModalFooter'
-
-import Combobox from '@/components/widgets/Combobox'
+import ColorField from '@/components/widgets/ColorField'
 import TextField from '@/components/widgets/TextField'
 
 export default {
-  name: 'edit-search-filter-modal',
+  name: 'edit-search-filter-group-modal',
   mixins: [modalMixin],
   components: {
-    Combobox,
+    ColorField,
     ModalFooter,
     TextField
   },
@@ -77,32 +70,21 @@ export default {
       type: Boolean,
       default: false
     },
-    isGroupEnabled: {
-      type: Boolean,
-      default: false
-    },
     isLoading: {
       type: Boolean,
       default: false
     },
-    searchQueryToEdit: {
+    groupToEdit: {
       type: Object,
       default: () => {}
-    },
-    groupOptions: {
-      type: Array,
-      default: () => []
     }
   },
 
   data() {
     return {
       form: {
-        id: null,
-        name: '',
-        search_filter_group_id: null,
-        search_query: '',
-        task_status_id: null
+        color: '',
+        name: ''
       }
     }
   },
@@ -115,30 +97,22 @@ export default {
       }
 
       if (!event || event.keyCode === 13 || !event.keyCode) {
-        this.$emit('confirm', {
-          id: this.searchQueryToEdit.id,
-          ...this.form
-        })
+        this.$emit('confirm', this.form)
       }
     }
   },
 
   watch: {
-    searchQueryToEdit() {
-      if (this.searchQueryToEdit?.id) {
-        this.form.id = this.searchQueryToEdit.id
-        this.form.name = this.searchQueryToEdit.name
-        this.form.search_filter_group_id =
-          this.searchQueryToEdit.search_filter_group_id
-        this.form.search_query = this.searchQueryToEdit.search_query
-      } else {
-        this.form = {
-          id: null,
-          name: '',
-          search_filter_group_id: null,
-          search_query: '',
-          task_status_id: null
-        }
+    groupToEdit() {
+      const {
+        id,
+        color = '',
+        name = ''
+      } = this.groupToEdit?.id ? this.groupToEdit : {}
+      this.form = {
+        id,
+        color,
+        name
       }
     },
 

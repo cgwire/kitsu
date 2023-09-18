@@ -1169,20 +1169,6 @@ textarea.input:focus {
   max-width: 95%;
 }
 
-.query-list .tag {
-  margin-right: 1em;
-  margin-bottom: 0.2em;
-  border: 1px solid transparent;
-}
-
-.query-list .tag .delete {
-  transform: rotate(45deg) scale(0.7);
-}
-
-.query-list .tag:hover {
-  transform: scale(1.1);
-}
-
 .fixed-page {
   position: fixed;
   left: 0;
