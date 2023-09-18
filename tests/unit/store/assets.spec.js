@@ -771,6 +771,7 @@ describe('Assets store', () => {
         assetValidationColumns: 1,
         displayedAssets: 1,
         assetFilledColumns: 1,
+        assetSearchFilterGroups: 1,
         assetSearchQueries: 1,
         displayedAssetsCount: 100,
         displayedAssetsLength: 100,
@@ -786,6 +787,7 @@ describe('Assets store', () => {
         assetValidationColumns: [],
         displayedAssets: [],
         assetFilledColumns: {},
+        assetSearchFilterGroups: [],
         assetSearchQueries: [],
         displayedAssetsCount: 0,
         displayedAssetsLength: 0,
@@ -806,6 +808,7 @@ describe('Assets store', () => {
         assetValidationColumns: 1,
         displayedAssets: 1,
         assetFilledColumns: 1,
+        assetSearchFilterGroups: 1,
         assetSearchQueries: 1,
         displayedAssetsCount: 100,
         displayedAssetsLength: 100,
@@ -823,6 +826,7 @@ describe('Assets store', () => {
         assetValidationColumns: [],
         displayedAssets: [],
         assetFilledColumns: {},
+        assetSearchFilterGroups: [],
         assetSearchQueries: [],
         displayedAssetsCount: 0,
         displayedAssetsLength: 0,
@@ -896,6 +900,11 @@ describe('Assets store', () => {
           1: 'assetSearchQueries'
         }
       }
+      const userFilterGroups = {
+        asset: {
+          1: 'assetSearchFilterGroups'
+        }
+      }
       const personMap = new Map()
       const taskMap = new Map()
       const taskTypeMap = new Map()
@@ -903,6 +912,7 @@ describe('Assets store', () => {
         production,
         assets,
         userFilters,
+        userFilterGroups,
         personMap,
         taskMap,
         taskTypeMap
@@ -998,6 +1008,7 @@ describe('Assets store', () => {
         displayedAssetsCount: 4,
         displayedAssetsLength: 2,
         displayedAssetsTimeSpent: 0,
+        assetSearchFilterGroups: 'assetSearchFilterGroups',
         assetSearchQueries: 'assetSearchQueries',
         assetMap: new Map(Object.entries({
           4: {
@@ -1961,6 +1972,7 @@ describe('Assets store', () => {
         assetFilledColumns: {},
         assetListScrollPosition: 0,
         assetMap: new Map(),
+        assetSearchFilterGroups: [],
         assetSearchQueries: [],
         assetSearchText: '',
         assetSelectionGrid: {},
