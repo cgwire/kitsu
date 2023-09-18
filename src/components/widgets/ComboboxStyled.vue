@@ -124,16 +124,16 @@ export default {
   },
 
   methods: {
-    selectOption(option) {
-      this.$emit('input', option.value)
-      this.$emit('change', option.value)
-      this.selectedOption = option
-    },
-
     openRoute(option) {
       const ahref = this.$router.resolve(option.route).href
       const url = `${window.location.protocol}//${window.location.host}${ahref}`
       window.open(url, '_blank')
+    },
+
+    selectOption(option) {
+      this.$emit('input', option.value)
+      this.$emit('change', option.value)
+      this.selectedOption = option
     },
 
     toggleList() {
@@ -170,7 +170,7 @@ export default {
     },
 
     showList() {
-      if (this.showList) {
+      if (this.showList && this.isReversed) {
         this.$nextTick(() => {
           let list = null
           for (const child of this.$refs.select.children) {
