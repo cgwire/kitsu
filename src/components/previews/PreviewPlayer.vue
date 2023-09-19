@@ -1122,34 +1122,31 @@ export default {
     },
 
     fixCanvasSize(dimensions) {
-      if (this.fabricCanvas) {
-        const { height, left, top, width } = dimensions
-
-        this.fabricCanvas.setDimensions({ width, height })
-        this.fabricCanvas.width = width
-        this.fabricCanvas.height = height
-
-        if (this.canvasWrapper) {
-          this.canvasWrapper.style.top = top + 'px'
-          this.canvasWrapper.style.left = left + 'px'
-          this.canvasWrapper.style.width = width + 'px'
-          this.canvasWrapper.style.height = height + 'px'
-          setTimeout(() => {
-            this.fabricCanvas.calcOffset()
-            this.fabricCanvas.setDimensions({ width, height })
-            this.width = this.getDimensions().width
-            if (this.isComparing && !this.isComparisonOverlay) {
-              this.canvasComparisonWrapper.style.top = top + 'px'
-              this.canvasComparisonWrapper.style.left = left + width + 'px'
-              this.canvasComparisonWrapper.style.width = width + 'px'
-              this.canvasComparisonWrapper.style.height = height + 'px'
-              this.fabricCanvasComparison.calcOffset()
-              this.fabricCanvasComparison.setDimensions({ width, height })
-            }
-            this.$nextTick(this.refreshCanvas())
-          }, 10)
-        }
+      if (!this.fabricCanvas) {
+        return
       }
+
+      const { height, left, top, width } = dimensions
+
+      this.canvasWrapper.style.top = top + 'px'
+      this.canvasWrapper.style.left = left + 'px'
+      this.canvasWrapper.style.width = width + 'px'
+      this.canvasWrapper.style.height = height + 'px'
+      // const calcOffset = this.fabricCanvas.calcOffset()
+      this.fabricCanvas.setDimensions({ width, height })
+
+      this.width = this.getDimensions().width
+
+      if (this.isComparing && !this.isComparisonOverlay) {
+        this.canvasComparisonWrapper.style.top = top + 'px'
+        this.canvasComparisonWrapper.style.left = left + width + 'px'
+        this.canvasComparisonWrapper.style.width = width + 'px'
+        this.canvasComparisonWrapper.style.height = height + 'px'
+        // this.fabricCanvasComparison.calcOffset()
+        this.fabricCanvasComparison.setDimensions({ width, height })
+      }
+
+      this.refreshCanvas()
     },
 
     // Screen
