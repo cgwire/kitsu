@@ -929,7 +929,7 @@ const mutations = {
 
     state.shotSearchQueries = userFilters.shot?.[production.id] || []
 
-    state.shotSearchFilterGroups = userFilterGroups.shot?.[production.id] || []
+    state.shotSearchFilterGroups = userFilterGroups?.shot?.[production.id] || []
   },
 
   [SAVE_SHOT_SEARCH_END](state, { searchQuery }) {

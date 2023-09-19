@@ -155,6 +155,7 @@ export default {
       isFrameNumberVisible: false,
       isTileLoading: false,
       hoverFrame: 0,
+      progressDragging: false,
       width: 0,
       domEvents: [
         ['mousemove', this.doProgressDrag],

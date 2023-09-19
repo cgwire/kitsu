@@ -863,7 +863,7 @@ const mutations = {
     state.assetSearchQueries = userFilters.asset?.[production.id] || []
 
     state.assetSearchFilterGroups =
-      userFilterGroups.asset?.[production.id] || []
+      userFilterGroups?.asset?.[production.id] || []
   },
 
   [ADD_ASSET](state, { taskTypeMap, taskMap, personMap, production, asset }) {
