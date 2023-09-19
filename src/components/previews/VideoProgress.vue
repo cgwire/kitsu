@@ -81,23 +81,32 @@
       <span
         class="frame-number"
         :style="getFrameNumberStyle(hoverFrame)"
-        v-show="isFrameNumberVisible && hoverFrame > 0"
+        v-show="isFrameNumberVisible && hoverFrame > 0 && !progressDragging"
       >
         <span>
           {{ hoverFrame }}
         </span>
-        <span :style="getFrameBackgroundStyle(hoverFrame)"> </span>
+        <span
+          :style="getFrameBackgroundStyle(hoverFrame)"
+          v-if="!isTileLoading"
+        ></span>
+        <spinner class="mt2" v-else />
       </span>
     </div>
   </div>
 </template>
 
 <script>
+import Spinner from '@/components/widgets/Spinner'
 import { domMixin } from '@/components/mixins/dom'
 
 export default {
   name: 'video-progress',
   mixins: [domMixin],
+
+  components: {
+    Spinner
+  },
 
   props: {
     annotations: {
@@ -144,6 +153,7 @@ export default {
       frameNumberHeight: 0,
       frameNumberLeftPosition: 0,
       isFrameNumberVisible: false,
+      isTileLoading: false,
       hoverFrame: 0,
       width: 0,
       domEvents: [
@@ -369,6 +379,16 @@ export default {
       this.width = progressCoordinates.width
       this.progress.setAttribute('max', this.videoDuration)
       this.updateProgressBar(0)
+    },
+
+    previewId() {
+      const path = `/api/movies/tiles/preview-files/${this.previewId}.png`
+      const img = new Image()
+      this.isTileLoading = true
+      img.src = path
+      img.onload = () => {
+        this.isTileLoading = false
+      }
     }
   }
 }
