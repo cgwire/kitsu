@@ -93,8 +93,8 @@ export default {
   mounted() {
     this.container.style.height = this.defaultHeight + 'px'
     this.isLoading = true
+    this.setPictureEmptyPath()
     if (this.picture.complete) {
-      this.isLoading = false
       this.onWindowResize()
     }
     this.picture.addEventListener('load', this.endLoading)
@@ -236,7 +236,15 @@ export default {
     // Configuration
 
     endLoading() {
-      this.isLoading = false
+      if (
+        this.fullScreen &&
+        (this.pictureBig.complete || this.pictureGif.complete)
+      ) {
+        this.isLoading = false
+      } else if (!this.fullScreen && this.picture.complete) {
+        this.isLoading = false
+      }
+      this.$emit('loaded')
       this.$nextTick(this.resetPicture)
     },
 
@@ -291,6 +299,15 @@ export default {
           this.$emit('size-changed', { width, height, top, left })
         }
         this.previousDimensions = { width, height, top, left }
+      }
+    },
+
+    setPictureEmptyPath() {
+      if (this.isGif && this.isPicture) {
+        this.pictureGifPath = null
+      } else if (this.preview && this.isPicture) {
+        this.picturePath = null
+        this.pictureDlPath = null
       }
     },
 
@@ -386,23 +403,26 @@ export default {
     },
 
     preview() {
-      this.resetPanZoom()
-      this.isLoading = true
-      this.setPicturePath()
-      this.setPictureDlPath()
-      if (this.currentIndex > 1) {
-        this.currentIndex = 1
-      }
-      if (this.fullScreen) {
-        if (this.pictureBig.complete) {
+      if (this.preview && this.preview.id !== this.lastPreviewId) {
+        this.lastPreviewId = this.preview.id
+        this.resetPanZoom()
+        this.isLoading = true
+        this.setPictureEmptyPath()
+        this.$nextTick(() => {
           this.resetPicture()
-          this.isLoading = false
-        }
-      } else {
-        if (this.picture.complete) {
-          this.isLoading = false
-        }
-        this.$nextTick(this.resetPicture)
+          this.setPicturePath()
+          this.setPictureDlPath()
+          if (this.currentIndex > 1) {
+            this.currentIndex = 1
+          }
+          if (this.fullScreen) {
+            if (this.pictureBig.complete) {
+              this.resetPicture()
+            }
+          } else {
+            this.$nextTick(this.resetPicture)
+          }
+        })
       }
     }
   }

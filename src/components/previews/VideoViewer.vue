@@ -21,13 +21,11 @@
       <video
         ref="movie"
         class="annotation-movie"
-        :style="{
-          display: isLoading ? 'none' : 'block'
-        }"
         :src="moviePath"
         :poster="posterPath"
         preload="auto"
         type="video/mp4"
+        v-show="!isLoading"
       ></video>
     </div>
   </div>
@@ -154,10 +152,13 @@ export default {
         this.video.addEventListener('loadedmetadata', () => {
           this.configureVideo()
           this.onWindowResize()
-          this.isLoading = false
           this.setCurrentTime(0)
           this.setCurrentTimeRaw(0)
           this.$emit('video-loaded')
+        })
+
+        this.video.addEventListener('canplay', () => {
+          this.isLoading = false
         })
 
         this.video.addEventListener('ended', () => {
@@ -168,6 +169,18 @@ export default {
           console.error('An error occurred while loading a video', err)
           this.$refs.movie.style.height = this.defaultHeight + 'px'
           this.isLoading = false
+        })
+
+        this.video.addEventListener('loadstart', () => {
+          this.isLoading = true
+        })
+
+        this.video.addEventListener('stalled', () => {
+          this.isLoading = true
+        })
+
+        this.video.addEventListener('waiting', () => {
+          this.isLoading = true
         })
 
         window.addEventListener('resize', this.onWindowResize)
@@ -515,10 +528,13 @@ export default {
 
 <style lang="scss" scoped>
 .loading-background {
-  width: 100%;
-  height: 100%;
-  background: black;
+  background: #00000088;
+  position: absolute;
   display: flex;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   align-items: center;
   justify-content: center;
   text-align: center;

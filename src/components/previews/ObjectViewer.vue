@@ -29,7 +29,7 @@ export default {
 
   props: {
     previewUrl: {
-      default: '',
+      default: null,
       type: String
     },
     light: {

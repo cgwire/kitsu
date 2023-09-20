@@ -1877,6 +1877,7 @@ export default {
       this.$nextTick(() => {
         // Hack needed to reset positioning.
         window.dispatchEvent(new Event('resize'))
+        this.previewViewer.resetZoom()
       })
     },
 
