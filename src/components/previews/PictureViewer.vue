@@ -281,7 +281,16 @@ export default {
 
         this.resetPanZoom()
 
-        this.$emit('size-changed', { width, height, top, left })
+        if (
+          !this.previousDimensions ||
+          this.previousDimensions.width !== width ||
+          this.previousDimensions.height !== height ||
+          this.previousDimensions.left !== left ||
+          this.previousDimensions.top !== top
+        ) {
+          this.$emit('size-changed', { width, height, top, left })
+        }
+        this.previousDimensions = { width, height, top, left }
       }
     },
 

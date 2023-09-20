@@ -380,7 +380,17 @@ export default {
         const left = videoPosition.left - containerPosition.left
         width = videoPosition.width
         height = videoPosition.height
-        this.$emit('size-changed', { width, height, top, left })
+
+        if (
+          !this.previousDimensions ||
+          this.previousDimensions.width !== width ||
+          this.previousDimensions.height !== height ||
+          this.previousDimensions.left !== left ||
+          this.previousDimensions.top !== top
+        ) {
+          this.$emit('size-changed', { width, height, top, left })
+        }
+        this.previousDimensions = { width, height, top, left }
       } else {
         this.$emit('size-changed', { width: 0, height: 0, top: 0, left: 0 })
       }
