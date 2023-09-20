@@ -44,9 +44,30 @@ export default {
   },
 
   props: {
+    currentPreviewIndex: {
+      type: Number,
+      default: 0
+    },
     entities: {
       type: Array,
       default: () => []
+    },
+    fullScreen: {
+      type: Boolean,
+      default: false
+    },
+    handleIn: {
+      type: Number,
+      default: 0
+    },
+    handleOut: {
+      type: Number,
+      default: 0
+    },
+    name: {
+      // Debug purpose
+      type: String,
+      default: 'main'
     },
     muted: {
       type: Boolean,
@@ -59,27 +80,6 @@ export default {
     isRepeating: {
       type: Boolean,
       default: false
-    },
-    fullScreen: {
-      type: Boolean,
-      default: false
-    },
-    currentPreviewIndex: {
-      type: Number,
-      default: 0
-    },
-    name: {
-      // Debug purpose
-      type: String,
-      default: 'main'
-    },
-    handleIn: {
-      type: Number,
-      default: 0
-    },
-    handleOut: {
-      type: Number,
-      default: 0
     }
   },
 
@@ -105,21 +105,28 @@ export default {
     this.player1.addEventListener('stalled', this.showLoading)
     this.player1.addEventListener('waiting', this.showLoading)
     this.player1.addEventListener('loadstart', this.showLoading)
-    this.player1.addEventListener('error', err => {
-      this.hideLoading()
-    })
+    this.player1.addEventListener('error', this.hideLoading)
     this.player2.addEventListener('canplay', this.hideLoading)
     this.player2.addEventListener('stalled', this.showLoading)
     this.player2.addEventListener('waiting', this.showLoading)
     this.player2.addEventListener('loadstart', this.showLoading)
-    this.player2.addEventListener('error', err => {
-      this.hideLoading()
-    })
+    this.player2.addEventListener('error', this.hideLoading)
   },
 
   beforeDestroy() {
     window.removeEventListener('resize', this.resetHeight)
     this.player1.removeEventListener('loadedmetadata', this.emitLoadedEvent)
+
+    this.player1.removeEventListener('canplay', this.hideLoading)
+    this.player1.removeEventListener('stalled', this.showLoading)
+    this.player1.removeEventListener('waiting', this.showLoading)
+    this.player1.removeEventListener('loadstart', this.showLoading)
+    this.player1.removeEventListener('error', this.hideLoading)
+    this.player2.removeEventListener('canplay', this.hideLoading)
+    this.player2.removeEventListener('stalled', this.showLoading)
+    this.player2.removeEventListener('waiting', this.showLoading)
+    this.player2.removeEventListener('loadstart', this.showLoading)
+    this.player2.removeEventListener('error', this.hideLoading)
   },
 
   computed: {
@@ -133,16 +140,16 @@ export default {
       return parseFloat(this.currentProduction.fps || '24')
     },
 
+    frameDuration() {
+      return Math.round((1 / this.fps) * 10000) / 10000
+    },
+
     player1() {
       return this.$refs.player1
     },
 
     player2() {
       return this.$refs.player2
-    },
-
-    frameDuration() {
-      return Math.round((1 / this.fps) * 10000) / 10000
     }
   },
 
@@ -153,11 +160,10 @@ export default {
 
     showLoading() {
       setTimeout(() => {
-        console.log(this.currentPlayer.readyState)
         if (this.currentPlayer.readyState !== 4) {
           this.isLoading = true
         }
-      }, 150)
+      }, 150) // Hack to avoid blinking effect
     },
 
     // Helpers
@@ -387,7 +393,7 @@ export default {
         if (this.nextPlayer) {
           this.nextPlayer.currentTime = handleIn
             ? handleIn * this.frameDuration
-            : this.frameDuration
+            : 0
           this.nextPlayer.style.display = 'block'
           this.nextPlayer.play()
         }
@@ -525,10 +531,11 @@ export default {
   },
 
   watch: {
-    isHd() {
-      if (this.currentPlayer) {
-        this.reloadCurrentEntity()
-        if (this.isPlaying) this.play()
+    currentPreviewIndex() {
+      if (!this.isPlaying) {
+        const silent = true
+        this.setCurrentTimeRaw(0)
+        this.reloadCurrentEntity(silent)
       }
     },
 
@@ -546,11 +553,10 @@ export default {
       }, 300)
     },
 
-    currentPreviewIndex() {
-      if (!this.isPlaying) {
-        const silent = true
-        this.setCurrentTimeRaw(0)
-        this.reloadCurrentEntity(silent)
+    isHd() {
+      if (this.currentPlayer) {
+        this.reloadCurrentEntity()
+        if (this.isPlaying) this.play()
       }
     }
   }
@@ -572,10 +578,10 @@ export default {
 }
 
 .video-loader {
+  align-items: center;
   background: #00000088;
   color: white;
   display: flex;
-  align-items: center;
   justify-content: center;
   position: absolute;
   top: 0;
