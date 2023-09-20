@@ -1,5 +1,8 @@
 <template>
   <div ref="container" class="video-wrapper filler flexrow-item">
+    <div class="video-loader" v-show="isLoading">
+      <Spinner class="mt2" style="color: white" />
+    </div>
     <video
       ref="player1"
       preload="auto"
@@ -31,10 +34,14 @@
 import { mapGetters } from 'vuex'
 import { floorToFrame, roundToFrame } from '@/lib/video'
 
+import Spinner from '@/components/widgets/Spinner'
+
 export default {
   name: 'raw-video-player',
 
-  components: {},
+  components: {
+    Spinner
+  },
 
   props: {
     entities: {
@@ -79,6 +86,7 @@ export default {
   data() {
     return {
       currentPlayer: undefined,
+      isLoading: true,
       isPlaying: false,
       nextPlayer: undefined,
       playingIndex: 0
@@ -92,10 +100,23 @@ export default {
     this.player1.addEventListener('loadedmetadata', this.emitLoadedEvent)
     window.addEventListener('resize', this.resetHeight)
     this.$options.currentTimeCalls = []
-    if (this.video && this.video.readyState === 4) {
-      this.$emit('metadata-loaded', event)
-      this.resetHeight()
-    }
+
+    this.player1.addEventListener('canplay', this.hideLoading)
+    this.player1.addEventListener('stalled', this.showLoading)
+    this.player1.addEventListener('waiting', this.showLoading)
+    this.player1.addEventListener('loadstart', this.showLoading)
+    this.player1.addEventListener('error', err => {
+      console.error(err)
+      this.hideLoading()
+    })
+    this.player2.addEventListener('canplay', this.hideLoading)
+    this.player2.addEventListener('stalled', this.showLoading)
+    this.player2.addEventListener('waiting', this.showLoading)
+    this.player2.addEventListener('loadstart', this.showLoading)
+    this.player2.addEventListener('error', err => {
+      console.error(err)
+      this.hideLoading()
+    })
   },
 
   beforeDestroy() {
@@ -128,6 +149,19 @@ export default {
   },
 
   methods: {
+    hideLoading() {
+      this.isLoading = false
+    },
+
+    showLoading() {
+      setTimeout(() => {
+        console.log(this.currentPlayer.readyState)
+        if (this.currentPlayer.readyState !== 4) {
+          this.isLoading = true
+        }
+      }, 150)
+    },
+
     // Helpers
 
     emitLoadedEvent(event) {
@@ -528,6 +562,7 @@ export default {
 <style lang="scss" scoped>
 .video-wrapper {
   height: 100%;
+  position: relative;
 
   video {
     margin: auto;
@@ -536,5 +571,19 @@ export default {
 
 .container {
   max-height: 100%;
+}
+
+.video-loader {
+  background: #00000088;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 300;
 }
 </style>

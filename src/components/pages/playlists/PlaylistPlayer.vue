@@ -89,7 +89,7 @@
           ref="raw-player-comparison"
           class="raw-player"
           :style="{
-            position: isComparisonOverlay ? 'absolute' : 'static'
+            position: isComparisonOverlay ? 'absolute' : 'relative'
           }"
           :entities="entityListToCompare"
           :full-screen="fullScreen"
@@ -149,7 +149,7 @@
           ref="raw-player"
           class="raw-player"
           :style="{
-            position: isComparisonOverlay ? 'absolute' : 'static',
+            position: isComparisonOverlay ? 'absolute' : 'relative',
             opacity: overlayOpacity
           }"
           :entities="entityList"
