@@ -357,7 +357,9 @@ export default {
     getFrameNumberStyle(frame) {
       const frameHeight = 100
       const height = frameHeight + 30
-      const ratio = this.movieDimensions.width / this.movieDimensions.height
+      const ratio = this.movieDimensions.width
+        ? this.movieDimensions.width / this.movieDimensions.height
+        : 1
       const frameWidth = Math.ceil(frameHeight * ratio)
       const width = frameWidth + 10
       const left = Math.min(
@@ -383,12 +385,14 @@ export default {
     },
 
     previewId() {
-      const path = `/api/movies/tiles/preview-files/${this.previewId}.png`
-      const img = new Image()
-      this.isTileLoading = true
-      img.src = path
-      img.onload = () => {
-        this.isTileLoading = false
+      if (this.movieDimensions.width) {
+        const path = `/api/movies/tiles/preview-files/${this.previewId}.png`
+        const img = new Image()
+        this.isTileLoading = true
+        img.src = path
+        img.onload = () => {
+          this.isTileLoading = false
+        }
       }
     }
   }
