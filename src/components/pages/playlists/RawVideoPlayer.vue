@@ -106,7 +106,6 @@ export default {
     this.player1.addEventListener('waiting', this.showLoading)
     this.player1.addEventListener('loadstart', this.showLoading)
     this.player1.addEventListener('error', err => {
-      console.error(err)
       this.hideLoading()
     })
     this.player2.addEventListener('canplay', this.hideLoading)
@@ -114,7 +113,6 @@ export default {
     this.player2.addEventListener('waiting', this.showLoading)
     this.player2.addEventListener('loadstart', this.showLoading)
     this.player2.addEventListener('error', err => {
-      console.error(err)
       this.hideLoading()
     })
   },

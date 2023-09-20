@@ -755,6 +755,7 @@ export const playerMixin = {
 
     onFilmClicked() {
       this.isEntitiesHidden = !this.isEntitiesHidden
+      window.dispatchEvent(new Event('resize'))
       this.$nextTick(() => {
         this.resetHeight()
         this.reloadAnnotations()
@@ -791,6 +792,7 @@ export const playerMixin = {
       if (!this.isCommentsHidden) {
         this.$refs['task-info'].$el.style.height = `${height}px`
       }
+      window.dispatchEvent(new Event('resize'))
       this.$nextTick(() => {
         this.$refs['task-info'].focusCommentTextarea()
         this.resetHeight()
@@ -933,8 +935,15 @@ export const playerMixin = {
         } else if (this.isCurrentPreviewPicture && this.isAnnotationCanvas()) {
           if (this.canvas) {
             // Picture ratio
-            const naturalWidth = this.picturePlayer.naturalWidth
-            const naturalHeight = this.picturePlayer.naturalHeight
+
+            const naturalDimensions = this.currentPreview.width
+              ? {
+                  width: this.currentPreview.width,
+                  height: this.currentPreview.height
+                }
+              : this.picturePlayer.getNaturalDimensions()
+            const naturalWidth = naturalDimensions.width
+            const naturalHeight = naturalDimensions.height
             const ratio = naturalWidth / naturalHeight
 
             if (!this.$refs['video-container']) return Promise.resolve()

@@ -122,12 +122,21 @@
               !isCurrentPreviewMovie)
           "
         >
-          <img
+          <picture-viewer
             ref="picture-player-comparison"
             class="picture-preview"
-            :src="currentComparisonPreviewPath"
+            :big="true"
+            :default-height="pictureDefaultHeight"
+            :full-screen="fullScreen"
+            :light="false"
+            :margin-bottom="0"
+            :panzoom="false"
+            :preview="currentPreviewToCompare"
+            :isComparing="isComparing"
+            @loaded="onPictureLoaded"
             v-show="isComparing && isPictureComparison"
           />
+
           <video
             ref="picture-video-player-comparison"
             class="picture-preview"
@@ -214,16 +223,20 @@
             position: isComparisonOverlay ? 'absolute' : 'static',
             opacity: overlayOpacity,
             left: 0,
-            right: 0
+            right: 0,
+            'z-index': 1
           }"
           v-show="isCurrentPreviewPicture && !isLoading"
         >
-          <img
+          <picture-viewer
             ref="picture-player"
-            id="picture-player"
-            class="picture-preview"
-            :src="isCurrentPreviewPicture ? currentPreviewPath : null"
-            v-show="isCurrentPreviewPicture"
+            :big="true"
+            :default-height="pictureDefaultHeight"
+            :full-screen="fullScreen"
+            :light="false"
+            :margin-bottom="0"
+            :panzoom="false"
+            :preview="currentPreview"
           />
         </div>
 
@@ -832,6 +845,7 @@ import Combobox from '@/components/widgets/Combobox'
 import DeleteModal from '@/components/modals/DeleteModal'
 import ObjectViewer from '@/components/previews/ObjectViewer'
 import PencilPicker from '@/components/widgets/PencilPicker'
+import PictureViewer from '@/components/previews/PictureViewer'
 import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity'
 import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer'
 import PreviewRoom from '@/components/widgets/PreviewRoom'
@@ -863,6 +877,7 @@ export default {
     PlaylistedEntity,
     RawVideoPlayer,
     PreviewRoom,
+    PictureViewer,
     SelectTaskTypeModal,
     SoundViewer,
     Spinner,
@@ -914,6 +929,7 @@ export default {
       isShowAnnotationsWhilePlaying: false,
       isWaveformDisplayed: false,
       movieDimensions: { width: 0, height: 0 },
+      pictureDefaultHeight: 0,
       playlistToEdit: {},
       previewRoomRef: 'playlist-player-preview-room',
       revisionOptions: [],
@@ -949,13 +965,6 @@ export default {
       this.entityList = Object.values(this.entities)
     } else {
       this.entityList = []
-    }
-    if (this.picturePlayer) {
-      this.picturePlayer.addEventListener('load', async () => {
-        const wasPlaying = this.isPlaying
-        await this.resetPictureCanvas()
-        this.isPlaying = wasPlaying
-      })
     }
     this.$nextTick(() => {
       this.configureEvents()
@@ -1419,12 +1428,15 @@ export default {
         if (!this.isCommentsHidden) {
           this.$refs['task-info'].$el.style.height = `${height}px`
         }
+        if (this.$refs['picture-preview-wrapper']) {
+          this.$refs['picture-preview-wrapper'].style.height = `${height}px`
+          this.pictureDefaultHeight = height
+        }
+        this.pictureDefaultHeight = height
+
         if (this.rawPlayer) this.rawPlayer.resetHeight(height)
         if (this.isComparing && this.$refs['raw-player-comparison']) {
           this.$refs['raw-player-comparison'].resetHeight(height)
-          if (this.$refs['picture-preview-wrapper']) {
-            this.$refs['picture-preview-wrapper'].style.height = `${height}px`
-          }
         }
         this.$nextTick(() => {
           this.resetCanvas()
@@ -1557,6 +1569,15 @@ export default {
 
     toggleDlButtons() {
       this.isDlButtonsHidden = !this.isDlButtonsHidden
+    },
+
+    onPictureLoaded() {
+      this.$nextTick(async () => {
+        this.resetCanvasSize()
+        const wasPlaying = this.isPlaying
+        await this.resetPictureCanvas()
+        this.isPlaying = wasPlaying
+      })
     },
 
     onBuildClicked() {
@@ -1702,9 +1723,16 @@ export default {
   },
 
   watch: {
+    isLoading() {
+      if (!this.isLoading) {
+        this.resetHeight()
+      }
+    },
+
     currentPreviewIndex() {
       this.endAnnotationSaving()
       this.resetUndoStacks()
+      this.resetHeight()
       this.$nextTick(() => {
         if (this.isCurrentPreviewPicture) {
           this.resetPictureCanvas()
@@ -1759,6 +1787,7 @@ export default {
         this.rebuildEntityListToCompare()
       }
       this.$nextTick().then(() => {
+        window.dispatchEvent(new Event('resize'))
         this.resetPictureCanvas()
         this.resetCanvas()
         this.syncComparisonPlayer()
@@ -2187,12 +2216,17 @@ progress {
   margin-right: 0;
 }
 
+.canvas-wrapper {
+  z-index: 5;
+}
+
 .picture-preview-wrapper {
   display: flex;
   height: inherit;
   justify-content: center;
   align-items: center;
   flex: 1;
+  z-index: 3;
 }
 
 .picture-preview-comparison-wrapper {
@@ -2201,6 +2235,7 @@ progress {
   justify-content: center;
   align-items: center;
   flex: 1;
+  z-index: 1;
 }
 
 .picture-preview {
@@ -2254,9 +2289,11 @@ input[type='number'] {
 
 .frame-per-image-input {
   padding: 2px;
-  margin-left: 3px;
+  margin-left: 4px;
+  padding-left: 5px;
   background-color: $dark-grey-2;
   border: 1px solid $dark-grey-stronger;
+  border-radius: 5px;
   color: white;
   width: 3rem;
 }
