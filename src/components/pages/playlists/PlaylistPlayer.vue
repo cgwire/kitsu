@@ -798,6 +798,7 @@
           @play-click="entityListClicked"
           @remove-entity="removeEntity"
           @preview-changed="onPreviewChanged"
+          @entity-to-add="$emit('entity-to-add', $event)"
           @entity-dropped="onEntityDropped"
         />
       </div>
@@ -1350,19 +1351,30 @@ export default {
       this.updateTaskPanel()
     },
 
+    /*
+     * Called when an entity is dropped in the playlist. The entity is moved
+     * to the new position and the order of the entities is updated.
+     * @param {Object} info - {
+     *   before: where entity is dropped (id of the entity before),
+     *   after: the id of the entity dropped.
+     * }
+     */
     onEntityDropped(info) {
       const playlistEl = this.$refs['playlisted-entities']
       const scrollLeft = playlistEl.scrollLeft
-
       const entityToMove = this.entityList.find(s => s.id === info.after)
-      const toMoveIndex = this.entityList.findIndex(s => s.id === info.after)
-      let targetIndex = this.entityList.findIndex(s => s.id === info.before)
-      if (toMoveIndex > targetIndex) targetIndex += 1
-      this.moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
-      this.$nextTick(() => {
-        playlistEl.scrollLeft = scrollLeft
-      })
-      this.$emit('order-change', info)
+      if (!entityToMove) {
+        this.$emit('new-entity-dropped', info)
+      } else {
+        const toMoveIndex = this.entityList.findIndex(s => s.id === info.after)
+        let targetIndex = this.entityList.findIndex(s => s.id === info.before)
+        if (toMoveIndex > targetIndex) targetIndex += 1
+        this.moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
+        this.$nextTick(() => {
+          playlistEl.scrollLeft = scrollLeft
+        })
+        this.$emit('order-change', info)
+      }
     },
 
     moveSelectedEntityToLeft() {
