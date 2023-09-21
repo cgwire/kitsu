@@ -231,7 +231,7 @@
                       :with-link="false"
                       :no-cache="true"
                     />
-                    <div>
+                    <div class="break-word">
                       {{ asset.asset_name }}
                       <span v-if="asset.nb_occurences > 1">
                         ({{ asset.nb_occurences }})
