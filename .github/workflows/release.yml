@@ -1,5 +1,5 @@
 ---
-name: "Kitsu release"
+name: 'Kitsu release'
 
 on:
   push:
@@ -18,8 +18,10 @@ jobs:
           fetch-depth: 0
       - name: Build release
         env:
-          NODE_OPTIONS: "--max_old_space_size=8192"
+          NODE_OPTIONS: '--max_old_space_size=8192'
         run: |
+          echo "Node.js $(node -v)"
+          echo "npm v$(npm -v)"
           npm ci
           npm run build
           GIT_COMMIT="$(git rev-parse HEAD)"
@@ -37,7 +39,7 @@ jobs:
         uses: ncipollo/release-action@v1
         id: create_release
         with:
-          artifacts: "kitsu-*.tgz,kitsu-*.SHA512"
+          artifacts: 'kitsu-*.tgz,kitsu-*.SHA512'
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Update "build" branch
         if: startsWith(github.ref, 'refs/tags')
