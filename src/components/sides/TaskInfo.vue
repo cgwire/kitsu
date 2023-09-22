@@ -404,7 +404,6 @@ export default {
   },
 
   mounted() {
-    this.loadTaskData()
     if (this.$refs['add-comment']) {
       const draft = drafts.getTaskDraft(this.task.id)
       if (draft) {
@@ -1273,6 +1272,14 @@ export default {
       })
       if (!this.silent) {
         this.loadTaskData()
+      }
+    },
+    silent: {
+      immediate: true,
+      handler() {
+        if (!this.silent) {
+          this.loadTaskData()
+        }
       }
     }
   },

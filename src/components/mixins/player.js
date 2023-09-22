@@ -1268,7 +1268,6 @@ export const playerMixin = {
 
   watch: {
     isCommentsHidden() {
-      if (!this.isCommentsHidden) this.$refs['task-info'].loadTaskData()
       if (this.isCurrentPreviewSound) {
         this.soundPlayer.redraw()
       }

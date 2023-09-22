@@ -93,6 +93,7 @@
           class="flexrow-item task-info-column"
           :task="task"
           :is-preview="false"
+          :silent="isCommentsHidden"
           :current-time-raw="currentTimeRaw"
           :current-parent-preview="currentPreview"
           @comment-added="$emit('comment-added')"

@@ -1423,7 +1423,7 @@ export default {
         if (this.$refs['video-container']) {
           this.$refs['video-container'].style.height = `${height}px`
         }
-        if (!this.isCommentsHidden) {
+        if (this.$refs['task-info'] && !this.isCommentsHidden) {
           this.$refs['task-info'].$el.style.height = `${height}px`
         }
         if (this.$refs['picture-preview-wrapper']) {
