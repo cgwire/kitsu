@@ -89,19 +89,15 @@
         </div>
 
         <task-info
-          name="task-info"
           ref="task-info-player"
-          :class="{
-            'flexrow-item': true,
-            'task-info-column': true,
-            hidden: isCommentsHidden
-          }"
+          class="flexrow-item task-info-column"
           :task="task"
           :is-preview="false"
           :current-time-raw="currentTimeRaw"
           :current-parent-preview="currentPreview"
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
+          v-show="!isCommentsHidden"
         />
       </div>
     </div>
@@ -1591,8 +1587,6 @@ export default {
       this.$nextTick(() => {
         if (!this.isCommentsHidden) {
           this.$refs['task-info-player'].$el.style.height = `${height}px`
-        }
-        if (this.$refs['task-info-player']) {
           this.$refs['task-info-player'].focusCommentTextarea()
         }
         this.previewViewer.resetVideo()

@@ -22,7 +22,7 @@
         @click="$emit('show-metadata-header-menu', $event)"
         v-if="!noMenu"
       >
-        <chevron-down-icon :size="'12'" />
+        <chevron-down-icon size="12" />
       </span>
     </div>
   </th>

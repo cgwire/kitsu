@@ -339,10 +339,6 @@ export default {
       type: Boolean,
       default: false
     },
-    panelName: {
-      type: String,
-      default: 'todefine'
-    },
     withActions: {
       type: Boolean,
       default: false
@@ -804,7 +800,7 @@ export default {
     },
 
     focusCommentTextarea() {
-      if (this.$refs['add-comment']) this.$refs['add-comment'].focus()
+      this.$refs['add-comment']?.focus()
     },
 
     getOriginalPath() {

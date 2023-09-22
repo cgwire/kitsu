@@ -265,18 +265,14 @@
 
       <task-info
         ref="task-info"
-        :class="{
-          'flexrow-item': true,
-          'task-info-column': true,
-          hidden: isCommentsHidden
-        }"
+        class="flexrow-item task-info-column"
         :task="task"
         :is-preview="false"
         :silent="isCommentsHidden"
         :current-time-raw="currentTimeRaw"
         :current-parent-preview="currentPreview"
-        panel-name="playlist-side-panel"
         @time-code-clicked="onTimeCodeClicked"
+        v-show="!isCommentsHidden"
       />
     </div>
 
