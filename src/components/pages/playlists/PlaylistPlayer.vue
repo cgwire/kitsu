@@ -670,6 +670,7 @@
       <div class="separator"></div>
       <button-simple
         class="button playlist-button flexrow-item"
+        :active="!isCommentsHidden"
         :title="$t('playlists.actions.comments')"
         @click="onCommentClicked"
         icon="comment"
@@ -677,6 +678,7 @@
       <button-simple
         class="playlist-button flexrow-item"
         :title="$t('playlists.actions.entity_list')"
+        :active="!isEntitiesHidden"
         @click="onFilmClicked"
         icon="film"
       />

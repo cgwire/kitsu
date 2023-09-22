@@ -421,6 +421,7 @@
           <div class="separator"></div>
           <button-simple
             class="button player-button flexrow-item"
+            :active="!isCommentsHidden"
             :title="$t('playlists.actions.comments')"
             @click="onCommentClicked"
             icon="comment"

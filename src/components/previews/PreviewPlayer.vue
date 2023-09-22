@@ -348,6 +348,7 @@
             <button-simple
               class="button playlist-button flexrow-item"
               icon="comment"
+              :active="!isCommentsHidden"
               :title="$t('playlists.actions.comments')"
               @click="onCommentClicked"
               v-if="!readOnly && fullScreen"
