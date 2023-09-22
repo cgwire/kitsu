@@ -1568,7 +1568,7 @@ export default {
 
 .side {
   flex: 1;
-  overflow: scroll;
+  overflow: auto;
 }
 
 .extend-bar {
