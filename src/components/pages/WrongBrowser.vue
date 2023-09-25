@@ -8,18 +8,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
 export default {
-  name: 'server-down',
-  computed: {
-    ...mapGetters([])
-  },
-  methods: {
-    ...mapActions([])
-  },
-  mounted() {}
+  name: 'wrong-browser'
 }
 </script>
-
-<style lang="scss" scoped></style>
