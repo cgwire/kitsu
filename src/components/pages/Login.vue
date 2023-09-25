@@ -69,7 +69,10 @@
             {{ $t('login.login') }}
           </a>
         </p>
-        <p class="control error" v-if="isTooMuchLoginFailedAttemps">
+        <p class="control error" v-if="isServerError">
+          {{ $t('login.login_server_failed') }}
+        </p>
+        <p class="control error" v-else-if="isTooMuchLoginFailedAttemps">
           {{ $t('login.too_many_failed_login_attemps') }}
         </p>
         <p
@@ -111,6 +114,7 @@ export default {
       isTooMuchLoginFailedAttemps: false,
       isWrongOTP: false,
       isMissingOTP: false,
+      isServerError: false,
       preferredTwoFA: '',
       TwoFAsEnabled: [],
       fadeAway: false
@@ -142,6 +146,7 @@ export default {
       this.isTooMuchLoginFailedAttemps = false
       this.isWrongOTP = false
       this.isMissingOTP = false
+      this.isServerError = false
       this.logIn({
         twoFactorPayload: twoFactorPayload,
         callback: (err, success) => {
@@ -159,6 +164,8 @@ export default {
               this.isMissingOTP = true
               this.preferredTwoFA = err.preferred_two_factor_authentication
               this.TwoFAsEnabled = err.two_factor_authentication_enabled
+            } else if (err.server_error) {
+              this.isServerError = true
             } else {
               console.error(err)
             }
@@ -234,6 +241,10 @@ export default {
 
 .icon {
   padding: 0.25em;
+}
+
+.error {
+  text-align: center;
 }
 
 @media (max-width: 1600px) {

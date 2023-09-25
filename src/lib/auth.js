@@ -15,22 +15,27 @@ const auth = {
       .send(payload)
       .end((err, res) => {
         if (err) {
-          if (res.body.default_password) {
-            err.default_password = res.body.default_password
-            err.token = res.body.token
+          if (res?.body) {
+            if (res.body.default_password) {
+              err.default_password = res.body.default_password
+              err.token = res.body.token
+            }
+            if (res.body.too_many_failed_login_attemps) {
+              err.too_many_failed_login_attemps = true
+            }
+            if (res.body.wrong_OTP) {
+              err.wrong_OTP = true
+            }
+            if (res.body.missing_OTP) {
+              err.missing_OTP = true
+              err.preferred_two_factor_authentication =
+                res.body.preferred_two_factor_authentication
+              err.two_factor_authentication_enabled =
+                res.body.two_factor_authentication_enabled
+            }
           }
-          if (res.body.too_many_failed_login_attemps) {
-            err.too_many_failed_login_attemps = true
-          }
-          if (res.body.wrong_OTP) {
-            err.wrong_OTP = true
-          }
-          if (res.body.missing_OTP) {
-            err.missing_OTP = true
-            err.preferred_two_factor_authentication =
-              res.body.preferred_two_factor_authentication
-            err.two_factor_authentication_enabled =
-              res.body.two_factor_authentication_enabled
+          if (!res || err.status >= 500) {
+            err.server_error = true
           }
           callback(err)
         } else {
