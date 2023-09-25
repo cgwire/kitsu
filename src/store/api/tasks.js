@@ -39,12 +39,10 @@ export default {
       comment: data.comment,
       checklist: data.checklist || []
     }
-    if (data.attachment && data.attachment.length > 0) {
+    if (data.attachment?.length) {
       commentData = new FormData()
-      let i = 0
-      data.attachment.forEach(attachment => {
-        commentData.append('file-' + i, attachment.get('file'))
-        i++
+      data.attachment.forEach((attachment, index) => {
+        commentData.append(`file-${index}`, attachment.get('file'))
       })
       commentData.set('task_status_id', data.taskStatusId)
       commentData.set('comment', data.comment)
