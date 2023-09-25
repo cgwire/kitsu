@@ -982,6 +982,7 @@ article.comment {
 .date {
   font-size: 0.8em;
   margin-right: 0.5em;
+  white-space: nowrap;
 }
 
 .preview-info {

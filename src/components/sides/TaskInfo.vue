@@ -339,10 +339,6 @@ export default {
       type: Boolean,
       default: false
     },
-    panelName: {
-      type: String,
-      default: 'todefine'
-    },
     withActions: {
       type: Boolean,
       default: false
@@ -408,7 +404,6 @@ export default {
   },
 
   mounted() {
-    this.loadTaskData()
     if (this.$refs['add-comment']) {
       const draft = drafts.getTaskDraft(this.task.id)
       if (draft) {
@@ -804,7 +799,7 @@ export default {
     },
 
     focusCommentTextarea() {
-      if (this.$refs['add-comment']) this.$refs['add-comment'].focus()
+      this.$refs['add-comment']?.focus()
     },
 
     getOriginalPath() {
@@ -1278,6 +1273,14 @@ export default {
       if (!this.silent) {
         this.loadTaskData()
       }
+    },
+    silent: {
+      immediate: true,
+      handler() {
+        if (!this.silent) {
+          this.loadTaskData()
+        }
+      }
     }
   },
 
@@ -1568,7 +1571,7 @@ export default {
 
 .side {
   flex: 1;
-  overflow: scroll;
+  overflow: auto;
 }
 
 .extend-bar {

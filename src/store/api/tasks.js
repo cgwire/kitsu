@@ -9,10 +9,6 @@ export default {
     return client.pput(`/api/data/tasks/${taskId}`, data, callback)
   },
 
-  getTaskStatuses(callback) {
-    client.get('/api/data/task-status', callback)
-  },
-
   getTaskSubscribed(taskId, callback) {
     return client.pget(`/api/data/user/tasks/${taskId}/subscribed`)
   },
@@ -39,12 +35,10 @@ export default {
       comment: data.comment,
       checklist: data.checklist || []
     }
-    if (data.attachment && data.attachment.length > 0) {
+    if (data.attachment?.length) {
       commentData = new FormData()
-      let i = 0
-      data.attachment.forEach(attachment => {
-        commentData.append('file-' + i, attachment.get('file'))
-        i++
+      data.attachment.forEach((attachment, index) => {
+        commentData.append(`file-${index}`, attachment.get('file'))
       })
       commentData.set('task_status_id', data.taskStatusId)
       commentData.set('comment', data.comment)

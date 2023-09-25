@@ -265,18 +265,14 @@
 
       <task-info
         ref="task-info"
-        :class="{
-          'flexrow-item': true,
-          'task-info-column': true,
-          hidden: isCommentsHidden
-        }"
+        class="flexrow-item task-info-column"
         :task="task"
         :is-preview="false"
         :silent="isCommentsHidden"
         :current-time-raw="currentTimeRaw"
         :current-parent-preview="currentPreview"
-        panel-name="playlist-side-panel"
         @time-code-clicked="onTimeCodeClicked"
+        v-show="!isCommentsHidden"
       />
     </div>
 
@@ -670,6 +666,7 @@
       <div class="separator"></div>
       <button-simple
         class="button playlist-button flexrow-item"
+        :active="!isCommentsHidden"
         :title="$t('playlists.actions.comments')"
         @click="onCommentClicked"
         icon="comment"
@@ -677,6 +674,7 @@
       <button-simple
         class="playlist-button flexrow-item"
         :title="$t('playlists.actions.entity_list')"
+        :active="!isEntitiesHidden"
         @click="onFilmClicked"
         icon="film"
       />
@@ -1425,7 +1423,7 @@ export default {
         if (this.$refs['video-container']) {
           this.$refs['video-container'].style.height = `${height}px`
         }
-        if (!this.isCommentsHidden) {
+        if (this.$refs['task-info'] && !this.isCommentsHidden) {
           this.$refs['task-info'].$el.style.height = `${height}px`
         }
         if (this.$refs['picture-preview-wrapper']) {
