@@ -200,7 +200,7 @@
         <div class="flexrow">
           <combobox-task-type
             class="flexrow-item"
-            :task-type-list="readyForTaskTypeList"
+            :task-type-list="taskTypeList"
             open-top
             v-model="priority.taskTypeId"
           />
