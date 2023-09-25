@@ -323,6 +323,7 @@ export default {
     information_recovery_code: 'If you are unable to use any other two-factor authentication, enter one of your recovery codes to verify your identity.',
     login: 'Log in',
     login_failed: 'Login failed, please verify your credentials.',
+    login_server_failed: 'A server error occurred while logging in.',
     login_page: 'Cancel',
     redirecting: 'Redirecting in {secondsLeft} seconds...',
     reset_change_password: 'Change password',

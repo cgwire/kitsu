@@ -108,22 +108,22 @@ const mutations = {
     state.isLoginError = false
   },
 
-  [LOGIN_SUCCESS](state, email) {
+  [LOGIN_SUCCESS](state) {
     state.isLoginLoading = false
     state.isLoginError = false
   },
 
-  [LOGIN_FAILURE](state, email) {
+  [LOGIN_FAILURE](state) {
     state.isLoginLoading = false
     state.isLoginError = true
   },
 
-  [LOGOUT_SUCCESS](state, email) {
+  [LOGOUT_SUCCESS](state) {
     state.isLoginLoading = false
     state.isLoginError = false
   },
 
-  [DATA_LOADING_START](state, payload) {
+  [DATA_LOADING_START](state) {
     state.isDataLoading = true
   },
 
@@ -131,7 +131,7 @@ const mutations = {
     state.isDataLoading = false
   },
 
-  [RESET_ALL](state, email) {
+  [RESET_ALL](state) {
     Object.assign(state, { ...initialState })
   }
 }
