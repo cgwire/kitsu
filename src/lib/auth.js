@@ -36,7 +36,7 @@ const auth = {
         } else {
           if (res.body.login) {
             const user = res.body.user
-            store.commit(DATA_LOADING_START, {})
+            store.commit(DATA_LOADING_START)
             callback(null, user)
           } else {
             store.commit(USER_LOGIN_FAIL)
@@ -117,21 +117,17 @@ const auth = {
       if (!store.state.user.isAuthenticated) {
         store
           .dispatch('getOrganisation')
-          .then(() => {
-            next({
-              path: '/login',
-              query: { redirect: to.fullPath }
-            })
-          })
           .catch(err => {
             console.error(err)
+          })
+          .finally(() => {
             next({
-              path: '/login',
+              name: 'login',
               query: { redirect: to.fullPath }
             })
           })
       } else {
-        store.commit(DATA_LOADING_START, {})
+        store.commit(DATA_LOADING_START)
         next()
       }
     }
@@ -140,7 +136,7 @@ const auth = {
       auth.isServerLoggedIn(err => {
         if (err) {
           next({
-            path: '/server-down',
+            name: 'server-down',
             query: { redirect: to.fullPath }
           })
         } else {
