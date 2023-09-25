@@ -9,10 +9,6 @@ export default {
     return client.pput(`/api/data/tasks/${taskId}`, data, callback)
   },
 
-  getTaskStatuses(callback) {
-    client.get('/api/data/task-status', callback)
-  },
-
   getTaskSubscribed(taskId, callback) {
     return client.pget(`/api/data/user/tasks/${taskId}/subscribed`)
   },
