@@ -191,6 +191,7 @@
           @annotation-changed="onAnnotationChanged"
           @for-client-changed="onForClientChanged"
           @annotations-refreshed="onAnnotationsRefreshed"
+          @new-entity-dropped="onNewEntityDropped"
         />
 
         <div
@@ -370,33 +371,40 @@
                   </button>
                 </h2>
                 <div class="addition-entities">
-                  <div
-                    :class="{
-                      'addition-shot': true,
-                      playlisted: currentEntities[shot.id] !== undefined
-                    }"
+                  <drag
                     :key="shot.id"
-                    @click.prevent="addEntityToPlaylist(shot)"
+                    :transfer-data="shot.id"
                     v-for="shot in sequenceShots.filter(s => !s.canceled)"
                   >
-                    <light-entity-thumbnail
-                      :preview-file-id="shot.preview_file_id"
-                      width="150px"
-                      height="100px"
-                    />
-                    <div>
-                      <span
-                        :title="getTaskStatus(shot).name"
-                        :style="{
-                          color: getTaskStatus(shot).color
-                        }"
-                        v-if="currentPlaylist.task_type_id"
-                      >
-                        &bullet;
-                      </span>
-                      <span class="playlisted-shot-name">{{ shot.name }}</span>
+                    <div
+                      :class="{
+                        'addition-shot': true,
+                        playlisted: currentEntities[shot.id] !== undefined
+                      }"
+                      :transfer-data="shot.id"
+                      @click.prevent="addEntityToPlaylist(shot)"
+                    >
+                      <light-entity-thumbnail
+                        :preview-file-id="shot.preview_file_id"
+                        width="150px"
+                        height="100px"
+                      />
+                      <div>
+                        <span
+                          :title="getTaskStatus(shot).name"
+                          :style="{
+                            color: getTaskStatus(shot).color
+                          }"
+                          v-if="currentPlaylist.task_type_id"
+                        >
+                          &bullet;
+                        </span>
+                        <span class="playlisted-shot-name">{{
+                          shot.name
+                        }}</span>
+                      </div>
                     </div>
-                  </div>
+                  </drag>
                 </div>
               </div>
             </div>
@@ -906,12 +914,14 @@ export default {
       }
     },
 
-    addEntity(entity) {
+    addEntity(entity, scrollRight = true) {
       return this.loadEntityPreviewFiles(entity)
         .then(previewFiles => {
           return this.addToStorePlaylistAndSave(previewFiles, entity)
         })
-        .then(this.addToPlayerPlaylist)
+        .then(entity => {
+          this.addToPlayerPlaylist(entity, scrollRight)
+        })
         .catch(err => console.error(err))
     },
 
@@ -923,18 +933,38 @@ export default {
       })
     },
 
-    addToPlayerPlaylist(entity) {
+    addToPlayerPlaylist(entity, scrollRight = true) {
       const playlistEntity = this.convertEntityToPlaylistFormat(entity)
       Vue.set(this.currentEntities, playlistEntity.id, playlistEntity)
       this.playlistPlayer.entityList.push(playlistEntity)
-      this.$nextTick(() => {
-        this.playlistPlayer.scrollToRight()
-      })
+      if (scrollRight) {
+        this.$nextTick(() => {
+          this.playlistPlayer.scrollToRight()
+        })
+      }
     },
 
     addEntityToPlaylist(entity) {
       if (!this.currentEntities[entity.id]) {
         this.addEntity(entity).then(this.playlistPlayer.scrollToRight())
+      }
+    },
+
+    onNewEntityDropped(info) {
+      let entity = null
+      if (this.isAssetPlaylist) {
+        entity = this.assetMap.get(info.after)
+      } else if (this.isSequencePlaylist) {
+        entity = this.sequenceMap.get(info.after)
+      } else {
+        entity = this.shotMap.get(info.after)
+      }
+
+      if (entity && !this.currentEntities[entity.id]) {
+        const notScrollRight = false
+        this.addEntity(entity, notScrollRight).then(() => {
+          this.playlistPlayer.onEntityDropped(info)
+        })
       }
     },
 

@@ -279,4 +279,8 @@ export default {
 .modify-asset {
   min-width: 20px;
 }
+
+.asset-text-name {
+  word-wrap: anywhere;
+}
 </style>

@@ -108,7 +108,7 @@
       <div class="post-area">
         <checklist
           :checklist="checklist"
-          :frame="frame"
+          :frame="frame + 1"
           :revision="revision"
           :is-movie-preview="isMovie"
           @add-item="onAddChecklistItem"

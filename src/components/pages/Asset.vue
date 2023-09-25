@@ -176,7 +176,7 @@
                       :with-link="false"
                     />
                     <div>
-                      <span>{{ shot.shot_name }}</span>
+                      <span class="break-word">{{ shot.shot_name }}</span>
                       <span v-if="shot.nb_occurences > 1">
                         ({{ shot.nb_occurences }})
                       </span>
@@ -244,7 +244,7 @@
                       :with-link="false"
                     />
                     <div>
-                      <span>{{ asset.asset_name }}</span>
+                      <span class="break-word">{{ asset.asset_name }}</span>
                       <span v-if="asset.nb_occurences > 1">
                         ({{ asset.nb_occurences }})
                       </span>

@@ -17,7 +17,7 @@
         </h1>
 
         <form v-on:submit.prevent>
-          <h2 class="subtitle">{{ $t('status_automations.entity_title') }}</h2>
+          <h3 class="subtitle">{{ $t('status_automations.entity_title') }}</h3>
           <combobox
             :label="$t('status_automations.fields.entity_type')"
             :options="entityTypeOptions"
@@ -26,7 +26,7 @@
             locale-key-prefix="status_automations.entity_types."
             @enter="confirmClicked"
           />
-          <span v-else> {{ form.entityType }} </span>
+          <span class="entity-type-name" v-else> {{ form.entityType }} </span>
 
           <h2 class="subtitle">{{ $t('status_automations.in_title') }}</h2>
 
@@ -197,7 +197,11 @@ export default {
     setTaskTypes(fieldType) {
       if (fieldType === 'asset') {
         this.form.inEntityTaskTypes = this.assetTaskTypes
-        this.form.outEntityTaskTypes = this.assetTaskTypes
+        if (this.mode === 'status') {
+          this.form.outEntityTaskTypes = this.assetTaskTypes
+        } else {
+          this.form.outEntityTaskTypes = this.shotTaskTypes
+        }
       } else if (fieldType === 'shot') {
         this.form.inEntityTaskTypes = this.shotTaskTypes
         this.form.outEntityTaskTypes = this.shotTaskTypes
@@ -272,7 +276,12 @@ export default {
 }
 .subtitle {
   font-size: 1.4em;
-  margin-top: 1.5em;
+  margin-top: 2em;
   margin-bottom: 0.5em;
+  text-transform: none;
+}
+.entity-type-name {
+  font-size: 1.2em;
+  text-transform: capitalize;
 }
 </style>
