@@ -8,7 +8,7 @@
     <div class="modal-background" @click="$emit('cancel')"></div>
 
     <div class="modal-content">
-      <div class="box content">
+      <div class="box">
         <h1 class="title">
           {{ $t('main.csv.import_title') }}
         </h1>
