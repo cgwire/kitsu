@@ -41,7 +41,7 @@
       </div>
 
       <div class="tab" v-show="isActiveTab('brief')">
-        <ProductionBrief />
+        <production-brief />
       </div>
 
       <div class="tab" v-show="isActiveTab('assetTypes')">

@@ -20,6 +20,7 @@ module.exports = {
         destructuring: 'all'
       }
     ],
+    'vue/component-name-in-template-casing': ['error', 'kebab-case'],
     'vue/multi-word-component-names': 'off',
     'vue/no-use-v-if-with-v-for': 'off',
     'vue/prop-name-casing': ['error', 'camelCase']

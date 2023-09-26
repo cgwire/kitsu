@@ -1,7 +1,7 @@
 <template>
   <div ref="container" class="video-wrapper filler flexrow-item">
     <div class="video-loader" v-show="isLoading">
-      <Spinner class="mt2" style="color: white" />
+      <spinner class="mt2" style="color: white" />
     </div>
     <video
       ref="player1"

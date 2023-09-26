@@ -64,7 +64,7 @@
             {{ nbTasksToCheck }} tasks to check
           </h1>
           <div class="filler"></div>
-          <ButtonSimple
+          <button-simple
             class="flexrow-item"
             @click="isPlaylist = true"
             text="Build playlist from list"

@@ -14,9 +14,8 @@
         </li>
       </ul>
     </div>
-
-    <Events v-if="isActiveTab('events')" />
-    <PreviewFiles v-if="isActiveTab('preview_files')" />
+    <events v-if="isActiveTab('events')" />
+    <preview-files v-if="isActiveTab('preview_files')" />
   </div>
 </template>
 
