@@ -63,3 +63,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tags: true
           branch: build
+          force: true
