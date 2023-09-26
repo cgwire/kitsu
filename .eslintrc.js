@@ -21,7 +21,8 @@ module.exports = {
       }
     ],
     'vue/multi-word-component-names': 'off',
-    'vue/no-use-v-if-with-v-for': 'off'
+    'vue/no-use-v-if-with-v-for': 'off',
+    'vue/prop-name-casing': ['error', 'camelCase']
   },
   globals: {
     Canny: true

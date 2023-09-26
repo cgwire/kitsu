@@ -59,7 +59,7 @@ export default {
   },
 
   props: {
-    'task-id': {
+    taskId: {
       type: String,
       default: ''
     },
