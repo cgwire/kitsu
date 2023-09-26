@@ -797,7 +797,7 @@ export default {
           this.resetTaskTypeDates()
           this.loading.entities = false
           let searchQuery = this.$route.query.search
-          if (searchQuery.length === 0) {
+          if (!searchQuery || searchQuery.length === 0) {
             searchQuery =
               !searchQuery && this.searchField
                 ? this.searchField.getValue()

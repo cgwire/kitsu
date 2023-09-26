@@ -179,6 +179,7 @@ export const getKeyWords = queryText => {
   } else {
     return queryText
       .replace(UNION_REGEX, '')
+      .replace(EQUAL_PRIORITY_REGEX, '')
       .replace(EQUAL_REGEX, '')
       .replace(MULTIPLE_REGEX, '')
       .split(' ')
