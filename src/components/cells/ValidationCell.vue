@@ -60,30 +60,16 @@
           &nbsp; &nbsp; &nbsp; &nbsp;
         </span>
       </span>
-      <span> </span>
       <span
         class="avatar has-text-centered"
-        :title="personMap.get(personId).full_name"
-        :style="{
-          background: personMap.get(personId).color,
-          width: '20px',
-          height: '20px',
-          'font-size': '10px'
-        }"
-        :key="'avatar-' + personId"
-        v-for="personId in assignees"
+        :title="person.full_name"
+        :style="{ background: person.color }"
+        :key="`avatar-${person.id}`"
+        v-for="person in assignees"
         v-if="isAssignees && !isCurrentUserClient && !disabled"
       >
-        <img
-          v-lazy="avatarPath(personId)"
-          :key="avatarKey(personId)"
-          width="20"
-          height="20"
-          v-if="personMap.get(personId).has_avatar"
-        />
-        <span v-else>
-          {{ personMap.get(personId).initials }}
-        </span>
+        <img v-lazy="person.avatarPath" v-if="person.has_avatar" />
+        <template v-else>{{ person.initials }}</template>
       </span>
       <span class="subscribed" v-if="task && task.is_subscribed">
         <eye-icon size="0.8x" />
@@ -216,11 +202,9 @@ export default {
     ]),
 
     assignees() {
-      if (this.task) {
-        return this.task.assignees
-      } else {
-        return []
-      }
+      return (
+        this.task?.assignees.map(personId => this.personMap.get(personId)) || []
+      )
     },
 
     backgroundColor() {
@@ -346,24 +330,6 @@ export default {
       }
     },
 
-    avatarPath(personId) {
-      const person = this.personMap.get(personId)
-      if (person) {
-        return person.avatarPath + '?unique=' + person.uniqueHash
-      } else {
-        return ''
-      }
-    },
-
-    avatarKey(personId) {
-      const person = this.personMap.get(personId)
-      if (person) {
-        return person.id + '-' + person.uniqueHash
-      } else {
-        return ''
-      }
-    },
-
     changeStyleBasedOnSelected() {
       if (this.selected) {
         const background = this.isDarkTheme ? '#5E60BA' : '#BFC1FF'
@@ -445,10 +411,9 @@ span.person-avatar:nth-child(2) {
   align-items: center;
   justify-content: center;
   margin-right: 2px;
-}
-
-.avatar span {
-  flex: 1;
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
 }
 
 .avatar img {

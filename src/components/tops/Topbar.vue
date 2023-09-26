@@ -809,12 +809,6 @@ export default {
         ) {
           this.incrementNotificationCounter()
         }
-      },
-
-      'person:update'(eventData) {
-        if (this.user.id === eventData.person_id) {
-          this.$refs.avatar.reloadAvatar()
-        }
       }
     }
   }

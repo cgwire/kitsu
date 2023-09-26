@@ -1,4 +1,3 @@
-import Vue from 'vue/dist/vue'
 import peopleApi from '@/store/api/people'
 import peopleStore from '@/store/modules/people'
 import taskStatusStore from '@/store/modules/taskstatus'
@@ -323,16 +322,14 @@ const actions = {
     })
   },
 
-  uploadAvatar({ commit, state }, callback) {
-    peopleApi.postAvatar(state.user.id, state.avatarFormData, err => {
-      if (!err) commit(UPLOAD_AVATAR_END, state.user.id)
-      if (callback) callback(err)
-    })
+  async uploadAvatar({ commit, state }) {
+    await peopleApi.postAvatar(state.user.id, state.avatarFormData)
+    commit(UPLOAD_AVATAR_END, state.user.id)
   },
 
-  clearAvatar({ commit, state }) {
-    commit(CLEAR_AVATAR)
-    return peopleApi.clearAvatar()
+  async clearAvatar({ commit, state }) {
+    await peopleApi.clearAvatar()
+    commit(CLEAR_AVATAR, state.user.id)
   },
 
   setTodosSearch({ commit, state }, searchText) {
@@ -614,10 +611,9 @@ const mutations = {
 
   [UPLOAD_AVATAR_END](state) {
     if (state.user) {
-      const randomHash = Math.random().toString(36).substring(7)
+      const timestamp = Date.now()
+      state.user.avatarPath = `/api/pictures/thumbnails/persons/${state.user.id}.png?t=${timestamp}`
       state.user.has_avatar = true
-      Vue.set(state.user, 'uniqueHash', randomHash)
-      state.user.avatarPath = `/api/pictures/thumbnails/persons/${state.user.id}.png`
     }
   },
 

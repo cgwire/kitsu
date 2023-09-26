@@ -10,20 +10,9 @@
         'font-size': fontSize + 'px'
       }"
     >
-      <img
-        class="avatar-image"
-        :src="avatarPath"
-        v-if="person.has_avatar && noCache"
-      />
-      <img
-        class="avatar-image"
-        v-lazy="avatarPath"
-        :key="avatarKey"
-        v-else-if="person.has_avatar"
-      />
-      <span v-else>
-        {{ initials }}
-      </span>
+      <img :src="person.avatarPath" v-if="person.has_avatar && noCache" />
+      <img v-lazy="person.avatarPath" v-else-if="person.has_avatar" />
+      <template v-else>{{ person.initials }}</template>
     </span>
 
     <div class="avatar-menu">
@@ -46,19 +35,11 @@
 import { UserIcon, UserMinusIcon } from 'vue-feather-icons'
 
 export default {
-  name: 'person-avatar',
+  name: 'people-avatar-with-menu',
 
   components: {
     UserIcon,
     UserMinusIcon
-  },
-
-  data() {
-    return {
-      avatarPath: '',
-      avatarKey: '',
-      initials: ''
-    }
   },
 
   props: {
@@ -89,32 +70,6 @@ export default {
       type: Boolean,
       default: false
     }
-  },
-
-  created() {
-    this.reloadAvatar()
-  },
-
-  methods: {
-    reloadAvatar() {
-      this.avatarPath =
-        this.person.avatarPath + '?unique=' + this.person.uniqueHash
-      this.avatarKey = this.person.id + '-' + this.person.uniqueHash
-    }
-  },
-
-  mounted() {
-    this.initials = this.person.initials
-  },
-
-  watch: {
-    person() {
-      this.reloadAvatar()
-    },
-
-    'person.uniqueHash'() {
-      this.reloadAvatar()
-    }
   }
 }
 </script>
@@ -133,10 +88,6 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.avatar span {
-  flex: 1;
 }
 
 .avatar a {

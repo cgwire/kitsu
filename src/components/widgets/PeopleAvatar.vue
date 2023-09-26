@@ -19,13 +19,10 @@
         }
       }"
       :title="person.full_name"
-      class="avatar-link"
     >
-      <img :src="avatarPath" v-if="person.has_avatar && noCache" />
-      <img v-lazy="avatarPath" :key="avatarKey" v-else-if="person.has_avatar" />
-      <span v-if="!person.has_avatar">
-        {{ initials }}
-      </span>
+      <img :src="person.avatarPath" v-if="person.has_avatar && noCache" />
+      <img v-lazy="person.avatarPath" v-else-if="person.has_avatar" />
+      <template v-else>{{ person.initials }}</template>
     </router-link>
   </span>
 
@@ -40,25 +37,15 @@
     }"
     v-else
   >
-    <img :src="avatarPath" v-if="person.has_avatar && noCache" />
-    <img v-lazy="avatarPath" :key="avatarKey" v-else-if="person.has_avatar" />
-    <span v-else>
-      {{ initials }}
-    </span>
+    <img :src="person.avatarPath" v-if="person.has_avatar && noCache" />
+    <img v-lazy="person.avatarPath" v-else-if="person.has_avatar" />
+    <template v-else>{{ person.initials }}</template>
   </span>
 </template>
 
 <script>
 export default {
-  name: 'person-avatar',
-
-  data() {
-    return {
-      avatarPath: '',
-      avatarKey: '',
-      initials: ''
-    }
-  },
+  name: 'people-avatar',
 
   props: {
     person: {
@@ -84,32 +71,6 @@ export default {
       type: Boolean,
       default: false
     }
-  },
-
-  created() {
-    this.reloadAvatar()
-  },
-
-  methods: {
-    reloadAvatar() {
-      this.avatarPath =
-        this.person.avatarPath + '?unique=' + this.person.uniqueHash
-      this.avatarKey = this.person.id + '-' + this.person.uniqueHash
-    }
-  },
-
-  mounted() {
-    this.initials = this.person.initials
-  },
-
-  watch: {
-    person() {
-      this.reloadAvatar()
-    },
-
-    'person.uniqueHash'() {
-      this.reloadAvatar()
-    }
   }
 }
 </script>
@@ -127,10 +88,6 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.avatar span {
-  flex: 1;
 }
 
 .avatar a {

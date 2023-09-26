@@ -1071,14 +1071,15 @@ export default {
     uploadAvatarFile() {
       this.changeAvatar.isLoading = true
       this.changeAvatar.isError = false
-      this.uploadAvatar(err => {
-        if (err) {
+      this.uploadAvatar()
+        .catch(err => {
+          console.error(err)
           this.changeAvatar.isError = true
-        }
-        this.changeAvatar.isLoading = false
-        this.$refs.avatar.reloadAvatar()
-        this.hideAvatarModal()
-      })
+        })
+        .finally(() => {
+          this.changeAvatar.isLoading = false
+          this.hideAvatarModal()
+        })
     },
 
     hideAvatarModal() {
