@@ -203,7 +203,7 @@ const getters = {
   getPersonOptions: state =>
     state.people.map(person => {
       return {
-        label: `${person.first_name} ${person.last_name}`,
+        label: person.full_name,
         value: person.id
       }
     }),

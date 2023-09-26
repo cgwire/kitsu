@@ -285,13 +285,8 @@ export default {
     },
 
     deleteText() {
-      const person = this.personToDelete
-      if (person !== undefined) {
-        const personName = `${person.first_name} ${person.last_name}`
-        return this.$t('people.delete_text', { personName })
-      } else {
-        return ''
-      }
+      const personName = this.personToDelete?.full_name
+      return personName ? this.$t('people.delete_text', { personName }) : ''
     },
 
     filteredPeople() {
