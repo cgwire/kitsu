@@ -17,7 +17,7 @@
     @click="onClick"
   >
     <div class="wrapper" v-if="!minimized">
-      <span v-if="task">
+      <template v-if="task">
         <span
           class="tag"
           :title="taskStatus.name"
@@ -59,7 +59,7 @@
         >
           &nbsp; &nbsp; &nbsp; &nbsp;
         </span>
-      </span>
+      </template>
       <span
         class="avatar has-text-centered"
         :title="person.full_name"
