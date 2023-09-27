@@ -88,8 +88,8 @@ export default {
   components: {
     FileUpload,
     ModalFooter,
-    Tabs,
-    Tab
+    Tab,
+    Tabs
   },
 
   data() {

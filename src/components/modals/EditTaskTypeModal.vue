@@ -44,8 +44,15 @@
           />
           <color-field
             ref="colorField"
+            class="mt2"
             :label="$t('task_types.fields.color')"
             v-model="form.color"
+          />
+          <combobox-boolean
+            :label="$t('main.archived')"
+            @enter="confirmClicked"
+            v-model="form.archived"
+            v-if="isEditing"
           />
         </form>
 
@@ -66,6 +73,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
 import BooleanField from '@/components/widgets/BooleanField'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
 import ComboboxSimple from '@/components/widgets/ComboboxSimple'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
 import ColorField from '@/components/widgets/ColorField'
@@ -77,6 +85,7 @@ export default {
   mixins: [modalMixin],
   components: {
     BooleanField,
+    ComboboxBoolean,
     ComboboxSimple,
     ComboboxDepartment,
     ColorField,
@@ -97,10 +106,6 @@ export default {
       type: Boolean,
       default: false
     },
-    taskTypes: {
-      type: Array,
-      default: () => []
-    },
     taskTypeToEdit: {
       type: Object,
       default: () => {}
@@ -115,7 +120,8 @@ export default {
           color: this.taskTypeToEdit.color,
           for_entity: this.taskTypeToEdit.for_entity || 'Asset',
           allow_timelog: String(this.taskTypeToEdit.allow_timelog === true),
-          department_id: this.taskTypeToEdit.department_id
+          department_id: this.taskTypeToEdit.department_id,
+          archived: String(this.taskTypeToEdit.archived === true)
         }
       }
     }
@@ -128,7 +134,8 @@ export default {
         color: '$grey',
         for_entity: 'Asset',
         allow_timelog: 'false',
-        department_id: null
+        department_id: null,
+        archived: 'false'
       },
       dedicatedToOptions: [
         { label: this.$t('assets.title'), value: 'Asset' },

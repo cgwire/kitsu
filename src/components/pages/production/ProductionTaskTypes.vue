@@ -38,20 +38,6 @@
           {{ taskListObject.title }}
         </h2>
         <table class="datatable list" v-if="taskListObject.list.length > 0">
-          <thead>
-            <tr>
-              <th class="name">
-                {{ $t('task_types.fields.name') }}
-              </th>
-              <!--th class="start-date">
-                {{ $t('productions.fields.start_date') }}
-              </th>
-              <th class="end-date">
-                {{ $t('productions.fields.end_date') }}
-              </th-->
-              <th class="remove"></th>
-            </tr>
-          </thead>
           <draggable
             v-model="taskListObject.list"
             draggable=".task-type"
@@ -70,6 +56,9 @@
             />
           </draggable>
         </table>
+        <p class="empty" v-if="taskListObject.list.length === 0">
+          {{ $t('task_types.no_task_types') }}
+        </p>
       </div>
     </div>
   </div>
@@ -417,5 +406,9 @@ td ::v-deep p.control.flexrow {
 
 h2 {
   border: 0;
+}
+
+.empty {
+  font-style: italic;
 }
 </style>

@@ -380,13 +380,15 @@ export default {
 
   main: {
     about: 'About',
+    active: 'Active',
     add: 'add',
+    after: 'After',
+    admin: 'Admin',
     all: 'All',
     all_assets: 'All assets',
     all_edits: 'All edits',
     all_shots: 'All shots',
-    admin: 'Admin',
-    after: 'After',
+    archived: 'Archived',
     attach_snapshots: 'Attach snapshots from your annotation',
     before: 'Before',
     cancel: 'Cancel',
@@ -1027,6 +1029,7 @@ export default {
     edit_title: 'Edit task type',
     create_error: 'An error occurred while creating the task type. Please, check that there is no task type with a similar name.',
     new_task_type: 'Add a task type',
+    no_task_types: 'There is no task type for this entity type',
     number: 'task type | task types',
     title: 'Task Types',
     fields: {

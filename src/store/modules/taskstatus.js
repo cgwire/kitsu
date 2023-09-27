@@ -18,7 +18,10 @@ const initialState = {
 const state = initialState
 
 const getters = {
-  taskStatus: state => state.taskStatus,
+  taskStatus: state =>
+    state.taskStatus.filter(taskStatus => !taskStatus.archived),
+  archivedTaskStatus: state =>
+    state.taskStatus.filter(taskStatus => taskStatus.archived),
   taskStatusMap: state => state.taskStatusMap,
   editTaskStatus: state => state.editTaskStatus,
   deleteTaskStatus: state => state.deleteTaskStatus,

@@ -6,8 +6,15 @@
       @new-clicked="onNewClicked"
     />
 
+    <route-tabs
+      class="mt2"
+      :active-tab="activeTab"
+      :tabs="tabs"
+      route-name="task-status"
+    />
+
     <task-status-list
-      :entries="taskStatus"
+      :entries="taskStatusList"
       :is-loading="loading.list"
       :is-error="errors.list"
       @edit-clicked="onEditClicked"
@@ -40,6 +47,7 @@ import { mapGetters, mapActions } from 'vuex'
 import DeleteModal from '@/components/modals/DeleteModal'
 import EditTaskStatusModal from '@/components/modals/EditTaskStatusModal'
 import ListPageHeader from '@/components/widgets/ListPageHeader'
+import RouteTabs from '@/components/widgets/RouteTabs'
 import TaskStatusList from '@/components/lists/TaskStatusList'
 
 export default {
@@ -49,11 +57,13 @@ export default {
     DeleteModal,
     EditTaskStatusModal,
     ListPageHeader,
+    RouteTabs,
     TaskStatusList
   },
 
   data() {
     return {
+      activeTab: 'actived',
       taskStatusToDelete: null,
       taskStatusToEdit: { color: '#000000' },
       modals: {
@@ -69,12 +79,32 @@ export default {
         edit: false,
         del: false,
         list: false
-      }
+      },
+      tabs: [
+        {
+          name: 'active',
+          label: this.$t('main.active')
+        },
+        {
+          name: 'archived',
+          label: this.$t('main.archived')
+        }
+      ]
     }
   },
 
+  mounted() {
+    this.activeTab = this.$route.query.tab || 'active'
+  },
+
   computed: {
-    ...mapGetters(['taskStatus', 'taskStatusMap'])
+    ...mapGetters(['taskStatus', 'archivedTaskStatus', 'taskStatusMap']),
+
+    taskStatusList() {
+      return this.activeTab === 'active'
+        ? this.taskStatus
+        : this.archivedTaskStatus
+    }
   },
 
   created() {},
@@ -145,7 +175,12 @@ export default {
     }
   },
 
-  watch: {},
+  watch: {
+    $route() {
+      console.log(this.$route.query)
+      this.activeTab = this.$route.query.tab || 'actived'
+    }
+  },
 
   metaInfo() {
     return {

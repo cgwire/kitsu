@@ -6,8 +6,15 @@
       @new-clicked="onNewClicked"
     />
 
+    <route-tabs
+      class="mt2"
+      :active-tab="activeTab"
+      :tabs="tabs"
+      route-name="task-types"
+    />
+
     <task-type-list
-      :entries="taskTypes"
+      :entries="listTaskTypes"
       :is-loading="loading.taskTypes || loading.departments"
       :is-error="errors.taskTypes || errors.departments"
       @update-priorities="updatePriorities"
@@ -43,6 +50,7 @@ import func from '@/lib/func'
 import DeleteModal from '@/components/modals/DeleteModal'
 import EditTaskTypeModal from '@/components/modals/EditTaskTypeModal'
 import ListPageHeader from '@/components/widgets/ListPageHeader'
+import RouteTabs from '@/components/widgets/RouteTabs'
 import TaskTypeList from '@/components/lists/TaskTypeList'
 
 export default {
@@ -52,11 +60,13 @@ export default {
     DeleteModal,
     EditTaskTypeModal,
     ListPageHeader,
+    RouteTabs,
     TaskTypeList
   },
 
   data() {
     return {
+      activeTab: 'active',
       errors: {
         taskTypes: false,
         departments: false,
@@ -73,16 +83,33 @@ export default {
         del: false,
         edit: false
       },
+      tabs: [
+        {
+          name: 'active',
+          label: 'main.active'
+        },
+        {
+          name: 'archived',
+          label: 'main.archived'
+        }
+      ],
       taskTypeToDelete: { color: '#999999' },
       taskTypeToEdit: null
     }
   },
 
   computed: {
-    ...mapGetters(['getTaskType', 'taskTypes'])
+    ...mapGetters(['archivedTaskTypes', 'getTaskType', 'taskTypes']),
+
+    listTaskTypes() {
+      return this.activeTab === 'active'
+        ? this.taskTypes
+        : this.archivedTaskTypes
+    }
   },
 
   mounted() {
+    this.activeTab = this.$route.query.tab || 'active'
     this.loading.taskTypes = true
     this.errors.taskTypes = false
     this.loading.departments = true
@@ -198,7 +225,11 @@ export default {
     }
   },
 
-  watch: {},
+  watch: {
+    $route() {
+      this.activeTab = this.$route.query.tab
+    }
+  },
 
   metaInfo() {
     return {
