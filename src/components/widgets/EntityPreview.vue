@@ -35,13 +35,14 @@
   >
     <img
       class="thumbnail-picture"
+      loading="lazy"
+      :key="thumbnailKey"
+      :src="thumbnailPath"
       :style="{
         width: 'auto',
-        'max-height': emptyHeight + 'px'
+        'max-height': `${emptyHeight}px`
       }"
       :width="width || ''"
-      v-lazy="thumbnailPath"
-      :key="thumbnailKey"
     />
   </a>
 </template>

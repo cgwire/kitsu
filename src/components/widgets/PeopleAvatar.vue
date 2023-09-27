@@ -21,7 +21,11 @@
       :title="person.full_name"
     >
       <img :src="person.avatarPath" v-if="person.has_avatar && noCache" />
-      <img v-lazy="person.avatarPath" v-else-if="person.has_avatar" />
+      <img
+        loading="lazy"
+        :src="person.avatarPath"
+        v-else-if="person.has_avatar"
+      />
       <template v-else>{{ person.initials }}</template>
     </router-link>
   </span>
@@ -38,7 +42,11 @@
     v-else
   >
     <img :src="person.avatarPath" v-if="person.has_avatar && noCache" />
-    <img v-lazy="person.avatarPath" v-else-if="person.has_avatar" />
+    <img
+      loading="lazy"
+      :src="person.avatarPath"
+      v-else-if="person.has_avatar"
+    />
     <template v-else>{{ person.initials }}</template>
   </span>
 </template>

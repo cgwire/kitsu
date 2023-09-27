@@ -1,22 +1,17 @@
 <template functional>
   <img
     class="thumbnail-picture"
+    loading="lazy"
+    :key="props.previewFileId"
+    :src="`/api/pictures/${props.type}/preview-files/${props.previewFileId}.png`"
     :style="{
       width: props.width,
       height: props.height,
       'max-width': props.maxWidth,
       'max-height': props.maxHeight
     }"
-    v-lazy="
-      '/api/pictures/' +
-      props.type +
-      '/preview-files/' +
-      props.previewFileId +
-      '.png'
-    "
-    :key="props.previewFileId"
-    v-if="props.previewFileId"
     v-bind="data.attrs"
+    v-if="props.previewFileId"
   />
   <span
     :class="{

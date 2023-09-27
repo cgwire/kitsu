@@ -16,12 +16,8 @@
       <div class="asset-add" @click="removeOneAsset" v-if="!readOnly">- 1</div>
       <div class="asset-picture" v-if="asset.preview_file_id">
         <img
-          v-lazy="
-            '/api/pictures/thumbnails-square/preview-files/' +
-            asset.preview_file_id +
-            '.png'
-          "
-          alt=""
+          loading="lazy"
+          :src="`/api/pictures/thumbnails-square/preview-files/${asset.preview_file_id}.png`"
         />
         <span class="nb-occurences" v-if="nbOccurences > 1">
           {{ nbOccurences }}

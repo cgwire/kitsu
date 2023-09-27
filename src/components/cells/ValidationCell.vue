@@ -68,7 +68,7 @@
         v-for="person in assignees"
         v-if="isAssignees && !isCurrentUserClient && !disabled"
       >
-        <img v-lazy="person.avatarPath" v-if="person.has_avatar" />
+        <img loading="lazy" :src="person.avatarPath" v-if="person.has_avatar" />
         <template v-else>{{ person.initials }}</template>
       </span>
       <span class="subscribed" v-if="task && task.is_subscribed">
