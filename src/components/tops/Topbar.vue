@@ -3,7 +3,7 @@
     <div
       id="c-mask-user-menu"
       @click="toggleUserMenu()"
-      v-bind:class="{ 'is-active': !isUserMenuHidden }"
+      :class="{ 'is-active': !isUserMenuHidden }"
     ></div>
 
     <nav class="nav">
@@ -121,11 +121,10 @@
           @click="toggleUserMenu"
         >
           <people-avatar
-            ref="avatar"
             class="avatar"
-            :no-cache="true"
-            :person="user"
+            :is-lazy="false"
             :is-link="false"
+            :person="user"
           />
         </div>
       </div>

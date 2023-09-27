@@ -4,8 +4,7 @@
       <div class="has-text-centered profile-header">
         <div class="profile-header-content has-text-centered">
           <people-avatar
-            ref="avatar"
-            :no-cache="true"
+            :is-lazy="false"
             :person="this.user"
             :size="150"
             :font-size="60"

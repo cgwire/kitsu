@@ -2,7 +2,6 @@
   <div class="flexrow">
     <people-avatar
       :is-link="false"
-      :no-cache="true"
       :person="item"
       :size="30"
       class="flexrow-item"

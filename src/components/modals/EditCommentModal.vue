@@ -13,7 +13,7 @@
           {{ $t('comments.edit_title') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <combo-box-status
             :label="$t('task_status.title')"
             :task-status-list="taskStatusForCurrentUser"
@@ -31,7 +31,6 @@
                     class="flexrow-item"
                     :person="team.item"
                     :size="20"
-                    :no-cache="true"
                   />
                   <span class="flexrow-item">
                     {{ team.item.full_name }}

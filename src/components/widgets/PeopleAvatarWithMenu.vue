@@ -10,11 +10,10 @@
         'font-size': fontSize + 'px'
       }"
     >
-      <img :src="person.avatarPath" v-if="person.has_avatar && noCache" />
       <img
-        loading="lazy"
+        :loading="this.isLazy ? 'lazy' : undefined"
         :src="person.avatarPath"
-        v-else-if="person.has_avatar"
+        v-if="person.has_avatar"
       />
       <template v-else>{{ person.initials }}</template>
     </span>
@@ -66,9 +65,9 @@ export default {
       type: Boolean,
       default: true
     },
-    noCache: {
+    isLazy: {
       type: Boolean,
-      default: false
+      default: true
     },
     isMenu: {
       type: Boolean,
