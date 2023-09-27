@@ -145,7 +145,11 @@ export default {
         return [...this.departmentsToTakeAccount]
       } else {
         return [
-          { name: '---', id: null, color: '#000000' },
+          {
+            color: '#AAA',
+            id: null,
+            name: this.$t('departments.no_department')
+          },
           ...this.departmentsToTakeAccount
         ]
       }
