@@ -10,6 +10,7 @@ const sanitizeTaskStatus = taskStatus => {
     is_artist_allowed: Boolean(taskStatus.is_artist_allowed === 'true'),
     is_client_allowed: Boolean(taskStatus.is_client_allowed === 'true'),
     is_feedback_request: Boolean(taskStatus.is_feedback_request === 'true'),
+    archived: Boolean(taskStatus.archived === 'true'),
     color: taskStatus.color
   }
 }

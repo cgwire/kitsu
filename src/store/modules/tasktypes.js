@@ -26,7 +26,9 @@ const state = {
 }
 
 const getters = {
-  taskTypes: state => state.taskTypes,
+  taskTypes: state => state.taskTypes.filter(taskType => !taskType.archived),
+  archivedTaskTypes: state =>
+    state.taskTypes.filter(taskType => taskType.archived),
   taskTypeMap: state => state.taskTypeMap,
   sequenceSubscriptions: state => state.sequenceSubscriptions,
 

@@ -46,6 +46,12 @@
 
           <div class="departments field">
             <label class="label">{{ $t('people.fields.departments') }}</label>
+            <p
+              class="empty mb1"
+              v-if="form.departments && form.departments.length === 0"
+            >
+              {{ $t('people.departments_empty') }}
+            </p>
             <div
               class="department-element mb1 mt05"
               :key="departmentId"
@@ -379,6 +385,11 @@ export default {
 }
 .is-danger {
   color: #ff3860;
+  font-style: italic;
+}
+
+.empty {
+  color: var(--text);
   font-style: italic;
 }
 </style>

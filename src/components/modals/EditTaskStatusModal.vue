@@ -9,7 +9,7 @@
 
     <div class="modal-content">
       <div class="box">
-        <h1 class="title" v-if="isEditing()">
+        <h1 class="title" v-if="isEditing">
           {{ $t('task_status.edit_title') }} {{ taskStatusToEdit.name }}
         </h1>
         <h1 class="title" v-else>
@@ -77,6 +77,13 @@
             v-model="form.color"
             v-if="taskStatusToEdit.short_name !== 'todo'"
           />
+
+          <combobox-boolean
+            :label="$t('main.archived')"
+            @enter="confirmClicked"
+            v-model="form.archived"
+            v-if="isEditing"
+          />
         </form>
 
         <modal-footer
@@ -95,6 +102,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 import BooleanField from '@/components/widgets/BooleanField'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
 import ColorField from '@/components/widgets/ColorField'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '@/components/widgets/TextField'
@@ -105,6 +113,7 @@ export default {
   components: {
     BooleanField,
     ColorField,
+    ComboboxBoolean,
     ModalFooter,
     TextField
   },
@@ -136,7 +145,8 @@ export default {
         color: '$grey999',
         is_done: 'false',
         is_feedback_request: 'false',
-        is_default: 'false'
+        is_default: 'false',
+        archived: 'false'
       },
       isRetakeOptions: [
         { label: this.$t('main.yes'), value: 'true' },
@@ -180,7 +190,11 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['taskStatus', 'taskStatusStatusOptions'])
+    ...mapGetters(['taskStatus', 'taskStatusStatusOptions']),
+
+    isEditing() {
+      return this.taskStatusToEdit && this.taskStatusToEdit.id
+    }
   },
 
   methods: {
@@ -188,10 +202,6 @@ export default {
 
     confirmClicked() {
       this.$emit('confirm', this.form)
-    },
-
-    isEditing() {
-      return this.taskStatusToEdit && this.taskStatusToEdit.id
     },
 
     resetForm() {
@@ -207,7 +217,8 @@ export default {
           is_default: String(this.taskStatusToEdit.is_default || false),
           is_feedback_request: String(
             this.taskStatusToEdit.is_feedback_request || false
-          )
+          ),
+          archived: String(this.taskStatusToEdit.archived || false)
         }
       }
     }

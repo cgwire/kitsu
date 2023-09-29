@@ -174,9 +174,12 @@ export default {
 }
 
 .name {
-  text-transform: capitalize;
   width: 120px;
   min-width: 120px;
+}
+
+td.name {
+  text-transform: capitalize;
 }
 
 .in-task-type {

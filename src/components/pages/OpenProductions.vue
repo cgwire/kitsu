@@ -25,6 +25,14 @@
       class="open-productions-box"
       v-if="!isOpenProductionsLoading && openProductions.length > 0"
     >
+      <div class="flexrow search-area" v-if="openProductions.length > 6">
+        <search-field
+          ref="search-field"
+          class="search-field"
+          @change="onSearchChange"
+        />
+      </div>
+
       <div
         :class="{
           'open-productions-list': true,
@@ -34,7 +42,7 @@
         <div
           class="open-production has-text-centered"
           :key="production.id"
-          v-for="production in openProductions"
+          v-for="production in filteredProductions"
         >
           <router-link :to="getPath(production)">
             <div
@@ -94,8 +102,11 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import colors from '@/lib/colors.js'
+import { buildNameIndex } from '@/lib/indexing'
+
+import colors from '@/lib/colors'
 import EditProductionModal from '@/components/modals/EditProductionModal'
+import SearchField from '@/components/widgets/SearchField'
 import Spinner from '@/components/widgets/Spinner'
 
 export default {
@@ -103,11 +114,14 @@ export default {
 
   components: {
     EditProductionModal,
+    SearchField,
     Spinner
   },
 
   data() {
     return {
+      filteredProductions: [],
+      search: '',
       errors: {
         edit: false
       },
@@ -118,6 +132,12 @@ export default {
         isNewDisplayed: false
       }
     }
+  },
+
+  mounted() {
+    this.$refs['search-field'].focus()
+    this.filteredProductions = this.openProductions
+    this.productionIndex = buildNameIndex(this.openProductions)
   },
 
   computed: {
@@ -196,6 +216,15 @@ export default {
 
     hideNewModal() {
       this.modals.isNewDisplayed = false
+    },
+
+    onSearchChange(search) {
+      console.log(search)
+      if (search === '') {
+        this.filteredProductions = this.openProductions
+      } else {
+        this.filteredProductions = this.productionIndex[search]
+      }
     }
   },
 
@@ -383,6 +412,10 @@ a.secondary:hover {
   &:active {
     box-shadow: none;
   }
+}
+
+.search-area {
+  justify-content: center;
 }
 
 @media screen and (max-width: 768px) {
