@@ -437,9 +437,8 @@ export default {
     displayedTasks() {
       if (this.tasks && this.tasks.length > 0) {
         return this.tasks.slice(0, 60 * this.page)
-      } else {
-        return []
       }
+      return []
     },
 
     tasksByParent() {
@@ -507,10 +506,9 @@ export default {
 
     getTaskName(task) {
       if (this.entityType === 'Shot') {
-        return task.sequence_name + ' / ' + this.getEntity(task.entity.id).name
-      } else {
-        return task.entity_name
+        return `${task.sequence_name} / ${this.getEntity(task.entity.id).name}`
       }
+      return task.entity_name
     },
 
     isTaskChanged(task, data) {
@@ -629,7 +627,7 @@ export default {
 
     formatDate(date) {
       if (date) return moment(date).format('YYYY-MM-DD')
-      else return ''
+      return ''
     },
 
     isEstimationBurned(task) {
@@ -650,7 +648,7 @@ export default {
     },
 
     getEntity(entityId) {
-      return this[`${this.entityType.toLowerCase()}Map`].get(entityId)
+      return this[`${this.entityType.toLowerCase()}Map`].get(entityId) || {}
     },
 
     onKeyDown(event) {
@@ -720,7 +718,7 @@ export default {
     },
 
     scrollToLine(taskId) {
-      const taskLine = this.$refs['task-' + taskId]
+      const taskLine = this.$refs[`task-${taskId}`]
       if (taskLine && this.$refs.body) {
         const margin = 30
         const rect = taskLine[0].getBoundingClientRect()
@@ -744,16 +742,14 @@ export default {
       } else if (this.isCurrentUserSupervisor) {
         if (this.user.departments.length === 0) {
           return true
-        } else {
-          const taskType = this.taskTypeMap.get(task.task_type_id)
-          return (
-            taskType.department_id &&
-            this.user.departments.includes(taskType.department_id)
-          )
         }
-      } else {
-        return false
+        const taskType = this.taskTypeMap.get(task.task_type_id)
+        return (
+          taskType.department_id &&
+          this.user.departments.includes(taskType.department_id)
+        )
       }
+      return false
     },
 
     resetSelection() {
@@ -788,7 +784,7 @@ export default {
           .map(personId => {
             const person = this.personMap.get(personId)
             if (person) return person.name
-            else return ''
+            return ''
           })
           .join(', ')
 
