@@ -148,7 +148,6 @@
                       :empty-width="103"
                       :empty-height="103"
                       :with-link="false"
-                      :no-cache="true"
                     />
                     <div class="break-word">
                       {{ asset.asset_name }}

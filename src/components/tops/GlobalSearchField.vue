@@ -268,10 +268,9 @@ export default {
         this.searchData({ query: this.searchQuery })
           .then(results => {
             this.assets = results.assets
-            results.persons.forEach(person => {
-              peopleStore.helpers.addAdditionalInformation(person)
-            })
-            this.persons = results.persons
+            this.persons = results.persons.map(
+              peopleStore.helpers.addAdditionalInformation
+            )
             this.shots = results.shots
           })
           .catch(console.error)

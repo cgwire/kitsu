@@ -193,7 +193,7 @@
                         :person="team.item"
                         :size="20"
                         :font-size="11"
-                        :no-cache="true"
+                        :is-lazy="false"
                         :is-link="false"
                       />
                       <span class="flexrow-item">

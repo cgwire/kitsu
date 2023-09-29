@@ -926,9 +926,7 @@ const mutations = {
 
   [LOAD_TASK_COMMENTS_END](state, { taskId, comments }) {
     comments.forEach(comment => {
-      comment.person = personStore.helpers.addAdditionalInformation(
-        comment.person
-      )
+      comment.person = personStore.state.personMap.get(comment.person_id)
     })
     state.taskComments[taskId] = sortComments(comments)
     Vue.set(

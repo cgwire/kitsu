@@ -7,7 +7,7 @@
     </div>
 
     <div class="flexrow">
-      <people-avatar class="flexrow-item" :person="person" :no-cache="true" />
+      <people-avatar class="flexrow-item" :person="person" :is-lazy="false" />
       <page-title class="flexrow-item" :text="person.full_name" />
     </div>
 

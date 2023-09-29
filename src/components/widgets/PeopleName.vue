@@ -10,17 +10,16 @@
     :title="person.full_name"
     v-if="withLink"
   >
-    {{ person.first_name + ' ' + person.last_name }}
+    {{ person.full_name }}
   </router-link>
   <span class="person-name" v-else>
-    {{ person.first_name + ' ' + person.last_name }}
+    {{ person.full_name }}
   </span>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 export default {
-  name: 'person-name',
+  name: 'people-name',
   props: {
     person: {
       type: Object,
@@ -30,12 +29,6 @@ export default {
       type: Boolean,
       default: false
     }
-  },
-  computed: {
-    ...mapGetters([])
-  },
-  methods: {
-    ...mapActions([])
   }
 }
 </script>

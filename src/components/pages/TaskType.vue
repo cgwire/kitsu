@@ -1139,7 +1139,6 @@ export default {
           avatar: true,
           has_avatar: person.has_avatar,
           avatarPath: person.avatarPath,
-          uniqueHash: person.uniqueHash,
           initials: person.initials,
           id: person.id,
           name: person.full_name,

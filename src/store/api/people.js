@@ -49,8 +49,8 @@ export default {
     client.get('/api/data/persons?relations=true', callback)
   },
 
-  getPerson(personId, callback) {
-    client.get(`/api/data/persons/${personId}`, callback)
+  getPerson(personId) {
+    return client.pget(`/api/data/persons/${personId}`)
   },
 
   createPerson(person) {
@@ -122,12 +122,8 @@ export default {
     return client.ppost(path, formData)
   },
 
-  postAvatar(userId, formData, callback) {
-    client.post(
-      `/api/pictures/thumbnails/persons/${userId}`,
-      formData,
-      callback
-    )
+  postAvatar(userId, formData) {
+    return client.ppost(`/api/pictures/thumbnails/persons/${userId}`, formData)
   },
 
   changePassword(form, callback) {

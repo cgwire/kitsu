@@ -61,7 +61,6 @@
                   :is-link="false"
                   :font-size="14"
                   :size="28"
-                  :no-cache="true"
                   v-else
                 />
               </span>

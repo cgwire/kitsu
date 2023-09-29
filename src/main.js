@@ -10,7 +10,6 @@ import Chart from 'chart.js'
 import Meta from 'vue-meta'
 import VueChartkick from 'vue-chartkick'
 import VueDragDrop from 'vue-drag-drop'
-import VueLazyload from 'vue-lazyload'
 import vuescroll from 'vue-scroll'
 import VueTextareaAutosize from 'vue-textarea-autosize'
 import VueWebsocket from 'vue-websocket-next'
@@ -25,7 +24,6 @@ Vue.use(Autocomplete)
 Vue.use(Meta)
 Vue.use(resizableColumn)
 Vue.use(VueChartkick, { adapter: Chart })
-Vue.use(VueLazyload)
 Vue.use(vuescroll)
 Vue.use(VueDragDrop)
 Vue.use(VueTextareaAutosize)
