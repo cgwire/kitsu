@@ -41,6 +41,12 @@
       >
         <div
           class="open-production has-text-centered"
+          v-if="!filteredProductions?.length"
+        >
+          {{ $t('main.search.no_result') }}
+        </div>
+        <div
+          class="open-production has-text-centered"
           :key="production.id"
           v-for="production in filteredProductions"
         >
