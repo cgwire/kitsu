@@ -239,7 +239,8 @@ export default {
 
     thumbnails: {
       assets_pattern: '"AssetType AssetName" eg. Environment_Forest.',
-      edits_pattern: '"Edit EditName" eg. Edit_Trailer.',
+      edits_pattern: '"EditName" eg. Trailer.',
+      edits_tvshow_pattern: '"EpisodeName EditName" eg. E01_Trailer.',
       error: 'An error occurred while uploading thumbnails',
       explaination: 'Adding a thumbnail requires to set a new preview. In order to set several thumbnails at the same time, you must choose first a task type that will be used to create the new previews. The thumbnails will be set from this new preview.',
       explaination_two: 'Then you have to select the files you want to upload. To find the right entities, the file names must match the following pattern:',

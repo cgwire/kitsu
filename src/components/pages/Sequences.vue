@@ -148,12 +148,14 @@
 
     <add-thumbnails-modal
       ref="add-thumbnails-modal"
+      entity-type="Sequence"
       parent="sequences"
       :active="modals.isAddThumbnailsDisplayed"
       :is-loading="loading.addThumbnails"
       :is-error="errors.addThumbnails"
       @cancel="hideAddThumbnailsModal"
       @confirm="confirmAddThumbnails"
+      v-if="false"
     />
 
     <build-filter-modal
@@ -309,7 +311,7 @@ export default {
       this.searchField.setValue(this.sequenceSearchText)
     }
     if (this.$route.query.search && this.$route.query.search.length > 0) {
-      searchQuery = '' + this.$route.query.search
+      searchQuery = `${this.$route.query.search}`
     }
     if (searchQuery === 'undefined') searchQuery = ''
     this.$refs['sequence-list'].setScrollPosition(
@@ -391,7 +393,7 @@ export default {
 
       this.productionSequenceTaskTypes.forEach(item => {
         collection.push(item.name)
-        collection.push(item.name + ' comment')
+        collection.push(`${item.name} comment`)
       })
       return collection
     },
@@ -609,9 +611,8 @@ export default {
       const sequence = this.sequenceToDelete
       if (sequence) {
         return this.$t('sequences.delete_text', { name: sequence.name })
-      } else {
-        return ''
       }
+      return ''
     }
   },
 
@@ -644,7 +645,7 @@ export default {
       if (!this.isSequencesLoading) {
         let searchQuery = ''
         if (this.$route.query.search && this.$route.query.search.length > 0) {
-          searchQuery = '' + this.$route.query.search
+          searchQuery = `${this.$route.query.search}`
         }
         this.initialLoading = false
         this.$refs['sequence-search-field'].setValue(searchQuery)

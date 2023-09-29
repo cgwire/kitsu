@@ -148,12 +148,14 @@
 
     <add-thumbnails-modal
       ref="add-thumbnails-modal"
+      entity-type="Episode"
       parent="episodes"
       :active="modals.isAddThumbnailsDisplayed"
       :is-loading="loading.addThumbnails"
       :is-error="errors.addThumbnails"
       @cancel="hideAddThumbnailsModal"
       @confirm="confirmAddThumbnails"
+      v-if="false"
     />
 
     <build-filter-modal
@@ -309,7 +311,7 @@ export default {
       this.searchField.setValue(this.episodeSearchText)
     }
     if (this.$route.query.search && this.$route.query.search.length > 0) {
-      searchQuery = '' + this.$route.query.search
+      searchQuery = `${this.$route.query.search}`
     }
     if (searchQuery === 'undefined') searchQuery = ''
     this.$refs['episode-list'].setScrollPosition(this.episodeListScrollPosition)
@@ -387,7 +389,7 @@ export default {
 
       this.productionEpisodeTaskTypes.forEach(item => {
         collection.push(item.name)
-        collection.push(item.name + ' comment')
+        collection.push(`${item.name} comment`)
       })
       return collection
     },
@@ -602,9 +604,8 @@ export default {
       const episode = this.episodeToDelete
       if (episode) {
         return this.$t('episodes.delete_text', { name: episode.name })
-      } else {
-        return ''
       }
+      return ''
     }
   },
 
@@ -630,7 +631,7 @@ export default {
       if (!this.isEpisodesLoading) {
         let searchQuery = ''
         if (this.$route.query.search && this.$route.query.search.length > 0) {
-          searchQuery = '' + this.$route.query.search
+          searchQuery = `${this.$route.query.search}`
         }
         this.initialLoading = false
         this.$refs['episode-search-field'].setValue(searchQuery)

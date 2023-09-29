@@ -230,6 +230,7 @@
 
     <add-thumbnails-modal
       ref="add-thumbnails-modal"
+      entity-type="Asset"
       parent="assets"
       :active="modals.isAddThumbnailsDisplayed"
       :is-loading="loading.addThumbnails"
@@ -383,7 +384,7 @@ export default {
       this.searchField.setValue(this.assetSearchText)
     }
     if (this.$route.query.search && this.$route.query.search.length > 0) {
-      searchQuery = '' + this.$route.query.search
+      searchQuery = `${this.$route.query.search}`
     }
     this.$refs['asset-list'].setScrollPosition(this.assetListScrollPosition)
     this.onSearchChange()
@@ -513,7 +514,7 @@ export default {
 
       this.productionAssetTaskTypes.forEach(item => {
         collection.push(item.name)
-        collection.push(item.name + ' comment')
+        collection.push(`${item.name} comment`)
       })
 
       return collection
@@ -733,9 +734,8 @@ export default {
         return this.$t('assets.delete_text', { name: asset.name })
       } else if (asset) {
         return this.$t('assets.cancel_text', { name: asset.name })
-      } else {
-        return ''
       }
+      return ''
     },
 
     deleteAllTasksText() {
@@ -748,9 +748,8 @@ export default {
       const asset = this.assetToRestore
       if (asset) {
         return this.$t('assets.restore_text', { name: asset.name })
-      } else {
-        return ''
       }
+      return ''
     },
 
     renderImport(data, mode) {
@@ -873,7 +872,7 @@ export default {
           taskId: form.task.id,
           commentText: '',
           taskStatusId: form.task.task_status_id,
-          form: form
+          form
         })
           .then(({ newComment, preview }) => {
             return this.setPreview({
@@ -1019,9 +1018,8 @@ export default {
   metaInfo() {
     if (this.isTVShow) {
       return { title: this.tvShowPageTitle }
-    } else {
-      return { title: this.shortPageTitle }
     }
+    return { title: this.shortPageTitle }
   }
 }
 </script>
