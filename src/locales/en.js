@@ -238,14 +238,15 @@ export default {
     },
 
     thumbnails: {
+      assets_pattern: '"AssetType AssetName" eg. Environment_Forest.',
+      edits_pattern: '"Edit EditName" eg. Edit_Trailer.',
       error: 'An error occurred while uploading thumbnails',
       explaination: 'Adding a thumbnail requires to set a new preview. In order to set several thumbnails at the same time, you must choose first a task type that will be used to create the new previews. The thumbnails will be set from this new preview.',
       explaination_two: 'Then you have to select the files you want to upload. To find the right entities, the file names must match the following pattern:',
-      shots_pattern: '"SequenceName ShotName" eg. SQ01_SH01.',
-      assets_pattern: '"AssetType AssetName" eg. Environment_Forest.',
       select_files: 'Select Files',
       selected_files: 'Selected Files',
       select_task_type: 'Select Task Type',
+      shots_pattern: '"SequenceName ShotName" eg. SQ01_SH01.',
       title: 'Add Thumbnails',
       undefined: 'Undefined',
       undefined_pattern: 'Undefined',
@@ -1054,7 +1055,8 @@ export default {
     tasks: 'Tasks',
     fields: {
       name: 'Name',
-      description: 'description'
+      description: 'description',
+      person: 'Person',
     }
   },
 
@@ -1070,13 +1072,16 @@ export default {
     empty_list: 'There are no edits in the production. What about creating some?',
     empty_list_client: 'There are no edits in this production.',
     new_edit: 'New edit',
+    history: 'Edit values history',
     number: 'edit | edits',
+    restore_error: 'An error occurred while restoring this edit.',
     tasks: 'Tasks',
     title: 'Edits',
     fields: {
       name: 'Name',
       episode: 'Ep.',
-      description: 'Description'
+      description: 'Description',
+      person: 'Modifier',
     }
   },
 
