@@ -394,7 +394,7 @@ const filters = {
 }
 
 export default {
-  name: 'task-type-page',
+  name: 'task-type',
   mixins: [formatListMixin, searchMixin],
   components: {
     ButtonSimple,
@@ -586,9 +586,8 @@ export default {
     locale() {
       if (this.user.locale === 'fr_FR') {
         return fr
-      } else {
-        return en
       }
+      return en
     },
 
     productionStartDate() {
@@ -641,12 +640,10 @@ export default {
             `${episodeName} / ` +
             `${this.currentTaskType.name}`
           )
-        } else {
-          return `${this.currentProduction.name} / ${this.currentTaskType.name}`
         }
-      } else {
-        return 'Loading...'
+        return `${this.currentProduction.name} / ${this.currentTaskType.name}`
       }
+      return 'Loading...'
     },
 
     // Paths
@@ -765,11 +762,8 @@ export default {
             this.resetTasks()
             this.focusSearchField({ preventScroll: true })
             let searchQuery = this.$route.query.search
-            if (searchQuery.length === 0) {
-              searchQuery =
-                !searchQuery && this.searchField
-                  ? this.searchField.getValue()
-                  : ''
+            if (!searchQuery && this.searchField) {
+              searchQuery = this.searchField.getValue()
             }
             if (searchQuery) this.onSearchChange(searchQuery)
             setTimeout(() => {
@@ -784,7 +778,6 @@ export default {
             this.dueDateFilter = this.$route.query.duedate || 'all'
             this.estimationFilter = this.$route.query.late || 'all'
             this.priorityFilter = this.$route.query.priority || '-1'
-            this.onSearchChange(this.$route.query.search)
           })
           .catch(err => {
             console.error(err)
@@ -797,11 +790,8 @@ export default {
           this.resetTaskTypeDates()
           this.loading.entities = false
           let searchQuery = this.$route.query.search
-          if (!searchQuery || searchQuery.length === 0) {
-            searchQuery =
-              !searchQuery && this.searchField
-                ? this.searchField.getValue()
-                : ''
+          if (!searchQuery && this.searchField) {
+            searchQuery = this.searchField.getValue()
           }
           if (searchQuery) this.onSearchChange(searchQuery)
           if (this.isActiveTab('schedule')) {
@@ -831,18 +821,17 @@ export default {
             Promise.resolve(this.currentScheduleItem)
           }
         })
-      } else {
-        return this.loadScheduleItems(this.currentProduction).then(items => {
-          if (!items) {
-            Promise.resolve([])
-          } else {
-            this.currentScheduleItem = items.find(item => {
-              return item.task_type_id === this.currentTaskType.id
-            })
-            Promise.resolve(this.currentScheduleItem)
-          }
-        })
       }
+      return this.loadScheduleItems(this.currentProduction).then(items => {
+        if (!items) {
+          Promise.resolve([])
+        } else {
+          this.currentScheduleItem = items.find(item => {
+            return item.task_type_id === this.currentTaskType.id
+          })
+          Promise.resolve(this.currentScheduleItem)
+        }
+      })
     },
 
     // Tabs
@@ -1211,8 +1200,8 @@ export default {
         return {
           ...task,
           name: task.entity_name,
-          startDate: startDate,
-          endDate: endDate,
+          startDate,
+          endDate,
           expanded: false,
           loading: false,
           man_days: estimation,
@@ -1224,7 +1213,7 @@ export default {
         }
       })
       Object.assign(personElement, {
-        children: children,
+        children,
         startDate: minStartDate,
         endDate: maxEndDate,
         man_days: manDays
@@ -1242,9 +1231,8 @@ export default {
           !this.taskStatusMap.get(task.task_status_id).is_done &&
           endDate.isBefore(moment())
         return isLate ? '#FF3860' : '#999'
-      } else {
-        return null
       }
+      return null
     },
 
     saveTaskScheduleItem(item) {

@@ -260,6 +260,7 @@
 
     <add-thumbnails-modal
       ref="add-thumbnails-modal"
+      entity-type="Shot"
       parent="shots"
       :active="modals.isAddThumbnailsDisplayed"
       :is-loading="loading.addThumbnails"
@@ -428,7 +429,7 @@ export default {
   mounted() {
     let searchQuery = ''
     if (this.$route.query.search && this.$route.query.search.length > 0) {
-      searchQuery = '' + this.$route.query.search
+      searchQuery = `${this.$route.query.search}`
     }
     this.$refs['shot-search-field'].setValue(searchQuery)
     const finalize = () => {
@@ -517,7 +518,7 @@ export default {
 
       this.productionShotTaskTypes.forEach(item => {
         collection.push(item.name)
-        collection.push(item.name + ' comment')
+        collection.push(`${item.name} comment`)
       })
 
       return collection
@@ -731,7 +732,7 @@ export default {
           taskId: form.task.id,
           commentText: '',
           taskStatusId: form.task.task_status_id,
-          form: form
+          form
         })
           .then(({ newComment, preview }) => {
             return this.setPreview({
@@ -814,27 +815,24 @@ export default {
         return this.$t('shots.delete_text', { name: shot.name })
       } else if (shot) {
         return this.$t('shots.cancel_text', { name: shot.name })
-      } else {
-        return ''
       }
+      return ''
     },
 
     deleteAllTasksText() {
       const taskType = this.taskTypeForTaskDeletion
       if (taskType) {
         return this.$t('tasks.delete_all_text', { name: taskType.name })
-      } else {
-        return ''
       }
+      return ''
     },
 
     restoreText() {
       const shot = this.shotToRestore
       if (shot) {
         return this.$t('shots.restore_text', { name: shot.name })
-      } else {
-        return ''
       }
+      return ''
     },
 
     renderImport(data, mode) {
@@ -1150,7 +1148,7 @@ export default {
       if (!this.isShotsLoading) {
         let searchQuery = ''
         if (this.$route.query.search && this.$route.query.search.length > 0) {
-          searchQuery = '' + this.$route.query.search
+          searchQuery = `${this.$route.query.search}`
         }
         this.initialLoading = false
         this.$refs['shot-search-field'].setValue(searchQuery)
@@ -1172,12 +1170,9 @@ export default {
           ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
           ` | ${this.$t('shots.title')} - Kitsu`
       }
-    } else {
-      return {
-        title: `${this.currentProduction.name} ${this.$t(
-          'shots.title'
-        )} - Kitsu`
-      }
+    }
+    return {
+      title: `${this.currentProduction.name} ${this.$t('shots.title')} - Kitsu`
     }
   }
 }

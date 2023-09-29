@@ -31,9 +31,8 @@ export const sortSequences = sequences => {
     firstBy((a, b) => {
       if (a.episode_name) {
         return a.episode_name.localeCompare(b.episode_name)
-      } else {
-        return 0
       }
+      return 0
     }).thenBy((a, b) => {
       return a.name.localeCompare(b.name)
     })
@@ -44,9 +43,8 @@ export const sortProductions = productions => {
   return productions.sort((a, b) => {
     if (a.project_status_name === b.project_status_name) {
       return a.name.localeCompare(b.name)
-    } else {
-      return -1 * a.project_status_name.localeCompare(b.project_status_name)
     }
+    return -1 * a.project_status_name.localeCompare(b.project_status_name)
   })
 }
 
@@ -59,9 +57,8 @@ export const sortTaskNames = (tasks, taskTypeMap) => {
     }).thenBy((a, b) => {
       if (a.full_entity_name) {
         return a.full_entity_name.localeCompare(b.full_entity_name)
-      } else {
-        return a.entity_name.localeCompare(b.entity_name)
       }
+      return a.entity_name.localeCompare(b.entity_name)
     })
   )
 }
@@ -71,9 +68,8 @@ export const sortTasks = (tasks, taskTypeMap) => {
       .thenBy((a, b) => {
         if (a.project_name) {
           return a.project_name.localeCompare(b.project_name)
-        } else {
-          return 0
         }
+        return 0
       })
       .thenBy((a, b) => {
         const taskTypeA = taskTypeMap.get(a.task_type_id)
@@ -83,9 +79,8 @@ export const sortTasks = (tasks, taskTypeMap) => {
       .thenBy((a, b) => {
         if (a.full_entity_name) {
           return a.full_entity_name.localeCompare(b.full_entity_name)
-        } else {
-          return a.entity_name.localeCompare(b.entity_name)
         }
+        return a.entity_name.localeCompare(b.entity_name)
       })
   )
 }
@@ -171,6 +166,10 @@ export const sortByName = entries => {
   return entries.sort((a, b) => a.name.localeCompare(b.name))
 }
 
+export const sortByValue = entries => {
+  return entries.sort((a, b) => a.value.localeCompare(b.value))
+}
+
 export const sortByDate = entries => {
   return entries.sort(firstBy('created_at', -1))
 }
@@ -195,9 +194,8 @@ export const sortValidationColumns = (
       return taskTypeA.name.localeCompare(taskTypeB.name)
     } else if (taskTypeAPriority > taskTypeBPriority) {
       return 1
-    } else {
-      return -1
     }
+    return -1
   })
 }
 
@@ -307,7 +305,6 @@ const sortByTaskType = (taskMap, sortInfo) => (a, b) => {
 const sortByEpisode = (a, b) => {
   if (a.episode_name) {
     return a.episode_name.localeCompare(b.episode_name)
-  } else {
-    return 0
   }
+  return 0
 }

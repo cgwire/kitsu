@@ -117,9 +117,8 @@ export default {
     optionList() {
       if (this.isReversed) {
         return [...this.options].reverse()
-      } else {
-        return this.options
       }
+      return this.options
     }
   },
 
@@ -149,11 +148,10 @@ export default {
     },
 
     getOptionLabel(option) {
-      if (this.localeKeyPrefix.length > 0) {
+      if (this.localeKeyPrefix && option.label) {
         return this.$t(this.localeKeyPrefix + option.label.toLowerCase())
-      } else {
-        return option.label
       }
+      return option.label
     }
   },
 

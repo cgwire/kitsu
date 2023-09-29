@@ -64,7 +64,10 @@
             v-if="thumbnailInfo.src"
           />
           <span class="flexrow-item">
-            {{ thumbnailInfo.parentName }} / {{ thumbnailInfo.name }}
+            <template v-if="thumbnailInfo.parentName">
+              {{ thumbnailInfo.parentName }} /
+            </template>
+            {{ thumbnailInfo.name }}
           </span>
           <spinner v-if="loading[thumbnailInfo.id]" :size="10" />
           <check-icon v-if="uploaded[thumbnailInfo.id]" />
@@ -83,13 +86,14 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
 import { CheckIcon } from 'vue-feather-icons'
 
 import stringHelpers from '@/lib/string'
 import assetStore from '@/store/modules/assets'
+import editStore from '@/store/modules/edits'
 import shotStore from '@/store/modules/shots'
 
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
@@ -114,6 +118,11 @@ export default {
       type: Boolean,
       default: false
     },
+    entityType: {
+      type: String,
+      required: true,
+      validator: value => ['Asset', 'Edit', 'Shot'].includes(value)
+    },
     isLoading: {
       type: Boolean,
       default: false
@@ -130,7 +139,7 @@ export default {
 
   data() {
     return {
-      extensions: '.png,.jpg,.mp4,.mov',
+      extensions: '.png,.jpg,.jpeg,.mp4,.mov',
       forms: [],
       loading: {},
       taskTypeId: null,
@@ -146,6 +155,7 @@ export default {
   computed: {
     ...mapGetters([
       'assetValidationColumns',
+      'editValidationColumns',
       'shotValidationColumns',
       'taskTypeMap',
       'taskMap'
@@ -156,25 +166,31 @@ export default {
     },
 
     taskTypeList() {
+      let validationColumns = []
       if (this.isAssets) {
-        return this.assetValidationColumns.map(taskTypeId =>
-          this.taskTypeMap.get(taskTypeId)
-        )
-      } else {
-        return this.shotValidationColumns.map(taskTypeId =>
-          this.taskTypeMap.get(taskTypeId)
-        )
+        validationColumns = this.assetValidationColumns
+      } else if (this.isEdits) {
+        validationColumns = this.editValidationColumns
+      } else if (this.isShots) {
+        validationColumns = this.shotValidationColumns
       }
+      return validationColumns.map(taskTypeId =>
+        this.taskTypeMap.get(taskTypeId)
+      )
     },
 
     isAssets() {
-      return this.$route.path.indexOf('assets') > -1
+      return this.entityType === 'Asset'
+    },
+    isEdits() {
+      return this.entityType === 'Edit'
+    },
+    isShots() {
+      return this.entityType === 'Shot'
     }
   },
 
   methods: {
-    ...mapActions([]),
-
     reset() {
       if (this.taskTypeList.length > 0) {
         this.taskTypeId = this.taskTypeList[0].id
@@ -198,13 +214,18 @@ export default {
         fullName = stringHelpers.slugify(
           `${entity.asset_type_name}_${entity.name}`
         )
-      } else {
+      } else if (this.isEdits) {
+        fullName = stringHelpers.slugify(
+          entity.episode_name
+            ? `${entity.episode_name}_${entity.name}`
+            : entity.name
+        )
+      } else if (this.isShots) {
         fullName = stringHelpers.slugify(
           `${entity.sequence_name}_${entity.name}`
         )
       }
       this.entityMap[fullName] = entity
-      return this.entityMap
     },
 
     addTaskInformation(form) {
@@ -218,13 +239,17 @@ export default {
     onFileSelected(forms) {
       this.entityMap = {}
       this.uploaded = {}
+      let cachedEntities = []
       if (this.isAssets) {
-        assetStore.cache.assets.forEach(this.addEntityToEntityMap)
-      } else {
-        shotStore.cache.shots.forEach(this.addEntityToEntityMap)
+        cachedEntities = assetStore.cache.assets
+      } else if (this.isEdits) {
+        cachedEntities = editStore.cache.edits
+      } else if (this.isShots) {
+        cachedEntities = shotStore.cache.shots
       }
+      cachedEntities.forEach(this.addEntityToEntityMap)
       this.forms = this.filterForms(forms)
-      return this.buildThumbnailList()
+      this.buildThumbnailList()
     },
 
     filterForms(forms) {
@@ -239,9 +264,14 @@ export default {
       this.thumbnailList = this.forms.map(form => {
         const asset = this.entityMap[this.slugifyFilename(form)]
         const url = this.prepareImagePreview(form)
-        const parentName = this.isAssets
-          ? asset.asset_type_name
-          : asset.sequence_name
+        let parentName = ''
+        if (this.isAssets) {
+          parentName = asset.asset_type_name
+        } else if (this.isEdits) {
+          parentName = asset.episode_name
+        } else if (this.isShots) {
+          parentName = asset.sequence_name
+        }
         form.asset = asset
         return {
           parentName,

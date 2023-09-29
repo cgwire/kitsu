@@ -225,7 +225,8 @@
 
     <add-thumbnails-modal
       ref="add-thumbnails-modal"
-      parent="edits"
+      entity-type="Edit"
+      :parent="isTVShow ? 'edits_tvshow' : 'edits'"
       :active="modals.isAddThumbnailsDisplayed"
       :is-loading="loading.addThumbnails"
       :is-error="errors.addThumbnails"
@@ -382,7 +383,7 @@ export default {
       this.searchField.setValue(this.editSearchText)
     }
     if (this.$route.query.search && this.$route.query.search.length > 0) {
-      searchQuery = '' + this.$route.query.search
+      searchQuery = `${this.$route.query.search}`
     }
     if (searchQuery === 'undefined') searchQuery = ''
     this.$refs['edit-list'].setScrollPosition(this.editListScrollPosition)
@@ -462,7 +463,7 @@ export default {
 
       this.productionEditTaskTypes.forEach(item => {
         collection.push(item.name)
-        collection.push(item.name + ' comment')
+        collection.push(`${item.name} comment`)
       })
       return collection
     },
@@ -661,7 +662,7 @@ export default {
           taskId: form.task.id,
           commentText: '',
           taskStatusId: form.task.task_status_id,
-          form: form
+          form
         })
           .then(({ newComment, preview }) => {
             return this.setPreview({
@@ -741,27 +742,24 @@ export default {
         return this.$t('edits.delete_text', { name: edit.name })
       } else if (edit) {
         return this.$t('edits.cancel_text', { name: edit.name })
-      } else {
-        return ''
       }
+      return ''
     },
 
     deleteAllTasksText() {
       const taskType = this.taskTypeForTaskDeletion
       if (taskType) {
         return this.$t('tasks.delete_all_text', { name: taskType.name })
-      } else {
-        return ''
       }
+      return ''
     },
 
     restoreText() {
       const edit = this.editToRestore
       if (edit) {
         return this.$t('edits.restore_text', { name: edit.name })
-      } else {
-        return ''
       }
+      return ''
     },
 
     renderImport(data, mode) {
@@ -971,7 +969,7 @@ export default {
       if (!this.isEditsLoading) {
         let searchQuery = ''
         if (this.$route.query.search && this.$route.query.search.length > 0) {
-          searchQuery = '' + this.$route.query.search
+          searchQuery = `${this.$route.query.search}`
         }
         this.initialLoading = false
         this.$refs['edit-search-field'].setValue(searchQuery)
@@ -996,12 +994,9 @@ export default {
             : ''
         } | ${this.$t('edits.title')} - Kitsu`
       }
-    } else {
-      return {
-        title: `${this.currentProduction.name} ${this.$t(
-          'edits.title'
-        )} - Kitsu`
-      }
+    }
+    return {
+      title: `${this.currentProduction.name} ${this.$t('edits.title')} - Kitsu`
     }
   }
 }

@@ -44,6 +44,8 @@
 <script>
 import { ChevronDownIcon } from 'vue-feather-icons'
 
+import { sortByValue } from '@/lib/sorting'
+
 export default {
   name: 'combobox-tag',
 
@@ -94,15 +96,15 @@ export default {
 
   computed: {
     optionList() {
+      const sortedOptions = sortByValue([...this.options])
       if (this.isReversed) {
-        return [...this.options].reverse()
-      } else {
-        return this.options
+        sortedOptions.reverse()
       }
+      return sortedOptions
     },
 
     renderedValue() {
-      return this.value.split(',').filter(Boolean).join(', ')
+      return this.value.split(',').filter(Boolean).sort().join(', ')
     }
   },
 
@@ -137,11 +139,10 @@ export default {
     },
 
     getOptionLabel(option) {
-      if (this.localeKeyPrefix.length > 0) {
+      if (this.localeKeyPrefix && option.label) {
         return this.$t(this.localeKeyPrefix + option.label.toLowerCase())
-      } else {
-        return option.label
       }
+      return option.label
     },
 
     isChecked(option) {

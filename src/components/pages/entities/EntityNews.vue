@@ -60,7 +60,7 @@
       </div>
     </div>
     <div v-else>
-      {{ $t('entities.news.no_news') }}
+      {{ $t('news.no_news') }}
     </div>
   </div>
 </template>

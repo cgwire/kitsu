@@ -308,9 +308,16 @@ export default {
       const newValue = this.$refs.addChoiceField.value
       if (!this.form.values.find(v => v === newValue) && newValue) {
         this.form.values.push(newValue)
+        if (this.form.data_type === 'taglist') {
+          this.form.values.sort()
+        }
         this.valueToAdd = ''
         this.$nextTick(() => {
-          this.valueList.scrollTop = this.valueList.scrollHeight
+          const newValueIndex = this.form.values.findIndex(v => v === newValue)
+          const newValuePosition =
+            (this.valueList.scrollHeight / this.form.values.length) *
+            newValueIndex
+          this.valueList.scrollTop = newValuePosition
         })
       }
       return newValue
@@ -374,6 +381,9 @@ export default {
         this.checklist = this.getDescriptorChecklistValues(
           this.descriptorToEdit
         )
+        if (this.form.data_type === 'taglist') {
+          this.form.values.sort()
+        }
       } else {
         this.form = {
           name: '',

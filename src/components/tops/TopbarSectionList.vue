@@ -42,7 +42,7 @@ import { getProductionPath } from '@/lib/path'
 import ComboboxMask from '@/components/widgets/ComboboxMask'
 
 export default {
-  name: 'topbar-section-menu',
+  name: 'topbar-section-list',
 
   components: {
     ChevronDownIcon,
@@ -82,7 +82,7 @@ export default {
       const section = this.localSection
       const sectionOption = this.sectionList.find(s => s.value === section)
       if (sectionOption) return sectionOption.label
-      else return null
+      return null
     }
   },
 
