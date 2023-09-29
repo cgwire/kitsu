@@ -16,7 +16,7 @@
             <th scope="col" class="role">
               {{ $t('people.list.role') }}
             </th>
-            <th scope="col" class="departments">
+            <th scope="col">
               {{ $t('people.list.departments') }}
             </th>
             <th scope="col" class="actions"></th>
@@ -30,17 +30,17 @@
             />
             <td class="email">{{ person.email }}</td>
             <td class="phone">{{ person.phone }}</td>
-            <td class="role">{{ $t('people.role.' + person.role) }}</td>
-            <department-names-cell
-              class="departemnts"
-              :departments="person.departments"
-            />
-            <td class="actions" v-if="isCurrentUserAdmin">
-              <button class="button" @click="removePerson(person)">
+            <td class="role">{{ $t(`people.role.${person.role}`) }}</td>
+            <department-names-cell :departments="person.departments" />
+            <td class="actions">
+              <button
+                class="button"
+                @click="removePerson(person)"
+                v-if="isCurrentUserAdmin"
+              >
                 {{ $t('main.remove') }}
               </button>
             </td>
-            <td class="actions" v-else></td>
           </tr>
         </tbody>
       </table>
@@ -50,7 +50,7 @@
       {{ $t('people.empty_team') }}
     </p>
 
-    <p class="has-text-centered footer-info">
+    <p class="has-text-centered footer-info" v-else>
       {{ entries.length }} {{ $tc('people.persons', entries.length) }}
     </p>
   </div>
@@ -68,13 +68,18 @@ export default {
     PeopleNameCell
   },
 
-  props: ['entries'],
+  props: {
+    entries: {
+      type: Array,
+      default: () => []
+    }
+  },
 
   computed: {
     ...mapGetters(['isCurrentUserAdmin']),
 
     isEmpty() {
-      return !this.entries || this.entries.length === 0
+      return !this.entries?.length
     }
   },
 
