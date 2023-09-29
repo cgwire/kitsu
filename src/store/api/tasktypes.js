@@ -24,7 +24,6 @@ export default {
       department_id: taskType.department_id,
       archived: taskType.archived === 'true'
     }
-    console.log(data, taskType.archived)
     if (taskType.priority && taskType.priority > 0) {
       data.priority = Number(taskType.priority)
     }
