@@ -219,7 +219,6 @@ export default {
     },
 
     onSearchChange(search) {
-      console.log(search)
       if (search === '') {
         this.filteredProductions = this.openProductions
       } else {

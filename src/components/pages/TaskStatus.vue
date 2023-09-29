@@ -177,7 +177,6 @@ export default {
 
   watch: {
     $route() {
-      console.log(this.$route.query)
       this.activeTab = this.$route.query.tab || 'actived'
     }
   },
