@@ -261,9 +261,7 @@ export default {
   mounted() {
     window.addEventListener('keydown', event => {
       if (event.ctrlKey && event.altKey && event.keyCode === 70) {
-        if (this.$refs['search-field']) {
-          this.$refs['search-field'].focus()
-        }
+        this.searchField.focus()
       } else if (event.keyCode === 40) {
         this.selectNext()
       } else if (event.keyCode === 38) {

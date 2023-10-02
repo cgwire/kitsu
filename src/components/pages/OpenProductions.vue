@@ -141,7 +141,7 @@ export default {
   },
 
   mounted() {
-    this.$refs['search-field'].focus()
+    this.$refs['search-field']?.focus()
     this.filteredProductions = this.openProductions
     this.productionIndex = buildNameIndex(this.openProductions)
   },
