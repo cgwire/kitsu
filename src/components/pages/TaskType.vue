@@ -307,7 +307,7 @@ const filters = {
   },
 
   duepreviousweek(tasks) {
-    const previousWeek = moment().add('days', -7).isoWeek()
+    const previousWeek = moment().add(-7, 'days').isoWeek()
     return tasks.filter(t => {
       const dueDate = parseDate(t.due_date)
       return dueDate.isoWeek() === previousWeek
@@ -315,7 +315,7 @@ const filters = {
   },
 
   duenextweek(tasks) {
-    const nextWeek = moment().add('days', 7).isoWeek()
+    const nextWeek = moment().add(7, 'days').isoWeek()
     return tasks.filter(t => {
       const dueDate = parseDate(t.due_date)
       return dueDate.isoWeek() === nextWeek
@@ -339,7 +339,7 @@ const filters = {
   },
 
   duepreviousmonth(tasks) {
-    const previousMonth = moment().add('months', -1).month()
+    const previousMonth = moment().add(-1, 'months').month()
     return tasks.filter(t => {
       const dueDate = parseDate(t.due_date)
       return dueDate.month() === previousMonth
@@ -347,7 +347,7 @@ const filters = {
   },
 
   duenextmonth(tasks) {
-    const nextMonth = moment().add('months', 1).month()
+    const nextMonth = moment().add(1, 'months').month()
     return tasks.filter(t => {
       const dueDate = parseDate(t.due_date)
       return dueDate.month() === nextMonth
@@ -1377,7 +1377,7 @@ export default {
           today.isAfter(moment(this.schedule.taskTypeEndDate))
         ) {
           this.$refs['schedule-widget'].scrollToDate(
-            moment(this.schedule.taskTypeStartDate).add('days', 20)
+            moment(this.schedule.taskTypeStartDate).add(20, 'days')
           )
         } else {
           this.$refs['schedule-widget'].scrollToToday()
