@@ -419,11 +419,15 @@ export default {
       },
 
       'metadata-descriptor:new'(eventData) {
-        this.refreshMetadataDescriptor(eventData.metadata_descriptor_id)
+        if (this.currentProduction?.id === eventData.project_id) {
+          this.refreshMetadataDescriptor(eventData.metadata_descriptor_id)
+        }
       },
 
       'metadata-descriptor:update'(eventData) {
-        this.refreshMetadataDescriptor(eventData.metadata_descriptor_id)
+        if (this.currentProduction?.id === eventData.project_id) {
+          this.refreshMetadataDescriptor(eventData.metadata_descriptor_id)
+        }
       },
 
       'metadata-descriptor:delete'(eventData) {
