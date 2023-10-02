@@ -101,7 +101,7 @@ export default {
         .day('Monday')
         .year(this.year)
         .week(this.week)
-        .add('days', 6)
+        .add(6, 'days')
         .date()
     },
 

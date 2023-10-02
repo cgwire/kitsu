@@ -52,7 +52,7 @@ export default {
 
   createScheduleItem(scheduleItem) {
     if (!scheduleItem.endDate) {
-      scheduleItem.endDate = scheduleItem.startDate.add('days', 1).clone()
+      scheduleItem.endDate = scheduleItem.startDate.add(1, 'days').clone()
     }
     const manDays = scheduleItem.man_days
     const data = {
@@ -91,7 +91,7 @@ export default {
 
   updateScheduleItem(scheduleItem) {
     if (!scheduleItem.endDate) {
-      scheduleItem.endDate = scheduleItem.startDate.add('days', 1).clone()
+      scheduleItem.endDate = scheduleItem.startDate.add(1, 'days').clone()
     }
     const manDays = scheduleItem.man_days
     const data = {

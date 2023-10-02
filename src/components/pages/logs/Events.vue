@@ -3,6 +3,7 @@
     <div class="flexrow">
       <date-field
         class="flexrow-item"
+        :can-delete="false"
         :disabled-dates="{ from: today }"
         :label="$t('logs.current_date_label')"
         v-model="currentDate"

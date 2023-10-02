@@ -57,7 +57,7 @@ export default {
       type: Number,
       default: 40
     },
-    fontsize: {
+    fontSize: {
       type: Number,
       default: 18
     },

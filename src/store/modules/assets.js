@@ -255,7 +255,8 @@ const helpers = {
 const cache = {
   assetIndex: {},
   assetTypeIndex: {},
-  assets: []
+  assets: [],
+  result: []
 }
 
 const initialState = {
@@ -1035,10 +1036,7 @@ const mutations = {
     }
   },
 
-  [DISPLAY_MORE_ASSETS](
-    state,
-    { taskTypeMap, taskStatusMap, taskMap, production }
-  ) {
+  [DISPLAY_MORE_ASSETS](state) {
     const assets = cache.result
     const newLength = state.displayedAssets.length + PAGE_SIZE
     if (newLength < assets.length + PAGE_SIZE) {
@@ -1061,11 +1059,11 @@ const mutations = {
     }
   },
 
-  [SET_CURRENT_PRODUCTION](state, production) {
+  [SET_CURRENT_PRODUCTION](state) {
     state.assetSearchText = ''
   },
 
-  [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
+  [SET_PREVIEW](state, { entityId, previewId, taskMap }) {
     const asset = state.assetMap.get(entityId)
     if (asset) {
       asset.preview_file_id = previewId

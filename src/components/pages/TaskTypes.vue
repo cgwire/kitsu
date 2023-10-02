@@ -86,11 +86,11 @@ export default {
       tabs: [
         {
           name: 'active',
-          label: 'main.active'
+          label: this.$t('main.active')
         },
         {
           name: 'archived',
-          label: 'main.archived'
+          label: this.$t('main.archived')
         }
       ],
       taskTypeToDelete: { color: '#999999' },
