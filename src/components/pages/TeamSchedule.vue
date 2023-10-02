@@ -8,7 +8,7 @@
           </label>
           <datepicker
             wrapper-class="datepicker"
-            input-class="date-input input"
+            input-class="date-input input short"
             :language="locale"
             :monday-first="true"
             :typeable="true"
@@ -23,7 +23,7 @@
           </label>
           <datepicker
             wrapper-class="datepicker"
-            input-class="date-input input"
+            input-class="date-input input short"
             :language="locale"
             :monday-first="true"
             :typeable="true"

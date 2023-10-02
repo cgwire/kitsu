@@ -1998,7 +1998,7 @@ th.validation-cell {
   width: 150px;
 
   &.short {
-    width: 106px;
+    width: 112px;
   }
 }
 
