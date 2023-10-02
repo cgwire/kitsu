@@ -358,7 +358,6 @@ export default {
       'person:delete'(eventData) {
         const person = this.personMap.get(eventData.person_id)
         if (person) {
-          this.$store.commit('DELETE_PEOPLE_START', person)
           this.$store.commit('DELETE_PEOPLE_END', person)
         }
       },
