@@ -45,7 +45,7 @@
             class="flexrow-item"
             icon="grid"
             :is-on="isBigMode"
-            :title="$t('breakdown.big_pictures_mode')"
+            :title="$t('tasks.big_thumbnails')"
             @click="isBigMode = !isBigMode"
           />
           <button-simple

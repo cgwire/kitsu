@@ -1200,6 +1200,7 @@ export default {
     count_mode: 'Count',
     data_mode: 'Data',
     display_mode: 'Display',
+    episode_status: 'Episode status',
     frames: 'Frames',
     only_running: 'Only running',
     pie: 'Pie charts',
