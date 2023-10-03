@@ -14,10 +14,7 @@
     v-if="props.previewFileId"
   />
   <span
-    :class="{
-      'thumbnail-picture': true,
-      'thumbnail-empty': true
-    }"
+    class="thumbnail-picture thumbnail-empty"
     :style="{
       width: props.width,
       height: props.emptyHeight ? props.emptyHeight : props.height

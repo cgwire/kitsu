@@ -335,7 +335,7 @@ const actions = {
     commit(EDIT_PRODUCTION_START, data)
     return productionsApi.newProduction(data).then(production => {
       commit(EDIT_PRODUCTION_END, production)
-      return Promise.resolve(production)
+      return production
     })
   },
 
@@ -491,15 +491,11 @@ const actions = {
   },
 
   deleteMetadataDescriptor({ commit, state }, descriptorId) {
-    return new Promise((resolve, reject) => {
-      return productionsApi
-        .deleteMetadataDescriptor(state.currentProduction.id, descriptorId)
-        .then(() => {
-          commit(DELETE_METADATA_DESCRIPTOR_END, { id: descriptorId })
-          resolve()
-        })
-        .catch(reject)
-    })
+    return productionsApi
+      .deleteMetadataDescriptor(state.currentProduction.id, descriptorId)
+      .then(() => {
+        commit(DELETE_METADATA_DESCRIPTOR_END, { id: descriptorId })
+      })
   },
 
   refreshMetadataDescriptor({ commit, state }, descriptorId) {
@@ -524,7 +520,6 @@ const actions = {
             descriptor
           })
         }
-        return Promise.resolve()
       })
   }
 }

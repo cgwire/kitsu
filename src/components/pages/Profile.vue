@@ -288,7 +288,6 @@
           />
           <textarea
             class="input recovery-codes"
-            ref="textField"
             v-text="twoFA.OTPRecoveryCodes.join('\t')"
             readonly
           ></textarea>
