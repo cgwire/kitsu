@@ -148,8 +148,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['taskTypeStatusOptions', 'departments']),
-
+    ...mapGetters(['taskTypes', 'taskTypeStatusOptions', 'departments']),
     isEditing() {
       return this.taskTypeToEdit && this.taskTypeToEdit.id
     }
