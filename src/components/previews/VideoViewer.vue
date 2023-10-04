@@ -8,7 +8,6 @@
     }"
   >
     <div
-      ref="video-wrapper"
       class="video-wrapper"
       :style="{
         'border-top-left-radius': isRoundedTopBorder ? '10px' : '',
@@ -122,7 +121,6 @@ export default {
   },
 
   mounted() {
-    if (!this.container) return
     this.$options.currentTimeCalls = []
 
     this.container.style.height = this.defaultHeight + 'px'
@@ -241,10 +239,6 @@ export default {
 
     video() {
       return this.$refs.movie
-    },
-
-    videoWrapper() {
-      return this.$refs['video-wrapper']
     },
 
     moviePath() {
@@ -374,12 +368,10 @@ export default {
       this.videoDuration = this.video.duration
       this.isLoading = false
       this.$emit('duration-changed', this.videoDuration)
-      if (this.container) {
+      this.resetSize()
+      setTimeout(() => {
         this.resetSize()
-        setTimeout(() => {
-          this.resetSize()
-        })
-      }
+      }, 500)
     },
 
     resetSize() {
@@ -474,15 +466,7 @@ export default {
     },
 
     onWindowResize() {
-      const now = new Date().getTime()
-      this.lastCall = this.lastCall || 0
-      if (now - this.lastCall > 600) {
-        this.lastCall = now
-        this.$nextTick(this.mountVideo)
-        setTimeout(() => {
-          this.mountVideo()
-        }, 400)
-      }
+      this.mountVideo()
     },
 
     resetPanZoom() {

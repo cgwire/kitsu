@@ -222,15 +222,7 @@ export default {
     },
 
     onWindowResize() {
-      const now = new Date().getTime()
-      this.lastCall = this.lastCall || 0
-      if (now - this.lastCall > 600) {
-        this.lastCall = now
-        this.$nextTick(this.resetPicture)
-        setTimeout(() => {
-          this.resetPicture()
-        }, 400)
-      }
+      this.resetPicture()
     },
 
     // Configuration
