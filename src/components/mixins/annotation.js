@@ -504,22 +504,22 @@ export const annotationMixin = {
       let path, text
       let scaleMultiplierX = 1
       let scaleMultiplierY = 1
-      if (annotation && annotation.width) {
-        scaleMultiplierX = this.fabricCanvas.width / annotation.width
-        scaleMultiplierY = this.fabricCanvas.width / annotation.width
+      if (annotation?.width) {
+        scaleMultiplierX = canvas.width / annotation.width
+        scaleMultiplierY = canvas.width / annotation.width
       }
-      if (annotation && annotation.height) {
-        scaleMultiplierY = this.fabricCanvas.height / annotation.height
+      if (annotation?.height) {
+        scaleMultiplierY = canvas.height / annotation.height
       }
       const canvasWidth = obj.canvasWidth || annotation.width
       const canvasHeight = obj.canvasHeight
 
       if (canvasWidth) {
-        scaleMultiplierX = this.fabricCanvas.width / canvasWidth
-        scaleMultiplierY = this.fabricCanvas.width / canvasWidth
+        scaleMultiplierX = canvas.width / canvasWidth
+        scaleMultiplierY = canvas.width / canvasWidth
       }
       if (canvasHeight) {
-        scaleMultiplierY = this.fabricCanvas.height / canvasHeight
+        scaleMultiplierY = canvas.height / canvasHeight
       }
 
       const base = {

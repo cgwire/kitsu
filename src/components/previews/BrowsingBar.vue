@@ -143,5 +143,6 @@ export default {
 
 .current-index {
   cursor: pointer;
+  white-space: nowrap;
 }
 </style>

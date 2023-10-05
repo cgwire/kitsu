@@ -88,7 +88,7 @@
               </div>
 
               <div class="preview">
-                <div v-if="taskPreviews && taskPreviews.length > 0">
+                <template v-if="taskPreviews && taskPreviews.length > 0">
                   <preview-player
                     :entity-preview-files="taskEntityPreviews"
                     :extra-wide="isExtraWide"
@@ -108,7 +108,7 @@
                     @time-updated="onTimeUpdated"
                     ref="preview-player"
                   />
-                </div>
+                </template>
 
                 <div
                   class="no-preview"

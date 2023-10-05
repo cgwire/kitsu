@@ -8,37 +8,34 @@
             ref="canvas-wrapper"
             oncontextmenu="return false;"
             @click="onCanvasClicked"
-            v-show="!isZoomPan"
+            v-show="!isZoomPan && isAnnotationsDisplayed"
           >
-            <div v-show="isAnnotationsDisplayed">
-              <canvas ref="annotation-canvas" :id="canvasId" class="canvas">
-              </canvas>
-            </div>
+            <canvas ref="annotation-canvas" class="canvas" :id="canvasId">
+            </canvas>
           </div>
           <div
             class="canvas-comparison-wrapper"
             ref="canvas-comparison-wrapper"
             oncontextmenu="return false;"
             @click="onCanvasClicked"
-            v-show="!isZoomPan"
+            v-show="
+              !isZoomPan &&
+              isAnnotationsDisplayed &&
+              isComparing &&
+              previewToCompare &&
+              !isComparisonOverlay
+            "
           >
-            <div
-              v-show="
-                isAnnotationsDisplayed && isComparing && !isComparisonOverlay
-              "
+            <canvas
+              ref="annotation-canvas-comparison"
+              class="canvas"
+              :id="`${canvasId}-comparison`"
             >
-              <canvas
-                ref="annotation-canvas-comparison"
-                :id="canvasId + '-comparison'"
-                class="canvas"
-              >
-              </canvas>
-            </div>
+            </canvas>
           </div>
           <div class="viewers">
             <preview-viewer
               ref="preview-viewer"
-              name="player1"
               class="preview-viewer"
               :default-height="defaultHeight"
               :is-big="big"
@@ -68,21 +65,22 @@
 
             <preview-viewer
               ref="comparison-preview-viewer"
-              name="player2"
               class="comparison-preview-viewer"
-              :big="big"
               :default-height="defaultHeight"
-              :margin-bottom="marginBottom"
-              :full-screen="fullScreen"
+              :is-big="big"
               :is-comparing="isComparing && isComparisonEnabled"
+              :is-full-screen="fullScreen"
+              :is-light="light"
               :is-hd="isHd"
               :is-muted="true"
+              :is-ordering="isOrdering"
               :is-repeating="isRepeating"
-              :light="light"
+              :margin-bottom="marginBottom"
               :preview="previewToCompare"
               :style="{
                 opacity: overlayOpacity
               }"
+              @size-changed="fixCanvasComparisonSize"
               v-show="isComparing && previewToCompare"
             />
           </div>
@@ -654,7 +652,6 @@ export default {
   },
 
   mounted() {
-    if (!this.container) return
     this.configureEvents()
     this.setupFabricCanvas()
     this.reloadAnnotations()
@@ -665,6 +662,7 @@ export default {
       // hide canvas
       this.fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
     }
+    new ResizeObserver(this.comparisonViewer.resize).observe(this.container)
   },
 
   beforeDestroy() {
@@ -710,6 +708,10 @@ export default {
 
     previewContainer() {
       return this.$refs['preview-container']
+    },
+
+    commentContainer() {
+      return this.$refs['task-info-player']
     },
 
     progress() {
@@ -1092,9 +1094,9 @@ export default {
 
     getDimensions() {
       const dimensions = { width: 0, height: 0 }
-      if (this.container) {
-        dimensions.width = this.container.offsetWidth
-        dimensions.height = this.container.offsetHeight
+      if (this.previewContainer) {
+        dimensions.width = this.previewContainer.offsetWidth
+        dimensions.height = this.previewContainer.offsetHeight
       }
       return dimensions
     },
@@ -1123,27 +1125,36 @@ export default {
       if (!this.fabricCanvas) {
         return
       }
-
       const { height, left, top, width } = dimensions
-
       this.canvasWrapper.style.top = top + 'px'
       this.canvasWrapper.style.left = left + 'px'
       this.canvasWrapper.style.width = width + 'px'
       this.canvasWrapper.style.height = height + 'px'
-      // const calcOffset = this.fabricCanvas.calcOffset()
-      this.fabricCanvas.setDimensions({ width, height })
+      if (
+        this.fabricCanvas.width !== width ||
+        this.fabricCanvas.height !== height
+      ) {
+        this.fabricCanvas.setDimensions({ width, height })
+      }
+      this.refreshCanvas()
+    },
 
-      this.width = this.getDimensions().width
-
-      if (this.isComparing && !this.isComparisonOverlay) {
-        this.canvasComparisonWrapper.style.top = top + 'px'
-        this.canvasComparisonWrapper.style.left = left + width + 'px'
-        this.canvasComparisonWrapper.style.width = width + 'px'
-        this.canvasComparisonWrapper.style.height = height + 'px'
-        // this.fabricCanvasComparison.calcOffset()
+    fixCanvasComparisonSize(dimensions) {
+      if (!this.fabricCanvasComparison) {
+        return
+      }
+      const { height, left, top, width } = dimensions
+      this.canvasComparisonWrapper.style.top = top + 'px'
+      this.canvasComparisonWrapper.style.left =
+        this.getDimensions().width / 2 + left + 'px'
+      this.canvasComparisonWrapper.style.width = width + 'px'
+      this.canvasComparisonWrapper.style.height = height + 'px'
+      if (
+        this.fabricCanvasComparison.width !== width ||
+        this.fabricCanvasComparison.height !== height
+      ) {
         this.fabricCanvasComparison.setDimensions({ width, height })
       }
-
       this.refreshCanvas()
     },
 
@@ -1160,25 +1171,34 @@ export default {
         // fallback for legacy browsers
         this.fullScreen = true
       }
-      this.container.setAttribute('data-fullscreen', !!true)
       this.$nextTick(() => {
         // Needed to avoid fullscreen button to be called with space bar.
         this.clearFocus()
-        this.previewViewer.resize()
       })
     },
 
     exitFullScreen() {
       this.endAnnotationSaving()
-      this.documentExitFullScreen()
-      this.container.setAttribute('data-fullscreen', !!false)
+      const promise = this.documentExitFullScreen()
+      if (promise) {
+        promise.then(() => {
+          this.fullScreen = false
+          this.$nextTick(() => {
+            this.previewViewer.resize()
+            this.comparisonViewer.resize()
+          })
+        })
+      } else {
+        // fallback for legacy browsers
+        this.fullScreen = false
+      }
       this.isComparing = false
-      this.fullScreen = false
       this.isCommentsHidden = true
       this.$nextTick(() => {
         // Needed to avoid fullscreen button to be called with space bar.
         this.clearFocus()
         this.previewViewer.resize()
+        this.comparisonViewer.resize()
       })
     },
 
@@ -1199,14 +1219,19 @@ export default {
         this.isCommentsHidden = true
         this.endAnnotationSaving()
         this.$nextTick(() => {
-          this.previewViewer.resetVideo()
-          this.previewViewer.resetPicture()
+          this.previewViewer.resize()
+          this.comparisonViewer.resize()
           this.clearFocus()
           this.$nextTick(() => {
             this.loadAnnotation()
           })
         })
       }
+      // fix edge cases on toggling fullscreen
+      setTimeout(() => {
+        this.previewViewer.resize()
+        this.comparisonViewer.resize()
+      }, 500)
     },
 
     // Comparison
@@ -1362,6 +1387,7 @@ export default {
       this.isAnnotationsDisplayed = !this.isAnnotationsDisplayed
       this.isZoomPan = false
       this.previewViewer.resetZoom()
+      this.comparisonViewer.resetZoom()
     },
 
     saveAnnotations() {
@@ -1585,20 +1611,16 @@ export default {
     onCommentClicked() {
       const height = this.previewContainer.offsetHeight
       this.isCommentsHidden = !this.isCommentsHidden
+      if (!this.isCommentsHidden) {
+        this.commentContainer.$el.style.height = `${height}px`
+        this.commentContainer.focusCommentTextarea()
+      }
+      this.endAnnotationSaving()
       this.$nextTick(() => {
-        if (!this.isCommentsHidden) {
-          this.$refs['task-info-player'].$el.style.height = `${height}px`
-          this.$refs['task-info-player'].focusCommentTextarea()
-        }
-        this.previewViewer.resetVideo()
-        this.previewViewer.resetPicture()
-        this.endAnnotationSaving()
-        this.$nextTick(() => {
-          this.previewViewer.resize()
-          this.comparisonViewer.resize()
-          this.reloadAnnotations()
-          this.loadAnnotation()
-        })
+        this.previewViewer.resize()
+        this.comparisonViewer.resize()
+        this.reloadAnnotations()
+        this.loadAnnotation()
       })
     },
 
@@ -1796,27 +1818,25 @@ export default {
     currentPreview() {
       this.endAnnotationSaving()
       this.reloadAnnotations()
+      this.isComparing = false
       if (this.isMovie) {
         this.configureVideo()
         this.pause()
         this.maxDuration = '00:00.000'
         this.isDrawing = false
-        if (this.isComparing) this.isComparing = false
         setTimeout(() => {
           this.movieDimensions = this.previewViewer.getNaturalDimensions()
-        }, 10)
+          this.previewViewer.resize()
+          this.comparisonViewer.resize()
+        }, 500)
       } else if (this.isPicture) {
         this.pause()
         this.isDrawing = false
         this.refreshCanvas()
         setTimeout(() => {
-          this.previewViewer.resetPicture()
-        }, 10)
-        if (this.comparisonViewer) {
-          setTimeout(() => {
-            this.comparisonViewer.resetPicture()
-          }, 20)
-        }
+          this.previewViewer.resize()
+          this.comparisonViewer.resize()
+        }, 500)
       } else if (this.isSound || this.isFile || this.is3DModel) {
         // hide canvas
         this.fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
@@ -1836,6 +1856,13 @@ export default {
 
     currentIndex() {
       lastIndex = this.currentIndex
+    },
+
+    previewToCompare() {
+      this.$nextTick(() => {
+        this.previewViewer.resize()
+        this.comparisonViewer.resize()
+      })
     },
 
     previewToCompareId() {
@@ -1871,21 +1898,23 @@ export default {
         this.previewToCompareId = ''
       }
       this.$nextTick(() => {
-        // Hack needed to reset positioning.
-        window.dispatchEvent(new Event('resize'))
+        this.previewViewer.resize()
+        this.comparisonViewer.resize()
         this.previewViewer.resetZoom()
+        this.comparisonViewer.resetZoom()
       })
     },
 
     light() {
       this.endAnnotationSaving()
       this.previewViewer.resize()
+      this.comparisonViewer.resize()
     },
 
     extraWide() {
       this.endAnnotationSaving()
-      this.previewViewer.resetPicture()
       this.previewViewer.resize()
+      this.comparisonViewer.resize()
     },
 
     isDrawing() {
@@ -1899,8 +1928,8 @@ export default {
 
     isOrdering() {
       this.$nextTick(() => {
-        this.previewViewer.resetVideo()
-        this.previewViewer.resetPicture()
+        this.previewViewer.resize()
+        this.comparisonViewer.resize()
       })
     },
 
@@ -1921,6 +1950,7 @@ export default {
       if (this.isAnnotationsDisplayed) {
         this.$nextTick(() => {
           this.previewViewer.resetZoom()
+          this.comparisonViewer.resetZoom()
         })
       }
       if (!this.isAnnotationsDisplayed) {
@@ -1930,8 +1960,8 @@ export default {
 
     isComparisonOverlay() {
       this.$nextTick(() => {
-        // Hack needed to reset positioning.
-        window.dispatchEvent(new Event('resize'))
+        this.previewViewer.resize()
+        this.comparisonViewer.resize()
       })
     }
   }
@@ -2068,10 +2098,16 @@ export default {
 }
 
 .canvas-wrapper {
-  width: 100%;
   position: absolute;
+  width: 100%;
   left: 0;
   z-index: 500;
+}
+.canvas-comparison-wrapper {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  z-index: 5;
 }
 
 .center {
@@ -2090,7 +2126,7 @@ export default {
 
   .preview {
     position: relative;
-    align-items: center;
+    align-items: flex-start;
     background: black;
     display: flex;
     justify-content: center;
@@ -2119,13 +2155,13 @@ export default {
   }
 }
 
-.comparision-preview-viewer,
-.preview-viewer {
+.preview-viewer,
+.comparison-preview-viewer {
   flex: 1 1 0;
+  overflow: hidden;
 }
 
 .preview-viewer {
-  overflow: hidden;
   z-index: 1;
 }
 
@@ -2159,10 +2195,5 @@ export default {
 #resize-annotation-canvas,
 #annotation-snapshot {
   display: none;
-}
-
-.canvas-comparison-wrapper {
-  position: absolute;
-  z-index: 5;
 }
 </style>
