@@ -83,7 +83,9 @@ export default {
         const materials = texture[materialsSymbol]
         materials.forEach(material => {
           material.wireframe = true
-          material.emissive.setHex(0xc0c0c0)
+          material.color.setHex(0xc0c0c0)
+          material.emissive?.setHex(0xc0c0c0)
+          material.emissiveMap = null
           material.envMapIntensity = 0
         })
       }
