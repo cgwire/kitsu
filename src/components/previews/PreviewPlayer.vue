@@ -40,15 +40,16 @@
               :default-height="defaultHeight"
               :is-big="big"
               :is-comparing="isComparing && isComparisonEnabled"
+              :is-comparison-overlay="isComparisonOverlay"
               :is-environment-skybox="isEnvironmentSkybox"
               :is-full-screen="fullScreen"
-              :is-object-background="isObjectBackground"
-              :is-light="light"
               :is-hd="isHd"
+              :is-light="light"
               :is-muted="isMuted"
+              :is-object-background="isObjectBackground"
               :is-ordering="isOrdering"
               :is-repeating="isRepeating"
-              :is-comparison-overlay="isComparisonOverlay"
+              :is-wireframe="isWireframe"
               :margin-bottom="marginBottom"
               :object-background-url="objectBackgroundUrl"
               :preview="currentPreview"
@@ -56,9 +57,9 @@
                 position: isComparisonOverlay ? 'absolute' : 'static'
               }"
               @duration-changed="changeMaxDuration"
+              @frame-update="updateFrame"
               @play-ended="pause"
               @size-changed="fixCanvasSize"
-              @frame-update="updateFrame"
               @video-end="onVideoEnd"
               @video-loaded="onVideoLoaded"
             />
@@ -371,6 +372,13 @@
               :title="$t('playlists.actions.toggle_environment_skybox')"
               @click="isEnvironmentSkybox = !isEnvironmentSkybox"
             />
+            <button-simple
+              class="flexrow-item"
+              :active="isWireframe"
+              icon="codepen"
+              :title="$t('playlists.actions.toggle_wireframe')"
+              @click="isWireframe = !isWireframe"
+            />
             <input
               ref="object-background-input-file"
               accept=".hdr"
@@ -605,6 +613,7 @@ export default {
       isOrdering: false,
       isRepeating: false,
       isTyping: false,
+      isWireframe: false,
       maxDuration: '00:00.000',
       movieDimensions: {
         width: 1920,
