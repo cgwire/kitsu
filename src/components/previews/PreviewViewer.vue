@@ -69,6 +69,7 @@
       :empty="!is3DModel"
       :full-screen="isFullScreen"
       :is-environment-skybox="isEnvironmentSkybox"
+      :is-wireframe="isWireframe"
       :light="isLight"
       :preview-url="originalPath"
       v-if="is3DModel"
@@ -192,6 +193,10 @@ export default {
       default: () => {}
     },
     isEnvironmentSkybox: {
+      type: Boolean,
+      default: false
+    },
+    isWireframe: {
       type: Boolean,
       default: false
     }

@@ -8,6 +8,7 @@
       'is-loading': isLoading,
       'is-primary': isPrimary
     }"
+    :disabled="disabled"
     :title="title"
     @click="$emit('click')"
   >
@@ -53,6 +54,7 @@
     <key-icon :class="iconClass" v-if="icon == 'key'" />
     <zoom-in-icon :class="iconClass" v-if="icon == 'loupe'" />
     <globe-icon :class="iconClass" v-if="icon == 'globe'" />
+    <codepen-icon :class="iconClass" v-if="icon == 'codepen'" />
     <span :class="iconClass" v-if="icon === 'laser'"> ⦿ </span>
     <span
       :class="{
@@ -71,6 +73,7 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  CodepenIcon,
   CornerLeftDownIcon,
   CornerRightDownIcon,
   CopyIcon,
@@ -118,6 +121,7 @@ export default {
     ChevronDownIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
+    CodepenIcon,
     CornerLeftDownIcon,
     CornerRightDownIcon,
     CopyIcon,
@@ -161,6 +165,10 @@ export default {
 
   props: {
     active: {
+      default: false,
+      type: Boolean
+    },
+    disabled: {
       default: false,
       type: Boolean
     },

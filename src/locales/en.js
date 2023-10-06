@@ -760,7 +760,8 @@ export default {
       toggle_object_background: 'Enable/Disable environment map',
       toggle_environment_skybox: 'Show/Hide skybox background',
       toggle_playing_annotations: 'Show/Hide annotations while playing movies',
-      toggle_waveform: 'Show/Hide movie waveform'
+      toggle_waveform: 'Show/Hide movie waveform',
+      toggle_wireframe: 'Enable/Disable wireframe rendering',
     }
   },
 
