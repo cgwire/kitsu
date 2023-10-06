@@ -114,7 +114,7 @@
         :width="width"
         :handle-in="-1"
         :handle-out="-1"
-        :preview-id="currentPreview ? currentPreview.id : ''"
+        :preview-id="isMovie && currentPreview ? currentPreview.id : ''"
         @start-scrub="$refs['button-bar'].classList.add('unselectable')"
         @end-scrub="$refs['button-bar'].classList.remove('unselectable')"
         @progress-changed="onProgressChanged"
