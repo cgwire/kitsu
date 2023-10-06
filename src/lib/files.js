@@ -5,6 +5,7 @@ const ALL_EXTENSIONS = [
   'mov',
   'obj',
   'glb',
+  'gltf',
   'pdf',
   'ma',
   'mb',
