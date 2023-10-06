@@ -419,11 +419,11 @@ const mutations = {
     state.user = peopleStore.helpers.addAdditionalInformation(user)
     state.isAuthenticated = true
   },
-  [USER_LOGOUT](state, user) {
+  [USER_LOGOUT](state) {
     state.user = null
     state.isAuthenticated = false
   },
-  [USER_LOGIN_FAIL](state, user) {
+  [USER_LOGIN_FAIL](state) {
     state.user = null
     state.isAuthenticated = false
   },

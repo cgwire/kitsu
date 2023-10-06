@@ -385,7 +385,7 @@ export default {
     },
 
     previewId() {
-      if (this.movieDimensions.width) {
+      if (this.movieDimensions.width && this.previewId) {
         const path = `/api/movies/tiles/preview-files/${this.previewId}.png`
         const img = new Image()
         this.isTileLoading = true

@@ -274,7 +274,6 @@ const actions = {
   newPerson({ commit, state }, data) {
     return peopleApi.createPerson(data).then(person => {
       commit(EDIT_PEOPLE_END, person)
-      Promise.resolve()
     })
   },
 

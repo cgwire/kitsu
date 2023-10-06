@@ -166,8 +166,7 @@ export default {
       'sequence:new'(eventData) {
         if (
           !this.sequenceMap.get(eventData.sequence_id) &&
-          this.currentProduction &&
-          this.currentProduction.id === eventData.project_id
+          this.currentProduction?.id === eventData.project_id
         ) {
           this.loadSequence(eventData.sequence_id)
         }
@@ -188,8 +187,7 @@ export default {
       'edit:new'(eventData) {
         if (
           !this.editMap.get(eventData.edit_id) &&
-          this.currentProduction &&
-          this.currentProduction.id === eventData.project_id
+          this.currentProduction?.id === eventData.project_id
         ) {
           this.loadEdit(eventData.edit_id)
         }
@@ -210,8 +208,7 @@ export default {
       'episode:new'(eventData) {
         if (
           !this.episodeMap.get(eventData.episode_id) &&
-          this.currentProduction &&
-          this.currentProduction.id === eventData.project_id
+          this.currentProduction?.id === eventData.project_id
         ) {
           this.loadEpisode(eventData.episode_id)
         }
@@ -232,8 +229,7 @@ export default {
       'shot:new'(eventData) {
         if (
           !this.shotMap.get(eventData.shot_id) &&
-          this.currentProduction &&
-          this.currentProduction.id === eventData.project_id &&
+          this.currentProduction?.id === eventData.project_id &&
           (!this.isTVShow || this.currentEpisode.id === eventData.episode_id)
         ) {
           setTimeout(() => {
@@ -257,8 +253,7 @@ export default {
       'asset:new'(eventData) {
         if (
           !this.assetMap.get(eventData.asset_id) &&
-          this.currentProduction &&
-          this.currentProduction.id === eventData.project_id
+          this.currentProduction?.id === eventData.project_id
         ) {
           setTimeout(() => {
             this.loadAsset(eventData.asset_id)
@@ -358,7 +353,6 @@ export default {
       'person:delete'(eventData) {
         const person = this.personMap.get(eventData.person_id)
         if (person) {
-          this.$store.commit('DELETE_PEOPLE_START', person)
           this.$store.commit('DELETE_PEOPLE_END', person)
         }
       },
@@ -420,11 +414,15 @@ export default {
       },
 
       'metadata-descriptor:new'(eventData) {
-        this.refreshMetadataDescriptor(eventData.metadata_descriptor_id)
+        if (this.currentProduction?.id === eventData.project_id) {
+          this.refreshMetadataDescriptor(eventData.metadata_descriptor_id)
+        }
       },
 
       'metadata-descriptor:update'(eventData) {
-        this.refreshMetadataDescriptor(eventData.metadata_descriptor_id)
+        if (this.currentProduction?.id === eventData.project_id) {
+          this.refreshMetadataDescriptor(eventData.metadata_descriptor_id)
+        }
       },
 
       'metadata-descriptor:delete'(eventData) {

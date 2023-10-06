@@ -680,14 +680,15 @@ export default {
       this.loading.deleteAllTasks = true
       this.deleteAllAssetTasks({ projectId, taskTypeId, selectionOnly })
         .then(() => {
-          this.loading.deleteAllTasks = false
           if (!selectionOnly) this.loadAssets()
           this.modals.isDeleteAllTasksDisplayed = false
         })
         .catch(err => {
           console.error(err)
-          this.loading.deleteAllTasks = false
           this.errors.deleteAllTasks = true
+        })
+        .finally(() => {
+          this.loading.deleteAllTasks = false
         })
     },
 
@@ -697,12 +698,13 @@ export default {
       this.deleteMetadataDescriptor(this.descriptorIdToDelete)
         .then(() => {
           this.errors.deleteMetadata = false
-          this.loading.deleteMetadata = false
           this.modals.isDeleteMetadataDisplayed = false
         })
         .catch(err => {
           console.error(err)
           this.errors.deleteMetadata = true
+        })
+        .finally(() => {
           this.loading.deleteMetadata = false
         })
     },

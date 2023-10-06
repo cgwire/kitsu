@@ -95,7 +95,7 @@ export default {
     return client.pput(`/api/data/persons/${person.id}`, data)
   },
 
-  deletePerson(person, callback) {
+  deletePerson(person) {
     return client.pdel(`/api/data/persons/${person.id}?force=true`)
   },
 
@@ -105,14 +105,14 @@ export default {
       password_2: form.password2
     }
     return client.ppost(
-      `api/actions/persons/${person.id}/change-password`,
+      `/api/actions/persons/${person.id}/change-password`,
       data
     )
   },
 
   disableTwoFactorAuthenticationPerson(person) {
     return client.pdel(
-      `api/actions/persons/${person.id}/disable-two-factor-authentication`
+      `/api/actions/persons/${person.id}/disable-two-factor-authentication`
     )
   },
 

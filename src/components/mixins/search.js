@@ -3,14 +3,6 @@
  * list.
  */
 export const searchMixin = {
-  created() {},
-
-  mounted() {},
-
-  beforeDestroy() {},
-
-  computed: {},
-
   methods: {
     changeSearch(searchQuery) {
       this.searchField.setValue(searchQuery.search_query)

@@ -112,12 +112,8 @@
           </a>
         </div>
         <div
-          :class="{
-            'nav-item': true,
-            'user-nav': true,
-            active: !isUserMenuHidden
-          }"
-          ref="user-name"
+          class="nav-item user-nav"
+          :class="{ active: !isUserMenuHidden }"
           @click="toggleUserMenu"
         >
           <people-avatar
@@ -132,7 +128,6 @@
 
     <nav
       class="user-menu"
-      ref="user-menu"
       :style="{
         top: isUserMenuHidden ? '-480px' : '60px'
       }"
