@@ -8,6 +8,7 @@
       'is-loading': isLoading,
       'is-primary': isPrimary
     }"
+    :disabled="disabled"
     :title="title"
     @click="$emit('click')"
   >
@@ -164,6 +165,10 @@ export default {
 
   props: {
     active: {
+      default: false,
+      type: Boolean
+    },
+    disabled: {
       default: false,
       type: Boolean
     },

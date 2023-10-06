@@ -361,13 +361,15 @@
             <button-simple
               class="flexrow-item"
               :active="isObjectBackground"
+              :disabled="!objectBackgroundUrl"
               icon="globe"
               :title="$t('playlists.actions.toggle_object_background')"
               @click="isObjectBackground = !isObjectBackground"
             />
             <button-simple
               class="flexrow-item"
-              :active="isEnvironmentSkybox"
+              :active="isObjectBackground && isEnvironmentSkybox"
+              :disabled="!objectBackgroundUrl || !isObjectBackground"
               icon="image"
               :title="$t('playlists.actions.toggle_environment_skybox')"
               @click="isEnvironmentSkybox = !isEnvironmentSkybox"
@@ -602,7 +604,7 @@ export default {
       isObjectBackground: false,
       objectBackgroundUrl: null,
       isAnnotationsDisplayed: true,
-      isEnvironmentSkybox: true,
+      isEnvironmentSkybox: false,
       isCommentsHidden: true,
       isComparing: false,
       isDrawing: false,
@@ -1336,6 +1338,7 @@ export default {
       const blobURL = URL.createObjectURL(file)
       this.objectBackgroundUrl = `${blobURL}#.hdr`
       this.isObjectBackground = true
+      this.isEnvironmentSkybox = true
     },
 
     // Annotations
