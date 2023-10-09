@@ -39,20 +39,19 @@
             />
             <span
               class="flexrow-item"
-              v-if="task.assignees.length > 0 && !isCurrentUserClient"
+              v-if="assignees.length > 0 && !isCurrentUserClient"
             >
               {{ $t('tasks.fields.assignees') }}:
             </span>
             <span
               class="flexrow-item avatar-wrapper"
-              :key="personId"
-              v-for="personId in task.assignees"
+              :key="person.id"
+              v-for="person in assignees"
               v-if="!isCurrentUserClient"
             >
               <people-avatar
                 class="flexrow-item"
-                :key="personId"
-                :person="personMap.get(personId)"
+                :person="person"
                 :size="30"
                 :font-size="16"
               />
@@ -236,7 +235,7 @@
             </div>
           </div>
 
-          <div class="has-text-centered" v-else>
+          <div class="has-text-centered" v-if="taskLoading.isLoading">
             <spinner />
           </div>
         </div>
@@ -311,6 +310,7 @@ import { ImageIcon } from 'vue-feather-icons'
 
 import { getTaskEntityPath } from '@/lib/path'
 import drafts from '@/lib/drafts'
+import { sortPeople } from '@/lib/sorting'
 import { formatListMixin } from '@/components/mixins/format'
 import { taskMixin } from '@/components/mixins/task'
 
@@ -709,6 +709,12 @@ export default {
       }
     },
 
+    assignees() {
+      return sortPeople(
+        this.task.assignees.map(personId => this.personMap.get(personId))
+      )
+    },
+
     isAssigned() {
       if (this.task) {
         return this.task.assignees.some(assigneeId => {
@@ -728,7 +734,11 @@ export default {
     },
 
     currentTeam() {
-      return this.currentProduction.team.map(id => this.personMap.get(id))
+      return sortPeople(
+        this.currentProduction.team.map(personId =>
+          this.personMap.get(personId)
+        )
+      )
     },
 
     pinnedCount() {
@@ -770,8 +780,8 @@ export default {
       const task = this.getCurrentTask()
       if (!task) {
         this.taskLoading = { isLoading: true, isError: false }
-        return this.loadTask({ taskId: this.route.params.task_id }).then(
-          task => {
+        return this.loadTask({ taskId: this.route.params.task_id })
+          .then(task => {
             let loadingFunction = callback => {
               this.loadAssets().then(callback)
             }
@@ -804,8 +814,11 @@ export default {
                   this.taskLoading = { isLoading: false, isError: true }
                 })
             })
-          }
-        )
+          })
+          .catch(err => {
+            console.error(err)
+            this.taskLoading = { isLoading: false, isError: true }
+          })
       } else {
         const taskId = this.route.params.task_id
         this.task = task

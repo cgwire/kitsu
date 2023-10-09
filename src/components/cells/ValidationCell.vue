@@ -92,6 +92,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import colors from '@/lib/colors'
+import { sortPeople } from '@/lib/sorting'
 
 import { EyeIcon } from 'vue-feather-icons'
 
@@ -202,7 +203,7 @@ export default {
     ]),
 
     assignees() {
-      return (
+      return sortPeople(
         this.task?.assignees.map(personId => this.personMap.get(personId)) || []
       )
     },

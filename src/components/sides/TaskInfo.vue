@@ -274,7 +274,7 @@ import drafts from '@/lib/drafts'
 import { getTaskEntityPath, getTaskPath } from '@/lib/path'
 import preferences from '@/lib/preferences'
 import { getTaskTypeStyle } from '@/lib/render'
-import { sortTaskNames } from '@/lib/sorting'
+import { sortPeople, sortTaskNames } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 import { formatDate } from '@/lib/time'
 
@@ -470,7 +470,9 @@ export default {
     currentTeam() {
       if (!this.task) return []
       const production = this.productionMap.get(this.task.project_id)
-      return production.team.map(id => this.personMap.get(id))
+      return sortPeople(
+        production.team.map(personId => this.personMap.get(personId))
+      )
     },
 
     title() {

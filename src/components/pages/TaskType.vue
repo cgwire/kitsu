@@ -718,10 +718,11 @@ export default {
     },
 
     scheduleTeam() {
-      const scheduleTeam = this.currentProduction.team.map(personId => {
-        return this.personMap.get(personId)
-      })
-      return sortPeople(scheduleTeam)
+      return sortPeople(
+        this.currentProduction.team.map(personId =>
+          this.personMap.get(personId)
+        )
+      )
     },
 
     scheduleWidget() {
