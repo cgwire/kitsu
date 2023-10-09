@@ -391,7 +391,7 @@ export default {
     this.$refs['asset-list'].setScrollPosition(this.assetListScrollPosition)
     const finalize = () => {
       if (this.$refs['asset-list']) {
-        this.$refs['asset-search-field'].setValue(searchQuery)
+        this.searchField.setValue(searchQuery)
         this.onSearchChange()
         this.$refs['asset-list'].setScrollPosition(this.assetListScrollPosition)
       }
@@ -483,14 +483,19 @@ export default {
     // Page titles
 
     tvShowPageTitle() {
-      const productionName = this.currentProduction
-        ? this.currentProduction.name
-        : ''
+      const productionName = this.currentProduction?.name || ''
       let episodeName = ''
       if (this.currentEpisode) {
-        episodeName = this.currentEpisode.name
-        if (this.currentEpisode.id === 'all') episodeName = this.$t('main.all')
-        if (this.currentEpisode.id === 'main') episodeName = 'Main Pack'
+        switch (this.currentEpisode.id) {
+          case 'all':
+            episodeName = this.$t('main.all')
+            break
+          case 'main':
+            episodeName = this.$t('main.main_pack')
+            break
+          default:
+            episodeName = this.currentEpisode.name
+        }
       }
       return (
         `${productionName} - ${episodeName}` +
@@ -499,9 +504,7 @@ export default {
     },
 
     shortPageTitle() {
-      const productionName = this.currentProduction
-        ? this.currentProduction.name
-        : ''
+      const productionName = this.currentProduction?.name || ''
       return `${productionName} ${this.$t('assets.title')} - Kitsu`
     },
 
@@ -637,7 +640,7 @@ export default {
 
     confirmBuildFilter(query) {
       this.modals.isBuildFilterDisplayed = false
-      this.$refs['asset-search-field'].setValue(query)
+      this.searchField.setValue(query)
       this.onSearchChange()
     },
 
@@ -805,7 +808,7 @@ export default {
     },
 
     onSearchChange() {
-      const searchQuery = this.$refs['asset-search-field'].getValue()
+      const searchQuery = this.searchField.getValue() || ''
       if (
         searchQuery.length !== 1 &&
         searchQuery !== undefined &&
@@ -994,7 +997,7 @@ export default {
     $route() {
       if (!this.$route.query) return
       const search = this.$route.query.search
-      const actualSearch = this.$refs['asset-search-field'].getValue()
+      const actualSearch = this.searchField.getValue()
       if (search !== actualSearch) {
         this.searchField.setValue(search)
         this.onSearchChange()
@@ -1002,14 +1005,14 @@ export default {
     },
 
     currentProduction() {
-      this.$refs['asset-search-field'].setValue('')
+      this.searchField.setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       this.initialLoading = true
       if (!this.isTVShow) this.reset()
     },
 
     currentEpisode() {
-      this.$refs['asset-search-field'].setValue('')
+      this.searchField.setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       if (this.isTVShow && this.currentEpisode) this.reset()
     },
