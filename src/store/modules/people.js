@@ -730,6 +730,7 @@ const mutations = {
   [LOAD_PERSON_DONE_TASKS_END](state, tasks) {
     tasks.forEach(populateTask)
     state.displayedPersonDoneTasks = tasks
+    cache.personDoneTasks = tasks
     cache.personDoneTasksIndex = buildTaskIndex(tasks)
   },
 

@@ -104,10 +104,7 @@
         </div>
 
         <div ref="query">
-          <div
-            class="query-list"
-            v-show="isActiveTab('todos') || isActiveTab('timesheets')"
-          >
+          <div class="query-list">
             <search-query-list
               :queries="personTaskSearchQueries"
               type="person"
