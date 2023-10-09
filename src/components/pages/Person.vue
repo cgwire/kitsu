@@ -104,10 +104,7 @@
         </div>
 
         <div ref="query">
-          <div
-            class="query-list"
-            v-show="isActiveTab('todos') || isActiveTab('timesheets')"
-          >
+          <div class="query-list">
             <search-query-list
               :queries="personTaskSearchQueries"
               type="person"
@@ -220,6 +217,9 @@ export default {
       currentSort: 'entity_name',
       isTasksLoading: false,
       isTasksLoadingError: false,
+      loading: {
+        savingSearch: false
+      },
       person: null,
       scheduleHeight: 0,
       selectedDate: moment().format('YYYY-MM-DD'),
@@ -364,7 +364,7 @@ export default {
     },
 
     tasksStartDate() {
-      if (this.scheduleItems.length > 0) {
+      if (this.scheduleTasks.length) {
         return getFirstStartDate(this.scheduleTasks)
       } else {
         return moment()
@@ -372,7 +372,7 @@ export default {
     },
 
     tasksEndDate() {
-      if (this.scheduleItems.length > 0) {
+      if (this.scheduleTasks.length) {
         return getLastEndDate(this.scheduleTasks)
       } else {
         return moment().add(15, 'days')
@@ -380,11 +380,7 @@ export default {
     },
 
     scheduleTasks() {
-      let children = []
-      this.scheduleItems.forEach(item => {
-        children = children.concat(item.children)
-      })
-      return children
+      return this.scheduleItems.flatMap(item => item.children)
     },
 
     scheduleItems() {
@@ -438,16 +434,14 @@ export default {
     resetScheduleHeight() {
       this.$nextTick(() => {
         if (this.isActiveTab('schedule')) {
-          const pageHeight = this.$refs.page.offsetHeight
-          const headerHeight = this.$refs.header.offsetHeight
-          const tabsHeight = this.$refs.tabs.offsetHeight
-          const searchHeight = this.$refs.search.offsetHeight
-          const queryHeight = this.$refs.query.offsetHeight
+          const pageHeight = this.$refs.page?.offsetHeight || 0
+          const headerHeight = this.$refs.header?.offsetHeight || 0
+          const tabsHeight = this.$refs.tabs?.offsetHeight || 0
+          const searchHeight = this.$refs.search?.offsetHeight || 0
+          const queryHeight = this.$refs.query?.offsetHeight || 0
           this.scheduleHeight =
             pageHeight - headerHeight - tabsHeight - searchHeight - queryHeight
-          if (this.$refs['schedule-widget']) {
-            this.$refs['schedule-widget'].resetScheduleSize()
-          }
+          this.$refs['schedule-widget']?.resetScheduleSize()
         }
       })
     },
@@ -578,9 +572,15 @@ export default {
     },
 
     saveSearchQuery(searchQuery) {
-      this.savePersonTasksSearch(searchQuery).catch(err => {
-        if (err) console.error(err)
-      })
+      if (this.loading.savingSearch) {
+        return
+      }
+      this.loading.savingSearch = true
+      this.savePersonTasksSearch(searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
     },
 
     removeSearchQuery(searchQuery) {

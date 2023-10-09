@@ -302,32 +302,27 @@ const actions = {
   },
 
   saveSequenceSearch({ commit, rootGetters }, searchQuery) {
-    const query = state.sequenceSearchQueries.find(
-      query => query && query.name === searchQuery
-    )
-    const production = rootGetters.currentProduction
-    if (!query) {
-      return peopleApi
-        .createFilter(
-          'sequence',
-          searchQuery,
-          searchQuery,
-          production.id,
-          'Sequence'
-        )
-        .then(query => {
-          commit(ADD_SEQUENCE_SEARCH, query)
-          return Promise.resolve(query)
-        })
-    } else {
-      return Promise.resolve()
+    if (state.sequenceSearchQueries.some(query => query.name === searchQuery)) {
+      return
     }
+    const production = rootGetters.currentProduction
+    return peopleApi
+      .createFilter(
+        'sequence',
+        searchQuery,
+        searchQuery,
+        production.id,
+        'Sequence'
+      )
+      .then(searchQuery => {
+        commit(ADD_SEQUENCE_SEARCH, searchQuery)
+        return searchQuery
+      })
   },
 
-  removeSequenceSearch({ commit, rootGetters }, searchQuery) {
+  removeSequenceSearch({ commit }, searchQuery) {
     return peopleApi.removeFilter(searchQuery).then(() => {
       commit(REMOVE_SEQUENCE_SEARCH, searchQuery)
-      return Promise.resolve()
     })
   },
 

@@ -362,26 +362,20 @@ const actions = {
   },
 
   saveTodoSearch({ commit, rootGetters }, searchQuery) {
-    const query = state.todoSearchQueries.find(
-      query => query.name === searchQuery
-    )
-
-    if (!query) {
-      return peopleApi
-        .createFilter('todos', searchQuery, searchQuery, null, null)
-        .then(searchQuery => {
-          commit(SAVE_TODO_SEARCH_END, { searchQuery })
-          return Promise.resolve(searchQuery)
-        })
-    } else {
-      return Promise.resolve()
+    if (state.todoSearchQueries.some(query => query.name === searchQuery)) {
+      return
     }
+    return peopleApi
+      .createFilter('todos', searchQuery, searchQuery, null, null)
+      .then(searchQuery => {
+        commit(SAVE_TODO_SEARCH_END, { searchQuery })
+        return searchQuery
+      })
   },
 
-  removeTodoSearch({ commit, rootGetters }, searchQuery) {
+  removeTodoSearch({ commit }, searchQuery) {
     return peopleApi.removeFilter(searchQuery).then(() => {
       commit(REMOVE_TODO_SEARCH_END, { searchQuery })
-      return Promise.resolve(searchQuery)
     })
   },
 

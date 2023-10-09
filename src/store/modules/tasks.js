@@ -786,34 +786,22 @@ const actions = {
   },
 
   saveTaskSearch({ commit, rootGetters }, { searchQuery, entityType }) {
-    const query = state.taskSearchQueries.find(
-      query => query.name === searchQuery
-    )
-    const production = rootGetters.currentProduction
-
-    if (!query) {
-      return peopleApi
-        .createFilter(
-          'task',
-          searchQuery,
-          searchQuery,
-          production.id,
-          entityType
-        )
-        .then(searchQuery => {
-          commit(SAVE_TASK_SEARCH_END, { searchQuery, production })
-          return Promise.resolve(searchQuery)
-        })
-    } else {
-      Promise.resolve()
+    if (state.taskSearchQueries.some(query => query.name === searchQuery)) {
+      return
     }
+    const production = rootGetters.currentProduction
+    return peopleApi
+      .createFilter('task', searchQuery, searchQuery, production.id, entityType)
+      .then(searchQuery => {
+        commit(SAVE_TASK_SEARCH_END, { searchQuery, production })
+        return searchQuery
+      })
   },
 
   removeTaskSearch({ commit, rootGetters }, searchQuery) {
     const production = rootGetters.currentProduction
     return peopleApi.removeFilter(searchQuery).then(() => {
       commit(REMOVE_TASK_SEARCH_END, { searchQuery, production })
-      return Promise.resolve(searchQuery)
     })
   },
 

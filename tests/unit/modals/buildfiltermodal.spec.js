@@ -185,7 +185,7 @@ describe('BuildFilterModal', () => {
         expect(wrapper.vm.taskTypeList[0].id).toBe('task-type-3')
       })
       it('team', () => {
-        expect(wrapper.vm.team[0].id).toBe('person-2')
+        expect(wrapper.vm.team[0].id).toBe('person-3')
       })
       it('descriptorOptions', async () => {
         expect(wrapper.vm.descriptorOptions[0]).toStrictEqual({

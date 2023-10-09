@@ -283,6 +283,7 @@ export default {
         edit: false,
         episode: false,
         importing: false,
+        savingSearch: false,
         stay: false
       },
       errors: {
@@ -500,7 +501,15 @@ export default {
     },
 
     saveSearchQuery(searchQuery) {
-      this.saveEpisodeSearch(searchQuery).catch(console.error)
+      if (this.loading.savingSearch) {
+        return
+      }
+      this.loading.savingSearch = true
+      this.saveEpisodeSearch(searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
     },
 
     removeSearchQuery(searchQuery) {

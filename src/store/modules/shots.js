@@ -576,21 +576,16 @@ const actions = {
   },
 
   saveShotSearch({ commit, rootGetters }, searchQuery) {
-    const query = state.shotSearchQueries.find(
-      query => query.name === searchQuery
-    )
-    const production = rootGetters.currentProduction
-
-    if (!query) {
-      return peopleApi
-        .createFilter('shot', searchQuery, searchQuery, production.id, null)
-        .then(searchQuery => {
-          commit(SAVE_SHOT_SEARCH_END, { searchQuery, production })
-          return Promise.resolve(searchQuery)
-        })
-    } else {
-      return Promise.resolve()
+    if (state.shotSearchQueries.some(query => query.name === searchQuery)) {
+      return
     }
+    const production = rootGetters.currentProduction
+    return peopleApi
+      .createFilter('shot', searchQuery, searchQuery, production.id, null)
+      .then(searchQuery => {
+        commit(SAVE_SHOT_SEARCH_END, { searchQuery, production })
+        return searchQuery
+      })
   },
 
   saveShotSearchFilterGroup({ commit, state, rootGetters }, filterGroup) {
@@ -620,7 +615,6 @@ const actions = {
     const production = rootGetters.currentProduction
     return peopleApi.removeFilter(searchQuery).then(() => {
       commit(REMOVE_SHOT_SEARCH_END, { searchQuery, production })
-      return Promise.resolve()
     })
   },
 

@@ -319,7 +319,7 @@
  */
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
-import { sortByName } from '@/lib/sorting'
+import { sortByName, sortPeople } from '@/lib/sorting'
 import { formatFullDateWithRevertedTimezone } from '@/lib/time'
 import { timeMixin } from '@/components/mixins/time'
 
@@ -501,9 +501,11 @@ export default {
     },
 
     team() {
-      return this.currentProduction.team
-        .map(pId => this.personMap.get(pId))
-        .sort((a, b) => a.full_name.localeCompare(b.full_name))
+      return sortPeople(
+        this.currentProduction.team.map(personId =>
+          this.personMap.get(personId)
+        )
+      )
     },
 
     renderedStats() {

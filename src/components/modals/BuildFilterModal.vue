@@ -254,9 +254,10 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 import { getFilters } from '@/lib/filtering'
+import { sortPeople } from '@/lib/sorting'
 import { descriptorMixin } from '@/components/mixins/descriptors'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
@@ -449,7 +450,11 @@ export default {
     },
 
     team() {
-      return this.currentProduction.team.map(pId => this.personMap.get(pId))
+      return sortPeople(
+        this.currentProduction.team.map(personId =>
+          this.personMap.get(personId)
+        )
+      )
     },
 
     descriptorOptions() {
@@ -465,8 +470,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     // Build filter
 
     applyFilter() {

@@ -498,28 +498,22 @@ const actions = {
   },
 
   saveEditSearch({ commit, rootGetters }, searchQuery) {
-    const query = state.editSearchQueries.find(
-      query => query.name === searchQuery
-    )
-    const production = rootGetters.currentProduction
-
-    if (!query) {
-      return peopleApi
-        .createFilter('edit', searchQuery, searchQuery, production.id, null)
-        .then(searchQuery => {
-          commit(SAVE_EDIT_SEARCH_END, { searchQuery, production })
-          return searchQuery
-        })
-    } else {
-      return Promise.resolve()
+    if (state.editSearchQueries.some(query => query.name === searchQuery)) {
+      return
     }
+    const production = rootGetters.currentProduction
+    return peopleApi
+      .createFilter('edit', searchQuery, searchQuery, production.id, null)
+      .then(searchQuery => {
+        commit(SAVE_EDIT_SEARCH_END, { searchQuery, production })
+        return searchQuery
+      })
   },
 
   removeEditSearch({ commit, rootGetters }, searchQuery) {
     const production = rootGetters.currentProduction
     return peopleApi.removeFilter(searchQuery).then(() => {
       commit(REMOVE_EDIT_SEARCH_END, { searchQuery, production })
-      return Promise.resolve()
     })
   },
 

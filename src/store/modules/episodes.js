@@ -307,32 +307,27 @@ const actions = {
   },
 
   saveEpisodeSearch({ commit, rootGetters }, searchQuery) {
-    const query = state.episodeSearchQueries.find(
-      query => query && query.name === searchQuery
-    )
-    const production = rootGetters.currentProduction
-    if (!query) {
-      return peopleApi
-        .createFilter(
-          'episode',
-          searchQuery,
-          searchQuery,
-          production.id,
-          'Episode'
-        )
-        .then(query => {
-          commit(ADD_EPISODE_SEARCH, query)
-          return Promise.resolve(query)
-        })
-    } else {
-      return Promise.resolve()
+    if (state.episodeSearchQueries.some(query => query.name === searchQuery)) {
+      return
     }
+    const production = rootGetters.currentProduction
+    return peopleApi
+      .createFilter(
+        'episode',
+        searchQuery,
+        searchQuery,
+        production.id,
+        'Episode'
+      )
+      .then(searchQuery => {
+        commit(ADD_EPISODE_SEARCH, searchQuery)
+        return searchQuery
+      })
   },
 
-  removeEpisodeSearch({ commit, rootGetters }, searchQuery) {
+  removeEpisodeSearch({ commit }, searchQuery) {
     return peopleApi.removeFilter(searchQuery).then(() => {
       commit(REMOVE_EPISODE_SEARCH, searchQuery)
-      return Promise.resolve()
     })
   },
 
