@@ -364,7 +364,7 @@ export default {
     },
 
     tasksStartDate() {
-      if (this.scheduleItems.length > 0) {
+      if (this.scheduleTasks.length) {
         return getFirstStartDate(this.scheduleTasks)
       } else {
         return moment()
@@ -372,7 +372,7 @@ export default {
     },
 
     tasksEndDate() {
-      if (this.scheduleItems.length > 0) {
+      if (this.scheduleTasks.length) {
         return getLastEndDate(this.scheduleTasks)
       } else {
         return moment().add(15, 'days')
@@ -380,11 +380,7 @@ export default {
     },
 
     scheduleTasks() {
-      let children = []
-      this.scheduleItems.forEach(item => {
-        children = children.concat(item.children)
-      })
-      return children
+      return this.scheduleItems.flatMap(item => item.children)
     },
 
     scheduleItems() {
