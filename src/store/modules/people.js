@@ -446,26 +446,22 @@ const actions = {
   },
 
   savePersonTasksSearch({ commit, rootGetters }, searchQuery) {
-    const query = state.personTaskSearchQueries.find(
-      query => query.name === searchQuery
-    )
-
-    if (!query) {
-      return peopleApi
-        .createFilter('persontasks', searchQuery, searchQuery, null, null)
-        .then(searchQuery => {
-          commit(SAVE_PERSON_TASKS_SEARCH_END, { searchQuery })
-          return Promise.resolve(searchQuery)
-        })
-    } else {
-      return Promise.resolve()
+    if (
+      state.personTaskSearchQueries.some(query => query.name === searchQuery)
+    ) {
+      return
     }
+    return peopleApi
+      .createFilter('persontasks', searchQuery, searchQuery, null, null)
+      .then(searchQuery => {
+        commit(SAVE_PERSON_TASKS_SEARCH_END, { searchQuery })
+        return searchQuery
+      })
   },
 
-  removePersonTasksSearch({ commit, rootGetters }, searchQuery) {
+  removePersonTasksSearch({ commit }, searchQuery) {
     return peopleApi.removeFilter(searchQuery).then(() => {
       commit(REMOVE_PERSON_TASKS_SEARCH_END, { searchQuery })
-      return Promise.resolve()
     })
   },
 
@@ -531,27 +527,21 @@ const actions = {
     })
   },
 
-  savePeopleSearch({ commit, rootGetters }, searchQuery) {
-    const query = state.peopleSearchQueries.find(
-      query => query.name === searchQuery
-    )
-
-    if (!query) {
-      peopleApi
-        .createFilter('people', searchQuery, searchQuery, null, null)
-        .then(searchQuery => {
-          commit(SAVE_PEOPLE_SEARCH_END, { searchQuery })
-          return Promise.resolve(searchQuery)
-        })
-    } else {
-      Promise.resolve()
+  savePeopleSearch({ commit }, searchQuery) {
+    if (state.peopleSearchQueries.some(query => query.name === searchQuery)) {
+      return
     }
+    return peopleApi
+      .createFilter('people', searchQuery, searchQuery, null, null)
+      .then(searchQuery => {
+        commit(SAVE_PEOPLE_SEARCH_END, { searchQuery })
+        return searchQuery
+      })
   },
 
-  removePeopleSearch({ commit, rootGetters }, searchQuery) {
+  removePeopleSearch({ commit }, searchQuery) {
     return peopleApi.removeFilter(searchQuery).then(() => {
       commit(REMOVE_PEOPLE_SEARCH_END, { searchQuery })
-      return Promise.resolve()
     })
   },
 

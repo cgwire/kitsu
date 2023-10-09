@@ -217,6 +217,9 @@ export default {
       currentSort: 'entity_name',
       isTasksLoading: false,
       isTasksLoadingError: false,
+      loading: {
+        savingSearch: false
+      },
       person: null,
       scheduleHeight: 0,
       selectedDate: moment().format('YYYY-MM-DD'),
@@ -569,9 +572,15 @@ export default {
     },
 
     saveSearchQuery(searchQuery) {
-      this.savePersonTasksSearch(searchQuery).catch(err => {
-        if (err) console.error(err)
-      })
+      if (this.loading.savingSearch) {
+        return
+      }
+      this.loading.savingSearch = true
+      this.savePersonTasksSearch(searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
     },
 
     removeSearchQuery(searchQuery) {

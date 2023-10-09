@@ -282,6 +282,7 @@ export default {
         deleteMetadata: false,
         edit: false,
         importing: false,
+        savingSearch: false,
         sequence: false,
         stay: false
       },
@@ -504,7 +505,15 @@ export default {
     },
 
     saveSearchQuery(searchQuery) {
-      this.saveSequenceSearch(searchQuery).catch(console.error)
+      if (this.loading.savingSearch) {
+        return
+      }
+      this.loading.savingSearch = true
+      this.saveSequenceSearch(searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
     },
 
     removeSearchQuery(searchQuery) {

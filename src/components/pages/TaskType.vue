@@ -60,7 +60,7 @@
             </ul>
           </div>
 
-          <div class="flexcolumn-item flexrow">
+          <div class="flexcolumn-item flexrow search-options mb1">
             <div class="flexrow-item">
               <search-field
                 ref="task-search-field"
@@ -452,7 +452,8 @@ export default {
       },
       loading: {
         entities: false,
-        importing: false
+        importing: false,
+        savingSearch: false
       },
       priorityOptions: [
         { label: 'all_tasks', value: '-1' },
@@ -929,10 +930,16 @@ export default {
     },
 
     saveSearchQuery(searchQuery) {
+      if (this.loading.savingSearch) {
+        return
+      }
       const entityType = this.entityType
-      this.saveTaskSearch({ searchQuery, entityType }).catch(err => {
-        console.error(err)
-      })
+      this.loading.savingSearch = true
+      this.saveTaskSearch({ searchQuery, entityType })
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
     },
 
     removeSearchQuery(searchQuery) {
@@ -1500,6 +1507,10 @@ export default {
 .page-header {
   margin-top: 1em;
   margin-right: 0;
+}
+
+.search-options {
+  align-items: flex-end;
 }
 
 .tabs ul {

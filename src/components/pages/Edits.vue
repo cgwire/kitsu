@@ -3,7 +3,7 @@
     <div class="column main-column">
       <div class="edits page">
         <div class="edit-list-header page-header">
-          <div class="flexrow">
+          <div class="flexrow mb1">
             <search-field
               ref="edit-search-field"
               :can-save="true"
@@ -356,6 +356,7 @@ export default {
         del: false,
         importing: false,
         restore: false,
+        savingSearch: false,
         stay: false
       },
       errors: {
@@ -843,7 +844,15 @@ export default {
     },
 
     saveSearchQuery(searchQuery) {
-      this.saveEditSearch(searchQuery).catch(console.error)
+      if (this.loading.savingSearch) {
+        return
+      }
+      this.loading.savingSearch = true
+      this.saveEditSearch(searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
     },
 
     removeSearchQuery(searchQuery) {

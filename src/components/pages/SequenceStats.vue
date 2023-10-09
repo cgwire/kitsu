@@ -98,7 +98,10 @@ export default {
       displayModeOptions: [
         { label: 'pie', value: 'pie' },
         { label: 'count', value: 'count' }
-      ]
+      ],
+      loading: {
+        savingSearch: false
+      }
     }
   },
 
@@ -191,7 +194,15 @@ export default {
     },
 
     saveSearchQuery(searchQuery) {
-      this.saveSequenceSearch(searchQuery).catch(console.error)
+      if (this.loading.savingSearch) {
+        return
+      }
+      this.loading.savingSearch = true
+      this.saveSequenceSearch(searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
     },
 
     removeSearchQuery(searchQuery) {

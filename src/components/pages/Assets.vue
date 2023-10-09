@@ -350,6 +350,7 @@ export default {
         edit: false,
         importing: false,
         restore: false,
+        savingSearch: false,
         stay: false,
         taskStay: false
       },
@@ -820,9 +821,15 @@ export default {
     },
 
     saveSearchQuery(searchQuery) {
-      this.saveAssetSearch(searchQuery).catch(err => {
-        if (err) console.error(err)
-      })
+      if (this.loading.savingSearch) {
+        return
+      }
+      this.loading.savingSearch = true
+      this.saveAssetSearch(searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
     },
 
     removeSearchQuery(searchQuery) {

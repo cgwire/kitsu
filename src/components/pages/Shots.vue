@@ -404,6 +404,7 @@ export default {
         del: false,
         importing: false,
         restore: false,
+        savingSearch: false,
         stay: false
       },
       pageName: 'Shots',
@@ -922,7 +923,15 @@ export default {
     },
 
     saveSearchQuery(searchQuery) {
-      this.saveShotSearch(searchQuery).catch(console.error)
+      if (this.loading.savingSearch) {
+        return
+      }
+      this.loading.savingSearch = true
+      this.saveShotSearch(searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
     },
 
     removeSearchQuery(searchQuery) {

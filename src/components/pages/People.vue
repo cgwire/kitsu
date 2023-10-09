@@ -203,7 +203,8 @@ export default {
         createAndInvite: false,
         edit: false,
         del: false,
-        invite: false
+        invite: false,
+        savingSearch: false
       },
       modals: {
         edit: false,
@@ -497,7 +498,15 @@ export default {
     },
 
     saveSearchQuery(searchQuery) {
-      this.savePeopleSearch(searchQuery).catch(console.error)
+      if (this.loading.savingSearch) {
+        return
+      }
+      this.loading.savingSearch = true
+      this.savePeopleSearch(searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
     },
 
     removeSearchQuery(searchQuery) {

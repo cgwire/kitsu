@@ -548,21 +548,16 @@ const actions = {
   },
 
   saveAssetSearch({ commit, state, rootGetters }, searchQuery) {
-    const query = state.assetSearchQueries.find(
-      query => query.name === searchQuery
-    )
-    const production = rootGetters.currentProduction
-
-    if (!query) {
-      return peopleApi
-        .createFilter('asset', searchQuery, searchQuery, production.id, null)
-        .then(searchQuery => {
-          commit(SAVE_ASSET_SEARCH_END, { searchQuery, production })
-          return Promise.resolve(searchQuery)
-        })
-    } else {
-      Promise.resolve()
+    if (state.assetSearchQueries.some(query => query.name === searchQuery)) {
+      return
     }
+    const production = rootGetters.currentProduction
+    return peopleApi
+      .createFilter('asset', searchQuery, searchQuery, production.id, null)
+      .then(searchQuery => {
+        commit(SAVE_ASSET_SEARCH_END, { searchQuery, production })
+        return searchQuery
+      })
   },
 
   saveAssetSearchFilterGroup({ commit, state, rootGetters }, filterGroup) {
@@ -592,7 +587,6 @@ const actions = {
     const production = rootGetters.currentProduction
     return peopleApi.removeFilter(searchQuery).then(() => {
       commit(REMOVE_ASSET_SEARCH_END, { searchQuery, production })
-      return Promise.resolve()
     })
   },
 

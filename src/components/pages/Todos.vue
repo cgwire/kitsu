@@ -165,6 +165,9 @@ export default {
         label: name,
         value: name
       })),
+      loading: {
+        savingSearch: false
+      },
       selectedDate: moment().format('YYYY-MM-DD'),
       sortOptions: [
         'entity_name',
@@ -362,7 +365,15 @@ export default {
     },
 
     saveSearchQuery(searchQuery) {
-      this.saveTodoSearch(searchQuery).catch(console.error)
+      if (this.loading.savingSearch) {
+        return
+      }
+      this.loading.savingSearch = true
+      this.saveTodoSearch(searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
     },
 
     removeSearchQuery(searchQuery) {
