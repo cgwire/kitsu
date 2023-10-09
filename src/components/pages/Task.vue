@@ -530,7 +530,7 @@ export default {
       return (
         this.isCurrentUserManager ||
         this.isCurrentUserClient ||
-        this.task.assignees.find(personId => personId === this.user.id)
+        this.task.assignees.some(personId => personId === this.user.id)
       )
     },
 
@@ -564,14 +564,10 @@ export default {
     },
 
     entityList() {
-      const entity = this.displayedShots.find(entity => {
-        return entity.id === this.task.entity_id
-      })
-      if (entity) {
-        return this.displayedShots
-      } else {
-        return this.displayedAssets
-      }
+      const hasEntity = this.displayedShots.some(
+        entity => entity.id === this.task.entity_id
+      )
+      return hasEntity ? this.displayedShots : this.displayedAssets
     },
 
     previousEntity() {
@@ -717,9 +713,7 @@ export default {
 
     isAssigned() {
       if (this.task) {
-        return this.task.assignees.some(assigneeId => {
-          return assigneeId === this.user.id
-        })
+        return this.task.assignees.some(personId => personId === this.user.id)
       } else {
         return false
       }
@@ -1337,8 +1331,10 @@ export default {
           )
           if (comment) {
             if (!comment.replies) comment.replies = []
-            const reply = comment.replies.find(r => r.id === eventData.reply_id)
-            if (!reply) {
+            const hasReply = comment.replies.some(
+              reply => reply.id === eventData.reply_id
+            )
+            if (!hasReply) {
               this.refreshComment({
                 taskId: this.task.id,
                 commentId: eventData.comment_id
