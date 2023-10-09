@@ -431,16 +431,14 @@ export default {
     resetScheduleHeight() {
       this.$nextTick(() => {
         if (this.isActiveTab('schedule')) {
-          const pageHeight = this.$refs.page.offsetHeight
-          const headerHeight = this.$refs.header.offsetHeight
-          const tabsHeight = this.$refs.tabs.offsetHeight
-          const searchHeight = this.$refs.search.offsetHeight
-          const queryHeight = this.$refs.query.offsetHeight
+          const pageHeight = this.$refs.page?.offsetHeight || 0
+          const headerHeight = this.$refs.header?.offsetHeight || 0
+          const tabsHeight = this.$refs.tabs?.offsetHeight || 0
+          const searchHeight = this.$refs.search?.offsetHeight || 0
+          const queryHeight = this.$refs.query?.offsetHeight || 0
           this.scheduleHeight =
             pageHeight - headerHeight - tabsHeight - searchHeight - queryHeight
-          if (this.$refs['schedule-widget']) {
-            this.$refs['schedule-widget'].resetScheduleSize()
-          }
+          this.$refs['schedule-widget']?.resetScheduleSize()
         }
       })
     },
