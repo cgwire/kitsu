@@ -41,7 +41,7 @@
         :members="atOptions"
         name-key="full_name"
         :limit="2"
-        @input="onTextChanged"
+        @input="onAtTextChanged"
         v-if="mode === 'status' || showCommentArea"
       >
         <template slot="item" slot-scope="team">
@@ -637,7 +637,7 @@ export default {
       this.text = comment.text
     },
 
-    onTextChanged(input) {
+    onAtTextChanged(input) {
       if (input.includes('@frame')) {
         this.text = replaceTimeWithTimecode(
           input,

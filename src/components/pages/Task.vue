@@ -213,6 +213,9 @@
                       (comment.person && user.id === comment.person.id) ||
                       isCurrentUserAdmin
                     "
+                    :fps="parseInt(currentFps)"
+                    :time="currentTime"
+                    :revision="currentRevision"
                     :is-first="index === 0"
                     :is-last="index === pinnedCount"
                     :is-change="isStatusChange(index)"
@@ -277,6 +280,9 @@
         :is-error="errors.editComment"
         :comment-to-edit="commentToEdit"
         :team="currentTeam"
+        :fps="parseInt(currentFps)"
+        :time="currentTime"
+        :revision="currentRevision"
         @confirm="confirmEditTaskComment"
         @cancel="onCancelEditComment"
       />
@@ -508,11 +514,11 @@ export default {
     },
 
     currentFps() {
-      return this.productionMap.get(this.task.project_id).fps || '25'
+      return this.productionMap.get(this.task?.project_id)?.fps || '25'
     },
 
     currentRevision() {
-      return this.currentPreview ? this.currentPreview.revision : 0
+      return this.currentPreview?.revision || 0
     },
 
     isCommentingAllowed() {

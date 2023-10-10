@@ -24,18 +24,40 @@
             <label class="label">
               {{ $t('comments.text') }}
             </label>
-            <at-ta :members="team" name-key="full_name" limit="2">
+            <at-ta
+              :members="atOptions"
+              name-key="full_name"
+              limit="2"
+              @input="onAtTextChanged"
+            >
               <template slot="item" slot-scope="team">
-                <div class="flexrow">
-                  <people-avatar
-                    class="flexrow-item"
-                    :person="team.item"
-                    :size="20"
-                  />
-                  <span class="flexrow-item">
-                    {{ team.item.full_name }}
+                <template v-if="team.item.isTime"> ⏱️ frame </template>
+                <template v-else-if="team.item.isDepartment">
+                  <span
+                    class="mr05"
+                    :style="{
+                      background: team.item.color,
+                      width: '10px',
+                      height: '10px',
+                      'border-radius': '50%'
+                    }"
+                  >
+                    &nbsp;
                   </span>
-                </div>
+                  {{ team.item.full_name }}
+                </template>
+                <template v-else>
+                  <div class="flexrow">
+                    <people-avatar
+                      class="flexrow-item"
+                      :person="team.item"
+                      :size="20"
+                    />
+                    <span class="flexrow-item">
+                      {{ team.item.full_name }}
+                    </span>
+                  </div>
+                </template>
               </template>
 
               <textarea
@@ -126,8 +148,10 @@
 <script>
 import { mapGetters } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
-import { remove } from '@/lib/models'
+
 import files from '@/lib/files'
+import { remove } from '@/lib/models'
+import { replaceTimeWithTimecode } from '@/lib/render'
 
 import { XIcon } from 'vue-feather-icons'
 
@@ -171,6 +195,18 @@ export default {
     team: {
       type: Array,
       default: () => []
+    },
+    fps: {
+      type: Number,
+      default: 25
+    },
+    revision: {
+      type: Number,
+      default: 1
+    },
+    time: {
+      type: Number,
+      default: 0
     }
   },
 
@@ -187,7 +223,12 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['taskStatusForCurrentUser'])
+    ...mapGetters([
+      'departmentMap',
+      'isCurrentUserClient',
+      'productionDepartmentIds',
+      'taskStatusForCurrentUser'
+    ])
   },
 
   methods: {
@@ -257,6 +298,17 @@ export default {
       for (let i = 0; i < this.form.checklist.length; i++) {
         this.form.checklist[i].index = i
       }
+    },
+
+    onAtTextChanged(input) {
+      if (input.includes('@frame')) {
+        this.form.text = replaceTimeWithTimecode(
+          input,
+          this.revision,
+          this.time,
+          this.fps
+        )
+      }
     }
   },
 
@@ -271,6 +323,35 @@ export default {
           this.reset()
           this.$refs.textField.focus()
         }, 100)
+      }
+    },
+
+    team: {
+      deep: true,
+      immediate: true,
+      handler() {
+        if (this.isCurrentUserClient) {
+          this.atOptions = this.team.filter(person =>
+            ['admin', 'manager', 'supervisor', 'client'].includes(person.role)
+          )
+        } else {
+          this.atOptions = [...this.team]
+        }
+        this.atOptions = this.atOptions.concat(
+          this.productionDepartmentIds.map(departmentId => {
+            const department = this.departmentMap.get(departmentId)
+            return {
+              isDepartment: true,
+              full_name: department.name,
+              color: department.color,
+              id: departmentId
+            }
+          })
+        )
+        this.atOptions.push({
+          isTime: true,
+          full_name: 'frame'
+        })
       }
     }
   }

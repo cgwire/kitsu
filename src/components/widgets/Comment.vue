@@ -186,6 +186,20 @@
               >
                 <template slot="item" slot-scope="team">
                   <template v-if="team.item.isTime"> ⏱️ frame </template>
+                  <template v-else-if="team.item.isDepartment">
+                    <span
+                      class="mr05"
+                      :style="{
+                        background: team.item.color,
+                        width: '10px',
+                        height: '10px',
+                        'border-radius': '50%'
+                      }"
+                    >
+                      &nbsp;
+                    </span>
+                    {{ team.item.full_name }}
+                  </template>
                   <template v-else>
                     <div class="flexrow">
                       <people-avatar
@@ -411,6 +425,18 @@ export default {
     isChange: {
       type: Boolean,
       default: false
+    },
+    fps: {
+      type: Number,
+      default: 25
+    },
+    revision: {
+      type: Number,
+      default: 1
+    },
+    time: {
+      type: Number,
+      default: 0
     }
   },
 
@@ -737,16 +763,13 @@ export default {
     },
 
     onAtTextChanged(input) {
-      if (input.indexOf('@frame') >= 0) {
-        this.$nextTick(() => {
-          const text = replaceTimeWithTimecode(
-            this.$refs['comment-textarea'].value,
-            this.revision,
-            this.time,
-            this.fps
-          )
-          this.$refs['comment-textarea'].value = text
-        })
+      if (input.includes('@frame')) {
+        this.replyText = replaceTimeWithTimecode(
+          input,
+          this.revision,
+          this.time,
+          this.fps
+        )
       }
     }
   },

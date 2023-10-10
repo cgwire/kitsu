@@ -171,6 +171,9 @@
                         (comment.person && user.id === comment.person.id) ||
                         isCurrentUserAdmin
                       "
+                      :fps="parseInt(currentFps)"
+                      :time="isPreview ? currentTime : currentTimeRaw"
+                      :revision="currentRevision"
                       @duplicate-comment="onDuplicateComment"
                       @pin-comment="onPinComment"
                       @edit-comment="onEditComment"
@@ -221,6 +224,9 @@
           :is-error="errors.editComment"
           :comment-to-edit="commentToEdit"
           :team="currentTeam"
+          :fps="parseInt(currentFps)"
+          :time="isPreview ? currentTime : currentTimeRaw"
+          :revision="currentRevision"
           @confirm="confirmEditTaskComment"
           @cancel="onCancelEditComment"
         />
