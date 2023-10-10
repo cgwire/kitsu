@@ -537,8 +537,11 @@ export default {
     },
 
     focus() {
-      if (this.$refs['comment-textarea']) {
-        this.$refs['comment-textarea'].$el.focus()
+      const textarea = this.$refs['comment-textarea']
+      if (textarea) {
+        textarea.$el.focus()
+        const caretPosition = textarea.$el.value.length
+        textarea.$el.setSelectionRange(caretPosition, caretPosition)
       }
     },
 
