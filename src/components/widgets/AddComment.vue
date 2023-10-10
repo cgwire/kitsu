@@ -631,10 +631,7 @@ export default {
 
     setValue(comment) {
       this.checklist = comment.checklist
-      this.$nextTick(() => {
-        this.$refs['comment-textarea'].value = comment.text
-        this.text = comment.text
-      })
+      this.text = comment.text
     },
 
     onTextChanged(input) {
