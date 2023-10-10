@@ -412,17 +412,6 @@ export default {
     })
   },
 
-  beforeDestroy() {
-    if (this.$refs['add-comment']) {
-      const task = this.getTask()
-      const lastComment = `${this.$refs['add-comment'].text}`
-      const previousDraft = drafts.getTaskDraft(task.id)
-      if (lastComment !== previousDraft && !this.$options.drafted) {
-        drafts.setTaskDraft(task.id, lastComment)
-      }
-    }
-  },
-
   computed: {
     ...mapGetters([
       'currentEpisode',

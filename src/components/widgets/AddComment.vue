@@ -296,9 +296,11 @@
 
 <script>
 import { mapGetters } from 'vuex'
+
+import colors from '@/lib/colors'
+import drafts from '@/lib/drafts'
 import { remove } from '@/lib/models'
 import strings from '@/lib/string'
-import colors from '@/lib/colors'
 import { replaceTimeWithTimecode } from '@/lib/render'
 
 import AtTa from 'vue-at/dist/vue-at-textarea'
@@ -424,7 +426,6 @@ export default {
         })
       }
     })
-    this.resetStatus()
   },
 
   computed: {
@@ -564,16 +565,14 @@ export default {
     },
 
     resetStatus() {
-      if (this.task) {
-        const taskStatus = this.taskStatusMap.get(this.task.task_status_id)
-        if (
-          (!this.isCurrentUserArtist || taskStatus.is_artist_allowed) &&
-          (!this.isCurrentUserClient || taskStatus.is_client_allowed)
-        ) {
-          this.task_status_id = this.task.task_status_id
-        } else {
-          this.task_status_id = this.taskStatusForCurrentUser[0].id
-        }
+      const taskStatus = this.taskStatusMap.get(this.task.task_status_id)
+      if (
+        (!this.isCurrentUserArtist || taskStatus.is_artist_allowed) &&
+        (!this.isCurrentUserClient || taskStatus.is_client_allowed)
+      ) {
+        this.task_status_id = this.task.task_status_id
+      } else {
+        this.task_status_id = this.taskStatusForCurrentUser[0].id
       }
     },
 
@@ -600,7 +599,7 @@ export default {
       this.isDragging = false
     },
 
-    onAddCommentAttachmentClicked(comment) {
+    onAddCommentAttachmentClicked() {
       this.modals.addCommentAttachment = true
     },
 
@@ -639,16 +638,13 @@ export default {
     },
 
     onTextChanged(input) {
-      if (input.indexOf('@frame') >= 0) {
-        this.$nextTick(() => {
-          const text = replaceTimeWithTimecode(
-            this.$refs['comment-textarea'].value,
-            this.revision,
-            this.time,
-            this.fps
-          )
-          this.$refs['comment-textarea'].value = text
-        })
+      if (input.includes('@frame')) {
+        this.text = replaceTimeWithTimecode(
+          input,
+          this.revision,
+          this.time,
+          this.fps
+        )
       }
     },
 
@@ -666,8 +662,19 @@ export default {
   },
 
   watch: {
-    task() {
-      this.resetStatus()
+    task: {
+      immediate: true,
+      handler() {
+        this.resetStatus()
+        const draft = drafts.getTaskDraft(this.task.id)
+        if (draft) {
+          this.text = draft
+        }
+      }
+    },
+
+    text() {
+      drafts.setTaskDraft(this.task.id, this.text)
     },
 
     mode() {

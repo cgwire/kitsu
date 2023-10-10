@@ -404,13 +404,6 @@ export default {
   },
 
   mounted() {
-    if (this.$refs['add-comment']) {
-      const draft = drafts.getTaskDraft(this.task.id)
-      if (draft) {
-        this.$refs['add-comment'].text = draft
-      }
-    }
-
     if (this.sideColumnParent) {
       const panelWidth =
         preferences.getIntPreference('task:panel-width') || DEFAULT_PANEL_WIDTH
@@ -795,7 +788,7 @@ export default {
         this.currentPreviewDlPath = this.getOriginalDlPath()
         this.resetDraft()
         this.$nextTick(() => {
-          if (this.$refs['add-comment']) this.$refs['add-comment'].focus()
+          this.focusCommentTextarea()
         })
       }
     },
@@ -1255,23 +1248,6 @@ export default {
     task() {
       this.previewForms = []
       this.currentPreviewIndex = 0
-      if (this.previousTaskId && this.$refs['add-comment']) {
-        const lastComment = `${this.$refs['add-comment'].text}`
-        const previousDraft = drafts.getTaskDraft(this.previousTaskId)
-        if (
-          (this.$refs['add-comment'].text.length > 0 || previousDraft) &&
-          this.$refs['add-comment'].text !== previousDraft
-        ) {
-          drafts.setTaskDraft(this.previousTaskId, lastComment)
-        }
-      }
-      this.$nextTick(() => {
-        if (this.task) this.previousTaskId = this.task.id
-        if (this.task && this.$refs['add-comment']) {
-          const draft = drafts.getTaskDraft(this.task.id)
-          if (draft) this.$refs['add-comment'].text = draft
-        }
-      })
       if (!this.silent) {
         this.loadTaskData()
       }
