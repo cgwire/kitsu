@@ -188,7 +188,6 @@
                 :revision="currentRevision"
                 @add-comment="addComment"
                 @add-preview="onAddPreviewClicked"
-                @duplicate-comment="onDuplicateComment"
                 @file-drop="selectFile"
                 @clear-files="clearPreviewFiles"
                 @annotation-snapshots-requested="extractAnnotationSnapshots"
@@ -214,10 +213,14 @@
                       (comment.person && user.id === comment.person.id) ||
                       isCurrentUserAdmin
                     "
+                    :fps="parseInt(currentFps)"
+                    :time="currentTime"
+                    :revision="currentRevision"
                     :is-first="index === 0"
                     :is-last="index === pinnedCount"
                     :is-change="isStatusChange(index)"
                     @ack-comment="ackComment"
+                    @duplicate-comment="onDuplicateComment"
                     @pin-comment="onPinComment"
                     @edit-comment="onEditComment"
                     @delete-comment="onDeleteComment"
@@ -277,6 +280,9 @@
         :is-error="errors.editComment"
         :comment-to-edit="commentToEdit"
         :team="currentTeam"
+        :fps="parseInt(currentFps)"
+        :time="currentTime"
+        :revision="currentRevision"
         @confirm="confirmEditTaskComment"
         @cancel="onCancelEditComment"
       />
@@ -412,17 +418,6 @@ export default {
     })
   },
 
-  beforeDestroy() {
-    if (this.$refs['add-comment']) {
-      const task = this.getTask()
-      const lastComment = `${this.$refs['add-comment'].text}`
-      const previousDraft = drafts.getTaskDraft(task.id)
-      if (lastComment !== previousDraft && !this.$options.drafted) {
-        drafts.setTaskDraft(task.id, lastComment)
-      }
-    }
-  },
-
   computed: {
     ...mapGetters([
       'currentEpisode',
@@ -519,11 +514,11 @@ export default {
     },
 
     currentFps() {
-      return this.productionMap.get(this.task.project_id).fps || '25'
+      return this.productionMap.get(this.task?.project_id)?.fps || '25'
     },
 
     currentRevision() {
-      return this.currentPreview ? this.currentPreview.revision : 0
+      return this.currentPreview?.revision || 0
     },
 
     isCommentingAllowed() {
@@ -755,6 +750,7 @@ export default {
       'deleteTaskPreview',
       'deleteTaskComment',
       'editTaskComment',
+      'loadComment',
       'loadEpisodes',
       'loadTask',
       'loadShots',
@@ -792,7 +788,7 @@ export default {
                   .catch(callback)
               }
             }
-            loadingFunction(() => {
+            return loadingFunction(() => {
               this.task = task
               return this.loadTaskComments({
                 taskId: task.id,
@@ -801,7 +797,6 @@ export default {
                 .then(() => {
                   this.reset()
                   this.taskLoading = { isLoading: false, isError: false }
-                  return Promise.resolve()
                 })
                 .catch(err => {
                   console.error(err)
@@ -822,11 +817,13 @@ export default {
         })
           .then(() => {
             this.reset()
-            return Promise.resolve()
           })
           .catch(err => {
             console.error(err)
             this.taskLoading.isError = true
+          })
+          .finally(() => {
+            this.taskLoading.isLoading = false
           })
       }
     },
@@ -1324,6 +1321,14 @@ export default {
         }, 1000)
       },
 
+      'comment:update'(eventData) {
+        const commentId = eventData.comment_id
+        if (!this.taskComments.some(({ id }) => id === commentId)) {
+          return
+        }
+        this.loadComment({ commentId }).catch(console.error)
+      },
+
       'comment:reply'(eventData) {
         if (this.task) {
           const comment = this.taskComments.find(
@@ -1336,7 +1341,6 @@ export default {
             )
             if (!hasReply) {
               this.refreshComment({
-                taskId: this.task.id,
                 commentId: eventData.comment_id
               })
                 .then(remoteComment => {

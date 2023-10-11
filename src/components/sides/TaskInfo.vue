@@ -171,6 +171,9 @@
                         (comment.person && user.id === comment.person.id) ||
                         isCurrentUserAdmin
                       "
+                      :fps="parseInt(currentFps)"
+                      :time="isPreview ? currentTime : currentTimeRaw"
+                      :revision="currentRevision"
                       @duplicate-comment="onDuplicateComment"
                       @pin-comment="onPinComment"
                       @edit-comment="onEditComment"
@@ -221,6 +224,9 @@
           :is-error="errors.editComment"
           :comment-to-edit="commentToEdit"
           :team="currentTeam"
+          :fps="parseInt(currentFps)"
+          :time="isPreview ? currentTime : currentTimeRaw"
+          :revision="currentRevision"
           @confirm="confirmEditTaskComment"
           @cancel="onCancelEditComment"
         />
@@ -404,13 +410,6 @@ export default {
   },
 
   mounted() {
-    if (this.$refs['add-comment']) {
-      const draft = drafts.getTaskDraft(this.task.id)
-      if (draft) {
-        this.$refs['add-comment'].text = draft
-      }
-    }
-
     if (this.sideColumnParent) {
       const panelWidth =
         preferences.getIntPreference('task:panel-width') || DEFAULT_PANEL_WIDTH
@@ -703,6 +702,7 @@ export default {
       'deleteTaskComment',
       'deleteTaskPreview',
       'editTaskComment',
+      'loadComment',
       'loadPreviewFileFormData',
       'loadTask',
       'loadTaskComments',
@@ -795,7 +795,7 @@ export default {
         this.currentPreviewDlPath = this.getOriginalDlPath()
         this.resetDraft()
         this.$nextTick(() => {
-          if (this.$refs['add-comment']) this.$refs['add-comment'].focus()
+          this.focusCommentTextarea()
         })
       }
     },
@@ -1255,23 +1255,6 @@ export default {
     task() {
       this.previewForms = []
       this.currentPreviewIndex = 0
-      if (this.previousTaskId && this.$refs['add-comment']) {
-        const lastComment = `${this.$refs['add-comment'].text}`
-        const previousDraft = drafts.getTaskDraft(this.previousTaskId)
-        if (
-          (this.$refs['add-comment'].text.length > 0 || previousDraft) &&
-          this.$refs['add-comment'].text !== previousDraft
-        ) {
-          drafts.setTaskDraft(this.previousTaskId, lastComment)
-        }
-      }
-      this.$nextTick(() => {
-        if (this.task) this.previousTaskId = this.task.id
-        if (this.task && this.$refs['add-comment']) {
-          const draft = drafts.getTaskDraft(this.task.id)
-          if (draft) this.$refs['add-comment'].text = draft
-        }
-      })
       if (!this.silent) {
         this.loadTaskData()
       }
@@ -1341,6 +1324,17 @@ export default {
         }, 1000)
       },
 
+      'comment:update'(eventData) {
+        const commentId = eventData.comment_id
+        if (
+          !this.task &&
+          !this.taskComments.some(({ id }) => id === commentId)
+        ) {
+          return
+        }
+        this.loadComment({ commentId }).catch(console.error)
+      },
+
       'comment:acknowledge'(eventData) {
         this.onRemoteAcknowledge(eventData, 'ack')
       },
@@ -1359,7 +1353,6 @@ export default {
             const reply = comment.replies.find(r => r.id === eventData.reply_id)
             if (!reply) {
               this.refreshComment({
-                taskId: this.task.id,
                 commentId: eventData.comment_id
               })
                 .then(remoteComment => {
