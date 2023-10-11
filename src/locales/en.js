@@ -982,6 +982,7 @@ export default {
     integrations: 'Integrations',
     logo: 'Studio logo',
     no_logo: 'There is no logo set.',
+    remove_logo: 'Remove studio logo',
     set_logo: 'Set studio logo',
     title: 'Settings',
     webhook_error: 'An error occurred while posting webhook',
