@@ -750,6 +750,7 @@ export default {
       'deleteTaskPreview',
       'deleteTaskComment',
       'editTaskComment',
+      'loadComment',
       'loadEpisodes',
       'loadTask',
       'loadShots',
@@ -787,7 +788,7 @@ export default {
                   .catch(callback)
               }
             }
-            loadingFunction(() => {
+            return loadingFunction(() => {
               this.task = task
               return this.loadTaskComments({
                 taskId: task.id,
@@ -796,7 +797,6 @@ export default {
                 .then(() => {
                   this.reset()
                   this.taskLoading = { isLoading: false, isError: false }
-                  return Promise.resolve()
                 })
                 .catch(err => {
                   console.error(err)
@@ -817,11 +817,13 @@ export default {
         })
           .then(() => {
             this.reset()
-            return Promise.resolve()
           })
           .catch(err => {
             console.error(err)
             this.taskLoading.isError = true
+          })
+          .finally(() => {
+            this.taskLoading.isLoading = false
           })
       }
     },
@@ -1319,6 +1321,14 @@ export default {
         }, 1000)
       },
 
+      'comment:update'(eventData) {
+        const commentId = eventData.comment_id
+        if (!this.taskComments.some(({ id }) => id === commentId)) {
+          return
+        }
+        this.loadComment({ commentId }).catch(console.error)
+      },
+
       'comment:reply'(eventData) {
         if (this.task) {
           const comment = this.taskComments.find(
@@ -1331,7 +1341,6 @@ export default {
             )
             if (!hasReply) {
               this.refreshComment({
-                taskId: this.task.id,
                 commentId: eventData.comment_id
               })
                 .then(remoteComment => {

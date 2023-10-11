@@ -702,6 +702,7 @@ export default {
       'deleteTaskComment',
       'deleteTaskPreview',
       'editTaskComment',
+      'loadComment',
       'loadPreviewFileFormData',
       'loadTask',
       'loadTaskComments',
@@ -1323,6 +1324,17 @@ export default {
         }, 1000)
       },
 
+      'comment:update'(eventData) {
+        const commentId = eventData.comment_id
+        if (
+          !this.task &&
+          !this.taskComments.some(({ id }) => id === commentId)
+        ) {
+          return
+        }
+        this.loadComment({ commentId }).catch(console.error)
+      },
+
       'comment:acknowledge'(eventData) {
         this.onRemoteAcknowledge(eventData, 'ack')
       },
@@ -1341,7 +1353,6 @@ export default {
             const reply = comment.replies.find(r => r.id === eventData.reply_id)
             if (!reply) {
               this.refreshComment({
-                taskId: this.task.id,
                 commentId: eventData.comment_id
               })
                 .then(remoteComment => {

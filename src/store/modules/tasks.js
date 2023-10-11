@@ -213,10 +213,10 @@ const actions = {
     })
   },
 
-  loadComment({ commit, state }, { commentId, callback }) {
+  loadComment({ commit }, { commentId }) {
     return tasksApi.getTaskComment({ id: commentId }).then(comment => {
       commit(NEW_TASK_COMMENT_END, { comment, taskId: comment.object_id })
-      return Promise.resolve(comment)
+      return comment
     })
   },
 
@@ -830,10 +830,10 @@ const actions = {
     return tasksApi.pinComment(comment)
   },
 
-  refreshComment({ commit, state }, { taskId, commentId }) {
+  refreshComment({ commit }, { commentId }) {
     return tasksApi.getTaskComment({ id: commentId }).then(comment => {
       commit(UPDATE_COMMENT_REPLIES, comment)
-      return Promise.resolve(comment)
+      return comment
     })
   },
 
@@ -982,8 +982,13 @@ const mutations = {
     )
 
     if (!state.taskComments[taskId]) state.taskComments[taskId] = []
-    if (!state.taskComments[taskId].find(cmt => cmt.id === comment.id)) {
+    const commentIndex = state.taskComments[taskId].findIndex(
+      ({ id }) => id === comment.id
+    )
+    if (commentIndex < 0) {
       state.taskComments[taskId].unshift(comment)
+    } else {
+      state.taskComments[taskId].splice(commentIndex, 1, comment)
     }
     state.taskComments[taskId] = sortComments(state.taskComments[taskId])
     if (task) {
