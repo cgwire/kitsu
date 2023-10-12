@@ -33,7 +33,8 @@ export default {
       hd_by_default: organisation.hd_by_default === 'true',
       chat_token_slack: organisation.chat_token_slack,
       chat_webhook_mattermost: organisation.chat_webhook_mattermost,
-      chat_token_discord: organisation.chat_token_discord
+      chat_token_discord: organisation.chat_token_discord,
+      has_avatar: organisation.has_avatar
     }
     return client.pput(`/api/data/organisations/${organisation.id}`, data)
   },

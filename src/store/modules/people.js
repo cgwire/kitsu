@@ -230,20 +230,14 @@ const actions = {
     form.id = state.organisation.id
     return peopleApi.updateOrganisation(form).then(organisation => {
       commit(SET_ORGANISATION, organisation)
-      Promise.resolve(organisation)
+      return organisation
     })
   },
 
   uploadOrganisationLogo({ commit, state }, formData) {
-    return new Promise((resolve, reject) => {
-      const organisationId = state.organisation.id
-      peopleApi
-        .postOrganisationLogo(organisationId, formData)
-        .then(organisation => {
-          commit(SET_ORGANISATION, { has_avatar: true })
-          resolve()
-        })
-        .catch(reject)
+    const organisationId = state.organisation.id
+    return peopleApi.postOrganisationLogo(organisationId, formData).then(() => {
+      commit(SET_ORGANISATION, { has_avatar: true })
     })
   },
 
@@ -848,8 +842,7 @@ const mutations = {
   },
 
   [SET_ORGANISATION](state, organisation) {
-    Object.assign(state.organisation, organisation)
-    state.organisation = { ...state.organisation }
+    state.organisation = { ...state.organisation, ...organisation }
   },
 
   [RESET_ALL](state, people) {
