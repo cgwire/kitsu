@@ -30,14 +30,15 @@
             v-model="selectedEndDate"
           />
         </div>
+        <!--
         <text-field
           class="flexrow-item overall-man-days"
           type="number"
           v-model="overallManDays"
           :label="$t('schedule.overall_man_days')"
           :disabled="!isCurrentUserAdmin"
-          v-show="false"
         />
+        -->
         <combobox-number
           class="flexrow-item zoom-level"
           :label="$t('schedule.zoom_level')"
@@ -85,7 +86,6 @@ import { daysToMinutes, parseDate } from '@/lib/time'
 
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
 import TaskInfo from '@/components/sides/TaskInfo'
-import TextField from '@/components/widgets/TextField'
 import Schedule from '@/components/pages/schedule/Schedule'
 
 export default {
@@ -94,14 +94,13 @@ export default {
     ComboboxNumber,
     Datepicker,
     Schedule,
-    TaskInfo,
-    TextField
+    TaskInfo
   },
 
   data() {
     return {
       currentTask: null,
-      overallManDays: 0,
+      // overallManDays: 0,
       endDate: moment().add(6, 'months').endOf('day'),
       scheduleItems: [],
       startDate: moment().startOf('day'),
@@ -236,7 +235,7 @@ export default {
       if (this.currentProduction.end_date) {
         this.endDate = parseDate(this.currentProduction.end_date)
       }
-      this.overallManDays = this.currentProduction.man_days
+      // this.overallManDays = this.currentProduction.man_days
       this.selectedStartDate = this.startDate.toDate()
       this.selectedEndDate = this.endDate.toDate()
       this.loadData()
@@ -397,14 +396,14 @@ export default {
       })
     },
 
-    overallManDays() {
-      if (this.overallManDays !== this.currentProduction.man_days) {
-        this.editProduction({
-          ...this.currentProduction,
-          man_days: this.overallManDays
-        })
-      }
-    },
+    // overallManDays() {
+    //   if (this.overallManDays !== this.currentProduction.man_days) {
+    //     this.editProduction({
+    //       ...this.currentProduction,
+    //       man_days: this.overallManDays
+    //     })
+    //   }
+    // },
 
     currentProduction() {
       this.reset()
