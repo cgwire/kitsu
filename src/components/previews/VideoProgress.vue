@@ -384,13 +384,16 @@ export default {
       this.updateProgressBar(0)
     },
 
-    previewId() {
-      if (this.movieDimensions.width && this.previewId) {
-        this.isTileLoading = true
-        const img = new Image()
-        img.src = this.tilePath
-        img.onload = () => {
-          this.isTileLoading = false
+    previewId: {
+      immediate: true,
+      handler() {
+        if (this.previewId) {
+          this.isTileLoading = true
+          const img = new Image()
+          img.src = this.tilePath
+          img.onload = () => {
+            this.isTileLoading = false
+          }
         }
       }
     }
