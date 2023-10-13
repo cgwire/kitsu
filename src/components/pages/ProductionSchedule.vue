@@ -382,18 +382,30 @@ export default {
   watch: {
     selectedStartDate() {
       this.startDate = parseDate(this.selectedStartDate)
-      this.editProduction({
-        ...this.currentProduction,
-        start_date: this.startDate.format('YYYY-MM-DD')
-      })
+      const start_date = this.startDate.format('YYYY-MM-DD')
+      if (
+        this.currentProduction.start_date &&
+        this.currentProduction.start_date !== start_date
+      ) {
+        this.editProduction({
+          ...this.currentProduction,
+          start_date
+        })
+      }
     },
 
     selectedEndDate() {
       this.endDate = parseDate(this.selectedEndDate)
-      this.editProduction({
-        ...this.currentProduction,
-        end_date: this.endDate.format('YYYY-MM-DD')
-      })
+      const end_date = this.endDate.format('YYYY-MM-DD')
+      if (
+        this.currentProduction.end_date &&
+        this.currentProduction.end_date !== end_date
+      ) {
+        this.editProduction({
+          ...this.currentProduction,
+          end_date
+        })
+      }
     },
 
     // overallManDays() {
