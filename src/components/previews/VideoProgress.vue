@@ -80,13 +80,12 @@
       </span>
       <span
         class="frame-number"
-        :style="getFrameNumberStyle(hoverFrame)"
+        :style="frameNumberStyle"
         v-show="isFrameNumberVisible && hoverFrame > 0 && !progressDragging"
       >
-        <span>
-          {{ hoverFrame }}
-        </span>
+        {{ hoverFrame }}
         <span
+          class="frame-tile"
           :style="getFrameBackgroundStyle(hoverFrame)"
           v-if="!isTileLoading"
         ></span>
@@ -205,12 +204,39 @@ export default {
       return this.width / this.nbFrames
     },
 
+    frameNumberStyle() {
+      const frameHeight = 100
+      const height = frameHeight + 30
+      const frameWidth = Math.ceil(frameHeight * this.videoRatio)
+      const width = frameWidth + 10
+      const left = Math.min(
+        Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
+        this.width - frameWidth - 10
+      )
+      return {
+        height: `${height}px`,
+        width: `${width}px`,
+        top: this.isFullScreen ? `-${height}px` : '30px',
+        left: `${left}px`
+      }
+    },
+
     progress() {
       return this.$refs.progress
     },
 
+    tilePath() {
+      return `/api/movies/tiles/preview-files/${this.previewId}.png`
+    },
+
     videoDuration() {
       return this.nbFrames * this.frameDuration
+    },
+
+    videoRatio() {
+      return this.movieDimensions.width
+        ? this.movieDimensions.width / this.movieDimensions.height
+        : 1
     },
 
     handleInWidth() {
@@ -330,48 +356,22 @@ export default {
     /**
      * Returns the background style for a given frame, calculating the
      * background position depending on the frame number. The tile background is
-     * 5 frames wide.
+     * 8 frames wide.
      * @param {number} frame
      */
     getFrameBackgroundStyle(frame) {
       if (!frame) return {}
       const frameX = frame % 8
       const frameY = Math.floor(frame / 8)
-      const ratio = this.movieDimensions.width / this.movieDimensions.height
       const frameHeight = 100
-      const frameWidth = Math.ceil(frameHeight * ratio)
-      const style = {
-        background: `url(/api/movies/tiles/preview-files/${this.previewId}.png)`,
-        'background-repeat': 'no-repeat',
-        'background-size': `${8 * frameWidth}px auto`,
+      const frameWidth = Math.ceil(frameHeight * this.videoRatio)
+      return {
+        background: `url(${this.tilePath})`,
         'background-position': `-${frameX * frameWidth}px -${
           frameY * frameHeight
         }px`,
-        height: `${frameHeight}px`,
-        width: `${frameWidth}px`,
-        display: 'inline-block'
-      }
-      return style
-    },
-
-    getFrameNumberStyle(frame) {
-      const frameHeight = 100
-      const height = frameHeight + 30
-      const ratio = this.movieDimensions.width
-        ? this.movieDimensions.width / this.movieDimensions.height
-        : 1
-      const frameWidth = Math.ceil(frameHeight * ratio)
-      const width = frameWidth + 10
-      const left = Math.min(
-        Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
-        this.width - frameWidth - 10
-      )
-
-      return {
-        height: height + 'px',
-        width: width + 'px',
-        top: this.isFullScreen ? `-${height}px` : '30px',
-        left: left + 'px'
+        // height: `${frameHeight}px`,
+        width: `${frameWidth}px`
       }
     }
   },
@@ -386,10 +386,9 @@ export default {
 
     previewId() {
       if (this.movieDimensions.width && this.previewId) {
-        const path = `/api/movies/tiles/preview-files/${this.previewId}.png`
-        const img = new Image()
         this.isTileLoading = true
-        img.src = path
+        const img = new Image()
+        img.src = this.tilePath
         img.onload = () => {
           this.isTileLoading = false
         }
@@ -463,8 +462,10 @@ progress {
   width: 110px;
   z-index: 800;
 
-  img {
-    width: 100px;
+  .frame-tile {
+    display: inline-block;
+    background-repeat: no-repeat;
+    height: 100px;
   }
 }
 
