@@ -453,7 +453,6 @@
     </div>
 
     <edit-milestone-modal
-      ref="edit-milestone-modal"
       :active="modals.edit"
       :is-loading="loading.edit"
       :is-error="errors.edit"
@@ -1566,12 +1565,13 @@ export default {
       this.saveMilestone(milestone)
         .then(() => {
           this.modals.edit = false
-          this.loading.edit = false
         })
         .catch(err => {
           console.error(err)
-          this.loading.edit = false
           this.errors.edit = true
+        })
+        .finally(() => {
+          this.loading.edit = false
         })
     },
 
@@ -1580,12 +1580,13 @@ export default {
       this.deleteMilestone(milestone)
         .then(() => {
           this.modals.edit = false
-          this.loading.edit = false
         })
         .catch(err => {
           console.error(err)
-          this.loading.edit = false
           this.errors.edit = true
+        })
+        .finally(() => {
+          this.loading.edit = false
         })
     },
 
@@ -1612,8 +1613,6 @@ export default {
       )
     }
   },
-
-  socket: {},
 
   watch: {
     startDate() {

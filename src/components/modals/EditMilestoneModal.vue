@@ -20,17 +20,17 @@
         <text-field
           ref="nameField"
           :label="$t('schedule.milestone.name')"
-          v-model="form.name"
+          :maxlength="40"
+          v-model.trim="form.name"
           @enter="confirm"
           v-focus
         />
         <button-simple
           class="button is-link error"
-          text="Delete milestone"
+          :text="$t('schedule.milestone.delete_milestone')"
           @click="$emit('remove-milestone', milestoneToEdit)"
           v-if="isEdit"
         />
-
         <modal-footer
           :error-text="$t('schedule.milestone.error')"
           :is-error="isError"
@@ -48,7 +48,7 @@
 /*
  * Modal used to edit and create milestones.
  */
-import { mapGetters, mapActions } from 'vuex'
+import { mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
@@ -97,8 +97,6 @@ export default {
   },
 
   computed: {
-    ...mapGetters([]),
-
     isEdit() {
       return this.milestoneToEdit.id !== undefined
     },
@@ -118,7 +116,7 @@ export default {
     reset() {
       this.form = {
         id: this.milestoneToEdit.id || undefined,
-        name: `${this.milestoneToEdit.name || ''}`,
+        name: this.milestoneToEdit.name || '',
         date: this.milestoneToEdit.date
       }
     }
