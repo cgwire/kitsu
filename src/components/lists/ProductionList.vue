@@ -47,7 +47,9 @@
               {{ $t('productions.type.' + (entry.production_type || 'short')) }}
             </td>
             <td class="style">
-              {{ $t('productions.style.' + (entry.production_style || '3d')) }}
+              {{
+                $t('productions.style.' + (entry.production_style || '2d3d'))
+              }}
             </td>
             <td class="fps">
               {{ entry.fps }}
@@ -90,7 +92,9 @@
               {{ $t('productions.type.' + (entry.production_type || 'short')) }}
             </td>
             <td class="style">
-              {{ $t('productions.style.' + (entry.production_style || '3d')) }}
+              {{
+                $t('productions.style.' + (entry.production_style || '2d3d'))
+              }}
             </td>
             <td class="fps">
               {{ entry.fps }}
