@@ -1101,6 +1101,7 @@ export default {
     zoom_level: 'Zoom level',
     milestone: {
       add_milestone: 'Add milestone for',
+      delete_milestone: 'Delete milestone',
       edit_milestone: 'Edit milestone for',
       name: 'Name',
       error: 'An error occurred while adding or editing the milestone. Please try again.'
