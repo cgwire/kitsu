@@ -72,9 +72,10 @@
               :current-preview-index="currentPreviewIndex"
               :muted="isMuted"
               @max-duration-update="onMaxDurationUpdate"
+              @frame-update="onFrameUpdate"
               @metadata-loaded="onMetadataLoaded"
               @repeat="onVideoRepeated"
-              @frame-update="onFrameUpdate"
+              @video-loaded="onVideoLoaded"
               v-show="isCurrentPreviewMovie && !isLoading"
             />
 
@@ -173,9 +174,11 @@
           class="video-progress pull-bottom"
           :annotations="annotations"
           :frame-duration="frameDuration"
+          :movie-dimensions="movieDimensions"
           :nb-frames="nbFrames"
           :handle-in="-1"
           :handle-out="-1"
+          :preview-id="currentPreview ? currentPreview.id : ''"
           @start-scrub="onScrubStart"
           @end-scrub="onScrubEnd"
           @progress-changed="onProgressChanged"
@@ -655,6 +658,7 @@ export default {
       currentSection: 'infos',
       isLoading: true,
       isError: false,
+      movieDimensions: { width: 0, height: 0 },
       previewRoomRef: 'edits-preview-room',
       previewFileMap: new Map(),
       tempMode: false,
@@ -884,6 +888,13 @@ export default {
         deletions,
         updates
       })
+    },
+
+    onVideoLoaded() {
+      this.movieDimensions = {
+        width: this.currentPreview.width,
+        height: this.currentPreview.height
+      }
     },
 
     scrollToEntity() {
