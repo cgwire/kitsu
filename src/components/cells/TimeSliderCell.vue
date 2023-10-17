@@ -30,21 +30,15 @@ export default {
     return {
       value: this.duration,
       options: {
-        show: true,
         width: 400,
         min: 0,
         interval: 0.25,
         lazy: true,
-        marks: true,
-        hideLabel: true,
         piecewise: true,
-        tooltip: 'focus',
-        tooltipPlacement: 'bottom',
+        useKeyboard: true,
+        tooltip: 'hover',
         processStyle: {
           'background-color': '#8F91EB'
-        },
-        railStyle: {
-          background: '#CCC'
         }
       }
     }
@@ -98,11 +92,10 @@ export default {
 .value {
   font-size: 1.5em;
   font-weight: bold;
-  width: 30px;
+  width: 40px;
 }
 
 .slider {
   cursor: pointer;
-  z-index: 0;
 }
 </style>
