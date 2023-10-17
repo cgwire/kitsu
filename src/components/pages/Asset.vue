@@ -202,7 +202,7 @@
               currentAsset.castingAssetsByType[0].length > 0
             "
           >
-            <page-subtitle text="Linked" />
+            <page-subtitle :text="$t('assets.linked')" />
             <div
               v-if="
                 currentAsset.castingAssetsByType &&

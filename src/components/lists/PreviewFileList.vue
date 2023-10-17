@@ -63,7 +63,7 @@
             <td class="end-cell has-text-right">
               <button-simple
                 class="mark-broken-button"
-                text="Mark as broken"
+                :text="$t('logs.preview_files.mark_broken')"
                 @click="$emit('mark-broken-clicked', previewFile.id)"
                 v-if="previewFile.status === 'processing'"
               />

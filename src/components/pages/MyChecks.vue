@@ -67,7 +67,7 @@
           <button-simple
             class="flexrow-item"
             @click="isPlaylist = true"
-            text="Build playlist from list"
+            :text="$t('tasks.build_playlist')"
           />
         </div>
 
