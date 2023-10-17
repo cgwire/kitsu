@@ -73,7 +73,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { MailIcon } from 'vue-feather-icons'
 
 export default {
-  name: 'reset-password',
+  name: 'first-connection',
 
   components: {
     MailIcon

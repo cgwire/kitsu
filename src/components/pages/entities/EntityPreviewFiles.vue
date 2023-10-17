@@ -50,7 +50,7 @@
               />
             </td>
 
-            <task-type-name
+            <task-type-cell
               class="type"
               :task-type="getTaskType(previewFile)"
               :production-id="currentProduction.id"
@@ -103,7 +103,7 @@ import { renderFileSize } from '@/lib/render'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PeopleNameCell from '@/components/cells/PeopleNameCell'
 import Spinner from '@/components/widgets/Spinner'
-import TaskTypeName from '@/components/cells/TaskTypeName'
+import TaskTypeCell from '@/components/cells/TaskTypeCell'
 
 export default {
   name: 'entity-preview-files',
@@ -112,7 +112,7 @@ export default {
     EntityThumbnail,
     PeopleNameCell,
     Spinner,
-    TaskTypeName
+    TaskTypeCell
   },
 
   data() {

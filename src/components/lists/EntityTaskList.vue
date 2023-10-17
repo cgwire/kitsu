@@ -108,7 +108,7 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { formatListMixin } from '@/components/mixins/format'
 
-import TaskTypeCell from '@/components/cells/TaskTypeName'
+import TaskTypeCell from '@/components/cells/TaskTypeCell'
 import TableInfo from '@/components/widgets/TableInfo'
 import ValidationTag from '@/components/widgets/ValidationTag'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'

@@ -83,7 +83,7 @@ import ComboboxTag from '@/components/widgets/ComboboxTag'
 import TextField from '@/components/widgets/TextField'
 
 export default {
-  name: 'MetadataField',
+  name: 'metadata-field',
   mixins: [entityListMixin, descriptorMixin],
 
   components: {

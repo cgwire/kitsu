@@ -51,7 +51,7 @@ import TeamSchedule from '@/components/pages/TeamSchedule'
 import Timesheets from '@/components/pages/Timesheets'
 import TaskStatus from '@/components/pages/TaskStatus'
 import TaskTypes from '@/components/pages/TaskTypes'
-import Departements from '@/components/pages/departments/Departments'
+import Departments from '@/components/pages/departments/Departments'
 import WrongBrowser from '@/components/pages/WrongBrowser'
 import Edit from '@/components/pages/Edit'
 
@@ -183,7 +183,7 @@ export const routes = [
 
       {
         path: 'departments',
-        component: Departements,
+        component: Departments,
         name: 'departments'
       },
 

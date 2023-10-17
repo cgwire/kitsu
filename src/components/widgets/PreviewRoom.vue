@@ -35,7 +35,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 
 export default {
-  name: 'review-room',
+  name: 'preview-room',
   mixins: [],
 
   components: {

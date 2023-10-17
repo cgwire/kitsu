@@ -338,7 +338,7 @@ import ValidationTag from '@/components/widgets/ValidationTag'
 import PreviewPlayer from '@/components/previews/PreviewPlayer'
 
 export default {
-  name: 'news-page',
+  name: 'production-news-feed',
   mixins: [timeMixin],
   components: {
     Combobox,

@@ -64,7 +64,7 @@ const Timesheets = () => import('@/components/pages/Timesheets.vue')
 
 const TaskStatus = () => import('@/components/pages/TaskStatus.vue')
 const TaskTypes = () => import('@/components/pages/TaskTypes.vue')
-const Departements = () =>
+const Departments = () =>
   import('@/components/pages/departments/Departments.vue')
 const WrongBrowser = () => import('@/components/pages/WrongBrowser.vue')
 const Edit = () => import('@/components/pages/Edit.vue')
@@ -197,7 +197,7 @@ export const routes = [
 
       {
         path: 'departments',
-        component: Departements,
+        component: Departments,
         name: 'departments'
       },
 

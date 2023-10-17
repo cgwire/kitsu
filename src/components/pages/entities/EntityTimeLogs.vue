@@ -33,7 +33,7 @@
               class="person"
               :person="personMap.get(log.person_id)"
             />
-            <task-type-name
+            <task-type-cell
               class="type"
               :task-type="getTaskType(log)"
               :production-id="currentProduction.id"
@@ -58,7 +58,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { formatListMixin } from '@/components/mixins/format'
 import PeopleNameCell from '@/components/cells/PeopleNameCell'
 import Spinner from '@/components/widgets/Spinner'
-import TaskTypeName from '@/components/cells/TaskTypeName'
+import TaskTypeCell from '@/components/cells/TaskTypeCell'
 
 export default {
   name: 'entity-time-logs',
@@ -66,7 +66,7 @@ export default {
   components: {
     PeopleNameCell,
     Spinner,
-    TaskTypeName
+    TaskTypeCell
   },
 
   props: {

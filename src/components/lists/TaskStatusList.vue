@@ -36,7 +36,7 @@
             <td class="name">
               {{ entry.name }}
             </td>
-            <task-status-name class="short-name" :entry="entry" />
+            <task-status-cell class="short-name" :entry="entry" />
             <boolean-cell class="is-default" :value="entry.is_default" />
             <boolean-cell class="is-done" :value="entry.is_done" />
             <boolean-cell class="is-retake" :value="entry.is_retake" />
@@ -77,7 +77,7 @@ import { formatListMixin } from '@/components/mixins/format'
 import BooleanCell from '@/components/cells/BooleanCell'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
-import TaskStatusName from '@/components/cells/TaskStatusName'
+import TaskStatusCell from '@/components/cells/TaskStatusCell'
 
 export default {
   name: 'task-status-list',
@@ -105,7 +105,7 @@ export default {
     BooleanCell,
     RowActionsCell,
     TableInfo,
-    TaskStatusName
+    TaskStatusCell
   },
   computed: {
     ...mapGetters([])

@@ -111,7 +111,7 @@ import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo'
 import PageTitle from '@/components/widgets/PageTitle'
 
 export default {
-  name: 'people',
+  name: 'timesheets',
   components: {
     ButtonSimple,
     ButtonHrefLink,

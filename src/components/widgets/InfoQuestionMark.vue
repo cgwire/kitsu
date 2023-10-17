@@ -10,7 +10,7 @@ import { HelpCircleIcon } from 'vue-feather-icons'
 import { renderMarkdown } from '@/lib/render'
 
 export default {
-  name: 'spinner',
+  name: 'info-question-mark',
   components: {
     HelpCircleIcon
   },

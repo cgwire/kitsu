@@ -83,7 +83,7 @@ import { LockIcon } from 'vue-feather-icons'
 import auth from '@/lib/auth'
 
 export default {
-  name: 'reset-password',
+  name: 'reset-change-password',
 
   components: {
     LockIcon

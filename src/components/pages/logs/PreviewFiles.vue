@@ -27,7 +27,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple'
 import PreviewFileList from '@/components/lists/PreviewFileList'
 
 export default {
-  name: 'PreviewFiles',
+  name: 'preview-files',
   mixins: [timeMixin],
 
   components: {

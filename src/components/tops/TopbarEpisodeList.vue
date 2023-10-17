@@ -63,7 +63,7 @@ import { getProductionPath } from '@/lib/path'
 import ComboboxMask from '@/components/widgets/ComboboxMask'
 
 export default {
-  name: 'topbar-episode-menu',
+  name: 'topbar-episode-list',
 
   components: {
     ChevronDownIcon,

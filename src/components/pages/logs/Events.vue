@@ -89,7 +89,7 @@ import PeopleName from '@/components/widgets/PeopleName'
 import Spinner from '@/components/widgets/Spinner'
 
 export default {
-  name: 'Events',
+  name: 'events',
   mixins: [timeMixin],
 
   components: {

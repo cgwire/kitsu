@@ -50,7 +50,7 @@
             <td class="entity-name">
               {{ previewFile.full_entity_name }}
             </td>
-            <task-type-name
+            <task-type-cell
               class="task-type"
               :task-type="taskTypeMap.get(previewFile.task_type_id)"
             />
@@ -84,17 +84,17 @@ import { getTaskPath } from '@/lib/path'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import TableInfo from '@/components/widgets/TableInfo'
 import ProductionNameCell from '@/components/cells/ProductionNameCell'
-import TaskTypeName from '@/components/cells/TaskTypeName'
+import TaskTypeCell from '@/components/cells/TaskTypeCell'
 
 export default {
-  name: 'entity-task-list',
+  name: 'preview-file-list',
   mixins: [formatListMixin],
 
   components: {
     ButtonSimple,
     ProductionNameCell,
     TableInfo,
-    TaskTypeName
+    TaskTypeCell
   },
 
   props: {

@@ -35,7 +35,7 @@ import Datepicker from 'vuejs-datepicker'
 import { domMixin } from '@/components/mixins/dom'
 
 export default {
-  name: 'text-field',
+  name: 'date-field',
 
   components: {
     Datepicker

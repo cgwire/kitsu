@@ -85,7 +85,7 @@ import EpisodeStatsList from '@/components/lists/EpisodeStatsList.vue'
 import SearchField from '@/components/widgets/SearchField'
 
 export default {
-  name: 'episodes',
+  name: 'episode-stats',
 
   components: {
     ButtonSimple,

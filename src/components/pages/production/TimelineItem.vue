@@ -28,7 +28,7 @@
 import { CheckIcon } from 'vue-feather-icons'
 
 export default {
-  name: 'TimelineItem',
+  name: 'timeline-item',
   components: {
     CheckIcon
   },

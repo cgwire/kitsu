@@ -18,7 +18,7 @@
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
-  name: 'task-status-name',
+  name: 'task-status-cell',
   components: {},
   props: {
     entry: {

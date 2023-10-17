@@ -41,7 +41,7 @@ import QuotaShotList from '@/components/lists/QuotaShotList'
 import { monthToString } from '@/lib/time'
 
 export default {
-  name: 'shot-quota-info',
+  name: 'people-quota-info',
 
   components: {
     XIcon,

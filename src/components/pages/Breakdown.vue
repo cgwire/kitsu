@@ -340,7 +340,7 @@ import Spinner from '@/components/widgets/Spinner'
 import DepartmentName from '@/components/widgets/DepartmentName'
 
 export default {
-  name: 'breakdown-page',
+  name: 'breakdown',
   mixins: [entityListMixin],
   components: {
     AvailableAssetBlock,
