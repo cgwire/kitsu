@@ -175,7 +175,7 @@ export default {
       ],
       form: {
         entityType: 'asset',
-        mode: 'status',
+        outFieldType: 'status',
         inEntityTaskTypes: [],
         outEntityTaskTypes: [],
         inTaskTypeId: '',
@@ -197,7 +197,7 @@ export default {
     setTaskTypes(fieldType) {
       if (fieldType === 'asset') {
         this.form.inEntityTaskTypes = this.assetTaskTypes
-        if (this.mode === 'status') {
+        if (this.form.outFieldType === 'status') {
           this.form.outEntityTaskTypes = this.assetTaskTypes
         } else {
           this.form.outEntityTaskTypes = this.shotTaskTypes
