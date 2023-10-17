@@ -105,8 +105,8 @@ export default {
     },
 
     isPreview() {
-      const previewFileId = this.previewFileId || this.entity.preview_file_id
-      return previewFileId && previewFileId.length > 0
+      const previewFileId = this.previewFileId || this.entity?.preview_file_id
+      return previewFileId?.length > 0
     },
 
     imgStyle() {
