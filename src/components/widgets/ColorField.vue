@@ -23,7 +23,7 @@
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
-  name: 'text-field',
+  name: 'color-field',
   props: {
     label: {
       default: '',

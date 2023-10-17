@@ -29,7 +29,7 @@
 
 <script>
 export default {
-  name: 'colorpicker',
+  name: 'color-picker',
 
   props: {
     color: {

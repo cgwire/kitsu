@@ -42,7 +42,7 @@ import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
 
 export default {
-  name: 'departments-list',
+  name: 'department-list',
   props: ['entries', 'isLoading', 'isError'],
   data() {
     return {}

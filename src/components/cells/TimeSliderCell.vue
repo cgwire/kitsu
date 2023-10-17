@@ -6,24 +6,21 @@
       </span>
       <vue-slider
         class="flexrow-item slider"
-        ref="slider"
         v-model="value"
         v-bind="options"
+        :max="maxHoursByDay"
       />
       <button class="button flexrow-item" @click="setValue(1)">1</button>
       <button class="button flexrow-item" @click="setValue(4)">4</button>
-      <button
-        class="button flexrow-item"
-        @click="setValue(organisation.hours_by_day || 8)"
-      >
-        {{ organisation.hours_by_day || 8 }}
+      <button class="button flexrow-item" @click="setValue(hoursByDay)">
+        {{ hoursByDay }}
       </button>
     </div>
   </td>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import VueSlider from 'vue-slider-component'
 
 export default {
@@ -33,22 +30,15 @@ export default {
     return {
       value: this.duration,
       options: {
-        show: true,
         width: 400,
         min: 0,
-        max: 10,
         interval: 0.25,
         lazy: true,
-        marks: true,
-        hideLabel: true,
         piecewise: true,
-        tooltip: 'focus',
-        tooltipPlacement: 'bottom',
+        useKeyboard: true,
+        tooltip: 'hover',
         processStyle: {
           'background-color': '#8F91EB'
-        },
-        railStyle: {
-          background: '#CCC'
         }
       }
     }
@@ -70,12 +60,18 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['organisation'])
+    ...mapGetters(['organisation']),
+
+    hoursByDay() {
+      return this.organisation.hours_by_day || 8
+    },
+
+    maxHoursByDay() {
+      return Math.min(this.hoursByDay + 4, 24)
+    }
   },
 
   methods: {
-    ...mapActions([]),
-
     setValue(value) {
       this.value = value
     }
@@ -96,11 +92,10 @@ export default {
 .value {
   font-size: 1.5em;
   font-weight: bold;
-  width: 30px;
+  width: 40px;
 }
 
 .slider {
   cursor: pointer;
-  z-index: 0;
 }
 </style>

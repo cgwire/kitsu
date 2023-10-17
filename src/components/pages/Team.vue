@@ -33,7 +33,7 @@ import ProductionTeamList from '@/components/lists/ProductionTeamList'
 import PeopleField from '@/components/widgets/PeopleField'
 
 export default {
-  name: 'people',
+  name: 'team',
   components: {
     PeopleField,
     ProductionTeamList

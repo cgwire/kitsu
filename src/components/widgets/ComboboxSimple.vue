@@ -24,7 +24,7 @@
 import { mapGetters } from 'vuex'
 
 export default {
-  name: 'combobox-styled',
+  name: 'combobox-simple',
 
   components: {},
 

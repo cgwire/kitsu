@@ -53,7 +53,7 @@
 
 <script>
 export default {
-  name: 'combobox',
+  name: 'combobox-number',
 
   props: {
     label: {

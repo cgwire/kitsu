@@ -34,7 +34,7 @@
 import { CheckIcon, XIcon } from 'vue-feather-icons'
 
 export default {
-  name: 'combobox-field',
+  name: 'boolean-field',
 
   components: {
     CheckIcon,

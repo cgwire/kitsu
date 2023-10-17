@@ -43,7 +43,7 @@ import EditDepartmentsModal from '@/components/modals/EditDepartmentsModal'
 import DeleteModal from '@/components/modals/DeleteModal'
 
 export default {
-  name: 'production-departments',
+  name: 'departments',
   components: {
     DeleteModal,
     DepartmentList,

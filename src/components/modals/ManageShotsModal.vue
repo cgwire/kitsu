@@ -162,7 +162,7 @@ import stringHelpers from '@/lib/string'
 import { sortByName } from '@/lib/sorting'
 
 export default {
-  name: 'manage-shot-modal',
+  name: 'manage-shots-modal',
   mixins: [modalMixin],
 
   components: {

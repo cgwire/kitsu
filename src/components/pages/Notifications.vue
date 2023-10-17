@@ -251,7 +251,7 @@ import TaskTypeName from '@/components/widgets/TaskTypeName'
 import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
-  name: 'notification-page',
+  name: 'notifications',
   components: {
     AtSignIcon,
     ComboboxTaskType,

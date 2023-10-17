@@ -148,7 +148,7 @@ export default {
         ratio: this.productionToEdit.ratio,
         resolution: this.productionToEdit.resolution,
         production_type: this.productionToEdit.production_type || 'short',
-        production_style: this.productionToEdit.production_style || '3d'
+        production_style: this.productionToEdit.production_style || '2d3d'
       }
     } else {
       data.form = {
@@ -160,7 +160,7 @@ export default {
         ratio: '',
         resolution: '',
         production_type: 'short',
-        production_style: '3d'
+        production_style: '2d3d'
       }
     }
 

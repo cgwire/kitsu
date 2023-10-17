@@ -59,7 +59,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
 export default {
-  name: 'shot-history-modal',
+  name: 'shortcut-modal',
   mixins: [modalMixin],
 
   components: {},

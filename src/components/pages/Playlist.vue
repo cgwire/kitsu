@@ -460,7 +460,7 @@ import Spinner from '@/components/widgets/Spinner'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
-  name: 'productions',
+  name: 'playlist',
 
   components: {
     BuildFilterModal,

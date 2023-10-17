@@ -257,7 +257,7 @@ import BooleanRep from '@/components/widgets/BooleanRep'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
-import TaskTypeCell from '@/components/cells/TaskTypeName'
+import TaskTypeCell from '@/components/cells/TaskTypeCell'
 
 export default {
   name: 'task-type-list',

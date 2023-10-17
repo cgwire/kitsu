@@ -70,7 +70,7 @@ import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import PageTitle from '@/components/widgets/PageTitle'
 
 export default {
-  name: 'create-task-modal',
+  name: 'create-tasks-modal',
   mixins: [modalMixin],
 
   components: {

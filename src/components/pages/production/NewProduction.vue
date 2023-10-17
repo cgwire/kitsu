@@ -453,7 +453,7 @@ import TimelineItem from '@/components/pages/production/TimelineItem'
 import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
-  name: 'NewProduction',
+  name: 'new-production',
   components: {
     draggable,
     Combobox,

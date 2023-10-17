@@ -83,7 +83,7 @@ import Tabs from '@/components/widgets/Tabs'
 import Tab from '@/components/widgets/Tab'
 
 export default {
-  name: 'import-people-modal',
+  name: 'import-modal',
   mixins: [modalMixin],
   components: {
     FileUpload,

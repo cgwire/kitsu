@@ -207,7 +207,7 @@ import StatsCell from '@/components/cells/StatsCell'
 import TableInfo from '@/components/widgets/TableInfo'
 
 export default {
-  name: 'episode-list',
+  name: 'episode-stats-list',
   mixins: [entityListMixin],
 
   components: {

@@ -28,7 +28,7 @@
 
 <script>
 export default {
-  name: 'pencilpicker',
+  name: 'pencil-picker',
 
   props: {
     pencil: {

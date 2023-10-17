@@ -67,7 +67,7 @@
           <button-simple
             class="flexrow-item"
             @click="isPlaylist = true"
-            text="Build playlist from list"
+            :text="$t('tasks.build_playlist')"
           />
         </div>
 
@@ -117,7 +117,7 @@ import TodosList from '@/components/lists/TodosList'
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal'
 
 export default {
-  name: 'todos',
+  name: 'my-checks',
 
   components: {
     ButtonSimple,

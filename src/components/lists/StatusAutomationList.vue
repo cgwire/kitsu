@@ -45,11 +45,11 @@
                 </span>
               </div>
             </td>
-            <task-type-name
+            <task-type-cell
               class="in-task-type"
               :task-type="getTaskType(statusAutomation.in_task_type_id)"
             />
-            <task-status-name
+            <task-status-cell
               class="in-task-status"
               :entry="getTaskStatus(statusAutomation.in_task_status_id)"
             />
@@ -60,11 +60,11 @@
                   : $t('status_automations.change_status')
               }}
             </td>
-            <task-type-name
+            <task-type-cell
               class="out-task-type"
               :task-type="getTaskType(statusAutomation.out_task_type_id)"
             />
-            <task-status-name
+            <task-status-cell
               class="out-task-status"
               v-if="statusAutomation.out_field_type === 'status'"
               :entry="getTaskStatus(statusAutomation.out_task_status_id)"
@@ -105,8 +105,8 @@ import { formatListMixin } from '@/components/mixins/format'
 import { AlertTriangleIcon } from 'vue-feather-icons'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
-import TaskTypeName from '@/components/cells/TaskTypeName'
-import TaskStatusName from '@/components/cells/TaskStatusName'
+import TaskStatusCell from '@/components/cells/TaskStatusCell'
+import TaskTypeCell from '@/components/cells/TaskTypeCell'
 
 export default {
   name: 'status-automation-list',
@@ -116,8 +116,8 @@ export default {
     AlertTriangleIcon,
     RowActionsCell,
     TableInfo,
-    TaskTypeName,
-    TaskStatusName
+    TaskStatusCell,
+    TaskTypeCell
   },
 
   props: {

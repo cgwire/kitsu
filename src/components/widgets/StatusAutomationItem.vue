@@ -10,7 +10,7 @@
       />
     </span>
     <span class="in-task-status flexrow-item">
-      <task-status-name
+      <task-status-cell
         :entry="getTaskStatus(statusAutomation.in_task_status_id)"
         v-if="statusAutomation.in_field_type !== 'ready_for'"
       />
@@ -35,7 +35,7 @@
       to
     </span>
     <span class="out-task-status flexrow-item">
-      <task-status-name
+      <task-status-cell
         :entry="getTaskStatus(statusAutomation.out_task_status_id)"
         v-if="statusAutomation.out_field_type === 'status'"
       />
@@ -46,14 +46,14 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { pluralizeEntityType } from '@/lib/path'
+import TaskStatusCell from '@/components/cells/TaskStatusCell'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
-import TaskStatusName from '@/components/cells/TaskStatusName'
 
 export default {
   name: 'status-automation-item',
   components: {
-    TaskTypeName,
-    TaskStatusName
+    TaskStatusCell,
+    TaskTypeName
   },
 
   props: {

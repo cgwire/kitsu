@@ -31,7 +31,7 @@ import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
 // import DateField from '@/components/widgets/DateField'
-import TaskTypeCell from '@/components/cells/TaskTypeName'
+import TaskTypeCell from '@/components/cells/TaskTypeCell'
 
 import { parseDate } from '@/lib/time'
 

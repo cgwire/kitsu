@@ -197,7 +197,7 @@ import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PageSubtitle from '@/components/widgets/PageSubtitle'
 import ProductionNameCell from '@/components/cells/ProductionNameCell'
 import TableInfo from '@/components/widgets/TableInfo'
-import TaskTypeCell from '@/components/cells/TaskTypeName'
+import TaskTypeCell from '@/components/cells/TaskTypeCell'
 import TimeSliderCell from '@/components/cells/TimeSliderCell'
 
 export default {
