@@ -789,10 +789,6 @@ export default {
       return this.getEntityLineNumber(this.displayedAssets, i, k)
     },
 
-    newAssetPath() {
-      return this.getPath('new-asset')
-    },
-
     assetPath(assetId) {
       return this.getPath('asset', assetId)
     },
