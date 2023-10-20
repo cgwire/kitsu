@@ -98,11 +98,6 @@
         <img src="../../assets/illustrations/empty_asset.png" />
       </p>
       <p class="info">{{ $t('assets.empty_list') }}</p>
-      <button-link
-        class="level-item big-button"
-        :text="$t('assets.new_asset')"
-        :path="newAssetPath"
-      />
     </div>
     <div
       class="has-text-centered"
@@ -125,10 +120,11 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-import { entityListMixin } from '@/components/mixins/entity_list'
+import { mapGetters } from 'vuex'
+
 import { getChartColors, getChartData } from '@/lib/stats'
-import ButtonLink from '@/components/widgets/ButtonLink'
+
+import { entityListMixin } from '@/components/mixins/entity_list'
 import StatsCell from '@/components/cells/StatsCell'
 import TableInfo from '@/components/widgets/TableInfo'
 
@@ -167,15 +163,7 @@ export default {
     }
   },
 
-  data() {
-    return {
-      busy: false,
-      lastSelection: null
-    }
-  },
-
   components: {
-    ButtonLink,
     StatsCell,
     TableInfo
   },
@@ -199,28 +187,10 @@ export default {
         !this.isError &&
         (!this.assetTypeSearchText || this.assetTypeSearchText.length === 0)
       )
-    },
-
-    newAssetPath() {
-      const route = {
-        name: 'new-asset',
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = 'episode-new-asset'
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      return route
     }
   },
 
   methods: {
-    ...mapActions([]),
-
     chartColors(entryId, columnId) {
       return getChartColors(this.assetTypeStats, entryId, columnId)
     },

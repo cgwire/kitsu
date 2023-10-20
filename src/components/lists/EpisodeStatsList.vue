@@ -254,7 +254,6 @@ export default {
 
   data() {
     return {
-      busy: false,
       expanded: {},
       lastSelection: null,
       takeLabelColors: ['#FB8C00', '#EF6C00', '#d35400', '#e74c3c', '#c0392b']

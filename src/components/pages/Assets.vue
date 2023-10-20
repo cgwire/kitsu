@@ -454,10 +454,6 @@ export default {
       'user'
     ]),
 
-    newAssetPath() {
-      return this.getPath('new-asset')
-    },
-
     addThumbnailsModal() {
       return this.$refs['add-thumbnails-modal']
     },
@@ -842,20 +838,6 @@ export default {
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', scrollPosition)
     },
 
-    getPath(section) {
-      const route = {
-        name: section,
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = `episode-${section}`
-        route.params.episode_id = this.currentEpisode.id
-      }
-      return route
-    },
-
     onDeleteAllTasksClicked(taskTypeId) {
       const taskType = this.taskTypeMap.get(taskTypeId)
       this.deleteAllTasksLockText = taskType.name
@@ -1022,9 +1004,7 @@ export default {
       this.searchField.setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       if (this.isTVShow && this.currentEpisode) this.reset()
-    },
-
-    displayedAssets() {}
+    }
   },
 
   metaInfo() {
@@ -1062,6 +1042,6 @@ export default {
 }
 
 .combobox-department {
-  margin-bottom: 0px;
+  margin-bottom: 0;
 }
 </style>

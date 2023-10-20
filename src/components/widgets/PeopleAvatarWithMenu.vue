@@ -24,11 +24,15 @@
         class="menu-button flexrow"
       >
         <user-icon class="flexrow-item" size="1.2x" />
-        <span class="flexrow-item">Open {{ person.name }} page</span>
+        <span class="flexrow-item">
+          {{ $t('main.avatar.open_page', { personName: person.name }) }}
+        </span>
       </router-link>
       <div class="menu-button flexrow" @click.stop="$emit('unassign', person)">
         <user-minus-icon class="flexrow-item" size="1.2x" />
-        <span class="flexrow-item">Unassign {{ person.name }}</span>
+        <span class="flexrow-item">
+          {{ $t('main.avatar.unassign', { personName: person.name }) }}
+        </span>
       </div>
     </div>
   </div>

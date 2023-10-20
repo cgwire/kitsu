@@ -182,13 +182,6 @@ export default {
     }
   },
 
-  data() {
-    return {
-      busy: false,
-      lastSelection: null
-    }
-  },
-
   computed: {
     ...mapGetters([
       'currentProduction',
