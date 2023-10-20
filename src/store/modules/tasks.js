@@ -518,6 +518,7 @@ const actions = {
     { taskId, comment, revision, taskStatusId, form, attachment, checklist }
   ) {
     const data = { taskId, taskStatusId, comment, attachment, checklist }
+    const remainingPreviews = [...state.previewForms].splice(1)
     commit(ADD_PREVIEW_START)
     let newComment
     locks[taskId] = true
@@ -583,7 +584,7 @@ const actions = {
                   return Promise.resolve(preview)
                 })
             }
-            const remainingPreviews = [...state.previewForms].splice(1)
+            // run promise in sequence
             return remainingPreviews.reduce((accumulatorPromise, form) => {
               return accumulatorPromise.then(() => {
                 return addPreview(form)
