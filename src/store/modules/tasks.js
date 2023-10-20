@@ -514,10 +514,11 @@ const actions = {
   },
 
   commentTaskWithPreview(
-    { commit, getters, state, dispatch },
+    { commit, state },
     { taskId, comment, revision, taskStatusId, form, attachment, checklist }
   ) {
     const data = { taskId, taskStatusId, comment, attachment, checklist }
+    const remainingPreviews = [...state.previewForms].splice(1)
     commit(ADD_PREVIEW_START)
     let newComment
     locks[taskId] = true
@@ -580,23 +581,21 @@ const actions = {
                     commentId: newComment.id,
                     comment: newComment
                   })
-                  return Promise.resolve(preview)
+                  return preview
                 })
             }
-            const remainingPreviews = [...state.previewForms].splice(1)
+            // run promise in sequence
             return remainingPreviews.reduce((accumulatorPromise, form) => {
-              return accumulatorPromise.then(() => {
-                return addPreview(form)
-              })
+              return accumulatorPromise.then(() => addPreview(form))
             }, Promise.resolve())
           } else {
-            return Promise.resolve(preview)
+            return preview
           }
         })
         .then(preview => {
           commit(NEW_TASK_COMMENT_END, { comment: newComment, taskId })
           commit(CLEAR_UPLOAD_PROGRESS)
-          return Promise.resolve({ newComment, preview })
+          return { newComment, preview }
         })
     )
   },
