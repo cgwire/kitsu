@@ -395,6 +395,10 @@ export default {
     all_shots: 'All shots',
     archived: 'Archived',
     attach_snapshots: 'Attach snapshots from your annotation',
+    avatar: {
+      open_page: 'Open {personName} page',
+      unassign: 'Unassign {personName}',
+    },
     before: 'Before',
     cancel: 'Cancel',
     clear_selection: 'Clear current selection',
