@@ -889,10 +889,12 @@ export default {
         })
     },
 
-    reset() {
+    reset({ keepPreviewFiles = false } = {}) {
       this.resetModals()
       this.resetPreview(false)
-      this.clearPreviewFiles()
+      if (!keepPreviewFiles) {
+        this.clearPreviewFiles(false)
+      }
       this.taskComments = this.getCurrentTaskComments()
       this.taskPreviews = this.getCurrentTaskPreviews()
       this.task = this.getCurrentTask()
@@ -1062,7 +1064,7 @@ export default {
           commentId,
           comment
         })
-        this.resetPreview()
+        this.reset({ keepPreviewFiles: true })
       }
     },
 

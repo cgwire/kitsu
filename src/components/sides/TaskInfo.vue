@@ -784,9 +784,11 @@ export default {
       })
     },
 
-    reset() {
+    reset({ keepPreviewFiles = false } = {}) {
       this.resetModals()
-      this.clearPreviewFiles()
+      if (!keepPreviewFiles) {
+        this.clearPreviewFiles()
+      }
       if (this.task) {
         this.taskComments = this.getTaskComments(this.task.id)
         this.taskPreviews = this.getTaskPreviews(this.task.id)
@@ -854,7 +856,6 @@ export default {
         .then(() => {
           this.loading.addExtraPreview = false
           this.$refs['add-extra-preview-modal'].reset()
-          this.clearPreviewFiles()
           this.reset()
           setTimeout(() => {
             this.$refs['preview-player'].displayLast()
@@ -893,7 +894,7 @@ export default {
             commentId,
             comment
           })
-          this.reset()
+          this.reset({ keepPreviewFiles: true })
         }
       }
     },
@@ -1253,7 +1254,7 @@ export default {
 
   watch: {
     task() {
-      this.previewForms = []
+      this.clearPreviewFiles()
       this.currentPreviewIndex = 0
       if (!this.silent) {
         this.loadTaskData()
