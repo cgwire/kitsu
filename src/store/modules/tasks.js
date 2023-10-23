@@ -73,7 +73,6 @@ import {
   CLEAR_UPLOAD_PROGRESS,
   ADD_ATTACHMENT_TO_COMMENT,
   REMOVE_ATTACHMENT_FROM_COMMENT,
-  REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD,
   UPDATE_REVISION_PREVIEW_POSITION,
   RESET_ALL
 } from '@/store/mutation-types'
@@ -585,10 +584,12 @@ const actions = {
                 })
             }
             const remainingPreviews = previewForms.slice(1)
-            // run promise in sequence
-            return remainingPreviews.reduce((accumulatorPromise, form) => {
-              return accumulatorPromise.then(() => addPreview(form))
-            }, Promise.resolve())
+            // run promises in sequence
+            return remainingPreviews.reduce(
+              (accumulatorPromise, form) =>
+                accumulatorPromise.then(() => addPreview(form)),
+              Promise.resolve()
+            )
           } else {
             return preview
           }
@@ -630,14 +631,15 @@ const actions = {
             commentId,
             comment
           })
-          return Promise.resolve(preview)
+          return preview
         })
     }
-    return state.previewForms.reduce((accumulatorPromise, form) => {
-      return accumulatorPromise.then(() => {
-        return addPreview(form)
-      })
-    }, Promise.resolve())
+    // run promises in sequence
+    return state.previewForms.reduce(
+      (accumulatorPromise, form) =>
+        accumulatorPromise.then(() => addPreview(form)),
+      Promise.resolve()
+    )
   },
 
   deleteTaskPreview({ commit, state }, { taskId, commentId, previewId }) {
@@ -1437,15 +1439,9 @@ const mutations = {
       p => p.revision === revision
     )
     preview.previews = arrayMove(preview.previews, previousIndex, newIndex)
-    let i = 1
-    preview.previews.forEach(preview => {
-      preview.position = i
-      i++
+    preview.previews.forEach((preview, index) => {
+      preview.position = index + 1
     })
-  },
-
-  [REMOVE_FIRST_PREVIEW_FILE_TO_UPLOAD](state) {
-    state.previewForms = state.previewForms.splice(1)
   },
 
   [SET_UPLOAD_PROGRESS](state, { name, percent }) {
