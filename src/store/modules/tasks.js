@@ -518,7 +518,7 @@ const actions = {
     { taskId, comment, revision, taskStatusId, form, attachment, checklist }
   ) {
     const data = { taskId, taskStatusId, comment, attachment, checklist }
-    const remainingPreviews = [...state.previewForms].splice(1)
+    const previewForms = [...state.previewForms]
     commit(ADD_PREVIEW_START)
     let newComment
     locks[taskId] = true
@@ -537,7 +537,7 @@ const actions = {
         })
         // Create the main preview entry.
         .then(preview => {
-          if (!form) form = state.previewForms[0]
+          if (!form) form = previewForms[0]
           const { request, promise } = tasksApi.uploadPreview(preview.id, form)
           request.on('progress', e => {
             commit(SET_UPLOAD_PROGRESS, {
@@ -556,7 +556,7 @@ const actions = {
             comment: newComment
           })
           // Create the remaining previews if there are some.
-          if (state.previewForms.length > 1) {
+          if (previewForms.length > 1) {
             const addPreview = form => {
               return tasksApi
                 .addExtraPreview(preview.id, taskId, newComment.id)
@@ -584,6 +584,7 @@ const actions = {
                   return preview
                 })
             }
+            const remainingPreviews = previewForms.slice(1)
             // run promise in sequence
             return remainingPreviews.reduce((accumulatorPromise, form) => {
               return accumulatorPromise.then(() => addPreview(form))
@@ -596,6 +597,9 @@ const actions = {
           commit(NEW_TASK_COMMENT_END, { comment: newComment, taskId })
           commit(CLEAR_UPLOAD_PROGRESS)
           return { newComment, preview }
+        })
+        .finally(() => {
+          locks[taskId] = false
         })
     )
   },
@@ -996,7 +1000,6 @@ const mutations = {
         last_comment: comment
       })
     }
-    locks[taskId] = false
   },
 
   [DELETE_TASK_END](state, task) {
