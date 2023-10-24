@@ -3,7 +3,7 @@
     <aside :class="{ 'hidden-bar': isSidebarHidden }">
       <div>
         <router-link class="home-link" to="/" @click="toggleSidebar()">
-          <div class="company-logo has-text-centered">
+          <div class="company-logo has-text-centered" :title="title">
             <img
               :src="logoPath"
               v-if="organisation && organisation.has_avatar"

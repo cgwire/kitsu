@@ -36,11 +36,14 @@
       <text-field
         class="mt2"
         :label="$t('settings.fields.name')"
+        :required="true"
         v-model.trim="form.name"
       />
       <text-field
         :label="$t('settings.fields.hours_by_day')"
+        :min="1"
         :max="24"
+        :required="true"
         type="number"
         v-model="form.hours_by_day"
       />
@@ -243,7 +246,6 @@ export default {
             ? 'true'
             : 'false'
         }
-        console.log(this.form.has_avatar)
       }
     }
   },
