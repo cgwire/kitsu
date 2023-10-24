@@ -448,7 +448,7 @@ export default {
 
     params() {
       const params = {
-        productionId: this.currentProduction.id,
+        productionId: this.currentProduction?.id,
         only_preview: this.previewMode === 'previews',
         page_size: this.previewMode === 'previews' ? 6 : 50,
         task_type_id: this.taskTypeId !== '' ? this.taskTypeId : undefined,
@@ -501,11 +501,8 @@ export default {
     },
 
     team() {
-      return sortPeople(
-        this.currentProduction.team.map(personId =>
-          this.personMap.get(personId)
-        )
-      )
+      const team = this.currentProduction?.team || []
+      return sortPeople(team.map(personId => this.personMap.get(personId)))
     },
 
     renderedStats() {

@@ -393,6 +393,8 @@ export default {
     },
 
     sectionOptions() {
+      if (!this.currentProduction) return []
+
       let options = []
       const isNotOnlyAssets =
         this.currentProduction.production_type !== 'assets'
@@ -501,10 +503,9 @@ export default {
     },
 
     currentSectionOption() {
-      return (
-        this.sectionOptions.find(o => o.value === this.currentProjectSection) ||
-        {}
-      ).value
+      return this.sectionOptions.find(
+        option => option.value === this.currentProjectSection
+      )?.value
     }
   },
 
