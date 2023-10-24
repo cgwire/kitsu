@@ -584,7 +584,7 @@ export default {
     },
 
     csvColumns() {
-      return this.isTVShow
+      return this.isTVShow && this.currentEpisode?.id !== 'all'
         ? ['Episode', 'Parent', 'Name', 'Asset Type', 'Asset', 'Occurences']
         : ['Parent', 'Name', 'Asset Type', 'Asset', 'Occurences']
     },
