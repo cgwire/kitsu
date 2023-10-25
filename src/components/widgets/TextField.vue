@@ -23,6 +23,7 @@
         :maxlength="maxlength"
         :min="min"
         :max="max || undefined"
+        :required="required"
         :step="step || 'any'"
         :readonly="readonly"
         @input="updateValue()"
@@ -98,6 +99,10 @@ export default {
       type: Boolean
     },
     readonly: {
+      default: false,
+      type: Boolean
+    },
+    required: {
       default: false,
       type: Boolean
     }

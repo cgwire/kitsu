@@ -128,6 +128,9 @@ export default {
     ...mapActions(['editProduction', 'loadScheduleItems', 'saveScheduleItem']),
 
     reset() {
+      if (!this.openProductions.length) {
+        return
+      }
       this.scheduleItems = this.convertScheduleItems(this.openProductions)
       this.startDate = getFirstStartDate(this.scheduleItems)
       this.endDate = getLastEndDate(this.scheduleItems)

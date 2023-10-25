@@ -65,13 +65,15 @@
                 />
               </span>
               <span
-                class="filler flexrow-item root-element-name"
+                class="filler flexrow-item root-element-name ellipsis"
+                :title="rootElement.name"
                 v-if="!rootElement.route"
               >
                 {{ rootElement.name }}
               </span>
               <router-link
-                class="filler flexrow-item root-element-name"
+                class="filler flexrow-item root-element-name ellipsis"
+                :title="rootElement.name"
                 :to="rootElement.route"
                 v-else
               >
