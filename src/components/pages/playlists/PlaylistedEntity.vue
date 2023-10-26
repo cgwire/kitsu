@@ -163,11 +163,7 @@ export default {
     },
 
     taskStatus() {
-      let entity = this.shotMap.get(this.entity.id)
-      if (!entity) entity = this.assetMap.get(this.entity.id)
-      if (!entity) return ''
-
-      const taskId = entity.validations.get(this.taskTypeId)
+      const taskId = this.entity.preview_file_task_id
       if (taskId) {
         const task = this.taskMap.get(taskId)
         if (!task) return ''

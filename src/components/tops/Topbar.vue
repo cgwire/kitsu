@@ -9,13 +9,21 @@
     <nav class="nav">
       <div class="nav-left">
         <a
-          class="nav-item sidebar-button"
           id="toggle-menu-button"
+          :class="{
+            'studio-logo-wrapper': true,
+            'nav-item': true,
+            selected: !isSidebarHidden
+          }"
           @click="toggleSidebar()"
-          :class="{ selected: !isSidebarHidden }"
           v-if="!isCurrentUserClient"
         >
-          ≡
+          <img
+            class="studio-logo"
+            :src="logoPath"
+            v-if="organisation && organisation.has_avatar"
+          />
+          <img class="studio-logo" src="../../assets/kitsu.png" v-else />
         </a>
 
         <div class="flexrow topbar-menu" v-if="isProductionContext">
@@ -282,10 +290,18 @@ export default {
       'mainConfig',
       'openProductions',
       'openProductionOptions',
+      'organisation',
       'productionMap',
       'productionEditTaskTypes',
       'user'
     ]),
+
+    logoPath() {
+      return (
+        '/api/pictures/thumbnails/' +
+        `organisations/${this.organisation.id}.png`
+      )
+    },
 
     assetSections() {
       return ['assets', 'assetTypes', 'playlists']
@@ -817,10 +833,6 @@ export default {
     color: $white-grey;
   }
 
-  #toggle-menu-button:hover {
-    color: $white-grey;
-  }
-
   .topbar .nav,
   .user-menu {
     background-color: $black;
@@ -852,10 +864,6 @@ export default {
   position: fixed;
   right: 0;
   z-index: 204;
-}
-
-#toggle-menu-button {
-  font-size: 2em;
 }
 
 .avatar {
@@ -970,6 +978,20 @@ strong {
 .user-menu {
   padding: 10px;
   border-bottom-left-radius: 10px;
+}
+
+.studio-logo-wrapper {
+  background-color: var(--background);
+  margin: 8px 8px;
+  margin-right: 1em;
+  padding: 0;
+
+  .studio-logo {
+    border-radius: 5px;
+    background-color: var(--background);
+    min-height: 36px;
+    width: 36px;
+  }
 }
 
 @media screen and (max-width: 768px) {

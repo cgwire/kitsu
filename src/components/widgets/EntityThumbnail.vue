@@ -5,7 +5,8 @@
     :style="{
       width: emptyWidth + 'px',
       'min-width': emptyWidth + 'px',
-      height: emptyHeight + 'px'
+      height: emptyHeight + 'px',
+      cursor: noPreview ? 'default' : 'zoom-in'
     }"
     @click="onClicked"
     v-if="isPreview && withLink"

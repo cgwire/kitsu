@@ -12,6 +12,11 @@
       :style="{
         'background-size': backgroundSize
       }"
+      @mouseenter="isFrameNumberVisible = true"
+      @mouseleave="isFrameNumberVisible = false"
+      @touchstart="isFrameNumberVisible = true"
+      @touchend="isFrameNumberVisible = false"
+      @touchcancel="isFrameNumberVisible = false"
     >
       <span
         class="handle-in"
@@ -21,7 +26,7 @@
         }"
         @mousedown="startHandleInDrag"
         @touchstart="startHandleInDrag"
-        v-if="handleIn >= 0"
+        v-if="handleIn >= 0 && !isFullMode"
       >
         {{ handleIn !== 0 ? handleIn + 1 : '' }}
       </span>
@@ -33,7 +38,7 @@
         }"
         @mousedown="startHandleOutDrag"
         @touchstart="startHandleOutDrag"
-        v-if="handleOut >= 0"
+        v-if="handleOut >= 0 && !isFullMode"
       >
         {{ handleOut + 1 }}
       </span>
@@ -92,6 +97,58 @@
         <spinner class="mt2" v-else />
       </span>
     </div>
+    <div
+      ref="playlist-progress"
+      class="playlist-progress"
+      @click="onPlaylistProgressClicked"
+      @mouseenter="isFrameNumberVisible = true"
+      @mouseleave="isFrameNumberVisible = false"
+      @touchend="isFrameNumberVisible = false"
+      @touchcancel="isFrameNumberVisible = false"
+      @mousedown="startPlaylistProgressDrag"
+      @touchstart="
+        startProgressDrag()
+        isFrameNumberVisible = true
+      "
+      v-show="entityList.length > 1"
+    >
+      <div
+        class="entity-status"
+        :key="`progress-entity-${entity.id}`"
+        :style="{
+          left: getEntityPosition(entity) + '%',
+          width: getEntityWidth(entity) + '%',
+          'background-color': getEntityColor(entity)
+        }"
+        @mouseenter="isFrameNumberVisible = true"
+        @mouseleave="isFrameNumberVisible = false"
+        @touchend="isFrameNumberVisible = false"
+        @touchcancel="isFrameNumberVisible = false"
+        @mousedown="startPlaylistProgressDrag"
+        @touchstart="
+          startProgressDrag
+          isFrameNumberVisible = true
+        "
+        v-for="entity in entityList"
+      >
+        <span>
+          {{ getFullEntityName(entity) }}
+        </span>
+      </div>
+      <span
+        class="playlist-progress-position"
+        :style="{
+          left:
+            'calc(' + (100 * playlistProgress) / playlistDuration + '% - 3px)'
+        }"
+        @mouseenter="isFrameNumberVisible = true"
+        @mouseleave="isFrameNumberVisible = false"
+        @touchstart="isFrameNumberVisible = true"
+        @touchend="isFrameNumberVisible = false"
+        @touchcancel="isFrameNumberVisible = false"
+      >
+      </span>
+    </div>
   </div>
 </template>
 
@@ -116,9 +173,17 @@ export default {
       default: () => [],
       type: Array
     },
+    fps: {
+      default: 0,
+      type: Number
+    },
     frameDuration: {
       default: 0,
       type: Number
+    },
+    isFullMode: {
+      default: false,
+      type: Boolean
     },
     isFullScreen: {
       default: false,
@@ -143,6 +208,26 @@ export default {
     previewId: {
       default: '',
       type: String
+    },
+    isPlaylist: {
+      default: false,
+      type: Boolean
+    },
+    playlistDuration: {
+      default: 0,
+      type: Number
+    },
+    playlistProgress: {
+      default: 0,
+      type: Number
+    },
+    playlistShotPosition: {
+      default: () => {},
+      type: Object
+    },
+    entityList: {
+      default: () => [],
+      type: Array
     }
   },
 
@@ -154,7 +239,9 @@ export default {
       isFrameNumberVisible: false,
       isTileLoading: false,
       hoverFrame: 0,
+      isPlaylistHover: false,
       progressDragging: false,
+      playlistProgressDragging: false,
       width: 0,
       domEvents: [
         ['mousemove', this.doProgressDrag],
@@ -163,6 +250,10 @@ export default {
         ['mouseleave', this.stopProgressDrag],
         ['touchend', this.stopProgressDrag],
         ['touchcancel', this.stopProgressDrag],
+        ['mouseup', this.stopPlaylistProgressDrag],
+        ['mouseleave', this.stopPlaylistProgressDrag],
+        ['touchend', this.stopPlaylistProgressDrag],
+        ['touchcancel', this.stopPlaylistProgressDrag],
         ['mouseup', this.stopHandleInDrag],
         ['mouseleave', this.stopHandleInDrag],
         ['touchend', this.stopHandleInDrag],
@@ -213,10 +304,16 @@ export default {
         Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
         this.width - frameWidth - 10
       )
+      const top = this.isFullScreen
+        ? `-${height}px`
+        : this.isPlaylist
+        ? '42px'
+        : '30px'
+
       return {
         height: `${height}px`,
         width: `${width}px`,
-        top: this.isFullScreen ? `-${height}px` : '30px',
+        top,
         left: `${left}px`
       }
     },
@@ -241,6 +338,10 @@ export default {
 
     handleInWidth() {
       return Math.max(this.frameSize * this.handleIn, 0) + 'px'
+    },
+
+    playlistProgressWidget() {
+      return this.$refs['playlist-progress']
     }
   },
 
@@ -256,6 +357,8 @@ export default {
       return frameNumber * this.frameSize
     },
 
+    updatePlaylistProgressBar(time) {},
+
     updateProgressBar(frameNumber) {
       this.progress.value = (frameNumber + 1) * this.frameDuration
     },
@@ -267,6 +370,16 @@ export default {
 
     stopProgressDrag(event) {
       this.progressDragging = false
+      this.$emit('end-scrub')
+    },
+
+    startPlaylistProgressDrag(event) {
+      this.playlistProgressDragging = true
+      this.$emit('start-scrub')
+    },
+
+    stopPlaylistProgressDrag(event) {
+      this.playlistProgressDragging = false
       this.$emit('end-scrub')
     },
 
@@ -298,17 +411,39 @@ export default {
     doProgressDrag(event) {
       if (
         this.progressDragging ||
+        this.playlistProgressDragging ||
         this.handleInDragging ||
         this.handleOutDragging ||
         this.isFrameNumberVisible
       ) {
-        this.currentMouseFrame = this._getMouseFrame(event)
+        if (
+          this.playlistProgressDragging ||
+          (event.target.classList &&
+            (event.target.classList.contains('playlilst-progress') ||
+              event.target.classList.contains('entity-status') ||
+              event.target.classList.contains('playlist-progress-position')))
+        ) {
+          this.currentMouseFrame = this._getPlaylistMouseFrame(event)
+          const { frameNumber } = this.currentMouseFrame
+          this.hoverFrame = frameNumber + 1
+          const allDuration = Math.round(this.playlistDuration * this.fps)
+          this.frameNumberLeftPosition =
+            (this.width / allDuration) * frameNumber
+          this.isPlaylistHover = true
+        } else {
+          this.currentMouseFrame = this._getMouseFrame(event)
+          const { frameNumber } = this.currentMouseFrame
+          this.hoverFrame = frameNumber + 1
+          this.frameNumberLeftPosition =
+            (this.width / this.nbFrames) * frameNumber
+          this.isPlaylistHover = false
+        }
         const { frameNumber } = this.currentMouseFrame
-        this.hoverFrame = frameNumber + 1
-        this.frameNumberLeftPosition =
-          (this.width / this.nbFrames) * frameNumber
         if (this.progressDragging) {
           this.$emit('progress-changed', frameNumber)
+        }
+        if (this.playlistProgressDragging) {
+          this.$emit('progress-playlist-changed', frameNumber)
         }
         if (this.handleInDragging) {
           this.$emit('handle-in-changed', { frameNumber, save: false })
@@ -321,13 +456,22 @@ export default {
       }
     },
 
+    onPlaylistProgressClicked(event) {
+      const { frameNumber } = this._getPlaylistMouseFrame(event)
+      this.$emit('progress-playlist-changed', frameNumber)
+    },
+
     onProgressClicked(event) {
       this._emitProgressEvent(event)
     },
 
     _getMouseFrame(event, annotation) {
       let left = this.progress.getBoundingClientRect().left
-      if (left === 0 && !this.isFullScreen) {
+      if (
+        left === 0 &&
+        !this.isFullScreen &&
+        this.progress.parentElement.offsetParent
+      ) {
         left = this.progress.parentElement.offsetParent.offsetLeft
       }
       let position = this.getClientX(event) - left
@@ -341,9 +485,21 @@ export default {
 
       const isChromium = !!window.chrome
       const change = isChromium ? this.frameDuration : 0
-      if (duration > this.videoDuration - change) {
-        duration = this.videoDuration - change
+      const videoDuration = this.nbFrames * this.frameDuration
+      if (duration > videoDuration) {
+        duration = videoDuration - change
       }
+      const frameNumber = Math.floor(duration / this.frameDuration)
+      return { frameNumber, position }
+    },
+
+    _getPlaylistMouseFrame(event) {
+      const left = this.playlistProgressWidget.getBoundingClientRect().left
+      let position = this.getClientX(event) - left
+      if (position > this.width) position = this.width - 1
+      const ratio = position / this.width
+      let duration = this.playlistDuration * ratio
+      if (duration < 0) duration = 0
       const frameNumber = Math.floor(duration / this.frameDuration)
       return { frameNumber, position }
     },
@@ -361,18 +517,70 @@ export default {
      */
     getFrameBackgroundStyle(frame) {
       if (!frame) return {}
+      let previewId = this.previewId
+      if (this.isPlaylistHover) {
+        previewId = this.playlistShotPosition[frame].id
+        frame = frame - this.playlistShotPosition[frame].start * this.fps
+      } else {
+        frame = frame - 1
+      }
       const frameX = frame % 8
       const frameY = Math.floor(frame / 8)
       const frameHeight = 100
       const frameWidth = Math.ceil(frameHeight * this.videoRatio)
+      const tilePath = `/api/movies/tiles/preview-files/${previewId}.png`
       return {
-        background: `url(${this.tilePath})`,
+        background: `url(${tilePath})`,
         'background-position': `-${frameX * frameWidth}px -${
           frameY * frameHeight
         }px`,
-        // height: `${frameHeight}px`,
         width: `${frameWidth}px`
       }
+    },
+
+    getFrameNumberStyle(frame) {
+      const frameHeight = 100
+      const height = frameHeight + 30
+      const ratio = this.movieDimensions.width
+        ? this.movieDimensions.width / this.movieDimensions.height
+        : 1
+      const frameWidth = Math.ceil(frameHeight * ratio)
+      const width = frameWidth + 10
+      const left = Math.min(
+        Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
+        this.width - frameWidth - 10
+      )
+      const top = this.isFullScreen
+        ? `-${height}px`
+        : this.isPlaylist
+        ? '42px'
+        : '30px'
+
+      return {
+        height: height + 'px',
+        width: width + 'px',
+        top,
+        left: left + 'px'
+      }
+    },
+
+    getEntityPosition(entity) {
+      const ratio =
+        (entity.start_duration - this.frameDuration) / this.playlistDuration
+      return ratio * 100
+    },
+
+    getEntityWidth(entity) {
+      const ratio = entity.preview_file_duration / this.playlistDuration
+      return ratio * 100
+    },
+
+    getEntityColor(entity) {
+      return entity.task_status_color
+    },
+
+    getFullEntityName(entity) {
+      return `${entity.parent_name} / ${entity.name}`.replaceAll(' ', ' ')
     }
   },
 
@@ -396,6 +604,10 @@ export default {
           }
         }
       }
+    },
+
+    playlistProgress() {
+      this.updatePlaylistProgressBar(this.playlistProgress)
     }
   }
 }
@@ -523,5 +735,59 @@ progress {
   top: -2px;
   width: 5px;
   z-index: 120;
+}
+
+.playlist-progress {
+  background: $dark-grey;
+  border-bottom: 1px solid $dark-grey-light;
+  border-top: 1px solid $dark-grey-light;
+  cursor: pointer;
+  height: 12px;
+  width: 100%;
+  position: relative; /* Relative positioning for pseudo-element placement */
+  overflow: visible;
+  transition: height 0.2s ease-in-out;
+
+  &:hover {
+    height: 12px;
+  }
+}
+
+.playlist-progress-position {
+  border-left: 5px solid $green;
+  position: absolute;
+  height: 6px;
+  border-radius: 50%;
+  z-index: 3;
+  top: -2px;
+}
+
+.entity-status {
+  border-left: 0;
+  border-right: 3px solid $dark-grey;
+  position: absolute;
+  bottom: 0;
+  transition: height 0.3s ease-in-out;
+  height: 10px;
+  z-index: 2;
+  opacity: 0.4;
+
+  span {
+    background: $dark-grey;
+    border-radius: 5px;
+    color: $white;
+    display: none;
+    padding: 0.2em 0.5em;
+    position: absolute;
+    top: -30px;
+  }
+
+  &:hover {
+    height: 12px;
+    opacity: 1;
+    span {
+      display: block;
+    }
+  }
 }
 </style>

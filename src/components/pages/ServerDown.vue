@@ -31,9 +31,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.page {
+  background-color: #f5f5f5;
+}
+
 .illustration {
   max-width: 1000px;
   margin: auto;
+  img {
+    border-radius: 3rem;
+    box-shadow: 0 0 2rem rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+  }
 }
 
 p {

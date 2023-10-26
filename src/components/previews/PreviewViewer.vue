@@ -36,6 +36,7 @@
       :is-muted="isMuted"
       :is-repeating="isRepeating"
       :light="isLight"
+      :nb-frames="nbFrames"
       :panzoom="true"
       :preview="preview"
       @duration-changed="duration => $emit('duration-changed', duration)"
@@ -145,6 +146,10 @@ export default {
       default: 0
     },
     marginBottom: {
+      type: Number,
+      default: 0
+    },
+    nbFrames: {
       type: Number,
       default: 0
     },

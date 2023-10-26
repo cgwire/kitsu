@@ -11,7 +11,7 @@ export const previewRoomMixin = {
     },
 
     joinedRoom() {
-      return this.previewRoom().joinedRoom
+      return this.previewRoom() && this.previewRoom().joinedRoom
     }
   },
 
@@ -31,6 +31,7 @@ export const previewRoomMixin = {
 
     joinRoom() {
       if (!this.previewRoom()) return
+      if (this.isFullMode) this.isFullMode = false
 
       this.$socket.emit('preview-room:join', {
         user_id: this.user.id,

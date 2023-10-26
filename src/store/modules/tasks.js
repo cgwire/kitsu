@@ -940,6 +940,7 @@ const mutations = {
                 status: p.status,
                 revision: p.revision,
                 position: p.position,
+                duration: p.duration,
                 original_name: p.original_name
               }
               Vue.set(prev, 'status', p.status)
@@ -1084,6 +1085,7 @@ const mutations = {
       position: preview.position,
       original_name: preview.original_name,
       extension: preview.extension,
+      duration: preview.duration,
       task_id: taskId
     }
 
@@ -1153,7 +1155,8 @@ const mutations = {
       revision: preview.revision,
       position: preview.position,
       original_name: preview.original_name,
-      extension: preview.extension
+      extension: preview.extension,
+      duration: preview.duration
     }
     state.taskPreviews[taskId].shift()
     state.taskPreviews[taskId] = [newPreview].concat(state.taskPreviews[taskId])
