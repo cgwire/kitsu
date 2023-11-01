@@ -17,33 +17,9 @@ For further information about features and installation, please refer to the
 
 ## Contributing
 
-As any open source project, we enjoy any contribution! You will find below 
-how you can help the Kitsu project to get better.
-
-### Bug reports 
-
-All bugs must be submitted directly in 
-[the issue page](https://github.com/cgwire/kitsu/issues) of this repository.
-
-### Feature requests
-
-Feature requests must be posted on our [Canny page](https://cgwire.canny.io/).
-
-### Translations
-
-If you want to contribute to translations, you can connect directly to the 
-[POEditor platform](https://poeditor.com/join/project?hash=fpUejpWDVo).
-
-### Code
-
-All contributions are welcomed as long as they respect the [C4
-contract](https://rfc.zeromq.org/spec:42/C4).
-
-The Kitsu code is written with Javascript (ES6) and is based on the 
-[VueJS](https://vuejs.org/v2/guide/) framework extended with 
-the [Vuex](https://vuex.vuejs.org) plugin.
-
-To install the development environment, follow [the dedicated guide](https://kitsu.cg-wire.com/development-environment/).
+There are many ways to contribute to Kitsu, from simple tasks to most complex ones. We created a 
+[contributing guide](https://github.com/cgwire/kitsu/blob/master/CONTRIBUTING.md) explaining everything. 
+You will find all the information you are looking for!
 
 ## Sponsors
 
