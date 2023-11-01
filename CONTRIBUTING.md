@@ -12,6 +12,8 @@ For that, you have several ways to contribute:
 - Follow our [X account](https://github.com/cgwire/kitsu).
 - Follow our [Linkedin account](https://www.linkedin.com/company/cgwire/).
 - Download our [trial Docker image](https://hub.docker.com/r/cgwire/cgwire).
+- Come to our [meetups](https://www.meetup.com/Infrastructure-et-film-danimation/)
+- Organize a meetup dedicated to Kitsu
 - Write a social media post about us.
 - Write a blog post about us.
 - Talk about Kitsu to your colleagues and friends.
@@ -21,7 +23,7 @@ For that, you have several ways to contribute:
 
 Our community chat and forum is available on Discord. The topics discussed are wider 
 than Kitsu discussion, they cover everything related to pipelines.
-The community support for Kitsu is avalaible here too. Everyone is very friendly and would
+Community support for Kitsu is available here, too. Everyone is amiable and would
 be glad to meet you!
 
 [Join the Animation/VFX Pipeline Discord](https://discord.com/invite/VbCxtKN)
@@ -29,8 +31,8 @@ be glad to meet you!
 
 ## Feature requests
 
-Another great way to contribute is to propose new feature ideas. For that we use the
-Canny platform. It allows you to post new capabilities you would like to see into Kitsu or to vote 
+Another great way to contribute is to propose new feature ideas. For that, we use the
+Canny platform. It allows you to post new capabilities you would like to see in Kitsu or to vote 
 for already listed requests.
 
 [Post a feature request ](https://cgwire.canny.io/)
@@ -52,7 +54,7 @@ If you want to contribute to translations, we have an account on the POEditor pl
 
 ## Improve the documentation
 
-You can contribute to the documentation of Kitsu by correcting sentences or adding information into it. Find below the list
+You can contribute to the documentation of Kitsu by correcting sentences or adding information to it. Find below the list
 of the documentation repositories:
 
 * Kitsu: https://github.com/cgwire/kitsu/tree/docs
