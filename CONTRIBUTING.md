@@ -47,7 +47,7 @@ If you find any issue with Kitsu
 
 If you want to contribute to translations, we have an account on the POEditor platform that you can use to participate.
 
-[Contribute to the translation]([POEditor platform](https://poeditor.com/join/project?hash=fpUejpWDVo)
+[Contribute to the translation](https://poeditor.com/join/project?hash=fpUejpWDVo)
 
 
 ## Improve the documentation
