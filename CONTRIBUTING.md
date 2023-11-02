@@ -8,12 +8,12 @@ As you guess we enjoy any contribution! You will find below how you can help the
 Making the project more visible helps a lot and doesn't takes much of your time. 
 For that, you have several ways to contribute:
 
-- Star the [Github](https://github.com/cgwire/kitsu) repository.
-- Follow our [X account](https://github.com/cgwire/kitsu).
-- Follow our [Linkedin account](https://www.linkedin.com/company/cgwire/).
+- Star the [GitHub](https://github.com/cgwire/kitsu) repository.
+- Follow our [X account](https://twitter.com/cgwirekitsu).
+- Follow our [LinkedIn account](https://www.linkedin.com/company/cgwire/).
 - Download our [trial Docker image](https://hub.docker.com/r/cgwire/cgwire).
-- Come to our [meetups](https://www.meetup.com/Infrastructure-et-film-danimation/)
-- Organize a meetup dedicated to Kitsu
+- Come to our [meetups](https://www.meetup.com/Infrastructure-et-film-danimation/).
+- Organize a meetup dedicated to Kitsu.
 - Write a social media post about us.
 - Write a blog post about us.
 - Talk about Kitsu to your colleagues and friends.
@@ -66,11 +66,11 @@ of the documentation repositories:
 
 Of course, we enjoy receiving code contributions. 
 All contributions are welcomed as long as they respect the [C4
-contract](https://rfc.zeromq.org/spec:42/C4). You can find tickets waiting for a fix on our Github repository and 
+contract](https://rfc.zeromq.org/spec:42/C4). You can find tickets waiting for a fix on our GitHub repository and 
 feature requests on our Canny page.
 
-The Kitsu code is written with Javascript (ES6) and is based on the 
-[VueJS](https://vuejs.org/v2/guide/) framework extended with 
+The Kitsu code is written with JavaScript (ES6+) and is based on the 
+[Vue.js](https://vuejs.org/v2/guide/) framework extended with 
 the [Vuex](https://vuex.vuejs.org) plugin.
 
 To install the development environment, follow [the dedicated guide](https://kitsu.cg-wire.com/development-environment/).
