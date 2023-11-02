@@ -46,6 +46,12 @@ export default {
     )
   },
 
+  deleteOrganisationLogo(organisationId) {
+    return client.pput(`/api/data/organisations/${organisationId}`, {
+      has_avatar: false
+    })
+  },
+
   getPeople(callback) {
     client.get('/api/data/persons?relations=true', callback)
   },
