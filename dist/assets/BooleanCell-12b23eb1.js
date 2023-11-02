@@ -1,2 +1,0 @@
-import{B as n}from"./BooleanRep-5dfd8caf.js";import{n as t}from"./index-cf51728c.js";const a={name:"boolean-cell",components:{BooleanRep:n},data(){return{}},props:{value:{default:!1,type:Boolean}},computed:{},methods:{}};var l=function(){var e=this,o=e._self._c;return o("td",{staticClass:"has-text-centered"},[o("boolean-rep",{staticClass:"bool-icon",attrs:{value:e.value}})],1)},s=[],r=t(a,l,s,!1,null,"5b9b0917",null,null);const m=r.exports;export{m as B};
-//# sourceMappingURL=BooleanCell-12b23eb1.js.map
