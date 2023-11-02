@@ -241,6 +241,13 @@ const actions = {
     })
   },
 
+  deleteOrganisationLogo({ commit, state }) {
+    const organisationId = state.organisation.id
+    return peopleApi.deleteOrganisationLogo(organisationId).then(() => {
+      commit(SET_ORGANISATION, { has_avatar: false })
+    })
+  },
+
   loadPeople({ commit, state, rootGetters }, callback) {
     commit(LOAD_PEOPLE_START)
     peopleApi.getPeople((err, people) => {

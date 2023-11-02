@@ -1,100 +1,107 @@
 <template>
   <div class="settings page">
-    <form ref="form" class="settings-form" @submit.prevent="saveSettings">
-      <h2>
-        {{ $t('settings.title') }}
-      </h2>
-      <div class="field">
-        <label class="label">
-          {{ $t('settings.logo') }}
-        </label>
-        <div class="logo-wrapper" v-if="form.has_avatar">
-          <img :src="organisationLogoPath" />
+    <div class="settings-form">
+      <form class="settings-header" @submit.prevent>
+        <h2>
+          {{ $t('main.studio') }}
+        </h2>
+        <div class="field">
+          <label class="label">
+            {{ $t('settings.logo') }}
+          </label>
+          <div class="logo-wrapper" v-if="form.has_avatar">
+            <img :src="organisationLogoPath" />
+          </div>
+          <p class="no-logo" v-else>
+            <em>{{ $t('settings.no_logo') }}</em>
+          </p>
+          <p>
+            <button
+              type="button"
+              class="button set-logo-button"
+              @click="showAvatarModal"
+            >
+              {{ $t('settings.set_logo') }}
+            </button>
+          </p>
+          <p v-if="form.has_avatar">
+            <button
+              type="button"
+              class="button is-link remove-logo-button"
+              @click="removeAvatar"
+            >
+              {{ $t('settings.remove_logo') }}
+            </button>
+          </p>
         </div>
-        <p class="no-logo" v-else>
-          <em>{{ $t('settings.no_logo') }}</em>
-        </p>
-        <p>
-          <button
-            type="button"
-            class="button set-logo-button"
-            @click="showAvatarModal"
-          >
-            {{ $t('settings.set_logo') }}
-          </button>
-        </p>
-        <p v-if="form.has_avatar">
-          <button
-            type="button"
-            class="button is-link remove-logo-button"
-            @click="removeAvatar"
-          >
-            {{ $t('settings.remove_logo') }}
-          </button>
-        </p>
-      </div>
-      <text-field
-        class="mt2"
-        :label="$t('settings.fields.name')"
-        :required="true"
-        v-model.trim="form.name"
-      />
-      <text-field
-        :label="$t('settings.fields.hours_by_day')"
-        :min="1"
-        :max="24"
-        :required="true"
-        type="number"
-        v-model="form.hours_by_day"
-      />
-      <combobox-boolean
-        :label="$t('settings.fields.use_original_name')"
-        v-model="form.use_original_file_name"
-      />
-      <combobox-boolean
-        :label="$t('settings.fields.show_hd_default')"
-        v-model="form.hd_by_default"
-      />
-      <combobox-boolean
-        :label="$t('settings.fields.timesheets_locked')"
-        v-model="form.timesheets_locked"
-      />
-      <h2>
-        {{ $t('settings.integrations') }}
-      </h2>
-      <text-field
-        :label="$t('settings.fields.slack_token')"
-        v-model.trim="form.chat_token_slack"
-      />
-      <text-field
-        :label="$t('settings.fields.discord_token')"
-        v-model.trim="form.chat_token_discord"
-      />
-      <div class="mattermost_integrations">
+      </form>
+      <form ref="form" @submit.prevent="saveSettings">
+        <h2>
+          {{ $t('settings.title') }}
+        </h2>
         <text-field
-          :label="$t('settings.fields.mattermost_webhook')"
-          v-model.trim="form.chat_webhook_mattermost"
+          class="mt2"
+          :label="$t('settings.fields.name')"
+          :required="true"
+          v-model.trim="form.name"
         />
-        <div
-          class="error has-text-centered"
-          v-if="this.errors.webhook_error === true"
-        >
-          <em>{{ $t('settings.webhook_error') }}</em>
+        <text-field
+          :label="$t('settings.fields.hours_by_day')"
+          :min="1"
+          :max="24"
+          :required="true"
+          type="number"
+          v-model="form.hours_by_day"
+        />
+        <combobox-boolean
+          :label="$t('settings.fields.use_original_name')"
+          v-model="form.use_original_file_name"
+        />
+        <combobox-boolean
+          :label="$t('settings.fields.show_hd_default')"
+          v-model="form.hd_by_default"
+        />
+        <combobox-boolean
+          :label="$t('settings.fields.timesheets_locked')"
+          v-model="form.timesheets_locked"
+        />
+        <h2>
+          {{ $t('settings.integrations') }}
+        </h2>
+        <text-field
+          :label="$t('settings.fields.slack_token')"
+          v-model.trim="form.chat_token_slack"
+        />
+        <text-field
+          :label="$t('settings.fields.discord_token')"
+          v-model.trim="form.chat_token_discord"
+        />
+        <div class="mattermost_integrations">
+          <text-field
+            :label="$t('settings.fields.mattermost_webhook')"
+            v-model.trim="form.chat_webhook_mattermost"
+          />
+          <div
+            class="error has-text-centered"
+            v-if="this.errors.webhook_error === true"
+          >
+            <em>{{ $t('settings.webhook_error') }}</em>
+          </div>
         </div>
-      </div>
-      <button
-        class="button save-button is-medium"
-        :class="{
-          'is-loading': loading.save
-        }"
-        :disabled="loading.save || !this.$refs.form?.checkValidity()"
-      >
-        {{ $t('settings.save.button') }}
-      </button>
-      <p class="error has-text-centered mt2" v-if="errors.save">
-        <em>{{ $t('settings.save.error') }}</em>
-      </p>
-    </form>
+        <button
+          class="button save-button is-medium"
+          :class="{
+            'is-loading': loading.save
+          }"
+          :disabled="loading.save || !this.$refs.form?.checkValidity()"
+        >
+          {{ $t('settings.save.button') }}
+        </button>
+        <p class="error has-text-centered mt2" v-if="errors.save">
+          <em>{{ $t('settings.save.error') }}</em>
+        </p>
+      </form>
+    </div>
 
     <change-avatar-modal
       :active="modals.avatar"
@@ -163,8 +170,9 @@ export default {
   methods: {
     ...mapActions([
       'changeAvatar',
-      'uploadOrganisationLogo',
-      'saveOrganisation'
+      'deleteOrganisationLogo',
+      'saveOrganisation',
+      'uploadOrganisationLogo'
     ]),
 
     checkWebhook() {
@@ -182,6 +190,10 @@ export default {
 
     hideAvatarModal() {
       this.modals.avatar = false
+    },
+
+    showAvatarModal() {
+      this.modals.avatar = true
     },
 
     saveSettings() {
@@ -205,7 +217,6 @@ export default {
       this.uploadOrganisationLogo(formData)
         .then(() => {
           setTimeout(() => {
-            this.loading.saveAvatar = false
             this.modals.avatar = false
             const timestamp = Date.now()
             this.organisationLogoPath = `/api/pictures/thumbnails/organisations/${this.organisation.id}.png?t=${timestamp}`
@@ -213,17 +224,24 @@ export default {
         })
         .catch(err => {
           console.error(err)
-          this.loading.saveAvatar = false
           this.errors.saveAvatar = true
+        })
+        .finally(() => {
+          this.loading.saveAvatar = false
         })
     },
 
-    showAvatarModal() {
-      this.modals.avatar = true
-    },
-
     removeAvatar() {
-      this.form.has_avatar = false
+      this.loading.save = true
+      this.errors.save = false
+      this.deleteOrganisationLogo()
+        .catch(err => {
+          console.error(err)
+          this.errors.save = true
+        })
+        .finally(() => {
+          this.loading.save = false
+        })
     }
   },
 
