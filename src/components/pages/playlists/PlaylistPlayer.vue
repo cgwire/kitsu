@@ -564,7 +564,7 @@
         class="playlist-button flexrow-item"
         :title="$t('playlists.actions.save_playlist')"
         icon="save"
-        v-if="isCurrentUserManager && tempMode"
+        v-if="(isCurrentUserManager || isCurrentUserSupervisor) && tempMode"
       />
       <div
         class="flexrow"
@@ -984,6 +984,7 @@ export default {
       'isCurrentUserArtist',
       'isCurrentUserClient',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'isTVShow',
       'organisation',
       'previewFileMap',
