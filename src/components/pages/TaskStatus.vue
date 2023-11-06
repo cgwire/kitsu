@@ -63,7 +63,7 @@ export default {
 
   data() {
     return {
-      activeTab: 'actived',
+      activeTab: 'active',
       taskStatusToDelete: null,
       taskStatusToEdit: { color: '#000000' },
       modals: {
@@ -177,7 +177,7 @@ export default {
 
   watch: {
     $route() {
-      this.activeTab = this.$route.query.tab || 'actived'
+      this.activeTab = this.$route.query.tab || 'active'
     }
   },
 
