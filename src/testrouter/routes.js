@@ -58,16 +58,17 @@ import Edit from '@/components/pages/Edit'
 const ADMIN_PAGES = [
   'asset-types',
   'custom-actions',
-  'status-automations',
   'departments',
   'logs',
   'main-schedule',
   'people',
+  'newsfeed',
   'productions',
   'task-status',
   'task-types',
   'team-schedule',
-  'settings'
+  'settings',
+  'status-automations'
 ]
 
 export const routes = [
