@@ -98,7 +98,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['taskStatus', 'archivedTaskStatus', 'taskStatusMap']),
+    ...mapGetters(['archivedTaskStatus', 'taskStatus']),
 
     taskStatusList() {
       return this.activeTab === 'active'
