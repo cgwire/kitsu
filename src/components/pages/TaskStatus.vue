@@ -121,7 +121,7 @@ export default {
       }
 
       this.loading.edit = true
-      this.loading.del = false
+      this.errors.edit = false
       this.$store
         .dispatch(action, form)
         .then(() => {
