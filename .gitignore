@@ -49,6 +49,7 @@ tests/test-bundle.js
 # IDE
 .idea/
 .vscode/
+.eslintcache
 
 # Custom
 TODO
