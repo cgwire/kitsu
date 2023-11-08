@@ -21,7 +21,7 @@
             ref="nameField"
             :label="$t('playlists.fields.name')"
             @enter="runConfirmation"
-            v-model="form.name"
+            v-model.trim="form.name"
             v-focus
           />
           <combobox-simple
@@ -177,6 +177,10 @@ export default {
 
   methods: {
     runConfirmation() {
+      if (!this.form.name) {
+        this.$refs.nameField.focus()
+        return
+      }
       this.form.for_client = this.forClient === 'true'
       this.$emit('confirm', this.form)
     },
