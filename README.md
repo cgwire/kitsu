@@ -1,14 +1,14 @@
 [![Kitsu](https://zou.cg-wire.com/kitsu.png)](https://kitsu.cg-wire.com)
 
-# Kitsu, Collaboration Platform for Animation Studios
+# Kitsu, Collaboration Platform for Animation And VFX Studios
 
-Kitsu is a web application to share the progress of your productions and 
-validate your deliveries. It improves the communication between all stakeholders. 
-Which leads to better pictures, shipped faster. 
+Kitsu is a web application to collaborate around your creative productions and 
+manage your deliveries. It improves the communication between all stakeholders. 
+Which leads to better results, shipped faster.
 
 [![CI badge](https://github.com/cgwire/kitsu/actions/workflows/ci.yml/badge.svg)](https://github.com/cgwire/kitsu/actions/workflows/ci.yml)
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.com/invite/VbCxtKN)
-
+[![Donation](https://img.shields.io/liberapay/receives/CGWire.svg?logo=liberapay">)](https://liberapay.com/CGWire/donate)
 
 ## Documentation 
 
