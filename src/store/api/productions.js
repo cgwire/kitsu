@@ -76,6 +76,26 @@ export default {
     return client.pdel(path)
   },
 
+  addBackgroundToProduction(productionId, backgroundId) {
+    const data = { preview_background_file_id: backgroundId }
+    return client.ppost(
+      `/api/data/projects/${productionId}/settings/preview-background-files`,
+      data
+    )
+  },
+
+  removeBackgroundFromProduction(productionId, backgroundId) {
+    return client.pdel(
+      `/api/data/projects/${productionId}/settings/preview-background-files/${backgroundId}`
+    )
+  },
+
+  setDefaultBackgroundToProduction(productionId, backgroundId) {
+    return client.pput(`/api/data/projects/${productionId}`, {
+      default_preview_background_file_id: backgroundId
+    })
+  },
+
   addTaskTypeToProduction(productionId, taskTypeId, priority) {
     const data = { task_type_id: taskTypeId, priority }
     const path = `/api/data/projects/${productionId}/settings/task-types`
@@ -84,7 +104,7 @@ export default {
 
   removeTaskTypeFromProduction(productionId, taskTypeId) {
     const path = `/api/data/projects/${productionId}/settings/task-types/${taskTypeId}`
-    return client.pdel(path).catch(console.error)
+    return client.pdel(path)
   },
 
   addTaskStatusToProduction(productionId, taskStatusId) {

@@ -52,6 +52,22 @@ export default {
     }
   },
 
+  backgrounds: {
+    create_error: 'An error occurred while saving this background. Are you sure there is no background with a similar name?',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occurred while deleting this background. There are probably data linked to it. Are you sure this background has no task linked to it?',
+    name: 'background',
+    number: 'background | backgrounds',
+    edit_background: 'Edit background',
+    new_background: 'Add a new background',
+    title: 'Preview Backgrounds',
+    fields: {
+      is_default: 'Is default',
+      name: 'Name',
+      file: 'HDRi File',
+    }
+  },
+
   breakdown: {
     all_assets: 'All available assets',
     edit_label: 'Change the asset\'s label',
@@ -727,6 +743,7 @@ export default {
       comments: 'Show/Hide comments',
       delete: 'Delete playlist',
       display_revision: 'Display revision',
+      default: 'default',
       download: 'Download playlist',
       download_file: 'Download file',
       edit: 'Edit playlist',
@@ -756,6 +773,7 @@ export default {
       previous_shot: 'Previous entity',
       save_playlist: 'Save playlist',
       see_original_file: 'Open original file in a new tab',
+      select_background: 'Select a background',
       side_by_side: 'Side by side',
       speed: 'Change speed',
       split_screen: 'Compare with other task types',

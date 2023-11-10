@@ -142,6 +142,12 @@
               </router-link>
             </p>
             <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'backgrounds' }">
+                <image-icon size="0.9x" />
+                {{ $t('backgrounds.title') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
               <router-link :to="{ name: 'settings' }">
                 <settings-icon size="0.9x" />
                 {{ $t('settings.title') }}
@@ -177,6 +183,7 @@ import {
   FilmIcon,
   GitPullRequestIcon,
   HexagonIcon,
+  ImageIcon,
   ListIcon,
   PlayCircleIcon,
   SearchIcon,
@@ -197,6 +204,7 @@ export default {
     FilmIcon,
     GitPullRequestIcon,
     HexagonIcon,
+    ImageIcon,
     ListIcon,
     PlayCircleIcon,
     SearchIcon,

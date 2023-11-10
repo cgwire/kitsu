@@ -1,33 +1,23 @@
 <template>
-  <div class="field">
-    <span
-      :class="{
-        'bool-field': true,
-        flexrow: true,
-        'is-true': localValue
-      }"
-      :disabled="disabled"
-      @click="onClick"
-    >
-      <span class="icon-wrapper flexrow-item">
-        <check-icon
-          :title="$t('main.yes')"
-          class="true"
-          stroke-width="3"
-          v-show="localValue"
-        />
-        <x-icon
-          :title="$t('main.no')"
-          class="false"
-          stroke-width="3"
-          v-show="!localValue"
-        />
-      </span>
-      <span class="flexrow-item">
-        {{ label }}
-      </span>
+  <span
+    class="field bool-field flexrow"
+    :class="{ 'is-true': localValue }"
+    :disabled="disabled"
+    @click="onClick"
+  >
+    <span class="icon-wrapper flexrow-item">
+      <check-icon
+        :title="$t('main.yes')"
+        class="true"
+        stroke-width="3"
+        v-if="localValue"
+      />
+      <x-icon :title="$t('main.no')" class="false" stroke-width="3" v-else />
     </span>
-  </div>
+    <span class="flexrow-item">
+      {{ label }}
+    </span>
+  </span>
 </template>
 
 <script>
@@ -62,31 +52,23 @@ export default {
     }
   },
 
-  mounted() {
-    if (this.value === 'true') this.localValue = true
-  },
-
-  computed: {},
-
   methods: {
     emitValue() {
-      if (this.localValue) this.$emit('input', 'true')
-      else this.$emit('input', 'false')
-    },
-
-    emitEnter() {
-      this.emitValue()
+      this.$emit('input', this.localValue ? 'true' : 'false')
     },
 
     onClick() {
       this.localValue = !this.localValue
+      this.$emit('click', this.localValue ? 'true' : 'false')
     }
   },
 
   watch: {
-    value() {
-      if (this.value === 'true') this.localValue = true
-      else this.localValue = false
+    value: {
+      immediate: true,
+      handler() {
+        this.localValue = this.value === 'true'
+      }
     },
 
     localValue() {
@@ -113,11 +95,7 @@ export default {
   margin-right: 5px;
 }
 
-.false {
-}
-
 .field {
-  display: inline-block;
   margin-right: 0.5em;
 }
 
@@ -133,6 +111,10 @@ export default {
   padding: 0.5em 1.2em;
   text-transform: uppercase;
   transition: 0.3s ease all;
+
+  &[disabled] {
+    pointer-events: none;
+  }
 
   &.is-true {
     color: $light-green;
