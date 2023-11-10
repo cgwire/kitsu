@@ -54,12 +54,12 @@ export default {
 
   methods: {
     emitValue() {
-      if (this.localValue) this.$emit('input', 'true')
-      else this.$emit('input', 'false')
+      this.$emit('input', this.localValue ? 'true' : 'false')
     },
 
     onClick() {
       this.localValue = !this.localValue
+      this.$emit('click', this.localValue ? 'true' : 'false')
     }
   },
 

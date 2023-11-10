@@ -33,6 +33,11 @@
               {{ $t('status_automations.title') }}
             </a>
           </li>
+          <li :class="{ 'is-active': isActiveTab('backgrounds') }">
+            <a @click="activeTab = 'backgrounds'">
+              {{ $t('backgrounds.title') }}
+            </a>
+          </li>
         </ul>
       </div>
 
@@ -147,6 +152,10 @@
       <div class="tab" v-show="isActiveTab('statusAutomations')">
         <production-status-automations />
       </div>
+
+      <div class="tab" v-show="isActiveTab('backgrounds')">
+        <production-backgrounds />
+      </div>
     </div>
   </div>
 </template>
@@ -157,6 +166,7 @@ import { mapGetters, mapActions } from 'vuex'
 import BooleanCell from '@/components/cells/BooleanCell'
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
+import ProductionBackgrounds from '@/components/pages/production/ProductionBackgrounds'
 import ProductionBrief from '@/components/pages/production/ProductionBrief'
 import ProductionParameters from '@/components/pages/production/ProductionParameters'
 import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes'
@@ -169,6 +179,7 @@ export default {
     BooleanCell,
     Combobox,
     ComboboxStatus,
+    ProductionBackgrounds,
     ProductionBrief,
     ProductionParameters,
     ProductionTaskTypes,

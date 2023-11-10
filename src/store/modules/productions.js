@@ -34,6 +34,9 @@ import {
   TEAM_REMOVE_PERSON,
   PRODUCTION_ADD_ASSET_TYPE,
   PRODUCTION_REMOVE_ASSET_TYPE,
+  PRODUCTION_ADD_BACKGROUND,
+  PRODUCTION_REMOVE_BACKGROUND,
+  PRODUCTION_UPDATE_DEFAULT_BACKGROUND,
   PRODUCTION_ADD_TASK_TYPE,
   PRODUCTION_REMOVE_TASK_TYPE,
   PRODUCTION_ADD_TASK_STATUS,
@@ -168,6 +171,14 @@ const getters = {
         )
       )
     }
+  },
+
+  productionBackgrounds: (state, rootState) => {
+    return sortByName(
+      state.currentProduction.preview_background_files.map(id =>
+        rootState.backgroundMap.get(id)
+      )
+    )
   },
 
   productionTaskStatuses: (state, getters, rootState) => {
@@ -521,6 +532,38 @@ const actions = {
           })
         }
       })
+  },
+
+  async addBackgroundToProduction({ commit, state }, backgroundId) {
+    await productionsApi.addBackgroundToProduction(
+      state.currentProduction.id,
+      backgroundId
+    )
+    commit(PRODUCTION_ADD_BACKGROUND, backgroundId)
+  },
+
+  async removeBackgroundFromProduction({ commit, state }, backgroundId) {
+    try {
+      await productionsApi.removeBackgroundFromProduction(
+        state.currentProduction.id,
+        backgroundId
+      )
+      commit(PRODUCTION_REMOVE_BACKGROUND, backgroundId)
+    } catch (err) {
+      console.error(err)
+    }
+  },
+
+  async setDefaultBackgroundToProduction({ commit, state }, backgroundId) {
+    try {
+      await productionsApi.setDefaultBackgroundToProduction(
+        state.currentProduction.id,
+        backgroundId
+      )
+      commit(PRODUCTION_UPDATE_DEFAULT_BACKGROUND, backgroundId)
+    } catch (err) {
+      console.error(err)
+    }
   }
 }
 
@@ -590,7 +633,6 @@ const mutations = {
 
   [EDIT_PRODUCTION_START](state, data) {},
   [EDIT_PRODUCTION_ERROR](state) {},
-
   [EDIT_PRODUCTION_END](state, newProduction) {
     const productionStatus = state.productionStatusMap.get(
       newProduction.project_status_id
@@ -787,6 +829,26 @@ const mutations = {
 
   [PRODUCTION_REMOVE_ASSET_TYPE](state, assetTypeId) {
     removeFromIdList(state.currentProduction, 'asset_types', assetTypeId)
+  },
+
+  [PRODUCTION_ADD_BACKGROUND](state, backgroundId) {
+    addToIdList(
+      state.currentProduction,
+      'preview_background_files',
+      backgroundId
+    )
+  },
+
+  [PRODUCTION_REMOVE_BACKGROUND](state, backgroundId) {
+    removeFromIdList(
+      state.currentProduction,
+      'preview_background_files',
+      backgroundId
+    )
+  },
+
+  [PRODUCTION_UPDATE_DEFAULT_BACKGROUND](state, backgroundId) {
+    state.currentProduction.default_preview_background_file_id = backgroundId
   },
 
   [PRODUCTION_ADD_TASK_STATUS](state, taskStatusId) {

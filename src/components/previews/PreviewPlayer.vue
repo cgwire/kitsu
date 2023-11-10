@@ -352,6 +352,27 @@
           </div>
 
           <div class="flexrow" v-if="is3DModel">
+            <template v-if="productionBackgrounds.length">
+              <select
+                class="backgrounds flexrow-item"
+                v-model="currentBackground"
+                @change="onSharedObjectBackgroundSelected"
+              >
+                <option disabled value="">
+                  {{ $t('playlists.actions.select_background') }}
+                </option>
+                <option
+                  :key="background.id"
+                  :value="background"
+                  v-for="background in productionBackgrounds"
+                >
+                  {{ background.name }}
+                  <template v-if="isDefaultBackground(background)">
+                    ({{ $t('playlists.actions.default') }})
+                  </template>
+                </option>
+              </select>
+            </template>
             <button-simple
               class="flexrow-item"
               icon="upload"
@@ -501,6 +522,7 @@
 <script>
 import { fabric } from 'fabric'
 import { mapGetters, mapActions } from 'vuex'
+
 import {
   formatFrame,
   formatTime,
@@ -599,6 +621,7 @@ export default {
       currentIndex: 1,
       fullScreen: false,
       color: '#ff3860',
+      currentBackground: '',
       currentTime: '00:00.000',
       currentTimeRaw: 0,
       isObjectBackground: false,
@@ -674,6 +697,12 @@ export default {
       this.fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
     }
     new ResizeObserver(this.comparisonViewer.resize).observe(this.container)
+
+    if (this.is3DModel) {
+      this.currentBackground =
+        this.productionBackgrounds.find(this.isDefaultBackground) || ''
+      this.onSharedObjectBackgroundSelected()
+    }
   },
 
   beforeDestroy() {
@@ -686,6 +715,7 @@ export default {
       'currentProduction',
       'isCurrentUserArtist',
       'organisation',
+      'productionBackgrounds',
       'user'
     ]),
 
@@ -1339,6 +1369,19 @@ export default {
       this.objectBackgroundUrl = `${blobURL}#.hdr`
       this.isObjectBackground = true
       this.isEnvironmentSkybox = true
+      this.currentBackground = ''
+    },
+
+    onSharedObjectBackgroundSelected() {
+      this.objectBackgroundUrl = this.currentBackground?.url
+      this.isObjectBackground = true
+      this.isEnvironmentSkybox = true
+    },
+
+    isDefaultBackground(background) {
+      const defaultId =
+        this.currentProduction.default_preview_background_file_id
+      return defaultId ? background.id === defaultId : background.is_default
     },
 
     // Annotations
@@ -2185,6 +2228,13 @@ export default {
   background: $dark-grey-2;
 }
 
+.backgrounds {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.backgrounds,
 .entity-name {
   color: $light-grey;
 }

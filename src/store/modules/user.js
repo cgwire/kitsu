@@ -61,6 +61,7 @@ import {
   SAVE_SHOT_SEARCH_END,
   REMOVE_ASSET_SEARCH_END,
   LOAD_PRODUCTION_STATUS_END,
+  LOAD_BACKGROUNDS_END,
   LOAD_DEPARTMENTS_END,
   LOAD_TASK_STATUSES_END,
   LOAD_TASK_TYPES_END,
@@ -383,12 +384,13 @@ const actions = {
     commit(SET_TODO_LIST_SCROLL_POSITION, scrollPosition)
   },
 
-  loadContext({ commit, rootGetters }, callback) {
+  loadContext({ commit, rootGetters }) {
     return peopleApi.getContext().then(context => {
       commit(LOAD_USER_FILTERS_END, context.search_filters)
       commit(LOAD_USER_FILTER_GROUPS_END, context.search_filter_groups)
       commit(LOAD_PRODUCTION_STATUS_END, context.project_status)
       commit(LOAD_DEPARTMENTS_END, context.departments)
+      commit(LOAD_BACKGROUNDS_END, context.preview_background_files)
       commit(LOAD_TASK_STATUSES_END, context.task_status)
       commit(LOAD_PEOPLE_END, {
         people: context.persons,

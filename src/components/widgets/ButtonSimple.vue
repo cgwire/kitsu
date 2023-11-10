@@ -10,6 +10,7 @@
     }"
     :disabled="disabled"
     :title="title"
+    :type="type"
     @click="$emit('click')"
   >
     <grid-icon :class="iconClass" v-if="icon === 'grid'" />
@@ -203,6 +204,10 @@ export default {
     title: {
       default: '',
       type: String
+    },
+    type: {
+      type: String,
+      validator: value => ['submit', 'button', 'reset'].includes(value)
     }
   },
 

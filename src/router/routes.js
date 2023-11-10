@@ -21,56 +21,57 @@ import TaskType from '@/components/pages/TaskType'
 import Todos from '@/components/pages/Todos'
 import Edits from '@/components/pages/Edits'
 
-const AssetTypes = () => import('@/components/pages/AssetTypes.vue')
 const Asset = () => import('@/components/pages/Asset.vue')
+const AssetTypes = () => import('@/components/pages/AssetTypes.vue')
+const Backgrounds = () => import('@/components/pages/Backgrounds.vue')
 const Breakdown = () => import('@/components/pages/Breakdown.vue')
 const CustomActions = () => import('@/components/pages/CustomActions.vue')
-const FirstConnection = () => import('@/components/pages/FirstConnection.vue')
-const Episodes = () => import('@/components/pages/Episodes.vue')
+const Departments = () =>
+  import('@/components/pages/departments/Departments.vue')
+const Edit = () => import('@/components/pages/Edit.vue')
+const EntitySearch = () => import('@/components/pages/EntitySearch.vue')
 const Episode = () => import('@/components/pages/Episode.vue')
+const Episodes = () => import('@/components/pages/Episodes.vue')
 const EpisodeStats = () => import('@/components/pages/EpisodeStats.vue')
+const FirstConnection = () => import('@/components/pages/FirstConnection.vue')
+const Logs = () => import('@/components/pages/Logs.vue')
 const MainSchedule = () => import('@/components/pages/MainSchedule.vue')
 const MyChecks = () => import('@/components/pages/MyChecks.vue')
 const NotFound = () => import('@/components/pages/NotFound.vue')
-const Person = () => import('@/components/pages/Person.vue')
 const People = () => import('@/components/pages/People.vue')
+const Person = () => import('@/components/pages/Person.vue')
 const Playlist = () => import('@/components/pages/Playlist.vue')
-const Productions = () => import('@/components/pages/Productions.vue')
 const ProductionAssetTypes = () =>
   import('@/components/pages/ProductionAssetTypes.vue')
+const ProductionQuota = () => import('@/components/pages/ProductionQuota.vue')
+const Productions = () => import('@/components/pages/Productions.vue')
 const ProductionSchedule = () =>
   import('@/components/pages/ProductionSchedule.vue')
-const ProductionQuota = () => import('@/components/pages/ProductionQuota.vue')
 const ProductionSettings = () =>
   import('@/components/pages/ProductionSettings.vue')
 const Profile = () => import('@/components/pages/Profile.vue')
 const ResetPassword = () => import('@/components/pages/ResetPassword.vue')
 const ResetChangePassword = () =>
   import('@/components/pages/ResetChangePassword.vue')
-const Logs = () => import('@/components/pages/Logs.vue')
-const EntitySearch = () => import('@/components/pages/EntitySearch.vue')
-const ServerDown = () => import('@/components/pages/ServerDown.vue')
-const Settings = () => import('@/components/pages/Settings.vue')
 const Sequence = () => import('@/components/pages/Sequence.vue')
 const Sequences = () => import('@/components/pages/Sequences.vue')
 const SequenceStats = () => import('@/components/pages/SequenceStats.vue')
+const ServerDown = () => import('@/components/pages/ServerDown.vue')
+const Settings = () => import('@/components/pages/Settings.vue')
 const Shot = () => import('@/components/pages/Shot.vue')
 const StatusAutomations = () =>
   import('@/components/pages/StatusAutomations.vue')
 const Task = () => import('@/components/pages/Task.vue')
-const Team = () => import('@/components/pages/Team.vue')
-import TeamSchedule from '@/components/pages/TeamSchedule'
-const Timesheets = () => import('@/components/pages/Timesheets.vue')
-
 const TaskStatus = () => import('@/components/pages/TaskStatus.vue')
 const TaskTypes = () => import('@/components/pages/TaskTypes.vue')
-const Departments = () =>
-  import('@/components/pages/departments/Departments.vue')
+const Team = () => import('@/components/pages/Team.vue')
+const TeamSchedule = () => import('@/components/pages/TeamSchedule')
+const Timesheets = () => import('@/components/pages/Timesheets.vue')
 const WrongBrowser = () => import('@/components/pages/WrongBrowser.vue')
-const Edit = () => import('@/components/pages/Edit.vue')
 
 const ADMIN_PAGES = [
   'asset-types',
+  'backgrounds',
   'custom-actions',
   'status-automations',
   'departments',
@@ -193,6 +194,12 @@ export const routes = [
             component: AssetTypes
           }
         ]
+      },
+
+      {
+        path: 'backgrounds',
+        component: Backgrounds,
+        name: 'backgrounds'
       },
 
       {
