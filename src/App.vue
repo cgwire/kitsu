@@ -76,15 +76,6 @@ export default {
     this.setMainConfig()
   },
 
-  metaInfo: {
-    link: [
-      {
-        rel: 'icon',
-        href: '/static/favicon.ico'
-      }
-    ]
-  },
-
   methods: {
     ...mapActions([
       'getOrganisation',

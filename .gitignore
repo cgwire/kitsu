@@ -53,3 +53,6 @@ tests/test-bundle.js
 # Custom
 TODO
 QA
+
+# Cache
+.eslintcache

@@ -63,7 +63,7 @@ export default {
 
   data() {
     return {
-      activeTab: 'actived',
+      activeTab: 'active',
       taskStatusToDelete: null,
       taskStatusToEdit: { color: '#000000' },
       modals: {
@@ -98,7 +98,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['taskStatus', 'archivedTaskStatus', 'taskStatusMap']),
+    ...mapGetters(['archivedTaskStatus', 'taskStatus']),
 
     taskStatusList() {
       return this.activeTab === 'active'
@@ -121,7 +121,7 @@ export default {
       }
 
       this.loading.edit = true
-      this.loading.del = false
+      this.errors.edit = false
       this.$store
         .dispatch(action, form)
         .then(() => {
@@ -177,7 +177,7 @@ export default {
 
   watch: {
     $route() {
-      this.activeTab = this.$route.query.tab || 'actived'
+      this.activeTab = this.$route.query.tab || 'active'
     }
   },
 
