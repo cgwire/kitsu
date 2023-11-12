@@ -161,7 +161,7 @@
           {{ $t('entities.build_filter.assignation') }}
         </h3>
 
-        <div class="flexrow" v-if="!isCurrentUserVendor">
+        <div class="flexrow assignation-filter" v-if="!isCurrentUserVendor">
           <combobox
             class="flexrow-item"
             :options="assignation.options"
@@ -169,19 +169,30 @@
             v-model="assignation.value"
           />
 
-          <combobox-task-type
-            class="flexrow-item"
-            :task-type-list="taskTypeList"
-            v-model="assignation.taskTypeId"
-            v-if="['assigned', 'unassigned'].includes(assignation.value)"
-          />
+          <div class="flexcolumn">
+            <people-field
+              class="flexrow-item assignation-person"
+              :people="team"
+              big
+              v-model="assignation.person"
+              v-if="['assignedto', '-assignedto'].includes(assignation.value)"
+            />
+            <span class="flexrow-item"> on </span>
 
-          <people-field
-            class="flexrow-item"
-            :people="team"
-            v-model="assignation.person"
-            v-if="['assignedto', '-assignedto'].includes(assignation.value)"
-          />
+            <combobox-task-type
+              class="flexrow-item"
+              :task-type-list="taskTypeList"
+              v-model="assignation.taskTypeId"
+              v-if="
+                [
+                  'assigned',
+                  'unassigned',
+                  'assignedto',
+                  '-assignedto'
+                ].includes(assignation.value)
+              "
+            />
+          </div>
         </div>
 
         <h3 class="subtitle">
@@ -538,8 +549,9 @@ export default {
       if (this.assignation.value !== 'nofilter') {
         if (this.assignation.person) {
           let value = this.assignation.person.name
+          const taskType = this.taskTypeMap.get(this.assignation.taskTypeId)
           if (this.assignation.value === '-assignedto') value = `-${value}`
-          query += ` assignedto=[${value}]`
+          query += ` assignedto[${taskType.name}]=[${value}]`
         } else if (this.assignation.taskTypeId) {
           const taskType = this.taskTypeMap.get(this.assignation.taskTypeId)
           const value =
@@ -795,8 +807,10 @@ export default {
     },
 
     setFiltersFromAssignedToQuery(filter) {
+      console.log(filter)
       this.assignation.value = filter.excluding ? '-assignedto' : 'assignedto'
       this.assignation.person = this.people.find(p => p.id === filter.personId)
+      this.assignation.taskTypeId = filter.taskType?.id
     },
 
     setFiltersFromThumbnailQuery(filter) {
@@ -904,5 +918,17 @@ export default {
 .value-column {
   flex-direction: column;
   align-items: flex-start;
+}
+
+.assignation-filter {
+  align-items: flex-start;
+
+  input {
+    line-height: 30px;
+  }
+}
+
+.assignation-person {
+  margin-bottom: 0.5em;
 }
 </style>

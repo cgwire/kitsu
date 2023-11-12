@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
@@ -24,17 +26,22 @@ describe('BuildFilterModal', () => {
       getters: {
         assetMetadataDescriptors: () => [
           {
-            id: 'descriptor-1', name: 'Difficulty', choices: ['easy', 'hard']
+            id: 'descriptor-1',
+            name: 'Difficulty',
+            choices: ['easy', 'hard']
           },
           { id: 'descriptor-2', name: 'Size' }
         ],
-        assetSearchText: (state) => state.assetSearchText,
+        assetSearchText: state => state.assetSearchText,
         assetValidationColumns: () => ['task-type-1', 'task-type-2'],
-        assetTypeMap: () => new Map(Object.entries({
-          'asset-type-1': { id: 'asset-type-1', name: 'chars' },
-          'asset-type-2': { id: 'asset-type-2', name: 'sets' },
-          'asset-type-3': { id: 'asset-type-3', name: 'props' }
-        })),
+        assetTypeMap: () =>
+          new Map(
+            Object.entries({
+              'asset-type-1': { id: 'asset-type-1', name: 'chars' },
+              'asset-type-2': { id: 'asset-type-2', name: 'sets' },
+              'asset-type-3': { id: 'asset-type-3', name: 'props' }
+            })
+          ),
         assetTypes: () => [
           { id: 'asset-type-1', name: 'chars' },
           { id: 'asset-type-2', name: 'sets' },
@@ -42,10 +49,12 @@ describe('BuildFilterModal', () => {
         ]
       },
       mutations: {
-        CHANGE_SEARCH: (state, query) => { state.assetSearchText = query }
+        CHANGE_SEARCH: (state, query) => {
+          state.assetSearchText = query
+        }
       },
       actions: {
-        changeSearch ({ commit, state }, query) {
+        changeSearch({ commit, state }, query) {
           commit('CHANGE_SEARCH', query)
         }
       }
@@ -69,11 +78,14 @@ describe('BuildFilterModal', () => {
           { id: 'person-2', name: 'James', active: true },
           { id: 'person-3', name: 'Ema', active: true }
         ],
-        personMap: () => new Map(Object.entries({
-          'person-1': { id: 'person-1', name: 'John', active: true },
-          'person-2': { id: 'person-2', name: 'James', active: true },
-          'person-3': { id: 'person-3', name: 'Ema', active: true }
-        }))
+        personMap: () =>
+          new Map(
+            Object.entries({
+              'person-1': { id: 'person-1', name: 'John', active: true },
+              'person-2': { id: 'person-2', name: 'James', active: true },
+              'person-3': { id: 'person-3', name: 'Ema', active: true }
+            })
+          )
       },
       actions: {}
     }
@@ -90,17 +102,23 @@ describe('BuildFilterModal', () => {
           { id: 'task-status-2', short_name: 'WIP' },
           { id: 'task-status-3', short_name: 'Retake' }
         ],
-        taskTypeMap: () => new Map(Object.entries({
-          'task-type-1': { id: 'task-type-1', name: 'Modeling' },
-          'task-type-2': { id: 'task-type-2', name: 'Rigging' },
-          'task-type-3': { id: 'task-type-3', name: 'Layout' },
-          'task-type-4': { id: 'task-type-4', name: 'Animation' }
-        })),
-        taskStatusMap: () => new Map(Object.entries({
-          'task-status-1': { id: 'task-status-1', short_name: 'WFA' },
-          'task-status-2': { id: 'task-status-2', short_name: 'WIP' },
-          'task-status-3': { id: 'task-status-3', short_name: 'Retake' }
-        }))
+        taskTypeMap: () =>
+          new Map(
+            Object.entries({
+              'task-type-1': { id: 'task-type-1', name: 'Modeling' },
+              'task-type-2': { id: 'task-type-2', name: 'Rigging' },
+              'task-type-3': { id: 'task-type-3', name: 'Layout' },
+              'task-type-4': { id: 'task-type-4', name: 'Animation' }
+            })
+          ),
+        taskStatusMap: () =>
+          new Map(
+            Object.entries({
+              'task-status-1': { id: 'task-status-1', short_name: 'WFA' },
+              'task-status-2': { id: 'task-status-2', short_name: 'WIP' },
+              'task-status-3': { id: 'task-status-3', short_name: 'Retake' }
+            })
+          )
       },
       actions: {}
     }
@@ -132,43 +150,45 @@ describe('BuildFilterModal', () => {
       wrapper.findComponent(BuildFilterModal)
     })
     describe('mount with query', () => {
-      it('task types', () => new Promise(done => {
-        expect(wrapper.find('.task-type-filter').exists()).toBeFalsy()
-        wrapper.setData({
-          taskTypeFilters: {
-            values: [
-              {
-                id: 'task-type-1',
-                operator: '=',
-                values: ['task-status-2']
-              }
-            ]
-          }
-        })
-        wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.find('.task-type-filter').exists()).toBeTruthy()
-          done()
-        })
-      }))
-      it('descriptors', () => new Promise(done => {
-        expect(wrapper.find('.descriptor-filter').exists()).toBeFalsy()
-        wrapper.setData({
-          metadataDescriptorFilters: {
-            values: [
-              {
-                id: 'descriptor-1',
-                operator: '=',
-                values: ['easy'],
-                is_checklist: false
-              }
-            ]
-          }
-        })
-        wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.find('.descriptor-filter').exists()).toBeTruthy()
-          done()
-        })
-      }))
+      it('task types', () =>
+        new Promise(done => {
+          expect(wrapper.find('.task-type-filter').exists()).toBeFalsy()
+          wrapper.setData({
+            taskTypeFilters: {
+              values: [
+                {
+                  id: 'task-type-1',
+                  operator: '=',
+                  values: ['task-status-2']
+                }
+              ]
+            }
+          })
+          wrapper.vm.$nextTick().then(() => {
+            expect(wrapper.find('.task-type-filter').exists()).toBeTruthy()
+            done()
+          })
+        }))
+      it('descriptors', () =>
+        new Promise(done => {
+          expect(wrapper.find('.descriptor-filter').exists()).toBeFalsy()
+          wrapper.setData({
+            metadataDescriptorFilters: {
+              values: [
+                {
+                  id: 'descriptor-1',
+                  operator: '=',
+                  values: ['easy'],
+                  is_checklist: false
+                }
+              ]
+            }
+          })
+          wrapper.vm.$nextTick().then(() => {
+            expect(wrapper.find('.descriptor-filter').exists()).toBeTruthy()
+            done()
+          })
+        }))
     })
   })
 
@@ -352,21 +372,26 @@ describe('BuildFilterModal', () => {
             wrapper.setData({
               assignation: {
                 value: 'assignedto',
-                person: { id: 'person-1', name: 'John' }
+                taskTypeId: 'task-type-1',
+                person: {
+                  id: 'person-1',
+                  name: 'John'
+                }
               }
             })
             const query = wrapper.vm.buildFilter()
-            expect(query).toBe('assignedto=[John]')
+            expect(query).toBe('assignedto[Modeling]=[John]')
           })
           it('not assigned to', () => {
             wrapper.setData({
               assignation: {
                 value: '-assignedto',
+                taskTypeId: 'task-type-1',
                 person: { id: 'person-1', name: 'John' }
               }
             })
             const query = wrapper.vm.buildFilter()
-            expect(query).toBe('assignedto=[-John]')
+            expect(query).toBe('assignedto[Modeling]=[-John]')
           })
         })
         describe('thumbnail', () => {
@@ -394,22 +419,26 @@ describe('BuildFilterModal', () => {
             wrapper.setData({
               assignation: {
                 value: 'assignedto',
+                taskTypeId: 'task-type-1',
                 person: { id: 'person-1', name: 'John' }
               },
               union: 'or'
             })
             const query = wrapper.vm.buildFilter()
-            expect(query).toBe('+(assignedto=[John])')
+            expect(query).toBe('+(assignedto[Modeling]=[John])')
           })
         })
       })
 
       describe('Set values from query', () => {
-        const changeSearch = (query) => {
-          assetStore.actions.changeSearch({
-            commit: store.commit,
-            state: store.state
-          }, query)
+        const changeSearch = query => {
+          assetStore.actions.changeSearch(
+            {
+              commit: store.commit,
+              state: store.state
+            },
+            query
+          )
         }
 
         describe('task types', () => {
@@ -499,15 +528,16 @@ describe('BuildFilterModal', () => {
             expect(wrapper.vm.assignation.taskTypeId).toBe('task-type-1')
           })
           it('assigned to', () => {
-            changeSearch('assignedto=[John]')
+            changeSearch('assignedto[Modeling]=[John]')
             wrapper.vm.setFiltersFromCurrentQuery()
             expect(wrapper.vm.assignation.value).toBe('assignedto')
             expect(wrapper.vm.assignation.person.id).toBe('person-1')
           })
           it('not assigned to', () => {
-            changeSearch('assignedto=[-John]')
+            changeSearch('assignedto[Modeling]=[-John]')
             wrapper.vm.setFiltersFromCurrentQuery()
             expect(wrapper.vm.assignation.value).toBe('-assignedto')
+            expect(wrapper.vm.assignation.taskTypeId).toBe('task-type-1')
             expect(wrapper.vm.assignation.person.id).toBe('person-1')
           })
         })
@@ -541,11 +571,13 @@ describe('BuildFilterModal', () => {
         it('add', () => {
           expect(wrapper.vm.taskTypeFilters.values).toHaveLength(0)
           wrapper.vm.addTaskTypeFilter()
-          expect(wrapper.vm.taskTypeFilters.values).toStrictEqual([{
-            id: 'task-type-1',
-            operator: '=',
-            values: ['task-status-1']
-          }])
+          expect(wrapper.vm.taskTypeFilters.values).toStrictEqual([
+            {
+              id: 'task-type-1',
+              operator: '=',
+              values: ['task-status-1']
+            }
+          ])
           wrapper.vm.addTaskTypeFilter()
           expect(wrapper.vm.taskTypeFilters.values).toHaveLength(2)
         })
@@ -562,12 +594,14 @@ describe('BuildFilterModal', () => {
         it('add', () => {
           expect(wrapper.vm.taskTypeFilters.values).toHaveLength(0)
           wrapper.vm.addDescriptorFilter()
-          expect(wrapper.vm.metadataDescriptorFilters.values).toStrictEqual([{
-            id: 'descriptor-1',
-            operator: '=',
-            values: ['easy'],
-            is_checklist: false
-          }])
+          expect(wrapper.vm.metadataDescriptorFilters.values).toStrictEqual([
+            {
+              id: 'descriptor-1',
+              operator: '=',
+              values: ['easy'],
+              is_checklist: false
+            }
+          ])
           wrapper.vm.addDescriptorFilter()
           expect(wrapper.vm.metadataDescriptorFilters.values).toHaveLength(2)
         })

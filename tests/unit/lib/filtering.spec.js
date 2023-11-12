@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+
 import {
   applyFilters,
   getKeyWords,
@@ -16,9 +18,7 @@ describe('lib/filtering', () => {
     })
 
     it('no keyword query', () => {
-      const keyWords = getKeyWords(
-        'modeling=wip -bunnyfat'
-      )
+      const keyWords = getKeyWords('modeling=wip -bunnyfat')
       expect(keyWords).toEqual([])
     })
 
@@ -30,20 +30,14 @@ describe('lib/filtering', () => {
 
   describe('getMultipleKeyWords', () => {
     it('multiple query', () => {
-      let keyWords = getMultipleKeyWords(
-        '[chars,bunny,with space]'
-      )
+      let keyWords = getMultipleKeyWords('[chars,bunny,with space]')
       expect(keyWords).toEqual(['chars', 'bunny', 'with space'])
-      keyWords = getMultipleKeyWords(
-        '[chars]'
-      )
+      keyWords = getMultipleKeyWords('[chars]')
       expect(keyWords).toEqual(['chars'])
     })
 
     it('no keyword query', () => {
-      const keyWords = getKeyWords(
-        'modeling=wip -bunnyfat'
-      )
+      const keyWords = getKeyWords('modeling=wip -bunnyfat')
       expect(keyWords).toEqual([])
     })
 
@@ -52,7 +46,6 @@ describe('lib/filtering', () => {
       expect(keyWords).toEqual([])
     })
   })
-
 
   describe('getExcludingKeyWords', () => {
     it('classic query', () => {
@@ -63,9 +56,7 @@ describe('lib/filtering', () => {
     })
 
     it('no excluding keyword query', () => {
-      const keyWords = getExcludingKeyWords(
-        'chars bunny'
-      )
+      const keyWords = getExcludingKeyWords('chars bunny')
       expect(keyWords).toEqual([])
     })
 
@@ -104,7 +95,6 @@ describe('lib/filtering', () => {
         name: 'BG',
         id: 'task-type-5'
       }
-
     ]
     const descriptors = [
       {
@@ -117,7 +107,6 @@ describe('lib/filtering', () => {
         name: 'Modeling infos',
         field_name: 'modeling_infos'
       }
-
     ]
     const persons = [
       {
@@ -412,7 +401,7 @@ describe('lib/filtering', () => {
       expect(filters[0].excluding).toEqual(true)
     })
 
-    it('assignedto=[John Doe] in query case', () => {
+    it('assignedto[Modeling]=[John Doe] in query case', () => {
       const filters = getFilters({
         entryIndex,
         assetTypes,
@@ -420,11 +409,12 @@ describe('lib/filtering', () => {
         taskStatuses,
         descriptors,
         persons,
-        query: 'assignedto=[John Doe]'
+        query: 'assignedto[Modeling]=[John Doe]'
       })
       expect(filters).toHaveLength(1)
       expect(filters[0].type).toEqual('assignedto')
       expect(filters[0].personId).toEqual('person-1')
+      expect(filters[0].taskType.id).toEqual('task-type-2')
       expect(filters[0].excluding).toEqual(false)
     })
 
@@ -557,56 +547,60 @@ describe('lib/filtering', () => {
         episode_name: 'E02',
         id: 'shot-5',
         data: { color: 'red' },
-        validations: new Map(
-          [['task-type-1', 'task-5'], ['task-type-3', 'task-6'], ['task-type-4', 'task-7']]
-        ),
+        validations: new Map([
+          ['task-type-1', 'task-5'],
+          ['task-type-3', 'task-6'],
+          ['task-type-4', 'task-7']
+        ]),
         tasks: ['task-5', 'task-6']
       }
     ]
-    const taskMap = new Map(Object.entries({
-      'task-1': {
-        id: 'task-1',
-        assignees: [],
-        task_status_id: 'task-status-1',
-        priority: 0
-      },
-      'task-2': {
-        id: 'task-2',
-        assignees: ['person-1'],
-        task_status_id: 'task-status-1',
-        priority: 0
-      },
-      'task-3': {
-        id: 'task-3',
-        assignees: ['person-1', 'person-2'],
-        task_status_id: 'task-status-1',
-        priority: 3
-      },
-      'task-4': {
-        id: 'task-4',
-        assignees: [],
-        task_status_id: 'task-status-2',
-        priority: 0
-      },
-      'task-5': {
-        id: 'task-5',
-        assignees: [],
-        task_status_id: 'task-status-2',
-        priority: 0
-      },
-      'task-6': {
-        id: 'task-6',
-        assignees: [],
-        task_status_id: 'task-status-1',
-        priority: 0
-      },
-      'task-7': {
-        id: 'task-7',
-        assignees: [],
-        task_status_id: 'task-status-2',
-        priority: 0
-      }
-    }))
+    const taskMap = new Map(
+      Object.entries({
+        'task-1': {
+          id: 'task-1',
+          assignees: [],
+          task_status_id: 'task-status-1',
+          priority: 0
+        },
+        'task-2': {
+          id: 'task-2',
+          assignees: ['person-1'],
+          task_status_id: 'task-status-1',
+          priority: 0
+        },
+        'task-3': {
+          id: 'task-3',
+          assignees: ['person-1', 'person-2'],
+          task_status_id: 'task-status-1',
+          priority: 3
+        },
+        'task-4': {
+          id: 'task-4',
+          assignees: [],
+          task_status_id: 'task-status-2',
+          priority: 0
+        },
+        'task-5': {
+          id: 'task-5',
+          assignees: [],
+          task_status_id: 'task-status-2',
+          priority: 0
+        },
+        'task-6': {
+          id: 'task-6',
+          assignees: [],
+          task_status_id: 'task-status-1',
+          priority: 0
+        },
+        'task-7': {
+          id: 'task-7',
+          assignees: [],
+          task_status_id: 'task-status-2',
+          priority: 0
+        }
+      })
+    )
     const descriptors = [
       {
         id: 'descriptor-1',
@@ -623,11 +617,7 @@ describe('lib/filtering', () => {
           type: 'status'
         }
       ]
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(3)
     })
 
@@ -639,21 +629,13 @@ describe('lib/filtering', () => {
           type: 'status'
         }
       ]
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(1)
     })
 
     it('empty filter', () => {
       const filters = []
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(5)
     })
 
@@ -670,11 +652,7 @@ describe('lib/filtering', () => {
           type: 'status'
         }
       ]
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(1)
     })
 
@@ -692,12 +670,7 @@ describe('lib/filtering', () => {
         }
       ]
       filters.union = true
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap,
-        true
-      )
+      const results = applyFilters(entries, filters, taskMap, true)
       expect(results).toHaveLength(2)
     })
 
@@ -709,11 +682,7 @@ describe('lib/filtering', () => {
           type: 'status'
         }
       ]
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(5)
     })
 
@@ -725,11 +694,7 @@ describe('lib/filtering', () => {
           type: 'assignation'
         }
       ]
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(3)
     })
 
@@ -741,11 +706,7 @@ describe('lib/filtering', () => {
           type: 'assignation'
         }
       ]
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(2)
     })
 
@@ -758,11 +719,7 @@ describe('lib/filtering', () => {
           type: 'exclusion'
         }
       ]
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(4)
     })
 
@@ -774,11 +731,7 @@ describe('lib/filtering', () => {
           type: 'descriptor'
         }
       ]
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(3)
     })
 
@@ -790,11 +743,7 @@ describe('lib/filtering', () => {
           type: 'descriptor'
         }
       ]
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(1)
     })
 
@@ -806,11 +755,7 @@ describe('lib/filtering', () => {
           type: 'descriptor'
         }
       ]
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(4)
     })
 
@@ -821,11 +766,7 @@ describe('lib/filtering', () => {
           type: 'thumbnail'
         }
       ]
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(2)
     })
 
@@ -836,11 +777,7 @@ describe('lib/filtering', () => {
           type: 'thumbnail'
         }
       ]
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(3)
     })
 
@@ -852,11 +789,7 @@ describe('lib/filtering', () => {
           excluding: false
         }
       ]
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(2)
     })
 
@@ -865,14 +798,10 @@ describe('lib/filtering', () => {
         {
           type: 'priority',
           taskTypeId: 'task-type-1',
-          value: 3,
+          value: 3
         }
       ]
-      const results = applyFilters(
-        entries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(entries, filters, taskMap)
       expect(results).toHaveLength(1)
     })
 
@@ -881,7 +810,7 @@ describe('lib/filtering', () => {
         {
           name: 'Bunny',
           id: 'asset-1',
-          data: { },
+          data: {},
           validations: new Map([['task-type-1', 'task-1']]),
           tasks: ['task-1'],
           ready_for: 'task-type-1'
@@ -889,7 +818,7 @@ describe('lib/filtering', () => {
         {
           name: 'Lama',
           id: 'asset-1',
-          data: { },
+          data: {},
           validations: new Map([['task-type-1', 'task-1']]),
           tasks: ['task-1'],
           ready_for: 'task-type-2'
@@ -901,11 +830,7 @@ describe('lib/filtering', () => {
           value: 'task-type-1'
         }
       ]
-      const results = applyFilters(
-        assetEntries,
-        filters,
-        taskMap
-      )
+      const results = applyFilters(assetEntries, filters, taskMap)
       expect(results).toHaveLength(1)
     })
   })
