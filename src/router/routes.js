@@ -26,8 +26,7 @@ const AssetTypes = () => import('@/components/pages/AssetTypes.vue')
 const Backgrounds = () => import('@/components/pages/Backgrounds.vue')
 const Breakdown = () => import('@/components/pages/Breakdown.vue')
 const CustomActions = () => import('@/components/pages/CustomActions.vue')
-const Departments = () =>
-  import('@/components/pages/departments/Departments.vue')
+const Departments = () => import('@/components/pages/Departments.vue')
 const Edit = () => import('@/components/pages/Edit.vue')
 const EntitySearch = () => import('@/components/pages/EntitySearch.vue')
 const Episode = () => import('@/components/pages/Episode.vue')
@@ -181,20 +180,8 @@ export const routes = [
 
       {
         path: 'asset-types',
-        component: AssetTypes,
-        children: [
-          { path: 'new', component: AssetTypes },
-          {
-            name: 'edit-asset-type',
-            path: 'edit/:asset_type_id',
-            component: AssetTypes
-          },
-          {
-            name: 'delete-asset-type',
-            path: 'delete/:asset_type_id',
-            component: AssetTypes
-          }
-        ]
+        name: 'asset-types',
+        component: AssetTypes
       },
 
       {
@@ -205,54 +192,20 @@ export const routes = [
 
       {
         path: 'departments',
-        component: Departments,
-        name: 'departments'
+        name: 'departments',
+        component: Departments
       },
 
       {
         name: 'custom-actions',
         path: 'custom-actions',
-        component: CustomActions,
-        children: [
-          {
-            name: 'custom-actions-new',
-            path: 'new',
-            component: CustomActions
-          },
-          {
-            name: 'edit-custom-action',
-            path: 'edit/:custom_action_id',
-            component: CustomActions
-          },
-          {
-            name: 'delete-custom-action',
-            path: 'delete/:custom_action_id',
-            component: CustomActions
-          }
-        ]
+        component: CustomActions
       },
 
       {
         name: 'status-automations',
         path: 'status-automations',
-        component: StatusAutomations,
-        children: [
-          {
-            name: 'status-automations-new',
-            path: 'new',
-            component: StatusAutomations
-          },
-          {
-            name: 'edit-status-automation',
-            path: 'edit/:status_automation_id',
-            component: StatusAutomations
-          },
-          {
-            name: 'delete-status-automation',
-            path: 'delete/:status_automation_id',
-            component: StatusAutomations
-          }
-        ]
+        component: StatusAutomations
       },
 
       {
@@ -282,20 +235,7 @@ export const routes = [
       {
         path: 'people',
         component: People,
-        name: 'people',
-        children: [
-          { path: 'new', component: People, name: 'new-people' },
-          {
-            path: 'edit/:person_id',
-            component: People,
-            name: 'edit-person'
-          },
-          {
-            name: 'delete-person',
-            path: 'delete/:person_id',
-            component: People
-          }
-        ]
+        name: 'people'
       },
 
       {
@@ -399,45 +339,14 @@ export const routes = [
       {
         name: 'task-types',
         path: 'task-types',
-        component: TaskTypes,
-        children: [
-          { path: 'new', component: TaskTypes },
-          {
-            name: 'edit-task-type',
-            path: 'edit/:task_type_id',
-            component: TaskTypes
-          },
-          {
-            name: 'delete-task-type',
-            path: 'delete/:task_type_id',
-            component: TaskTypes
-          }
-        ]
+        component: TaskTypes
       },
 
       {
         name: 'task-status',
         path: 'task-status',
-        component: TaskStatus,
-        children: [
-          {
-            name: 'new-task-status',
-            path: 'new',
-            component: TaskStatus
-          },
-          {
-            name: 'edit-task-status',
-            path: 'edit/:task_status_id',
-            component: TaskStatus
-          },
-          {
-            name: 'delete-task-status',
-            path: 'delete/:task_status_id',
-            component: TaskStatus
-          }
-        ]
+        component: TaskStatus
       },
-
       {
         path: 'my-tasks',
         component: Todos,
