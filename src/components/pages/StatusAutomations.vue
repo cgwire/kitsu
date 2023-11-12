@@ -6,8 +6,16 @@
       @new-clicked="onNewClicked"
     />
 
+    <route-tabs
+      class="mt2"
+      :active-tab="activeTab"
+      :tabs="tabs"
+      route-name="status-automations"
+    />
+
     <status-automation-list
-      :entries="statusAutomations"
+      class="status-automation-list"
+      :entries="statusAutomationsList"
       :is-editable="true"
       :is-loading="loading.list"
       :is-error="errors.list"
@@ -38,10 +46,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import StatusAutomationList from '@/components/lists/StatusAutomationList'
 import DeleteModal from '@/components/modals/DeleteModal'
 import EditStatusAutomationModal from '@/components/modals/EditStatusAutomationModal'
 import ListPageHeader from '@/components/widgets/ListPageHeader'
+import RouteTabs from '@/components/widgets/RouteTabs'
+import StatusAutomationList from '@/components/lists/StatusAutomationList'
 
 export default {
   name: 'status-automations',
@@ -50,11 +59,13 @@ export default {
     DeleteModal,
     EditStatusAutomationModal,
     ListPageHeader,
+    RouteTabs,
     StatusAutomationList
   },
 
   data() {
     return {
+      activeTab: 'active',
       modals: {
         edit: false,
         del: false
@@ -69,13 +80,31 @@ export default {
         del: false,
         list: false
       },
+      tabs: [
+        {
+          name: 'active',
+          label: this.$t('main.active')
+        },
+        {
+          name: 'archived',
+          label: this.$t('main.archived')
+        }
+      ],
       statusAutomationToDelete: null,
       statusAutomationToEdit: null
     }
   },
 
   computed: {
-    ...mapGetters(['statusAutomations']),
+    ...mapGetters(['statusAutomations', 'archivedStatusAutomations']),
+
+    statusAutomationsList() {
+      if (this.activeTab === 'active') {
+        return this.statusAutomations
+      } else {
+        return this.archivedStatusAutomations
+      }
+    },
 
     deleteText() {
       const statusAutomation = this.statusAutomationToDelete
@@ -90,6 +119,7 @@ export default {
   },
 
   created() {
+    this.activeTab = this.$route.query.tab || 'active'
     this.loading.list = true
     this.errors.list = false
     this.loadStatusAutomations(err => {
@@ -167,6 +197,7 @@ export default {
   watch: {
     $route() {
       this.handleModalsDisplay()
+      this.activeTab = this.$route.query.tab
     }
   },
 
@@ -178,4 +209,8 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.status-automation-list {
+  margin-top: 0rem;
+}
+</style>

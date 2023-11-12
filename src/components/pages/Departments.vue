@@ -6,8 +6,16 @@
       @new-clicked="onNewClicked"
     />
 
+    <route-tabs
+      class="mt2"
+      :active-tab="activeTab"
+      :tabs="tabs"
+      route-name="departments"
+    />
+
     <department-list
-      :entries="departments"
+      class="department-list"
+      :entries="departmentList"
       :is-loading="loading.departments"
       :is-error="errors.departments"
       @edit-clicked="onEditClicked"
@@ -37,10 +45,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import DepartmentList from '@/components/lists/DepartmentList.vue'
-import ListPageHeader from '@/components/widgets/ListPageHeader'
-import EditDepartmentsModal from '@/components/modals/EditDepartmentsModal'
 import DeleteModal from '@/components/modals/DeleteModal'
+import DepartmentList from '@/components/lists/DepartmentList.vue'
+import EditDepartmentsModal from '@/components/modals/EditDepartmentsModal'
+import ListPageHeader from '@/components/widgets/ListPageHeader'
+import RouteTabs from '@/components/widgets/RouteTabs'
 
 export default {
   name: 'departments',
@@ -48,13 +57,17 @@ export default {
     DeleteModal,
     DepartmentList,
     EditDepartmentsModal,
-    ListPageHeader
+    ListPageHeader,
+    RouteTabs
   },
 
   props: {},
 
   data() {
     return {
+      activeTab: 'active',
+      departmentToEdit: null,
+      departmentToDelete: null,
       errors: {
         departments: false,
         edit: false,
@@ -69,25 +82,21 @@ export default {
         del: false,
         edit: false
       },
-      departmentToEdit: null,
-      departmentToDelete: null
-    }
-  },
-
-  computed: {
-    ...mapGetters(['departments']),
-    deleteText() {
-      if (this.departmentToDelete) {
-        return this.$t('departments.delete_text', {
-          name: this.departmentToDelete.name
-        })
-      } else {
-        return ''
-      }
+      tabs: [
+        {
+          name: 'active',
+          label: this.$t('main.active')
+        },
+        {
+          name: 'archived',
+          label: this.$t('main.archived')
+        }
+      ]
     }
   },
 
   mounted() {
+    this.activeTab = this.$route.query.tab || 'active'
     this.loading.departments = true
     this.errors.departments = false
     this.loadDepartments()
@@ -99,6 +108,28 @@ export default {
         this.loading.departments = false
         this.errors.departments = true
       })
+  },
+
+  computed: {
+    ...mapGetters(['departments', 'archivedDepartments']),
+
+    departmentList() {
+      if (this.activeTab === 'active') {
+        return this.departments
+      } else {
+        return this.archivedDepartments
+      }
+    },
+
+    deleteText() {
+      if (this.departmentToDelete) {
+        return this.$t('departments.delete_text', {
+          name: this.departmentToDelete.name
+        })
+      } else {
+        return ''
+      }
+    }
   },
 
   methods: {
@@ -152,8 +183,18 @@ export default {
         this.errors.del = true
       }
     }
+  },
+
+  watch: {
+    $route() {
+      this.activeTab = this.$route.query.tab
+    }
   }
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.department-list {
+  margin-top: 0rem;
+}
+</style>

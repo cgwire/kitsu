@@ -6,9 +6,16 @@
       @new-clicked="onNewClicked"
     />
 
-    <asset-type-list
+    <route-tabs
       class="mt2"
-      :entries="assetTypes"
+      :active-tab="activeTab"
+      :tabs="tabs"
+      route-name="asset-types"
+    />
+
+    <asset-type-list
+      class="asset-type-list"
+      :entries="assetTypesList"
       :is-loading="loading.list"
       :is-error="errors.list"
       @edit-clicked="onEditClicked"
@@ -42,6 +49,7 @@ import AssetTypeList from '@/components/lists/AssetTypeList'
 import DeleteModal from '@/components/modals/DeleteModal'
 import EditAssetTypeModal from '@/components/modals/EditAssetTypeModal'
 import ListPageHeader from '@/components/widgets/ListPageHeader'
+import RouteTabs from '@/components/widgets/RouteTabs'
 
 export default {
   name: 'asset-types',
@@ -50,11 +58,13 @@ export default {
     AssetTypeList,
     DeleteModal,
     EditAssetTypeModal,
-    ListPageHeader
+    ListPageHeader,
+    RouteTabs
   },
 
   data() {
     return {
+      activeTab: 'active',
       assetTypeToDelete: null,
       assetTypeToEdit: {},
       choices: [],
@@ -71,12 +81,32 @@ export default {
         del: false,
         edit: false,
         list: false
-      }
+      },
+      tabs: [
+        {
+          name: 'active',
+          label: this.$t('main.active')
+        },
+        {
+          name: 'archived',
+          label: this.$t('main.archived')
+        }
+      ]
     }
   },
 
+  mounted() {
+    this.activeTab = this.$route.query.tab || 'active'
+  },
+
   computed: {
-    ...mapGetters(['assetTypes', 'getAssetType']),
+    ...mapGetters(['assetTypes', 'archivedAssetTypes', 'getAssetType']),
+
+    assetTypesList() {
+      return this.activeTab === 'active'
+        ? this.assetTypes
+        : this.archivedAssetTypes
+    },
 
     deleteText() {
       const assetType = this.assetTypeToDelete
@@ -151,7 +181,11 @@ export default {
     }
   },
 
-  watch: {},
+  watch: {
+    $route() {
+      this.activeTab = this.$route.query.tab
+    }
+  },
 
   metaInfo() {
     return {
@@ -161,4 +195,8 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.asset-type-list {
+  margin-top: 0rem;
+}
+</style>

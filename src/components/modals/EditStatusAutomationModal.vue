@@ -9,7 +9,7 @@
 
     <div class="modal-content">
       <div class="box">
-        <h1 class="title" v-if="isEditing()">
+        <h1 class="title" v-if="isEditing">
           {{ $t('status_automations.edit_title') }}
         </h1>
         <h1 class="title" v-else>
@@ -21,10 +21,10 @@
           <combobox
             :label="$t('status_automations.fields.entity_type')"
             :options="entityTypeOptions"
-            v-if="!isEditing()"
-            v-model="form.entityType"
             locale-key-prefix="status_automations.entity_types."
             @enter="confirmClicked"
+            v-model="form.entityType"
+            v-if="!isEditing"
           />
           <span class="entity-type-name" v-else> {{ form.entityType }} </span>
 
@@ -42,7 +42,7 @@
             <combobox-status
               class="flexrow-item"
               :label="$t('status_automations.fields.in_task_status')"
-              :task-status-list="productionTaskStatuses"
+              :task-status-list="taskStatusList || []"
               v-model="form.inTaskStatusId"
               @enter="confirmClicked"
             />
@@ -58,11 +58,11 @@
               locale-key-prefix="status_automations.field_types."
               @enter="confirmClicked"
               v-model="form.outFieldType"
-              v-if="!isEditing() && form.entityType == 'asset'"
+              v-if="!isEditing && form.entityType == 'asset'"
             />
             <span
               class="flexrow-item"
-              v-if="isEditing() && form.outFieldType == 'ready_for'"
+              v-if="isEditing && form.outFieldType == 'ready_for'"
             >
               Ready For
             </span>
@@ -79,13 +79,20 @@
             <combobox-status
               class="flexrow-item"
               :label="$t('status_automations.fields.out_task_status')"
-              :task-status-list="productionTaskStatuses"
+              :task-status-list="taskStatusList || []"
               :open-top="true"
               @enter="confirmClicked"
               v-model="form.outTaskStatusId"
               v-if="form.outFieldType == 'status'"
             />
           </div>
+
+          <combobox-boolean
+            :label="$t('main.archived')"
+            @enter="confirmClicked"
+            v-model="form.archived"
+            v-if="isEditing"
+          />
         </form>
 
         <modal-footer
@@ -103,6 +110,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 import Combobox from '@/components/widgets/Combobox'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ModalFooter from '@/components/modals/ModalFooter'
@@ -112,6 +120,7 @@ export default {
   mixins: [modalMixin],
   components: {
     Combobox,
+    ComboboxBoolean,
     ComboboxTaskType,
     ComboboxStatus,
     ModalFooter
@@ -138,17 +147,6 @@ export default {
       type: Object,
       default: () => {}
     }
-  },
-
-  computed: {
-    ...mapGetters([
-      'statusAutomations',
-      'statusAutomationsStatusOptions',
-      'assetTaskTypes',
-      'shotTaskTypes',
-      'productionTaskTypes',
-      'productionTaskStatuses'
-    ])
   },
 
   data() {
@@ -186,14 +184,31 @@ export default {
     }
   },
 
+  computed: {
+    ...mapGetters([
+      'statusAutomations',
+      'statusAutomationsStatusOptions',
+      'assetTaskTypes',
+      'shotTaskTypes',
+      'taskStatuses'
+    ]),
+
+    taskStatusList() {
+      return this.taskStatuses || []
+    },
+
+    isEditing() {
+      return this.statusAutomationToEdit && this.statusAutomationToEdit.id
+    }
+  },
+
   methods: {
     ...mapActions([]),
+
     confirmClicked() {
       this.$emit('confirm', this.form)
     },
-    isEditing() {
-      return this.statusAutomationToEdit && this.statusAutomationToEdit.id
-    },
+
     setTaskTypes(fieldType) {
       if (fieldType === 'asset') {
         this.form.inEntityTaskTypes = this.assetTaskTypes
@@ -219,26 +234,29 @@ export default {
           entityTaskTypes = this.shotTaskTypes
         }
         this.form = {
-          entityType: this.isEditing()
+          entityType: this.isEditing
             ? this.statusAutomationToEdit.entity_type
             : 'asset',
           inEntityTaskTypes: entityTaskTypes,
           outEntityTaskTypes: entityTaskTypes,
-          inTaskTypeId: this.isEditing()
+          inTaskTypeId: this.isEditing
             ? this.statusAutomationToEdit.in_task_type_id
             : entityTaskTypes[0].id,
-          inTaskStatusId: this.isEditing()
+          inTaskStatusId: this.isEditing
             ? this.statusAutomationToEdit.in_task_status_id
-            : this.productionTaskStatuses[0].id,
-          outFieldType: this.isEditing()
+            : this.taskStatuses[0].id,
+          outFieldType: this.isEditing
             ? this.statusAutomationToEdit.out_field_type
             : 'status',
-          outTaskTypeId: this.isEditing()
+          outTaskTypeId: this.isEditing
             ? this.statusAutomationToEdit.out_task_type_id
             : entityTaskTypes[1].id,
-          outTaskStatusId: this.isEditing()
+          outTaskStatusId: this.isEditing
             ? this.statusAutomationToEdit.out_task_status_id
-            : this.productionTaskStatuses[1].id
+            : this.taskStatuses[1].id,
+          archived: this.isEditing
+            ? String(this.statusAutomationToEdit.archived === true)
+            : 'false'
         }
       }
     },
@@ -246,11 +264,11 @@ export default {
     // Adapt available values to the entity type
     'form.entityType': function (entityType) {
       this.setTaskTypes(entityType)
-      if (!this.isEditing()) {
+      if (!this.isEditing) {
         this.form.inTaskTypeId = this.form.inEntityTaskTypes[0].id
-        this.form.inTaskStatusId = this.productionTaskStatuses[0].id
+        this.form.inTaskStatusId = this.taskStatuses[0].id
         this.form.outTaskTypeId = this.form.outEntityTaskTypes[1].id
-        this.form.outTaskStatusId = this.productionTaskStatuses[1].id
+        this.form.outTaskStatusId = this.taskStatuses[1].id
       }
     },
 

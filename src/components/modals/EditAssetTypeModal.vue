@@ -26,6 +26,13 @@
             v-focus
           />
 
+          <combobox-boolean
+            :label="$t('main.archived')"
+            @enter="runConfirmation"
+            v-model="form.archived"
+            v-if="isEditing"
+          />
+
           <label class="label">
             {{ $t('asset_types.fields.task_types') }}
           </label>
@@ -75,6 +82,7 @@ import { modalMixin } from '@/components/modals/base_modal'
 import { sortByName } from '@/lib/sorting'
 
 import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '@/components/widgets/TextField'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
@@ -84,6 +92,7 @@ export default {
   mixins: [modalMixin],
   components: {
     Combobox,
+    ComboboxBoolean,
     TaskTypeName,
     ModalFooter,
     TextField
@@ -124,6 +133,10 @@ export default {
       'assetTypes',
       'assetTypeStatusOptions'
     ]),
+
+    isEditing() {
+      return this.assetTypeToEdit && this.assetTypeToEdit.id
+    },
 
     availableTaskTypes() {
       const taskTypes = sortByName(
@@ -178,12 +191,14 @@ export default {
         const types = this.assetTypeToEdit.task_types || []
         this.form = {
           name: this.assetTypeToEdit.name,
-          task_types: [...types]
+          task_types: [...types],
+          archived: String(this.assetTypeToEdit.archived === true)
         }
       } else {
         this.form = {
           name: '',
-          task_types: []
+          task_types: [],
+          archived: 'false'
         }
       }
     }

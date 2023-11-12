@@ -31,7 +31,8 @@ export default {
       in_task_status_id: statusAutomation.inTaskStatusId,
       out_field_type: statusAutomation.outFieldType,
       out_task_type_id: statusAutomation.outTaskTypeId,
-      out_task_status_id: statusAutomation.outTaskStatusId
+      out_task_status_id: statusAutomation.outTaskStatusId,
+      archived: statusAutomation.archived === 'true'
     }
     return client.pput(
       `/api/data/status-automations/${statusAutomation.id}`,

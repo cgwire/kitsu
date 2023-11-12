@@ -5,18 +5,26 @@ export default {
     client.get('/api/data/departments', callback)
   },
 
-  newDepartement(newDepartement) {
-    return client.ppost('/api/data/departments', newDepartement)
+  newDepartement(department) {
+    const data = {
+      name: department.name,
+      color: department.color,
+      archived: department.archived === 'true'
+    }
+    return client.ppost('/api/data/departments', data)
   },
 
-  editDepartement(editedDepartement) {
-    return client.pput(
-      `/api/data/departments/${editedDepartement.id}`,
-      editedDepartement
-    )
+  editDepartement(department) {
+    const data = {
+      name: department.name,
+      color: department.color,
+      archived: department.archived === 'true'
+    }
+    console.log(data)
+    return client.pput(`/api/data/departments/${department.id}`, data)
   },
 
-  deleteDepartment(departementToDelete) {
-    return client.pdel(`/api/data/departments/${departementToDelete.id}`)
+  deleteDepartment(department) {
+    return client.pdel(`/api/data/departments/${department.id}`)
   }
 }
