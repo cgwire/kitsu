@@ -474,6 +474,18 @@ export default {
         this.panzoomInstance.moveTo(0, 0)
         this.panzoomInstance.zoomAbs(0, 0, 1)
       }
+    },
+
+    pausePanZoom() {
+      if (this.panzoomInstance) {
+        this.panzoomInstance.pause()
+      }
+    },
+
+    resumePanZoom() {
+      if (this.panzoomInstance) {
+        this.panzoomInstance.resume()
+      }
     }
   },
 

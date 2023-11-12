@@ -1203,6 +1203,7 @@ export default {
 
     setFullScreen() {
       this.endAnnotationSaving()
+      this.previewViewer.pauseZoom()
       const promise = this.documentSetFullScreen(this.container)
       if (promise) {
         promise.then(() => {
@@ -1212,6 +1213,9 @@ export default {
         // fallback for legacy browsers
         this.fullScreen = true
       }
+      setTimeout(() => {
+        this.previewViewer.resumeZoom()
+      }, 2000)
       this.$nextTick(() => {
         // Needed to avoid fullscreen button to be called with space bar.
         this.clearFocus()
@@ -1220,6 +1224,7 @@ export default {
 
     exitFullScreen() {
       this.endAnnotationSaving()
+      this.previewViewer.pauseZoom()
       const promise = this.documentExitFullScreen()
       if (promise) {
         promise.then(() => {
@@ -1233,6 +1238,9 @@ export default {
         // fallback for legacy browsers
         this.fullScreen = false
       }
+      setTimeout(() => {
+        this.previewViewer.resumeZoom()
+      }, 2000)
       this.isComparing = false
       this.isCommentsHidden = true
       this.$nextTick(() => {
