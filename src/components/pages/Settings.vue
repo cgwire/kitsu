@@ -179,7 +179,7 @@ export default {
 
     checkWebhook () {
       if (!this.form.chat_webhook_mattermost ||
-      this.form.chat_webhook_mattermost.match('/hooks/[a-zA-Z0-9]+$')) {
+      this.form.chat_webhook_mattermost.match('/trigger-webhook/[a-zA-Z0-9]+$')) {
         this.errors.webhook_error = false
         return true
       } else {
