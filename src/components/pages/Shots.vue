@@ -764,7 +764,7 @@ export default {
         })
         .catch(err => {
           this.errors.creatingTasks = true
-          console.errror(err)
+          console.error(err)
         })
     },
 
@@ -777,7 +777,7 @@ export default {
         })
         .catch(err => {
           this.errors.creatingTasks = true
-          console.errror(err)
+          console.error(err)
         })
     },
 
