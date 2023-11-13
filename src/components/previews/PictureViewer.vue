@@ -270,8 +270,8 @@ export default {
         const pictureElement = this.isGif
           ? this.pictureGif
           : this.fullScreen
-          ? this.pictureBig
-          : this.picture
+            ? this.pictureBig
+            : this.picture
         const picturePosition = pictureElement.getBoundingClientRect()
         const containerPosition = this.container.getBoundingClientRect()
         const top = picturePosition.top - containerPosition.top

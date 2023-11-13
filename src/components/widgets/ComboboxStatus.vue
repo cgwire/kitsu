@@ -141,21 +141,21 @@ export default {
         background: this.colorOnly
           ? this.backgroundColor(this.currentStatus)
           : this.isDarkTheme
-          ? '#36393F'
-          : '#FEFEFE',
+            ? '#36393F'
+            : '#FEFEFE',
         color: this.colorOnly ? this.color(this.currentStatus) : 'inherit',
         'border-top-left-radius': this.colorOnly ? '20px' : '10px',
         'border-top-right-radius': this.colorOnly ? '0px' : '10px',
         'border-bottom-left-radius': this.showStatusList
           ? '0'
           : this.colorOnly
-          ? '20px'
-          : '10px',
+            ? '20px'
+            : '10px',
         'border-bottom-right-radius': this.showStatusList
           ? '0'
           : this.colorOnly
-          ? '0px'
-          : '10px'
+            ? '0px'
+            : '10px'
       }
     }
   },

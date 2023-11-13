@@ -514,12 +514,12 @@ export default {
     this.entityType = isAssets
       ? 'Asset'
       : isShots
-      ? 'Shot'
-      : isEdits
-      ? 'Edit'
-      : isSequences
-      ? 'Sequence'
-      : 'Episode'
+        ? 'Shot'
+        : isEdits
+          ? 'Edit'
+          : isSequences
+            ? 'Sequence'
+            : 'Episode'
     this.updateActiveTab()
     setTimeout(() => {
       this.initData(false)
