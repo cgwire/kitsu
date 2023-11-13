@@ -14,8 +14,12 @@
       @click="toggleList"
     >
       <div class="flexrow">
-        <div class="selected-line flexrow-item">
-          {{ selectedOption ? getOptionLabel(selectedOption) : '' }}
+        <div
+          class="selected-line flexrow-item"
+          :class="{ placeholder: selectedOption?.placeholder }"
+          :title="selectedOptionLabel"
+        >
+          {{ selectedOptionLabel }}
         </div>
         <chevron-down-icon class="down-icon flexrow-item" />
       </div>
@@ -23,6 +27,7 @@
         <div
           :key="option.id"
           class="option-line flexrow"
+          :class="{ placeholder: option.placeholder }"
           @click="selectOption(option)"
           @click.middle="openRoute(option)"
           v-for="option in optionList"
@@ -37,7 +42,7 @@
             no-preview
             v-if="isPreview"
           />
-          {{ getOptionLabel(option) }}
+          {{ option.optionLabel ?? getOptionLabel(option) }}
         </div>
       </div>
     </div>
@@ -85,7 +90,7 @@ export default {
     },
     value: {
       default: '',
-      type: String
+      type: [String, Object]
     },
     localeKeyPrefix: {
       default: '',
@@ -99,15 +104,13 @@ export default {
       default: false,
       type: Boolean
     },
+    keepOrder: {
+      default: false,
+      type: Boolean
+    },
     thin: {
       default: false,
       type: Boolean
-    }
-  },
-
-  mounted() {
-    if (this.options.length > 0) {
-      this.selectedOption = this.options[0]
     }
   },
 
@@ -115,10 +118,14 @@ export default {
     ...mapGetters(['isDarkTheme']),
 
     optionList() {
-      if (this.isReversed) {
+      if (this.isReversed && !this.keepOrder) {
         return [...this.options].reverse()
       }
       return this.options
+    },
+
+    selectedOptionLabel() {
+      return this.selectedOption ? this.getOptionLabel(this.selectedOption) : ''
     }
   },
 
@@ -156,13 +163,12 @@ export default {
   },
 
   watch: {
-    options() {
-      if (this.options.length > 0) {
-        const option = this.options.find(o => o.value === this.value)
-        if (option) {
-          this.selectedOption = option
-        } else {
-          this.selectedOption = this.options[0]
+    options: {
+      immediate: true,
+      handler() {
+        if (this.options.length > 0) {
+          const option = this.options.find(({ value }) => value === this.value)
+          this.selectedOption = option || this.options[0]
         }
       }
     },
@@ -230,6 +236,7 @@ export default {
 
 .selected-line {
   flex: 1;
+  white-space: nowrap;
 }
 
 .option-line {
@@ -244,6 +251,10 @@ export default {
   &:hover {
     background: $purple;
   }
+}
+
+.placeholder {
+  opacity: 0.5;
 }
 
 .down-icon {

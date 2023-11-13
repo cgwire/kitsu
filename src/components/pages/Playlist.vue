@@ -94,7 +94,7 @@
         </div>
         <spinner class="mt2" v-else />
         <error-text
-          text="$t('playlists.loading_error')"
+          :text="$t('playlists.loading_error')"
           v-if="errors.playlistLoading"
         />
       </div>

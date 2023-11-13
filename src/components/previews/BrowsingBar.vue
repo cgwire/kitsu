@@ -119,7 +119,7 @@ export default {
   color: #bbb;
   border: 0;
   margin: 0;
-  transition: all 0.3 ease;
+  transition: all 0.3s ease;
 
   &:first-child {
     border-bottom-left-radius: 5px;

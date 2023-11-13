@@ -352,27 +352,16 @@
           </div>
 
           <div class="flexrow" v-if="is3DModel">
-            <template v-if="productionBackgrounds.length">
-              <select
-                class="backgrounds flexrow-item"
-                v-model="currentBackground"
-                @change="onSharedObjectBackgroundSelected"
-              >
-                <option disabled value="">
-                  {{ $t('playlists.actions.select_background') }}
-                </option>
-                <option
-                  :key="background.id"
-                  :value="background"
-                  v-for="background in productionBackgrounds"
-                >
-                  {{ background.name }}
-                  <template v-if="isDefaultBackground(background)">
-                    ({{ $t('playlists.actions.default') }})
-                  </template>
-                </option>
-              </select>
-            </template>
+            <combobox-styled
+              class="mr05"
+              is-reversed
+              keep-order
+              thin
+              :options="backgroundOptions"
+              v-model="currentBackground"
+              @change="onObjectBackgroundSelected()"
+              v-if="productionBackgrounds.length"
+            />
             <!--
             <button-simple
               class="flexrow-item"
@@ -385,7 +374,7 @@
               accept=".hdr"
               class="visuallyhidden"
               type="file"
-              @change="onObjectBackgroundSelected"
+              @change="onObjectBackgroundUploaded"
             />
             -->
             <button-simple
@@ -623,11 +612,10 @@ export default {
       currentIndex: 1,
       fullScreen: false,
       color: '#ff3860',
-      currentBackground: '',
+      currentBackground: null,
       currentTime: '00:00.000',
       currentTimeRaw: 0,
       isObjectBackground: false,
-      objectBackgroundUrl: null,
       isAnnotationsDisplayed: true,
       isEnvironmentSkybox: false,
       isCommentsHidden: true,
@@ -646,6 +634,7 @@ export default {
         width: 1920,
         height: 1080
       },
+      objectBackgroundUrl: null,
       pencil: 'big',
       pencilPalette: ['big', 'medium', 'small'],
       previewToCompare: null,
@@ -702,8 +691,8 @@ export default {
 
     if (this.is3DModel) {
       this.currentBackground =
-        this.productionBackgrounds.find(this.isDefaultBackground) || ''
-      this.onSharedObjectBackgroundSelected()
+        this.productionBackgrounds.find(this.isDefaultBackground) || null
+      this.onObjectBackgroundSelected()
     }
   },
 
@@ -953,6 +942,24 @@ export default {
       } else {
         return 1
       }
+    },
+
+    backgroundOptions() {
+      const defaultFlag = this.$t('playlists.actions.default')
+      return [
+        {
+          label: this.$t('playlists.actions.select_background'),
+          value: null,
+          placeholder: true
+        },
+        ...this.productionBackgrounds.map(background => ({
+          value: background,
+          label: background.name,
+          optionLabel:
+            background.name +
+            (this.isDefaultBackground(background) ? ` (${defaultFlag})` : '')
+        }))
+      ]
     }
   },
 
@@ -1366,7 +1373,7 @@ export default {
       }
     },
 
-    onObjectBackgroundSelected(event) {
+    onObjectBackgroundUploaded(event) {
       const file = event.target.files[0]
       const blobURL = URL.createObjectURL(file)
       this.objectBackgroundUrl = `${blobURL}#.hdr`
@@ -1376,10 +1383,11 @@ export default {
     },
     */
 
-    onSharedObjectBackgroundSelected() {
+    onObjectBackgroundSelected() {
       this.objectBackgroundUrl = this.currentBackground?.url
-      this.isObjectBackground = true
-      this.isEnvironmentSkybox = true
+      const enabled = Boolean(this.objectBackgroundUrl)
+      this.isObjectBackground = enabled
+      this.isEnvironmentSkybox = enabled
     },
 
     isDefaultBackground(background) {
@@ -2232,13 +2240,6 @@ export default {
   background: $dark-grey-2;
 }
 
-.backgrounds {
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.backgrounds,
 .entity-name {
   color: $light-grey;
 }
