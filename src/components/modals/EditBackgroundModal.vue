@@ -20,6 +20,7 @@
           <div class="field" v-if="!isEditing">
             <label class="label"> {{ $t('backgrounds.fields.file') }}</label>
             <file-upload
+              ref="fileUpload"
               :label="$t('main.select_file')"
               accept=".hdr"
               :is-primary="false"
@@ -150,6 +151,7 @@ export default {
           is_default: String(this.backgroundToEdit.is_default || false),
           archived: String(this.backgroundToEdit.archived || false)
         }
+        this.$refs.fileUpload?.reset()
       }
     }
   },
