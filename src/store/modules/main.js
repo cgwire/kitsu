@@ -75,11 +75,8 @@ const actions = {
     })
   },
 
-  searchData(_, { query, limit, productionId, index_names }) {
-    if (!limit) {
-      limit = 3
-    }
-    return client.searchData(query, limit, index_names, productionId)
+  searchData(_, { query, limit = 3, offset = 0, productionId, index_names }) {
+    return client.searchData(query, limit, offset, index_names, productionId)
   }
 }
 

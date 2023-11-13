@@ -458,6 +458,7 @@ export default {
     or: 'or',
     no: 'No',
     less_filters: 'Fewer filters',
+    load_more: 'Load more',
     loading: 'Loading...',
     loading_data: 'Loading data',
     loading_error: 'An error occurred while loading data.',

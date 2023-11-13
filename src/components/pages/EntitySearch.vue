@@ -104,9 +104,24 @@
               </router-link>
             </div>
           </div>
+          <p
+            class="has-text-centered mt2"
+            v-if="
+              results.assets.length !== 0 && results.assets.length % 12 === 0
+            "
+          >
+            <button
+              class="button is-link"
+              @click="loadMoreResults('assets')"
+              v-if="!isLoadingMoreAssets"
+            >
+              {{ $t('main.load_more') }}
+            </button>
+            <spinner v-else />
+          </p>
         </div>
         <div class="pb1" v-if="this.searchFilter.shots">
-          <h2 class="mt0">
+          <h2 class="mt1">
             {{ $t('shots.title') }} ({{ this.results.shots?.length || 0 }})
           </h2>
           <div class="has-text-centered" v-if="!this.results.shots?.length">
@@ -153,49 +168,20 @@
               </router-link>
             </div>
           </div>
-        </div>
-        <!--
-        <div class="pb1" v-if="this.searchFilter.persons">
-          <h2 class="mt0">
-            {{ $t('people.title') }} ({{ this.results.persons?.length || 0 }})
-          </h2>
-          <div class="has-text-centered" v-if="!this.results.persons.length">
-            {{ $t('main.search.no_result') }}
-          </div>
-          <div class="result-list" v-else>
-            <div
-              class="result flexcolumn"
-              :class="{
-                'selected-result': flattenResults[selectedIndex] === person
-              }"
-              :key="person.id"
-              @mouseover="selectResultById(person.id)"
-              v-for="person in this.results.persons"
+          <p
+            class="has-text-centered mt2"
+            v-if="results.shots.length !== 0 && results.shots.length % 12 === 0"
+          >
+            <button
+              class="button is-link"
+              @click="loadMoreResults('shots')"
+              v-if="!isLoadingMoreShots"
             >
-              <router-link
-                :id="`result-link-${person.id}`"
-                :to="personPath(person)"
-              >
-                <div class="flexcolumn has-text-centered">
-                  <people-avatar
-                    class="mauto"
-                    :is-link="false"
-                    :person="person"
-                    :size="200"
-                  />
-                  <div class="result-description">
-                    <div class="person-name">{{ person.name }}</div>
-                    <div class="person-email">{{ person.email }}</div>
-                    <div class="person-role">
-                      {{ $t(`people.role.${person.role}`) }}
-                    </div>
-                  </div>
-                </div>
-              </router-link>
-            </div>
-          </div>
+              {{ $t('main.load_more') }}
+            </button>
+            <spinner v-else />
+          </p>
         </div>
-        -->
       </div>
     </div>
   </div>
@@ -209,14 +195,12 @@ import { mapGetters, mapActions } from 'vuex'
 import { getEntityPath, getPersonPath } from '@/lib/path'
 
 import { SearchIcon } from 'vue-feather-icons'
-
-// import peopleStore from '@/store/modules/people'
+import stringHelpers from '@/lib/string'
 
 import Checkbox from '@/components/widgets/Checkbox'
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction'
 import EntityPreview from '@/components/widgets/EntityPreview'
-// import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import Spinner from '@/components/widgets/Spinner'
 
 const AVAILABLE_LIMITS = [12, 24, 48]
@@ -230,7 +214,6 @@ export default {
     Combobox,
     ComboboxProduction,
     EntityPreview,
-    // PeopleAvatar,
     SearchIcon,
     Spinner
   },
@@ -238,6 +221,8 @@ export default {
   data() {
     return {
       isLoading: false,
+      isLoadingMoreAssets: false,
+      isLoadingMoreShots: false,
       limit: AVAILABLE_LIMITS[0],
       limitOptions: AVAILABLE_LIMITS.map(value => ({ label: value, value })),
       productionId: '',
@@ -336,6 +321,29 @@ export default {
         .catch(console.error)
         .finally(() => {
           this.isLoading = false
+        })
+    },
+
+    loadMoreResults(indexName) {
+      const index_names = [indexName]
+      const loadingField = `isLoadingMore${stringHelpers.capitalize(indexName)}`
+      this[loadingField] = true
+
+      this.searchData({
+        query: this.searchQuery,
+        limit: this.limit,
+        offset: this.results[indexName].length,
+        productionId: this.productionId,
+        index_names
+      })
+        .then(results => {
+          this.results[indexName] = this.results[indexName].concat(
+            results[indexName]
+          )
+        })
+        .catch(console.error)
+        .finally(() => {
+          this[loadingField] = false
         })
     },
 
