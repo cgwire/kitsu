@@ -2,6 +2,7 @@
   <img
     class="thumbnail-picture"
     loading="lazy"
+    alt=""
     :key="props.previewFileId"
     :src="`/api/pictures/${props.type}/preview-files/${props.previewFileId}.png`"
     :style="{

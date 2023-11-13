@@ -14,6 +14,7 @@
     <div class="asset-picture" v-if="asset.preview_file_id.length > 0">
       <img
         loading="lazy"
+        alt=""
         :src="`/api/pictures/thumbnails-square/preview-files/${asset.preview_file_id}.png`"
       />
     </div>

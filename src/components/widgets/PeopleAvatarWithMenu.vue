@@ -12,6 +12,7 @@
     >
       <img
         :loading="this.isLazy ? 'lazy' : undefined"
+        alt=""
         :src="person.avatarPath"
         v-if="person.has_avatar"
       />
