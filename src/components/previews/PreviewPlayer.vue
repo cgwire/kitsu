@@ -373,12 +373,21 @@
                 </option>
               </select>
             </template>
+            <!--
             <button-simple
               class="flexrow-item"
               icon="upload"
               :title="$t('playlists.actions.object_background')"
               @click="onObjectBackgroundClicked"
             />
+            <input
+              ref="object-background-input-file"
+              accept=".hdr"
+              class="visuallyhidden"
+              type="file"
+              @change="onObjectBackgroundSelected"
+            />
+            -->
             <button-simple
               class="flexrow-item"
               :active="isObjectBackground"
@@ -401,13 +410,6 @@
               icon="codepen"
               :title="$t('playlists.actions.toggle_wireframe')"
               @click="isWireframe = !isWireframe"
-            />
-            <input
-              ref="object-background-input-file"
-              accept=".hdr"
-              class="visuallyhidden"
-              type="file"
-              @change="onObjectBackgroundSelected"
             />
           </div>
 
@@ -1353,6 +1355,7 @@ export default {
       }
     },
 
+    /*
     onObjectBackgroundClicked() {
       if (this.isObjectBackground) {
         this.$refs['object-background-input-file'].value = ''
@@ -1371,6 +1374,7 @@ export default {
       this.isEnvironmentSkybox = true
       this.currentBackground = ''
     },
+    */
 
     onSharedObjectBackgroundSelected() {
       this.objectBackgroundUrl = this.currentBackground?.url
