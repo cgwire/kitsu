@@ -20,7 +20,6 @@ export default {
       color: department.color,
       archived: department.archived === 'true'
     }
-    console.log(data)
     return client.pput(`/api/data/departments/${department.id}`, data)
   },
 

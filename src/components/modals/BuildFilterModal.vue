@@ -807,7 +807,6 @@ export default {
     },
 
     setFiltersFromAssignedToQuery(filter) {
-      console.log(filter)
       this.assignation.value = filter.excluding ? '-assignedto' : 'assignedto'
       this.assignation.person = this.people.find(p => p.id === filter.personId)
       this.assignation.taskTypeId = filter.taskType?.id
