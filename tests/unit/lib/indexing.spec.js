@@ -1,4 +1,4 @@
-import test from '../../../src/lib/string'
+/* eslint-disable no-undef */
 import {
   buildNameIndex,
   buildAssetIndex,
@@ -50,7 +50,12 @@ describe('lib/indexing', () => {
       { name: 'SH01', sequence_name: 'S02', episode_name: 'E01', id: 3 },
       { name: 'SH01', sequence_name: 'S01', episode_name: 'E02', id: 4 },
       { name: 'SH02', sequence_name: 'S01', episode_name: 'E02', id: 5 },
-      { name: 'constructor', sequence_name: 'SEQ01', episode_name: 'EP02', id: 6 }
+      {
+        name: 'constructor',
+        sequence_name: 'SEQ01',
+        episode_name: 'EP02',
+        id: 6
+      }
     ]
     const index = buildShotIndex(entries)
     expect(index.e01).toHaveLength(3)

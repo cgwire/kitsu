@@ -451,6 +451,24 @@ export default {
       if (this.videoViewer) {
         this.videoViewer.resetPanZoom()
       }
+    },
+
+    pauseZoom() {
+      if (this.pictureViewer) {
+        this.pictureViewer.pausePanZoom()
+      }
+      if (this.videoViewer) {
+        this.videoViewer.pausePanZoom()
+      }
+    },
+
+    resumeZoom() {
+      if (this.pictureViewer) {
+        this.pictureViewer.resumePanZoom()
+      }
+      if (this.videoViewer) {
+        this.videoViewer.resumePanZoom()
+      }
     }
   },
 

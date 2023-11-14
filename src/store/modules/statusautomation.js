@@ -28,7 +28,9 @@ const initialState = {
 const state = { ...initialState }
 
 const getters = {
-  statusAutomations: state => state.statusAutomations,
+  statusAutomations: state => state.statusAutomations.filter(s => !s.archived),
+  archivedStatusAutomations: state =>
+    state.statusAutomations.filter(s => s.archived),
   statusAutomationMap: state => state.statusAutomationMap,
 
   // Used to know if the automation will apply in the current production.

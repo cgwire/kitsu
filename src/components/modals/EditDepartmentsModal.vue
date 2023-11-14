@@ -27,6 +27,12 @@
             :label="$t('departments.fields.color')"
             v-model="form.color"
           />
+          <combobox-boolean
+            :label="$t('main.archived')"
+            @enter="runConfirmation"
+            v-model="form.archived"
+            v-if="isEditing"
+          />
         </form>
         <modal-footer
           :error-text="$t('departments.create_error')"
@@ -44,15 +50,17 @@
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
+import ColorField from '@/components/widgets/ColorField'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '@/components/widgets/TextField'
-import ColorField from '@/components/widgets/ColorField'
 
 export default {
   name: 'edit-departments-modal',
   mixins: [modalMixin],
   components: {
     ColorField,
+    ComboboxBoolean,
     ModalFooter,
     TextField
   },
@@ -87,7 +95,11 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['assetTypes', 'assetTypeStatusOptions'])
+    ...mapGetters(['assetTypes', 'assetTypeStatusOptions']),
+
+    isEditing() {
+      return this.departmentToEdit && this.departmentToEdit.id
+    }
   },
 
   methods: {
@@ -108,10 +120,18 @@ export default {
     },
 
     departmentToEdit() {
-      if (this.departmentToEdit) {
+      if (this.isEditing) {
         this.form.name = this.departmentToEdit.name
         this.form.color = this.departmentToEdit.color
         this.form.id = this.departmentToEdit.id
+        this.form.archived = this.departmentToEdit.archive
+      } else {
+        this.form = {
+          name: '',
+          color: '',
+          id: null,
+          archived: String(this.departmentToEdit.archive === true)
+        }
       }
     }
   }

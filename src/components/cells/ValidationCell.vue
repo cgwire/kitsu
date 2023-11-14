@@ -36,12 +36,7 @@
             emergency: task.priority === 3
           }"
           :title="formatPriority(task.priority)"
-          v-if="
-            !isCurrentUserClient &&
-            !disabled &&
-            task.priority > 0 &&
-            !this.taskStatus.is_done
-          "
+          v-if="!isCurrentUserClient && !disabled && task.priority > 0"
         >
           {{ priority }}
         </span>
@@ -68,7 +63,12 @@
         v-for="person in assignees"
         v-if="isAssignees && !isCurrentUserClient && !disabled"
       >
-        <img loading="lazy" :src="person.avatarPath" v-if="person.has_avatar" />
+        <img
+          loading="lazy"
+          alt=""
+          :src="person.avatarPath"
+          v-if="person.has_avatar"
+        />
         <template v-else>{{ person.initials }}</template>
       </span>
       <span class="subscribed" v-if="task && task.is_subscribed">
@@ -233,7 +233,7 @@ export default {
     },
 
     priority() {
-      if (this.task.priority && !this.taskStatus.is_done) {
+      if (this.task.priority) {
         if (this.task.priority === 3) {
           return '!!!'
         } else if (this.task.priority === 2) {

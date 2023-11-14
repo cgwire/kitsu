@@ -134,9 +134,9 @@ const client = {
     return client.pget(path)
   },
 
-  searchData(query, limit, index_names, productionId) {
+  searchData(query, limit, offset, index_names, productionId) {
     const path = '/api/data/search'
-    const data = { query, limit, index_names }
+    const data = { query, limit, offset, index_names }
     if (productionId !== 'all') data.project_id = productionId
     return client.ppost(path, data)
   }

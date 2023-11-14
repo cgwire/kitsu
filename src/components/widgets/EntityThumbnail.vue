@@ -17,6 +17,7 @@
       :src="thumbnailPath"
       :style="imgStyle"
       :width="width || ''"
+      alt=""
     />
   </a>
 
@@ -27,6 +28,7 @@
     :key="thumbnailKey"
     :src="thumbnailPath"
     :style="imgStyle"
+    alt=""
   />
 
   <span

@@ -43,6 +43,7 @@
         'max-height': `${emptyHeight}px`
       }"
       :width="width || ''"
+      alt=""
     />
   </a>
 </template>

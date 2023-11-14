@@ -17,6 +17,7 @@
       <div class="asset-picture" v-if="asset.preview_file_id">
         <img
           loading="lazy"
+          alt=""
           :src="`/api/pictures/thumbnails-square/preview-files/${asset.preview_file_id}.png`"
         />
         <span class="nb-occurences" v-if="nbOccurences > 1">

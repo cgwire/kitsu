@@ -18,6 +18,7 @@ const EQUAL_PRIORITY_REGEX = /priority-\[([^[]*)\]=\d|priority-([^ ]*)=\d/g
 const EQUAL_ASSETS_READY_REGEX =
   /assetsready=\[([^[]*)\]|assetsready=([^ ]*)|assetsready=([^ ]*)/g
 const MULTIPLE_REGEX = /\[([^[]*)\]/g
+const EQUAL_ASSIGNATION_REGEX = /assignedto\[([^[]*)\]=\[([^[]*)\]/g
 
 /*
  * Look in the search query for task type filter like anim=wip.
@@ -59,7 +60,10 @@ const applyFiltersFunctions = {
 
   assignedto(entry, filter, taskMap) {
     let isOk = false
-    if (entry.tasks) {
+    if (filter.taskType) {
+      const task = taskMap.get(entry.validations.get(filter.taskType.id))
+      isOk = isOk || task.assignees.includes(filter.personId)
+    } else if (entry.tasks) {
       entry.tasks.forEach(taskId => {
         const task = taskMap.get(taskId)
         isOk = isOk || task.assignees.includes(filter.personId)
@@ -251,7 +255,7 @@ export const getFilters = ({
     ...getAssetTypeFilters(assetTypes, query),
     ...getTaskTypeFilters(taskTypes, taskStatuses, query),
     ...getDescFilters(descriptors, taskTypes, query),
-    ...getAssignedToFilters(persons, query),
+    ...getAssignedToFilters(persons, taskTypes, query),
     ...getDepartmentFilters(departments, query),
     ...(getThumbnailFilters(query) || []),
     ...getPriorityFilter(taskTypes, query),
@@ -505,11 +509,12 @@ export const getDepartmentFilters = (departments, queryText) => {
  * Extract person filters (like size=big or size=small) from given
  * query.
  */
-export const getAssignedToFilters = (persons, queryText) => {
+export const getAssignedToFilters = (persons, taskTypes, queryText) => {
   if (!queryText) return []
 
   const results = []
-  const rgxMatches = queryText.match(EQUAL_REGEX)
+  const rgxMatches = queryText.match(EQUAL_ASSIGNATION_REGEX)
+  const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
   if (rgxMatches) {
     rgxMatches.forEach(rgxMatch => {
       const personIndex = new Map()
@@ -518,21 +523,25 @@ export const getAssignedToFilters = (persons, queryText) => {
         personIndex.set(name, person)
       })
       const pattern = rgxMatch.split('=')
-      if (pattern[0] === 'assignedto') {
-        let value = pattern[1]
-        value = cleanParenthesis(value)
-        const excluding = value.startsWith('-')
-        if (excluding) value = value.substring(1)
-        const simplifiedValue = string.slugify(value.toLowerCase())
-        const person = personIndex.get(simplifiedValue)
-        if (person) {
-          results.push({
-            personId: person.id,
-            value,
-            type: 'assignedto',
-            excluding
-          })
-        }
+      let taskTypeName = pattern[0].substring('assignedto'.length)
+      taskTypeName = cleanParenthesis(taskTypeName)
+      const taskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
+      const taskType = taskTypes[0]
+
+      let value = pattern[1]
+      value = cleanParenthesis(value)
+      const excluding = value.startsWith('-')
+      if (excluding) value = value.substring(1)
+      const simplifiedValue = string.slugify(value.toLowerCase())
+      const person = personIndex.get(simplifiedValue)
+      if (person) {
+        results.push({
+          personId: person.id,
+          taskType: taskType,
+          value,
+          type: 'assignedto',
+          excluding
+        })
       }
     })
   }

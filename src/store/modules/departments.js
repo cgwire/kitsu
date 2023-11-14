@@ -20,7 +20,8 @@ const initialState = {
 const state = { ...initialState }
 
 const getters = {
-  departments: state => state.departments,
+  departments: state => state.departments.filter(d => !d.archived),
+  archivedDepartments: state => state.departments.filter(d => d.archived),
   departmentMap: state => state.departmentMap,
 
   getDepartments: state => id => {

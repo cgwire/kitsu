@@ -20,7 +20,8 @@ export default {
   updateAssetType(assetType) {
     const data = {
       name: assetType.name,
-      task_types: assetType.task_types
+      task_types: assetType.task_types,
+      archived: assetType.archived === 'true'
     }
     return client.pput(`/api/data/entity-types/${assetType.id}`, data)
   },

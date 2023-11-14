@@ -17,7 +17,8 @@ const initialState = {
 const state = { ...initialState }
 
 const getters = {
-  assetTypes: state => state.assetTypes,
+  assetTypes: state => state.assetTypes.filter(type => !type.archived),
+  archivedAssetTypes: state => state.assetTypes.filter(type => type.archived),
   assetTypeMap: state => state.assetTypeMap,
 
   getAssetType: (state, getters) => id => {
