@@ -6,10 +6,6 @@ import {
   ADD_PRODUCTION,
   CLEAR_ASSETS,
   CLEAR_SHOTS,
-  DELETE_PRODUCTION_END,
-  DELETE_PRODUCTION_START,
-  EDIT_PRODUCTION_END,
-  EDIT_PRODUCTION_START,
   LOAD_OPEN_PRODUCTIONS_END,
   LOAD_OPEN_PRODUCTIONS_ERROR,
   LOAD_OPEN_PRODUCTIONS_START,
@@ -35,7 +31,6 @@ import {
   UPDATE_METADATA_DESCRIPTOR_END,
   UPDATE_PRODUCTION
 } from '@/store/mutation-types'
-import { sortByName, sortProductions } from '@/lib/sorting'
 
 describe('Productions store', () => {
   describe('Getters', () => {
@@ -354,9 +349,8 @@ describe('Productions store', () => {
       productionApi.newProduction = vi.fn(productionId => Promise.resolve({ id: '1' }))
       await store.actions.newProduction({ commit: mockCommit, state: null }, 'production-id')
       expect(productionApi.newProduction).toBeCalledTimes(1)
-      expect(mockCommit).toBeCalledTimes(2)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, EDIT_PRODUCTION_START, 'production-id')
-      expect(mockCommit).toHaveBeenNthCalledWith(2, EDIT_PRODUCTION_END, { id: '1' })
+      expect(mockCommit).toBeCalledTimes(1)
+      expect(mockCommit).toHaveBeenNthCalledWith(1, ADD_PRODUCTION, { id: '1' })
 
       mockCommit = vi.fn()
       productionApi.newProduction = vi.fn(productionId => Promise.reject(new Error('error')))
@@ -364,8 +358,7 @@ describe('Productions store', () => {
         await store.actions.newProduction({ commit: mockCommit, state: null }, 'production-id')
       } catch (e) {
         expect(productionApi.newProduction).toBeCalledTimes(1)
-        expect(mockCommit).toBeCalledTimes(1)
-        expect(mockCommit).toHaveBeenNthCalledWith(1, EDIT_PRODUCTION_START, 'production-id')
+        expect(mockCommit).toBeCalledTimes(0)
       }
     })
 
@@ -374,9 +367,8 @@ describe('Productions store', () => {
       productionApi.updateProduction = vi.fn(productionId => Promise.resolve({ id: '1' }))
       await store.actions.editProduction({ commit: mockCommit, state: null }, 'production-id')
       expect(productionApi.updateProduction).toBeCalledTimes(1)
-      expect(mockCommit).toBeCalledTimes(2)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, EDIT_PRODUCTION_START)
-      expect(mockCommit).toHaveBeenNthCalledWith(2, EDIT_PRODUCTION_END, { id: '1' })
+      expect(mockCommit).toBeCalledTimes(1)
+      expect(mockCommit).toHaveBeenNthCalledWith(1, UPDATE_PRODUCTION, { id: '1' })
 
       mockCommit = vi.fn()
       productionApi.updateProduction = vi.fn(productionId => Promise.reject(new Error('error')))
@@ -384,8 +376,7 @@ describe('Productions store', () => {
         await store.actions.editProduction({ commit: mockCommit, state: null }, 'production-id')
       } catch (e) {
         expect(productionApi.updateProduction).toBeCalledTimes(1)
-        expect(mockCommit).toBeCalledTimes(1)
-        expect(mockCommit).toHaveBeenNthCalledWith(1, EDIT_PRODUCTION_START)
+        expect(mockCommit).toBeCalledTimes(0)
       }
     })
 
@@ -394,10 +385,8 @@ describe('Productions store', () => {
       productionApi.deleteProduction = vi.fn(productionId => Promise.resolve({ id: '1' }))
       await store.actions.deleteProduction({ commit: mockCommit, state: null }, 'production-id')
       expect(productionApi.deleteProduction).toBeCalledTimes(1)
-      expect(mockCommit).toBeCalledTimes(3)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, DELETE_PRODUCTION_START)
-      expect(mockCommit).toHaveBeenNthCalledWith(2, REMOVE_PRODUCTION, 'production-id')
-      expect(mockCommit).toHaveBeenNthCalledWith(3, DELETE_PRODUCTION_END)
+      expect(mockCommit).toBeCalledTimes(1)
+      expect(mockCommit).toHaveBeenNthCalledWith(1, REMOVE_PRODUCTION, 'production-id')
 
       mockCommit = vi.fn()
       productionApi.deleteProduction = vi.fn(productionId => Promise.reject(new Error('error')))
@@ -405,8 +394,7 @@ describe('Productions store', () => {
         await store.actions.deleteProduction({ commit: mockCommit, state: null }, 'production-id')
       } catch (e) {
         expect(productionApi.deleteProduction).toBeCalledTimes(1)
-        expect(mockCommit).toBeCalledTimes(1)
-        expect(mockCommit).toHaveBeenNthCalledWith(1, DELETE_PRODUCTION_START)
+        expect(mockCommit).toBeCalledTimes(0)
       }
     })
 
@@ -693,67 +681,21 @@ describe('Productions store', () => {
       expect(state.productionStatusMap.get(1)).toEqual({ id: 1, status: 'status' })
     })
 
-    test.skip('EDIT_PRODUCTION_START', () => {})
-
-    test.skip('EDIT_PRODUCTION_ERROR', () => {})
-
-    test('EDIT_PRODUCTION_END', () => {
-      state.productionStatusMap = new Map()
-      state.productionMap = new Map()
-      state.productionStatusMap.set('Project status ID', { name: 'Status name' })
-      state.productionStatusMap.set('other Project status ID', { name: 'Status name 2' })
-      state.productions = [{ id: 1, project_status_id: 'other Project status ID', production_type: 'short', name: 'production3' }]
-      store.mutations.EDIT_PRODUCTION_END(state, {
-        id: 1,
-        name: 'production1',
-        project_status_id: 'Project status ID',
-        project_status_name: 'Project status name',
-        production_type: 'Production type',
-        first_episode_id: 1
-      })
-      store.mutations.EDIT_PRODUCTION_END(state, {
-        id: 2,
-        name: 'production2',
-        project_status_id: 'Project status ID',
-        project_status_name: 'Project status name',
-        production_type: 'Production type',
-        first_episode_id: 1
-      })
-      expect(state.productions[0]).toEqual({
-        id: 1,
-        name: 'production1',
-        project_status_id: 'Project status ID',
-        project_status_name: 'Status name',
-        production_type: 'Production type',
-        first_episode_id: 1
-      })
-      expect(state.productions[1]).toEqual({
-        id: 2,
-        name: 'production2',
-        project_status_id: 'Project status ID',
-        project_status_name: 'Status name',
-        production_type: 'Production type',
-        first_episode_id: 1,
-        team: [],
-        task_statuses: [],
-        asset_types: [],
-        task_types: [],
-        status_automations: [],
-      })
-    })
-
     test('ADD_PRODUCTION', () => {
       state.productionMap = new Map()
-      store.mutations.ADD_PRODUCTION(state, { id: 123, name: 'new production' })
+      state.productionStatusMap = new Map(Object.entries({
+        1: { name: 'old status' },
+        2: { name: 'new status' }
+      }))
+      store.mutations.ADD_PRODUCTION(state, { id: 123, name: 'new production', project_status_id: '2' })
       expect(state.productions).toHaveLength(2)
       expect(state.openProductions).toHaveLength(1)
-      expect(state.productionMap.get(123)).toEqual({ id: 123, name: 'new production' })
+      expect(state.productionMap.get(123)).toEqual({ id: 123, name: 'new production', project_status_id: '2', project_status_name: 'new status' })
     })
 
     test('UPDATE_PRODUCTION', () => {
-      state.productionMap = new Map(Object.entries({
-        123: { id: '123', name: 'old production', project_status_id: '1' }
-      }))
+      state.productions = [{ id: '123', name: 'old production', project_status_id: '1' }]
+      state.productionMap = new Map(state.productions.map(p => [p.id, p]))
       state.productionStatusMap = new Map(Object.entries({
         1: { name: 'old status' },
         2: { name: 'new status' }
@@ -763,10 +705,6 @@ describe('Productions store', () => {
       expect(state.openProductions).toHaveLength(0)
       expect(state.productionMap.get('123')).toEqual({ id: '123', name: 'new production', project_status_id: '2', project_status_name: 'new status' })
     })
-
-    test.skip('DELETE_PRODUCTION_START', () => {})
-
-    test.skip('DELETE_PRODUCTION_ERROR', () => {})
 
     test('REMOVE_PRODUCTION', () => {
       const production = { id: '123', name: 'old production', project_status_id: '1' }
@@ -780,8 +718,6 @@ describe('Productions store', () => {
       expect(state.openProductions).toHaveLength(0)
       expect(state.productionMap).toEqual(new Map())
     })
-
-    test.skip('DELETE_PRODUCTION_END', () => {})
 
     test('PRODUCTION_PICTURE_FILE_SELECTED', () => {
       store.mutations.PRODUCTION_PICTURE_FILE_SELECTED(state, 'form-data')
