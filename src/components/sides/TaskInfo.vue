@@ -579,8 +579,8 @@ export default {
       return this.currentParentPreview && this.currentParentPreview.revision
         ? this.currentParentPreview.revision
         : this.currentPreview
-        ? this.currentPreview.revision
-        : 0
+          ? this.currentPreview.revision
+          : 0
     },
 
     extension() {

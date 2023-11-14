@@ -180,12 +180,15 @@
         <object-viewer
           ref="object-player"
           class="object-player"
+          :background-url="backgroundUrl"
+          :full-screen="fullScreen"
+          :is-environment-skybox="isEnvironmentSkybox"
+          :is-wireframe="isWireframe"
           :preview-url="currentPreviewDlPath"
           :style="{
             position: isComparisonOverlay ? 'absolute' : 'static',
             opacity: overlayOpacity
           }"
-          :full-screen="fullScreen"
           v-if="isCurrentPreviewModel && !isLoading"
         />
 
@@ -387,7 +390,9 @@
           }})
         </span>
       </div>
+
       <div class="separator"></div>
+
       <template v-if="isCurrentPreviewPicture">
         {{ framesSeenOfPicture }} /
         <input
@@ -481,6 +486,7 @@
       </div>
 
       <div class="separator"></div>
+
       <button-simple
         class="playlist-button flexrow-item"
         :title="$t('playlists.actions.change_task_type')"
@@ -557,7 +563,44 @@
           </div>
         </div>
       </div>
+
       <span class="filler"></span>
+
+      <div class="flexrow" v-if="isCurrentPreviewModel">
+        <combobox-styled
+          class="mr05"
+          is-reversed
+          keep-order
+          thin
+          :options="backgroundOptions"
+          v-model="currentBackground"
+          @change="onObjectBackgroundSelected()"
+          v-if="productionBackgrounds.length"
+        />
+        <button-simple
+          class="playlist-button flexrow-item"
+          :active="isObjectBackground"
+          :disabled="!objectBackgroundUrl"
+          icon="globe"
+          :title="$t('playlists.actions.toggle_object_background')"
+          @click="isObjectBackground = !isObjectBackground"
+        />
+        <button-simple
+          class="playlist-button flexrow-item"
+          :active="isObjectBackground && isEnvironmentSkybox"
+          :disabled="!objectBackgroundUrl || !isObjectBackground"
+          icon="image"
+          :title="$t('playlists.actions.toggle_environment_skybox')"
+          @click="isEnvironmentSkybox = !isEnvironmentSkybox"
+        />
+        <button-simple
+          class="playlist-button flexrow-item"
+          :active="isWireframe"
+          icon="codepen"
+          :title="$t('playlists.actions.toggle_wireframe')"
+          @click="isWireframe = !isWireframe"
+        />
+      </div>
 
       <button-simple
         @click="$emit('save-clicked')"
@@ -841,6 +884,7 @@ import { formatFrame } from '@/lib/video'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ColorPicker from '@/components/widgets/ColorPicker'
 import Combobox from '@/components/widgets/Combobox'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DeleteModal from '@/components/modals/DeleteModal'
 import ObjectViewer from '@/components/previews/ObjectViewer'
 import PencilPicker from '@/components/widgets/PencilPicker'
@@ -869,6 +913,7 @@ export default {
     ButtonSimple,
     ColorPicker,
     Combobox,
+    ComboboxStyled,
     DownloadIcon,
     DeleteModal,
     ObjectViewer,
@@ -916,18 +961,23 @@ export default {
       buildLaunched: false,
       comparisonEntityMissing: false,
       comparisonMode: 'sidebyside',
+      currentBackground: null,
       currentComparisonPreviewIndex: 0,
       handleIn: 0,
       handleOut: 0,
       isAnnotationsDisplayed: true,
       isBuildLaunched: false,
       isDlButtonsHidden: true,
+      isEnvironmentSkybox: false,
       isLaserModeOn: false,
+      isObjectBackground: false,
       isShowingPalette: false,
       isShowingPencilPalette: false,
       isShowAnnotationsWhilePlaying: false,
       isWaveformDisplayed: false,
+      isWireframe: false,
       movieDimensions: { width: 0, height: 0 },
+      objectBackgroundUrl: null,
       pictureDefaultHeight: 0,
       playlistToEdit: {},
       previewRoomRef: 'playlist-player-preview-room',
@@ -974,6 +1024,9 @@ export default {
       this.onFrameUpdate(0)
       this.configureWaveForm()
     })
+    this.currentBackground =
+      this.productionBackgrounds.find(this.isDefaultBackground) || null
+    this.onObjectBackgroundSelected()
   },
 
   computed: {
@@ -988,6 +1041,7 @@ export default {
       'isTVShow',
       'organisation',
       'previewFileMap',
+      'productionBackgrounds',
       'shotMap',
       'taskMap',
       'taskTypeMap',
@@ -1140,6 +1194,28 @@ export default {
         this.playlist.build_jobs.filter(job => job.status === 'running')
           .length !== 0
       )
+    },
+
+    backgroundOptions() {
+      const defaultFlag = this.$t('playlists.actions.default')
+      return [
+        {
+          label: this.$t('playlists.actions.select_background'),
+          value: null,
+          placeholder: true
+        },
+        ...this.productionBackgrounds.map(background => ({
+          value: background,
+          label: background.name,
+          optionLabel:
+            background.name +
+            (this.isDefaultBackground(background) ? ` (${defaultFlag})` : '')
+        }))
+      ]
+    },
+
+    backgroundUrl() {
+      return this.isObjectBackground ? this.objectBackgroundUrl : undefined
     }
   },
 
@@ -1591,6 +1667,19 @@ export default {
       })
     },
 
+    onObjectBackgroundSelected() {
+      this.objectBackgroundUrl = this.currentBackground?.url
+      const enabled = Boolean(this.objectBackgroundUrl)
+      this.isObjectBackground = enabled
+      this.isEnvironmentSkybox = enabled
+    },
+
+    isDefaultBackground(background) {
+      const defaultId =
+        this.currentProduction.default_preview_background_file_id
+      return defaultId ? background.id === defaultId : background.is_default
+    },
+
     onBuildClicked() {
       this.runBuild(false)
     },
@@ -1939,9 +2028,12 @@ export default {
     border: 0;
     border-radius: 0;
     color: var(--text);
+    transition: all 0.3s ease;
 
     &:hover {
       background: var(--background-tag-button);
+      border-radius: 5px;
+      transform: scale(1.2);
     }
 
     &.active {

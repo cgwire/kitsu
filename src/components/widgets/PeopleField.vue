@@ -10,8 +10,8 @@
       class: wide
         ? 'big wide v-autocomplete-input'
         : big
-        ? 'big v-autocomplete-input'
-        : 'v-autocomplete-input'
+          ? 'big v-autocomplete-input'
+          : 'v-autocomplete-input'
     }"
     :min-len="1"
     @update-items="update"

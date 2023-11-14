@@ -64,7 +64,7 @@
 
     <object-viewer
       class="model-viewer"
-      :background-url="isObjectBackground ? objectBackgroundUrl : undefined"
+      :background-url="backgroundUrl"
       :default-height="defaultHeight"
       :empty="!is3DModel"
       :full-screen="isFullScreen"
@@ -232,6 +232,10 @@ export default {
     },
 
     //  Utils
+
+    backgroundUrl() {
+      return this.isObjectBackground ? this.objectBackgroundUrl : undefined
+    },
 
     fileTitle() {
       return this.preview
