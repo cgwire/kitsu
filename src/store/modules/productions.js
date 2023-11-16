@@ -168,11 +168,10 @@ const getters = {
   },
 
   productionBackgrounds: (state, rootState) => {
-    return sortByName(
-      state.currentProduction.preview_background_files.map(id =>
-        rootState.backgroundMap.get(id)
-      )
+    const backgrounds = state.currentProduction?.preview_background_files?.map(
+      id => rootState.backgroundMap.get(id)
     )
+    return backgrounds ? sortByName(backgrounds) : []
   },
 
   productionTaskStatuses: (state, getters, rootState) => {
