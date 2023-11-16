@@ -646,11 +646,14 @@ const mutations = {
 
     // status changed
     const isStatusChanged =
+      previousProduction &&
       previousProduction.project_status_id !== productionStatus.id
     production.project_status_name = productionStatus.name
 
     // update states
-    Object.assign(previousProduction, production)
+    if (previousProduction) {
+      Object.assign(previousProduction, production)
+    }
     if (openProduction) {
       Object.assign(openProduction, production)
     }
