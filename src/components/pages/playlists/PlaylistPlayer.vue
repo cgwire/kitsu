@@ -430,6 +430,7 @@
         >
           <arrow-up-right-icon class="icon is-small" />
         </a>
+        <div class="separator"></div>
       </div>
 
       <div class="flexrow flexrow-item mr0" v-if="isCurrentPreviewMovie">
@@ -483,9 +484,8 @@
           icon="music"
           @click="isWaveformDisplayed = !isWaveformDisplayed"
         />
+        <div class="separator"></div>
       </div>
-
-      <div class="separator"></div>
 
       <button-simple
         class="playlist-button flexrow-item"
@@ -600,6 +600,7 @@
           :title="$t('playlists.actions.toggle_wireframe')"
           @click="isWireframe = !isWireframe"
         />
+        <div class="separator"></div>
       </div>
 
       <button-simple
