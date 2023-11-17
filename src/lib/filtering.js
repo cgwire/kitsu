@@ -184,6 +184,7 @@ export const getKeyWords = queryText => {
     return queryText
       .replace(UNION_REGEX, '')
       .replace(EQUAL_PRIORITY_REGEX, '')
+      .replace(EQUAL_ASSIGNATION_REGEX, '')
       .replace(EQUAL_REGEX, '')
       .replace(MULTIPLE_REGEX, '')
       .split(' ')
@@ -514,14 +515,15 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
 
   const results = []
   const rgxMatches = queryText.match(EQUAL_ASSIGNATION_REGEX)
-  const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
   if (rgxMatches) {
+    const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
+    const personIndex = new Map()
+    persons.forEach(person => {
+      const name = string.slugify(person.name.toLowerCase())
+      personIndex.set(name, person)
+    })
+
     rgxMatches.forEach(rgxMatch => {
-      const personIndex = new Map()
-      persons.forEach(person => {
-        const name = string.slugify(person.name.toLowerCase())
-        personIndex.set(name, person)
-      })
       const pattern = rgxMatch.split('=')
       let taskTypeName = pattern[0].substring('assignedto'.length)
       taskTypeName = cleanParenthesis(taskTypeName)

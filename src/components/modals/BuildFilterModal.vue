@@ -177,7 +177,12 @@
               v-model="assignation.person"
               v-if="['assignedto', '-assignedto'].includes(assignation.value)"
             />
-            <span class="flexrow-item"> on </span>
+            <span
+              class="flexrow-item align-middle"
+              v-if="['assignedto', '-assignedto'].includes(assignation.value)"
+            >
+              on
+            </span>
 
             <combobox-task-type
               class="flexrow-item"
@@ -929,5 +934,9 @@ export default {
 
 .assignation-person {
   margin-bottom: 0.5em;
+}
+
+.align-middle {
+  margin-top: 9px;
 }
 </style>
