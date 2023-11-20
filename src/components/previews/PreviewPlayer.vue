@@ -353,15 +353,23 @@
 
           <div class="flexrow" v-if="is3DModel">
             <combobox-styled
-              class="mr05"
+              class="background-combo mr05"
+              :active="Boolean(currentBackground)"
+              :disabled="!productionBackgrounds.length"
+              :is-compact="
+                (light && !fullScreen) || !productionBackgrounds.length
+              "
               is-reversed
               keep-order
               thin
               :options="backgroundOptions"
               v-model="currentBackground"
               @change="onObjectBackgroundSelected()"
-              v-if="productionBackgrounds.length"
-            />
+            >
+              <template #icon>
+                <globe-icon class="icon is-small mr05" />
+              </template>
+            </combobox-styled>
             <!--
             <button-simple
               class="flexrow-item"
@@ -379,19 +387,12 @@
             -->
             <button-simple
               class="flexrow-item"
-              :active="isObjectBackground"
-              :disabled="!objectBackgroundUrl"
-              icon="globe"
-              :title="$t('playlists.actions.toggle_object_background')"
-              @click="isObjectBackground = !isObjectBackground"
-            />
-            <button-simple
-              class="flexrow-item"
               :active="isObjectBackground && isEnvironmentSkybox"
               :disabled="!objectBackgroundUrl || !isObjectBackground"
               icon="image"
               :title="$t('playlists.actions.toggle_environment_skybox')"
               @click="isEnvironmentSkybox = !isEnvironmentSkybox"
+              v-if="!light || fullScreen"
             />
             <button-simple
               class="flexrow-item"
@@ -513,6 +514,7 @@
 <script>
 import { fabric } from 'fabric'
 import { mapGetters, mapActions } from 'vuex'
+import { GlobeIcon } from 'vue-feather-icons'
 
 import {
   formatFrame,
@@ -546,17 +548,18 @@ export default {
 
   components: {
     ArrowUpRightIcon,
-    VideoProgress,
-    ButtonSimple,
     BrowsingBar,
+    ButtonSimple,
     ColorPicker,
     Combobox,
     ComboboxStyled,
     DownloadIcon,
+    GlobeIcon,
     PencilPicker,
     PreviewViewer,
     RevisionPreview,
-    TaskInfo
+    TaskInfo,
+    VideoProgress
   },
 
   props: {
@@ -2104,8 +2107,17 @@ export default {
   transition: all 0.3s ease;
 }
 
+.buttons .background-combo {
+  max-width: 300px;
+
+  :deep(.combo) {
+    max-width: 100%;
+  }
+}
+
 .buttons .button.active,
-.buttons .button:hover {
+.buttons .button:hover,
+.buttons .background-combo.active .icon {
   color: #43b581;
 }
 

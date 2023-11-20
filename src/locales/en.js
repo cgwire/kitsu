@@ -782,7 +782,6 @@ export default {
       switch_hd: 'Switch to high definition',
       toggle_annotations: 'Show/Hide annotations while playing movies',
       toggle_laser: 'Enable/Disable drawing laser mode',
-      toggle_object_background: 'Enable/Disable environment map',
       toggle_environment_skybox: 'Show/Hide skybox background',
       toggle_playing_annotations: 'Show/Hide annotations while playing movies',
       toggle_waveform: 'Show/Hide movie waveform',

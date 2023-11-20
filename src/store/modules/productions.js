@@ -168,11 +168,10 @@ const getters = {
   },
 
   productionBackgrounds: (state, rootState) => {
-    return sortByName(
-      state.currentProduction.preview_background_files.map(id =>
-        rootState.backgroundMap.get(id)
-      )
+    const backgrounds = state.currentProduction?.preview_background_files?.map(
+      id => rootState.backgroundMap.get(id)
     )
+    return backgrounds ? sortByName(backgrounds) : []
   },
 
   productionTaskStatuses: (state, getters, rootState) => {
@@ -647,11 +646,14 @@ const mutations = {
 
     // status changed
     const isStatusChanged =
+      previousProduction &&
       previousProduction.project_status_id !== productionStatus.id
     production.project_status_name = productionStatus.name
 
     // update states
-    Object.assign(previousProduction, production)
+    if (previousProduction) {
+      Object.assign(previousProduction, production)
+    }
     if (openProduction) {
       Object.assign(openProduction, production)
     }

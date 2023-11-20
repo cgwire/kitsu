@@ -1,23 +1,25 @@
 <template>
-  <div>
-    <label class="label" v-if="label.length > 0">
+  <div :class="{ active }">
+    <label class="label" v-if="label.length">
       {{ label }}
     </label>
     <div
       :class="{
         combo: true,
         thin: thin,
+        compact: isCompact,
         reversed: isReversed,
         open: showList
       }"
       ref="select"
       @click="toggleList"
     >
-      <div class="flexrow">
+      <div class="flexrow" :title="selectedOptionLabel">
+        <slot name="icon"></slot>
         <div
           class="selected-line flexrow-item"
           :class="{ placeholder: selectedOption?.placeholder }"
-          :title="selectedOptionLabel"
+          v-if="!isCompact"
         >
           {{ selectedOptionLabel }}
         </div>
@@ -80,6 +82,10 @@ export default {
   },
 
   props: {
+    active: {
+      default: false,
+      type: Boolean
+    },
     label: {
       default: '',
       type: String
@@ -95,6 +101,10 @@ export default {
     localeKeyPrefix: {
       default: '',
       type: String
+    },
+    isCompact: {
+      default: false,
+      type: Boolean
     },
     isPreview: {
       default: false,
@@ -195,6 +205,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+[disabled] {
+  pointer-events: none;
+  opacity: 0.5;
+
+  .down-icon {
+    color: $white;
+  }
+}
+
 .dark {
   .select-input,
   .selected-line,
@@ -237,6 +256,8 @@ export default {
 .selected-line {
   flex: 1;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .option-line {
@@ -253,8 +274,11 @@ export default {
   }
 }
 
-.placeholder {
-  opacity: 0.5;
+.option-line,
+.selected-line {
+  &.placeholder {
+    color: rgba($white, 0.5);
+  }
 }
 
 .down-icon {
@@ -262,7 +286,6 @@ export default {
   min-width: 15px;
   margin-right: 0.4em;
   color: $green;
-  cursor: pointer;
 }
 
 .select-input {

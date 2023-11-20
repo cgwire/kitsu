@@ -430,6 +430,7 @@
         >
           <arrow-up-right-icon class="icon is-small" />
         </a>
+        <div class="separator"></div>
       </div>
 
       <div class="flexrow flexrow-item mr0" v-if="isCurrentPreviewMovie">
@@ -483,9 +484,8 @@
           icon="music"
           @click="isWaveformDisplayed = !isWaveformDisplayed"
         />
+        <div class="separator"></div>
       </div>
-
-      <div class="separator"></div>
 
       <button-simple
         class="playlist-button flexrow-item"
@@ -568,23 +568,21 @@
 
       <div class="flexrow" v-if="isCurrentPreviewModel">
         <combobox-styled
-          class="mr05"
+          class="background-combo mr05"
+          :active="Boolean(currentBackground)"
+          :disabled="!productionBackgrounds.length"
+          :is-compact="!productionBackgrounds.length"
           is-reversed
           keep-order
           thin
           :options="backgroundOptions"
           v-model="currentBackground"
           @change="onObjectBackgroundSelected()"
-          v-if="productionBackgrounds.length"
-        />
-        <button-simple
-          class="playlist-button flexrow-item"
-          :active="isObjectBackground"
-          :disabled="!objectBackgroundUrl"
-          icon="globe"
-          :title="$t('playlists.actions.toggle_object_background')"
-          @click="isObjectBackground = !isObjectBackground"
-        />
+        >
+          <template #icon>
+            <globe-icon class="icon is-small mr05" />
+          </template>
+        </combobox-styled>
         <button-simple
           class="playlist-button flexrow-item"
           :active="isObjectBackground && isEnvironmentSkybox"
@@ -602,13 +600,17 @@
         />
       </div>
 
-      <button-simple
-        @click="$emit('save-clicked')"
-        class="playlist-button flexrow-item"
-        :title="$t('playlists.actions.save_playlist')"
-        icon="save"
+      <template
         v-if="(isCurrentUserManager || isCurrentUserSupervisor) && tempMode"
-      />
+      >
+        <div class="separator"></div>
+        <button-simple
+          @click="$emit('save-clicked')"
+          class="playlist-button flexrow-item"
+          :title="$t('playlists.actions.save_playlist')"
+          icon="save"
+        />
+      </template>
       <div
         class="flexrow"
         v-if="
@@ -878,7 +880,7 @@
 import moment from 'moment-timezone'
 import WaveSurfer from 'wavesurfer.js'
 import { mapActions, mapGetters } from 'vuex'
-import { ArrowUpRightIcon, DownloadIcon } from 'vue-feather-icons'
+import { ArrowUpRightIcon, DownloadIcon, GlobeIcon } from 'vue-feather-icons'
 
 import { formatFrame } from '@/lib/video'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
@@ -914,14 +916,15 @@ export default {
     ColorPicker,
     Combobox,
     ComboboxStyled,
-    DownloadIcon,
     DeleteModal,
+    DownloadIcon,
+    GlobeIcon,
     ObjectViewer,
     PencilPicker,
-    PlaylistedEntity,
-    RawVideoPlayer,
-    PreviewRoom,
     PictureViewer,
+    PlaylistedEntity,
+    PreviewRoom,
+    RawVideoPlayer,
     SelectTaskTypeModal,
     SoundViewer,
     Spinner,
@@ -2060,7 +2063,7 @@ export default {
 
 .playlist-footer {
   width: 100%;
-  min-height: 32px;
+  height: 32px;
   padding-right: 5px;
 }
 
@@ -2146,17 +2149,26 @@ export default {
   top: 0;
   left: 0;
 }
-
-.buttons {
-  height: 32px;
-}
-
 .comparison-combobox {
   margin-bottom: 0;
 }
 
-.buttons .comparison-button {
-  margin-left: 1em;
+.playlist-footer .background-combo {
+  max-width: 300px;
+
+  :deep(.combo) {
+    max-width: 100%;
+  }
+  .icon {
+    height: 1rem;
+    margin-top: 0;
+  }
+}
+
+.playlist-footer .button.active,
+.playlist-footer .button:hover,
+.playlist-footer .background-combo.active .icon {
+  color: #43b581;
 }
 
 progress::-moz-progress-bar {

@@ -120,9 +120,8 @@
               v-if="isDescriptionPresent && !isToCheck"
             />
             <td class="assignees" v-if="isToCheck">
-              <div class="flexrow">
+              <div class="avatars">
                 <people-avatar
-                  class="flexrow-item"
                   :key="entry.id + '-' + personId"
                   :person="personMap.get(personId)"
                   :size="30"
@@ -702,8 +701,14 @@ export default {
 }
 
 .assignees {
-  width: 130px;
-  max-width: 130px;
+  width: 140px;
+  max-width: 140px;
+
+  .avatars {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
 }
 
 .status {
