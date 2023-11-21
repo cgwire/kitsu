@@ -117,7 +117,8 @@ export const getProductionPath = (
       'quota',
       'team',
       'episodes',
-      'episode-stats'
+      'episode-stats',
+      'concepts'
     ].includes(section)
   ) {
     route = episodifyRoute(route, episodeId || 'all')

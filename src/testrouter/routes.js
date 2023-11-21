@@ -25,6 +25,7 @@ import Asset from '@/components/pages/Asset'
 import AssetTypes from '@/components/pages/AssetTypes'
 import Backgrounds from '@/components/pages/Backgrounds'
 import Breakdown from '@/components/pages/Breakdown'
+import Concepts from '@/components/pages/Concepts'
 import CustomActions from '@/components/pages/CustomActions'
 import Departments from '@/components/pages/departments/Departments'
 import Edit from '@/components/pages/Edit'
@@ -589,6 +590,12 @@ export const routes = [
             name: 'breakdown-asset-type'
           }
         ]
+      },
+
+      {
+        path: 'productions/:production_id/concepts',
+        component: Concepts,
+        name: 'concepts'
       },
 
       {
