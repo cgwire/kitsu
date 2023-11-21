@@ -134,6 +134,16 @@ export default {
     }
   },
 
+  concepts: {
+    title: 'Concepts',
+    fields: {
+      entity_type: 'Entity type',
+      created_at: 'Creation date',
+      updated_at: 'Update date',
+      // last_comment_date: 'Last comment',
+    }
+  },
+
   custom_actions: {
     create_error: 'An error occurred while saving this custom action. Are you sure that there is no other action with the same name?',
     delete_text: 'Are you sure you want to remove custom action {name} from your database?',
@@ -1065,6 +1075,7 @@ export default {
       color: 'Color',
       is_artist_allowed: 'Is artist allowed',
       is_client_allowed: 'Is client allowed',
+      is_concept: 'Is concept',
       is_done: 'Is done',
       is_feedback_request: 'Is feedback request',
       is_retake: 'Has retake value',

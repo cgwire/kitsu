@@ -1,0 +1,515 @@
+<template>
+  <div class="fixed-page columns">
+    <div class="column main-column">
+      <div class="concepts page">
+        <div class="page-header">
+          <div class="filters">
+            <search-field
+              ref="search-field"
+              class="field"
+              :can-save="true"
+              placeholder="ex: chara"
+              @change="onSearchChange"
+              @save="saveSearchQuery"
+            />
+            <combobox-status
+              :label="$t('main.status')"
+              :task-status-list="taskStatusList"
+              v-model="filters.taskStatusId"
+            />
+            <span class="field small">
+              <label class="label">
+                {{ $t('tasks.fields.assignees') }}
+              </label>
+              <people-field
+                :big="true"
+                :people="assignees"
+                v-model="filters.assignee"
+              />
+            </span>
+            <combobox
+              :label="$t('concepts.fields.entity_type')"
+              :options="entityTypeOptions"
+              v-model="filters.entityType"
+            />
+            <combobox
+              class="right"
+              :label="$t('main.sorted_by')"
+              locale-key-prefix="concepts.fields."
+              :options="sortByOptions"
+              v-model="filters.sortBy"
+            />
+          </div>
+          <div class="query-list">
+            <search-query-list
+              :queries="conceptSearchQueries"
+              type="concept"
+              @change-search="changeSearch"
+              @remove-search="removeSearchQuery"
+              v-if="!loading.loadingConcepts"
+            />
+          </div>
+        </div>
+        <h2 class="mt0">
+          {{ $t('concepts.title') }} ({{ concepts?.length || 0 }})
+        </h2>
+
+        <table-info
+          :is-loading="loading.loadingConcepts"
+          :is-error="error.loadingConcepts"
+          v-if="loading.loadingConcepts || error.loadingConcepts"
+        />
+
+        <div v-else>
+          <ul class="items">
+            <li
+              class="item"
+              :class="{
+                'selected-item': currentTask?.entity_id === concept.id
+              }"
+              v-for="concept in filteredConcepts"
+              :key="concept.id"
+              @click="onSelectConcept(concept)"
+            >
+              <img
+                class="preview"
+                alt=""
+                width="300"
+                height="200"
+                :src="concept.url"
+                @click.stop="onPreviewClicked"
+              />
+              <div class="description">
+                <span>{{ concept.name }}</span>
+                <ul class="tags">
+                  <li class="tag" v-for="tag in concept.tags" :key="tag">
+                    <a href="#">{{ tag }}</a>
+                  </li>
+                </ul>
+                <div class="status">
+                  <span
+                    class="tag"
+                    :style="{
+                      backgroundColor: taskStatusMap?.get(concept.status).color,
+                      color: 'white'
+                    }"
+                  >
+                    {{ taskStatusMap?.get(concept.status).short_name }}
+                  </span>
+                  <div class="assignees">
+                    <people-avatar
+                      :key="`${concept.id}-${personId}`"
+                      :person="personMap.get(personId)"
+                      :size="25"
+                      :font-size="14"
+                      v-for="personId in concept.assignees"
+                    />
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <footer class="footer">
+          <button-simple
+            :disabled="loading.loadingConcepts"
+            :text="$t('Add a new reference to concepts')"
+            @click="onAddConceptClicked"
+          />
+        </footer>
+      </div>
+    </div>
+
+    <div class="column side-column" v-if="currentTask">
+      <task-info :task="currentTask" />
+    </div>
+  </div>
+</template>
+
+<script>
+import { mapGetters, mapActions } from 'vuex'
+import { firstBy } from 'thenby'
+
+import { sortByName } from '@/lib/sorting'
+
+import { searchMixin } from '@/components/mixins/search'
+
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import PeopleField from '@/components/widgets/PeopleField'
+import SearchField from '@/components/widgets/SearchField'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import SearchQueryList from '@/components/widgets/SearchQueryList'
+import TableInfo from '@/components/widgets/TableInfo'
+import TaskInfo from '@/components/sides/TaskInfo'
+
+export default {
+  name: 'concepts',
+  mixins: [searchMixin],
+
+  components: {
+    ButtonSimple,
+    Combobox,
+    ComboboxStatus,
+    PeopleField,
+    SearchField,
+    PeopleAvatar,
+    SearchQueryList,
+    TableInfo,
+    TaskInfo
+  },
+
+  data() {
+    return {
+      loading: {
+        loadingConcepts: true,
+        savingSearch: false
+      },
+      error: {
+        loadingConcepts: false
+      },
+      filters: {
+        taskStatusId: null,
+        assignee: null,
+        entityType: null,
+        sortBy: 'created_at'
+      },
+
+      // TODO: module getters
+      currentTask: null,
+      conceptSearchQueries: [
+        {
+          id: 'filter-test-1',
+          list_type: 'concept',
+          name: 'test',
+          search_query: 'test'
+        }
+      ],
+      concepts: [
+        {
+          id: 1,
+          name: 'concept 1',
+          url: 'https://placehold.co/300x200',
+          status: 'concept-neutral',
+          task: null,
+          assignees: ['9609db21-9fe7-4c98-a536-5590f7ff1676'], // me
+          tags: ['tag1', 'tag2', 'tag3'],
+          created_at: '2023-11-20T00:00:00',
+          updated_at: '2023-11-23T00:00:00'
+        },
+        {
+          id: 2,
+          name: 'concept 2',
+          url: 'https://placehold.co/300x200',
+          status: 'concept-approved',
+          task: null,
+          assignees: ['532028cc-a249-4cc6-ace6-86f63ca9c5c8'], // alicia cooper
+          tags: [],
+          created_at: '2023-11-21T00:00:00',
+          updated_at: '2023-11-24T00:00:00'
+        },
+        {
+          id: 3,
+          name: 'concept 3',
+          url: 'https://placehold.co/300x200',
+          status: 'concept-rejected',
+          task: null,
+          assignees: [],
+          tags: [],
+          created_at: '2023-11-23T00:00:00',
+          updated_at: '2023-11-23T00:00:00'
+        }
+      ]
+    }
+  },
+
+  mounted() {
+    // FIXME: remove fake loading
+    setTimeout(() => {
+      this.loading.loadingConcepts = false
+    }, 2000)
+
+    this.setSearch(this.$route.query.search)
+
+    this.searchField.focus()
+  },
+
+  computed: {
+    ...mapGetters([
+      'currentProduction',
+      'isDarkTheme',
+      'personMap',
+      'taskStatusMap',
+      'taskTypes'
+    ]),
+
+    assignees() {
+      const assignees = []
+      const assigneesMap = {}
+      this.filteredConcepts.forEach(task => {
+        task.assignees.forEach(personId => {
+          if (!assigneesMap[personId]) {
+            assignees.push(this.personMap.get(personId))
+            assigneesMap[personId] = true
+          }
+        })
+      })
+      return sortByName(assignees)
+    },
+
+    entityTypeOptions() {
+      const allEntityTypeOptions = {
+        label: this.$t('main.all'),
+        value: null
+      }
+      const options = ['assets', 'shots', 'sequences', 'edits', 'episodes'].map(
+        name => ({
+          label: this.$t(`${name}.title`),
+          value: name
+        })
+      )
+      return [allEntityTypeOptions].concat(options)
+    },
+
+    sortByOptions() {
+      // FIXME: sorting options to define
+      return [
+        'created_at',
+        'updated_at'
+        //'last_comment_date'
+      ].map(name => ({
+        label: name,
+        value: name
+      }))
+    },
+
+    filteredConcepts() {
+      let concepts = this.concepts.slice()
+      if (this.filters.taskStatusId) {
+        concepts = concepts.filter(
+          concept => concept.status === this.filters.taskStatusId
+        )
+      }
+      if (this.filters.assignee) {
+        concepts = concepts.filter(concept =>
+          concept.assignees?.includes(this.filters.assignee.id)
+        )
+      }
+      if (this.filters.entityType) {
+        concepts = concepts.filter(concept =>
+          concept.entities?.some(
+            // FIXME: condition related to many-to-many relationship
+            entity => entity.type === this.filters.entityType
+          )
+        )
+      }
+
+      return concepts.sort(
+        firstBy(this.filters.sortBy, -1).thenBy('created_at')
+      )
+    },
+
+    searchField() {
+      return this.$refs['search-field']
+    },
+
+    taskStatusList() {
+      const allStatusItem = {
+        id: null,
+        color: '#999',
+        name: this.$t('main.all'),
+        short_name: this.$t('main.all')
+      }
+      const conceptTaskStatusList = sortByName(
+        Array.from(this.taskStatusMap.values()).filter(
+          status => status.is_concept
+        )
+      )
+      return [allStatusItem].concat(conceptTaskStatusList)
+    }
+  },
+
+  methods: {
+    ...mapActions([]),
+
+    // TODO: module actions
+    setConceptSearch: searchQuery => Promise.resolve(),
+    saveConceptSearch: searchQuery => Promise.resolve(),
+    removeConceptSearch: searchQuery => Promise.resolve(),
+
+    setSearch(value) {
+      this.searchField.setValue(value)
+    },
+
+    onSearchChange() {
+      const searchQuery = this.searchField.getValue() || ''
+      if (searchQuery?.length !== 1) {
+        this.setConceptSearch(searchQuery)
+      }
+      this.setSearchInUrl()
+    },
+
+    saveSearchQuery(searchQuery) {
+      if (this.loading.savingSearch) {
+        return
+      }
+      this.loading.savingSearch = true
+      this.saveConceptSearch(searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
+    },
+
+    removeSearchQuery(searchQuery) {
+      this.removeConceptSearch(searchQuery).catch(err => {
+        if (err) console.error(err)
+      })
+    },
+
+    onPreviewClicked() {
+      alert('onPreviewClicked')
+    },
+
+    onSelectConcept(concept) {
+      // FIXME: remove mock data
+      concept.task = {
+        id: `task-${concept.id}`,
+        entity_id: concept.id,
+        task_type_id: this.taskTypes[0].id,
+        project_id: this.currentProduction.id
+      }
+
+      this.currentTask =
+        !this.currentTask || this.currentTask.entity_id !== concept.id
+          ? concept.task
+          : null
+    },
+
+    onAddConceptClicked() {
+      alert('onAddConceptClicked')
+    }
+  },
+
+  watch: {},
+
+  metaInfo() {
+    return {
+      title: `${this.$t('concepts.title')} - Kitsu`
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.filters {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 0 20px;
+  padding: 10px;
+
+  .field {
+    margin-bottom: 1em;
+
+    .label {
+      padding-top: 5px;
+    }
+  }
+
+  .right {
+    margin-left: auto;
+  }
+}
+
+.items {
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  list-style: none;
+  margin: 0;
+
+  .item {
+    width: 300px;
+    background-color: var(--background);
+    border-radius: 1em;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+
+    .dark & {
+      background-color: var(--background-alt);
+    }
+
+    &.selected-item {
+      background-color: var(--background-selected);
+    }
+    &:hover {
+      background-color: var(--background-hover);
+    }
+
+    .preview {
+      cursor: zoom-in;
+      background-color: $black;
+      border-top-left-radius: inherit;
+      border-top-right-radius: inherit;
+      max-width: 300px;
+      min-width: 300px;
+      max-height: 200px;
+      min-height: 200px;
+    }
+
+    .description {
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      row-gap: 10px;
+      padding: 0.3em 1em;
+      margin-bottom: 0.3em;
+      color: var(--text-strong);
+
+      font-weight: 500;
+
+      text-transform: uppercase;
+    }
+
+    .tags {
+      display: inline-flex;
+      gap: 10px;
+      margin-left: 0;
+      height: 21px;
+
+      .tag:hover {
+        transform: scale(1.1);
+      }
+    }
+
+    .status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .tag {
+        text-transform: uppercase;
+      }
+
+      .assignees {
+        display: flex;
+        gap: 5px;
+      }
+    }
+
+    .tag {
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  padding: 3em;
+  margin-top: 3em;
+}
+</style>
