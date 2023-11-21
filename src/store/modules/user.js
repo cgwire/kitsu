@@ -386,6 +386,35 @@ const actions = {
 
   loadContext({ commit, rootGetters }) {
     return peopleApi.getContext().then(context => {
+      // FIXME: remove mock data
+      context.task_status.push(
+        {
+          id: 'concept-neutral',
+          name: 'Neutral',
+          archived: false,
+          short_name: 'neutral',
+          color: '#CCCCCC',
+          // is_default: true,
+          is_concept: true
+        },
+        {
+          id: 'concept-approved',
+          name: 'Approved',
+          archived: false,
+          short_name: 'approved',
+          color: '#66BB6A',
+          is_concept: true
+        },
+        {
+          id: 'concept-rejected',
+          name: 'Rejected',
+          archived: false,
+          short_name: 'rejected',
+          color: '#E81123',
+          is_concept: true
+        }
+      )
+
       commit(LOAD_USER_FILTERS_END, context.search_filters)
       commit(LOAD_USER_FILTER_GROUPS_END, context.search_filter_groups)
       commit(LOAD_PRODUCTION_STATUS_END, context.project_status)

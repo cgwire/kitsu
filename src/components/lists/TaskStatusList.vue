@@ -28,6 +28,9 @@
             <th scope="col" class="is-feedback-request">
               {{ $t('task_status.fields.is_feedback_request') }}
             </th>
+            <th scope="col" class="is-concept">
+              {{ $t('task_status.fields.is_concept') }}
+            </th>
             <th scope="col" class="actions"></th>
           </tr>
         </thead>
@@ -52,6 +55,7 @@
               class="is-feedback-request"
               :value="entry.is_feedback_request"
             />
+            <boolean-cell class="is-concept" :value="entry.is_concept" />
             <row-actions-cell
               :entry-id="entry.id"
               :hide-delete="entry.is_default === true"
@@ -138,7 +142,8 @@ export default {
 .is-retake,
 .is-artist-allowed,
 .is-client-allowed,
-.is-feedback-request {
+.is-feedback-request,
+.is-concept {
   text-align: center;
   width: 140px;
   min-width: 140px;

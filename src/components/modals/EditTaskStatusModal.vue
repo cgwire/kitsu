@@ -69,6 +69,12 @@
             v-model="form.is_feedback_request"
             v-if="form.is_default === 'false'"
           />
+          <boolean-field
+            :label="$t('task_status.fields.is_concept')"
+            @enter="confirmClicked"
+            v-model="form.is_concept"
+            v-if="form.is_default === 'false'"
+          />
 
           <color-field
             ref="colorField"
@@ -218,6 +224,7 @@ export default {
           is_feedback_request: String(
             this.taskStatusToEdit.is_feedback_request || false
           ),
+          is_concept: String(this.taskStatusToEdit.is_concept || false),
           archived: String(this.taskStatusToEdit.archived || false)
         }
       }
