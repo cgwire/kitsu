@@ -62,7 +62,7 @@ const applyFiltersFunctions = {
     let isOk = false
     if (filter.taskType) {
       const task = taskMap.get(entry.validations.get(filter.taskType.id))
-      isOk = isOk || task.assignees.includes(filter.personId)
+      isOk = isOk || (task && task.assignees.includes(filter.personId))
     } else if (entry.tasks) {
       entry.tasks.forEach(taskId => {
         const task = taskMap.get(taskId)
