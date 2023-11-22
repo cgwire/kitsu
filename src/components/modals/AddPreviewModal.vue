@@ -15,7 +15,7 @@
           {{ $t('tasks.change_preview') }}
         </h1>
         <h1 class="title" v-else>
-          {{ $t('tasks.add_preview') }}
+          {{ isConcept ? $t('concepts.add_concept') : $t('tasks.add_preview') }}
         </h1>
 
         <p>
@@ -25,7 +25,7 @@
         <file-upload
           ref="preview-field"
           :accept="extensions"
-          :multiple="true"
+          :multiple="isMultiple"
           :label="$t('main.select_file')"
           :is-primary="false"
           @fileselected="onFileSelected"
@@ -33,7 +33,11 @@
         />
 
         <p class="error" v-if="isError">
-          {{ $t('tasks.add_preview_error') }}
+          {{
+            isConcept
+              ? $t('concepts.add_concept_error')
+              : $t('tasks.add_preview_error')
+          }}
         </p>
 
         <h3 class="subtitle has-text-centered" v-if="forms.length > 0">
@@ -73,9 +77,9 @@
           </template>
         </p>
 
-        <div class="mt1 message">
+        <div class="mt1 message" v-if="message">
           <div class="message-body">
-            {{ $t('tasks.revision_preview_file') }}
+            {{ $t(message) }}
           </div>
         </div>
 
@@ -89,7 +93,11 @@
             }"
             @click="$emit('confirm', forms)"
           >
-            {{ $t('tasks.add_revision_confirm') }}
+            {{
+              isConcept
+                ? $t('main.confirmation')
+                : $t('tasks.add_revision_confirm')
+            }}
           </a>
           <button @click="$emit('cancel')" class="button is-link">
             {{ $t('main.cancel') }}
@@ -119,11 +127,7 @@ export default {
       type: Boolean,
       default: false
     },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
+    isConcept: {
       type: Boolean,
       default: false
     },
@@ -131,9 +135,25 @@ export default {
       type: Boolean,
       default: false
     },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    isMultiple: {
+      type: Boolean,
+      default: true
+    },
     extensions: {
       type: String,
       default: files.ALL_EXTENSIONS_STRING
+    },
+    message: {
+      type: String,
+      default: 'tasks.revision_preview_file'
     },
     title: {
       type: String,

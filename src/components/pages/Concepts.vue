@@ -46,7 +46,6 @@
               type="concept"
               @change-search="changeSearch"
               @remove-search="removeSearchQuery"
-              v-if="!loading.loadingConcepts"
             />
           </div>
         </div>
@@ -56,8 +55,8 @@
 
         <table-info
           :is-loading="loading.loadingConcepts"
-          :is-error="error.loadingConcepts"
-          v-if="loading.loadingConcepts || error.loadingConcepts"
+          :is-error="errors.loadingConcepts"
+          v-if="loading.loadingConcepts || errors.loadingConcepts"
         />
 
         <div v-else>
@@ -113,12 +112,24 @@
         <footer class="footer">
           <button-simple
             :disabled="loading.loadingConcepts"
-            :text="$t('Add a new reference to concepts')"
-            @click="onAddConceptClicked"
+            :text="$t('concepts.add_new_concept')"
+            @click="openAddConceptModal"
           />
         </footer>
       </div>
     </div>
+
+    <add-preview-modal
+      ref="add-preview-modal"
+      :active="modals.addConcept"
+      is-concept
+      :is-error="errors.addingConcept"
+      :is-loading="loading.addingConcept"
+      :is-multiple="false"
+      message=""
+      @cancel="closeAddConceptModal"
+      @confirm="confirmAddConceptModal"
+    />
 
     <div class="column side-column" v-if="currentTask">
       <task-info :task="currentTask" />
@@ -134,6 +145,7 @@ import { sortByName } from '@/lib/sorting'
 
 import { searchMixin } from '@/components/mixins/search'
 
+import AddPreviewModal from '@/components/modals/AddPreviewModal'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
@@ -149,6 +161,7 @@ export default {
   mixins: [searchMixin],
 
   components: {
+    AddPreviewModal,
     ButtonSimple,
     Combobox,
     ComboboxStatus,
@@ -163,10 +176,12 @@ export default {
   data() {
     return {
       loading: {
+        addingConcept: false,
         loadingConcepts: true,
         savingSearch: false
       },
-      error: {
+      errors: {
+        addingConcept: false,
         loadingConcepts: false
       },
       filters: {
@@ -174,6 +189,12 @@ export default {
         assignee: null,
         entityType: null,
         sortBy: 'created_at'
+      },
+      form: {
+        file: null
+      },
+      modals: {
+        addConcept: false
       },
 
       // TODO: module getters
@@ -228,7 +249,7 @@ export default {
     // FIXME: remove fake loading
     setTimeout(() => {
       this.loading.loadingConcepts = false
-    }, 2000)
+    }, 500)
 
     this.setSearch(this.$route.query.search)
 
@@ -331,7 +352,7 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
+    ...mapActions(['newConcept']),
 
     // TODO: module actions
     setConceptSearch: searchQuery => Promise.resolve(),
@@ -387,8 +408,23 @@ export default {
           : null
     },
 
-    onAddConceptClicked() {
-      alert('onAddConceptClicked')
+    openAddConceptModal() {
+      this.modals.addConcept = true
+    },
+
+    closeAddConceptModal() {
+      this.modals.addConcept = false
+    },
+
+    async confirmAddConceptModal(forms) {
+      const file = forms[0].get('file')
+      try {
+        await this.newConcept({ file })
+        this.closeAddConceptModal()
+      } catch (error) {
+        console.error(error)
+        this.errors.addingConcept = true
+      }
     }
   },
 

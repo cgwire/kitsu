@@ -135,6 +135,9 @@ export default {
   },
 
   concepts: {
+    add_new_concept: 'Add a new reference to concepts',
+    add_concept: 'Add file for a new concept revision',
+    add_concept_error: 'An error occurred while adding concept.',
     title: 'Concepts',
     fields: {
       entity_type: 'Entity type',
