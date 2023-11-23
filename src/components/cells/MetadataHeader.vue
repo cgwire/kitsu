@@ -13,7 +13,10 @@
         :style="{ padding: '0px 0px' }"
         v-for="department in currentDepartments"
       />
-      <span class="flexrow-item descriptor-name">
+      <span
+        class="flexrow-item ellipsis descriptor-name"
+        :title="descriptor.name"
+      >
         {{ descriptor.name }}
       </span>
 

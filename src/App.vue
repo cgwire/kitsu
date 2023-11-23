@@ -1450,6 +1450,10 @@ tbody:last-child .empty-line:last-child {
     &:hover .header-icon {
       opacity: 1;
     }
+
+    .descriptor-name {
+      margin-right: 0;
+    }
   }
 
   .validation-cell,
