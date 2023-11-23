@@ -188,6 +188,8 @@ export default {
   width: 100%;
   background: transparent;
   border: 1px solid transparent;
+  text-overflow: ellipsis;
+  overflow: hidden;
   z-index: 100;
 
   &[type='checkbox'] {
