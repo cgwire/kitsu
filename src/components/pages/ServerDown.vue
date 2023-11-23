@@ -32,7 +32,7 @@ export default {
 
 <style lang="scss" scoped>
 .page {
-  background-color: #f5f5f5;
+  background-color: var(--background);
 }
 
 .illustration {
