@@ -925,8 +925,8 @@ export default {
     uploadImportFile(data) {
       const formData = new FormData()
       const filename = 'import.csv'
-      const csvcontent = csv.turnEntriesToCsvString(data)
-      const file = new File([csvcontent], filename, { type: 'text/csv' })
+      const csvContent = csv.turnEntriesToCsvString(data)
+      const file = new File([csvContent], filename, { type: 'text/csv' })
 
       formData.append('file', file)
 
