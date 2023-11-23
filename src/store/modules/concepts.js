@@ -24,7 +24,8 @@ const state = {
 
 const getters = {
   concepts: state => state.concepts,
-  conceptMap: state => state.conceptMap
+  conceptMap: state => state.conceptMap,
+  displayedConcepts: state => state.displayedConcepts
   // editConcept: state => state.editConcept,
   // deleteConcept: state => state.deleteConcept
 }
@@ -100,6 +101,7 @@ const mutations = {
     state.conceptMap = new Map(
       state.concepts.map(concept => [concept.id, concept])
     )
+    state.displayedConcepts = concepts
   },
 
   [EDIT_CONCEPT_END](state, newConcept) {
@@ -120,14 +122,12 @@ const mutations = {
     }
   },
 
-  [DELETE_CONCEPT_END](state, conceptToDelete) {
-    const conceptToDeleteIndex = state.concepts.findIndex(
-      ({ id }) => id === conceptToDelete.id
-    )
-    if (conceptToDeleteIndex >= 0) {
-      state.concepts.splice(conceptToDeleteIndex, 1)
+  [DELETE_CONCEPT_END](state, concept) {
+    const conceptIndex = state.concepts.findIndex(({ id }) => id === concept.id)
+    if (conceptIndex >= 0) {
+      state.concepts.splice(conceptIndex, 1)
     }
-    delete state.conceptMap.get(conceptToDelete.id)
+    delete state.conceptMap.get(concept.id)
   },
 
   [RESET_ALL](state) {

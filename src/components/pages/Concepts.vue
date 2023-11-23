@@ -50,7 +50,7 @@
           </div>
         </div>
         <h2 class="mt0">
-          {{ $t('concepts.title') }} ({{ concepts?.length || 0 }})
+          {{ $t('concepts.title') }} ({{ filteredConcepts?.length || 0 }})
         </h2>
 
         <table-info
@@ -75,7 +75,7 @@
                 alt=""
                 width="300"
                 height="200"
-                :src="concept.url"
+                :src="concept.thumbnail"
                 @click.stop="onPreviewClicked"
               />
               <div class="description">
@@ -206,59 +206,20 @@ export default {
           name: 'test',
           search_query: 'test'
         }
-      ],
-      concepts: [
-        {
-          id: 1,
-          name: 'concept 1',
-          url: 'https://placehold.co/300x200',
-          status: 'concept-neutral',
-          task: null,
-          assignees: ['9609db21-9fe7-4c98-a536-5590f7ff1676'], // me
-          tags: ['tag1', 'tag2', 'tag3'],
-          created_at: '2023-11-20T00:00:00',
-          updated_at: '2023-11-23T00:00:00'
-        },
-        {
-          id: 2,
-          name: 'concept 2',
-          url: 'https://placehold.co/300x200',
-          status: 'concept-approved',
-          task: null,
-          assignees: ['532028cc-a249-4cc6-ace6-86f63ca9c5c8'], // alicia cooper
-          tags: [],
-          created_at: '2023-11-21T00:00:00',
-          updated_at: '2023-11-24T00:00:00'
-        },
-        {
-          id: 3,
-          name: 'concept 3',
-          url: 'https://placehold.co/300x200',
-          status: 'concept-rejected',
-          task: null,
-          assignees: [],
-          tags: [],
-          created_at: '2023-11-23T00:00:00',
-          updated_at: '2023-11-23T00:00:00'
-        }
       ]
     }
   },
 
   mounted() {
-    // FIXME: remove fake loading
-    setTimeout(() => {
-      this.loading.loadingConcepts = false
-    }, 500)
-
     this.setSearch(this.$route.query.search)
-
+    this.refreshConcepts()
     this.searchField.focus()
   },
 
   computed: {
     ...mapGetters([
       'currentProduction',
+      'displayedConcepts',
       'isDarkTheme',
       'personMap',
       'taskStatusMap',
@@ -306,7 +267,7 @@ export default {
     },
 
     filteredConcepts() {
-      let concepts = this.concepts.slice()
+      let concepts = this.displayedConcepts.slice()
       if (this.filters.taskStatusId) {
         concepts = concepts.filter(
           concept => concept.status === this.filters.taskStatusId
@@ -352,7 +313,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['newConcept']),
+    ...mapActions(['loadConcepts', 'newConcept']),
 
     // TODO: module actions
     setConceptSearch: searchQuery => Promise.resolve(),
@@ -389,6 +350,18 @@ export default {
       })
     },
 
+    async refreshConcepts() {
+      this.loading.loadingConcepts = true
+      try {
+        await this.loadConcepts()
+      } catch (err) {
+        console.error(err)
+        this.errors.loadingConcepts = true
+      } finally {
+        this.loading.loadingConcepts = false
+      }
+    },
+
     onPreviewClicked() {
       alert('onPreviewClicked')
     },
@@ -417,13 +390,16 @@ export default {
     },
 
     async confirmAddConceptModal(forms) {
+      this.loading.addingConcept = true
       const file = forms[0].get('file')
       try {
         await this.newConcept({ file })
         this.closeAddConceptModal()
-      } catch (error) {
-        console.error(error)
+      } catch (err) {
+        console.error(err)
         this.errors.addingConcept = true
+      } finally {
+        this.loading.addingConcept = false
       }
     }
   },
