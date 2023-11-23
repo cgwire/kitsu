@@ -1,11 +1,13 @@
 import Papa from 'papaparse'
+
+import { getPercentage } from '@/lib/stats'
+import stringHelpers from '@/lib/string'
 import {
   getDayRange,
   getMonthRange,
   getWeekRange,
   hoursToDays
 } from '@/lib/time'
-import { getPercentage } from '@/lib/stats'
 
 const csv = {
   generateTimesheet(
@@ -402,30 +404,19 @@ const csv = {
     return entries
   },
 
-  processCSV: (data, config) => {
+  processCSV: (data, config = {}) => {
     return new Promise((resolve, reject) => {
       Papa.parse(data, {
-        config: config,
+        ...config,
         encoding: 'UTF-8',
         error: reject,
+        transform: value => value.trim(),
         complete: results => {
-          const parsedData = csv.cleanUpCsv(results.data)
-          resolve(parsedData)
+          results.data[0].forEach(stringHelpers.capitalize)
+          resolve(results.data)
         }
       })
     })
-  },
-
-  cleanUpCsv: data => {
-    data.forEach(item => {
-      item.forEach((item, index, data) => {
-        data[index] = item.trim()
-      })
-    })
-    data[0].forEach((item, index, data) => {
-      data[index] = (item[0] || '').toUpperCase() + item.slice(1)
-    })
-    return data
   }
 }
 
