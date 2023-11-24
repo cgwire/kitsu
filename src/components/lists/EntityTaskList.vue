@@ -54,6 +54,7 @@
               class="type"
               :task-type="getTaskType(taskId)"
               :production-id="currentProduction.id"
+              :task-id="taskId"
               v-if="getTaskType(taskId)"
             />
             <td class="status">

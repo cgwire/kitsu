@@ -3,6 +3,7 @@
     <task-type-name
       :task-type="taskType"
       :production-id="productionId"
+      :task-id="taskId"
       :disable="disable"
     />
   </td>
@@ -20,6 +21,10 @@ export default {
   },
 
   props: {
+    taskId: {
+      type: String,
+      default: null
+    },
     taskType: {
       type: Object,
       default: null

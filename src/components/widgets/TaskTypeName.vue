@@ -1,5 +1,5 @@
 <template>
-  <router-link :to="taskTypePath" v-if="productionId && !isCurrentUserClient">
+  <router-link :to="targetRoute" v-if="productionId && !isCurrentUserClient">
     <span
       class="tag task-type-name"
       :style="{ 'border-left': '4px solid ' + color }"
@@ -34,14 +34,6 @@ export default {
   components: {},
 
   props: {
-    taskType: {
-      type: Object,
-      default: null
-    },
-    productionId: {
-      type: String,
-      default: null
-    },
     deletable: {
       type: Boolean,
       default: false
@@ -49,6 +41,18 @@ export default {
     disable: {
       type: Boolean,
       default: false
+    },
+    productionId: {
+      type: String,
+      default: null
+    },
+    taskId: {
+      type: String,
+      default: null
+    },
+    taskType: {
+      type: Object,
+      default: null
     }
   },
 
@@ -60,9 +64,30 @@ export default {
       else return this.taskType.color
     },
 
-    taskTypePath() {
+    targetRoute() {
       let route = {}
-      if (this.taskType.for_entity === 'Episode') {
+      if (this.taskId) {
+        if (this.$route.params.episode_id) {
+          route = {
+            name: 'episode-task',
+            params: {
+              production_id: this.productionId,
+              task_id: this.taskId,
+              episode_id: this.$route.params.episode_id,
+              type: pluralizeEntityType(this.taskType.for_entity)
+            }
+          }
+        } else {
+          route = {
+            name: 'task',
+            params: {
+              production_id: this.productionId,
+              task_id: this.taskId,
+              type: pluralizeEntityType(this.taskType.for_entity)
+            }
+          }
+        }
+      } else if (this.taskType.for_entity === 'Episode') {
         route = {
           name: 'episodes-task-type',
           params: {
