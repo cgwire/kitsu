@@ -63,7 +63,7 @@
     "@vue/compiler-sfc": "2.7.15",
     "@vue/test-utils": "1.3.6",
     "autoprefixer": "10.4.16",
-    "eslint": "8.53.0",
+    "eslint": "8.54.0",
     "eslint-config-prettier": "9.0.0",
     "eslint-plugin-prettier": "5.0.1",
     "eslint-plugin-vue": "9.18.1",

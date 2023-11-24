@@ -17,16 +17,14 @@
         v-if="currentDepartment"
       />
       <router-link
-        class="flexrow-item datatable-dropdown task-type-name"
-        style="margin-right: 0"
+        class="flexrow-item datatable-dropdown ellipsis task-type-name"
         :to="taskTypePath(columnId)"
         v-if="!isCurrentUserClient"
       >
         {{ !hiddenColumns[columnId] ? taskTypeMap.get(columnId).name : '' }}
       </router-link>
       <span
-        class="flexrow-item datatable-dropdown task-type-name"
-        style="margin-right: 0"
+        class="flexrow-item datatable-dropdown ellipsis task-type-name"
         v-else
       >
         {{ !hiddenColumns[columnId] ? taskTypeMap.get(columnId).name : '' }}
@@ -130,6 +128,7 @@ th.metadata-descriptor {
   font-size: 1.1em;
   max-width: 95%;
   text-transform: none;
+  margin-right: 0;
 }
 
 .header-icon {
