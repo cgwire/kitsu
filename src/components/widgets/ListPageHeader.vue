@@ -5,6 +5,13 @@
     </div>
     <div class="level-right">
       <button-simple
+        class="flexrow-item"
+        icon="download"
+        :title="$t('main.csv.export_file')"
+        @click="$emit('export-clicked')"
+        v-if="isExportable"
+      />
+      <button-simple
         class="level-item"
         icon="plus"
         :text="newEntryLabel"
@@ -15,8 +22,6 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import PageTitle from '@/components/widgets/PageTitle'
 
@@ -29,26 +34,18 @@ export default {
   },
 
   props: {
-    title: {
-      type: String,
-      default: ''
+    isExportable: {
+      type: Boolean,
+      default: true
     },
     newEntryLabel: {
       type: String,
       default: ''
+    },
+    title: {
+      type: String,
+      default: ''
     }
-  },
-
-  computed: {
-    ...mapGetters([])
-  },
-
-  methods: {
-    ...mapActions([])
-  },
-
-  watch: {}
+  }
 }
 </script>
-
-<style lang="scss" scoped></style>
