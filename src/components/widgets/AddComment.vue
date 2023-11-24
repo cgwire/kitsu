@@ -480,7 +480,7 @@ export default {
     },
 
     frame() {
-      return Math.floor(this.time * this.fps)
+      return Math.round(this.time * this.fps)
     }
   },
 
@@ -639,10 +639,13 @@ export default {
 
     onAtTextChanged(input) {
       if (input.includes('@frame')) {
+        const isChromium = !!window.chrome
+        const change = isChromium ? 1 : 0
+        const time = this.time + change / this.fps
         this.text = replaceTimeWithTimecode(
           input,
           this.revision,
-          this.time,
+          time,
           this.fps
         )
       }

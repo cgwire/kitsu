@@ -36,28 +36,38 @@
         @click="onPlayPreviousEntityClicked"
         :title="$t('playlists.actions.previous_shot')"
         icon="back"
+        v-if="!isFullMode"
       />
       <button-simple
         class="playlist-button flexrow-item"
         @click="onPlayNextEntityClicked"
         :title="$t('playlists.actions.next_shot')"
         icon="forward"
+        v-if="!isFullMode"
       />
 
       <div class="filler"></div>
+      <button-simple
+        class="playlist-button topbar-button flexrow-item"
+        @click="isFullMode = false"
+        :title="$t('playlists.actions.next_shot')"
+        text="Exit build play"
+        v-if="isFullMode"
+      />
+
       <preview-room
         :ref="previewRoomRef"
         :roomId="isValidRoomId(playlist.id) ? playlist.id : ''"
         :joinRoom="joinRoom"
         :leaveRoom="leaveRoom"
-        v-if="isValidRoomId(playlist.id)"
+        v-if="isValidRoomId(playlist.id) && !isFullMode"
       />
       <button-simple
         @click="$emit('show-add-entities')"
         class="playlist-button topbar-button flexrow-item"
         icon="plus"
         :text="addEntitiesText"
-        v-if="isCurrentUserManager && !isAddingEntity"
+        v-if="isCurrentUserManager && !isAddingEntity && !isFullMode"
       />
       <button-simple
         @click="$emit('edit-clicked')"
@@ -85,6 +95,18 @@
         }"
         ref="video-container"
       >
+        <span class="video-time">
+          {{ currentTimeRaw }}
+        </span>
+        <video
+          ref="full-playlist-player"
+          class="raw-player"
+          :style="{
+            position: isComparisonOverlay ? 'absolute' : 'relative'
+          }"
+          v-show="isFullMode"
+        />
+
         <raw-video-player
           ref="raw-player-comparison"
           class="raw-player"
@@ -103,6 +125,7 @@
             isComparing &&
             isCurrentPreviewMovie &&
             isMovieComparison &&
+            !isFullMode &&
             !isLoading
           "
         />
@@ -168,13 +191,13 @@
           :current-preview-index="currentPreviewIndex"
           :muted="isMuted"
           @entity-change="onPlayerPlayingEntityChange"
-          @frame-update="onFrameUpdate"
+          @frame-update="onRawPlayerFrameUpdate"
           @max-duration-update="onMaxDurationUpdate"
           @metadata-loaded="onMetadataLoaded"
           @play-next="onPlayNext"
           @repeat="onVideoRepeated"
           @video-loaded="onVideoLoaded"
-          v-show="isCurrentPreviewMovie && !isLoading"
+          v-show="isCurrentPreviewMovie && !isFullMode && !isLoading"
         />
 
         <object-viewer
@@ -283,16 +306,24 @@
       ref="video-progress"
       class="video-progress pull-bottom"
       :annotations="annotations"
+      :fps="fps"
       :frame-duration="frameDuration"
+      :is-playlist="true"
+      :is-full-mode="isFullMode"
       :is-full-screen="fullScreen"
       :movie-dimensions="movieDimensions"
       :nb-frames="nbFrames"
       :handle-in="playlist.for_entity === 'shot' ? handleIn : -1"
       :handle-out="playlist.for_entity === 'shot' ? handleOut : -1"
       :preview-id="currentPreview ? currentPreview.id : ''"
+      :playlist-duration="playlistDuration"
+      :playlist-progress="playlistProgress"
+      :playlist-shot-position="playlistShotPosition"
+      :entity-list="entityList"
       @start-scrub="onScrubStart"
       @end-scrub="onScrubEnd"
       @progress-changed="onProgressChanged"
+      @progress-playlist-changed="onProgressPlaylistChanged"
       @handle-in-changed="onHandleInChanged"
       @handle-out-changed="onHandleOutChanged"
       v-show="isCurrentPreviewMovie && playlist.id && !isAddingEntity"
@@ -310,8 +341,8 @@
     </div>
 
     <div
-      class="playlist-footer flexrow"
       ref="button-bar"
+      class="playlist-footer flexrow"
       v-if="playlist.id && !isAddingEntity"
     >
       <div class="flexrow flexrow-item comparison-buttons" v-if="tempMode">
@@ -368,27 +399,29 @@
       </div>
 
       <div v-if="isCurrentPreviewMovie">
-        <span
-          class="flexrow-item time-indicator is-hidden-desktop"
-          :title="$t('playlists.actions.current_time')"
-        >
-          {{ currentTime }}
-        </span>
-        <span class="flexrow-item time-indicator is-hidden-desktop"> / </span>
-        <span
-          class="flexrow-item time-indicator is-hidden-desktop"
-          :title="$t('playlists.actions.max_duration')"
-        >
-          {{ maxDuration }}
-        </span>
-        <span
-          class="flexrow-item time-indicator mr1"
-          :title="$t('playlists.actions.frame_number')"
-        >
-          ({{ currentFrame }}&nbsp;/&nbsp;{{
-            (nbFrames + '').padStart(3, '0')
-          }})
-        </span>
+        <template v-if="!isFullMode">
+          <span
+            class="flexrow-item time-indicator is-hidden-desktop"
+            :title="$t('playlists.actions.current_time')"
+          >
+            {{ currentTime }}
+          </span>
+          <span class="flexrow-item time-indicator is-hidden-desktop"> / </span>
+          <span
+            class="flexrow-item time-indicator is-hidden-desktop"
+            :title="$t('playlists.actions.max_duration')"
+          >
+            {{ maxDuration }}
+          </span>
+          <span
+            class="flexrow-item time-indicator mr1"
+            :title="$t('playlists.actions.frame_number')"
+          >
+            ({{ currentFrame }}&nbsp;/&nbsp;{{
+              (nbFrames + '').padStart(3, '0')
+            }})
+          </span>
+        </template>
       </div>
 
       <div class="separator"></div>
@@ -433,7 +466,10 @@
         <div class="separator"></div>
       </div>
 
-      <div class="flexrow flexrow-item mr0" v-if="isCurrentPreviewMovie">
+      <div
+        class="flexrow flexrow-item mr0"
+        v-if="isCurrentPreviewMovie && !isFullMode"
+      >
         <button-simple
           class="button playlist-button flexrow-item"
           :active="isRepeating"
@@ -487,16 +523,17 @@
         <div class="separator"></div>
       </div>
 
+      <div class="separator" v-if="!isFullMode"></div>
       <button-simple
         class="playlist-button flexrow-item"
         :title="$t('playlists.actions.change_task_type')"
         icon="layers"
         @click="showTaskTypeModal"
-        v-if="!tempMode"
+        v-if="!tempMode && !isFullMode"
       />
       <div
         class="flexrow flexrow-item comparison-buttons"
-        v-if="isCurrentPreviewMovie || isCurrentPreviewPicture"
+        v-if="(isCurrentPreviewMovie || isCurrentPreviewPicture) && !isFullMode"
       >
         <button-simple
           :class="{
@@ -615,7 +652,8 @@
         class="flexrow"
         v-if="
           !isCurrentUserArtist &&
-          (isCurrentPreviewMovie || isCurrentPreviewPicture)
+          (isCurrentPreviewMovie || isCurrentPreviewPicture) &&
+          !isFullMode
         "
       >
         <div class="separator" v-if="isCurrentUserManager && tempMode"></div>
@@ -788,11 +826,20 @@
               <span v-else-if="job.status === 'failed'">
                 {{ $t('playlists.failed') }}
               </span>
-              <a class="flexrow-item" :href="getBuildPath(job)" v-else>
-                {{ formatDate(job.created_at) }}
-              </a>
+              <template v-else>
+                <button
+                  class="job-button mr05"
+                  v-if="!joinedRoom"
+                  @click="playBuild(job)"
+                >
+                  <play-icon size="0.8x" />
+                </button>
+                <a class="flexrow-item" :href="getBuildPath(job)">
+                  {{ formatDate(job.created_at) }}
+                </a>
+              </template>
               <span class="filler"></span>
-              <button class="delete-job-button" @click="onRemoveBuildJob(job)">
+              <button class="job-button" @click="onRemoveBuildJob(job)">
                 x
               </button>
             </div>
@@ -880,7 +927,12 @@
 import moment from 'moment-timezone'
 import WaveSurfer from 'wavesurfer.js'
 import { mapActions, mapGetters } from 'vuex'
-import { ArrowUpRightIcon, DownloadIcon, GlobeIcon } from 'vue-feather-icons'
+import {
+  ArrowUpRightIcon,
+  DownloadIcon,
+  GlobeIcon,
+  PlayIcon
+} from 'vue-feather-icons'
 
 import { formatFrame } from '@/lib/video'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
@@ -922,6 +974,7 @@ export default {
     ObjectViewer,
     PencilPicker,
     PictureViewer,
+    PlayIcon,
     PlaylistedEntity,
     PreviewRoom,
     RawVideoPlayer,
@@ -972,6 +1025,7 @@ export default {
       isBuildLaunched: false,
       isDlButtonsHidden: true,
       isEnvironmentSkybox: false,
+      isFullMode: false,
       isLaserModeOn: false,
       isObjectBackground: false,
       isShowingPalette: false,
@@ -982,6 +1036,9 @@ export default {
       movieDimensions: { width: 0, height: 0 },
       objectBackgroundUrl: null,
       pictureDefaultHeight: 0,
+      playlistShotPosition: {},
+      playlistDuration: 0,
+      playlistProgress: 0,
       playlistToEdit: {},
       previewRoomRef: 'playlist-player-preview-room',
       revisionOptions: [],
@@ -1018,6 +1075,7 @@ export default {
     } else {
       this.entityList = []
     }
+    this.resetPlaylistFrameData()
     this.$nextTick(() => {
       this.configureEvents()
       this.setupFabricCanvas()
@@ -1026,6 +1084,7 @@ export default {
       this.rebuildComparisonOptions()
       this.onFrameUpdate(0)
       this.configureWaveForm()
+      this.configureFullPlayer()
     })
     this.currentBackground =
       this.productionBackgrounds.find(this.isDefaultBackground) || null
@@ -1047,10 +1106,15 @@ export default {
       'productionBackgrounds',
       'shotMap',
       'taskMap',
+      'taskStatusMap',
       'taskTypeMap',
       'shotTaskTypes',
       'user'
     ]),
+
+    fullPlayer() {
+      return this.$refs['full-playlist-player']
+    },
 
     isMovieComparison() {
       if (!this.currentPreviewToCompare) return false
@@ -1411,6 +1475,7 @@ export default {
       localEntity.preview_file_annotations = previewFile.annotations
       localEntity.preview_file_width = previewFile.width
       localEntity.preview_file_height = previewFile.height
+      localEntity.preview_file_duration = previewFile.duration
       localEntity.preview_file_previews = previewFile.previews
       localEntity.preview_file_revision = previewFile.revision
       if (this.rawPlayer) {
@@ -1523,6 +1588,8 @@ export default {
           this.pictureDefaultHeight = height
         }
         this.pictureDefaultHeight = height
+
+        this.$refs['full-playlist-player'].style.height = height + 'px'
 
         if (this.rawPlayer) this.rawPlayer.resetHeight(height)
         if (this.isComparing && this.$refs['raw-player-comparison']) {
@@ -1706,6 +1773,28 @@ export default {
       }
     },
 
+    playBuild(job) {
+      this.isFullMode = true
+      const path = this.getBuildPath(job)
+      if (this.$options.fullPlayingPath !== path) {
+        this.$options.fullPlayingPath = path
+        this.fullPlayer.src = path
+        this.fullPlayer.currentTime = 0
+        this.setPlaylistProgress(0)
+      }
+    },
+
+    setPlaylistProgress(time) {
+      this.playlistProgress = time
+      const frame = Math.round(this.playlistProgress * this.fps)
+      if (this.playlistShotPosition[frame]) {
+        const entityIndex = this.playlistShotPosition[frame].index
+        if (entityIndex !== this.playingEntityIndex && entityIndex) {
+          this.playEntity(entityIndex)
+        }
+      }
+    },
+
     onRemoveBuildJob(job) {
       job.playlist_id = this.playlist.id
       this.removeBuildJob(job)
@@ -1722,6 +1811,15 @@ export default {
     confirmChangeTaskType(taskTypeId) {
       this.$emit('task-type-changed', taskTypeId)
       this.modals.taskType = false
+    },
+
+    configureFullPlayer() {
+      this.fullPlayer.addEventListener('loadedmetadata', () => {
+        this.playlistDuration = this.fullPlayer.duration
+      })
+      this.fullPlayer.addEventListener('ended', () => {
+        this.pause()
+      })
     },
 
     onPreviousPreviewClicked() {
@@ -1778,6 +1876,25 @@ export default {
       }
     },
 
+    onProgressPlaylistChanged(frameNumber) {
+      if (this.isFullMode) {
+        const time = frameNumber / this.fps
+        this.fullPlayer.currentTime = time
+        this.playlistProgress = time
+      }
+      const { index, start } = this.playlistShotPosition[frameNumber]
+      const frame = (frameNumber / this.fps - start) * this.fps + 1
+      if (index !== this.playingEntityIndex) {
+        this.$nextTick(() => {
+          this.playEntity(index, false, frame)
+          this.onFrameUpdate(frame)
+        })
+      } else {
+        // this.onFrameUpdate(frame)
+        this.setCurrentTimeRaw(frame / this.fps)
+      }
+    },
+
     saveUserComparisonChoice() {
       this.savedTaskTypeToCompare = this.taskTypeToCompare
       this.sendUpdatePlayingStatus()
@@ -1813,6 +1930,10 @@ export default {
       if (this.progress) {
         this.progress.updateProgressBar(this.frameNumber + 1)
       }
+      if (this.playlistDuration && !this.isFullMode && this.currentEntity) {
+        this.playlistProgress =
+          this.currentEntity.start_duration + this.frameNumber / this.fps
+      }
     },
 
     resetHandles(entity) {
@@ -1821,6 +1942,44 @@ export default {
         const shot = this.shotMap.get(entity.id)
         this.handleIn = shot.data.handle_in || 0
         this.handleOut = shot.data.handle_out || this.nbFrames
+      }
+    },
+
+    resetPlaylistFrameData() {
+      let playlistDuration = 0
+      let currentFrame = 0
+      this.entityList.forEach((entity, index) => {
+        this.framesPerImage[index] =
+          entity.preview_nb_frames || DEFAULT_NB_FRAMES_PICTURE
+        const nbFrames = Math.round(
+          (entity.preview_file_duration || 0) * this.fps
+        )
+        entity.start_duration = (currentFrame + 1) / this.fps
+        for (let i = 0; i < nbFrames; i++) {
+          this.playlistShotPosition[currentFrame + i] = {
+            index,
+            name: entity.name,
+            start: entity.start_duration,
+            id: entity.preview_file_id
+          }
+        }
+        currentFrame += nbFrames
+        playlistDuration += nbFrames / this.fps
+
+        const taskId = entity.preview_file_task_id
+        const task = this.taskMap.get(taskId)
+        if (task) {
+          const taskStatus = this.taskStatusMap.get(task.task_status_id)
+          entity.task_status_color = taskStatus.color
+        }
+      })
+      this.playlistDuration = playlistDuration
+      return playlistDuration
+    },
+
+    onRawPlayerFrameUpdate(frame) {
+      if (!this.isFullMode) {
+        this.onFrameUpdate(frame)
       }
     }
   },
@@ -1910,13 +2069,11 @@ export default {
       this.currentPreviewIndex = 0
       this.currentComparisonPreviewuIndex = 0
       this.entityList = Object.values(this.entities)
-      this.entityList.forEach((entity, i) => {
-        this.framesPerImage[i] =
-          entity.preview_nb_frames || DEFAULT_NB_FRAMES_PICTURE
-      })
+      this.resetPlaylistFrameData()
+
       this.playingEntityIndex = 0
       this.pause()
-      if (this.rawPlayer) this.rawPlayer.setCurrentFrame(1)
+      if (this.rawPlayer) this.rawPlayer.setCurrentFrame(0)
       this.currentTimeRaw = 0
       this.updateProgressBar()
       this.updateTaskPanel()
@@ -1983,6 +2140,18 @@ export default {
 
     isLaserModeOn() {
       this.updateRoomStatus()
+    },
+
+    isFullMode() {
+      this.isComparing = false
+      if (this.isFullMode) {
+        this.$nextTick(() => {
+          this.playEntity(0)
+        })
+      } else {
+        this.$options.fullPlayingPath = ''
+        this.onFrameUpdate(0)
+      }
     }
   },
 
@@ -2036,7 +2205,7 @@ export default {
     &:hover {
       background: var(--background-tag-button);
       border-radius: 5px;
-      transform: scale(1.2);
+      // transform: scale(1.2);
     }
 
     &.active {
@@ -2248,7 +2417,7 @@ progress {
   background: $dark-grey;
   border: 1px solid $dark-grey-light;
   position: absolute;
-  width: 190px;
+  width: 200px;
   left: -120px;
   top: -280px;
   height: 160px;
@@ -2259,7 +2428,7 @@ progress {
   background: $dark-grey-stronger;
   border: 1px solid $dark-grey-light;
   position: absolute;
-  width: 190px;
+  width: 200px;
   left: -120px;
   top: -121px;
   height: 120px;
@@ -2272,9 +2441,10 @@ progress {
   margin-bottom: 0.5em;
 }
 
-.delete-job-button {
+.job-button {
   background: transparent;
   border-radius: 50%;
+  width: 22px;
   color: $light-grey-light;
   cursor: pointer;
   padding: 3px;
@@ -2416,6 +2586,15 @@ input[type='number'] {
 #resize-annotation-canvas,
 #annotation-snapshot {
   display: none;
+}
+
+.video-time {
+  position: absolute;
+  background: black;
+  color: white;
+  top: 0;
+  left: 0;
+  z-index: 100000;
 }
 
 @media only screen and (min-width: 1600px) {

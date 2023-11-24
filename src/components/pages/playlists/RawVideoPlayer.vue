@@ -268,8 +268,11 @@ export default {
 
     goPreviousFrame() {
       if (this.currentPlayer) {
+        const isChromium = !!window.chrome
+        const change = isChromium ? this.frameDuration : 0
         const time = this.currentTimeRaw
         let newTime = floorToFrame(time - this.frameDuration, this.fps)
+        newTime = newTime + change
         newTime = this._setCurrentTime(newTime)
         const frameNumber = newTime / this.frameDuration
         this.$emit('frame-update', frameNumber)
@@ -280,6 +283,9 @@ export default {
       if (this.currentPlayer) {
         const time = this.currentTimeRaw
         let newTime = floorToFrame(time + this.frameDuration, this.fps)
+        const isChromium = !!window.chrome
+        const change = isChromium ? this.frameDuration : 0
+        newTime = newTime + change
         newTime = this._setCurrentTime(newTime)
         const frameNumber = newTime / this.frameDuration
         this.$emit('frame-update', frameNumber)
@@ -432,12 +438,14 @@ export default {
     },
 
     setCurrentTimeRaw(currentTime) {
+      console.log(currentTime)
       if (this.currentPlayer) {
         this.currentPlayer.currentTime = currentTime
       }
     },
 
     setCurrentFrame(frameNumber) {
+      console.log(frameNumber)
       this._setCurrentTime(frameNumber * this.frameDuration)
     },
 
@@ -461,13 +469,16 @@ export default {
 
     runSetCurrentTime(currentTime) {
       const isChromium = !!window.chrome
-      const change = isChromium ? this.frameDuration : 0
+      const change = isChromium ? 0 : 0
       if (
         this.currentPlayer &&
         this.currentPlayer.currentTime !== currentTime + change
       ) {
         // tweaks needed because the html video player is messy with frames
-        this.currentPlayer.currentTime = currentTime + change + 0.01
+        let time = currentTime + change + 0.001
+        time = Number(time.toPrecision(4))
+        console.log(time)
+        this.currentPlayer.currentTime = currentTime + change + 0.001
         this.onTimeUpdate()
       }
     },

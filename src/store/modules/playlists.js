@@ -322,6 +322,7 @@ const mutations = {
       entity.preview_file_revision = preview.revision
       entity.preview_file_width = preview.width
       entity.preview_file_height = preview.height
+      entity.preview_file_duration = preview.duration
       entity.preview_file_annotations = preview.annotations
       entity.preview_file_task_id = preview.task_id
     }
@@ -337,6 +338,7 @@ const mutations = {
       preview_file_extension: entity.preview_file_extension,
       preview_file_width: entity.preview_file_width,
       preview_file_height: entity.preview_file_height,
+      preview_file_duration: entity.preview_file_duration,
       preview_file_revision: entity.preview_file_revision,
       preview_file_annotations: entity.preview_file_annotations,
       preview_files: entity.preview_files,
@@ -419,11 +421,13 @@ const mutations = {
           entity.preview_file_revision = previewFile.revision
           entity.preview_file_width = previewFile.width
           entity.preview_file_height = previewFile.height
+          entity.preview_file_duration = previewFile.duration
           entity.preview_file_annotations = previewFile.annotations
           entity.extension = previewFile.extension
           entity.revision = previewFile.revision
           entity.width = previewFile.width
           entity.height = previewFile.height
+          entity.duration = previewFile.duration
           entity.annotations = previewFile.annotations
         }
       })

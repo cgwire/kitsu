@@ -694,7 +694,11 @@ export default {
     },
 
     timeCodeClicked(event) {
-      this.$emit('time-code-clicked', event.target.dataset)
+      const data = { ...event.target.dataset }
+      const isChromium = !!window.chrome
+      const change = isChromium ? 2 : 1
+      data.frame = data.frame - change
+      this.$emit('time-code-clicked', data)
     },
 
     onChecklistTimecodeClicked(data) {
@@ -707,7 +711,7 @@ export default {
     setFrame(data) {
       this.$emit('time-code-clicked', {
         versionRevision: data.revision,
-        frame: data.frame
+        frame: data.frame - 1
       })
     },
 

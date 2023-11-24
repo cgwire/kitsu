@@ -88,6 +88,10 @@ export default {
       type: Boolean,
       default: false
     },
+    nbFrames: {
+      type: Number,
+      default: 0
+    },
     preview: {
       type: Object,
       default: () => {}
@@ -192,6 +196,7 @@ export default {
         maxZoom: 5,
         minZoom: 1
       })
+      this.pausePanZoom()
     }
   },
 
@@ -325,12 +330,15 @@ export default {
         this.$options.running = false
       } else {
         const isChromium = !!window.chrome
-        const change = isChromium ? this.frameDuration + 0.01 : 0.01
+        const change = isChromium ? this.frameDuration + 0.001 : 0.001
         this.$options.running = true
         const currentTime = this.$options.currentTimeCalls.shift()
-        if (this.video.currentTime !== currentTime) {
+        if (isChromium && currentTime < -0.01) {
+          this.video.currentTime = -0.001
+          this.onTimeUpdate()
+        } else if (this.video.currentTime !== currentTime) {
           // tweaks needed because the html video player is messy with frames
-          this.video.currentTime = currentTime + change
+          this.video.currentTime = Number(currentTime.toPrecision(4)) + change
           this.onTimeUpdate()
         }
         setTimeout(() => {
@@ -340,16 +348,24 @@ export default {
     },
 
     _setRoundedTime(time, ceil = false) {
-      if (ceil) {
+      if (ceil && time > 0) {
         time = ceilToFrame(time, this.fps)
       } else {
         time = floorToFrame(time, this.fps)
       }
 
-      if (time < this.frameDuration) {
-        time = 0
-      } else if (time > floorToFrame(this.video.duration, this.fps)) {
+      const isChromium = !!window.chrome
+      const lowLimit = !isChromium ? 0 : -1 * this.frameDuration
+      const highLimit = !isChromium
+        ? this.video.duration - 0.01
+        : this.video.duration - this.frameDuration - 0.01
+      if (time < lowLimit) {
+        console.log('low limit', time, lowLimit)
+        time = isChromium ? -0.1 : 0
+      } else if (time > highLimit) {
         time = floorToFrame(this.video.duration, this.fps)
+      } else if (time === 0) {
+        time = isChromium ? 0.001 : 0
       }
       this.setCurrentTime(time)
       return time
@@ -440,16 +456,17 @@ export default {
 
     goPreviousFrame() {
       const time = this.getLastPushedCurrentTime()
-      const newTime = time - this.frameDuration
+      const newTime = Number((time - this.frameDuration).toPrecision(4))
       return this._setRoundedTime(newTime)
     },
 
     goNextFrame() {
       const time = this.getLastPushedCurrentTime()
       const newTime = time + this.frameDuration
+      const videoDuration = this.nbFrames * this.frameDuration
       const isChromium = !!window.chrome
-      const change = !isChromium ? this.frameDuration : 0
-      if (newTime > this.video.duration - change) return
+      const change = isChromium ? this.frameDuration : 0
+      if (newTime > videoDuration - change) return
       return this._setRoundedTime(newTime)
     },
 
@@ -566,5 +583,10 @@ export default {
 
 video {
   object-fit: inherit;
+}
+
+.video-time {
+  position: absolute;
+  font-size: 2em;
 }
 </style>

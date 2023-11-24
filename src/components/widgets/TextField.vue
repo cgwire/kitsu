@@ -37,6 +37,9 @@
         {{ buttonLabel }}
       </button>
     </p>
+    <p class="error" v-if="errored">
+      {{ errorText }}
+    </p>
   </div>
 </template>
 
@@ -93,6 +96,10 @@ export default {
     errored: {
       default: false,
       type: Boolean
+    },
+    errorText: {
+      default: '',
+      type: String
     },
     emptyLabel: {
       default: false,

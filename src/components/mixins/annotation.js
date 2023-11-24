@@ -297,6 +297,7 @@ export const annotationMixin = {
     addToDeletions(obj) {
       this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
+      console.log('removeFromDeletions', currentTime)
       const deletion = this.deletions.find(d => d.time === currentTime)
       if (deletion) {
         deletion.objects.push(obj.id)
@@ -406,6 +407,7 @@ export const annotationMixin = {
      * Later it will be interesting to represent time in as a frame number.
      */
     getNewAnnotations(currentTime, annotation) {
+      console.log('getNewAnnotations', currentTime, annotation)
       this.fabricCanvas.getObjects().forEach(obj => {
         this.setObjectData(obj)
         if (obj.type === 'path') {
