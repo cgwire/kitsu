@@ -307,8 +307,8 @@ export default {
       const top = this.isFullScreen
         ? `-${height}px`
         : this.isPlaylist
-        ? '42px'
-        : '30px'
+          ? '42px'
+          : '30px'
 
       return {
         height: `${height}px`,
@@ -553,14 +553,14 @@ export default {
       const top = this.isFullScreen
         ? `-${height}px`
         : this.isPlaylist
-        ? '42px'
-        : '30px'
+          ? '42px'
+          : '30px'
 
       return {
-        height: height + 'px',
-        width: width + 'px',
+        height: `${height}px`,
+        width: `${width}px`,
         top,
-        left: left + 'px'
+        left: `${left}px`
       }
     },
 
