@@ -4,6 +4,8 @@ import {
   parseDate,
   parseSimpleDate
 } from '@/lib/time'
+import { mapActions } from 'vuex'
+
 import moment from 'moment'
 
 /*
@@ -177,6 +179,8 @@ export const entityMixin = {
   },
 
   methods: {
+    ...mapActions(['addSelectedTask', 'clearSelectedTasks']),
+
     changeTab(tab) {
       this.selectedTab = tab
     },
@@ -186,7 +190,9 @@ export const entityMixin = {
     },
 
     onTaskSelected(task) {
+      this.clearSelectedTasks()
       if (!this.currentTask || this.currentTask.id !== task.id) {
+        this.addSelectedTask(task)
         this.currentTask = task
       } else {
         this.currentTask = null

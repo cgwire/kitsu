@@ -294,7 +294,7 @@
     </div>
 
     <div class="column side-column" v-if="currentTask">
-      <task-info :task="currentTask" />
+      <task-info :task="currentTask" entity-type="Asset" with-actions />
     </div>
 
     <edit-asset-modal

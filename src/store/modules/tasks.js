@@ -1163,7 +1163,12 @@ const mutations = {
   },
 
   [ADD_SELECTED_TASK](state, validationInfo) {
-    if (validationInfo.task) {
+    if (validationInfo.id) {
+      const task = validationInfo
+      state.selectedTasks.set(task.id, task)
+      state.selectedTasks = new Map(state.selectedTasks) // for reactivity
+      state.nbSelectedTasks = state.selectedTasks.size
+    } else if (validationInfo.task) {
       state.selectedTasks.set(validationInfo.task.id, validationInfo.task)
       state.selectedTasks = new Map(state.selectedTasks) // for reactivity
       state.nbSelectedTasks = state.selectedTasks.size
