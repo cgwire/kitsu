@@ -95,9 +95,6 @@
         }"
         ref="video-container"
       >
-        <span class="video-time">
-          {{ currentTimeRaw }}
-        </span>
         <video
           ref="full-playlist-player"
           class="raw-player"
@@ -2039,6 +2036,19 @@ export default {
             this.resetCanvas()
           }
         })
+      })
+    },
+
+    fullScreen() {
+      this.resetHeight()
+      console.log('fullscreen', this.fullScreen)
+
+      this.$nextTick().then(() => {
+        window.dispatchEvent(new Event('resize'))
+
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'))
+        }, 300)
       })
     },
 
