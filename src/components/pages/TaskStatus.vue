@@ -3,6 +3,8 @@
     <list-page-header
       :title="$t('task_status.title')"
       :new-entry-label="$t('task_status.new_task_status')"
+      :is-exportable="isActiveTab"
+      @export-clicked="onExportClicked"
       @new-clicked="onNewClicked"
     />
 
@@ -44,6 +46,10 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
+import csv from '@/lib/csv'
+import stringHelpers from '@/lib/string'
+
 import DeleteModal from '@/components/modals/DeleteModal'
 import EditTaskStatusModal from '@/components/modals/EditTaskStatusModal'
 import ListPageHeader from '@/components/widgets/ListPageHeader'
@@ -100,14 +106,14 @@ export default {
   computed: {
     ...mapGetters(['archivedTaskStatus', 'taskStatus']),
 
-    taskStatusList() {
+    isActiveTab() {
       return this.activeTab === 'active'
-        ? this.taskStatus
-        : this.archivedTaskStatus
+    },
+
+    taskStatusList() {
+      return this.isActiveTab ? this.taskStatus : this.archivedTaskStatus
     }
   },
-
-  created() {},
 
   methods: {
     ...mapActions(['deleteTaskStatus']),
@@ -159,6 +165,37 @@ export default {
       }
     },
 
+    onExportClicked() {
+      const name = stringHelpers.slugify(this.$t('task_status.title'))
+      const headers = [
+        this.$t('main.type'),
+        this.$t('task_status.fields.name'),
+        this.$t('task_status.fields.short_name'),
+        this.$t('task_status.fields.color'),
+        this.$t('task_status.fields.is_default'),
+        this.$t('task_status.fields.is_done'),
+        this.$t('task_status.fields.is_retake'),
+        this.$t('task_status.fields.is_artist_allowed'),
+        this.$t('task_status.fields.is_client_allowed'),
+        this.$t('task_status.fields.is_feedback_request')
+      ]
+      const entries = [headers].concat(
+        this.taskStatus.map(taskStatus => [
+          taskStatus.type,
+          taskStatus.name,
+          taskStatus.short_name,
+          taskStatus.color,
+          taskStatus.is_default,
+          taskStatus.is_done,
+          taskStatus.is_retake,
+          taskStatus.is_artist_allowed,
+          taskStatus.is_client_allowed,
+          taskStatus.is_feedback_request
+        ])
+      )
+      csv.buildCsvFile(name, entries)
+    },
+
     onNewClicked() {
       this.taskStatusToEdit = { color: '#000000' }
       this.modals.edit = true
@@ -188,5 +225,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

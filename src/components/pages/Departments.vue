@@ -3,6 +3,8 @@
     <list-page-header
       :title="$t('departments.title')"
       :new-entry-label="$t('departments.new_departments')"
+      :is-exportable="isActiveTab"
+      @export-clicked="onExportClicked"
       @new-clicked="onNewClicked"
     />
 
@@ -45,6 +47,10 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
+import csv from '@/lib/csv'
+import stringHelpers from '@/lib/string'
+
 import DeleteModal from '@/components/modals/DeleteModal'
 import DepartmentList from '@/components/lists/DepartmentList.vue'
 import EditDepartmentsModal from '@/components/modals/EditDepartmentsModal'
@@ -53,6 +59,7 @@ import RouteTabs from '@/components/widgets/RouteTabs'
 
 export default {
   name: 'departments',
+
   components: {
     DeleteModal,
     DepartmentList,
@@ -60,8 +67,6 @@ export default {
     ListPageHeader,
     RouteTabs
   },
-
-  props: {},
 
   data() {
     return {
@@ -113,12 +118,12 @@ export default {
   computed: {
     ...mapGetters(['departments', 'archivedDepartments']),
 
+    isActiveTab() {
+      return this.activeTab === 'active'
+    },
+
     departmentList() {
-      if (this.activeTab === 'active') {
-        return this.departments
-      } else {
-        return this.archivedDepartments
-      }
+      return this.isActiveTab ? this.departments : this.archivedDepartments
     },
 
     deleteText() {
@@ -134,6 +139,23 @@ export default {
 
   methods: {
     ...mapActions(['deleteDepartment', 'loadDepartments', 'newDepartement']),
+
+    onExportClicked() {
+      const name = stringHelpers.slugify(this.$t('departments.title'))
+      const headers = [
+        this.$t('main.type'),
+        this.$t('departments.fields.name'),
+        this.$t('departments.fields.color')
+      ]
+      const entries = [headers].concat(
+        this.departments.map(department => [
+          department.type,
+          department.name,
+          department.color
+        ])
+      )
+      csv.buildCsvFile(name, entries)
+    },
 
     onNewClicked() {
       this.departmentToEdit = { name: '', color: '#999999' }
@@ -189,12 +211,18 @@ export default {
     $route() {
       this.activeTab = this.$route.query.tab
     }
+  },
+
+  metaInfo() {
+    return {
+      title: `${this.$t('departments.title')} - Kitsu`
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
 .department-list {
-  margin-top: 0rem;
+  margin-top: 0;
 }
 </style>

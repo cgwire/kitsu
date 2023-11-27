@@ -3,6 +3,8 @@
     <list-page-header
       :title="$t('asset_types.title')"
       :new-entry-label="$t('asset_types.new_asset_type')"
+      :is-exportable="isActiveTab"
+      @export-clicked="onExportClicked"
       @new-clicked="onNewClicked"
     />
 
@@ -45,6 +47,10 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
+import csv from '@/lib/csv'
+import stringHelpers from '@/lib/string'
+
 import AssetTypeList from '@/components/lists/AssetTypeList'
 import DeleteModal from '@/components/modals/DeleteModal'
 import EditAssetTypeModal from '@/components/modals/EditAssetTypeModal'
@@ -100,12 +106,19 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['assetTypes', 'archivedAssetTypes', 'getAssetType']),
+    ...mapGetters([
+      'assetTypes',
+      'archivedAssetTypes',
+      'getAssetType',
+      'taskTypeMap'
+    ]),
+
+    isActiveTab() {
+      return this.activeTab === 'active'
+    },
 
     assetTypesList() {
-      return this.activeTab === 'active'
-        ? this.assetTypes
-        : this.archivedAssetTypes
+      return this.isActiveTab ? this.assetTypes : this.archivedAssetTypes
     },
 
     deleteText() {
@@ -162,6 +175,27 @@ export default {
         })
     },
 
+    onExportClicked() {
+      const name = stringHelpers.slugify(this.$t('asset_types.title'))
+      const headers = [
+        this.$t('main.type'),
+        this.$t('asset_types.fields.name'),
+        this.$t('asset_types.fields.task_types')
+      ]
+      const entries = [headers].concat(
+        this.assetTypes.map(assetType => [
+          assetType.type,
+          assetType.name,
+          assetType.task_types.length
+            ? assetType.task_types
+                .map(taskTypeId => this.taskTypeMap.get(taskTypeId)?.name)
+                .join(', ')
+            : this.$t('asset_types.include_all')
+        ])
+      )
+      csv.buildCsvFile(name, entries)
+    },
+
     onNewClicked() {
       this.assetTypeToEdit = {}
       this.errors.edit = false
@@ -183,7 +217,7 @@ export default {
 
   watch: {
     $route() {
-      this.activeTab = this.$route.query.tab
+      this.activeTab = this.$route.query.tab || 'active'
     }
   },
 
@@ -197,6 +231,6 @@ export default {
 
 <style lang="scss" scoped>
 .asset-type-list {
-  margin-top: 0rem;
+  margin-top: 0;
 }
 </style>

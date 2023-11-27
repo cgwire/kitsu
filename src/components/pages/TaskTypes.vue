@@ -3,6 +3,8 @@
     <list-page-header
       :title="$t('task_types.title')"
       :new-entry-label="$t('task_types.new_task_type')"
+      :is-exportable="isActiveTab"
+      @export-clicked="onExportClicked"
       @new-clicked="onNewClicked"
     />
 
@@ -46,7 +48,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
+import csv from '@/lib/csv'
 import func from '@/lib/func'
+import stringHelpers from '@/lib/string'
+
 import DeleteModal from '@/components/modals/DeleteModal'
 import EditTaskTypeModal from '@/components/modals/EditTaskTypeModal'
 import ListPageHeader from '@/components/widgets/ListPageHeader'
@@ -99,12 +105,19 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['archivedTaskTypes', 'getTaskType', 'taskTypes']),
+    ...mapGetters([
+      'archivedTaskTypes',
+      'departmentMap',
+      'getTaskType',
+      'taskTypes'
+    ]),
+
+    isActiveTab() {
+      return this.activeTab === 'active'
+    },
 
     listTaskTypes() {
-      return this.activeTab === 'active'
-        ? this.taskTypes
-        : this.archivedTaskTypes
+      return this.isActiveTab ? this.taskTypes : this.archivedTaskTypes
     }
   },
 
@@ -219,6 +232,29 @@ export default {
       this.modals.edit = true
     },
 
+    onExportClicked() {
+      const name = stringHelpers.slugify(this.$t('task_types.title'))
+      const headers = [
+        this.$t('main.type'),
+        this.$t('task_types.fields.dedicated_to'),
+        this.$t('task_types.fields.department'),
+        this.$t('task_types.fields.name'),
+        this.$t('task_types.fields.color'),
+        this.$t('task_types.fields.allow_timelog')
+      ]
+      const entries = [headers].concat(
+        this.taskTypes.map(taskType => [
+          taskType.type,
+          taskType.for_entity,
+          this.departmentMap.get(taskType.department_id)?.name,
+          taskType.name,
+          taskType.color,
+          taskType.allow_timelog
+        ])
+      )
+      csv.buildCsvFile(name, entries)
+    },
+
     onNewClicked() {
       this.taskTypeToEdit = { color: '#999999' }
       this.modals.edit = true
@@ -227,7 +263,7 @@ export default {
 
   watch: {
     $route() {
-      this.activeTab = this.$route.query.tab
+      this.activeTab = this.$route.query.tab || 'active'
     }
   },
 
@@ -238,5 +274,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

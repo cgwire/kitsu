@@ -3,6 +3,7 @@
     <list-page-header
       :title="$t('custom_actions.title')"
       :new-entry-label="$t('custom_actions.new_custom_action')"
+      @export-clicked="onExportClicked"
       @new-clicked="onNewClicked"
     />
 
@@ -37,6 +38,10 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
+import csv from '@/lib/csv'
+import stringHelpers from '@/lib/string'
+
 import CustomActionList from '@/components/lists/CustomActionList'
 import DeleteModal from '@/components/modals/DeleteModal'
 import EditCustomActionModal from '@/components/modals/EditCustomActionModal'
@@ -143,6 +148,27 @@ export default {
         })
     },
 
+    onExportClicked() {
+      const name = stringHelpers.slugify(this.$t('custom_actions.title'))
+      const headers = [
+        this.$t('main.type'),
+        this.$t('custom_actions.fields.name'),
+        this.$t('custom_actions.fields.url'),
+        this.$t('custom_actions.fields.entity_type'),
+        this.$t('custom_actions.fields.is_ajax')
+      ]
+      const entries = [headers].concat(
+        this.customActions.map(customAction => [
+          customAction.type,
+          customAction.name,
+          customAction.url,
+          customAction.entity_type,
+          customAction.is_ajax
+        ])
+      )
+      csv.buildCsvFile(name, entries)
+    },
+
     onNewClicked() {
       this.customActionToEdit = {}
       this.errors.edit = false
@@ -175,5 +201,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

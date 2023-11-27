@@ -3,6 +3,7 @@
     <list-page-header
       :title="$t('backgrounds.title')"
       :new-entry-label="$t('backgrounds.new_background')"
+      :is-exportable="false"
       @new-clicked="onNewClicked"
     />
 
