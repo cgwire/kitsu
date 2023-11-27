@@ -438,14 +438,12 @@ export default {
     },
 
     setCurrentTimeRaw(currentTime) {
-      console.log(currentTime)
       if (this.currentPlayer) {
         this.currentPlayer.currentTime = currentTime
       }
     },
 
     setCurrentFrame(frameNumber) {
-      console.log(frameNumber)
       this._setCurrentTime(frameNumber * this.frameDuration)
     },
 
@@ -475,9 +473,6 @@ export default {
         this.currentPlayer.currentTime !== currentTime + change
       ) {
         // tweaks needed because the html video player is messy with frames
-        let time = currentTime + change + 0.001
-        time = Number(time.toPrecision(4))
-        console.log(time)
         this.currentPlayer.currentTime = currentTime + change + 0.001
         this.onTimeUpdate()
       }

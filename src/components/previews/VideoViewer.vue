@@ -360,7 +360,6 @@ export default {
         ? this.video.duration - 0.01
         : this.video.duration - this.frameDuration - 0.01
       if (time < lowLimit) {
-        console.log('low limit', time, lowLimit)
         time = isChromium ? -0.1 : 0
       } else if (time > highLimit) {
         time = floorToFrame(this.video.duration, this.fps)

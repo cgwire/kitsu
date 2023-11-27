@@ -1495,11 +1495,9 @@ export default {
         const change = isChromium ? this.frameDuration : 0
         const currentTimeRaw = this.previewViewer.getCurrentTimeRaw()
         currentTime = roundToFrame(currentTimeRaw, this.fps) + change
-        console.log(currentTimeRaw, currentTime)
       }
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)
-      console.log(annotation, annotations)
       if (!this.readOnly) {
         const preview = this.currentPreview
         if (!this.notSaved) {
@@ -1516,7 +1514,6 @@ export default {
           const change = isChromium ? this.frameDuration : 0
           currentTime = roundToFrame(this.currentTimeRaw, this.fps) + change
         }
-        console.log(currentTime, this.annotations)
         annotation = this.getAnnotation(currentTime)
         if (!annotation) {
           if (!this.isMovie) {
