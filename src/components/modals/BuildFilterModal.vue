@@ -181,12 +181,16 @@
               class="flexrow-item align-middle"
               v-if="['assignedto', '-assignedto'].includes(assignation.value)"
             >
-              on
+              {{ $t('main.on') }}
             </span>
 
             <combobox-task-type
               class="flexrow-item"
-              :task-type-list="taskTypeList"
+              :task-type-list="
+                ['assigned', 'unassigned'].includes(assignation.value)
+                  ? taskTypeList
+                  : taskTypeListWithAll
+              "
               v-model="assignation.taskTypeId"
               v-if="
                 [
@@ -449,6 +453,16 @@ export default {
       ]
     },
 
+    taskTypeListWithAll() {
+      return [
+        {
+          id: '',
+          color: '#999',
+          name: this.$t('main.all')
+        }
+      ].concat(this.taskTypeList)
+    },
+
     taskTypeList() {
       return this[`${this.entityType}ValidationColumns`].map(taskTypeId =>
         this.taskTypeMap.get(taskTypeId)
@@ -556,7 +570,11 @@ export default {
           let value = this.assignation.person.name
           const taskType = this.taskTypeMap.get(this.assignation.taskTypeId)
           if (this.assignation.value === '-assignedto') value = `-${value}`
-          query += ` assignedto[${taskType.name}]=[${value}]`
+          if (taskType) {
+            query += ` assignedto[${taskType.name}]=[${value}]`
+          } else {
+            query += ` assignedto[]=[${value}]`
+          }
         } else if (this.assignation.taskTypeId) {
           const taskType = this.taskTypeMap.get(this.assignation.taskTypeId)
           const value =

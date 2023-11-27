@@ -527,8 +527,11 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
       const pattern = rgxMatch.split('=')
       let taskTypeName = pattern[0].substring('assignedto'.length)
       taskTypeName = cleanParenthesis(taskTypeName)
-      const taskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
-      const taskType = taskTypes[0]
+      let taskType = null
+      if (taskTypeName !== '') {
+        const taskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
+        taskType = taskTypes[0]
+      }
 
       let value = pattern[1]
       value = cleanParenthesis(value)

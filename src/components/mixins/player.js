@@ -564,12 +564,6 @@ export const playerMixin = {
         let previousFrameTime = this.fullPlayer.currentTime - this.frameDuration
         const previousFrame = Math.round(previousFrameTime * this.fps)
         const entityPosition = this.playlistShotPosition[previousFrame]
-        console.log(
-          'entityPosition',
-          this.fullPlayer.currentTime,
-          previousFrame,
-          previousFrameTime
-        )
         if (!entityPosition) return
 
         const entityIndex = entityPosition.index
@@ -980,7 +974,6 @@ export const playerMixin = {
       if (duration) {
         duration = floorToFrame(duration, this.fps)
         this.maxDurationRaw = duration
-        console.log(duration)
         this.maxDuration = this.formatTime(duration)
         this.resetHandles()
       } else {

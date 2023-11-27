@@ -471,6 +471,7 @@ export default {
     more_filters: 'More filters',
     move_action_bar: 'Move action bar',
     nb_frames: 'frame | frames',
+    on: 'On',
     person: 'Person',
     profile: 'Profile',
     production: 'Production',

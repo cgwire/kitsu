@@ -34,7 +34,7 @@
 import panzoom from 'panzoom'
 import { mapGetters } from 'vuex'
 
-import { formatFrame, formatTime, floorToFrame, ceilToFrame } from '@/lib/video'
+import { formatFrame, formatTime } from '@/lib/video'
 import Spinner from '@/components/widgets/Spinner'
 
 import { domMixin } from '@/components/mixins/dom'
@@ -87,6 +87,10 @@ export default {
     light: {
       type: Boolean,
       default: false
+    },
+    currentFrame: {
+      type: Number,
+      default: 0
     },
     nbFrames: {
       type: Number,
@@ -182,7 +186,7 @@ export default {
         })
 
         this.video.addEventListener('waiting', () => {
-          this.isLoading = true
+          // this.isLoading = true
         })
 
         window.addEventListener('resize', this.onWindowResize)
@@ -317,6 +321,10 @@ export default {
       this.video.currentTime = currentTime
     },
 
+    setCurrentFrameRaw(frameNumber) {
+      this.setCurrentTimeRaw(frameNumber * this.frameDuration)
+    },
+
     setCurrentTime(currentTime) {
       if (!this.$options.currentTimeCalls) {
         this.$options.currentTimeCalls = []
@@ -329,46 +337,15 @@ export default {
       if (this.$options.currentTimeCalls.length === 0) {
         this.$options.running = false
       } else {
-        const isChromium = !!window.chrome
-        const change = isChromium ? this.frameDuration + 0.001 : 0.001
         this.$options.running = true
         const currentTime = this.$options.currentTimeCalls.shift()
-        if (isChromium && currentTime < -0.01) {
-          this.video.currentTime = -0.001
-          this.onTimeUpdate()
-        } else if (this.video.currentTime !== currentTime) {
-          // tweaks needed because the html video player is messy with frames
-          this.video.currentTime = Number(currentTime.toPrecision(4)) + change
-          this.onTimeUpdate()
+        if (this.video.currentTime !== currentTime) {
+          this.video.currentTime = Number(currentTime.toPrecision(4))
         }
         setTimeout(() => {
           this.runSetCurrentTime()
         }, 10)
       }
-    },
-
-    _setRoundedTime(time, ceil = false) {
-      if (ceil && time > 0) {
-        time = ceilToFrame(time, this.fps)
-      } else {
-        time = floorToFrame(time, this.fps)
-      }
-
-      const isChromium = !!window.chrome
-      const lowLimit = !isChromium ? 0 : -1 * this.frameDuration
-      const highLimit = !isChromium
-        ? this.video.duration - 0.01
-        : this.video.duration - this.frameDuration - 0.01
-      if (time < lowLimit) {
-        console.log('low limit', time, lowLimit)
-        time = isChromium ? -0.1 : 0
-      } else if (time > highLimit) {
-        time = floorToFrame(this.video.duration, this.fps)
-      } else if (time === 0) {
-        time = isChromium ? 0.001 : 0
-      }
-      this.setCurrentTime(time)
-      return time
     },
 
     configureVideo() {
@@ -417,37 +394,49 @@ export default {
       }
     },
 
-    onTimeUpdate() {
-      const isChromium = !!window.chrome
-      const change = isChromium ? this.frameDuration : 0
+    getFrameFromPlayer() {
+      let currentTimeRaw = 0
       if (this.video) {
-        this.currentTimeRaw = this.video.currentTime - change
+        currentTimeRaw = this.video.currentTime
       } else {
-        this.currentTimeRaw = 0 + change
+        currentTimeRaw = 0
       }
-      this.$emit(
-        'frame-update',
-        Math.round(this.currentTimeRaw / this.frameDuration)
-      )
+      return Math.ceil(currentTimeRaw / this.frameDuration) + 1
+    },
+
+    play() {
+      if (
+        !this.isPlaying &&
+        this.videoDuration === this.video.currentTime &&
+        this.name.indexOf('comparison') < 0
+      ) {
+        this.setCurrentTime(0)
+      }
+      this.video.play()
+      if (this.name.indexOf('comarison') < 0) {
+        this.runEmitTimeUpdateLoop()
+      }
     },
 
     runEmitTimeUpdateLoop() {
       clearInterval(this.$options.playLoop)
-      this.$options.playLoop = setInterval(this.onTimeUpdate, 1000 / this.fps)
+      this.$options.playLoop = setInterval(
+        this.emitNextFrameChange,
+        Math.round(1000000 / (this.fps * 1000))
+      )
     },
 
-    play() {
-      if (!this.isPlaying && this.videoDuration === this.video.currentTime) {
-        this.setCurrentTime(0)
-      }
-      this.video.play()
-      this.runEmitTimeUpdateLoop()
+    emitNextFrameChange() {
+      const frame = this.getFrameFromPlayer()
+      this.$emit('frame-update', frame)
     },
 
     pause() {
       this.video.pause()
-      this._setRoundedTime(this.currentTimeRaw, true)
       clearInterval(this.$options.playLoop)
+      const frame = this.getFrameFromPlayer()
+      this.video.currentTime = frame * this.frameDuration
+      this.$emit('frame-update', frame)
     },
 
     toggleMute() {
@@ -455,19 +444,19 @@ export default {
     },
 
     goPreviousFrame() {
-      const time = this.getLastPushedCurrentTime()
-      const newTime = Number((time - this.frameDuration).toPrecision(4))
-      return this._setRoundedTime(newTime)
+      const nextFrame = this.currentFrame - 1
+      if (nextFrame < 0) return
+      this.video.currentTime = nextFrame * this.frameDuration
+      this.$emit('frame-update', nextFrame)
+      return nextFrame
     },
 
     goNextFrame() {
-      const time = this.getLastPushedCurrentTime()
-      const newTime = time + this.frameDuration
-      const videoDuration = this.nbFrames * this.frameDuration
-      const isChromium = !!window.chrome
-      const change = isChromium ? this.frameDuration : 0
-      if (newTime > videoDuration - change) return
-      return this._setRoundedTime(newTime)
+      const nextFrame = this.currentFrame + 1
+      if (nextFrame >= this.nbFrames) return
+      this.video.currentTime = nextFrame * this.frameDuration
+      this.$emit('frame-update', nextFrame)
+      return nextFrame
     },
 
     onVideoEnd() {

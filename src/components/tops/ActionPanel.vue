@@ -31,10 +31,11 @@
             :title="$t('menu.assign_tasks')"
             @click="selectBar('assignation')"
             v-if="
-              isCurrentViewEntity &&
+              (isCurrentViewSingleEntity || isCurrentViewEntity) &&
               (isCurrentUserManager ||
                 isSupervisorInDepartment ||
-                isInDepartment) &&
+                isInDepartment ||
+                isCurrentViewSingleEntity) &&
               !isEntitySelection &&
               isTaskSelection &&
               !isCurrentUserArtist
@@ -50,7 +51,10 @@
             }"
             :title="$t('menu.change_priority')"
             v-if="
-              (isCurrentViewEntity || isCurrentViewPerson) &&
+              (isCurrentViewSingleEntity ||
+                isCurrentViewEntity ||
+                isCurrentViewPerson ||
+                isCurrentViewSingleEntity) &&
               (isCurrentUserManager || isSupervisorInDepartment) &&
               !isEntitySelection &&
               isTaskSelection
@@ -78,7 +82,11 @@
               active: selectedBar === 'subscribe'
             }"
             :title="$t('menu.subscribe')"
-            v-if="isTaskSelection && !isCurrentViewTodos"
+            v-if="
+              isTaskSelection &&
+              !isCurrentViewSingleEntity &&
+              !isCurrentViewTodos
+            "
             @click="selectBar('subscribe')"
           >
             <eye-icon />
@@ -102,6 +110,7 @@
                 isCurrentViewTodos ||
                 isCurrentViewTaskType) &&
               !isEntitySelection &&
+              !isCurrentViewSingleEntity &&
               isTaskSelection &&
               nbSelectedTasks > 0
             "
@@ -116,6 +125,7 @@
                 isCurrentViewShot ||
                 isCurrentViewTaskType) &&
               !isEntitySelection &&
+              !isCurrentViewSingleEntity &&
               isTaskSelection &&
               isCurrentUserManager
             "
@@ -151,6 +161,7 @@
               isCurrentViewEntity &&
               isCurrentUserManager &&
               !isEntitySelection &&
+              !isCurrentViewSingleEntity &&
               isTaskSelection
             "
           >
@@ -875,9 +886,23 @@ export default {
       )
     },
 
+    isCurrentViewSingleEntity() {
+      return [
+        'asset',
+        'shot',
+        'edit',
+        'episode',
+        'sequence',
+        'episode-asset',
+        'episode-shot',
+        'episode-edit',
+        'episode-sequence'
+      ].includes(this.$route.name)
+    },
+
     isCurrentViewAsset() {
       return (
-        this.$route.path.indexOf('asset') > 0 && !this.$route.params.asset_id
+        this.$route.path.indexOf('asset') > 0 && !this.$route.params.shot_id
       )
     },
 
@@ -1078,10 +1103,10 @@ export default {
         this.$route.path.indexOf('shots') > 0
           ? 'shots'
           : this.$route.path.indexOf('assets') > 0
-            ? 'assets'
-            : this.$route.path.indexOf('edits') > 0
-              ? 'edits'
-              : 'episodes'
+          ? 'assets'
+          : this.$route.path.indexOf('edits') > 0
+          ? 'edits'
+          : 'episodes'
       this.loading.taskCreation = true
       this.createSelectedTasks({
         type,

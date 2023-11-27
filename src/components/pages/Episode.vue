@@ -220,7 +220,7 @@
     </div>
 
     <div class="column side-column" v-if="currentTask">
-      <task-info :task="currentTask" />
+      <task-info :task="currentTask" entity-type="Episode" with-actions />
     </div>
 
     <edit-episode-modal
