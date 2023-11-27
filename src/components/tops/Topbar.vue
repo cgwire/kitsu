@@ -981,14 +981,12 @@ strong {
 }
 
 .studio-logo-wrapper {
-  background-color: var(--background);
   margin: 8px 8px;
   margin-right: 1em;
   padding: 0;
 
   .studio-logo {
     border-radius: 5px;
-    background-color: var(--background);
     min-height: 36px;
     width: 36px;
   }
