@@ -37,6 +37,7 @@
             <preview-viewer
               ref="preview-viewer"
               class="preview-viewer"
+              :current-frame="frameNumberRaw"
               :default-height="defaultHeight"
               :is-big="big"
               :is-comparing="isComparing && isComparisonEnabled"
@@ -58,7 +59,7 @@
                 position: isComparisonOverlay ? 'absolute' : 'static'
               }"
               @duration-changed="changeMaxDuration"
-              @frame-update="updateFrame"
+              @frame-update="setVideoFrameContext"
               @play-ended="pause"
               @size-changed="fixCanvasSize"
               @video-end="onVideoEnd"
@@ -68,6 +69,8 @@
             <preview-viewer
               ref="comparison-preview-viewer"
               class="comparison-preview-viewer"
+              name="comparison-preview-viewer"
+              :current-frame="frameNumberRaw"
               :default-height="defaultHeight"
               :is-big="big"
               :is-comparing="isComparing && isComparisonEnabled"
@@ -615,6 +618,7 @@ export default {
     return {
       annotations: [],
       currentIndex: 1,
+      frameNumberRaw: 0,
       fullScreen: false,
       color: '#ff3860',
       currentBackground: null,
@@ -766,11 +770,8 @@ export default {
     },
 
     currentFrame() {
-      const isChromium = !!window.chrome
-      let change = isChromium ? 2 : 1
-      if (this.frameNumber === 0) change = 1
-      const frame = Math.min(this.nbFrames, this.frameNumber + change)
-      return formatFrame(frame)
+      const frame = Math.min(this.nbFrames, this.frameNumberRaw)
+      return formatFrame(frame + 1)
     },
 
     currentPreview() {
@@ -992,17 +993,27 @@ export default {
       )
     },
 
-    updateFrame(frameNumber) {
-      const isChromium = !!window.chrome
-      const change = isChromium ? 1 : 0
-
-      const time = frameNumber * this.frameDuration
-      if (this.frameNumber !== frameNumber) {
-        this.progress.updateProgressBar(frameNumber + change)
+    setVideoFrameContext(frameNumber) {
+      if (this.frameNumberRaw !== frameNumber) {
+        this.frameNumberRaw = frameNumber
+        const time = frameNumber * this.frameDuration
         this.currentTimeRaw = time
-        this.currentTime = this.formatTime(time + change * this.frameDuration)
-        this.$emit('time-updated', time)
+        this.currentTime = this.formatTime(time)
+        this.progress.updateProgressBar(frameNumber)
+
+        if (!this.isPlaying) {
+          this.syncComparisonViewer()
+        }
         if (!this.isPlaying) this.loadAnnotation()
+      }
+    },
+
+    // Video progress
+
+    setCurrentFrame(frameNumber) {
+      if (frameNumber !== this.frameNumber) {
+        this.setVideoFrameContext(frameNumber)
+        this.previewViewer.setCurrentFrame(frameNumber)
       }
     },
 
@@ -1061,10 +1072,7 @@ export default {
     },
 
     getCurrentTime() {
-      const currentTimeRaw = this.previewViewer.getCurrentTimeRaw()
-      const isChromium = !!window.chrome
-      const change = isChromium ? this.frameDuration : 0
-      return roundToFrame(currentTimeRaw + change, this.fps) || 0
+      return this.currentTimeRaw
     },
 
     play() {
@@ -1108,25 +1116,13 @@ export default {
 
     syncComparisonViewer() {
       if (this.comparisonViewer && this.isComparing) {
-        // Dirty fix: add a missing frame to the comparison video
-        const isChromium = !!window.chrome
-        const change = isChromium ? this.frameDuration : 0
-        this.comparisonViewer.setCurrentTimeRaw(
-          this.previewViewer.getCurrentTimeRaw() + change
-        )
+        this.comparisonViewer.setCurrentFrameRaw(this.frameNumberRaw)
       }
     },
 
     onProgressChanged(frameNumber) {
-      const isChromium = !!window.chrome
-      if (isChromium || frameNumber !== this.frameNumber) {
+      if (frameNumber !== this.frameNumberRaw) {
         this.clearCanvas()
-        if (isChromium) {
-          // Chromium has a bug with the video duration
-          // https://bugs.chromium.org/p/chromium/issues/detail?id=642012
-          frameNumber -= 1
-          frameNumber = Math.max(0, frameNumber)
-        }
         this.setCurrentFrame(frameNumber)
       }
     },
@@ -1491,10 +1487,7 @@ export default {
     saveAnnotations() {
       let currentTime = 0
       if (this.isMovie) {
-        const isChromium = !!window.chrome
-        const change = isChromium ? this.frameDuration : 0
-        const currentTimeRaw = this.previewViewer.getCurrentTimeRaw()
-        currentTime = roundToFrame(currentTimeRaw, this.fps) + change
+        currentTime = this.currentTimeRaw
       }
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)
@@ -1873,18 +1866,6 @@ export default {
         this.$options.scrubbing = false
       }
       return false
-    },
-
-    // Video progress
-
-    setCurrentFrame(frameNumber) {
-      if (frameNumber !== this.frameNumber) {
-        this.previewViewer.setCurrentFrame(frameNumber)
-        this.syncComparisonViewer()
-        setTimeout(() => {
-          this.syncComparisonViewer()
-        }, this.frameDuration)
-      }
     },
 
     // Revision previews

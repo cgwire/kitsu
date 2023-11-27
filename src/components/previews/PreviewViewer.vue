@@ -36,6 +36,7 @@
       :is-muted="isMuted"
       :is-repeating="isRepeating"
       :light="isLight"
+      :current-frame="currentFrame"
       :nb-frames="nbFrames"
       :panzoom="true"
       :preview="preview"
@@ -146,6 +147,10 @@ export default {
       default: 0
     },
     marginBottom: {
+      type: Number,
+      default: 0
+    },
+    currentFrame: {
       type: Number,
       default: 0
     },
@@ -413,6 +418,10 @@ export default {
 
     setCurrentFrame(frameNumber) {
       this.videoViewer.setCurrentFrame(frameNumber)
+    },
+
+    setCurrentFrameRaw(frameNumber) {
+      this.videoViewer.setCurrentFrameRaw(frameNumber)
     },
 
     // To use when you don't want to handle back pressure and rounding
