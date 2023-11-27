@@ -37,14 +37,13 @@
             <preview-viewer
               ref="preview-viewer"
               class="preview-viewer"
-              :current-frame="frameNumberRaw"
+              :current-frame="currentFrame"
               :default-height="defaultHeight"
               :is-big="big"
               :is-comparing="isComparing && isComparisonEnabled"
               :is-comparison-overlay="isComparisonOverlay"
               :is-environment-skybox="isEnvironmentSkybox"
               :is-full-screen="fullScreen"
-              :nb-frames="nbFrames"
               :is-hd="isHd"
               :is-light="light"
               :is-muted="isMuted"
@@ -53,6 +52,7 @@
               :is-repeating="isRepeating"
               :is-wireframe="isWireframe"
               :margin-bottom="marginBottom"
+              :nb-frames="nbFrames"
               :object-background-url="objectBackgroundUrl"
               :preview="currentPreview"
               :style="{
@@ -70,7 +70,7 @@
               ref="comparison-preview-viewer"
               class="comparison-preview-viewer"
               name="comparison-preview-viewer"
-              :current-frame="frameNumberRaw"
+              :current-frame="currentFrame"
               :default-height="defaultHeight"
               :is-big="big"
               :is-comparing="isComparing && isComparisonEnabled"
@@ -196,7 +196,7 @@
             class="flexrow-item time-indicator mr1"
             :title="$t('playlists.actions.frame_number')"
           >
-            <span> ({{ currentFrame }}</span
+            <span> ({{ currentFrameLabel }}</span
             ><span v-if="!light || fullScreen"> / </span
             ><span v-if="!light || fullScreen">{{
               (nbFrames + '').padStart(3, '0')
@@ -617,8 +617,8 @@ export default {
   data() {
     return {
       annotations: [],
+      currentFrame: 0,
       currentIndex: 1,
-      frameNumberRaw: 0,
       fullScreen: false,
       color: '#ff3860',
       currentBackground: null,
@@ -761,16 +761,8 @@ export default {
 
     // Utils
 
-    frameNumber() {
-      let frameNumber = this.currentTimeRaw / this.frameDuration
-      if (frameNumber >= this.nbFrames) {
-        frameNumber = this.nbFrames
-      }
-      return Math.round(frameNumber)
-    },
-
-    currentFrame() {
-      const frame = Math.min(this.nbFrames, this.frameNumberRaw)
+    currentFrameLabel() {
+      const frame = Math.min(this.nbFrames, this.currentFrame)
       return formatFrame(frame + 1)
     },
 
@@ -993,13 +985,13 @@ export default {
       )
     },
 
-    setVideoFrameContext(frameNumber) {
-      if (this.frameNumberRaw !== frameNumber) {
-        this.frameNumberRaw = frameNumber
-        const time = frameNumber * this.frameDuration
+    setVideoFrameContext(frame) {
+      if (this.currentFrame !== frame) {
+        const time = frame * this.frameDuration
+        this.currentFrame = frame
         this.currentTimeRaw = time
         this.currentTime = this.formatTime(time)
-        this.progress.updateProgressBar(frameNumber)
+        this.progress.updateProgressBar(frame)
 
         if (!this.isPlaying) {
           this.syncComparisonViewer()
@@ -1010,10 +1002,10 @@ export default {
 
     // Video progress
 
-    setCurrentFrame(frameNumber) {
-      if (frameNumber !== this.frameNumber) {
-        this.setVideoFrameContext(frameNumber)
-        this.previewViewer.setCurrentFrame(frameNumber)
+    setCurrentFrame(frame) {
+      if (this.currentFrame !== frame) {
+        this.setVideoFrameContext(frame)
+        this.previewViewer.setCurrentFrame(frame)
       }
     },
 
@@ -1116,14 +1108,14 @@ export default {
 
     syncComparisonViewer() {
       if (this.comparisonViewer && this.isComparing) {
-        this.comparisonViewer.setCurrentFrameRaw(this.frameNumberRaw)
+        this.comparisonViewer.setCurrentFrame(this.currentFrame)
       }
     },
 
-    onProgressChanged(frameNumber) {
-      if (frameNumber !== this.frameNumberRaw) {
+    onProgressChanged(frame) {
+      if (this.currentFrame !== frame) {
         this.clearCanvas()
-        this.setCurrentFrame(frameNumber)
+        this.setCurrentFrame(frame)
       }
     },
 
@@ -1503,9 +1495,7 @@ export default {
       let currentTime = 0
       if (!annotation) {
         if (this.isMovie) {
-          const isChromium = !!window.chrome
-          const change = isChromium ? this.frameDuration : 0
-          currentTime = roundToFrame(this.currentTimeRaw, this.fps) + change
+          currentTime = this.currentTimeRaw
         }
         annotation = this.getAnnotation(currentTime)
         if (!annotation) {
@@ -1579,12 +1569,12 @@ export default {
       })
     },
 
-    extractVideoFrame(canvas, frameNumber) {
+    extractVideoFrame(canvas, frame) {
       return new Promise(resolve => {
-        this.setCurrentFrame(frameNumber)
+        this.setCurrentFrame(frame)
         this.$nextTick(() => {
           setTimeout(() => {
-            this.previewViewer.extractFrame(canvas, frameNumber)
+            this.previewViewer.extractFrame(canvas, frame)
             resolve()
           }, 500)
         })
@@ -1627,22 +1617,21 @@ export default {
     },
 
     async extractAnnotationSnapshots() {
-      const currentFrame = this.currentFrame
       const annotations = this.annotations.sort((a, b) => b.time < a.time)
       const files = []
       let index = 1
       for (const annotation of annotations) {
         const canvas = document.getElementById('annotation-snapshot')
         const filename = `annotation ${index}.png`
-        const frameNumber =
+        const frame =
           roundToFrame(annotation.time, this.fps) / this.frameDuration
-        await this.extractVideoFrame(canvas, frameNumber)
+        await this.extractVideoFrame(canvas, frame)
         await this.copyAnnotationCanvas(canvas, annotation)
         const file = await this.getFileFromCanvas(canvas, filename)
         files.push(file)
         index++
       }
-      this.previewViewer.setCurrentFrame(currentFrame - 1)
+      this.previewViewer.setCurrentFrame(this.currentFrame - 1)
       this.$nextTick(() => {
         this.clearCanvas()
       })
@@ -1952,11 +1941,10 @@ export default {
 
     previewToCompareId() {
       this.$nextTick(() => {
-        const currentFrame = this.currentFrame
         if (this.comparisonViewer) this.comparisonViewer.pause()
         this.previewToCompare = this.previewFileMap[this.previewToCompareId]
         if (this.isComparing) {
-          this.setCurrentFrame(currentFrame - 1)
+          this.setCurrentFrame(this.currentFrame - 1)
           setTimeout(() => {
             this.syncComparisonViewer()
           }, 200)

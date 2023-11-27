@@ -186,7 +186,9 @@ export default {
         })
 
         this.video.addEventListener('waiting', () => {
-          // this.isLoading = true
+          if (this.name.indexOf('comparison') < 0) {
+            this.isLoading = true
+          }
         })
 
         window.addEventListener('resize', this.onWindowResize)
@@ -312,17 +314,13 @@ export default {
       }
     },
 
-    setCurrentFrame(frameNumber) {
-      this.setCurrentTime(frameNumber * this.frameDuration)
+    setCurrentFrame(frame) {
+      this.setCurrentTime(frame * this.frameDuration)
     },
 
     setCurrentTimeRaw(currentTime) {
       if (currentTime < this.frameDuration) currentTime = 0
       this.video.currentTime = currentTime
-    },
-
-    setCurrentFrameRaw(frameNumber) {
-      this.setCurrentTimeRaw(frameNumber * this.frameDuration)
     },
 
     setCurrentTime(currentTime) {
@@ -421,12 +419,12 @@ export default {
     runEmitTimeUpdateLoop() {
       clearInterval(this.$options.playLoop)
       this.$options.playLoop = setInterval(
-        this.emitNextFrameChange,
+        this.emitFrameChange,
         Math.round(1000000 / (this.fps * 1000))
       )
     },
 
-    emitNextFrameChange() {
+    emitFrameChange() {
       const frame = this.getFrameFromPlayer()
       this.$emit('frame-update', frame)
     },

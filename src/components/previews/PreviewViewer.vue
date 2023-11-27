@@ -146,11 +146,11 @@ export default {
       type: Number,
       default: 0
     },
-    marginBottom: {
+    currentFrame: {
       type: Number,
       default: 0
     },
-    currentFrame: {
+    marginBottom: {
       type: Number,
       default: 0
     },
@@ -163,6 +163,10 @@ export default {
       default: false
     },
     isComparing: {
+      type: Boolean,
+      default: false
+    },
+    isEnvironmentSkybox: {
       type: Boolean,
       default: false
     },
@@ -194,6 +198,10 @@ export default {
       type: Boolean,
       default: false
     },
+    isWireframe: {
+      type: Boolean,
+      default: false
+    },
     objectBackgroundUrl: {
       type: String,
       default: ''
@@ -201,14 +209,6 @@ export default {
     preview: {
       type: Object,
       default: () => {}
-    },
-    isEnvironmentSkybox: {
-      type: Boolean,
-      default: false
-    },
-    isWireframe: {
-      type: Boolean,
-      default: false
     }
   },
 
@@ -418,10 +418,6 @@ export default {
 
     setCurrentFrame(frameNumber) {
       this.videoViewer.setCurrentFrame(frameNumber)
-    },
-
-    setCurrentFrameRaw(frameNumber) {
-      this.videoViewer.setCurrentFrameRaw(frameNumber)
     },
 
     // To use when you don't want to handle back pressure and rounding
