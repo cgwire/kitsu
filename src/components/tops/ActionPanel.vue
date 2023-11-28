@@ -1103,10 +1103,10 @@ export default {
         this.$route.path.indexOf('shots') > 0
           ? 'shots'
           : this.$route.path.indexOf('assets') > 0
-          ? 'assets'
-          : this.$route.path.indexOf('edits') > 0
-          ? 'edits'
-          : 'episodes'
+            ? 'assets'
+            : this.$route.path.indexOf('edits') > 0
+              ? 'edits'
+              : 'episodes'
       this.loading.taskCreation = true
       this.createSelectedTasks({
         type,
