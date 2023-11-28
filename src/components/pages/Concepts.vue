@@ -70,13 +70,13 @@
               :key="concept.id"
               @click="onSelectConcept(concept)"
             >
-              <img
-                class="preview"
-                alt=""
-                width="300"
-                height="200"
-                :src="concept.thumbnail"
-                @click.stop="onPreviewClicked"
+              <entity-preview
+                :empty-height="200"
+                :empty-width="300"
+                :height="200"
+                :width="300"
+                :entity="concept"
+                is-rounded-top-border
               />
               <div class="description">
                 <span>{{ concept.name }}</span>
@@ -101,7 +101,7 @@
                       :person="personMap.get(personId)"
                       :size="25"
                       :font-size="14"
-                      v-for="personId in concept.assignees"
+                      v-for="personId in concept.tasks[0].assignees"
                     />
                   </div>
                 </div>
@@ -132,7 +132,7 @@
     />
 
     <div class="column side-column" v-if="currentTask">
-      <task-info :task="currentTask" />
+      <task-info :task="currentTask" entity-type="Concept" with-actions />
     </div>
   </div>
 </template>
@@ -149,9 +149,10 @@ import AddPreviewModal from '@/components/modals/AddPreviewModal'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import EntityPreview from '@/components/widgets/EntityPreview.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import PeopleField from '@/components/widgets/PeopleField'
 import SearchField from '@/components/widgets/SearchField'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import SearchQueryList from '@/components/widgets/SearchQueryList'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskInfo from '@/components/sides/TaskInfo'
@@ -165,9 +166,10 @@ export default {
     ButtonSimple,
     Combobox,
     ComboboxStatus,
+    EntityPreview,
+    PeopleAvatar,
     PeopleField,
     SearchField,
-    PeopleAvatar,
     SearchQueryList,
     TableInfo,
     TaskInfo
@@ -222,22 +224,24 @@ export default {
       'displayedConcepts',
       'isDarkTheme',
       'personMap',
-      'taskStatusMap',
-      'taskTypes'
+      'taskStatusMap'
     ]),
 
     assignees() {
-      const assignees = []
-      const assigneesMap = {}
-      this.filteredConcepts.forEach(task => {
-        task.assignees.forEach(personId => {
-          if (!assigneesMap[personId]) {
-            assignees.push(this.personMap.get(personId))
-            assigneesMap[personId] = true
-          }
+      const assignees = new Map()
+      this.filteredConcepts.forEach(concept => {
+        concept.tasks.forEach(task => {
+          task.assignees.forEach(personId => {
+            if (!assignees.has(personId)) {
+              const person = this.personMap.get(personId)
+              if (person) {
+                assignees.set(personId, person)
+              }
+            }
+          })
         })
       })
-      return sortByName(assignees)
+      return sortByName([...assignees.values()])
     },
 
     entityTypeOptions() {
@@ -275,7 +279,8 @@ export default {
       }
       if (this.filters.assignee) {
         concepts = concepts.filter(concept =>
-          concept.assignees?.includes(this.filters.assignee.id)
+          // FIXME: loop instead of tasks[0] ???
+          concept.tasks[0].assignees?.includes(this.filters.assignee.id)
         )
       }
       if (this.filters.entityType) {
@@ -362,10 +367,6 @@ export default {
       }
     },
 
-    onPreviewClicked() {
-      alert('onPreviewClicked')
-    },
-
     onSelectConcept(concept) {
       // FIXME: remove mock data
       concept.task = {
@@ -377,7 +378,7 @@ export default {
 
       this.currentTask =
         !this.currentTask || this.currentTask.entity_id !== concept.id
-          ? concept.task
+          ? concept.tasks[0]
           : null
     },
 
@@ -418,7 +419,6 @@ export default {
 .filters {
   display: flex;
   align-items: flex-end;
-  flex-wrap: wrap;
   gap: 0 20px;
   padding: 10px;
 
@@ -458,17 +458,6 @@ export default {
     }
     &:hover {
       background-color: var(--background-hover);
-    }
-
-    .preview {
-      cursor: zoom-in;
-      background-color: $black;
-      border-top-left-radius: inherit;
-      border-top-right-radius: inherit;
-      max-width: 300px;
-      min-width: 300px;
-      max-height: 200px;
-      min-height: 200px;
     }
 
     .description {
@@ -519,6 +508,8 @@ export default {
 }
 
 .footer {
+  position: sticky;
+  bottom: 0;
   display: flex;
   justify-content: center;
   padding: 3em;

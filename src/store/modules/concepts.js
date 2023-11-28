@@ -92,11 +92,6 @@ const mutations = {
   },
 
   [LOAD_CONCEPTS_END](state, concepts) {
-    concepts.forEach(concept => {
-      concept.url = `/api/pictures/preview-files/${concept.id}.${concept.extension}`
-      concept.thumbnail = `/api/pictures/thumbnails/preview-files/${concept.id}.png`
-    })
-    // state.concepts = sortByName(concepts)
     state.concepts = concepts
     state.conceptMap = new Map(
       state.concepts.map(concept => [concept.id, concept])
@@ -105,9 +100,6 @@ const mutations = {
   },
 
   [EDIT_CONCEPT_END](state, newConcept) {
-    newConcept.url = `/api/pictures/preview-files/${newConcept.id}.${newConcept.extension}`
-    newConcept.thumbnail = `/api/pictures/thumbnails/preview-files/${newConcept.id}.png`
-
     const concept = state.conceptMap.get(newConcept.id)
 
     if (concept?.id) {
