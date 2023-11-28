@@ -63,7 +63,7 @@
         <div class="task-columns pa1 pt0" ref="task-columns">
           <div class="task-column preview-column" v-if="isPreview">
             <div class="preview-column-content">
-              <div class="flexrow">
+              <div class="flexrow" v-if="!isConceptTask">
                 <div
                   class="preview-list flexrow w100"
                   v-if="previewOptions.length > 0"
@@ -516,6 +516,10 @@ export default {
         }
       }
       return false
+    },
+
+    isConceptTask() {
+      return this.entityType === 'Concept'
     },
 
     isPreviewPlayerReadOnly() {

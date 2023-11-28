@@ -31,7 +31,9 @@
             :title="$t('menu.assign_tasks')"
             @click="selectBar('assignation')"
             v-if="
-              (isCurrentViewSingleEntity || isCurrentViewEntity) &&
+              (isCurrentViewSingleEntity ||
+                isCurrentViewEntity ||
+                isCurrentViewConcept) &&
               (isCurrentUserManager ||
                 isSupervisorInDepartment ||
                 isInDepartment ||
@@ -70,7 +72,11 @@
               active: selectedBar === 'thumbnails'
             }"
             :title="$t('menu.set_thumbnails')"
-            v-if="isTaskSelection && !this.isCurrentUserArtist"
+            v-if="
+              isTaskSelection &&
+              !this.isCurrentUserArtist &&
+              !isCurrentViewConcept
+            "
             @click="selectBar('thumbnails')"
           >
             <image-icon />
@@ -201,6 +207,18 @@
           <div
             class="menu-item"
             :class="{
+              active: selectedBar === 'tag-concepts'
+            }"
+            :title="$t('menu.tag_concepts')"
+            @click="selectBar('tag-concepts')"
+            v-if="isCurrentViewConcept && isCurrentUserManager"
+          >
+            <tag-icon />
+          </div>
+
+          <div
+            class="menu-item"
+            :class="{
               active: selectedBar === 'delete-assets'
             }"
             :title="$t('menu.delete_assets')"
@@ -232,6 +250,18 @@
             :title="$t('menu.delete_edits')"
             @click="selectBar('delete-edits')"
             v-if="isCurrentViewEdit && isCurrentUserManager && !isTaskSelection"
+          >
+            <trash-icon />
+          </div>
+
+          <div
+            class="menu-item"
+            :class="{
+              active: selectedBar === 'delete-concepts'
+            }"
+            :title="$t('menu.delete_concepts')"
+            @click="selectBar('delete-concepts')"
+            v-if="isCurrentViewConcept && isCurrentUserManager"
           >
             <trash-icon />
           </div>
@@ -487,6 +517,13 @@
           </button>
         </div>
 
+        <div class="flexrow-item is-wide" v-if="selectedBar === 'tag-concepts'">
+          <div>Tag linked to Concept</div>
+          <ul style="margin: 1rem 0">
+            <li class="tag" style="border: 1px solid #67be4b">tag1</li>
+          </ul>
+        </div>
+
         <div class="flexrow-item is-wide" v-if="selectedBar === 'delete-tasks'">
           <div class="flexrow is-wide">
             <button
@@ -673,6 +710,7 @@ import {
   FilmIcon,
   ImageIcon,
   PlayCircleIcon,
+  TagIcon,
   TrashIcon,
   UserIcon
 } from 'vue-feather-icons'
@@ -709,6 +747,7 @@ export default {
     PlayCircleIcon,
     Spinner,
     UserIcon,
+    TagIcon,
     TrashIcon,
     ViewPlaylistModal
   },
@@ -912,6 +951,10 @@ export default {
 
     isCurrentViewEdit() {
       return this.$route.path.indexOf('edit') > 0 && !this.$route.params.edit_id
+    },
+
+    isCurrentViewConcept() {
+      return this.$route.path.includes('concept')
     },
 
     isCurrentViewTodos() {

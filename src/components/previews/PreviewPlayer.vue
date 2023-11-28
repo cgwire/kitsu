@@ -205,7 +205,7 @@
           </div>
         </div>
 
-        <div class="flexrow flexrow-item">
+        <div class="flexrow flexrow-item" v-if="!isConcept">
           <button-simple
             class="ml1"
             :active="isComparing"
@@ -255,7 +255,7 @@
               class="flexrow-item"
               icon="undo"
               :title="$t('playlists.actions.annotation_undo')"
-              v-if="!readOnly && fullScreen"
+              v-if="!readOnly && fullScreen && !isConcept"
               @click="undoLastAction"
             />
 
@@ -263,7 +263,7 @@
               class="flexrow-item flexrow-item"
               :title="$t('playlists.actions.annotation_redo')"
               icon="redo"
-              v-if="!readOnly && fullScreen"
+              v-if="!readOnly && fullScreen && !isConcept"
               @click="redoLastAction"
             />
 
@@ -272,7 +272,7 @@
               icon="remove"
               :title="$t('playlists.actions.annotation_delete')"
               @click="onDeleteClicked"
-              v-if="!readOnly && fullScreen"
+              v-if="!readOnly && fullScreen && !isConcept"
             />
 
             <transition name="slide">
@@ -295,7 +295,7 @@
               :active="isTyping"
               :title="$t('playlists.actions.annotation_text')"
               @click="onTypeClicked"
-              v-if="!readOnly && (!light || fullScreen)"
+              v-if="!readOnly && (!light || fullScreen) && !isConcept"
             />
 
             <transition name="slide">
@@ -326,7 +326,7 @@
               :active="isDrawing"
               :title="$t('playlists.actions.annotation_draw')"
               @click="onPencilAnnotateClicked"
-              v-if="!readOnly && (!light || fullScreen)"
+              v-if="!readOnly && (!light || fullScreen) && !isConcept"
             />
 
             <button-simple
@@ -334,7 +334,9 @@
               :title="$t('playlists.actions.toggle_annotations')"
               :active="isAnnotationsDisplayed"
               @click="onAnnotationDisplayedClicked"
-              v-if="(isPicture || isMovie) && (!light || fullScreen)"
+              v-if="
+                (isPicture || isMovie) && (!light || fullScreen) && !isConcept
+              "
             />
 
             <button-simple
@@ -343,7 +345,7 @@
               :active="isZoomPan"
               :title="$t('playlists.actions.annotation_zoom_pan')"
               @click="onZoomPanClicked"
-              v-if="!light || fullScreen"
+              v-if="(!light || fullScreen) && !isConcept"
             />
 
             <button-simple
@@ -444,20 +446,18 @@
             @previous-clicked="onPreviousClicked"
             @remove-preview-clicked="onRemovePreviewClicked"
             @current-index-clicked="isOrdering = !isOrdering"
-            v-if="currentPreview"
+            v-if="currentPreview && !isConcept"
           />
 
-          <div class="flexrow">
-            <div class="flexrow" v-if="fullScreen">
-              <combobox-styled
-                class="preview-combo flexrow-item"
-                :options="lastPreviewFileOptions"
-                is-reversed
-                is-preview
-                thin
-                @input="changeCurrentPreviewFile"
-              />
-            </div>
+          <div class="flexrow" v-if="fullScreen && !isConcept">
+            <combobox-styled
+              class="preview-combo flexrow-item"
+              :options="lastPreviewFileOptions"
+              is-reversed
+              is-preview
+              thin
+              @input="changeCurrentPreviewFile"
+            />
           </div>
 
           <div
@@ -809,6 +809,11 @@ export default {
 
     extension() {
       return this.currentPreview ? this.currentPreview.extension : ''
+    },
+
+    isConcept() {
+      // FIXME: write correct logic
+      return this.$route.path.includes('concept')
     },
 
     isPicture() {
