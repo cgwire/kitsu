@@ -27,6 +27,10 @@
             >
               {{ $t('tasks.fields.entity') }}
             </th>
+            <th scope="col" class="episode" v-if="isEpisodeVisible">
+              {{ $t('assets.fields.episode') }}
+            </th>
+
             <th class="assignees" ref="th-assignees" v-if="isToCheck">
               {{ $t('tasks.fields.assignees') }}
             </th>
@@ -114,6 +118,13 @@
                 </router-link>
               </div>
             </td>
+
+            <td class="episode" v-if="isEpisodeVisible">
+              <div class="flexrow" :title="assetEpisodes(entry, true)">
+                {{ assetEpisodes(entry, false) }}
+              </div>
+            </td>
+
             <description-cell
               class="description"
               :entry="{ description: entry.entity_description }"
@@ -410,11 +421,41 @@ export default {
       return (
         Math.floor((this.timeEstimated ? this.timeEstimated : 0) / 60 / 8) <= 1
       )
+    },
+
+    isEpisodeVisible() {
+      return this.displayedTasks.some(
+        task => task.source_id || task.episode_names?.length > 0
+      )
     }
   },
 
   methods: {
     ...mapActions([]),
+
+    assetEpisodes(entry, full) {
+      if (
+        ['Episode', 'Sequence', 'Shot', 'Edit'].includes(entry.entity_type_name)
+      )
+        return ''
+      const mainEpisodeName = entry.episode_name || 'MP'
+      const episodeNames = (entry.episode_names || []).filter(
+        name => name !== mainEpisodeName
+      )
+      let episodeNameString = ''
+      if (episodeNames.length > 2) {
+        if (full) {
+          episodeNameString = episodeNames.join(', ')
+        } else {
+          episodeNameString = episodeNames.slice(0, 2).join(', ') + ', ...'
+        }
+      } else if (episodeNames.length > 0) {
+        episodeNameString = episodeNames.join(', ')
+      }
+      return episodeNames.length > 0
+        ? mainEpisodeName + ', ' + episodeNameString
+        : mainEpisodeName
+    },
 
     setScrollPosition(scrollPosition) {
       if (this.$refs.body) {
@@ -765,5 +806,10 @@ td.end-date {
 .entity-name {
   color: var(--text);
   font-weight: bold;
+}
+
+.episode {
+  min-width: 130px;
+  width: 130px;
 }
 </style>
