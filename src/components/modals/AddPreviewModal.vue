@@ -179,7 +179,7 @@ export default {
     ...mapActions([]),
 
     onFileSelected(forms) {
-      this.forms = this.forms.concat(forms)
+      this.forms = this.isMultiple ? this.forms.concat(forms) : [forms]
       this.$emit('fileselected', this.forms)
     },
 
