@@ -1,11 +1,11 @@
 ### Kitsu Development Environment with Docker
 
-Start developing for Kitsu using Docker on Windows, Linux and OSX.
+Start developing for Kitsu using Docker on Windows, Linux and macOS.
 
 **Prerequisites**
 
-- [Node.js 16.x](https://nodejs.org/en/) or greater
-- [Docker 1.13](https://store.docker.com/search?type=edition&offering=community) or greater
+- [Node.js >= 18.12](https://nodejs.org/en/)
+- [Docker >= 1.13](https://store.docker.com/search?type=edition&offering=community)
 
 **Setup**
 
@@ -23,12 +23,12 @@ After 30 or so seconds, a browser window should appear with Kitsu up and running
 
 **Resources**
 
-Kitsu is based on the VueJs framework. The VueJs documentation is exhaustive and very clear. We encourage you to read it before hacking significant piece of code.
+Kitsu is based on the Vue.js framework. The Vue.js documentation is exhaustive and very clear. We encourage you to read it before hacking significant piece of code.
 
 The architecture is based on [vuex](https://kitsu.cg-wire.com/development-environment/) and [vue-router](https://kitsu.cg-wire.com/development-environment/). Documentations are good too, again, we recommend to read it. The main idea is that:
 
-- Url routes gives the main context.
-- Views are described in components through HTML, CSS and small pieces of javascript.
+- URL routes gives the main context.
+- Views are described in components through HTML, CSS and small pieces of JavaScript.
 - Shared state is stored inside stores which are modified through mutations (kind of event bus to require state changes) and actions.
 - Actions are similar to mutations but they allow asynchronous operations. Mainly actions fire mutations and send requests to the server.
 - Stores provide getter to access state properties from components.
