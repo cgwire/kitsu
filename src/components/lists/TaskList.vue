@@ -1036,6 +1036,10 @@ td.retake-count {
   }
 }
 
+.error {
+  color: $red;
+}
+
 input[type='number']::-webkit-outer-spin-button,
 input[type='number']::-webkit-inner-spin-button {
   -webkit-appearance: none;
