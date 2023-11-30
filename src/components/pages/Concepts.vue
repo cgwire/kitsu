@@ -200,7 +200,6 @@ export default {
       },
 
       // TODO: module getters
-      currentTask: null,
       conceptSearchQueries: [
         {
           id: 'filter-test-1',
@@ -224,6 +223,7 @@ export default {
       'displayedConcepts',
       'isDarkTheme',
       'personMap',
+      'selectedTasks',
       'taskStatusMap'
     ]),
 
@@ -242,6 +242,10 @@ export default {
         })
       })
       return sortByName([...assignees.values()])
+    },
+
+    currentTask() {
+      return this.selectedTasks.values().next().value
     },
 
     entityTypeOptions() {
@@ -318,7 +322,12 @@ export default {
   },
 
   methods: {
-    ...mapActions(['loadConcepts', 'newConcept']),
+    ...mapActions([
+      'addSelectedTask',
+      'clearSelectedTasks',
+      'loadConcepts',
+      'newConcept'
+    ]),
 
     // TODO: module actions
     setConceptSearch: searchQuery => Promise.resolve(),
@@ -368,18 +377,13 @@ export default {
     },
 
     onSelectConcept(concept) {
-      // FIXME: remove mock data
-      concept.task = {
-        id: `task-${concept.id}`,
-        entity_id: concept.id,
-        task_type_id: this.taskTypes[0].id,
-        project_id: this.currentProduction.id
+      const task = concept.tasks[0]
+      if (this.selectedTasks.has(task.id)) {
+        this.clearSelectedTasks()
+      } else {
+        this.clearSelectedTasks()
+        this.addSelectedTask(task)
       }
-
-      this.currentTask =
-        !this.currentTask || this.currentTask.entity_id !== concept.id
-          ? concept.tasks[0]
-          : null
     },
 
     openAddConceptModal() {
