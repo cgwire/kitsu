@@ -1,11 +1,13 @@
 import Papa from 'papaparse'
+
+import { getPercentage } from '@/lib/stats'
+import stringHelpers from '@/lib/string'
 import {
   getDayRange,
   getMonthRange,
   getWeekRange,
   hoursToDays
 } from '@/lib/time'
-import { getPercentage } from '@/lib/stats'
 
 const csv = {
   generateTimesheet(
@@ -108,17 +110,14 @@ const csv = {
     return entries
   },
 
-  turnEntriesToCsvString(entries) {
-    const lineArray = []
-    entries.forEach(infoArray => {
-      const sanitizedCells = infoArray.map(cell => {
-        const cellString = `${cell || ''}`
-        return `"${cellString.replace(/"/g, '""')}"`
-      })
-      const line = sanitizedCells.join(';')
-      if (line.length > 2) lineArray.push(line)
+  turnEntriesToCsvString(entries, config = {}) {
+    return Papa.unparse(entries, {
+      delimiter: ';',
+      newline: '\n',
+      quotes: true,
+      skipEmptyLines: true,
+      ...config
     })
-    return lineArray.join('\n')
   },
 
   buildCsvFile(name, entries) {
@@ -402,30 +401,19 @@ const csv = {
     return entries
   },
 
-  processCSV: (data, config) => {
+  processCSV: (data, config = {}) => {
     return new Promise((resolve, reject) => {
       Papa.parse(data, {
-        config: config,
         encoding: 'UTF-8',
         error: reject,
+        transform: value => value.trim(),
         complete: results => {
-          const parsedData = csv.cleanUpCsv(results.data)
-          resolve(parsedData)
-        }
+          results.data[0].forEach(stringHelpers.capitalize)
+          resolve(results.data)
+        },
+        ...config
       })
     })
-  },
-
-  cleanUpCsv: data => {
-    data.forEach(item => {
-      item.forEach((item, index, data) => {
-        data[index] = item.trim()
-      })
-    })
-    data[0].forEach((item, index, data) => {
-      data[index] = (item[0] || '').toUpperCase() + item.slice(1)
-    })
-    return data
   }
 }
 
