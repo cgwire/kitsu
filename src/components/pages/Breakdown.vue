@@ -416,6 +416,7 @@ export default {
     if (!this.isLoading) {
       this.reset()
     }
+    this.resetSequenceOption()
     this.setLastProductionScreen('breakdown')
     this.isTextMode = localStorage.getItem('breakdown:text-mode') === 'true'
     window.addEventListener('keydown', this.onKeyDown, false)
@@ -702,6 +703,7 @@ export default {
           } else {
             this.setCastingSequence(this.sequenceId || 'all')
           }
+          this.resetSequenceOption()
           this.resetSelection()
           if (
             (this.currentEpisode && this.currentEpisode.id === 'main') ||
@@ -711,6 +713,12 @@ export default {
           }
         })
       })
+    },
+
+    resetSequenceOption() {
+      if (this.currentProduction.production_style === 'nft') {
+        this.sequenceId = this.castingSequencesOptions[1].value
+      }
     },
 
     resetSelection() {
