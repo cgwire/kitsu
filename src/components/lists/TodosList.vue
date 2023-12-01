@@ -801,6 +801,7 @@ td.end-date {
 
 .empty-list img {
   max-width: 80vh;
+  -webkit-filter: brightness(103%);
 }
 
 .entity-name {

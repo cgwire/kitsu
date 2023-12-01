@@ -32,7 +32,6 @@ export default {
 
 <style lang="scss" scoped>
 .page {
-  background-color: var(--background);
 }
 
 .illustration {
@@ -40,7 +39,6 @@ export default {
   margin: auto;
   img {
     border-radius: 3rem;
-    box-shadow: 0 0 2rem rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
   }
 }
@@ -52,5 +50,11 @@ p {
   a {
     text-decoration: underline;
   }
+}
+
+.title {
+  color: var(--text);
+  font-weight: bold;
+  font-size: 2.4em;
 }
 </style>
