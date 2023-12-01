@@ -15,8 +15,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-
 import Spinner from '@/components/widgets/Spinner'
 
 export default {
@@ -47,15 +45,7 @@ export default {
       default: '',
       type: String
     }
-  },
-
-  mounted() {},
-
-  computed: {
-    ...mapGetters([])
-  },
-
-  methods: {}
+  }
 }
 </script>
 

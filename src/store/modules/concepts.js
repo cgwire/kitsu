@@ -1,3 +1,4 @@
+import async from 'async'
 import conceptsApi from '@/store/api/concepts'
 import tasksApi from '@/store/api/tasks'
 
@@ -7,6 +8,8 @@ import {
   LOAD_CONCEPTS_END,
   EDIT_CONCEPT_END,
   DELETE_CONCEPT_END,
+  ADD_SELECTED_CONCEPTS,
+  CLEAR_SELECTED_CONCEPTS,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -15,7 +18,8 @@ const initialState = {
   conceptMap: new Map(),
   displayedConcepts: [],
   conceptSearchText: '',
-  conceptSearchQueries: []
+  conceptSearchQueries: [],
+  selectedConcepts: new Map()
 }
 
 const state = {
@@ -25,9 +29,8 @@ const state = {
 const getters = {
   concepts: state => state.concepts,
   conceptMap: state => state.conceptMap,
-  displayedConcepts: state => state.displayedConcepts
-  // editConcept: state => state.editConcept,
-  // deleteConcept: state => state.deleteConcept
+  displayedConcepts: state => state.displayedConcepts,
+  selectedConcepts: state => state.selectedConcepts
 }
 
 const actions = {
@@ -75,6 +78,41 @@ const actions = {
   async deleteConcept({ commit }, concept) {
     await conceptsApi.deleteConcept(concept)
     commit(DELETE_CONCEPT_END, concept)
+  },
+
+  addSelectedConcepts({ commit }, concept) {
+    commit(ADD_SELECTED_CONCEPTS, concept)
+  },
+
+  deleteSelectedConcepts({ state, dispatch }) {
+    return new Promise((resolve, reject) => {
+      let selectedConceptIds = [...state.selectedConcepts.values()]
+        .filter(concept => !concept.canceled)
+        .map(concept => concept.id)
+      if (selectedConceptIds.length === 0) {
+        selectedConceptIds = [...state.selectedConcepts.keys()]
+      }
+      async.eachSeries(
+        selectedConceptIds,
+        (conceptId, next) => {
+          const concept = state.conceptMap.get(conceptId)
+          if (concept) {
+            dispatch('deleteConcept', concept)
+          }
+          next()
+        },
+        err => {
+          if (err) reject(err)
+          else {
+            resolve()
+          }
+        }
+      )
+    })
+  },
+
+  clearSelectedConcepts({ commit }) {
+    commit(CLEAR_SELECTED_CONCEPTS)
   }
 }
 
@@ -120,6 +158,17 @@ const mutations = {
       state.concepts.splice(conceptIndex, 1)
     }
     delete state.conceptMap.get(concept.id)
+  },
+
+  [ADD_SELECTED_CONCEPTS](state, concepts) {
+    concepts.forEach(concept => {
+      state.selectedConcepts.set(concept.id, concept)
+    })
+    state.selectedConcepts = new Map(state.selectedConcepts) // for reactivity
+  },
+
+  [CLEAR_SELECTED_CONCEPTS](state) {
+    state.selectedConcepts = new Map()
   },
 
   [RESET_ALL](state) {

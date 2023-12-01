@@ -64,11 +64,13 @@
             <li
               class="item"
               :class="{
-                'selected-item': currentTask?.entity_id === concept.id
+                'selected-item': isSelected(concept)
               }"
               v-for="concept in filteredConcepts"
               :key="concept.id"
-              @click="onSelectConcept(concept)"
+              @click="
+                onSelectConcept(concept, $event.ctrlKey || $event.metaKey)
+              "
             >
               <entity-preview
                 :empty-height="200"
@@ -131,8 +133,8 @@
       @confirm="confirmAddConceptModal"
     />
 
-    <div class="column side-column" v-if="currentTask">
-      <task-info :task="currentTask" entity-type="Concept" with-actions />
+    <div class="column side-column" v-if="selectedConcepts.size">
+      <task-info entity-type="Concept" :task="currentTask" with-actions />
     </div>
   </div>
 </template>
@@ -223,7 +225,7 @@ export default {
       'displayedConcepts',
       'isDarkTheme',
       'personMap',
-      'selectedTasks',
+      'selectedConcepts',
       'taskStatusMap'
     ]),
 
@@ -245,7 +247,13 @@ export default {
     },
 
     currentTask() {
-      return this.selectedTasks.values().next().value
+      return this.currentConcept?.tasks[0]
+    },
+
+    currentConcept() {
+      return this.selectedConcepts.size === 1
+        ? this.selectedConcepts.values().next().value
+        : null
     },
 
     entityTypeOptions() {
@@ -275,7 +283,7 @@ export default {
     },
 
     filteredConcepts() {
-      let concepts = this.displayedConcepts.slice()
+      let concepts = [...this.displayedConcepts]
       if (this.filters.taskStatusId) {
         concepts = concepts.filter(
           concept => concept.status === this.filters.taskStatusId
@@ -283,7 +291,6 @@ export default {
       }
       if (this.filters.assignee) {
         concepts = concepts.filter(concept =>
-          // FIXME: loop instead of tasks[0] ???
           concept.tasks[0].assignees?.includes(this.filters.assignee.id)
         )
       }
@@ -323,7 +330,9 @@ export default {
 
   methods: {
     ...mapActions([
+      'addSelectedConcepts',
       'addSelectedTask',
+      'clearSelectedConcepts',
       'clearSelectedTasks',
       'loadConcepts',
       'newConcept'
@@ -376,13 +385,28 @@ export default {
       }
     },
 
-    onSelectConcept(concept) {
-      const task = concept.tasks[0]
-      if (this.selectedTasks.has(task.id)) {
-        this.clearSelectedTasks()
+    isSelected(concept) {
+      return this.selectedConcepts.has(concept.id)
+    },
+
+    onSelectConcept(concept, isMultipleSelection = false) {
+      const selection = isMultipleSelection
+        ? new Map(this.selectedConcepts)
+        : new Map()
+      if (
+        (isMultipleSelection && this.isSelected(concept)) ||
+        (!isMultipleSelection && concept === this.currentConcept)
+      ) {
+        selection.delete(concept.id)
       } else {
-        this.clearSelectedTasks()
-        this.addSelectedTask(task)
+        selection.set(concept.id, concept)
+      }
+      this.clearSelectedConcepts()
+      this.addSelectedConcepts(selection)
+
+      this.clearSelectedTasks()
+      if (this.currentTask) {
+        this.addSelectedTask(this.currentTask)
       }
     },
 

@@ -99,6 +99,20 @@
           </div>
 
           <div
+            class="menu-item"
+            :class="{
+              active: selectedBar === 'tag-concepts'
+            }"
+            :title="$t('menu.tag_concepts')"
+            @click="selectBar('tag-concepts')"
+            v-if="
+              isCurrentViewConcept && isCurrentUserManager && isTaskSelection
+            "
+          >
+            <tag-icon />
+          </div>
+
+          <div
             class="menu-separator"
             v-if="!isEntitySelection && isTaskSelection && nbSelectedTasks > 1"
           ></div>
@@ -180,6 +194,7 @@
               !isEntitySelection &&
               isTaskSelection &&
               !isCurrentViewEpisode &&
+              !isCurrentViewConcept &&
               customActions &&
               customActions.length > 0
             "
@@ -197,23 +212,12 @@
               !isEntitySelection &&
               isTaskSelection &&
               !isCurrentViewEpisode &&
+              !isCurrentViewConcept &&
               customActions &&
               customActions.length > 0
             "
           >
             <play-circle-icon />
-          </div>
-
-          <div
-            class="menu-item"
-            :class="{
-              active: selectedBar === 'tag-concepts'
-            }"
-            :title="$t('menu.tag_concepts')"
-            @click="selectBar('tag-concepts')"
-            v-if="isCurrentViewConcept && isCurrentUserManager"
-          >
-            <tag-icon />
           </div>
 
           <div
@@ -684,6 +688,23 @@
             @confirm="confirmEpisodeDeletion"
           />
         </div>
+
+        <div
+          class="flexrow-item is-wide"
+          v-if="selectedBar === 'delete-concepts'"
+        >
+          <delete-entities
+            :error-text="$t('concepts.multiple_delete_error')"
+            :is-loading="loading.episodeDeletion"
+            :is-error="errors.deleteEpisode"
+            :text="
+              $tc('concepts.delete_for_selection', nbSelectedConcepts, {
+                nbSelectedConcepts
+              })
+            "
+            @confirm="confirmConceptDeletion"
+          />
+        </div>
       </div>
     </div>
 
@@ -791,6 +812,7 @@ export default {
         assetDeletion: false,
         changePriority: false,
         changeStatus: false,
+        conceptDeletion: false,
         editDeletion: false,
         episodeDeletion: false,
         taskCreation: false,
@@ -802,6 +824,7 @@ export default {
       errors: {
         assetDeletion: false,
         taskDeletion: false,
+        conceptDeletion: false,
         editDeletion: false,
         episodeDeletion: false,
         shotDeletion: false
@@ -836,6 +859,7 @@ export default {
       'personMap',
       'productionMap',
       'selectedAssets',
+      'selectedConcepts',
       'selectedEdits',
       'selectedShots',
       'selectedTasks',
@@ -860,8 +884,8 @@ export default {
 
     currentEntityType() {
       if (this.isCurrentViewAsset) return 'asset'
-      else if (this.isCurrentViewShot) return 'shot'
-      else if (this.isCurrentViewEdit) return 'edit'
+      if (this.isCurrentViewShot) return 'shot'
+      if (this.isCurrentViewEdit) return 'edit'
       return 'episode'
     },
 
@@ -907,20 +931,26 @@ export default {
       return this.selectedEdits.size
     },
 
+    nbSelectedConcepts() {
+      return this.selectedConcepts.size
+    },
+
     isHidden() {
       return (
         (this.nbSelectedTasks === 0 &&
           this.nbSelectedValidations === 0 &&
           this.nbSelectedAssets === 0 &&
           this.nbSelectedShots === 0 &&
-          this.nbSelectedEdits === 0) ||
+          this.nbSelectedEdits === 0 &&
+          this.nbSelectedConcepts === 0) ||
         !(
           this.isCurrentViewAsset ||
           this.isCurrentViewTodos ||
           this.isCurrentViewShot ||
           this.isCurrentViewEpisode ||
           this.isCurrentViewSequence ||
-          this.isCurrentViewEdit
+          this.isCurrentViewEdit ||
+          this.isCurrentViewConcept
         )
       )
     },
@@ -940,17 +970,15 @@ export default {
     },
 
     isCurrentViewAsset() {
-      return (
-        this.$route.path.indexOf('asset') > 0 && !this.$route.params.shot_id
-      )
+      return this.$route.path.includes('asset') && !this.$route.params.shot_id
     },
 
     isCurrentViewShot() {
-      return this.$route.path.indexOf('shot') > 0 && !this.$route.params.shot_id
+      return this.$route.path.includes('shot') && !this.$route.params.shot_id
     },
 
     isCurrentViewEdit() {
-      return this.$route.path.indexOf('edit') > 0 && !this.$route.params.edit_id
+      return this.$route.path.includes('edit') && !this.$route.params.edit_id
     },
 
     isCurrentViewConcept() {
@@ -959,21 +987,21 @@ export default {
 
     isCurrentViewTodos() {
       return (
-        this.$route.path.indexOf('my-tasks') > 0 ||
-        this.$route.path.indexOf('people/') > 0
+        this.$route.path.includes('my-tasks') ||
+        this.$route.path.includes('people/')
       )
     },
 
     isCurrentViewPerson() {
-      return this.$route.path.indexOf('people/') > 0
+      return this.$route.path.includes('people/')
     },
 
     isCurrentViewPersonTasks() {
-      return this.$route.path.indexOf('todos') > 0
+      return this.$route.path.includes('todos')
     },
 
     isCurrentViewTaskType() {
-      return this.$route.path.indexOf('task-type') > 0
+      return this.$route.path.includes('task-type')
     },
 
     isCurrentViewEntity() {
@@ -992,7 +1020,7 @@ export default {
           this.isCurrentViewAsset ||
           this.isCurrentViewShot ||
           this.isCurrentViewEdit
-        ) && this.$route.path.indexOf('episodes') > 0
+        ) && this.$route.path.includes('episodes')
       )
     },
 
@@ -1002,7 +1030,7 @@ export default {
           this.isCurrentViewAsset ||
           this.isCurrentViewShot ||
           this.isCurrentViewEdit
-        ) && this.$route.path.indexOf('sequences') > 0
+        ) && this.$route.path.includes('sequences')
       )
     },
 
@@ -1038,7 +1066,12 @@ export default {
 
     storagePrefix() {
       let prefix = 'todos-'
-      if (this.isCurrentViewAsset || this.isCurrentViewShot) {
+      if (
+        this.isCurrentViewAsset ||
+        this.isCurrentViewShot ||
+        this.isCurrentViewEdit ||
+        this.isCurrentViewConcept
+      ) {
         prefix = 'entities-'
       }
       if (this.isCurrentViewTaskType) prefix = 'tasks-'
@@ -1052,12 +1085,14 @@ export default {
       'clearSelectedAssets',
       'clearSelectedShots',
       'clearSelectedEdits',
+      'clearSelectedConcepts',
       'createSelectedTasks',
       'deleteSelectedAssets',
       'deleteSelectedShots',
       'deleteSelectedTasks',
       'deleteSelectedEdits',
       'deleteSelectedEpisodes',
+      'deleteSelectedConcepts',
       'changeSelectedTaskStatus',
       'changeSelectedPriorities',
       'clearSelectedTasks',
@@ -1142,14 +1177,13 @@ export default {
     },
 
     confirmTaskCreation() {
-      const type =
-        this.$route.path.indexOf('shots') > 0
-          ? 'shots'
-          : this.$route.path.indexOf('assets') > 0
-            ? 'assets'
-            : this.$route.path.indexOf('edits') > 0
-              ? 'edits'
-              : 'episodes'
+      const type = this.$route.path.includes('shots')
+        ? 'shots'
+        : this.$route.path.includes('assets')
+          ? 'assets'
+          : this.$route.path.includes('edits')
+            ? 'edits'
+            : 'episodes'
       this.loading.taskCreation = true
       this.createSelectedTasks({
         type,
@@ -1220,6 +1254,21 @@ export default {
           console.error(err)
           this.loading.deleteEdit = false
           this.errors.deleteEdit = true
+        })
+    },
+
+    confirmConceptDeletion() {
+      this.loading.deleteConcept = true
+      this.errors.deleteConcept = false
+      this.deleteSelectedConcepts()
+        .then(() => {
+          this.loading.deleteConcept = false
+          this.clearSelectedConcepts()
+        })
+        .catch(err => {
+          console.error(err)
+          this.loading.deleteConcept = false
+          this.errors.deleteConcept = true
         })
     },
 
@@ -1362,18 +1411,25 @@ export default {
           this.selectedBar = 'delete-edits'
           return
         }
+        if (this.isCurrentViewConcept && this.nbSelectedConcepts > 1) {
+          this.selectedBar = 'delete-concepts'
+          return
+        }
         if (this.nbSelectedTasks === 1) {
           this.selectedBar = ''
         }
 
-        const prefix = this.storagePrefix
-        const lastSelection = localStorage.getItem(`${prefix}-selected-bar`)
+        const lastSelection = localStorage.getItem(
+          `${this.storagePrefix}-selected-bar`
+        )
         if (lastSelection) {
           this.selectedBar = lastSelection
-        } else {
-          if (this.isCurrentViewAsset || this.isCurrentViewShot) {
-            this.selectedBar = 'change-status'
-          }
+        } else if (
+          this.isCurrentViewAsset ||
+          this.isCurrentViewShot ||
+          this.isCurrentViewEdit
+        ) {
+          this.selectedBar = 'change-status'
         }
       } else {
         window.removeEventListener('keydown', this.onKeyDown)
@@ -1414,7 +1470,12 @@ export default {
 
     nbSelectedEdits() {
       this.autoChooseSelectBar()
-      if (this.nbSelectedShots > 0) this.clearSelectedTasks()
+      if (this.nbSelectedEdits > 0) this.clearSelectedTasks()
+    },
+
+    nbSelectedConcepts() {
+      this.autoChooseSelectBar()
+      if (this.nbSelectedConcepts > 1) this.clearSelectedTasks()
     },
 
     isHidden() {

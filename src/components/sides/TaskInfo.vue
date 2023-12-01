@@ -50,7 +50,7 @@
               class="flexrow-item task-type"
               :task-type="currentTaskType"
               :production-id="currentProduction.id"
-              v-if="currentTaskType"
+              v-if="currentTaskType && !isConceptTask"
             />
             <div class="title flexrow-item filler">
               <router-link :to="taskEntityPath">
@@ -442,6 +442,7 @@ export default {
       'previewFormData',
       'productionMap',
       'selectedAssets',
+      'selectedConcepts',
       'selectedEdits',
       'selectedShots',
       'selectedTasks',
@@ -459,7 +460,7 @@ export default {
     },
 
     nbSelectedEntities() {
-      return this.selectedEntities ? this.selectedEntities.size : 0
+      return this.selectedEntities?.size || 0
     },
 
     selectedEntities() {

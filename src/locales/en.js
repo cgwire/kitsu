@@ -138,6 +138,8 @@ export default {
     add_new_concept: 'Add a new reference to concepts',
     add_concept: 'Add file for a new concept revision',
     add_concept_error: 'An error occurred while adding concept.',
+    delete_for_selection: 'Delete the selected concept | Delete the {nbSelectedConcepts} selected concepts',
+    multiple_delete_error: 'An error occurred while deleting a concept. There is probably some data linked to a concept. Are you sure there is no task linked to a selected concept?',
     title: 'Concepts',
     fields: {
       entity_type: 'Entity type',
@@ -585,14 +587,16 @@ export default {
     change_status: 'Change status',
     create_tasks: 'Create tasks',
     delete_assets: 'Delete assets',
-    delete_shots: 'Delete shots',
+    delete_concepts: 'Delete concepts',
     delete_edits: 'Delete edits',
+    delete_shots: 'Delete shots',
     delete_tasks: 'Delete tasks',
     generate_playlist: 'Generate a playlist',
     run_custom_action: 'Run custom action',
     set_estimations: 'Set estimations',
     set_thumbnails: 'Set thumbnails from last preview',
-    subscribe: 'Subscribe to notifications'
+    subscribe: 'Subscribe to notifications',
+    tag_concepts: "Edit concept tags",
   },
 
   news: {
