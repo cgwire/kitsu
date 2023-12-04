@@ -289,11 +289,12 @@
       <task-info
         ref="task-info"
         class="flexrow-item task-info-column"
-        :task="task"
+        :current-frame="parseInt(currentFrame)"
+        :current-parent-preview="currentPreview"
+        :fps="fps"
         :is-preview="false"
         :silent="isCommentsHidden"
-        :current-time-raw="currentTimeRaw"
-        :current-parent-preview="currentPreview"
+        :task="task"
         @time-code-clicked="onTimeCodeClicked"
         v-show="!isCommentsHidden"
       />

@@ -79,10 +79,10 @@
         <textarea-autosize
           ref="comment-textarea"
           class="textarea flexrow-item"
-          :placeholder="$t('comments.add_comment')"
           :disabled="isLoading"
           :min-height="50"
           :max-height="300"
+          :placeholder="$t('comments.add_comment')"
           @keyup.enter.ctrl.native="
             runAddComment(
               text,
@@ -355,6 +355,10 @@ export default {
       type: Function,
       default: null
     },
+    frame: {
+      type: Number,
+      default: 0
+    },
     isError: {
       type: Boolean,
       default: null
@@ -477,10 +481,6 @@ export default {
           return color
         }
       }
-    },
-
-    frame() {
-      return Math.round(this.time * this.fps)
     }
   },
 
@@ -639,9 +639,7 @@ export default {
 
     onAtTextChanged(input) {
       if (input.includes('@frame')) {
-        const isChromium = !!window.chrome
-        const change = isChromium ? 1 : 0
-        const time = this.time + change / this.fps
+        const time = this.frame / this.fps
         this.text = replaceTimeWithTimecode(
           input,
           this.revision,

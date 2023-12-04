@@ -105,7 +105,7 @@
                     @remove-extra-preview="onRemoveExtraPreview"
                     @previews-order-change="onPreviewsOrderChange"
                     @comment-added="onCommentAdded"
-                    @time-updated="onTimeUpdated"
+                    @frame-updated="onFrameUpdated"
                     ref="preview-player"
                   />
                 </template>
@@ -135,7 +135,7 @@
                   :is-error="errors.addComment"
                   :is-max-retakes-error="errors.addCommentMaxRetakes"
                   :fps="parseInt(currentFps)"
-                  :time="isPreview ? currentTime : currentTimeRaw"
+                  :frame="currentFrame || currentFrameRaw"
                   :revision="currentRevision"
                   :is-movie="isMoviePreview"
                   @add-comment="addComment"
@@ -172,7 +172,7 @@
                         isCurrentUserAdmin
                       "
                       :fps="parseInt(currentFps)"
-                      :time="isPreview ? currentTime : currentTimeRaw"
+                      :frame="currentFrame || currentFrameRaw"
                       :revision="currentRevision"
                       @duplicate-comment="onDuplicateComment"
                       @pin-comment="onPinComment"
@@ -220,13 +220,13 @@
 
         <edit-comment-modal
           :active="modals.editComment"
+          :comment-to-edit="commentToEdit"
+          :fps="parseInt(currentFps)"
+          :frame="currentFrame || currentFrameRaw"
           :is-loading="loading.editComment"
           :is-error="errors.editComment"
-          :comment-to-edit="commentToEdit"
-          :team="currentTeam"
-          :fps="parseInt(currentFps)"
-          :time="isPreview ? currentTime : currentTimeRaw"
           :revision="currentRevision"
+          :team="currentTeam"
           @confirm="confirmEditTaskComment"
           @cancel="onCancelEditComment"
         />
@@ -325,6 +325,10 @@ export default {
       type: Object,
       default: () => {}
     },
+    currentFrame: {
+      type: Number,
+      default: 0
+    },
     isLoading: {
       type: Boolean,
       default: true
@@ -332,10 +336,6 @@ export default {
     isPreview: {
       type: Boolean,
       default: true
-    },
-    currentTimeRaw: {
-      type: Number,
-      default: 0
     },
     currentParentPreview: {
       type: Object,
@@ -360,10 +360,10 @@ export default {
       addExtraPreviewFormData: null,
       animOn: false,
       previewForms: [],
+      currentFrameRaw: 0,
       currentPreviewIndex: 0,
       currentPreviewPath: '',
       currentPreviewDlPath: '',
-      currentTime: 0,
       commentToEdit: null,
       isWide: false,
       isExtraWide: false,
@@ -1129,8 +1129,8 @@ export default {
       }, 20)
     },
 
-    onTimeUpdated(time) {
-      this.currentTime = time
+    onFrameUpdated(frame) {
+      this.currentFrameRaw = frame
     },
 
     async extractAnnotationSnapshots() {

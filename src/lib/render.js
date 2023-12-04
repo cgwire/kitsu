@@ -60,7 +60,7 @@ export const renderComment = (
   return compiled.replaceAll(
     TIME_CODE_REGEX,
     (match, p1, p2, p3, p4, p5, offset, string) => {
-      return `<a
+      return `<span
         class="timecode ${className}"
         href="#"
         data-version-revision="${p1}"
@@ -68,7 +68,7 @@ export const renderComment = (
         data-seconds="${p3}"
         data-milliseconds="${p4}"
         data-frame="${p5}"
-      >${match}</a>`
+      >${match}</span>`
     }
   )
 }

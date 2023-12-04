@@ -348,6 +348,7 @@ import { formatDate, parseDate } from '@/lib/time'
 import colors from '@/lib/colors'
 import files from '@/lib/files'
 import { pluralizeEntityType } from '@/lib/path'
+import { domMixin } from '@/components/mixins/dom'
 
 import {
   ChevronDownIcon,
@@ -364,6 +365,7 @@ import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
   name: 'comment',
+  mixins: [domMixin],
   components: {
     AtTa,
     ButtonSimple,
@@ -410,6 +412,10 @@ export default {
       type: Boolean,
       default: false
     },
+    frame: {
+      type: Number,
+      default: 0
+    },
     light: {
       type: Boolean,
       default: false
@@ -433,10 +439,6 @@ export default {
     revision: {
       type: Number,
       default: 1
-    },
-    time: {
-      type: Number,
-      default: 0
     }
   },
 
@@ -698,6 +700,7 @@ export default {
       const isChromium = !!window.chrome
       const change = isChromium ? 2 : 1
       data.frame = data.frame - change
+      this.pauseEvent(event)
       this.$emit('time-code-clicked', data)
     },
 
@@ -768,10 +771,11 @@ export default {
 
     onAtTextChanged(input) {
       if (input.includes('@frame')) {
+        const time = this.frame / this.fps
         this.replyText = replaceTimeWithTimecode(
           input,
           this.revision,
-          this.time,
+          time,
           this.fps
         )
       }

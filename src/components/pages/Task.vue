@@ -121,7 +121,7 @@
                   @change-current-preview="changeCurrentPreview"
                   @remove-extra-preview="onRemoveExtraPreviewClicked"
                   @previews-order-changed="onPreviewsOrderChanged"
-                  @time-updated="onTimeUpdated"
+                  @frame-updated="onFrameUpdated"
                   v-if="currentPreview"
                 />
               </div>
@@ -174,6 +174,7 @@
             <div>
               <add-comment
                 ref="add-comment"
+                :frame="currentFrame"
                 :is-error="errors.addComment"
                 :is-max-retakes-error="errors.addCommentMaxRetakes"
                 :is-loading="loading.addComment"
@@ -184,7 +185,6 @@
                 :task-status="taskStatusForCurrentUser"
                 :preview-forms="previewForms"
                 :fps="parseInt(currentFps)"
-                :time="currentTime"
                 :revision="currentRevision"
                 @add-comment="addComment"
                 @add-preview="onAddPreviewClicked"
@@ -205,20 +205,20 @@
                   <comment
                     :key="comment.id"
                     :comment="comment"
-                    :team="currentTeam"
-                    :task="task"
-                    :highlighted="false"
                     :current-user="user"
+                    :frame="currentFrame"
                     :editable="
                       (comment.person && user.id === comment.person.id) ||
                       isCurrentUserAdmin
                     "
                     :fps="parseInt(currentFps)"
-                    :time="currentTime"
-                    :revision="currentRevision"
+                    :highlighted="false"
                     :is-first="index === 0"
                     :is-last="index === pinnedCount"
                     :is-change="isStatusChange(index)"
+                    :revision="currentRevision"
+                    :team="currentTeam"
+                    :task="task"
                     @ack-comment="ackComment"
                     @duplicate-comment="onDuplicateComment"
                     @pin-comment="onPinComment"
@@ -276,12 +276,12 @@
 
       <edit-comment-modal
         :active="modals.editComment"
+        :frame="currentFrame"
         :is-loading="loading.editComment"
         :is-error="errors.editComment"
         :comment-to-edit="commentToEdit"
         :team="currentTeam"
         :fps="parseInt(currentFps)"
-        :time="currentTime"
         :revision="currentRevision"
         @confirm="confirmEditTaskComment"
         @cancel="onCancelEditComment"
@@ -359,7 +359,7 @@ export default {
   data() {
     return {
       previewForms: [],
-      currentTime: 0,
+      currentFrame: 0,
       selectedTab: 'validation',
       taskLoading: {
         isLoading: true,
@@ -1191,8 +1191,8 @@ export default {
       this.modals.deleteComment = false
     },
 
-    onTimeUpdated(time) {
-      this.currentTime = time
+    onFrameUpdated(frame) {
+      this.currentFrame = frame
     },
 
     onPreviewFormRemoved(previewForm) {

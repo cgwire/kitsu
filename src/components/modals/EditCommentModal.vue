@@ -180,6 +180,14 @@ export default {
       type: Boolean,
       default: false
     },
+    frame: {
+      type: Number,
+      default: 0
+    },
+    commentToEdit: {
+      type: Object,
+      default: () => {}
+    },
     isLoading: {
       type: Boolean,
       default: false
@@ -187,10 +195,6 @@ export default {
     isError: {
       type: Boolean,
       default: false
-    },
-    commentToEdit: {
-      type: Object,
-      default: () => {}
     },
     team: {
       type: Array,
@@ -203,10 +207,6 @@ export default {
     revision: {
       type: Number,
       default: 1
-    },
-    time: {
-      type: Number,
-      default: 0
     }
   },
 
@@ -302,10 +302,11 @@ export default {
 
     onAtTextChanged(input) {
       if (input.includes('@frame')) {
+        const time = this.frame / this.fps
         this.form.text = replaceTimeWithTimecode(
           input,
           this.revision,
-          this.time,
+          time,
           this.fps
         )
       }

@@ -779,6 +779,7 @@ h2 {
   border: 1px solid $blue;
   border-radius: 5px;
   color: $blue;
+  cursor: pointer;
   font-size: 0.9em;
   padding: 3px 4px;
 
