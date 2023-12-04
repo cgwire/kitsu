@@ -1295,26 +1295,15 @@ export const playerMixin = {
       return false
     },
 
-    onTimeCodeClicked({
-      versionRevision,
-      minutes,
-      seconds,
-      milliseconds,
-      frame
-    }) {
+    onTimeCodeClicked({ versionRevision, frame }) {
       const previews = this.currentEntity.preview_files[this.task.task_type_id]
       const previewFile = previews.find(
         p => p.revision === parseInt(versionRevision)
       )
       this.onPreviewChanged(this.currentEntity, previewFile)
-      const time =
-        parseInt(minutes) * 60 +
-        parseInt(seconds) +
-        parseInt(milliseconds) / 1000
       setTimeout(() => {
-        const frameNumber = time / this.frameDuration
-        this.rawPlayer.setCurrentFrame(frameNumber)
-        this.onFrameUpdate(frameNumber)
+        this.rawPlayer.setCurrentFrame(frame)
+        this.onFrameUpdate(frame)
         this.syncComparisonPlayer()
       }, 20)
     },

@@ -588,8 +588,8 @@ export default {
   },
 
   not_found: {
-    text: 'There was something wrong with the link you clicked on, we encourage you to come back to the home page.',
-    title: 'Page not found... are you looking for something you deleted?'
+    text: 'There was something wrong with the link you clicked on, the target was not found. We encourage you to come back to the home page.',
+    title: 'Page not found...'
   },
 
   notifications: {
@@ -1218,8 +1218,8 @@ export default {
   },
 
   server_down: {
-    text: 'Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.',
-    title: 'Kitsu encountered an error while reaching its data API.'
+    text: 'Please contact our support, your system administrator or your IT department to understand what is going wrong.',
+    title: 'Kitsu encountered an error while reaching its data API'
   },
 
   statistics: {

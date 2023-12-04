@@ -98,7 +98,7 @@
           :task="task"
           :is-preview="false"
           :silent="isCommentsHidden"
-          :current-time-raw="currentTimeRaw"
+          :current-frame="currentFrame"
           :current-parent-preview="currentPreview"
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
@@ -992,6 +992,7 @@ export default {
         this.currentTimeRaw = time
         this.currentTime = this.formatTime(time)
         this.progress.updateProgressBar(frame)
+        this.$emit('frame-updated', frame)
 
         if (!this.isPlaying) {
           this.syncComparisonViewer()

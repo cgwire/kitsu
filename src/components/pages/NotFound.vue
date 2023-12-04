@@ -32,11 +32,18 @@ export default {
 }
 
 p {
+  color: var(--text);
   font-size: 1.3em;
   padding-bottom: 1em;
 
   a {
     text-decoration: underline;
   }
+}
+
+.title {
+  color: var(--text);
+  font-weight: bold;
+  font-size: 2.6em;
 }
 </style>
