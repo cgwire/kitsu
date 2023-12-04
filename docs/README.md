@@ -16,7 +16,7 @@ img[src$='#logo-kitsu'] {
 
 # Kitsu Documentation
 
-Kitsu is a collaboration platform for animation and VFX productions. Through
+[Kitsu](https://cg-wire.com/kitsu) is a collaboration platform for animation and VFX productions. Through
 its clean UI and shared database it connects all the shareholders of the
 production: Artists, Production managers, Supervisors, Vendors, and Clients.
 
