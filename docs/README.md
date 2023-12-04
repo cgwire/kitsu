@@ -9,18 +9,16 @@ img[src$='#logo-cgwire'],
 img[src$='#logo-kitsu'] {
   border: 0;
   box-shadow: none;
-  width: 120px;
 }
 </style>
 
-![Kitsu Logo](./img/kitsu.svg#logo-kitsu)
+![Kitsu Banner](./img/kitsu-banner.png#logo-kitsu)
 
 # Kitsu Documentation
 
-Kitsu is a collaboration platform for animation productions. Through
-its clean UI and shared database it allows you to communicate
-efficiently with all the shareholders of the production: Artists,
-Production managers, Supervisors, Vendors, and Clients.
+Kitsu is a collaboration platform for animation and VFX productions. Through
+its clean UI and shared database it connects all the shareholders of the
+production: Artists, Production managers, Supervisors, Vendors, and Clients.
 
 ## Getting Started
 
