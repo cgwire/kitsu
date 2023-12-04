@@ -4,8 +4,8 @@
   "description": "Documentation for Kitsu, CG production manager",
   "main": "index.js",
   "scripts": {
-    "docs:dev": "./node_modules/.bin/vuepress dev docs",
-    "docs:build": "./node_modules/.bin/vuepress build docs"
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,6 @@
   },
   "homepage": "https://github.com/cgwire/kitsu#readme",
   "devDependencies": {
-    "vuepress": "1.9.9"
+    "vuepress": "1.9.10"
   }
 }
