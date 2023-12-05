@@ -165,12 +165,13 @@ export default {
       if (this.isSequencesTasks) {
         return this.productionSequenceTaskTypes
       }
-      if (this.isEpisodesTasks) {
-        return this.productionEpisodeTaskTypes
-      }
       if (this.isEditsTasks) {
         return this.productionEditTaskTypes
       }
+      if (this.isEpisodesTasks) {
+        return this.productionEpisodeTaskTypes
+      }
+      return []
     },
 
     confirmClicked() {
