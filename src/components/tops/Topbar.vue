@@ -137,7 +137,7 @@
     <nav
       class="user-menu"
       :style="{
-        top: isUserMenuHidden ? '-480px' : '60px'
+        top: isUserMenuHidden ? '-500px' : '60px'
       }"
     >
       <ul>
@@ -179,6 +179,12 @@
         <hr />
         <a href="https://discord.gg/VbCxtKN" target="_blank">
           <li>Discord</li>
+        </a>
+        <a href="https://linkedin.com/company/cgwire/" target="_blank">
+          <li>Linkedin</li>
+        </a>
+        <a href="https://twitter.com/cgwirekitsu" target="_blank">
+          <li>X</li>
         </a>
         <a href="https://cgwire.canny.io" target="_blank">
           <li>Roadmap / Feedback</li>
