@@ -325,6 +325,17 @@ export default {
     shortcuts: 'Shortcuts'
   },
 
+  intro: {
+    main: 'Welcome to Kitsu! To make our project thrives, we need your support. To help us, we propose you simple contributions:',
+    first: 'Star our repository on ',
+    second: 'Follow us on ',
+    third: 'Join our',
+    four: 'You can suggest new features on ',
+    five: 'Donate to our ',
+    six: 'Have a look at our cloud and on-premise ',
+    seven: 'Finally, you can help us by sharing Kitsu with your friends and colleagues. The more we are, the more we can improve Kitsu.'
+  },
+
   login: {
     back_to_login: 'Go back to login page',
     choose_totp: 'Enter two-factor authentication code via TOTP',
