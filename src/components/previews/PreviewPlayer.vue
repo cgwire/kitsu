@@ -1463,7 +1463,9 @@ export default {
     getAnnotation(time) {
       if (this.isMovie) {
         time = roundToFrame(time, this.fps)
-        return this.annotations.find(annotation => annotation.time === time)
+        return this.annotations.find(annotation => {
+          return roundToFrame(annotation.time, this.fps) === time
+        })
       } else if (this.isPicture) {
         return this.annotations.find(annotation => annotation.time === 0)
       }
@@ -1480,7 +1482,8 @@ export default {
     saveAnnotations() {
       let currentTime = 0
       if (this.isMovie) {
-        currentTime = this.currentTimeRaw
+        currentTime = this.currentFrame * this.frameDuration
+        currentTime = roundToFrame(currentTime, this.fps)
       }
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)
@@ -1496,7 +1499,7 @@ export default {
       let currentTime = 0
       if (!annotation) {
         if (this.isMovie) {
-          currentTime = this.currentTimeRaw
+          currentTime = this.currentFrame * this.frameDuration
         }
         annotation = this.getAnnotation(currentTime)
         if (!annotation) {
