@@ -81,10 +81,14 @@
                 is-rounded-top-border
               />
               <div class="description">
-                <span>{{ concept.name }}</span>
                 <ul class="tags">
-                  <li class="tag" v-for="tag in concept.tags" :key="tag">
-                    <a href="#">{{ tag }}</a>
+                  <li
+                    class="tag"
+                    v-for="tag in concept.tags"
+                    :key="tag.id"
+                    @click.stop="onSelectedTag"
+                  >
+                    {{ tag.name }}
                   </li>
                 </ul>
                 <div class="status">
@@ -418,6 +422,10 @@ export default {
       this.modals.addConcept = false
     },
 
+    onSelectedTag(tag) {
+      // TODO: select ta action ???
+    },
+
     async confirmAddConceptModal(forms) {
       this.loading.addingConcept = true
       const file = forms[0].get('file')
@@ -494,12 +502,10 @@ export default {
       flex-wrap: wrap;
       row-gap: 10px;
       padding: 0.3em 1em;
-      margin-bottom: 0.3em;
-      color: var(--text-strong);
-
-      font-weight: 500;
-
-      text-transform: uppercase;
+      margin: 0.3em 0;
+      // color: var(--text-strong);
+      // font-weight: 500;
+      // text-transform: uppercase;
     }
 
     .tags {

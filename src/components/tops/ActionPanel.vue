@@ -522,9 +522,19 @@
         </div>
 
         <div class="flexrow-item is-wide" v-if="selectedBar === 'tag-concepts'">
-          <div>Tag linked to Concept</div>
-          <ul style="margin: 1rem 0">
-            <li class="tag" style="border: 1px solid #67be4b">tag1</li>
+          <h3 class="mb05">{{ $t('concepts.actions.title') }}</h3>
+          <ul class="tags mb05">
+            <li v-if="!currentConcept?.tags.length">
+              <em>{{ $t('concepts.actions.empty') }}</em>
+            </li>
+            <template v-else>
+              <li class="tag" v-for="tag in currentConcept.tags" :key="tag.id">
+                {{ tag.name }}
+                <button class="action" @click="removeTag(tag)">
+                  <trash2-icon size="0.6x" />
+                </button>
+              </li>
+            </template>
           </ul>
         </div>
 
@@ -708,6 +718,47 @@
       </div>
     </div>
 
+    <div class="flexrow-item is-wide pa1" v-if="selectedBar === 'tag-concepts'">
+      <div ref="asset-list" class="concept-tags">
+        <h2 class="subtitle">
+          {{ $t('breakdown.all_assets') }}
+        </h2>
+        <div class="filters-area flexrow mb2" v-if="true">
+          <search-field ref="search-field" @change="onSearchTagChange" />
+          <button-simple
+            class="flexrow-item"
+            :title="$t('entities.build_filter.title')"
+            icon="funnel"
+            @click="modals.isBuildFilterDisplayed = true"
+          />
+        </div>
+        <spinner v-if="loading.tags" />
+        <template v-else>
+          <ul
+            class="tag-types"
+            :key="`tags-types-${index}`"
+            v-for="(tagGroup, index) in availableTagsByType"
+          >
+            <li class="tag-type">
+              <h4 class="subtitle">
+                {{ tagGroup.type }}
+              </h4>
+              <ul class="tags">
+                <li
+                  class="tag"
+                  :key="tag.id"
+                  v-for="tag in tagGroup.tags"
+                  @click="onSelectTag"
+                >
+                  {{ tag.name }}
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </template>
+      </div>
+    </div>
+
     <view-playlist-modal
       :active="modals.playlist"
       :task-ids="selectedTaskIds"
@@ -719,6 +770,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
 import { intersection } from '@/lib/array'
 import { sortPeople } from '@/lib/sorting'
 import func from '@/lib/func'
@@ -733,13 +785,17 @@ import {
   PlayCircleIcon,
   TagIcon,
   TrashIcon,
+  Trash2Icon,
   UserIcon
 } from 'vue-feather-icons'
+
+import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxModel from '@/components/widgets/ComboboxModel'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DeleteEntities from '@/components/tops/actions/DeleteEntities'
 import PeopleField from '@/components/widgets/PeopleField'
+import SearchField from '@/components/widgets/SearchField'
 import Spinner from '@/components/widgets/Spinner'
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal'
 
@@ -755,6 +811,7 @@ export default {
 
   components: {
     AlertCircleIcon,
+    ButtonSimple,
     CheckSquareIcon,
     ComboboxModel,
     ComboboxStatus,
@@ -766,10 +823,12 @@ export default {
     ImageIcon,
     PeopleField,
     PlayCircleIcon,
+    SearchField,
     Spinner,
     UserIcon,
     TagIcon,
     TrashIcon,
+    Trash2Icon,
     ViewPlaylistModal
   },
 
@@ -819,6 +878,7 @@ export default {
         taskDeletion: false,
         setThumbnails: false,
         shotDeletion: false,
+        tags: false,
         tasksSubscription: false
       },
       errors: {
@@ -835,6 +895,12 @@ export default {
   mounted() {
     this.customAction = this.defaultCustomAction
     this.setCurrentTeam()
+
+    // FIXME: hack to init available tags
+    this.loading.tags = true
+    this.loadAssets(true).finally(() => {
+      this.loading.tags = false
+    })
   },
 
   beforeDestroy() {
@@ -846,6 +912,7 @@ export default {
       'allCustomActions',
       'assetMap',
       'assetCustomActions',
+      'assetsByType',
       'currentProduction',
       'getPersonOptions',
       'isCurrentUserArtist',
@@ -887,6 +954,10 @@ export default {
       if (this.isCurrentViewShot) return 'shot'
       if (this.isCurrentViewEdit) return 'edit'
       return 'episode'
+    },
+
+    currentConcept() {
+      return this.selectedConcepts.values().next().value
     },
 
     defaultCustomAction() {
@@ -1069,13 +1140,25 @@ export default {
       if (
         this.isCurrentViewAsset ||
         this.isCurrentViewShot ||
-        this.isCurrentViewEdit ||
-        this.isCurrentViewConcept
+        this.isCurrentViewEdit
       ) {
         prefix = 'entities-'
       }
+      if (this.isCurrentViewConcept) prefix = 'concepts-'
       if (this.isCurrentViewTaskType) prefix = 'tasks-'
       return prefix
+    },
+
+    availableTagsByType() {
+      const assetGroups = [...this.assetsByType]
+      const result = assetGroups.map(assets => ({
+        type: assets[0].asset_type_name,
+        tags: assets.map(asset => ({
+          id: asset.id,
+          name: asset.name
+        }))
+      }))
+      return result
     }
   },
 
@@ -1096,6 +1179,7 @@ export default {
       'changeSelectedTaskStatus',
       'changeSelectedPriorities',
       'clearSelectedTasks',
+      'loadAssets',
       'postCustomAction',
       'setLastTaskPreview',
       'subscribeToTask',
@@ -1454,6 +1538,18 @@ export default {
       } else {
         this.availableTaskStatuses = this.taskStatusForCurrentUser
       }
+    },
+
+    removeTag(tag) {
+      // TODO: remove tag from concept
+    },
+
+    onSearchTagChange(query) {
+      // TODO: search in available tags
+    },
+
+    onSelectTag(tag) {
+      // TODO: link tag to concept
     }
   },
 
@@ -1707,5 +1803,80 @@ div.assignation {
 .spinner {
   margin: auto;
   margin-top: 0.5em;
+}
+
+.tags {
+  display: inline-flex;
+  gap: 10px;
+  margin-left: 0;
+  height: 21px;
+
+  .tag {
+    display: inline- flex;
+    gap: 1em;
+    border: 1px solid $light-green;
+
+    .action {
+      background: $light-grey;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: none;
+      height: 14px;
+      width: 14px;
+      line-height: 8px;
+
+      &:hover {
+        background: $dark-grey-lighter;
+      }
+    }
+
+    &:hover {
+      transform: scale(1.1);
+
+      .action {
+        display: inline-block;
+      }
+    }
+  }
+}
+
+.concept-tags {
+  overflow-y: auto;
+  padding: 1em;
+  background: $white;
+  border: 1px solid $white-grey;
+  box-shadow: 0 0 6px #e0e0e0;
+  border-radius: 1em;
+
+  .subtitle {
+    margin-top: 0;
+    border-bottom: 0;
+  }
+
+  .tag-types {
+    list-style: none;
+    margin-left: 0;
+  }
+
+  .tag-type {
+    .subtitle {
+      text-transform: uppercase;
+      color: $grey;
+      border-bottom: 1px solid $light-grey;
+      font-size: 1.2em;
+      margin-top: 1em;
+      margin-bottom: 1em;
+    }
+
+    .tag {
+      border-color: $light-grey;
+      cursor: pointer;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
 }
 </style>

@@ -488,6 +488,14 @@
       </div>
     </div>
 
+    <div class="flexrow" v-if="isConcept">
+      <ul class="tags">
+        <li class="tag" :key="tag.id" v-for="tag in currentConcept.tags">
+          {{ tag.name }}
+        </li>
+      </ul>
+    </div>
+
     <div
       class="flexrow revision-previews"
       ref="revision-previews"
@@ -716,6 +724,7 @@ export default {
       'isCurrentUserArtist',
       'organisation',
       'productionBackgrounds',
+      'selectedConcepts',
       'user'
     ]),
 
@@ -971,6 +980,10 @@ export default {
             (this.isDefaultBackground(background) ? ` (${defaultFlag})` : '')
         }))
       ]
+    },
+
+    currentConcept() {
+      return this.selectedConcepts.values().next().value
     }
   },
 
@@ -2289,6 +2302,15 @@ export default {
 
 .viewers {
   display: flex;
+}
+
+.tags {
+  display: flex;
+  gap: 10px;
+  padding: 1rem;
+  margin-left: 0;
+  font-weight: 500;
+  letter-spacing: 1px;
 }
 
 #resize-annotation-canvas,

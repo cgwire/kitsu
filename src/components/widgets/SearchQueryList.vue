@@ -87,9 +87,7 @@
       @click="changeSearch(searchQuery)"
       v-for="searchQuery in userFilters"
     >
-      <span>
-        {{ searchQuery.name }}
-      </span>
+      {{ searchQuery.name }}
       <button class="edit" @click.stop="editSearch(searchQuery)">
         <edit2-icon size="0.6x" />
       </button>

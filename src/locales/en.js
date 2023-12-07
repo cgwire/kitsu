@@ -146,6 +146,10 @@ export default {
       created_at: 'Creation date',
       updated_at: 'Update date',
       // last_comment_date: 'Last comment',
+    },
+    actions: {
+      title: 'Tags linked to Concept',
+      empty: 'No tags'
     }
   },
 
