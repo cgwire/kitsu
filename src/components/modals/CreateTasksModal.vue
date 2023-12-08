@@ -6,20 +6,16 @@
     }"
   >
     <div class="modal-background" @click="$emit('cancel')"></div>
-
     <div class="modal-content">
       <div class="box content">
         <page-title :text="title" />
-
         <p>{{ text }}</p>
-
         <form v-on:submit.prevent class="widden">
           <combobox-task-type
             :task-type-list="getApplicableTaskTypes()"
             v-model="form.task_type_id"
           />
         </form>
-
         <div class="flexrow">
           <div class="filler"></div>
           <combobox
@@ -63,7 +59,8 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+
 import { modalMixin } from '@/components/modals/base_modal'
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
@@ -136,25 +133,23 @@ export default {
       'productionSequenceTaskTypes'
     ]),
     isAssetTasks() {
-      return this.$route.path.indexOf('assets') >= 0
+      return this.$route.path.includes('assets')
     },
     isShotsTasks() {
-      return this.$route.path.indexOf('shots') >= 0
+      return this.$route.path.includes('shots')
     },
     isSequencesTasks() {
-      return this.$route.path.indexOf('sequences') >= 0
-    },
-    isEpisodesTasks() {
-      return this.$route.path.indexOf('episodes') >= 0
+      return this.$route.path.includes('sequences')
     },
     isEditsTasks() {
-      return this.$route.path.indexOf('edits') >= 0
+      return this.$route.path.includes('edits')
+    },
+    isEpisodesTasks() {
+      return this.$route.path.includes('episodes')
     }
   },
 
   methods: {
-    ...mapActions([]),
-
     getApplicableTaskTypes() {
       if (this.isAssetTasks) {
         return this.productionAssetTaskTypes
@@ -165,12 +160,13 @@ export default {
       if (this.isSequencesTasks) {
         return this.productionSequenceTaskTypes
       }
-      if (this.isEpisodesTasks) {
-        return this.productionEpisodeTaskTypes
-      }
       if (this.isEditsTasks) {
         return this.productionEditTaskTypes
       }
+      if (this.isEpisodesTasks) {
+        return this.productionEpisodeTaskTypes
+      }
+      return []
     },
 
     confirmClicked() {

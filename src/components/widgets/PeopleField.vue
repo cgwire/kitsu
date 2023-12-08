@@ -1,28 +1,40 @@
 <template>
-  <v-autocomplete
-    ref="autocomplete"
-    :auto-select-one-item="false"
-    :component-item="assignationItem"
-    :get-label="getAssignationLabel"
-    :items="items"
-    :input-attrs="{
-      placeholder: placeholder || this.$t('people.select_person'),
-      class: wide
-        ? 'big wide v-autocomplete-input'
-        : big
-          ? 'big v-autocomplete-input'
-          : 'v-autocomplete-input'
-    }"
-    :min-len="1"
-    @update-items="update"
-    @input="onChange"
-    v-model="item"
-  />
+  <div>
+    <v-autocomplete
+      ref="autocomplete"
+      :auto-select-one-item="false"
+      :component-item="assignationItem"
+      :get-label="getAssignationLabel"
+      :items="items"
+      :input-attrs="{
+        placeholder: placeholder || this.$t('people.select_person'),
+        class: wide
+          ? 'big wide v-autocomplete-input'
+          : big
+            ? 'big v-autocomplete-input'
+            : 'v-autocomplete-input'
+      }"
+      :keep-open="keepOpen"
+      :min-len="1"
+      :wait="100"
+      @focus="keepOpen = true"
+      @input="onChange"
+      @item-clicked="keepOpen = false"
+      @update-items="update"
+      v-model="item"
+    />
+    <div
+      @click="keepOpen = false"
+      :class="{
+        'c-mask': true,
+        'is-active': keepOpen
+      }"
+    ></div>
+  </div>
 </template>
 
 <script>
 import AssignationItem from '@/components/widgets/AssignationItem'
-import { mapGetters } from 'vuex'
 import { buildNameIndex, indexSearch } from '@/lib/indexing'
 
 export default {
@@ -31,8 +43,9 @@ export default {
   data() {
     return {
       assignationItem: AssignationItem,
+      item: null,
       items: [],
-      item: {},
+      keepOpen: false,
       searchText: ''
     }
   },
@@ -62,48 +75,38 @@ export default {
   },
 
   props: {
-    value: {
-      type: Object,
-      default: () => {}
+    big: {
+      type: Boolean,
+      default: false
     },
     people: {
       type: Array,
       default: () => []
     },
-    big: {
-      type: Boolean,
-      default: false
+    placeholder: {
+      type: String,
+      default: ''
+    },
+    value: {
+      type: Object,
+      default: () => {}
     },
     wide: {
       type: Boolean,
       default: false
-    },
-    placeholder: {
-      type: String,
-      default: ''
     }
-  },
-
-  computed: {
-    ...mapGetters(['peopleIndex'])
   },
 
   methods: {
     getAssignationLabel(item) {
-      if (item) {
-        return item.name
-      } else {
-        return ''
-      }
+      return item?.name || ''
     },
 
     update(searchText) {
-      if (searchText && searchText.length > 0) {
-        const result = indexSearch(this.index, [searchText])
-        this.items = result
-      } else {
-        this.items = this.people
-      }
+      this.keepOpen = true
+      this.items = searchText?.length
+        ? indexSearch(this.index, [searchText])
+        : this.people
     },
 
     onChange() {
@@ -115,8 +118,7 @@ export default {
     },
 
     focus() {
-      const inputEl = this.$el.querySelector('.v-autocomplete-input')
-      if (inputEl) inputEl.focus()
+      this.$el.querySelector('.v-autocomplete-input')?.focus()
     }
   },
 
@@ -128,7 +130,7 @@ export default {
     },
 
     people() {
-      this.items = null
+      this.item = null
       this.items = this.people
       this.index = buildNameIndex(this.people)
     }
@@ -142,26 +144,23 @@ export default {
   border-color: $dark-grey;
   color: $white-grey;
 
-  &:active {
-    border: 1px solid $green;
-  }
-
+  &:active,
   &:hover {
     border: 1px solid $green;
   }
-}
 
-.dark .v-autocomplete .v-autocomplete-input-group .v-autocomplete-input:focus {
-  border-color: $green;
+  &:focus {
+    border-color: $green;
+  }
 }
 
 .dark .v-autocomplete .v-autocomplete-list {
-  box-shadow: 2px 2px 2px 0px $dark-grey-light;
+  box-shadow: 2px 2px 2px 0 $dark-grey-light;
   border-color: $dark-grey;
 }
 
 .v-autocomplete .v-autocomplete-list {
-  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2);
   left: 6px;
   top: 41px;
   width: calc(100% - 13px);
@@ -171,6 +170,11 @@ export default {
   border: 1px solid var(--border);
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
+}
+
+.v-autocomplete {
+  z-index: 2000;
+  position: relative;
 }
 
 .v-autocomplete .v-autocomplete-list-item {
@@ -204,12 +208,7 @@ export default {
   border-radius: 10px;
   padding: 0.5em;
 
-  &:active {
-    border: 1px solid $green;
-    border-left-bottom-radius: 0px;
-    border-right-bottom-radius: 0px;
-  }
-
+  &:active,
   &:hover {
     border: 1px solid $green;
   }

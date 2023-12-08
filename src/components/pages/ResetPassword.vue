@@ -12,7 +12,7 @@
           <p class="control has-icon">
             <input
               class="input is-medium email"
-              type="text"
+              type="email"
               :placeholder="$t('login.fields.email')"
               @keyup.enter="confirmResetPassword"
               v-model="email"
