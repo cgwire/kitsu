@@ -1237,9 +1237,9 @@ export default {
     onSetCurrentFrameAsThumbnail(isUseCurrentFrame) {
       if (this.$refs['preview-player']) {
         this.loading.setFrameThumbnail = true
-        let frame = undefined
-        if (isUseCurrentFrame && this.$refs['preview-player'].isMovie) {
-          frame = parseInt(this.$refs['preview-player'].currentFrame)
+        let frame = null
+        if (isUseCurrentFrame) {
+          frame = this.currentFrameRaw
         }
         return this.setCurrentPreviewAsEntityThumbnail(frame)
       }

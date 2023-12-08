@@ -1,5 +1,50 @@
 <template>
   <div class="open-productions page">
+    <div class="social-contributions flexrow" v-if="isContributions">
+      <img
+        class="flexrow-item kitsu-with-body"
+        src="../../assets/illustrations/kitsu-band.png"
+      />
+      <div class="filler">
+        <span class="close-contributions" @click="hideContributions">
+          <x-icon size="0.9x" />
+        </span>
+        <p>
+          {{ $t('intro.main') }}
+        </p>
+        <ul>
+          <li>
+            {{ $t('intro.first') }}
+            <a href="https://github.com/cgwire/kitsu">Github</a>
+          </li>
+          <li>
+            {{ $t('intro.second') }}
+            <a href="https://twitter.com/cgwirekitsu">X</a>
+            {{ $t('main.or') }}
+            <a href="https://www.linkedin.com/company/cgwire/">Linkedin</a>
+          </li>
+          <li>
+            {{ $t('intro.third') }}
+            <a href="https://discord.gg/VbCxtKN">Discord</a>
+          </li>
+          <li>
+            {{ $t('intro.four') }}
+            <a href="https://cgwire.canny.io">Canny</a>
+          </li>
+          <li>
+            {{ $t('intro.five') }}
+            <a href="https://liberapay.com/CGWire/donate">Liberapay</a>
+          </li>
+          <li>
+            {{ $t('intro.six') }}
+            <a href="https://cg-wire.com/pricing">offers</a>
+          </li>
+        </ul>
+        <p>
+          {{ $t('intro.seven') }}
+        </p>
+      </div>
+    </div>
     <div class="has-text-centered" v-if="isOpenProductionsLoading">
       <spinner />
     </div>
@@ -108,7 +153,9 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+import { XIcon } from 'vue-feather-icons'
 import { buildNameIndex } from '@/lib/indexing'
+import preferences from '@/lib/preferences'
 
 import colors from '@/lib/colors'
 import EditProductionModal from '@/components/modals/EditProductionModal'
@@ -121,11 +168,13 @@ export default {
   components: {
     EditProductionModal,
     SearchField,
-    Spinner
+    Spinner,
+    XIcon
   },
 
   data() {
     return {
+      isContributions: false,
       filteredProductions: [],
       search: '',
       errors: {
@@ -144,6 +193,9 @@ export default {
     this.$refs['search-field']?.focus()
     this.filteredProductions = this.openProductions
     this.productionIndex = buildNameIndex(this.openProductions)
+    this.isContributions =
+      preferences.getPreference('open-productions:contributions') === 'true'
+    this.isContributions = false
   },
 
   computed: {
@@ -230,6 +282,11 @@ export default {
       } else {
         this.filteredProductions = this.productionIndex[search]
       }
+    },
+
+    hideContributions() {
+      this.isContributions = false
+      preferences.setPreference('open-productions:contributions', false)
     }
   },
 
@@ -399,6 +456,44 @@ a.secondary:hover {
   height: auto;
   min-height: 100vh;
   padding-bottom: 3em;
+}
+
+.social-contributions {
+  background: $white;
+  border: 3px solid $purple;
+  box-shadow: 0 0 3px 3px #eee;
+  border-radius: 1em;
+  color: $dark-purple;
+  font-size: 1.1rem;
+  max-width: 800px;
+  margin-bottom: 0em;
+  margin-top: 2em;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2em;
+  position: relative;
+
+  a {
+    color: $green;
+  }
+
+  ul {
+    margin-bottom: 1em;
+    margin-top: 1em;
+  }
+
+  .close-contributions {
+    cursor: pointer;
+    position: absolute;
+    right: 30px;
+    top: 15px;
+    width: 2px;
+  }
+
+  .kitsu-with-body {
+    margin-right: 2em;
+    width: 320px;
+  }
 }
 
 .big-button {
