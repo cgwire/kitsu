@@ -110,7 +110,7 @@
         <div class="flexrow">
           <combobox-styled
             class="section-combo flexrow-item"
-            :options="entityNavOptions"
+            :options="assetNavOptions"
             v-model="currentSection"
           />
           <span
@@ -190,7 +190,7 @@
             </div>
           </div>
           <table-info
-            :is-loading="castIn.isLoadin"
+            :is-loading="castIn.isLoading"
             :is-error="castIn.isError"
             v-else
           />
@@ -252,6 +252,46 @@
                   </router-link>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="concepts mt1"
+          v-show="currentSection === 'concept'"
+          v-if="currentAsset"
+        >
+          <combobox-styled
+            class="section-combo flexrow-item"
+            :options="conceptStatusOptions"
+            v-model="currentConceptStatus"
+          />
+          <div class="concept-list mt1">
+            <template v-if="concepts.length">
+              <router-link
+                class="concept-link"
+                :key="concept.id"
+                :to="conceptPath(concept)"
+                v-for="concept in concepts"
+              >
+                <entity-thumbnail
+                  class="entity-thumbnail"
+                  :entity="concept"
+                  :square="true"
+                  :empty-width="103"
+                  :empty-height="103"
+                  :with-link="false"
+                />
+                <div
+                  class="tag"
+                  :style="{ backgroundColor: concept.status?.color }"
+                >
+                  {{ concept.status?.short_name }}
+                </div>
+              </router-link>
+            </template>
+            <div v-else>
+              {{ $t('assets.no_concept') }}
             </div>
           </div>
         </div>
@@ -357,6 +397,7 @@ export default {
     return {
       currentAsset: null,
       currentTask: null,
+      currentConceptStatus: null,
       castIn: {
         isLoading: false,
         isError: false
@@ -486,6 +527,32 @@ export default {
         route.params.episode_id = this.currentEpisode.id
       }
       return route
+    },
+
+    assetNavOptions() {
+      return [{ label: 'Concept', value: 'concept' }].concat(
+        this.entityNavOptions
+      )
+    },
+
+    conceptStatusOptions() {
+      // TODO: link to data store
+      return [
+        { label: 'All', value: null },
+        { label: 'Neutral', value: 'neutral' },
+        { label: 'Done', value: 'done' },
+        { label: 'Rejected', value: 'rejected' }
+      ]
+    },
+
+    concepts() {
+      const concepts = this.currentAsset?.concepts
+
+      return !this.currentConceptStatus
+        ? concepts
+        : concepts.filter(
+            concept => concept.status === this.currentConceptStatus
+          )
     }
   },
 
@@ -562,6 +629,17 @@ export default {
             console.error(err)
           })
       })
+    },
+
+    conceptPath(concept) {
+      // TODO: add concept_id to the targeted route
+      return {
+        name: 'concepts',
+        params: {
+          production_id: this.currentProduction.id,
+          concept_id: concept.concept_id
+        }
+      }
     },
 
     shotPath(shot) {
@@ -701,10 +779,15 @@ h2.subtitle {
 }
 
 .asset-list,
-.shot-list {
+.shot-list,
+.concept-list {
   color: var(--text);
   display: flex;
   flex-wrap: wrap;
+}
+
+.concept-list {
+  gap: 10px;
 }
 
 .asset-link,
@@ -725,6 +808,14 @@ h2.subtitle {
 .asset-link span,
 .shot-link span {
   word-wrap: break-word;
+}
+
+.concept-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
 }
 
 .field-label {
