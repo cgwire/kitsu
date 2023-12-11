@@ -226,22 +226,30 @@ export default {
     },
 
     sectionPath(production, section) {
+      const routeName = production.homepage || section
       const route = {
-        name: section,
+        name: routeName,
         params: {
           production_id: production.id
         },
         query: {}
       }
       if (production.production_type === 'tvshow') {
-        route.name = `episode-${section}`
+        route.name = `episode-${routeName}`
         if (section !== 'edits') {
           route.params.episode_id = production.first_episode_id
         } else {
           route.params.episode_id = 'all'
         }
       }
-      if (['assets', 'shots', 'edits'].includes(section)) {
+      const isEntityPage = [
+        'assets',
+        'shots',
+        'edits',
+        'sequences',
+        'episodes'
+      ].includes(routeName)
+      if (isEntityPage) {
         route.query.search = ''
       }
       return route

@@ -38,6 +38,12 @@ export const PRODUCTION_STYLE_OPTIONS = [
   { label: 'ar', value: 'ar' }
 ]
 
+export const HOME_PAGE_OPTIONS = [
+  { label: 'assets', value: 'assets' },
+  { label: 'shots', value: 'shots' },
+  { label: 'sequences', value: 'sequences' }
+]
+
 export function getTaskTypePriorityOfProd(taskType, production) {
   if (!taskType) {
     return 1

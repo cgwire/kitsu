@@ -812,6 +812,7 @@ export default {
     open_productions: 'My Productions',
     picture: 'Change picture',
     title: 'Productions',
+
     creation: {
       add_assets: 'Add assets (optional)',
       add_asset_types: 'Add asset types',
@@ -865,6 +866,7 @@ export default {
       title: 'My Productions',
       welcome: 'Welcome to Kitsu'
     },
+
     fields: {
       end_date: 'End date',
       episode_span: 'Episode spacing',
@@ -874,6 +876,7 @@ export default {
       max_retakes: 'Maximum number of retakes',
       name: 'Name',
       nb_episodes: 'Number of episodes',
+      homepage: 'Homepage (first page displayed)',
       ratio: 'Ratio',
       resolution: 'Resolution',
       start_date: 'Start date',
@@ -881,6 +884,7 @@ export default {
       style: 'Style',
       type: 'Type'
     },
+
     metadata: {
       add_explaination: 'Add specific data required by this project.',
       add_failed: 'An error occurred while adding metadata to your project.',
@@ -902,6 +906,12 @@ export default {
     brief: {
       empty: 'There is no brief yet. What about creating one?',
       title: 'Brief'
+    },
+
+    homepage: {
+      'assets': 'Assets',
+      'shots': 'Shots',
+      'sequences': 'sequences',
     },
 
     parameters: {
