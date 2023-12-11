@@ -689,7 +689,7 @@ export default {
     this.configureEvents()
     this.setupFabricCanvas()
     this.reloadAnnotations()
-    if (this.isPicture) this.loadAnnotation(this.getAnnotation(0))
+    if (this.isPicture) this.loadAnnotation()
     this.resetPreviewFileMap()
     this.initPreferences()
     if (this.isSound || this.is3DModel || this.isFile) {
@@ -1065,6 +1065,7 @@ export default {
     },
 
     getCurrentTime() {
+      if (!this.isMovie) return 0
       return this.currentTimeRaw
     },
 
@@ -1184,9 +1185,9 @@ export default {
     },
 
     fixCanvasSize(dimensions) {
-      if (!this.fabricCanvas) {
-        return
-      }
+      if (!this.fabricCanvas) return
+      if (this.isPicture && dimensions.source === 'movie') return
+      if (this.isMovie && dimensions.source === 'picture') return
       const { height, left, top, width } = dimensions
       this.canvasWrapper.style.top = top + 'px'
       this.canvasWrapper.style.left = left + 'px'
@@ -1224,7 +1225,6 @@ export default {
 
     setFullScreen() {
       this.endAnnotationSaving()
-      this.previewViewer.pauseZoom()
       const promise = this.documentSetFullScreen(this.container)
       if (promise) {
         promise.then(() => {
@@ -1234,9 +1234,6 @@ export default {
         // fallback for legacy browsers
         this.fullScreen = true
       }
-      setTimeout(() => {
-        this.previewViewer.resumeZoom()
-      }, 2000)
       this.$nextTick(() => {
         // Needed to avoid fullscreen button to be called with space bar.
         this.clearFocus()
@@ -1245,7 +1242,6 @@ export default {
 
     exitFullScreen() {
       this.endAnnotationSaving()
-      this.previewViewer.pauseZoom()
       const promise = this.documentExitFullScreen()
       if (promise) {
         promise.then(() => {
@@ -1259,9 +1255,6 @@ export default {
         // fallback for legacy browsers
         this.fullScreen = false
       }
-      setTimeout(() => {
-        this.previewViewer.resumeZoom()
-      }, 2000)
       this.isComparing = false
       this.isCommentsHidden = true
       this.$nextTick(() => {
@@ -1455,7 +1448,7 @@ export default {
         if (this.isMovie) {
           this.loadAnnotation()
         } else if (this.isPicture) {
-          this.loadAnnotation(this.getAnnotation(0))
+          this.loadAnnotation()
         }
       }
     },
