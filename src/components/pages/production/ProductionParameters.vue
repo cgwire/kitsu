@@ -14,6 +14,7 @@
           <div class="mr1">
             <date-field
               ref="startDateField"
+              class="mb0"
               :label="$t('productions.fields.start_date')"
               :short-date="true"
               v-model="form.start_date"
@@ -22,19 +23,33 @@
           <div>
             <date-field
               ref="endDateField"
+              class="mb0"
               :label="$t('productions.fields.end_date')"
               :short-date="true"
               v-model="form.end_date"
             />
           </div>
         </div>
-        <combobox
+
+        <combobox-styled
           ref="productionTypeField"
-          localeKeyPrefix="productions.type."
+          class="mb2"
+          locale-key-prefix="productions.type."
           :label="$t('productions.fields.type')"
           :options="productionTypeOptions"
           @enter="runConfirmation"
           v-model="form.production_type"
+        />
+
+        <combobox-styled
+          ref="homepage"
+          class="mb2"
+          locale-key-prefix="productions.homepage."
+          :label="$t('productions.fields.homepage')"
+          :options="homepageOptions"
+          @enter="runConfirmation"
+          v-model="form.homepage"
+          v-if="currentProduction && currentProduction.id"
         />
 
         <text-field
@@ -43,7 +58,6 @@
           :step="1"
           :label="$t('productions.fields.nb_episodes')"
           @enter="runConfirmation"
-          v-focus
           v-model="form.nb_episodes"
           v-if="currentProduction && currentProduction.id && isLocalTVShow"
         />
@@ -63,7 +77,6 @@
           :step="0.001"
           :label="$t('productions.fields.fps')"
           @enter="runConfirmation"
-          v-focus
           v-model="form.fps"
           v-if="currentProduction && currentProduction.id"
         />
@@ -71,7 +84,6 @@
           ref="ratioField"
           :label="$t('productions.fields.ratio')"
           @enter="runConfirmation"
-          v-focus
           v-model="form.ratio"
           v-if="currentProduction && currentProduction.id"
         />
@@ -79,7 +91,6 @@
           ref="resolutionField"
           :label="$t('productions.fields.resolution')"
           @enter="runConfirmation"
-          v-focus
           v-model="form.resolution"
           v-if="currentProduction && currentProduction.id"
         />
@@ -87,7 +98,6 @@
           ref="isClientsIsolatedField"
           :label="$t('productions.fields.is_clients_isolated')"
           @enter="runConfirmation"
-          v-focus
           v-model="form.is_clients_isolated"
           v-if="currentProduction && currentProduction.id"
         />
@@ -95,7 +105,6 @@
           ref="isPreviewDownloadAllowed"
           :label="$t('productions.fields.is_preview_download_allowed')"
           @enter="runConfirmation"
-          v-focus
           v-model="form.is_preview_download_allowed"
           v-if="currentProduction && currentProduction.id"
         />
@@ -105,11 +114,9 @@
           :step="1"
           :label="$t('productions.fields.max_retakes')"
           @enter="runConfirmation"
-          v-focus
           v-model="form.max_retakes"
           v-if="currentProduction && currentProduction.id"
         />
-
         <div v-if="currentProduction && currentProduction.id">
           <label class="label">{{ $t('productions.picture') }}</label>
           <file-upload
@@ -140,10 +147,10 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { formatSimpleDate, parseSimpleDate } from '@/lib/time'
-import { PRODUCTION_TYPE_OPTIONS } from '@/lib/productions'
+import { PRODUCTION_TYPE_OPTIONS, HOME_PAGE_OPTIONS } from '@/lib/productions'
 
-import Combobox from '@/components/widgets/Combobox'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DateField from '@/components/widgets/DateField'
 import FileUpload from '@/components/widgets/FileUpload'
 import TextField from '@/components/widgets/TextField'
@@ -152,8 +159,8 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 export default {
   name: 'production-parameters',
   components: {
-    Combobox,
     ComboboxBoolean,
+    ComboboxStyled,
     DateField,
     FileUpload,
     TextField,
@@ -167,6 +174,7 @@ export default {
       isError: false,
       isLocalTVShow: false,
       productionTypeOptions: PRODUCTION_TYPE_OPTIONS,
+      homepageOptions: HOME_PAGE_OPTIONS,
       form: {
         name: '',
         start_date: new Date(),
@@ -259,7 +267,8 @@ export default {
             ? 'true'
             : 'false',
           ratio: this.currentProduction.ratio,
-          resolution: this.currentProduction.resolution
+          resolution: this.currentProduction.resolution,
+          homepage: this.currentProduction.homepage
         }
       } else {
         this.form = {
@@ -274,7 +283,8 @@ export default {
           is_preview_download_allowed: 'false',
           fps: '',
           ratio: '',
-          resolution: ''
+          resolution: '',
+          homepage: HOME_PAGE_OPTIONS[0].value
         }
       }
     },

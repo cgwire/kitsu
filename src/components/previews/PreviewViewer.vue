@@ -43,7 +43,7 @@
       @duration-changed="duration => $emit('duration-changed', duration)"
       @frame-update="frameNumber => $emit('frame-update', frameNumber)"
       @play-ended="$emit('play-ended')"
-      @size-changed="dimensions => $emit('size-changed', dimensions)"
+      @size-changed="onVideoSizeChanged"
       @video-end="$emit('video-end')"
       @video-loaded="$emit('video-loaded')"
       v-show="isMovie"
@@ -60,7 +60,7 @@
       :margin-bottom="marginBottom"
       :panzoom="true"
       :preview="preview"
-      @size-changed="dimensions => $emit('size-changed', dimensions)"
+      @size-changed="onPictureSizeChanged"
       v-show="isPicture"
     />
 
@@ -411,13 +411,23 @@ export default {
     },
 
     resize() {
-      if (this.pictureViewer) this.pictureViewer.resetPicture()
-      if (this.videoViewer) this.videoViewer.mountVideo()
+      if (this.isPicture) this.pictureViewer.resetPicture()
+      if (this.isMovie) this.videoViewer.mountVideo()
       if (this.isSound) this.soundViewer.redraw()
     },
 
     setCurrentFrame(frameNumber) {
       this.videoViewer.setCurrentFrame(frameNumber)
+    },
+
+    onPictureSizeChanged(dimensions) {
+      dimensions.source = 'picture'
+      this.$emit('size-changed', dimensions)
+    },
+
+    onVideoSizeChanged(dimensions) {
+      dimensions.source = 'movie'
+      this.$emit('size-changed', dimensions)
     },
 
     // To use when you don't want to handle back pressure and rounding
