@@ -1,6 +1,6 @@
 <template>
   <div class="data-list">
-    <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
+    <div ref="body" class="datatable-wrapper" v-scroll="onBodyScroll">
       <table-header-menu
         ref="headerMenu"
         :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"
@@ -430,32 +430,32 @@
           </tr>
         </tbody>
       </table>
-    </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+      <div
+        class="has-text-centered"
+        v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+      >
+        <p class="info">
+          <img src="../../assets/illustrations/empty_asset.png" />
+        </p>
+        <p class="info">{{ $t('assets.empty_list') }}</p>
+        <button-simple
+          class="level-item big-button"
+          :text="$t('assets.new_assets')"
+          @click="$emit('new-clicked')"
+        />
+      </div>
+      <div
+        class="has-text-centered"
+        v-if="isEmptyList && isCurrentUserClient && !isLoading"
+      >
+        <p class="info">
+          <img src="../../assets/illustrations/empty_asset.png" />
+        </p>
+        <p class="info">{{ $t('assets.empty_list_client') }}</p>
+      </div>
 
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && !isCurrentUserClient && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_asset.png" />
-      </p>
-      <p class="info">{{ $t('assets.empty_list') }}</p>
-      <button-simple
-        class="level-item big-button"
-        :text="$t('assets.new_assets')"
-        @click="$emit('new-clicked')"
-      />
-    </div>
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && isCurrentUserClient && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_asset.png" />
-      </p>
-      <p class="info">{{ $t('assets.empty_list_client') }}</p>
+      <table-info :is-loading="isLoading" :is-error="isError" />
     </div>
 
     <p class="has-text-centered nb-assets" v-if="!isEmptyList && !isLoading">
@@ -977,6 +977,7 @@ td.ready-for {
 
 .datatable-wrapper {
   min-height: 200px;
+  flex: 1;
 }
 
 .datatable-row th.name {
