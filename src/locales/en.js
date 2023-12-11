@@ -140,13 +140,14 @@ export default {
     add_concept: 'Add file for a new concept revision',
     add_concept_error: 'An error occurred while adding concept.',
     delete_for_selection: 'Delete the selected concept | Delete the {nbSelectedConcepts} selected concepts',
+    empty: 'There are no concepts',
     multiple_delete_error: 'An error occurred while deleting a concept. There is probably some data linked to a concept. Are you sure there is no task linked to a selected concept?',
     title: 'Concepts',
     fields: {
       entity_type: 'Entity type',
       created_at: 'Creation date',
       updated_at: 'Update date',
-      // last_comment_date: 'Last comment',
+      last_comment_date: 'Last comment',
     },
     actions: {
       title: 'Tags linked to Concept',

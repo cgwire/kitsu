@@ -12,7 +12,14 @@ export default {
   },
 
   newConcept(concept) {
-    return client.ppost('/api/data/concepts/', concept)
+    const data = {
+      name: concept.name,
+      description: concept.description
+    }
+    return client.ppost(
+      `/api/data/projects/${concept.project_id}/concepts`,
+      data
+    )
   },
 
   updateConcept(concept) {

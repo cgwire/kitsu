@@ -31,6 +31,7 @@
               :label="$t('concepts.fields.entity_type')"
               :options="entityTypeOptions"
               v-model="filters.entityType"
+              disabled
             />
             <combobox
               class="right"
@@ -52,14 +53,12 @@
         <h2 class="mt0">
           {{ $t('concepts.title') }} ({{ filteredConcepts?.length || 0 }})
         </h2>
-
         <table-info
           :is-loading="loading.loadingConcepts"
           :is-error="errors.loadingConcepts"
           v-if="loading.loadingConcepts || errors.loadingConcepts"
         />
-
-        <div v-else>
+        <div class="concept-list pb1" v-else-if="filteredConcepts?.length">
           <ul class="items">
             <li
               class="item"
@@ -91,15 +90,15 @@
                     {{ tag.name }}
                   </li>
                 </ul>
-                <div class="status">
+                <div class="status" v-if="hasTask(concept)">
                   <span
                     class="tag"
                     :style="{
-                      backgroundColor: taskStatusMap?.get(concept.status).color,
+                      backgroundColor: getTaskStatus(concept).color,
                       color: 'white'
                     }"
                   >
-                    {{ taskStatusMap?.get(concept.status).short_name }}
+                    {{ getTaskStatus(concept).short_name }}
                   </span>
                   <div class="assignees">
                     <people-avatar
@@ -115,7 +114,10 @@
             </li>
           </ul>
         </div>
-        <footer class="footer">
+        <div v-else>
+          {{ $t('concepts.empty') }}
+        </div>
+        <footer class="footer mt2">
           <button-simple
             :disabled="loading.loadingConcepts"
             :text="$t('concepts.add_new_concept')"
@@ -196,7 +198,7 @@ export default {
         taskStatusId: null,
         assignee: null,
         entityType: null,
-        sortBy: 'created_at'
+        sortBy: 'last_comment_date'
       },
       form: {
         file: null
@@ -251,7 +253,7 @@ export default {
     },
 
     currentTask() {
-      return this.currentConcept?.tasks[0]
+      return this.currentConcept?.tasks?.[0]
     },
 
     currentConcept() {
@@ -275,12 +277,7 @@ export default {
     },
 
     sortByOptions() {
-      // FIXME: sorting options to define
-      return [
-        'created_at',
-        'updated_at'
-        //'last_comment_date'
-      ].map(name => ({
+      return ['created_at', 'updated_at', 'last_comment_date'].map(name => ({
         label: name,
         value: name
       }))
@@ -288,28 +285,27 @@ export default {
 
     filteredConcepts() {
       let concepts = [...this.displayedConcepts]
+
       if (this.filters.taskStatusId) {
         concepts = concepts.filter(
-          concept => concept.status === this.filters.taskStatusId
+          concept =>
+            concept.tasks[0].task_status_id === this.filters.taskStatusId
         )
       }
       if (this.filters.assignee) {
         concepts = concepts.filter(concept =>
-          concept.tasks[0].assignees?.includes(this.filters.assignee.id)
+          concept.tasks[0].assignees.includes(this.filters.assignee.id)
         )
       }
       if (this.filters.entityType) {
         concepts = concepts.filter(concept =>
-          concept.entities?.some(
+          concept.tags?.some(
             // FIXME: condition related to many-to-many relationship
             entity => entity.type === this.filters.entityType
           )
         )
       }
-
-      return concepts.sort(
-        firstBy(this.filters.sortBy, -1).thenBy('created_at')
-      )
+      return concepts.sort(firstBy(this.filters.sortBy, -1))
     },
 
     searchField() {
@@ -389,6 +385,14 @@ export default {
       }
     },
 
+    getTaskStatus(concept) {
+      return this.taskStatusMap.get(concept.tasks[0].task_status_id)
+    },
+
+    hasTask(concept) {
+      return concept.tasks?.length
+    },
+
     isSelected(concept) {
       return this.selectedConcepts.has(concept.id)
     },
@@ -428,9 +432,9 @@ export default {
 
     async confirmAddConceptModal(forms) {
       this.loading.addingConcept = true
-      const file = forms[0].get('file')
+      const form = forms[0]
       try {
-        await this.newConcept({ file })
+        await this.newConcept({ form })
         this.closeAddConceptModal()
       } catch (err) {
         console.error(err)
@@ -441,7 +445,13 @@ export default {
     }
   },
 
-  watch: {},
+  watch: {
+    currentProduction() {
+      this.clearSelectedConcepts()
+      this.clearSelectedTasks()
+      this.refreshConcepts()
+    }
+  },
 
   metaInfo() {
     return {
@@ -471,6 +481,10 @@ export default {
   }
 }
 
+.concept-list {
+  overflow-x: auto;
+}
+
 .items {
   cursor: pointer;
   display: flex;
@@ -478,6 +492,7 @@ export default {
   gap: 20px;
   list-style: none;
   margin: 0;
+  width: 100vw;
 
   .item {
     width: 300px;
@@ -492,6 +507,7 @@ export default {
     &.selected-item {
       background-color: var(--background-selected);
     }
+
     &:hover {
       background-color: var(--background-hover);
     }
@@ -503,12 +519,10 @@ export default {
       row-gap: 10px;
       padding: 0.3em 1em;
       margin: 0.3em 0;
-      // color: var(--text-strong);
-      // font-weight: 500;
-      // text-transform: uppercase;
     }
 
     .tags {
+      cursor: pointer;
       display: inline-flex;
       gap: 10px;
       margin-left: 0;
@@ -517,6 +531,11 @@ export default {
       .tag:hover {
         transform: scale(1.1);
       }
+    }
+
+    .tag {
+      font-weight: 500;
+      letter-spacing: 1px;
     }
 
     .status {
@@ -533,11 +552,6 @@ export default {
         gap: 5px;
       }
     }
-
-    .tag {
-      font-weight: 500;
-      letter-spacing: 1px;
-    }
   }
 }
 
@@ -547,6 +561,5 @@ export default {
   display: flex;
   justify-content: center;
   padding: 3em;
-  margin-top: 3em;
 }
 </style>

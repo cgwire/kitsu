@@ -1,6 +1,6 @@
 import async from 'async'
+
 import conceptsApi from '@/store/api/concepts'
-import tasksApi from '@/store/api/tasks'
 
 import {
   LOAD_CONCEPTS_START,
@@ -12,6 +12,29 @@ import {
   CLEAR_SELECTED_CONCEPTS,
   RESET_ALL
 } from '@/store/mutation-types'
+
+const helpers = {
+  populateTask(task, concept) {
+    Object.assign(task, {
+      project_id: concept.project_id
+    })
+    return task
+  },
+
+  populateConcept(concept, personMap) {
+    concept.full_name = 'Concept'
+    concept.last_comment_date = concept.tasks[0].last_comment_date
+    concept.tasks.forEach(task => {
+      helpers.populateTask(task, concept)
+      // Sort assignees by name
+      if (task.assignees.length > 1) {
+        task.assignees = task.assignees.sort((a, b) =>
+          personMap.get(a).name.localeCompare(personMap.get(b).name)
+        )
+      }
+    })
+  }
+}
 
 const initialState = {
   concepts: [],
@@ -34,12 +57,15 @@ const getters = {
 }
 
 const actions = {
-  async loadConcepts({ commit }) {
+  async loadConcepts({ commit, rootGetters }) {
     commit(LOAD_CONCEPTS_START)
     try {
-      const concepts = await conceptsApi.getConcepts()
-      commit(LOAD_CONCEPTS_END, concepts)
+      const personMap = rootGetters.personMap
+      const production = rootGetters.currentProduction
+      const concepts = await conceptsApi.getConcepts(production)
+      commit(LOAD_CONCEPTS_END, { concepts, personMap })
     } catch (err) {
+      console.error(err)
       commit(LOAD_CONCEPTS_ERROR)
     }
   },
@@ -53,18 +79,46 @@ const actions = {
     }
   },
 
-  async newConcept({ commit }, { file, ...data }) {
-    let concept = await conceptsApi.newConcept(data)
-    const preview = concept.tasks[0].previews[0]
-    const { request, promise } = tasksApi.uploadPreview(preview.id, file)
-    request.on('progress', e => {
-      // commit(SET_UPLOAD_PROGRESS, {
-      //   previewId: preview.id,
-      //   percent: e.percent,
-      //   name: file.name
-      // })
+  async newConcept({ commit, dispatch, rootGetters }, { form, ...data }) {
+    const personMap = rootGetters.personMap
+    const production = rootGetters.currentProduction
+
+    // Create Entity
+    data.name = crypto.randomUUID() // unique and mandatory field
+    data.project_id = production.id
+    const concept = await conceptsApi.newConcept(data)
+
+    // Create Task
+    const conceptTaskType = rootGetters.taskTypes.find(
+      taskType => taskType.for_entity === 'Concept'
+    )
+    const task = await dispatch('createTask', {
+      entityId: concept.id,
+      projectId: production.id,
+      taskTypeId: conceptTaskType.id,
+      type: 'concepts'
     })
-    concept = await promise
+
+    // Create Comment with Preview
+    const { preview } = await dispatch('commentTaskWithPreview', {
+      taskId: task.id,
+      taskStatusId: task.task_status_id,
+      form
+    })
+    await dispatch('setLastTaskPreview', task.id)
+
+    // Assign Task to current User
+    const currentUser = rootGetters.user.id
+    await dispatch('assignSelectedTasks', {
+      personId: currentUser,
+      taskIds: [task.id]
+    })
+    task.assignees = [currentUser]
+
+    concept.tasks = [task]
+    concept.preview_file_id = preview.id
+    helpers.populateConcept(concept, personMap)
+
     commit(EDIT_CONCEPT_END, concept)
     return concept
   },
@@ -129,7 +183,10 @@ const mutations = {
     state.displayedConcepts = []
   },
 
-  [LOAD_CONCEPTS_END](state, concepts) {
+  [LOAD_CONCEPTS_END](state, { concepts, personMap }) {
+    concepts.forEach(concept => {
+      helpers.populateConcept(concept, personMap)
+    })
     state.concepts = concepts
     state.conceptMap = new Map(
       state.concepts.map(concept => [concept.id, concept])
@@ -139,17 +196,15 @@ const mutations = {
 
   [EDIT_CONCEPT_END](state, newConcept) {
     const concept = state.conceptMap.get(newConcept.id)
-
     if (concept?.id) {
       Object.assign(concept, newConcept)
       state.conceptMap.delete(concept.id)
       state.conceptMap.set(concept.id, concept)
-      // state.concepts = sortByName(state.concepts)
     } else {
       state.concepts.push(newConcept)
       state.conceptMap.set(newConcept.id, newConcept)
-      // state.concepts = sortByName(state.concepts)
     }
+    state.conceptMap = new Map(state.conceptMap) // for reactivity
   },
 
   [DELETE_CONCEPT_END](state, concept) {

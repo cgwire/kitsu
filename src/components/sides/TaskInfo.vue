@@ -45,12 +45,12 @@
 
       <div v-else-if="task">
         <div class="pa1 pb0">
-          <div class="flexrow header-title">
+          <div class="flexrow header-title" v-if="!isConceptTask">
             <task-type-name
               class="flexrow-item task-type"
               :task-type="currentTaskType"
               :production-id="currentProduction.id"
-              v-if="currentTaskType && !isConceptTask"
+              v-if="currentTaskType"
             />
             <div class="title flexrow-item filler">
               <router-link :to="taskEntityPath">
@@ -91,6 +91,7 @@
                 <template v-if="taskPreviews && taskPreviews.length > 0">
                   <preview-player
                     :entity-preview-files="taskEntityPreviews"
+                    :entity-type="entityType"
                     :extra-wide="isExtraWide"
                     :is-assigned="isAssigned"
                     :last-preview-files="taskPreviews"
@@ -128,7 +129,7 @@
                   :user="user"
                   :team="currentTeam"
                   :task="task"
-                  :task-status="getTaskStatusForCurrentUser(task.project_id)"
+                  :task-status="taskStatuses"
                   :light="true"
                   :is-loading="loading.addComment"
                   :previewForms="previewForms"
@@ -644,6 +645,15 @@ export default {
       let previewId = null
       previewId = this.currentPreview.id
       return `/api/movies/originals/preview-files/${previewId}.mp4`
+    },
+
+    taskStatuses() {
+      const taskStatuses = this.getTaskStatusForCurrentUser(
+        this.task.project_id
+      )
+      return taskStatuses.filter(
+        status => Boolean(status.for_concept) === this.isConceptTask
+      )
     },
 
     taskTypeStyle() {

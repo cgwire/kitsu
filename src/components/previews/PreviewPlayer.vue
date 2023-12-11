@@ -100,6 +100,7 @@
           :silent="isCommentsHidden"
           :current-frame="currentFrame"
           :current-parent-preview="currentPreview"
+          :entity-type="entityType"
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
           v-show="!isCommentsHidden"
@@ -488,7 +489,7 @@
       </div>
     </div>
 
-    <div class="flexrow" v-if="isConcept">
+    <div class="flexrow" v-if="isConcept && currentConcept.tags?.length">
       <ul class="tags">
         <li class="tag" :key="tag.id" v-for="tag in currentConcept.tags">
           {{ tag.name }}
@@ -619,6 +620,9 @@ export default {
     extraWide: {
       type: Boolean,
       default: false
+    },
+    entityType: {
+      type: String
     }
   },
 
@@ -821,8 +825,7 @@ export default {
     },
 
     isConcept() {
-      // FIXME: write correct logic
-      return this.$route.path.includes('concept')
+      return this.entityType === 'Concept'
     },
 
     isPicture() {

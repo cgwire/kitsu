@@ -1053,6 +1053,7 @@ export default {
     },
 
     isCurrentViewConcept() {
+      // FIXME: write correct logic
       return this.$route.path.includes('concept')
     },
 
@@ -1520,9 +1521,11 @@ export default {
       }
     },
 
-    setAvailableStatus() {
-      if (this.selectedTasks.size === 0) this.availableTaskStatuses = []
-      else if (this.isCurrentViewTodos) {
+    setAvailableStatuses() {
+      let availableTaskStatuses
+      if (this.selectedTasks.size === 0) {
+        availableTaskStatuses = []
+      } else if (this.isCurrentViewTodos) {
         const productions = new Map()
         this.selectedTasks.forEach(task => {
           const project = this.productionMap.get(task.project_id)
@@ -1532,12 +1535,16 @@ export default {
           p => p.task_statuses
         )
         const availableStatus = new Set(intersection(statusLists))
-        this.availableTaskStatuses = this.taskStatusForCurrentUser.filter(
-          status => availableStatus.has(status.id)
+        availableTaskStatuses = this.taskStatusForCurrentUser.filter(status =>
+          availableStatus.has(status.id)
         )
       } else {
-        this.availableTaskStatuses = this.taskStatusForCurrentUser
+        availableTaskStatuses = this.taskStatusForCurrentUser
       }
+      availableTaskStatuses = availableTaskStatuses.filter(
+        status => Boolean(status.for_concept) === this.isCurrentViewConcept
+      )
+      this.availableTaskStatuses = availableTaskStatuses
     },
 
     removeTag(tag) {
@@ -1583,7 +1590,7 @@ export default {
       if (this.nbSelectedTasks > 0) {
         let isShotSelected = false
         let isAssetSelected = false
-        this.setAvailableStatus()
+        this.setAvailableStatuses()
         this.selectedTaskIds.forEach(taskId => {
           const task = this.selectedTasks.get(taskId)
           if (task && task.sequence_name) {
