@@ -325,7 +325,7 @@ export default {
       }
       const conceptTaskStatusList = sortByName(
         Array.from(this.taskStatusMap.values()).filter(
-          status => status.is_concept
+          status => status.for_concept
         )
       )
       return [allStatusItem].concat(conceptTaskStatusList)

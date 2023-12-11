@@ -70,9 +70,9 @@
             v-if="form.is_default === 'false'"
           />
           <boolean-field
-            :label="$t('task_status.fields.is_concept')"
+            :label="$t('task_status.fields.for_concept')"
             @enter="confirmClicked"
-            v-model="form.is_concept"
+            v-model="form.for_concept"
             v-if="form.is_default === 'false'"
           />
 
@@ -224,7 +224,7 @@ export default {
           is_feedback_request: String(
             this.taskStatusToEdit.is_feedback_request || false
           ),
-          is_concept: String(this.taskStatusToEdit.is_concept || false),
+          for_concept: String(this.taskStatusToEdit.for_concept || false),
           archived: String(this.taskStatusToEdit.archived || false)
         }
       }

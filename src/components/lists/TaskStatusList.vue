@@ -29,7 +29,7 @@
               {{ $t('task_status.fields.is_feedback_request') }}
             </th>
             <th scope="col" class="is-concept">
-              {{ $t('task_status.fields.is_concept') }}
+              {{ $t('task_status.fields.for_concept') }}
             </th>
             <th scope="col" class="actions"></th>
           </tr>
@@ -55,7 +55,7 @@
               class="is-feedback-request"
               :value="entry.is_feedback_request"
             />
-            <boolean-cell class="is-concept" :value="entry.is_concept" />
+            <boolean-cell class="is-concept" :value="entry.for_concept" />
             <row-actions-cell
               :entry-id="entry.id"
               :hide-delete="entry.is_default === true"

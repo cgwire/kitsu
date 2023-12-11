@@ -1085,9 +1085,9 @@ export default {
     title: 'Task Status',
     fields: {
       color: 'Color',
+      for_concept: 'For concept',
       is_artist_allowed: 'Is artist allowed',
       is_client_allowed: 'Is client allowed',
-      is_concept: 'Is concept',
       is_done: 'Is done',
       is_feedback_request: 'Is feedback request',
       is_retake: 'Has retake value',
