@@ -150,8 +150,8 @@ export default {
       last_comment_date: 'Last comment',
     },
     actions: {
-      title: 'Tags linked to Concept',
-      empty: 'No tags'
+      title: 'Links to Concept',
+      empty: 'No links'
     }
   },
 
@@ -597,6 +597,7 @@ export default {
     delete_edits: 'Delete edits',
     delete_shots: 'Delete shots',
     delete_tasks: 'Delete tasks',
+    edit_concepts: "Edit concept links",
     generate_playlist: 'Generate a playlist',
     run_custom_action: 'Run custom action',
     set_estimations: 'Set estimations',

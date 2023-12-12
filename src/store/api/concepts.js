@@ -23,7 +23,7 @@ export default {
   },
 
   updateConcept(concept) {
-    return client.pput(`/api/data/concepts/${concept.id}`, concept)
+    return client.pput(`/api/data/entities/${concept.id}`, concept)
   },
 
   deleteConcept(concept) {

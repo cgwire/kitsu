@@ -101,15 +101,15 @@
           <div
             class="menu-item"
             :class="{
-              active: selectedBar === 'tag-concepts'
+              active: selectedBar === 'edit-concepts'
             }"
-            :title="$t('menu.tag_concepts')"
-            @click="selectBar('tag-concepts')"
+            :title="$t('menu.edit_concepts')"
+            @click="selectBar('edit-concepts')"
             v-if="
               isCurrentViewConcept && isCurrentUserManager && isTaskSelection
             "
           >
-            <tag-icon />
+            <link-icon />
           </div>
 
           <div
@@ -521,20 +521,23 @@
           </button>
         </div>
 
-        <div class="flexrow-item is-wide" v-if="selectedBar === 'tag-concepts'">
+        <div
+          class="flexrow-item is-wide"
+          v-if="selectedBar === 'edit-concepts'"
+        >
           <h3 class="mb05">{{ $t('concepts.actions.title') }}</h3>
           <ul class="tags mb05">
-            <li v-if="!currentConcept.tagged_entities?.length">
+            <li v-if="!conceptEntityLinks.length">
               <em>{{ $t('concepts.actions.empty') }}</em>
             </li>
             <template v-else>
               <li
                 class="tag"
-                v-for="tag in currentConcept.tagged_entities"
-                :key="tag.id"
+                v-for="entity in conceptEntityLinks"
+                :key="entity.id"
               >
-                {{ tag.name }}
-                <button class="action" @click="removeTag(tag)">
+                {{ entity.name }}
+                <button class="action" @click="onRemoveLink(entity)">
                   <trash2-icon size="0.6x" />
                 </button>
               </li>
@@ -722,13 +725,16 @@
       </div>
     </div>
 
-    <div class="flexrow-item is-wide pa1" v-if="selectedBar === 'tag-concepts'">
+    <div
+      class="flexrow-item is-wide pa1"
+      v-if="selectedBar === 'edit-concepts'"
+    >
       <div ref="asset-list" class="concept-tags">
         <h2 class="subtitle">
           {{ $t('breakdown.all_assets') }}
         </h2>
-        <div class="filters-area flexrow mb2" v-if="true">
-          <search-field ref="search-field" @change="onSearchTagChange" />
+        <div class="filters-area flexrow mb2">
+          <search-field ref="search-field" @change="onSearchAssetChange" />
           <button-simple
             class="flexrow-item"
             :title="$t('entities.build_filter.title')"
@@ -736,25 +742,25 @@
             @click="modals.isBuildFilterDisplayed = true"
           />
         </div>
-        <spinner v-if="loading.tags" />
+        <spinner v-if="loading.links" />
         <template v-else>
           <ul
-            class="tag-types"
-            :key="`tags-types-${index}`"
-            v-for="(tagGroup, index) in availableTagsByType"
+            class="link-types"
+            :key="`link-types-${index}`"
+            v-for="(linkGroup, index) in availableLinksByType"
           >
-            <li class="tag-type">
+            <li class="link-type">
               <h4 class="subtitle">
-                {{ tagGroup.type }}
+                {{ linkGroup.type }}
               </h4>
               <ul class="tags">
                 <li
                   class="tag"
-                  :key="tag.id"
-                  v-for="tag in tagGroup.tags"
-                  @click="onSelectTag(tag)"
+                  :key="link.id"
+                  v-for="link in linkGroup.links"
+                  @click="onSelectLink(link)"
                 >
-                  {{ tag.name }}
+                  {{ link.name }}
                 </li>
               </ul>
             </li>
@@ -786,8 +792,8 @@ import {
   EyeIcon,
   FilmIcon,
   ImageIcon,
+  LinkIcon,
   PlayCircleIcon,
-  TagIcon,
   TrashIcon,
   Trash2Icon,
   UserIcon
@@ -825,12 +831,12 @@ export default {
     EyeIcon,
     FilmIcon,
     ImageIcon,
+    LinkIcon,
     PeopleField,
     PlayCircleIcon,
     SearchField,
     Spinner,
     UserIcon,
-    TagIcon,
     TrashIcon,
     Trash2Icon,
     ViewPlaylistModal
@@ -882,7 +888,7 @@ export default {
         taskDeletion: false,
         setThumbnails: false,
         shotDeletion: false,
-        tags: false,
+        links: false,
         tasksSubscription: false
       },
       errors: {
@@ -956,6 +962,10 @@ export default {
 
     currentConcept() {
       return this.selectedConcepts.values().next().value
+    },
+
+    conceptEntityLinks() {
+      return this.getEntities(this.currentConcept.tagged_entities)
     },
 
     defaultCustomAction() {
@@ -1148,11 +1158,11 @@ export default {
       return prefix
     },
 
-    availableTagsByType() {
+    availableLinksByType() {
       const assetGroups = [...this.assetsByType]
       const result = assetGroups.map(assets => ({
         type: assets[0].asset_type_name,
-        tags: assets.map(asset => ({
+        links: assets.map(asset => ({
           id: asset.id,
           name: asset.name
         }))
@@ -1164,10 +1174,13 @@ export default {
   methods: {
     ...mapActions([
       'assignSelectedTasks',
+      'changeSelectedTaskStatus',
+      'changeSelectedPriorities',
       'clearSelectedAssets',
       'clearSelectedShots',
       'clearSelectedEdits',
       'clearSelectedConcepts',
+      'clearSelectedTasks',
       'createSelectedTasks',
       'deleteSelectedAssets',
       'deleteSelectedShots',
@@ -1175,9 +1188,7 @@ export default {
       'deleteSelectedEdits',
       'deleteSelectedEpisodes',
       'deleteSelectedConcepts',
-      'changeSelectedTaskStatus',
-      'changeSelectedPriorities',
-      'clearSelectedTasks',
+      'editConcept',
       'loadAssets',
       'postCustomAction',
       'setLastTaskPreview',
@@ -1186,6 +1197,10 @@ export default {
       'unassignSelectedTasks',
       'unsubscribeFromTask'
     ]),
+
+    getEntities(entityIds) {
+      return entityIds.map(id => this.assetMap.get(id)).filter(Boolean)
+    },
 
     confirmTaskStatusChange() {
       this.loading.changeStatus = true
@@ -1545,16 +1560,28 @@ export default {
       this.availableTaskStatuses = availableTaskStatuses
     },
 
-    removeTag(tag) {
-      // TODO: remove tag from concept
+    onRemoveLink(link) {
+      const concept = {
+        id: this.currentConcept.id,
+        tagged_entities: this.currentConcept.tagged_entities.filter(
+          id => id !== link.id
+        )
+      }
+      this.editConcept(concept)
     },
 
-    onSearchTagChange(query) {
-      // TODO: search in available tags
+    onSearchAssetChange(query) {
+      // TODO: search in available links
     },
 
-    onSelectTag(tag) {
-      // TODO: link tag to concept
+    onSelectLink(link) {
+      const concept = {
+        id: this.currentConcept.id,
+        tagged_entities: [...this.currentConcept.tagged_entities].concat(
+          link.id
+        )
+      }
+      this.editConcept(concept)
     }
   },
 
@@ -1812,9 +1839,10 @@ div.assignation {
 
 .tags {
   display: inline-flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-left: 0;
-  height: 21px;
+  min-height: 21px;
 
   .tag {
     display: inline- flex;
@@ -1859,12 +1887,12 @@ div.assignation {
     border-bottom: 0;
   }
 
-  .tag-types {
+  .link-types {
     list-style: none;
     margin-left: 0;
   }
 
-  .tag-type {
+  .link-type {
     .subtitle {
       text-transform: uppercase;
       color: $grey;

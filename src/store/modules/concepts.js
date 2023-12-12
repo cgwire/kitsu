@@ -123,7 +123,7 @@ const actions = {
     return concept
   },
 
-  async saveConcept({ commit }, data) {
+  async editConcept({ commit }, data) {
     const concept = await conceptsApi.updateConcept(data)
     commit(EDIT_CONCEPT_END, concept)
     return concept

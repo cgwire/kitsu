@@ -526,6 +526,8 @@ export default {
   width: 100vw;
 
   .item {
+    display: flex;
+    flex-direction: column;
     width: 300px;
     background-color: var(--background);
     border-radius: 1em;
@@ -550,17 +552,22 @@ export default {
       row-gap: 10px;
       padding: 0.3em 1em;
       margin: 0.3em 0;
+      flex: 1;
     }
 
     .tags {
-      cursor: pointer;
       display: inline-flex;
+      flex-wrap: wrap;
       gap: 10px;
       margin-left: 0;
-      height: 21px;
+      flex: 1;
 
-      .tag:hover {
-        transform: scale(1.1);
+      .tag {
+        cursor: pointer;
+
+        &:hover {
+          transform: scale(1.1);
+        }
       }
     }
 

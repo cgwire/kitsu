@@ -489,10 +489,12 @@
       </div>
     </div>
 
-    <div class="flexrow" v-if="isConcept && currentConcept.tags?.length">
+    <div class="flexrow" v-if="isConcept && conceptEntityLinks.length">
       <ul class="tags">
-        <li class="tag" :key="tag.id" v-for="tag in currentConcept.tags">
-          {{ tag.name }}
+        <li class="tag" :key="entity.id" v-for="entity in conceptEntityLinks">
+          <router-link :to="entityPath(entity, 'asset')">
+            {{ entity.name }}
+          </router-link>
         </li>
       </ul>
     </div>
@@ -536,6 +538,7 @@ import {
   roundToFrame,
   floorToFrame
 } from '@/lib/video'
+import { getEntityPath } from '@/lib/path'
 import localPreferences from '@/lib/preferences'
 
 import { annotationMixin } from '@/components/mixins/annotation'
@@ -724,6 +727,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetMap',
       'currentProduction',
       'isCurrentUserArtist',
       'organisation',
@@ -987,6 +991,10 @@ export default {
 
     currentConcept() {
       return this.selectedConcepts.values().next().value
+    },
+
+    conceptEntityLinks() {
+      return this.getEntities(this.currentConcept.tagged_entities)
     }
   },
 
@@ -1662,6 +1670,22 @@ export default {
       return files
     },
 
+    // Concepts
+
+    entityPath(entity, section) {
+      const episodeId = this.isTVShow ? entity.episode_id || 'main' : null
+      return getEntityPath(
+        entity.id,
+        this.currentProduction.id,
+        section,
+        episodeId
+      )
+    },
+
+    getEntities(entityIds) {
+      return entityIds.map(id => this.assetMap.get(id)).filter(Boolean)
+    },
+
     // Events
 
     onKeyDown(event) {
@@ -2308,12 +2332,21 @@ export default {
 }
 
 .tags {
-  display: flex;
+  display: inline-flex;
+  flex-wrap: wrap;
   gap: 10px;
   padding: 1rem;
   margin-left: 0;
   font-weight: 500;
   letter-spacing: 1px;
+
+  .tag {
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
 }
 
 #resize-annotation-canvas,
