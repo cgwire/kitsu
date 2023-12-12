@@ -215,6 +215,7 @@
           :is-loading="loading.addExtraPreview"
           :is-error="errors.addExtraPreview"
           :form-data="addExtraPreviewFormData"
+          message=""
           @cancel="onCloseExtraPreview"
           @confirm="createExtraPreview"
         />

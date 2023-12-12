@@ -135,7 +135,6 @@
       is-concept
       :is-error="errors.addingConcept"
       :is-loading="loading.addingConcept"
-      :is-multiple="false"
       message=""
       @cancel="closeAddConceptModal"
       @confirm="confirmAddConceptModal"
@@ -342,7 +341,7 @@ export default {
       'clearSelectedTasks',
       'loadAssets',
       'loadConcepts',
-      'newConcept',
+      'newConcepts',
       'setCurrentEpisode'
     ]),
 
@@ -452,9 +451,8 @@ export default {
 
     async confirmAddConceptModal(forms) {
       this.loading.addingConcept = true
-      const form = forms[0]
       try {
-        await this.newConcept({ form })
+        await this.newConcepts(forms)
         this.closeAddConceptModal()
       } catch (err) {
         console.error(err)

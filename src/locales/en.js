@@ -137,7 +137,7 @@ export default {
 
   concepts: {
     add_new_concept: 'Add a new reference to concepts',
-    add_concept: 'Add file for a new concept revision',
+    add_concept: 'Add files for new concepts',
     add_concept_error: 'An error occurred while adding concept.',
     delete_for_selection: 'Delete the selected concept | Delete the {nbSelectedConcepts} selected concepts',
     empty: 'There are no concepts',
@@ -603,7 +603,6 @@ export default {
     set_estimations: 'Set estimations',
     set_thumbnails: 'Set thumbnails from last preview',
     subscribe: 'Subscribe to notifications',
-    tag_concepts: "Edit concept tags",
   },
 
   news: {

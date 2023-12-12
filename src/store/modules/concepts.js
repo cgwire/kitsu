@@ -79,14 +79,24 @@ const actions = {
     }
   },
 
-  async newConcept({ commit, dispatch, rootGetters }, { form, ...data }) {
+  async newConcepts({ commit, dispatch, rootGetters }, forms) {
+    return Promise.all(
+      forms.map(form => {
+        return dispatch('newConcept', form)
+      })
+    )
+  },
+
+  async newConcept({ commit, dispatch, rootGetters }, form) {
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
 
     // Create Entity
-    data.name = crypto.randomUUID() // unique and mandatory field
-    data.project_id = production.id
-    const concept = await conceptsApi.newConcept(data)
+    const entity = {
+      name: crypto.randomUUID(), // unique and mandatory field
+      project_id: production.id
+    }
+    const concept = await conceptsApi.newConcept(entity)
 
     // Create Task
     const conceptTaskType = rootGetters.taskTypes.find(
