@@ -899,12 +899,6 @@ export default {
   mounted() {
     this.customAction = this.defaultCustomAction
     this.setCurrentTeam()
-
-    // FIXME: hack to init available tags
-    this.loading.tags = true
-    this.loadAssets(true).finally(() => {
-      this.loading.tags = false
-    })
   },
 
   beforeDestroy() {

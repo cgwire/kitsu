@@ -83,11 +83,13 @@
                 <ul class="tags">
                   <li
                     class="tag"
-                    v-for="tag in concept.tags"
-                    :key="tag.id"
-                    @click.stop="onSelectedTag"
+                    v-for="entity in getEntities(concept.tagged_entities)"
+                    :key="entity.id"
+                    @click.stop
                   >
-                    {{ tag.name }}
+                    <router-link :to="entityPath(entity, 'asset')">
+                      {{ entity.name }}
+                    </router-link>
                   </li>
                 </ul>
                 <div class="status" v-if="hasTask(concept)">
@@ -149,6 +151,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { firstBy } from 'thenby'
 
+import { getEntityPath } from '@/lib/path'
 import { sortByName } from '@/lib/sorting'
 
 import { searchMixin } from '@/components/mixins/search'
@@ -187,7 +190,7 @@ export default {
     return {
       loading: {
         addingConcept: false,
-        loadingConcepts: true,
+        loadingConcepts: false,
         savingSearch: false
       },
       errors: {
@@ -226,9 +229,11 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetMap',
       'currentProduction',
       'displayedConcepts',
       'isDarkTheme',
+      'isTVShow',
       'personMap',
       'selectedConcepts',
       'taskStatusMap'
@@ -335,8 +340,10 @@ export default {
       'addSelectedTask',
       'clearSelectedConcepts',
       'clearSelectedTasks',
+      'loadAssets',
       'loadConcepts',
-      'newConcept'
+      'newConcept',
+      'setCurrentEpisode'
     ]),
 
     // TODO: module actions
@@ -377,6 +384,8 @@ export default {
     async refreshConcepts() {
       this.loading.loadingConcepts = true
       try {
+        this.setCurrentEpisode('all') // mandatory to load all assets
+        await this.loadAssets(true)
         await this.loadConcepts()
       } catch (err) {
         console.error(err)
@@ -384,6 +393,20 @@ export default {
       } finally {
         this.loading.loadingConcepts = false
       }
+    },
+
+    entityPath(entity, section) {
+      const episodeId = this.isTVShow ? entity.episode_id || 'main' : null
+      return getEntityPath(
+        entity.id,
+        this.currentProduction.id,
+        section,
+        episodeId
+      )
+    },
+
+    getEntities(entityIds) {
+      return entityIds.map(id => this.assetMap.get(id)).filter(Boolean)
     },
 
     getTaskStatus(concept) {
@@ -427,10 +450,6 @@ export default {
       this.modals.addConcept = false
     },
 
-    onSelectedTag(tag) {
-      // TODO: select ta action ???
-    },
-
     async confirmAddConceptModal(forms) {
       this.loading.addingConcept = true
       const form = forms[0]
@@ -456,7 +475,11 @@ export default {
     currentProduction: {
       immediate: true,
       handler() {
-        this.reset()
+        // HACK: the store init a wrong current production by default
+        const productionId = this.$route.params.production_id
+        if (this.currentProduction.id === productionId) {
+          this.reset()
+        }
       }
     }
   },
