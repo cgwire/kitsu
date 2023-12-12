@@ -872,7 +872,8 @@ export const playerMixin = {
     },
 
     getCurrentTime() {
-      return roundToFrame(this.currentTimeRaw, this.fps) || 0
+      const time = roundToFrame(this.currentTimeRaw, this.fps) || 0
+      return Number(time.toPrecision(4))
     },
 
     setCurrentTimeRaw(time) {
