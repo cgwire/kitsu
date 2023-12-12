@@ -524,11 +524,15 @@
         <div class="flexrow-item is-wide" v-if="selectedBar === 'tag-concepts'">
           <h3 class="mb05">{{ $t('concepts.actions.title') }}</h3>
           <ul class="tags mb05">
-            <li v-if="!currentConcept?.tags.length">
+            <li v-if="!currentConcept.tagged_entities?.length">
               <em>{{ $t('concepts.actions.empty') }}</em>
             </li>
             <template v-else>
-              <li class="tag" v-for="tag in currentConcept.tags" :key="tag.id">
+              <li
+                class="tag"
+                v-for="tag in currentConcept.tagged_entities"
+                :key="tag.id"
+              >
                 {{ tag.name }}
                 <button class="action" @click="removeTag(tag)">
                   <trash2-icon size="0.6x" />
@@ -748,7 +752,7 @@
                   class="tag"
                   :key="tag.id"
                   v-for="tag in tagGroup.tags"
-                  @click="onSelectTag"
+                  @click="onSelectTag(tag)"
                 >
                   {{ tag.name }}
                 </li>

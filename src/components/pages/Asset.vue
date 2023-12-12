@@ -258,7 +258,7 @@
 
         <div
           class="concepts mt1"
-          v-show="currentSection === 'concept'"
+          v-show="currentSection === 'concepts'"
           v-if="currentAsset"
         >
           <combobox-styled
@@ -530,7 +530,7 @@ export default {
     },
 
     assetNavOptions() {
-      return [{ label: 'Concept', value: 'concept' }].concat(
+      return [{ label: 'Concepts', value: 'concepts' }].concat(
         this.entityNavOptions
       )
     },
@@ -547,6 +547,8 @@ export default {
 
     concepts() {
       const concepts = this.currentAsset?.concepts
+
+      if (!concepts) return []
 
       return !this.currentConceptStatus
         ? concepts

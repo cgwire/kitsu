@@ -18,7 +18,7 @@ export default {
     new_assets: 'Create assets',
     new_success: 'Asset {name} successfully created.',
     no_cast_in: 'This asset is not cast in any shot.',
-    no_concept: 'No concepts linked to this assets.',
+    no_concept: 'No concepts linked to this assets',
     number: 'asset | assets',
     restore_text: 'Are you sure you want to restore {name} from your archive?',
     restore_error: 'An error occurred while restoring this asset.',

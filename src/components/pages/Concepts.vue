@@ -198,7 +198,7 @@ export default {
         taskStatusId: null,
         assignee: null,
         entityType: null,
-        sortBy: 'last_comment_date'
+        sortBy: 'created_at'
       },
       form: {
         file: null
@@ -221,7 +221,6 @@ export default {
 
   mounted() {
     this.setSearch(this.$route.query.search)
-    this.refreshConcepts()
     this.searchField.focus()
   },
 
@@ -277,7 +276,7 @@ export default {
     },
 
     sortByOptions() {
-      return ['created_at', 'updated_at', 'last_comment_date'].map(name => ({
+      return ['created_at', 'last_comment_date'].map(name => ({
         label: name,
         value: name
       }))
@@ -305,7 +304,9 @@ export default {
           )
         )
       }
-      return concepts.sort(firstBy(this.filters.sortBy, -1))
+      return concepts.sort(
+        firstBy(this.filters.sortBy, -1).thenBy('created_at')
+      )
     },
 
     searchField() {
@@ -442,14 +443,21 @@ export default {
       } finally {
         this.loading.addingConcept = false
       }
+    },
+
+    reset() {
+      this.clearSelectedConcepts()
+      this.clearSelectedTasks()
+      this.refreshConcepts()
     }
   },
 
   watch: {
-    currentProduction() {
-      this.clearSelectedConcepts()
-      this.clearSelectedTasks()
-      this.refreshConcepts()
+    currentProduction: {
+      immediate: true,
+      handler() {
+        this.reset()
+      }
     }
   },
 
