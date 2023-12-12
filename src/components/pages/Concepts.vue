@@ -280,7 +280,7 @@ export default {
     },
 
     sortByOptions() {
-      return ['created_at', 'last_comment_date'].map(name => ({
+      return ['created_at', 'updated_at', 'last_comment_date'].map(name => ({
         label: name,
         value: name
       }))
@@ -309,7 +309,7 @@ export default {
         )
       }
       return concepts.sort(
-        firstBy(this.filters.sortBy, -1).thenBy('created_at')
+        firstBy(this.filters.sortBy, -1).thenBy('created_at', -1)
       )
     },
 
