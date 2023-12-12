@@ -911,7 +911,7 @@ export default {
     homepage: {
       'assets': 'Assets',
       'shots': 'Shots',
-      'sequences': 'sequences',
+      'sequences': 'Sequences',
     },
 
     parameters: {
