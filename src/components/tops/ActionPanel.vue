@@ -91,7 +91,8 @@
             v-if="
               isTaskSelection &&
               !isCurrentViewSingleEntity &&
-              !isCurrentViewTodos
+              !isCurrentViewTodos &&
+              !isCurrentViewConcept
             "
             @click="selectBar('subscribe')"
           >
