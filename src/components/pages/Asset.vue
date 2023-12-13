@@ -267,12 +267,12 @@
             v-model="currentConceptStatus"
           />
           <div class="concept-list mt1">
-            <template v-if="concepts.length">
+            <template v-if="linkedConcepts.length">
               <router-link
                 class="concept-link"
                 :key="concept.id"
                 :to="conceptPath(concept)"
-                v-for="concept in concepts"
+                v-for="concept in linkedConcepts"
               >
                 <entity-thumbnail
                   class="entity-thumbnail"
@@ -282,12 +282,15 @@
                   :empty-height="103"
                   :with-link="false"
                 />
-                <div
+                <span
                   class="tag"
-                  :style="{ backgroundColor: concept.status?.color }"
+                  :style="{
+                    backgroundColor: getConceptTaskStatus(concept).color,
+                    color: 'white'
+                  }"
                 >
-                  {{ concept.status?.short_name }}
-                </div>
+                  {{ getConceptTaskStatus(concept).short_name }}
+                </span>
               </router-link>
             </template>
             <div v-else>
@@ -418,6 +421,9 @@ export default {
   mounted() {
     this.clearSelectedTasks()
     this.init()
+
+    // FIXME: waiting for a new API to load concepts by entity
+    this.loadConcepts()
   },
 
   computed: {
@@ -425,6 +431,7 @@ export default {
       'assetMap',
       'assetSearchText',
       'assetMetadataDescriptors',
+      'conceptMap',
       'currentEpisode',
       'currentProduction',
       'getTaskTypePriority',
@@ -432,6 +439,7 @@ export default {
       'isCurrentUserManager',
       'route',
       'taskMap',
+      'taskStatusMap',
       'taskTypeMap',
       'shotId'
     ]),
@@ -545,16 +553,16 @@ export default {
       ]
     },
 
-    concepts() {
-      const concepts = this.currentAsset?.concepts
-
-      if (!concepts) return []
-
-      return !this.currentConceptStatus
-        ? concepts
-        : concepts.filter(
+    linkedConcepts() {
+      const conceptIds = this.currentAsset?.entity_links || []
+      const concepts = conceptIds
+        .map(id => this.conceptMap.get(id))
+        .filter(Boolean)
+      return this.currentConceptStatus
+        ? concepts.filter(
             concept => concept.status === this.currentConceptStatus
           )
+        : concepts
     }
   },
 
@@ -566,6 +574,7 @@ export default {
       'loadAssets',
       'loadAssetCastIn',
       'loadAssetCasting',
+      'loadConcepts',
       'loadShots',
       'setCurrentEpisode'
     ]),
@@ -587,6 +596,10 @@ export default {
           return resolve(asset)
         }
       })
+    },
+
+    getConceptTaskStatus(concept) {
+      return this.taskStatusMap.get(concept.tasks[0].task_status_id)
     },
 
     onEditClicked() {
