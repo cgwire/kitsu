@@ -2042,15 +2042,6 @@ export default {
 
     fullScreen() {
       this.resetHeight()
-      console.log('fullscreen', this.fullScreen)
-
-      this.$nextTick().then(() => {
-        window.dispatchEvent(new Event('resize'))
-
-        setTimeout(() => {
-          window.dispatchEvent(new Event('resize'))
-        }, 300)
-      })
     },
 
     isComparing() {

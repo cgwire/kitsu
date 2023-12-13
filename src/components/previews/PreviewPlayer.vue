@@ -986,6 +986,7 @@ export default {
     },
 
     setVideoFrameContext(frame) {
+      frame = Math.min(frame, this.nbFrames - 1)
       if (this.currentFrame !== frame) {
         const time = frame * this.frameDuration
         this.currentFrame = frame
@@ -1066,7 +1067,8 @@ export default {
 
     getCurrentTime() {
       if (!this.isMovie) return 0
-      return this.currentTimeRaw
+      const time = roundToFrame(this.currentTimeRaw, this.fps)
+      return Number(time.toPrecision(4))
     },
 
     play() {
@@ -1457,7 +1459,10 @@ export default {
       if (this.isMovie) {
         time = roundToFrame(time, this.fps)
         return this.annotations.find(annotation => {
-          return roundToFrame(annotation.time, this.fps) === time
+          return (
+            roundToFrame(annotation.time, this.fps) < time + 0.0001 &&
+            roundToFrame(annotation.time, this.fps) > time - 0.0001
+          )
         })
       } else if (this.isPicture) {
         return this.annotations.find(annotation => annotation.time === 0)
@@ -1477,6 +1482,7 @@ export default {
       if (this.isMovie) {
         currentTime = this.currentFrame * this.frameDuration
         currentTime = roundToFrame(currentTime, this.fps)
+        currentTime = Number(currentTime.toPrecision(4))
       }
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)

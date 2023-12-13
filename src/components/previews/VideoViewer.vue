@@ -399,7 +399,10 @@ export default {
       } else {
         currentTimeRaw = 0
       }
-      return Math.ceil(currentTimeRaw / this.frameDuration) + 1
+      let frame = Math.ceil(currentTimeRaw / this.frameDuration) + 1
+      frame = Number(frame.toPrecision(4))
+      frame = Math.min(frame, this.nbFrames)
+      return frame
     },
 
     play() {

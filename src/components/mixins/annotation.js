@@ -60,6 +60,10 @@ export const annotationMixin = {
   },
 
   methods: {
+    findAnnotation(list, time) {
+      return list.find(a => a.time < time + 0.0001 && a.time > time - 0.0001)
+    },
+
     // Objects
 
     /*
@@ -259,7 +263,7 @@ export const annotationMixin = {
     addToAdditions(obj) {
       this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
-      const additions = this.additions.find(a => a.time === currentTime)
+      const additions = this.findAnnotation(this.additions, currentTime)
       if (additions) {
         additions.drawing.objects.push(obj.serialize())
       } else {
@@ -283,7 +287,7 @@ export const annotationMixin = {
      */
     removeFromAdditions(obj) {
       const currentTime = this.getCurrentTime()
-      const additions = this.additions.find(a => a.time === currentTime)
+      const additions = this.findAnnotation(this.additions, currentTime)
       if (additions) {
         additions.drawing.objects = additions.drawing.objects.filter(
           o => o.id !== obj.id
@@ -297,7 +301,7 @@ export const annotationMixin = {
     addToDeletions(obj) {
       this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
-      const deletion = this.deletions.find(d => d.time === currentTime)
+      const deletion = this.findAnnotation(this.deletions, currentTime)
       if (deletion) {
         deletion.objects.push(obj.id)
       } else {
@@ -309,7 +313,6 @@ export const annotationMixin = {
       if (!obj.serialize) {
         this.addSerialization(obj)
       }
-
       this.postAnnotationDeletion(currentTime, obj.serialize())
     },
 
@@ -325,7 +328,7 @@ export const annotationMixin = {
      */
     removeFromDeletions(obj) {
       const currentTime = this.getCurrentTime()
-      const deletions = this.deletions.find(a => a.time === currentTime)
+      const deletions = this.findAnnotation(this.deletions, currentTime)
       if (deletions) {
         deletions.objects = deletions.objects.filter(oId => oId !== obj.id)
       }
@@ -345,7 +348,7 @@ export const annotationMixin = {
     addToUpdatesSerializedObject(obj) {
       this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
-      const updates = this.updates.find(a => a.time === currentTime)
+      const updates = this.findAnnotation(this.updates, currentTime)
       if (updates) {
         updates.drawing.objects = updates.drawing.objects.filter(
           o => o.id !== obj.id
