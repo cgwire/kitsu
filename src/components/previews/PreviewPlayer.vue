@@ -489,9 +489,13 @@
       </div>
     </div>
 
-    <div class="flexrow" v-if="isConcept && conceptEntityLinks.length">
+    <div class="flexrow" v-if="isConcept && conceptLinkedEntities.length">
       <ul class="tags">
-        <li class="tag" :key="entity.id" v-for="entity in conceptEntityLinks">
+        <li
+          class="tag"
+          :key="entity.id"
+          v-for="entity in conceptLinkedEntities"
+        >
           <router-link :to="entityPath(entity, 'asset')">
             {{ entity.name }}
           </router-link>
@@ -993,8 +997,8 @@ export default {
       return this.selectedConcepts.values().next().value
     },
 
-    conceptEntityLinks() {
-      return this.getEntities(this.currentConcept.tagged_entities)
+    conceptLinkedEntities() {
+      return this.getLinkedEntities(this.currentConcept)
     }
   },
 
@@ -1682,8 +1686,10 @@ export default {
       )
     },
 
-    getEntities(entityIds) {
-      return entityIds.map(id => this.assetMap.get(id)).filter(Boolean)
+    getLinkedEntities(concept) {
+      return concept.entity_links
+        .map(id => this.assetMap.get(id))
+        .filter(Boolean)
     },
 
     // Events

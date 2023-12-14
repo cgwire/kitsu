@@ -83,7 +83,7 @@
                 <ul class="tags">
                   <li
                     class="tag"
-                    v-for="entity in getEntities(concept.tagged_entities)"
+                    v-for="entity in getLinkedEntities(concept)"
                     :key="entity.id"
                     @click.stop
                   >
@@ -404,8 +404,10 @@ export default {
       )
     },
 
-    getEntities(entityIds) {
-      return entityIds.map(id => this.assetMap.get(id)).filter(Boolean)
+    getLinkedEntities(concept) {
+      return concept.entity_links
+        .map(id => this.assetMap.get(id))
+        .filter(Boolean)
     },
 
     getTaskStatus(concept) {

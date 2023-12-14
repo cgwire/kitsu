@@ -528,13 +528,13 @@
         >
           <h3 class="mb05">{{ $t('concepts.actions.title') }}</h3>
           <ul class="tags mb05">
-            <li v-if="!conceptEntityLinks.length">
+            <li v-if="!conceptLinkedEntities.length">
               <em>{{ $t('concepts.actions.empty') }}</em>
             </li>
             <template v-else>
               <li
                 class="tag"
-                v-for="entity in conceptEntityLinks"
+                v-for="entity in conceptLinkedEntities"
                 :key="entity.id"
               >
                 {{ entity.name }}
@@ -965,8 +965,8 @@ export default {
       return this.selectedConcepts.values().next().value
     },
 
-    conceptEntityLinks() {
-      return this.getEntities(this.currentConcept.tagged_entities)
+    conceptLinkedEntities() {
+      return this.getLinkedEntities(this.currentConcept)
     },
 
     defaultCustomAction() {
@@ -1199,8 +1199,10 @@ export default {
       'unsubscribeFromTask'
     ]),
 
-    getEntities(entityIds) {
-      return entityIds.map(id => this.assetMap.get(id)).filter(Boolean)
+    getLinkedEntities(concept) {
+      return concept.entity_links
+        .map(id => this.assetMap.get(id))
+        .filter(Boolean)
     },
 
     confirmTaskStatusChange() {
@@ -1564,7 +1566,7 @@ export default {
     onRemoveLink(link) {
       const concept = {
         id: this.currentConcept.id,
-        tagged_entities: this.currentConcept.tagged_entities.filter(
+        entity_links: this.currentConcept.entity_links.filter(
           id => id !== link.id
         )
       }
@@ -1578,9 +1580,7 @@ export default {
     onSelectLink(link) {
       const concept = {
         id: this.currentConcept.id,
-        tagged_entities: [...this.currentConcept.tagged_entities].concat(
-          link.id
-        )
+        entity_links: [...this.currentConcept.entity_links].concat(link.id)
       }
       this.editConcept(concept)
     }
