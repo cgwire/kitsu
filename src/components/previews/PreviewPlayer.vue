@@ -498,6 +498,9 @@
         >
           <router-link :to="entityPath(entity, 'asset')">
             {{ entity.name }}
+            <button class="action" @click.prevent="onRemoveLink(entity)">
+              <trash2-icon size="0.6x" />
+            </button>
           </router-link>
         </li>
       </ul>
@@ -549,7 +552,7 @@ import { annotationMixin } from '@/components/mixins/annotation'
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { domMixin } from '@/components/mixins/dom'
 
-import { ArrowUpRightIcon, DownloadIcon } from 'vue-feather-icons'
+import { ArrowUpRightIcon, DownloadIcon, Trash2Icon } from 'vue-feather-icons'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import BrowsingBar from '@/components/previews/BrowsingBar'
 import ColorPicker from '@/components/widgets/ColorPicker'
@@ -580,6 +583,7 @@ export default {
     PreviewViewer,
     RevisionPreview,
     TaskInfo,
+    Trash2Icon,
     VideoProgress
   },
 
@@ -1003,7 +1007,11 @@ export default {
   },
 
   methods: {
-    ...mapActions(['refreshPreview', 'updateRevisionPreviewPosition']),
+    ...mapActions([
+      'editConcept',
+      'refreshPreview',
+      'updateRevisionPreviewPosition'
+    ]),
     formatFrame,
     formatTime,
 
@@ -1692,6 +1700,16 @@ export default {
         .filter(Boolean)
     },
 
+    onRemoveLink(link) {
+      const concept = {
+        id: this.currentConcept.id,
+        entity_links: this.currentConcept.entity_links.filter(
+          id => id !== link.id
+        )
+      }
+      this.editConcept(concept)
+    },
+
     // Events
 
     onKeyDown(event) {
@@ -2347,10 +2365,30 @@ export default {
   letter-spacing: 1px;
 
   .tag {
-    cursor: pointer;
+    display: inline-flex;
+    gap: 1em;
+
+    .action {
+      background: $light-grey;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: none;
+      height: 14px;
+      width: 14px;
+      line-height: 8px;
+
+      &:hover {
+        background: $dark-grey-lighter;
+      }
+    }
 
     &:hover {
       transform: scale(1.1);
+
+      .action {
+        display: inline-block;
+      }
     }
   }
 }
