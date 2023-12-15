@@ -291,7 +291,6 @@
                     backgroundColor: getConceptTaskStatus(concept).color,
                     color: 'white'
                   }"
-                  v-if="getConceptTaskStatus(concept)"
                 >
                   {{ getConceptTaskStatus(concept).short_name }}
                 </span>
@@ -617,7 +616,7 @@ export default {
     },
 
     getConceptTaskStatus(concept) {
-      return this.taskStatusMap.get(concept.tasks?.[0].task_status_id)
+      return this.taskStatusMap.get(concept.tasks[0].task_status_id)
     },
 
     onEditClicked() {

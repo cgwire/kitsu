@@ -31,6 +31,8 @@ export default {
   },
 
   getEntityLinked(entity) {
-    return client.pget(`/api/data/entities/${entity.id}/entity-linked`)
+    return client.pget(
+      `/api/data/entities/${entity.id}/entities-linked/with-tasks`
+    )
   }
 }
