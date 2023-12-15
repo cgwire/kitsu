@@ -1844,9 +1844,11 @@ div.assignation {
   gap: 10px;
   margin-left: 0;
   min-height: 21px;
+  font-weight: 500;
+  letter-spacing: 1px;
 
   .tag {
-    display: inline- flex;
+    display: inline-flex;
     gap: 1em;
     border: 1px solid $light-green;
 
