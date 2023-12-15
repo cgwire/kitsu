@@ -31,9 +31,7 @@
             :title="$t('menu.assign_tasks')"
             @click="selectBar('assignation')"
             v-if="
-              (isCurrentViewSingleEntity ||
-                isCurrentViewEntity ||
-                isCurrentViewConcept) &&
+              (isCurrentViewSingleEntity || isCurrentViewEntity) &&
               (isCurrentUserManager ||
                 isSupervisorInDepartment ||
                 isInDepartment ||
