@@ -20,12 +20,12 @@
             />
             <span class="field small">
               <label class="label">
-                {{ $t('tasks.fields.assignees') }}
+                {{ $t('concepts.fields.assigner') }}
               </label>
               <people-field
                 :big="true"
-                :people="assignees"
-                v-model="filters.assignee"
+                :people="assigners"
+                v-model="filters.assigner"
               />
             </span>
             <combobox
@@ -103,15 +103,11 @@
                   >
                     {{ getTaskStatus(concept).short_name }}
                   </span>
-                  <div class="assignees">
-                    <people-avatar
-                      :key="`${concept.id}-${personId}`"
-                      :person="personMap.get(personId)"
-                      :size="25"
-                      :font-size="14"
-                      v-for="personId in concept.tasks[0].assignees"
-                    />
-                  </div>
+                  <people-avatar
+                    :person="personMap.get(concept.tasks[0].assigner_id)"
+                    :size="25"
+                    :font-size="14"
+                  />
                 </div>
               </div>
             </li>
@@ -198,10 +194,10 @@ export default {
         loadingConcepts: false
       },
       filters: {
-        taskStatusId: null,
-        assignee: null,
+        assigner: null,
         entityType: null,
-        sortBy: 'created_at'
+        sortBy: 'created_at',
+        taskStatusId: null
       },
       form: {
         file: null
@@ -223,8 +219,9 @@ export default {
   },
 
   mounted() {
-    this.setSearch(this.$route.query.search)
-    this.searchField.focus()
+    // TODO: concept search
+    // this.setSearch(this.$route.query.search)
+    // this.searchField.focus()
   },
 
   computed: {
@@ -239,21 +236,20 @@ export default {
       'taskStatusMap'
     ]),
 
-    assignees() {
-      const assignees = new Map()
+    assigners() {
+      const assigners = new Map()
       this.filteredConcepts.forEach(concept => {
         concept.tasks.forEach(task => {
-          task.assignees.forEach(personId => {
-            if (!assignees.has(personId)) {
-              const person = this.personMap.get(personId)
-              if (person) {
-                assignees.set(personId, person)
-              }
+          const personId = task.assigner_id
+          if (!assigners.has(personId)) {
+            const person = this.personMap.get(personId)
+            if (person) {
+              assigners.set(personId, person)
             }
-          })
+          }
         })
       })
-      return sortByName([...assignees.values()])
+      return sortByName([...assigners.values()])
     },
 
     currentTask() {
@@ -296,9 +292,9 @@ export default {
             concept.tasks[0].task_status_id === this.filters.taskStatusId
         )
       }
-      if (this.filters.assignee) {
+      if (this.filters.assigner) {
         concepts = concepts.filter(concept =>
-          concept.tasks[0].assignees.includes(this.filters.assignee.id)
+          concept.tasks[0].assigner_id.includes(this.filters.assigner.id)
         )
       }
       if (this.filters.entityType) {
@@ -584,11 +580,6 @@ export default {
 
       .tag {
         text-transform: uppercase;
-      }
-
-      .assignees {
-        display: flex;
-        gap: 5px;
       }
     }
   }

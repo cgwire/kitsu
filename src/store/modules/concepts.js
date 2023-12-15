@@ -24,17 +24,11 @@ const helpers = {
     return task
   },
 
-  populateConcept(concept, personMap) {
+  populateConcept(concept) {
     concept.full_name = 'Concept'
-    concept.last_comment_date = concept.tasks[0].last_comment_date
-    concept.tasks.forEach(task => {
+    concept.last_comment_date = concept.tasks?.[0]?.last_comment_date
+    concept.tasks?.forEach(task => {
       helpers.populateTask(task, concept)
-      // Sort assignees by name
-      if (task.assignees.length > 1) {
-        task.assignees = task.assignees.sort((a, b) =>
-          personMap.get(a).name.localeCompare(personMap.get(b).name)
-        )
-      }
     })
   }
 }
@@ -65,10 +59,9 @@ const actions = {
   async loadConcepts({ commit, rootGetters }) {
     commit(LOAD_CONCEPTS_START)
     try {
-      const personMap = rootGetters.personMap
       const production = rootGetters.currentProduction
       const concepts = await conceptsApi.getConcepts(production)
-      commit(LOAD_CONCEPTS_END, { concepts, personMap })
+      commit(LOAD_CONCEPTS_END, { concepts })
     } catch (err) {
       console.error(err)
       commit(LOAD_CONCEPTS_ERROR)
@@ -84,16 +77,11 @@ const actions = {
     }
   },
 
-  async newConcepts({ commit, dispatch, rootGetters }, forms) {
-    return Promise.all(
-      forms.map(form => {
-        return dispatch('newConcept', form)
-      })
-    )
+  async newConcepts({ dispatch }, forms) {
+    return Promise.all(forms.map(form => dispatch('newConcept', form)))
   },
 
   async newConcept({ commit, dispatch, rootGetters }, form) {
-    const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
 
     // Create Entity
@@ -122,17 +110,9 @@ const actions = {
     })
     await dispatch('setLastTaskPreview', task.id)
 
-    // Assign Task to current User
-    const currentUser = rootGetters.user.id
-    await dispatch('assignSelectedTasks', {
-      personId: currentUser,
-      taskIds: [task.id]
-    })
-    task.assignees = [currentUser]
-
     concept.tasks = [task]
     concept.preview_file_id = preview.id
-    helpers.populateConcept(concept, personMap)
+    helpers.populateConcept(concept)
 
     commit(EDIT_CONCEPT_END, concept)
     return concept
@@ -209,10 +189,8 @@ const mutations = {
     state.displayedConcepts = []
   },
 
-  [LOAD_CONCEPTS_END](state, { concepts, personMap }) {
-    concepts.forEach(concept => {
-      helpers.populateConcept(concept, personMap)
-    })
+  [LOAD_CONCEPTS_END](state, { concepts }) {
+    concepts.forEach(helpers.populateConcept)
     state.concepts = concepts
     state.conceptMap = new Map(concepts.map(concept => [concept.id, concept]))
     state.displayedConcepts = concepts
@@ -259,6 +237,7 @@ const mutations = {
   },
 
   [LOAD_LINKED_CONCEPTS_END](state, { concepts }) {
+    concepts.forEach(helpers.populateConcept)
     state.linkedConcepts = concepts
   },
 
