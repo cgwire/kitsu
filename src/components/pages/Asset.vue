@@ -257,22 +257,25 @@
         </div>
 
         <div
-          class="concepts mt1"
+          class="concepts"
           v-show="currentSection === 'concepts'"
           v-if="currentAsset"
         >
-          <combobox-styled
-            class="section-combo flexrow-item"
-            :options="conceptStatusOptions"
+          <combobox-status
+            :label="$t('main.status')"
+            :task-status-list="taskStatusList"
             v-model="currentConceptStatus"
           />
+          <div class="concept-type">
+            {{ $t('concepts.title') }} ({{ filteredLinkedConcepts.length }})
+          </div>
           <div class="concept-list mt1">
-            <template v-if="linkedConcepts.length">
+            <template v-if="filteredLinkedConcepts.length">
               <router-link
                 class="concept-link"
                 :key="concept.id"
                 :to="conceptPath(concept)"
-                v-for="concept in linkedConcepts"
+                v-for="concept in filteredLinkedConcepts"
               >
                 <entity-thumbnail
                   class="entity-thumbnail"
@@ -288,6 +291,7 @@
                     backgroundColor: getConceptTaskStatus(concept).color,
                     color: 'white'
                   }"
+                  v-if="getConceptTaskStatus(concept)"
                 >
                   {{ getConceptTaskStatus(concept).short_name }}
                 </span>
@@ -354,12 +358,16 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { CornerLeftUpIcon } from 'vue-feather-icons'
+
+import { sortByName } from '@/lib/sorting'
+
 import { entityMixin } from '@/components/mixins/entity'
 import { formatListMixin } from '@/components/mixins/format'
 
-import { CornerLeftUpIcon } from 'vue-feather-icons'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EditAssetModal from '@/components/modals/EditAssetModal'
@@ -382,6 +390,7 @@ export default {
     ComboboxNumber,
     CornerLeftUpIcon,
     ComboboxStyled,
+    ComboboxStatus,
     DescriptionCell,
     EditAssetModal,
     EntityNews,
@@ -421,9 +430,6 @@ export default {
   mounted() {
     this.clearSelectedTasks()
     this.init()
-
-    // FIXME: waiting for a new API to load concepts by entity
-    this.loadConcepts()
   },
 
   computed: {
@@ -437,6 +443,7 @@ export default {
       'getTaskTypePriority',
       'isTVShow',
       'isCurrentUserManager',
+      'linkedConcepts',
       'route',
       'taskMap',
       'taskStatusMap',
@@ -543,6 +550,21 @@ export default {
       )
     },
 
+    taskStatusList() {
+      const allStatusItem = {
+        id: null,
+        color: '#999',
+        name: this.$t('main.all'),
+        short_name: this.$t('main.all')
+      }
+      const conceptTaskStatusList = sortByName(
+        Array.from(this.taskStatusMap.values()).filter(
+          status => status.for_concept
+        )
+      )
+      return [allStatusItem].concat(conceptTaskStatusList)
+    },
+
     conceptStatusOptions() {
       // TODO: link to data store
       return [
@@ -553,16 +575,12 @@ export default {
       ]
     },
 
-    linkedConcepts() {
-      const conceptIds = this.currentAsset?.entity_links || []
-      const concepts = conceptIds
-        .map(id => this.conceptMap.get(id))
-        .filter(Boolean)
+    filteredLinkedConcepts() {
       return this.currentConceptStatus
-        ? concepts.filter(
-            concept => concept.status === this.currentConceptStatus
+        ? this.linkedConcepts.filter(
+            ({ status }) => status === this.currentConceptStatus
           )
-        : concepts
+        : this.linkedConcepts
     }
   },
 
@@ -574,7 +592,7 @@ export default {
       'loadAssets',
       'loadAssetCastIn',
       'loadAssetCasting',
-      'loadConcepts',
+      'loadLinkedConcepts',
       'loadShots',
       'setCurrentEpisode'
     ]),
@@ -599,7 +617,7 @@ export default {
     },
 
     getConceptTaskStatus(concept) {
-      return this.taskStatusMap.get(concept.tasks[0].task_status_id)
+      return this.taskStatusMap.get(concept.tasks?.[0].task_status_id)
     },
 
     onEditClicked() {
@@ -638,6 +656,7 @@ export default {
           .then(() => {
             this.castIn.isLoading = false
           })
+          .then(() => this.loadLinkedConcepts(this.currentAsset))
           .catch(err => {
             this.castIn.isError = true
             this.castIn.isLoading = false
@@ -681,6 +700,7 @@ export default {
               .then(() => {
                 this.castIn.isLoading = false
               })
+              .then(() => this.loadLinkedConcepts(this.currentAsset))
               .catch(err => {
                 this.castIn.isLoading = false
                 this.castIn.isError = true
@@ -771,7 +791,8 @@ h2.subtitle {
 }
 
 .asset-casting,
-.asset-casted-in {
+.asset-casted-in,
+.concepts {
   overflow-y: auto;
   margin-top: 1em;
 }
@@ -785,6 +806,7 @@ h2.subtitle {
 }
 
 .asset-type,
+.concept-type,
 .shot-sequence {
   text-transform: uppercase;
   font-size: 1.2em;

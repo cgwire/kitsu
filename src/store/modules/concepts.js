@@ -10,6 +10,9 @@ import {
   DELETE_CONCEPT_END,
   ADD_SELECTED_CONCEPTS,
   CLEAR_SELECTED_CONCEPTS,
+  LOAD_LINKED_CONCEPTS_START,
+  LOAD_LINKED_CONCEPTS_ERROR,
+  LOAD_LINKED_CONCEPTS_END,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -39,9 +42,10 @@ const helpers = {
 const initialState = {
   concepts: [],
   conceptMap: new Map(),
-  displayedConcepts: [],
   conceptSearchText: '',
   conceptSearchQueries: [],
+  displayedConcepts: [],
+  linkedConcepts: [],
   selectedConcepts: new Map()
 }
 
@@ -53,6 +57,7 @@ const getters = {
   concepts: state => state.concepts,
   conceptMap: state => state.conceptMap,
   displayedConcepts: state => state.displayedConcepts,
+  linkedConcepts: state => state.linkedConcepts,
   selectedConcepts: state => state.selectedConcepts
 }
 
@@ -177,6 +182,17 @@ const actions = {
 
   clearSelectedConcepts({ commit }) {
     commit(CLEAR_SELECTED_CONCEPTS)
+  },
+
+  async loadLinkedConcepts({ commit }, entity) {
+    commit(LOAD_LINKED_CONCEPTS_START)
+    try {
+      const concepts = await conceptsApi.getEntityLinked(entity)
+      commit(LOAD_LINKED_CONCEPTS_END, { concepts })
+    } catch (err) {
+      console.error(err)
+      commit(LOAD_LINKED_CONCEPTS_ERROR)
+    }
   }
 }
 
@@ -198,9 +214,7 @@ const mutations = {
       helpers.populateConcept(concept, personMap)
     })
     state.concepts = concepts
-    state.conceptMap = new Map(
-      state.concepts.map(concept => [concept.id, concept])
-    )
+    state.conceptMap = new Map(concepts.map(concept => [concept.id, concept]))
     state.displayedConcepts = concepts
   },
 
@@ -234,6 +248,18 @@ const mutations = {
 
   [CLEAR_SELECTED_CONCEPTS](state) {
     state.selectedConcepts = new Map()
+  },
+
+  [LOAD_LINKED_CONCEPTS_START](state) {
+    state.linkedConcepts = []
+  },
+
+  [LOAD_LINKED_CONCEPTS_ERROR](state) {
+    state.linkedConcepts = []
+  },
+
+  [LOAD_LINKED_CONCEPTS_END](state, { concepts }) {
+    state.linkedConcepts = concepts
   },
 
   [RESET_ALL](state) {

@@ -28,5 +28,9 @@ export default {
 
   deleteConcept(concept) {
     return client.pdel(`/api/data/concepts/${concept.id}?force=true`)
+  },
+
+  getEntityLinked(entity) {
+    return client.pget(`/api/data/entities/${entity.id}/entity-linked`)
   }
 }
