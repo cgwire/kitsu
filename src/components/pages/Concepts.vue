@@ -11,6 +11,7 @@
               placeholder="ex: chara"
               @change="onSearchChange"
               @save="saveSearchQuery"
+              v-if="false"
             />
             <combobox-status
               :label="$t('main.status')"
@@ -31,7 +32,7 @@
               :label="$t('concepts.fields.entity_type')"
               :options="entityTypeOptions"
               v-model="filters.entityType"
-              disabled
+              v-if="false"
             />
             <combobox
               class="right"
@@ -41,7 +42,7 @@
               v-model="filters.sortBy"
             />
           </div>
-          <div class="query-list">
+          <div class="query-list" v-if="false">
             <search-query-list
               :queries="conceptSearchQueries"
               type="concept"
