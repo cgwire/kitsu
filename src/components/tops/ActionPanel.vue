@@ -735,12 +735,15 @@
           {{ $t('breakdown.all_assets') }}
         </h2>
         <div class="filters-area flexrow mb2">
-          <search-field ref="search-field" @change="onSearchAssetChange" />
+          <search-field
+            ref="entity-search-field"
+            @change="onEntitySearchChange"
+          />
           <button-simple
             class="flexrow-item"
             :title="$t('entities.build_filter.title')"
             icon="funnel"
-            @click="modals.isBuildFilterDisplayed = true"
+            @click="modals.buildFilter = true"
           />
         </div>
         <spinner v-if="loading.links" />
@@ -770,6 +773,13 @@
       </div>
     </div>
 
+    <build-filter-modal
+      :active="modals.buildFilter"
+      @confirm="confirmBuildFilter"
+      @cancel="modals.buildFilter = false"
+      v-if="isCurrentViewConcept"
+    />
+
     <view-playlist-modal
       :active="modals.playlist"
       :task-ids="selectedTaskIds"
@@ -781,10 +791,6 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-
-import { intersection } from '@/lib/array'
-import { sortPeople } from '@/lib/sorting'
-import func from '@/lib/func'
 
 import {
   AlertCircleIcon,
@@ -800,6 +806,11 @@ import {
   UserIcon
 } from 'vue-feather-icons'
 
+import { intersection } from '@/lib/array'
+import { sortPeople } from '@/lib/sorting'
+import func from '@/lib/func'
+
+import BuildFilterModal from '@/components/modals/BuildFilterModal'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxModel from '@/components/widgets/ComboboxModel'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
@@ -822,6 +833,7 @@ export default {
 
   components: {
     AlertCircleIcon,
+    BuildFilterModal,
     ButtonSimple,
     CheckSquareIcon,
     ComboboxModel,
@@ -857,6 +869,7 @@ export default {
       taskStatusId: '',
       statusComment: '',
       modals: {
+        buildFilter: false,
         playlist: false
       },
       priorityOptions: [
@@ -1161,13 +1174,18 @@ export default {
 
     availableLinksByType() {
       const assetGroups = [...this.assetsByType]
-      const result = assetGroups.map(assets => ({
-        type: assets[0].asset_type_name,
-        links: assets.map(asset => ({
-          id: asset.id,
-          name: asset.name
-        }))
-      }))
+      const result = assetGroups
+        .map(assets => {
+          if (!assets.length) return
+          return {
+            type: assets[0].asset_type_name,
+            links: assets.map(asset => ({
+              id: asset.id,
+              name: asset.name
+            }))
+          }
+        })
+        .filter(Boolean)
       return result
     }
   },
@@ -1192,6 +1210,7 @@ export default {
       'editConcept',
       'loadAssets',
       'postCustomAction',
+      'setAssetSearch',
       'setLastTaskPreview',
       'subscribeToTask',
       'unassignPersonFromTask',
@@ -1573,8 +1592,14 @@ export default {
       this.editConcept(concept)
     },
 
-    onSearchAssetChange(query) {
-      // TODO: search in available links
+    confirmBuildFilter(query) {
+      this.modals.buildFilter = false
+      this.$refs['entity-search-field'].setValue(query)
+      this.onEntitySearchChange(query)
+    },
+
+    onEntitySearchChange(searchQuery) {
+      this.setAssetSearch(searchQuery)
     },
 
     onSelectLink(link) {
