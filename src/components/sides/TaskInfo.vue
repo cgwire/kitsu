@@ -1276,6 +1276,7 @@ export default {
         this.loadTaskData()
       }
     },
+
     silent: {
       immediate: true,
       handler() {
@@ -1283,6 +1284,10 @@ export default {
           this.loadTaskData()
         }
       }
+    },
+
+    currentFrame() {
+      this.currentFrameRaw = this.currentFrame
     }
   },
 

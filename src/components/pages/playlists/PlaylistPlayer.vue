@@ -289,7 +289,7 @@
       <task-info
         ref="task-info"
         class="flexrow-item task-info-column"
-        :current-frame="parseInt(currentFrame)"
+        :current-frame="parseInt(currentFrame) - 1"
         :current-parent-preview="currentPreview"
         :fps="fps"
         :is-preview="false"
