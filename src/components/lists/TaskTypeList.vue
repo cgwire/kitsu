@@ -251,8 +251,9 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import draggable from 'vuedraggable'
+
 import BooleanRep from '@/components/widgets/BooleanRep'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell'
@@ -296,8 +297,6 @@ export default {
     TaskTypeCell
   },
 
-  mounted() {},
-
   computed: {
     ...mapGetters(['getDepartments']),
 
@@ -323,8 +322,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     getTaskTypesForEntity(entity) {
       return this.entries.filter(taskType => taskType.for_entity === entity)
     },
