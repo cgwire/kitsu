@@ -400,7 +400,7 @@ export default {
     },
 
     getLinkedEntities(concept) {
-      return concept.entity_links
+      return concept.entity_concept_links
         .map(id => this.assetMap.get(id))
         .filter(Boolean)
     },
@@ -472,7 +472,7 @@ export default {
       handler() {
         // HACK: the store init a wrong current production by default
         const productionId = this.$route.params.production_id
-        if (this.currentProduction.id === productionId) {
+        if (this.currentProduction?.id === productionId) {
           this.reset()
         }
       }

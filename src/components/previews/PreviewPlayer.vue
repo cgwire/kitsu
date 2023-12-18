@@ -1695,7 +1695,7 @@ export default {
     },
 
     getLinkedEntities(concept) {
-      return concept.entity_links
+      return concept.entity_concept_links
         .map(id => this.assetMap.get(id))
         .filter(Boolean)
     },
@@ -1703,7 +1703,7 @@ export default {
     onRemoveLink(link) {
       const concept = {
         id: this.currentConcept.id,
-        entity_links: this.currentConcept.entity_links.filter(
+        entity_concept_links: this.currentConcept.entity_concept_links.filter(
           id => id !== link.id
         )
       }
