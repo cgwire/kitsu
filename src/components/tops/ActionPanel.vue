@@ -105,7 +105,9 @@
             :title="$t('menu.edit_concepts')"
             @click="selectBar('edit-concepts')"
             v-if="
-              isCurrentViewConcept && isCurrentUserManager && isTaskSelection
+              isCurrentViewConcept &&
+              (isCurrentUserManager || isConceptPublisher) &&
+              isTaskSelection
             "
           >
             <link-icon />
@@ -264,7 +266,10 @@
             }"
             :title="$t('menu.delete_concepts')"
             @click="selectBar('delete-concepts')"
-            v-if="isCurrentViewConcept && isCurrentUserManager"
+            v-if="
+              isCurrentViewConcept &&
+              (isCurrentUserManager || isConceptPublisher)
+            "
           >
             <trash-icon />
           </div>
@@ -1044,6 +1049,10 @@ export default {
           this.isCurrentViewConcept
         )
       )
+    },
+
+    isConceptPublisher() {
+      return this.currentConcept?.created_by === this.user.id
     },
 
     isCurrentViewSingleEntity() {
