@@ -395,7 +395,8 @@ export default {
         entity.id,
         this.currentProduction.id,
         section,
-        episodeId
+        episodeId,
+        { section: 'concepts' }
       )
     },
 
