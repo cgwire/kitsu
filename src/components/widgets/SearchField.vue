@@ -130,10 +130,11 @@ export default {
 
 .search-field {
   margin-right: 0.2em;
+  width: 100%;
 }
 
 .search-input {
-  width: 300px;
+  width: 100%;
   background: inherit;
   color: var(--text);
 }
@@ -168,6 +169,8 @@ export default {
 }
 
 .search-field-wrapper {
+  max-width: 420px;
+  width: 100%;
   border: 1px solid #ddd;
   border-radius: 2em;
   padding: 0.2em 1em;

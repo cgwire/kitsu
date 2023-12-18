@@ -737,7 +737,7 @@
         <h2 class="subtitle">
           {{ $t('breakdown.all_assets') }}
         </h2>
-        <div class="filters-area flexrow mb2">
+        <div class="flexrow mb2">
           <search-field
             ref="entity-search-field"
             @change="onEntitySearchChange"
