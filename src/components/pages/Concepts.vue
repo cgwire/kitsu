@@ -589,5 +589,9 @@ export default {
   display: flex;
   justify-content: center;
   padding: 3em;
+
+  .dark & {
+    background-color: var(--background-alt);
+  }
 }
 </style>

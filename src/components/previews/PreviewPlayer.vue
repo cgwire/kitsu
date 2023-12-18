@@ -2365,22 +2365,18 @@ export default {
   letter-spacing: 1px;
 
   .tag {
-    display: inline-flex;
-    gap: 1em;
+    a {
+      display: inline-flex;
+      gap: 1em;
+      line-height: normal;
+    }
 
     .action {
-      background: $light-grey;
       border-radius: 50%;
-      color: white;
-      cursor: pointer;
       display: none;
       height: 14px;
       width: 14px;
       line-height: 8px;
-
-      &:hover {
-        background: $dark-grey-lighter;
-      }
     }
 
     &:hover {

@@ -733,7 +733,7 @@
       class="flexrow-item is-wide pa1"
       v-if="selectedBar === 'edit-concepts'"
     >
-      <div ref="asset-list" class="concept-tags">
+      <div ref="asset-list" class="concept-links">
         <h2 class="subtitle">
           {{ $t('breakdown.all_assets') }}
         </h2>
@@ -1738,6 +1738,12 @@ export default {
       border-bottom: 1px solid $dark-grey-light;
     }
   }
+
+  .concept-links {
+    background: $dark-grey-light;
+    border: 1px solid #222;
+    box-shadow: 0 0 6px #222;
+  }
 }
 
 .action-topbar {
@@ -1884,18 +1890,11 @@ div.assignation {
     border: 1px solid $light-green;
 
     .action {
-      background: $light-grey;
       border-radius: 50%;
-      color: white;
-      cursor: pointer;
       display: none;
       height: 14px;
       width: 14px;
       line-height: 8px;
-
-      &:hover {
-        background: $dark-grey-lighter;
-      }
     }
 
     &:hover {
@@ -1908,7 +1907,7 @@ div.assignation {
   }
 }
 
-.concept-tags {
+.concept-links {
   overflow-y: auto;
   padding: 1em;
   background: $white;
