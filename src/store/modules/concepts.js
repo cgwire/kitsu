@@ -19,6 +19,7 @@ import {
 const helpers = {
   populateTask(task, concept) {
     Object.assign(task, {
+      entity_name: '',
       project_id: concept.project_id
     })
     return task
