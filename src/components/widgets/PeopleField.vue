@@ -173,7 +173,7 @@ export default {
 }
 
 .v-autocomplete {
-  z-index: 2000;
+  z-index: 205; // +1 relative to the z-index of c-mask
   position: relative;
 }
 

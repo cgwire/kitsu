@@ -71,7 +71,13 @@ export const getEntitiesPath = (productionId, type, episodeId) => {
   return route
 }
 
-export const getEntityPath = (entityId, productionId, section, episodeId) => {
+export const getEntityPath = (
+  entityId,
+  productionId,
+  section,
+  episodeId,
+  query
+) => {
   const route = {
     name: section,
     params: {
@@ -86,6 +92,10 @@ export const getEntityPath = (entityId, productionId, section, episodeId) => {
 
   if (['shot', 'asset', 'edit', 'sequence'].includes(section)) {
     route.params[`${section}_id`] = entityId
+  }
+
+  if (query) {
+    route.query = query
   }
 
   return route
@@ -117,7 +127,8 @@ export const getProductionPath = (
       'quota',
       'team',
       'episodes',
-      'episode-stats'
+      'episode-stats',
+      'concepts'
     ].includes(section)
   ) {
     route = episodifyRoute(route, episodeId || 'all')

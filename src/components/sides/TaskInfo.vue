@@ -45,7 +45,7 @@
 
       <div v-else-if="task">
         <div class="pa1 pb0">
-          <div class="flexrow header-title">
+          <div class="flexrow header-title" v-if="!isConceptTask">
             <task-type-name
               class="flexrow-item task-type"
               :task-type="currentTaskType"
@@ -63,7 +63,7 @@
         <div class="task-columns pa1 pt0" ref="task-columns">
           <div class="task-column preview-column" v-if="isPreview">
             <div class="preview-column-content">
-              <div class="flexrow">
+              <div class="flexrow" v-if="!isConceptTask">
                 <div
                   class="preview-list flexrow w100"
                   v-if="previewOptions.length > 0"
@@ -91,6 +91,7 @@
                 <template v-if="taskPreviews && taskPreviews.length > 0">
                   <preview-player
                     :entity-preview-files="taskEntityPreviews"
+                    :entity-type="entityType"
                     :extra-wide="isExtraWide"
                     :is-assigned="isAssigned"
                     :last-preview-files="taskPreviews"
@@ -128,7 +129,7 @@
                   :user="user"
                   :team="currentTeam"
                   :task="task"
-                  :task-status="getTaskStatusForCurrentUser(task.project_id)"
+                  :task-status="taskStatuses"
                   :light="true"
                   :is-loading="loading.addComment"
                   :previewForms="previewForms"
@@ -214,6 +215,7 @@
           :is-loading="loading.addExtraPreview"
           :is-error="errors.addExtraPreview"
           :form-data="addExtraPreviewFormData"
+          message=""
           @cancel="onCloseExtraPreview"
           @confirm="createExtraPreview"
         />
@@ -442,6 +444,7 @@ export default {
       'previewFormData',
       'productionMap',
       'selectedAssets',
+      'selectedConcepts',
       'selectedEdits',
       'selectedShots',
       'selectedTasks',
@@ -459,7 +462,7 @@ export default {
     },
 
     nbSelectedEntities() {
-      return this.selectedEntities ? this.selectedEntities.size : 0
+      return this.selectedEntities?.size || 0
     },
 
     selectedEntities() {
@@ -516,6 +519,10 @@ export default {
         }
       }
       return false
+    },
+
+    isConceptTask() {
+      return this.entityType === 'Concept'
     },
 
     isPreviewPlayerReadOnly() {
@@ -639,6 +646,15 @@ export default {
       let previewId = null
       previewId = this.currentPreview.id
       return `/api/movies/originals/preview-files/${previewId}.mp4`
+    },
+
+    taskStatuses() {
+      const taskStatuses = this.getTaskStatusForCurrentUser(
+        this.task.project_id
+      )
+      return taskStatuses.filter(
+        status => Boolean(status.for_concept) === this.isConceptTask
+      )
     },
 
     taskTypeStyle() {

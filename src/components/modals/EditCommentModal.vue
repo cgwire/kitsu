@@ -14,9 +14,9 @@
         </h1>
 
         <form @submit.prevent>
-          <combo-box-status
+          <combobox-status
             :label="$t('task_status.title')"
-            :task-status-list="taskStatusForCurrentUser"
+            :task-status-list="taskStatuses"
             v-model="form.task_status_id"
           />
 
@@ -157,7 +157,7 @@ import { XIcon } from 'vue-feather-icons'
 
 import AtTa from 'vue-at/dist/vue-at-textarea'
 import Checklist from '@/components/widgets/Checklist'
-import ComboBoxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import FileUpload from '@/components/widgets/FileUpload'
 import ModalFooter from '@/components/modals/ModalFooter'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
@@ -168,7 +168,7 @@ export default {
   components: {
     AtTa,
     Checklist,
-    ComboBoxStatus,
+    ComboboxStatus,
     FileUpload,
     ModalFooter,
     PeopleAvatar,
@@ -228,7 +228,17 @@ export default {
       'isCurrentUserClient',
       'productionDepartmentIds',
       'taskStatusForCurrentUser'
-    ])
+    ]),
+
+    taskStatuses() {
+      return this.taskStatusForCurrentUser.filter(
+        status => Boolean(status.for_concept) === this.isConceptTask
+      )
+    },
+
+    isConceptTask() {
+      return this.$route.path.includes('concept')
+    }
   },
 
   methods: {

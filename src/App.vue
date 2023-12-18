@@ -775,6 +775,31 @@ h2 {
   color: $blue;
 }
 
+.tags {
+  .tag {
+    background: var(--background-tag);
+    color: var(--text);
+
+    a {
+      color: var(--text);
+    }
+
+    .action {
+      cursor: pointer;
+      background: $light-grey;
+      color: white;
+
+      .dark & {
+        background: $dark-grey;
+      }
+
+      &:hover {
+        background: $dark-grey-lighter;
+      }
+    }
+  }
+}
+
 .timecode {
   border: 1px solid $blue;
   border-radius: 5px;

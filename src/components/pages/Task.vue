@@ -265,6 +265,7 @@
         :is-loading="loading.addExtraPreview"
         :is-error="errors.addExtraPreview"
         :form-data="addExtraPreviewFormData"
+        message=""
         :title="
           task
             ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id).name}`

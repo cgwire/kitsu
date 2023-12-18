@@ -270,7 +270,7 @@
       </div>
       <div
         class="flexrow content-wrapper preview-info"
-        v-if="comment.previews.length > 0"
+        v-if="comment.previews.length > 0 && !isConcept"
       >
         <router-link
           class="flexrow-item round-name revision"
@@ -479,6 +479,10 @@ export default {
       'taskTypeMap',
       'taskStatusMap'
     ]),
+
+    isConcept() {
+      return this.$route.path.includes('concept')
+    },
 
     isEmpty() {
       return (

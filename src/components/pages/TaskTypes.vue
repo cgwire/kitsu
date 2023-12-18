@@ -117,7 +117,11 @@ export default {
     },
 
     listTaskTypes() {
-      return this.isActiveTab ? this.taskTypes : this.archivedTaskTypes
+      const taskTypes = this.isActiveTab
+        ? this.taskTypes
+        : this.archivedTaskTypes
+
+      return taskTypes.filter(taskType => taskType.for_entity !== 'Concept')
     }
   },
 

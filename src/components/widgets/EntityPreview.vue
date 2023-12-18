@@ -30,7 +30,7 @@
       'border-top-left-radius': isRoundedTopBorder ? '10px' : '',
       'border-top-right-radius': isRoundedTopBorder ? '10px' : ''
     }"
-    @click="onPictureClicked()"
+    @click.stop="onPictureClicked()"
     v-else
   >
     <img

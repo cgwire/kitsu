@@ -110,7 +110,7 @@
         <div class="flexrow">
           <combobox-styled
             class="section-combo flexrow-item"
-            :options="entityNavOptions"
+            :options="assetNavOptions"
             v-model="currentSection"
           />
           <span
@@ -190,7 +190,7 @@
             </div>
           </div>
           <table-info
-            :is-loading="castIn.isLoadin"
+            :is-loading="castIn.isLoading"
             :is-error="castIn.isError"
             v-else
           />
@@ -257,6 +257,52 @@
         </div>
 
         <div
+          class="concepts"
+          v-show="currentSection === 'concepts'"
+          v-if="currentAsset"
+        >
+          <combobox-status
+            :label="$t('main.status')"
+            :task-status-list="taskStatusList"
+            v-model="currentConceptStatus"
+          />
+          <div class="concept-type">
+            {{ $t('concepts.title') }} ({{ filteredLinkedConcepts.length }})
+          </div>
+          <div class="concept-list mt1">
+            <template v-if="filteredLinkedConcepts.length">
+              <router-link
+                class="concept-link"
+                :key="concept.id"
+                :to="conceptPath(concept)"
+                v-for="concept in filteredLinkedConcepts"
+              >
+                <entity-thumbnail
+                  class="entity-thumbnail"
+                  :entity="concept"
+                  :square="true"
+                  :empty-width="103"
+                  :empty-height="103"
+                  :with-link="false"
+                />
+                <span
+                  class="tag"
+                  :style="{
+                    backgroundColor: getConceptTaskStatus(concept).color,
+                    color: 'white'
+                  }"
+                >
+                  {{ getConceptTaskStatus(concept).short_name }}
+                </span>
+              </router-link>
+            </template>
+            <div v-else>
+              {{ $t('assets.no_concept') }}
+            </div>
+          </div>
+        </div>
+
+        <div
           class="schedule mt1"
           v-if="scheduleItems[0].children.length > 0"
           v-show="currentSection === 'schedule'"
@@ -311,12 +357,16 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { CornerLeftUpIcon } from 'vue-feather-icons'
+
+import { sortByName } from '@/lib/sorting'
+
 import { entityMixin } from '@/components/mixins/entity'
 import { formatListMixin } from '@/components/mixins/format'
 
-import { CornerLeftUpIcon } from 'vue-feather-icons'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EditAssetModal from '@/components/modals/EditAssetModal'
@@ -339,6 +389,7 @@ export default {
     ComboboxNumber,
     CornerLeftUpIcon,
     ComboboxStyled,
+    ComboboxStatus,
     DescriptionCell,
     EditAssetModal,
     EntityNews,
@@ -357,6 +408,7 @@ export default {
     return {
       currentAsset: null,
       currentTask: null,
+      currentConceptStatus: null,
       castIn: {
         isLoading: false,
         isError: false
@@ -384,13 +436,16 @@ export default {
       'assetMap',
       'assetSearchText',
       'assetMetadataDescriptors',
+      'conceptMap',
       'currentEpisode',
       'currentProduction',
       'getTaskTypePriority',
       'isTVShow',
       'isCurrentUserManager',
+      'linkedConcepts',
       'route',
       'taskMap',
+      'taskStatusMap',
       'taskTypeMap',
       'shotId'
     ]),
@@ -486,6 +541,36 @@ export default {
         route.params.episode_id = this.currentEpisode.id
       }
       return route
+    },
+
+    assetNavOptions() {
+      return [{ label: 'Concepts', value: 'concepts' }].concat(
+        this.entityNavOptions
+      )
+    },
+
+    taskStatusList() {
+      const allStatusItem = {
+        id: null,
+        color: '#999',
+        name: this.$t('main.all'),
+        short_name: this.$t('main.all')
+      }
+      const conceptTaskStatusList = sortByName(
+        Array.from(this.taskStatusMap.values()).filter(
+          status => status.for_concept
+        )
+      )
+      return [allStatusItem].concat(conceptTaskStatusList)
+    },
+
+    filteredLinkedConcepts() {
+      return this.currentConceptStatus
+        ? this.linkedConcepts.filter(
+            concept =>
+              concept.tasks[0].task_status_id === this.currentConceptStatus
+          )
+        : this.linkedConcepts
     }
   },
 
@@ -497,6 +582,7 @@ export default {
       'loadAssets',
       'loadAssetCastIn',
       'loadAssetCasting',
+      'loadLinkedConcepts',
       'loadShots',
       'setCurrentEpisode'
     ]),
@@ -518,6 +604,10 @@ export default {
           return resolve(asset)
         }
       })
+    },
+
+    getConceptTaskStatus(concept) {
+      return this.taskStatusMap.get(concept.tasks[0].task_status_id)
     },
 
     onEditClicked() {
@@ -556,12 +646,22 @@ export default {
           .then(() => {
             this.castIn.isLoading = false
           })
+          .then(() => this.loadLinkedConcepts(this.currentAsset))
           .catch(err => {
             this.castIn.isError = true
             this.castIn.isLoading = false
             console.error(err)
           })
       })
+    },
+
+    conceptPath(concept) {
+      return {
+        name: 'concepts',
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
     },
 
     shotPath(shot) {
@@ -588,6 +688,7 @@ export default {
               .then(() => {
                 this.castIn.isLoading = false
               })
+              .then(() => this.loadLinkedConcepts(this.currentAsset))
               .catch(err => {
                 this.castIn.isLoading = false
                 this.castIn.isError = true
@@ -678,7 +779,8 @@ h2.subtitle {
 }
 
 .asset-casting,
-.asset-casted-in {
+.asset-casted-in,
+.concepts {
   overflow-y: auto;
   margin-top: 1em;
 }
@@ -692,6 +794,7 @@ h2.subtitle {
 }
 
 .asset-type,
+.concept-type,
 .shot-sequence {
   text-transform: uppercase;
   font-size: 1.2em;
@@ -701,10 +804,15 @@ h2.subtitle {
 }
 
 .asset-list,
-.shot-list {
+.shot-list,
+.concept-list {
   color: var(--text);
   display: flex;
   flex-wrap: wrap;
+}
+
+.concept-list {
+  gap: 10px;
 }
 
 .asset-link,
@@ -725,6 +833,14 @@ h2.subtitle {
 .asset-link span,
 .shot-link span {
   word-wrap: break-word;
+}
+
+.concept-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
 }
 
 .field-label {

@@ -100,6 +100,7 @@
           :silent="isCommentsHidden"
           :current-frame="currentFrame"
           :current-parent-preview="currentPreview"
+          :entity-type="entityType"
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
           v-show="!isCommentsHidden"
@@ -205,7 +206,7 @@
           </div>
         </div>
 
-        <div class="flexrow flexrow-item">
+        <div class="flexrow flexrow-item" v-if="!isConcept">
           <button-simple
             class="ml1"
             :active="isComparing"
@@ -255,7 +256,7 @@
               class="flexrow-item"
               icon="undo"
               :title="$t('playlists.actions.annotation_undo')"
-              v-if="!readOnly && fullScreen"
+              v-if="!readOnly && fullScreen && !isConcept"
               @click="undoLastAction"
             />
 
@@ -263,7 +264,7 @@
               class="flexrow-item flexrow-item"
               :title="$t('playlists.actions.annotation_redo')"
               icon="redo"
-              v-if="!readOnly && fullScreen"
+              v-if="!readOnly && fullScreen && !isConcept"
               @click="redoLastAction"
             />
 
@@ -272,7 +273,7 @@
               icon="remove"
               :title="$t('playlists.actions.annotation_delete')"
               @click="onDeleteClicked"
-              v-if="!readOnly && fullScreen"
+              v-if="!readOnly && fullScreen && !isConcept"
             />
 
             <transition name="slide">
@@ -295,7 +296,7 @@
               :active="isTyping"
               :title="$t('playlists.actions.annotation_text')"
               @click="onTypeClicked"
-              v-if="!readOnly && (!light || fullScreen)"
+              v-if="!readOnly && (!light || fullScreen) && !isConcept"
             />
 
             <transition name="slide">
@@ -326,7 +327,7 @@
               :active="isDrawing"
               :title="$t('playlists.actions.annotation_draw')"
               @click="onPencilAnnotateClicked"
-              v-if="!readOnly && (!light || fullScreen)"
+              v-if="!readOnly && (!light || fullScreen) && !isConcept"
             />
 
             <button-simple
@@ -334,7 +335,9 @@
               :title="$t('playlists.actions.toggle_annotations')"
               :active="isAnnotationsDisplayed"
               @click="onAnnotationDisplayedClicked"
-              v-if="(isPicture || isMovie) && (!light || fullScreen)"
+              v-if="
+                (isPicture || isMovie) && (!light || fullScreen) && !isConcept
+              "
             />
 
             <button-simple
@@ -343,7 +346,7 @@
               :active="isZoomPan"
               :title="$t('playlists.actions.annotation_zoom_pan')"
               @click="onZoomPanClicked"
-              v-if="!light || fullScreen"
+              v-if="(!light || fullScreen) && !isConcept"
             />
 
             <button-simple
@@ -444,20 +447,18 @@
             @previous-clicked="onPreviousClicked"
             @remove-preview-clicked="onRemovePreviewClicked"
             @current-index-clicked="isOrdering = !isOrdering"
-            v-if="currentPreview"
+            v-if="currentPreview && !isConcept"
           />
 
-          <div class="flexrow">
-            <div class="flexrow" v-if="fullScreen">
-              <combobox-styled
-                class="preview-combo flexrow-item"
-                :options="lastPreviewFileOptions"
-                is-reversed
-                is-preview
-                thin
-                @input="changeCurrentPreviewFile"
-              />
-            </div>
+          <div class="flexrow" v-if="fullScreen && !isConcept">
+            <combobox-styled
+              class="preview-combo flexrow-item"
+              :options="lastPreviewFileOptions"
+              is-reversed
+              is-preview
+              thin
+              @input="changeCurrentPreviewFile"
+            />
           </div>
 
           <div
@@ -486,6 +487,23 @@
           />
         </div>
       </div>
+    </div>
+
+    <div class="flexrow" v-if="isConcept && conceptLinkedEntities.length">
+      <ul class="tags">
+        <li
+          class="tag"
+          :key="entity.id"
+          v-for="entity in conceptLinkedEntities"
+        >
+          <router-link :to="entityPath(entity, 'asset')">
+            {{ entity.name }}
+            <button class="action" @click.prevent="onRemoveLink(entity)">
+              <trash2-icon size="0.6x" />
+            </button>
+          </router-link>
+        </li>
+      </ul>
     </div>
 
     <div
@@ -527,13 +545,14 @@ import {
   roundToFrame,
   floorToFrame
 } from '@/lib/video'
+import { getEntityPath } from '@/lib/path'
 import localPreferences from '@/lib/preferences'
 
 import { annotationMixin } from '@/components/mixins/annotation'
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { domMixin } from '@/components/mixins/dom'
 
-import { ArrowUpRightIcon, DownloadIcon } from 'vue-feather-icons'
+import { ArrowUpRightIcon, DownloadIcon, Trash2Icon } from 'vue-feather-icons'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import BrowsingBar from '@/components/previews/BrowsingBar'
 import ColorPicker from '@/components/widgets/ColorPicker'
@@ -564,6 +583,7 @@ export default {
     PreviewViewer,
     RevisionPreview,
     TaskInfo,
+    Trash2Icon,
     VideoProgress
   },
 
@@ -611,6 +631,9 @@ export default {
     extraWide: {
       type: Boolean,
       default: false
+    },
+    entityType: {
+      type: String
     }
   },
 
@@ -712,10 +735,12 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetMap',
       'currentProduction',
       'isCurrentUserArtist',
       'organisation',
       'productionBackgrounds',
+      'selectedConcepts',
       'user'
     ]),
 
@@ -809,6 +834,10 @@ export default {
 
     extension() {
       return this.currentPreview ? this.currentPreview.extension : ''
+    },
+
+    isConcept() {
+      return this.entityType === 'Concept'
     },
 
     isPicture() {
@@ -966,11 +995,23 @@ export default {
             (this.isDefaultBackground(background) ? ` (${defaultFlag})` : '')
         }))
       ]
+    },
+
+    currentConcept() {
+      return this.selectedConcepts.values().next().value
+    },
+
+    conceptLinkedEntities() {
+      return this.getLinkedEntities(this.currentConcept)
     }
   },
 
   methods: {
-    ...mapActions(['refreshPreview', 'updateRevisionPreviewPosition']),
+    ...mapActions([
+      'editConcept',
+      'refreshPreview',
+      'updateRevisionPreviewPosition'
+    ]),
     formatFrame,
     formatTime,
 
@@ -1641,6 +1682,34 @@ export default {
       return files
     },
 
+    // Concepts
+
+    entityPath(entity, section) {
+      const episodeId = this.isTVShow ? entity.episode_id || 'main' : null
+      return getEntityPath(
+        entity.id,
+        this.currentProduction.id,
+        section,
+        episodeId
+      )
+    },
+
+    getLinkedEntities(concept) {
+      return concept.entity_concept_links
+        .map(id => this.assetMap.get(id))
+        .filter(Boolean)
+    },
+
+    onRemoveLink(link) {
+      const concept = {
+        id: this.currentConcept.id,
+        entity_concept_links: this.currentConcept.entity_concept_links.filter(
+          id => id !== link.id
+        )
+      }
+      this.editConcept(concept)
+    },
+
     // Events
 
     onKeyDown(event) {
@@ -2284,6 +2353,40 @@ export default {
 
 .viewers {
   display: flex;
+}
+
+.tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 1rem;
+  margin-left: 0;
+  font-weight: 500;
+  letter-spacing: 1px;
+
+  .tag {
+    a {
+      display: inline-flex;
+      gap: 1em;
+      line-height: normal;
+    }
+
+    .action {
+      border-radius: 50%;
+      display: none;
+      height: 14px;
+      width: 14px;
+      line-height: 8px;
+    }
+
+    &:hover {
+      transform: scale(1.1);
+
+      .action {
+        display: inline-block;
+      }
+    }
+  }
 }
 
 #resize-annotation-canvas,

@@ -32,6 +32,7 @@
             active: mode === 'publish'
           }"
           @click="mode = 'publish'"
+          v-if="!isConcept"
         >
           {{ $t('tasks.publish_revision') }}
         </span>
@@ -455,6 +456,10 @@ export default {
         this.taskStatus.find(t => t.id === this.task_status_id) ||
         this.taskStatus[0]
       return status.is_retake && this.checklist.length === 0
+    },
+
+    isConcept() {
+      return this.$route.path.includes('concept')
     },
 
     isValidForm() {

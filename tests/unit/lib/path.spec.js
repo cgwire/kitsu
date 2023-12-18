@@ -191,6 +191,16 @@ describe('path', () => {
         asset_id: 1
       }
     })
+    expect(getEntityPath(1, 2, 'asset', null, { param: 'test' })).toEqual({
+      name: 'asset',
+      params: {
+        production_id: 2,
+        asset_id: 1
+      },
+      query: {
+        param: 'test'
+      }
+    })
     expect(getEntityPath(1, 2, 'shot', 3)).toEqual({
       name: 'episode-shot',
       params: {

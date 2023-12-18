@@ -441,6 +441,14 @@ export default {
         options.push({ label: 'Episodes', value: 'episodes' })
       }
 
+      options = options.concat([{ label: 'separator', value: 'separator' }])
+
+      if (!this.isCurrentUserClient) {
+        options = options.concat([
+          { label: this.$t('concepts.title'), value: 'concepts' }
+        ])
+      }
+
       if (!this.isCurrentUserClient) {
         options = options.concat([
           { label: this.$t('breakdown.title'), value: 'breakdown' }

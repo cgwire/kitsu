@@ -18,6 +18,7 @@ export default {
     new_assets: 'Create assets',
     new_success: 'Asset {name} successfully created.',
     no_cast_in: 'This asset is not cast in any shot.',
+    no_concept: 'No concepts linked to this asset',
     number: 'asset | assets',
     restore_text: 'Are you sure you want to restore {name} from your archive?',
     restore_error: 'An error occurred while restoring this asset.',
@@ -131,6 +132,27 @@ export default {
       person: 'Person name',
       checklist: 'Checklist',
       acknowledgements: 'Acknowledgements'
+    }
+  },
+
+  concepts: {
+    add_new_concept: 'Add a new reference to concepts',
+    add_concept: 'Add files for new concepts',
+    add_concept_error: 'An error occurred while adding concept.',
+    delete_for_selection: 'Delete the selected concept | Delete the {nbSelectedConcepts} selected concepts',
+    empty: 'There are no concepts',
+    multiple_delete_error: 'An error occurred while deleting a concept. There is probably some data linked to a concept. Are you sure there is no task linked to a selected concept?',
+    title: 'Concepts',
+    fields: {
+      entity_type: 'Entity type',
+      created_at: 'Creation date',
+      updated_at: 'Update date',
+      last_comment_date: 'Last comment',
+      publisher: 'Publish by',
+    },
+    actions: {
+      title: 'Links to Concept',
+      empty: 'No links'
     }
   },
 
@@ -572,14 +594,16 @@ export default {
     change_status: 'Change status',
     create_tasks: 'Create tasks',
     delete_assets: 'Delete assets',
-    delete_shots: 'Delete shots',
+    delete_concepts: 'Delete concepts',
     delete_edits: 'Delete edits',
+    delete_shots: 'Delete shots',
     delete_tasks: 'Delete tasks',
+    edit_concepts: "Edit concept links",
     generate_playlist: 'Generate a playlist',
     run_custom_action: 'Run custom action',
     set_estimations: 'Set estimations',
     set_thumbnails: 'Set thumbnails from last preview',
-    subscribe: 'Subscribe to notifications'
+    subscribe: 'Subscribe to notifications',
   },
 
   news: {
@@ -1063,6 +1087,7 @@ export default {
     title: 'Task Status',
     fields: {
       color: 'Color',
+      for_concept: 'For concept',
       is_artist_allowed: 'Is artist allowed',
       is_client_allowed: 'Is client allowed',
       is_done: 'Is done',

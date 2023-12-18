@@ -25,6 +25,7 @@ const Asset = () => import('@/components/pages/Asset.vue')
 const AssetTypes = () => import('@/components/pages/AssetTypes.vue')
 const Backgrounds = () => import('@/components/pages/Backgrounds.vue')
 const Breakdown = () => import('@/components/pages/Breakdown.vue')
+const Concepts = () => import('@/components/pages/Concepts.vue')
 const CustomActions = () => import('@/components/pages/CustomActions.vue')
 const Departments = () => import('@/components/pages/Departments.vue')
 const Edit = () => import('@/components/pages/Edit.vue')
@@ -529,6 +530,12 @@ export const routes = [
             name: 'breakdown-asset-type'
           }
         ]
+      },
+
+      {
+        path: 'productions/:production_id/concepts',
+        component: Concepts,
+        name: 'concepts'
       },
 
       {
