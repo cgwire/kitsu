@@ -144,11 +144,11 @@ export default {
     multiple_delete_error: 'An error occurred while deleting a concept. There is probably some data linked to a concept. Are you sure there is no task linked to a selected concept?',
     title: 'Concepts',
     fields: {
-      assigner: 'Publish by',
       entity_type: 'Entity type',
       created_at: 'Creation date',
       updated_at: 'Update date',
       last_comment_date: 'Last comment',
+      publisher: 'Publish by',
     },
     actions: {
       title: 'Links to Concept',

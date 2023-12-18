@@ -20,12 +20,12 @@
             />
             <span class="field small">
               <label class="label">
-                {{ $t('concepts.fields.assigner') }}
+                {{ $t('concepts.fields.publisher') }}
               </label>
               <people-field
                 :big="true"
-                :people="assigners"
-                v-model="filters.assigner"
+                :people="publishers"
+                v-model="filters.publisher"
               />
             </span>
             <combobox
@@ -104,7 +104,7 @@
                     {{ getTaskStatus(concept).short_name }}
                   </span>
                   <people-avatar
-                    :person="personMap.get(concept.tasks[0].assigner_id)"
+                    :person="personMap.get(concept.created_by)"
                     :size="25"
                     :font-size="14"
                   />
@@ -194,8 +194,8 @@ export default {
         loadingConcepts: false
       },
       filters: {
-        assigner: null,
         entityType: null,
+        publisher: null,
         sortBy: 'created_at',
         taskStatusId: null
       },
@@ -236,20 +236,18 @@ export default {
       'taskStatusMap'
     ]),
 
-    assigners() {
-      const assigners = new Map()
+    publishers() {
+      const publishers = new Map()
       this.filteredConcepts.forEach(concept => {
-        concept.tasks.forEach(task => {
-          const personId = task.assigner_id
-          if (!assigners.has(personId)) {
-            const person = this.personMap.get(personId)
-            if (person) {
-              assigners.set(personId, person)
-            }
+        const personId = concept.created_by
+        if (!publishers.has(personId)) {
+          const person = this.personMap.get(personId)
+          if (person) {
+            publishers.set(personId, person)
           }
-        })
+        }
       })
-      return sortByName([...assigners.values()])
+      return sortByName([...publishers.values()])
     },
 
     currentTask() {
@@ -292,9 +290,9 @@ export default {
             concept.tasks[0].task_status_id === this.filters.taskStatusId
         )
       }
-      if (this.filters.assigner) {
-        concepts = concepts.filter(concept =>
-          concept.tasks[0].assigner_id.includes(this.filters.assigner.id)
+      if (this.filters.publisher) {
+        concepts = concepts.filter(
+          concept => concept.created_by === this.filters.publisher.id
         )
       }
       if (this.filters.entityType) {
