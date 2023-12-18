@@ -564,20 +564,11 @@ export default {
       return [allStatusItem].concat(conceptTaskStatusList)
     },
 
-    conceptStatusOptions() {
-      // TODO: link to data store
-      return [
-        { label: 'All', value: null },
-        { label: 'Neutral', value: 'neutral' },
-        { label: 'Done', value: 'done' },
-        { label: 'Rejected', value: 'rejected' }
-      ]
-    },
-
     filteredLinkedConcepts() {
       return this.currentConceptStatus
         ? this.linkedConcepts.filter(
-            ({ status }) => status === this.currentConceptStatus
+            concept =>
+              concept.tasks[0].task_status_id === this.currentConceptStatus
           )
         : this.linkedConcepts
     }
@@ -665,12 +656,10 @@ export default {
     },
 
     conceptPath(concept) {
-      // TODO: add concept_id to the targeted route
       return {
         name: 'concepts',
         params: {
-          production_id: this.currentProduction.id,
-          concept_id: concept.concept_id
+          production_id: this.currentProduction.id
         }
       }
     },

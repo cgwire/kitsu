@@ -237,7 +237,6 @@ export default {
     },
 
     isConceptTask() {
-      // FIXME: write correct logic
       return this.$route.path.includes('concept')
     }
   },

@@ -1082,7 +1082,6 @@ export default {
     },
 
     isCurrentViewConcept() {
-      // FIXME: write correct logic
       return this.$route.path.includes('concept')
     },
 
