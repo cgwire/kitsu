@@ -102,7 +102,7 @@ import moment from 'moment-timezone'
 import firstBy from 'thenby'
 
 import { populateTask } from '@/lib/models'
-import { sortByName } from '@/lib/sorting'
+import { sortByName, sortPeople } from '@/lib/sorting'
 import { buildSelectionGrid } from '@/lib/selection'
 import { parseDate } from '@/lib/time'
 
@@ -181,16 +181,14 @@ export default {
       })
   },
 
-  afterDestroy() {},
-
   computed: {
     ...mapGetters([
       'nbSelectedTasks',
       'personMap',
       'productionMap',
+      'selectedTasks',
       'taskStatusMap',
-      'taskTypeMap',
-      'selectedTasks'
+      'taskTypeMap'
     ]),
 
     nbTasksToCheck() {
@@ -210,7 +208,7 @@ export default {
           }
         })
       })
-      return assignees
+      return sortPeople(assignees)
     },
 
     episodeOptions() {
