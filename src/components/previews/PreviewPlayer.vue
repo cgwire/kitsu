@@ -737,9 +737,9 @@ export default {
     ...mapGetters([
       'assetMap',
       'currentProduction',
+      'getProductionBackgrounds',
       'isCurrentUserArtist',
       'organisation',
-      'productionBackgrounds',
       'selectedConcepts',
       'user'
     ]),
@@ -995,6 +995,10 @@ export default {
             (this.isDefaultBackground(background) ? ` (${defaultFlag})` : '')
         }))
       ]
+    },
+
+    productionBackgrounds() {
+      return this.getProductionBackgrounds(this.task?.project_id)
     },
 
     currentConcept() {

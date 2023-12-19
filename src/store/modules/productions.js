@@ -167,9 +167,14 @@ const getters = {
     }
   },
 
-  productionBackgrounds: (state, rootState) => {
-    const backgrounds = state.currentProduction?.preview_background_files?.map(
-      id => rootState.backgroundMap.get(id)
+  productionBackgrounds: (state, getters) => {
+    return getters.getProductionBackgrounds(state.currentProduction?.id)
+  },
+
+  getProductionBackgrounds: (state, rootState) => id => {
+    const production = state.productionMap.get(id)
+    const backgrounds = production?.preview_background_files?.map(id =>
+      rootState.backgroundMap.get(id)
     )
     return backgrounds ? sortByName(backgrounds) : []
   },
