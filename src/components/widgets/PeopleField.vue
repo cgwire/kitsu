@@ -130,7 +130,9 @@ export default {
     },
 
     people() {
-      this.item = null
+      this.item = this.item
+        ? this.people.find(person => person.id === this.item.id)
+        : undefined
       this.items = this.people
       this.index = buildNameIndex(this.people)
     }
