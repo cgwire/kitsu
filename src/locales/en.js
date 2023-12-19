@@ -606,6 +606,10 @@ export default {
     subscribe: 'Subscribe to notifications',
   },
 
+  my_checks : {
+    title: 'Task to check | Tasks to check',
+  },
+
   news: {
     all: 'All',
     commented_on: 'commented on',

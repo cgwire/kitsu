@@ -133,11 +133,11 @@
             <td class="assignees" v-if="isToCheck">
               <div class="avatars">
                 <people-avatar
-                  :key="entry.id + '-' + personId"
-                  :person="personMap.get(personId)"
+                  :key="`${entry.id}-${person.id}`"
+                  :person="person"
                   :size="30"
                   :font-size="16"
-                  v-for="personId in entry.assignees"
+                  v-for="person in getSortedPeople(entry.assignees)"
                 />
               </div>
             </td>
@@ -269,12 +269,14 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 
 import { selectionListMixin } from '@/components/mixins/selection'
 import { formatListMixin } from '@/components/mixins/format'
 import { descriptorMixin } from '@/components/mixins/descriptors'
+
 import { PAGE_SIZE } from '@/lib/pagination'
+import { sortPeople } from '@/lib/sorting'
 import { formatSimpleDate } from '@/lib/time'
 
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
@@ -431,8 +433,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     assetEpisodes(entry, full) {
       if (
         ['Episode', 'Sequence', 'Shot', 'Edit'].includes(entry.entity_type_name)
@@ -455,6 +455,11 @@ export default {
       return episodeNames.length > 0
         ? mainEpisodeName + ', ' + episodeNameString
         : mainEpisodeName
+    },
+
+    getSortedPeople(personIds) {
+      const people = personIds.map(id => this.personMap.get(id))
+      return sortPeople(people)
     },
 
     setScrollPosition(scrollPosition) {

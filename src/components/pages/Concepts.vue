@@ -148,7 +148,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { firstBy } from 'thenby'
 
 import { getEntityPath } from '@/lib/path'
-import { sortByName } from '@/lib/sorting'
+import { sortByName, sortPeople } from '@/lib/sorting'
 
 import { searchMixin } from '@/components/mixins/search'
 
@@ -247,7 +247,7 @@ export default {
           }
         }
       })
-      return sortByName([...publishers.values()])
+      return sortPeople([...publishers.values()])
     },
 
     currentTask() {
