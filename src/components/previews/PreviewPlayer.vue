@@ -645,7 +645,7 @@ export default {
       fullScreen: false,
       color: '#ff3860',
       currentBackground: null,
-      currentTime: '00:00.000',
+      currentTime: '00:00:00.00',
       currentTimeRaw: 0,
       isObjectBackground: false,
       isAnnotationsDisplayed: true,
@@ -1105,7 +1105,7 @@ export default {
           this.videoDuration - this.frameDuration
         )
       } else {
-        this.maxDuration = '00:00.000'
+        this.maxDuration = '00:00:00.00'
         this.videoDuration = 0
       }
     },

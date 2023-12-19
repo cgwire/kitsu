@@ -701,9 +701,7 @@ export default {
 
     timeCodeClicked(event) {
       const data = { ...event.target.dataset }
-      const isChromium = !!window.chrome
-      const change = isChromium ? 2 : 1
-      data.frame = data.frame - change
+      data.frame = data.frame - 1
       this.pauseEvent(event)
       this.$emit('time-code-clicked', data)
     },

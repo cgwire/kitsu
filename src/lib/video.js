@@ -40,13 +40,13 @@ export const frameToSeconds = (nbFrames, production, shot) => {
  */
 export const formatTime = seconds => {
   if (seconds < 0) seconds = 0
-  let milliseconds = `${Math.round((seconds % 1) * 1000)}`.padStart(3, '0')
-  milliseconds = '.' + milliseconds
+  let centiseconds = `${Math.round((seconds % 1) * 100)}`.padStart(2, '0')
+  centiseconds = '.' + centiseconds
   try {
-    return new Date(1000 * seconds).toISOString().substr(14, 5) + milliseconds
+    return new Date(1000 * seconds).toISOString().substr(11, 8) + centiseconds
   } catch (err) {
     console.error(err)
-    return '00:00.000'
+    return '00:00:00.00'
   }
 }
 

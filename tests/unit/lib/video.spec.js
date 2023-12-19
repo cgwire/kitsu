@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+
 import {
   formatFrame,
   formatTime,
@@ -43,14 +45,14 @@ describe('video', () => {
   })
 
   it('formatTime', () => {
-    expect(formatTime(0.091)).toBe('00:00.091')
-    expect(formatTime(0.001)).toBe('00:00.001')
-    expect(formatTime(0.900)).toBe('00:00.900')
-    expect(formatTime(0.960)).toBe('00:00.960')
-    expect(formatTime(0.966)).toBe('00:00.966')
-    expect(formatTime(2.416)).toBe('00:02.416')
-    expect(formatTime(2.016)).toBe('00:02.016')
-    expect(formatTime(60.018)).toBe('01:00.018')
-    expect(formatTime(362.018)).toBe('06:02.018')
+    expect(formatTime(0.091)).toBe('00:00:00.09')
+    expect(formatTime(0.001)).toBe('00:00:00.00')
+    expect(formatTime(0.9)).toBe('00:00:00.90')
+    expect(formatTime(0.96)).toBe('00:00:00.96')
+    expect(formatTime(0.966)).toBe('00:00:00.97')
+    expect(formatTime(2.416)).toBe('00:00:02.42')
+    expect(formatTime(2.016)).toBe('00:00:02.02')
+    expect(formatTime(60.018)).toBe('00:01:00.02')
+    expect(formatTime(362.018)).toBe('00:06:02.02')
   })
 })
