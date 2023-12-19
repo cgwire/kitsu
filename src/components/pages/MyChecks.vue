@@ -60,10 +60,10 @@
         </div>
 
         <div class="flexrow">
-          <h1 class="title mt1 flerow-item">
-            {{ nbTasksToCheck }} tasks to check
+          <h1 class="title mt1 flexrow-item filler">
+            {{ nbTasksToCheck }}
+            {{ $tc('my_checks.title', nbTasksToCheck) }}
           </h1>
-          <div class="filler"></div>
           <button-simple
             class="flexrow-item"
             @click="isPlaylist = true"
