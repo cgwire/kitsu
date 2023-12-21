@@ -26,11 +26,9 @@
       width: emptyWidth + 'px',
       'min-width': emptyWidth + 'px',
       height: emptyHeight + 'px',
-      cursor: 'zoom-in',
       'border-top-left-radius': isRoundedTopBorder ? '10px' : '',
       'border-top-right-radius': isRoundedTopBorder ? '10px' : ''
     }"
-    @click.stop="onPictureClicked()"
     v-else
   >
     <img
@@ -45,10 +43,15 @@
       :width="width || ''"
       alt=""
     />
+
+    <span class="view-icon" @click.stop="onPictureClicked()">
+      <eye-icon size="1.2x" />
+    </span>
   </a>
 </template>
 
 <script>
+import { EyeIcon } from 'vue-feather-icons'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import VideoViewer from '@/components/previews/VideoViewer'
 
@@ -57,6 +60,7 @@ export default {
 
   components: {
     ButtonSimple,
+    EyeIcon,
     VideoViewer
   },
 
@@ -200,5 +204,34 @@ span.thumbnail-empty {
 .thumbnail-picture.square {
   width: 100px;
   height: 100px;
+}
+
+span.view-icon {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
+  color: $light-grey-light;
+  display: none;
+  padding: 0.4rem;
+  height: 30px;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 30px;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.75);
+    color: $white;
+  }
+}
+
+.preview-wrapper {
+  position: relative;
+
+  &:hover {
+    span.view-icon {
+      display: block;
+    }
+  }
 }
 </style>
