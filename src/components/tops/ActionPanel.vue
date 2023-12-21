@@ -98,7 +98,7 @@
           </div>
 
           <div
-            class="menu-item"
+            class="menu-item ml05"
             :class="{
               active: selectedBar === 'edit-concepts'
             }"
@@ -536,14 +536,12 @@
             </li>
             <template v-else>
               <li
-                class="tag"
-                v-for="entity in conceptLinkedEntities"
                 :key="entity.id"
+                class="tag"
+                @click="onRemoveLink(entity)"
+                v-for="entity in conceptLinkedEntities"
               >
                 {{ entity.name }}
-                <button class="action" @click="onRemoveLink(entity)">
-                  <trash2-icon size="0.6x" />
-                </button>
               </li>
             </template>
           </ul>
@@ -734,9 +732,7 @@
       v-if="selectedBar === 'edit-concepts'"
     >
       <div ref="asset-list" class="concept-links">
-        <h2 class="subtitle">
-          {{ $t('breakdown.all_assets') }}
-        </h2>
+        <h2 class="subtitle">Add links to assets</h2>
         <div class="flexrow mb2">
           <search-field
             ref="entity-search-field"
@@ -750,7 +746,7 @@
           />
         </div>
         <spinner v-if="loading.links" />
-        <template v-else>
+        <div class="link-list" v-else>
           <ul
             class="link-types"
             :key="`link-types-${index}`"
@@ -772,7 +768,7 @@
               </ul>
             </li>
           </ul>
-        </template>
+        </div>
       </div>
     </div>
 
@@ -805,7 +801,6 @@ import {
   LinkIcon,
   PlayCircleIcon,
   TrashIcon,
-  Trash2Icon,
   UserIcon
 } from 'vue-feather-icons'
 
@@ -854,7 +849,6 @@ export default {
     Spinner,
     UserIcon,
     TrashIcon,
-    Trash2Icon,
     ViewPlaylistModal
   },
 
@@ -1180,18 +1174,20 @@ export default {
 
     availableLinksByType() {
       const assetGroups = [...this.assetsByType]
-      const result = assetGroups
-        .map(assets => {
-          if (!assets.length) return
-          return {
-            type: assets[0].asset_type_name,
-            links: assets.map(asset => ({
+      const result = assetGroups.map(assets => {
+        if (!assets.length) return
+        return {
+          type: assets[0].asset_type_name,
+          links: assets
+            .map(asset => ({
               id: asset.id,
               name: asset.name
             }))
-          }
-        })
-        .filter(Boolean)
+            .filter(asset => {
+              return !this.conceptLinkedEntities.some(e => e.id === asset.id)
+            })
+        }
+      })
       return result
     }
   },
@@ -1887,9 +1883,11 @@ div.assignation {
   letter-spacing: 1px;
 
   .tag {
+    cursor: pointer;
     display: inline-flex;
     gap: 1em;
     border: 1px solid $light-green;
+    transition: transform 0.1s linear;
 
     .action {
       border-radius: 50%;
@@ -1927,6 +1925,11 @@ div.assignation {
     margin-left: 0;
   }
 
+  .link-list {
+    height: 300px;
+    overflow-y: auto;
+  }
+
   .link-type {
     .subtitle {
       text-transform: uppercase;
@@ -1940,6 +1943,7 @@ div.assignation {
     .tag {
       border-color: $light-grey;
       cursor: pointer;
+      transition: transform 0.1s linear;
 
       &:hover {
         transform: scale(1.1);

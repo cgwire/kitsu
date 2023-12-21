@@ -498,9 +498,6 @@
         >
           <router-link :to="entityPath(entity, 'asset')">
             {{ entity.name }}
-            <button class="action" @click.prevent="onRemoveLink(entity)">
-              <trash2-icon size="0.6x" />
-            </button>
           </router-link>
         </li>
       </ul>
@@ -552,7 +549,7 @@ import { annotationMixin } from '@/components/mixins/annotation'
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { domMixin } from '@/components/mixins/dom'
 
-import { ArrowUpRightIcon, DownloadIcon, Trash2Icon } from 'vue-feather-icons'
+import { ArrowUpRightIcon, DownloadIcon } from 'vue-feather-icons'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import BrowsingBar from '@/components/previews/BrowsingBar'
 import ColorPicker from '@/components/widgets/ColorPicker'
@@ -583,7 +580,6 @@ export default {
     PreviewViewer,
     RevisionPreview,
     TaskInfo,
-    Trash2Icon,
     VideoProgress
   },
 
@@ -2369,6 +2365,8 @@ export default {
   letter-spacing: 1px;
 
   .tag {
+    transition: transform 0.1s linear;
+
     a {
       display: inline-flex;
       gap: 1em;
