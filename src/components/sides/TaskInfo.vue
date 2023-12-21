@@ -649,11 +649,9 @@ export default {
     },
 
     taskStatuses() {
-      const taskStatuses = this.getTaskStatusForCurrentUser(
-        this.task.project_id
-      )
-      return taskStatuses.filter(
-        status => Boolean(status.for_concept) === this.isConceptTask
+      return this.getTaskStatusForCurrentUser(
+        this.task.project_id,
+        this.isConceptTask
       )
     },
 
