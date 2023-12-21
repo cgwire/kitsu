@@ -51,15 +51,27 @@
             />
           </div>
         </div>
-        <h2 class="mt0">
-          {{ $t('concepts.title') }} ({{ filteredConcepts?.length || 0 }})
-        </h2>
+        <div class="footer mb2">
+          <button-simple
+            class="upload-button"
+            :disabled="loading.loadingConcepts"
+            :text="$t('concepts.add_new_concept')"
+            @click="openAddConceptModal"
+          />
+        </div>
+
         <table-info
           :is-loading="loading.loadingConcepts"
           :is-error="errors.loadingConcepts"
           v-if="loading.loadingConcepts || errors.loadingConcepts"
         />
-        <div class="concept-list pb1" v-else-if="filteredConcepts?.length">
+        <div
+          class="concept-list pb1"
+          @drop="onFileDrop"
+          @dragover="onFileDragover"
+          @dragleave="onFileDragLeave"
+          v-else-if="filteredConcepts?.length"
+        >
           <ul class="items">
             <li
               class="item"
@@ -107,6 +119,7 @@
                     :person="personMap.get(concept.created_by)"
                     :size="25"
                     :font-size="14"
+                    :is-link="false"
                   />
                 </div>
               </div>
@@ -116,13 +129,6 @@
         <div v-else>
           {{ $t('concepts.empty') }}
         </div>
-        <footer class="footer mt2">
-          <button-simple
-            :disabled="loading.loadingConcepts"
-            :text="$t('concepts.add_new_concept')"
-            @click="openAddConceptModal"
-          />
-        </footer>
       </div>
     </div>
 
@@ -464,6 +470,18 @@ export default {
       this.clearSelectedConcepts()
       this.clearSelectedTasks()
       this.refreshConcepts()
+    },
+
+    onFileDrop() {
+      console.log('file dropped')
+    },
+
+    onFileDragover() {
+      console.log('file over')
+    },
+
+    onFileDragLeave() {
+      console.log('file leave')
     }
   },
 
@@ -489,6 +507,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.concepts {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .filters {
   display: flex;
   align-items: flex-end;
@@ -519,26 +543,24 @@ export default {
   gap: 20px;
   list-style: none;
   margin: 0;
-  width: 100vw;
 
   .item {
     display: flex;
     flex-direction: column;
-    width: 300px;
+    width: 310px;
     background-color: var(--background);
     border-radius: 1em;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 
-    .dark & {
-      background-color: var(--background-alt);
+    border: 5px solid transparent;
+    transition: border-color 0.2s ease-in-out;
+
+    &:hover {
+      border-color: var(--background-hover);
     }
 
     &.selected-item {
-      background-color: var(--background-selected);
-    }
-
-    &:hover {
-      background-color: var(--background-hover);
+      border-color: var(--background-selected);
     }
 
     .description {
@@ -560,6 +582,7 @@ export default {
 
       .tag {
         cursor: pointer;
+        transition: transform 0.1s linear;
 
         &:hover {
           transform: scale(1.1);
@@ -584,15 +607,29 @@ export default {
   }
 }
 
+.page-header {
+  margin-top: 0;
+  padding: 0;
+}
+
 .footer {
+  background: transparent;
   position: sticky;
   bottom: 0;
   display: flex;
   justify-content: center;
-  padding: 3em;
+  padding: 5px;
 
-  .dark & {
-    background-color: var(--background-alt);
+  .button {
+    border-radius: 10px;
+    font-size: 1.2em;
+    height: 50px;
+    transition: background-color 0.1s ease-in-out;
+    width: 100%;
+
+    &:hover {
+      background-color: var(--background-hover);
+    }
   }
 }
 </style>
