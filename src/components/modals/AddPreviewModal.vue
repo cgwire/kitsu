@@ -111,6 +111,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
+
 import files from '@/lib/files'
 import FileUpload from '@/components/widgets/FileUpload.vue'
 
@@ -255,6 +256,9 @@ export default {
 
 .upload-previews {
   text-align: center;
+  padding: 1.5em;
+  max-height: 40vh;
+  overflow-y: auto;
 }
 
 .subtitle {

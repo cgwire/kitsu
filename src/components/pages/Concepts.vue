@@ -135,6 +135,7 @@
     <add-preview-modal
       ref="add-preview-modal"
       :active="modals.addConcept"
+      :extensions="imgExtensions"
       is-concept
       :is-error="errors.addingConcept"
       :is-loading="loading.addingConcept"
@@ -157,6 +158,8 @@ import { getEntityPath } from '@/lib/path'
 import { sortByName, sortPeople } from '@/lib/sorting'
 
 import { searchMixin } from '@/components/mixins/search'
+
+import files from '@/lib/files'
 
 import AddPreviewModal from '@/components/modals/AddPreviewModal'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
@@ -190,6 +193,7 @@ export default {
 
   data() {
     return {
+      imgExtensions: files.IMG_EXTENSIONS_STRING,
       loading: {
         addingConcept: false,
         loadingConcepts: false,
