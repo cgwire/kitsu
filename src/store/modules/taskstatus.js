@@ -48,21 +48,23 @@ const getters = {
   },
 
   getTaskStatusForCurrentUser:
-    (state, getters, rootState, rootGetters) => projectId => {
-      const statuses = rootGetters.getProductionTaskStatuses(projectId)
+    (state, getters, rootState, rootGetters) =>
+    (projectId, forConcept = false) => {
+      let statuses = forConcept
+        ? getters.taskStatuses
+        : rootGetters.getProductionTaskStatuses(projectId)
+      statuses = statuses.filter(
+        status => Boolean(status.for_concept) === forConcept
+      )
       if (
         rootGetters.isCurrentUserManager ||
         rootGetters.isCurrentUserSupervisor
       ) {
         return statuses
       } else if (rootGetters.isCurrentUserClient) {
-        return statuses.filter(taskStatus => {
-          return taskStatus.is_client_allowed
-        })
+        return statuses.filter(taskStatus => taskStatus.is_client_allowed)
       } else {
-        return statuses.filter(taskStatus => {
-          return taskStatus.is_artist_allowed
-        })
+        return statuses.filter(taskStatus => taskStatus.is_artist_allowed)
       }
     }
 }

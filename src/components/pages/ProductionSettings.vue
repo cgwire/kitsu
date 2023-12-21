@@ -231,7 +231,9 @@ export default {
 
     remainingTaskStatuses() {
       return this.taskStatus.filter(
-        s => !this.currentProduction.task_statuses.includes(s.id)
+        status =>
+          !this.currentProduction.task_statuses.includes(status.id) &&
+          !status.for_concept
       )
     }
   },

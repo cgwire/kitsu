@@ -225,15 +225,16 @@ export default {
   computed: {
     ...mapGetters([
       'departmentMap',
+      'getTaskStatusForCurrentUser',
       'isCurrentUserClient',
       'productionDepartmentIds',
       'taskStatusForCurrentUser'
     ]),
 
     taskStatuses() {
-      return this.taskStatusForCurrentUser.filter(
-        status => Boolean(status.for_concept) === this.isConceptTask
-      )
+      return this.isConceptTask
+        ? this.getTaskStatusForCurrentUser(null, true)
+        : this.taskStatusForCurrentUser.filter(status => !status.for_concept)
     },
 
     isConceptTask() {

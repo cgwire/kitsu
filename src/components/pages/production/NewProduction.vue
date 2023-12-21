@@ -738,7 +738,8 @@ export default {
       return this.taskStatus.filter(
         status =>
           this.productionToCreate.taskStatuses.indexOf(status) === -1 &&
-          !status.is_default
+          !status.is_default &&
+          !status.for_concept
       )
     },
 
