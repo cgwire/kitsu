@@ -113,7 +113,7 @@ export default {
     border: 1px solid #666;
 
     &.focused {
-      box-shadow: 0 0 4px 3px #222;
+      box-shadow: 0 0 4px 3px #444;
     }
   }
 
