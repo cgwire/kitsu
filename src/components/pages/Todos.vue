@@ -27,6 +27,19 @@
               </router-link>
             </li>
             <li
+              :class="{ 'is-active': isTabActive('board') }"
+              @click="selectTab('board')"
+            >
+              <router-link
+                :to="{
+                  name: 'todos-tab',
+                  params: { tab: 'board' }
+                }"
+              >
+                {{ $t('board.title') }}
+              </router-link>
+            </li>
+            <li
               :class="{ 'is-active': isTabActive('timesheets') }"
               @click="selectTab('timesheets')"
             >
@@ -95,9 +108,9 @@
           v-if="isTabActive('todos')"
         />
 
-        <div v-if="isTabActive('done')">&nbsp;</div>
         <todos-list
           ref="done-list"
+          class="done-list"
           :tasks="displayedDoneTasks"
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
@@ -105,6 +118,10 @@
           :done="true"
           v-if="isTabActive('done')"
         />
+
+        <div v-if="isTabActive('board')">
+          <kanban-board :statuses="boardStatuses" :tasks="boardTasks" />
+        </div>
 
         <timesheet-list
           ref="timesheet-list"
@@ -138,6 +155,7 @@ import firstBy from 'thenby'
 
 import { parseDate } from '@/lib/time'
 import Combobox from '@/components/widgets/Combobox'
+import KanbanBoard from '@/components/lists/KanbanBoard'
 import SearchField from '@/components/widgets/SearchField'
 import SearchQueryList from '@/components/widgets/SearchQueryList'
 import TaskInfo from '@/components/sides/TaskInfo'
@@ -149,6 +167,7 @@ export default {
 
   components: {
     Combobox,
+    KanbanBoard,
     SearchField,
     SearchQueryList,
     TaskInfo,
@@ -218,6 +237,7 @@ export default {
       'isTodosLoadingError',
       'nbSelectedTasks',
       'selectedTasks',
+      'taskStatuses',
       'taskTypeMap',
       'todosSearchText',
       'timeSpentMap',
@@ -227,6 +247,18 @@ export default {
       'todoSearchQueries',
       'user'
     ]),
+
+    boardTasks() {
+      const tasks = []
+        .concat(this.displayedDoneTasks)
+        .concat(this.displayedTodos)
+      return tasks
+    },
+
+    boardStatuses() {
+      const statuses = this.taskStatuses.filter(status => !status.for_concept)
+      return statuses
+    },
 
     loggableTodos() {
       return this.sortedTasks.filter(task => {
@@ -347,7 +379,7 @@ export default {
     },
 
     updateActiveTab() {
-      if (['done', 'timesheets'].includes(this.$route.params.tab)) {
+      if (['board', 'done', 'timesheets'].includes(this.$route.params.tab)) {
         this.activeTab = this.$route.params.tab
       } else {
         this.activeTab = 'todos'
@@ -490,8 +522,8 @@ export default {
   border-right: 3px solid $grey-strong;
 }
 
-.data-list {
-  margin-top: 0;
+.done-list {
+  margin-top: 2em;
 }
 
 .todos {
