@@ -2,7 +2,18 @@
   <div class="board">
     <ol class="board-columns">
       <li class="board-column" :key="column.id" v-for="column in columns">
-        <h2 class="board-column-title">{{ column.status.short_name }}</h2>
+        <h2 class="board-column-title">
+          <span
+            class="tag"
+            :style="{
+              background: getStatusColor(column.status),
+              color: getStatusTextColor(column.status)
+            }"
+            :title="column.status.name"
+          >
+            {{ column.status.short_name }}
+          </span>
+        </h2>
         <ol class="board-cards">
           <li
             class="board-card"
@@ -10,12 +21,32 @@
             :key="task.id"
             v-for="task in column.tasks"
           >
-            <div>
-              {{ task.project_name }}<br /><br />
-              {{ task.entity_type_name }} > {{ task.entity_name }}<br /><br />
-              {{ task.task_type_name }}<br />
-              <br />
-              {{ task.assignees }}<br />
+            <div>{{ task.project_name }}</div>
+            <div class="flexrow">
+              <entity-thumbnail
+                :empty-width="60"
+                :empty-height="40"
+                :entity="{ preview_file_id: task.entity_preview_file_id }"
+              />
+              <div class="pa1">
+                <span>{{ task.full_entity_name }}</span>
+              </div>
+            </div>
+            <div class="level">
+              <task-type-name
+                :task-id="task.id"
+                :task-type="getTaskType(task)"
+              />
+              <div class="avatars">
+                <people-avatar
+                  :is-link="false"
+                  :key="`${task.id}-${person.id}`"
+                  :person="person"
+                  :size="20"
+                  :font-size="12"
+                  v-for="person in getSortedPeople(task.assignees)"
+                />
+              </div>
             </div>
           </li>
         </ol>
@@ -27,21 +58,23 @@
 <script>
 import { mapGetters } from 'vuex'
 
+import { sortPeople } from '@/lib/sorting'
+
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
+
 export default {
   name: 'kanban-board',
   mixins: [],
 
-  components: {},
+  components: {
+    EntityThumbnail,
+    PeopleAvatar,
+    TaskTypeName
+  },
 
   props: {
-    tasks: {
-      type: Array,
-      default: () => []
-    },
-    statuses: {
-      type: Array,
-      default: () => []
-    },
     isError: {
       type: Boolean,
       default: false
@@ -49,6 +82,14 @@ export default {
     isLoading: {
       type: Boolean,
       default: false
+    },
+    statuses: {
+      type: Array,
+      default: () => []
+    },
+    tasks: {
+      type: Array,
+      default: () => []
     }
   },
 
@@ -62,7 +103,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([]),
+    ...mapGetters(['isDarkTheme', 'personMap', 'productionMap', 'taskTypeMap']),
 
     columns() {
       const columns = this.statuses.map(status => {
@@ -86,7 +127,38 @@ export default {
     }
   },
 
-  methods: {}
+  methods: {
+    getSortedPeople(personIds) {
+      const people = personIds.map(id => this.personMap.get(id))
+      return sortPeople(people)
+    },
+
+    getStatusColor(status) {
+      if (status.name === 'Todo' && this.isDarkTheme) {
+        return '#5F626A'
+      } else {
+        return status.color
+      }
+    },
+
+    getStatusTextColor(status) {
+      if (status.name === 'Todo' && !this.isDarkTheme) {
+        return '#333'
+      } else {
+        return 'white'
+      }
+    },
+
+    getTaskType(task) {
+      const taskType = this.taskTypeMap.get(task.task_type_id)
+      const production = this.productionMap.get(task.project_id)
+      taskType.episode_id = task.episode_id
+      if (production?.production_type === 'tvshow' && !task.episode_id) {
+        taskType.episode_id = production.first_episode_id
+      }
+      return taskType
+    }
+  }
 }
 </script>
 
@@ -125,9 +197,15 @@ export default {
   position: sticky;
   top: 0;
   margin: 0 0 1em;
+  padding-top: 5px;
   width: 100%;
   text-align: center;
   background: #eee;
+  border: none;
+
+  .tag {
+    font-weight: bold;
+  }
 }
 
 .board-cards {
@@ -146,11 +224,22 @@ export default {
   padding: 1em;
   border-radius: 1em;
   overflow: auto;
-  border: 1px solid grey;
+  border: 1px solid #eee;
   background: #eeeeee5a;
 
   &:hover {
-    background: #eeeeee;
+    cursor: grab;
+    background: #eee;
   }
+
+  .avatars {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+  }
+}
+
+.thumbnail-picture {
+  background-color: black;
 }
 </style>
