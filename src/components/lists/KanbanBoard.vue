@@ -1,7 +1,15 @@
 <template>
   <div class="board">
     <ol class="board-columns">
-      <li class="board-column" :key="column.id" v-for="column in columns">
+      <li
+        class="board-column"
+        :key="column.id"
+        @dragenter="onCardDragEnter"
+        @dragover="onCardDragOver"
+        @dragleave="onCardDragLeave"
+        @drop="onCardDrop($event, column.status.id)"
+        v-for="column in columns"
+      >
         <h2 class="board-column-title">
           <span
             class="tag"
@@ -17,35 +25,41 @@
         <ol class="board-cards">
           <li
             class="board-card"
-            draggable="true"
+            draggable
             :key="task.id"
+            @dragstart="onCardDragStart($event, task)"
+            @drag="onCardDrag"
+            @dragend="onCardDragEnd"
+            @mouseenter="onCardMouseEnter"
+            @mouseleave="onCardMouseLeave"
+            tabindex="0"
             v-for="task in column.tasks"
           >
-            <div>{{ task.project_name }}</div>
-            <div class="flexrow">
-              <entity-thumbnail
-                :empty-width="60"
-                :empty-height="40"
-                :entity="{ preview_file_id: task.entity_preview_file_id }"
-              />
-              <div class="pa1">
-                <span>{{ task.full_entity_name }}</span>
-              </div>
-            </div>
-            <div class="level">
-              <task-type-name
-                :task-id="task.id"
-                :task-type="getTaskType(task)"
-              />
-              <div class="avatars">
-                <people-avatar
-                  :is-link="false"
-                  :key="`${task.id}-${person.id}`"
-                  :person="person"
-                  :size="20"
-                  :font-size="12"
-                  v-for="person in getSortedPeople(task.assignees)"
+            <div class="ui-droppable">
+              <div>{{ task.project_name }}</div>
+              <div class="flexrow">
+                <entity-thumbnail
+                  :empty-width="60"
+                  :empty-height="40"
+                  :entity="{ preview_file_id: task.entity_preview_file_id }"
                 />
+                <div class="pa1">{{ task.full_entity_name }}</div>
+              </div>
+              <div class="level">
+                <task-type-name
+                  :task-id="task.id"
+                  :task-type="getTaskType(task)"
+                />
+                <div class="avatars">
+                  <people-avatar
+                    :is-link="false"
+                    :key="`${task.id}-${person.id}`"
+                    :person="person"
+                    :size="20"
+                    :font-size="12"
+                    v-for="person in getSortedPeople(task.assignees)"
+                  />
+                </div>
               </div>
             </div>
           </li>
@@ -56,7 +70,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 import { sortPeople } from '@/lib/sorting'
 
@@ -128,6 +142,8 @@ export default {
   },
 
   methods: {
+    ...mapActions(['commentTask']),
+
     getSortedPeople(personIds) {
       const people = personIds.map(id => this.personMap.get(id))
       return sortPeople(people)
@@ -157,6 +173,53 @@ export default {
         taskType.episode_id = production.first_episode_id
       }
       return taskType
+    },
+
+    onCardDragStart(event, task) {
+      event.stopPropagation()
+      event.target.classList.add('drag')
+      event.dataTransfer.dropEffect = 'move'
+      event.dataTransfer.effectAllowed = 'move'
+      event.dataTransfer.setData('taskId', task.id)
+    },
+
+    onCardDrag(event) {
+      event.stopPropagation()
+      event.target.classList.add('dragging')
+    },
+
+    onCardDragEnd(event) {
+      event.target.classList.remove('drag')
+      event.target.classList.remove('dragging')
+    },
+
+    onCardDragEnter(event) {
+      event.currentTarget.classList.add('droppable')
+    },
+
+    onCardDragOver(event) {
+      event.preventDefault()
+    },
+
+    onCardDragLeave(event) {
+      event.currentTarget.classList.remove('droppable')
+    },
+
+    onCardDrop(event, taskStatusId) {
+      event.currentTarget.classList.remove('droppable')
+      const taskId = event.dataTransfer.getData('taskId')
+      this.commentTask({
+        taskId,
+        taskStatusId
+      })
+    },
+
+    onCardMouseEnter(event) {
+      event.currentTarget.focus()
+    },
+
+    onCardMouseLeave(event) {
+      event.currentTarget.blur()
     }
   }
 }
@@ -165,12 +228,13 @@ export default {
 <style lang="scss" scoped>
 .board {
   padding: 2em 0;
+}
 
-  ol {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
+.board-columns,
+.board-cards {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .board-columns {
@@ -190,7 +254,15 @@ export default {
   padding-bottom: 2em;
   overflow-y: auto;
   max-height: 60vh;
-  border: 2px solid #eee;
+  border: 2px solid $white-grey;
+
+  &.droppable {
+    background: var(--background-selectable);
+
+    * {
+      pointer-events: none;
+    }
+  }
 }
 
 .board-column-title {
@@ -200,7 +272,7 @@ export default {
   padding-top: 5px;
   width: 100%;
   text-align: center;
-  background: #eee;
+  background: $white-grey;
   border: none;
 
   .tag {
@@ -212,31 +284,50 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 100%;
-  padding: 0;
-  margin: 0;
-  list-style: none;
+  width: calc(100% - 2em);
 }
 
 .board-card {
-  cursor: pointer;
-  margin: 0 1em;
-  padding: 1em;
-  border-radius: 1em;
-  overflow: auto;
-  border: 1px solid #eee;
-  background: #eeeeee5a;
+  cursor: grab;
 
-  &:hover {
-    cursor: grab;
-    background: #eee;
+  .ui-droppable {
+    padding: 1em;
+    border-radius: 1em;
+    border: 1px solid $white-grey;
+    background-color: $white-grey-light;
   }
 
-  .avatars {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
+  &:focus-within {
+    .ui-droppable {
+      outline: 2px solid var(--background-selected);
+    }
   }
+
+  &.drag {
+    transform: translate(0, 0); // fix dragging style
+
+    .ui-droppable {
+      background: var(--background-selected);
+      transform: rotate(5deg);
+    }
+  }
+
+  &.dragging {
+    cursor: grabbing;
+    opacity: 0.5;
+
+    .ui-droppable {
+      transform: rotate(0);
+      border: 1px solid $white-grey;
+      background-color: $white-grey-light;
+    }
+  }
+}
+
+.avatars {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
 }
 
 .thumbnail-picture {
