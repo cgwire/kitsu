@@ -48,7 +48,7 @@ task's progress.
 
 Let's begin with the asset page. You can access it via the drop-down menu at the top of the page.
 
-![Drop down menu asset](../img/getting-started/drop_down_menu.png).
+![Drop down menu asset](../img/getting-started/drop_down_menu.png)
 
 On the asset page, click on **Add assets**.
 
