@@ -67,21 +67,25 @@
         class="playlist-button topbar-button flexrow-item"
         icon="plus"
         :text="addEntitiesText"
-        v-if="isCurrentUserManager && !isAddingEntity && !isFullMode"
+        v-if="
+          (isCurrentUserManager || isCurrentUserSupervisor) &&
+          !isAddingEntity &&
+          !isFullMode
+        "
       />
       <button-simple
         @click="$emit('edit-clicked')"
         class="edit-button playlist-button flexrow-item"
         :title="$t('playlists.actions.edit')"
         icon="edit"
-        v-if="isCurrentUserManager"
+        v-if="isCurrentUserManager || isCurrentUserSupervisor"
       />
       <button-simple
         @click="showDeleteModal"
         class="delete-button playlist-button flexrow-item"
         :title="$t('playlists.actions.delete')"
         icon="delete"
-        v-if="isCurrentUserManager"
+        v-if="isCurrentUserManager || isCurrentUserSupervisor"
       />
     </div>
 
@@ -654,7 +658,10 @@
           !isFullMode
         "
       >
-        <div class="separator" v-if="isCurrentUserManager && tempMode"></div>
+        <div
+          class="separator"
+          v-if="(isCurrentUserManager || isCurrentUserSupervisor) && tempMode"
+        ></div>
         <button-simple
           @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
           :class="{
@@ -664,7 +671,9 @@
           }"
           icon="pen"
           :title="$t('playlists.actions.toggle_annotations')"
-          v-if="isCurrentUserManager && !isAddingEntity"
+          v-if="
+            (isCurrentUserManager || isCurrentUserSupervisor) && !isAddingEntity
+          "
         />
         <transition name="slide">
           <div class="annotation-tools" v-show="isTyping">
@@ -724,7 +733,9 @@
           }"
           icon="laser"
           :title="$t('playlists.actions.toggle_laser')"
-          v-if="isCurrentUserManager && !isAddingEntity"
+          v-if="
+            (isCurrentUserManager || isCurrentUserSupervisor) && !isAddingEntity
+          "
         />
         <button-simple
           :class="{
@@ -780,7 +791,9 @@
             :class="{
               'dl-button': true,
               'mp4-button': true,
-              disabled: !isCurrentUserManager || isJobRunning,
+              disabled:
+                !(isCurrentUserManager || isCurrentUserSupervisor) ||
+                isJobRunning,
               hidden: isDlButtonsHidden
             }"
             @click="onBuildClicked"
@@ -791,7 +804,9 @@
             :class="{
               'dl-button': true,
               'mp4-2-button': true,
-              disabled: !isCurrentUserManager || isJobRunning,
+              disabled:
+                !(isCurrentUserManager || isCurrentUserSupervisor) ||
+                isJobRunning,
               hidden: isDlButtonsHidden
             }"
             @click="onBuildFullClicked"
@@ -1758,7 +1773,7 @@ export default {
 
     runBuild(full = false) {
       if (
-        this.isCurrentUserManager &&
+        (this.isCurrentUserManager || this.isCurrentUserSupervisor) &&
         !this.isJobRunning &&
         !this.isBuildLaunched
       ) {

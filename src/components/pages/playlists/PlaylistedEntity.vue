@@ -12,7 +12,7 @@
             class="remove-button flexrow-item"
             :title="$t('playlists.remove')"
             @click.prevent="onRemoveClick"
-            v-if="isCurrentUserManager"
+            v-if="isCurrentUserManager || isCurrentUserSupervisor"
           >
             <x-icon />
           </span>
@@ -129,7 +129,8 @@ export default {
       'taskMap',
       'taskTypeMap',
       'taskStatusMap',
-      'isCurrentUserManager'
+      'isCurrentUserManager',
+      'isCurrentUserSupervisor'
     ]),
 
     dropArea() {
