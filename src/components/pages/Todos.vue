@@ -3,56 +3,12 @@
     <div class="column main-column">
       <div class="todos page">
         <div class="task-tabs tabs">
-          <ul>
-            <li :class="{ 'is-active': isTabActive('todos') }">
-              <router-link
-                :to="{
-                  name: 'todos'
-                }"
-              >
-                {{ $t('tasks.current') }}
-              </router-link>
-            </li>
-            <li
-              :class="{ 'is-active': isTabActive('done') }"
-              @click="selectTab('done')"
-            >
-              <router-link
-                :to="{
-                  name: 'todos-tab',
-                  params: { tab: 'done' }
-                }"
-              >
-                {{ $t('tasks.done') }} ({{ displayedDoneTasks.length }})
-              </router-link>
-            </li>
-            <li
-              :class="{ 'is-active': isTabActive('board') }"
-              @click="selectTab('board')"
-            >
-              <router-link
-                :to="{
-                  name: 'todos-tab',
-                  params: { tab: 'board' }
-                }"
-              >
-                {{ $t('board.title') }}
-              </router-link>
-            </li>
-            <li
-              :class="{ 'is-active': isTabActive('timesheets') }"
-              @click="selectTab('timesheets')"
-            >
-              <router-link
-                :to="{
-                  name: 'todos-tab',
-                  params: { tab: 'timesheets' }
-                }"
-              >
-                {{ $t('timesheets.title') }}
-              </router-link>
-            </li>
-          </ul>
+          <route-section-tabs
+            class="section-tabs"
+            :activeTab="currentSection"
+            :route="$route"
+            :tabs="todoTabs"
+          />
         </div>
 
         <div class="flexrow">
@@ -136,6 +92,12 @@
           v-if="isTabActive('board')"
         />
 
+        <user-calendar
+          ref="user-calendar"
+          :tasks="sortedTasks"
+          v-if="isTabActive('calendar')"
+        />
+
         <timesheet-list
           ref="timesheet-list"
           :tasks="loggableTodos"
@@ -172,11 +134,13 @@ import { parseDate } from '@/lib/time'
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction'
 import KanbanBoard from '@/components/lists/KanbanBoard'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs'
 import SearchField from '@/components/widgets/SearchField'
 import SearchQueryList from '@/components/widgets/SearchQueryList'
 import TaskInfo from '@/components/sides/TaskInfo'
 import TimesheetList from '@/components/lists/TimesheetList'
 import TodosList from '@/components/lists/TodosList'
+import UserCalendar from '@/components/widgets/UserCalendar'
 
 export default {
   name: 'todos',
@@ -185,11 +149,13 @@ export default {
     Combobox,
     ComboboxProduction,
     KanbanBoard,
+    RouteSectionTabs,
     SearchField,
     SearchQueryList,
     TaskInfo,
     TimesheetList,
-    TodosList
+    TodosList,
+    UserCalendar
   },
 
   data() {
@@ -287,6 +253,49 @@ export default {
         }
       )
       return sortTaskStatuses(statuses, production)
+    },
+
+    pendingTasks() {
+      return this.displayedTodos.filter(task => task.is_feedback_request)
+    },
+
+    notPendingTasks() {
+      return this.displayedTodos.filter(task => !task.is_feedback_request)
+    },
+
+    todoTabs() {
+      return [
+        {
+          label: this.$t('board.title'),
+          name: 'todos'
+        },
+        {
+          label: this.$t('tasks.board'),
+          name: 'board'
+        },
+        {
+          label:
+            this.$t('tasks.pending') + ' (' + this.pendingTasks.length + ')',
+          name: 'pending'
+        },
+        {
+          label:
+            this.$t('tasks.validated') +
+            ' (' +
+            this.displayedDoneTasks.length +
+            ')',
+          name: 'done'
+        },
+        {
+          label: this.$t('tasks.calendar'),
+          name: 'calendar'
+        },
+        {
+          label: this.$t('timesheets.title'),
+          name: 'timesheets'
+        }
+      ]
+>>>>>>> wiptodo
     },
 
     loggableTodos() {
