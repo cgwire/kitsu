@@ -313,11 +313,10 @@ export default {
 
     onAtTextChanged(input) {
       if (input.includes('@frame')) {
-        const time = this.frame / this.fps
         this.form.text = replaceTimeWithTimecode(
           input,
           this.revision,
-          time,
+          this.frame + 1,
           this.fps
         )
       }

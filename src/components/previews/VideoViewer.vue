@@ -34,7 +34,7 @@
 import panzoom from 'panzoom'
 import { mapGetters } from 'vuex'
 
-import { formatFrame, formatTime } from '@/lib/video'
+import { formatFrame } from '@/lib/video'
 import Spinner from '@/components/widgets/Spinner'
 
 import { domMixin } from '@/components/mixins/dom'
@@ -281,8 +281,6 @@ export default {
 
   methods: {
     formatFrame,
-
-    formatTime,
 
     getNaturalDimensions() {
       return {
