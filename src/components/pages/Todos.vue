@@ -2,14 +2,12 @@
   <div class="columns fixed-page">
     <div class="column main-column">
       <div class="todos page">
-        <div class="task-tabs tabs">
-          <route-section-tabs
-            class="section-tabs"
-            :activeTab="currentSection"
-            :route="$route"
-            :tabs="todoTabs"
-          />
-        </div>
+        <route-section-tabs
+          class="section-tabs"
+          :activeTab="currentSection"
+          :route="$route"
+          :tabs="todoTabs"
+        />
 
         <div class="flexrow">
           <search-field
@@ -67,22 +65,19 @@
           :empty-text="$t('people.no_task_assigned')"
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
-          :tasks="
-            sortedTasks.filter(task => !task.taskStatus.is_feedback_request)
-          "
+          :tasks="notPendingTasks"
           :selection-grid="todoSelectionGrid"
           @scroll="setTodoListScrollPosition"
           v-if="isTabActive('todos')"
         />
 
+        <div v-if="isTabActive('pending')">&nbsp;</div>
         <todos-list
-          ref="todo-list"
+          ref="pending-list"
           :empty-text="$t('people.no_task_assigned')"
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
-          :tasks="
-            sortedTasks.filter(task => task.taskStatus.is_feedback_request)
-          "
+          :tasks="pendingTasks"
           :selection-grid="todoSelectionGrid"
           @scroll="setTodoListScrollPosition"
           v-if="isTabActive('pending')"
@@ -176,9 +171,9 @@ export default {
 
   data() {
     return {
-      activeTab: 'todos',
       currentFilter: 'all_tasks',
       currentSort: 'priority',
+      currentSection: 'todos',
       filterOptions: ['all_tasks', 'due_this_week'].map(name => ({
         label: name,
         value: name
@@ -272,11 +267,15 @@ export default {
     },
 
     pendingTasks() {
-      return this.displayedTodos.filter(task => task.is_feedback_request)
+      return this.sortedTasks.filter(
+        task => task.taskStatus.is_feedback_request
+      )
     },
 
     notPendingTasks() {
-      return this.displayedTodos.filter(task => !task.is_feedback_request)
+      return this.sortedTasks.filter(
+        task => !task.taskStatus.is_feedback_request
+      )
     },
 
     todoTabs() {
@@ -412,7 +411,7 @@ export default {
     ]),
 
     isTabActive(tab) {
-      return this.activeTab === tab
+      return this.currentSection === tab
     },
 
     resizeHeaders() {
@@ -557,8 +556,12 @@ export default {
       })
     },
 
-    '$route.params.tab'() {
+    '$route.query.section'() {
       this.updateActiveTab()
+    },
+
+    $route() {
+      this.currentSection = this.$route.query.section || 'todos'
     }
   },
 
