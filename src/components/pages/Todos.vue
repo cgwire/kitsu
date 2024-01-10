@@ -57,14 +57,19 @@
 
         <div class="flexrow">
           <search-field
-            :class="{
-              'search-field': true,
-              'flexrow-item': true
-            }"
+            class="flexrow-item search-field"
             ref="todos-search-field"
             @change="onSearchChange"
             @save="saveSearchQuery"
             :can-save="true"
+          />
+
+          <combobox-production
+            v-if="isTabActive('board')"
+            class="flexrow-item production-field"
+            :label="$t('main.production')"
+            :production-list="openProductions"
+            v-model="productionId"
           />
 
           <span class="filler"></span>
@@ -120,7 +125,12 @@
         />
 
         <div v-if="isTabActive('board')">
-          <kanban-board :statuses="boardStatuses" :tasks="boardTasks" />
+          <kanban-board
+            :is-loading="isTodosLoading"
+            :is-error="isTodosLoadingError"
+            :statuses="boardStatuses"
+            :tasks="boardTasks"
+          />
         </div>
 
         <timesheet-list
@@ -154,7 +164,9 @@ import moment from 'moment-timezone'
 import firstBy from 'thenby'
 
 import { parseDate } from '@/lib/time'
+
 import Combobox from '@/components/widgets/Combobox'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction'
 import KanbanBoard from '@/components/lists/KanbanBoard'
 import SearchField from '@/components/widgets/SearchField'
 import SearchQueryList from '@/components/widgets/SearchQueryList'
@@ -167,6 +179,7 @@ export default {
 
   components: {
     Combobox,
+    ComboboxProduction,
     KanbanBoard,
     SearchField,
     SearchQueryList,
@@ -187,6 +200,7 @@ export default {
       loading: {
         savingSearch: false
       },
+      productionId: null,
       selectedDate: moment().format('YYYY-MM-DD'),
       sortOptions: [
         'entity_name',
@@ -233,18 +247,20 @@ export default {
       'displayedDoneTasks',
       'displayedTodos',
       'doneSelectionGrid',
+      'getProductionTaskStatuses',
       'isTodosLoading',
       'isTodosLoadingError',
       'nbSelectedTasks',
+      'openProductions',
       'selectedTasks',
       'taskStatuses',
       'taskTypeMap',
-      'todosSearchText',
       'timeSpentMap',
       'timeSpentTotal',
       'todoListScrollPosition',
-      'todoSelectionGrid',
       'todoSearchQueries',
+      'todoSelectionGrid',
+      'todosSearchText',
       'user'
     ]),
 
@@ -252,12 +268,12 @@ export default {
       const tasks = []
         .concat(this.displayedDoneTasks)
         .concat(this.displayedTodos)
-      return tasks
+      return tasks.filter(task => task.project_id === this.productionId)
     },
 
     boardStatuses() {
-      const statuses = this.taskStatuses.filter(status => !status.for_concept)
-      return statuses
+      const statuses = this.getProductionTaskStatuses(this.productionId)
+      return statuses.filter(status => !status.for_concept)
     },
 
     loggableTodos() {
@@ -379,8 +395,27 @@ export default {
     },
 
     updateActiveTab() {
-      if (['board', 'done', 'timesheets'].includes(this.$route.params.tab)) {
+      const tab = this.$route.params.tab
+      if (['board', 'done', 'timesheets'].includes(tab)) {
         this.activeTab = this.$route.params.tab
+
+        if (tab === 'board') {
+          this.loadOpenProductions().then(() => {
+            const currentProduction = this.openProductions.find(
+              ({ id }) => id === this.$route.query.productionId
+            )
+            if (currentProduction) {
+              this.productionId = currentProduction.id
+            } else {
+              if (!this.productionId) {
+                this.productionId = this.openProductions?.[0].id
+              }
+              this.$router.push({
+                query: { productionId: this.productionId }
+              })
+            }
+          })
+        }
       } else {
         this.activeTab = 'todos'
       }
@@ -481,7 +516,13 @@ export default {
   },
 
   watch: {
-    $route() {
+    productionId() {
+      this.$router.push({
+        query: { productionId: this.productionId }
+      })
+    },
+
+    '$route.params.tab'() {
       this.updateActiveTab()
     }
   },
@@ -510,8 +551,7 @@ export default {
 }
 
 .search-field {
-  margin-top: 1em;
-  margin-bottom: 1em;
+  margin: 25px 2em 5px 0;
 }
 
 .query-list {

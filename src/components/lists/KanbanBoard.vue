@@ -1,5 +1,6 @@
 <template>
   <div class="board">
+    <table-info class="mb2" :is-loading="isLoading" :is-error="isError" />
     <ol class="board-columns">
       <li
         class="board-column"
@@ -36,7 +37,6 @@
             v-for="task in column.tasks"
           >
             <div class="ui-droppable">
-              <div>{{ task.project_name }}</div>
               <div class="flexrow">
                 <entity-thumbnail
                   :empty-width="60"
@@ -76,6 +76,7 @@ import { sortPeople } from '@/lib/sorting'
 
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import TableInfo from '@/components/widgets/TableInfo'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
@@ -85,6 +86,7 @@ export default {
   components: {
     EntityThumbnail,
     PeopleAvatar,
+    TableInfo,
     TaskTypeName
   },
 
@@ -125,19 +127,24 @@ export default {
           task => task.task_status_id === status.id
         )
 
-        // TODO: handle order by configuration
-        const order = ['TODO', 'WIP', 'WFA', 'RETAKE', 'READY', 'DONE'].indexOf(
-          status.short_name.toUpperCase()
-        )
+        // TODO: handle priority by configuration
+        const priority = [
+          'TODO',
+          'WIP',
+          'WFA',
+          'RETAKE',
+          'READY',
+          'DONE'
+        ].indexOf(status.short_name.toUpperCase())
 
         return {
           id: status.id,
-          status: status,
-          order,
+          priority,
+          status,
           tasks
         }
       })
-      return columns.sort((a, b) => a.order - b.order)
+      return columns.sort((a, b) => a.priority - b.priority)
     }
   },
 
@@ -251,7 +258,6 @@ export default {
   min-width: 300px;
   max-width: 300px;
   align-items: center;
-  padding-bottom: 2em;
   overflow-y: auto;
   max-height: 60vh;
   border: 2px solid $white-grey;
@@ -268,7 +274,7 @@ export default {
 .board-column-title {
   position: sticky;
   top: 0;
-  margin: 0 0 1em;
+  margin: 0;
   padding-top: 5px;
   width: 100%;
   text-align: center;
@@ -283,8 +289,9 @@ export default {
 .board-cards {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  width: calc(100% - 2em);
+  gap: 1em;
+  padding: 2em 1em;
+  width: 100%;
 }
 
 .board-card {
