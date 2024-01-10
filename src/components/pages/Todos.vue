@@ -67,12 +67,28 @@
           :empty-text="$t('people.no_task_assigned')"
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
-          :tasks="sortedTasks"
+          :tasks="
+            sortedTasks.filter(task => !task.taskStatus.is_feedback_request)
+          "
           :selection-grid="todoSelectionGrid"
           @scroll="setTodoListScrollPosition"
           v-if="isTabActive('todos')"
         />
 
+        <todos-list
+          ref="todo-list"
+          :empty-text="$t('people.no_task_assigned')"
+          :is-loading="isTodosLoading"
+          :is-error="isTodosLoadingError"
+          :tasks="
+            sortedTasks.filter(task => task.taskStatus.is_feedback_request)
+          "
+          :selection-grid="todoSelectionGrid"
+          @scroll="setTodoListScrollPosition"
+          v-if="isTabActive('pending')"
+        />
+
+        <div v-if="isTabActive('done')">&nbsp;</div>
         <todos-list
           ref="done-list"
           class="done-list"
