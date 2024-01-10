@@ -61,7 +61,7 @@ to your task list.
 
 ## Share your Progress
 
-When you start a new task you are assigned to, click on the Status![Todo](../img/getting-started/todo_icon.png)
+When you start a new task you are assigned to, click on the Status![Ready](../img/getting-started/ready_icon.png)
 (1) on your my task page. You can also do it on the shots or assets page.
 
 ![Shot status](../img/getting-started/my_task_status.png)
@@ -74,7 +74,7 @@ text comment to it.
 For example, when you start a **new task**, you can say that everything is ok.
 If some information is missing, you can either ask all the questions you want.
 
-To change the Status, let's say from ![Todo](../img/getting-started/todo_icon.png) to ![Wip](../img/getting-started/wip_icon.png) as an example,select the **Change status** tab,
+To change the Status, let's say from ![Ready](../img/getting-started/ready_icon.png) to ![Wip](../img/getting-started/wip_icon.png) as an example,select the **Change status** tab,
 type your comment. Then, click on the status box, choose the
 one you want.
 
