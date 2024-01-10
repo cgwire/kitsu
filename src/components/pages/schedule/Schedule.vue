@@ -230,6 +230,9 @@
                 <span class="month-name" v-if="day.newMonth">
                   {{ day.monthText }}
                 </span>
+                <span class="week-number" v-if="day.newWeek">
+                  {{ day.weekNumber }}
+                </span>
                 <div :class="dayClass(day, index)">
                   <span v-if="zoomLevel > 2"> {{ day.dayText }} / </span>
                   <span class="day-number">
@@ -266,6 +269,7 @@
                 <span class="month-name" v-if="week.newMonth">
                   {{ week.monthText }}
                 </span>
+                <span class="week-number"> &nbsp; </span>
                 <div :class="dayClass(week, index)">
                   <span class="day-number">
                     {{ week.weekNumber }}
@@ -663,6 +667,7 @@ export default {
         momentDay.newWeek = nextDay.newWeek
         momentDay.newMonth = nextDay.newMonth
         momentDay.weekend = nextDay.weekend
+        momentDay.weekNumber = momentDay.week()
         momentDay.text = momentDay.format('YYYY-MM-DD')
         momentDay.monthText = momentDay.format('MMMM YY')
         momentDay.dayNumber = momentDay.format('DD')
@@ -914,7 +919,7 @@ export default {
     },
 
     onChildEstimationChanged(event, childElement, rootElement) {
-      const estimation = event.target.value
+      const estimation = Number(event.target.value)
       if (this.isEstimationLinked) {
         childElement.man_days = daysToMinutes(this.organisation, estimation)
         rootElement.man_days = rootElement.children.reduce((acc, child) => {
@@ -929,7 +934,13 @@ export default {
         if (estimation > 0) {
           childElement.endDate = addBusinessDays(
             childElement.startDate,
-            estimation
+            estimation - 1
+          )
+          console.log(
+            'childElement.endDate',
+            estimation,
+            estimation + 1,
+            childElement.endDate
           )
         }
       }
@@ -941,6 +952,7 @@ export default {
     },
 
     updatePositionBarPosition(event) {
+      if (!this.timelineContentWrapper) return
       let position =
         this.timelineContentWrapper.scrollLeft + this.getClientX(event)
       position -= 332
@@ -1262,6 +1274,7 @@ export default {
     },
 
     scrollScheduleLeft(event) {
+      if (!this.timelineContentWrapper) return
       const previousLeft = this.timelineContentWrapper.scrollLeft
       const movementX =
         event.movementX || this.getClientX(event) - this.initialClientX
@@ -1272,6 +1285,7 @@ export default {
     },
 
     scrollScheduleTop(event) {
+      if (!this.timelineContentWrapper) return
       const previousTop = this.timelineContentWrapper.scrollTop
       const movementY =
         event.movementY || this.getClientY(event) - this.initialClientY
@@ -1610,7 +1624,7 @@ export default {
   watch: {
     startDate() {
       this.resetScheduleSize()
-      this.scrollToToday()
+      // this.scrollToToday()
     },
     endDate() {
       this.resetScheduleSize()
@@ -1730,7 +1744,6 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
         }
 
         .month-name {
-          background-color: $dark-grey-2;
           border-left: 2px solid white;
           color: white;
         }
@@ -1869,14 +1882,20 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
     margin-left: 2px;
     padding-bottom: 0;
     overflow: hidden;
-    padding-top: 24px;
 
     .day {
       display: inline-block;
       font-size: 0.8em;
 
       &.without-milestones {
-        margin-top: 10px;
+        margin-top: 17px;
+      }
+
+      .week-number {
+        color: $grey;
+        display: inline-block;
+        font-size: 0.8em;
+        padding-left: 3px;
       }
 
       .day-name {
@@ -1900,7 +1919,6 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
       }
 
       .month-name {
-        background-color: white;
         border-left: 2px solid black;
         bottom: 0;
         color: black;
@@ -1910,7 +1928,6 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
         top: 10px;
         text-transform: uppercase;
         position: absolute;
-        z-index: -1;
       }
     }
   }
@@ -1924,6 +1941,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
     .timeline-content {
       position: relative;
       overflow: hidden;
+      height: 100%;
 
       .timeline-position {
         visibility: hidden;
@@ -2159,7 +2177,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
 .milestone {
   margin-bottom: 0;
-  min-height: 40px;
+  min-height: 48px;
   position: relative;
   text-align: center;
 
