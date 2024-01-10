@@ -118,13 +118,10 @@ distribution.
 
 You can also display the statistic as a percentage.
 
-![Overview sequence detail](../img/getting-started/global_view_sequence_detail_perc.png)
+![Overview sequence detail](../img/getting-started/global_view_asset_detail_perc.png)
 
 
-You can also click on the **tasks name** to have the detailed shots about this
-task (page supervisor).
-
-On both sequence and asset stats page, you can download an export of your data, as a `.csv` file.
+On asset stats page, you can download an export of your data, as a `.csv` file.
 
 Click on the **export** button ![download](../img/getting-started/export.png).
 

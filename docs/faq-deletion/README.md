@@ -82,15 +82,6 @@ Once you have click on it, a message appears and ask you to type the name of the
 
 ![Delete sequence](../img/getting-started/delete_tasktype.png).
 
-## How to Delete a Task Type Column for a Specific Group
-
-To delete a task type (shot or asset), go to the global spreadsheet page,
-and click on the arrow next to the name of the task type ![Delete sequence](../img/getting-started/arrow.png).
-
-A sub-menu appears with the option **Delete all** the tasks.
-Once you have click on it, a message appears and ask you to type the name of the task. You need to type it as it shows, it's case sensitive.
-
-![Delete sequence](../img/getting-started/delete_tasktype.png).
 
 ## How to Delete a Task
 
