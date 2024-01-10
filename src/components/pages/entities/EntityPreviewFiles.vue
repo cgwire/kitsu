@@ -11,11 +11,11 @@
             <th class="type">
               {{ $t('entities.preview_files.task_type') }}
             </th>
-            <th class="revision">
-              {{ $t('entities.preview_files.revision') }}
-            </th>
             <th class="original-name">
               {{ $t('entities.preview_files.original_file_name') }}
+            </th>
+            <th class="revision">
+              {{ $t('entities.preview_files.revision') }}
             </th>
             <th class="extension">
               {{ $t('entities.preview_files.extension') }}
@@ -26,10 +26,9 @@
             <th class="status">
               {{ $t('entities.preview_files.status') }}
             </th>
-            <th class="uploader">
+            <th class="person">
               {{ $t('entities.preview_files.uploader') }}
             </th>
-            <th class="person"></th>
             <th class="end-cell"></th>
           </tr>
         </thead>
@@ -55,11 +54,11 @@
               :task-type="getTaskType(previewFile)"
               :production-id="currentProduction.id"
             />
-            <td class="revision">
-              {{ previewFile.revision }}
-            </td>
             <td class="original-name">
               {{ previewFile.original_name }}
+            </td>
+            <td class="revision">
+              {{ previewFile.revision }}
             </td>
             <td class="extension">
               {{ previewFile.extension }}
@@ -70,11 +69,11 @@
             <td class="status">
               {{ previewFile.validation_status }}
             </td>
-
             <people-name-cell
               class="person"
               :person="personMap.get(previewFile.person_id)"
             />
+
             <td class="download">
               <a
                 class="button flexrow-item"
@@ -199,9 +198,6 @@ export default {
 .revision {
   width: 80px;
 }
-.original-name {
-  width: 300px;
-}
 .extension {
   width: 80px;
 }
@@ -213,6 +209,9 @@ export default {
 }
 .download {
   width: 40px;
+}
+.person {
+  width: 250px;
 }
 
 .preview-files {

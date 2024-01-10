@@ -41,40 +41,40 @@
       <table class="datatable">
         <tbody class="datatable-body">
           <tr
-            :key="typeof taskId === 'string' ? taskId : taskId.id"
+            :key="task.id"
             :class="{
-              selected: currentTask && currentTask.id === taskId,
+              selected: currentTask && currentTask.id === task.id,
               'datatable-row': true,
               'datatable-row--selectable': true
             }"
-            @click="selectTask(getTask(taskId))"
-            v-for="taskId in sortedEntries"
+            @click="selectTask(task)"
+            v-for="task in sortedEntries"
           >
             <task-type-cell
               class="type"
-              :task-type="getTaskType(taskId)"
+              :task-type="getTaskType(task.id)"
               :production-id="currentProduction.id"
-              :task-id="taskId"
-              v-if="getTaskType(taskId)"
+              :task-id="task.id"
+              v-if="getTaskType(task.id)"
             />
             <td class="status">
               <validation-tag
-                :task="getTask(taskId)"
+                :task="getTask(task.id)"
                 :is-static="true"
-                v-if="getTask(taskId)"
+                v-if="getTask(task.id)"
               />
             </td>
             <td class="estimation">
-              {{ getTaskEstimation(taskId) }}
+              {{ getTaskEstimation(task) }}
             </td>
             <td class="estimation">
-              {{ getTaskDuration(taskId) }}
+              {{ getTaskDuration(task) }}
             </td>
             <td class="startdate">
-              {{ getTaskStartDate(taskId) }}
+              {{ getTaskStartDate(task) }}
             </td>
             <td class="duedate">
-              {{ getTaskDueDate(taskId) }}
+              {{ getTaskDueDate(task) }}
             </td>
             <td class="assignees">
               <div
@@ -84,11 +84,11 @@
                 <div
                   class="avatar-wrapper"
                   :key="personId"
-                  v-for="personId in getAssignees(taskId)"
+                  v-for="personId in getAssignees(task)"
                 >
                   <people-avatar
                     class="person-avatar flexrow-item"
-                    :key="taskId + '-' + personId"
+                    :key="task.id + '-' + personId"
                     :person="personMap.get(personId)"
                     :size="30"
                     :font-size="15"
@@ -158,9 +158,7 @@ export default {
     ]),
 
     sortedEntries() {
-      return [...this.entries].sort((taskIdA, taskIdB) => {
-        const taskA = this.getTask(taskIdA)
-        const taskB = this.getTask(taskIdB)
+      return [...this.entries].sort((taskA, taskB) => {
         if (!taskA) return false
         const taskTypeA = this.taskTypeMap.get(taskA.task_type_id)
         const taskTypeB = this.taskTypeMap.get(taskB.task_type_id)
@@ -190,23 +188,19 @@ export default {
       }
     },
 
-    getTaskStartDate(taskId) {
-      const task = this.getTask(taskId)
+    getTaskStartDate(task) {
       return task && task.start_date ? task.start_date.substring(0, 10) : ''
     },
 
-    getTaskDueDate(taskId) {
-      const task = this.getTask(taskId)
+    getTaskDueDate(task) {
       return task && task.due_date ? task.due_date.substring(0, 10) : ''
     },
 
-    getTaskEstimation(taskId) {
-      const task = this.getTask(taskId)
+    getTaskEstimation(task) {
       return task && task.estimation ? this.formatDuration(task.estimation) : ''
     },
 
-    getTaskDuration(taskId) {
-      const task = this.getTask(taskId)
+    getTaskDuration(task) {
       return task && task.duration ? this.formatDuration(task.duration) : ''
     },
 
@@ -251,8 +245,8 @@ export default {
 }
 
 .status {
-  max-width: 120px;
-  min-width: 120px;
+  max-width: 130px;
+  min-width: 130px;
 }
 
 .assignees {
@@ -273,8 +267,6 @@ export default {
 }
 
 .task-list-body {
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 .datatable-row-header::after {

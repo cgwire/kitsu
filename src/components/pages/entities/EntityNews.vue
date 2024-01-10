@@ -4,7 +4,10 @@
       <spinner />
     </div>
     <div class="news" v-else-if="newsList.length > 0">
-      <div class="timeline">
+      <div>
+        <em> {{ newsList.length }} modifications occured </em>
+      </div>
+      <div class="timeline mt1">
         <div :key="'news-' + news.id" v-for="news in newsList">
           <div class="news-line timeline-entry flexrow">
             <span
@@ -18,7 +21,16 @@
               {{ formatFullDate(news.created_at) }}
             </span>
 
-            <div class="flexrow-item task-type-wrapper">
+            <people-avatar
+              class="flexrow-item"
+              :person="personMap.get(news.author_id)"
+              :size="30"
+              :font-size="14"
+              :is-link="false"
+              v-if="personMap.get(news.author_id)"
+            />
+
+            <div class="flexrow-item task-type-wrapper ml1">
               <task-type-name
                 class="task-type-name"
                 :task-type="buildTaskTypeFromNews(news)"
@@ -29,31 +41,10 @@
 
             <div class="flexrow-item validation-wrapper">
               <validation-tag
-                class="validation-tag"
                 :task="taskMap.get(news.task_id)"
                 :is-static="true"
                 :thin="!news.change"
               />
-            </div>
-
-            <div class="flexrow-item comment-content">
-              <div>
-                <div class="news-info flexrow">
-                  <people-avatar
-                    class="flexrow-item"
-                    :person="personMap.get(news.author_id)"
-                    :size="30"
-                    :font-size="14"
-                    :is-link="false"
-                    v-if="personMap.get(news.author_id)"
-                  />
-                  <span class="explaination flexrow-item">
-                    <span class="strong person-name">
-                      {{ personName(news) }}
-                    </span>
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -171,6 +162,21 @@ export default {
     entity() {
       if (this.entity) this.reset()
     }
+  },
+
+  socket: {
+    events: {
+      'news:new'(eventData) {
+        if (
+          eventData.project_id === this.currentProduction.id &&
+          (!this.taskTypeId || this.taskTypeId === eventData.task_type_id) &&
+          (!this.taskStatusId || this.taskStatusId === eventData.task_status_id)
+        ) {
+          this.reset()
+          console.log(eventData)
+        }
+      }
+    }
   }
 }
 </script>
@@ -193,7 +199,8 @@ export default {
 .timeline {
   border-left: 4px solid $blue-light;
   margin-left: 8px;
-  padding-bottom: 2em;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
 
   .subtitle {
     margin-top: 2em;

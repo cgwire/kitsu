@@ -48,6 +48,7 @@
         :start-date="startDate"
         :zoom-level="zoomLevel"
         :hide-man-days="true"
+        :with-milestones="false"
         @item-changed="onScheduleItemChanged"
         @root-element-expanded="expandProductionElement"
       />

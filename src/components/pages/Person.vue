@@ -155,14 +155,16 @@
         <div v-if="isActiveTab('schedule')">
           <schedule
             ref="schedule-widget"
-            :start-date="tasksStartDate"
-            :end-date="tasksEndDate"
+            :start-date="tasksStartDate.clone().add(-3, 'months')"
+            :end-date="tasksEndDate.clone().add(3, 'months')"
             :hierarchy="scheduleItems"
             :zoom-level="zoomLevel"
             :height="scheduleHeight"
             :is-loading="isTasksLoading"
             :is-estimation-linked="true"
             :with-milestones="false"
+            @item-changed="saveTaskScheduleItem"
+            @estimation-changed="event => saveTaskScheduleItem(event.item)"
             v-if="scheduleItems.length > 0"
           />
           <div class="has-text-centered" v-else>
@@ -184,7 +186,13 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { formatListMixin } from '@/components/mixins/format'
 import colors from '@/lib/colors'
-import { getFirstStartDate, getLastEndDate, parseDate } from '@/lib/time'
+import {
+  daysToMinutes,
+  getBusinessDays,
+  getFirstStartDate,
+  getLastEndDate,
+  parseDate
+} from '@/lib/time'
 
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
@@ -249,7 +257,10 @@ export default {
     }
     setTimeout(() => {
       if (this.searchField) this.searchField.focus()
-    }, 100)
+      if (this.$refs['schedule-widget']) {
+        this.$refs['schedule-widget'].scrollToDate(this.tasksStartDate)
+      }
+    }, 300)
     this.loadPerson(this.$route.params.person_id)
     window.addEventListener('resize', this.resetScheduleHeight)
   },
@@ -428,7 +439,8 @@ export default {
       'setDayOff',
       'setPersonTasksScrollPosition',
       'setTimeSpent',
-      'unsetDayOff'
+      'unsetDayOff',
+      'updateTask'
     ]),
 
     resetScheduleHeight() {
@@ -477,7 +489,7 @@ export default {
         startDate = parseDate(task.real_start_date)
       }
 
-      const estimation = this.formatDuration(task.estimation)
+      const estimation = task.estimation
       if (task.due_date) {
         endDate = parseDate(task.due_date)
       } else if (task.end_date) {
@@ -498,7 +510,7 @@ export default {
         expanded: false,
         loading: false,
         man_days: estimation,
-        editable: false,
+        editable: this.isCurrentUserManager,
         unresizable: false,
         parentElement,
         color: taskType.color,
@@ -623,6 +635,23 @@ export default {
         date: this.selectedDate
       }
       this.unsetDayOff(dayOff)
+    },
+
+    saveTaskScheduleItem(item) {
+      const daysLength = getBusinessDays(item.startDate, item.endDate)
+      const estimation = daysToMinutes(this.organisation, daysLength)
+      item.man_days = estimation
+      console.log('saveTask', item)
+      if (item.startDate && item.endDate) {
+        this.updateTask({
+          taskId: item.id,
+          data: {
+            estimation,
+            start_date: item.startDate.format('YYYY-MM-DD'),
+            due_date: item.endDate.format('YYYY-MM-DD')
+          }
+        })
+      }
     }
   },
 
@@ -644,6 +673,12 @@ export default {
 
     activeTab() {
       this.resetScheduleHeight()
+    },
+
+    zoomLevel() {
+      if (this.$refs['schedule-widget']) {
+        this.$refs['schedule-widget'].scrollToDate(this.tasksStartDate)
+      }
     }
   }
 }
