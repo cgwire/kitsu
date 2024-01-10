@@ -25,9 +25,9 @@
         <file-upload
           ref="preview-field"
           :accept="extensions"
-          :multiple="isMultiple"
-          :label="$t('main.select_file')"
           :is-primary="false"
+          :label="$t('main.select_file')"
+          :multiple="isMultiple"
           @fileselected="onFileSelected"
           hide-file-names
         />
@@ -178,6 +178,10 @@ export default {
 
   methods: {
     ...mapActions([]),
+
+    setFiles(files) {
+      this.previewField.filesChange('file', files)
+    },
 
     onFileSelected(forms) {
       this.forms = this.isMultiple ? this.forms.concat(forms) : [forms]

@@ -51,27 +51,26 @@
             />
           </div>
         </div>
-        <div class="footer mb2">
-          <button-simple
-            class="upload-button"
-            :disabled="loading.loadingConcepts"
-            :text="$t('concepts.add_new_concept')"
-            @click="openAddConceptModal"
-          />
-        </div>
-
         <table-info
           :is-loading="loading.loadingConcepts"
           :is-error="errors.loadingConcepts"
           v-if="loading.loadingConcepts || errors.loadingConcepts"
         />
         <div
+          ref="concept-list"
           class="concept-list pb1"
-          @drop="onFileDrop"
           @dragover="onFileDragover"
-          @dragleave="onFileDragLeave"
           v-else-if="filteredConcepts?.length"
         >
+          <div
+            class="drop-mask"
+            @drop="onFileDrop"
+            @dragover="onFileDragover"
+            @dragleave="onFileDragLeave"
+            v-if="isDraggingFile"
+          >
+            Drop new concepts
+          </div>
           <ul class="items">
             <li
               class="item"
@@ -84,50 +83,20 @@
                 onSelectConcept(concept, $event.ctrlKey || $event.metaKey)
               "
             >
-              <entity-preview
-                :empty-height="200"
-                :empty-width="300"
-                :height="200"
-                :width="300"
-                :entity="concept"
-                is-rounded-top-border
-              />
-              <div class="description">
-                <ul class="tags">
-                  <li
-                    class="tag"
-                    v-for="entity in getLinkedEntities(concept)"
-                    :key="entity.id"
-                    @click.stop
-                  >
-                    <router-link :to="entityPath(entity, 'asset')">
-                      {{ entity.name }}
-                    </router-link>
-                  </li>
-                </ul>
-                <div class="status" v-if="hasTask(concept)">
-                  <span
-                    class="tag"
-                    :style="{
-                      backgroundColor: getTaskStatus(concept).color,
-                      color: 'white'
-                    }"
-                  >
-                    {{ getTaskStatus(concept).short_name }}
-                  </span>
-                  <people-avatar
-                    :person="personMap.get(concept.created_by)"
-                    :size="25"
-                    :font-size="14"
-                    :is-link="false"
-                  />
-                </div>
-              </div>
+              <concept-card :concept="concept" />
             </li>
           </ul>
         </div>
         <div v-else>
           {{ $t('concepts.empty') }}
+        </div>
+        <div class="footer mb2">
+          <button-simple
+            class="upload-button"
+            :disabled="loading.loadingConcepts"
+            :text="$t('concepts.add_new_concept')"
+            @click="openAddConceptModal"
+          />
         </div>
       </div>
     </div>
@@ -144,7 +113,7 @@
       @confirm="confirmAddConceptModal"
     />
 
-    <div class="column side-column" v-if="selectedConcepts.size">
+    <div class="column side-column">
       <task-info entity-type="Concept" :task="currentTask" with-actions />
     </div>
   </div>
@@ -154,10 +123,10 @@
 import { mapGetters, mapActions } from 'vuex'
 import { firstBy } from 'thenby'
 
-import { getEntityPath } from '@/lib/path'
 import { sortByName, sortPeople } from '@/lib/sorting'
 
 import { searchMixin } from '@/components/mixins/search'
+import { domMixin } from '@/components/mixins/dom'
 
 import files from '@/lib/files'
 
@@ -165,8 +134,7 @@ import AddPreviewModal from '@/components/modals/AddPreviewModal'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
-import EntityPreview from '@/components/widgets/EntityPreview.vue'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import ConceptCard from '@/components/widgets/ConceptCard'
 import PeopleField from '@/components/widgets/PeopleField'
 import SearchField from '@/components/widgets/SearchField'
 import SearchQueryList from '@/components/widgets/SearchQueryList'
@@ -175,15 +143,14 @@ import TaskInfo from '@/components/sides/TaskInfo'
 
 export default {
   name: 'concepts',
-  mixins: [searchMixin],
+  mixins: [searchMixin, domMixin],
 
   components: {
     AddPreviewModal,
     ButtonSimple,
     Combobox,
     ComboboxStatus,
-    EntityPreview,
-    PeopleAvatar,
+    ConceptCard,
     PeopleField,
     SearchField,
     SearchQueryList,
@@ -194,6 +161,7 @@ export default {
   data() {
     return {
       imgExtensions: files.IMG_EXTENSIONS_STRING,
+      isDraggingFile: false,
       loading: {
         addingConcept: false,
         loadingConcepts: false,
@@ -399,31 +367,6 @@ export default {
       }
     },
 
-    entityPath(entity, section) {
-      const episodeId = this.isTVShow ? entity.episode_id || 'main' : null
-      return getEntityPath(
-        entity.id,
-        this.currentProduction.id,
-        section,
-        episodeId,
-        { section: 'concepts' }
-      )
-    },
-
-    getLinkedEntities(concept) {
-      return concept.entity_concept_links
-        .map(id => this.assetMap.get(id))
-        .filter(Boolean)
-    },
-
-    getTaskStatus(concept) {
-      return this.taskStatusMap.get(concept.tasks[0].task_status_id)
-    },
-
-    hasTask(concept) {
-      return concept.tasks?.length
-    },
-
     isSelected(concept) {
       return this.selectedConcepts.has(concept.id)
     },
@@ -476,16 +419,23 @@ export default {
       this.refreshConcepts()
     },
 
-    onFileDrop() {
-      console.log('file dropped')
+    onFileDrop(event) {
+      this.pauseEvent(event)
+      const files = event.dataTransfer.files
+      this.modals.addConcept = true
+      this.isDraggingFile = false
+      this.$nextTick(() => {
+        this.$refs['add-preview-modal'].setFiles(files)
+      })
     },
 
-    onFileDragover() {
-      console.log('file over')
+    onFileDragover(event) {
+      this.pauseEvent(event)
+      this.isDraggingFile = true
     },
 
     onFileDragLeave() {
-      console.log('file leave')
+      this.isDraggingFile = false
     }
   },
 
@@ -537,7 +487,9 @@ export default {
 }
 
 .concept-list {
-  overflow-x: auto;
+  margin: 0 auto;
+  position: relative;
+  overflow-y: auto;
 }
 
 .items {
@@ -566,48 +518,6 @@ export default {
     &.selected-item {
       border-color: var(--background-selected);
     }
-
-    .description {
-      display: flex;
-      flex-direction: column;
-      flex-wrap: wrap;
-      row-gap: 10px;
-      padding: 0.3em 1em;
-      margin: 0.3em 0;
-      flex: 1;
-    }
-
-    .tags {
-      display: inline-flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-left: 0;
-      flex: 1;
-
-      .tag {
-        cursor: pointer;
-        transition: transform 0.1s linear;
-
-        &:hover {
-          transform: scale(1.1);
-        }
-      }
-    }
-
-    .tag {
-      font-weight: 500;
-      letter-spacing: 1px;
-    }
-
-    .status {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      .tag {
-        text-transform: uppercase;
-      }
-    }
   }
 }
 
@@ -635,5 +545,21 @@ export default {
       background-color: var(--background-hover);
     }
   }
+}
+
+.drop-mask {
+  background: rgba(0.1, 0, 0, 0.5);
+  border-radius: 0.5em;
+  color: white;
+  font-size: 2em;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
 }
 </style>
