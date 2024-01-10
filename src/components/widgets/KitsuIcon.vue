@@ -23,6 +23,7 @@ import productionSettings from '@/assets/icons/fi_settings.svg'
 import quota from '@/assets/icons/fi_quotas.svg'
 import logs from '@/assets/icons/fi_logs.svg'
 import schedule from '@/assets/icons/fi_calendar.svg'
+import search from '@/assets/icons/fi_entity-search.svg'
 import shots from '@/assets/icons/fi_shots.svg'
 import sequences from '@/assets/icons/fi_sequences.svg'
 import sequenceStats from '@/assets/icons/fi_sequence_stats.svg'
@@ -54,6 +55,7 @@ const icons = {
   'production-settings': productionSettings,
   quota,
   'sequence-stats': sequenceStats,
+  search,
   schedule,
   shots,
   sequences,
@@ -96,5 +98,9 @@ export default {
   img {
     filter: brightness(90);
   }
+}
+
+img {
+  filter: brightness(1.5);
 }
 </style>
