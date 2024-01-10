@@ -11,7 +11,7 @@ Go to the **Episode Stats** page. You can go there with the drop-down menu on to
 ![Drop down menu episode](../img/getting-started/drop_down_menu_ep_seq.png)
 
 With this view, you can see all the Take number per tasks on each
-sequences.
+episodes.
 
 ![Overview sequence task](../img/getting-started/global_view_episode_retake.png)
 
@@ -46,8 +46,8 @@ Go to the **Episode Stats** page. You can go there with the drop-down menu on to
 
 ![Drop down menu episode](../img/getting-started/drop_down_menu_ep_seq.png)
 
-With this view, you can see all the Take number per tasks on each
-sequences.
+With this view, you can see all the starus per tasks on each
+episode.
 
 ![Overview sequence task](../img/getting-started/global_view_episode_stat.png)
 
