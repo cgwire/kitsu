@@ -199,7 +199,7 @@ The **Start date** and the **Due date** are displayed on the **Tasks** tab of th
 
 But you can also see the **Due date** and **Estimation** days on the **Todo Page** of an Artist.
 
-![Task type page schedule artist due date](../img/getting-started/task_type_schedule_due_date_todo.png)
+![Task type page schedule artist due date](../img/getting-started/my_task_page.png)
 
 Everybody has access to this page, but only the **Studio Manager** can modify it.
 
