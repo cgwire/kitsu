@@ -99,7 +99,7 @@ and click on the status of the task that you want to delete.
 
 ![Delete task selection](../img/getting-started/delete_task_selection.png)
 
-The action box will appear. Select **Delete tasks** and validate with the **Confirm** button.
+The comment panel will appear . Select **Delete tasks** and validate with the **Confirm** button.
 
 ![Delete task menu](../img/getting-started/delete_task_menu_delete.png).
 
