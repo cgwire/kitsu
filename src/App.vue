@@ -2254,4 +2254,43 @@ th.validation-cell {
     flex-direction: column;
   }
 }
+
+/* scrollbar */
+::-webkit-scrollbar {
+  width: 20px;
+  height: 20px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #eee;
+  border-radius: 20px;
+  border: 6px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #ddd;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: #ccc;
+}
+.dark {
+  ::-webkit-scrollbar-thumb {
+    background-color: #46494f;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #4d5560;
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background-color: #5e6169;
+  }
+}
 </style>
