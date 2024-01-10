@@ -61,7 +61,7 @@ export default {
     number: 'background | backgrounds',
     edit_background: 'Edit background',
     new_background: 'Add a new background',
-    title: 'Preview Backgrounds',
+    title: '3D Backgrounds',
     fields: {
       is_default: 'Is default',
       name: 'Name',
@@ -144,7 +144,7 @@ export default {
   },
 
   concepts: {
-    add_new_concept: 'Add a new reference to concepts',
+    add_new_concept: 'Add new concepts',
     add_concept: 'Add files for new concepts',
     add_concept_error: 'An error occurred while adding concept.',
     delete_for_selection: 'Delete the selected concept | Delete the {nbSelectedConcepts} selected concepts',
@@ -199,7 +199,7 @@ export default {
     out_title: 'The change that will be applied on trigger firing',
     new_status_automation: 'Add status automation',
     run_for_selection: 'Run status automation for selected tasks:',
-    title: 'Status Automations',
+    title: 'Automations',
     wrong_automation: 'This automation applies to a backward task type. It is not permitted by Kitsu (to avoid cycles). It will have no effect.',
     fields: {
       entity_type: 'Entity Type',
@@ -443,6 +443,7 @@ export default {
   main: {
     about: 'About',
     active: 'Active',
+    activity: 'Activity',
     add: 'add',
     after: 'After',
     admin: 'Admin',
@@ -534,6 +535,7 @@ export default {
     stick: 'Stick',
     studio: 'Studio',
     status: 'Status',
+    tasks: 'Tasks',
     to: 'To',
     timeSpent: 'Time Spent',
     tutorials: 'Tutorials',
