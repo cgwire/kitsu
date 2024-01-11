@@ -624,9 +624,30 @@ From there, you can change the status too![Retake](../img/getting-started/retake
 Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the Artist that his work is validated.
 
 
-## Review the Concept
+## Review a Concept
+
+Once your artists upload the concept, you can review it with the supervisor or the director.
+
+To review the concept, you use the navigation menu at the top of the screen and select the concept page.
+
+![Menu concept](../img/getting-started/menu_concept.png)
+
+You can see all the concepts uploaded, the status, assignation, and linked assets.
+
+![Ccncept filled status](../img/getting-started/concept_empty_prod_linked.png)
 
 
+To review a concept, click the status part to open the comment panel. You can enlarge the comment panel or go fullscreen.
+
+Then, write a comment, select the status **Approved** or **Rejected**, and validate with the **Post** button.
+
+![Ccncept status comment](../img/getting-started/concept_status_comment.png)
+
+You can filter the page with the **Status** filter to display all the **Neutral** status concepts.
+
+![Ccncept status filter](../img/getting-started/concept_status_filter.png)
+
+You can also filter per artist and change the order sort.
 
 ## Create a Breakdown List
 
