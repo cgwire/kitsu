@@ -123,7 +123,7 @@ On the comment panel, you have 2 options on top the panel.
 	- Link a concept to an asset
 	- delete the concept
 
-To link an asset, click on the **Link** ![Link button](../img/getting-started/link_icon) button.
+To link an asset, click on the **Link** ![Link button](../img/getting-started/link_icon.png) button.
 
 Kitsu will display all the **Assets** available to link with the concept uploaded.
 
