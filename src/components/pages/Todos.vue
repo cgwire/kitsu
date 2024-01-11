@@ -560,7 +560,7 @@ export default {
 }
 
 .query-list {
-  margin-bottom: 2em;
+  margin-top: 0.5em;
 }
 
 .dark .main-column {

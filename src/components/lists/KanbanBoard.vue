@@ -43,9 +43,11 @@
                   :empty-height="40"
                   :entity="{ preview_file_id: task.entity_preview_file_id }"
                 />
-                <div class="pa1">{{ task.full_entity_name }}</div>
+                <div class="pa1 ellipsis">
+                  {{ task.full_entity_name }}
+                </div>
               </div>
-              <div class="level">
+              <div class="level mt05">
                 <task-type-name
                   :task-id="task.id"
                   :task-type="getTaskType(task)"
@@ -188,7 +190,7 @@ export default {
     },
 
     onCardDragLeave(event) {
-      event.currentTarget.classList.remove('droppable')
+      event.target.classList.remove('droppable')
     },
 
     onCardDrop(event, taskStatusId) {
@@ -228,6 +230,7 @@ export default {
   flex-direction: row;
   gap: 20px;
   overflow-x: auto;
+  padding-bottom: 2em;
 }
 
 .board-column {
@@ -240,6 +243,7 @@ export default {
   overflow-y: auto;
   max-height: 60vh;
   border: 2px solid $white-grey;
+  border-radius: 0.5em;
 
   &.droppable {
     background: var(--background-selectable);
