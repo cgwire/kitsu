@@ -1,4 +1,5 @@
 import async from 'async'
+import { v4 as uuidv4 } from 'uuid'
 
 import conceptsApi from '@/store/api/concepts'
 
@@ -87,7 +88,7 @@ const actions = {
 
     // Create Entity
     const entity = {
-      name: crypto.randomUUID(), // unique and mandatory field
+      name: uuidv4(), // unique and mandatory field
       project_id: production.id
     }
     const concept = await conceptsApi.newConcept(entity)
