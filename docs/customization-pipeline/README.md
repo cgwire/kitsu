@@ -120,7 +120,7 @@ On the new pop-up, you can define your personalized task :
 - If this Status is used to comment on a task (useful to keep track of the back and forth in the task type page and for the episode stats page)
 - Can the artist use this Status? If **No** the artist won't see this Status on his list. But he can post on top of it.
 - Can the client use this Status? If **No** the client won't see this Status on his list
-- If this Status is used to ask for a review(useful to keep track of the quotas if you don't use timesheet)
+- If this Status is used to ask for a review (useful to keep track of the quotas if you don't use timesheet)
 - Is is a Status dedicated for the Concept
 - Choose a color you like
 
