@@ -119,15 +119,13 @@ Click on the status part of the concept, it will open the comment panel on the r
 
 ![Concept Comment Panel](../img/getting-started/concept_comment_panel.png)
 
-On the comment panel, you have 2 options on top the panel.
-	- Link a concept to an asset
-	- delete the concept
+On the comment panel, you have 2 options on top the panel:Link a concept to an asset and delete the concept.
 
 To link an asset, click on the **Link** ![Link button](../img/getting-started/link_icon.png) button.
 
 Kitsu will display all the **Assets** available to link with the concept uploaded.
 
-On top of the comment panel, Kitsu will list the asset already link. For now there is **No Links**.
+On top of the comment panel, Kitsu will list the asset already linked. For now there is **No Links**.
 
 
 ![Concept link](../img/getting-started/concept_link.png)

@@ -471,9 +471,86 @@ Click the **Leave a Comment** button to unfold the comment section.
 You can select your status and publish your preview with the **Post** Button.
 
 
+## Publish a Concept
+
+To publish a **Concept**, you need to go to the **Concept** page with the navigation menu.
+
+![Concept Menu](../img/getting-started/menu_concept.png)
+
+To upload a concept, you need to click on the **Add a new reference to concepts** button.
+
+You can upload one or several concept at the same time.
+
+![Concept empty page](../img/getting-started/concept_empty_prod.png)
+
+Once you uplaoded your previews, the concept page will look like this.
+
+![Concept filled page](../img/getting-started/concept_filled_prod.png)
+
+
+You can interact with the concept in two ways: first is to click on the picture to see an elarged view.
+The second is to click on the status part to open the **Comment Panel** on the right.
+
+On the comment panel you have two options, link a concept with an existing asset, or delete the concept.
+You can also comment and change the status of the asset.
+
+The idea is to have one version per **Concept**. If it's not valdated, you need to upload a new concept, not to have multiple version of the same concept.
+
+One concept is one task.
+
+
+![Concept options](../img/getting-started/concept_options.png)
+
+
+## Link a Concept to an Asset
+
+Once concepts are uploaded, you can link them to the assets.
+
+You can see the links on the status part of the assets.
+
+Click on the status part of the concept, it will open the comment panel on the right.
+
+![Concept Comment Panel](../img/getting-started/concept_comment_panel.png)
+
+On the comment panel, you have 2 options on top the panel:Link a concept to an asset and delete the concept.
+
+To link an asset, click on the **Link** ![Link button](../img/getting-started/link_icon.png) button.
+
+Kitsu will display all the **Assets** available to link with the concept uploaded.
+
+On top of the comment panel, Kitsu will list the asset already linked. For now there is **No Links**.
+
+
+![Concept link](../img/getting-started/concept_link.png)
+
+To link an asset, you have to click on it. You will see the name of the assets linked on the top of the screen, but also under the preview of the concept.
+
+
+![Concept asset linked](../img/getting-started/concept_asset_linked.png)
+
+Once a concept is linked to an asset, you can see the concepts on the detail page of an asset.
+
+Go back to the asset page, and click on the name of the asset you want to see the concept.
+
+![Detail asset page](../img/getting-started/asset_detail_page.png)
+
+On the second par the screen, per deault it's the casting detail that are displayed. 
+Use the dropdown menu to choose the concept.
+
+![asset detail concept](../img/getting-started/asset_detail_concept.png)
+
+Once in the concept section, you will see all the concept created for this asset. You can filter them per status.
+
+![asset detail concept list](../img/getting-started/asset_detail_concep_listt.png)
+
+
 
 
 ## Add a Thumbnail
+
+To define a preview as a thumbnail, the preview MUST hae been upladed as a revision. 
+
+To publish a preview, picture, or video, select the **PUBLISH REVISION** tab on the comment panel of the task.
 
 You can use the preview as a **thumbnail** on the asset or shot task. It
 helps to recognize the assets/shots on the main pages.
@@ -545,6 +622,10 @@ From there, you can change the status too![Retake](../img/getting-started/retake
 
 
 Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the Artist that his work is validated.
+
+
+## Review the Concept
+
 
 
 ## Create a Breakdown List
