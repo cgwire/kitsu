@@ -107,6 +107,31 @@ For example, You can filter per **Due Date Status** and select **Due this week**
 
 You can now click on the contact sheet to open the comment panel or select several tasks to create a playlist.
 
+## Check a Concept
+
+Once your artists upload the concept, you can review it.
+
+To review the concept, you use the navigation menu at the top of the screen and select the concept page.
+
+![Menu concept](../img/getting-started/menu_concept.png)
+
+You can see all the concepts uploaded, the status, assignation, and linked assets.
+
+![Ccncept filled status](../img/getting-started/concept_empty_prod_linked.png)
+
+
+To review a concept, click the status part to open the comment panel. You can enlarge the comment panel or go fullscreen.
+
+Then, write a comment, select the status **Approved** or **Rejected**, and validate with the **Post** button.
+
+![Ccncept status comment](../img/getting-started/concept_status_comment.png)
+
+You can filter the page with the **Status** filter to display all the **Neutral** status concepts.
+
+![Ccncept status filter](../img/getting-started/concept_status_filter.png)
+
+You can also filter per artist and change the order sort.
+
 
 
 ## Supervise the Quotas of your Department
