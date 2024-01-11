@@ -163,6 +163,7 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import firstBy from 'thenby'
 
+import { sortTaskStatuses } from '@/lib/sorting'
 import { parseDate } from '@/lib/time'
 
 import Combobox from '@/components/widgets/Combobox'
@@ -252,6 +253,7 @@ export default {
       'isTodosLoadingError',
       'nbSelectedTasks',
       'openProductions',
+      'productionMap',
       'selectedTasks',
       'taskStatuses',
       'taskTypeMap',
@@ -272,8 +274,11 @@ export default {
     },
 
     boardStatuses() {
-      const statuses = this.getProductionTaskStatuses(this.productionId)
-      return statuses.filter(status => !status.for_concept)
+      const statuses = this.getProductionTaskStatuses(this.productionId).filter(
+        status => !status.for_concept
+      )
+      const production = this.productionMap.get(this.productionId)
+      return sortTaskStatuses(statuses, production)
     },
 
     loggableTodos() {

@@ -109,15 +109,6 @@ export default {
     }
   },
 
-  data() {
-    return {}
-  },
-
-  mounted() {
-    console.log('tasks', this.tasks)
-    console.log('statuses', this.statuses)
-  },
-
   computed: {
     ...mapGetters(['isDarkTheme', 'personMap', 'productionMap', 'taskTypeMap']),
 
@@ -126,25 +117,13 @@ export default {
         const tasks = this.tasks.filter(
           task => task.task_status_id === status.id
         )
-
-        // TODO: handle priority by configuration
-        const priority = [
-          'TODO',
-          'WIP',
-          'WFA',
-          'RETAKE',
-          'READY',
-          'DONE'
-        ].indexOf(status.short_name.toUpperCase())
-
         return {
           id: status.id,
-          priority,
           status,
           tasks
         }
       })
-      return columns.sort((a, b) => a.priority - b.priority)
+      return columns
     }
   },
 

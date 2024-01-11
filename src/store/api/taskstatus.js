@@ -35,6 +35,15 @@ export default {
     return client.pput(`/api/data/task-status/${taskStatus.id}`, data)
   },
 
+  async updateTaskStatusLink(taskStatusLink) {
+    const data = {
+      project_id: taskStatusLink.projectId,
+      task_status_id: taskStatusLink.taskStatusId,
+      priority: taskStatusLink.priority
+    }
+    return await client.ppost('/api/data/task-status-links', data)
+  },
+
   deleteTaskStatus(taskStatus) {
     return client.pdel(`/api/data/task-status/${taskStatus.id}`)
   }
