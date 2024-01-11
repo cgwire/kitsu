@@ -88,6 +88,58 @@ using the **edit** button
 ![Edit button](../img/getting-started/edit_button.png).
 
 
+## Share your Concept
+
+As a **Concept Artist** you have **Concept** to share with your supervisor and director.
+
+From your **Todo page**, go back to the production, with the **Return to Production** button
+
+![Todo Return](../img/getting-started/todo_return.png)
+
+Once you are on the global page of the production, use the navigation drop-down menu 
+on top the screen to navigate to the **Concept** page.
+
+![menu concept global](../img/getting-started/menu_concept_global.png)
+
+Once in the **Concept Page**, you have the filter option on top of the screen, then the list of the concept.
+
+To upload a concept, you need to click on the **Add a new reference to concepts** button.
+
+![menu concept global](../img/getting-started/concept_empty.png)
+
+A popin will open and let you load your concepts. You can upload one or several concept at the same time.
+
+The concept page is now filled with references.
+
+![Concept filled](../img/getting-started/concept_filled.png)
+
+The next step is to link the uploaded **Concept** to the created assets of the production.
+
+Click on the status part of the concept, it will open the comment panel on the right.
+
+![Concept Comment Panel](../img/getting-started/concept_comment_panel.png)
+
+On the comment panel, you have 2 options on top the panel.
+	- Link a concept to an asset
+	- delete the concept
+
+To link an asset, click on the **Link** ![Link button](../img/getting-started/link_icon) button.
+
+Kitsu will display all the **Assets** available to link with the concept uploaded.
+
+On top of the comment panel, Kitsu will list the asset already link. For now there is **No Links**.
+
+
+![Concept link](../img/getting-started/concept_link.png)
+
+To link an asset, you have to click on it. You will see the name of the assets linked on the top of the screen, but also under the preview of the concept.
+
+
+![Concept asset linked](../img/getting-started/concept_asset_linked.png)
+
+
+
+
 ## Ask for a Review
 
 You can ask for a review by switching the tab to **Publish revision**
