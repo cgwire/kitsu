@@ -342,7 +342,7 @@ You need to return to your production with the **Return To Production** button o
 
 On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
 
-![Setting Status automation new](../img/getting-started/preview_background_setting)
+![Setting Status automation new](../img/getting-started/preview_background_setting.png)
 
 On the **Preview Backgrounds** tab, you can choose which HDR file you want to add or remove on this production,
 
