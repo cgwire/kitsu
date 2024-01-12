@@ -406,21 +406,19 @@ export default {
         this.activeTab = this.$route.params.tab
 
         if (tab === 'board') {
-          this.loadOpenProductions().then(() => {
-            const currentProduction = this.openProductions.find(
-              ({ id }) => id === this.$route.query.productionId
-            )
-            if (currentProduction) {
-              this.productionId = currentProduction.id
-            } else {
-              if (!this.productionId) {
-                this.productionId = this.openProductions?.[0]?.id
-              }
-              this.$router.push({
-                query: { productionId: this.productionId }
-              })
+          const currentProduction = this.openProductions.find(
+            ({ id }) => id === this.$route.query.productionId
+          )
+          if (currentProduction) {
+            this.productionId = currentProduction.id
+          } else {
+            if (!this.productionId) {
+              this.productionId = this.openProductions?.[0]?.id
             }
-          })
+            this.$router.push({
+              query: { productionId: this.productionId }
+            })
+          }
         }
       } else {
         this.activeTab = 'todos'
