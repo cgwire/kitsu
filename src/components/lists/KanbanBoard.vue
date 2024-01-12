@@ -1,6 +1,10 @@
 <template>
   <div class="board">
-    <table-info class="mb2" :is-loading="isLoading" :is-error="isError" />
+    <table-info
+      :class="{ mb2: isLoading }"
+      :is-loading="isLoading"
+      :is-error="isError"
+    />
     <ol class="board-columns">
       <li
         class="board-column"
@@ -260,7 +264,6 @@ export default {
 
 <style lang="scss" scoped>
 .board {
-  padding: 2em 0;
 }
 
 .board-columns,
@@ -287,7 +290,7 @@ export default {
   align-items: center;
   overflow-y: auto;
   max-height: 60vh;
-  border: 2px solid $white-grey;
+  border: 2px solid var(--border-alt);
   border-radius: 0.5em;
 
   &.droppable {
@@ -306,7 +309,7 @@ export default {
   padding-top: 5px;
   width: 100%;
   text-align: center;
-  background: $white-grey;
+  background: var(--border-alt);
   border: none;
 
   .tag {
@@ -328,8 +331,8 @@ export default {
   .ui-droppable {
     padding: 1em;
     border-radius: 1em;
-    border: 1px solid $white-grey;
-    background-color: $white-grey-light;
+    border: 1px solid var(--border-alt);
+    background-color: var(--background-alt);
   }
 
   &.selected {
@@ -361,8 +364,8 @@ export default {
 
     .ui-droppable {
       transform: rotate(0);
-      border: 1px solid $white-grey;
-      background-color: $white-grey-light;
+      border: 1px solid var(--border-alt);
+      background-color: var(--background-alt);
     }
   }
 }

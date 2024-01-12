@@ -128,14 +128,13 @@
           v-if="isTabActive('done')"
         />
 
-        <div v-if="isTabActive('board')">
-          <kanban-board
-            :is-loading="isTodosLoading"
-            :is-error="isTodosLoadingError"
-            :statuses="boardStatuses"
-            :tasks="boardTasks"
-          />
-        </div>
+        <kanban-board
+          :is-loading="isTodosLoading"
+          :is-error="isTodosLoadingError"
+          :statuses="boardStatuses"
+          :tasks="boardTasks"
+          v-if="isTabActive('board')"
+        />
 
         <timesheet-list
           ref="timesheet-list"
@@ -407,21 +406,19 @@ export default {
         this.activeTab = this.$route.params.tab
 
         if (tab === 'board') {
-          this.loadOpenProductions().then(() => {
-            const currentProduction = this.openProductions.find(
-              ({ id }) => id === this.$route.query.productionId
-            )
-            if (currentProduction) {
-              this.productionId = currentProduction.id
-            } else {
-              if (!this.productionId) {
-                this.productionId = this.openProductions?.[0]?.id
-              }
-              this.$router.push({
-                query: { productionId: this.productionId }
-              })
+          const currentProduction = this.openProductions.find(
+            ({ id }) => id === this.$route.query.productionId
+          )
+          if (currentProduction) {
+            this.productionId = currentProduction.id
+          } else {
+            if (!this.productionId) {
+              this.productionId = this.openProductions?.[0]?.id
             }
-          })
+            this.$router.push({
+              query: { productionId: this.productionId }
+            })
+          }
         }
       } else {
         this.activeTab = 'todos'
@@ -563,10 +560,6 @@ export default {
 
 .query-list {
   margin-top: 0.5em;
-}
-
-.dark .main-column {
-  border-right: 3px solid $grey-strong;
 }
 
 .done-list {
