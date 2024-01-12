@@ -589,10 +589,6 @@ export default {
   padding: 0;
 }
 
-.main-column {
-  border-right: 3px solid $light-grey;
-}
-
 .push-right {
   flex: 1;
   text-align: right;

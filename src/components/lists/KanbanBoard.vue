@@ -26,8 +26,12 @@
         <ol class="board-cards">
           <li
             class="board-card"
+            :class="{
+              selected: isSelected(task)
+            }"
             draggable
             :key="task.id"
+            @click="onSelectTask(task, $event.ctrlKey || $event.metaKey)"
             @dragstart="onCardDragStart($event, task)"
             @drag="onCardDrag"
             @dragend="onCardDragEnd"
@@ -126,7 +130,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['isDarkTheme', 'personMap', 'productionMap', 'taskTypeMap']),
+    ...mapGetters([
+      'isDarkTheme',
+      'personMap',
+      'productionMap',
+      'selectedTasks',
+      'taskTypeMap'
+    ]),
 
     columns() {
       const columns = this.statuses.map(status => {
@@ -144,7 +154,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['commentTask']),
+    ...mapActions(['addSelectedTasks', 'clearSelectedTasks', 'commentTask']),
 
     getSortedPeople(personIds) {
       const people = personIds.map(id => this.personMap.get(id))
@@ -175,6 +185,27 @@ export default {
         taskType.episode_id = production.first_episode_id
       }
       return taskType
+    },
+
+    isSelected(task) {
+      return this.selectedTasks.has(task.id)
+    },
+
+    onSelectTask(task, isMultipleSelection = false) {
+      const selection = isMultipleSelection
+        ? new Map(this.selectedTasks)
+        : new Map()
+      if (this.isSelected(task)) {
+        selection.delete(task.id)
+      } else {
+        selection.set(task.id, task)
+      }
+      this.clearSelectedTasks()
+      this.addSelectedTasks(
+        Array.from(selection.values()).map(task => ({
+          task
+        }))
+      )
     },
 
     onCardDragStart(event, task) {
@@ -292,13 +323,21 @@ export default {
 }
 
 .board-card {
-  cursor: grab;
+  cursor: pointer;
 
   .ui-droppable {
     padding: 1em;
     border-radius: 1em;
     border: 1px solid $white-grey;
     background-color: $white-grey-light;
+  }
+
+  &.selected {
+    cursor: grab;
+
+    .ui-droppable {
+      background: var(--background-selected);
+    }
   }
 
   &:focus-within {
