@@ -80,6 +80,8 @@ Now, you have all your assets imported into Kitsu and the task created according
 
 You can use the CSV import to update your data quickly.
 
+You can update the **type** of an asset, the **Assignation**, the **Status** of tasks and add a **Comment**.
+
 You need to switch on the option **Update existing data**. Then the lines that will be updated
 will be highlighted in blue.
 
@@ -213,6 +215,8 @@ Now, you have all your shots imported into Kitsu, and the task created according
 ## Update Shots Information with CSV Import
 
 You can use the **CSV Import** to update your data as the **NB Frames**, **Frame IN**, **Frame Out** or any custom **Metadata column**.
+
+You can update the **Assignation**, the **Status** of tasks and add a **Comment**.
 
 Open your spreadsheet, select your data and copy them.
 
