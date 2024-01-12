@@ -310,11 +310,11 @@ You can see your Status updating thanks to the Automation.
 
 ## Preview backgrounds
 
-### Create your global library of HDR file
+### Create your global library of HDR files
 
-The Preview Backgrounds are here to help to better review your 3D preview file (`.glb`).
+The Preview Backgrounds help better review your 3D preview file (`.glb`).
 
-On this section, you can create your `.HDR`library file that you can use in your different production.
+In this section, you can create your `.HDR`library file that you can use in your production.
 
 Go to the main menu, and select **Preview Backgrounds**.
 
@@ -326,19 +326,19 @@ Once on the new page, you can add a **HDR Preview Background** by clicking the *
 ![add preview background](../img/getting-started/preview_background_empty.png)
 
 
-From here; you need to select your HDR preview background, name it and choose if you want this HDR to be the default background.
+From here, you need to select your HDR preview background, name it, and choose if you want this HDR to be the default background.
 
 ![Main menu preview background](../img/getting-started/preview_background_new.png)
 
-Once you have uplaoded all your HDR file, Kitsu will display them as a list.
+Once you have uploaded all your HDR files, Kitsu will display them as a list.
 
 ![Preview background filled](../img/getting-started/preview_background_filled.png)
 
 
-Now your new **Preview Background** is created on your **Global Library**.
-You need to add it to your **production Library** to be able to use it.
+Your new **Preview Background** is now created on your **Global Library**.
+You must add it to your **production Library** to use it.
 
-You need to return to your production with the **Return To Production** button on top of the screen.
+You must return to your production with the **Return To Production** button on top of the screen.
 
 On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
 
@@ -351,3 +351,5 @@ Validate your choice with the **add** button.
 ![Setting Add Asset](../img/getting-started/preview_background_setting_filled.png)
 
 You can review your 3D file with an HDR background.
+
+![Preview background example](../img/getting-started/preview_background_example.png)
