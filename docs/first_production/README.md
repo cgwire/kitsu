@@ -579,6 +579,17 @@ You can watch the version from the right panel, enlarge it by grabbing the side 
 
 ![review on global page](../img/getting-started/review_global.png)
 
+For the 3D file (`.glb` file) you can also review it as wireframe, or add a `.HDR` file to check the lighting. 
+
+You can move around the 3d file with a drag and move with your cursor, and zoom in or out with the scroll.
+
+![review 3d wireframe](../img/getting-started/review_wireframe.png)
+
+![Preview background example](../img/getting-started/preview_background_example.png)
+
+See the **Customization** section for more details.
+[Pipeline Customization](../customization-pipeline/README.md)
+
 You can draw directly on the preview with the **Pencil** tool and select a color ![Pencil](../img/getting-started/draw.png).
 
 ![review drawing](../img/getting-started/review_comment.png)
