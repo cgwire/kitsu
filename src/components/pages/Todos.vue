@@ -128,14 +128,13 @@
           v-if="isTabActive('done')"
         />
 
-        <div v-if="isTabActive('board')">
-          <kanban-board
-            :is-loading="isTodosLoading"
-            :is-error="isTodosLoadingError"
-            :statuses="boardStatuses"
-            :tasks="boardTasks"
-          />
-        </div>
+        <kanban-board
+          :is-loading="isTodosLoading"
+          :is-error="isTodosLoadingError"
+          :statuses="boardStatuses"
+          :tasks="boardTasks"
+          v-if="isTabActive('board')"
+        />
 
         <timesheet-list
           ref="timesheet-list"
@@ -563,10 +562,6 @@ export default {
 
 .query-list {
   margin-top: 0.5em;
-}
-
-.dark .main-column {
-  border-right: 3px solid $grey-strong;
 }
 
 .done-list {
