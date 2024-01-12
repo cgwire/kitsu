@@ -53,6 +53,18 @@
                   :task-type="getTaskType(task)"
                 />
                 <div class="avatars">
+                  <span
+                    class="priority"
+                    :class="{
+                      high: task.priority === 1,
+                      veryhigh: task.priority === 2,
+                      emergency: task.priority === 3
+                    }"
+                    :title="formatPriority(task.priority)"
+                    v-if="task.priority > 0"
+                  >
+                    {{ formatPrioritySymbol(task.priority) }}
+                  </span>
                   <people-avatar
                     :is-link="false"
                     :key="`${task.id}-${person.id}`"
@@ -77,13 +89,15 @@ import { mapActions, mapGetters } from 'vuex'
 import { sortPeople } from '@/lib/sorting'
 
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import { formatListMixin } from '@/components/mixins/format'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
   name: 'kanban-board',
-  mixins: [],
+
+  mixins: [formatListMixin],
 
   components: {
     EntityThumbnail,
@@ -322,5 +336,27 @@ export default {
 
 .thumbnail-picture {
   background-color: black;
+}
+
+.priority {
+  border-radius: 5px;
+  display: inline-block;
+  color: white;
+  margin-left: 5px;
+  font-weight: bold;
+  min-width: 23px;
+  text-align: center;
+
+  &.high {
+    background: $yellow;
+  }
+
+  &.veryhigh {
+    background: $orange;
+  }
+
+  &.emergency {
+    background: $red;
+  }
 }
 </style>
