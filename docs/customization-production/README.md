@@ -81,3 +81,20 @@ validate your choice with the **add** button.
 
 
 ![Setting Add Task Type](../img/getting-started/setting_auto_add.png)
+
+
+## Select Specific Preview Background for a Production
+
+On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
+
+![Setting Status automation new](../img/getting-started/preview_background_setting.png)
+
+On the **Preview Backgrounds** tab, you can choose which HDR file you want to add or remove on this production,
+
+Validate your choice with the **add** button.
+
+![Setting Add Asset](../img/getting-started/preview_background_setting_filled.png)
+
+You can review your 3D file with an HDR background.
+
+![Preview background example](../img/getting-started/preview_background_example.png)
