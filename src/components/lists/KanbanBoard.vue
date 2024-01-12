@@ -1,10 +1,5 @@
 <template>
   <div class="board">
-    <table-info
-      :class="{ mb2: isLoading }"
-      :is-loading="isLoading"
-      :is-error="isError"
-    />
     <ol class="board-columns">
       <li
         class="board-column"
@@ -88,6 +83,7 @@
         </ol>
       </li>
     </ol>
+    <table-info :is-loading="isLoading" :is-error="isError" />
   </div>
 </template>
 
