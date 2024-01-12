@@ -487,21 +487,20 @@ export default {
       this.setTimeSpent(timeSpentInfo)
     },
 
-    onAssignation(eventData) {
+    async onAssignation(eventData) {
       if (this.user.id === eventData.person_id) {
-        this.loadOpenProductions(() => {
-          this.loadTodos({
-            forced: true,
-            date: this.selectedDate,
-            callback: () => {
-              if (this.todoList) {
-                this.$nextTick(() => {
-                  this.todoList.setScrollPosition(this.todoListScrollPosition)
-                })
-              }
-              this.resizeHeaders()
+        await this.loadOpenProductions()
+        this.loadTodos({
+          forced: true,
+          date: this.selectedDate,
+          callback: () => {
+            if (this.todoList) {
+              this.$nextTick(() => {
+                this.todoList.setScrollPosition(this.todoListScrollPosition)
+              })
             }
-          })
+            this.resizeHeaders()
+          }
         })
       }
     }
