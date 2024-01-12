@@ -420,7 +420,7 @@ export default {
   width: 100px;
 }
 
-.tasktype-item[draggable='false'] {
+.tasktype-item {
   cursor: grab;
 }
 

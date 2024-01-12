@@ -69,6 +69,10 @@ export default {
     }
   },
 
+  board: {
+    title: 'Board'
+  },
+
   breakdown: {
     all_assets: 'All available assets',
     edit_label: 'Change the asset\'s label',

@@ -34,11 +34,19 @@
             <th scope="col" class="actions"></th>
           </tr>
         </thead>
-        <tbody class="datatable-body">
-          <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
-            <td class="name">
-              {{ entry.name }}
-            </td>
+        <draggable
+          class="datatable-body"
+          draggable=".task-status"
+          tag="tbody"
+          :value="entries"
+          @end="updateTaskStatusPriority($event.oldIndex, $event.newIndex)"
+        >
+          <tr
+            class="datatable-row task-status"
+            v-for="entry in entries"
+            :key="entry.id"
+          >
+            <td class="name">{{ entry.name }}</td>
             <task-status-cell class="short-name" :entry="entry" />
             <boolean-cell class="is-default" :value="entry.is_default" />
             <boolean-cell class="is-done" :value="entry.is_done" />
@@ -63,7 +71,7 @@
               @delete-clicked="$emit('delete-clicked', entry)"
             />
           </tr>
-        </tbody>
+        </draggable>
       </table>
     </div>
 
@@ -76,8 +84,10 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import draggable from 'vuedraggable'
+
 import { formatListMixin } from '@/components/mixins/format'
+
 import BooleanCell from '@/components/cells/BooleanCell'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
@@ -85,6 +95,7 @@ import TaskStatusCell from '@/components/cells/TaskStatusCell'
 
 export default {
   name: 'task-status-list',
+
   mixins: [formatListMixin],
 
   props: {
@@ -102,20 +113,30 @@ export default {
     }
   },
 
-  data() {
-    return {}
-  },
   components: {
     BooleanCell,
+    draggable,
     RowActionsCell,
     TableInfo,
     TaskStatusCell
   },
-  computed: {
-    ...mapGetters([])
-  },
+
   methods: {
-    ...mapActions([])
+    async updateTaskStatusPriority(oldIndex, newIndex) {
+      const taskStatuses = [...this.entries]
+      const taskStatus = taskStatuses[oldIndex]
+      taskStatuses.splice(oldIndex, 1)
+      taskStatuses.splice(newIndex, 0, taskStatus)
+      await this.updateTaskStatusPriorities(taskStatuses)
+    },
+
+    async updateTaskStatusPriorities(taskStatuses) {
+      const taskStatusPriorities = taskStatuses.map((taskStatus, index) => ({
+        id: taskStatus.id,
+        priority: index + 1
+      }))
+      this.$emit('update-priorities', taskStatusPriorities)
+    }
   }
 }
 </script>
@@ -147,5 +168,13 @@ export default {
   text-align: center;
   width: 140px;
   min-width: 140px;
+}
+
+.task-status {
+  cursor: grab;
+}
+
+.task-status[draggable='true'] {
+  cursor: grabbing;
 }
 </style>

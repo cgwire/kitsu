@@ -9,8 +9,8 @@ export default {
     return client.getModel('projects', productionId)
   },
 
-  getOpenProductions(callback) {
-    client.get('/api/data/projects/open', callback)
+  getOpenProductions() {
+    return client.pget('/api/data/projects/open')
   },
 
   getProductionStatus(callback) {

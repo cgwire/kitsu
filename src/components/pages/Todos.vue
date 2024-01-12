@@ -27,6 +27,19 @@
               </router-link>
             </li>
             <li
+              :class="{ 'is-active': isTabActive('board') }"
+              @click="selectTab('board')"
+            >
+              <router-link
+                :to="{
+                  name: 'todos-tab',
+                  params: { tab: 'board' }
+                }"
+              >
+                {{ $t('board.title') }}
+              </router-link>
+            </li>
+            <li
               :class="{ 'is-active': isTabActive('timesheets') }"
               @click="selectTab('timesheets')"
             >
@@ -44,14 +57,19 @@
 
         <div class="flexrow">
           <search-field
-            :class="{
-              'search-field': true,
-              'flexrow-item': true
-            }"
+            class="flexrow-item search-field"
             ref="todos-search-field"
             @change="onSearchChange"
             @save="saveSearchQuery"
             :can-save="true"
+          />
+
+          <combobox-production
+            v-if="isTabActive('board')"
+            class="flexrow-item production-field"
+            :label="$t('main.production')"
+            :production-list="openProductions"
+            v-model="productionId"
           />
 
           <span class="filler"></span>
@@ -74,7 +92,11 @@
         </div>
         <div
           class="query-list"
-          v-if="isTabActive('todos') || isTabActive('timesheets')"
+          v-if="
+            isTabActive('todos') ||
+            isTabActive('timesheets') ||
+            isTabActive('board')
+          "
         >
           <search-query-list
             :queries="todoSearchQueries"
@@ -95,9 +117,9 @@
           v-if="isTabActive('todos')"
         />
 
-        <div v-if="isTabActive('done')">&nbsp;</div>
         <todos-list
           ref="done-list"
+          class="done-list"
           :tasks="displayedDoneTasks"
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
@@ -105,6 +127,15 @@
           :done="true"
           v-if="isTabActive('done')"
         />
+
+        <div v-if="isTabActive('board')">
+          <kanban-board
+            :is-loading="isTodosLoading"
+            :is-error="isTodosLoadingError"
+            :statuses="boardStatuses"
+            :tasks="boardTasks"
+          />
+        </div>
 
         <timesheet-list
           ref="timesheet-list"
@@ -136,8 +167,12 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import firstBy from 'thenby'
 
+import { sortTaskStatuses } from '@/lib/sorting'
 import { parseDate } from '@/lib/time'
+
 import Combobox from '@/components/widgets/Combobox'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction'
+import KanbanBoard from '@/components/lists/KanbanBoard'
 import SearchField from '@/components/widgets/SearchField'
 import SearchQueryList from '@/components/widgets/SearchQueryList'
 import TaskInfo from '@/components/sides/TaskInfo'
@@ -149,6 +184,8 @@ export default {
 
   components: {
     Combobox,
+    ComboboxProduction,
+    KanbanBoard,
     SearchField,
     SearchQueryList,
     TaskInfo,
@@ -168,6 +205,7 @@ export default {
       loading: {
         savingSearch: false
       },
+      productionId: null,
       selectedDate: moment().format('YYYY-MM-DD'),
       sortOptions: [
         'entity_name',
@@ -214,19 +252,36 @@ export default {
       'displayedDoneTasks',
       'displayedTodos',
       'doneSelectionGrid',
+      'getProductionTaskStatuses',
       'isTodosLoading',
       'isTodosLoadingError',
       'nbSelectedTasks',
+      'openProductions',
+      'productionMap',
       'selectedTasks',
+      'taskStatuses',
       'taskTypeMap',
-      'todosSearchText',
       'timeSpentMap',
       'timeSpentTotal',
       'todoListScrollPosition',
-      'todoSelectionGrid',
       'todoSearchQueries',
+      'todoSelectionGrid',
+      'todosSearchText',
       'user'
     ]),
+
+    boardTasks() {
+      const tasks = this.sortedTasks.concat(this.displayedDoneTasks)
+      return tasks.filter(task => task.project_id === this.productionId)
+    },
+
+    boardStatuses() {
+      const statuses = this.getProductionTaskStatuses(this.productionId).filter(
+        status => !status.for_concept
+      )
+      const production = this.productionMap.get(this.productionId)
+      return sortTaskStatuses(statuses, production)
+    },
 
     loggableTodos() {
       return this.sortedTasks.filter(task => {
@@ -347,8 +402,27 @@ export default {
     },
 
     updateActiveTab() {
-      if (['done', 'timesheets'].includes(this.$route.params.tab)) {
+      const tab = this.$route.params.tab
+      if (['board', 'done', 'timesheets'].includes(tab)) {
         this.activeTab = this.$route.params.tab
+
+        if (tab === 'board') {
+          this.loadOpenProductions().then(() => {
+            const currentProduction = this.openProductions.find(
+              ({ id }) => id === this.$route.query.productionId
+            )
+            if (currentProduction) {
+              this.productionId = currentProduction.id
+            } else {
+              if (!this.productionId) {
+                this.productionId = this.openProductions?.[0]?.id
+              }
+              this.$router.push({
+                query: { productionId: this.productionId }
+              })
+            }
+          })
+        }
       } else {
         this.activeTab = 'todos'
       }
@@ -449,7 +523,13 @@ export default {
   },
 
   watch: {
-    $route() {
+    productionId() {
+      this.$router.push({
+        query: { productionId: this.productionId }
+      })
+    },
+
+    '$route.params.tab'() {
       this.updateActiveTab()
     }
   },
@@ -478,20 +558,19 @@ export default {
 }
 
 .search-field {
-  margin-top: 1em;
-  margin-bottom: 1em;
+  margin: 25px 2em 5px 0;
 }
 
 .query-list {
-  margin-bottom: 2em;
+  margin-top: 0.5em;
 }
 
 .dark .main-column {
   border-right: 3px solid $grey-strong;
 }
 
-.data-list {
-  margin-top: 0;
+.done-list {
+  margin-top: 2em;
 }
 
 .todos {
@@ -508,10 +587,6 @@ export default {
 .column {
   overflow-y: auto;
   padding: 0;
-}
-
-.main-column {
-  border-right: 3px solid $light-grey;
 }
 
 .push-right {

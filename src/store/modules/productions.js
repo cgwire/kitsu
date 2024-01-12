@@ -307,15 +307,14 @@ const actions = {
     })
   },
 
-  loadOpenProductions({ commit, state }, callback) {
+  async loadOpenProductions({ commit }) {
     commit(LOAD_OPEN_PRODUCTIONS_START)
-    productionsApi.getOpenProductions((err, productions) => {
-      if (err) commit(LOAD_OPEN_PRODUCTIONS_ERROR)
-      else {
-        commit(LOAD_OPEN_PRODUCTIONS_END, productions)
-      }
-      if (callback) callback(err)
-    })
+    try {
+      const productions = await productionsApi.getOpenProductions()
+      commit(LOAD_OPEN_PRODUCTIONS_END, productions)
+    } catch (err) {
+      commit(LOAD_OPEN_PRODUCTIONS_ERROR)
+    }
   },
 
   loadProductions({ commit, state }, callback) {

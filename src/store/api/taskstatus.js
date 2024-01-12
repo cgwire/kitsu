@@ -12,7 +12,8 @@ const sanitizeTaskStatus = taskStatus => {
     is_client_allowed: Boolean(taskStatus.is_client_allowed === 'true'),
     is_feedback_request: Boolean(taskStatus.is_feedback_request === 'true'),
     archived: Boolean(taskStatus.archived === 'true'),
-    color: taskStatus.color
+    color: taskStatus.color,
+    priority: taskStatus.priority
   }
 }
 
@@ -33,6 +34,20 @@ export default {
   updateTaskStatus(taskStatus) {
     const data = sanitizeTaskStatus(taskStatus)
     return client.pput(`/api/data/task-status/${taskStatus.id}`, data)
+  },
+
+  updateTaskStatusPriority(taskStatus) {
+    const data = { priority: taskStatus.priority }
+    return client.pput(`/api/data/task-status/${taskStatus.id}`, data)
+  },
+
+  async updateTaskStatusLink(taskStatusLink) {
+    const data = {
+      project_id: taskStatusLink.projectId,
+      task_status_id: taskStatusLink.taskStatusId,
+      priority: taskStatusLink.priority
+    }
+    return await client.ppost('/api/data/task-status-links', data)
   },
 
   deleteTaskStatus(taskStatus) {

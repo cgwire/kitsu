@@ -1,5 +1,9 @@
 import firstBy from 'thenby'
-import { getTaskTypePriorityOfProd } from '@/lib/productions'
+
+import {
+  getTaskStatusPriorityOfProd,
+  getTaskTypePriorityOfProd
+} from '@/lib/productions'
 
 export const sortAssets = assets => {
   return assets.sort(
@@ -93,6 +97,22 @@ export const sortRevisionPreviewFiles = previewFiles => {
   return previewFiles.sort(firstBy('position').thenBy('created_at'))
 }
 
+export const sortTaskStatuses = (taskStatuses, currentProduction) => {
+  return taskStatuses.sort(
+    firstBy((taskStatusA, taskStatusB) => {
+      const taskStatusAPriority = getTaskStatusPriorityOfProd(
+        taskStatusA,
+        currentProduction
+      )
+      const taskStatusBPriority = getTaskStatusPriorityOfProd(
+        taskStatusB,
+        currentProduction
+      )
+      return taskStatusAPriority - taskStatusBPriority
+    }).thenBy('name')
+  )
+}
+
 export const sortTaskTypes = (taskTypes, currentProduction) => {
   return taskTypes.sort(
     firstBy('for_entity')
@@ -105,12 +125,7 @@ export const sortTaskTypes = (taskTypes, currentProduction) => {
           taskTypeB,
           currentProduction
         )
-        if (taskTypeAPriority > taskTypeBPriority) {
-          return 1
-        } else if (taskTypeAPriority < taskTypeBPriority) {
-          return -1
-        }
-        return 0
+        return taskTypeAPriority - taskTypeBPriority
       })
       .thenBy('name')
   )
@@ -133,12 +148,7 @@ export const sortTaskTypeScheduleItems = (
         taskTypeB,
         currentProduction
       )
-      if (taskTypeAPriority > taskTypeBPriority) {
-        return 1
-      } else if (taskTypeAPriority < taskTypeBPriority) {
-        return -1
-      }
-      return 0
+      return taskTypeAPriority - taskTypeBPriority
     })
     .thenBy('name')
   return items.sort(sortFunc)

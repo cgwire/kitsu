@@ -267,28 +267,22 @@ describe('Productions store', () => {
       expect(mockCallback).toBeCalledWith(null)
     })
 
-    test('loadOpenProductions', () => {
+    test('loadOpenProductions', async () => {
       let mockCommit = vi.fn()
-      let mockCallback = vi.fn()
-      productionApi.getOpenProductions = vi.fn(callback => callback(1, null))
-      store.actions.loadOpenProductions({ commit: mockCommit, state: null }, mockCallback)
+      productionApi.getOpenProductions = vi.fn(() => Promise.reject())
+      await store.actions.loadOpenProductions({ commit: mockCommit, state: null })
       expect(productionApi.getOpenProductions).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(2)
       expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_OPEN_PRODUCTIONS_START)
       expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_OPEN_PRODUCTIONS_ERROR)
-      expect(mockCallback).toBeCalledTimes(1)
-      expect(mockCallback).toBeCalledWith(1)
 
       mockCommit = vi.fn()
-      mockCallback = vi.fn()
-      productionApi.getOpenProductions = vi.fn(callback => callback(null, 123))
-      store.actions.loadOpenProductions({ commit: mockCommit, state: null }, mockCallback)
+      productionApi.getOpenProductions = vi.fn(() => Promise.resolve(123))
+      await store.actions.loadOpenProductions({ commit: mockCommit, state: null })
       expect(productionApi.getOpenProductions).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(2)
       expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_OPEN_PRODUCTIONS_START)
       expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_OPEN_PRODUCTIONS_END, 123)
-      expect(mockCallback).toBeCalledTimes(1)
-      expect(mockCallback).toBeCalledWith(null)
     })
 
     test('loadProductions', () => {

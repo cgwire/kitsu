@@ -21,6 +21,7 @@
       :is-error="errors.list"
       @edit-clicked="onEditClicked"
       @delete-clicked="onDeleteClicked"
+      @update-priorities="updatePriorities"
     />
 
     <edit-task-status-modal
@@ -111,12 +112,21 @@ export default {
     },
 
     taskStatusList() {
-      return this.isActiveTab ? this.taskStatus : this.archivedTaskStatus
+      const taskStatusList = this.isActiveTab
+        ? this.taskStatus
+        : this.archivedTaskStatus
+      return [...taskStatusList].sort((a, b) => a.priority - b.priority)
     }
   },
 
   methods: {
-    ...mapActions(['deleteTaskStatus']),
+    ...mapActions(['deleteTaskStatus', 'updateTaskStatusPriority']),
+
+    async updatePriorities(taskStatuses) {
+      for (const taskStatus of taskStatuses) {
+        await this.updateTaskStatusPriority(taskStatus)
+      }
+    },
 
     confirmEditTaskStatus(form) {
       const isNew = !(this.taskStatusToEdit && this.taskStatusToEdit.id)

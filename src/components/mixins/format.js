@@ -57,6 +57,11 @@ export const formatListMixin = {
       return label
     },
 
+    formatPrioritySymbol(priority) {
+      priority = Math.max(0, Math.min(priority, 3))
+      return '!'.repeat(priority)
+    },
+
     sanitizeInteger(value) {
       let val = 0
       if (typeof value === 'string') {

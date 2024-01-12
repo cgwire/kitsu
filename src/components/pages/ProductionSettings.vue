@@ -119,9 +119,19 @@
               </th>
             </tr>
           </thead>
-          <tbody class="datatable-body">
-            <template v-for="taskStatus in productionTaskStatuses">
-              <tr class="datatable-row" :key="taskStatus.id" v-if="taskStatus">
+          <draggable
+            class="datatable-body"
+            draggable=".task-status"
+            tag="tbody"
+            :value="sortedProductionTaskStatuses"
+            @end="updateTaskStatusPriority($event.oldIndex, $event.newIndex)"
+          >
+            <template v-for="taskStatus in sortedProductionTaskStatuses">
+              <tr
+                class="datatable-row task-status"
+                :key="taskStatus.id"
+                v-if="taskStatus"
+              >
                 <td>
                   {{ taskStatus.name }}
                 </td>
@@ -145,7 +155,7 @@
                 </td>
               </tr>
             </template>
-          </tbody>
+          </draggable>
         </table>
       </div>
 
@@ -161,7 +171,10 @@
 </template>
 
 <script>
+import draggable from 'vuedraggable'
 import { mapGetters, mapActions } from 'vuex'
+
+import { sortTaskStatuses } from '@/lib/sorting'
 
 import BooleanCell from '@/components/cells/BooleanCell'
 import Combobox from '@/components/widgets/Combobox'
@@ -169,8 +182,8 @@ import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ProductionBackgrounds from '@/components/pages/production/ProductionBackgrounds'
 import ProductionBrief from '@/components/pages/production/ProductionBrief'
 import ProductionParameters from '@/components/pages/production/ProductionParameters'
-import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes'
 import ProductionStatusAutomations from '@/components/pages/production/ProductionStatusAutomations'
+import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes'
 import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
@@ -179,11 +192,12 @@ export default {
     BooleanCell,
     Combobox,
     ComboboxStatus,
+    draggable,
     ProductionBackgrounds,
     ProductionBrief,
     ProductionParameters,
-    ProductionTaskTypes,
     ProductionStatusAutomations,
+    ProductionTaskTypes,
     ValidationTag
   },
 
@@ -235,6 +249,13 @@ export default {
           !this.currentProduction.task_statuses.includes(status.id) &&
           !status.for_concept
       )
+    },
+
+    sortedProductionTaskStatuses() {
+      return sortTaskStatuses(
+        this.productionTaskStatuses,
+        this.currentProduction
+      )
     }
   },
 
@@ -242,6 +263,8 @@ export default {
     ...mapActions([
       'addAssetTypeToProduction',
       'addTaskStatusToProduction',
+      'editTaskStatusLink',
+      'loadContext',
       'removeAssetTypeFromProduction',
       'removeTaskStatusFromProduction'
     ]),
@@ -286,6 +309,26 @@ export default {
 
     getBooleanTranslation(bool) {
       return bool ? this.$t('main.yes') : this.$t('main.no')
+    },
+
+    async updateTaskStatusPriority(oldIndex, newIndex) {
+      const taskStatuses = [...this.productionTaskStatuses]
+      const taskStatus = taskStatuses[oldIndex]
+      taskStatuses.splice(oldIndex, 1)
+      taskStatuses.splice(newIndex, 0, taskStatus)
+      await this.updateTaskStatusPriorities(taskStatuses)
+    },
+
+    async updateTaskStatusPriorities(taskStatuses) {
+      const taskStatusLinks = taskStatuses.map((taskStatus, index) => ({
+        projectId: this.currentProduction.id,
+        taskStatusId: taskStatus.id,
+        priority: index + 1
+      }))
+      for (const taskStatusLink of taskStatusLinks) {
+        await this.editTaskStatusLink(taskStatusLink)
+      }
+      await this.loadContext()
     }
   },
 
@@ -389,5 +432,13 @@ th {
 
 .box {
   max-width: 400px;
+}
+
+.task-status {
+  cursor: grab;
+}
+
+.task-status[draggable='true'] {
+  cursor: grabbing;
 }
 </style>
