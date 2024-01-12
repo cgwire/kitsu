@@ -271,9 +271,7 @@ export default {
     ]),
 
     boardTasks() {
-      const tasks = []
-        .concat(this.displayedDoneTasks)
-        .concat(this.displayedTodos)
+      const tasks = this.sortedTasks.concat(this.displayedDoneTasks)
       return tasks.filter(task => task.project_id === this.productionId)
     },
 
